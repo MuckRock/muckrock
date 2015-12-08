@@ -40,11 +40,16 @@ mock_charge.source = {'last4': '1234'}
 MockCharge = mock.Mock()
 MockCharge.retrieve.return_value = mock_charge
 
+mock_invoice_line_item = mock.Mock()
+mock_invoice_line_item.plan.id = mock_subscription.id
+
 mock_invoice = mock.Mock()
 mock_invoice.id = 'test-invoice'
 mock_invoice.attempt_count = 1
 mock_invoice.customer = mock_customer.id
 mock_invoice.charge = mock_charge
+mock_invoice.lines.total_count = 1
+mock_invoice.lines.data = [mock_invoice_line_item]
 MockInvoice = mock.Mock()
 MockInvoice.retrieve.return_value = mock_invoice
 
