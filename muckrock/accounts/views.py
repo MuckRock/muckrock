@@ -256,8 +256,8 @@ def settings(request):
             if form.is_valid():
                 form.save()
                 messages.success(request, 'Your settings have been updated.')
-            else:
-                context[action + '_form'] = form
+            # override the existing form in the context
+            context[action + '_form'] = form
 
     return render_to_response(
         'accounts/settings.html',

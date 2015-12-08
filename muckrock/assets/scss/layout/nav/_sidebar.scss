@@ -71,6 +71,7 @@ $sidebar-width: 250px;
         margin: 0;
         padding: $vertical-rhythm;
         background: $color-grey-2;
+        color: $color-white;
         h1 {
             font-size: $font-size-5;
             font-weight: $font-weight-bold;
@@ -122,7 +123,6 @@ $sidebar-width: 250px;
             }
         }
     }
-
 
     section {
         width: 100%;
@@ -237,14 +237,6 @@ $sidebar-width: 250px;
                 margin-bottom: 0;
             }
         }
-    }
-
-    .newsletter {
-        margin-bottom: 0;
-        padding-bottom: $vertical-rhythm;
-        color: $color-white;
-        background-color: $color-blue;
-        @include action-input($color-white, $color-blue-dark);
     }
 
 }
