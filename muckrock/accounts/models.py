@@ -258,6 +258,14 @@ class Profile(models.Model):
             card = customer.sources.retrieve(customer.default_source)
         return card
 
+    def has_subscription(self, token=None):
+        """Check Stripe to see if this user has any active subscriptions."""
+        customer = self.customer()
+        if customer.subscriptions.total_count > 0:
+            return True
+        else:
+            return False
+
     def start_pro_subscription(self, token=None):
         """Subscribe this profile to a professional plan. Return the subscription."""
         # create the stripe subscription

@@ -140,6 +140,7 @@
         @include flex(3);
     }
     .form {
+        border-radius: 0;
         max-width: 40em;
         input {
             width: 100%;
@@ -154,5 +155,31 @@
             @include justify-content(space-between);
             @include align-items(center);
         }
+        .required label::after {
+            content: 'Required';
+            color: $color-blue;
+            margin-left: $vertical-rhythm/4;
+        }
+        .errors {
+            .errorlist {
+                margin-bottom: 0;
+                padding-left: 0;
+                list-style: none;
+                float: right;
+            }
+            label {
+                float: left;
+            }
+            label::after {
+                color: $color-red;
+            }
+            input {
+                background: $color-red-light;
+                color: $color-red-dark;
+            }
+        }
+    }
+    .billing td:nth-child(2n) {
+        text-align: right;
     }
 }

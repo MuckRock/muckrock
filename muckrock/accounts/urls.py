@@ -32,6 +32,17 @@ urlpatterns = patterns(
     url(r'^logout/$',
         views.account_logout,
         name='acct-logout'),
+    url(r'^change_pw/$',
+        auth_views.password_change,
+        {'template_name': 'forms/account/pw_change.html',
+         'post_change_redirect': 'acct-change-pw-done'},
+        name='acct-change-pw'
+    ),
+    url(r'^change_pw_done/$',
+        auth_views.password_change_done,
+        {'template_name': 'forms/account/pw_change_done.html'},
+        name='acct-change-pw-done'
+    ),
     url(r'^reset_pw/$',
         auth_views.password_reset,
         {'template_name': 'forms/account/pw_reset_part1.html',

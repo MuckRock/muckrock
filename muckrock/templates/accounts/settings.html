@@ -7,12 +7,15 @@
 <article class="account settings">
     <header>
         <h1>Settings</h1>
-        <ul>
-            <li><a href="#profile">Profile</a></li>
-            <li><a href="#email">Email</a></li>
-            <li><a href="#billing">Billing</a></li>
-            <li><a href="#password">Change Password</a></li>
-        </ul>
+        <dl>
+            <dt>Preferences</dt>
+            <dd><a href="#profile">Profile</a></dd>
+            <dd><a href="#email">Email</a></dd>
+            <dd><a href="#billing">Billing</a></dd>
+            <dt>Password</dt>
+            <dd><a href="{% url 'acct-change-pw' %}">Change Password</a></dd>
+            <dd><a href="{% url 'acct-reset-pw' %}">Reset Password</a></dd>
+        </dl>
     </header>
     <main>
         <form method="post" action="?type=profile" class="profile form" id="profile">
@@ -21,8 +24,8 @@
             <input type="hidden" name="action" value="profile" />
             <div class="fields">
             {% for field in profile_form.visible_fields %}
-                <fieldset class="{{ field.label|lower }} field{% if field.field.required %} required{% endif %}">
-                    <label {% if field.errors %}class="failure"{% endif %} for="{{ field.auto_id }}">{{ field.label}}</label>
+                <fieldset class="{{ field.label|lower }} field{% if field.field.required %} required{% endif %}{% if field.errors %} errors{%endif%}">
+                    <label for="{{ field.auto_id }}">{{field.label}}</label>
                     {{ field.errors }}
                     {{ field }}
                     {% if field.help_text %}<p class="default"><small>{{ field.help_text }}</small></p>{% endif %}
@@ -39,23 +42,21 @@
             <h2>Email</h2>
             <div class="fields">
             {% for field in email_form.visible_fields %}
-                <fieldset class="{{ field.label|lower }} field{% if field.field.required %} required{% endif %}">
-                    <label {% if field.errors %}class="failure"{% endif %} for="{{ field.auto_id }}">{{ field.label}}</label>
+                <fieldset class="{{ field.label|lower }} field{% if field.field.required %} required{% endif %}{% if field.errors %} errors{%endif%}">
+                    <label for="{{ field.auto_id }}">{{field.label}}</label>
                     {{ field.errors }}
                     {{ field }}
                     {% if field.help_text %}<p class="default"><small>{{ field.help_text }}</small></p>{% endif %}
-                    {% if field == form.email %}
-                    {% if request.user.profile.email_confirmed %}
-                    <span>Verified</span>
-                    {% else %}
-                    <a href="{% url 'acct-verify-email' %}">Verify your email</a>
-                    {% endif %}
-                    {% endif %}
                 </fieldset>
             {% endfor %}
             </div>
             <footer>
-                <button type="submit" class="primary">Save preferences</button>
+                <button type="submit" class="primary">Update email</button>
+                {% if request.user.profile.email_confirmed %}
+                <span>Verified</span>
+                {% else %}
+                <a href="{% url 'acct-verify-email' %}">Verify your email</a>
+                {% endif %}
             </footer>
         </form>
         <form method="post" class="billing form" id="billing">
@@ -71,7 +72,7 @@
                         </td>
                         <td><a href="{% url 'accounts' %}" class="button">Change Plan</a></td>
                     </tr>
-                    {% if credit_card %}
+                    {% if credit_card and request.user.profile.has_subscription %}
                     <tr>
                         <td>
                             <dfn>Card on file</dfn>
@@ -93,25 +94,6 @@
                     {% endif %}
                 </tbody>
             </table>
-        </form>
-        <form method="post" class="password form" id="password">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="password" />
-            <h2>Change Password</h2>
-            <div class="fields">
-            {% for field in password_form.visible_fields %}
-                <fieldset class="{{ field.label|lower }} field{% if field.field.required %} required{% endif %}">
-                    <label {% if field.errors %}class="failure"{% endif %} for="{{ field.auto_id }}">{{ field.label}}</label>
-                    {{ field.errors }}
-                    {{ field }}
-                    {% if field.help_text %}<p class="default"><small>{{ field.help_text }}</small></p>{% endif %}
-                </fieldset>
-            {% endfor %}
-            </div>
-            <footer>
-                <button type="submit" class="primary">Change Password</button>
-                <a href="{% url 'acct-reset-pw' %}">Forgot your password?</a>
-            </footer>
         </form>
     </main>
 </article>

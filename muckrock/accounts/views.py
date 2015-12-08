@@ -7,7 +7,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import PasswordChangeForm
 from django.core.urlresolvers import reverse
 from django.core.mail import send_mail
 
@@ -230,8 +229,7 @@ def settings(request):
     settings_forms = {
         'profile': ProfileSettingsForm,
         'email': EmailSettingsForm,
-        'billing': BillingPreferencesForm,
-        'password': PasswordChangeForm
+        'billing': BillingPreferencesForm
     }
     profile_initial = {
         'first_name': request.user.first_name,
@@ -242,13 +240,11 @@ def settings(request):
     }
     profile_form = ProfileSettingsForm(initial=profile_initial, instance=user_profile)
     email_form = EmailSettingsForm(initial=email_initial, instance=user_profile)
-    password_form = PasswordChangeForm(request.user)
     current_plan = dict(ACCT_TYPES)[user_profile.acct_type]
     context = {
         'stripe_pk': STRIPE_PUB_KEY,
         'profile_form': profile_form,
         'email_form': email_form,
-        'password_form': password_form,
         'current_plan': current_plan,
         'credit_card': user_profile.card()
     }
@@ -258,17 +254,12 @@ def settings(request):
         print action
         if action:
             form = settings_forms[action]
-            if isinstance(form, forms.ModelForm):
-                form = form(request.POST, instance=user_profile)
-            else:
-                form = form(request.POST)
-            print form
+            form = form(request.POST, instance=user_profile)
             if form.is_valid():
                 form.save()
                 messages.success(request, 'Your settings have been updated.')
             else:
-                context_form = action + '_form'
-                context[context_form] = form
+                context[action + '_form'] = form
 
     return render_to_response(
         'accounts/settings.html',
