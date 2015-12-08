@@ -123,18 +123,18 @@ def failed_payment(invoice_id):
         profile.payment_failed = False
         profile.save()
         logger.info('%s subscription has been cancelled due to failed payment', user.username)
-        notification = notifications.FailedPaymentNotification(user, kwargs={
+        context = {
             'attempt': 'final',
             'type': subscription_type
-        })
-        notification.send(fail_silently=False)
+        }
     else:
         logger.info('Failed payment by %s, attempt %s', user.username, attempt)
-        notification = notifications.FailedPaymentNotification(user, kwargs={
+        context = {
             'attempt': attempt,
             'type': subscription_type
-        })
-        notification.send(fail_silently=False)
+        }
+    notification = notifications.FailedPaymentNotification(user, context)
+    notification.send(fail_silently=False)
 
 @task(name='muckrock.message.tasks.welcome')
 def welcome(user):
@@ -145,8 +145,9 @@ def welcome(user):
 @task(name='muckrock.message.tasks.gift')
 def gift(to_user, from_user, gift_description):
     """Notify the user when they have been gifted requests."""
-    notification = notifications.GiftNotification(to_user, kwargs={
+    context = {
         'from': from_user,
         'gift': gift_description
-    })
+    }
+    notification = notifications.GiftNotification(to_user, context)
     notification.send(fail_silently=False)
