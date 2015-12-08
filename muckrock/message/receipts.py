@@ -17,7 +17,6 @@ logger = logging.getLogger(__name__)
 
 class GenericReceipt(EmailMultiAlternatives):
     """A basic receipt"""
-    subject = u'Your Receipt'
     item = u''
     text_template = 'message/receipt/base.txt'
 
@@ -35,10 +34,18 @@ class GenericReceipt(EmailMultiAlternatives):
                 self.to = []
         self.from_email = 'MuckRock <info@muckrock.com>'
         self.bcc = ['diagnostics@muckrock.com']
+        self.subject = self.get_subject()
         self.body = render_to_string(
             self.text_template,
             self.get_context_data(charge)
         )
+
+    def get_subject(self):
+        """Returns a subject if specified, or a generic one if it isn't."""
+        subject = u'Your Receipt'
+        if self.subject:
+           subject = self.subject
+        return subject
 
     def get_context_data(self, charge):
         """Returns a dictionary of context for the template, given the charge object"""
