@@ -10,7 +10,9 @@ import muckrock.accounts.views as views
 
 urlpatterns = patterns(
     '',
-    url(r'^$', views.AccountsView.as_view(), name='accounts'),
+    url(r'^$',
+        views.AccountsView.as_view(),
+        name='accounts'),
     url(r'^signup/$',
         views.AccountsView.as_view(),
         name='accounts-signup'),
@@ -34,11 +36,13 @@ urlpatterns = patterns(
         auth_views.password_change,
         {'template_name': 'forms/account/pw_change.html',
          'post_change_redirect': 'acct-change-pw-done'},
-        name='acct-change-pw'),
-    url(r'^change_pw/done/$',
+        name='acct-change-pw'
+    ),
+    url(r'^change_pw_done/$',
         auth_views.password_change_done,
         {'template_name': 'forms/account/pw_change_done.html'},
-        name='acct-change-pw-done'),
+        name='acct-change-pw-done'
+    ),
     url(r'^reset_pw/$',
         auth_views.password_reset,
         {'template_name': 'forms/account/pw_reset_part1.html',
@@ -71,5 +75,7 @@ urlpatterns = patterns(
     url(r'^settings/verify_email/$',
         views.verify_email,
         name='acct-verify-email'),
-    url(r'^stripe_webhook_v2/$', views.stripe_webhook, name='acct-webhook-v2'),
+    url(r'^stripe_webhook_v2/$',
+        views.stripe_webhook,
+        name='acct-webhook-v2'),
 )

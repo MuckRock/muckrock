@@ -99,23 +99,40 @@ def failed_payment(invoice_id):
     logger.debug(invoice.customer)
     profile = Profile.objects.get(customer_id=invoice.customer)
     user = profile.user
+    # raise the failed payment flag on the profile
+    profile.payment_failed = True
+    profile.save()
     if attempt == 4:
-        # on last attempt, cancel the user's subscription
+        # on last attempt, cancel the user's subscription and lower the failed payment flag
         if invoice.plan.id == 'pro':
             profile.cancel_pro_subscription()
         elif invoice.plan.id == 'org':
             org = Organization.objects.get(owner=user)
             org.cancel_subscription()
+        profile.payment_failed = False
+        profile.save()
         logger.info('%s subscription has been cancelled due to failed payment', user.username)
-        notification = notifications.FailedPaymentNotification(user, 'final', invoice.plan.id)
+        notification = notifications.FailedPaymentNotification(user, kwargs={
+            'attempt': 'final',
+            'type': invoice.plan.id
+        })
         notification.send(fail_silently=False)
     else:
         logger.info('Failed payment by %s, attempt %s', user.username, attempt)
-        notification = notifications.FailedPaymentNotification(user, attempt, invoice.plan.id)
+        notification = notifications.FailedPaymentNotification(user, kwargs={
+            'attempt': attempt,
+            'type': invoice.plan.id
+        })
         notification.send(fail_silently=False)
 
 @task(name='muckrock.message.tasks.welcome')
 def welcome(user):
     """Send a welcome notification to a new user. Hello!"""
     notification = notifications.WelcomeNotification(user)
+    notification.send(fail_silently=False)
+
+@task(name='muckrock.message.tasks.gift')
+def gift(to_user, from_user, gift_description):
+    """Notify the user when they have been gifted requests."""
+    notification = notifications.GiftNotification(to_user, kwargs={'from': from_user, 'gift': gift_description})
     notification.send(fail_silently=False)

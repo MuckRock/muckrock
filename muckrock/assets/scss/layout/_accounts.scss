@@ -33,12 +33,18 @@
         overflow: hidden;
         max-width: 40em;
         background: #fff;
+        border-color: $color-blue-dark;
         main, footer {
             padding: $vertical-rhythm;
         }
         header {
             padding-top: $vertical-rhythm;
             text-align: center;
+            background: $color-blue-light;
+            color: $color-blue-dark;
+            h2 {
+                font-weight: $font-weight-bold;
+            }
         }
         .superlative {
             @extend dfn;
@@ -113,5 +119,67 @@
             color: $color-blue-dark;
             border-bottom-style: solid;
         }
+    }
+}
+
+.account.settings {
+    $breakpoint: 768px;
+    @include display(flex);
+    @include align-items(stretch);
+    @include flex-direction(column);
+    @media all and (min-width: $breakpoint) {
+        @include flex-direction(row);
+        .request.main {
+            margin-left: $vertical-rhythm * 2;
+        }
+    }
+    header {
+        @include flex(1);
+    }
+    main {
+        @include flex(3);
+    }
+    .form {
+        border-radius: 0;
+        max-width: 40em;
+        input {
+            width: 100%;
+        }
+        table {
+            p {
+                margin-bottom: 0;
+            }
+        }
+        footer {
+            @include display(flex);
+            @include justify-content(space-between);
+            @include align-items(center);
+        }
+        .required label::after {
+            content: 'Required';
+            color: $color-blue;
+            margin-left: $vertical-rhythm/4;
+        }
+        .errors {
+            .errorlist {
+                margin-bottom: 0;
+                padding-left: 0;
+                list-style: none;
+                float: right;
+            }
+            label {
+                float: left;
+            }
+            label::after {
+                color: $color-red;
+            }
+            input {
+                background: $color-red-light;
+                color: $color-red-dark;
+            }
+        }
+    }
+    .billing td:nth-child(2n) {
+        text-align: right;
     }
 }

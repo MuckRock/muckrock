@@ -7,33 +7,51 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.utils.text import slugify
 
-from localflavor.us.forms import USZipCodeField
+import autocomplete_light
 import re
 
 from muckrock.accounts.models import Profile
+from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.organization.models import Organization
 
 
-class ProfileForm(forms.ModelForm):
-    """A form for a user profile"""
-    zip_code = USZipCodeField(required=False)
-
-    class Meta:
-        # pylint: disable=too-few-public-methods
-        model = Profile
-        fields = '__all__'
-
-
-class UserChangeForm(ProfileForm):
+class ProfileSettingsForm(forms.ModelForm):
     """A form for updating user information"""
     first_name = forms.CharField(max_length=30)
     last_name = forms.CharField(max_length=30)
+
+    location = forms.ModelChoiceField(
+        required=False,
+        queryset=Jurisdiction.objects.all(),
+        widget=autocomplete_light.ChoiceWidget('JurisdictionLocalAutocomplete'))
+
+    class Meta():
+        model = Profile
+        fields = ['first_name', 'last_name', 'twitter', 'location']
+
+
+
+    def clean_twitter(self):
+        """Stripe @ from beginning of Twitter name, if it exists."""
+        twitter = self.cleaned_data['twitter']
+        return twitter.split('@')[-1]
+
+    def save(self, commit=True):
+        """Modifies associated User model."""
+        profile = super(ProfileSettingsForm, self).save(commit)
+        profile.user.first_name = self.cleaned_data['first_name']
+        profile.user.last_name = self.cleaned_data['last_name']
+        profile.user.save()
+        return profile
+
+
+class EmailSettingsForm(forms.ModelForm):
+    """A form for updating user email preferences."""
     email = forms.EmailField()
 
-    class Meta(ProfileForm.Meta):
-        # pylint: disable=too-few-public-methods
-        fields = ['first_name', 'last_name', 'email', 'address1', 'address2', 'city', 'state',
-                  'zip_code', 'phone', 'email_pref', 'use_autologin']
+    class Meta():
+        model = Profile
+        fields = ['email', 'email_pref', 'use_autologin']
 
     def clean_email(self):
         """Validates that a user does not exist with the given e-mail address"""
@@ -44,8 +62,37 @@ class UserChangeForm(ProfileForm):
         if len(users) > 1: # pragma: no cover
             # this should never happen
             raise forms.ValidationError('A user with that e-mail address already exists.')
-
         return email
+
+    def save(self, commit=True):
+        """Modifies associated User and Stripe.Customer models"""
+        profile = super(EmailSettingsForm, self).save(commit)
+        profile.user.email = self.cleaned_data['email']
+        profile.user.save()
+        customer = profile.customer()
+        customer.email = profile.user.email
+        customer.save()
+        return profile
+
+
+class BillingPreferencesForm(forms.ModelForm):
+    """A form for updating billing preferences."""
+    stripe_token = forms.CharField()
+
+    class Meta():
+        model = Profile
+        fields = ['stripe_token']
+
+    def save(self, commit=True):
+        """Modifies associated Profile and Stripe.Customer model"""
+        profile = super(BillingPreferencesForm, self).save(commit)
+        profile.payment_failed = False
+        profile.save()
+        token = self.cleaned_data['stripe_token']
+        customer = profile.customer()
+        customer.source = token
+        customer.save()
+        return profile
 
 
 class RegisterForm(UserCreationForm):

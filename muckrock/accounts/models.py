@@ -84,10 +84,6 @@ class Profile(models.Model):
         related_name='members',
         on_delete=models.SET_NULL)
 
-    # email confirmation
-    email_confirmed = models.BooleanField(default=False)
-    confirmation_key = models.CharField(max_length=24, blank=True)
-
     # extended information
     profile = models.TextField(blank=True)
     location = models.ForeignKey(Jurisdiction, blank=True, null=True)
@@ -110,7 +106,10 @@ class Profile(models.Model):
         resize_source={'size': (200, 200), 'crop': 'smart'}
     )
 
-    # prefrences
+    # email confirmation
+    email_confirmed = models.BooleanField(default=False)
+    confirmation_key = models.CharField(max_length=24, blank=True)
+    # email preferences
     email_pref = models.CharField(
         max_length=10,
         choices=email_prefs,
@@ -133,6 +132,7 @@ class Profile(models.Model):
     # for Stripe
     customer_id = models.CharField(max_length=255, blank=True)
     subscription_id = models.CharField(max_length=255, blank=True)
+    payment_failed = models.BooleanField(default=False)
 
     def __unicode__(self):
         return u"%s's Profile" % unicode(self.user).capitalize()
@@ -228,6 +228,13 @@ class Profile(models.Model):
         """Is this user allowed to view all emails and private contact information?"""
         return self.acct_type in ['admin', 'pro']
 
+    def bundled_requests(self):
+        """Returns the number of requests the user gets when they buy a bundle."""
+        how_many = settings.BUNDLED_REQUESTS[self.acct_type]
+        if self.organization:
+            how_many = 5
+        return how_many
+
     def customer(self):
         """Retrieve the customer from Stripe or create one if it doesn't exist. Then return it."""
         try:
@@ -242,6 +249,22 @@ class Profile(models.Model):
             self.customer_id = customer.id
             self.save()
         return customer
+
+    def card(self):
+        """Retrieve the default credit card from Stripe, if one exists."""
+        card = None
+        customer = self.customer()
+        if customer.default_source:
+            card = customer.sources.retrieve(customer.default_source)
+        return card
+
+    def has_subscription(self, token=None):
+        """Check Stripe to see if this user has any active subscriptions."""
+        customer = self.customer()
+        if customer.subscriptions.total_count > 0:
+            return True
+        else:
+            return False
 
     def start_pro_subscription(self, token=None):
         """Subscribe this profile to a professional plan. Return the subscription."""
@@ -278,6 +301,7 @@ class Profile(models.Model):
         self.subscription_id = ''
         self.acct_type = 'basic'
         self.monthly_requests = settings.MONTHLY_REQUESTS.get('basic', 0)
+        self.payment_failed = False
         self.save()
         return subscription
 

@@ -44,8 +44,9 @@ function prettifyAmountInput(input) {
     });
 }
 
-function checkout(pk, image, description, amount, email, label, form, submit) {
+function checkout(pk, image, description, amount, email, label, form, submit, bitcoin) {
     submit = typeof submit !== 'undefined' ? submit : true;
+    bitcoin = typeof bitcoin !== 'undefined' ? bitcoin : true;
     var token = function(token) {
         form.append('<input type="hidden" name="stripe_token" value="' + token.id + '" />');
         form.append('<input type="hidden" name="stripe_email" value="' + token.email + '" />');
@@ -64,7 +65,7 @@ function checkout(pk, image, description, amount, email, label, form, submit) {
         email: email,
         panelLabel: label,
         token: token,
-        bitcoin: true
+        bitcoin: bitcoin
     });
 }
 

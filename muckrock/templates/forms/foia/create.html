@@ -114,7 +114,7 @@
             <input type="submit" name="submit" value="Create" class="primary button"  />
         {% endif %}
         {% if not user.is_authenticated %}
-		<p>Create a MuckRock account and file up to four requests for just $20, or <a href="https://www.muckrock.com/accounts/subscribe/" target="_blank">go Pro for 20 requests a month</a> with the option to keep your submissions private. Already have an account? <a href="https://www.muckrock.com/accounts/login/">Log in</a>.</p>
+		<p>Create a MuckRock account and file up to four requests for just $20, or <a href="{% url 'accounts-signup-professional' %}" target="_blank">go Pro for 20 requests a month</a> with the option to keep your submissions private. Already have an account? <a href="{% url 'acct-login' %}">Log in</a>.</p>
 		{% endif %}
         </footer>
 

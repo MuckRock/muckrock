@@ -2,12 +2,14 @@
 Views for the accounts application
 """
 
+from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.core.mail import send_mail
+
 from django.http import HttpResponse,\
                         HttpResponseBadRequest,\
                         HttpResponseNotAllowed,\
@@ -26,16 +28,21 @@ import logging
 import stripe
 import sys
 
-from muckrock.accounts.forms import UserChangeForm, RegisterForm, RegisterOrganizationForm
-from muckrock.accounts.models import Profile, Statistics
+from muckrock.accounts.forms import ProfileSettingsForm,\
+                                    EmailSettingsForm,\
+                                    BillingPreferencesForm,\
+                                    RegisterForm,\
+                                    RegisterOrganizationForm
+from muckrock.accounts.models import Profile, Statistics, ACCT_TYPES
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.foia.models import FOIARequest
 from muckrock.organization.models import Organization
 from muckrock.message.tasks import send_charge_receipt,\
                                    send_invoice_receipt,\
                                    failed_payment,\
-                                   welcome
-from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
+                                   welcome,\
+                                   gift
+from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY, BUNDLED_REQUESTS
 
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
@@ -217,59 +224,97 @@ def downgrade(request):
 @login_required
 def settings(request):
     """Update a users information"""
+    # TODO display form errors!
+    user_profile = request.user.profile
+    settings_forms = {
+        'profile': ProfileSettingsForm,
+        'email': EmailSettingsForm,
+        'billing': BillingPreferencesForm
+    }
+    profile_initial = {
+        'first_name': request.user.first_name,
+        'last_name': request.user.last_name,
+    }
+    email_initial = {
+        'email': request.user.email
+    }
+    profile_form = ProfileSettingsForm(initial=profile_initial, instance=user_profile)
+    email_form = EmailSettingsForm(initial=email_initial, instance=user_profile)
+    current_plan = dict(ACCT_TYPES)[user_profile.acct_type]
+    context = {
+        'stripe_pk': STRIPE_PUB_KEY,
+        'profile_form': profile_form,
+        'email_form': email_form,
+        'current_plan': current_plan,
+        'credit_card': user_profile.card()
+    }
+
     if request.method == 'POST':
-        user_profile = request.user.profile
-        form = UserChangeForm(request.POST, instance=user_profile)
-        if form.is_valid():
-            request.user.first_name = form.cleaned_data['first_name']
-            request.user.last_name = form.cleaned_data['last_name']
-            request.user.email = form.cleaned_data['email']
-            request.user.save()
-            customer = request.user.profile.customer()
-            customer.email = request.user.email
-            customer.save()
-            user_profile = form.save()
-            messages.success(request, 'Your account has been updated.')
-            return redirect('acct-my-profile')
-    else:
-        user_profile = request.user.profile
-        initial = {
-            'first_name': request.user.first_name,
-            'last_name': request.user.last_name,
-            'email': request.user.email
-        }
-        form = UserChangeForm(initial=initial, instance=user_profile)
+        action = request.POST.get('action')
+        print action
+        if action:
+            form = settings_forms[action]
+            form = form(request.POST, instance=user_profile)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Your settings have been updated.')
+            else:
+                context[action + '_form'] = form
 
-    return render_to_response('forms/account/update.html', {'form': form},
-                              context_instance=RequestContext(request))
+    return render_to_response(
+        'accounts/settings.html',
+        context,
+        context_instance=RequestContext(request))
 
-@login_required
 def buy_requests(request, username=None):
-    """Buy more requests"""
-    # pylint:disable=unused-argument
+    """A purchaser buys requests for a recipient. The recipient can even be themselves!"""
     url_redirect = request.GET.get('next', 'acct-my-profile')
-    if request.POST.get('stripe_token', False):
-        user_profile = request.user.profile
-        try:
-            stripe_token = request.POST['stripe_token']
-            stripe_email = request.POST['stripe_email']
-            metadata = {
-                'email': stripe_email,
-                'action': 'request-purchase',
-            }
-            user_profile.pay(stripe_token, 2000, metadata)
-        except (stripe.CardError, ValueError) as exc:
-            msg = 'Payment error: %s Your card has not been charged.' % exc
-            messages.error(request, msg)
-            logger.warn('Payment error: %s', exc, exc_info=sys.exc_info())
-            return redirect(url_redirect)
-        user_profile.num_requests += 4
-        user_profile.save()
-        request.session['ga'] = 'request_purchase'
-        msg = 'Purchase successful. 4 requests have been added to your account.'
-        messages.success(request, msg)
-        logger.info('%s has purchased requests', request.user.username)
+    recipient = get_object_or_404(User, username=username)
+    purchaser = request.user
+    request_price = 2000
+    if purchaser.is_authenticated():
+        request_count = purchaser.profile.bundled_requests()
+    else:
+        request_count = 4
+    try:
+        if request.POST:
+            stripe_token = request.POST.get('stripe_token')
+            stripe_email = request.POST.get('stripe_email')
+            if not stripe_token and not stripe_email:
+                raise KeyError('Missing Stripe payment data.')
+            # take from the purchaser
+            stripe.Charge.create(
+                amount=request_price,
+                currency='usd',
+                source=stripe_token,
+                metadata={
+                    'email': stripe_email,
+                    'action': 'request-purchase',
+                }
+            )
+            # and give to the recipient
+            recipient.profile.num_requests += request_count
+            recipient.profile.save()
+            # record the purchase
+            request.session['ga'] = 'request_purchase'
+            if recipient == purchaser:
+                msg = 'Purchase successful. %d requests have been added to your account.' % request_count
+            else:
+                msg = 'Purchase successful. %d requests have been gifted to %s' % (request_count, recipient.first_name)
+                gift_description = '%d requests' % request_count
+                gift.delay(recipient, purchaser, gift_description) # notify the recipient with an email
+            messages.success(request, msg)
+            logger.info('%s purchased %d requests', purchaser.username, request_count)
+    except KeyError as exception:
+        msg = 'Payment error: %s' % exception
+        messages.error(request, msg)
+        logger.warn('Payment error: %s', exception, exc_info=sys.exc_info())
+    except stripe.CardError as exception:
+        msg = 'Payment error: %s Your card has not been charged.' % exception
+        messages.error(request, msg)
+        logger.warn('Payment error: %s', exception, exc_info=sys.exc_info())
     return redirect(url_redirect)
+
 
 @login_required
 def verify_email(request):
