@@ -49,7 +49,7 @@ class GenericReceipt(EmailMultiAlternatives):
             'id': charge.id,
             'date': datetime.fromtimestamp(charge.created),
             'item': self.item,
-            'last4': card['last4'],
+            'last4': card.get('last4'),
             'amount': amount
         }
 
