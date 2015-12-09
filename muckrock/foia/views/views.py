@@ -173,7 +173,8 @@ class Detail(DetailView):
         context['past_due'] = is_past_due
         context['user_can_edit'] = user_can_edit
         context['embargo'] = {
-            'show': (user_can_edit and foia.user.profile.can_embargo) or foia.embargo,
+            'show': ((user_can_edit and foia.user.profile.can_embargo)\
+                    or foia.embargo) or user.is_staff,
             'edit': user_can_edit and foia.user.profile.can_embargo,
             'add': user_can_edit and user.profile.can_embargo,
             'remove': user_can_edit and foia.embargo

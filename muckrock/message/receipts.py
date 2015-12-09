@@ -17,12 +17,12 @@ logger = logging.getLogger(__name__)
 
 class GenericReceipt(EmailMultiAlternatives):
     """A basic receipt"""
-    subject = u'Your Receipt'
     item = u''
     text_template = 'message/receipt/base.txt'
+    subject = u'Your Receipt'
 
     def __init__(self, user, charge, **kwargs):
-        super(GenericReceipt, self).__init__(**kwargs)
+        super(GenericReceipt, self).__init__(subject=self.subject, **kwargs)
         if isinstance(user, User):
             self.user = user
             self.to = [user.email]
@@ -49,7 +49,7 @@ class GenericReceipt(EmailMultiAlternatives):
             'id': charge.id,
             'date': datetime.fromtimestamp(charge.created),
             'item': self.item,
-            'last4': card['last4'],
+            'last4': card.get('last4'),
             'amount': amount
         }
 

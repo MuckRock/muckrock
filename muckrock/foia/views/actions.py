@@ -199,7 +199,7 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
             request.user.profile.pay(token, amount, metadata)
         except (stripe.InvalidRequestError, stripe.CardError, ValueError) as exception:
             messages.error(request, 'Payment error: %s' % exception)
-            logger.error('Payment error: %s', exception, exc_info=sys.exc_info())
+            logger.warning('Payment error: %s', exception, exc_info=sys.exc_info())
             return redirect(foia)
         msg = 'Your payment was successful. We will get this to the agency right away.'
         messages.success(request, msg)
