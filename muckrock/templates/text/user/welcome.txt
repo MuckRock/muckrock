@@ -6,7 +6,7 @@ Just a reminder, your username is {{ user.username }}.
 {% if password_link %}
 Your account is almost set up, but we need you to set a password. You can set it here: https://www.muckrock.com{{ password_link }}
 {% endif %}
-We ask that you please verify your email by following this link: https://www.muckrock.com{{ verification_link }}
+We ask that you please verify your email by following this link: https://www.muckrock.com{{ verification_link|safe }}
 You can also verify your email from your account settings page: https://www.muckrock.com{% url 'acct-settings' %}
 
 Have a technical support or customer service issue?
