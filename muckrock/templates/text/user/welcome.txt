@@ -1,16 +1,25 @@
-Hi {{user.get_full_name}}, and welcome to MuckRock!
+Hi {{user.first_name}},
+
+Welcome to MuckRock!
+
+Just a reminder, your username is {{ user.username }}.
 {% if password_link %}
-You're account is almost set up, but we need you to set a password. You can set it here: https://www.muckrock.com{{ password_link }}
+Your account is almost set up, but we need you to set a password. You can set it here: https://www.muckrock.com{{ password_link }}
 {% endif %}
 We ask that you please verify your email by following this link: https://www.muckrock.com{{ verification_link }}
+You can also verify your email from your account settings page: https://www.muckrock.com{% url 'acct-settings' %}
 
-Just a reminder, your username is {{ user.username }}, and the email address for your account is {{ user.email }}.
+Have a technical support or customer service issue?
 
-After that, get started filing by just clicking the "Create a FOIA Request" button on the top right of any page.
+* Click the "Get Help" button on the request page.
+* Email us at info@muckrock.com
 
-Thanks for trying MuckRock. To get in touch with staff, just reply to this email, and we'll respond as soon as we can. We're here to answer any questions you might have, whether you want help crafting the perfect request or just want to find some interesting stuff to follow and read.
+Looking for FOIA advice?
 
-Thanks again!
+* Post your question to our forum to get invaluable insight from MuckRock's community of public records pros. https://www.muckrock.com/questions/
+* Send us your question through Twitter. https://www.twitter.com/muckrock/
 
-Michael
-MuckRock.com
+Thank you so much for joining the MuckRock community. We are excited to see what you do with the tools we've built.
+
+Sincerely,
+The MuckRock Team

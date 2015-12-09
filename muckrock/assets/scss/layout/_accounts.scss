@@ -31,6 +31,7 @@
         @include border;
         @include border-radius;
         overflow: hidden;
+        width: 100%;
         max-width: 40em;
         background: #fff;
         border-color: $color-blue-dark;
@@ -38,7 +39,7 @@
             padding: $vertical-rhythm;
         }
         header {
-            padding-top: $vertical-rhythm;
+            padding: $vertical-rhythm 0;
             text-align: center;
             background: $color-blue-light;
             color: $color-blue-dark;
@@ -107,6 +108,10 @@
             @include display(flex);
             @include justify-content(space-between);
             @include align-items(center);
+            @include flex-direction(column-reverse);
+            @include media($medium-layout) {
+                @include flex-direction(row);
+            }
         }
 
     }

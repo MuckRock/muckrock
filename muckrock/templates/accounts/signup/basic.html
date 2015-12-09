@@ -3,7 +3,7 @@
 {% block content %}
 <article class="account signup">
     <header>
-        <h1>Sign up for a basic account</h1>
+        <h1>Sign up for a Basic account</h1>
     </header>
     <form method="post" class="basic form">
         {% csrf_token %}
@@ -18,7 +18,7 @@
             {% endfor %}
         </div>
         <footer>
-            <a href="{% url 'accounts' %}" class="cancel">Pick a different plan</a>
+            <a href="{% url 'accounts' %}" class="cancel">Go Pro for embargo, multirequest, and other features.</a>
             <button type="submit" class="primary">Sign Up</button>
         </footer>
     </form>
