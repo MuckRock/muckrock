@@ -19,9 +19,10 @@ class GenericReceipt(EmailMultiAlternatives):
     """A basic receipt"""
     item = u''
     text_template = 'message/receipt/base.txt'
+    subject = u'Your Receipt'
 
     def __init__(self, user, charge, **kwargs):
-        super(GenericReceipt, self).__init__(**kwargs)
+        super(GenericReceipt, self).__init__(subject=self.subject, **kwargs)
         if isinstance(user, User):
             self.user = user
             self.to = [user.email]
@@ -34,18 +35,10 @@ class GenericReceipt(EmailMultiAlternatives):
                 self.to = []
         self.from_email = 'MuckRock <info@muckrock.com>'
         self.bcc = ['diagnostics@muckrock.com']
-        self.subject = self.get_subject()
         self.body = render_to_string(
             self.text_template,
             self.get_context_data(charge)
         )
-
-    def get_subject(self):
-        """Returns a subject if specified, or a generic one if it isn't."""
-        subject = u'Your Receipt'
-        if self.subject:
-           subject = self.subject
-        return subject
 
     def get_context_data(self, charge):
         """Returns a dictionary of context for the template, given the charge object"""
