@@ -43,8 +43,11 @@ def detail(request, fed_slug, state_slug, local_slug):
     if request.method == 'POST':
         form = FlagForm(request.POST)
         if form.is_valid():
+            user = None
+            if request.user.is_authenticated():
+                user = request.user
             FlaggedTask.objects.create(
-                user=request.user,
+                user=user,
                 text=form.cleaned_data.get('reason'),
                 jurisdiction=jurisdiction)
             messages.info(request, 'Correction submitted, thanks.')

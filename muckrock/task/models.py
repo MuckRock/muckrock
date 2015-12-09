@@ -246,8 +246,8 @@ class StaleAgencyTask(Task):
 
 class FlaggedTask(Task):
     """A user has flagged a request, agency or jurisdiction"""
-    user = models.ForeignKey(User)
     text = models.TextField()
+    user = models.ForeignKey(User, blank=True, null=True)
     foia = models.ForeignKey('foia.FOIARequest', blank=True, null=True)
     agency = models.ForeignKey(Agency, blank=True, null=True)
     jurisdiction = models.ForeignKey(Jurisdiction, blank=True, null=True)
