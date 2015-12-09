@@ -4,7 +4,6 @@ Notification objects for the messages app
 
 from django.contrib.auth.models import User
 from django.core.mail import EmailMultiAlternatives
-from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
 
 import actstream
@@ -112,7 +111,7 @@ class Notification(EmailMultiAlternatives):
     text_template = None
     subject = u'Notification'
 
-    def __init__(self, user, context={}):
+    def __init__(self, user, context):
         """Initialize the notification"""
         super(Notification, self).__init__(subject=self.subject)
         if isinstance(user, User):
@@ -147,14 +146,6 @@ class WelcomeNotification(Notification):
     """Sends a welcome notification"""
     text_template = 'text/user/welcome.txt'
     subject = u'Welcome to MuckRock'
-
-    def get_context_data(self, context):
-        """Add the email verification link to context."""
-        context = super(WelcomeNotification, self).get_context_data(context)
-        verification_url = reverse('acct-verify-email')
-        key = self.user.profile.generate_confirmation_key()
-        context['verification_link'] = self.user.profile.wrap_url(verification_url, key=key)
-        return context
 
 
 class GiftNotification(Notification):

@@ -3,6 +3,7 @@ Tasks for the messages application.
 """
 
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 
 from celery.schedules import crontab
 from celery.task import periodic_task, task
@@ -139,7 +140,10 @@ def failed_payment(invoice_id):
 @task(name='muckrock.message.tasks.welcome')
 def welcome(user):
     """Send a welcome notification to a new user. Hello!"""
-    notification = notifications.WelcomeNotification(user)
+    verification_url = reverse('acct-verify-email')
+    key = user.profile.generate_confirmation_key()
+    context = {'verification_link': user.profile.wrap_url(verification_url, key=key)}
+    notification = notifications.WelcomeNotification(user, context)
     notification.send(fail_silently=False)
 
 @task(name='muckrock.message.tasks.gift')
