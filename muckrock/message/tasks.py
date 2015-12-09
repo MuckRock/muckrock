@@ -3,6 +3,7 @@ Tasks for the messages application.
 """
 
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 
 from celery.schedules import crontab
 from celery.task import periodic_task, task
@@ -91,25 +92,66 @@ def send_charge_receipt(charge_id):
     receipt = receipt_class(user, charge)
     receipt.send(fail_silently=False)
 
+def get_subscription_type(invoice):
+    """Gets the subscription type from the invoice."""
+    # get the first line of the invoice
+    lines = invoice.lines
+    subscription_type = 'unknown'
+    if lines.total_count > 0:
+        data = lines.data
+        plan = data[0].plan
+        subscription_type = plan.id
+    return subscription_type
+
 @task(name='muckrock.message.tasks.failed_payment')
 def failed_payment(invoice_id):
     """Notify a customer about a failed subscription invoice."""
     invoice = stripe.Invoice.retrieve(invoice_id)
     attempt = invoice.attempt_count
-    logger.debug(invoice.customer)
+    subscription_type = get_subscription_type(invoice)
     profile = Profile.objects.get(customer_id=invoice.customer)
     user = profile.user
+    # raise the failed payment flag on the profile
+    profile.payment_failed = True
+    profile.save()
     if attempt == 4:
-        # on last attempt, cancel the user's subscription
-        if invoice.plan.id == 'pro':
+        # on last attempt, cancel the user's subscription and lower the failed payment flag
+        if subscription_type == 'pro':
             profile.cancel_pro_subscription()
-        elif invoice.plan.id == 'org':
+        elif subscription_type == 'org':
             org = Organization.objects.get(owner=user)
             org.cancel_subscription()
+        profile.payment_failed = False
+        profile.save()
         logger.info('%s subscription has been cancelled due to failed payment', user.username)
-        notification = notifications.FailedPaymentNotification(user, 'final', invoice.plan.id)
-        notification.send(fail_silently=False)
+        context = {
+            'attempt': 'final',
+            'type': subscription_type
+        }
     else:
         logger.info('Failed payment by %s, attempt %s', user.username, attempt)
-        notification = notifications.FailedPaymentNotification(user, attempt, invoice.plan.id)
-        notification.send(fail_silently=False)
+        context = {
+            'attempt': attempt,
+            'type': subscription_type
+        }
+    notification = notifications.FailedPaymentNotification(user, context)
+    notification.send(fail_silently=False)
+
+@task(name='muckrock.message.tasks.welcome')
+def welcome(user):
+    """Send a welcome notification to a new user. Hello!"""
+    verification_url = reverse('acct-verify-email')
+    key = user.profile.generate_confirmation_key()
+    context = {'verification_link': user.profile.wrap_url(verification_url, key=key)}
+    notification = notifications.WelcomeNotification(user, context)
+    notification.send(fail_silently=False)
+
+@task(name='muckrock.message.tasks.gift')
+def gift(to_user, from_user, gift_description):
+    """Notify the user when they have been gifted requests."""
+    context = {
+        'from': from_user,
+        'gift': gift_description
+    }
+    notification = notifications.GiftNotification(to_user, context)
+    notification.send(fail_silently=False)

@@ -52,10 +52,11 @@
               type="text/x-scss"
               href="{% static 'scss/style.scss' %}" />
         {% endcompress %}
-
-        <!-- Preloading and Prerendering -->
-        {% block preload %}
-        {% endblock preload %}
+        {% block styles %}
+        {% endblock %}
+        <!-- Prefetch and Prerendering -->
+        {% block prefetch %}
+        {% endblock prefetch %}
         {% block prerender %}
         {% endblock prerender %}
         <!-- Facebook and Twitter Integration -->
@@ -153,8 +154,6 @@
                 src="{% static 'js/jquery.hotkeys.js' %}"></script>-->
         {% block scripts %}
         {% endblock scripts %}
-        {% block styles %}
-        {% endblock %}
         <!-- END SCRIPTS -->
     </body>
 </html>

@@ -44,8 +44,9 @@ function prettifyAmountInput(input) {
     });
 }
 
-function checkout(pk, image, description, amount, email, label, form, submit) {
+function checkout(pk, image, description, amount, email, label, form, submit, bitcoin) {
     submit = typeof submit !== 'undefined' ? submit : true;
+    bitcoin = typeof bitcoin !== 'undefined' ? bitcoin : true;
     var token = function(token) {
         form.append('<input type="hidden" name="stripe_token" value="' + token.id + '" />');
         form.append('<input type="hidden" name="stripe_email" value="' + token.email + '" />');
@@ -64,7 +65,7 @@ function checkout(pk, image, description, amount, email, label, form, submit) {
         email: email,
         panelLabel: label,
         token: token,
-        bitcoin: true
+        bitcoin: bitcoin
     });
 }
 
@@ -212,5 +213,15 @@ $('#show-search').click(function(){
     }
     $(closeSearch).click(function(){
         $(search).removeClass('visible');
+    });
+});
+
+$('#quick-log-in').click(function(e){
+    e.preventDefault();
+    var quickLogin = $('#quick-log-in-form');
+    quickLogin.addClass('visible');
+    quickLogin.find('input[type=text]')[0].focus();
+    quickLogin.find('.cancel').click(function(){
+        quickLogin.removeClass('visible');
     });
 });

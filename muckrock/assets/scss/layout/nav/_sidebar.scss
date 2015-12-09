@@ -45,16 +45,50 @@ $sidebar-width: 250px;
     -webkit-overflow-scrolling: touch;
     border-left: 1px solid $color-grey-0;
     background-color: $color-grey-1;
-    color: $color-white;
-
+    color: $color-grey-5;
     dfn {
         color: $color-white;
+    }
+
+    a {
+        color: $color-white;
+        &:hover {
+            color: $color-blue;
+            text-decoration: none;
+        }
+        @include transition(color .25s linear);
     }
 
     & > * {
         margin-bottom: $vertical-rhythm/2;
         &:last-child {
             margin-bottom: $vertical-rhythm/2;
+        }
+    }
+
+    .quick-log-in {
+        position: absolute;
+        margin: 0;
+        padding: $vertical-rhythm;
+        background: $color-grey-2;
+        color: $color-white;
+        h1 {
+            font-size: $font-size-5;
+            font-weight: $font-weight-bold;
+        }
+        input {
+            width: 100%;
+            margin-bottom: $vertical-rhythm;
+            color: $color-black;
+        }
+        .row {
+            @include display(flex);
+            @include justify-content(space-between);
+        }
+        @include transition(transform .25s ease-in-out);
+        @include transform(translateY(-100%));
+        &.visible {
+            @include transform(translateY(0));
         }
     }
 
@@ -69,13 +103,13 @@ $sidebar-width: 250px;
             border-bottom: 1px solid $color-black;
             border-right: 1px solid $color-black;
             background-color: $color-grey-2;
-            color: $color-white;
             font-weight: $font-weight-bold;
             text-align: center;
-            @include transition(background-color .25s linear);
+            @include transition(all .25s linear);
             &:hover {
                 text-decoration: none;
                 background-color: $color-blue;
+                color: $color-white;
             }
             &:last-child {
                 border-right: 0;
@@ -102,21 +136,22 @@ $sidebar-width: 250px;
         p {
             margin-bottom: $vertical-rhythm/2;
         }
+
+
+        &.failure {
+            strong {
+                color: $color-red;
+            }
+            p:last-child {
+                margin-bottom: 0;
+            }
+        }
     }
 
     .organization a, .my-requests, .admin {
         display: block;
         width: 100%;
-        // padding: $vertical-rhythm/2;
-        color: $color-white;
-        font-size: $font-size-3;
         font-weight: $font-weight-bold;
-        @include border-radius;
-        @include transition(color .25s linear);
-        &:hover {
-            color: $color-blue;
-            text-decoration: none;
-        }
     }
 
     .requests {
@@ -174,11 +209,6 @@ $sidebar-width: 250px;
             a {
                 display: block;
                 color: $color-grey-6;
-                @include transition(color .25s linear);
-                &:hover {
-                    color: $color-blue;
-                    text-decoration: none;
-                }
             }
         }
     }
@@ -207,14 +237,6 @@ $sidebar-width: 250px;
                 margin-bottom: 0;
             }
         }
-    }
-
-    .newsletter {
-        margin-bottom: 0;
-        padding-bottom: $vertical-rhythm;
-        color: $color-white;
-        background-color: $color-blue;
-        @include action-input($color-white, $color-blue-dark);
     }
 
 }

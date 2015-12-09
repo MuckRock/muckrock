@@ -34,8 +34,8 @@ options = EmailOptions()
 
 ACCT_TYPES = [
     ('admin', 'Admin'),
+    ('basic', 'Basic'),
     ('beta', 'Beta'),
-    ('community', 'Community'),
     ('pro', 'Professional'),
     ('proxy', 'Proxy'),
     ('robot', 'Robot'),
@@ -44,6 +44,7 @@ ACCT_TYPES = [
 class Profile(models.Model):
     """User profile information for muckrock"""
     # pylint: disable=too-many-public-methods
+    # pylint: disable=too-many-instance-attributes
 
     email_prefs = (
         ('instant', 'Instant'),
@@ -84,10 +85,6 @@ class Profile(models.Model):
         related_name='members',
         on_delete=models.SET_NULL)
 
-    # email confirmation
-    email_confirmed = models.BooleanField(default=False)
-    confirmation_key = models.CharField(max_length=24, blank=True)
-
     # extended information
     profile = models.TextField(blank=True)
     location = models.ForeignKey(Jurisdiction, blank=True, null=True)
@@ -110,7 +107,10 @@ class Profile(models.Model):
         resize_source={'size': (200, 200), 'crop': 'smart'}
     )
 
-    # prefrences
+    # email confirmation
+    email_confirmed = models.BooleanField(default=False)
+    confirmation_key = models.CharField(max_length=24, blank=True)
+    # email preferences
     email_pref = models.CharField(
         max_length=10,
         choices=email_prefs,
@@ -133,6 +133,7 @@ class Profile(models.Model):
     # for Stripe
     customer_id = models.CharField(max_length=255, blank=True)
     subscription_id = models.CharField(max_length=255, blank=True)
+    payment_failed = models.BooleanField(default=False)
 
     def __unicode__(self):
         return u"%s's Profile" % unicode(self.user).capitalize()
@@ -141,7 +142,7 @@ class Profile(models.Model):
     def get_absolute_url(self):
         """The url for this object"""
         # pylint: disable=no-member
-        return ('acct-profile', [], {'user_name': self.user.username})
+        return ('acct-profile', [], {'username': self.user.username})
 
     def is_member_of(self, organization):
         """Answers whether the profile is a member of the passed organization"""
@@ -216,6 +217,10 @@ class Profile(models.Model):
         """Is this user allowed to embargo?"""
         return self.acct_type in ['admin', 'beta', 'pro', 'proxy'] or self.organization != None
 
+    def can_multirequest(self):
+        """Is this user allowed to multirequest?"""
+        return self.acct_type in ['admin', 'beta', 'pro', 'proxy'] or self.organization != None
+
     def can_embargo_permanently(self):
         """Is this user allowed to permanently embargo?"""
         return self.acct_type in ['admin'] or self.organization != None
@@ -223,6 +228,13 @@ class Profile(models.Model):
     def can_view_emails(self):
         """Is this user allowed to view all emails and private contact information?"""
         return self.acct_type in ['admin', 'pro']
+
+    def bundled_requests(self):
+        """Returns the number of requests the user gets when they buy a bundle."""
+        how_many = settings.BUNDLED_REQUESTS[self.acct_type]
+        if self.organization:
+            how_many = 5
+        return how_many
 
     def customer(self):
         """Retrieve the customer from Stripe or create one if it doesn't exist. Then return it."""
@@ -238,6 +250,22 @@ class Profile(models.Model):
             self.customer_id = customer.id
             self.save()
         return customer
+
+    def card(self):
+        """Retrieve the default credit card from Stripe, if one exists."""
+        card = None
+        customer = self.customer()
+        if customer.default_source:
+            card = customer.sources.retrieve(customer.default_source)
+        return card
+
+    def has_subscription(self):
+        """Check Stripe to see if this user has any active subscriptions."""
+        customer = self.customer()
+        if customer.subscriptions.total_count > 0:
+            return True
+        else:
+            return False
 
     def start_pro_subscription(self, token=None):
         """Subscribe this profile to a professional plan. Return the subscription."""
@@ -272,8 +300,9 @@ class Profile(models.Model):
         subscription = subscription.delete()
         customer = customer.save()
         self.subscription_id = ''
-        self.acct_type = 'community'
-        self.monthly_requests = settings.MONTHLY_REQUESTS.get('community', 0)
+        self.acct_type = 'basic'
+        self.monthly_requests = settings.MONTHLY_REQUESTS.get('basic', 0)
+        self.payment_failed = False
         self.save()
         return subscription
 
@@ -439,7 +468,7 @@ class Statistics(models.Model):
     pro_user_names = models.TextField(blank=True)
     total_page_views = models.IntegerField(null=True, blank=True)
     daily_requests_pro = models.IntegerField(null=True, blank=True)
-    daily_requests_community = models.IntegerField(null=True, blank=True)
+    daily_requests_basic = models.IntegerField(null=True, blank=True)
     daily_requests_beta = models.IntegerField(null=True, blank=True)
     daily_articles = models.IntegerField(null=True, blank=True)
 

@@ -11,6 +11,7 @@
     }
 </style>
 {% endblock styles %}
+
 {% block content %}
 <div class="new-request">
     <header>
@@ -25,7 +26,11 @@
             Out of ideas? <a href="#clone">Try cloning a request.</a>
             <br>
             Want to send a multirequest?
+            {% if request.user.is_authenticated and request.user.profile.can_multirequest %}
             <a href="{% url 'foia-create-multi' %}">Click here.</a>
+            {% else %}
+            <a href="{% url 'accounts' %}">Go Pro!</a>
+            {% endif %}
             <br>
             <noscript>It looks like you have JavaScript turned off. This page requires JavaScript to function. If you are not willing to enable JavaScript, please send an email containing all necessary information to file and we will create your request for you.</noscript>
         <summary>
@@ -109,7 +114,7 @@
             <input type="submit" name="submit" value="Create" class="primary button"  />
         {% endif %}
         {% if not user.is_authenticated %}
-		<p>Create a MuckRock account and file up to four requests for just $20, or <a href="https://www.muckrock.com/accounts/subscribe/" target="_blank">go Pro for 20 requests a month</a> with the option to keep your submissions private. Already have an account? <a href="https://www.muckrock.com/accounts/login/">Log in</a>.</p>
+		<p>Create a MuckRock account and file up to four requests for just $20, or <a href="{% url 'accounts-signup-professional' %}" target="_blank">go Pro for 20 requests a month</a> with the option to keep your submissions private. Already have an account? <a href="{% url 'acct-login' %}">Log in</a>.</p>
 		{% endif %}
         </footer>
 

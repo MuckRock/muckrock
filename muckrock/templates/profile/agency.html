@@ -48,7 +48,7 @@
             {% if request.user.profile.can_view_emails %}
         <dd>{{agency.email}}</dd>
             {% else %}
-        <dd><a href="{% url 'acct-subscribe' %}">Available to Pro Users</a></dd>
+        <dd><a href="{% url 'accounts' %}">Available to Pro Users</a></dd>
             {% endif %}
         {% else %}
         <dd>Unknown</dd>
