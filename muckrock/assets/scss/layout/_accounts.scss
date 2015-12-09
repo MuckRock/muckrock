@@ -149,6 +149,12 @@
             p {
                 margin-bottom: 0;
             }
+            tr {
+                border: none;
+            }
+            td {
+                padding: 0 0 $vertical-rhythm 0;
+            }
         }
         footer {
             @include display(flex);
