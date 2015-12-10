@@ -58,6 +58,37 @@
     }
 }
 
+.profile .article-list {
+    @include border;
+    padding-left: 0;
+    list-style: none;
+    a {
+        display: block;
+        padding: $vertical-rhythm;
+        color: $color-black;
+        background: #fff;
+    }
+    a:hover {
+        text-decoration: none;
+        background: $color-blue-light;
+        & .title {
+            text-decoration: underline;
+        }
+    }
+    .title {
+        font-weight: $font-weight-bold;
+    }
+    .date {
+        color: $color-grey;
+    }
+    li {
+        border-bottom: 1px solid $color-grey;
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+}
+
 .agency.profile {
 
 }

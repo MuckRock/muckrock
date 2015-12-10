@@ -35,6 +35,7 @@ from muckrock.accounts.forms import ProfileSettingsForm,\
 from muckrock.accounts.models import Profile, Statistics, ACCT_TYPES
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.foia.models import FOIARequest
+from muckrock.news.models import Article
 from muckrock.organization.models import Organization
 from muckrock.message.tasks import send_charge_receipt,\
                                    send_invoice_receipt,\
@@ -356,15 +357,17 @@ def profile(request, username=None):
     requests = FOIARequest.objects.filter(user=user).get_viewable(request.user)
     recent_requests = requests.order_by('-date_submitted')[:5]
     recent_completed = requests.filter(status='done').order_by('-date_done')[:5]
+    articles = Article.objects.get_published().filter(authors=user)[:5]
     context = {
         'user_obj': user,
         'recent_requests': recent_requests,
         'recent_completed': recent_completed,
+        'articles': articles,
         'stripe_pk': STRIPE_PUB_KEY,
         'sidebar_admin_url': reverse('admin:auth_user_change', args=(user.pk,)),
     }
     return render_to_response(
-        'profile/account.html',
+        'accounts/profile.html',
         context,
         context_instance=RequestContext(request)
     )
