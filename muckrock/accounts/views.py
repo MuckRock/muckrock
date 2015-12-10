@@ -354,12 +354,16 @@ def profile(request, username=None):
     if not username and request.user.is_anonymous():
         return redirect('acct-login')
     user = get_object_or_404(User, username=username) if username else request.user
+    profile = user.profile
+    org = profile.organization
     requests = FOIARequest.objects.filter(user=user).get_viewable(request.user)
     recent_requests = requests.order_by('-date_submitted')[:5]
     recent_completed = requests.filter(status='done').order_by('-date_done')[:5]
     articles = Article.objects.get_published().filter(authors=user)[:5]
     context = {
         'user_obj': user,
+        'profile': profile,
+        'org': org,
         'recent_requests': recent_requests,
         'recent_completed': recent_completed,
         'articles': articles,

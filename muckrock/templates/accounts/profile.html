@@ -1,20 +1,22 @@
 {% extends 'base_profile.html' %}
+{% load thumbnail %}
 {% load markdown_deux_tags %}
 {% load static from staticfiles %}
 
-{% block title %}{{ user_obj.username|capfirst }}{% endblock title %}
+{% block title %}{{ user_obj.get_full_name }}&rsquo;s profile &bull; MuckRock{% endblock title %}
 {% block type %}account{% endblock type %}
 
 {% block metadata %}
 <aside class="metadata">
-
-    <h1>{{user_obj.get_full_name}}</h1>
-    <p>{{user_obj.username}}</p>
-    {% with user_obj.profile.organization as org %}
-        {% if org %}
-        <h2>{% if org.owner == user_obj %}Owner{% else %}Member{% endif %} of <a href="{% url 'org-detail' org.slug %}" title="{{org}}'s organization page">{{org}}</a></h2>
-        {% endif %}
-    {% endwith %}
+    <section class="identity">
+        {% if profile.avatar %}<img src="{% thumbnail profile.avatar 600x600 %}" class="avatar">{% endif %}
+        <h1 class="fullname">{{user_obj.get_full_name}}</h1>
+        <p class="username">{{user_obj.username}}</p>
+    </section>
+    <ul class="links">
+        {% if profile.twitter %}<li class="twitter"><a href="https://www.twitter.com/{{profile.twitter}}" title="{{user_obj.first_name}}'s Twitter profile">@{{profile.twitter}}</a></li>{% endif %}
+        {% if profile.location %}<li class="location"><a href="{{profile.location.get_absolute_url}}">{{profile.location}}</a></li>{% endif %}
+    </ul>
     {% if user == user_obj %}
     <dl class="stats">
         {% if user.profile.acct_type != 'basic' %}
@@ -32,6 +34,9 @@
         <dd>0</dd>
         {% endif %}
     </dl>
+    {% endif %}
+    {% if org %}
+    <p class="organization">{% if org.owner == user_obj %}Owner{% else %}Member{% endif %} of <a href="{% url 'org-detail' org.slug %}" title="{{org}}'s organization page">{{org}}</a></p>
     {% endif %}
 </aside>
 {% endblock metadata %}

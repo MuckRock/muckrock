@@ -52,13 +52,20 @@
 }
 
 .account.profile {
-    .metadata h1 small {
-        font-weight: $font-weight-normal;
-        font-size: $font-size-3;
+    .fullname {
+        margin-bottom: 0;
+    }
+    .username {
+        color: $color-grey;
+    }
+    .avatar {
+        @include border-radius;
+        width: 100%;
+        max-width: 300px;
     }
 }
 
-.profile .article-list {
+.account.profile .article-list {
     @include border;
     padding-left: 0;
     list-style: none;
@@ -70,8 +77,8 @@
     }
     a:hover {
         text-decoration: none;
-        background: $color-blue-light;
         & .title {
+            color: $color-blue;
             text-decoration: underline;
         }
     }
