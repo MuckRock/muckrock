@@ -21,7 +21,7 @@
 <tr class="list-table-item">
     <td><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></td>
     <td>{{ foia.communications.all.0.date|date:"m/d/Y" }}</td>
-    <td>{{ foia.date_processing|timesince }}</td>
+    <td>{{ foia.processing_length }} days</td>
 </tr>
 {% endfor %}
 {% endblock list-table-body %}
