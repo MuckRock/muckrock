@@ -14,8 +14,18 @@
         <p class="username">{{user_obj.username}}</p>
     </section>
     <ul class="links">
-        {% if profile.twitter %}<li class="twitter"><a href="https://www.twitter.com/{{profile.twitter}}" title="{{user_obj.first_name}}'s Twitter profile">@{{profile.twitter}}</a></li>{% endif %}
-        {% if profile.location %}<li class="location"><a href="{{profile.location.get_absolute_url}}">{{profile.location}}</a></li>{% endif %}
+        {% if profile.twitter %}
+        <li class="twitter">
+            {% include 'lib/icons/twitter.svg' %}
+            <a href="https://www.twitter.com/{{profile.twitter}}" title="{{user_obj.first_name}}'s Twitter profile">@{{profile.twitter}}</a>
+        </li>
+        {% endif %}
+        {% if profile.location %}
+        <li class="location">
+            {% include 'lib/icons/location.svg' %}
+            <a href="{{profile.location.get_absolute_url}}">{{profile.location}}</a>
+        </li>
+        {% endif %}
     </ul>
     {% if user == user_obj %}
     <dl class="stats">
