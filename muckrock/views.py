@@ -175,6 +175,8 @@ class MRFilterableListView(ListView):
         except ValueError:
             context['filter_form'] = MRFilterForm()
         context['filter_url'] = filter_data['filter_url']
+        context['active_sort'] = self.request.GET.get('sort', self.default_sort)
+        context['active_order'] = self.request.GET.get('order', self.default_order)
         return context
 
     def get_queryset(self):
