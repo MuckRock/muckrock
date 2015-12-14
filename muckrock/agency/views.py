@@ -26,6 +26,7 @@ class List(MRFilterableListView):
     model = Agency
     title = 'Agencies'
     template_name = 'lists/agency_list.html'
+    default_sort = 'name'
 
 
 def detail(request, jurisdiction, jidx, slug, idx):
