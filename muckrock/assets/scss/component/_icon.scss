@@ -1,7 +1,6 @@
 svg.icon {
     height: $font-size-3;
-    width: auto;
-    margin: 0 $vertical-rhythm/2;
+    width: $font-size-3;
     fill-rule: evenodd;
     path, polygon, rect {
         fill: $color-black;

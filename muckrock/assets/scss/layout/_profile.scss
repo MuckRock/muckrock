@@ -70,12 +70,16 @@
     .title {
         font-weight: $font-weight-bold;
     }
+    .links svg {
+        margin-right: $vertical-rhythm/2;
+    }
 }
 
 .account.profile .article-list {
     @include border;
     a {
         display: flex;
+        align-items: center;
         color: $color-black;
         background: #fff;
     }
@@ -87,6 +91,7 @@
         }
     }
     .article-image {
+        flex-shrink: 0;
         margin-bottom: 0;
         opacity: .75;
         transition: opacity .1s linear;
@@ -96,6 +101,7 @@
     }
     .date {
         color: $color-grey;
+        font-size: $font-size-2;
     }
     li {
         border-bottom: 1px solid $color-grey;

@@ -91,7 +91,7 @@
 
             <li class="project-item" {% if project.image %}style="background-image:url('{% thumbnail project.image 800x600 %}')"{% endif %}>
                 <a href="{{project.get_absolute_url}}" title="{{project.title}}" class="project-info">
-                    <h4 class="title truncate">{{project.title}}</h4>
+                    <h4 class="title">{{project.title}}</h4>
                     <p class="summary">{{project.summary|truncatechars:"300"}}</p>
                 </a>
             </li>
@@ -110,8 +110,8 @@
         {% for article in articles %}
             <li class="article-item">
                 <a href="{{article.get_absolute_url}}" title="{{article.title}}">
-                    {% if article.image %}<img src="{% thumbnail article.image 100x100 crop %}" class="article-image" />{% endif %}
-                    <div class="article-info">
+                    {% if article.image %}<img src="{% thumbnail article.image 120x120 crop %}" class="article-image" />{% endif %}
+                    <div class="article-info truncate">
                         <h4 class="title truncate">{{article.title}}</h4>
                         <p class="date">{{article.pub_date|date:"F d, Y"}}</p>
                     </div>
