@@ -355,8 +355,8 @@ def profile(request, username=None):
     if not username and request.user.is_anonymous():
         return redirect('acct-login')
     user = get_object_or_404(User, username=username) if username else request.user
-    profile = user.profile
-    org = profile.organization
+    user_profile = user.profile
+    org = user_profile.organization
     requests = FOIARequest.objects.filter(user=user).get_viewable(request.user)
     recent_requests = requests.order_by('-date_submitted')[:5]
     recent_completed = requests.filter(status='done').order_by('-date_done')[:5]
@@ -364,7 +364,7 @@ def profile(request, username=None):
     projects = Project.objects.get_for_contributor(user).get_visible(request.user)
     context = {
         'user_obj': user,
-        'profile': profile,
+        'profile': user_profile,
         'org': org,
         'projects': projects,
         'recent_requests': recent_requests,
