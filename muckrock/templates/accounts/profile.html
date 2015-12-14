@@ -79,6 +79,25 @@
             {% endif %}
         </div>
     </section>
+    {% if projects %}
+    <section class="projects">
+        {% if request.user == user_obj %}
+        <h3>Your Projects</h3>
+        {% else %}
+        <h3>Projects</h3>
+        {% endif %}
+        <ul class="project-list">
+        {% for project in projects %}
+            <li class="project-item" style="background-image:url('{% thumbnail project.image 800x600 %}')">
+                <a href="{{project.get_absolute_url}}" title="{{project.title}}" class="project-info">
+                    <h4 class="title">{{project.title}}</h4>
+                    <p class="summary">{{project.summary|truncatechars:"300"}}</p>
+                </a>
+            </li>
+        {% endfor %}
+        </ul>
+    </section>
+    {% endif %}
     {% if articles %}
     <section class="articles">
         {% if request.user == user_obj %}

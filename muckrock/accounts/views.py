@@ -37,6 +37,7 @@ from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
 from muckrock.organization.models import Organization
+from muckrock.project.models import Project
 from muckrock.message.tasks import send_charge_receipt,\
                                    send_invoice_receipt,\
                                    failed_payment,\
@@ -360,10 +361,12 @@ def profile(request, username=None):
     recent_requests = requests.order_by('-date_submitted')[:5]
     recent_completed = requests.filter(status='done').order_by('-date_done')[:5]
     articles = Article.objects.get_published().filter(authors=user)[:5]
+    projects = Project.objects.get_for_contributor(user).get_visible(request.user)
     context = {
         'user_obj': user,
         'profile': profile,
         'org': org,
+        'projects': projects,
         'recent_requests': recent_requests,
         'recent_completed': recent_completed,
         'articles': articles,
