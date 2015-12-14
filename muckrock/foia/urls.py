@@ -37,6 +37,9 @@ urlpatterns = patterns(
     url(r'^list/following/$',
         views.FollowingRequestList.as_view(),
         name='foia-list-following'),
+    url(r'^list/processing/$',
+        views.ProcessingRequestList.as_view(),
+        name='foia-list-processing'),
 
     # Create and Draft Views
     url(r'^create/$',

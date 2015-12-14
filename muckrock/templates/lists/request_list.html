@@ -51,6 +51,9 @@
         <li class="{% active request '^/foi/list/$' %}"><a href="{% url 'foia-list' %}">All</a></li>
         <li class="{% active request '^/foi/mylist/$' %}"><a href="{% url 'foia-mylist' %}">Yours</a></li>
         <li class="{% active request '^/foi/list/following/$' %}"><a href="{% url 'foia-list-following' %}">Following</a></li>
+        {% if user.is_staff %}
+        <li class="{% active request '^/foi/list/processing/$' %}"><a href="{% url 'foia-list-processing' %}">Processing</a></li>
+        {% endif %}
     </ul>
 </section>
 {% endif %}
