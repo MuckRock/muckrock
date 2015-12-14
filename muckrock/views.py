@@ -18,6 +18,7 @@ from muckrock.forms import MRFilterForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.news.models import Article
 
+import logging
 import re
 from haystack.views import SearchView
 
@@ -34,6 +35,8 @@ class MRFilterableListView(ListView):
 
     title = ''
     template_name = 'lists/base_list.html'
+    default_sort = 'title'
+    default_order = 'asc'
 
     def get_filters(self):
         """
@@ -151,13 +154,14 @@ class MRFilterableListView(ListView):
 
     def sort_list(self, objects):
         """Sorts the list of objects"""
-        get = self.request.GET
-        sort = get.get('sort')
-        if sort in ['title', 'status', 'date_submitted']:
-            order = get.get('order', 'asc')
-            if order != 'asc':
-                sort = '-' + sort
+        sort = self.request.GET.get('sort', self.default_sort)
+        order = self.request.GET.get('order', self.default_order)
+        if order != 'asc':
+            sort = '-' + sort
+        try:
             objects = objects.order_by(sort)
+        except FieldError as exception:
+            logging.error(exception)
         return objects
 
     def get_context_data(self, **kwargs):
@@ -175,8 +179,8 @@ class MRFilterableListView(ListView):
 
     def get_queryset(self):
         objects = super(MRFilterableListView, self).get_queryset()
-        objects = self.sort_list(objects)
-        return self.filter_list(objects)
+        objects = self.filter_list(objects)
+        return self.sort_list(objects)
 
     def get_paginate_by(self, queryset):
         """Paginates list by the return value"""

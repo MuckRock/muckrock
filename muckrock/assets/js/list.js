@@ -13,10 +13,13 @@ var tableHeadSortIndicator = function() {
         var order = urlParam('order');
         var arrow = (order == 'desc') ? '&#x25B2;' : '&#x25BC;';
         var inverseOrder = (order == 'desc') ? 'asc' : 'desc';
-        $('th:icontains(' + sort + ')')
-            .prepend('<span class="arrow">' + arrow + '</span>')
-            .data('order', inverseOrder)
-            .addClass('sorted_by');
+        $('th').each(function(){
+            if ($(this).data('sort') == sort) {
+                $(this).prepend('<span class="arrow">' + arrow + '</span>')
+                       .data('order', inverseOrder)
+                       .addClass('sorted_by');
+            }
+        });
     }
 }
 
