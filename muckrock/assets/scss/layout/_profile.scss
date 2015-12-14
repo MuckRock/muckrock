@@ -52,9 +52,89 @@
 }
 
 .account.profile {
-    .metadata h1 small {
-        font-weight: $font-weight-normal;
-        font-size: $font-size-3;
+    .fullname {
+        margin-bottom: 0;
+    }
+    .username {
+        color: $color-grey;
+    }
+    .avatar {
+        @include border-radius;
+        width: 100%;
+        max-width: 300px;
+    }
+    ul {
+        list-style: none;
+        padding-left: 0;
+    }
+    .title {
+        font-weight: $font-weight-bold;
+    }
+}
+
+.account.profile .article-list {
+    @include border;
+    a {
+        display: flex;
+        color: $color-black;
+        background: #fff;
+    }
+    a:hover {
+        text-decoration: none;
+        & .title {
+            color: $color-blue;
+            text-decoration: underline;
+        }
+    }
+    .article-image {
+        margin-bottom: 0;
+        opacity: .75;
+        transition: opacity .1s linear;
+    }
+    .article-info {
+        padding: $vertical-rhythm;
+    }
+    .date {
+        color: $color-grey;
+    }
+    li {
+        border-bottom: 1px solid $color-grey;
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+}
+
+.account.profile .project-list {
+    @include border;
+    .project-item {
+        background-size: cover;
+        background-position: center;
+    }
+    .project-info {
+        display: block;
+        padding: $vertical-rhythm;
+        color: $color-black;
+        background: rgba(255,255,255,.75);
+        &:hover {
+            text-decoration: none;
+            & .title {
+                color: $color-blue;
+                text-decoration: underline;
+            }
+        }
+    }
+    .title {
+        font-size: $font-size-5;
+    }
+    .summary {
+        font-size: $font-size-2;
+    }
+    li {
+        border-bottom: 1px solid $color-grey;
+        &:last-child {
+            border-bottom: none;
+        }
     }
 }
 

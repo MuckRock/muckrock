@@ -170,3 +170,9 @@ th {
 }
 
 td { vertical-align: top; }
+
+.truncate {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
