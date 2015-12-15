@@ -155,8 +155,6 @@ class MRFilterableListView(ListView):
         """Sorts the list of objects"""
         sort = self.request.GET.get('sort', self.default_sort)
         order = self.request.GET.get('order', self.default_order)
-        if order != 'asc':
-            sort = '-' + sort
         # We need to make sure the field to sort by actually exists.
         # If the field doesn't exist, revert to the default field.
         # Otherwise, Django will throw a hard-to-catch FieldError.
@@ -168,6 +166,8 @@ class MRFilterableListView(ListView):
             # pylint:enable=protected-access
         except FieldDoesNotExist:
             sort = self.default_sort
+        if order != 'asc':
+            sort = '-' + sort
         objects = objects.order_by(sort)
         return objects
 
