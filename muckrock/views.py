@@ -18,7 +18,6 @@ from muckrock.forms import MRFilterForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.news.models import Article
 
-import logging
 import re
 from haystack.views import SearchView
 
@@ -164,7 +163,9 @@ class MRFilterableListView(ListView):
         # It's hard to catch because the error isn't raised until
         # the QuerySet is evaluated. <Insert poop emoji here>
         try:
+            # pylint:disable=protected-access
             self.model._meta.get_field_by_name(sort)
+            # pylint:enable=protected-access
         except FieldDoesNotExist:
             sort = self.default_sort
         objects = objects.order_by(sort)
