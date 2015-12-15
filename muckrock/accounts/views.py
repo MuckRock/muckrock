@@ -35,7 +35,9 @@ from muckrock.accounts.forms import ProfileSettingsForm,\
 from muckrock.accounts.models import Profile, Statistics, ACCT_TYPES
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.foia.models import FOIARequest
+from muckrock.news.models import Article
 from muckrock.organization.models import Organization
+from muckrock.project.models import Project
 from muckrock.message.tasks import send_charge_receipt,\
                                    send_invoice_receipt,\
                                    failed_payment,\
@@ -353,18 +355,26 @@ def profile(request, username=None):
     if not username and request.user.is_anonymous():
         return redirect('acct-login')
     user = get_object_or_404(User, username=username) if username else request.user
+    user_profile = user.profile
+    org = user_profile.organization
     requests = FOIARequest.objects.filter(user=user).get_viewable(request.user)
     recent_requests = requests.order_by('-date_submitted')[:5]
     recent_completed = requests.filter(status='done').order_by('-date_done')[:5]
+    articles = Article.objects.get_published().filter(authors=user)[:5]
+    projects = Project.objects.get_for_contributor(user).get_visible(request.user)
     context = {
         'user_obj': user,
+        'profile': user_profile,
+        'org': org,
+        'projects': projects,
         'recent_requests': recent_requests,
         'recent_completed': recent_completed,
+        'articles': articles,
         'stripe_pk': STRIPE_PUB_KEY,
         'sidebar_admin_url': reverse('admin:auth_user_change', args=(user.pk,)),
     }
     return render_to_response(
-        'profile/account.html',
+        'accounts/profile.html',
         context,
         context_instance=RequestContext(request)
     )

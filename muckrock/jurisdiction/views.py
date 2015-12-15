@@ -73,6 +73,7 @@ class List(MRFilterableListView):
     model = Jurisdiction
     title = 'Jurisdictions'
     template_name = 'lists/jurisdiction_list.html'
+    default_sort = 'name'
 
     def get_filters(self):
         base_filters = super(List, self).get_filters()

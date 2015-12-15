@@ -163,13 +163,17 @@ $(function() {
 	$('.formset-container').formset();
 });
 
-var urlParam = function(name){
-    var urlString = '[\\?&amp;]' + name + '=([^&amp;#]*)'
-    var results = new RegExp(urlString).exec(window.location.search);
-    if (results) {
-        return results[1] || 0;
-    } else {
-        return 0;
+function urlParam(sParam)
+{
+    var sPageURL = window.location.search.substring(1);
+    var sURLVariables = sPageURL.split('&');
+    for (var i = 0; i < sURLVariables.length; i++)
+    {
+        var sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] == sParam)
+        {
+            return sParameterName[1];
+        }
     }
 }
 

@@ -42,6 +42,7 @@ from muckrock.views import class_view_decorator, MRFilterableListView
 logger = logging.getLogger(__name__)
 STATUS_NODRAFT = [st for st in STATUS if st != ('started', 'Draft')]
 
+
 class RequestList(MRFilterableListView):
     """Base list view for other list views to inherit from"""
     model = FOIARequest
@@ -66,6 +67,7 @@ class RequestList(MRFilterableListView):
         objects = super(RequestList, self).get_queryset()
         objects = objects.select_related('jurisdiction')
         return objects.get_viewable(self.request.user)
+
 
 @class_view_decorator(login_required)
 class MyRequestList(RequestList):
@@ -105,6 +107,7 @@ class MyRequestList(RequestList):
         single_req = self.sort_list(self.filter_list(single_req))
         return list(single_req) + list(multi_req)
 
+
 @class_view_decorator(login_required)
 class FollowingRequestList(RequestList):
     """List of all FOIA requests the user is following"""
@@ -117,6 +120,32 @@ class FollowingRequestList(RequestList):
         objects = self.sort_list(objects)
         objects = objects.select_related('jurisdiction')
         return self.filter_list(objects)
+
+
+class ProcessingRequestList(RequestList):
+    """List all of the currently processing FOIA requests."""
+    template_name = 'lists/request_processing_list.html'
+    default_sort = 'date_processing'
+
+    def dispatch(self, *args, **kwargs):
+        """Only staff can see the list of processing requests."""
+        if not self.request.user.is_staff:
+            raise Http404()
+        return super(ProcessingRequestList, self).dispatch(*args, **kwargs)
+
+    def filter_list(self, objects):
+        """Gets all processing requests"""
+        objects = super(ProcessingRequestList, self).filter_list(objects)
+        return objects.filter(status='submitted')
+
+    def get_filters(self):
+        """Removes the 'status' filter, because its only processing requests"""
+        filters = super(ProcessingRequestList, self).get_filters()
+        for filter_dict in filters:
+            if 'status' in filter_dict.values():
+                filters.pop(filters.index(filter_dict))
+        return filters
+
 
 # pylint: disable=no-self-use
 class Detail(DetailView):

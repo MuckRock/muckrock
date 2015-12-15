@@ -104,7 +104,7 @@ class Profile(models.Model):
     avatar = ThumbnailerImageField(
         upload_to='account_images',
         blank=True, null=True,
-        resize_source={'size': (200, 200), 'crop': 'smart'}
+        resize_source={'size': (600, 600), 'crop': 'smart'}
     )
 
     # email confirmation

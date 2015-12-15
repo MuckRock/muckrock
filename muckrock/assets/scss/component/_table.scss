@@ -1,10 +1,11 @@
 table {
     width: 100%;
     border-collapse: collapse;
+    background: #fff;
     td, th {
         padding: $vertical-rhythm/2;
     }
-    tbody tr {
-        border: $base-border-width solid $color-grey;
+    tbody tr, thead th {
+        border: $base-border-width solid $color-grey-6;
     }
 }

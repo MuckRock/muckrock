@@ -1,3 +1,12 @@
+svg.icon {
+    height: $font-size-3;
+    width: $font-size-3;
+    fill-rule: evenodd;
+    path, polygon, rect {
+        fill: $color-black;
+    }
+}
+
 .svg-icon {
     display: inline-block;
     width: auto;

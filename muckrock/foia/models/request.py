@@ -450,6 +450,13 @@ class FOIARequest(models.Model):
         if responses:
             return (date.today() - responses[0].date.date()).days
 
+    def processing_length(self):
+        """How many days since the request was set as processing"""
+        days_since = 0
+        if self.date_processing:
+            days_since = (date.today() - self.date_processing).days
+        return days_since
+
     def _notify(self):
         """Notify request's creator and followers about the update"""
         # pylint: disable=no-member

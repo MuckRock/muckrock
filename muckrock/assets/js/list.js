@@ -7,16 +7,19 @@ var identifySortable = function() {
 }
 
 var tableHeadSortIndicator = function() {
-    var sort = urlParam('sort');
+    var sort = $('thead').data('activeSort');
+    var order = $('thead').data('activeOrder');
     if (!!sort) {
         // find the right title and add the right arrow to it
-        var order = urlParam('order');
         var arrow = (order == 'desc') ? '&#x25B2;' : '&#x25BC;';
         var inverseOrder = (order == 'desc') ? 'asc' : 'desc';
-        $('th:icontains(' + sort + ')')
-            .prepend('<span class="arrow">' + arrow + '</span>')
-            .data('order', inverseOrder)
-            .addClass('sorted_by');
+        $('th').each(function(){
+            if ($(this).data('sort') == sort) {
+                $(this).prepend('<span class="arrow">' + arrow + '</span>')
+                       .data('order', inverseOrder)
+                       .addClass('sorted_by');
+            }
+        });
     }
 }
 

@@ -48,6 +48,7 @@ class TaskList(MRFilterableListView):
     title = 'Tasks'
     model = Task
     template_name = 'lists/task_list.html'
+    default_sort = 'pk'
     bulk_actions = ['resolve'] # bulk actions have to be lowercase and 1 word
 
     def get_queryset(self):
