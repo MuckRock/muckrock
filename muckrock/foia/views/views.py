@@ -49,6 +49,7 @@ class RequestList(MRFilterableListView):
     model = FOIARequest
     title = 'Requests'
     template_name = 'lists/request_list.html'
+    default_sort = 'title'
 
     def get_filters(self):
         """Adds request-specific filter fields"""
@@ -66,10 +67,15 @@ class RequestList(MRFilterableListView):
     def get_queryset(self):
         """Limits requests to those visible by current user"""
         objects = super(RequestList, self).get_queryset()
-        objects = objects.select_related('jurisdiction').only(
-                'title', 'slug', 'status', 'date_submitted', 'date_due',
-                'jurisdiction__slug')
-        objects = objects.annotate(date_updated=Max('communications__date'))
+        objects = objects.select_related('jurisdiction')
+        # ===
+        # Disables date_update sorting until performance issues can be worked out.
+        # ---
+        # objects = objects.select_related('jurisdiction').only(
+        #         'title', 'slug', 'status', 'date_submitted', 'date_due',
+        #         'jurisdiction__slug')
+        # objects = objects.annotate(date_updated=Max('communications__date'))
+        # ===
         return objects.get_viewable(self.request.user)
 
 
