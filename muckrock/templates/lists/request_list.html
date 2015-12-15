@@ -18,7 +18,7 @@
 <th data-sort="title">Title</th>
 <th width="15%" data-sort="status">Status</th>
 <th width="10%" data-sort="date_submitted">Created</th>
-<th width="10%">Updated</th>
+<th width="10%" data-sort="date_updated">Updated</th>
 {% endblock list-table-head %}
 
 {% block list-table-item %}
@@ -34,7 +34,7 @@
 
 
 <td>{{ foia.date_submitted|date:"m/d/Y" }}</td>
-<td>{{ foia.last_comm.date|date:"m/d/Y" }}</td>
+<td>{{ foia.date_updated|date:"m/d/Y" }}</td>
 
 {% comment %}
 <!--<td><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a></td>
