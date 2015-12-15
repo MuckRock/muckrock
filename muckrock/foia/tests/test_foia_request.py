@@ -275,6 +275,11 @@ class TestFOIAFunctional(TestCase):
                                [f.title for f in sorted(response.context['object_list'],
                                                         key=attrgetter(field),
                                                         reverse=(order == 'desc'))])
+    def test_foia_bad_sort(self):
+        """Test sorting against a non-existant field"""
+        response = get_allowed(self.client, reverse('foia-list') + '?sort=test',
+                               ['lists/request_list.html', 'lists/base_list.html'])
+        nose.tools.eq_(response.status_code, 200)
 
     def test_foia_detail(self):
         """Test the foia-detail view"""
