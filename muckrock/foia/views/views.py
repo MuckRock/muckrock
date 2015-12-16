@@ -30,7 +30,11 @@ from muckrock.foia.models import \
     FOIAMultiRequest, \
     STATUS, END_STATUS
 from muckrock.foia.views.composers import get_foia
-from muckrock.foia.views.comms import move_comm, delete_comm, save_foia_comm, resend_comm
+from muckrock.foia.views.comms import move_comm,\
+                                      delete_comm,\
+                                      save_foia_comm,\
+                                      resend_comm,\
+                                      change_comm_status
 from muckrock.qanda.models import Question
 from muckrock.settings import STRIPE_PUB_KEY
 from muckrock.tags.models import Tag
@@ -248,6 +252,7 @@ class Detail(DetailView):
             'flag': self._flag,
             'appeal': self._appeal,
             'date_estimate': self._update_estimate,
+            'status_comm': change_comm_status,
             'move_comm': move_comm,
             'delete_comm': delete_comm,
             'resend_comm': resend_comm,

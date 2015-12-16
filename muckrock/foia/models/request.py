@@ -374,19 +374,6 @@ class FOIARequest(models.Model):
         """Get a list of public documents attached to this request"""
         return self.files.filter(access='public')
 
-    def color_code(self):
-        """Get the color code for the current status"""
-        # pylint: disable=bad-whitespace
-        code_stop = 'failure'
-        code_wait = ''
-        code_go = 'success'
-        code_processed = code_stop if self.date_due and date.today() > self.date_due else code_go
-        colors = {'started':   code_wait, 'submitted': code_go,   'code_processed': code_processed,
-                  'fix':       code_wait, 'payment':   code_wait, 'rejected':  code_stop,
-                  'no_docs':   code_stop, 'done':      code_go,   'partial': code_go,
-                  'abandoned': code_stop, 'appealing': code_processed, 'ack': code_processed}
-        return colors.get(self.status, code_wait)
-
     def first_request(self):
         """Return the first request text"""
         try:

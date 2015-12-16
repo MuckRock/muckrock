@@ -1,7 +1,8 @@
+{% load foia_tags %}
 {% if foia %}
 <div class="foia-single">
     <div class="foia-info">
-        <p class="status {{ foia.color_code }}">{{ foia.get_status_display }}</p>
+        <p class="status {{ foia.status|classify_status }}">{{ foia.get_status_display }}</p>
         {% if foia.public_documents %}
         <p class="files">{{ foia.public_documents|length }} file{{ foia.public_documents|length|pluralize }}</p>
         {% else %}
