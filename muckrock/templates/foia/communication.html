@@ -53,14 +53,14 @@
         <form method="post" class="status-communication communication-action" id="status-{{comm.pk}}-form">
             {% csrf_token %}
             <input type="hidden" name="comm_pk" value="{{comm.pk}}" />
-            <label for="new_status">Change Communication Status</label>
-            <select name="new_status">
+            <label for="status">Change Communication Status</label>
+            <select name="status">
             {% for choice in status_choices %}
                 <option value="{{ choice|first }}" {% if choice|first == foia.status %}selected{% endif %}>{{ choice|last }}</option>
             {% endfor %}
             </select>
             <p class="help-text">This will only change the status of the communication, it will not effect the status of the request.</p>
-            <button type="submit" name="action" value="change_status" class="primary">Change</button>
+            <button type="submit" name="action" value="status_comm" class="primary">Change</button>
             <button class="cancel" id="cancel-status-communication">Close</button>
         </form>
         <form method="post" class="move-communication communication-action" id="move-{{comm.pk}}-form">

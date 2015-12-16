@@ -10,7 +10,7 @@ from django.shortcuts import redirect, get_object_or_404
 
 from datetime import datetime
 
-from muckrock.foia.models import FOIACommunication
+from muckrock.foia.models import FOIACommunication, STATUS
 
 def save_foia_comm(foia, from_who, comm, formset=None, appeal=False, snail=False, thanks=False):
     """Save the FOI Communication"""
@@ -81,6 +81,19 @@ def resend_comm(request, next_):
         elif exc.args[1] == 'no_agency':
             messages.error(request, 'The communication\'s associated agency is '
                     'not approved, refusing to resend.')
+    return redirect(next_)
+
+@user_passes_test(lambda u: u.is_staff)
+def change_comm_status(request, next_):
+    """Change the status of a communication"""
+    try:
+        comm = FOIACommunication.objects.get(pk=request.POST['comm_pk'])
+        status = request.POST.get('status', '')
+        if status in [s for s, _ in STATUS]:
+            comm.status = status
+            comm.save()
+    except (KeyError, FOIACommunication.DoesNotExist):
+        messages.error(request, 'The communication does not exist.')
     return redirect(next_)
 
 @user_passes_test(lambda u: u.is_staff)
