@@ -1,3 +1,4 @@
+{% load foia_tags %}
 {% if requests %}
     <table class="foia-table">
         <thead>
@@ -11,7 +12,7 @@
             {% for foia in requests %}
             <tr>
                 <td><a href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}">{{ foia.title }}</a></td>
-                <td><span class="{{ foia.color_code }}">{{ foia.get_status_display }}</span></td>
+                <td><span class="{{ foia.status|classify_status }}">{{ foia.get_status_display }}</span></td>
                 <td><a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction }}</a></td>
             </tr>
             {% endfor %}
