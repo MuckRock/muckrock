@@ -18,7 +18,7 @@
 <th data-sort="title">Title</th>
 <th width="15%" data-sort="status">Status</th>
 <th width="10%" data-sort="date_submitted">Created</th>
-<th width="10%">Updated</th>
+<th width="10%" data-sort="date_updated">Updated</th>
 {% endblock list-table-head %}
 
 {% block list-table-item %}
@@ -26,7 +26,7 @@
 <td><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></td>
 <td class="{{ foia.color_code }}">{{ foia.get_status_display }}</td>
 <td>{{ foia.date_submitted|date:"m/d/Y" }}</td>
-<td>{{ foia.last_comm.date|date:"m/d/Y" }}</td>
+<td>{{ foia.date_updated|date:"m/d/Y" }}</td>
 {% endwith %}
 {% endblock list-table-item %}
 

@@ -509,7 +509,7 @@ urlparse.uses_netloc.append('mysql')
 
 DATABASES = {}
 
-url = urlparse.urlparse(os.environ.get('DATABASE_URL', 'postgres://muckrock@localhost/muckrock'))
+url = urlparse.urlparse(os.environ.get('DATABASE_URL', 'postgres://muckrock@localhost/muckrock_full'))
 
 # pylint: disable=no-member
 # Update with environment configuration.

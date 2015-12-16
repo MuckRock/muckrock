@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
-# from django.db.models import Max
+from django.db.models import Max
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
@@ -68,14 +68,9 @@ class RequestList(MRFilterableListView):
         """Limits requests to those visible by current user"""
         objects = super(RequestList, self).get_queryset()
         objects = objects.select_related('jurisdiction')
-        # ===
-        # Disables date_update sorting until performance issues can be worked out.
-        # ---
-        # objects = objects.select_related('jurisdiction').only(
-        #         'title', 'slug', 'status', 'date_submitted', 'date_due',
-        #         'jurisdiction__slug')
-        # objects = objects.annotate(date_updated=Max('communications__date'))
-        # ===
+        objects = objects.only(
+                'title', 'slug', 'status', 'date_submitted',
+                'date_due', 'date_updated', 'jurisdiction__slug')
         return objects.get_viewable(self.request.user)
 
 
