@@ -1,4 +1,5 @@
 {% load tags %}
+{% load foia_tags %}
 
 {% if communication %}
 <section class="{% if communication.response %}received{% else %}sent{% endif %} communication {% if communication.from_who == 'MuckRock.com' %}collapsed{% endif %}" id="{{ communication.anchor }}">
@@ -11,6 +12,7 @@
                 {% include 'lib/icons/options.svg' %}
                 <ul class="options dropdown-list">
                     {% if comm.rawemail.raw_email %}<li><a href="{% url 'foia-raw' idx=comm.pk %}" class="option">Raw Email</a></li>{% endif %}
+                    <li onClick="showCommForm('#status-{{comm.pk}}-form');" class="option">Status</li>
                     <li onClick="showCommForm('#move-{{comm.pk}}-form');" class="option">Move</li>
                     <li onClick="showCommForm('#resend-{{comm.pk}}-form');" class="option">Resend</li>
                     <li onClick="showCommForm('#delete-{{comm.pk}}-form');" class="option">Delete</li>
@@ -19,13 +21,19 @@
             {% endif %}
         </div>
     </header>
+    <section class="communication-metadata">
+    {% if communication.subject %}
+        <p class="subject">Subject: {{ communication.subject }}</p>
+    {% else %}
+        <p class="subject">Subject: None</p>
+    {% endif %}
+    {% if communication.status and request.user.is_staff %}
+        <p class="status badge {{communication.status|classify_status}}">
+        {{communication.get_status_display}}</p>
+    {% endif %}
+    </section>
     {% if communication.communication %}
     <section class="communication-body">
-        {% if communication.subject %}
-        <header class="communication-body-header">
-            <p class="subject">Subject: {{ communication.subject }}</p>
-        </header>
-        {% endif %}
         {% if communication.full_html %}
         {{ communication.communication|redact_emails|safe }}
         {% else %}
@@ -42,6 +50,19 @@
     {% endif %}
     {% if request.user.is_staff %}
     <div class="communication-actions">
+        <form method="post" class="status-communication communication-action" id="status-{{comm.pk}}-form">
+            {% csrf_token %}
+            <input type="hidden" name="comm_pk" value="{{comm.pk}}" />
+            <label for="new_status">Change Communication Status</label>
+            <select name="new_status">
+            {% for choice in status_choices %}
+                <option value="{{ choice|first }}" {% if choice|first == foia.status %}selected{% endif %}>{{ choice|last }}</option>
+            {% endfor %}
+            </select>
+            <p class="help-text">This will only change the status of the communication, it will not effect the status of the request.</p>
+            <button type="submit" name="action" value="change_status" class="primary">Change</button>
+            <button class="cancel" id="cancel-status-communication">Close</button>
+        </form>
         <form method="post" class="move-communication communication-action" id="move-{{comm.pk}}-form">
             {% csrf_token %}
             <input type="hidden" name="comm_pk" value="{{comm.pk}}" />
