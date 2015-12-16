@@ -140,14 +140,15 @@ class FOIARequest(models.Model):
     # pylint: disable=too-many-instance-attributes
 
     user = models.ForeignKey(User)
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, db_index=True)
     slug = models.SlugField(max_length=255)
-    status = models.CharField(max_length=10, choices=STATUS)
+    status = models.CharField(max_length=10, choices=STATUS, db_index=True)
     jurisdiction = models.ForeignKey(Jurisdiction)
     agency = models.ForeignKey(Agency, blank=True, null=True)
-    date_submitted = models.DateField(blank=True, null=True)
+    date_submitted = models.DateField(blank=True, null=True, db_index=True)
+    date_updated = models.DateField(blank=True, null=True, db_index=True)
     date_done = models.DateField(blank=True, null=True, verbose_name='Date response received')
-    date_due = models.DateField(blank=True, null=True)
+    date_due = models.DateField(blank=True, null=True, db_index=True)
     days_until_due = models.IntegerField(blank=True, null=True)
     date_followup = models.DateField(blank=True, null=True)
     date_estimate = models.DateField(blank=True, null=True,
