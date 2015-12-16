@@ -576,7 +576,7 @@ class TestFOIAIntegration(TestCase):
         ## after 4 days agency replies with the documents
         self.set_today(datetime.date.today() + datetime.timedelta(4))
         comm = FOIACommunication.objects.create(
-            foia=foia, from_who='Test Agency', to_who='Muckrock', date=datetime.date.today(),
+            foia=foia, from_who='Test Agency', to_who='Muckrock', date=datetime.datetime.now(),
             response=True, communication='Test communication')
         foia.status = 'done'
         foia.save()
