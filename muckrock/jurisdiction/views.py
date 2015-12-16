@@ -75,6 +75,12 @@ class List(MRFilterableListView):
     template_name = 'lists/jurisdiction_list.html'
     default_sort = 'name'
 
+    def get_queryset(self):
+        """Hides hidden jurisdictions from list"""
+        objects = super(List, self).get_queryset()
+        objects = objects.exclude(hidden=True)
+        return objects
+
     def get_filters(self):
         base_filters = super(List, self).get_filters()
         new_filters = [
