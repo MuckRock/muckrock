@@ -28,6 +28,11 @@ class List(MRFilterableListView):
     template_name = 'lists/agency_list.html'
     default_sort = 'name'
 
+    def get_queryset(self):
+        """Limit agencies to only approved ones."""
+        objects = super(List, self).get_queryset()
+        objects = objects.get_approved()
+        return objects
 
 def detail(request, jurisdiction, jidx, slug, idx):
     """Details for an agency"""
