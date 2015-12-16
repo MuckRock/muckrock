@@ -90,9 +90,9 @@ class TestAgencyManager(TestCase):
 class TestAgencyViews(TestCase):
     """Tests for Agency views"""
     def setUp(self):
-        request_factory = RequestFactory()
+        self.request_factory = RequestFactory()
         self.agency = factories.AgencyFactory()
-        self.request = request_factory.get(self.agency.get_absolute_url())
+        self.request = self.request_factory.get(self.agency.get_absolute_url())
         self.request.user = factories.UserFactory()
         self.request = mock_middleware(self.request)
         self.view = agency.views.detail
@@ -122,6 +122,17 @@ class TestAgencyViews(TestCase):
             self.agency.slug,
             self.agency.pk
         )
+
+    def test_list(self):
+        """The list should only contain approved agencies"""
+        approved_agency = factories.AgencyFactory()
+        unapproved_agency = factories.AgencyFactory(status='pending')
+        request = self.request_factory.get(reverse('agency-list'))
+        view = agency.views.List.as_view()
+        response = view(request)
+        agency_list = response.context_data['object_list']
+        ok_(approved_agency in agency_list, 'Approved agencies should be listed.')
+        ok_(unapproved_agency not in agency_list, 'Unapproved agencies should not be listed.')
 
 
 class TestAgencyForm(TestCase):
