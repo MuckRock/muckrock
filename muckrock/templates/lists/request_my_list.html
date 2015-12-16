@@ -1,5 +1,6 @@
 {% extends 'lists/request_list.html' %}
 {% load tags %}
+{% load foia_tags %}
 
 {% block title %}Your Requests{% endblock title %}
 {% block list-type %}my request{% endblock list-type %}
@@ -38,7 +39,7 @@
                form="my-request-actions">
     </td>
     <td><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></td>
-    <td class="{{ foia.color_code }}">{{ foia.get_status_display }}</td>
+    <td class="{{ foia.status|classify_status }}">{{ foia.get_status_display }}</td>
     <td>{{ foia.communications.all.0.date|date:"m/d/Y" }}</td>
     <td>{{ foia.last_comm.date|date:"m/d/Y" }}</td>
 </tr>

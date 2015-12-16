@@ -44,11 +44,6 @@ class FOIAMultiRequest(models.Model):
         """The url for this object"""
         return ('foia-multi-draft', [], {'slug': self.slug, 'idx': self.pk})
 
-    def color_code(self):
-        """Get the color code for the current status"""
-        colors = {'started':   'wait', 'submitted': 'go'}
-        return colors.get(self.status, 'go')
-
     class Meta:
         # pylint: disable=too-few-public-methods
         ordering = ['title']

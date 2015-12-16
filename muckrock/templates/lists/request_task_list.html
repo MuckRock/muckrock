@@ -1,4 +1,5 @@
 {% extends 'lists/task_list.html' %}
+{% load foia_tags %}
 
 {% block list-navigation %}
 <h1>Request Tasks</h1>
@@ -9,6 +10,6 @@
     <dt>Agency</dt>
     <dd><a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency }}</a></dd>
     <dt>Status</dt>
-    <dd class="{{ foia.color_code }}">{{ foia.get_status_display }}</dd>
+    <dd class="{{ foia.status|classify_status }}">{{ foia.get_status_display }}</dd>
 </dl>
 {% endblock %}
