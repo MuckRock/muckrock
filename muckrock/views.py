@@ -245,8 +245,8 @@ class MRSearchView(SearchView):
             raise Http404("No such page!")
         return (paginator, page)
 
-def front_page(request):
-    """Get all the details needed for the front page"""
+def homepage(request):
+    """Get all the details needed for the homepage"""
     # pylint: disable=unused-variable
     # pylint: disable=E1103
 
@@ -267,7 +267,7 @@ def front_page(request):
     most_viewed_reqs = FOIARequest.objects.order_by('-times_viewed')[:5]
     overdue_requests = FOIARequest.objects.get_overdue().get_public()[:5]
 
-    return render_to_response('front_page.html', locals(),
+    return render_to_response('homepage.html', locals(),
                               context_instance=RequestContext(request))
 
 def blog(request, path=''):
