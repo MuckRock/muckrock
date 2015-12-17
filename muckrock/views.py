@@ -251,21 +251,20 @@ def homepage(request):
     # pylint: disable=E1103
 
     try:
-        articles = Article.objects.get_published()[:1]
+        articles = Article.objects.get_published()[:5]
     except IndexError:
         # no published articles
         articles = None
 
-    public_reqs = FOIARequest.objects.get_public()
-    featured_reqs = public_reqs.filter(featured=True).order_by('-date_done')[:3]
+    public_requests = FOIARequest.objects.get_public()
+    featured_reqs = public_requests.filter(featured=True).order_by('-date_done')[:3]
+    popular_requests = public_requests.order_by('-times_viewed')[:5]
 
-    num_requests = FOIARequest.objects.exclude(status='started').count()
-    num_completed_requests = FOIARequest.objects.filter(status='done').count()
-    num_denied_requests = FOIARequest.objects.filter(status='rejected').count()
-    num_pages = FOIAFile.objects.aggregate(Sum('pages'))['pages__sum']
-
-    most_viewed_reqs = FOIARequest.objects.order_by('-times_viewed')[:5]
-    overdue_requests = FOIARequest.objects.get_overdue().get_public()[:5]
+    stats = {
+        'request_count': FOIARequest.objects.exclude(status='started').count(),
+        'completed_count': FOIARequest.objects.filter(status='done').count(),
+        'page_count': FOIAFile.objects.aggregate(Sum('pages'))['pages__sum']
+    }
 
     return render_to_response('homepage.html', locals(),
                               context_instance=RequestContext(request))
