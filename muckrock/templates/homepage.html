@@ -24,16 +24,16 @@
                     <div class="key">filed request{{ stats.request_count|pluralize }}</div>
                 </li>
                 <li class="stat">
+                    <div class="value">{{ stats.agency_count|intcomma }}</div>
+                    <div class="key">agenc{{ stats.agency_count|pluralize:"y,ies" }}</div>
+                </li>
+                <li class="stat">
                     <div class="value">{{ stats.completed_count|intcomma }}</div>
-                    <div class="key">completed request{{ stats.completed_count|pluralize }}</div>
+                    <div class="key">fulfilled request{{ stats.completed_count|pluralize }}</div>
                 </li>
                 <li class="stat">
                     <div class="value">{{ stats.page_count|intcomma }}</div>
                     <div class="key">released page{{ stats.page_count|pluralize }}</div>
-                </li>
-                <li class="stat">
-                    <div class="value">{{ stats.agency_count|intcomma }}</div>
-                    <div class="key">agenc{{ stats.agency_count|pluralize:"y,ies" }}</div>
                 </li>
             </ul>
         </section>
