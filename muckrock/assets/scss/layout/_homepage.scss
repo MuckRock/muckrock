@@ -1,0 +1,125 @@
+.homepage {
+    overflow: hidden;
+    margin: 0 -.5 * $vertical-rhythm;
+    margin-bottom: 0;
+    section {
+        margin-bottom: 0;
+    }
+    @include media($medium-layout) {
+        margin: 0 -1 * $vertical-rhythm;
+    }
+    @include media($large-layout) {
+        margin: 0 -24px 0 -1 * $vertical-rhythm;
+    }
+
+    .articles {
+        @include outer-container;
+        margin-bottom: $vertical-rhythm;
+    }
+    .featured-article {
+        @include row;
+        padding: $vertical-rhythm/2;
+        .image {
+            @include half;
+            @include media($small-layout) {
+                margin-bottom: $vertical-rhythm/3;
+            }
+        }
+        .body { @include half; }
+    }
+    .article {
+        @include half;
+        &:nth-child(even) { clear: left; }
+        &:nth-child(odd) { clear: none; }
+        padding: 0 $vertical-rhythm $vertical-rhythm;
+        h1 { @include font-sizing(1.5); }
+    }
+
+    .requests {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        @include align-items(center);
+        padding: $vertical-rhythm 0;
+        background-size: cover;
+        background-position: right bottom;
+        background-color: rgba(0, 0, 0, .4);
+        background-blend-mode: multiply;
+    }
+
+    .banner {
+        @include flex(3 1 500px);
+        @include display(flex);
+        @include justify-content(center);
+        @include align-items(center);
+        padding: $vertical-rhythm;
+        color: $color-white;
+        text-align: center;
+
+        h1 {
+            margin: 0 auto $vertical-rhythm;
+            max-width: 15em;
+            font-weight: $font-weight-bold;
+        }
+
+        h2 {
+            font-size: $font-size-5;
+        }
+
+        a.dotted {
+            color: $color-white;
+            text-decoration: none;
+            border-bottom: 1px dotted $color-white;
+            &:hover {
+                border-bottom: 1px solid $color-white;
+            }
+        }
+        .button {
+            display: inline-block;
+            @include media($small-layout) {
+                display: block;
+                margin: 0 auto $vertical-rhythm;
+            }
+        }
+        #learn-more {
+            display: inline-block;
+            margin-left: $vertical-rhythm/4;
+        }
+    }
+
+    .achievements {
+        @include flex(1 1 240px);
+        margin: $vertical-rhythm;
+        padding: 0 $vertical-rhythm;
+        @include border;
+        border-color: $color-white;
+        color: $color-blue-dark;
+        color: $color-white;
+    }
+
+    .stats {
+
+        @include display(flex);
+        @include flex-wrap(wrap);
+        @include justify-content(space-around);
+        list-style: none;
+        padding-left: 0;
+
+    }
+    .stat {
+        width: 7em;
+        margin: $vertical-rhythm 0;
+        text-align: center;
+        .value {
+            font-size: $font-size-6;
+        }
+        .key {
+            font-size: $font-size-2;
+        }
+    }
+
+
+    .footer-container {
+        padding: 0 $vertical-rhythm/2;
+        @include media($medium-layout) { padding: 0 $vertical-rhythm; }
+    }
+}
