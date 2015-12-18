@@ -230,3 +230,36 @@
         }
     }
 }
+
+.project-list {
+    @include border;
+    .project-item {
+        background-size: cover;
+        background-position: center;
+    }
+    .project-info {
+        display: block;
+        padding: $vertical-rhythm;
+        color: $color-black;
+        background: rgba(255,255,255,.75);
+        &:hover {
+            text-decoration: none;
+            & .title {
+                color: $color-blue;
+                text-decoration: underline;
+            }
+        }
+    }
+    .title {
+        font-size: $font-size-5;
+    }
+    .summary {
+        font-size: $font-size-2;
+    }
+    li {
+        border-bottom: 1px solid $color-grey;
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+}

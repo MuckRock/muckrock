@@ -13,7 +13,7 @@
         <h1 class="fullname">{{user_obj.get_full_name}}</h1>
         <p class="username">{{user_obj.username}}</p>
     </section>
-    <ul class="links">
+    <ul class="links nostyle">
         {% if profile.twitter %}
         <li class="twitter">
             {% include 'lib/icons/twitter.svg' %}
@@ -86,9 +86,8 @@
         {% else %}
         <h3>Projects</h3>
         {% endif %}
-        <ul class="project-list">
+        <ul class="project-list nostyle">
         {% for project in projects %}
-
             <li class="project-item" {% if project.image %}style="background-image:url('{% thumbnail project.image 800x600 %}')"{% endif %}>
                 <a href="{{project.get_absolute_url}}" title="{{project.title}}" class="project-info">
                     <h4 class="title">{{project.title}}</h4>
@@ -106,7 +105,7 @@
         {% else %}
         <h3>Latest Articles</h3>
         {% endif %}
-        <ul class="article-list">
+        <ul class="article-list nostyle">
         {% for article in articles %}
             <li class="article-item">
                 <a href="{{article.get_absolute_url}}" title="{{article.title}}">
