@@ -180,3 +180,10 @@ td { vertical-align: top; }
     white-space: nowrap;
     text-overflow: ellipsis;
 }
+
+ul, ol {
+    &.nostyle {
+        list-style: none;
+        padding-left: 0;
+    }
+}
