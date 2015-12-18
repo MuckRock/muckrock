@@ -36,34 +36,37 @@
             </ul>
         </section>
     </section>
-
+    {% if featured_article %}
     <section class="news">
-        {% for article in articles %}
-        {% if forloop.first %}
-        <section class="featured-article">
-            <div class="image">
-                {% if article.image %}
-                <a href="{{ article.get_absolute_url }}">
-                    <img src="{% thumbnail article.image 1200x675 %}">
-                </a>
-                {% endif %}
-            </div>
-        {% else %}
-        <section class="article">
-        {% endif %}
-            <div class="body">
-            <dfn>News</dfn>
-            <h1><a href="{{ article.get_absolute_url }}">
-            {{ article.title }}
-            </a></h1>
-            {% if article.summary %}
-            <summary>{{ article.summary|markdown:"trusted" }}</summary>
-            {% endif %}
+        <section class="featured article">
+            <a href="{{ featured_article.get_absolute_url }}" title="{{featured_article.title}}">
+                {% if featured_article.image %}<img src="{% thumbnail featured_article.image 1200x675 %}">{% endif %}
+                <h1>{{featured_article.title}}</h1>
+            </a>
+            {% if featured_article.summary %}<summary>{{featured_article.summary|markdown:"trusted"}}</summary>{% endif %}
+            <div class="tags">
+                {% for tag in featured_article.tags.all %}
+                <a class="tag" href="{% url 'tag-detail' slug=tag.slug %}">{{tag.name}}</a>
+                {% endfor %}
             </div>
         </section>
+        {% comment %}
+        <ul class="articles nostyle">
+        {% for article in recent_articles %}
+            <li class="article-item">
+                <a href="{{article.get_absolute_url}}" title="{{article.title}}">
+                    {% if article.image %}<img src="{% thumbnail article.image 120x120 crop %}" class="article-image" />{% endif %}
+                    <div class="article-info truncate">
+                        <h4 class="title truncate">{{article.title}}</h4>
+                        <p class="date">{{article.pub_date|date:"F d, Y"}}</p>
+                    </div>
+                </a>
+            </li>
         {% endfor %}
+        </ul>
+        {% endcomment %}
     </section>
-
+    {% endif %}
     {% comment %}
     {% if featured_reqs %}
     <section class="featured-requests">

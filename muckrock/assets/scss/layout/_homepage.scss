@@ -1,41 +1,22 @@
-.homepage {
+.homepage
+{
     overflow: hidden;
     margin: 0 -.5 * $vertical-rhythm;
     margin-bottom: 0;
-    section {
+    section
+    {
         margin-bottom: 0;
     }
-    @include media($medium-layout) {
+    @include media($medium-layout)
+    {
         margin: 0 -1 * $vertical-rhythm;
     }
-    @include media($large-layout) {
+    @include media($large-layout)
+    {
         margin: 0 -24px 0 -1 * $vertical-rhythm;
     }
-
-    .articles {
-        @include outer-container;
-        margin-bottom: $vertical-rhythm;
-    }
-    .featured-article {
-        @include row;
-        padding: $vertical-rhythm/2;
-        .image {
-            @include half;
-            @include media($small-layout) {
-                margin-bottom: $vertical-rhythm/3;
-            }
-        }
-        .body { @include half; }
-    }
-    .article {
-        @include half;
-        &:nth-child(even) { clear: left; }
-        &:nth-child(odd) { clear: none; }
-        padding: 0 $vertical-rhythm $vertical-rhythm;
-        h1 { @include font-sizing(1.5); }
-    }
-
-    .requests {
+    .requests
+    {
         @include display(flex);
         @include flex-wrap(wrap);
         @include align-items(center);
@@ -46,7 +27,8 @@
         background-blend-mode: multiply;
     }
 
-    .banner {
+    .banner
+    {
         @include flex(3 1 500px);
         @include display(flex);
         @include justify-content(center);
@@ -54,35 +36,39 @@
         padding: $vertical-rhythm;
         color: $color-white;
         text-align: center;
-
-        h1 {
+        h1
+        {
             margin: 0 auto $vertical-rhythm;
             max-width: 15em;
             font-weight: $font-weight-bold;
         }
-
-        a.dotted {
+        a.dotted
+        {
             color: $color-white;
             text-decoration: none;
             border-bottom: 1px dotted $color-white;
-            &:hover {
+            &:hover
+            {
                 border-bottom: 1px solid $color-white;
             }
         }
-        .button {
+        .button
+        {
             display: inline-block;
-            @include media($small-layout) {
+            @include media($small-layout)
+            {
                 display: block;
                 margin: 0 auto $vertical-rhythm;
             }
         }
-        #learn-more {
+        #learn-more
+        {
             display: inline-block;
             margin-left: $vertical-rhythm/4;
         }
     }
-
-    .achievements {
+    .achievements
+    {
         @include flex(1 1 240px);
         margin: $vertical-rhythm;
         padding: $vertical-rhythm $vertical-rhythm 0 $vertical-rhythm;
@@ -113,11 +99,5 @@
         {
             font-size: $font-size-2;
         }
-    }
-
-
-    .footer-container {
-        padding: 0 $vertical-rhythm/2;
-        @include media($medium-layout) { padding: 0 $vertical-rhythm; }
     }
 }
