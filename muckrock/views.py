@@ -252,7 +252,7 @@ def homepage(request):
     try:
         articles = Article.objects.prefetch_related('projects')\
                                   .prefetch_related('authors')\
-                                  .get_published()[:6]
+                                  .get_published()[:3]
     except IndexError:
         # no published articles
         articles = None
