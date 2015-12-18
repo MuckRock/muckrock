@@ -250,10 +250,14 @@ def homepage(request):
     # pylint: disable=unused-variable
     # pylint: disable=no-member
     try:
-        articles = Article.objects.get_published()[:5]
+        articles = Article.objects.get_published()
+        featured_article = articles[0]
+        recent_articles = articles[1:5]
     except IndexError:
         # no published articles
-        articles = None
+        featured_article = None
+        recent_articles = None
+
     public_requests = FOIARequest.objects.get_public()
     featured_reqs = public_requests.filter(featured=True).order_by('-date_done')[:3]
     popular_requests = public_requests.order_by('-times_viewed')[:5]
