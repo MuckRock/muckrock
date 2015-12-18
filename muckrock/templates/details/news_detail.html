@@ -45,6 +45,7 @@
         </section>
         <aside class="news-aside">
             {% include 'lib/social.html' with title=article.title %}
+            {% if projects %}
             <ul class="project-list nostyle">
             {% for project in projects %}
                 <li class="project-item" {% if project.image %}style="background-image:url('{% thumbnail project.image 800x600 %}')"{% endif %}>
@@ -55,6 +56,7 @@
                 </li>
             {% endfor %}
             </ul>
+            {% endif %}
             {% tag_manager article %}
             {% if article.foias.exists %}
             <dfn>Related Requests</dfn>
