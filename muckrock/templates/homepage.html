@@ -44,34 +44,29 @@
         <div class="articles">
             {% with lead_article as article %}
             <div class="lead article">
+                <datetime title="{{article.pub_date|date:'c'}}">{{article.pub_date|date:'F d, Y'}}</datetime>
+                {% if article.image %}<a href="{{article.get_absolute_url}}" title="{{article.title}}" class="article-image"><img src="{% thumbnail article.image 1200x675 %}" /></a>{% endif %}
                 {% if article.projects.exists %}
                 {% with article.projects.first as project %}
                 <dfn class="article-project"><a href="{{project.get_absolute_url}}">{{project.title}}</a></dfn>
                 {% endwith %}
                 {% endif %}
                 <h1><a href="{{ article.get_absolute_url }}" title="{{article.title}}">{{article.title}}</a></h1>
-                {% if article.image %}<a href="{{article.get_absolute_url}}" title="{{article.title}}" class="article-image"><img src="{% thumbnail article.image 1200x675 %}" /></a>{% endif %}
-                <div class="article-metadata">
-                    {% if article.authors.all %}
-                    <div class="article-authors">by
-                        {% for author in article.authors.all %}
-                            <a href="{{ author.profile.get_absolute_url }}" title="{{ author.get_full_name }}">{{ author.get_full_name }}</a>{% if not forloop.last %}, {% endif %}
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-                    <datetime title="{{article.pub_date|date:'c'}}">{{article.pub_date|date:'F d, Y'}}</datetime>
-                </div>
-                {% if article.summary %}<summary>{{article.summary|markdown:"trusted"}}</summary>{% endif %}
-                <div class="tags">
-                    {% for tag in article.tags.all %}
-                    <a class="tag" href="{% url 'tag-detail' slug=tag.slug %}">{{tag.name}}</a>
+                {% if article.authors.all %}
+                <div class="article-authors">by
+                    {% for author in article.authors.all %}
+                        <a href="{{ author.profile.get_absolute_url }}" title="{{ author.get_full_name }}">{{ author.get_full_name }}</a>{% if not forloop.last %}, {% endif %}
                     {% endfor %}
                 </div>
+                {% endif %}
+                {% if article.summary %}<summary>{{article.summary|markdown:"trusted"}}</summary>{% endif %}
             </div>
             {% endwith %}
             <ul class="others nostyle">
                 {% for article in other_articles %}
                 <li class="other article">
+                    <datetime title="{{article.pub_date|date:'c'}}">{{article.pub_date|date:'F d, Y'}}</datetime>
+                    {% if article.image %}<a href="{{article.get_absolute_url}}" title="{{article.title}}" class="article-image"><img src="{% thumbnail article.image 400x300 %}" /></a>{% endif %}
                     {% if article.projects.exists %}
                     {% with article.projects.first as project %}
                     <dfn class="article-project"><a href="{{project.get_absolute_url}}">{{project.title}}</a></dfn>
@@ -86,12 +81,6 @@
                             {% endfor %}
                         </div>
                         {% endif %}
-                        <datetime title="{{article.pub_date|date:'c'}}">{{article.pub_date|date:'F d, Y'}}</datetime>
-                    </div>
-                    <div class="tags">
-                        {% for tag in article.tags.all %}
-                        <a class="tag" href="{% url 'tag-detail' slug=tag.slug %}">{{tag.name}}</a>
-                        {% endfor %}
                     </div>
                 </li>
                 {% endfor %}

@@ -22,9 +22,8 @@
         header
         {
             margin-bottom: 0;
-            padding: 2*$vertical-rhythm;
+            padding: $vertical-rhythm $vertical-rhythm 0;
             color: $color-black;
-            font-weight: $font-weight-bold;
             text-align: center;
         }
     }
@@ -36,49 +35,63 @@
     }
     .lead
     {
-        flex: 2 1 50%;
+        flex: 3 1 400px;
         margin-bottom: 0;
-        border-right: 1px solid $color-grey;
+        padding: $vertical-rhythm;
     }
     .others
     {
-        flex: 1 1 50%;
+        flex: 1 1 200px;
+        padding: $vertical-rhythm;
     }
     .article
     {
-        padding: $vertical-rhythm;
         background: $color-white;
-
         h1
         {
+            margin-bottom: 0;
             font-size: $font-size-6;
             font-weight: $font-weight-bold;
+            line-height: 1.2em;
+            a
+            {
+                color: $color-black;
+            }
+        }
+        summary
+        {
+            max-width: 40em;
         }
         .article-image, img
         {
             display: block;
+            width: 100%;
         }
         .article-image
         {
-            margin-bottom: $vertical-rhythm;
+            margin-bottom: $vertical-rhythm/2;
         }
-        .article-metadata
+        .article-authors, datetime
         {
-            @include display(flex);
-            @include flex-wrap(wrap);
-
-            & > *
+            margin-bottom: 0;
+            font-size: $font-size-2;
+            &, a
             {
-                @include flex(1 1 11em);
-                margin-bottom: 0;
+                color: $color-grey-3;
             }
+        }
+        .article-project a
+        {
+            color: $color-grey-3;
         }
     }
     .other.article
     {
+        margin-bottom: $vertical-rhythm;
         h1
         {
-            font-size: $font-size-5;
+            font-size: $font-size-4;
+            margin-bottom: 0;
         }
     }
     .requests
