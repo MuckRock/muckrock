@@ -99,6 +99,7 @@
         @include display(flex);
         @include flex-wrap(wrap);
         @include align-items(center);
+        @include justify-content(center);
         padding: $vertical-rhythm 0;
         background-size: cover;
         background-position: right bottom;
@@ -148,7 +149,8 @@
     }
     .achievements
     {
-        @include flex(1 1 240px);
+        @include flex(1 1 200px);
+        max-width: 20em;
         margin: $vertical-rhythm;
         padding: $vertical-rhythm $vertical-rhythm 0 $vertical-rhythm;
         @include border;
@@ -178,6 +180,7 @@
         .key
         {
             font-size: $font-size-2;
+            line-height: 1em;
         }
     }
 
