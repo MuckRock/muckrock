@@ -43,8 +43,11 @@ def detail(request, fed_slug, state_slug, local_slug):
     if request.method == 'POST':
         form = FlagForm(request.POST)
         if form.is_valid():
+            user = None
+            if request.user.is_authenticated():
+                user = request.user
             FlaggedTask.objects.create(
-                user=request.user,
+                user=user,
                 text=form.cleaned_data.get('reason'),
                 jurisdiction=jurisdiction)
             messages.info(request, 'Correction submitted, thanks.')
@@ -70,6 +73,13 @@ class List(MRFilterableListView):
     model = Jurisdiction
     title = 'Jurisdictions'
     template_name = 'lists/jurisdiction_list.html'
+    default_sort = 'name'
+
+    def get_queryset(self):
+        """Hides hidden jurisdictions from list"""
+        objects = super(List, self).get_queryset()
+        objects = objects.exclude(hidden=True)
+        return objects
 
     def get_filters(self):
         base_filters = super(List, self).get_filters()

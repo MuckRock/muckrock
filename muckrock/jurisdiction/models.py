@@ -109,6 +109,9 @@ class Jurisdiction(models.Model, RequestHelper):
     law_name = models.CharField(blank=True, max_length=255, help_text='The pertinant FOIA law')
     waiver = models.TextField(blank=True, help_text='Optional - custom waiver paragraph if '
                               'FOI law has special line for waivers')
+    has_appeal = models.BooleanField(
+            default=True,
+            help_text='Does this jurisdiction have an appeals process?')
 
     def __unicode__(self):
         # pylint: disable=no-member
@@ -212,6 +215,14 @@ class Jurisdiction(models.Model, RequestHelper):
             return Calendar()
         else:
             return HolidayCalendar(self.holidays.all(), self.observe_sat)
+
+    def can_appeal(self):
+        """Can you appeal to this jurisdiction?"""
+        # pylint: disable=no-member
+        if self.level == 'l':
+            return self.parent.has_appeal
+        else:
+            return self.has_appeal
 
     class Meta:
         # pylint: disable=too-few-public-methods

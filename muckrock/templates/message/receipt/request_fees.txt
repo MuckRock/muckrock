@@ -1,0 +1,10 @@
+{% extends 'message/receipt/base.txt' %}
+
+{% block description %}
+This e-mail confirms your payment of a request fee through MuckRock. No further action is required. {% if url %}You can check the current status of your request here: https://www.muckrock.com{{url}}{% endif %}
+{% endblock %}
+
+{% block charge-breakdown %}
+Request Fee: ${{base_amount|floatformat:2}}
+Payment Proceesing Fee (5%): ${{fee_amount|floatformat:2}}
+{% endblock %}

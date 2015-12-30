@@ -3,115 +3,149 @@ Tests for Agency application
 """
 
 from django.core.urlresolvers import reverse
-from django.test import TestCase
+from django.http import Http404
+from django.test import TestCase, RequestFactory
+
 import nose.tools
 
-from muckrock.agency.models import Agency
-from muckrock.agency.forms import AgencyForm
-from muckrock.tests import get_allowed, get_404
+from muckrock import agency
+from muckrock import factories
+from muckrock.utils import mock_middleware
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
-raises = nose.tools.raises
 
-# allow methods that could be functions and too many public methods in tests
-# pylint: disable=no-self-use
-# pylint: disable=too-many-public-methods
+# pylint: disable=no-member
 
 class TestAgencyUnit(TestCase):
     """Unit tests for Agencies"""
-    fixtures = ['test_users.json', 'holidays.json', 'jurisdictions.json', 'agency_types.json',
-                'test_agencies.json']
 
     def setUp(self):
         """Set up tests"""
         # pylint: disable=C0103
-        self.agency = Agency.objects.get(pk=1)
-
-    def test_agency_unicode(self):
-        """Test Agency model's __unicode__ method"""
-        eq_(unicode(self.agency), u'Test Agency')
+        self.agency1 = factories.AgencyFactory(
+            fax='1-987-654-3210',
+            email='test@agency1.gov',
+            other_emails='other_a@agency1.gov, other_b@agency1.gov'
+        )
+        self.agency2 = factories.AgencyFactory(
+            fax='987.654.3210',
+            email=''
+        )
+        self.agency3 = factories.AgencyFactory()
 
     def test_agency_url(self):
         """Test Agency model's get_absolute_url method"""
-        eq_(
-            self.agency.get_absolute_url(),
-            reverse('agency-detail', kwargs={
-                'idx': self.agency.pk,
-                'slug': 'test-agency',
-                'jurisdiction': 'cambridge-ma',
-                'jidx': self.agency.jurisdiction.pk
+        eq_(self.agency1.get_absolute_url(), reverse('agency-detail', kwargs={
+                'idx': self.agency1.pk,
+                'slug': self.agency1.slug,
+                'jurisdiction': self.agency1.jurisdiction.slug,
+                'jidx': self.agency1.jurisdiction.pk
             })
         )
 
     def test_agency_normalize_fax(self):
         """Test the normalize fax method"""
-        eq_(Agency.objects.get(pk=1).normalize_fax(), '19876543210')
-        eq_(Agency.objects.get(pk=2).normalize_fax(), '19876543210')
-        eq_(Agency.objects.get(pk=3).normalize_fax(), None)
+        normalized = '19876543210'
+        eq_(self.agency1.normalize_fax(), normalized)
+        eq_(self.agency2.normalize_fax(), normalized)
+        eq_(self.agency3.normalize_fax(), None)
 
     def test_agency_get_email(self):
         """Test the get email method"""
-        eq_(Agency.objects.get(pk=1).get_email(), 'test@agency1.gov')
-        eq_(Agency.objects.get(pk=2).get_email(), '19876543210@fax2.faxaway.com')
-        eq_(Agency.objects.get(pk=3).get_email(), '')
+        eq_(self.agency1.get_email(), 'test@agency1.gov')
+        eq_(self.agency2.get_email(), '19876543210@fax2.faxaway.com')
+        eq_(self.agency3.get_email(), '')
 
     def test_agency_get_other_emails(self):
         """Test get other emails method"""
-        eq_(self.agency.get_other_emails(),
-                       ['other_a@agency1.gov', 'other_b@agency1.gov'])
+        eq_(self.agency1.get_other_emails(), ['other_a@agency1.gov', 'other_b@agency1.gov'])
+
+
+class TestAgencyManager(TestCase):
+    """Tests for the Agency object manager"""
+    def setUp(self):
+        self.agency1 = factories.AgencyFactory()
+        self.agency2 = factories.AgencyFactory(
+                jurisdiction=self.agency1.jurisdiction)
+        self.agency3 = factories.AgencyFactory(
+                jurisdiction=self.agency1.jurisdiction,
+                status='pending')
+
+    def test_get_approved(self):
+        """Manager should return all approved agencies"""
+        agencies = agency.models.Agency.objects.get_approved()
+        ok_(self.agency1 in agencies)
+        ok_(self.agency2 in agencies)
+        ok_(self.agency3 not in agencies)
+
+    def test_get_siblings(self):
+        """Manager should return all siblings to a given agency"""
+        agencies = agency.models.Agency.objects.get_siblings(self.agency1)
+        ok_(self.agency1 not in agencies, 'The given agency shouldn\'t be its own sibling.')
+        ok_(self.agency2 in agencies)
+        ok_(self.agency3 not in agencies, 'Unapproved agencies shouldn\'t be siblings.')
+
 
 class TestAgencyViews(TestCase):
     """Tests for Agency views"""
-    fixtures = ['test_users.json', 'holidays.json', 'jurisdictions.json', 'agency_types.json',
-                'test_agencies.json', 'test_foiarequests.json']
-
     def setUp(self):
-        """Set up tests"""
-        # pylint: disable=C0103
-        self.agency = Agency.objects.get(pk=1)
+        self.request_factory = RequestFactory()
+        self.agency = factories.AgencyFactory()
+        self.request = self.request_factory.get(self.agency.get_absolute_url())
+        self.request.user = factories.UserFactory()
+        self.request = mock_middleware(self.request)
+        self.view = agency.views.detail
 
-    def test_detail(self):
-        """Test the detail view"""
+    def test_approved_ok(self):
+        """An approved agency should return an 200 response."""
+        jurisdiction = self.agency.jurisdiction
+        response = self.view(
+            self.request,
+            jurisdiction.slug,
+            jurisdiction.pk,
+            self.agency.slug,
+            self.agency.pk
+        )
+        eq_(response.status_code, 200)
 
-        get_allowed(self.client,
-                    reverse('agency-detail',
-                            kwargs={'jurisdiction': self.agency.jurisdiction.slug,
-                                    'jidx': self.agency.jurisdiction.pk,
-                                    'slug': self.agency.slug, 'idx': self.agency.pk}),
-                    ['profile/agency.html', 'base_profile.html'],
-                    context={'agency': self.agency})
+    @nose.tools.raises(Http404)
+    def test_unapproved_not_found(self):
+        """An unapproved agency should return a 404 response."""
+        self.agency.status = 'pending'
+        self.agency.save()
+        jurisdiction = self.agency.jurisdiction
+        self.view(
+            self.request,
+            jurisdiction.slug,
+            jurisdiction.pk,
+            self.agency.slug,
+            self.agency.pk
+        )
 
-        get_404(self.client,
-                reverse('agency-detail',
-                        kwargs={'jurisdiction': 'fake-jurisdiction',
-                                'jidx': self.agency.jurisdiction.pk,
-                                'slug': self.agency.slug, 'idx': self.agency.pk}))
-        get_404(self.client,
-                reverse('agency-detail',
-                        kwargs={'jurisdiction': self.agency.jurisdiction.slug,
-                                'jidx': self.agency.jurisdiction.pk,
-                                'slug': 'fake-slug', 'idx': self.agency.pk}))
+    def test_list(self):
+        """The list should only contain approved agencies"""
+        approved_agency = factories.AgencyFactory()
+        unapproved_agency = factories.AgencyFactory(status='pending')
+        request = self.request_factory.get(reverse('agency-list'))
+        view = agency.views.List.as_view()
+        response = view(request)
+        agency_list = response.context_data['object_list']
+        ok_(approved_agency in agency_list, 'Approved agencies should be listed.')
+        ok_(unapproved_agency not in agency_list, 'Unapproved agencies should not be listed.')
 
-        agency = Agency.objects.get(pk=3)
-        get_404(self.client,
-                reverse('agency-detail',
-                        kwargs={'jurisdiction': agency.jurisdiction.slug,
-                                'jidx': self.agency.jurisdiction.pk,
-                                'slug': agency.slug, 'idx': agency.pk}))
 
 class TestAgencyForm(TestCase):
     """Tests the AgencyForm"""
-    fixtures = ['test_users.json', 'holidays.json', 'jurisdictions.json', 'agency_types.json',
-                'test_agencies.json', 'test_foiarequests.json']
 
     def setUp(self):
-        self.agency = Agency.objects.get(pk=1)
-        self.form = AgencyForm({'name': 'Test Agency'}, instance=self.agency)
+        self.agency = factories.AgencyFactory()
+        self.form = agency.forms.AgencyForm({'name': self.agency.name}, instance=self.agency)
 
     def test_validate_empty_form(self):
         """The form should have a name, at least"""
-        ok_(not AgencyForm().is_valid(),
+        # pylint: disable=no-self-use
+        ok_(not agency.forms.AgencyForm().is_valid(),
             'Empty AgencyForm should not validate.')
 
     def test_instance_form(self):

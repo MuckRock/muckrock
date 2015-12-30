@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import FieldError
 from django.core.paginator import Paginator, InvalidPage
-from django.db.models import Sum
+from django.db.models import Sum, FieldDoesNotExist
 from django.http import HttpResponseServerError, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext, Context, loader
@@ -34,6 +34,8 @@ class MRFilterableListView(ListView):
 
     title = ''
     template_name = 'lists/base_list.html'
+    default_sort = 'title'
+    default_order = 'asc'
 
     def get_filters(self):
         """
@@ -151,13 +153,22 @@ class MRFilterableListView(ListView):
 
     def sort_list(self, objects):
         """Sorts the list of objects"""
-        get = self.request.GET
-        sort = get.get('sort')
-        if sort in ['title', 'status', 'date_submitted']:
-            order = get.get('order', 'asc')
-            if order != 'asc':
-                sort = '-' + sort
-            objects = objects.order_by(sort)
+        sort = self.request.GET.get('sort', self.default_sort)
+        order = self.request.GET.get('order', self.default_order)
+        # We need to make sure the field to sort by actually exists.
+        # If the field doesn't exist, revert to the default field.
+        # Otherwise, Django will throw a hard-to-catch FieldError.
+        # It's hard to catch because the error isn't raised until
+        # the QuerySet is evaluated. <Insert poop emoji here>
+        try:
+            # pylint:disable=protected-access
+            self.model._meta.get_field_by_name(sort)
+            # pylint:enable=protected-access
+        except FieldDoesNotExist:
+            sort = self.default_sort
+        if order != 'asc':
+            sort = '-' + sort
+        objects = objects.order_by(sort)
         return objects
 
     def get_context_data(self, **kwargs):
@@ -171,16 +182,24 @@ class MRFilterableListView(ListView):
         except ValueError:
             context['filter_form'] = MRFilterForm()
         context['filter_url'] = filter_data['filter_url']
+        context['active_sort'] = self.request.GET.get('sort', self.default_sort)
+        context['active_order'] = self.request.GET.get('order', self.default_order)
         return context
 
     def get_queryset(self):
         objects = super(MRFilterableListView, self).get_queryset()
+        objects = self.filter_list(objects)
         objects = self.sort_list(objects)
-        return self.filter_list(objects)
+        return objects
 
     def get_paginate_by(self, queryset):
         """Paginates list by the return value"""
-        return min(self.request.GET.get('per_page', 25), 100)
+        try:
+            per_page = int(self.request.GET.get('per_page'))
+            return max(min(per_page, 100), 5)
+        except (ValueError, TypeError):
+            return 25
+
 
 class SearchView(TemplateView):
     """Get objects that correspond to the search query"""
@@ -193,6 +212,14 @@ class SearchView(TemplateView):
     def get_search_results(self, query):
         """Gets the query and perfoms the search."""
         return watson.search(query)
+
+    def get_paginate_by(self):
+        """Gets per_page the right way"""
+        try:
+            per_page = int(self.request.GET.get('per_page'))
+            return max(min(per_page, 100), 5)
+        except (ValueError, TypeError):
+            return 25
 
     def get_context_data(self, **kwargs):
         """Returns the context"""

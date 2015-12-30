@@ -7,15 +7,19 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 
 from muckrock.accounts.models import Profile, Statistics
+from muckrock.jurisdiction.models import Jurisdiction
 
 # pylint: disable=too-few-public-methods
 
 class ProfileSerializer(serializers.ModelSerializer):
     """Serializer for Profile model"""
+    location = serializers.PrimaryKeyRelatedField(
+            queryset=Jurisdiction.objects.all(),
+            style={'base_template': 'input.html'})
 
     class Meta:
         model = Profile
-        exclude = ('user', 'follows_foia', 'follows_question', 'notifications')
+        exclude = ('user', 'notifications')
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -41,7 +45,7 @@ class StatisticsSerializer(serializers.ModelSerializer):
                     'pro_user_names',
                     'total_page_views',
                     'daily_requests_pro',
-                    'daily_requests_community',
+                    'daily_requests_basic',
                     'daily_requests_beta',
                     'daily_articles',
                     'total_tasks',
@@ -97,7 +101,7 @@ class StatisticsSerializer(serializers.ModelSerializer):
                 'pro_user_names',
                 'total_page_views',
                 'daily_requests_pro',
-                'daily_requests_community',
+                'daily_requests_basic',
                 'daily_requests_beta',
                 'daily_articles',
                 'total_tasks',

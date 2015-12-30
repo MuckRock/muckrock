@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% load static from staticfiles %}
+
+{% block prefetch %}
+    {% if logged_in %}
+    <link rel="prefetch" href="{% url 'org-create' %}" />
+    {% else %}
+    <link rel="prefetch" href="{% url 'accounts-signup-basic' %}" />
+    <link rel="prefetch" href="{% url 'accounts-signup-professional' %}" />
+    <link rel="prefetch" href="{% url 'accounts-signup-organization' %}" />
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<article class="account plans">
+    <header>
+        {% if logged_in %}
+        <h1>Change your plan</h1>
+        {% else %}
+        <h1>Join MuckRock today</h1>
+        {% endif %}
+        <p>We offer a 30-day money-back guarantee for all purchases. Questions or concerns? <a class="action" href="mailto:info@muckrock.com">Contact us.</a></p>
+    </header>
+    <main>
+        <section class="basic plan">
+            <header>
+                <h2>Basic</h2>
+            </header>
+            <main>
+                <ul>
+                    <li>Sign up for free, no credit card required.</li>
+                    <li>Purchase bundles of 4 requests for $20.</li>
+                    <li>File requests to any agency in the United States.</li>
+                    <li>Track requests with email notifications.</li>
+                    <li>Crowdfund costly request fees.</li>
+                </ul>
+            </main>
+            {% if logged_in %}
+            <footer>
+                {% if org %}
+                <button disabled>You own an organization</button>
+                {% elif acct_type == 'proxy' %}
+                <button disabled>You are a proxy requester</button>
+                {% elif acct_type == 'admin' %}
+                <button disabled>You are staff</button>
+                {% elif acct_type == 'pro' %}
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="downgrade" />
+                    <button type="submit">Downgrade to Basic</button>
+                </form>
+                {% else %}
+                <p class="current-plan">Your Current Plan</p>
+                {% endif %}
+            </footer>
+            {% else %}
+            <footer>
+                <a class="primary button" href="{% url 'accounts-signup-basic' %}">Sign up for free</a>
+            </footer>
+            {% endif %}
+        </section>
+        <section class="professional plan">
+            <header>
+                <h2>Professional</h2>
+            </header>
+            <main>
+                <ul>
+                    <li>All Basic features.</li>
+                    <li>Receive 20 requests per month.</li>
+                    <li>Embargo requests for up to 30 days after completion.</li>
+                    <li>Privately share requests with other MuckRock users.</li>
+                    <li>File multirequests: the same request to multiple agencies.</li>
+                </ul>
+            </main>
+            {% if logged_in %}
+            <footer>
+                {% if org %}
+                <button disabled>You own an organization</button>
+                {% elif acct_type == 'admin' %}
+                <button disabled>You are staff</button>
+                {% elif acct_type == 'pro' or acct_type == 'proxy' %}
+                <p class="current-plan">Your Current Plan</p>
+                {% else %}
+                <form method="post" id="subscribe">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="upgrade" />
+                    <button
+                        data-amount="0"
+                        data-description="Subscription ($40.00/month)"
+                        data-email="{{email}}"
+                        data-label="Subscribe"
+                        data-form="#subscribe"
+                        class="checkout-button primary">
+                        Subscribe for $40/month
+                    </button>
+                </form>
+                {% endif %}
+            </footer>
+            {% else %}
+            <footer>
+                <a class="primary button" href="{% url 'accounts-signup-professional' %}">Subscribe for $40/month</a>
+            </footer>
+            {% endif %}
+        </section>
+        <section class="organization plan">
+            <header>
+                <h2>Organization</h2>
+            </header>
+            <main>
+                <ul>
+                    <li>Start with 3 members and 50 collective requests per month.</li>
+                    <li>Add additional members for $20.</li>
+                    <li>Each new member adds 10 requests per month.</li>
+                    <li>Members can embargo and multirequest.</li>
+                    <li>Members can make embargos permanent.</li>
+                </ul>
+            </main>
+            {% if logged_in %}
+            <footer>
+                {% if org %}
+                <p class="current-plan">Your Current Plan</p>
+                {% else %}
+                <a class="primary button" href="{% url 'org-create' %}">Subscribe from $100/month</a>
+                {% endif %}
+            </footer>
+            {% else %}
+            <footer>
+                <a class="primary button" href="{% url 'accounts-signup-organization' %}">Subscribe from $100/month</a>
+            </footer>
+            {% endif %}
+        </section>
+    </main>
+</article>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://checkout.stripe.com/checkout.js"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('.checkout-button').click(function(e){
+            e.preventDefault();
+            var checkoutData = getCheckoutData($(this));
+            checkout(
+                "{{ stripe_pk }}",
+                "{% static 'apple-touch-icon.png' %}",
+                checkoutData.description,
+                checkoutData.amount,
+                checkoutData.email,
+                checkoutData.label,
+                checkoutData.form
+            );
+        });
+    });
+</script>
+{% endblock %}

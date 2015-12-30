@@ -26,11 +26,9 @@ from muckrock.foia.forms import \
 from muckrock.foia.models import FOIARequest, FOIAFile, END_STATUS
 from muckrock.foia.views.comms import save_foia_comm
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.settings import STRIPE_SECRET_KEY
 from muckrock.task.models import PaymentTask
 
 logger = logging.getLogger(__name__)
-stripe.api_key = STRIPE_SECRET_KEY
 
 RequestAction = namedtuple(
     'RequestAction',
@@ -193,14 +191,15 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
     amount = request.POST.get('amount', False)
     if token and email and amount:
         try:
-            request.user.profile.pay(
-                token,
-                amount,
-                'Charge for request: %s %s' % (foia.title, foia.pk)
-            )
-        except stripe.CardError as exc:
-            messages.error(request, 'Payment error: %s' % exc)
-            logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
+            metadata = {
+                'email': email,
+                'action': 'request-fee',
+                'foia': foia.pk
+            }
+            request.user.profile.pay(token, amount, metadata)
+        except (stripe.InvalidRequestError, stripe.CardError, ValueError) as exception:
+            messages.error(request, 'Payment error: %s' % exception)
+            logger.warning('Payment error: %s', exception, exc_info=sys.exc_info())
             return redirect(foia)
         msg = 'Your payment was successful. We will get this to the agency right away.'
         messages.success(request, msg)

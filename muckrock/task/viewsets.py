@@ -19,7 +19,7 @@ def create_task_viewset(model, serializer, fields):
     """Create a viewset for a task"""
     # pylint: disable=invalid-name
     Meta = type('Meta', (object,), {
-        'queryset': model.objects.all(),
+        'model': model,
         'fields': (
             'min_date_created',
             'max_date_created',
@@ -39,7 +39,7 @@ def create_task_viewset(model, serializer, fields):
     ))
 
     return type((model.__name__ + 'ViewSet'), (viewsets.ModelViewSet,), {
-        'model': model,
+        'queryset': model.objects.all(),
         'serializer_class': serializer,
         'permission_classes': (DjangoModelPermissions,),
         'filter_class': Filter,

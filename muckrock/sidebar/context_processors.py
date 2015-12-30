@@ -1,10 +1,11 @@
-"""
-Context processors to ensure data is displayed in sidebar for all views
-"""
+"""Context processors to ensure data is displayed in sidebar for all views"""
+
+from django.contrib.auth.forms import AuthenticationForm
 
 from muckrock.accounts.models import Profile
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
+from muckrock.organization.models import Organization
 from muckrock.sidebar.models import Broadcast
 
 def get_recent_articles():
@@ -25,6 +26,17 @@ def get_actionable_requests(user):
         'drafts': drafts,
     }
 
+def get_organization(user):
+    """Gets organization, if it exists"""
+    org = None
+    if user.profile.organization:
+        org = user.profile.organization
+    owned_org = Organization.objects.filter(owner=user)
+    if owned_org.exists():
+        # there should only ever be one. if there is more than one, just get the first.
+        org = owned_org.first()
+    return org
+
 def sidebar_broadcast(user):
     """Displays a broadcast to a given usertype"""
     try:
@@ -42,12 +54,15 @@ def sidebar_info(request):
     # content for all users
     sidebar_info_dict = {
         'recent_articles': get_recent_articles(),
-        'broadcast': sidebar_broadcast(request.user)
+        'broadcast': sidebar_broadcast(request.user),
+        'login_form': AuthenticationForm()
     }
     if request.user.is_authenticated():
         # content for logged in users
         sidebar_info_dict.update({
-            'actionable_requests': get_actionable_requests(request.user)
+            'actionable_requests': get_actionable_requests(request.user),
+            'organization': get_organization(request.user),
+            'payment_failed': request.user.profile.payment_failed
         })
     else:
         # content for logged out users

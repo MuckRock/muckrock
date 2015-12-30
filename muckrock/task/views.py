@@ -48,6 +48,7 @@ class TaskList(MRFilterableListView):
     title = 'Tasks'
     model = Task
     template_name = 'lists/task_list.html'
+    default_sort = 'pk'
     bulk_actions = ['resolve'] # bulk actions have to be lowercase and 1 word
 
     def get_queryset(self):
@@ -55,6 +56,7 @@ class TaskList(MRFilterableListView):
         queryset = super(TaskList, self).get_queryset()
         filter_ids = self.request.GET.getlist('id')
         show_resolved = self.request.GET.get('show_resolved')
+        resolved_by = self.request.GET.get('resolved_by')
         # first we have to check the integrity of the id values
         for filter_id in filter_ids:
             try:
@@ -66,6 +68,8 @@ class TaskList(MRFilterableListView):
             show_resolved = True
         if not show_resolved:
             queryset = queryset.exclude(resolved=True)
+        if resolved_by:
+            queryset = queryset.filter(resolved_by__pk=resolved_by)
         # order queryset
         queryset = queryset.order_by('date_done', 'date_created')
         return queryset
@@ -73,10 +77,14 @@ class TaskList(MRFilterableListView):
     def get_context_data(self, **kwargs):
         """Adds counters for each of the sections (except all) and uses TaskFilterForm"""
         context = super(TaskList, self).get_context_data(**kwargs)
-        if self.request.GET.get('show_resolved'):
-            context['filter_form'] = TaskFilterForm(initial={'show_resolved': True})
-        else:
-            context['filter_form'] = TaskFilterForm()
+        filter_initial = {}
+        show_resolved = self.request.GET.get('show_resolved')
+        if show_resolved:
+            filter_initial['show_resolved'] = True
+        resolved_by = self.request.GET.get('resolved_by')
+        if resolved_by:
+            filter_initial['resolved_by'] = resolved_by
+        context['filter_form'] = TaskFilterForm(initial=filter_initial)
         context['counters'] = count_tasks()
         context['bulk_actions'] = self.bulk_actions
         return context
@@ -224,6 +232,7 @@ class ResponseTaskList(TaskList):
         status = cleaned_data['status']
         move = cleaned_data['move']
         tracking_number = cleaned_data['tracking_number']
+        date_estimate = cleaned_data['date_estimate']
         price = cleaned_data['price']
         # move is executed first, so that the status and tracking
         # operations are applied to the correct FOIA request
@@ -245,6 +254,12 @@ class ResponseTaskList(TaskList):
             except ValueError:
                 messages.error(request,
                     'You tried to set an invalid tracking id. Just use a string of characters.')
+                error_happened = True
+        if date_estimate:
+            try:
+                task.set_date_estimate(date_estimate)
+            except ValueError:
+                messages.error(request, 'You tried to set the request to an invalid date.')
                 error_happened = True
         if price:
             try:

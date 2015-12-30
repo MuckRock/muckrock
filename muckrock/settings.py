@@ -163,6 +163,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'lot.middleware.LOTMiddleware',
+    'muckrock.middleware.RemoveTokenMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'reversion.middleware.RevisionMiddleware',
@@ -246,6 +247,7 @@ INSTALLED_APPS = (
     'muckrock.crowdfund',
     'muckrock.sidebar',
     'muckrock.task',
+    'muckrock.message',
     'muckrock.organization',
     'muckrock.project',
     'muckrock.mailgun',
@@ -307,10 +309,10 @@ AUTHENTICATION_BACKENDS = (
     'lot.auth_backend.LOTBackend',
     )
 ABSOLUTE_URL_OVERRIDES = {
-    'auth.user': lambda u: reverse('acct-profile', kwargs={'user_name': u.username}),
+    'auth.user': lambda u: reverse('acct-profile', kwargs={'username': u.username}),
 }
 
-DBSETTINGS_USE_SITES = False
+DBSETTINGS_USE_SITES = True
 
 if DEBUG:
     TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
@@ -331,11 +333,22 @@ ASSETS_DEBUG = False
 
 MONTHLY_REQUESTS = {
     'admin': 20,
+    'basic': 0,
     'beta': 5,
-    'community': 0,
     'pro': 20,
     'proxy': 20,
-    'org': 200,
+    'org': 50,
+    'robot': 0,
+}
+
+BUNDLED_REQUESTS = {
+    'admin': 5,
+    'basic': 4,
+    'beta': 4,
+    'pro': 5,
+    'proxy': 5,
+    'org': 5,
+    'robot': 0,
 }
 
 MARKDOWN_DEUX_STYLES = {
@@ -546,6 +559,10 @@ FILER_STORAGES = {
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
+ACTSTREAM_SETTINGS = {
+    'MANAGER': 'muckrock.managers.MRActionManager'
+}
+
 SOUTH_MIGRATION_MODULES = {
     'taggit': 'taggit.south_migrations',
     'easy_thumbnails': 'easy_thumbnails.south_migrations',
@@ -559,6 +576,12 @@ LOT = {
   },
 }
 LOT_MIDDLEWARE_PARAM_NAME = 'uuid-login'
+
+# Organization Settings
+
+ORG_MIN_SEATS = 3
+ORG_PRICE_PER_SEAT = 2000
+ORG_REQUESTS_PER_SEAT = 10
 
 # pylint: disable=wildcard-import
 # pylint: disable=unused-wildcard-import

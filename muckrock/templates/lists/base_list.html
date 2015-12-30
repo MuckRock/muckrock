@@ -59,7 +59,7 @@ This is the parent style for a collection of objects: a collection of blog posts
             {% include 'lib/pagination.html' %}
             <table class="list-table">
             {% block list-table %}
-                <thead class="list-table-head">
+                <thead class="list-table-head" data-active-sort="{{active_sort}}" data-active-order="{{active_order}}">
                 {% block list-table-head %}
                     <tr>
                         <th data-sort="title">Title</th>

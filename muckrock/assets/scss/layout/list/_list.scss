@@ -196,7 +196,7 @@
         }
     }
     .list-table-body tr:hover {
-        background: $color-grey-7;
+        // background: $color-grey-7;
     }
     .list-table-body tr.unread {
         background: lighten($color-blue, 35%);

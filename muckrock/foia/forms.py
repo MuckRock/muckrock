@@ -95,7 +95,7 @@ class AgencyMultipleChoiceField(forms.MultipleChoiceField):
         for agency_id in value:
             try:
                 Agency.objects.get(pk=agency_id)
-            except Agency.DoesNotExist:
+            except (Agency.DoesNotExist, ValueError):
                 raise forms.ValidationError
         return value
 

@@ -17,7 +17,6 @@ import actstream
 from datetime import datetime
 import json
 import logging
-import stripe
 
 from muckrock.foia.codes import CODES
 from muckrock.foia.forms import \
@@ -31,9 +30,13 @@ from muckrock.foia.models import \
     FOIAMultiRequest, \
     STATUS, END_STATUS
 from muckrock.foia.views.composers import get_foia
-from muckrock.foia.views.comms import move_comm, delete_comm, save_foia_comm, resend_comm
+from muckrock.foia.views.comms import move_comm,\
+                                      delete_comm,\
+                                      save_foia_comm,\
+                                      resend_comm,\
+                                      change_comm_status
 from muckrock.qanda.models import Question
-from muckrock.settings import STRIPE_PUB_KEY, STRIPE_SECRET_KEY
+from muckrock.settings import STRIPE_PUB_KEY
 from muckrock.tags.models import Tag
 from muckrock.task.models import Task, FlaggedTask, StatusChangeTask
 from muckrock.views import class_view_decorator, MRFilterableListView
@@ -41,14 +44,15 @@ from muckrock.views import class_view_decorator, MRFilterableListView
 # pylint: disable=too-many-ancestors
 
 logger = logging.getLogger(__name__)
-stripe.api_key = STRIPE_SECRET_KEY
 STATUS_NODRAFT = [st for st in STATUS if st != ('started', 'Draft')]
+
 
 class RequestList(MRFilterableListView):
     """Base list view for other list views to inherit from"""
     model = FOIARequest
     title = 'Requests'
     template_name = 'lists/request_list.html'
+    default_sort = 'title'
 
     def get_filters(self):
         """Adds request-specific filter fields"""
@@ -66,12 +70,16 @@ class RequestList(MRFilterableListView):
     def get_queryset(self):
         """Limits requests to those visible by current user"""
         objects = super(RequestList, self).get_queryset()
+        objects = objects.select_related('jurisdiction')
+        objects = objects.only(
+                'title', 'slug', 'status', 'date_submitted',
+                'date_due', 'date_updated', 'jurisdiction__slug')
         return objects.get_viewable(self.request.user)
+
 
 @class_view_decorator(login_required)
 class MyRequestList(RequestList):
     """View requests owned by current user"""
-
     template_name = 'lists/request_my_list.html'
 
     def post(self, request):
@@ -100,10 +108,12 @@ class MyRequestList(RequestList):
 
     def get_queryset(self):
         """Gets multirequests as well, limits to just those by the current user"""
-        single_req = FOIARequest.objects.filter(user=self.request.user)
+        single_req = (FOIARequest.objects.filter(user=self.request.user)
+                                         .select_related('jurisdiction'))
         multi_req = FOIAMultiRequest.objects.filter(user=self.request.user)
         single_req = self.sort_list(self.filter_list(single_req))
         return list(single_req) + list(multi_req)
+
 
 @class_view_decorator(login_required)
 class FollowingRequestList(RequestList):
@@ -112,9 +122,40 @@ class FollowingRequestList(RequestList):
         """Limits FOIAs to those followed by the current user"""
         objects = actstream.models.following(self.request.user, FOIARequest)
         # actstream returns a list of objects, so we have to turn it into a queryset
-        objects = FOIARequest.objects.filter(id__in=[_object.pk for _object in objects])
+        pk_list = [_object.pk for _object in objects if _object]
+        objects = FOIARequest.objects.filter(pk__in=pk_list)
+        objects = objects.select_related('jurisdiction')
+        # now we filter and sort the list like in the parent class
+        objects = self.filter_list(objects)
         objects = self.sort_list(objects)
-        return self.filter_list(objects)
+        # finally, we can only show requests visible to that user
+        return objects.get_viewable(self.request.user)
+
+
+class ProcessingRequestList(RequestList):
+    """List all of the currently processing FOIA requests."""
+    template_name = 'lists/request_processing_list.html'
+    default_sort = 'date_processing'
+
+    def dispatch(self, *args, **kwargs):
+        """Only staff can see the list of processing requests."""
+        if not self.request.user.is_staff:
+            raise Http404()
+        return super(ProcessingRequestList, self).dispatch(*args, **kwargs)
+
+    def filter_list(self, objects):
+        """Gets all processing requests"""
+        objects = super(ProcessingRequestList, self).filter_list(objects)
+        return objects.filter(status='submitted')
+
+    def get_filters(self):
+        """Removes the 'status' filter, because its only processing requests"""
+        filters = super(ProcessingRequestList, self).get_filters()
+        for filter_dict in filters:
+            if 'status' in filter_dict.values():
+                filters.pop(filters.index(filter_dict))
+        return filters
+
 
 # pylint: disable=no-self-use
 class Detail(DetailView):
@@ -171,7 +212,8 @@ class Detail(DetailView):
         context['past_due'] = is_past_due
         context['user_can_edit'] = user_can_edit
         context['embargo'] = {
-            'show': (user_can_edit and foia.user.profile.can_embargo) or foia.embargo,
+            'show': ((user_can_edit and foia.user.profile.can_embargo)\
+                    or foia.embargo) or user.is_staff,
             'edit': user_can_edit and foia.user.profile.can_embargo,
             'add': user_can_edit and user.profile.can_embargo,
             'remove': user_can_edit and foia.embargo
@@ -204,11 +246,13 @@ class Detail(DetailView):
             'status': self._status,
             'tags': self._tags,
             'follow_up': self._follow_up,
+            'thanks': self._thank,
             'question': self._question,
             'add_note': self._add_note,
             'flag': self._flag,
             'appeal': self._appeal,
             'date_estimate': self._update_estimate,
+            'status_comm': change_comm_status,
             'move_comm': move_comm,
             'delete_comm': delete_comm,
             'resend_comm': resend_comm,
@@ -250,22 +294,6 @@ class Detail(DetailView):
                 request.user,
                 verb='changed the status of',
                 action_object=foia
-            )
-        return redirect(foia)
-
-    def _follow_up(self, request, foia):
-        """Handle submitting follow ups"""
-        text = request.POST.get('text', False)
-        can_follow_up = foia.editable_by(request.user) or request.user.is_staff
-        if can_follow_up and foia.status != 'started' and text:
-            save_foia_comm(foia, request.user.get_full_name(), text)
-            messages.success(request, 'Your follow up has been sent.')
-            # generate follow up action
-            actstream.action.send(
-                request.user,
-                verb='followed up',
-                action_object=foia,
-                target=foia.agency
             )
         return redirect(foia)
 
@@ -324,17 +352,60 @@ class Detail(DetailView):
             )
         return redirect(foia)
 
+    def _follow_up(self, request, foia):
+        """Handle submitting follow ups"""
+        can_follow_up = foia.editable_by(request.user) or request.user.is_staff
+        test = can_follow_up and foia.status != 'started'
+        success_msg = 'Your follow up has been sent.'
+        agency = foia.agency
+        verb = 'followed up'
+        return self._new_comm(request, foia, test, success_msg, agency, verb)
+
+    def _thank(self, request, foia):
+        """Handle submitting a thank you follow up"""
+        test = foia.editable_by(request.user) and foia.is_thankable()
+        success_msg = 'Your thank you has been sent.'
+        agency = foia.agency
+        verb = 'thanked'
+        return self._new_comm(
+                request, foia, test, success_msg, agency, verb, thanks=True)
+
     def _appeal(self, request, foia):
         """Handle submitting an appeal"""
+        test = foia.editable_by(request.user) and foia.is_appealable()
+        success_msg = 'Appeal successfully sent.'
+        agency = foia.agency.appeal_agency if foia.agency.appeal_agency else foia.agency
+        verb = 'appealed'
+        return self._new_comm(
+                request, foia, test, success_msg, agency, verb, appeal=True)
+
+    def _new_comm(
+            self,
+            request,
+            foia,
+            test,
+            success_msg,
+            agency,
+            verb,
+            appeal=False,
+            thanks=False,
+            ):
+        """Helper function for sending a new comm"""
+        # pylint: disable=too-many-arguments
         text = request.POST.get('text')
-        if foia.editable_by(request.user) and foia.is_appealable() and text:
-            save_foia_comm(foia, foia.user.get_full_name(), text, appeal=True)
-            messages.success(request, 'Appeal successfully sent.')
-            agency = foia.agency.appeal_agency if foia.agency.appeal_agency else foia.agency
+        if text and test:
+            save_foia_comm(
+                    foia,
+                    foia.user.get_full_name(),
+                    text,
+                    appeal=appeal,
+                    thanks=thanks,
+                    )
+            messages.success(request, success_msg)
             # generate appeal action
             actstream.action.send(
                 request.user,
-                verb='appealed',
+                verb=verb,
                 action_object=foia,
                 target=agency
             )

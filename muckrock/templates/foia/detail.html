@@ -7,7 +7,7 @@
 {% load crowdfund_tags %}
 {% load tags %}
 
-{% block title %}MuckRock &bull; {{ foia.title }}{% endblock %}
+{% block title %}{{ foia.title }}{% endblock %}
 {% block type %}request{% endblock %}
 
 {% block open_graph %}
@@ -39,7 +39,7 @@
             </section>
         </header>
         <section class="basic-information">
-            <summary class="synopsis"><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> filed this request{% if foia.agency %} with the {% if foia.agency.approved %}<a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a>{% else %}{{ foia.agency.name }}{% endif %} of {% if foia.jurisdiction.level == 'f' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% if foia.jurisdiction.parent and foia.jurisdiction.level == 'l' %}, <a href="{{ foia.jurisdiction.parent.get_absolute_url }}" title="{{ foia.jurisdiction.parent.name }}">{{ foia.jurisdiction.parent.abbrev }}</a>{% endif %}{% endif %}.</summary>
+			<summary class="synopsis"><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> filed this request{% if foia.agency %} with the {{foia.agency.link_display}} of {% if foia.jurisdiction.level == 'f' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% if foia.jurisdiction.parent and foia.jurisdiction.level == 'l' %}, <a href="{{ foia.jurisdiction.parent.get_absolute_url }}" title="{{ foia.jurisdiction.parent.name }}">{{ foia.jurisdiction.parent.abbrev }}</a>{% endif %}{% endif %}.</summary>
             {% if foia.parent %}
             <p>It is a clone of <a href="{{ foia.parent.get_absolute_url }}">this request</a>.</p>
             {% endif %}
@@ -158,6 +158,9 @@
             <div class="communications-composer">
                 <div class="composer-actions">
                     <button class="primary" id="follow-up">Follow Up</button>
+                    {% if foia.is_thankable %}
+                    <button class="success" id="thanks">Thank Agency</button>
+                    {% endif %}
                     {% if foia.is_appealable %}
                     <button class="failure" id="appeal">Appeal</button>
                     {% endif %}
@@ -180,6 +183,25 @@
                         <span class="button cancel">Cancel</span>
                     </div>
                 </form>
+                {% if foia.is_thankable %}
+                <form class="thanks composer-input" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="thanks" />
+                    <label for="thanks-composer">Send a thank you note to the {{ foia.agency.name }}</label>
+                    <textarea name="text" id="thanks-composer">
+Hi,
+
+Thanks so much for your help with this request! I really appreciate it.
+
+Sincerely,
+{{foia.user.get_full_name}}
+					</textarea>
+                    <div class="buttons">
+                        <button class="primary" type="submit" name="thanks" value="1">Send</button>
+                        <span class="button cancel">Cancel</span>
+                    </div>
+                </form>
+                {% endif %}
                 {% if foia.is_appealable %}
                 <form class="appeal composer-input" method="post">
                     {% csrf_token %}

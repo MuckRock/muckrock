@@ -1,13 +1,29 @@
 <aside class="website-sidebar" id="website-sidebar">
+    <form method="post" action="{% url 'acct-login' %}?next={{ request.get_full_path }}" class="quick-log-in" id="quick-log-in-form">
+        {% csrf_token %}
+        <h1>Log In</h1>
+        {{ login_form }}
+        <div class="row">
+            <span class="cancel button">Cancel</span>
+            <button type="submit" class="primary">Log In</button>
+        </div>
+    </form>
     <header class="account-links">
         {% if user.is_authenticated %}
         <a href="{% url 'acct-my-profile' %}" class="username">{{ user.get_full_name }}</a>
         <a href="{% url 'acct-logout' %}" class="log-out">Log Out</a>
         {% else %}
-        <a href="{% url 'acct-register' %}" class="sign-up">Sign&nbsp;Up</a>
-        <a href="{% url 'acct-login' %}?next={{ request.get_full_path }}" class="log-in">Log&nbsp;In</a>
+        <a href="{% url 'accounts' %}" class="sign-up">Sign&nbsp;Up</a>
+        <a href="{% url 'acct-login' %}?next={{ request.get_full_path }}" class="log-in" id="quick-log-in">Log&nbsp;In</a>
         {% endif %}
     </header>
+
+    {% if payment_failed %}
+    <section class="payment failure">
+        <p><strong>Your payment failed!</strong></p>
+        <p>A recent charge made against your credit card has failed. You can <a href="{% url 'acct-settings' %}#billing">update your billing information</a> from your account settings.</p>
+    </section>
+    {% endif %}
 
     {% if user.is_staff %}
     <section>
@@ -16,8 +32,13 @@
     {% endif %}
 
     {% if user.is_authenticated %}
+        {% if organization %}
+    <section class="organization">
+        <a href="{{organization.get_absolute_url}}">Your Organization</a>
+    </section>
+        {% endif %}
     <section class="requests">
-        <a class="my-requests" href="{% url 'foia-mylist' %}">My Requests</a>
+        <a class="my-requests" href="{% url 'foia-mylist' %}">Your Requests</a>
 
         {% if actionable_requests %}
             {% if actionable_requests.payments %}
@@ -53,6 +74,13 @@
             </ul>
             {% endif %}
         {% endif %}
+    </section>
+    {% endif %}
+
+    {% if broadcast %}
+    <section class="broadcast">
+        <dfn>Announcement</dfn>
+        <p>{{ broadcast|safe }}</p>
     </section>
     {% endif %}
 

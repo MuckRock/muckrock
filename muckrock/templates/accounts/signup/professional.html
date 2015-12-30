@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static from staticfiles %}
+
+{% block content %}
+<article class="account signup">
+    <header>
+        <h1>Subscribe to a Professional account</h1>
+    </header>
+    <form method="post" class="professional form" id="subscribe">
+        {% csrf_token %}
+        <div class="fields">
+            {% for field in form.visible_fields %}
+            <fieldset class="{{ field.label|lower }} field{% if field.field.required %} required{% endif %}">
+                <label {% if field.errors %}class="failure"{% endif %} for="{{ field.auto_id }}">{{ field.label}}</label>
+                {{ field.errors }}
+                {{ field }}
+                {% if field.help_text %}<p class="default"><small>{{ field.help_text }}</small></p>{% endif %}
+            </fieldset>
+            {% endfor %}
+        </div>
+        <footer>
+            <a href="{% url 'accounts' %}" class="cancel">Pick a different plan</a>
+            <button
+                data-amount="0"
+                data-description="Subscription ($40.00/month)"
+                data-email=""
+                data-label="Subscribe"
+                data-form="#subscribe"
+                class="checkout-button primary">
+                Subscribe
+            </button>
+        </footer>
+    </form>
+</article>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://checkout.stripe.com/checkout.js"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('.checkout-button').click(function(e){
+            e.preventDefault();
+            var checkoutData = getCheckoutData($(this));
+            var userEmail = $('#id_email').val();
+            checkout(
+                "{{ stripe_pk }}",
+                "{% static 'apple-touch-icon.png' %}",
+                checkoutData.description,
+                checkoutData.amount,
+                userEmail,
+                checkoutData.label,
+                checkoutData.form,
+                true,
+                false
+            );
+        });
+    });
+</script>
+{% endblock %}

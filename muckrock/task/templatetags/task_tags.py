@@ -121,11 +121,8 @@ class NewAgencyTaskNode(TaskNode):
         """Adds an approval form, other agencies, and relevant requests to context"""
         # pylint:disable=line-too-long
         extra_context = super(NewAgencyTaskNode, self).get_extra_context(the_task)
-        other_agencies = agency.models.Agency.objects.filter(jurisdiction=the_task.agency.jurisdiction)
-        other_agencies = other_agencies.exclude(id=the_task.agency.id)
-        other_agencies = other_agencies.order_by('name')
         extra_context['agency_form'] = agency.forms.AgencyForm(instance=the_task.agency)
-        extra_context['other_agencies'] = other_agencies
+        extra_context['other_agencies'] = agency.models.Agency.objects.get_siblings(the_task.agency)
         extra_context['foias'] = foia.models.FOIARequest.objects.filter(agency=the_task.agency)
         return extra_context
 
@@ -143,6 +140,7 @@ class ResponseTaskNode(TaskNode):
             the_foia = the_task.communication.foia
             form_initial['status'] = the_foia.status
             form_initial['tracking_number'] = the_foia.tracking_id
+            form_initial['date_estimate'] = the_foia.date_estimate
             extra_context['all_comms'] = the_foia.communications.all().order_by('-date')
         extra_context['response_form'] = task.forms.ResponseTaskForm(initial=form_initial)
         extra_context['attachments'] = the_task.communication.files.all()

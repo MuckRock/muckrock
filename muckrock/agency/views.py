@@ -26,7 +26,13 @@ class List(MRFilterableListView):
     model = Agency
     title = 'Agencies'
     template_name = 'lists/agency_list.html'
+    default_sort = 'name'
 
+    def get_queryset(self):
+        """Limit agencies to only approved ones."""
+        objects = super(List, self).get_queryset()
+        objects = objects.get_approved()
+        return objects
 
 def detail(request, jurisdiction, jidx, slug, idx):
     """Details for an agency"""
@@ -34,7 +40,7 @@ def detail(request, jurisdiction, jidx, slug, idx):
     jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
     agency = get_object_or_404(Agency, jurisdiction=jmodel, slug=slug, pk=idx)
 
-    if not agency.approved:
+    if agency.status != 'approved':
         raise Http404()
 
     foia_requests = FOIARequest.objects.get_viewable(request.user)\

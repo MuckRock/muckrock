@@ -247,7 +247,7 @@ class NewAgencyTaskViewTests(TestCase):
         post_data.update({'approve': 'truthy', 'task': self.task.pk})
         self.client.post(self.url, post_data)
         updated_task = task.models.NewAgencyTask.objects.get(pk=self.task.pk)
-        eq_(updated_task.agency.approved, True,
+        eq_(updated_task.agency.status, 'approved',
                 ('New agency task should approve agency when'
                 ' given a truthy value for the "approve" field'))
         eq_(updated_task.resolved, True,

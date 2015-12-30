@@ -36,6 +36,7 @@ class NewsDetail(DateDetailView):
 
     def get_context_data(self, **kwargs):
         context = super(NewsDetail, self).get_context_data(**kwargs)
+        context['projects'] = self.get_object().projects.all()
         context['sidebar_admin_url'] = reverse('admin:news_article_change',
             args=(context['object'].pk,))
         context['stripe_pk'] = STRIPE_PUB_KEY
@@ -99,5 +100,7 @@ class ArticleViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         if 'no_editor' in self.request.QUERY_PARAMS:
-            return self.model.objects.filter(editors=None)
-        return self.model.objects.all()
+            queryset = self.model.objects.filter(editors=None)
+        else:
+            queryset = self.model.objects.all()
+        return queryset.prefetch_related('authors', 'editors', 'foias')

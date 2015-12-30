@@ -12,8 +12,41 @@ function modal(nextSelector) {
     });
 }
 
-function checkout(pk, image, description, amount, email, label, form, submit) {
+function prettifyAmountInput(input) {
+    // pretty_amount_input is used as a functional wrapper for the amount input field
+    // progressive enhancement ftw!
+    $(input).attr('hidden', true).hide();
+    var initialAmount = $(input).attr('value');
+    var prettyInputElement = '<input name="pretty-input" class="success" >';
+    var prettyInput = 'input[name=pretty-input]';
+    $(input).before(prettyInputElement);
+    $(prettyInput).autoNumeric('init', {aSign:'$', pSign:'p'});
+    $(prettyInput).autoNumeric('set', initialAmount/100.00);
+    $(prettyInput).keyup(function(e){
+        var value = $(this).autoNumeric('get') * 100;
+        $(input).attr('value', value);
+    });
+}
+
+function prettifyAmountInput(input) {
+    // pretty_amount_input is used as a functional wrapper for the amount input field
+    // progressive enhancement ftw!
+    $(input).attr('hidden', true).hide();
+    var initialAmount = $(input).attr('value');
+    var prettyInputElement = '<input name="pretty-input" class="success" >';
+    var prettyInput = 'input[name=pretty-input]';
+    $(input).before(prettyInputElement);
+    $(prettyInput).autoNumeric('init', {aSign:'$', pSign:'p'});
+    $(prettyInput).autoNumeric('set', initialAmount/100.00);
+    $(prettyInput).keyup(function(e){
+        var value = $(this).autoNumeric('get') * 100;
+        $(input).attr('value', value);
+    });
+}
+
+function checkout(pk, image, description, amount, email, label, form, submit, bitcoin) {
     submit = typeof submit !== 'undefined' ? submit : true;
+    bitcoin = typeof bitcoin !== 'undefined' ? bitcoin : true;
     var token = function(token) {
         form.append('<input type="hidden" name="stripe_token" value="' + token.id + '" />');
         form.append('<input type="hidden" name="stripe_email" value="' + token.email + '" />');
@@ -32,7 +65,7 @@ function checkout(pk, image, description, amount, email, label, form, submit) {
         email: email,
         panelLabel: label,
         token: token,
-        bitcoin: true
+        bitcoin: bitcoin
     });
 }
 
@@ -130,13 +163,17 @@ $(function() {
 	$('.formset-container').formset();
 });
 
-var urlParam = function(name){
-    var urlString = '[\\?&amp;]' + name + '=([^&amp;#]*)'
-    var results = new RegExp(urlString).exec(window.location.search);
-    if (results) {
-        return results[1] || 0;
-    } else {
-        return 0;
+function urlParam(sParam)
+{
+    var sPageURL = window.location.search.substring(1);
+    var sURLVariables = sPageURL.split('&');
+    for (var i = 0; i < sURLVariables.length; i++)
+    {
+        var sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] == sParam)
+        {
+            return sParameterName[1];
+        }
     }
 }
 
@@ -180,5 +217,15 @@ $('#show-search').click(function(){
     }
     $(closeSearch).click(function(){
         $(search).removeClass('visible');
+    });
+});
+
+$('#quick-log-in').click(function(e){
+    e.preventDefault();
+    var quickLogin = $('#quick-log-in-form');
+    quickLogin.addClass('visible');
+    quickLogin.find('input[type=text]')[0].focus();
+    quickLogin.find('.cancel').click(function(){
+        quickLogin.removeClass('visible');
     });
 });

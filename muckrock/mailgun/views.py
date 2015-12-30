@@ -20,10 +20,16 @@ from localflavor.us.us_states import STATE_CHOICES
 
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, RawEmail
-from muckrock.foia.tasks import upload_document_cloud
+from muckrock.foia.tasks import upload_document_cloud, classify_status
 from muckrock.mailgun.models import WhitelistDomain
 from muckrock.settings import MAILGUN_ACCESS_KEY
-from muckrock.task.models import OrphanTask, ResponseTask, RejectedEmailTask, FailedFaxTask
+from muckrock.task.models import (
+        FailedFaxTask,
+        OrphanTask,
+        RejectedEmailTask,
+        ResponseTask,
+        StaleAgencyTask,
+        )
 
 logger = logging.getLogger(__name__)
 
@@ -112,7 +118,15 @@ def handle_request(request, mail_id):
             if type_ == 'file':
                 _upload_file(foia, comm, file_, from_)
 
-        ResponseTask.objects.create(communication=comm)
+        task = ResponseTask.objects.create(communication=comm)
+        classify_status.apply_async(args=(task.pk,), countdown=30 * 60)
+        # resolve any stale agency tasks for this agency
+        if foia.agency:
+            StaleAgencyTask.objects.filter(resolved=False, agency=foia.agency)\
+                                   .update(resolved=True)
+            foia.agency.stale = False
+            foia.agency.save()
+
 
         foia.email = from_email
         foia.other_emails = ','.join(email for name, email
@@ -126,8 +140,6 @@ def handle_request(request, mail_id):
             foia.status = 'processed'
         foia.save()
         foia.update(comm.anchor())
-
-        # NLTK
 
     except FOIARequest.DoesNotExist:
         logger.warning('Invalid Address: %s', mail_id)

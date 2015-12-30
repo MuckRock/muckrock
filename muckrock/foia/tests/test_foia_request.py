@@ -2,41 +2,35 @@
 Tests using nose for the FOIA application
 """
 
-from django.contrib import messages
 from django.contrib.auth.models import User, AnonymousUser
-from django.core.urlresolvers import reverse, resolve
+from django.core.urlresolvers import reverse
 from django.core import mail
 from django.test import TestCase, Client, RequestFactory
-from django.utils.text import slugify
 
 import datetime
-import factory
 from mock import Mock
 import nose.tools
 import re
 from datetime import date as real_date
-import logging
 from operator import attrgetter
-import re
 
-from muckrock.crowdfund.models import CrowdfundRequest
-from muckrock.crowdfund.forms import CrowdfundRequestForm
 from muckrock.factories import UserFactory, FOIARequestFactory
 from muckrock.foia import tasks
 from muckrock.foia.models import FOIARequest, FOIACommunication, END_STATUS
-from muckrock.foia.forms import FOIAEmbargoForm, FOIAAccessForm
+from muckrock.foia.forms import FOIAEmbargoForm
 from muckrock.foia.views import Detail
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import SnailMailTask
-from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed, get_404
-
-# MockDate breaks pylint-django
-# pylint: skip-file
+from muckrock.tests import get_allowed, post_allowed, get_post_unallowed, get_404
 
 # allow methods that could be functions and too many public methods in tests
 # pylint: disable=no-self-use
 # pylint: disable=too-many-public-methods
+# pylint: disable=too-many-lines
+# pylint: disable=no-member
+# pylint: disable=invalid-name
+# pylint: disable=bad-mcs-method-argument
 
 class TestFOIARequestUnit(TestCase):
     """Unit tests for FOIARequests"""
@@ -167,16 +161,16 @@ class TestFOIARequestUnit(TestCase):
         nose.tools.assert_true(foias[4].viewable_by(user1))
 
         nose.tools.assert_false(foias[0].viewable_by(user2))
-        nose.tools.assert_true (foias[1].viewable_by(user2))
+        nose.tools.assert_true(foias[1].viewable_by(user2))
         nose.tools.assert_false(foias[2].viewable_by(user2))
-        nose.tools.assert_true (foias[3].viewable_by(user2))
-        nose.tools.assert_true (foias[4].viewable_by(user2))
+        nose.tools.assert_true(foias[3].viewable_by(user2))
+        nose.tools.assert_true(foias[4].viewable_by(user2))
 
         nose.tools.assert_false(foias[0].viewable_by(AnonymousUser()))
-        nose.tools.assert_true (foias[1].viewable_by(AnonymousUser()))
+        nose.tools.assert_true(foias[1].viewable_by(AnonymousUser()))
         nose.tools.assert_false(foias[2].viewable_by(AnonymousUser()))
-        nose.tools.assert_true (foias[3].viewable_by(AnonymousUser()))
-        nose.tools.assert_true (foias[4].viewable_by(AnonymousUser()))
+        nose.tools.assert_true(foias[3].viewable_by(AnonymousUser()))
+        nose.tools.assert_true(foias[4].viewable_by(AnonymousUser()))
 
     def test_foia_set_mail_id(self):
         """Test the set_mail_id function"""
@@ -280,7 +274,12 @@ class TestFOIAFunctional(TestCase):
                 nose.tools.eq_([f.title for f in response.context['object_list']],
                                [f.title for f in sorted(response.context['object_list'],
                                                         key=attrgetter(field),
-                                                        reverse=order=='desc')])
+                                                        reverse=(order == 'desc'))])
+    def test_foia_bad_sort(self):
+        """Test sorting against a non-existant field"""
+        response = get_allowed(self.client, reverse('foia-list') + '?sort=test',
+                               ['lists/request_list.html', 'lists/base_list.html'])
+        nose.tools.eq_(response.status_code, 200)
 
     def test_foia_detail(self):
         """Test the foia-detail view"""
@@ -291,7 +290,7 @@ class TestFOIAFunctional(TestCase):
                                                    'jurisdiction': foia.jurisdiction.slug,
                                                    'jidx': foia.jurisdiction.pk}),
                     ['foia/detail.html', 'base.html'],
-                    context = {'foia': foia})
+                    context={'foia': foia})
 
     def test_feeds(self):
         """Test the RSS feed views"""
@@ -577,7 +576,7 @@ class TestFOIAIntegration(TestCase):
         ## after 4 days agency replies with the documents
         self.set_today(datetime.date.today() + datetime.timedelta(4))
         comm = FOIACommunication.objects.create(
-            foia=foia, from_who='Test Agency', to_who='Muckrock', date=datetime.date.today(),
+            foia=foia, from_who='Test Agency', to_who='Muckrock', date=datetime.datetime.now(),
             response=True, communication='Test communication')
         foia.status = 'done'
         foia.save()
@@ -843,7 +842,6 @@ class TestFOIANotes(TestCase):
         self.creator = self.foia.user
         self.editor = UserFactory()
         self.viewer = UserFactory()
-        self.normie = UserFactory()
         self.foia.add_editor(self.editor)
         self.foia.add_viewer(self.viewer)
         self.note_text = u'Lorem ipsum dolor su ament.'

@@ -54,11 +54,27 @@
     &.failure   { @include button($color-red);      }
     &.warning   { @include button($color-yellow);   }
     &.disabled, &:disabled  {
-        @include button($color-white);
-        color: darken($color-white, $color-darken-amount);
+        @include button($color-disabled);
+        background: $color-white;
+        color: $color-grey-5;
         &:hover {
-            color: darken($color-white, $color-darken-amount);
+            color: $color-grey-5;
         }
+    }
+}
+
+.button.simple, button.simple, input[type='submit'].simple {
+    margin: 0;
+    padding: $vertical-rhythm/4 $vertical-rhythm/2;
+    font-weight: $font-weight-bold;
+    font-size: $font-size-2;
+    box-shadow: none;
+    @include transform(none);
+    &:hover, &:active {
+        box-shadow: none;
+        @include transform(none);
+        background: $color-black;
+        border-color: $color-black;
     }
 }
 

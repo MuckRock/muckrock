@@ -14,7 +14,10 @@ def stale():
 
     for agency in agencies:
         latest_response = agency.latest_response()
-        if latest_response >= 30 or agency.expired():
+        if ((latest_response is not None and latest_response >= 120) or
+                agency.expired()):
             agency.stale = True
             agency.save()
-            StaleAgencyTask.objects.create(agency=agency)
+            if not StaleAgencyTask.objects.filter(
+                    resolved=False, agency=agency).exists():
+                StaleAgencyTask.objects.create(agency=agency)

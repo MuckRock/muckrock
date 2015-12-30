@@ -13,14 +13,12 @@ from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from rest_framework.response import Response
 import django_filters
 import logging
-import stripe
 
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.foia.serializers import FOIARequestSerializer, FOIACommunicationSerializer, \
                                       FOIAPermissions, IsOwner
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.task.models import PaymentTask
 
 # pylint: disable=too-many-ancestors
 # pylint: disable=bad-continuation
@@ -33,7 +31,6 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
     """
     # pylint: disable=too-many-public-methods
     # pylint: disable=C0103
-    queryset = FOIARequest.objects.all()
     serializer_class = FOIARequestSerializer
     permission_classes = (FOIAPermissions,)
 
@@ -53,7 +50,9 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
     filter_class = Filter
 
     def get_queryset(self):
-        return FOIARequest.objects.get_viewable(self.request.user)
+        return (FOIARequest.objects.get_viewable(self.request.user)
+                .select_related('user')
+                .prefetch_related('communications__files', 'notes', 'tags'))
 
     def create(self, request):
         """Submit new request"""
@@ -132,41 +131,6 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             return Response({'status': 'Missing data - Please supply text for followup'},
                              status=http_status.HTTP_400_BAD_REQUEST)
 
-    @decorators.detail_route(permission_classes=(IsOwner,))
-    def pay(self, request, pk=None):
-        """Pay for a request"""
-        try:
-            foia = FOIARequest.objects.get(pk=pk)
-            self.check_object_permissions(request, foia)
-            if foia.status != 'payment':
-                return Response({'status': 'Payment not required'},
-                                status=http_status.HTTP_400_BAD_REQUEST)
-
-            amount = int(foia.price * 105)
-            request.user.profile.api_pay(amount,
-                                               'Charge for request: %s %s' % (foia.title, foia.pk))
-
-            foia.status = 'processed'
-            foia.save()
-
-            PaymentTask.objects.create(
-                user=request.user,
-                amount=int(amount)/100.0,
-                foia=foia)
-
-            logger.info('%s has paid %0.2f for request %s',
-                        request.user.username, amount / 100.0, foia.title)
-
-            return Response({'status': 'You have paid $%0.2f for the request' % (amount / 100.0)},
-                             status=http_status.HTTP_200_OK)
-
-        except FOIARequest.DoesNotExist:
-            return Response({'status': 'Not Found'}, status=http_status.HTTP_404_NOT_FOUND)
-
-        except stripe.CardError as exc:
-            return Response({'status': 'Stripe Card Error: %s' % exc},
-                            status=http_status.HTTP_400_BAD_REQUEST)
-
     @decorators.detail_route(methods=['POST', 'DELETE'], permission_classes=(IsAuthenticated,))
     def follow(self, request, pk=None):
         """Follow or unfollow a request"""
@@ -200,7 +164,7 @@ class FOIACommunicationViewSet(viewsets.ModelViewSet):
     """API views for FOIARequest"""
     # pylint: disable=too-many-public-methods
     # pylint: disable=C0103
-    queryset = FOIACommunication.objects.all()
+    queryset = FOIACommunication.objects.prefetch_related('files')
     serializer_class = FOIACommunicationSerializer
     permission_classes = (DjangoModelPermissions,)
 

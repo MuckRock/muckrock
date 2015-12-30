@@ -27,6 +27,12 @@
         {% endfor %}
     {% endif %}
     {% endwith %}
+	{% if task.predicted_status %}
+	<dt>Predicted Status</dt>
+	<dd>{{task.get_predicted_status_display}}</dd>
+	<dt>Probability</dt>
+	<dd>{{task.status_probability}}%</dd>
+	{% endif %}
 </dl>
 {% endblock %}
 

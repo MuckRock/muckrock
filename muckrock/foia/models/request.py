@@ -92,6 +92,14 @@ class FOIARequestQuerySet(models.QuerySet):
         """Get requests which have an undated file"""
         return self.filter(~Q(files=None) & Q(files__date=None)).distinct()
 
+    def organization(self, organization):
+        """Get requests belonging to an organization's members."""
+        members = organization.members.select_related('user').all()
+        users = [member.user for member in members]
+        return self.select_related('jurisdiction')\
+                   .select_related('jurisdiction__parent')\
+                   .select_related('jurisdiction__parent__parent')\
+                   .filter(user__in=users)
 
 STATUS = (
     ('started', 'Draft'),
@@ -132,18 +140,20 @@ class FOIARequest(models.Model):
     # pylint: disable=too-many-instance-attributes
 
     user = models.ForeignKey(User)
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, db_index=True)
     slug = models.SlugField(max_length=255)
-    status = models.CharField(max_length=10, choices=STATUS)
+    status = models.CharField(max_length=10, choices=STATUS, db_index=True)
     jurisdiction = models.ForeignKey(Jurisdiction)
     agency = models.ForeignKey(Agency, blank=True, null=True)
-    date_submitted = models.DateField(blank=True, null=True)
+    date_submitted = models.DateField(blank=True, null=True, db_index=True)
+    date_updated = models.DateField(blank=True, null=True, db_index=True)
     date_done = models.DateField(blank=True, null=True, verbose_name='Date response received')
-    date_due = models.DateField(blank=True, null=True)
+    date_due = models.DateField(blank=True, null=True, db_index=True)
     days_until_due = models.IntegerField(blank=True, null=True)
     date_followup = models.DateField(blank=True, null=True)
     date_estimate = models.DateField(blank=True, null=True,
             verbose_name='Estimated Date Completed')
+    date_processing = models.DateField(blank=True, null=True)
     embargo = models.BooleanField(default=False)
     permanent_embargo = models.BooleanField(default=False)
     date_embargo = models.DateField(blank=True, null=True)
@@ -208,14 +218,31 @@ class FOIARequest(models.Model):
                 self.date_embargo = default_date if not existing_date else existing_date
             else:
                 self.date_embargo = None
+        if self.status == 'submitted' and self.date_processing is None:
+            self.date_processing = date.today()
         super(FOIARequest, self).save(*args, **kwargs)
 
     def is_editable(self):
         """Can this request be updated?"""
         return self.status == 'started'
 
+    def is_thankable(self):
+        """Should we show a send thank you button for this request?"""
+        has_thanks = self.communications.filter(thanks=True).exists()
+        valid_status = self.status in [
+                'done',
+                'partial',
+                'rejected',
+                'abandoned',
+                'no_docs',
+                ]
+        return not has_thanks and valid_status
+
     def is_appealable(self):
         """Can this request be appealed by the user?"""
+        if not self.jurisdiction.can_appeal():
+            return False
+
         if self.status in ['processed', 'appealing']:
             # can appeal these only if they are over due
             if not self.date_due:
@@ -347,19 +374,6 @@ class FOIARequest(models.Model):
         """Get a list of public documents attached to this request"""
         return self.files.filter(access='public')
 
-    def color_code(self):
-        """Get the color code for the current status"""
-        # pylint: disable=bad-whitespace
-        code_stop = 'failure'
-        code_wait = ''
-        code_go = 'success'
-        code_processed = code_stop if self.date_due and date.today() > self.date_due else code_go
-        colors = {'started':   code_wait, 'submitted': code_go,   'code_processed': code_processed,
-                  'fix':       code_wait, 'payment':   code_wait, 'rejected':  code_stop,
-                  'no_docs':   code_stop, 'done':      code_go,   'partial': code_go,
-                  'abandoned': code_stop, 'appealing': code_processed, 'ack': code_processed}
-        return colors.get(self.status, code_wait)
-
     def first_request(self):
         """Return the first request text"""
         try:
@@ -424,6 +438,13 @@ class FOIARequest(models.Model):
         if responses:
             return (date.today() - responses[0].date.date()).days
 
+    def processing_length(self):
+        """How many days since the request was set as processing"""
+        days_since = 0
+        if self.date_processing:
+            days_since = (date.today() - self.date_processing).days
+        return days_since
+
     def _notify(self):
         """Notify request's creator and followers about the update"""
         # pylint: disable=no-member
@@ -444,7 +465,7 @@ class FOIARequest(models.Model):
         self._notify()
         self.update_dates()
 
-    def submit(self, appeal=False, snail=False):
+    def submit(self, appeal=False, snail=False, thanks=False):
         """The request has been submitted.  Notify admin and try to auto submit"""
         # pylint: disable=no-member
 
@@ -464,31 +485,36 @@ class FOIARequest(models.Model):
 
         # if agency isnt approved, do not email or snail mail
         # it will be handled after agency is approved
-        approved_agency = self.agency and self.agency.approved
+        approved_agency = self.agency and self.agency.status == 'approved'
         can_email = self.email and not appeal
         comm = self.last_comm()
 
         # if the request can be emailed, email it, otherwise send a notice to the admin
+        # if this is a thanks, send it as normal but do not change the status
         if not snail and approved_agency and (can_email or can_email_appeal):
-            if appeal:
+            if appeal and not thanks:
                 self.status = 'appealing'
-            elif self.has_ack():
+            elif self.has_ack() and not thanks:
                 self.status = 'processed'
-            else:
+            elif not thanks:
                 self.status = 'ack'
             self._send_email()
             self.update_dates()
         elif approved_agency:
             # snail mail it
-            self.status = 'submitted'
+            if not thanks:
+                self.status = 'submitted'
+                self.date_processing = date.today()
             notice = 'n' if self.communications.count() == 1 else 'u'
             notice = 'a' if appeal else notice
             comm.delivered = 'mail'
             comm.save()
             task.models.SnailMailTask.objects.create(category=notice, communication=comm)
-        else:
+        elif not thanks:
+            # there should never be a thanks to an unapproved agency
             # not an approved agency, all we do is mark as submitted
             self.status = 'submitted'
+            self.date_processing = date.today()
         # generate sent activity
         actstream.action.send(
             self,
@@ -525,6 +551,7 @@ class FOIARequest(models.Model):
             self._send_email()
         else:
             self.status = 'submitted'
+            self.date_processing = date.today()
             self.save()
             comm.delivered = 'mail'
             comm.save()

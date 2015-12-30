@@ -13,11 +13,11 @@
 {% for agency in foia.agencies.all %}
 {% if forloop.last %}
 {% if not forloop.first %}
-and 
+and
 {% endif %}
 {{ agency.name }}.
 {% else %}
-{{ agency.name }}, 
+{{ agency.name }},
 {% endif %}
 {% endfor %}</p>
 {% endwith %}
@@ -45,8 +45,8 @@ and
                 <p>To Whom It May Concern:</p>
                 <p>This is a request under [Insert jurisdiction's applicable freedom of information law] for a copy of the following records:</p>
                 {{ field }}
-                <p>I also request that, if appropriate, fees be waived as I believe this request is in the public interest. The requested documents will be made available to the general public free of charge as part of the public information service at MuckRock.com, processed by a representative of the news media/press and is made in the process of news gathering and not for commercial usage.</p>
-                <p>In the event that fees cannot be waived, I would be grateful if you would inform me of the total charges in advance of fulfilling my request. I would prefer the request filled electronically, by e-mail attachment if available or CD-ROM if not.</p>
+                <p>The requested documents will be made available to the general public free of charge, and this request is not for commercial usage.</p>
+                <p>In the event that there are fees, I would be grateful if you would inform me of the total charges in advance of fulfilling my request. I would prefer the request filled electronically, by e-mail attachment if available or CD-ROM if not.</p>
                 <p>Thank you in advance for your anticipated cooperation in this matter. I look forward to receiving your response to this request within 20 business days, as the statute requires.</p>
                 <p>Sincerely,</p>
                 <p>{{foia.user.get_full_name}}</p>
@@ -66,7 +66,7 @@ and
         {% endif %}
     {% endfor %}
     {% if not balance.extra_requests %}
-    <section class="buttons">    
+    <section class="buttons">
         <input type="submit" name="submit" value="Submit" class="primary button" />
         <input type="submit" name="submit" value="Delete" class="failure button" />
     </section>
@@ -74,7 +74,7 @@ and
 </form>
 
 {% if balance.extra_requests %}
-<form action="{% url 'acct-buy-requests' %}?next={{ foia.get_absolute_url }}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
+<form action="{% url 'acct-buy-requests' username=request.user.username %}?next={{ foia.get_absolute_url }}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
 <p>You will be submitting {{ requests }} request{{ requests|pluralize }}, but {% if not remaining %}have no requests{% else %}only have {{ remaining }} remaining{%endif%}. You must purchase {{ bundles }} request bundle{{ bundles|pluralize }} before you can submit your request.</p>
 <button data-amount="{{ bundles|mul:'2000' }}"
         data-description="{{ bundles|mul:'5' }} request{{ bundles|mul:'5'|pluralize }} (${{ bundles|mul:'20' }}.00)"

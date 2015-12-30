@@ -106,6 +106,10 @@ body {
     @include font-feature-settings('liga', 'kern');
 }
 
+p:empty {
+    display: none;
+}
+
 b, strong { font-weight: $font-weight-bold; }
 
 a {
@@ -170,3 +174,16 @@ th {
 }
 
 td { vertical-align: top; }
+
+.truncate {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+ul, ol {
+    &.nostyle {
+        list-style: none;
+        padding-left: 0;
+    }
+}

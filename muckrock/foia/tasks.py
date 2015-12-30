@@ -3,24 +3,29 @@
 from celery.signals import task_failure
 from celery.schedules import crontab
 from celery.task import periodic_task, task
+from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string, get_template
 from django.template import Context
 
 import actstream
+import dill as pickle
 import dbsettings
 import base64
 import json
 import logging
+import numpy as np
 import os.path
 import re
+import requests
 import sys
 import urllib2
 from boto.s3.connection import S3Connection
 from datetime import date, datetime
 from decimal import Decimal
 from django_mailgun import MailgunAPIError
+from scipy.sparse import hstack
 
 from muckrock.foia.models import (
     FOIAFile,
@@ -37,6 +42,7 @@ from muckrock.settings import (
     AWS_AUTOIMPORT_BUCKET_NAME,
     AWS_STORAGE_BUCKET_NAME,
     )
+from muckrock.task.models import ResponseTask
 from muckrock.vendor import MultipartPostHandler
 
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)'
@@ -45,10 +51,19 @@ logger = logging.getLogger(__name__)
 
 class FOIAOptions(dbsettings.Group):
     """DB settings for the FOIA app"""
-    enable_followup = dbsettings.BooleanValue('whether to send automated followups or not')
-    enable_weekend_followup = dbsettings.BooleanValue('whether to send automated followups '
-                                                      'or not on the weekends')
-options = FOIAOptions()
+    enable_followup = dbsettings.BooleanValue(
+            'whether to send automated followups or not')
+    enable_weekend_followup = dbsettings.BooleanValue(
+            'whether to send automated followups or not on the weekends')
+foia_options = FOIAOptions()
+
+class MLOptions(dbsettings.Group):
+    """DB settings for the machine learning"""
+    enable = dbsettings.BooleanValue(
+            'automatically resolve response tasks by machine learning')
+    confidence_min = dbsettings.PositiveIntegerValue(
+            'minimum percent confidence level to automatically resolve')
+ml_options = MLOptions()
 
 @task(ignore_result=True, max_retries=3, name='muckrock.foia.tasks.upload_document_cloud')
 def upload_document_cloud(doc_pk, change, **kwargs):
@@ -180,6 +195,85 @@ def submit_multi_request(req_pk, **kwargs):
             new_foia.submit()
     req.delete()
 
+@task(ignore_result=True, max_retries=3, name='muckrock.foia.tasks.classify_status')
+def classify_status(task_pk, **kwargs):
+    """Use a machine learning classifier to predict the communications status"""
+    # pylint: disable=too-many-locals
+
+    def get_text_ocr(doc_id):
+        """Get the text OCR from document cloud"""
+        doc_cloud_url = 'http://www.documentcloud.org/api/documents/%s.json'
+        resp = requests.get(doc_cloud_url % doc_id)
+        try:
+            doc_cloud_json = resp.json()
+        except ValueError:
+            logger.warn('Doc Cloud error for %s: %s', doc_id, resp.content)
+            return ''
+        if 'error' in doc_cloud_json:
+            logger.warn('Doc Cloud error for %s: %s',
+                    doc_id, doc_cloud_json['error'])
+            return ''
+        text_url = doc_cloud_json['document']['resources']['text']
+        resp = requests.get(text_url)
+        return resp.content.decode('utf-8')
+
+    def get_classifier():
+        """Load the pickled classifier"""
+        with open('muckrock/foia/classifier.pkl', 'rb') as pkl_fp:
+            return pickle.load(pkl_fp)
+
+    def predict_status(vectorizer, selector, classifier, text, pages):
+        """Run the prediction"""
+        # pylint: disable=no-member
+        input_vect = vectorizer.transform([text])
+        pages_vect = np.array([pages], dtype=np.float).transpose()
+        input_vect = hstack([input_vect, pages_vect])
+        input_vect = selector.transform(input_vect)
+        probs = classifier.predict_proba(input_vect)[0]
+        max_prob = max(probs)
+        status = classifier.classes_[list(probs).index(max_prob)]
+        return status, max_prob
+
+    def resolve_if_possible(resp_task):
+        """Resolve this response task if possible based off of ML setttings"""
+        if (ml_options.enable and
+                resp_task.status_probability >= ml_options.confidence_min):
+            try:
+                ml_robot = User.objects.get(username='mlrobot')
+                resp_task.set_status(resp_task.predicted_status)
+                resp_task.resolve(ml_robot)
+            except User.DoesNotExist:
+                logger.error('mlrobot account does not exist')
+
+    try:
+        resp_task = ResponseTask.objects.get(pk=task_pk)
+    except ResponseTask.DoesNotExist, exc:
+        classify_status.retry(
+                countdown=60*30, args=[task_pk], kwargs=kwargs, exc=exc)
+
+    file_text = []
+    total_pages = 0
+    for file_ in resp_task.communication.files.all():
+        total_pages += file_.pages
+        if file_.is_doccloud() and file_.doc_id:
+            file_text.append(get_text_ocr(file_.doc_id))
+        elif file_.is_doccloud() and not file_.doc_id:
+            # wait longer for document cloud
+            classify_status.retry(
+                    countdown=60*30, args=[task_pk], kwargs=kwargs)
+
+    full_text = resp_task.communication.communication + (' '.join(file_text))
+    vectorizer, selector, classifier = get_classifier()
+
+    status, prob = predict_status(
+        vectorizer, selector, classifier, full_text, total_pages)
+
+    resp_task.predicted_status = status
+    resp_task.status_probability = int(100 * prob)
+
+    resolve_if_possible(resp_task)
+
+    resp_task.save()
 
 @periodic_task(run_every=crontab(hour=5, minute=0), name='muckrock.foia.tasks.followup_requests')
 def followup_requests():
@@ -188,7 +282,8 @@ def followup_requests():
     error_log = []
     # weekday returns 5 for sat and 6 for sun
     is_weekday = datetime.today().weekday() < 5
-    if options.enable_followup and (options.enable_weekend_followup or is_weekday):
+    if (foia_options.enable_followup and
+            (foia_options.enable_weekend_followup or is_weekday)):
         for foia in FOIARequest.objects.get_followup():
             try:
                 foia.followup(automatic=True)
@@ -216,7 +311,9 @@ def followup_requests():
 @periodic_task(run_every=crontab(hour=6, minute=0), name='muckrock.foia.tasks.embargo_warn')
 def embargo_warn():
     """Warn users their requests are about to come off of embargo"""
-    for foia in FOIARequest.objects.filter(embargo=True, date_embargo=date.today()):
+    for foia in FOIARequest.objects.filter(embargo=True,
+                                           permanent_embargo=False,
+                                           date_embargo=date.today()):
         send_mail('[MuckRock] Embargo about to expire for FOI Request "%s"' % foia.title,
                   render_to_string('text/foia/embargo_will_expire.txt', {'request': foia}),
                   'info@muckrock.com',
@@ -369,6 +466,10 @@ def autoimport():
         for key in bucket.list(prefix=prefix.name, delimiter='/'):
             if key.name == prefix.name:
                 continue
+            if key.name.endswith('/'):
+                log.append('ERROR: nested directories not allowed: %s in %s' %
+                        (key.name, prefix.name))
+                continue
             try:
                 import_key(key, comm, log)
             except SizeError as exc:
@@ -410,7 +511,7 @@ def autoimport():
 
                 foia.status = status or foia.status
                 if foia.status in ['done', 'rejected', 'no_docs']:
-                    foia.date_done = file_date
+                    foia.date_done = file_date.date()
                 if code == 'FEE' and arg:
                     foia.price = Decimal(arg)
                 if id_:

@@ -17,10 +17,9 @@ from django.template import RequestContext, Context
 from django.utils.encoding import smart_text
 
 import actstream
-from datetime import datetime
+from datetime import datetime, date
 import json
 import logging
-import stripe
 from random import choice
 import string
 
@@ -37,13 +36,12 @@ from muckrock.foia.models import \
     FOIACommunication, \
     STATUS
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.settings import STRIPE_PUB_KEY, STRIPE_SECRET_KEY, MONTHLY_REQUESTS
+from muckrock.settings import STRIPE_PUB_KEY, MONTHLY_REQUESTS
 from muckrock.task.models import NewAgencyTask, MultiRequestTask
 
 # pylint: disable=too-many-ancestors
 
 logger = logging.getLogger(__name__)
-stripe.api_key = STRIPE_SECRET_KEY
 STATUS_NODRAFT = [st for st in STATUS if st != ('started', 'Draft')]
 
 # HELPER FUNCTIONS
@@ -73,7 +71,7 @@ def _make_new_agency(request, agency, jurisdiction):
         slug=(slugify(agency[:255]) or 'untitled'),
         jurisdiction=jurisdiction,
         user=user,
-        approved=False,
+        status='pending',
     )
     NewAgencyTask.objects.create(
             user=user,
@@ -125,8 +123,8 @@ def _make_user(request, data):
     # create a new profile
     Profile.objects.create(
         user=user,
-        acct_type='community',
-        monthly_requests=MONTHLY_REQUESTS.get('community', 0),
+        acct_type='basic',
+        monthly_requests=MONTHLY_REQUESTS.get('basic', 0),
         date_update=datetime.now()
     )
     # send the new user a welcome email
@@ -209,7 +207,7 @@ def create_request(request):
     initial_data = {}
     clone = False
     parent = None
-    if request.GET.get('clone', False):
+    try:
         foia_pk = request.GET['clone']
         foia = get_object_or_404(FOIARequest, pk=foia_pk)
         initial_data = {
@@ -226,6 +224,10 @@ def create_request(request):
         initial_data['jurisdiction'] = level
         clone = True
         parent = foia
+    except (KeyError, ValueError):
+        # KeyError if no clone was passed in
+        # Value error if invalid clone is passed in
+        pass
     if request.method == 'POST':
         foia_request = _process_request_form(request)
         if foia_request:
@@ -251,12 +253,14 @@ def create_request(request):
             # form is invalid
             # autocomplete blows up if you pass it a bad value in state
             # or local - not sure how this is happening, but am removing
-            # blank values for these keys
+            # non numeric values for these keys
             # this seems to technically be a bug in autocompletes rendering
             # should probably fix it there and submit a patch
             post = request.POST.copy()
             for chk_val in ['local', 'state']:
-                if chk_val in post and not post[chk_val]:
+                try:
+                    chk_val in post and int(post[chk_val])
+                except (ValueError, TypeError):
                     del post[chk_val]
             form = RequestForm(post, request=request)
     else:
@@ -335,6 +339,7 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
         'action': 'Draft',
         'form': form,
         'foia': foia,
+        'remaining': foia.user.profile.total_requests(),
         'stripe_pk': STRIPE_PUB_KEY,
         'sidebar_admin_url': reverse('admin:foia_foiarequest_change', args=(foia.pk,))
     }
@@ -348,6 +353,11 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
 @login_required
 def create_multirequest(request):
     """A view for composing multirequests"""
+    # limit multirequest feature to Pro users
+    if not request.user.profile.can_multirequest():
+        messages.warning(request, 'Multirequesting is a Pro feature.')
+        return redirect('accounts')
+
     if request.method == 'GET' and request.is_ajax():
         agency_queries = request.GET.get('query', '').split(' ')
         agencies = {}
@@ -428,6 +438,7 @@ def draft_multirequest(request, slug, idx):
                     profile.monthly_requests -= request_count['monthly_requests']
                     profile.save()
                     foia.status = 'submitted'
+                    foia.date_processing = date.today()
                     foia.save()
                     messages.success(request, 'Your multi-request was submitted.')
                     MultiRequestTask.objects.create(multirequest=foia)
