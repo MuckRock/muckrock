@@ -252,10 +252,14 @@ def homepage(request):
     try:
         articles = Article.objects.prefetch_related('projects')\
                                   .prefetch_related('authors')\
-                                  .get_published()[:3]
+                                  .get_published()[:5]
+        lead_article = articles[0]
+        other_articles = articles[1:]
     except IndexError:
         # no published articles
         articles = None
+        lead_article = None
+        other_articles = None
     public_requests = FOIARequest.objects.get_public()
     featured_reqs = public_requests.filter(featured=True).order_by('-date_done')[:3]
     popular_requests = public_requests.order_by('-times_viewed')[:5]

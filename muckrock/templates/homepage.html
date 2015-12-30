@@ -11,7 +11,7 @@
     <section class="requests" style="background-image: url('{% static 'img/homepage.jpg' %}');">
         <section class="banner">
             <div class="banner-container">
-                <h2>File, track, and share public records requests</h2>
+                <h2>File, track, and share<br />public records requests</h2>
                 <div class="call-to-action"><a href="{% url 'foia-create' %}" class="primary button">Create a FOIA request</a>&emsp;or <a href="/about/how-we-work/" class="dotted" id="learn-more">learn how it works.</a></div>
             </div>
         </section>
@@ -41,11 +41,37 @@
         <header>
             <h3>Follow our investigative, document-based reporting</h3>
         </header>
-        <ul class="articles nostyle">
-            {% for article in articles %}
-            <li class="article">
+        <div class="articles">
+            {% with lead_article as article %}
+            <div class="lead article">
+                {% if article.projects.exists %}
+                {% with article.projects.first as project %}
+                <dfn class="article-project"><a href="{{project.get_absolute_url}}">{{project.title}}</a></dfn>
+                {% endwith %}
+                {% endif %}
+                <h1><a href="{{ article.get_absolute_url }}" title="{{article.title}}">{{article.title}}</a></h1>
                 {% if article.image %}<a href="{{article.get_absolute_url}}" title="{{article.title}}" class="article-image"><img src="{% thumbnail article.image 1200x675 %}" /></a>{% endif %}
-                <div class="article-info">
+                <div class="article-metadata">
+                    {% if article.authors.all %}
+                    <div class="article-authors">by
+                        {% for author in article.authors.all %}
+                            <a href="{{ author.profile.get_absolute_url }}" title="{{ author.get_full_name }}">{{ author.get_full_name }}</a>{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <datetime title="{{article.pub_date|date:'c'}}">{{article.pub_date|date:'F d, Y'}}</datetime>
+                </div>
+                {% if article.summary %}<summary>{{article.summary|markdown:"trusted"}}</summary>{% endif %}
+                <div class="tags">
+                    {% for tag in article.tags.all %}
+                    <a class="tag" href="{% url 'tag-detail' slug=tag.slug %}">{{tag.name}}</a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endwith %}
+            <ul class="others nostyle">
+                {% for article in other_articles %}
+                <li class="other article">
                     {% if article.projects.exists %}
                     {% with article.projects.first as project %}
                     <dfn class="article-project"><a href="{{project.get_absolute_url}}">{{project.title}}</a></dfn>
@@ -62,16 +88,15 @@
                         {% endif %}
                         <datetime title="{{article.pub_date|date:'c'}}">{{article.pub_date|date:'F d, Y'}}</datetime>
                     </div>
-                    {% if article.summary %}<summary>{{article.summary|markdown:"trusted"}}</summary>{% endif %}
                     <div class="tags">
                         {% for tag in article.tags.all %}
                         <a class="tag" href="{% url 'tag-detail' slug=tag.slug %}">{{tag.name}}</a>
                         {% endfor %}
                     </div>
-                </div>
-            </li>
-            {% endfor %}
-        </ul>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
     </section>
     {% endif %}
     {% comment %}

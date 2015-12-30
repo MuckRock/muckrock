@@ -17,31 +17,15 @@
     }
     .news
     {
-        background: $color-blue-dark;
+        background: $color-white;
 
         header
         {
             margin-bottom: 0;
             padding: 2*$vertical-rhythm;
-            color: $color-white;
+            color: $color-black;
+            font-weight: $font-weight-bold;
             text-align: center;
-        }
-        @include media($medium-layout)
-        {
-            .article
-            {
-                margin: 0 $vertical-rhythm $vertical-rhythm;
-                border-radius: 4px;
-                overflow: hidden;
-                box-shadow: 4px 4px 16px rgba(0,0,0,0.5);
-            }
-        }
-        @media all and (min-width: 800px)
-        {
-            .articles
-            {
-                @include flex-wrap(nowrap);
-            }
         }
     }
     .articles
@@ -50,9 +34,19 @@
         @include flex-wrap(wrap);
         @include justify-content(space-around);
     }
+    .lead
+    {
+        flex: 2 1 50%;
+        margin-bottom: 0;
+        border-right: 1px solid $color-grey;
+    }
+    .others
+    {
+        flex: 1 1 50%;
+    }
     .article
     {
-        flex: 1 1 25em;
+        padding: $vertical-rhythm;
         background: $color-white;
 
         h1
@@ -60,17 +54,13 @@
             font-size: $font-size-6;
             font-weight: $font-weight-bold;
         }
-        summary
-        {
-            font-size: $font-size-2;
-        }
         .article-image, img
         {
             display: block;
         }
-        .article-info
+        .article-image
         {
-            padding: $vertical-rhythm;
+            margin-bottom: $vertical-rhythm;
         }
         .article-metadata
         {
@@ -82,6 +72,13 @@
                 @include flex(1 1 11em);
                 margin-bottom: 0;
             }
+        }
+    }
+    .other.article
+    {
+        h1
+        {
+            font-size: $font-size-5;
         }
     }
     .requests
@@ -156,6 +153,7 @@
     }
     .stat
     {
+        @include flex(50%);
         width: 7em;
         margin: 0 0 $vertical-rhythm 0;
         text-align: center;
