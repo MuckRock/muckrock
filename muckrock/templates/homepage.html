@@ -8,46 +8,70 @@
 {% block content %}
 <div class="homepage">
 
-    <section class="requests" style="background-image: url('{% static 'img/homepage.jpg' %}');">
-        <section class="banner">
-            <div class="banner-container">
+    <section class="requests">
+        <header class="banner" style="background-image: url('{% static 'img/homepage/requests.jpg' %}');">
+            <div class="about">
                 <h2>File, track, and share<br />public records requests</h2>
-                <div class="call-to-action"><a href="{% url 'foia-create' %}" class="primary button">Create a FOIA request</a>&emsp;or <a href="/about/how-we-work/" class="dotted" id="learn-more">learn how it works.</a></div>
+                <div class="call-to-action"><a href="{% url 'foia-create' %}" class="primary button">Create a FOIA request</a>&emsp;or <a href="/about/how-we-work/" class="dotted" id="learn-more">learn how it works</a>.</div>
             </div>
-        </section>
-        <section class="achievements">
-            <ul class="stats">
-                <li class="stat">
-                    <div class="value">{{ stats.request_count|intcomma }}</div>
-                    <div class="key">filed request{{ stats.request_count|pluralize }}</div>
-                </li>
-                <li class="stat">
-                    <div class="value">{{ stats.agency_count|intcomma }}</div>
-                    <div class="key">agenc{{ stats.agency_count|pluralize:"y,ies" }}</div>
-                </li>
-                <li class="stat">
-                    <div class="value">{{ stats.completed_count|intcomma }}</div>
-                    <div class="key">fulfilled request{{ stats.completed_count|pluralize }}</div>
-                </li>
-                <li class="stat">
-                    <div class="value">{{ stats.page_count|intcomma }}</div>
-                    <div class="key">released page{{ stats.page_count|pluralize }}</div>
-                </li>
-            </ul>
-        </section>
+            <div class="info">
+                <ul class="stats">
+                    <li class="stat">
+                        <div class="value">{{ stats.request_count|intcomma }}</div>
+                        <div class="key">filed request{{ stats.request_count|pluralize }}</div>
+                    </li>
+                    <li class="stat">
+                        <div class="value">{{ stats.agency_count|intcomma }}</div>
+                        <div class="key">agenc{{ stats.agency_count|pluralize:"y,ies" }}</div>
+                    </li>
+                    <li class="stat">
+                        <div class="value">{{ stats.completed_count|intcomma }}</div>
+                        <div class="key">fulfilled request{{ stats.completed_count|pluralize }}</div>
+                    </li>
+                    <li class="stat">
+                        <div class="value">{{ stats.page_count|intcomma }}</div>
+                        <div class="key">released page{{ stats.page_count|pluralize }}</div>
+                    </li>
+                </ul>
+            </div>
+        </header>
     </section>
     {% if articles %}
     <section class="news">
-        <!--
-        <header>
-            <h3>Follow our investigative, document-based reporting</h3>
+        <header class="banner" style="background-image: url('{% static 'img/homepage/news.jpg' %}');">
+            <div class="about">
+                <h2>We publish original,<br>document-based reporting</h2>
+                <p><a href="{% url 'project-list' %}">See our active projects</a> or <a href="{% url 'news-archive' %}">explore our archives</a>.</p>
+            </div>
+            <div class="info">
+                <p>Stay up-to-date on our reporting.</p>
+                <ul class="links nostyle">
+                    <li class="link">
+                        <a href="https://www.twitter.com/muckrock">
+                            {% include 'lib/icons/twitter.svg' %}
+                            Follow us on Twitter
+                        </a>
+                    </li>
+                    <li class="link">
+                        <a href="https://www.facebook.com/muckrock" target="_blank">
+                            {% include 'lib/icons/facebook.svg' %}
+                            Like us on Facebook
+                        </a>
+                    </li>
+                    <li class="link">
+                        <a href="http://eepurl.com/bpgFb" target="_blank">
+                            {% include 'lib/icons/email.svg' %}
+                            Subscribe to our newsletter
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </header>
-        -->
         <div class="articles">
             {% with lead_article as article %}
             <div class="lead article">
                 <datetime title="{{article.pub_date|date:'c'}}">{{article.pub_date|date:'F d, Y'}}</datetime>
-                {% if article.image %}<a href="{{article.get_absolute_url}}" title="{{article.title}}" class="article-image"><img src="{% thumbnail article.image 1200x675 %}" /></a>{% endif %}
+                {% if article.image %}<a href="{{article.get_absolute_url}}" title="{{article.title}}" class="article-image"><img src="{% thumbnail article.image 1200x400 %}" /></a>{% endif %}
                 {% if article.projects.exists %}
                 {% with article.projects.first as project %}
                 <dfn class="article-project"><a href="{{project.get_absolute_url}}">{{project.title}}</a></dfn>
