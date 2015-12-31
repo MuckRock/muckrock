@@ -8,6 +8,11 @@
     padding: $vertical-rhythm;
     color: $color-white;
 
+    a:hover
+    {
+        color: $color-blue-light;
+    }
+
     .about
     {
         @include flex(3 1 500px);
@@ -26,6 +31,7 @@
         max-width: 20em;
         padding: $vertical-rhythm $vertical-rhythm 0 $vertical-rhythm;
         @include border;
+        background-color: rgba(0,0,0,.4);
     }
 }
 
@@ -89,6 +95,26 @@
     background-position: right bottom;
     background-color: $color-blue-dark;
     background-blend-mode: multiply;
+
+    .icon
+    {
+        vertical-align: middle;
+        margin-right: $vertical-rhythm;
+        path, rect
+        {
+            fill: $color-blue;
+        }
+        &.email path
+        {
+            fill: none;
+            stroke: $color-blue;
+        }
+    }
+    .channel
+    {
+        margin-bottom: $vertical-rhythm/2;
+        font-size: $font-size-2;
+    }
 }
 
 .homepage
