@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import FieldError
 from django.core.paginator import Paginator, InvalidPage
-from django.db.models import Sum, Count, FieldDoesNotExist
+from django.db.models import Sum, FieldDoesNotExist
 from django.http import HttpResponseServerError, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext, Context, loader
@@ -263,7 +263,8 @@ def homepage(request):
     federal_government = Jurisdiction.objects.filter(level='f').first()
     public_requests = FOIARequest.objects.get_public()
     featured_requests = public_requests.filter(featured=True).order_by('-date_done')[:4]
-    completed_requests = public_requests.filter(status__in=['done', 'partial']).order_by('date_done')[:3]
+    completed_requests = public_requests.filter(status__in=['done', 'partial'])\
+                                        .order_by('date_done')[:3]
     stats = {
         'request_count': FOIARequest.objects.exclude(status='started').count(),
         'completed_count': FOIARequest.objects.filter(status__in=['done', 'partial']).count(),
