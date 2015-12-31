@@ -35,7 +35,7 @@
     }
 }
 
-.requests .banner
+.foia .banner
 {
     background-size: cover;
     background-position: right bottom;
@@ -93,7 +93,7 @@
 {
     background-size: cover;
     background-position: right bottom;
-    background-color: $color-blue-dark;
+    background-color: darken($color-blue-dark, 10%);
     background-blend-mode: multiply;
 
     .icon
@@ -134,75 +134,118 @@
     {
         margin: 0 -24px 0 -1 * $vertical-rhythm;
     }
+    .mission
+    {
+        padding: $vertical-rhythm;
+        h1
+        {
+            max-width: 23em;
+            font-weight: $font-weight-bold;
+        }
+    }
+    .foia
+    {
+        h3
+        {
+            font-size: $font-size-4;
+            font-weight: $font-weight-bold;
+        }
+        .requests
+        {
+            @include display(flex);
+            @include flex-wrap(wrap);
+            @include justify-content(space-around);
+        }
+        .featured
+        {
+            @include flex(3 1 400px);
+            margin-bottom: 0;
+            padding: $vertical-rhythm;
+            .foia-info
+            {
+                font-size: $font-size-3;
+            }
+            .title
+            {
+                font-size: $font-size-5;
+            }
+        }
+        .completed
+        {
+            @include flex(1 1 200px);
+            padding: $vertical-rhythm;
+        }
+    }
     .news
     {
         background: $color-white;
-    }
-    .articles
-    {
-        @include display(flex);
-        @include flex-wrap(wrap);
-        @include justify-content(space-around);
-    }
-    .lead
-    {
-        flex: 3 1 400px;
-        margin-bottom: 0;
-        padding: $vertical-rhythm;
-    }
-    .others
-    {
-        flex: 1 1 200px;
-        padding: $vertical-rhythm;
-    }
-    .article
-    {
-        background: $color-white;
-        h1
+
+        .articles
         {
+            @include display(flex);
+            @include flex-wrap(wrap);
+            @include justify-content(space-around);
+        }
+        .lead
+        {
+            flex: 3 1 400px;
             margin-bottom: 0;
-            font-size: $font-size-6;
-            font-weight: $font-weight-bold;
-            line-height: 1.2em;
-            a
+            padding: $vertical-rhythm;
+        }
+        .others
+        {
+            flex: 1 1 200px;
+            padding: $vertical-rhythm;
+        }
+        .article
+        {
+            background: $color-white;
+            h1
             {
-                color: $color-black;
+                margin-bottom: 0;
+                font-size: $font-size-6;
+                font-weight: $font-weight-bold;
+                line-height: 1.2em;
+                a
+                {
+                    color: $color-black;
+                }
             }
-        }
-        summary
-        {
-            max-width: 40em;
-        }
-        .article-image, img
-        {
-            display: block;
-            width: 100%;
-        }
-        .article-image
-        {
-            margin-bottom: $vertical-rhythm/2;
-        }
-        .article-authors, datetime
-        {
-            margin-bottom: 0;
-            font-size: $font-size-2;
-            &, a
+            summary
+            {
+                max-width: 40em;
+            }
+            .article-image, img
+            {
+                display: block;
+                width: 100%;
+            }
+            .article-image
+            {
+                margin-bottom: $vertical-rhythm/2;
+            }
+            .article-authors, datetime
+            {
+                margin-bottom: 0;
+                font-size: $font-size-2;
+                &, a
+                {
+                    color: $color-grey-3;
+                }
+            }
+            .article-project a
             {
                 color: $color-grey-3;
             }
         }
-        .article-project a
+        .other.article
         {
-            color: $color-grey-3;
-        }
-    }
-    .other.article
-    {
-        margin-bottom: $vertical-rhythm;
-        h1
-        {
-            font-size: $font-size-4;
-            margin-bottom: 0;
+            margin-bottom: $vertical-rhythm;
+            h1
+            {
+                font-size: $font-size-4;
+                margin-bottom: 0;
+            }
         }
     }
 }

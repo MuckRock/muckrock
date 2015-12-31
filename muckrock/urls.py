@@ -109,7 +109,6 @@ urlpatterns = patterns(
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^activity/', include('actstream.urls')),
     url(r'^xmlrpc/$', csrf_exempt(handle_xmlrpc), name='xmlrpc'),
-    url(r'^blog/(?P<path>.*)$', views.blog, name='blog'),
     url(r'^robots\.txt$', include('robots.urls')),
     url(r'^favicon.ico$', RedirectView.as_view(url=settings.STATIC_URL + 'favicon.ico')),
     url(r'^sitemap\.xml$', 'django.contrib.sitemaps.views.index', {'sitemaps': sitemaps}),

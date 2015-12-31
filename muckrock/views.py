@@ -260,9 +260,10 @@ def homepage(request):
         articles = None
         lead_article = None
         other_articles = None
+    federal_government = Jurisdiction.objects.filter(level='f').first()
     public_requests = FOIARequest.objects.get_public()
-    featured_reqs = public_requests.filter(featured=True).order_by('-date_done')[:3]
-    popular_requests = public_requests.order_by('-times_viewed')[:5]
+    featured_requests = public_requests.filter(featured=True).order_by('-date_done')[:4]
+    completed_requests = public_requests.filter(status__in=['done', 'partial']).order_by('date_done')[:3]
     stats = {
         'request_count': FOIARequest.objects.exclude(status='started').count(),
         'completed_count': FOIARequest.objects.filter(status__in=['done', 'partial']).count(),
@@ -272,10 +273,6 @@ def homepage(request):
     return render_to_response('homepage.html', locals(),
                               context_instance=RequestContext(request))
 
-def blog(request, path=''):
-    """Redirect to the new blog URL"""
-    # pylint: disable=unused-argument
-    return redirect('http://blog.muckrock.com/%s/' % path, permanant=True)
 
 def jurisdiction(request, jurisdiction=None, slug=None, idx=None, view=None):
     """Redirect to the jurisdiction page"""
