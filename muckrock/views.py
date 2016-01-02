@@ -6,9 +6,9 @@ from django.contrib.auth.models import User
 from django.core.exceptions import FieldError
 from django.core.paginator import Paginator, InvalidPage
 from django.db.models import Sum, FieldDoesNotExist
-from django.http import HttpResponseServerError, Http404
+from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
-from django.template import RequestContext, Context, loader
+from django.template import RequestContext
 from django.utils.decorators import method_decorator
 from django.views.generic.list import ListView
 
@@ -292,15 +292,14 @@ def jurisdiction(request, jurisdiction=None, slug=None, idx=None, view=None):
 
 def handler500(request):
     """
-    500 error handler which includes ``request`` in the context.
+    500 error handler which includes request in the context.
 
     Templates: `500.html`
     Context: None
     """
-
-    template = loader.get_template('500.html')
-    return HttpResponseServerError(template.render(Context({'request': request})))
-
+    response = render_to_response('500.html', {}, context_instance=RequestContext(request))
+    response.status_code = 500
+    return response
 
 # http://stackoverflow.com/a/8429311
 def class_view_decorator(function_decorator):

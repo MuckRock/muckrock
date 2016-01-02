@@ -7,10 +7,10 @@ from django.test import TestCase
 
 from datetime import datetime
 import logging
+import mock
 import nose
 
-from muckrock import factories
-from muckrock import task
+from muckrock import factories, task
 from muckrock.task.signals import domain_blacklist
 
 ok_ = nose.tools.ok_
@@ -167,10 +167,18 @@ class NewAgencyTaskTests(TestCase):
         ok_(self.task,
             'New agency tasks should create successfully given a user and an agency')
 
-    def test_approve(self):
+    @mock.patch('muckrock.foia.models.FOIARequest.submit')
+    def test_approve(self, mock_submit):
+        submitted_foia = factories.FOIARequestFactory(agency=self.agency, status='submitted')
+        factories.FOIACommunicationFactory(foia=submitted_foia)
+        drafted_foia = factories.FOIARequestFactory(agency=self.agency, status='started')
+        factories.FOIACommunicationFactory(foia=drafted_foia)
         self.task.approve()
         eq_(self.task.agency.status, 'approved',
             'Approving a new agency should actually, you know, approve the agency.')
+        # since we have 1 draft and 1 nondraft FOIA, we should expect submit() to be called once
+        eq_(mock_submit.call_count, 1,
+            'Approving a new agency should resubmit non-draft FOIAs associated with that agency.')
 
     def test_reject(self):
         replacement = factories.AgencyFactory()

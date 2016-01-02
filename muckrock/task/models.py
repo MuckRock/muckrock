@@ -266,7 +266,7 @@ class NewAgencyTask(Task):
 
     def pending_requests(self):
         """Returns the requests to be acted on"""
-        return FOIARequest.objects.filter(agency=self.agency)
+        return FOIARequest.objects.filter(agency=self.agency).exclude(status='started')
 
     def approve(self):
         """Approves agency, resends pending requests, and resolves"""
