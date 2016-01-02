@@ -134,22 +134,23 @@
     {
         margin: 0 -24px 0 -1 * $vertical-rhythm;
     }
+    h3
+    {
+        font-size: $font-size-4;
+        font-weight: $font-weight-bold;
+    }
     .mission
     {
-        padding: $vertical-rhythm;
+        padding: 0 $vertical-rhythm;
         h1
         {
             max-width: 23em;
+            font-size: $font-size-6;
             font-weight: $font-weight-bold;
         }
     }
     .foia
     {
-        h3
-        {
-            font-size: $font-size-4;
-            font-weight: $font-weight-bold;
-        }
         .requests
         {
             @include display(flex);
@@ -179,23 +180,28 @@
     .news
     {
         background: $color-white;
-
+        h3
+        {
+            padding: $vertical-rhythm;
+            margin-bottom: 0;
+        }
         .articles
         {
             @include display(flex);
             @include flex-wrap(wrap);
             @include justify-content(space-around);
+            margin-bottom: 0;
         }
         .lead
         {
             flex: 3 1 400px;
             margin-bottom: 0;
-            padding: $vertical-rhythm;
+            padding: 0 $vertical-rhythm;
         }
         .others
         {
             flex: 1 1 200px;
-            padding: $vertical-rhythm;
+            padding: 0 $vertical-rhythm;
         }
         .article
         {
@@ -245,6 +251,54 @@
             {
                 font-size: $font-size-4;
                 margin-bottom: 0;
+            }
+        }
+        .project-list
+        {
+            @include display(flex);
+            @include flex-wrap(wrap);
+            padding-right: $vertical-rhythm;
+            border: none;
+        }
+        .project-item
+        {
+            @include flex(1 1 13em);
+            @include border;
+            height: 23em;
+            max-width: 19em;
+            margin: 0 0 $vertical-rhythm $vertical-rhythm;
+            background-blend-mode: overlay;
+            background-color: $color-blue-dark;
+            border-color: $color-blue-dark;
+            position: relative;
+            a
+            {
+                display: block;
+                height: 100%;
+                width: 100%;
+                &:hover h4
+                {
+                    text-decoration: underline;
+                }
+            }
+            .project-info
+            {
+                background: none;
+                color: $color-white;
+                position: absolute;
+                bottom: 0;
+                &:hover h4
+                {
+                    color: $color-white;
+                }
+            }
+            h4
+            {
+                font-weight: $font-weight-bold;
+            }
+            .summary
+            {
+                max-width: 30em;
             }
         }
     }

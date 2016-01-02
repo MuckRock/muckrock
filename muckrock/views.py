@@ -17,6 +17,7 @@ from muckrock.foia.models import FOIARequest, FOIAFile
 from muckrock.forms import MRFilterForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.news.models import Article
+from muckrock.project.models import Project
 
 import re
 from haystack.views import SearchView
@@ -260,6 +261,7 @@ def homepage(request):
         articles = None
         lead_article = None
         other_articles = None
+    featured_projects = Project.objects.get_public().filter(featured=True)[:3]
     federal_government = Jurisdiction.objects.filter(level='f').first()
     public_requests = FOIARequest.objects.get_public()
     featured_requests = public_requests.filter(featured=True).order_by('-date_done')[:4]

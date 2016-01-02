@@ -5,6 +5,7 @@
 {% load static from staticfiles %}
 {% load thumbnail %}
 {% load foia_tags %}
+{% load news_tags %}
 
 {% block content %}
 <div class="homepage">
@@ -42,6 +43,7 @@
                 </ul>
             </div>
         </header>
+        <h3>Recent articles</h3>
         <div class="articles">
             {% with lead_article as article %}
             <div class="lead article">
@@ -87,6 +89,21 @@
                 {% endfor %}
             </ul>
         </div>
+        {% if featured_projects %}
+        <h3>Featured projects</h3>
+        <ul class="project-list nostyle">
+        {% for project in featured_projects %}
+            <li class="project-item" {% if project.image %}style="background-image:url('{% thumbnail project.image 800x600 %}')"{% endif %}>
+                <a href="{{project.get_absolute_url}}" title="{{project.title}}">
+                    <div class="project-info">
+                        <h4 class="title">{{project.title}}</h4>
+                        <p class="summary">{{project.summary|truncatechars:"300"}}</p>
+                    </div>
+                </a>
+            </li>
+        {% endfor %}
+        </ul>
+        {% endif %}
     </section>
     {% endif %}
     <section class="foia">
