@@ -2,6 +2,8 @@
 
 from django.contrib.auth.forms import AuthenticationForm
 
+from datetime import datetime, timedelta
+
 from muckrock.accounts.models import Profile
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
@@ -44,7 +46,9 @@ def sidebar_broadcast(user):
     except Profile.DoesNotExist:
         user_class = 'anonymous'
     try:
-        broadcast = Broadcast.objects.get(context=user_class).text
+        # exclude stale broadcasts from displaying
+        last_week = datetime.now() - timedelta(7)
+        broadcast = Broadcast.objects.get(updated__gte=last_week, context=user_class).text
     except Broadcast.DoesNotExist:
         broadcast = None
     return broadcast

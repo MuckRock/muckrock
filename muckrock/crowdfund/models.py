@@ -118,7 +118,9 @@ class CrowdfundABC(models.Model):
             currency='usd',
             metadata={
                 'email': email,
-                'action': 'crowdfund-payment'
+                'action': 'crowdfund-payment',
+                'crowdfund_id': self.id,
+                'crowdfund_name': self.name
             }
         )
         payment_object = self.get_crowdfund_payment_object()
