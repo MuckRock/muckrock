@@ -14,36 +14,6 @@
     </header>
     {% if articles %}
     <section class="news">
-        <header class="banner" style="background-image: url('{% static 'img/homepage/news.jpg' %}');">
-            <div class="about">
-                <h2>We publish original,<br>document-based reporting</h2>
-                <p><a href="{% url 'project-list' %}">See our active projects</a> or <a href="{% url 'news-archive' %}">explore our archives</a>.</p>
-            </div>
-            <div class="info">
-                <p>Stay up-to-date</p>
-                <ul class="channels nostyle">
-                    <li class="channel">
-                        <a href="https://www.twitter.com/muckrock">
-                            {% include 'lib/icons/twitter.svg' %}
-                            Follow us on Twitter
-                        </a>
-                    </li>
-                    <li class="channel">
-                        <a href="https://www.facebook.com/muckrock" target="_blank">
-                            {% include 'lib/icons/facebook.svg' %}
-                            Like us on Facebook
-                        </a>
-                    </li>
-                    <li class="channel">
-                        <a href="http://eepurl.com/bpgFb" target="_blank">
-                            {% include 'lib/icons/email.svg' %}
-                            Get our newsletter
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </header>
-        <h3>Recent articles</h3>
         <div class="articles">
             {% with lead_article as article %}
             <div class="lead article">
@@ -104,6 +74,35 @@
         {% endfor %}
         </ul>
         {% endif %}
+        <footer class="banner" style="background-image: url('{% static 'img/homepage/news.jpg' %}');">
+            <div class="about">
+                <h2>We publish original,<br>document-based reporting</h2>
+                <p><a href="{% url 'project-list' %}">See our active projects</a> or <a href="{% url 'news-archive' %}">explore our archives</a>.</p>
+            </div>
+            <div class="info">
+                <p>Stay up-to-date</p>
+                <ul class="channels nostyle">
+                    <li class="channel">
+                        <a href="https://www.twitter.com/muckrock">
+                            {% include 'lib/icons/twitter.svg' %}
+                            Follow us on Twitter
+                        </a>
+                    </li>
+                    <li class="channel">
+                        <a href="https://www.facebook.com/muckrock" target="_blank">
+                            {% include 'lib/icons/facebook.svg' %}
+                            Like us on Facebook
+                        </a>
+                    </li>
+                    <li class="channel">
+                        <a href="http://eepurl.com/bpgFb" target="_blank">
+                            {% include 'lib/icons/email.svg' %}
+                            Get our newsletter
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </footer>
     </section>
     {% endif %}
     <section class="foia">
