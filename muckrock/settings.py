@@ -600,6 +600,8 @@ LOT = {
 }
 LOT_MIDDLEWARE_PARAM_NAME = 'uuid-login'
 
+ROBOTS_CACHE_TIMEOUT = 60 * 60 * 24
+
 # Organization Settings
 
 ORG_MIN_SEATS = 3
