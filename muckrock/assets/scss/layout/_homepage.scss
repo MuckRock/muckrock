@@ -4,211 +4,170 @@
     @include flex-wrap(wrap);
     @include align-items(center);
     @include justify-content(center);
-    margin-bottom: 0;
-    padding: 2*$vertical-rhythm $vertical-rhythm;
+
     color: $color-white;
 
-    a:hover
+    h2
     {
-        color: $color-blue-light;
+        font-size: $font-size-5;
     }
 
     .about
     {
         @include flex(3 1 500px);
-        text-align: center;
-        h1
-        {
-            margin: 0 auto $vertical-rhythm;
-            max-width: 15em;
-            font-weight: $font-weight-bold;
-        }
     }
 
     .info
     {
         @include flex(1 1 200px);
         max-width: 20em;
-        padding: $vertical-rhythm $vertical-rhythm 0 $vertical-rhythm;
+        font-size: $font-size-2;
+    }
+
+    &.foia
+    {
+
+        background-size: cover;
+        background-position: right bottom;
+        background-color: rgba(0, 0, 0, .4);
+        background-blend-mode: multiply;
+        padding: $vertical-rhythm;
         @include border;
-        background-color: rgba(0,0,0,.4);
-    }
-}
+        @include border-radius;
+        border-color: $color-red-dark;
 
-.foia .banner
-{
-    background-size: cover;
-    background-position: right bottom;
-    background-color: rgba(0, 0, 0, .4);
-    background-blend-mode: multiply;
-
-    .stats
-    {
-        @include display(flex);
-        @include flex-wrap(wrap);
-        @include justify-content(space-around);
-        list-style: none;
-        padding-left: 0;
-    }
-
-    .stat
-    {
-        @include flex(50%);
-        width: 7em;
-        margin: 0 0 $vertical-rhythm 0;
-        text-align: center;
-        .value
+        h2
         {
+            margin: 0 auto $vertical-rhythm;
+            max-width: 15em;
             font-size: $font-size-5;
-            margin-bottom: $vertical-rhythm/2;
+            font-weight: $font-weight-bold;
         }
-        .key
-        {
-            font-size: $font-size-2;
-            line-height: 1em;
-        }
-    }
 
-    .about
-    {
-        .button
+        a:hover
         {
-            display: inline-block;
-            @include media($small-layout)
+            color: $color-blue-light;
+        }
+        .info
+        {
+            padding: $vertical-rhythm $vertical-rhythm 0 $vertical-rhythm;
+            @include border;
+            background-color: rgba(0,0,0,.4);
+        }
+        .stats
+        {
+            @include display(flex);
+            @include flex-wrap(wrap);
+            @include justify-content(space-around);
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .stat
+        {
+            @include flex(50%);
+            width: 7em;
+            margin: 0 0 $vertical-rhythm 0;
+            text-align: center;
+            .value
             {
-                display: block;
-                max-width: 20em;
-                margin: 0 auto $vertical-rhythm;
+                font-size: $font-size-5;
+                margin-bottom: $vertical-rhythm/2;
+            }
+            .key
+            {
+                line-height: 1em;
             }
         }
-        #learn-more
+
+        .about
         {
-            display: inline-block;
-            margin-left: $vertical-rhythm/4;
+            text-align: center;
+            .button
+            {
+                display: inline-block;
+                @include media($small-layout)
+                {
+                    display: block;
+                    max-width: 20em;
+                    margin: 0 auto $vertical-rhythm;
+                }
+            }
+            #learn-more
+            {
+                display: inline-block;
+                margin-left: $vertical-rhythm/4;
+            }
         }
     }
-}
-
-.news .banner
-{
-    background-size: cover;
-    background-position: right bottom;
-    background-color: darken($color-blue-dark, 10%);
-    background-blend-mode: multiply;
-
-    .icon
+    &.mission
     {
-        vertical-align: middle;
-        margin-right: $vertical-rhythm;
-        path, rect
+        @include justify-content(space-between);
+        margin-bottom: $vertical-rhythm;
+        padding: 0;
+        color: $color-black;
+        h1
         {
-            fill: $color-blue;
+            max-width: 23em;
+            margin-right: $vertical-rhythm;
+            font-size: $font-size-5;
+            font-weight: $font-weight-bold;
         }
-        &.email path
+        .icon
         {
-            fill: none;
-            stroke: $color-blue;
+            vertical-align: middle;
+            margin-right: $vertical-rhythm;
+            path, rect
+            {
+                fill: $color-blue;
+            }
+            &.email path
+            {
+                fill: none;
+                stroke: $color-blue;
+            }
         }
-    }
-    .channel
-    {
-        margin-bottom: $vertical-rhythm/2;
-        font-size: $font-size-2;
+        .channel
+        {
+            margin-bottom: $vertical-rhythm/4;
+        }
     }
 }
 
 .homepage
 {
-    overflow: hidden;
-    margin: 0 -.5 * $vertical-rhythm;
-    margin-bottom: 0;
-    section
-    {
-        margin-bottom: 0;
-    }
-    @include media($medium-layout)
-    {
-        margin: 0 -1 * $vertical-rhythm;
-    }
-    @include media($large-layout)
-    {
-        margin: 0 -24px 0 -1 * $vertical-rhythm;
-    }
-    h3
+    h2
     {
         font-size: $font-size-4;
         font-weight: $font-weight-bold;
     }
-    .mission
+    main
     {
-        padding: 0 $vertical-rhythm;
-        h1
+        margin-bottom: $vertical-rhythm;
+        @include display(flex);
+        @include flex-wrap(wrap);
+        .news
         {
-            max-width: 23em;
-            font-size: $font-size-6;
-            font-weight: $font-weight-bold;
+            @include flex(2 1 400px);
         }
-    }
-    .foia
-    {
         .requests
         {
-            @include display(flex);
-            @include flex-wrap(wrap);
-            @include justify-content(space-around);
-        }
-        .featured
-        {
-            @include flex(3 1 400px);
-            margin-bottom: 0;
-            padding: $vertical-rhythm;
-            .foia-info
-            {
-                font-size: $font-size-3;
-            }
-            .title
-            {
-                font-size: $font-size-5;
-            }
-        }
-        .completed
-        {
             @include flex(1 1 200px);
-            padding: $vertical-rhythm;
+        }
+        .projects
+        {
+            @include flex(0 1 100%);
+            @include order(1);
         }
     }
     .news
     {
-        background: $color-white;
-        h3
-        {
-            padding: $vertical-rhythm;
-            margin-bottom: 0;
-        }
-        .articles
-        {
-            @include display(flex);
-            @include flex-wrap(wrap);
-            @include justify-content(space-around);
-            margin-bottom: 0;
-        }
-        .lead
-        {
-            flex: 3 1 400px;
-            margin-bottom: 0;
-            padding: 0 $vertical-rhythm;
-        }
-        .others
-        {
-            flex: 1 1 200px;
-            padding: 0 $vertical-rhythm;
-        }
         .article
         {
-            background: $color-white;
+            margin: 0 0 $vertical-rhythm 0;
             h1
             {
-                margin-bottom: 0;
+                margin-bottom: $vertical-rhythm/4;
                 font-size: $font-size-6;
                 font-weight: $font-weight-bold;
                 line-height: 1.2em;
@@ -239,72 +198,65 @@
                     color: $color-grey-3;
                 }
             }
+            .article-metadata
+            {
+                @include display(flex);
+                @include justify-content(space-between);
+                margin-bottom: $vertical-rhythm/4;
+                line-height: 1em;
+            }
             .article-project a
             {
                 color: $color-grey-3;
             }
         }
-        .other.article
+        .other.article h1
         {
-            margin-bottom: $vertical-rhythm;
-            h1
-            {
-                font-size: $font-size-4;
-                margin-bottom: 0;
-            }
-        }
-        .project-list
-        {
-            @include display(flex);
-            @include flex-wrap(wrap);
-            padding-right: $vertical-rhythm;
-            border: none;
-        }
-        .project-item
-        {
-            @include flex(1 1 13em);
-            @include border;
-            height: 23em;
-            max-width: 19em;
-            margin: 0 0 $vertical-rhythm $vertical-rhythm;
-            background-blend-mode: overlay;
-            background-color: $color-blue-dark;
-            border-color: $color-blue-dark;
-            position: relative;
-            a
-            {
-                display: block;
-                height: 100%;
-                width: 100%;
-                &:hover h4
-                {
-                    text-decoration: underline;
-                }
-            }
-            .project-info
-            {
-                background: none;
-                color: $color-white;
-                position: absolute;
-                bottom: 0;
-                &:hover h4
-                {
-                    color: $color-white;
-                }
-            }
-            h4
-            {
-                font-weight: $font-weight-bold;
-            }
-            .summary
-            {
-                max-width: 30em;
-            }
+            font-size: $font-size-3;
         }
     }
-}
-
-.website-footer
-{
-    margin-top: 0;
+    .project-list
+    {
+        border: none;
+    }
+    .project-item
+    {
+        margin-bottom: $vertical-rhythm;
+        @include border;
+        background-blend-mode: overlay;
+        background-color: $color-blue-dark;
+        border-color: $color-blue-dark;
+        a
+        {
+            display: block;
+            height: 100%;
+            width: 100%;
+            &:hover h4
+            {
+                text-decoration: underline;
+            }
+            &:hover .summary
+            {
+                text-decoration: none;
+            }
+        }
+        .project-info
+        {
+            background: none;
+            color: $color-white;
+            bottom: 0;
+            &:hover h4
+            {
+                color: $color-white;
+            }
+        }
+        h4
+        {
+            font-weight: $font-weight-bold;
+        }
+        .summary
+        {
+            max-width: 30em;
+        }
+    }
 }

@@ -9,37 +9,38 @@
 
 {% block content %}
 <div class="homepage">
-    <header class="mission">
-        <h1>A <a href="//muckrock.com/about/" title="About Us">collaborative news site</a> that <a href="//muckrock.com/landing/" title="Landing Page">gives you the tools</a> to hold <a href="{{ federal_government.get_absolute_url }}" title="{{ federal_government }}">the government</a> transparent and accountable.</a></h1>
+    <header class="mission banner">
+        <h1 class="about">A <a href="//muckrock.com/about/" title="About Us">collaborative news site</a> that <a href="//muckrock.com/landing/" title="Landing Page">gives you the tools</a> to hold <a href="{{ federal_government.get_absolute_url }}" title="{{ federal_government }}">the government</a> accountable.</a></h1>
+        {% comment %}
+        <ul class="info channels nostyle">
+            <li class="channel">
+                <a href="https://www.twitter.com/muckrock">
+                    {% include 'lib/icons/twitter.svg' %}
+                    Follow us on Twitter
+                </a>
+            </li>
+            <li class="channel">
+                <a href="https://www.facebook.com/muckrock" target="_blank">
+                    {% include 'lib/icons/facebook.svg' %}
+                    Like us on Facebook
+                </a>
+            </li>
+            <li class="channel">
+                <a href="http://eepurl.com/bpgFb" target="_blank">
+                    {% include 'lib/icons/email.svg' %}
+                    Get our newsletter
+                </a>
+            </li>
+        </ul>
+        {% endcomment %}
     </header>
-    {% if articles %}
-    <section class="news">
-        <div class="articles">
-            {% with lead_article as article %}
-            <div class="lead article">
-                <datetime title="{{article.pub_date|date:'c'}}">{{article.pub_date|date:'F d, Y'}}</datetime>
-                {% if article.image %}<a href="{{article.get_absolute_url}}" title="{{article.title}}" class="article-image"><img src="{% thumbnail article.image 1200x400 %}" /></a>{% endif %}
-                {% if article.projects.exists %}
-                {% with article.projects.first as project %}
-                <dfn class="article-project"><a href="{{project.get_absolute_url}}">{{project.title}}</a></dfn>
-                {% endwith %}
-                {% endif %}
-                <h1><a href="{{ article.get_absolute_url }}" title="{{article.title}}">{{article.title}}</a></h1>
-                {% if article.authors.all %}
-                <div class="article-authors">by
-                    {% for author in article.authors.all %}
-                        <a href="{{ author.profile.get_absolute_url }}" title="{{ author.get_full_name }}">{{ author.get_full_name }}</a>{% if not forloop.last %}, {% endif %}
-                    {% endfor %}
-                </div>
-                {% endif %}
-                {% if article.summary %}<summary>{{article.summary|markdown:"trusted"}}</summary>{% endif %}
-            </div>
-            {% endwith %}
-            <ul class="others nostyle">
-                {% for article in other_articles %}
-                <li class="other article">
-                    <datetime title="{{article.pub_date|date:'c'}}">{{article.pub_date|date:'F d, Y'}}</datetime>
-                    {% if article.image %}<a href="{{article.get_absolute_url}}" title="{{article.title}}" class="article-image"><img src="{% thumbnail article.image 400x300 %}" /></a>{% endif %}
+    <main>
+        <section class="news">
+            <h2>Recent news</h2>
+            <ul class="articles nostyle">
+                {% with lead_article as article %}
+                <li class="lead article">
+                    {% if article.image %}<a href="{{article.get_absolute_url}}" title="{{article.title}}" class="article-image"><img src="{% thumbnail article.image 1200x400 %}" /></a>{% endif %}
                     {% if article.projects.exists %}
                     {% with article.projects.first as project %}
                     <dfn class="article-project"><a href="{{project.get_absolute_url}}">{{project.title}}</a></dfn>
@@ -54,117 +55,84 @@
                             {% endfor %}
                         </div>
                         {% endif %}
+                        <datetime title="{{article.pub_date|date:'c'}}">{{article.pub_date|date:'F d, Y'}}</datetime>
                     </div>
+                    {% if article.summary %}<summary>{{article.summary|markdown:"trusted"}}</summary>{% endif %}
+                </li>
+                {% endwith %}
+                {% for article in other_articles %}
+                <li class="other article">
+                    {% if article.projects.exists %}
+                    {% with article.projects.first as project %}
+                    <dfn class="article-project"><a href="{{project.get_absolute_url}}">{{project.title}}</a></dfn>
+                    {% endwith %}
+                    {% endif %}
+                    <h1><a href="{{ article.get_absolute_url }}" title="{{article.title}}">{{article.title}}</a></h1>
+                    <div class="article-metadata">
+                        {% if article.authors.all %}
+                        <div class="article-authors">by
+                            {% for author in article.authors.all %}
+                                <a href="{{ author.profile.get_absolute_url }}" title="{{ author.get_full_name }}">{{ author.get_full_name }}</a>{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <datetime title="{{article.pub_date|date:'c'}}">{{article.pub_date|date:'F d, Y'}}</datetime>
+                    </div>
+                    {% if article.summary %}<summary>{{article.summary|markdown:"trusted"}}</summary>{% endif %}
                 </li>
                 {% endfor %}
             </ul>
-        </div>
+        </section>
         {% if featured_projects %}
-        <h3>Featured projects</h3>
-        <ul class="project-list nostyle">
-        {% for project in featured_projects %}
-            <li class="project-item" {% if project.image %}style="background-image:url('{% thumbnail project.image 800x600 %}')"{% endif %}>
-                <a href="{{project.get_absolute_url}}" title="{{project.title}}">
-                    <div class="project-info">
-                        <h4 class="title">{{project.title}}</h4>
-                        <p class="summary">{{project.summary|truncatechars:"300"}}</p>
-                    </div>
-                </a>
-            </li>
-        {% endfor %}
-        </ul>
-        {% endif %}
-        <footer class="banner" style="background-image: url('{% static 'img/homepage/news.jpg' %}');">
-            <div class="about">
-                <h2>We publish original,<br>document-based reporting</h2>
-                <p><a href="{% url 'project-list' %}">See our active projects</a> or <a href="{% url 'news-archive' %}">explore our archives</a>.</p>
-            </div>
-            <div class="info">
-                <p>Stay up-to-date</p>
-                <ul class="channels nostyle">
-                    <li class="channel">
-                        <a href="https://www.twitter.com/muckrock">
-                            {% include 'lib/icons/twitter.svg' %}
-                            Follow us on Twitter
-                        </a>
-                    </li>
-                    <li class="channel">
-                        <a href="https://www.facebook.com/muckrock" target="_blank">
-                            {% include 'lib/icons/facebook.svg' %}
-                            Like us on Facebook
-                        </a>
-                    </li>
-                    <li class="channel">
-                        <a href="http://eepurl.com/bpgFb" target="_blank">
-                            {% include 'lib/icons/email.svg' %}
-                            Get our newsletter
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </footer>
-    </section>
-    {% endif %}
-    <section class="foia">
-        <header class="banner" style="background-image: url('{% static 'img/homepage/requests.jpg' %}');">
-            <div class="about">
-                <h2>File, track, and share<br />public records requests</h2>
-                <div class="call-to-action"><a href="{% url 'foia-create' %}" class="primary button">Create a FOIA request</a>&emsp;or <a href="/about/how-we-work/" class="dotted" id="learn-more">learn how it works</a>.</div>
-            </div>
-            <div class="info">
-                <ul class="stats">
-                    <li class="stat">
-                        <div class="value">{{ stats.request_count|intcomma }}</div>
-                        <div class="key">filed request{{ stats.request_count|pluralize }}</div>
-                    </li>
-                    <li class="stat">
-                        <div class="value">{{ stats.agency_count|intcomma }}</div>
-                        <div class="key">agenc{{ stats.agency_count|pluralize:"y,ies" }}</div>
-                    </li>
-                    <li class="stat">
-                        <div class="value">{{ stats.completed_count|intcomma }}</div>
-                        <div class="key">fulfilled request{{ stats.completed_count|pluralize }}</div>
-                    </li>
-                    <li class="stat">
-                        <div class="value">{{ stats.page_count|intcomma }}</div>
-                        <div class="key">released page{{ stats.page_count|pluralize }}</div>
-                    </li>
-                </ul>
-            </div>
-        </header>
-        <div class="requests">
-            <div class="featured">
-                <h3>Featured requests</h3>
-                {% for foia in featured_requests %}
-                {% comment %}
-                <div class="request">
-                    <div class="image">
-                        <a href="{{foia.get_absolute_url}}"><img src="{{foia.featured_image}}" /></a>
-                    </div>
-                    <div class="details">
-                        <p class="title"><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></p>
-                        <p class="summary"><a href="{{ foia.user.profile.get_absolute_url }}">{{ foia.user.get_full_name }}</a> sent this request to the <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency }}</a> of {% if foia.jurisdiction.level == 'f' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% if foia.jurisdiction.parent and foia.jurisdiction.level == 'l' %}, <a href="{{ foia.jurisdiction.parent.get_absolute_url }}" title="{{ foia.jurisdiction.parent.name }}">{{ foia.jurisdiction.parent.abbrev }}</a>{% endif %}</p>
-                        <div class="state">
-                            <p class="status {{ foia.status|classify_status }}">{{ foia.get_status_display }}</p>
-                            {% if foia.public_documents %}
-                            <p class="files"><a href="{{foia.get_absolute_url}}#files">{{ foia.public_documents|length }} file{{ foia.public_documents|length|pluralize }}</a></p>
-                            {% else %}
-                            <p class="files">No files</p>
-                            {% endif %}
+        <section class="projects">
+            <h2>Featured projects</h2>
+            <ul class="project-list nostyle">
+            {% for project in featured_projects %}
+                <li class="project-item" {% if project.image %}style="background-image:url('{% thumbnail project.image 800x600 %}')"{% endif %}>
+                    <a href="{{project.get_absolute_url}}" title="{{project.title}}">
+                        <div class="project-info">
+                            <h4 class="title">{{project.title}}</h4>
+                            <p class="summary">{{project.summary|truncatechars:"300"}}</p>
                         </div>
-                    </div>
-                </div>
-                {% endcomment %}
+                    </a>
+                </li>
+            {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+        <section class="requests">
+            <h2>Recently completed requests</h2>
+            {% for foia in completed_requests %}
                 {% include 'lib/foia.html' with hide_actions=True %}
-                {% endfor %}
-            </div>
-            <div class="completed">
-                <h3>Recently completed requests</h3>
-                {% for foia in completed_requests %}
-                    {% include 'lib/foia.html' with hide_actions=True %}
-                {% endfor %}
-            </div>
+            {% endfor %}
+            <a href="{% url 'foia-list' %}?status=completed">See more</a>
+        </section>
+    </main>
+    <footer class="foia banner" style="background-image: url('{% static 'img/homepage/requests.jpg' %}');">
+        <div class="about">
+            <h2>File, track, and share<br />public records requests</h2>
+            <div class="call-to-action"><a href="{% url 'foia-create' %}" class="primary button">Create a FOIA request</a>&emsp;or <a href="/about/how-we-work/" class="dotted" id="learn-more">learn how it works</a>.</div>
         </div>
-    </section>
+        <div class="info">
+            <ul class="stats">
+                <li class="stat">
+                    <div class="value">{{ stats.request_count|intcomma }}</div>
+                    <div class="key">filed request{{ stats.request_count|pluralize }}</div>
+                </li>
+                <li class="stat">
+                    <div class="value">{{ stats.agency_count|intcomma }}</div>
+                    <div class="key">agenc{{ stats.agency_count|pluralize:"y,ies" }}</div>
+                </li>
+                <li class="stat">
+                    <div class="value">{{ stats.completed_count|intcomma }}</div>
+                    <div class="key">fulfilled request{{ stats.completed_count|pluralize }}</div>
+                </li>
+                <li class="stat">
+                    <div class="value">{{ stats.page_count|intcomma }}</div>
+                    <div class="key">released page{{ stats.page_count|pluralize }}</div>
+                </li>
+            </ul>
+        </div>
+    </footer>
 </div>
 {% endblock content %}
