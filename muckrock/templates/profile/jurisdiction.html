@@ -2,11 +2,11 @@
 {% load markdown_deux_tags %}
 {% load thumbnail %}
 {% block title %}MuckRock &bull; {{ jurisdiction.name }}{% endblock title %}
-{% block type %}jurisdiction{% endblock type %}
+{% block type %}{% if jurisdiction.name == 'Georgia' %}georgia {% endif %}jurisdiction{% endblock type %}
 
 {% block metadata %}
 <aside class="metadata">
-    <dfn>Jurisdiction</dfn>
+    <dfn>{{ jurisdiction.get_level_display }} Jurisdiction</dfn>
     {% if jurisdiction.image %}
     <figure class="jurisdiction image">
         <img src="{% thumbnail jurisdiction.image 600x600 %}" class="header-image">
@@ -16,7 +16,7 @@
     </figure>
     {% endif %}
     <h1>{{jurisdiction.name}}</h1>
-    {% if jurisdiction.parent %}
+    {% if jurisdiction.parent and jurisdiction.level != 'f' %}
     <h2><a href="{{ jurisdiction.parent.get_absolute_url }}">{{ jurisdiction.parent }}</a></h2>
     {% endif %}
 
