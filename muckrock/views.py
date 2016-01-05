@@ -17,6 +17,7 @@ from muckrock.foia.models import FOIARequest, FOIAFile
 from muckrock.forms import MRFilterForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.news.models import Article
+from muckrock.project.models import Project
 
 import re
 from haystack.views import SearchView
@@ -245,35 +246,35 @@ class MRSearchView(SearchView):
             raise Http404("No such page!")
         return (paginator, page)
 
-def front_page(request):
-    """Get all the details needed for the front page"""
+def homepage(request):
+    """Get all the details needed for the homepage"""
     # pylint: disable=unused-variable
-    # pylint: disable=E1103
-
+    # pylint: disable=no-member
     try:
-        articles = Article.objects.get_published()[:1]
+        articles = Article.objects.prefetch_related('projects')\
+                                  .prefetch_related('authors')\
+                                  .get_published()[:3]
+        lead_article = articles[0]
+        other_articles = articles[1:]
     except IndexError:
         # no published articles
         articles = None
-
-    public_reqs = FOIARequest.objects.get_public()
-    featured_reqs = public_reqs.filter(featured=True).order_by('-date_done')[:3]
-
-    num_requests = FOIARequest.objects.exclude(status='started').count()
-    num_completed_requests = FOIARequest.objects.filter(status='done').count()
-    num_denied_requests = FOIARequest.objects.filter(status='rejected').count()
-    num_pages = FOIAFile.objects.aggregate(Sum('pages'))['pages__sum']
-
-    most_viewed_reqs = FOIARequest.objects.order_by('-times_viewed')[:5]
-    overdue_requests = FOIARequest.objects.get_overdue().get_public()[:5]
-
-    return render_to_response('front_page.html', locals(),
+        lead_article = None
+        other_articles = None
+    featured_projects = Project.objects.get_public().filter(featured=True)[:3]
+    federal_government = Jurisdiction.objects.filter(level='f').first()
+    public_requests = FOIARequest.objects.get_public()
+    completed_requests = public_requests.filter(status__in=['done', 'partial'])\
+                                        .order_by('date_done')[:6]
+    stats = {
+        'request_count': FOIARequest.objects.exclude(status='started').count(),
+        'completed_count': FOIARequest.objects.filter(status__in=['done', 'partial']).count(),
+        'page_count': FOIAFile.objects.aggregate(Sum('pages'))['pages__sum'],
+        'agency_count': Agency.objects.get_approved().count()
+    }
+    return render_to_response('homepage.html', locals(),
                               context_instance=RequestContext(request))
 
-def blog(request, path=''):
-    """Redirect to the new blog URL"""
-    # pylint: disable=unused-argument
-    return redirect('http://blog.muckrock.com/%s/' % path, permanant=True)
 
 def jurisdiction(request, jurisdiction=None, slug=None, idx=None, view=None):
     """Redirect to the jurisdiction page"""

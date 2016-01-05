@@ -2,17 +2,17 @@
     width: 100%;
     @include display(flex);
     @include flex-direction(column);
+    @include border;
+    overflow: hidden;
+    background-color: #fff;
     .foia-info {
         @include display(flex);
         @include flex-wrap(wrap);
         padding: $vertical-rhythm/2;
-        @include border;
-        border-bottom: 0;
-        @include border-top-radius($base-border-radius);
         margin-bottom: 0;
+        font-size: $font-size-2;
         .status, .files {
             @include flex(1 1 50%);
-            font-size: $font-size-2;
         }
         .files {
             text-align: right;
@@ -21,7 +21,7 @@
             @include flex(2 2 100%);
         }
         .title {
-            font-size: $font-size-4;
+            font-size: $font-size-3;
             font-weight: $font-weight-bold;
         }
     }
@@ -29,8 +29,6 @@
         @include display(flex);
         .clone, .view {
             @include flex(1);
-            @include border;
-            border-color: $color-blue-dark;
             padding: $vertical-rhythm/2;
             background-color: $color-blue;
             color: $color-white;
@@ -44,11 +42,7 @@
             }
         }
         .view {
-            border-bottom-left-radius: $base-border-radius;
-            border-right: none;
-        }
-        .clone {
-            border-bottom-right-radius: $base-border-radius;
+            border-right: 1px solid $color-blue-dark;
         }
     }
 }
