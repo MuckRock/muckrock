@@ -265,7 +265,7 @@ def homepage(request):
     federal_government = Jurisdiction.objects.filter(level='f').first()
     public_requests = FOIARequest.objects.get_public()
     completed_requests = public_requests.filter(status__in=['done', 'partial'])\
-                                        .order_by('date_done')[:6]
+                                        .order_by('-date_done')[:6]
     stats = {
         'request_count': FOIARequest.objects.exclude(status='started').count(),
         'completed_count': FOIARequest.objects.filter(status__in=['done', 'partial']).count(),
