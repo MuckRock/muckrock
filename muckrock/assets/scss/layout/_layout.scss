@@ -19,7 +19,7 @@ html, body {
 
 .content {
     @include flex(1);
-    margin: $vertical-rhythm 0 0 0;
+    margin: $vertical-rhythm 0;
     padding: 0 $vertical-rhythm/2;
     @include media($medium-layout) { padding: 0 $vertical-rhythm; }
 }
@@ -85,7 +85,7 @@ article.error-500 {
 }
 
 @import 'profile';
-@import 'front-page';
+@import 'homepage';
 @import 'new-request';
 @import 'draft-request';
 @import 'crowdfund';

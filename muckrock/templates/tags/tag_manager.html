@@ -1,5 +1,5 @@
 {% if tags or is_authorized %}
-<div class="tag manager">
+<div class="manager">
     {% if is_authorized %}
     <header>
         <dfn>Tags</dfn>
@@ -17,7 +17,7 @@
         <dfn>Tags</dfn>
     </header>
     {% endif %}
-    <ul class="tag-list state">
+    <ul class="tag-list nostyle state">
         {% for tag in tags %}
         <li>
             <a class="tag" href="{% url 'tag-detail' slug=tag.slug %}">{{tag.name}}</a>
