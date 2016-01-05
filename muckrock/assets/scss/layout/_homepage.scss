@@ -257,7 +257,7 @@
         @include border;
         background-color: $color-blue-dark;
         border-color: $color-blue-dark;
-        background-blend-mode: overlay;
+        background-blend-mode: multiply;
         &:hover
         {
             background-color: lighten($color-blue-dark, 5%);
