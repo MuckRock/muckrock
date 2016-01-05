@@ -4,7 +4,7 @@
     @include flex-wrap(wrap);
     @include align-items(center);
     @include justify-content(center);
-
+    margin: 0 $vertical-rhythm;
     color: $color-white;
 
     h2
@@ -33,7 +33,6 @@
         background-blend-mode: multiply;
         padding: $vertical-rhythm;
         @include border;
-        @include border-radius;
         border-color: $color-red-dark;
 
         h2
@@ -110,7 +109,7 @@
         {
             max-width: 23em;
             margin-right: $vertical-rhythm;
-            font-size: $font-size-5;
+            font-size: $font-size-6;
             font-weight: $font-weight-bold;
         }
         .icon
@@ -143,25 +142,46 @@
     }
     main
     {
-        margin-bottom: $vertical-rhythm;
+        margin-bottom: 0;
         @include display(flex);
         @include flex-wrap(wrap);
         .news
         {
             @include flex(2 1 400px);
+            h2
+            {
+                margin: 0 $vertical-rhythm $vertical-rhythm;
+            }
+            .articles
+            {
+                @include display(flex);
+                @include flex-wrap(wrap);
+            }
+            .article
+            {
+                margin: 0 $vertical-rhythm $vertical-rhythm;
+            }
+            .lead.article
+            {
+                @include flex(0 1 100%);
+            }
+            .other.article
+            {
+                @include flex(1 1 275px);
+            }
         }
         .requests
         {
             @include flex(1 1 200px);
-        }
-        .projects
-        {
-            @include flex(0 1 100%);
-            @include order(1);
+            margin: 0 $vertical-rhythm $vertical-rhythm;
         }
     }
     .news
     {
+        .articles
+        {
+            margin-bottom: 0;
+        }
         .article
         {
             margin: 0 0 $vertical-rhythm 0;
@@ -210,34 +230,49 @@
                 color: $color-grey-3;
             }
         }
-        .other.article h1
+        .other.article
         {
-            font-size: $font-size-3;
+            h1
+            {
+                font-size: $font-size-3;
+            }
+            summary
+            {
+                font-size: $font-size-2;
+                line-height: $font-line-height;
+            }
         }
+
     }
     .project-list
     {
         border: none;
+        @include display(flex);
+        @include flex-wrap(wrap);
     }
     .project-item
     {
-        margin-bottom: $vertical-rhythm;
+        @include flex(1 1 300px);
+        margin: 0 $vertical-rhythm $vertical-rhythm;
         @include border;
-        background-blend-mode: overlay;
-        background-color: $color-blue-dark;
+        background-color: $color-blue;
         border-color: $color-blue-dark;
+        background-blend-mode: multiply;
+        &:hover
+        {
+            background-color: lighten($color-blue-dark, 5%);
+        }
+        transition: background-color .25s linear;
         a
         {
             display: block;
             height: 100%;
             width: 100%;
-            &:hover h4
-            {
-                text-decoration: underline;
-            }
-            &:hover .summary
+            &:hover
             {
                 text-decoration: none;
+                color: $color-white;
+                h4 { text-decoration: underline; }
             }
         }
         .project-info
@@ -258,5 +293,25 @@
         {
             max-width: 30em;
         }
+    }
+}
+
+/* This knocks out the margin applied by the parent container */
+.homepage
+{
+    overflow: hidden;
+    margin: 0 -.5 * $vertical-rhythm;
+    margin-bottom: 0;
+    section
+    {
+        margin-bottom: 0;
+    }
+    @include media($medium-layout)
+    {
+        margin: 0 -1 * $vertical-rhythm;
+    }
+    @include media($large-layout)
+    {
+        margin: 0 -24px 0 -1 * $vertical-rhythm;
     }
 }
