@@ -3,11 +3,12 @@ Digest objects for the messages app
 """
 
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
-import actstream
-import datetime
+from actstream.models import Action, user_stream
+from datetime import datetime, timedelta
 import logging
 
 class Digest(EmailMultiAlternatives):
@@ -15,6 +16,10 @@ class Digest(EmailMultiAlternatives):
     A digest is a collection of activity over a duration,
     generated and delivered at a scheduled interval.
     """
+    text_template = None
+    html_template = None
+    interval = None
+
     def __init__(self, user, **kwargs):
         """Initialize the notification"""
         super(Digest, self).__init__(**kwargs)
@@ -25,6 +30,73 @@ class Digest(EmailMultiAlternatives):
             raise TypeError('Digest requires a User to recieve it')
         self.from_email = 'MuckRock <info@muckrock.com>'
         self.bcc = ['diagnostics@muckrock.com']
+        self.activity = self.get_activity()
+        self.notification_count = self.activity['count']
+        context = self.get_context_data()
+        text_email = render_to_string(self.get_text_template(), context)
+        html_email = render_to_string(self.get_html_template(), context)
+        self.subject = self.get_subject()
+        self.body = text_email
+        self.attach_alternative(html_email, 'text/html')
+
+    def send(self, *args):
+        """Don't send the email if there's no notifications."""
+        if self.notification_count < 1:
+            return 0
+        return super(Digest, self).send(*args)
+
+    def get_context_data(self):
+        """Returns context for the digest"""
+        context = {'user': self.user}
+        return context
+
+    def get_text_template(self):
+        """Returns the text template"""
+        if not self.text_template:
+            raise NotImplementedError('No text template specified.')
+        return self.text_template
+
+    def get_html_template(self):
+        """Returns the html template"""
+        if not self.html_template:
+            raise NotImplementedError('No HTML template specified.')
+        return self.html_template
+
+    def get_subject(self):
+        """Summarizes the activities in the notification"""
+        subject = str(self.notification_count) + ' Update'
+        if self.notification_count > 1:
+            subject += 's'
+        return subject
+
+    def get_duration(self):
+        if not self.interval:
+            raise NotImplementedError('No interval specified.')
+        if not isinstance(self.interval, timedelta):
+            raise TypeError('Interval attribute must be a datetime.timedelta object.')
+        return datetime.now() - self.interval
+
+    def get_foia_activity(self, period):
+        """Returns a sorted collection of FOIA activity."""
+        foia_stream = Action.objects.requests_for_user(self.user)
+        foia_stream = foia_stream.filter(timestamp__gte=period)
+        user_ct = ContentType.objects.get_for_model(self.user)
+        # exclude actions where the user is the Actor
+        # since they know which actions they've taken themselves
+        foia_stream.exclude(actor_content_type=user_ct, actor_object_id=self.user.id)
+        return foia_stream
+
+    def get_activity(self):
+        """Returns a list of activities to be sent in the email"""
+        duration = self.get_duration()
+        f_stream = self.get_foia_activity(duration)
+        u_stream = user_stream(self.user).filter(timestamp__gte=duration)\
+                                         .exclude(verb__icontains='following')
+        return {
+            'count': f_stream.count() + u_stream.count(),
+            'requests': f_stream,
+            'following': u_stream
+        }
 
 
 class DailyDigest(Digest):
@@ -32,85 +104,25 @@ class DailyDigest(Digest):
 
     text_template = 'message/notification/daily.txt'
     html_template = 'message/notification/daily.html'
+    interval = timedelta(days=1)
 
-    notification_count = 0
-    since = 'yesterday'
-
-    def __init__(self, *args, **kwargs):
-        """Initialize the notification subject, body, and attachments"""
-        super(DailyDigest, self).__init__(*args, **kwargs)
-        self.compose()
-
-    def send(self, *args):
-        """Don't send the email if there's no notifications."""
-        if self.notification_count == 0:
-            return 0
-        return super(DailyDigest, self).send(*args)
-
-    def compose(self):
+    def get_context_data(self):
         """Compose the email"""
-        activity = self.get_activity()
-        self.notification_count = activity['following'].count() + activity['requests']['count']
-        show_requests = activity['requests']['count'] > 0
-        show_following = activity['following'].count() > 0
+        context = super(DailyDigest, self).get_context_data()
+        show_requests = self.activity['requests'].count() > 0
+        show_following = self.activity['following'].count() > 0
         show_headings = show_requests and show_following
-        context = {
-            'user': self.user,
+        context.update({
             'show_headings': show_headings,
             'show_requests': show_requests,
             'show_following': show_following,
-            'attention_foia': activity['requests']['attention'],
-            'finished_foia': activity['requests']['finished'],
-            'other_foia': activity['requests']['other'],
-            'following': activity['following'],
-            'count': self.notification_count,
-            'since': self.since,
+            'requests': self.activity['requests'],
+            'following': self.activity['following'],
+            'count': self.activity['count'],
             'base_url': 'https://www.muckrock.com'
-        }
-        logging.info(context)
-        text_content = render_to_string(self.text_template, context)
-        html_content = render_to_string(self.html_template, context)
-        self.subject = self.get_subject()
-        self.body = text_content
-        self.attach_alternative(html_content, 'text/html')
-        return
+        })
+        return context
 
-    def get_foia_activity(self, period):
-        """Returns a sorted collection of FOIA activity."""
-        foia_stream = actstream.models.Action.objects.requests_for_user(self.user)
-        foia_stream = foia_stream.filter(timestamp__gte=period)
-        foia_stream = foia_stream.exclude(actor=self.user) # Exclude activity initiated by the user
-        # we sort the items in the foia stream to figure out their priority
-        finished_verbs = ['completed', 'rejected', 'partially completed']
-        attention_verbs = ['requires fix', 'requires payment']
-        foia_actions = {
-            'count': foia_stream.count(),
-            'finished': [],
-            'attention': [],
-            'other': []
-        }
-        for foia_action in foia_stream:
-            if foia_action.verb in finished_verbs:
-                foia_actions['finished'].append(foia_action)
-            elif foia_action.verb in attention_verbs:
-                foia_actions['attention'].append(foia_action)
-            else:
-                foia_actions['other'].append(foia_action)
-        return foia_actions
 
-    def get_activity(self):
-        """Returns a list of activities to be sent in the email"""
-        period = datetime.datetime.now() - datetime.timedelta(1)
-        foia_activity = get_foia_activity(self.user, period)
-        user_stream = actstream.models.user_stream(self.user)
-        user_stream = user_stream.filter(timestamp__gte=period).exclude(verb__icontains='following')
-        return {
-            'requests': foia_activity,
-            'following': user_stream
-        }
 
-    def get_subject(self):
-        """Summarizes the activities in the notificiation"""
-        noun = 'update' if self.notification_count == 1 else 'updates'
-        subject = '%d %s %s' % (self.notification_count, noun, self.since)
-        return subject
+
