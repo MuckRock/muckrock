@@ -10,29 +10,6 @@ import actstream
 import datetime
 import logging
 
-def get_foia_activity(user, period):
-    """Returns a sorted collection of FOIA activity."""
-    foia_stream = actstream.models.Action.objects.requests_for_user(user)
-    foia_stream = foia_stream.filter(timestamp__gte=period)
-    # we sort the items in the foia stream to figure out their priority
-    finished_verbs = ['completed', 'rejected', 'partially completed']
-    attention_verbs = ['requires fix', 'requires payment']
-    foia_actions = {
-        'count': foia_stream.count(),
-        'finished': [],
-        'attention': [],
-        'other': []
-    }
-    for foia_action in foia_stream:
-        if foia_action.verb in finished_verbs:
-            foia_actions['finished'].append(foia_action)
-        elif foia_action.verb in attention_verbs:
-            foia_actions['attention'].append(foia_action)
-        else:
-            foia_actions['other'].append(foia_action)
-    return foia_actions
-
-
 class Digest(EmailMultiAlternatives):
     """
     A digest is a collection of activity over a duration,
@@ -97,6 +74,29 @@ class DailyDigest(Digest):
         self.body = text_content
         self.attach_alternative(html_content, 'text/html')
         return
+
+    def get_foia_activity(self, period):
+        """Returns a sorted collection of FOIA activity."""
+        foia_stream = actstream.models.Action.objects.requests_for_user(self.user)
+        foia_stream = foia_stream.filter(timestamp__gte=period)
+        foia_stream = foia_stream.exclude(actor=self.user) # Exclude activity initiated by the user
+        # we sort the items in the foia stream to figure out their priority
+        finished_verbs = ['completed', 'rejected', 'partially completed']
+        attention_verbs = ['requires fix', 'requires payment']
+        foia_actions = {
+            'count': foia_stream.count(),
+            'finished': [],
+            'attention': [],
+            'other': []
+        }
+        for foia_action in foia_stream:
+            if foia_action.verb in finished_verbs:
+                foia_actions['finished'].append(foia_action)
+            elif foia_action.verb in attention_verbs:
+                foia_actions['attention'].append(foia_action)
+            else:
+                foia_actions['other'].append(foia_action)
+        return foia_actions
 
     def get_activity(self):
         """Returns a list of activities to be sent in the email"""
