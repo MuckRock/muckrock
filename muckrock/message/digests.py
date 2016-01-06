@@ -34,8 +34,21 @@ def get_foia_activity(user, period):
 
 
 class Digest(EmailMultiAlternatives):
-    """A generic base class for sending timed digests."""
-    pass
+    """
+    A digest is a collection of activity over a duration,
+    generated and delivered at a scheduled interval.
+    """
+    def __init__(self, user, **kwargs):
+        """Initialize the notification"""
+        super(Digest, self).__init__(**kwargs)
+        if isinstance(user, User):
+            self.user = user
+            self.to = [user.email]
+        else:
+            raise TypeError('Digest requires a User to recieve it')
+        self.from_email = 'MuckRock <info@muckrock.com>'
+        self.bcc = ['diagnostics@muckrock.com']
+
 
 class DailyDigest(Digest):
     """Sends a daily email digest"""
@@ -46,16 +59,9 @@ class DailyDigest(Digest):
     notification_count = 0
     since = 'yesterday'
 
-    def __init__(self, user, **kwargs):
-        """Initialize the notification"""
-        super(DailyDigest, self).__init__(**kwargs)
-        if isinstance(user, User):
-            self.user = user
-            self.to = [user.email]
-        else:
-            raise TypeError('Notification requires a User to recieve it')
-        self.from_email = 'MuckRock <info@muckrock.com>'
-        self.bcc = ['diagnostics@muckrock.com']
+    def __init__(self, *args, **kwargs):
+        """Initialize the notification subject, body, and attachments"""
+        super(DailyDigest, self).__init__(*args, **kwargs)
         self.compose()
 
     def send(self, *args):
