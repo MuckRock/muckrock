@@ -11,32 +11,9 @@
 <div class="homepage">
     <header class="mission banner">
         <h1 class="about">A <a href="//muckrock.com/about/" title="About Us">collaborative news site</a> that <a href="//muckrock.com/landing/" title="Landing Page">gives you the tools</a> to hold <a href="{{ federal_government.get_absolute_url }}" title="{{ federal_government }}">the government</a> accountable.</a></h1>
-        {% comment %}
-        <ul class="info channels nostyle">
-            <li class="channel">
-                <a href="https://www.twitter.com/muckrock">
-                    {% include 'lib/icons/twitter.svg' %}
-                    Follow us on Twitter
-                </a>
-            </li>
-            <li class="channel">
-                <a href="https://www.facebook.com/muckrock" target="_blank">
-                    {% include 'lib/icons/facebook.svg' %}
-                    Like us on Facebook
-                </a>
-            </li>
-            <li class="channel">
-                <a href="http://eepurl.com/bpgFb" target="_blank">
-                    {% include 'lib/icons/email.svg' %}
-                    Get our newsletter
-                </a>
-            </li>
-        </ul>
-        {% endcomment %}
     </header>
     <main>
         <section class="news">
-            <h2>Recent news</h2>
             <ul class="articles nostyle">
                 {% with lead_article as article %}
                 <li class="lead article">
@@ -101,6 +78,32 @@
             {% endif %}
         </section>
         <section class="requests">
+            <div class="foia banner" style="background-image: url('{% static 'img/homepage/requests.jpg' %}');">
+                <div class="about">
+                    <h2>File, track, and share public records requests</h2>
+                    <div class="call-to-action"><a href="/about/how-we-work/" id="learn-more">Learn how it works.</a></div>
+                </div>
+                <div class="info">
+                    <ul class="stats">
+                        <li class="stat">
+                            <div class="value">{{ stats.request_count|intcomma }}</div>
+                            <div class="key">filed request{{ stats.request_count|pluralize }}</div>
+                        </li>
+                        <li class="stat">
+                            <div class="value">{{ stats.agency_count|intcomma }}</div>
+                            <div class="key">agenc{{ stats.agency_count|pluralize:"y,ies" }}</div>
+                        </li>
+                        <li class="stat">
+                            <div class="value">{{ stats.completed_count|intcomma }}</div>
+                            <div class="key">fulfilled request{{ stats.completed_count|pluralize }}</div>
+                        </li>
+                        <li class="stat">
+                            <div class="value">{{ stats.page_count|intcomma }}</div>
+                            <div class="key">released page{{ stats.page_count|pluralize }}</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
             <h2>Recent completed requests</h2>
             {% for foia in completed_requests %}
                 {% include 'lib/foia.html' with hide_actions=True %}
@@ -108,31 +111,6 @@
             <a href="{% url 'foia-list' %}?status=completed">See more</a>
         </section>
     </main>
-    <footer class="foia banner" style="background-image: url('{% static 'img/homepage/requests.jpg' %}');">
-        <div class="about">
-            <h2>File, track, and share<br />public records requests</h2>
-            <div class="call-to-action"><a href="{% url 'foia-create' %}" class="primary button">Create a FOIA request</a>&emsp;or <a href="/about/how-we-work/" class="dotted" id="learn-more">learn how it works</a>.</div>
-        </div>
-        <div class="info">
-            <ul class="stats">
-                <li class="stat">
-                    <div class="value">{{ stats.request_count|intcomma }}</div>
-                    <div class="key">filed request{{ stats.request_count|pluralize }}</div>
-                </li>
-                <li class="stat">
-                    <div class="value">{{ stats.agency_count|intcomma }}</div>
-                    <div class="key">agenc{{ stats.agency_count|pluralize:"y,ies" }}</div>
-                </li>
-                <li class="stat">
-                    <div class="value">{{ stats.completed_count|intcomma }}</div>
-                    <div class="key">fulfilled request{{ stats.completed_count|pluralize }}</div>
-                </li>
-                <li class="stat">
-                    <div class="value">{{ stats.page_count|intcomma }}</div>
-                    <div class="key">released page{{ stats.page_count|pluralize }}</div>
-                </li>
-            </ul>
-        </div>
-    </footer>
+
 </div>
 {% endblock content %}
