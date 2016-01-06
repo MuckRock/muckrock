@@ -11,20 +11,21 @@ import logging
 import stripe
 
 from muckrock.accounts.models import Profile
-from muckrock.message import notifications, receipts
+from muckrock.message import digests, notifications, receipts
 from muckrock.organization.models import Organization
 
 logger = logging.getLogger(__name__)
 
 @periodic_task(run_every=crontab(hour=10, minute=0),
-               name='muckrock.message.tasks.daily_notification')
-def daily_notification():
-    """Send out daily notifications"""
+               name='muckrock.message.tasks.daily_digest')
+def daily_digest():
+    """Send out daily digest"""
+    # TODO prefetch the user at this time
     profiles_to_notify = Profile.objects.filter(email_pref='daily').distinct()
     for profile in profiles_to_notify:
         # for now, only send staff the new updates
         if profile.user.is_staff:
-            email = notifications.DailyNotification(profile.user)
+            email = digests.DailyDigest(profile.user)
             email.send()
         else:
             profile.send_notifications()
