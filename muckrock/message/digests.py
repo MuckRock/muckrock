@@ -33,7 +33,11 @@ def get_foia_activity(user, period):
     return foia_actions
 
 
-class DailyDigest(EmailMultiAlternatives):
+class Digest(EmailMultiAlternatives):
+    """A generic base class for sending timed digests."""
+    pass
+
+class DailyDigest(Digest):
     """Sends a daily email digest"""
 
     text_template = 'message/notification/daily.txt'
