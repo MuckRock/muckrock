@@ -9,6 +9,9 @@
 
 {% block content %}
 <div class="homepage">
+    <header class="mission banner">
+        <h1 class="about">A <a href="//muckrock.com/about/" title="About Us">collaborative news site</a> that <a href="//muckrock.com/landing/" title="Landing Page">gives you the tools</a> to hold <a href="{{ federal_government.get_absolute_url }}" title="{{ federal_government }}">the government</a> accountable.</a></h1>
+    </header>
     <main>
         <section class="news">
             <ul class="articles nostyle">
@@ -77,7 +80,7 @@
         <section class="requests">
             <div class="foia banner" style="background-image: url('{% static 'img/homepage/requests.jpg' %}');">
                 <div class="about">
-                    <h2>File, track, and share<br />public records requests</h2>
+                    <h2>File, track, and share public records requests</h2>
                     <div class="call-to-action"><a href="/about/how-we-work/" id="learn-more">Learn how it works.</a></div>
                 </div>
                 <div class="info">
