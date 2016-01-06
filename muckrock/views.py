@@ -261,7 +261,7 @@ def homepage(request):
         articles = None
         lead_article = None
         other_articles = None
-    featured_projects = Project.objects.get_public().filter(featured=True)[:3]
+    featured_projects = Project.objects.get_public().filter(featured=True)[:4]
     federal_government = Jurisdiction.objects.filter(level='f').first()
     public_requests = FOIARequest.objects.get_public()
     completed_requests = public_requests.filter(status__in=['done', 'partial'])\
