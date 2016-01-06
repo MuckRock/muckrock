@@ -4,7 +4,6 @@
     @include flex-wrap(wrap);
     @include align-items(center);
     @include justify-content(center);
-    margin: 0 $vertical-rhythm;
     color: $color-white;
 
     h2
@@ -29,8 +28,6 @@
 
         background-size: cover;
         background-position: right bottom;
-        background-color: rgba(0, 0, 0, .4);
-        background-blend-mode: multiply;
         padding: $vertical-rhythm;
         @include border;
         border-color: $color-red-dark;
@@ -38,14 +35,21 @@
         h2
         {
             margin: 0 auto $vertical-rhythm;
-            max-width: 15em;
+            max-width: 11em;
             font-size: $font-size-5;
             font-weight: $font-weight-bold;
         }
-
+        a
+        {
+            color: $color-white;
+            font-weight: $font-weight-bold;
+            border-bottom: 1px dotted;
+        }
         a:hover
         {
-            color: $color-blue-light;
+            color: $color-red-light;
+            text-decoration: none;
+            border-bottom: 1px solid;
         }
         .info
         {
@@ -102,33 +106,15 @@
     &.mission
     {
         @include justify-content(space-between);
-        margin-bottom: $vertical-rhythm;
+        margin: 0 $vertical-rhythm $vertical-rhythm;
         padding: 0;
         color: $color-black;
         h1
         {
-            max-width: 23em;
+            max-width: 21em;
             margin-right: $vertical-rhythm;
             font-size: $font-size-6;
             font-weight: $font-weight-bold;
-        }
-        .icon
-        {
-            vertical-align: middle;
-            margin-right: $vertical-rhythm;
-            path, rect
-            {
-                fill: $color-blue;
-            }
-            &.email path
-            {
-                fill: none;
-                stroke: $color-blue;
-            }
-        }
-        .channel
-        {
-            margin-bottom: $vertical-rhythm/4;
         }
     }
 }
@@ -247,17 +233,10 @@
     .project-list
     {
         border: none;
-        @include display(flex);
-        @include flex-wrap(wrap);
     }
     .project-item
     {
-        @include flex(1 1 300px);
         margin: 0 $vertical-rhythm $vertical-rhythm;
-        @include border;
-        background-color: $color-blue-dark;
-        border-color: $color-blue-dark;
-        background-blend-mode: multiply;
         &:hover
         {
             background-color: lighten($color-blue-dark, 5%);
@@ -268,11 +247,14 @@
             display: block;
             height: 100%;
             width: 100%;
+            background-color: rgba(0,0,0,.5);
+            transition: background-color .25s linear;
             &:hover
             {
                 text-decoration: none;
                 color: $color-white;
                 h4 { text-decoration: underline; }
+                background-color: rgba(0,0,0,.25);
             }
         }
         .project-info
@@ -285,13 +267,10 @@
                 color: $color-white;
             }
         }
-        h4
+        h4, .summary
         {
+            max-width: 24rem;
             font-weight: $font-weight-bold;
-        }
-        .summary
-        {
-            max-width: 30em;
         }
     }
 }
