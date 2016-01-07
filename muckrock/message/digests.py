@@ -106,8 +106,22 @@ class Digest(EmailMultiAlternatives):
         return super(Digest, self).send(*args)
 
 
+class HourlyDigest(Digest):
+    """An hourly email digest"""
+    text_template = 'message/digest/hourly.txt'
+    html_template = 'message/digest/hourly.html'
+    interval = timedelta(hours=1)
+
+
 class DailyDigest(Digest):
-    """Sends a daily email digest"""
+    """A daily email digest"""
     text_template = 'message/notification/daily.txt'
     html_template = 'message/notification/daily.html'
     interval = timedelta(days=1)
+
+
+class WeeklyDigest(Digest):
+    """A weekly email digest"""
+    text_template = 'message/digest/weekly.txt'
+    html_template = 'message/digest/weekly.html'
+    interval = timedelta(days=7)
