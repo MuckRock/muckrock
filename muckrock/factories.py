@@ -43,7 +43,6 @@ class OrganizationFactory(factory.django.DjangoModelFactory):
     name = factory.Sequence(lambda n: "Organization %d" % n)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
     owner = factory.SubFactory(UserFactory)
-    active = True
 
 
 class JurisdictionFactory(factory.django.DjangoModelFactory):
