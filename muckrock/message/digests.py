@@ -72,13 +72,28 @@ class Digest(EmailMultiAlternatives):
         return foia_stream
 
     def get_context_data(self):
-        """Segment and classify the activity"""
+        """Adds classified activity to the context"""
+        classified_foia_activity = self.classify_foia_activity()
         context = {
             'user': self.user,
             'activity': self.activity,
+            'foia_activity': classified_foia_activity,
             'base_url': 'https://www.muckrock.com'
         }
         return context
+
+    def classify_foia_activity(self):
+        """Segment and classify the activity"""
+        foia_activity = self.activity['requests']
+        return {
+            'granted': foia_activity.filter(verb__icontains='completed'),
+            'denied': foia_activity.filter(verb__icontains='rejected'),
+            'unsuccessful': foia_activity.filter(verb__icontains='no responsive documents'),
+            'needs_action': foia_activity.filter(verb__icontains='payment', verb__icontains='fix'),
+            'unembargo': foia_activity.filter(verb__icontains='unembargo'),
+            'response': foia_activity.filter(verb__icontains='responded'),
+            'auto_follow_up': foia_activity.filter(verb__icontains='automatically followed up'),
+        }
 
     def get_text_template(self):
         """Returns the text template"""
