@@ -1,40 +1,18 @@
 {% load notification_tags %}
 
-{% if show_requests %}
-    {% if show_headings %}
+{% if activity.requests %}
     <h1>Your requests<h1>
-    {% endif %}
-    {% if attention_foia %}
-    <h2>Requests requiring attention</h2>
     <ul>
-        {% for action in attention_foia %}
-        <li>{% display_action action %}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-    {% if finished_foia %}
-    <h2>Finished requests</h2>
-    <ul>
-        {% for action in finished_foia %}
-        <li>{% display_action action %}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-    {% if other_foia %}
-    <h2>Updated requests</h2>
-    <ul>
-        {% for action in other_foia %}
+        {% for action in activity.requests %}
         <li>{% display_action action %}</li>
         {% endfor %}
     </ul>
     {% endif %}
 {% endif %}
-{% if following %}
-    {% if show_headings %}
-    <h1>Site Activity</h1>
-    {% endif %}
+{% if activity.following %}
+    <h1>Site activity</h1>
     <ul>
-    {% for action in following %}
+    {% for action in activity.following %}
         <li>{% display_action action %}</li>
     {% endfor %}
     </ul>
