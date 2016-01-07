@@ -147,13 +147,13 @@ class Profile(models.Model):
     def is_advanced(self):
         """Advanced users can access features basic users cannot."""
         advanced_types = ['admin', 'beta', 'pro', 'proxy']
-        return self.acct_type in advanced_types or self.is_member_of_active_organization()
+        return self.acct_type in advanced_types or self.is_member_of_active_org()
 
     def is_member_of(self, organization):
         """Answers whether the profile is a member of the passed organization"""
         return self.organization == organization
 
-    def is_member_of_active_organization(self):
+    def is_member_of_active_org(self):
         """Answers whether the user is a member of an active organization"""
         return self.organization is not None and self.organization.active
 
@@ -163,7 +163,7 @@ class Profile(models.Model):
 
     def can_embargo_permanently(self):
         """Is this user allowed to permanently embargo?"""
-        return self.acct_type in ['admin'] or self.is_member_of_active_organization()
+        return self.acct_type in ['admin'] or self.is_member_of_active_org()
 
     def can_multirequest(self):
         """Is this user allowed to multirequest?"""
@@ -238,7 +238,7 @@ class Profile(models.Model):
     def bundled_requests(self):
         """Returns the number of requests the user gets when they buy a bundle."""
         how_many = settings.BUNDLED_REQUESTS[self.acct_type]
-        if self.is_member_of_active_organization():
+        if self.is_member_of_active_org():
             how_many = 5
         return how_many
 

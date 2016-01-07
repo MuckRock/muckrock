@@ -56,7 +56,6 @@ class TestProfileUnit(TestCase):
 
     def test_is_advanced(self):
         """Test whether the users are marked as advanced."""
-        pro = ProfileFactory(acct_type='pro')
         beta = ProfileFactory(acct_type='beta')
         proxy = ProfileFactory(acct_type='beta')
         admin = ProfileFactory(acct_type='admin')
@@ -65,7 +64,7 @@ class TestProfileUnit(TestCase):
         inactive_org = OrganizationFactory(active=False)
         active_org_member = ProfileFactory(acct_type='basic', organization=active_org)
         inactive_org_member = ProfileFactory(acct_type='basic', organization=inactive_org)
-        assert_true(pro.is_advanced())
+        assert_true(self.profile.is_advanced())
         assert_true(beta.is_advanced())
         assert_true(proxy.is_advanced())
         assert_true(admin.is_advanced())
