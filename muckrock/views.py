@@ -263,12 +263,10 @@ def homepage(request):
         other_articles = None
     featured_projects = Project.objects.get_public().filter(featured=True)[:4]
     federal_government = Jurisdiction.objects.filter(level='f').first()
-    public_requests = FOIARequest.objects.get_public()
-    completed_requests = public_requests.filter(status__in=['done', 'partial'])\
-                                        .order_by('-date_done')[:6]
+    completed_requests = FOIARequest.objects.get_public().get_done().order_by('-date_done')[:6]
     stats = {
         'request_count': FOIARequest.objects.exclude(status='started').count(),
-        'completed_count': FOIARequest.objects.filter(status__in=['done', 'partial']).count(),
+        'completed_count': FOIARequest.objects.get_done().count(),
         'page_count': FOIAFile.objects.aggregate(Sum('pages'))['pages__sum'],
         'agency_count': Agency.objects.get_approved().count()
     }

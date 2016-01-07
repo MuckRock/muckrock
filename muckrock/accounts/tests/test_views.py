@@ -277,7 +277,7 @@ class TestBuyRequestsView(TestCase):
     def test_buy_requests_as_org(self):
         """An org member should get an extra request in each bundle."""
         existing_request_count = self.user.profile.num_requests
-        self.user.profile.organization = OrganizationFactory()
+        self.user.profile.organization = OrganizationFactory(active=True)
         self.user.profile.save()
         post_request = self.factory.post(self.url, self.data)
         post_request = mock_middleware(post_request)

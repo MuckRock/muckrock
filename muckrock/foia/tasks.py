@@ -510,7 +510,7 @@ def autoimport():
                     communication=body, status=status)
 
                 foia.status = status or foia.status
-                if foia.status in ['done', 'rejected', 'no_docs']:
+                if foia.status in ['partial', 'done', 'rejected', 'no_docs']:
                     foia.date_done = file_date.date()
                 if code == 'FEE' and arg:
                     foia.price = Decimal(arg)
