@@ -137,6 +137,11 @@ def embargo(request, jurisdiction, jidx, slug, idx):
             foia.embargo = True
             foia.save()
             logger.info('%s embargoed %s', request.user, foia)
+            # unsubscribe all followers of the request
+            # https://github.com/MuckRock/muckrock/issues/720
+            followers = actstream.models.followers(foia)
+            for follower in followers:
+                actstream.actions.unfollow(follower, foia)
             # generate action
             actstream.action.send(
                 request.user,
