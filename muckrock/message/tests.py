@@ -83,7 +83,7 @@ class TestDailyDigest(TestCase):
         actstream.action.send(other_user, verb='acted')
         # generate the email, which should contain the generated action
         email = self.digest(self.user)
-        logging.debug(email.notification_count)
+        logging.debug(email.activity['count'])
         eq_(email.send(), 1)
 
     def test_notification_composition(self):
