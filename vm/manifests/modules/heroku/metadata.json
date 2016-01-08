@@ -1,0 +1,29 @@
+{
+  "name": "garethr-heroku",
+  "version": "0.0.1",
+  "source": "UNKNOWN",
+  "author": "garethr",
+  "license": "Apache License, Version 2.0",
+  "summary": "Module to install the heroku toolbelt",
+  "description": "UNKNOWN",
+  "project_page": "https://github.com/garethr/garethr-heroku",
+  "dependencies": [
+    {
+      "name": "maestrodev/wget"
+    }
+  ],
+  "types": [
+
+  ],
+  "checksums": {
+    "Gemfile": "84708ea1c9b80130a40fde87376882b9",
+    "Gemfile.lock": "c2cd23342abc2b1e207e7c5d32cb3c06",
+    "Modulefile": "9a3e96b82cffd8716654861136d4c820",
+    "README.md": "e861bc7885a15141781676fee03a400f",
+    "Rakefile": "c6a91ef43608c5d4b22bc7e50a94d6a5",
+    "manifests/init.pp": "5ca33c6cce60c2f44826e0b91967a2e6",
+    "manifests/params.pp": "018b0c0e81d90c823767ba556c2ce3c1",
+    "spec/classes/heroku/heroku_spec.rb": "3d2a77ec86d4002e0e865e25929282ce",
+    "spec/spec_helper.rb": "0db89c9a486df193c0e40095422e19dc"
+  }
+}
