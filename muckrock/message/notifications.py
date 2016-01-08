@@ -152,3 +152,10 @@ class GiftNotification(Notification):
     """Sends a gift notification to the receipient"""
     text_template = 'message/notification/gift.txt'
     subject = u'You have a gift'
+
+
+class EmailChangeNotification(Notification):
+    """Sends an email confirming an email change"""
+    text_template = 'message/notification/email_change.txt'
+    subject = u'Changed email address'
+

@@ -155,3 +155,14 @@ def gift(to_user, from_user, gift_description):
     }
     notification = notifications.GiftNotification(to_user, context)
     notification.send(fail_silently=False)
+
+@task(name='muckrock.message.tasks.email_change')
+def email_change(user, old_email):
+    """Notify the user when their email is changed."""
+    context = {
+        'old_email': old_email,
+        'new_email': user.email
+    }
+    notification = notifications.EmailChangeNotification(user, context)
+    notification.to.append(old_email) # Send to both the new and old email addresses
+    notification.send(fail_silently=False)
