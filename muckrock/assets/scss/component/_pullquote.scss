@@ -1,0 +1,46 @@
+.pullquote {
+    @include display(flex);
+    @include align-items(flex-start);
+    margin: 2*$vertical-rhythm 0;
+    blockquote {
+        margin-bottom: 0;
+        border-left: 4px solid $color-black;
+        font-size: $font-size-5;
+        font-weight: $font-weight-bold;
+        font-style: normal;
+        line-height: $font-line-height;
+        @include media($medium-layout) {
+            font-size: $font-size-6;
+        }
+    }
+    .sharing {
+        width: 40%;
+    }
+    .sharing a {
+        @include display(inline-flex);
+        @include justify-content(center);
+        @include align-items(center);
+        height: 2em;
+        width: 2em;
+        border-radius: 100%;
+        .icon {
+            height: $font-size-4;
+            width: $font-size-4;
+        }
+        path {
+            fill: $color-white;
+        }
+        background: $color-black;
+        &.twitter {
+            background: $color-twitter;
+        }
+        &.facebook {
+            background: $color-facebook;
+        }
+        transition: transform .25s ease-out;
+        transform: scale(0.8);
+        &:hover {
+            transform: scale(1.0);
+        }
+    }
+}

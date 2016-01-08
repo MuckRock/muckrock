@@ -191,4 +191,3 @@ def display_eml(foia_file):
             if sub_msg.get_content_type() == 'text/plain':
                 return sub_msg.get_payload(decode=True)
 
-

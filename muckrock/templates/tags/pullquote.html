@@ -1,0 +1,13 @@
+<aside class="pullquote">
+    <blockquote>{{text}}</blockquote>
+    {% if sharing %}
+    <div class="sharing">
+        <a class="twitter" href="javascript:window.open('http://twitter.com/intent/tweet?text={{text|truncatechars:'100'|escapejs|urlencode}}&amp;url=https://{{ request.get_host }}{{ request.path }}&amp;via=muckrock', 'Share on Twitter', 'width=500,height=253,location=no,menubar=no,status=no');" onclick="ga('send', 'event', 'Share', 'Twitter', window.location.pathname)">
+            {% include 'lib/icons/twitter.svg' %}
+        </a>
+        <a class="facebook" href="javascript:window.open('https://www.facebook.com/sharer/sharer.php?u=https://{{ request.get_host }}{{ request.path }}', 'Share on Facebook', 'width=500,height=140,location=no,menubar=no,status=no');" onclick="ga('send', 'event', 'Share', 'Facebook', window.location.pathname)">
+            {% include 'lib/icons/facebook.svg' %}
+        </a>
+    </div>
+    {% endif %}
+</aside>

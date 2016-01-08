@@ -1,5 +1,6 @@
 {% extends 'lists/base_list.html' %}
 {% load tags %}
+{% load foia_tags %}
 {% load mathfilters %}
 {% load static from staticfiles %}
 {% block title %}MuckRock &bull; Requests{% endblock title %}
@@ -23,24 +24,10 @@
 
 {% block list-table-item %}
 {% with item as foia %}
-
 <td><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></td>
-<td class="{{ foia.color_code }}">{{ foia.get_status_display }}</td>
-{% comment %}
-    <!--<div class="request-status">{{ foia.get_status_display }}</div>
-    <div class="request-title">{{ foia.title }}</div>
-    <div class="request-from-to">From <a href="{{ foia.user.profile.get_absolute_url }}">{{ foia.user.get_full_name }}</a> to <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a></div>-->
-{% endcomment %}
-
-
+<td class="{{ foia.status|classify_status }}">{{ foia.get_status_display }}</td>
 <td>{{ foia.date_submitted|date:"m/d/Y" }}</td>
 <td>{{ foia.date_updated|date:"m/d/Y" }}</td>
-
-{% comment %}
-<!--<td><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a></td>
-<td><a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a></td>
-<td><a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a></td>-->
-{% endcomment %}
 {% endwith %}
 {% endblock list-table-item %}
 

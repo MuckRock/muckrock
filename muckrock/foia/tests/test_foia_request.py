@@ -275,6 +275,11 @@ class TestFOIAFunctional(TestCase):
                                [f.title for f in sorted(response.context['object_list'],
                                                         key=attrgetter(field),
                                                         reverse=(order == 'desc'))])
+    def test_foia_bad_sort(self):
+        """Test sorting against a non-existant field"""
+        response = get_allowed(self.client, reverse('foia-list') + '?sort=test',
+                               ['lists/request_list.html', 'lists/base_list.html'])
+        nose.tools.eq_(response.status_code, 200)
 
     def test_foia_detail(self):
         """Test the foia-detail view"""
@@ -571,7 +576,7 @@ class TestFOIAIntegration(TestCase):
         ## after 4 days agency replies with the documents
         self.set_today(datetime.date.today() + datetime.timedelta(4))
         comm = FOIACommunication.objects.create(
-            foia=foia, from_who='Test Agency', to_who='Muckrock', date=datetime.date.today(),
+            foia=foia, from_who='Test Agency', to_who='Muckrock', date=datetime.datetime.now(),
             response=True, communication='Test communication')
         foia.status = 'done'
         foia.save()

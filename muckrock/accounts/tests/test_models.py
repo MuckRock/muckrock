@@ -8,7 +8,7 @@ from datetime import datetime, date, timedelta
 from mock import Mock, patch
 from nose.tools import ok_, eq_, assert_true, assert_false, raises, nottest
 
-from muckrock.factories import ProfileFactory
+from muckrock.factories import ProfileFactory, OrganizationFactory
 from muckrock.settings import MONTHLY_REQUESTS
 from muckrock.utils import get_stripe_token
 
@@ -53,6 +53,24 @@ class TestProfileUnit(TestCase):
         """Test profile model's __unicode__ method"""
         expected = "%s's Profile" % unicode(self.profile.user).capitalize()
         eq_(unicode(self.profile), expected)
+
+    def test_is_advanced(self):
+        """Test whether the users are marked as advanced."""
+        beta = ProfileFactory(acct_type='beta')
+        proxy = ProfileFactory(acct_type='beta')
+        admin = ProfileFactory(acct_type='admin')
+        basic = ProfileFactory(acct_type='basic')
+        active_org = OrganizationFactory(active=True)
+        inactive_org = OrganizationFactory(active=False)
+        active_org_member = ProfileFactory(acct_type='basic', organization=active_org)
+        inactive_org_member = ProfileFactory(acct_type='basic', organization=inactive_org)
+        assert_true(self.profile.is_advanced())
+        assert_true(beta.is_advanced())
+        assert_true(proxy.is_advanced())
+        assert_true(admin.is_advanced())
+        assert_true(active_org_member.is_advanced())
+        assert_false(basic.is_advanced())
+        assert_false(inactive_org_member.is_advanced())
 
     def test_monthly_requests(self):
         """Normal get number requests just returns the current value"""

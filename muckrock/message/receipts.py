@@ -11,7 +11,7 @@ import logging
 
 from muckrock.foia.models import FOIARequest
 from muckrock.organization.models import Organization
-from muckrock.settings import MONTHLY_REQUESTS
+from muckrock.settings import MONTHLY_REQUESTS, BUNDLED_REQUESTS
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +59,15 @@ class RequestPurchaseReceipt(GenericReceipt):
     subject = u'Payment received for additional requests'
     item = u'4 requests'
     text_template = 'message/receipt/request_purchase.txt'
+
+    def get_context_data(self, charge):
+        """Adjusts the item description to account for variable request purchase amounts"""
+        context = super(RequestPurchaseReceipt, self).get_context_data(charge)
+        if self.user:
+            bundle_size = BUNDLED_REQUESTS.get(self.user.profile.acct_type, 4)
+            item = unicode(bundle_size) + u' requests'
+            context['item'] = item
+        return context
 
 
 class RequestFeeReceipt(GenericReceipt):

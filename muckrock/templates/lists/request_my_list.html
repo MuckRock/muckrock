@@ -1,5 +1,6 @@
 {% extends 'lists/request_list.html' %}
 {% load tags %}
+{% load foia_tags %}
 
 {% block title %}Your Requests{% endblock title %}
 {% block list-type %}my request{% endblock list-type %}
@@ -24,8 +25,8 @@
 <th width="3%" class="list-table-checkbox"><input type="checkbox" id="toggle-all" /></th>
 <th data-sort="title">Title</th>
 <th width="20%" data-sort="status">Status</th>
-<th width="20%" data-sort="date_submitted">Date Created</th>
-<th width="20%">Date Updated</th>
+<th width="20%" data-sort="date_submitted">Created</th>
+<th width="20%" data-sort="date_updated">Updated</th>
 {% endblock list-table-head %}
 
 {% block list-table-body %}
@@ -38,7 +39,7 @@
                form="my-request-actions">
     </td>
     <td><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></td>
-    <td class="{{ foia.color_code }}">{{ foia.get_status_display }}</td>
+    <td class="{{ foia.status|classify_status }}">{{ foia.get_status_display }}</td>
     <td>{{ foia.communications.all.0.date|date:"m/d/Y" }}</td>
     <td>{{ foia.last_comm.date|date:"m/d/Y" }}</td>
 </tr>

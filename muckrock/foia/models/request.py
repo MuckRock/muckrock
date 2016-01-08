@@ -38,7 +38,7 @@ class FOIARequestQuerySet(models.QuerySet):
 
     def get_done(self):
         """Get all FOIA requests with responses"""
-        return self.filter(status='done').exclude(date_done=None)
+        return self.filter(status__in=['partial', 'done']).exclude(date_done=None)
 
     def get_editable(self):
         """Get all editable FOIA requests"""
@@ -140,14 +140,15 @@ class FOIARequest(models.Model):
     # pylint: disable=too-many-instance-attributes
 
     user = models.ForeignKey(User)
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, db_index=True)
     slug = models.SlugField(max_length=255)
-    status = models.CharField(max_length=10, choices=STATUS)
+    status = models.CharField(max_length=10, choices=STATUS, db_index=True)
     jurisdiction = models.ForeignKey(Jurisdiction)
     agency = models.ForeignKey(Agency, blank=True, null=True)
-    date_submitted = models.DateField(blank=True, null=True)
+    date_submitted = models.DateField(blank=True, null=True, db_index=True)
+    date_updated = models.DateField(blank=True, null=True, db_index=True)
     date_done = models.DateField(blank=True, null=True, verbose_name='Date response received')
-    date_due = models.DateField(blank=True, null=True)
+    date_due = models.DateField(blank=True, null=True, db_index=True)
     days_until_due = models.IntegerField(blank=True, null=True)
     date_followup = models.DateField(blank=True, null=True)
     date_estimate = models.DateField(blank=True, null=True,
@@ -372,19 +373,6 @@ class FOIARequest(models.Model):
     def public_documents(self):
         """Get a list of public documents attached to this request"""
         return self.files.filter(access='public')
-
-    def color_code(self):
-        """Get the color code for the current status"""
-        # pylint: disable=bad-whitespace
-        code_stop = 'failure'
-        code_wait = ''
-        code_go = 'success'
-        code_processed = code_stop if self.date_due and date.today() > self.date_due else code_go
-        colors = {'started':   code_wait, 'submitted': code_go,   'code_processed': code_processed,
-                  'fix':       code_wait, 'payment':   code_wait, 'rejected':  code_stop,
-                  'no_docs':   code_stop, 'done':      code_go,   'partial': code_go,
-                  'abandoned': code_stop, 'appealing': code_processed, 'ack': code_processed}
-        return colors.get(self.status, code_wait)
 
     def first_request(self):
         """Return the first request text"""

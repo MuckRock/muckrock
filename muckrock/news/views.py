@@ -36,6 +36,7 @@ class NewsDetail(DateDetailView):
 
     def get_context_data(self, **kwargs):
         context = super(NewsDetail, self).get_context_data(**kwargs)
+        context['projects'] = self.get_object().projects.all()
         context['sidebar_admin_url'] = reverse('admin:news_article_change',
             args=(context['object'].pk,))
         context['stripe_pk'] = STRIPE_PUB_KEY

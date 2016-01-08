@@ -5,6 +5,7 @@
     header, section, footer {
         padding: $vertical-rhythm/2;
     }
+    background: #fff;
     &.received {
         border-color: $color-black;
         .communication-header {
@@ -15,14 +16,6 @@
         border-color: $color-blue;
         .communication-header {
             background-color: $color-blue;
-        }
-    }
-    &.collapsed {
-        & > * {
-            display: none;
-        }
-        .communication-header {
-            @include display(flex);
         }
     }
     .communication-header {
@@ -93,11 +86,13 @@
         font-size: $font-size-3;
         font-weight: $font-weight-bold;
     }
+    .communication-metadata {
+        @include display(flex);
+        @include justify-content(space-between);
+        margin-bottom: 0;
+        font-size: $font-size-2;
+    }
     .communication-body {
-        header {
-            @include display(flex);
-            padding: 0;
-        }
         margin-bottom: 0;
     }
     .files {
@@ -133,7 +128,7 @@
         &.visible {
             display: block;
         }
-        label, input {
+        label, input, select {
             display: block;
             width: 100%;
             margin-bottom: $vertical-rhythm/2;
@@ -143,6 +138,14 @@
         }
         input {
             color: $color-black;
+        }
+    }
+    &.collapsed {
+        & > * {
+            display: none;
+        }
+        .communication-header {
+            @include display(flex);
         }
     }
 }

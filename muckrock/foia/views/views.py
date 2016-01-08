@@ -7,7 +7,6 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
-from django.db.models import Max
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
@@ -31,7 +30,11 @@ from muckrock.foia.models import \
     FOIAMultiRequest, \
     STATUS, END_STATUS
 from muckrock.foia.views.composers import get_foia
-from muckrock.foia.views.comms import move_comm, delete_comm, save_foia_comm, resend_comm
+from muckrock.foia.views.comms import move_comm,\
+                                      delete_comm,\
+                                      save_foia_comm,\
+                                      resend_comm,\
+                                      change_comm_status
 from muckrock.qanda.models import Question
 from muckrock.settings import STRIPE_PUB_KEY
 from muckrock.tags.models import Tag
@@ -49,6 +52,7 @@ class RequestList(MRFilterableListView):
     model = FOIARequest
     title = 'Requests'
     template_name = 'lists/request_list.html'
+    default_sort = 'title'
 
     def get_filters(self):
         """Adds request-specific filter fields"""
@@ -66,17 +70,16 @@ class RequestList(MRFilterableListView):
     def get_queryset(self):
         """Limits requests to those visible by current user"""
         objects = super(RequestList, self).get_queryset()
-        objects = objects.select_related('jurisdiction').only(
-                'title', 'slug', 'status', 'date_submitted', 'date_due',
-                'jurisdiction__slug')
-        objects = objects.annotate(date_updated=Max('communications__date'))
+        objects = objects.select_related('jurisdiction')
+        objects = objects.only(
+                'title', 'slug', 'status', 'date_submitted',
+                'date_due', 'date_updated', 'jurisdiction__slug')
         return objects.get_viewable(self.request.user)
 
 
 @class_view_decorator(login_required)
 class MyRequestList(RequestList):
     """View requests owned by current user"""
-
     template_name = 'lists/request_my_list.html'
 
     def post(self, request):
@@ -119,11 +122,14 @@ class FollowingRequestList(RequestList):
         """Limits FOIAs to those followed by the current user"""
         objects = actstream.models.following(self.request.user, FOIARequest)
         # actstream returns a list of objects, so we have to turn it into a queryset
-        objects = FOIARequest.objects.filter(
-                id__in=[_object.pk for _object in objects if _object])
-        objects = self.sort_list(objects)
+        pk_list = [_object.pk for _object in objects if _object]
+        objects = FOIARequest.objects.filter(pk__in=pk_list)
         objects = objects.select_related('jurisdiction')
-        return self.filter_list(objects)
+        # now we filter and sort the list like in the parent class
+        objects = self.filter_list(objects)
+        objects = self.sort_list(objects)
+        # finally, we can only show requests visible to that user
+        return objects.get_viewable(self.request.user)
 
 
 class ProcessingRequestList(RequestList):
@@ -246,6 +252,7 @@ class Detail(DetailView):
             'flag': self._flag,
             'appeal': self._appeal,
             'date_estimate': self._update_estimate,
+            'status_comm': change_comm_status,
             'move_comm': move_comm,
             'delete_comm': delete_comm,
             'resend_comm': resend_comm,

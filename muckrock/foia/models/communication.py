@@ -96,6 +96,12 @@ class FOIACommunication(models.Model):
         self.communication = self.communication[:150000]
         # special handling for certain agencies
         self._presave_special_handling()
+        # update foia's date updated if this is the latest communication
+        if (self.foia and
+                (self.foia.date_updated is None or
+                 self.date.date() > self.foia.date_updated)):
+            self.foia.date_updated = self.date.date()
+            self.foia.save()
         super(FOIACommunication, self).save(*args, **kwargs)
 
     def anchor(self):
