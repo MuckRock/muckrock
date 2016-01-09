@@ -1,3 +1,4 @@
+-e git+https://github.com/yunojuno/python-semanticversion.git@e8a1b3a543ab7d8b303f54e3ce48681f6c1589e7#egg=semantic_version-origin_issue-33
 -e git://github.com/callowayproject/django-news-sitemaps.git@55da6b72580dd6d79380f2bb17240e7afa00555a#egg=django_news_sitemaps-master
 -e git://github.com/dhan88/django-mailgun.git@df4e2f444bd488b6234f87c879a8402e7c8b552e#egg=django_mailgun-master
 -e git://github.com/jezdez/celery-haystack.git@6d6ef5ea61a2a88bda3e65be69115841545ac3c3#egg=celery_haystack-develop
@@ -38,6 +39,7 @@ django-markdown-deux==1.0.4
 django-mathfilters==0.3.0
 django-mptt==0.7.4
 django-nose==1.4.2
+django-package-monitor==0.2.3
 django-polymorphic==0.7.1
 django-pylibmc-sasl==0.2.4
 django-rest-swagger==0.3.2
