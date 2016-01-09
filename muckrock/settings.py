@@ -236,6 +236,7 @@ INSTALLED_APPS = (
     'taggit',
     'django_xmlrpc',
     'lot',
+    'package_monitor',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
@@ -601,6 +602,8 @@ LOT = {
 LOT_MIDDLEWARE_PARAM_NAME = 'uuid-login'
 
 ROBOTS_CACHE_TIMEOUT = 60 * 60 * 24
+
+PACKAGE_MONITOR_REQUIREMENTS_FILE = os.path.join(SITE_ROOT, '../requirements.txt')
 
 # Organization Settings
 
