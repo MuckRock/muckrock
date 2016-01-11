@@ -108,7 +108,7 @@
             {% for foia in completed_requests %}
                 {% include 'lib/foia.html' with hide_actions=True %}
             {% endfor %}
-            <a href="{% url 'foia-list' %}?status=completed">See more</a>
+            <a href="{% url 'foia-list' %}?status=done&sort=date_submitted&order=desc">See more</a>
         </section>
     </main>
 
