@@ -520,6 +520,7 @@ DATABASES['default'] = {
     'PASSWORD': url.password,
     'HOST': url.hostname,
     'PORT': url.port,
+    'CONN_MAX_AGE': os.environ.get('CONN_MAX_AGE', 500),
 }
 
 # test runner seems to want this...
