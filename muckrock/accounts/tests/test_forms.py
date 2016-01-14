@@ -3,9 +3,8 @@ Tests accounts forms
 """
 
 from django.test import TestCase
-from django.forms import ValidationError
 
-from nose.tools import eq_, raises, assert_false, assert_true
+from nose.tools import eq_, assert_false, assert_true
 from mock import patch
 
 from muckrock.accounts.forms import EmailSettingsForm, RegisterForm
@@ -15,6 +14,7 @@ class TestEmailSettingsForm(TestCase):
     """Users should be able to modify their email settings."""
     def setUp(self):
         """Set up tests"""
+        # pylint:disable=no-member
         self.profile = ProfileFactory()
         self.data = {
             'email_pref': self.profile.email_pref,
