@@ -104,21 +104,25 @@ def _make_request(request, foia_request, parent=None):
 
 def _make_user(request, data):
     """Helper function to create a new user"""
-    # create unique username
-    base_username = data['full_name'].replace(' ', '')
+    # create unique username thats at most 30 characters
+    base_username = data['full_name'].replace(' ', '')[:30]
     username = base_username
     num = 1
     while User.objects.filter(username=username).exists():
-        username = '%s%d' % (base_username, num)
+        postfix = str(num)
+        username = '%s%s' % (base_username[:30 - len(postfix)], postfix)
         num += 1
     # create random password
     password = ''.join(choice(string.ascii_letters + string.digits) for _ in range(12))
     # create a new user
     user = User.objects.create_user(username, data['email'], password)
-    if ' ' in data['full_name']:
-        user.first_name, user.last_name = data['full_name'].rsplit(' ', 1)
+    full_name = data['full_name'].strip()
+    if ' ' in full_name:
+        first_name, last_name = full_name.rsplit(' ', 1)
+        user.first_name = first_name[:30]
+        user.last_name = last_name[:30]
     else:
-        user.first_name = data['full_name']
+        user.first_name = full_name[:30]
     user.save()
     # create a new profile
     Profile.objects.create(
