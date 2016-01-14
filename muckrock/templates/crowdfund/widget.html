@@ -16,14 +16,16 @@
     <section class="stats">
         <div class="contributors">
             <p class="contributor summary">{{ contributor_summary }}</p>
-        {% if crowdfund.contributors|length > 0 %}
+        {% if crowdfund.contributors_count > 0 %}
             <ul class="contributor dropdown">
             {% for contributor in crowdfund.named_contributors %}
                 <li>{{ contributor.get_full_name }}</li>
             {% endfor %}
-            {% if crowdfund.anonymous_contributors %}
-                <li>{{ crowdfund.anonymous_contributors|length }} anonymous backer{{ crowdfund.anonymous_contributors|length|pluralize }}</li>
-            {% endif %}
+			{% with crowdfund.anonymous_contributors_count as anon_count %}
+				{% if anon_count %}
+					<li>{{ anon_count }} anonymous backer{{ anon_count|pluralize }}</li>
+				{% endif %}
+			{% endwith %}
             </ul>
         {% endif %}
         </div>

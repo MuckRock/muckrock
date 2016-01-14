@@ -57,7 +57,7 @@ def crowdfund_user(context):
 
 def contributor_summary(crowdfund):
     """Returns a summary of the contributors to the project"""
-    anonymous = len(crowdfund.anonymous_contributors())
+    anonymous = crowdfund.anonymous_contributors_count()
     contributor_names = [x.get_full_name() for x in crowdfund.named_contributors()]
     unnamed_string = ''
     named_limit = 4
@@ -77,7 +77,7 @@ def contributor_summary(crowdfund):
                 unnamed_string += ' people'
             else:
                 unnamed_string += ' person'
-    if len(crowdfund.contributors()) > 0:
+    if crowdfund.contributors_count() > 0:
         summary = ('Backed by '
                    + list_to_english_string(contributor_names[:named_limit] + [unnamed_string])
                    + '.')
