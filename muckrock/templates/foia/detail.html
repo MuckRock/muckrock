@@ -46,7 +46,6 @@
         </section>
         <span class="toggle-details" id="toggle-specific-information" data-state="0">Show details</span>
         <section class="specific-information">
-            {% if user.is_staff %}
             <table class="numbers">
                 <tr class="muckrock-number">
                     <td>MuckRock #</td>
@@ -57,7 +56,6 @@
                     <td>{{ foia.tracking_id }}</td>
                 </tr>
             </table>
-            {% endif %}
             <table class="dates">
                 <tr class="submitted">
                     <td class="label">Submitted</td>
