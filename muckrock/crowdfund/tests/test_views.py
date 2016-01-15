@@ -158,12 +158,12 @@ class TestCrowdfundRequestView(TestCase):
         self.post(self.data, user2)
 
         new_crowdfund = CrowdfundRequest.objects.get(pk=self.crowdfund.pk)
-        contributors = new_crowdfund.contributors()
-        logging.info(contributors)
-        ok_(contributors, 'Crowdfund should generate a list of contributors')
-        eq_(len(contributors), 3, 'All contributions should return some kind of user')
-        eq_(sum(contributor.is_anonymous() is True for contributor in contributors), 2,
-            'There should only be two anonymous users in this list')
+        eq_(new_crowdfund.contributors_count(), 3,
+                'All contributions should return some kind of user')
+        eq_(new_crowdfund.anonymous_contributors_count(), 2,
+                'There should be 2 anonymous contributors')
+        eq_(len(new_crowdfund.named_contributors()), 1,
+                'There should be 1 named contributor')
 
     def test_unlimit_amount(self):
         """The amount paid should be able to exceed the amount required."""
