@@ -171,7 +171,8 @@ MIDDLEWARE_CLASSES = (
 MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
 if DEBUG:
     MIDDLEWARE_CLASSES += ('muckrock.settings.ExceptionLoggingMiddleware',)
-    MIDDLEWARE_CLASSES += ('muckrock.middleware.ProfileMiddleware',)
+    # XXX add graphviz to vm
+    MIDDLEWARE_CLASSES += ('yet_another_django_profiler.middleware.ProfilerMiddleware',)
 
 class ExceptionLoggingMiddleware(object):
     """Log exceptions to command line

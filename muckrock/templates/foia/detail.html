@@ -135,9 +135,11 @@
                 <button id="toggle-communication-collapse" data-state="0">Collapse All</button>
             </div>
             <div class="communications-list">
+            {% with foia_url=foia.get_absolute_url %}
             {% for comm in foia.communications.all %}
                 {% include 'foia/communication.html' with communication=comm %}
             {% endfor %}
+            {% endwith %}
             </div>
 
             {% if user_can_edit %}
@@ -238,9 +240,11 @@ Sincerely,
             {% endif %}
             {% if foia.files.count > 0 %}
             <ul class="files-list" id="all-files">
+                {% with foia_url=foia.get_absolute_url %}
                 {% for file in foia.files.all %}
                 <li>{% include "lib/file.html" %}</li>
                 {% endfor %}
+                {% endwith %}
             </ul>
             {% else %}
             <h3 class="empty">There are no files associated with this request.</h3>

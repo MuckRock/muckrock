@@ -46,10 +46,15 @@ STATUS_NODRAFT = [st for st in STATUS if st != ('started', 'Draft')]
 
 # HELPER FUNCTIONS
 
-def get_foia(jurisdiction, jidx, slug, idx):
+def get_foia(jurisdiction, jidx, slug, idx, prefetch=None):
     """A helper function that gets and returns a FOIA object"""
     jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
-    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
+    if prefetch is None:
+        foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
+    else:
+        foia = get_object_or_404(
+                FOIARequest.objects.prefetch_related(*prefetch),
+                jurisdiction=jmodel, slug=slug, id=idx)
     return foia
 
 def _make_comm(foia):

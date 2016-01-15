@@ -188,7 +188,11 @@ class Detail(DetailView):
             self.kwargs['jurisdiction'],
             self.kwargs['jidx'],
             self.kwargs['slug'],
-            self.kwargs['idx']
+            self.kwargs['idx'],
+            prefetch=(
+                'communications',
+                'communications__rawemail',
+                'communications__files')
         )
         user = self.request.user
         valid_access_key = self.request.GET.get('key') == foia.access_key
