@@ -339,28 +339,53 @@ class Detail(DetailView):
         can_follow_up = foia.editable_by(request.user) or request.user.is_staff
         test = can_follow_up and foia.status != 'started'
         success_msg = 'Your follow up has been sent.'
-        return self._new_comm(request, foia, test, success_msg)
+        comm_sent = self._new_comm(request, foia, test, success_msg)
+        if comm_sent:
+            actstream.action.send(
+                request.user,
+                verb='followed up on',
+                action_object=foia,
+                target=foia.agency
+            )
+        return redirect(foia)
 
     def _thank(self, request, foia):
         """Handle submitting a thank you follow up"""
         test = foia.editable_by(request.user) and foia.is_thankable()
         success_msg = 'Your thank you has been sent.'
-        return self._new_comm(request, foia, test, success_msg, thanks=True)
+        comm_sent = self._new_comm(request, foia, test, success_msg, thanks=True)
+        if comm_sent:
+            actstream.action.send(
+                request.user,
+                verb='thanked',
+                action_object=foia.agency
+            )
+        return redirect(foia)
 
     def _appeal(self, request, foia):
         """Handle submitting an appeal"""
         test = foia.editable_by(request.user) and foia.is_appealable()
         success_msg = 'Appeal successfully sent.'
-        return self._new_comm(request, foia, test, success_msg, appeal=True)
+        comm_sent = self._new_comm(request, foia, test, success_msg, appeal=True)
+        if comm_sent:
+            actstream.action.send(
+                request.user,
+                verb='appealed',
+                action_object=foia,
+                target=foia.agency
+            )
+        return redirect(foia)
 
     def _new_comm(self, request, foia, test, success_msg, appeal=False, thanks=False):
         """Helper function for sending a new comm"""
         # pylint: disable=too-many-arguments
         text = request.POST.get('text')
+        comm_sent = False
         if text and test:
             save_foia_comm(foia, foia.user.get_full_name(), text, appeal=appeal, thanks=thanks)
             messages.success(request, success_msg)
-        return redirect(foia)
+            comm_sent = True
+        return comm_sent
 
     def _update_estimate(self, request, foia):
         """Change the estimated completion date"""

@@ -39,7 +39,7 @@ class CrowdfundABC(models.Model):
     closed = models.BooleanField(default=False)
 
     def expired(self):
-        """Has this crowdfuning run out of time?"""
+        """Has this crowdfund run out of time?"""
         return date.today() >= self.date_due or self.closed
 
     def amount_remaining(self):
