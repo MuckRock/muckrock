@@ -142,12 +142,7 @@ def embargo(request, jurisdiction, jidx, slug, idx):
             followers = actstream.models.followers(foia)
             for follower in followers:
                 actstream.actions.unfollow(follower, foia)
-            # generate action
-            actstream.action.send(
-                request.user,
-                verb='embargoed',
-                action_object=foia
-            )
+            actstream.action.send(request.user, verb='embargoed', action_object=foia)
             fine_tune_embargo(request, foia)
         else:
             logger.error('%s was forbidden from embargoing %s', request.user, foia)
@@ -168,12 +163,7 @@ def embargo(request, jurisdiction, jidx, slug, idx):
         foia.embargo = False
         foia.save()
         logger.info('%s unembargoed %s', request.user, foia)
-        # generate action
-        actstream.action.send(
-            request.user,
-            verb='unembargoed',
-            action_object=foia
-        )
+        actstream.action.send(request.user, verb='unembargoed', action_object=foia)
         return
 
     foia = _get_foia(jurisdiction, jidx, slug, idx)
@@ -214,11 +204,11 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
             int(amount)/100,
             foia.title
         )
-        # generate action
         actstream.action.send(
             request.user,
-            verb='paid fees',
-            target=foia
+            verb='paid fees for',
+            action_object=foia,
+            target=foia.agency
         )
         foia.status = 'processed'
         foia.save()
@@ -328,8 +318,9 @@ def crowdfund_request(request, idx, **kwargs):
             messages.success(request, 'Your crowdfund has started, spread the word!')
             actstream.action.send(
                 request.user,
-                verb='created',
-                action_object=crowdfund
+                verb='started',
+                action_object=crowdfund,
+                target=foia
             )
             return redirect(foia)
 

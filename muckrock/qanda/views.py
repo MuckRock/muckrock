@@ -128,12 +128,6 @@ def create_question(request):
             question.user = request.user
             question.date = datetime.now()
             question.save()
-            actstream.action.send(
-                question.user,
-                verb='asked',
-                action_object=question
-            )
-            actstream.actions.follow(request.user, question, actor_only=False)
             return redirect(question)
     else:
         form = QuestionForm()
@@ -170,11 +164,6 @@ def create_answer(request, slug, idx):
             answer.date = datetime.now()
             answer.question = question
             answer.save()
-            actstream.action.send(
-                answer.user,
-                verb='answered',
-                action_object=answer.question
-            )
             answer.question.notify_update()
             return redirect(answer.question)
     else:

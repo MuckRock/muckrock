@@ -239,19 +239,6 @@ def create_request(request):
             foia_comm.save()
             foia.save()
             request.session['ga'] = 'request_drafted'
-            # generate action
-            actstream.action.send(
-                request.user,
-                verb='drafted',
-                action_object=foia
-            )
-            if foia.parent:
-                # generate action
-                actstream.action.send(
-                    request.user,
-                    verb='cloned',
-                    action_object=foia.parent
-                )
             return redirect(foia)
         else:
             # form is invalid

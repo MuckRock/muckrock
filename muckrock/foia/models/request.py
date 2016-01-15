@@ -516,10 +516,16 @@ class FOIARequest(models.Model):
             self.status = 'submitted'
             self.date_processing = date.today()
         # generate sent activity
+        if appeal:
+            verb = 'appealed'
+        elif self.has_ack():
+            verb = 'followed up on'
+        else:
+            verb = 'submitted'
         actstream.action.send(
-            self,
-            verb='sent',
-            action_object=comm,
+            self.user,
+            verb=verb,
+            action_object=self,
             target=self.agency
         )
         self.save()
