@@ -9,6 +9,7 @@ from django.shortcuts import get_object_or_404
 from muckrock.crowdfund.models import CrowdfundProject, CrowdfundRequest
 from muckrock.crowdfund.forms import CrowdfundRequestPaymentForm, CrowdfundProjectPaymentForm
 from muckrock.settings import STRIPE_PUB_KEY
+from muckrock.utils import cache_get_or_set
 
 register = template.Library()
 
@@ -86,24 +87,29 @@ def contributor_summary(crowdfund, named_contributors, contributors_count, anony
 
 def generate_crowdfund_context(the_crowdfund, the_url_name, the_form, the_context):
     """Generates context in a way that's agnostic towards the object being crowdfunded."""
-    # XXX cache this
     endpoint = reverse(the_url_name, kwargs={'pk': the_crowdfund.pk})
     payment_form = crowdfund_form(the_crowdfund, the_form)
     logged_in, user_email = crowdfund_user(the_context)
-    named_contributors = the_crowdfund.named_contributors()
-    contributors_count = the_crowdfund.contributors_count()
-    anon_contributors_count = the_crowdfund.anonymous_contributors_count()
+    the_request = the_context.request
+    named, contrib_count, anon_count = (
+            cache_get_or_set(
+                'cf:%s:crowdfund_widget_data' % the_crowdfund.pk, 
+                lambda: (
+                    the_crowdfund.named_contributors(),
+                    the_crowdfund.contributors_count(),
+                    the_crowdfund.anonymous_contributors_count(),
+                    ),
+                600))
     contrib_sum = contributor_summary(
             the_crowdfund,
-            named_contributors,
-            contributors_count,
-            anon_contributors_count)
-    the_request = the_context.request
+            named,
+            contrib_count,
+            anon_count)
     return {
         'crowdfund': the_crowdfund,
-        'named_contributors': named_contributors,
-        'contributors_count': contributors_count,
-        'anon_contributors_count': anon_contributors_count,
+        'named_contributors': named,
+        'contributors_count': contrib_count,
+        'anon_contributors_count': anon_count,
         'contributor_summary': contrib_sum,
         'endpoint': endpoint,
         'logged_in': logged_in,

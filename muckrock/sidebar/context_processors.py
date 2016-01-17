@@ -36,6 +36,7 @@ def get_organization(user):
     def load_organization(user):
         """Return a function to load the user's organization"""
         def inner():
+            """Argument-less function to load user's organization"""
             org = None
             if user.profile.organization:
                 org = user.profile.organization

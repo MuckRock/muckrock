@@ -6,7 +6,7 @@ from django.test import TestCase
 
 from datetime import timedelta
 from mock import patch
-from nose.tools import eq_, ok_
+from nose.tools import eq_
 
 from muckrock.factories import UserFactory
 from muckrock.sidebar.models import Broadcast

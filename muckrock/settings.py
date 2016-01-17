@@ -549,7 +549,7 @@ CACHES = {
 }
 
 if TEST:
-    CACHES['default']['BACKEND'] = 'django.core.cache.backends.dummy.DummyCache'    
+    CACHES['default']['BACKEND'] = 'django.core.cache.backends.dummy.DummyCache'
 
 if 'MEMCACHIER_SERVERS' in os.environ:
     CACHES['default']['BACKEND'] = 'django.core.cache.backends.memcached.MemcachedCache'
