@@ -284,17 +284,8 @@ def homepage(request):
             'hp:completed_requests',
             lambda: FOIARequest.objects.get_public().get_done()
                                .order_by('-date_done')
-                               .select_related(
-                                   'agency',
-                                   'agency__jurisdiction',
-                                   'jurisdiction',
-                                   'jurisdiction__parent',
-                                   'jurisdiction__parent__parent',
-                                   'user',
-                                   'user__profile',
-                               ).prefetch_related(
-                                   'files',
-                               )[:6],
+                               .select_related_view()
+                               .prefetch_related('files')[:6],
             600)
     stats = cache_get_or_set(
             'hp:stats',

@@ -101,6 +101,18 @@ class FOIARequestQuerySet(models.QuerySet):
                    .select_related('jurisdiction__parent__parent')\
                    .filter(user__in=users)
 
+    def select_related_view(self):
+        """Select related models for viewing"""
+        return self.select_related(
+                'agency',
+                'agency__jurisdiction',
+                'jurisdiction',
+                'jurisdiction__parent',
+                'jurisdiction__parent__parent',
+                'user',
+                'user__profile',
+                )
+
 STATUS = (
     ('started', 'Draft'),
     ('submitted', 'Processing'),

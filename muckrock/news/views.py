@@ -34,15 +34,7 @@ class NewsDetail(DateDetailView):
                 Prefetch('editors',
                     queryset=User.objects.select_related('profile')),
                 Prefetch('foias',
-                    queryset=FOIARequest.objects.select_related(
-                        'agency',
-                        'agency__jurisdiction',
-                        'jurisdiction',
-                        'jurisdiction__parent',
-                        'jurisdiction__parent__parent',
-                        'user',
-                        'user__profile',
-                        )))
+                    queryset=FOIARequest.objects.select_related_view()))
         if self.request.user.is_staff:
             return queryset.all()
         else:

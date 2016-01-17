@@ -280,7 +280,7 @@ def create_request(request):
             form = RequestForm(request=request)
 
     viewable = FOIARequest.objects.get_viewable(request.user)
-    featured = viewable.filter(featured=True)
+    featured = viewable.filter(featured=True).select_related_view()
 
     context = {
         'form': form,
