@@ -67,9 +67,7 @@ class TaskQuerySet(models.QuerySet):
 
     def filter_by_foia(self, foia):
         """Get all tasks that relate to the provided FOIA request."""
-        # pylint:disable=line-too-long
-        # I disabled pylint line length checking here because it's like 4 characters and
-        # I think that shortening these lines would reduce the overall legibility.
+        # pylint:disable=no-self-use
         tasks = []
         # infer foia from communication
         for task_type in (ResponseTask, SnailMailTask, FailedFaxTask):

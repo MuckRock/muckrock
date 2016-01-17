@@ -712,7 +712,7 @@ class FOIARequest(models.Model):
             ),
         ]
 
-    def noncontextual_request_actions(self, user, can_edit):
+    def noncontextual_request_actions(self, can_edit):
         '''Provides context-insensitive action interfaces for requests'''
         can_pay = can_edit and self.is_payable()
         kwargs = {

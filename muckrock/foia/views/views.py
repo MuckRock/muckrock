@@ -167,7 +167,7 @@ class Detail(DetailView):
 
     def __init__(self, *args, **kwargs):
         self._obj = None
-        return super(Detail, self).__init__(*args, **kwargs)
+        super(Detail, self).__init__(*args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
         """If request is a draft, then redirect to drafting interface"""
@@ -249,8 +249,10 @@ class Detail(DetailView):
         context['access_form'] = FOIAAccessForm()
         context['embargo_needs_date'] = foia.status in END_STATUS
         context['user_actions'] = foia.user_actions(user)
-        context['noncontextual_request_actions'] = foia.noncontextual_request_actions(user, user_can_edit)
-        context['contextual_request_actions'] = foia.contextual_request_actions(user, user_can_edit)
+        context['noncontextual_request_actions'] = \
+                foia.noncontextual_request_actions(user_can_edit)
+        context['contextual_request_actions'] = \
+                foia.contextual_request_actions(user, user_can_edit)
         context['status_choices'] = STATUS if include_draft else STATUS_NODRAFT
         context['show_estimated_date'] = foia.status not in ['submitted', 'ack', 'done', 'rejected']
         context['change_estimated_date'] = FOIAEstimatedCompletionDateForm(instance=foia)

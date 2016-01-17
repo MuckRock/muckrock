@@ -48,6 +48,7 @@ STATUS_NODRAFT = [st for st in STATUS if st != ('started', 'Draft')]
 
 def get_foia(jurisdiction, jidx, slug, idx, select_related=None, prefetch_related=None):
     """A helper function that gets and returns a FOIA object"""
+    # pylint: disable=too-many-arguments
     jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
     foia_qs = FOIARequest.objects.all()
     if select_related:
