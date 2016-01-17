@@ -2,7 +2,7 @@
 Models for the Jurisdiction application
 """
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Avg, F
 from django.template.defaultfilters import slugify
 
 from easy_thumbnails.fields import ThumbnailerImageField
@@ -62,12 +62,8 @@ class RequestHelper(object):
 
     def average_response_time(self):
         """Get the average response time from a submitted to completed request"""
-
-        reqs = self.foiarequest_set.exclude(date_submitted=None).exclude(date_done=None)
-        if reqs.exists():
-            return sum((req.date_done - req.date_submitted).days for req in reqs) / reqs.count()
-        else:
-            return 0
+        return int(self.foiarequest_set.aggregate(
+                avg=Avg(F('date_done') - F('date_submitted')))['avg'])
 
     def total_pages(self):
         """Total pages released"""

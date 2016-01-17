@@ -165,10 +165,10 @@ MIDDLEWARE_CLASSES = (
     'lot.middleware.LOTMiddleware',
     'muckrock.middleware.RemoveTokenMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'reversion.middleware.RevisionMiddleware',
 )
-MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
 if DEBUG:
     MIDDLEWARE_CLASSES += ('muckrock.settings.ExceptionLoggingMiddleware',)
     MIDDLEWARE_CLASSES += ('yet_another_django_profiler.middleware.ProfilerMiddleware',)
