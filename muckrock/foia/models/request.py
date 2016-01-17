@@ -712,9 +712,8 @@ class FOIARequest(models.Model):
             ),
         ]
 
-    def noncontextual_request_actions(self, user):
+    def noncontextual_request_actions(self, user, can_edit):
         '''Provides context-insensitive action interfaces for requests'''
-        can_edit = self.editable_by(user) or user.is_staff
         can_pay = can_edit and self.is_payable()
         kwargs = {
             'jurisdiction': self.jurisdiction.slug,
@@ -739,9 +738,8 @@ class FOIARequest(models.Model):
             ),
         ]
 
-    def contextual_request_actions(self, user):
+    def contextual_request_actions(self, user, can_edit):
         '''Provides context-sensitive action interfaces for requests'''
-        can_edit = self.editable_by(user) or user.is_staff
         can_follow_up = can_edit and self.status != 'started'
         can_appeal = can_edit and self.is_appealable()
         kwargs = {

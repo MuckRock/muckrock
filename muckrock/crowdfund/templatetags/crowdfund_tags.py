@@ -56,7 +56,7 @@ def crowdfund_user(context):
     user_email = context['user'].email if logged_in else ''
     return (logged_in, user_email)
 
-def contributor_summary(crowdfund, named_contributors, contributors_count, anonymous):
+def contributor_summary(named_contributors, contributors_count, anonymous):
     """Returns a summary of the contributors to the project"""
     contributor_names = [x.get_full_name() for x in named_contributors]
     unnamed_string = ''
@@ -93,7 +93,7 @@ def generate_crowdfund_context(the_crowdfund, the_url_name, the_form, the_contex
     the_request = the_context.request
     named, contrib_count, anon_count = (
             cache_get_or_set(
-                'cf:%s:crowdfund_widget_data' % the_crowdfund.pk, 
+                'cf:%s:crowdfund_widget_data' % the_crowdfund.pk,
                 lambda: (
                     the_crowdfund.named_contributors(),
                     the_crowdfund.contributors_count(),
@@ -101,7 +101,6 @@ def generate_crowdfund_context(the_crowdfund, the_url_name, the_form, the_contex
                     ),
                 600))
     contrib_sum = contributor_summary(
-            the_crowdfund,
             named,
             contrib_count,
             anon_count)

@@ -73,12 +73,14 @@
                     {% endif %}
                 </tr>
                 {% endif %}
-                {% if foia.last_response %}
+                {% with last_response as foia.last_response %}
+                {% if last_response %}
                 <tr class="last-response">
                     <td class="label">Last Response</td>
-                    <td class="date">{{ foia.last_response.date.date }}</td>
+                    <td class="date">{{ last_response.date.date }}</td>
                 </tr>
                 {% endif %}
+                {% endwith %}
                 {% if show_estimated_date %}
                 <tr class="estimated-completion">
                     <td class="label">Est. Completion</td>
@@ -160,7 +162,7 @@
             <div class="communications-composer">
                 <div class="composer-actions">
                     <button class="primary" id="follow-up">Follow Up</button>
-                    {% if foia.is_thankable %}
+                    {% if is_thankable %}
                     <button class="success" id="thanks">Thank Agency</button>
                     {% endif %}
                     {% if foia.is_appealable %}
@@ -185,7 +187,7 @@
                         <span class="button cancel">Cancel</span>
                     </div>
                 </form>
-                {% if foia.is_thankable %}
+                {% if is_thankable %}
                 <form class="thanks composer-input" method="post">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="thanks" />
@@ -238,10 +240,11 @@ Sincerely,
                 <div class="viewer" id="viewer"></div>
             </div>
             {% endif %}
-            {% if foia.files.count > 0 %}
+            {% with foia.files.all as files %}
+            {% if files %}
             <ul class="files-list" id="all-files">
                 {% with foia_url=foia.get_absolute_url %}
-                {% for file in foia.files.all %}
+                {% for file in files %}
                 <li>{% include "lib/file.html" %}</li>
                 {% endfor %}
                 {% endwith %}
@@ -249,21 +252,24 @@ Sincerely,
             {% else %}
             <h3 class="empty">There are no files associated with this request.</h3>
             {% endif %}
+            {% endwith %}
         </section>
 
         <!-- NOTES -->
         {% if user_can_edit %}
         <section class="tab-section notes" id="notes">
-            {% if foia.notes.count > 0 %}
+            {% with foia.notes.all as notes %}
+            {% if notes %}
             <header class="notes-controls">
                 <div class="notes filter">
                     <input id="notes-filter" type="search" placeholder="Filter notes" />
                 </div>
             </header>
             {% endif %}
-            {% for note in foia.notes.all %}
+            {% for note in notes %}
                 {% include 'foia/note.html' with note=note %}
             {% endfor %}
+            {% endwith %}
             <form class="add-note" method="post">
                 {% csrf_token %}
                 <header>

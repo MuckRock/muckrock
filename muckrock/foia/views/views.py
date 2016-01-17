@@ -165,6 +165,10 @@ class Detail(DetailView):
     model = FOIARequest
     context_object_name = 'foia'
 
+    def __init__(self, *args, **kwargs):
+        self._obj = None
+        return super(Detail, self).__init__(*args, **kwargs)
+
     def dispatch(self, request, *args, **kwargs):
         """If request is a draft, then redirect to drafting interface"""
         if request.POST:
@@ -184,12 +188,26 @@ class Detail(DetailView):
     def get_object(self, queryset=None):
         """Get the FOIA Request"""
         # pylint: disable=unused-argument
+        # this is called twice in dispatch, so cache to not actually run twice
+        if self._obj:
+            return self._obj
+
         foia = get_foia(
             self.kwargs['jurisdiction'],
             self.kwargs['jidx'],
             self.kwargs['slug'],
             self.kwargs['idx'],
-            prefetch=(
+            select_related=(
+                'agency',
+                'agency__jurisdiction',
+                'crowdfund',
+                'jurisdiction',
+                'jurisdiction__parent',
+                'jurisdiction__parent__parent',
+                'user',
+                'user__profile',
+                ),
+            prefetch_related=(
                 'communications',
                 'communications__rawemail',
                 'communications__files')
@@ -202,6 +220,7 @@ class Detail(DetailView):
             if foia.updated:
                 foia.updated = False
                 foia.save()
+        self._obj = foia
         return foia
 
     def get_context_data(self, **kwargs):
@@ -230,15 +249,18 @@ class Detail(DetailView):
         context['access_form'] = FOIAAccessForm()
         context['embargo_needs_date'] = foia.status in END_STATUS
         context['user_actions'] = foia.user_actions(user)
-        context['noncontextual_request_actions'] = foia.noncontextual_request_actions(user)
-        context['contextual_request_actions'] = foia.contextual_request_actions(user)
+        context['noncontextual_request_actions'] = foia.noncontextual_request_actions(user, user_can_edit)
+        context['contextual_request_actions'] = foia.contextual_request_actions(user, user_can_edit)
         context['status_choices'] = STATUS if include_draft else STATUS_NODRAFT
         context['show_estimated_date'] = foia.status not in ['submitted', 'ack', 'done', 'rejected']
         context['change_estimated_date'] = FOIAEstimatedCompletionDateForm(instance=foia)
-        context['task_count'] = len(Task.objects.filter_by_foia(foia))
-        context['open_tasks'] = Task.objects.get_unresolved().filter_by_foia(foia)
+        if user.is_staff:
+            all_tasks = Task.objects.filter_by_foia(foia)
+            context['task_count'] = len(all_tasks)
+            context['open_tasks'] = [task for task in all_tasks if not task.resolved]
         context['stripe_pk'] = STRIPE_PUB_KEY
         context['sidebar_admin_url'] = reverse('admin:foia_foiarequest_change', args=(foia.pk,))
+        context['is_thankable'] = foia.is_thankable()
         if foia.sidebar_html:
             messages.info(self.request, foia.sidebar_html)
         return context
