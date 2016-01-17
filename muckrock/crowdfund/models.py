@@ -147,6 +147,7 @@ class CrowdfundPaymentABC(models.Model):
 
 class CrowdfundRequest(CrowdfundABC):
     """Keep track of crowdfunding for a request"""
+    type_ = 'foia'
     foia = models.OneToOneField(FOIARequest, related_name='crowdfund')
 
     def __unicode__(self):
@@ -175,6 +176,7 @@ class CrowdfundRequestPayment(CrowdfundPaymentABC):
 
 class CrowdfundProject(CrowdfundABC):
     """A crowdfunding campaign for a project."""
+    type_ = 'project'
     project = models.ForeignKey('project.Project', related_name='crowdfund')
 
     def __unicode__(self):

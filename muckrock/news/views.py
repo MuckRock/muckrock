@@ -3,7 +3,9 @@ Views for the news application
 """
 
 from django.contrib import messages
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.db.models import Prefetch
 from django.shortcuts import redirect
 from django.views.generic.list import ListView
 from django.views.generic.dates import YearArchiveView, DateDetailView
@@ -12,6 +14,7 @@ from rest_framework import viewsets
 from rest_framework.permissions import DjangoModelPermissions
 import django_filters
 
+from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
 from muckrock.news.serializers import ArticleSerializer
 from muckrock.settings import STRIPE_PUB_KEY
@@ -25,10 +28,25 @@ class NewsDetail(DateDetailView):
 
     def get_queryset(self):
         """Get articles for this view"""
+        queryset = Article.objects.prefetch_related(
+                Prefetch('authors',
+                    queryset=User.objects.select_related('profile')),
+                Prefetch('editors',
+                    queryset=User.objects.select_related('profile')),
+                Prefetch('foias',
+                    queryset=FOIARequest.objects.select_related(
+                        'agency',
+                        'agency__jurisdiction',
+                        'jurisdiction',
+                        'jurisdiction__parent',
+                        'jurisdiction__parent__parent',
+                        'user',
+                        'user__profile',
+                        )))
         if self.request.user.is_staff:
-            return Article.objects.all()
+            return queryset.all()
         else:
-            return Article.objects.get_published()
+            return queryset.get_published()
 
     def get_allow_future(self):
         """Can future posts be seen?"""
@@ -36,7 +54,7 @@ class NewsDetail(DateDetailView):
 
     def get_context_data(self, **kwargs):
         context = super(NewsDetail, self).get_context_data(**kwargs)
-        context['projects'] = self.get_object().projects.all()
+        context['projects'] = context['object'].projects.all()
         context['sidebar_admin_url'] = reverse('admin:news_article_change',
             args=(context['object'].pk,))
         context['stripe_pk'] = STRIPE_PUB_KEY
@@ -58,6 +76,7 @@ class NewsDetail(DateDetailView):
             self.get_object().save()
             messages.success(request, 'Your tags have been saved to this article.')
         return redirect(self.get_object())
+
 
 class NewsYear(YearArchiveView):
     """View for year archive"""

@@ -55,10 +55,9 @@ def crowdfund_user(context):
     user_email = context['user'].email if logged_in else ''
     return (logged_in, user_email)
 
-def contributor_summary(crowdfund):
+def contributor_summary(crowdfund, named_contributors, contributors_count, anonymous):
     """Returns a summary of the contributors to the project"""
-    anonymous = crowdfund.anonymous_contributors_count()
-    contributor_names = [x.get_full_name() for x in crowdfund.named_contributors()]
+    contributor_names = [x.get_full_name() for x in named_contributors]
     unnamed_string = ''
     named_limit = 4
     num_unnamed = len(contributor_names) - named_limit
@@ -77,7 +76,7 @@ def contributor_summary(crowdfund):
                 unnamed_string += ' people'
             else:
                 unnamed_string += ' person'
-    if crowdfund.contributors_count() > 0:
+    if contributors_count > 0:
         summary = ('Backed by '
                    + list_to_english_string(contributor_names[:named_limit] + [unnamed_string])
                    + '.')
@@ -87,13 +86,24 @@ def contributor_summary(crowdfund):
 
 def generate_crowdfund_context(the_crowdfund, the_url_name, the_form, the_context):
     """Generates context in a way that's agnostic towards the object being crowdfunded."""
+    # XXX cache this
     endpoint = reverse(the_url_name, kwargs={'pk': the_crowdfund.pk})
     payment_form = crowdfund_form(the_crowdfund, the_form)
     logged_in, user_email = crowdfund_user(the_context)
-    contrib_sum = contributor_summary(the_crowdfund)
+    named_contributors = the_crowdfund.named_contributors()
+    contributors_count = the_crowdfund.contributors_count()
+    anon_contributors_count = the_crowdfund.anonymous_contributors_count()
+    contrib_sum = contributor_summary(
+            the_crowdfund,
+            named_contributors,
+            contributors_count,
+            anon_contributors_count)
     the_request = the_context.request
     return {
         'crowdfund': the_crowdfund,
+        'named_contributors': named_contributors,
+        'contributors_count': contributors_count,
+        'anon_contributors_count': anon_contributors_count,
         'contributor_summary': contrib_sum,
         'endpoint': endpoint,
         'logged_in': logged_in,

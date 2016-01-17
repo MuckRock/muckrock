@@ -16,8 +16,7 @@ def get_recent_articles():
     """Lists last five recent news articles"""
     return cache_get_or_set(
             'sb:recent_articles',
-            lambda: Article.objects.get_published().order_by('-pub_date')
-                .prefetch_related('authors', 'projects')[:5],
+            lambda: Article.objects.get_published().order_by('-pub_date')[:5],
             600)
 
 def get_actionable_requests(user):
