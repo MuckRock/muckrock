@@ -6,8 +6,10 @@
 {% load thumbnail %}
 {% load foia_tags %}
 {% load news_tags %}
+{% load cache %}
 
 {% block content %}
+{% cache 600 homepage %}
 <div class="homepage">
     <header class="mission banner">
         <h1 class="about">A <a href="//muckrock.com/about/" title="About Us">collaborative news site</a> that <a href="//muckrock.com/landing/" title="Landing Page">gives you the tools</a> to hold <a href="{{ federal_government.get_absolute_url }}" title="{{ federal_government }}">the government</a> accountable.</a></h1>
@@ -18,8 +20,8 @@
                 {% with lead_article as article %}
                 <li class="lead article">
                     {% if article.image %}<a href="{{article.get_absolute_url}}" title="{{article.title}}" class="article-image"><img src="{% thumbnail article.image 1200x400 %}" /></a>{% endif %}
-                    {% if article.projects.exists %}
-                    {% with article.projects.first as project %}
+                    {% if article.projects %}
+                    {% with article.projects.0 as project %}
                     <dfn class="article-project"><a href="{{project.get_absolute_url}}">{{project.title}}</a></dfn>
                     {% endwith %}
                     {% endif %}
@@ -39,8 +41,8 @@
                 {% endwith %}
                 {% for article in other_articles %}
                 <li class="other article">
-                    {% if article.projects.exists %}
-                    {% with article.projects.first as project %}
+                    {% if article.projects %}
+                    {% with article.projects.0 as project %}
                     <dfn class="article-project"><a href="{{project.get_absolute_url}}">{{project.title}}</a></dfn>
                     {% endwith %}
                     {% endif %}
@@ -113,4 +115,5 @@
     </main>
 
 </div>
+{% endcache %}
 {% endblock content %}
