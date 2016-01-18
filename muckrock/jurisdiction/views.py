@@ -60,7 +60,7 @@ def detail(request, fed_slug, state_slug, local_slug):
             .only('pk', 'slug', 'name', 'jurisdiction')
             .annotate(foia_count=Count('foiarequest'))
             .annotate(pages=Sum('foiarequest__files__pages'))
-            .order_by('name')
+            .order_by('-foia_count')
             [:15])
 
     if request.method == 'POST':
