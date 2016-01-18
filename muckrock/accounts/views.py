@@ -357,7 +357,14 @@ def profile(request, username=None):
     user = get_object_or_404(User, username=username) if username else request.user
     user_profile = user.profile
     org = user_profile.organization
-    requests = FOIARequest.objects.filter(user=user).get_viewable(request.user)
+    requests = (FOIARequest.objects
+            .filter(user=user)
+            .get_viewable(request.user)
+            .select_related(
+                'jurisdiction',
+                'jurisdiction__parent',
+                'jurisdiction__parent__parent',
+                ))
     recent_requests = requests.order_by('-date_submitted')[:5]
     recent_completed = requests.filter(status='done').order_by('-date_done')[:5]
     articles = Article.objects.get_published().filter(authors=user)[:5]
