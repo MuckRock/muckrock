@@ -8,7 +8,6 @@ from django.template.defaultfilters import slugify
 from easy_thumbnails.fields import ThumbnailerImageField
 
 from muckrock.business_days.models import Holiday, HolidayCalendar, Calendar
-from muckrock.tags.models import Tag
 
 # pylint: disable=bad-continuation
 

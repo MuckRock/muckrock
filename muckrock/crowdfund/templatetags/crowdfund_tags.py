@@ -6,7 +6,7 @@ from django import template
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 
-from muckrock.crowdfund.models import CrowdfundProject, CrowdfundRequest
+from muckrock.crowdfund.models import CrowdfundRequest
 from muckrock.crowdfund.forms import CrowdfundRequestPaymentForm, CrowdfundProjectPaymentForm
 from muckrock.settings import STRIPE_PUB_KEY
 from muckrock.utils import cache_get_or_set

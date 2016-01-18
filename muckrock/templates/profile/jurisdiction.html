@@ -55,7 +55,7 @@
     {% include 'lib/foia_table.html' with requests=foia_requests %}
 
     {% if agencies %}
-    <h3>Documented Agencies</h3>
+    <h3>Documented Agencies <small><a href="{% url 'agency-list' %}?jurisdiction={{ jurisdiction.pk }}">See All</a></small></h3>
     <table>
         <tr>
             <th width="50%">Agency</th>
@@ -70,7 +70,6 @@
         </tr>
         {% endfor %}
     </table>
-    <a href="{% url 'agency-list' %}?jurisdiction={{ jurisdiction.pk }}">See all</a>
     {% else %}
     <h3>No agencies have been documented for this jurisdiction.</h3>
     {% endif %}

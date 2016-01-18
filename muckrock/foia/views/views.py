@@ -168,9 +168,8 @@ class ProcessingRequestList(RequestList):
 
     def get_queryset(self):
         """Apply select and prefetch related"""
-        objects = super(RequestList, self).get_queryset()
+        objects = super(ProcessingRequestList, self).get_queryset()
         return (objects
-                .select_related('jurisdiction')
                 .prefetch_related('communications'))
 
 
