@@ -2,7 +2,7 @@
 Models for the Jurisdiction application
 """
 from django.db import models
-from django.db.models import Sum, Avg, F
+from django.db.models import Avg, Count, F, Sum
 from django.template.defaultfilters import slugify
 
 from easy_thumbnails.fields import ThumbnailerImageField
@@ -18,14 +18,11 @@ class RequestHelper(object):
 
     def exemptions(self):
         """Get a list of exemptions tagged for requests from this agency"""
-
-        exemption_list = []
-        for tag in Tag.objects.filter(name__startswith='exemption'):
-            count = self.foiarequest_set.filter(tags=tag).count()
-            if count:
-                exemption_list.append({'name': tag.name, 'count': count})
-
-        return exemption_list
+        return (self.foiarequest_set
+                .filter(tags__name__startswith='exemption')
+                .order_by('tags__name')
+                .values('tags__name')
+                .annotate(count=Count('tags')))
 
     def interesting_requests(self):
         """Return a list of interesting requests to display on the agency's detail page"""

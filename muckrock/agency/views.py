@@ -30,8 +30,14 @@ class List(MRFilterableListView):
 
     def get_queryset(self):
         """Limit agencies to only approved ones."""
-        objects = super(List, self).get_queryset()
-        objects = objects.get_approved()
+        objects = (super(List, self)
+                .get_queryset()
+                .get_approved()
+                .select_related(
+                    'jurisdiction',
+                    'jurisdiction__parent',
+                    'jurisdiction__parent__parent',
+                    ))
         return objects
 
 def detail(request, jurisdiction, jidx, slug, idx):
@@ -43,9 +49,11 @@ def detail(request, jurisdiction, jidx, slug, idx):
     if agency.status != 'approved':
         raise Http404()
 
-    foia_requests = FOIARequest.objects.get_viewable(request.user)\
-                                       .filter(agency=agency)\
-                                       .order_by('-date_submitted')[:5]
+    foia_requests = (FOIARequest.objects
+            .get_viewable(request.user)
+            .filter(agency=agency)
+            .select_related('jurisdiction')
+            .order_by('-date_submitted')[:5])
 
     if request.method == 'POST':
         form = FlagForm(request.POST)
