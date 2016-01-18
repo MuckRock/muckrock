@@ -151,7 +151,7 @@ class Profile(models.Model):
 
     def is_member_of(self, organization):
         """Answers whether the profile is a member of the passed organization"""
-        return self.organization == organization
+        return self.organization_id == organization.pk
 
     def is_member_of_active_org(self):
         """Answers whether the user is a member of an active organization"""
