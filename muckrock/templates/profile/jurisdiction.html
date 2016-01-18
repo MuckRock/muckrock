@@ -70,7 +70,7 @@
         </tr>
         {% endfor %}
     </table>
-    <a href="{% url 'foia-list' %}?jurisdiction={{ jurisdiction.slug }}">See all</a>
+    <a href="{% url 'agency-list' %}?jurisdiction={{ jurisdiction.pk }}">See all</a>
     {% else %}
     <h3>No agencies have been documented for this jurisdiction.</h3>
     {% endif %}
