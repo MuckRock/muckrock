@@ -81,7 +81,8 @@ class NewsYear(YearArchiveView):
 class List(ListView):
     """List of news articles"""
     paginate_by = 10
-    queryset = Article.objects.get_published()
+    queryset = Article.objects.get_published().prefetch_related(
+            Prefetch('authors', queryset=User.objects.select_related('profile')))
 
 
 class ArticleViewSet(viewsets.ModelViewSet):
