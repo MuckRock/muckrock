@@ -50,8 +50,8 @@ class TestJurisdictionUnit(TestCase):
     def test_exemptions(self):
         """Test the RequestHelper exemption mixin method with Jurisdictions"""
 
-        nose.tools.eq_(self.state.exemptions(), [{'name': 'exemption 42', 'count': 1},
-                                                 {'name': 'exemption x', 'count': 2}])
+        nose.tools.eq_(self.state.exemptions(), [{'tags__name': 'exemption 42', 'count': 1},
+                                                 {'tags__name': 'exemption x', 'count': 2}])
 
     def test_interesting_requests(self):
         """Test the RequestHelper interesting requests mixin method with Jurisdictions"""
