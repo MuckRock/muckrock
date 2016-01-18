@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
+from django.db.models import Prefetch
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
@@ -19,22 +20,28 @@ import json
 import logging
 
 from muckrock.foia.codes import CODES
-from muckrock.foia.forms import \
-    RequestFilterForm, \
-    FOIAEmbargoForm, \
-    FOIANoteForm, \
-    FOIAEstimatedCompletionDateForm, \
-    FOIAAccessForm
-from muckrock.foia.models import \
-    FOIARequest, \
-    FOIAMultiRequest, \
-    STATUS, END_STATUS
+from muckrock.foia.forms import (
+    RequestFilterForm,
+    FOIAEmbargoForm,
+    FOIANoteForm,
+    FOIAEstimatedCompletionDateForm,
+    FOIAAccessForm,
+    )
+from muckrock.foia.models import (
+    FOIARequest,
+    FOIAMultiRequest,
+    RawEmail,
+    STATUS,
+    END_STATUS,
+    )
 from muckrock.foia.views.composers import get_foia
-from muckrock.foia.views.comms import move_comm,\
-                                      delete_comm,\
-                                      save_foia_comm,\
-                                      resend_comm,\
-                                      change_comm_status
+from muckrock.foia.views.comms import (
+        move_comm,
+        delete_comm,
+        save_foia_comm,
+        resend_comm,
+        change_comm_status,
+        )
 from muckrock.qanda.models import Question
 from muckrock.settings import STRIPE_PUB_KEY
 from muckrock.tags.models import Tag
@@ -72,8 +79,8 @@ class RequestList(MRFilterableListView):
         objects = super(RequestList, self).get_queryset()
         objects = objects.select_related('jurisdiction')
         objects = objects.only(
-                'title', 'slug', 'status', 'date_submitted',
-                'date_due', 'date_updated', 'jurisdiction__slug')
+                'title', 'slug', 'status', 'date_submitted', 'date_due',
+                'date_updated', 'date_processing', 'jurisdiction__slug')
         return objects.get_viewable(self.request.user)
 
 
@@ -108,8 +115,11 @@ class MyRequestList(RequestList):
 
     def get_queryset(self):
         """Gets multirequests as well, limits to just those by the current user"""
-        single_req = (FOIARequest.objects.filter(user=self.request.user)
-                                         .select_related('jurisdiction'))
+        single_req = (FOIARequest.objects
+                .filter(user=self.request.user)
+                .select_related('jurisdiction')
+                .prefetch_related('communications')
+                )
         multi_req = FOIAMultiRequest.objects.filter(user=self.request.user)
         single_req = self.sort_list(self.filter_list(single_req))
         return list(single_req) + list(multi_req)
@@ -155,6 +165,13 @@ class ProcessingRequestList(RequestList):
             if 'status' in filter_dict.values():
                 filters.pop(filters.index(filter_dict))
         return filters
+
+    def get_queryset(self):
+        """Apply select and prefetch related"""
+        objects = super(RequestList, self).get_queryset()
+        return (objects
+                .select_related('jurisdiction')
+                .prefetch_related('communications'))
 
 
 # pylint: disable=no-self-use
@@ -209,8 +226,9 @@ class Detail(DetailView):
                 ),
             prefetch_related=(
                 'communications',
-                'communications__rawemail',
-                'communications__files')
+                'communications__files',
+                Prefetch('communications__rawemail', RawEmail.objects.defer('raw_email')),
+                ),
         )
         user = self.request.user
         valid_access_key = self.request.GET.get('key') == foia.access_key
