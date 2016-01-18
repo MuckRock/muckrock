@@ -30,6 +30,12 @@ class QuestionList(MRFilterableListView):
     title = 'Questions & Answers'
     template_name = 'lists/question_list.html'
 
+    def get_queryset(self):
+        """Hides hidden jurisdictions from list"""
+        objects = super(QuestionList, self).get_queryset()
+        objects = objects.select_related('user').prefetch_related('answers')
+        return objects
+
     def get_context_data(self, **kwargs):
         """Adds an info message to the context"""
         context = super(QuestionList, self).get_context_data(**kwargs)
@@ -107,12 +113,10 @@ class Detail(DetailView):
     def get_context_data(self, **kwargs):
         context = super(Detail, self).get_context_data(**kwargs)
         user = self.request.user
-        if user.is_authenticated() and actstream.actions.is_following(user, self.get_object()):
-            context['follow_label'] = 'Unfollow'
-        else:
-            context['follow_label'] = 'Follow'
         context['sidebar_admin_url'] = reverse('admin:qanda_question_change',
             args=(context['object'].pk,))
+        context['answers'] = context['object'].answers.select_related('user')
+        context['answer_users'] = set(a.user for a in context['answers'])
         return context
 
 
