@@ -102,7 +102,9 @@ class List(MRFilterableListView):
     def get_queryset(self):
         """Hides hidden jurisdictions from list"""
         objects = super(List, self).get_queryset()
-        objects = objects.exclude(hidden=True)
+        objects = (objects
+                .exclude(hidden=True)
+                .select_related('parent', 'parent__parent'))
         return objects
 
     def get_filters(self):
