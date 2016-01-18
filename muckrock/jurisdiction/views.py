@@ -33,11 +33,23 @@ def collect_stats(obj, context):
 def detail(request, fed_slug, state_slug, local_slug):
     """Details for a jurisdiction"""
 
-    jurisdiction = get_object_or_404(Jurisdiction, slug=fed_slug)
-    if state_slug:
-        jurisdiction = get_object_or_404(Jurisdiction, slug=state_slug, parent=jurisdiction)
     if local_slug:
-        jurisdiction = get_object_or_404(Jurisdiction, slug=local_slug, parent=jurisdiction)
+        jurisdiction = get_object_or_404(
+                Jurisdiction.objects.select_related(
+                    'parent',
+                    'parent__parent',
+                    ),
+                slug=local_slug,
+                parent__slug=state_slug,
+                parent__parent__slug=fed_slug)
+    elif state_slug:
+        jurisdiction = get_object_or_404(
+                Jurisdiction.objects.select_related('parent'),
+                slug=state_slug,
+                parent__slug=fed_slug)
+    else:
+        jurisdiction = get_object_or_404(Jurisdiction,
+                slug=fed_slug)
 
     foia_requests = (FOIARequest.objects.get_viewable(request.user)
                                        .filter(jurisdiction=jurisdiction)

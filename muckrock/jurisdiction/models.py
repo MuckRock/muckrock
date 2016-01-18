@@ -59,8 +59,9 @@ class RequestHelper(object):
 
     def average_response_time(self):
         """Get the average response time from a submitted to completed request"""
-        return int(self.foiarequest_set.aggregate(
+        avg = (self.foiarequest_set.aggregate(
                 avg=Avg(F('date_done') - F('date_submitted')))['avg'])
+        return int(avg) if avg else 0
 
     def total_pages(self):
         """Total pages released"""
