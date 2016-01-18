@@ -2,7 +2,7 @@
 Models for the Jurisdiction application
 """
 from django.db import models
-from django.db.models import Avg, F
+from django.db.models import Sum, Avg, F
 from django.template.defaultfilters import slugify
 
 from easy_thumbnails.fields import ThumbnailerImageField
