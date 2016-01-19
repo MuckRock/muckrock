@@ -222,10 +222,7 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
 def follow(request, jurisdiction, jidx, slug, idx):
     """Follow or unfollow a request"""
     foia = _get_foia(jurisdiction, jidx, slug, idx)
-    followers = actstream.models.followers(foia)
-    if foia.user == request.user:
-        messages.error(request, 'You automatically follow requests you own.')
-    elif request.user in followers:
+    if actstream.actions.is_following(request.user, foia):
         actstream.actions.unfollow(request.user, foia)
         messages.success(request, 'You are no longer following this request.')
     else:
