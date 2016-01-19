@@ -84,8 +84,6 @@ class TestProjectCreateView(TestCase):
         eq_(Project.objects.count(), 1, 'There should now be one project.')
         # An action should also be created with this project as the target
         project = Project.objects.first()
-        eq_(len(project.target_actions.filter(verb='created')), 1,
-            'An activity stream action should be generated.')
         logging.debug('Projects: %s', Project.objects.all())
         eq_(response.status_code, 302,
             'Should redirect to the newly created project.')
@@ -199,9 +197,6 @@ class TestProjectUpdateView(TestCase):
         ok_(project_update_form.is_valid(), 'The project form should validate.')
         # Then I submit the form with my updated information.
         response = self.user.post(self.url, project_update_form.data)
-        # An activity stream action should be generated.
-        eq_(len(self.project.target_actions.filter(verb='updated')), 1,
-            'An activity stream action should be generated.')
         # I expect to be redirected back to the project.
         eq_(response.status_code, 302,
             'Should redirect after submitting the update form.')
