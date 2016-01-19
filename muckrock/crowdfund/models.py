@@ -39,7 +39,7 @@ class CrowdfundABC(models.Model):
     closed = models.BooleanField(default=False)
 
     def expired(self):
-        """Has this crowdfuning run out of time?"""
+        """Has this crowdfund run out of time?"""
         return date.today() >= self.date_due or self.closed
 
     def amount_remaining(self):
@@ -55,19 +55,20 @@ class CrowdfundABC(models.Model):
             total_amount += payment.amount
         self.payment_received = total_amount
         self.save()
-        if self.payment_received >= self.payment_required:
-            logging.info('Crowdfund %d reached its goal.', self.id)
-            actstream.action.send(self, verb='succeeded')
-            if self.payment_capped:
-                self.close_crowdfund()
+        if self.payment_received >= self.payment_required and self.payment_capped:
+            self.close_crowdfund(succeeded=True)
         return
 
-    def close_crowdfund(self):
+    def close_crowdfund(self, succeeded=False):
         """Close the crowdfund and create a new task for it once it reaches its goal."""
         self.closed = True
         self.save()
         task.models.GenericCrowdfundTask.objects.create(crowdfund=self)
-        actstream.action.send(self, verb='ended')
+        verb = 'ended'
+        if succeeded:
+            logging.info('Crowdfund %d reached its goal.', self.id)
+            verb = 'succeeded'
+        actstream.action.send(self, verb)
         return
 
     def contributors(self):

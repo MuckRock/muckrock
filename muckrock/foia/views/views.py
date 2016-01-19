@@ -289,12 +289,6 @@ class Detail(DetailView):
                 old_status=old_status,
                 foia=foia,
             )
-            # generate status change activity
-            actstream.action.send(
-                request.user,
-                verb='changed the status of',
-                action_object=foia
-            )
         return redirect(foia)
 
     def _question(self, request, foia):
@@ -326,13 +320,6 @@ class Detail(DetailView):
             foia_note.save()
             logging.info('%s added %s to %s', foia_note.author, foia_note, foia_note.foia)
             messages.success(request, 'Your note is attached to the request.')
-            # generate note added action
-            actstream.action.send(
-                request.user,
-                verb='added',
-                action_object=foia_note,
-                target=foia
-            )
         return redirect(foia)
 
     def _flag(self, request, foia):
@@ -344,12 +331,7 @@ class Detail(DetailView):
                 text=text,
                 foia=foia)
             messages.success(request, 'Problem succesfully reported')
-            # generate flagged action
-            actstream.action.send(
-                request.user,
-                verb='flagged',
-                action_object=foia
-            )
+            actstream.action.send(request.user, verb='flagged', action_object=foia)
         return redirect(foia)
 
     def _follow_up(self, request, foia):
@@ -357,59 +339,53 @@ class Detail(DetailView):
         can_follow_up = foia.editable_by(request.user) or request.user.is_staff
         test = can_follow_up and foia.status != 'started'
         success_msg = 'Your follow up has been sent.'
-        agency = foia.agency
-        verb = 'followed up'
-        return self._new_comm(request, foia, test, success_msg, agency, verb)
+        comm_sent = self._new_comm(request, foia, test, success_msg)
+        if comm_sent:
+            actstream.action.send(
+                request.user,
+                verb='followed up on',
+                action_object=foia,
+                target=foia.agency
+            )
+        return redirect(foia)
 
     def _thank(self, request, foia):
         """Handle submitting a thank you follow up"""
         test = foia.editable_by(request.user) and foia.is_thankable()
         success_msg = 'Your thank you has been sent.'
-        agency = foia.agency
-        verb = 'thanked'
-        return self._new_comm(
-                request, foia, test, success_msg, agency, verb, thanks=True)
+        comm_sent = self._new_comm(request, foia, test, success_msg, thanks=True)
+        if comm_sent:
+            actstream.action.send(
+                request.user,
+                verb='thanked',
+                action_object=foia.agency
+            )
+        return redirect(foia)
 
     def _appeal(self, request, foia):
         """Handle submitting an appeal"""
         test = foia.editable_by(request.user) and foia.is_appealable()
         success_msg = 'Appeal successfully sent.'
-        agency = foia.agency.appeal_agency if foia.agency.appeal_agency else foia.agency
-        verb = 'appealed'
-        return self._new_comm(
-                request, foia, test, success_msg, agency, verb, appeal=True)
+        comm_sent = self._new_comm(request, foia, test, success_msg, appeal=True)
+        if comm_sent:
+            actstream.action.send(
+                request.user,
+                verb='appealed',
+                action_object=foia,
+                target=foia.agency
+            )
+        return redirect(foia)
 
-    def _new_comm(
-            self,
-            request,
-            foia,
-            test,
-            success_msg,
-            agency,
-            verb,
-            appeal=False,
-            thanks=False,
-            ):
+    def _new_comm(self, request, foia, test, success_msg, appeal=False, thanks=False):
         """Helper function for sending a new comm"""
         # pylint: disable=too-many-arguments
         text = request.POST.get('text')
+        comm_sent = False
         if text and test:
-            save_foia_comm(
-                    foia,
-                    foia.user.get_full_name(),
-                    text,
-                    appeal=appeal,
-                    thanks=thanks,
-                    )
+            save_foia_comm(foia, foia.user.get_full_name(), text, appeal=appeal, thanks=thanks)
             messages.success(request, success_msg)
-            # generate appeal action
-            actstream.action.send(
-                request.user,
-                verb=verb,
-                action_object=foia,
-                target=agency
-            )
-        return redirect(foia)
+            comm_sent = True
+        return comm_sent
 
     def _update_estimate(self, request, foia):
         """Change the estimated completion date"""
@@ -449,23 +425,9 @@ class Detail(DetailView):
         if access == 'edit' and users:
             for user in users:
                 foia.add_editor(user)
-                # generate action
-                actstream.action.send(
-                    request.user,
-                    verb='added editor',
-                    action_object=user,
-                    target=foia
-                )
         if access == 'view' and users:
             for user in users:
                 foia.add_viewer(user)
-                # generate action
-                actstream.action.send(
-                    request.user,
-                    verb='added viewer',
-                    action_object=user,
-                    target=foia
-                )
         if len(users) > 1:
             success_msg = '%d people can now %s this request.' % (len(users), access)
         else:
@@ -482,13 +444,6 @@ class Detail(DetailView):
                 foia.remove_editor(user)
             elif foia.has_viewer(user):
                 foia.remove_viewer(user)
-            # generate action
-            actstream.action.send(
-                request.user,
-                verb='removed',
-                action_object=user,
-                target=foia
-            )
             messages.success(request, '%s no longer has access to this request.' % user.first_name)
         return redirect(foia)
 
