@@ -68,7 +68,7 @@ class CrowdfundABC(models.Model):
         if succeeded:
             logging.info('Crowdfund %d reached its goal.', self.id)
             verb = 'succeeded'
-        actstream.action.send(self, verb)
+        actstream.action.send(self, verb=verb)
         return
 
     def contributors(self):
