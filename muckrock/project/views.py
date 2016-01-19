@@ -5,11 +5,10 @@ Views for the project application
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.urlresolvers import reverse_lazy
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 from django.utils.decorators import method_decorator
 
-from actstream import action
 from actstream.models import followers
 
 from muckrock.project.models import Project

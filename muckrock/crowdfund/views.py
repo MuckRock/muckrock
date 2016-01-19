@@ -144,7 +144,7 @@ class CrowdfundDetailView(DetailView):
                 stripe.AuthenticationError
             )
             try:
-                payment = crowdfund.make_payment(token, email, amount, show, user)
+                crowdfund.make_payment(token, email, amount, show, user)
             except stripe_exceptions as payment_error:
                 logging.error(payment_error)
                 self.return_error(request)
