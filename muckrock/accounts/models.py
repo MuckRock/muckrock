@@ -107,6 +107,9 @@ class Profile(models.Model):
         resize_source={'size': (600, 600), 'crop': 'smart'}
     )
 
+    # provide user access to experimental features
+    experimental = models.BooleanField(default=False)
+
     # email confirmation
     email_confirmed = models.BooleanField(default=False)
     confirmation_key = models.CharField(max_length=24, blank=True)
