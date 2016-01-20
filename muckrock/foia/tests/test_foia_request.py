@@ -67,50 +67,6 @@ class TestFOIARequestUnit(TestCase):
             else:
                 nose.tools.assert_false(foia.is_editable())
 
-    def test_foia_email(self):
-        """Test FOIA sending an email to the user when a FOIA request is updated"""
-
-        nose.tools.eq_(len(mail.outbox), 0)
-
-        self.foia.status = 'submitted'
-        self.foia.save()
-        self.foia.submit()
-        nose.tools.eq_(len(mail.outbox), 0)
-
-        self.foia.status = 'processed'
-        self.foia.save()
-        self.foia.update()
-        nose.tools.eq_(len(mail.outbox), 1)
-        nose.tools.eq_(mail.outbox[0].to, [self.foia.user.email])
-
-        # already updated, no additional email
-        self.foia.status = 'fix'
-        self.foia.save()
-        self.foia.update()
-        nose.tools.eq_(len(mail.outbox), 2)
-
-        # if the user views it and clears the updated flag, we do get another email
-        self.foia.updated = False
-        self.foia.save()
-        self.foia.status = 'rejected'
-        self.foia.save()
-        self.foia.update()
-        nose.tools.eq_(len(mail.outbox), 3)
-
-        foia = FOIARequest.objects.get(pk=6)
-        foia.status = 'submitted'
-        foia.save()
-        foia.submit()
-        nose.tools.eq_(mail.outbox[-1].from_email, '%s@requests.muckrock.com' % foia.get_mail_id())
-        nose.tools.eq_(mail.outbox[-1].to, ['test@agency1.gov'])
-        nose.tools.eq_(mail.outbox[-1].bcc,
-                       ['other_a@agency1.gov', 'other_b@agency1.gov', 'diagnostics@muckrock.com'])
-        nose.tools.eq_(mail.outbox[-1].subject,
-                       'Mass Law Request: %s' % foia.title)
-        nose.tools.eq_(foia.status, 'ack')
-        nose.tools.eq_(foia.date_submitted, datetime.date.today())
-        nose.tools.ok_(foia.date_due > datetime.date.today())
-
     def test_foia_viewable(self):
         """Test all the viewable and embargo functions"""
 
@@ -526,11 +482,6 @@ class TestFOIAIntegration(TestCase):
         foia.status = 'fix'
         foia.save()
         foia.update(comm.anchor())
-
-        # check that a notification has been sent to the user
-        nose.tools.eq_(len(mail.outbox), 1)
-        nose.tools.ok_(mail.outbox[-1].subject.startswith('[MuckRock]'))
-        nose.tools.eq_(mail.outbox[-1].to, ['adam@example.com'])
 
         # make sure dates were set correctly
         nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 3))
