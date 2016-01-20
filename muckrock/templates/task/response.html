@@ -47,9 +47,9 @@
     <dl class="extra-context hidden">
         <dt>Full Text</dt>
         <dd>{{task.communication.communication}}</dd>
-        {% if all_comms %}
+        {% if task.communication.foia.reverse_communications %}
         <dt>Previous Communications</dt>
-            {% for comm in all_comms %}
+            {% for comm in task.communication.foia.reverse_communications %}
         <dd>
             <div class="communication">
                 <header>

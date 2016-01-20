@@ -20,17 +20,21 @@
     <dt>Error</dt>
     <dd>{{task.error}}</dd>
     {% endif %}
-    {% if task.foias %}
+    {% with task.foias as foias %}
+    {% if foias %}
     <dt>Requests</dt>
-    {% for foia in task.foias %}
+    {% for foia in foias %}
     <dd><a href="{% url 'admin:foia_foiarequest_change' foia.pk %}">{{foia.title}}</a></dd>
     {% endfor %}
     {% endif %}
-    {% if task.agencies %}
+    {% endwith %}
+    {% with task.agencies as agencies %}
+    {% if agencies %}
     <dt>Agencies</dt>
-    {% for agency in task.agencies %}
+    {% for agency in agencies %}
     <dd><a href="{% url 'admin:agency_agency_change' agency.pk %}">{{agency.name}}</a></dd>
     {% endfor %}
     {% endif %}
+    {% endwith %}
 </dl>
 {% endblock %}
