@@ -321,7 +321,7 @@ class PaymentTaskList(TaskList):
 
 class CrowdfundTaskList(TaskList):
     title = 'Crowdfunds'
-    # XXX generic FKs are problematic (can't select related on foia/project
+    # XXX generic FKs are problematic (can't select related on foia/project)
     queryset = GenericCrowdfundTask.objects.prefetch_related('crowdfund')
 
 
@@ -334,7 +334,14 @@ class MultiRequestTaskList(TaskList):
 
 class FailedFaxTaskList(TaskList):
     title = 'Failed Faxes'
-    queryset = FailedFaxTask.objects.select_related('communication__foia__agency')
+    queryset = (FailedFaxTask.objects
+            .select_related('communication__foia__agency')
+            .select_related('communication__foia__user')
+            .prefetch_related(
+                Prefetch(
+                    'communication__foia__communications',
+                    queryset=FOIACommunication.objects.order_by('-date'),
+                    to_attr='reverse_communications')))
 
 
 class RequestTaskList(TaskList):
