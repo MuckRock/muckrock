@@ -135,3 +135,7 @@ class WeeklyDigest(Digest):
     """A weekly email digest"""
     interval = relativedelta(weeks=1)
 
+
+class MonthlyDigest(Digest):
+    """A monthly email digest"""
+    interval = relativedelta(months=1)

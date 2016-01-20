@@ -48,6 +48,15 @@ def weekly_digest():
     """Send out weekly digest"""
     send_digest('weekly', digests.WeeklyDigest)
 
+# first day of every month at 10am
+@periodic_task(
+    run_every=crontab(day_of_month=1, hour=10, minute=0),
+    name='muckrock.message.tasks.monthly_digest'
+)
+def monthly_digest():
+    """Send out monthly digest"""
+    send_digest('monthly', digests.MonthlyDigest)
+
 @task(name='muckrock.message.tasks.send_invoice_receipt')
 def send_invoice_receipt(invoice_id):
     """Send out a receipt for an invoiced charge"""
