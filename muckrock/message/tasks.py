@@ -16,19 +16,37 @@ from muckrock.organization.models import Organization
 
 logger = logging.getLogger(__name__)
 
-@periodic_task(run_every=crontab(hour=10, minute=0),
-               name='muckrock.message.tasks.daily_digest')
-def daily_digest():
-    """Send out daily digest"""
-    # TODO prefetch the user at this time
-    profiles_to_notify = Profile.objects.filter(email_pref='daily').distinct()
-    for profile in profiles_to_notify:
-        # for now, only send staff the new updates
-        if profile.user.is_staff:
-            email = digests.DailyDigest(profile.user)
+def send_digest(preference, digest):
+    """Helper to send out timed digests"""
+    profiles = Profile.objects.select_related('user').filter(email_pref=preference).distinct()
+    for profile in profiles:
+        # for now, only send experimental users the new updates
+        if profile.experimental:
+            email = digest(profile.user)
             email.send()
         else:
             profile.send_notifications()
+
+# every hour
+@periodic_task(run_every=crontab(hour='*/1', minute=0, name='muckrock.message.tasks.hourly_digest')
+def hourly_digest():
+    """Send out hourly digest"""
+    send_digest('hourly', digests.HourlyDigest)
+
+# every day at 10am
+@periodic_task(run_every=crontab(hour=10, minute=0), name='muckrock.message.tasks.daily_digest')
+def daily_digest():
+    """Send out daily digest"""
+    send_digest('daily', digests.DailyDigest)
+
+# every Monday at 10am
+@periodic_task(
+    run_every=crontab(day_of_week=1, hour=10, minute=0),
+    name='muckrock.message.tasks.weekly_digest'
+)
+def weekly_digest():
+    """Send out weekly digest"""
+    send_digest('weekly', digests.WeeklyDigest)
 
 @task(name='muckrock.message.tasks.send_invoice_receipt')
 def send_invoice_receipt(invoice_id):
