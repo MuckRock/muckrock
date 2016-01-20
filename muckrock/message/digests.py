@@ -8,7 +8,8 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
 from actstream.models import Action, user_stream
-from datetime import datetime, timedelta
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 import logging
 
 class Digest(EmailMultiAlternatives):
@@ -57,8 +58,10 @@ class Digest(EmailMultiAlternatives):
     def get_duration(self):
         if not self.interval:
             raise NotImplementedError('No interval specified.')
-        if not isinstance(self.interval, timedelta):
-            raise TypeError('Interval attribute must be a datetime.timedelta object.')
+        if not isinstance(self.interval, relativedelta):
+            # we use relativedelta instead of timedelta because it gives us a greater
+            # flexibility in the kinds of intervals we can define, e.g. weeks and months
+            raise TypeError('Interval must be a dateutil.relativedelta.relativedelta object.')
         return datetime.now() - self.interval
 
     def get_foia_activity(self, period):
@@ -120,14 +123,15 @@ class Digest(EmailMultiAlternatives):
 
 class HourlyDigest(Digest):
     """An hourly email digest"""
-    interval = timedelta(hours=1)
+    interval = relativedelta(hours=1)
 
 
 class DailyDigest(Digest):
     """A daily email digest"""
-    interval = timedelta(days=1)
+    interval = relativedelta(days=1)
 
 
 class WeeklyDigest(Digest):
     """A weekly email digest"""
-    interval = timedelta(days=7)
+    interval = relativedelta(weeks=1)
+
