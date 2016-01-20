@@ -28,7 +28,7 @@ def send_digest(preference, digest):
             profile.send_notifications()
 
 # every hour
-@periodic_task(run_every=crontab(hour='*/1', minute=0, name='muckrock.message.tasks.hourly_digest')
+@periodic_task(run_every=crontab(hour='*/1', minute=0), name='muckrock.message.tasks.hourly_digest')
 def hourly_digest():
     """Send out hourly digest"""
     send_digest('hourly', digests.HourlyDigest)
@@ -42,8 +42,7 @@ def daily_digest():
 # every Monday at 10am
 @periodic_task(
     run_every=crontab(day_of_week=1, hour=10, minute=0),
-    name='muckrock.message.tasks.weekly_digest'
-)
+    name='muckrock.message.tasks.weekly_digest')
 def weekly_digest():
     """Send out weekly digest"""
     send_digest('weekly', digests.WeeklyDigest)
@@ -51,8 +50,7 @@ def weekly_digest():
 # first day of every month at 10am
 @periodic_task(
     run_every=crontab(day_of_month=1, hour=10, minute=0),
-    name='muckrock.message.tasks.monthly_digest'
-)
+    name='muckrock.message.tasks.monthly_digest')
 def monthly_digest():
     """Send out monthly digest"""
     send_digest('monthly', digests.MonthlyDigest)

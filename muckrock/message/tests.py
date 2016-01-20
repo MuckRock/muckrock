@@ -10,7 +10,7 @@ import mock
 import nose.tools
 
 from muckrock import factories
-from muckrock.message import digests, notifications, tasks
+from muckrock.message import digests, tasks
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_

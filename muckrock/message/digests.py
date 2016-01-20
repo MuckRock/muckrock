@@ -10,7 +10,6 @@ from django.template.loader import render_to_string
 from actstream.models import Action, user_stream
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-import logging
 
 class Digest(EmailMultiAlternatives):
     """
@@ -56,6 +55,7 @@ class Digest(EmailMultiAlternatives):
         return self.activity
 
     def get_duration(self):
+        """Returns the start of the duration of activity for the digest."""
         if not self.interval:
             raise NotImplementedError('No interval specified.')
         if not isinstance(self.interval, relativedelta):
