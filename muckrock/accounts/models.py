@@ -47,9 +47,11 @@ class Profile(models.Model):
     # pylint: disable=too-many-instance-attributes
 
     email_prefs = (
-        ('instant', 'Instant'),
+        ('never', 'Never'),
+        ('hourly', 'Hourly'),
         ('daily', 'Daily'),
         ('weekly', 'Weekly'),
+        ('monthly', 'Monthly'),
     )
 
     user = models.OneToOneField(User)
@@ -107,6 +109,9 @@ class Profile(models.Model):
         resize_source={'size': (600, 600), 'crop': 'smart'}
     )
 
+    # provide user access to experimental features
+    experimental = models.BooleanField(default=False)
+
     # email confirmation
     email_confirmed = models.BooleanField(default=False)
     confirmation_key = models.CharField(max_length=24, blank=True)
@@ -115,9 +120,8 @@ class Profile(models.Model):
         max_length=10,
         choices=email_prefs,
         default='daily',
-        verbose_name='Email Preference',
-        help_text=('Receive email updates to your requests instantly'
-                   ' or in a daily or weekly digest')
+        verbose_name='Digest Frequency',
+        help_text=('Receive updates on site activity as an emailed digest.')
     )
     use_autologin = models.BooleanField(
         default=True,
@@ -332,33 +336,10 @@ class Profile(models.Model):
         return key
 
     def notify(self, foia):
-        """Notify a user that foia has been updated or mark to be notified later
-           according to preference"""
+        """Queue up a notification for later"""
         # pylint: disable=no-member
-
-        if self.email_pref == 'instant':
-            link = self.wrap_url(foia.get_absolute_url())
-
-            msg = render_to_string('text/foia/mail.txt', {
-                'name': self.user.get_full_name(),
-                'title': foia.title,
-                'status': foia.get_status_display(),
-                'link': link,
-                'follow': self.user != foia.user,
-                'footer': options.email_footer
-            })
-            email = EmailMessage(
-                subject='[MuckRock] FOI request "%s" has been updated' % foia.title,
-                body=msg,
-                from_email='info@muckrock.com',
-                to=[self.user.email],
-                bcc=['diagnostics@muckrock.com']
-            )
-            email.send(fail_silently=False)
-
-        else:
-            self.notifications.add(foia)
-            self.save()
+        self.notifications.add(foia)
+        self.save()
 
     def send_notifications(self):
         """Send deferred notifications"""

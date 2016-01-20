@@ -1,0 +1,19 @@
+{% load notification_tags %}
+
+{% if activity.requests %}
+    <h1>Your requests<h1>
+    <ul>
+        {% for action in activity.requests %}
+        <li>{% display_action action %}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+{% endif %}
+{% if activity.following %}
+    <h1>Site activity</h1>
+    <ul>
+    {% for action in activity.following %}
+        <li>{% display_action action %}</li>
+    {% endfor %}
+    </ul>
+{% endif %}
