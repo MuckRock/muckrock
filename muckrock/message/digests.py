@@ -16,8 +16,8 @@ class Digest(EmailMultiAlternatives):
     A digest describes a collection of activity over a duration, which
     is then rendered into an email and delivered at a scheduled interval.
     """
-    text_template = None
-    html_template = None
+    text_template = 'message/digest.txt'
+    html_template = 'message/digest.html'
     interval = None
     activity = {
         'count': 0,
@@ -98,14 +98,10 @@ class Digest(EmailMultiAlternatives):
 
     def get_text_template(self):
         """Returns the text template"""
-        if not self.text_template:
-            raise NotImplementedError('No text template specified.')
         return self.text_template
 
     def get_html_template(self):
         """Returns the html template"""
-        if not self.html_template:
-            raise NotImplementedError('No HTML template specified.')
         return self.html_template
 
     def get_subject(self):
@@ -124,20 +120,14 @@ class Digest(EmailMultiAlternatives):
 
 class HourlyDigest(Digest):
     """An hourly email digest"""
-    text_template = 'message/digest/hourly.txt'
-    html_template = 'message/digest/hourly.html'
     interval = timedelta(hours=1)
 
 
 class DailyDigest(Digest):
     """A daily email digest"""
-    text_template = 'message/notification/daily.txt'
-    html_template = 'message/notification/daily.html'
     interval = timedelta(days=1)
 
 
 class WeeklyDigest(Digest):
     """A weekly email digest"""
-    text_template = 'message/digest/weekly.txt'
-    html_template = 'message/digest/weekly.html'
     interval = timedelta(days=7)
