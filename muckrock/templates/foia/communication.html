@@ -18,6 +18,13 @@
                     <li onClick="showCommForm('#delete-{{comm.pk}}-form');" class="option">Delete</li>
                 </ul>
             </div>
+            {% elif request.user.profile.is_advanced and comm.rawemail.raw_email %}
+            <div class="options dropdown">
+                {% include 'lib/icons/options.svg' %}
+                <ul class="options dropdown-list">
+                    <li><a href="{% url 'foia-raw' idx=comm.pk %}" class="option">Raw Email</a></li>
+                </ul>
+            </div>
             {% endif %}
         </div>
     </header>
