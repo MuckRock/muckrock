@@ -5,7 +5,7 @@ Views for the Task application
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import resolve
-from django.db.models import Count, Prefetch, F
+from django.db.models import Count, Prefetch
 from django.http import HttpResponse, Http404
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
@@ -176,7 +176,6 @@ class SnailMailTaskList(TaskList):
                 Prefetch(
                     'communication__foia__communications',
                     queryset=FOIACommunication.objects.order_by('-date'),
-                    # XXX this is gonna break the template used in other places
                     to_attr='reverse_communications'),
                 Prefetch(
                     'communication__foia__communications',

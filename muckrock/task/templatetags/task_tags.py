@@ -19,9 +19,9 @@ class TaskNode(template.Node):
     task_template = 'task/default.html'
     endpoint_name = 'task-list'
 
-    def __init__(self, task):
+    def __init__(self, task_):
         """The node should be initialized with a task object"""
-        self._task = template.Variable(task)
+        self._task = template.Variable(task_)
         self.task = None
 
     def render(self, context):
