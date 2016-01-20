@@ -87,10 +87,7 @@ class TaskList(MRFilterableListView):
         context['filter_form'] = TaskFilterForm(initial=filter_initial)
         context['counters'] = count_tasks()
         context['bulk_actions'] = self.bulk_actions
-        if self.queryset is not None:
-            context['type'] = self.queryset.model.__name__
-        else:
-            context['type'] = self.model.__name__
+        context['type'] = self.get_model().__name__
         return context
 
     @method_decorator(user_passes_test(lambda u: u.is_staff))
@@ -111,7 +108,7 @@ class TaskList(MRFilterableListView):
         task_pks = [int(task_pk) for task_pk in task_pks if task_pk is not None]
         if not task_pks:
             raise ValueError('No tasks were selected, so there\'s nothing to do!')
-        tasks = [get_object_or_404(self.model, pk=each_pk) for each_pk in task_pks]
+        tasks = [get_object_or_404(self.get_model(), pk=each_pk) for each_pk in task_pks]
         return tasks
 
     def task_post_helper(self, request, task):

@@ -168,7 +168,7 @@ class MRFilterableListView(ListView):
         # the QuerySet is evaluated. <Insert poop emoji here>
         try:
             # pylint:disable=protected-access
-            self.model._meta.get_field_by_name(sort)
+            self.get_model()._meta.get_field_by_name(sort)
             # pylint:enable=protected-access
         except FieldDoesNotExist:
             sort = self.default_sort
@@ -205,6 +205,13 @@ class MRFilterableListView(ListView):
             return max(min(per_page, 100), 5)
         except (ValueError, TypeError):
             return 25
+
+    def get_model(self):
+        """Get the model for this view - directly or from the queryset"""
+        if self.queryset is not None:
+            return self.queryset.model
+        if self.model is not None:
+            return self.model
 
 
 class MRSearchView(SearchView):
