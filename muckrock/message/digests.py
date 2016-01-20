@@ -65,9 +65,9 @@ class Digest(EmailMultiAlternatives):
         """Returns activity on requests owned by the user."""
         foia_stream = Action.objects.requests_for_user(self.user)
         foia_stream = foia_stream.filter(timestamp__gte=period)
-        user_ct = ContentType.objects.get_for_model(self.user)
         # exclude actions where the user is the Actor
         # since they know which actions they've taken themselves
+        user_ct = ContentType.objects.get_for_model(self.user)
         foia_stream.exclude(actor_content_type=user_ct, actor_object_id=self.user.id)
         return foia_stream
 
@@ -89,7 +89,8 @@ class Digest(EmailMultiAlternatives):
             'granted': foia_activity.filter(verb__icontains='completed'),
             'denied': foia_activity.filter(verb__icontains='rejected'),
             'unsuccessful': foia_activity.filter(verb__icontains='no responsive documents'),
-            'needs_action': foia_activity.filter(verb__icontains='payment', verb__icontains='fix'),
+            'payment': foia_activity.filter(verb__icontains='payment'),
+            'fix': foia_activity.filter(verb__icontains='fix'),
             'unembargo': foia_activity.filter(verb__icontains='unembargo'),
             'response': foia_activity.filter(verb__icontains='responded'),
             'auto_follow_up': foia_activity.filter(verb__icontains='automatically followed up'),
