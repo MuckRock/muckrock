@@ -46,16 +46,22 @@
         </section>
         <span class="toggle-details" id="toggle-specific-information" data-state="0">Show details</span>
         <section class="specific-information">
+            {% if request.user.is_staff or foia.tracking_id %}
             <table class="numbers">
+                {% if request.user.is_staff %}
                 <tr class="muckrock-number">
                     <td>MuckRock #</td>
                     <td>{{ foia.id }}</td>
                 </tr>
+                {% endif %}
+                {% if foia.tracking_id %}
                 <tr class="tracking-number">
                     <td>Tracking #</td>
                     <td>{{ foia.tracking_id }}</td>
                 </tr>
+                {% endif %}
             </table>
+            {% endif %}
             <table class="dates">
                 <tr class="submitted">
                     <td class="label">Submitted</td>
