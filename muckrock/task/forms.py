@@ -33,7 +33,7 @@ class ResponseTaskForm(forms.Form):
     date_estimate = forms.DateField(
         label='Estimated completion date',
         required=False,
-        widget=forms.DateInput(format='%m/%d/%Y'),
+        widget=forms.DateInput(format='%m/%d/%Y', attrs={'placeholder': 'mm/dd/yyyy'}),
         input_formats=[
             '%Y-%m-%d',      # '2006-10-25'
             '%m/%d/%Y',      # '10/25/2006'
