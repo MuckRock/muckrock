@@ -34,10 +34,6 @@ class TestDailyDigest(TestCase):
         """The email should raise an error when instantiated without a user."""
         self.digest(None)
 
-    def test_interval(self):
-        """The daily digest should have an interval of 1 day."""
-        eq_(self.digest.interval, self.interval)
-
     def test_send_no_notifications(self):
         """The email shouldn't send if there's no notifications."""
         email = self.digest(self.user)
@@ -72,3 +68,25 @@ class TestDailyDigest(TestCase):
         actstream.action.send(agency, verb='sent an email', target=other_user)
         email = self.digest(self.user)
         logging.info(email.message())
+
+
+class TestDigestIntervals(TestCase):
+    """All digests should behave the same, except for their interval"""
+    def setUp(self):
+        self.user = factories.UserFactory()
+
+    def test_hourly(self):
+        digest = digests.HourlyDigest(self.user)
+        eq_(digest.interval, relativedelta(hours=1))
+
+    def test_daily(self):
+        digest = digests.DailyDigest(self.user)
+        eq_(digest.interval, relativedelta(days=1))
+
+    def test_weekly(self):
+        digest = digests.WeeklyDigest(self.user)
+        eq_(digest.interval, relativedelta(weeks=1))
+
+    def test_monthly(self):
+        digest = digests.MonthlyDigest(self.user)
+        eq_(digest.interval, relativedelta(months=1))
