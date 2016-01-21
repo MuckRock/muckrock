@@ -5,7 +5,7 @@ Views for the Task application
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import resolve
-from django.db.models import Count, Prefetch
+from django.db.models import Count, Prefetch, Q
 from django.http import HttpResponse, Http404
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
@@ -198,8 +198,33 @@ class SnailMailTaskList(TaskList):
 
 class RejectedEmailTaskList(TaskList):
     title = 'Rejected Emails'
-    # XXX how to prefetch foias and agencies sharing an email??
     queryset = RejectedEmailTask.objects.select_related('foia')
+
+    def get_context_data(self, **kwargs):
+        """Prefetch the agencies and foias sharing an email"""
+        context = super(RejectedEmailTaskList, self).get_context_data(**kwargs)
+        email_filter = Q()
+        all_emails = {t.email for t in context['object_list']}
+        for email in all_emails:
+            email_filter |= Q(email__iexact=email)
+            email_filter |= Q(other_emails__icontains=email)
+        agencies = Agency.objects.filter(email_filter)
+        statuses = ('ack', 'processed', 'appealing', 'fix', 'payment')
+        foias = (FOIARequest.objects.filter(email_filter)
+                .filter(status__in=statuses)
+                .order_by())
+        def seperate_by_email(objects, emails):
+            """Make a dictionary of each email to the objects having that email"""
+            return_value = {}
+            for email in emails:
+                email_upper = email.upper()
+                return_value[email] = [o for o in objects if
+                        email_upper == o.email.upper() or
+                        email_upper in o.other_emails.upper()]
+            return return_value
+        context['agency_by_email'] = seperate_by_email(agencies, all_emails)
+        context['foia_by_email'] = seperate_by_email(foias, all_emails)
+        return context
 
 
 class StaleAgencyTaskList(TaskList):

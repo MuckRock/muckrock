@@ -1,4 +1,5 @@
 {% extends 'task/default.html' %}
+{% load tags %}
 
 {% block task-class %}
     rejected-email
@@ -20,7 +21,7 @@
     <dt>Error</dt>
     <dd>{{task.error}}</dd>
     {% endif %}
-    {% with task.foias as foias %}
+    {% with foia_by_email|get_item:task.email as foias %}
     {% if foias %}
     <dt>Requests</dt>
     {% for foia in foias %}
@@ -28,7 +29,7 @@
     {% endfor %}
     {% endif %}
     {% endwith %}
-    {% with task.agencies as agencies %}
+    {% with agency_by_email|get_item:task.email as agencies %}
     {% if agencies %}
     <dt>Agencies</dt>
     {% for agency in agencies %}
