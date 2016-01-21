@@ -23,7 +23,6 @@ class TestDailyDigest(TestCase):
     def setUp(self):
         self.user = factories.UserFactory()
         self.digest = digests.DailyDigest
-        self.interval = relativedelta(days=1)
 
     def test_init(self):
         """The email should create when given a User."""
@@ -48,26 +47,34 @@ class TestDailyDigest(TestCase):
         actstream.action.send(other_user, verb='acted')
         # generate the email, which should contain the generated action
         email = self.digest(self.user)
-        ok_(email.activity['count'] > 0, 'There should be activity.')
+        eq_(email.activity['count'], 1, 'There should be activity.')
         eq_(email.send(), 1, 'The email should send.')
 
-    def test_notification_composition(self):
-        """The email should be composed of updates to requests I own and things I follow."""
-        # lets create a FOIA to belong to our user
+    def test_digest_user_requests(self):
+        """Digests should include information on requests I own."""
+        # generate an action on a request the user owns
         foia = factories.FOIARequestFactory(user=self.user)
-        # lets have this FOIA do some things
-        actstream.action.send(foia, verb='created')
-        # lets also create an agency to act upon our FOIA
         agency = factories.AgencyFactory()
         actstream.action.send(agency, verb='rejected', action_object=foia)
-        # lets also have the user follow somebody
-        other_user = factories.UserFactory()
-        actstream.actions.follow(self.user, other_user, actor_only=False)
-        # lets generate some actions on behalf of this other user
-        actstream.action.send(other_user, verb='acted')
-        actstream.action.send(agency, verb='sent an email', target=other_user)
+        actstream.action.send(self.user, verb='followed up on', action_object=foia)
+        # generate the email, which should contain the generated action
         email = self.digest(self.user)
-        logging.info(email.message())
+        eq_(email.activity['count'], 1, 'There should be activity that is not user initiated.')
+        eq_(email.activity['requests'].first().actor, agency, 'User activity should be excluded.')
+        eq_(email.send(), 1, 'The email should send.')
+
+    def test_digest_follow_requests(self):
+        """Digests should include information on requests I follow."""
+        # generate an action on a request the user owns
+        other_user = factories.UserFactory()
+        foia = factories.FOIARequestFactory(user=other_user)
+        actstream.actions.follow(self.user, foia, actor_only=False)
+        agency = factories.AgencyFactory()
+        actstream.action.send(agency, verb='rejected', action_object=foia)
+        # generate the email, which should contain the generated action
+        email = self.digest(self.user)
+        eq_(email.activity['count'], 1, 'There should be activity.')
+        eq_(email.send(), 1, 'The email should send.')
 
 
 class TestDigestIntervals(TestCase):

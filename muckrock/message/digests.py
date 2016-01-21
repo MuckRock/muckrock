@@ -66,12 +66,13 @@ class Digest(EmailMultiAlternatives):
 
     def get_foia_activity(self, period):
         """Returns activity on requests owned by the user."""
-        foia_stream = Action.objects.requests_for_user(self.user)
-        foia_stream = foia_stream.filter(timestamp__gte=period)
         # exclude actions where the user is the Actor
         # since they know which actions they've taken themselves
         user_ct = ContentType.objects.get_for_model(self.user)
-        foia_stream.exclude(actor_content_type=user_ct, actor_object_id=self.user.id)
+        foia_stream = (Action.objects.requests_for_user(self.user)
+                                     .filter(timestamp__gte=period)
+                                     .exclude(actor_content_type=user_ct,
+                                              actor_object_id=self.user.id))
         return foia_stream
 
     def get_context_data(self):
