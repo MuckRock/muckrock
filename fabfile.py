@@ -94,10 +94,10 @@ def populate_db():
                      'Are you sure you want to continue? [y/N]')
     if confirm.lower() not in ['y', 'yes']:
         return
-    
+
     with env.cd(env.base_path):
         env.run('PGUSER=postgres dropdb muckrock')
-        env.run('PGUSER=postgres heroku pg:pull DATABASE muckrock')
+        env.run('PGUSER=postgres heroku pg:pull DATABASE muckrock --app muckrock')
 
 @task(name='sync-aws')
 def sync_aws():
@@ -106,10 +106,10 @@ def sync_aws():
     folders = [
             'account_images',
             'agency_images',
-            'jurisdiction_images', 
-            'news_images', 
-            'news_photos', 
-            'project_images', 
+            'jurisdiction_images',
+            'news_images',
+            'news_photos',
+            'project_images',
             ]
     with env.cd(env.base_path):
         for folder in folders:

@@ -594,6 +594,7 @@ class FOIARequest(models.Model):
         # update communication
         comm.set_raw_email(msg.message())
         comm.delivered = 'fax' if self.email.endswith('faxaway.com') else 'email'
+        comm.subject = subject
         comm.save()
 
         # unblock incoming messages if we send one out
