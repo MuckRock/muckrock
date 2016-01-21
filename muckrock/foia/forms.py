@@ -152,11 +152,13 @@ class FOIAEstimatedCompletionDateForm(forms.ModelForm):
     date_estimate = forms.DateField(
         label='Estimated completion date',
         help_text='The est. completion date is declared by the agency.',
-        widget=forms.DateInput(format='%m/%d/%Y'),
+        widget=forms.DateInput(format='%m/%d/%Y', attrs={'placeholder': 'mm/dd/yyyy'}),
         input_formats=[
             '%Y-%m-%d',      # '2006-10-25'
             '%m/%d/%Y',      # '10/25/2006'
             '%m/%d/%y',      # '10/25/06'
+            '%m-%d-%Y',      # '10-25-2006',
+            '%m-%d-%y',      # '10-25-06',
             '%b %d %Y',      # 'Oct 25 2006'
             '%b %d, %Y',     # 'Oct 25, 2006'
             '%d %b %Y',      # '25 Oct 2006'

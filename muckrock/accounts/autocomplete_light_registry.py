@@ -20,8 +20,9 @@ class UserAutocomplete(autocomplete_light.AutocompleteModelBase):
     }
 
     def choice_label(self, choice):
-        """Uses the user's full name as the choice label."""
-        return choice.get_full_name()
+        """Uses the user's full name and username as the choice label."""
+        label = choice.get_full_name() + ' (' + choice.username + ')'
+        return label
 
 class RequestSharingAutocomplete(UserAutocomplete):
     """Adds request sharing filtering for users"""

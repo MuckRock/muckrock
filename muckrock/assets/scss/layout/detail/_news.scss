@@ -100,6 +100,7 @@
 
     .news-aside {
         @include order(3);
+        width: 100%;
         @media screen and (min-width: $news-layout-breakpoint) {
             @include order(2);
             @include flex(0 0 15em);
