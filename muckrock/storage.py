@@ -17,7 +17,9 @@ class CachedS3BotoStorage(S3BotoStorage):
 
     # pylint: disable=protected-access
     def save(self, name, content, max_length=None):
+        non_gzipped_file_content = content.file
         name = super(CachedS3BotoStorage, self).save(name, content, max_length)
+        content.file = non_gzipped_file_content
         self.local_storage._save(name, content)
         return name
 

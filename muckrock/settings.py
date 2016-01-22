@@ -135,6 +135,17 @@ STATICFILES_FINDERS = (
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_SECURE_URLS = True
 AWS_S3_FILE_OVERWRITE = False
+AWS_HEADERS = {
+ 'Expires': 'Thu, 31 Dec 2099 20:00:00 GMT',
+ 'Cache-Control': 'max-age=94608000',
+}
+AWS_IS_GZIPPED = True
+GZIP_CONTENT_TYPES = (
+ 'text/css',
+ 'application/javascript',
+ 'application/x-javascript',
+ 'text/javascript'
+)
 
 if not DEBUG:
     # List of callables that know how to import templates from various sources.
