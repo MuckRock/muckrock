@@ -2,7 +2,10 @@
 Views for muckrock project
 """
 from django.contrib import messages
+from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
+from django.core.cache import cache
+from django.core.cache.utils import make_template_fragment_key
 from django.core.exceptions import FieldError
 from django.core.paginator import Paginator, InvalidPage
 from django.db.models import Sum, FieldDoesNotExist
@@ -307,6 +310,41 @@ def homepage(request):
             600)
     return render_to_response('homepage.html', locals(),
                               context_instance=RequestContext(request))
+
+@user_passes_test(lambda u: u.is_staff)
+def reset_homepage_cache(request):
+    """Reset the homepage cache"""
+    key = make_template_fragment_key('homepage')
+    cache.delete(key)
+    cache.set('hp:articles',
+            Article.objects.get_published().prefetch_related(
+                'authors',
+                'authors__profile',
+                'projects')[:3],
+            600)
+    cache.set('hp:featured_projects',
+            Project.objects.get_public().filter(featured=True)[:4],
+            600)
+    cache.set('hp:federal_government',
+            Jurisdiction.objects.filter(level='f').first(),
+            None)
+    cache.set('hp:completed_requests',
+            FOIARequest.objects.get_public().get_done()
+                               .order_by('-date_done')
+                               .select_related_view()
+                               .prefetch_related('files')[:6],
+            600)
+    cache.set('hp:stats',
+            {
+                'request_count': FOIARequest.objects
+                    .exclude(status='started').count(),
+                'completed_count': FOIARequest.objects.get_done().count(),
+                'page_count': FOIAFile.objects
+                    .aggregate(Sum('pages'))['pages__sum'],
+                'agency_count': Agency.objects.get_approved().count()
+            },
+            600)
+    return redirect('index')
 
 
 def jurisdiction(request, jurisdiction=None, slug=None, idx=None, view=None):

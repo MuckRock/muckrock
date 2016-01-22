@@ -87,6 +87,7 @@ router.register(r'responsetask',
 urlpatterns = patterns(
     '',
     url(r'^$', views.homepage, name='index'),
+    url(r'^reset_cache/$', views.reset_homepage_cache, name='reset-cache'),
     url(r'^accounts/', include(muckrock.accounts.urls)),
     url(r'^foi/', include(muckrock.foia.urls)),
     url(r'^news/', include(muckrock.news.urls)),
