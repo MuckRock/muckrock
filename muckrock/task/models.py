@@ -26,9 +26,9 @@ def generate_status_action(foia):
         'done': 'completed',
         'partial': 'partially completed',
         'processed': 'acknowledged',
-        'no_docs': 'found no responsive documents for',
-        'fix': 'requires fix for',
-        'payment': 'requires payment for',
+        'no_docs': 'has no responsive documents',
+        'fix': 'requires fix',
+        'payment': 'requires payment',
     }
     verb = verbs.get(foia.status, 'is processing')
     actstream.action.send(foia.agency, verb=verb, action_object=foia)
