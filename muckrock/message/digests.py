@@ -13,6 +13,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 from muckrock.foia.models import FOIARequest
+from muckrock.qanda.models import Question
 
 class Digest(EmailMultiAlternatives):
     """
@@ -46,23 +47,41 @@ class Digest(EmailMultiAlternatives):
         self.body = text_email
         self.attach_alternative(html_email, 'text/html')
 
+    def model_stream(self, model, stream):
+        """Extract actions from stream by model"""
+        content_type = ContentType.objects.get_for_model(model)
+        action_object = Q(action_object_content_type=content_type)
+        target = Q(target_content_type=content_type)
+        return stream.filter(action_object|target)
+
     def get_activity(self):
         """Returns a list of activities to be sent in the email"""
         duration = self.get_duration()
         user_ct = ContentType.objects.get_for_model(self.user)
-        foia_ct = ContentType.objects.get_for_model(FOIARequest)
-        following = (user_stream(self.user).filter(timestamp__gte=duration).exclude(verb__icontains='following'))
-        foia_following = following.filter(Q(action_object_content_type=foia_ct)|Q(target_content_type=foia_ct))
-        foia_stream = (Action.objects.requests_for_user(self.user)
+        following = (user_stream(self.user).filter(timestamp__gte=duration)
+                                           .exclude(verb__icontains='following'))
+        foia_following = self.model_stream(FOIARequest, following)
+        question_following = self.model_stream(Question, following).exclude(verb='asked')
+        foia_stream = (Action.objects.owned_by(self.user, FOIARequest)
                                      .filter(timestamp__gte=duration)
                                      .exclude(actor_content_type=user_ct,
                                               actor_object_id=self.user.id))
-        self.activity['count'] = foia_stream.count() + foia_following.count()
+        question_stream = (Action.objects.owned_by(self.user, Question)
+                                         .filter(timestamp__gte=duration)
+                                         .exclude(actor_content_type=user_ct,
+                                                  actor_object_id=self.user.id))
         self.activity['requests'] = {
             'count': foia_stream.count() + foia_following.count(),
             'mine': foia_stream,
             'following': foia_following
         }
+        self.activity['questions'] = {
+            'count': question_stream.count() + question_following.count(),
+            'mine': question_stream,
+            'following': question_following
+        }
+        self.activity['count'] = self.activity['requests']['count'] + self.activity['questions']['count']
+        print self.activity['questions']
         return self.activity
 
     def get_duration(self):
