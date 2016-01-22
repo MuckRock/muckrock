@@ -13,7 +13,7 @@
     <h2>and got {{ answers|length }} answer{{ answers|length|pluralize }} from
         {% for user in answer_users %}
             {% if forloop.first and forloop.last %}
-                <a href="{% url "acct-profile" user.username %}">{{ user.get_full_name }}.
+                <a href="{% url "acct-profile" user.username %}">{{ user.get_full_name }}</a>.
             {% else %}
                 {% if forloop.last %}
 					and <a href="{% url "acct-profile" user.username %}">{{ user.get_full_name }}</a>.
