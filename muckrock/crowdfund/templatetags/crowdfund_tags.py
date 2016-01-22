@@ -130,10 +130,12 @@ def crowdfund_request(context, crowdfund_pk):
     )
 
 @register.inclusion_tag('crowdfund/widget.html', takes_context=True)
-def crowdfund_project(context, the_crowdfund):
+def crowdfund_project(context, crowdfund_pk=None, crowdfund=None):
     """Template tag to insert a crowdfunding widget"""
+    if crowdfund is None:
+        crowdfund = get_object_or_404(CrowdfundProject, pk=crowdfund_pk)
     return generate_crowdfund_context(
-        the_crowdfund,
+        crowdfund,
         'crowdfund-project',
         CrowdfundProjectPaymentForm,
         context
