@@ -80,8 +80,8 @@ class Digest(EmailMultiAlternatives):
             'mine': question_stream,
             'following': question_following
         }
-        self.activity['count'] = self.activity['requests']['count'] + self.activity['questions']['count']
-        print self.activity['questions']
+        self.activity['count'] = (self.activity['requests']['count'] +
+                                  self.activity['questions']['count'])
         return self.activity
 
     def get_duration(self):
