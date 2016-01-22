@@ -594,6 +594,7 @@ class FOIARequest(models.Model):
 
         cc_addrs = self.get_other_emails()
         from_email = '%s@%s' % (from_addr, MAILGUN_SERVER_NAME)
+        # pylint:disable=attribute-defined-outside-init
         self.reverse_communications = self.communications.reverse()
         body = render_to_string('text/foia/request_email.txt', {'request': self})
         body = unidecode(body) if from_addr == 'fax' else body

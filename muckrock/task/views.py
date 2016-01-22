@@ -345,7 +345,7 @@ class PaymentTaskList(TaskList):
 
 class CrowdfundTaskList(TaskList):
     title = 'Crowdfunds'
-    # XXX generic FKs are problematic (can't select related on foia/project)
+    # generic FKs are problematic (can't select related on foia/project)
     queryset = GenericCrowdfundTask.objects.prefetch_related('crowdfund')
 
 

@@ -44,6 +44,7 @@ class OrphanTaskNode(TaskNode):
 
     def get_extra_context(self):
         """Adds sender domain to the context"""
+        # pylint:disable=no-member
         extra_context = super(OrphanTaskNode, self).get_extra_context()
         extra_context['domain'] = self.task.get_sender_domain()
         extra_context['attachments'] = self.task.communication.files.all()
@@ -118,6 +119,7 @@ class NewAgencyTaskNode(TaskNode):
     def get_extra_context(self):
         """Adds an approval form, other agencies, and relevant requests to context"""
         # pylint:disable=line-too-long
+        # pylint:disable=no-member
         extra_context = super(NewAgencyTaskNode, self).get_extra_context()
         extra_context['agency_form'] = agency.forms.AgencyForm(instance=self.task.agency)
         return extra_context
@@ -130,6 +132,7 @@ class ResponseTaskNode(TaskNode):
 
     def get_extra_context(self):
         """Adds ResponseTask-specific context"""
+        # pylint:disable=no-member
         extra_context = super(ResponseTaskNode, self).get_extra_context()
         form_initial = {}
         if self.task.communication.foia:
