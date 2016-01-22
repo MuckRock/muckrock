@@ -82,7 +82,7 @@ MuckRock &bull; {{ project.title }}
             {% with project.crowdfund.all as crowdfunds %}
             {% if crowdfunds %}
                 {% for crowdfund in crowdfunds %}
-                    {% crowdfund_project crowdfund %}
+                    {% crowdfund_project crowdfund=crowdfund %}
                 {% endfor %}
             {% endif %}
             {% endwith %}
