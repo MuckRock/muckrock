@@ -314,6 +314,7 @@ def homepage(request):
 @user_passes_test(lambda u: u.is_staff)
 def reset_homepage_cache(request):
     """Reset the homepage cache"""
+    # pylint: disable=unused-argument
     key = make_template_fragment_key('homepage')
     cache.delete(key)
     cache.set('hp:articles',
@@ -345,7 +346,6 @@ def reset_homepage_cache(request):
             },
             600)
     return redirect('index')
-
 
 def jurisdiction(request, jurisdiction=None, slug=None, idx=None, view=None):
     """Redirect to the jurisdiction page"""
