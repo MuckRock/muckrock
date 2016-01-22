@@ -1,4 +1,6 @@
 {% load notification_tags %}
+{% load premailer %}
+{% premailer "https://www.muckrock.com" %}
 <html>
     <style>
         html {
@@ -78,3 +80,4 @@
     {% endif %}
 {% endif %}
 </html>
+{% endpremailer %}

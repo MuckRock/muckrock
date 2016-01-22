@@ -215,6 +215,7 @@ INSTALLED_APPS = (
     'compressor',
     'debug_toolbar',
     'django_tablib',
+    'django_premailer',
     'djangosecure',
     'djcelery',
     'easy_thumbnails',
