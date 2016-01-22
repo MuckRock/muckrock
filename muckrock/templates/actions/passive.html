@@ -4,32 +4,32 @@
 {% if action.action_object %}
     <span class="object">
     {% if action.action_object.get_absolute_url %}
-        <a href="https://www.muckrock.com{{ action.action_object.get_absolute_url }}">{{ action.action_object }}</a>
+        <a href="{{ action.action_object.get_absolute_url }}">{{ action.action_object }}</a>
     {% else %}
-        <a href="https://www.muckrock.com{{ action.action_object_url }}">{{ action.action_object }}</a>
+        <a href="{{ action.action_object_url }}">{{ action.action_object }}</a>
     {% endif %}
     </span>
 {% endif %}
 {% endblock action_object %}
 
 {% block preposition %}
-{% if action.action_object and action.target %}<span class="preposition">to</span>{% endif %}
+{% if action.action_object and action.target %}<span class="preposition"> to</span>{% endif %}
 {% endblock preposition %}
 
 {% block target %}
 {% if action.target %}
     <span class="target">
     {% if action.target.get_absolute_url %}
-        <a href="https://www.muckrock.com{{ action.target.get_absolute_url }}">{{ action.target }}</a>
+        <a href="{{ action.target.get_absolute_url }}"> {{ action.target }}</a>
     {% else %}
-        <a href="https://www.muckrock.com{{ action.target_url }}">{{ action.target }}</a>
+        <a href="{{ action.target_url }}"> {{ action.target }}</a>
     {% endif %}
     </span>
 {% endif %}
 {% endblock target %}
 
 {% block verb %}
-<span class="verb">{{ action.verb }}</span>
+<span class="verb"> {{ action.verb }}</span>
 {% endblock verb %}
 
 <span> by</span>
@@ -37,15 +37,11 @@
 {% block actor %}
 <span class="action actor">
     {% if action.actor.get_absolute_url %}
-    <a href="https://www.muckrock.com{{ action.actor.get_absolute_url }}">{{ action.actor }}</a>
+    <a href="{{ action.actor.get_absolute_url }}"> {{ action.actor }}</a>
     {% else %}
-    <a href="https://www.muckrock.com{{ action.actor_url }}">{{ action.actor }}</a>
+    <a href="{{ action.actor_url }}"> {{ action.actor }}</a>
     {% endif %}
 </span>
 {% endblock actor %}
-
-{% block extra %}
-    <time class="timestamp" title="{{ action.timestamp|date:'c' }}" datetime="{{ action.timestamp|date:'c' }}">{{ action.timestamp|timesince }} ago</time>
-{% endblock extra %}
 
 </div>

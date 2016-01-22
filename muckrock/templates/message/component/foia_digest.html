@@ -4,7 +4,7 @@
     {% for action in stream %}
     <li>
         <a href="{{action.action_object.get_absolute_url}}">{{ action.action_object }}</a>
-        <span class="verb">{{ action.verb }}</span>
+        <span class="verb"> {{ action.verb }}</span>
     </li>
     {% endfor %}
 </ul>

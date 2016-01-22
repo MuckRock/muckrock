@@ -128,11 +128,12 @@ class Digest(EmailMultiAlternatives):
     def get_context_data(self):
         """Adds classified activity to the context"""
         my_foia_stream = self.activity['requests']['mine']
-        classified_foia_activity = self.classify_foia_activity(my_foia_stream)
+        follow_foia_stream = self.activity['requests']['following']
         context = {
             'user': self.user,
             'activity': self.activity,
-            'my_foia_activity': classified_foia_activity,
+            'my_foia': self.classify_foia_activity(my_foia_stream),
+            'follow_foia': self.classify_foia_activity(follow_foia_stream),
             'base_url': 'https://www.muckrock.com'
         }
         return context
