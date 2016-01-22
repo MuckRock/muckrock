@@ -78,6 +78,32 @@ class TestDailyDigest(TestCase):
         eq_(email.activity['requests']['following'].first().actor, agency)
         eq_(email.send(), 1, 'The email should send.')
 
+    def test_digest_user_questions(self):
+        """Digests should include information on questions I asked."""
+        # generate an action on a question the user asked
+        question = factories.QuestionFactory(user=self.user)
+        other_user = factories.UserFactory()
+        answer = factories.AnswerFactory(user=other_user, question=question)
+        # creating an answer _should_ have created an action
+        # so let's generate the email and see what happened
+        email = self.digest(self.user)
+        eq_(email.activity['count'], 1, 'There should be activity that is not user initiated.')
+        eq_(email.activity['questions']['mine'].first().actor, other_user)
+        eq_(email.activity['questions']['mine'].first().verb, 'answered')
+        eq_(email.send(), 1, 'The email should send.')
+
+    def test_digest_follow_questions(self):
+        """Digests should include information on questions I follow."""
+        # generate an action on a question that I follow
+        question = factories.QuestionFactory()
+        actstream.actions.follow(self.user, question, actor_only=False)
+        other_user = factories.UserFactory()
+        answer = factories.AnswerFactory(user=other_user, question=question)
+        email = self.digest(self.user)
+        eq_(email.activity['count'], 1, 'There should be activity.')
+        eq_(email.activity['questions']['following'].first().actor, other_user)
+        eq_(email.activity['questions']['following'].first().action_object, question)
+        eq_(email.send(), 1, 'The email should send.')
 
 class TestDigestIntervals(TestCase):
     """All digests should behave the same, except for their interval"""
