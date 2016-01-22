@@ -127,28 +127,32 @@ class Digest(EmailMultiAlternatives):
 
     def get_context_data(self):
         """Adds classified activity to the context"""
-        classified_foia_activity = self.classify_foia_activity()
+        my_foia_stream = self.activity['requests']['mine']
+        classified_foia_activity = self.classify_foia_activity(my_foia_stream)
         context = {
             'user': self.user,
             'activity': self.activity,
-            'foia_activity': classified_foia_activity,
+            'my_foia_activity': classified_foia_activity,
             'base_url': 'https://www.muckrock.com'
         }
         return context
 
-    def classify_foia_activity(self):
+    def classify_foia_activity(self, stream):
         """Segment and classify the activity"""
-        foia_activity = self.activity['requests']['mine']
-        return {
-            'granted': foia_activity.filter(verb__icontains='completed'),
-            'denied': foia_activity.filter(verb__icontains='rejected'),
-            'unsuccessful': foia_activity.filter(verb__icontains='no responsive documents'),
-            'payment': foia_activity.filter(verb__icontains='payment'),
-            'fix': foia_activity.filter(verb__icontains='fix'),
-            'unembargo': foia_activity.filter(verb__icontains='unembargo'),
-            'response': foia_activity.filter(verb__icontains='responded'),
-            'auto_follow_up': foia_activity.filter(verb__icontains='automatically followed up'),
+        classified = {
+            'completed': stream.filter(verb__icontains='completed'),
+            'rejected': stream.filter(verb__icontains='rejected'),
+            'unsuccessful': stream.filter(verb__icontains='no responsive documents'),
+            'action_required': stream.filter(
+                Q(verb__icontains='payment')|Q(verb__icontains='fix')),
+            'response': stream.filter(
+                Q(verb__icontains='processing')|Q(verb__icontains='acknowledged')),
         }
+        activity_count = 0
+        for _, classified_stream in classified.iteritems():
+            activity_count += len(classified_stream)
+        classified['count'] = activity_count
+        return classified
 
     def get_subject(self):
         """Summarizes the activities in the notification"""
