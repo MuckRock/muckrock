@@ -11,7 +11,7 @@
     <h2>Following</h2>
     <ul>
         {% for action in activity.requests.following %}
-        <li>{% display_action action %}</li>
+        <li>{% display_passive_action action %}</li>
         {% endfor %}
     </ul>
 {% endif %}
@@ -20,13 +20,13 @@
     <h2>Yours</h2>
     <ul>
         {% for action in activity.questions.mine %}
-        <li>{% display_action action %}</li>
+        <li>{% display_passive_action action %}</li>
         {% endfor %}
     </ul>
     <h2>Following</h2>
     <ul>
         {% for action in activity.questions.following %}
-        <li>{% display_action action %}</li>
+        <li>{% display_passive_action action %}</li>
         {% endfor %}
     </ul>
 {% endif %}
