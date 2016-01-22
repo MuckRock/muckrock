@@ -6,9 +6,10 @@ from django import template
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 
-from muckrock.crowdfund.models import CrowdfundProject, CrowdfundRequest
+from muckrock.crowdfund.models import CrowdfundRequest
 from muckrock.crowdfund.forms import CrowdfundRequestPaymentForm, CrowdfundProjectPaymentForm
 from muckrock.settings import STRIPE_PUB_KEY
+from muckrock.utils import cache_get_or_set
 
 register = template.Library()
 
@@ -55,10 +56,9 @@ def crowdfund_user(context):
     user_email = context['user'].email if logged_in else ''
     return (logged_in, user_email)
 
-def contributor_summary(crowdfund):
+def contributor_summary(named_contributors, contributors_count, anonymous):
     """Returns a summary of the contributors to the project"""
-    anonymous = len(crowdfund.anonymous_contributors())
-    contributor_names = [x.get_full_name() for x in crowdfund.named_contributors()]
+    contributor_names = [x.get_full_name() for x in named_contributors]
     unnamed_string = ''
     named_limit = 4
     num_unnamed = len(contributor_names) - named_limit
@@ -77,7 +77,7 @@ def contributor_summary(crowdfund):
                 unnamed_string += ' people'
             else:
                 unnamed_string += ' person'
-    if len(crowdfund.contributors()) > 0:
+    if contributors_count > 0:
         summary = ('Backed by '
                    + list_to_english_string(contributor_names[:named_limit] + [unnamed_string])
                    + '.')
@@ -90,10 +90,25 @@ def generate_crowdfund_context(the_crowdfund, the_url_name, the_form, the_contex
     endpoint = reverse(the_url_name, kwargs={'pk': the_crowdfund.pk})
     payment_form = crowdfund_form(the_crowdfund, the_form)
     logged_in, user_email = crowdfund_user(the_context)
-    contrib_sum = contributor_summary(the_crowdfund)
     the_request = the_context.request
+    named, contrib_count, anon_count = (
+            cache_get_or_set(
+                'cf:%s:crowdfund_widget_data' % the_crowdfund.pk,
+                lambda: (
+                    the_crowdfund.named_contributors(),
+                    the_crowdfund.contributors_count(),
+                    the_crowdfund.anonymous_contributors_count(),
+                    ),
+                600))
+    contrib_sum = contributor_summary(
+            named,
+            contrib_count,
+            anon_count)
     return {
         'crowdfund': the_crowdfund,
+        'named_contributors': named,
+        'contributors_count': contrib_count,
+        'anon_contributors_count': anon_count,
         'contributor_summary': contrib_sum,
         'endpoint': endpoint,
         'logged_in': logged_in,
@@ -115,9 +130,8 @@ def crowdfund_request(context, crowdfund_pk):
     )
 
 @register.inclusion_tag('crowdfund/widget.html', takes_context=True)
-def crowdfund_project(context, crowdfund_pk):
+def crowdfund_project(context, the_crowdfund):
     """Template tag to insert a crowdfunding widget"""
-    the_crowdfund = get_object_or_404(CrowdfundProject, pk=crowdfund_pk)
     return generate_crowdfund_context(
         the_crowdfund,
         'crowdfund-project',

@@ -26,7 +26,7 @@ from muckrock.settings import STRIPE_PUB_KEY
 
 class OrganizationListView(ListView):
     """List of organizations"""
-    model = Organization
+    queryset = Organization.objects.select_related('owner')
     template_name = "organization/list.html"
     paginate_by = 25
 
@@ -113,7 +113,7 @@ class OrganizationActivateView(UpdateView):
     def get_context_data(self, **kwargs):
         """Adds Stripe pk and user's email to activation form."""
         context = super(OrganizationActivateView, self).get_context_data(**kwargs)
-        organization = self.get_object()
+        organization = context['object']
         context['org'] = organization
         context['base_users'] = organization.max_users
         context['base_requests'] = organization.monthly_requests
@@ -190,11 +190,11 @@ class OrganizationUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         """Adds Stripe pk and user's email to activation form."""
         context = super(OrganizationUpdateView, self).get_context_data(**kwargs)
-        organization = self.get_object()
+        organization = context['object']
         context['org'] = organization
         context['base_users'] = organization.max_users
         context['base_requests'] = organization.monthly_requests
-        context['base_price'] = organization.monthly_cost/100.00
+        context['base_price'] = organization.monthly_cost / 100.00
         return context
 
     def form_valid(self, form):
@@ -254,7 +254,7 @@ class OrganizationDeleteView(DeleteView):
 
 class OrganizationDetailView(DetailView):
     """Organization detail view"""
-    model = Organization
+    queryset = Organization.objects.select_related('owner')
     template_name = "organization/detail.html"
 
     def get_context_data(self, **kwargs):
@@ -269,15 +269,16 @@ class OrganizationDetailView(DetailView):
             context['is_staff'] = user.is_staff
             context['is_owner'] = organization.is_owned_by(user)
             context['is_member'] = user.profile.is_member_of(organization)
-        context['requests'] = FOIARequest.objects.organization(organization).get_viewable(user)[:99]
-        context['members'] = organization.members.select_related('user').all()
+        context['requests'] = (FOIARequest.objects
+                .organization(organization).get_viewable(user)[:99])
+        context['members'] = organization.members.select_related('user')
         context['available'] = {
             'requests': organization.num_requests,
-            'seats': organization.max_users - organization.members.count()
+            'seats': organization.max_users - len(context['members'])
         }
         context['progress'] = {
-            'requests': ((1.0*organization.num_requests)/organization.monthly_requests)*100,
-            'seats': (1.0-(1.0*organization.members.count())/organization.max_users)*100
+            'requests': (float(organization.num_requests) / organization.monthly_requests) * 100,
+            'seats': (1.0 - float(len(context['members'])) / organization.max_users) * 100,
         }
         try:
             date_update = organization.date_update

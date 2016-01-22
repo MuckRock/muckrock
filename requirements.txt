@@ -93,3 +93,4 @@ stripe==1.27.1
 tablib==0.10.0
 waitress==0.8.8
 webassets==0.7.1
+yet-another-django-profiler==1.0.2

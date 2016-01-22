@@ -59,13 +59,32 @@ class ProjectDetailView(DetailView):
     model = Project
     template_name = 'project/detail.html'
 
+    def __init__(self, *args, **kwargs):
+        self._obj = None
+        super(ProjectDetailView, self).__init__(*args, **kwargs)
+
+    def get_object(self, *args, **kwargs):
+        """Cache getting the object"""
+        if self._obj is not None:
+            return self._obj
+        self._obj = super(ProjectDetailView, self).get_object(*args, **kwargs)
+        return self._obj
+
     def get_context_data(self, **kwargs):
         """Adds visible requests and followers to project context"""
         context = super(ProjectDetailView, self).get_context_data(**kwargs)
         project = self.get_object()
         user = self.request.user
-        context['visible_requests'] = project.requests.get_viewable(user)
+        context['visible_requests'] = (project.requests
+                .get_viewable(user)
+                .select_related(
+                    'jurisdiction',
+                    'jurisdiction__parent',
+                    'jurisdiction__parent__parent',
+                    ))
         context['followers'] = followers(project)
+        context['articles'] = project.articles.get_published()
+        context['contributors'] = project.contributors.select_related('profile')
         return context
 
     def dispatch(self, *args, **kwargs):

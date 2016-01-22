@@ -10,6 +10,7 @@ import stripe
 
 from django.template import Context
 from django.template.loader_tags import BlockNode, ExtendsNode
+from django.core.cache import cache
 
 #From http://stackoverflow.com/questions/2687173/django-how-can-i-get-a-block-from-a-template
 
@@ -51,3 +52,11 @@ def get_stripe_token(card_number='4242424242424242'):
     token = stripe.Token.create(card=card)
     # all we need for testing stripe calls is the token id
     return token.id
+
+def cache_get_or_set(key, update, timeout):
+    """Get the value from the cache if present, otherwise update it"""
+    value = cache.get(key)
+    if value is None:
+        value = update()
+        cache.set(key, value, timeout)
+    return value

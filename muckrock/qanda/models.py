@@ -51,14 +51,6 @@ class Question(models.Model):
             send_data.append((subject, msg, 'info@muckrock.com', [user.email]))
         send_mass_mail(send_data, fail_silently=False)
 
-    def get_answer_users(self):
-        """Get a list of all the users who answered the question"""
-        users = []
-        for answer in self.answers.all():
-            if answer.user not in users:
-                users.append(answer.user)
-        return users
-
     class Meta:
         # pylint: disable=too-few-public-methods
         ordering = ['-date']

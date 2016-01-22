@@ -165,13 +165,13 @@ MIDDLEWARE_CLASSES = (
     'lot.middleware.LOTMiddleware',
     'muckrock.middleware.RemoveTokenMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'reversion.middleware.RevisionMiddleware',
 )
-MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
 if DEBUG:
     MIDDLEWARE_CLASSES += ('muckrock.settings.ExceptionLoggingMiddleware',)
-    MIDDLEWARE_CLASSES += ('muckrock.middleware.ProfileMiddleware',)
+    MIDDLEWARE_CLASSES += ('yet_another_django_profiler.middleware.ProfilerMiddleware',)
 
 class ExceptionLoggingMiddleware(object):
     """Log exceptions to command line
@@ -544,9 +544,12 @@ if 'PG_USER' in os.environ:
 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     }
 }
+
+if TEST:
+    CACHES['default']['BACKEND'] = 'django.core.cache.backends.dummy.DummyCache'
 
 if 'MEMCACHIER_SERVERS' in os.environ:
     CACHES['default']['BACKEND'] = 'django.core.cache.backends.memcached.MemcachedCache'

@@ -1,4 +1,4 @@
-{% autoescape off %}{% for comm in request.communications.reverse %}
+{% autoescape off %}{% for comm in request.reverse_communications %}
 {% if not forloop.first %}On {{ comm.date|date }}:{% endif %}
 {{ comm.communication }}
 {% if forloop.last %}

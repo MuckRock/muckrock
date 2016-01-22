@@ -5,6 +5,7 @@ Views for the Task application
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import resolve
+from django.db.models import Count, Prefetch, Q
 from django.http import HttpResponse, Http404
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
@@ -13,7 +14,7 @@ import logging
 
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
-from muckrock import foia
+from muckrock.foia.models import STATUS, FOIARequest, FOIACommunication, FOIAFile
 from muckrock.task.forms import TaskFilterForm, ResponseTaskForm
 from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
                                  StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask, \
@@ -21,26 +22,25 @@ from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailT
                                  StatusChangeTask, FailedFaxTask
 from muckrock.views import MRFilterableListView
 
-STATUS = foia.models.STATUS
-
 # pylint:disable=missing-docstring
 
 def count_tasks():
     """Counts all unresolved tasks and adds them to a dictionary"""
-    count = {}
-    count['all'] = Task.objects.exclude(resolved=True).count()
-    count['orphan'] = OrphanTask.objects.exclude(resolved=True).count()
-    count['snail_mail'] = SnailMailTask.objects.exclude(resolved=True).count()
-    count['rejected'] = RejectedEmailTask.objects.exclude(resolved=True).count()
-    count['stale_agency'] = StaleAgencyTask.objects.exclude(resolved=True).count()
-    count['flagged'] = FlaggedTask.objects.exclude(resolved=True).count()
-    count['new_agency'] = NewAgencyTask.objects.exclude(resolved=True).count()
-    count['response'] = ResponseTask.objects.exclude(resolved=True).count()
-    count['status_change'] = StatusChangeTask.objects.exclude(resolved=True).count()
-    count['payment'] = PaymentTask.objects.exclude(resolved=True).count()
-    count['crowdfund'] = GenericCrowdfundTask.objects.exclude(resolved=True).count()
-    count['multirequest'] = MultiRequestTask.objects.exclude(resolved=True).count()
-    count['failed_fax'] = FailedFaxTask.objects.exclude(resolved=True).count()
+    count = Task.objects.filter(resolved=False).aggregate(
+            all=Count('id'),
+            orphan=Count('orphantask'),
+            snail_mail=Count('snailmailtask'),
+            rejected=Count('rejectedemailtask'),
+            stale_agency=Count('staleagencytask'),
+            flagged=Count('flaggedtask'),
+            new_agency=Count('newagencytask'),
+            response=Count('responsetask'),
+            status_change=Count('statuschangetask'),
+            payment=Count('paymenttask'),
+            crowdfund=Count('genericcrowdfundtask'),
+            multirequest=Count('multirequesttask'),
+            failed_fax=Count('failedfaxtask'),
+            )
     return count
 
 class TaskList(MRFilterableListView):
@@ -87,6 +87,7 @@ class TaskList(MRFilterableListView):
         context['filter_form'] = TaskFilterForm(initial=filter_initial)
         context['counters'] = count_tasks()
         context['bulk_actions'] = self.bulk_actions
+        context['type'] = self.get_model().__name__
         return context
 
     @method_decorator(user_passes_test(lambda u: u.is_staff))
@@ -107,7 +108,7 @@ class TaskList(MRFilterableListView):
         task_pks = [int(task_pk) for task_pk in task_pks if task_pk is not None]
         if not task_pks:
             raise ValueError('No tasks were selected, so there\'s nothing to do!')
-        tasks = [get_object_or_404(self.model, pk=each_pk) for each_pk in task_pks]
+        tasks = [get_object_or_404(self.get_model(), pk=each_pk) for each_pk in task_pks]
         return tasks
 
     def task_post_helper(self, request, task):
@@ -137,7 +138,9 @@ class TaskList(MRFilterableListView):
 
 class OrphanTaskList(TaskList):
     title = 'Orphans'
-    model = OrphanTask
+    queryset = (OrphanTask.objects
+            .select_related('communication__likely_foia')
+            .prefetch_related('communication__files'))
     bulk_actions = ['reject']
 
     def task_post_helper(self, request, task):
@@ -164,7 +167,21 @@ class OrphanTaskList(TaskList):
 
 class SnailMailTaskList(TaskList):
     title = 'Snail Mails'
-    model = SnailMailTask
+    queryset = (SnailMailTask.objects
+            .select_related(
+                'communication__foia__agency',
+                'communication__foia__user',
+                )
+            .prefetch_related(
+                Prefetch(
+                    'communication__foia__communications',
+                    queryset=FOIACommunication.objects.order_by('-date'),
+                    to_attr='reverse_communications'),
+                Prefetch(
+                    'communication__foia__communications',
+                    queryset=FOIACommunication.objects.filter(response=True),
+                    to_attr='has_ack'),
+                ))
 
     def task_post_helper(self, request, task):
         """Special post helper exclusive to SnailMailTasks"""
@@ -181,22 +198,58 @@ class SnailMailTaskList(TaskList):
 
 class RejectedEmailTaskList(TaskList):
     title = 'Rejected Emails'
-    model = RejectedEmailTask
+    queryset = RejectedEmailTask.objects.select_related('foia')
+
+    def get_context_data(self, **kwargs):
+        """Prefetch the agencies and foias sharing an email"""
+        context = super(RejectedEmailTaskList, self).get_context_data(**kwargs)
+        email_filter = Q()
+        all_emails = {t.email for t in context['object_list']}
+        for email in all_emails:
+            email_filter |= Q(email__iexact=email)
+            email_filter |= Q(other_emails__icontains=email)
+        agencies = Agency.objects.filter(email_filter)
+        statuses = ('ack', 'processed', 'appealing', 'fix', 'payment')
+        foias = (FOIARequest.objects.filter(email_filter)
+                .filter(status__in=statuses)
+                .order_by())
+        def seperate_by_email(objects, emails):
+            """Make a dictionary of each email to the objects having that email"""
+            return_value = {}
+            for email in emails:
+                email_upper = email.upper()
+                return_value[email] = [o for o in objects if
+                        email_upper == o.email.upper() or
+                        email_upper in o.other_emails.upper()]
+            return return_value
+        context['agency_by_email'] = seperate_by_email(agencies, all_emails)
+        context['foia_by_email'] = seperate_by_email(foias, all_emails)
+        return context
 
 
 class StaleAgencyTaskList(TaskList):
     title = 'Stale Agencies'
-    model = StaleAgencyTask
+    queryset = StaleAgencyTask.objects.select_related('agency')
 
 
 class FlaggedTaskList(TaskList):
     title = 'Flagged'
-    model = FlaggedTask
+    queryset = FlaggedTask.objects.select_related(
+            'user', 'foia', 'agency', 'jurisdiction')
 
 
 class NewAgencyTaskList(TaskList):
     title = 'New Agencies'
-    model = NewAgencyTask
+    queryset = (NewAgencyTask.objects
+            .select_related('agency__jurisdiction')
+            .prefetch_related(
+                Prefetch('agency__foiarequest_set',
+                    queryset=FOIARequest.objects.select_related('jurisdiction')),
+                Prefetch('agency__jurisdiction__agencies',
+                    queryset=Agency.objects
+                    .filter(status='approved')
+                    .order_by('name'),
+                    to_attr='other_agencies')))
 
     def task_post_helper(self, request, task):
         """Special post handlers exclusive to NewAgencyTasks"""
@@ -219,7 +272,15 @@ class NewAgencyTaskList(TaskList):
 
 class ResponseTaskList(TaskList):
     title = 'Responses'
-    model = ResponseTask
+    queryset = (ResponseTask.objects
+            .select_related('communication__foia')
+            .prefetch_related(
+                Prefetch('communication__files',
+                    queryset=FOIAFile.objects.select_related('foia__jurisdiction')),
+                Prefetch('communication__foia__communications',
+                    queryset=FOIACommunication.objects.order_by('-date'),
+                    to_attr='reverse_communications'),
+                ))
 
     def task_post_helper(self, request, task):
         """Special post helper exclusive to ResponseTask"""
@@ -274,27 +335,38 @@ class ResponseTaskList(TaskList):
 
 class StatusChangeTaskList(TaskList):
     title = 'Status Change'
-    model = StatusChangeTask
+    queryset = StatusChangeTask.objects.select_related('user', 'foia')
 
 
 class PaymentTaskList(TaskList):
     title = 'Payments'
-    model = PaymentTask
+    queryset = PaymentTask.objects.select_related('user', 'foia')
 
 
 class CrowdfundTaskList(TaskList):
     title = 'Crowdfunds'
-    model = GenericCrowdfundTask
+    # generic FKs are problematic (can't select related on foia/project)
+    queryset = GenericCrowdfundTask.objects.prefetch_related('crowdfund')
 
 
 class MultiRequestTaskList(TaskList):
     title = 'Multi-Requests'
-    model = MultiRequestTask
+    queryset = (MultiRequestTask.objects
+            .select_related('multirequest__user')
+            .prefetch_related('multirequest__agencies'))
 
 
 class FailedFaxTaskList(TaskList):
     title = 'Failed Faxes'
-    model = FailedFaxTask
+    queryset = (FailedFaxTask.objects
+            .select_related('communication__foia__agency')
+            .select_related('communication__foia__user')
+            .prefetch_related(
+                Prefetch(
+                    'communication__foia__communications',
+                    queryset=FOIACommunication.objects.order_by('-date'),
+                    to_attr='reverse_communications')))
+
 
 class RequestTaskList(TaskList):
     """Displays all the tasks for a given request."""
@@ -302,11 +374,11 @@ class RequestTaskList(TaskList):
     template_name = 'lists/request_task_list.html'
 
     def get_queryset(self):
-        foia_request = get_object_or_404(foia.models.FOIARequest, pk=self.kwargs['pk'])
+        foia_request = get_object_or_404(FOIARequest, pk=self.kwargs['pk'])
         tasks = Task.objects.filter_by_foia(foia_request)
         return tasks
 
     def get_context_data(self, **kwargs):
         context = super(RequestTaskList, self).get_context_data(**kwargs)
-        context['foia'] = get_object_or_404(foia.models.FOIARequest, pk=self.kwargs['pk'])
+        context['foia'] = get_object_or_404(FOIARequest, pk=self.kwargs['pk'])
         return context

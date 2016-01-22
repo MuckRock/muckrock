@@ -2,7 +2,10 @@
 Views for muckrock project
 """
 from django.contrib import messages
+from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
+from django.core.cache import cache
+from django.core.cache.utils import make_template_fragment_key
 from django.core.exceptions import FieldError
 from django.core.paginator import Paginator, InvalidPage
 from django.db.models import Sum, FieldDoesNotExist
@@ -18,6 +21,7 @@ from muckrock.forms import MRFilterForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.news.models import Article
 from muckrock.project.models import Project
+from muckrock.utils import cache_get_or_set
 
 import re
 from haystack.views import SearchView
@@ -142,9 +146,13 @@ class MRFilterableListView(ListView):
             filter_value = self.clean_filter_value(filter_key, filter_value)
             if filter_value:
                 kwargs.update({'{0}__{1}'.format(filter_key, filter_lookup): filter_value})
-        # tag filtering could add duplicate items to results, so .distinct() is used
+        # tag filtering could add duplicate items to results, so .distinct()
+        # is used only if there are tags, as adding distinct can cause
+        # performance issues
+        if get.get('tags'):
+            objects = objects.distinct()
         try:
-            objects = objects.filter(**kwargs).distinct()
+            objects = objects.filter(**kwargs)
         except FieldError:
             pass
         except ValueError:
@@ -163,7 +171,7 @@ class MRFilterableListView(ListView):
         # the QuerySet is evaluated. <Insert poop emoji here>
         try:
             # pylint:disable=protected-access
-            self.model._meta.get_field_by_name(sort)
+            self.get_model()._meta.get_field_by_name(sort)
             # pylint:enable=protected-access
         except FieldDoesNotExist:
             sort = self.default_sort
@@ -200,6 +208,13 @@ class MRFilterableListView(ListView):
             return max(min(per_page, 100), 5)
         except (ValueError, TypeError):
             return 25
+
+    def get_model(self):
+        """Get the model for this view - directly or from the queryset"""
+        if self.queryset is not None:
+            return self.queryset.model
+        if self.model is not None:
+            return self.model
 
 
 class MRSearchView(SearchView):
@@ -250,29 +265,87 @@ def homepage(request):
     """Get all the details needed for the homepage"""
     # pylint: disable=unused-variable
     # pylint: disable=no-member
+    articles = cache_get_or_set(
+            'hp:articles',
+            lambda: Article.objects.get_published()
+                                   .prefetch_related(
+                                        'authors',
+                                        'authors__profile',
+                                        'projects',
+                                    )
+                                   [:3],
+            600)
     try:
-        articles = Article.objects.prefetch_related('projects')\
-                                  .prefetch_related('authors')\
-                                  .get_published()[:3]
         lead_article = articles[0]
         other_articles = articles[1:]
     except IndexError:
         # no published articles
-        articles = None
         lead_article = None
         other_articles = None
-    featured_projects = Project.objects.get_public().filter(featured=True)[:4]
-    federal_government = Jurisdiction.objects.filter(level='f').first()
-    completed_requests = FOIARequest.objects.get_public().get_done().order_by('-date_done')[:6]
-    stats = {
-        'request_count': FOIARequest.objects.exclude(status='started').count(),
-        'completed_count': FOIARequest.objects.get_done().count(),
-        'page_count': FOIAFile.objects.aggregate(Sum('pages'))['pages__sum'],
-        'agency_count': Agency.objects.get_approved().count()
-    }
+    featured_projects = cache_get_or_set(
+            'hp:featured_projects',
+            lambda: Project.objects.get_public().filter(featured=True)[:4],
+            600)
+    federal_government = cache_get_or_set(
+            'hp:federal_government',
+            lambda: Jurisdiction.objects.filter(level='f').first(),
+            None)
+    completed_requests = cache_get_or_set(
+            'hp:completed_requests',
+            lambda: FOIARequest.objects.get_public().get_done()
+                               .order_by('-date_done')
+                               .select_related_view()
+                               .prefetch_related('files')[:6],
+            600)
+    stats = cache_get_or_set(
+            'hp:stats',
+            lambda: {
+                'request_count': FOIARequest.objects
+                    .exclude(status='started').count(),
+                'completed_count': FOIARequest.objects.get_done().count(),
+                'page_count': FOIAFile.objects
+                    .aggregate(Sum('pages'))['pages__sum'],
+                'agency_count': Agency.objects.get_approved().count()
+            },
+            600)
     return render_to_response('homepage.html', locals(),
                               context_instance=RequestContext(request))
 
+@user_passes_test(lambda u: u.is_staff)
+def reset_homepage_cache(request):
+    """Reset the homepage cache"""
+    # pylint: disable=unused-argument
+    key = make_template_fragment_key('homepage')
+    cache.delete(key)
+    cache.set('hp:articles',
+            Article.objects.get_published().prefetch_related(
+                'authors',
+                'authors__profile',
+                'projects')[:3],
+            600)
+    cache.set('hp:featured_projects',
+            Project.objects.get_public().filter(featured=True)[:4],
+            600)
+    cache.set('hp:federal_government',
+            Jurisdiction.objects.filter(level='f').first(),
+            None)
+    cache.set('hp:completed_requests',
+            FOIARequest.objects.get_public().get_done()
+                               .order_by('-date_done')
+                               .select_related_view()
+                               .prefetch_related('files')[:6],
+            600)
+    cache.set('hp:stats',
+            {
+                'request_count': FOIARequest.objects
+                    .exclude(status='started').count(),
+                'completed_count': FOIARequest.objects.get_done().count(),
+                'page_count': FOIAFile.objects
+                    .aggregate(Sum('pages'))['pages__sum'],
+                'agency_count': Agency.objects.get_approved().count()
+            },
+            600)
+    return redirect('index')
 
 def jurisdiction(request, jurisdiction=None, slug=None, idx=None, view=None):
     """Redirect to the jurisdiction page"""

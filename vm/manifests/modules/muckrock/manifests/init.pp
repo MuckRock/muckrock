@@ -70,6 +70,10 @@ class muckrock {
 		ensure => installed,
 	}
 
+	package { 'graphviz':
+		ensure => installed,
+	}
+
 	# python
 
 	class { 'python':

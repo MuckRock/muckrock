@@ -10,7 +10,11 @@
             <li><a href="{{file.ffile.url}}" target="_blank">Download</a></li>
             {% endif %}
             {% if file.is_doccloud and file.doc_id %}
-            <li><a href="{{ SITE_ROOT }}{{ file.foia.get_absolute_url }}#{{ file.anchor }}" class="view-file" data-doc-id="{{ file.doc_id }}" data-doc-title="{{ file.title }}" data-doc-anchor="{{ file.anchor }}">View</a></li>
+				{% if foia_url %}
+				<li><a href="{{ SITE_ROOT }}{{ foia_url }}#{{ file.anchor }}" class="view-file" data-doc-id="{{ file.doc_id }}" data-doc-title="{{ file.title }}" data-doc-anchor="{{ file.anchor }}">View</a></li>
+				{% else %}
+				<li><a href="{{ SITE_ROOT }}{{ file.foia.get_absolute_url }}#{{ file.anchor }}" class="view-file" data-doc-id="{{ file.doc_id }}" data-doc-title="{{ file.title }}" data-doc-anchor="{{ file.anchor }}">View</a></li>
+				{% endif %}
             <li><span class="toggle-embed">Embed</span></li>
             {% endif %}
         </ul>

@@ -6,7 +6,7 @@ from django.test import TestCase
 
 from datetime import timedelta
 from mock import patch
-from nose.tools import eq_, ok_
+from nose.tools import eq_
 
 from muckrock.factories import UserFactory
 from muckrock.sidebar.models import Broadcast
@@ -33,4 +33,4 @@ class TestBroadcasts(TestCase):
             mock_now.return_value = self.broadcast.updated - timedelta(8)
             self.broadcast.save()
             broadcast = sidebar_broadcast(self.user)
-            ok_(broadcast is None)
+            eq_(broadcast, '')

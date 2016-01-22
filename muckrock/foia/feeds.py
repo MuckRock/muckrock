@@ -9,7 +9,9 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import escape, linebreaks
 
-from muckrock.foia.models import FOIARequest
+from datetime import date
+
+from muckrock.foia.models import FOIARequest, FOIACommunication
 
 class LatestSubmittedRequests(Feed):
     """An RSS Feed for submitted FOIA requests"""
@@ -21,7 +23,11 @@ class LatestSubmittedRequests(Feed):
         """Return the items for the rss feed"""
         # pylint: disable=no-self-use
         # pylint: disable=E1103
-        return FOIARequest.objects.get_submitted().get_public().order_by('-date_submitted')[:25]
+        return (FOIARequest.objects
+                .get_submitted()
+                .get_public()
+                .order_by('-date_submitted')
+                .prefetch_related('communications')[:25])
 
     def item_description(self, item):
         """The description of each rss item"""
@@ -38,7 +44,11 @@ class LatestDoneRequests(Feed):
         """Return the items for the rss feed"""
         # pylint: disable=no-self-use
         # pylint: disable=E1103
-        return FOIARequest.objects.get_done().get_public().order_by('-date_done')[:25]
+        return (FOIARequest.objects
+                .get_done()
+                .get_public()
+                .order_by('-date_done')
+                .prefetch_related('communications')[:25])
 
     def item_description(self, item):
         """The description of each rss item"""
@@ -100,10 +110,12 @@ class UserSubmittedFeed(Feed):
         return 'Newly submitted requests by %s' % obj.username
 
     def items(self, obj):
-        """The communications are the items for this feed"""
-        foia_requests = FOIARequest.objects.get_submitted()
-        foia_requests = foia_requests.filter(user=obj, embargo=False)
-        return foia_requests.order_by('-date_submitted')[:25]
+        """The submitted requests are the items for this feed"""
+        return (FOIARequest.objects
+                .get_submitted()
+                .filter(user=obj, embargo=False)
+                .order_by('-date_submitted')
+                .prefetch_related('communications')[:25])
 
     def item_description(self, item):
         """The description of each rss item"""
@@ -132,10 +144,12 @@ class UserDoneFeed(Feed):
         return 'Completed requests by %s' % obj.username
 
     def items(self, obj):
-        """The communications are the items for this feed"""
-        foia_requests = FOIARequest.objects.get_done()
-        foia_requests = foia_requests.filter(user=obj, embargo=False)
-        return foia_requests.order_by('-date_submitted')[:25]
+        """The completed requests are the items for this feed"""
+        return (FOIARequest.objects
+                .get_done()
+                .filter(user=obj, embargo=False)
+                .order_by('-date_submitted')
+                .prefetch_related('communications')[:25])
 
     def item_description(self, item):
         """The description of each rss item"""
@@ -165,13 +179,13 @@ class UserUpdateFeed(Feed):
 
     def items(self, obj):
         """The communications are the items for this feed"""
-        foias = FOIARequest.objects.get_public().filter(user=obj).prefetch_related('communications')
-        communications = []
-        for foia in foias:
-            communications.extend(foia.communications.all())
-        communications.sort(key=lambda f: f.date, reverse=True)
+        communications = (FOIACommunication.objects
+                .filter(foia__user=obj)
+                .exclude(foia__status='started')
+                .exclude(foia__embargo=True, foia__date_embargo=None)
+                .exclude(foia__embargo=True, foia__date_embargo__gte=date.today())
+                .order_by('-date'))
         return communications[:25]
-
 
     def item_description(self, item):
         """The description of each rss item"""

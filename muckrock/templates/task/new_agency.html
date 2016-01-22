@@ -14,9 +14,9 @@
     <dt>User</dt>
     <dd><a href="{% url 'admin:auth_user_change' task.user.pk %}">{{task.user}}</a></dd>
     {% endif %}
-    {% if foias %}
+    {% if task.foias %}
     <dt>Pending Requests</dt>
-    {% for foia in foias %}
+    {% for foia in task.foias %}
     <dd><a href="{{ foia.get_absolute_url }}">{{ foia }}</a></dd>
     {% endfor %}
     {% endif %}
@@ -31,7 +31,7 @@
         <input type="hidden" name="reject" value="true">
         <label>Move this agency’s requests to</label>
         <select name="replacement">
-        {% for other_agency in other_agencies %}
+        {% for other_agency in task.agency.jurisdiction.other_agencies %}
             <option value="{{ other_agency.id }}">{{ other_agency.name }}</option>
         {% endfor %}
         </select>

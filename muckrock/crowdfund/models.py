@@ -2,8 +2,9 @@
 Models for the crowdfund application
 """
 
-from django.contrib.auth.models import User, AnonymousUser
+from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import Q
 
 import actstream
 from datetime import date
@@ -70,27 +71,23 @@ class CrowdfundABC(models.Model):
         actstream.action.send(self, verb='ended')
         return
 
-    def contributors(self):
-        """Return a list of all the contributors to a crowdfund"""
-        contributors = []
-        payments = self.payments.all()
-        for payment in payments:
-            if payment.show and payment.user:
-                contributors.append(payment.user)
-            else:
-                contributors.append(AnonymousUser())
-        logging.debug(payments)
-        logging.debug(contributors)
-        return contributors
+    def contributors_count(self):
+        """Return a count of all the contributors to a crowdfund"""
+        return self.payments.count()
 
-    def anonymous_contributors(self):
-        """Return anonymous contributors only."""
-        return [x for x in self.contributors() if x.is_anonymous()]
+    def anonymous_contributors_count(self):
+        """Return a count of anonymous contributors"""
+        return self.payments.filter(Q(show=False) | Q(user=None)).count()
 
     def named_contributors(self):
         """Return unique named contributors only."""
         # returns the list of a set of a list to remove duplicates
-        return list(set([x for x in self.contributors() if not x.is_anonymous()]))
+        payment_name = self.get_crowdfund_payment_object().__name__.lower()
+        params = {
+                payment_name + '__crowdfund': self,
+                payment_name + '__show': True,
+                }
+        return User.objects.filter(**params).distinct()
 
     def get_crowdfund_payment_object(self):
         """Return the crowdfund payment object. Should be implemented by subclasses."""
@@ -150,6 +147,7 @@ class CrowdfundPaymentABC(models.Model):
 
 class CrowdfundRequest(CrowdfundABC):
     """Keep track of crowdfunding for a request"""
+    type_ = 'foia'
     foia = models.OneToOneField(FOIARequest, related_name='crowdfund')
 
     def __unicode__(self):
@@ -178,6 +176,7 @@ class CrowdfundRequestPayment(CrowdfundPaymentABC):
 
 class CrowdfundProject(CrowdfundABC):
     """A crowdfunding campaign for a project."""
+    type_ = 'project'
     project = models.ForeignKey('project.Project', related_name='crowdfund')
 
     def __unicode__(self):

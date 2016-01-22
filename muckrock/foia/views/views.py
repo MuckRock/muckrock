@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
+from django.db.models import Prefetch
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
@@ -19,22 +20,28 @@ import json
 import logging
 
 from muckrock.foia.codes import CODES
-from muckrock.foia.forms import \
-    RequestFilterForm, \
-    FOIAEmbargoForm, \
-    FOIANoteForm, \
-    FOIAEstimatedCompletionDateForm, \
-    FOIAAccessForm
-from muckrock.foia.models import \
-    FOIARequest, \
-    FOIAMultiRequest, \
-    STATUS, END_STATUS
+from muckrock.foia.forms import (
+    RequestFilterForm,
+    FOIAEmbargoForm,
+    FOIANoteForm,
+    FOIAEstimatedCompletionDateForm,
+    FOIAAccessForm,
+    )
+from muckrock.foia.models import (
+    FOIARequest,
+    FOIAMultiRequest,
+    RawEmail,
+    STATUS,
+    END_STATUS,
+    )
 from muckrock.foia.views.composers import get_foia
-from muckrock.foia.views.comms import move_comm,\
-                                      delete_comm,\
-                                      save_foia_comm,\
-                                      resend_comm,\
-                                      change_comm_status
+from muckrock.foia.views.comms import (
+        move_comm,
+        delete_comm,
+        save_foia_comm,
+        resend_comm,
+        change_comm_status,
+        )
 from muckrock.qanda.models import Question
 from muckrock.settings import STRIPE_PUB_KEY
 from muckrock.tags.models import Tag
@@ -72,8 +79,8 @@ class RequestList(MRFilterableListView):
         objects = super(RequestList, self).get_queryset()
         objects = objects.select_related('jurisdiction')
         objects = objects.only(
-                'title', 'slug', 'status', 'date_submitted',
-                'date_due', 'date_updated', 'jurisdiction__slug')
+                'title', 'slug', 'status', 'date_submitted', 'date_due',
+                'date_updated', 'date_processing', 'jurisdiction__slug')
         return objects.get_viewable(self.request.user)
 
 
@@ -108,8 +115,11 @@ class MyRequestList(RequestList):
 
     def get_queryset(self):
         """Gets multirequests as well, limits to just those by the current user"""
-        single_req = (FOIARequest.objects.filter(user=self.request.user)
-                                         .select_related('jurisdiction'))
+        single_req = (FOIARequest.objects
+                .filter(user=self.request.user)
+                .select_related('jurisdiction')
+                .prefetch_related('communications')
+                )
         multi_req = FOIAMultiRequest.objects.filter(user=self.request.user)
         single_req = self.sort_list(self.filter_list(single_req))
         return list(single_req) + list(multi_req)
@@ -156,6 +166,12 @@ class ProcessingRequestList(RequestList):
                 filters.pop(filters.index(filter_dict))
         return filters
 
+    def get_queryset(self):
+        """Apply select and prefetch related"""
+        objects = super(ProcessingRequestList, self).get_queryset()
+        return (objects
+                .prefetch_related('communications'))
+
 
 # pylint: disable=no-self-use
 class Detail(DetailView):
@@ -164,6 +180,10 @@ class Detail(DetailView):
 
     model = FOIARequest
     context_object_name = 'foia'
+
+    def __init__(self, *args, **kwargs):
+        self._obj = None
+        super(Detail, self).__init__(*args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
         """If request is a draft, then redirect to drafting interface"""
@@ -184,11 +204,30 @@ class Detail(DetailView):
     def get_object(self, queryset=None):
         """Get the FOIA Request"""
         # pylint: disable=unused-argument
+        # this is called twice in dispatch, so cache to not actually run twice
+        if self._obj:
+            return self._obj
+
         foia = get_foia(
             self.kwargs['jurisdiction'],
             self.kwargs['jidx'],
             self.kwargs['slug'],
-            self.kwargs['idx']
+            self.kwargs['idx'],
+            select_related=(
+                'agency',
+                'agency__jurisdiction',
+                'crowdfund',
+                'jurisdiction',
+                'jurisdiction__parent',
+                'jurisdiction__parent__parent',
+                'user',
+                'user__profile',
+                ),
+            prefetch_related=(
+                'communications',
+                'communications__files',
+                Prefetch('communications__rawemail', RawEmail.objects.defer('raw_email')),
+                ),
         )
         user = self.request.user
         valid_access_key = self.request.GET.get('key') == foia.access_key
@@ -198,6 +237,7 @@ class Detail(DetailView):
             if foia.updated:
                 foia.updated = False
                 foia.save()
+        self._obj = foia
         return foia
 
     def get_context_data(self, **kwargs):
@@ -226,15 +266,20 @@ class Detail(DetailView):
         context['access_form'] = FOIAAccessForm()
         context['embargo_needs_date'] = foia.status in END_STATUS
         context['user_actions'] = foia.user_actions(user)
-        context['noncontextual_request_actions'] = foia.noncontextual_request_actions(user)
-        context['contextual_request_actions'] = foia.contextual_request_actions(user)
+        context['noncontextual_request_actions'] = \
+                foia.noncontextual_request_actions(user_can_edit)
+        context['contextual_request_actions'] = \
+                foia.contextual_request_actions(user, user_can_edit)
         context['status_choices'] = STATUS if include_draft else STATUS_NODRAFT
         context['show_estimated_date'] = foia.status not in ['submitted', 'ack', 'done', 'rejected']
         context['change_estimated_date'] = FOIAEstimatedCompletionDateForm(instance=foia)
-        context['task_count'] = len(Task.objects.filter_by_foia(foia))
-        context['open_tasks'] = Task.objects.get_unresolved().filter_by_foia(foia)
+        if user.is_staff:
+            all_tasks = Task.objects.filter_by_foia(foia)
+            context['task_count'] = len(all_tasks)
+            context['open_tasks'] = [task for task in all_tasks if not task.resolved]
         context['stripe_pk'] = STRIPE_PUB_KEY
         context['sidebar_admin_url'] = reverse('admin:foia_foiarequest_change', args=(foia.pk,))
+        context['is_thankable'] = foia.is_thankable()
         if foia.sidebar_html:
             messages.info(self.request, foia.sidebar_html)
         return context

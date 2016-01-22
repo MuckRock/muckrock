@@ -19,23 +19,21 @@ class TaskNode(template.Node):
     task_template = 'task/default.html'
     endpoint_name = 'task-list'
 
-    def __init__(self, task_id):
+    def __init__(self, task_):
         """The node should be initialized with a task object"""
-        self.task_id = template.Variable(task_id)
+        self._task = template.Variable(task_)
+        self.task = None
 
     def render(self, context):
         """Render the task"""
-        try:
-            the_task = self.model.objects.get(id=self.task_id.resolve(context))
-        except (template.VariableDoesNotExist, self.model.DoesNotExist):
-            return ''
-        context.update(self.get_extra_context(the_task))
+        self.task = self._task.resolve(context)
+        context.update(self.get_extra_context())
         return template.loader.render_to_string(self.task_template, context)
 
-    def get_extra_context(self, the_task):
+    def get_extra_context(self):
         """Returns a dictionary of context for the specific task"""
         endpoint_url = reverse(self.endpoint_name)
-        extra_context = {'task': the_task, 'endpoint': endpoint_url}
+        extra_context = {'task': self.task, 'endpoint': endpoint_url}
         return extra_context
 
 class OrphanTaskNode(TaskNode):
@@ -44,11 +42,12 @@ class OrphanTaskNode(TaskNode):
     task_template = 'task/orphan.html'
     endpoint_name = 'orphan-task-list'
 
-    def get_extra_context(self, the_task):
+    def get_extra_context(self):
         """Adds sender domain to the context"""
-        extra_context = super(OrphanTaskNode, self).get_extra_context(the_task)
-        extra_context['domain'] = the_task.get_sender_domain()
-        extra_context['attachments'] = the_task.communication.files.all()
+        # pylint:disable=no-member
+        extra_context = super(OrphanTaskNode, self).get_extra_context()
+        extra_context['domain'] = self.task.get_sender_domain()
+        extra_context['attachments'] = self.task.communication.files.all()
         return extra_context
 
 class SnailMailTaskNode(TaskNode):
@@ -57,9 +56,9 @@ class SnailMailTaskNode(TaskNode):
     task_template = 'task/snail_mail.html'
     endpoint_name = 'snail-mail-task-list'
 
-    def get_extra_context(self, the_task):
+    def get_extra_context(self):
         """Adds status to the context"""
-        extra_context = super(SnailMailTaskNode, self).get_extra_context(the_task)
+        extra_context = super(SnailMailTaskNode, self).get_extra_context()
         extra_context['status'] = foia.models.STATUS
         return extra_context
 
@@ -117,13 +116,12 @@ class NewAgencyTaskNode(TaskNode):
     task_template = 'task/new_agency.html'
     endpoint_name = 'new-agency-task-list'
 
-    def get_extra_context(self, the_task):
+    def get_extra_context(self):
         """Adds an approval form, other agencies, and relevant requests to context"""
         # pylint:disable=line-too-long
-        extra_context = super(NewAgencyTaskNode, self).get_extra_context(the_task)
-        extra_context['agency_form'] = agency.forms.AgencyForm(instance=the_task.agency)
-        extra_context['other_agencies'] = agency.models.Agency.objects.get_siblings(the_task.agency)
-        extra_context['foias'] = foia.models.FOIARequest.objects.filter(agency=the_task.agency)
+        # pylint:disable=no-member
+        extra_context = super(NewAgencyTaskNode, self).get_extra_context()
+        extra_context['agency_form'] = agency.forms.AgencyForm(instance=self.task.agency)
         return extra_context
 
 class ResponseTaskNode(TaskNode):
@@ -132,18 +130,18 @@ class ResponseTaskNode(TaskNode):
     task_template = 'task/response.html'
     endpoint_name = 'response-task-list'
 
-    def get_extra_context(self, the_task):
+    def get_extra_context(self):
         """Adds ResponseTask-specific context"""
-        extra_context = super(ResponseTaskNode, self).get_extra_context(the_task)
+        # pylint:disable=no-member
+        extra_context = super(ResponseTaskNode, self).get_extra_context()
         form_initial = {}
-        if the_task.communication.foia:
-            the_foia = the_task.communication.foia
+        if self.task.communication.foia:
+            the_foia = self.task.communication.foia
             form_initial['status'] = the_foia.status
             form_initial['tracking_number'] = the_foia.tracking_id
             form_initial['date_estimate'] = the_foia.date_estimate
-            extra_context['all_comms'] = the_foia.communications.all().order_by('-date')
         extra_context['response_form'] = task.forms.ResponseTaskForm(initial=form_initial)
-        extra_context['attachments'] = the_task.communication.files.all()
+        extra_context['attachments'] = self.task.communication.files.all()
         return extra_context
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#

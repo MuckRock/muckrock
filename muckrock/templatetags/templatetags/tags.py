@@ -191,3 +191,7 @@ def display_eml(foia_file):
             if sub_msg.get_content_type() == 'text/plain':
                 return sub_msg.get_payload(decode=True)
 
+@register.filter
+def get_item(dictionary, key):
+    """Get an item from a dictionary template filter"""
+    return dictionary.get(key)

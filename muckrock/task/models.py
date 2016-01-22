@@ -67,22 +67,17 @@ class TaskQuerySet(models.QuerySet):
 
     def filter_by_foia(self, foia):
         """Get all tasks that relate to the provided FOIA request."""
-        # pylint:disable=line-too-long
-        # I disabled pylint line length checking here because it's like 4 characters and
-        # I think that shortening these lines would reduce the overall legibility.
+        # pylint:disable=no-self-use
         tasks = []
         # infer foia from communication
-        tasks += [task.responsetask for task in self.filter(responsetask__communication__foia=foia)]
-        tasks += [task.snailmailtask for task in self.filter(snailmailtask__communication__foia=foia)]
-        tasks += [task.failedfaxtask for task in self.filter(failedfaxtask__communication__foia=foia)]
+        for task_type in (ResponseTask, SnailMailTask, FailedFaxTask):
+            tasks += list(task_type.objects.filter(communication__foia=foia))
         # these tasks have a direct foia attribute
-        tasks += [task.rejectedemailtask for task in self.filter(rejectedemailtask__foia=foia)]
-        tasks += [task.flaggedtask for task in self.filter(flaggedtask__foia=foia)]
-        tasks += [task.statuschangetask for task in self.filter(statuschangetask__foia=foia)]
-        tasks += [task.paymenttask for task in self.filter(paymenttask__foia=foia)]
+        for task_type in (RejectedEmailTask, FlaggedTask, StatusChangeTask, PaymentTask):
+            tasks += list(task_type.objects.filter(foia=foia))
         # try matching foia agency with task agency
         if foia.agency:
-            tasks += [task.newagencytask for task in self.filter(newagencytask__agency=foia.agency)]
+            tasks += list(NewAgencyTask.objects.filter(agency=foia.agency))
         return tasks
 
 
@@ -97,7 +92,7 @@ class Task(models.Model):
     """A base task model for fields common to all tasks"""
     date_created = models.DateTimeField(auto_now_add=True)
     date_done = models.DateTimeField(blank=True, null=True)
-    resolved = models.BooleanField(default=False)
+    resolved = models.BooleanField(default=False, db_index=True)
     assigned = models.ForeignKey(User, blank=True, null=True, related_name="assigned_tasks")
     resolved_by = models.ForeignKey(User, blank=True, null=True, related_name="resolved_tasks")
 

@@ -94,12 +94,24 @@ class FOIARequestQuerySet(models.QuerySet):
 
     def organization(self, organization):
         """Get requests belonging to an organization's members."""
-        members = organization.members.select_related('user').all()
-        users = [member.user for member in members]
-        return self.select_related('jurisdiction')\
-                   .select_related('jurisdiction__parent')\
-                   .select_related('jurisdiction__parent__parent')\
-                   .filter(user__in=users)
+        return (self.select_related(
+                        'jurisdiction',
+                        'jurisdiction__parent',
+                        'jurisdiction__parent__parent'
+                        )
+                    .filter(user__profile__organization=organization))
+
+    def select_related_view(self):
+        """Select related models for viewing"""
+        return self.select_related(
+                'agency',
+                'agency__jurisdiction',
+                'jurisdiction',
+                'jurisdiction__parent',
+                'jurisdiction__parent__parent',
+                'user',
+                'user__profile',
+                )
 
 STATUS = (
     ('started', 'Draft'),
@@ -582,6 +594,8 @@ class FOIARequest(models.Model):
 
         cc_addrs = self.get_other_emails()
         from_email = '%s@%s' % (from_addr, MAILGUN_SERVER_NAME)
+        # pylint:disable=attribute-defined-outside-init
+        self.reverse_communications = self.communications.reverse()
         body = render_to_string('text/foia/request_email.txt', {'request': self})
         body = unidecode(body) if from_addr == 'fax' else body
         msg = EmailMultiAlternatives(
@@ -713,9 +727,8 @@ class FOIARequest(models.Model):
             ),
         ]
 
-    def noncontextual_request_actions(self, user):
+    def noncontextual_request_actions(self, can_edit):
         '''Provides context-insensitive action interfaces for requests'''
-        can_edit = self.editable_by(user) or user.is_staff
         can_pay = can_edit and self.is_payable()
         kwargs = {
             'jurisdiction': self.jurisdiction.slug,
@@ -740,9 +753,8 @@ class FOIARequest(models.Model):
             ),
         ]
 
-    def contextual_request_actions(self, user):
+    def contextual_request_actions(self, user, can_edit):
         '''Provides context-sensitive action interfaces for requests'''
-        can_edit = self.editable_by(user) or user.is_staff
         can_follow_up = can_edit and self.status != 'started'
         can_appeal = can_edit and self.is_appealable()
         kwargs = {
