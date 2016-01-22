@@ -14,25 +14,25 @@ class MRActionManager(ActionManager):
     """Adds custom activity streams"""
 
     @stream
-    def requests_for_user(self, user, **kwargs):
+    def owned_by(self, user, model, **kwargs):
         """Get the stream for all requests with the given owner"""
         if user is None or not isinstance(user, User):
             raise ValueError('Must provide a User')
-        foia_ctype = ContentType.objects.get_for_model(FOIARequest)
-        foia_pks = list(FOIARequest.objects.filter(user=user).values_list('pk', flat=True))
-        if not foia_pks:
+        # TODO: check that the model is registered with activity streams
+        ctype = ContentType.objects.get_for_model(model)
+        pks = list(model.objects.filter(user=user).values_list('pk', flat=True))
+        if not pks:
             # self.none is inherited from the GFKManager parent
             return self.none()
         else:
             return self.public(
                 (Q(
-                    actor_content_type=foia_ctype,
-                    actor_object_id__in=foia_pks,
+                    actor_content_type=ctype,
+                    actor_object_id__in=pks,
                 ) | Q(
-                    target_content_type=foia_ctype,
-                    target_object_id__in=foia_pks,
+                    target_content_type=ctype,
+                    target_object_id__in=pks,
                 ) | Q(
-                    action_object_content_type=foia_ctype,
-                    action_object_object_id__in=foia_pks,
+                    action_object_content_type=ctype,
+                    action_object_object_id__in=pks,
                 )), **kwargs)
-
