@@ -1,18 +1,32 @@
 {% load notification_tags %}
 
 {% if activity.requests %}
-    <h1>Your requests<h1>
+    <h1>Requests<h1>
+    <h2>Yours</h2>
     <ul>
-        {% for action in activity.requests %}
+        {% for action in activity.requests.mine %}
+        <li>{% display_action action %}</li>
+        {% endfor %}
+    </ul>
+    <h2>Following</h2>
+    <ul>
+        {% for action in activity.requests.following %}
         <li>{% display_action action %}</li>
         {% endfor %}
     </ul>
 {% endif %}
-{% if activity.following %}
-    <h1>Site activity</h1>
+{% if activity.questions %}
+    <h1>Questions</h1>
+    <h2>Yours</h2>
     <ul>
-    {% for action in activity.following %}
+        {% for action in activity.questions.mine %}
         <li>{% display_action action %}</li>
-    {% endfor %}
+        {% endfor %}
+    </ul>
+    <h2>Following</h2>
+    <ul>
+        {% for action in activity.questions.following %}
+        <li>{% display_action action %}</li>
+        {% endfor %}
     </ul>
 {% endif %}

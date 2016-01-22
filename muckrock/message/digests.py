@@ -5,11 +5,14 @@ Digest objects for the messages app
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core.mail import EmailMultiAlternatives
+from django.db.models import Q
 from django.template.loader import render_to_string
 
 from actstream.models import Action, user_stream
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+
+from muckrock.foia.models import FOIARequest
 
 class Digest(EmailMultiAlternatives):
     """
@@ -46,12 +49,20 @@ class Digest(EmailMultiAlternatives):
     def get_activity(self):
         """Returns a list of activities to be sent in the email"""
         duration = self.get_duration()
-        f_stream = self.get_foia_activity(duration)
-        u_stream = user_stream(self.user).filter(timestamp__gte=duration)\
-                                         .exclude(verb__icontains='following')
-        self.activity['count'] = f_stream.count() + u_stream.count()
-        self.activity['requests'] = f_stream
-        self.activity['following'] = u_stream
+        user_ct = ContentType.objects.get_for_model(self.user)
+        foia_ct = ContentType.objects.get_for_model(FOIARequest)
+        following = (user_stream(self.user).filter(timestamp__gte=duration).exclude(verb__icontains='following'))
+        foia_following = following.filter(Q(action_object_content_type=foia_ct)|Q(target_content_type=foia_ct))
+        foia_stream = (Action.objects.requests_for_user(self.user)
+                                     .filter(timestamp__gte=duration)
+                                     .exclude(actor_content_type=user_ct,
+                                              actor_object_id=self.user.id))
+        self.activity['count'] = foia_stream.count() + foia_following.count()
+        self.activity['requests'] = {
+            'count': foia_stream.count() + foia_following.count(),
+            'mine': foia_stream,
+            'following': foia_following
+        }
         return self.activity
 
     def get_duration(self):
@@ -63,17 +74,6 @@ class Digest(EmailMultiAlternatives):
             # flexibility in the kinds of intervals we can define, e.g. weeks and months
             raise TypeError('Interval must be a dateutil.relativedelta.relativedelta object.')
         return datetime.now() - self.interval
-
-    def get_foia_activity(self, period):
-        """Returns activity on requests owned by the user."""
-        # exclude actions where the user is the Actor
-        # since they know which actions they've taken themselves
-        user_ct = ContentType.objects.get_for_model(self.user)
-        foia_stream = (Action.objects.requests_for_user(self.user)
-                                     .filter(timestamp__gte=period)
-                                     .exclude(actor_content_type=user_ct,
-                                              actor_object_id=self.user.id))
-        return foia_stream
 
     def get_context_data(self):
         """Adds classified activity to the context"""
@@ -88,7 +88,7 @@ class Digest(EmailMultiAlternatives):
 
     def classify_foia_activity(self):
         """Segment and classify the activity"""
-        foia_activity = self.activity['requests']
+        foia_activity = self.activity['requests']['mine']
         return {
             'granted': foia_activity.filter(verb__icontains='completed'),
             'denied': foia_activity.filter(verb__icontains='rejected'),
