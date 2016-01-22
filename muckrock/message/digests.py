@@ -23,11 +23,41 @@ class Digest(EmailMultiAlternatives):
     text_template = 'message/digest.txt'
     html_template = 'message/digest.html'
     interval = None
+
+    # Here we scaffold out the activity dictionary.
+    # It is scaffolded to prevent key errors when counting
+    # activity, as well as to provide some guidance for
+    # which activities to filter from the global stream.
+
+    # Activity is independent from template context because
+    # we use activity counts to influence other parts of the
+    # email, like the subject line and whether or not to
+    # even send the email at all.
+
     activity = {
         'count': 0,
-        'requests': None,
-        'following': None
+        'requests': {
+            'count': 0,
+            'mine': None,
+            'following': None
+        },
+        'questions': {
+            'count': 0,
+            'mine': None,
+            'following': None
+        }
     }
+
+    # Most of the work re: composing the email takes place
+    # at init. This is by design, since digests should require
+    # a minimum of configuration outside of their own configuration,
+    # which is their responsibility. In other words, a digest really
+    # only needs to know its user.
+
+    # Question: should interval be made into a required init value?
+    # On the one hand, having interval hardcoded into subclasses is
+    # less flexible. On the other, this flexibility might not be required
+    # beyond specifically-defined subclasses.
 
     def __init__(self, user, **kwargs):
         """Initialize the notification"""
@@ -39,8 +69,8 @@ class Digest(EmailMultiAlternatives):
             raise TypeError('Digest requires a User to recieve it')
         self.activity = self.get_activity()
         context = self.get_context_data()
-        text_email = render_to_string(self.get_text_template(), context)
-        html_email = render_to_string(self.get_html_template(), context)
+        text_email = render_to_string(self.text_template, context)
+        html_email = render_to_string(self.html_template, context)
         self.from_email = 'MuckRock <info@muckrock.com>'
         self.bcc = ['diagnostics@muckrock.com']
         self.subject = self.get_subject()
@@ -48,7 +78,8 @@ class Digest(EmailMultiAlternatives):
         self.attach_alternative(html_email, 'text/html')
 
     def model_stream(self, model, stream):
-        """Extract actions from stream by model"""
+        """Helper function to extract actions from stream by model"""
+        # pylint: disable=no-self-use
         content_type = ContentType.objects.get_for_model(model)
         action_object = Q(action_object_content_type=content_type)
         target = Q(target_content_type=content_type)
@@ -118,14 +149,6 @@ class Digest(EmailMultiAlternatives):
             'response': foia_activity.filter(verb__icontains='responded'),
             'auto_follow_up': foia_activity.filter(verb__icontains='automatically followed up'),
         }
-
-    def get_text_template(self):
-        """Returns the text template"""
-        return self.text_template
-
-    def get_html_template(self):
-        """Returns the html template"""
-        return self.html_template
 
     def get_subject(self):
         """Summarizes the activities in the notification"""
