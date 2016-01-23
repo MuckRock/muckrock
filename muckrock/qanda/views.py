@@ -130,9 +130,10 @@ class Detail(DetailView):
         context['answers'] = context['object'].answers.select_related('user')
         context['answer_users'] = set(a.user for a in context['answers'])
         foia = context['object'].foia
-        foia.public_file_count = (FOIAFile.objects
-                .filter(foia=foia, access='public')
-                .aggregate(count=Count('id'))['count'])
+        if foia is not None:
+            foia.public_file_count = (FOIAFile.objects
+                    .filter(foia=foia, access='public')
+                    .aggregate(count=Count('id'))['count'])
         return context
 
 
