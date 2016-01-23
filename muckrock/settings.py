@@ -110,8 +110,11 @@ if not DEBUG:
     THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
     STATICFILES_STORAGE = 'muckrock.storage.CachedS3BotoStorage'
     COMPRESS_STORAGE = STATICFILES_STORAGE
-    STATIC_URL = 'https://' + BUCKET_NAME + '.s3.amazonaws.com/'
     AWS_S3_CUSTOM_DOMAIN = os.environ.get('CLOUDFRONT_DOMAIN')
+    if AWS_S3_CUSTOM_DOMAIN:
+        STATIC_URL = 'https://' + AWS_S3_CUSTOM_DOMAIN + '/'
+    else:
+        STATIC_URL = 'https://' + BUCKET_NAME + '.s3.amazonaws.com/'
     COMPRESS_URL = STATIC_URL
     MEDIA_URL = STATIC_URL + 'media/'
 elif AWS_DEBUG:
