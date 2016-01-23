@@ -112,6 +112,7 @@ if not DEBUG:
     COMPRESS_STORAGE = STATICFILES_STORAGE
     STATIC_URL = os.environ.get('CLOUDFRONT_URL',
             'https://' + BUCKET_NAME + '.s3.amazonaws.com/')
+    AWS_S3_CUSTOM_DOMAIN = os.environ.get('CLOUDFRONT_URL')
     COMPRESS_URL = STATIC_URL
     MEDIA_URL = STATIC_URL + 'media/'
 elif AWS_DEBUG:
