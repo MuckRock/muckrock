@@ -14,7 +14,6 @@ from rest_framework import viewsets
 from rest_framework.permissions import DjangoModelPermissions
 import django_filters
 
-from muckrock.foia.models import FOIARequest, FOIAFile
 from muckrock.news.models import Article
 from muckrock.news.serializers import ArticleSerializer
 from muckrock.settings import STRIPE_PUB_KEY
@@ -32,12 +31,7 @@ class NewsDetail(DateDetailView):
                 Prefetch('authors',
                     queryset=User.objects.select_related('profile')),
                 Prefetch('editors',
-                    queryset=User.objects.select_related('profile')),
-                Prefetch('foias',
-                    queryset=FOIARequest.objects.select_related_view()),
-                Prefetch('foias__files',
-                    queryset=FOIAFile.objects.filter(access='public'),
-                    to_attr='public_files'))
+                    queryset=User.objects.select_related('profile')))
         if self.request.user.is_staff:
             return queryset.all()
         else:
@@ -50,6 +44,8 @@ class NewsDetail(DateDetailView):
     def get_context_data(self, **kwargs):
         context = super(NewsDetail, self).get_context_data(**kwargs)
         context['projects'] = context['object'].projects.all()
+        context['foias'] = (context['object'].foias
+                .select_related_view().get_public_file_count())
         context['sidebar_admin_url'] = reverse('admin:news_article_change',
             args=(context['object'].pk,))
         context['stripe_pk'] = STRIPE_PUB_KEY

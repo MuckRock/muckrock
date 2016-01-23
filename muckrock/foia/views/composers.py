@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
-from django.db.models import Q, Prefetch
+from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
@@ -33,7 +33,6 @@ from muckrock.foia.forms import (
     )
 from muckrock.foia.models import (
     FOIARequest,
-    FOIAFile,
     FOIAMultiRequest,
     FOIACommunication,
     STATUS,
@@ -286,10 +285,7 @@ def create_request(request):
             .get_viewable(request.user)
             .filter(featured=True)
             .select_related_view()
-            .prefetch_related(
-                Prefetch('files',
-                    queryset=FOIAFile.objects.filter(access='public'),
-                    to_attr='public_files')))
+            .get_public_file_count())
 
     context = {
         'form': form,

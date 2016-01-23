@@ -3,8 +3,8 @@
 <div class="foia-single">
     <div class="foia-info">
         <p class="status {{ foia.status|classify_status }}">{{ foia.get_status_display }}</p>
-        {% if foia.public_files %}
-        <p class="files"><a href="{{foia.get_absolute_url}}#files">{{ foia.public_files|length }} file{{ foia.public_files|length|pluralize }}</a></p>
+        {% if foia.public_file_count %}
+        <p class="files"><a href="{{foia.get_absolute_url}}#files">{{ foia.public_file_count }} file{{ foia.public_file_count|pluralize }}</a></p>
         {% else %}
         <p class="files">No files</p>
         {% endif %}
