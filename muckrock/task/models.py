@@ -127,6 +127,7 @@ class GenericTask(Task):
 class OrphanTask(Task):
     """A communication that needs to be approved before showing it on the site"""
     # pylint: disable=no-member
+    type = 'OrphanTask'
     reasons = (('bs', 'Bad Sender'),
                ('ib', 'Incoming Blocked'),
                ('ia', 'Invalid Address'))
@@ -181,6 +182,7 @@ class OrphanTask(Task):
 class SnailMailTask(Task):
     """A communication that needs to be snail mailed"""
     # pylint: disable=no-member
+    type = 'SnailMailTask'
     categories = (('a', 'Appeal'), ('n', 'New'),
                   ('u', 'Update'), ('f', 'Followup'))
     category = models.CharField(max_length=1, choices=categories)
@@ -208,6 +210,7 @@ class SnailMailTask(Task):
 
 class RejectedEmailTask(Task):
     """A FOIA request has had an outgoing email rejected"""
+    type = 'RejectedEmailTask'
     categories = (('b', 'Bounced'), ('d', 'Dropped'))
     category = models.CharField(max_length=1, choices=categories)
     foia = models.ForeignKey('foia.FOIARequest', blank=True, null=True)
@@ -233,6 +236,7 @@ class RejectedEmailTask(Task):
 
 class StaleAgencyTask(Task):
     """An agency has gone stale"""
+    type = 'StaleAgencyTask'
     agency = models.ForeignKey(Agency)
 
     def __unicode__(self):
@@ -241,6 +245,7 @@ class StaleAgencyTask(Task):
 
 class FlaggedTask(Task):
     """A user has flagged a request, agency or jurisdiction"""
+    type = 'FlaggedTask'
     text = models.TextField()
     user = models.ForeignKey(User, blank=True, null=True)
     foia = models.ForeignKey('foia.FOIARequest', blank=True, null=True)
@@ -253,6 +258,7 @@ class FlaggedTask(Task):
 
 class NewAgencyTask(Task):
     """A new agency has been created and needs approval"""
+    type = 'NewAgencyTask'
     user = models.ForeignKey(User, blank=True, null=True)
     agency = models.ForeignKey(Agency)
 
@@ -291,6 +297,7 @@ class NewAgencyTask(Task):
 class ResponseTask(Task):
     """A response has been received and needs its status set"""
     # pylint: disable=no-member
+    type = 'ResponseTask'
     communication = models.ForeignKey('foia.FOIACommunication')
     created_from_orphan = models.BooleanField(default=False)
 
@@ -358,6 +365,7 @@ class ResponseTask(Task):
 class FailedFaxTask(Task):
     """A fax for this communication failed"""
     # pylint: disable=no-member
+    type = 'FailedFaxTask'
     communication = models.ForeignKey('foia.FOIACommunication')
 
     def __unicode__(self):
@@ -366,7 +374,7 @@ class FailedFaxTask(Task):
 
 class StatusChangeTask(Task):
     """A user has the status on a request"""
-
+    type = 'StatusChangeTask'
     user = models.ForeignKey(User)
     old_status = models.CharField(max_length=255)
     foia = models.ForeignKey('foia.FOIARequest')
@@ -377,12 +385,14 @@ class StatusChangeTask(Task):
 
 class PaymentTask(Task):
     """Created when the fee for a request has been paid"""
+    type = 'PaymentTask'
     amount = models.DecimalField(max_digits=8, decimal_places=2)
     user = models.ForeignKey(User)
     foia = models.ForeignKey('foia.FOIARequest')
 
     def __unicode__(self):
         return u'Payment Task'
+
 
 class CrowdfundTask(Task):
     """Created when a crowdfund is finished"""
@@ -394,6 +404,7 @@ class CrowdfundTask(Task):
 
 class GenericCrowdfundTask(Task):
     """Created when a crowdfund is finished"""
+    type = 'GenericCrowdfundTask'
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     crowdfund = GenericForeignKey('content_type', 'object_id')
@@ -404,6 +415,7 @@ class GenericCrowdfundTask(Task):
 
 class MultiRequestTask(Task):
     """Created when a multirequest is created and needs approval."""
+    type = 'MultiRequestTask'
     multirequest = models.ForeignKey('foia.FOIAMultiRequest')
 
     def __unicode__(self):
