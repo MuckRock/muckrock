@@ -140,6 +140,7 @@ class Digest(EmailMultiAlternatives):
 
     def classify_foia_activity(self, stream):
         """Segment and classify the activity"""
+        # pylint: disable=no-self-use
         classified = {
             'completed': stream.filter(verb__icontains='completed'),
             'rejected': stream.filter(verb__icontains='rejected'),

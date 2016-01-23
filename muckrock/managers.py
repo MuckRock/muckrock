@@ -8,8 +8,6 @@ from django.contrib.contenttypes.models import ContentType
 
 from actstream.managers import ActionManager, stream
 
-from muckrock.foia.models import FOIARequest
-
 class MRActionManager(ActionManager):
     """Adds custom activity streams"""
 
@@ -18,7 +16,6 @@ class MRActionManager(ActionManager):
         """Get the stream for all requests with the given owner"""
         if user is None or not isinstance(user, User):
             raise ValueError('Must provide a User')
-        # TODO: check that the model is registered with activity streams
         ctype = ContentType.objects.get_for_model(model)
         pks = list(model.objects.filter(user=user).values_list('pk', flat=True))
         if not pks:

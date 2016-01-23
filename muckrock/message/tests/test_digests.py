@@ -8,7 +8,6 @@ from django.test import TestCase
 
 import actstream
 from dateutil.relativedelta import relativedelta
-import logging
 import nose.tools
 
 from muckrock import factories
@@ -60,8 +59,10 @@ class TestDailyDigest(TestCase):
         actstream.action.send(self.user, verb='followed up on', action_object=foia)
         # generate the email, which should contain the generated action
         email = self.digest(self.user)
-        eq_(email.activity['count'], 1, 'There should be activity that is not user initiated.')
-        eq_(email.activity['requests']['mine'].first().actor, agency, 'User activity should be excluded.')
+        eq_(email.activity['count'], 1,
+            'There should be activity that is not user initiated.')
+        eq_(email.activity['requests']['mine'].first().actor, agency,
+            'User activity should be excluded.')
         eq_(email.send(), 1, 'The email should send.')
 
     def test_digest_follow_requests(self):
@@ -83,7 +84,7 @@ class TestDailyDigest(TestCase):
         # generate an action on a question the user asked
         question = factories.QuestionFactory(user=self.user)
         other_user = factories.UserFactory()
-        answer = factories.AnswerFactory(user=other_user, question=question)
+        factories.AnswerFactory(user=other_user, question=question)
         # creating an answer _should_ have created an action
         # so let's generate the email and see what happened
         email = self.digest(self.user)
@@ -98,7 +99,7 @@ class TestDailyDigest(TestCase):
         question = factories.QuestionFactory()
         actstream.actions.follow(self.user, question, actor_only=False)
         other_user = factories.UserFactory()
-        answer = factories.AnswerFactory(user=other_user, question=question)
+        factories.AnswerFactory(user=other_user, question=question)
         email = self.digest(self.user)
         eq_(email.activity['count'], 1, 'There should be activity.')
         eq_(email.activity['questions']['following'].first().actor, other_user)
