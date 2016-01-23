@@ -390,7 +390,7 @@ class TestAccountFunctional(TestCase):
         email_data = {
             'action': 'email',
             'email': 'allan@muckrock.com',
-            'email_pref': 'instant'
+            'email_pref': 'hourly'
         }
         settings_url = reverse('acct-settings')
         http_post_response(settings_url, views.settings, profile_data, self.user)

@@ -11,23 +11,49 @@ import logging
 import stripe
 
 from muckrock.accounts.models import Profile
-from muckrock.message import notifications, receipts
+from muckrock.message import digests, notifications, receipts
 from muckrock.organization.models import Organization
 
 logger = logging.getLogger(__name__)
 
-@periodic_task(run_every=crontab(hour=10, minute=0),
-               name='muckrock.message.tasks.daily_notification')
-def daily_notification():
-    """Send out daily notifications"""
-    profiles_to_notify = Profile.objects.filter(email_pref='daily').distinct()
-    for profile in profiles_to_notify:
-        # for now, only send staff the new updates
-        if profile.user.is_staff:
-            email = notifications.DailyNotification(profile.user)
+def send_digest(preference, digest):
+    """Helper to send out timed digests"""
+    profiles = Profile.objects.select_related('user').filter(email_pref=preference).distinct()
+    for profile in profiles:
+        # for now, only send experimental users the new updates
+        if profile.experimental:
+            email = digest(profile.user)
             email.send()
         else:
             profile.send_notifications()
+
+# every hour
+@periodic_task(run_every=crontab(hour='*/1', minute=0), name='muckrock.message.tasks.hourly_digest')
+def hourly_digest():
+    """Send out hourly digest"""
+    send_digest('hourly', digests.HourlyDigest)
+
+# every day at 10am
+@periodic_task(run_every=crontab(hour=10, minute=0), name='muckrock.message.tasks.daily_digest')
+def daily_digest():
+    """Send out daily digest"""
+    send_digest('daily', digests.DailyDigest)
+
+# every Monday at 10am
+@periodic_task(
+    run_every=crontab(day_of_week=1, hour=10, minute=0),
+    name='muckrock.message.tasks.weekly_digest')
+def weekly_digest():
+    """Send out weekly digest"""
+    send_digest('weekly', digests.WeeklyDigest)
+
+# first day of every month at 10am
+@periodic_task(
+    run_every=crontab(day_of_month=1, hour=10, minute=0),
+    name='muckrock.message.tasks.monthly_digest')
+def monthly_digest():
+    """Send out monthly digest"""
+    send_digest('monthly', digests.MonthlyDigest)
 
 @task(name='muckrock.message.tasks.send_invoice_receipt')
 def send_invoice_receipt(invoice_id):
@@ -154,4 +180,15 @@ def gift(to_user, from_user, gift_description):
         'gift': gift_description
     }
     notification = notifications.GiftNotification(to_user, context)
+    notification.send(fail_silently=False)
+
+@task(name='muckrock.message.tasks.email_change')
+def email_change(user, old_email):
+    """Notify the user when their email is changed."""
+    context = {
+        'old_email': old_email,
+        'new_email': user.email
+    }
+    notification = notifications.EmailChangeNotification(user, context)
+    notification.to.append(old_email) # Send to both the new and old email addresses
     notification.send(fail_silently=False)

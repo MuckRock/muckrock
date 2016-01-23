@@ -17,43 +17,21 @@ from muckrock.foia.models import FOIARequest, STATUS
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 
-def generate_status_actions(foia, comm, status):
-    """Generate activity stream actions for agency replies"""
+def generate_status_action(foia):
+    """Generate activity stream action for agency response"""
     if not foia.agency:
         return
-    # generate action
-    actstream.action.send(
-        foia.agency,
-        verb='sent',
-        action_object=comm,
-        target=foia
-    )
-    if status == 'rejected':
-        # generate action
-        actstream.action.send(
-            foia.agency,
-            verb='rejected',
-            action_object=foia
-        )
-    elif status == 'done':
-        # generate action
-        actstream.action.send(
-            foia.agency,
-            verb='completed',
-            action_object=foia
-        )
-    elif status == 'partial':
-        # generate action
-        actstream.action.send(
-            foia.agency,
-            verb='partially completed',
-            action_object=foia
-        )
-    elif status == 'fix':
-        actstream.action.send(foia, verb='requires fix')
-    elif status == 'payment':
-        actstream.action.send(foia, verb='requires payment')
-    return
+    verbs = {
+        'rejected': 'rejected',
+        'done': 'completed',
+        'partial': 'partially completed',
+        'processed': 'acknowledged',
+        'no_docs': 'has no responsive documents',
+        'fix': 'requires fix',
+        'payment': 'requires payment',
+    }
+    verb = verbs.get(foia.status, 'is processing')
+    actstream.action.send(foia.agency, verb=verb, action_object=foia)
 
 class TaskQuerySet(models.QuerySet):
     """Object manager for all tasks"""
@@ -341,7 +319,7 @@ class ResponseTask(Task):
         foia.update()
         foia.save()
         logging.info('Request #%d status changed to "%s"', foia.id, status)
-        generate_status_actions(foia, comm, status)
+        generate_status_action(foia)
 
     def set_price(self, price):
         """Sets the price of the communication's request"""

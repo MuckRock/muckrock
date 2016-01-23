@@ -12,8 +12,9 @@ from muckrock.accounts.models import Profile
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.project.models import Project
 from muckrock.organization.models import Organization
+from muckrock.project.models import Project
+from muckrock.qanda.models import Question, Answer
 
 class ProfileFactory(factory.django.DjangoModelFactory):
     """A factory for creating Profile test objects."""
@@ -94,3 +95,27 @@ class ProjectFactory(factory.django.DjangoModelFactory):
         model = Project
 
     title = factory.Sequence(lambda n: "Project %d" % n)
+
+
+class QuestionFactory(factory.django.DjangoModelFactory):
+    """A factory for creating Question test objects."""
+    class Meta:
+        model = Question
+
+    user = factory.SubFactory(UserFactory)
+    title = factory.Sequence(lambda n: "Question %d" % n)
+    slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
+    question = factory.Faker('paragraph')
+    date = factory.LazyAttribute(lambda obj: datetime.datetime.now())
+
+
+class AnswerFactory(factory.django.DjangoModelFactory):
+    """A factory for creating Answer test objects."""
+    class Meta:
+        model = Answer
+
+    user = factory.SubFactory(UserFactory)
+    date = factory.LazyAttribute(lambda obj: datetime.datetime.now())
+    question = factory.SubFactory(QuestionFactory)
+    answer = factory.Faker('paragraph')
+
