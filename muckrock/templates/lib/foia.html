@@ -3,15 +3,13 @@
 <div class="foia-single">
     <div class="foia-info">
         <p class="status {{ foia.status|classify_status }}">{{ foia.get_status_display }}</p>
-        {% with public_documents as foia.public_documents %}
-        {% if public_documents %}
-        <p class="files"><a href="{{foia.get_absolute_url}}#files">{{ public_documents|length }} file{{ public_documents|length|pluralize }}</a></p>
+        {% if foia.public_files %}
+        <p class="files"><a href="{{foia.get_absolute_url}}#files">{{ foia.public_files|length }} file{{ foia.public_files|length|pluralize }}</a></p>
         {% else %}
         <p class="files">No files</p>
         {% endif %}
-        {% endwith %}
         <p class="title"><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></p>
-        <p class="summary"><a href="{{ foia.user.profile.get_absolute_url }}">{{ foia.user.get_full_name }}</a> sent this request to the <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency }}</a> of {% if foia.jurisdiction.level == 'f' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% if foia.jurisdiction.parent and foia.jurisdiction.level == 'l' %}, <a href="{{ foia.jurisdiction.parent.get_absolute_url }}" title="{{ foia.jurisdiction.parent.name }}">{{ foia.jurisdiction.parent.abbrev }}</a>{% endif %}</p>
+        <p class="summary"><a href="{% url 'acct-profile' username=foia.user.username %}">{{ foia.user.get_full_name }}</a> sent this request to the <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency }}</a> of {% if foia.jurisdiction.level == 'f' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% if foia.jurisdiction.parent and foia.jurisdiction.level == 'l' %}, <a href="{{ foia.jurisdiction.parent.get_absolute_url }}" title="{{ foia.jurisdiction.parent.name }}">{{ foia.jurisdiction.parent.abbrev }}</a>{% endif %}</p>
     </div>
     {% if not hide_actions %}
     <div class="foia-actions">

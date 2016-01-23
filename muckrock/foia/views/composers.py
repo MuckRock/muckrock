@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
@@ -25,16 +25,19 @@ import string
 
 from muckrock.accounts.models import Profile
 from muckrock.agency.models import Agency
-from muckrock.foia.forms import \
-    RequestForm, \
-    RequestDraftForm, \
-    MultiRequestForm, \
-    MultiRequestDraftForm
-from muckrock.foia.models import \
-    FOIARequest, \
-    FOIAMultiRequest, \
-    FOIACommunication, \
-    STATUS
+from muckrock.foia.forms import (
+    RequestForm,
+    RequestDraftForm,
+    MultiRequestForm,
+    MultiRequestDraftForm,
+    )
+from muckrock.foia.models import (
+    FOIARequest,
+    FOIAFile,
+    FOIAMultiRequest,
+    FOIACommunication,
+    STATUS,
+    )
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.settings import STRIPE_PUB_KEY, MONTHLY_REQUESTS
 from muckrock.task.models import NewAgencyTask, MultiRequestTask
@@ -279,8 +282,14 @@ def create_request(request):
         else:
             form = RequestForm(request=request)
 
-    viewable = FOIARequest.objects.get_viewable(request.user)
-    featured = viewable.filter(featured=True).select_related_view()
+    featured = (FOIARequest.objects
+            .get_viewable(request.user)
+            .filter(featured=True)
+            .select_related_view()
+            .prefetch_related(
+                Prefetch('files',
+                    queryset=FOIAFile.objects.filter(access='public'),
+                    to_attr='public_files')))
 
     context = {
         'form': form,
