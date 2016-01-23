@@ -125,7 +125,7 @@ class FOIARequestQuerySet(models.QuerySet):
         counts = dict(count_qs)
         foias = []
         for foia in foia_qs:
-            foia.public_file_count = counts[foia.pk]
+            foia.public_file_count = counts.get(foia.pk, 0)
             foias.append(foia)
         return foias
 
