@@ -110,7 +110,6 @@ class FOIARequestQuerySet(models.QuerySet):
                 'jurisdiction__parent',
                 'jurisdiction__parent__parent',
                 'user',
-                'user__profile',
                 )
 
 STATUS = (

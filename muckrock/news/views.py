@@ -14,7 +14,7 @@ from rest_framework import viewsets
 from rest_framework.permissions import DjangoModelPermissions
 import django_filters
 
-from muckrock.foia.models import FOIARequest
+from muckrock.foia.models import FOIARequest, FOIAFile
 from muckrock.news.models import Article
 from muckrock.news.serializers import ArticleSerializer
 from muckrock.settings import STRIPE_PUB_KEY
@@ -34,7 +34,10 @@ class NewsDetail(DateDetailView):
                 Prefetch('editors',
                     queryset=User.objects.select_related('profile')),
                 Prefetch('foias',
-                    queryset=FOIARequest.objects.select_related_view()))
+                    queryset=FOIARequest.objects.select_related_view()),
+                Prefetch('foias__files',
+                    queryset=FOIAFile.objects.filter(access='public'),
+                    to_attr='public_files'))
         if self.request.user.is_staff:
             return queryset.all()
         else:

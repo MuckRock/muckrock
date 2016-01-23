@@ -18,6 +18,7 @@ from rest_framework.decorators import detail_route
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from muckrock.foia.models import FOIAFile
 from muckrock.qanda.models import Question, Answer
 from muckrock.qanda.forms import QuestionForm, AnswerForm
 from muckrock.qanda.serializers import QuestionSerializer, QuestionPermissions
@@ -58,6 +59,21 @@ class UnansweredQuestionList(QuestionList):
 class Detail(DetailView):
     """Question detail view"""
     model = Question
+
+    def get_queryset(self):
+        """Select related and prefetch the query set"""
+        return Question.objects.select_related(
+                'foia',
+                'foia__agency',
+                'foia__agency__jurisdiction',
+                'foia__jurisdiction',
+                'foia__jurisdiction__parent',
+                'foia__jurisdiction__parent__parent',
+                'foia__user',
+                ).prefetch_related(
+                    Prefetch('foia__files',
+                        queryset=FOIAFile.objects.filter(access='public'),
+                        to_attr='public_files'))
 
     def post(self, request, **kwargs):
         """Edit the question or answer"""
