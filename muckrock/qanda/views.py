@@ -18,6 +18,7 @@ from rest_framework.decorators import detail_route
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from muckrock.foia.models import FOIAFile
 from muckrock.qanda.models import Question, Answer
 from muckrock.qanda.forms import QuestionForm, AnswerForm
 from muckrock.qanda.serializers import QuestionSerializer, QuestionPermissions
@@ -128,6 +129,10 @@ class Detail(DetailView):
             args=(context['object'].pk,))
         context['answers'] = context['object'].answers.select_related('user')
         context['answer_users'] = set(a.user for a in context['answers'])
+        foia = context['object'].foia
+        foia.public_file_count = (FOIAFile.objects
+                .filter(foia=foia, access='public')
+                .aggregate(count=Count('id'))['count'])
         return context
 
 
