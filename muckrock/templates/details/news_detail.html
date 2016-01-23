@@ -58,9 +58,9 @@
             </ul>
             {% endif %}
             {% tag_manager article %}
-            {% if article.foias.exists %}
+            {% if foias %}
             <dfn>Related Requests</dfn>
-                {% include 'lib/foia_group.html' with foias=article.foias.all %}
+                {% include 'lib/foia_group.html' with foias=foias %}
             {% endif %}
         </aside>
     </article>

@@ -18,7 +18,6 @@ from rest_framework.decorators import detail_route
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from muckrock.foia.models import FOIAFile
 from muckrock.qanda.models import Question, Answer
 from muckrock.qanda.forms import QuestionForm, AnswerForm
 from muckrock.qanda.serializers import QuestionSerializer, QuestionPermissions
@@ -70,10 +69,7 @@ class Detail(DetailView):
                 'foia__jurisdiction__parent',
                 'foia__jurisdiction__parent__parent',
                 'foia__user',
-                ).prefetch_related(
-                    Prefetch('foia__files',
-                        queryset=FOIAFile.objects.filter(access='public'),
-                        to_attr='public_files'))
+                )
 
     def post(self, request, **kwargs):
         """Edit the question or answer"""
@@ -131,6 +127,8 @@ class Detail(DetailView):
         context['sidebar_admin_url'] = reverse('admin:qanda_question_change',
             args=(context['object'].pk,))
         context['answers'] = context['object'].answers.select_related('user')
+        context['foias'] = (context['object'].foias
+                .select_related_view().get_public_file_count())
         context['answer_users'] = set(a.user for a in context['answers'])
         return context
 

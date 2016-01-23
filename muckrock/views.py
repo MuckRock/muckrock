@@ -8,7 +8,7 @@ from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.core.exceptions import FieldError
 from django.core.paginator import Paginator, InvalidPage
-from django.db.models import Prefetch, Sum, FieldDoesNotExist
+from django.db.models import Sum, FieldDoesNotExist
 from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
@@ -292,14 +292,10 @@ def homepage(request):
             None)
     completed_requests = cache_get_or_set(
             'hp:completed_requests',
-            lambda: FOIARequest.objects.get_public().get_done()
+            lambda: (FOIARequest.objects.get_public().get_done()
                    .order_by('-date_done')
                    .select_related_view()
-                   .prefetch_related(
-                       Prefetch('files',
-                           queryset=FOIAFile.objects.filter(access='public'),
-                           to_attr='public_files'))
-                   [:6],
+                   .get_public_file_count(limit=6)),
             600)
     stats = cache_get_or_set(
             'hp:stats',
@@ -337,11 +333,7 @@ def reset_homepage_cache(request):
             FOIARequest.objects.get_public().get_done()
                    .order_by('-date_done')
                    .select_related_view()
-                   .prefetch_related(
-                       Prefetch('files',
-                           queryset=FOIAFile.objects.filter(access='public'),
-                           to_attr='public_files'))
-                   [:6],
+                   .get_public_file_count(limit=6),
             600)
     cache.set('hp:stats',
             {

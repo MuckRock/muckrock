@@ -7,7 +7,7 @@ from django.contrib.auth.models import User, AnonymousUser
 from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
 from django.db import models, connection
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Count
 from django.template.defaultfilters import escape, linebreaks, slugify
 from django.template.loader import render_to_string
 
@@ -111,6 +111,24 @@ class FOIARequestQuerySet(models.QuerySet):
                 'jurisdiction__parent__parent',
                 'user',
                 )
+
+    def get_public_file_count(self, limit=None):
+        """Annotate the public file count"""
+        foia_qs = self
+        count_qs = (self._clone()
+                .values_list('id')
+                .annotate(Count('files'))
+                .extra(where=['"foia_foiafile"."access" = \'public\'']))
+        if limit is not None:
+            foia_qs = foia_qs[:limit]
+            count_qs = count_qs[:limit]
+        counts = dict(count_qs)
+        foias = []
+        for foia in foia_qs:
+            foia.public_file_count = counts[foia.pk]
+            foias.append(foia)
+        return foias
+
 
 STATUS = (
     ('started', 'Draft'),
