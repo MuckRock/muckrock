@@ -110,9 +110,8 @@ if not DEBUG:
     THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
     STATICFILES_STORAGE = 'muckrock.storage.CachedS3BotoStorage'
     COMPRESS_STORAGE = STATICFILES_STORAGE
-    STATIC_URL = os.environ.get('CLOUDFRONT_URL',
-            'https://' + BUCKET_NAME + '.s3.amazonaws.com/')
-    AWS_S3_CUSTOM_DOMAIN = os.environ.get('CLOUDFRONT_URL')
+    STATIC_URL = 'https://' + BUCKET_NAME + '.s3.amazonaws.com/'
+    AWS_S3_CUSTOM_DOMAIN = os.environ.get('CLOUDFRONT_DOMAIN')
     COMPRESS_URL = STATIC_URL
     MEDIA_URL = STATIC_URL + 'media/'
 elif AWS_DEBUG:
@@ -141,13 +140,6 @@ AWS_HEADERS = {
  'Expires': 'Thu, 31 Dec 2099 20:00:00 GMT',
  'Cache-Control': 'max-age=94608000',
 }
-AWS_IS_GZIPPED = True
-GZIP_CONTENT_TYPES = (
- 'text/css',
- 'application/javascript',
- 'application/x-javascript',
- 'text/javascript'
-)
 
 if not DEBUG:
     # List of callables that know how to import templates from various sources.
