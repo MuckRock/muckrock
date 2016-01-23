@@ -1,0 +1,7 @@
+{% if stream|length > 0 %}
+- - - - - - - - - - - - -
+{{stream_name}}
+- - - - - - - - - - - - -
+{% for action in stream %}
+* {{ action.action_object }}{% if action.action_object.get_absolute_url %} <{{action.action_object.get_absolute_url}}>{% endif %} {{ action.verb }}
+{% endfor %}{% endif %}

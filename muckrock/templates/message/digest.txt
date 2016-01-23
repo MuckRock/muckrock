@@ -1,0 +1,41 @@
+{% if follow_foia.count > 0 or my_foia.count > 0 %}
+--------------------------
+Requests
+..........................
+{% if my_foia.count > 0 %}
+Yours
+
+{{my_foia.count}} update{{my_foia.count|pluralize}} on your requests
+{% include 'message/component/foia_digest.txt' with stream=my_foia.completed stream_name='completed' %}
+{% include 'message/component/foia_digest.txt' with stream=my_foia.rejected stream_name='rejected' %}
+{% include 'message/component/foia_digest.txt' with stream=my_foia.unsuccessful stream_name='unsuccessful' %}
+{% include 'message/component/foia_digest.txt' with stream=my_foia.action_required stream_name='require action' %}
+{% include 'message/component/foia_digest.txt' with stream=my_foia.response stream_name='updated' %}
+{% endif %}
+{% if follow_foia.count > 0 %}
+Following
+
+{{follow_foia.count}} update{{follow_foia.count|pluralize}} on requests you follow
+{% include 'message/component/foia_digest.txt' with stream=follow_foia.completed stream_name='completed' %}
+{% include 'message/component/foia_digest.txt' with stream=follow_foia.rejected stream_name='rejected' %}
+{% include 'message/component/foia_digest.txt' with stream=follow_foia.unsuccessful stream_name='unsuccessful' %}
+{% include 'message/component/foia_digest.txt' with stream=follow_foia.action_required stream_name='require action' %}
+{% include 'message/component/foia_digest.txt' with stream=follow_foia.response stream_name='updated' %}
+{% endif %}{% endif %}
+{% if activity.questions.count > 0 %}
+--------------------------
+Questions
+..........................
+{% if activity.questions.mine|length > 0 %}
+Yours
+{% for action in activity.questions.mine %}
+* {% if action.action_object %}{{ action.action_object }}{% if action.action_object.get_absolute_url %} <{{action.action_object.get_absolute_url }}>{% endif %}{% endif %}{% if action.action_object and action.target %} to{% endif %}{% if action.target %} {{ action.target }}{% if action.target.get_absolute_url %} <{{action.target.get_absolute_url }}>{% endif %}{% endif %} {{ action.verb }} by {{ action.actor }}{% if action.actor.get_absolute_url %} <{{action.actor.get_absolute_url }}>{% endif %}.
+{% endfor %}
+{% endif %}
+{% if activity.questions.following|length > 0 %}
+Following
+{% for action in activity.questions.following %}
+* {% if action.action_object %}{{ action.action_object }}{% if action.action_object.get_absolute_url %} <{{action.action_object.get_absolute_url }}>{% endif %}{% endif %}{% if action.action_object and action.target %} to{% endif %}{% if action.target %} {{ action.target }}{% if action.target.get_absolute_url %} <{{action.target.get_absolute_url }}>{% endif %}{% endif %} {{ action.verb }} by {{ action.actor }}{% if action.actor.get_absolute_url %} <{{action.actor.get_absolute_url }}>{% endif %}.
+{% endfor %}
+{% endif %}
+{% endif %}
