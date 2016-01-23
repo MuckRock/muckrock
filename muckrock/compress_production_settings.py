@@ -7,6 +7,5 @@ Settings for compressing production assets
 
 from settings import *
 
-BUCKET_NAME = 'muckrock'
-STATIC_URL = 'https://' + BUCKET_NAME + '.s3.amazonaws.com/'
+STATIC_URL = 'https://d3gn0r3afghep.cloudfront.net/'
 COMPRESS_ENABLED = True
