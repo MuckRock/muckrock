@@ -43,16 +43,25 @@ class List(MRFilterableListView):
 def detail(request, jurisdiction, jidx, slug, idx):
     """Details for an agency"""
 
-    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
-    agency = get_object_or_404(Agency, jurisdiction=jmodel, slug=slug, pk=idx)
-
-    if agency.status != 'approved':
-        raise Http404()
+    agency = get_object_or_404(
+            Agency.objects.select_related(
+                'jurisdiction',
+                'jurisdiction__parent',
+                'jurisdiction__parent__parent'),
+            jurisdiction__slug=jurisdiction,
+            jurisdiction__pk=jidx,
+            slug=slug,
+            pk=idx,
+            status='approved')
 
     foia_requests = (FOIARequest.objects
             .get_viewable(request.user)
             .filter(agency=agency)
-            .select_related('jurisdiction')
+            .select_related(
+                'jurisdiction',
+                'jurisdiction__parent',
+                'jurisdiction__parent__parent',
+                )
             .order_by('-date_submitted')[:5])
 
     if request.method == 'POST':
