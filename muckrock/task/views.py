@@ -375,6 +375,7 @@ class RequestTaskList(TaskList):
     template_name = 'lists/request_task_list.html'
 
     def get_queryset(self):
+        # pylint: disable=attribute-defined-outside-init
         self.foia_request = get_object_or_404(
                 FOIARequest.objects.select_related(
                     'agency__jurisdiction',
@@ -385,6 +386,10 @@ class RequestTaskList(TaskList):
         return tasks
 
     def get_context_data(self, **kwargs):
+        # pylint: disable=bad-super-call
+        # we purposely call super on TaskList here, as we do want the generic
+        # list views method to be called, but we don't need any of the
+        # data calculated in the TaskList method, so using it just slows us down
         context = super(TaskList, self).get_context_data(**kwargs)
         context['foia'] = self.foia_request
         context['foia_url'] = self.foia_request.get_absolute_url()
