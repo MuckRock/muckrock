@@ -5,7 +5,6 @@ Views for the Agency application
 from django.contrib import messages
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.core.urlresolvers import reverse
-from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 
@@ -16,7 +15,6 @@ from muckrock.agency.models import Agency
 from muckrock.agency.serializers import AgencySerializer
 from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.forms import FlagForm
-from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.views import collect_stats
 from muckrock.task.models import FlaggedTask
 from muckrock.views import MRFilterableListView

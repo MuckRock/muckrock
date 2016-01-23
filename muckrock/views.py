@@ -7,9 +7,7 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.core.exceptions import FieldError
-from django.core.paginator import Paginator, InvalidPage
 from django.db.models import Sum, FieldDoesNotExist
-from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.utils.decorators import method_decorator
@@ -223,7 +221,7 @@ class MRSearchView(SearchView):
 
     def __init__(self, *args, **kwargs):
         kwargs['searchqueryset'] = RelatedSearchQuerySet()
-        return super(MRSearchView, self).__init__(*args, **kwargs)
+        super(MRSearchView, self).__init__(*args, **kwargs)
 
     def get_query(self):
         """Lower case the query"""
