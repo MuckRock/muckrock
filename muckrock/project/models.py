@@ -47,7 +47,7 @@ class Project(models.Model):
         help_text='The slug is automatically generated based on the title.')
     summary = models.TextField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
-    image = models.ImageField(upload_to='project_images', blank=True, null=True)
+    image = models.ImageField(upload_to='project_images/%Y/%m/%d', blank=True, null=True)
     private = models.BooleanField(
         default=False,
         help_text='If a project is private, it is only visible to its contributors.')
