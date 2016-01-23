@@ -16,10 +16,12 @@ from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
 from muckrock.foia.models import STATUS, FOIARequest, FOIACommunication, FOIAFile
 from muckrock.task.forms import TaskFilterForm, ResponseTaskForm
-from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
-                                 StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask, \
-                                 PaymentTask, GenericCrowdfundTask, MultiRequestTask, \
-                                 StatusChangeTask, FailedFaxTask
+from muckrock.task.models import (
+        Task, OrphanTask, SnailMailTask, RejectedEmailTask,
+        StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask,
+        PaymentTask, GenericCrowdfundTask, MultiRequestTask,
+        StatusChangeTask, FailedFaxTask
+        )
 from muckrock.views import MRFilterableListView
 
 # pylint:disable=missing-docstring
@@ -87,7 +89,6 @@ class TaskList(MRFilterableListView):
         context['filter_form'] = TaskFilterForm(initial=filter_initial)
         context['counters'] = count_tasks()
         context['bulk_actions'] = self.bulk_actions
-        context['type'] = self.get_model().__name__
         return context
 
     @method_decorator(user_passes_test(lambda u: u.is_staff))
