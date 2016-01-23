@@ -375,11 +375,17 @@ class RequestTaskList(TaskList):
     template_name = 'lists/request_task_list.html'
 
     def get_queryset(self):
-        foia_request = get_object_or_404(FOIARequest, pk=self.kwargs['pk'])
-        tasks = Task.objects.filter_by_foia(foia_request)
+        self.foia_request = get_object_or_404(
+                FOIARequest.objects.select_related(
+                    'agency__jurisdiction',
+                    'jurisdiction__parent__parent',
+                    'user__profile'),
+                pk=self.kwargs['pk'])
+        tasks = Task.objects.filter_by_foia(self.foia_request)
         return tasks
 
     def get_context_data(self, **kwargs):
-        context = super(RequestTaskList, self).get_context_data(**kwargs)
-        context['foia'] = get_object_or_404(FOIARequest, pk=self.kwargs['pk'])
+        context = super(TaskList, self).get_context_data(**kwargs)
+        context['foia'] = self.foia_request
+        context['foia_url'] = self.foia_request.get_absolute_url()
         return context

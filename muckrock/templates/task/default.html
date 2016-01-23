@@ -21,8 +21,8 @@
     {% endblock task-header %}
 
     {% block resolved-task-data %}
-    {% if task.resolved %}
-        <p class="task-data">Resolved by <a href="{{ task.resolved_by.profile.get_absolute_url }}">{{ task.resolved_by.get_full_name }}</a>.</p>
+    {% if task.resolved and task.resolved_by %}
+        <p class="task-data">Resolved by <a href="{% url "acct-profile" username=task.resolved_by.username %}">{{ task.resolved_by.get_full_name }}</a>.</p>
     {% endif %}
     {% endblock %}
 
