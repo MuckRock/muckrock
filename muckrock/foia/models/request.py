@@ -497,13 +497,11 @@ class FOIARequest(models.Model):
     def submit(self, appeal=False, snail=False, thanks=False):
         """The request has been submitted.  Notify admin and try to auto submit"""
         # pylint: disable=no-member
-
         # can email appeal if the agency has an appeal agency which has an email address
         # and can accept emailed appeals
         can_email_appeal = appeal and self.agency and \
             self.agency.appeal_agency and self.agency.appeal_agency.email and \
             self.agency.appeal_agency.can_email_appeals
-
         # update email addresses for the request
         if can_email_appeal:
             self.email = self.agency.appeal_agency.get_email()
@@ -511,13 +509,11 @@ class FOIARequest(models.Model):
         elif not self.email and self.agency:
             self.email = self.agency.get_email()
             self.other_emails = self.agency.other_emails
-
         # if agency isnt approved, do not email or snail mail
         # it will be handled after agency is approved
         approved_agency = self.agency and self.agency.status == 'approved'
         can_email = self.email and not appeal
         comm = self.last_comm()
-
         # if the request can be emailed, email it, otherwise send a notice to the admin
         # if this is a thanks, send it as normal but do not change the status
         if not snail and approved_agency and (can_email or can_email_appeal):
@@ -544,13 +540,6 @@ class FOIARequest(models.Model):
             # not an approved agency, all we do is mark as submitted
             self.status = 'submitted'
             self.date_processing = date.today()
-        # generate sent activity
-        actstream.action.send(
-            self,
-            verb='sent',
-            action_object=comm,
-            target=self.agency
-        )
         self.save()
 
     def followup(self, automatic=False):

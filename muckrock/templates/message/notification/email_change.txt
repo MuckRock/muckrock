@@ -1,0 +1,13 @@
+{% load humanize %}
+{% autoescape off %}
+Hi {{user.first_name}},
+
+This mail is to let you know that the email associated with your MuckRock account has changed.
+If you did not make this change or something seems amiss, please contact us at info@muckrock.com.
+
+Old email: {{ old_email }}
+New email: {{ new_email }}
+
+Sincerely,
+The MuckRock Team
+{% endautoescape %}

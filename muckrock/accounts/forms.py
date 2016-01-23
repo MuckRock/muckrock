@@ -12,6 +12,7 @@ import re
 
 from muckrock.accounts.models import Profile
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.message.tasks import email_change
 from muckrock.organization.models import Organization
 
 
@@ -57,9 +58,9 @@ class EmailSettingsForm(forms.ModelForm):
         """Validates that a user does not exist with the given e-mail address"""
         email = self.cleaned_data['email']
         users = User.objects.filter(email__iexact=email)
-        if len(users) == 1 and users[0] != self.instance.user:
+        if users.count() == 1 and users.first() != self.instance.user:
             raise forms.ValidationError('A user with that e-mail address already exists.')
-        if len(users) > 1: # pragma: no cover
+        if users.count() > 1: # pragma: no cover
             # this should never happen
             raise forms.ValidationError('A user with that e-mail address already exists.')
         return email
@@ -67,11 +68,17 @@ class EmailSettingsForm(forms.ModelForm):
     def save(self, commit=True):
         """Modifies associated User and Stripe.Customer models"""
         profile = super(EmailSettingsForm, self).save(commit)
-        profile.user.email = self.cleaned_data['email']
-        profile.user.save()
-        customer = profile.customer()
-        customer.email = profile.user.email
-        customer.save()
+        user = profile.user
+        old_email = user.email
+        new_email = self.cleaned_data['email']
+        if old_email != new_email:
+            customer = profile.customer()
+            user.email = new_email
+            customer.email = new_email
+            user.save()
+            customer.save()
+            # notify the user
+            email_change.delay(user, old_email)
         return profile
 
 
