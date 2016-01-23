@@ -18,7 +18,6 @@ from rest_framework.decorators import detail_route
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from muckrock.foia.models import FOIAFile
 from muckrock.qanda.models import Question, Answer
 from muckrock.qanda.forms import QuestionForm, AnswerForm
 from muckrock.qanda.serializers import QuestionSerializer, QuestionPermissions
