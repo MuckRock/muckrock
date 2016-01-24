@@ -49,13 +49,20 @@ class TaskQuerySet(models.QuerySet):
         tasks = []
         # infer foia from communication
         for task_type in (ResponseTask, SnailMailTask, FailedFaxTask):
-            tasks += list(task_type.objects.filter(communication__foia=foia))
+            tasks += list(task_type.objects
+                    .filter(communication__foia=foia)
+                    .select_related('communication__foia', 'resolved_by')
+                    .prefetch_related('communication__files'))
         # these tasks have a direct foia attribute
         for task_type in (RejectedEmailTask, FlaggedTask, StatusChangeTask, PaymentTask):
-            tasks += list(task_type.objects.filter(foia=foia))
+            tasks += list(task_type.objects
+                    .filter(foia=foia)
+                    .select_related('foia', 'resolved_by'))
         # try matching foia agency with task agency
         if foia.agency:
-            tasks += list(NewAgencyTask.objects.filter(agency=foia.agency))
+            tasks += list(NewAgencyTask.objects
+                    .filter(agency=foia.agency)
+                    .select_related('agency', 'resolved_by'))
         return tasks
 
 
