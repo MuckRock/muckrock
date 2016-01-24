@@ -1,0 +1,15 @@
+
+keep_processed: false
+
+parameters:
+    advpng: -z4 '{file}'
+
+pipelines:
+    png:
+        - optipng
+        - advpng
+        - pngcrush
+    jpeg:
+        - jpegtran
+    gif:
+        - gifsicle
