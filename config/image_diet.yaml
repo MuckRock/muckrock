@@ -6,7 +6,7 @@ pipelines:
         - optipng
         - advpng
         - pngcrush
-    jpg:
-        - jpegtran
     jpeg:
         - jpegtran
+    gif:
+        - gifsicle
