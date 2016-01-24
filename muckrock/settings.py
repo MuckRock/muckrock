@@ -108,6 +108,7 @@ if not DEBUG:
     BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', DEFAULT_BUCKET_NAME)
     DEFAULT_FILE_STORAGE = 'image_diet.storage.DietStorage'
     DIET_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    DIET_COFIG = os.path.join(SITE_ROOT, '../config/image_diet.yaml')
     THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
     STATICFILES_STORAGE = 'muckrock.storage.CachedS3BotoStorage'
     COMPRESS_STORAGE = STATICFILES_STORAGE
