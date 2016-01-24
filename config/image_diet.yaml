@@ -1,0 +1,12 @@
+
+keep_processed: false
+
+pipelines:
+    png:
+        - optipng
+        - advpng
+        - pngcrush
+    jpg:
+        - jpegtran
+    jpeg:
+        - jpegtran
