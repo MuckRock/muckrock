@@ -1,6 +1,9 @@
 
 keep_processed: false
 
+parameters:
+    advpng: -z4 '{file}'
+
 pipelines:
     png:
         - optipng
