@@ -251,6 +251,7 @@ INSTALLED_APPS = (
     'django_xmlrpc',
     'lot',
     'package_monitor',
+    'image_diet',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
