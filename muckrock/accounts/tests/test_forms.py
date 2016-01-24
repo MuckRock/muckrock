@@ -3,9 +3,9 @@ Tests accounts forms
 """
 
 from django.test import TestCase
-from django.forms import ValidationError
 
-from nose.tools import eq_, raises, assert_false
+from nose.tools import eq_, assert_false, assert_true
+from mock import patch
 
 from muckrock.accounts.forms import EmailSettingsForm, RegisterForm
 from muckrock.factories import UserFactory, ProfileFactory
@@ -14,27 +14,41 @@ class TestEmailSettingsForm(TestCase):
     """Users should be able to modify their email settings."""
     def setUp(self):
         """Set up tests"""
+        # pylint:disable=no-member
         self.profile = ProfileFactory()
-        self.form = EmailSettingsForm(instance=self.profile)
+        self.data = {
+            'email_pref': self.profile.email_pref,
+            'use_autologin': self.profile.use_autologin,
+            'email': self.profile.user.email
+        }
+        self.form = EmailSettingsForm
 
-    def test_email_normal(self):
+    @patch('muckrock.message.tasks.email_change.delay')
+    def test_email_normal(self, mock_notify):
         """Changing email normally should succeed"""
         new_email = 'new@example.com'
-        self.form.cleaned_data = {'email': new_email}
-        eq_(self.form.clean_email(), new_email)
+        self.data['email'] = new_email
+        form = self.form(self.data, instance=self.profile)
+        assert_true(form.is_valid())
+        eq_(form.clean_email(), new_email)
+        form.save()
+        mock_notify.assert_called_once()
 
-    def test_email_same(self):
+    @patch('muckrock.message.tasks.email_change.delay')
+    def test_email_same(self, mock_notify):
         """Keeping email the same should succeed"""
-        existing_email = self.profile.user.email
-        self.form.cleaned_data = {'email': existing_email}
-        eq_(self.form.clean_email(), existing_email)
+        form = self.form(self.data, instance=self.profile)
+        assert_true(form.is_valid())
+        eq_(form.clean_email(), self.profile.user.email)
+        form.save()
+        mock_notify.assert_not_called()
 
-    @raises(ValidationError)
     def test_email_conflict(self):
         """Trying to use an already taken email should fail"""
         other_user = UserFactory()
-        self.form.cleaned_data = {'email': other_user.email}
-        self.form.clean_email()
+        self.data['email'] = other_user.email
+        form = self.form(self.data, instance=self.profile)
+        assert_false(form.is_valid())
 
 
 class TestRegistrationForm(TestCase):

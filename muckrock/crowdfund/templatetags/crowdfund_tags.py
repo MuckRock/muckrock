@@ -6,7 +6,7 @@ from django import template
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 
-from muckrock.crowdfund.models import CrowdfundRequest
+from muckrock.crowdfund.models import CrowdfundRequest, CrowdfundProject
 from muckrock.crowdfund.forms import CrowdfundRequestPaymentForm, CrowdfundProjectPaymentForm
 from muckrock.settings import STRIPE_PUB_KEY
 from muckrock.utils import cache_get_or_set
@@ -130,10 +130,12 @@ def crowdfund_request(context, crowdfund_pk):
     )
 
 @register.inclusion_tag('crowdfund/widget.html', takes_context=True)
-def crowdfund_project(context, the_crowdfund):
+def crowdfund_project(context, crowdfund_pk=None, crowdfund=None):
     """Template tag to insert a crowdfunding widget"""
+    if crowdfund is None:
+        crowdfund = get_object_or_404(CrowdfundProject, pk=crowdfund_pk)
     return generate_crowdfund_context(
-        the_crowdfund,
+        crowdfund,
         'crowdfund-project',
         CrowdfundProjectPaymentForm,
         context

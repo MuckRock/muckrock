@@ -52,7 +52,7 @@ class Article(models.Model):
         blank=True,
     )
     image = ThumbnailerImageField(
-        upload_to='news_images',
+        upload_to='news_images/%Y/%m/%d',
         blank=True,
         null=True,
         resize_source={'size': (1600, 1200), 'crop': 'smart'}
@@ -100,7 +100,7 @@ class Article(models.Model):
 class Photo(models.Model):
     """A photograph to embed in a news article"""
 
-    image = models.ImageField(upload_to='news_photos')
+    image = models.ImageField(upload_to='news_photos/%Y/%m/%d')
 
     def __unicode__(self):
         return self.image.name

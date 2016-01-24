@@ -7,9 +7,7 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.core.exceptions import FieldError
-from django.core.paginator import Paginator, InvalidPage
 from django.db.models import Sum, FieldDoesNotExist
-from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.utils.decorators import method_decorator
@@ -25,6 +23,7 @@ from muckrock.utils import cache_get_or_set
 
 import re
 from haystack.views import SearchView
+from haystack.query import RelatedSearchQuerySet
 
 class MRFilterableListView(ListView):
     """
@@ -220,14 +219,33 @@ class MRFilterableListView(ListView):
 class MRSearchView(SearchView):
     """Always lower case queries for case insensitive searches"""
 
+    def __init__(self, *args, **kwargs):
+        kwargs['searchqueryset'] = RelatedSearchQuerySet()
+        super(MRSearchView, self).__init__(*args, **kwargs)
+
     def get_query(self):
         """Lower case the query"""
         return super(MRSearchView, self).get_query().lower()
+
+    def get_results(self):
+        """Apply select related to results"""
+        results = super(MRSearchView, self).get_results()
+        try:
+            results = results.load_all_queryset(
+                FOIARequest, FOIARequest.objects.select_related('jurisdiction'))
+        except AttributeError:
+            pass
+
+        return results
 
     def extra_context(self):
         """Adds per_page to context data"""
         context = super(MRSearchView, self).extra_context()
         context['per_page'] = int(self.request.GET.get('per_page', 25))
+        models = self.request.GET.getlist('models')
+        context['news_checked'] = 'news.article' in models
+        context['foia_checked'] = 'foia.foiarequest' in models
+        context['qanda_checked'] = 'qanda.question' in models
         return context
 
     def get_paginate_by(self):
@@ -240,26 +258,8 @@ class MRSearchView(SearchView):
 
     def build_page(self):
         """Circumvents the hard-coded haystack per page value."""
-        # pylint: disable=pointless-statement
-        # disabled pylint because this is not really my code
-        # also, this should only be temporary (see issue #383)
-        try:
-            page_no = int(self.request.GET.get('page', 1))
-        except (TypeError, ValueError):
-            raise Http404("Not a valid number for page.")
-
-        if page_no < 1:
-            raise Http404("Pages should be 1 or greater.")
-
-        start_offset = (page_no - 1) * self.results_per_page
-        self.results[start_offset:start_offset + self.results_per_page]
-
-        paginator = Paginator(self.results, self.get_paginate_by())
-        try:
-            page = paginator.page(page_no)
-        except InvalidPage:
-            raise Http404("No such page!")
-        return (paginator, page)
+        self.results_per_page = self.get_paginate_by()
+        return super(MRSearchView, self).build_page()
 
 def homepage(request):
     """Get all the details needed for the homepage"""
@@ -292,10 +292,10 @@ def homepage(request):
             None)
     completed_requests = cache_get_or_set(
             'hp:completed_requests',
-            lambda: FOIARequest.objects.get_public().get_done()
-                               .order_by('-date_done')
-                               .select_related_view()
-                               .prefetch_related('files')[:6],
+            lambda: (FOIARequest.objects.get_public().get_done()
+                   .order_by('-date_done')
+                   .select_related_view()
+                   .get_public_file_count(limit=6)),
             600)
     stats = cache_get_or_set(
             'hp:stats',
@@ -331,9 +331,9 @@ def reset_homepage_cache(request):
             None)
     cache.set('hp:completed_requests',
             FOIARequest.objects.get_public().get_done()
-                               .order_by('-date_done')
-                               .select_related_view()
-                               .prefetch_related('files')[:6],
+                   .order_by('-date_done')
+                   .select_related_view()
+                   .get_public_file_count(limit=6),
             600)
     cache.set('hp:stats',
             {

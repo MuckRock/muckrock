@@ -1,27 +1,27 @@
 {% load task_tags %}
-{% if type == "OrphanTask" %}
+{% if task.type == "OrphanTask" %}
     {% orphan_task task %}
-{% elif type == "SnailMailTask" %}
+{% elif task.type == "SnailMailTask" %}
     {% snail_mail_task task %}
-{% elif type == "RejectedEmailTask" %}
+{% elif task.type == "RejectedEmailTask" %}
     {% rejected_email_task task %}
-{% elif type == "StaleAgencyTask" %}
+{% elif task.type == "StaleAgencyTask" %}
     {% stale_agency_task task %}
-{% elif type == "FlaggedTask" %}
+{% elif task.type == "FlaggedTask" %}
     {% flagged_task task %}
-{% elif type == "NewAgencyTask" %}
+{% elif task.type == "NewAgencyTask" %}
     {% new_agency_task task %}
-{% elif type == "ResponseTask" %}
+{% elif task.type == "ResponseTask" %}
     {% response_task task %}
-{% elif type == "StatusChangeTask" %}
+{% elif task.type == "StatusChangeTask" %}
     {% status_change_task task %}
-{% elif type == "PaymentTask" %}
+{% elif task.type == "PaymentTask" %}
     {% payment_task task %}
-{% elif type == "GenericCrowdfundTask" %}
+{% elif task.type == "GenericCrowdfundTask" %}
     {% crowdfund_task task %}
-{% elif type == "MultiRequestTask" %}
+{% elif task.type == "MultiRequestTask" %}
     {% multi_request_task task %}
-{% elif type == "FailedFaxTask" %}
+{% elif task.type == "FailedFaxTask" %}
     {% failed_fax_task task %}
 {% else %}
     {% default_task task %}

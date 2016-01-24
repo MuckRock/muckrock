@@ -36,6 +36,8 @@ if not DEBUG and os.environ.get('ENV') != 'staging':
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
 
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+
 DOGSLOW = True
 DOGSLOW_LOG_TO_FILE = False
 DOGSLOW_TIMER = 25
@@ -98,17 +100,24 @@ COMPRESS_PRECOMPILERS = (
     ('text/x-scss', 'sass --sourcemap=none {infile} {outfile}'),
 )
 
+
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
 if not DEBUG:
     DEFAULT_BUCKET_NAME = 'muckrock'
     BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', DEFAULT_BUCKET_NAME)
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    DEFAULT_FILE_STORAGE = 'image_diet.storage.DietStorage'
+    DIET_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    DIET_CONFIG = os.path.join(SITE_ROOT, '../config/image_diet.yaml')
     THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
     STATICFILES_STORAGE = 'muckrock.storage.CachedS3BotoStorage'
     COMPRESS_STORAGE = STATICFILES_STORAGE
-    STATIC_URL = 'https://' + BUCKET_NAME + '.s3.amazonaws.com/'
+    AWS_S3_CUSTOM_DOMAIN = os.environ.get('CLOUDFRONT_DOMAIN')
+    if AWS_S3_CUSTOM_DOMAIN:
+        STATIC_URL = 'https://' + AWS_S3_CUSTOM_DOMAIN + '/'
+    else:
+        STATIC_URL = 'https://' + BUCKET_NAME + '.s3.amazonaws.com/'
     COMPRESS_URL = STATIC_URL
     MEDIA_URL = STATIC_URL + 'media/'
 elif AWS_DEBUG:
@@ -133,6 +142,10 @@ STATICFILES_FINDERS = (
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_SECURE_URLS = True
 AWS_S3_FILE_OVERWRITE = False
+AWS_HEADERS = {
+ 'Expires': 'Thu, 31 Dec 2099 20:00:00 GMT',
+ 'Cache-Control': 'max-age=94608000',
+}
 
 if not DEBUG:
     # List of callables that know how to import templates from various sources.
@@ -215,6 +228,7 @@ INSTALLED_APPS = (
     'compressor',
     'debug_toolbar',
     'django_tablib',
+    'django_premailer',
     'djangosecure',
     'djcelery',
     'easy_thumbnails',
@@ -237,6 +251,7 @@ INSTALLED_APPS = (
     'django_xmlrpc',
     'lot',
     'package_monitor',
+    'image_diet',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
@@ -552,11 +567,45 @@ if TEST:
     CACHES['default']['BACKEND'] = 'django.core.cache.backends.dummy.DummyCache'
 
 if 'MEMCACHIER_SERVERS' in os.environ:
-    CACHES['default']['BACKEND'] = 'django.core.cache.backends.memcached.MemcachedCache'
-    server = os.environ.get('MEMCACHIER_SERVERS')
-    if not server.endswith(':11211'):
-        server += ':11211'
-    CACHES['default']['LOCATION'] = server
+    os.environ['MEMCACHE_SERVERS'] = os.environ.get('MEMCACHIER_SERVERS', '').replace(',', ';')
+    os.environ['MEMCACHE_USERNAME'] = os.environ.get('MEMCACHIER_USERNAME', '')
+    os.environ['MEMCACHE_PASSWORD'] = os.environ.get('MEMCACHIER_PASSWORD', '')
+
+    CACHES = {
+        'default': {
+            # Use pylibmc
+            'BACKEND': 'django_pylibmc.memcached.PyLibMCCache',
+
+            # Use binary memcache protocol (needed for authentication)
+            'BINARY': True,
+
+            # TIMEOUT is not the connection timeout! It's the default expiration
+            # timeout that should be applied to keys! Setting it to `None`
+            # disables expiration.
+            'TIMEOUT': None,
+
+            'OPTIONS': {
+                # Enable faster IO
+                'no_block': True,
+                'tcp_nodelay': True,
+
+                # Keep connection alive
+                'tcp_keepalive': True,
+
+                # Timeout for set/get requests
+                '_poll_timeout': 2000,
+
+                # Use consistent hashing for failover
+                'ketama': True,
+
+                # Configure failover timings
+                'connect_timeout': 2000,
+                'remove_failed': 4,
+                'retry_timeout': 2,
+                'dead_timeout': 10
+            }
+        }
+    }
 
 
 REST_FRAMEWORK = {

@@ -1,55 +1,37 @@
-$darken-amount: 10%;
-$button-width: 7em;
-
-.sharing {
-    @include display(flex);
-    @include flex-wrap(wrap);
-    dfn {
-        @include flex(100%);
+.social.sharing {
+    .channels {
+        @include display(flex);
+        @include align-items(center);
     }
-    @include media($medium-layout) {
-        width: $button-width;
+    .channel {
+        overflow: hidden;
+        @include flex(1);
+        text-align: center;
     }
-}
-
-
-.share {
-    @include flex(1 1 $button-width);
-    display: block;
-    margin: 0 $vertical-rhythm/4 $vertical-rhythm/4 0;
-    padding: $vertical-rhythm/2 $vertical-rhythm;
-    @include border-radius;
-    color: $color-white;
-    font-weight: $font-weight-bold;
-    text-align: center;
-    text-decoration: none;
-    @include transition(background-color, .25s, linear);
-    &:hover {
-        color: $color-white;
-        text-decoration: none;
-    }
-    &.facebook {
-        background-color: $color-facebook;
-        &:hover {
-            background-color: darken($color-facebook, $darken-amount);
+    .icon {
+        vertical-align: middle;
+        path {
+            fill: $color-white;
+        }
+        &.email path {
+            fill: none;
+            stroke: $color-white;
         }
     }
-    &.twitter {
-        background-color: $color-twitter;
+    a {
+        display: block;
+        padding: $vertical-rhythm/2;
+        background: $color-grey;
+        &.email { background: $color-email; }
+        &.twitter { background: $color-twitter; }
+        &.facebook { background: $color-facebook; }
+        transition: opacity .25s linear;
+        opacity: .9;
         &:hover {
-            background-color: darken($color-twitter, $darken-amount);
+            opacity: 1;
         }
     }
-    &.email {
-        background-color: $color-email;
-        &:hover {
-            background-color: darken($color-email, $darken-amount);
-        }
-    }
-    @include colorize-icon($color-white);
-    .svg-icon {
-        height: 1rem;
-        width: 1rem;
-        margin-left: 0;
+    .label {
+        display: none;
     }
 }

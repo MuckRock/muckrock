@@ -18,6 +18,7 @@ from rest_framework.decorators import detail_route
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from muckrock.foia.models import FOIAFile
 from muckrock.qanda.models import Question, Answer
 from muckrock.qanda.forms import QuestionForm, AnswerForm
 from muckrock.qanda.serializers import QuestionSerializer, QuestionPermissions
@@ -58,6 +59,18 @@ class UnansweredQuestionList(QuestionList):
 class Detail(DetailView):
     """Question detail view"""
     model = Question
+
+    def get_queryset(self):
+        """Select related and prefetch the query set"""
+        return Question.objects.select_related(
+                'foia',
+                'foia__agency',
+                'foia__agency__jurisdiction',
+                'foia__jurisdiction',
+                'foia__jurisdiction__parent',
+                'foia__jurisdiction__parent__parent',
+                'foia__user',
+                )
 
     def post(self, request, **kwargs):
         """Edit the question or answer"""
@@ -116,13 +129,16 @@ class Detail(DetailView):
             args=(context['object'].pk,))
         context['answers'] = context['object'].answers.select_related('user')
         context['answer_users'] = set(a.user for a in context['answers'])
+        foia = context['object'].foia
+        if foia is not None:
+            foia.public_file_count = (FOIAFile.objects
+                    .filter(foia=foia, access='public')
+                    .aggregate(count=Count('id'))['count'])
         return context
-
 
 @login_required
 def create_question(request):
     """Create a question"""
-
     if request.method == 'POST':
         form = QuestionForm(request.POST)
         if form.is_valid():
@@ -131,16 +147,9 @@ def create_question(request):
             question.user = request.user
             question.date = datetime.now()
             question.save()
-            actstream.action.send(
-                question.user,
-                verb='asked',
-                action_object=question
-            )
-            actstream.actions.follow(request.user, question, actor_only=False)
             return redirect(question)
     else:
         form = QuestionForm()
-
     return render_to_response('forms/question.html', {'form': form},
                               context_instance=RequestContext(request))
 
@@ -148,10 +157,7 @@ def create_question(request):
 def follow(request, slug, idx):
     """Follow or unfollow a question"""
     question = get_object_or_404(Question, slug=slug, id=idx)
-    followers = actstream.models.followers(question)
-    if question.user == request.user:
-        messages.error(request, 'You automatically follow questions you ask.')
-    elif request.user in followers:
+    if actstream.actions.is_following(request.user, question):
         actstream.actions.unfollow(request.user, question)
         messages.success(request, 'You are no longer following this question.')
     else:
@@ -173,11 +179,6 @@ def create_answer(request, slug, idx):
             answer.date = datetime.now()
             answer.question = question
             answer.save()
-            actstream.action.send(
-                answer.user,
-                verb='answered',
-                action_object=answer.question
-            )
             answer.question.notify_update()
             return redirect(answer.question)
     else:

@@ -7,7 +7,7 @@ from django.contrib.auth.models import User, AnonymousUser
 from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
 from django.db import models, connection
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Count
 from django.template.defaultfilters import escape, linebreaks, slugify
 from django.template.loader import render_to_string
 
@@ -110,8 +110,25 @@ class FOIARequestQuerySet(models.QuerySet):
                 'jurisdiction__parent',
                 'jurisdiction__parent__parent',
                 'user',
-                'user__profile',
                 )
+
+    def get_public_file_count(self, limit=None):
+        """Annotate the public file count"""
+        foia_qs = self
+        count_qs = (self._clone()
+                .values_list('id')
+                .annotate(Count('files'))
+                .extra(where=['"foia_foiafile"."access" = \'public\'']))
+        if limit is not None:
+            foia_qs = foia_qs[:limit]
+            count_qs = count_qs[:limit]
+        counts = dict(count_qs)
+        foias = []
+        for foia in foia_qs:
+            foia.public_file_count = counts.get(foia.pk, 0)
+            foias.append(foia)
+        return foias
+
 
 STATUS = (
     ('started', 'Draft'),
@@ -480,13 +497,11 @@ class FOIARequest(models.Model):
     def submit(self, appeal=False, snail=False, thanks=False):
         """The request has been submitted.  Notify admin and try to auto submit"""
         # pylint: disable=no-member
-
         # can email appeal if the agency has an appeal agency which has an email address
         # and can accept emailed appeals
         can_email_appeal = appeal and self.agency and \
             self.agency.appeal_agency and self.agency.appeal_agency.email and \
             self.agency.appeal_agency.can_email_appeals
-
         # update email addresses for the request
         if can_email_appeal:
             self.email = self.agency.appeal_agency.get_email()
@@ -494,13 +509,11 @@ class FOIARequest(models.Model):
         elif not self.email and self.agency:
             self.email = self.agency.get_email()
             self.other_emails = self.agency.other_emails
-
         # if agency isnt approved, do not email or snail mail
         # it will be handled after agency is approved
         approved_agency = self.agency and self.agency.status == 'approved'
         can_email = self.email and not appeal
         comm = self.last_comm()
-
         # if the request can be emailed, email it, otherwise send a notice to the admin
         # if this is a thanks, send it as normal but do not change the status
         if not snail and approved_agency and (can_email or can_email_appeal):
@@ -527,13 +540,6 @@ class FOIARequest(models.Model):
             # not an approved agency, all we do is mark as submitted
             self.status = 'submitted'
             self.date_processing = date.today()
-        # generate sent activity
-        actstream.action.send(
-            self,
-            verb='sent',
-            action_object=comm,
-            target=self.agency
-        )
         self.save()
 
     def followup(self, automatic=False):
@@ -619,6 +625,7 @@ class FOIARequest(models.Model):
         # update communication
         comm.set_raw_email(msg.message())
         comm.delivered = 'fax' if self.email.endswith('faxaway.com') else 'email'
+        comm.subject = subject
         comm.save()
 
         # unblock incoming messages if we send one out
