@@ -100,13 +100,16 @@ COMPRESS_PRECOMPILERS = (
     ('text/x-scss', 'sass --sourcemap=none {infile} {outfile}'),
 )
 
+
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
 if not DEBUG:
     DEFAULT_BUCKET_NAME = 'muckrock'
     BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', DEFAULT_BUCKET_NAME)
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    DEFAULT_FILE_STORAGE = 'image_diet.storage.DietStorage'
+    DIET_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    DIET_CONFIG = os.path.join(SITE_ROOT, '../config/image_diet.yaml')
     THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
     STATICFILES_STORAGE = 'muckrock.storage.CachedS3BotoStorage'
     COMPRESS_STORAGE = STATICFILES_STORAGE
@@ -248,6 +251,7 @@ INSTALLED_APPS = (
     'django_xmlrpc',
     'lot',
     'package_monitor',
+    'image_diet',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',

@@ -41,8 +41,8 @@ django-mathfilters==0.3.0
 django-mptt==0.7.4
 django-nose==1.4.2
 django-package-monitor==0.2.3
-django-premailer==0.1.0
 django-polymorphic==0.7.1
+django-premailer==0.1.0
 django-pylibmc==0.6.1
 django-rest-swagger==0.3.2
 django-reversion==1.8.7
@@ -61,6 +61,7 @@ gdata==2.0.17
 gevent==0.13.7
 greenlet==0.3.4
 gunicorn==0.14.3
+image-diet2==1.0
 ipython==0.10
 iron-cache==0.3.2
 iron-celery==0.3.1
