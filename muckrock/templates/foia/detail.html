@@ -388,16 +388,6 @@ Sincerely,
 {% block scripts %}
 <script src="https://checkout.stripe.com/checkout.js" type="text/javascript"></script>
 <script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js" type="text/javascript"></script>
-{% if foia.has_crowdfund %}
-<script src="{% static 'js/autoNumeric.js' %}" type="text/javascript"></script>
-<script type="text/javascript" src="{% static 'js/crowdfund.js' %}"></script>
-{% endif %}
-{% include 'autocomplete_light/static.html' %}
-<script type="text/javascript" src="{% static 'js/jquery.quicksearch.min.js' %}"></script>
-<script type="text/javascript" src="{% static 'js/jquery.ui.datepicker.js' %}" ></script>
-<script type="text/javascript" src="{% static 'js/communication.js' %}"></script>
-<script type="text/javascript" src="{% static 'js/task.js' %}"></script>
-<script type="text/javascript" src="{% static 'js/foiaRequest.js' %}"></script>
 <script type="text/javascript">
     $('#comms-filter').quicksearch('#comms .communications-list .communication');
     $('#notes-filter').quicksearch('#notes .note');

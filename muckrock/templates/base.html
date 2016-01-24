@@ -1,5 +1,6 @@
 {% load static from staticfiles %}
 {% load compress %}
+{% load raven %}
 <!doctype html>
 
 <html>
@@ -134,6 +135,8 @@
         </script>
         <!-- End Google Analytics -->
         <script src="//cdn.optimizely.com/js/2610441018.js"></script>
+        <script src="//cdn.ravenjs.com/2.1.0/raven.min.js"></script>
+        <script>Raven.config('{% sentry_public_dsn %}').install()</script>
         {% compress js %}
         <script type="text/javascript"
                 src="{% static 'js/jquery.min.js' %}"></script>
@@ -149,6 +152,25 @@
                 src="{% static 'js/muckrock.js' %}"></script>
         <script type="text/javascript"
                 src="{% static 'js/notification.js' %}"></script>
+        <script type="text/javascript"
+                src="{% static 'js/jquery.quicksearch.min.js' %}"></script>
+        <script type="text/javascript"
+                src="{% static 'js/crowdfund.js' %}"></script>
+        <script type="text/javascript"
+                src="{% static 'js/jquery.ui.datepicker.js' %}"></script>
+        <script type="text/javascript"
+                src="{% static 'js/task.js' %}"></script>
+        <script type="text/javascript"
+                src="{% static 'js/list.js' %}"></script>
+        <script type="text/javascript"
+                src="{% static 'js/communication.js' %}"></script>
+        <script type="text/javascript"
+                src="{% static 'js/foiaRequest.js' %}"></script>
+        <script type="text/javascript"
+                src="{% static 'js/jquery.fitvids.js' %}"></script>
+        <script type="text/javascript"
+                src="{% static 'js/jquery.multiselect.js' %}"></script>
+        {% include 'autocomplete_light/static.html' %}
         {% endcompress %}
         <!--<script type="text/javascript"
                 src="{% static 'js/jquery.hotkeys.js' %}"></script>-->
