@@ -40,8 +40,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1" />
     </head>
     <body>
-    {% if follow_foia.count > 0 or my_foia.count > 0 %}
+    {% if activity.requests.count > 0 %}
         <h1>Requests</h1>
+        {% with activity.requests.mine as my_foia %}
         {% if my_foia.count > 0 %}
         <h2>Yours</h2>
         <p>{{my_foia.count}} update{{my_foia.count|pluralize}} on your requests</p>
@@ -51,6 +52,8 @@
         {% include 'message/component/foia_digest.html' with stream=my_foia.action_required stream_name='require action' %}
         {% include 'message/component/foia_digest.html' with stream=my_foia.response stream_name='updated' %}
         {% endif %}
+        {% endwith %}
+        {% with activity.requests.following as follow_foia %}
         {% if follow_foia.count > 0 %}
         <h2>Following</h2>
         <p>{{follow_foia.count}} update{{follow_foia.count|pluralize}} on requests you follow</p>
@@ -60,6 +63,7 @@
         {% include 'message/component/foia_digest.html' with stream=follow_foia.action_required stream_name='require action' %}
         {% include 'message/component/foia_digest.html' with stream=follow_foia.response stream_name='updated' %}
         {% endif %}
+        {% endwith %}
     {% endif %}
     {% if activity.questions.count > 0 %}
         <h1>Questions</h1>

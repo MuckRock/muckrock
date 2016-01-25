@@ -101,8 +101,10 @@ class Digest(EmailMultiAlternatives):
                                          .filter(timestamp__gte=duration)
                                          .exclude(actor_content_type=user_ct,
                                                   actor_object_id=self.user.id))
+        foia_stream = self.classify_foia_activity(foia_stream)
+        foia_following = self.classify_foia_activity(foia_following)
         self.activity['requests'] = {
-            'count': foia_stream.count() + foia_following.count(),
+            'count': foia_stream['count'] + foia_following['count'],
             'mine': foia_stream,
             'following': foia_following
         }
@@ -127,13 +129,9 @@ class Digest(EmailMultiAlternatives):
 
     def get_context_data(self):
         """Adds classified activity to the context"""
-        my_foia_stream = self.activity['requests']['mine']
-        follow_foia_stream = self.activity['requests']['following']
         context = {
             'user': self.user,
             'activity': self.activity,
-            'my_foia': self.classify_foia_activity(my_foia_stream),
-            'follow_foia': self.classify_foia_activity(follow_foia_stream),
             'base_url': 'https://www.muckrock.com'
         }
         return context
