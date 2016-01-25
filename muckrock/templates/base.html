@@ -51,7 +51,6 @@
         <link rel="stylesheet"
               type="text/x-scss"
               href="{% static 'scss/style.scss' %}" />
-        {% include 'autocomplete_light/static.html' %}
         {% endcompress %}
         {% block styles %}
         {% endblock %}
@@ -168,8 +167,8 @@
                 src="{% static 'js/jquery.fitvids.js' %}"></script>
         <script type="text/javascript"
                 src="{% static 'js/jquery.multiselect.js' %}"></script>
-        {% include 'autocomplete_light/static.html' %}
         {% endcompress %}
+        {% include 'autocomplete_light/static.html' %}
         <!--<script type="text/javascript"
                 src="{% static 'js/jquery.hotkeys.js' %}"></script>-->
         {% block scripts %}
