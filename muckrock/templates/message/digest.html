@@ -5,14 +5,10 @@
 <html>
     <head>
         <style>
-            html {
-                background: #D5DAE0;
-            }
             body {
                 max-width: 600px;
                 margin: 0 auto;
-                padding: 2em;
-                background: #F7F8FA;
+                padding: 1em;
                 color: #21262E;
                 font-family: sans-serif;
                 font-size: 14px;
@@ -25,6 +21,7 @@
             }
             ul {
                 list-style: none;
+                padding-left: 1em;
             }
             li {
                 margin-bottom: 1em;
@@ -40,6 +37,7 @@
                 color: #CC5C52;
             }
         </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
     </head>
     <body>
     {% if follow_foia.count > 0 or my_foia.count > 0 %}
