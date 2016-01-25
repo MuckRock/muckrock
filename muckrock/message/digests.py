@@ -199,16 +199,9 @@ class StaffDigest(Digest):
         """Does what it says on the box"""
         return 'Daily Staff Digest'
 
-    def stat(self, name, current, previous):
-        """Returns a statistic dictionary"""
-        return {
-            'name': name,
-            'current': current,
-            'delta': current - previous
-        }
-
     def get_activity(self):
         """Returns yesterday's statistics"""
+
         # we overwrite the existing activity dictionary
         # and we fix count at 1 so the digest will send
         current_date = date.today() - self.interval
@@ -217,55 +210,42 @@ class StaffDigest(Digest):
             current = Statistics.objects.get(date=current_date)
             previous = Statistics.objects.get(date=previous_date)
         except Statistics.DoesNotExist:
-            # if statistics cannot be found, don't send anything
-            return {'count': 0}
+            return {'count': 0} # if statistics cannot be found, don't send anything
+        stats = [
+            stat('Requests', current.total_requests, previous.total_requests),
+            stat(
+                'Processing',
+                current.total_requests_submitted,
+                previous.total_requests_submitted
+            ),
+            stat(
+                'Processing Time',
+                current.requests_processing_days,
+                previous.requests_processing_days
+            ),
+            stat('Tasks', current.total_tasks, previous.total_tasks),
+            stat(
+                'Unresolved Tasks',
+                current.total_unresolved_tasks,
+                previous.total_unresolved_tasks
+            ),
+            stat(
+                'Automatically Resolved',
+                current.daily_robot_response_tasks,
+                previous.daily_robot_response_tasks
+            ),
+            stat('Orphans', current.orphaned_communications, previous.orphaned_communications),
+            stat('Pages', current.total_pages, previous.total_pages),
+            stat('Users', current.total_users, previous.total_users),
+            stat('Pro Users', current.pro_users, previous.pro_users),
+            stat('Agencies', current.total_agencies, previous.total_agencies),
+            stat('Stale Agencies', current.stale_agencies, previous.stale_agencies),
+            stat('New Agencies', current.unapproved_agencies, previous.unapproved_agencies),
+        ]
         return {
             'count': 1,
-            'stats': [
-                self.stat('Requests', current.total_requests, previous.total_requests),
-                self.stat('Processing', current.total_requests_submitted, previous.total_requests_submitted),
-                self.stat('Processing Time', current.requests_processing_days, previous.requests_processing_days),
-                self.stat('Orphans', current.orphaned_communications, previous.orphaned_communications),
-                self.stat('Pages', current.total_pages, previous.total_pages),
-                self.stat('Users', current.total_users, previous.total_users),
-                self.stat('Pro Users', current.pro_users, previous.pro_users),
-                self.stat('Agencies', current.total_agencies, previous.total_agencies),
-                self.stat('Stale Agencies', current.stale_agencies, previous.stale_agencies),
-                self.stat('New Agencies', current.unapproved_agencies, previous.unapproved_agencies),
-                self.stat('Tasks', current.total_tasks, previous.total_tasks),
-                self.stat('Unresolved Tasks', current.total_unresolved_tasks, previous.total_unresolved_tasks),
-                self.stat('Automatically Resolved', current.daily_robot_response_tasks, previous.daily_robot_response_tasks)
-            ],
-            'comms': self.get_comms(current_date, previous_date),
-        }
-
-    def get_comms(self, current, previous):
-        """Returns a dictionary of communications"""
-        received = FOIACommunication.objects.filter(date__range=[previous, current], response=True)
-        sent = FOIACommunication.objects.filter(date__range=[previous, current], response=False)
-        delivered_by = {
-            'email': sent.filter(delivered='email').count(),
-            'fax': sent.filter(delivered='fax').count(),
-            'mail': sent.filter(delivered='mail').count()
-        }
-        cost_per = {
-            'email': 0.00,
-            'fax': 0.12,
-            'mail': 0.54,
-        }
-        cost = {
-            'email': delivered_by['email'] * cost_per['email'],
-            'fax': delivered_by['fax'] * cost_per['fax'],
-            'mail': delivered_by['mail'] * cost_per['mail'],
-        }
-        return {
-            'sent': sent.count(),
-            'received': received.count(),
-            'delivery': {
-                'format': delivered_by,
-                'cost': cost_per,
-                'expense': cost,
-            }
+            'stats': stats,
+            'comms': get_comms(current_date, previous_date),
         }
 
     def get_context_data(self):
@@ -273,30 +253,67 @@ class StaffDigest(Digest):
         context = super(StaffDigest, self).get_context_data()
         current = datetime.now()
         context['yesterday'] = current - self.interval
-        context['salutation'] = self.get_salutation(current.hour)
-        context['signoff'] = self.get_signoff(current.hour)
+        context['salutation'] = get_salutation(current.hour)
+        context['signoff'] = get_signoff(current.hour)
         return context
-
-    def get_salutation(self, hour):
-        """Returns a time-appropriate salutation"""
-        if hour < 12:
-            salutation = 'Good morning'
-        elif hour < 18:
-            salutation = 'Good afternoon'
-        else:
-            salutation = 'Good evening'
-        return salutation
-
-    def get_signoff(self, hour):
-        """Returns a time-appropriate signoff"""
-        if hour < 18:
-            signoff = 'Have a great day'
-        else:
-            signoff = 'Have a great night'
-        return signoff
 
     def send(self, *args):
         """Don't send to users who are not staff"""
         if not self.user.is_staff:
             return 0
         return super(StaffDigest, self).send(*args)
+
+def stat(name, current, previous):
+    """Returns a statistic dictionary"""
+    return {
+        'name': name,
+        'current': current,
+        'delta': current - previous
+    }
+
+def get_comms(current, previous):
+    """Returns a dictionary of communications"""
+    received = FOIACommunication.objects.filter(date__range=[previous, current], response=True)
+    sent = FOIACommunication.objects.filter(date__range=[previous, current], response=False)
+    delivered_by = {
+        'email': sent.filter(delivered='email').count(),
+        'fax': sent.filter(delivered='fax').count(),
+        'mail': sent.filter(delivered='mail').count()
+    }
+    cost_per = {
+        'email': 0.00,
+        'fax': 0.12,
+        'mail': 0.54,
+    }
+    cost = {
+        'email': delivered_by['email'] * cost_per['email'],
+        'fax': delivered_by['fax'] * cost_per['fax'],
+        'mail': delivered_by['mail'] * cost_per['mail'],
+    }
+    return {
+        'sent': sent.count(),
+        'received': received.count(),
+        'delivery': {
+            'format': delivered_by,
+            'cost': cost_per,
+            'expense': cost,
+        }
+    }
+
+def get_salutation(hour):
+    """Returns a time-appropriate salutation"""
+    if hour < 12:
+        salutation = 'Good morning'
+    elif hour < 18:
+        salutation = 'Good afternoon'
+    else:
+        salutation = 'Good evening'
+    return salutation
+
+def get_signoff(hour):
+    """Returns a time-appropriate signoff"""
+    if hour < 18:
+        signoff = 'Have a great day'
+    else:
+        signoff = 'Have a great night'
+    return signoff
