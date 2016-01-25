@@ -8,7 +8,7 @@ from django.utils.text import slugify
 import datetime
 import factory
 
-from muckrock.accounts.models import Profile
+from muckrock.accounts.models import Profile, Statistics
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.jurisdiction.models import Jurisdiction
@@ -119,3 +119,25 @@ class AnswerFactory(factory.django.DjangoModelFactory):
     question = factory.SubFactory(QuestionFactory)
     answer = factory.Faker('paragraph')
 
+class StatisticsFactory(factory.django.DjangoModelFactory):
+    """A factory for creating Statistics test objects."""
+    class Meta:
+        model = Statistics
+
+    date = factory.LazyAttribute(lambda obj: datetime.date.today())
+    total_requests = 42
+    total_requests_success = 4
+    total_requests_denied = 2
+    total_requests_submitted = 8
+    requests_processing_days = 10
+    orphaned_communications = 3
+    total_pages = 23
+    total_fees = 0
+    total_users = 24
+    pro_users = 2
+    total_agencies = 12
+    stale_agencies = 4
+    unapproved_agencies = 2
+    total_tasks = 100
+    total_unresolved_tasks = 45
+    daily_robot_response_tasks = 12
