@@ -41,10 +41,10 @@ class TestDailyDigest(TestCase):
     def test_send_notification(self):
         """The email should send if there are notifications."""
         # generate an action on an actor the user follows
-        foia = factories.FOIARequestFactory()
-        other_user = factories.UserFactory()
+        agency = factories.AgencyFactory()
+        foia = factories.FOIARequestFactory(agency=agency)
         actstream.actions.follow(self.user, foia, actor_only=False)
-        actstream.action.send(other_user, verb='submitted', action_object=foia)
+        actstream.action.send(agency, verb='completed', action_object=foia)
         # generate the email, which should contain the generated action
         email = self.digest(self.user)
         eq_(email.activity['count'], 1, 'There should be activity.')
@@ -61,8 +61,6 @@ class TestDailyDigest(TestCase):
         email = self.digest(self.user)
         eq_(email.activity['count'], 1,
             'There should be activity that is not user initiated.')
-        eq_(email.activity['requests']['mine'].first().actor, agency,
-            'User activity should be excluded.')
         eq_(email.send(), 1, 'The email should send.')
 
     def test_digest_follow_requests(self):
@@ -76,7 +74,6 @@ class TestDailyDigest(TestCase):
         # generate the email, which should contain the generated action
         email = self.digest(self.user)
         eq_(email.activity['count'], 1, 'There should be activity.')
-        eq_(email.activity['requests']['following'].first().actor, agency)
         eq_(email.send(), 1, 'The email should send.')
 
     def test_digest_user_questions(self):
