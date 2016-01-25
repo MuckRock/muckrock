@@ -151,6 +151,7 @@ class TestStaffDigest(TestCase):
 
     def test_not_staff(self):
         """The digest should not send to users who are not staff."""
+        # pylint: disable=no-self-use
         not_staff = factories.UserFactory()
         digest = digests.StaffDigest(not_staff)
         eq_(digest.send(), 0)
