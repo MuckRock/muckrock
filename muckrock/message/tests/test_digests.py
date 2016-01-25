@@ -7,6 +7,7 @@ correctly grabbing site activity.
 from django.test import TestCase
 
 import actstream
+from datetime import date
 from dateutil.relativedelta import relativedelta
 import nose.tools
 
@@ -106,6 +107,7 @@ class TestDailyDigest(TestCase):
         eq_(email.activity['questions']['following'].first().action_object, question)
         eq_(email.send(), 1, 'The email should send.')
 
+
 class TestDigestIntervals(TestCase):
     """All digests should behave the same, except for their interval"""
     def setUp(self):
@@ -130,3 +132,25 @@ class TestDigestIntervals(TestCase):
         """1 month interval"""
         digest = digests.MonthlyDigest(self.user)
         eq_(digest.interval, relativedelta(months=1))
+
+
+class TestStaffDigest(TestCase):
+    """The Staff Digest updates us about the state of the website."""
+    def setUp(self):
+        self.user = factories.UserFactory(is_staff=True)
+        interval = relativedelta(days=1)
+        yesterday = date.today() - interval
+        day_before_yesterday = yesterday - interval
+        factories.StatisticsFactory(date=yesterday)
+        factories.StatisticsFactory(date=day_before_yesterday)
+
+    def test_send(self):
+        """The digest should send to staff members without errors."""
+        digest = digests.StaffDigest(self.user)
+        eq_(digest.send(), 1)
+
+    def test_not_staff(self):
+        """The digest should not send to users who are not staff."""
+        not_staff = factories.UserFactory()
+        digest = digests.StaffDigest(not_staff)
+        eq_(digest.send(), 0)
