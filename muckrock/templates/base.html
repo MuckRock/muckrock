@@ -1,6 +1,5 @@
 {% load static from staticfiles %}
 {% load compress %}
-{% load raven %}
 <!doctype html>
 
 <html>
@@ -135,8 +134,6 @@
         </script>
         <!-- End Google Analytics -->
         <script src="//cdn.optimizely.com/js/2610441018.js"></script>
-        <script src="//cdn.ravenjs.com/2.1.0/raven.min.js"></script>
-        <script>Raven.config('{% sentry_public_dsn %}').install()</script>
         {% compress js %}
         <script type="text/javascript"
                 src="{% static 'js/jquery.min.js' %}"></script>
