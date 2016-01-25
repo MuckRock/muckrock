@@ -398,6 +398,14 @@ class GenericCrowdfundTask(Task):
         return u'Crowdfund Task'
 
 
+class NewCrowdfundTask(Task):
+    """Created when a crowdfund is finished"""
+    crowdfund = models.ForeignKey('crowdfund.Crowdfund')
+
+    def __unicode__(self):
+        return u'Crowdfund Task'
+
+
 class MultiRequestTask(Task):
     """Created when a multirequest is created and needs approval."""
     type = 'MultiRequestTask'

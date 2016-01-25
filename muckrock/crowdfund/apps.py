@@ -12,7 +12,5 @@ class CrowdfundConfig(AppConfig):
 
     def ready(self):
         """Registers the application with the activity streams plugin"""
-        registry.register(self.get_model('CrowdfundRequest'))
-        registry.register(self.get_model('CrowdfundRequestPayment'))
-        registry.register(self.get_model('CrowdfundProject'))
-        registry.register(self.get_model('CrowdfundProjectPayment'))
+        registry.register(self.get_model('Crowdfund'))
+        registry.register(self.get_model('CrowdfundPayment'))
