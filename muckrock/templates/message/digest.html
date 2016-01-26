@@ -1,49 +1,10 @@
+{% extends 'message/base.html' %}
 {% load notification_tags %}
-{% load premailer %}
-{% spaceless %}
-{% premailer base_url %}
-<html>
-    <head>
-        <style>
-            html {
-                background: #D5DAE0;
-            }
-            body {
-                max-width: 600px;
-                margin: 0 auto;
-                padding: 2em;
-                background: #F7F8FA;
-                color: #21262E;
-                font-family: sans-serif;
-                font-size: 14px;
-                line-height: 1.3em;
-            }
-            h1 {
-                padding: .5em 0;
-                border-top: 1px solid #21262E;
-                border-bottom: 1px dotted #21262E;
-            }
-            ul {
-                list-style: none;
-            }
-            li {
-                margin-bottom: 1em;
-            }
-            a {
-                font-weight: bold;
-                color: #4582CC;
-            }
-            .completed {
-                color: #52CC66;
-            }
-            .rejected, .unsuccessful, .require.action {
-                color: #CC5C52;
-            }
-        </style>
-    </head>
-    <body>
-    {% if follow_foia.count > 0 or my_foia.count > 0 %}
+
+{% block body %}
+    {% if activity.requests.count > 0 %}
         <h1>Requests</h1>
+        {% with activity.requests.mine as my_foia %}
         {% if my_foia.count > 0 %}
         <h2>Yours</h2>
         <p>{{my_foia.count}} update{{my_foia.count|pluralize}} on your requests</p>
@@ -53,6 +14,8 @@
         {% include 'message/component/foia_digest.html' with stream=my_foia.action_required stream_name='require action' %}
         {% include 'message/component/foia_digest.html' with stream=my_foia.response stream_name='updated' %}
         {% endif %}
+        {% endwith %}
+        {% with activity.requests.following as follow_foia %}
         {% if follow_foia.count > 0 %}
         <h2>Following</h2>
         <p>{{follow_foia.count}} update{{follow_foia.count|pluralize}} on requests you follow</p>
@@ -62,6 +25,7 @@
         {% include 'message/component/foia_digest.html' with stream=follow_foia.action_required stream_name='require action' %}
         {% include 'message/component/foia_digest.html' with stream=follow_foia.response stream_name='updated' %}
         {% endif %}
+        {% endwith %}
     {% endif %}
     {% if activity.questions.count > 0 %}
         <h1>Questions</h1>
@@ -82,7 +46,4 @@
         </ul>
         {% endif %}
     {% endif %}
-    </body>
-</html>
-{% endpremailer %}
-{% endspaceless %}
+{% endblock body %}

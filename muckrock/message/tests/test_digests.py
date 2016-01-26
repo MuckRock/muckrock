@@ -7,6 +7,7 @@ correctly grabbing site activity.
 from django.test import TestCase
 
 import actstream
+from datetime import date
 from dateutil.relativedelta import relativedelta
 import nose.tools
 
@@ -41,10 +42,10 @@ class TestDailyDigest(TestCase):
     def test_send_notification(self):
         """The email should send if there are notifications."""
         # generate an action on an actor the user follows
-        foia = factories.FOIARequestFactory()
-        other_user = factories.UserFactory()
+        agency = factories.AgencyFactory()
+        foia = factories.FOIARequestFactory(agency=agency)
         actstream.actions.follow(self.user, foia, actor_only=False)
-        actstream.action.send(other_user, verb='submitted', action_object=foia)
+        actstream.action.send(agency, verb='completed', action_object=foia)
         # generate the email, which should contain the generated action
         email = self.digest(self.user)
         eq_(email.activity['count'], 1, 'There should be activity.')
@@ -61,8 +62,6 @@ class TestDailyDigest(TestCase):
         email = self.digest(self.user)
         eq_(email.activity['count'], 1,
             'There should be activity that is not user initiated.')
-        eq_(email.activity['requests']['mine'].first().actor, agency,
-            'User activity should be excluded.')
         eq_(email.send(), 1, 'The email should send.')
 
     def test_digest_follow_requests(self):
@@ -76,7 +75,6 @@ class TestDailyDigest(TestCase):
         # generate the email, which should contain the generated action
         email = self.digest(self.user)
         eq_(email.activity['count'], 1, 'There should be activity.')
-        eq_(email.activity['requests']['following'].first().actor, agency)
         eq_(email.send(), 1, 'The email should send.')
 
     def test_digest_user_questions(self):
@@ -106,6 +104,7 @@ class TestDailyDigest(TestCase):
         eq_(email.activity['questions']['following'].first().action_object, question)
         eq_(email.send(), 1, 'The email should send.')
 
+
 class TestDigestIntervals(TestCase):
     """All digests should behave the same, except for their interval"""
     def setUp(self):
@@ -130,3 +129,26 @@ class TestDigestIntervals(TestCase):
         """1 month interval"""
         digest = digests.MonthlyDigest(self.user)
         eq_(digest.interval, relativedelta(months=1))
+
+
+class TestStaffDigest(TestCase):
+    """The Staff Digest updates us about the state of the website."""
+    def setUp(self):
+        self.user = factories.UserFactory(is_staff=True)
+        interval = relativedelta(days=1)
+        yesterday = date.today() - interval
+        day_before_yesterday = yesterday - interval
+        factories.StatisticsFactory(date=yesterday)
+        factories.StatisticsFactory(date=day_before_yesterday)
+
+    def test_send(self):
+        """The digest should send to staff members without errors."""
+        digest = digests.StaffDigest(self.user)
+        eq_(digest.send(), 1)
+
+    def test_not_staff(self):
+        """The digest should not send to users who are not staff."""
+        # pylint: disable=no-self-use
+        not_staff = factories.UserFactory()
+        digest = digests.StaffDigest(not_staff)
+        eq_(digest.send(), 0)
