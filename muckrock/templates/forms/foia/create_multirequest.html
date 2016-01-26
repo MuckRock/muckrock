@@ -3,8 +3,6 @@
 {% block form-type %}multirequest-create{% endblock %}
 {% block form-title %}Create a multi-request{% endblock form-title %}
 
-{% load static from staticfiles %}
-
 {% block scripts %}
 <script>
     // AGENCY MULTISELECT
@@ -46,7 +44,7 @@
     //setup before functions
     var typingTimer;
     var request;
-    var agencySearch = '#agency-search';
+    var agencySearch = $('#agency-search');
     var doneTypingInterval = 1000;
     //on keyup, start the countdown
     $(agencySearch).keyup(function(key){
