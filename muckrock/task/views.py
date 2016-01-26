@@ -292,6 +292,7 @@ class ResponseTaskList(TaskList):
             return
         cleaned_data = form.cleaned_data
         status = cleaned_data['status']
+        set_foia = cleaned_data['set_foia']
         move = cleaned_data['move']
         tracking_number = cleaned_data['tracking_number']
         date_estimate = cleaned_data['date_estimate']
@@ -306,7 +307,7 @@ class ResponseTaskList(TaskList):
                 error_happened = True
         if status:
             try:
-                task.set_status(status)
+                task.set_status(status, set_foia)
             except ValueError:
                 messages.error(request, 'You tried to set the request to an invalid status.')
                 error_happened = True

@@ -301,7 +301,8 @@ class ResponseTaskListViewTests(TestCase):
     def test_post_set_status(self):
         """Setting the status should save it to the response and request, then resolve task."""
         status_change = 'done'
-        self.client.post(self.url, {'status': status_change, 'task': self.task.pk})
+        data = {'status': status_change, 'set_foia': True, 'task': self.task.pk}
+        self.client.post(self.url, data)
         updated_task = task.models.ResponseTask.objects.get(pk=self.task.pk)
         comm_status = updated_task.communication.status
         foia_status = updated_task.communication.foia.status
@@ -311,6 +312,22 @@ class ResponseTaskListViewTests(TestCase):
             'The status of the FOIA should be set.')
         eq_(updated_task.resolved, True,
             'Setting the status should resolve the task')
+
+    def test_post_set_comm_status(self):
+        """Setting the status on just the communication should not influence its request."""
+        status_change = 'done'
+        existing_foia_status = self.task.communication.foia.status
+        data = {'status': status_change, 'set_foia': False, 'task': self.task.pk}
+        self.client.post(self.url, data)
+        updated_task = task.models.ResponseTask.objects.get(pk=self.task.pk)
+        comm_status = updated_task.communication.status
+        foia_status = updated_task.communication.foia.status
+        eq_(comm_status, status_change,
+            'The status change should be saved to the communication.')
+        eq_(foia_status, existing_foia_status,
+            'The status of the FOIA should not be changed.')
+        eq_(updated_task.resolved, True,
+            'Settings the status should resolve the task.')
 
     def test_post_tracking_number(self):
         """Setting the tracking number should save it to the response's request."""
