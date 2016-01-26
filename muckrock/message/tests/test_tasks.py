@@ -6,7 +6,6 @@ object cannot be instantiated.
 
 from django.test import TestCase
 
-import actstream
 import mock
 import nose.tools
 
@@ -19,6 +18,7 @@ raises = nose.tools.raises
 
 mock_subscription = mock.Mock()
 mock_subscription.id = 'test-pro-subscription'
+mock_subscription.plan.id = 'pro'
 mock_subscription.save.return_value = mock_subscription
 mock_subscription.delete.return_value = mock_subscription
 mock_customer = mock.Mock()
@@ -51,6 +51,7 @@ mock_invoice.customer = mock_customer.id
 mock_invoice.charge = mock_charge
 mock_invoice.lines.total_count = 1
 mock_invoice.lines.data = [mock_invoice_line_item]
+mock_invoice.subscription = mock_subscription
 MockInvoice = mock.Mock()
 MockInvoice.retrieve.return_value = mock_invoice
 
@@ -60,13 +61,14 @@ class TestDailyTask(TestCase):
     def setUp(self):
         # create an experimental user to notify about an activity
         # right now special emails are limited to experimental only
-        self.user = factories.UserFactory(profile__experimental=True)
-        other_user = factories.UserFactory()
+        factories.UserFactory(profile__experimental=True)
+        factories.UserFactory()
 
     @mock.patch('muckrock.message.digests.DailyDigest.send')
     @mock.patch('muckrock.accounts.models.Profile.send_notifications')
     def test_daily_notification_task(self, mock_profile_send, mock_send):
         """Make sure the send method is called for the experimental user."""
+        # pylint: disable=no-self-use
         tasks.daily_digest()
         mock_send.assert_called_with()
         mock_profile_send.assert_called_with()
@@ -80,6 +82,7 @@ class TestStaffTask(TestCase):
     @mock.patch('muckrock.message.digests.StaffDigest.send')
     def test_staff_digest_task(self, mock_send):
         """Make sure the send method is called with the staff user."""
+        # pylint: disable=no-self-use
         tasks.staff_digest()
         mock_send.assert_called_with()
 
@@ -191,21 +194,23 @@ class TestSendInvoiceReceiptTask(TestCase):
     @mock.patch('muckrock.message.receipts.ProSubscriptionReceipt.send')
     def test_pro_invoice_receipt(self, mock_send):
         """A receipt should be sent after a pro subscription payment is made."""
+        mock_subscription.plan.id = 'pro'
         customer_id = 'test-pro'
-        profile = factories.ProfileFactory(customer_id=customer_id)
+        factories.ProfileFactory(customer_id=customer_id)
         mock_invoice.customer = customer_id
         tasks.send_invoice_receipt(mock_invoice.id)
-        mock_send.assert_called()
+        mock_send.assert_called_with(fail_silently=False)
 
     @mock.patch('muckrock.message.receipts.OrgSubscriptionReceipt.send')
     def test_org_invoice_receipt(self, mock_send):
         """A receipt should be sent after an org subscription payment is made."""
+        mock_subscription.plan.id = 'org'
         customer_id = 'test-org'
         owner = factories.UserFactory(profile__customer_id=customer_id)
         factories.OrganizationFactory(owner=owner)
         mock_invoice.customer = customer_id
         tasks.send_invoice_receipt(mock_invoice.id)
-        mock_send.assert_called()
+        mock_send.assert_called_with(fail_silently=False)
 
 
 @mock.patch('stripe.Invoice', MockInvoice)
