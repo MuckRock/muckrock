@@ -240,6 +240,17 @@ class FlaggedTask(Task):
     def __unicode__(self):
         return u'Flagged Task'
 
+    def flagged_object(self):
+        """Return the object that was flagged (should only ever be one, and never none)"""
+        if self.foia:
+            return self.foia
+        elif self.agency:
+            return self.agency
+        elif self.jurisdiction:
+            return self.jurisdiction
+        else:
+            raise AttributeError('No flagged object.')
+
 
 class NewAgencyTask(Task):
     """A new agency has been created and needs approval"""
