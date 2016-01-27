@@ -27,7 +27,8 @@ def domain_blacklist(sender, instance, created, **kwargs):
 def notify_flagged(sender, instance, created, **kwargs):
     """When a new flagged task is created, send a Slack notification."""
     # pylint: disable=unused-argument
-    if not created:
+    if not created or kwargs.get('raw', False):
+        # the raw test prevents text fixtures from creating any notifications
         return
     payload = create_flagged_task_payload(instance)
     slack = SlackNotification(payload)
