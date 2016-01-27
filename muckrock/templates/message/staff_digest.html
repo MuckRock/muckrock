@@ -20,7 +20,7 @@
             {% if stat.delta > 0 %}
             <td class="positive">+{{ stat.delta }}</td>
             {% elif stat.delta < 0 %}
-            <td class="negative">-{{ stat.delta }}</td>
+            <td class="negative">{{ stat.delta }}</td>
             {% else %}
             <td>{{ stat.delta }}</td>
             {% endif %}
