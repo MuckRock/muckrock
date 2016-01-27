@@ -517,6 +517,8 @@ GA_USERNAME = os.environ.get('GA_USERNAME')
 GA_PASSWORD = os.environ.get('GA_PASSWORD')
 GA_ID = os.environ.get('GA_ID')
 
+SLACK_WEBHOOK_URL = os.environ.get('SLACK_WEBHOOK_URL')
+
 PUBLICATION_NAME = 'MuckRock'
 
 # Register database schemes in URLs.
