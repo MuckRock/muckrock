@@ -8,6 +8,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase, Client
 
 import logging
+import mock
 import nose
 
 from muckrock import task
@@ -19,9 +20,11 @@ from muckrock.views import MRFilterableListView
 eq_ = nose.tools.eq_
 ok_ = nose.tools.ok_
 raises = nose.tools.raises
+mock_send = mock.Mock()
 
 # pylint: disable=missing-docstring
 
+@mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class TaskListViewTests(TestCase):
     """Test that the task list view resolves and renders correctly."""
 
@@ -70,6 +73,7 @@ class TaskListViewTests(TestCase):
         ok_(obj_list,
             'Object list should not be empty.')
 
+@mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class TaskListViewPOSTTests(TestCase):
     """Tests POST requests to the Task list view"""
     # we have to get the task again if we want to see the updated value
@@ -99,6 +103,7 @@ class TaskListViewPOSTTests(TestCase):
         eq_(updated_task.resolved, False,
             'Tasks should not be resolved when no "resolve" data is POSTed.')
 
+@mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class TaskListViewBatchedPOSTTests(TestCase):
     """Tests batched POST requests for all tasks"""
     # we have to get the task again if we want to see the updated value
@@ -123,6 +128,7 @@ class TaskListViewBatchedPOSTTests(TestCase):
             eq_(updated_task.resolved, True,
                 'Task %d should be resolved when doing a batched resolve' % updated_task.pk)
 
+@mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class OrphanTaskViewTests(TestCase):
     """Tests OrphanTask-specific POST handlers"""
 
@@ -187,6 +193,7 @@ class OrphanTaskViewTests(TestCase):
             'task': self.task.pk})
         ok_(task.models.BlacklistDomain.objects.filter(domain='muckrock.com'))
 
+@mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class SnailMailTaskViewTests(TestCase):
     """Tests SnailMailTask-specific POST handlers"""
 
@@ -220,6 +227,7 @@ class SnailMailTaskViewTests(TestCase):
         eq_(updated_task.communication.date.day, datetime.now().day,
             'Should update the communication to today\'s date.')
 
+@mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class NewAgencyTaskViewTests(TestCase):
     """Tests NewAgencyTask-specific POST handlers"""
 
@@ -270,6 +278,7 @@ class NewAgencyTaskViewTests(TestCase):
                 ('New agency task should resolve when given any'
                 ' truthy value for the "reject" data field'))
 
+@mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class ResponseTaskListViewTests(TestCase):
     """Tests ResponseTask-specific POST handlers"""
 
