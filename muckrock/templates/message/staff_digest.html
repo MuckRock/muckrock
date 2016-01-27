@@ -18,9 +18,21 @@
             <td>{{ stat.name }}</td>
             <td>{{ stat.current }}</td>
             {% if stat.delta > 0 %}
-            <td class="positive">+{{ stat.delta }}</td>
+                {% if stat.growth %}
+            <td class="positive">
+                {% else %}
+            <td class="negative">
+                {% endif %}
+                +{{ stat.delta }}
+            </td>
             {% elif stat.delta < 0 %}
-            <td class="negative">-{{ stat.delta }}</td>
+                {% if stat.growth %}
+            <td class="negative">
+                {% else %}
+            <td class="positive">
+                {% endif %}
+                {{ stat.delta }}
+            </td>
             {% else %}
             <td>{{ stat.delta }}</td>
             {% endif %}

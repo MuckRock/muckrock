@@ -48,6 +48,7 @@ class ResponseTaskForm(forms.Form):
             '%d %B, %Y']     # '25 October, 2006'
     )
     status = forms.ChoiceField(choices=foia.models.STATUS)
+    set_foia = forms.BooleanField(label='Set request status', initial=True, required=False)
 
     def clean_move(self):
         """Splits a comma separated string into an array"""
