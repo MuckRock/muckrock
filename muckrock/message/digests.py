@@ -216,31 +216,38 @@ class StaffDigest(Digest):
             stat(
                 'Processing',
                 current.total_requests_submitted,
-                previous.total_requests_submitted
+                previous.total_requests_submitted,
+                False
             ),
             stat(
                 'Processing Time',
                 current.requests_processing_days,
-                previous.requests_processing_days
+                previous.requests_processing_days,
+                False
             ),
-            stat('Tasks', current.total_tasks, previous.total_tasks),
             stat(
                 'Unresolved Tasks',
                 current.total_unresolved_tasks,
-                previous.total_unresolved_tasks
+                previous.total_unresolved_tasks,
+                False
             ),
             stat(
                 'Automatically Resolved',
                 current.daily_robot_response_tasks,
                 previous.daily_robot_response_tasks
             ),
-            stat('Orphans', current.orphaned_communications, previous.orphaned_communications),
+            stat(
+                'Orphans',
+                current.orphaned_communications,
+                previous.orphaned_communications,
+                False
+            ),
             stat('Pages', current.total_pages, previous.total_pages),
             stat('Users', current.total_users, previous.total_users),
             stat('Pro Users', current.pro_users, previous.pro_users),
             stat('Agencies', current.total_agencies, previous.total_agencies),
-            stat('Stale Agencies', current.stale_agencies, previous.stale_agencies),
-            stat('New Agencies', current.unapproved_agencies, previous.unapproved_agencies),
+            stat('Stale Agencies', current.stale_agencies, previous.stale_agencies, False),
+            stat('New Agencies', current.unapproved_agencies, previous.unapproved_agencies, False),
         ]
         return {
             'count': 1,
@@ -263,12 +270,13 @@ class StaffDigest(Digest):
             return 0
         return super(StaffDigest, self).send(*args)
 
-def stat(name, current, previous):
+def stat(name, current, previous, growth=True):
     """Returns a statistic dictionary"""
     return {
         'name': name,
         'current': current,
-        'delta': current - previous
+        'delta': current - previous,
+        'growth': growth
     }
 
 def get_comms(current, previous):
