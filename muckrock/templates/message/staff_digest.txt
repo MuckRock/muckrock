@@ -6,7 +6,7 @@ Stats
 
 Statistic, Today's value, Change from yesterday
 {% for stat in activity.stats %}
-{{ stat.name }}, {{ stat.current }}, {% if stat.delta > 0 %}+{% elif stat.delta < 0 %}-{% endif %}{{stat.delta}}
+{{ stat.name }}, {{ stat.current }}, {% if stat.delta > 0 %}+{% endif %}{{stat.delta}}
 {% endfor %}
 
 --------------------------
