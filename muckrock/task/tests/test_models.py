@@ -124,6 +124,37 @@ class OrphanTaskTests(TestCase):
         ok_(new_orphan.resolved)
 
 
+@mock.patch('muckrock.message.notifications.SlackNotification.send')
+class FlaggedTaskTests(TestCase):
+    """Test the FlaggedTask class"""
+    # pylint:disable=unused-argument
+    def setUp(self):
+        self.task = task.models.FlaggedTask
+
+    def test_flagged_object(self, mock_send):
+        """A flagged task should be able to return its object."""
+        text = 'Lorem ipsum'
+        user = factories.UserFactory()
+        foia = factories.FOIARequestFactory()
+        agency = factories.AgencyFactory()
+        jurisdiction = factories.JurisdictionFactory()
+        flagged_foia_task = self.task.objects.create(user=user, foia=foia, text=text)
+        flagged_agency_task = self.task.objects.create(user=user, agency=agency, text=text)
+        flagged_jurisdiction_task = self.task.objects.create(
+            user=user, jurisdiction=jurisdiction, text=text)
+        eq_(flagged_foia_task.flagged_object(), foia)
+        eq_(flagged_agency_task.flagged_object(), agency)
+        eq_(flagged_jurisdiction_task.flagged_object(), jurisdiction)
+
+    @raises(AttributeError)
+    def test_no_flagged_object(self, mock_send):
+        """Should raise an error if no flagged object"""
+        text = 'Lorem ipsum'
+        user = factories.UserFactory()
+        flagged_task = self.task.objects.create(user=user, text=text)
+        flagged_task.flagged_object()
+
+
 class SnailMailTaskTests(TestCase):
     """Test the SnailMailTask class"""
 
