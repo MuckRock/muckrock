@@ -219,6 +219,18 @@ class ResponseTaskTests(TestCase):
         eq_(self.task.communication.foia.status, 'done',
             'The FOIA should be set to the proper status.')
 
+    def test_set_comm_status_only(self):
+        foia = self.task.communication.foia
+        existing_status = foia.status
+        self.task.set_status('done', set_foia=False)
+        foia.refresh_from_db()
+        eq_(foia.date_done is None, True,
+            'The FOIA should not be set to done because we are not settings its status.')
+        eq_(foia.status, existing_status,
+            'The FOIA status should not be changed.')
+        eq_(self.task.communication.status, 'done',
+            'The Communication status should be changed, however.')
+
     def test_set_tracking_id(self):
         new_tracking = u'dogs-r-cool'
         self.task.set_tracking_id(new_tracking)

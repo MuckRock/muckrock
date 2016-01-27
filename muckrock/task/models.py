@@ -285,10 +285,8 @@ class ResponseTask(Task):
     type = 'ResponseTask'
     communication = models.ForeignKey('foia.FOIACommunication')
     created_from_orphan = models.BooleanField(default=False)
-
     # for predicting statuses
-    predicted_status = models.CharField(
-            max_length=10, choices=STATUS, blank=True, null=True)
+    predicted_status = models.CharField(max_length=10, choices=STATUS, blank=True, null=True)
     status_probability = models.IntegerField(blank=True, null=True)
 
     def __unicode__(self):
@@ -309,8 +307,8 @@ class ResponseTask(Task):
         foia.tracking_id = tracking_id
         foia.save()
 
-    def set_status(self, status):
-        """Sets status of comm and foia"""
+    def set_status(self, status, set_foia=True):
+        """Sets status of comm and foia, with option for only setting comm stats"""
         comm = self.communication
         # check that status is valid
         if status not in [status_set[0] for status_set in STATUS]:
@@ -318,15 +316,16 @@ class ResponseTask(Task):
         # save comm first
         comm.status = status
         comm.save()
-        # save foia next
-        foia = comm.foia
-        foia.status = status
-        if status in ['rejected', 'no_docs', 'done', 'abandoned']:
-            foia.date_done = comm.date
-        foia.update()
-        foia.save()
-        logging.info('Request #%d status changed to "%s"', foia.id, status)
-        generate_status_action(foia)
+        # save foia next, unless just updating comm status
+        if set_foia:
+            foia = comm.foia
+            foia.status = status
+            if status in ['rejected', 'no_docs', 'done', 'abandoned']:
+                foia.date_done = comm.date
+            foia.update()
+            foia.save()
+            logging.info('Request #%d status changed to "%s"', foia.id, status)
+            generate_status_action(foia)
 
     def set_price(self, price):
         """Sets the price of the communication's request"""
