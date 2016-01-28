@@ -65,6 +65,11 @@ class EmailChangeNotification(EmailNotification):
     subject = u'Changed email address'
 
 
+class SupportNotification(EmailNotification):
+    """Send a support email."""
+    text_template = 'message/notification/support.txt'
+    subject = u'Support'
+
 class SlackNotification(object):
     """
     Sends a Slack notification, conforming to the platform's specification.
