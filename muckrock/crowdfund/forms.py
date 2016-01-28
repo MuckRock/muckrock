@@ -21,19 +21,19 @@ class CrowdfundForm(forms.ModelForm):
     fee_rate = Decimal(0.15)
 
     class Meta:
-        model = CrowdfundRequest
+        model = Crowdfund
         fields = [
             'name',
             'description',
             'payment_required',
             'payment_capped',
             'date_due',
-            'foia'
+            'foia',
             'project'
         ]
         widgets = {
-            'foia': forms.HiddenInput()
-            'project': forms.HiddenInput()
+            'foia': forms.HiddenInput(),
+            'project': forms.HiddenInput(),
         }
 
     payment_required = forms.DecimalField(

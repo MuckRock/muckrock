@@ -10,8 +10,8 @@ import nose.tools
 
 import datetime
 
-from muckrock.crowdfund.models import CrowdfundRequest
-from muckrock.crowdfund.forms import CrowdfundRequestForm
+from muckrock.crowdfund.models import Crowdfund
+from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.foia.models import FOIARequest
 
 # pylint: disable=no-self-use
@@ -96,7 +96,7 @@ class TestFOIACrowdfunding(TestCase):
 
     def test_crowdfund_view_crowdfund_already_exists(self):
         date_due = datetime.datetime.now() + datetime.timedelta(30)
-        CrowdfundRequest.objects.create(foia=self.foia, date_due=date_due)
+        Crowdfund.objects.create(foia=self.foia, date_due=date_due)
         self.client.login(username='adam', password='abc')
         response = self.client.get(self.url)
         nose.tools.eq_(response.status_code, 302,
@@ -122,13 +122,13 @@ class TestFOIACrowdfunding(TestCase):
 
     def test_crowdfund_view_uses_correct_form(self):
         form = self.form()
-        nose.tools.eq_(form.__class__, CrowdfundRequestForm,
-            'View should use the CrowdfundRequestForm')
+        nose.tools.eq_(form.__class__, CrowdfundForm,
+            'View should use the CrowdfundForm')
 
     def test_crowdfund_view_form_has_initial_data(self):
         form = self.form()
         nose.tools.eq_(hasattr(form, 'initial'), True,
-            'Every CrowdfundRequestForm should have some initial data')
+            'Every CrowdfundForm should have some initial data')
 
     def test_crowdfund_submit_with_initial_data(self):
         form = self.form()

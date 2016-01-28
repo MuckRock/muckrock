@@ -10,14 +10,14 @@ from muckrock.crowdfund import models
 
 # pylint: disable=too-many-public-methods
 
-class CrowdfundtPaymentAdmin(admin.TabularInline):
+class CrowdfundPaymentAdmin(admin.TabularInline):
     """Model Admin for crowdfund payment"""
     model = models.CrowdfundPayment
     readonly_fields = ('user', 'name', 'date', 'amount', 'show')
     extra = 0
 
 
-class CrowdfundRequestAdmin(VersionAdmin):
+class CrowdfundAdmin(VersionAdmin):
     """Model Admin for crowdfund"""
     list_display = ('foia', 'project', 'payment_required', 'payment_received', 'date_due')
     date_hierarchy = 'date_due'

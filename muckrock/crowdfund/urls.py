@@ -12,6 +12,6 @@ urlpatterns = patterns(
         views.CrowdfundListView.as_view(),
         name='crowdfund-list'),
     url(r'^(?P<pk>\d+)/$',
-        views.CrowdfundDetail.as_view(),
+        views.CrowdfundDetailView.as_view(),
         name='crowdfund'),
 )

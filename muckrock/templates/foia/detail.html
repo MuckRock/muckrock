@@ -116,7 +116,7 @@
         </section>
 
         {% if foia.has_crowdfund %}
-            {% crowdfund_request foia.crowdfund.pk %}
+            {% crowdfund foia.crowdfund.pk %}
         {% endif %}
 
         <ul class="tabs">

@@ -3,6 +3,7 @@ Models for the crowdfund application
 """
 
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
 
@@ -149,7 +150,7 @@ class CrowdfundPaymentABC(models.Model):
 class CrowdfundRequest(CrowdfundABC):
     """Keep track of crowdfunding for a request"""
     type_ = 'foia'
-    foia = models.OneToOneField(FOIARequest, related_name='crowdfund')
+    foia = models.OneToOneField(FOIARequest)
 
     def __unicode__(self):
         # pylint: disable=no-member
@@ -282,12 +283,9 @@ class Crowdfund(models.Model):
     def named_contributors(self):
         """Return unique named contributors only."""
         # returns the list of a set of a list to remove duplicates
-        payment_name = self.get_crowdfund_payment_object().__name__.lower()
-        params = {
-                payment_name + '__crowdfund': self,
-                payment_name + '__show': True,
-                }
-        return User.objects.filter(**params).distinct()
+        return User.objects.filter(
+                crowdfundpayment__crowdfund=self,
+                crowdfundpayment__show=True).distinct()
 
     def get_crowdfund_object(self):
         """Is this for a request or a project?"""
@@ -319,8 +317,7 @@ class Crowdfund(models.Model):
                 'crowdfund_name': self.name
             }
         )
-        payment_object = self.get_crowdfund_payment_object()
-        payment = payment_object.objects.create(
+        payment = CrowdfundPayment.objects.create(
             amount=amount,
             crowdfund=self,
             user=user,
@@ -345,4 +342,4 @@ class CrowdfundPayment(models.Model):
     def __unicode__(self):
         return (u'Payment of $%.2f by %s on %s for %s' %
             (self.amount, self.user, self.date.date(),
-                self.crowdfund.get_crowdfund_payment_object()))
+                self.crowdfund.get_crowdfund_object()))

@@ -16,15 +16,8 @@ from datetime import date, timedelta
 import logging
 import stripe
 
-from muckrock.crowdfund.forms import (
-        CrowdfundForm,
-        CrowdfundPaymentForm,
-        )
-from muckrock.crowdfund.models import (
-        CrowdfundRequest,
-        CrowdfundProject,
-        Crowdfund,
-        )
+from muckrock.crowdfund.forms import CrowdfundForm, CrowdfundPaymentForm
+from muckrock.crowdfund.models import Crowdfund
 from muckrock.project.models import Project
 from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 
