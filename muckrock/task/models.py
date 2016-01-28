@@ -13,9 +13,10 @@ from datetime import datetime
 import email
 import logging
 
-from muckrock.foia.models import FOIARequest, STATUS
 from muckrock.agency.models import Agency
+from muckrock.foia.models import FOIARequest, STATUS
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.message.notifications import SupportNotification
 
 def generate_status_action(foia):
     """Generate activity stream action for agency response"""
@@ -250,6 +251,11 @@ class FlaggedTask(Task):
             return self.jurisdiction
         else:
             raise AttributeError('No flagged object.')
+
+    def reply(self, text):
+        """Send an email reply to the user that raised the flag."""
+        email = SupportNotification(self.user, {'message': text, 'task': self})
+        email.send()
 
 
 class NewAgencyTask(Task):
