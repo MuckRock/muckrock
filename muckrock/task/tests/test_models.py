@@ -156,11 +156,12 @@ class FlaggedTaskTests(TestCase):
         flagged_task.flagged_object()
 
     @mock.patch('muckrock.message.notifications.SupportNotification.send')
-    def test_reply(self, mock_send):
+    def test_reply(self, mock_support_send):
         """Given a message, a support notification should be sent to the task's user."""
-        task = FlaggedTaskFactory()
-        task.reply('Lorem ipsum')
-        mock_send.assert_called_with()
+        # pylint: disable=no-self-use
+        flagged_task = FlaggedTaskFactory()
+        flagged_task.reply('Lorem ipsum')
+        mock_support_send.assert_called_with()
 
 class SnailMailTaskTests(TestCase):
     """Test the SnailMailTask class"""

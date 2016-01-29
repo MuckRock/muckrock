@@ -24,6 +24,7 @@ raises = nose.tools.raises
 mock_send = mock.Mock()
 
 # pylint: disable=missing-docstring
+# pylint: disable=no-member
 
 @mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class TaskListViewTests(TestCase):

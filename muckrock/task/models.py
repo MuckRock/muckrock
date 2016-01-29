@@ -254,8 +254,8 @@ class FlaggedTask(Task):
 
     def reply(self, text):
         """Send an email reply to the user that raised the flag."""
-        email = SupportNotification(self.user, {'message': text, 'task': self})
-        email.send()
+        support_email = SupportNotification(self.user, {'message': text, 'task': self})
+        support_email.send()
 
 
 class NewAgencyTask(Task):

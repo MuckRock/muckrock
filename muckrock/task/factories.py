@@ -4,7 +4,6 @@ Task factories, for testing
 
 import factory
 
-from muckrock import factories
 from muckrock.task.models import FlaggedTask
 
 class FlaggedTaskFactory(factory.django.DjangoModelFactory):
