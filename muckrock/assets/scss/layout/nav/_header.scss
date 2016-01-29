@@ -137,14 +137,12 @@ nav.website-navigation {
         display: block;
         text-decoration: none;
     }
-
     .nav-item {
         font-weight: $font-weight-bold;
         padding: $vertical-rhythm/2;
         @include nav-item-color;
     }
-
-    .search {
+    .search-form {
         width: 100%;
         height: 100%;
         position: absolute;
@@ -193,12 +191,11 @@ nav.website-navigation {
         margin-bottom: 0;
         font-weight: $font-weight-bold;
         cursor: pointer;
+        .search.icon {
+            margin-right: $vertical-rhythm/4;
+            vertical-align: middle;
+        }
     }
-    .search-icon {
-        margin-right: $vertical-rhythm/4;
-        vertical-align: middle;
-    }
-
     .social-links {
         float: right;
         .label { display: none; }

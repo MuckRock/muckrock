@@ -11,17 +11,13 @@
             <li><a class="nav-item" href="{% url 'task-list' %}">Tasks</a></li>
             {% endif %}
         </ul>
-        <form action="/search" method="get" class="search" id="global-search">
+        <form action="/search" method="get" class="search-form" id="global-search">
             <input type="search" name="q" placeholder="Search">
             <input type="submit" style="display: none;">
             <div class="search-cancel" id="hide-search">Cancel</div>
         </form>
         <div class="nav-item search-button" id="show-search">
-            <svg width="16px" height="16px" viewBox="0 0 24 24" class="search-icon">
-                <title>Search Icon</title>
-                <desc>The search icon resembles a magnifying glass.</desc>
-                <path fill="#000000" fill-rule="evenodd" d="M13.7662737,16.6357276 C12.3841494,17.5002833 10.7504323,18 9,18 C4.02943725,18 0,13.9705627 0,9 C0,4.02943725 4.02943725,0 9,0 C13.9705627,0 18,4.02943725 18,9 C18,10.7504323 17.5002833,12.3841494 16.6357276,13.7662737 L24,21.1305462 L21.1305462,24 L13.7662737,16.6357276 Z M9,14.25 C11.8994949,14.25 14.25,11.8994949 14.25,9 C14.25,6.10050506 11.8994949,3.75 9,3.75 C6.10050506,3.75 3.75,6.10050506 3.75,9 C3.75,11.8994949 6.10050506,14.25 9,14.25 Z"></path>
-            </svg>
+            {% include 'lib/icons/search.svg' %}
             <span class="search-text">Search</span>
         </div>
         <ul class="social-links">
