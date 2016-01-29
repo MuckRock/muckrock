@@ -65,6 +65,11 @@ class EmailChangeNotification(EmailNotification):
     subject = u'Changed email address'
 
 
+class SupportNotification(EmailNotification):
+    """Send a support email."""
+    text_template = 'message/notification/support.txt'
+    subject = u'Support'
+
 class SlackNotification(object):
     """
     Sends a Slack notification, conforming to the platform's specification.
@@ -85,6 +90,10 @@ class SlackNotification(object):
 
     def send(self, fail_silently=True):
         """Send the notification to our Slack webhook."""
+        if not self.endpoint:
+            # don't send when the endpoint value is empty,
+            # or the requests module will throw errors like woah
+            return 0
         data = json.dumps(self.payload)
         response = requests.post(self.endpoint, data=data)
         if response.status_code == 200:

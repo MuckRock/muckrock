@@ -11,12 +11,15 @@
 {% block content %}
 {% cache 600 homepage %}
 <div class="homepage">
+    {% if not request.user.is_authenticated %}
     <header class="mission banner">
         <h1 class="about">A <a href="//muckrock.com/about/" title="About Us">collaborative news site</a> that <a href="//muckrock.com/landing/" title="Landing Page">gives you the tools</a> to hold <a href="{{ federal_government.get_absolute_url }}" title="{{ federal_government }}">the government</a> accountable.</a></h1>
     </header>
+    {% endif %}
     <main>
         <section class="news">
             <ul class="articles nostyle">
+                {% if lead_article %}
                 {% with lead_article as article %}
                 <li class="lead article">
                     {% if article.image %}<a href="{{article.get_absolute_url}}" title="{{article.title}}" class="article-image"><img src="{% thumbnail article.image 1200x400 %}" /></a>{% endif %}
@@ -39,6 +42,7 @@
                     {% if article.summary %}<summary>{{article.summary|markdown:"trusted"}}</summary>{% endif %}
                 </li>
                 {% endwith %}
+                {% endif %}
                 {% for article in other_articles %}
                 <li class="other article">
                     {% if article.projects %}

@@ -1,4 +1,5 @@
 <aside class="website-sidebar" id="website-sidebar">
+    {% if not user.is_authenticated %}
     <form method="post" action="{% url 'acct-login' %}?next={{ request.get_full_path }}" class="quick-log-in" id="quick-log-in-form">
         {% csrf_token %}
         <h1>Log In</h1>
@@ -8,6 +9,7 @@
             <button type="submit" class="primary">Log In</button>
         </div>
     </form>
+    {% endif %}
     <header class="account-links">
         {% if user.is_authenticated %}
         <a href="{% url 'acct-my-profile' %}" class="username">{{ user.get_full_name }}</a>
