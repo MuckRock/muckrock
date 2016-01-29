@@ -11,6 +11,7 @@ import mock
 import nose
 
 from muckrock import factories, task
+from muckrock.task.factories import FlaggedTaskFactory
 from muckrock.task.signals import domain_blacklist
 
 ok_ = nose.tools.ok_
@@ -154,6 +155,12 @@ class FlaggedTaskTests(TestCase):
         flagged_task = self.task.objects.create(user=user, text=text)
         flagged_task.flagged_object()
 
+    @mock.patch('muckrock.message.notifications.SupportNotification.send')
+    def test_reply(self, mock_send):
+        """Given a message, a support notification should be sent to the task's user."""
+        task = FlaggedTaskFactory()
+        task.reply('Lorem ipsum')
+        mock_send.assert_called_with()
 
 class SnailMailTaskTests(TestCase):
     """Test the SnailMailTask class"""

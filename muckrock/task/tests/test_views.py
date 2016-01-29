@@ -5,16 +5,17 @@ from datetime import datetime
 
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.test import TestCase, Client
+from django.test import TestCase, Client, RequestFactory
 
 import logging
 import mock
 import nose
 
-from muckrock import task
-from muckrock import agency
+from muckrock import agency, factories, task
 from muckrock.foia.models import FOIARequest
 from muckrock.foia.views import save_foia_comm
+from muckrock.task.factories import FlaggedTaskFactory
+from muckrock.utils import mock_middleware
 from muckrock.views import MRFilterableListView
 
 eq_ = nose.tools.eq_
@@ -226,6 +227,49 @@ class SnailMailTaskViewTests(TestCase):
             'Should update the communication date.')
         eq_(updated_task.communication.date.day, datetime.now().day,
             'Should update the communication to today\'s date.')
+
+
+@mock.patch('muckrock.task.models.FlaggedTask.reply')
+class FlaggedTaskViewTests(TestCase):
+    """Tests FlaggedTask POST handlers"""
+    def setUp(self):
+        self.user = factories.UserFactory(is_staff=True)
+        self.url = reverse('flagged-task-list')
+        self.view = task.views.FlaggedTaskList.as_view()
+        self.task = FlaggedTaskFactory()
+        self.request_factory = RequestFactory()
+
+    def post_request(self, data):
+        """Helper to post data and get a response"""
+        request = self.request_factory.post(self.url, data)
+        request.user = self.user
+        request = mock_middleware(request)
+        response = self.view(request)
+        return response
+
+    def test_post_reply(self, mock_reply):
+        """Staff should be able to reply to the user who raised the flag"""
+        test_text = 'Lorem ipsum'
+        form = task.forms.FlaggedTaskForm({'text': test_text})
+        ok_(form.is_valid())
+        post_data = form.cleaned_data
+        post_data.update({'reply': 'truthy', 'task': self.task.pk})
+        self.post_request(post_data)
+        self.task.refresh_from_db()
+        ok_(not self.task.resolved, 'The task should not automatically resolve when replying.')
+        mock_reply.assert_called_with(test_text)
+
+    def test_post_reply_resolve(self, mock_reply):
+        """The task should optionally resolve when replying"""
+        test_text = 'Lorem ipsum'
+        form = task.forms.FlaggedTaskForm({'text': test_text})
+        ok_(form.is_valid())
+        post_data = form.cleaned_data
+        post_data.update({'reply': 'truthy', 'resolve': True, 'task': self.task.pk})
+        self.post_request(post_data)
+        self.task.refresh_from_db()
+        ok_(self.task.resolved, 'The task should resolve.')
+        mock_reply.assert_called_with(test_text)
 
 @mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class NewAgencyTaskViewTests(TestCase):
