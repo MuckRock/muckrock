@@ -2,15 +2,6 @@
     margin-bottom: 0;
 }
 
-.website-header > * {
-    padding-left: $vertical-rhythm/2;
-    padding-right: $vertical-rhythm/2;
-    @include media($medium-layout) {
-        padding-left: $vertical-rhythm;
-        padding-right: $vertical-rhythm;
-    }
-}
-
 // Logo visibility depends on viewport size
 .website-header .brand .muckrock-logo {
     .plaintext {
@@ -33,6 +24,8 @@
 }
 
 nav.primary {
+    padding-left: $vertical-rhythm;
+    padding-right: $vertical-rhythm;
     overflow: hidden;
     ul {
         display: inline-block;
@@ -112,15 +105,26 @@ nav.primary {
     }
 }
 
+@mixin nav-item-hover {
+    color: #FFFFFF;
+    background: $color-blue;
+    path { fill: #FFFFFF; }
+}
+
+@mixin nav-item-color {
+    color: $color-black;
+    path { fill: $color-black; }
+    &:hover {
+        @include nav-item-hover;
+    }
+}
 
 nav.website-navigation {
-    overflow: hidden;
     position: relative;
-    padding-top: $vertical-rhythm/2;
-    padding-bottom: $vertical-rhythm/2;
     margin-bottom: $vertical-rhythm/2;
     background-color: #FFF;
     border-bottom: 1px solid $color-grey-6;
+    padding-left: $vertical-rhythm/2;
     ul {
         display: inline-block;
         margin-bottom: 0;
@@ -128,53 +132,35 @@ nav.website-navigation {
     }
     li {
         display: inline-block;
-        margin: 0 $vertical-rhythm/4;
-        @include media($large-layout) {
-            margin: 0 $vertical-rhythm/2;
-        }
-        &:first-child {
-            margin-left: 0;
-        }
-        &:last-child {
-            margin-right: 0;
-        }
     }
     a {
-        position: relative;
-        padding-bottom: $vertical-rhythm/2.5;
-        border-bottom: 4px solid #FFF;
-        color: $color-black;
-        &:hover {
-            color: $color-blue;
-            border-color: $color-blue;
-            text-decoration: none;
-        }
-        @include transition (color .25s linear, border-color .25s linear);
+        display: block;
+        text-decoration: none;
     }
-    @media screen and (min-width: $small-menu-breakpoint ) {
-        li {
-            text-align: left;
-            // padding-right: 10%;
-        }
+
+    .nav-item {
+        font-weight: $font-weight-bold;
+        padding: $vertical-rhythm/2;
+        @include nav-item-color;
     }
 
     .search {
+        width: 100%;
+        height: 100%;
         position: absolute;
         top: 0;
         right: 0;
-        left: 2em;
-        z-index: 1;
+        z-index: -1;
         @include display(flex);
         @include align-items(center);
-        height: 100%;
         margin-bottom: 0;
+        border-top: 1px solid $color-grey-6;
+        border-bottom: 1px solid $color-grey-6;
         background-color: #FFF;
-        opacity: 0;
-        @include transition(opacity .25s linear, transform .25s ease-in-out);
-        @include transform(translateY(-10em));
+        @include transform(translateY(0));
         input[type="search"] {
             width: 100%;
-            padding: 0 $vertical-rhythm/2;
+            padding: 0 $vertical-rhythm;
             border: none;
             border-radius: 0;
             outline: none;
@@ -190,33 +176,27 @@ nav.website-navigation {
             }
         }
         &.visible {
-            opacity: 1;
-            @include transform(translateY(0));
+            z-index: 1;
+            @include transform(translateY(100%));
         }
-        @include media($medium-layout) {
-            left: 3em;
+        &.visible + .search-button {
+            @include nav-item-hover;
         }
     }
 
-     .search-icon {
+    .search-button {
+        float: right;
         display: inline-block;
-        width: $font-size-4;
-        height: $font-size-4;
-        margin-right: $vertical-rhythm/2;
-        @include media($large-layout) {
-            margin-right: $vertical-rhythm;
-        }
-        vertical-align: middle;
+        padding-left: $vertical-rhythm;
+        padding-right: $vertical-rhythm;
+        border-left: 1px solid $color-grey-7;
+        margin-bottom: 0;
+        font-weight: $font-weight-bold;
         cursor: pointer;
-        path {
-            fill: $color-black;
-            @include transition(fill .25s linear);
-        }
-        &:hover {
-            path {
-                fill: $color-blue;
-            }
-        }
+    }
+    .search-icon {
+        margin-right: $vertical-rhythm/4;
+        vertical-align: middle;
     }
 
     .social-links {
@@ -226,11 +206,6 @@ nav.website-navigation {
             width: auto;
             height: 16px;
             vertical-align: middle;
-            fill: $color-black;
-            @include transition(fill .25s ease);
-        }
-        a:hover svg {
-            fill: $color-blue;
         }
     }
 
@@ -244,7 +219,6 @@ nav.website-navigation {
             margin-bottom: 0;
             font-weight: $font-weight-bold;
             cursor: pointer;
-            @include border-radius;
             &.active {
                 color: $color-blue;
             }

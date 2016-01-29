@@ -1,36 +1,38 @@
 <header class="website-header">
     <nav class="website-navigation">
-        <svg width="24px" height="24px" viewBox="0 0 24 24" class="search-icon" id="show-search">
-            <title>Search Icon</title>
-            <desc>The search icon resembles a magnifying glass.</desc>
-            <path fill="#000000" fill-rule="evenodd" d="M13.7662737,16.6357276 C12.3841494,17.5002833 10.7504323,18 9,18 C4.02943725,18 0,13.9705627 0,9 C0,4.02943725 4.02943725,0 9,0 C13.9705627,0 18,4.02943725 18,9 C18,10.7504323 17.5002833,12.3841494 16.6357276,13.7662737 L24,21.1305462 L21.1305462,24 L13.7662737,16.6357276 Z M9,14.25 C11.8994949,14.25 14.25,11.8994949 14.25,9 C14.25,6.10050506 11.8994949,3.75 9,3.75 C6.10050506,3.75 3.75,6.10050506 3.75,9 C3.75,11.8994949 6.10050506,14.25 9,14.25 Z"></path>
-        </svg>
+        <div class="nav-item" id="website-sections-dropdown">Sections</div>
+        <ul class="website-sections">
+            <li><a class="nav-item" href="{% url 'news-index'%}">News</a></li>
+            <li><a class="nav-item" href="{% url 'project-list' %}">Projects</a></li>
+            <li><a class="nav-item" href="{% url 'foia-list'%}">Requests</a></li>
+            <li><a class="nav-item" href="{% url 'agency-list'%}">Agencies</a></li>
+            <li><a class="nav-item" href="{% url 'question-index'%}">Q &amp; A Forum</a></li>
+            {% if user.is_staff %}
+            <li><a class="nav-item" href="{% url 'task-list' %}">Tasks</a></li>
+            {% endif %}
+        </ul>
         <form action="/search" method="get" class="search" id="global-search">
             <input type="search" name="q" placeholder="Search">
             <input type="submit" style="display: none;">
             <div class="search-cancel" id="hide-search">Cancel</div>
         </form>
-        <div id="website-sections-dropdown">Sections</div>
-        <ul class="website-sections">
-            <li><a href="{% url 'news-index'%}">News</a></li>
-            <li><a href="{% url 'project-list' %}">Projects</a></li>
-            <li><a href="{% url 'foia-list'%}">Requests</a></li>
-            <li><a href="{% url 'agency-list'%}">Agencies</a></li>
-            <li><a href="{% url 'jurisdiction-list'%}">Jurisdictions</a></li>
-            <li><a href="{% url 'question-index'%}">Q &amp; A Forum</a></li>
-            {% if user.is_staff %}
-            <li><a href="{% url 'task-list' %}">Tasks</a></li>
-            {% endif %}
-        </ul>
+        <div class="nav-item search-button" id="show-search">
+            <svg width="16px" height="16px" viewBox="0 0 24 24" class="search-icon">
+                <title>Search Icon</title>
+                <desc>The search icon resembles a magnifying glass.</desc>
+                <path fill="#000000" fill-rule="evenodd" d="M13.7662737,16.6357276 C12.3841494,17.5002833 10.7504323,18 9,18 C4.02943725,18 0,13.9705627 0,9 C0,4.02943725 4.02943725,0 9,0 C13.9705627,0 18,4.02943725 18,9 C18,10.7504323 17.5002833,12.3841494 16.6357276,13.7662737 L24,21.1305462 L21.1305462,24 L13.7662737,16.6357276 Z M9,14.25 C11.8994949,14.25 14.25,11.8994949 14.25,9 C14.25,6.10050506 11.8994949,3.75 9,3.75 C6.10050506,3.75 3.75,6.10050506 3.75,9 C3.75,11.8994949 6.10050506,14.25 9,14.25 Z"></path>
+            </svg>
+            <span class="search-text">Search</span>
+        </div>
         <ul class="social-links">
             <li>
-                <a href="http://www.twitter.com/muckrock" title="MuckRock on Twitter">
+                <a class="nav-item" href="http://www.twitter.com/muckrock" title="MuckRock on Twitter">
                     {% include 'lib/icons/twitter.svg' %}
                     <span class="label">Follow MuckRock on Twitter</span>
                 </a>
             </li>
             <li>
-                <a href="https://www.facebook.com/muckrock" title="MuckRock on Facebook">
+                <a class="nav-item" href="https://www.facebook.com/muckrock" title="MuckRock on Facebook">
                     {% include 'lib/icons/facebook.svg' %}
                     <span class="label">Like MuckRock on Facebook</span>
                 </a>

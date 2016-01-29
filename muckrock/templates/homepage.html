@@ -17,6 +17,7 @@
     <main>
         <section class="news">
             <ul class="articles nostyle">
+                {% if lead_article %}
                 {% with lead_article as article %}
                 <li class="lead article">
                     {% if article.image %}<a href="{{article.get_absolute_url}}" title="{{article.title}}" class="article-image"><img src="{% thumbnail article.image 1200x400 %}" /></a>{% endif %}
@@ -39,6 +40,7 @@
                     {% if article.summary %}<summary>{{article.summary|markdown:"trusted"}}</summary>{% endif %}
                 </li>
                 {% endwith %}
+                {% endif %}
                 {% for article in other_articles %}
                 <li class="other article">
                     {% if article.projects %}
