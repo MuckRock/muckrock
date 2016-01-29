@@ -130,7 +130,7 @@ class StatisticsFactory(factory.django.DjangoModelFactory):
     total_requests_denied = 2
     total_requests_submitted = 8
     requests_processing_days = 10
-    orphaned_communications = 3
+    total_unresolved_orphan_tasks = 3
     total_pages = 23
     total_fees = 0
     total_users = 24

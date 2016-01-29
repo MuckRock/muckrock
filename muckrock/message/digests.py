@@ -238,8 +238,8 @@ class StaffDigest(Digest):
             ),
             stat(
                 'Orphans',
-                current.orphaned_communications,
-                previous.orphaned_communications,
+                current.total_unresolved_orphan_tasks,
+                previous.total_unresolved_orphan_tasks,
                 False
             ),
             stat('Pages', current.total_pages, previous.total_pages),
