@@ -1,0 +1,5 @@
+<svg width="16px" height="16px" viewBox="0 0 16 16" class="sections icon">
+    <title>Sections</title>
+    <desc>A list of items</desc>
+    <path fill-rule="evenodd" d="M1,1 L15,1 L15,4 L1,4 L1,1 Z M1,6 L15,6 L15,9 L1,9 L1,6 Z M1,11 L15,11 L15,14 L1,14 L1,11 Z"></path>
+</svg>

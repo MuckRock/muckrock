@@ -1,7 +1,15 @@
 <header class="website-header">
     <nav class="website-navigation">
-        <div class="nav-item" id="website-sections-dropdown">Sections</div>
-        <ul class="website-sections">
+        <form action="/search" method="get" class="search-form" id="global-search">
+            <input type="search" name="q" placeholder="Search">
+            <input type="submit" style="display: none;">
+            <div class="search-cancel" id="hide-search">Cancel</div>
+        </form>
+        <div class="nav-item search-button" id="show-search">
+            {% include 'lib/icons/search.svg' %}
+            <span class="label">Search</span>
+        </div>
+        <ul class="website-sections" id="global-sections">
             <li><a class="nav-item" href="{% url 'news-index'%}">News</a></li>
             <li><a class="nav-item" href="{% url 'project-list' %}">Projects</a></li>
             <li><a class="nav-item" href="{% url 'foia-list'%}">Requests</a></li>
@@ -11,15 +19,11 @@
             <li><a class="nav-item" href="{% url 'task-list' %}">Tasks</a></li>
             {% endif %}
         </ul>
-        <form action="/search" method="get" class="search-form" id="global-search">
-            <input type="search" name="q" placeholder="Search">
-            <input type="submit" style="display: none;">
-            <div class="search-cancel" id="hide-search">Cancel</div>
-        </form>
-        <div class="nav-item search-button" id="show-search">
-            {% include 'lib/icons/search.svg' %}
-            <span class="search-text">Search</span>
+        <div class="nav-item website-sections-button" id="show-sections">
+            {% include 'lib/icons/sections.svg' %}
+            <span class="label">Sections</span>
         </div>
+
         <ul class="social-links">
             <li>
                 <a class="nav-item" href="http://www.twitter.com/muckrock" title="MuckRock on Twitter">
