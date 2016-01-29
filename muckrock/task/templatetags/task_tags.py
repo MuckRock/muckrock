@@ -11,6 +11,8 @@ from muckrock import task
 # imports Task model separately to patch bug in django-compressor parser
 from muckrock.task.models import Task
 
+ # pylint:disable=no-member
+
 register = template.Library()
 
 class TaskNode(template.Node):
@@ -80,6 +82,12 @@ class FlaggedTaskNode(TaskNode):
     task_template = 'task/flagged.html'
     endpoint_name = 'flagged-task-list'
 
+    def get_extra_context(self):
+        """Adds a form for replying to the user"""
+        extra_context = super(FlaggedTaskNode, self).get_extra_context()
+        extra_context['flag_form'] = task.forms.FlaggedTaskForm()
+        return extra_context
+
 class StatusChangeTaskNode(TaskNode):
     """Renders a status change task."""
     model = task.models.StatusChangeTask
@@ -118,8 +126,6 @@ class NewAgencyTaskNode(TaskNode):
 
     def get_extra_context(self):
         """Adds an approval form, other agencies, and relevant requests to context"""
-        # pylint:disable=line-too-long
-        # pylint:disable=no-member
         extra_context = super(NewAgencyTaskNode, self).get_extra_context()
         extra_context['agency_form'] = agency.forms.AgencyForm(instance=self.task.agency)
         return extra_context
@@ -132,7 +138,6 @@ class ResponseTaskNode(TaskNode):
 
     def get_extra_context(self):
         """Adds ResponseTask-specific context"""
-        # pylint:disable=no-member
         extra_context = super(ResponseTaskNode, self).get_extra_context()
         form_initial = {}
         if self.task.communication.foia:
