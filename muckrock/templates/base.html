@@ -51,6 +51,8 @@
         <link rel="stylesheet"
               type="text/x-scss"
               href="{% static 'scss/style.scss' %}" />
+        <link rel="stylesheet" type="text/css"
+              href="{% static 'autocomplete_light/style.css' %}" />
         {% endcompress %}
         {% block styles %}
         {% endblock %}
@@ -144,9 +146,12 @@
         <script type="text/javascript" src="{% static 'js/jquery.quicksearch.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/jquery.ui.datepicker.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/autoNumeric.js' %}"></script>
-        {% endcompress %}
-        {% include 'autocomplete_light/static.html' %}
-        {% compress js %}
+        <script type="text/javascript" src="{% static 'autocomplete_light/django_admin.js' %}"></script>
+        <script type="text/javascript" src="{% static 'autocomplete_light/autocomplete.js' %}"></script>
+        <script type="text/javascript" src="{% static 'autocomplete_light/widget.js' %}"></script>
+        <script type="text/javascript" src="{% static 'autocomplete_light/addanother.js' %}"></script>
+        <script type="text/javascript" src="{% static 'autocomplete_light/text_widget.js' %}"></script>
+        <script type="text/javascript" src="{% static 'autocomplete_light/remote.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/muckrock.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/notification.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/crowdfund.js' %}"></script>
