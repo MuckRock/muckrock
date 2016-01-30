@@ -15,7 +15,7 @@ import logging
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
 from muckrock.foia.models import STATUS, FOIARequest, FOIACommunication, FOIAFile
-from muckrock.task.forms import TaskFilterForm, ResponseTaskForm
+from muckrock.task.forms import TaskFilterForm, FlaggedTaskForm, ResponseTaskForm
 from muckrock.task.models import (
         Task, OrphanTask, SnailMailTask, RejectedEmailTask,
         StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask,
@@ -238,6 +238,18 @@ class FlaggedTaskList(TaskList):
     queryset = FlaggedTask.objects.select_related(
             'user', 'foia', 'agency', 'jurisdiction')
 
+    def task_post_helper(self, request, task):
+        """Special post handler for FlaggedTasks"""
+        if request.POST.get('reply'):
+            reply_form = FlaggedTaskForm(request.POST)
+            if reply_form.is_valid():
+                text = reply_form.cleaned_data['text']
+                task.reply(text)
+            else:
+                messages.error(request, 'The form is invalid')
+                return
+        if request.POST.get('resolve'):
+            task.resolve(request.user)
 
 class NewAgencyTaskList(TaskList):
     title = 'New Agencies'
@@ -292,6 +304,7 @@ class ResponseTaskList(TaskList):
             return
         cleaned_data = form.cleaned_data
         status = cleaned_data['status']
+        set_foia = cleaned_data['set_foia']
         move = cleaned_data['move']
         tracking_number = cleaned_data['tracking_number']
         date_estimate = cleaned_data['date_estimate']
@@ -306,7 +319,7 @@ class ResponseTaskList(TaskList):
                 error_happened = True
         if status:
             try:
-                task.set_status(status)
+                task.set_status(status, set_foia)
             except ValueError:
                 messages.error(request, 'You tried to set the request to an invalid status.')
                 error_happened = True

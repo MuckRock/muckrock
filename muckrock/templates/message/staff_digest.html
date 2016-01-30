@@ -1,0 +1,90 @@
+{% extends 'message/base.html' %}
+
+{% block body %}
+<p>{{ salutation }}, {{ user.first_name }}.</p>
+<p>Here is what happened on MuckRock yesterday ({{ yesterday|date:'m/d/y' }}):</p>
+<h1>Stats</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Statistic</th>
+            <th>Current value</th>
+            <th>Change from day before</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for stat in activity.stats %}
+        <tr>
+            <td>{{ stat.name }}</td>
+            <td>{{ stat.current }}</td>
+            {% if stat.delta > 0 %}
+                {% if stat.growth %}
+            <td class="positive">
+                {% else %}
+            <td class="negative">
+                {% endif %}
+                +{{ stat.delta }}
+            </td>
+            {% elif stat.delta < 0 %}
+                {% if stat.growth %}
+            <td class="negative">
+                {% else %}
+            <td class="positive">
+                {% endif %}
+                {{ stat.delta }}
+            </td>
+            {% else %}
+            <td>{{ stat.delta }}</td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    <tbody>
+</table>
+<h1>Communications</h1>
+<table>
+    <tbody>
+        <tr>
+            <td>Sent</td>
+            <td>{{ activity.comms.sent }}</td>
+        </tr>
+        <tr>
+            <td>Received</td>
+            <td>{{ activity.comms.received }}</td>
+        </tr>
+    </tbody>
+<table>
+<h2>Sent</h2>
+{% with activity.comms.delivery as sent %}
+<table>
+    <thead>
+        <tr>
+            <th>Format</th>
+            <th>Count</th>
+            <th>Cost/Message</th>
+            <th>Total Cost</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Email</td>
+            <td>{{ sent.format.email }}</td>
+            <td>${{ sent.cost.email|floatformat:2 }}</td>
+            <td>${{ sent.expense.email|floatformat:2 }}</td>
+        </tr>
+        <tr>
+            <td>Fax</td>
+            <td>{{ sent.format.fax }}</td>
+            <td>${{ sent.cost.fax|floatformat:2 }}</td>
+            <td>${{ sent.expense.fax|floatformat:2 }}</td>
+        </tr>
+            <td>Post</td>
+            <td>{{ sent.format.mail }}</td>
+            <td>${{ sent.cost.mail|floatformat:2 }}</td>
+            <td>${{ sent.expense.mail|floatformat:2 }}</td>
+        </tr>
+    </tbody>
+<table>
+{% endwith %}
+<hr />
+<p>That is all for today. {{ signoff }} and see you tomorrow.</p>
+{% endblock %}

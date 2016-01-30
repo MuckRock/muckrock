@@ -11,11 +11,13 @@ import mock
 import nose
 
 from muckrock import factories, task
+from muckrock.task.factories import FlaggedTaskFactory
 from muckrock.task.signals import domain_blacklist
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
 raises = nose.tools.raises
+mock_send = mock.Mock()
 
 # pylint: disable=missing-docstring
 # pylint: disable=line-too-long
@@ -124,6 +126,43 @@ class OrphanTaskTests(TestCase):
         ok_(new_orphan.resolved)
 
 
+@mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
+class FlaggedTaskTests(TestCase):
+    """Test the FlaggedTask class"""
+    def setUp(self):
+        self.task = task.models.FlaggedTask
+
+    def test_flagged_object(self):
+        """A flagged task should be able to return its object."""
+        text = 'Lorem ipsum'
+        user = factories.UserFactory()
+        foia = factories.FOIARequestFactory()
+        agency = factories.AgencyFactory()
+        jurisdiction = factories.JurisdictionFactory()
+        flagged_foia_task = self.task.objects.create(user=user, foia=foia, text=text)
+        flagged_agency_task = self.task.objects.create(user=user, agency=agency, text=text)
+        flagged_jurisdiction_task = self.task.objects.create(
+            user=user, jurisdiction=jurisdiction, text=text)
+        eq_(flagged_foia_task.flagged_object(), foia)
+        eq_(flagged_agency_task.flagged_object(), agency)
+        eq_(flagged_jurisdiction_task.flagged_object(), jurisdiction)
+
+    @raises(AttributeError)
+    def test_no_flagged_object(self):
+        """Should raise an error if no flagged object"""
+        text = 'Lorem ipsum'
+        user = factories.UserFactory()
+        flagged_task = self.task.objects.create(user=user, text=text)
+        flagged_task.flagged_object()
+
+    @mock.patch('muckrock.message.notifications.SupportNotification.send')
+    def test_reply(self, mock_support_send):
+        """Given a message, a support notification should be sent to the task's user."""
+        # pylint: disable=no-self-use
+        flagged_task = FlaggedTaskFactory()
+        flagged_task.reply('Lorem ipsum')
+        mock_support_send.assert_called_with()
+
 class SnailMailTaskTests(TestCase):
     """Test the SnailMailTask class"""
 
@@ -219,6 +258,18 @@ class ResponseTaskTests(TestCase):
         eq_(self.task.communication.foia.status, 'done',
             'The FOIA should be set to the proper status.')
 
+    def test_set_comm_status_only(self):
+        foia = self.task.communication.foia
+        existing_status = foia.status
+        self.task.set_status('done', set_foia=False)
+        foia.refresh_from_db()
+        eq_(foia.date_done is None, True,
+            'The FOIA should not be set to done because we are not settings its status.')
+        eq_(foia.status, existing_status,
+            'The FOIA status should not be changed.')
+        eq_(self.task.communication.status, 'done',
+            'The Communication status should be changed, however.')
+
     def test_set_tracking_id(self):
         new_tracking = u'dogs-r-cool'
         self.task.set_tracking_id(new_tracking)
@@ -268,13 +319,12 @@ class ResponseTaskTests(TestCase):
 
 class TestTaskManager(TestCase):
     """Tests for a helpful and handy task object manager."""
-
+    @mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
     def setUp(self):
         user = factories.UserFactory()
         agency = factories.AgencyFactory(status='pending')
         self.foia = factories.FOIARequestFactory(user=user, agency=agency)
         self.comm = factories.FOIACommunicationFactory(foia=self.foia, response=True)
-
         # tasks that incorporate FOIAs are:
         # ResponseTask, SnailMailTask, FailedFaxTask, RejectedEmailTask, FlaggedTask,
         # StatusChangeTask, PaymentTask, NewAgencyTask

@@ -84,12 +84,6 @@ function getCheckoutData(button) {
     }
 }
 
-// $('textarea').autosize();
-
-if (typeof $.cookie('broadcast') == 'undefined') {
-    $.cookie('broadcast', 1);
-}
-
 // MODALS
 $('.modal-button').click(function(){ modal($(this).next()); });
 $('.embed.hidden-modal').each(function() {
@@ -183,41 +177,47 @@ $.expr[":"].icontains = $.expr.createPseudo(function(arg) {
     };
 });
 
-$('#website-sections-dropdown').click(function(){
-    var menu = 'ul.website-sections';
-    var overlay = '#modal-overlay';
-    $(menu).toggleClass('visible');
-    $(overlay).toggleClass('visible');
-    $(overlay).click(function(e) {
-        $(menu).removeClass('visible');
-        $(overlay).removeClass('visible');
-    });
-});
-
-$('#sidebar-button').click(function(){
+$('#sidebar-button').click(function(e){
     var overlay = '#modal-overlay';
     var sidebar = '#website-sidebar';
     $(sidebar).addClass('visible');
     $(overlay).addClass('visible');
-    $(overlay).click(function(){
+    $(overlay).click(function(e){
         $(sidebar).removeClass('visible');
         $(overlay).removeClass('visible');
     });
 });
 
+function toggleNav(nav, button) {
+    $(nav).toggleClass('visible');
+    $(button).toggleClass('active');
+}
+
+function hideNav(nav, button) {
+    $(nav).removeClass('visible');
+    $(button).removeClass('active');
+}
+
+$('#show-sections').click(function(){
+    var button = this;
+    var sections = '#global-sections';
+    toggleNav(sections, button);
+});
+
 $('#show-search').click(function(){
+    var searchButton = this;
     var search = '#global-search';
     var closeSearch = '#hide-search';
     var searchInput = $(search).children('input[type="search"]');
-    $(search).toggleClass('visible');
+    toggleNav(search, searchButton);
+    $(closeSearch).click(function(){
+        hideNav(search, searchButton);
+    });
     if ($(search).hasClass('visible')) {
         searchInput.focus();
     } else {
         searchInput.blur()
     }
-    $(closeSearch).click(function(){
-        $(search).removeClass('visible');
-    });
 });
 
 $('#quick-log-in').click(function(e){

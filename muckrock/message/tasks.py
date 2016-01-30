@@ -55,6 +55,15 @@ def monthly_digest():
     """Send out monthly digest"""
     send_digest('monthly', digests.MonthlyDigest)
 
+# every day at 9:30am
+@periodic_task(run_every=crontab(hour=9, minute=30), name='muckrock.message.tasks.staff_digest')
+def staff_digest():
+    """Send out staff digest"""
+    staff_users = User.objects.filter(is_staff=True).distinct()
+    for staff_user in staff_users:
+        email = digests.StaffDigest(staff_user)
+        email.send()
+
 @task(name='muckrock.message.tasks.send_invoice_receipt')
 def send_invoice_receipt(invoice_id):
     """Send out a receipt for an invoiced charge"""

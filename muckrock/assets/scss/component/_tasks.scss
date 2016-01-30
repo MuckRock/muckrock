@@ -133,6 +133,30 @@
     }
 }
 
+/* Flagged Task */
+
+.flagged.task .task-extra-context {
+    padding: 0;
+    header, footer, textarea {
+        margin-bottom: 0;
+        padding: $vertical-rhythm/2;
+    }
+    textarea {
+        display: block;
+        height: 10em;
+        border-radius: 0;
+        border: none;
+    }
+    form footer {
+        @include display(flex);
+        @include justify-content(space-between);
+        @include align-items(center);
+    }
+    .checkbox-field {
+        margin-bottom: 0;
+    }
+}
+
 /* New Agency Task */
 
 .new-agency.rejection.form {

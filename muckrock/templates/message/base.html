@@ -1,0 +1,69 @@
+{% load premailer %}
+{% spaceless %}
+{% premailer base_url %}
+<html>
+    <head>
+        <style>
+            body {
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 1em;
+                color: #21262E;
+                font-family: sans-serif;
+                font-size: 14px;
+                line-height: 1.3em;
+            }
+            h1 {
+                margin-top: 1.5em;
+                padding: .5em 0;
+                border-top: 1px solid #21262E;
+                border-bottom: 1px dotted #21262E;
+            }
+            h2 {
+                padding: .5em 0;
+                border-bottom: 1px dotted #21262E;
+            }
+            ul {
+                list-style: none;
+                padding-left: 1em;
+            }
+            li {
+                margin-bottom: 1em;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 1em;
+            }
+            th, td {
+                padding: .5em;
+                text-align: left;
+            }
+            td {
+                padding: .5em;
+                border: 1px solid #B5BDC7;
+            }
+            a {
+                font-weight: bold;
+                color: #4582CC;
+            }
+            hr {
+                margin: 2em 0;
+                border: 2px solid #21262E;
+            }
+            .positive, .completed {
+                color: #52CC66;
+            }
+            .negative, .rejected, .unsuccessful, .require.action {
+                color: #CC5C52;
+            }
+        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+    </head>
+    <body>
+    {% block body %}
+    {% endblock body %}
+    </body>
+</html>
+{% endpremailer %}
+{% endspaceless %}

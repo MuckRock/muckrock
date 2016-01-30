@@ -14,6 +14,10 @@
     <dt>From</dt>
     <dd>{{comm.priv_from_who}}</dd>
     {% endif %}
+    {% if comm.subject %}
+    <dt>Subject</dt>
+    <dd>{{comm.subject}}</dd>
+    {% endif %}
     {% if comm.foia %}
     <dt>Request</dt>
     <dd><a href="{% url 'admin:foia_foiarequest_change' comm.foia.pk %}">{{comm.foia}}</a></dd>
