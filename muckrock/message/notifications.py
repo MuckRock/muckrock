@@ -2,14 +2,13 @@
 Notification objects for the messages app
 """
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
 import json
 import requests
-
-from muckrock.settings import SLACK_WEBHOOK_URL
 
 class EmailNotification(EmailMultiAlternatives):
     """A generic base class for composing notification emails."""
@@ -80,10 +79,9 @@ class SlackNotification(object):
     https://api.slack.com/docs/formatting
     https://api.slack.com/docs/attachments
     """
-    endpoint = SLACK_WEBHOOK_URL
-
     def __init__(self, payload=None):
         """Initializes the request with a payload"""
+        self.endpoint = settings.SLACK_WEBHOOK_URL
         if payload is None:
             payload = {}
         self.payload = payload

@@ -3,6 +3,7 @@ Tests the notification objects.
 """
 
 from django.test import TestCase
+from django.test.utils import override_settings
 
 import json
 from mock import patch
@@ -10,6 +11,7 @@ from mock import patch
 from muckrock.message.notifications import SlackNotification
 
 
+@override_settings(SLACK_WEBHOOK_URL='http://www.example.com') 
 class TestSlackNotifications(TestCase):
     """Check that Slack notifications send to the correct endpoint."""
     def setUp(self):
