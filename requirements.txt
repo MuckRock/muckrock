@@ -1,35 +1,62 @@
+# Required by package monitor
 -e git+https://github.com/yunojuno/python-semanticversion.git@e8a1b3a543ab7d8b303f54e3ce48681f6c1589e7#egg=semantic_version-origin_issue-33
+# Generates a news sitemap
 -e git://github.com/callowayproject/django-news-sitemaps.git@55da6b72580dd6d79380f2bb17240e7afa00555a#egg=django_news_sitemaps-master
+# Mail backend used directly (on production)
 -e git://github.com/dhan88/django-mailgun.git@df4e2f444bd488b6234f87c879a8402e7c8b552e#egg=django_mailgun-master
+# Integrate celery and haystack
 -e git://github.com/jezdez/celery-haystack.git@6d6ef5ea61a2a88bda3e65be69115841545ac3c3#egg=celery_haystack-develop
-BeautifulSoup==3.2.1
+# Django is kinda important...
 Django==1.8.6
+# Used for dev scripts
 Fabric==1.10.2
-Markdown==2.3.1
+# Used by Django for image handling
 Pillow==2.8.2
+# Used for unicode decoding
 Unidecode==0.4.14
+# Used for search backend in development
 Whoosh==2.6.0
-amqp==1.4.5
+# Required by kombu
 anyjson==0.3.3
+# Required by pylint
 astroid==1.3.6
+# Required by celery
 billiard==3.3.0.18
+# Used to sanitize input
 bleach==1.4.1
+# Used to access AWS
 boto==2.27.0
+# Used to run async tasks
 celery==3.1.10
+# Used to generate coverage reports in dev
 coverage==3.7.1
+# Required by premailer
 cssselect==0.7.1
+# Required by premailer
 cssutils==1.0.1
+# Used to serialize machine learning data
 dill==0.2.4
+# Used for notifications
 django-activity-stream==0.6.0
+# Used for model import
 django-adaptors==0.2.3
+# Required by celery-haystack, django-compressor, and django-staticfiles
 django-appconf==0.6
+# Autocomplete drop down inputs
 django-autocomplete-light==2.2.3
+# ???
 django-celery-transactions==0.3.1
+# Integrate celery with django
 django-celery==3.1.17
+# Compress all JS and CSS assets into a single file
 django-compressor==1.5
+# DB stored configurations
 django-dbsettings==0.8.2
+# Toolbar for debugging
 django-debug-toolbar==1.3.0
+# Do we use epic editor anymore?
 django-epiceditor==0.2.1.2
+# Do we use django-filer anymore?
 django-filer==0.9.11
 django-filter==0.10.0
 django-haystack==2.4.0
@@ -63,10 +90,6 @@ greenlet==0.3.4
 gunicorn==0.14.3
 image-diet2==1.0
 ipython==0.10
-iron-cache==0.3.2
-iron-celery==0.3.1
-iron-core==1.1.1
-iron-mq==0.7
 kombu==3.0.14
 logilab-common==0.63.2
 lxml==3.1.0

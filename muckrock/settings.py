@@ -290,23 +290,13 @@ DEBUG_TOOLBAR_CONFIG = {
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
 urlparse.uses_netloc.append('redis')
-urlparse.uses_netloc.append('amqp')
-urlparse.uses_netloc.append('ironmq')
-
 
 if 'REDISTOGO_URL' in os.environ:
     BROKER_URL = os.environ['REDISTOGO_URL']
-elif 'IRON_MQ_PROJECT_ID' in os.environ:
-    BROKER_URL = 'ironmq://%s:%s@' % (os.environ.get('IRON_MQ_PROJECT_ID'),
-                                      os.environ.get('IRON_MQ_TOKEN'))
 else:
     BROKER_URL = 'redis://localhost:6379/0'
 
-
 import djcelery
-# pylint: disable=unused-import
-import iron_celery
-# pylint: enable=unused-import
 djcelery.setup_loader()
 
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
