@@ -56,6 +56,7 @@
     @include span-columns(4);
     @include omega;
     padding: $vertical-rhythm/2;
+    margin-bottom: 0;
     input, select, button, label {
         display: block;
         width: 100%;
@@ -76,7 +77,6 @@
     padding: $vertical-rhythm/2;
     background: $color-grey-7;
     button {
-        display: block;
         width: 10em;
         margin-bottom: $vertical-rhythm/2;
     }
@@ -159,30 +159,78 @@
 
 /* New Agency Task */
 
+.new-agency.task .task-extra-context {
+    background: none;
+}
+
+.new-agency.form {
+    margin-top: 0;
+    padding: 0;
+    border-radius: 0;
+    header, main, footer {
+        padding: $vertical-rhythm/2;
+        margin-bottom: 0;
+    }
+    header {
+        font-weight: $font-weight-bold;
+        font-size: $font-size-2;
+        color: $color-white;
+        background: $color-grey-6;
+        cursor: pointer;
+    }
+}
+
 .new-agency.rejection.form {
+    background: $color-red-light;
     border-color: $color-red;
+    header {
+        background: $color-red;
+    }
+    select {
+        display: block;
+        width: 100%;
+    }
 }
 
 .new-agency.approval.form {
+    background: $color-green-light;
     border-color: $color-green;
-    @include row;
-    overflow: hidden;
-    .id_name, .id_aliases, .id_address {
-        @include full;
+    header {
+        background: $color-green;
     }
-    .id_address, .id_url, .id_fax {
-        @include omega;
+    input {
+        display: block;
+        width: 100%;
+    }
+    textarea {
+        height: 5em;
+        resize: none;
+    }
+    main {
+        @include display(flex);
+        @include flex-wrap(wrap);
     }
     fieldset {
-        @include grid-columns(4, 3, 6);
-        input {
-            width: 100%;
+        @include flex(1 0 48%);
+        margin-bottom: $vertical-rhythm/2;
+        &:nth-child(even) {
+            margin-left: 2%;
         }
-        .help-text {
-            margin: $vertical-rhythm/4 0 0 0;
+        &:nth-child(odd) {
+            margin-right: 2%;
         }
     }
+    fieldset.id_name {
+        @include flex(1 0 100%);
+        margin-left: 0;
+        margin-right: 0;
+    }
+}
 
+.new-agency.form.collapsed {
+    main, footer {
+        display: none;
+    }
 }
 
 /* Response Task */
