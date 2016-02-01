@@ -1,9 +1,5 @@
 {% extends 'task/default.html' %}
 
-{% block task-class %}
-    response
-{% endblock %}
-
 {% block task-data %}
 {% if task.created_from_orphan %}
 <p class="created-from-orphan">This response was created from an orphan task.</p>

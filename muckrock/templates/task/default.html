@@ -1,5 +1,4 @@
-<section class="{% block task-class %}default{% endblock %} {% if task.resolved %}resolved{% endif %} task" id="{{task.pk}}-task">
-  {% block task-header %}
+<section class="{{class}} {% if task.resolved %}resolved{% endif %} task" id="{{task.pk}}-task">
     <header class="task-header">
         <input type="checkbox" form="batched" name="tasks" value="{{task.pk}}" class="toggle checkbox">
         {% if task.resolved %}
@@ -12,13 +11,10 @@
             <p class="task-type">
                 {{task}}
             </p>
-            {% block task-date %}
             <time class="task-date-created" datetime="{{task.date_created|date:'Y-m-d G:i::s'}}"><a class="permalink" href="{% url 'task-list' %}?id={{task.id}}">{{task.date_created|date:'m/d/Y G:i'}}</a></time>
-            {% endblock %}
         </div>
         {% endif %}
     </header>
-    {% endblock task-header %}
 
     {% block resolved-task-data %}
     {% if task.resolved and task.resolved_by %}
