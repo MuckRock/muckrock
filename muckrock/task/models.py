@@ -169,8 +169,7 @@ class SnailMailTask(Task):
     """A communication that needs to be snail mailed"""
     # pylint: disable=no-member
     type = 'SnailMailTask'
-    categories = (('a', 'Appeal'), ('n', 'New'),
-                  ('u', 'Update'), ('f', 'Followup'))
+    categories = (('a', 'Appeal'), ('n', 'New'), ('u', 'Update'), ('f', 'Followup'))
     category = models.CharField(max_length=1, choices=categories)
     communication = models.ForeignKey('foia.FOIACommunication')
 
