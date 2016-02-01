@@ -15,25 +15,24 @@
         </div>
         {% endif %}
     </header>
-
-    {% block resolved-task-data %}
-    {% if task.resolved and task.resolved_by %}
+    {% block task-main %}
+    <main>
+        {% if task.resolved and task.resolved_by %}
         <p class="task-data">Resolved by <a href="{% url 'acct-profile' username=task.resolved_by.username %}">{{ task.resolved_by.get_full_name }}</a>.</p>
-    {% endif %}
+        {% endif %}
+        {% block task-data %}
+        {% endblock %}
+    </main>
     {% endblock %}
-
-    {% block task-data %}
-    {% endblock %}
-
-    <div class="task-actions">
+    <footer class="task-actions">
         <form method="POST" action="{{ endpoint }}" class="task-post-actions">
             {% csrf_token %}
             <input type="hidden" name="task" value="{{task.pk}}">
-    {% block task-actions %}
+            {% block task-actions %}
             <button type="submit" name="resolve" value="true" class="primary">Resolve</button>
-    {% endblock task-actions %}
+            {% endblock task-actions %}
         </form>
-    </div>
+    </footer>
 
     {% block task-extra-context %}
     {% endblock %}

@@ -1,9 +1,17 @@
+.collapsed {
+    & > * { display: none; }
+    & > header { display: block; }
+}
+
 .task {
-    @include row;
     border: 1px solid $color-black;
     &.resolved {
         border-color: $color-green;
     }
+}
+
+.task header {
+    cursor: pointer;
 }
 
 .resolved .task-header {
@@ -45,7 +53,6 @@
 }
 
 .task .task-data {
-    @include span-columns(8);
     padding: $vertical-rhythm/2;
     li {
         margin-left: $vertical-rhythm;
@@ -53,10 +60,8 @@
 }
 
 .task .task-actions {
-    @include span-columns(4);
-    @include omega;
     padding: $vertical-rhythm/2;
-    input, select, button, label {
+    input, select, label {
         display: block;
         width: 100%;
         margin-bottom: $vertical-rhythm;
@@ -71,13 +76,11 @@
 }
 
 .task .task-extra-context {
-    @include span-columns(12);
     margin-bottom: 0;
     padding: $vertical-rhythm/2;
     background: $color-grey-7;
     button {
-        display: block;
-        width: 10em;
+        display: inline-block;
         margin-bottom: $vertical-rhythm/2;
     }
 
