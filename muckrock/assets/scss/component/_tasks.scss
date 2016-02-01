@@ -1,58 +1,51 @@
-.collapsed {
-    & > * { display: none; }
-    & > header { display: block; }
+$task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
+
+.collapsable > header {
+    cursor: pointer;
+}
+
+.collapsable.collapsed {
+    & > * { display: none !important; }
+    & > header { @include display(flex !important); }
 }
 
 .task {
+    position: relative;
     border: 1px solid $color-black;
-    &.resolved {
-        border-color: $color-green;
+    & > * {
+        padding: $task-padding;
+        margin-bottom: 0;
+    }
+    & > main {
+        padding: 0;
     }
 }
 
-.task header {
-    cursor: pointer;
-}
-
-.resolved .task-header {
-    background: $color-green;
+.task.resolved {
+    border-color: $color-green;
+    .task-header {
+        background: $color-green;
+    }
 }
 
 .task-header {
-    overflow: hidden;
-    position: relative;
-    margin-bottom: 0;
+    @include display(flex);
+    @include align-items(center);
     background-color: $color-black;
     color: $color-white;
-    cursor: pointer;
-
-    .checkbox {
-        position: absolute;
-        top: $vertical-rhythm/2;
-        left: $vertical-rhythm/4;
+    a {
+        color: $color-white;
     }
-
-    .task-resolved, .task-metadata {
-        @include span-columns(12);
-        @include row;
-        padding: $vertical-rhythm/4 $vertical-rhythm/2;
-        p, time {
-            @include span-columns(6);
-        }
-    }
-
     .task-type {
-        margin: 0;
-        padding-left: $vertical-rhythm;
+        padding-left: $vertical-rhythm/2;
     }
-
     time {
+        @include flex(auto);
         text-align: right;
-        a { color: $color-white; }
     }
 }
 
-.task .task-data {
+.task-data {
     padding: $vertical-rhythm/2;
     li {
         margin-left: $vertical-rhythm;
@@ -60,7 +53,8 @@
 }
 
 .task .task-actions {
-    padding: $vertical-rhythm/2;
+    background: $color-grey-7;
+    text-align: right;
     input, select, label {
         display: block;
         width: 100%;
@@ -76,8 +70,7 @@
 }
 
 .task .task-extra-context {
-    margin-bottom: 0;
-    padding: $vertical-rhythm/2;
+    padding: $vertical-rhythm/2 inherit;
     background: $color-grey-7;
     button {
         display: inline-block;
@@ -94,55 +87,45 @@
     }
 }
 
-.collapsed.task {
-    & > * {
-        display: none;
-    }
-    .task-header {
-        display: block;
-    }
-}
 
-.task {
-    position: relative;
-    .overlay {
-        display: block;
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 100%;
-        width: 100%;
+.task .overlay {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    color: $color-white;
+    text-align: center;
+    font-weight: $font-weight-bold;
+    a {
         color: $color-white;
-        text-align: center;
-        font-weight: $font-weight-bold;
-        a {
-            color: $color-white;
-        }
-        z-index: -1;
-        opacity: 0;
-        @include transition(opacity, .5s, linear);
-        &.visible {
-            z-index: 1;
-            opacity: .9;
-        }
-        &.pending  { background-color: $color-grey;    }
-        &.error    { background-color: $color-red;     }
-        .loader, .dialog {
-            width: 100%;
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-        }
+    }
+    z-index: -1;
+    opacity: 0;
+    @include transition(opacity, .5s, linear);
+    &.visible {
+        z-index: 1;
+        opacity: .9;
+    }
+    &.pending  { background-color: $color-grey;    }
+    &.error    { background-color: $color-red;     }
+    .loader, .dialog {
+        width: 100%;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
     }
 }
 
 /* Flagged Task */
 
-.flagged.task .task-extra-context {
-    padding: 0;
+.flagged.task .flag-reply {
+    background-color: $color-grey-7;
+    border-bottom: 1px solid $color-grey;
     header, footer, textarea {
         margin-bottom: 0;
-        padding: $vertical-rhythm/2;
+        padding: $task-padding;
     }
     textarea {
         display: block;
@@ -150,42 +133,87 @@
         border-radius: 0;
         border: none;
     }
-    form footer {
+    .submission-control {
         @include display(flex);
-        @include justify-content(space-between);
+        @include justify-content(flex-start);
         @include align-items(center);
     }
     .checkbox-field {
         margin-bottom: 0;
+        margin-left: $vertical-rhythm;
     }
 }
 
 /* New Agency Task */
 
+.new-agency-forms {
+    padding: $vertical-rhythm/2;
+}
+
+.new-agency.form {
+    margin-top: 0;
+    padding: 0;
+    border-radius: 0;
+    header, footer {
+        padding: $task-padding;
+        margin-bottom: 0;
+    }
+    main {
+        margin-bottom: 0;
+    }
+    header {
+        font-weight: $font-weight-bold;
+        font-size: $font-size-2;
+        color: $color-white;
+        background: $color-grey-6;
+    }
+}
+
 .new-agency.rejection.form {
+    background: $color-red-light;
     border-color: $color-red;
+    header {
+        background: $color-red;
+    }
+    main {
+        padding: $task-padding;
+    }
+    select {
+        display: block;
+        width: 100%;
+    }
 }
 
 .new-agency.approval.form {
+    background: $color-green-light;
     border-color: $color-green;
-    @include row;
-    overflow: hidden;
-    .id_name, .id_aliases, .id_address {
-        @include full;
+    header {
+        background: $color-green;
     }
-    .id_address, .id_url, .id_fax {
-        @include omega;
+    input {
+        display: block;
+        width: 100%;
+    }
+    textarea {
+        height: 5em;
+        resize: none;
+    }
+    main {
+        @include display(flex);
+        @include flex-wrap(wrap);
     }
     fieldset {
-        @include grid-columns(4, 3, 6);
-        input {
-            width: 100%;
-        }
-        .help-text {
-            margin: $vertical-rhythm/4 0 0 0;
-        }
+        @include flex(1 0 50%);
+        padding: 0 $vertical-rhythm/2;
     }
-
+    fieldset.id_name {
+        @include flex(1 0 100%);
+        margin-left: 0;
+        margin-right: 0;
+    }
+    .help-text {
+        color: $color-green-dark;
+    }
 }
 
 /* Response Task */

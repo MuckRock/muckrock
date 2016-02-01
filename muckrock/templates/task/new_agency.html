@@ -1,6 +1,6 @@
 {% extends 'task/default.html' %}
 
-{% block task-data %}
+{% block task-content %}
 <dl class="task-data">
     {% if task.agency %}
     <dt>Agency</dt>
@@ -17,11 +17,8 @@
     {% endfor %}
     {% endif %}
 </dl>
-{% endblock %}
-
-{% block task-extra-context %}
-<div class="task-extra-context">
-    <form method="POST" action="{{ endpoint }}" class="new-agency rejection form">
+<div class="new-agency-forms">
+    <form method="POST" action="{{ endpoint }}" class="new-agency rejection form collapsable">
         <header>
             <p>Reject</p>
         </header>
@@ -40,7 +37,7 @@
             <button type="submit" name="reject" value="true" class="failure">Reject</button>
         </footer>
     </form>
-    <form method="POST" action="{{ endpoint }}" class="new-agency approval form">
+    <form method="POST" action="{{ endpoint }}" class="new-agency approval form collapsable">
         <header>
             <p>Approve</p>
         </header>
@@ -55,7 +52,7 @@
                 {% if field.help_text %}<p class="help-text"><small>{{field.help_text}}</small></p>{% endif %}
             </fieldset>
             {% endfor %}
-    	</main>
+        </main>
         <footer>
             <button type="submit" name="approve" value="true" class="success">Approve</button>
         </footer>

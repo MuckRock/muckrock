@@ -1,6 +1,6 @@
 {% extends 'task/default.html' %}
 
-{% block task-data %}
+{% block task-content %}
 {% if task.created_from_orphan %}
 <p class="created-from-orphan">This response was created from an orphan task.</p>
 {% endif %}
@@ -41,9 +41,8 @@
     <button type="submit" name="resolve" value="true" class="primary">Save & Resolve</button>
 {% endblock %}
 
-{% block task-extra-context %}
-<div class="task-extra-context response-communication">
-    <button class="reveal-extra-context" data-state="0">More Info</button>
+<div class="collapsed collapsable full-communication">
+    <header>Full text and previous communications</header>
     <dl class="extra-context hidden">
         <dt>Full Text</dt>
         <dd>{{task.communication.communication}}</dd>

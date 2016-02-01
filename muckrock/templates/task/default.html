@@ -1,18 +1,12 @@
-<section class="{{class}} {% if task.resolved %}resolved{% endif %} task" id="{{task.pk}}-task">
+<section class="{{class}} {% if task.resolved %}resolved{% endif %} task collapsable" id="{{task.pk}}-task">
     <header class="task-header">
         <input type="checkbox" form="batched" name="tasks" value="{{task.pk}}" class="toggle checkbox">
         {% if task.resolved %}
-        <div class="task-resolved">
-            <p class="task-type">Resolved {{task}}</p>
-            <time class="task-date-done" datetime="{{task.date_done|date:'Y-m-d G:i::s'}}"><a class="permalink" href="{% url 'task-list' %}?id={{task.pk}}">Resolved {{task.date_done|date:'m/d/Y G:i'}}</a></time>
-        </div>
+        <span class="task-type">Resolved {{task}}</span>
+        <time class="task-date-done" datetime="{{task.date_done|date:'Y-m-d G:i::s'}}"><a class="permalink" href="{% url 'task-list' %}?id={{task.pk}}">Resolved {{task.date_done|date:'m/d/Y G:i'}}</a></time>
         {% else %}
-        <div class="task-metadata">
-            <p class="task-type">
-                {{task}}
-            </p>
-            <time class="task-date-created" datetime="{{task.date_created|date:'Y-m-d G:i::s'}}"><a class="permalink" href="{% url 'task-list' %}?id={{task.id}}">{{task.date_created|date:'m/d/Y G:i'}}</a></time>
-        </div>
+        <span class="task-type">{{task}}</span>
+        <time class="task-date-created" datetime="{{task.date_created|date:'Y-m-d G:i::s'}}"><a class="permalink" href="{% url 'task-list' %}?id={{task.id}}">{{task.date_created|date:'m/d/Y G:i'}}</a></time>
         {% endif %}
     </header>
     {% block task-main %}
@@ -20,7 +14,7 @@
         {% if task.resolved and task.resolved_by %}
         <p class="task-data">Resolved by <a href="{% url 'acct-profile' username=task.resolved_by.username %}">{{ task.resolved_by.get_full_name }}</a>.</p>
         {% endif %}
-        {% block task-data %}
+        {% block task-content %}
         {% endblock %}
     </main>
     {% endblock %}
@@ -33,10 +27,6 @@
             {% endblock task-actions %}
         </form>
     </footer>
-
-    {% block task-extra-context %}
-    {% endblock %}
-
     <div class="pending ajax overlay">
         <!-- Loader animation via https://github.com/ConnorAtherton/loaders.css -->
         <div class="loader">

@@ -1,6 +1,6 @@
 {% extends 'task/default.html' %}
 
-{% block task-data %}
+{% block task-content %}
 <dl class="task-data">
     <dt>Agency</dt>
     <dd><a href="{% url 'admin:agency_agency_change' task.agency.pk %}">{{task.agency}}</a></dd>

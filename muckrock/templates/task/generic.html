@@ -1,7 +1,9 @@
 {% extends 'task/default.html' %}
 
-{% block task-data %}
-<p><strong>{{task.subject}}<strong></p>
-<p>{{task.body}}</p>
+{% block task-content %}
+<div class="task-data">
+    <p><strong>{{task.subject}}<strong></p>
+    <p>{{task.body}}</p>
+</div>
 {% endblock %}
 
