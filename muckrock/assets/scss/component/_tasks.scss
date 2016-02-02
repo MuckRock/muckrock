@@ -219,41 +219,27 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
 /* Response Task */
 
 .response.task {
-    #id_status {
-        margin-bottom: $vertical-rhythm;
-    }
-    .file {
-        margin-bottom: $vertical-rhythm/4;
-        border: 1px solid $color-grey;
-        padding: $vertical-rhythm/4;
-    }
-    .task-extra-context {
-        margin: 0;
-    }
-    .task-extra-context dd {
-        margin-bottom: $vertical-rhythm;
-        &:last-child { margin-bottom: 0; }
-    }
-    .communication {
-        // margin: $vertical-rhythm/2 0;
-        border: 1px solid $color-grey;
-        border-left-width: 9px;
-        padding: $vertical-rhythm/2;
-        header {
-            @include row;
-            @extend dfn;
-            p, time { @include half; }
-            p { margin: 0; }
-            @include media($medium-layout) {
-                time { text-align: right; }
-            }
+    .full-communication {
+        background: $color-grey-7;
+        & > header {
+            @include display(flex);
+            margin-bottom: 0;
+            border-bottom: 1px solid $color-grey;
+            padding: $task-padding;
+            background: $color-grey-7;
         }
-        p { margin-bottom: 0; }
+        main {
+            border-bottom: 1px solid $color-grey;
+            padding: $vertical-rhythm/2;
+        }
     }
-    .created-from-orphan {
+    .response-input {
         margin-bottom: 0;
-        padding: $vertical-rhythm/2;
-        background-color: $color-yellow;
+        text-align: left;
+        -webkit-column-count: 3;
+        label {
+            font-size: $font-size-2;
+        }
     }
 }
 

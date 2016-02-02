@@ -1,4 +1,5 @@
 {% extends 'task/default.html' %}
+{% load markdown_deux_tags %}
 
 {% block task-content %}
 {% if task.created_from_orphan %}
@@ -18,7 +19,11 @@
     <dt>Request</dt>
     <dd><a href="{% url 'admin:foia_foiarequest_change' comm.foia.pk %}">{{comm.foia}}</a></dd>
     <dt>Tracking Number</dt>
+    {% if comm.foia.tracking_id %}
     <dd>{{comm.foia.tracking_id}}</dd>
+    {% else %}
+    <dd>None</dd>
+    {% endif %}
     {% endif %}
     {% if attachments %}
     <dt>Attachments</dt>
@@ -34,38 +39,22 @@
 	<dd>{{task.status_probability}}%</dd>
 	{% endif %}
 </dl>
+<div class="collapsed collapsable full-communication">
+    <header>See this and previous communications</header>
+    <main>
+        {% include 'foia/communication.html' with communication=task.communication %}
+        {% if task.communication.foia.reverse_communications %}
+        {% for communication in task.communication.foia.reverse_communications %}
+            {% include 'foia/communication.html' %}
+        {% endfor %}
+        {% endif %}
+    </main>
+</div>
 {% endblock %}
 
 {% block task-actions %}
-    {{ response_form }}
+    <div class="response-input">
+        {{ response_form }}
+    </div>
     <button type="submit" name="resolve" value="true" class="primary">Save & Resolve</button>
-{% endblock %}
-
-<div class="collapsed collapsable full-communication">
-    <header>Full text and previous communications</header>
-    <dl class="extra-context hidden">
-        <dt>Full Text</dt>
-        <dd>{{task.communication.communication}}</dd>
-        {% if task.communication.foia.reverse_communications %}
-        <dt>Previous Communications</dt>
-            {% for comm in task.communication.foia.reverse_communications %}
-        <dd>
-            <div class="communication">
-                <header>
-                    {% if comm.from_who %}
-                    <p>From: {{ comm.from_who }}</p>
-                    {% endif %}
-                    {% if comm.date %}
-                    <time datetime="{{comm.date}}">{{ comm.date|date:"m/d/Y" }}</time>
-                    {% endif %}
-                </header>
-                {% if comm.communication %}
-                    <p>{{ comm.communication }}</p>
-                {% endif %}
-            </div>
-        </dd>
-            {% endfor %}
-        {% endif %}
-    </dl>
-</div>
 {% endblock %}
