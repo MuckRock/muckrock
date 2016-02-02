@@ -5,9 +5,7 @@ Nodes and tags for rendering tasks into templates
 from django import template
 from django.core.urlresolvers import reverse
 
-from muckrock import agency
-from muckrock import foia
-from muckrock import task
+from muckrock import agency, foia, task
 # imports Task model separately to patch bug in django-compressor parser
 from muckrock.task.models import Task
 
@@ -138,11 +136,14 @@ class ResponseTaskNode(TaskNode):
         """Adds ResponseTask-specific context"""
         extra_context = super(ResponseTaskNode, self).get_extra_context()
         form_initial = {}
-        if self.task.communication.foia:
-            the_foia = self.task.communication.foia
-            form_initial['status'] = the_foia.status
-            form_initial['tracking_number'] = the_foia.tracking_id
-            form_initial['date_estimate'] = the_foia.date_estimate
+        communication = self.task.communication
+        _foia = communication.foia
+        if _foia:
+            form_initial['status'] = _foia.status
+            form_initial['tracking_number'] = _foia.tracking_id
+            form_initial['date_estimate'] = _foia.date_estimate
+            previous_communications = [comm for comm in _foia.reverse_communications if comm.pk != communication.pk]
+            extra_context['previous_communications'] = previous_communications
         extra_context['response_form'] = task.forms.ResponseTaskForm(initial=form_initial)
         extra_context['attachments'] = self.task.communication.files.all()
         return extra_context

@@ -293,6 +293,7 @@ class ResponseTaskList(TaskList):
                 Prefetch('communication__foia__communications',
                     queryset=FOIACommunication.objects.order_by('-date'),
                     to_attr='reverse_communications'),
+                'communication__foia__communications__files',
                 ))
 
     def task_post_helper(self, request, task):

@@ -40,14 +40,12 @@
 	{% endif %}
 </dl>
 <div class="collapsed collapsable full-communication">
-    <header>See this and previous communications</header>
+    <header>See this {% if previous_communications %}and previous {% endif %}communication{% if previous_communications %}s{% endif %}</header>
     <main>
         {% include 'foia/communication.html' with communication=task.communication %}
-        {% if task.communication.foia.reverse_communications %}
-        {% for communication in task.communication.foia.reverse_communications %}
+        {% for communication in previous_communications %}
             {% include 'foia/communication.html' %}
         {% endfor %}
-        {% endif %}
     </main>
 </div>
 {% endblock %}
