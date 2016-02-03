@@ -78,6 +78,7 @@
     .news-article-body {
         @include order(2);
         max-width: 100%;
+        min-width: 0;
         @media screen and (min-width: $news-layout-breakpoint) {
             @include order(3);
             @include flex(1);
