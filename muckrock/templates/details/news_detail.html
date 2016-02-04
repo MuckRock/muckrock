@@ -10,44 +10,42 @@
 {% block title %}{{ article.title }}{% endblock title %}
 
 {% block content %}
-<div class="news detail">
-    <article class="news--article">
-        <header class="news--article-header">
-            <time title="{{ article.pub_date|date:'c' }}" datetime="{{ article.pub_date|date:'c' }}">{{ article.pub_date | date:"F j, Y" }}</time>
-            <h1>{{ article.title }}</h1>
-            {% if article.image %}
-            <img src="{% thumbnail article.image 1200x400 crop %}">
-            {% endif %}
-            {% if article.kicker %}
-            <summary class="kicker">{{ article.kicker }}</summary>
-            {% endif %}
-            <div class="contributors">
-                {% with article.authors.all as authors %}
-                {% if authors %}
-                <div class="authors">Written by
-                    {% for author in authors %}
-                        <a href="{{ author.profile.get_absolute_url }}" title="{{ author.get_full_name }}">{{ author.get_full_name }}</a>{% if not forloop.last %}, {% endif %}
-                    {% endfor %}
-                </div>
-                {% endif %}
-                {% endwith %}
-                {% with article.editors.all as editors %}
-                {% if editors %}
-                <div class="editors">Edited by
-                    {% for editor in editors %}
-                        <a href="{{ editor.profile.get_absolute_url }}" title="{{ editor.get_full_name }}">{{ editor.get_full_name }}</a>{% if not forloop.last %}, {% endif %}
-                    {% endfor %}
-                </div>
-                {% endif %}
-                {% endwith %}
+<article class="news detail news--article">
+    <header class="news--header">
+        {% if article.image %}
+        <img src="{% thumbnail article.image 1200x400 crop %}">
+        {% endif %}
+        <time title="{{ article.pub_date|date:'c' }}" datetime="{{ article.pub_date|date:'c' }}">{{ article.pub_date | date:"F j, Y" }}</time>
+        <h1>{{ article.title }}</h1>
+        {% if article.kicker %}
+        <summary class="kicker">{{ article.kicker }}</summary>
+        {% endif %}
+        <div class="contributors">
+            {% with article.authors.all as authors %}
+            {% if authors %}
+            <div class="authors">Written by
+                {% for author in authors %}
+                    <a href="{{ author.profile.get_absolute_url }}" title="{{ author.get_full_name }}">{{ author.get_full_name }}</a>{% if not forloop.last %}, {% endif %}
+                {% endfor %}
             </div>
-        </header>
-        <main class="news--article-main">
+            {% endif %}
+            {% endwith %}
+            {% with article.editors.all as editors %}
+            {% if editors %}
+            <div class="editors">Edited by
+                {% for editor in editors %}
+                    <a href="{{ editor.profile.get_absolute_url }}" title="{{ editor.get_full_name }}">{{ editor.get_full_name }}</a>{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+        </div>
+    </header>
+    <main class="news--main">
         {% with article.body|markdown:"trusted" as copy %}
             {% evaluate copy %}
         {% endwith %}
-        </main>
-    </article>
+    </main>
     <aside class="news--aside">
         {% include 'lib/social.html' with title=article.title %}
         {% tag_manager article %}
@@ -121,7 +119,7 @@ $('.checkout-button').click(function(e){
     );
     return false;
 });
-$('.news--article-main img').loupe({
+$('.news--main img').loupe({
     height: 200,
     width: 200
 });

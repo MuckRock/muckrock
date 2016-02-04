@@ -1,27 +1,23 @@
-.detail.news {
+article.news--article {
     @include display(flex);
     @include justify-content(center);
     @include flex-wrap(wrap-reverse);
     max-width: 48em;
-    margin: 0 auto;
-    .news--article, .news--aside {
+    margin: 0 auto $vertical-rhythm;
+    .news--header, .news--main, .news--aside {
         padding: 0 $vertical-rhythm/2;
     }
-    .news--article {
-        flex: 0 1 32em;
-        max-width: 32em;
-        min-width: 0;
-        header {
-            border-bottom: 1px solid $color-grey-6;
-            time { @extend dfn; }
-            img {
-                margin-bottom: $vertical-rhythm/2;
-            }
-            h1, .kicker {
-                margin-bottom: $vertical-rhythm/2;
-                font-weight: $font-weight-bold;
-                line-height: 1.25em;
-            }
+    .news--header {
+        flex: 0 0 100%;
+        order: 1;
+        time { @extend dfn; }
+        img {
+            margin-bottom: $vertical-rhythm/2;
+        }
+        h1, .kicker {
+            margin-bottom: $vertical-rhythm/2;
+            font-weight: $font-weight-bold;
+            line-height: 1.25em;
         }
         .contributors {
             @include display(flex);
@@ -34,11 +30,20 @@
             }
         }
     }
+    .news--main {
+        flex: 0 1 32em;
+        max-width: 32em;
+        min-width: 0;
+    }
     .news--aside {
         flex: 1 1 12em;
         max-width: 32em;
         min-width: 0;
         order: -1;
+    }
+    @include media(72rem) {
+        font-size: $font-size-4;
+        line-height: $font-line-height;
     }
     // Fixes for embedded content
     div[id^='viewer'] {
@@ -66,6 +71,7 @@
 }
 
 .loupe {
+    z-index: 500;
     border: 2px solid $color-grey-3;
     border-radius: 50%;
     background: $color-grey;
