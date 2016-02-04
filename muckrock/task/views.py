@@ -181,7 +181,7 @@ class SnailMailTaskList(TaskList):
                 Prefetch(
                     'communication__foia__communications',
                     queryset=FOIACommunication.objects.filter(response=True),
-                    to_attr='has_ack'),
+                    to_attr='replies'),
                 ))
 
     def task_post_helper(self, request, task):

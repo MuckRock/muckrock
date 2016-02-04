@@ -13,7 +13,7 @@
     <dd>{{task.get_category_display}}</dd>
 {% if foia %}
     <dt>Is Acknowledged</dt>
-    <dd>{{foia.replies|yesno:"True,False"}}</dd>
+    <dd>{{foia.has_ack|yesno:"True,False"}}</dd>
     <dt>Submitter</dt>
     <dd><a href="{% url 'admin:auth_user_change' foia.user.pk %}">{{foia.user}}</a></dd>
     <dt>Request</dt>

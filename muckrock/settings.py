@@ -227,12 +227,10 @@ INSTALLED_APPS = (
     'celery_haystack',
     'compressor',
     'debug_toolbar',
-    'django_tablib',
     'django_premailer',
     'djangosecure',
     'djcelery',
     'easy_thumbnails',
-    'filer',
     'gunicorn',
     'haystack',
     'dbsettings',
@@ -611,19 +609,6 @@ REST_FRAMEWORK = {
          'rest_framework.authentication.SessionAuthentication',),
     'DEFAULT_PERMISSION_CLASSES':
         ('rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',),
-}
-
-FILER_STORAGES = {
-    'public': {
-        'main': {
-            'UPLOAD_TO': 'filer.utils.generate_filename.by_date',
-        },
-    },
-    'private': {
-        'main': {
-            'UPLOAD_TO': 'filer.utils.generate_filename.by_date',
-        },
-    },
 }
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
