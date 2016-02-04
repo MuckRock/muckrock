@@ -17,14 +17,13 @@
     }
     .project-info {
         display: block;
+        margin-bottom: 0;
         padding: $vertical-rhythm/2;
+        p {
+            font-size: $font-size-2;
+        }
     }
     .title {
         margin-bottom: $vertical-rhythm/2;
-    }
-    .summary {
-        font-size: $font-size-2;
-        color: $color-black;
-        text-decoration: none;
     }
 }
