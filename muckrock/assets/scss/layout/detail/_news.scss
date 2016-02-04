@@ -64,3 +64,13 @@
         }
     }
 }
+
+.loupe {
+    border: 2px solid $color-grey-3;
+    border-radius: 50%;
+    background: $color-grey;
+    cursor: none;
+}
+.loupe img {
+    max-width: none;
+}
