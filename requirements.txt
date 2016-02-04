@@ -113,7 +113,7 @@ markdown2==2.2.1
 # Used for mocking objects during test
 mock==0.7.0b2
 # Interface to newrelic service
-newrelic==2.18.1.15
+newrelic==2.60.0.46
 # Used for testing
 nose==1.3.7
 # Used by machine learning
