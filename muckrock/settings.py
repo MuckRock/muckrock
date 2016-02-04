@@ -246,7 +246,6 @@ INSTALLED_APPS = (
     'robots',
     'storages',
     'taggit',
-    'django_xmlrpc',
     'lot',
     'package_monitor',
     'image_diet',

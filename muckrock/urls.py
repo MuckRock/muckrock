@@ -12,7 +12,6 @@ from django.contrib import admin
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import RedirectView
 
-from django_xmlrpc.views import handle_xmlrpc
 from rest_framework.routers import DefaultRouter
 import dbsettings.urls
 
@@ -108,7 +107,6 @@ urlpatterns = patterns(
     url(r'^api_v1/token-auth/', 'rest_framework.authtoken.views.obtain_auth_token'),
     url(r'^api_doc/', include('rest_framework_swagger.urls')),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
-    url(r'^xmlrpc/$', csrf_exempt(handle_xmlrpc), name='xmlrpc'),
     url(r'^package_monitor/', include('package_monitor.urls', namespace='package_monitor')),
     url(r'^robots\.txt$', include('robots.urls')),
     url(r'^favicon.ico$', RedirectView.as_view(url=settings.STATIC_URL + 'favicon.ico')),
