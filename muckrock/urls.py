@@ -9,7 +9,6 @@ from views import handler500
 # pylint: enable=unused-import
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
-from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import RedirectView
 
 from rest_framework.routers import DefaultRouter
