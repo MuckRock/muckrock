@@ -1,0 +1,30 @@
+.project-list {
+    @include border;
+    li {
+        border-bottom: 1px solid $color-grey;
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+}
+
+.project-item {
+    display: block;
+    background: $color-white-pure;
+    .project-image {
+        display: block;
+        margin-bottom: 0;
+    }
+    .project-info {
+        display: block;
+        padding: $vertical-rhythm/2;
+    }
+    .title {
+        margin-bottom: $vertical-rhythm/2;
+    }
+    .summary {
+        font-size: $font-size-2;
+        color: $color-black;
+        text-decoration: none;
+    }
+}

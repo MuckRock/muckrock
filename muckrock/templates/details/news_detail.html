@@ -50,19 +50,24 @@
     </article>
     <aside class="news--aside">
         {% include 'lib/social.html' with title=article.title %}
+        {% tag_manager article %}
         {% if projects %}
         <ul class="project-list nostyle">
         {% for project in projects %}
-            <li class="project-item" {% if project.image %}style="background-image:url('{% thumbnail project.image 800x600 %}')"{% endif %}>
-                <a href="{{project.get_absolute_url}}" title="{{project.title}}" class="project-info">
-                    <h4 class="title">{{project.title}}</h4>
-                    <p class="summary">{{project.summary|truncatechars:"300"}}</p>
+            <li>
+                <a href="{{project.get_absolute_url}}" title="{{project.title}}" class="project-item">
+                    {% if project.image %}
+                    <img src="{% thumbnail project.image 600x600 %}" class="project-image"/>
+                    {% endif %}
+                    <div class="project-info">
+                        <h4 class="title">{{project.title}}</h4>
+                        <p class="summary">{{project.summary|truncatechars:"300"}}</p>
+                    </div>
                 </a>
             </li>
         {% endfor %}
         </ul>
         {% endif %}
-        {% tag_manager article %}
         {% if foias %}
         <div class="related-requests">
             <dfn>Related Requests</dfn>
