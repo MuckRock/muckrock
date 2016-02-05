@@ -1,100 +1,158 @@
+# Required by package monitor
 -e git+https://github.com/yunojuno/python-semanticversion.git@e8a1b3a543ab7d8b303f54e3ce48681f6c1589e7#egg=semantic_version-origin_issue-33
+# Generates a news sitemap
 -e git://github.com/callowayproject/django-news-sitemaps.git@55da6b72580dd6d79380f2bb17240e7afa00555a#egg=django_news_sitemaps-master
+# Mail backend used directly (on production)
 -e git://github.com/dhan88/django-mailgun.git@df4e2f444bd488b6234f87c879a8402e7c8b552e#egg=django_mailgun-master
+# Integrate celery and haystack
 -e git://github.com/jezdez/celery-haystack.git@6d6ef5ea61a2a88bda3e65be69115841545ac3c3#egg=celery_haystack-develop
-BeautifulSoup==3.2.1
+# Django is kinda important...
 Django==1.8.6
+# Used for dev scripts
 Fabric==1.10.2
-Markdown==2.3.1
+# Used by Django for image handling
 Pillow==2.8.2
+# Used for unicode decoding
 Unidecode==0.4.14
+# Used for search backend in development
 Whoosh==2.6.0
+# Required by kombu
 amqp==1.4.9
+# Required by kombu
 anyjson==0.3.3
+# Required by pylint
 astroid==1.3.6
+# Required by celery
 billiard==3.3.0.22
+# Used to sanitize input
 bleach==1.4.1
+# Used to access AWS
 boto==2.27.0
+# Used to run async tasks
 celery==3.1.20
+# Used to generate coverage reports in dev
 coverage==3.7.1
+# Required by premailer
 cssselect==0.7.1
+# Required by premailer
 cssutils==1.0.1
+# Used to serialize machine learning data
 dill==0.2.4
+# Used for notifications
 django-activity-stream==0.6.0
+# Used for model import
 django-adaptors==0.2.3
+# Required by celery-haystack, django-compressor, and django-staticfiles
 django-appconf==0.6
+# Autocomplete drop down inputs
 django-autocomplete-light==2.2.3
-django-celery-transactions==0.3.1
+# Integrate celery with django
 django-celery==3.1.17
+# Compress all JS and CSS assets into a single file
 django-compressor==1.5
+# DB stored configurations
 django-dbsettings==0.8.2
+# Toolbar for debugging
 django-debug-toolbar==1.3.0
-django-epiceditor==0.2.1.2
-django-filer==0.9.11
+# Used for filtering in viewsets
 django-filter==0.10.0
+# Search engine
 django-haystack==2.4.0
-django-keyedcache==1.5.1
+# Used for phone numbers and state list
 django-localflavor==1.1
+# Used for Log On Tokens
 django-lot==0.0.6
+# Used for markdown
 django-markdown-deux==1.0.4
+# Mathematical template filters
 django-mathfilters==0.3.0
-django-mptt==0.7.4
+# Used for testing
 django-nose==1.4.2
+# Keeps track of which packages need upgrading
 django-package-monitor==0.2.3
-django-polymorphic==0.7.1
+# Styles HTML emails
 django-premailer==0.1.0
+# Interface to memcache
 django-pylibmc==0.6.1
+# API documentation
 django-rest-swagger==0.3.2
+# Version history for models
 django-reversion==1.8.7
+# Manage robots.txt file
 django-robots==1.1
+# Enforces security best practices
 django-secure==1.0
+# Force SSL everywhere
 django-sslify==0.2
+# Store files on S3
 django-storages==1.1.8
-django-tablib==3.1.1
+# Used for tagging
 django-taggit==0.14.0
-django-xmlrpc==0.1.3
+# The API framework
 djangorestframework==3.1.3
+# Monitors slow requests
 dogslow==0.9.7
+# Used for thumbnailing images
 easy-thumbnails==2.2
+# Used for creating test data
 factory-boy==2.6
-gdata==2.0.17
-gevent==0.13.7
-greenlet==0.3.4
+# Python WSGI app server
 gunicorn==0.14.3
+# Used to compress images on upload
 image-diet2==1.0
+# Interactive python shell
 ipython==0.10
-iron-cache==0.3.2
-iron-celery==0.3.1
-iron-core==1.1.1
-iron-mq==0.7
+# Required by celery
 kombu==3.0.33
+# Required by pylint
 logilab-common==0.63.2
+# Required by django-adapters and premailer
 lxml==3.1.0
+# Required by markdown deux
 markdown2==2.2.1
+# Used for mocking objects during test
 mock==0.7.0b2
-newrelic==2.18.1.15
+# Interface to newrelic service
+newrelic==2.60.0.46
+# Used for testing
 nose==1.3.7
+# Used by machine learning
 numpy==1.9.1
+# Used by business days to calculate th date of Easter
 pascha==0.5
+# Styles HTML emails
 premailer==2.9.7
+# Interface to postgres DB
 psycopg2==2.6.1
+# Interface to memcache
 pylibmc==1.5.0
+# Pylint for Django integration
 pylint-django==0.6.1
+# Required by pylint django
 pylint-plugin-utils==0.2.2
+# Linter for python
 pylint==1.4.3
+# Interface to Apache solr for search engine
 pysolr==3.0.5
+# Used for relative time deltas
 python-dateutil==2.2
-python-memcached==1.48
+# Required by celery
 pytz==2014.4
+# Sentry integration
 raven==5.0.0
+# Redis integration - for use with celery
 redis==2.4.10
+# HTTP for humans
 requests==2.3.0
+# Used for machine learning
 scikit-learn==0.16.1
+# Used for machine learning
 scipy==0.14.0
+# Python2/3 compatibility - used by many libraries
 six==1.7.3
+# Required by django debug toolbar
 sqlparse==0.1.15
+# Stripe payment processor integration
 stripe==1.27.1
-tablib==0.10.0
-waitress==0.8.8
-webassets==0.7.1
+# Profiler for django
 yet-another-django-profiler==1.0.2
