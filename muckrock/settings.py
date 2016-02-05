@@ -227,12 +227,10 @@ INSTALLED_APPS = (
     'celery_haystack',
     'compressor',
     'debug_toolbar',
-    'django_tablib',
     'django_premailer',
     'djangosecure',
     'djcelery',
     'easy_thumbnails',
-    'filer',
     'gunicorn',
     'haystack',
     'dbsettings',
@@ -248,7 +246,6 @@ INSTALLED_APPS = (
     'robots',
     'storages',
     'taggit',
-    'django_xmlrpc',
     'lot',
     'package_monitor',
     'image_diet',
@@ -290,23 +287,13 @@ DEBUG_TOOLBAR_CONFIG = {
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
 urlparse.uses_netloc.append('redis')
-urlparse.uses_netloc.append('amqp')
-urlparse.uses_netloc.append('ironmq')
-
 
 if 'REDISTOGO_URL' in os.environ:
     BROKER_URL = os.environ['REDISTOGO_URL']
-elif 'IRON_MQ_PROJECT_ID' in os.environ:
-    BROKER_URL = 'ironmq://%s:%s@' % (os.environ.get('IRON_MQ_PROJECT_ID'),
-                                      os.environ.get('IRON_MQ_TOKEN'))
 else:
     BROKER_URL = 'redis://localhost:6379/0'
 
-
 import djcelery
-# pylint: disable=unused-import
-import iron_celery
-# pylint: enable=unused-import
 djcelery.setup_loader()
 
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
@@ -621,19 +608,6 @@ REST_FRAMEWORK = {
          'rest_framework.authentication.SessionAuthentication',),
     'DEFAULT_PERMISSION_CLASSES':
         ('rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',),
-}
-
-FILER_STORAGES = {
-    'public': {
-        'main': {
-            'UPLOAD_TO': 'filer.utils.generate_filename.by_date',
-        },
-    },
-    'private': {
-        'main': {
-            'UPLOAD_TO': 'filer.utils.generate_filename.by_date',
-        },
-    },
 }
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
