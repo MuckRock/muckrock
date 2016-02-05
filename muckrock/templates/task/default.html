@@ -18,6 +18,7 @@
         {% endblock %}
     </main>
     {% endblock %}
+    {% block task-footer %}
     <footer class="task-actions">
         <form method="POST" action="{{ endpoint }}" class="task-post-actions">
             {% csrf_token %}
@@ -27,6 +28,7 @@
             {% endblock task-actions %}
         </form>
     </footer>
+    {% endblock %}
     <div class="pending ajax overlay">
         <!-- Loader animation via https://github.com/ConnorAtherton/loaders.css -->
         <div class="loader">

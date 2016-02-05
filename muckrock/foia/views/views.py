@@ -19,6 +19,7 @@ from datetime import datetime
 import json
 import logging
 
+from muckrock.agency.forms import AgencyForm
 from muckrock.foia.codes import CODES
 from muckrock.foia.forms import (
     RequestFilterForm,
@@ -273,10 +274,11 @@ class Detail(DetailView):
         context['status_choices'] = STATUS if include_draft else STATUS_NODRAFT
         context['show_estimated_date'] = foia.status not in ['submitted', 'ack', 'done', 'rejected']
         context['change_estimated_date'] = FOIAEstimatedCompletionDateForm(instance=foia)
-        if user.is_staff:
-            all_tasks = Task.objects.filter_by_foia(foia)
-            context['task_count'] = len(all_tasks)
-            context['open_tasks'] = [task for task in all_tasks if not task.resolved]
+
+        all_tasks = Task.objects.filter_by_foia(foia, user)
+        open_tasks = [task for task in all_tasks if not task.resolved]
+        context['task_count'] = len(open_tasks)
+        context['open_tasks'] = open_tasks
         context['stripe_pk'] = STRIPE_PUB_KEY
         context['sidebar_admin_url'] = reverse('admin:foia_foiarequest_change', args=(foia.pk,))
         context['is_thankable'] = foia.is_thankable()
@@ -306,6 +308,7 @@ class Detail(DetailView):
             'revoke_access': self._revoke_access,
             'demote': self._demote_editor,
             'promote': self._promote_viewer,
+            'update_new_agency': self._update_new_agency,
         }
         try:
             return actions[request.POST['action']](request, foia)
@@ -443,6 +446,19 @@ class Detail(DetailView):
                 messages.error(request, 'Invalid date provided.')
         else:
             messages.error(request, 'You cannot do that, stop it.')
+        return redirect(foia)
+
+    def _update_new_agency(self, request, foia):
+        """Update the new agency"""
+        form = AgencyForm(request.POST, instance=foia.agency)
+        if foia.editable_by(request.user):
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Agency info saved. Thanks for your help!')
+            else:
+                messages.success(request, 'The data was invalid! Try again.')
+        else:
+            message.error(request, 'You cannot do that, stop it.')
         return redirect(foia)
 
     def _generate_key(self, request, foia):
