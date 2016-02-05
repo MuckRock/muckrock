@@ -44,21 +44,33 @@ class TaskQuerySet(models.QuerySet):
         """Get all resolved tasks"""
         return self.filter(resolved=True)
 
-    def filter_by_foia(self, foia):
-        """Get all tasks that relate to the provided FOIA request."""
+    def filter_by_foia(self, foia, user):
+        """
+        Get tasks that relate to the provided FOIA request.
+        If user is staff, get all tasks.
+        If user is advanced, get response tasks.
+        For all users, get new agency task.
+        """
         # pylint:disable=no-self-use
         tasks = []
         # infer foia from communication
-        for task_type in (ResponseTask, SnailMailTask, FailedFaxTask):
+        communication_task_types = []
+        if user.is_staff:
+            communication_task_types.append(ResponseTask)
+            communication_task_types.append(SnailMailTask)
+            communication_task_types.append(FailedFaxTask)
+        for task_type in communication_task_types:
             tasks += list(task_type.objects
                     .filter(communication__foia=foia)
                     .select_related('communication__foia', 'resolved_by')
                     .prefetch_related('communication__files'))
         # these tasks have a direct foia attribute
-        for task_type in (RejectedEmailTask, FlaggedTask, StatusChangeTask, PaymentTask):
-            tasks += list(task_type.objects
-                    .filter(foia=foia)
-                    .select_related('foia', 'resolved_by'))
+        foia_task_types = [RejectedEmailTask, FlaggedTask, StatusChangeTask, PaymentTask]
+        if user.is_staff:
+            for task_type in foia_task_types:
+                tasks += list(task_type.objects
+                        .filter(foia=foia)
+                        .select_related('foia', 'resolved_by'))
         # try matching foia agency with task agency
         if foia.agency:
             tasks += list(NewAgencyTask.objects

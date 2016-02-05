@@ -52,6 +52,25 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
     }
 }
 
+.task .full-letter {
+    background: $color-grey-7;
+    & > header {
+        @include display(flex);
+        margin-bottom: 0;
+        border-bottom: 1px solid $color-grey;
+        padding: $task-padding;
+        background: $color-grey-7;
+    }
+    textarea {
+        border-radius: 0;
+        border-bottom: 1px solid $color-grey;
+        height: 10em;
+        padding: $vertical-rhythm/2;
+        font-family: $font-monospace;
+        font-size: $font-size-2;
+    }
+}
+
 .task .task-actions {
     background: $color-grey-7;
     text-align: right;
@@ -68,25 +87,6 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
         margin-bottom: 0;
     }
 }
-
-.task .task-extra-context {
-    padding: $vertical-rhythm/2 inherit;
-    background: $color-grey-7;
-    button {
-        display: inline-block;
-        margin-bottom: $vertical-rhythm/2;
-    }
-
-    .extra-context {
-        display: block;
-        padding-top: $vertical-rhythm;
-        border-top: 1px solid $color-grey;
-    }
-    .extra-context.hidden {
-        display: none;
-    }
-}
-
 
 .task .overlay {
     display: block;
@@ -247,16 +247,10 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
 
 
 .task-post-actions input[type=checkbox] {
-    width: 20%;
-    float: left;
+    float: right;
     margin-top: .4em;
+    margin-left: .4em;
     & + label {
-        line-height: 1.5em;
         margin-bottom: $vertical-rhythm;
     }
-}
-
-.extra-context textarea {
-    height: 15em;
-    overflow: none;
 }

@@ -273,10 +273,11 @@ class Detail(DetailView):
         context['status_choices'] = STATUS if include_draft else STATUS_NODRAFT
         context['show_estimated_date'] = foia.status not in ['submitted', 'ack', 'done', 'rejected']
         context['change_estimated_date'] = FOIAEstimatedCompletionDateForm(instance=foia)
-        if user.is_staff:
-            all_tasks = Task.objects.filter_by_foia(foia)
-            context['task_count'] = len(all_tasks)
-            context['open_tasks'] = [task for task in all_tasks if not task.resolved]
+
+        all_tasks = Task.objects.filter_by_foia(foia, user)
+        open_tasks = [task for task in all_tasks if not task.resolved]
+        context['task_count'] = len(open_tasks)
+        context['open_tasks'] = open_tasks
         context['stripe_pk'] = STRIPE_PUB_KEY
         context['sidebar_admin_url'] = reverse('admin:foia_foiarequest_change', args=(foia.pk,))
         context['is_thankable'] = foia.is_thankable()
