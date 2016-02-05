@@ -21,7 +21,7 @@
     <dt>Error</dt>
     <dd>{{task.error}}</dd>
     {% endif %}
-    {% with foia_by_email|get_item:task.email as foias %}
+    {% with task.foias as foias %}
     {% if foias %}
     <dt>Requests</dt>
     {% for foia in foias %}
@@ -29,7 +29,7 @@
     {% endfor %}
     {% endif %}
     {% endwith %}
-    {% with agency_by_email|get_item:task.email as agencies %}
+    {% with task.agencies as agencies %}
     {% if agencies %}
     <dt>Agencies</dt>
     {% for agency in agencies %}

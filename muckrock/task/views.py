@@ -223,8 +223,11 @@ class RejectedEmailTaskList(TaskList):
                         email_upper == o.email.upper() or
                         email_upper in o.other_emails.upper()]
             return return_value
-        context['agency_by_email'] = seperate_by_email(agencies, all_emails)
-        context['foia_by_email'] = seperate_by_email(foias, all_emails)
+        agency_by_email = seperate_by_email(agencies, all_emails)
+        foia_by_email = seperate_by_email(foias, all_emails)
+        for task in context['object_list']:
+            task.foias = foia_by_email[task.email]
+            task.agencies = agency_by_email[task.email]
         return context
 
 
