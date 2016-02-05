@@ -1,3 +1,4 @@
+{% autoescape off %}
 {{message}}
 {% if task %}
 --------------
