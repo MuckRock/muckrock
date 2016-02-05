@@ -72,7 +72,7 @@
         </footer>
     </form>
     {% else %}
-    <form method="POST" action="{{ endpoint }}" class="new-agency update form collapsable">
+    <form method="POST" class="new-agency update form collapsable">
         <header>
             <p>Update contact information</p>
         </header>
@@ -89,7 +89,7 @@
             {% endfor %}
         </main>
         <footer>
-            <button type="submit" name="update" value="true" class="primary">Save</button>
+            <button type="submit" name="action" value="update_new_agency" class="primary">Save</button>
         </footer>
     </form>
     {% endif %}
