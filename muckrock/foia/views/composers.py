@@ -82,6 +82,7 @@ def _make_new_agency(request, agency, jurisdiction):
         status='pending',
     )
     NewAgencyTask.objects.create(
+            assigned=user,
             user=user,
             agency=agency)
     return agency
