@@ -12,6 +12,7 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
 .task {
     position: relative;
     border: 1px solid $color-black;
+    background: $color-white-pure;
     & > * {
         padding: $task-padding;
         margin-bottom: 0;
@@ -147,18 +148,21 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
 /* New Agency Task */
 
 .new-agency-forms {
-    padding: $vertical-rhythm/2;
+    padding: 0 $vertical-rhythm/2;
+}
+
+.new-agency .task-data {
+    margin-bottom: 0;
 }
 
 .new-agency.form {
     margin-top: 0;
+    margin-bottom: $vertical-rhythm/2;
     padding: 0;
     border-radius: 0;
+    background: $color-white;
     header, footer {
         padding: $task-padding;
-        margin-bottom: 0;
-    }
-    main {
         margin-bottom: 0;
     }
     header {
@@ -166,6 +170,37 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
         font-size: $font-size-2;
         color: $color-white;
         background: $color-grey-6;
+    }
+    footer {
+        text-align: right;
+    }
+    input {
+        display: block;
+        width: 100%;
+    }
+    textarea {
+        margin-bottom: 0;
+        height: 5em;
+        resize: none;
+    }
+    main {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        margin-bottom: 0;
+    }
+    fieldset {
+        @include flex(1 0 50%);
+        margin-bottom: $vertical-rhythm/2;
+        padding: 0 $vertical-rhythm/2;
+    }
+    fieldset.id_name {
+        @include flex(1 0 100%);
+        margin-left: 0;
+        margin-right: 0;
+    }
+    .help-text {
+        color: $color-grey-3;
+        line-height: $font-line-height;
     }
 }
 
@@ -189,27 +224,6 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
     border-color: $color-green;
     header {
         background: $color-green;
-    }
-    input {
-        display: block;
-        width: 100%;
-    }
-    textarea {
-        height: 5em;
-        resize: none;
-    }
-    main {
-        @include display(flex);
-        @include flex-wrap(wrap);
-    }
-    fieldset {
-        @include flex(1 0 50%);
-        padding: 0 $vertical-rhythm/2;
-    }
-    fieldset.id_name {
-        @include flex(1 0 100%);
-        margin-left: 0;
-        margin-right: 0;
     }
     .help-text {
         color: $color-green-dark;
