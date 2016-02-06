@@ -19,6 +19,15 @@ class AgencyForm(forms.ModelForm):
         # pylint: disable=too-few-public-methods
         model = Agency
         fields = ['name', 'aliases', 'address', 'email', 'url', 'phone', 'fax']
+        labels = {
+            'aliases': 'Alias',
+            'url': 'Website',
+            'address': 'Mailing Address'
+        }
+        help_texts = {
+            'aliases': ('An alternate name for the agency, '
+                        'e.g. "CIA" is an alias for "Central Intelligence Agency".')
+        }
 
 
 class CSVImportForm(forms.Form):
