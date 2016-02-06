@@ -72,6 +72,8 @@ class StatisticsSerializer(serializers.ModelSerializer):
                     'total_unresolved_payment_tasks',
                     'total_crowdfundpayment_tasks',
                     'total_unresolved_crowdfundpayment_tasks',
+                    'daily_robot_tasks',
+                    'admin_notes',
                     )
             for field in staff_only:
                 self.fields.pop(field)
@@ -128,5 +130,8 @@ class StatisticsSerializer(serializers.ModelSerializer):
                 'total_unresolved_payment_tasks',
                 'total_crowdfundpayment_tasks',
                 'total_unresolved_crowdfundpayment_tasks',
+                'daily_robot_tasks',
+                'public_notes',
+                'admin_notes',
                 )
 
