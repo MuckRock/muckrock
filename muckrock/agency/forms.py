@@ -25,7 +25,8 @@ class AgencyForm(forms.ModelForm):
             'address': 'Mailing Address'
         }
         help_texts = {
-            'aliases': 'An alternate name for the agency, e.g. "CIA" is an alias for "Central Intelligence Agency".'
+            'aliases': ('An alternate name for the agency, '
+                        'e.g. "CIA" is an alias for "Central Intelligence Agency".')
         }
 
 

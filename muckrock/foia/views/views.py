@@ -458,7 +458,7 @@ class Detail(DetailView):
             else:
                 messages.success(request, 'The data was invalid! Try again.')
         else:
-            message.error(request, 'You cannot do that, stop it.')
+            messages.error(request, 'You cannot do that, stop it.')
         return redirect(foia)
 
     def _generate_key(self, request, foia):
