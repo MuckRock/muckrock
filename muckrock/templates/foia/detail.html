@@ -128,8 +128,11 @@
             {% if user_can_edit %}
             <li class="tab" data-target="#sharing">Sharing</li>
             {% endif %}
-            {% if user.is_staff %}
-            <li class="tab" data-target="#tasks">Tasks</li>
+            {% if user_can_edit and task_count or user.is_staff %}
+            <li class="tab" data-target="#tasks">
+                <span class="counter">{{task_count}}</span>
+                Task{{task_count|pluralize}}
+            </li>
             {% endif %}
         </ul>
 
@@ -259,8 +262,8 @@ Sincerely,
             {% endwith %}
         </section>
 
-        <!-- NOTES -->
         {% if user_can_edit %}
+        <!-- NOTES -->
         <section class="tab-section notes" id="notes">
             {% with foia.notes.all as notes %}
             {% if notes %}
@@ -364,12 +367,14 @@ Sincerely,
         </section>
         {% endif %}
 
-        {% if user.is_staff %}
+        {% if task_count and user_can_edit or user.is_staff %}
         <!-- TASKS -->
         <section class="tab-section tasks" id="tasks">
+            {% if user.is_staff %}
             <header class="tasks-control">
-                <p>{% if open_tasks|length > 0 %}Showing {{ open_tasks|length }} unresolved task{{ open_tasks|length|pluralize }}. {% endif %}<a href="{% url 'request-task-list' pk=foia.pk %}" class="task-link">See all tasks for this request.</a></p>
+                <p><a href="{% url 'request-task-list' pk=foia.pk %}" class="task-link">See all tasks for this request.</a></p>
             </header>
+            {% endif %}
             {% for task in open_tasks %}
                 {% include 'lib/task.html' with task=task %}
             {% empty %}
