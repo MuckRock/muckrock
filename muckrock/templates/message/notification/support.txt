@@ -7,3 +7,4 @@ Created {{task.date_created|date:"m/d/y"}}
 {% if task.flagged_object %}For {{task.flagged_object}} (https://www.muckrock.com{{task.flagged_object.get_absolute_url}}){% endif %}
 --------------
 {% endif %}
+{% endautoescape %}
