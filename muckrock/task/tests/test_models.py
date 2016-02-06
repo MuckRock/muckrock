@@ -377,8 +377,7 @@ class TestTaskManager(TestCase):
         The task manager should return all tasks that explictly
         or implicitly reference the provided FOIA.
         """
-        returned_tasks = task.models.Task.objects.filter_by_foia(self.foia)
-        logging.debug(returned_tasks)
-        logging.debug(self.tasks)
+        staff_user = factories.UserFactory(is_staff=True, profile__acct_type='admin')
+        returned_tasks = task.models.Task.objects.filter_by_foia(self.foia, staff_user)
         eq_(returned_tasks, self.tasks,
             'The manager should return all the tasks that incorporate this FOIA.')
