@@ -8,11 +8,13 @@ from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.core.exceptions import FieldError
 from django.db.models import Sum, FieldDoesNotExist
+from django.http import HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView, ListView
 
+import json
 import re
 import watson
 
@@ -223,6 +225,14 @@ class SearchView(TemplateView):
     def __init__(self, *args, **kwargs):
         super(SearchView, self).__init__(*args, **kwargs)
 
+    def get(self, request, *args, **kwargs):
+        """Responds to AJAX requests with a JSON response"""
+        if request.is_ajax():
+            context = self.get_context_data(**kwargs)
+            return self.render_to_json_response(context, **kwargs)
+        else:
+            return super(SearchView, self).get(request, *args, **kwargs)
+
     def get_query(self):
         """Returns the query"""
         return self.request.GET.get('q', '')
@@ -230,6 +240,26 @@ class SearchView(TemplateView):
     def get_search_results(self, query):
         """Gets the query and perfoms the search."""
         return watson.search(query)
+
+    def render_to_json_response(self, context, **kwargs):
+        """Serializes the search results into JSON"""
+        # serialize the context
+        json_context = json.dumps({
+            "query": context['query'],
+            "results": [
+                {
+                    "title": result.title,
+                    "description": result.description,
+                    "url": result.url,
+                    "meta": result.meta,
+                } for result in context['results']
+            ]
+        }).encode("utf-8")
+        # Generate the response.
+        response = HttpResponse(json_context, **kwargs)
+        response["Content-Type"] = "application/json; charset=utf-8"
+        response["Content-Length"] = len(json_context)
+        return response
 
     def get_paginate_by(self):
         """Gets per_page the right way"""
