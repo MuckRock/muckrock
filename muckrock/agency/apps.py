@@ -13,6 +13,6 @@ class AgencyConfig(AppConfig):
 
     def ready(self):
         """Registers agencies with the activity streams plugin"""
-        agency = self.get_model('Agency')
-        actstream.registry.register(agency)
-        watson.register(agency)
+        Agency = self.get_model('Agency')
+        actstream.registry.register(Agency)
+        watson.register(Agency.objects.get_approved())

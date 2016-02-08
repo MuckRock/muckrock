@@ -13,6 +13,6 @@ class NewsConfig(AppConfig):
 
     def ready(self):
         """Registers articles with plugins"""
-        article = self.get_model('Article')
-        actstream.registry.register(article)
-        watson.register(article)
+        Article = self.get_model('Article')
+        actstream.registry.register(Article)
+        watson.register(Article.objects.get_published())
