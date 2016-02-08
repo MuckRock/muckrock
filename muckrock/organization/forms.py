@@ -3,12 +3,12 @@ Forms for the organization application
 """
 
 from django import forms
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.template.defaultfilters import slugify
 
 from muckrock.organization.models import Organization
-from muckrock.settings import ORG_MIN_SEATS
 
 import autocomplete_light
 
@@ -39,8 +39,8 @@ class StaffCreateForm(CreateForm):
     def clean_max_users(self):
         """Ensures that max_users is not below the minimum value."""
         max_users = self.cleaned_data['max_users']
-        if max_users < ORG_MIN_SEATS:
-            err_msg = 'Organizations have a %d-seat minimum' % ORG_MIN_SEATS
+        if max_users < settings.ORG_MIN_SEATS:
+            err_msg = 'Organizations have a %d-seat minimum' % settings.ORG_MIN_SEATS
             raise forms.ValidationError(err_msg)
         return max_users
 
@@ -50,14 +50,14 @@ class UpdateForm(forms.ModelForm):
     class Meta:
         model = Organization
         fields = ['max_users']
-        widgets = {'max_users': forms.NumberInput(attrs={'min': ORG_MIN_SEATS})}
+        widgets = {'max_users': forms.NumberInput(attrs={'min': settings.ORG_MIN_SEATS})}
         labels = {'max_users': 'Member Seats'}
 
     def clean_max_users(self):
         """Ensures that max_users is not below the minimum value."""
         max_users = self.cleaned_data['max_users']
-        if max_users < ORG_MIN_SEATS:
-            err_msg = 'Organizations have a %d-seat minimum' % ORG_MIN_SEATS
+        if max_users < settings.ORG_MIN_SEATS:
+            err_msg = 'Organizations have a %d-seat minimum' % settings.ORG_MIN_SEATS
             raise forms.ValidationError(err_msg)
         if max_users < self.instance.members.count():
             err_msg = ('Organizations cannot have fewer seats than members. ' +

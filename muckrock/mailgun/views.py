@@ -2,6 +2,7 @@
 Views for mailgun
 """
 
+from django.conf import settings
 from django.core.mail import EmailMessage
 from django.http import HttpResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
@@ -22,7 +23,6 @@ from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, RawEmail
 from muckrock.foia.tasks import upload_document_cloud, classify_status
 from muckrock.mailgun.models import WhitelistDomain
-from muckrock.settings import MAILGUN_ACCESS_KEY
 from muckrock.task.models import (
         FailedFaxTask,
         OrphanTask,
@@ -275,7 +275,7 @@ def _verify(post):
     token = post.get('token')
     timestamp = post.get('timestamp')
     signature = post.get('signature')
-    return (signature == hmac.new(key=MAILGUN_ACCESS_KEY,
+    return (signature == hmac.new(key=settings.MAILGUN_ACCESS_KEY,
                                   msg='%s%s' % (timestamp, token),
                                   digestmod=hashlib.sha256).hexdigest()) \
            and int(timestamp) + 300 > time.time()

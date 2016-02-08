@@ -1,6 +1,7 @@
 """
 Views for the organization application
 """
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -21,7 +22,6 @@ from muckrock.organization.forms import CreateForm, \
                                         UpdateForm, \
                                         StaffUpdateForm, \
                                         AddMembersForm
-from muckrock.settings import STRIPE_PUB_KEY
 
 
 class OrganizationListView(ListView):
@@ -119,7 +119,7 @@ class OrganizationActivateView(UpdateView):
         context['base_requests'] = organization.monthly_requests
         context['base_price'] = organization.monthly_cost/100.00
         context['user_email'] = self.request.user.email
-        context['stripe_pk'] = STRIPE_PUB_KEY
+        context['stripe_pk'] = settings.STRIPE_PUB_KEY
         return context
 
     def form_valid(self, form):
