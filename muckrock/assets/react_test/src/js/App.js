@@ -1,3 +1,3 @@
-var SearchContainer = require('./SearchContainer'); 
+var SearchContainer = require('./SearchContainer');
 
-React.render(<SearchContainer />, document.getElementById('react-test'));  
+React.render(<SearchContainer />, document.getElementById('react-search'));

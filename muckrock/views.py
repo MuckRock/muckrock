@@ -221,7 +221,6 @@ class SearchView(TemplateView):
     template_name = 'search.html'
 
     def __init__(self, *args, **kwargs):
-        kwargs['searchqueryset'] = RelatedSearchQuerySet()
         super(SearchView, self).__init__(*args, **kwargs)
 
     def get_query(self):

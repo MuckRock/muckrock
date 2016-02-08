@@ -1,18 +1,18 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<div>
+    <form method="GET">
+        <input type="search" name="q" value="{{ query }}" />
+        <button type="submit">Search</button>
+    </form>
 
-<form method="GET">
-    <input type="search" name="q" value="{{ query }}" />
-    <button type="submit">Search</button>
-</form>
-
-<ul class="search results">
-{% for result in results %}
-    <li class="search result"><a href="{{ result.get_absolute_url }}">{{ result }}</a></li>
-{% empty %}
-    <li class="empty">No results</li>
-{% endfor %}
-</ul>
-
+    <ul class="search results">
+    {% for result in results %}
+        <li class="search result"><a href="{{ result.get_absolute_url }}">{{ result }}</a></li>
+    {% empty %}
+        <li class="empty">No results</li>
+    {% endfor %}
+    </ul>
+</div>
 {% endblock %}
