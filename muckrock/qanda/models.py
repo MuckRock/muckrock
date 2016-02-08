@@ -32,6 +32,13 @@ class Question(models.Model):
     def __unicode__(self):
         return self.title
 
+    def save(self, *args, **kwargs):
+        """Creates an action if question is newly asked"""
+        is_new = True if self.pk is None else False
+        super(Question, self).save(*args, **kwargs)
+        if is_new:
+            actstream.action.send(self.user, verb='asked', action_object=self)
+
     @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
@@ -50,14 +57,6 @@ class Question(models.Model):
             msg = render_to_string('text/qanda/follow.txt', {'question': self, 'link': link})
             send_data.append((subject, msg, 'info@muckrock.com', [user.email]))
         send_mass_mail(send_data, fail_silently=False)
-
-    def get_answer_users(self):
-        """Get a list of all the users who answered the question"""
-        users = []
-        for answer in self.answers.all():
-            if answer.user not in users:
-                users.append(answer.user)
-        return users
 
     class Meta:
         # pylint: disable=too-few-public-methods
@@ -80,11 +79,14 @@ class Answer(models.Model):
     def save(self, *args, **kwargs):
         """Update the questions answer date when you save the answer"""
         # pylint: disable=no-member
+        is_new = True if self.pk is None else False
         super(Answer, self).save(*args, **kwargs)
         question = self.question
         question.answer_date = self.date
         question.answer_authors.update([self.user])
         question.save()
+        if is_new:
+            actstream.action.send(self.user, verb='answered', action_object=question)
 
     class Meta:
         # pylint: disable=too-few-public-methods

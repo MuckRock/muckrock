@@ -93,12 +93,6 @@ This is the parent style for a collection of objects: a collection of blog posts
 {% endblock content %}
 
 {% block scripts %}
-    {% include 'autocomplete_light/static.html' %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.12.2/react.min.js"></script>
-    <script type="text/javascript"
-            src="{% static 'js/list.js' %}"></script>
-    <script type="text/javascript"
-            src="{% static 'react_test/dist/build.js' %}"></script>
-    {% block list-scripts %}
-    {% endblock list-scripts %}
+{% block list-scripts %}
+{% endblock list-scripts %}
 {% endblock scripts %}

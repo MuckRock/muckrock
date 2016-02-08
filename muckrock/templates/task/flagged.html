@@ -1,10 +1,6 @@
 {% extends 'task/default.html' %}
 
-{% block task-class %}
-    flagged
-{% endblock %}
-
-{% block task-data %}
+{% block task-content %}
 <dl class="task-data">
     {% if task.text %}
     <dt>Message</dt>
@@ -12,7 +8,7 @@
     {% endif %}
     {% if task.user %}
     <dt>User</dt>
-    <dd><a href="{% url 'admin:auth_user_change' task.user.pk %}">{{task.user}}</a></dd>
+    <dd><a href="{% url 'admin:auth_user_change' task.user.pk %}">{{task.user.get_full_name}}</a></dd>
     {% endif %}
     {% if task.foia %}
     <dt>Request</dt>
@@ -25,4 +21,19 @@
     <dd><a href="{% url 'admin:jurisdiction_jurisdiction_change' task.jurisdiction.pk %}">{{task.jurisidiction}}</a></dd>
     {% endif %}
 </dl>
+<form method="POST" action="{{ endpoint }}" class="collapsable flag-reply">
+    <header>
+        <p>&crarr; Reply to {{task.user.first_name}} &lt;<a href="mailto:{{task.user.email}}">{{task.user.email}}</a>&gt;</p>
+    </header>
+    {% csrf_token %}
+    <input type="hidden" name="task" value="{{task.pk}}">
+    {{ flag_form.text }}
+    <footer class="submission-control">
+        <button type="submit" name="reply" value="true" class="primary">Reply</button>
+        <div class="checkbox-field">
+            <input type="checkbox" name="resolve" id="resolve-with-reply" checked>
+            <label for="resolve-with-reply">Resolve after sending</label>
+        </div>
+    </footer>
+</form>
 {% endblock %}

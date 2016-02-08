@@ -1,19 +1,13 @@
 {% extends 'task/default.html' %}
 
-
-
-{% block task-class %}
-    snail-mail
-{% endblock %}
-
-{% block task-data %}
+{% block task-content %}
 <dl class="task-data">
 {% with task.communication.foia as foia %}
     <dt>Category</dt>
     <dd>{{task.get_category_display}}</dd>
 {% if foia %}
     <dt>Is Acknowledged</dt>
-    <dd>{{foia.has_ack}}</dd>
+    <dd>{{foia.has_ack|yesno:"True,False"}}</dd>
     <dt>Submitter</dt>
     <dd><a href="{% url 'admin:auth_user_change' foia.user.pk %}">{{foia.user}}</a></dd>
     <dt>Request</dt>
@@ -53,6 +47,16 @@
 {% endif %}
 {% endwith %}
 </dl>
+<div class="collapsed collapsable full-letter">
+    {# full letter here, hidden #}
+    <header>Full letter</header>
+    <textarea id="full-letter-{{task.pk}}">
+    {{task.communication.foia.agency.address}}
+
+    {% now "F j, Y" %}
+    {% with task.communication.foia as request %}{% include "text/foia/comms.txt" %}{% endwith %}
+    </textarea>
+</div>
 {% endblock %}
 
 {% block task-actions %}
@@ -65,19 +69,4 @@
     <input type="checkbox" name="update_date" id="update-date-{{task.pk}}" checked>
     <label for="update-date-{{task.pk}}">Save the communication with today's date.</label>
     <button class="primary" type="submit" name="resolve" value="true">Save & Resolve</button>
-{% endblock %}
-
-{% block task-extra-context %}
-<div class="task-extra-context snail-mail-full-letter">
-{# full letter here, hidden #}
-    <button class="reveal-extra-context" data-state="0">More Info</button>
-    <div class="extra-context hidden">
-        <textarea id="full-letter-{{task.pk}}">
-{{task.communication.foia.agency.address}}
-
-{% now "F j, Y" %}
-{% with task.communication.foia as request %}{% include "text/foia/comms.txt" %}{% endwith %}
-        </textarea>
-    </div>
-</div>
 {% endblock %}

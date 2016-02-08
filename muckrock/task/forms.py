@@ -25,6 +25,13 @@ class TaskFilterForm(MRFilterForm):
     )
 
 
+class FlaggedTaskForm(forms.Form):
+    """Simple form for acting on a FlaggedTask"""
+    text = forms.CharField(widget=forms.Textarea(attrs={
+        'placeholder': 'Write your reply here'
+    }))
+
+
 class ResponseTaskForm(forms.Form):
     """Simple form for acting on a ResponseTask"""
     move = forms.CharField(required=False)
@@ -33,7 +40,7 @@ class ResponseTaskForm(forms.Form):
     date_estimate = forms.DateField(
         label='Estimated completion date',
         required=False,
-        widget=forms.DateInput(format='%m/%d/%Y'),
+        widget=forms.DateInput(format='%m/%d/%Y', attrs={'placeholder': 'mm/dd/yyyy'}),
         input_formats=[
             '%Y-%m-%d',      # '2006-10-25'
             '%m/%d/%Y',      # '10/25/2006'
@@ -48,6 +55,7 @@ class ResponseTaskForm(forms.Form):
             '%d %B, %Y']     # '25 October, 2006'
     )
     status = forms.ChoiceField(choices=foia.models.STATUS)
+    set_foia = forms.BooleanField(label='Set request status', initial=True, required=False)
 
     def clean_move(self):
         """Splits a comma separated string into an array"""

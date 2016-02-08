@@ -4,6 +4,7 @@ Views for the Jurisdiction application
 
 from django.contrib import messages
 from django.core.urlresolvers import reverse
+from django.db.models import Count, Sum
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 
@@ -18,27 +19,49 @@ from muckrock.views import MRFilterableListView
 
 def collect_stats(obj, context):
     """Helper for collecting stats"""
-    for status in ['rejected', 'ack', 'processed', 'fix', 'no_docs', 'done', 'appealing']:
-        context['num_%s' % status] = obj.foiarequest_set.filter(status=status).count()
+    statuses = ('rejected', 'ack', 'processed', 'fix', 'no_docs', 'done', 'appealing')
+    status_counts = (obj.foiarequest_set
+        .filter(status__in=statuses)
+        .order_by('status')
+        .values_list('status')
+        .annotate(Count('status')))
+    context.update({'num_%s' % s: c for s, c in status_counts})
     context['num_overdue'] = obj.foiarequest_set.get_overdue().count()
     context['num_submitted'] = obj.foiarequest_set.get_submitted().count()
-    context['submitted_reqs'] = obj.foiarequest_set.get_public().order_by('-date_submitted')[:5]
-    context['overdue_reqs'] = obj.foiarequest_set.get_public() \
-                                 .get_overdue().order_by('date_due')[:5]
 
 
 def detail(request, fed_slug, state_slug, local_slug):
     """Details for a jurisdiction"""
 
-    jurisdiction = get_object_or_404(Jurisdiction, slug=fed_slug)
-    if state_slug:
-        jurisdiction = get_object_or_404(Jurisdiction, slug=state_slug, parent=jurisdiction)
     if local_slug:
-        jurisdiction = get_object_or_404(Jurisdiction, slug=local_slug, parent=jurisdiction)
+        jurisdiction = get_object_or_404(
+                Jurisdiction.objects.select_related(
+                    'parent',
+                    'parent__parent',
+                    ),
+                slug=local_slug,
+                parent__slug=state_slug,
+                parent__parent__slug=fed_slug)
+    elif state_slug:
+        jurisdiction = get_object_or_404(
+                Jurisdiction.objects.select_related('parent'),
+                slug=state_slug,
+                parent__slug=fed_slug)
+    else:
+        jurisdiction = get_object_or_404(Jurisdiction,
+                slug=fed_slug)
 
-    foia_requests = FOIARequest.objects.get_viewable(request.user)\
-                                       .filter(jurisdiction=jurisdiction)\
-                                       .order_by('-date_submitted')[:5]
+    foia_requests = (FOIARequest.objects.get_viewable(request.user)
+                                       .filter(jurisdiction=jurisdiction)
+                                       .order_by('-date_submitted')
+                                       .select_related_view()[:5])
+
+    agencies = (jurisdiction.agencies.get_approved()
+            .only('pk', 'slug', 'name', 'jurisdiction')
+            .annotate(foia_count=Count('foiarequest'))
+            .annotate(pages=Sum('foiarequest__files__pages'))
+            .order_by('-foia_count')
+            [:15])
 
     if request.method == 'POST':
         form = FlagForm(request.POST)
@@ -57,6 +80,7 @@ def detail(request, fed_slug, state_slug, local_slug):
 
     context = {
         'jurisdiction': jurisdiction,
+        'agencies': agencies,
         'foia_requests': foia_requests,
         'form': form,
         'sidebar_admin_url': reverse('admin:jurisdiction_jurisdiction_change',
@@ -78,7 +102,9 @@ class List(MRFilterableListView):
     def get_queryset(self):
         """Hides hidden jurisdictions from list"""
         objects = super(List, self).get_queryset()
-        objects = objects.exclude(hidden=True)
+        objects = (objects
+                .exclude(hidden=True)
+                .select_related('parent', 'parent__parent'))
         return objects
 
     def get_filters(self):

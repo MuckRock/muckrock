@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
+from django.db.models import Prefetch
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
@@ -18,23 +19,30 @@ from datetime import datetime
 import json
 import logging
 
+from muckrock.agency.forms import AgencyForm
 from muckrock.foia.codes import CODES
-from muckrock.foia.forms import \
-    RequestFilterForm, \
-    FOIAEmbargoForm, \
-    FOIANoteForm, \
-    FOIAEstimatedCompletionDateForm, \
-    FOIAAccessForm
-from muckrock.foia.models import \
-    FOIARequest, \
-    FOIAMultiRequest, \
-    STATUS, END_STATUS
+from muckrock.foia.forms import (
+    RequestFilterForm,
+    FOIAEmbargoForm,
+    FOIANoteForm,
+    FOIAEstimatedCompletionDateForm,
+    FOIAAccessForm,
+    )
+from muckrock.foia.models import (
+    FOIARequest,
+    FOIAMultiRequest,
+    RawEmail,
+    STATUS,
+    END_STATUS,
+    )
 from muckrock.foia.views.composers import get_foia
-from muckrock.foia.views.comms import move_comm,\
-                                      delete_comm,\
-                                      save_foia_comm,\
-                                      resend_comm,\
-                                      change_comm_status
+from muckrock.foia.views.comms import (
+        move_comm,
+        delete_comm,
+        save_foia_comm,
+        resend_comm,
+        change_comm_status,
+        )
 from muckrock.qanda.models import Question
 from muckrock.settings import STRIPE_PUB_KEY
 from muckrock.tags.models import Tag
@@ -72,8 +80,8 @@ class RequestList(MRFilterableListView):
         objects = super(RequestList, self).get_queryset()
         objects = objects.select_related('jurisdiction')
         objects = objects.only(
-                'title', 'slug', 'status', 'date_submitted',
-                'date_due', 'date_updated', 'jurisdiction__slug')
+                'title', 'slug', 'status', 'date_submitted', 'date_due',
+                'date_updated', 'date_processing', 'jurisdiction__slug')
         return objects.get_viewable(self.request.user)
 
 
@@ -108,8 +116,11 @@ class MyRequestList(RequestList):
 
     def get_queryset(self):
         """Gets multirequests as well, limits to just those by the current user"""
-        single_req = (FOIARequest.objects.filter(user=self.request.user)
-                                         .select_related('jurisdiction'))
+        single_req = (FOIARequest.objects
+                .filter(user=self.request.user)
+                .select_related('jurisdiction')
+                .prefetch_related('communications')
+                )
         multi_req = FOIAMultiRequest.objects.filter(user=self.request.user)
         single_req = self.sort_list(self.filter_list(single_req))
         return list(single_req) + list(multi_req)
@@ -156,6 +167,12 @@ class ProcessingRequestList(RequestList):
                 filters.pop(filters.index(filter_dict))
         return filters
 
+    def get_queryset(self):
+        """Apply select and prefetch related"""
+        objects = super(ProcessingRequestList, self).get_queryset()
+        return (objects
+                .prefetch_related('communications'))
+
 
 # pylint: disable=no-self-use
 class Detail(DetailView):
@@ -164,6 +181,10 @@ class Detail(DetailView):
 
     model = FOIARequest
     context_object_name = 'foia'
+
+    def __init__(self, *args, **kwargs):
+        self._obj = None
+        super(Detail, self).__init__(*args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
         """If request is a draft, then redirect to drafting interface"""
@@ -184,11 +205,30 @@ class Detail(DetailView):
     def get_object(self, queryset=None):
         """Get the FOIA Request"""
         # pylint: disable=unused-argument
+        # this is called twice in dispatch, so cache to not actually run twice
+        if self._obj:
+            return self._obj
+
         foia = get_foia(
             self.kwargs['jurisdiction'],
             self.kwargs['jidx'],
             self.kwargs['slug'],
-            self.kwargs['idx']
+            self.kwargs['idx'],
+            select_related=(
+                'agency',
+                'agency__jurisdiction',
+                'crowdfund',
+                'jurisdiction',
+                'jurisdiction__parent',
+                'jurisdiction__parent__parent',
+                'user',
+                'user__profile',
+                ),
+            prefetch_related=(
+                'communications',
+                'communications__files',
+                Prefetch('communications__rawemail', RawEmail.objects.defer('raw_email')),
+                ),
         )
         user = self.request.user
         valid_access_key = self.request.GET.get('key') == foia.access_key
@@ -198,6 +238,7 @@ class Detail(DetailView):
             if foia.updated:
                 foia.updated = False
                 foia.save()
+        self._obj = foia
         return foia
 
     def get_context_data(self, **kwargs):
@@ -226,15 +267,21 @@ class Detail(DetailView):
         context['access_form'] = FOIAAccessForm()
         context['embargo_needs_date'] = foia.status in END_STATUS
         context['user_actions'] = foia.user_actions(user)
-        context['noncontextual_request_actions'] = foia.noncontextual_request_actions(user)
-        context['contextual_request_actions'] = foia.contextual_request_actions(user)
+        context['noncontextual_request_actions'] = \
+                foia.noncontextual_request_actions(user_can_edit)
+        context['contextual_request_actions'] = \
+                foia.contextual_request_actions(user, user_can_edit)
         context['status_choices'] = STATUS if include_draft else STATUS_NODRAFT
         context['show_estimated_date'] = foia.status not in ['submitted', 'ack', 'done', 'rejected']
         context['change_estimated_date'] = FOIAEstimatedCompletionDateForm(instance=foia)
-        context['task_count'] = len(Task.objects.filter_by_foia(foia))
-        context['open_tasks'] = Task.objects.get_unresolved().filter_by_foia(foia)
+
+        all_tasks = Task.objects.filter_by_foia(foia, user)
+        open_tasks = [task for task in all_tasks if not task.resolved]
+        context['task_count'] = len(open_tasks)
+        context['open_tasks'] = open_tasks
         context['stripe_pk'] = STRIPE_PUB_KEY
         context['sidebar_admin_url'] = reverse('admin:foia_foiarequest_change', args=(foia.pk,))
+        context['is_thankable'] = foia.is_thankable()
         if foia.sidebar_html:
             messages.info(self.request, foia.sidebar_html)
         return context
@@ -261,6 +308,7 @@ class Detail(DetailView):
             'revoke_access': self._revoke_access,
             'demote': self._demote_editor,
             'promote': self._promote_viewer,
+            'update_new_agency': self._update_new_agency,
         }
         try:
             return actions[request.POST['action']](request, foia)
@@ -288,12 +336,6 @@ class Detail(DetailView):
                 user=request.user,
                 old_status=old_status,
                 foia=foia,
-            )
-            # generate status change activity
-            actstream.action.send(
-                request.user,
-                verb='changed the status of',
-                action_object=foia
             )
         return redirect(foia)
 
@@ -326,13 +368,6 @@ class Detail(DetailView):
             foia_note.save()
             logging.info('%s added %s to %s', foia_note.author, foia_note, foia_note.foia)
             messages.success(request, 'Your note is attached to the request.')
-            # generate note added action
-            actstream.action.send(
-                request.user,
-                verb='added',
-                action_object=foia_note,
-                target=foia
-            )
         return redirect(foia)
 
     def _flag(self, request, foia):
@@ -344,12 +379,7 @@ class Detail(DetailView):
                 text=text,
                 foia=foia)
             messages.success(request, 'Problem succesfully reported')
-            # generate flagged action
-            actstream.action.send(
-                request.user,
-                verb='flagged',
-                action_object=foia
-            )
+            actstream.action.send(request.user, verb='flagged', action_object=foia)
         return redirect(foia)
 
     def _follow_up(self, request, foia):
@@ -357,59 +387,53 @@ class Detail(DetailView):
         can_follow_up = foia.editable_by(request.user) or request.user.is_staff
         test = can_follow_up and foia.status != 'started'
         success_msg = 'Your follow up has been sent.'
-        agency = foia.agency
-        verb = 'followed up'
-        return self._new_comm(request, foia, test, success_msg, agency, verb)
+        comm_sent = self._new_comm(request, foia, test, success_msg)
+        if comm_sent:
+            actstream.action.send(
+                request.user,
+                verb='followed up on',
+                action_object=foia,
+                target=foia.agency
+            )
+        return redirect(foia)
 
     def _thank(self, request, foia):
         """Handle submitting a thank you follow up"""
         test = foia.editable_by(request.user) and foia.is_thankable()
         success_msg = 'Your thank you has been sent.'
-        agency = foia.agency
-        verb = 'thanked'
-        return self._new_comm(
-                request, foia, test, success_msg, agency, verb, thanks=True)
+        comm_sent = self._new_comm(request, foia, test, success_msg, thanks=True)
+        if comm_sent:
+            actstream.action.send(
+                request.user,
+                verb='thanked',
+                action_object=foia.agency
+            )
+        return redirect(foia)
 
     def _appeal(self, request, foia):
         """Handle submitting an appeal"""
         test = foia.editable_by(request.user) and foia.is_appealable()
         success_msg = 'Appeal successfully sent.'
-        agency = foia.agency.appeal_agency if foia.agency.appeal_agency else foia.agency
-        verb = 'appealed'
-        return self._new_comm(
-                request, foia, test, success_msg, agency, verb, appeal=True)
+        comm_sent = self._new_comm(request, foia, test, success_msg, appeal=True)
+        if comm_sent:
+            actstream.action.send(
+                request.user,
+                verb='appealed',
+                action_object=foia,
+                target=foia.agency
+            )
+        return redirect(foia)
 
-    def _new_comm(
-            self,
-            request,
-            foia,
-            test,
-            success_msg,
-            agency,
-            verb,
-            appeal=False,
-            thanks=False,
-            ):
+    def _new_comm(self, request, foia, test, success_msg, appeal=False, thanks=False):
         """Helper function for sending a new comm"""
         # pylint: disable=too-many-arguments
         text = request.POST.get('text')
+        comm_sent = False
         if text and test:
-            save_foia_comm(
-                    foia,
-                    foia.user.get_full_name(),
-                    text,
-                    appeal=appeal,
-                    thanks=thanks,
-                    )
+            save_foia_comm(foia, foia.user.get_full_name(), text, appeal=appeal, thanks=thanks)
             messages.success(request, success_msg)
-            # generate appeal action
-            actstream.action.send(
-                request.user,
-                verb=verb,
-                action_object=foia,
-                target=agency
-            )
-        return redirect(foia)
+            comm_sent = True
+        return comm_sent
 
     def _update_estimate(self, request, foia):
         """Change the estimated completion date"""
@@ -420,6 +444,19 @@ class Detail(DetailView):
                 messages.success(request, 'Successfully changed the estimated completion date.')
             else:
                 messages.error(request, 'Invalid date provided.')
+        else:
+            messages.error(request, 'You cannot do that, stop it.')
+        return redirect(foia)
+
+    def _update_new_agency(self, request, foia):
+        """Update the new agency"""
+        form = AgencyForm(request.POST, instance=foia.agency)
+        if foia.editable_by(request.user):
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Agency info saved. Thanks for your help!')
+            else:
+                messages.success(request, 'The data was invalid! Try again.')
         else:
             messages.error(request, 'You cannot do that, stop it.')
         return redirect(foia)
@@ -449,23 +486,9 @@ class Detail(DetailView):
         if access == 'edit' and users:
             for user in users:
                 foia.add_editor(user)
-                # generate action
-                actstream.action.send(
-                    request.user,
-                    verb='added editor',
-                    action_object=user,
-                    target=foia
-                )
         if access == 'view' and users:
             for user in users:
                 foia.add_viewer(user)
-                # generate action
-                actstream.action.send(
-                    request.user,
-                    verb='added viewer',
-                    action_object=user,
-                    target=foia
-                )
         if len(users) > 1:
             success_msg = '%d people can now %s this request.' % (len(users), access)
         else:
@@ -482,13 +505,6 @@ class Detail(DetailView):
                 foia.remove_editor(user)
             elif foia.has_viewer(user):
                 foia.remove_viewer(user)
-            # generate action
-            actstream.action.send(
-                request.user,
-                verb='removed',
-                action_object=user,
-                target=foia
-            )
             messages.success(request, '%s no longer has access to this request.' % user.first_name)
         return redirect(foia)
 

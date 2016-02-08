@@ -1,0 +1,11 @@
+{% if stream|length > 0 %}
+<h3 class="{{stream_name}}">{{stream_name}}</h3>
+<ul>
+    {% for action in stream %}
+    <li>
+        <a href="{{action.action_object.get_absolute_url}}">{{ action.action_object }}</a>
+        <span class="verb"> {{ action.verb }}</span>
+    </li>
+    {% endfor %}
+</ul>
+{% endif %}

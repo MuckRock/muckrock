@@ -1,12 +1,13 @@
 {% extends 'base_profile.html' %}
 {% load markdown_deux_tags %}
 {% load thumbnail %}
+{% load humanize %}
 {% block title %}MuckRock &bull; {{ jurisdiction.name }}{% endblock title %}
-{% block type %}jurisdiction{% endblock type %}
+{% block type %}{% if jurisdiction.name == 'Georgia' %}georgia {% endif %}jurisdiction{% endblock type %}
 
 {% block metadata %}
 <aside class="metadata">
-    <dfn>Jurisdiction</dfn>
+    <dfn>{{ jurisdiction.get_level_display }} Jurisdiction</dfn>
     {% if jurisdiction.image %}
     <figure class="jurisdiction image">
         <img src="{% thumbnail jurisdiction.image 600x600 %}" class="header-image">
@@ -16,7 +17,7 @@
     </figure>
     {% endif %}
     <h1>{{jurisdiction.name}}</h1>
-    {% if jurisdiction.parent %}
+    {% if jurisdiction.parent and jurisdiction.level != 'f' %}
     <h2><a href="{{ jurisdiction.parent.get_absolute_url }}">{{ jurisdiction.parent }}</a></h2>
     {% endif %}
 
@@ -33,7 +34,9 @@
             {% endif %}
         {% endwith %}
         <dt>Average Response Time</dt>
-        <dd>{{ jurisdiction.average_response_time }} day{{ jurisdiction.average_response_time | pluralize }}</dd>
+        {% with jurisdiction.average_response_time as average_response_time %}
+        <dd>{{ average_response_time }} day{{ average_response_time|pluralize }}</dd>
+        {% endwith %}
     </dl>
 </aside>
 {% endblock metadata %}
@@ -51,19 +54,19 @@
     <h3>Recent Requests <small><a href="{% url 'foia-list' %}?jurisdiction={{ jurisdiction.pk }}">See All</a></small></h3>
     {% include 'lib/foia_table.html' with requests=foia_requests %}
 
-    {% if jurisdiction.agencies.count %}
-    <h3>Documented Agencies</h3>
+    {% if agencies %}
+    <h3>Documented Agencies <small><a href="{% url 'agency-list' %}?jurisdiction={{ jurisdiction.pk }}">See All</a></small></h3>
     <table>
         <tr>
             <th width="50%">Agency</th>
             <th width="20%">Requests</th>
             <th width="30%">Pages Released</th>
         </tr>
-        {% for agency in jurisdiction.agencies.get_approved %}
+        {% for agency in agencies %}
         <tr>
             <td><a href="{% url 'agency-detail' jurisdiction=jurisdiction.slug jidx=jurisdiction.pk slug=agency.slug idx=agency.pk %}">{{ agency.name }}</a></td>
-            <td>{{ agency.foiarequest_set.count }}</td>
-            <td>{{ agency.total_pages }}</td>
+            <td>{{ agency.foia_count|intcomma }}</td>
+            <td>{% if agency.pages %}{{ agency.pages|intcomma }}{% else %}0{%endif %}</td>
         </tr>
         {% endfor %}
     </table>

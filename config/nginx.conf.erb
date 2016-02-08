@@ -18,7 +18,9 @@ http {
 
 	real_ip_header X-Forwarded-For;
 	set_real_ip_from 10.0.0.0/8;
-	deny 76.8.215.42;
+	<% ENV.fetch('DENY_IPS', '').split(',').each do |ip| %>
+		deny <%= ip %>;
+	<% end %>
 
 	limit_req_zone $binary_remote_addr zone=one:10m rate=1r/s;
 

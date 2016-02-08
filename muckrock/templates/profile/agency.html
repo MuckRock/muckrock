@@ -1,5 +1,4 @@
 {% extends 'base_profile.html' %}
-{% load activity_tags %}
 {% load markdown_deux_tags %}
 {% load thumbnail %}
 {% block title %}MuckRock &bull; {{ agency.name }}{% endblock title %}
@@ -28,13 +27,15 @@
         {% endwith %}
 
         <dt>Commonly Cited Exemptions</dt>
-        {% if agency.exemptions %}
-            {% for exmp in agency.exemptions %}
-        <dd>{{exmp.name|capfirst}} <small>{{exmp.count}} time{{exmp.count|pluralize}}</small></dd>
+        {% with agency.exemptions as exemptions %}
+        {% if exemptions %}
+            {% for exmp in exemptions %}
+        <dd>{{exmp.tags__name|capfirst}} <small>{{exmp.count}} time{{exmp.count|pluralize}}</small></dd>
             {% endfor %}
         {% else %}
         <dd>None</dd>
         {% endif %}
+        {% endwith %}
 
         <dt>Mailing Address</dt>
         {% if agency.address %}

@@ -36,6 +36,8 @@ if not DEBUG and os.environ.get('ENV') != 'staging':
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
 
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+
 DOGSLOW = True
 DOGSLOW_LOG_TO_FILE = False
 DOGSLOW_TIMER = 25
@@ -98,17 +100,24 @@ COMPRESS_PRECOMPILERS = (
     ('text/x-scss', 'sass --sourcemap=none {infile} {outfile}'),
 )
 
+
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
 if not DEBUG:
     DEFAULT_BUCKET_NAME = 'muckrock'
     BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', DEFAULT_BUCKET_NAME)
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    DEFAULT_FILE_STORAGE = 'image_diet.storage.DietStorage'
+    DIET_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    DIET_CONFIG = os.path.join(SITE_ROOT, '../config/image_diet.yaml')
     THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
     STATICFILES_STORAGE = 'muckrock.storage.CachedS3BotoStorage'
     COMPRESS_STORAGE = STATICFILES_STORAGE
-    STATIC_URL = 'https://' + BUCKET_NAME + '.s3.amazonaws.com/'
+    AWS_S3_CUSTOM_DOMAIN = os.environ.get('CLOUDFRONT_DOMAIN')
+    if AWS_S3_CUSTOM_DOMAIN:
+        STATIC_URL = 'https://' + AWS_S3_CUSTOM_DOMAIN + '/'
+    else:
+        STATIC_URL = 'https://' + BUCKET_NAME + '.s3.amazonaws.com/'
     COMPRESS_URL = STATIC_URL
     MEDIA_URL = STATIC_URL + 'media/'
 elif AWS_DEBUG:
@@ -133,6 +142,10 @@ STATICFILES_FINDERS = (
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_SECURE_URLS = True
 AWS_S3_FILE_OVERWRITE = False
+AWS_HEADERS = {
+ 'Expires': 'Thu, 31 Dec 2099 20:00:00 GMT',
+ 'Cache-Control': 'max-age=94608000',
+}
 
 if not DEBUG:
     # List of callables that know how to import templates from various sources.
@@ -165,13 +178,13 @@ MIDDLEWARE_CLASSES = (
     'lot.middleware.LOTMiddleware',
     'muckrock.middleware.RemoveTokenMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'reversion.middleware.RevisionMiddleware',
 )
-MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
 if DEBUG:
     MIDDLEWARE_CLASSES += ('muckrock.settings.ExceptionLoggingMiddleware',)
-    MIDDLEWARE_CLASSES += ('muckrock.middleware.ProfileMiddleware',)
+    MIDDLEWARE_CLASSES += ('yet_another_django_profiler.middleware.ProfilerMiddleware',)
 
 class ExceptionLoggingMiddleware(object):
     """Log exceptions to command line
@@ -213,11 +226,10 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'compressor',
     'debug_toolbar',
-    'django_tablib',
+    'django_premailer',
     'djangosecure',
     'djcelery',
     'easy_thumbnails',
-    'filer',
     'gunicorn',
     'dbsettings',
     'localflavor',
@@ -233,8 +245,9 @@ INSTALLED_APPS = (
     'storages',
     'taggit',
     'watson',
-    'django_xmlrpc',
     'lot',
+    'package_monitor',
+    'image_diet',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
@@ -273,23 +286,13 @@ DEBUG_TOOLBAR_CONFIG = {
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
 urlparse.uses_netloc.append('redis')
-urlparse.uses_netloc.append('amqp')
-urlparse.uses_netloc.append('ironmq')
-
 
 if 'REDISTOGO_URL' in os.environ:
     BROKER_URL = os.environ['REDISTOGO_URL']
-elif 'IRON_MQ_PROJECT_ID' in os.environ:
-    BROKER_URL = 'ironmq://%s:%s@' % (os.environ.get('IRON_MQ_PROJECT_ID'),
-                                      os.environ.get('IRON_MQ_TOKEN'))
 else:
     BROKER_URL = 'redis://localhost:6379/0'
 
-
 import djcelery
-# pylint: disable=unused-import
-import iron_celery
-# pylint: enable=unused-import
 djcelery.setup_loader()
 
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
@@ -478,6 +481,8 @@ GA_USERNAME = os.environ.get('GA_USERNAME')
 GA_PASSWORD = os.environ.get('GA_PASSWORD')
 GA_ID = os.environ.get('GA_ID')
 
+SLACK_WEBHOOK_URL = os.environ.get('SLACK_WEBHOOK_URL', '')
+
 PUBLICATION_NAME = 'MuckRock'
 
 # Register database schemes in URLs.
@@ -496,6 +501,7 @@ DATABASES['default'] = {
     'PASSWORD': url.password,
     'HOST': url.hostname,
     'PORT': url.port,
+    'CONN_MAX_AGE': os.environ.get('CONN_MAX_AGE', 500),
 }
 
 # test runner seems to want this...
@@ -519,16 +525,53 @@ if 'PG_USER' in os.environ:
 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     }
 }
 
+if TEST:
+    CACHES['default']['BACKEND'] = 'django.core.cache.backends.dummy.DummyCache'
+
 if 'MEMCACHIER_SERVERS' in os.environ:
-    CACHES['default']['BACKEND'] = 'django.core.cache.backends.memcached.MemcachedCache'
-    server = os.environ.get('MEMCACHIER_SERVERS')
-    if not server.endswith(':11211'):
-        server += ':11211'
-    CACHES['default']['LOCATION'] = server
+    os.environ['MEMCACHE_SERVERS'] = os.environ.get('MEMCACHIER_SERVERS', '').replace(',', ';')
+    os.environ['MEMCACHE_USERNAME'] = os.environ.get('MEMCACHIER_USERNAME', '')
+    os.environ['MEMCACHE_PASSWORD'] = os.environ.get('MEMCACHIER_PASSWORD', '')
+
+    CACHES = {
+        'default': {
+            # Use pylibmc
+            'BACKEND': 'django_pylibmc.memcached.PyLibMCCache',
+
+            # Use binary memcache protocol (needed for authentication)
+            'BINARY': True,
+
+            # TIMEOUT is not the connection timeout! It's the default expiration
+            # timeout that should be applied to keys! Setting it to `None`
+            # disables expiration.
+            'TIMEOUT': None,
+
+            'OPTIONS': {
+                # Enable faster IO
+                'no_block': True,
+                'tcp_nodelay': True,
+
+                # Keep connection alive
+                'tcp_keepalive': True,
+
+                # Timeout for set/get requests
+                '_poll_timeout': 2000,
+
+                # Use consistent hashing for failover
+                'ketama': True,
+
+                # Configure failover timings
+                'connect_timeout': 2000,
+                'remove_failed': 4,
+                'retry_timeout': 2,
+                'dead_timeout': 10
+            }
+        }
+    }
 
 
 REST_FRAMEWORK = {
@@ -542,19 +585,6 @@ REST_FRAMEWORK = {
          'rest_framework.authentication.SessionAuthentication',),
     'DEFAULT_PERMISSION_CLASSES':
         ('rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',),
-}
-
-FILER_STORAGES = {
-    'public': {
-        'main': {
-            'UPLOAD_TO': 'filer.utils.generate_filename.by_date',
-        },
-    },
-    'private': {
-        'main': {
-            'UPLOAD_TO': 'filer.utils.generate_filename.by_date',
-        },
-    },
 }
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
@@ -576,6 +606,10 @@ LOT = {
   },
 }
 LOT_MIDDLEWARE_PARAM_NAME = 'uuid-login'
+
+ROBOTS_CACHE_TIMEOUT = 60 * 60 * 24
+
+PACKAGE_MONITOR_REQUIREMENTS_FILE = os.path.join(SITE_ROOT, '../requirements.txt')
 
 # Organization Settings
 

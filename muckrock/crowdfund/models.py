@@ -2,8 +2,9 @@
 Models for the crowdfund application
 """
 
-from django.contrib.auth.models import User, AnonymousUser
+from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import Q
 
 import actstream
 from datetime import date
@@ -39,7 +40,7 @@ class CrowdfundABC(models.Model):
     closed = models.BooleanField(default=False)
 
     def expired(self):
-        """Has this crowdfuning run out of time?"""
+        """Has this crowdfund run out of time?"""
         return date.today() >= self.date_due or self.closed
 
     def amount_remaining(self):
@@ -55,42 +56,39 @@ class CrowdfundABC(models.Model):
             total_amount += payment.amount
         self.payment_received = total_amount
         self.save()
-        if self.payment_received >= self.payment_required:
-            logging.info('Crowdfund %d reached its goal.', self.id)
-            actstream.action.send(self, verb='succeeded')
-            if self.payment_capped:
-                self.close_crowdfund()
+        if self.payment_received >= self.payment_required and self.payment_capped:
+            self.close_crowdfund(succeeded=True)
         return
 
-    def close_crowdfund(self):
+    def close_crowdfund(self, succeeded=False):
         """Close the crowdfund and create a new task for it once it reaches its goal."""
         self.closed = True
         self.save()
         task.models.GenericCrowdfundTask.objects.create(crowdfund=self)
-        actstream.action.send(self, verb='ended')
+        verb = 'ended'
+        if succeeded:
+            logging.info('Crowdfund %d reached its goal.', self.id)
+            verb = 'succeeded'
+        actstream.action.send(self, verb=verb)
         return
 
-    def contributors(self):
-        """Return a list of all the contributors to a crowdfund"""
-        contributors = []
-        payments = self.payments.all()
-        for payment in payments:
-            if payment.show and payment.user:
-                contributors.append(payment.user)
-            else:
-                contributors.append(AnonymousUser())
-        logging.debug(payments)
-        logging.debug(contributors)
-        return contributors
+    def contributors_count(self):
+        """Return a count of all the contributors to a crowdfund"""
+        return self.payments.count()
 
-    def anonymous_contributors(self):
-        """Return anonymous contributors only."""
-        return [x for x in self.contributors() if x.is_anonymous()]
+    def anonymous_contributors_count(self):
+        """Return a count of anonymous contributors"""
+        return self.payments.filter(Q(show=False) | Q(user=None)).count()
 
     def named_contributors(self):
         """Return unique named contributors only."""
         # returns the list of a set of a list to remove duplicates
-        return list(set([x for x in self.contributors() if not x.is_anonymous()]))
+        payment_name = self.get_crowdfund_payment_object().__name__.lower()
+        params = {
+                payment_name + '__crowdfund': self,
+                payment_name + '__show': True,
+                }
+        return User.objects.filter(**params).distinct()
 
     def get_crowdfund_payment_object(self):
         """Return the crowdfund payment object. Should be implemented by subclasses."""
@@ -118,7 +116,9 @@ class CrowdfundABC(models.Model):
             currency='usd',
             metadata={
                 'email': email,
-                'action': 'crowdfund-payment'
+                'action': 'crowdfund-payment',
+                'crowdfund_id': self.id,
+                'crowdfund_name': self.name
             }
         )
         payment_object = self.get_crowdfund_payment_object()
@@ -148,6 +148,7 @@ class CrowdfundPaymentABC(models.Model):
 
 class CrowdfundRequest(CrowdfundABC):
     """Keep track of crowdfunding for a request"""
+    type_ = 'foia'
     foia = models.OneToOneField(FOIARequest, related_name='crowdfund')
 
     def __unicode__(self):
@@ -176,6 +177,7 @@ class CrowdfundRequestPayment(CrowdfundPaymentABC):
 
 class CrowdfundProject(CrowdfundABC):
     """A crowdfunding campaign for a project."""
+    type_ = 'project'
     project = models.ForeignKey('project.Project', related_name='crowdfund')
 
     def __unicode__(self):

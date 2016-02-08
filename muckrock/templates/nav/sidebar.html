@@ -1,4 +1,5 @@
 <aside class="website-sidebar" id="website-sidebar">
+    {% if not user.is_authenticated %}
     <form method="post" action="{% url 'acct-login' %}?next={{ request.get_full_path }}" class="quick-log-in" id="quick-log-in-form">
         {% csrf_token %}
         <h1>Log In</h1>
@@ -8,6 +9,7 @@
             <button type="submit" class="primary">Log In</button>
         </div>
     </form>
+    {% endif %}
     <header class="account-links">
         {% if user.is_authenticated %}
         <a href="{% url 'acct-my-profile' %}" class="username">{{ user.get_full_name }}</a>
@@ -25,11 +27,13 @@
     </section>
     {% endif %}
 
+
     {% if user.is_staff %}
     <section>
         <a class="admin" href="{% if sidebar_admin_url %}{{ sidebar_admin_url }}{% else %}/admin/{% endif %}" >Admin</a>
     </section>
     {% endif %}
+
 
     {% if user.is_authenticated %}
         {% if organization %}
@@ -41,22 +45,22 @@
         <a class="my-requests" href="{% url 'foia-mylist' %}">Your Requests</a>
 
         {% if actionable_requests %}
-            {% if actionable_requests.payments %}
+            {% if actionable_requests.payment %}
             <a class="actionable payment" href="{% url 'foia-mylist' %}?status=payment">
-                <span class="payments counter">{{ actionable_requests.payments|length }}</span>
-                Payment{{ actionable_requests.payments|length|pluralize }} Required
+                <span class="payments counter">{{ actionable_requests.payment }}</span>
+                Payment{{ actionable_requests.payment|pluralize }} Required
             </a>
             {% endif %}
-            {% if actionable_requests.fixes %}
+            {% if actionable_requests.fix %}
             <a class="actionable fixes" href="{% url 'foia-mylist' %}?status=fix">
-                <span class="fixes counter">{{ actionable_requests.fixes|length }}</span>
-                Fix{{ actionable_requests.fixes|length|pluralize:"es" }} Required
+                <span class="fixes counter">{{ actionable_requests.fix }}</span>
+                Fix{{ actionable_requests.fix|pluralize:"es" }} Required
             </a>
             {% endif %}
-            {% if actionable_requests.drafts %}
+            {% if actionable_requests.started %}
             <a class="actionable drafts" href="{% url 'foia-mylist' %}?status=started">
-                <span class="drafts counter">{{ actionable_requests.drafts|length }}</span>
-                Draft{{ actionable_requests.drafts|length|pluralize }}
+                <span class="drafts counter">{{ actionable_requests.started }}</span>
+                Draft{{ actionable_requests.started|pluralize }}
             </a>
             {% endif %}
             {% if actionable_requests.updates %}

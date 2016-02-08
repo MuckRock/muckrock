@@ -47,9 +47,11 @@ class Profile(models.Model):
     # pylint: disable=too-many-instance-attributes
 
     email_prefs = (
-        ('instant', 'Instant'),
+        ('never', 'Never'),
+        ('hourly', 'Hourly'),
         ('daily', 'Daily'),
         ('weekly', 'Weekly'),
+        ('monthly', 'Monthly'),
     )
 
     user = models.OneToOneField(User)
@@ -107,6 +109,9 @@ class Profile(models.Model):
         resize_source={'size': (600, 600), 'crop': 'smart'}
     )
 
+    # provide user access to experimental features
+    experimental = models.BooleanField(default=False)
+
     # email confirmation
     email_confirmed = models.BooleanField(default=False)
     confirmation_key = models.CharField(max_length=24, blank=True)
@@ -115,9 +120,8 @@ class Profile(models.Model):
         max_length=10,
         choices=email_prefs,
         default='daily',
-        verbose_name='Email Preference',
-        help_text=('Receive email updates to your requests instantly'
-                   ' or in a daily or weekly digest')
+        verbose_name='Digest Frequency',
+        help_text=('Receive updates on site activity as an emailed digest.')
     )
     use_autologin = models.BooleanField(
         default=True,
@@ -144,9 +148,34 @@ class Profile(models.Model):
         # pylint: disable=no-member
         return ('acct-profile', [], {'username': self.user.username})
 
+    def is_advanced(self):
+        """Advanced users can access features basic users cannot."""
+        advanced_types = ['admin', 'beta', 'pro', 'proxy']
+        return self.acct_type in advanced_types or self.is_member_of_active_org()
+
     def is_member_of(self, organization):
         """Answers whether the profile is a member of the passed organization"""
-        return self.organization == organization
+        return self.organization_id == organization.pk
+
+    def is_member_of_active_org(self):
+        """Answers whether the user is a member of an active organization"""
+        return self.organization is not None and self.organization.active
+
+    def can_embargo(self):
+        """Is this user allowed to embargo?"""
+        return self.is_advanced()
+
+    def can_embargo_permanently(self):
+        """Is this user allowed to permanently embargo?"""
+        return self.acct_type in ['admin'] or self.is_member_of_active_org()
+
+    def can_multirequest(self):
+        """Is this user allowed to multirequest?"""
+        return self.is_advanced()
+
+    def can_view_emails(self):
+        """Is this user allowed to view all emails and private contact information?"""
+        return self.is_advanced()
 
     def get_monthly_requests(self):
         """Get the number of requests left for this month"""
@@ -182,21 +211,19 @@ class Profile(models.Model):
 
     def multiple_requests(self, num):
         """How many requests of each type would be used for this user to make num requests"""
-        request_dict = {'org_requests': 0, 'monthly_requests': 0,
-                        'reg_requests': 0, 'extra_requests': 0}
-
-        if self.organization:
-            org_reqs = self.organization.get_requests()
-        else:
-            org_reqs = 0
-
+        request_dict = {
+            'org_requests': 0,
+            'monthly_requests': 0,
+            'reg_requests': 0,
+            'extra_requests': 0
+        }
+        org_reqs = self.organization.get_requests() if self.organization else 0
         if org_reqs > num:
             request_dict['org_requests'] = num
             return request_dict
         else:
             request_dict['org_requests'] = org_reqs
             num -= org_reqs
-
         monthly = self.get_monthly_requests()
         if monthly > num:
             request_dict['monthly_requests'] = num
@@ -204,7 +231,6 @@ class Profile(models.Model):
         else:
             request_dict['monthly_requests'] = monthly
             num -= monthly
-
         if self.num_requests > num:
             request_dict['reg_requests'] = num
             return request_dict
@@ -213,26 +239,10 @@ class Profile(models.Model):
             request_dict['extra_requests'] = num - self.num_requests
             return request_dict
 
-    def can_embargo(self):
-        """Is this user allowed to embargo?"""
-        return self.acct_type in ['admin', 'beta', 'pro', 'proxy'] or self.organization != None
-
-    def can_multirequest(self):
-        """Is this user allowed to multirequest?"""
-        return self.acct_type in ['admin', 'beta', 'pro', 'proxy'] or self.organization != None
-
-    def can_embargo_permanently(self):
-        """Is this user allowed to permanently embargo?"""
-        return self.acct_type in ['admin'] or self.organization != None
-
-    def can_view_emails(self):
-        """Is this user allowed to view all emails and private contact information?"""
-        return self.acct_type in ['admin', 'pro']
-
     def bundled_requests(self):
         """Returns the number of requests the user gets when they buy a bundle."""
         how_many = settings.BUNDLED_REQUESTS[self.acct_type]
-        if self.organization:
+        if self.is_member_of_active_org():
             how_many = 5
         return how_many
 
@@ -319,40 +329,17 @@ class Profile(models.Model):
         )
 
     def generate_confirmation_key(self):
-        """Generate random key"""
+        """Generate random key used for validating the email address"""
         key = utils.generate_key(24)
         self.confirmation_key = key
         self.save()
         return key
 
     def notify(self, foia):
-        """Notify a user that foia has been updated or mark to be notified later
-           according to preference"""
+        """Queue up a notification for later"""
         # pylint: disable=no-member
-
-        if self.email_pref == 'instant':
-            link = self.wrap_url(foia.get_absolute_url())
-
-            msg = render_to_string('text/foia/mail.txt', {
-                'name': self.user.get_full_name(),
-                'title': foia.title,
-                'status': foia.get_status_display(),
-                'link': link,
-                'follow': self.user != foia.user,
-                'footer': options.email_footer
-            })
-            email = EmailMessage(
-                subject='[MuckRock] FOI request "%s" has been updated' % foia.title,
-                body=msg,
-                from_email='info@muckrock.com',
-                to=[self.user.email],
-                bcc=['diagnostics@muckrock.com']
-            )
-            email.send(fail_silently=False)
-
-        else:
-            self.notifications.add(foia)
-            self.save()
+        self.notifications.add(foia)
+        self.save()
 
     def send_notifications(self):
         """Send deferred notifications"""

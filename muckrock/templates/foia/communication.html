@@ -11,11 +11,18 @@
             <div class="options dropdown">
                 {% include 'lib/icons/options.svg' %}
                 <ul class="options dropdown-list">
-                    {% if comm.rawemail.raw_email %}<li><a href="{% url 'foia-raw' idx=comm.pk %}" class="option">Raw Email</a></li>{% endif %}
+                    {% if comm.rawemail %}<li><a href="{% url 'foia-raw' idx=comm.pk %}" class="option">Raw Email</a></li>{% endif %}
                     <li onClick="showCommForm('#status-{{comm.pk}}-form');" class="option">Status</li>
                     <li onClick="showCommForm('#move-{{comm.pk}}-form');" class="option">Move</li>
                     <li onClick="showCommForm('#resend-{{comm.pk}}-form');" class="option">Resend</li>
                     <li onClick="showCommForm('#delete-{{comm.pk}}-form');" class="option">Delete</li>
+                </ul>
+            </div>
+            {% elif request.user.profile.is_advanced and comm.rawemail.raw_email %}
+            <div class="options dropdown">
+                {% include 'lib/icons/options.svg' %}
+                <ul class="options dropdown-list">
+                    <li><a href="{% url 'foia-raw' idx=comm.pk %}" class="option">Raw Email</a></li>
                 </ul>
             </div>
             {% endif %}

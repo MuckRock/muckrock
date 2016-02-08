@@ -1,28 +1,28 @@
 {% load task_tags %}
-{% if task.orphantask %}
-    {% orphan_task task.id %}
-{% elif task.snailmailtask %}
-    {% snail_mail_task task.id %}
-{% elif task.rejectedemailtask %}
-    {% rejected_email_task task.id %}
-{% elif task.staleagencytask %}
-    {% stale_agency_task task.id %}
-{% elif task.flaggedtask %}
-    {% flagged_task task.id %}
-{% elif task.newagencytask %}
-    {% new_agency_task task.id %}
-{% elif task.responsetask %}
-    {% response_task task.id %}
-{% elif task.statuschangetask %}
-    {% status_change_task task.id %}
-{% elif task.paymenttask %}
-    {% payment_task task.id %}
-{% elif task.genericcrowdfundtask %}
-    {% crowdfund_task task.id %}
-{% elif task.multirequesttask %}
-    {% multi_request_task task.id %}
-{% elif task.failedfaxtask %}
-    {% failed_fax_task task.id %}
+{% if task.type == "OrphanTask" %}
+    {% orphan_task task %}
+{% elif task.type == "SnailMailTask" %}
+    {% snail_mail_task task %}
+{% elif task.type == "RejectedEmailTask" %}
+    {% rejected_email_task task %}
+{% elif task.type == "StaleAgencyTask" %}
+    {% stale_agency_task task %}
+{% elif task.type == "FlaggedTask" %}
+    {% flagged_task task %}
+{% elif task.type == "NewAgencyTask" %}
+    {% new_agency_task task %}
+{% elif task.type == "ResponseTask" %}
+    {% response_task task %}
+{% elif task.type == "StatusChangeTask" %}
+    {% status_change_task task %}
+{% elif task.type == "PaymentTask" %}
+    {% payment_task task %}
+{% elif task.type == "GenericCrowdfundTask" %}
+    {% crowdfund_task task %}
+{% elif task.type == "MultiRequestTask" %}
+    {% multi_request_task task %}
+{% elif task.type == "FailedFaxTask" %}
+    {% failed_fax_task task %}
 {% else %}
-    {% default_task task.id %}
+    {% default_task task %}
 {% endif %}

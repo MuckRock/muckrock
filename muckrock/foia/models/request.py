@@ -7,7 +7,7 @@ from django.contrib.auth.models import User, AnonymousUser
 from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
 from django.db import models, connection
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Count
 from django.template.defaultfilters import escape, linebreaks, slugify
 from django.template.loader import render_to_string
 
@@ -38,7 +38,7 @@ class FOIARequestQuerySet(models.QuerySet):
 
     def get_done(self):
         """Get all FOIA requests with responses"""
-        return self.filter(status='done').exclude(date_done=None)
+        return self.filter(status__in=['partial', 'done']).exclude(date_done=None)
 
     def get_editable(self):
         """Get all editable FOIA requests"""
@@ -94,12 +94,41 @@ class FOIARequestQuerySet(models.QuerySet):
 
     def organization(self, organization):
         """Get requests belonging to an organization's members."""
-        members = organization.members.select_related('user').all()
-        users = [member.user for member in members]
-        return self.select_related('jurisdiction')\
-                   .select_related('jurisdiction__parent')\
-                   .select_related('jurisdiction__parent__parent')\
-                   .filter(user__in=users)
+        return (self.select_related(
+                        'jurisdiction',
+                        'jurisdiction__parent',
+                        'jurisdiction__parent__parent'
+                        )
+                    .filter(user__profile__organization=organization))
+
+    def select_related_view(self):
+        """Select related models for viewing"""
+        return self.select_related(
+                'agency',
+                'agency__jurisdiction',
+                'jurisdiction',
+                'jurisdiction__parent',
+                'jurisdiction__parent__parent',
+                'user',
+                )
+
+    def get_public_file_count(self, limit=None):
+        """Annotate the public file count"""
+        foia_qs = self
+        count_qs = (self._clone()
+                .values_list('id')
+                .annotate(Count('files'))
+                .extra(where=['"foia_foiafile"."access" = \'public\'']))
+        if limit is not None:
+            foia_qs = foia_qs[:limit]
+            count_qs = count_qs[:limit]
+        counts = dict(count_qs)
+        foias = []
+        for foia in foia_qs:
+            foia.public_file_count = counts.get(foia.pk, 0)
+            foias.append(foia)
+        return foias
+
 
 STATUS = (
     ('started', 'Draft'),
@@ -468,13 +497,11 @@ class FOIARequest(models.Model):
     def submit(self, appeal=False, snail=False, thanks=False):
         """The request has been submitted.  Notify admin and try to auto submit"""
         # pylint: disable=no-member
-
         # can email appeal if the agency has an appeal agency which has an email address
         # and can accept emailed appeals
         can_email_appeal = appeal and self.agency and \
             self.agency.appeal_agency and self.agency.appeal_agency.email and \
             self.agency.appeal_agency.can_email_appeals
-
         # update email addresses for the request
         if can_email_appeal:
             self.email = self.agency.appeal_agency.get_email()
@@ -482,13 +509,11 @@ class FOIARequest(models.Model):
         elif not self.email and self.agency:
             self.email = self.agency.get_email()
             self.other_emails = self.agency.other_emails
-
         # if agency isnt approved, do not email or snail mail
         # it will be handled after agency is approved
         approved_agency = self.agency and self.agency.status == 'approved'
         can_email = self.email and not appeal
         comm = self.last_comm()
-
         # if the request can be emailed, email it, otherwise send a notice to the admin
         # if this is a thanks, send it as normal but do not change the status
         if not snail and approved_agency and (can_email or can_email_appeal):
@@ -515,13 +540,6 @@ class FOIARequest(models.Model):
             # not an approved agency, all we do is mark as submitted
             self.status = 'submitted'
             self.date_processing = date.today()
-        # generate sent activity
-        actstream.action.send(
-            self,
-            verb='sent',
-            action_object=comm,
-            target=self.agency
-        )
         self.save()
 
     def followup(self, automatic=False):
@@ -582,6 +600,8 @@ class FOIARequest(models.Model):
 
         cc_addrs = self.get_other_emails()
         from_email = '%s@%s' % (from_addr, MAILGUN_SERVER_NAME)
+        # pylint:disable=attribute-defined-outside-init
+        self.reverse_communications = self.communications.reverse()
         body = render_to_string('text/foia/request_email.txt', {'request': self})
         body = unidecode(body) if from_addr == 'fax' else body
         msg = EmailMultiAlternatives(
@@ -605,6 +625,7 @@ class FOIARequest(models.Model):
         # update communication
         comm.set_raw_email(msg.message())
         comm.delivered = 'fax' if self.email.endswith('faxaway.com') else 'email'
+        comm.subject = subject
         comm.save()
 
         # unblock incoming messages if we send one out
@@ -712,9 +733,8 @@ class FOIARequest(models.Model):
             ),
         ]
 
-    def noncontextual_request_actions(self, user):
+    def noncontextual_request_actions(self, can_edit):
         '''Provides context-insensitive action interfaces for requests'''
-        can_edit = self.editable_by(user) or user.is_staff
         can_pay = can_edit and self.is_payable()
         kwargs = {
             'jurisdiction': self.jurisdiction.slug,
@@ -739,9 +759,8 @@ class FOIARequest(models.Model):
             ),
         ]
 
-    def contextual_request_actions(self, user):
+    def contextual_request_actions(self, user, can_edit):
         '''Provides context-sensitive action interfaces for requests'''
-        can_edit = self.editable_by(user) or user.is_staff
         can_follow_up = can_edit and self.status != 'started'
         can_appeal = can_edit and self.is_appealable()
         kwargs = {

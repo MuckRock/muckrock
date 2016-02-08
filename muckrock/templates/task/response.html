@@ -1,10 +1,7 @@
 {% extends 'task/default.html' %}
+{% load markdown_deux_tags %}
 
-{% block task-class %}
-    response
-{% endblock %}
-
-{% block task-data %}
+{% block task-content %}
 {% if task.created_from_orphan %}
 <p class="created-from-orphan">This response was created from an orphan task.</p>
 {% endif %}
@@ -14,11 +11,19 @@
     <dt>From</dt>
     <dd>{{comm.priv_from_who}}</dd>
     {% endif %}
+    {% if comm.subject %}
+    <dt>Subject</dt>
+    <dd>{{comm.subject}}</dd>
+    {% endif %}
     {% if comm.foia %}
     <dt>Request</dt>
     <dd><a href="{% url 'admin:foia_foiarequest_change' comm.foia.pk %}">{{comm.foia}}</a></dd>
     <dt>Tracking Number</dt>
+    {% if comm.foia.tracking_id %}
     <dd>{{comm.foia.tracking_id}}</dd>
+    {% else %}
+    <dd>None</dd>
+    {% endif %}
     {% endif %}
     {% if attachments %}
     <dt>Attachments</dt>
@@ -34,39 +39,20 @@
 	<dd>{{task.status_probability}}%</dd>
 	{% endif %}
 </dl>
+<div class="collapsed collapsable full-communication">
+    <header>See this {% if previous_communications %}and previous {% endif %}communication{% if previous_communications %}s{% endif %}</header>
+    <main>
+        {% include 'foia/communication.html' with communication=task.communication %}
+        {% for communication in previous_communications %}
+            {% include 'foia/communication.html' %}
+        {% endfor %}
+    </main>
+</div>
 {% endblock %}
 
 {% block task-actions %}
-    {{ response_form }}
+    <div class="response-input">
+        {{ response_form }}
+    </div>
     <button type="submit" name="resolve" value="true" class="primary">Save & Resolve</button>
-{% endblock %}
-
-{% block task-extra-context %}
-<div class="task-extra-context response-communication">
-    <button class="reveal-extra-context" data-state="0">More Info</button>
-    <dl class="extra-context hidden">
-        <dt>Full Text</dt>
-        <dd>{{task.communication.communication}}</dd>
-        {% if all_comms %}
-        <dt>Previous Communications</dt>
-            {% for comm in all_comms %}
-        <dd>
-            <div class="communication">
-                <header>
-                    {% if comm.from_who %}
-                    <p>From: {{ comm.from_who }}</p>
-                    {% endif %}
-                    {% if comm.date %}
-                    <time datetime="{{comm.date}}">{{ comm.date|date:"m/d/Y" }}</time>
-                    {% endif %}
-                </header>
-                {% if comm.communication %}
-                    <p>{{ comm.communication }}</p>
-                {% endif %}
-            </div>
-        </dd>
-            {% endfor %}
-        {% endif %}
-    </dl>
-</div>
 {% endblock %}

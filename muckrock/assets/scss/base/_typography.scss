@@ -54,43 +54,16 @@ $font-size-display-3:   $font-size-9;
 // Headings
 
 h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
-    font-weight: $font-weight-normal;
+    font-weight: $font-weight-bold;
     line-height: $font-line-height;
     @extend %vertical-rhythm;
 }
-h1, .h1 { font-size: $font-size-7; }
-h2, .h2 { font-size: $font-size-6; }
-h3, .h3 { font-size: $font-size-5; }
-h4, .h4 { font-size: $font-size-4; }
-h5, .h5 { font-size: $font-size-3; }
-h6, .h6 { font-size: $font-size-2; }
-
-.display {
-    font-size: $font-size-7;
-    font-weight: $font-weight-light;
-    &.h1 {
-        font-size: $font-size-7;
-    }
-    &.h2 {
-        font-size: $font-size-6;
-    }
-    @include media($medium-layout) {
-        &.h1 {
-            font-size: $font-size-8;
-        }
-        &.h2 {
-            font-size: $font-size-7;
-        }
-    }
-    @include media($large-layout) {
-        &.h1 {
-            font-size: $font-size-9;
-        }
-        &.h2 {
-            font-size: $font-size-8;
-        }
-    }
-}
+h1, .h1 { font-size: $font-size-6; }
+h2, .h2 { font-size: $font-size-5; }
+h3, .h3 { font-size: $font-size-4; }
+h4, .h4 { font-size: $font-size-3; }
+h5, .h5 { font-size: $font-size-2; }
+h6, .h6 { font-size: $font-size-1; }
 
 // Body
 
@@ -115,6 +88,14 @@ b, strong { font-weight: $font-weight-bold; }
 a {
     text-decoration: none;
     &:hover { text-decoration: underline; }
+}
+
+a.disabled {
+    color: $color-grey;
+    &:hover {
+        color: $color-grey;
+        text-decoration: none;
+    }
 }
 
 blockquote {

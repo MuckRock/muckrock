@@ -5,7 +5,6 @@ Views for the Agency application
 from django.contrib import messages
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.core.urlresolvers import reverse
-from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 
@@ -16,7 +15,6 @@ from muckrock.agency.models import Agency
 from muckrock.agency.serializers import AgencySerializer
 from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.forms import FlagForm
-from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.views import collect_stats
 from muckrock.task.models import FlaggedTask
 from muckrock.views import MRFilterableListView
@@ -30,22 +28,39 @@ class List(MRFilterableListView):
 
     def get_queryset(self):
         """Limit agencies to only approved ones."""
-        objects = super(List, self).get_queryset()
-        objects = objects.get_approved()
+        objects = (super(List, self)
+                .get_queryset()
+                .get_approved()
+                .select_related(
+                    'jurisdiction',
+                    'jurisdiction__parent',
+                    'jurisdiction__parent__parent',
+                    ))
         return objects
 
 def detail(request, jurisdiction, jidx, slug, idx):
     """Details for an agency"""
 
-    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
-    agency = get_object_or_404(Agency, jurisdiction=jmodel, slug=slug, pk=idx)
+    agency = get_object_or_404(
+            Agency.objects.select_related(
+                'jurisdiction',
+                'jurisdiction__parent',
+                'jurisdiction__parent__parent'),
+            jurisdiction__slug=jurisdiction,
+            jurisdiction__pk=jidx,
+            slug=slug,
+            pk=idx,
+            status='approved')
 
-    if agency.status != 'approved':
-        raise Http404()
-
-    foia_requests = FOIARequest.objects.get_viewable(request.user)\
-                                       .filter(agency=agency)\
-                                       .order_by('-date_submitted')[:5]
+    foia_requests = (FOIARequest.objects
+            .get_viewable(request.user)
+            .filter(agency=agency)
+            .select_related(
+                'jurisdiction',
+                'jurisdiction__parent',
+                'jurisdiction__parent__parent',
+                )
+            .order_by('-date_submitted')[:5])
 
     if request.method == 'POST':
         form = FlagForm(request.POST)

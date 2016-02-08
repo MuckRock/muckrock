@@ -144,12 +144,7 @@ class CrowdfundDetailView(DetailView):
                 stripe.AuthenticationError
             )
             try:
-                payment = crowdfund.make_payment(token, email, amount, show, user)
-                actstream.action.send(
-                    payment,
-                    verb='contributed',
-                    target=crowdfund
-                )
+                crowdfund.make_payment(token, email, amount, show, user)
             except stripe_exceptions as payment_error:
                 logging.error(payment_error)
                 self.return_error(request)
@@ -207,12 +202,7 @@ class CrowdfundProjectCreateView(CreateView):
         project = self.get_project()
         actstream.action.send(
             self.request.user,
-            verb='created',
-            action_object=crowdfund
-        )
-        actstream.action.send(
-            self.request.user,
-            varb='added',
+            varb='started',
             action_object=crowdfund,
             target=project
         )

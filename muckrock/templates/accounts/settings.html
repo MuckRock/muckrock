@@ -55,7 +55,7 @@
                 {% if request.user.profile.email_confirmed %}
                 <span>Verified</span>
                 {% else %}
-                <a href="{% url 'acct-verify-email' %}">Verify your email</a>
+                <a href="{% url 'acct-verify-email' %}" id="verify_email">Verify your email</a>
                 {% endif %}
             </footer>
         </form>
@@ -100,25 +100,34 @@
 {% endblock %}
 
 {% block scripts %}
-    {% include 'autocomplete_light/static.html' %}
     <script src="https://checkout.stripe.com/checkout.js"></script>
     <script type="text/javascript">
-    $(document).ready(function() {
-        $('.checkout-button').click(function(e){
-            e.preventDefault();
-            var checkoutData = getCheckoutData($(this));
-            checkout(
-                "{{ stripe_pk }}",
-                "{% static 'apple-touch-icon.png' %}",
-                checkoutData.description,
-                checkoutData.amount,
-                checkoutData.email,
-                checkoutData.label,
-                checkoutData.form,
-                true,
-                false
-            );
+        var email = $('#id_email').val();
+        var validateHref = $('#verify_email').attr('href');
+        $('#id_email').change(function(){
+            var newEmail = $('#id_email').val();
+            if (newEmail != email) {
+                $('#verify_email').addClass('disabled').removeAttr('href');
+            } else {
+                $('#verify_email').removeClass('disabled').attr('href', validateHref);
+            }
         });
-    });
-</script>
+        $(document).ready(function() {
+            $('.checkout-button').click(function(e){
+                e.preventDefault();
+                var checkoutData = getCheckoutData($(this));
+                checkout(
+                    "{{ stripe_pk }}",
+                    "{% static 'apple-touch-icon.png' %}",
+                    checkoutData.description,
+                    checkoutData.amount,
+                    checkoutData.email,
+                    checkoutData.label,
+                    checkoutData.form,
+                    true,
+                    false
+                );
+            });
+        });
+    </script>
 {% endblock %}

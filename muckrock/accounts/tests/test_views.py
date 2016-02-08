@@ -277,7 +277,7 @@ class TestBuyRequestsView(TestCase):
     def test_buy_requests_as_org(self):
         """An org member should get an extra request in each bundle."""
         existing_request_count = self.user.profile.num_requests
-        self.user.profile.organization = OrganizationFactory()
+        self.user.profile.organization = OrganizationFactory(active=True)
         self.user.profile.save()
         post_request = self.factory.post(self.url, self.data)
         post_request = mock_middleware(post_request)
@@ -390,7 +390,7 @@ class TestAccountFunctional(TestCase):
         email_data = {
             'action': 'email',
             'email': 'allan@muckrock.com',
-            'email_pref': 'instant'
+            'email_pref': 'hourly'
         }
         settings_url = reverse('acct-settings')
         http_post_response(settings_url, views.settings, profile_data, self.user)

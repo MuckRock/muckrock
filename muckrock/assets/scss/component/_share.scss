@@ -1,55 +1,39 @@
-$darken-amount: 10%;
-$button-width: 7em;
-
-.sharing {
-    @include display(flex);
-    @include flex-wrap(wrap);
-    dfn {
-        @include flex(100%);
+.social.sharing {
+    .channels {
+        @include display(flex);
+        @include align-items(center);
     }
-    @include media($medium-layout) {
-        width: $button-width;
-    }
-}
-
-
-.share {
-    @include flex(1 1 $button-width);
-    display: block;
-    margin: 0 $vertical-rhythm/4 $vertical-rhythm/4 0;
-    padding: $vertical-rhythm/2 $vertical-rhythm;
-    @include border-radius;
-    color: $color-white;
-    font-weight: $font-weight-bold;
-    text-align: center;
-    text-decoration: none;
-    @include transition(background-color, .25s, linear);
-    &:hover {
-        color: $color-white;
-        text-decoration: none;
-    }
-    &.facebook {
-        background-color: $color-facebook;
+    .channel {
+        overflow: hidden;
+        @include flex(1);
+        text-align: center;
+        transition: transform .1s ease-out;
         &:hover {
-            background-color: darken($color-facebook, $darken-amount);
+            z-index: 1;
+            transform: scale(1.15);
         }
     }
-    &.twitter {
-        background-color: $color-twitter;
-        &:hover {
-            background-color: darken($color-twitter, $darken-amount);
+    .icon {
+        height: 1.25rem;
+        width: 1.25rem;
+        vertical-align: middle;
+        path {
+            fill: $color-white;
+        }
+        &.email path {
+            fill: none;
+            stroke: $color-white;
         }
     }
-    &.email {
-        background-color: $color-email;
-        &:hover {
-            background-color: darken($color-email, $darken-amount);
-        }
+    a {
+        display: block;
+        padding: $vertical-rhythm/2;
+        background: $color-grey;
+        &.email { background: $color-email; }
+        &.twitter { background: $color-twitter; }
+        &.facebook { background: $color-facebook; }
     }
-    @include colorize-icon($color-white);
-    .svg-icon {
-        height: 1rem;
-        width: 1rem;
-        margin-left: 0;
+    .label {
+        display: none;
     }
 }

@@ -1,4 +1,4 @@
-from fabric.api import cd, env, lcd, local, run, settings, task
+from fabric.api import cd, env, lcd, local, run, settings, task, prompt
 import os
 
 env.run = local
@@ -87,41 +87,35 @@ def pip():
 
 @task(name='populate-db')
 def populate_db():
-    """Populate the local DB with some data from the remote server"""
-    # XXX this doesnt work yet
-    result = local('heroku pg:credentials DATABASE_URL -a muckrock',
-            capture=True)
+    """Populate the local DB with the data from the latest heroku backup"""
+    # https://devcenter.heroku.com/articles/heroku-postgres-import-export
 
-    param_line = result.split('\n')[1].replace('"', '')
-    params = {p.split('=')[0]:p.split('=')[1] for p in param_line.split()}
-    tables = [
-            'accounts_profile',
-            'accounts_profile_follows_question',
-            'agency_agency',
-            'agency_agency_types',
-            'agency_agencytype',
-            'auth_group',
-            'auth_group_permissions',
-            'auth_permission',
-            'auth_user',
-            'auth_user_groups',
-            'auth_user_user_permissions',
-            'business_days_holiday',
-            'jurisdiction_jurisdiction',
-            'jurisdiction_jurisdiction_holidays',
-            'mailgun_whitelistdomain',
+    confirm = prompt('This will over write your local database.  '
+                     'Are you sure you want to continue? [y/N]')
+    if confirm.lower() not in ['y', 'yes']:
+        return
+
+    with env.cd(env.base_path):
+        env.run('PGUSER=postgres dropdb muckrock')
+        env.run('PGUSER=postgres heroku pg:pull DATABASE muckrock --app muckrock')
+
+@task(name='sync-aws')
+def sync_aws():
+    """Sync images from AWS to match the production database"""
+
+    folders = [
+            'account_images',
+            'agency_images',
+            'jurisdiction_images',
+            'news_images',
+            'news_photos',
+            'project_images',
             ]
-    params['tables'] = ' '.join('-t %s' % table for table in tables)
-    env.run('PGPASSWORD=%(password)s pg_dump --no-acl --no-owner -h %(host)s '
-            '-U %(user)s -p %(port)s %(tables)s --data-only %(dbname)s '
-            '> data.dump' % params)
-    # XXX
-    with lcd(os.path.join(env.base_path, 'vm')):
-        result = local('vagrant ssh-config | grep IdentityFile',
-                capture=True)
-    with settings(user='vagrant', host_string='127.0.0.1:2222', key_filename=result.split()[1]):
-        with cd('muckrock'):
-            run('psql muckrock -U muckrock < data.dump')
+    with env.cd(env.base_path):
+        for folder in folders:
+            env.run('aws s3 sync s3://muckrock/{folder} '
+                    './muckrock/static/media/{folder}'
+                    .format(folder=folder))
 
 @task
 def hello():

@@ -1,10 +1,6 @@
 {% extends 'task/default.html' %}
 
-{% block task-class %}
-    orphan
-{% endblock %}
-
-{% block task-data %}
+{% block task-content %}
 <dl class="task-data">
     <dt>Reason</dt>
     <dd>{{task.get_reason_display}}</dd>

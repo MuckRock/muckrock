@@ -9,10 +9,8 @@ from views import handler500
 # pylint: enable=unused-import
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
-from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import RedirectView
 
-from django_xmlrpc.views import handle_xmlrpc
 from rest_framework.routers import DefaultRouter
 import dbsettings.urls
 
@@ -86,7 +84,8 @@ router.register(r'responsetask',
 
 urlpatterns = patterns(
     '',
-    url(r'^$', views.front_page, name='index'),
+    url(r'^$', views.homepage, name='index'),
+    url(r'^reset_cache/$', views.reset_homepage_cache, name='reset-cache'),
     url(r'^accounts/', include(muckrock.accounts.urls)),
     url(r'^foi/', include(muckrock.foia.urls)),
     url(r'^news/', include(muckrock.news.urls)),
@@ -107,9 +106,7 @@ urlpatterns = patterns(
     url(r'^api_v1/token-auth/', 'rest_framework.authtoken.views.obtain_auth_token'),
     url(r'^api_doc/', include('rest_framework_swagger.urls')),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
-    url(r'^activity/', include('actstream.urls')),
-    url(r'^xmlrpc/$', csrf_exempt(handle_xmlrpc), name='xmlrpc'),
-    url(r'^blog/(?P<path>.*)$', views.blog, name='blog'),
+    url(r'^package_monitor/', include('package_monitor.urls', namespace='package_monitor')),
     url(r'^robots\.txt$', include('robots.urls')),
     url(r'^favicon.ico$', RedirectView.as_view(url=settings.STATIC_URL + 'favicon.ico')),
     url(r'^sitemap\.xml$', 'django.contrib.sitemaps.views.index', {'sitemaps': sitemaps}),

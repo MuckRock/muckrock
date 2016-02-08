@@ -158,7 +158,7 @@ class Agency(models.Model, RequestHelper):
             if response:
                 latest_responses.append(response)
         if latest_responses:
-            return max(latest_responses)
+            return min(latest_responses)
 
     def count_thanks(self):
         """Count how many thanks this agency has received"""

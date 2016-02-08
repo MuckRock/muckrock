@@ -61,7 +61,7 @@ class AgencyAdmin(VersionAdmin):
     """Agency admin options"""
     change_list_template = 'admin/agency/agency/change_list.html'
     prepopulated_fields = {'slug': ('name',)}
-    list_display = ('name', 'jurisdiction')
+    list_display = ('name', 'jurisdiction', 'status')
     list_filter = ['status', 'types']
     search_fields = ['name']
     filter_horizontal = ('types',)

@@ -13,47 +13,26 @@ from datetime import datetime
 import email
 import logging
 
-from muckrock.foia.models import FOIARequest, STATUS
 from muckrock.agency.models import Agency
+from muckrock.foia.models import FOIARequest, STATUS
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.message.notifications import SupportNotification
 
-def generate_status_actions(foia, comm, status):
-    """Generate activity stream actions for agency replies"""
+def generate_status_action(foia):
+    """Generate activity stream action for agency response"""
     if not foia.agency:
         return
-    # generate action
-    actstream.action.send(
-        foia.agency,
-        verb='sent',
-        action_object=comm,
-        target=foia
-    )
-    if status == 'rejected':
-        # generate action
-        actstream.action.send(
-            foia.agency,
-            verb='rejected',
-            action_object=foia
-        )
-    elif status == 'done':
-        # generate action
-        actstream.action.send(
-            foia.agency,
-            verb='completed',
-            action_object=foia
-        )
-    elif status == 'partial':
-        # generate action
-        actstream.action.send(
-            foia.agency,
-            verb='partially completed',
-            action_object=foia
-        )
-    elif status == 'fix':
-        actstream.action.send(foia, verb='requires fix')
-    elif status == 'payment':
-        actstream.action.send(foia, verb='requires payment')
-    return
+    verbs = {
+        'rejected': 'rejected',
+        'done': 'completed',
+        'partial': 'partially completed',
+        'processed': 'acknowledged',
+        'no_docs': 'has no responsive documents',
+        'fix': 'requires fix',
+        'payment': 'requires payment',
+    }
+    verb = verbs.get(foia.status, 'is processing')
+    actstream.action.send(foia.agency, verb=verb, action_object=foia)
 
 class TaskQuerySet(models.QuerySet):
     """Object manager for all tasks"""
@@ -65,24 +44,38 @@ class TaskQuerySet(models.QuerySet):
         """Get all resolved tasks"""
         return self.filter(resolved=True)
 
-    def filter_by_foia(self, foia):
-        """Get all tasks that relate to the provided FOIA request."""
-        # pylint:disable=line-too-long
-        # I disabled pylint line length checking here because it's like 4 characters and
-        # I think that shortening these lines would reduce the overall legibility.
+    def filter_by_foia(self, foia, user):
+        """
+        Get tasks that relate to the provided FOIA request.
+        If user is staff, get all tasks.
+        If user is advanced, get response tasks.
+        For all users, get new agency task.
+        """
+        # pylint:disable=no-self-use
         tasks = []
         # infer foia from communication
-        tasks += [task.responsetask for task in self.filter(responsetask__communication__foia=foia)]
-        tasks += [task.snailmailtask for task in self.filter(snailmailtask__communication__foia=foia)]
-        tasks += [task.failedfaxtask for task in self.filter(failedfaxtask__communication__foia=foia)]
+        communication_task_types = []
+        if user.is_staff:
+            communication_task_types.append(ResponseTask)
+            communication_task_types.append(SnailMailTask)
+            communication_task_types.append(FailedFaxTask)
+        for task_type in communication_task_types:
+            tasks += list(task_type.objects
+                    .filter(communication__foia=foia)
+                    .select_related('communication__foia', 'resolved_by')
+                    .prefetch_related('communication__files'))
         # these tasks have a direct foia attribute
-        tasks += [task.rejectedemailtask for task in self.filter(rejectedemailtask__foia=foia)]
-        tasks += [task.flaggedtask for task in self.filter(flaggedtask__foia=foia)]
-        tasks += [task.statuschangetask for task in self.filter(statuschangetask__foia=foia)]
-        tasks += [task.paymenttask for task in self.filter(paymenttask__foia=foia)]
+        foia_task_types = [RejectedEmailTask, FlaggedTask, StatusChangeTask, PaymentTask]
+        if user.is_staff:
+            for task_type in foia_task_types:
+                tasks += list(task_type.objects
+                        .filter(foia=foia)
+                        .select_related('foia', 'resolved_by'))
         # try matching foia agency with task agency
         if foia.agency:
-            tasks += [task.newagencytask for task in self.filter(newagencytask__agency=foia.agency)]
+            tasks += list(NewAgencyTask.objects
+                    .filter(agency=foia.agency)
+                    .select_related('agency', 'resolved_by'))
         return tasks
 
 
@@ -97,7 +90,7 @@ class Task(models.Model):
     """A base task model for fields common to all tasks"""
     date_created = models.DateTimeField(auto_now_add=True)
     date_done = models.DateTimeField(blank=True, null=True)
-    resolved = models.BooleanField(default=False)
+    resolved = models.BooleanField(default=False, db_index=True)
     assigned = models.ForeignKey(User, blank=True, null=True, related_name="assigned_tasks")
     resolved_by = models.ForeignKey(User, blank=True, null=True, related_name="resolved_tasks")
 
@@ -132,6 +125,7 @@ class GenericTask(Task):
 class OrphanTask(Task):
     """A communication that needs to be approved before showing it on the site"""
     # pylint: disable=no-member
+    type = 'OrphanTask'
     reasons = (('bs', 'Bad Sender'),
                ('ib', 'Incoming Blocked'),
                ('ia', 'Invalid Address'))
@@ -186,8 +180,8 @@ class OrphanTask(Task):
 class SnailMailTask(Task):
     """A communication that needs to be snail mailed"""
     # pylint: disable=no-member
-    categories = (('a', 'Appeal'), ('n', 'New'),
-                  ('u', 'Update'), ('f', 'Followup'))
+    type = 'SnailMailTask'
+    categories = (('a', 'Appeal'), ('n', 'New'), ('u', 'Update'), ('f', 'Followup'))
     category = models.CharField(max_length=1, choices=categories)
     communication = models.ForeignKey('foia.FOIACommunication')
 
@@ -213,6 +207,7 @@ class SnailMailTask(Task):
 
 class RejectedEmailTask(Task):
     """A FOIA request has had an outgoing email rejected"""
+    type = 'RejectedEmailTask'
     categories = (('b', 'Bounced'), ('d', 'Dropped'))
     category = models.CharField(max_length=1, choices=categories)
     foia = models.ForeignKey('foia.FOIARequest', blank=True, null=True)
@@ -238,6 +233,7 @@ class RejectedEmailTask(Task):
 
 class StaleAgencyTask(Task):
     """An agency has gone stale"""
+    type = 'StaleAgencyTask'
     agency = models.ForeignKey(Agency)
 
     def __unicode__(self):
@@ -246,6 +242,7 @@ class StaleAgencyTask(Task):
 
 class FlaggedTask(Task):
     """A user has flagged a request, agency or jurisdiction"""
+    type = 'FlaggedTask'
     text = models.TextField()
     user = models.ForeignKey(User, blank=True, null=True)
     foia = models.ForeignKey('foia.FOIARequest', blank=True, null=True)
@@ -255,9 +252,26 @@ class FlaggedTask(Task):
     def __unicode__(self):
         return u'Flagged Task'
 
+    def flagged_object(self):
+        """Return the object that was flagged (should only ever be one, and never none)"""
+        if self.foia:
+            return self.foia
+        elif self.agency:
+            return self.agency
+        elif self.jurisdiction:
+            return self.jurisdiction
+        else:
+            raise AttributeError('No flagged object.')
+
+    def reply(self, text):
+        """Send an email reply to the user that raised the flag."""
+        support_email = SupportNotification(self.user, {'message': text, 'task': self})
+        support_email.send()
+
 
 class NewAgencyTask(Task):
     """A new agency has been created and needs approval"""
+    type = 'NewAgencyTask'
     user = models.ForeignKey(User, blank=True, null=True)
     agency = models.ForeignKey(Agency)
 
@@ -266,10 +280,10 @@ class NewAgencyTask(Task):
 
     def pending_requests(self):
         """Returns the requests to be acted on"""
-        return FOIARequest.objects.filter(agency=self.agency)
+        return FOIARequest.objects.filter(agency=self.agency).exclude(status='started')
 
     def approve(self):
-        """Approves agency, resends pending requests, and resolves"""
+        """Approves agency, resends pending requests to it"""
         self.agency.status = 'approved'
         self.agency.save()
         # resend the first comm of each foia associated to this agency
@@ -280,7 +294,7 @@ class NewAgencyTask(Task):
                 first_comm.resend(self.agency.get_email())
 
     def reject(self, replacement_agency):
-        """Resends pending requests to replacement agency and resolves"""
+        """Resends pending requests to replacement agency"""
         self.agency.status = 'rejected'
         self.agency.save()
         for foia in self.pending_requests():
@@ -296,12 +310,11 @@ class NewAgencyTask(Task):
 class ResponseTask(Task):
     """A response has been received and needs its status set"""
     # pylint: disable=no-member
+    type = 'ResponseTask'
     communication = models.ForeignKey('foia.FOIACommunication')
     created_from_orphan = models.BooleanField(default=False)
-
     # for predicting statuses
-    predicted_status = models.CharField(
-            max_length=10, choices=STATUS, blank=True, null=True)
+    predicted_status = models.CharField(max_length=10, choices=STATUS, blank=True, null=True)
     status_probability = models.IntegerField(blank=True, null=True)
 
     def __unicode__(self):
@@ -322,8 +335,8 @@ class ResponseTask(Task):
         foia.tracking_id = tracking_id
         foia.save()
 
-    def set_status(self, status):
-        """Sets status of comm and foia"""
+    def set_status(self, status, set_foia=True):
+        """Sets status of comm and foia, with option for only setting comm stats"""
         comm = self.communication
         # check that status is valid
         if status not in [status_set[0] for status_set in STATUS]:
@@ -331,15 +344,16 @@ class ResponseTask(Task):
         # save comm first
         comm.status = status
         comm.save()
-        # save foia next
-        foia = comm.foia
-        foia.status = status
-        if status in ['rejected', 'no_docs', 'done', 'abandoned']:
-            foia.date_done = comm.date
-        foia.update()
-        foia.save()
-        logging.info('Request #%d status changed to "%s"', foia.id, status)
-        generate_status_actions(foia, comm, status)
+        # save foia next, unless just updating comm status
+        if set_foia:
+            foia = comm.foia
+            foia.status = status
+            if status in ['rejected', 'no_docs', 'done', 'abandoned']:
+                foia.date_done = comm.date
+            foia.update()
+            foia.save()
+            logging.info('Request #%d status changed to "%s"', foia.id, status)
+            generate_status_action(foia)
 
     def set_price(self, price):
         """Sets the price of the communication's request"""
@@ -363,6 +377,7 @@ class ResponseTask(Task):
 class FailedFaxTask(Task):
     """A fax for this communication failed"""
     # pylint: disable=no-member
+    type = 'FailedFaxTask'
     communication = models.ForeignKey('foia.FOIACommunication')
 
     def __unicode__(self):
@@ -371,7 +386,7 @@ class FailedFaxTask(Task):
 
 class StatusChangeTask(Task):
     """A user has the status on a request"""
-
+    type = 'StatusChangeTask'
     user = models.ForeignKey(User)
     old_status = models.CharField(max_length=255)
     foia = models.ForeignKey('foia.FOIARequest')
@@ -382,12 +397,14 @@ class StatusChangeTask(Task):
 
 class PaymentTask(Task):
     """Created when the fee for a request has been paid"""
+    type = 'PaymentTask'
     amount = models.DecimalField(max_digits=8, decimal_places=2)
     user = models.ForeignKey(User)
     foia = models.ForeignKey('foia.FOIARequest')
 
     def __unicode__(self):
         return u'Payment Task'
+
 
 class CrowdfundTask(Task):
     """Created when a crowdfund is finished"""
@@ -399,6 +416,7 @@ class CrowdfundTask(Task):
 
 class GenericCrowdfundTask(Task):
     """Created when a crowdfund is finished"""
+    type = 'GenericCrowdfundTask'
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     crowdfund = GenericForeignKey('content_type', 'object_id')
@@ -409,6 +427,7 @@ class GenericCrowdfundTask(Task):
 
 class MultiRequestTask(Task):
     """Created when a multirequest is created and needs approval."""
+    type = 'MultiRequestTask'
     multirequest = models.ForeignKey('foia.FOIAMultiRequest')
 
     def __unicode__(self):
