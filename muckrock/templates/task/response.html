@@ -17,7 +17,8 @@
     {% endif %}
     {% if comm.foia %}
     <dt>Request</dt>
-    <dd><a href="{% url 'admin:foia_foiarequest_change' comm.foia.pk %}">{{comm.foia}}</a></dd>
+    <dd><a href="{{comm.foia.get_absolute_url}}">{{comm.foia}}</a> (<a href="{% url 'admin:foia_foiarequest_change' comm.foia.pk %}">admin</a>)</dd>
+    <dd>MuckRock #{{comm.foia.id}}</dd>
     <dt>Tracking Number</dt>
     {% if comm.foia.tracking_id %}
     <dd>{{comm.foia.tracking_id}}</dd>
@@ -39,15 +40,22 @@
 	<dd>{{task.status_probability}}%</dd>
 	{% endif %}
 </dl>
-<div class="collapsed collapsable full-communication">
-    <header>See this {% if previous_communications %}and previous {% endif %}communication{% if previous_communications %}s{% endif %}</header>
+<div class="collapsable full-communication">
+    <header>This communication</header>
     <main>
         {% include 'foia/communication.html' with communication=task.communication %}
-        {% for communication in previous_communications %}
-            {% include 'foia/communication.html' %}
-        {% endfor %}
     </main>
 </div>
+{% if previous_communications %}
+<div class="collapsed collapsable full-communication">
+    <header>Previous communications</header>
+    <main>
+    {% for communication in previous_communications %}
+        {% include 'foia/communication.html' %}
+    {% endfor %}
+    </main>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block task-actions %}
