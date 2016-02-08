@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.db.models import Q
+from django.db.models import Prefetch, Q
 
 import actstream
 from datetime import datetime
@@ -14,7 +14,7 @@ import email
 import logging
 
 from muckrock.agency.models import Agency
-from muckrock.foia.models import FOIARequest, STATUS
+from muckrock.foia.models import FOIACommunication, FOIAFile, FOIARequest, STATUS
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.notifications import SupportNotification
 
@@ -63,7 +63,15 @@ class TaskQuerySet(models.QuerySet):
             tasks += list(task_type.objects
                     .filter(communication__foia=foia)
                     .select_related('communication__foia', 'resolved_by')
-                    .prefetch_related('communication__files'))
+                    .prefetch_related(
+                        Prefetch('communication__files',
+                            queryset=FOIAFile.objects.select_related('foia__jurisdiction')),
+                        Prefetch('communication__foia__communications',
+                            queryset=FOIACommunication.objects.order_by('-date'),
+                            to_attr='reverse_communications'),
+                        'communication__foia__communications__files',
+                        )
+                    )
         # these tasks have a direct foia attribute
         foia_task_types = [RejectedEmailTask, FlaggedTask, StatusChangeTask, PaymentTask]
         if user.is_staff:
