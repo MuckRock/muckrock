@@ -30,6 +30,16 @@
 You should have a very bare MuckRock site running locally now.
 The code checked out from GitHub is synced between the virtual machine and your host machine, so you may edit the code using your favorite text editor locally while running the code from within the virtual machine. To run the server again, just follow step 4.
 
+## Build search index
+
+Our search engine is [django-watson][watson], and these are the steps to build its index.
+
+1. `./manage.py installwatson`
+2. `./manage.py buildwatson`
+
+This should create an index of all the existing models in your local DB.
+Any new models should be indexed automatically.
+
 ## Test and lint
 
 * Test your code in one of two ways:
@@ -48,3 +58,4 @@ The `master` branch represents our product code. `master` should only ever be up
 [production]: https://www.muckrock.com
 [vagrant]: https://www.vagrantup.com/downloads.html
 [virtualbox]: https://www.virtualbox.org
+[watson]: https://github.com/etianen/django-watson
