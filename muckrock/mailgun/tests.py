@@ -10,6 +10,7 @@ from django.test import TestCase
 from datetime import date
 import hashlib
 import hmac
+import mock
 import nose.tools
 import os
 import time
@@ -95,7 +96,8 @@ class TestMailgunViews(TestCase):
                                     kwargs={'mail_id': '123-12345678'}), data, **self.kwargs)
         nose.tools.eq_(response.status_code, 200)
 
-    def test_attachments(self):
+    @mock.patch('boto.s3.connection.S3Connection')
+    def test_attachments(self, mock_connection):
         """Test a message with an attachment"""
 
         try:
