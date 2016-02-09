@@ -28,7 +28,7 @@ def foia_file_delete_s3(sender, **kwargs):
     """Delete file from S3 after the model is deleted"""
     # pylint: disable=unused-argument
 
-    if not settings.DEBUG or settings.AWS_DEBUG:
+    if (not settings.DEBUG and not settings.TEST) or settings.AWS_DEBUG:
         # only delete if we are using s3
         foia_file = kwargs['instance']
 
