@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.test import TestCase, RequestFactory
 
+from datetime import datetime, timedelta
 import nose.tools
 
 from muckrock import agency
@@ -61,6 +62,14 @@ class TestAgencyUnit(TestCase):
         """Test get other emails method"""
         eq_(self.agency1.get_other_emails(), ['other_a@agency1.gov', 'other_b@agency1.gov'])
 
+    def test_agency_latest_response(self):
+        """Should return the date of the last response by the agency"""
+        agency = self.agency1
+        duration = 30
+        comm_date = datetime.today() - timedelta(duration)
+        communication = factories.FOIACommunicationFactory(date=comm_date, response=True, foia__status='ack', foia__agency=agency)
+        print agency.latest_response()
+        eq_(agency.latest_response(), duration, "The agency should report the days since its latest response.")
 
 class TestAgencyManager(TestCase):
     """Tests for the Agency object manager"""
@@ -151,3 +160,21 @@ class TestAgencyForm(TestCase):
     def test_instance_form(self):
         """The form should validate given only instance data"""
         ok_(self.form.is_valid())
+
+
+class TestStaleAgency(TestCase):
+    """Tests the stale agency task"""
+    def setUp(self):
+        self.stale_agency = factories.StaleAgencyFactory()
+
+    def test_stale_task(self):
+        """A stale agency should be marked as stale"""
+        from muckrock.agency.tasks import stale
+        # The stale agency factory marks it as Stale by default, for convenience.
+        # So, we lower to stale flag to make sure it's actually raised!
+        self.stale_agency.stale = False
+        self.stale_agency.save()
+        ok_(not self.stale_agency.stale)
+        stale()
+        self.stale_agency.refresh_from_db()
+        ok_(self.stale_agency.stale, 'The agency should be marked as stale')
