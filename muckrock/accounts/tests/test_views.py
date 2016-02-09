@@ -367,7 +367,7 @@ class TestAccountFunctional(TestCase):
         eq_(get.status_code, 302, 'My profile link reponds with 302 to logged out user.')
         eq_(post.status_code, 302, 'POST to my profile link responds with 302.')
         # settings
-        get, post = http_get_post(reverse('acct-settings'), views.settings, {})
+        get, post = http_get_post(reverse('acct-settings'), views.profile_settings, {})
         eq_(get.status_code, 302, 'GET /profile responds with 302 to logged out user.')
         eq_(post.status_code, 302, 'POST /settings reponds with 302 to logged out user.')
 
@@ -375,7 +375,7 @@ class TestAccountFunctional(TestCase):
         """Test private views while logged in"""
         response = http_get_response(reverse('acct-my-profile'), views.profile, self.user)
         eq_(response.status_code, 200, 'Logged in user may view their own profile.')
-        response = http_get_response(reverse('acct-settings'), views.settings, self.user)
+        response = http_get_response(reverse('acct-settings'), views.profile_settings, self.user)
         eq_(response.status_code, 200, 'Logged in user may view their own settings.')
 
     def test_settings_view(self):
@@ -393,8 +393,8 @@ class TestAccountFunctional(TestCase):
             'email_pref': 'hourly'
         }
         settings_url = reverse('acct-settings')
-        http_post_response(settings_url, views.settings, profile_data, self.user)
-        http_post_response(settings_url, views.settings, email_data, self.user)
+        http_post_response(settings_url, views.profile_settings, profile_data, self.user)
+        http_post_response(settings_url, views.profile_settings, email_data, self.user)
         self.user.refresh_from_db()
         profile.refresh_from_db()
         all_data = {}
