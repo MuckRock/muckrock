@@ -40,7 +40,7 @@ class StaleAgencyTaskFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = task.models.StaleAgencyTask
 
-    agency = factory.SubFactory('muckrock.factories.AgencyFactory')
+    agency = factory.SubFactory('muckrock.factories.StaleAgencyFactory', stale=True)
 
 
 class FlaggedTaskFactory(factory.django.DjangoModelFactory):
