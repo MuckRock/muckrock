@@ -1,7 +1,7 @@
 # MuckRock
 
 [![Codeship Status for MuckRock/muckrock][codeship-img]][codeship]
-[![codecov.io](codecov-img)](codecov)
+[![codecov.io][codecov-img]][codecov]
 
 ## Install
 
