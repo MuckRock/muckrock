@@ -233,7 +233,10 @@ class RejectedEmailTaskList(TaskList):
 
 class StaleAgencyTaskList(TaskList):
     title = 'Stale Agencies'
-    queryset = StaleAgencyTask.objects.select_related('agency')
+    queryset = (StaleAgencyTask.objects.select_related('agency').prefetch_related(
+        'agency__foiarequest_set',
+        'agency__foiarequest_set__communications'
+    )
 
 
 class FlaggedTaskList(TaskList):
