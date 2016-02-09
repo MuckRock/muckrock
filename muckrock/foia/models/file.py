@@ -3,6 +3,7 @@
 Models for the FOIA application
 """
 
+from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.db import models
 
@@ -11,7 +12,6 @@ import os
 
 from muckrock.foia.models.request import FOIARequest
 from muckrock.foia.models.communication import FOIACommunication
-from muckrock.settings import STATIC_URL
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +68,7 @@ class FOIAFile(models.Model):
         }
         ext = os.path.splitext(self.name())[1][1:]
         filename = mimetypes.get(ext, 'file-document.png')
-        return '%simg/%s' % (STATIC_URL, filename)
+        return '%simg/%s' % (settings.STATIC_URL, filename)
 
     def get_foia(self):
         """Get FOIA - self.foia should be refactored out"""

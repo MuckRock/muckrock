@@ -3,6 +3,7 @@
 Models for the FOIA application
 """
 
+from django.conf import settings
 from django.contrib.auth.models import User, AnonymousUser
 from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
@@ -20,7 +21,6 @@ from unidecode import unidecode
 
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.settings import MAILGUN_SERVER_NAME
 from muckrock.tags.models import Tag, TaggedItemBase
 from muckrock import task
 from muckrock import fields
@@ -599,7 +599,7 @@ class FOIARequest(models.Model):
             subject = 'MR#%s-%s - %s' % (self.pk, comm.pk, subject)
 
         cc_addrs = self.get_other_emails()
-        from_email = '%s@%s' % (from_addr, MAILGUN_SERVER_NAME)
+        from_email = '%s@%s' % (from_addr, settings.MAILGUN_SERVER_NAME)
         # pylint:disable=attribute-defined-outside-init
         self.reverse_communications = self.communications.reverse()
         body = render_to_string('text/foia/request_email.txt', {'request': self})

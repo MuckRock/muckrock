@@ -2,6 +2,7 @@
 Views for the FOIA application
 """
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -44,7 +45,6 @@ from muckrock.foia.views.comms import (
         change_comm_status,
         )
 from muckrock.qanda.models import Question
-from muckrock.settings import STRIPE_PUB_KEY
 from muckrock.tags.models import Tag
 from muckrock.task.models import Task, FlaggedTask, StatusChangeTask
 from muckrock.views import class_view_decorator, MRFilterableListView
@@ -279,7 +279,7 @@ class Detail(DetailView):
         open_tasks = [task for task in all_tasks if not task.resolved]
         context['task_count'] = len(open_tasks)
         context['open_tasks'] = open_tasks
-        context['stripe_pk'] = STRIPE_PUB_KEY
+        context['stripe_pk'] = settings.STRIPE_PUB_KEY
         context['sidebar_admin_url'] = reverse('admin:foia_foiarequest_change', args=(foia.pk,))
         context['is_thankable'] = foia.is_thankable()
         if foia.sidebar_html:
