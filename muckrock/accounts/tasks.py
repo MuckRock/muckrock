@@ -15,6 +15,7 @@ from muckrock.accounts.models import Profile, Statistics
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAFile, FOIACommunication
 from muckrock.news.models import Article
+from muckrock.organization.models import Organization
 from muckrock.task.models import (
         Task,
         OrphanTask,
@@ -139,11 +140,11 @@ def store_statstics():
                date_done__lt=date.today(),
                resolved_by__profile__acct_type='robot',
                ).count(),
-        total_active_org_members = Profile.objects.filter(
+        total_active_org_members=Profile.objects.filter(
                 organization__active=True,
                 organization__monthly_cost__gt=0,
                 ).count(),
-        total_active_orgs = Organization.objects.filter(
+        total_active_orgs=Organization.objects.filter(
                 active=True,
                 monthly_cost__gt=0,
                 ).count(),

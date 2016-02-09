@@ -493,7 +493,6 @@ class Statistics(models.Model):
     total_active_org_members = models.IntegerField(null=True, blank=True)
     total_active_orgs = models.IntegerField(null=True, blank=True)
 
-
     # notes
     public_notes = models.TextField(default='', blank=True)
     admin_notes = models.TextField(default='', blank=True)
