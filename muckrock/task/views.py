@@ -399,7 +399,8 @@ class RequestTaskList(TaskList):
                     'jurisdiction__parent__parent',
                     'user__profile'),
                 pk=self.kwargs['pk'])
-        tasks = Task.objects.filter_by_foia(self.foia_request)
+        user = self.request.user
+        tasks = Task.objects.filter_by_foia(self.foia_request, user)
         return tasks
 
     def get_context_data(self, **kwargs):

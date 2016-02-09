@@ -82,7 +82,7 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
     }
     input[type="checkbox"] {
         width: auto;
-        margin-right: $vertical-rhythm;
+        float: left;
     }
     label {
         margin-bottom: 0;
@@ -234,6 +234,7 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
 
 .response.task {
     .full-communication {
+        margin-bottom: 0;
         background: $color-grey-7;
         & > header {
             @include display(flex);
@@ -259,11 +260,7 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
 
 /* Snail Mail Task */
 
-
 .task-post-actions input[type=checkbox] {
-    float: right;
-    margin-top: .4em;
-    margin-left: .4em;
     & + label {
         margin-bottom: $vertical-rhythm;
     }
