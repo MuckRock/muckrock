@@ -1,6 +1,7 @@
 # MuckRock
 
 [![Codeship Status for MuckRock/muckrock][codeship-img]][codeship]
+[![codecov.io](codecov-img)](codecov)
 
 ## Install
 
@@ -48,3 +49,5 @@ The `master` branch represents our product code. `master` should only ever be up
 [production]: https://www.muckrock.com
 [vagrant]: https://www.vagrantup.com/downloads.html
 [virtualbox]: https://www.virtualbox.org
+[codecov-img]:https://codecov.io/github/MuckRock/muckrock/coverage.svg?token=SBg37XM3j1&branch=master
+[codecov]: https://codecov.io/github/MuckRock/muckrock?branch=master
