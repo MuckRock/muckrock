@@ -15,6 +15,7 @@ from muckrock.accounts.models import Profile, Statistics
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAFile, FOIACommunication
 from muckrock.news.models import Article
+from muckrock.organization.models import Organization
 from muckrock.task.models import (
         Task,
         OrphanTask,
@@ -66,13 +67,41 @@ def store_statstics():
         daily_requests_pro=FOIARequest.objects.filter(
             user__profile__acct_type='pro',
             date_submitted=yesterday
+        ).exclude(
+            user__profile__organization__active=True,
+            user__profile__organization__monthly_cost__gt=0,
         ).count(),
         daily_requests_basic=FOIARequest.objects.filter(
             user__profile__acct_type='basic',
             date_submitted=yesterday
+        ).exclude(
+            user__profile__organization__active=True,
+            user__profile__organization__monthly_cost__gt=0,
         ).count(),
         daily_requests_beta=FOIARequest.objects.filter(
             user__profile__acct_type='beta',
+            date_submitted=yesterday
+        ).exclude(
+            user__profile__organization__active=True,
+            user__profile__organization__monthly_cost__gt=0,
+        ).count(),
+        daily_requests_proxy=FOIARequest.objects.filter(
+            user__profile__acct_type='proxy',
+            date_submitted=yesterday
+        ).exclude(
+            user__profile__organization__active=True,
+            user__profile__organization__monthly_cost__gt=0,
+        ).count(),
+        daily_requests_admin=FOIARequest.objects.filter(
+            user__profile__acct_type='admin',
+            date_submitted=yesterday
+        ).exclude(
+            user__profile__organization__active=True,
+            user__profile__organization__monthly_cost__gt=0,
+        ).count(),
+        daily_requests_org=FOIARequest.objects.filter(
+            user__profile__organization__active=True,
+            user__profile__organization__monthly_cost__gt=0,
             date_submitted=yesterday
         ).count(),
         daily_articles=Article.objects.filter(pub_date__gte=yesterday,
@@ -111,6 +140,14 @@ def store_statstics():
                date_done__lt=date.today(),
                resolved_by__profile__acct_type='robot',
                ).count(),
+        total_active_org_members=Profile.objects.filter(
+                organization__active=True,
+                organization__monthly_cost__gt=0,
+                ).count(),
+        total_active_orgs=Organization.objects.filter(
+                active=True,
+                monthly_cost__gt=0,
+                ).count(),
         )
     # stats needs to be saved before many to many relationships can be set
     stats.users_today = User.objects.filter(last_login__year=yesterday.year,
