@@ -542,7 +542,7 @@ class FOIARequest(models.Model):
             self.date_processing = date.today()
         self.save()
 
-    def followup(self, automatic=False):
+    def followup(self, automatic=False, show_all_comms=True):
         """Send a follow up email for this request"""
         # pylint: disable=no-member
         from muckrock.foia.models.communication import FOIACommunication
@@ -566,7 +566,7 @@ class FOIARequest(models.Model):
             self.save()
 
         if self.email:
-            self._send_email()
+            self._send_email(show_all_comms)
         else:
             self.status = 'submitted'
             self.date_processing = date.today()
@@ -578,7 +578,7 @@ class FOIARequest(models.Model):
         # Do not self.update() here for now to avoid excessive emails
         self.update_dates()
 
-    def _send_email(self):
+    def _send_email(self, show_all_comms=True):
         """Send an email of the request to its email address"""
         # pylint: disable=no-member
         # self.email should be set before calling this method
@@ -602,7 +602,10 @@ class FOIARequest(models.Model):
         from_email = '%s@%s' % (from_addr, settings.MAILGUN_SERVER_NAME)
         # pylint:disable=attribute-defined-outside-init
         self.reverse_communications = self.communications.reverse()
-        body = render_to_string('text/foia/request_email.txt', {'request': self})
+        body = render_to_string(
+            'text/foia/request_email.txt',
+            {'request': self, 'show_all_comms': show_all_comms}
+        )
         body = unidecode(body) if from_addr == 'fax' else body
         msg = EmailMultiAlternatives(
             subject=subject,

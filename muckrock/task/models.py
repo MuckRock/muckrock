@@ -13,7 +13,7 @@ from datetime import datetime
 import email
 import logging
 
-from muckrock.agency.models import Agency
+from muckrock.agency.models import Agency, STALE_DURATION
 from muckrock.foia.models import FOIACommunication, FOIAFile, FOIARequest, STATUS
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.notifications import SupportNotification
@@ -247,6 +247,45 @@ class StaleAgencyTask(Task):
     def __unicode__(self):
         return u'Stale Agency Task'
 
+    def stale_requests(self):
+        """Returns a list of stale requests associated with the task's agency"""
+        requests = FOIARequest.objects.filter(agency=self.agency)
+        stale_requests = []
+        for foia_request in requests:
+            if foia_request.latest_response() >= STALE_DURATION:
+                stale_requests.append(foia_request)
+        return requests
+
+    def stalest_request(self):
+        """Returns the stalest of all the stale requests"""
+        stale_requests = self.stale_requests()
+        stalest_request = stale_requests[0]
+        for stale_request in stale_requests:
+            if stale_request.latest_response() >= stalest_request.latest_response():
+                stalest_request = stale_request
+        return stalest_request
+
+    def latest_response(self):
+        """Returns the latest response from the agency"""
+        all_requests = FOIARequest.objects.filter(agency=self.agency)
+        latest_response = all_requests.first().last_comm()
+        for foia_request in all_requests:
+            comm = foia_request.last_comm()
+            if comm.date > latest_response.date:
+                latest_response = comm
+        return latest_response
+
+    def update_email(self, new_email, foia_list=None):
+        """
+        Updates the email on the agency and the provided requests.
+        Marks the agency as not-stale.
+        """
+        self.agency.email = new_email
+        self.agency.stale = False
+        self.agency.save()
+        for foia in foia_list:
+            foia.email = new_email
+            foia.followup(automatic=True, show_all_comms=False)
 
 class FlaggedTask(Task):
     """A user has flagged a request, agency or jurisdiction"""

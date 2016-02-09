@@ -5,12 +5,14 @@ Tests for Tasks models
 from django.http import Http404
 from django.test import TestCase
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 import mock
 import nose
 
 from muckrock import factories, task
+from muckrock.agency.models import STALE_DURATION
+from muckrock.foia.models import FOIARequest
 from muckrock.task.factories import FlaggedTaskFactory
 from muckrock.task.signals import domain_blacklist
 
@@ -192,6 +194,56 @@ class SnailMailTaskTests(TestCase):
         eq_(self.task.communication.date.day, datetime.now().day,
             'Should update the date to today.')
 
+
+class StaleAgencyTaskTests(TestCase):
+    """Test the StaleAgencyTask class"""
+    def setUp(self):
+        self.task = task.factories.StaleAgencyTaskFactory()
+        self.foia = FOIARequest.objects.filter(agency=self.task.agency).first()
+
+    def test_stale_requests(self):
+        """
+        The stale agency task should provide a list of requests which have not
+        recieved any response since the stale duration.
+        """
+        stale_requests = self.task.stale_requests()
+        ok_(self.foia in stale_requests)
+
+    def test_stalest_request(self):
+        """The stale agency task should provide the stalest request it knows about."""
+        # first lets create a foia with a pretty stale communication
+        really_stale_request = factories.StaleFOIARequestFactory(agency=self.task.agency)
+        really_stale_communication = really_stale_request.communications.last()
+        really_stale_communication.date -= timedelta(STALE_DURATION)
+        really_stale_communication.save()
+        self.task.refresh_from_db()
+        stalest_request = self.task.stalest_request()
+        eq_(stalest_request, really_stale_request)
+
+    def test_latest_response(self):
+        """
+        The stale agency task should provide the most
+        recent response received from the agency.
+        """
+        latest_response = self.task.latest_response()
+        eq_(latest_response, self.foia.last_comm())
+
+    @mock.patch('muckrock.foia.models.FOIARequest.followup')
+    def test_update_email(self, mock_followup):
+        """
+        The stale agency task should update the email of its associated
+        agency and any selected stale requests. Then, the foias with
+        updated emails should automatically follow up with the agency.
+        The agency should also have its stale flag lowered.
+        """
+        new_email = 'test@email.com'
+        self.task.update_email(new_email, [self.foia])
+        self.task.refresh_from_db()
+        eq_(self.task.agency.email, new_email, 'The agency\'s email should be updated.')
+        ok_(not self.task.agency.stale, 'The agency should no longer be stale.')
+        eq_(self.foia.email, new_email, 'The foia\'s email should be updated.')
+        mock_followup.assert_called_with(automatic=True, show_all_comms=False)
+
 class NewAgencyTaskTests(TestCase):
     """Test the NewAgencyTask class"""
 
@@ -228,6 +280,7 @@ class NewAgencyTaskTests(TestCase):
             'Rejecting a new agency should leave it unapproved.')
         eq_(existing_foia.agency, replacement,
             'The replacement agency should receive the rejected agency\'s requests.')
+
 
 class ResponseTaskTests(TestCase):
     """Test the ResponseTask class"""
