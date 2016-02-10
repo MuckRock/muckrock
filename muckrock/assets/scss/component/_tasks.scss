@@ -145,6 +145,40 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
     }
 }
 
+/* Stale Agency Task */
+
+.stale-agency .task-data {
+    margin-bottom: 0;
+}
+
+.stale-agency .stale-requests {
+    border-bottom: 1px solid $color-grey;
+    header {
+        margin-bottom: 0;
+        padding: $vertical-rhythm/2;
+        background: $color-grey-7;
+    }
+    input[type="text"] {
+        margin: 0;
+        border-radius: 0;
+        width: 100%;
+    }
+    abbr {
+        cursor: help;
+    }
+}
+
+.stale-agency .recent-response {
+    text-align: left;
+    p {
+        margin-bottom: 0;
+    }
+}
+
+.stale-agency .form-field {
+    text-align: left;
+}
+
 /* New Agency Task */
 
 .new-agency-forms {
