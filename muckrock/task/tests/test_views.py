@@ -14,7 +14,7 @@ import nose
 from muckrock import agency, factories, task
 from muckrock.foia.models import FOIARequest
 from muckrock.foia.views import save_foia_comm
-from muckrock.task.factories import FlaggedTaskFactory
+from muckrock.task.factories import FlaggedTaskFactory, StaleAgencyTaskFactory
 from muckrock.utils import mock_middleware
 from muckrock.views import MRFilterableListView
 
@@ -271,6 +271,77 @@ class FlaggedTaskViewTests(TestCase):
         self.task.refresh_from_db()
         ok_(self.task.resolved, 'The task should resolve.')
         mock_reply.assert_called_with(test_text)
+
+
+class StaleAgencyTaskViewTests(TestCase):
+    """Tests StaleAgencyTask POST handlers"""
+    def setUp(self):
+        self.user = factories.UserFactory(is_staff=True)
+        self.url = reverse('stale-agency-task-list')
+        self.view = task.views.StaleAgencyTaskList.as_view()
+        self.task = StaleAgencyTaskFactory()
+        self.request_factory = RequestFactory()
+
+    def post_request(self, data):
+        """Helper to post data and get a response"""
+        request = self.request_factory.post(self.url, data)
+        request.user = self.user
+        request = mock_middleware(request)
+        response = self.view(request)
+        return response
+
+    @mock.patch('muckrock.task.models.StaleAgencyTask.update_email')
+    def test_post_email_update(self, mock_update):
+        """Should update email when given an email and a list of FOIA"""
+        new_email = u'new_email@muckrock.com'
+        foia = factories.FOIARequestFactory()
+        post_data = {
+            'email': new_email,
+            'foia': [foia.pk],
+            'update': 'truthy',
+            'resolve': 'truthy',
+            'task': self.task.pk
+        }
+        self.post_request(post_data)
+        self.task.refresh_from_db()
+        ok_(mock_update.called, 'The email should be updated.')
+        ok_(self.task.resolved, 'The task should resolve.')
+
+    @mock.patch('muckrock.task.models.StaleAgencyTask.update_email')
+    def test_post_bad_email_update(self, mock_update):
+        """An invalid email should be prevented from updating or resolving anything."""
+        bad_email = u'bad_email'
+        foia = factories.FOIARequestFactory()
+        post_data = {
+            'email': bad_email,
+            'foia': [foia.pk],
+            'update': 'truthy',
+            'resolve': 'truthy',
+            'task': self.task.pk
+        }
+        self.post_request(post_data)
+        self.task.refresh_from_db()
+        ok_(not mock_update.called, 'The email should not be updated.')
+        ok_(not self.task.resolved, 'The task should not resolve.')
+
+    @mock.patch('muckrock.task.models.StaleAgencyTask.update_email')
+    def test_post_bad_foia(self, mock_update):
+        """An invalid FOIA should not prevent the task from updating or resolving anything."""
+        new_email = u'new_email@muckrock.com'
+        foia = factories.FOIARequestFactory()
+        bad_pk = 12345
+        post_data = {
+            'email': new_email,
+            'foia': [foia.pk, bad_pk],
+            'update': 'truthy',
+            'resolve': 'truthy',
+            'task': self.task.pk
+        }
+        self.post_request(post_data)
+        self.task.refresh_from_db()
+        ok_(mock_update.called, 'The email should be updated.')
+        ok_(self.task.resolved, 'The task should resolve.')
+
 
 @mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class NewAgencyTaskViewTests(TestCase):

@@ -88,27 +88,9 @@ function formHasAction(taskForm, action) {
     return actionExists;
 }
 
-function rebindCheckboxes(){
-    // Rebinds the toggle all checkbox to only select checkboxes in task headers
-    $('#toggle-all').off('click');
-    $('#toggle-all').click(function(){
-        var toggleAll = this;
-        $('.task header :checkbox').not('#toggle-all').not('.list-filters-fields').each(function(){
-            $(this).click(function(){
-                toggleAll.checked = false;
-            });
-            if (!$(this).data('ignore-toggle-all')) {
-                this.checked = toggleAll.checked;
-                toggleBatchedButtons();
-            }
-        });
-    });
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 authenticateAjax();
-rebindCheckboxes();
 
 var tasks = $('.task');
 
@@ -184,11 +166,7 @@ function toggleBatchedButtons() {
     }
 }
 batchedButtons.attr('disabled', true);
-checkboxes.click(function(){
-    toggleBatchedButtons();
-});
-
-
+checkboxes.change(toggleBatchedButtons);
 
 $('#collapse-all').click(function(e){
     e.preventDefault();

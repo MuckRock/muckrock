@@ -32,6 +32,11 @@ class FlaggedTaskForm(forms.Form):
     }))
 
 
+class StaleAgencyTaskForm(forms.Form):
+    """Simple form for acting on a StaleAgencyTask"""
+    email = forms.EmailField()
+
+
 class ResponseTaskForm(forms.Form):
     """Simple form for acting on a ResponseTask"""
     move = forms.CharField(required=False)

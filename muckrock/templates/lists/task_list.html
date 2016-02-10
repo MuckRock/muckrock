@@ -75,7 +75,7 @@
 {% block list-content %}
     <section class="list-actions">
         <div>
-            <input type="checkbox" id="toggle-all" />
+            <input type="checkbox" onClick="selectAll(this, 'tasks')" />
             <label for="toggle-all">Select/Unselect All</label>
         </div>
         <form method="POST" id="batched">
