@@ -226,7 +226,8 @@ class StaleAgencyTaskTests(TestCase):
         recent response received from the agency.
         """
         latest_response = self.task.latest_response()
-        eq_(latest_response, self.foia.last_comm())
+        eq_(latest_response, self.foia.last_response())
+        ok_(latest_response.response, 'Should return a response!')
 
     @mock.patch('muckrock.foia.models.FOIARequest.followup')
     def test_update_email(self, mock_followup):

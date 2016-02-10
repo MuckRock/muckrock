@@ -460,12 +460,17 @@ class FOIARequest(models.Model):
         # pylint: disable=no-member
         return self.communications.last()
 
-    def latest_response(self):
-        """How many days since the last response"""
-        # pylint: disable=no-member
+    def last_response(self):
+        """Return the last response"""
         responses = self.communications.filter(response=True).order_by('-date')
         if responses:
-            return (date.today() - responses[0].date.date()).days
+            return responses.first()
+
+    def latest_response(self):
+        """How many days since the last response"""
+        response = self.last_response()
+        if response:
+            return (date.today() - response.date.date()).days
 
     def processing_length(self):
         """How many days since the request was set as processing"""

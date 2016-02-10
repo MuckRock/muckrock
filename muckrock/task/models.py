@@ -268,9 +268,9 @@ class StaleAgencyTask(Task):
     def latest_response(self):
         """Returns the latest response from the agency"""
         all_requests = FOIARequest.objects.filter(agency=self.agency)
-        latest_response = all_requests.first().last_comm()
+        latest_response = all_requests.first().last_response()
         for foia_request in all_requests:
-            comm = foia_request.last_comm()
+            comm = foia_request.last_response()
             if comm.date > latest_response.date:
                 latest_response = comm
         return latest_response
