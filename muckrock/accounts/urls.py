@@ -70,7 +70,7 @@ urlpatterns = patterns(
         views.buy_requests,
         name='acct-buy-requests'),
     url(r'^settings/$',
-        views.settings,
+        views.profile_settings,
         name='acct-settings'),
     url(r'^settings/verify_email/$',
         views.verify_email,

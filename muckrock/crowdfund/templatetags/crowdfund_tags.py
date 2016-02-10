@@ -3,12 +3,12 @@ Nodes and tags for rendering crowdfunds into templates
 """
 
 from django import template
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 
 from muckrock.crowdfund.models import CrowdfundRequest, CrowdfundProject
 from muckrock.crowdfund.forms import CrowdfundRequestPaymentForm, CrowdfundProjectPaymentForm
-from muckrock.settings import STRIPE_PUB_KEY
 from muckrock.utils import cache_get_or_set
 
 register = template.Library()
@@ -115,7 +115,7 @@ def generate_crowdfund_context(the_crowdfund, the_url_name, the_form, the_contex
         'user_email': user_email,
         'payment_form': payment_form,
         'request': the_request,
-        'stripe_pk': STRIPE_PUB_KEY
+        'stripe_pk': settings.STRIPE_PUB_KEY
     }
 
 @register.inclusion_tag('crowdfund/widget.html', takes_context=True)

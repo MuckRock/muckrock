@@ -2,6 +2,7 @@
 Views for the news application
 """
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
@@ -16,7 +17,6 @@ import django_filters
 
 from muckrock.news.models import Article
 from muckrock.news.serializers import ArticleSerializer
-from muckrock.settings import STRIPE_PUB_KEY
 from muckrock.tags.models import Tag
 
 # pylint: disable=too-many-ancestors
@@ -48,7 +48,7 @@ class NewsDetail(DateDetailView):
                 .select_related_view().get_public_file_count())
         context['sidebar_admin_url'] = reverse('admin:news_article_change',
             args=(context['object'].pk,))
-        context['stripe_pk'] = STRIPE_PUB_KEY
+        context['stripe_pk'] = settings.STRIPE_PUB_KEY
         return context
 
     def post(self, request, **kwargs):

@@ -198,6 +198,14 @@ function hideNav(nav, button) {
     $(button).removeClass('active');
 }
 
+function selectAll(source, name) {
+    var checkboxes = $('input[type="checkbox"][name="' + name + '"]');
+    $(checkboxes).each(function(){
+        this.checked = source.checked;
+        $(this).change();
+    });
+}
+
 $('#show-sections').click(function(){
     var button = this;
     var sections = '#global-sections';

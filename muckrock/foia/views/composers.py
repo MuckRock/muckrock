@@ -2,6 +2,7 @@
 FOIA views for composing
 """
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
@@ -38,7 +39,6 @@ from muckrock.foia.models import (
     STATUS,
     )
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.settings import STRIPE_PUB_KEY, MONTHLY_REQUESTS
 from muckrock.task.models import NewAgencyTask, MultiRequestTask
 
 # pylint: disable=too-many-ancestors
@@ -137,7 +137,7 @@ def _make_user(request, data):
     Profile.objects.create(
         user=user,
         acct_type='basic',
-        monthly_requests=MONTHLY_REQUESTS.get('basic', 0),
+        monthly_requests=settings.MONTHLY_REQUESTS.get('basic', 0),
         date_update=datetime.now()
     )
     # send the new user a welcome email
@@ -343,7 +343,7 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
         'form': form,
         'foia': foia,
         'remaining': foia.user.profile.total_requests(),
-        'stripe_pk': STRIPE_PUB_KEY,
+        'stripe_pk': settings.STRIPE_PUB_KEY,
         'sidebar_admin_url': reverse('admin:foia_foiarequest_change', args=(foia.pk,))
     }
 
@@ -466,7 +466,7 @@ def draft_multirequest(request, slug, idx):
         'profile': profile,
         'balance': request_balance,
         'bundles': num_bundles,
-        'stripe_pk': STRIPE_PUB_KEY
+        'stripe_pk': settings.STRIPE_PUB_KEY
     }
 
     return render_to_response(

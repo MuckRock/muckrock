@@ -2,6 +2,7 @@
 Views for the accounts application
 """
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
@@ -43,10 +44,9 @@ from muckrock.message.tasks import send_charge_receipt,\
                                    failed_payment,\
                                    welcome,\
                                    gift
-from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 
 logger = logging.getLogger(__name__)
-stripe.api_key = STRIPE_SECRET_KEY
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 def create_new_user(request, valid_form):
     """Create a user from the valid form, give them a profile, and log them in."""
@@ -107,7 +107,7 @@ class ProfessionalSignupView(SignupView):
     def get_context_data(self, **kwargs):
         """Adds Stripe PK to template context data."""
         context = super(ProfessionalSignupView, self).get_context_data(**kwargs)
-        context['stripe_pk'] = STRIPE_PUB_KEY
+        context['stripe_pk'] = settings.STRIPE_PUB_KEY
         return context
 
     def form_valid(self, form):
@@ -174,7 +174,7 @@ class AccountsView(TemplateView):
                 context['org'] = Organization.objects.get(owner=self.request.user)
             except Organization.DoesNotExist:
                 context['org'] = None
-        context['stripe_pk'] = STRIPE_PUB_KEY
+        context['stripe_pk'] = settings.STRIPE_PUB_KEY
         context['logged_in'] = logged_in
         return context
 
@@ -223,7 +223,7 @@ def downgrade(request):
     request.user.profile.cancel_pro_subscription()
 
 @login_required
-def settings(request):
+def profile_settings(request):
     """Update a users information"""
     user_profile = request.user.profile
     settings_forms = {
@@ -242,7 +242,7 @@ def settings(request):
     email_form = EmailSettingsForm(initial=email_initial, instance=user_profile)
     current_plan = dict(ACCT_TYPES)[user_profile.acct_type]
     context = {
-        'stripe_pk': STRIPE_PUB_KEY,
+        'stripe_pk': settings.STRIPE_PUB_KEY,
         'profile_form': profile_form,
         'email_form': email_form,
         'current_plan': current_plan,
@@ -377,7 +377,7 @@ def profile(request, username=None):
         'recent_requests': recent_requests,
         'recent_completed': recent_completed,
         'articles': articles,
-        'stripe_pk': STRIPE_PUB_KEY,
+        'stripe_pk': settings.STRIPE_PUB_KEY,
         'sidebar_admin_url': reverse('admin:auth_user_change', args=(user.pk,)),
     }
     return render_to_response(

@@ -104,7 +104,7 @@ COMPRESS_PRECOMPILERS = (
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
-if not DEBUG:
+if not DEBUG and not TEST:
     DEFAULT_BUCKET_NAME = 'muckrock'
     BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', DEFAULT_BUCKET_NAME)
     DEFAULT_FILE_STORAGE = 'image_diet.storage.DietStorage'
