@@ -410,6 +410,11 @@ class FOIARequest(models.Model):
         except IndexError:
             return ''
 
+    def last_comm(self):
+        """Return the last communication"""
+        # pylint: disable=no-member
+        return self.communications.last()
+
     def last_response(self):
         """Return the most recent response"""
         return self.communications.filter(response=True).order_by('-date').first()
@@ -417,7 +422,6 @@ class FOIARequest(models.Model):
     def set_mail_id(self):
         """Set the mail id, which is the unique identifier for the auto mailer system"""
         # pylint: disable=no-member
-
         # use raw sql here in order to avoid race conditions
         uid = int(md5(self.title.encode('utf8') +
                       datetime.now().isoformat()).hexdigest(), 16) % 10 ** 8
@@ -454,17 +458,6 @@ class FOIARequest(models.Model):
             return FOIARequest.objects.get(pk=self.pk)
         except FOIARequest.DoesNotExist:
             return None
-
-    def last_comm(self):
-        """Return the last communication"""
-        # pylint: disable=no-member
-        return self.communications.last()
-
-    def last_response(self):
-        """Return the last response"""
-        responses = self.communications.filter(response=True).order_by('-date')
-        if responses:
-            return responses.first()
 
     def latest_response(self):
         """How many days since the last response"""

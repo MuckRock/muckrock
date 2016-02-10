@@ -64,12 +64,16 @@ class TestAgencyUnit(TestCase):
 
     def test_agency_latest_response(self):
         """Should return the date of the last response by the agency"""
-        agency = self.agency1
         duration = 30
         comm_date = datetime.today() - timedelta(duration)
-        communication = factories.FOIACommunicationFactory(date=comm_date, response=True, foia__status='ack', foia__agency=agency)
-        print agency.latest_response()
-        eq_(agency.latest_response(), duration, "The agency should report the days since its latest response.")
+        factories.FOIACommunicationFactory(
+            date=comm_date,
+            response=True,
+            foia__status='ack',
+            foia__agency=self.agency1
+        )
+        eq_(self.agency1.latest_response(), duration,
+            "The agency should report the days since its latest response.")
 
 class TestAgencyManager(TestCase):
     """Tests for the Agency object manager"""

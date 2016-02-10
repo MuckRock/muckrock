@@ -152,7 +152,7 @@ class StaleAgencyFactory(AgencyFactory):
 
 class StaleFOIARequestFactory(FOIARequestFactory):
     """A factory for creating stale FOIARequest test objects."""
-    status='ack'
+    status = 'ack'
     stale_comm = factory.RelatedFactory('muckrock.factories.StaleFOIACommunicationFactory', 'foia')
 
 
