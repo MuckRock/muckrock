@@ -15,7 +15,9 @@ import logging
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
 from muckrock.foia.models import STATUS, FOIARequest, FOIACommunication, FOIAFile
-from muckrock.task.forms import TaskFilterForm, FlaggedTaskForm, ResponseTaskForm
+from muckrock.task.forms import (
+        TaskFilterForm, FlaggedTaskForm, StaleAgencyTaskForm, ResponseTaskForm
+        )
 from muckrock.task.models import (
         Task, OrphanTask, SnailMailTask, RejectedEmailTask,
         StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask,
@@ -236,7 +238,22 @@ class StaleAgencyTaskList(TaskList):
     queryset = (StaleAgencyTask.objects.select_related('agency').prefetch_related(
         'agency__foiarequest_set',
         'agency__foiarequest_set__communications'
-    )
+    ))
+
+    def task_post_helper(self, request, task):
+        """Check the new email is valid and, if so, apply it"""
+        if request.POST.get('update'):
+            email_form = StaleAgencyTaskForm(request.POST)
+            if email_form.is_valid():
+                new_email = email_form.cleaned_data['email']
+                foia_pks = request.POST.getlist('foia')
+                foias = FOIARequest.objects.filter(pk__in=foia_pks)
+                task.update_email(new_email, foias)
+            else:
+                messages.error(request, 'The email is invalid.')
+                return
+        if request.POST.get('resolve'):
+            task.resolve(request.user)
 
 
 class FlaggedTaskList(TaskList):
