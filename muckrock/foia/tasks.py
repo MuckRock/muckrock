@@ -60,7 +60,7 @@ ml_options = MLOptions()
 
 def authenticate_documentcloud(request):
     """This is just standard username/password encoding"""
-    username = settings.DOCUMNETCLOUD_USERNAME
+    username = settings.DOCUMENTCLOUD_USERNAME
     password = settings.DOCUMENTCLOUD_PASSWORD
     auth = base64.encodestring('%s:%s' % (username, password))[:-1]
     request.add_header('Authorization', 'Basic %s' % auth)
