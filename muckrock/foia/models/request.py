@@ -410,6 +410,11 @@ class FOIARequest(models.Model):
         except IndexError:
             return ''
 
+    def last_comm(self):
+        """Return the last communication"""
+        # pylint: disable=no-member
+        return self.communications.last()
+
     def last_response(self):
         """Return the most recent response"""
         return self.communications.filter(response=True).order_by('-date').first()
@@ -417,7 +422,6 @@ class FOIARequest(models.Model):
     def set_mail_id(self):
         """Set the mail id, which is the unique identifier for the auto mailer system"""
         # pylint: disable=no-member
-
         # use raw sql here in order to avoid race conditions
         uid = int(md5(self.title.encode('utf8') +
                       datetime.now().isoformat()).hexdigest(), 16) % 10 ** 8
@@ -455,17 +459,11 @@ class FOIARequest(models.Model):
         except FOIARequest.DoesNotExist:
             return None
 
-    def last_comm(self):
-        """Return the last communication"""
-        # pylint: disable=no-member
-        return self.communications.last()
-
     def latest_response(self):
         """How many days since the last response"""
-        # pylint: disable=no-member
-        responses = self.communications.filter(response=True).order_by('-date')
-        if responses:
-            return (date.today() - responses[0].date.date()).days
+        response = self.last_response()
+        if response:
+            return (date.today() - response.date.date()).days
 
     def processing_length(self):
         """How many days since the request was set as processing"""
@@ -542,7 +540,7 @@ class FOIARequest(models.Model):
             self.date_processing = date.today()
         self.save()
 
-    def followup(self, automatic=False):
+    def followup(self, automatic=False, show_all_comms=True):
         """Send a follow up email for this request"""
         # pylint: disable=no-member
         from muckrock.foia.models.communication import FOIACommunication
@@ -566,7 +564,7 @@ class FOIARequest(models.Model):
             self.save()
 
         if self.email:
-            self._send_email()
+            self._send_email(show_all_comms)
         else:
             self.status = 'submitted'
             self.date_processing = date.today()
@@ -578,7 +576,7 @@ class FOIARequest(models.Model):
         # Do not self.update() here for now to avoid excessive emails
         self.update_dates()
 
-    def _send_email(self):
+    def _send_email(self, show_all_comms=True):
         """Send an email of the request to its email address"""
         # pylint: disable=no-member
         # self.email should be set before calling this method
@@ -602,7 +600,10 @@ class FOIARequest(models.Model):
         from_email = '%s@%s' % (from_addr, settings.MAILGUN_SERVER_NAME)
         # pylint:disable=attribute-defined-outside-init
         self.reverse_communications = self.communications.reverse()
-        body = render_to_string('text/foia/request_email.txt', {'request': self})
+        body = render_to_string(
+            'text/foia/request_email.txt',
+            {'request': self, 'show_all_comms': show_all_comms}
+        )
         body = unidecode(body) if from_addr == 'fax' else body
         msg = EmailMultiAlternatives(
             subject=subject,

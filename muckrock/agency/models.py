@@ -13,6 +13,8 @@ from easy_thumbnails.fields import ThumbnailerImageField
 from muckrock.jurisdiction.models import Jurisdiction, RequestHelper
 from muckrock import fields
 
+STALE_DURATION = 120
+
 class AgencyType(models.Model):
     """Marks an agency as fufilling requests of this type for its jurisdiction"""
 
