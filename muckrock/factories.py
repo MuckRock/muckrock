@@ -9,7 +9,7 @@ import datetime
 import factory
 
 from muckrock.accounts.models import Profile, Statistics
-from muckrock.agency.models import Agency
+from muckrock.agency.models import Agency, STALE_DURATION
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.organization.models import Organization
@@ -63,7 +63,7 @@ class AgencyFactory(factory.django.DjangoModelFactory):
 
     name = factory.Sequence(lambda n: "Agency %d" % n)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
-    jurisdiction = factory.SubFactory(JurisdictionFactory)
+    jurisdiction = factory.SubFactory('muckrock.factories.JurisdictionFactory')
     status = 'approved'
 
 
@@ -75,7 +75,7 @@ class FOIARequestFactory(factory.django.DjangoModelFactory):
     title = factory.Sequence(lambda n: "FOIA Request %d" % n)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
     user = factory.SubFactory(UserFactory)
-    jurisdiction = factory.SubFactory(JurisdictionFactory)
+    jurisdiction = factory.SubFactory('muckrock.factories.JurisdictionFactory')
 
 
 class FOIACommunicationFactory(factory.django.DjangoModelFactory):
@@ -141,3 +141,24 @@ class StatisticsFactory(factory.django.DjangoModelFactory):
     total_tasks = 100
     total_unresolved_tasks = 45
     daily_robot_response_tasks = 12
+
+# Stale Agency Factory
+
+class StaleAgencyFactory(AgencyFactory):
+    """A factory for creating stale Agency test objects."""
+    stale = True
+    stale_foia = factory.RelatedFactory('muckrock.factories.StaleFOIARequestFactory', 'agency')
+
+
+class StaleFOIARequestFactory(FOIARequestFactory):
+    """A factory for creating stale FOIARequest test objects."""
+    status = 'ack'
+    stale_comm = factory.RelatedFactory('muckrock.factories.StaleFOIACommunicationFactory', 'foia')
+
+
+class StaleFOIACommunicationFactory(FOIACommunicationFactory):
+    """A factory for creating stale FOIARequest test objects."""
+    response = True
+    date = factory.LazyAttribute(
+        lambda obj: datetime.datetime.now() - datetime.timedelta(STALE_DURATION)
+    )
