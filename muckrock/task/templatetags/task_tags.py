@@ -169,6 +169,16 @@ class StaleAgencyTaskNode(TaskNode):
     endpoint_name = 'stale-agency-task-list'
     class_name = 'stale-agency'
 
+    def get_extra_context(self):
+        """Adds a form for updating the email"""
+        extra_context = super(FlaggedTaskNode, self).get_extra_context()
+        latest_response = self.task.latest_response()
+        initial = {'email': latest_response.priv_from_who}
+        extra_context['email_form'] = task.forms.StaleAgencyTaskForm(initial=initial)
+        extra_context['stale_requests'] = self.task.stale_requests()
+        extra_context['stalest_request'] = self.task.stalest_request()
+        return extra_context
+
 
 class StatusChangeTaskNode(TaskNode):
     """Renders a status change task."""
