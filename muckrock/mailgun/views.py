@@ -159,7 +159,7 @@ def handle_request(request, mail_id):
         # If anything I haven't accounted for happens, at the very least forward
         # the email to requests so it isn't lost
         logger.error('Uncaught Mailgun Exception: %s', mail_id, exc_info=sys.exc_info())
-        _forward(post, request.FILES, 'Uncaught Mailgun Exception')
+        _forward(post, request.FILES, 'Uncaught Mailgun Exception', info=True)
         return HttpResponse('ERROR')
 
     return HttpResponse('OK')
@@ -280,7 +280,7 @@ def _verify(post):
                                   digestmod=hashlib.sha256).hexdigest()) \
            and int(timestamp) + 300 > time.time()
 
-def _forward(post, files, title='', extra_content=''):
+def _forward(post, files, title='', extra_content='', info=False):
     """Forward an email from mailgun to admin"""
     if title:
         subject = '%s: %s' % (title, post.get('subject', ''))
@@ -293,7 +293,10 @@ def _forward(post, files, title='', extra_content=''):
     else:
         body = post.get('body-plain')
 
-    email = EmailMessage(subject, body, post.get('From'), ['requests@muckrock.com'])
+    to_addresses = ['requests@muckrock.com']
+    if info:
+        to_addresses.append('info@muckrock.com')
+    email = EmailMessage(subject, body, post.get('From'), to_addresses)
     for file_ in files.itervalues():
         email.attach(file_.name, file_.read(), file_.content_type)
 
