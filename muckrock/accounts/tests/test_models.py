@@ -2,6 +2,7 @@
 Tests accounts models
 """
 
+from django.conf import settings
 from django.test import TestCase
 
 from datetime import datetime, date, timedelta
@@ -9,7 +10,6 @@ from mock import Mock, patch
 from nose.tools import ok_, eq_, assert_true, assert_false, raises, nottest
 
 from muckrock.factories import ProfileFactory, OrganizationFactory
-from muckrock.settings import MONTHLY_REQUESTS
 from muckrock.utils import get_stripe_token
 
 # pylint:disable=no-member
@@ -79,7 +79,7 @@ class TestProfileUnit(TestCase):
     def test_monthly_requests_refresh(self):
         """Get number requests resets the number of requests if its been over a month"""
         self.profile.date_update = datetime.now() - timedelta(32)
-        monthly_requests = MONTHLY_REQUESTS[self.profile.acct_type]
+        monthly_requests = settings.MONTHLY_REQUESTS[self.profile.acct_type]
         eq_(self.profile.get_monthly_requests(), monthly_requests)
         eq_(self.profile.date_update.date(), date.today())
 
@@ -139,7 +139,7 @@ class TestProfileUnit(TestCase):
         eq_(self.profile.acct_type, 'pro')
         eq_(self.profile.subscription_id, mock_subscription.id)
         eq_(self.profile.date_update.today(), date.today())
-        eq_(self.profile.monthly_requests, MONTHLY_REQUESTS.get('pro'))
+        eq_(self.profile.monthly_requests, settings.MONTHLY_REQUESTS.get('pro'))
 
     @raises(AttributeError)
     def test_start_pro_as_owner(self):
@@ -155,17 +155,17 @@ class TestProfileUnit(TestCase):
         ok_(mock_subscription.delete.called)
         eq_(self.profile.acct_type, 'basic')
         ok_(not self.profile.subscription_id)
-        eq_(self.profile.monthly_requests, MONTHLY_REQUESTS.get('basic'))
+        eq_(self.profile.monthly_requests, settings.MONTHLY_REQUESTS.get('basic'))
 
     def test_cancel_legacy_subscription(self):
         """Test ending a pro subscription when missing a subscription ID"""
         # pylint:disable=no-self-use
         pro_profile = ProfileFactory(acct_type='basic',
-                                     monthly_requests=MONTHLY_REQUESTS.get('pro'))
+                                     monthly_requests=settings.MONTHLY_REQUESTS.get('pro'))
         ok_(not pro_profile.subscription_id)
         pro_profile.cancel_pro_subscription()
         eq_(pro_profile.acct_type, 'basic')
-        eq_(pro_profile.monthly_requests, MONTHLY_REQUESTS.get('basic'))
+        eq_(pro_profile.monthly_requests, settings.MONTHLY_REQUESTS.get('basic'))
 
 
 class TestStripeIntegration(TestCase):

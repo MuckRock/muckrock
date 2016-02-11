@@ -2,6 +2,7 @@
 Tests for mailgun
 """
 
+from django.conf import settings
 from django.core import mail
 from django.core.urlresolvers import reverse
 from django.test import TestCase
@@ -14,7 +15,6 @@ import os
 import time
 
 from muckrock.foia.models import FOIARequest
-from muckrock.settings import MAILGUN_ACCESS_KEY, SITE_ROOT
 
 # pylint: disable=no-self-use
 # pylint: disable=too-many-public-methods
@@ -34,7 +34,7 @@ class TestMailgunViews(TestCase):
         """Add mailgun signature to data"""
         token = 'token'
         timestamp = int(time.time())
-        signature = hmac.new(key=MAILGUN_ACCESS_KEY,
+        signature = hmac.new(key=settings.MAILGUN_ACCESS_KEY,
                              msg='%s%s' % (timestamp, token),
                              digestmod=hashlib.sha256).hexdigest()
         data['token'] = token
@@ -124,7 +124,7 @@ class TestMailgunViews(TestCase):
         finally:
             foia.files.all()[0].delete()
             os.remove('data.xls')
-            file_path = os.path.join(SITE_ROOT, 'static/media/', file_path)
+            file_path = os.path.join(settings.SITE_ROOT, 'static/media/', file_path)
             if os.path.exists(file_path):
                 os.remove(file_path)
 

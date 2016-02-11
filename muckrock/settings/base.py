@@ -104,7 +104,7 @@ COMPRESS_PRECOMPILERS = (
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
-if not DEBUG:
+if not DEBUG and not TEST:
     DEFAULT_BUCKET_NAME = 'muckrock'
     BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', DEFAULT_BUCKET_NAME)
     DEFAULT_FILE_STORAGE = 'image_diet.storage.DietStorage'
@@ -497,7 +497,7 @@ MAILGUN_SERVER_NAME = 'requests.muckrock.com'
 EMAIL_SUBJECT_PREFIX = '[Muckrock]'
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
 
-DOCUMNETCLOUD_USERNAME = os.environ.get('DOCUMNETCLOUD_USERNAME')
+DOCUMENTCLOUD_USERNAME = os.environ.get('DOCUMENTCLOUD_USERNAME')
 DOCUMENTCLOUD_PASSWORD = os.environ.get('DOCUMENTCLOUD_PASSWORD')
 
 GA_USERNAME = os.environ.get('GA_USERNAME')

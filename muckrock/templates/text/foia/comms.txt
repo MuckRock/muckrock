@@ -1,7 +1,10 @@
-{% autoescape off %}{% for comm in request.reverse_communications %}
+{% autoescape off %}
+{% if show_all_comms %}{% for comm in request.reverse_communications %}
 {% if not forloop.first %}On {{ comm.date|date }}:{% endif %}
 {{ comm.communication }}
-{% if forloop.last %}
+{% if not forloop.last %}---{% endif %}
+{% endfor %}{% else %}{{ request.last_comm.communication }}{% endif %}
+------
 Filed via MuckRock.com
 E-mail (Preferred): {{ request.get_mail_id }}@requests.muckrock.com
 
@@ -11,4 +14,6 @@ DEPT MR {{ request.pk }}
 411A Highland Ave
 Somerville, MA 02144-2516
 
-{% if request.user.is_staff %}PLEASE NOTE: This request was filed by a MuckRock staff reporter. Also note that improperly addressed (i.e., with the requester's name rather than "MuckRock News" and the department number) requests might be returned as undeliverable.{% else %}PLEASE NOTE: This request is not filed by a MuckRock staff member, but is being sent through MuckRock by the above in order to better track, share, and manage public records requests. Also note that improperly addressed (i.e., with the requester's name rather than "MuckRock News" and the department number) requests might be returned as undeliverable.{% endif %}{% endif %}{% if not forloop.last %}---{% endif %}{% endfor %}{% endautoescape %}
+{% if request.user.is_staff %}PLEASE NOTE: This request was filed by a MuckRock staff reporter. Also note that improperly addressed (i.e., with the requester's name rather than "MuckRock News" and the department number) requests might be returned as undeliverable.{% else %}PLEASE NOTE: This request is not filed by a MuckRock staff member, but is being sent through MuckRock by the above in order to better track, share, and manage public records requests. Also note that improperly addressed (i.e., with the requester's name rather than "MuckRock News" and the department number) requests might be returned as undeliverable.{% endif %}
+------
+{% endautoescape %}

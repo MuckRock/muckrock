@@ -13,6 +13,8 @@ from easy_thumbnails.fields import ThumbnailerImageField
 from muckrock.jurisdiction.models import Jurisdiction, RequestHelper
 from muckrock import fields
 
+STALE_DURATION = 120
+
 class AgencyType(models.Model):
     """Marks an agency as fufilling requests of this type for its jurisdiction"""
 
@@ -49,7 +51,6 @@ class Agency(models.Model, RequestHelper):
     slug = models.SlugField(max_length=255)
     jurisdiction = models.ForeignKey(Jurisdiction, related_name='agencies')
     types = models.ManyToManyField(AgencyType, blank=True)
-    approved = models.BooleanField(default=False)
     status = models.CharField(choices=(
         ('pending', 'Pending'),
         ('approved', 'Approved'),
@@ -75,7 +76,6 @@ class Agency(models.Model, RequestHelper):
     contact_last_name = models.CharField(blank=True, max_length=100)
     contact_title = models.CharField(blank=True, max_length=255)
     url = models.URLField(blank=True, verbose_name='FOIA Web Page', help_text='Begin with http://')
-    expires = models.DateField(blank=True, null=True)
     phone = models.CharField(blank=True, max_length=30)
     fax = models.CharField(blank=True, max_length=30)
     notes = models.TextField(blank=True)
@@ -142,23 +142,28 @@ class Agency(models.Model, RequestHelper):
         else:
             return self.name
 
-    def expired(self):
-        """Is this agency expired?"""
+    def is_stale(self):
+        """Should this agency be marked as stale?
 
-        if self.expires:
-            return self.expires < date.today()
-
-    def latest_response(self):
-        """When was the last time we heard from them?"""
+        If the latest response to any open request is greater than STALE_DURATION
+        days ago, or if no responses to any open request, if the oldest open
+        request was sent greater than STALE_DURATION days ago.  If no open requests,
+        do not mark as stale."""
         # pylint: disable=no-member
-        foias = self.foiarequest_set.get_open()
+        # first find any open requests, if none, not stale
+        foias = self.foiarequest_set.get_open().order_by('date_submitted')
+        if not foias:
+            return False
+        # find the latest response to an open request
         latest_responses = []
         for foia in foias:
             response = foia.latest_response()
             if response:
                 latest_responses.append(response)
         if latest_responses:
-            return min(latest_responses)
+            return min(latest_responses) >= STALE_DURATION
+        # no response to open requests, use oldest open request submit date
+        return (date.today() - foias[0].date_submitted).days >= STALE_DURATION
 
     def count_thanks(self):
         """Count how many thanks this agency has received"""
