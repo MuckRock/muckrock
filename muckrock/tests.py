@@ -88,7 +88,7 @@ class TestFunctional(TestCase):
         get_allowed(self.client, '/search/')
 
     def test_api_views(self):
-        """Test APY views"""
+        """Test API views"""
         self.client.login(username='super', password='abc')
         api_objs = ['jurisdiction', 'agency', 'foia', 'question', 'statistics',
                 'communication', 'user', 'news', 'task', 'orphantask',
