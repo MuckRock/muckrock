@@ -31,4 +31,4 @@ if [ -f .dir_colors ]; then
     . .dir_colors
 fi
 
-export DJANGO_MODULE_SETTINGS="muckrock.settings.local"
+export DJANGO_SETTINGS_MODULE="muckrock.settings.local"
