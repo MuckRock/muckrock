@@ -10,7 +10,7 @@ import factory
 
 from muckrock.accounts.models import Profile, Statistics
 from muckrock.agency.models import Agency, STALE_DURATION
-from muckrock.foia.models import FOIARequest, FOIACommunication
+from muckrock.foia.models import FOIARequest, FOIACommunication, RawEmail
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.organization.models import Organization
 from muckrock.project.models import Project
@@ -87,6 +87,15 @@ class FOIACommunicationFactory(factory.django.DjangoModelFactory):
     from_who = factory.Sequence(lambda n: "From: %d" % n)
     priv_from_who = 'Test Sender <test@muckrock.com>'
     date = factory.LazyAttribute(lambda obj: datetime.datetime.now())
+    rawemail = factory.RelatedFactory('muckrock.factories.RawEmailFactory', 'communication')
+
+class RawEmailFactory(factory.django.DjangoModelFactory):
+    """A factory for creating  objects."""
+    class Meta:
+        model = RawEmail
+
+    communication = factory.SubFactory(FOIACommunicationFactory, rawemail=None)
+    raw_email = factory.Faker('paragraph')
 
 
 class ProjectFactory(factory.django.DjangoModelFactory):
