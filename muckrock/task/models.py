@@ -247,9 +247,15 @@ class StaleAgencyTask(Task):
     def __unicode__(self):
         return u'Stale Agency Task'
 
+    def resolve(self, user=None):
+        """Mark the agency as stale when resolving"""
+        self.agency.stale = False
+        self.agency.save()
+        super(StaleAgencyTask, self).resolve(user)
+
     def stale_requests(self):
         """Returns a list of stale requests associated with the task's agency"""
-        requests = FOIARequest.objects.filter(agency=self.agency)
+        requests = FOIARequest.objects.get_open().filter(agency=self.agency)
         stale_requests = []
         for foia_request in requests:
             if foia_request.latest_response() >= STALE_DURATION:
@@ -276,12 +282,8 @@ class StaleAgencyTask(Task):
         return latest_response
 
     def update_email(self, new_email, foia_list=None):
-        """
-        Updates the email on the agency and the provided requests.
-        Marks the agency as not-stale.
-        """
+        """Updates the email on the agency and the provided requests."""
         self.agency.email = new_email
-        self.agency.stale = False
         self.agency.save()
         for foia in foia_list:
             foia.email = new_email
