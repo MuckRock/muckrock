@@ -62,9 +62,9 @@ class TestAgencyUnit(TestCase):
         """Test get other emails method"""
         eq_(self.agency1.get_other_emails(), ['other_a@agency1.gov', 'other_b@agency1.gov'])
 
-    def test_agency_latest_response(self):
+    def test_agency_is_stale(self):
         """Should return the date of the last response by the agency"""
-        duration = 30
+        duration = agency.models.STALE_DURATION + 1
         comm_date = datetime.today() - timedelta(duration)
         factories.FOIACommunicationFactory(
             date=comm_date,
@@ -72,7 +72,7 @@ class TestAgencyUnit(TestCase):
             foia__status='ack',
             foia__agency=self.agency1
         )
-        eq_(self.agency1.latest_response(), duration,
+        eq_(self.agency1.is_stale(), True,
             "The agency should report the days since its latest response.")
 
 class TestAgencyManager(TestCase):

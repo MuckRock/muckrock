@@ -354,7 +354,7 @@ class NewAgencyTaskViewTests(TestCase):
     def setUp(self):
         self.url = reverse('new-agency-task-list')
         self.task = task.models.NewAgencyTask.objects.get(pk=7)
-        self.task.agency.approved = False
+        self.task.agency.status = 'pending'
         self.task.agency.save()
         self.client = Client()
         self.client.login(username='adam', password='abc')
@@ -387,7 +387,7 @@ class NewAgencyTaskViewTests(TestCase):
             'replacement': replacement.id
         })
         updated_task = task.models.NewAgencyTask.objects.get(pk=self.task.id)
-        eq_(updated_task.agency.approved, False,
+        eq_(updated_task.agency.status, 'rejected',
                 ('New agency task should not approve the agency'
                 ' when given a truthy value for the "reject" field'))
         eq_(updated_task.resolved, True,
