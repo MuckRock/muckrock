@@ -21,3 +21,4 @@ dump.rdb
 style.*.css
 .vagrant
 node_modules
+.settings.sh

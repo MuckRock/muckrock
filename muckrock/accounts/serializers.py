@@ -138,7 +138,7 @@ class StatisticsSerializer(serializers.ModelSerializer):
                 'total_unresolved_payment_tasks',
                 'total_crowdfundpayment_tasks',
                 'total_unresolved_crowdfundpayment_tasks',
-                'daily_robot_tasks',
+                'daily_robot_response_tasks',
                 'public_notes',
                 'admin_notes',
                 'total_active_org_members',
