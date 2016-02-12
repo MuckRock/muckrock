@@ -11,7 +11,7 @@
     <dt>Submitter</dt>
     <dd><a href="{% url 'admin:auth_user_change' foia.user.pk %}">{{foia.user}}</a></dd>
     <dt>Request</dt>
-    <dd><a href="{% url 'admin:foia_foiarequest_change' foia.pk %}">{{foia}}</a></dd>
+    <dd><a href="{{foia.get_absolute_url}}">{{foia}}</a> (<a href="{% url 'admin:foia_foiarequest_change' foia.pk %}">admin</a>)</dd>
     {# agency info #}
     {% if not appeal %}
         {% if foia.agency %}
