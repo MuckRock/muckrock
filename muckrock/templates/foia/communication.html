@@ -7,6 +7,7 @@
         <h1 class="from">From: {{ communication.from_who }}</h1>
         <div class="actionables">
             <a href="{{ request.path }}#{{ communication.anchor }}" class="permalink"><time datetime="{{ communication.date|date:'c' }}" class="date">{{ communication.date | date:"m/d/Y" }}</time></a>
+            {% if not hide_options %}
             {% if request.user.is_staff %}
             <div class="options dropdown">
                 {% include 'lib/icons/options.svg' %}
@@ -25,6 +26,7 @@
                     <li><a href="{% url 'foia-raw' idx=comm.pk %}" class="option">Raw Email</a></li>
                 </ul>
             </div>
+            {% endif %}
             {% endif %}
         </div>
     </header>
