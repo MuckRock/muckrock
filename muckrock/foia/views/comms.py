@@ -96,7 +96,7 @@ def change_comm_status(request, next_):
         messages.error(request, 'The communication does not exist.')
     return redirect(next_)
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_authenticated() and u.profile.is_advanced())
 def raw(request, idx):
     """Get the raw email for a communication"""
     # pylint: disable=unused-argument

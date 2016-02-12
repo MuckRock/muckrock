@@ -30,3 +30,5 @@ source ~/ve/muckrock/bin/activate
 if [ -f .dir_colors ]; then
     . .dir_colors
 fi
+
+export DJANGO_SETTINGS_MODULE="muckrock.settings.local"

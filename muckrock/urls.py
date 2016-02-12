@@ -4,6 +4,7 @@ URL mappings for muckrock project
 
 # pylint: disable=unused-import
 # these are called dynmically
+from django.conf import settings
 from django.conf.urls import handler404
 from views import handler500
 # pylint: enable=unused-import
@@ -20,7 +21,6 @@ import muckrock.accounts.urls, muckrock.foia.urls, muckrock.news.urls, muckrock.
        muckrock.project.urls, muckrock.tags.urls
 import muckrock.agency.views, muckrock.foia.viewsets, muckrock.jurisdiction.views, \
        muckrock.accounts.views, muckrock.task.viewsets
-import muckrock.settings as settings
 import muckrock.views as views
 from muckrock.agency.sitemap import AgencySitemap
 from muckrock.foia.sitemap import FoiaSitemap

@@ -6,11 +6,14 @@ import datetime
 
 from django import test
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.urlresolvers import reverse
 from django.core.validators import ValidationError
 
+from muckrock import factories
 from muckrock.foia.models.communication import FOIACommunication
 from muckrock.foia.models.request import FOIARequest
 from muckrock.foia.models.file import FOIAFile
+from muckrock.foia.views import raw
 
 import logging
 import nose
@@ -255,3 +258,25 @@ class TestCommunicationResend(test.TestCase):
         self.comm.foia.agency.status = 'rejected'
         self.comm.foia.agency.save()
         self.comm.resend('hello@world.com')
+
+
+class TestRawEmail(test.TestCase):
+    """Tests the raw email view"""
+    # pylint:disable=no-member
+    def setUp(self):
+        self.comm = factories.FOIACommunicationFactory()
+        self.request_factory = test.RequestFactory()
+        self.url = reverse('foia-raw', kwargs={'idx': self.comm.id})
+        self.view = raw
+
+    def test_raw_email_view(self):
+        """Advanced users should be able to view raw emails"""
+        basic_user = factories.UserFactory(profile__acct_type='basic')
+        pro_user = factories.UserFactory(profile__acct_type='pro')
+        request = self.request_factory.get(self.url)
+        request.user = basic_user
+        response = self.view(request, self.comm.id)
+        eq_(response.status_code, 302, 'Basic users should be denied access.')
+        request.user = pro_user
+        response = self.view(request, self.comm.id)
+        eq_(response.status_code, 200, 'Advanced users should be allowed access.')

@@ -2,6 +2,7 @@
 Tests accounts views
 """
 
+from django.conf import settings
 from django.contrib.auth.models import User, AnonymousUser
 from django.contrib.auth.views import login
 from django.core.urlresolvers import reverse
@@ -14,7 +15,6 @@ from nose.tools import eq_, ok_, raises
 from muckrock.accounts import views
 from muckrock.factories import UserFactory, OrganizationFactory
 from muckrock.organization.models import Organization
-from muckrock.settings import BUNDLED_REQUESTS
 from muckrock.utils import mock_middleware
 
 # pylint:disable=no-member
@@ -258,7 +258,7 @@ class TestBuyRequestsView(TestCase):
         post_request.user = self.user
         self.view(post_request, self.user.username)
         self.user.profile.refresh_from_db()
-        requests_to_add = BUNDLED_REQUESTS[self.user.profile.acct_type]
+        requests_to_add = settings.BUNDLED_REQUESTS[self.user.profile.acct_type]
         eq_(self.user.profile.num_requests, existing_request_count + requests_to_add)
 
     def test_buy_requests_as_pro(self):
@@ -271,7 +271,7 @@ class TestBuyRequestsView(TestCase):
         post_request.user = self.user
         self.view(post_request, self.user.username)
         self.user.profile.refresh_from_db()
-        requests_to_add = BUNDLED_REQUESTS[self.user.profile.acct_type]
+        requests_to_add = settings.BUNDLED_REQUESTS[self.user.profile.acct_type]
         eq_(self.user.profile.num_requests, existing_request_count + requests_to_add)
 
     def test_buy_requests_as_org(self):
@@ -298,7 +298,7 @@ class TestBuyRequestsView(TestCase):
         post_request.user = self.user
         self.view(post_request, other_user.username)
         other_user.profile.refresh_from_db()
-        requests_to_add = BUNDLED_REQUESTS[self.user.profile.acct_type]
+        requests_to_add = settings.BUNDLED_REQUESTS[self.user.profile.acct_type]
         eq_(other_user.profile.num_requests, existing_request_count + requests_to_add)
         ok_(mock_notify.called, 'The recipient should be notified of their gift by email.')
 
@@ -367,7 +367,7 @@ class TestAccountFunctional(TestCase):
         eq_(get.status_code, 302, 'My profile link reponds with 302 to logged out user.')
         eq_(post.status_code, 302, 'POST to my profile link responds with 302.')
         # settings
-        get, post = http_get_post(reverse('acct-settings'), views.settings, {})
+        get, post = http_get_post(reverse('acct-settings'), views.profile_settings, {})
         eq_(get.status_code, 302, 'GET /profile responds with 302 to logged out user.')
         eq_(post.status_code, 302, 'POST /settings reponds with 302 to logged out user.')
 
@@ -375,7 +375,7 @@ class TestAccountFunctional(TestCase):
         """Test private views while logged in"""
         response = http_get_response(reverse('acct-my-profile'), views.profile, self.user)
         eq_(response.status_code, 200, 'Logged in user may view their own profile.')
-        response = http_get_response(reverse('acct-settings'), views.settings, self.user)
+        response = http_get_response(reverse('acct-settings'), views.profile_settings, self.user)
         eq_(response.status_code, 200, 'Logged in user may view their own settings.')
 
     def test_settings_view(self):
@@ -393,8 +393,8 @@ class TestAccountFunctional(TestCase):
             'email_pref': 'hourly'
         }
         settings_url = reverse('acct-settings')
-        http_post_response(settings_url, views.settings, profile_data, self.user)
-        http_post_response(settings_url, views.settings, email_data, self.user)
+        http_post_response(settings_url, views.profile_settings, profile_data, self.user)
+        http_post_response(settings_url, views.profile_settings, email_data, self.user)
         self.user.refresh_from_db()
         profile.refresh_from_db()
         all_data = {}

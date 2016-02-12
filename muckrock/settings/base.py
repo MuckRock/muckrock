@@ -3,11 +3,8 @@ Django settings for muckrock project
 """
 
 import os
-import sys
 import urlparse
 from django.core.urlresolvers import reverse
-
-TEST = 'test' in sys.argv
 
 def boolcheck(setting):
     """Turn env var into proper bool"""
@@ -16,25 +13,16 @@ def boolcheck(setting):
     else:
         return bool(setting)
 
-DEBUG = boolcheck(os.environ.get('DEBUG', True))
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 EMAIL_DEBUG = DEBUG
 THUMBNAIL_DEBUG = DEBUG
 AWS_DEBUG = False
 
-SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
+SITE_ROOT = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
 
 SESSION_COOKIE_HTTPONLY = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-if not DEBUG and os.environ.get('ENV') != 'staging':
-    SECURE_HSTS_SECONDS = 31536000 #one year
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_FRAME_DENY = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
-    SECURE_BROWSER_XSS_FILTER = True
-    SECURE_SSL_REDIRECT = True
-    CSRF_COOKIE_SECURE = True
-    SESSION_COOKIE_SECURE = True
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 
@@ -71,8 +59,6 @@ SITE_ID = 1
 # to load the internationalization machinery.
 USE_I18N = True
 
-PREPEND_WWW = boolcheck(os.environ.get('PREPEND_WWW', False))
-
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
 STATIC_ROOT = os.path.join(SITE_ROOT, 'static')
@@ -84,43 +70,18 @@ STATICFILES_DIRS = (
     os.path.join(SITE_ROOT, 'assets'),
 )
 
-if TEST:
-    COMPRESS_ENABLED = False
-
 COMPRESS_OFFLINE = True
 
 COMPRESS_STORAGE = 'compressor.storage.CompressorFileStorage'
 COMPRESS_CSS_FILTERS = [
     'compressor.filters.css_default.CssAbsoluteFilter',
-    #'compressor.filters.csstidy.CSSTidyFilter',
     'compressor.filters.cssmin.CSSMinFilter',
 ]
 COMPRESS_PRECOMPILERS = (
-    #('text/x-scss', 'django_libsass.SassCompiler'),
     ('text/x-scss', 'sass --sourcemap=none {infile} {outfile}'),
 )
 
-
-# URL that handles the media served from MEDIA_ROOT. Make sure to use a
-# trailing slash if there is a path component (optional in other cases).
-# Examples: "http://media.lawrence.com", "http://example.com/media/"
-if not DEBUG:
-    DEFAULT_BUCKET_NAME = 'muckrock'
-    BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', DEFAULT_BUCKET_NAME)
-    DEFAULT_FILE_STORAGE = 'image_diet.storage.DietStorage'
-    DIET_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-    DIET_CONFIG = os.path.join(SITE_ROOT, '../config/image_diet.yaml')
-    THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-    STATICFILES_STORAGE = 'muckrock.storage.CachedS3BotoStorage'
-    COMPRESS_STORAGE = STATICFILES_STORAGE
-    AWS_S3_CUSTOM_DOMAIN = os.environ.get('CLOUDFRONT_DOMAIN')
-    if AWS_S3_CUSTOM_DOMAIN:
-        STATIC_URL = 'https://' + AWS_S3_CUSTOM_DOMAIN + '/'
-    else:
-        STATIC_URL = 'https://' + BUCKET_NAME + '.s3.amazonaws.com/'
-    COMPRESS_URL = STATIC_URL
-    MEDIA_URL = STATIC_URL + 'media/'
-elif AWS_DEBUG:
+if AWS_DEBUG:
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
     THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
     STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
@@ -128,10 +89,12 @@ elif AWS_DEBUG:
     STATIC_URL = 'https://muckrock-devel2.s3.amazonaws.com/'
     COMPRESS_URL = STATIC_URL
     MEDIA_URL = 'https://muckrock-devel2.s3.amazonaws.com/media/'
+    CLEAN_S3_ON_FOIA_DELETE = True
 else:
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
     STATIC_URL = '/static/'
     MEDIA_URL = '/media/'
+    CLEAN_S3_ON_FOIA_DELETE = False
 
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -146,15 +109,6 @@ AWS_HEADERS = {
  'Expires': 'Thu, 31 Dec 2099 20:00:00 GMT',
  'Cache-Control': 'max-age=94608000',
 }
-
-if not DEBUG:
-    # List of callables that know how to import templates from various sources.
-    TEMPLATE_LOADERS = (
-        ('django.template.loaders.cached.Loader', (
-            'django.template.loaders.filesystem.Loader',
-            'django.template.loaders.app_directories.Loader',
-        )),
-    )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
@@ -182,22 +136,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'reversion.middleware.RevisionMiddleware',
 )
-if DEBUG:
-    MIDDLEWARE_CLASSES += ('muckrock.settings.ExceptionLoggingMiddleware',)
-    MIDDLEWARE_CLASSES += ('yet_another_django_profiler.middleware.ProfilerMiddleware',)
-
-class ExceptionLoggingMiddleware(object):
-    """Log exceptions to command line
-
-    useful for debugging non html outputting views, such as stripe webhooks"""
-    # pylint: disable=too-few-public-methods
-    # pylint: disable=no-self-use
-    def process_exception(self, request, exception):
-        # pylint: disable=unused-argument
-        """printe the exception traceback"""
-        import traceback
-        print traceback.format_exc()
-
 
 INTERNAL_IPS = ('127.0.0.1',)
 
@@ -266,14 +204,11 @@ INSTALLED_APPS = (
     'muckrock.mailgun',
     'actstream'
 )
-if DEBUG:
-    INSTALLED_APPS += ('django_nose',)
 
-# pylint: disable=unused-argument
 def show_toolbar(request):
     """show toolbar on the site"""
-    if DEBUG or (boolcheck(os.environ.get('SHOW_DDT', False))) or \
-        (request.user and request.user.username == 'mitch'):
+    if ((boolcheck(os.environ.get('SHOW_DDT', False))) or
+            (request.user and request.user.username == 'mitch')):
         return True
     return False
 
@@ -287,10 +222,7 @@ DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
 urlparse.uses_netloc.append('redis')
 
-if 'REDISTOGO_URL' in os.environ:
-    BROKER_URL = os.environ['REDISTOGO_URL']
-else:
-    BROKER_URL = 'redis://localhost:6379/0'
+BROKER_URL = os.environ.get('REDISTOGO_URL', 'redis://localhost:6379/0')
 
 import djcelery
 djcelery.setup_loader()
@@ -316,19 +248,6 @@ ABSOLUTE_URL_OVERRIDES = {
 }
 
 DBSETTINGS_USE_SITES = True
-
-if DEBUG:
-    TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-
-TINYMCE_DEFAULT_CONFIG = {
-    'theme': 'advanced',
-    'theme_advanced_buttons1': 'bold,italic,underline,strikethrough,|,indent,outdent,blockquote,|,'
-                               'undo,redo,|,bullist,numlist,|,link,unlink,image,|,cleanup,code',
-    'theme_advanced_buttons2': '',
-    'theme_advanced_buttons3': '',
-    'theme_advanced_statusbar_location': 'none',
-    'convert_urls': False,
-}
 
 SESAME_MAX_AGE = 60 * 60 * 24 * 2
 
@@ -452,9 +371,6 @@ LOGGING = {
     }
 }
 
-# pylint: disable=unused-import
-import monkey
-
 # these will be set in local settings if not in env var
 
 # Make this unique, and don't share it with anybody.
@@ -462,8 +378,9 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
-AWS_AUTOIMPORT_BUCKET_NAME = os.environ.get('AWS_AUTOIMPORT_BUCKET_NAME')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', 'muckrock-devel2')
+AWS_AUTOIMPORT_BUCKET_NAME = os.environ.get(
+    'AWS_AUTOIMPORT_BUCKET_NAME', 'muckrock-autoimprot-devel')
 
 STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
 STRIPE_PUB_KEY = os.environ.get('STRIPE_PUB_KEY')
@@ -472,14 +389,10 @@ MAILGUN_ACCESS_KEY = os.environ.get('MAILGUN_ACCESS_KEY')
 MAILGUN_SERVER_NAME = 'requests.muckrock.com'
 
 EMAIL_SUBJECT_PREFIX = '[Muckrock]'
-EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-DOCUMNETCLOUD_USERNAME = os.environ.get('DOCUMNETCLOUD_USERNAME')
+DOCUMENTCLOUD_USERNAME = os.environ.get('DOCUMENTCLOUD_USERNAME')
 DOCUMENTCLOUD_PASSWORD = os.environ.get('DOCUMENTCLOUD_PASSWORD')
-
-GA_USERNAME = os.environ.get('GA_USERNAME')
-GA_PASSWORD = os.environ.get('GA_PASSWORD')
-GA_ID = os.environ.get('GA_ID')
 
 SLACK_WEBHOOK_URL = os.environ.get('SLACK_WEBHOOK_URL', '')
 
@@ -487,92 +400,27 @@ PUBLICATION_NAME = 'MuckRock'
 
 # Register database schemes in URLs.
 urlparse.uses_netloc.append('postgres')
-urlparse.uses_netloc.append('mysql')
-
-DATABASES = {}
 
 url = urlparse.urlparse(os.environ.get('DATABASE_URL', 'postgres://muckrock@localhost/muckrock'))
 
-# pylint: disable=no-member
 # Update with environment configuration.
-DATABASES['default'] = {
-    'NAME': url.path[1:],
-    'USER': url.username,
-    'PASSWORD': url.password,
-    'HOST': url.hostname,
-    'PORT': url.port,
-    'CONN_MAX_AGE': os.environ.get('CONN_MAX_AGE', 500),
-}
-
-# test runner seems to want this...
-DATABASE_NAME = DATABASES['default']['NAME']
-
-if url.scheme == 'postgres':
-    DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql_psycopg2'
-
-if url.scheme == 'mysql':
-    DATABASES['default']['ENGINE'] = 'django.db.backends.mysql'
-
-# codeship
-if 'PG_USER' in os.environ:
-    DATABASES['default'] = {
-        'NAME': 'test',
-        'USER': os.environ.get('PG_USER'),
-        'PASSWORD': os.environ.get('PG_PASSWORD'),
-        'HOST': '127.0.0.1',
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-    }
+DATABASES = {
+        'default': {
+            'NAME': url.path[1:],
+            'USER': url.username,
+            'PASSWORD': url.password,
+            'HOST': url.hostname,
+            'PORT': url.port,
+            'CONN_MAX_AGE': os.environ.get('CONN_MAX_AGE', 500),
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            }
+        }
 
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     }
 }
-
-if TEST:
-    CACHES['default']['BACKEND'] = 'django.core.cache.backends.dummy.DummyCache'
-
-if 'MEMCACHIER_SERVERS' in os.environ:
-    os.environ['MEMCACHE_SERVERS'] = os.environ.get('MEMCACHIER_SERVERS', '').replace(',', ';')
-    os.environ['MEMCACHE_USERNAME'] = os.environ.get('MEMCACHIER_USERNAME', '')
-    os.environ['MEMCACHE_PASSWORD'] = os.environ.get('MEMCACHIER_PASSWORD', '')
-
-    CACHES = {
-        'default': {
-            # Use pylibmc
-            'BACKEND': 'django_pylibmc.memcached.PyLibMCCache',
-
-            # Use binary memcache protocol (needed for authentication)
-            'BINARY': True,
-
-            # TIMEOUT is not the connection timeout! It's the default expiration
-            # timeout that should be applied to keys! Setting it to `None`
-            # disables expiration.
-            'TIMEOUT': None,
-
-            'OPTIONS': {
-                # Enable faster IO
-                'no_block': True,
-                'tcp_nodelay': True,
-
-                # Keep connection alive
-                'tcp_keepalive': True,
-
-                # Timeout for set/get requests
-                '_poll_timeout': 2000,
-
-                # Use consistent hashing for failover
-                'ketama': True,
-
-                # Configure failover timings
-                'connect_timeout': 2000,
-                'remove_failed': 4,
-                'retry_timeout': 2,
-                'dead_timeout': 10
-            }
-        }
-    }
-
 
 REST_FRAMEWORK = {
     'PAGINATE_BY': 20,                 # Default to 20
@@ -601,7 +449,7 @@ SOUTH_MIGRATION_MODULES = {
 LOT = {
   'slow-login': {
       'name': u'Slow login',
-      'duration': 60*60*24*2,
+      'duration': 60 * 60 * 24 * 2,
       'one-time': True,
   },
 }
@@ -616,11 +464,4 @@ PACKAGE_MONITOR_REQUIREMENTS_FILE = os.path.join(SITE_ROOT, '../requirements.txt
 ORG_MIN_SEATS = 3
 ORG_PRICE_PER_SEAT = 2000
 ORG_REQUESTS_PER_SEAT = 10
-
-# pylint: disable=wildcard-import
-# pylint: disable=unused-wildcard-import
-try:
-    from local_settings import *
-except ImportError:
-    pass
 

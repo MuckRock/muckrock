@@ -1,6 +1,7 @@
 # MuckRock
 
 [![Codeship Status for MuckRock/muckrock][codeship-img]][codeship]
+[![codecov.io][codecov-img]][codecov]
 
 ## Install
 
@@ -11,9 +12,11 @@
 
 2. Set the secrets
   1. `cd muckrock`
-  2. `touch local_settings.py` (`settings.py` should already be in this directory).
-  2. The `local_settings.py` file should never be checked in to the repository.
-  3. We will send you the (definitely) sensitive information in a (probably) secure manner.
+  2. `touch .settings.sh`
+  3. The `.settings.sh` file should **never** be checked in to the repository.
+  4. We will send you the (definitely) sensitive information in a (probably) secure manner.
+  5. Inside your VM, add `source ~/muckrock/.settings.sh` the `~/.bashrc` file.
+  6. Inside your VM, run `source ~/.bashrc`.
 
 3. Sync and populate the database inside the virtual machine
   1. From within the virtual machine, `cd muckrock`
@@ -52,6 +55,8 @@ Any new models should be indexed automatically.
 
 The `master` branch represents our product code. `master` should only ever be updated by merges from the `dev` branch, which tracks it. New features should be branched from `dev`, then merged back into `dev` once they are tested and linted. Any feature branch pushed to GitHub will be evaluated by Codeship. If the `staging` branch is pushed, the [staging server][staging] will be updated. If the `master` branch is pushed, the [production server][production] will be updated.
 
+[codecov-img]:https://codecov.io/github/MuckRock/muckrock/coverage.svg?token=SBg37XM3j1&branch=master
+[codecov]: https://codecov.io/github/MuckRock/muckrock?branch=master
 [codeship]: https://codeship.com/projects/52228
 [codeship-img]: https://codeship.com/projects/c14392c0-630c-0132-1e4c-4ad47cf4b99f/status?branch=master
 [staging]: http://muckrock-staging.herokuapp.com

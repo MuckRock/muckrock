@@ -82,7 +82,7 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
     }
     input[type="checkbox"] {
         width: auto;
-        margin-right: $vertical-rhythm;
+        float: left;
     }
     label {
         margin-bottom: 0;
@@ -143,6 +143,40 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
         margin-bottom: 0;
         margin-left: $vertical-rhythm;
     }
+}
+
+/* Stale Agency Task */
+
+.stale-agency .task-data {
+    margin-bottom: 0;
+}
+
+.stale-agency .stale-requests {
+    border-bottom: 1px solid $color-grey;
+    header {
+        margin-bottom: 0;
+        padding: $vertical-rhythm/2;
+        background: $color-grey-7;
+    }
+    input[type="text"] {
+        margin: 0;
+        border-radius: 0;
+        width: 100%;
+    }
+    abbr {
+        cursor: help;
+    }
+}
+
+.stale-agency .recent-response {
+    text-align: left;
+    p {
+        margin-bottom: 0;
+    }
+}
+
+.stale-agency .form-field {
+    text-align: left;
 }
 
 /* New Agency Task */
@@ -234,6 +268,7 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
 
 .response.task {
     .full-communication {
+        margin-bottom: 0;
         background: $color-grey-7;
         & > header {
             @include display(flex);
@@ -259,11 +294,7 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
 
 /* Snail Mail Task */
 
-
 .task-post-actions input[type=checkbox] {
-    float: right;
-    margin-top: .4em;
-    margin-left: .4em;
     & + label {
         margin-bottom: $vertical-rhythm;
     }

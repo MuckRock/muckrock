@@ -142,9 +142,7 @@ class ResponseTaskNode(TaskNode):
             form_initial['status'] = _foia.status
             form_initial['tracking_number'] = _foia.tracking_id
             form_initial['date_estimate'] = _foia.date_estimate
-            previous_comms = _foia.reverse_communications
-            previous_comms = [comm for comm in previous_comms if comm.pk != communication.pk]
-            extra_context['previous_communications'] = previous_comms
+            extra_context['previous_communications'] = _foia.reverse_communications
         extra_context['response_form'] = task.forms.ResponseTaskForm(initial=form_initial)
         extra_context['attachments'] = self.task.communication.files.all()
         return extra_context
@@ -170,6 +168,17 @@ class StaleAgencyTaskNode(TaskNode):
     task_template = 'task/stale_agency.html'
     endpoint_name = 'stale-agency-task-list'
     class_name = 'stale-agency'
+
+    def get_extra_context(self):
+        """Adds a form for updating the email"""
+        extra_context = super(StaleAgencyTaskNode, self).get_extra_context()
+        latest_response = self.task.latest_response()
+        initial = {'email': latest_response.priv_from_who}
+        extra_context['email_form'] = task.forms.StaleAgencyTaskForm(initial=initial)
+        extra_context['latest_response'] = latest_response
+        extra_context['stale_requests'] = self.task.stale_requests()
+        extra_context['stalest_request'] = self.task.stalest_request()
+        return extra_context
 
 
 class StatusChangeTaskNode(TaskNode):

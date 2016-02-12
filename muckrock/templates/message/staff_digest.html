@@ -52,7 +52,7 @@
             <td>{{ activity.comms.received }}</td>
         </tr>
     </tbody>
-<table>
+</table>
 <h2>Sent</h2>
 {% with activity.comms.delivery as sent %}
 <table>
@@ -83,7 +83,7 @@
             <td>${{ sent.expense.mail|floatformat:2 }}</td>
         </tr>
     </tbody>
-<table>
+</table>
 {% endwith %}
 <hr />
 <p>That is all for today. {{ signoff }} and see you tomorrow.</p>

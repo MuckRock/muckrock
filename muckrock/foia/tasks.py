@@ -3,6 +3,7 @@
 from celery.signals import task_failure
 from celery.schedules import crontab
 from celery.task import periodic_task, task
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.template.defaultfilters import slugify
@@ -34,14 +35,6 @@ from muckrock.foia.models import (
     FOIACommunication,
     )
 from muckrock.foia.codes import CODES
-from muckrock.settings import (
-    DOCUMNETCLOUD_USERNAME,
-    DOCUMENTCLOUD_PASSWORD,
-    AWS_ACCESS_KEY_ID,
-    AWS_SECRET_ACCESS_KEY,
-    AWS_AUTOIMPORT_BUCKET_NAME,
-    AWS_STORAGE_BUCKET_NAME,
-    )
 from muckrock.task.models import ResponseTask
 from muckrock.vendor import MultipartPostHandler
 
@@ -64,6 +57,14 @@ class MLOptions(dbsettings.Group):
     confidence_min = dbsettings.PositiveIntegerValue(
             'minimum percent confidence level to automatically resolve')
 ml_options = MLOptions()
+
+def authenticate_documentcloud(request):
+    """This is just standard username/password encoding"""
+    username = settings.DOCUMENTCLOUD_USERNAME
+    password = settings.DOCUMENTCLOUD_PASSWORD
+    auth = base64.encodestring('%s:%s' % (username, password))[:-1]
+    request.add_header('Authorization', 'Basic %s' % auth)
+    return request
 
 @task(ignore_result=True, max_retries=3, name='muckrock.foia.tasks.upload_document_cloud')
 def upload_document_cloud(doc_pk, change, **kwargs):
@@ -107,9 +108,7 @@ def upload_document_cloud(doc_pk, change, **kwargs):
 
     opener = urllib2.build_opener(MultipartPostHandler.MultipartPostHandler)
     request = urllib2.Request('https://www.documentcloud.org/api/%s' % url, params)
-    # This is just standard username/password encoding
-    auth = base64.encodestring('%s:%s' % (DOCUMNETCLOUD_USERNAME, DOCUMENTCLOUD_PASSWORD))[:-1]
-    request.add_header('Authorization', 'Basic %s' % auth)
+    request = authenticate_documentcloud(request)
 
     try:
         ret = opener.open(request).read()
@@ -139,9 +138,7 @@ def set_document_cloud_pages(doc_pk, **kwargs):
         return
 
     request = urllib2.Request('https://www.documentcloud.org/api/documents/%s.json' % doc.doc_id)
-    # This is just standard username/password encoding
-    auth = base64.encodestring('%s:%s' % (DOCUMNETCLOUD_USERNAME, DOCUMENTCLOUD_PASSWORD))[:-1]
-    request.add_header('Authorization', 'Basic %s' % auth)
+    request = authenticate_documentcloud(request)
 
     try:
         ret = urllib2.urlopen(request).read()
@@ -470,9 +467,9 @@ def autoimport():
                 log.append('ERROR: %s was %s bytes and after uploaded was %s bytes - retry' %
                            (key.name[6:], exc.args[0], exc.args[1]))
 
-    conn = S3Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
-    bucket = conn.get_bucket(AWS_AUTOIMPORT_BUCKET_NAME)
-    storage_bucket = conn.get_bucket(AWS_STORAGE_BUCKET_NAME)
+    conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
+    bucket = conn.get_bucket(settings.AWS_AUTOIMPORT_BUCKET_NAME)
+    storage_bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
     for key in bucket.list(prefix='scans/', delimiter='/'):
         if key.name == 'scans/':
             continue

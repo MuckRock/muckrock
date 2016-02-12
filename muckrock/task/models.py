@@ -6,15 +6,15 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.db.models import Q
+from django.db.models import Prefetch, Q
 
 import actstream
 from datetime import datetime
 import email
 import logging
 
-from muckrock.agency.models import Agency
-from muckrock.foia.models import FOIARequest, STATUS
+from muckrock.agency.models import Agency, STALE_DURATION
+from muckrock.foia.models import FOIACommunication, FOIAFile, FOIARequest, STATUS
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.notifications import SupportNotification
 
@@ -63,7 +63,15 @@ class TaskQuerySet(models.QuerySet):
             tasks += list(task_type.objects
                     .filter(communication__foia=foia)
                     .select_related('communication__foia', 'resolved_by')
-                    .prefetch_related('communication__files'))
+                    .prefetch_related(
+                        Prefetch('communication__files',
+                            queryset=FOIAFile.objects.select_related('foia__jurisdiction')),
+                        Prefetch('communication__foia__communications',
+                            queryset=FOIACommunication.objects.order_by('-date'),
+                            to_attr='reverse_communications'),
+                        'communication__foia__communications__files',
+                        )
+                    )
         # these tasks have a direct foia attribute
         foia_task_types = [RejectedEmailTask, FlaggedTask, StatusChangeTask, PaymentTask]
         if user.is_staff:
@@ -239,6 +247,47 @@ class StaleAgencyTask(Task):
     def __unicode__(self):
         return u'Stale Agency Task'
 
+    def resolve(self, user=None):
+        """Mark the agency as stale when resolving"""
+        self.agency.stale = False
+        self.agency.save()
+        super(StaleAgencyTask, self).resolve(user)
+
+    def stale_requests(self):
+        """Returns a list of stale requests associated with the task's agency"""
+        requests = FOIARequest.objects.get_open().filter(agency=self.agency)
+        stale_requests = []
+        for foia_request in requests:
+            if foia_request.latest_response() >= STALE_DURATION:
+                stale_requests.append(foia_request)
+        return requests
+
+    def stalest_request(self):
+        """Returns the stalest of all the stale requests"""
+        stale_requests = self.stale_requests()
+        stalest_request = stale_requests[0]
+        for stale_request in stale_requests:
+            if stale_request.latest_response() >= stalest_request.latest_response():
+                stalest_request = stale_request
+        return stalest_request
+
+    def latest_response(self):
+        """Returns the latest response from the agency"""
+        all_requests = FOIARequest.objects.filter(agency=self.agency)
+        latest_response = all_requests.first().last_response()
+        for foia_request in all_requests:
+            comm = foia_request.last_response()
+            if comm.date > latest_response.date:
+                latest_response = comm
+        return latest_response
+
+    def update_email(self, new_email, foia_list=None):
+        """Updates the email on the agency and the provided requests."""
+        self.agency.email = new_email
+        self.agency.save()
+        for foia in foia_list:
+            foia.email = new_email
+            foia.followup(automatic=True, show_all_comms=False)
 
 class FlaggedTask(Task):
     """A user has flagged a request, agency or jurisdiction"""
