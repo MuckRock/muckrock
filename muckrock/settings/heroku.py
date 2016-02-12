@@ -15,6 +15,7 @@ else:
     STATIC_URL = 'https://' + BUCKET_NAME + '.s3.amazonaws.com/'
 COMPRESS_URL = STATIC_URL
 MEDIA_URL = STATIC_URL + 'media/'
+CLEAN_S3_ON_FOIA_DELETE = True
 
 TEMPLATE_LOADERS = (
     ('django.template.loaders.cached.Loader', (

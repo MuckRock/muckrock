@@ -20,7 +20,7 @@ EMAIL_DEBUG = DEBUG
 THUMBNAIL_DEBUG = DEBUG
 AWS_DEBUG = False
 
-SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
+SITE_ROOT = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
 
 SESSION_COOKIE_HTTPONLY = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -90,10 +90,12 @@ if AWS_DEBUG:
     STATIC_URL = 'https://muckrock-devel2.s3.amazonaws.com/'
     COMPRESS_URL = STATIC_URL
     MEDIA_URL = 'https://muckrock-devel2.s3.amazonaws.com/media/'
+    CLEAN_S3_ON_FOIA_DELETE = True
 else:
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
     STATIC_URL = '/static/'
     MEDIA_URL = '/media/'
+    CLEAN_S3_ON_FOIA_DELETE = False
 
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
