@@ -8,8 +8,9 @@ article.news--article {
         padding: 0 $vertical-rhythm/2;
     }
     .news--header {
-        flex: 0 0 100%;
-        order: 1;
+        @include flex(0 0 100%);
+        @include order(1);
+        min-width: 0;
         time { @extend dfn; }
         img {
             margin-bottom: $vertical-rhythm/2;
@@ -31,15 +32,15 @@ article.news--article {
         }
     }
     .news--main {
-        flex: 0 1 32em;
+        @include flex(0 1 32em);
         max-width: 32em;
         min-width: 0;
     }
     .news--aside {
-        flex: 1 1 12em;
+        @include flex(1 1 12em);
+        @include order(-1);
         max-width: 32em;
         min-width: 0;
-        order: -1;
     }
     @include media(72rem) {
         font-size: $font-size-4;
