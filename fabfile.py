@@ -28,11 +28,12 @@ def staging():
 @task
 def test(test_path='', reuse='0', capture=False):
     """Run all tests, or a specific subset of tests"""
-    cmd = 'REUSE_DB=%(reuse)s ./manage.py test %(test_path)s %(capture)s' % {
+    cmd = ('REUSE_DB=%(reuse)s ./manage.py test %(test_path)s %(capture)s '
+           '--settings=muckrock.settings.test' % {
         'reuse': reuse,
         'test_path': test_path,
         'capture': '--nologcapture' if not capture else ''
-    }
+    })
     with env.cd(env.base_path):
         env.run(cmd)
 
