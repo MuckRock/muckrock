@@ -14,7 +14,7 @@ import email
 import logging
 
 from muckrock.agency.models import Agency, STALE_DURATION
-from muckrock.foia.models import FOIACommunication, FOIAFile, FOIARequest, STATUS
+from muckrock.foia.models import FOIACommunication, FOIAFile, FOIANote, FOIARequest, STATUS
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.notifications import SupportNotification
 
@@ -219,6 +219,22 @@ class SnailMailTask(Task):
         comm.date = datetime.now()
         comm.save()
         comm.foia.update()
+
+    def update_text(self, new_text):
+        """Sets the body text of the communication"""
+        comm = self.communication
+        comm.communication = new_text
+        comm.save()
+
+    def record_check(self, number, user):
+        """Records the check to a note on the request"""
+        foia = self.communication.foia
+        text = "A check (#%(number)d) of $%(amount).2f was mailed to the agency." % {
+            'number': number,
+            'amount': self.amount
+        }
+        note = FOIANote.objects.create(foia=foia, note=text, author=user)
+        return note
 
 
 class RejectedEmailTask(Task):

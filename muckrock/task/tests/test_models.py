@@ -6,13 +6,14 @@ from django.http import Http404
 from django.test import TestCase
 
 from datetime import datetime, timedelta
+import factory
 import logging
 import mock
 import nose
 
 from muckrock import factories, task
 from muckrock.agency.models import STALE_DURATION
-from muckrock.foia.models import FOIARequest
+from muckrock.foia.models import FOIARequest, FOIANote
 from muckrock.task.factories import FlaggedTaskFactory
 from muckrock.task.signals import domain_blacklist
 
@@ -193,6 +194,26 @@ class SnailMailTaskTests(TestCase):
             'Date should be moved foward.')
         eq_(self.task.communication.date.day, datetime.now().day,
             'Should update the date to today.')
+
+    def test_update_text(self):
+        """Snail mail tasks should be able to update the text of their communication."""
+        comm = self.task.communication
+        old_text = comm.communication
+        new_text = 'test'
+        self.task.update_text(new_text)
+        self.task.refresh_from_db()
+        comm.refresh_from_db()
+        eq_(comm.communication, new_text,
+            'The text of the communication should be updated.')
+
+    def test_record_check(self):
+        """When given a check number, a note should be attached to the request."""
+        user = factories.UserFactory(is_staff=True)
+        check_number = 1
+        self.task.amount = 100.00
+        self.task.save()
+        note = self.task.record_check(check_number, user)
+        ok_(isinstance(note, FOIANote), 'The method should return a FOIANote.')
 
 
 class StaleAgencyTaskTests(TestCase):
@@ -389,7 +410,7 @@ class TestTaskManager(TestCase):
         self.comm = factories.FOIACommunicationFactory(foia=self.foia, response=True)
         # tasks that incorporate FOIAs are:
         # ResponseTask, SnailMailTask, FailedFaxTask, RejectedEmailTask, FlaggedTask,
-        # StatusChangeTask, PaymentTask, NewAgencyTask
+        # StatusChangeTask, NewAgencyTask
         response_task = task.models.ResponseTask.objects.create(
             communication=self.comm
         )
@@ -414,11 +435,6 @@ class TestTaskManager(TestCase):
             old_status='ack',
             foia=self.foia
         )
-        payment_task = task.models.PaymentTask.objects.create(
-            amount=100.00,
-            user=user,
-            foia=self.foia
-        )
         new_agency_task = task.models.NewAgencyTask.objects.create(
             user=user,
             agency=agency
@@ -430,7 +446,6 @@ class TestTaskManager(TestCase):
             rejected_email_task,
             flagged_task,
             status_change_task,
-            payment_task,
             new_agency_task
         ]
 
