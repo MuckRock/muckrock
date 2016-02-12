@@ -3,7 +3,6 @@ Django settings for muckrock project
 """
 
 import os
-import sys
 import urlparse
 from django.core.urlresolvers import reverse
 
@@ -207,7 +206,6 @@ INSTALLED_APPS = (
     'actstream'
 )
 
-# pylint: disable=unused-argument
 def show_toolbar(request):
     """show toolbar on the site"""
     if ((boolcheck(os.environ.get('SHOW_DDT', False))) or
@@ -388,7 +386,6 @@ LOGGING = {
 }
 
 # these will be set in local settings if not in env var
-# XXX set these env vars in vagrant
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = os.environ.get('SECRET_KEY')
@@ -396,7 +393,8 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', 'muckrock-devel2')
-AWS_AUTOIMPORT_BUCKET_NAME = os.environ.get('AWS_AUTOIMPORT_BUCKET_NAME', 'muckrock-autoimprot-devel')
+AWS_AUTOIMPORT_BUCKET_NAME = os.environ.get(
+    'AWS_AUTOIMPORT_BUCKET_NAME', 'muckrock-autoimprot-devel')
 
 STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
 STRIPE_PUB_KEY = os.environ.get('STRIPE_PUB_KEY')
@@ -419,7 +417,6 @@ urlparse.uses_netloc.append('postgres')
 
 url = urlparse.urlparse(os.environ.get('DATABASE_URL', 'postgres://muckrock@localhost/muckrock'))
 
-# pylint: disable=no-member
 # Update with environment configuration.
 DATABASES = {
         'default': {

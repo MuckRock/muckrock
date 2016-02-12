@@ -1,3 +1,9 @@
+"""
+Settings used during testing of the application on codeship
+Import from test settings
+"""
+# pylint: disable=wildcard-import
+# pylint: disable=unused-wildcard-import
 from muckrock.settings.test import *
 
 DATABASES['default'] = {

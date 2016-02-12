@@ -1,3 +1,8 @@
+"""
+Settings used when developing locally
+"""
+# pylint: disable=wildcard-import
+# pylint: disable=unused-wildcard-import
 from muckrock.settings.base import *
 
 DEBUG = True
@@ -23,12 +28,9 @@ class ExceptionLoggingMiddleware(object):
         import traceback
         print traceback.format_exc()
 
-def show_toolbar(request):
-    """show toolbar on the site"""
-    return True
-
 DEBUG_TOOLBAR_CONFIG = {
-    'SHOW_TOOLBAR_CALLBACK': show_toolbar,
+    # always show the toolbar locally
+    'SHOW_TOOLBAR_CALLBACK': lambda _: True,
     'INTERCEPT_REDIRECTS': False,
     'JQUERY_URL': '',
 }

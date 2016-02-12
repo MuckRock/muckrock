@@ -1,3 +1,9 @@
+"""
+Settings used when deployed on heroku
+Not used directly - imported from production and staging settings
+"""
+# pylint: disable=wildcard-import
+# pylint: disable=unused-wildcard-import
 from muckrock.settings.base import *
 
 # media and static asset handling

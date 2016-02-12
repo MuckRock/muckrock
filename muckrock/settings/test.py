@@ -1,3 +1,8 @@
+"""
+Settings used during testing of the application
+"""
+# pylint: disable=wildcard-import
+# pylint: disable=unused-wildcard-import
 from muckrock.settings.base import *
 
 COMPRESS_ENABLED = False

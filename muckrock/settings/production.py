@@ -1,3 +1,9 @@
+"""
+Settings used when deployed to the production server
+Imports from the heroku settings
+"""
+# pylint: disable=wildcard-import
+# pylint: disable=unused-wildcard-import
 from muckrock.settings.heroku import *
 
 # Security
