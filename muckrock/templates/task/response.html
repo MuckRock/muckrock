@@ -51,7 +51,7 @@
     <header>Previous communications</header>
     <main>
     {% for communication in previous_communications %}
-        {% include 'foia/communication.html' %}
+        {% include 'foia/communication.html' with hide_options=True %}
     {% endfor %}
     </main>
 </div>
