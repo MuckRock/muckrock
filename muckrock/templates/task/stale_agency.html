@@ -8,7 +8,7 @@
     <dd><a href="{% url 'admin:agency_agency_change' task.agency.pk %}">{{task.agency}}</a></dd>
     <dd>{{task.agency.phone}}</dd>
     <dt>Stalest Request</dt>
-    <dd><a href="{{stalest_request.get_absolute_url}}">{{stalest_request}}</a></dd>
+    <dd><a href="{{stalest_request.get_absolute_url}}">{{stalest_request}}</a> (<a href="{% url 'admin:foia_foiarequest_change' stalest_request.pk %}">admin</a>)</dd>
     <dd>{{stalest_request.latest_response}} day{{stalest_request.latest_response|pluralize}} stale</dd>
 </dl>
 <div class="collapsable stale-requests">
@@ -47,7 +47,7 @@
 {% block task-actions %}
     <div class="recent-response">
         <p>Latest response received from:</p>
-        <p>{{latest_response.priv_from_who}} on <a href="{{latest_response.foia.get_absolute_url}}">{{latest_response.foia}}</a></p>
+        <p>{{latest_response.priv_from_who}} on <a href="{{latest_response.foia.get_absolute_url}}">{{latest_response.foia}}</a> (<a href="{% url 'admin:foia_foiarequest_change' latest_response.foia.pk %}">admin</a>)</p>
     </div>
     <div class="form-field">
         <label for="{{email_form.email.id_for_label}}">Update email on checked requests:</label>
