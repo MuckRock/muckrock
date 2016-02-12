@@ -26,7 +26,7 @@ from muckrock.foia.forms import \
 from muckrock.foia.models import FOIARequest, FOIAFile, END_STATUS
 from muckrock.foia.views.comms import save_foia_comm
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.task.models import PaymentTask
+from muckrock.task.models import SnailMailTask
 
 logger = logging.getLogger(__name__)
 
@@ -212,10 +212,14 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
         )
         foia.status = 'processed'
         foia.save()
-        PaymentTask.objects.create(
+        # TODO fix this
+        communication = FOIACommunication.objects.create()
+        SnailMailTask.objects.create(
+            communication=
+            category='p',
             user=request.user,
-            amount=int(amount)/100.0,
-            foia=foia)
+            amount=int(amount)/100.0
+        )
     return redirect(foia)
 
 @login_required

@@ -110,14 +110,6 @@ class OrphanTaskNode(TaskNode):
         return extra_context
 
 
-class PaymentTaskNode(TaskNode):
-    """Renders a payment task."""
-    model = task.models.PaymentTask
-    task_template = 'task/payment.html'
-    endpoint_name = 'payment-task-list'
-    class_name = 'payment'
-
-
 class RejectedEmailTaskNode(TaskNode):
     """Renders a rejected email task."""
     model = task.models.RejectedEmailTask
@@ -247,11 +239,6 @@ def response_task(parser, token):
 def status_change_task(parser, token):
     """Returns a StatusChangeTaskNode"""
     return StatusChangeTaskNode(get_id(token))
-
-@register.tag
-def payment_task(parser, token):
-    """Returns a PaymentTaskNode"""
-    return PaymentTaskNode(get_id(token))
 
 @register.tag
 def crowdfund_task(parser, token):

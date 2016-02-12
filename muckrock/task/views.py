@@ -16,14 +16,13 @@ from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
 from muckrock.foia.models import STATUS, FOIARequest, FOIACommunication, FOIAFile
 from muckrock.task.forms import (
-        TaskFilterForm, FlaggedTaskForm, StaleAgencyTaskForm, ResponseTaskForm
-        )
+    TaskFilterForm, FlaggedTaskForm, StaleAgencyTaskForm, ResponseTaskForm
+    )
 from muckrock.task.models import (
-        Task, OrphanTask, SnailMailTask, RejectedEmailTask,
-        StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask,
-        PaymentTask, GenericCrowdfundTask, MultiRequestTask,
-        StatusChangeTask, FailedFaxTask
-        )
+    Task, OrphanTask, SnailMailTask, RejectedEmailTask,
+    StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask,
+    GenericCrowdfundTask, MultiRequestTask, StatusChangeTask, FailedFaxTask
+    )
 from muckrock.views import MRFilterableListView
 
 # pylint:disable=missing-docstring
@@ -31,20 +30,19 @@ from muckrock.views import MRFilterableListView
 def count_tasks():
     """Counts all unresolved tasks and adds them to a dictionary"""
     count = Task.objects.filter(resolved=False).aggregate(
-            all=Count('id'),
-            orphan=Count('orphantask'),
-            snail_mail=Count('snailmailtask'),
-            rejected=Count('rejectedemailtask'),
-            stale_agency=Count('staleagencytask'),
-            flagged=Count('flaggedtask'),
-            new_agency=Count('newagencytask'),
-            response=Count('responsetask'),
-            status_change=Count('statuschangetask'),
-            payment=Count('paymenttask'),
-            crowdfund=Count('genericcrowdfundtask'),
-            multirequest=Count('multirequesttask'),
-            failed_fax=Count('failedfaxtask'),
-            )
+        all=Count('id'),
+        orphan=Count('orphantask'),
+        snail_mail=Count('snailmailtask'),
+        rejected=Count('rejectedemailtask'),
+        stale_agency=Count('staleagencytask'),
+        flagged=Count('flaggedtask'),
+        new_agency=Count('newagencytask'),
+        response=Count('responsetask'),
+        status_change=Count('statuschangetask'),
+        crowdfund=Count('genericcrowdfundtask'),
+        multirequest=Count('multirequesttask'),
+        failed_fax=Count('failedfaxtask'),
+        )
     return count
 
 class TaskList(MRFilterableListView):
@@ -174,7 +172,7 @@ class SnailMailTaskList(TaskList):
             .select_related(
                 'communication__foia__agency',
                 'communication__foia__user',
-                )
+                'user')
             .prefetch_related(
                 Prefetch(
                     'communication__foia__communications',
@@ -376,11 +374,6 @@ class ResponseTaskList(TaskList):
 class StatusChangeTaskList(TaskList):
     title = 'Status Change'
     queryset = StatusChangeTask.objects.select_related('user', 'foia')
-
-
-class PaymentTaskList(TaskList):
-    title = 'Payments'
-    queryset = PaymentTask.objects.select_related('user', 'foia')
 
 
 class CrowdfundTaskList(TaskList):

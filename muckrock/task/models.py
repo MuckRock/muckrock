@@ -73,7 +73,7 @@ class TaskQuerySet(models.QuerySet):
                         )
                     )
         # these tasks have a direct foia attribute
-        foia_task_types = [RejectedEmailTask, FlaggedTask, StatusChangeTask, PaymentTask]
+        foia_task_types = [RejectedEmailTask, FlaggedTask, StatusChangeTask]
         if user.is_staff:
             for task_type in foia_task_types:
                 tasks += list(task_type.objects
@@ -189,9 +189,17 @@ class SnailMailTask(Task):
     """A communication that needs to be snail mailed"""
     # pylint: disable=no-member
     type = 'SnailMailTask'
-    categories = (('a', 'Appeal'), ('n', 'New'), ('u', 'Update'), ('f', 'Followup'))
+    categories = (
+        ('a', 'Appeal'),
+        ('n', 'New'),
+        ('u', 'Update'),
+        ('f', 'Followup'),
+        ('p', 'Payment')
+    )
     category = models.CharField(max_length=1, choices=categories)
     communication = models.ForeignKey('foia.FOIACommunication')
+    user = models.ForeignKey(User, blank=True, null=True)
+    amount = models.DecimalField(default=0.00, max_digits=8, decimal_places=2)
 
     def __unicode__(self):
         return u'Snail Mail Task'
@@ -442,17 +450,6 @@ class StatusChangeTask(Task):
 
     def __unicode__(self):
         return u'Status Change Task'
-
-
-class PaymentTask(Task):
-    """Created when the fee for a request has been paid"""
-    type = 'PaymentTask'
-    amount = models.DecimalField(max_digits=8, decimal_places=2)
-    user = models.ForeignKey(User)
-    foia = models.ForeignKey('foia.FOIARequest')
-
-    def __unicode__(self):
-        return u'Payment Task'
 
 
 class CrowdfundTask(Task):
