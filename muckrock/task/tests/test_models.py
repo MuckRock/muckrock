@@ -203,11 +203,15 @@ class StaleAgencyTaskTests(TestCase):
 
     def test_stale_requests(self):
         """
-        The stale agency task should provide a list of requests which have not
+        The stale agency task should provide a list of open requests which have not
         recieved any response since the stale duration.
         """
+        closed_foia = factories.StaleFOIARequestFactory(agency=self.task.agency, status='done')
         stale_requests = self.task.stale_requests()
-        ok_(self.foia in stale_requests)
+        ok_(self.foia in stale_requests,
+            'Open requests should be considered stale.')
+        ok_(closed_foia not in stale_requests,
+            'Closed requests should not be considered stale.')
 
     def test_stalest_request(self):
         """The stale agency task should provide the stalest request it knows about."""
@@ -241,9 +245,13 @@ class StaleAgencyTaskTests(TestCase):
         self.task.update_email(new_email, [self.foia])
         self.task.refresh_from_db()
         eq_(self.task.agency.email, new_email, 'The agency\'s email should be updated.')
-        ok_(not self.task.agency.stale, 'The agency should no longer be stale.')
         eq_(self.foia.email, new_email, 'The foia\'s email should be updated.')
         mock_followup.assert_called_with(automatic=True, show_all_comms=False)
+
+    def test_resolve(self):
+        """Resolving the task should lower the stale flag on the agency."""
+        self.task.resolve()
+        ok_(not self.task.agency.stale, 'The agency should no longer be stale.')
 
 class NewAgencyTaskTests(TestCase):
     """Test the NewAgencyTask class"""

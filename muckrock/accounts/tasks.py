@@ -108,7 +108,7 @@ def store_statstics():
                                               pub_date__lt=date.today()).count(),
         orphaned_communications=FOIACommunication.objects.filter(foia=None).count(),
         stale_agencies=Agency.objects.filter(stale=True).count(),
-        unapproved_agencies=Agency.objects.filter(approved=False).count(),
+        unapproved_agencies=Agency.objects.filter(status='pending').count(),
         total_tasks=Task.objects.count(),
         total_unresolved_tasks=Task.objects.filter(resolved=False).count(),
         total_generic_tasks=GenericTask.objects.count(),
