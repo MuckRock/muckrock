@@ -309,16 +309,16 @@ class NewAgencyTaskList(TaskList):
 class ResponseTaskList(TaskList):
     title = 'Responses'
     queryset = (ResponseTask.objects
-            .select_related('communication__foia')
             .select_related('communication__foia__agency')
             .select_related('communication__foia__jurisdiction')
             .prefetch_related(
                 Prefetch('communication__files',
                     queryset=FOIAFile.objects.select_related('foia__jurisdiction')),
                 Prefetch('communication__foia__communications',
-                    queryset=FOIACommunication.objects.order_by('-date'),
+                    queryset=FOIACommunication.objects
+                        .order_by('-date')
+                        .prefetch_related('files'),
                     to_attr='reverse_communications'),
-                'communication__foia__communications__files',
                 ))
 
     def task_post_helper(self, request, task):

@@ -31,17 +31,19 @@
     {% endwith %}
     {% if attachments %}
     <dt>Attachments</dt>
+        {% with foia_url=comm.foia.get_absolute_url %}
         {% for file in attachments %}
     <dd>{% include "lib/file.html" %}</dd>
         {% endfor %}
+        {% endwith %}
     {% endif %}
     {% endwith %}
-	{% if task.predicted_status %}
-	<dt>Predicted Status</dt>
-	<dd>{{task.get_predicted_status_display}}</dd>
-	<dt>Probability</dt>
-	<dd>{{task.status_probability}}%</dd>
-	{% endif %}
+    {% if task.predicted_status %}
+    <dt>Predicted Status</dt>
+    <dd>{{task.get_predicted_status_display}}</dd>
+    <dt>Probability</dt>
+    <dd>{{task.status_probability}}%</dd>
+    {% endif %}
 </dl>
 <div class="collapsable full-communication">
     <header>This communication</header>
