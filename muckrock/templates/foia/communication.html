@@ -48,11 +48,13 @@
         {% endif %}
     </section>
     {% endif %}
-    {% if communication.files.count > 0 %}
+    {% if communication.files %}
     <ul class="files">
+    {% with foia_url=communication.foia.get_absolute_url %}
     {% for file in communication.files.all %}
         <li>{% include 'lib/file.html' %}</li>
     {% endfor %}
+    {% endwith %}
     </ul>
     {% endif %}
     {% if request.user.is_staff %}
