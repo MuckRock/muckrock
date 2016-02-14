@@ -309,6 +309,7 @@ class NewAgencyTaskList(TaskList):
 class ResponseTaskList(TaskList):
     title = 'Responses'
     queryset = (ResponseTask.objects
+            .select_related('communication__foia__agency')
             .select_related('communication__foia__jurisdiction')
             .prefetch_related(
                 Prefetch('communication__files',

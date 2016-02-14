@@ -15,17 +15,20 @@
     <dt>Subject</dt>
     <dd>{{comm.subject}}</dd>
     {% endif %}
-    {% if comm.foia %}
+    {% with comm.foia as foia %}
+    {% if foia %}
     <dt>Request</dt>
-    <dd><a href="{{comm.foia.get_absolute_url}}">{{comm.foia}}</a> (<a href="{% url 'admin:foia_foiarequest_change' comm.foia.pk %}">admin</a>)</dd>
-    <dd>MuckRock #{{comm.foia.id}}</dd>
+    <dd><a href="{{foia.get_absolute_url}}">{{foia}}</a> (<a href="{% url 'admin:foia_foiarequest_change' foia.pk %}">admin</a>)</dd>
+    <dd>MuckRock #{{foia.id}}</dd>
+    <dd><a href="{% url 'foia-admin-fix' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Make an admin fix" class="admin-fix">Make an Admin Fix</a></dd>
     <dt>Tracking Number</dt>
-    {% if comm.foia.tracking_id %}
-    <dd>{{comm.foia.tracking_id}}</dd>
+    {% if foia.tracking_id %}
+    <dd>{{foia.tracking_id}}</dd>
     {% else %}
     <dd>None</dd>
     {% endif %}
     {% endif %}
+    {% endwith %}
     {% if attachments %}
     <dt>Attachments</dt>
         {% with foia_url=comm.foia.get_absolute_url %}
@@ -45,7 +48,7 @@
 <div class="collapsable full-communication">
     <header>This communication</header>
     <main>
-        {% include 'foia/communication.html' with communication=task.communication %}
+        {% include 'foia/communication.html' with communication=task.communication hide_options=True %}
     </main>
 </div>
 {% if previous_communications %}
@@ -53,7 +56,7 @@
     <header>Previous communications</header>
     <main>
     {% for communication in previous_communications %}
-        {% include 'foia/communication.html' %}
+        {% include 'foia/communication.html' with hide_options=True %}
     {% endfor %}
     </main>
 </div>

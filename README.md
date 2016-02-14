@@ -12,9 +12,11 @@
 
 2. Set the secrets
   1. `cd muckrock`
-  2. `touch local_settings.py` (`settings.py` should already be in this directory).
-  2. The `local_settings.py` file should never be checked in to the repository.
-  3. We will send you the (definitely) sensitive information in a (probably) secure manner.
+  2. `touch .settings.sh`
+  3. The `.settings.sh` file should **never** be checked in to the repository.
+  4. We will send you the (definitely) sensitive information in a (probably) secure manner.
+  5. Inside your VM, add `source ~/muckrock/.settings.sh` the `~/.bashrc` file.
+  6. Inside your VM, run `source ~/.bashrc`.
 
 3. Sync and populate the database inside the virtual machine
   1. From within the virtual machine, `cd muckrock`

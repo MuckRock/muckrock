@@ -4,7 +4,7 @@
 <dl class="task-data">
     {% with task.communication.foia as request %}
     <dt>Request</dt>
-    <dd><a href="{% url 'admin:foia_foiarequest_change' request.id %}">{{request}}</a></dd>
+    <dd><a href="{{request.get_absolute_url}}">{{request}}</a> (<a href="{% url 'admin:foia_foiarequest_change' request.id %}">admin</a>)</dd>
     {% endwith %}
     {% with task.communication.foia.agency as agency %}
     <dt>Agency</dt>

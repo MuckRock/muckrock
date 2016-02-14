@@ -11,7 +11,7 @@
     <dt>Submitter</dt>
     <dd><a href="{% url 'admin:auth_user_change' foia.user.pk %}">{{foia.user}}</a></dd>
     <dt>Request</dt>
-    <dd><a href="{% url 'admin:foia_foiarequest_change' foia.pk %}">{{foia}}</a></dd>
+    <dd><a href="{{foia.get_absolute_url}}">{{foia}}</a> (<a href="{% url 'admin:foia_foiarequest_change' foia.pk %}">admin</a>)</dd>
     {# agency info #}
     {% if not appeal %}
         {% if foia.agency %}
@@ -45,18 +45,26 @@
         {% endif %}
     {% endif %}
 {% endif %}
-{% endwith %}
 </dl>
 <div class="collapsed collapsable full-letter">
     {# full letter here, hidden #}
     <header>Full letter</header>
     <textarea id="full-letter-{{task.pk}}">
-    {{task.communication.foia.agency.address}}
+{{foia.agency.address}}
 
-    {% now "F j, Y" %}
-    {% with task.communication.foia as request %}{% include "text/foia/comms.txt" %}{% endwith %}
+{% now "F j, Y" %}
+{% with foia as request %}{% include "text/foia/comms.txt" %}{% endwith %}
     </textarea>
 </div>
+<div class="collapsed collapsable full-communication">
+    <header>Previous communications</header>
+    <main>
+    {% for communication in foia.reverse_communications %}
+        {% include 'foia/communication.html' with hide_options=True %}
+    {% endfor %}
+    </main>
+</div>
+{% endwith %}
 {% endblock %}
 
 {% block task-actions %}
