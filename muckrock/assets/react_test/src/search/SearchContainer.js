@@ -1,17 +1,19 @@
-var SearchBox = require('./SearchBox');
+import React from 'react';
+import SearchBox from './SearchBox';
+import SearchResults from './SearchResults';
 
 var SearchContainer = React.createClass({ 
     render: function() {
     	var divStyle = {
-    		border: 'solid 1px black',
     		display: 'inline-block',
 			padding: '5px'
     	};
         return (
             <div style={divStyle}>
-                <SearchBox name="search" />
+                <SearchBox />
+                <SearchResults />
             </div>
         )
     }
 });
-module.exports = SearchContainer;
+export default SearchContainer;

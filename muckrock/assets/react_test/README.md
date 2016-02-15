@@ -7,10 +7,10 @@ Already have node.js and npm installed
 
 1. Install watchify globally
 ```
-npm install -g watchify
+npm install
 ```
 
-2. Run watchify
+2. Run watchify from react_test/
 ```
-watchify -v -o dist/build.js src/js/App.js
+node_modules/.bin/watchify -v -o dist/build.js src/js/App.js
 ```
