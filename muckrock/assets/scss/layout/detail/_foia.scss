@@ -15,6 +15,7 @@ $request-breakpoint: 768px;
     }
     .request.main {
         @include flex(3);
+        min-width: 0;
     }
 }
 

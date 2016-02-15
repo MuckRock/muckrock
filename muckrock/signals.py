@@ -1,5 +1,5 @@
 """
-Signal processor for haystack
+Signal processor for plugins
 """
 
 from celery_haystack.signals import CelerySignalProcessor

@@ -2,6 +2,7 @@
 Views for the crowdfund application
 """
 
+from django.conf import settings
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -19,10 +20,9 @@ import stripe
 from muckrock.crowdfund.forms import CrowdfundForm, CrowdfundPaymentForm
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.project.models import Project
-from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 
 logger = logging.getLogger(__name__)
-stripe.api_key = STRIPE_SECRET_KEY
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 class CrowdfundListView(ListView):
@@ -67,7 +67,7 @@ class CrowdfundDetailView(DetailView):
     def get_context_data(self, **kwargs):
         """Adds Stripe public key to context"""
         context = super(CrowdfundDetailView, self).get_context_data(**kwargs)
-        context['stripe_pk'] = STRIPE_PUB_KEY
+        context['stripe_pk'] = settings.STRIPE_PUB_KEY
         return context
 
     def get_redirect_url(self):

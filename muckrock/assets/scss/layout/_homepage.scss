@@ -134,10 +134,6 @@
         .news
         {
             @include flex(2 1 400px);
-            h2
-            {
-                margin: 0 $vertical-rhythm $vertical-rhythm;
-            }
             .articles
             {
                 @include display(flex);
@@ -228,49 +224,64 @@
                 line-height: $font-line-height;
             }
         }
-
     }
-    .project-list
-    {
-        border: none;
+    .projects {
+        padding: 0 $vertical-rhythm;
     }
-    .project-item
-    {
-        margin: 0 $vertical-rhythm $vertical-rhythm;
-        &:hover
-        {
-            background-color: lighten($color-blue-dark, 5%);
-        }
-        transition: background-color .25s linear;
-        a
-        {
+    .projects li {
+        margin-bottom: $vertical-rhythm;
+    }
+    .project {
+        border: 1px solid $color-grey;
+        background: $color-white-pure;
+    }
+    .project--header {
+        background-position: center;
+        background-size: cover;
+        .project--title {
             display: block;
             height: 100%;
             width: 100%;
+            padding: $vertical-rhythm;
+            color: $color-white;
             background-color: rgba(0,0,0,.5);
             transition: background-color .25s linear;
-            &:hover
-            {
+            &:hover {
+                background-color: rgba(0,0,0,.75);
                 text-decoration: none;
                 color: $color-white;
-                h4 { text-decoration: underline; }
-                background-color: rgba(0,0,0,.25);
+                h3 {
+                    text-decoration: underline;
+                    color: $color-white;
+                }
             }
         }
-        .project-info
-        {
-            background: none;
+        .title {
+            font-size: $font-size-5;
+        }
+    }
+    .project--info {
+        max-width: 32em;
+        padding: 0 $vertical-rhythm;
+        font-size: $font-size-2;
+        p {
+            margin-bottom: $vertical-rhythm/2;
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
+    }
+    .project--footer {
+        display: block;
+        margin-bottom: 0;
+        padding: $vertical-rhythm/2 $vertical-rhythm;
+        border-top: 1px solid $color-grey;
+        font-weight: $font-weight-bold;
+        text-align: center;
+        &:hover {
+            background: $color-blue;
             color: $color-white;
-            bottom: 0;
-            &:hover h4
-            {
-                color: $color-white;
-            }
-        }
-        h4, .summary
-        {
-            max-width: 24rem;
-            font-weight: $font-weight-bold;
+            border-color: $color-blue-dark;
         }
     }
 }

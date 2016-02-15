@@ -36,10 +36,34 @@ class AgencySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Agency
-        fields = ('id', 'name', 'slug', 'jurisdiction', 'types', 'public_notes', 'address',
-                  'contact_salutation', 'contact_first_name', 'contact_last_name',
-                  'contact_title', 'url', 'expires', 'phone', 'fax', 'approved', 'appeal_agency',
-                  'can_email_appeals', 'image_attr_line', 'stale', 'website', 'twitter',
-                  'twitter_handles', 'foia_logs', 'foia_guide', 'exempt', 'email', 'other_emails',
-                  'parent')
+        fields = (
+                'id',
+                'name',
+                'slug',
+                'jurisdiction',
+                'types',
+                'public_notes',
+                'address',
+                'contact_salutation',
+                'contact_first_name',
+                'contact_last_name',
+                'contact_title',
+                'url',
+                'phone',
+                'fax',
+                'status',
+                'appeal_agency',
+                'can_email_appeals',
+                'image_attr_line',
+                'stale',
+                'website',
+                'twitter',
+                'twitter_handles',
+                'foia_logs',
+                'foia_guide',
+                'exempt',
+                'email',
+                'other_emails',
+                'parent',
+                )
 

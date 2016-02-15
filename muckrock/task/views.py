@@ -15,7 +15,9 @@ import logging
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
 from muckrock.foia.models import STATUS, FOIARequest, FOIACommunication, FOIAFile
-from muckrock.task.forms import TaskFilterForm, ResponseTaskForm
+from muckrock.task.forms import (
+        TaskFilterForm, FlaggedTaskForm, StaleAgencyTaskForm, ResponseTaskForm
+        )
 from muckrock.task.models import (
         Task, OrphanTask, SnailMailTask, RejectedEmailTask,
         StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask,
@@ -181,7 +183,7 @@ class SnailMailTaskList(TaskList):
                 Prefetch(
                     'communication__foia__communications',
                     queryset=FOIACommunication.objects.filter(response=True),
-                    to_attr='has_ack'),
+                    to_attr='replies'),
                 ))
 
     def task_post_helper(self, request, task):
@@ -223,14 +225,35 @@ class RejectedEmailTaskList(TaskList):
                         email_upper == o.email.upper() or
                         email_upper in o.other_emails.upper()]
             return return_value
-        context['agency_by_email'] = seperate_by_email(agencies, all_emails)
-        context['foia_by_email'] = seperate_by_email(foias, all_emails)
+        agency_by_email = seperate_by_email(agencies, all_emails)
+        foia_by_email = seperate_by_email(foias, all_emails)
+        for task in context['object_list']:
+            task.foias = foia_by_email[task.email]
+            task.agencies = agency_by_email[task.email]
         return context
 
 
 class StaleAgencyTaskList(TaskList):
     title = 'Stale Agencies'
-    queryset = StaleAgencyTask.objects.select_related('agency')
+    queryset = (StaleAgencyTask.objects.select_related('agency').prefetch_related(
+        'agency__foiarequest_set',
+        'agency__foiarequest_set__communications'
+    ))
+
+    def task_post_helper(self, request, task):
+        """Check the new email is valid and, if so, apply it"""
+        if request.POST.get('update'):
+            email_form = StaleAgencyTaskForm(request.POST)
+            if email_form.is_valid():
+                new_email = email_form.cleaned_data['email']
+                foia_pks = request.POST.getlist('foia')
+                foias = FOIARequest.objects.filter(pk__in=foia_pks)
+                task.update_email(new_email, foias)
+            else:
+                messages.error(request, 'The email is invalid.')
+                return
+        if request.POST.get('resolve'):
+            task.resolve(request.user)
 
 
 class FlaggedTaskList(TaskList):
@@ -238,6 +261,18 @@ class FlaggedTaskList(TaskList):
     queryset = FlaggedTask.objects.select_related(
             'user', 'foia', 'agency', 'jurisdiction')
 
+    def task_post_helper(self, request, task):
+        """Special post handler for FlaggedTasks"""
+        if request.POST.get('reply'):
+            reply_form = FlaggedTaskForm(request.POST)
+            if reply_form.is_valid():
+                text = reply_form.cleaned_data['text']
+                task.reply(text)
+            else:
+                messages.error(request, 'The form is invalid')
+                return
+        if request.POST.get('resolve'):
+            task.resolve(request.user)
 
 class NewAgencyTaskList(TaskList):
     title = 'New Agencies'
@@ -274,12 +309,15 @@ class NewAgencyTaskList(TaskList):
 class ResponseTaskList(TaskList):
     title = 'Responses'
     queryset = (ResponseTask.objects
-            .select_related('communication__foia')
+            .select_related('communication__foia__agency')
+            .select_related('communication__foia__jurisdiction')
             .prefetch_related(
                 Prefetch('communication__files',
                     queryset=FOIAFile.objects.select_related('foia__jurisdiction')),
                 Prefetch('communication__foia__communications',
-                    queryset=FOIACommunication.objects.order_by('-date'),
+                    queryset=FOIACommunication.objects
+                        .order_by('-date')
+                        .prefetch_related('files'),
                     to_attr='reverse_communications'),
                 ))
 
@@ -292,6 +330,7 @@ class ResponseTaskList(TaskList):
             return
         cleaned_data = form.cleaned_data
         status = cleaned_data['status']
+        set_foia = cleaned_data['set_foia']
         move = cleaned_data['move']
         tracking_number = cleaned_data['tracking_number']
         date_estimate = cleaned_data['date_estimate']
@@ -306,7 +345,7 @@ class ResponseTaskList(TaskList):
                 error_happened = True
         if status:
             try:
-                task.set_status(status)
+                task.set_status(status, set_foia)
             except ValueError:
                 messages.error(request, 'You tried to set the request to an invalid status.')
                 error_happened = True
@@ -382,7 +421,8 @@ class RequestTaskList(TaskList):
                     'jurisdiction__parent__parent',
                     'user__profile'),
                 pk=self.kwargs['pk'])
-        tasks = Task.objects.filter_by_foia(self.foia_request)
+        user = self.request.user
+        tasks = Task.objects.filter_by_foia(self.foia_request, user)
         return tasks
 
     def get_context_data(self, **kwargs):

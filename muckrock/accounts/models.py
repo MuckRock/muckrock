@@ -457,6 +457,9 @@ class Statistics(models.Model):
     daily_requests_pro = models.IntegerField(null=True, blank=True)
     daily_requests_basic = models.IntegerField(null=True, blank=True)
     daily_requests_beta = models.IntegerField(null=True, blank=True)
+    daily_requests_proxy = models.IntegerField(null=True, blank=True)
+    daily_requests_admin = models.IntegerField(null=True, blank=True)
+    daily_requests_org = models.IntegerField(null=True, blank=True)
     daily_articles = models.IntegerField(null=True, blank=True)
 
     # Task statistics
@@ -485,6 +488,10 @@ class Statistics(models.Model):
     total_crowdfundpayment_tasks = models.IntegerField(null=True, blank=True)
     total_unresolved_crowdfundpayment_tasks = models.IntegerField(null=True, blank=True)
     daily_robot_response_tasks = models.IntegerField(null=True, blank=True)
+
+    # Org stats
+    total_active_org_members = models.IntegerField(null=True, blank=True)
+    total_active_orgs = models.IntegerField(null=True, blank=True)
 
     # notes
     public_notes = models.TextField(default='', blank=True)

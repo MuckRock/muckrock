@@ -9,10 +9,11 @@ from django.db.models import Q
 from django.template.loader import render_to_string
 
 from actstream.models import Action, user_stream
-from datetime import datetime
+from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 
-from muckrock.foia.models import FOIARequest
+from muckrock.accounts.models import Statistics
+from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.qanda.models import Question
 
 class Digest(EmailMultiAlternatives):
@@ -101,8 +102,10 @@ class Digest(EmailMultiAlternatives):
                                          .filter(timestamp__gte=duration)
                                          .exclude(actor_content_type=user_ct,
                                                   actor_object_id=self.user.id))
+        foia_stream = self.classify_foia_activity(foia_stream)
+        foia_following = self.classify_foia_activity(foia_following)
         self.activity['requests'] = {
-            'count': foia_stream.count() + foia_following.count(),
+            'count': foia_stream['count'] + foia_following['count'],
             'mine': foia_stream,
             'following': foia_following
         }
@@ -127,13 +130,9 @@ class Digest(EmailMultiAlternatives):
 
     def get_context_data(self):
         """Adds classified activity to the context"""
-        my_foia_stream = self.activity['requests']['mine']
-        follow_foia_stream = self.activity['requests']['following']
         context = {
             'user': self.user,
             'activity': self.activity,
-            'my_foia': self.classify_foia_activity(my_foia_stream),
-            'follow_foia': self.classify_foia_activity(follow_foia_stream),
             'base_url': 'https://www.muckrock.com'
         }
         return context
@@ -188,3 +187,141 @@ class WeeklyDigest(Digest):
 class MonthlyDigest(Digest):
     """A monthly email digest"""
     interval = relativedelta(months=1)
+
+
+class StaffDigest(Digest):
+    """An email that digests other site stats for staff members."""
+    text_template = 'message/staff_digest.txt'
+    html_template = 'message/staff_digest.html'
+    interval = relativedelta(days=1)
+
+    def get_subject(self):
+        """Does what it says on the box"""
+        return 'Daily Staff Digest'
+
+    def get_activity(self):
+        """Returns yesterday's statistics"""
+
+        # we overwrite the existing activity dictionary
+        # and we fix count at 1 so the digest will send
+        current_date = date.today() - self.interval
+        previous_date = current_date - self.interval
+        try:
+            current = Statistics.objects.get(date=current_date)
+            previous = Statistics.objects.get(date=previous_date)
+        except Statistics.DoesNotExist:
+            return {'count': 0} # if statistics cannot be found, don't send anything
+        stats = [
+            stat('Requests', current.total_requests, previous.total_requests),
+            stat(
+                'Processing',
+                current.total_requests_submitted,
+                previous.total_requests_submitted,
+                False
+            ),
+            stat(
+                'Processing Time',
+                current.requests_processing_days,
+                previous.requests_processing_days,
+                False
+            ),
+            stat(
+                'Unresolved Tasks',
+                current.total_unresolved_tasks,
+                previous.total_unresolved_tasks,
+                False
+            ),
+            stat(
+                'Automatically Resolved',
+                current.daily_robot_response_tasks,
+                previous.daily_robot_response_tasks
+            ),
+            stat(
+                'Orphans',
+                current.total_unresolved_orphan_tasks,
+                previous.total_unresolved_orphan_tasks,
+                False
+            ),
+            stat('Pages', current.total_pages, previous.total_pages),
+            stat('Users', current.total_users, previous.total_users),
+            stat('Pro Users', current.pro_users, previous.pro_users),
+            stat('Agencies', current.total_agencies, previous.total_agencies),
+            stat('Stale Agencies', current.stale_agencies, previous.stale_agencies, False),
+            stat('New Agencies', current.unapproved_agencies, previous.unapproved_agencies, False),
+        ]
+        return {
+            'count': 1,
+            'stats': stats,
+            'comms': get_comms(current_date, previous_date),
+        }
+
+    def get_context_data(self):
+        """Gathers what we need for the digest"""
+        context = super(StaffDigest, self).get_context_data()
+        current = datetime.now()
+        context['yesterday'] = current - self.interval
+        context['salutation'] = get_salutation(current.hour)
+        context['signoff'] = get_signoff(current.hour)
+        return context
+
+    def send(self, *args):
+        """Don't send to users who are not staff"""
+        if not self.user.is_staff:
+            return 0
+        return super(StaffDigest, self).send(*args)
+
+def stat(name, current, previous, growth=True):
+    """Returns a statistic dictionary"""
+    return {
+        'name': name,
+        'current': current,
+        'delta': current - previous,
+        'growth': growth
+    }
+
+def get_comms(current, previous):
+    """Returns a dictionary of communications"""
+    received = FOIACommunication.objects.filter(date__range=[previous, current], response=True)
+    sent = FOIACommunication.objects.filter(date__range=[previous, current], response=False)
+    delivered_by = {
+        'email': sent.filter(delivered='email').count(),
+        'fax': sent.filter(delivered='fax').count(),
+        'mail': sent.filter(delivered='mail').count()
+    }
+    cost_per = {
+        'email': 0.00,
+        'fax': 0.12,
+        'mail': 0.54,
+    }
+    cost = {
+        'email': delivered_by['email'] * cost_per['email'],
+        'fax': delivered_by['fax'] * cost_per['fax'],
+        'mail': delivered_by['mail'] * cost_per['mail'],
+    }
+    return {
+        'sent': sent.count(),
+        'received': received.count(),
+        'delivery': {
+            'format': delivered_by,
+            'cost': cost_per,
+            'expense': cost,
+        }
+    }
+
+def get_salutation(hour):
+    """Returns a time-appropriate salutation"""
+    if hour < 12:
+        salutation = 'Good morning'
+    elif hour < 18:
+        salutation = 'Good afternoon'
+    else:
+        salutation = 'Good evening'
+    return salutation
+
+def get_signoff(hour):
+    """Returns a time-appropriate signoff"""
+    if hour < 18:
+        signoff = 'Have a great day'
+    else:
+        signoff = 'Have a great night'
+    return signoff

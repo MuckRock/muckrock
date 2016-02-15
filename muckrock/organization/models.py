@@ -2,16 +2,12 @@
 Models for the organization application
 """
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
 from django.db import models
 from django.template.loader import render_to_string
 from django.utils.text import slugify
-
-from muckrock.settings import MONTHLY_REQUESTS,\
-                              ORG_MIN_SEATS,\
-                              ORG_PRICE_PER_SEAT,\
-                              ORG_REQUESTS_PER_SEAT
 
 from datetime import date
 import logging
@@ -31,7 +27,7 @@ class Organization(models.Model):
     num_requests = models.IntegerField(default=0)
     max_users = models.IntegerField(default=3)
     monthly_cost = models.IntegerField(default=10000)
-    monthly_requests = models.IntegerField(default=MONTHLY_REQUESTS.get('org', 0))
+    monthly_requests = models.IntegerField(default=settings.MONTHLY_REQUESTS.get('org', 0))
     stripe_id = models.CharField(max_length=255, blank=True)
     active = models.BooleanField(default=False)
 
@@ -111,7 +107,7 @@ class Organization(models.Model):
 
     def compute_monthly_cost(self, num_seats):
         """Computes the monthly cost given the number of seats, which can be negative."""
-        price_per_user = ORG_PRICE_PER_SEAT
+        price_per_user = settings.ORG_PRICE_PER_SEAT
         current_monthly_cost = self.monthly_cost
         seat_difference = num_seats - self.max_users
         cost_adjustment = price_per_user * seat_difference
@@ -119,7 +115,7 @@ class Organization(models.Model):
 
     def compute_monthly_requests(self, num_seats):
         """Computes the monthly requests given the number of seats, which can be negative."""
-        requests_per_user = ORG_REQUESTS_PER_SEAT
+        requests_per_user = settings.ORG_REQUESTS_PER_SEAT
         current_requests = self.monthly_requests
         seat_difference = num_seats - self.max_users
         request_adjustment = requests_per_user * seat_difference
@@ -172,7 +168,7 @@ class Organization(models.Model):
         # pylint: disable=no-member
         if self.active:
             raise AttributeError('Cannot activate an active organization.')
-        if num_seats < ORG_MIN_SEATS:
+        if num_seats < settings.ORG_MIN_SEATS:
             raise ValueError('Cannot have an organization with less than three member seats.')
 
         quantity = self.compute_monthly_cost(num_seats)/100
@@ -205,7 +201,7 @@ class Organization(models.Model):
         # pylint: disable=no-member
         if not self.active:
             raise AttributeError('Cannot update an inactive subscription.')
-        if num_seats < ORG_MIN_SEATS:
+        if num_seats < settings.ORG_MIN_SEATS:
             raise ValueError('Cannot have an organization with less than three member seats.')
         quantity = self.compute_monthly_cost(num_seats)/100
         customer = self.owner.profile.customer()

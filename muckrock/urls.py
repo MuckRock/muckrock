@@ -4,15 +4,14 @@ URL mappings for muckrock project
 
 # pylint: disable=unused-import
 # these are called dynmically
+from django.conf import settings
 from django.conf.urls import handler404
 from views import handler500
 # pylint: enable=unused-import
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
-from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import RedirectView
 
-from django_xmlrpc.views import handle_xmlrpc
 from rest_framework.routers import DefaultRouter
 import dbsettings.urls
 
@@ -22,7 +21,6 @@ import muckrock.accounts.urls, muckrock.foia.urls, muckrock.news.urls, muckrock.
        muckrock.project.urls, muckrock.tags.urls
 import muckrock.agency.views, muckrock.foia.viewsets, muckrock.jurisdiction.views, \
        muckrock.accounts.views, muckrock.task.viewsets
-import muckrock.settings as settings
 import muckrock.views as views
 from muckrock.agency.sitemap import AgencySitemap
 from muckrock.foia.sitemap import FoiaSitemap
@@ -108,7 +106,6 @@ urlpatterns = patterns(
     url(r'^api_v1/token-auth/', 'rest_framework.authtoken.views.obtain_auth_token'),
     url(r'^api_doc/', include('rest_framework_swagger.urls')),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
-    url(r'^xmlrpc/$', csrf_exempt(handle_xmlrpc), name='xmlrpc'),
     url(r'^package_monitor/', include('package_monitor.urls', namespace='package_monitor')),
     url(r'^robots\.txt$', include('robots.urls')),
     url(r'^favicon.ico$', RedirectView.as_view(url=settings.STATIC_URL + 'favicon.ico')),

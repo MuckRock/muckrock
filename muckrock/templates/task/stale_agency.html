@@ -1,12 +1,59 @@
 {% extends 'task/default.html' %}
 
-{% block task-class %}
-    stale-agency
-{% endblock %}
+{% block title %}Stale Agency Tasks{%endblock %}
 
-{% block task-data %}
+{% block task-content %}
 <dl class="task-data">
     <dt>Agency</dt>
     <dd><a href="{% url 'admin:agency_agency_change' task.agency.pk %}">{{task.agency}}</a></dd>
+    <dd>{{task.agency.phone}}</dd>
+    <dt>Stalest Request</dt>
+    <dd><a href="{{stalest_request.get_absolute_url}}">{{stalest_request}}</a> (<a href="{% url 'admin:foia_foiarequest_change' stalest_request.pk %}">admin</a>)</dd>
+    <dd>{{stalest_request.latest_response}} day{{stalest_request.latest_response|pluralize}} stale</dd>
 </dl>
+<div class="collapsable stale-requests">
+    <header>
+        <p>{{stale_requests|length}} request{{stale_requests|length|pluralize}} over 120 days stale</p>
+    </header>
+    <table class="stale-request-table">
+        <thead>
+            <tr>
+                <th><input type="checkbox" onClick="selectAll(this, 'foia')" checked /></th>
+                <th>Request</th>
+                <th>Days Stale</th>
+                <th><abbr title="Estimated Completion Date">ECD</abbr></th>
+                <th>Status</th>
+                <th>To:</th>
+                <th>Cc:</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for stale_request in stale_requests %}
+            <tr class="stale-request">
+                <td><input type="checkbox" form="{{task.pk}}-form" name="foia" value="{{stale_request.pk}}" checked /></td>
+                <td><a href="{{stale_request.get_absolute_url}}">{{stale_request}}</a></td>
+                <td>{{stale_request.latest_response}}</td>
+                <td>{{stale_request.date_estimate|date:"m/d/y"}}</td>
+                <td>{{stale_request.get_status_display}}</td>
+                <td><input type="text" value="{{stale_request.email}}" readonly /></td>
+                <td><input type="text" value="{{stale_request.other_emails}}" readonly /></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block task-actions %}
+    <div class="recent-response">
+        <p>Latest response received from:</p>
+        <p>{{latest_response.priv_from_who}} on <a href="{{latest_response.foia.get_absolute_url}}">{{latest_response.foia}}</a> (<a href="{% url 'admin:foia_foiarequest_change' latest_response.foia.pk %}">admin</a>)</p>
+    </div>
+    <div class="form-field">
+        <label for="{{email_form.email.id_for_label}}">Update email on checked requests:</label>
+        {{ email_form.email }}
+    </div>
+    <input type="hidden" name="resolve" value="true" />
+    <button type="submit" name="update" value="true" class="primary">Update email</button>
+    <button type="submit" name="resolve" value="true">Resolve</button>
 {% endblock %}

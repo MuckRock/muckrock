@@ -10,14 +10,15 @@ from muckrock.task.models import StaleAgencyTask
                name='muckrock.agency.tasks.stale')
 def stale():
     """Record all stale agencies once a week"""
-    agencies = Agency.objects.all()
-
-    for agency in agencies:
-        latest_response = agency.latest_response()
-        if ((latest_response is not None and latest_response >= 120) or
-                agency.expired()):
+    for agency in Agency.objects.all():
+        is_stale = agency.is_stale()
+        if is_stale and not agency.stale:
             agency.stale = True
             agency.save()
-            if not StaleAgencyTask.objects.filter(
-                    resolved=False, agency=agency).exists():
+            if not StaleAgencyTask.objects.filter(resolved=False, agency=agency).exists():
                 StaleAgencyTask.objects.create(agency=agency)
+        elif not is_stale and agency.stale:
+            agency.stale = False
+            agency.save()
+            for task in StaleAgencyTask.objects.filter(resolved=False, agency=agency):
+                task.resolve()

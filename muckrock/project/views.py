@@ -4,6 +4,7 @@ Views for the project application
 
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
 from django.http import Http404
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
@@ -66,8 +67,10 @@ class ProjectDetailView(DetailView):
     def get_context_data(self, **kwargs):
         """Adds visible requests and followers to project context"""
         context = super(ProjectDetailView, self).get_context_data(**kwargs)
-        project = self.get_object()
+        project = context['object']
         user = self.request.user
+        context['sidebar_admin_url'] = reverse('admin:project_project_change',
+            args=(project.pk,))
         context['visible_requests'] = (project.requests
                 .get_viewable(user)
                 .select_related(

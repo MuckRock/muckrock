@@ -1,9 +1,11 @@
 """Signals for the task application"""
+from django.core.urlresolvers import reverse
 from django.db.models.signals import post_save
 
 import logging
 
-from muckrock.task.models import OrphanTask, BlacklistDomain
+from muckrock.message.notifications import SlackNotification
+from muckrock.task.models import FlaggedTask, OrphanTask, BlacklistDomain
 
 logger = logging.getLogger(__name__)
 
@@ -22,5 +24,64 @@ def domain_blacklist(sender, instance, created, **kwargs):
         instance.resolve()
     return
 
-post_save.connect(domain_blacklist, sender=OrphanTask,
-        dispatch_uid='muckrock.task.signals.domain_blacklist')
+def notify_flagged(sender, instance, created, **kwargs):
+    """When a new flagged task is created, send a Slack notification."""
+    # pylint: disable=unused-argument
+    if not created or kwargs.get('raw', False):
+        # the raw test prevents text fixtures from creating any notifications
+        return
+    payload = create_flagged_task_payload(instance)
+    slack = SlackNotification(payload)
+    slack.send()
+
+def create_flagged_task_payload(flagged_task):
+    """Create a Slack notification payload for a Flagged Task"""
+    base_url = 'https://www.muckrock.com'
+    task_url = base_url + reverse('task-list') + '?id=' + str(flagged_task.id)
+    author_url = base_url + flagged_task.user.profile.get_absolute_url()
+    author_name = flagged_task.user.get_full_name()
+    flagged_by = {
+        'title': 'Flagged by',
+        'value': '<%(user_url)s|%(user_name)s>' % {
+            'user_url': author_url,
+            'user_name': author_name
+        },
+        'short': True
+    }
+    flagged_object = {
+        'title': '%s' % flagged_task.flagged_object().__class__.__name__,
+        'value': '<%(url)s|%(name)s>' % {
+            'url': base_url + flagged_task.flagged_object().get_absolute_url(),
+            'name': unicode(flagged_task.flagged_object())
+        },
+        'short': True
+    }
+    summary = (
+        'A <%(task_url)s|flagged task> was created by <%(user_url)s|%(user_name)s>: %(text)s' % {
+            'task_url': task_url,
+            'user_url': author_url,
+            'user_name': author_name,
+            'text': flagged_task.text
+        })
+    payload = {
+        'icon_emoji': ':triangular_flag_on_post:',
+        'channel': '#tasks',
+        'text': 'New <%s|flagged task>' % task_url,
+        'attachments': [
+            {
+                'fallback': summary,
+                'text': flagged_task.text,
+                'fields': [flagged_by, flagged_object]
+            }
+        ]
+    }
+    return payload
+
+post_save.connect(
+    domain_blacklist,
+    sender=OrphanTask,
+    dispatch_uid='muckrock.task.signals.domain_blacklist')
+post_save.connect(
+    notify_flagged,
+    sender=FlaggedTask,
+    dispatch_uid='muckrock.task.signals.notify_flagged')

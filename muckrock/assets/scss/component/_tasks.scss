@@ -1,221 +1,308 @@
+$task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
+
+.collapsable > header {
+    cursor: pointer;
+}
+
+.collapsable.collapsed {
+    & > * { display: none !important; }
+    & > header { @include display(flex !important); }
+}
+
 .task {
-    @include row;
+    position: relative;
     border: 1px solid $color-black;
-    &.resolved {
-        border-color: $color-green;
+    background: $color-white-pure;
+    & > * {
+        padding: $task-padding;
+        margin-bottom: 0;
+    }
+    & > main {
+        padding: 0;
     }
 }
 
-.resolved .task-header {
-    background: $color-green;
+.task.resolved {
+    border-color: $color-green;
+    .task-header {
+        background: $color-green;
+    }
 }
 
 .task-header {
-    overflow: hidden;
-    position: relative;
-    margin-bottom: 0;
+    @include display(flex);
+    @include align-items(center);
     background-color: $color-black;
     color: $color-white;
-    cursor: pointer;
-
-    .checkbox {
-        position: absolute;
-        top: $vertical-rhythm/2;
-        left: $vertical-rhythm/4;
+    a {
+        color: $color-white;
     }
-
-    .task-resolved, .task-metadata {
-        @include span-columns(12);
-        @include row;
-        padding: $vertical-rhythm/4 $vertical-rhythm/2;
-        p, time {
-            @include span-columns(6);
-        }
-    }
-
     .task-type {
-        margin: 0;
-        padding-left: $vertical-rhythm;
+        padding-left: $vertical-rhythm/2;
     }
-
     time {
+        @include flex(auto);
         text-align: right;
-        a { color: $color-white; }
     }
 }
 
-.task .task-data {
-    @include span-columns(8);
+.task-data {
     padding: $vertical-rhythm/2;
     li {
         margin-left: $vertical-rhythm;
     }
 }
 
+.task .full-letter {
+    margin-bottom: 0;
+    background: $color-grey-7;
+    & > header {
+        @include display(flex);
+        margin-bottom: 0;
+        border-bottom: 1px solid $color-grey;
+        padding: $task-padding;
+        background: $color-grey-7;
+    }
+    textarea {
+        display: block;
+        border-radius: 0;
+        border-bottom: 1px solid $color-grey;
+        max-width: 100%;
+        height: 10em;
+        padding: $vertical-rhythm/2;
+        font-family: $font-monospace;
+        font-size: $font-size-2;
+    }
+}
+
+.task .full-communication {
+    margin-bottom: 0;
+    background: $color-grey-7;
+    & > header {
+        @include display(flex);
+        margin-bottom: 0;
+        border-bottom: 1px solid $color-grey;
+        padding: $task-padding;
+        background: $color-grey-7;
+    }
+    main {
+        border-bottom: 1px solid $color-grey;
+        padding: $vertical-rhythm/2;
+    }
+}
+
 .task .task-actions {
-    @include span-columns(4);
-    @include omega;
-    padding: $vertical-rhythm/2;
-    input, select, button, label {
+    background: $color-grey-7;
+    text-align: right;
+    input, select, label {
         display: block;
         width: 100%;
         margin-bottom: $vertical-rhythm;
     }
     input[type="checkbox"] {
         width: auto;
-        margin-right: $vertical-rhythm;
+        float: left;
     }
     label {
         margin-bottom: 0;
     }
 }
 
-.task .task-extra-context {
-    @include span-columns(12);
-    margin-bottom: 0;
-    padding: $vertical-rhythm/2;
-    background: $color-grey-7;
-    button {
-        display: block;
-        width: 10em;
-        margin-bottom: $vertical-rhythm/2;
-    }
-
-    .extra-context {
-        display: block;
-        padding-top: $vertical-rhythm;
-        border-top: 1px solid $color-grey;
-    }
-    .extra-context.hidden {
-        display: none;
-    }
-}
-
-.collapsed.task {
-    & > * {
-        display: none;
-    }
-    .task-header {
-        display: block;
-    }
-}
-
-.task {
-    position: relative;
-    .overlay {
-        display: block;
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 100%;
-        width: 100%;
+.task .overlay {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    color: $color-white;
+    text-align: center;
+    font-weight: $font-weight-bold;
+    a {
         color: $color-white;
-        text-align: center;
-        font-weight: $font-weight-bold;
-        a {
-            color: $color-white;
-        }
-        z-index: -1;
-        opacity: 0;
-        @include transition(opacity, .5s, linear);
-        &.visible {
-            z-index: 1;
-            opacity: .9;
-        }
-        &.pending  { background-color: $color-grey;    }
-        &.error    { background-color: $color-red;     }
-        .loader, .dialog {
-            width: 100%;
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-        }
     }
+    z-index: -1;
+    opacity: 0;
+    @include transition(opacity, .5s, linear);
+    &.visible {
+        z-index: 1;
+        opacity: .9;
+    }
+    &.pending  { background-color: $color-grey;    }
+    &.error    { background-color: $color-red;     }
+    .loader, .dialog {
+        width: 100%;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+}
+
+/* Flagged Task */
+
+.flagged.task .flag-reply {
+    background-color: $color-grey-7;
+    border-bottom: 1px solid $color-grey;
+    header, footer, textarea {
+        margin-bottom: 0;
+        padding: $task-padding;
+    }
+    textarea {
+        display: block;
+        height: 10em;
+        border-radius: 0;
+        border: none;
+    }
+    .submission-control {
+        @include display(flex);
+        @include justify-content(flex-start);
+        @include align-items(center);
+    }
+    .checkbox-field {
+        margin-bottom: 0;
+        margin-left: $vertical-rhythm;
+    }
+}
+
+/* Stale Agency Task */
+
+.stale-agency .task-data {
+    margin-bottom: 0;
+}
+
+.stale-agency .stale-requests {
+    border-bottom: 1px solid $color-grey;
+    header {
+        margin-bottom: 0;
+        padding: $vertical-rhythm/2;
+        background: $color-grey-7;
+    }
+    input[type="text"] {
+        margin: 0;
+        border-radius: 0;
+        width: 100%;
+    }
+    abbr {
+        cursor: help;
+    }
+}
+
+.stale-agency .recent-response {
+    text-align: left;
+    p {
+        margin-bottom: 0;
+    }
+}
+
+.stale-agency .form-field {
+    text-align: left;
 }
 
 /* New Agency Task */
 
+.new-agency-forms {
+    padding: 0 $vertical-rhythm/2;
+}
+
+.new-agency .task-data {
+    margin-bottom: 0;
+}
+
+.new-agency.form {
+    margin-top: 0;
+    margin-bottom: $vertical-rhythm/2;
+    padding: 0;
+    border-radius: 0;
+    background: $color-white;
+    header, footer {
+        padding: $task-padding;
+        margin-bottom: 0;
+    }
+    header {
+        font-weight: $font-weight-bold;
+        font-size: $font-size-2;
+        color: $color-white;
+        background: $color-grey-6;
+    }
+    footer {
+        text-align: right;
+    }
+    input {
+        display: block;
+        width: 100%;
+    }
+    textarea {
+        margin-bottom: 0;
+        height: 5em;
+        resize: none;
+    }
+    main {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        margin-bottom: 0;
+    }
+    fieldset {
+        @include flex(1 0 50%);
+        margin-bottom: $vertical-rhythm/2;
+        padding: 0 $vertical-rhythm/2;
+    }
+    fieldset.id_name {
+        @include flex(1 0 100%);
+        margin-left: 0;
+        margin-right: 0;
+    }
+    .help-text {
+        color: $color-grey-3;
+        line-height: $font-line-height;
+    }
+}
+
 .new-agency.rejection.form {
+    background: $color-red-light;
     border-color: $color-red;
+    header {
+        background: $color-red;
+    }
+    main {
+        padding: $task-padding;
+    }
+    select {
+        display: block;
+        width: 100%;
+    }
 }
 
 .new-agency.approval.form {
+    background: $color-green-light;
     border-color: $color-green;
-    @include row;
-    overflow: hidden;
-    .id_name, .id_aliases, .id_address {
-        @include full;
+    header {
+        background: $color-green;
     }
-    .id_address, .id_url, .id_fax {
-        @include omega;
+    .help-text {
+        color: $color-green-dark;
     }
-    fieldset {
-        @include grid-columns(4, 3, 6);
-        input {
-            width: 100%;
-        }
-        .help-text {
-            margin: $vertical-rhythm/4 0 0 0;
-        }
-    }
-
 }
 
 /* Response Task */
 
 .response.task {
-    #id_status {
-        margin-bottom: $vertical-rhythm;
-    }
-    .file {
-        margin-bottom: $vertical-rhythm/4;
-        border: 1px solid $color-grey;
-        padding: $vertical-rhythm/4;
-    }
-    .task-extra-context {
-        margin: 0;
-    }
-    .task-extra-context dd {
-        margin-bottom: $vertical-rhythm;
-        &:last-child { margin-bottom: 0; }
-    }
-    .communication {
-        // margin: $vertical-rhythm/2 0;
-        border: 1px solid $color-grey;
-        border-left-width: 9px;
-        padding: $vertical-rhythm/2;
-        header {
-            @include row;
-            @extend dfn;
-            p, time { @include half; }
-            p { margin: 0; }
-            @include media($medium-layout) {
-                time { text-align: right; }
-            }
-        }
-        p { margin-bottom: 0; }
-    }
-    .created-from-orphan {
+    .response-input {
         margin-bottom: 0;
-        padding: $vertical-rhythm/2;
-        background-color: $color-yellow;
+        text-align: left;
+        @include columns(3 12em);
+        label {
+            font-size: $font-size-2;
+        }
+    }
+    .task-data {
+        margin-bottom: 0;
     }
 }
 
 /* Snail Mail Task */
 
-
 .task-post-actions input[type=checkbox] {
-    width: 20%;
-    float: left;
-    margin-top: .4em;
     & + label {
-        line-height: 1.5em;
         margin-bottom: $vertical-rhythm;
     }
-}
-
-.extra-context textarea {
-    height: 15em;
-    overflow: none;
 }

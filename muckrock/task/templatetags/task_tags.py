@@ -5,11 +5,11 @@ Nodes and tags for rendering tasks into templates
 from django import template
 from django.core.urlresolvers import reverse
 
-from muckrock import agency
-from muckrock import foia
-from muckrock import task
+from muckrock import agency, foia, task
 # imports Task model separately to patch bug in django-compressor parser
 from muckrock.task.models import Task
+
+ # pylint:disable=no-member
 
 register = template.Library()
 
@@ -18,6 +18,7 @@ class TaskNode(template.Node):
     model = Task
     task_template = 'task/default.html'
     endpoint_name = 'task-list'
+    class_name = 'default'
 
     def __init__(self, task_):
         """The node should be initialized with a task object"""
@@ -33,14 +34,72 @@ class TaskNode(template.Node):
     def get_extra_context(self):
         """Returns a dictionary of context for the specific task"""
         endpoint_url = reverse(self.endpoint_name)
-        extra_context = {'task': self.task, 'endpoint': endpoint_url}
+        extra_context = {
+            'task': self.task,
+            'class': self.class_name,
+            'endpoint': endpoint_url
+        }
         return extra_context
+
+
+class CrowdfundTaskNode(TaskNode):
+    """Renders a crowdfund task."""
+    model = task.models.GenericCrowdfundTask
+    task_template = 'task/crowdfund.html'
+    endpoint_name = 'crowdfund-task-list'
+    class_name = 'crowdfund'
+
+
+class FailedFaxTaskNode(TaskNode):
+    """Renders a failed fax task."""
+    model = task.models.FailedFaxTask
+    task_template = 'task/failed_fax.html'
+    endpoint_name = 'failed-fax-task-list'
+    class_name = 'failed-fax'
+
+
+class FlaggedTaskNode(TaskNode):
+    """Renders a flagged task."""
+    model = task.models.FlaggedTask
+    task_template = 'task/flagged.html'
+    endpoint_name = 'flagged-task-list'
+    class_name = 'flagged'
+
+    def get_extra_context(self):
+        """Adds a form for replying to the user"""
+        extra_context = super(FlaggedTaskNode, self).get_extra_context()
+        extra_context['flag_form'] = task.forms.FlaggedTaskForm()
+        return extra_context
+
+
+class MultiRequestTaskNode(TaskNode):
+    """Renders a multi-request task."""
+    model = task.models.MultiRequestTask
+    task_template = 'task/multirequest.html'
+    endpoint_name = 'multirequest-task-list'
+    class_name = 'multirequest'
+
+
+class NewAgencyTaskNode(TaskNode):
+    """Renders a new agency task."""
+    model = task.models.NewAgencyTask
+    task_template = 'task/new_agency.html'
+    endpoint_name = 'new-agency-task-list'
+    class_name = 'new-agency'
+
+    def get_extra_context(self):
+        """Adds an approval form, other agencies, and relevant requests to context"""
+        extra_context = super(NewAgencyTaskNode, self).get_extra_context()
+        extra_context['agency_form'] = agency.forms.AgencyForm(instance=self.task.agency)
+        return extra_context
+
 
 class OrphanTaskNode(TaskNode):
     """Renders an orphan task."""
     model = task.models.OrphanTask
     task_template = 'task/orphan.html'
     endpoint_name = 'orphan-task-list'
+    class_name = 'orphan'
 
     def get_extra_context(self):
         """Adds sender domain to the context"""
@@ -50,11 +109,51 @@ class OrphanTaskNode(TaskNode):
         extra_context['attachments'] = self.task.communication.files.all()
         return extra_context
 
+
+class PaymentTaskNode(TaskNode):
+    """Renders a payment task."""
+    model = task.models.PaymentTask
+    task_template = 'task/payment.html'
+    endpoint_name = 'payment-task-list'
+    class_name = 'payment'
+
+
+class RejectedEmailTaskNode(TaskNode):
+    """Renders a rejected email task."""
+    model = task.models.RejectedEmailTask
+    task_template = 'task/rejected_email.html'
+    endpoint_name = 'rejected-email-task-list'
+    class_name = 'rejected-email'
+
+class ResponseTaskNode(TaskNode):
+    """Renders a response task."""
+    model = task.models.ResponseTask
+    task_template = 'task/response.html'
+    endpoint_name = 'response-task-list'
+    class_name = 'response'
+
+    def get_extra_context(self):
+        """Adds ResponseTask-specific context"""
+        extra_context = super(ResponseTaskNode, self).get_extra_context()
+        form_initial = {}
+        communication = self.task.communication
+        _foia = communication.foia
+        if _foia:
+            form_initial['status'] = _foia.status
+            form_initial['tracking_number'] = _foia.tracking_id
+            form_initial['date_estimate'] = _foia.date_estimate
+            extra_context['previous_communications'] = _foia.reverse_communications
+        extra_context['response_form'] = task.forms.ResponseTaskForm(initial=form_initial)
+        extra_context['attachments'] = self.task.communication.files.all()
+        return extra_context
+
+
 class SnailMailTaskNode(TaskNode):
     """Renders a snail mail task."""
     model = task.models.SnailMailTask
     task_template = 'task/snail_mail.html'
     endpoint_name = 'snail-mail-task-list'
+    class_name = 'snail-mail'
 
     def get_extra_context(self):
         """Adds status to the context"""
@@ -62,87 +161,33 @@ class SnailMailTaskNode(TaskNode):
         extra_context['status'] = foia.models.STATUS
         return extra_context
 
-class RejectedEmailTaskNode(TaskNode):
-    """Renders a rejected email task."""
-    model = task.models.RejectedEmailTask
-    task_template = 'task/rejected_email.html'
-    endpoint_name = 'rejected-email-task-list'
 
 class StaleAgencyTaskNode(TaskNode):
     """Renders a stale agency task."""
     model = task.models.StaleAgencyTask
     task_template = 'task/stale_agency.html'
     endpoint_name = 'stale-agency-task-list'
+    class_name = 'stale-agency'
 
-class FlaggedTaskNode(TaskNode):
-    """Renders a flagged task."""
-    model = task.models.FlaggedTask
-    task_template = 'task/flagged.html'
-    endpoint_name = 'flagged-task-list'
+    def get_extra_context(self):
+        """Adds a form for updating the email"""
+        extra_context = super(StaleAgencyTaskNode, self).get_extra_context()
+        latest_response = self.task.latest_response()
+        initial = {'email': latest_response.priv_from_who}
+        extra_context['email_form'] = task.forms.StaleAgencyTaskForm(initial=initial)
+        extra_context['latest_response'] = latest_response
+        extra_context['stale_requests'] = self.task.stale_requests()
+        extra_context['stalest_request'] = self.task.stalest_request()
+        return extra_context
+
 
 class StatusChangeTaskNode(TaskNode):
     """Renders a status change task."""
     model = task.models.StatusChangeTask
     task_template = 'task/status_change.html'
     endpoint_name = 'status-change-task-list'
+    class_name = 'status-change'
 
-class PaymentTaskNode(TaskNode):
-    """Renders a payment task."""
-    model = task.models.PaymentTask
-    task_template = 'task/payment.html'
-    endpoint_name = 'payment-task-list'
-
-class CrowdfundTaskNode(TaskNode):
-    """Renders a crowdfund task."""
-    model = task.models.GenericCrowdfundTask
-    task_template = 'task/crowdfund.html'
-    endpoint_name = 'crowdfund-task-list'
-
-class MultiRequestTaskNode(TaskNode):
-    """Renders a multi-request task."""
-    model = task.models.MultiRequestTask
-    task_template = 'task/multirequest.html'
-    endpoint_name = 'multirequest-task-list'
-
-class FailedFaxTaskNode(TaskNode):
-    """Renders a failed fax task."""
-    model = task.models.FailedFaxTask
-    task_template = 'task/failed_fax.html'
-    endpoint_name = 'failed-fax-task-list'
-
-class NewAgencyTaskNode(TaskNode):
-    """Renders a new agency task."""
-    model = task.models.NewAgencyTask
-    task_template = 'task/new_agency.html'
-    endpoint_name = 'new-agency-task-list'
-
-    def get_extra_context(self):
-        """Adds an approval form, other agencies, and relevant requests to context"""
-        # pylint:disable=line-too-long
-        # pylint:disable=no-member
-        extra_context = super(NewAgencyTaskNode, self).get_extra_context()
-        extra_context['agency_form'] = agency.forms.AgencyForm(instance=self.task.agency)
-        return extra_context
-
-class ResponseTaskNode(TaskNode):
-    """Renders a response task."""
-    model = task.models.ResponseTask
-    task_template = 'task/response.html'
-    endpoint_name = 'response-task-list'
-
-    def get_extra_context(self):
-        """Adds ResponseTask-specific context"""
-        # pylint:disable=no-member
-        extra_context = super(ResponseTaskNode, self).get_extra_context()
-        form_initial = {}
-        if self.task.communication.foia:
-            the_foia = self.task.communication.foia
-            form_initial['status'] = the_foia.status
-            form_initial['tracking_number'] = the_foia.tracking_id
-            form_initial['date_estimate'] = the_foia.date_estimate
-        extra_context['response_form'] = task.forms.ResponseTaskForm(initial=form_initial)
-        extra_context['attachments'] = self.task.communication.files.all()
-        return extra_context
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 

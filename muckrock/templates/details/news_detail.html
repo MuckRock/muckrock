@@ -10,60 +10,61 @@
 {% block title %}{{ article.title }}{% endblock title %}
 
 {% block content %}
-<div class="news detail">
-    <article class="news-article">
-        <header class="news-article-header">
-            {% if article.image %}
-            <img src="{% thumbnail article.image 1200x400 crop %}" class="news-image">
-            {% endif %}
-            <h1 class="news-article-title">{{ article.title }}</h1>
-            {% if article.kicker %}
-            <summary class="news-article-kicker">{{ article.kicker }}</summary>
-            {% endif %}
-            <div class="secondary">
-                {% if article.authors.all %}
-                <div class="news-article-authors">by
-                    {% for author in article.authors.all %}
-                        <a href="{{ author.profile.get_absolute_url }}" title="{{ author.get_full_name }}">{{ author.get_full_name }}</a>{% if not forloop.last %}, {% endif %}
-                    {% endfor %}
-                </div>
-                {% endif %}
-                <time title="{{ article.pub_date|date:'c' }}" datetime="{{ article.pub_date|date:'c' }}" class="news-article-date">{{ article.pub_date | date:"F j, Y" }}</time>
-                {% if article.editors.all %}
-                <div class="news-article-editors">edited by
-                    {% for editor in article.editors.all %}
-                        <a href="{{ editor.profile.get_absolute_url }}" title="{{ editor.get_full_name }}">{{ editor.get_full_name }}</a>{% if not forloop.last %}, {% endif %}
-                    {% endfor %}
-                </div>
-                {% endif %}
+<article class="news detail news--article">
+    <header class="news--header">
+        {% if article.image %}
+        <img src="{% thumbnail article.image 1200x400 crop %}">
+        {% endif %}
+        <time title="{{ article.pub_date|date:'c' }}" datetime="{{ article.pub_date|date:'c' }}">{{ article.pub_date | date:"F j, Y" }}</time>
+        <h1>{{ article.title }}</h1>
+        {% if article.kicker %}
+        <summary class="kicker">{{ article.kicker }}</summary>
+        {% endif %}
+        <div class="contributors">
+            {% with article.authors.all as authors %}
+            {% if authors %}
+            <div class="authors">Written by
+                {% for author in authors %}
+                    <a href="{{ author.profile.get_absolute_url }}" title="{{ author.get_full_name }}">{{ author.get_full_name }}</a>{% if not forloop.last %}, {% endif %}
+                {% endfor %}
             </div>
-        </header>
-        <section class="news-article-body">
+            {% endif %}
+            {% endwith %}
+            {% with article.editors.all as editors %}
+            {% if editors %}
+            <div class="editors">Edited by
+                {% for editor in editors %}
+                    <a href="{{ editor.profile.get_absolute_url }}" title="{{ editor.get_full_name }}">{{ editor.get_full_name }}</a>{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+        </div>
+    </header>
+    <main class="news--main">
         {% with article.body|markdown:"trusted" as copy %}
             {% evaluate copy %}
         {% endwith %}
-        </section>
-        <aside class="news-aside">
-            {% include 'lib/social.html' with title=article.title %}
-            {% if projects %}
-            <ul class="project-list nostyle">
-            {% for project in projects %}
-                <li class="project-item" {% if project.image %}style="background-image:url('{% thumbnail project.image 800x600 %}')"{% endif %}>
-                    <a href="{{project.get_absolute_url}}" title="{{project.title}}" class="project-info">
-                        <h4 class="title">{{project.title}}</h4>
-                        <p class="summary">{{project.summary|truncatechars:"300"}}</p>
-                    </a>
-                </li>
-            {% endfor %}
-            </ul>
-            {% endif %}
-            {% tag_manager article %}
-            {% if foias %}
+    </main>
+    <aside class="news--aside">
+        {% include 'lib/social.html' with title=article.title %}
+        {% tag_manager article %}
+        {% if projects %}
+        <ul class="project-list nostyle">
+        {% for project in projects %}
+            <li>{% include 'lib/project.html' %}</li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+        {% if foias %}
+        <div class="related-requests">
             <dfn>Related Requests</dfn>
-                {% include 'lib/foia_group.html' with foias=foias %}
-            {% endif %}
-        </aside>
-    </article>
+            {% for foia in foias %}
+            {% include 'lib/foia.html' with hide_actions=True %}
+            {% endfor %}
+        </div>
+        {% endif %}
+    </aside>
 </div>
 {% endblock %}
 
@@ -117,6 +118,10 @@ $('.checkout-button').click(function(e){
         checkoutData.form
     );
     return false;
+});
+$('.news--main img').loupe({
+    height: 200,
+    width: 200
 });
 </script>
 {% endblock scripts %}

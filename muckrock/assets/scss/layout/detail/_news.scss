@@ -1,115 +1,53 @@
-.detail.news {
-
-    $news-layout-breakpoint: 850px;
-
-    .news-article {
-        @include display(flex);
-        @include flex-wrap(wrap);
+article.news--article {
+    @include display(flex);
+    @include justify-content(center);
+    @include flex-wrap(wrap-reverse);
+    max-width: 48em;
+    margin: 0 auto $vertical-rhythm;
+    .news--header, .news--main, .news--aside {
+        padding: 0 $vertical-rhythm/2;
     }
-
-    .news-article-header {
-        @include flex(100%);
+    .news--header {
+        @include flex(0 0 100%);
         @include order(1);
-
-        .news-image {
-            display: block;
-            width: 100%;
-        }
-
-        .news-article-title, .news-article-kicker {
-        font-weight: $font-weight-bold;
-        }
-
-        .news-article-title {
-            font-size: $font-size-6;
-        }
-
-        .news-article-kicker {
-            font-size: $font-size-4;
-            line-height: $font-line-height;
-        }
-
-        @include media($medium-layout) {
-            .news-article-title {
-                font-size: $font-size-7;
-            }
-            .news-article-kicker {
-                font-size: $font-size-5;
-            }
-        }
-
-        .secondary {
-            color: $color-grey-3;
-            @include display(flex);
-            @include flex-direction(column);
-            @include justify-content(space-between);
-            @include border;
-            border-left: none;
-            border-right: none;
-            padding: $vertical-rhythm/2 0;
-            .news-article-authors {
-                font-weight: $font-weight-bold;
-                font-size: $font-size-4;
-            }
-            .news-article-editors {
-                margin-bottom: $vertical-rhythm;
-            }
-            .news-article-date {
-                @include order(2);
-            }
-            @media screen and (min-width: $news-layout-breakpoint) {
-                @include flex-direction(row);
-                @include align-items(center);
-                & > * {
-                    max-width: 15em;
-                    margin-bottom: 0;
-                }
-                .news-article-date {
-                    @include order(1);
-                }
-                .news-article-editors {
-                    margin-bottom: 0;
-                    @include order(2);
-                }
-            }
-        }
-    }
-
-    .news-article-body {
-        @include order(2);
-        max-width: 100%;
-        @media screen and (min-width: $news-layout-breakpoint) {
-            @include order(3);
-            @include flex(1);
-            max-width: 40em;
-            margin: 0 $vertical-rhythm $vertical-rhythm;
-            font-size: $font-size-4;
-            line-height: $font-line-height;
-        }
-
-        p {
-            overflow: hidden;
-        }
+        min-width: 0;
+        time { @extend dfn; }
         img {
-            text-align: center;
+            margin-bottom: $vertical-rhythm/2;
         }
-        .widget {
-            font-size: initial;
+        h1, .kicker {
+            margin-bottom: $vertical-rhythm/2;
+            font-weight: $font-weight-bold;
+            line-height: 1.25em;
+        }
+        .contributors {
+            @include display(flex);
+            @include justify-content(space-between);
+            color: $color-grey;
+            font-size: $font-size-2;
+            font-weight: $font-weight-bold;
+            .authors, .editors {
+                margin-bottom: 0;
+            }
         }
     }
-
-    .news-aside {
-        @include order(3);
-        width: 100%;
-        @media screen and (min-width: $news-layout-breakpoint) {
-            @include order(2);
-            @include flex(0 0 15em);
-        }
+    .news--main {
+        @include flex(0 1 32em);
+        max-width: 32em;
+        min-width: 0;
     }
-
+    .news--aside {
+        @include flex(1 1 12em);
+        @include order(-1);
+        max-width: 32em;
+        min-width: 0;
+    }
+    @include media(72rem) {
+        font-size: $font-size-4;
+        line-height: $font-line-height;
+    }
     // Fixes for embedded content
     div[id^='viewer'] {
-        max-width: 90%;
         margin: $vertical-rhythm auto;
         @include media($large-layout) {
             margin: $vertical-rhythm auto $vertical-rhythm 0;
@@ -131,4 +69,15 @@
             height: 100%;
         }
     }
+}
+
+.loupe {
+    z-index: 500;
+    border: 2px solid $color-grey-3;
+    border-radius: 50%;
+    background: $color-grey;
+    cursor: none;
+}
+.loupe img {
+    max-width: none;
 }

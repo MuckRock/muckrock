@@ -5,23 +5,28 @@ from datetime import datetime
 
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.test import TestCase, Client
+from django.test import TestCase, Client, RequestFactory
 
 import logging
+import mock
 import nose
 
-from muckrock import task
-from muckrock import agency
+from muckrock import agency, factories, task
 from muckrock.foia.models import FOIARequest
 from muckrock.foia.views import save_foia_comm
+from muckrock.task.factories import FlaggedTaskFactory, StaleAgencyTaskFactory
+from muckrock.utils import mock_middleware
 from muckrock.views import MRFilterableListView
 
 eq_ = nose.tools.eq_
 ok_ = nose.tools.ok_
 raises = nose.tools.raises
+mock_send = mock.Mock()
 
 # pylint: disable=missing-docstring
+# pylint: disable=no-member
 
+@mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class TaskListViewTests(TestCase):
     """Test that the task list view resolves and renders correctly."""
 
@@ -70,6 +75,7 @@ class TaskListViewTests(TestCase):
         ok_(obj_list,
             'Object list should not be empty.')
 
+@mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class TaskListViewPOSTTests(TestCase):
     """Tests POST requests to the Task list view"""
     # we have to get the task again if we want to see the updated value
@@ -99,6 +105,7 @@ class TaskListViewPOSTTests(TestCase):
         eq_(updated_task.resolved, False,
             'Tasks should not be resolved when no "resolve" data is POSTed.')
 
+@mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class TaskListViewBatchedPOSTTests(TestCase):
     """Tests batched POST requests for all tasks"""
     # we have to get the task again if we want to see the updated value
@@ -123,6 +130,7 @@ class TaskListViewBatchedPOSTTests(TestCase):
             eq_(updated_task.resolved, True,
                 'Task %d should be resolved when doing a batched resolve' % updated_task.pk)
 
+@mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class OrphanTaskViewTests(TestCase):
     """Tests OrphanTask-specific POST handlers"""
 
@@ -187,6 +195,7 @@ class OrphanTaskViewTests(TestCase):
             'task': self.task.pk})
         ok_(task.models.BlacklistDomain.objects.filter(domain='muckrock.com'))
 
+@mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class SnailMailTaskViewTests(TestCase):
     """Tests SnailMailTask-specific POST handlers"""
 
@@ -220,6 +229,127 @@ class SnailMailTaskViewTests(TestCase):
         eq_(updated_task.communication.date.day, datetime.now().day,
             'Should update the communication to today\'s date.')
 
+
+@mock.patch('muckrock.task.models.FlaggedTask.reply')
+class FlaggedTaskViewTests(TestCase):
+    """Tests FlaggedTask POST handlers"""
+    def setUp(self):
+        self.user = factories.UserFactory(is_staff=True)
+        self.url = reverse('flagged-task-list')
+        self.view = task.views.FlaggedTaskList.as_view()
+        self.task = FlaggedTaskFactory()
+        self.request_factory = RequestFactory()
+
+    def post_request(self, data):
+        """Helper to post data and get a response"""
+        request = self.request_factory.post(self.url, data)
+        request.user = self.user
+        request = mock_middleware(request)
+        response = self.view(request)
+        return response
+
+    def test_post_reply(self, mock_reply):
+        """Staff should be able to reply to the user who raised the flag"""
+        test_text = 'Lorem ipsum'
+        form = task.forms.FlaggedTaskForm({'text': test_text})
+        ok_(form.is_valid())
+        post_data = form.cleaned_data
+        post_data.update({'reply': 'truthy', 'task': self.task.pk})
+        self.post_request(post_data)
+        self.task.refresh_from_db()
+        ok_(not self.task.resolved, 'The task should not automatically resolve when replying.')
+        mock_reply.assert_called_with(test_text)
+
+    def test_post_reply_resolve(self, mock_reply):
+        """The task should optionally resolve when replying"""
+        test_text = 'Lorem ipsum'
+        form = task.forms.FlaggedTaskForm({'text': test_text})
+        ok_(form.is_valid())
+        post_data = form.cleaned_data
+        post_data.update({'reply': 'truthy', 'resolve': True, 'task': self.task.pk})
+        self.post_request(post_data)
+        self.task.refresh_from_db()
+        ok_(self.task.resolved, 'The task should resolve.')
+        mock_reply.assert_called_with(test_text)
+
+
+class StaleAgencyTaskViewTests(TestCase):
+    """Tests StaleAgencyTask POST handlers"""
+    def setUp(self):
+        self.user = factories.UserFactory(is_staff=True)
+        self.url = reverse('stale-agency-task-list')
+        self.view = task.views.StaleAgencyTaskList.as_view()
+        self.task = StaleAgencyTaskFactory()
+        self.request_factory = RequestFactory()
+
+    def post_request(self, data):
+        """Helper to post data and get a response"""
+        request = self.request_factory.post(self.url, data)
+        request.user = self.user
+        request = mock_middleware(request)
+        response = self.view(request)
+        return response
+
+    @mock.patch('muckrock.task.models.StaleAgencyTask.update_email')
+    def test_post_email_update(self, mock_update):
+        """Should update email when given an email and a list of FOIA"""
+        new_email = u'new_email@muckrock.com'
+        foia = factories.FOIARequestFactory()
+        post_data = {
+            'email': new_email,
+            'foia': [foia.pk],
+            'update': 'truthy',
+            'resolve': 'truthy',
+            'task': self.task.pk
+        }
+        self.post_request(post_data)
+        self.task.refresh_from_db()
+        self.task.agency.refresh_from_db()
+        ok_(mock_update.called, 'The email should be updated.')
+        ok_(self.task.resolved, 'The task should resolve.')
+        ok_(not self.task.agency.stale, 'The agency should no longer be stale.')
+
+    @mock.patch('muckrock.task.models.StaleAgencyTask.update_email')
+    def test_post_bad_email_update(self, mock_update):
+        """An invalid email should be prevented from updating or resolving anything."""
+        bad_email = u'bad_email'
+        foia = factories.FOIARequestFactory()
+        post_data = {
+            'email': bad_email,
+            'foia': [foia.pk],
+            'update': 'truthy',
+            'resolve': 'truthy',
+            'task': self.task.pk
+        }
+        self.post_request(post_data)
+        self.task.refresh_from_db()
+        self.task.agency.refresh_from_db()
+        ok_(not mock_update.called, 'The email should not be updated.')
+        ok_(not self.task.resolved, 'The task should not resolve.')
+        ok_(self.task.agency.stale, 'The agency should still be stale.')
+
+    @mock.patch('muckrock.task.models.StaleAgencyTask.update_email')
+    def test_post_bad_foia(self, mock_update):
+        """An invalid FOIA should not prevent the task from updating or resolving anything."""
+        new_email = u'new_email@muckrock.com'
+        foia = factories.FOIARequestFactory()
+        bad_pk = 12345
+        post_data = {
+            'email': new_email,
+            'foia': [foia.pk, bad_pk],
+            'update': 'truthy',
+            'resolve': 'truthy',
+            'task': self.task.pk
+        }
+        self.post_request(post_data)
+        self.task.refresh_from_db()
+        self.task.agency.refresh_from_db()
+        ok_(mock_update.called, 'The email should be updated.')
+        ok_(self.task.resolved, 'The task should resolve.')
+        ok_(not self.task.agency.stale, 'The agency should no longer be stale.')
+
+
+@mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class NewAgencyTaskViewTests(TestCase):
     """Tests NewAgencyTask-specific POST handlers"""
 
@@ -230,7 +360,7 @@ class NewAgencyTaskViewTests(TestCase):
     def setUp(self):
         self.url = reverse('new-agency-task-list')
         self.task = task.models.NewAgencyTask.objects.get(pk=7)
-        self.task.agency.approved = False
+        self.task.agency.status = 'pending'
         self.task.agency.save()
         self.client = Client()
         self.client.login(username='adam', password='abc')
@@ -263,13 +393,14 @@ class NewAgencyTaskViewTests(TestCase):
             'replacement': replacement.id
         })
         updated_task = task.models.NewAgencyTask.objects.get(pk=self.task.id)
-        eq_(updated_task.agency.approved, False,
+        eq_(updated_task.agency.status, 'rejected',
                 ('New agency task should not approve the agency'
                 ' when given a truthy value for the "reject" field'))
         eq_(updated_task.resolved, True,
                 ('New agency task should resolve when given any'
                 ' truthy value for the "reject" data field'))
 
+@mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class ResponseTaskListViewTests(TestCase):
     """Tests ResponseTask-specific POST handlers"""
 
@@ -301,7 +432,8 @@ class ResponseTaskListViewTests(TestCase):
     def test_post_set_status(self):
         """Setting the status should save it to the response and request, then resolve task."""
         status_change = 'done'
-        self.client.post(self.url, {'status': status_change, 'task': self.task.pk})
+        data = {'status': status_change, 'set_foia': True, 'task': self.task.pk}
+        self.client.post(self.url, data)
         updated_task = task.models.ResponseTask.objects.get(pk=self.task.pk)
         comm_status = updated_task.communication.status
         foia_status = updated_task.communication.foia.status
@@ -311,6 +443,22 @@ class ResponseTaskListViewTests(TestCase):
             'The status of the FOIA should be set.')
         eq_(updated_task.resolved, True,
             'Setting the status should resolve the task')
+
+    def test_post_set_comm_status(self):
+        """Setting the status on just the communication should not influence its request."""
+        status_change = 'done'
+        existing_foia_status = self.task.communication.foia.status
+        data = {'status': status_change, 'set_foia': False, 'task': self.task.pk}
+        self.client.post(self.url, data)
+        updated_task = task.models.ResponseTask.objects.get(pk=self.task.pk)
+        comm_status = updated_task.communication.status
+        foia_status = updated_task.communication.foia.status
+        eq_(comm_status, status_change,
+            'The status change should be saved to the communication.')
+        eq_(foia_status, existing_foia_status,
+            'The status of the FOIA should not be changed.')
+        eq_(updated_task.resolved, True,
+            'Settings the status should resolve the task.')
 
     def test_post_tracking_number(self):
         """Setting the tracking number should save it to the response's request."""

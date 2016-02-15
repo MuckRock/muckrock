@@ -25,6 +25,18 @@ class TaskFilterForm(MRFilterForm):
     )
 
 
+class FlaggedTaskForm(forms.Form):
+    """Simple form for acting on a FlaggedTask"""
+    text = forms.CharField(widget=forms.Textarea(attrs={
+        'placeholder': 'Write your reply here'
+    }))
+
+
+class StaleAgencyTaskForm(forms.Form):
+    """Simple form for acting on a StaleAgencyTask"""
+    email = forms.EmailField()
+
+
 class ResponseTaskForm(forms.Form):
     """Simple form for acting on a ResponseTask"""
     move = forms.CharField(required=False)
@@ -48,6 +60,7 @@ class ResponseTaskForm(forms.Form):
             '%d %B, %Y']     # '25 October, 2006'
     )
     status = forms.ChoiceField(choices=foia.models.STATUS)
+    set_foia = forms.BooleanField(label='Set request status', initial=True, required=False)
 
     def clean_move(self):
         """Splits a comma separated string into an array"""

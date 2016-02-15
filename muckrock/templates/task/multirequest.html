@@ -1,10 +1,6 @@
 {% extends 'task/default.html' %}
 
-{% block task-class %}
-    multirequest
-{% endblock %}
-
-{% block task-data %}
+{% block task-content %}
 <summary class="task-data">
     <p><a href="{% url 'admin:foia_foiamultirequest_change' task.multirequest.id %}">{{task.multirequest}}</a> was created by <a href="{% url 'admin:auth_user_change' task.multirequest.user.id %}">{{task.multirequest.user}}</a> and requires approval.</p>
     <ul>Upon approval, it will be sent to {{task.multirequest.agencies.all|length}} agencies:

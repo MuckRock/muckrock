@@ -3,6 +3,7 @@ General temaplate tags
 """
 
 from django import template
+from django.conf import settings
 from django.template import Library, Node, TemplateSyntaxError
 from django.template.defaultfilters import stringfilter
 from django.utils.html import escape
@@ -11,7 +12,6 @@ from email.parser import Parser
 import re
 
 from muckrock.forms import TagManagerForm
-from muckrock.settings import STATIC_URL
 
 register = Library()
 
@@ -66,10 +66,10 @@ class TableHeaderNode(Node):
             if field:
                 if get.get('field') == field and get.get('order') == 'asc':
                     order = 'desc'
-                    img = '&nbsp;<img src="%simg/down-arrow.png" />' % STATIC_URL
+                    img = '&nbsp;<img src="%simg/down-arrow.png" />' % settings.STATIC_URL
                 elif get.get('field') == field and get.get('order') == 'desc':
                     order = 'asc'
-                    img = '&nbsp;<img src="%simg/up-arrow.png" />' % STATIC_URL
+                    img = '&nbsp;<img src="%simg/up-arrow.png" />' % settings.STATIC_URL
                 else:
                     order = 'asc'
                     img = ''

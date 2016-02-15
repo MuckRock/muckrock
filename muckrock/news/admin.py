@@ -46,9 +46,6 @@ class ArticleAdminForm(forms.ModelForm):
         model = Article
         fields = '__all__'
 
-    class Media:
-        css = {'all': ('css/admin/epiceditor.css',)}
-
 
 class ArticleAdmin(VersionAdmin):
     """Model Admin for a news article"""

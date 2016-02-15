@@ -5,17 +5,21 @@ Tests for Tasks models
 from django.http import Http404
 from django.test import TestCase
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 import mock
 import nose
 
 from muckrock import factories, task
+from muckrock.agency.models import STALE_DURATION
+from muckrock.foia.models import FOIARequest
+from muckrock.task.factories import FlaggedTaskFactory
 from muckrock.task.signals import domain_blacklist
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
 raises = nose.tools.raises
+mock_send = mock.Mock()
 
 # pylint: disable=missing-docstring
 # pylint: disable=line-too-long
@@ -124,6 +128,43 @@ class OrphanTaskTests(TestCase):
         ok_(new_orphan.resolved)
 
 
+@mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
+class FlaggedTaskTests(TestCase):
+    """Test the FlaggedTask class"""
+    def setUp(self):
+        self.task = task.models.FlaggedTask
+
+    def test_flagged_object(self):
+        """A flagged task should be able to return its object."""
+        text = 'Lorem ipsum'
+        user = factories.UserFactory()
+        foia = factories.FOIARequestFactory()
+        agency = factories.AgencyFactory()
+        jurisdiction = factories.JurisdictionFactory()
+        flagged_foia_task = self.task.objects.create(user=user, foia=foia, text=text)
+        flagged_agency_task = self.task.objects.create(user=user, agency=agency, text=text)
+        flagged_jurisdiction_task = self.task.objects.create(
+            user=user, jurisdiction=jurisdiction, text=text)
+        eq_(flagged_foia_task.flagged_object(), foia)
+        eq_(flagged_agency_task.flagged_object(), agency)
+        eq_(flagged_jurisdiction_task.flagged_object(), jurisdiction)
+
+    @raises(AttributeError)
+    def test_no_flagged_object(self):
+        """Should raise an error if no flagged object"""
+        text = 'Lorem ipsum'
+        user = factories.UserFactory()
+        flagged_task = self.task.objects.create(user=user, text=text)
+        flagged_task.flagged_object()
+
+    @mock.patch('muckrock.message.notifications.SupportNotification.send')
+    def test_reply(self, mock_support_send):
+        """Given a message, a support notification should be sent to the task's user."""
+        # pylint: disable=no-self-use
+        flagged_task = FlaggedTaskFactory()
+        flagged_task.reply('Lorem ipsum')
+        mock_support_send.assert_called_with()
+
 class SnailMailTaskTests(TestCase):
     """Test the SnailMailTask class"""
 
@@ -152,6 +193,65 @@ class SnailMailTaskTests(TestCase):
             'Date should be moved foward.')
         eq_(self.task.communication.date.day, datetime.now().day,
             'Should update the date to today.')
+
+
+class StaleAgencyTaskTests(TestCase):
+    """Test the StaleAgencyTask class"""
+    def setUp(self):
+        self.task = task.factories.StaleAgencyTaskFactory()
+        self.foia = FOIARequest.objects.filter(agency=self.task.agency).first()
+
+    def test_stale_requests(self):
+        """
+        The stale agency task should provide a list of open requests which have not
+        recieved any response since the stale duration.
+        """
+        closed_foia = factories.StaleFOIARequestFactory(agency=self.task.agency, status='done')
+        stale_requests = self.task.stale_requests()
+        ok_(self.foia in stale_requests,
+            'Open requests should be considered stale.')
+        ok_(closed_foia not in stale_requests,
+            'Closed requests should not be considered stale.')
+
+    def test_stalest_request(self):
+        """The stale agency task should provide the stalest request it knows about."""
+        # first lets create a foia with a pretty stale communication
+        really_stale_request = factories.StaleFOIARequestFactory(agency=self.task.agency)
+        really_stale_communication = really_stale_request.communications.last()
+        really_stale_communication.date -= timedelta(STALE_DURATION)
+        really_stale_communication.save()
+        self.task.refresh_from_db()
+        stalest_request = self.task.stalest_request()
+        eq_(stalest_request, really_stale_request)
+
+    def test_latest_response(self):
+        """
+        The stale agency task should provide the most
+        recent response received from the agency.
+        """
+        latest_response = self.task.latest_response()
+        eq_(latest_response, self.foia.last_response())
+        ok_(latest_response.response, 'Should return a response!')
+
+    @mock.patch('muckrock.foia.models.FOIARequest.followup')
+    def test_update_email(self, mock_followup):
+        """
+        The stale agency task should update the email of its associated
+        agency and any selected stale requests. Then, the foias with
+        updated emails should automatically follow up with the agency.
+        The agency should also have its stale flag lowered.
+        """
+        new_email = 'test@email.com'
+        self.task.update_email(new_email, [self.foia])
+        self.task.refresh_from_db()
+        eq_(self.task.agency.email, new_email, 'The agency\'s email should be updated.')
+        eq_(self.foia.email, new_email, 'The foia\'s email should be updated.')
+        mock_followup.assert_called_with(automatic=True, show_all_comms=False)
+
+    def test_resolve(self):
+        """Resolving the task should lower the stale flag on the agency."""
+        self.task.resolve()
+        ok_(not self.task.agency.stale, 'The agency should no longer be stale.')
 
 class NewAgencyTaskTests(TestCase):
     """Test the NewAgencyTask class"""
@@ -190,6 +290,7 @@ class NewAgencyTaskTests(TestCase):
         eq_(existing_foia.agency, replacement,
             'The replacement agency should receive the rejected agency\'s requests.')
 
+
 class ResponseTaskTests(TestCase):
     """Test the ResponseTask class"""
 
@@ -218,6 +319,18 @@ class ResponseTaskTests(TestCase):
             'The communication should be set to the proper status.')
         eq_(self.task.communication.foia.status, 'done',
             'The FOIA should be set to the proper status.')
+
+    def test_set_comm_status_only(self):
+        foia = self.task.communication.foia
+        existing_status = foia.status
+        self.task.set_status('done', set_foia=False)
+        foia.refresh_from_db()
+        eq_(foia.date_done is None, True,
+            'The FOIA should not be set to done because we are not settings its status.')
+        eq_(foia.status, existing_status,
+            'The FOIA status should not be changed.')
+        eq_(self.task.communication.status, 'done',
+            'The Communication status should be changed, however.')
 
     def test_set_tracking_id(self):
         new_tracking = u'dogs-r-cool'
@@ -268,13 +381,12 @@ class ResponseTaskTests(TestCase):
 
 class TestTaskManager(TestCase):
     """Tests for a helpful and handy task object manager."""
-
+    @mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
     def setUp(self):
         user = factories.UserFactory()
         agency = factories.AgencyFactory(status='pending')
         self.foia = factories.FOIARequestFactory(user=user, agency=agency)
         self.comm = factories.FOIACommunicationFactory(foia=self.foia, response=True)
-
         # tasks that incorporate FOIAs are:
         # ResponseTask, SnailMailTask, FailedFaxTask, RejectedEmailTask, FlaggedTask,
         # StatusChangeTask, PaymentTask, NewAgencyTask
@@ -327,8 +439,7 @@ class TestTaskManager(TestCase):
         The task manager should return all tasks that explictly
         or implicitly reference the provided FOIA.
         """
-        returned_tasks = task.models.Task.objects.filter_by_foia(self.foia)
-        logging.debug(returned_tasks)
-        logging.debug(self.tasks)
+        staff_user = factories.UserFactory(is_staff=True, profile__acct_type='admin')
+        returned_tasks = task.models.Task.objects.filter_by_foia(self.foia, staff_user)
         eq_(returned_tasks, self.tasks,
             'The manager should return all the tasks that incorporate this FOIA.')
