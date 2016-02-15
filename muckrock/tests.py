@@ -20,7 +20,7 @@ logging.disable(logging.CRITICAL)
 kwargs = {"wsgi.url_scheme": "https"}
 
 # helper functions for view testing
-def get_allowed(client, url, templates=None, base='base.html', redirect=None):
+def get_allowed(client, url, redirect=None):
     """Test a get on a url that is allowed with the users current credntials"""
     response = client.get(url, follow=True, **kwargs)
     nose.tools.eq_(response.status_code, 200)
