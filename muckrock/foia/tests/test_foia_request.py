@@ -200,8 +200,7 @@ class TestFOIAFunctional(TestCase):
     def test_foia_list(self):
         """Test the foia-list view"""
 
-        response = get_allowed(self.client, reverse('foia-list'),
-                ['lists/request_list.html', 'lists/base_list.html'])
+        response = get_allowed(self.client, reverse('foia-list'))
         nose.tools.eq_(set(response.context['object_list']),
             set(FOIARequest.objects.get_viewable(AnonymousUser()).order_by('-date_submitted')[:12]))
 
@@ -210,8 +209,7 @@ class TestFOIAFunctional(TestCase):
 
         for user_pk in [1, 2]:
             response = get_allowed(self.client,
-                                   reverse('foia-list-user', kwargs={'user_pk': user_pk}),
-                                   ['lists/request_list.html', 'lists/base_list.html'])
+                    reverse('foia-list-user', kwargs={'user_pk': user_pk}))
             user = User.objects.get(pk=user_pk)
             nose.tools.eq_(set(response.context['object_list']),
                            set(FOIARequest.objects.get_viewable(AnonymousUser()).filter(user=user)))
@@ -223,16 +221,14 @@ class TestFOIAFunctional(TestCase):
         for field in ['title', 'date_submitted', 'status']:
             for order in ['asc', 'desc']:
                 response = get_allowed(self.client, reverse('foia-list') +
-                                       '?sort=%s&order=%s' % (field, order),
-                                       ['lists/request_list.html', 'lists/base_list.html'])
+                        '?sort=%s&order=%s' % (field, order))
                 nose.tools.eq_([f.title for f in response.context['object_list']],
                                [f.title for f in sorted(response.context['object_list'],
                                                         key=attrgetter(field),
                                                         reverse=(order == 'desc'))])
     def test_foia_bad_sort(self):
         """Test sorting against a non-existant field"""
-        response = get_allowed(self.client, reverse('foia-list') + '?sort=test',
-                               ['lists/request_list.html', 'lists/base_list.html'])
+        response = get_allowed(self.client, reverse('foia-list') + '?sort=test')
         nose.tools.eq_(response.status_code, 200)
 
     def test_foia_detail(self):
@@ -240,10 +236,10 @@ class TestFOIAFunctional(TestCase):
 
         foia = FOIARequest.objects.get(pk=2)
         get_allowed(self.client,
-                    reverse('foia-detail', kwargs={'idx': foia.pk, 'slug': foia.slug,
-                                                   'jurisdiction': foia.jurisdiction.slug,
-                                                   'jidx': foia.jurisdiction.pk}),
-                    ['foia/detail.html', 'base.html'])
+                    reverse('foia-detail',
+                        kwargs={'idx': foia.pk, 'slug': foia.slug,
+                            'jurisdiction': foia.jurisdiction.slug,
+                            'jidx': foia.jurisdiction.pk}))
 
     def test_feeds(self):
         """Test the RSS feed views"""
@@ -277,14 +273,12 @@ class TestFOIAFunctional(TestCase):
         self.client.login(username='adam', password='abc')
 
         # get authenticated pages
-        get_allowed(self.client, reverse('foia-create'),
-                    ['forms/foia/create.html'])
+        get_allowed(self.client, reverse('foia-create'))
 
         get_allowed(self.client, reverse('foia-draft',
-                                    kwargs={'jurisdiction': foia.jurisdiction.slug,
-                                            'jidx': foia.jurisdiction.pk,
-                                            'idx': foia.pk, 'slug': foia.slug}),
-                    ['forms/foia/draft.html', 'forms/base_form.html'])
+            kwargs={'jurisdiction': foia.jurisdiction.slug,
+                'jidx': foia.jurisdiction.pk,
+                'idx': foia.pk, 'slug': foia.slug}))
 
         get_404(self.client, reverse('foia-draft',
                                 kwargs={'jurisdiction': foia.jurisdiction.slug,
@@ -349,10 +343,9 @@ class TestFOIAFunctional(TestCase):
 
         foia = FOIARequest.objects.get(pk=18)
         get_allowed(self.client, reverse('foia-pay',
-                                    kwargs={'jurisdiction': foia.jurisdiction.slug,
-                                            'jidx': foia.jurisdiction.pk,
-                                            'idx': foia.pk, 'slug': foia.slug}),
-                    ['foia/detail.html', 'base.html'])
+            kwargs={'jurisdiction': foia.jurisdiction.slug,
+                'jidx': foia.jurisdiction.pk,
+                'idx': foia.pk, 'slug': foia.slug}))
 
 
 class TestFOIAIntegration(TestCase):

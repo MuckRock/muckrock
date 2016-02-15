@@ -56,14 +56,11 @@ class TestNewsFunctional(TestCase):
     # views
     def test_news_index(self):
         """Should redirect to list"""
-        get_allowed(self.client, reverse('news-index'),
-                    ['lists/news_list.html', 'lists/base_list.html'])
+        get_allowed(self.client, reverse('news-index'))
 
     def test_news_archive_year(self):
         """Should return all articles in the given year"""
-        response = get_allowed(self.client, reverse('news-archive-year', kwargs={'year': 1999}),
-                               ['archives/year_archive.html', 'archives/base_archive.html'],
-                               'lists/base_list.html')
+        response = get_allowed(self.client, reverse('news-archive-year', kwargs={'year': 1999}))
         nose.tools.eq_(len(response.context['object_list']), 4)
         nose.tools.ok_(all(article.pub_date.year == 1999
                            for article in response.context['object_list']))
@@ -71,9 +68,7 @@ class TestNewsFunctional(TestCase):
     def test_news_archive_month(self):
         """Should return all articel from the given month"""
         response = get_allowed(self.client,
-                               reverse('news-archive-month', kwargs={'year': 1999, 'month': 'jan'}),
-                               ['archives/month_archive.html', 'archives/base_archive.html'],
-                               'lists/base_list.html')
+                reverse('news-archive-month', kwargs={'year': 1999, 'month': 'jan'}))
         nose.tools.eq_(len(response.context['object_list']), 3)
         nose.tools.ok_(all(article.pub_date.year == 1999 and article.pub_date.month == 1
                            for article in response.context['object_list']))
@@ -81,10 +76,8 @@ class TestNewsFunctional(TestCase):
     def test_news_archive_day(self):
         """Should return all article for the given day"""
         response = get_allowed(self.client,
-                               reverse('news-archive-day',
-                                       kwargs={'year': 1999, 'month': 'jan', 'day': 1}),
-                               ['archives/day_archive.html', 'archives/base_archive.html'],
-                               'lists/base_list.html')
+                reverse('news-archive-day',
+                    kwargs={'year': 1999, 'month': 'jan', 'day': 1}))
         nose.tools.eq_(len(response.context['object_list']), 2)
         nose.tools.ok_(all(article.pub_date.year == 1999 and article.pub_date.month == 1 and
                            article.pub_date.day == 1
@@ -93,19 +86,19 @@ class TestNewsFunctional(TestCase):
     def test_news_archive_day_empty(self):
         """Should return nothing for a day with no articles"""
         response = get_allowed(self.client,
-                               reverse('news-archive-day',
-                                       kwargs={'year': 1999, 'month': 'mar', 'day': 1}),
-                               ['archives/day_archive.html', 'archives/base_archive.html'],
-                               'lists/base_list.html')
+                reverse('news-archive-day',
+                    kwargs={'year': 1999, 'month': 'mar', 'day': 1}))
         nose.tools.eq_(len(response.context['object_list']), 0)
 
     def test_news_detail(self):
         """News detail should display the given article"""
         response = get_allowed(self.client,
-                               reverse('news-detail',
-                                       kwargs={'year': 1999, 'month': 'jan', 'day': 1,
-                                               'slug': 'test-article-5'}),
-                               ['details/news_detail.html', 'details/base_detail.html'])
+                reverse('news-detail',
+                    kwargs={
+                        'year': 1999,
+                        'month': 'jan',
+                        'day': 1,
+                        'slug': 'test-article-5'}))
         nose.tools.eq_(response.context['object'], Article.objects.get(slug='test-article-5'))
 
     def test_news_detail_404(self):
