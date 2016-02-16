@@ -1,24 +1,17 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div>
-    <div id="react-search">
-
-    {% comment %}
-    <form method="GET">
+<div id="react-search">
+    <form class="search form" method="GET">
         <input type="search" name="q" value="{{ query }}" />
         <button type="submit">Search</button>
     </form>
-
     <ul class="search results">
-    
-    </div>
     {% for result in results %}
         <li class="search result"><a href="{{ result.get_absolute_url }}">{{ result }}</a></li>
     {% empty %}
         <li class="empty">No results</li>
     {% endfor %}
     </ul>
-    {% endcomment %}
 </div>
 {% endblock %}
