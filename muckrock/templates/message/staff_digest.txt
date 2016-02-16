@@ -1,4 +1,4 @@
-{{ salutation }}, {{ user.first_name }}. Here's what happened on MuckRock yesterday ({{ yesterday|date:'%m/%d/%y' }}):
+{{ salutation }}, {{ user.first_name }}. Here's what happened on MuckRock yesterday ({{ yesterday|date:'m/d/y' }}):
 
 --------------------------
 Stats
