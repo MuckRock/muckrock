@@ -184,6 +184,7 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
     token = request.POST.get('stripe_token', False)
     email = request.POST.get('stripe_email', False)
     amount = request.POST.get('amount', False)
+    decimal_amount = int(amount)/100.0
     if token and email and amount:
         try:
             metadata = {
@@ -198,28 +199,7 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
             return redirect(foia)
         msg = 'Your payment was successful. We will get this to the agency right away.'
         messages.success(request, msg)
-        logger.info(
-            '%s has paid %0.2f for request %s',
-            request.user.username,
-            int(amount)/100,
-            foia.title
-        )
-        actstream.action.send(
-            request.user,
-            verb='paid fees for',
-            action_object=foia,
-            target=foia.agency
-        )
-        foia.status = 'processed'
-        foia.save()
-        # TODO fix this
-        communication = FOIACommunication.objects.create()
-        SnailMailTask.objects.create(
-            communication=
-            category='p',
-            user=request.user,
-            amount=int(amount)/100.0
-        )
+        foia.pay(request.user, decimal_amount)
     return redirect(foia)
 
 @login_required
