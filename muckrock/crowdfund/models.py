@@ -150,7 +150,7 @@ class CrowdfundPaymentABC(models.Model):
 class CrowdfundRequest(CrowdfundABC):
     """Keep track of crowdfunding for a request"""
     type_ = 'foia'
-    foia = models.OneToOneField(FOIARequest)
+    foia = models.OneToOneField(FOIARequest, related_name='xxx')
 
     def __unicode__(self):
         # pylint: disable=no-member
@@ -179,7 +179,7 @@ class CrowdfundRequestPayment(CrowdfundPaymentABC):
 class CrowdfundProject(CrowdfundABC):
     """A crowdfunding campaign for a project."""
     type_ = 'project'
-    project = models.ForeignKey('project.Project', related_name='crowdfund')
+    project = models.ForeignKey('project.Project', related_name='xxx')
 
     def __unicode__(self):
         # pylint: disable=no-member
@@ -226,14 +226,8 @@ class Crowdfund(models.Model):
     date_due = models.DateField()
     closed = models.BooleanField(default=False)
 
-    # only one of these should be set
-    foia = models.OneToOneField(FOIARequest,
-            related_name='crowdfund', blank=True, null=True)
-    project = models.ForeignKey('project.Project',
-            related_name='crowdfunds', blank=True, null=True)
-
     def __unicode__(self):
-        return u'Crowdfunding for %s' % self.get_crowdfund_object().title
+        return self.name
 
     def get_absolute_url(self):
         """The url for this object"""
@@ -289,7 +283,7 @@ class Crowdfund(models.Model):
 
     def get_crowdfund_object(self):
         """Is this for a request or a project?"""
-        if self.foia:
+        if hasattr(self, 'foia'):
             return self.foia
         elif self.project:
             return self.project
@@ -327,6 +321,16 @@ class Crowdfund(models.Model):
         logging.info(payment)
         self.update_payment_received()
         return payment
+
+    @property
+    def project(self):
+        """Get the project for this crowdfund if it exists"""
+        # there will never be more than one project due to unique constraint
+        projects = self.projects.all()
+        if projects:
+            return projects[0]
+        else:
+            return None
 
 
 class CrowdfundPayment(models.Model):

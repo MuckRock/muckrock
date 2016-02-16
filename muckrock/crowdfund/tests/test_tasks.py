@@ -21,9 +21,7 @@ class TestRecurringTasks(test.TestCase):
             name='Cool project please help',
             date_due=(date.today() - timedelta(1)),
             payment_required=20.00,
-            project=self.project
         )
-        crowdfund.save()
         tasks.close_expired()
         updated_crowdfund = models.Crowdfund.objects.get(pk=crowdfund.pk)
         ok_(updated_crowdfund.closed, 'Any crowdfund past its date due should be closed.')
@@ -34,7 +32,6 @@ class TestRecurringTasks(test.TestCase):
             name='Cool project please help',
             date_due=(date.today()),
             payment_required=20.00,
-            project=self.project
         )
         crowdfund.save()
         tasks.close_expired()

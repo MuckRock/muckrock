@@ -19,7 +19,7 @@ class CrowdfundPaymentAdmin(admin.TabularInline):
 
 class CrowdfundAdmin(VersionAdmin):
     """Model Admin for crowdfund"""
-    list_display = ('foia', 'project', 'payment_required', 'payment_received', 'date_due')
+    list_display = ('name', 'payment_required', 'payment_received', 'date_due')
     date_hierarchy = 'date_due'
     inlines = [CrowdfundPaymentAdmin]
 

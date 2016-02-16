@@ -28,13 +28,7 @@ class CrowdfundForm(forms.ModelForm):
             'payment_required',
             'payment_capped',
             'date_due',
-            'foia',
-            'project'
         ]
-        widgets = {
-            'foia': forms.HiddenInput(),
-            'project': forms.HiddenInput(),
-        }
 
     payment_required = forms.DecimalField(
         label='Amount',

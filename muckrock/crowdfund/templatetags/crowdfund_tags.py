@@ -9,7 +9,6 @@ from django.shortcuts import get_object_or_404
 
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.crowdfund.forms import CrowdfundPaymentForm
-from muckrock.settings import STRIPE_PUB_KEY
 from muckrock.utils import cache_get_or_set
 
 register = template.Library()

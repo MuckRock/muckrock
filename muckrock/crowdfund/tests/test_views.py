@@ -16,7 +16,9 @@ from muckrock.crowdfund.forms import CrowdfundPaymentForm
 from muckrock.crowdfund.models import Crowdfund, CrowdfundPayment
 from muckrock.crowdfund.views import CrowdfundDetailView
 from muckrock.factories import UserFactory, FOIARequestFactory, ProjectFactory
+from muckrock.project.models import ProjectCrowdfunds
 from muckrock.utils import mock_middleware
+
 
 class TestCrowdfundDetailView(TestCase):
     """Tests the helper method in the DetailView subclass"""
@@ -48,20 +50,22 @@ class TestCrowdfundDetailView(TestCase):
             ('The function should return the index url as a fallback '
             'if the url cannot be reversed.'))
 
+
 @patch('stripe.Charge', Mock())
 class TestCrowdfundView(TestCase):
     """Tests the Detail view for Crowdfund objects"""
     def setUp(self):
         # pylint:disable=no-member
-        foia = FOIARequestFactory(status='payment', price=10.00)
         due = datetime.today() + timedelta(30)
         self.crowdfund = Crowdfund.objects.create(
-            foia=foia,
             name='Test Crowdfund',
             description='Testing contributions to this request',
-            payment_required=foia.price,
+            payment_required=10.00,
             date_due=due
         )
+        FOIARequestFactory(status='payment',
+                price=self.crowdfund.payment_required,
+                crowdfund=self.crowdfund)
         self.num_payments = self.crowdfund.payments.count()
         self.url = self.crowdfund.get_absolute_url()
         self.data = {
@@ -203,8 +207,10 @@ class TestCrowdfundProjectDetailView(TestCase):
         self.crowdfund = Crowdfund.objects.create(
             name='Cool project please help',
             date_due=date.today() + timedelta(30),
-            project=ProjectFactory()
         )
+        project = ProjectFactory()
+        ProjectCrowdfunds.objects.create(
+                crowdfund=self.crowdfund, project=project)
         self.url = self.crowdfund.get_absolute_url()
         self.data = {
             'amount': 200,

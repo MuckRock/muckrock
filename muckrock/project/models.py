@@ -69,6 +69,9 @@ class Project(models.Model):
         related_name='projects',
         blank=True,
         )
+    crowdfunds = models.ManyToManyField('crowdfund.Crowdfund',
+            through='ProjectCrowdfunds', related_name='projects')
+
     tags = taggit.managers.TaggableManager(through='tags.TaggedItemBase', blank=True)
 
     def __unicode__(self):
@@ -117,3 +120,10 @@ class Project(models.Model):
             tags__name__in=self.tags.names(),
         ).exclude(projects=self))
         return articles
+
+
+class ProjectCrowdfunds(models.Model):
+    """Project to Crowdfund through model"""
+    project = models.ForeignKey(Project)
+    #crowdfund = models.ForeignKey('crowdfund.Crowdfund', unique=True)
+    crowdfund = models.OneToOneField('crowdfund.Crowdfund')
