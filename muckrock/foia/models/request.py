@@ -287,7 +287,7 @@ class FOIARequest(models.Model):
 
     def get_stripe_amount(self):
         """Output a Stripe Checkout formatted price"""
-        return int(self.price*105)
+        return int(self.price*100)
 
     def is_deletable(self):
         """Can this request be deleted?"""
