@@ -5,6 +5,10 @@
 {% with task.communication.foia as foia %}
     <dt>Category</dt>
     <dd>{{task.get_category_display}}</dd>
+{% if task.amount %}
+    <dt>Amount</dt>
+    <dd class="success">${{task.amount|floatformat:2}}</dd>
+{% endif %}
 {% if foia %}
     <dt>Is Acknowledged</dt>
     <dd>{{foia.has_ack|yesno:"True,False"}}</dd>
@@ -49,32 +53,39 @@
 <div class="collapsed collapsable full-letter">
     {# full letter here, hidden #}
     <header>Full letter</header>
-    <textarea id="full-letter-{{task.pk}}">
+    <textarea name="full-communication" id="full-letter-{{task.pk}}">
 {{foia.agency.address}}
 
 {% now "F j, Y" %}
-{% with foia as request %}{% include "text/foia/comms.txt" %}{% endwith %}
+{% with foia as request %}{% include "text/foia/comms.txt" with show_all_comms=True %}{% endwith %}
     </textarea>
-</div>
-<div class="collapsed collapsable full-communication">
-    <header>Previous communications</header>
-    <main>
-    {% for communication in foia.reverse_communications %}
-        {% include 'foia/communication.html' with hide_options=True %}
-    {% endfor %}
-    </main>
 </div>
 {% endwith %}
 {% endblock %}
 
 {% block task-actions %}
-    <select name="status">
-        <option value="" selected>Set Status</option>
-    {% for s in status %}
-        <option value="{{s|first}}">{{s|last}}</option>
-    {% endfor %}
-    </select>
-    <input type="checkbox" name="update_date" id="update-date-{{task.pk}}" checked>
-    <label for="update-date-{{task.pk}}">Save the communication with today's date.</label>
-    <button class="primary" type="submit" name="resolve" value="true">Save & Resolve</button>
+    <div class="input-group">
+        <div class="form-field">
+            <label for="id_status">Set Status</label>
+            <select name="status" id="id_status">
+                <option value="" selected>---</option>
+            {% for s in status %}
+                <option value="{{s|first}}">{{s|last}}</option>
+            {% endfor %}
+            </select>
+        </div>
+        {% if task.category == 'p' %}
+        <div class="form-field">
+            <label for="id_check_number">Check Number</label>
+            <input type="number" name="check_number" id="id_check_number" placeholder="$$$" />
+        </div>
+        {% endif %}
+        <label for="update-date-{{task.pk}}">
+            Save the communication with today's date:
+            <input type="checkbox" name="update_date" id="update-date-{{task.pk}}" checked />
+        </label>
+    </div>
+    <div class="button-group">
+        <button class="primary" type="submit" name="resolve" value="true">Save & Resolve</button>
+    </div>
 {% endblock %}
