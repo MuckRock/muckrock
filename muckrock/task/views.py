@@ -186,14 +186,21 @@ class SnailMailTaskList(TaskList):
 
     def task_post_helper(self, request, task):
         """Special post helper exclusive to SnailMailTasks"""
+        # we should always set the status of a request when resolving
+        # a snail mail task so that the request leaves processing status
         if request.POST.get('status'):
             status = request.POST.get('status')
             if status in dict(STATUS):
                 task.set_status(status)
-                task.resolve(request.user)
             # updating the date is an option and not an action
             if request.POST.get('update_date'):
                 task.update_date()
+        # if the task is in the payment category and we're given a check
+        # number, then we should record the existence of this check
+        if request.POST.get('check_number') and task.category == 'p':
+            check_number = int(request.POST.get('check_number'))
+            task.record_check(check_number, request.user)
+        task.resolve(request.user)
         return
 
 
