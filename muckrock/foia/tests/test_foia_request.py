@@ -591,6 +591,7 @@ class TestRequestPayment(TestCase):
         self.foia = FOIARequestFactory()
 
     def test_make_payment(self):
+        """The request should accept payments for request fees."""
         user = self.foia.user
         amount = 100.0
         comm = self.foia.pay(user, amount)
@@ -605,6 +606,7 @@ class TestRequestPayment(TestCase):
         ok_(task, 'A snail mail task should be created.')
         eq_(task.user, user, 'The task should be attributed to the user.')
         eq_(task.amount, amount, 'The task should contain the amount of the request.')
+
 
 class TestRequestSharing(TestCase):
     """Allow people to edit and view another user's request."""

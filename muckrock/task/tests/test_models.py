@@ -6,7 +6,6 @@ from django.http import Http404
 from django.test import TestCase
 
 from datetime import datetime, timedelta
-import factory
 import logging
 import mock
 import nose
@@ -198,7 +197,6 @@ class SnailMailTaskTests(TestCase):
     def test_update_text(self):
         """Snail mail tasks should be able to update the text of their communication."""
         comm = self.task.communication
-        old_text = comm.communication
         new_text = 'test'
         self.task.update_text(new_text)
         self.task.refresh_from_db()
