@@ -53,7 +53,7 @@
 <div class="collapsed collapsable full-letter">
     {# full letter here, hidden #}
     <header>Full letter</header>
-    <textarea id="full-letter-{{task.pk}}">
+    <textarea name="communication" form="{{task.id}}-form" id="full-letter-{{task.pk}}">
 {{foia.agency.address}}
 
 {% now "F j, Y" %}
@@ -64,13 +64,24 @@
 {% endblock %}
 
 {% block task-actions %}
-    <select name="status">
-        <option value="" selected>Set Status</option>
-    {% for s in status %}
-        <option value="{{s|first}}">{{s|last}}</option>
-    {% endfor %}
-    </select>
-    <input type="checkbox" name="update_date" id="update-date-{{task.pk}}" checked>
-    <label for="update-date-{{task.pk}}">Save the communication with today's date.</label>
+    <div class="form-field">
+        <label for="id_status">Set Status</label>
+        <select name="status" id="id_status">
+            <option value="" selected>---</option>
+        {% for s in status %}
+            <option value="{{s|first}}">{{s|last}}</option>
+        {% endfor %}
+        </select>
+    </div>
+    {% if task.category == 'p' %}
+    <div class="form-field">
+        <label for="id_check_number">Check Number</label>
+        <input type="number" name="check_number" id="id_check_number" />
+    </div>
+    {% endif %}
+    <label for="update-date-{{task.pk}}">
+        <input type="checkbox" name="update_date" id="update-date-{{task.pk}}" checked />
+        Save the communication with today's date.
+    </label>
     <button class="primary" type="submit" name="resolve" value="true">Save & Resolve</button>
 {% endblock %}
