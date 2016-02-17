@@ -41,6 +41,8 @@ ACCT_TYPES = [
     ('robot', 'Robot'),
 ]
 
+PAYMENT_FEE = .05
+
 class Profile(models.Model):
     """User profile information for muckrock"""
     # pylint: disable=too-many-public-methods
@@ -316,13 +318,18 @@ class Profile(models.Model):
         self.save()
         return subscription
 
-    def pay(self, token, amount, metadata):
-        """Create a stripe charge for the user"""
+    def pay(self, token, amount, metadata, fee=PAYMENT_FEE):
+        """
+        Creates a Stripe charge for the user.
+        Should always expect a 1-cent based integer (e.g. $1.00 = 100)
+        Should apply a baseline fee (5%) to all payments.
+        """
         # pylint: disable=no-self-use
+        modified_amount = int(amount + (amount * fee))
         if not metadata.get('email') or not metadata.get('action'):
             raise ValueError('The charge metadata is malformed.')
         stripe.Charge.create(
-            amount=amount,
+            amount=modified_amount,
             currency='usd',
             source=token,
             metadata=metadata

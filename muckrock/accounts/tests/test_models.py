@@ -124,12 +124,19 @@ class TestProfileUnit(TestCase):
 
     def test_pay(self):
         """Test making a payment"""
+        token = 'token'
+        amount = 100
+        modified_amount = 105
         metadata = {
             'email': self.profile.user.email,
             'action': 'test-charge'
         }
-        self.profile.pay('token', 100, metadata)
-        ok_(mock_charge.create.called)
+        self.profile.pay(token, amount, metadata)
+        mock_charge.create.assert_called_with(
+            currency='usd',
+            amount=modified_amount,
+            metadata=metadata,
+            source=token)
 
     def test_start_pro_subscription(self):
         """Test starting a pro subscription"""

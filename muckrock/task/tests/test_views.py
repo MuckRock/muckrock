@@ -12,7 +12,7 @@ import mock
 import nose
 
 from muckrock import agency, factories, task
-from muckrock.foia.models import FOIARequest
+from muckrock.foia.models import FOIARequest, FOIANote
 from muckrock.foia.views import save_foia_comm
 from muckrock.task.factories import FlaggedTaskFactory, StaleAgencyTaskFactory
 from muckrock.utils import mock_middleware
@@ -228,6 +228,20 @@ class SnailMailTaskViewTests(TestCase):
             'Should update the communication date.')
         eq_(updated_task.communication.date.day, datetime.now().day,
             'Should update the communication to today\'s date.')
+
+    def test_post_record_check(self):
+        """A payment snail mail task should record the check number."""
+        check_number = 42
+        self.task.category = 'p'
+        self.task.save()
+        self.client.post(self.url, {
+            'status': 'ack',
+            'check_number': check_number,
+            'task': self.task.pk
+        })
+        self.task.refresh_from_db()
+        note = FOIANote.objects.filter(foia=self.task.communication.foia).first()
+        ok_(note, 'A note should be generated.')
 
 
 @mock.patch('muckrock.task.models.FlaggedTask.reply')

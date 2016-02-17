@@ -286,7 +286,7 @@ class FOIANote(models.Model):
 
     foia = models.ForeignKey(FOIARequest, related_name='notes')
     author = models.ForeignKey('auth.User', related_name='notes', null=True)
-    datetime = models.DateTimeField()
+    datetime = models.DateTimeField(auto_now_add=True)
     note = models.TextField()
 
     def __unicode__(self):
