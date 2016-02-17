@@ -26,7 +26,6 @@ from muckrock.task.models import (
         NewAgencyTask,
         ResponseTask,
         GenericTask,
-        PaymentTask,
         GenericCrowdfundTask,
         FailedFaxTask,
         )
@@ -130,8 +129,6 @@ def store_statstics():
         total_unresolved_response_tasks=ResponseTask.objects.filter(resolved=False).count(),
         total_faxfail_tasks=FailedFaxTask.objects.count(),
         total_unresolved_faxfail_tasks=FailedFaxTask.objects.filter(resolved=False).count(),
-        total_payment_tasks=PaymentTask.objects.count(),
-        total_unresolved_payment_tasks=PaymentTask.objects.filter(resolved=False).count(),
         total_crowdfundpayment_tasks=GenericCrowdfundTask.objects.count(),
         total_unresolved_crowdfundpayment_tasks=
             GenericCrowdfundTask.objects.filter(resolved=False).count(),

@@ -59,6 +59,7 @@ class Agency(models.Model, RequestHelper):
     user = models.ForeignKey(User, null=True, blank=True)
     appeal_agency = models.ForeignKey('self', null=True, blank=True)
     can_email_appeals = models.BooleanField(default=False)
+    payable_to = models.ForeignKey('self', related_name='receivable', null=True, blank=True)
     image = ThumbnailerImageField(
         upload_to='agency_images',
         blank=True,

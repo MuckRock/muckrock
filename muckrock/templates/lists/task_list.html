@@ -42,10 +42,6 @@
             <span class="counter">{{ counters.response }}</span>
             <a href="{% url 'response-task-list' %}">Response</a>
         </li>
-        <li class="{% active request '^/task/payment/$' %}">
-            <span class="counter">{{ counters.payment }}</span>
-            <a href="{% url 'payment-task-list' %}">Payment</a>
-        </li>
         <li class="{% active request '^/task/crowdfund/$' %}">
             <span class="counter">{{ counters.crowdfund }}</span>
             <a href="{% url 'crowdfund-task-list' %}">Crowdfund</a>

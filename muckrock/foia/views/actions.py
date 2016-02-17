@@ -26,7 +26,6 @@ from muckrock.foia.forms import \
 from muckrock.foia.models import FOIARequest, FOIAFile, END_STATUS
 from muckrock.foia.views.comms import save_foia_comm
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.task.models import PaymentTask
 
 logger = logging.getLogger(__name__)
 
@@ -184,6 +183,7 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
     token = request.POST.get('stripe_token', False)
     email = request.POST.get('stripe_email', False)
     amount = request.POST.get('amount', False)
+    decimal_amount = int(amount)/100.0
     if token and email and amount:
         try:
             metadata = {
@@ -192,30 +192,13 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
                 'foia': foia.pk
             }
             request.user.profile.pay(token, amount, metadata)
+            foia.pay(request.user, decimal_amount)
         except (stripe.InvalidRequestError, stripe.CardError, ValueError) as exception:
             messages.error(request, 'Payment error: %s' % exception)
             logger.warning('Payment error: %s', exception, exc_info=sys.exc_info())
             return redirect(foia)
         msg = 'Your payment was successful. We will get this to the agency right away.'
         messages.success(request, msg)
-        logger.info(
-            '%s has paid %0.2f for request %s',
-            request.user.username,
-            int(amount)/100,
-            foia.title
-        )
-        actstream.action.send(
-            request.user,
-            verb='paid fees for',
-            action_object=foia,
-            target=foia.agency
-        )
-        foia.status = 'processed'
-        foia.save()
-        PaymentTask.objects.create(
-            user=request.user,
-            amount=int(amount)/100.0,
-            foia=foia)
     return redirect(foia)
 
 @login_required

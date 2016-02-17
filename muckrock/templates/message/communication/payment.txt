@@ -1,0 +1,7 @@
+{% autoescape off %}
+To Whom It May Concern:
+
+Please find enclosed a check for ${{amount|floatformat:2}} {% if payable_to %}[made payable to {{payable_to}}]{% endif %} to satisfy the fee associated with the attached public records request.
+
+Thank you.
+{% endautoescape %}

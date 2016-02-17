@@ -15,7 +15,6 @@ from muckrock.task.models import (
         NewAgencyTask,
         ResponseTask,
         GenericTask,
-        PaymentTask,
         GenericCrowdfundTask,
         BlacklistDomain,
         )
@@ -26,7 +25,7 @@ class OrphanTaskAdmin(VersionAdmin):
 
 class SnailMailTaskAdmin(VersionAdmin):
     """Snail Mail Task Admin"""
-    readonly_fields = ['communication']
+    readonly_fields = ['communication', 'amount']
 
 class RejectedEmailTaskAdmin(VersionAdmin):
     """Rejected Email Task Admin"""
@@ -51,10 +50,6 @@ class ResponseTaskAdmin(VersionAdmin):
 class GenericTaskAdmin(VersionAdmin):
     """Generic Task Admin"""
 
-class PaymentTaskAdmin(VersionAdmin):
-    """Payment Task Admin"""
-    readonly_fields = ['foia', 'user', 'amount']
-
 class CrowdfundTaskAdmin(VersionAdmin):
     """Crowdfund Task Admin"""
     readonly_fields = ['crowdfund']
@@ -67,6 +62,5 @@ admin.site.register(FlaggedTask, FlaggedTaskAdmin)
 admin.site.register(NewAgencyTask, NewAgencyTaskAdmin)
 admin.site.register(ResponseTask, ResponseTaskAdmin)
 admin.site.register(GenericTask, GenericTaskAdmin)
-admin.site.register(PaymentTask, PaymentTaskAdmin)
 admin.site.register(GenericCrowdfundTask, CrowdfundTaskAdmin)
 admin.site.register(BlacklistDomain)
