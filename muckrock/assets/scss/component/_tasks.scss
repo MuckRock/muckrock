@@ -301,8 +301,23 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
 
 /* Snail Mail Task */
 
-.task-post-actions input[type=checkbox] {
-    & + label {
-        margin-bottom: $vertical-rhythm;
+.task .task-post-actions input[type="checkbox"] {
+    float: none;
+    display: inline-block;
+    margin: 0 $vertical-rhythm/2;
+}
+
+.snail-mail.task .task-post-actions {
+    @include display(flex);
+    @include flex-wrap(wrap);
+    @include justify-content(space-between);
+    @include align-items(flex-end);
+    margin-bottom: 0;
+    .input-group {
+        @include flex(3 1 auto);
+    }
+    .button-group {
+        @include flex(1 1 auto);
+        text-align: right;
     }
 }
