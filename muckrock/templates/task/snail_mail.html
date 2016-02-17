@@ -5,6 +5,10 @@
 {% with task.communication.foia as foia %}
     <dt>Category</dt>
     <dd>{{task.get_category_display}}</dd>
+{% if task.amount %}
+    <dt>Amount</dt>
+    <dd class="success">${{task.amount|floatformat:2}}</dd>
+{% endif %}
 {% if foia %}
     <dt>Is Acknowledged</dt>
     <dd>{{foia.has_ack|yesno:"True,False"}}</dd>
