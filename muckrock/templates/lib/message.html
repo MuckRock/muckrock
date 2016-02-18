@@ -20,17 +20,17 @@ The message object contains:
         {% if user %}<span class="name left">{{ user }}</span>{% endif %}
         {% if uid %}<span class="permalink right"><a href="{{ request.path }}#{{ uid }}" class="permalink">&infin;</a></span>{% endif %}
         {% if date %}<span class="date right">{{ date | date:"m/d/Y" }}</span>{% endif %}
-        
+
     </section>
     {% if body %}
     <section class="body">
-        {{ body|safe }}
+        {{ body|urlize|safe }}
     </section>
     {% endif %}
     {% if files %}
     <section class="attachments">
         <ul class="attachment-list">
-        {% for file in files %}    
+        {% for file in files %}
             <li class="attachment">{% include 'lib/file.html' %}</li>
         {% endfor %}
         </ul>
