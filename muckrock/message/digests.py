@@ -305,8 +305,25 @@ def get_comms(current, previous):
             'format': delivered_by,
             'cost': cost_per,
             'expense': cost,
+            'trailing': get_trailing_cost(current, 30, cost_per)
         }
     }
+
+def get_trailing_cost(current, duration, cost_per):
+    """Returns the trailing cost for communications over a period"""
+    period = [current - relativedelta(days=duration), current]
+    sent_comms = FOIACommunication.objects.filter(date__range=period, response=False)
+    trailing = {
+        'email': sent_comms.filter(delivered='email').count(),
+        'fax': sent_comms.filter(delivered='fax').count(),
+        'mail': sent_comms.filter(delivered='mail').count()
+    }
+    trailing_cost = {
+        'email': trailing['email'] * cost_per['email'],
+        'fax': trailing['fax'] * cost_per['fax'],
+        'mail': trailing['mail'] * cost_per['mail']
+    }
+    return trailing_cost
 
 def get_salutation(hour):
     """Returns a time-appropriate salutation"""
