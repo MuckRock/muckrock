@@ -44,7 +44,7 @@ class TaskNode(template.Node):
 
 class CrowdfundTaskNode(TaskNode):
     """Renders a crowdfund task."""
-    model = task.models.GenericCrowdfundTask
+    model = task.models.NewCrowdfundTask
     task_template = 'task/crowdfund.html'
     endpoint_name = 'crowdfund-task-list'
     class_name = 'crowdfund'

@@ -22,7 +22,7 @@ from muckrock.task.models import (
         Task, OrphanTask, SnailMailTask, RejectedEmailTask,
         StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask,
         PaymentTask, GenericCrowdfundTask, MultiRequestTask,
-        StatusChangeTask, FailedFaxTask
+        StatusChangeTask, FailedFaxTask, NewCrowdfundTask
         )
 from muckrock.views import MRFilterableListView
 
@@ -386,7 +386,8 @@ class PaymentTaskList(TaskList):
 class CrowdfundTaskList(TaskList):
     title = 'Crowdfunds'
     # generic FKs are problematic (can't select related on foia/project)
-    queryset = GenericCrowdfundTask.objects.prefetch_related('crowdfund')
+    # queryset = GenericCrowdfundTask.objects.prefetch_related('crowdfund')
+    queryset = NewCrowdfundTask.objects.select_related('crowdfund')
 
 
 class MultiRequestTaskList(TaskList):

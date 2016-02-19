@@ -2,6 +2,6 @@
 
 {% block task-content %}
 <summary class="task-data">
-    <p>{% if task.crowdfund.foia %}<a href="{% url 'admin:crowdfund_crowdfundrequest_change' task.crowdfund.id %}">{% elif task.crowdfund.project %}<a href="{% url 'admin:crowdfund_crowdfundproject_change' task.crowdfund.id %}">{{task.crowdfund}}</a>{% endif %}{{task.crowdfund}}</a> has closed. It was requesting {{task.crowdfund.payment_required}} and received {{task.crowdfund.payment_received}}.</p>
+    <p><a href="{% url 'admin:crowdfund_crowdfund_change' task.crowdfund.id %}">{{task.crowdfund}}</a> has closed. It was requesting {{task.crowdfund.payment_required}} and received {{task.crowdfund.payment_received}}.</p>
 </summary>
 {% endblock %}
