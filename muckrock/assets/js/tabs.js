@@ -14,6 +14,9 @@ var tab_panels = $(tab_targets.join(','));
 function showTab(id) {
     // if no id provided, use the id of the first panel
     id = !id ? tab_targets[0] : id;
+    if (!id) {
+        return
+    }
     // remove the active class from the tabs,
     // and add it back to the one the user selected
     tabs.removeClass('active').attr('aria-selected', 'false').filter(function() {
