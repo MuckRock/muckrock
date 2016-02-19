@@ -289,6 +289,7 @@ class StaleAgencyTask(Task):
             foia.email = new_email
             foia.followup(automatic=True, show_all_comms=False)
 
+
 class FlaggedTask(Task):
     """A user has flagged a request, agency or jurisdiction"""
     type = 'FlaggedTask'
