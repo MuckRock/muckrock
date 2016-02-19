@@ -34,6 +34,7 @@ class ProjectQuerySet(models.QuerySet):
             projects = projects.distinct()
         return projects
 
+
 class Project(models.Model):
     """Projects are a mixture of general and specific information on a broad subject."""
     objects = ProjectQuerySet.as_manager()
@@ -125,5 +126,7 @@ class Project(models.Model):
 class ProjectCrowdfunds(models.Model):
     """Project to Crowdfund through model"""
     project = models.ForeignKey(Project)
-    #crowdfund = models.ForeignKey('crowdfund.Crowdfund', unique=True)
     crowdfund = models.OneToOneField('crowdfund.Crowdfund')
+
+    def __unicode__(self):
+        return 'ProjectCrowdfunds'
