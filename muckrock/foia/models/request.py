@@ -264,12 +264,12 @@ class FOIARequest(models.Model):
         """Should we show a send thank you button for this request?"""
         has_thanks = self.communications.filter(thanks=True).exists()
         valid_status = self.status in [
-                'done',
-                'partial',
-                'rejected',
-                'abandoned',
-                'no_docs',
-                ]
+            'done',
+            'partial',
+            'rejected',
+            'abandoned',
+            'no_docs',
+        ]
         return not has_thanks and valid_status
 
     def is_appealable(self):
@@ -286,9 +286,15 @@ class FOIARequest(models.Model):
         # otherwise it can be appealed as long as it has actually been sent to the agency
         return self.status not in ['started', 'submitted']
 
+    def has_crowdfund(self):
+        """Does this request have crowdfunding enabled?"""
+        return bool(self.crowdfund)
+
     def is_payable(self):
         """Can this request be payed for by the user?"""
-        return self.price > 0 and not self.has_crowdfund()
+        has_closed_crowdfund = self.has_crowdfund and self.crowdfund.closed
+        has_payment_status = self.status == 'payment'
+        return has_payment_status and has_closed_crowdfund
 
     def get_stripe_amount(self):
         """Output a Stripe Checkout formatted price"""
@@ -399,10 +405,6 @@ class FOIARequest(models.Model):
         self.save()
         logger.info('New access key generated for %s', self)
         return key
-
-    def has_crowdfund(self):
-        """Does this request have crowdfunding enabled?"""
-        return bool(self.crowdfund)
 
     def public_documents(self):
         """Get a list of public documents attached to this request"""
@@ -780,32 +782,6 @@ class FOIARequest(models.Model):
                 action='flag',
                 desc=u'Something broken, buggy, or off?  Let us know and we’ll fix it',
                 class_name='failure modal'
-            ),
-        ]
-
-    def noncontextual_request_actions(self, can_edit):
-        '''Provides context-insensitive action interfaces for requests'''
-        can_pay = can_edit and self.is_payable()
-        kwargs = {
-            'jurisdiction': self.jurisdiction.slug,
-            'jidx': self.jurisdiction.pk,
-            'idx': self.pk,
-            'slug': self.slug
-        }
-        return [
-            Action(
-                test=can_pay,
-                link=reverse('foia-pay', kwargs=kwargs),
-                title='Pay',
-                desc='Pay the fee for this request',
-                class_name='success'
-            ),
-            Action(
-                test=can_pay,
-                link=reverse('foia-crowdfund', kwargs=kwargs),
-                title='Crowdfund',
-                desc='Ask the community to help pay the fee for this request',
-                class_name='success'
             ),
         ]
 
