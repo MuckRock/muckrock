@@ -1,47 +1,23 @@
-{% load mathfilters %}
-
-{% if foia.is_payable and user_can_edit %}
-<form method="post" action="{% url 'foia-pay' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="hidden-stripe-handler" id="payment-form">
-    {% csrf_token %}
-    <input name="amount" value="{{ foia.get_stripe_amount }}" hidden>
-</form>
-{% endif %}
 {% if user.is_authenticated %}
-<form method="post">
-{% csrf_token %}
-{% for action in user_actions %}
-    {% if action.is_possible %}
-        {% if action.link %}
-            <a href={{ action.link }} class="button{% if action.class_name %} {{ action.class_name }}{% endif %}" title="{{ action.desc }}">{{ action.title }}</a>
+<section class="actions">
+    {% if foia.is_payable %}
+    <div class="payment prompt">
+        <p>This request requires a payment{% if foia.price %} of ${{foia.price|floatformat:2}}{% endif %}.</p>
+        <a class="button" href="#pay">Pay</a>
+        {% if not foia.has_crowdfund %}
+        <a class="button" href="#crowdfund">Crowdfund</a>
         {% endif %}
-        {% if 'modal' in action.class_name %}
-            <span class="text-area modal-button button {% if action.title == 'Get Help' %}failure{% endif %}">{{ action.title }}</span>
-            <div class="modal">
-                <h1>{{ action.title }}</h1>
-                <h2>{{ action.desc }}</h2>
-                <button type="submit" name="action" value="{{ action.action }}" class="primary">{{ action.title }}</button>
-                <span class="close-modal button">Close</span>
-            </div>
-        {% endif %}
+    </div>
     {% endif %}
-{% endfor %}
-{% for action in noncontextual_request_actions %}
-    {% if action.is_possible %}
-         {% if action.title == 'Pay' %}
-        <button data-amount="{{ foia.get_stripe_amount }}"
-                data-description="Request Fee (${{ foia.price|mul:1.05|floatformat:2 }})"
-                data-email="{{ user.email }}"
-                data-form="#payment-form"
-                data-label="${{ foia.price|mul:1.05|floatformat:2 }}"
-                class="checkout-button{% if action.class_name %} {{ action.class_name }}{% endif %}">
-            {{ action.title }}
-        </button>
-        {% else %}
+    <form method="post">
+    {% csrf_token %}
+    {% for action in user_actions %}
+        {% if action.is_possible %}
             {% if action.link %}
                 <a href={{ action.link }} class="button{% if action.class_name %} {{ action.class_name }}{% endif %}" title="{{ action.desc }}">{{ action.title }}</a>
             {% endif %}
-            {% if action.class_name == 'modal' %}
-                <span class="text-area modal-button button">{{ action.title }}</span>
+            {% if 'modal' in action.class_name %}
+                <span class="text-area modal-button button {% if action.title == 'Get Help' %}failure{% endif %}">{{ action.title }}</span>
                 <div class="modal">
                     <h1>{{ action.title }}</h1>
                     <h2>{{ action.desc }}</h2>
@@ -50,11 +26,11 @@
                 </div>
             {% endif %}
         {% endif %}
-    {% endif %}
-{% endfor %}
-</form>
+    {% endfor %}
+    </form>
+</section>
 {% else %}
-<div class="signup-prompt">
+<div class="signup prompt">
     <p>MuckRock users can create, duplicate, track, and share public records requests like this one.</p>
     <a href="{% url 'accounts' %}" class="primary button">Sign Up Today</a>
 </div>
