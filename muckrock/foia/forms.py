@@ -142,8 +142,9 @@ class MultiRequestDraftForm(forms.ModelForm):
 
 class RequestFilterForm(MRFilterForm):
     """Provides options for filtering list by request characteristics"""
+    status_filters = [('', 'All Status')] + list(STATUS)
     status = forms.ChoiceField(
-        choices=STATUS,
+        choices=status_filters,
         required=False
     )
 
