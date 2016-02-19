@@ -44,3 +44,28 @@
 .tab-panel-heading {
     border-bottom: 1px solid $color-grey;
 }
+
+@media only screen and (max-width: 768px) {
+    .tab-list {
+        border: 1px solid $color-black;
+    }
+    .tab-list li {
+        display: block;
+        border-bottom: 1px solid $color-black;;
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+    .tab {
+        border-radius: 0;
+    }
+    .tab.active {
+        border: none;
+        border-bottom: 1px solid $color-black;
+        background: $color-blue;
+        color: $color-white;
+    }
+    .tab.active .counter {
+        background: $color-blue-dark;
+    }
+}
