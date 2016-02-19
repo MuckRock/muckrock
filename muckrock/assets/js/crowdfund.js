@@ -79,7 +79,8 @@ function checkoutCrowdfund(crowdfund) {
     return true;
 }
 
-prettifyAmountInput(amount);
+$('.crowdfund input[type="number"][name="amount"]').currencyField();
+
 $(button).click(function(e){
     // get the crowdfund associated with this button
     e.preventDefault();

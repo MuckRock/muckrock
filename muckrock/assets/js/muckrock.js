@@ -12,38 +12,6 @@ function modal(nextSelector) {
     });
 }
 
-function prettifyAmountInput(input) {
-    // pretty_amount_input is used as a functional wrapper for the amount input field
-    // progressive enhancement ftw!
-    $(input).attr('hidden', true).hide();
-    var initialAmount = $(input).attr('value');
-    var prettyInputElement = '<input name="pretty-input" class="success" >';
-    var prettyInput = 'input[name=pretty-input]';
-    $(input).before(prettyInputElement);
-    $(prettyInput).autoNumeric('init', {aSign:'$', pSign:'p'});
-    $(prettyInput).autoNumeric('set', initialAmount/100.00);
-    $(prettyInput).keyup(function(e){
-        var value = $(this).autoNumeric('get') * 100;
-        $(input).attr('value', value);
-    });
-}
-
-function prettifyAmountInput(input) {
-    // pretty_amount_input is used as a functional wrapper for the amount input field
-    // progressive enhancement ftw!
-    $(input).attr('hidden', true).hide();
-    var initialAmount = $(input).attr('value');
-    var prettyInputElement = '<input name="pretty-input" class="success" >';
-    var prettyInput = 'input[name=pretty-input]';
-    $(input).before(prettyInputElement);
-    $(prettyInput).autoNumeric('init', {aSign:'$', pSign:'p'});
-    $(prettyInput).autoNumeric('set', initialAmount/100.00);
-    $(prettyInput).keyup(function(e){
-        var value = $(this).autoNumeric('get') * 100;
-        $(input).attr('value', value);
-    });
-}
-
 function checkout(pk, image, description, amount, email, label, form, submit, bitcoin) {
     submit = typeof submit !== 'undefined' ? submit : true;
     bitcoin = typeof bitcoin !== 'undefined' ? bitcoin : true;
