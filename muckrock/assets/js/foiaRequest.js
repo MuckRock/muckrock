@@ -30,11 +30,6 @@ function textAreaReply(nextSelector) {
     });
 }
 
-function hideAllExcept(visible) {
-    $('.tab-section').removeClass( 'active' );
-    visible.addClass( 'active' );
-}
-
 function get_thumbnail(doc_id) {
         var idx = doc_id.indexOf('-');
         var num = doc_id.slice(0, idx);
@@ -68,57 +63,43 @@ $('.estimated-completion .edit').click(function(){
     });
 });
 
-/* Tab Bar */
+/* Deep link into tab */
 
-$('.tab').click(function() {
-    $(this).addClass('active');
-    $(this).siblings().removeClass('active');
-    var tabSection = $(this).data('target');
-    if (tabSection) {
-        $(tabSection).addClass('visible');
-        $(tabSection).siblings().removeClass('visible');
+// get all the deep link things
+var foiaItems = $('.file, .note, .communication');
+// get a list of all the file hashes
+var foiaItemTargets = foiaItems.map(function() {
+    return '#' + $(this).attr('id');
+}).get();
+
+function deepLink(id) {
+    // we expect a hyphen delimited id, e.g. #file-1
+    if (!id || id.indexOf('-') === -1) {
+        return
+    }
+    var hyphen = id.indexOf('-');
+    var tab = id.substring(0, hyphen != -1 ? hyphen : id.length) + 's';
+    showTab(tab);
+    // deep link to single file
+    if (tab == '#files') {
+        var file = foiaItems.filter(id).first();
+        displayFile(file);
+    } else if (tab == '#notes' || tab == '#comms') { // deep link to specific element
+        var elementOffset = foiaItems.filter(id).first().offset();
+        window.scrollTo(elementOffset.top, elementOffset.left);
+    }
+    console.log('Deeplinked to:', id);
+}
+
+$(window).on('hashchange', function() {
+    // check if the hash is a target
+    var hash = location.hash;
+    if (foiaItemTargets.indexOf(hash) !== -1) {
+        deepLink(hash);
     }
 });
 
-/* Deep link into tab */
-
-function deepLink(e) {
-    var target;
-    if (e) {
-        e.preventDefault();
-        target = '#' + $(e.target).data('doc-anchor');
-    } else {
-        target = window.location.hash;
-    }
-    var n = target.indexOf('-');
-    var tab = target.substring(0, n != -1 ? n : target.length);
-    tab += 's';
-    $('.tab').each(function(index, element){
-        var tabTarget = $(this).data('target');
-        if (tab == tabTarget) {
-            $(this).click();
-        }
-    });
-    // deep link to single file
-    if (tab == '#files') {
-        var specificFile = target;
-        var linkToView = $(specificFile).find('.view-file');
-        if (linkToView) {
-            var id = linkToView.data('doc-id');
-            var title = linkToView.data('doc-title');
-            var anchor = linkToView.data('doc-anchor');
-            console.log(id, title, anchor);
-            displayDoc(id, title, anchor);
-        }
-    } else if (tab == '#notes' || tab == '#comms' || tab == '#tasks') { // deep link to specific element
-        var specificElement = window.location.hash;
-        var elementOffset = $(specificElement).offset();
-        window.scrollTo(elementOffset.top, elementOffset.left);
-    }
-}
-
-deepLink();
-$('a.view-file').click(deepLink);
+deepLink(foiaItemTargets.indexOf(location.hash) !== -1 ? location.hash : '');
 
 /* Communications */
 
@@ -181,34 +162,42 @@ $('#inactive-appeal').click(function(){
 
 /* Documents */
 
-function displayDoc(docId, docTitle, docAnchor) {
-    var title;
-    if (!!docTitle) {
-        title = docTitle;
-    } else {
+function displayFile(file) {
+    var activeFile = $('.active-document');
+    var files = $('.file');
+    if (!file) {
+        return
+    }
+    var title = file.data('title');
+    var docId = file.data('doc-id');
+    if (!title) {
         title = 'Untitled';
     }
     $('#doc-title').empty().text(title);
-    $('.file').parent('li').removeClass('active');
-    if (!!docAnchor) {
-        var fileListItem = $('#files ul li > #' + docAnchor).parent('li');
-        $(fileListItem).addClass('active');
-    }
-    DV.load(
-        'https://www.documentcloud.org/documents/' + docId + '.js',
-        {
-            sidebar: false,
-            container: "#viewer"
-        }
-    );
-    $('.active-document').addClass('visible');
-    window.scrollTo(0, $('.active-document').offset().top);
+    // remove the active class from all the list items,
+    // then apply active class to this file's list item
+    files.parent('li').removeClass('active');
+    files.filter(file).parent('li').addClass('active');
+    docCloudSettings = {sidebar: false, container: "#viewer"}
+    DV.load('https://www.documentcloud.org/documents/' + docId + '.js', docCloudSettings);
+    activeFile.addClass('visible');
+    window.scrollTo(0, activeFile.offset().top);
 }
 
-$('.active-document .cancel.button').click(function(){
+$('.view-file').click(function() {
+    // We force a hashchange when the view-file link is clicked.
+    $(window).trigger('hashchange');
+    window.scrollTo(0, $('.active-document').offset().top);
+
+});
+
+$('.active-document').find('.cancel.button').click(function(){
+    var activeFile = $('.active-document');
+    var files = $('.file');
     $('#viewer').empty();
-    $('.active-document').removeClass('visible');
-    $('.files-list .active').removeClass('active');
+    activeFile.removeClass('visible');
+    files.parent('li').removeClass('active');
+    console.log('Closed file');
 });
 
 $('.toggle-embed').click(function(){
@@ -225,10 +214,6 @@ $('.toggle-embed').click(function(){
 
 $('.note-header').click(function(){
     $(this).parent().toggleClass('collapsed');
-});
-
-$('.note-date').click(function(){
-    return false;
 });
 
 /* Sharing */

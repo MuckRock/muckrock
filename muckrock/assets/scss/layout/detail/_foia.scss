@@ -114,69 +114,11 @@ $request-breakpoint: 768px;
         }
     }
 
-    .tabs {
-        list-style-type: none;
-        padding-left: 0;
-        @include border;
-        border-color: $color-blue-dark;
-        font-size: 0;
-        &:hover .tab {
-            display: block;
-        }
-        .tab {
-            display: none;
-            color: $color-blue;
-            padding: $vertical-rhythm/2 $vertical-rhythm;
-            font-weight: $font-weight-bold;
-            font-size: $font-size-3;
-            cursor: pointer;
-            &:hover {
-                background-color: $color-blue;
-                color: $color-white;
-            }
-            &.active {
-                display: block;
-                background-color: $color-blue-dark;
-                color: $color-white;
-            }
-
-        }
-        @include media($medium-layout) {
-            border-top: none;
-            border-left: none;
-            border-right: none;
-            &:hover .tab {
-                display: inline-block;
-            }
-            .tab {
-                display: inline-block;
-                @include border-top-radius(4px);
-                &.active {
-                    display: inline-block;
-                    border: 1px solid $color-blue-dark;
-                    border-bottom-color: $color-white;
-                    background-color: $color-white;
-                    color: $color-blue-dark;
-                    margin-bottom: -1px;
-                }
-            }
-        }
-    }
-
-    .tab-section {
-        display: none;
-        &.visible { display: block; }
-        margin-bottom: 0;
-    }
     .filter {
         margin-bottom: 0;
         input {
             width: 100%;
         }
-    }
-    .empty {
-        margin-top: 2*$vertical-rhythm;
-        text-align: center;
     }
 }
 
