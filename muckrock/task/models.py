@@ -476,6 +476,7 @@ class GenericCrowdfundTask(Task):
 
 class NewCrowdfundTask(Task):
     """Created when a crowdfund is finished"""
+    type = 'CrowdfundTask'
     crowdfund = models.ForeignKey('crowdfund.Crowdfund')
 
     def __unicode__(self):
