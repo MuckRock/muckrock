@@ -125,8 +125,6 @@ class Project(models.Model):
 
 class ProjectCrowdfunds(models.Model):
     """Project to Crowdfund through model"""
+    # pylint: disable=model-missing-unicode
     project = models.ForeignKey(Project)
     crowdfund = models.OneToOneField('crowdfund.Crowdfund')
-
-    def __unicode__(self):
-        return 'ProjectCrowdfunds'
