@@ -16,7 +16,7 @@ from muckrock.task.models import (
         ResponseTask,
         GenericTask,
         PaymentTask,
-        GenericCrowdfundTask,
+        NewCrowdfundTask,
         BlacklistDomain,
         )
 
@@ -68,5 +68,5 @@ admin.site.register(NewAgencyTask, NewAgencyTaskAdmin)
 admin.site.register(ResponseTask, ResponseTaskAdmin)
 admin.site.register(GenericTask, GenericTaskAdmin)
 admin.site.register(PaymentTask, PaymentTaskAdmin)
-admin.site.register(GenericCrowdfundTask, CrowdfundTaskAdmin)
+admin.site.register(NewCrowdfundTask, CrowdfundTaskAdmin)
 admin.site.register(BlacklistDomain)
