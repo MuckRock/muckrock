@@ -473,6 +473,9 @@ ROBOTS_CACHE_TIMEOUT = 60 * 60 * 24
 
 PACKAGE_MONITOR_REQUIREMENTS_FILE = os.path.join(SITE_ROOT, '../requirements.txt')
 
+TAGGIT_CASE_INSENSITIVE = True
+TAGGIT_TAGS_FROM_STRING = 'muckrock.tags.models.parse_tags'
+
 # Organization Settings
 
 ORG_MIN_SEATS = 3
