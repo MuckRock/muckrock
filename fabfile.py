@@ -159,4 +159,11 @@ def setup():
     with settings(user='vagrant', host_string='127.0.0.1:2222', key_filename=result.split()[1]):
         manage('migrate')
 
-
+@task
+def update_staging_db():
+    """Update the staging database"""
+    env.run('heroku maintenance:on --app muckrock-staging')
+    env.run('heroku ps:scale --app muckrock-staging web=0')
+    env.run('heroku pg:copy muckrock::DATABASE_URL DATABASE_URL --app muckrock-staging')
+    env.run('heroku ps:scale --app muckrock-staging web=1')
+    env.run('heroku maintenance:off --app muckrock-staging')

@@ -50,17 +50,18 @@ class FOIARequestQuerySet(models.QuerySet):
         if user.is_staff:
             return self.all()
 
-        # Requests are visible if you own them, or if they are not drafts and not embargoed
+        # Requests are visible if you own them, have view or edit permissions,
+        # or if they are not drafts and not embargoed
         if user.is_authenticated():
-            return self.filter(Q(user=user) |
-                               (~Q(status='started') &
-                                ~Q(embargo=True, date_embargo=None) &
-                                ~Q(embargo=True, date_embargo__gte=date.today())))
+            return self.filter(
+                    Q(user=user) |
+                    Q(edit_collaborators=user) |
+                    Q(read_collaborators=user) |
+                    (~Q(status='started') & ~Q(embargo=True)))
         else:
             # anonymous user, filter out drafts and embargoes
-            return self.exclude(status='started') \
-                       .exclude(embargo=True, date_embargo=None) \
-                       .exclude(embargo=True, date_embargo__gte=date.today())
+            return (self.exclude(status='started')
+                        .exclude(embargo=True))
 
     def get_public(self):
         """Get all publically viewable FOIA requests"""
