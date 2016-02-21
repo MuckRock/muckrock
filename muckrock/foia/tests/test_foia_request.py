@@ -22,6 +22,9 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import SnailMailTask
 from muckrock.tests import get_allowed, post_allowed, get_post_unallowed, get_404
 
+ok_ = nose.tools.ok_
+eq_ = nose.tools.eq_
+
 # allow methods that could be functions and too many public methods in tests
 # pylint: disable=no-self-use
 # pylint: disable=too-many-public-methods
@@ -580,6 +583,30 @@ class TestFOIANotes(TestCase):
         self.foia.refresh_from_db()
         nose.tools.eq_(response.status_code, 302)
         nose.tools.assert_true(self.foia.notes.count() == 0)
+
+
+class TestRequestPayment(TestCase):
+    """Allow users to pay fees on a request"""
+    def setUp(self):
+        self.foia = FOIARequestFactory()
+
+    def test_make_payment(self):
+        """The request should accept payments for request fees."""
+        user = self.foia.user
+        amount = 100.0
+        comm = self.foia.pay(user, amount)
+        self.foia.refresh_from_db()
+        eq_(self.foia.status, 'submitted',
+            'The request should be set to processing.')
+        eq_(self.foia.date_processing, datetime.date.today(),
+            'The request should start tracking its days processing.')
+        ok_(comm, 'The function should return a communication.')
+        eq_(comm.delivered, 'mail', 'The communication should be mailed.')
+        task = SnailMailTask.objects.filter(communication=comm).first()
+        ok_(task, 'A snail mail task should be created.')
+        eq_(task.user, user, 'The task should be attributed to the user.')
+        eq_(task.amount, amount, 'The task should contain the amount of the request.')
+
 
 class TestRequestSharing(TestCase):
     """Allow people to edit and view another user's request."""
