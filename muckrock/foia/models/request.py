@@ -724,7 +724,7 @@ class FOIARequest(models.Model):
         if self.status == 'ack':
             # if we have not at least been acknowledged yet, set the days
             # to the period required by law
-            return self.agency.jurisdiction.get_days()
+            return self.jurisdiction.get_days()
         if self.date_estimate and date.today() < self.date_estimate:
             # return the days until the estimated date
             date_difference = self.date_estimate - date.today()
