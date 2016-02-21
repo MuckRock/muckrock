@@ -30,8 +30,10 @@ class Tag(TaggitTag):
         # pylint: disable=too-few-public-methods
         ordering = ['name']
 
+
 class TaggedItemBase(GenericTaggedItemBase):
     """Custom Tagged Item Base Class"""
     tag = models.ForeignKey(Tag, related_name="%(app_label)s_%(class)s_items")
+
 
 autocomplete_light.register(Tag)
