@@ -21,7 +21,7 @@ from unidecode import unidecode
 
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.tags.models import Tag, TaggedItemBase
+from muckrock.tags.models import Tag, TaggedItemBase, parse_tags
 from muckrock import task
 from muckrock import fields
 from muckrock import utils
@@ -737,10 +737,7 @@ class FOIARequest(models.Model):
     def update_tags(self, tags):
         """Update the requests tags"""
         tag_set = set()
-        for tag in tags.split(','):
-            tag = Tag.normalize(tag)
-            if not tag:
-                continue
+        for tag in parse_tags(tags):
             new_tag, _ = Tag.objects.get_or_create(name=tag)
             tag_set.add(new_tag)
         self.tags.set(*tag_set)
