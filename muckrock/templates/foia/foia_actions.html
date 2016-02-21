@@ -32,7 +32,7 @@
                 data-description="Request Fee (${{ foia.price|mul:1.05|floatformat:2 }})"
                 data-email="{{ user.email }}"
                 data-form="#payment-form"
-                data-label=""
+                data-label="${{ foia.price|mul:1.05|floatformat:2 }}"
                 class="checkout-button{% if action.class_name %} {{ action.class_name }}{% endif %}">
             {{ action.title }}
         </button>

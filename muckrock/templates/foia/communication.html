@@ -6,7 +6,13 @@
     <header class="communication-header">
         <h1 class="from">From: {{ communication.from_who }}</h1>
         <div class="actionables">
-            <a href="{{ request.path }}#{{ communication.anchor }}" class="permalink"><time datetime="{{ communication.date|date:'c' }}" class="date">{{ communication.date | date:"m/d/Y" }}</time></a>
+            {% if foia_url %}
+            <a href="#{{ communication.anchor }}" class="permalink">
+            {% else %}
+            <a href="{{communication.foia.get_absolute_url}}#{{communication.anchor}}" class="permalink">
+            {% endif %}
+                <time datetime="{{ communication.date|date:'c' }}" class="date">{{ communication.date | date:"m/d/Y" }}</time>
+            </a>
             {% if not hide_options %}
             {% if request.user.is_staff %}
             <div class="options dropdown">
@@ -54,7 +60,7 @@
     <ul class="files">
     {% with foia_url=communication.foia.get_absolute_url %}
     {% for file in communication.files.all %}
-        <li>{% include 'lib/file.html' %}</li>
+        <li>{% include 'lib/file.html' with hide_id=True %}</li>
     {% endfor %}
     {% endwith %}
     </ul>

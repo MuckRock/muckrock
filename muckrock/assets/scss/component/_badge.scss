@@ -1,0 +1,14 @@
+.badge {
+    display: inline-block;
+    margin-left: $vertical-rhythm/4;
+    padding: 0 $vertical-rhythm/4;
+    background: $color-grey;
+    color: $color-white;
+    font-size: $font-size-2;
+    font-weight: $font-weight-bold;
+    line-height: $font-line-height;
+}
+
+.staff.badge {
+    background: $color-red;
+}

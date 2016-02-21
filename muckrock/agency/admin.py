@@ -46,6 +46,10 @@ class AgencyAdminForm(forms.ModelForm):
             'AgencyAdminAutocomplete',
             queryset=Agency.objects.all(),
             required=False)
+    payable_to = autocomplete_light.ModelChoiceField(
+            'AgencyAdminAutocomplete',
+            queryset=Agency.objects.all(),
+            required=False)
     parent = autocomplete_light.ModelChoiceField(
             'AgencyAdminAutocomplete',
             queryset=Agency.objects.all(),
