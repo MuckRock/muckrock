@@ -20,7 +20,6 @@ def normalize(name):
     clean_name = re.sub(r'\s+', ' ', name)
     return clean_name.strip().lower()
 
-
 class Tag(TaggitTag):
     """Custom Tag Class"""
 
