@@ -34,7 +34,7 @@ class muckrock {
 	package { 'sass':
 		ensure   => installed,
 		provider => 'gem',
-	} 
+	}
 	package { 'git':
 		ensure => installed,
 	} ->
@@ -93,7 +93,19 @@ class muckrock {
 		requirements => '/home/vagrant/muckrock/requirements.txt',
 		require      => [File['/home/vagrant/ve'],
                          Package['zlib1g-dev'],],
-	} 
+	}
+
+	# nodejs
+
+    class { 'nodejs': }
+
+    # symlink the nodejs folder to node, since Ubuntu
+    # has a weird legacy issue when installing NodeJS
+    file { '/usr/bin/node':
+        ensure => 'link',
+        target => '/usr/bin/nodejs'
+    }
+
 
 	# postgresql
 
@@ -117,7 +129,7 @@ class muckrock {
 		user        => 'all',
 		auth_method => 'trust',
 	}
-	
+
 	postgresql::server::pg_hba_rule { 'trust localhost access':
 		type        => 'host',
 		database    => 'all',
