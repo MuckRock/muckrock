@@ -49,11 +49,7 @@
                 font-style: normal;
             }
         </style>
-        <link rel="stylesheet"
-              type="text/x-scss"
-              href="{% static 'scss/style.scss' %}" />
-        <link rel="stylesheet" type="text/css"
-              href="{% static 'autocomplete_light/style.css' %}" />
+        <link rel="stylesheet" type="text/css" href="{% static 'autocomplete_light/style.css' %}" />
         {% endcompress %}
         {% block styles %}
         {% endblock %}
@@ -93,7 +89,7 @@
             </div>
             {% include 'nav/footer.html' %}
         </div>
-        {% render_bundle 'main' %}
+        {% render_bundle 'main' 'js' %}
         <!-- SCRIPTS -->
         <!-- Google Analytics -->
         <script>
