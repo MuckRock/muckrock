@@ -1,5 +1,6 @@
 {% load static from staticfiles %}
 {% load compress %}
+{% load render_bundle from webpack_loader %}
 <!doctype html>
 
 <html>
@@ -85,12 +86,14 @@
             <div id="modal-overlay"></div>
             {% include 'lib/notification.html' %}
             {% include 'nav/header.html' %}
+            <div id="react-app"></div>
             <div class="content">
             {% block content %}
             {% endblock content %}
             </div>
             {% include 'nav/footer.html' %}
         </div>
+        {% render_bundle 'main' %}
         <!-- SCRIPTS -->
         <!-- Google Analytics -->
         <script>

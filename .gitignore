@@ -22,3 +22,4 @@ style.*.css
 .vagrant
 node_modules
 .settings.sh
+muckrock/assets/bundle
