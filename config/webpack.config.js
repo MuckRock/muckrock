@@ -8,7 +8,7 @@ var root = './muckrock/'
 
 module.exports = {
     context: __dirname,
-    entry: path.resolve(root + 'assets/js/index'),
+    entry: path.resolve(root + 'assets/entry'),
     output: {
         path: path.resolve(root + 'assets/bundles/'),
         filename: '[name].js',
