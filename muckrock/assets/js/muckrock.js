@@ -1,3 +1,11 @@
+import './crowdfund'
+import './communication'
+import './foiaRequest'
+import './list'
+import './notification'
+import './tabs'
+import './task'
+
 function modal(nextSelector) {
     var overlay = '#modal-overlay';
     $(overlay).addClass('visible');
@@ -9,22 +17,6 @@ function modal(nextSelector) {
     $('.close-modal').click(function(){
         $(overlay).removeClass('visible');
         $(nextSelector).removeClass('visible');
-    });
-}
-
-function prettifyAmountInput(input) {
-    // pretty_amount_input is used as a functional wrapper for the amount input field
-    // progressive enhancement ftw!
-    $(input).attr('hidden', true).hide();
-    var initialAmount = $(input).attr('value');
-    var prettyInputElement = '<input name="pretty-input" class="success" >';
-    var prettyInput = 'input[name=pretty-input]';
-    $(input).before(prettyInputElement);
-    $(prettyInput).autoNumeric('init', {aSign:'$', pSign:'p'});
-    $(prettyInput).autoNumeric('set', initialAmount/100.00);
-    $(prettyInput).keyup(function(e){
-        var value = $(this).autoNumeric('get') * 100;
-        $(input).attr('value', value);
     });
 }
 
@@ -94,7 +86,6 @@ $('.embed.hidden-modal').each(function() {
 });
 
 // FLAG FORM
-
 $('#show-flag-form').click(function(){
     var thisButton = $(this);
     $(thisButton).hide();
@@ -150,6 +141,17 @@ $('.message .visibility').click(function() {
         header.removeClass('collapsed');
         $(this).html('&#9660;');
     }
+});
+
+// DATEPICKER
+// Set defaults for datepicker plugin, and
+// bind it to elements with `.datepicker` class
+$('.datepicker').datepicker({
+    changeMonth: true,
+    changeYear: true,
+    minDate: new Date(1776, 6, 4),
+    maxDate: '+1y',
+    yearRange: '1776:+1'
 });
 
 // formsets
