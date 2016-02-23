@@ -1,3 +1,13 @@
+import './muckrock.checkout.js'
+import './muckrock.currencyfield.js'
+import './muckrock.crowdfund.js'
+import './communication'
+import './foiaRequest'
+import './list'
+import './notification'
+import './tabs'
+import './task'
+
 function modal(nextSelector) {
     var overlay = '#modal-overlay';
     $(overlay).addClass('visible');
@@ -22,7 +32,6 @@ $('.embed.hidden-modal').each(function() {
 });
 
 // FLAG FORM
-
 $('#show-flag-form').click(function(){
     var thisButton = $(this);
     $(thisButton).hide();
@@ -78,6 +87,17 @@ $('.message .visibility').click(function() {
         header.removeClass('collapsed');
         $(this).html('&#9660;');
     }
+});
+
+// DATEPICKER
+// Set defaults for datepicker plugin, and
+// bind it to elements with `.datepicker` class
+$('.datepicker').datepicker({
+    changeMonth: true,
+    changeYear: true,
+    minDate: new Date(1776, 6, 4),
+    maxDate: '+1y',
+    yearRange: '1776:+1'
 });
 
 // formsets
