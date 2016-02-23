@@ -70,6 +70,15 @@ STATICFILES_DIRS = (
     os.path.join(SITE_ROOT, 'assets'),
 )
 
+
+
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'BUNDLE_DIR_NAME': 'bundles/',
+        'STATS_FILE': os.path.join(SITE_ROOT, 'webpack-stats.json'),
+    }
+}
+
 COMPRESS_OFFLINE = True
 
 COMPRESS_STORAGE = 'compressor.storage.CompressorFileStorage'
@@ -186,6 +195,7 @@ INSTALLED_APPS = (
     'robots',
     'storages',
     'taggit',
+    'webpack_loader',
     'lot',
     'package_monitor',
     'image_diet',
