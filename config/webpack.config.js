@@ -7,7 +7,6 @@ var ExtractText = require('extract-text-webpack-plugin')
 var root = './muckrock/'
 
 module.exports = {
-    devtool: 'source-map',
     context: __dirname,
     entry: path.resolve(root + 'assets/js/index'),
     output: {
@@ -31,7 +30,7 @@ module.exports = {
         ],
     },
     plugins: [
-        new BundleTracker({filename: './muckrock/webpack-stats.json'}),
+        new BundleTracker({filename: './muckrock/assets/webpack-stats.json'}),
         new ExtractText('[name].css'),
     ],
     resolve: {

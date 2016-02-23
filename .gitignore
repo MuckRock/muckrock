@@ -22,4 +22,4 @@ style.*.css
 .vagrant
 node_modules
 .settings.sh
-/assets/bundles
+/assets/bundles/
