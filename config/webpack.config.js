@@ -2,17 +2,18 @@ var path = require('path')
 var webpack = require('webpack')
 var BundleTracker = require('webpack-bundle-tracker')
 
+// paths are absolute to the root of the project, where we run `npm` commands
 var root = './muckrock/'
 
 module.exports = {
     context: __dirname,
-    entry: root + 'assets/js/index',
+    entry: path.resolve(root + 'assets/js/index'),
     output: {
         path: path.resolve(root + 'assets/bundles/'),
-        filename: '[name]-[hash].js',
+        filename: '[name].js',
     },
     plugins: [
-        new BundleTracker({filename: root + 'webpack-stats.json'}),
+        new BundleTracker({filename: './muckrock/webpack-stats.json'}),
     ],
     module: {
         loaders: [

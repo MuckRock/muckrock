@@ -4,8 +4,8 @@
   "description": "Frontend code for MuckRock",
   "main": "index.js",
   "scripts": {
-    "build": "webpack --config webpack.config.js --progress --color",
-    "watch": "webpack --config webpack.config.js --progress --color --watch"
+    "build": "webpack --config config/webpack.config.js --progress --color",
+    "watch": "webpack --config config/webpack.config.js --progress --color --watch"
   },
   "repository": {
     "type": "git",
