@@ -45,6 +45,7 @@ def count_tasks():
         )
     return count
 
+
 class TaskList(MRFilterableListView):
     """List of tasks"""
     title = 'Tasks'
@@ -279,6 +280,7 @@ class FlaggedTaskList(TaskList):
         if request.POST.get('resolve'):
             task.resolve(request.user)
 
+
 class NewAgencyTaskList(TaskList):
     title = 'New Agencies'
     queryset = (NewAgencyTask.objects
@@ -385,8 +387,6 @@ class StatusChangeTaskList(TaskList):
 
 class CrowdfundTaskList(TaskList):
     title = 'Crowdfunds'
-    # generic FKs are problematic (can't select related on foia/project)
-    # queryset = GenericCrowdfundTask.objects.prefetch_related('crowdfund')
     queryset = NewCrowdfundTask.objects.select_related('crowdfund')
 
 
