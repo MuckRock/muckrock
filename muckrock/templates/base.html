@@ -50,6 +50,7 @@
             }
         </style>
         <link rel="stylesheet" type="text/css" href="{% static 'autocomplete_light/style.css' %}" />
+        {% render_bundle 'main' 'css' %}
         {% endcompress %}
         {% block styles %}
         {% endblock %}
