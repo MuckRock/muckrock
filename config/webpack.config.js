@@ -7,7 +7,7 @@ var ExtractText = require('extract-text-webpack-plugin')
 var root = './muckrock/'
 
 module.exports = {
-    context: __dirname,
+    devtool: 'source-map',
     entry: path.resolve(root + 'assets/entry'),
     output: {
         path: path.resolve(root + 'assets/bundles/'),
@@ -25,7 +25,7 @@ module.exports = {
             },
             {
                 test: /\.scss?$/,
-                loader: ExtractText.extract('style-loader', 'css-loader!sass-loader'),
+                loader: ExtractText.extract('style-loader', 'css-loader?sourceMap!sass-loader?sourceMap'),
             },
         ],
     },
