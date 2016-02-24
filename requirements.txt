@@ -104,6 +104,8 @@ gunicorn==0.14.3
 image-diet2==1.0
 # Interactive python shell
 ipython==0.10
+# Used for storing JSON data, required by django-geojson
+jsonfield==1.0.3
 # Required by celery
 kombu==3.0.33
 # Required by pylint
