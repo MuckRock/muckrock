@@ -117,3 +117,23 @@ class Project(models.Model):
             tags__name__in=self.tags.names(),
         ).exclude(projects=self))
         return articles
+
+
+class ProjectMap(models.Model):
+    """Project maps plot the locations of requests"""
+    title = models.CharField(max_length=100, help_text='Titles are limited to 100 characters.')
+    description = models.TextField(blank=True, null=True)
+    project = models.ForeignKey(Project, related_name='maps')
+    requests = models.ManyToManyField('foia.FOIARequest', related_name='maps', blank=True)
+
+    def __unicode__(self):
+        return unicode(self.title)
+
+    def get_absolute_url(self):
+        """Returns the map URL as a string"""
+        return reverse('project-map-detail', kwargs={
+            'project_slug': self.project.slug,
+            'project_pk': self.project.id,
+            'pk': self.pk,
+        })
+

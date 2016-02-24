@@ -331,4 +331,3 @@ class FOIAMultiRequestAdmin(VersionAdmin):
 
 admin.site.register(FOIARequest, FOIARequestAdmin)
 admin.site.register(FOIAMultiRequest, FOIAMultiRequestAdmin)
-
