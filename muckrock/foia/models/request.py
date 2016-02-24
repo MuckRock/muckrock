@@ -292,9 +292,9 @@ class FOIARequest(models.Model):
 
     def is_payable(self):
         """Can this request be payed for by the user?"""
-        has_closed_crowdfund = self.has_crowdfund and self.crowdfund.closed
+        has_open_crowdfund = self.has_crowdfund() and not self.crowdfund.closed
         has_payment_status = self.status == 'payment'
-        return has_payment_status and has_closed_crowdfund
+        return has_payment_status and not has_open_crowdfund
 
     def get_stripe_amount(self):
         """Output a Stripe Checkout formatted price"""
