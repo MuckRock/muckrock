@@ -145,3 +145,9 @@ class ProjectMapDetailView(DetailView):
     """View a project map"""
     model = ProjectMap
     template_name = 'project/map.html'
+
+    @method_decorator(login_required)
+    @method_decorator(user_passes_test(lambda u: u.is_staff))
+    def dispatch(self, *args, **kwargs):
+        """At the moment, only staff are allowed to view a project map."""
+        return super(ProjectMapDetailView, self).dispatch(*args, **kwargs)
