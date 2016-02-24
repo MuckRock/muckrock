@@ -101,7 +101,7 @@ monthly request{{ profile.monthly_requests|sub:balance.monthly_requests|pluraliz
             checkoutData = getCheckoutData($(this));
             checkout(
                 "{{ stripe_pk }}",
-                "{% static 'apple-touch-icon.png' %}",
+                "{% static 'icons/logo.png' %}",
                 checkoutData.description,
                 checkoutData.amount,
                 checkoutData.email,

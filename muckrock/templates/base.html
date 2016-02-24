@@ -5,16 +5,14 @@
 <html>
     <head>
         <title>{% block title %}MuckRock{% endblock title %}</title>
-        {% block description %}<meta name="description" content=""/>{% endblock description %}
         <meta charset="utf-8" />
-        <meta name="viewport"
-              content="width=device-width, initial-scale=1" />
-        <meta name="google-site-verification"
-              content="4KnIEDr5Fi-PUL9klVnMlC2BMcStrUwQIj-4gMVfqjk" />
+        {% block description %}<meta name="description" content=""/>{% endblock description %}
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="google-site-verification" content="4KnIEDr5Fi-PUL9klVnMlC2BMcStrUwQIj-4gMVfqjk" />
         <!-- Load Assets -->
-        <link rel="shortcut icon" href="{% static 'favicon.ico' %}" />
-        <link rel="mask-icon" href="{% static 'favicon.svg' %}" color="#367AF0" />
-        <link rel="apple-touch-icon" href="{% static 'logo.png' %}" />
+        <link rel="shortcut icon"       href="{% static 'icons/favicon.ico' %}" />
+        <link rel="mask-icon"           href="{% static 'icons/favicon.svg' %}" color="#367AF0" />
+        <link rel="apple-touch-icon"    href="{% static 'icons/logo.png' %}" />
         {% compress css %}
         <style type="text/css">
             @font-face {
@@ -48,11 +46,8 @@
                 font-style: normal;
             }
         </style>
-        <link rel="stylesheet"
-              type="text/x-scss"
-              href="{% static 'scss/style.scss' %}" />
-        <link rel="stylesheet" type="text/css"
-              href="{% static 'autocomplete_light/style.css' %}" />
+        <link rel="stylesheet" type="text/x-scss" href="{% static 'scss/style.scss' %}" />
+        <link rel="stylesheet" type="text/css" href="{% static 'autocomplete_light/style.css' %}" />
         {% endcompress %}
         {% block styles %}
         {% endblock %}
@@ -68,16 +63,15 @@
         <meta property="og:type" content="website" />
         <meta property="og:url" content="{{ request.build_absolute_uri }}" />
         <meta property="og:description" content="MuckRock gives people the tools they need to keep our government transparent and accountable." />
-        <meta property="og:image" content="{{ STATIC_URL }}apple-touch-icon.png" />
+        <meta property="og:image" content="{% static 'icons/logo.png' %}" />
         {% endblock open_graph %}
         {% block twitter_card %}
         <meta name="twitter:card" content="summary" />
         <meta name="twitter:site" content="@muckrock" />
         <meta name="twitter:title" content="MuckRock" />
         <meta name="twitter:description" content="MuckRock gives people the tools they need to keep our government transparent and accountable." />
-        <meta name="twitter:image:src" content="{{ STATIC_URL }}apple-touch-icon.png" />
+        <meta name="twitter:image:src" content="{% static 'icons/logo.png' %}" />
         {% endblock twitter_card %}
-        <meta name="google-site-verification" content="4KnIEDr5Fi-PUL9klVnMlC2BMcStrUwQIj-4gMVfqjk" />
     </head>
     <body>
         {% include 'nav/sidebar.html' %}

@@ -75,7 +75,7 @@
 {% if article.image %}
 <meta property="og:image" content="{% thumbnail article.image 1200x400 %}" />
 {% else %}
-<meta property="og:image" content="{% static 'apple-touch-icon.png' %}" />
+<meta property="og:image" content="{% static 'icons/logo.png' %}" />
 {% endif %}
 <meta property="og:description" content="{{ article.summary }}" />
 <meta property="og:site_name" content="MuckRock" />
@@ -95,7 +95,7 @@
 {% if article.image %}
 <meta name="twitter:image:src" content="{% thumbnail article.image 1200x400 %}" />
 {% else %}
-<meta name="twitter:image:src" content="{% static 'apple-touch-icon.png' %}" />
+<meta name="twitter:image:src" content="{% static 'icons/logo.png' %}" />
 {% endif %}
 {% endblock twitter_card %}
 
@@ -110,7 +110,7 @@ $('.checkout-button').click(function(e){
     var checkoutData = getCheckoutData($(this));
     checkout(
         "{{ stripe_pk }}",
-        "{% static 'apple-touch-icon.png' %}",
+        "{% static 'icons/logo.png' %}",
         checkoutData.description,
         checkoutData.amount,
         checkoutData.email,
