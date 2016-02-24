@@ -128,3 +128,12 @@ class ProjectMap(models.Model):
 
     def __unicode__(self):
         return unicode(self.title)
+
+    def get_absolute_url(self):
+        """Returns the map URL as a string"""
+        return reverse('project-map-detail', kwargs={
+            'project_slug': self.project.slug,
+            'project_pk': self.project.id,
+            'pk': self.pk,
+        })
+

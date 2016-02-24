@@ -80,6 +80,7 @@ class ProjectDetailView(DetailView):
                     ))
         context['followers'] = followers(project)
         context['articles'] = project.articles.get_published()
+        context['maps'] = ProjectMap.objects.filter(project=project)
         context['contributors'] = project.contributors.select_related('profile')
         return context
 
