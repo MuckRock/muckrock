@@ -11,6 +11,7 @@ from reversion import VersionAdmin
 from muckrock.project.models import Project, ProjectMap
 
 class ProjectMapAdminForm(forms.ModelForm):
+    """Adds autocomplete to requests field"""
     requests = autocomplete_light.ModelMultipleChoiceField('FOIARequestAutocomplete')
 
     class Meta:
@@ -25,6 +26,7 @@ class ProjectAdmin(VersionAdmin):
     search_fields = ('title', 'description')
 
 class ProjectMapAdmin(VersionAdmin):
+    """Admin interface for ProjectMap models"""
     list_display = ('title', 'project')
     search_fields = ('title', 'project')
     form = ProjectMapAdminForm
