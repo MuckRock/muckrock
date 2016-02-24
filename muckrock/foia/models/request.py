@@ -721,10 +721,12 @@ class FOIARequest(models.Model):
     def _followup_days(self):
         """How many days do we wait until we follow up?"""
         # pylint: disable=no-member
-        if self.status == 'ack':
+        if self.status == 'ack' and self.jurisdiction:
             # if we have not at least been acknowledged yet, set the days
             # to the period required by law
-            return self.jurisdiction.get_days()
+            jurisdiction_days = self.jurisdiction.get_days()
+            if jurisdiction_days is not None:
+                return jurisdiction_days
         if self.date_estimate and date.today() < self.date_estimate:
             # return the days until the estimated date
             date_difference = self.date_estimate - date.today()
