@@ -249,11 +249,13 @@
                     {% if foia.is_payable %}
                     <form class="payment composer-input stripe-checkout" id="pay" method="post" action="{% url 'foia-pay' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">
                         {% csrf_token %}
-                        <input type="hidden" name="token" value="" />
-                        <input type="hidden" name="email" value="{{request.user.email}}" />
-                        <input type="number" name="amount" value="{{ foia.get_stripe_amount }}" />
-                        <input type="hidden" name="description" value="Request Fee" />
-                        <input type="hidden" name="fee" value=".05" />
+                        <input type="hidden" name="stripe_pk" value="{{ stripe_pk }}" />
+                        <input type="hidden" name="stripe_image" value="{% static 'logo.png' %}" />
+                        <input type="hidden" name="stripe_email" value="{{request.user.email}}" />
+                        <input type="hidden" name="stripe_description" value="Request Fee" />
+                        <input type="number" name="stripe_amount" value="{{ foia.get_stripe_amount }}" />
+                        <input type="hidden" name="stripe_fee" value=".05" />
+                        <input type="hidden" name="stripe_token" value="" />
                         <button type="submit">Pay</button>
                     </form>
                     {% endif %}
@@ -419,6 +421,7 @@
 
 {% block scripts %}
 <script type="text/javascript">
+    $('.stripe-checkout').checkout();
     $('#comms-filter').quicksearch('#comms .communications-list .communication');
     $('#notes-filter').quicksearch('#notes .note');
     $('.datepicker').datepicker({
@@ -430,21 +433,6 @@
         {% if foia.date_embargo %}
         defaultDate: '{{ foia.date_embargo|date:"m/d/Y" }}'
         {% endif %}
-    });
-    /* CHECKOUT */
-    $('.checkout-button').click(function(e){
-        e.preventDefault();
-        var checkoutData = getCheckoutData($(this));
-        checkout(
-            "{{ stripe_pk }}",
-            "{% static 'icons/logo.png' %}",
-            checkoutData.description,
-            checkoutData.amount,
-            checkoutData.email,
-            checkoutData.label,
-            checkoutData.form
-        );
-        return false;
     });
 </script>
 {% endblock scripts %}
