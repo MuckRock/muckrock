@@ -2,13 +2,22 @@
     display: inline-block;
     margin-left: $vertical-rhythm/4;
     padding: 0 $vertical-rhythm/4;
-    background: $color-grey;
+    border-radius: 4px;
+    background: $color-grey-3;
     color: $color-white;
     font-size: $font-size-2;
     font-weight: $font-weight-bold;
     line-height: $font-line-height;
 }
 
+.failure.badge {
+    background: $color-red-dark;
+}
+
+.success.badge {
+    background: $color-green-dark;
+}
+
 .staff.badge {
-    background: $color-red;
+    background: $color-blue-dark;
 }
