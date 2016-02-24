@@ -12,7 +12,7 @@ from django.utils.decorators import method_decorator
 
 from actstream.models import followers
 
-from muckrock.project.models import Project
+from muckrock.project.models import Project, ProjectMap
 from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm
 
 
@@ -138,3 +138,9 @@ class ProjectDeleteView(ProjectPermissionsMixin, DeleteView):
     model = Project
     success_url = reverse_lazy('index')
     template_name = 'project/delete.html'
+
+
+class ProjectMapDetailView(DetailView):
+    """View a project map"""
+    model = ProjectMap
+    template_name = 'project/map.html'
