@@ -1,7 +1,6 @@
 $(window).on('map:init', function (e) {
     var detail = e.originalEvent ? e.originalEvent.detail : e.detail;
     var map = detail.map;
-    map.setZoom(map.getMaxZoom());
     // Add geocoder to the map
     var geocoder_settings = {
         'position': 'topright',
