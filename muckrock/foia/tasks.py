@@ -182,7 +182,8 @@ def submit_multi_request(req_pk, **kwargs):
             new_foia = FOIARequest.objects.create(
                 user=req.user, status='started', title=title, slug=slugify(title),
                 jurisdiction=agency.jurisdiction, agency=agency, embargo=req.embargo,
-                requested_docs=req.requested_docs, description=req.requested_docs)
+                requested_docs=req.requested_docs, description=req.requested_docs,
+                location=agency.location)
 
             FOIACommunication.objects.create(
                 foia=new_foia, from_who=new_foia.user.get_full_name(),
