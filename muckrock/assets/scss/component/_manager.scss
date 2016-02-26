@@ -79,27 +79,3 @@
         }
     }
 }
-
-.tag {
-    display: inline-block;
-    margin-bottom: $vertical-rhythm/6;
-    padding: 0 $vertical-rhythm/4;
-    background: $color-blue;
-    color: $color-white;
-    line-height: $font-line-height;
-    &:hover {
-        color: $color-white;
-        background: $color-blue-dark;
-        text-decoration: none;
-    }
-}
-
-button.tag, .button.tag {
-    border: none;
-    border-radius: 0;
-    box-shadow: none;
-    &:hover {
-        box-shadow: none;
-    }
-}
-
