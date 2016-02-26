@@ -82,16 +82,14 @@
 
 .tag {
     display: inline-block;
-    margin-left: $vertical-rhythm/4;
-    margin-bottom: $vertical-rhythm/4;
+    margin-bottom: $vertical-rhythm/6;
     padding: 0 $vertical-rhythm/4;
-    border-radius: 4px;
-    background: $color-blue-dark;
+    background: $color-blue;
     color: $color-white;
     line-height: $font-line-height;
     &:hover {
         color: $color-white;
-        background: $color-blue;
+        background: $color-blue-dark;
         text-decoration: none;
     }
 }
