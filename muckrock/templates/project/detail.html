@@ -79,10 +79,10 @@ MuckRock &bull; {{ project.title }}
             </div>
         </section>
         <section class="project-crowdfunds">
-            {% with project.crowdfund.all as crowdfunds %}
+            {% with project.crowdfunds.all as crowdfunds %}
             {% if crowdfunds %}
                 {% for crowdfund in crowdfunds %}
-                    {% crowdfund_project crowdfund=crowdfund %}
+                    {% crowdfund crowdfund=crowdfund %}
                 {% endfor %}
             {% endif %}
             {% endwith %}

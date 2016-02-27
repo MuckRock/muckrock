@@ -5,6 +5,7 @@ Tasks for the account application
 
 from celery.schedules import crontab
 from celery.task import periodic_task
+from django.core.management import call_command
 from django.contrib.auth.models import User
 from django.db.models import Sum, F
 
@@ -163,3 +164,15 @@ def _notices(email_pref):
 def weekly_notices():
     """Send out weekly notices"""
     _notices('weekly')
+
+@periodic_task(run_every=crontab(day_of_week='sun', hour=1, minute=0),
+               name='muckrock.accounts.tasks.db_cleanup')
+def db_cleanup():
+    """Call some management commands to clean up the database"""
+    call_command('deleterevisions', 'foia', days=180,
+            force=True, no_confirmation=True, verbosity=2)
+    call_command('deleterevisions', 'task', days=180,
+            force=True, no_confirmation=True, verbosity=2)
+    call_command('deleterevisions', days=730,
+            force=True, no_confirmation=True, verbosity=2)
+    call_command('clearsessions', verbosity=2)

@@ -207,6 +207,8 @@ class FOIARequest(models.Model):
         help_text=('Block emails incoming to this request from '
                    'automatically being posted on the site')
     )
+    crowdfund = models.OneToOneField('crowdfund.Crowdfund',
+            related_name='foia', blank=True, null=True)
 
     read_collaborators = models.ManyToManyField(
         User,
@@ -400,7 +402,7 @@ class FOIARequest(models.Model):
 
     def has_crowdfund(self):
         """Does this request have crowdfunding enabled?"""
-        return hasattr(self, 'crowdfund')
+        return bool(self.crowdfund)
 
     def public_documents(self):
         """Get a list of public documents attached to this request"""

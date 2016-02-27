@@ -17,61 +17,37 @@ from datetime import date, timedelta
 import logging
 import stripe
 
-from muckrock.crowdfund.forms import CrowdfundProjectForm, \
-                                     CrowdfundRequestPaymentForm, \
-                                     CrowdfundProjectPaymentForm
-from muckrock.crowdfund.models import CrowdfundRequest, CrowdfundProject
+from muckrock.crowdfund.forms import CrowdfundForm, CrowdfundPaymentForm
+from muckrock.crowdfund.models import Crowdfund
 from muckrock.project.models import Project
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
-class CrowdfundRequestListView(ListView):
-    """Lists active request crowdfunds"""
-    model = CrowdfundRequest
-    template_name = 'crowdfund/request_list.html'
+class CrowdfundListView(ListView):
+    """Lists active crowdfunds"""
+    model = Crowdfund
+    template_name = 'crowdfund/list.html'
 
     def get_context_data(self, **kwargs):
         """Add title and other data to context"""
-        context = super(CrowdfundRequestListView, self).get_context_data(**kwargs)
-        context['title'] = 'Requests needing funding'
+        context = super(CrowdfundListView, self).get_context_data(**kwargs)
+        context['title'] = 'Crowdfund campaigns needing funding'
         return context
 
     def get_queryset(self):
         """Only list open crowdfunds on unembargoed requests"""
-        queryset = super(CrowdfundRequestListView, self).get_queryset()
+        queryset = super(CrowdfundListView, self).get_queryset()
         queryset = queryset.exclude(closed=True).exclude(date_due__lt=date.today())
         user = self.request.user
-        if not user.is_staff:
-            if user.is_authenticated():
-                queryset = queryset.filter(Q(foia__embargo=False)|Q(foia__user=user))
-            else:
-                queryset = queryset.filter(foia__embargo=False)
-        return queryset
-
-
-class CrowdfundProjectListView(ListView):
-    """Lists active project crowdfunds"""
-    model = CrowdfundProject
-    template_name = 'crowdfund/project_list.html'
-
-    def get_context_data(self, **kwargs):
-        """Add title and other data to context"""
-        context = super(CrowdfundProjectListView, self).get_context_data(**kwargs)
-        context['title'] = 'Projects needing funding'
-        return context
-
-    def get_queryset(self):
-        """Only list open crowdfunds on public projects"""
-        queryset = super(CrowdfundProjectListView, self).get_queryset()
-        queryset = queryset.exclude(closed=True).exclude(date_due__lt=date.today())
-        user = self.request.user
-        if not user.is_staff:
-            if user.is_authenticated():
-                queryset = queryset.filter(Q(project__private=False)|Q(project__contributors=user))
-            else:
-                queryset = queryset.filter(project__private=False)
+        if not user.is_staff and user.is_authenticated():
+            queryset = (queryset
+                .filter(Q(foia__embargo=False) | Q(foia__user=user))
+                .filter(Q(project__private=False) | Q(project__contributors=user)))
+        elif not user.is_staff:
+            queryset = queryset.filter(
+                    foia__embargo=False, project__private=False)
         return queryset
 
 
@@ -80,7 +56,9 @@ class CrowdfundDetailView(DetailView):
     Presents details about a crowdfunding campaign,
     as well as providing a private endpoint for contributions.
     """
-    form = None
+    model = Crowdfund
+    form = CrowdfundPaymentForm
+    template_name = 'crowdfund/detail.html'
 
     def get_form(self):
         """Returns a form or None"""
@@ -157,22 +135,11 @@ class CrowdfundDetailView(DetailView):
                 return redirect(self.get_redirect_url())
         return self.return_error(request)
 
-class CrowdfundRequestDetail(CrowdfundDetailView):
-    """Specificies a detail view for crowdfunding requests."""
-    model = CrowdfundRequest
-    form = CrowdfundRequestPaymentForm
-    template_name = 'crowdfund/request_detail.html'
-
-class CrowdfundProjectDetail(CrowdfundDetailView):
-    """Specifies a detail view for crowdfunding projects."""
-    model = CrowdfundProject
-    form = CrowdfundProjectPaymentForm
-    template_name = 'crowdfund/project_detail.html'
 
 class CrowdfundProjectCreateView(CreateView):
     """A creation view for project crowdfunding"""
-    model = CrowdfundProject
-    form_class = CrowdfundProjectForm
+    model = Crowdfund
+    form_class = CrowdfundForm
     template_name = 'project/crowdfund.html'
 
     @method_decorator(login_required)
@@ -207,3 +174,4 @@ class CrowdfundProjectCreateView(CreateView):
             target=project
         )
         return project.get_absolute_url()
+

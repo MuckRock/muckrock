@@ -17,7 +17,7 @@ import logging
 import stripe
 import sys
 
-from muckrock.crowdfund.forms import CrowdfundRequestForm
+from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.foia.forms import \
     FOIADeleteForm, \
     FOIAAdminFixForm, \
@@ -292,7 +292,7 @@ def crowdfund_request(request, idx, **kwargs):
 
     if request.method == 'POST':
         # save crowdfund object
-        form = CrowdfundRequestForm(request.POST)
+        form = CrowdfundForm(request.POST)
         if form.is_valid():
             crowdfund = form.save()
             messages.success(request, 'Your crowdfund has started, spread the word!')
@@ -315,7 +315,7 @@ def crowdfund_request(request, idx, **kwargs):
             'date_due': date_due,
             'foia': foia
         }
-        form = CrowdfundRequestForm(initial=initial)
+        form = CrowdfundForm(initial=initial)
 
     return render_to_response(
         'forms/foia/crowdfund.html',

@@ -34,6 +34,7 @@ class ProjectQuerySet(models.QuerySet):
             projects = projects.distinct()
         return projects
 
+
 class Project(models.Model):
     """Projects are a mixture of general and specific information on a broad subject."""
     objects = ProjectQuerySet.as_manager()
@@ -69,6 +70,9 @@ class Project(models.Model):
         related_name='projects',
         blank=True,
         )
+    crowdfunds = models.ManyToManyField('crowdfund.Crowdfund',
+            through='ProjectCrowdfunds', related_name='projects')
+
     tags = taggit.managers.TaggableManager(through='tags.TaggedItemBase', blank=True)
 
     def __unicode__(self):
@@ -117,6 +121,13 @@ class Project(models.Model):
             tags__name__in=self.tags.names(),
         ).exclude(projects=self))
         return articles
+
+
+class ProjectCrowdfunds(models.Model):
+    """Project to Crowdfund through model"""
+    # pylint: disable=model-missing-unicode
+    project = models.ForeignKey(Project)
+    crowdfund = models.OneToOneField('crowdfund.Crowdfund')
 
 
 class ProjectMap(models.Model):
