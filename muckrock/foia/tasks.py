@@ -204,7 +204,7 @@ def classify_status(task_pk, **kwargs):
     def get_text_ocr(doc_id):
         """Get the text OCR from document cloud"""
         doc_cloud_url = u'http://www.documentcloud.org/api/documents/%s.json'
-        resp = requests.get(doc_cloud_url % quote_plus(doc_id.encode('utf-8'))
+        resp = requests.get(doc_cloud_url % quote_plus(doc_id.encode('utf-8')))
         try:
             doc_cloud_json = resp.json()
         except ValueError:
