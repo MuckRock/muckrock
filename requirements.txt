@@ -24,8 +24,6 @@ anyjson==0.3.3
 astroid==1.3.6
 # Required by celery
 billiard==3.3.0.22
-# Used to sanitize input
-bleach==1.4.1
 # Used to access AWS
 boto==2.27.0
 # Used to run async tasks
@@ -56,8 +54,12 @@ django-dbsettings==0.8.2
 django-debug-toolbar==1.3.0
 # Used for filtering in viewsets
 django-filter==0.10.0
+# Used for storing geographic data
+django-geojson==2.8.1
 # Search engine
 django-haystack==2.4.0
+# Used for plotting geographic data
+django-leaflet==0.18.0
 # Used for phone numbers and state list
 django-localflavor==1.1
 # Used for Log On Tokens
@@ -87,7 +89,7 @@ django-sslify==0.2
 # Store files on S3
 django-storages==1.1.8
 # Used for tagging
-django-taggit==0.14.0
+django-taggit==0.18.0
 # The API framework
 djangorestframework==3.1.3
 # Monitors slow requests
@@ -102,6 +104,8 @@ gunicorn==0.14.3
 image-diet2==1.0
 # Interactive python shell
 ipython==0.10
+# Used for storing JSON data, required by django-geojson
+jsonfield==1.0.3
 # Required by celery
 kombu==3.0.33
 # Required by pylint

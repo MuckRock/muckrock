@@ -142,7 +142,7 @@
             var checkoutData = getCheckoutData($(this));
             checkout(
                 "{{ stripe_pk }}",
-                "{% static 'apple-touch-icon.png' %}",
+                "{% static 'icons/logo.png' %}",
                 checkoutData.description,
                 checkoutData.amount,
                 checkoutData.email,

@@ -43,8 +43,9 @@
         <p class="subject">Subject: None</p>
     {% endif %}
     {% if communication.status and request.user.is_staff %}
-        <p class="status badge {{communication.status|classify_status}}">
-        {{communication.get_status_display}}</p>
+        <p class="status">
+            <span class="badge {{communication.status|classify_status}}">{{communication.get_status_display}}</span>
+        </p>
     {% endif %}
     </section>
     {% if communication.communication %}

@@ -17,7 +17,7 @@ import django_filters
 
 from muckrock.news.models import Article
 from muckrock.news.serializers import ArticleSerializer
-from muckrock.tags.models import Tag
+from muckrock.tags.models import Tag, parse_tags
 
 # pylint: disable=too-many-ancestors
 
@@ -57,10 +57,7 @@ class NewsDetail(DateDetailView):
         tags = request.POST.get('tags')
         if tags:
             tag_set = set()
-            for tag in tags.split(','):
-                tag = Tag.normalize(tag)
-                if not tag:
-                    continue
+            for tag in parse_tags(tags):
                 new_tag, _ = Tag.objects.get_or_create(name=tag)
                 tag_set.add(new_tag)
             self.get_object().tags.set(*tag_set)

@@ -53,6 +53,7 @@ class JurisdictionFactory(factory.django.DjangoModelFactory):
 
     name = factory.Sequence(lambda n: "Jurisdiction %d" % n)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
+    days = 20
     level = 'f'
 
 

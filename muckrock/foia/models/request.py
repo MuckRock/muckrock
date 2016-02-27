@@ -14,6 +14,7 @@ from django.template.loader import render_to_string
 
 import actstream
 from datetime import datetime, date, timedelta
+from djgeojson.fields import PointField
 from hashlib import md5
 import logging
 from taggit.managers import TaggableManager
@@ -21,7 +22,7 @@ from unidecode import unidecode
 
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.tags.models import Tag, TaggedItemBase
+from muckrock.tags.models import Tag, TaggedItemBase, parse_tags
 from muckrock import task
 from muckrock import fields
 from muckrock import utils
@@ -50,17 +51,18 @@ class FOIARequestQuerySet(models.QuerySet):
         if user.is_staff:
             return self.all()
 
-        # Requests are visible if you own them, or if they are not drafts and not embargoed
+        # Requests are visible if you own them, have view or edit permissions,
+        # or if they are not drafts and not embargoed
         if user.is_authenticated():
-            return self.filter(Q(user=user) |
-                               (~Q(status='started') &
-                                ~Q(embargo=True, date_embargo=None) &
-                                ~Q(embargo=True, date_embargo__gte=date.today())))
+            return self.filter(
+                    Q(user=user) |
+                    Q(edit_collaborators=user) |
+                    Q(read_collaborators=user) |
+                    (~Q(status='started') & ~Q(embargo=True)))
         else:
             # anonymous user, filter out drafts and embargoes
-            return self.exclude(status='started') \
-                       .exclude(embargo=True, date_embargo=None) \
-                       .exclude(embargo=True, date_embargo__gte=date.today())
+            return (self.exclude(status='started')
+                        .exclude(embargo=True))
 
     def get_public(self):
         """Get all publically viewable FOIA requests"""
@@ -222,6 +224,7 @@ class FOIARequest(models.Model):
 
     objects = FOIARequestQuerySet.as_manager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
+    location = PointField(blank=True)
 
     foia_type = 'foia'
 
@@ -722,6 +725,12 @@ class FOIARequest(models.Model):
     def _followup_days(self):
         """How many days do we wait until we follow up?"""
         # pylint: disable=no-member
+        if self.status == 'ack' and self.jurisdiction:
+            # if we have not at least been acknowledged yet, set the days
+            # to the period required by law
+            jurisdiction_days = self.jurisdiction.get_days()
+            if jurisdiction_days is not None:
+                return jurisdiction_days
         if self.date_estimate and date.today() < self.date_estimate:
             # return the days until the estimated date
             date_difference = self.date_estimate - date.today()
@@ -734,10 +743,7 @@ class FOIARequest(models.Model):
     def update_tags(self, tags):
         """Update the requests tags"""
         tag_set = set()
-        for tag in tags.split(','):
-            tag = Tag.normalize(tag)
-            if not tag:
-                continue
+        for tag in parse_tags(tags):
             new_tag, _ = Tag.objects.get_or_create(name=tag)
             tag_set.add(new_tag)
         self.tags.set(*tag_set)

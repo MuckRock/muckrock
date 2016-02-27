@@ -168,10 +168,12 @@ INSTALLED_APPS = (
     'django_premailer',
     'djangosecure',
     'djcelery',
+    'djgeojson',
     'easy_thumbnails',
     'gunicorn',
     'haystack',
     'dbsettings',
+    'leaflet',
     'localflavor',
     'markdown_deux',
     'mathfilters',
@@ -473,9 +475,17 @@ ROBOTS_CACHE_TIMEOUT = 60 * 60 * 24
 
 PACKAGE_MONITOR_REQUIREMENTS_FILE = os.path.join(SITE_ROOT, '../requirements.txt')
 
+TAGGIT_CASE_INSENSITIVE = True
+TAGGIT_TAGS_FROM_STRING = 'muckrock.tags.models.parse_tags'
+
 # Organization Settings
 
 ORG_MIN_SEATS = 3
 ORG_PRICE_PER_SEAT = 2000
 ORG_REQUESTS_PER_SEAT = 10
 
+# Leaflet Settings
+LEAFLET_CONFIG = {
+    'DEFAULT_CENTER': (37.8, -96.9),
+    'DEFAULT_ZOOM': 4,
+}
