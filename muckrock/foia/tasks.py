@@ -27,6 +27,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from django_mailgun import MailgunAPIError
 from scipy.sparse import hstack
+from urllib import quote_plus
 
 from muckrock.foia.models import (
     FOIAFile,
@@ -101,7 +102,7 @@ def upload_document_cloud(doc_pk, change, **kwargs):
         }
     if change:
         params['_method'] = str('put')
-        url = '/documents/%s.json' % doc.doc_id
+        url = '/documents/%s.json' % quote_plus(doc.doc_id.encode('utf-8'))
     else:
         params['file'] = doc.ffile.url.replace('https', 'http', 1)
         url = '/upload.json'
@@ -137,7 +138,9 @@ def set_document_cloud_pages(doc_pk, **kwargs):
         # already has pages set or not a doc cloud, just return
         return
 
-    request = urllib2.Request('https://www.documentcloud.org/api/documents/%s.json' % doc.doc_id)
+    request = urllib2.Request(
+            u'https://www.documentcloud.org/api/documents/%s.json' %
+            quote_plus(doc.doc_id.encode('utf-8')))
     request = authenticate_documentcloud(request)
 
     try:
@@ -200,15 +203,15 @@ def classify_status(task_pk, **kwargs):
 
     def get_text_ocr(doc_id):
         """Get the text OCR from document cloud"""
-        doc_cloud_url = 'http://www.documentcloud.org/api/documents/%s.json'
-        resp = requests.get(doc_cloud_url % doc_id)
+        doc_cloud_url = u'http://www.documentcloud.org/api/documents/%s.json'
+        resp = requests.get(doc_cloud_url % quote_plus(doc_id.encode('utf-8'))
         try:
             doc_cloud_json = resp.json()
         except ValueError:
-            logger.warn('Doc Cloud error for %s: %s', doc_id, resp.content)
+            logger.warn(u'Doc Cloud error for %s: %s', doc_id, resp.content)
             return ''
         if 'error' in doc_cloud_json:
-            logger.warn('Doc Cloud error for %s: %s',
+            logger.warn(u'Doc Cloud error for %s: %s',
                     doc_id, doc_cloud_json['error'])
             return ''
         text_url = doc_cloud_json['document']['resources']['text']
