@@ -98,7 +98,8 @@ def _make_request(request, foia_request, parent=None):
         agency=foia_request['agency'],
         requested_docs=foia_request['document'],
         description=foia_request['document'],
-        parent=parent
+        parent=parent,
+        location=foia_request['agency'].location
     )
     foia_comm = FOIACommunication.objects.create(
         foia=foia,
