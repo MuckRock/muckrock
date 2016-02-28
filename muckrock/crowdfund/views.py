@@ -124,7 +124,7 @@ class CrowdfundDetailView(DetailView):
             try:
                 crowdfund.make_payment(token, email, amount, show, user)
             except stripe_exceptions as payment_error:
-                logging.error(payment_error)
+                logging.warn(payment_error)
                 self.return_error(request)
             # if AJAX, return HTTP 200 OK
             # else, add a message to the session

@@ -180,19 +180,19 @@ def embargo(request, jurisdiction, jidx, slug, idx):
 def pay_request(request, jurisdiction, jidx, slug, idx):
     """Pay us through CC for the payment on a request"""
     foia = _get_foia(jurisdiction, jidx, slug, idx)
-    token = request.POST.get('stripe_token', False)
-    email = request.POST.get('stripe_email', False)
-    amount = request.POST.get('amount', False)
-    decimal_amount = int(amount)/100.0
-    if token and email and amount:
+    token = request.POST.get('stripe_token')
+    email = request.POST.get('stripe_email')
+    amount = request.POST.get('amount')
+    if token is not None and email is not None and amount is not None:
         try:
             metadata = {
                 'email': email,
                 'action': 'request-fee',
                 'foia': foia.pk
             }
+            amount = int(amount)
             request.user.profile.pay(token, amount, metadata)
-            foia.pay(request.user, decimal_amount)
+            foia.pay(request.user, amount / 100.0)
         except (stripe.InvalidRequestError, stripe.CardError, ValueError) as exception:
             messages.error(request, 'Payment error: %s' % exception)
             logger.warning('Payment error: %s', exception, exc_info=sys.exc_info())
