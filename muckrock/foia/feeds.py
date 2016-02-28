@@ -9,8 +9,6 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import escape, linebreaks
 
-from datetime import date
-
 from muckrock.foia.models import FOIARequest, FOIACommunication
 
 class LatestSubmittedRequests(Feed):
