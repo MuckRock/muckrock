@@ -49,7 +49,7 @@ class LatestDoneRequests(Feed):
                 .get_done()
                 .get_public()
                 .order_by('-date_done')
-                .select_related('jurisdictions')
+                .select_related('jurisdiction')
                 .prefetch_related('communications')[:25])
 
     def item_description(self, item):

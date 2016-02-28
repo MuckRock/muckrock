@@ -76,6 +76,8 @@ django-package-monitor==0.2.3
 django-premailer==0.1.0
 # Interface to memcache
 django-pylibmc==0.6.1
+# Counts queries for dev
+django-querycount==0.4.1
 # API documentation
 django-rest-swagger==0.3.2
 # Version history for models
