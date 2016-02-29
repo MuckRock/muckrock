@@ -38,13 +38,13 @@
     function handleCheckout(form) {
         var key         = formValue('stripe_pk'),
             image       = formValue('stripe_image'),
+            label       = formValue('stripe_label'),
             description = formValue('stripe_description'),
             amount      = formValue('stripe_amount'),
             fee         = formValue('stripe_fee'),
             email       = formValue('stripe_email'),
             bitcoin     = formValue('stripe_bitcoin'),
-            name        = 'MuckRock',
-            label       = 'Pay';
+            name        = 'MuckRock';
         amount  += amount * fee;
         StripeCheckout.open({
             key: key,
