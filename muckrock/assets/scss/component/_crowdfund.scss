@@ -181,7 +181,6 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
         left: 0;
         height: 100%;
         width: 100%;
-        @include border-radius;
 
         color: $color-white;
         text-align: center;

@@ -98,21 +98,19 @@ class CrowdfundDetailView(DetailView):
         Next, we charge their card. Finally, use the validated payment form to create and
         return a CrowdfundRequestPayment object.
         """
-        token = request.POST.get('token')
-        email = request.POST.get('email')
+        token = request.POST.get('stripe_token')
+        email = request.POST.get('stripe_email')
         try:
             payment_form = self.get_form()
             # pylint:disable=not-callable
             payment_form = payment_form(request.POST)
             # pylint:enable=not-callable
         except TypeError:
-            logging.error(('The subclassed object does not have a form attribute '
-                           'so no payments can be made.'))
-            raise ValueError('%s does not have its form attribute set.' % self.__class__)
+            raise NotImplementedError('%s does not have its form attribute set.' % self.__class__)
         if payment_form.is_valid() and token:
             cleaned_data = payment_form.cleaned_data
             crowdfund = cleaned_data['crowdfund']
-            amount = cleaned_data['amount']
+            amount = cleaned_data['stripe_amount']
             show = cleaned_data['show']
             user = request.user if request.user.is_authenticated() else None
             stripe_exceptions = (

@@ -165,3 +165,10 @@ $('#quick-log-in').click(function(e){
         quickLogin.removeClass('visible');
     });
 });
+// Crowdfund form submission
+
+$('form.crowdfund-form').crowdfund();
+
+// Currency Field
+
+$('input.currency-field').currencyField();
