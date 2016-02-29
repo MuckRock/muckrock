@@ -36,6 +36,7 @@
     }
 
     function handleCheckout(form) {
+        console.debug('Using Stripe Checkout to obtain token...');
         var key         = formValue('stripe_pk'),
             image       = formValue('stripe_image'),
             label       = formValue('stripe_label'),
@@ -45,8 +46,10 @@
             email       = formValue('stripe_email'),
             bitcoin     = formValue('stripe_bitcoin'),
             name        = 'MuckRock';
-        amount  += amount * fee;
-        StripeCheckout.open({
+        if (fee) {
+            amount += amount * fee;
+        }
+        var settings = {
             key: key,
             image: image,
             name: 'MuckRock',
@@ -56,7 +59,9 @@
             panelLabel: label,
             token: handleToken,
             bitcoin: bitcoin
-        });
+        };
+        console.debug('Opened Stripe Checkout with settings: ', settings);
+        StripeCheckout.open(settings);
     }
 
     $.fn.checkout = function() {
@@ -72,8 +77,10 @@
             // submission and call the handleCheckout method,
             // which will add a token before resubmitting the form.
             if (formValue('stripe_token')) {
+                console.debug('Submitted form with Stripe token.');
                 return true
             } else {
+                console.debug('Submitted form without Stripe token.');
                 event.preventDefault();
                 handleCheckout(this);
             }
