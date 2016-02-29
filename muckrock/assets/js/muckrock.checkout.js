@@ -46,7 +46,7 @@
             email       = formValue('stripe_email'),
             bitcoin     = formValue('stripe_bitcoin'),
             name        = 'MuckRock';
-        if (fee) {
+        if (fee > 0) {
             amount += amount * fee;
         }
         var settings = {
