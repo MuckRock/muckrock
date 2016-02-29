@@ -165,6 +165,11 @@ $('#quick-log-in').click(function(e){
         quickLogin.removeClass('visible');
     });
 });
+
+// Stripe Checkout
+
+$('form.stripe-checkout').checkout();
+
 // Crowdfund form submission
 
 $('form.crowdfund-form').crowdfund();

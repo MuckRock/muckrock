@@ -38,8 +38,6 @@
 
 {% block scripts %}
 <script>
-    $('form.stripe-checkout').checkout();
-
     $('#{{form.max_users.id_for_label}}').change(function(){
         var input = this;
         var num_seats = $(input).val();
