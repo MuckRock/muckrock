@@ -105,6 +105,7 @@ class ProjectFactory(factory.django.DjangoModelFactory):
         model = Project
 
     title = factory.Sequence(lambda n: "Project %d" % n)
+    slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
 
 
 class QuestionFactory(factory.django.DjangoModelFactory):

@@ -10,9 +10,7 @@ import nose.tools
 import datetime
 
 from muckrock.crowdfund.models import Crowdfund
-from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.factories import UserFactory, FOIARequestFactory
-from muckrock.foia.models import FOIARequest
 from muckrock.foia.views import crowdfund_request
 from muckrock.utils import mock_middleware
 

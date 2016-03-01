@@ -165,8 +165,8 @@ class CrowdfundProjectCreateView(CreateView):
 
     def form_valid(self, form):
         """Saves relationship and sends action before returning URL"""
-        crowdfund = form.save()
-        self.object = crowdfund
+        redirection = super(CrowdfundProjectCreateView, self).form_valid(form)
+        crowdfund = self.object
         project = self.get_project()
         relationship = ProjectCrowdfunds.objects.create(project=project, crowdfund=crowdfund)
         actstream.action.send(
@@ -175,7 +175,7 @@ class CrowdfundProjectCreateView(CreateView):
             action_object=relationship.crowdfund,
             target=relationship.project
         )
-        return redirect(self.get_success_url())
+        return redirection
 
     def get_success_url(self):
         """Generates actions before returning URL"""

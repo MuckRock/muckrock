@@ -12,7 +12,7 @@ import logging
 from mock import Mock, patch
 from nose.tools import ok_, eq_
 
-from muckrock.crowdfund.forms import CrowdfundForm, CrowdfundPaymentForm
+from muckrock.crowdfund.forms import CrowdfundPaymentForm
 from muckrock.crowdfund.models import Crowdfund, CrowdfundPayment
 from muckrock.crowdfund.views import CrowdfundDetailView, CrowdfundProjectCreateView
 from muckrock.factories import UserFactory, FOIARequestFactory, ProjectFactory
@@ -202,13 +202,17 @@ class TestCrowdfundView(TestCase):
 
 class TestCrowdfundProjectCreateView(TestCase):
     """Tests the creation of a crowdfund for a project."""
+    # pylint:disable=no-member
     def setUp(self):
         self.project = ProjectFactory()
-        self.url = reverse('project-crowdfund', kwargs={'slug': self.project.slug, 'pk': self.project.pk})
+        self.url = reverse('project-crowdfund', kwargs={
+            'slug': self.project.slug,
+            'pk': self.project.pk
+        })
         self.view = CrowdfundProjectCreateView.as_view()
         self.request_factory = RequestFactory()
 
-    def testPost(self):
+    def test_post(self):
         """Posting data for a crowdfund should create it."""
         user = UserFactory(is_staff=True)
         name = 'Project Crowdfund'
@@ -229,7 +233,7 @@ class TestCrowdfundProjectCreateView(TestCase):
         response = self.view(request, slug=self.project.slug, pk=self.project.pk)
         self.project.refresh_from_db()
         eq_(self.project.crowdfunds.count(), 1,
-            'A crowdfund should be created and added to the project: %s' % self.project.crowdfunds.all())
+            'A crowdfund should be created and added to the project.')
         crowdfund = self.project.crowdfunds.first()
         eq_(crowdfund.name, name)
         eq_(crowdfund.description, description)
