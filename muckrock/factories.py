@@ -16,6 +16,8 @@ from muckrock.organization.models import Organization
 from muckrock.project.models import Project
 from muckrock.qanda.models import Question, Answer
 
+# pylint:disable=too-many-instance-attributes
+
 class ProfileFactory(factory.django.DjangoModelFactory):
     """A factory for creating Profile test objects."""
     class Meta:
@@ -105,6 +107,7 @@ class ProjectFactory(factory.django.DjangoModelFactory):
         model = Project
 
     title = factory.Sequence(lambda n: "Project %d" % n)
+    slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
 
 
 class QuestionFactory(factory.django.DjangoModelFactory):
