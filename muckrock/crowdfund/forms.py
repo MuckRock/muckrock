@@ -18,7 +18,7 @@ class NumberInput(forms.TextInput):
 class CrowdfundForm(forms.ModelForm):
     """Form to confirm enable crowdfunding"""
 
-    fee_rate = Decimal(0.15)
+    fee_rate = 0.15
 
     class Meta:
         model = Crowdfund
@@ -30,7 +30,7 @@ class CrowdfundForm(forms.ModelForm):
             'date_due',
         ]
 
-    payment_required = forms.DecimalField(
+    payment_required = forms.IntegerField(
         label='Amount',
         help_text='We will add 15% to this amount, which goes towards our operating costs.',
         widget=NumberInput()
@@ -56,6 +56,9 @@ class CrowdfundForm(forms.ModelForm):
         if not valid_amount:
             raise forms.ValidationError('Amount to crowdfund must be greater than zero.')
         amount += amount * self.fee_rate
+        # since the amount we get should always be a 1-cent relative integer
+        # (e.g. $1.00 = 100), we should normalize the amount into a decimal value
+        amount = amount/100
         return amount
 
     def clean_date_due(self):

@@ -19,7 +19,7 @@ import stripe
 
 from muckrock.crowdfund.forms import CrowdfundForm, CrowdfundPaymentForm
 from muckrock.crowdfund.models import Crowdfund
-from muckrock.project.models import Project
+from muckrock.project.models import Project, ProjectCrowdfunds
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -163,15 +163,21 @@ class CrowdfundProjectCreateView(CreateView):
             'project': project.id
         }
 
-    def get_success_url(self):
-        """Generates actions before returning URL"""
-        crowdfund = self.get_object()
+    def form_valid(self, form):
+        """Saves relationship and sends action before returning URL"""
+        crowdfund = form.save()
+        self.object = crowdfund
         project = self.get_project()
+        relationship = ProjectCrowdfunds.objects.create(project=project, crowdfund=crowdfund)
         actstream.action.send(
             self.request.user,
-            varb='started',
-            action_object=crowdfund,
-            target=project
+            verb='started',
+            action_object=relationship.crowdfund,
+            target=relationship.project
         )
-        return project.get_absolute_url()
+        return redirect(self.get_success_url())
 
+    def get_success_url(self):
+        """Generates actions before returning URL"""
+        project = self.get_project()
+        return project.get_absolute_url()
