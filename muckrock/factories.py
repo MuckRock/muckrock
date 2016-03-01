@@ -16,6 +16,8 @@ from muckrock.organization.models import Organization
 from muckrock.project.models import Project
 from muckrock.qanda.models import Question, Answer
 
+# pylint:disable=too-many-instance-attributes
+
 class ProfileFactory(factory.django.DjangoModelFactory):
     """A factory for creating Profile test objects."""
     class Meta:
