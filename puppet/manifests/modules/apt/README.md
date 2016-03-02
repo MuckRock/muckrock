@@ -1,371 +1,478 @@
 # apt
 
-[![Build Status](https://travis-ci.org/puppetlabs/puppetlabs-apt.png?branch=master)](https://travis-ci.org/puppetlabs/puppetlabs-apt)
+#### Table of Contents
+
+1. [Overview](#overview)
+2. [Module Description - What the module does and why it is useful](#module-description)
+3. [Setup - The basics of getting started with apt](#setup)
+    * [What apt affects](#what-apt-affects)
+    * [Beginning with apt](#beginning-with-apt)
+4. [Usage - Configuration options and additional functionality](#usage)
+5. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
+    * [Classes](#classes)
+    * [Defines](#defines)
+    * [Types](#types)
+    * [Facts](#facts)
+6. [Limitations - OS compatibility, etc.](#limitations)
+7. [Development - Guide for contributing to the module](#development)
 
 ## Overview
 
-The apt module provides a simple interface for managing Apt source, key, and definitions with Puppet.
+The apt module lets you use Puppet to manage Apt sources, keys, and other configuration options.
 
 ## Module Description
 
-The apt module automates obtaining and installing software packages on \*nix systems.
+Apt (Advanced Package Tool) is a package manager available on Debian, Ubuntu, and several other operating systems. The apt module provides a series of classes, defines, types, and facts to help you automate Apt package management.
 
-**Note**: While this module allows the use of short keys, **we urge you NOT to use short keys**, as they pose a serious security issue by opening you up to collision attacks.
+**Note**: For this module to correctly autodetect which version of Debian/Ubuntu (or derivative) you're running, you need to make sure the 'lsb-release' package is installed. We highly recommend you either make this part of your provisioning layer, if you run many Debian or derivative systems, or ensure that you have Facter 2.2.0 or later installed, which will pull this dependency in for you.
 
 ## Setup
 
-### What apt affects:
+### What apt affects
 
-* Package/service/configuration files for Apt
+* Your system's `preferences` file and `preferences.d` directory
 * Your system's `sources.list` file and `sources.list.d` directory
 * System repositories
 * Authentication keys
 
-**Note**: Setting the apt module's `purge_sources_list` and `purge_sources_list_d` parameters to 'true' will **destroy** any existing content that was not declared with Puppet. The default for these parameters is 'false'.
+**Note:** This module offers `purge` parameters which, if set to 'true', **destroy** any configuration on the node's `sources.list(.d)` and `preferences(.d)` that you haven't declared through Puppet. The default for these parameters is 'false'.
 
 ### Beginning with apt
 
-To begin using the apt module with default parameters, declare the class with `include apt`.
+To use the apt module with default parameters, declare the `apt` class.
 
-Any Puppet code that uses anything from the apt module requires that the core apt class be declared.
+~~~puppet
+include apt
+~~~
+
+**Note:** The main `apt` class is required by all other classes, types, and defines in this module. You must declare it whenever you use the module.
 
 ## Usage
 
-Using the apt module consists predominantly of declaring classes and defined types that provide the desired functionality and features. This module provides common resources and options that are shared by the various defined types in the apt module, so you **must always** include this class in your manifests.
+### Add GPG keys
 
-```
-class { 'apt':
-  always_apt_update    => false,
-  apt_update_frequency => undef,
-  disable_keys         => undef,
-  proxy_host           => false,
-  proxy_port           => '8080',
-  purge_sources_list   => false,
-  purge_sources_list_d => false,
-  purge_preferences_d  => false,
-  update_timeout       => undef,
-  fancy_progress       => undef
+**Warning:** Using short key IDs presents a serious security issue, potentially leaving you open to collision attacks. We recommend you always use full fingerprints to identify your GPG keys. This module allows short keys, but issues a security warning if you use them.
+
+Declare the `apt::key` class:
+
+~~~puppet
+apt::key { 'puppetlabs':
+  id      => '47B320EB4C7C375AA9DAE1A01054B7A24BD6EC30',
+  server  => 'pgp.mit.edu',
+  options => 'http-proxy="http://proxyuser:proxypass@example.org:3128"',
 }
-```
+~~~
 
-## Reference
+### Prioritize backports
 
-### Classes
+~~~puppet
+class { 'apt::backports':
+  pin => 500,
+}
+~~~
 
-* `apt`: Main class, provides common resources and options. Allows Puppet to manage your system's sources.list file and sources.list.d directory, but it does its best to respect existing content.
+By default, the `apt::backports` class drops a pin file for backports, pinning it to a priority of 200. This is lower than the normal default of 500, so packages with `ensure => latest` don't get upgraded from backports without your explicit permission.
 
-  If you declare your apt class with `purge_sources_list`, `purge_sources_list_d`, `purge_preferences` and `purge_preferences_d` set to 'true', Puppet will unapologetically purge any existing content it finds that wasn't declared with Puppet.
-  
-* `apt::backports`: This class adds the necessary components to get backports for Ubuntu and Debian. The release name defaults to `$lsbdistcodename`. Setting this manually can cause undefined and potentially serious behavior.
+If you raise the priority through the `pin` parameter to 500, normal policy goes into effect and Apt installs or upgrades to the newest version. This means that if a package is available from backports, it and its dependencies are pulled in from backports unless you explicitly set the `ensure` attribute of the `package` resource to `installed`/`present` or a specific version.
 
-  By default, this class drops a pin-file for backports, pinning it to a priority of 200. This is lower than the normal Debian archive, which gets a priority of 500 to ensure that packages with `ensure => latest` don't get magically upgraded from backports without your explicit permission.
+### Update the list of packages
 
-  If you raise the priority through the `pin_priority` parameter to 500---identical to the rest of the Debian mirrors---normal policy goes into effect, and Apt installs or upgrades to the newest version. This means that if a package is available from backports, it and its dependencies are pulled in from backports unless you explicitly set the `ensure` attribute of the `package` resource to `installed`/`present` or a specific version.
+By default, Puppet runs `apt-get update` on the first Puppet run after you include the `apt` class, and anytime `notify  => Exec['apt_update']` occurs; i.e., whenever config files get updated or other relevant changes occur. If you set `update['frequency']` to 'always', the update runs on every Puppet run. You can also set `update['frequency']` to 'daily' or 'weekly':
 
-* `apt::params`: Sets defaults for the apt module parameters.
+~~~puppet
+class { 'apt':
+  update => {
+    frequency => 'daily',
+  },
+}
+~~~
 
-* `apt::release`: Sets the default Apt release. This class is particularly useful when using repositories that are unstable in Ubuntu, such as Debian.
+### Pin a specific release
 
-  ```
-  class { 'apt::release':
-    release_id => 'precise',
-  }
-  ```  
+~~~puppet
+apt::pin { 'karmic': priority => 700 }
+apt::pin { 'karmic-updates': priority => 700 }
+apt::pin { 'karmic-security': priority => 700 }
+~~~
 
-* `apt::unattended_updates`: This class manages the unattended-upgrades package and related configuration files for Ubuntu and Debian systems. You can configure the class to automatically upgrade all new package releases or just security releases.
+You can also specify more complex pins using distribution properties:
 
-  ```
-  apt::unattended_upgrades {
-    origins             = $::apt::params::origins,
-    blacklist           = [],
-    update              = '1',
-    download            = '1',
-    upgrade             = '1',
-    autoclean           = '7',
-  }
-  ```
-  
-* `apt::update`: Runs `apt-get update`, updating the list of available packages and their versions without installing or upgrading any packages. The update runs on the first Puppet run after you include the class, then whenever `notify  => Exec['apt_update']` occurs; i.e., whenever config files get updated or other relevant changes occur. If you set the `always_apt_update` parameter to 'true', the update runs on every Puppet run.
+~~~puppet
+apt::pin { 'stable':
+  priority        => -10,
+  originator      => 'Debian',
+  release_version => '3.0',
+  component       => 'main',
+  label           => 'Debian'
+}
+~~~
 
-### Types
+To pin multiple packages, pass them to the `packages` parameter as an array or a space-delimited string.
 
-* `apt_key`
+### Add a PPA (Personal Package Archive) repository
 
-  A native Puppet type and provider for managing GPG keys for Apt is provided by this module.
+~~~puppet
+apt::ppa { 'ppa:drizzle-developers/ppa': }
+~~~
 
-  ```
-  apt_key { 'puppetlabs':
-    ensure => 'present',
-    id     => '1054B7A24BD6EC30',
-  }
-  ```
+### Add an Apt source to `/etc/apt/sources.list.d/`
 
-  You can additionally set the following attributes:
+~~~puppet
+apt::source { 'debian_unstable':
+  comment  => 'This is the iWeb Debian unstable mirror',
+  location => 'http://debian.mirror.iweb.ca/debian/',
+  release  => 'unstable',
+  repos    => 'main contrib non-free',
+  pin      => '-10',
+  key      => {
+    'id'     => 'A1BD8E9D78F7FE5C3E65D8AF8B48AD6246925553',
+    'server' => 'subkeys.pgp.net',
+  },
+  include  => {
+    'src' => true,
+    'deb' => true,
+  },
+}
+~~~
 
-   * `source`: HTTP, HTTPS or FTP location of a GPG key or path to a file on the target host.
-   * `content`: Instead of pointing to a file, pass the key in as a string.
-   * `server`: The GPG key server to use. It defaults to *keyserver.ubuntu.com*.
-   * `keyserver_options`: Additional options to pass to `--keyserver`.
+To use the Puppet Labs Apt repository as a source:
 
-  Because apt_key is a native type, you can use it and query for it with MCollective. 
+~~~puppet
+apt::source { 'puppetlabs':
+  location => 'http://apt.puppetlabs.com',
+  repos    => 'main',
+  key      => {
+    'id'     => '47B320EB4C7C375AA9DAE1A01054B7A24BD6EC30',
+    'server' => 'pgp.mit.edu',
+  },
+},
+~~~
 
-### Defined Types
+### Configure Apt from Hiera
 
-* `apt::builddep`: Installs the build dependencies of a specified package.
-
-  `apt::builddep { 'glusterfs-server': }`
-    
-* `apt::conf`: Specifies a custom configuration file. The priority defaults to 50, but you can set the priority parameter to load the file earlier or later. The content parameter passes specified content, if any, into the file resource.
-
-* `apt::hold`: Holds a specific version of a package. You can hold a package to a full version or a partial version.
-
-  To set a package's ensure attribute to 'latest' but get the version specified by `apt::hold`:
-
-  ```
-  apt::hold { 'vim':
-    version => '2:7.3.547-7',
-  }
-  ```
-
-  Alternatively, if you want to hold your package at a partial version, you can use a wildcard. For example, you can hold Vim at version 7.3.*:
-
-
-  ```
-  apt::hold { 'vim':
-    version => '2:7.3.*',
-  }
-  ```
-
-* `apt::force`: Forces a package to be installed from a specific release. This is particularly useful when using repositories that are unstable in Ubuntu, such as Debian.
-
-  ```
-  apt::force { 'glusterfs-server':
-    release     => 'unstable',
-    version     => '3.0.3',
-    cfg_files   => 'unchanged',
-    cfg_missing => true,
-    require => Apt::Source['debian_unstable'],
-  }
-  ```
-
-  Valid values for `cfg_files` are:
-    * 'new': Overwrites all existing configuration files with newer ones.
-    * 'old': Forces usage of all old files.
-    * 'unchanged: Updates only unchanged config files.
-    * 'none': Provides backward-compatibility with existing Puppet manifests.
-   
-  Valid values for `cfg_missing` are 'true', 'false'. Setting this to 'false' provides backward compatability; setting it to 'true' checks for and installs missing configuration files for the selected package.
-
-* `apt::key`: Adds a key to the list of keys used by Apt to authenticate packages. This type uses the aforementioned `apt_key` native type. As such, it no longer requires the `wget` command on which the old implementation depended.
-
-  ```
-  apt::key { 'puppetlabs':
-    key        => '1054B7A24BD6EC30',
-    key_server => 'pgp.mit.edu',
-  }
-
-  apt::key { 'jenkins':
-    key        => '9B7D32F2D50582E6',
-    key_source => 'http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key',
-  }
-  ```
-
-* `apt::pin`: Defined type that adds an Apt pin for a certain release.
-
-  ```
-  apt::pin { 'karmic': priority => 700 }
-  apt::pin { 'karmic-updates': priority => 700 }
-  apt::pin { 'karmic-security': priority => 700 }
-  ```
-
-  Note that you can also specify more complex pins using distribution properties.
-
-  ```
-  apt::pin { 'stable':
-    priority        => -10,
-    originator      => 'Debian',
-    release_version => '3.0',
-    component       => 'main',
-    label           => 'Debian'
-  }
-  ```  
-
-  If you want to pin a number of packages, you can specify the packages as a space-delimited string using the `packages` attribute, or you can pass in an array of package names.
-
-* `apt::ppa`: Adds a PPA repository using `add-apt-repository`. For example, `apt::ppa { 'ppa:drizzle-developers/ppa': }`.
-
-* `apt::source`: Adds an Apt source to `/etc/apt/sources.list.d/`. For example:
-
-  ```
-  apt::source { 'debian_unstable':
-    comment           => 'This is the iWeb Debian unstable mirror',
-    location          => 'http://debian.mirror.iweb.ca/debian/',
-    release           => 'unstable',
-    repos             => 'main contrib non-free',
-    required_packages => 'debian-keyring debian-archive-keyring',
-    key               => '8B48AD6246925553',
-    key_server        => 'subkeys.pgp.net',
-    pin               => '-10',
-    include_src       => true,
-    include_deb       => true
-  }
-  ```  
-
-  For example, to configure your system so the source is the Puppet Labs Apt repository:
-
-  ```
-  apt::source { 'puppetlabs':
-    location   => 'http://apt.puppetlabs.com',
-    repos      => 'main',
-    key        => '1054B7A24BD6EC30',
-    key_server => 'pgp.mit.edu',
-    }
-  ```
-
-### Facts
-
-The apt module includes a few facts to describe the state of the Apt system:
-
-* `apt_updates`: The number of updates available on the system
-* `apt_security_updates`: The number of updates which are security updates
-* `apt_package_updates`: The package names that are available for update. In Facter 2.0 and later, this will be a list type; in earlier versions, it is a comma-delimited string.
-* `apt_update_last_success`: The date, in epochtime, of the most recent successful `apt-get update` run. This is determined by reading the mtime of  /var/lib/apt/periodic/update-success-stamp.
-
-**Note:** The facts depend on 'update-notifier' being installed on your system. Though this is a GNOME daemon only the support files are needed so the package 'update-notifier-common' is enough to enable this functionality.
-
-#### Hiera example
-
-```
-<pre>
+~~~yaml
 apt::sources:
   'debian_unstable':
     location: 'http://debian.mirror.iweb.ca/debian/'
     release: 'unstable'
     repos: 'main contrib non-free'
-    required_packages: 'debian-keyring debian-archive-keyring'
-    key: '9AA38DCD55BE302B'
-    key_server: 'subkeys.pgp.net'
+    key:
+      id: '9AA38DCD55BE302B'
+      server: 'subkeys.pgp.net'
     pin: '-10'
-    include_src: 'true'
-    include_deb: 'true'
+    include:
+      src: true
+      deb: true
 
   'puppetlabs':
     location: 'http://apt.puppetlabs.com'
     repos: 'main'
-    key: '1054B7A24BD6EC30'
-    key_server: 'pgp.mit.edu'
-</pre>
-```
+    key:
+      id: '47B320EB4C7C375AA9DAE1A01054B7A24BD6EC30'
+      server: 'pgp.mit.edu'
+~~~
 
-### Parameters
+## Reference
 
-#### apt
+### Classes
 
-* `always_apt_update`: Set to 'true' to update Apt on every run. This setting is intended for development environments where package updates are frequent. Defaults to 'false'. 
-* `apt_update_frequency`: Sets the run frequency for `apt-get update`. Defaults to 'reluctantly'. Accepts the following values:
-  * 'always': Runs update at every Puppet run.
-  * 'daily': Runs update daily; that is, `apt-get update` runs if the value of `apt_update_last_success` is less than current epoch time - 86400. If the exec resource `apt_update` is notified, `apt-get update` runs regardless of this value. 
-  * 'weekly': Runs update weekly; that is, `apt-get update` runs if the value of `apt_update_last_success` is less than current epoch time - 604800. If the exec resource `apt_update` is notified, `apt-get update` runs regardless of this value. 
-  * 'reluctantly': Only runs `apt-get update` if the exec resource `apt_update` is notified. This is the default setting.  
-* `disable_keys`: Disables the requirement for all packages to be signed.
-* `proxy_host`: Configures a proxy host and stores the configuration in /etc/apt/apt.conf.d/01proxy.
-* `proxy_port`: Configures a proxy port and stores the configuration in /etc/apt/apt.conf.d/01proxy.
-* `purge_sources_list`: If set to 'true', Puppet purges all unmanaged entries from sources.list. Accepts 'true' or 'false'. Defaults to 'false'.
-* `purge_sources_list_d`: If set to 'true', Puppet purges all unmanaged entries from sources.list.d. Accepts 'true' or 'false'. Defaults to 'false'.
-* `update_timeout`: Overrides the exec timeout in seconds for `apt-get update`. Defaults to exec default (300).
-* `update_tries`: Sets how many times to attempt running `apt-get update`. Use this to work around transient DNS and HTTP errors. By default, the command runs only once.
-* `sources`: Passes a hash to create_resource to make new `apt::source` resources.
-* `fancy_progress`: Enables fancy progress bars for apt. Accepts 'true', 'false'. Defaults to 'false'.
+#### Public Classes
 
-####apt::unattended_upgrades
+* [`apt`](#class-apt)
+* [`apt::backports`](#class-aptbackports)
 
-* `origins`: The repositories from which to automatically upgrade included packages.
-* `blacklist`: A list of packages to **not** automatically upgrade.
-* `update`: How often, in days, to run `apt-get update`.
-* `download`: How often, in days, to run `apt-get upgrade --download-only`.
-* `upgrade`: How often, in days, to upgrade packages included in the origins list.
-* `autoclean`: How often, in days, to run `apt-get autoclean`.
-* `randomsleep`: How long, in seconds, to randomly wait before applying upgrades.
+#### Private Classes
 
-### Testing
+* `apt::params`: Provides defaults for the apt module parameters.
+* `apt::update`: Updates the list of available packages using `apt-get update`.
 
-The apt module is mostly a collection of defined resource types, which provide reusable logic for managing Apt. It provides smoke tests for testing functionality on a target system, as well as spec tests for checking a compiled catalog against an expected set of resources.
+### Defines
 
-#### Example Test
+* [`apt::conf`](#define-aptconf)
+* [`apt::key`](#define-aptkey)
+* [`apt::pin`](#define-aptpin)
+* [`apt::ppa`](#define-aptppa)
+* [`apt::setting`](#define-aptsetting)
+* [`apt::source`](#define-aptsource)
 
-This test sets up a Puppet Labs Apt repository. Start by creating a new smoke test, called puppetlabs-apt.pp, in the apt module's test folder. In this test, declare a single resource representing the Puppet Labs Apt source and GPG key:
+### Types
 
-```
-apt::source { 'puppetlabs':
-  location   => 'http://apt.puppetlabs.com',
-  repos      => 'main',
-  key        => '1054B7A24BD6EC30',
-  key_server => 'pgp.mit.edu',
-}
-```    
+* [`apt_key`](#type-apt_key)
 
-This resource creates an Apt source named puppetlabs and gives Puppet information about the repository's location and the key used to sign its packages. Puppet leverages Facter to determine the appropriate release, but you can set this directly by adding the release type.
+### Facts
 
-Check your smoke test for syntax errors:
+* `apt_updates`: The number of installed packages with available updates.
 
-`$ puppet parser validate tests/puppetlabs-apt.pp`
+* `apt_security_updates`: The number of installed packages with available security updates.
 
-If you receive no output from that command, it means nothing is wrong. Then, apply the code:
+* `apt_package_updates`: The names of all installed packages with available updates. In Facter 2.0 and later this data is formatted as an array; in earlier versions it is a comma-delimited string.
 
-```
-$ puppet apply --verbose tests/puppetlabs-apt.pp
-notice: /Stage[main]//Apt::Source[puppetlabs]/File[puppetlabs.list]/ensure: defined content as '{md5}3be1da4923fb910f1102a233b77e982e'
-info: /Stage[main]//Apt::Source[puppetlabs]/File[puppetlabs.list]: Scheduling refresh of Exec[puppetlabs apt update]
-notice: /Stage[main]//Apt::Source[puppetlabs]/Exec[puppetlabs apt update]: Triggered 'refresh' from 1 events>
-```    
+* `apt_update_last_success`: The date, in epochtime, of the most recent successful `apt-get update` run (based on the mtime of  /var/lib/apt/periodic/update-success-stamp).
 
-The above example uses a smoke test to lay out a resource declaration and apply it on your system. In production, you might want to declare your Apt sources inside the classes where they’re needed.
+* `apt_reboot_required`: Determines if a reboot is necessary after updates have been installed.
 
-Limitations
------------
+#### Class: `apt`
 
-This module should work across all versions of Debian/Ubuntu and support all major Apt repository management features.
+Main class, includes all other classes.
 
-Development
-------------
+##### Parameters (all optional)
 
-Puppet Labs modules on the Puppet Forge are open projects, and community contributions are essential for keeping them great. We can’t access the huge number of platforms and myriad of hardware, software, and deployment configurations that Puppet is intended to serve.
+* `keys`: Creates new `apt::key` resources. Valid options: a hash to be passed to the [`create_resources` function](https://docs.puppetlabs.com/references/latest/function.html#createresources). Default: {}.
 
-We want to keep it as easy as possible to contribute changes so that our modules work in your environment. There are a few guidelines that we need contributors to follow so that we can have a chance of keeping on top of things.
+* `ppas`: Creates new `apt::ppa` resources. Valid options: a hash to be passed to the [`create_resources` function](https://docs.puppetlabs.com/references/latest/function.html#createresources). Default: {}.
 
-You can read the complete module contribution guide [on the Puppet Labs wiki.](http://projects.puppetlabs.com/projects/module-site/wiki/Module_contributing)
+* `proxy`: Configures Apt to connect to a proxy server. Valid options: a hash made up from the following keys:
 
-License
--------
+  * 'host': Specifies a proxy host to be stored in `/etc/apt/apt.conf.d/01proxy`. Valid options: a string containing a hostname. Default: undef.
 
-The original code for this module comes from Evolving Web and was licensed under the MIT license. Code added since the fork of this module is licensed under the Apache 2.0 License like the rest of the Puppet Labs products.
+  * 'port': Specifies a proxy port to be stored in `/etc/apt/apt.conf.d/01proxy`. Valid options: a string containing a port number. Default: '8080'.
 
-The LICENSE contains both licenses.
+  * 'https': Specifies whether to enable https proxies. Valid options: 'true' and 'false'. Default: 'false'.
 
-Contributors
-------------
+  * 'ensure': Optional parameter. Valid options: 'file', 'present', and 'absent'. Default: 'undef'. Prefer 'file' over 'present'.
 
-A lot of great people have contributed to this module. A somewhat current list follows:
+* `purge`: Specifies whether to purge any existing settings that aren't managed by Puppet. Valid options: a hash made up from the following keys:
 
-* Ben Godfrey <ben.godfrey@wonga.com>
-* Branan Purvine-Riley <branan@puppetlabs.com>
-* Christian G. Warden <cwarden@xerus.org>
-* Dan Bode <bodepd@gmail.com> <dan@puppetlabs.com>
-* Daniel Tremblay <github@danieltremblay.ca>
-* Garrett Honeycutt <github@garretthoneycutt.com>
-* Jeff Wallace <jeff@evolvingweb.ca> <jeff@tjwallace.ca>
-* Ken Barber <ken@bob.sh>
-* Matthaus Litteken <matthaus@puppetlabs.com> <mlitteken@gmail.com>
-* Matthias Pigulla <mp@webfactory.de>
-* Monty Taylor <mordred@inaugust.com>
-* Peter Drake <pdrake@allplayers.com>
-* Reid Vandewiele <marut@cat.pdx.edu>
-* Robert Navarro <rnavarro@phiivo.com>
-* Ryan Coleman <ryan@puppetlabs.com>
-* Scott McLeod <scott.mcleod@theice.com>
-* Spencer Krum <spencer@puppetlabs.com>
-* William Van Hevelingen <blkperl@cat.pdx.edu> <wvan13@gmail.com>
-* Zach Leslie <zach@puppetlabs.com>
-* Daniele Sluijters <github@daenney.net>
-* Daniel Paulus <daniel@inuits.eu>
-* Wolf Noble <wolf@wolfspyre.com>
+  * 'sources.list': Specifies whether to purge any unmanaged entries from `sources.list`. Valid options: 'true' and 'false'. Default: 'false'.
+
+  * 'sources.list.d': Specifies whether to purge any unmanaged entries from `sources.list.d`. Valid options: 'true' and 'false'. Default: 'false'.
+
+  * 'preferences': Specifies whether to purge any unmanaged entries from `preferences`. Valid options: 'true' and 'false'. Default: 'false'.
+
+  * 'preferences.d': Specifies whether to purge any unmanaged entries from `preferences.d`. Valid options: 'true' and 'false'. Default: 'false'.
+
+* `settings`: Creates new `apt::setting` resources. Valid options: a hash to be passed to the [`create_resources` function](https://docs.puppetlabs.com/references/latest/function.html#createresources). Default: {}.
+
+* `sources`: Creates new `apt::source` resources. Valid options: a hash to be passed to the [`create_resources` function](https://docs.puppetlabs.com/references/latest/function.html#createresources). Default: {}.
+
+* `pins`: Creates new `apt::pin` resources. Valid options: a hash to be passed to the [`create_resources` function](https://docs.puppetlabs.com/references/latest/function.html#createresources). Default: {}.
+
+* `update`: Configures various update settings. Valid options: a hash made up from the following keys:
+
+  * 'frequency': Specifies how often to run `apt-get update`. If the exec resource `apt_update` is notified, `apt-get update` runs regardless of this value. Valid options: 'always' (at every Puppet run); 'daily' (if the value of `apt_update_last_success` is less than current epoch time minus 86400); 'weekly' (if the value of `apt_update_last_success` is less than current epoch time minus 604800); and 'reluctantly' (only if the exec resource `apt_update` is notified). Default: 'reluctantly'.
+
+  * 'timeout': Specifies how long to wait for the update to complete before canceling it. Valid options: an integer, in seconds. Default: 300.
+
+  * 'tries': Specifies how many times to retry the update after receiving a DNS or HTTP error. Valid options: an integer. Default: 1.
+
+#### Class: `apt::backports`
+
+Manages backports.
+
+##### Parameters (all optional on Debian and Ubuntu; all required on other operating systems, except where specified)
+
+* `key`: Specifies a key to authenticate the backports. Valid options: a string to be passed to the `id` parameter of the `apt::key` define, or a hash of `parameter => value` pairs to be passed to `apt::key`'s `id`, `server`, `content`, `source`, and/or `options` parameters. Defaults:
+
+  * Debian: 'A1BD8E9D78F7FE5C3E65D8AF8B48AD6246925553'
+  * Ubuntu: '630239CC130E1A7FD81A27B140976EAF437D05B5'
+
+* `location`: Specifies an Apt repository containing the backports to manage. Valid options: a string containing a URL. Defaults:
+
+  * Debian (squeeze): 'http://httpredir.debian.org/debian-backports'
+  * Debian (other): 'http://httpredir.debian.org/debian'
+  * Ubuntu: 'http://archive.ubuntu.com/ubuntu'
+
+* `pin`: *Optional.* Specifies a pin priority for the backports. Valid options: a number or string to be passed to the `id` parameter of the `apt::pin` define, or a hash of `parameter => value` pairs to be passed to `apt::pin`'s corresponding parameters. Default: '200'.
+
+* `release`: Specifies a distribution of the Apt repository containing the backports to manage. Valid options: a string containing the release, used in populating the `source.list` configuration file. Default: on Debian and Ubuntu, '${lsbdistcodename}-backports'. We recommend keeping this default, except on other operating systems.
+
+* `repos`: Specifies a component of the Apt repository containing the backports to manage. Valid options: A string containing the repos to include, used in populating the `source.list` configuration file. Defaults:
+
+  * Debian: 'main contrib non-free'
+  * Ubuntu: 'main universe multiverse restricted'
+
+#### Define: `apt::conf`
+
+Specifies a custom Apt configuration file.
+
+##### Parameters
+
+* `content`: *Required, unless `ensure` is set to 'absent'.* Directly supplies content for the configuration file. Valid options: a string. Default: undef.
+
+* `ensure`: Specifies whether the configuration file should exist. Valid options: 'present' and 'absent'. Default: 'present'.
+
+* `priority`: *Optional.* Determines the order in which Apt processes the configuration file. Files with lower priority numbers are loaded first. Valid options: a string containing an integer. Default: '50'.
+
+* `notify_update`: *Optional.* Specifies whether to trigger an `apt-get update` run. Valid options: 'true' and 'false'. Default: 'true'.
+
+#### Define: `apt::key`
+
+Manages the GPG keys that Apt uses to authenticate packages.
+
+The `apt::key` define makes use of the `apt_key` type, but includes extra functionality to help prevent duplicate keys.
+
+##### Parameters (all optional)
+
+* `content`: Supplies the entire GPG key. Useful in case the key can't be fetched from a remote location and using a file resource is inconvenient. Valid options: a string. Default: undef.
+
+* `ensure`: Specifies whether the key should exist. Valid options: 'present' and 'absent'. Default: 'present'.
+
+* `id`: Specifies a GPG key to authenticate Apt package signatures. Valid options: a string containing a key ID (8 or 16 hexadecimal characters, optionally prefixed with "0x") or a full key fingerprint (40 hexadecimal characters). Default: $title.
+
+* `options`: Passes additional options to `apt-key adv --keyserver-options`. Valid options: a string. Default: undef.
+
+* `source`: Specifies the location of an existing GPG key file to copy. Valid options: a string containing a URL (ftp://, http://, or https://) or an absolute path. Default: undef.
+
+* `server`: Specifies a keyserver to provide the GPG key. Valid options: a string containing a domain name or a full URL (http://, https://, or hkp://). Default: 'keyserver.ubuntu.com'.
+
+* `key`: Specifies a GPG key to authenticate Apt package signatures. Valid options: a string containing a key ID (8 or 16 hexadecimal characters, optionally prefixed with "0x") or a full key fingerprint (40 hexadecimal characters). Default: undef. **Note** This parameter is deprecated and will be removed in a future release.
+
+* `key_content`: Supplies the entire GPG key. Useful in case the key can't be fetched from a remote location and using a file resource is inconvenient. Valid options: a string. Default: undef. **Note** This parameter is deprecated and will be removed in a future release.
+
+* `key_source`: Specifies the location of an existing GPG key file to copy. Valid options: a string containing a URL (ftp://, http://, or https://) or an absolute path. Default: undef. **Note** This parameter is deprecated and will be removed in a future release.
+
+* `key_server`: Specifies a keyserver to provide the GPG key. Valid options: a string containing a domain name or a full URL (http://, https://, or hkp://). Default: 'keyserver.ubuntu.com'. **Note** This parameter is deprecated and will be removed in a future release.
+
+* `key_options`: Passes additional options to `apt-key adv --keyserver-options`. Valid options: a string. Default: undef. **Note** This parameter is deprecated and will be removed in a future release.
+
+#### Define: `apt::pin`
+
+Manages Apt pins. Does not trigger an `apt-get update` run.
+
+**Note:** For context on these parameters, we recommend reading the man page ['apt_preferences(5)'](http://linux.die.net/man/5/apt_preferences)
+
+##### Parameters (all optional)
+
+* `codename`: Specifies the distribution (lsbdistcodename) of the Apt repository. Valid options: a string. Default: ''.
+
+* `component`: Names the licensing component associated with the packages in the directory tree of the Release file. Valid options: a string. Default: ''.
+
+* `ensure`: Specifies whether the pin should exist. Valid options: 'file', 'present', and 'absent'. Default: 'present'.
+
+* `explanation`: Supplies a comment to explain the pin. Valid options: a string. Default: "${caller_module_name}: ${name}".
+
+* `label`: Names the label of the packages in the directory tree of the Release file. Valid options: a string (most commonly, 'debian'). Default: ''.
+
+* `order`: Determines the order in which Apt processes the pin file. Files with lower order numbers are loaded first. Valid options: an integer. Default: 50.
+
+* `origin`: Tells Apt to prefer packages from the specified server. Valid options: a string containing a hostname. Default: ''.
+
+* `originator`: Names the originator of the packages in the directory tree of the Release file. Valid options: a string (most commonly, 'debian'). Default: ''.
+
+* `packages`: Specifies which package(s) to pin. Valid options: a string or an array. Default: '*'.
+
+* `priority`: Sets the priority of the package. If multiple versions of a given package are available, `apt-get` installs the one with the highest priority number (subject to dependency constraints). Valid options: an integer. Default: 0.
+
+* `release`: Tells Apt to prefer packages that support the specified release. Typical values include 'stable', 'testing', and 'unstable' Valid options: a string. Default: ''.
+
+* `release_version`: Tells Apt to prefer packages that support the specified operating system release version (e.g., Debian release version 7). Valid options: a string. Default: ''.
+
+* `version`: Tells Apt to prefer a specified package version or version range. Valid options: a string. Default: ''.
+
+#### Define: `apt::ppa`
+
+Manages PPA repositories using `add-apt-repository`. Not supported on Debian.
+
+##### Parameters (all optional, except where specified)
+
+* `ensure`: Specifies whether the PPA should exist. Valid options: 'present' and 'absent'. Default: 'present'.
+
+* `options`: Supplies options to be passed to the `add-apt-repository` command. Valid options: a string. Defaults:
+
+  * Lucid: undef
+  * All others: '-y'
+
+* `package_manage`: Specifies whether Puppet should manage the package that provides `apt-add-repository`. Valid options: 'true' and 'false'. Default: 'false'.
+
+* `package_name`: Names the package that provides the `apt-add-repository` command. Valid options: a string. Defaults:
+
+  * Lucid and Precise: 'python-software-properties'
+  * Trusty, Utopic, and Vivid: 'software-properties-common'
+  * All others: undef
+
+* `release`: *Optional if lsb-release is installed (unless you're using a different release than indicated by lsb-release, e.g., Linux Mint).* Specifies the operating system of your node. Valid options: a string containing a valid LSB distribution codename. Default: "$lsbdistcodename".
+
+#### Define: `apt:setting`
+
+Manages Apt configuration files.
+
+##### Parameters
+
+* `content`: *Required, unless `source` is set.* Directly supplies content for the configuration file. Cannot be used in combination with `source`. Valid options: see the `content` attribute of [Puppet's native `file` type](https://docs.puppetlabs.com/references/latest/type.html#file-attribute-content). Default: undef.
+
+* `ensure`: Specifies whether the file should exist. Valid options: 'present', 'absent', and 'file'. Default: 'file'.
+
+* `notify_update`: *Optional.* Specifies whether to trigger an `apt-get update` run. Valid options: 'true' and 'false'. Default: 'true'.
+
+* `priority`: *Optional.* Determines the order in which Apt processes the configuration file. Files with higher priority numbers are loaded first. Valid options: an integer or zero-padded integer. Default: 50.
+
+* `source`: *Required, unless `content` is set.* Specifies a source file to supply the content of the configuration file. Cannot be used in combination with `content`. Valid options: see the `source` attribute of [Puppet's native `file` type](https://docs.puppetlabs.com/references/latest/type.html#file-attribute-source). Default: undef.
+
+#### Define: `apt::source`
+
+Manages the Apt sources in `/etc/apt/sources.list.d/`.
+
+##### Parameters (all optional, except where specified)
+
+* `allow_unsigned`: Specifies whether to authenticate packages from this release, even if the Release file is not signed or the signature can't be checked. Valid options: 'true' and 'false'. Default: 'false'.
+
+* `architecture`: Tells Apt to only download information for specified architectures. Valid options: a string containing one or more architecture names, separated by commas (e.g., 'i386' or 'i386,alpha,powerpc'). Default: undef (if unspecified, Apt downloads information for all architectures defined in the Apt::Architectures option).
+
+* `comment`: Supplies a comment for adding to the Apt source file. Valid options: a string. Default: $name.
+
+* `ensure`: Specifies whether the Apt source file should exist. Valid options: 'present' and 'absent'. Default: 'present'.
+
+* `key`: Creates a declaration of the apt::key define Valid options: a string to be passed to the `id` parameter of the `apt::key` define, or a hash of `parameter => value` pairs to be passed to `apt::key`'s `id`, `server`, `content`, `source`, and/or `options` parameters. Default: undef.
+
+* `include`: Configures include options. Valid options: a hash of available keys. Default: {}. Available keys are:
+
+  * 'deb' - Specifies whether to request the distribution's compiled binaries. Valid options: 'true' and 'false'. Default: 'true'.
+
+  * 'src' - Specifies whether to request the distribution's uncompiled source code. Valid options: 'true' and 'false'. Default: 'false'.
+
+* `location`: *Required, unless `ensure` is set to 'absent'.* Specifies an Apt repository. Valid options: a string containing a repository URL. Default: undef.
+
+* `pin`: Creates a declaration of the apt::pin define Valid options: a number or string to be passed to the `id` parameter of the `apt::pin` define, or a hash of `parameter => value` pairs to be passed to `apt::pin`'s corresponding parameters. Default: undef.
+
+* `release`: Specifies a distribution of the Apt repository. Valid options: a string. Default: "$lsbdistcodename".
+
+  * `repos`: Specifies a component of the Apt repository. Valid options: a string. Default: 'main'.
+
+* `include_deb`: Specify whether to request the distrubution's compiled binaries. Valid options: 'true' and 'false'. Default: undef. **Note**: This parameter is deprecated and will be removed in future versions of the module.
+
+* `include_src`: Specifies whether to request the distribution's uncompiled source code. Valid options: 'true' and 'false'. Default: undef. **Note**: This parameter is deprecated and will be removed in future versions of the module.
+
+* `required_packages`: Installs packages required for this Apt source via an exec. Default: 'false'. **Note**: This parameter is deprecated and will be removed in future versions of the module.
+
+* `key_content`: Specifies the content to be passed to `apt::key`. Default: undef. **Note**: This parameter is deprecated and will be removed in future versions of the module.
+
+* `key_server`: Specifies the server to be passed to `apt::key`. Default: undef. **Note**: This parameter is deprecated and will be removed in future versions of the module.
+
+* `key_source`: Specifies the source to be passed to `apt::key`. Default: undef. **Note**: This parameter is deprecated and will be removed in future versions of the module.
+
+* `trusted_source`: Specifies whether to authenticate packages from this release, even if the Release file is not signed or the signature can't be checked. Valid options: 'true' and 'false'. Default: undef. This parameter is **deprecated** and will be removed in a future version of the module.
+
+#### Type: `apt_key`
+
+Manages the GPG keys that Apt uses to authenticate packages.
+
+**Note:** In most cases, we recommend using the `apt::key` define. It makes use of the `apt_key` type, but includes extra functionality to help prevent duplicate keys.
+
+##### Parameters (all optional)
+
+* `content`: Supplies the entire GPG key. Useful in case the key can't be fetched from a remote location and using a file resource is inconvenient. Cannot be used in combination with `source`. Valid options: a string. Default: undef.
+
+* `options`: Passes additional options to `apt-key adv --keyserver-options`. Valid options: a string. Default: undef.
+
+* `server`: Specifies a keyserver to provide Puppet's GPG key. Valid options: a string containing a domain name or a full URL. Default: 'keyserver.ubuntu.com'.
+
+* `source`: Specifies the location of an existing GPG key file to copy. Cannot be used in combination with `content`. Valid options: a string containing a URL (ftp://, http://, or https://) or an absolute path. Default: undef.
+
+## Limitations
+
+This module is tested and officially supported on Debian 6 and 7 and Ubuntu 10.04, 12.04, and 14.04. Testing on other platforms has been light and cannot be guaranteed.
+
+### Adding new sources or PPAs
+
+If you are adding a new source or PPA and trying to install packages from the new source or PPA on the same Puppet run, your `package` resource should depend on `Class['apt::update']`, in addition to depending on the `Apt::Source` or the `Apt::Ppa`. You can also add [collectors](https://docs.puppetlabs.com/puppet/latest/reference/lang_collectors.html) to ensure that all packages happen after `apt::update`, but this can lead to dependency cycles and has implications for [virtual resources](https://docs.puppetlabs.com/puppet/latest/reference/lang_collectors.html#behavior).
+
+~~~puppet
+Class['apt::update'] -> Package<| |>
+~~~
+
+## Development
+Puppet Labs modules on the Puppet Forge are open projects, and community contributions are essential for keeping them great. We can't access the huge number of platforms and myriad hardware, software, and deployment configurations that Puppet is intended to serve. We want to keep it as easy as possible to contribute changes so that our modules work in your environment. There are a few guidelines that we need contributors to follow so that we can have a chance of keeping on top of things.
+
+For more information, see our [module contribution guide.](https://docs.puppetlabs.com/forge/contributing.html)
+
+To see who's already involved, see the [list of contributors.](https://github.com/puppetlabs/puppetlabs-apt/graphs/contributors)

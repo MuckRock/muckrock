@@ -4,11 +4,11 @@ require 'spec_helper_acceptance'
 # location properly.
 
 # Allow postgresql to use /tmp/* as a datadir
-if fact('osfamily') == 'RedHat'
-  shell("setenforce 0")
+if fact('osfamily') == 'RedHat' and fact('selinux') == 'true'
+  shell 'setenforce 0'
 end
 
-describe 'postgres::server', :unless => UNSUPPORTED_PLATFORMS.include?(fact('osfamily')) do
+describe 'postgresql::server', :unless => UNSUPPORTED_PLATFORMS.include?(fact('osfamily')) do
   it 'on an alternative pgdata location' do
     pp = <<-EOS
       #file { '/var/lib/pgsql': ensure => directory, } ->
