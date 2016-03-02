@@ -12,46 +12,6 @@ function modal(nextSelector) {
     });
 }
 
-function checkout(pk, image, description, amount, email, label, form, submit, bitcoin) {
-    submit = typeof submit !== 'undefined' ? submit : true;
-    bitcoin = typeof bitcoin !== 'undefined' ? bitcoin : true;
-    var token = function(token) {
-        form.append('<input type="hidden" name="stripe_token" value="' + token.id + '" />');
-        form.append('<input type="hidden" name="stripe_email" value="' + token.email + '" />');
-        $('a').click(function() { return false; });
-        $('button').click(function() { return false; });
-        if (submit) {
-            form.submit();
-        }
-    }
-    StripeCheckout.open({
-        key: pk,
-        image: image,
-        name: 'MuckRock',
-        description: description,
-        amount: amount,
-        email: email,
-        panelLabel: label,
-        token: token,
-        bitcoin: bitcoin
-    });
-}
-
-function getCheckoutData(button) {
-    var amount = button.data('amount');
-    var description = button.data('description');
-    var email = button.data('email');
-    var form = button.data('form');
-    var label = button.data('label');
-    return {
-        'amount': amount,
-        'description': description,
-        'email': email,
-        'label': label,
-        'form': $(form)
-    }
-}
-
 // MODALS
 $('.modal-button').click(function(){ modal($(this).next()); });
 $('.embed.hidden-modal').each(function() {
@@ -205,3 +165,15 @@ $('#quick-log-in').click(function(e){
         quickLogin.removeClass('visible');
     });
 });
+
+// Stripe Checkout
+
+$('form.stripe-checkout').checkout();
+
+// Crowdfund form submission
+
+$('form.crowdfund-form').crowdfund();
+
+// Currency Field
+
+$('input.currency-field').currencyField();

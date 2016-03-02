@@ -74,20 +74,15 @@ class CrowdfundForm(forms.ModelForm):
         return deadline
 
 
-class CrowdfundPaymentForm(forms.ModelForm):
+class CrowdfundPaymentForm(forms.Form):
     """Form to create a payment to a crowdfund"""
-    class Meta:
-        model = CrowdfundPayment
-        fields = ['amount', 'show', 'crowdfund']
-        widgets = {
-            'amount': NumberInput(),
-            'show': forms.CheckboxInput(),
-            'crowdfund': forms.HiddenInput()
-        }
+    stripe_amount = forms.CharField(widget=NumberInput())
+    show = forms.BooleanField(widget=forms.CheckboxInput())
+    crowdfund = forms.ModelChoiceField(queryset=Crowdfund.objects.all(), widget=forms.HiddenInput())
 
-    def clean_amount(self):
+    def clean_stripe_amount(self):
         """Ensure the amount of the payment is greater than zero"""
-        amount = self.cleaned_data['amount']
+        amount = self.cleaned_data['stripe_amount']
         if not amount > 0:
             raise forms.ValidationError('Cannot contribute zero dollars')
         amount = Decimal(amount)/100
