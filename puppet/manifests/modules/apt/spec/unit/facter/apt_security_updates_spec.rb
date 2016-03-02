@@ -8,7 +8,7 @@ describe 'apt_security_updates fact' do
     before { 
       Facter.fact(:apt_has_updates).stubs(:value).returns false
     }
-    it { should be nil }
+    it { is_expected.to be nil }
   end
 
   describe 'when apt has security updates' do
@@ -17,9 +17,9 @@ describe 'apt_security_updates fact' do
       File.stubs(:executable?) # Stub all other calls
       Facter::Util::Resolution.stubs(:exec) # Catch all other calls
       File.expects(:executable?).with('/usr/lib/update-notifier/apt-check').returns true
-      Facter::Util::Resolution.expects(:exec).with('/usr/lib/update-notifier/apt-check 2>/dev/null').returns "14;7"
+      Facter::Util::Resolution.expects(:exec).with('/usr/lib/update-notifier/apt-check 2>&1').returns "14;7"
     }
-    it { should == 7 }
+    it { is_expected.to eq(7) }
   end
 
 end

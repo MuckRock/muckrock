@@ -9,15 +9,17 @@ define postgresql::validate_db_connection(
   $database_password = undef,
   $database_username = undef,
   $database_port     = undef,
+  $connect_settings  = undef,
   $run_as            = undef,
   $sleep             = 2,
   $tries             = 10,
   $create_db_first   = true
 ) {
-  require postgresql::client
+  include postgresql::client
   include postgresql::params
 
   $psql_path = $postgresql::params::psql_path
+  $validcon_script_path = $postgresql::client::validcon_script_path
 
   $cmd_init = "${psql_path} --tuples-only --quiet "
   $cmd_host = $database_host ? {
@@ -36,18 +38,32 @@ define postgresql::validate_db_connection(
     undef   => "--dbname ${postgresql::params::default_database} ",
     default => "--dbname ${database_name} ",
   }
-  $env = $database_password ? {
+  $pass_env = $database_password ? {
     undef   => undef,
     default => "PGPASSWORD=${database_password}",
   }
-  $cmd = join([$cmd_init, $cmd_host, $cmd_user, $cmd_port, $cmd_dbname])
-  $validate_cmd = "/usr/local/bin/validate_postgresql_connection.sh ${sleep} ${tries} '${cmd}'"
+  $cmd = join([$cmd_init, $cmd_host, $cmd_user, $cmd_port, $cmd_dbname], ' ')
+  $validate_cmd = "${validcon_script_path} ${sleep} ${tries} '${cmd}'"
 
   # This is more of a safety valve, we add a little extra to compensate for the
   # time it takes to run each psql command.
   $timeout = (($sleep + 2) * $tries)
 
-  $exec_name = "validate postgres connection for ${database_host}/${database_name}"
+  # Combine $database_password and $connect_settings into an array of environment
+  # variables, ensure $database_password is last, allowing it to override a password
+  # from the $connect_settings hash
+  if $connect_settings != undef {
+    if $pass_env != undef {
+      $env = concat(join_keys_to_values( $connect_settings, '='), $pass_env)
+    } else {
+      $env = join_keys_to_values( $connect_settings, '=')
+    }
+  } else {
+    $env = $pass_env
+  }
+
+  $exec_name = "validate postgres connection for ${database_username}@${database_host}:${database_port}/${database_name}"
+
   exec { $exec_name:
     command     => "echo 'Unable to connect to defined database using: ${cmd}' && false",
     unless      => $validate_cmd,
@@ -57,7 +73,7 @@ define postgresql::validate_db_connection(
     user        => $run_as,
     path        => '/bin:/usr/bin:/usr/local/bin',
     timeout     => $timeout,
-    require     => Package['postgresql-client'],
+    require     => Class['postgresql::client'],
   }
 
   # This is a little bit of puppet magic.  What we want to do here is make

@@ -5,6 +5,7 @@ describe 'postgresql::server', :type => :class do
     {
       :osfamily => 'Debian',
       :operatingsystem => 'Debian',
+      :lsbdistid => 'Debian',
       :operatingsystemrelease => '6.0',
       :concat_basedir => tmpfilename('server'),
       :kernel => 'Linux',
@@ -16,17 +17,39 @@ describe 'postgresql::server', :type => :class do
   describe 'with no parameters' do
     it { is_expected.to contain_class("postgresql::params") }
     it { is_expected.to contain_class("postgresql::server") }
+    it { is_expected.to contain_exec('postgresql_reload').with({
+      'command' => 'service postgresql reload',
+    })
+    }
     it 'should validate connection' do
       is_expected.to contain_postgresql__validate_db_connection('validate_service_is_running')
     end
   end
 
   describe 'service_ensure => running' do
-    let(:params) {{ :service_ensure => 'running' }}
+    let(:params) do
+      {
+        :service_ensure    => 'running',
+        :postgres_password => 'new-p@s$word-to-set'
+      }
+    end
     it { is_expected.to contain_class("postgresql::params") }
     it { is_expected.to contain_class("postgresql::server") }
+    it { is_expected.to contain_class("postgresql::server::passwd") }
     it 'should validate connection' do
       is_expected.to contain_postgresql__validate_db_connection('validate_service_is_running')
+    end
+    it 'should set postgres password' do
+      is_expected.to contain_exec('set_postgres_postgrespw').with({
+        'command'     => '/usr/bin/psql -c "ALTER ROLE \"postgres\" PASSWORD ${NEWPASSWD_ESCAPED}"',
+        'user'        => 'postgres',
+        'environment' => [
+          "PGPASSWORD=new-p@s$word-to-set",
+          "PGPORT=5432",
+          "NEWPASSWD_ESCAPED=$$new-p@s$word-to-set$$"
+        ],
+        'unless'      => "/usr/bin/psql -h localhost -p 5432 -c 'select 1' > /dev/null",
+      })
     end
   end
 
@@ -34,6 +57,54 @@ describe 'postgresql::server', :type => :class do
     let(:params) {{ :service_ensure => 'stopped' }}
     it { is_expected.to contain_class("postgresql::params") }
     it { is_expected.to contain_class("postgresql::server") }
+    it 'shouldnt validate connection' do
+      is_expected.not_to contain_postgresql__validate_db_connection('validate_service_is_running')
+    end
+  end
+
+  describe 'service_restart_on_change => false' do
+    let(:params) {{ :service_restart_on_change => false }}
+    it { is_expected.to contain_class("postgresql::params") }
+    it { is_expected.to contain_class("postgresql::server") }
+    it { is_expected.to_not contain_Postgresql_conf('data_directory').that_notifies('Class[postgresql::server::service]')
+    }
+    it 'should validate connection' do
+      is_expected.to contain_postgresql__validate_db_connection('validate_service_is_running')
+    end
+  end
+
+  describe 'service_restart_on_change => true' do
+    let(:params) {{ :service_restart_on_change => true }}
+    it { is_expected.to contain_class("postgresql::params") }
+    it { is_expected.to contain_class("postgresql::server") }
+    it { is_expected.to contain_Postgresql_conf('data_directory').that_notifies('Class[postgresql::server::service]')
+    }
+    it 'should validate connection' do
+      is_expected.to contain_postgresql__validate_db_connection('validate_service_is_running')
+    end
+  end
+
+  describe 'service_reload => /bin/true' do
+    let(:params) {{ :service_reload => '/bin/true' }}
+    it { is_expected.to contain_class("postgresql::params") }
+    it { is_expected.to contain_class("postgresql::server") }
+    it { is_expected.to contain_exec('postgresql_reload').with({
+      'command' => '/bin/true',
+    })
+    }
+    it 'should validate connection' do
+      is_expected.to contain_postgresql__validate_db_connection('validate_service_is_running')
+    end
+  end
+
+  describe 'service_manage => true' do
+    let(:params) {{ :service_manage => true }}
+    it { is_expected.to contain_service('postgresqld') }
+  end
+
+  describe 'service_manage => false' do
+    let(:params) {{ :service_manage => false }}
+    it { is_expected.not_to contain_service('postgresqld') }
     it 'shouldnt validate connection' do
       is_expected.not_to contain_postgresql__validate_db_connection('validate_service_is_running')
     end
@@ -68,6 +139,21 @@ describe 'postgresql::server', :type => :class do
 
     it 'should contain proper initdb exec' do
       is_expected.to contain_exec('postgresql_initdb')
+    end
+  end
+
+  describe 'postgresql_version' do
+    let(:pre_condition) do
+      <<-EOS
+      class { 'postgresql::globals':
+        manage_package_repo => true,
+        version             => '99.5',
+        before              => Class['postgresql::server'],
+      }
+      EOS
+    end
+    it 'contains the correct package version' do
+      is_expected.to contain_class('postgresql::repo').with_version('99.5')
     end
   end
 end
