@@ -2,8 +2,8 @@
 # vi: set ft=ruby :
 
 VERSION = "2" # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
-BOX = "ubuntu/trusty64"
-BOX_URL = "https://vagrantcloud.com/ubuntu/boxes/trusty64/versions/14.04/providers/virtualbox.box"
+BOX = "ubuntu/wily64"
+BOX_URL = "https://vagrantcloud.com/ubuntu/boxes/wily64/versions/20160226.0.0/providers/virtualbox.box"
 PORT = 8000
 
 Vagrant.configure(VERSION) do |config|

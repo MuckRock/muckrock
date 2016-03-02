@@ -6,29 +6,51 @@ describe 'apt_has_updates fact' do
 
   describe 'on non-Debian distro' do
     before {
-      Facter.fact(:osfamily).expects(:value).returns 'RedHat'
+      Facter.fact(:osfamily).expects(:value).at_least(1).returns 'RedHat'
     }
-    it { should be_nil }
+    it { is_expected.to be_nil }
   end
 
   describe 'on Debian based distro missing update-notifier-common' do
     before {
-      Facter.fact(:osfamily).expects(:value).returns 'Debian'
+      Facter.fact(:osfamily).expects(:value).at_least(1).returns 'Debian'
       File.stubs(:executable?) # Stub all other calls
       File.expects(:executable?).with('/usr/lib/update-notifier/apt-check').returns false
     }
-    it { should be_nil }
+    it { is_expected.to be_nil }
+  end
+
+  describe 'on Debian based distro with broken packages' do
+    before {
+      Facter.fact(:osfamily).expects(:value).at_least(1).returns 'Debian'
+      File.stubs(:executable?) # Stub all other calls
+      Facter::Util::Resolution.stubs(:exec) # Catch all other calls
+      File.expects(:executable?).with('/usr/lib/update-notifier/apt-check').returns true
+      Facter::Util::Resolution.expects(:exec).with('/usr/lib/update-notifier/apt-check 2>&1').returns "E: Error: BrokenCount > 0"
+    }
+    it { is_expected.to be_nil }
+  end
+
+  describe 'on Debian based distro with unknown error with semicolons' do
+    before {
+      Facter.fact(:osfamily).expects(:value).at_least(1).returns 'Debian'
+      File.stubs(:executable?) # Stub all other calls
+      Facter::Util::Resolution.stubs(:exec) # Catch all other calls
+      File.expects(:executable?).with('/usr/lib/update-notifier/apt-check').returns true
+      Facter::Util::Resolution.expects(:exec).with('/usr/lib/update-notifier/apt-check 2>&1').returns "E: Unknown Error: 'This error contains something that could be parsed like 4;3' (10)"
+    }
+    it { is_expected.to be_nil }
   end
 
   describe 'on Debian based distro' do
     before {
-      Facter.fact(:osfamily).expects(:value).returns 'Debian'
+      Facter.fact(:osfamily).expects(:value).at_least(1).returns 'Debian'
       File.stubs(:executable?) # Stub all other calls
       Facter::Util::Resolution.stubs(:exec) # Catch all other calls
       File.expects(:executable?).with('/usr/lib/update-notifier/apt-check').returns true
-      Facter::Util::Resolution.expects(:exec).with('/usr/lib/update-notifier/apt-check 2>/dev/null').returns "4;3"
+      Facter::Util::Resolution.expects(:exec).with('/usr/lib/update-notifier/apt-check 2>&1').returns "4;3"
     }
-    it { should be true }
+    it { is_expected.to be true }
   end
 end
 

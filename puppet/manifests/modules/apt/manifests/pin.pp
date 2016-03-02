@@ -3,8 +3,8 @@
 
 define apt::pin(
   $ensure          = present,
-  $explanation     = "${caller_module_name}: ${name}",
-  $order           = '',
+  $explanation     = undef,
+  $order           = undef,
   $packages        = '*',
   $priority        = 0,
   $release         = '', # a=
@@ -16,12 +16,18 @@ define apt::pin(
   $originator      = '', # o=
   $label           = ''  # l=
 ) {
-  include apt::params
-
-  $preferences_d = $apt::params::preferences_d
-
-  if $order != '' and !is_integer($order) {
+  if $order and !is_integer($order) {
     fail('Only integers are allowed in the apt::pin order param')
+  }
+
+  if $explanation {
+    $_explanation = $explanation
+  } else {
+    if defined('$caller_module_name') { # strict vars check
+      $_explanation = "${caller_module_name}: ${name}"
+    } else {
+      $_explanation = ": ${name}"
+    }
   }
 
   $pin_release_array = [
@@ -56,7 +62,6 @@ define apt::pin(
     }
   }
 
-
   # According to man 5 apt_preferences:
   # The files have either no or "pref" as filename extension
   # and only contain alphanumeric, hyphen (-), underscore (_) and period
@@ -66,16 +71,10 @@ define apt::pin(
   # be silently ignored.
   $file_name = regsubst($title, '[^0-9a-z\-_\.]', '_', 'IG')
 
-  $path = $order ? {
-    ''      => "${preferences_d}/${file_name}.pref",
-    default => "${preferences_d}/${order}-${file_name}.pref",
-  }
-  file { "${file_name}.pref":
-    ensure  => $ensure,
-    path    => $path,
-    owner   => root,
-    group   => root,
-    mode    => '0644',
-    content => template('apt/pin.pref.erb'),
+  apt::setting { "pref-${file_name}":
+    ensure        => $ensure,
+    priority      => $order,
+    content       => template('apt/_header.erb', 'apt/pin.pref.erb'),
+    notify_update => false,
   }
 }
