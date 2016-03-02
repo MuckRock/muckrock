@@ -84,9 +84,9 @@
         <div class="dialog">
             <h1>Thank you!</h1>
             <p>Help this crowdfund find more supporters:</p>
-            {% if crowdfund.type_ == "foia" %}
+            {% if crowdfund.foia %}
             {% include 'lib/social.html' with title="Help me free these docs" %}
-            {% elif crowdfund.type_ == "project" %}
+            {% elif crowdfund.projects.exists %}
             {% include 'lib/social.html' with title="I just funded this project" %}
             {% endif %}
         </div>
