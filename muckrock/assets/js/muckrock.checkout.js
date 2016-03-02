@@ -47,7 +47,6 @@
         if (fee > 0) {
             amount += amount * fee;
         }
-        console.debug(amount);
         var settings = {
             key: key,
             image: image,
