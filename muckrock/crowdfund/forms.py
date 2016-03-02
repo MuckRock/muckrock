@@ -7,7 +7,7 @@ from django import forms
 from decimal import Decimal
 from datetime import date, timedelta
 
-from muckrock.crowdfund.models import Crowdfund, CrowdfundPayment
+from muckrock.crowdfund.models import Crowdfund
 
 
 class NumberInput(forms.TextInput):
