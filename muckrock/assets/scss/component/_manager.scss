@@ -79,29 +79,3 @@
         }
     }
 }
-
-.tag {
-    display: inline-block;
-    margin-left: $vertical-rhythm/4;
-    margin-bottom: $vertical-rhythm/4;
-    padding: 0 $vertical-rhythm/4;
-    border-radius: 4px;
-    background: $color-blue-dark;
-    color: $color-white;
-    line-height: $font-line-height;
-    &:hover {
-        color: $color-white;
-        background: $color-blue;
-        text-decoration: none;
-    }
-}
-
-button.tag, .button.tag {
-    border: none;
-    border-radius: 0;
-    box-shadow: none;
-    &:hover {
-        box-shadow: none;
-    }
-}
-

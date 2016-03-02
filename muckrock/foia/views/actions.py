@@ -278,7 +278,6 @@ def crowdfund_request(request, idx, **kwargs):
     # pylint: disable=unused-argument
     foia = FOIARequest.objects.get(pk=idx)
     owner_or_staff = request.user == foia.user or request.user.is_staff
-
     # check for unauthorized access
     if not owner_or_staff:
         messages.error(request, 'You may only crowdfund your own requests.')
@@ -289,12 +288,13 @@ def crowdfund_request(request, idx, **kwargs):
     if foia.status != 'payment':
         messages.error(request, 'You may only crowfund when payment is required.')
         return redirect(foia)
-
     if request.method == 'POST':
         # save crowdfund object
         form = CrowdfundForm(request.POST)
         if form.is_valid():
             crowdfund = form.save()
+            foia.crowdfund = crowdfund
+            foia.save()
             messages.success(request, 'Your crowdfund has started, spread the word!')
             actstream.action.send(
                 request.user,
