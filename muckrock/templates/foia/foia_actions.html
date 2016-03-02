@@ -3,10 +3,12 @@
     {% if foia.is_payable %}
     <div class="payment prompt">
         <p>This request requires a payment{% if foia.price %} of ${{foia.price|floatformat:2}}{% endif %}.</p>
-        <a class="button" href="#pay">Pay</a>
-        {% if not foia.has_crowdfund %}
-        <a class="button" href="#crowdfund">Crowdfund</a>
-        {% endif %}
+        <footer>
+            <a class="success button" href="#pay">Pay</a>
+            {% if not foia.has_crowdfund %}
+            <a class="success button" href="#crowdfund">Crowdfund</a>
+            {% endif %}
+        </footer>
     </div>
     {% endif %}
     <form method="post">
@@ -32,6 +34,8 @@
 {% else %}
 <div class="signup prompt">
     <p>MuckRock users can create, duplicate, track, and share public records requests like this one.</p>
-    <a href="{% url 'accounts' %}" class="primary button">Sign Up Today</a>
+    <footer>
+        <a href="{% url 'accounts' %}" class="primary button">Sign Up Today</a>
+    </footer>
 </div>
 {% endif %}

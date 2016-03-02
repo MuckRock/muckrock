@@ -97,21 +97,32 @@ $request-breakpoint: 768px;
 }
 
 .request.main {
-    .signup-prompt {
+    .prompt {
         @include display(flex);
-        @include flex-direction(column);
         @include justify-content(space-between);
-        @include align-items(flex-start);
+        @include flex-wrap(wrap);
+        @include align-items(center);
         @include border;
-        @include border-radius;
-        padding: $vertical-rhythm/2;
-        @include media($medium-layout) {
-            @include flex-direction(row);
-            p {
-                @include flex(0 1 60%);
-                margin-bottom: 0;
-            }
+        padding: $vertical-rhythm/4 $vertical-rhythm/2;
+        font-weight: $font-weight-bold;
+        p, footer {
+            margin-bottom: 0;
         }
+        p {
+            max-width: 70%;
+        }
+    }
+
+    .signup.prompt {
+        color: $color-blue-dark;
+        border-color: $color-blue;
+        background-color: $color-blue-light;
+    }
+
+    .payment.prompt {
+        color: $color-green-dark;
+        border-color: $color-green;
+        background-color: $color-green-light;
     }
 
     .filter {
