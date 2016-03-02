@@ -31,4 +31,7 @@ if [ -f .dir_colors ]; then
     . .dir_colors
 fi
 
+### Added by the Heroku Toolbelt
+export PATH="/usr/local/heroku/bin:$PATH"
+
 export DJANGO_SETTINGS_MODULE="muckrock.settings.local"
