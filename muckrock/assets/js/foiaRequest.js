@@ -81,45 +81,35 @@ $('#toggle-communication-collapse').click(function(e){
     }
 });
 
-/* Follow up and appeal */
+/* Request action composer */
 
-var composeResponse = function(target, composerForm) {
-    var composer = $(target).closest('.communications-composer');
-    var inactiveComposerForm = $(composer).find('.inactive.composer-input');
-    var activeComposerForm = $(composer).find(composerForm);
-    $(activeComposerForm).siblings().removeClass('visible');
-    $(activeComposerForm).addClass('visible');
-    var textarea = $(activeComposerForm).children('textarea');
-    $(textarea).focus();
-    $(activeComposerForm).find('.button.cancel').click(function(e){
-        e.preventDefault();
-        $(inactiveComposerForm).siblings().removeClass('visible');
-        $(inactiveComposerForm).addClass('visible');
-    });
+var composerInputs = $('.composer-input');
+
+function showComposer(id) {
+    // if no id provided, use the inactive panel
+    id = !id ? '#inactive' : id;
+    // hide all the composers, then filter to
+    // the one we're interested in and show it
+    var composer = composerInputs.hide().filter(id).show();
+    // We also want to bring the composer's first input into focus
+    // in order to make it clear to the user that this is actionable
+    composer.find(':text,textarea,select').filter(':visible:first').focus();
+    console.log('Switched to composer: ', id);
 }
 
-$('#follow-up').click(function(e){
-    e.preventDefault();
-    composeResponse(this, '.follow-up.composer-input');
+// Bind to hashchange event
+$(window).on('hashchange', function () {
+    // check if the hash is a target
+    var hash = location.hash;
+    var composers = composerInputs.filter(hash);
+    if (composers.length > 0) {
+        showComposer(hash);
+    }
 });
 
-$('#thanks').click(function(e){
-    e.preventDefault();
-    composeResponse(this, '.thanks.composer-input');
-});
-
-$('#appeal').click(function(e){
-    e.preventDefault();
-    composeResponse(this, '.appeal.composer-input');
-});
-
-$('.inactive.composer-input').click(function(){
-    $('#follow-up').click();
-});
-
-$('#inactive-appeal').click(function(){
-    $('#appeal').click();
-    return false;
+// Initialize
+$(document).ready(function(){
+    showComposer(composerInputs.filter(location.hash).length > 0 ? location.hash : '');
 });
 
 /* Documents */

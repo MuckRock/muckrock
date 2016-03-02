@@ -173,31 +173,55 @@ $request-breakpoint: 768px;
     }
     .communications-composer {
         @include display(flex);
-        @include align-items(stretch);
+        @include align-items(flex-start);
         .composer-actions {
             @include display(flex);
             @include flex-direction(column);
         }
-        .composer-input {
+        .composer-inputs {
             @include flex(1);
-            display: none;
-            &.visible {
-                display: block;
-            }
             margin-left: $vertical-rhythm;
             margin-bottom: 0;
+        }
+        .composer-input {
             @include border;
+            box-shadow: 0px 4px 8px 0px $color-grey;
+            header {
+                display: block;
+                margin-bottom: 0;
+                padding: $vertical-rhythm/2;
+                border-bottom: 1px solid $color-grey;
+                p {
+                    margin-bottom: 0;
+                    &.help-text {
+                        padding: 0;
+                    }
+                }
+            }
+            input[type="number"], input[type="text"] {
+                display: block;
+                width: 100%;
+                border: none;
+                border-radius: 0;
+            }
+            label, .help-text {
+                padding: 0 $vertical-rhythm/2;
+            }
+            .limit.amount {
+                label, input {
+                    display: inline-block;
+                    vertical-align: middle;
+                }
+            }
+            .currency {
+                font-size: $font-size-4;
+            }
             textarea {
                 display: block;
                 height: 15em;
                 margin-bottom: 0;
                 border: none;
                 border-radius: 0;
-            }
-            label {
-                display: block;
-                padding: $vertical-rhythm/2;
-                border-bottom: 1px solid $color-grey;
             }
             .buttons {
                 padding: $vertical-rhythm/2;
