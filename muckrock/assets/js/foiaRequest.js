@@ -63,44 +63,6 @@ $('.estimated-completion .edit').click(function(){
     });
 });
 
-/* Deep link into tab */
-
-// get all the deep link things
-var foiaItems = $('.file, .note, .communication');
-// get a list of all the file hashes
-var foiaItemTargets = foiaItems.map(function() {
-    return '#' + $(this).attr('id');
-}).get();
-
-function deepLink(id) {
-    // we expect a hyphen delimited id, e.g. #file-1
-    if (!id || id.indexOf('-') === -1) {
-        return
-    }
-    var hyphen = id.indexOf('-');
-    var tab = id.substring(0, hyphen != -1 ? hyphen : id.length) + 's';
-    showTab(tab);
-    // deep link to single file
-    if (tab == '#files') {
-        var file = foiaItems.filter(id).first();
-        displayFile(file);
-    } else if (tab == '#notes' || tab == '#comms') { // deep link to specific element
-        var elementOffset = foiaItems.filter(id).first().offset();
-        window.scrollTo(elementOffset.top, elementOffset.left);
-    }
-    console.log('Deeplinked to:', id);
-}
-
-$(window).on('hashchange', function() {
-    // check if the hash is a target
-    var hash = location.hash;
-    if (foiaItemTargets.indexOf(hash) !== -1) {
-        deepLink(hash);
-    }
-});
-
-deepLink(foiaItemTargets.indexOf(location.hash) !== -1 ? location.hash : '');
-
 /* Communications */
 
 $('#toggle-communication-collapse').click(function(e){
