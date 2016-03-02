@@ -21,10 +21,6 @@
     }
 
     function handleToken(token) {
-        // Prevent anything navigating away from this page
-        // before the handler is done processing and the
-        // form is submitted.
-        $('a, button').click(function() { return false; });
         // Set the value of the form's token and the email
         // fields based on the token received by this method
         formValue('stripe_token', token.id);
