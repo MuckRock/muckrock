@@ -16,11 +16,12 @@ from django.template import RequestContext
 from django.views.generic.detail import DetailView
 
 import actstream
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import logging
 
 from muckrock.agency.forms import AgencyForm
+from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.foia.codes import CODES
 from muckrock.foia.forms import (
     RequestFilterForm,
@@ -266,6 +267,13 @@ class Detail(DetailView):
         })
         context['note_form'] = FOIANoteForm()
         context['access_form'] = FOIAAccessForm()
+        context['crowdfund_form'] = CrowdfundForm(initial={
+            'name': u'Crowdfund Request: %s' % unicode(foia),
+            'description': 'Help cover the request fees needed to free these docs!',
+            'payment_required': foia.price,
+            'date_due': datetime.now() + timedelta(30),
+            'foia': foia
+        })
         context['embargo_needs_date'] = foia.status in END_STATUS
         context['user_actions'] = foia.user_actions(user)
         context['contextual_request_actions'] = \
