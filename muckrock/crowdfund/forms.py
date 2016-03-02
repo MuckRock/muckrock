@@ -77,7 +77,7 @@ class CrowdfundForm(forms.ModelForm):
 class CrowdfundPaymentForm(forms.Form):
     """Form to create a payment to a crowdfund"""
     stripe_amount = forms.CharField(widget=NumberInput())
-    show = forms.BooleanField(widget=forms.CheckboxInput())
+    show = forms.BooleanField(required=False, widget=forms.CheckboxInput())
     crowdfund = forms.ModelChoiceField(queryset=Crowdfund.objects.all(), widget=forms.HiddenInput())
 
     def clean_stripe_amount(self):
