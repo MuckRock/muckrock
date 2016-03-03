@@ -9,16 +9,7 @@ import autocomplete_light
 from reversion import VersionAdmin
 
 from muckrock.foia.models import FOIARequest
-from muckrock.project.models import Project, ProjectMap
-
-class ProjectMapAdminForm(forms.ModelForm):
-    """Adds autocomplete to requests field"""
-    requests = autocomplete_light.ModelMultipleChoiceField('FOIARequestAutocomplete')
-
-    class Meta:
-        # pylint: disable=too-few-public-methods
-        model = ProjectMap
-        fields = '__all__'
+from muckrock.project.models import Project
 
 
 class ProjectAdminForm(forms.ModelForm):
@@ -43,12 +34,4 @@ class ProjectAdmin(VersionAdmin):
     filter_horizontal = ('contributors', 'articles')
 
 
-class ProjectMapAdmin(VersionAdmin):
-    """Admin interface for ProjectMap models"""
-    list_display = ('title', 'project')
-    search_fields = ('title', 'project')
-    form = ProjectMapAdminForm
-
-
 admin.site.register(Project, ProjectAdmin)
-admin.site.register(ProjectMap, ProjectMapAdmin)
