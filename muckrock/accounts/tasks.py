@@ -170,9 +170,9 @@ def weekly_notices():
 def db_cleanup():
     """Call some management commands to clean up the database"""
     call_command('deleterevisions', 'foia', days=180,
-            force=True, no_confirmation=True, verbosity=2)
+            force=True, confirmation=False, verbosity=2)
     call_command('deleterevisions', 'task', days=180,
-            force=True, no_confirmation=True, verbosity=2)
+            force=True, confirmation=False, verbosity=2)
     call_command('deleterevisions', days=730,
-            force=True, no_confirmation=True, verbosity=2)
+            force=True, confirmation=False, verbosity=2)
     call_command('clearsessions', verbosity=2)
