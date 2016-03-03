@@ -9,8 +9,6 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import escape, linebreaks
 
-from datetime import date
-
 from muckrock.foia.models import FOIARequest, FOIACommunication
 
 class LatestSubmittedRequests(Feed):
@@ -27,6 +25,7 @@ class LatestSubmittedRequests(Feed):
                 .get_submitted()
                 .get_public()
                 .order_by('-date_submitted')
+                .select_related('jurisdiction')
                 .prefetch_related('communications')[:25])
 
     def item_description(self, item):
@@ -48,6 +47,7 @@ class LatestDoneRequests(Feed):
                 .get_done()
                 .get_public()
                 .order_by('-date_done')
+                .select_related('jurisdiction')
                 .prefetch_related('communications')[:25])
 
     def item_description(self, item):
@@ -115,6 +115,7 @@ class UserSubmittedFeed(Feed):
                 .get_submitted()
                 .filter(user=obj, embargo=False)
                 .order_by('-date_submitted')
+                .select_related('jurisdiction')
                 .prefetch_related('communications')[:25])
 
     def item_description(self, item):
@@ -149,6 +150,7 @@ class UserDoneFeed(Feed):
                 .get_done()
                 .filter(user=obj, embargo=False)
                 .order_by('-date_submitted')
+                .select_related('jurisdiction')
                 .prefetch_related('communications')[:25])
 
     def item_description(self, item):
@@ -182,8 +184,8 @@ class UserUpdateFeed(Feed):
         communications = (FOIACommunication.objects
                 .filter(foia__user=obj)
                 .exclude(foia__status='started')
-                .exclude(foia__embargo=True, foia__date_embargo=None)
-                .exclude(foia__embargo=True, foia__date_embargo__gte=date.today())
+                .exclude(foia__embargo=True)
+                .select_related('foia__jurisdiction')
                 .order_by('-date'))
         return communications[:25]
 

@@ -143,5 +143,7 @@ class muckrock {
 
 	# heroku
 
-	class { 'heroku':; }
+	#class { 'heroku':; }
+	include 'heroku'
+
 }

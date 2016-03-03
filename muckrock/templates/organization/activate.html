@@ -12,8 +12,17 @@
         <p>Once you activate your organization, you can add members to it.</p>
         <p><a href="{{ org.get_absolute_url }}">Continue without activating</a></p>
     </aside>
-    <form method="post" id="activate-organization">
+    <form method="post" class="stripe-checkout" id="activate-organization">
         {% csrf_token %}
+        <input type="hidden" name="stripe_token" value="" />
+        <input type="hidden" name="stripe_pk" value="{{ stripe_pk }}" />
+        <input type="hidden" name="stripe_image" value="{% static 'icons/logo.png' %}" />
+        <input type="hidden" name="stripe_email" value="{{ user_email }}" />
+        <input type="hidden" name="stripe_label" value="Activate" />
+        <input type="hidden" name="stripe_description" value="Organization Account" />
+        <input type="hidden" name="stripe_bitcoin" value="false" />
+        <input type="hidden" name="stripe_fee" value="0" />
+        <input type="hidden" name="stripe_amount" value="0" />
         <label for="{{ form.max_users.id_for_label }}">Member Seats</label>
         {{ form.max_users }}
         <h2>Your plan</h2>
@@ -22,38 +31,13 @@
             <li id="your-plan-requests"><span class="value">{{ base_requests }}</span> requests per month</li>
             <li id="your-plan-price">$<span class="value">{{ base_price|floatformat:2 }}</span> per month</li>
         </ul>
-        <button
-            data-amount="0"
-            data-description="Organization Account"
-            data-email="{{ user_email }}"
-            data-label="Activate"
-            data-form="#activate-organization"
-            class="checkout-button primary">
-            Activate
-        </button>
+        <button type="submit" class="primary">Activate</button>
     </form>
 </section>
 {% endblock content %}
 
 {% block scripts %}
-<script src="https://checkout.stripe.com/checkout.js"></script>
 <script>
-    $(document).ready(function() {
-        $('.checkout-button').click(function(e){
-            e.preventDefault();
-            checkoutData = getCheckoutData($(this));
-            checkout(
-                "{{ stripe_pk }}",
-                "{% static 'apple-touch-icon.png' %}",
-                checkoutData.description,
-                checkoutData.amount,
-                checkoutData.email,
-                checkoutData.label,
-                checkoutData.form
-            );
-        });
-    });
-
     $('#{{form.max_users.id_for_label}}').change(function(){
         var input = this;
         var num_seats = $(input).val();

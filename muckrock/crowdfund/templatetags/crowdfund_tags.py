@@ -7,8 +7,8 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 
-from muckrock.crowdfund.models import CrowdfundRequest, CrowdfundProject
-from muckrock.crowdfund.forms import CrowdfundRequestPaymentForm, CrowdfundProjectPaymentForm
+from muckrock.crowdfund.models import Crowdfund
+from muckrock.crowdfund.forms import CrowdfundPaymentForm
 from muckrock.utils import cache_get_or_set
 
 register = template.Library()
@@ -46,7 +46,7 @@ def crowdfund_form(crowdfund, form):
     initial_data = {
         'show': True,
         'crowdfund': crowdfund.pk,
-        'amount': get_initial_amount(crowdfund)
+        'stripe_amount': get_initial_amount(crowdfund)
     }
     return form(initial=initial_data)
 
@@ -118,25 +118,14 @@ def generate_crowdfund_context(the_crowdfund, the_url_name, the_form, the_contex
         'stripe_pk': settings.STRIPE_PUB_KEY
     }
 
-@register.inclusion_tag('crowdfund/widget.html', takes_context=True)
-def crowdfund_request(context, crowdfund_pk):
-    """Template tag to insert a crowdfunding panel"""
-    the_crowdfund = get_object_or_404(CrowdfundRequest, pk=crowdfund_pk)
-    return generate_crowdfund_context(
-        the_crowdfund,
-        'crowdfund-request',
-        CrowdfundRequestPaymentForm,
-        context
-    )
-
-@register.inclusion_tag('crowdfund/widget.html', takes_context=True)
-def crowdfund_project(context, crowdfund_pk=None, crowdfund=None):
+@register.inclusion_tag('crowdfund/widget.html', name='crowdfund', takes_context=True)
+def crowdfund_tag(context, crowdfund_pk=None, crowdfund=None):
     """Template tag to insert a crowdfunding widget"""
     if crowdfund is None:
-        crowdfund = get_object_or_404(CrowdfundProject, pk=crowdfund_pk)
+        crowdfund = get_object_or_404(Crowdfund, pk=crowdfund_pk)
     return generate_crowdfund_context(
         crowdfund,
-        'crowdfund-project',
-        CrowdfundProjectPaymentForm,
+        'crowdfund',
+        CrowdfundPaymentForm,
         context
     )

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load geojson_tags %}
+{% load leaflet_tags %}
+
+{% block title %}MuckRock &bull; MAPS!!!{% endblock %}
+
+{% block styles %}
+{% leaflet_css %}
+{% endblock %}
+
+{% block content %}
+<h1>{{projectmap.title}}</h1>
+<p>{{projectmap.description}}</p>
+{% leaflet_map "map" callback="window.map_init" %}
+{% endblock %}
+
+{% block scripts %}
+{% leaflet_js %}
+<script type="text/javascript">
+    var collection = {{ projectmap.requests.all|geojsonfeature:":location"|safe }};
+    function map_init(map, options) {
+        L.geoJson(collection).addTo(map);
+    }
+</script>
+{% endblock %}

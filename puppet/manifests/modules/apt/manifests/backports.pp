@@ -1,77 +1,65 @@
-# This adds the necessary components to get backports for ubuntu and debian
-#
-# == Parameters
-#
-# [*release*]
-#   The ubuntu/debian release name. Defaults to $lsbdistcodename. Setting this
-#   manually can cause undefined behavior. (Read: universe exploding)
-#
-# [*pin_priority*]
-#   _default_: 200
-#
-#   The priority that should be awarded by default to all packages coming from
-#   the Debian Backports project.
-#
-# == Examples
-#
-#   include apt::backports
-#
-#   class { 'apt::backports':
-#     release => 'natty',
-#   }
-#
-# == Authors
-#
-# Ben Hughes, I think. At least blame him if this goes wrong.
-# I just added puppet doc.
-#
-# == Copyright
-#
-# Copyright 2011 Puppet Labs Inc, unless otherwise noted.
-class apt::backports(
-  $release      = $::lsbdistcodename,
-  $location     = $::apt::params::backports_location,
-  $pin_priority = 200,
-) inherits apt::params {
-
-  if ! is_integer($pin_priority) {
-    fail('$pin_priority must be an integer')
+class apt::backports (
+  $location = undef,
+  $release  = undef,
+  $repos    = undef,
+  $key      = undef,
+  $pin      = 200,
+){
+  if $location {
+    validate_string($location)
+    $_location = $location
   }
-
-  if $::lsbdistid == 'LinuxMint' {
-    if $::lsbdistcodename == 'debian' {
-      $distid = 'debian'
-      $release_real = 'wheezy'
-    } else {
-      $distid = 'ubuntu'
-      $release_real = $::lsbdistcodename ? {
-        'qiana'  => 'trusty',
-        'petra'  => 'saucy',
-        'olivia' => 'raring',
-        'nadia'  => 'quantal',
-        'maya'   => 'precise',
-      }
+  if $release {
+    validate_string($release)
+    $_release = $release
+  }
+  if $repos {
+    validate_string($repos)
+    $_repos = $repos
+  }
+  if $key {
+    unless is_hash($key) {
+      validate_string($key)
+    }
+    $_key = $key
+  }
+  if ($::apt::xfacts['lsbdistid'] == 'debian' or $::apt::xfacts['lsbdistid'] == 'ubuntu') {
+    unless $location {
+      $_location = $::apt::backports['location']
+    }
+    unless $release {
+      $_release = "${::apt::xfacts['lsbdistcodename']}-backports"
+    }
+    unless $repos {
+      $_repos = $::apt::backports['repos']
+    }
+    unless $key {
+      $_key =  $::apt::backports['key']
     }
   } else {
-    $distid = $::lsbdistid
-    $release_real = downcase($release)
+    unless $location and $release and $repos and $key {
+      fail('If not on Debian or Ubuntu, you must explicitly pass location, release, repos, and key')
+    }
   }
 
-  $key = $distid ? {
-    'debian' => '46925553',
-    'ubuntu' => '437D05B5',
-  }
-  $repos = $distid ? {
-    'debian' => 'main contrib non-free',
-    'ubuntu' => 'main universe multiverse restricted',
+  if is_hash($pin) {
+    $_pin = $pin
+  } elsif is_numeric($pin) or is_string($pin) {
+    # apt::source defaults to pinning to origin, but we should pin to release
+    # for backports
+    $_pin = {
+      'priority' => $pin,
+      'release'  => $_release,
+    }
+  } else {
+    fail('pin must be either a string, number or hash')
   }
 
   apt::source { 'backports':
-    location   => $location,
-    release    => "${release_real}-backports",
-    repos      => $repos,
-    key        => $key,
-    key_server => 'pgp.mit.edu',
-    pin        => $pin_priority,
+    location => $_location,
+    release  => $_release,
+    repos    => $_repos,
+    key      => $_key,
+    pin      => $_pin,
   }
 }

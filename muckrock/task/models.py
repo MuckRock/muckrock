@@ -313,6 +313,7 @@ class StaleAgencyTask(Task):
             foia.email = new_email
             foia.followup(automatic=True, show_all_comms=False)
 
+
 class FlaggedTask(Task):
     """A user has flagged a request, agency or jurisdiction"""
     type = 'FlaggedTask'
@@ -482,6 +483,15 @@ class GenericCrowdfundTask(Task):
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     crowdfund = GenericForeignKey('content_type', 'object_id')
+
+    def __unicode__(self):
+        return u'Crowdfund Task'
+
+
+class NewCrowdfundTask(Task):
+    """Created when a crowdfund is finished"""
+    type = 'CrowdfundTask'
+    crowdfund = models.ForeignKey('crowdfund.Crowdfund')
 
     def __unicode__(self):
         return u'Crowdfund Task'

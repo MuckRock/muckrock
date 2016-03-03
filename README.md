@@ -5,12 +5,15 @@
 
 ## Install
 
-1. Set up your virtual machine
+1. Check out the git repository
+  1. `git clone git@github.com:MuckRock/muckrock.git`
+
+2. Set up your virtual machine
   1. Install [Vagrant][vagrant] and [VirtualBox][virtualbox]
   2. Run `vagrant up` (this will take a while)
   3. Run `vagrant ssh` to ssh into the virtual machine
 
-2. Set the secrets
+3. Set the secrets
   1. `cd muckrock`
   2. `touch .settings.sh`
   3. The `.settings.sh` file should **never** be checked in to the repository.
@@ -18,19 +21,17 @@
   5. Inside your VM, add `source ~/muckrock/.settings.sh` the `~/.bashrc` file.
   6. Inside your VM, run `source ~/.bashrc`.
 
-3. Sync and populate the database inside the virtual machine
-  1. From within the virtual machine, `cd muckrock`
-  2. Run `./manage.py syncdb` and create a superuser when asked to do so
-  3. Run `./manage.py migrate`
-  4. ~~Run `fab populate-db` to populate the DB~~ (Broken)
+4. Populate the database and sync the files from AWS inside the virtual machine
+  1. From within the virtual machine, `fab populate-db`
+  2. From within the virtual machine, `fab sync-aws`
 
-4. Run the test server inside the virtual machine
+5. Run the test server inside the virtual machine
   1. Run `fab mail &` to start a background email server
   2. Run `fab celery &` to start a background task queue
   3. Run `fab runserver` to start a server instance
   4. Navigate your web browser (from the host machine) to `localhost:8000`
 
-You should have a very bare MuckRock site running locally now.
+You should have a fully populated MuckRock site running locally now.
 The code checked out from GitHub is synced between the virtual machine and your host machine, so you may edit the code using your favorite text editor locally while running the code from within the virtual machine. To run the server again, just follow step 4.
 
 ## Test and lint

@@ -14,7 +14,7 @@
 <meta property="og:title" content="{{ foia.title }}" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="{{ request.build_absolute_uri }}" />
-<meta property="og:image" content="{% static 'apple-touch-icon.png' %}" />
+<meta property="og:image" content="{% static 'icons/logo.png' %}" />
 <meta property="og:description" content="{{ foia.user.get_full_name }} {% if foia.date_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to {{ foia.agency.name }} of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}{{ foia.jurisdiction.name }}.{% endif %}" />
 <meta property="og:site_name" content="MuckRock" />
 {% endblock open_graph %}
@@ -27,7 +27,7 @@
 {% endif %}
 <meta name="twitter:title" content="{{ foia.title }}" />
 <meta name="twitter:description" content="{{ foia.user.get_full_name }} {% if foia.date_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to {{ foia.agency.name }} of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}{{ foia.jurisdiction.name }}.{% endif %}" />
-<meta name="twitter:image:src" content="{% static 'apple-touch-icon.png' %}" />
+<meta name="twitter:image:src" content="{% static 'icons/logo.png' %}" />
 {% endblock twitter_card %}
 
 {% block content %}
@@ -111,13 +111,11 @@
     </section>
     <main class="request main">
 
-        <section class="actions">
-            {% include 'foia/foia_actions.html' %}
-        </section>
-
         {% if foia.has_crowdfund %}
-            {% crowdfund_request foia.crowdfund.pk %}
+            {% crowdfund foia.crowdfund.pk %}
         {% endif %}
+
+        {% include 'foia/foia_actions.html' %}
 
         <div class="tab-container">
             <ul role="tablist" class="tab-list">
@@ -187,12 +185,18 @@
                 {% if user_can_edit %}
                 <div class="communications-composer">
                     <div class="composer-actions">
-                        <button class="primary" id="follow-up">Follow Up</button>
+                        <a href="#follow-up" class="primary button">Follow Up</a>
+                        {% if foia.is_payable %}
+                        <a href="#pay" class="success button">Pay Fees</a>
+                        {% if not foia.has_crowdfund %}
+                        <a href="#crowdfund" class="success button">Crowdfund</a>
+                        {% endif %}
+                        {% endif %}
                         {% if is_thankable %}
-                        <button class="success" id="thanks">Thank Agency</button>
+                        <a href="#thanks" class="success button">Thank Agency</a>
                         {% endif %}
                         {% if foia.is_appealable %}
-                        <button class="failure" id="appeal">Appeal</button>
+                        <a href="#appeal" class="failure button">Appeal</a>
                         {% endif %}
                         {% if request.user.is_staff %}
                         <a href="{% url 'foia-admin-fix' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Make an admin fix" class="button">Admin Fix</a>
@@ -200,54 +204,107 @@
                         <button id="get-advice">Get Advice</button>
                         {% endif %}
                     </div>
-                    <div class="inactive composer-input visible">
-                        <p>You may <span id="inactive-follow-up">follow up</span> {% if not foia.disable_autofollowups %}manually {% endif %}with the agency{% if foia.is_appealable %} or <span id="inactive-appeal">appeal</span> their decision{% endif %}.</p>
-                    </div>
-                    <form class="follow-up composer-input" method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="follow_up" />
-                        <label for="follow-up-composer">Send a follow up to the {{ foia.agency.name }}</label>
-                        <textarea name="text" id="follow-up-composer"></textarea>
-                        <div class="buttons">
-                            <button class="primary" type="submit" name="appeal" value="1">Send</button>
-                            <span class="button cancel">Cancel</span>
+                    <div class="composer-inputs">
+                        <div class="inactive composer-input" id="inactive">
+                            <p>You may <a href="#follow-up">follow up</a> {% if not foia.disable_autofollowups %}manually {% endif %}with the agency{% if foia.is_appealable %} or <a href="#appeal">appeal</a> their decision{% endif %}.</p>
                         </div>
-                    </form>
-                    {% if is_thankable %}
-                    <form class="thanks composer-input" method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="thanks" />
-                        <label for="thanks-composer">Send a thank you note to the {{ foia.agency.name }}</label>
-                        <textarea name="text" id="thanks-composer">
-    Hi,
+                        <form class="follow-up composer-input" id="follow-up" method="post">
+                            <header>Send a follow up to the {{ foia.agency.name }}</header>
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="follow_up" />
+                            <textarea name="text" id="follow-up-composer"></textarea>
+                            <div class="buttons">
+                                <button class="primary" type="submit" name="appeal" value="1">Send</button>
+                                <a href="#inactive" class="button cancel">Cancel</a>
+                            </div>
+                        </form>
+                        {% if is_thankable %}
+                        <form class="thanks composer-input" id="thanks" method="post">
+                            <header>Send a thank you note to the {{ foia.agency.name }}</header>
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="thanks" />
 
-    Thanks so much for your help with this request! I really appreciate it.
+                            <textarea name="text" id="thanks-composer">
+        Hi,
 
-    Sincerely,
-    {{foia.user.get_full_name}}
-                        </textarea>
-                        <div class="buttons">
-                            <button class="primary" type="submit" name="thanks" value="1">Send</button>
-                            <span class="button cancel">Cancel</span>
-                        </div>
-                    </form>
-                    {% endif %}
-                    {% if foia.is_appealable %}
-                    <form class="appeal composer-input" method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="appeal" />
-                        {% if foia.agency.appeal_agency %}
-                        <label for="appeal-composer">Send an appeal to the {{ foia.agency.appeal_agency.name }}</label>
-                        {% else %}
-                        <label for="appeal-composer">Send an appeal to the {{ foia.agency.name }}</label>
+        Thanks so much for your help with this request! I really appreciate it.
+
+        Sincerely,
+        {{foia.user.get_full_name}}
+                            </textarea>
+                            <div class="buttons">
+                                <button class="primary" type="submit" name="thanks" value="1">Send</button>
+                                <a href="#inactive" class="button">Cancel</a>
+                            </div>
+                        </form>
                         {% endif %}
-                        <textarea name="text" id="appeal-composer"></textarea>
-                        <div class="buttons">
-                            <button class="primary" type="submit" name="appeal" value="1">Send</button>
-                            <span class="button cancel">Cancel</span>
-                        </div>
-                    </form>
-                    {% endif %}
+                        {% if foia.is_appealable %}
+                        <form class="appeal composer-input" id="appeal" method="post">
+                            {% if foia.agency.appeal_agency %}
+                            <header>Send an appeal to the {{ foia.agency.appeal_agency.name }}</header>
+                            {% else %}
+                            <header>Send an appeal to the {{ foia.agency.name }}</header>
+                            {% endif %}
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="appeal" />
+                            <textarea name="text" id="appeal-composer"></textarea>
+                            <div class="buttons">
+                                <button class="primary" type="submit" name="appeal" value="1">Send</button>
+                                <a href="#inactive" class="button">Cancel</a>
+                            </div>
+                        </form>
+                        {% endif %}
+                        {% if foia.is_payable %}
+                        <form class="payment composer-input stripe-checkout" id="pay" method="post" action="{% url 'foia-pay' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">
+                            <header>
+                                <p>Pay your request fees</p>
+                                <p class="help-text">We will add a 5% fee to this amount to cover our transaction fees.</p>
+                            </header>
+                            {% csrf_token %}
+                            <input type="hidden" name="stripe_token" value="" />
+                            <input type="hidden" name="stripe_pk" value="{{ stripe_pk }}" />
+                            <input type="hidden" name="stripe_image" value="{% static 'icons/logo.png' %}" />
+                            <input type="hidden" name="stripe_email" value="{{request.user.email}}" />
+                            <input type="hidden" name="stripe_label" value="Pay" />
+                            <input type="hidden" name="stripe_description" value="Request Fee" />
+                            <input type="hidden" name="stripe_bitcoin" value="true" />
+                            <input type="hidden" name="stripe_fee" value="0.05" />
+                            <input type="number" name="stripe_amount" class="currency-field" id="stripe_amount" value="{{ foia.get_stripe_amount }}" />
+                            <div class="buttons">
+                                <button type="submit" class="primary">Pay</button>
+                                <a href="#inactive" class="button">Cancel</a>
+                            </div>
+                        </form>
+                        {% if not foia.has_crowdfund %}
+                        <form class="crowdfund composer-input" id="crowdfund" method="post" action="{% url 'foia-crowdfund' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">
+                            <header>Crowdfund your request fees</header>
+                            {% csrf_token %}
+                            {% if form.non_field_errors %}
+                            <object class="failure panel">
+                            {{ form.non_field_errors }}
+                            </object>
+                            {% endif %}
+                            <div class="hidden-fields">
+                            {% for field in form.hidden_fields %}
+                                {{ field }}
+                            {% endfor %}
+                            </div>
+                            {% for field in crowdfund_form.visible_fields %}
+                            <fieldset class="{{ field.label|lower }}{% if field.field.required %} required{% endif %}">
+                                <label {% if field.errors %}class="failure"{% endif %} for="{{ field.auto_id }}">{{ field.label}}</label>
+                                {{ field.errors }}
+                                {{ field }}
+                                {% if field.help_text %}<p class="help-text">{{ field.help_text }}</p>{% endif %}
+                            </fieldset>
+                            {% endfor %}
+                            <div class="buttons">
+                                <button type="submit" class="primary">Create Crowdfund</button>
+                                <a href="#inactive" class="button">Cancel</a>
+                            </div>
+                        </form>
+                        {% endif %}
+                        {% endif %}
+                    </div>
                 </div>
                 {% endif %}
 
@@ -422,20 +479,15 @@
         defaultDate: '{{ foia.date_embargo|date:"m/d/Y" }}'
         {% endif %}
     });
-    /* CHECKOUT */
-    $('.checkout-button').click(function(e){
-        e.preventDefault();
-        var checkoutData = getCheckoutData($(this));
-        checkout(
-            "{{ stripe_pk }}",
-            "{% static 'apple-touch-icon.png' %}",
-            checkoutData.description,
-            checkoutData.amount,
-            checkoutData.email,
-            checkoutData.label,
-            checkoutData.form
-        );
-        return false;
-    });
+    var datepicker_settings = {
+        dateFormat: 'yy-mm-dd',
+        maxDate: '+1m',
+        minDate: 0,
+        firstDay: 1,
+        hideIfNoPrevNext: true,
+        numberOfMonths: 1,
+    };
+    $('input[name=payment_required]').currencyField();
+    $('#id_date_due').datepicker(datepicker_settings);
 </script>
 {% endblock scripts %}

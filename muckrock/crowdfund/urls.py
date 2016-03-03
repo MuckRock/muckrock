@@ -8,16 +8,10 @@ from muckrock.crowdfund import views
 
 urlpatterns = patterns(
     '',
-    url(r'^request/$',
-        views.CrowdfundRequestListView.as_view(),
-        name='crowdfund-request-list'),
-    url(r'^request/(?P<pk>\d+)/$',
-        views.CrowdfundRequestDetail.as_view(),
-        name='crowdfund-request'),
-    url(r'^project/$',
-        views.CrowdfundProjectListView.as_view(),
-        name='crowdfund-project-list'),
-    url(r'^project/(?P<pk>\d+)/$',
-        views.CrowdfundProjectDetail.as_view(),
-        name='crowdfund-project'),
+    url(r'^$',
+        views.CrowdfundListView.as_view(),
+        name='crowdfund-list'),
+    url(r'^(?P<pk>\d+)/$',
+        views.CrowdfundDetailView.as_view(),
+        name='crowdfund'),
 )

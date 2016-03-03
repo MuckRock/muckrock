@@ -55,27 +55,32 @@
 <main class="activity">
 
     <section class="actions">
-        <form action="{% url 'acct-buy-requests' username=user_obj.username %}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
-        <div class="controls">
-            {% if request.user.is_authenticated %}
-            <button data-amount="2000"
-                    data-description="{{request.user.profile.bundled_requests}} requests ($20.00)"
-                    data-email="{{ request.user.email }}"
-                    data-form="#buy-requests"
-                    data-label=""
-                    class="checkout-button primary">
-                    {% if request.user == user_obj %}Buy Requests{% else %}&hearts; Gift Requests{% endif %}
-            </button>
-            {% if request.user == user_obj %}<a href="{% url 'acct-settings' %}" class="button">Settings</a>{% endif %}
+        <form action="{% url 'acct-buy-requests' username=user_obj.username %}" method="POST" class="stripe-checkout" id="buy-requests">
+            {% csrf_token %}
+            <input type="hidden" name="stripe_token" value="" />
+            <input type="hidden" name="stripe_pk" value="{{ stripe_pk }}" />
+            <input type="hidden" name="stripe_image" value="{% static 'icons/logo.png' %}" />
+            <input type="hidden" name="stripe_email" value="{{request.user.email}}" />
+            {% if request.user == user_obj %}
+            <input type="hidden" name="stripe_label" value="Buy" />
             {% else %}
-            <button data-amount="2000"
-                    data-description="4 requests ($20.00)"
-                    data-email=""
-                    data-form="#buy-requests"
-                    data-label=""
-                    class="checkout-button primary">
-                    &hearts; Gift Requests
-            </button>
+            <input type="hidden" name="stripe_label" value="Gift" />
+            {% endif %}
+            {% if request.user.is_authenticated %}
+            <input type="hidden" name="stripe_description" value="{{request.user.profile.bundled_requests}} requests ($20.00)" />
+            {% else %}
+            <input type="hidden" name="stripe_description" value="4 requests ($20.00)" />
+            {% endif %}
+            <input type="hidden" name="stripe_bitcoin" value="true" />
+            <input type="hidden" name="stripe_fee" value="0" />
+            <input type="hidden" name="stripe_amount" value="2000" />
+        </form>
+        <div class="controls">
+            {% if request.user == user_obj %}
+            <button class="primary" form="buy-requests" type="submit">Buy Requests</button>
+            <a href="{% url 'acct-settings' %}" class="button">Settings</a>
+            {% else %}
+            <button class="primary" form="buy-requests" type="submit">&hearts; Gift Requests</button>
             {% endif %}
         </div>
     </section>
@@ -153,24 +158,3 @@
     </section>
 </main>
 {% endblock activity %}
-
-{% block scripts %}
-<script src="https://checkout.stripe.com/checkout.js"></script>
-<script>
-    $(document).ready(function() {
-        $('.checkout-button').click(function(e){
-            e.preventDefault();
-            checkoutData = getCheckoutData($(this));
-            checkout(
-                "{{ stripe_pk }}",
-                "{% static 'apple-touch-icon.png' %}",
-                checkoutData.description,
-                checkoutData.amount,
-                checkoutData.email,
-                checkoutData.label,
-                checkoutData.form
-            );
-        });
-    });
-</script>
-{% endblock scripts %}

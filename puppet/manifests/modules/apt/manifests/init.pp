@@ -1,207 +1,163 @@
-# Class: apt
 #
-# This module manages the initial configuration of apt.
-#
-# Parameters:
-#   The parameters listed here are not required in general and were
-#     added for use cases related to development environments.
-#
-#   disable_keys - disables the requirement for all packages to be signed
-#
-#   always_apt_update - rather apt should be updated on every run (intended
-#     for development environments where package updates are frequent)
-#
-#   apt_update_frequency - *string* Supported values:
-#     **always**: Will fire `apt-get update` at every puppet run. Intended to
-#       deprecate the `always_apt_update` parameter.
-#     **daily**: Trigger `apt-get update` if the value of the fact
-#       `apt_update_last_success` is less than current epoch time - 86400.
-#        *notifying the apt_update exec will trigger apt-get update regardless*
-#     **weekly**: Trigger `apt-get update` if the value of the fact
-#       `apt_update_last_success` is less than current epoch time - 604800.
-#        *notifying the apt_update exec will trigger apt-get update regardless*
-#     **reluctantly**: *Default* only run apt-get update if the exec resource `apt_update` is notified.
-#
-#   purge_sources_list - Accepts true or false. Defaults to false If set to
-#     true, Puppet will purge all unmanaged entries from sources.list
-#
-#   purge_sources_list_d - Accepts true or false. Defaults to false. If set
-#     to true, Puppet will purge all unmanaged entries from sources.list.d
-#
-#   update_timeout - Overrides the exec timeout in seconds for apt-get update.
-#     If not set defaults to Exec's default (300)
-#
-#   update_tries - Number of times that `apt-get update` will be tried. Use this
-#     to work around transient DNS and HTTP errors. By default, the command
-#     will only be run once.
-#
-# Actions:
-#
-# Requires:
-#   puppetlabs/stdlib
-# Sample Usage:
-#  class { 'apt': }
-
 class apt(
-  $always_apt_update    = false,
-  $apt_update_frequency = 'reluctantly',
-  $disable_keys         = undef,
-  $proxy_host           = undef,
-  $proxy_port           = '8080',
-  $purge_sources_list   = false,
-  $purge_sources_list_d = false,
-  $purge_preferences    = false,
-  $purge_preferences_d  = false,
-  $update_timeout       = undef,
-  $update_tries         = undef,
-  $sources              = undef,
-  $fancy_progress       = undef
-) {
-
-  if $::osfamily != 'Debian' {
-    fail('This module only works on Debian or derivatives like Ubuntu')
-  }
+  $update   = {},
+  $purge    = {},
+  $proxy    = {},
+  $sources  = {},
+  $keys     = {},
+  $ppas     = {},
+  $pins     = {},
+  $settings = {},
+) inherits ::apt::params {
 
   $frequency_options = ['always','daily','weekly','reluctantly']
-  validate_re($apt_update_frequency, $frequency_options)
-  include apt::params
-  include apt::update
-
-  validate_bool($purge_sources_list, $purge_sources_list_d,
-                $purge_preferences, $purge_preferences_d)
-
-  $sources_list_content = $purge_sources_list ? {
-    false => undef,
-    true  => "# Repos managed by puppet.\n",
+  validate_hash($update)
+  if $update['frequency'] {
+    validate_re($update['frequency'], $frequency_options)
+  }
+  if $update['timeout'] {
+    unless is_integer($update['timeout']) {
+      fail('timeout value for update must be an integer')
+    }
+  }
+  if $update['tries'] {
+    unless is_integer($update['tries']) {
+      fail('tries value for update must be an integer')
+    }
   }
 
-  if $always_apt_update == true {
+  $_update = merge($::apt::update_defaults, $update)
+  include ::apt::update
+
+  validate_hash($purge)
+  if $purge['sources.list'] {
+    validate_bool($purge['sources.list'])
+  }
+  if $purge['sources.list.d'] {
+    validate_bool($purge['sources.list.d'])
+  }
+  if $purge['preferences'] {
+    validate_bool($purge['preferences'])
+  }
+  if $purge['preferences.d'] {
+    validate_bool($purge['preferences.d'])
+  }
+
+  $_purge = merge($::apt::purge_defaults, $purge)
+
+  validate_hash($proxy)
+  if $proxy['ensure'] {
+    validate_re($proxy['ensure'], ['file', 'present', 'absent'])
+  }
+  if $proxy['host'] {
+    validate_string($proxy['host'])
+  }
+  if $proxy['port'] {
+    unless is_integer($proxy['port']) {
+      fail('$proxy port must be an integer')
+    }
+  }
+  if $proxy['https'] {
+    validate_bool($proxy['https'])
+  }
+
+  $_proxy = merge($apt::proxy_defaults, $proxy)
+
+  validate_hash($sources)
+  validate_hash($keys)
+  validate_hash($settings)
+  validate_hash($ppas)
+  validate_hash($pins)
+
+  if $_proxy['ensure'] == 'absent' or $_proxy['host'] {
+    apt::setting { 'conf-proxy':
+      ensure   => $_proxy['ensure'],
+      priority => '01',
+      content  => template('apt/_conf_header.erb', 'apt/proxy.erb'),
+    }
+  }
+
+  $sources_list_content = $_purge['sources.list'] ? {
+    true    => "# Repos managed by puppet.\n",
+    default => undef,
+  }
+
+  $preferences_ensure = $_purge['preferences'] ? {
+    true    => absent,
+    default => file,
+  }
+
+  if $_update['frequency'] == 'always' {
     Exec <| title=='apt_update' |> {
       refreshonly => false,
     }
   }
 
-  file { '/etc/apt/apt.conf.d/15update-stamp':
-    ensure  => 'file',
-    content => 'APT::Update::Post-Invoke-Success {"touch /var/lib/apt/periodic/update-success-stamp 2>/dev/null || true";};',
-    group   => 'root',
-    mode    => '0644',
-    owner   => 'root',
+  apt::setting { 'conf-update-stamp':
+    priority => 15,
+    content  => template('apt/_conf_header.erb', 'apt/15update-stamp.erb'),
   }
 
-  $root           = $apt::params::root
-  $apt_conf_d     = $apt::params::apt_conf_d
-  $sources_list_d = $apt::params::sources_list_d
-  $preferences_d  = $apt::params::preferences_d
-  $provider       = $apt::params::provider
-
   file { 'sources.list':
-    ensure  => present,
-    path    => "${root}/sources.list",
+    ensure  => file,
+    path    => $::apt::sources_list,
     owner   => root,
     group   => root,
     mode    => '0644',
     content => $sources_list_content,
-    notify  => Exec['apt_update'],
+    notify  => Class['apt::update'],
   }
 
   file { 'sources.list.d':
     ensure  => directory,
-    path    => $sources_list_d,
+    path    => $::apt::sources_list_d,
     owner   => root,
     group   => root,
-    purge   => $purge_sources_list_d,
-    recurse => $purge_sources_list_d,
-    notify  => Exec['apt_update'],
+    mode    => '0644',
+    purge   => $_purge['sources.list.d'],
+    recurse => $_purge['sources.list.d'],
+    notify  => Class['apt::update'],
   }
 
-  if $purge_preferences {
-    file { 'apt-preferences':
-      ensure => absent,
-      path   => "${root}/preferences",
-    }
+  file { 'preferences':
+    ensure => $preferences_ensure,
+    path   => $::apt::preferences,
+    owner  => root,
+    group  => root,
+    mode   => '0644',
+    notify => Class['apt::update'],
   }
 
   file { 'preferences.d':
     ensure  => directory,
-    path    => $preferences_d,
+    path    => $::apt::preferences_d,
     owner   => root,
     group   => root,
-    purge   => $purge_preferences_d,
-    recurse => $purge_preferences_d,
-  }
-
-  case $fancy_progress {
-    true: {
-      file { '99progressbar':
-        ensure  => present,
-        content => 'Dpkg::Progress-Fancy "1";',
-        path    => "${apt_conf_d}/99progressbar",
-      }
-    }
-    false: {
-      file { '99progressbar':
-        ensure => absent,
-        path   => "${apt_conf_d}/99progressbar",
-      }
-    }
-    undef: {} # do nothing
-    default: { fail('Valid values for fancy_progress are true or false') }
-  }
-
-  case $disable_keys {
-    true: {
-      file { '99unauth':
-        ensure  => present,
-        content => "APT::Get::AllowUnauthenticated 1;\n",
-        path    => "${apt_conf_d}/99unauth",
-      }
-    }
-    false: {
-      file { '99unauth':
-        ensure => absent,
-        path   => "${apt_conf_d}/99unauth",
-      }
-    }
-    undef:   { } # do nothing
-    default: { fail('Valid values for disable_keys are true or false') }
-  }
-
-  case $proxy_host {
-    false, '', undef: {
-      file { '01proxy':
-        ensure => absent,
-        path   => "${apt_conf_d}/01proxy",
-        notify => Exec['apt_update'],
-      }
-    }
-    default: {
-      file { '01proxy':
-        ensure  => present,
-        path    => "${apt_conf_d}/01proxy",
-        content => "Acquire::http::Proxy \"http://${proxy_host}:${proxy_port}\";\n",
-        notify  => Exec['apt_update'],
-        mode    => '0644',
-        owner   => root,
-        group   => root,
-      }
-    }
-  }
-
-  file { 'old-proxy-file':
-    ensure => absent,
-    path   => "${apt_conf_d}/proxy",
-    notify => Exec['apt_update'],
-  }
-
-  # Need anchor to provide containment for dependencies.
-  anchor { 'apt::update':
-    require => Class['apt::update'],
+    mode    => '0644',
+    purge   => $_purge['preferences.d'],
+    recurse => $_purge['preferences.d'],
+    notify  => Class['apt::update'],
   }
 
   # manage sources if present
-  if $sources != undef {
-    validate_hash($sources)
+  if $sources {
     create_resources('apt::source', $sources)
+  }
+  # manage keys if present
+  if $keys {
+    create_resources('apt::key', $keys)
+  }
+  # manage ppas if present
+  if $ppas {
+    create_resources('apt::ppa', $ppas)
+  }
+  # manage settings if present
+  if $settings {
+    create_resources('apt::setting', $settings)
+  }
+
+  # manage pins if present
+  if $pins {
+    create_resources('apt::pin', $pins)
   }
 }

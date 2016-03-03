@@ -79,10 +79,10 @@ MuckRock &bull; {{ project.title }}
             </div>
         </section>
         <section class="project-crowdfunds">
-            {% with project.crowdfund.all as crowdfunds %}
+            {% with project.crowdfunds.all as crowdfunds %}
             {% if crowdfunds %}
                 {% for crowdfund in crowdfunds %}
-                    {% crowdfund_project crowdfund=crowdfund %}
+                    {% crowdfund crowdfund=crowdfund %}
                 {% endfor %}
             {% endif %}
             {% endwith %}
@@ -122,6 +122,14 @@ MuckRock &bull; {{ project.title }}
             <h2>Requests</h2>
             {% include 'lib/foia_table.html' with requests=visible_requests %}
         </section>
+        {% endif %}
+        {% if maps and request.user.is_staff %}
+        <h2>Maps</h2>
+        <ul class="maps">
+            {% for map in maps %}
+            <li class="map"><a href="{{ map.get_absolute_url }}">{{ map.title }}</a></li>
+            {% endfor %}
+        </ul>
         {% endif %}
     </article>
 {% endblock %}

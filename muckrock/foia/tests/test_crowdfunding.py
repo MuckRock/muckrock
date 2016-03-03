@@ -2,53 +2,54 @@
 Tests using nose for the FOIA application
 """
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AnonymousUser
 from django.core.urlresolvers import reverse, resolve
-from django.core import mail
-from django.test import TestCase, Client
+from django.test import TestCase, RequestFactory
 import nose.tools
 
 import datetime
 
-from muckrock.crowdfund.models import CrowdfundRequest
-from muckrock.crowdfund.forms import CrowdfundRequestForm
-from muckrock.foia.models import FOIARequest
+from muckrock.crowdfund.models import Crowdfund
+from muckrock.factories import UserFactory, FOIARequestFactory
+from muckrock.foia.views import crowdfund_request
+from muckrock.utils import mock_middleware
 
-# pylint: disable=no-self-use
-# pylint: disable=too-many-public-methods
 # pylint: disable=no-member
 # pylint: disable=missing-docstring
 # pylint: disable=invalid-name
 
 class TestFOIACrowdfunding(TestCase):
     """Tests for FOIA Crowdfunding"""
-
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
-                'test_foiacommunications.json']
-
     def setUp(self):
-        """Set up tests"""
-        # pylint: disable=C0103
-        # pylint: disable=bad-super-call
-        # pylint: disable=C0111
-
-        mail.outbox = []
-        self.user = User.objects.get(pk=1)
-        self.foia = FOIARequest.objects.get(pk=18)
+        self.foia = FOIARequestFactory(status='payment')
         self.url = reverse('foia-crowdfund', args=(
             self.foia.jurisdiction.slug,
             self.foia.jurisdiction.id,
             self.foia.slug,
             self.foia.id))
-        self.client = Client()
+        self.request_factory = RequestFactory()
+        self.view = crowdfund_request
 
-    def form(self):
-        self.client.login(username='adam', password='abc')
-        response = self.client.get(self.url)
-        return response.context['form']
+    def get_res(self, user):
+        """Returns a GET response from the endpoint."""
+        if user is None:
+            user = AnonymousUser()
+        request = self.request_factory.get(self.url)
+        request.user = user
+        request = mock_middleware(request)
+        return self.view(request, self.foia.pk)
+
+    def post_res(self, user, data):
+        """Returns a POST response from the endpoint."""
+        if user is None:
+            user = AnonymousUser()
+        request = self.request_factory.post(self.url, data)
+        request.user = user
+        request = mock_middleware(request)
+        return self.view(request, self.foia.pk)
 
     def test_crowdfund_url(self):
+        """Crowdfund creation should use the /crowdfund endpoint of a request."""
         expected_url = (
             '/foi/' +
             self.foia.jurisdiction.slug + '-' + str(self.foia.jurisdiction.id) + '/' +
@@ -59,79 +60,75 @@ class TestFOIACrowdfunding(TestCase):
             'Crowdfund URL <' + self.url + '> should match expected URL <' + expected_url + '>')
 
     def test_crowdfund_view(self):
+        """The url should actually resolve to a view."""
         resolver = resolve(self.url)
         nose.tools.eq_(resolver.view_name, 'foia-crowdfund',
             'Crowdfund view name "' + resolver.view_name + '" should match "foia-crowdfund"')
 
     def test_crowdfund_view_requires_login(self):
-        # client should be logged out
-        response = self.client.get(self.url, follow=True)
-        nose.tools.ok_(response,
-            'Crowdfund should return a response object when issued a GET command')
-        self.assertRedirects(response, '/accounts/login/?next=%s' % self.url)
+        """Logged out users should be redirected to the login page"""
+        response = self.get_res(None)
+        nose.tools.ok_(response.status_code, 302)
+        nose.tools.eq_(response.url, '/accounts/login/?next=%s' % self.url)
+
+    def test_crowdfund_view_allows_owner(self):
+        """Request owners may create a crowdfund on their request."""
+        response = self.get_res(self.foia.user)
+        nose.tools.eq_(response.status_code, 200,
+            ('Above all else crowdfund should totally respond with a 200 OK if'
+            ' logged in user owns the request. (Responds with %d)' % response.status_code))
 
     def test_crowdfund_view_requires_owner(self):
-        # adam is the owner, not bob
-        self.client.login(username='bob', password='abc')
-        response = self.client.get(self.url)
+        """Users who are not the owner cannot start a crowdfund on a request."""
+        not_owner = UserFactory()
+        response = self.get_res(not_owner)
         nose.tools.eq_(response.status_code, 302,
             ('Crowdfund should respond with a 302 redirect if logged in'
             ' user is not the owner. (Responds with %d)' % response.status_code))
 
     def test_crowdfund_view_allows_staff(self):
-        # adam is the owner, charles is staff
-        self.client.login(username='charles', password='abc')
-        response = self.client.get(self.url)
+        """Staff members are the exception to the above rule, they can do whatevs."""
+        staff_user = UserFactory(is_staff=True)
+        response = self.get_res(staff_user)
         nose.tools.eq_(response.status_code, 200,
             ('Crowdfund should respond with a 200 OK if logged in user'
             ' is a staff member. (Responds with %d)' % response.status_code))
 
-    def test_crowdfund_view_allows_owner(self):
-        # adam is the owner
-        self.client.login(username='adam', password='abc')
-        response = self.client.get(self.url)
-        nose.tools.eq_(response.status_code, 200,
-            ('Above all else crowdfund should totally respond with a 200 OK if'
-            ' logged in user owns the request. (Responds with %d)' % response.status_code))
-
     def test_crowdfund_view_crowdfund_already_exists(self):
+        """A crowdfund cannot be created for a request that already has one, even if expired."""
         date_due = datetime.datetime.now() + datetime.timedelta(30)
-        CrowdfundRequest.objects.create(foia=self.foia, date_due=date_due)
-        self.client.login(username='adam', password='abc')
-        response = self.client.get(self.url)
+        self.foia.crowdfund = Crowdfund.objects.create(date_due=date_due)
+        self.foia.save()
+        response = self.get_res(self.foia.user)
         nose.tools.eq_(response.status_code, 302,
             ('If a request already has a crowdfund, trying to create a new one '
             'should respond with 302 status code. (Responds with %d)' % response.status_code))
 
     def test_crowdfund_view_payment_not_required(self):
-        self.client.login(username='adam', password='abc')
+        """A crowdfund can only be created for a request with a status of 'payment'"""
         self.foia.status = 'submitted'
         self.foia.save()
-        response = self.client.get(self.url)
+        response = self.get_res(self.foia.user)
         nose.tools.eq_(response.status_code, 302,
             ('If a request does not have a "Payment Required" status, should '
             'respond with a 302 status code. (Responds with %d)' % response.status_code))
 
-    def test_crowdfund_view_uses_correct_template(self):
-        template = 'forms/foia/crowdfund.html'
-        self.client.login(username='adam', password='abc')
-        response = self.client.get(self.url)
-        nose.tools.ok_(template in [template.name for template in response.templates],
-            ('Should render a form-based template for creating a crowdfund.'
-            ' (Renders %s)' % response.templates))
-
-    def test_crowdfund_view_uses_correct_form(self):
-        form = self.form()
-        nose.tools.eq_(form.__class__, CrowdfundRequestForm,
-            'View should use the CrowdfundRequestForm')
-
-    def test_crowdfund_view_form_has_initial_data(self):
-        form = self.form()
-        nose.tools.eq_(hasattr(form, 'initial'), True,
-            'Every CrowdfundRequestForm should have some initial data')
-
-    def test_crowdfund_submit_with_initial_data(self):
-        form = self.form()
-        response = self.client.post(self.url, form.data)
-        nose.tools.eq_(response.status_code, 200,
-            'The crowdfund form should be submittable with just the initial data')
+    def test_crowdfund_creation(self):
+        """Creating a crowdfund should associate it with the request."""
+        name = 'Request Crowdfund'
+        description = 'A crowdfund'
+        payment_required = 100
+        payment_capped = True
+        date_due = datetime.date.today() + datetime.timedelta(20)
+        data = {
+            'name': name,
+            'description': description,
+            'payment_required': payment_required,
+            'payment_capped': payment_capped,
+            'date_due': date_due
+        }
+        response = self.post_res(self.foia.user, data)
+        nose.tools.eq_(response.status_code, 302, 'The request should redirect to the FOIA.')
+        self.foia.refresh_from_db()
+        nose.tools.ok_(self.foia.has_crowdfund(),
+            'The crowdfund should be created and associated with the FOIA.')

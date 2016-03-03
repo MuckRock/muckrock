@@ -15,7 +15,7 @@
     {% response_task task %}
 {% elif task.type == "StatusChangeTask" %}
     {% status_change_task task %}
-{% elif task.type == "GenericCrowdfundTask" %}
+{% elif task.type == "CrowdfundTask" %}
     {% crowdfund_task task %}
 {% elif task.type == "MultiRequestTask" %}
     {% multi_request_task task %}
