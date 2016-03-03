@@ -70,8 +70,11 @@ class Project(models.Model):
         related_name='projects',
         blank=True,
         )
-    crowdfunds = models.ManyToManyField('crowdfund.Crowdfund',
-            through='ProjectCrowdfunds', related_name='projects')
+    crowdfunds = models.ManyToManyField(
+        'crowdfund.Crowdfund',
+        through='ProjectCrowdfunds',
+        related_name='projects'
+        )
 
     tags = taggit.managers.TaggableManager(through='tags.TaggedItemBase', blank=True)
 

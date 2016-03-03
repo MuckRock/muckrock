@@ -1,115 +1,106 @@
 # == Define: apt::key
-#
-# The apt::key defined type allows for keys to be added to apt's keyring
-# which is used for package validation. This defined type uses the apt_key
-# native type to manage keys. This is a simple wrapper around apt_key with
-# a few safeguards in place.
-#
-# === Parameters
-#
-# [*key*]
-#   _default_: +$title+, the title/name of the resource
-#
-#   Is a GPG key ID. This key ID is validated with a regex enforcing it
-#   to only contain valid hexadecimal characters, be precisely 8 or 16
-#   characters long and optionally prefixed with 0x.
-#
-# [*ensure*]
-#   _default_: +present+
-#
-#   The state we want this key in, may be either one of:
-#   * +present+
-#   * +absent+
-#
-# [*key_content*]
-#   _default_: +undef+
-#
-#   This parameter can be used to pass in a GPG key as a
-#   string in case it cannot be fetched from a remote location
-#   and using a file resource is for other reasons inconvenient.
-#
-# [*key_source*]
-#   _default_: +undef+
-#
-#   This parameter can be used to pass in the location of a GPG
-#   key. This URI can take the form of a:
-#   * +URL+: ftp, http or https
-#   * +path+: absolute path to a file on the target system.
-#
-# [*key_server*]
-#   _default_: +undef+
-#
-#   The keyserver from where to fetch our GPG key. It can either be a domain
-#   name or url. It defaults to
-#   undef which results in apt_key's default keyserver being used,
-#   currently +keyserver.ubuntu.com+.
-#
-# [*key_options*]
-#   _default_: +undef+
-#
-#   Additional options to pass on to `apt-key adv --keyserver-options`.
 define apt::key (
-  $key         = $title,
+  $id          = $title,
   $ensure      = present,
+  $content     = undef,
+  $source      = undef,
+  $server      = $::apt::keyserver,
+  $options     = undef,
+  $key         = undef,
   $key_content = undef,
   $key_source  = undef,
   $key_server  = undef,
   $key_options = undef,
 ) {
 
-  validate_re($key, ['\A(0x)?[0-9a-fA-F]{8}\Z', '\A(0x)?[0-9a-fA-F]{16}\Z'])
+  if $key != undef {
+    warning('$key is deprecated and will be removed in the next major release. Please use $id instead.')
+    $_id = $key
+  } else {
+    $_id = $id
+  }
+
+  if $key_content != undef {
+    warning('$key_content is deprecated and will be removed in the next major release. Please use $content instead.')
+    $_content = $key_content
+  } else {
+    $_content = $content
+  }
+
+  if $key_source != undef {
+    warning('$key_source is deprecated and will be removed in the next major release. Please use $source instead.')
+    $_source = $key_source
+  } else {
+    $_source = $source
+  }
+
+  if $key_server != undef {
+    warning('$key_server is deprecated and will be removed in the next major release. Please use $server instead.')
+    $_server = $key_server
+  } else {
+    $_server = $server
+  }
+
+  if $key_options != undef {
+    warning('$key_options is deprecated and will be removed in the next major release. Please use $options instead.')
+    $_options = $key_options
+  } else {
+    $_options = $options
+  }
+
+  validate_re($_id, ['\A(0x)?[0-9a-fA-F]{8}\Z', '\A(0x)?[0-9a-fA-F]{16}\Z', '\A(0x)?[0-9a-fA-F]{40}\Z'])
   validate_re($ensure, ['\Aabsent|present\Z',])
 
-  if $key_content {
-    validate_string($key_content)
+  if $_content {
+    validate_string($_content)
   }
 
-  if $key_source {
-    validate_re($key_source, ['\Ahttps?:\/\/', '\Aftp:\/\/', '\A\/\w+'])
+  if $_source {
+    validate_re($_source, ['\Ahttps?:\/\/', '\Aftp:\/\/', '\A\/\w+'])
   }
 
-  if $key_server {
-    validate_re($key_server,['\A((hkp|http|https):\/\/)?([a-z\d])([a-z\d-]{0,61}\.)+[a-z\d]+(:\d{2,4})?$'])
+  if $_server {
+    validate_re($_server,['\A((hkp|http|https):\/\/)?([a-z\d])([a-z\d-]{0,61}\.)+[a-z\d]+(:\d{2,5})?$'])
   }
 
-  if $key_options {
-    validate_string($key_options)
+  if $_options {
+    validate_string($_options)
   }
 
   case $ensure {
     present: {
-      if defined(Anchor["apt_key ${key} absent"]){
-        fail("key with id ${key} already ensured as absent")
+      if defined(Anchor["apt_key ${_id} absent"]){
+        fail("key with id ${_id} already ensured as absent")
       }
 
-      if !defined(Anchor["apt_key ${key} present"]) {
+      if !defined(Anchor["apt_key ${_id} present"]) {
         apt_key { $title:
-          ensure            => $ensure,
-          id                => $key,
-          source            => $key_source,
-          content           => $key_content,
-          server            => $key_server,
-          keyserver_options => $key_options,
+          ensure  => $ensure,
+          id      => $_id,
+          source  => $_source,
+          content => $_content,
+          server  => $_server,
+          options => $_options,
         } ->
-        anchor { "apt_key ${key} present": }
+        anchor { "apt_key ${_id} present": }
       }
     }
 
     absent: {
-      if defined(Anchor["apt_key ${key} present"]){
-        fail("key with id ${key} already ensured as present")
+      if defined(Anchor["apt_key ${_id} present"]){
+        fail("key with id ${_id} already ensured as present")
       }
 
-      if !defined(Anchor["apt_key ${key} absent"]){
+      if !defined(Anchor["apt_key ${_id} absent"]){
         apt_key { $title:
-          ensure            => $ensure,
-          id                => $key,
-          source            => $key_source,
-          content           => $key_content,
-          server            => $key_server,
-          keyserver_options => $key_options,
+          ensure  => $ensure,
+          id      => $_id,
+          source  => $_source,
+          content => $_content,
+          server  => $_server,
+          options => $_options,
         } ->
-        anchor { "apt_key ${key} absent": }
+        anchor { "apt_key ${_id} absent": }
       }
     }
 

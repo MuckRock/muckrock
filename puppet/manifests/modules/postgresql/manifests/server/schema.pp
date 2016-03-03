@@ -1,14 +1,34 @@
-# This defined types creates database schemas. See README.md for more details.
+# = Type: postgresql::server::schema
+#
+# Create a new schema. See README.md for more details.
+#
+# == Requires:
+#
+# The database must exist and the PostgreSQL user should have enough privileges
+#
+# == Sample Usage:
+#
+# postgresql::server::schema {'private':
+#     db => 'template1',
+# }
+#
 define postgresql::server::schema(
-  $db,
+  $db = $postgresql::server::default_database,
   $owner  = undef,
   $schema = $title,
+  $connect_settings = $postgresql::server::default_connect_settings,
 ) {
   $user      = $postgresql::server::user
   $group     = $postgresql::server::group
-  $port      = $postgresql::server::port
   $psql_path = $postgresql::server::psql_path
   $version   = $postgresql::server::_version
+
+  # If the connection settings do not contain a port, then use the local server port
+  if $connect_settings != undef and has_key( $connect_settings, 'PGPORT') {
+    $port = undef
+  } else {
+    $port = $postgresql::server::port
+  }
 
   Postgresql_psql {
     db         => $db,
@@ -16,9 +36,10 @@ define postgresql::server::schema(
     psql_group => $group,
     psql_path  => $psql_path,
     port       => $port,
+    connect_settings => $connect_settings,
   }
 
-  $schema_title   = "Create Schema '${schema}'"
+  $schema_title   = "Create Schema '${title}'"
   $authorization = $owner? {
     undef   => '',
     default => "AUTHORIZATION \"${owner}\"",

@@ -1,4 +1,3 @@
-require 'date'
 require 'open-uri'
 require 'net/ftp'
 require 'tempfile'
@@ -13,42 +12,54 @@ end
 
 Puppet::Type.type(:apt_key).provide(:apt_key) do
 
-  KEY_LINE = {
-    :date     => '[0-9]{4}-[0-9]{2}-[0-9]{2}',
-    :key_type => '(R|D)',
-    :key_size => '\d{4}',
-    :key_id   => '[0-9a-fA-F]+',
-    :expires  => 'expire(d|s)',
-  }
-
   confine    :osfamily => :debian
   defaultfor :osfamily => :debian
   commands   :apt_key  => 'apt-key'
+  commands   :gpg      => '/usr/bin/gpg'
 
   def self.instances
+    cli_args = ['adv','--list-keys', '--with-colons', '--fingerprint', '--fixed-list-mode']
+
     if RUBY_VERSION > '1.8.7'
-      key_output = apt_key('list').encode('UTF-8', 'binary', :invalid => :replace, :undef => :replace, :replace => '')
+      key_output = apt_key(cli_args).encode('UTF-8', 'binary', :invalid => :replace, :undef => :replace, :replace => '')
     else
-      key_output = apt_key('list')
+      key_output = apt_key(cli_args)
     end
+
+    pub_line, fpr_line = nil
+
     key_array = key_output.split("\n").collect do |line|
-      line_hash = key_line_hash(line)
-      next unless line_hash
+      if line.start_with?('pub')
+          pub_line = line
+      elsif line.start_with?('fpr')
+          fpr_line = line
+      end
+
+      next unless (pub_line and fpr_line)
+
+      line_hash = key_line_hash(pub_line, fpr_line)
+
+      # reset everything
+      pub_line, fpr_line = nil
+
       expired = false
 
       if line_hash[:key_expiry]
-        expired = Date.today > Date.parse(line_hash[:key_expiry])
+        expired = Time.now >= line_hash[:key_expiry]
       end
 
       new(
-        :name    => line_hash[:key_id],
-        :id      => line_hash[:key_id],
-        :ensure  => :present,
-        :expired => expired,
-        :expiry  => line_hash[:key_expiry],
-        :size    => line_hash[:key_size],
-        :type    => line_hash[:key_type] == 'R' ? :rsa : :dsa,
-        :created => line_hash[:key_created]
+        :name        => line_hash[:key_fingerprint],
+        :id          => line_hash[:key_long],
+        :fingerprint => line_hash[:key_fingerprint],
+        :short       => line_hash[:key_short],
+        :long        => line_hash[:key_long],
+        :ensure      => :present,
+        :expired     => expired,
+        :expiry      => line_hash[:key_expiry].nil? ? nil : line_hash[:key_expiry].strftime("%Y-%m-%d"),
+        :size        => line_hash[:key_size],
+        :type        => line_hash[:key_type],
+        :created     => line_hash[:key_created].strftime("%Y-%m-%d")
       )
     end
     key_array.compact!
@@ -57,68 +68,60 @@ Puppet::Type.type(:apt_key).provide(:apt_key) do
   def self.prefetch(resources)
     apt_keys = instances
     resources.keys.each do |name|
-      if name.length == 16
-        shortname=name[8..-1]
-      else
-        shortname=name
-      end
-      if provider = apt_keys.find{ |key| key.name == shortname }
-        resources[name].provider = provider
+      if name.length == 40
+        if provider = apt_keys.find{ |key| key.fingerprint == name }
+          resources[name].provider = provider
+        end
+      elsif name.length == 16
+        if provider = apt_keys.find{ |key| key.long == name }
+          resources[name].provider = provider
+        end
+      elsif name.length == 8
+        if provider = apt_keys.find{ |key| key.short == name }
+          resources[name].provider = provider
+        end
       end
     end
   end
 
-  def self.key_line_hash(line)
-    line_array = line.match(key_line_regexp).to_a
-    return nil if line_array.length < 5
+  def self.key_line_hash(pub_line, fpr_line)
+    pub_split = pub_line.split(':')
+    fpr_split = fpr_line.split(':')
 
+    fingerprint = fpr_split.last
     return_hash = {
-      :key_id      => line_array[3],
-      :key_size    => line_array[1],
-      :key_type    => line_array[2],
-      :key_created => line_array[4],
-      :key_expiry  => nil,
+      :key_fingerprint => fingerprint,
+      :key_long        => fingerprint[-16..-1], # last 16 characters of fingerprint
+      :key_short       => fingerprint[-8..-1], # last 8 characters of fingerprint
+      :key_size        => pub_split[2],
+      :key_type        => nil,
+      :key_created     => Time.at(pub_split[5].to_i),
+      :key_expiry      => pub_split[6].empty? ? nil : Time.at(pub_split[6].to_i),
     }
 
-    return_hash[:key_expiry] = line_array[7] if line_array.length == 8
+    # set key type based on types defined in /usr/share/doc/gnupg/DETAILS.gz
+    case pub_split[3]
+    when "1"
+      return_hash[:key_type] = :rsa
+    when "17"
+      return_hash[:key_type] = :dsa
+    when "18"
+      return_hash[:key_type] = :ecc
+    when "19"
+      return_hash[:key_type] = :ecdsa
+    end
+
     return return_hash
   end
 
-  def self.key_line_regexp
-    # This regexp is trying to match the following output
-    # pub   4096R/4BD6EC30 2010-07-10 [expires: 2016-07-08]
-    # pub   1024D/CD2EFD2A 2009-12-15
-    regexp = /\A
-      pub  # match only the public key, not signatures
-      \s+  # bunch of spaces after that
-      (#{KEY_LINE[:key_size]})  # size of the key, usually a multiple of 1024
-      #{KEY_LINE[:key_type]}  # type of the key, usually R or D
-      \/  # separator between key_type and key_id
-      (#{KEY_LINE[:key_id]})  # hex id of the key
-      \s+  # bunch of spaces after that
-      (#{KEY_LINE[:date]})  # date the key was added to the keyring
-      # following an optional block which indicates if the key has an expiration
-      # date and if it has expired yet
-      (
-        \s+  # again with thes paces
-        \[  # we open with a square bracket
-        #{KEY_LINE[:expires]}  # expires or expired
-        \:  # a colon
-        \s+  # more spaces
-        (#{KEY_LINE[:date]})  # date indicating key expiry
-        \]  # we close with a square bracket
-      )?  # end of the optional block
-      \Z/x
-      regexp
-  end
-
   def source_to_file(value)
-    if URI::parse(value).scheme.nil?
+    parsedValue = URI::parse(value)
+    if parsedValue.scheme.nil?
       fail("The file #{value} does not exist") unless File.exists?(value)
       value
     else
       begin
-        key = open(value, :ftp_active_mode => false).read
+        key = parsedValue.read
       rescue OpenURI::HTTPError, Net::FTPPermError => e
         fail("#{e.message} for #{resource[:source]}")
       rescue SocketError
@@ -133,6 +136,25 @@ Puppet::Type.type(:apt_key).provide(:apt_key) do
     file = Tempfile.new('apt_key')
     file.write content
     file.close
+    #confirm that the fingerprint from the file, matches the long key that is in the manifest
+    if name.size == 40
+      if File.executable? command(:gpg)
+        extracted_key = execute(["#{command(:gpg)} --with-fingerprint --with-colons #{file.path} | awk -F: '/^fpr:/ { print $10 }'"], :failonfail => false)
+        extracted_key = extracted_key.chomp
+
+        found_match = false
+        extracted_key.each_line do |line|
+          if line.chomp == name
+            found_match = true
+          end
+        end
+        if not found_match
+          fail("The id in your manifest #{resource[:name]} and the fingerprint from content/source do not match. Please check there is not an error in the id or check the content/source is legitimate.")
+        end
+      else
+        warning('/usr/bin/gpg cannot be found for verification of the id.')
+      end
+    end
     file.path
   end
 
@@ -146,8 +168,8 @@ Puppet::Type.type(:apt_key).provide(:apt_key) do
       # Breaking up the command like this is needed because it blows up
       # if --recv-keys isn't the last argument.
       command.push('adv', '--keyserver', resource[:server])
-      unless resource[:keyserver_options].nil?
-        command.push('--keyserver-options', resource[:keyserver_options])
+      unless resource[:options].nil?
+        command.push('--keyserver-options', resource[:options])
       end
       command.push('--recv-keys', resource[:id])
     elsif resource[:content]
@@ -163,7 +185,10 @@ Puppet::Type.type(:apt_key).provide(:apt_key) do
   end
 
   def destroy
-    apt_key('del', resource[:id])
+    begin
+      apt_key('del', resource.provider.short)
+      r = execute(["#{command(:apt_key)} list | grep '/#{resource.provider.short}\s'"], :failonfail => false)
+    end while r.exitstatus == 0
     @property_hash.clear
   end
 
