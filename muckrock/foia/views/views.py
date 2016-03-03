@@ -270,7 +270,7 @@ class Detail(DetailView):
         context['crowdfund_form'] = CrowdfundForm(initial={
             'name': u'Crowdfund Request: %s' % unicode(foia),
             'description': 'Help cover the request fees needed to free these docs!',
-            'payment_required': foia.price,
+            'payment_required': foia.get_stripe_amount(),
             'date_due': datetime.now() + timedelta(30),
             'foia': foia
         })
