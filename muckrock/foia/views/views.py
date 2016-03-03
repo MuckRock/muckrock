@@ -16,11 +16,12 @@ from django.template import RequestContext
 from django.views.generic.detail import DetailView
 
 import actstream
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import logging
 
 from muckrock.agency.forms import AgencyForm
+from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.foia.codes import CODES
 from muckrock.foia.forms import (
     RequestFilterForm,
@@ -252,6 +253,7 @@ class Detail(DetailView):
         context['all_tags'] = Tag.objects.all()
         context['past_due'] = is_past_due
         context['user_can_edit'] = user_can_edit
+        context['user_can_pay'] = user_can_edit and foia.is_payable()
         context['embargo'] = {
             'show': ((user_can_edit and foia.user.profile.can_embargo)\
                     or foia.embargo) or user.is_staff,
@@ -265,10 +267,15 @@ class Detail(DetailView):
         })
         context['note_form'] = FOIANoteForm()
         context['access_form'] = FOIAAccessForm()
+        context['crowdfund_form'] = CrowdfundForm(initial={
+            'name': u'Crowdfund Request: %s' % unicode(foia),
+            'description': 'Help cover the request fees needed to free these docs!',
+            'payment_required': foia.price,
+            'date_due': datetime.now() + timedelta(30),
+            'foia': foia
+        })
         context['embargo_needs_date'] = foia.status in END_STATUS
         context['user_actions'] = foia.user_actions(user)
-        context['noncontextual_request_actions'] = \
-                foia.noncontextual_request_actions(user_can_edit)
         context['contextual_request_actions'] = \
                 foia.contextual_request_actions(user, user_can_edit)
         context['status_choices'] = STATUS if include_draft else STATUS_NODRAFT

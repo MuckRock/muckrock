@@ -59,9 +59,18 @@
                 {% endif %}
             </footer>
         </form>
-        <form method="post" class="billing form" id="billing">
+        <form method="post" class="billing form stripe-checkout" id="billing">
             {% csrf_token %}
             <input type="hidden" name="action" value="billing" />
+            <input type="hidden" name="stripe_token" value="" />
+            <input type="hidden" name="stripe_pk" value="{{ stripe_pk }}" />
+            <input type="hidden" name="stripe_image" value="{% static 'icons/logo.png' %}" />
+            <input type="hidden" name="stripe_email" value="{{request.user.email}}" />
+            <input type="hidden" name="stripe_label" value="Update" />
+            <input type="hidden" name="stripe_description" value="Update Credit Card" />
+            <input type="hidden" name="stripe_bitcoin" value="false" />
+            <input type="hidden" name="stripe_fee" value="0" />
+            <input type="hidden" name="stripe_amount" value="0" />
             <h2>Billing</h2>
             <table>
                 <tbody>
@@ -80,15 +89,7 @@
                             <p>Expires {{credit_card.exp_month}}/{{credit_card.exp_year}}</p>
                         </td>
                         <td>
-                            <button
-                                data-amount="0"
-                                data-description="Update Credit Card"
-                                data-email="{{ request.user.email }}"
-                                data-label="Update"
-                                data-form="#billing"
-                                class="checkout-button primary">
-                                Update Credit Card
-                            </button>
+                            <button type="submit">Update Credit Card</button>
                         </td>
                     <tr>
                     {% endif %}
@@ -100,34 +101,16 @@
 {% endblock %}
 
 {% block scripts %}
-    <script src="https://checkout.stripe.com/checkout.js"></script>
-    <script type="text/javascript">
-        var email = $('#id_email').val();
-        var validateHref = $('#verify_email').attr('href');
-        $('#id_email').change(function(){
-            var newEmail = $('#id_email').val();
-            if (newEmail != email) {
-                $('#verify_email').addClass('disabled').removeAttr('href');
-            } else {
-                $('#verify_email').removeClass('disabled').attr('href', validateHref);
-            }
-        });
-        $(document).ready(function() {
-            $('.checkout-button').click(function(e){
-                e.preventDefault();
-                var checkoutData = getCheckoutData($(this));
-                checkout(
-                    "{{ stripe_pk }}",
-                    "{% static 'icons/logo.png' %}",
-                    checkoutData.description,
-                    checkoutData.amount,
-                    checkoutData.email,
-                    checkoutData.label,
-                    checkoutData.form,
-                    true,
-                    false
-                );
-            });
-        });
-    </script>
+<script type="text/javascript">
+    var email = $('#id_email').val();
+    var validateHref = $('#verify_email').attr('href');
+    $('#id_email').change(function(){
+        var newEmail = $('#id_email').val();
+        if (newEmail != email) {
+            $('#verify_email').addClass('disabled').removeAttr('href');
+        } else {
+            $('#verify_email').removeClass('disabled').attr('href', validateHref);
+        }
+    });
+</script>
 {% endblock %}
