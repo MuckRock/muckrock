@@ -3,8 +3,6 @@ Models for the Task application
 """
 
 from django.contrib.auth.models import User
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import Prefetch, Q
 
@@ -470,25 +468,6 @@ class StatusChangeTask(Task):
 
 
 class CrowdfundTask(Task):
-    """Created when a crowdfund is finished"""
-    crowdfund = models.ForeignKey('crowdfund.CrowdfundRequest')
-
-    def __unicode__(self):
-        return u'Crowdfund Task'
-
-
-class GenericCrowdfundTask(Task):
-    """Created when a crowdfund is finished"""
-    type = 'GenericCrowdfundTask'
-    content_type = models.ForeignKey(ContentType)
-    object_id = models.PositiveIntegerField()
-    crowdfund = GenericForeignKey('content_type', 'object_id')
-
-    def __unicode__(self):
-        return u'Crowdfund Task'
-
-
-class NewCrowdfundTask(Task):
     """Created when a crowdfund is finished"""
     type = 'CrowdfundTask'
     crowdfund = models.ForeignKey('crowdfund.Crowdfund')
