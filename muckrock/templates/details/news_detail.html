@@ -103,20 +103,6 @@
 
 {% block scripts %}
 <script type="text/javascript">
-$('.checkout-button').click(function(e){
-    e.preventDefault();
-    var checkoutData = getCheckoutData($(this));
-    checkout(
-        "{{ stripe_pk }}",
-        "{% static 'icons/logo.png' %}",
-        checkoutData.description,
-        checkoutData.amount,
-        checkoutData.email,
-        checkoutData.label,
-        checkoutData.form
-    );
-    return false;
-});
 $('.news--main img').loupe({
     height: 200,
     width: 200

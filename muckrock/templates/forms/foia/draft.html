@@ -32,12 +32,7 @@
     {% if not remaining %}
     <div class="buy-requests panel">
         <p>You have no requests credited to your account. You must purchase requests before you can submit your request.</p>
-        <button data-amount="2000"
-                data-description="4 requests ($20.00)"
-                data-email="{{ user.email }}"
-                data-label=""
-                data-form="#buy-requests"
-                class="checkout-button success">Buy Requests</button>
+        <button type="submit" class="success" form="buy-requests">Buy Requests</button>
     </div>
     {% endif %}
 
@@ -75,29 +70,23 @@
 
 </form>
 {% if not remaining %}
-<form action="{% url 'acct-buy-requests' username=request.user.username %}?next={{ foia.get_absolute_url }}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
+<form action="{% url 'acct-buy-requests' username=request.user.username %}?next={{ foia.get_absolute_url }}" method="POST" class="stripe-checkout" id="buy-requests">
+    {% csrf_token %}
+    <input type="hidden" name="stripe_token" value="" />
+    <input type="hidden" name="stripe_pk" value="{{ stripe_pk }}" />
+    <input type="hidden" name="stripe_image" value="{% static 'icons/logo.png' %}" />
+    <input type="hidden" name="stripe_email" value="{{request.user.email}}" />
+    <input type="hidden" name="stripe_label" value="Buy" />
+    {% if request.user.is_authenticated %}
+    <input type="hidden" name="stripe_description" value="{{request.user.profile.bundled_requests}} requests ($20.00)" />
+    {% else %}
+    <input type="hidden" name="stripe_description" value="4 requests ($20.00)" />
+    {% endif %}
+    <input type="hidden" name="stripe_bitcoin" value="true" />
+    <input type="hidden" name="stripe_fee" value="0" />
+    <input type="hidden" name="stripe_amount" value="2000" />
+</form>
 {% endif %}
 {% endif %}
 
 {% endblock form-form %}
-
-{% block scripts %}
-<script src="https://checkout.stripe.com/checkout.js"></script>
-<script>
-    $(document).ready(function() {
-        $('.checkout-button').click(function(e){
-            e.preventDefault();
-            checkoutData = getCheckoutData($(this));
-            checkout(
-                "{{ stripe_pk }}",
-                "{% static 'icons/logo.png' %}",
-                checkoutData.description,
-                checkoutData.amount,
-                checkoutData.email,
-                checkoutData.label,
-                checkoutData.form
-            );
-        });
-    });
-</script>
-{% endblock scripts %}

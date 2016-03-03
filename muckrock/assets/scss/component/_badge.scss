@@ -21,3 +21,11 @@
 .staff.badge {
     background: $color-blue-dark;
 }
+
+.active.badge {
+    background: $color-green;
+}
+
+.inactive.badge {
+    background: $color-red;
+}
