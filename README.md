@@ -21,9 +21,10 @@
   5. Inside your VM, add `source ~/muckrock/.settings.sh` the `~/.bashrc` file.
   6. Inside your VM, run `source ~/.bashrc`.
 
-4. Populate the database and sync the files from AWS inside the virtual machine
-  1. From within the virtual machine, `fab populate-db`
-  2. From within the virtual machine, `fab sync-aws`
+4. Populate the database and sync the files from AWS inside the virtual machine (Run all commands inside the VM)
+  1. Restart the database to pick up correct permissions, `sudo service postgresql`
+  2. Pull the database, `fab populate-db`
+  3. Pull files from S3, `fab sync-aws`
 
 5. Run the test server inside the virtual machine
   1. Run `fab mail &` to start a background email server
