@@ -35,3 +35,5 @@ fi
 export PATH="/usr/local/heroku/bin:$PATH"
 
 export DJANGO_SETTINGS_MODULE="muckrock.settings.local"
+
+source ~/muckrock/.settings.sh
