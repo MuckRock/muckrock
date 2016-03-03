@@ -65,19 +65,20 @@ $('.estimated-completion .edit').click(function(){
 
 /* Communications */
 
-$('#toggle-communication-collapse').click(function(e){
+$('#toggle-communication-collapse').click(function(){
+    var onText = 'Expand All';
+    var offText = 'Collapse All';
     var state = $(this).data('state');
-    var tab = $(this).closest('.tab-section.communications');
-    var communications = $(tab).find('.communications-list').children();
-    if (state == 0) {
-        $(communications).addClass('collapsed');
+    var communications = $('.communications .communication');
+    if (state === 0) {
+        communications.addClass('collapsed');
         $(this).data('state', 1);
-        $(this).text('Expand All');
+        $(this).text(onText);
     }
     else {
-        $(communications).removeClass('collapsed');
+        communications.removeClass('collapsed');
         $(this).data('state', 0);
-        $(this).text('Collapse All');
+        $(this).text(offText);
     }
 });
 
