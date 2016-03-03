@@ -69,11 +69,11 @@ class TestCrowdfundView(TestCase):
         self.num_payments = self.crowdfund.payments.count()
         self.url = self.crowdfund.get_absolute_url()
         self.data = {
-            'amount': 200,
+            'stripe_amount': 200,
             'show': '',
             'crowdfund': self.crowdfund.pk,
-            'email': 'test@example.com',
-            'token': 'test'
+            'stripe_email': 'test@example.com',
+            'stripe_token': 'test'
         }
         self.view = CrowdfundDetailView.as_view()
         self.request_factory = RequestFactory()
@@ -88,7 +88,7 @@ class TestCrowdfundView(TestCase):
         """Helper function to post the data as the user."""
         # need a unique token for each POST
         form = CrowdfundPaymentForm(data)
-        ok_(form.is_valid())
+        ok_(form.is_valid(), form.errors)
         request = self.request_factory.post(self.url, data=data)
         request = mock_middleware(request)
         request.user = user
@@ -144,7 +144,7 @@ class TestCrowdfundView(TestCase):
         """
         self.post(self.data)
         payment = CrowdfundPayment.objects.get(crowdfund=self.crowdfund)
-        amount = Decimal(self.data['amount']/100)
+        amount = Decimal(self.data['stripe_amount']/100)
         eq_(payment.amount, amount)
 
     def test_contributors(self):
@@ -171,7 +171,7 @@ class TestCrowdfundView(TestCase):
         """The amount paid should be able to exceed the amount required."""
         data = self.data
         amount_paid = 20000
-        data['amount'] = amount_paid
+        data['stripe_amount'] = amount_paid
         self.post(data)
         payment = CrowdfundPayment.objects.get(crowdfund=self.crowdfund)
         eq_(payment.amount, 200.00,
@@ -182,7 +182,7 @@ class TestCrowdfundView(TestCase):
         self.crowdfund.payment_capped = True
         self.crowdfund.save()
         data = self.data
-        data['amount'] = 20000
+        data['stripe_amount'] = 20000
         self.post(data)
         payment = CrowdfundPayment.objects.get(crowdfund=self.crowdfund)
         eq_(payment.amount, self.crowdfund.payment_required,
@@ -194,7 +194,7 @@ class TestCrowdfundView(TestCase):
         self.crowdfund.payment_received = Decimal('150.00')
         self.crowdfund.save()
         cent_payment = 105 # $1.05
-        self.data['amount'] = cent_payment
+        self.data['stripe_amount'] = cent_payment
         self.post(self.data)
         payment = CrowdfundPayment.objects.get(crowdfund=self.crowdfund)
         eq_(payment.amount, Decimal('01.05'))

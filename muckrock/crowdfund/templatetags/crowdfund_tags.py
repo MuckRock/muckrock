@@ -46,7 +46,7 @@ def crowdfund_form(crowdfund, form):
     initial_data = {
         'show': True,
         'crowdfund': crowdfund.pk,
-        'amount': get_initial_amount(crowdfund)
+        'stripe_amount': get_initial_amount(crowdfund)
     }
     return form(initial=initial_data)
 
