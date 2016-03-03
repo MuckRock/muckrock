@@ -18,7 +18,6 @@
   2. `touch .settings.sh`
   3. The `.settings.sh` file should **never** be checked in to the repository.
   4. We will send you the (definitely) sensitive information in a (probably) secure manner.
-  5. Inside your VM, add `source ~/muckrock/.settings.sh` the `~/.bashrc` file.
   6. Inside your VM, run `source ~/.bashrc`.
 
 4. Populate the database and sync the files from AWS inside the virtual machine (Run all commands inside the VM)
