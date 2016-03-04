@@ -4,7 +4,7 @@ Models for the Task application
 
 from django.contrib.auth.models import User
 from django.db import models
-from django.db.models import Prefetch, Q
+from django.db.models import Max, Prefetch, Q
 
 import actstream
 from datetime import datetime
@@ -15,6 +15,7 @@ from muckrock.agency.models import Agency, STALE_DURATION
 from muckrock.foia.models import FOIACommunication, FOIAFile, FOIANote, FOIARequest, STATUS
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.notifications import SupportNotification
+from muckrock.models import ExtractDay, Now
 
 def generate_status_action(foia):
     """Generate activity stream action for agency response"""
@@ -81,7 +82,8 @@ class TaskQuerySet(models.QuerySet):
         if foia.agency:
             tasks += list(NewAgencyTask.objects
                     .filter(agency=foia.agency)
-                    .select_related('agency', 'resolved_by'))
+                    .preload_list()
+                    .select_related('resolved_by'))
         return tasks
 
 
@@ -90,6 +92,21 @@ class OrphanTaskQuerySet(models.QuerySet):
     def get_from_sender(self, sender):
         """Get all orphan tasks from a specific sender"""
         return self.filter(communication__priv_from_who__icontains=sender)
+
+
+class NewAgencyTaskQuerySet(models.QuerySet):
+    """Object manager for new agency tasks"""
+    def preload_list(self):
+        """Preload relations for list display"""
+        return (self.select_related('agency__jurisdiction')
+                .prefetch_related(
+                    Prefetch('agency__foiarequest_set',
+                        queryset=FOIARequest.objects.select_related('jurisdiction')),
+                    Prefetch('agency__jurisdiction__agencies',
+                        queryset=Agency.objects
+                        .filter(status='approved')
+                        .order_by('name'),
+                        to_attr='other_agencies')))
 
 
 class Task(models.Model):
@@ -277,31 +294,25 @@ class StaleAgencyTask(Task):
 
     def stale_requests(self):
         """Returns a list of stale requests associated with the task's agency"""
-        requests = FOIARequest.objects.get_open().filter(agency=self.agency)
-        stale_requests = []
-        for foia_request in requests:
-            if foia_request.latest_response() >= STALE_DURATION:
-                stale_requests.append(foia_request)
+        if hasattr(self.agency, '_stale_requests'):
+            return self.agency._stale_requests
+        requests = (FOIARequest.objects
+                .get_open()
+                .filter(agency=self.agency)
+                .select_related('jurisdiction')
+                .filter(communications__response=True)
+                .annotate(latest_response=ExtractDay(
+                    Now() - Max('communications__date')))
+                .filter(latest_response__gte=STALE_DURATION)
+                .order_by('-latest_response')
+                )
         return requests
-
-    def stalest_request(self):
-        """Returns the stalest of all the stale requests"""
-        stale_requests = self.stale_requests()
-        stalest_request = stale_requests[0]
-        for stale_request in stale_requests:
-            if stale_request.latest_response() >= stalest_request.latest_response():
-                stalest_request = stale_request
-        return stalest_request
 
     def latest_response(self):
         """Returns the latest response from the agency"""
-        all_requests = FOIARequest.objects.filter(agency=self.agency)
-        latest_response = all_requests.first().last_response()
-        for foia_request in all_requests:
-            comm = foia_request.last_response()
-            if comm.date > latest_response.date:
-                latest_response = comm
-        return latest_response
+        foias = self.agency.foiarequest_set.all()
+        comms = [c for f in foias for c in f.communications.all() if c.response]
+        return max(comms, key=lambda x: x.date)
 
     def update_email(self, new_email, foia_list=None):
         """Updates the email on the agency and the provided requests."""
@@ -346,6 +357,7 @@ class NewAgencyTask(Task):
     type = 'NewAgencyTask'
     user = models.ForeignKey(User, blank=True, null=True)
     agency = models.ForeignKey(Agency)
+    objects = NewAgencyTaskQuerySet.as_manager()
 
     def __unicode__(self):
         return u'New Agency Task'

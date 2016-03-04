@@ -169,7 +169,7 @@ class StaleAgencyTaskNode(TaskNode):
         extra_context['email_form'] = task.forms.StaleAgencyTaskForm(initial=initial)
         extra_context['latest_response'] = latest_response
         extra_context['stale_requests'] = self.task.stale_requests()
-        extra_context['stalest_request'] = self.task.stalest_request()
+        extra_context['stalest_request'] = list(extra_context['stale_requests'])[0]
         return extra_context
 
 
