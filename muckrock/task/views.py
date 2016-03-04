@@ -294,16 +294,7 @@ class FlaggedTaskList(TaskList):
 
 class NewAgencyTaskList(TaskList):
     title = 'New Agencies'
-    queryset = (NewAgencyTask.objects
-            .select_related('agency__jurisdiction')
-            .prefetch_related(
-                Prefetch('agency__foiarequest_set',
-                    queryset=FOIARequest.objects.select_related('jurisdiction')),
-                Prefetch('agency__jurisdiction__agencies',
-                    queryset=Agency.objects
-                    .filter(status='approved')
-                    .order_by('name'),
-                    to_attr='other_agencies')))
+    queryset = NewAgencyTask.objects.preload_list()
 
     def task_post_helper(self, request, task):
         """Special post handlers exclusive to NewAgencyTasks"""

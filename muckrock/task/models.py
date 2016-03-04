@@ -82,7 +82,8 @@ class TaskQuerySet(models.QuerySet):
         if foia.agency:
             tasks += list(NewAgencyTask.objects
                     .filter(agency=foia.agency)
-                    .select_related('agency', 'resolved_by'))
+                    .preload_list()
+                    .select_related('resolved_by'))
         return tasks
 
 
@@ -91,6 +92,21 @@ class OrphanTaskQuerySet(models.QuerySet):
     def get_from_sender(self, sender):
         """Get all orphan tasks from a specific sender"""
         return self.filter(communication__priv_from_who__icontains=sender)
+
+
+class NewAgencyTaskQuerySet(models.QuerySet):
+    """Object manager for new agency tasks"""
+    def preload_list(self):
+        """Preload relations for list display"""
+        return (self.select_related('agency__jurisdiction')
+                .prefetch_related(
+                    Prefetch('agency__foiarequest_set',
+                        queryset=FOIARequest.objects.select_related('jurisdiction')),
+                    Prefetch('agency__jurisdiction__agencies',
+                        queryset=Agency.objects
+                        .filter(status='approved')
+                        .order_by('name'),
+                        to_attr='other_agencies')))
 
 
 class Task(models.Model):
@@ -341,6 +357,7 @@ class NewAgencyTask(Task):
     type = 'NewAgencyTask'
     user = models.ForeignKey(User, blank=True, null=True)
     agency = models.ForeignKey(Agency)
+    objects = NewAgencyTaskQuerySet.as_manager()
 
     def __unicode__(self):
         return u'New Agency Task'
