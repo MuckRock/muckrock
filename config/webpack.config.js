@@ -37,4 +37,7 @@ module.exports = {
         moduleDirectories: ['node_modules'],
         extensions: ['', '.js', '.jsx']
     },
+    watchOptions: {
+	poll: true,
+    },
 }

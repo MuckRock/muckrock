@@ -12,9 +12,8 @@ Vagrant.configure(VERSION) do |config|
   config.vm.network :private_network, type: :dhcp
   config.vm.network :forwarded_port, guest: PORT, host: PORT
   config.vm.synced_folder ".", "/home/vagrant/muckrock/",
-	:nfs => true,
-	:mount_options => ['nolock,vers=3,udp,noatime,actimeo=1']
-
+	  :nfs => true,
+	  :mount_options => ['nolock,vers=3,udp,noatime,actimeo=1']
 
   config.vm.provider "virtualbox" do |v|
     v.customize ["modifyvm", :id, "--ioapic", "on"]
