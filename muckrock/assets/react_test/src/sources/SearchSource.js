@@ -4,7 +4,7 @@ import SearchActions from '../actions/SearchActions';
 const SearchSource = {
     performSearch: {
         remote(state) {
-            return axios.get('/search', {
+            return axios.get('/search/', {
                 params: {
                     q: state.query
                 }
