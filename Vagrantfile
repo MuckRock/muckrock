@@ -11,7 +11,7 @@ Vagrant.configure(VERSION) do |config|
   config.vm.box_url = BOX_URL
   config.vm.network :private_network, type: :dhcp
   config.vm.network :forwarded_port, guest: PORT, host: PORT
-  config.vm.synced_folder ".", "/home/vagrant/muckrock/"
+  config.vm.synced_folder ".", "/home/vagrant/muckrock/", nfs: "true"
 
   config.vm.provider "virtualbox" do |v|
     v.customize ["modifyvm", :id, "--ioapic", "on"]
