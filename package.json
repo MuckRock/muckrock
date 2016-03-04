@@ -2,7 +2,7 @@
   "name": "muckrock",
   "version": "1.0.0",
   "description": "Frontend code for MuckRock",
-  "main": "index.js",
+  "main": "muckrock/assets/entry.js",
   "scripts": {
     "build": "webpack --config config/webpack.config.js --progress --color",
     "watch": "webpack --config config/webpack.config.js --progress --color --watch"
@@ -17,6 +17,7 @@
     "url": "https://github.com/MuckRock/muckrock/issues"
   },
   "homepage": "https://github.com/MuckRock/muckrock#readme",
+  "engines": {"node": "5.6.0"},
   "devDependencies": {
     "babel": "^6.5.2",
     "babel-core": "^6.5.2",
