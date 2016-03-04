@@ -2,6 +2,6 @@
 
 {% block task-content %}
 <summary class="task-data">
-    <p><a href="{% url 'admin:auth_user_change' task.user.id %}">{{task.user}}</a> changed the status of <a href="{% url 'admin:foia_foiarequest_change' task.foia.id %}">{{task.foia}}</a> from {{task.old_status}} to {{task.foia.get_status_display}}.</p>
+    <p><a href="{% url 'admin:auth_user_change' task.user.id %}">{{task.user}}</a> changed the status of <a href="{{task.foia.get_absolute_url}}">{{task.foia}}</a> (<a href="{% url 'admin:foia_foiarequest_change' task.foia.id %}">admin</a>) from {{task.old_status}} to {{task.foia.get_status_display}}.</p>
 </summary>
 {% endblock %}

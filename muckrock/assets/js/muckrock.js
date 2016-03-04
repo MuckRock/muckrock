@@ -1,3 +1,22 @@
+import '../vendor/jquery.autonumeric'
+import '../vendor/jquery.autosize'
+import '../vendor/jquery.cookie'
+import '../vendor/jquery.formset'
+import '../vendor/jquery.loupe'
+import '../vendor/jquery.multiselect'
+import '../vendor/jquery.quicksearch'
+import '../vendor/jquery.ui.datepicker'
+
+import './muckrock.checkout'
+import './muckrock.currencyfield'
+import './muckrock.crowdfund'
+import './communication'
+import './foiaRequest'
+import './list'
+import './notification'
+import './tabs'
+import './task'
+
 function modal(nextSelector) {
     var overlay = '#modal-overlay';
     $(overlay).addClass('visible');
@@ -12,78 +31,6 @@ function modal(nextSelector) {
     });
 }
 
-function prettifyAmountInput(input) {
-    // pretty_amount_input is used as a functional wrapper for the amount input field
-    // progressive enhancement ftw!
-    $(input).attr('hidden', true).hide();
-    var initialAmount = $(input).attr('value');
-    var prettyInputElement = '<input name="pretty-input" class="success" >';
-    var prettyInput = 'input[name=pretty-input]';
-    $(input).before(prettyInputElement);
-    $(prettyInput).autoNumeric('init', {aSign:'$', pSign:'p'});
-    $(prettyInput).autoNumeric('set', initialAmount/100.00);
-    $(prettyInput).keyup(function(e){
-        var value = $(this).autoNumeric('get') * 100;
-        $(input).attr('value', value);
-    });
-}
-
-function prettifyAmountInput(input) {
-    // pretty_amount_input is used as a functional wrapper for the amount input field
-    // progressive enhancement ftw!
-    $(input).attr('hidden', true).hide();
-    var initialAmount = $(input).attr('value');
-    var prettyInputElement = '<input name="pretty-input" class="success" >';
-    var prettyInput = 'input[name=pretty-input]';
-    $(input).before(prettyInputElement);
-    $(prettyInput).autoNumeric('init', {aSign:'$', pSign:'p'});
-    $(prettyInput).autoNumeric('set', initialAmount/100.00);
-    $(prettyInput).keyup(function(e){
-        var value = $(this).autoNumeric('get') * 100;
-        $(input).attr('value', value);
-    });
-}
-
-function checkout(pk, image, description, amount, email, label, form, submit, bitcoin) {
-    submit = typeof submit !== 'undefined' ? submit : true;
-    bitcoin = typeof bitcoin !== 'undefined' ? bitcoin : true;
-    var token = function(token) {
-        form.append('<input type="hidden" name="stripe_token" value="' + token.id + '" />');
-        form.append('<input type="hidden" name="stripe_email" value="' + token.email + '" />');
-        $('a').click(function() { return false; });
-        $('button').click(function() { return false; });
-        if (submit) {
-            form.submit();
-        }
-    }
-    StripeCheckout.open({
-        key: pk,
-        image: image,
-        name: 'MuckRock',
-        description: description,
-        amount: amount,
-        email: email,
-        panelLabel: label,
-        token: token,
-        bitcoin: bitcoin
-    });
-}
-
-function getCheckoutData(button) {
-    var amount = button.data('amount');
-    var description = button.data('description');
-    var email = button.data('email');
-    var form = button.data('form');
-    var label = button.data('label');
-    return {
-        'amount': amount,
-        'description': description,
-        'email': email,
-        'label': label,
-        'form': $(form)
-    }
-}
-
 // MODALS
 $('.modal-button').click(function(){ modal($(this).next()); });
 $('.embed.hidden-modal').each(function() {
@@ -94,7 +41,6 @@ $('.embed.hidden-modal').each(function() {
 });
 
 // FLAG FORM
-
 $('#show-flag-form').click(function(){
     var thisButton = $(this);
     $(thisButton).hide();
@@ -150,6 +96,17 @@ $('.message .visibility').click(function() {
         header.removeClass('collapsed');
         $(this).html('&#9660;');
     }
+});
+
+// DATEPICKER
+// Set defaults for datepicker plugin, and
+// bind it to elements with `.datepicker` class
+$('.datepicker').datepicker({
+    changeMonth: true,
+    changeYear: true,
+    minDate: new Date(1776, 6, 4),
+    maxDate: '+1y',
+    yearRange: '1776:+1'
 });
 
 // formsets
@@ -235,5 +192,29 @@ $('#quick-log-in').click(function(e){
     quickLogin.find('input[type=text]')[0].focus();
     quickLogin.find('.cancel').click(function(){
         quickLogin.removeClass('visible');
+    });
+});
+
+// Stripe Checkout
+
+$('form.stripe-checkout').checkout();
+
+// Crowdfund form submission
+
+$('form.crowdfund-form').crowdfund();
+
+// Currency Field
+
+$('input.currency-field').currencyField();
+
+// Date Picker
+
+$(function() {
+    $('.datepicker').datepicker({
+        changeMonth: true,
+        changeYear: true,
+        minDate: new Date(1776, 6, 4),
+        maxDate: '+1y',
+        yearRange: '1776:+1'
     });
 });

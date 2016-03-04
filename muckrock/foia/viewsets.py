@@ -76,7 +76,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             foia = FOIARequest.objects.create(user=request.user, status='started', title=title,
                                               jurisdiction=jurisdiction, slug=slug,
                                               agency=agency, requested_docs=requested_docs,
-                                              description=requested_docs)
+                                              description=requested_docs, location=agency.location)
             FOIACommunication.objects.create(
                     foia=foia, from_who=request.user.get_full_name(), to_who=foia.get_to_who(),
                     date=datetime.now(), response=False, full_html=False,

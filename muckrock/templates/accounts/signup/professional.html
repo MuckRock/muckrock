@@ -6,8 +6,17 @@
     <header>
         <h1>Subscribe to a Professional account</h1>
     </header>
-    <form method="post" class="professional form" id="subscribe">
+    <form method="post" class="professional form stripe-checkout" id="subscribe">
         {% csrf_token %}
+        <input type="hidden" name="stripe_token" value="" />
+        <input type="hidden" name="stripe_pk" value="{{ stripe_pk }}" />
+        <input type="hidden" name="stripe_image" value="{% static 'icons/logo.png' %}" />
+        <input type="hidden" name="stripe_email" value="" />
+        <input type="hidden" name="stripe_label" value="Subscribe" />
+        <input type="hidden" name="stripe_description" value="Subscription ($40.00/month)" />
+        <input type="hidden" name="stripe_bitcoin" value="false" />
+        <input type="hidden" name="stripe_fee" value="0" />
+        <input type="hidden" name="stripe_amount" value="0" />
         <div class="fields">
             {% for field in form.visible_fields %}
             <fieldset class="{{ field.label|lower }} field{% if field.field.required %} required{% endif %}">
@@ -20,40 +29,8 @@
         </div>
         <footer>
             <a href="{% url 'accounts' %}" class="cancel">Pick a different plan</a>
-            <button
-                data-amount="0"
-                data-description="Subscription ($40.00/month)"
-                data-email=""
-                data-label="Subscribe"
-                data-form="#subscribe"
-                class="checkout-button primary">
-                Subscribe
-            </button>
+            <button type="submit" class="primary" onclick="ga('send', 'event', 'Account', 'Registration', window.location.pathname)">Subscribe</button>
         </footer>
     </form>
 </article>
-{% endblock %}
-
-{% block scripts %}
-<script src="https://checkout.stripe.com/checkout.js"></script>
-<script type="text/javascript">
-    $(document).ready(function() {
-        $('.checkout-button').click(function(e){
-            e.preventDefault();
-            var checkoutData = getCheckoutData($(this));
-            var userEmail = $('#id_email').val();
-            checkout(
-                "{{ stripe_pk }}",
-                "{% static 'apple-touch-icon.png' %}",
-                checkoutData.description,
-                checkoutData.amount,
-                userEmail,
-                checkoutData.label,
-                checkoutData.form,
-                true,
-                false
-            );
-        });
-    });
-</script>
 {% endblock %}

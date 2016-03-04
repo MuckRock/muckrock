@@ -7,23 +7,23 @@ describe Puppet::Type::type(:apt_key) do
       :id => '4BD6EC30'
     )}
     it 'id is set' do
-      resource[:id].should eq '4BD6EC30'
+      expect(resource[:id]).to eq '4BD6EC30'
     end
 
     it 'name is set to id' do
-      resource[:name].should eq '4BD6EC30'
+      expect(resource[:name]).to eq '4BD6EC30'
     end
 
     it 'keyserver is default' do
-      resource[:server].should eq :'keyserver.ubuntu.com'
+      expect(resource[:server]).to eq :'keyserver.ubuntu.com'
     end
 
     it 'source is not set' do
-      resource[:source].should eq nil
+      expect(resource[:source]).to eq nil
     end
 
     it 'content is not set' do
-      resource[:content].should eq nil
+      expect(resource[:content]).to eq nil
     end
   end
 
@@ -32,7 +32,7 @@ describe Puppet::Type::type(:apt_key) do
       :id => '4bd6ec30'
     )}
     it 'id is set' do
-      resource[:id].should eq '4BD6EC30'
+      expect(resource[:id]).to eq '4BD6EC30'
     end
   end
 
@@ -41,7 +41,7 @@ describe Puppet::Type::type(:apt_key) do
       :id => 'FFFFFFFF4BD6EC30'
     )}
     it 'id is set' do
-      resource[:id].should eq 'FFFFFFFF4BD6EC30'
+      expect(resource[:id]).to eq 'FFFFFFFF4BD6EC30'
     end
   end
 
@@ -50,7 +50,7 @@ describe Puppet::Type::type(:apt_key) do
       :id => '0x4BD6EC30'
     )}
     it 'id is set' do
-      resource[:id].should eq '4BD6EC30'
+      expect(resource[:id]).to eq '4BD6EC30'
     end
   end
 
@@ -59,7 +59,7 @@ describe Puppet::Type::type(:apt_key) do
       :id => '0x4bd6ec30'
     )}
     it 'id is set' do
-      resource[:id].should eq '4BD6EC30'
+      expect(resource[:id]).to eq '4BD6EC30'
     end
   end
 
@@ -68,7 +68,7 @@ describe Puppet::Type::type(:apt_key) do
       :id => '0xFFFFFFFF4BD6EC30'
     )}
     it 'id is set' do
-      resource[:id].should eq 'FFFFFFFF4BD6EC30'
+      expect(resource[:id]).to eq 'FFFFFFFF4BD6EC30'
     end
   end
 
@@ -79,10 +79,10 @@ describe Puppet::Type::type(:apt_key) do
     )}
 
     it 'source is set to the URL' do
-      resource[:source].should eq 'http://apt.puppetlabs.com/pubkey.gpg'
+      expect(resource[:source]).to eq 'http://apt.puppetlabs.com/pubkey.gpg'
     end
   end
-  
+
   context 'with content' do
     let(:resource) { Puppet::Type.type(:apt_key).new(
       :id => '4BD6EC30',
@@ -90,10 +90,10 @@ describe Puppet::Type::type(:apt_key) do
     )}
 
     it 'content is set to the string' do
-      resource[:content].should eq 'http://apt.puppetlabs.com/pubkey.gpg'
+      expect(resource[:content]).to eq 'http://apt.puppetlabs.com/pubkey.gpg'
     end
   end
-  
+
   context 'with keyserver' do
     let(:resource) { Puppet::Type.type(:apt_key).new(
       :id => '4BD6EC30',
@@ -101,7 +101,7 @@ describe Puppet::Type::type(:apt_key) do
     )}
 
     it 'keyserver is set to Debian' do
-      resource[:server].should eq 'http://keyring.debian.org'
+      expect(resource[:server]).to eq 'http://keyring.debian.org'
     end
   end
 
@@ -143,6 +143,13 @@ describe Puppet::Type::type(:apt_key) do
       )}.to_not raise_error
     end
 
+    it 'allows the https URI with username and password' do
+      expect { Puppet::Type.type(:apt_key).new(
+          :id      => '4BD6EC30',
+          :source  => 'https://testme:Password2@pgp.mit.edu'
+      )}.to_not raise_error
+    end
+
     it 'allows the ftp URI scheme in source' do
       expect { Puppet::Type.type(:apt_key).new(
         :id      => '4BD6EC30',
@@ -154,6 +161,20 @@ describe Puppet::Type::type(:apt_key) do
       expect { Puppet::Type.type(:apt_key).new(
         :id      => '4BD6EC30',
         :source  => '/path/to/a/file'
+      )}.to_not raise_error
+    end
+
+    it 'allows 5-digit ports' do
+      expect { Puppet::Type.type(:apt_key).new(
+        :id      => '4BD6EC30',
+        :source  => 'http://pgp.mit.edu:12345/key'
+      )}.to_not raise_error
+    end
+
+    it 'allows 5-digit ports when using key servers' do
+      expect { Puppet::Type.type(:apt_key).new(
+        :id      => '4BD6EC30',
+        :server  => 'http://pgp.mit.edu:12345'
       )}.to_not raise_error
     end
   end

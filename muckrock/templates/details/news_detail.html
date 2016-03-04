@@ -65,7 +65,7 @@
         </div>
         {% endif %}
     </aside>
-</div>
+</article>
 {% endblock %}
 
 {% block open_graph %}
@@ -75,7 +75,7 @@
 {% if article.image %}
 <meta property="og:image" content="{% thumbnail article.image 1200x400 %}" />
 {% else %}
-<meta property="og:image" content="{% static 'apple-touch-icon.png' %}" />
+<meta property="og:image" content="{% static 'icons/logo.png' %}" />
 {% endif %}
 <meta property="og:description" content="{{ article.summary }}" />
 <meta property="og:site_name" content="MuckRock" />
@@ -95,30 +95,14 @@
 {% if article.image %}
 <meta name="twitter:image:src" content="{% thumbnail article.image 1200x400 %}" />
 {% else %}
-<meta name="twitter:image:src" content="{% static 'apple-touch-icon.png' %}" />
+<meta name="twitter:image:src" content="{% static 'icons/logo.png' %}" />
 {% endif %}
 {% endblock twitter_card %}
 
 {% endwith %}
 
 {% block scripts %}
-<script src="https://checkout.stripe.com/checkout.js" type="text/javascript"></script>
-<script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js" type="text/javascript"></script>
 <script type="text/javascript">
-$('.checkout-button').click(function(e){
-    e.preventDefault();
-    var checkoutData = getCheckoutData($(this));
-    checkout(
-        "{{ stripe_pk }}",
-        "{% static 'apple-touch-icon.png' %}",
-        checkoutData.description,
-        checkoutData.amount,
-        checkoutData.email,
-        checkoutData.label,
-        checkoutData.form
-    );
-    return false;
-});
 $('.news--main img').loupe({
     height: 200,
     width: 200

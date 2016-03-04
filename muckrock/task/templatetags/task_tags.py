@@ -44,7 +44,7 @@ class TaskNode(template.Node):
 
 class CrowdfundTaskNode(TaskNode):
     """Renders a crowdfund task."""
-    model = task.models.GenericCrowdfundTask
+    model = task.models.NewCrowdfundTask
     task_template = 'task/crowdfund.html'
     endpoint_name = 'crowdfund-task-list'
     class_name = 'crowdfund'
@@ -108,14 +108,6 @@ class OrphanTaskNode(TaskNode):
         extra_context['domain'] = self.task.get_sender_domain()
         extra_context['attachments'] = self.task.communication.files.all()
         return extra_context
-
-
-class PaymentTaskNode(TaskNode):
-    """Renders a payment task."""
-    model = task.models.PaymentTask
-    task_template = 'task/payment.html'
-    endpoint_name = 'payment-task-list'
-    class_name = 'payment'
 
 
 class RejectedEmailTaskNode(TaskNode):
@@ -247,11 +239,6 @@ def response_task(parser, token):
 def status_change_task(parser, token):
     """Returns a StatusChangeTaskNode"""
     return StatusChangeTaskNode(get_id(token))
-
-@register.tag
-def payment_task(parser, token):
-    """Returns a PaymentTaskNode"""
-    return PaymentTaskNode(get_id(token))
 
 @register.tag
 def crowdfund_task(parser, token):

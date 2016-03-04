@@ -14,7 +14,7 @@ import email
 import logging
 
 from muckrock.agency.models import Agency, STALE_DURATION
-from muckrock.foia.models import FOIACommunication, FOIAFile, FOIARequest, STATUS
+from muckrock.foia.models import FOIACommunication, FOIAFile, FOIANote, FOIARequest, STATUS
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.notifications import SupportNotification
 
@@ -73,7 +73,7 @@ class TaskQuerySet(models.QuerySet):
                         )
                     )
         # these tasks have a direct foia attribute
-        foia_task_types = [RejectedEmailTask, FlaggedTask, StatusChangeTask, PaymentTask]
+        foia_task_types = [RejectedEmailTask, FlaggedTask, StatusChangeTask]
         if user.is_staff:
             for task_type in foia_task_types:
                 tasks += list(task_type.objects
@@ -189,9 +189,17 @@ class SnailMailTask(Task):
     """A communication that needs to be snail mailed"""
     # pylint: disable=no-member
     type = 'SnailMailTask'
-    categories = (('a', 'Appeal'), ('n', 'New'), ('u', 'Update'), ('f', 'Followup'))
+    categories = (
+        ('a', 'Appeal'),
+        ('n', 'New'),
+        ('u', 'Update'),
+        ('f', 'Followup'),
+        ('p', 'Payment')
+    )
     category = models.CharField(max_length=1, choices=categories)
     communication = models.ForeignKey('foia.FOIACommunication')
+    user = models.ForeignKey(User, blank=True, null=True)
+    amount = models.DecimalField(default=0.00, max_digits=8, decimal_places=2)
 
     def __unicode__(self):
         return u'Snail Mail Task'
@@ -211,6 +219,22 @@ class SnailMailTask(Task):
         comm.date = datetime.now()
         comm.save()
         comm.foia.update()
+
+    def update_text(self, new_text):
+        """Sets the body text of the communication"""
+        comm = self.communication
+        comm.communication = new_text
+        comm.save()
+
+    def record_check(self, number, user):
+        """Records the check to a note on the request"""
+        foia = self.communication.foia
+        text = "A check (#%(number)d) of $%(amount).2f was mailed to the agency." % {
+            'number': number,
+            'amount': self.amount
+        }
+        note = FOIANote.objects.create(foia=foia, note=text, author=user)
+        return note
 
 
 class RejectedEmailTask(Task):
@@ -288,6 +312,7 @@ class StaleAgencyTask(Task):
         for foia in foia_list:
             foia.email = new_email
             foia.followup(automatic=True, show_all_comms=False)
+
 
 class FlaggedTask(Task):
     """A user has flagged a request, agency or jurisdiction"""
@@ -444,17 +469,6 @@ class StatusChangeTask(Task):
         return u'Status Change Task'
 
 
-class PaymentTask(Task):
-    """Created when the fee for a request has been paid"""
-    type = 'PaymentTask'
-    amount = models.DecimalField(max_digits=8, decimal_places=2)
-    user = models.ForeignKey(User)
-    foia = models.ForeignKey('foia.FOIARequest')
-
-    def __unicode__(self):
-        return u'Payment Task'
-
-
 class CrowdfundTask(Task):
     """Created when a crowdfund is finished"""
     crowdfund = models.ForeignKey('crowdfund.CrowdfundRequest')
@@ -469,6 +483,15 @@ class GenericCrowdfundTask(Task):
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     crowdfund = GenericForeignKey('content_type', 'object_id')
+
+    def __unicode__(self):
+        return u'Crowdfund Task'
+
+
+class NewCrowdfundTask(Task):
+    """Created when a crowdfund is finished"""
+    type = 'CrowdfundTask'
+    crowdfund = models.ForeignKey('crowdfund.Crowdfund')
 
     def __unicode__(self):
         return u'Crowdfund Task'

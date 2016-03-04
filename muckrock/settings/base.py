@@ -70,6 +70,13 @@ STATICFILES_DIRS = (
     os.path.join(SITE_ROOT, 'assets'),
 )
 
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'BUNDLE_DIR_NAME': 'bundles/',
+        'STATS_FILE': os.path.join(SITE_ROOT, 'assets/webpack-stats.json'),
+    }
+}
+
 COMPRESS_OFFLINE = True
 
 COMPRESS_STORAGE = 'compressor.storage.CompressorFileStorage'
@@ -77,9 +84,6 @@ COMPRESS_CSS_FILTERS = [
     'compressor.filters.css_default.CssAbsoluteFilter',
     'compressor.filters.cssmin.CSSMinFilter',
 ]
-COMPRESS_PRECOMPILERS = (
-    ('text/x-scss', 'sass --sourcemap=none {infile} {outfile}'),
-)
 
 if AWS_DEBUG:
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
@@ -167,9 +171,11 @@ INSTALLED_APPS = (
     'django_premailer',
     'djangosecure',
     'djcelery',
+    'djgeojson',
     'easy_thumbnails',
     'gunicorn',
     'dbsettings',
+    'leaflet',
     'localflavor',
     'markdown_deux',
     'mathfilters',
@@ -183,6 +189,7 @@ INSTALLED_APPS = (
     'storages',
     'taggit',
     'watson',
+    'webpack_loader',
     'lot',
     'package_monitor',
     'image_diet',
@@ -459,9 +466,31 @@ ROBOTS_CACHE_TIMEOUT = 60 * 60 * 24
 
 PACKAGE_MONITOR_REQUIREMENTS_FILE = os.path.join(SITE_ROOT, '../requirements.txt')
 
+TAGGIT_CASE_INSENSITIVE = True
+TAGGIT_TAGS_FROM_STRING = 'muckrock.tags.models.parse_tags'
+
 # Organization Settings
 
 ORG_MIN_SEATS = 3
 ORG_PRICE_PER_SEAT = 2000
 ORG_REQUESTS_PER_SEAT = 10
 
+# Leaflet Settings
+LEAFLET_CONFIG = {
+    'DEFAULT_CENTER': (37.8, -96.9),
+    'DEFAULT_ZOOM': 4,
+    'MIN_ZOOM': 4,
+    'MAX_ZOOM': 18,
+    'PLUGINS': {
+        'forms': {
+            'css': [
+                'vendor/leaflet-geocoder-control/Control.Geocoder.css',
+            ],
+            'js': [
+                'vendor/leaflet-geocoder-control/Control.Geocoder.js',
+                'js/leaflet-form.js'
+            ],
+            'auto-include': True,
+        }
+    }
+}

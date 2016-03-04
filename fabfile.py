@@ -38,11 +38,11 @@ def test(test_path='', reuse='0', capture=False):
         env.run(cmd)
 
 @task
-def coverage():
+def coverage(settings='test'):
     """Run the tests and generate a coverage report"""
     with env.cd(env.base_path):
         env.run('coverage erase')
-        env.run('coverage run --branch --source muckrock manage.py test')
+        env.run('coverage run --branch --source muckrock manage.py test --settings=muckrock.settings.%s' % settings)
         env.run('coverage html')
 
 @task
@@ -97,8 +97,8 @@ def populate_db():
         return
 
     with env.cd(env.base_path):
-        env.run('PGUSER=postgres dropdb muckrock')
-        env.run('PGUSER=postgres heroku pg:pull DATABASE muckrock --app muckrock')
+        env.run('PGUSER=muckrock dropdb muckrock')
+        env.run('PGUSER=muckrock heroku pg:pull DATABASE muckrock --app muckrock')
 
 @task(name='sync-aws')
 def sync_aws():
@@ -159,4 +159,11 @@ def setup():
     with settings(user='vagrant', host_string='127.0.0.1:2222', key_filename=result.split()[1]):
         manage('migrate')
 
-
+@task
+def update_staging_db():
+    """Update the staging database"""
+    env.run('heroku maintenance:on --app muckrock-staging')
+    env.run('heroku ps:scale --app muckrock-staging web=0')
+    env.run('heroku pg:copy muckrock::DATABASE_URL DATABASE_URL --app muckrock-staging')
+    env.run('heroku ps:scale --app muckrock-staging web=1')
+    env.run('heroku maintenance:off --app muckrock-staging')

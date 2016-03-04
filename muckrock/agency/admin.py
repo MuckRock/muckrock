@@ -15,6 +15,7 @@ from adaptor.model import CsvModel
 from adaptor.fields import CharField, DjangoModelField
 from reversion import VersionAdmin
 import autocomplete_light
+from leaflet.admin import LeafletGeoAdmin
 import logging
 import sys
 
@@ -46,6 +47,10 @@ class AgencyAdminForm(forms.ModelForm):
             'AgencyAdminAutocomplete',
             queryset=Agency.objects.all(),
             required=False)
+    payable_to = autocomplete_light.ModelChoiceField(
+            'AgencyAdminAutocomplete',
+            queryset=Agency.objects.all(),
+            required=False)
     parent = autocomplete_light.ModelChoiceField(
             'AgencyAdminAutocomplete',
             queryset=Agency.objects.all(),
@@ -57,7 +62,7 @@ class AgencyAdminForm(forms.ModelForm):
         fields = '__all__'
 
 
-class AgencyAdmin(VersionAdmin):
+class AgencyAdmin(LeafletGeoAdmin, VersionAdmin):
     """Agency admin options"""
     change_list_template = 'admin/agency/agency/change_list.html'
     prepopulated_fields = {'slug': ('name',)}

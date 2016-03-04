@@ -79,19 +79,3 @@
         }
     }
 }
-
-.tag {
-    display: inline-block;
-    margin: $vertical-rhythm/4 $vertical-rhythm/6;
-    padding: $vertical-rhythm/6 $vertical-rhythm/3 $vertical-rhythm/6 $vertical-rhythm/3;
-    background-color: $color-blue;
-    color: $color-white;
-    font-size: $font-size-2;
-    text-decoration: none;
-    @include transition(background-color .25s linear);
-    &:hover {
-        color: $color-white;
-        background-color: $color-blue-dark;
-        text-decoration: none;
-    }
-}

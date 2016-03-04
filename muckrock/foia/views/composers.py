@@ -98,7 +98,8 @@ def _make_request(request, foia_request, parent=None):
         agency=foia_request['agency'],
         requested_docs=foia_request['document'],
         description=foia_request['document'],
-        parent=parent
+        parent=parent,
+        location=foia_request['agency'].location
     )
     foia_comm = FOIACommunication.objects.create(
         foia=foia,
@@ -372,12 +373,13 @@ def create_multirequest(request):
         # 5. listN = list(reduce(set.intersection, listN))
         for agency_query in agency_queries:
             if len(agency_query) > 2:
-                matching_agencies.append(set(list(Agency.objects.filter(approved=True).filter(
-                    Q(name__icontains=agency_query)|
-                    Q(aliases__icontains=agency_query)|
-                    Q(jurisdiction__name__icontains=agency_query)|
-                    Q(types__name__exact=agency_query)
-                ))))
+                matching_agencies.append(set(list(
+                    Agency.objects.filter(status='approved').filter(
+                        Q(name__icontains=agency_query)|
+                        Q(aliases__icontains=agency_query)|
+                        Q(jurisdiction__name__icontains=agency_query)|
+                        Q(types__name__exact=agency_query)
+                        ))))
         try:
             matching_agencies = list(reduce(set.intersection, matching_agencies))
         except TypeError:

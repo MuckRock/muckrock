@@ -1,4 +1,4 @@
-{{ salutation }}, {{ user.first_name }}. Here's what happened on MuckRock yesterday ({{ yesterday|date:'%m/%d/%y' }}):
+{{ salutation }}, {{ user.first_name }}. Here's what happened on MuckRock yesterday ({{ yesterday|date:'m/d/y' }}):
 
 --------------------------
 Stats
@@ -20,11 +20,11 @@ Received, {{ activity.comms.received }}
 Sent
 - - - - - - - - - - - - -
 {% with activity.comms.delivery as sent %}
-Format, Count, Cost/Message, Total Cost
+Format, Count, Cost/Message, Total Cost, 30 Day Cost
 
-Email, {{ sent.format.email }}, ${{ sent.cost.email }}, ${{ sent.expense.email }}
-Fax, {{ sent.format.fax }}, ${{ sent.cost.fax }}, ${{ sent.expense.fax }}
-Post, {{ sent.format.mail }}, ${{ sent.cost.mail }}, ${{ sent.expense.mail }}
+Email, {{ sent.format.email }}, ${{ sent.cost.email }}, ${{ sent.expense.email }}, ${{sent.trailing.email}}
+Fax, {{ sent.format.fax }}, ${{ sent.cost.fax }}, ${{ sent.expense.fax }}, ${{sent.trailing.fax}}
+Post, {{ sent.format.mail }}, ${{ sent.cost.mail }}, ${{ sent.expense.mail }}, ${{sent.trailing.mail}}
 {% endwith %}
 
 That's all for today. {{ signoff }} and see you tomorrow.

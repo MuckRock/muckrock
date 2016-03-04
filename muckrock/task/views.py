@@ -16,14 +16,13 @@ from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
 from muckrock.foia.models import STATUS, FOIARequest, FOIACommunication, FOIAFile
 from muckrock.task.forms import (
-        TaskFilterForm, FlaggedTaskForm, StaleAgencyTaskForm, ResponseTaskForm
-        )
+    TaskFilterForm, FlaggedTaskForm, StaleAgencyTaskForm, ResponseTaskForm
+    )
 from muckrock.task.models import (
-        Task, OrphanTask, SnailMailTask, RejectedEmailTask,
-        StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask,
-        PaymentTask, GenericCrowdfundTask, MultiRequestTask,
-        StatusChangeTask, FailedFaxTask
-        )
+    Task, OrphanTask, SnailMailTask, RejectedEmailTask,
+    StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask,
+    NewCrowdfundTask, MultiRequestTask, StatusChangeTask, FailedFaxTask
+    )
 from muckrock.views import MRFilterableListView
 
 # pylint:disable=missing-docstring
@@ -31,21 +30,21 @@ from muckrock.views import MRFilterableListView
 def count_tasks():
     """Counts all unresolved tasks and adds them to a dictionary"""
     count = Task.objects.filter(resolved=False).aggregate(
-            all=Count('id'),
-            orphan=Count('orphantask'),
-            snail_mail=Count('snailmailtask'),
-            rejected=Count('rejectedemailtask'),
-            stale_agency=Count('staleagencytask'),
-            flagged=Count('flaggedtask'),
-            new_agency=Count('newagencytask'),
-            response=Count('responsetask'),
-            status_change=Count('statuschangetask'),
-            payment=Count('paymenttask'),
-            crowdfund=Count('genericcrowdfundtask'),
-            multirequest=Count('multirequesttask'),
-            failed_fax=Count('failedfaxtask'),
-            )
+        all=Count('id'),
+        orphan=Count('orphantask'),
+        snail_mail=Count('snailmailtask'),
+        rejected=Count('rejectedemailtask'),
+        stale_agency=Count('staleagencytask'),
+        flagged=Count('flaggedtask'),
+        new_agency=Count('newagencytask'),
+        response=Count('responsetask'),
+        status_change=Count('statuschangetask'),
+        crowdfund=Count('genericcrowdfundtask'),
+        multirequest=Count('multirequesttask'),
+        failed_fax=Count('failedfaxtask'),
+        )
     return count
+
 
 class TaskList(MRFilterableListView):
     """List of tasks"""
@@ -174,7 +173,7 @@ class SnailMailTaskList(TaskList):
             .select_related(
                 'communication__foia__agency',
                 'communication__foia__user',
-                )
+                'user')
             .prefetch_related(
                 Prefetch(
                     'communication__foia__communications',
@@ -188,14 +187,21 @@ class SnailMailTaskList(TaskList):
 
     def task_post_helper(self, request, task):
         """Special post helper exclusive to SnailMailTasks"""
+        # we should always set the status of a request when resolving
+        # a snail mail task so that the request leaves processing status
         if request.POST.get('status'):
             status = request.POST.get('status')
             if status in dict(STATUS):
                 task.set_status(status)
-                task.resolve(request.user)
             # updating the date is an option and not an action
             if request.POST.get('update_date'):
                 task.update_date()
+        # if the task is in the payment category and we're given a check
+        # number, then we should record the existence of this check
+        if request.POST.get('check_number') and task.category == 'p':
+            check_number = int(request.POST.get('check_number'))
+            task.record_check(check_number, request.user)
+        task.resolve(request.user)
         return
 
 
@@ -274,6 +280,7 @@ class FlaggedTaskList(TaskList):
         if request.POST.get('resolve'):
             task.resolve(request.user)
 
+
 class NewAgencyTaskList(TaskList):
     title = 'New Agencies'
     queryset = (NewAgencyTask.objects
@@ -309,14 +316,16 @@ class NewAgencyTaskList(TaskList):
 class ResponseTaskList(TaskList):
     title = 'Responses'
     queryset = (ResponseTask.objects
-            .select_related('communication__foia')
+            .select_related('communication__foia__agency')
+            .select_related('communication__foia__jurisdiction')
             .prefetch_related(
                 Prefetch('communication__files',
                     queryset=FOIAFile.objects.select_related('foia__jurisdiction')),
                 Prefetch('communication__foia__communications',
-                    queryset=FOIACommunication.objects.order_by('-date'),
+                    queryset=FOIACommunication.objects
+                        .order_by('-date')
+                        .prefetch_related('files'),
                     to_attr='reverse_communications'),
-                'communication__foia__communications__files',
                 ))
 
     def task_post_helper(self, request, task):
@@ -376,15 +385,9 @@ class StatusChangeTaskList(TaskList):
     queryset = StatusChangeTask.objects.select_related('user', 'foia')
 
 
-class PaymentTaskList(TaskList):
-    title = 'Payments'
-    queryset = PaymentTask.objects.select_related('user', 'foia')
-
-
 class CrowdfundTaskList(TaskList):
     title = 'Crowdfunds'
-    # generic FKs are problematic (can't select related on foia/project)
-    queryset = GenericCrowdfundTask.objects.prefetch_related('crowdfund')
+    queryset = NewCrowdfundTask.objects.select_related('crowdfund')
 
 
 class MultiRequestTaskList(TaskList):

@@ -8,6 +8,7 @@ from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
 
 from datetime import date
+from djgeojson.fields import PointField
 from easy_thumbnails.fields import ThumbnailerImageField
 
 from muckrock.jurisdiction.models import Jurisdiction, RequestHelper
@@ -59,6 +60,7 @@ class Agency(models.Model, RequestHelper):
     user = models.ForeignKey(User, null=True, blank=True)
     appeal_agency = models.ForeignKey('self', null=True, blank=True)
     can_email_appeals = models.BooleanField(default=False)
+    payable_to = models.ForeignKey('self', related_name='receivable', null=True, blank=True)
     image = ThumbnailerImageField(
         upload_to='agency_images',
         blank=True,
@@ -69,6 +71,7 @@ class Agency(models.Model, RequestHelper):
     public_notes = models.TextField(blank=True, help_text='May use html')
     stale = models.BooleanField(default=False)
     address = models.TextField(blank=True)
+    location = PointField(blank=True)
     email = models.EmailField(blank=True)
     other_emails = fields.EmailsListField(blank=True, max_length=255)
     contact_salutation = models.CharField(blank=True, max_length=30)

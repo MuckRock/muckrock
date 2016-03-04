@@ -6,7 +6,14 @@
     <header class="communication-header">
         <h1 class="from">From: {{ communication.from_who }}</h1>
         <div class="actionables">
-            <a href="{{ request.path }}#{{ communication.anchor }}" class="permalink"><time datetime="{{ communication.date|date:'c' }}" class="date">{{ communication.date | date:"m/d/Y" }}</time></a>
+            {% if foia_url %}
+            <a href="#{{ communication.anchor }}" class="permalink">
+            {% else %}
+            <a href="{{communication.foia.get_absolute_url}}#{{communication.anchor}}" class="permalink">
+            {% endif %}
+                <time datetime="{{ communication.date|date:'c' }}" class="date">{{ communication.date | date:"m/d/Y" }}</time>
+            </a>
+            {% if not hide_options %}
             {% if request.user.is_staff %}
             <div class="options dropdown">
                 {% include 'lib/icons/options.svg' %}
@@ -26,6 +33,7 @@
                 </ul>
             </div>
             {% endif %}
+            {% endif %}
         </div>
     </header>
     <section class="communication-metadata">
@@ -35,8 +43,9 @@
         <p class="subject">Subject: None</p>
     {% endif %}
     {% if communication.status and request.user.is_staff %}
-        <p class="status badge {{communication.status|classify_status}}">
-        {{communication.get_status_display}}</p>
+        <p class="status">
+            <span class="badge {{communication.status|classify_status}}">{{communication.get_status_display}}</span>
+        </p>
     {% endif %}
     </section>
     {% if communication.communication %}
@@ -48,11 +57,13 @@
         {% endif %}
     </section>
     {% endif %}
-    {% if communication.files.count > 0 %}
+    {% if communication.files %}
     <ul class="files">
+    {% with foia_url=communication.foia.get_absolute_url %}
     {% for file in communication.files.all %}
-        <li>{% include 'lib/file.html' %}</li>
+        <li>{% include 'lib/file.html' with hide_id=True %}</li>
     {% endfor %}
+    {% endwith %}
     </ul>
     {% endif %}
     {% if request.user.is_staff %}

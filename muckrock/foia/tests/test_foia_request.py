@@ -22,6 +22,9 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import SnailMailTask
 from muckrock.tests import get_allowed, post_allowed, get_post_unallowed, get_404
 
+ok_ = nose.tools.ok_
+eq_ = nose.tools.eq_
+
 # allow methods that could be functions and too many public methods in tests
 # pylint: disable=no-self-use
 # pylint: disable=too-many-public-methods
@@ -200,8 +203,7 @@ class TestFOIAFunctional(TestCase):
     def test_foia_list(self):
         """Test the foia-list view"""
 
-        response = get_allowed(self.client, reverse('foia-list'),
-                ['lists/request_list.html', 'lists/base_list.html'])
+        response = get_allowed(self.client, reverse('foia-list'))
         nose.tools.eq_(set(response.context['object_list']),
             set(FOIARequest.objects.get_viewable(AnonymousUser()).order_by('-date_submitted')[:12]))
 
@@ -210,8 +212,7 @@ class TestFOIAFunctional(TestCase):
 
         for user_pk in [1, 2]:
             response = get_allowed(self.client,
-                                   reverse('foia-list-user', kwargs={'user_pk': user_pk}),
-                                   ['lists/request_list.html', 'lists/base_list.html'])
+                    reverse('foia-list-user', kwargs={'user_pk': user_pk}))
             user = User.objects.get(pk=user_pk)
             nose.tools.eq_(set(response.context['object_list']),
                            set(FOIARequest.objects.get_viewable(AnonymousUser()).filter(user=user)))
@@ -223,16 +224,14 @@ class TestFOIAFunctional(TestCase):
         for field in ['title', 'date_submitted', 'status']:
             for order in ['asc', 'desc']:
                 response = get_allowed(self.client, reverse('foia-list') +
-                                       '?sort=%s&order=%s' % (field, order),
-                                       ['lists/request_list.html', 'lists/base_list.html'])
+                        '?sort=%s&order=%s' % (field, order))
                 nose.tools.eq_([f.title for f in response.context['object_list']],
                                [f.title for f in sorted(response.context['object_list'],
                                                         key=attrgetter(field),
                                                         reverse=(order == 'desc'))])
     def test_foia_bad_sort(self):
         """Test sorting against a non-existant field"""
-        response = get_allowed(self.client, reverse('foia-list') + '?sort=test',
-                               ['lists/request_list.html', 'lists/base_list.html'])
+        response = get_allowed(self.client, reverse('foia-list') + '?sort=test')
         nose.tools.eq_(response.status_code, 200)
 
     def test_foia_detail(self):
@@ -240,11 +239,10 @@ class TestFOIAFunctional(TestCase):
 
         foia = FOIARequest.objects.get(pk=2)
         get_allowed(self.client,
-                    reverse('foia-detail', kwargs={'idx': foia.pk, 'slug': foia.slug,
-                                                   'jurisdiction': foia.jurisdiction.slug,
-                                                   'jidx': foia.jurisdiction.pk}),
-                    ['foia/detail.html', 'base.html'],
-                    context={'foia': foia})
+                    reverse('foia-detail',
+                        kwargs={'idx': foia.pk, 'slug': foia.slug,
+                            'jurisdiction': foia.jurisdiction.slug,
+                            'jidx': foia.jurisdiction.pk}))
 
     def test_feeds(self):
         """Test the RSS feed views"""
@@ -278,14 +276,12 @@ class TestFOIAFunctional(TestCase):
         self.client.login(username='adam', password='abc')
 
         # get authenticated pages
-        get_allowed(self.client, reverse('foia-create'),
-                    ['forms/foia/create.html'])
+        get_allowed(self.client, reverse('foia-create'))
 
         get_allowed(self.client, reverse('foia-draft',
-                                    kwargs={'jurisdiction': foia.jurisdiction.slug,
-                                            'jidx': foia.jurisdiction.pk,
-                                            'idx': foia.pk, 'slug': foia.slug}),
-                    ['forms/foia/draft.html', 'forms/base_form.html'])
+            kwargs={'jurisdiction': foia.jurisdiction.slug,
+                'jidx': foia.jurisdiction.pk,
+                'idx': foia.pk, 'slug': foia.slug}))
 
         get_404(self.client, reverse('foia-draft',
                                 kwargs={'jurisdiction': foia.jurisdiction.slug,
@@ -350,10 +346,9 @@ class TestFOIAFunctional(TestCase):
 
         foia = FOIARequest.objects.get(pk=18)
         get_allowed(self.client, reverse('foia-pay',
-                                    kwargs={'jurisdiction': foia.jurisdiction.slug,
-                                            'jidx': foia.jurisdiction.pk,
-                                            'idx': foia.pk, 'slug': foia.slug}),
-                    ['foia/detail.html', 'base.html'])
+            kwargs={'jurisdiction': foia.jurisdiction.slug,
+                'jidx': foia.jurisdiction.pk,
+                'idx': foia.pk, 'slug': foia.slug}))
 
 
 class TestFOIAIntegration(TestCase):
@@ -444,7 +439,8 @@ class TestFOIAIntegration(TestCase):
         ## create and submit request
         foia = FOIARequest.objects.create(
             user=user, title='Test with no email', slug='test-with-no-email',
-            status='submitted', jurisdiction=jurisdiction, agency=agency)
+            status='submitted', jurisdiction=jurisdiction, agency=agency,
+            location=agency.location)
         comm = FOIACommunication.objects.create(
             foia=foia, from_who='Muckrock', to_who='Test Agency', date=datetime.datetime.now(),
             response=False, communication=u'Test communication')
@@ -588,6 +584,30 @@ class TestFOIANotes(TestCase):
         self.foia.refresh_from_db()
         nose.tools.eq_(response.status_code, 302)
         nose.tools.assert_true(self.foia.notes.count() == 0)
+
+
+class TestRequestPayment(TestCase):
+    """Allow users to pay fees on a request"""
+    def setUp(self):
+        self.foia = FOIARequestFactory()
+
+    def test_make_payment(self):
+        """The request should accept payments for request fees."""
+        user = self.foia.user
+        amount = 100.0
+        comm = self.foia.pay(user, amount)
+        self.foia.refresh_from_db()
+        eq_(self.foia.status, 'submitted',
+            'The request should be set to processing.')
+        eq_(self.foia.date_processing, datetime.date.today(),
+            'The request should start tracking its days processing.')
+        ok_(comm, 'The function should return a communication.')
+        eq_(comm.delivered, 'mail', 'The communication should be mailed.')
+        task = SnailMailTask.objects.filter(communication=comm).first()
+        ok_(task, 'A snail mail task should be created.')
+        eq_(task.user, user, 'The task should be attributed to the user.')
+        eq_(task.amount, amount, 'The task should contain the amount of the request.')
+
 
 class TestRequestSharing(TestCase):
     """Allow people to edit and view another user's request."""

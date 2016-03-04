@@ -16,7 +16,7 @@
     {% endif %}
     {% if task.communication.likely_foia %}
     <dt>Probable Request</dt>
-    <dd><a href="{% url 'admin:foia_foiarequest_change' task.communication.likely_foia.pk %}">{{task.communication.likely_foia.pk}}</a></dd>
+    <dd><a href="{{task.communication.likely_foia.get_absolute_url}}">{{task.communication.likely_foia.pk}}</a> (<a href="{% url 'admin:foia_foiarequest_change' task.communication.likely_foia.pk %}">admin</a>)</dd>
     {% endif %}
     {% if attachments %}
     <dt>Attachments</dt>

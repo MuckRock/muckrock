@@ -74,14 +74,20 @@ and
 </form>
 
 {% if balance.extra_requests %}
-<form action="{% url 'acct-buy-requests' username=request.user.username %}?next={{ foia.get_absolute_url }}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
+<form action="{% url 'acct-buy-requests' username=request.user.username %}?next={{ foia.get_absolute_url }}" method="POST" class="stripe-checkout" id="buy-requests">
+    {% csrf_token %}
+    <input type="hidden" name="stripe_token" value="" />
+    <input type="hidden" name="stripe_pk" value="{{ stripe_pk }}" />
+    <input type="hidden" name="stripe_image" value="{% static 'icons/logo.png' %}" />
+    <input type="hidden" name="stripe_email" value="{{user.email}}" />
+    <input type="hidden" name="stripe_label" value="Buy" />
+    <input type="hidden" name="stripe_description" value="{{ bundles|mul:'5' }} request{{ bundles|mul:'5'|pluralize }} (${{ bundles|mul:'20' }}.00)" />
+    <input type="hidden" name="stripe_bitcoin" value="true" />
+    <input type="hidden" name="stripe_fee" value="0" />
+    <input type="hidden" name="stripe_amount" value="{{ bundles|mul:'2000' }}" />
+</form>
 <p>You will be submitting {{ requests }} request{{ requests|pluralize }}, but {% if not remaining %}have no requests{% else %}only have {{ remaining }} remaining{%endif%}. You must purchase {{ bundles }} request bundle{{ bundles|pluralize }} before you can submit your request.</p>
-<button data-amount="{{ bundles|mul:'2000' }}"
-        data-description="{{ bundles|mul:'5' }} request{{ bundles|mul:'5'|pluralize }} (${{ bundles|mul:'20' }}.00)"
-        data-email="{{ user.email }}"
-        data-label=""
-        data-form="#buy-requests"
-        class="checkout-button primary">Buy Requests</button>
+<button class="primary" form="buy-requests" type="submit">Buy Requests</button>
 {% else %}
 <p>You will be submitting {{ requests }} request{{ requests|pluralize }}, leaving
 you with {% if balance.monthly_requests %}{{ profile.monthly_requests|sub:balance.monthly_requests }}
@@ -91,24 +97,3 @@ monthly request{{ profile.monthly_requests|sub:balance.monthly_requests|pluraliz
 
 {% endwith %}
 {% endblock form-form %}
-
-{% block scripts %}
-<script src="https://checkout.stripe.com/checkout.js"></script>
-<script>
-    $(document).ready(function() {
-        $('.checkout-button').click(function(e){
-            e.preventDefault();
-            checkoutData = getCheckoutData($(this));
-            checkout(
-                "{{ stripe_pk }}",
-                "{% static 'apple-touch-icon.png' %}",
-                checkoutData.description,
-                checkoutData.amount,
-                checkoutData.email,
-                checkoutData.label,
-                checkoutData.form
-            );
-        });
-    });
-</script>
-{% endblock scripts %}

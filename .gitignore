@@ -16,6 +16,7 @@ apache
 local_settings.py
 dump.rdb
 .bundle
+bundles
 .noseids
 .ruby-version
 style.*.css

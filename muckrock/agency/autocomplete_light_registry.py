@@ -37,7 +37,7 @@ class AgencyAdminAutocomplete(autocomplete_light.AutocompleteModelBase):
         jurisdiction_id = self.request.GET.get('jurisdiction_id', None)
 
         conditions = self._choices_for_request_conditions(query, self.search_fields)
-        choices = self.choices.filter(conditions)
+        choices = self.choices.filter(conditions, status='approved')
         if jurisdiction_id:
             choices = choices.filter(jurisdiction_id=jurisdiction_id)
 

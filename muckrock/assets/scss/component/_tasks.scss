@@ -54,6 +54,7 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
 }
 
 .task .full-letter {
+    margin-bottom: 0;
     background: $color-grey-7;
     & > header {
         @include display(flex);
@@ -63,12 +64,30 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
         background: $color-grey-7;
     }
     textarea {
+        display: block;
         border-radius: 0;
         border-bottom: 1px solid $color-grey;
-        height: 10em;
+        max-width: 100%;
+        height: 20em;
         padding: $vertical-rhythm/2;
         font-family: $font-monospace;
         font-size: $font-size-2;
+    }
+}
+
+.task .full-communication {
+    margin-bottom: 0;
+    background: $color-grey-7;
+    & > header {
+        @include display(flex);
+        margin-bottom: 0;
+        border-bottom: 1px solid $color-grey;
+        padding: $task-padding;
+        background: $color-grey-7;
+    }
+    main {
+        border-bottom: 1px solid $color-grey;
+        padding: $vertical-rhythm/2;
     }
 }
 
@@ -267,21 +286,6 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
 /* Response Task */
 
 .response.task {
-    .full-communication {
-        margin-bottom: 0;
-        background: $color-grey-7;
-        & > header {
-            @include display(flex);
-            margin-bottom: 0;
-            border-bottom: 1px solid $color-grey;
-            padding: $task-padding;
-            background: $color-grey-7;
-        }
-        main {
-            border-bottom: 1px solid $color-grey;
-            padding: $vertical-rhythm/2;
-        }
-    }
     .response-input {
         margin-bottom: 0;
         text-align: left;
@@ -290,12 +294,30 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
             font-size: $font-size-2;
         }
     }
+    .task-data {
+        margin-bottom: 0;
+    }
 }
 
 /* Snail Mail Task */
 
-.task-post-actions input[type=checkbox] {
-    & + label {
-        margin-bottom: $vertical-rhythm;
+.task .task-post-actions input[type="checkbox"] {
+    float: none;
+    display: inline-block;
+    margin: 0 $vertical-rhythm/2;
+}
+
+.snail-mail.task .task-post-actions {
+    @include display(flex);
+    @include flex-wrap(wrap);
+    @include justify-content(space-between);
+    @include align-items(flex-end);
+    margin-bottom: 0;
+    .input-group {
+        @include flex(3 1 auto);
+    }
+    .button-group {
+        @include flex(1 1 auto);
+        text-align: right;
     }
 }

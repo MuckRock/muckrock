@@ -19,7 +19,7 @@
         </div>
         <footer>
             <a href="{% url 'accounts' %}" class="cancel">Go Pro for embargo, multirequest, and other features.</a>
-            <button type="submit" class="primary">Sign Up</button>
+            <button type="submit" class="primary" onclick="ga('send', 'event', 'Account', 'Registration', window.location.pathname)">Sign Up</button>
         </footer>
     </form>
 </article>

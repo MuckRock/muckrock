@@ -62,6 +62,7 @@
             <th>Count</th>
             <th>Cost/Message</th>
             <th>Total Cost</th>
+            <th>30 Day Cost</th>
         </tr>
     </thead>
     <tbody>
@@ -70,17 +71,20 @@
             <td>{{ sent.format.email }}</td>
             <td>${{ sent.cost.email|floatformat:2 }}</td>
             <td>${{ sent.expense.email|floatformat:2 }}</td>
+            <td>${{ sent.trailing.email|floatformat:2 }}</td>
         </tr>
         <tr>
             <td>Fax</td>
             <td>{{ sent.format.fax }}</td>
             <td>${{ sent.cost.fax|floatformat:2 }}</td>
             <td>${{ sent.expense.fax|floatformat:2 }}</td>
+            <td>${{ sent.trailing.fax|floatformat:2 }}</td>
         </tr>
             <td>Post</td>
             <td>{{ sent.format.mail }}</td>
             <td>${{ sent.cost.mail|floatformat:2 }}</td>
             <td>${{ sent.expense.mail|floatformat:2 }}</td>
+            <td>${{ sent.trailing.mail|floatformat:2 }}</td>
         </tr>
     </tbody>
 </table>

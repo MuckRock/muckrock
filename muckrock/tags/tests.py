@@ -6,30 +6,21 @@ from django.core.urlresolvers import reverse
 
 from nose.tools import eq_
 
-from . import models, views
+from muckrock.tags.models import Tag, normalize
+from muckrock.tags import views
 
 
 class TestTagModel(test.TestCase):
     """
-    Test the methods attached to tags.
+    Test the normalize function
     """
-
-    def setUp(self):
-        self.tag = models.Tag.objects.create(name=u'foo')
-
-    def test_sanitize_html(self):
-        """The tag should sanitize the name for HTML."""
-        dirty_string = u'<p>hello</p>'
-        expected_clean_string = u'hello'
-        clean_string = self.tag.normalize(dirty_string)
-        eq_(clean_string, expected_clean_string,
-            'The tag should strip HTML tags from strings.')
+    # pylint: disable=no-self-use
 
     def test_convert_to_lowercase(self):
         """The tag should be entirely lowercase"""
         dirty_string = u'HELLO'
         expected_clean_string = u'hello'
-        clean_string = self.tag.normalize(dirty_string)
+        clean_string = normalize(dirty_string)
         eq_(clean_string, expected_clean_string,
             'The tag should lowercase its name.')
 
@@ -37,7 +28,7 @@ class TestTagModel(test.TestCase):
         """The tag should strip extra whitespace from the beginning and end of the name."""
         dirty_string = u' hello '
         expected_clean_string = u'hello'
-        clean_string = self.tag.normalize(dirty_string)
+        clean_string = normalize(dirty_string)
         eq_(clean_string, expected_clean_string,
             'The tag should strip extra whitespace from the beginning and end of the name.')
 
@@ -45,7 +36,7 @@ class TestTagModel(test.TestCase):
         """The tag should remove extra whitespace from between words."""
         dirty_string = u'hello    world'
         expected_clean_string = u'hello world'
-        clean_string = self.tag.normalize(dirty_string)
+        clean_string = normalize(dirty_string)
         eq_(clean_string, expected_clean_string,
             'The tag should strip extra whitespace from between words.')
 
@@ -59,9 +50,9 @@ class TestTagListView(test.TestCase):
 
     def setUp(self):
         self.client = test.Client()
-        self.tag_foo = models.Tag.objects.create(name=u'foo')
-        self.tag_bar = models.Tag.objects.create(name=u'bar')
-        self.tag_baz = models.Tag.objects.create(name=u'baz')
+        self.tag_foo = Tag.objects.create(name=u'foo')
+        self.tag_bar = Tag.objects.create(name=u'bar')
+        self.tag_baz = Tag.objects.create(name=u'baz')
 
     def test_resolve_url(self):
         """The tag list url should resolve."""
@@ -73,7 +64,7 @@ class TestTagListView(test.TestCase):
         """The tag list should list all the tags that are used."""
         # pylint: disable=no-self-use
         tag_list = views.list_all_tags()
-        eq_(len(models.Tag.objects.all()), 3,
+        eq_(len(Tag.objects.all()), 3,
             "There should be 3 tag items.")
         eq_(len(tag_list), 0,
             "But none should be listed since they aren't used")
@@ -87,7 +78,7 @@ class TestTagDetailView(test.TestCase):
 
     def setUp(self):
         self.client = test.Client()
-        self.tag_foo = models.Tag.objects.create(name=u'foo')
+        self.tag_foo = Tag.objects.create(name=u'foo')
 
     def test_resolve_url(self):
         """The tag detail url should resolve."""

@@ -17,7 +17,7 @@ import logging
 import stripe
 import sys
 
-from muckrock.crowdfund.forms import CrowdfundRequestForm
+from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.foia.forms import \
     FOIADeleteForm, \
     FOIAAdminFixForm, \
@@ -26,7 +26,6 @@ from muckrock.foia.forms import \
 from muckrock.foia.models import FOIARequest, FOIAFile, END_STATUS
 from muckrock.foia.views.comms import save_foia_comm
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.task.models import PaymentTask
 
 logger = logging.getLogger(__name__)
 
@@ -181,41 +180,36 @@ def embargo(request, jurisdiction, jidx, slug, idx):
 def pay_request(request, jurisdiction, jidx, slug, idx):
     """Pay us through CC for the payment on a request"""
     foia = _get_foia(jurisdiction, jidx, slug, idx)
-    token = request.POST.get('stripe_token', False)
-    email = request.POST.get('stripe_email', False)
-    amount = request.POST.get('amount', False)
-    if token and email and amount:
+    token = request.POST.get('stripe_token')
+    email = request.POST.get('stripe_email')
+    amount = request.POST.get('stripe_amount')
+    if request.method == 'POST':
+        error_msg = None
+        if not token:
+            error_msg = 'Missing Stripe token.'
+        if not email:
+            error_msg = 'Missing email address.'
+        if not amount:
+            error_msg = 'Missing payment amount.'
+        if error_msg is not None:
+            messages.error(request, 'Payment error: %s' % error_msg)
+            logger.warning('Payment error: %s', error_msg, exc_info=sys.exc_info())
+            return redirect(foia)
         try:
             metadata = {
                 'email': email,
                 'action': 'request-fee',
                 'foia': foia.pk
             }
+            amount = int(amount)
             request.user.profile.pay(token, amount, metadata)
+            foia.pay(request.user, amount / 100.0)
         except (stripe.InvalidRequestError, stripe.CardError, ValueError) as exception:
             messages.error(request, 'Payment error: %s' % exception)
             logger.warning('Payment error: %s', exception, exc_info=sys.exc_info())
             return redirect(foia)
-        msg = 'Your payment was successful. We will get this to the agency right away.'
+        msg = 'Your payment was successful. We will get this to the agency right away!'
         messages.success(request, msg)
-        logger.info(
-            '%s has paid %0.2f for request %s',
-            request.user.username,
-            int(amount)/100,
-            foia.title
-        )
-        actstream.action.send(
-            request.user,
-            verb='paid fees for',
-            action_object=foia,
-            target=foia.agency
-        )
-        foia.status = 'processed'
-        foia.save()
-        PaymentTask.objects.create(
-            user=request.user,
-            amount=int(amount)/100.0,
-            foia=foia)
     return redirect(foia)
 
 @login_required
@@ -295,7 +289,6 @@ def crowdfund_request(request, idx, **kwargs):
     # pylint: disable=unused-argument
     foia = FOIARequest.objects.get(pk=idx)
     owner_or_staff = request.user == foia.user or request.user.is_staff
-
     # check for unauthorized access
     if not owner_or_staff:
         messages.error(request, 'You may only crowdfund your own requests.')
@@ -306,12 +299,13 @@ def crowdfund_request(request, idx, **kwargs):
     if foia.status != 'payment':
         messages.error(request, 'You may only crowfund when payment is required.')
         return redirect(foia)
-
     if request.method == 'POST':
         # save crowdfund object
-        form = CrowdfundRequestForm(request.POST)
+        form = CrowdfundForm(request.POST)
         if form.is_valid():
             crowdfund = form.save()
+            foia.crowdfund = crowdfund
+            foia.save()
             messages.success(request, 'Your crowdfund has started, spread the word!')
             actstream.action.send(
                 request.user,
@@ -332,7 +326,7 @@ def crowdfund_request(request, idx, **kwargs):
             'date_due': date_due,
             'foia': foia
         }
-        form = CrowdfundRequestForm(initial=initial)
+        form = CrowdfundForm(initial=initial)
 
     return render_to_response(
         'forms/foia/crowdfund.html',

@@ -30,11 +30,6 @@ function textAreaReply(nextSelector) {
     });
 }
 
-function hideAllExcept(visible) {
-    $('.tab-section').removeClass( 'active' );
-    visible.addClass( 'active' );
-}
-
 function get_thumbnail(doc_id) {
         var idx = doc_id.indexOf('-');
         var num = doc_id.slice(0, idx);
@@ -68,58 +63,6 @@ $('.estimated-completion .edit').click(function(){
     });
 });
 
-/* Tab Bar */
-
-$('.tab').click(function() {
-    $(this).addClass('active');
-    $(this).siblings().removeClass('active');
-    var tabSection = $(this).data('target');
-    if (tabSection) {
-        $(tabSection).addClass('visible');
-        $(tabSection).siblings().removeClass('visible');
-    }
-});
-
-/* Deep link into tab */
-
-function deepLink(e) {
-    var target;
-    if (e) {
-        e.preventDefault();
-        target = '#' + $(e.target).data('doc-anchor');
-    } else {
-        target = window.location.hash;
-    }
-    var n = target.indexOf('-');
-    var tab = target.substring(0, n != -1 ? n : target.length);
-    tab += 's';
-    $('.tab').each(function(index, element){
-        var tabTarget = $(this).data('target');
-        if (tab == tabTarget) {
-            $(this).click();
-        }
-    });
-    // deep link to single file
-    if (tab == '#files') {
-        var specificFile = target;
-        var linkToView = $(specificFile).find('.view-file');
-        if (linkToView) {
-            var id = linkToView.data('doc-id');
-            var title = linkToView.data('doc-title');
-            var anchor = linkToView.data('doc-anchor');
-            console.log(id, title, anchor);
-            displayDoc(id, title, anchor);
-        }
-    } else if (tab == '#notes' || tab == '#comms' || tab == '#tasks') { // deep link to specific element
-        var specificElement = window.location.hash;
-        var elementOffset = $(specificElement).offset();
-        window.scrollTo(elementOffset.top, elementOffset.left);
-    }
-}
-
-deepLink();
-$('a.view-file').click(deepLink);
-
 /* Communications */
 
 $('#toggle-communication-collapse').click(function(e){
@@ -138,77 +81,75 @@ $('#toggle-communication-collapse').click(function(e){
     }
 });
 
-/* Follow up and appeal */
+/* Request action composer */
 
-var composeResponse = function(target, composerForm) {
-    var composer = $(target).closest('.communications-composer');
-    var inactiveComposerForm = $(composer).find('.inactive.composer-input');
-    var activeComposerForm = $(composer).find(composerForm);
-    $(activeComposerForm).siblings().removeClass('visible');
-    $(activeComposerForm).addClass('visible');
-    var textarea = $(activeComposerForm).children('textarea');
-    $(textarea).focus();
-    $(activeComposerForm).find('.button.cancel').click(function(e){
-        e.preventDefault();
-        $(inactiveComposerForm).siblings().removeClass('visible');
-        $(inactiveComposerForm).addClass('visible');
-    });
+var composerInputs = $('.composer-input');
+
+function showComposer(id) {
+    // if no id provided, use the inactive panel
+    id = !id ? '#inactive' : id;
+    // hide all the composers, then filter to
+    // the one we're interested in and show it
+    var composer = composerInputs.hide().filter(id).show();
+    // We also want to bring the composer's first input into focus
+    // in order to make it clear to the user that this is actionable
+    composer.find(':text,textarea,select').filter(':visible:first').focus();
+    console.log('Switched to composer: ', id);
 }
 
-$('#follow-up').click(function(e){
-    e.preventDefault();
-    composeResponse(this, '.follow-up.composer-input');
+// Bind to hashchange event
+$(window).on('hashchange', function () {
+    // check if the hash is a target
+    var hash = location.hash;
+    var composers = composerInputs.filter(hash);
+    if (composers.length > 0) {
+        showComposer(hash);
+    }
 });
 
-$('#thanks').click(function(e){
-    e.preventDefault();
-    composeResponse(this, '.thanks.composer-input');
-});
-
-$('#appeal').click(function(e){
-    e.preventDefault();
-    composeResponse(this, '.appeal.composer-input');
-});
-
-$('.inactive.composer-input').click(function(){
-    $('#follow-up').click();
-});
-
-$('#inactive-appeal').click(function(){
-    $('#appeal').click();
-    return false;
+// Initialize
+$(document).ready(function(){
+    showComposer(composerInputs.filter(location.hash).length > 0 ? location.hash : '');
 });
 
 /* Documents */
 
-function displayDoc(docId, docTitle, docAnchor) {
-    var title;
-    if (!!docTitle) {
-        title = docTitle;
-    } else {
+function displayFile(file) {
+    var activeFile = $('.active-document');
+    var files = $('.file');
+    if (!file) {
+        return
+    }
+    var title = file.data('title');
+    var docId = file.data('doc-id');
+    if (!title) {
         title = 'Untitled';
     }
     $('#doc-title').empty().text(title);
-    $('.file').parent('li').removeClass('active');
-    if (!!docAnchor) {
-        var fileListItem = $('#files ul li > #' + docAnchor).parent('li');
-        $(fileListItem).addClass('active');
-    }
-    DV.load(
-        'https://www.documentcloud.org/documents/' + docId + '.js',
-        {
-            sidebar: false,
-            container: "#viewer"
-        }
-    );
-    $('.active-document').addClass('visible');
-    window.scrollTo(0, $('.active-document').offset().top);
+    // remove the active class from all the list items,
+    // then apply active class to this file's list item
+    files.parent('li').removeClass('active');
+    files.filter(file).parent('li').addClass('active');
+    docCloudSettings = {sidebar: false, container: "#viewer"}
+    DV.load('https://www.documentcloud.org/documents/' + docId + '.js', docCloudSettings);
+    activeFile.addClass('visible');
+    window.scrollTo(0, activeFile.offset().top);
 }
 
-$('.active-document .cancel.button').click(function(){
+$('.view-file').click(function() {
+    // We force a hashchange when the view-file link is clicked.
+    $(window).trigger('hashchange');
+    window.scrollTo(0, $('.active-document').offset().top);
+
+});
+
+$('.active-document').find('.cancel.button').click(function(){
+    var activeFile = $('.active-document');
+    var files = $('.file');
     $('#viewer').empty();
-    $('.active-document').removeClass('visible');
-    $('.files-list .active').removeClass('active');
+    activeFile.removeClass('visible');
+    files.parent('li').removeClass('active');
+    console.log('Closed file');
 });
 
 $('.toggle-embed').click(function(){
@@ -225,10 +166,6 @@ $('.toggle-embed').click(function(){
 
 $('.note-header').click(function(){
     $(this).parent().toggleClass('collapsed');
-});
-
-$('.note-date').click(function(){
-    return false;
 });
 
 /* Sharing */
