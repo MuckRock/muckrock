@@ -21,7 +21,7 @@ from muckrock.task.forms import (
 from muckrock.task.models import (
     Task, OrphanTask, SnailMailTask, RejectedEmailTask,
     StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask,
-    NewCrowdfundTask, MultiRequestTask, StatusChangeTask, FailedFaxTask
+    CrowdfundTask, MultiRequestTask, StatusChangeTask, FailedFaxTask
     )
 from muckrock.views import MRFilterableListView
 
@@ -39,7 +39,7 @@ def count_tasks():
         new_agency=Count('newagencytask'),
         response=Count('responsetask'),
         status_change=Count('statuschangetask'),
-        crowdfund=Count('genericcrowdfundtask'),
+        crowdfund=Count('crowdfundtask'),
         multirequest=Count('multirequesttask'),
         failed_fax=Count('failedfaxtask'),
         )
@@ -387,7 +387,7 @@ class StatusChangeTaskList(TaskList):
 
 class CrowdfundTaskList(TaskList):
     title = 'Crowdfunds'
-    queryset = NewCrowdfundTask.objects.select_related('crowdfund')
+    queryset = CrowdfundTask.objects.select_related('crowdfund')
 
 
 class MultiRequestTaskList(TaskList):

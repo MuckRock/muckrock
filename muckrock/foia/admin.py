@@ -14,7 +14,6 @@ from django.template import RequestContext
 
 import autocomplete_light
 from datetime import date, datetime, timedelta
-from leaflet.admin import LeafletGeoAdmin
 from reversion import VersionAdmin
 
 from muckrock.agency.models import Agency
@@ -107,7 +106,7 @@ class FOIARequestAdminForm(forms.ModelForm):
         fields = '__all__'
 
 
-class FOIARequestAdmin(NestedModelAdmin, LeafletGeoAdmin, VersionAdmin):
+class FOIARequestAdmin(NestedModelAdmin, VersionAdmin):
     """FOIA Request admin options"""
     change_list_template = 'admin/foia/foiarequest/change_list.html'
     prepopulated_fields = {'slug': ('title',)}
