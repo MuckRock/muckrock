@@ -46,7 +46,8 @@ def _upload_file(foia, comm, file_, sender):
             date=datetime.now(),
             source=source[:70],
             access=access)
-    foia_file.ffile.save(file_.name[:100].encode('ascii', 'ignore'), file_)
+    # max db size of 255, - 22 for folder name
+    foia_file.ffile.save(file_.name[:233].encode('ascii', 'ignore'), file_)
     foia_file.save()
     if foia:
         upload_document_cloud.apply_async(args=[foia_file.pk, False], countdown=3)
