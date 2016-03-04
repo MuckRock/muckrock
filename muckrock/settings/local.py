@@ -4,7 +4,6 @@ Settings used when developing locally
 # pylint: disable=wildcard-import
 # pylint: disable=unused-wildcard-import
 from muckrock.settings.base import *
-import logging
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG

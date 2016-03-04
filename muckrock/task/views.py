@@ -254,7 +254,7 @@ class StaleAgencyTaskList(TaskList):
                         Now() - Max('communications__date')))
                     .filter(latest_response__gte=STALE_DURATION)
                     .order_by('-latest_response'),
-                    to_attr='_stale_requests'),
+                    to_attr='stale_requests_'),
                 ))
 
     def task_post_helper(self, request, task):
