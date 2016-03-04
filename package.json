@@ -17,7 +17,9 @@
     "url": "https://github.com/MuckRock/muckrock/issues"
   },
   "homepage": "https://github.com/MuckRock/muckrock#readme",
-  "engines": {"node": "5.6.0"},
+  "engines": {
+    "node": "5.6.0"
+  },
   "devDependencies": {
     "babel": "^6.5.2",
     "babel-core": "^6.5.2",
@@ -35,6 +37,7 @@
   "dependencies": {
     "alt": "^0.18.2",
     "axios": "^0.9.1",
+    "jquery": "^2.2.1",
     "react": "^0.14.7",
     "react-dom": "^0.14.7"
   }
