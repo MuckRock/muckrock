@@ -232,17 +232,6 @@ class StaleAgencyTaskTests(TestCase):
         ok_(closed_foia not in stale_requests,
             'Closed requests should not be considered stale.')
 
-    def test_stalest_request(self):
-        """The stale agency task should provide the stalest request it knows about."""
-        # first lets create a foia with a pretty stale communication
-        really_stale_request = factories.StaleFOIARequestFactory(agency=self.task.agency)
-        really_stale_communication = really_stale_request.communications.last()
-        really_stale_communication.date -= timedelta(STALE_DURATION)
-        really_stale_communication.save()
-        self.task.refresh_from_db()
-        stalest_request = self.task.stalest_request()
-        eq_(stalest_request, really_stale_request)
-
     def test_latest_response(self):
         """
         The stale agency task should provide the most
