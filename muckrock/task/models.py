@@ -294,8 +294,9 @@ class StaleAgencyTask(Task):
 
     def stale_requests(self):
         """Returns a list of stale requests associated with the task's agency"""
-        if hasattr(self.agency, '_stale_requests'):
-            return self.agency._stale_requests
+        if hasattr(self.agency, 'stale_requests_'):
+            # pylint: disable=no-member
+            return self.agency.stale_requests_
         requests = (FOIARequest.objects
                 .get_open()
                 .filter(agency=self.agency)

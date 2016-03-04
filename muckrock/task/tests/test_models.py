@@ -5,13 +5,12 @@ Tests for Tasks models
 from django.http import Http404
 from django.test import TestCase
 
-from datetime import datetime, timedelta
+from datetime import datetime
 import logging
 import mock
 import nose
 
 from muckrock import factories, task
-from muckrock.agency.models import STALE_DURATION
 from muckrock.foia.models import FOIARequest, FOIANote
 from muckrock.task.factories import FlaggedTaskFactory
 from muckrock.task.signals import domain_blacklist
