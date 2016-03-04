@@ -32,6 +32,11 @@ module.exports = {
     plugins: [
         new BundleTracker({filename: './muckrock/assets/webpack-stats.json'}),
         new ExtractText('[name].css'),
+        new webpack.ProvidePlugin({
+            $: "jquery",
+            jQuery: "jquery",
+            "window.jQuery": "jquery"
+        }),
     ],
     resolve: {
         moduleDirectories: ['node_modules'],
