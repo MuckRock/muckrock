@@ -372,7 +372,6 @@ def autoimport():
             r'(?: ID#(?P<id>\S+))?'
             r'(?: EST(?P<estm>\d\d?)-(?P<estd>\d\d?)-(?P<esty>\d\d))?'
             , re.I)
-    storage_bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
 
     def s3_copy(bucket, key_or_pre, dest_name):
         """Copy an s3 key or prefix"""
@@ -430,7 +429,7 @@ def autoimport():
         return (foia_pks, file_date, code, title,
                 status, body, arg, id_, est_date)
 
-    def import_key(key, comm, log, title=None):
+    def import_key(key, storage_bucket, comm, log, title=None):
         """Import a key"""
         # pylint: disable=no-member
 
@@ -458,7 +457,7 @@ def autoimport():
 
         upload_document_cloud.apply_async(args=[foia_file.pk, False], countdown=3)
 
-    def import_prefix(prefix, bucket, comm, log):
+    def import_prefix(prefix, bucket, storage_bucket, comm, log):
         """Import a prefix (folder) full of documents"""
 
         for key in bucket.list(prefix=prefix.name, delimiter='/'):
@@ -469,7 +468,7 @@ def autoimport():
                         (key.name, prefix.name))
                 continue
             try:
-                import_key(key, comm, log)
+                import_key(key, storage_bucket, comm, log)
             except SizeError as exc:
                 s3_copy(bucket, key, 'review/%s' % key.name[6:])
                 exc.args[2].delete() # delete the foia file
@@ -482,6 +481,7 @@ def autoimport():
         log.append('Start Time: %s' % datetime.now())
         conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
         bucket = conn.get_bucket(settings.AWS_AUTOIMPORT_BUCKET_NAME)
+        storage_bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
         for key in bucket.list(prefix='scans/', delimiter='/'):
             if key.name == 'scans/':
                 continue
@@ -489,8 +489,8 @@ def autoimport():
             file_name = key.name[6:]
 
             try:
-                foia_pks, file_date, code, title, status, body, arg, id_, est_date \
-                    = parse_name(file_name)
+                (foia_pks, file_date, code, title, status,
+                        body, arg, id_, est_date) = parse_name(file_name)
             except ValueError as exc:
                 s3_copy(bucket, key, 'review/%s' % file_name)
                 s3_delete(bucket, key)
@@ -520,9 +520,9 @@ def autoimport():
                         foia.date_estimate = est_date
 
                     if key.name.endswith('/'):
-                        import_prefix(key, bucket, comm, log)
+                        import_prefix(key, bucket, storage_bucket, comm, log)
                     else:
-                        import_key(key, comm, log, title=title)
+                        import_key(key, storage_bucket, comm, log, title=title)
 
                     foia.save()
                     foia.update(comm.anchor())
