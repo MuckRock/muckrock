@@ -356,7 +356,10 @@ class SizeError(Exception):
 
 # Increase the time limit for autoimport to 1 hour, and a soft time limit to
 # 5 minutes before that
-@periodic_task(run_every=crontab(hour=2, minute=0), name='muckrock.foia.tasks.autoimport', time_limit=3600, soft_time_limit=3300)
+@periodic_task(
+        run_every=crontab(hour=2, minute=0),
+        name='muckrock.foia.tasks.autoimport',
+        time_limit=3600, soft_time_limit=3300)
 def autoimport():
     """Auto import documents from S3"""
     # pylint: disable=broad-except
@@ -369,6 +372,7 @@ def autoimport():
             r'(?: ID#(?P<id>\S+))?'
             r'(?: EST(?P<estm>\d\d?)-(?P<estd>\d\d?)-(?P<esty>\d\d))?'
             , re.I)
+    storage_bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
 
     def s3_copy(bucket, key_or_pre, dest_name):
         """Copy an s3 key or prefix"""
@@ -478,7 +482,6 @@ def autoimport():
         log.append('Start Time: %s' % datetime.now())
         conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
         bucket = conn.get_bucket(settings.AWS_AUTOIMPORT_BUCKET_NAME)
-        storage_bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
         for key in bucket.list(prefix='scans/', delimiter='/'):
             if key.name == 'scans/':
                 continue
