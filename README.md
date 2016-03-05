@@ -22,8 +22,9 @@
   6. Inside your VM, run `source ~/.bashrc`.
 
 4. Populate the database and sync the files from AWS inside the virtual machine
-  1. From within the virtual machine, `fab populate-db`
-  2. From within the virtual machine, `fab sync-aws`
+  1. `cd muckrock`
+  2. `fab populate-db`
+  3. `fab sync-aws`
 
 5. Run the test server inside the virtual machine
   1. Run `fab mail &` to start a background email server
