@@ -82,9 +82,9 @@ def route_mailgun(request):
         return HttpResponseForbidden()
 
     p_request_email = re.compile(r'(\d+-\d{3,10})@requests.muckrock.com')
-    tos = post.get('To') or post.get('to')
-    ccs = post.get('CC') or post.get('cc')
-    name_emails = [parseaddr(addr) for addr in tos.split(',') + ccs.split(',')]
+    tos = post.get('To', '') or post.get('to', '')
+    ccs = post.get('Cc', '') or post.get('cc', '')
+    name_emails = getaddresses([tos, ccs])
     logger.info('Incoming email: %s', name_emails)
     for _, email in name_emails:
         m_request_email = p_request_email.match(email)
