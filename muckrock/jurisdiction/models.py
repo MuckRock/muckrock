@@ -105,6 +105,7 @@ class Jurisdiction(models.Model, RequestHelper):
     has_appeal = models.BooleanField(
             default=True,
             help_text='Does this jurisdiction have an appeals process?')
+    requires_proxy = models.BooleanField(default=False)
 
     def __unicode__(self):
         # pylint: disable=no-member

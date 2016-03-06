@@ -93,6 +93,7 @@ class Agency(models.Model, RequestHelper):
     foia_guide = models.URLField(blank=True, verbose_name='FOIA Processing Guide',
                                  help_text='Begin with http://')
     exempt = models.BooleanField(default=False)
+    requires_proxy = models.BooleanField(default=False)
 
     objects = AgencyQuerySet.as_manager()
 
