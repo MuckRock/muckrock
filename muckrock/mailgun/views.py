@@ -3,6 +3,7 @@ Views for mailgun
 """
 
 from django.conf import settings
+from django.core.cache import cache
 from django.core.mail import EmailMessage
 from django.http import HttpResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
@@ -80,6 +81,23 @@ def route_mailgun(request):
     post = request.POST
     if not _verify(post):
         return HttpResponseForbidden()
+
+    # The way spam hero is currently set up, all emails are sent to the same
+    # address, so we must parse to headers to find the recipient.  This can
+    # cause duplicate messages if one email is sent to or CC'd to multiple
+    # addresses @request.muckrock.com.  To try and avoid this, we will cache
+    # the message id, which should be a unique identifier for the message.
+    # If it exists int he cache, we will stop processing this email.  The
+    # ID will be cached for 5 minutes - duplicates should normally be processed
+    # within seconds of each other.
+    message_id = (
+            post.get('Message-ID') or
+            post.get('Message-Id') or
+            post.get('message-id'))
+    if message_id:
+        # cache.add will return False if the key is already present
+        if not cache.add(message_id, 1, 300):
+            return HttpResponse('OK')
 
     p_request_email = re.compile(r'(\d+-\d{3,10})@requests.muckrock.com')
     tos = post.get('To', '') or post.get('to', '')
