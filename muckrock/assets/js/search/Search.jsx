@@ -16,7 +16,7 @@ var Search = React.createClass({
 
 var container = document.getElementById('react-search');
 if (container) {
-    ReactDOM.renderComponent(<Search />, container);
+    ReactDOM.render(<Search />, container);
 }
 
 export default Search;

@@ -20,11 +20,11 @@ var SearchForm = React.createClass({
 
     render: function() {
         return (
-            <form onSubmit={this.search}>
+            <form className="search form" onSubmit={this.search}>
                 <label>Search</label>
                 <input type="text" value={this.state.query} onChange={this.inputChange} />
-                <button type="submit">Search</button>
-            </div>
+                <button className="primary" type="submit">Search</button>
+            </form>
         )
     }
 });

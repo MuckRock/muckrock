@@ -1,6 +1,7 @@
 import React from 'react';
-import alt from '../alt';
+import alt from './alt';
 import SearchStore from './SearchStore';
+
 var SearchResults = React.createClass({
 
     getInitialState: function() {
@@ -18,23 +19,23 @@ var SearchResults = React.createClass({
     },
 
     onChange(state) {
-        console.log('onchange', state);
-        this.setState({results: state.results});
+        console.debug('Results state:', this.state);
     },
+
     render: function() {
-        console.log('results state', this.state);
         var results = this.state.results.map((result) => {
             return (
-                <li>{result}</li>
+                <li className="search results item">
+                    {result}
+                </li>
             )
         });
         return (
-            <div>
-                <ul>
-                    {results}
-                </ul>
-            </div>
+            <ul className="search results list">
+                {results}
+            </ul>
         )
     }
 });
+
 export default SearchResults;

@@ -20,4 +20,5 @@ const SearchSource = {
 
     }
 };
+
 export default SearchSource;
