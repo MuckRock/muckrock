@@ -17,8 +17,6 @@ import './notification'
 import './tabs'
 import './task'
 
-import './search/Search'
-
 function modal(nextSelector) {
     var overlay = '#modal-overlay';
     $(overlay).addClass('visible');
