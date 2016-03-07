@@ -6,13 +6,19 @@
         <input type="search" name="q" value="{{ query }}" />
         <button type="submit">Search</button>
     </form>
-    <ul class="search results">
+    {% if results %}
+    <div class="search results stats">
+        <p>{{ results|length }} result{{results|length|pluralize}}</p>
+    </div>
+    <table class="search results table">
     {% for result in results %}
-        {{ result.description }}
-        <li class="search result"><a href="{{ result.get_absolute_url }}">{{ result }}</a></li>
-    {% empty %}
-        <li class="empty">No results</li>
+        <tr class="search result">
+            <td><a href="{{ result.get_absolute_url }}">{{ result }}</a></td>
+        </tr>
     {% endfor %}
-    </ul>
+    </table>
+    {% else %}
+    <h1>Start searching!</h1>
+    {% endif %}
 </div>
 {% endblock %}
