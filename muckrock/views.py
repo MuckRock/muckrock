@@ -8,10 +8,13 @@ from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.core.exceptions import FieldError
 from django.db.models import Sum, FieldDoesNotExist
+from django.http import HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.utils.decorators import method_decorator
-from django.views.generic.list import ListView
+from django.views.generic import ListView
+
+import re
 
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAFile
@@ -21,9 +24,6 @@ from muckrock.news.models import Article
 from muckrock.project.models import Project
 from muckrock.utils import cache_get_or_set
 
-import re
-from haystack.views import SearchView
-from haystack.query import RelatedSearchQuerySet
 
 class MRFilterableListView(ListView):
     """
@@ -215,51 +215,6 @@ class MRFilterableListView(ListView):
         if self.model is not None:
             return self.model
 
-
-class MRSearchView(SearchView):
-    """Always lower case queries for case insensitive searches"""
-
-    def __init__(self, *args, **kwargs):
-        kwargs['searchqueryset'] = RelatedSearchQuerySet()
-        super(MRSearchView, self).__init__(*args, **kwargs)
-
-    def get_query(self):
-        """Lower case the query"""
-        return super(MRSearchView, self).get_query().lower()
-
-    def get_results(self):
-        """Apply select related to results"""
-        results = super(MRSearchView, self).get_results()
-        try:
-            results = results.load_all_queryset(
-                FOIARequest, FOIARequest.objects.select_related('jurisdiction'))
-        except AttributeError:
-            pass
-
-        return results
-
-    def extra_context(self):
-        """Adds per_page to context data"""
-        context = super(MRSearchView, self).extra_context()
-        context['per_page'] = int(self.request.GET.get('per_page', 25))
-        models = self.request.GET.getlist('models')
-        context['news_checked'] = 'news.article' in models
-        context['foia_checked'] = 'foia.foiarequest' in models
-        context['qanda_checked'] = 'qanda.question' in models
-        return context
-
-    def get_paginate_by(self):
-        """Gets per_page the right way"""
-        try:
-            per_page = int(self.request.GET.get('per_page'))
-            return max(min(per_page, 100), 5)
-        except (ValueError, TypeError):
-            return 25
-
-    def build_page(self):
-        """Circumvents the hard-coded haystack per page value."""
-        self.results_per_page = self.get_paginate_by()
-        return super(MRSearchView, self).build_page()
 
 def homepage(request):
     """Get all the details needed for the homepage"""

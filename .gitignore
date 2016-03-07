@@ -16,9 +16,11 @@ apache
 local_settings.py
 dump.rdb
 .bundle
+bundles
 .noseids
 .ruby-version
 style.*.css
 .vagrant
 node_modules
 .settings.sh
+webpack-stats.json

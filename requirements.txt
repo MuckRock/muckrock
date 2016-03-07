@@ -57,7 +57,7 @@ django-filter==0.10.0
 # Used for storing geographic data
 django-geojson==2.8.1
 # Search engine
-django-haystack==2.4.0
+django-watson==1.1.8
 # Used for plotting geographic data
 django-leaflet==0.18.0
 # Used for phone numbers and state list
@@ -92,6 +92,8 @@ django-sslify==0.2
 django-storages==1.1.8
 # Used for tagging
 django-taggit==0.18.0
+# Used for loading Webpack bundles
+django-webpack-loader==0.3.0
 # The API framework
 djangorestframework==3.1.3
 # Monitors slow requests

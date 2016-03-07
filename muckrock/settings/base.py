@@ -70,6 +70,13 @@ STATICFILES_DIRS = (
     os.path.join(SITE_ROOT, 'assets'),
 )
 
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'BUNDLE_DIR_NAME': 'bundles/',
+        'STATS_FILE': os.path.join(SITE_ROOT, 'assets/webpack-stats.json'),
+    }
+}
+
 COMPRESS_OFFLINE = True
 
 COMPRESS_STORAGE = 'compressor.storage.CompressorFileStorage'
@@ -77,9 +84,6 @@ COMPRESS_CSS_FILTERS = [
     'compressor.filters.css_default.CssAbsoluteFilter',
     'compressor.filters.cssmin.CSSMinFilter',
 ]
-COMPRESS_PRECOMPILERS = (
-    ('text/x-scss', 'sass --sourcemap=none {infile} {outfile}'),
-)
 
 if AWS_DEBUG:
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
@@ -162,7 +166,6 @@ INSTALLED_APPS = (
     'django.contrib.flatpages',
     'django.contrib.humanize',
     'django.contrib.staticfiles',
-    'celery_haystack',
     'compressor',
     'debug_toolbar',
     'django_premailer',
@@ -171,7 +174,6 @@ INSTALLED_APPS = (
     'djgeojson',
     'easy_thumbnails',
     'gunicorn',
-    'haystack',
     'dbsettings',
     'leaflet',
     'localflavor',
@@ -186,6 +188,8 @@ INSTALLED_APPS = (
     'robots',
     'storages',
     'taggit',
+    'watson',
+    'webpack_loader',
     'lot',
     'package_monitor',
     'image_diet',
@@ -201,6 +205,7 @@ INSTALLED_APPS = (
     'muckrock.crowdfund',
     'muckrock.sidebar',
     'muckrock.task',
+    'muckrock.map',
     'muckrock.message',
     'muckrock.organization',
     'muckrock.project',
@@ -251,19 +256,6 @@ ABSOLUTE_URL_OVERRIDES = {
 }
 
 DBSETTINGS_USE_SITES = True
-
-HAYSTACK_CONNECTIONS = {
-    'default': {
-        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
-        'PATH': os.path.join(SITE_ROOT, 'whoosh/mysite_index'),
-        'STORAGE': 'file',
-        'POST_LIMIT': 128 * 1024 * 1024,
-        'INCLUDE_SPELLING': True,
-        'BATCH_SIZE': 100,
-    },
-}
-
-HAYSTACK_SIGNAL_PROCESSOR = 'muckrock.signals.RelatedCelerySignalProcessor'
 
 SESAME_MAX_AGE = 60 * 60 * 24 * 2
 
