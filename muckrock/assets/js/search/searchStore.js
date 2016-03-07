@@ -1,6 +1,6 @@
 import alt from '../alt';
-import SearchActions from '../actions/SearchActions';
-import SearchSource from '../sources/SearchSource';
+import SearchActions from './SearchActions';
+import SearchSource from './SearchSource';
 
 class SearchStore {
     constructor() {
@@ -21,7 +21,7 @@ class SearchStore {
     	console.log('received', data);
         this.setState({data: data});
     }
-    
+
     onFetchingResultsFailed (response) {
     	console.log(response)
     }

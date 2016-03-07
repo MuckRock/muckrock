@@ -1,8 +1,8 @@
 import React from 'react';
 import alt from '../alt';
-import SearchStore from '../stores/SearchStore';
-var SearchResults = React.createClass({ 
-    
+import SearchStore from './SearchStore';
+var SearchResults = React.createClass({
+
     getInitialState: function() {
         return {
             results: []

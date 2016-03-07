@@ -8,6 +8,7 @@
     </form>
     <ul class="search results">
     {% for result in results %}
+        {{ result.description }}
         <li class="search result"><a href="{{ result.get_absolute_url }}">{{ result }}</a></li>
     {% empty %}
         <li class="empty">No results</li>

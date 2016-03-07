@@ -1,7 +1,7 @@
 import React from 'react';
-import SearchActions from '../actions/SearchActions';
+import SearchActions from './SearchActions';
 
-var SearchBox = React.createClass({ 
+var SearchForm = React.createClass({
 
     getInitialState: function() {
         return {
@@ -20,13 +20,13 @@ var SearchBox = React.createClass({
 
     render: function() {
         return (
-            <div>
-                <label>Search:</label>
+            <form onSubmit={this.search}>
+                <label>Search</label>
                 <input type="text" value={this.state.query} onChange={this.inputChange} />
-                <button onClick={this.search}>Search</button>
+                <button type="submit">Search</button>
             </div>
         )
     }
 });
 
-export default SearchBox;
+export default SearchForm;

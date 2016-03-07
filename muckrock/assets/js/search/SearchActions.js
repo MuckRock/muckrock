@@ -1,6 +1,6 @@
-import alt from '../alt';
+import alt from './alt';
 
-class SearchActions { 
+class SearchActions {
     constructor() {
         this.generateActions('search', 'receivedResults', 'fetchingResultsFailed');
     }

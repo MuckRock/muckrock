@@ -1,5 +1,5 @@
 import axios from 'axios';
-import SearchActions from '../actions/SearchActions';
+import SearchActions from './SearchActions';
 
 const SearchSource = {
     performSearch: {
@@ -17,7 +17,7 @@ const SearchSource = {
 
         success: SearchActions.receivedResults,
         error: SearchActions.fetchingResultsFailed
- 
+
     }
 };
 export default SearchSource;
