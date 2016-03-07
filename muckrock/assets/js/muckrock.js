@@ -16,7 +16,6 @@ import './list'
 import './notification'
 import './tabs'
 import './task'
-import './search/search'
 
 function modal(nextSelector) {
     var overlay = '#modal-overlay';
