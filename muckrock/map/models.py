@@ -7,7 +7,7 @@ from django.utils.text import slugify
 
 from djgeojson.fields import PointField
 
-DEFAULT_CENTER_POINT = {'type': 'Point', 'coordinates': [39.83, -98.58]}
+DEFAULT_CENTER_POINT = {"type": "Point", "coordinates": [39.83, -98.58]}
 DEFAULT_ZOOM_LEVEL = 4
 
 class Map(models.Model):
