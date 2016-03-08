@@ -50,7 +50,7 @@ def pylint():
     """Run pylint"""
     with env.cd(env.base_path):
         excludes = ['migrations', '__init__.py', 'manage.py', 'formwizard',
-                    'vendor', 'fabfile', 'static', 'nested_inlines']
+                    'vendor', 'fabfile', 'static', 'nested_inlines', 'node_modules']
         stmt = ('find . -name "*.py"' +
                 ''.join(' | grep -v %s' % e for e in excludes) +
                 ' | xargs pylint --load-plugins=pylint_django '
