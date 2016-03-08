@@ -2,13 +2,19 @@
 Models for the Map application
 """
 
+from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.text import slugify
 
 from djgeojson.fields import PointField
+import json
 
-DEFAULT_CENTER_POINT = {"type": "Point", "coordinates": [39.83, -98.58]}
-DEFAULT_ZOOM_LEVEL = 4
+DEFAULT_CENTER_POINT = json.dumps({
+    "type": "Point",
+    "coordinates": settings.LEAFLET_CONFIG['DEFAULT_CENTER']
+})
+DEFAULT_ZOOM_LEVEL = settings.LEAFLET_CONFIG['DEFAULT_ZOOM']
 
 class Map(models.Model):
     """A map holds a collection of Markers."""
@@ -32,6 +38,9 @@ class Map(models.Model):
 
     def __unicode__(self):
         return unicode(self.title)
+
+    def get_absolute_url(self):
+        return reverse('map-detail', {'slug': self.slug, 'idx': self.id})
 
 class Marker(models.Model):
     """A Marker connects a FOIARequest to a Map with a location."""
