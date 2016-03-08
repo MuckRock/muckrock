@@ -4,7 +4,6 @@ URL mappings for the Map application
 
 from django.conf.urls import patterns, url
 
-from muckrock.map.models import Map, Marker
 from muckrock.map.views import MapListView, MapDetailView, MapLayerView
 
 urlpatterns = patterns('',

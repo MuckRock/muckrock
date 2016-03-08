@@ -40,6 +40,7 @@ class Map(models.Model):
         return unicode(self.title)
 
     def get_absolute_url(self):
+        """Returns the URL for this map"""
         return reverse('map-detail', kwargs={'slug': self.slug, 'idx': self.id})
 
 class Marker(models.Model):
@@ -57,4 +58,4 @@ class Marker(models.Model):
     point = PointField(blank=True)
 
     def __unicode__(self):
-        return u'Marker on %s' % map
+        return u'Marker %d on %s' % (self.id, map)

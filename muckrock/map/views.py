@@ -38,9 +38,10 @@ class MapLayerView(View):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
-        map = Map.objects.get(id=kwargs['idx'])
+        """Returns GeoJSON for all the map's markers"""
+        _map = Map.objects.get(id=kwargs['idx'])
         data = GeoJSONSerializer().serialize(
-            Marker.objects.filter(map=map),
+            Marker.objects.filter(map=_map),
             geometry_field='point',
             use_natural_keys=True,
             with_modelname=False
