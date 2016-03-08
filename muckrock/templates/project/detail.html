@@ -123,14 +123,16 @@ MuckRock &bull; {{ project.title }}
             {% include 'lib/foia_table.html' with requests=visible_requests %}
         </section>
         {% endif %}
-        {% if maps and request.user.is_staff %}
+        {% with request.user.is_authenticated and request.user.profile.experimental as experimental %}
+        {% if project.maps.exists and experimental %}
         <h2>Maps</h2>
         <ul class="maps">
-            {% for map in maps %}
+            {% for map in project.maps.all %}
             <li class="map"><a href="{{ map.get_absolute_url }}">{{ map.title }}</a></li>
             {% endfor %}
         </ul>
         {% endif %}
+        {% endwith %}
     </article>
 {% endblock %}
 

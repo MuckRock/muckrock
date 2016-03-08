@@ -492,7 +492,7 @@ LEAFLET_CONFIG = {
     'MIN_ZOOM': 4,
     'MAX_ZOOM': 18,
     'PLUGINS': {
-        'forms': {
+        'search': {
             'css': [
                 'vendor/leaflet-geocoder-control/Control.Geocoder.css',
             ],
@@ -501,6 +501,15 @@ LEAFLET_CONFIG = {
                 'js/leaflet-form.js'
             ],
             'auto-include': True,
+        },
+        'draw': {
+            'css': [
+                'leaflet/draw/leaflet.draw.css',
+                'leaflet/draw/leaflet.draw.ie.css'
+            ],
+            'js': [
+                'leaflet/draw/leaflet.draw.js'
+            ]
         }
     }
 }

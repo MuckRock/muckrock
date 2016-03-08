@@ -11,8 +11,9 @@ from reversion import VersionAdmin
 from muckrock.foia.models import FOIARequest
 from muckrock.map.models import Map, Marker
 
-class MarkerAdminForm(forms.ModelForm):
 
+class MarkerAdminForm(forms.ModelForm):
+    """Marker form for admin interface"""
     foia = autocomplete_light.ModelChoiceField(
         'FOIARequestAdminAutocomplete',
         queryset=FOIARequest.objects.all(),
@@ -24,11 +25,20 @@ class MarkerAdminForm(forms.ModelForm):
         model = Marker
         fields = '__all__'
 
+
 class MarkerInline(admin.TabularInline):
     """Marker inline settings"""
     model = Marker
     form = MarkerAdminForm
     extra = 0
+
+
+class MapAdminForm(forms.ModelForm):
+    """Map form for admin interface"""
+    class Meta:
+        model = Map
+        fields = '__all__'
+
 
 class MapAdmin(VersionAdmin):
     """Map admin interface settings"""
@@ -37,5 +47,6 @@ class MapAdmin(VersionAdmin):
     list_filter = ['project']
     search_fields = ['title']
     inlines = [MarkerInline]
+    form = MapAdminForm
 
 admin.site.register(Map, MapAdmin)
