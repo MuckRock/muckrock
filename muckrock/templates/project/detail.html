@@ -123,8 +123,7 @@ MuckRock &bull; {{ project.title }}
             {% include 'lib/foia_table.html' with requests=visible_requests %}
         </section>
         {% endif %}
-        {% with request.user.is_authenticated and request.user.profile.experimental as experimental %}
-        {% if project.maps.exists and experimental %}
+        {% if project.maps.exists and user_is_experimental %}
         <h2>Maps</h2>
         <ul class="maps">
             {% for map in project.maps.all %}
@@ -132,7 +131,6 @@ MuckRock &bull; {{ project.title }}
             {% endfor %}
         </ul>
         {% endif %}
-        {% endwith %}
     </article>
 {% endblock %}
 

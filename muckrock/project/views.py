@@ -81,6 +81,7 @@ class ProjectDetailView(DetailView):
         context['followers'] = followers(project)
         context['articles'] = project.articles.get_published()
         context['contributors'] = project.contributors.select_related('profile')
+        context['user_is_experimental'] = user.is_authenticated() and user.profile.experimental
         return context
 
     def dispatch(self, *args, **kwargs):
