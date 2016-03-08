@@ -5,6 +5,7 @@ Tests for the Map application
 from django.test import TestCase
 from django.utils.text import slugify
 
+import json
 from nose.tools import ok_, eq_
 
 from muckrock.factories import FOIARequestFactory, ProjectFactory
@@ -45,7 +46,11 @@ class UnitTestMap(TestCase):
             'Maps should have the date they were created.')
         ok_(self.map.date_updated,
             'Maps should have the date they were last updated.')
-        eq_(self.map.center['coordinates'], [39.83, -98.58],
+        expected_center = json.dumps({
+            'type': 'Point',
+            'coordinates': [37.8, -96.9]
+        })
+        eq_(self.map.center, expected_center,
             'Maps should have an initial center point, which is the center of the USA by default.')
         eq_(self.map.zoom, 4,
             'Maps should have an initial zoom level that is 4 by default.')
