@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load leaflet_tags %}
+{% load foia_tags %}
+
+{% block styles %}
+    {% leaflet_css %}
+{% endblock %}
+
+{% block content %}
+<div class="map-container">
+    <div class="map">
+        <h1>{{map.title}}</h1>
+        {% if map.project %}
+        <p>Part of <a href="{{map.project.get_absolute_url}}">{{map.project}}</a></p>
+        {% endif %}
+        {% if map.description %}
+        <p>{{map.description}}</p>
+        {% endif %}
+        {% leaflet_map "map" callback="window.initialize_map" %}
+    </div>
+    <div class="markers">
+        <h2>{{map.markers.count}} Marker{{map.markers.count|pluralize}}</h2>
+        <table class="marker-table">
+        {% for marker in map.markers.all %}
+            <tr data-foia="{{marker.foia.id}}">
+                <td class="marker-icon {{marker.foia.status|classify_status}}">{% include 'lib/icons/location.svg' %}</td>
+                <td>
+                    <p><a href="{{marker.foia.get_absolute_url}}">{{marker.foia}}</a></p>
+                </td>
+            </tr>
+        {% endfor %}
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {% leaflet_js %}
+    <script type="text/javascript">
+        function initialize_map (map, options) {
+            $.getJSON('data.geojson', function (data) {
+                // Add GeoJSON layer
+                L.geoJson(data).addTo(map);
+            });
+        }
+    </script>
+{% endblock %}

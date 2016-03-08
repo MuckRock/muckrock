@@ -15,13 +15,13 @@ from django.views.generic.base import RedirectView
 from rest_framework.routers import DefaultRouter
 import dbsettings.urls
 
-import muckrock.accounts.urls, muckrock.foia.urls, muckrock.news.urls, muckrock.agency.urls, \
-       muckrock.jurisdiction.urls, muckrock.mailgun.urls, muckrock.qanda.urls, \
-       muckrock.crowdfund.urls, muckrock.organization.urls, muckrock.task.urls, \
-       muckrock.project.urls, muckrock.tags.urls
-import muckrock.agency.views, muckrock.foia.viewsets, muckrock.jurisdiction.views, \
-       muckrock.accounts.views, muckrock.task.viewsets
-import muckrock.views as views
+import  muckrock.accounts.urls, muckrock.foia.urls, muckrock.news.urls, muckrock.agency.urls,\
+        muckrock.jurisdiction.urls, muckrock.mailgun.urls, muckrock.qanda.urls,\
+        muckrock.crowdfund.urls, muckrock.organization.urls, muckrock.task.urls,\
+        muckrock.map.urls, muckrock.project.urls, muckrock.tags.urls
+import  muckrock.agency.views, muckrock.foia.viewsets, muckrock.jurisdiction.views,\
+        muckrock.accounts.views, muckrock.task.viewsets
+import  muckrock.views as views
 from muckrock.agency.sitemap import AgencySitemap
 from muckrock.foia.sitemap import FoiaSitemap
 from muckrock.jurisdiction.sitemap import JurisdictionSitemap
@@ -29,8 +29,12 @@ from muckrock.news.sitemap import ArticleSitemap
 
 admin.site.index_template = 'admin/custom_index.html'
 
-sitemaps = {'FOIA': FoiaSitemap, 'News': ArticleSitemap,
-            'Agency': AgencySitemap, 'Jurisdiction': JurisdictionSitemap}
+sitemaps = {
+    'FOIA': FoiaSitemap,
+    'News': ArticleSitemap,
+    'Agency': AgencySitemap,
+    'Jurisdiction': JurisdictionSitemap
+}
 
 router = DefaultRouter()
 router.register(r'jurisdiction',
@@ -99,6 +103,7 @@ urlpatterns = patterns(
     url(r'^tags/', include(muckrock.tags.urls)),
     url(r'^organization/', include(muckrock.organization.urls)),
     url(r'^project/', include(muckrock.project.urls)),
+    url(r'^map/', include(muckrock.map.urls)),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^search/$', views.MRSearchView(), name='search'),
     url(r'^settings/', include(dbsettings.urls)),
