@@ -57,5 +57,12 @@ class Marker(models.Model):
     )
     point = PointField(blank=True)
 
+    def save(self, *args, **kwargs):
+        """If marker location is empty, try setting it to the location of the FOIA agency."""
+        agency_location = self.foia.agency.location if self.foia.agency else ''
+        if not self.point and agency_location:
+            self.point = self.foia.agency.location
+        super(Marker, self).save(*args, **kwargs)
+
     def __unicode__(self):
         return u'Marker %d on %s' % (self.id, map)
