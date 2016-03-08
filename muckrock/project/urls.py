@@ -26,9 +26,4 @@ urlpatterns = patterns('',
     url(r'^(?P<slug>[\w-]+)-(?P<pk>\d+)/crowdfund/$',
         CrowdfundProjectCreateView.as_view(),
         name='project-crowdfund'),
-
-    # Map URLs
-    url(r'^(?P<project_slug>[\w-]+)-(?P<project_pk>\d+)/map/(?P<pk>\d+)/$',
-        views.ProjectMapDetailView.as_view(),
-        name='project-map-detail'),
 )
