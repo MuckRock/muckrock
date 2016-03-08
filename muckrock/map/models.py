@@ -40,7 +40,7 @@ class Map(models.Model):
         return unicode(self.title)
 
     def get_absolute_url(self):
-        return reverse('map-detail', {'slug': self.slug, 'idx': self.id})
+        return reverse('map-detail', kwargs={'slug': self.slug, 'idx': self.id})
 
 class Marker(models.Model):
     """A Marker connects a FOIARequest to a Map with a location."""
