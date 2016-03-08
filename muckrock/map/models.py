@@ -16,6 +16,8 @@ DEFAULT_CENTER_POINT = json.dumps({
 })
 DEFAULT_ZOOM_LEVEL = settings.LEAFLET_CONFIG['DEFAULT_ZOOM']
 
+# pylint: disable=no-member
+
 class Map(models.Model):
     """A map holds a collection of Markers."""
     title = models.CharField(max_length=80, unique=True)
