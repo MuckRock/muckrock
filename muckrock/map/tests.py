@@ -8,7 +8,7 @@ from django.utils.text import slugify
 import json
 from nose.tools import ok_, eq_
 
-from muckrock.factories import FOIARequestFactory, ProjectFactory
+from muckrock.factories import FOIARequestFactory, AgencyFactory, ProjectFactory
 from muckrock.map.models import Map, Marker
 
 class UnitTestMap(TestCase):
@@ -80,3 +80,21 @@ class UnitTestMarker(TestCase):
             'Markers should reference a request.')
         eq_(self.marker.point, '',
             'Markers should contain a point location, empty by default.')
+
+    def test_agency_location_default(self):
+        """Creating a marker with an empty location should try to grab the FOIA agency location."""
+        location1 = self.map.center
+        location2 = json.dumps({
+            'type': 'Point',
+            'coordinates': [40.0, -40.0]
+        })
+        # set the location of the agency
+        self.foia.agency = AgencyFactory(location=location1)
+        self.foia.agency.save()
+        # create a new marker
+        empty_marker = Marker.objects.create(map=self.map, foia=self.foia)
+        filled_marker = Marker.objects.create(map=self.map, foia=self.foia, point=location2)
+        eq_(empty_marker.point, location1,
+            'The location of the agency should be copied to the marker.')
+        eq_(filled_marker.point, location2,
+            'The location of the marker should not change since it was provided at creation.')

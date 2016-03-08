@@ -16,6 +16,8 @@ DEFAULT_CENTER_POINT = json.dumps({
 })
 DEFAULT_ZOOM_LEVEL = settings.LEAFLET_CONFIG['DEFAULT_ZOOM']
 
+# pylint: disable=no-member
+
 class Map(models.Model):
     """A map holds a collection of Markers."""
     title = models.CharField(max_length=80, unique=True)
@@ -56,6 +58,13 @@ class Marker(models.Model):
         related_name='locations'
     )
     point = PointField(blank=True)
+
+    def save(self, *args, **kwargs):
+        """If marker location is empty, try setting it to the location of the FOIA agency."""
+        agency_location = self.foia.agency.location if self.foia.agency else ''
+        if not self.point and agency_location:
+            self.point = self.foia.agency.location
+        super(Marker, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return u'Marker %d on %s' % (self.id, map)
