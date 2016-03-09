@@ -332,6 +332,7 @@ class ResponseTaskList(TaskList):
 
     def task_post_helper(self, request, task):
         """Special post helper exclusive to ResponseTask"""
+        # XXX need a UI way to mark as proxy rejected
         error_happened = False
         form = ResponseTaskForm(request.POST)
         if not form.is_valid():

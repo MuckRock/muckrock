@@ -518,6 +518,8 @@ def autoimport():
                         foia.tracking_id = id_
                     if est_date:
                         foia.date_estimate = est_date
+                    if code == 'REJ-P':
+                         foia.proxy_reject()
 
                     if key.name.endswith('/'):
                         import_prefix(key, bucket, storage_bucket, comm, log)

@@ -840,6 +840,23 @@ class FOIARequest(models.Model):
         # pylint: disable=no-member
         return self.communications.filter(response=True).exists()
 
+    def proxy_reject(self):
+        """Mark this request as being rejected due to a proxy being required"""
+        # mark the agency as requiring a proxy going forward
+        self.agency.requires_proxy = True
+        self.agency.save()
+        # mark to re-file with a proxy
+        FlaggedTask.objects.create(
+            foia=self,
+            text='This request was rejected as requiring a proxy; please refile'
+            ' it with in of our volunteers names and a note that the request is'
+            ' being filed by a state citizen. Make sure the new request is'
+            ' associated with the original user\'s account. To add someone as'
+            ' a proxy, change their user type to "Proxy" and make sure they'
+            ' properly have their state set on the backend. This message should'
+            ' only appear the first time an agency rejects a request for being'
+            ' from an out-of-state resident.'
+            )
 
     class Meta:
         # pylint: disable=too-few-public-methods

@@ -60,13 +60,14 @@ def get_foia(jurisdiction, jidx, slug, idx, select_related=None, prefetch_relate
     foia = get_object_or_404(foia_qs, jurisdiction=jmodel, slug=slug, id=idx)
     return foia
 
-def _make_comm(foia):
+def _make_comm(foia, from_who, proxy=False):
     """A helper function to compose the text of a communication"""
     template = get_template('text/foia/request.txt')
     context = Context({
         'document_request': smart_text(foia.requested_docs),
         'jurisdiction': foia.jurisdiction,
-        'user': foia.user
+        'user_name': from_who,
+        'proxy': proxy,
     })
     request_text = template.render(context).split('\n', 1)[1].strip()
     return request_text
@@ -101,14 +102,26 @@ def _make_request(request, foia_request, parent=None):
         parent=parent,
         location=foia_request['agency'].location
     )
+    if foia.agency.proxy_required:
+        proxy = True
+        proxy_user = foia.agency.jurisdiction.get_proxy()
+        if proxy_user is None:
+            from_who = '<Proxy Placeholder>'
+            # XXX need to mark this as a non-auto submit and create a flag
+            # to find a proxy before submitting
+        else:
+            from_who = proxy_user.get_full_name()
+    else:
+        proxy = False
+        from_who = request.user.get_full_name()
     foia_comm = FOIACommunication.objects.create(
         foia=foia,
-        from_who=request.user.get_full_name(),
+        from_who=from_who,
         to_who=foia.get_to_who(),
         date=datetime.now(),
         response=False,
         full_html=False,
-        communication=_make_comm(foia)
+        communication=_make_comm(foia, from_who, proxy=proxy)
     )
     return foia, foia_comm
 

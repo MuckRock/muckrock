@@ -458,6 +458,16 @@ class ResponseTask(Task):
         foia.save()
         logging.info('Estimated completion date set to %s', date_estimate)
 
+    def proxy_reject(self):
+        """Special handling for a proxy reject"""
+        self.communication.status = 'rejected'
+        self.communication.save()
+        self.communication.foia.status = 'rejected'
+        self.communication.foia.proxy_reject()
+        self.communication.foia.update()
+        self.communication.foia.save()
+        generate_status_action(foia)
+
 
 class FailedFaxTask(Task):
     """A fax for this communication failed"""

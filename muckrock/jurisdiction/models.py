@@ -6,6 +6,7 @@ from django.db.models import Avg, Count, F, Sum
 from django.template.defaultfilters import slugify
 
 from easy_thumbnails.fields import ThumbnailerImageField
+from random import choice
 
 from muckrock.business_days.models import Holiday, HolidayCalendar, Calendar
 
@@ -209,6 +210,23 @@ class Jurisdiction(models.Model, RequestHelper):
             return Calendar()
         else:
             return HolidayCalendar(self.holidays.all(), self.observe_sat)
+
+    def get_proxy(self):
+        """Get a random proxy user for this jurisdiction"""
+        try:
+            proxy = choice(Profile.objects.filter(
+                acct_type='proxy', state=self.legal()))
+            return proxy.user
+        except IndexError:
+            return None
+
+    def get_state(self):
+        """The state name for the jurisdiction"""
+        # pylint: disable=no-member
+        if self.level == 'l':
+            return self.parent.name
+        else:
+            return self.name
 
     def can_appeal(self):
         """Can you appeal to this jurisdiction?"""

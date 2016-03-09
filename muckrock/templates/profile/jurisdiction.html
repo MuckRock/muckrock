@@ -37,6 +37,12 @@
         {% with jurisdiction.average_response_time as average_response_time %}
         <dd>{{ average_response_time }} day{{ average_response_time|pluralize }}</dd>
         {% endwith %}
+		{% if proxies %}
+		<dt>Proxies</dt>
+		{% for proxy in proxies %}
+		<dd><a href="{{proxy.get_absolute_url}}">{{proxy.get_full_name}}</a></dd>
+		{% endfor %}
+		{% endif %}
     </dl>
 </aside>
 {% endblock metadata %}
