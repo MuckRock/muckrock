@@ -36,6 +36,8 @@ cssselect==0.7.1
 cssutils==1.0.1
 # Used to serialize machine learning data
 dill==0.2.4
+# in memory file storage for faster testing
+dj-inmemorystorage==1.4.0
 # Used for notifications
 django-activity-stream==0.6.0
 # Used for model import
