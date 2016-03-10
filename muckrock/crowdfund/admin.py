@@ -4,7 +4,7 @@ Admin registration for Crowdfunding
 
 from django.contrib import admin
 
-from reversion import VersionAdmin
+from reversion.admin import VersionAdmin
 
 from muckrock.crowdfund import models
 

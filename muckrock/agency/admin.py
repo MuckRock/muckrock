@@ -13,7 +13,7 @@ from django.template import RequestContext
 
 from adaptor.model import CsvModel
 from adaptor.fields import CharField, DjangoModelField
-from reversion import VersionAdmin
+from reversion.admin import VersionAdmin
 import autocomplete_light
 from leaflet.admin import LeafletGeoAdmin
 import logging

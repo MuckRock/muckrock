@@ -2,9 +2,9 @@
 Admin registration for Tasks
 """
 
-from reversion import VersionAdmin
-
 from django.contrib import admin
+
+from reversion.admin import VersionAdmin
 
 from muckrock.task.models import (
         OrphanTask,

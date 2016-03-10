@@ -159,9 +159,23 @@ def setup():
     with settings(user='vagrant', host_string='127.0.0.1:2222', key_filename=result.split()[1]):
         manage('migrate')
 
-@task
+@task(name='update-staging-db')
 def update_staging_db():
     """Update the staging database"""
     env.run('heroku maintenance:on --app muckrock-staging')
     env.run('heroku pg:copy muckrock::DATABASE_URL DATABASE_URL --app muckrock-staging')
     env.run('heroku maintenance:off --app muckrock-staging')
+
+@task(name='pip-compile')
+def pip_compile():
+    """Update requirements"""
+    with env.cd(os.path.join(env.base_path, 'pip')):
+        env.run('pip-compile --upgrade requirements.in')
+        env.run('pip-compile --upgrade dev-requirements.in')
+        env.run('cp -f requirements.txt ../')
+
+@task(name='pip-sync')
+def pip_sync():
+    """sync requirements"""
+    with env.cd(os.path.join(env.base_path, 'pip')):
+        env.run('pip-sync requirements.txt dev-requirements.txt')

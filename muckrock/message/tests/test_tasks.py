@@ -181,7 +181,7 @@ class TestSendChargeReceiptTask(TestCase):
         mock_charge.invoice = mock_invoice.id
         mock_charge.metadata['action'] = 'unknown-charge'
         tasks.send_charge_receipt(mock_charge.id)
-        mock_send.assert_not_called(fail_silently=False)
+        mock_send.assert_not_called()
 
 
 @mock.patch('stripe.Invoice', MockInvoice)
@@ -239,9 +239,10 @@ class TestFailedPaymentTask(TestCase):
         self.profile.save()
         ok_(self.profile.payment_failed, 'The payment failed flag should be raised.')
         mock_invoice.attempt_count = 4
+        mock_invoice.lines.data[0].plan.id = 'pro'
         tasks.failed_payment(mock_invoice.id)
         self.profile.refresh_from_db()
-        mock_cancel.assert_called()
+        mock_cancel.assert_called_with()
         mock_send.assert_called_with(fail_silently=False)
         ok_(not self.profile.payment_failed, 'The payment failed flag should be lowered.')
 
@@ -254,9 +255,9 @@ class TestFailedPaymentTask(TestCase):
         ok_(self.profile.payment_failed, 'The payment failed flag should be raised.')
         factories.OrganizationFactory(owner=self.profile.user)
         mock_invoice.attempt_count = 4
-        mock_invoice.plan.id = 'org'
+        mock_invoice.lines.data[0].plan.id = 'org'
         tasks.failed_payment(mock_invoice.id)
         self.profile.refresh_from_db()
-        mock_cancel.assert_called()
+        mock_cancel.assert_called_with()
         mock_send.assert_called_with(fail_silently=False)
         ok_(not self.profile.payment_failed, 'The payment failed flag should be lowered.')

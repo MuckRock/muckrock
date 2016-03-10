@@ -7,7 +7,7 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 
 import autocomplete_light
-from reversion import VersionAdmin
+from reversion.admin import VersionAdmin
 
 from muckrock.organization.models import Organization
 

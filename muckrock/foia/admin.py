@@ -14,7 +14,7 @@ from django.template import RequestContext
 
 import autocomplete_light
 from datetime import date, datetime, timedelta
-from reversion import VersionAdmin
+from reversion.admin import VersionAdmin
 
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIAFile, FOIACommunication, \

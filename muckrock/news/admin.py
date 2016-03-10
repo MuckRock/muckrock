@@ -6,7 +6,7 @@ from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import User
 
-from reversion import VersionAdmin
+from reversion.admin import VersionAdmin
 import autocomplete_light
 
 from muckrock.news.models import Article, Photo

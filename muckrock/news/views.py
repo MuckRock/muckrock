@@ -107,7 +107,7 @@ class ArticleViewSet(viewsets.ModelViewSet):
     filter_class = Filter
 
     def get_queryset(self):
-        if 'no_editor' in self.request.QUERY_PARAMS:
+        if 'no_editor' in self.request.query_params:
             queryset = self.model.objects.filter(editors=None)
         else:
             queryset = self.model.objects.all()
