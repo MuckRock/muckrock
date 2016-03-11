@@ -627,6 +627,7 @@ class FOIARequest(models.Model):
         """Send an email of the request to its email address"""
         # pylint: disable=no-member
         # self.email should be set before calling this method
+        from muckrock.foia.tasks import send_fax
 
         from_addr = 'fax' if self.email.endswith('faxaway.com') else self.get_mail_id()
         law_name = self.jurisdiction.get_law_name()
