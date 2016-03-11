@@ -12,10 +12,13 @@ from rest_framework.routers import DefaultRouter
 import dbsettings.urls
 import debug_toolbar
 
+import muckrock.accounts.views
 import muckrock.agency.views
 import muckrock.foia.viewsets
 import muckrock.jurisdiction.views
-import muckrock.accounts.views
+import muckrock.jurisdiction.urls
+import muckrock.news.views
+import muckrock.qanda.views
 import muckrock.task.viewsets
 import muckrock.views as views
 from muckrock.agency.sitemap import AgencySitemap
@@ -92,9 +95,9 @@ urlpatterns = patterns(
     url(r'^news/', include('muckrock.news.urls')),
     url(r'^mailgun/', include('muckrock.mailgun.urls')),
     url(r'^agency/', include('muckrock.agency.urls')),
-    url(r'^place/', include('muckrock.jurisdiction.urls.urlpatterns')),
+    url(r'^place/', include(muckrock.jurisdiction.urls.urlpatterns)),
     url(r'^jurisdiction/',
-        include('muckrock.jurisdiction.urls.old_urlpatterns')),
+        include(muckrock.jurisdiction.urls.old_urlpatterns)),
     url(r'^questions/', include('muckrock.qanda.urls')),
     url(r'^crowdfund/', include('muckrock.crowdfund.urls')),
     url(r'^task/', include('muckrock.task.urls')),
