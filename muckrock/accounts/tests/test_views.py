@@ -17,7 +17,6 @@ from muckrock.factories import UserFactory, OrganizationFactory
 from muckrock.organization.models import Organization
 from muckrock.utils import mock_middleware
 
-# pylint:disable=no-member
 
 def http_get_response(url, view, user=AnonymousUser()):
     """Handles making GET requests, returns the response."""

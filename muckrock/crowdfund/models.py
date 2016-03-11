@@ -93,7 +93,6 @@ class Crowdfund(models.Model):
 
     def get_crowdfund_object(self):
         """Is this for a request or a project?"""
-        # pylint: disable=no-member
         if hasattr(self, 'foia'):
             return self.foia
         elif self.project:

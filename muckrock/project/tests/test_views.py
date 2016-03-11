@@ -15,7 +15,6 @@ from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm
 import logging
 import nose
 
-# pylint: disable=no-member
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_

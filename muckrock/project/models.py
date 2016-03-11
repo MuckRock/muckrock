@@ -104,10 +104,7 @@ class Project(models.Model):
 
     def has_contributor(self, user):
         """Checks if the user is a contributor."""
-        if user in self.contributors.all():
-            return True
-        else:
-            return False
+        return user in self.contributors.all()
 
     def suggest_requests(self):
         """Returns a list of requests that may be related to this project."""

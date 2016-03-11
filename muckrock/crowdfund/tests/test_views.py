@@ -55,7 +55,6 @@ class TestCrowdfundDetailView(TestCase):
 class TestCrowdfundView(TestCase):
     """Tests the Detail view for Crowdfund objects"""
     def setUp(self):
-        # pylint:disable=no-member
         due = datetime.today() + timedelta(30)
         self.crowdfund = Crowdfund.objects.create(
             name='Test Crowdfund',
@@ -202,7 +201,6 @@ class TestCrowdfundView(TestCase):
 
 class TestCrowdfundProjectCreateView(TestCase):
     """Tests the creation of a crowdfund for a project."""
-    # pylint:disable=no-member
     def setUp(self):
         self.project = ProjectFactory()
         self.url = reverse('project-crowdfund', kwargs={

@@ -206,6 +206,7 @@ class Detail(DetailView):
     def get_object(self, queryset=None):
         """Get the FOIA Request"""
         # pylint: disable=unused-argument
+        # pylint: disable=unsubscriptable-object
         # this is called twice in dispatch, so cache to not actually run twice
         if self._obj:
             return self._obj
@@ -284,8 +285,7 @@ class Detail(DetailView):
 
         all_tasks = Task.objects.filter_by_foia(foia, user)
         open_tasks = [task for task in all_tasks if not task.resolved]
-        context['task_count'] = len(all_tasks)
-        context['open_task_count'] = len(open_tasks)
+        context['task_count'] = len(open_tasks)
         context['open_tasks'] = open_tasks
         context['stripe_pk'] = settings.STRIPE_PUB_KEY
         context['sidebar_admin_url'] = reverse('admin:foia_foiarequest_change', args=(foia.pk,))

@@ -13,7 +13,6 @@ from muckrock.tests import get_allowed, get_404
 
 # pylint: disable=no-self-use
 # pylint: disable=too-many-public-methods
-# pylint: disable=no-member
 
 class TestNewsUnit(TestCase):
     """Unit tests for news"""
@@ -21,7 +20,6 @@ class TestNewsUnit(TestCase):
 
     def setUp(self):
         """Set up tests"""
-        # pylint: disable=C0103
         self.article = Article.objects.get(pk=1)
 
     # models

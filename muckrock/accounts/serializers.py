@@ -36,7 +36,6 @@ class StatisticsSerializer(serializers.ModelSerializer):
     """Serializer for Statistics model"""
 
     def __init__(self, *args, **kwargs):
-        # pylint: disable=no-member
         # pylint: disable=super-on-old-class
         super(StatisticsSerializer, self).__init__(*args, **kwargs)
         if 'request' not in self.context or not self.context['request'].user.is_staff:

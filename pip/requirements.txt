@@ -7,13 +7,11 @@
 -e git+git://github.com/callowayproject/django-news-sitemaps.git@55da6b72580dd6d79380f2bb17240e7afa00555a#egg=django_news_sitemaps-master
 amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu
-astroid==1.4.4            # via pylint, pylint-plugin-utils
 billiard==3.3.0.23        # via celery
 boto==2.39.0
 celery-haystack==0.10
 celery==3.1.23
 Click==6.3                # via pyimagediet
-colorama==0.3.7           # via pylint
 contextlib2==0.5.1        # via raven
 cssselect==0.9.1          # via premailer
 cssutils==1.0.1           # via premailer
@@ -53,7 +51,6 @@ gunicorn==19.4.5
 image-diet2==1.0
 jsonfield==1.0.3
 kombu==3.0.34             # via celery
-lazy-object-proxy==1.2.1  # via astroid
 lxml==3.5.0               # via premailer
 markdown2==2.3.0          # via django-markdown-deux
 newrelic==2.60.0.46
@@ -64,9 +61,6 @@ premailer==2.9.7          # via django-premailer
 psycopg2==2.6.1
 pyimagediet==1.1.0        # via image-diet2
 pylibmc==1.5.0            # via django-pylibmc
-pylint-django==0.7.1
-pylint-plugin-utils==0.2.3  # via pylint-django
-pylint==1.5.4             # via pylint-django, pylint-plugin-utils
 pysolr==3.4.0
 python-dateutil==2.5.0
 python-magic==0.4.10      # via pyimagediet
@@ -82,7 +76,6 @@ scikit-learn==0.16.1
 scipy==0.14.0
 semantic-version==2.5.0   # via django-package-monitor
 simplejson==3.8.2         # via django-lot
-six==1.10.0               # via astroid, django-appconf, django-autocomplete-light, django-geojson, django-mailgun, pylint, python-dateutil
+six==1.10.0               # via django-appconf, django-autocomplete-light, django-geojson, django-mailgun, python-dateutil
 stripe==1.30.0
 unidecode==0.4.19
-wrapt==1.10.6             # via astroid

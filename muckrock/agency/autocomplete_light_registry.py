@@ -3,8 +3,10 @@ Autocomplete registry for Agency
 """
 
 import autocomplete_light
+
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
+
 
 class AgencyAutocomplete(autocomplete_light.AutocompleteModelBase):
     """Creates an autocomplete field for picking agencies"""
@@ -25,7 +27,7 @@ class AgencyAutocomplete(autocomplete_light.AutocompleteModelBase):
 
         return self.order_choices(choices)[0:self.limit_choices]
 
-#pylint: disable=interface-not-implemented
+
 class AgencyAdminAutocomplete(autocomplete_light.AutocompleteModelBase):
     """Autocomplete for Agencies for FOIA admin page"""
     attrs = {'placeholder': 'Agency?'}
@@ -42,6 +44,7 @@ class AgencyAdminAutocomplete(autocomplete_light.AutocompleteModelBase):
             choices = choices.filter(jurisdiction_id=jurisdiction_id)
 
         return self.order_choices(choices)[0:self.limit_choices]
+
 
 autocomplete_light.register(Agency, AgencyAutocomplete)
 autocomplete_light.register(Agency, AgencyAdminAutocomplete)

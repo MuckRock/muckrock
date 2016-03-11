@@ -2,9 +2,10 @@
 Django settings for muckrock project
 """
 
+from django.core.urlresolvers import reverse
+import djcelery
 import os
 import urlparse
-from django.core.urlresolvers import reverse
 
 def boolcheck(setting):
     """Turn env var into proper bool"""
@@ -228,7 +229,6 @@ urlparse.uses_netloc.append('redis')
 
 BROKER_URL = os.environ.get('REDISTOGO_URL', 'redis://localhost:6379/0')
 
-import djcelery
 djcelery.setup_loader()
 
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'

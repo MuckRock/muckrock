@@ -147,7 +147,6 @@ class TestSendChargeReceiptTask(TestCase):
     @mock.patch('muckrock.message.receipts.RequestFeeReceipt.send')
     def test_request_fee_receipt(self, mock_send):
         """A receipt should be sent after request fee is paid."""
-        # pylint: disable=no-member
         foia = factories.FOIARequestFactory()
         mock_charge.metadata['action'] = 'request-fee'
         mock_charge.metadata['foia'] = foia.pk
@@ -216,7 +215,6 @@ class TestSendInvoiceReceiptTask(TestCase):
 @mock.patch('stripe.Invoice', MockInvoice)
 class TestFailedPaymentTask(TestCase):
     """Tests the failed payment task."""
-    # pylint:disable=no-member
 
     def setUp(self):
         mock_invoice.plan.id = 'pro'

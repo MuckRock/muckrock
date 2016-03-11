@@ -131,7 +131,6 @@ class AgencyViewSet(viewsets.ModelViewSet):
 
     class Filter(django_filters.FilterSet):
         """API Filter for Agencies"""
-        # pylint: disable=no-member
         # pylint: disable=too-few-public-methods
         jurisdiction = django_filters.CharFilter(name='jurisdiction__name')
         types = django_filters.CharFilter(name='types__name')

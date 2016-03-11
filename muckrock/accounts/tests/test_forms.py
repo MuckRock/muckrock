@@ -14,7 +14,6 @@ class TestEmailSettingsForm(TestCase):
     """Users should be able to modify their email settings."""
     def setUp(self):
         """Set up tests"""
-        # pylint:disable=no-member
         self.profile = ProfileFactory()
         self.data = {
             'email_pref': self.profile.email_pref,

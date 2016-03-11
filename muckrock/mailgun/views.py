@@ -212,6 +212,7 @@ def _fax(request):
     m_id = p_id.search(subject)
 
     if m_id:
+        # pylint: disable=duplicate-except
         try:
             FOIARequest.objects.get(pk=m_id.group(1))
             comm = FOIACommunication.objects.get(pk=m_id.group(2))

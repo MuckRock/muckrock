@@ -6,7 +6,6 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 import nose.tools
 
-from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
 
 # allow methods that could be functions and too many public methods in tests
@@ -22,7 +21,6 @@ class TestJurisdictionUnit(TestCase):
 
     def setUp(self):
         """Set up tests"""
-        # pylint: disable=C0103
         self.state = Jurisdiction.objects.get(pk=1)
         self.local = Jurisdiction.objects.get(pk=3)
 
@@ -53,17 +51,6 @@ class TestJurisdictionUnit(TestCase):
         nose.tools.eq_(list(self.state.exemptions()),
                 [{'tags__name': u'exemption 42', 'count': 1},
                  {'tags__name': u'exemption x', 'count': 2}])
-
-    def test_interesting_requests(self):
-        """Test the RequestHelper interesting requests mixin method with Jurisdictions"""
-        # pylint: disable=bad-whitespace
-
-        nose.tools.eq_(self.state.interesting_requests(),
-           [
-            {'headline': 'Most Recently Completed Request', 'req': FOIARequest.objects.get(pk=10)},
-            {'headline': 'Oldest Overdue Request',          'req': FOIARequest.objects.get(pk=15)},
-            {'headline': 'Most Viewed Request',             'req': FOIARequest.objects.get(pk=17)},
-           ])
 
     def test_average_response_time(self):
         """Test the RequestHelper average response time mixin method with Jurisdictions"""

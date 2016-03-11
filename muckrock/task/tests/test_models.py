@@ -22,7 +22,6 @@ mock_send = mock.Mock()
 
 # pylint: disable=missing-docstring
 # pylint: disable=line-too-long
-# pylint: disable=no-member
 
 class TaskTests(TestCase):
     """Test the Task base class"""

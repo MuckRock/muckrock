@@ -120,7 +120,6 @@ admin.site.register(Agency, AgencyAdmin)
 
 def get_jurisdiction(full_name):
     """Get the jurisdiction from its name and parent"""
-    # pylint: disable=no-member
     if ', ' in full_name:
         name, parent_abbrev = full_name.split(', ')
         parent = Jurisdiction.objects.get(abbrev=parent_abbrev)

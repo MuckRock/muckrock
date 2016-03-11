@@ -17,7 +17,6 @@ class LatestQuestions(Feed):
     def items(self):
         """Return the items for the rss feed"""
         # pylint: disable=no-self-use
-        # pylint: disable=E1103
         return Question.objects.all().order_by('-date')[:25]
 
     def item_description(self, item):
