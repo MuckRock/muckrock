@@ -8,7 +8,6 @@ from django.test import TestCase, RequestFactory
 
 from datetime import datetime, date, timedelta
 from decimal import Decimal
-import logging
 from mock import Mock, patch
 from nose.tools import ok_, eq_
 
@@ -25,20 +24,12 @@ class TestCrowdfundDetailView(TestCase):
 
     def setUp(self):
         self.view = CrowdfundDetailView()
-        self.view.form = CrowdfundPaymentForm()
         self.mock_url = '/mock-123/'
         self.crowdfund = Mock()
         project = Mock()
         project.get_absolute_url = Mock(return_value=self.mock_url)
         self.crowdfund.get_crowdfund_object = Mock(return_value=project)
         self.view.get_object = Mock(return_value=self.crowdfund)
-
-    def test_get_form(self):
-        """Should return a form or nothing"""
-        logging.debug(self.view.get_form())
-        ok_(isinstance(self.view.get_form(), CrowdfundPaymentForm))
-        self.view.form = None
-        ok_(self.view.get_form() is None)
 
     def test_get_redirect_url(self):
         """Should return a redirect url or the index url"""
