@@ -668,7 +668,10 @@ class FOIARequest(models.Model):
         # atach all files from the latest communication
         for file_ in self.communications.reverse()[0].files.all():
             msg.attach(file_.name(), file_.ffile.read())
-        msg.send(fail_silently=False)
+        if from_addr == 'fax':
+            send_fax.apply_async(args=[msg])
+        else:
+            msg.send(fail_silently=False)
 
         # update communication
         comm.set_raw_email(msg.message())
