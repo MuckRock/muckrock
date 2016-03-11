@@ -224,8 +224,13 @@ def _fax(request):
                 comm.opened = True
                 comm.save()
             if subject.startswith('FAILURE:'):
+                reasons = [line for line in
+                        post.get('body-plain', '').split('\n')
+                        if line.startswith('REASON:')]
+                reason = reasons[0] if reasons else ''
                 FailedFaxTask.objects.create(
                     communication=comm,
+                    reason=reason,
                 )
 
     _forward(request.POST, request.FILES)
