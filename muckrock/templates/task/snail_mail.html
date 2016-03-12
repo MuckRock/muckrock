@@ -17,37 +17,24 @@
     <dt>Request</dt>
     <dd><a href="{{foia.get_absolute_url}}">{{foia}}</a> (<a href="{% url 'admin:foia_foiarequest_change' foia.pk %}">admin</a>)</dd>
     {# agency info #}
-    {% if not appeal %}
-        {% if foia.agency %}
     <dt>Agency</dt>
-    <dd><a href="{% url 'admin:agency_agency_change' foia.agency.pk %}">{{foia.agency}}</a></dd>
-            {% if foia.agency.email %}
+    <dd><a href="{% url 'admin:agency_agency_change' agency.pk %}">{{agency}}</a></dd>
+	{% if agency.email %}
     <dt>Agency Email</dt>
-    <dd>{{foia.agency.email}}</dd>
-            {% endif %}
-            {% if foia.agency.fax %}
+    <dd>{{agency.email}}</dd>
+	{% endif %}
+	{% if agency.fax %}
     <dt>Agency Fax</dt>
-    <dd>{{foia.agency.fax}}@fax2.faxaway.com</dd>
-            {% endif %}
-            {% if foia.agency.address %}
+    <dd>{{agency.fax}}@fax2.faxaway.com</dd>
+	{% endif %}
+	{% if agency.address %}
     <dt>Agency Address</dt>
-    <dd>{{foia.agency.address|linebreaks}}</dd>
-            {% endif %}
-            {% if foia.agency.notes and not foia.agency.email and not foia.agency.fax %}
+    <dd>{{agency.address|linebreaks}}</dd>
+	{% endif %}
+	{% if agency.notes and not agency.email and not agency.fax %}
     <dt>Agency Notes</dt>
-    <dd>{{foia.agency.notes}}</dd>
-            {% endif %}
-        {% endif %}
-    {% else %}
-        {% if foia.agency.appeal_agency %}
-    <dt>Appeal Agency</dt>
-    <dd><a href="{% url 'admin:agency_agency_change' foia.agency.appeal_agency.pk %}">{{foia.agency.appeal_agency}}</a></dd>
-            {% if foia.agency.appeal_agency.address %}
-    <dt>Appeal Agency Address</dt>
-    <dd>{{foia.agency.appeal_agency.address|linebreaks}}</dd>
-            {% endif %}
-        {% endif %}
-    {% endif %}
+    <dd>{{agency.notes}}</dd>
+	{% endif %}
 {% endif %}
 </dl>
 <div class="collapsed collapsable full-letter">
