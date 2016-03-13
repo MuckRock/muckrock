@@ -46,12 +46,3 @@
 {% endif %}
 {% endblock list-sections %}
 
-{% block list-scripts %}
-<script type="text/javascript">
-    if (urlParam('status') !== 0) {
-        $('#id_status').prepend('<option value="">All Status</option>');
-    } else {
-        $('#id_status').prepend('<option value="" selected class="title-option">All Status</option>');
-    }
-</script>
-{% endblock list-scripts %}

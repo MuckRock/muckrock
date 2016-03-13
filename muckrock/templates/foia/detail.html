@@ -139,11 +139,11 @@
                     </a>
                 </li>
                 {% endif %}
-                {% if user_can_edit and task_count or user.is_staff %}
+                {% if user_can_edit and open_task_count or user.is_staff %}
                 <li>
-                    <a role="tab" class="tab {% if task_count %}alert{% endif %}" aria-controls="tasks" href="#tasks">
-                        <span class="counter">{{task_count}}</span>
-                        <span class="label">Task{{task_count|pluralize}}</span>
+                    <a role="tab" class="tab {% if open_task_count %}alert{% endif %}" aria-controls="tasks" href="#tasks">
+                        <span class="counter">{{open_task_count}}</span>
+                        <span class="label">Task{{open_task_count|pluralize}}</span>
                     </a>
                 </li>
                 {% endif %}
@@ -370,7 +370,7 @@
             </section>
             {% endif %}
 
-            {% if task_count and user_can_edit or user.is_staff %}
+            {% if open_task_count and user_can_edit or user.is_staff %}
             <!-- TASKS -->
             <section role="tabpanel" class="tab-panel tasks" id="tasks">
                 <h2 class="tab-panel-heading">Tasks</h2>
@@ -382,10 +382,8 @@
                 {% for task in open_tasks %}
                     {% include 'lib/task.html' with task=task %}
                 {% empty %}
-                    {% if task_count > 0 %}
+                    {% if open_task_count > 0 %}
                 <p class="empty">There are no open tasks for this request.</p>
-                    {% else %}
-                <p class="empty">There are no tasks for this request.</p>
                     {% endif %}
                 {% endfor %}
             </section>

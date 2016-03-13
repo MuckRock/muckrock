@@ -4,6 +4,7 @@ from celery.exceptions import SoftTimeLimitExceeded
 from celery.signals import task_failure
 from celery.schedules import crontab
 from celery.task import periodic_task, task
+from django.core.cache import cache
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
@@ -27,6 +28,7 @@ from boto.s3.connection import S3Connection
 from datetime import date, datetime
 from decimal import Decimal
 from django_mailgun import MailgunAPIError
+from random import randint
 from scipy.sparse import hstack
 from urllib import quote_plus
 
@@ -186,8 +188,7 @@ def submit_multi_request(req_pk, **kwargs):
             new_foia = FOIARequest.objects.create(
                 user=req.user, status='started', title=title, slug=slugify(title),
                 jurisdiction=agency.jurisdiction, agency=agency, embargo=req.embargo,
-                requested_docs=req.requested_docs, description=req.requested_docs,
-                location=agency.location)
+                requested_docs=req.requested_docs, description=req.requested_docs)
 
             FOIACommunication.objects.create(
                 foia=new_foia, from_who=new_foia.user.get_full_name(),
@@ -584,6 +585,21 @@ def notify_unanswered():
               'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
 
 
+@task(ignore_result=True, max_retries=10, name='muckrock.foia.tasks.send_fax')
+def send_fax(msg, **kwargs):
+    """Send a fax - send only one per fax number per 5 minutes"""
+
+    fax_number = msg.to[0]
+    # cache.add will return false if key is already present
+    # not other faxes will be sent to this number for 5 minutes
+    if not cache.add('fax:' + fax_number, 1, 300):
+        logger.info('Buffering fax for %s', fax_number)
+        countdown = 300 + randint(0, 60)
+        send_fax.retry(countdown=countdown, args=[msg], kwargs=kwargs)
+
+    msg.send(fail_silently=False)
+
+
 def process_failure_signal(exception, traceback, sender, task_id,
                            signal, args, kwargs, einfo, **kw):
     """Log celery exceptions to sentry"""
@@ -603,4 +619,5 @@ def process_failure_signal(exception, traceback, sender, task_id,
             }
         }
     )
+
 task_failure.connect(process_failure_signal, dispatch_uid='muckrock.foia.tasks.logging')

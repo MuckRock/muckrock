@@ -117,6 +117,7 @@ class RejectedEmailTaskNode(TaskNode):
     endpoint_name = 'rejected-email-task-list'
     class_name = 'rejected-email'
 
+
 class ResponseTaskNode(TaskNode):
     """Renders a response task."""
     model = task.models.ResponseTask
@@ -151,6 +152,13 @@ class SnailMailTaskNode(TaskNode):
         """Adds status to the context"""
         extra_context = super(SnailMailTaskNode, self).get_extra_context()
         extra_context['status'] = foia.models.STATUS
+        # if this is an appeal and their is a specific appeal agency, display
+        # that agency, else display the standard agency
+        agency = self.task.communication.foia.agency
+        if self.task.category == 'a' and agency.appeal_agency:
+            extra_context['agency'] = agency.appeal_agency
+        else:
+            extra_context['agency'] = agency
         return extra_context
 
 

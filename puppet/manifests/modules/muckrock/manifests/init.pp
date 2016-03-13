@@ -125,6 +125,16 @@ class muckrock {
 		auth_method => 'trust',
 	}
 
+	postgresql::server::config_entry { 'fsync':
+		value => 'off',
+	}
+	postgresql::server::config_entry { 'synchronous_commit':
+		value => 'off',
+	}
+	postgresql::server::config_entry { 'full_page_writes':
+		value => 'off',
+	}
+
 	# redis
 
 	class { 'redis':; }
