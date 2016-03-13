@@ -213,6 +213,7 @@ class Jurisdiction(models.Model, RequestHelper):
 
     def get_proxy(self):
         """Get a random proxy user for this jurisdiction"""
+        from muckrock.accounts.models import Profile
         try:
             proxy = choice(Profile.objects.filter(
                 acct_type='proxy', state=self.legal()))

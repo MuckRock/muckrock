@@ -209,7 +209,8 @@ class SnailMailTask(Task):
         ('n', 'New'),
         ('u', 'Update'),
         ('f', 'Followup'),
-        ('p', 'Payment')
+        ('p', 'Payment'),
+        ('m', 'Missing Proxy'),
     )
     category = models.CharField(max_length=1, choices=categories)
     communication = models.ForeignKey('foia.FOIACommunication')

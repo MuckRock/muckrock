@@ -90,30 +90,42 @@ def _make_new_agency(request, agency, jurisdiction):
 
 def _make_request(request, foia_request, parent=None):
     """A helper function for creating request and comms objects"""
+    agency = foia_request['agency']
+    missing_proxy = False
+    if agency.requires_proxy:
+        proxy = True
+        proxy_user = agency.jurisdiction.get_proxy()
+        if proxy_user is None:
+            from_who = '<Proxy Placeholder>'
+            missing_proxy = True
+            messages.warning(request,
+                'This agency and jurisdiction requires requestors to be '
+                'in-state citizens.  We do not currently have a citizen proxy '
+                'requestor on file for this state, but will attempt to find '
+                'one to submit this request on your behalf.')
+        else:
+            from_who = proxy_user.get_full_name()
+            messages.warning(request,
+                'This agency and jurisdiction requires requestors to be '
+                'in-state citizens.  This request will be filed in the name '
+                'of one of our volunteer filers for this state.')
+    else:
+        proxy = False
+        from_who = request.user.get_full_name()
+
     foia = FOIARequest.objects.create(
         user=request.user,
         status='started',
         title=foia_request['title'],
         jurisdiction=foia_request['jurisdiction'],
         slug=slugify(foia_request['title']) or 'untitled',
-        agency=foia_request['agency'],
+        agency=agency,
         requested_docs=foia_request['document'],
         description=foia_request['document'],
         parent=parent,
-        location=foia_request['agency'].location
+        location=foia_request['agency'].location,
+        missing_proxy=missing_proxy,
     )
-    if foia.agency.proxy_required:
-        proxy = True
-        proxy_user = foia.agency.jurisdiction.get_proxy()
-        if proxy_user is None:
-            from_who = '<Proxy Placeholder>'
-            # XXX need to mark this as a non-auto submit and create a flag
-            # to find a proxy before submitting
-        else:
-            from_who = proxy_user.get_full_name()
-    else:
-        proxy = False
-        from_who = request.user.get_full_name()
     foia_comm = FOIACommunication.objects.create(
         foia=foia,
         from_who=from_who,

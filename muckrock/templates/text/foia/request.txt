@@ -22,5 +22,5 @@ Please note that I am a citizen of {{ jurisdiction.state }}, and am using MuckRo
 {% endif %}
 Sincerely,
 
-{{user.get_full_name}}
+{{user_name}}
 {% endautoescape %}

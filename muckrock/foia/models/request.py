@@ -201,6 +201,9 @@ class FOIARequest(models.Model):
     other_emails = fields.EmailsListField(blank=True, max_length=255)
     times_viewed = models.IntegerField(default=0)
     disable_autofollowups = models.BooleanField(default=False)
+    missing_proxy = models.BooleanField(default=False,
+            help_text='This request requires a proxy to file, but no such '
+            'proxy was avilable up draft creation.')
     parent = models.ForeignKey('self', blank=True, null=True, on_delete=models.SET_NULL)
     block_incoming = models.BooleanField(
         default=False,
@@ -518,7 +521,7 @@ class FOIARequest(models.Model):
         # if agency isnt approved, do not email or snail mail
         # it will be handled after agency is approved
         approved_agency = self.agency and self.agency.status == 'approved'
-        can_email = self.email and not appeal
+        can_email = self.email and not appeal and not self.missing_proxy
         comm = self.last_comm()
         # if the request can be emailed, email it, otherwise send a notice to the admin
         # if this is a thanks, send it as normal but do not change the status
@@ -538,6 +541,7 @@ class FOIARequest(models.Model):
                 self.date_processing = date.today()
             notice = 'n' if self.communications.count() == 1 else 'u'
             notice = 'a' if appeal else notice
+            notice = 'm' if self.missing_proxy else notice
             comm.delivered = 'mail'
             comm.save()
             task.models.SnailMailTask.objects.create(category=notice, communication=comm)
