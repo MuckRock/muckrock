@@ -22,7 +22,10 @@ class RequestForm(forms.Form):
         ('l', 'Local')
     ]
 
-    title = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Pick a Title'}))
+    title = forms.CharField(
+            widget=forms.TextInput(attrs={'placeholder': 'Pick a Title'}),
+            max_length=255,
+            )
     document_placeholder = (
         'Write one sentence describing what you\'re looking for. '
         'The more specific you can be, the better.'
@@ -45,9 +48,10 @@ class RequestForm(forms.Form):
         label='Agency',
         widget=autocomplete.TextWidget(
             'AgencyAutocomplete',
-            attrs={'placeholder': 'Type the agency\'s name'}))
+            attrs={'placeholder': 'Type the agency\'s name'}),
+        max_length=255)
     full_name = forms.CharField()
-    email = forms.EmailField()
+    email = forms.EmailField(max_length=75)
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
@@ -78,7 +82,10 @@ class RequestForm(forms.Form):
 
 class RequestDraftForm(forms.Form):
     """Presents limited information from created single request for editing"""
-    title = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Pick a Title'}))
+    title = forms.CharField(
+            widget=forms.TextInput(attrs={'placeholder': 'Pick a Title'}),
+            max_length=255,
+            )
     request = forms.CharField(widget=forms.Textarea())
     embargo = forms.BooleanField(
         required=False,
