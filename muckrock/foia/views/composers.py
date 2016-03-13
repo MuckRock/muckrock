@@ -75,8 +75,8 @@ def _make_new_agency(request, agency, jurisdiction):
     """Helper function to create new agency"""
     user = request.user if request.user.is_authenticated() else None
     agency = Agency.objects.create(
-        name=agency[:255],
-        slug=(slugify(agency[:255]) or 'untitled'),
+        name=agency,
+        slug=(slugify(agency) or 'untitled'),
         jurisdiction=jurisdiction,
         user=user,
         status='pending',
