@@ -2,6 +2,17 @@ import React from 'react';
 import alt from './alt';
 import SearchStore from './SearchStore';
 
+var SearchResult = React.createClass({
+    render: function() {
+        var result = this.props.result;
+        return (
+            <div className="search-result">
+                <p><a href="{result.url}">{result.title}</a></p>
+            </div>
+        )
+    }
+});
+
 var SearchResults = React.createClass({
 
     getInitialState: function() {
@@ -20,26 +31,33 @@ var SearchResults = React.createClass({
     },
 
     onChange(state) {
-        console.log(state);
+        console.log('Results changed.');
+        console.debug(state);
         this.setState({results: state.results, searchMade: true});
     },
 
     render: function() {
-        console.log(this.state);
-        var results = this.state.results.map((result) => {
+        console.debug(this.state);
+        var results = this.state.results.map((result, index) => {
             return (
-                <li className="search results item">
-                    {result}
+                <li key={index} className="search-results-item">
+                    <SearchResult result={result} />
                 </li>
             )
         });
-        if (results.length < 1 && this.state.searchMade) {
-            results = 'no results';
+        var resultsCounter = '0 results';
+        if (results.length == 1) {
+            resultsCounter = '1 result';
+        } else if (results.length > 1) {
+            resultsCounter = results.length + ' results';
         }
         return (
-            <ul className="search results list">
-                {results}
-            </ul>
+            <div className="search-results">
+                <p>{resultsCounter}</p>
+                <ul className="search-results-list">
+                    {results}
+                </ul>
+            </div>
         )
     }
 });
