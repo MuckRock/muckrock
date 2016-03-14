@@ -7,6 +7,9 @@ const SearchSource = {
             return axios.get('/search/', {
                 params: {
                     q: state.query
+                },
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
             });
         },

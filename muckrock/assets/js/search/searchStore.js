@@ -6,7 +6,7 @@ class SearchStore {
     constructor() {
         this.bindActions(SearchActions);
         this.registerAsync(SearchSource);
-        this.data = {};
+        this.results = [];
         this.query = ''
     }
 
@@ -19,7 +19,7 @@ class SearchStore {
 
     onReceivedResults (data) {
     	console.log('received', data);
-        this.setState({data: data});
+        this.setState({results: data.data.results});
     }
 
     onFetchingResultsFailed (response) {

@@ -6,7 +6,8 @@ var SearchResults = React.createClass({
 
     getInitialState: function() {
         return {
-            results: []
+            results: [],
+            searchMade: false
         }
     },
 
@@ -19,10 +20,12 @@ var SearchResults = React.createClass({
     },
 
     onChange(state) {
-        console.debug('Results state:', this.state);
+        console.log(state);
+        this.setState({results: state.results, searchMade: true});
     },
 
     render: function() {
+        console.log(this.state);
         var results = this.state.results.map((result) => {
             return (
                 <li className="search results item">
@@ -30,6 +33,9 @@ var SearchResults = React.createClass({
                 </li>
             )
         });
+        if (results.length < 1 && this.state.searchMade) {
+            results = 'no results';
+        }
         return (
             <ul className="search results list">
                 {results}
