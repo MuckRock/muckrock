@@ -14,7 +14,7 @@ AWS_DEBUG = False
 MIDDLEWARE_CLASSES += (
     'muckrock.settings.local.ExceptionLoggingMiddleware',
     'yet_another_django_profiler.middleware.ProfilerMiddleware',
-    'querycount.middleware.QueryCountMiddleware',
+    #'querycount.middleware.QueryCountMiddleware',
     )
 
 class ExceptionLoggingMiddleware(object):
@@ -41,3 +41,4 @@ EMAIL_PORT = 1025
 QUERYCOUNT = {
         'DISPLAY_DUPLICATES': 10,
         }
+

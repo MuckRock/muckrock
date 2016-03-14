@@ -439,8 +439,7 @@ class TestFOIAIntegration(TestCase):
         ## create and submit request
         foia = FOIARequest.objects.create(
             user=user, title='Test with no email', slug='test-with-no-email',
-            status='submitted', jurisdiction=jurisdiction, agency=agency,
-            location=agency.location)
+            status='submitted', jurisdiction=jurisdiction, agency=agency)
         comm = FOIACommunication.objects.create(
             foia=foia, from_who='Muckrock', to_who='Test Agency', date=datetime.datetime.now(),
             response=False, communication=u'Test communication')

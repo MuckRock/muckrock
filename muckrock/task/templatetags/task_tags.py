@@ -44,7 +44,7 @@ class TaskNode(template.Node):
 
 class CrowdfundTaskNode(TaskNode):
     """Renders a crowdfund task."""
-    model = task.models.NewCrowdfundTask
+    model = task.models.CrowdfundTask
     task_template = 'task/crowdfund.html'
     endpoint_name = 'crowdfund-task-list'
     class_name = 'crowdfund'
@@ -117,6 +117,7 @@ class RejectedEmailTaskNode(TaskNode):
     endpoint_name = 'rejected-email-task-list'
     class_name = 'rejected-email'
 
+
 class ResponseTaskNode(TaskNode):
     """Renders a response task."""
     model = task.models.ResponseTask
@@ -151,6 +152,13 @@ class SnailMailTaskNode(TaskNode):
         """Adds status to the context"""
         extra_context = super(SnailMailTaskNode, self).get_extra_context()
         extra_context['status'] = foia.models.STATUS
+        # if this is an appeal and their is a specific appeal agency, display
+        # that agency, else display the standard agency
+        foia_agency = self.task.communication.foia.agency
+        if self.task.category == 'a' and foia_agency.appeal_agency:
+            extra_context['agency'] = foia_agency.appeal_agency
+        else:
+            extra_context['agency'] = foia_agency
         return extra_context
 
 
@@ -169,7 +177,7 @@ class StaleAgencyTaskNode(TaskNode):
         extra_context['email_form'] = task.forms.StaleAgencyTaskForm(initial=initial)
         extra_context['latest_response'] = latest_response
         extra_context['stale_requests'] = self.task.stale_requests()
-        extra_context['stalest_request'] = self.task.stalest_request()
+        extra_context['stalest_request'] = list(extra_context['stale_requests'])[0]
         return extra_context
 
 

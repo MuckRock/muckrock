@@ -3,7 +3,7 @@
 {% if not forloop.first %}On {{ comm.date|date }}:{% endif %}
 {{ comm.communication }}
 {% if not forloop.last %}---{% endif %}
-{% endfor %}{% else %}{{ request.last_comm.communication }}{% endif %}
+{% endfor %}{% else %}{{ request.reverse_communications.0.communication }}{% endif %}
 ------
 Filed via MuckRock.com
 E-mail (Preferred): {{ request.get_mail_id }}@requests.muckrock.com

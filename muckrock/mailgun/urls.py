@@ -9,19 +9,9 @@ from muckrock.mailgun import views
 urlpatterns = patterns(
     '',
     url(
-        r'^request/(?P<mail_id>\d+-\d{3,10})/$',
-        views.handle_request,
-        name='mailgun-request'
-    ),
-    url(
-        r'^fax/$',
-        views.fax,
-        name='mailgun-fax'
-    ),
-    url(
-        r'^catch_all/(?P<address>.*)/$',
-        views.catch_all,
-        name='mailgun-catchall'
+        r'^route/$',
+        views.route_mailgun,
+        name='mailgun-route'
     ),
     url(
         r'^bounces/$',

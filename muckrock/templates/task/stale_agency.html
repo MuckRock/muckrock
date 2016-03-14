@@ -8,8 +8,8 @@
     <dd><a href="{% url 'admin:agency_agency_change' task.agency.pk %}">{{task.agency}}</a></dd>
     <dd>{{task.agency.phone}}</dd>
     <dt>Stalest Request</dt>
-    <dd><a href="{{stalest_request.get_absolute_url}}">{{stalest_request}}</a> (<a href="{% url 'admin:foia_foiarequest_change' stalest_request.pk %}">admin</a>)</dd>
-    <dd>{{stalest_request.latest_response}} day{{stalest_request.latest_response|pluralize}} stale</dd>
+    <dd><a href="{{stale_requests.0.get_absolute_url}}">{{stale_requests.0}}</a> (<a href="{% url 'admin:foia_foiarequest_change' stale_requests.0.pk %}">admin</a>)</dd>
+    <dd>{{stale_requests.0.latest_response}} day{{stale_requests.0.latest_response|pluralize}} stale</dd>
 </dl>
 <div class="collapsable stale-requests">
     <header>

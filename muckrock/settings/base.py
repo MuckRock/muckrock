@@ -201,6 +201,7 @@ INSTALLED_APPS = (
     'muckrock.crowdfund',
     'muckrock.sidebar',
     'muckrock.task',
+    'muckrock.map',
     'muckrock.message',
     'muckrock.organization',
     'muckrock.project',
@@ -363,7 +364,7 @@ LOGGING = {
         },
         'muckrock': {
             'handlers': ['console', 'mail_admins', 'sentry'],
-            'level': 'WARNING',
+            'level': 'INFO',
         },
         'django.db.backends': {
             'level': 'ERROR',
@@ -491,7 +492,7 @@ LEAFLET_CONFIG = {
     'MIN_ZOOM': 4,
     'MAX_ZOOM': 18,
     'PLUGINS': {
-        'forms': {
+        'search': {
             'css': [
                 'vendor/leaflet-geocoder-control/Control.Geocoder.css',
             ],
@@ -500,6 +501,15 @@ LEAFLET_CONFIG = {
                 'js/leaflet-form.js'
             ],
             'auto-include': True,
+        },
+        'draw': {
+            'css': [
+                'leaflet/draw/leaflet.draw.css',
+                'leaflet/draw/leaflet.draw.ie.css'
+            ],
+            'js': [
+                'leaflet/draw/leaflet.draw.js'
+            ]
         }
     }
 }

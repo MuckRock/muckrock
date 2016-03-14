@@ -173,5 +173,5 @@ class StaleFOIACommunicationFactory(FOIACommunicationFactory):
     """A factory for creating stale FOIARequest test objects."""
     response = True
     date = factory.LazyAttribute(
-        lambda obj: datetime.datetime.now() - datetime.timedelta(STALE_DURATION)
+        lambda obj: datetime.datetime.now() - datetime.timedelta(STALE_DURATION + 1)
     )

@@ -12,7 +12,7 @@ from django.utils.decorators import method_decorator
 
 from actstream.models import followers
 
-from muckrock.project.models import Project, ProjectMap
+from muckrock.project.models import Project
 from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm
 
 
@@ -80,8 +80,8 @@ class ProjectDetailView(DetailView):
                     ))
         context['followers'] = followers(project)
         context['articles'] = project.articles.get_published()
-        context['maps'] = ProjectMap.objects.filter(project=project)
         context['contributors'] = project.contributors.select_related('profile')
+        context['user_is_experimental'] = user.is_authenticated() and user.profile.experimental
         return context
 
     def dispatch(self, *args, **kwargs):
@@ -139,15 +139,3 @@ class ProjectDeleteView(ProjectPermissionsMixin, DeleteView):
     model = Project
     success_url = reverse_lazy('index')
     template_name = 'project/delete.html'
-
-
-class ProjectMapDetailView(DetailView):
-    """View a project map"""
-    model = ProjectMap
-    template_name = 'project/map.html'
-
-    @method_decorator(login_required)
-    @method_decorator(user_passes_test(lambda u: u.is_staff))
-    def dispatch(self, *args, **kwargs):
-        """At the moment, only staff are allowed to view a project map."""
-        return super(ProjectMapDetailView, self).dispatch(*args, **kwargs)

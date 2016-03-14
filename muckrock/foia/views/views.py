@@ -270,7 +270,7 @@ class Detail(DetailView):
         context['crowdfund_form'] = CrowdfundForm(initial={
             'name': u'Crowdfund Request: %s' % unicode(foia),
             'description': 'Help cover the request fees needed to free these docs!',
-            'payment_required': foia.price,
+            'payment_required': foia.get_stripe_amount(),
             'date_due': datetime.now() + timedelta(30),
             'foia': foia
         })
@@ -284,7 +284,8 @@ class Detail(DetailView):
 
         all_tasks = Task.objects.filter_by_foia(foia, user)
         open_tasks = [task for task in all_tasks if not task.resolved]
-        context['task_count'] = len(open_tasks)
+        context['task_count'] = len(all_tasks)
+        context['open_task_count'] = len(open_tasks)
         context['open_tasks'] = open_tasks
         context['stripe_pk'] = settings.STRIPE_PUB_KEY
         context['sidebar_admin_url'] = reverse('admin:foia_foiarequest_change', args=(foia.pk,))

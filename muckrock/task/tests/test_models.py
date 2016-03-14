@@ -5,13 +5,12 @@ Tests for Tasks models
 from django.http import Http404
 from django.test import TestCase
 
-from datetime import datetime, timedelta
+from datetime import datetime
 import logging
 import mock
 import nose
 
 from muckrock import factories, task
-from muckrock.agency.models import STALE_DURATION
 from muckrock.foia.models import FOIARequest, FOIANote
 from muckrock.task.factories import FlaggedTaskFactory
 from muckrock.task.signals import domain_blacklist
@@ -24,6 +23,7 @@ mock_send = mock.Mock()
 # pylint: disable=missing-docstring
 # pylint: disable=line-too-long
 # pylint: disable=no-member
+
 
 class TaskTests(TestCase):
     """Test the Task base class"""
@@ -165,6 +165,7 @@ class FlaggedTaskTests(TestCase):
         flagged_task.reply('Lorem ipsum')
         mock_support_send.assert_called_with()
 
+
 class SnailMailTaskTests(TestCase):
     """Test the SnailMailTask class"""
 
@@ -232,17 +233,6 @@ class StaleAgencyTaskTests(TestCase):
         ok_(closed_foia not in stale_requests,
             'Closed requests should not be considered stale.')
 
-    def test_stalest_request(self):
-        """The stale agency task should provide the stalest request it knows about."""
-        # first lets create a foia with a pretty stale communication
-        really_stale_request = factories.StaleFOIARequestFactory(agency=self.task.agency)
-        really_stale_communication = really_stale_request.communications.last()
-        really_stale_communication.date -= timedelta(STALE_DURATION)
-        really_stale_communication.save()
-        self.task.refresh_from_db()
-        stalest_request = self.task.stalest_request()
-        eq_(stalest_request, really_stale_request)
-
     def test_latest_response(self):
         """
         The stale agency task should provide the most
@@ -271,6 +261,7 @@ class StaleAgencyTaskTests(TestCase):
         """Resolving the task should lower the stale flag on the agency."""
         self.task.resolve()
         ok_(not self.task.agency.stale, 'The agency should no longer be stale.')
+
 
 class NewAgencyTaskTests(TestCase):
     """Test the NewAgencyTask class"""

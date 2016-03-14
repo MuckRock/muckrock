@@ -14,7 +14,6 @@ from django.template.loader import render_to_string
 
 import actstream
 from datetime import datetime, date, timedelta
-from djgeojson.fields import PointField
 from hashlib import md5
 import logging
 from taggit.managers import TaggableManager
@@ -224,7 +223,6 @@ class FOIARequest(models.Model):
 
     objects = FOIARequestQuerySet.as_manager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
-    location = PointField(blank=True)
 
     foia_type = 'foia'
 
@@ -629,6 +627,7 @@ class FOIARequest(models.Model):
         """Send an email of the request to its email address"""
         # pylint: disable=no-member
         # self.email should be set before calling this method
+        from muckrock.foia.tasks import send_fax
 
         from_addr = 'fax' if self.email.endswith('faxaway.com') else self.get_mail_id()
         law_name = self.jurisdiction.get_law_name()
@@ -670,7 +669,10 @@ class FOIARequest(models.Model):
         # atach all files from the latest communication
         for file_ in self.communications.reverse()[0].files.all():
             msg.attach(file_.name(), file_.ffile.read())
-        msg.send(fail_silently=False)
+        if from_addr == 'fax':
+            send_fax.apply_async(args=[msg])
+        else:
+            msg.send(fail_silently=False)
 
         # update communication
         comm.set_raw_email(msg.message())

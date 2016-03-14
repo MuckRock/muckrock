@@ -50,8 +50,8 @@ def pylint():
     """Run pylint"""
     with env.cd(env.base_path):
         excludes = ['migrations', '__init__.py', 'manage.py', 'formwizard',
-                    'vendor', 'fabfile', 'static', 'nested_inlines']
-        stmt = ('find . -name "*.py"' +
+                    'vendor', 'fabfile', 'static', 'nested_inlines', 'node_modules']
+        stmt = ('find ./muckrock -name "*.py"' +
                 ''.join(' | grep -v %s' % e for e in excludes) +
                 ' | xargs pylint --load-plugins=pylint_django '
                 '--rcfile=config/pylint.conf -r n')
@@ -163,7 +163,5 @@ def setup():
 def update_staging_db():
     """Update the staging database"""
     env.run('heroku maintenance:on --app muckrock-staging')
-    env.run('heroku ps:scale --app muckrock-staging web=0')
     env.run('heroku pg:copy muckrock::DATABASE_URL DATABASE_URL --app muckrock-staging')
-    env.run('heroku ps:scale --app muckrock-staging web=1')
     env.run('heroku maintenance:off --app muckrock-staging')
