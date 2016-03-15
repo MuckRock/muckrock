@@ -21,6 +21,7 @@ from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import SnailMailTask
 from muckrock.tests import get_allowed, post_allowed, get_post_unallowed, get_404
+from muckrock.utils import mock_middleware
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
@@ -546,16 +547,10 @@ class TestFOIANotes(TestCase):
         self.note_text = u'Lorem ipsum dolor su ament.'
         self.note_data = {'action': 'add_note', 'note': self.note_text}
 
-    def mockMiddleware(self, request):
-        """Mocks the request with messages and session middleware"""
-        setattr(request, 'session', Mock())
-        setattr(request, '_messages', Mock())
-        return request
-
     def test_add_note(self):
         """User with edit permission should be able to create a note."""
         request = self.factory.post(self.foia.get_absolute_url(), self.note_data)
-        request = self.mockMiddleware(request)
+        request = mock_middleware(request)
         request.user = self.editor
         response = Detail.as_view()(
             request,
@@ -571,7 +566,7 @@ class TestFOIANotes(TestCase):
     def test_add_note_without_permission(self):
         """Normies and viewers cannot add notes."""
         request = self.factory.post(self.foia.get_absolute_url(), self.note_data)
-        request = self.mockMiddleware(request)
+        request = mock_middleware(request)
         request.user = self.viewer
         response = Detail.as_view()(
             request,
@@ -717,17 +712,10 @@ class TestRequestSharingViews(TestCase):
         self.foia.add_viewer(self.viewer)
         self.foia.save()
 
-    def mockMiddleware(self, request):
-        """Mocks the request with messages and session middleware"""
-        setattr(request, 'session', Mock())
-        setattr(request, '_messages', Mock())
-        return request
-
     def reset_access_key(self):
         """Simple helper to reset access key betweeen tests"""
         self.foia.access_key = None
         nose.tools.assert_false(self.foia.access_key)
-        return
 
     def test_access_key_allowed(self):
         """
@@ -737,7 +725,7 @@ class TestRequestSharingViews(TestCase):
         self.reset_access_key()
         data = {'action': 'generate_key'}
         request = self.factory.post(self.foia.get_absolute_url(), data)
-        request = self.mockMiddleware(request)
+        request = mock_middleware(request)
         # editors should be able to generate the key
         request.user = self.editor
         response = Detail.as_view()(
@@ -769,7 +757,7 @@ class TestRequestSharingViews(TestCase):
         self.reset_access_key()
         data = {'action': 'generate_key'}
         request = self.factory.post(self.foia.get_absolute_url(), data)
-        request = self.mockMiddleware(request)
+        request = mock_middleware(request)
         # viewers should not be able to generate the key
         request.user = self.viewer
         response = Detail.as_view()(
@@ -806,7 +794,7 @@ class TestRequestSharingViews(TestCase):
             'access': 'edit'
         }
         edit_request = self.factory.post(self.foia.get_absolute_url(), edit_data)
-        edit_request = self.mockMiddleware(edit_request)
+        edit_request = mock_middleware(edit_request)
         edit_request.user = self.editor
         edit_response = Detail.as_view()(
             edit_request,
@@ -828,7 +816,7 @@ class TestRequestSharingViews(TestCase):
             'access': 'view'
         }
         view_request = self.factory.post(self.foia.get_absolute_url(), view_data)
-        view_request = self.mockMiddleware(view_request)
+        view_request = mock_middleware(view_request)
         view_request.user = self.editor
         view_response = Detail.as_view()(
             view_request,
@@ -850,7 +838,7 @@ class TestRequestSharingViews(TestCase):
             'user': user.pk
         }
         request = self.factory.post(self.foia.get_absolute_url(), data)
-        request = self.mockMiddleware(request)
+        request = mock_middleware(request)
         request.user = self.editor
         response = Detail.as_view()(
             request,
@@ -873,7 +861,7 @@ class TestRequestSharingViews(TestCase):
             'user': user.pk
         }
         request = self.factory.post(self.foia.get_absolute_url(), data)
-        request = self.mockMiddleware(request)
+        request = mock_middleware(request)
         request.user = self.editor
         response = Detail.as_view()(
             request,
@@ -895,7 +883,7 @@ class TestRequestSharingViews(TestCase):
             'user': an_editor.pk
         }
         request = self.factory.post(self.foia.get_absolute_url(), data)
-        request = self.mockMiddleware(request)
+        request = mock_middleware(request)
         request.user = self.editor
         response = Detail.as_view()(
             request,
@@ -916,7 +904,7 @@ class TestRequestSharingViews(TestCase):
             'user': a_viewer.pk
         }
         request = self.factory.post(self.foia.get_absolute_url(), data)
-        request = self.mockMiddleware(request)
+        request = mock_middleware(request)
         request.user = self.editor
         response = Detail.as_view()(
             request,
