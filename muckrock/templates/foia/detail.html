@@ -106,9 +106,7 @@
                 {% include 'foia/component/status.html' %}
                 {% include 'foia/component/embargo.html' %}
                 {% tag_manager foia %}
-                {% for project in foia.projects.all %}
-                    {% include 'lib/project.html' %}
-                {% endfor %}
+                {% project_manager foia %}
             </section>
         </section>
     </section>

@@ -12,6 +12,7 @@ from email.parser import Parser
 import re
 
 from muckrock.forms import TagManagerForm
+from muckrock.project.forms import ProjectManagerForm
 
 register = Library()
 
@@ -178,6 +179,26 @@ def tag_manager(context, mr_object):
         'form': form,
         'is_authorized': is_authorized,
         'endpoint': mr_object.get_absolute_url()
+    }
+
+@register.inclusion_tag('project/component/manager.html', takes_context=True)
+def project_manager(context, mr_object):
+    """Template tag to insert a project manager component"""
+    try:
+        projects = mr_object.projects.all()
+    except AttributeError:
+        projects = None
+    try:
+        owner = mr_object.owner
+    except AttributeError:
+        owner = None
+    is_authorized = context['user'].is_staff or context['user'] == owner
+    form = ProjectManagerForm(initial={'projects': [project.pk for project in projects]})
+    return {
+        'projects': projects,
+        'form': form,
+        'is_authorized': is_authorized,
+        'endpoint': mr_object.get_absolute_url(),
     }
 
 @register.filter
