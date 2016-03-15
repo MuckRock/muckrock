@@ -3,14 +3,16 @@ Tests using nose for the news application
 """
 
 from django.core.urlresolvers import reverse
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 
 from nose.tools import eq_, ok_
 from datetime import datetime
 
-from muckrock.factories import ArticleFactory
+from muckrock.factories import ArticleFactory, UserFactory
 from muckrock.news.models import Article
+from muckrock.news.views import NewsDetail
 from muckrock.tests import get_allowed, get_404
+from muckrock.utils import mock_middleware
 
 # pylint: disable=no-self-use
 # pylint: disable=too-many-public-methods
@@ -118,3 +120,36 @@ class TestNewsFunctional(TestCase):
         """Should have a feed"""
         get_allowed(self.client, reverse('news-feed'))
 
+
+class TestNewsArticleViews(TestCase):
+    """Tests the functions attached to news article views"""
+    def setUp(self):
+        self.article = ArticleFactory()
+        self.request_factory = RequestFactory()
+        self.url = self.article.get_absolute_url()
+        self.view = NewsDetail.as_view()
+
+    def post_helper(self, data, user):
+        """Returns a post response"""
+        request = self.request_factory.post(self.url, data)
+        request.user = user
+        request = mock_middleware(request)
+        return self.view(
+            request,
+            slug=self.article.slug,
+            year=self.article.pub_date.strftime('%Y'),
+            month=self.article.pub_date.strftime('%b').lower(),
+            day=self.article.pub_date.strftime('%d')
+        )
+
+    def test_set_tags(self):
+        """Posting a group of tags to an article should set the tags on that article."""
+        tags = "foo, bar, baz"
+        staff = UserFactory(is_staff=True)
+        response = self.post_helper({'tags': tags}, staff)
+        self.article.refresh_from_db()
+        ok_(response.status_code, 200)
+        print self.article.tags.all()
+        ok_('foo' in [tag.name for tag in self.article.tags.all()])
+        ok_('bar' in [tag.name for tag in self.article.tags.all()])
+        ok_('baz' in [tag.name for tag in self.article.tags.all()])

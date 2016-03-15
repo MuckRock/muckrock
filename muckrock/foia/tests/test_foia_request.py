@@ -580,6 +580,37 @@ class TestFOIANotes(TestCase):
         nose.tools.assert_true(self.foia.notes.count() == 0)
 
 
+class TestRequestDetailView(TestCase):
+    """Request detail views support a wide variety of interactions"""
+
+    def setUp(self):
+        self.foia = FOIARequestFactory()
+        self.request_factory = RequestFactory()
+        self.view = Detail.as_view()
+        self.url = self.foia.get_absolute_url()
+
+    def post_helper(self, data, user):
+        """Returns post responses"""
+        request = self.request_factory.post(self.url, data)
+        request.user = user
+        request = mock_middleware(request)
+        return self.view(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id
+        )
+
+    def test_add_tags(self):
+        """Posting a collection of tags to a request should update its tags."""
+        tags = 'foo, bar'
+        response = self.post_helper({'action': 'tags', 'tags': tags}, self.foia.user)
+        self.foia.refresh_from_db()
+        ok_('foo' in [tag.name for tag in self.foia.tags.all()])
+        ok_('bar' in [tag.name for tag in self.foia.tags.all()])
+
+
 class TestRequestPayment(TestCase):
     """Allow users to pay fees on a request"""
     def setUp(self):
