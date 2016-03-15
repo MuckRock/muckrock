@@ -17,6 +17,7 @@ import django_filters
 
 from muckrock.news.models import Article
 from muckrock.news.serializers import ArticleSerializer
+from muckrock.project.forms import ProjectManagerForm
 from muckrock.tags.models import Tag, parse_tags
 
 # pylint: disable=too-many-ancestors
@@ -54,15 +55,20 @@ class NewsDetail(DateDetailView):
     def post(self, request, **kwargs):
         """Handles POST requests on article pages"""
         # pylint:disable=unused-argument
+        article = self.get_object()
+        action = request.POST.get('action')
+        if action == 'projects':
+            form = ProjectManagerForm(request.POST)
+            if form.is_valid():
+                projects = form.cleaned_data['projects']
+                article.projects = projects
         tags = request.POST.get('tags')
         if tags:
             tag_set = set()
             for tag in parse_tags(tags):
                 new_tag, _ = Tag.objects.get_or_create(name=tag)
                 tag_set.add(new_tag)
-            self.get_object().tags.set(*tag_set)
-            self.get_object().save()
-            messages.success(request, 'Your tags have been saved to this article.')
+            article.tags.set(*tag_set)
         return redirect(self.get_object())
 
 

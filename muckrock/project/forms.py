@@ -58,7 +58,7 @@ class ProjectUpdateForm(forms.ModelForm):
 
 class ProjectManagerForm(forms.Form):
     """Form for managing a list of projects"""
-    projects = forms.ModelChoiceField(
+    projects = forms.ModelMultipleChoiceField(
         required=False,
         queryset=Project.objects.all(),
         widget=autocomplete_light.MultipleChoiceWidget(

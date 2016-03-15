@@ -14,11 +14,12 @@ import re
 from datetime import date as real_date
 from operator import attrgetter
 
-from muckrock.factories import UserFactory, FOIARequestFactory
+from muckrock.factories import UserFactory, FOIARequestFactory, ProjectFactory
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.foia.views import Detail
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.project.forms import ProjectManagerForm
 from muckrock.task.models import SnailMailTask
 from muckrock.tests import get_allowed, post_allowed, get_post_unallowed, get_404
 from muckrock.utils import mock_middleware
@@ -609,6 +610,17 @@ class TestRequestDetailView(TestCase):
         self.foia.refresh_from_db()
         ok_('foo' in [tag.name for tag in self.foia.tags.all()])
         ok_('bar' in [tag.name for tag in self.foia.tags.all()])
+
+    def test_add_projects(self):
+        """Posting a collection of projects to a request should add it to those projects."""
+        project = ProjectFactory()
+        form = ProjectManagerForm({'projects': [project.pk]})
+        ok_(form.is_valid())
+        data = {'action': 'projects'}
+        data.update(form.data)
+        response = self.post_helper(data, self.foia.user)
+        project.refresh_from_db()
+        ok_(self.foia in project.requests.all())
 
 
 class TestRequestPayment(TestCase):

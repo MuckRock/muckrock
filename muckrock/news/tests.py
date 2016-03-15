@@ -8,9 +8,10 @@ from django.test import TestCase, RequestFactory
 from nose.tools import eq_, ok_
 from datetime import datetime
 
-from muckrock.factories import ArticleFactory, UserFactory
+from muckrock.factories import ArticleFactory, UserFactory, ProjectFactory
 from muckrock.news.models import Article
 from muckrock.news.views import NewsDetail
+from muckrock.project.forms import ProjectManagerForm
 from muckrock.tests import get_allowed, get_404
 from muckrock.utils import mock_middleware
 
@@ -149,7 +150,26 @@ class TestNewsArticleViews(TestCase):
         response = self.post_helper({'tags': tags}, staff)
         self.article.refresh_from_db()
         ok_(response.status_code, 200)
-        print self.article.tags.all()
         ok_('foo' in [tag.name for tag in self.article.tags.all()])
         ok_('bar' in [tag.name for tag in self.article.tags.all()])
         ok_('baz' in [tag.name for tag in self.article.tags.all()])
+
+    def test_set_projects(self):
+        """Posting a group of projects to an article should set that article's projects."""
+        project1 = ProjectFactory()
+        project2 = ProjectFactory()
+        project_form = ProjectManagerForm({'projects': [project1.pk, project2.pk]})
+        ok_(project_form.is_valid(),
+            'We want to be sure we are posting valid data.')
+        staff = UserFactory(is_staff=True)
+        data = {'action': 'projects'}
+        data.update(project_form.data)
+        response = self.post_helper(data, staff)
+        self.article.refresh_from_db()
+        project1.refresh_from_db()
+        project2.refresh_from_db()
+        ok_(response.status_code, 200)
+        ok_(self.article in project1.articles.all(),
+            'The article should be added to the project.')
+        ok_(self.article in project2.articles.all(),
+            'The article should be added to teh project.')
