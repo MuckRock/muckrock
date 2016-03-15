@@ -189,15 +189,16 @@ def project_manager(context, mr_object):
     except AttributeError:
         projects = None
     try:
-        owner = mr_object.owner
+        owner = mr_object.user
     except AttributeError:
         owner = None
-    is_authorized = context['user'].is_staff or context['user'] == owner
+    user = context['user']
+    authorized = user.is_staff or user == owner
     form = ProjectManagerForm(initial={'projects': [project.pk for project in projects]})
     return {
         'projects': projects,
         'form': form,
-        'is_authorized': is_authorized,
+        'authorized': authorized,
         'endpoint': mr_object.get_absolute_url(),
     }
 
