@@ -125,7 +125,7 @@ class TestNewsFunctional(TestCase):
 class TestNewsArticleViews(TestCase):
     """Tests the functions attached to news article views"""
     def setUp(self):
-        self.article = ArticleFactory()
+        self.article = ArticleFactory(publish=True)
         self.request_factory = RequestFactory()
         self.url = self.article.get_absolute_url()
         self.view = NewsDetail.as_view()
@@ -173,3 +173,10 @@ class TestNewsArticleViews(TestCase):
             'The article should be added to the project.')
         ok_(self.article in project2.articles.all(),
             'The article should be added to teh project.')
+
+    def test_staff_only(self):
+        """Non-staff users cannot edit articles."""
+        user = UserFactory()
+        response = self.post_helper({'tags': 'hello'}, user)
+        eq_(response.status_code, 403,
+            'The server should return a 403 Forbidden error code.')

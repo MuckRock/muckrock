@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db.models import Prefetch
+from django.http import HttpResponseForbidden
 from django.shortcuts import redirect
 from django.views.generic.list import ListView
 from django.views.generic.dates import YearArchiveView, DateDetailView
@@ -56,7 +57,10 @@ class NewsDetail(DateDetailView):
         """Handles POST requests on article pages"""
         # pylint:disable=unused-argument
         article = self.get_object()
+        authorized = self.request.user.is_staff
         action = request.POST.get('action')
+        if not authorized:
+            return HttpResponseForbidden()
         if action == 'projects':
             form = ProjectManagerForm(request.POST)
             if form.is_valid():
@@ -69,7 +73,7 @@ class NewsDetail(DateDetailView):
                 new_tag, _ = Tag.objects.get_or_create(name=tag)
                 tag_set.add(new_tag)
             article.tags.set(*tag_set)
-        return redirect(self.get_object())
+        return redirect(article)
 
 
 class NewsYear(YearArchiveView):
