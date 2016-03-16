@@ -193,7 +193,8 @@ def project_manager(context, mr_object):
     except AttributeError:
         owner = None
     user = context['user']
-    authorized = user.is_staff or user == owner
+    experimental = user.is_authenticated() and user.profile.experimental
+    authorized = user.is_staff or (user == owner and experimental)
     form = ProjectManagerForm(initial={'projects': [project.pk for project in projects]})
     return {
         'projects': projects,
