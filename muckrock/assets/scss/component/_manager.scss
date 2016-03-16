@@ -11,6 +11,18 @@
         &.visible {
             display: block;
         }
+        footer {
+            @include display(flex);
+            @include justify-content(space-between);
+        }
+    }
+    input[type="text"] {
+        width: 100%;
+    }
+    .deck {
+        display: block;
+        width: 100%;
+        margin-bottom: $vertical-rhythm;
     }
 }
 
