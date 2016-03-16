@@ -146,6 +146,8 @@ class ArticleFactory(factory.django.DjangoModelFactory):
 
     @factory.post_generation
     def authors(self, create, extracted, **kwargs):
+        """Adds M2M authors"""
+        # pylint: disable=unused-argument
         if not create:
             # Simple build, do nothing.
             return

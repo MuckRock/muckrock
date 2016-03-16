@@ -3,7 +3,6 @@ Views for the news application
 """
 
 from django.conf import settings
-from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db.models import Prefetch

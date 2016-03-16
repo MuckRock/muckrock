@@ -8,7 +8,6 @@ from django.core import mail
 from django.test import TestCase, RequestFactory
 
 import datetime
-from mock import Mock
 import nose.tools
 import re
 from datetime import date as real_date
@@ -606,7 +605,7 @@ class TestRequestDetailView(TestCase):
     def test_add_tags(self):
         """Posting a collection of tags to a request should update its tags."""
         tags = 'foo, bar'
-        response = self.post_helper({'action': 'tags', 'tags': tags}, self.foia.user)
+        self.post_helper({'action': 'tags', 'tags': tags}, self.foia.user)
         self.foia.refresh_from_db()
         ok_('foo' in [tag.name for tag in self.foia.tags.all()])
         ok_('bar' in [tag.name for tag in self.foia.tags.all()])
@@ -618,7 +617,7 @@ class TestRequestDetailView(TestCase):
         ok_(form.is_valid())
         data = {'action': 'projects'}
         data.update(form.data)
-        response = self.post_helper(data, self.foia.user)
+        self.post_helper(data, self.foia.user)
         project.refresh_from_db()
         ok_(self.foia in project.requests.all())
 
