@@ -1,10 +1,23 @@
 .autocomplete-light-widget {
+    width: 100%;
     font-family: $font-family !important;
     color: $color-black !important;
-
+    .deck > span {
+        width: 100%;
+        display: block;
+        padding: 0;
+    }
+    .remove {
+        vertical-align: middle;
+        margin-right: $vertical-rhythm/4;
+        &:hover {
+            background-position: 0 0;
+        }
+    }
 }
 
 .yourlabs-autocomplete {
+    left: 0;
     background-color: $color-white !important;
     border-radius: $base-border-radius !important;
     .hilight {
