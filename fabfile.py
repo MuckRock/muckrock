@@ -97,8 +97,8 @@ def populate_db():
         return
 
     with env.cd(env.base_path):
-        env.run('PGUSER=muckrock dropdb muckrock')
-        env.run('PGUSER=muckrock heroku pg:pull DATABASE muckrock --app muckrock')
+        env.run('dropdb muckrock')
+        env.run('heroku pg:pull DATABASE muckrock --app muckrock')
 
 @task(name='sync-aws')
 def sync_aws():
