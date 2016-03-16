@@ -20,9 +20,9 @@ class ProjectManagerAutocomplete(autocomplete_light.AutocompleteModelBase):
         """
         query = self.request.GET.get('q', '')
         user = self.request.user
-        choices = super(ProjectManagerAutocomplete, self).choices_for_request()
         if not user.is_staff:
-            choices = choices.filter(contributors=user)
+            self.choices = self.choices.filter(contributors=user)
+        choices = super(ProjectManagerAutocomplete, self).choices_for_request()
         return choices
 
 autocomplete_light.register(Project, ProjectManagerAutocomplete)
