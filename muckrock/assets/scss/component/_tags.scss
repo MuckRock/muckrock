@@ -13,6 +13,13 @@
     }
 }
 
+.tag-list {
+    margin-bottom: $vertical-rhythm;
+}
+.tag-list li {
+    display: inline-block;
+}
+
 button.tag, .button.tag {
     border: none;
     border-radius: 0;
