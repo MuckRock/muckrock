@@ -48,8 +48,12 @@ class Crowdfund(models.Model):
         return date.today() >= self.date_due or self.closed
 
     def amount_remaining(self):
-        """Reports the amount still needed to be raised"""
+        """Reports the amount still needed to be raised as a decimal."""
         return Decimal(self.payment_required) - Decimal(self.payment_received)
+
+    def percent_funded(self):
+        """Reports the percent of the amount required that has been funded."""
+        return int(self.payment_received/self.payment_required * 100)
 
     def update_payment_received(self):
         """Combine the amounts of all the payments"""
