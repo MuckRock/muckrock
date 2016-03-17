@@ -10,11 +10,15 @@
 }
 
 .failure.badge {
-    background: $color-red-dark;
+    background: $color-red;
 }
 
 .success.badge {
-    background: $color-green-dark;
+    background: $color-green;
+}
+
+.featured.badge {
+    background: $color-blue;
 }
 
 .featured.badge {
