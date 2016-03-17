@@ -1,29 +1,76 @@
 {% extends 'base.html' %}
 {% load thumbnail %}
+{% load markdown_deux_tags %}
+{% load static from staticfiles %}
 
 {% block content %}
 <div class="project frontpage">
-    <h1>Projects</h1>
-    <h2>Featured</h2>
-    {% for project in featured %}
-    <div class="featured project">
-        <p><span class="featured badge">&#9733; Featured</span></p>
-        <img src="{% thumbnail project.image 800x600 %}" />
-        <h3><a href="{{project.get_absolute_url}}">{{project.title}}</a></h3>
-    </div>
-    {% endfor %}
-    <h2>Need ur support</h2>
-    {% for project in crowdfunding %}
-    <div class="project">
-        <h3>{{project.title}}</h3>
-        {% for crowdfund in project.active_crowdfunds %}
-        <div class="crowdfund">
-            <p>{{crowdfund.payment_required}}</p>
-            <p>{{crowdfund.payment_received}}</p>
-            <p>{{crowdfund.date_due|timeuntil}}</p>
+    <header>
+        <h1>Projects</h1>
+    </header>
+    <div class="discover">
+        {% for project in featured %}
+        <div class="project">
+            <header class="no-bottom-margin">
+                <a href="{{project.get_absolute_url}}"><img class="image" src="{% thumbnail project.image 800x200 crop %}" /></a>
+            </header>
+            <div class="details no-bottom-margin">
+                <h2 class="title"><a href="{{project.get_absolute_url}}">{{project.title}}</a></h3>
+                <div class="summary">
+                    {{project.summary|markdown}}
+                </div>
+            </div>
+            <div class="overview">
+                <p><span class="featured badge">&#9733; Featured</span></p>
+                <div class="contributors">
+                    <!--<h3>{{project.contributors.count}} Contributor{{project.contributors.count|pluralize}}</h3>-->
+                    <ul class="nostyle">
+                    {% for contributor in project.contributors.all %}
+                        <li>
+                            <a class="contributor" href="{{contributor.profile.get_absolute_url}}">
+                                {% if contributor.profile.avatar %}
+                                <img src="{% thumbnail contributor.profile.avatar 30x30 %}" class="avatar">
+                                {% else %}
+                                <img src="{% static 'icons/logo.png' %}" height="30" width="30" class="avatar">
+                                {% endif %}
+                                <span>{{contributor.get_full_name}}</span>
+                            </a>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                </div>
+                <p><a href="{{project.get_absolute_url}}#requests">{{project.requests.count}} Request{{project.requests.count|pluralize}}</a></p>
+                <p><a href="{{project.get_absolute_url}}#articles">{{project.articles.count}} Article{{project.articles.count|pluralize}}</a></p>
+            </div>
         </div>
         {% endfor %}
     </div>
-    {% endfor %}
+    <div class="take-action">
+        <div>
+            <h2>Start your own project</h2>
+            <a class="primary button" href="{% url 'project-create' %}">Create a project</a>
+        </div>
+        <div>
+            <h2>Support a project</h2>
+            {% for project in crowdfunding %}
+            <div class="project">
+                <a href="{{project.get_absolute_url}}"><img class="image" src="{% thumbnail project.image 400x300 crop %}" /></a>
+                <div class="details">
+                    <h3><a href="{{project.get_absolute_url}}">{{project.title}}</a></h3>
+                    {% for crowdfund in project.active_crowdfunds %}
+                    <div class="crowdfund">
+                        <div class="progress"><span class="meter" style="width: {{crowdfund.percent_funded}}%"></span></div>
+                        <div class="stats">
+                            <p class="stat"><strong>{{crowdfund.percent_funded}}%</strong> funded</p>
+                            <p class="stat"><strong>${{crowdfund.payment_received}}</strong> raised</p>
+                            <p class="stat"><strong>{{crowdfund.date_due|timeuntil}}</strong> remaining</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
 </div>
 {% endblock %}

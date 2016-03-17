@@ -230,3 +230,89 @@
         }
     }
 }
+
+.project.frontpage {
+    @include display(flex);
+    @include flex-wrap(wrap);
+    @include align-items(flex-start);
+    header {
+        flex: 0 1 100%;
+    }
+    .discover, .take-action {
+        padding-right: $vertical-rhythm;
+    }
+    .discover {
+        flex: 1 1 32em;
+    }
+    .take-action {
+        flex: 1 1 16em;
+    }
+    .summary {
+        font-size: $font-size-2;
+        line-height: $font-line-height;
+    }
+    .discover .project {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        @include align-items(flex-start);
+        border: 1px solid;
+        background: $color-white-pure;
+        .no-bottom-margin {
+            margin-bottom: 0;
+        }
+        .image {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        .details {
+            flex: 1 1 20em;
+            padding: $vertical-rhythm/2;
+        }
+        .overview {
+            flex: 1 1 10em;
+            padding: $vertical-rhythm/2;
+            font-weight: $font-weight-bold;
+        }
+        .title {
+            font-size: $font-size-4;
+            line-height: $font-line-height;
+        }
+
+        .contributor {
+            @include display(flex);
+            @include align-items(center);
+            margin-bottom: $vertical-rhythm/2;
+            .avatar {
+                margin-right: $vertical-rhythm/2;
+                margin-bottom: 0;
+            }
+        }
+    }
+    .take-action .project {
+        display: block;
+        border: 1px solid;
+        background: $color-white-pure;
+        .details {
+            padding: $vertical-rhythm/2;
+        }
+        .crowdfund {
+            font-size: $font-size-2;
+            line-height: $font-line-height;
+            .stats {
+                @include display(flex);
+            }
+            .stat {
+                max-width: 8em;
+                margin-right: $vertical-rhythm;
+            }
+            .stat strong {
+                display: block;
+            }
+        }
+    }
+    .take-action h2 {
+        border-bottom: 1px solid $color-grey;
+    }
+
+}
