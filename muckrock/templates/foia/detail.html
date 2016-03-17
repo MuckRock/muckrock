@@ -106,6 +106,7 @@
                 {% include 'foia/component/status.html' %}
                 {% include 'foia/component/embargo.html' %}
                 {% tag_manager foia %}
+                {% project_manager foia %}
             </section>
         </section>
     </section>
@@ -152,6 +153,7 @@
                 {% endif %}
             </ul>
 
+            <!-- COMMUNICATIONS -->
             <section role="tabpanel" class="tab-panel communications" id="comms">
                 <h2 class="tab-panel-heading">Communications</h2>
                 <div class="communications-controls">

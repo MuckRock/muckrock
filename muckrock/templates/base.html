@@ -97,9 +97,10 @@
                 })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
                 ga('create', 'UA-16635809-1', 'auto');
-                var dimensionValue = 'anonymous';
                 {% if request.user.is_authenticated %}
-                    dimensionValue = {{request.user.profile.acct_type}};
+                var dimensionValue = '{{request.user.profile.acct_type}}';
+                {% else %}
+                var dimensionValue = 'anonymous';
                 {% endif %}
                 ga('set', 'dimension1', dimensionValue);
                 ga('send', 'pageview');
