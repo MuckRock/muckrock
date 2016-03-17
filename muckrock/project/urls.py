@@ -9,6 +9,9 @@ from muckrock.project import views
 
 urlpatterns = patterns('',
     url(r'^$',
+        views.ProjectExploreView.as_view(),
+        name='project'),
+    url(r'^list/$',
         views.ProjectListView.as_view(),
         name='project-list'),
     url(r'^create/$',
