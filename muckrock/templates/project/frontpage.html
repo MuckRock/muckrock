@@ -1,7 +1,29 @@
 {% extends 'base.html' %}
+{% load thumbnail %}
 
 {% block content %}
 <div class="project frontpage">
     <h1>Projects</h1>
+    <h2>Featured</h2>
+    {% for project in featured %}
+    <div class="featured project">
+        <p><span class="featured badge">&#9733; Featured</span></p>
+        <img src="{% thumbnail project.image 800x600 %}" />
+        <h3><a href="{{project.get_absolute_url}}">{{project.title}}</a></h3>
+    </div>
+    {% endfor %}
+    <h2>Need ur support</h2>
+    {% for project in crowdfunding %}
+    <div class="project">
+        <h3>{{project.title}}</h3>
+        {% for crowdfund in project.active_crowdfunds %}
+        <div class="crowdfund">
+            <p>{{crowdfund.payment_required}}</p>
+            <p>{{crowdfund.payment_received}}</p>
+            <p>{{crowdfund.date_due|timeuntil}}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
 </div>
 {% endblock %}
