@@ -247,6 +247,14 @@
     .take-action {
         flex: 1 1 16em;
     }
+    .title {
+        a {
+            color: $color-black;
+            &:hover {
+                color: $color-blue;
+            }
+        }
+    }
     .summary {
         font-size: $font-size-2;
         line-height: $font-line-height;
@@ -272,20 +280,21 @@
         .overview {
             flex: 1 1 10em;
             padding: $vertical-rhythm/2;
-            font-weight: $font-weight-bold;
+            p {
+                margin-bottom: $vertical-rhythm/2;
+                font-weight: $font-weight-bold;
+            }
         }
-        .title {
-            font-size: $font-size-4;
-            line-height: $font-line-height;
-        }
-
         .contributor {
             @include display(flex);
             @include align-items(center);
-            margin-bottom: $vertical-rhythm/2;
+            margin-bottom: $vertical-rhythm/4;
+            font-size: $font-size-2;
+            line-height: $font-line-height;
             .avatar {
                 margin-right: $vertical-rhythm/2;
                 margin-bottom: 0;
+                border-radius: 4px;
             }
         }
     }
@@ -297,13 +306,14 @@
             padding: $vertical-rhythm/2;
         }
         .crowdfund {
-            font-size: $font-size-2;
-            line-height: $font-line-height;
             .stats {
                 @include display(flex);
+                font-size: $font-size-2;
+                line-height: $font-line-height;
             }
             .stat {
                 max-width: 8em;
+                margin-bottom: 0;
                 margin-right: $vertical-rhythm;
             }
             .stat strong {
@@ -311,8 +321,10 @@
             }
         }
     }
-    .take-action h2 {
-        border-bottom: 1px solid $color-grey;
+    .create-project {
+        border: 1px solid;
+        padding: $vertical-rhythm/2;
+        background: $color-blue-light;
+        color: $color-blue-dark;
     }
-
 }
