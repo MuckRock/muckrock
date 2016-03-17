@@ -1,4 +1,4 @@
-from fabric.api import cd, env, lcd, local, run, settings, task, prompt
+from fabric.api import cd, env, lcd, local, run, settings, task, prompt, warn_only
 import os
 
 env.run = local
@@ -112,7 +112,7 @@ def sync_aws():
             'news_photos',
             'project_images',
             ]
-    with env.cd(env.base_path):
+    with env.cd(env.base_path), warn_only():
         for folder in folders:
             env.run('aws s3 sync s3://muckrock/{folder} '
                     './muckrock/static/media/{folder}'

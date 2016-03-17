@@ -5,7 +5,7 @@ Autocomplete registry for Accounts
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 
-import autocomplete_light
+from autocomplete_light import shortcuts as autocomplete_light
 
 from muckrock.foia.models import FOIARequest
 from muckrock.organization.models import Organization

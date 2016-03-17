@@ -2,7 +2,7 @@ coverage # Used to generate coverage reports in dev
 dj-inmemorystorage # in memory file storage for faster testing
 django-debug-toolbar # Toolbar for debugging
 django-nose # Used for testing
-django<1.9 # keep django<1.9
+django<1.10 # django
 fabric # Used for dev scripts
 factory-boy # Used for creating test data
 ipdb # interactive debugger

@@ -65,7 +65,7 @@ class TestCrowdfund(TestCase):
         """The crowdfund should have a project being crowdfunded."""
         eq_(self.crowdfund.get_crowdfund_object(), self.project)
 
-@patch('stripe.Charge', Mock())
+@patch('stripe.Charge', Mock(create=Mock(return_value=Mock(id='stripe-charge-id'))))
 class TestCrowdfundPayment(TestCase):
     """Test making a payment to a crowdfund"""
 

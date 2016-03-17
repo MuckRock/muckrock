@@ -18,7 +18,7 @@ class ArticleQuerySet(models.QuerySet):
 
     def get_published(self):
         """Get all published news articles"""
-        return self.filter(publish=True, pub_date__lte=datetime.now)
+        return self.filter(publish=True, pub_date__lte=datetime.now())
 
     def get_drafts(self):
         """Get all draft news articles"""

@@ -329,7 +329,7 @@ LOGGING = {
     'handlers': {
         'null': {
             'level': 'DEBUG',
-            'class': 'django.utils.log.NullHandler',
+            'class': 'logging.NullHandler',
         },
         'console':{
             'level': 'INFO',
@@ -418,7 +418,7 @@ PUBLICATION_NAME = 'MuckRock'
 # Register database schemes in URLs.
 urlparse.uses_netloc.append('postgres')
 
-url = urlparse.urlparse(os.environ.get('DATABASE_URL', 'postgres://muckrock@localhost/muckrock'))
+url = urlparse.urlparse(os.environ.get('DATABASE_URL', 'postgres://vagrant@localhost/muckrock'))
 
 # Update with environment configuration.
 DATABASES = {

@@ -7,7 +7,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.utils.text import slugify
 
-import autocomplete_light
+from autocomplete_light import shortcuts as autocomplete_light
 import re
 
 from muckrock.accounts.models import Profile

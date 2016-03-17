@@ -14,7 +14,7 @@ from django.template import RequestContext
 from adaptor.model import CsvModel
 from adaptor.fields import CharField, DjangoModelField
 from reversion.admin import VersionAdmin
-import autocomplete_light
+from autocomplete_light import shortcuts as autocomplete_light
 from leaflet.admin import LeafletGeoAdmin
 import logging
 import sys

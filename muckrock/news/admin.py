@@ -7,7 +7,7 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 
 from reversion.admin import VersionAdmin
-import autocomplete_light
+from autocomplete_light import shortcuts as autocomplete_light
 
 from muckrock.news.models import Article, Photo
 

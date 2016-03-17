@@ -19,7 +19,7 @@ urlpatterns = patterns(
     '',
     url(
         r'^$',
-        RedirectView.as_view(url='archives'),
+        RedirectView.as_view(url='/news/archives/'),
         name='news-index'
     ),
     url(

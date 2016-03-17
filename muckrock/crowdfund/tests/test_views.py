@@ -42,7 +42,7 @@ class TestCrowdfundDetailView(TestCase):
             'if the url cannot be reversed.'))
 
 
-@patch('stripe.Charge', Mock())
+@patch('stripe.Charge', Mock(create=Mock(return_value=Mock(id='stripe-charge-id'))))
 class TestCrowdfundView(TestCase):
     """Tests the Detail view for Crowdfund objects"""
     def setUp(self):

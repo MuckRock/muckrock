@@ -2,7 +2,7 @@
 Autocomplete registry for Agency
 """
 
-import autocomplete_light
+from autocomplete_light import shortcuts as autocomplete_light
 
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction

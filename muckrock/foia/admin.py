@@ -12,7 +12,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
-import autocomplete_light
+from autocomplete_light import shortcuts as autocomplete_light
 from datetime import date, datetime, timedelta
 from reversion.admin import VersionAdmin
 

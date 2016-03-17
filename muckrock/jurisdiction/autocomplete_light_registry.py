@@ -2,7 +2,7 @@
 Autocomplete registry for Jurisdiction
 """
 
-import autocomplete_light
+from autocomplete_light import shortcuts as autocomplete_light
 from muckrock.jurisdiction.models import Jurisdiction
 
 class LocalAutocomplete(autocomplete_light.AutocompleteModelBase):

@@ -29,7 +29,7 @@ django-secure # Enforces security best practices
 django-sslify # Force SSL everywhere
 django-storages # Store files on S3
 django-taggit # Used for tagging
-django<1.9 # Django is kinda important...
+django<1.10 # Django is kinda important...
 djangorestframework # The API framework
 dogslow # Monitors slow requests
 easy-thumbnails # Used for thumbnailing images

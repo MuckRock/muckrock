@@ -5,7 +5,7 @@ Forms for FOIA application
 from django import forms
 from django.contrib.auth.models import User
 
-import autocomplete_light as autocomplete
+from autocomplete_light import shortcuts as autocomplete_light
 from datetime import date, timedelta
 
 from muckrock.forms import MRFilterForm
@@ -32,18 +32,18 @@ class RequestForm(forms.Form):
         choices=JURISDICTION_CHOICES,
         widget=forms.RadioSelect
     )
-    state = autocomplete.ModelChoiceField(
+    state = autocomplete_light.ModelChoiceField(
         'StateAutocomplete',
         queryset=Jurisdiction.objects.filter(level='s', hidden=False),
         required=False
     )
-    local = autocomplete.ModelChoiceField(
+    local = autocomplete_light.ModelChoiceField(
         'JurisdictionLocalAutocomplete',
         required=False
     )
     agency = forms.CharField(
         label='Agency',
-        widget=autocomplete.TextWidget(
+        widget=autocomplete_light.TextWidget(
             'AgencyAutocomplete',
             attrs={'placeholder': 'Type the agency\'s name'}))
     full_name = forms.CharField()
@@ -250,7 +250,7 @@ class FOIAAccessForm(forms.Form):
     """Form to add editors or viewers to a request."""
     users = forms.ModelMultipleChoiceField(
         queryset=User.objects.all(),
-        widget=autocomplete.MultipleChoiceWidget('UserRequestSharingAutocomplete')
+        widget=autocomplete_light.MultipleChoiceWidget('UserRequestSharingAutocomplete')
     )
     access_choices = [
         ('edit', 'Can Edit'),
