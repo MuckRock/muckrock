@@ -23,7 +23,8 @@ django-autocomplete-light==2.3.3
 django-celery==3.1.17
 django-compressor==2.0
 django-dbsettings==0.9.1
-django-filter==0.12.0
+django-debug-toolbar==1.4
+django-filter==0.13.0
 django-geojson==2.9.0
 django-haystack==2.4.1
 django-leaflet==0.18.0
@@ -44,27 +45,27 @@ django-sslify==0.2.7
 django-storages==1.4
 django-taggit==0.18.0
 django==1.8.11
-djangorestframework==3.3.2
+djangorestframework==3.3.3
 dogslow==0.9.7
 easy-thumbnails==2.3
 gunicorn==19.4.5
 image-diet2==1.0
 jsonfield==1.0.3
 kombu==3.0.34             # via celery
-lxml==3.5.0               # via premailer
+lxml==3.6.0               # via premailer
 markdown2==2.3.0          # via django-markdown-deux
 newrelic==2.60.0.46
 numpy==1.9.1
 pascha==0.5
 pillow==3.1.1
-premailer==2.9.7          # via django-premailer
+premailer==2.10.1         # via django-premailer
 psycopg2==2.6.1
 pyimagediet==1.1.0        # via image-diet2
 pylibmc==1.5.0            # via django-pylibmc
 pysolr==3.4.0
-python-dateutil==2.5.0
+python-dateutil==2.5.1
 python-magic==0.4.10      # via pyimagediet
-pytz==2015.7              # via celery
+pytz==2016.1              # via celery
 PyYAML==3.11              # via django-rest-swagger, pyimagediet
 raven==5.11.1
 rcssmin==1.0.6            # via django-compressor
@@ -77,5 +78,6 @@ scipy==0.14.0
 semantic-version==2.5.0   # via django-package-monitor
 simplejson==3.8.2         # via django-lot
 six==1.10.0               # via django-appconf, django-autocomplete-light, django-geojson, django-mailgun, python-dateutil
-stripe==1.30.0
+sqlparse==0.1.19          # via django-debug-toolbar
+stripe==1.31.0
 unidecode==0.4.19
