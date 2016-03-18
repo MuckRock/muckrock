@@ -10,7 +10,6 @@ colorama==0.3.7           # via pylint
 coverage==4.0.3
 decorator==4.0.9          # via ipython, traitlets
 dj-inmemorystorage==1.4.0
-django-debug-toolbar==1.4
 django-nose==1.4.3
 django==1.9.4
 ecdsa==0.13               # via paramiko
@@ -37,12 +36,11 @@ pycrypto==2.6.1           # via paramiko
 pylint-django==0.7.1
 pylint-plugin-utils==0.2.3  # via pylint-django
 pylint==1.5.4             # via pylint-django, pylint-plugin-utils
-python-dateutil==2.5.0    # via fake-factory
+python-dateutil==2.5.1    # via fake-factory
 simplegeneric==0.8.1      # via ipython
 six==1.10.0               # via astroid, dj-inmemorystorage, fake-factory, mock, pip-tools, pylint, python-dateutil
-sqlparse==0.1.19          # via django-debug-toolbar
 traitlets==4.2.1          # via ipython
-whoosh==2.7.2
+whoosh==2.7.3
 wrapt==1.10.6             # via astroid
 yet-another-django-profiler==1.0.3
 
