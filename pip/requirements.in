@@ -9,6 +9,7 @@ django-autocomplete-light<3 # Autocomplete drop down inputs
 django-celery # Integrate celery with django
 django-compressor # Compress all JS and CSS assets into a single file
 django-dbsettings # DB stored configurations
+django-debug-toolbar # Toolbar for debugging
 django-filter # Used for filtering in viewsets
 django-geojson # Used for storing geographic data
 django-haystack # Search engine
