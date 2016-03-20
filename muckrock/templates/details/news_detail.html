@@ -48,14 +48,8 @@
     </main>
     <aside class="news--aside">
         {% include 'lib/social.html' with title=article.title %}
+        {% project_manager article %}
         {% tag_manager article %}
-        {% if projects %}
-        <ul class="project-list nostyle">
-        {% for project in projects %}
-            <li>{% include 'lib/project.html' %}</li>
-        {% endfor %}
-        </ul>
-        {% endif %}
         {% if foias %}
         <div class="related-requests">
             <dfn>Related Requests</dfn>
