@@ -23,6 +23,7 @@ mock_send = mock.Mock()
 # pylint: disable=missing-docstring
 # pylint: disable=line-too-long
 
+
 class TaskTests(TestCase):
     """Test the Task base class"""
 
@@ -163,6 +164,7 @@ class FlaggedTaskTests(TestCase):
         flagged_task.reply('Lorem ipsum')
         mock_support_send.assert_called_with()
 
+
 class SnailMailTaskTests(TestCase):
     """Test the SnailMailTask class"""
 
@@ -258,6 +260,7 @@ class StaleAgencyTaskTests(TestCase):
         """Resolving the task should lower the stale flag on the agency."""
         self.task.resolve()
         ok_(not self.task.agency.stale, 'The agency should no longer be stale.')
+
 
 class NewAgencyTaskTests(TestCase):
     """Test the NewAgencyTask class"""

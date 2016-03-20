@@ -102,16 +102,18 @@ def route_mailgun(request):
     p_request_email = re.compile(r'(\d+-\d{3,10})@requests.muckrock.com')
     tos = post.get('To', '') or post.get('to', '')
     ccs = post.get('Cc', '') or post.get('cc', '')
-    name_emails = getaddresses([tos, ccs])
+    name_emails = getaddresses([tos.lower(), ccs.lower()])
     logger.info('Incoming email: %s', name_emails)
     for _, email in name_emails:
         m_request_email = p_request_email.match(email)
         if m_request_email:
-            return _handle_request(request, m_request_email.group(1))
+            _handle_request(request, m_request_email.group(1))
         elif email == 'fax@requests.muckrock.com':
-            return _fax(request)
+            _fax(request)
         elif email.endswith('@requests.muckrock.com'):
-            return _catch_all(request, email)
+            _catch_all(request, email)
+    return HttpResponse('OK')
+
 
 def _handle_request(request, mail_id):
     """Handle incoming mailgun FOI request messages"""
@@ -225,8 +227,13 @@ def _fax(request):
                 comm.opened = True
                 comm.save()
             if subject.startswith('FAILURE:'):
+                reasons = [line for line in
+                        post.get('body-plain', '').split('\n')
+                        if line.startswith('REASON:')]
+                reason = reasons[0] if reasons else ''
                 FailedFaxTask.objects.create(
                     communication=comm,
+                    reason=reason,
                 )
 
     _forward(request.POST, request.FILES)

@@ -18,6 +18,10 @@
     <dd>No fax number. No wonder it failed!</dd>
     {% endif %}
     {% endwith %}
+	{% if task.reason %}
+	<dt>Reason</dt>
+	<dd>{{ task.reason }}</dd>
+	{% endif %}
 </dl>
 {# full letter here, hidden #}
 <div class="collapsed collapsable full-letter">

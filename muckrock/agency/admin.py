@@ -44,7 +44,7 @@ class AgencyAdminForm(forms.ModelForm):
             'JurisdictionAdminAutocomplete',
             queryset=Jurisdiction.objects.all())
     appeal_agency = autocomplete_light.ModelChoiceField(
-            'AgencyAdminAutocomplete',
+            'AgencyAppealAdminAutocomplete',
             queryset=Agency.objects.all(),
             required=False)
     payable_to = autocomplete_light.ModelChoiceField(

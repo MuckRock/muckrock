@@ -614,6 +614,7 @@ class FOIARequest(models.Model):
     def _send_email(self, show_all_comms=True):
         """Send an email of the request to its email address"""
         # self.email should be set before calling this method
+        from muckrock.foia.tasks import send_fax
 
         from_addr = 'fax' if self.email.endswith('faxaway.com') else self.get_mail_id()
         law_name = self.jurisdiction.get_law_name()
@@ -655,7 +656,10 @@ class FOIARequest(models.Model):
         # atach all files from the latest communication
         for file_ in self.communications.reverse()[0].files.all():
             msg.attach(file_.name(), file_.ffile.read())
-        msg.send(fail_silently=False)
+        if from_addr == 'fax':
+            send_fax.apply_async(args=[msg])
+        else:
+            msg.send(fail_silently=False)
 
         # update communication
         comm.set_raw_email(msg.message())

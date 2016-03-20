@@ -181,6 +181,10 @@ class SnailMailTaskList(TaskList):
                     'communication__foia__communications',
                     queryset=FOIACommunication.objects.filter(response=True),
                     to_attr='has_ack'),
+                Prefetch(
+                    'communication__foia__communications',
+                    queryset=FOIACommunication.objects.order_by('-date'),
+                    to_attr='reverse_communications'),
                 )
             )
 

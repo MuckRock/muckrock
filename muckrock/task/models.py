@@ -458,6 +458,7 @@ class FailedFaxTask(Task):
     """A fax for this communication failed"""
     type = 'FailedFaxTask'
     communication = models.ForeignKey('foia.FOIACommunication')
+    reason = models.CharField(max_length=255, blank=True, default='')
 
     def __unicode__(self):
         return u'Failed Fax Task'

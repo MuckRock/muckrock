@@ -101,13 +101,13 @@ class muckrock {
 		pg_hba_conf_defaults => false,
 	}
 
-	postgresql::server::db { 'muckrock':
-		user     => 'muckrock',
-		password => false,
-	}
-
-	postgresql::server::role { 'muckrock':
+	postgresql::server::role { 'vagrant':
 		createdb => true,
+	} ->
+	postgresql::server::db { 'muckrock':
+		user     => 'vagrant',
+		owner    => 'vagrant',
+		password => false,
 	}
 
 	postgresql::server::pg_hba_rule { 'trust local access':
