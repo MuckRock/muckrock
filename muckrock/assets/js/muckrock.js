@@ -48,7 +48,7 @@ $('#toggle-all').click(function(){
 
 // Manager Component
 // A manager presents a state and a form that can modify that state.
-$('.edit').click(function(){
+$('.manager .edit').click(function(){
     var editButton = this;
     var manager = $(editButton).closest('.manager');
     var form = $(manager).find('form');
