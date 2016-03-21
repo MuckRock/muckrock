@@ -7,16 +7,43 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
 from django.http import Http404
-from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
+from django.shortcuts import render_to_response
+from django.template import RequestContext
+from django.views.generic import View, CreateView, DetailView, UpdateView, DeleteView
 from django.utils.decorators import method_decorator
 
 from actstream.models import followers
 
 from muckrock.project.models import Project
 from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm
+from muckrock.views import MRFilterableListView
 
 
-class ProjectListView(ListView):
+class ProjectExploreView(View):
+    """Provides a space for exploring our different projects."""
+    def get_context_data(self, request, *args, **kwargs):
+        """Gathers and returns a dictionary of context."""
+        # pylint: disable=unused-argument
+        # pylint: disable=no-self-use
+        user = request.user
+        visible_projects = Project.objects.get_visible(user)
+        featured_projects = visible_projects.filter(featured=True)
+        actively_crowdfunding = visible_projects.filter(crowdfunds__closed=False)
+        context = {
+            'visible': visible_projects,
+            'featured': featured_projects,
+            'crowdfunding': actively_crowdfunding,
+        }
+        return context
+
+    def get(self, request, *args, **kwargs):
+        """Renders the template with the correct context."""
+        template = 'project/frontpage.html'
+        context = self.get_context_data(request, *args, **kwargs)
+        return render_to_response(template, context, context_instance=RequestContext(request))
+
+
+class ProjectListView(MRFilterableListView):
     """List all projects"""
     model = Project
     template_name = 'project/list.html'
@@ -37,7 +64,7 @@ class ProjectCreateView(CreateView):
     template_name = 'project/create.html'
 
     @method_decorator(login_required)
-    @method_decorator(user_passes_test(lambda u: u.is_staff))
+    @method_decorator(user_passes_test(lambda u: u.is_authenticated() and u.profile.experimental))
     def dispatch(self, *args, **kwargs):
         """At the moment, only staff are allowed to create a project."""
         return super(ProjectCreateView, self).dispatch(*args, **kwargs)

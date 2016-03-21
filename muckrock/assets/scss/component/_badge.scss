@@ -1,6 +1,5 @@
 .badge {
     display: inline-block;
-    margin-left: $vertical-rhythm/4;
     padding: 0 $vertical-rhythm/4;
     border-radius: 4px;
     background: $color-grey-3;
@@ -16,6 +15,10 @@
 
 .success.badge {
     background: $color-green-dark;
+}
+
+.featured.badge {
+    background: $color-blue;
 }
 
 .staff.badge {
