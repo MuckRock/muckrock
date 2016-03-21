@@ -64,7 +64,7 @@ class ProjectCreateView(CreateView):
     template_name = 'project/create.html'
 
     @method_decorator(login_required)
-    @method_decorator(user_passes_test(lambda u: u.is_authenticated() and u.profile.experimental))
+    @method_decorator(user_passes_test(lambda u: u.is_staff))
     def dispatch(self, *args, **kwargs):
         """At the moment, only staff are allowed to create a project."""
         return super(ProjectCreateView, self).dispatch(*args, **kwargs)
