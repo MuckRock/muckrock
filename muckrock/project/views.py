@@ -9,7 +9,7 @@ from django.core.urlresolvers import reverse_lazy
 from django.http import Http404
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.views.generic import View, ListView, CreateView, DetailView, UpdateView, DeleteView
+from django.views.generic import View, CreateView, DetailView, UpdateView, DeleteView
 from django.utils.decorators import method_decorator
 
 from actstream.models import followers
@@ -23,6 +23,8 @@ class ProjectExploreView(View):
     """Provides a space for exploring our different projects."""
     def get_context_data(self, request, *args, **kwargs):
         """Gathers and returns a dictionary of context."""
+        # pylint: disable=unused-argument
+        # pylint: disable=no-self-use
         user = request.user
         visible_projects = Project.objects.get_visible(user)
         featured_projects = visible_projects.filter(featured=True)

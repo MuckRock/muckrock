@@ -5,90 +5,74 @@
 
 {% block content %}
 <div class="project frontpage">
-    <header>
-        <h1>Projects <span class="primary badge">BETA</span></h1>
+    {# The header explains what projects are and calls users to create their own. #}
+    <header class="frontpage-header">
+        <div class="overview">
+            <h1>Projects <span class="primary badge">BETA</span></h1>
+            <p>Projects collect requests and articles to tell larger stories. Using MuckRock to launch, fund, and manage your project gives your readers an easy way to support and follow along with your progress.</p>
+            <ul class="nostyle inline">
+                {% if request.user.is_staff %}
+                <li><a class="primary button" href="{% url 'project-create' %}">Create a project</a></li>
+                {% else %}
+                <li><a class="primary button" href="mailto:info@muckrock.com?subject=Projects%20Beta&body=I would like access to the projects beta.">Request beta access</a></li>
+                {% endif %}
+                <li><a href="{% url 'project-list' %}">See all projects</a></li>
+                <li><a href="https://www.muckrock.com/news/archives/2015/sep/03/muckrock-projects-organize-crowdfund-journalism/">Learn more</a></li>
+            </ul>
+        </div>
     </header>
-    <div class="discover">
+    {% comment %}
+    Featured projects are given top billing. If they have an active crowdfund, we place that on the right-hand
+    side of the section and give it a call to action. If they don't, we display project stats and make following
+    the call to action.
+    {% endcomment %}
+    <div class="featured">
         {% for project in featured %}
         <div class="project">
-            <header class="no-bottom-margin">
-                <a href="{{project.get_absolute_url}}"><img class="image" src="{% thumbnail project.image 800x200 crop %}" /></a>
+            <header class="project-header" style="background-image: url('{% thumbnail project.image 400x300 crop %}');">
+                <a href="{{project.get_absolute_url}}" class="project-header-wrapper">
+                    <h2 class="title">{{project.title}}</h2>
+                </a>
             </header>
-            <div class="details no-bottom-margin">
-                <h3 class="title"><a href="{{project.get_absolute_url}}">{{project.title}}</a></h3>
-                <div class="summary">
-                    {{project.summary|markdown}}
-                </div>
-            </div>
             <div class="overview">
+
+                <ul class="nostyle inline stats">
                 {% if project.requests.exists %}
-                <p><a href="{{project.get_absolute_url}}#requests"><span class="counter">{{project.requests.count}}</span> Request{{project.requests.count|pluralize}}</a></p>
+                    <li class="stat"><a href="{{project.get_absolute_url}}#requests"><span class="value">{{project.requests.count}}</span> request{{project.requests.count|pluralize}}</a></li>
                 {% endif %}
                 {% if project.articles.exists %}
-                <p><a href="{{project.get_absolute_url}}#articles"><span class="counter">{{project.articles.count}}</span> Article{{project.articles.count|pluralize}}</a></p>
+                    <li class="stat"><a href="{{project.get_absolute_url}}#articles"><span class="value">{{project.articles.count}}</span> article{{project.articles.count|pluralize}}</a></li>
                 {% endif %}
-                <div class="contributors">
-                    <dfn>Contributor{{project.contributors.count|pluralize}}</dfn>
-                    <ul class="nostyle">
-                    {% for contributor in project.contributors.all %}
-                        <li>
-                            <a class="contributor" href="{{contributor.profile.get_absolute_url}}">
-                                {% if contributor.profile.avatar %}
-                                <img src="{% thumbnail contributor.profile.avatar 30x30 %}" class="avatar">
-                                {% else %}
-                                <img src="{% static 'icons/logo.png' %}" height="30" width="30" class="avatar">
-                                {% endif %}
-                                <span>{{contributor.get_full_name}}</span>
-                            </a>
-                        </li>
-                    {% endfor %}
-                    </ul>
-                </div>
-                <ul class="tag-list nostyle">
-                    {% for tag in project.tags.all %}
-                    <li><a class="tag" href="{% url 'tag-detail' slug=tag.slug %}">{{tag.name}}</a></li>
-                    {% endfor %}
                 </ul>
+                <summary>
+                    {{project.summary|markdown}}
+                </summary>
+                <p class="more"><a href="{{project.get_absolute_url}}">Learn more</a></p>
+            </div>
+            <div class="details">
+                {% if project.crowdfunds.exists %}
+                {% with project.crowdfunds.last as crowdfund %}
+                <div class="crowdfund">
+                    <div class="progress"><span class="meter" style="width: {{crowdfund.percent_funded}}%"></span></div>
+                    <ul class="nostyle inline stats">
+                        <li class="stat"><span class="value">{{crowdfund.percent_funded}}%</span> funded</li>
+                        <li class="stat"><span class="value">${{crowdfund.payment_received}}</span> raised</li>
+                        <li class="stat"><span class="value">{{crowdfund.contributors_count}}</span> backer{{crowdfund.contributors_count|pluralize}}</li>
+                        {% if crowdfund.closed %}
+                        <li class="stat"><span class="value">Ended</li>
+                        {% else %}
+                        <li class="stat"><span class="value">{{crowdfund.date_due|timeuntil}}</span> remaining</li>
+                        {% endif %}
+                    </ul>
+                    {% if not crowdfund.closed %}
+                    <a class="success button" href="{{project.get_absolute_url}}#crowdfund-{{crowdfund.id}}">Contribute</a>
+                    {% endif %}
+                </div>
+                {% endwith %}
+                {% endif %}
             </div>
         </div>
         {% endfor %}
-    </div>
-    <div class="take-action">
-        {% if request.user.is_authenticated and request.user.profile.experimental %}
-        <div class="create-project">
-            <h2>Start your own project</h2>
-            <p>Looking to start a deep investigation into a local, state, or federal government? We can provide you with the tools and platform to fund, investigate, and broadcast your work.</p>
-            <div class="call-to-action">
-                <a class="primary button" href="{% url 'project-create' %}">Create a project</a>
-            </div>
-        </div>
-        {% endif %}
-        <ul>
-            <li><a href="{% url 'project-list' %}">See all projects</a></li>
-            <li><a href="/help/project/">Learn more about projects</a></li>
-        </ul>
-        <div>
-            <h2>Support a project</h2>
-            {% for project in crowdfunding %}
-            <div class="project">
-                <a href="{{project.get_absolute_url}}"><img class="image" src="{% thumbnail project.image 400x300 crop %}" /></a>
-                <div class="details">
-                    <h3 class="title"><a href="{{project.get_absolute_url}}">{{project.title}}</a></h3>
-                    {% for crowdfund in project.active_crowdfunds %}
-                    <div class="crowdfund">
-                        <div class="progress"><span class="meter" style="width: {{crowdfund.percent_funded}}%"></span></div>
-                        <div class="stats">
-                            <p class="stat"><strong>{{crowdfund.percent_funded}}%</strong> funded</p>
-                            <p class="stat"><strong>${{crowdfund.payment_received}}</strong> raised</p>
-                            <p class="stat"><strong>{{crowdfund.date_due|timeuntil}}</strong> remaining</p>
-                        </div>
-                        <a class="success button" href="{{project.get_absolute_url}}#crowdfund-{{crowdfund.id}}">Contribute</a>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endfor %}
-        </div>
     </div>
 </div>
 {% endblock %}
