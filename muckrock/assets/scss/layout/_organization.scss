@@ -72,17 +72,6 @@ $request-breakpoint: 768px;
     form {
         display: inline-block;
     }
-    .progress {
-        width: 100%;
-        border: 1px solid $color-grey;
-        @include border-radius;
-        overflow: hidden;
-        .meter {
-            display: block;
-            background: $color-green;
-            height: $vertical-rhythm;
-        }
-    }
     .counter {
         @include display(flex);
         p {
