@@ -1,5 +1,4 @@
 $('.hidden-reply').hide();
-$('.embed textarea').trigger('autosize.destroy');
 
 function textAreaModal(nextSelector) {
     modal(nextSelector);
