@@ -23,3 +23,4 @@ style.*.css
 .vagrant
 node_modules
 .settings.sh
+webpack-stats.json
