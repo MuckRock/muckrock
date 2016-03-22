@@ -70,7 +70,8 @@
         </h1>
         <div class="button-group">
             <a href="{% url 'foia-create'%}" class="primary button">
-                Create&nbsp;a&nbsp;FOIA&nbsp;request
+                {% include 'lib/icons/create-request.svg' %}
+                <span class="label">&nbsp;Create&nbsp;Request</span>
             </a>
             <span class="sidebar button" id="sidebar-button">More</span>
         </div>
