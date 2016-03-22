@@ -19,7 +19,7 @@ html, body {
 
 .content {
     @include flex(1);
-    margin: $vertical-rhythm 0;
+    margin: 0;
     padding: 0 $vertical-rhythm/2;
     @include media($medium-layout) { padding: 0 $vertical-rhythm; }
 }
