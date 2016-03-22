@@ -95,17 +95,6 @@ $('.message .visibility').click(function() {
     }
 });
 
-// DATEPICKER
-// Set defaults for datepicker plugin, and
-// bind it to elements with `.datepicker` class
-$('.datepicker').datepicker({
-    changeMonth: true,
-    changeYear: true,
-    minDate: new Date(1776, 6, 4),
-    maxDate: '+1y',
-    yearRange: '1776:+1'
-});
-
 // formsets
 $(function() {
 	$('.formset-container').formset();
@@ -193,26 +182,23 @@ $('#quick-log-in').click(function(e){
 });
 
 $('document').ready(function(){
-    // Stripe Checkout
 
+    // Stripe Checkout
     $('form.stripe-checkout').checkout();
 
     // Crowdfund form submission
-
     $('form.crowdfund-form').crowdfund();
 
     // Currency Field
     $('input.currency-field').currencyField();
 
     // Date Picker
-    $(function() {
-        $('.datepicker').datepicker({
-            changeMonth: true,
-            changeYear: true,
-            minDate: new Date(1776, 6, 4),
-            maxDate: '+1y',
-            yearRange: '1776:+1'
-        });
+    $('.datepicker').datepicker({
+        changeMonth: true,
+        changeYear: true,
+        minDate: new Date(1776, 6, 4),
+        maxDate: '+1y',
+        yearRange: '1776:+1'
     });
 
     $('.news--main img').loupe({
