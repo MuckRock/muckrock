@@ -1,6 +1,5 @@
 .badge {
     display: inline-block;
-    margin-left: $vertical-rhythm/4;
     padding: 0 $vertical-rhythm/4;
     border-radius: 4px;
     background: $color-grey-3;
@@ -11,11 +10,19 @@
 }
 
 .failure.badge {
-    background: $color-red-dark;
+    background: $color-red;
 }
 
 .success.badge {
-    background: $color-green-dark;
+    background: $color-green;
+}
+
+.featured.badge {
+    background: $color-blue;
+}
+
+.primary.badge {
+    background: $color-blue;
 }
 
 .staff.badge {
