@@ -1,10 +1,12 @@
+import Cookie from 'js-cookie';
+
 // Task.js
 //
 // Logic for client interactions with the MuckRock task system.
 
 function authenticateAjax() {
     // Sets up authentication for AJAX transactions
-    var csrftoken = $.cookie('csrftoken');
+    var csrftoken = Cookie.get('csrftoken');
     function csrfSafeMethod(method) {
         // these HTTP methods do not require CSRF protection
         return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));

@@ -1,5 +1,4 @@
 import '../vendor/jquery.autosize'
-import '../vendor/jquery.cookie'
 import '../vendor/jquery.formset'
 import '../vendor/jquery.loupe'
 import '../vendor/jquery.multiselect'
