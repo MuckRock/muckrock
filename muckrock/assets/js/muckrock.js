@@ -193,26 +193,29 @@ $('#quick-log-in').click(function(e){
     });
 });
 
-// Stripe Checkout
+$('document').ready(function(){
+    // Stripe Checkout
 
-$('form.stripe-checkout').checkout();
+    $('form.stripe-checkout').checkout();
 
-// Crowdfund form submission
+    // Crowdfund form submission
 
-$('form.crowdfund-form').crowdfund();
+    $('form.crowdfund-form').crowdfund();
 
-// Currency Field
+    // Currency Field
+    $('input.currency-field').currencyField();
 
-$('input.currency-field').currencyField();
-
-// Date Picker
-
-$(function() {
-    $('.datepicker').datepicker({
-        changeMonth: true,
-        changeYear: true,
-        minDate: new Date(1776, 6, 4),
-        maxDate: '+1y',
-        yearRange: '1776:+1'
+    // Date Picker
+    $(function() {
+        $('.datepicker').datepicker({
+            changeMonth: true,
+            changeYear: true,
+            minDate: new Date(1776, 6, 4),
+            maxDate: '+1y',
+            yearRange: '1776:+1'
+        });
     });
+
+    $('.news--main img').blowup();
+
 });
