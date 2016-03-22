@@ -1,3 +1,5 @@
+import 'autonumeric'
+
 // A jQuery function for turning a number
 // input into a pretty currency input.
 

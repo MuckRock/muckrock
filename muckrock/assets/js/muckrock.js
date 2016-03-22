@@ -1,4 +1,3 @@
-import '../vendor/jquery.autonumeric'
 import '../vendor/jquery.autosize'
 import '../vendor/jquery.cookie'
 import '../vendor/jquery.formset'
