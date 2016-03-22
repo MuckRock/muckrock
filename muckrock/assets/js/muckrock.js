@@ -1,11 +1,9 @@
 import '../vendor/jquery.formset'
-import '../vendor/jquery.multiselect'
-import '../vendor/jquery.quicksearch'
 import '../vendor/jquery.ui.datepicker'
 
-import './muckrock.checkout'
-import './muckrock.currencyfield'
-import './muckrock.crowdfund'
+import './checkout'
+import './crowdfund'
+import './currencyField'
 import './communication'
 import './foiaRequest'
 import './list'
@@ -191,6 +189,7 @@ $('document').ready(function(){
 
     // Currency Field
     $('input.currency-field').currencyField();
+    $('input[name=payment_required]').currencyField();
 
     // Date Picker
     $('.datepicker').datepicker({

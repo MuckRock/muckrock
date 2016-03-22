@@ -170,16 +170,6 @@ $('.note-header').click(function(){
 
 /* Sharing */
 
-var foiaId = $('.request.detail').attr('id');
-if (foiaId != undefined) {
-    foiaId = foiaId.substring(foiaId.indexOf('-') + 1);
-}
-if ($('#id_users-autocomplete').length) {
-    $('#id_users-autocomplete').yourlabsAutocomplete().data = {
-        foiaId: foiaId
-    }
-}
-
 // Generate private link with AJAX
 
 $('form.generate-private-link').submit(function(e){
