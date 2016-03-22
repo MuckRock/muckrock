@@ -216,6 +216,9 @@ $('document').ready(function(){
         });
     });
 
-    $('.news--main img').blowup();
+    $('.news--main img').loupe({
+        height: 200,
+        width: 200
+    });
 
 });
