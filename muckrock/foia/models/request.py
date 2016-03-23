@@ -532,6 +532,21 @@ class FOIARequest(models.Model):
                 self.status = 'ack'
             self._send_email()
             self.update_dates()
+        elif self.missing_proxy:
+            # flag for proxy re-submitting
+            self.status = 'submitted'
+            self.date_processing = date.today()
+            task.models.FlaggedTask.objects.create(
+                    foia=self,
+                    text='This request was rejected as requiring a proxy; please '
+                    'refile it with in of our volunteers names and a note that the '
+                    'request is being filed by a state citizen. Make sure the new '
+                    'request is associated with the original user\'s account. To '
+                    'add someone as a proxy, change their user type to "Proxy" and '
+                    'make sure they properly have their state set on the backend. '
+                    'This message should only appear the first time an agency '
+                    'rejects a request for being from an out-of-state resident.',
+                    )
         elif approved_agency:
             # snail mail it
             if not thanks:
@@ -539,7 +554,6 @@ class FOIARequest(models.Model):
                 self.date_processing = date.today()
             notice = 'n' if self.communications.count() == 1 else 'u'
             notice = 'a' if appeal else notice
-            notice = 'm' if self.missing_proxy else notice
             comm.delivered = 'mail'
             comm.save()
             task.models.SnailMailTask.objects.create(category=notice, communication=comm)
