@@ -77,7 +77,7 @@ class TaskQuerySet(models.QuerySet):
             for task_type in foia_task_types:
                 tasks += list(task_type.objects
                         .filter(foia=foia)
-                        .select_related('foia', 'resolved_by'))
+                        .select_related('foia__jurisdiction', 'resolved_by'))
         # try matching foia agency with task agency
         if foia.agency:
             tasks += list(NewAgencyTask.objects
@@ -272,11 +272,12 @@ class RejectedEmailTask(Task):
 
     def foias(self):
         """Get the FOIAs who use this email address"""
-        return FOIARequest.objects\
+        return (FOIARequest.objects
+                .select_related('jurisdiction')
                 .filter(Q(email__iexact=self.email) |
-                        Q(other_emails__icontains=self.email))\
+                        Q(other_emails__icontains=self.email))
                 .filter(status__in=['ack', 'processed', 'appealing',
-                                    'fix', 'payment'])
+                                    'fix', 'payment']))
 
 
 class StaleAgencyTask(Task):

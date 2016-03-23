@@ -99,6 +99,7 @@ class muckrock {
 
 	class { 'postgresql::server':
 		pg_hba_conf_defaults => false,
+		user     => 'muckrock',
 	}
 
 	postgresql::server::db { 'muckrock':

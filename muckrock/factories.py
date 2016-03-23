@@ -12,6 +12,7 @@ from muckrock.accounts.models import Profile, Statistics
 from muckrock.agency.models import Agency, STALE_DURATION
 from muckrock.foia.models import FOIARequest, FOIACommunication, RawEmail
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.news.models import Article
 from muckrock.organization.models import Organization
 from muckrock.project.models import Project
 from muckrock.qanda.models import Question, Answer
@@ -132,6 +133,35 @@ class AnswerFactory(factory.django.DjangoModelFactory):
     question = factory.SubFactory(QuestionFactory)
     answer = factory.Faker('paragraph')
 
+
+class ArticleFactory(factory.django.DjangoModelFactory):
+    """A factory for creating Article test objects."""
+    class Meta:
+        model = Article
+
+    title = factory.Sequence(lambda n: "Article %d" % n)
+    slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
+    summary = factory.Faker('paragraph')
+    body = factory.Faker('paragraph')
+
+    @factory.post_generation
+    def authors(self, create, extracted, **kwargs):
+        """Adds M2M authors"""
+        # pylint: disable=unused-argument
+        if not create:
+            # Simple build, do nothing.
+            return
+        if extracted:
+            # A list of authors were passed in, use them
+            for author in extracted:
+                self.authors.add(author)
+            return
+        # In all other cases, add at least one author
+        author = UserFactory()
+        self.authors.add(author)
+        return
+
+
 class StatisticsFactory(factory.django.DjangoModelFactory):
     """A factory for creating Statistics test objects."""
     class Meta:
@@ -173,5 +203,5 @@ class StaleFOIACommunicationFactory(FOIACommunicationFactory):
     """A factory for creating stale FOIARequest test objects."""
     response = True
     date = factory.LazyAttribute(
-        lambda obj: datetime.datetime.now() - datetime.timedelta(STALE_DURATION)
+        lambda obj: datetime.datetime.now() - datetime.timedelta(STALE_DURATION + 1)
     )

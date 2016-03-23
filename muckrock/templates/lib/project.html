@@ -1,12 +1,11 @@
 {% load thumbnail %}
 {% if project %}
 <div class="project-item">
+    <a href="{{project.get_absolute_url}}" title="{{project.title}}">
+        <h4 class="project-info title">{{project.title}}</h4>
     {% if project.image %}
-    <a href="{{project.get_absolute_url}}" title="{{project.title}}"><img src="{% thumbnail project.image 600x600 %}" class="project-image"/></a>
+        <img src="{% thumbnail project.image 600x600 %}" class="project-image"/>
     {% endif %}
-    <div class="project-info">
-        <h4 class="title"><a href="{{project.get_absolute_url}}" title="{{project.title}}">{{project.title}}</a></h4>
-        <p class="summary">{{project.summary|truncatechars:"300"}}</p>
-    </div>
+    </a>
 </div>
 {% endif %}

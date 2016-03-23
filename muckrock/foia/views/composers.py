@@ -76,8 +76,8 @@ def _make_new_agency(request, agency, jurisdiction):
     """Helper function to create new agency"""
     user = request.user if request.user.is_authenticated() else None
     agency = Agency.objects.create(
-        name=agency[:255],
-        slug=(slugify(agency[:255]) or 'untitled'),
+        name=agency,
+        slug=(slugify(agency) or 'untitled'),
         jurisdiction=jurisdiction,
         user=user,
         status='pending',
@@ -142,7 +142,7 @@ def _make_user(request, data):
     base_username = data['full_name'].replace(' ', '')[:30]
     username = base_username
     num = 1
-    while User.objects.filter(username=username).exists():
+    while User.objects.filter(username__iexact=username).exists():
         postfix = str(num)
         username = '%s%s' % (base_username[:30 - len(postfix)], postfix)
         num += 1

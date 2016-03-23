@@ -1,29 +1,24 @@
-.project-list {
-    @include border;
-    li {
-        border-bottom: 1px solid $color-grey;
-        &:last-child {
-            border-bottom: none;
-        }
-    }
-}
-
-.project-item {
+.project-item a {
     display: block;
-    background: $color-white-pure;
+    max-width: 15em;
+    margin-bottom: $vertical-rhythm;
+    border: 1px solid $color-black;
+    color: $color-white;
+    background: $color-blue;
     .project-image {
         display: block;
+        width: 100%;
+        height: auto;
         margin-bottom: 0;
+        opacity: .75;
     }
     .project-info {
         display: block;
         margin-bottom: 0;
         padding: $vertical-rhythm/2;
-        p {
-            font-size: $font-size-2;
-        }
     }
-    .title {
-        margin-bottom: $vertical-rhythm/2;
+    &:hover {
+        text-decoration: none;
+        background: $color-blue-dark;
     }
 }

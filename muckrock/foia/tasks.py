@@ -585,7 +585,7 @@ def notify_unanswered():
               'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
 
 
-@task(ignore_result=True, max_retries=10, name='muckrock.foia.tasks.send_fax')
+@task(ignore_result=True, max_retries=None, name='muckrock.foia.tasks.send_fax')
 def send_fax(msg, **kwargs):
     """Send a fax - send only one per fax number per 5 minutes"""
 
