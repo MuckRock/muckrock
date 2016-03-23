@@ -1,10 +1,10 @@
 <header class="website-header">
+    <form action="/search" method="get" class="search-form" id="global-search">
+        <input type="search" name="q" placeholder="Search">
+        <input type="submit" style="display: none;">
+        <div class="search-cancel" id="hide-search">Cancel</div>
+    </form>
     <nav class="website-navigation">
-        <form action="/search" method="get" class="search-form" id="global-search">
-            <input type="search" name="q" placeholder="Search">
-            <input type="submit" style="display: none;">
-            <div class="search-cancel" id="hide-search">Cancel</div>
-        </form>
         <div class="nav-section">
             <a href="{% url 'index'%}" class="nav-item brand">
                 <span class="logotype">
@@ -35,9 +35,11 @@
             </div>
             <a class="nav-item create-request-button" href="{% url 'foia-create'%}">
                 {% include 'lib/icons/create-request.svg' %}
-                <span class="label">&nbsp;Create&nbsp;Request</span>
+                <span class="label">Create Request</span>
             </a>
         </div>
-        <!--<span class="nav-item sidebar" id="sidebar-button">Account</span>-->
+        <!--
+        <span class="nav-item sidebar-toggle" id="sidebar-button">Account</span>
+        -->
     </nav>
 </header>

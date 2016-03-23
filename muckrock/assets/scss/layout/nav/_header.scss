@@ -27,6 +27,41 @@ $nav-background: #FFFFFF;
     margin-bottom: 0;
 }
 
+.website-header .search-form {
+    display: none;
+    &.visible {
+        @include display(flex);
+    }
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    @include align-items(center);
+    margin-bottom: 0;
+    border-top: $nav-border;
+    border-bottom: $nav-border;
+    background-color: $nav-background;
+    input[type="search"] {
+        max-width: 100%;
+        width: 100%;
+        padding: 0 $vertical-rhythm;
+        border: none;
+        border-radius: 0;
+        outline: none;
+    }
+    .search-cancel {
+        width: auto;
+        padding: $vertical-rhythm/2 $vertical-rhythm;
+        text-align: right;
+        cursor: pointer;
+        color: $color-blue;
+        &:hover {
+            color: $color-blue-dark;
+        }
+    }
+}
+
 // Logo visibility depends on viewport size
 .website-header .brand {
     .logotype {
@@ -49,56 +84,55 @@ $nav-background: #FFFFFF;
     }
 }
 
-nav.primary {
+.nav-section {
     @include display(flex);
-    @include justify-content(space-between);
-    @include align-items(center);
-    padding-left: $vertical-rhythm/2;
-    padding-right: $vertical-rhythm/2;
-    @include media($medium-layout) {
-        padding-left: $vertical-rhythm;
-        padding-right: $vertical-rhythm;
-    }
-
-
-    @include media($large-layout) {
-        #create-request-button {
-            padding-right: 0;
-        }
-        #sidebar-button {
-            display: none;
-        }
-    }
+    margin-bottom: 0;
 }
 
 .nav-item {
     display: inline-block;
+    width: 2.75em;
     padding: $vertical-rhythm/2;
     margin-bottom: 0;
     font-weight: $font-weight-bold;
+    text-align: center;
     @include nav-item-color;
     a {
         display: block;
+    }
+    .icon {
+        vertical-align: middle;
+    }
+    .label {
+        display: none;
+        vertical-align: bottom;
+    }
+    @include media($medium-layout) {
+        width: auto;
+        padding: $vertical-rhythm/2;
+        text-align: left;
+        .label {
+            display: inline;
+        }
     }
 }
 
 nav.website-navigation {
     position: relative;
-    margin-bottom: $vertical-rhythm/2;
     background-color: $nav-background;
     border-bottom: $nav-border;
     @include display(flex);
     @include justify-content(space-between);
-    .nav-section {
-        @include display(flex);
-        margin-bottom: 0;
-    }
+
+    /*
     .create-request-button {
         @include nav-item-hover;
         &:hover {
             background: $color-blue-dark;
         }
     }
+    */
+
     ul {
         margin-bottom: 0;
         padding-left: 0;
@@ -122,45 +156,6 @@ nav.website-navigation {
         .logo svg {
             transform: scale(1.3);
         }
-    }
-
-    .search-form {
-        display: none;
-        &.visible {
-            @include display(flex);
-        }
-        width: 100%;
-        height: 100%;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        @include align-items(center);
-        margin-bottom: 0;
-        border-top: $nav-border;
-        border-bottom: $nav-border;
-        background-color: $nav-background;
-        input[type="search"] {
-            max-width: 100%;
-            width: 100%;
-            padding: 0 $vertical-rhythm;
-            border: none;
-            border-radius: 0;
-            outline: none;
-        }
-        .search-cancel {
-            width: auto;
-            padding: $vertical-rhythm/2 $vertical-rhythm;
-            text-align: right;
-            cursor: pointer;
-            color: $color-blue;
-            &:hover {
-                color: $color-blue-dark;
-            }
-        }
-    }
-
-    .icon {
-        vertical-align: middle;
     }
 
     .search-button {
