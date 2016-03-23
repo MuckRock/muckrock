@@ -1,10 +1,10 @@
-$nav-border: 1px solid $color-grey-6;
+$nav-border: 1px solid $color-grey;
 $nav-background: #FFFFFF;
 
 @mixin nav-item-hover {
     color: $nav-background;
     background: $color-blue;
-    path { fill: $nav-background; }
+    svg path { fill: $nav-background; }
     a:hover {
         color: $nav-background;
     }
@@ -21,27 +21,29 @@ $nav-background: #FFFFFF;
     }
 }
 
-///////////////////////////////////////
-
 .website-header {
     margin-bottom: 0;
 }
 
 .website-header .search-form {
     display: none;
-    &.visible {
-        @include display(flex);
-    }
     width: 100%;
     height: 100%;
     position: absolute;
     top: 100%;
     left: 0;
-    @include align-items(center);
+    z-index: 100;
     margin-bottom: 0;
     border-top: $nav-border;
     border-bottom: $nav-border;
     background-color: $nav-background;
+    &.visible {
+        display: block;
+    }
+    .search-form-container {
+        @include display(flex);
+        @include align-items(center);
+    }
     input[type="search"] {
         max-width: 100%;
         width: 100%;
@@ -53,6 +55,7 @@ $nav-background: #FFFFFF;
     .search-cancel {
         width: auto;
         padding: $vertical-rhythm/2 $vertical-rhythm;
+        font-weight: $font-weight-bold;
         text-align: right;
         cursor: pointer;
         color: $color-blue;
@@ -96,6 +99,7 @@ $nav-background: #FFFFFF;
     margin-bottom: 0;
     font-weight: $font-weight-bold;
     text-align: center;
+    cursor: pointer;
     @include nav-item-color;
     a {
         display: block;
@@ -106,6 +110,16 @@ $nav-background: #FFFFFF;
     .label {
         display: none;
         vertical-align: bottom;
+    }
+    &.dark {
+        background: $color-black;
+        color: $color-white;
+        svg path {
+            fill: $color-white;
+        }
+        &:hover {
+            background: $color-blue;
+        }
     }
     @include media($medium-layout) {
         width: auto;
@@ -118,21 +132,14 @@ $nav-background: #FFFFFF;
 }
 
 nav.website-navigation {
-    position: relative;
+    position: fixed;
+    z-index: 100;
+    left: 0;
+    right: 0;
     background-color: $nav-background;
     border-bottom: $nav-border;
     @include display(flex);
     @include justify-content(space-between);
-
-    /*
-    .create-request-button {
-        @include nav-item-hover;
-        &:hover {
-            background: $color-blue-dark;
-        }
-    }
-    */
-
     ul {
         margin-bottom: 0;
         padding-left: 0;
@@ -143,7 +150,6 @@ nav.website-navigation {
     a {
         text-decoration: none;
     }
-
     .brand {
         margin-bottom: 0;
         // padding: 0;
@@ -171,10 +177,6 @@ nav.website-navigation {
         }
     }
 
-    .social-links {
-        float: right;
-        .label { display: none; }
-    }
 
     .website-sections-button {
         display: none;
@@ -183,13 +185,14 @@ nav.website-navigation {
         }
     }
 
-    @media (max-width: 700px) {
+    @media (max-width: 47em) {
         padding-left: 0;
         .website-sections {
             display: none;
             width: 100%;
             background: $nav-background;
-            border: $nav-border;
+            border-top: $nav-border;
+            border-bottom: $nav-border;
             li {
                 display: block;
             }
@@ -204,7 +207,21 @@ nav.website-navigation {
         .website-sections.visible {
             display: block;
             position: absolute;
+            z-index: 100;
+            left: 0;
             top: 100%;
+        }
+        .website-sections .nav-item {
+            width: auto;
+            display: block;
+            text-align: center;
+        }
+    }
+
+    @include media($large-layout) {
+        right: 15.625em;
+        .sidebar-toggle {
+            display: none;
         }
     }
 }

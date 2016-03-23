@@ -19,9 +19,10 @@ html, body {
 
 .content {
     @include flex(1);
-    margin: 0;
-    padding: 0 $vertical-rhythm/2;
-    @include media($medium-layout) { padding: 0 $vertical-rhythm; }
+    // The top margin accounts for the fixed header
+    margin-top: 2.6875em;
+    padding: $vertical-rhythm/2;
+    @include media($medium-layout) { padding: $vertical-rhythm; }
 }
 
 section.error-404 {
