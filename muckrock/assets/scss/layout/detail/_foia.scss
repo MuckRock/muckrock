@@ -4,18 +4,21 @@ $request-breakpoint: 768px;
     @include display(flex);
     @include align-items(stretch);
     @include flex-direction(column);
+    .request.properties {
+        @include flex(1 1 15em);
+    }
+    .request.main {
+        @include flex(3 1 30em);
+        min-width: 0;
+    }
     @media all and (min-width: $request-breakpoint) {
         @include flex-direction(row);
+        .request.properties {
+            max-width: 15em;
+        }
         .request.main {
             margin-left: $vertical-rhythm * 2;
         }
-    }
-    .request.properties {
-        @include flex(1);
-    }
-    .request.main {
-        @include flex(3);
-        min-width: 0;
     }
 }
 

@@ -1,11 +1,14 @@
 .project-item a {
     display: block;
+    max-width: 15em;
+    margin-bottom: $vertical-rhythm;
     border: 1px solid $color-black;
     color: $color-white;
     background: $color-blue;
-    // box-shadow: 0px 4px 8px 0px $color-grey;
     .project-image {
         display: block;
+        width: 100%;
+        height: auto;
         margin-bottom: 0;
         opacity: .75;
     }
