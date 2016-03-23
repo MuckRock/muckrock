@@ -128,15 +128,19 @@
                 </li>
                 <li>
                     <a role="tab" class="tab" aria-controls="files" href="#files">
-                        <span class="counter">{{foia.files.count}}</span>
-                        <span class="label">File{{foia.files.count|pluralize}}</span>
+                        {% with foia.files.count as files_count %}
+                            <span class="counter">{{files_count}}</span>
+                            <span class="label">File{{files_count|pluralize}}</span>
+                        {% endwith %}
                     </a>
                 </li>
                 {% if foia.user == user or user.is_staff %}
                 <li>
                     <a role="tab" class="tab" aria-controls="notes" href="#notes">
-                        <span class="counter">{{foia.notes.count}}</span>
-                        <span class="label">Note{{foia.notes.count|pluralize}}</span>
+                        {% with foia.notes.count as notes_count %}
+                            <span class="counter">{{notes_count}}</span>
+                            <span class="label">Note{{notes_count|pluralize}}</span>
+                        {% endwith %}
                     </a>
                 </li>
                 {% endif %}

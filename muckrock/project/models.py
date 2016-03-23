@@ -106,6 +106,10 @@ class Project(models.Model):
         """Checks if the user is a contributor."""
         return user in self.contributors.all()
 
+    def active_crowdfunds(self):
+        """Return all the active crowdfunds on this project."""
+        return self.crowdfunds.filter(closed=False)
+
     def suggest_requests(self):
         """Returns a list of requests that may be related to this project."""
         requests = list(FOIARequest.objects.filter(
