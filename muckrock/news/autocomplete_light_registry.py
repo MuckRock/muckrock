@@ -4,7 +4,7 @@ Autocomplete registry for news articles
 
 from muckrock.news.models import Article
 
-import autocomplete_light
+from autocomplete_light import shortcuts as autocomplete_light
 
 autocomplete_light.register(
     Article,

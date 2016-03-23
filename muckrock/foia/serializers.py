@@ -86,7 +86,6 @@ class FOIARequestSerializer(serializers.ModelSerializer):
     notes = FOIANoteSerializer(many=True)
 
     def __init__(self, *args, **kwargs):
-        # pylint: disable=no-member
         # pylint: disable=super-on-old-class
         super(FOIARequestSerializer, self).__init__(*args, **kwargs)
         if self.instance and isinstance(self.instance, FOIARequest):

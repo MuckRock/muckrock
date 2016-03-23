@@ -4,7 +4,7 @@ Models for the tags application
 
 from django.db import models
 
-import autocomplete_light
+from autocomplete_light import shortcuts as autocomplete_light
 import re
 from taggit.models import Tag as TaggitTag, GenericTaggedItemBase
 from taggit.utils import _parse_tags

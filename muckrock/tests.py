@@ -34,7 +34,7 @@ def post_allowed(client, url, data, redirect):
     """Test an allowed post with the given data and redirect location"""
     response = client.post(url, data, follow=True, **kwargs)
     nose.tools.eq_(response.status_code, 200)
-    nose.tools.eq_(response.redirect_chain, [('https://testserver:80' + redirect, 302)])
+    nose.tools.eq_(response.redirect_chain, [(redirect, 302)])
 
     return response
 
@@ -50,7 +50,7 @@ def post_allowed_bad(client, url, templates, data=None):
 def get_post_unallowed(client, url):
     """Test an unauthenticated get and post on a url that is allowed
     to be viewed only by authenticated users"""
-    redirect = 'https://testserver:80/accounts/login/?next=' + url
+    redirect = '/accounts/login/?next=' + url
     response = client.get(url, **kwargs)
     nose.tools.eq_(response.status_code, 302)
     nose.tools.eq_(response['Location'], redirect)

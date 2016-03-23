@@ -5,7 +5,7 @@ Forms for MuckRock
 from django import forms
 from django.contrib.auth.models import User
 
-import autocomplete_light as autocomplete
+from autocomplete_light import shortcuts as autocomplete_light
 from autocomplete_light.contrib.taggit_field import TaggitField
 from autocomplete_light.widgets import TextWidget
 import six
@@ -28,19 +28,19 @@ class MRFilterForm(forms.Form):
     user = forms.ModelChoiceField(
         required=False,
         queryset=User.objects.all(),
-        widget=autocomplete.ChoiceWidget(
+        widget=autocomplete_light.ChoiceWidget(
             'UserAutocomplete',
             attrs={'placeholder': 'All Users'}))
     agency = forms.ModelChoiceField(
         required=False,
         queryset=Agency.objects.all(),
-        widget=autocomplete.ChoiceWidget(
+        widget=autocomplete_light.ChoiceWidget(
             'AgencyAutocomplete',
             attrs={'placeholder': 'All Agencies'}))
     jurisdiction = forms.ModelChoiceField(
         required=False,
         queryset=Jurisdiction.objects.all(),
-        widget=autocomplete.ChoiceWidget(
+        widget=autocomplete_light.ChoiceWidget(
             'JurisdictionAutocomplete',
             attrs={'placeholder': 'All Jurisdictions'}))
     tags = TaggitField(widget=TaggitWidget(

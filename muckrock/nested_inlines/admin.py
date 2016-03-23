@@ -6,7 +6,7 @@ Nested Inlines
 
 from django.contrib.admin import ModelAdmin, helpers
 from django.contrib.admin.options import InlineModelAdmin
-from django.contrib.admin.util import unquote
+from django.contrib.admin.utils import unquote
 from django.core.exceptions import PermissionDenied
 from django.db import models, transaction
 from django.forms.formsets import all_valid

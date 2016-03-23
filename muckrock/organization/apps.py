@@ -4,7 +4,6 @@ App config for Organization
 
 from django.apps import AppConfig
 
-from actstream import registry
 
 class OrganizationConfig(AppConfig):
     """Configures the foia application to use activity streams"""
@@ -12,4 +11,5 @@ class OrganizationConfig(AppConfig):
 
     def ready(self):
         """Registers requests and communications with the activity streams plugin"""
+        from actstream import registry
         registry.register(self.get_model('Organization'))

@@ -20,7 +20,6 @@ class LatestSubmittedRequests(Feed):
     def items(self):
         """Return the items for the rss feed"""
         # pylint: disable=no-self-use
-        # pylint: disable=E1103
         return (FOIARequest.objects
                 .get_submitted()
                 .get_public()
@@ -42,7 +41,6 @@ class LatestDoneRequests(Feed):
     def items(self):
         """Return the items for the rss feed"""
         # pylint: disable=no-self-use
-        # pylint: disable=E1103
         return (FOIARequest.objects
                 .get_done()
                 .get_public()

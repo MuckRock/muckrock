@@ -10,7 +10,7 @@ from django.template.defaultfilters import slugify
 
 from muckrock.organization.models import Organization
 
-import autocomplete_light
+from autocomplete_light import shortcuts as autocomplete_light
 
 class CreateForm(forms.ModelForm):
     """Allows ordinary users to create an organization"""

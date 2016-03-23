@@ -137,7 +137,6 @@ class Task(models.Model):
 
 class GenericTask(Task):
     """A generic task"""
-    # pylint: disable=no-member
     subject = models.CharField(max_length=255)
     body = models.TextField(blank=True)
 
@@ -147,7 +146,6 @@ class GenericTask(Task):
 
 class OrphanTask(Task):
     """A communication that needs to be approved before showing it on the site"""
-    # pylint: disable=no-member
     type = 'OrphanTask'
     reasons = (('bs', 'Bad Sender'),
                ('ib', 'Incoming Blocked'),
@@ -202,7 +200,6 @@ class OrphanTask(Task):
 
 class SnailMailTask(Task):
     """A communication that needs to be snail mailed"""
-    # pylint: disable=no-member
     type = 'SnailMailTask'
     categories = (
         ('a', 'Appeal'),
@@ -296,7 +293,6 @@ class StaleAgencyTask(Task):
     def stale_requests(self):
         """Returns a list of stale requests associated with the task's agency"""
         if hasattr(self.agency, 'stale_requests_'):
-            # pylint: disable=no-member
             return self.agency.stale_requests_
         requests = (FOIARequest.objects
                 .get_open()
@@ -395,7 +391,6 @@ class NewAgencyTask(Task):
 
 class ResponseTask(Task):
     """A response has been received and needs its status set"""
-    # pylint: disable=no-member
     type = 'ResponseTask'
     communication = models.ForeignKey('foia.FOIACommunication')
     created_from_orphan = models.BooleanField(default=False)
@@ -462,7 +457,6 @@ class ResponseTask(Task):
 
 class FailedFaxTask(Task):
     """A fax for this communication failed"""
-    # pylint: disable=no-member
     type = 'FailedFaxTask'
     communication = models.ForeignKey('foia.FOIACommunication')
     reason = models.CharField(max_length=255, blank=True, default='')

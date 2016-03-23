@@ -107,5 +107,23 @@
             "email_pref": "hourly",
             "zip_code": "02140"
         }
+    },
+    {
+        "pk": 7,
+        "model": "accounts.profile",
+        "fields": {
+            "city": "Chicago",
+            "address1": "11 Main St",
+            "address2": "Apt 27",
+            "date_update": "2009-12-29",
+            "phone": "617-555-0001",
+            "state": "IL",
+            "user": 7,
+            "monthly_requests": 0,
+			"num_requests": 0,
+			"acct_type": "pro",
+            "email_pref": "hourly",
+            "zip_code": "02140"
+        }
     }
 ]

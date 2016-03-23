@@ -17,14 +17,12 @@ from muckrock.utils import mock_middleware
 
 # pylint: disable=no-self-use
 # pylint: disable=too-many-public-methods
-# pylint: disable=no-member
 
 class TestNewsUnit(TestCase):
     """Unit tests for news"""
 
     def setUp(self):
         """Set up tests"""
-        # pylint: disable=C0103
         self.article = ArticleFactory()
 
     # models
