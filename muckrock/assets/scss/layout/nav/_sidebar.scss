@@ -1,6 +1,6 @@
 // page positioning
 
-$sidebar-width: 250px;
+$sidebar-width: 15.625em;
 
 .website-sidebar {
     position: fixed;
@@ -43,20 +43,10 @@ $sidebar-width: 250px;
     min-height: 0;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    border-left: 1px solid $color-grey-0;
-    background-color: $color-grey-1;
+    background-color: $color-grey-2;
     color: $color-grey-5;
     dfn {
         color: $color-white;
-    }
-
-    a {
-        color: $color-white;
-        &:hover {
-            color: $color-blue;
-            text-decoration: none;
-        }
-        @include transition(color .25s linear);
     }
 
     & > * {
@@ -69,8 +59,9 @@ $sidebar-width: 250px;
     .quick-log-in {
         position: absolute;
         margin: 0;
+        border-bottom: 1px solid $color-black-pure;
         padding: $vertical-rhythm;
-        background: $color-grey-2;
+        background: $color-black;
         color: $color-white;
         h1 {
             font-size: $font-size-5;
@@ -93,34 +84,38 @@ $sidebar-width: 250px;
     }
 
     .account-links {
-        width: 100%;
-        // margin-bottom: 0;
         @include display(flex);
-        a {
+        width: 100%;
+        border-bottom: 1px solid $color-grey-3;
+        border-left: 1px solid $color-grey-3;
+        background-color: $color-black;
+        font-weight: $font-weight-bold;
+        .username, .sign-up, .log-in {
             @include flex(1);
             @include overflow-ellipsis;
             padding: $vertical-rhythm/2;
-            border-bottom: 1px solid $color-black;
-            border-right: 1px solid $color-black;
-            background-color: $color-grey-2;
-            font-weight: $font-weight-bold;
             text-align: center;
-            @include transition(all .25s linear);
+            color: $color-white;
+            text-decoration: none;
             &:hover {
-                text-decoration: none;
                 background-color: $color-blue;
-                color: $color-white;
             }
-            &:last-child {
-                border-right: 0;
+        }
+        .nav-item {
+            width: 2.75em;
+            text-align: center;
+            .icon {
+                vertical-align: middle;
+                path {
+                    fill: $color-white;
+                }
             }
-            &.username {
-                @include flex(3);
-            }
-            &.log-out {
-                font-weight: $font-weight-normal;
-                font-size: $font-size-2;
-            }
+        }
+        .visible .nav-item {
+            background: $color-blue;
+        }
+        .dropdown-list-item {
+            font-size: $font-size-2;
         }
     }
 
@@ -162,7 +157,6 @@ $sidebar-width: 250px;
             margin: $vertical-rhythm 0 0;
             border: none;
             color: $color-grey-6;
-            background-color: $color-black;
             font-size: $font-size-3;
             font-weight: $font-weight-bold;
             text-align: left;

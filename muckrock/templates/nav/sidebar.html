@@ -13,7 +13,16 @@
     <header class="account-links">
         {% if user.is_authenticated %}
         <a href="{% url 'acct-my-profile' %}" class="username">{{ user.get_full_name }}</a>
-        <a href="{% url 'acct-logout' %}" class="log-out">Log Out</a>
+        <div class="dropdown">
+            <div class="nav-item dropdown-trigger">
+                {% include 'lib/icons/options.svg' %}
+            </div>
+            <ul class="dropdown-list">
+                {% if user.is_staff %}<li class="dropdown-list-item"><a class="admin" href="{% if sidebar_admin_url %}{{ sidebar_admin_url }}{% else %}/admin/{% endif %}" >Admin</a></li>{% endif %}
+                <li class="dropdown-list-item"><a href="{% url 'acct-settings' %}">Settings</a></li>
+                <li class="dropdown-list-item"><a href="{% url 'acct-logout' %}">Log Out</a></li>
+            </ul>
+        </div>
         {% else %}
         <a href="{% url 'accounts' %}" class="sign-up">Sign&nbsp;Up</a>
         <a href="{% url 'acct-login' %}?next={{ request.get_full_path }}" class="log-in" id="quick-log-in">Log&nbsp;In</a>
@@ -24,13 +33,6 @@
     <section class="payment failure">
         <p><strong>Your payment failed!</strong></p>
         <p>A recent charge made against your credit card has failed. You can <a href="{% url 'acct-settings' %}#billing">update your billing information</a> from your account settings.</p>
-    </section>
-    {% endif %}
-
-
-    {% if user.is_staff %}
-    <section>
-        <a class="admin" href="{% if sidebar_admin_url %}{{ sidebar_admin_url }}{% else %}/admin/{% endif %}" >Admin</a>
     </section>
     {% endif %}
 
