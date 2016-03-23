@@ -1,6 +1,6 @@
 var dropdowns = $('.dropdown');
 
-$('.dropdown .icon').click(function(){
+$('.dropdown .icon, .dropdown .dropdown-trigger').click(function(){
     var thisDropdown = $(this).closest('.dropdown');
     var thisDropdownState = thisDropdown.hasClass('visible');
     // Remove visible to all dropdowns, then make this dropdown visible
