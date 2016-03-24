@@ -36,7 +36,7 @@ class NestedModelAdmin(ModelAdmin):
         prefixes = prefixes or {}
         if not hasattr(admin, 'inline_instances'):
             admin.inline_instances = admin.get_inline_instances(request)
-        for form_set, inline in zip(admin.get_formsets(request), admin.inline_instances):
+        for form_set, inline in admin.get_formsets_with_inlines(request):
             prefix = form_set.get_default_prefix()
             prefixes[prefix] = prefixes.get(prefix, 0) + 1
             if prefixes[prefix] != 1:
@@ -244,10 +244,10 @@ class NestedInlineModelAdmin(InlineModelAdmin):
             inline_instance = inline_class(self.model, self.admin_site)
             self.inline_instances.append(inline_instance)
 
-    def get_formsets(self, request, obj=None):
-        """Get formsets for inlines"""
+    def get_formsets_with_inlines(self, request, obj=None):
+        """Get formsets and inlines for inlines"""
         for inline in self.inline_instances:
-            yield inline.get_formset(request, obj)
+            yield inline.get_formset_with_inlines(request, obj)
 
 
 # would put this in for a patch, not sure if worth monkey patching in
