@@ -247,7 +247,7 @@ class NestedInlineModelAdmin(InlineModelAdmin):
     def get_formsets_with_inlines(self, request, obj=None):
         """Get formsets and inlines for inlines"""
         for inline in self.inline_instances:
-            yield inline.get_formset_with_inlines(request, obj)
+            yield inline.get_formsets_with_inlines(request, obj)
 
 
 # would put this in for a patch, not sure if worth monkey patching in
