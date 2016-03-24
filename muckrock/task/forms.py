@@ -5,7 +5,7 @@ Forms for Task app
 from django import forms
 from django.contrib.auth.models import User
 
-import autocomplete_light
+from autocomplete_light import shortcuts as autocomplete_light
 
 from muckrock.forms import MRFilterForm
 from muckrock import foia

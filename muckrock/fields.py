@@ -85,7 +85,6 @@ class FullEmailField(forms.EmailField):
         fullname, email = parseaddr(value)
         return email
 
-# pylint: disable=no-member
 class GroupedModelChoiceField(ModelChoiceField):
     """Form field for grouped model choice"""
     def __init__(self, group_by_field, group_label=None, *args, **kwargs):

@@ -1,7 +1,6 @@
 """
 Test organization view classes and functions
 """
-# pylint: disable=no-member
 
 from django.core.urlresolvers import reverse
 from django.test import TestCase, RequestFactory

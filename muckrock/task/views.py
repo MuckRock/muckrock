@@ -424,6 +424,7 @@ class RequestTaskList(TaskList):
 
     def get_queryset(self):
         # pylint: disable=attribute-defined-outside-init
+        # pylint: disable=unsubscriptable-object
         self.foia_request = get_object_or_404(
                 FOIARequest.objects.select_related(
                     'agency__jurisdiction',

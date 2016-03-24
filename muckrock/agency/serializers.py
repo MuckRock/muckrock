@@ -19,7 +19,6 @@ class AgencySerializer(serializers.ModelSerializer):
             style={'base_template': 'input.html'})
 
     def __init__(self, *args, **kwargs):
-        # pylint: disable=no-member
         # pylint: disable=super-on-old-class
         super(AgencySerializer, self).__init__(*args, **kwargs)
 

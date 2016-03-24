@@ -1,0 +1,13 @@
+coverage # Used to generate coverage reports in dev
+dj-inmemorystorage # in memory file storage for faster testing
+django-nose # Used for testing
+django<1.10 # django
+fabric # Used for dev scripts
+factory-boy # Used for creating test data
+ipdb # interactive debugger
+ipython # Interactive python shell
+mock # Used for mocking objects during test
+pip-tools # Keeps the requirements up to date
+pylint-django # Pylint for Django integration
+whoosh # Used for search backend in development
+yet-another-django-profiler # Profiler for django

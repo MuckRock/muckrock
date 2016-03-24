@@ -147,7 +147,6 @@ class Profile(models.Model):
     @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
-        # pylint: disable=no-member
         return ('acct-profile', [], {'username': self.user.username})
 
     def is_advanced(self):
@@ -250,6 +249,7 @@ class Profile(models.Model):
 
     def customer(self):
         """Retrieve the customer from Stripe or create one if it doesn't exist. Then return it."""
+        # pylint: disable=redefined-variable-type
         try:
             if not self.customer_id:
                 raise AttributeError('No Stripe ID')
@@ -274,10 +274,7 @@ class Profile(models.Model):
     def has_subscription(self):
         """Check Stripe to see if this user has any active subscriptions."""
         customer = self.customer()
-        if customer.subscriptions.total_count > 0:
-            return True
-        else:
-            return False
+        return customer.subscriptions.total_count > 0
 
     def start_pro_subscription(self, token=None):
         """Subscribe this profile to a professional plan. Return the subscription."""
@@ -344,13 +341,11 @@ class Profile(models.Model):
 
     def notify(self, foia):
         """Queue up a notification for later"""
-        # pylint: disable=no-member
         self.notifications.add(foia)
         self.save()
 
     def send_notifications(self):
         """Send deferred notifications"""
-        # pylint: disable=no-member
 
         subjects = {
             'done': "you've got new MuckRock docs!",

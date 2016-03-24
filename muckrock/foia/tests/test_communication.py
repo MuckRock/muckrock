@@ -262,7 +262,6 @@ class TestCommunicationResend(test.TestCase):
 
 class TestRawEmail(test.TestCase):
     """Tests the raw email view"""
-    # pylint:disable=no-member
     def setUp(self):
         self.comm = factories.FOIACommunicationFactory()
         self.request_factory = test.RequestFactory()

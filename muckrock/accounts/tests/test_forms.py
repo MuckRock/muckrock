@@ -14,7 +14,6 @@ class TestEmailSettingsForm(TestCase):
     """Users should be able to modify their email settings."""
     def setUp(self):
         """Set up tests"""
-        # pylint:disable=no-member
         self.profile = ProfileFactory()
         self.data = {
             'email_pref': self.profile.email_pref,
@@ -26,13 +25,14 @@ class TestEmailSettingsForm(TestCase):
     @patch('muckrock.message.tasks.email_change.delay')
     def test_email_normal(self, mock_notify):
         """Changing email normally should succeed"""
+        old_email = self.profile.user.email
         new_email = 'new@example.com'
         self.data['email'] = new_email
         form = self.form(self.data, instance=self.profile)
         assert_true(form.is_valid())
         eq_(form.clean_email(), new_email)
         form.save()
-        mock_notify.assert_called_once()
+        mock_notify.assert_called_once_with(self.profile.user, old_email)
 
     @patch('muckrock.message.tasks.email_change.delay')
     def test_email_same(self, mock_notify):

@@ -1,7 +1,6 @@
 """
 Tests the models of the organization application
 """
-# pylint: disable=no-member
 
 from django.conf import settings
 from django.test import TestCase

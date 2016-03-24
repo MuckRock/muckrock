@@ -16,8 +16,6 @@ DEFAULT_CENTER_POINT = json.dumps({
 })
 DEFAULT_ZOOM_LEVEL = settings.LEAFLET_CONFIG['DEFAULT_ZOOM']
 
-# pylint: disable=no-member
-
 class Map(models.Model):
     """A map holds a collection of Markers."""
     title = models.CharField(max_length=80, unique=True)
@@ -35,6 +33,7 @@ class Map(models.Model):
     )
 
     def save(self, *args, **kwargs):
+        """Slugify title before saving"""
         self.slug = slugify(self.title)
         super(Map, self).save(*args, **kwargs)
 

@@ -21,7 +21,6 @@ class FOIAFile(models.Model):
 
     access = (('public', 'Public'), ('private', 'Private'), ('organization', 'Organization'))
 
-    # pylint: disable=no-member
     foia = models.ForeignKey(FOIARequest, related_name='files', blank=True, null=True)
     comm = models.ForeignKey(FOIACommunication, related_name='files', blank=True, null=True)
     ffile = models.FileField(upload_to='foia_files/%Y/%m/%d', verbose_name='File', max_length=255)

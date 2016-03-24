@@ -4,7 +4,7 @@ Forms for the project application
 
 from django import forms
 
-import autocomplete_light
+from autocomplete_light import shortcuts as autocomplete_light
 from autocomplete_light.contrib.taggit_field import TaggitField, TaggitWidget
 
 from muckrock.project.models import Project

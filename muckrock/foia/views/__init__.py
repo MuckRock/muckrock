@@ -2,7 +2,7 @@
 Views for the FOIA application
 """
 
-import autocomplete_light
+from autocomplete_light import shortcuts as autocomplete_light
 autocomplete_light.autodiscover()
 
 from muckrock.foia.views.views import *

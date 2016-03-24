@@ -190,7 +190,6 @@ def create_answer(request, slug, idx):
 class QuestionViewSet(viewsets.ModelViewSet):
     """API views for Question"""
     # pylint: disable=too-many-public-methods
-    # pylint: disable=C0103
     # pylint: disable=too-many-ancestors
     queryset = (Question.objects.select_related('user')
             .prefetch_related('tags',

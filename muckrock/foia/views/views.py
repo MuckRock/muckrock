@@ -207,6 +207,7 @@ class Detail(DetailView):
     def get_object(self, queryset=None):
         """Get the FOIA Request"""
         # pylint: disable=unused-argument
+        # pylint: disable=unsubscriptable-object
         # this is called twice in dispatch, so cache to not actually run twice
         if self._obj:
             return self._obj

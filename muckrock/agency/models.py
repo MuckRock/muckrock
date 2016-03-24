@@ -102,7 +102,6 @@ class Agency(models.Model, RequestHelper):
     @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
-        # pylint: disable=no-member
         return ('agency-detail', [], {'jurisdiction': self.jurisdiction.slug,
                                       'jidx': self.jurisdiction.pk,
                                       'slug': self.slug, 'idx': self.pk})
@@ -152,7 +151,6 @@ class Agency(models.Model, RequestHelper):
         days ago, or if no responses to any open request, if the oldest open
         request was sent greater than STALE_DURATION days ago.  If no open requests,
         do not mark as stale."""
-        # pylint: disable=no-member
         # first find any open requests, if none, not stale
         foias = self.foiarequest_set.get_open().order_by('date_submitted')
         if not foias:
