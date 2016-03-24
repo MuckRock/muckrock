@@ -72,18 +72,7 @@ $request-breakpoint: 768px;
     form {
         display: inline-block;
     }
-    .counter {
-        @include display(flex);
-        p {
-            @include flex(1 1 25%);
-            margin-left: $vertical-rhythm/2;
-            color: $color-grey-2;
-        }
-    }
-    .available.seats {
-        margin-bottom: 0;
-    }
-    .available.requests .counter {
+    .progress {
         margin-bottom: 0;
     }
 }

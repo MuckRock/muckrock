@@ -167,11 +167,11 @@
                 @include media($medium-layout) {
                     margin-left: 0;
                 }
-                .counters {
+                .stats {
                     @include display(flex);
                     @include justify-content(flex-start);
                 }
-                .counter {
+                .stat {
                     @include flex(1);
                     margin: 0;
                     padding: $vertical-rhythm/2;
@@ -184,7 +184,7 @@
                             color: $color-white;
                         }
                     }
-                    .count {
+                    .value {
                         font-size: $font-size-5;
                         margin-bottom: 0;
                         display: block;
