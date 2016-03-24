@@ -4,11 +4,10 @@
 
     .header-container {
         @include display(flex);
+        @include flex-wrap(wrap);
         @include align-items(stretch);
         @include justify-content(space-between);
-        @include flex-direction(column);
         @include media($medium-layout) {
-            @include flex-direction(row);
             .aside .button {
                 float: right;
                 clear: right;
