@@ -4,6 +4,7 @@
 #
 #    pip-compile requirements.in
 #
+-e git+git://github.com/django-haystack/django-haystack.git@f1ed18313777005dd77ed724ecbfb27c0b03cad8#egg=django-haystack
 -e git+git://github.com/callowayproject/django-news-sitemaps.git@55da6b72580dd6d79380f2bb17240e7afa00555a#egg=django_news_sitemaps-master
 amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu
@@ -11,7 +12,7 @@ billiard==3.3.0.23        # via celery
 boto==2.39.0
 celery-haystack==0.10
 celery==3.1.23
-Click==6.3                # via pyimagediet
+Click==6.4                # via pyimagediet
 contextlib2==0.5.1        # via raven
 cssselect==0.9.1          # via premailer
 cssutils==1.0.1           # via premailer
@@ -26,7 +27,6 @@ django-dbsettings==0.9.1
 django-debug-toolbar==1.4
 django-filter==0.13.0
 django-geojson==2.9.0
-django-haystack==2.4.1
 django-leaflet==0.18.0
 django-localflavor==1.2
 django-lot==0.0.6
@@ -51,21 +51,21 @@ easy-thumbnails==2.3
 gunicorn==19.4.5
 image-diet2==1.0
 jsonfield==1.0.3
-kombu==3.0.34             # via celery
+kombu==3.0.35             # via celery
 lxml==3.6.0               # via premailer
-markdown2==2.3.0          # via django-markdown-deux
+markdown2==2.3.1          # via django-markdown-deux
 newrelic==2.60.0.46
 numpy==1.9.1
 pascha==0.5
 pillow==3.1.1
 premailer==2.10.1         # via django-premailer
 psycopg2==2.6.1
-pyimagediet==1.1.0        # via image-diet2
-pylibmc==1.5.0            # via django-pylibmc
+pyimagediet==1.1.1        # via image-diet2
+pylibmc==1.5.1            # via django-pylibmc
 pysolr==3.4.0
 python-dateutil==2.5.1
-python-magic==0.4.10      # via pyimagediet
-pytz==2016.1              # via celery
+python-magic==0.4.11      # via pyimagediet
+pytz==2016.2              # via celery
 PyYAML==3.11              # via django-rest-swagger, pyimagediet
 raven==5.11.1
 rcssmin==1.0.6            # via django-compressor
