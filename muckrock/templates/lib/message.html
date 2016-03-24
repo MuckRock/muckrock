@@ -1,3 +1,5 @@
+{% load markdown_deux_tags %}
+
 {% comment %}
 Message object
 ---
@@ -24,7 +26,7 @@ The message object contains:
     </section>
     {% if body %}
     <section class="body">
-        {{ body|urlize|safe }}
+        {{ body|markdown }}
     </section>
     {% endif %}
     {% if files %}
