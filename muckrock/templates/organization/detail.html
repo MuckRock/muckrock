@@ -54,12 +54,16 @@
         {% endif %}
     </aside>
     <main>
-        <ul class="tabs">
-            <li class="tab" data-section="requests"><span class="counter">{{requests|length}}</span> Request{{requests|pluralize}}</li>
-            <li class="tab" data-section="members"><span class="counter">{{members|length}}</span> Member{{members|pluralize}}</li>
+        <ul class="tab-list">
+            <li><a class="tab" href="#requests">
+                <span class="counter">{{requests|length}}</span> Request{{requests|pluralize}}
+            </a></li>
+            <li><a class="tab" href="#members">
+                <span class="counter">{{members|length}}</span> Member{{members|pluralize}}
+            </a></li>
         </ul>
         <div class="tab-sections">
-            <section class="tab-section" id="requests">
+            <section class="active tab-section" id="requests">
             {% if requests %}
                 {% include 'lib/foia_table.html' %}
             {% else %}
