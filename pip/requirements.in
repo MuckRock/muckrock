@@ -1,4 +1,5 @@
 -e git://github.com/callowayproject/django-news-sitemaps.git@55da6b72580dd6d79380f2bb17240e7afa00555a#egg=django_news_sitemaps-master # Generates a news sitemap
+-e git://github.com/django-haystack/django-haystack.git@f1ed18313777005dd77ed724ecbfb27c0b03cad8#egg=django-haystack # django search engine
 boto # Used to access AWS
 celery # Used to run async tasks
 celery-haystack # Integrate celery and haystack
@@ -12,7 +13,6 @@ django-dbsettings # DB stored configurations
 django-debug-toolbar # Toolbar for debugging
 django-filter # Used for filtering in viewsets
 django-geojson # Used for storing geographic data
-django-haystack # Search engine
 django-leaflet # Used for plotting geographic data
 django-localflavor # Used for phone numbers and state list
 django-lot # Used for Log On Tokens

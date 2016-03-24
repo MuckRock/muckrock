@@ -4,8 +4,8 @@
 #
 #    pip-compile dev-requirements.in
 #
-astroid==1.4.4            # via pylint, pylint-plugin-utils
-click==6.3                # via pip-tools
+astroid==1.4.5            # via pylint, pylint-plugin-utils
+click==6.4                # via pip-tools
 colorama==0.3.7           # via pylint
 coverage==4.0.3
 decorator==4.0.9          # via ipython, traitlets
@@ -35,7 +35,7 @@ ptyprocess==0.5.1         # via pexpect
 pycrypto==2.6.1           # via paramiko
 pylint-django==0.7.1
 pylint-plugin-utils==0.2.3  # via pylint-django
-pylint==1.5.4             # via pylint-django, pylint-plugin-utils
+pylint==1.5.5             # via pylint-django, pylint-plugin-utils
 python-dateutil==2.5.1    # via fake-factory
 simplegeneric==0.8.1      # via ipython
 six==1.10.0               # via astroid, dj-inmemorystorage, fake-factory, mock, pip-tools, pylint, python-dateutil
