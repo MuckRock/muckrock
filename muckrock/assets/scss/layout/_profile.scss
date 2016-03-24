@@ -69,6 +69,13 @@
     .links svg {
         margin-right: $vertical-rhythm/2;
     }
+    .project-group {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        .project-item {
+            margin-right: $vertical-rhythm;
+        }
+    }
 }
 
 .account.profile .article-list {
