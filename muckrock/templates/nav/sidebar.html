@@ -1,3 +1,5 @@
+{% load thumbnail %}
+
 <aside class="website-sidebar" id="website-sidebar">
     {% if not user.is_authenticated %}
     <form method="post" action="{% url 'acct-login' %}?next={{ request.get_full_path }}" class="quick-log-in" id="quick-log-in-form">
@@ -30,53 +32,63 @@
     </header>
 
     {% if payment_failed %}
-    <section class="payment failure">
-        <p><strong>Your payment failed!</strong></p>
-        <p>A recent charge made against your credit card has failed. You can <a href="{% url 'acct-settings' %}#billing">update your billing information</a> from your account settings.</p>
+    <section class="payment failure notification">
+        <header>
+            <p>Your payment failed!</p>
+        </header>
+        <main>
+            <p>A recent charge made against<br>your credit card has failed.</p>
+        </main>
+        <footer>
+            <a class="failure button" href="{% url 'acct-settings' %}#billing">Update billing info</a>
+        </footer>
     </section>
     {% endif %}
 
 
     {% if user.is_authenticated %}
         {% if organization %}
-    <section class="organization">
-        <a href="{{organization.get_absolute_url}}">Your Organization</a>
-    </section>
+    <a class="your-organization" href="{{organization.get_absolute_url}}">Your Organization</a>
         {% endif %}
     <section class="requests">
-        <a class="my-requests" href="{% url 'foia-mylist' %}">Your Requests</a>
+        <a class="your-requests" href="{% url 'foia-mylist' %}">Your Requests</a>
 
         {% if actionable_requests %}
             {% if actionable_requests.payment %}
             <a class="actionable payment" href="{% url 'foia-mylist' %}?status=payment">
-                <span class="payments counter">{{ actionable_requests.payment }}</span>
-                Payment{{ actionable_requests.payment|pluralize }} Required
+                <span class="payments counter">{{ actionable_requests.payment|length }}</span>
+                Payment{{ actionable_requests.payment|length|pluralize }} Required
             </a>
+            <ul class="actionable-request-list">
+                {% for foia in actionable_requests.payment|slice:":10" %}
+                <li><a href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}">{{ foia.title }}</a></li>
+                {% endfor %}
+            </ul>
             {% endif %}
             {% if actionable_requests.fix %}
             <a class="actionable fixes" href="{% url 'foia-mylist' %}?status=fix">
-                <span class="fixes counter">{{ actionable_requests.fix }}</span>
-                Fix{{ actionable_requests.fix|pluralize:"es" }} Required
+                <span class="fixes counter">{{ actionable_requests.fix|length }}</span>
+                Fix{{ actionable_requests.fix|length|pluralize:"es" }} Required
             </a>
             {% endif %}
             {% if actionable_requests.started %}
             <a class="actionable drafts" href="{% url 'foia-mylist' %}?status=started">
-                <span class="drafts counter">{{ actionable_requests.started }}</span>
-                Draft{{ actionable_requests.started|pluralize }}
+                <span class="drafts counter">{{ actionable_requests.started|length }}</span>
+                Draft{{ actionable_requests.started|length|pluralize }}
             </a>
             {% endif %}
             {% if actionable_requests.updates %}
             <a class="actionable updated" href="{% url 'foia-mylist' %}">
-                <span class="updates counter">{{ actionable_requests.updates|length }}</span>
+                <span class="counter">{{ actionable_requests.updates|length }}</span>
                 Update{{ actionable_requests.updates|length|pluralize }}
-                {% if actionable_requests.updates|length > 10 %}
-                <small>Click to see all</small>
-                {% endif %}
             </a>
             <ul class="actionable-request-list">
                 {% for foia in actionable_requests.updates|slice:":10" %}
                 <li><a href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}">{{ foia.title }}</a></li>
                 {% endfor %}
+                {% if actionable_requests.updates|length > 10 %}
+                <li><a href="{% url 'foia-mylist' %}">More</a></li>
+                {% endif %}
             </ul>
             {% endif %}
         {% endif %}
@@ -92,9 +104,10 @@
 
     {% if recent_articles %}
     <section class="recent articles">
-        <dfn>Newest News</dfn>
+        <dfn>Recently published</dfn>
         {% for article in recent_articles %}
-        <a href="{{article.get_absolute_url}}" title="{{article.summary}}" class="article block">
+        <a href="{{article.get_absolute_url}}" title="{{article.summary}}" class="article">
+            <img src="{% thumbnail article.image 250x100 crop %}" />
             <p>{{ article.title }}</p>
         </a>
         {% endfor %}

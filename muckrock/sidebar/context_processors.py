@@ -23,13 +23,16 @@ def get_actionable_requests(user):
     """Gets requests that require action or attention"""
     requests = FOIARequest.objects.filter(user=user)
     updates = requests.filter(updated=True)
-    actionable_requests = dict(requests
-            .filter(status__in=('fix', 'started', 'payment'))
-            .order_by('status')
-            .values_list('status')
-            .annotate(Count('status')))
-    actionable_requests.update({'updates': updates})
-    return actionable_requests
+    started = requests.filter(status='started')
+    payment = requests.filter(status='payment')
+    fix = requests.filter(status='fix')
+    return {
+        'updates': updates,
+        'started': started,
+        'payment': payment,
+        'fix': fix,
+    }
+
 
 def get_organization(user):
     """Gets organization, if it exists"""

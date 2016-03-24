@@ -1,60 +1,55 @@
-// page positioning
-
 $sidebar-width: 15.625em;
 
+/*
+This set of declarations controls the positioning of the sidebar and of the container.
+At small screen sizes, the sidebar is hidden underneath the container.
+When the sidebar is made visible, it moves the container out of the way using a transform;
+At large screen sizes, the sidebar is fixed to the right side of the window.
+It assumes a fixed width and applies a right margin of equal width to the container.
+*/
+
 .website-sidebar {
+    width: $sidebar-width;
     position: fixed;
     z-index: -100;
     top: 0;
-    right: -9999px;
-    transition: right 0s .3s;
-    &.visible {
+    right: -9999px;             // We change the right and transition properties
+    transition: right 0s .3s;   // when the sidebar is visible to create the
+    &.visible {                 // impression the contain is sliding over it.
         z-index: 0;
         right: 0;
         transition: right 0s 0s;
     }
-}
-
-.website-sidebar + .container {
-    @include transition(transform .25s ease-in-out);
-}
-
-.website-sidebar.visible + .container {
-    @include transform(translateX(-1 * $sidebar-width));
-}
-
-@include media($large-layout) {
-    .website-sidebar {
+    & + .container {
+        transition: transform .25s ease-in-out;
+    }
+    &.visible + .container {
+        @include transform(translateX(-1 * $sidebar-width));
+    }
+    @include media($large-layout) {
         z-index: 100;
         right: 0;
-        box-shadow: inset 4px 0px 8px rgba(0, 0, 0, 0.25);
-    }
-    .website-sidebar.visible + .container {
-        @include transform(translateX(0));
-    }
-    .website-sidebar + .container {
-        margin-right: $sidebar-width;
+        & + .container {
+            margin-right: $sidebar-width;
+        }
+        &.visible + .container {
+            @include transform(translateX(0));
+        }
     }
 }
 
+/*
+This set of declarations controls the style and appearance of the sidebar's contents.
+The sidebar should use a dark UI.
+*/
+
 .website-sidebar {
-    width: $sidebar-width;
     height: 100%;
     min-height: 0;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     background-color: $color-grey-2;
     color: $color-grey-5;
-    dfn {
-        color: $color-white;
-    }
-
-    & > * {
-        margin-bottom: $vertical-rhythm/2;
-        &:last-child {
-            margin-bottom: $vertical-rhythm/2;
-        }
-    }
 
     .quick-log-in {
         position: absolute;
@@ -85,7 +80,15 @@ $sidebar-width: 15.625em;
 
     .account-links {
         @include display(flex);
-        width: 100%;
+        position: fixed;
+        z-index: 20;
+        right: 0;
+        top: 0;
+        & + * {
+            margin-top: 2.6875em;
+        }
+        width: $sidebar-width;
+        margin-bottom: 0;
         border-bottom: 1px solid $color-grey-3;
         border-left: 1px solid $color-grey-3;
         background-color: $color-black;
@@ -119,118 +122,72 @@ $sidebar-width: 15.625em;
         }
     }
 
-    section {
-        width: 100%;
-        padding: $vertical-rhythm/2 $vertical-rhythm;
-        color: $color-grey-6;
-        font-size: $font-size-3;
-        line-height: $vertical-rhythm;
-        dfn {
-            color: $color-white;
-        }
-        p {
-            margin-bottom: $vertical-rhythm/2;
-        }
-
-
-        &.failure {
-            strong {
-                color: $color-red;
-            }
-            p:last-child {
-                margin-bottom: 0;
-            }
-        }
+    .articles dfn {
+        text-align: center;
+        padding: 0 $vertical-rhythm/2;
+        color: $color-white;
     }
 
-    .organization a, .my-requests, .admin {
+    .article {
         display: block;
-        width: 100%;
-        font-weight: $font-weight-bold;
-    }
-
-    .requests {
-
-        .actionable {
-            display: block;
-            height: auto;
-            margin: $vertical-rhythm 0 0;
-            border: none;
-            color: $color-grey-6;
-            font-size: $font-size-3;
+        height: 6.25em;
+        position: relative;
+        background: $color-black;
+        color: $color-grey-6;
+        text-decoration: none;
+        p {
+            position: absolute;
+            z-index: 2;
+            bottom: 0;
+            padding: $vertical-rhythm/2;
             font-weight: $font-weight-bold;
-            text-align: left;
-            text-decoration: none;
-            @include transition(color .25s linear);
-
-            &:first-child {
-                margin-top: $vertical-rhythm/2;
-            }
-
-            &:hover {
-                color: $color-blue;
-                .counter {
-                    background: $color-blue;
-                }
-            }
-
-            .counter {
-                @include transition(background-color .25s linear);
-                margin-right: $vertical-rhythm/4;
-                padding: $vertical-rhythm/5 $vertical-rhythm/1.5;
-                @include border-radius;
-                font-weight: $font-weight-bold;
-                text-align: center;
-                color: $color-white;
-                background: $color-grey-2;
-            }
+            color: $color-white;
+            text-shadow: $color-black 1px 1px 1px;
         }
-
-        .actionable-request-list {
-            display: block;
-            overflow: hidden;
-            padding: $vertical-rhythm;
-            li {
-                @include full;
-                @include overflow-ellipsis;
-                display: list-item;
-                margin-bottom: $vertical-rhythm/2;
-                &:last-child {
-                    margin-bottom: 0;
-                }
-            }
-
-            a {
-                display: block;
-                color: $color-grey-6;
-            }
+        img {
+            position: absolute;
+            z-index: 1;
+            opacity: .25;
+            margin-bottom: 0;
+        }
+        &:hover {
+            background: $color-blue-dark;
         }
     }
 
-    .recent.articles {
-        padding: 0;
-        margin-bottom: 0;
-        dfn, .article {
-            padding: $vertical-rhythm/2 $vertical-rhythm;
+    .notification {
+        font-weight: $font-weight-bold;
+        text-align: center;
+        header, main, footer {
+            margin-bottom: 0;
+            padding: $vertical-rhythm/2;
         }
-        .article {
-            display: block;
-            width: 100%;
-            color: $color-grey-6;
-            border-bottom: 1px solid $color-grey-0;
-            @include transition(background-color .25s linear, color .25s linear);
-            &:hover {
-                color: $color-white;
-                background-color: $color-grey-0;
-                text-decoration: none;
-            }
-            &:last-child {
-                border-bottom: 0;
-            }
-            p {
-                margin-bottom: 0;
-            }
+        main {
+            font-size: $font-size-2;
+            line-height: $font-line-height;
+        }
+        &.failure {
+            background: $color-red-dark;
+            color: $color-red-light;
+            border-bottom: 1px solid $color-red-dark;
         }
     }
 
+    .your-requests, .your-organization {
+        display: block;
+        padding: $vertical-rhythm/2 $vertical-rhythm;
+        color: $color-white;
+        font-weight: $font-weight-bold;
+
+        text-decoration: none;
+        &:hover {
+            background: $color-blue;
+        }
+    }
+
+    @include media($large-layout) {
+        &, .payment.failure {
+            box-shadow: inset 4px 0px 8px rgba(0, 0, 0, 0.25);
+        }
+    }
 }
