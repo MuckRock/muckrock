@@ -352,9 +352,12 @@ def verify_email(request):
 
 def profile(request, username=None):
     """View a user's profile"""
-    if not username and request.user.is_anonymous():
-        return redirect('acct-login')
-    user = get_object_or_404(User, username=username) if username else request.user
+    if username is None:
+        if request.user.is_anonymous():
+            return redirect('acct-login')
+        else:
+            return redirect('acct-profile', username=request.user.username)
+    user = get_object_or_404(User, username=username)
     user_profile = user.profile
     org = user_profile.organization
     requests = (FOIARequest.objects
