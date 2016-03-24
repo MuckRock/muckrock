@@ -223,6 +223,9 @@ nav.website-navigation {
         .sidebar-toggle {
             display: none;
         }
+        .create-request-button {
+            border-right: 1px solid $color-grey-3;
+        }
     }
 }
 

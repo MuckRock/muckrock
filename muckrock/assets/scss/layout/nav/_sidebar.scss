@@ -53,8 +53,9 @@ The sidebar should use a dark UI.
 
     .quick-log-in {
         position: absolute;
-        margin: 0;
-        border-bottom: 1px solid $color-black-pure;
+        z-index: 19;
+        margin: 2.6875em 0 0 0;
+        border-bottom: 1px solid $color-grey-3;
         padding: $vertical-rhythm;
         background: $color-black;
         color: $color-white;
@@ -90,7 +91,6 @@ The sidebar should use a dark UI.
         width: $sidebar-width;
         margin-bottom: 0;
         border-bottom: 1px solid $color-grey-3;
-        border-left: 1px solid $color-grey-3;
         background-color: $color-black;
         font-weight: $font-weight-bold;
         .username, .sign-up, .log-in {
@@ -122,8 +122,53 @@ The sidebar should use a dark UI.
         }
     }
 
-    .articles dfn {
-        text-align: center;
+    .requests {
+        .actionable {
+            display: block;
+            padding: $vertical-rhythm/2 $vertical-rhythm;
+            color: $color-white;
+            font-weight: $font-weight-bold;
+            text-decoration: none;
+            .counter {
+                background: $color-blue;
+            }
+            &:hover {
+                background: $color-blue;
+            }
+            &.payment, &.fix {
+                .counter {
+                    background: $color-red;
+                }
+                &:hover {
+                    background: $color-red;
+                }
+            }
+        }
+        .actionable-request-list {
+            margin-bottom: $vertical-rhythm/2;
+            a {
+                display: block;
+                padding: 0 $vertical-rhythm;
+                font-size: $font-size-2;
+                color: $color-white;
+                text-decoration: none;
+                &:hover {
+                    background: $color-blue;
+                }
+                &.more {
+                    font-weight: $font-weight-bold;
+                }
+            }
+            &.payment, &.fix {
+                a:hover {
+                    background: $color-red;
+                }
+            }
+        }
+
+    }
+
+    dfn {
         padding: 0 $vertical-rhythm/2;
         color: $color-white;
     }
@@ -147,7 +192,7 @@ The sidebar should use a dark UI.
         img {
             position: absolute;
             z-index: 1;
-            opacity: .25;
+            opacity: .15;
             margin-bottom: 0;
         }
         &:hover {
@@ -178,15 +223,15 @@ The sidebar should use a dark UI.
         padding: $vertical-rhythm/2 $vertical-rhythm;
         color: $color-white;
         font-weight: $font-weight-bold;
-
         text-decoration: none;
         &:hover {
             background: $color-blue;
         }
     }
 
+
     @include media($large-layout) {
-        &, .payment.failure {
+        &, .article, .payment.failure {
             box-shadow: inset 4px 0px 8px rgba(0, 0, 0, 0.25);
         }
     }

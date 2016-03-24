@@ -59,35 +59,54 @@
                 <span class="payments counter">{{ actionable_requests.payment|length }}</span>
                 Payment{{ actionable_requests.payment|length|pluralize }} Required
             </a>
-            <ul class="actionable-request-list">
+            <ul class="payment actionable-request-list nostyle">
                 {% for foia in actionable_requests.payment|slice:":10" %}
-                <li><a href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}">{{ foia.title }}</a></li>
+                <li><a class="truncate" href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}">{{ foia.title }}</a></li>
                 {% endfor %}
+                {% if actionable_requests.payment|length > 10 %}
+                <li><a class="more" href="{% url 'foia-mylist' %}?status=payment">{{actionable_requests.payment|slice:"10:"|length}} More</a></li>
+                {% endif %}
             </ul>
             {% endif %}
             {% if actionable_requests.fix %}
-            <a class="actionable fixes" href="{% url 'foia-mylist' %}?status=fix">
+            <a class="actionable fix" href="{% url 'foia-mylist' %}?status=fix">
                 <span class="fixes counter">{{ actionable_requests.fix|length }}</span>
                 Fix{{ actionable_requests.fix|length|pluralize:"es" }} Required
             </a>
+            <ul class="fix actionable-request-list nostyle">
+                {% for foia in actionable_requests.fix|slice:":10" %}
+                <li><a class="truncate" href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}">{{ foia.title }}</a></li>
+                {% endfor %}
+                {% if actionable_requests.fix|length > 10 %}
+                <li><a class="more" href="{% url 'foia-mylist' %}?status=fix">{{actionable_requests.fix|slice:"10:"|length}} More</a></li>
+                {% endif %}
+            </ul>
             {% endif %}
             {% if actionable_requests.started %}
             <a class="actionable drafts" href="{% url 'foia-mylist' %}?status=started">
                 <span class="drafts counter">{{ actionable_requests.started|length }}</span>
                 Draft{{ actionable_requests.started|length|pluralize }}
             </a>
+            <ul class="actionable-request-list nostyle">
+                {% for foia in actionable_requests.started|slice:":10" %}
+                <li><a class="truncate" href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}">{{ foia.title }}</a></li>
+                {% endfor %}
+                {% if actionable_requests.started|length > 10 %}
+                <li><a class="more" href="{% url 'foia-mylist' %}?status=started">{{actionable_requests.started|slice:"10:"|length}} More</a></li>
+                {% endif %}
+            </ul>
             {% endif %}
             {% if actionable_requests.updates %}
             <a class="actionable updated" href="{% url 'foia-mylist' %}">
                 <span class="counter">{{ actionable_requests.updates|length }}</span>
                 Update{{ actionable_requests.updates|length|pluralize }}
             </a>
-            <ul class="actionable-request-list">
+            <ul class="actionable-request-list nostyle">
                 {% for foia in actionable_requests.updates|slice:":10" %}
-                <li><a href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}">{{ foia.title }}</a></li>
+                <li><a class="truncate" href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}">{{ foia.title }}</a></li>
                 {% endfor %}
                 {% if actionable_requests.updates|length > 10 %}
-                <li><a href="{% url 'foia-mylist' %}">More</a></li>
+                <li><a class="more" href="{% url 'foia-mylist' %}">{{actionable_requests.updates|slice:"10:"|length}} More</a></li>
                 {% endif %}
             </ul>
             {% endif %}
@@ -104,7 +123,6 @@
 
     {% if recent_articles %}
     <section class="recent articles">
-        <dfn>Recently published</dfn>
         {% for article in recent_articles %}
         <a href="{{article.get_absolute_url}}" title="{{article.summary}}" class="article">
             <img src="{% thumbnail article.image 250x100 crop %}" />
