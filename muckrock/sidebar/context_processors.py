@@ -1,7 +1,6 @@
 """Context processors to ensure data is displayed in sidebar for all views"""
 
 from django.contrib.auth.forms import AuthenticationForm
-from django.db.models import Count
 
 from datetime import datetime, timedelta
 
