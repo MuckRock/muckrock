@@ -23,6 +23,19 @@ $nav-background: #FFFFFF;
 
 .website-header {
     margin-bottom: 0;
+    position: fixed;
+    z-index: 100;
+    left: 0;
+    right: 0;
+    background-color: $nav-background;
+    border-bottom: $nav-border;
+    & + * {
+        // The top margin accounts for the fixed header
+        margin-top: 2.6875em;
+    }
+    @include media($large-layout) {
+        right: 15.625em;
+    }
 }
 
 .website-header .search-form {
@@ -132,12 +145,6 @@ $nav-background: #FFFFFF;
 }
 
 nav.website-navigation {
-    position: fixed;
-    z-index: 100;
-    left: 0;
-    right: 0;
-    background-color: $nav-background;
-    border-bottom: $nav-border;
     @include display(flex);
     @include justify-content(space-between);
     ul {
@@ -219,7 +226,6 @@ nav.website-navigation {
     }
 
     @include media($large-layout) {
-        right: 15.625em;
         .sidebar-toggle {
             display: none;
         }

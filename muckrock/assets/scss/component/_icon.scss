@@ -2,7 +2,7 @@ svg.icon {
     height: $font-size-3;
     width: $font-size-3;
     fill-rule: evenodd;
-    path, polygon, rect {
+    path, polygon, rect, circle {
         fill: $color-black;
     }
 }

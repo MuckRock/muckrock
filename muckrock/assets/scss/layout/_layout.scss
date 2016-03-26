@@ -19,8 +19,6 @@ html, body {
 
 .content {
     @include flex(1);
-    // The top margin accounts for the fixed header
-    margin-top: 2.6875em;
     padding: $vertical-rhythm/2;
     @include media($medium-layout) { padding: $vertical-rhythm; }
 }

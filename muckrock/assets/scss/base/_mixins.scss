@@ -1,12 +1,3 @@
-@mixin colorize-icon($color) {
-    .svg-icon path,
-    .svg-icon polygon,
-    .svg-icon rect {
-        fill: $color;
-    }
-    .svg-icon circle { stroke: $color; }
-}
-
 @mixin font-sizing($size-multiplier, $line-multiplier:3) {
     $size: 1em * $size-multiplier;
     $line: $vertical-rhythm;
