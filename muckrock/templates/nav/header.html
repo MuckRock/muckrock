@@ -14,6 +14,7 @@
                 <li><a class="nav-item" href="{% url 'project' %}">Projects</a></li>
                 <li><a class="nav-item" href="{% url 'foia-list'%}">Requests</a></li>
                 <li><a class="nav-item" href="{% url 'agency-list'%}">Agencies</a></li>
+                <li><a class="nav-item" href="{% url 'question-index'%}">Q&A Forum</a></li>
                 {% if user.is_staff %}
                 <li><a class="nav-item" href="{% url 'task-list' %}">Tasks</a></li>
                 {% endif %}

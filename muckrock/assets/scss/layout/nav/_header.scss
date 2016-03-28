@@ -1,26 +1,3 @@
-$nav-border: 1px solid $color-grey;
-$nav-background: #FFFFFF;
-
-@mixin nav-item-hover {
-    color: $nav-background;
-    background: $color-blue;
-    svg path { fill: $nav-background; }
-    a:hover {
-        color: $nav-background;
-    }
-}
-
-@mixin nav-item-color {
-    color: $color-black;
-    path { fill: $color-black; }
-    a {
-        color: $color-black;
-    }
-    &:hover {
-        @include nav-item-hover;
-    }
-}
-
 .website-header {
     margin-bottom: 0;
     position: fixed;
@@ -33,7 +10,7 @@ $nav-background: #FFFFFF;
         // The top margin accounts for the fixed header
         margin-top: 2.6875em;
     }
-    @include media($large-layout) {
+    @media($sidebar-bp) {
         right: 15.625em;
     }
 }
@@ -88,7 +65,7 @@ $nav-background: #FFFFFF;
         display: block;
         visibility: visible;
     }
-    @include media($large-layout) {
+    @media($logo-bp) {
         .logotype {
             display: block;
             visibility: visible;
@@ -192,7 +169,7 @@ nav.website-navigation {
         }
     }
 
-    @media (max-width: 47em) {
+    @media($nav-bp) {
         padding-left: 0;
         .website-sections {
             display: none;
@@ -225,7 +202,7 @@ nav.website-navigation {
         }
     }
 
-    @include media($large-layout) {
+    @media($sidebar-bp) {
         .sidebar-toggle {
             display: none;
         }
