@@ -234,24 +234,3 @@ nav.website-navigation {
         }
     }
 }
-
-
-#modal-overlay {
-    position: fixed;
-    top: -9999px;
-    left: 0;
-    height: 110%;
-    width: 100vw;
-    z-index: 200;
-    background-color: $color-black;
-    opacity: 0;
-    transition: top 0s .25s, opacity .25s linear;
-    &.visible {
-        top: 0;
-        opacity: .9;
-        transition: top 0s 0s, opacity .25s linear;
-    }
-    &:hover {
-        cursor: pointer;
-    }
-}
