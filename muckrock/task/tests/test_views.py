@@ -144,6 +144,16 @@ class OrphanTaskViewTests(TestCase):
         self.client = Client()
         self.client.login(username='adam', password='abc')
 
+    def test_get_single(self):
+        """Should be able to view a single task"""
+        response = self.client.get(reverse('orphan-task', kwargs={'pk': self.task.pk}))
+        eq_(response.status_code, 200)
+
+    def test_get_single_404(self):
+        """If the single orphan task does not exist, then 404"""
+        response = self.client.get(reverse('orphan-task', kwargs={'pk': 123456789}))
+        eq_(response.status_code, 404)
+
     def test_move(self):
         foia_1_comm_count = FOIARequest.objects.get(pk=1).communications.all().count()
         foia_2_comm_count = FOIARequest.objects.get(pk=2).communications.all().count()
@@ -207,6 +217,11 @@ class SnailMailTaskViewTests(TestCase):
         self.client = Client()
         self.client.login(username='adam', password='abc')
 
+    def test_get_single(self):
+        """Should be able to view a single task"""
+        response = self.client.get(reverse('snail-mail-task', kwargs={'pk': self.task.pk}))
+        eq_(response.status_code, 200)
+
     def test_post_set_status(self):
         """Should update the status of the task's communication and associated request."""
         new_status = 'ack'
@@ -252,6 +267,15 @@ class FlaggedTaskViewTests(TestCase):
         self.task = FlaggedTaskFactory()
         self.request_factory = RequestFactory()
 
+    def test_get_single(self, mock_reply):
+        """Should be able to view a single task"""
+        # pylint: disable=unused-argument
+        request = self.request_factory.get(reverse('flagged-task', kwargs={'pk': self.task.pk}))
+        request.user = self.user
+        request = mock_middleware(request)
+        response = self.view(request)
+        eq_(response.status_code, 200)
+
     def post_request(self, data):
         """Helper to post data and get a response"""
         request = self.request_factory.post(self.url, data)
@@ -293,6 +317,15 @@ class StaleAgencyTaskViewTests(TestCase):
         self.view = task.views.StaleAgencyTaskList.as_view()
         self.task = StaleAgencyTaskFactory()
         self.request_factory = RequestFactory()
+
+    def test_get_single(self):
+        """Should be able to view a single task"""
+        _url = reverse('stale-agency-task', kwargs={'pk': self.task.pk})
+        request = self.request_factory.get(_url)
+        request.user = self.user
+        request = mock_middleware(request)
+        response = self.view(request)
+        eq_(response.status_code, 200)
 
     def post_request(self, data):
         """Helper to post data and get a response"""
@@ -377,6 +410,11 @@ class NewAgencyTaskViewTests(TestCase):
         self.client = Client()
         self.client.login(username='adam', password='abc')
 
+    def test_get_single(self):
+        """Should be able to view a single task"""
+        response = self.client.get(reverse('new-agency-task', kwargs={'pk': self.task.pk}))
+        eq_(response.status_code, 200)
+
     def test_post_accept(self):
         contact_data = {
             'name': 'Test Agency',
@@ -425,6 +463,11 @@ class ResponseTaskListViewTests(TestCase):
         self.task = task.models.ResponseTask.objects.get(pk=8)
         self.client = Client()
         self.client.login(username='adam', password='abc')
+
+    def test_get_single(self):
+        """Should be able to view a single task"""
+        response = self.client.get(reverse('response-task', kwargs={'pk': self.task.pk}))
+        eq_(response.status_code, 200)
 
     def test_post_set_price(self):
         """Setting the price should update the price on the response's request."""
