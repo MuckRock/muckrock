@@ -5,6 +5,7 @@
 #    pip-compile requirements.in
 #
 -e git+git://github.com/django-haystack/django-haystack.git@f1ed18313777005dd77ed724ecbfb27c0b03cad8#egg=django-haystack
+-e git+git://github.com/rentapplication/django-mailgun.git@2ec07afcda0db7dfe5588f83e9ed299bc04bb0b5#egg=django_mailgun
 -e git+git://github.com/callowayproject/django-news-sitemaps.git@55da6b72580dd6d79380f2bb17240e7afa00555a#egg=django_news_sitemaps-master
 amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu
@@ -30,7 +31,6 @@ django-geojson==2.9.0
 django-leaflet==0.18.0
 django-localflavor==1.2
 django-lot==0.0.6
-django-mailgun==0.8.0
 django-markdown-deux==1.0.5
 django-mathfilters==0.3.0
 django-package-monitor==0.3.4
@@ -63,11 +63,11 @@ psycopg2==2.6.1
 pyimagediet==1.1.1        # via image-diet2
 pylibmc==1.5.1            # via django-pylibmc
 pysolr==3.4.0
-python-dateutil==2.5.1
+python-dateutil==2.5.2
 python-magic==0.4.11      # via pyimagediet
-pytz==2016.2              # via celery
+pytz==2016.3              # via celery
 PyYAML==3.11              # via django-rest-swagger, pyimagediet
-raven==5.11.1
+raven==5.11.2
 rcssmin==1.0.6            # via django-compressor
 redis==2.10.5
 requests==2.9.1
@@ -77,7 +77,7 @@ scikit-learn==0.16.1
 scipy==0.14.0
 semantic-version==2.5.0   # via django-package-monitor
 simplejson==3.8.2         # via django-lot
-six==1.10.0               # via django-appconf, django-autocomplete-light, django-geojson, django-mailgun, python-dateutil
+six==1.10.0               # via django-appconf, django-autocomplete-light, django-geojson, python-dateutil
 sqlparse==0.1.19          # via django-debug-toolbar
-stripe==1.31.0
+stripe==1.31.1
 unidecode==0.4.19
