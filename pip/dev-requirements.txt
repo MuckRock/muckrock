@@ -36,7 +36,7 @@ pycrypto==2.6.1           # via paramiko
 pylint-django==0.7.1
 pylint-plugin-utils==0.2.3  # via pylint-django
 pylint==1.5.5             # via pylint-django, pylint-plugin-utils
-python-dateutil==2.5.1    # via fake-factory
+python-dateutil==2.5.2    # via fake-factory
 simplegeneric==0.8.1      # via ipython
 six==1.10.0               # via astroid, dj-inmemorystorage, fake-factory, mock, pip-tools, pylint, python-dateutil
 traitlets==4.2.1          # via ipython
