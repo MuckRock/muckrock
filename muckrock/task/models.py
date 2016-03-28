@@ -3,6 +3,7 @@ Models for the Task application
 """
 
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Max, Prefetch, Q
 
@@ -16,6 +17,8 @@ from muckrock.foia.models import FOIACommunication, FOIAFile, FOIANote, FOIARequ
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.notifications import SupportNotification
 from muckrock.models import ExtractDay, Now
+
+# pylint: disable=missing-docstring
 
 def generate_status_action(foia):
     """Generate activity stream action for agency response"""
@@ -160,6 +163,9 @@ class OrphanTask(Task):
     def __unicode__(self):
         return u'Orphan Task'
 
+    def get_absolute_url(self):
+        return reverse('orphan-task', kwargs={'pk': self.pk})
+
     def move(self, foia_pks):
         """Moves the comm and creates a ResponseTask for it"""
         moved_comms = self.communication.move(foia_pks)
@@ -216,6 +222,9 @@ class SnailMailTask(Task):
     def __unicode__(self):
         return u'Snail Mail Task'
 
+    def get_absolute_url(self):
+        return reverse('snail-mail-task', kwargs={'pk': self.pk})
+
     def set_status(self, status):
         """Set the status of the comm and FOIA affiliated with this task"""
         comm = self.communication
@@ -261,6 +270,9 @@ class RejectedEmailTask(Task):
     def __unicode__(self):
         return u'Rejected Email Task'
 
+    def get_absolute_url(self):
+        return reverse('rejected-email-task', kwargs={'pk': self.pk})
+
     def agencies(self):
         """Get the agencies who use this email address"""
         return Agency.objects.filter(Q(email__iexact=self.email) |
@@ -283,6 +295,9 @@ class StaleAgencyTask(Task):
 
     def __unicode__(self):
         return u'Stale Agency Task'
+
+    def get_absolute_url(self):
+        return reverse('stale-agency-task', kwargs={'pk': self.pk})
 
     def resolve(self, user=None):
         """Mark the agency as stale when resolving"""
@@ -333,6 +348,9 @@ class FlaggedTask(Task):
     def __unicode__(self):
         return u'Flagged Task'
 
+    def get_absolute_url(self):
+        return reverse('flagged-task', kwargs={'pk': self.pk})
+
     def flagged_object(self):
         """Return the object that was flagged (should only ever be one, and never none)"""
         if self.foia:
@@ -359,6 +377,9 @@ class NewAgencyTask(Task):
 
     def __unicode__(self):
         return u'New Agency Task'
+
+    def get_absolute_url(self):
+        return reverse('new-agency-task', kwargs={'pk': self.pk})
 
     def pending_requests(self):
         """Returns the requests to be acted on"""
@@ -400,6 +421,9 @@ class ResponseTask(Task):
 
     def __unicode__(self):
         return u'Response Task'
+
+    def get_absolute_url(self):
+        return reverse('response-task', kwargs={'pk': self.pk})
 
     def move(self, foia_pks):
         """Moves the associated communication to a new request"""
@@ -464,6 +488,9 @@ class FailedFaxTask(Task):
     def __unicode__(self):
         return u'Failed Fax Task'
 
+    def get_absolute_url(self):
+        return reverse('failed-fax-task', kwargs={'pk': self.pk})
+
 
 class StatusChangeTask(Task):
     """A user has the status on a request"""
@@ -475,6 +502,9 @@ class StatusChangeTask(Task):
     def __unicode__(self):
         return u'Status Change Task'
 
+    def get_absolute_url(self):
+        return reverse('status-change-task', kwargs={'pk': self.pk})
+
 
 class CrowdfundTask(Task):
     """Created when a crowdfund is finished"""
@@ -484,6 +514,9 @@ class CrowdfundTask(Task):
     def __unicode__(self):
         return u'Crowdfund Task'
 
+    def get_absolute_url(self):
+        return reverse('crowdfund-task', kwargs={'pk': self.pk})
+
 
 class MultiRequestTask(Task):
     """Created when a multirequest is created and needs approval."""
@@ -492,6 +525,9 @@ class MultiRequestTask(Task):
 
     def __unicode__(self):
         return u'Multi-Request Task'
+
+    def get_absolute_url(self):
+        return reverse('multirequest-task', kwargs={'pk': self.pk})
 
 
 # Not a task, but used by tasks
