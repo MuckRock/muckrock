@@ -19,8 +19,15 @@ html, body {
 
 .content {
     @include flex(1);
+    margin-bottom: 0;
     padding: $vertical-rhythm/2;
     @include media($medium-layout) { padding: $vertical-rhythm; }
+}
+
+@mixin edge-to-edge() {
+    // Edge-to-edge negates the content padding
+    margin: -1*$vertical-rhythm/2;
+    @include media($medium-layout) { margin: -1*$vertical-rhythm; }
 }
 
 section.error-404 {
@@ -75,12 +82,6 @@ article.error-500 {
             background: rgba(0, 0, 0, 0.6);
         }
     }
-}
-
-@mixin edge-to-edge() {
-    // Ignore container padding
-    margin: 0 -1*$vertical-rhythm/2;
-    @include media($medium-layout) { margin: 0 -1*$vertical-rhythm; }
 }
 
 @import 'profile';
