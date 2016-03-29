@@ -63,7 +63,6 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                 'jurisdiction'
             )
             .prefetch_related(
-                'communications',
                 'communications__files',
                 'notes',
                 'tags',
