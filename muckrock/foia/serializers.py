@@ -94,13 +94,14 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             foia = None
 
         request = self.context.get('request', None)
-        if request is None or not request.user.is_staff:
+        if request is None:
             self.fields.pop('mail_id')
             self.fields.pop('email')
             self.fields.pop('notes')
             return
-
         if not request.user.is_staff:
+            self.fields.pop('mail_id')
+            self.fields.pop('email')
             if not foia:
                 self.fields.pop('notes')
             else:
