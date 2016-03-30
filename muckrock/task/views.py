@@ -341,7 +341,6 @@ class ResponseTaskList(TaskList):
 
     def task_post_helper(self, request, task):
         """Special post helper exclusive to ResponseTask"""
-        # XXX need a UI way to mark as proxy rejected
         error_happened = False
         form = ResponseTaskForm(request.POST)
         if not form.is_valid():
@@ -354,6 +353,7 @@ class ResponseTaskList(TaskList):
         tracking_number = cleaned_data['tracking_number']
         date_estimate = cleaned_data['date_estimate']
         price = cleaned_data['price']
+        proxy = cleaned_data['proxy']
         # move is executed first, so that the status and tracking
         # operations are applied to the correct FOIA request
         if move:
@@ -387,9 +387,11 @@ class ResponseTaskList(TaskList):
             except ValueError:
                 messages.error(request, 'You tried to set a non-numeric price.')
                 error_happened = True
-        if (move or status or tracking_number or price) and not error_happened:
+        if proxy:
+            task.proxy_reject()
+        action_taken = move or status or tracking_number or price or proxy
+        if action_taken and not error_happened:
             task.resolve(request.user)
-        return
 
 
 class StatusChangeTaskList(TaskList):

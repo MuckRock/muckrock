@@ -212,7 +212,6 @@ class SnailMailTask(Task):
         ('n', 'New'),
         ('u', 'Update'),
         ('f', 'Followup'),
-        ('p', 'Payment'),
     )
     category = models.CharField(max_length=1, choices=categories)
     communication = models.ForeignKey('foia.FOIACommunication')
@@ -486,7 +485,7 @@ class ResponseTask(Task):
         self.communication.foia.proxy_reject()
         self.communication.foia.update()
         self.communication.foia.save()
-        generate_status_action(foia)
+        generate_status_action(self.communication.foia)
 
 
 class FailedFaxTask(Task):

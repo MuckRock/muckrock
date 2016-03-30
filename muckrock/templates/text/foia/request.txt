@@ -18,7 +18,7 @@ Thank you in advance for your anticipated cooperation in this matter. I look for
 Thank you in advance for your anticipated cooperation in this matter. I would request your response within ten (10) business days.
 {% endif %}
 {% if proxy %}
-Please note that I am a citizen of {{ jurisdiction.state }}, and am using MuckRock's services to help manage track my request.
+Please note that I am a citizen of {{ jurisdiction.get_state }}, and am using MuckRock's services to help manage track my request.
 {% endif %}
 Sincerely,
 
