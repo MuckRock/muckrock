@@ -43,10 +43,29 @@ class FOIACommunication(models.Model):
     """A single communication of a FOIA request"""
 
     foia = models.ForeignKey(FOIARequest, related_name='communications', blank=True, null=True)
+
+    # XXX these become deprecated
+    # from/to names
     from_who = models.CharField(max_length=255)
     to_who = models.CharField(max_length=255, blank=True)
+    # from/to full email address
     priv_from_who = models.CharField(max_length=255, blank=True)
     priv_to_who = models.CharField(max_length=255, blank=True)
+    # XXX
+
+    from_user = models.ForeignKey(
+            User,
+            blank=True,
+            null=True,
+            on_delete=models.PROTECT
+            )
+    to_user = models.ForeignKey(
+            User,
+            blank=True,
+            null=True,
+            on_delete=models.PROTECT
+            )
+
     subject = models.CharField(max_length=255, blank=True)
     date = models.DateTimeField(db_index=True)
     response = models.BooleanField(default=False,
@@ -58,6 +77,12 @@ class FOIACommunication(models.Model):
     delivered = models.CharField(max_length=10, choices=DELIVERED, blank=True, null=True)
     # what status this communication should set the request to - used for machine learning
     status = models.CharField(max_length=10, choices=STATUS, blank=True, null=True)
+
+    # confirmed, opened, error
+    confirmed = models.BooleanField(default=False)
+    #new_opened = models # keep track of metadata?
+    #error = # dropped/bounced/reason/code/notification
+
     opened = models.BooleanField(default=False,
             help_text='If emailed, did we receive an open notification? '
                       'If faxed, did we recieve a confirmation?')

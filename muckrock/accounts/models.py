@@ -18,6 +18,7 @@ import stripe
 from urllib import urlencode
 
 from muckrock import utils
+from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.organization.models import Organization
@@ -32,14 +33,15 @@ class EmailOptions(dbsettings.Group):
 
 options = EmailOptions()
 
-ACCT_TYPES = [
+ACCT_TYPES = (
     ('admin', 'Admin'),
     ('basic', 'Basic'),
     ('beta', 'Beta'),
     ('pro', 'Professional'),
     ('proxy', 'Proxy'),
     ('robot', 'Robot'),
-]
+    ('agency', 'Agency'),
+)
 
 PAYMENT_FEE = .05
 
@@ -422,6 +424,32 @@ class Profile(models.Model):
                 )
             extra.update({settings.LOT_MIDDLEWARE_PARAM_NAME: lot.uuid})
         return link + '?' + urlencode(extra)
+
+CONTACT_TYPES = (
+    ('primary', 'Primary'), # Send to this contact by default
+    ('copy', 'Copy'), # CC to this contact by default
+    ('appeal', 'Appeal'), # Send to this contact by default for appeals
+    ('other', 'Other'), # Only send to this contact when they reply to a message
+)
+
+class AgencyProfile(models.Model):
+    """Extra profile for agency users"""
+
+    agency = models.ForeignKey(
+        Agency,
+        blank=True,
+        null=True,
+        related_name='members',
+        on_delete=models.PROTECT)
+    phone = models.CharField(blank=True, max_length=30)
+    fax = models.CharField(blank=True, max_length=30)
+    salutation = models.CharField(blank=True, max_length=30)
+    title = models.CharField(blank=True, max_length=255)
+    contact_type = models.CharField(
+            choices=CONTACT_TYPES,
+            max_length=7,
+            default='other',
+            )
 
 
 class Statistics(models.Model):

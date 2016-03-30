@@ -72,12 +72,14 @@ class Agency(models.Model, RequestHelper):
     stale = models.BooleanField(default=False)
     address = models.TextField(blank=True)
     location = PointField(blank=True)
-    email = models.EmailField(blank=True)
+    # XXX delete
+    email = models.EmailField(blank=True) # maybe leave email
     other_emails = fields.EmailsListField(blank=True, max_length=255)
     contact_salutation = models.CharField(blank=True, max_length=30)
     contact_first_name = models.CharField(blank=True, max_length=100)
     contact_last_name = models.CharField(blank=True, max_length=100)
     contact_title = models.CharField(blank=True, max_length=255)
+    # XXX
     url = models.URLField(blank=True, verbose_name='FOIA Web Page', help_text='Begin with http://')
     phone = models.CharField(blank=True, max_length=30)
     fax = models.CharField(blank=True, max_length=30)
