@@ -212,7 +212,6 @@ class SnailMailTask(Task):
         ('n', 'New'),
         ('u', 'Update'),
         ('f', 'Followup'),
-        ('p', 'Payment')
     )
     category = models.CharField(max_length=1, choices=categories)
     communication = models.ForeignKey('foia.FOIACommunication')
@@ -477,6 +476,16 @@ class ResponseTask(Task):
         foia.update()
         foia.save()
         logging.info('Estimated completion date set to %s', date_estimate)
+
+    def proxy_reject(self):
+        """Special handling for a proxy reject"""
+        self.communication.status = 'rejected'
+        self.communication.save()
+        self.communication.foia.status = 'rejected'
+        self.communication.foia.proxy_reject()
+        self.communication.foia.update()
+        self.communication.foia.save()
+        generate_status_action(self.communication.foia)
 
 
 class FailedFaxTask(Task):
