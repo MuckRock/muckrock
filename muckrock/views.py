@@ -11,7 +11,7 @@ from django.db.models import Sum, FieldDoesNotExist
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.utils.decorators import method_decorator
-from django.views.generic.list import ListView
+from django.views.generic import View, ListView
 
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAFile
@@ -261,6 +261,16 @@ class MRSearchView(SearchView):
         """Circumvents the hard-coded haystack per page value."""
         self.results_per_page = self.get_paginate_by()
         return super(MRSearchView, self).build_page()
+
+
+class NewsletterSignupView(View):
+    """Allows users to signup for our MailChimp newsletter."""
+    def get(self, request, *args, **kwargs):
+        """Returns a signup form"""
+        return render_to_response(
+            'newsletter.html',
+            locals(),
+            context_instance=RequestContext(request))
 
 def homepage(request):
     """Get all the details needed for the homepage"""

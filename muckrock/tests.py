@@ -2,20 +2,25 @@
 Tests for site level functionality and helper functions for application tests
 """
 
+from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 
 from mock import Mock
 import logging
 import nose.tools
 
 from muckrock.fields import EmailsListField
+from muckrock.utils import mock_middleware
+from muckrock.views import NewsletterSignupView
 
 # pylint: disable=no-self-use
 # pylint: disable=too-many-public-methods
 
 logging.disable(logging.CRITICAL)
+
+eq_ = nose.tools.eq_
 
 kwargs = {"wsgi.url_scheme": "https"}
 
@@ -112,3 +117,17 @@ class TestUnit(TestCase):
 
         field.clean('a@example.com,an.email@foo.net', model_instance)
 
+class TestNewsletterSignupView(TestCase):
+    """By submitting an email, users can subscribe to our MailChimp newsletter list."""
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.view = NewsletterSignupView.as_view()
+        self.url = reverse('newsletter')
+
+    def test_get_view(self):
+        """Visiting the page should present a signup form."""
+        request = self.factory.get(self.url)
+        request.user = AnonymousUser()
+        request = mock_middleware(request)
+        response = self.view(request)
+        eq_(response.status_code, 200)
