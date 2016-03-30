@@ -1,0 +1,15 @@
+{% extends 'lists/base_list.html' %}
+{% block title %}MuckRock &bull; Proxies{% endblock title %}
+{% block list-type %}proxy{% endblock list-type %}
+
+{% block list-table-head %}
+<th data-sort="last_name">Name</th>
+<th data-sort="state">State</th>
+{% endblock list-table-head %}
+
+{% block list-table-item %}
+{% with item as user %}
+<td><a href="{{ user.get_absolute_url }}">{{ user.get_full_name }}</a></td>
+<td>{{ user.profile.get_state_display }}</td>
+{% endwith %}
+{% endblock list-table-item %}

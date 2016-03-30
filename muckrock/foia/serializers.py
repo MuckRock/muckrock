@@ -93,35 +93,57 @@ class FOIARequestSerializer(serializers.ModelSerializer):
         else:
             foia = None
 
-        if 'request' not in self.context:
+        request = self.context.get('request', None)
+        if request is None:
             self.fields.pop('mail_id')
             self.fields.pop('email')
             self.fields.pop('notes')
             return
-
-        request = self.context['request']
-
         if not request.user.is_staff:
             self.fields.pop('mail_id')
             self.fields.pop('email')
-
-        if foia and not foia.editable_by(request.user) and not request.user.is_staff:
-            self.fields.pop('notes')
-        if not foia and not request.user.is_staff:
-            self.fields.pop('notes')
-
-        if foia and request.method == 'PATCH' and foia.editable_by(request.user) \
-                and not request.user.is_staff:
-            allowed = ['notes', 'tags', 'embargo']
-            for field in self.fields.keys():
-                if field not in allowed:
-                    self.fields.pop(field)
-
+            if not foia:
+                self.fields.pop('notes')
+            else:
+                if not foia.editable_by(request.user):
+                    self.fields.pop('notes')
+                if request.method == 'PATCH' and foia.editable_by(request.user):
+                    allowed = ['notes', 'tags', 'embargo']
+                    for field in self.fields.keys():
+                        if field not in allowed:
+                            self.fields.pop(field)
 
     class Meta:
         model = FOIARequest
-        fields = ('id', 'user', 'username', 'title', 'slug', 'status', 'communications',
-                  'jurisdiction', 'agency', 'date_submitted', 'date_done', 'date_due',
-                  'days_until_due', 'date_followup', 'embargo', 'date_embargo', 'price',
-                  'requested_docs', 'description', 'tracking_id', 'tags', 'mail_id', 'email',
-                  'notes', 'disable_autofollowups')
+        fields = (
+            # request details
+            'id',
+            'title',
+            'slug',
+            'status',
+            'embargo',
+            'user',
+            'username',
+            'jurisdiction',
+            'agency',
+            # request content
+            'requested_docs',
+            'description',
+            # request dates
+            'date_submitted',
+            'date_due',
+            'days_until_due',
+            'date_followup',
+            'date_done',
+            'date_embargo',
+            # processing details
+            'email',
+            'mail_id',
+            'tracking_id',
+            'price',
+            'disable_autofollowups',
+            # connected models
+            'tags',
+            'notes',
+            'communications',
+	    )

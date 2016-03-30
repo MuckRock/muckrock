@@ -38,16 +38,19 @@ def create_flagged_task_payload(flagged_task):
     """Create a Slack notification payload for a Flagged Task"""
     base_url = 'https://www.muckrock.com'
     task_url = base_url + reverse('task-list') + '?id=' + str(flagged_task.id)
-    author_url = base_url + flagged_task.user.profile.get_absolute_url()
-    author_name = flagged_task.user.get_full_name()
-    flagged_by = {
-        'title': 'Flagged by',
-        'value': '<%(user_url)s|%(user_name)s>' % {
-            'user_url': author_url,
-            'user_name': author_name
-        },
-        'short': True
-    }
+    fields = []
+    if flagged_task.user is not None:
+        author_url = base_url + flagged_task.user.profile.get_absolute_url()
+        author_name = flagged_task.user.get_full_name()
+        flagged_by = {
+            'title': 'Flagged by',
+            'value': '<%(user_url)s|%(user_name)s>' % {
+                'user_url': author_url,
+                'user_name': author_name
+            },
+            'short': True
+        }
+        fields.append(flagged_by)
     flagged_object = {
         'title': '%s' % flagged_task.flagged_object().__class__.__name__,
         'value': '<%(url)s|%(name)s>' % {
@@ -56,12 +59,19 @@ def create_flagged_task_payload(flagged_task):
         },
         'short': True
     }
-    summary = (
-        'A <%(task_url)s|flagged task> was created by <%(user_url)s|%(user_name)s>: %(text)s' % {
-            'task_url': task_url,
+    fields.append(flagged_object)
+    if flagged_task.user is not None:
+        created_by = ' by <%(user_url)s|%(user_name)s>' % {
             'user_url': author_url,
             'user_name': author_name,
-            'text': flagged_task.text
+        }
+    else:
+        created_by = ''
+    summary = (
+        'A <%(task_url)s|flagged task> was created%(created_by)s: %(text)s' % {
+            'task_url': task_url,
+            'created_by': created_by,
+            'text': flagged_task.text,
         })
     payload = {
         'icon_emoji': ':triangular_flag_on_post:',
@@ -71,7 +81,7 @@ def create_flagged_task_payload(flagged_task):
             {
                 'fallback': summary,
                 'text': flagged_task.text,
-                'fields': [flagged_by, flagged_object]
+                'fields': fields,
             }
         ]
     }
