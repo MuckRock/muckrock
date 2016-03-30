@@ -341,6 +341,7 @@ class ResponseTaskList(TaskList):
 
     def task_post_helper(self, request, task):
         """Special post helper exclusive to ResponseTask"""
+        # pylint: disable=too-many-branches
         error_happened = False
         form = ResponseTaskForm(request.POST)
         if not form.is_valid():
