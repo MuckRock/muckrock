@@ -240,6 +240,7 @@ class MRSearchView(SearchView):
 
     def extra_context(self):
         """Adds per_page to context data"""
+        # pylint: disable=not-callable
         context = super(MRSearchView, self).extra_context()
         context['per_page'] = int(self.request.GET.get('per_page', 25))
         models = self.request.GET.getlist('models')
@@ -264,7 +265,6 @@ class MRSearchView(SearchView):
 def homepage(request):
     """Get all the details needed for the homepage"""
     # pylint: disable=unused-variable
-    # pylint: disable=no-member
     articles = cache_get_or_set(
             'hp:articles',
             lambda: Article.objects.get_published()

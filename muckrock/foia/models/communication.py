@@ -85,7 +85,6 @@ class FOIACommunication(models.Model):
 
     def get_absolute_url(self):
         """The url for this object"""
-        # pylint: disable=no-member
         return self.foia.get_absolute_url() + ('#comm-%d' % self.pk)
 
     def save(self, *args, **kwargs):
@@ -290,12 +289,12 @@ class FOIANote(models.Model):
     note = models.TextField()
 
     def __unicode__(self):
-        # pylint: disable=no-member
+        # pylint: disable=redefined-variable-type
         if self.author:
-            author = self.author
+            user = self.author
         else:
-            author = self.foia.user
-        return 'Note by %s on %s' % (author.get_full_name(), self.foia.title)
+            user = self.foia.user
+        return 'Note by %s on %s' % (user.get_full_name(), self.foia.title)
 
     class Meta:
         # pylint: disable=too-few-public-methods

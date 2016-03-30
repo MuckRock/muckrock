@@ -12,9 +12,9 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
-import autocomplete_light
+from autocomplete_light import shortcuts as autocomplete_light
 from datetime import date, datetime, timedelta
-from reversion import VersionAdmin
+from reversion.admin import VersionAdmin
 
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIAFile, FOIACommunication, \
@@ -120,7 +120,6 @@ class FOIARequestAdmin(NestedModelAdmin, VersionAdmin):
     save_on_top = True
     form = FOIARequestAdminForm
     formats = ['xls', 'csv']
-    # pylint: disable=no-member
     # pylint: disable=protected-access
     headers = [f.name for f in FOIARequest._meta.fields] + ['total_pages']
 
@@ -139,7 +138,6 @@ class FOIARequestAdmin(NestedModelAdmin, VersionAdmin):
 
     def save_formset(self, request, form, formset, change):
         """Actions to take while saving inline instances"""
-        # pylint: disable=no-member
 
         if formset.model == FOIANote:
             formset.save()
@@ -244,7 +242,6 @@ class FOIARequestAdmin(NestedModelAdmin, VersionAdmin):
 
     def retry_pages(self, request, idx):
         """Retry getting the page count"""
-        # pylint: disable=no-member
         # pylint: disable=no-self-use
 
         docs = FOIAFile.objects.filter(foia=idx, pages=0)

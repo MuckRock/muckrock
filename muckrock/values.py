@@ -6,9 +6,10 @@ from django import forms
 
 import dbsettings
 
+# pylint: disable=invalid-name
+
 class TextValue(dbsettings.values.Value):
     """Text area db value"""
-    # pylint: disable=C0103
     class field(forms.CharField):
         """Field for text value"""
         def __init__(self, *args, **kwargs):

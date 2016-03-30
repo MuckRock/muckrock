@@ -11,7 +11,7 @@ from muckrock.business_days.models import Holiday, Calendar
 from muckrock.jurisdiction.models import Jurisdiction
 
 # allow long names, methods that could be functions and too many public methods in tests
-# pylint: disable=C0103
+# pylint: disable=invalid-name
 # pylint: disable=no-self-use
 # pylint: disable=too-many-public-methods
 

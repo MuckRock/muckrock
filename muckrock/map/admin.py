@@ -5,8 +5,8 @@ Admin registration for Map models
 from django import forms
 from django.contrib import admin
 
-import autocomplete_light
-from reversion import VersionAdmin
+from autocomplete_light import shortcuts as autocomplete_light
+from reversion.admin import VersionAdmin
 
 from muckrock.foia.models import FOIARequest
 from muckrock.map.models import Map, Marker

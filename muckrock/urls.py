@@ -2,30 +2,30 @@
 URL mappings for muckrock project
 """
 
-# pylint: disable=unused-import
-# these are called dynmically
 from django.conf import settings
-from django.conf.urls import handler404
-from views import handler500
-# pylint: enable=unused-import
+from django.conf.urls import handler404 # pylint: disable=unused-import
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from django.views.generic.base import RedirectView
 
 from rest_framework.routers import DefaultRouter
 import dbsettings.urls
+import debug_toolbar
 
-import  muckrock.accounts.urls, muckrock.foia.urls, muckrock.news.urls, muckrock.agency.urls,\
-        muckrock.jurisdiction.urls, muckrock.mailgun.urls, muckrock.qanda.urls,\
-        muckrock.crowdfund.urls, muckrock.organization.urls, muckrock.task.urls,\
-        muckrock.map.urls, muckrock.project.urls, muckrock.tags.urls
-import  muckrock.agency.views, muckrock.foia.viewsets, muckrock.jurisdiction.views,\
-        muckrock.accounts.views, muckrock.task.viewsets
-import  muckrock.views as views
+import muckrock.accounts.views
+import muckrock.agency.views
+import muckrock.foia.viewsets
+import muckrock.jurisdiction.views
+import muckrock.jurisdiction.urls
+import muckrock.news.views
+import muckrock.qanda.views
+import muckrock.task.viewsets
+import muckrock.views as views
 from muckrock.agency.sitemap import AgencySitemap
 from muckrock.foia.sitemap import FoiaSitemap
 from muckrock.jurisdiction.sitemap import JurisdictionSitemap
 from muckrock.news.sitemap import ArticleSitemap
+from muckrock.views import handler500 # pylint: disable=unused-import
 
 admin.site.index_template = 'admin/custom_index.html'
 
@@ -90,20 +90,21 @@ urlpatterns = patterns(
     '',
     url(r'^$', views.homepage, name='index'),
     url(r'^reset_cache/$', views.reset_homepage_cache, name='reset-cache'),
-    url(r'^accounts/', include(muckrock.accounts.urls)),
-    url(r'^foi/', include(muckrock.foia.urls)),
-    url(r'^news/', include(muckrock.news.urls)),
-    url(r'^mailgun/', include(muckrock.mailgun.urls)),
-    url(r'^agency/', include(muckrock.agency.urls)),
+    url(r'^accounts/', include('muckrock.accounts.urls')),
+    url(r'^foi/', include('muckrock.foia.urls')),
+    url(r'^news/', include('muckrock.news.urls')),
+    url(r'^mailgun/', include('muckrock.mailgun.urls')),
+    url(r'^agency/', include('muckrock.agency.urls')),
     url(r'^place/', include(muckrock.jurisdiction.urls.urlpatterns)),
-    url(r'^jurisdiction/', include(muckrock.jurisdiction.urls.old_urlpatterns)),
-    url(r'^questions/', include(muckrock.qanda.urls)),
-    url(r'^crowdfund/', include(muckrock.crowdfund.urls)),
-    url(r'^task/', include(muckrock.task.urls)),
-    url(r'^tags/', include(muckrock.tags.urls)),
-    url(r'^organization/', include(muckrock.organization.urls)),
-    url(r'^project/', include(muckrock.project.urls)),
-    url(r'^map/', include(muckrock.map.urls)),
+    url(r'^jurisdiction/',
+        include(muckrock.jurisdiction.urls.old_urlpatterns)),
+    url(r'^questions/', include('muckrock.qanda.urls')),
+    url(r'^crowdfund/', include('muckrock.crowdfund.urls')),
+    url(r'^task/', include('muckrock.task.urls')),
+    url(r'^tags/', include('muckrock.tags.urls')),
+    url(r'^organization/', include('muckrock.organization.urls')),
+    url(r'^project/', include('muckrock.project.urls')),
+    url(r'^map/', include('muckrock.map.urls')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^search/$', views.MRSearchView(), name='search'),
     url(r'^settings/', include(dbsettings.urls)),
@@ -121,11 +122,6 @@ urlpatterns = patterns(
         {'sitemaps': sitemaps}
     ),
     url(r'^news-sitemaps/', include('news_sitemaps.urls')),
-
-)
-
-import debug_toolbar
-urlpatterns += patterns('',
     url(r'^__debug__/', include(debug_toolbar.urls)),
 )
 

@@ -4,7 +4,6 @@ App config for news
 
 from django.apps import AppConfig
 
-from actstream import registry
 
 class NewsConfig(AppConfig):
     """Configures the agency application to use activity streams"""
@@ -12,4 +11,5 @@ class NewsConfig(AppConfig):
 
     def ready(self):
         """Registers articles with the activity streams plugin"""
+        from actstream import registry
         registry.register(self.get_model('Article'))

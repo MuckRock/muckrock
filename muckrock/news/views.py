@@ -100,7 +100,6 @@ class ArticleViewSet(viewsets.ModelViewSet):
 
     class Filter(django_filters.FilterSet):
         """API Filter for Articles"""
-        # pylint: disable=no-member
         # pylint: disable=too-few-public-methods
         authors = django_filters.CharFilter(name='authors__username')
         editors = django_filters.CharFilter(name='editors__username')
@@ -116,7 +115,7 @@ class ArticleViewSet(viewsets.ModelViewSet):
     filter_class = Filter
 
     def get_queryset(self):
-        if 'no_editor' in self.request.QUERY_PARAMS:
+        if 'no_editor' in self.request.query_params:
             queryset = self.model.objects.filter(editors=None)
         else:
             queryset = self.model.objects.all()

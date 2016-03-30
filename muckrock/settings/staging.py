@@ -6,4 +6,4 @@ Imports from the heroku settings
 # pylint: disable=unused-wildcard-import
 from muckrock.settings.heroku import *
 
-EMAIL_BACKEND = 'djang.core.mail.backends.dummy.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'

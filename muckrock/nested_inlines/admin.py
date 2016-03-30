@@ -6,7 +6,7 @@ Nested Inlines
 
 from django.contrib.admin import ModelAdmin, helpers
 from django.contrib.admin.options import InlineModelAdmin
-from django.contrib.admin.util import unquote
+from django.contrib.admin.utils import unquote
 from django.core.exceptions import PermissionDenied
 from django.db import models, transaction
 from django.forms.formsets import all_valid
@@ -36,7 +36,7 @@ class NestedModelAdmin(ModelAdmin):
         prefixes = prefixes or {}
         if not hasattr(admin, 'inline_instances'):
             admin.inline_instances = admin.get_inline_instances(request)
-        for form_set, inline in zip(admin.get_formsets(request), admin.inline_instances):
+        for form_set, inline in admin.get_formsets_with_inlines(request):
             prefix = form_set.get_default_prefix()
             prefixes[prefix] = prefixes.get(prefix, 0) + 1
             if prefixes[prefix] != 1:
@@ -142,7 +142,7 @@ class NestedModelAdmin(ModelAdmin):
         context = {
             'title': _('Add %s') % force_unicode(opts.verbose_name),
             'adminform': adminForm,
-            'is_popup': request.REQUEST.has_key('_popup'),
+            'is_popup': ('_popup' in request.POST or '_popup' in request.GET),
             'show_delete': False,
             'media': mark_safe(media),
             'inline_admin_formsets': inline_admin_formsets,
@@ -221,7 +221,7 @@ class NestedModelAdmin(ModelAdmin):
             'adminform': adminForm,
             'object_id': object_id,
             'original': obj,
-            'is_popup': request.REQUEST.has_key('_popup'),
+            'is_popup': ('_popup' in request.POST or '_popup' in request.GET),
             'media': mark_safe(media),
             'inline_admin_formsets': inline_admin_formsets,
             'errors': helpers.AdminErrorList(form, formsets),
@@ -244,10 +244,10 @@ class NestedInlineModelAdmin(InlineModelAdmin):
             inline_instance = inline_class(self.model, self.admin_site)
             self.inline_instances.append(inline_instance)
 
-    def get_formsets(self, request, obj=None):
-        """Get formsets for inlines"""
+    def get_formsets_with_inlines(self, request, obj=None):
+        """Get formsets and inlines for inlines"""
         for inline in self.inline_instances:
-            yield inline.get_formset(request, obj)
+            yield inline.get_formset(request, obj), inline
 
 
 # would put this in for a patch, not sure if worth monkey patching in

@@ -2,8 +2,8 @@ $request-breakpoint: 768px;
 
 .request.detail {
     @include display(flex);
+    @include flex-wrap(wrap);
     @include align-items(stretch);
-    @include flex-direction(column);
     .request.properties {
         @include flex(1 1 15em);
     }

@@ -34,7 +34,7 @@ class EmailNotification(EmailMultiAlternatives):
 
     def get_text_template(self):
         """Every notification should have a text template."""
-        if self.text_template == None:
+        if self.text_template is None:
             raise NotImplementedError('Notification requires a text template.')
         else:
             return self.text_template

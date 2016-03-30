@@ -58,18 +58,18 @@ class TaskList(MRFilterableListView):
     def get_queryset(self):
         """Apply query parameters to the queryset"""
         queryset = super(TaskList, self).get_queryset()
-        filter_ids = self.request.GET.getlist('id')
+        task_pk = self.kwargs.get('pk')
         show_resolved = self.request.GET.get('show_resolved')
         resolved_by = self.request.GET.get('resolved_by')
-        # first we have to check the integrity of the id values
-        for filter_id in filter_ids:
-            try:
-                filter_id = int(filter_id)
-            except ValueError:
-                filter_ids.remove(filter_id)
-        if filter_ids:
-            queryset = queryset.filter(id__in=filter_ids)
+        if task_pk:
+            # when we are looking for a specific task,
+            # we filter the queryset for that task's pk
+            # and override show_resolved and resolved_by
+            queryset = queryset.filter(pk=task_pk)
+            if queryset.count() == 0:
+                raise Http404()
             show_resolved = True
+            resolved_by = None
         if not show_resolved:
             queryset = queryset.exclude(resolved=True)
         if resolved_by:
@@ -140,6 +140,7 @@ class TaskList(MRFilterableListView):
 
 
 class OrphanTaskList(TaskList):
+    model = OrphanTask
     title = 'Orphans'
     queryset = (OrphanTask.objects
             .select_related('communication__likely_foia__jurisdiction')
@@ -169,6 +170,7 @@ class OrphanTaskList(TaskList):
 
 
 class SnailMailTaskList(TaskList):
+    model = SnailMailTask
     title = 'Snail Mails'
     queryset = (SnailMailTask.objects
             .select_related(
@@ -209,6 +211,7 @@ class SnailMailTaskList(TaskList):
 
 
 class RejectedEmailTaskList(TaskList):
+    model = RejectedEmailTask
     title = 'Rejected Emails'
     queryset = RejectedEmailTask.objects.select_related('foia__jurisdiction')
 
@@ -244,6 +247,7 @@ class RejectedEmailTaskList(TaskList):
 
 
 class StaleAgencyTaskList(TaskList):
+    model = StaleAgencyTask
     title = 'Stale Agencies'
     queryset = (StaleAgencyTask.objects
             .select_related('agency')
@@ -278,6 +282,7 @@ class StaleAgencyTaskList(TaskList):
 
 
 class FlaggedTaskList(TaskList):
+    model = FlaggedTask
     title = 'Flagged'
     queryset = FlaggedTask.objects.select_related(
             'user', 'foia__jurisdiction', 'agency', 'jurisdiction')
@@ -425,6 +430,7 @@ class RequestTaskList(TaskList):
 
     def get_queryset(self):
         # pylint: disable=attribute-defined-outside-init
+        # pylint: disable=unsubscriptable-object
         self.foia_request = get_object_or_404(
                 FOIARequest.objects.select_related(
                     'agency__jurisdiction',

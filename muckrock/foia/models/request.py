@@ -293,7 +293,6 @@ class FOIARequest(models.Model):
 
     def is_payable(self):
         """Can this request be payed for by the user?"""
-        # pylint:disable=no-member
         has_open_crowdfund = self.has_crowdfund() and not self.crowdfund.closed
         has_payment_status = self.status == 'payment'
         return has_payment_status and not has_open_crowdfund
@@ -329,7 +328,6 @@ class FOIARequest(models.Model):
 
     def add_editor(self, user):
         """Grants the user permission to edit this request."""
-        # pylint: disable=no-member
         if not self.has_viewer(user) and not self.has_editor(user) and not self.created_by(user):
             self.edit_collaborators.add(user)
             self.save()
@@ -338,7 +336,6 @@ class FOIARequest(models.Model):
 
     def remove_editor(self, user):
         """Revokes the user's permission to edit this request."""
-        # pylint: disable=no-member
         if self.has_editor(user):
             self.edit_collaborators.remove(user)
             self.save()
@@ -366,7 +363,6 @@ class FOIARequest(models.Model):
 
     def add_viewer(self, user):
         """Grants the user permission to view this request."""
-        # pylint: disable=no-member
         if not self.has_viewer(user) and not self.has_editor(user) and not self.created_by(user):
             self.read_collaborators.add(user)
             self.save()
@@ -375,7 +371,6 @@ class FOIARequest(models.Model):
 
     def remove_viewer(self, user):
         """Revokes the user's permission to view this request."""
-        # pylint: disable=no-member
         if self.has_viewer(user):
             self.read_collaborators.remove(user)
             logger.info('%s revoked view access from %s', user, self)
@@ -421,7 +416,6 @@ class FOIARequest(models.Model):
 
     def last_comm(self):
         """Return the last communication"""
-        # pylint: disable=no-member
         return self.communications.last()
 
     def last_response(self):
@@ -430,7 +424,6 @@ class FOIARequest(models.Model):
 
     def set_mail_id(self):
         """Set the mail id, which is the unique identifier for the auto mailer system"""
-        # pylint: disable=no-member
         # use raw sql here in order to avoid race conditions
         uid = int(md5(self.title.encode('utf8') +
                       datetime.now().isoformat()).hexdigest(), 16) % 10 ** 8
@@ -455,7 +448,6 @@ class FOIARequest(models.Model):
 
     def get_to_who(self):
         """Who communications are to"""
-        # pylint: disable=no-member
         if self.agency:
             return self.agency.name
         else:
@@ -483,7 +475,6 @@ class FOIARequest(models.Model):
 
     def _notify(self):
         """Notify request's creator and followers about the update"""
-        # pylint: disable=no-member
         # notify creator
         self.user.profile.notify(self)
         # notify followers
@@ -493,7 +484,6 @@ class FOIARequest(models.Model):
 
     def update(self, anchor=None):
         """Various actions whenever the request has been updated"""
-        # pylint: disable=no-member
         # pylint: disable=unused-argument
         # Do something with anchor
         self.updated = True
@@ -503,7 +493,6 @@ class FOIARequest(models.Model):
 
     def submit(self, appeal=False, snail=False, thanks=False):
         """The request has been submitted.  Notify admin and try to auto submit"""
-        # pylint: disable=no-member
         # can email appeal if the agency has an appeal agency which has an email address
         # and can accept emailed appeals
         can_email_appeal = appeal and self.agency and \
@@ -566,7 +555,6 @@ class FOIARequest(models.Model):
 
     def followup(self, automatic=False, show_all_comms=True):
         """Send a follow up email for this request"""
-        # pylint: disable=no-member
         from muckrock.foia.models.communication import FOIACommunication
 
         if self.date_estimate and date.today() < self.date_estimate:
@@ -643,7 +631,6 @@ class FOIARequest(models.Model):
 
     def _send_email(self, show_all_comms=True):
         """Send an email of the request to its email address"""
-        # pylint: disable=no-member
         # self.email should be set before calling this method
         from muckrock.foia.tasks import send_fax
 
@@ -704,7 +691,6 @@ class FOIARequest(models.Model):
 
     def update_dates(self):
         """Set the due date, follow up date and days until due attributes"""
-        # pylint: disable=no-member
         cal = self.jurisdiction.get_calendar()
         # first submit
         if not self.date_submitted:
@@ -747,7 +733,6 @@ class FOIARequest(models.Model):
 
     def _followup_days(self):
         """How many days do we wait until we follow up?"""
-        # pylint: disable=no-member
         if self.status == 'ack' and self.jurisdiction:
             # if we have not at least been acknowledged yet, set the days
             # to the period required by law
@@ -849,7 +834,6 @@ class FOIARequest(models.Model):
 
     def total_pages(self):
         """Get the total number of pages for this request"""
-        # pylint: disable=no-member
         pages = self.files.aggregate(Sum('pages'))['pages__sum']
         if pages is None:
             return 0
@@ -857,7 +841,6 @@ class FOIARequest(models.Model):
 
     def has_ack(self):
         """Has this request been acknowledged?"""
-        # pylint: disable=no-member
         return self.communications.filter(response=True).exists()
 
     def proxy_reject(self):

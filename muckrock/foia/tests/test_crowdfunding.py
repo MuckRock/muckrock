@@ -14,7 +14,6 @@ from muckrock.factories import UserFactory, FOIARequestFactory
 from muckrock.foia.views import crowdfund_request
 from muckrock.utils import mock_middleware
 
-# pylint: disable=no-member
 # pylint: disable=missing-docstring
 # pylint: disable=invalid-name
 

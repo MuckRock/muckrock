@@ -9,7 +9,6 @@ from muckrock import agency, foia, task
 # imports Task model separately to patch bug in django-compressor parser
 from muckrock.task.models import Task
 
- # pylint:disable=no-member
 
 register = template.Library()
 
@@ -103,7 +102,6 @@ class OrphanTaskNode(TaskNode):
 
     def get_extra_context(self):
         """Adds sender domain to the context"""
-        # pylint:disable=no-member
         extra_context = super(OrphanTaskNode, self).get_extra_context()
         extra_context['domain'] = self.task.get_sender_domain()
         extra_context['attachments'] = self.task.communication.files.all()

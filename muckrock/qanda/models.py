@@ -46,7 +46,6 @@ class Question(models.Model):
 
     def notify_update(self):
         """Email users who want to be notified of updates to this question"""
-        # pylint: disable=no-member
         send_data = []
         for user in actstream.models.followers(self):
             link = user.profile.wrap_url(reverse(
@@ -78,7 +77,6 @@ class Answer(models.Model):
 
     def save(self, *args, **kwargs):
         """Update the questions answer date when you save the answer"""
-        # pylint: disable=no-member
         is_new = True if self.pk is None else False
         super(Answer, self).save(*args, **kwargs)
         question = self.question

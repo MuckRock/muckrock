@@ -2,10 +2,8 @@
 App config for accounts
 """
 
-from django.apps import AppConfig
-from django.contrib.auth.models import User
+from django.apps import AppConfig, apps
 
-from actstream import registry
 
 class AccountsConfig(AppConfig):
     """Configures the accounts application to use activity streams"""
@@ -13,5 +11,6 @@ class AccountsConfig(AppConfig):
 
     def ready(self):
         """Registers users with the activity streams plugin"""
-        registry.register(User)
+        from actstream import registry
+        registry.register(apps.get_model('auth.User'))
         registry.register(self.get_model('Profile'))

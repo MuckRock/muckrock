@@ -18,7 +18,7 @@ class ArticleQuerySet(models.QuerySet):
 
     def get_published(self):
         """Get all published news articles"""
-        return self.filter(publish=True, pub_date__lte=datetime.now)
+        return self.filter(publish=True, pub_date__lte=datetime.now())
 
     def get_drafts(self):
         """Get all draft news articles"""
@@ -82,7 +82,6 @@ class Article(models.Model):
 
     def get_authors_names(self):
         """Get all authors names for a byline"""
-        # pylint: disable=no-member
         authors = list(self.authors.all())
         names = ', '.join(a.get_full_name() for a in authors[:-1])
         if names:
