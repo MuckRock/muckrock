@@ -37,8 +37,7 @@ def notify_flagged(sender, instance, created, **kwargs):
 def create_flagged_task_payload(flagged_task):
     """Create a Slack notification payload for a Flagged Task"""
     base_url = 'https://www.muckrock.com'
-    task_url = (base_url + reverse('flagged-task-list') +
-            '?id=' + str(flagged_task.id))
+    task_url = base_url + reverse('flagged-task', args=(flagged_task.id,))
     fields = []
     if flagged_task.user is not None:
         author_url = base_url + flagged_task.user.profile.get_absolute_url()
