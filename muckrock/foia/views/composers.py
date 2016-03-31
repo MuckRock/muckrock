@@ -271,7 +271,7 @@ def create_request(request):
         if foia_request:
             foia, foia_comm = _make_request(request, foia_request, parent)
             foia_comm.save()
-            foia.save()
+            foia.save(comment='request drafted')
             request.session['ga'] = 'request_drafted'
             return redirect(foia)
         else:
@@ -348,7 +348,7 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
             foia_comm.date = datetime.now()
             foia_comm.communication = smart_text(data['request'])
             foia_comm.save()
-            foia.save()
+            foia.save(comment='draft edited')
             if request.POST.get('submit') == 'Save':
                 messages.success(request, 'Your draft has been updated.')
             elif request.POST.get('submit') == 'Submit':

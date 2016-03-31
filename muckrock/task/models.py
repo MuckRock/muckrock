@@ -230,7 +230,7 @@ class SnailMailTask(Task):
         comm.status = status
         comm.save()
         comm.foia.status = status
-        comm.foia.save()
+        comm.foia.save(comment='snail mail task')
         comm.foia.update()
 
     def update_date(self):
@@ -402,7 +402,7 @@ class NewAgencyTask(Task):
         for foia in self.pending_requests():
             # first switch foia to use replacement agency
             foia.agency = replacement_agency
-            foia.save()
+            foia.save(comment='new agency task')
             comms = foia.communications.all()
             if comms.count():
                 first_comm = comms[0]
@@ -437,7 +437,7 @@ class ResponseTask(Task):
             raise ValueError('The task communication is an orphan.')
         foia = comm.foia
         foia.tracking_id = tracking_id
-        foia.save()
+        foia.save(comment='response task tracking id')
 
     def set_status(self, status, set_foia=True):
         """Sets status of comm and foia, with option for only setting comm stats"""
@@ -455,7 +455,7 @@ class ResponseTask(Task):
             if status in ['rejected', 'no_docs', 'done', 'abandoned']:
                 foia.date_done = comm.date
             foia.update()
-            foia.save()
+            foia.save(comment='response task status')
             logging.info('Request #%d status changed to "%s"', foia.id, status)
             generate_status_action(foia)
 
@@ -467,14 +467,14 @@ class ResponseTask(Task):
             raise ValueError('This tasks\'s communication is an orphan.')
         foia = comm.foia
         foia.price = price
-        foia.save()
+        foia.save(comment='response task price')
 
     def set_date_estimate(self, date_estimate):
         """Sets the estimated completion date of the communication's request."""
         foia = self.communication.foia
         foia.date_estimate = date_estimate
         foia.update()
-        foia.save()
+        foia.save(comment='response task date estimate')
         logging.info('Estimated completion date set to %s', date_estimate)
 
     def proxy_reject(self):
@@ -484,7 +484,7 @@ class ResponseTask(Task):
         self.communication.foia.status = 'rejected'
         self.communication.foia.proxy_reject()
         self.communication.foia.update()
-        self.communication.foia.save()
+        self.communication.foia.save(comment='response task proxy reject')
         generate_status_action(self.communication.foia)
 
 

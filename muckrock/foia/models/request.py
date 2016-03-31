@@ -16,6 +16,7 @@ import actstream
 from datetime import datetime, date, timedelta
 from hashlib import md5
 import logging
+from reversion import revisions as reversion
 from taggit.managers import TaggableManager
 from unidecode import unidecode
 
@@ -255,6 +256,8 @@ class FOIARequest(models.Model):
                 self.date_embargo = None
         if self.status == 'submitted' and self.date_processing is None:
             self.date_processing = date.today()
+        if 'comment' in kwargs:
+            reversion.set_comment(kwargs.pop('comment'))
         super(FOIARequest, self).save(*args, **kwargs)
 
     def is_editable(self):
