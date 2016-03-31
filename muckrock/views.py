@@ -1,6 +1,7 @@
 """
 Views for muckrock project
 """
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
@@ -15,7 +16,7 @@ from django.views.generic import View, ListView
 
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAFile
-from muckrock.forms import MRFilterForm
+from muckrock.forms import MRFilterForm, NewsletterSignupForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.news.models import Article
 from muckrock.project.models import Project
@@ -267,10 +268,23 @@ class NewsletterSignupView(View):
     """Allows users to signup for our MailChimp newsletter."""
     def get(self, request, *args, **kwargs):
         """Returns a signup form"""
-        return render_to_response(
-            'newsletter.html',
-            locals(),
-            context_instance=RequestContext(request))
+        template = 'forms/newsletter/signup.html'
+        context = {'form': NewsletterSignupForm(initial={'list': settings.MAILCHIMP_LIST_DEFAULT})}
+        return render_to_response(template, context, context_instance=RequestContext(request))
+
+    def post(self, request, *args, **kwargs):
+        """If given email address data, adds that email to our newsletter list.
+        Then it returns a thank you for signing up page. If no email is provided or
+        the email is already on the list, we return the newsletter signup form again."""
+        template = 'forms/newsletter/done.html'
+        signup_form = NewsletterSignupForm(request.POST)
+        if signup_form.is_valid():
+            # take the cleaned email and add it to our mailing list
+            context = {}
+        else:
+            template = 'forms/newsletter/signup.html'
+            context = {'form': signup_form}
+        return render_to_response(template, context, context_instance=RequestContext(request))
 
 def homepage(request):
     """Get all the details needed for the homepage"""

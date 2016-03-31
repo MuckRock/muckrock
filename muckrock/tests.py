@@ -2,16 +2,19 @@
 Tests for site level functionality and helper functions for application tests
 """
 
+from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.test import TestCase, RequestFactory
 
+import factory
 from mock import Mock
 import logging
 import nose.tools
 
 from muckrock.fields import EmailsListField
+from muckrock.forms import NewsletterSignupForm
 from muckrock.utils import mock_middleware
 from muckrock.views import NewsletterSignupView
 
@@ -20,6 +23,7 @@ from muckrock.views import NewsletterSignupView
 
 logging.disable(logging.CRITICAL)
 
+ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
 
 kwargs = {"wsgi.url_scheme": "https"}
@@ -127,6 +131,19 @@ class TestNewsletterSignupView(TestCase):
     def test_get_view(self):
         """Visiting the page should present a signup form."""
         request = self.factory.get(self.url)
+        request.user = AnonymousUser()
+        request = mock_middleware(request)
+        response = self.view(request)
+        eq_(response.status_code, 200)
+
+    def test_post_view(self):
+        """Posting an email to the list should add that email to our MailChimp list."""
+        form = NewsletterSignupForm({
+            'email': 'test@muckrock.com',
+            'list': settings.MAILCHIMP_LIST_DEFAULT
+        })
+        ok_(form.is_valid(), 'The form should validate.')
+        request = self.factory.post(self.url, form.data)
         request.user = AnonymousUser()
         request = mock_middleware(request)
         response = self.view(request)
