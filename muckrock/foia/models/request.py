@@ -863,6 +863,13 @@ class FOIARequest(models.Model):
             ' only appear the first time an agency rejects a request for being'
             ' from an out-of-state resident.'
             )
+        self.notes.create(
+            author=User.objects.get(username='MuckrockStaff'),
+            note='The request has been rejected with the agency stating that '
+            'you must be a resident of the state. MuckRock is working with our '
+            'in-state volunteers to refile this request, and it should appear '
+            'in your account within a few days.',
+            )
 
     class Meta:
         # pylint: disable=too-few-public-methods
