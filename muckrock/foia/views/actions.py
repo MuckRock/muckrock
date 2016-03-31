@@ -127,14 +127,14 @@ def embargo(request, jurisdiction, jidx, slug, idx):
                 foia.permanent_embargo = permanent
             if expiration and foia.status in END_STATUS:
                 foia.date_embargo = expiration
-            foia.save()
+            foia.save(comment='updated embargo')
         return
 
     def create_embargo(request, foia):
         """Apply an embargo to the FOIA"""
         if request.user.profile.can_embargo():
             foia.embargo = True
-            foia.save()
+            foia.save(comment='added embargo')
             logger.info('%s embargoed %s', request.user, foia)
             # unsubscribe all followers of the request
             # https://github.com/MuckRock/muckrock/issues/720
@@ -160,7 +160,7 @@ def embargo(request, jurisdiction, jidx, slug, idx):
     def delete_embargo(request, foia):
         """Remove an embargo from the FOIA"""
         foia.embargo = False
-        foia.save()
+        foia.save(comment='removed embargo')
         logger.info('%s unembargoed %s', request.user, foia)
         actstream.action.send(request.user, verb='unembargoed', action_object=foia)
         return
@@ -231,7 +231,7 @@ def toggle_autofollowups(request, jurisdiction, jidx, slug, idx):
 
     if foia.editable_by(request.user):
         foia.disable_autofollowups = not foia.disable_autofollowups
-        foia.save()
+        foia.save(comment='toggled autofollowups')
         action = 'disabled' if foia.disable_autofollowups else 'enabled'
         msg = 'Autofollowups have been %s' % action
         messages.success(request, msg)
@@ -305,7 +305,7 @@ def crowdfund_request(request, idx, **kwargs):
         if form.is_valid():
             crowdfund = form.save()
             foia.crowdfund = crowdfund
-            foia.save()
+            foia.save(comment='added a crowdfund')
             messages.success(request, 'Your crowdfund has started, spread the word!')
             actstream.action.send(
                 request.user,
