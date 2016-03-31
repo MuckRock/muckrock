@@ -16,6 +16,7 @@ import actstream
 from datetime import datetime, date, timedelta
 from hashlib import md5
 import logging
+from reversion import revisions as reversion
 from taggit.managers import TaggableManager
 from unidecode import unidecode
 
@@ -255,6 +256,8 @@ class FOIARequest(models.Model):
                 self.date_embargo = None
         if self.status == 'submitted' and self.date_processing is None:
             self.date_processing = date.today()
+        if 'comment' in kwargs:
+            reversion.set_comment(kwargs.pop('comment'))
         super(FOIARequest, self).save(*args, **kwargs)
 
     def is_editable(self):
@@ -862,6 +865,13 @@ class FOIARequest(models.Model):
             ' properly have their state set on the backend. This message should'
             ' only appear the first time an agency rejects a request for being'
             ' from an out-of-state resident.'
+            )
+        self.notes.create(
+            author=User.objects.get(username='MuckrockStaff'),
+            note='The request has been rejected with the agency stating that '
+            'you must be a resident of the state. MuckRock is working with our '
+            'in-state volunteers to refile this request, and it should appear '
+            'in your account within a few days.',
             )
 
     class Meta:

@@ -240,7 +240,7 @@ class Detail(DetailView):
         if foia.created_by(user):
             if foia.updated:
                 foia.updated = False
-                foia.save()
+                foia.save(comment='remove updated flag since owner viewed')
         self._obj = foia
         return foia
 
@@ -349,7 +349,7 @@ class Detail(DetailView):
         staff_editable = request.user.is_staff and status in [s for s, _ in STATUS]
         if foia.status not in ['started', 'submitted'] and (user_editable or staff_editable):
             foia.status = status
-            foia.save()
+            foia.save(comment='status updated')
             StatusChangeTask.objects.create(
                 user=request.user,
                 old_status=old_status,

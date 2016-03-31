@@ -178,7 +178,7 @@ def _handle_request(request, mail_id):
 
         if foia.status == 'ack':
             foia.status = 'processed'
-        foia.save()
+        foia.save(comment='incoming mail')
         foia.update(comm.anchor())
 
     except FOIARequest.DoesNotExist:
