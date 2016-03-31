@@ -9,7 +9,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase, RequestFactory
 
 import factory
-from mock import Mock
+from mock import Mock, patch
 import logging
 import nose.tools
 
@@ -25,6 +25,7 @@ logging.disable(logging.CRITICAL)
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
+nottest = nose.tools.nottest
 
 kwargs = {"wsgi.url_scheme": "https"}
 
@@ -136,7 +137,8 @@ class TestNewsletterSignupView(TestCase):
         response = self.view(request)
         eq_(response.status_code, 200)
 
-    def test_post_view(self):
+    @patch('muckrock.views.NewsletterSignupView.subscribe')
+    def test_post_view(self, mock_subscribe):
         """Posting an email to the list should add that email to our MailChimp list."""
         form = NewsletterSignupForm({
             'email': 'test@muckrock.com',
@@ -147,4 +149,15 @@ class TestNewsletterSignupView(TestCase):
         request.user = AnonymousUser()
         request = mock_middleware(request)
         response = self.view(request)
+        mock_subscribe.assert_called_with(form.data['email'], form.data['list'])
+        eq_(response.status_code, 200)
+
+    @nottest
+    def test_subscribe(self):
+        """Tests the method for subscribing an email to a MailChimp list.
+        This test should be disabled under normal conditions because it
+        is using an external API call."""
+        _email = 'test@muckrock.com'
+        _list = settings.MAILCHIMP_LIST_DEFAULT
+        response = NewsletterSignupView().subscribe(_email, _list)
         eq_(response.status_code, 200)

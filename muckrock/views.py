@@ -22,7 +22,9 @@ from muckrock.news.models import Article
 from muckrock.project.models import Project
 from muckrock.utils import cache_get_or_set
 
+import logging
 import re
+import requests
 from haystack.views import SearchView
 from haystack.query import RelatedSearchQuerySet
 
@@ -278,13 +280,40 @@ class NewsletterSignupView(View):
         the email is already on the list, we return the newsletter signup form again."""
         template = 'forms/newsletter/done.html'
         signup_form = NewsletterSignupForm(request.POST)
-        if signup_form.is_valid():
-            # take the cleaned email and add it to our mailing list
-            context = {}
-        else:
+        context = {}
+        try:
+            if signup_form.is_valid():
+                # take the cleaned email and add it to our mailing list
+                _email = signup_form.cleaned_data['email']
+                _list = signup_form.cleaned_data['list']
+                self.subscribe(_email, _list)
+                messages.success(request, ('Thank you for subscribing to our newsletter. '
+                                           'We sent a confirmation email to your inbox.'))
+                return redirect('index')
+            else:
+                raise ValueError('The form data is invalid.')
+        except (ValueError, requests.exceptions.HTTPError) as exception:
+            messages.error(request, 'Sorry, there was a problem subscribing you to the list.')
+            logging.error(exception)
             template = 'forms/newsletter/signup.html'
             context = {'form': signup_form}
         return render_to_response(template, context, context_instance=RequestContext(request))
+
+    def subscribe(self, _email, _list):
+        """Adds the email to the mailing list throught the MailChimp API.
+        http://developer.mailchimp.com/documentation/mailchimp/reference/lists/members/"""
+        api_url = settings.MAILCHIMP_API_ROOT + '/lists/' + _list + '/members/'
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': 'apikey %s' % settings.MAILCHIMP_API_KEY
+        }
+        data = {
+            'email_address': _email,
+            'status': 'pending',
+        }
+        response = requests.post(api_url, json=data, headers=headers)
+        response.raise_for_status()
+        return response
 
 def homepage(request):
     """Get all the details needed for the homepage"""
