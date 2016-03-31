@@ -256,8 +256,12 @@ class FOIARequest(models.Model):
                 self.date_embargo = None
         if self.status == 'submitted' and self.date_processing is None:
             self.date_processing = date.today()
+
+        # add a reversion comment if possible
         if 'comment' in kwargs:
-            reversion.set_comment(kwargs.pop('comment'))
+            comment = kwargs.pop('comment')
+            if reversion.revision_context_manager.is_active():
+                reversion.set_comment(comment)
         super(FOIARequest, self).save(*args, **kwargs)
 
     def is_editable(self):
