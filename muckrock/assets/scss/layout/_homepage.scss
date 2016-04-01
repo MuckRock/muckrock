@@ -224,6 +224,9 @@
                 line-height: $font-line-height;
             }
         }
+        .newsletter-widget {
+            margin: 0 $vertical-rhythm $vertical-rhythm;
+        }
     }
     .projects {
         padding: 0 $vertical-rhythm;
