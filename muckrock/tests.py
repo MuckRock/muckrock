@@ -150,7 +150,7 @@ class TestNewsletterSignupView(TestCase):
         request = mock_middleware(request)
         response = self.view(request)
         mock_subscribe.assert_called_with(form.data['email'], form.data['list'])
-        eq_(response.status_code, 200)
+        eq_(response.status_code, 302, 'Should redirect upon successful submission.')
 
     @nottest
     def test_subscribe(self):
