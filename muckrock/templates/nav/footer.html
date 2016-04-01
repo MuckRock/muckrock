@@ -1,5 +1,6 @@
+{% load tags %}
 <footer class="website-footer">
-    {% include 'forms/newsletter/widget.html' %}
+    {% newsletter %}
     <div class="footer">
         <div class="brand">
             <a href="{% url 'index'%}" class="logo">

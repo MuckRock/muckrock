@@ -6,6 +6,7 @@
 {% load thumbnail %}
 {% load foia_tags %}
 {% load news_tags %}
+{% load tags %}
 {% load cache %}
 
 {% block content %}
@@ -65,7 +66,7 @@
                 </li>
                 {% endfor %}
             </ul>
-            {% include 'forms/newsletter/widget.html' %}
+            {% newsletter %}
             {% if featured_projects %}
             <div class="projects">
                 <h2>Featured projects</h2>

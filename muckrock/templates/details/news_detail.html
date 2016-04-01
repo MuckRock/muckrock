@@ -13,7 +13,7 @@
 
 <article class="news detail news--article">
     <header class="news--header">
-        {% include 'forms/newsletter/widget.html' %}
+        {% newsletter %}
         {% if article.image %}
         <img src="{% thumbnail article.image 1200x400 crop %}">
         {% endif %}

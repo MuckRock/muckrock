@@ -270,7 +270,7 @@ class NewsletterSignupView(View):
     """Allows users to signup for our MailChimp newsletter."""
     def get(self, request, *args, **kwargs):
         """Returns a signup form"""
-        template = 'forms/newsletter/signup.html'
+        template = 'forms/newsletter.html'
         context = {'form': NewsletterSignupForm(initial={'list': settings.MAILCHIMP_LIST_DEFAULT})}
         return render_to_response(template, context, context_instance=RequestContext(request))
 
@@ -278,12 +278,13 @@ class NewsletterSignupView(View):
         """If given email address data, adds that email to our newsletter list.
         Then it returns a thank you for signing up page. If no email is provided or
         the email is already on the list, we return the newsletter signup form again."""
-        template = 'forms/newsletter/done.html'
+        template = 'forms/newsletter.html'
         signup_form = NewsletterSignupForm(request.POST)
         context = {}
         try:
             if signup_form.is_valid():
                 # take the cleaned email and add it to our mailing list
+                # and redirect when successful
                 _email = signup_form.cleaned_data['email']
                 _list = signup_form.cleaned_data['list']
                 self.subscribe(_email, _list)
@@ -296,8 +297,7 @@ class NewsletterSignupView(View):
         except (ValueError, requests.exceptions.HTTPError) as exception:
             messages.error(request, 'Sorry, there was a problem subscribing you to the list.')
             logging.error(exception)
-            template = 'forms/newsletter/signup.html'
-            context = {'form': signup_form}
+        context = {'form': signup_form}
         return render_to_response(template, context, context_instance=RequestContext(request))
 
     def subscribe(self, _email, _list):
