@@ -281,6 +281,11 @@ class NewsletterSignupView(View):
         template = 'forms/newsletter.html'
         signup_form = NewsletterSignupForm(request.POST)
         context = {}
+        # We use the exception handler to populate the
+        # UI message. ValueErrors are created by us
+        # and contain custom language. HTTPError are
+        # created by the requests library and should
+        # use generic error language.
         try:
             if signup_form.is_valid():
                 # take the cleaned email and add it to our mailing list
@@ -290,15 +295,16 @@ class NewsletterSignupView(View):
                 self.subscribe(_email, _list)
                 messages.success(request, ('Thank you for subscribing to our newsletter. '
                                            'We sent a confirmation email to your inbox.'))
-                next_ = request.GET.get('next', 'index')
-                return redirect(next_)
             else:
-                raise ValueError('The form data is invalid.')
-        except (ValueError, requests.exceptions.HTTPError) as exception:
-            messages.error(request, 'Sorry, there was a problem subscribing you to the list.')
+                _email = signup_form.data['email']
+                raise ValueError('%s is not a valid email address.' % _email)
+        except ValueError as exception:
+            messages.error(request, exception)
+        except requests.exceptions.HTTPError as exception:
+            messages.error(request, 'Sorry, an error occurred while trying to subscribe you.')
             logging.error(exception)
-        context = {'form': signup_form}
-        return render_to_response(template, context, context_instance=RequestContext(request))
+        next_ = request.GET.get('next', 'index')
+        return redirect(next_)
 
     def subscribe(self, _email, _list):
         """Adds the email to the mailing list throught the MailChimp API.
@@ -314,7 +320,28 @@ class NewsletterSignupView(View):
             'status': 'pending',
         }
         response = requests.post(api_url, json=data, headers=headers)
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as exception:
+            # in the case of an error, the status will either be 4XX or 5XX
+            # if 4XX, the user did something wrong and should be notified
+            # if 5XX, MailChimp did something wrong and it's not our fault
+            status = response.status_code/100
+            if status == 4:
+                # MailChimp should have returned some data to us describing the error
+                error_data = response.json()
+                error_title = error_data['title']
+                if error_title == 'Member Exists':
+                    # the member already exists, so we should tell
+                    # the user they cannot use this email address
+                    raise ValueError('%s is already a subscriber.' % _email)
+                else:
+                    # we don't know how to specifically address this error
+                    # so we should just propagate the HTTPError
+                    raise exception
+            else:
+                # We did nothing wrong. Let's just allow the error to propagate.
+                raise exception
         return response
 
 def homepage(request):
