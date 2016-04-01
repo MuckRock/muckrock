@@ -4,7 +4,6 @@ App config for projects
 
 from django.apps import AppConfig
 
-from actstream import registry
 
 class ProjectConfig(AppConfig):
     """Configures the project application to use activity streams"""
@@ -12,4 +11,5 @@ class ProjectConfig(AppConfig):
 
     def ready(self):
         """Registers the application with the activity streams plugin"""
+        from actstream import registry
         registry.register(self.get_model('Project'))

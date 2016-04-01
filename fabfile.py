@@ -1,4 +1,4 @@
-from fabric.api import cd, env, lcd, local, run, settings, task, prompt
+from fabric.api import cd, env, lcd, local, run, settings, task, prompt, warn_only
 import os
 
 env.run = local
@@ -97,8 +97,8 @@ def populate_db():
         return
 
     with env.cd(env.base_path):
-        env.run('PGUSER=muckrock dropdb muckrock')
-        env.run('PGUSER=muckrock heroku pg:pull DATABASE muckrock --app muckrock')
+        env.run('dropdb muckrock')
+        env.run('heroku pg:pull DATABASE muckrock --app muckrock')
 
 @task(name='sync-aws')
 def sync_aws():
@@ -112,7 +112,7 @@ def sync_aws():
             'news_photos',
             'project_images',
             ]
-    with env.cd(env.base_path):
+    with env.cd(env.base_path), warn_only():
         for folder in folders:
             env.run('aws s3 sync s3://muckrock/{folder} '
                     './muckrock/static/media/{folder}'
@@ -159,9 +159,23 @@ def setup():
     with settings(user='vagrant', host_string='127.0.0.1:2222', key_filename=result.split()[1]):
         manage('migrate')
 
-@task
+@task(name='update-staging-db')
 def update_staging_db():
     """Update the staging database"""
     env.run('heroku maintenance:on --app muckrock-staging')
     env.run('heroku pg:copy muckrock::DATABASE_URL DATABASE_URL --app muckrock-staging')
     env.run('heroku maintenance:off --app muckrock-staging')
+
+@task(name='pip-compile')
+def pip_compile():
+    """Update requirements"""
+    with env.cd(os.path.join(env.base_path, 'pip')):
+        env.run('pip-compile --upgrade requirements.in')
+        env.run('pip-compile --upgrade dev-requirements.in')
+        env.run('cp -f requirements.txt ../')
+
+@task(name='pip-sync')
+def pip_sync():
+    """sync requirements"""
+    with env.cd(os.path.join(env.base_path, 'pip')):
+        env.run('pip-sync requirements.txt dev-requirements.txt')

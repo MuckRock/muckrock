@@ -16,14 +16,12 @@ from muckrock.utils import mock_middleware
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
 
-# pylint: disable=no-member
 
 class TestAgencyUnit(TestCase):
     """Unit tests for Agencies"""
 
     def setUp(self):
         """Set up tests"""
-        # pylint: disable=C0103
         self.agency1 = factories.AgencyFactory(
             fax='1-987-654-3210',
             email='test@agency1.gov',

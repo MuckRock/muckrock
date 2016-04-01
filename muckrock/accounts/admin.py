@@ -8,8 +8,8 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib import admin, messages
 from django.core.exceptions import ObjectDoesNotExist
 
-import autocomplete_light
-from reversion import VersionAdmin
+from autocomplete_light import shortcuts as autocomplete_light
+from reversion.admin import VersionAdmin
 import stripe
 
 from muckrock.accounts.models import Profile, Statistics

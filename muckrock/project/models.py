@@ -104,10 +104,7 @@ class Project(models.Model):
 
     def has_contributor(self, user):
         """Checks if the user is a contributor."""
-        if user in self.contributors.all():
-            return True
-        else:
-            return False
+        return user in self.contributors.all()
 
     def active_crowdfunds(self):
         """Return all the active crowdfunds on this project."""

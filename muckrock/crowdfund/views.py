@@ -57,12 +57,7 @@ class CrowdfundDetailView(DetailView):
     as well as providing a private endpoint for contributions.
     """
     model = Crowdfund
-    form = CrowdfundPaymentForm
     template_name = 'crowdfund/detail.html'
-
-    def get_form(self):
-        """Returns a form or None"""
-        return self.form
 
     def get_context_data(self, **kwargs):
         """Adds Stripe public key to context"""
@@ -100,13 +95,7 @@ class CrowdfundDetailView(DetailView):
         """
         token = request.POST.get('stripe_token')
         email = request.POST.get('stripe_email')
-        try:
-            payment_form = self.get_form()
-            # pylint:disable=not-callable
-            payment_form = payment_form(request.POST)
-            # pylint:enable=not-callable
-        except TypeError:
-            raise NotImplementedError('%s does not have its form attribute set.' % self.__class__)
+        payment_form = CrowdfundPaymentForm(request.POST)
         if payment_form.is_valid() and token:
             cleaned_data = payment_form.cleaned_data
             crowdfund = cleaned_data['crowdfund']

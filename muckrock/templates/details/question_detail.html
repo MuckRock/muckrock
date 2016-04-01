@@ -32,12 +32,12 @@
 
 {% block main %}
     <div class="messages-container">
-    {% include 'lib/message.html' with uid='0' body=object.question|markdown user=object.user.get_full_name date=object.date response=0 %}
+    {% include 'lib/message.html' with uid='0' body=object.question user=object.user.get_full_name date=object.date response=0 %}
     {% for answer in answers %}
         {% if answer.user == object.user %}
-            {% include 'lib/message.html' with uid=forloop.counter body=answer.answer|markdown user=answer.user.get_full_name date=answer.date response=0 %}
+            {% include 'lib/message.html' with uid=forloop.counter body=answer.answer user=answer.user.get_full_name date=answer.date response=0 %}
         {% else %}
-            {% include 'lib/message.html' with uid=forloop.counter body=answer.answer|markdown user=answer.user.get_full_name date=answer.date response=1 %}
+            {% include 'lib/message.html' with uid=forloop.counter body=answer.answer user=answer.user.get_full_name date=answer.date response=1 %}
         {% endif %}
     {% endfor %}
     </div>

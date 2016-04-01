@@ -26,33 +26,50 @@ from muckrock.jurisdiction.models import Jurisdiction
 logger = logging.getLogger(__name__)
 
 class FOIARequestViewSet(viewsets.ModelViewSet):
-    """API views for FOIARequest
-    Filter fields: `user`, `title`, `status`, `jurisdiction`, `agency`, `embargo`, `tags`
+    """
+    API views for FOIARequest
+
+    Filter fields:
+    * title
+    * embargo
+    * user, by username
+    * jurisdiction, by id
+    * agency, by id
+    * tags, by name
     """
     # pylint: disable=too-many-public-methods
-    # pylint: disable=C0103
     serializer_class = FOIARequestSerializer
     permission_classes = (FOIAPermissions,)
 
     class Filter(django_filters.FilterSet):
         """API Filter for FOIA Requests"""
-        # pylint: disable=no-member
         # pylint: disable=too-few-public-methods
-        agency = django_filters.CharFilter(name='agency__name')
-        jurisdiction = django_filters.CharFilter(name='jurisdiction__name')
+        agency = django_filters.NumberFilter(name='agency__id')
+        jurisdiction = django_filters.NumberFilter(name='jurisdiction__id')
         user = django_filters.CharFilter(name='user__username')
         tags = django_filters.CharFilter(name='tags__name')
 
         class Meta:
             model = FOIARequest
-            fields = ('user', 'title', 'status', 'jurisdiction', 'agency', 'embargo', 'tags')
+            fields = ('user', 'title', 'status', 'embargo', 'jurisdiction', 'agency', 'tags')
 
     filter_class = Filter
 
     def get_queryset(self):
         return (FOIARequest.objects.get_viewable(self.request.user)
-                .select_related('user')
-                .prefetch_related('communications__files', 'notes', 'tags'))
+            .select_related(
+                'user',
+                'agency',
+                'jurisdiction'
+            )
+            .prefetch_related(
+                'communications__files',
+                'notes',
+                'tags',
+                'edit_collaborators',
+                'read_collaborators'
+            )
+        )
 
     def create(self, request):
         """Submit new request"""
@@ -163,14 +180,12 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
 class FOIACommunicationViewSet(viewsets.ModelViewSet):
     """API views for FOIARequest"""
     # pylint: disable=too-many-public-methods
-    # pylint: disable=C0103
     queryset = FOIACommunication.objects.prefetch_related('files')
     serializer_class = FOIACommunicationSerializer
     permission_classes = (DjangoModelPermissions,)
 
     class Filter(django_filters.FilterSet):
         """API Filter for FOIA Communications"""
-        # pylint: disable=no-member
         # pylint: disable=too-few-public-methods
         min_date = django_filters.DateFilter(name='date', lookup_type='gte')
         max_date = django_filters.DateFilter(name='date', lookup_type='lte')

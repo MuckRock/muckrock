@@ -1,0 +1,54 @@
+-e git://github.com/callowayproject/django-news-sitemaps.git@55da6b72580dd6d79380f2bb17240e7afa00555a#egg=django_news_sitemaps-master # Generates a news sitemap
+-e git://github.com/django-haystack/django-haystack.git@f1ed18313777005dd77ed724ecbfb27c0b03cad8#egg=django-haystack # django search engine
+-e git://github.com/rentapplication/django-mailgun.git@2ec07afcda0db7dfe5588f83e9ed299bc04bb0b5#egg=django_mailgun # Mail backend used directly (on production)
+boto # Used to access AWS
+celery # Used to run async tasks
+celery-haystack # Integrate celery and haystack
+dill # Used to serialize machine learning data
+django-activity-stream # Used for notifications
+django-adaptors # Used for model import
+django-autocomplete-light<3 # Autocomplete drop down inputs
+django-celery # Integrate celery with django
+django-compressor # Compress all JS and CSS assets into a single file
+django-dbsettings # DB stored configurations
+django-debug-toolbar # Toolbar for debugging
+django-filter # Used for filtering in viewsets
+django-geojson # Used for storing geographic data
+django-leaflet # Used for plotting geographic data
+django-localflavor # Used for phone numbers and state list
+django-lot # Used for Log On Tokens
+django-markdown-deux # Used for markdown
+django-mathfilters # Mathematical template filters
+django-package-monitor # Keeps track of which packages need upgrading
+django-premailer # Styles HTML emails
+django-pylibmc # Interface to memcache
+django-querycount # Counts queries for dev
+django-rest-swagger # API documentation
+django-reversion # Version history for models
+django-robots # Manage robots.txt file
+django-secure # Enforces security best practices
+django-sslify # Force SSL everywhere
+django-storages # Store files on S3
+django-taggit # Used for tagging
+django-webpack-loader==0.3.0 # Used for loading Webpack bundles
+django<1.10 # Django is kinda important...
+djangorestframework # The API framework
+dogslow # Monitors slow requests
+easy-thumbnails # Used for thumbnailing images
+gunicorn # Python WSGI app server
+image-diet2 # Used to compress images on upload
+jsonfield # Used for storing JSON data, required by django-geojson
+newrelic # Interface to newrelic service
+numpy==1.9.1 # Used by machine learning
+pascha # Used by business days to calculate th date of Easter
+pillow # Used by Django for image handling
+psycopg2 # Interface to postgres DB
+pysolr # Interface to Apache solr for search engine
+python-dateutil # Used for relative time deltas
+raven # Sentry integration
+redis # Redis integration - for use with celery
+requests # HTTP for humans
+scikit-learn==0.16.1 # Used for machine learning
+scipy==0.14.0 # Used for machine learning
+stripe # Stripe payment processor integration
+unidecode # Used for unicode decoding

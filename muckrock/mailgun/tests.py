@@ -26,7 +26,6 @@ class TestMailgunViews(TestCase):
 
     def setUp(self):
         """Set up tests"""
-        # pylint: disable=C0103
         mail.outbox = []
         self.kwargs = {"wsgi.url_scheme": "https"}
 

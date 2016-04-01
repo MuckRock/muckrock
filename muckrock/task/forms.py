@@ -5,7 +5,7 @@ Forms for Task app
 from django import forms
 from django.contrib.auth.models import User
 
-import autocomplete_light
+from autocomplete_light import shortcuts as autocomplete_light
 
 from muckrock.forms import MRFilterForm
 from muckrock import foia
@@ -61,6 +61,7 @@ class ResponseTaskForm(forms.Form):
     )
     status = forms.ChoiceField(choices=foia.models.STATUS)
     set_foia = forms.BooleanField(label='Set request status', initial=True, required=False)
+    proxy = forms.BooleanField(required=False, widget=forms.HiddenInput())
 
     def clean_move(self):
         """Splits a comma separated string into an array"""

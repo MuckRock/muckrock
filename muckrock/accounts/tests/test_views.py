@@ -17,7 +17,6 @@ from muckrock.factories import UserFactory, OrganizationFactory
 from muckrock.organization.models import Organization
 from muckrock.utils import mock_middleware
 
-# pylint:disable=no-member
 
 def http_get_response(url, view, user=AnonymousUser()):
     """Handles making GET requests, returns the response."""
@@ -374,7 +373,7 @@ class TestAccountFunctional(TestCase):
     def test_auth_views(self):
         """Test private views while logged in"""
         response = http_get_response(reverse('acct-my-profile'), views.profile, self.user)
-        eq_(response.status_code, 200, 'Logged in user may view their own profile.')
+        eq_(response.status_code, 302, 'Logged in user may view their own profile.')
         response = http_get_response(reverse('acct-settings'), views.profile_settings, self.user)
         eq_(response.status_code, 200, 'Logged in user may view their own settings.')
 

@@ -4,7 +4,7 @@ Views for the accounts application
 
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
@@ -17,6 +17,7 @@ from django.http import HttpResponse,\
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
+from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView, FormView
 
@@ -28,22 +29,27 @@ import logging
 import stripe
 import sys
 
-from muckrock.accounts.forms import ProfileSettingsForm,\
-                                    EmailSettingsForm,\
-                                    BillingPreferencesForm,\
-                                    RegisterForm,\
-                                    RegisterOrganizationForm
+from muckrock.accounts.forms import (
+        ProfileSettingsForm,
+        EmailSettingsForm,
+        BillingPreferencesForm,
+        RegisterForm,
+        RegisterOrganizationForm,
+        )
 from muckrock.accounts.models import Profile, Statistics, ACCT_TYPES
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
 from muckrock.organization.models import Organization
 from muckrock.project.models import Project
-from muckrock.message.tasks import send_charge_receipt,\
-                                   send_invoice_receipt,\
-                                   failed_payment,\
-                                   welcome,\
-                                   gift
+from muckrock.message.tasks import (
+        send_charge_receipt,
+        send_invoice_receipt,
+        failed_payment,
+        welcome,
+        gift,
+        )
+from muckrock.views import MRFilterableListView
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -352,9 +358,12 @@ def verify_email(request):
 
 def profile(request, username=None):
     """View a user's profile"""
-    if not username and request.user.is_anonymous():
-        return redirect('acct-login')
-    user = get_object_or_404(User, username=username) if username else request.user
+    if username is None:
+        if request.user.is_anonymous():
+            return redirect('acct-login')
+        else:
+            return redirect('acct-profile', username=request.user.username)
+    user = get_object_or_404(User, username=username)
     user_profile = user.profile
     org = user_profile.organization
     requests = (FOIARequest.objects
@@ -444,3 +453,23 @@ class StatisticsViewSet(viewsets.ModelViewSet):
     serializer_class = StatisticsSerializer
     permission_classes = (DjangoModelPermissionsOrAnonReadOnly,)
     filter_fields = ('date',)
+
+
+class ProxyList(MRFilterableListView):
+    """List of Proxies"""
+    model = User
+    title = 'Proxies'
+    template_name = 'lists/proxy_list.html'
+    default_sort = 'profile__state'
+
+    @method_decorator(user_passes_test(lambda u: u.is_staff))
+    def dispatch(self, *args, **kwargs):
+        """Staff only"""
+        return super(ProxyList, self).dispatch(*args, **kwargs)
+
+    def get_queryset(self):
+        """Display all proxies"""
+        objects = super(ProxyList, self).get_queryset()
+        return (objects
+                .filter(profile__acct_type='proxy')
+                .select_related('profile'))

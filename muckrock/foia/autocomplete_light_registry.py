@@ -4,7 +4,7 @@ Autocomplete registry for FOIA Requests
 
 from muckrock.foia.models import FOIARequest
 
-import autocomplete_light
+from autocomplete_light import shortcuts as autocomplete_light
 
 class FOIARequestAutocomplete(autocomplete_light.AutocompleteModelBase):
     """Creates an autocomplete field for picking FOIA requests"""

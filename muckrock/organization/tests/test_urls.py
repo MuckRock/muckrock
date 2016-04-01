@@ -1,7 +1,6 @@
 """
 Test organization urls
 """
-# pylint: disable=no-member
 
 from django.test import TestCase, Client
 

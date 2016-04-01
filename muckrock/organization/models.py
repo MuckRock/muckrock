@@ -73,10 +73,7 @@ class Organization(models.Model):
 
     def has_member(self, user):
         """Returns true IFF the passed-in user is a member of the org"""
-        if user.profile in self.members.all():
-            return True
-        else:
-            return False
+        return user.profile in self.members.all()
 
     def send_email_notification(self, user, subject, template):
         """Notifies a user via email about a change to their organization membership."""
@@ -165,7 +162,6 @@ class Organization(models.Model):
 
     def activate_subscription(self, token, num_seats):
         """Subscribes the owner to the org plan, given a variable quantity"""
-        # pylint: disable=no-member
         if self.active:
             raise AttributeError('Cannot activate an active organization.')
         if num_seats < settings.ORG_MIN_SEATS:
@@ -198,7 +194,6 @@ class Organization(models.Model):
 
     def update_subscription(self, num_seats):
         """Updates the quantity of the subscription, but only if the subscription is active"""
-        # pylint: disable=no-member
         if not self.active:
             raise AttributeError('Cannot update an inactive subscription.')
         if num_seats < settings.ORG_MIN_SEATS:
@@ -227,7 +222,6 @@ class Organization(models.Model):
 
     def cancel_subscription(self):
         """Cancels the owner's subscription to this org's plan"""
-        # pylint: disable=no-member
         if not self.active:
             raise AttributeError('Cannot cancel an inactive subscription.')
         customer = self.owner.profile.customer()

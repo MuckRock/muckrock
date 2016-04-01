@@ -58,7 +58,7 @@ class CrowdfundForm(forms.ModelForm):
         amount += amount * self.fee_rate
         # since the amount we get should always be a 1-cent relative integer
         # (e.g. $1.00 = 100), we should normalize the amount into a decimal value
-        amount = amount/100
+        amount = Decimal(amount)/100
         return amount
 
     def clean_date_due(self):

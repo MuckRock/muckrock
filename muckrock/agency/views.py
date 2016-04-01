@@ -126,17 +126,16 @@ class AgencyViewSet(viewsets.ModelViewSet):
     """API views for Agency"""
     # pylint: disable=too-many-ancestors
     # pylint: disable=too-many-public-methods
-    queryset = Agency.objects.all()
+    queryset = Agency.objects.all().select_related('jurisdiction', 'parent', 'appeal_agency')
     serializer_class = AgencySerializer
 
     class Filter(django_filters.FilterSet):
         """API Filter for Agencies"""
-        # pylint: disable=no-member
         # pylint: disable=too-few-public-methods
-        jurisdiction = django_filters.CharFilter(name='jurisdiction__name')
+        jurisdiction = django_filters.NumberFilter(name='jurisdiction__id')
         types = django_filters.CharFilter(name='types__name')
         class Meta:
             model = Agency
-            fields = ('name', 'jurisdiction', 'types')
+            fields = ('name', 'status', 'jurisdiction', 'types')
 
     filter_class = Filter

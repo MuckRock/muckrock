@@ -5,7 +5,7 @@ from django import forms
 from muckrock.forms import MRFilterForm
 from muckrock.jurisdiction.models import Jurisdiction
 
-import autocomplete_light as autocomplete
+from autocomplete_light import shortcuts as autocomplete_light
 
 class JurisdictionFilterForm(MRFilterForm):
     """Adds a level filter to MRFilterForm"""
@@ -21,7 +21,7 @@ class JurisdictionFilterForm(MRFilterForm):
     parent = forms.ModelChoiceField(
         required=False,
         queryset=Jurisdiction.objects.all(),
-        widget=autocomplete.ChoiceWidget(
+        widget=autocomplete_light.ChoiceWidget(
             'StateAutocomplete',
             attrs={'placeholder': 'All States'}))
 

@@ -19,51 +19,48 @@ class AgencySerializer(serializers.ModelSerializer):
             style={'base_template': 'input.html'})
 
     def __init__(self, *args, **kwargs):
-        # pylint: disable=no-member
+        """After initializing the serializer,
+        check that the current user has permission
+        to view agency email data."""
         # pylint: disable=super-on-old-class
         super(AgencySerializer, self).__init__(*args, **kwargs)
-
-        if 'request' not in self.context:
-            self.fields.pop('email')
-            self.fields.pop('other_emails')
-            return
-
-        request = self.context['request']
-
-        if not request.user.is_staff:
+        request = self.context.get('request', None)
+        if request is None or not request.user.is_staff:
             self.fields.pop('email')
             self.fields.pop('other_emails')
 
     class Meta:
         model = Agency
         fields = (
-                'id',
-                'name',
-                'slug',
-                'jurisdiction',
-                'types',
-                'public_notes',
-                'address',
-                'contact_salutation',
-                'contact_first_name',
-                'contact_last_name',
-                'contact_title',
-                'url',
-                'phone',
-                'fax',
-                'status',
-                'appeal_agency',
-                'can_email_appeals',
-                'image_attr_line',
-                'stale',
-                'website',
-                'twitter',
-                'twitter_handles',
-                'foia_logs',
-                'foia_guide',
-                'exempt',
-                'email',
-                'other_emails',
-                'parent',
-                )
+            # describes agency
+            'id',
+            'name',
+            'slug',
+            'status',
+            'stale',
+            'exempt',
+            'types',
+            # location
+            'jurisdiction',
+            'address',
+            'location',
+            # contact info
+            'email',
+            'other_emails',
+            'phone',
+            'fax',
+            'website',
+            'twitter',
+            'twitter_handles',
+            # connects to other agencies
+            'parent',
+            'appeal_agency',
+            'can_email_appeals',
+            # describes agency foia process
+            'url',
+            'foia_logs',
+            'foia_guide',
+            # misc
+            'public_notes',
+        )
 

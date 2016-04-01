@@ -80,7 +80,6 @@
             <div id="modal-overlay"></div>
             {% include 'lib/notification.html' %}
             {% include 'nav/header.html' %}
-            <div id="react-app"></div>
             <div class="content">
             {% block content %}
             {% endblock content %}
@@ -145,7 +144,8 @@
         <script src="https://checkout.stripe.com/checkout.js" type="text/javascript"></script>
         <script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js" type="text/javascript"></script>
         {% compress js %}
-        <script type="text/javascript" src="{% static 'vendor/jquery.js' %}"></script>
+        {% render_bundle 'main' 'js' %}
+        <!--<script type="text/javascript" src="{% static 'vendor/jquery.js' %}"></script>-->
         <script type="text/javascript" src="{% static 'vendor/jquery.multiselect.js' %}"></script>
         <script type="text/javascript" src="{% static 'vendor/jquery.quicksearch.js' %}"></script>
         <script type="text/javascript" src="{% static 'vendor/jquery.ui.datepicker.js' %}"></script>
@@ -155,7 +155,6 @@
         <script type="text/javascript" src="{% static 'autocomplete_light/addanother.js' %}"></script>
         <script type="text/javascript" src="{% static 'autocomplete_light/text_widget.js' %}"></script>
         <script type="text/javascript" src="{% static 'autocomplete_light/remote.js' %}"></script>
-        {% render_bundle 'main' 'js' %}
         {% endcompress %}
         {% block scripts %}
         {% endblock scripts %}

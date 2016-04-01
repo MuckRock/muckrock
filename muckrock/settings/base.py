@@ -2,9 +2,10 @@
 Django settings for muckrock project
 """
 
+from django.core.urlresolvers import reverse
+import djcelery
 import os
 import urlparse
-from django.core.urlresolvers import reverse
 
 def boolcheck(setting):
     """Turn env var into proper bool"""
@@ -233,7 +234,6 @@ urlparse.uses_netloc.append('redis')
 
 BROKER_URL = os.environ.get('REDISTOGO_URL', 'redis://localhost:6379/0')
 
-import djcelery
 djcelery.setup_loader()
 
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
@@ -334,7 +334,7 @@ LOGGING = {
     'handlers': {
         'null': {
             'level': 'DEBUG',
-            'class': 'django.utils.log.NullHandler',
+            'class': 'logging.NullHandler',
         },
         'console':{
             'level': 'INFO',
@@ -423,7 +423,7 @@ PUBLICATION_NAME = 'MuckRock'
 # Register database schemes in URLs.
 urlparse.uses_netloc.append('postgres')
 
-url = urlparse.urlparse(os.environ.get('DATABASE_URL', 'postgres://muckrock@localhost/muckrock'))
+url = urlparse.urlparse(os.environ.get('DATABASE_URL', 'postgres://vagrant@localhost/muckrock'))
 
 # Update with environment configuration.
 DATABASES = {
@@ -445,9 +445,7 @@ CACHES = {
 }
 
 REST_FRAMEWORK = {
-    'PAGINATE_BY': 20,                 # Default to 20
-    'PAGINATE_BY_PARAM': 'page_size',  # Allow client to override, using `?page_size=xxx`.
-    'MAX_PAGINATE_BY': 100,            # Maximum limit allowed when using `?page_size=xxx`.
+    'DEFAULT_PAGINATION_CLASS': 'muckrock.pagination.StandardPagination',
     'DEFAULT_FILTER_BACKENDS':
         ('rest_framework.filters.DjangoFilterBackend',),
     'DEFAULT_AUTHENTICATION_CLASSES':

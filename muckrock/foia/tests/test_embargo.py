@@ -9,7 +9,6 @@ from nose.tools import assert_false, assert_true, eq_, ok_
 
 from muckrock import factories, foia, utils
 
-#pylint:disable=no-member
 
 class TestEmbargo(TestCase):
     """Embargoing a request hides it from public view."""
