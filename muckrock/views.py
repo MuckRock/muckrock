@@ -289,7 +289,8 @@ class NewsletterSignupView(View):
                 self.subscribe(_email, _list)
                 messages.success(request, ('Thank you for subscribing to our newsletter. '
                                            'We sent a confirmation email to your inbox.'))
-                return redirect('index')
+                next_ = request.GET.get('next', 'index')
+                return redirect(next_)
             else:
                 raise ValueError('The form data is invalid.')
         except (ValueError, requests.exceptions.HTTPError) as exception:
