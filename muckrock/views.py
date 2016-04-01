@@ -302,6 +302,7 @@ class NewsletterSignupView(View):
     def subscribe(self, _email, _list):
         """Adds the email to the mailing list throught the MailChimp API.
         http://developer.mailchimp.com/documentation/mailchimp/reference/lists/members/"""
+        # pylint: disable=no-self-use
         api_url = settings.MAILCHIMP_API_ROOT + '/lists/' + _list + '/members/'
         headers = {
             'Content-Type': 'application/json',

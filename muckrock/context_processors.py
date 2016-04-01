@@ -13,5 +13,6 @@ def google_analytics(request):
 
 def newsletter(request):
     """Add newsletter form to context."""
+    # pylint: disable=unused-argument
     form = NewsletterSignupForm(initial={'list': settings.MAILCHIMP_LIST_DEFAULT})
     return {'newsletter_form': form}

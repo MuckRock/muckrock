@@ -8,7 +8,6 @@ from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.test import TestCase, RequestFactory
 
-import factory
 from mock import Mock, patch
 import logging
 import nose.tools
