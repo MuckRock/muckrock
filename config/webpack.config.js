@@ -27,6 +27,10 @@ module.exports = {
                 test: /\.scss?$/,
                 loader: ExtractText.extract('style-loader', 'css-loader?sourceMap!sass-loader?sourceMap'),
             },
+            {
+                test: /jquery\.js$/,
+                loader: 'expose?jQuery!expose?$'
+            },
         ],
     },
     plugins: [
