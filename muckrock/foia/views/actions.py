@@ -18,11 +18,13 @@ import stripe
 import sys
 
 from muckrock.crowdfund.forms import CrowdfundForm
-from muckrock.foia.forms import \
-    FOIADeleteForm, \
-    FOIAAdminFixForm, \
-    FOIAEmbargoForm, \
-    FOIAFileFormSet
+from muckrock.foia.forms import (
+    FOIADeleteForm,
+    FOIAAdminFixForm,
+    FOIAAgencyReplyForm,
+    FOIAEmbargoForm,
+    FOIAFileFormSet,
+    )
 from muckrock.foia.models import FOIARequest, FOIAFile, END_STATUS
 from muckrock.foia.views.comms import save_foia_comm
 from muckrock.jurisdiction.models import Jurisdiction
@@ -239,6 +241,41 @@ def toggle_autofollowups(request, jurisdiction, jidx, slug, idx):
         msg = 'You must own the request to toggle auto-followups.'
         messages.error(request, msg)
     return redirect(foia)
+
+# XXX check that the user is for the right agency
+@user_passes_test(lambda u: u.profile.acct_type == 'agency' or u.is_staff)
+def agency_reply(request, jurisdiction, jidx, slug, idx):
+    """Allow agency users to reply directly"""
+    foia = _get_foia(jurisdiction, jidx, slug, idx)
+    # XXX check status
+
+    if request.method == 'POST':
+        form = FOIAAgencyReplyForm(request.POST, instance=foia)
+        formset = FOIAFileFormSet(request.POST, request.FILES)
+        if form.is_valid() and formset.is_valid():
+            foia = form.save()
+            save_foia_comm( # XXX cant use save foia comm for incoming messages
+                foia,
+                request.user.get_full_name(),
+                form.cleaned_data['comm'],
+                formset,
+            )
+            messages.success(request, 'Reply succesfully submitted')
+            return redirect(foia)
+    else:
+        form = FOIAAgencyReplyForm(instance=foia)
+        formset = FOIAFileFormSet(queryset=FOIAFile.objects.none())
+    context = {
+        'form': form,
+        'foia': foia,
+        'formset': formset,
+        'action': 'Submit'
+    }
+    return render_to_response(
+        'forms/foia/admin_fix.html',
+        context,
+        context_instance=RequestContext(request)
+    )
 
 # Staff Actions
 @user_passes_test(lambda u: u.is_staff)

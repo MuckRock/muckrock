@@ -33,7 +33,7 @@ class EmailOptions(dbsettings.Group):
 
 options = EmailOptions()
 
-ACCT_TYPES = (
+ACCT_TYPES = [
     ('admin', 'Admin'),
     ('basic', 'Basic'),
     ('beta', 'Beta'),
@@ -41,7 +41,7 @@ ACCT_TYPES = (
     ('proxy', 'Proxy'),
     ('robot', 'Robot'),
     ('agency', 'Agency'),
-)
+]
 
 PAYMENT_FEE = .05
 

@@ -79,9 +79,10 @@ class Agency(models.Model, RequestHelper):
     contact_first_name = models.CharField(blank=True, max_length=100)
     contact_last_name = models.CharField(blank=True, max_length=100)
     contact_title = models.CharField(blank=True, max_length=255)
-    # XXX
+    # XXX delete
     url = models.URLField(blank=True, verbose_name='FOIA Web Page', help_text='Begin with http://')
     phone = models.CharField(blank=True, max_length=30)
+    # XXX maybe delete fax also?
     fax = models.CharField(blank=True, max_length=30)
     notes = models.TextField(blank=True)
     aliases = models.TextField(blank=True)

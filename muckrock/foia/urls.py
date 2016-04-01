@@ -60,6 +60,8 @@ urlpatterns = patterns(
         views.clone_request, name='foia-clone'),
     url(r'^%s/admin_fix/$' % foia_url,
         views.admin_fix, name='foia-admin-fix'),
+    url(r'^%s/agency_reply/$' % foia_url,
+        views.agency_reply, name='foia-agency-reply'),
     url(r'^%s/delete/$' % foia_url,
         views.delete, name='foia-delete'),
     url(r'^%s/embargo/$' % foia_url,

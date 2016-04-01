@@ -22,22 +22,8 @@ DELIVERED = (
     ('fax', 'Fax'),
     ('email', 'Email'),
     ('mail', 'Mail'),
+    ('web', 'Web'), # The agency uploaded their reponse through our web interface
 )
-
-def requests_from_pks(foia_pks):
-    """A helper function to get all the requests given a list of their PKs."""
-    foias = []
-    # if foia_pks isn't a list (say, a single pk), then it should be made into one
-    if not isinstance(foia_pks, list):
-        foia_pks = [foia_pks]
-    for foia_pk in foia_pks:
-        try:
-            foia = FOIARequest.objects.get(pk=foia_pk)
-            foias.append(foia)
-        except (FOIARequest.DoesNotExist, ValueError):
-            logging.error('FOIA %s does not exist', foia_pk)
-            continue
-    return foias
 
 class FOIACommunication(models.Model):
     """A single communication of a FOIA request"""
@@ -54,16 +40,18 @@ class FOIACommunication(models.Model):
     # XXX
 
     from_user = models.ForeignKey(
-            User,
+            'auth.User',
             blank=True,
             null=True,
-            on_delete=models.PROTECT
+            related_name='comms_from',
+            on_delete=models.PROTECT,
             )
     to_user = models.ForeignKey(
-            User,
+            'auth.User',
             blank=True,
             null=True,
-            on_delete=models.PROTECT
+            related_name='comms_to',
+            on_delete=models.PROTECT,
             )
 
     subject = models.CharField(max_length=255, blank=True)
@@ -79,15 +67,26 @@ class FOIACommunication(models.Model):
     status = models.CharField(max_length=10, choices=STATUS, blank=True, null=True)
 
     # confirmed, opened, error
-    confirmed = models.BooleanField(default=False)
-    #new_opened = models # keep track of metadata?
-    #error = # dropped/bounced/reason/code/notification
+    # for outgoing messages (not responses)
+    #
+    # confirmed:
+    #  - email: mailgun delivered it
+    #  - fax: faxaway confirms it sent
+    #  - snail: snailmail task is closed (it was placed in the mail)
+    #
+    # opened:
+    #  - email: mailgun registered an open event (this comes with lots of metadata)
+    #
+    # error:
+    #  - email: mailgun had an error (hard/soft, error msg)
+    #  - fax: faxaway failed to fax the message (error msg)
 
     opened = models.BooleanField(default=False,
             help_text='If emailed, did we receive an open notification? '
                       'If faxed, did we recieve a confirmation?')
 
     # only used for orphans
+    # XXX approved bool instead of seprate FK?
     likely_foia = models.ForeignKey(
         FOIARequest,
         related_name='likely_communications',
@@ -170,7 +169,7 @@ class FOIACommunication(models.Model):
         """
         # avoid circular imports
         from muckrock.foia.tasks import upload_document_cloud
-        request_list = requests_from_pks(foia_pks)
+        request_list = FOIARequest.objects.filter(pk__in=foia_pks)
         if not request_list:
             raise ValueError('No valid request(s) provided for cloning.')
         cloned_comms = []
