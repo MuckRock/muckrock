@@ -275,17 +275,14 @@ class NewsletterSignupView(View):
         return render_to_response(template, context, context_instance=RequestContext(request))
 
     def post(self, request, *args, **kwargs):
-        """If given email address data, adds that email to our newsletter list.
-        Then it returns a thank you for signing up page. If no email is provided or
-        the email is already on the list, we return the newsletter signup form again."""
-        template = 'forms/newsletter.html'
+        """
+        If given email address data, adds that email to our newsletter list.
+        Then it returns a thank you for signing up page.
+        In case of an error, we use the exception handler to populate the UI message.
+        ValueErrors are raised by us and contain custom language.
+        HTTPError are raised by the requests library and should use generic error language.
+        """
         signup_form = NewsletterSignupForm(request.POST)
-        context = {}
-        # We use the exception handler to populate the
-        # UI message. ValueErrors are created by us
-        # and contain custom language. HTTPError are
-        # created by the requests library and should
-        # use generic error language.
         try:
             if signup_form.is_valid():
                 # take the cleaned email and add it to our mailing list
