@@ -317,7 +317,7 @@ def embargo_expire():
                                            permanent_embargo=False,
                                            date_embargo__lt=date.today()):
         foia.embargo = False
-        foia.save()
+        foia.save(comment='embargo expired')
         actstream.action.send(foia, verb='embargo expired')
         send_mail('[MuckRock] Embargo expired for FOI Request "%s"' % foia.title,
                   render_to_string('text/foia/embargo_did_expire.txt', {'request': foia}),
@@ -517,7 +517,7 @@ def autoimport():
                     else:
                         import_key(key, storage_bucket, comm, log, title=title)
 
-                    foia.save()
+                    foia.save(comment='updated from autoimport files')
                     foia.update(comm.anchor())
 
                 except FOIARequest.DoesNotExist:
