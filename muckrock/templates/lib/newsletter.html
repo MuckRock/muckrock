@@ -1,0 +1,16 @@
+<div class="newsletter-widget">
+    <div class="call-to-action">
+        <p><strong>Newsletter</strong></p>
+        {% if newsletter_cta %}
+        <p>{{newsletter_cta}}</p>
+        {% else %}
+        <p>Want the latest investigative and FOIA news?</p>
+        {% endif %}
+    </div>
+    <form class="signup-form" method="post" action="{% url 'newsletter' %}?next={{request.get_full_path}}" onsubmit="ga('send', 'event', 'Newsletter', 'Subscription', window.location.pathname)">
+        {% csrf_token %}
+        {{newsletter_form.list}}
+        {{newsletter_form.email}}
+        <button class="basic primary" type="submit">Subscribe</button>
+    </form>
+</div>

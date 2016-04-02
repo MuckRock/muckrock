@@ -10,8 +10,10 @@
 {% block title %}{{ article.title }}{% endblock title %}
 
 {% block content %}
+
 <article class="news detail news--article">
     <header class="news--header">
+        {% newsletter %}
         {% if article.image %}
         <img src="{% thumbnail article.image 1200x400 crop %}">
         {% endif %}

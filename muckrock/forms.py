@@ -57,3 +57,8 @@ class TagManagerForm(forms.Form):
         attrs={
             'placeholder': 'Tags',
             'data-autocomplete-minimum-characters': 1}))
+
+class NewsletterSignupForm(forms.Form):
+    """A form for adding an email to a MailChimp mailing list."""
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'email address'}))
+    list = forms.CharField(widget=forms.HiddenInput)
