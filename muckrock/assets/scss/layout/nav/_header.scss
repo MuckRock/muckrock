@@ -1,4 +1,9 @@
+@mixin drop-shadow() {
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, .2);
+}
+
 .website-header {
+    @include drop-shadow;
     margin-bottom: 0;
     position: fixed;
     z-index: 100;
@@ -16,6 +21,7 @@
 }
 
 .website-header .search-form {
+    @include drop-shadow;
     display: none;
     width: 100%;
     position: absolute;
@@ -180,6 +186,7 @@ nav.website-navigation {
     @media($nav-bp) {
         padding-left: 0;
         .website-sections {
+            @include drop-shadow;
             display: none;
             width: 100%;
             background: $nav-background;
