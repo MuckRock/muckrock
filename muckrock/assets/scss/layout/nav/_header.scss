@@ -18,7 +18,6 @@
 .website-header .search-form {
     display: none;
     width: 100%;
-    height: 100%;
     position: absolute;
     top: 100%;
     left: 0;
@@ -79,14 +78,18 @@
 
 .nav-section {
     @include display(flex);
+    @include align-items(center);
     margin-bottom: 0;
 }
 
 .nav-item {
     display: inline-block;
-    width: 2.75em;
+    width: auto;
+    min-width: 2.75em;
+    height: 42px;
     padding: $vertical-rhythm/2;
     margin-bottom: 0;
+    vertical-align: middle;
     font-weight: $font-weight-bold;
     text-align: center;
     cursor: pointer;
@@ -95,11 +98,14 @@
         display: block;
     }
     .icon {
+        // margin-top: $vertical-rhythm/8;
         vertical-align: middle;
     }
     .label {
         display: none;
-        vertical-align: bottom;
+        margin: 0 $vertical-rhythm/4;
+        vertical-align: middle;
+        line-height: $font-line-height;
     }
     &.dark {
         background: $color-grey-2;
@@ -111,10 +117,16 @@
             background: $color-blue;
         }
     }
+    @media(min-width:18em) {
+        &.website-sections-button .label {
+            display: inline;
+        }
+    }
     @include media($medium-layout) {
-        width: auto;
         padding: $vertical-rhythm/2;
-        text-align: left;
+        .icon {
+            margin-top: 0;
+        }
         .label {
             display: inline;
         }
@@ -124,6 +136,7 @@
 nav.website-navigation {
     @include display(flex);
     @include justify-content(space-between);
+    max-height: 42px;
     ul {
         margin-bottom: 0;
         padding-left: 0;
@@ -135,9 +148,11 @@ nav.website-navigation {
         text-decoration: none;
     }
     .brand {
+
+        @include display(flex);
+        @include align-items(center);
+        @include justify-content(center);
         margin-bottom: 0;
-        // padding: 0;
-        // line-height: .7em;
         svg {
             height: 22px;
             width: auto;
@@ -151,11 +166,7 @@ nav.website-navigation {
     .search-button {
         display: inline-block;
         margin-bottom: 0;
-        font-weight: $font-weight-bold;
         cursor: pointer;
-        .label {
-            margin-left: $vertical-rhythm/4;
-        }
         &.active {
             @include nav-item-hover;
         }
@@ -164,9 +175,6 @@ nav.website-navigation {
 
     .website-sections-button {
         display: none;
-        .label {
-            margin-left: $vertical-rhythm/4;
-        }
     }
 
     @media($nav-bp) {

@@ -20,7 +20,7 @@
                 {% endif %}
             </ul>
             <div class="nav-item website-sections-button" id="show-sections">
-                {% include 'lib/icons/sections.svg' %}
+                {% include 'lib/icons/sections-dots.svg' %}
                 <span class="label">Sections</span>
             </div>
         </div>
@@ -39,15 +39,15 @@
             </div>
             <a class="dark nav-item create-request-button" href="{% url 'foia-create'%}">
                 {% include 'lib/icons/create-request.svg' %}
-                <span class="label">Create Request</span>
+                <span class="label">File<span class="extended"> Request</span></span>
             </a>
             <div class="dark nav-item sidebar-toggle" id="sidebar-button">
                 {% if actionable_requests.count > 0 %}
                 <span class="blue counter">{{actionable_requests.count}}</span>
                 {% else %}
-                {% include 'lib/icons/account.svg' %}
+                {% include 'lib/icons/sections-lines.svg' %}
                 {% endif %}
-                <span class="label">Account</span>
+                <span class="label">Menu</span>
             </div>
         </div>
     </nav>

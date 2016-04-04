@@ -8,7 +8,7 @@ $sidebar-bp: "min-width:72em";
 @mixin nav-item-hover {
     color: $nav-background;
     background: $color-blue;
-    svg path { fill: $nav-background; }
+    path, circle { fill: $nav-background; }
     a:hover {
         color: $nav-background;
     }
@@ -16,7 +16,7 @@ $sidebar-bp: "min-width:72em";
 
 @mixin nav-item-color {
     color: $color-black;
-    path { fill: $color-black; }
+    path, circle { fill: $color-black; }
     a {
         color: $color-black;
     }
