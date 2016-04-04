@@ -19,7 +19,7 @@
         <h1>Clone a request</h1>
         <summary>Make any changes to the request, then clone it.</summary>
         {% else %}
-        <h1>Create a request</h1>
+        <h1>File a request</h1>
         <summary>
             Not sure where to start? <a href="/about/foia-101/">We can help.</a>
             <br>
@@ -110,9 +110,9 @@
         <footer class="buttons">
         {% if user.is_authenticated %}
             {% if clone %}
-            <input type="submit" name="submit" value="Clone" class="primary button"  />
+            <button type="submit" name="submit" value="Clone" class="primary">File</button>
             {% else %}
-            <input type="submit" name="submit" value="Create" class="primary button"  />
+            <button type="submit" name="submit" value="Create" class="primary">File</button>
             {% endif %}
         {% else %}
             {% if clone %}
