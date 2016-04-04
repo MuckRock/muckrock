@@ -15,6 +15,14 @@
 {{ filter_form.tags }}
 {% endblock list-filters %}
 
+{% block list-head %}
+{{ block.super }}
+<a href="{% url 'foia-create' %}" class="primary button">
+    {% include 'lib/icons/create-request.svg' %}
+    <span>File a Request</span>
+</a>
+{% endblock %}
+
 {% block list-table-head %}
 <th data-sort="title">Title</th>
 <th width="15%" data-sort="status">Status</th>

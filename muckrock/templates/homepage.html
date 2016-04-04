@@ -11,11 +11,6 @@
 {% block content %}
 {# cache 600 homepage #}
 <div class="homepage">
-    {% if not request.user.is_authenticated %}
-    <header class="mission banner">
-        <h1 class="about">A <a href="//muckrock.com/about/" title="About Us">collaborative news site</a> that <a href="//muckrock.com/landing/" title="Landing Page">gives you the tools</a> to hold <a href="{{ federal_government.get_absolute_url }}" title="{{ federal_government }}">the government</a> accountable.</a></h1>
-    </header>
-    {% endif %}
     <main>
         <section class="news">
             <ul class="articles nostyle">
@@ -92,7 +87,11 @@
             <div class="foia banner" style="background-image: url('{% static 'img/homepage/requests.jpg' %}');">
                 <div class="about">
                     <h2>File, track, and share public records requests</h2>
-                    <div class="call-to-action"><a href="/about/how-we-work/" id="learn-more">Learn how it works.</a></div>
+                    <a href="{% url 'foia-create' %}" class="primary button">
+                        {% include 'lib/icons/create-request.svg' %}
+                        <span class="label">File a Request</span>
+                    </a>
+                    <div class="call-to-action"><a href="/about/how-we-work/" id="learn-more">or learn how it works.</a></div>
                 </div>
                 <div class="info">
                     <ul class="stats">
