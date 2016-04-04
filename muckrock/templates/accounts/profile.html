@@ -77,7 +77,7 @@
         </form>
         <div class="controls">
             {% if request.user == user_obj %}
-            <a href="{% url 'foia-create' %}" class="primary button">
+            <a href="{% url 'foia-create' %}" class="primary button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
                 {% include 'lib/icons/create-request.svg' %}
                 <span>File a Request</span>
             </a>

@@ -37,7 +37,7 @@
                 {% include 'lib/icons/search.svg' %}
                 <span class="label">Search</span>
             </div>
-            <a class="dark nav-item create-request-button" href="{% url 'foia-create'%}">
+            <a class="dark nav-item create-request-button" href="{% url 'foia-create'%}" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
                 {% include 'lib/icons/create-request.svg' %}
                 <span class="label">File<span class="extended"> Request</span></span>
             </a>

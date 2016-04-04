@@ -87,7 +87,7 @@
             <div class="foia banner" style="background-image: url('{% static 'img/homepage/requests.jpg' %}');">
                 <div class="about">
                     <h2>File, track, and share public records requests</h2>
-                    <a href="{% url 'foia-create' %}" class="primary button">
+                    <a href="{% url 'foia-create' %}" class="primary button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
                         {% include 'lib/icons/create-request.svg' %}
                         <span class="label">File a Request</span>
                     </a>
