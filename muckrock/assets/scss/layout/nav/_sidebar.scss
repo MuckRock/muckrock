@@ -127,16 +127,10 @@ The sidebar should use a dark UI.
             color: $color-white;
             font-weight: $font-weight-bold;
             text-decoration: none;
-            .counter {
-                background: $color-blue;
-            }
             &:hover {
                 background: $color-blue;
             }
             &.payment, &.fix {
-                .counter {
-                    background: $color-red;
-                }
                 &:hover {
                     background: $color-red;
                 }

@@ -56,7 +56,7 @@
         {% if actionable_requests %}
             {% if actionable_requests.payment %}
             <a class="actionable payment" href="{% url 'foia-mylist' %}?status=payment">
-                <span class="payments counter">{{ actionable_requests.payment|length }}</span>
+                <span class="red counter">{{ actionable_requests.payment|length }}</span>
                 Payment{{ actionable_requests.payment|length|pluralize }} Required
             </a>
             <ul class="payment actionable-request-list nostyle">
@@ -70,7 +70,7 @@
             {% endif %}
             {% if actionable_requests.fix %}
             <a class="actionable fix" href="{% url 'foia-mylist' %}?status=fix">
-                <span class="fixes counter">{{ actionable_requests.fix|length }}</span>
+                <span class="red counter">{{ actionable_requests.fix|length }}</span>
                 Fix{{ actionable_requests.fix|length|pluralize:"es" }} Required
             </a>
             <ul class="fix actionable-request-list nostyle">
@@ -84,7 +84,7 @@
             {% endif %}
             {% if actionable_requests.started %}
             <a class="actionable drafts" href="{% url 'foia-mylist' %}?status=started">
-                <span class="drafts counter">{{ actionable_requests.started|length }}</span>
+                <span class="blue counter">{{ actionable_requests.started|length }}</span>
                 Draft{{ actionable_requests.started|length|pluralize }}
             </a>
             <ul class="actionable-request-list nostyle">
@@ -98,7 +98,7 @@
             {% endif %}
             {% if actionable_requests.updates %}
             <a class="actionable updated" href="{% url 'foia-mylist' %}">
-                <span class="counter">{{ actionable_requests.updates|length }}</span>
+                <span class="blue counter">{{ actionable_requests.updates|length }}</span>
                 Update{{ actionable_requests.updates|length|pluralize }}
             </a>
             <ul class="actionable-request-list nostyle">

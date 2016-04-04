@@ -26,6 +26,7 @@ def get_actionable_requests(user):
     payment = requests.filter(status='payment')
     fix = requests.filter(status='fix')
     return {
+        'count': updates.count() + started.count() + payment.count() + fix.count(),
         'updates': updates,
         'started': started,
         'payment': payment,
