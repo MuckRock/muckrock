@@ -16,6 +16,7 @@ import actstream
 from datetime import datetime, date, timedelta
 from hashlib import md5
 import logging
+from reversion import revisions as reversion
 from taggit.managers import TaggableManager
 from unidecode import unidecode
 
@@ -200,6 +201,9 @@ class FOIARequest(models.Model):
     other_emails = fields.EmailsListField(blank=True, max_length=255)
     times_viewed = models.IntegerField(default=0)
     disable_autofollowups = models.BooleanField(default=False)
+    missing_proxy = models.BooleanField(default=False,
+            help_text='This request requires a proxy to file, but no such '
+            'proxy was avilable upon draft creation.')
     parent = models.ForeignKey('self', blank=True, null=True, on_delete=models.SET_NULL)
     block_incoming = models.BooleanField(
         default=False,
@@ -252,6 +256,12 @@ class FOIARequest(models.Model):
                 self.date_embargo = None
         if self.status == 'submitted' and self.date_processing is None:
             self.date_processing = date.today()
+
+        # add a reversion comment if possible
+        if 'comment' in kwargs:
+            comment = kwargs.pop('comment')
+            if reversion.revision_context_manager.is_active():
+                reversion.set_comment(comment)
         super(FOIARequest, self).save(*args, **kwargs)
 
     def is_editable(self):
@@ -490,6 +500,7 @@ class FOIARequest(models.Model):
 
     def submit(self, appeal=False, snail=False, thanks=False):
         """The request has been submitted.  Notify admin and try to auto submit"""
+        from muckrock.task.models import FlaggedTask
         # can email appeal if the agency has an appeal agency which has an email address
         # and can accept emailed appeals
         can_email_appeal = appeal and self.agency and \
@@ -505,7 +516,7 @@ class FOIARequest(models.Model):
         # if agency isnt approved, do not email or snail mail
         # it will be handled after agency is approved
         approved_agency = self.agency and self.agency.status == 'approved'
-        can_email = self.email and not appeal
+        can_email = self.email and not appeal and not self.missing_proxy
         comm = self.last_comm()
         # if the request can be emailed, email it, otherwise send a notice to the admin
         # if this is a thanks, send it as normal but do not change the status
@@ -518,6 +529,22 @@ class FOIARequest(models.Model):
                 self.status = 'ack'
             self._send_email()
             self.update_dates()
+        elif self.missing_proxy:
+            # flag for proxy re-submitting
+            self.status = 'submitted'
+            self.date_processing = date.today()
+            task.models.FlaggedTask.objects.create(
+                    foia=self,
+                    text='This request was filed for an agency requiring a '
+                    'proxy, but no proxy was available.  Please add a suitable '
+                    'proxy for the state and refile it with a note that the '
+                    'request is being filed by a state citizen. Make sure the '
+                    'new request is associated with the original user\'s '
+                    'account. To add someone as a proxy, change their user type '
+                    'to "Proxy" and make sure they properly have their state '
+                    'set on the backend.  This message should only appear when '
+                    'a suitable proxy does not exist.'
+                    )
         elif approved_agency:
             # snail mail it
             if not thanks:
@@ -825,6 +852,31 @@ class FOIARequest(models.Model):
         """Has this request been acknowledged?"""
         return self.communications.filter(response=True).exists()
 
+    def proxy_reject(self):
+        """Mark this request as being rejected due to a proxy being required"""
+        from muckrock.task.models import FlaggedTask
+        # mark the agency as requiring a proxy going forward
+        self.agency.requires_proxy = True
+        self.agency.save()
+        # mark to re-file with a proxy
+        FlaggedTask.objects.create(
+            foia=self,
+            text='This request was rejected as requiring a proxy; please refile'
+            ' it with one of our volunteers names and a note that the request is'
+            ' being filed by a state citizen. Make sure the new request is'
+            ' associated with the original user\'s account. To add someone as'
+            ' a proxy, change their user type to "Proxy" and make sure they'
+            ' properly have their state set on the backend. This message should'
+            ' only appear the first time an agency rejects a request for being'
+            ' from an out-of-state resident.'
+            )
+        self.notes.create(
+            author=User.objects.get(username='MuckrockStaff'),
+            note='The request has been rejected with the agency stating that '
+            'you must be a resident of the state. MuckRock is working with our '
+            'in-state volunteers to refile this request, and it should appear '
+            'in your account within a few days.',
+            )
 
     class Meta:
         # pylint: disable=too-few-public-methods

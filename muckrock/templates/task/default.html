@@ -3,10 +3,10 @@
         <input type="checkbox" form="batched" name="tasks" value="{{task.pk}}" class="toggle checkbox">
         {% if task.resolved %}
         <span class="task-type">Resolved {{task}}</span>
-        <time class="task-date-done" datetime="{{task.date_done|date:'Y-m-d G:i::s'}}"><a class="permalink" href="{% url 'task-list' %}?id={{task.pk}}">Resolved {{task.date_done|date:'m/d/Y G:i'}}</a></time>
+        <time class="task-date-done" datetime="{{task.date_done|date:'Y-m-d G:i::s'}}"><a class="permalink" href="{{task.get_absolute_url}}">Resolved {{task.date_done|date:'m/d/Y G:i'}}</a></time>
         {% else %}
         <span class="task-type">{{task}}</span>
-        <time class="task-date-created" datetime="{{task.date_created|date:'Y-m-d G:i::s'}}"><a class="permalink" href="{% url 'task-list' %}?id={{task.id}}">{{task.date_created|date:'m/d/Y G:i'}}</a></time>
+        <time class="task-date-created" datetime="{{task.date_created|date:'Y-m-d G:i::s'}}"><a class="permalink" href="{{task.get_absolute_url}}">{{task.date_created|date:'m/d/Y G:i'}}</a></time>
         {% endif %}
     </header>
     {% block task-main %}

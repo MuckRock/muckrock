@@ -3,6 +3,7 @@ Views for the Jurisdiction application
 """
 
 from django.contrib import messages
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db.models import Count, Sum
 from django.shortcuts import render_to_response, get_object_or_404, redirect
@@ -16,6 +17,7 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.serializers import JurisdictionSerializer
 from muckrock.task.models import FlaggedTask
 from muckrock.views import MRFilterableListView
+
 
 def collect_stats(obj, context):
     """Helper for collecting stats"""
@@ -86,11 +88,16 @@ def detail(request, fed_slug, state_slug, local_slug):
         'sidebar_admin_url': reverse('admin:jurisdiction_jurisdiction_change',
             args=(jurisdiction.pk,)),
     }
-
+    if request.user.is_staff and jurisdiction.abbrev:
+        context['proxies'] = User.objects.filter(
+            profile__acct_type='proxy',
+            profile__state=jurisdiction.abbrev,
+            )
     collect_stats(jurisdiction, context)
 
     return render_to_response('profile/jurisdiction.html', context,
                               context_instance=RequestContext(request))
+
 
 class List(MRFilterableListView):
     """Filterable list of jurisdictions"""
@@ -121,12 +128,14 @@ class List(MRFilterableListView):
         context['filter_form'] = JurisdictionFilterForm(initial=filter_data['filter_initials'])
         return context
 
-# pylint: disable=unused-argument
+
 def redirect_flag(request, **kwargs):
     """Redirect flag urls to base agency"""
+    # pylint: disable=unused-argument
     # filter None from kwargs
     kwargs = dict((key, kwargs[key]) for key in kwargs if kwargs[key] is not None)
     return redirect('jurisdiction-detail', **kwargs)
+
 
 class JurisdictionViewSet(viewsets.ModelViewSet):
     """API views for Jurisdiction"""

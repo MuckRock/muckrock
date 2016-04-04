@@ -82,6 +82,27 @@
     }
 }
 
+button.basic {
+    margin: 0;
+    box-shadow: none;
+    transform: none;
+    transition: none;
+    border: none;
+    border-radius: 0;
+    &.blue {
+        background: $color-blue;
+        &:hover {
+            background: $color-blue-dark;
+        }
+    }
+    &.green {
+        background: $color-green;
+        &:hover {
+            background: $color-green-dark;
+        }
+    }
+}
+
 .edit {
     display: inline-block;
     font-size: $font-size-2;

@@ -60,13 +60,14 @@ def get_foia(jurisdiction, jidx, slug, idx, select_related=None, prefetch_relate
     foia = get_object_or_404(foia_qs, jurisdiction=jmodel, slug=slug, id=idx)
     return foia
 
-def _make_comm(foia):
+def _make_comm(foia, from_who, proxy=False):
     """A helper function to compose the text of a communication"""
     template = get_template('text/foia/request.txt')
     context = Context({
         'document_request': smart_text(foia.requested_docs),
         'jurisdiction': foia.jurisdiction,
-        'user': foia.user
+        'user_name': from_who,
+        'proxy': proxy,
     })
     request_text = template.render(context).split('\n', 1)[1].strip()
     return request_text
@@ -89,25 +90,49 @@ def _make_new_agency(request, agency, jurisdiction):
 
 def _make_request(request, foia_request, parent=None):
     """A helper function for creating request and comms objects"""
+    agency = foia_request['agency']
+    missing_proxy = False
+    if agency.requires_proxy:
+        proxy = True
+        proxy_user = agency.jurisdiction.get_proxy()
+        if proxy_user is None:
+            from_who = '<Proxy Placeholder>'
+            missing_proxy = True
+            messages.warning(request,
+                'This agency and jurisdiction requires requestors to be '
+                'in-state citizens.  We do not currently have a citizen proxy '
+                'requestor on file for this state, but will attempt to find '
+                'one to submit this request on your behalf.')
+        else:
+            from_who = proxy_user.get_full_name()
+            messages.warning(request,
+                'This agency and jurisdiction requires requestors to be '
+                'in-state citizens.  This request will be filed in the name '
+                'of one of our volunteer filers for this state.')
+    else:
+        proxy = False
+        from_who = request.user.get_full_name()
+
     foia = FOIARequest.objects.create(
         user=request.user,
         status='started',
         title=foia_request['title'],
         jurisdiction=foia_request['jurisdiction'],
         slug=slugify(foia_request['title']) or 'untitled',
-        agency=foia_request['agency'],
+        agency=agency,
         requested_docs=foia_request['document'],
         description=foia_request['document'],
-        parent=parent
+        parent=parent,
+        missing_proxy=missing_proxy,
     )
     foia_comm = FOIACommunication.objects.create(
         foia=foia,
-        from_who=request.user.get_full_name(),
+        from_who=from_who,
         to_who=foia.get_to_who(),
         date=datetime.now(),
         response=False,
         full_html=False,
-        communication=_make_comm(foia)
+        communication=_make_comm(foia, from_who, proxy=proxy)
     )
     return foia, foia_comm
 
@@ -246,7 +271,7 @@ def create_request(request):
         if foia_request:
             foia, foia_comm = _make_request(request, foia_request, parent)
             foia_comm.save()
-            foia.save()
+            foia.save(comment='request drafted')
             request.session['ga'] = 'request_drafted'
             return redirect(foia)
         else:
@@ -323,7 +348,7 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
             foia_comm.date = datetime.now()
             foia_comm.communication = smart_text(data['request'])
             foia_comm.save()
-            foia.save()
+            foia.save(comment='draft edited')
             if request.POST.get('submit') == 'Save':
                 messages.success(request, 'Your draft has been updated.')
             elif request.POST.get('submit') == 'Submit':

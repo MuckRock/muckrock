@@ -2,6 +2,7 @@
 Tests for Tasks models
 """
 
+from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.test import TestCase
 
@@ -64,6 +65,9 @@ class OrphanTaskTests(TestCase):
             reason='ib',
             communication=self.comm,
             address='Whatever Who Cares')
+
+    def test_get_absolute_url(self):
+        eq_(self.task.get_absolute_url(), reverse('orphan-task', kwargs={'pk': self.task.pk}))
 
     def test_task_creates_successfully(self):
         ok_(self.task,
@@ -133,6 +137,14 @@ class FlaggedTaskTests(TestCase):
     def setUp(self):
         self.task = task.models.FlaggedTask
 
+    def test_get_absolute_url(self):
+        text = 'Lorem ipsum'
+        user = factories.UserFactory()
+        foia = factories.FOIARequestFactory()
+        flagged_task = self.task.objects.create(user=user, foia=foia, text=text)
+        _url = reverse('flagged-task', kwargs={'pk': flagged_task.pk})
+        eq_(flagged_task.get_absolute_url(), _url)
+
     def test_flagged_object(self):
         """A flagged task should be able to return its object."""
         text = 'Lorem ipsum'
@@ -173,6 +185,9 @@ class SnailMailTaskTests(TestCase):
         self.task = task.models.SnailMailTask.objects.create(
             category='a',
             communication=self.comm)
+
+    def test_get_absolute_url(self):
+        eq_(self.task.get_absolute_url(), reverse('snail-mail-task', kwargs={'pk': self.task.pk}))
 
     def test_task_creates_successfully(self):
         ok_(self.task,
@@ -219,6 +234,9 @@ class StaleAgencyTaskTests(TestCase):
     def setUp(self):
         self.task = task.factories.StaleAgencyTaskFactory()
         self.foia = FOIARequest.objects.filter(agency=self.task.agency).first()
+
+    def test_get_absolute_url(self):
+        eq_(self.task.get_absolute_url(), reverse('stale-agency-task', kwargs={'pk': self.task.pk}))
 
     def test_stale_requests(self):
         """
@@ -272,6 +290,10 @@ class NewAgencyTaskTests(TestCase):
             user=self.user,
             agency=self.agency)
 
+
+    def test_get_absolute_url(self):
+        eq_(self.task.get_absolute_url(), reverse('new-agency-task', kwargs={'pk': self.task.pk}))
+
     def test_task_creates_successfully(self):
         ok_(self.task,
             'New agency tasks should create successfully given a user and an agency')
@@ -306,6 +328,9 @@ class ResponseTaskTests(TestCase):
     def setUp(self):
         comm = factories.FOIACommunicationFactory(response=True)
         self.task = task.models.ResponseTask.objects.create(communication=comm)
+
+    def test_get_absolute_url(self):
+        eq_(self.task.get_absolute_url(), reverse('response-task', kwargs={'pk': self.task.pk}))
 
     def test_task_creates_successfully(self):
         ok_(self.task,

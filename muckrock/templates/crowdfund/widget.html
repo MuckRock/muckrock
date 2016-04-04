@@ -13,6 +13,7 @@
     <section class="description">
         {{ crowdfund.description|markdown }}
     </section>
+    <div class="progress"><span class="meter" style="width: {{crowdfund.percent_funded}}%"></span></div>
     <section class="stats">
         <div class="contributors">
             <p class="contributor summary">{{ contributor_summary }}</p>
@@ -58,12 +59,9 @@
                 <input name="show" value="False" hidden>
                 {% endif %}
             </section>
-            <section class="amount">
-
-            </section>
             <section class="donate">
                 <input type="number" class="currency-field" name="stripe_amount" value="2500" />
-                <button type="submit">Donate</button>
+                <button type="submit" class="basic green">Donate</button>
             </section>
         </form>
     </footer>

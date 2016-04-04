@@ -402,6 +402,10 @@ AWS_AUTOIMPORT_BUCKET_NAME = os.environ.get(
 STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
 STRIPE_PUB_KEY = os.environ.get('STRIPE_PUB_KEY')
 
+MAILCHIMP_API_KEY = os.environ.get('MAILCHIMP_API_KEY', '')
+MAILCHIMP_API_ROOT = 'https://us2.api.mailchimp.com/3.0'
+MAILCHIMP_LIST_DEFAULT = '20aa4a931d'
+
 MAILGUN_ACCESS_KEY = os.environ.get('MAILGUN_ACCESS_KEY')
 MAILGUN_SERVER_NAME = 'requests.muckrock.com'
 
@@ -440,9 +444,7 @@ CACHES = {
 }
 
 REST_FRAMEWORK = {
-    'PAGINATE_BY': 20,                 # Default to 20
-    'PAGINATE_BY_PARAM': 'page_size',  # Allow client to override, using `?page_size=xxx`.
-    'MAX_PAGINATE_BY': 100,            # Maximum limit allowed when using `?page_size=xxx`.
+    'DEFAULT_PAGINATION_CLASS': 'muckrock.pagination.StandardPagination',
     'DEFAULT_FILTER_BACKENDS':
         ('rest_framework.filters.DjangoFilterBackend',),
     'DEFAULT_AUTHENTICATION_CLASSES':

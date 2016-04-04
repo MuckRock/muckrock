@@ -3,6 +3,7 @@ Models for the Task application
 """
 
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Max, Prefetch, Q
 
@@ -16,6 +17,8 @@ from muckrock.foia.models import FOIACommunication, FOIAFile, FOIANote, FOIARequ
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.notifications import SupportNotification
 from muckrock.models import ExtractDay, Now
+
+# pylint: disable=missing-docstring
 
 def generate_status_action(foia):
     """Generate activity stream action for agency response"""
@@ -160,6 +163,9 @@ class OrphanTask(Task):
     def __unicode__(self):
         return u'Orphan Task'
 
+    def get_absolute_url(self):
+        return reverse('orphan-task', kwargs={'pk': self.pk})
+
     def move(self, foia_pks):
         """Moves the comm and creates a ResponseTask for it"""
         moved_comms = self.communication.move(foia_pks)
@@ -206,7 +212,6 @@ class SnailMailTask(Task):
         ('n', 'New'),
         ('u', 'Update'),
         ('f', 'Followup'),
-        ('p', 'Payment')
     )
     category = models.CharField(max_length=1, choices=categories)
     communication = models.ForeignKey('foia.FOIACommunication')
@@ -216,13 +221,16 @@ class SnailMailTask(Task):
     def __unicode__(self):
         return u'Snail Mail Task'
 
+    def get_absolute_url(self):
+        return reverse('snail-mail-task', kwargs={'pk': self.pk})
+
     def set_status(self, status):
         """Set the status of the comm and FOIA affiliated with this task"""
         comm = self.communication
         comm.status = status
         comm.save()
         comm.foia.status = status
-        comm.foia.save()
+        comm.foia.save(comment='snail mail task')
         comm.foia.update()
 
     def update_date(self):
@@ -261,6 +269,9 @@ class RejectedEmailTask(Task):
     def __unicode__(self):
         return u'Rejected Email Task'
 
+    def get_absolute_url(self):
+        return reverse('rejected-email-task', kwargs={'pk': self.pk})
+
     def agencies(self):
         """Get the agencies who use this email address"""
         return Agency.objects.filter(Q(email__iexact=self.email) |
@@ -283,6 +294,9 @@ class StaleAgencyTask(Task):
 
     def __unicode__(self):
         return u'Stale Agency Task'
+
+    def get_absolute_url(self):
+        return reverse('stale-agency-task', kwargs={'pk': self.pk})
 
     def resolve(self, user=None):
         """Mark the agency as stale when resolving"""
@@ -333,6 +347,9 @@ class FlaggedTask(Task):
     def __unicode__(self):
         return u'Flagged Task'
 
+    def get_absolute_url(self):
+        return reverse('flagged-task', kwargs={'pk': self.pk})
+
     def flagged_object(self):
         """Return the object that was flagged (should only ever be one, and never none)"""
         if self.foia:
@@ -360,6 +377,9 @@ class NewAgencyTask(Task):
     def __unicode__(self):
         return u'New Agency Task'
 
+    def get_absolute_url(self):
+        return reverse('new-agency-task', kwargs={'pk': self.pk})
+
     def pending_requests(self):
         """Returns the requests to be acted on"""
         return FOIARequest.objects.filter(agency=self.agency).exclude(status='started')
@@ -382,7 +402,7 @@ class NewAgencyTask(Task):
         for foia in self.pending_requests():
             # first switch foia to use replacement agency
             foia.agency = replacement_agency
-            foia.save()
+            foia.save(comment='new agency task')
             comms = foia.communications.all()
             if comms.count():
                 first_comm = comms[0]
@@ -401,6 +421,9 @@ class ResponseTask(Task):
     def __unicode__(self):
         return u'Response Task'
 
+    def get_absolute_url(self):
+        return reverse('response-task', kwargs={'pk': self.pk})
+
     def move(self, foia_pks):
         """Moves the associated communication to a new request"""
         return self.communication.move(foia_pks)
@@ -414,7 +437,7 @@ class ResponseTask(Task):
             raise ValueError('The task communication is an orphan.')
         foia = comm.foia
         foia.tracking_id = tracking_id
-        foia.save()
+        foia.save(comment='response task tracking id')
 
     def set_status(self, status, set_foia=True):
         """Sets status of comm and foia, with option for only setting comm stats"""
@@ -432,7 +455,7 @@ class ResponseTask(Task):
             if status in ['rejected', 'no_docs', 'done', 'abandoned']:
                 foia.date_done = comm.date
             foia.update()
-            foia.save()
+            foia.save(comment='response task status')
             logging.info('Request #%d status changed to "%s"', foia.id, status)
             generate_status_action(foia)
 
@@ -444,15 +467,25 @@ class ResponseTask(Task):
             raise ValueError('This tasks\'s communication is an orphan.')
         foia = comm.foia
         foia.price = price
-        foia.save()
+        foia.save(comment='response task price')
 
     def set_date_estimate(self, date_estimate):
         """Sets the estimated completion date of the communication's request."""
         foia = self.communication.foia
         foia.date_estimate = date_estimate
         foia.update()
-        foia.save()
+        foia.save(comment='response task date estimate')
         logging.info('Estimated completion date set to %s', date_estimate)
+
+    def proxy_reject(self):
+        """Special handling for a proxy reject"""
+        self.communication.status = 'rejected'
+        self.communication.save()
+        self.communication.foia.status = 'rejected'
+        self.communication.foia.proxy_reject()
+        self.communication.foia.update()
+        self.communication.foia.save(comment='response task proxy reject')
+        generate_status_action(self.communication.foia)
 
 
 class FailedFaxTask(Task):
@@ -463,6 +496,9 @@ class FailedFaxTask(Task):
 
     def __unicode__(self):
         return u'Failed Fax Task'
+
+    def get_absolute_url(self):
+        return reverse('failed-fax-task', kwargs={'pk': self.pk})
 
 
 class StatusChangeTask(Task):
@@ -475,6 +511,9 @@ class StatusChangeTask(Task):
     def __unicode__(self):
         return u'Status Change Task'
 
+    def get_absolute_url(self):
+        return reverse('status-change-task', kwargs={'pk': self.pk})
+
 
 class CrowdfundTask(Task):
     """Created when a crowdfund is finished"""
@@ -484,6 +523,9 @@ class CrowdfundTask(Task):
     def __unicode__(self):
         return u'Crowdfund Task'
 
+    def get_absolute_url(self):
+        return reverse('crowdfund-task', kwargs={'pk': self.pk})
+
 
 class MultiRequestTask(Task):
     """Created when a multirequest is created and needs approval."""
@@ -492,6 +534,9 @@ class MultiRequestTask(Task):
 
     def __unicode__(self):
         return u'Multi-Request Task'
+
+    def get_absolute_url(self):
+        return reverse('multirequest-task', kwargs={'pk': self.pk})
 
 
 # Not a task, but used by tasks

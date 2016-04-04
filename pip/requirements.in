@@ -1,5 +1,6 @@
 -e git://github.com/callowayproject/django-news-sitemaps.git@55da6b72580dd6d79380f2bb17240e7afa00555a#egg=django_news_sitemaps-master # Generates a news sitemap
 -e git://github.com/django-haystack/django-haystack.git@f1ed18313777005dd77ed724ecbfb27c0b03cad8#egg=django-haystack # django search engine
+-e git://github.com/rentapplication/django-mailgun.git@2ec07afcda0db7dfe5588f83e9ed299bc04bb0b5#egg=django_mailgun # Mail backend used directly (on production)
 boto # Used to access AWS
 celery # Used to run async tasks
 celery-haystack # Integrate celery and haystack
@@ -16,7 +17,6 @@ django-geojson # Used for storing geographic data
 django-leaflet # Used for plotting geographic data
 django-localflavor # Used for phone numbers and state list
 django-lot # Used for Log On Tokens
-django-mailgun # Mail backend used directly (on production)
 django-markdown-deux # Used for markdown
 django-mathfilters # Mathematical template filters
 django-package-monitor # Keeps track of which packages need upgrading

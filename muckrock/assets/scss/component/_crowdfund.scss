@@ -1,7 +1,7 @@
 $crowdfund-color: $color-green;
 $crowdfund-color-dark: $color-green-dark;
-$crowdfund-color-light: desaturate(lighten($color-green, 30%), 15%);
-$crowdfund-border: $base-border-width solid $crowdfund-color-dark;
+$crowdfund-color-light: $color-green-light;
+$crowdfund-border: $base-border-width solid $crowdfund-color;
 
 .crowdfund.widget {
     overflow: visible;
@@ -64,6 +64,11 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
         padding-bottom: 0;
     }
 
+    .progress {
+        margin-bottom: 0;
+        border-radius: 0;
+    }
+
     .stats {
         @include display(flex);
         @include flex-direction(column);
@@ -73,7 +78,6 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
             @include align-items(center);
         }
         margin-bottom: 0;
-        border-top: 1px solid $color-grey-7;
         text-align: center;
         font-size: $font-size-2;
         line-height: $font-line-height;
@@ -112,26 +116,23 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
     .anonymity input {
         margin: $vertical-rhythm/4;
     }
-    .donate button, .donate input {
-        display: inline-block;
-    }
-    .donate button {
-        @extend .success.button;
-        font-weight: $font-weight-bold;
-    }
-    .donate input {
-        color: $color-green;
-        @include appearance(none);
-        transform: translateY(4px);
-        border: $crowdfund-border;
-        box-shadow: inset 0px 3px 3px 0px $color-grey-7;
-        padding-right: $vertical-rhythm/2;
-        font-size: $font-size-4;
-        font-weight: $font-weight-bold;
-        text-align: right;
-    }
-    @include media($medium-layout) {
-        .donate { padding-left: $vertical-rhythm/2; }
+    .donate {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        @include align-items(center);
+        margin: $vertical-rhythm/2 0;
+        border: 1px solid $color-green;
+        input {
+            @include flex(3 1 auto);
+            @include appearance(none);
+            border: none;
+            line-height: $font-line-height;
+            border-radius: 0;
+            color: $color-green-dark;
+        }
+        button {
+            @include flex(1 1 auto);
+        }
     }
 }
 
