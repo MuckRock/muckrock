@@ -75,10 +75,8 @@
 
 .project.detail {
     .project-header {
-        margin: 0 -1*$vertical-rhythm/2;
-        @include media($medium-layout) {
-            margin: 0 -1*$vertical-rhythm;
-        }
+        @include edge-to-edge;
+        margin-bottom: 0;
     }
     .project-header.with-image {
         position: relative;

@@ -26,8 +26,8 @@ html, body {
 
 @mixin edge-to-edge() {
     // Edge-to-edge negates the content padding
-    margin: -1*$vertical-rhythm/2;
-    @include media($medium-layout) { margin: -1*$vertical-rhythm; }
+    margin: -1*$vertical-rhythm/2 -1*$vertical-rhythm/2 0;
+    @include media($medium-layout) { margin: -1*$vertical-rhythm -1*$vertical-rhythm 0; }
 }
 
 section.error-404 {
