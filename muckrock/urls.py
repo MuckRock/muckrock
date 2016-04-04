@@ -93,6 +93,7 @@ urlpatterns = patterns(
     url(r'^accounts/', include('muckrock.accounts.urls')),
     url(r'^foi/', include('muckrock.foia.urls')),
     url(r'^news/', include('muckrock.news.urls')),
+    url(r'^newsletter/$', views.NewsletterSignupView.as_view(), name='newsletter'),
     url(r'^mailgun/', include('muckrock.mailgun.urls')),
     url(r'^agency/', include('muckrock.agency.urls')),
     url(r'^place/', include(muckrock.jurisdiction.urls.urlpatterns)),
