@@ -15,6 +15,9 @@
   // Color
   background: $color;
   color: $color-white;
+  path, rect {
+    fill: $color-white;
+  }
   // Type
   font-weight: $font-weight-bold;
   text-align: center;

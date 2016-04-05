@@ -72,62 +72,8 @@ $request-breakpoint: 768px;
     form {
         display: inline-block;
     }
-    .counter {
-        @include display(flex);
-        p {
-            @include flex(1 1 25%);
-            margin-left: $vertical-rhythm/2;
-            color: $color-grey-2;
-        }
-    }
-    .available.seats {
+    .progress {
         margin-bottom: 0;
-    }
-    .available.requests .counter {
-        margin-bottom: 0;
-    }
-}
-
-.organization.detail .tabs {
-    $border-color: $color-black;
-    list-style: none;
-    padding-left: 0;
-    border-bottom: 1px solid $border-color;
-    font-weight: $font-weight-bold;
-    .tab {
-        display: inline-block;
-        margin-bottom: -1px;
-        padding: $vertical-rhythm/2;
-        border: 1px solid transparent;
-        border-bottom-color: $border-color;
-        @include border-top-radius($base-border-radius/2);
-        cursor: pointer;
-        color: $color-blue;
-        &:hover {
-            background: $color-blue-light;
-        }
-        .counter {
-            @include transition(background-color .25s linear);
-            margin-right: $vertical-rhythm/4;
-            padding: $vertical-rhythm/5 $vertical-rhythm/1.5;
-            // border: 1px solid;
-            @include border-radius;
-            // font-size: $font-size-2;
-            text-align: center;
-            background: $color-blue-light;
-        }
-    }
-    .active {
-        border-color: $border-color;
-        border-bottom-color: $color-white;
-        color: $border-color;
-        cursor: default;
-        &:hover {
-            background: transparent;
-        }
-        .counter {
-            background: $color-grey-7;
-        }
     }
 }
 

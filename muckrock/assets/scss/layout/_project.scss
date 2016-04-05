@@ -75,10 +75,8 @@
 
 .project.detail {
     .project-header {
-        margin: 0 -1*$vertical-rhythm/2;
-        @include media($medium-layout) {
-            margin: 0 -1*$vertical-rhythm;
-        }
+        @include edge-to-edge;
+        margin-bottom: 0;
     }
     .project-header.with-image {
         position: relative;
@@ -167,11 +165,11 @@
                 @include media($medium-layout) {
                     margin-left: 0;
                 }
-                .counters {
+                .stats {
                     @include display(flex);
                     @include justify-content(flex-start);
                 }
-                .counter {
+                .stat {
                     @include flex(1);
                     margin: 0;
                     padding: $vertical-rhythm/2;
@@ -184,7 +182,7 @@
                             color: $color-white;
                         }
                     }
-                    .count {
+                    .value {
                         font-size: $font-size-5;
                         margin-bottom: 0;
                         display: block;
