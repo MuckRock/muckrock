@@ -1,6 +1,7 @@
+import 'jquery-ui/datepicker'
+
 import '../vendor/jquery.formset'
 import '../vendor/jquery.multiselect'
-import '../vendor/jquery.ui.datepicker'
 
 import './account'
 import './checkout'
