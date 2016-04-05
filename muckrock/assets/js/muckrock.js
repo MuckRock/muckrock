@@ -1,6 +1,7 @@
 import '../vendor/jquery.formset'
 import '../vendor/jquery.ui.datepicker'
 
+import './account'
 import './checkout'
 import './crowdfund'
 import './currencyField'
