@@ -1,4 +1,5 @@
 {% load thumbnail %}
+{% load cache %}
 
 <aside class="website-sidebar" id="website-sidebar">
     {% if not user.is_authenticated %}
@@ -122,6 +123,7 @@
     {% endif %}
 
     {% if recent_articles %}
+    {% cache 600 recent_articles %}
     <section class="recent articles">
         {% for article in recent_articles %}
         <a href="{{article.get_absolute_url}}" title="{{article.summary}}" class="article">
@@ -130,6 +132,7 @@
         </a>
         {% endfor %}
     </section>
+    {% endcache %}
     {% endif %}
 
 </aside>

@@ -370,10 +370,6 @@ def homepage(request):
             'hp:featured_projects',
             lambda: Project.objects.get_public().filter(featured=True)[:4],
             600)
-    federal_government = cache_get_or_set(
-            'hp:federal_government',
-            lambda: Jurisdiction.objects.filter(level='f').first(),
-            None)
     completed_requests = cache_get_or_set(
             'hp:completed_requests',
             lambda: (FOIARequest.objects.get_public().get_done()
@@ -410,9 +406,6 @@ def reset_homepage_cache(request):
     cache.set('hp:featured_projects',
             Project.objects.get_public().filter(featured=True)[:4],
             600)
-    cache.set('hp:federal_government',
-            Jurisdiction.objects.filter(level='f').first(),
-            None)
     cache.set('hp:completed_requests',
             FOIARequest.objects.get_public().get_done()
                    .order_by('-date_done')
