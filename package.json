@@ -5,7 +5,8 @@
   "main": "muckrock/assets/entry.js",
   "scripts": {
     "build": "webpack --config config/webpack.config.js --progress --color",
-    "watch": "webpack --config config/webpack.config.js --progress --color --watch"
+    "watch": "webpack --config config/webpack.config.js --progress --color --watch",
+    "heroku-postbuild": "npm run build"
   },
   "repository": {
     "type": "git",
