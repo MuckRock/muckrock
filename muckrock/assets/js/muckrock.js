@@ -1,4 +1,5 @@
 import '../vendor/jquery.formset'
+import '../vendor/jquery.multiselect'
 import '../vendor/jquery.ui.datepicker'
 
 import './account'
