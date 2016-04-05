@@ -2,9 +2,9 @@
 {% load foia_tags %}
 
 {% if communication %}
-<section class="{% if communication.response %}received{% else %}sent{% endif %} communication {% if communication.from_who == 'MuckRock.com' %}collapsed{% endif %}" id="{{ communication.anchor }}">
+<section class="{% if communication.response %}received{% else %}sent{% endif %} communication {% if communication.from_user.username == 'MuckrockStaff' %}collapsed{% endif %}" id="{{ communication.anchor }}">
     <header class="communication-header">
-        <h1 class="from">From: {{ communication.from_who }}</h1>
+        <h1 class="from">From: {{ communication.from_user.get_full_name }}</h1>
         <div class="actionables">
             {% if foia_url %}
             <a href="#{{ communication.anchor }}" class="permalink">

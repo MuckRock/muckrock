@@ -40,6 +40,7 @@ from muckrock.foia.models import (
     )
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import NewAgencyTask, MultiRequestTask
+from muckrock.utils import unique_username
 
 # pylint: disable=too-many-ancestors
 
@@ -60,13 +61,13 @@ def get_foia(jurisdiction, jidx, slug, idx, select_related=None, prefetch_relate
     foia = get_object_or_404(foia_qs, jurisdiction=jmodel, slug=slug, id=idx)
     return foia
 
-def _make_comm(foia, from_who, proxy=False):
+def _make_comm(foia, from_user, proxy=False):
     """A helper function to compose the text of a communication"""
     template = get_template('text/foia/request.txt')
     context = Context({
         'document_request': smart_text(foia.requested_docs),
         'jurisdiction': foia.jurisdiction,
-        'user_name': from_who,
+        'user_name': from_user.get_full_name(),
         'proxy': proxy,
     })
     request_text = template.render(context).split('\n', 1)[1].strip()
@@ -96,7 +97,7 @@ def _make_request(request, foia_request, parent=None):
         proxy = True
         proxy_user = agency.jurisdiction.get_proxy()
         if proxy_user is None:
-            from_who = '<Proxy Placeholder>'
+            from_user = User.objects.get(username='ProxyPlaceHolder')
             missing_proxy = True
             messages.warning(request,
                 'This agency and jurisdiction requires requestors to be '
@@ -104,14 +105,14 @@ def _make_request(request, foia_request, parent=None):
                 'requestor on file for this state, but will attempt to find '
                 'one to submit this request on your behalf.')
         else:
-            from_who = proxy_user.get_full_name()
+            from_user = proxy_user
             messages.warning(request,
                 'This agency and jurisdiction requires requestors to be '
                 'in-state citizens.  This request will be filed in the name '
                 'of one of our volunteer filers for this state.')
     else:
         proxy = False
-        from_who = request.user.get_full_name()
+        from_user = request.user
 
     foia = FOIARequest.objects.create(
         user=request.user,
@@ -127,25 +128,19 @@ def _make_request(request, foia_request, parent=None):
     )
     foia_comm = FOIACommunication.objects.create(
         foia=foia,
-        from_who=from_who,
-        to_who=foia.get_to_who(),
+        from_user=from_user,
+        to_user=foia.contact,
         date=datetime.now(),
         response=False,
         full_html=False,
-        communication=_make_comm(foia, from_who, proxy=proxy)
+        communication=_make_comm(foia, from_user, proxy=proxy)
     )
     return foia, foia_comm
 
 def _make_user(request, data):
     """Helper function to create a new user"""
     # create unique username thats at most 30 characters
-    base_username = data['full_name'].replace(' ', '')[:30]
-    username = base_username
-    num = 1
-    while User.objects.filter(username__iexact=username).exists():
-        postfix = str(num)
-        username = '%s%s' % (base_username[:30 - len(postfix)], postfix)
-        num += 1
+    username = unique_username(data['full_name'])
     # create random password
     password = ''.join(choice(string.ascii_letters + string.digits) for _ in range(12))
     # create a new user

@@ -12,17 +12,16 @@ from datetime import datetime
 
 from muckrock.foia.models import FOIACommunication, STATUS
 
-def save_foia_comm(foia, from_who, comm, formset=None, appeal=False, snail=False, thanks=False):
+def save_foia_comm(foia, from_user, comm_text, formset=None, appeal=False, snail=False, thanks=False):
     """Save the FOI Communication"""
     #pylint:disable=too-many-arguments
     comm = FOIACommunication.objects.create(
         foia=foia,
-        from_who=from_who,
-        to_who=foia.get_to_who(),
+        from_user=from_user,
+        to_user=foia.contact,
         date=datetime.now(),
         response=False,
-        full_html=False,
-        communication=comm,
+        communication=comm_text,
         thanks=thanks,
     )
     if formset is not None:

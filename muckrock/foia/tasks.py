@@ -181,14 +181,25 @@ def submit_multi_request(req_pk, **kwargs):
             foia_request = template.render(context).split('\n', 1)[1].strip()
 
             new_foia = FOIARequest.objects.create(
-                user=req.user, status='started', title=title, slug=slugify(title),
-                jurisdiction=agency.jurisdiction, agency=agency, embargo=req.embargo,
-                requested_docs=req.requested_docs, description=req.requested_docs)
+                user=req.user,
+                status='started',
+                title=title,
+                slug=slugify(title),
+                jurisdiction=agency.jurisdiction,
+                agency=agency,
+                embargo=req.embargo,
+                requested_docs=req.requested_docs,
+                description=req.requested_docs,
+                )
 
             FOIACommunication.objects.create(
-                foia=new_foia, from_who=new_foia.user.get_full_name(),
-                to_who=new_foia.get_to_who(), date=datetime.now(), response=False,
-                full_html=False, communication=foia_request)
+                foia=new_foia,
+                from_user=new_foia.user,
+                to_user=new_foia.contact,
+                date=datetime.now(),
+                response=False,
+                communication=foia_request,
+                )
 
             new_foia.submit()
     req.delete()
@@ -283,7 +294,7 @@ def followup_requests():
             (foia_options.enable_weekend_followup or is_weekday)):
         for foia in FOIARequest.objects.get_followup():
             try:
-                foia.followup(automatic=True)
+                foia.followup()
                 log.append('%s - %d - %s' % (foia.status, foia.pk, foia.title))
             except MailgunAPIError as exc:
                 error_log.append('ERROR: %s - %d - %s - %s' %
@@ -431,8 +442,14 @@ def autoimport():
         title = title or file_name
         access = 'private' if foia.embargo else 'public'
 
-        foia_file = FOIAFile(foia=foia, comm=comm, title=title, date=comm.date,
-                             source=comm.from_who[:70], access=access)
+        foia_file = FOIAFile(
+                foia=foia,
+                comm=comm,
+                title=title,
+                date=comm.date,
+                source=comm.from_user.get_full_name(),
+                access=access,
+                )
         full_file_name = foia_file.ffile.field.generate_filename(
                 foia_file.ffile.instance,
                 file_name)
@@ -492,13 +509,17 @@ def autoimport():
             for foia_pk in foia_pks:
                 try:
                     foia = FOIARequest.objects.get(pk=foia_pk)
-                    source = foia.agency.name if foia.agency else ''
-
                     comm = FOIACommunication.objects.create(
-                        foia=foia, from_who=source,
-                        to_who=foia.user.get_full_name(), response=True,
-                        date=file_date, full_html=False, delivered='mail',
-                        communication=body, status=status)
+                        foia=foia,
+                        from_user=foia.agency.get_address_user(), # XXX
+                        to_user=foia.user,
+                        response=True,
+                        date=file_date,
+                        full_html=False,
+                        delivered='mail',
+                        communication=body,
+                        status=status,
+                        )
 
                     foia.status = status or foia.status
                     if foia.status in ['partial', 'done', 'rejected', 'no_docs']:

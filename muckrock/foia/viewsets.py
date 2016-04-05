@@ -94,10 +94,15 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                                               jurisdiction=jurisdiction, slug=slug,
                                               agency=agency, requested_docs=requested_docs,
                                               description=requested_docs)
+            # XXX this should be a method on foia?
             FOIACommunication.objects.create(
-                    foia=foia, from_who=request.user.get_full_name(), to_who=foia.get_to_who(),
-                    date=datetime.now(), response=False, full_html=False,
-                    communication=foia_request)
+                    foia=foia,
+                    from_user=request.user,
+                    to_user=foia.contact,
+                    date=datetime.now(),
+                    response=False,
+                    communication=foia_request,
+                    )
 
             if request.user.profile.make_request():
                 foia.submit()
@@ -126,9 +131,13 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             self.check_object_permissions(request, foia)
 
             FOIACommunication.objects.create(
-                foia=foia, from_who=request.user.get_full_name(), to_who=foia.get_to_who(),
-                date=datetime.now(), response=False, full_html=False,
-                communication=request.DATA['text'])
+                foia=foia,
+                from_user=request.user,
+                to_user=foia.contact,
+                date=datetime.now(),
+                response=False,
+                communication=request.DATA['text'],
+                )
 
             appeal = request.DATA.get('appeal', False) and foia.is_appealable()
             foia.submit(appeal=appeal)

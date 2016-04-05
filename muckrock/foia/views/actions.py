@@ -292,12 +292,12 @@ def admin_fix(request, jurisdiction, jidx, slug, idx):
             if form.cleaned_data['other_emails']:
                 foia.other_emails = form.cleaned_data['other_emails']
             if form.cleaned_data['from_email']:
-                from_who = form.cleaned_data['from_email']
+                from_user = form.cleaned_data['from_email'] # XXX
             else:
-                from_who = foia.user.get_full_name()
+                from_user = foia.user
             save_foia_comm(
                 foia,
-                from_who,
+                from_user,
                 form.cleaned_data['comm'],
                 formset,
                 snail=form.cleaned_data['snail_mail']

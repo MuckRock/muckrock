@@ -94,6 +94,7 @@ class OrphanTaskQuerySet(models.QuerySet):
     """Object manager for orphan tasks"""
     def get_from_sender(self, sender):
         """Get all orphan tasks from a specific sender"""
+        # XXX do this using users
         return self.filter(communication__priv_from_who__icontains=sender)
 
 
@@ -114,9 +115,6 @@ class NewAgencyTaskQuerySet(models.QuerySet):
 
 class Task(models.Model):
     """A base task model for fields common to all tasks"""
-    date_created = models.DateTimeField(auto_now_add=True)
-    date_done = models.DateTimeField(blank=True, null=True)
-    resolved = models.BooleanField(default=False, db_index=True)
     assigned = models.ForeignKey(User, blank=True, null=True, related_name="assigned_tasks")
     resolved_by = models.ForeignKey(User, blank=True, null=True, related_name="resolved_tasks")
 
@@ -185,7 +183,7 @@ class OrphanTask(Task):
 
     def get_sender_domain(self):
         """Gets the domain of the sender's email address."""
-        _, email_address = email.utils.parseaddr(self.communication.priv_from_who)
+        email_address = self.communication.from_user.email
         if '@' not in email_address:
             return None
         else:
@@ -332,7 +330,7 @@ class StaleAgencyTask(Task):
         self.agency.save()
         for foia in foia_list:
             foia.email = new_email
-            foia.followup(automatic=True, show_all_comms=False)
+            foia.followup(show_all_comms=False)
 
 
 class FlaggedTask(Task):

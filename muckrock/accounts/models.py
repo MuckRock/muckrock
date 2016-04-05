@@ -41,6 +41,7 @@ ACCT_TYPES = [
     ('proxy', 'Proxy'),
     ('robot', 'Robot'),
     ('agency', 'Agency'),
+    ('unknown', 'Unknown'),
 ]
 
 PAYMENT_FEE = .05
@@ -435,6 +436,7 @@ CONTACT_TYPES = (
 class AgencyProfile(models.Model):
     """Extra profile for agency users"""
 
+    user = models.OneToOneField(User)
     agency = models.ForeignKey(
         Agency,
         blank=True,

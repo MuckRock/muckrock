@@ -2,15 +2,16 @@
 Miscellanous utilities
 """
 
+from django.contrib.auth.models import User
+from django.core.cache import cache
+from django.template import Context
+from django.template.loader_tags import BlockNode, ExtendsNode
+
 import datetime
 import mock
 import random
 import string
 import stripe
-
-from django.template import Context
-from django.template.loader_tags import BlockNode, ExtendsNode
-from django.core.cache import cache
 
 #From http://stackoverflow.com/questions/2687173/django-how-can-i-get-a-block-from-a-template
 
@@ -60,3 +61,14 @@ def cache_get_or_set(key, update, timeout):
         value = update()
         cache.set(key, value, timeout)
     return value
+
+def unique_username(base_username):
+    """Get a unique username"""
+    base_username = base_username.replace(' ', '')[:30]
+    username = base_username
+    num = 1
+    while User.objects.filter(username__iexact=username).exists():
+        postfix = str(num)
+        username = '%s%s' % (base_username[:30 - len(postfix)], postfix)
+        num += 1
+

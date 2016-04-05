@@ -7,10 +7,12 @@
 {% endif %}
 <dl class="task-data">
     {% with task.communication as comm %}
-    {% if comm.priv_from_who %}
     <dt>From</dt>
-    <dd>{{comm.priv_from_who}}</dd>
-    {% endif %}
+    <dd>
+        {{ task.communication.from_user.get_full_name }}
+        -
+        {{ task.communication.from_user.email }}
+    </dd>
     {% if comm.subject %}
     <dt>Subject</dt>
     <dd>{{comm.subject}}</dd>

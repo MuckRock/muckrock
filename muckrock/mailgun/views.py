@@ -31,6 +31,7 @@ from muckrock.task.models import (
         ResponseTask,
         StaleAgencyTask,
         )
+from muckrock.utils import unique_username
 
 logger = logging.getLogger(__name__)
 
@@ -55,12 +56,13 @@ def _upload_file(foia, comm, file_, sender):
 
 def _make_orphan_comm(from_, to_, post, files, foia):
     """Make an orphan commuication"""
-    from_realname, _ = parseaddr(from_)
     to_ = to_[:255] if to_ else ''
     comm = FOIACommunication.objects.create(
-            priv_from_who=from_[:255], from_who=from_realname[:255],
-            priv_to_who=to_, response=True,
-            date=datetime.now(), full_html=False, delivered='email',
+            from_user = _get_user_from_addr(from_, trusted=False, foia=foia),
+            priv_to_who=to_, # XXX
+            response=True,
+            date=datetime.now(),
+            delivered='email',
             communication='%s\n%s' %
                 (post.get('stripped-text', ''), post.get('stripped-signature')),
             likely_foia=foia)
@@ -73,6 +75,42 @@ def _make_orphan_comm(from_, to_, post, files, foia):
         if type_ == 'file':
             _upload_file(None, comm, file_, from_)
     return comm
+
+def _get_user_from_addr(addr, trusted=True, foia=None):
+    """Get a user account from a header address"""
+    name, email = parseaddr(addr)
+    if ',' in name:
+        last_name, first_name = name.split(',', 1)
+    elif ' ' in name:
+        first_name, last_name = name.rsplit(' ', 1)
+    else:
+        first_name, last_name = name, ''
+    user, created = User.objects.get_or_create(
+            email=email,
+            defaults={'username': unique_username(name)},
+            )
+    updated = False
+    if not user.first_name:
+        user.first_name = first_name[:30]
+        updated = True
+    if not user.last_name:
+        user.last_name = last_name[:30]
+        updated = True
+    if updated:
+        user.save()
+    if created:
+        Profile.objects.create(
+            user=user,
+            acct_type='agency' if trusted else 'unknown', # XXX doc the trust system here
+            email_pref='never',
+            )
+        if foia:
+            AgencyProfile.objects.create(
+                user=user,
+                agency=foia.agency,
+                )
+    return user
+
 
 @csrf_exempt
 def route_mailgun(request):
@@ -125,8 +163,9 @@ def _handle_request(request, mail_id):
     subject = post.get('Subject') or post.get('subject', '')
 
     try:
-        from_realname, from_email = parseaddr(from_)
         foia = FOIARequest.objects.get(mail_id=mail_id)
+        from_realname, from_email = parseaddr(from_)
+        from_user = _get_user_from_addr(from_, foia=foia)
 
         if not _allowed_email(from_email, foia):
             msg, reason = ('Bad Sender', 'bs')
@@ -142,10 +181,13 @@ def _handle_request(request, mail_id):
             return HttpResponse('WARNING')
 
         comm = FOIACommunication.objects.create(
-                foia=foia, from_who=from_realname[:255], priv_from_who=from_[:255],
-                to_who=foia.user.get_full_name(),
-                subject=subject[:255], response=True,
-                date=datetime.now(), full_html=False, delivered='email',
+                foia=foia,
+                from_user=from_user,
+                to_user=foia.user,
+                subject=subject[:255],
+                response=True,
+                date=datetime.now(),
+                delivered='email',
                 communication='%s\n%s' %
                     (post.get('stripped-text', ''), post.get('stripped-signature')))
         RawEmail.objects.create(
