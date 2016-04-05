@@ -1,0 +1,13 @@
+.counter {
+    @include border-radius;
+    padding: 0 $vertical-rhythm/2;
+    background: $color-grey-7;
+    font-size: $font-size-2;
+    font-weight: $font-weight-bold;
+    &.blue {
+        background: $color-blue;
+    }
+    &.red {
+        background: $color-red;
+    }
+}

@@ -39,17 +39,22 @@
             font-size: $font-size-5;
             font-weight: $font-weight-bold;
         }
-        a
-        {
-            color: $color-white;
-            font-weight: $font-weight-bold;
-            border-bottom: 1px dotted;
+        .button {
+            margin-bottom: $vertical-rhythm;
         }
-        a:hover
-        {
-            color: $color-red-light;
-            text-decoration: none;
-            border-bottom: 1px solid;
+        .call-to-action {
+            a
+            {
+                color: $color-white;
+                font-weight: $font-weight-bold;
+                border-bottom: 1px dotted;
+            }
+            a:hover
+            {
+                color: $color-red-light;
+                text-decoration: none;
+                border-bottom: 1px solid;
+            }
         }
         .info
         {

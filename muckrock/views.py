@@ -294,7 +294,12 @@ class NewsletterSignupView(View):
                                            'We sent a confirmation email to your inbox.'))
             else:
                 _email = signup_form.data['email']
-                raise ValueError('%s is not a valid email address.' % _email)
+                # if they provided an email, then it is invalid
+                # if they didn't, then they're just being dumb!
+                if _email:
+                    raise ValueError('%s is not a valid email address.' % _email)
+                else:
+                    raise ValueError('You forgot to enter an email!')
         except ValueError as exception:
             messages.error(request, exception)
         except requests.exceptions.HTTPError as exception:

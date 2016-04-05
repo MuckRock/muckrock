@@ -40,40 +40,14 @@
             line-height: 1em;
             color: $color-white;
         }
-        .options.dropdown {
-            position: relative;
-            svg {
-                margin-left: $vertical-rhythm;
-                vertical-align: middle;
-                cursor: pointer;
+        .options .icon {
+            margin-left: $vertical-rhythm;
+            path {
                 fill: $color-white;
-                opacity: .7;
-                &:hover {
-                    opacity: .9;
-                }
             }
-            .dropdown-list {
-                display: none;
-                position: absolute;
-                z-index: 200;
-                right: 0;
-                background-color: $color-white;
-                @include border;
-                color: $color-black;
-                li {
-                    padding: $vertical-rhythm/4;
-                    cursor: pointer;
-                    &:hover {
-                        background-color: $color-grey-7;
-                    }
-                }
-                list-style-type: none;
-                padding-left: 0;
-            }
-            &.visible {
-                .dropdown-list {
-                    display: block;
-                }
+            opacity: .7;
+            &:hover {
+                opacity: .9;
             }
         }
     }
