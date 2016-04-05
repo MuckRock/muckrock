@@ -137,6 +137,9 @@
             display: inline;
         }
     }
+    &.create-request-button {
+        background: $color-blue;
+    }
 }
 
 nav.website-navigation {
@@ -181,6 +184,9 @@ nav.website-navigation {
 
     .website-sections-button {
         display: none;
+        .icon {
+            display: none;
+        }
     }
 
     @media($nav-bp) {

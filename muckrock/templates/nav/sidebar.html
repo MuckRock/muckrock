@@ -8,7 +8,7 @@
         {{ login_form }}
         <div class="row">
             <span class="cancel button">Cancel</span>
-            <button type="submit" class="primary">Log In</button>
+            <button type="submit" class="primary" onclick="ga('send', 'event', 'Account', 'Login', window.location.pathname)">Log In</button>
         </div>
     </form>
     {% endif %}
@@ -22,7 +22,7 @@
             <ul class="dropdown-list">
                 {% if user.is_staff %}<li class="dropdown-list-item"><a class="admin" href="{% if sidebar_admin_url %}{{ sidebar_admin_url }}{% else %}/admin/{% endif %}" >Admin</a></li>{% endif %}
                 <li class="dropdown-list-item"><a href="{% url 'acct-settings' %}">Settings</a></li>
-                <li class="dropdown-list-item"><a href="{% url 'acct-logout' %}">Log Out</a></li>
+                <li class="dropdown-list-item"><a href="{% url 'acct-logout' %}" onclick="ga('send', 'event', 'Account', 'Logout', window.location.pathname)">Log Out</a></li>
             </ul>
         </div>
         {% else %}
