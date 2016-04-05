@@ -5,7 +5,11 @@
     border: 1px solid $color-blue;
     background: $color-blue-light;
     color: $color-blue-dark;
-    padding: $vertical-rhythm;
+    padding: $vertical-rhythm/2;
+
+    .label {
+        display: none;
+    }
 
     .call-to-action, .signup-form {
         @include flex(1 1 20em);
@@ -31,6 +35,13 @@
         }
         button {
             @include flex(1 1 auto);
+        }
+    }
+
+    @include media($medium-layout){
+        padding: $vertical-rhythm/2 $vertical-rhythm;
+        .label {
+            display: block;
         }
     }
 }
