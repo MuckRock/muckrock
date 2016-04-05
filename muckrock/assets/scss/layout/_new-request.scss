@@ -199,7 +199,7 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
         @include row;
         border: 2px solid $color-grey-5;
         border-top: none;
-        input {
+        button {
             @include quarter;
         }
         p {

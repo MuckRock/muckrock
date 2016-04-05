@@ -352,6 +352,7 @@ class TestFOIAFunctional(TestCase):
 
 class TestFOIAIntegration(TestCase):
     """Integration tests for FOIA"""
+    # rewrite this with freezeray
 
     fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
                 'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
@@ -398,6 +399,8 @@ class TestFOIAIntegration(TestCase):
                 self.date_done = MockDateTime(self.date_done.year,
                                               self.date_done.month,
                                               self.date_done.day)
+            if 'comment' in kwargs:
+                kwargs.pop('comment')
             super(FOIARequest, self).save(*args, **kwargs)
         self.FOIARequest_save = muckrock.foia.models.FOIARequest.save
         muckrock.foia.models.FOIARequest.save = save

@@ -49,13 +49,13 @@ MuckRock &bull; {{ project.title }}
         <section class="project-overview">
             <div class="project-quick-links">
                 <div class="project-references">
-                    <section class="counters">
-                        <a href="#articles" class="article counter">
-                            <span class="count">{{ articles|length }}</span>
+                    <section class="stats">
+                        <a href="#articles" class="article stat">
+                            <span class="value">{{ articles|length }}</span>
                             <span class="label">Article{{ articles|length|pluralize }}</spam>
                         </a>
-                        <a href="#requests" class="request counter">
-                            <span class="count">{{ visible_requests|length }}</span>
+                        <a href="#requests" class="request stat">
+                            <span class="value">{{ visible_requests|length }}</span>
                             <span class="label">Request{{ visible_requests|length|pluralize }}</span>
                         </a>
                     </section>
