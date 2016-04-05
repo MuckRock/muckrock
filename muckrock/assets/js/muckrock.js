@@ -11,6 +11,7 @@ import './dropdown'
 import './foiaRequest'
 import './list'
 import './loupe'
+import './quicksearch'
 import './tabs'
 import './task'
 
