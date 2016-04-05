@@ -96,46 +96,31 @@
                 (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
                 m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
                 })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
                 ga('create', 'UA-16635809-1', 'auto');
+                // Track the account type of the current user
                 {% if request.user.is_authenticated %}
                 var dimensionValue = '{{request.user.profile.acct_type}}';
                 {% else %}
                 var dimensionValue = 'anonymous';
                 {% endif %}
                 ga('set', 'dimension1', dimensionValue);
+                // Track this pageview
                 ga('send', 'pageview');
-
+                // Track any server events
                 {% if ga == 'request_purchase' %}
-                    ga('send', 'event', {
-                        'eventCategory': 'Requests',
-                        'eventAction': 'Purchase',
-                        'eventValue': 1
-                    });
+                    ga('send', 'event', 'Requests', 'Purchase', 1);
                 {% endif %}
                 {% if ga == 'request_drafted' %}
-                    ga('send', 'event', {
-                        'eventCategory': 'Requests',
-                        'eventAction': 'Draft'
-                    });
+                    ga('send', 'event', 'Requests', 'Draft');
                 {% endif %}
                 {% if ga == 'request_submitted' %}
-                    ga('send', 'event', {
-                        'eventCategory': 'Requests',
-                        'eventAction': 'Submitted'
-                    });
+                    ga('send', 'event', 'Requests', 'Submitted');
                 {% endif %}
                 {% if ga == "pro_started" %}
-                    ga('send', 'event', {
-                        'eventCategory': 'Pro Account',
-                        'eventAction': 'Subscription'
-                    });
+                    ga('send', 'event', 'Account', 'Pro', 'Subscription');
                 {% endif %}
                 {% if ga == "pro_cancelled" %}
-                    ga('send', 'event', {
-                        'eventCategory': 'Pro Account',
-                        'eventAction': 'Cancellation'
-                    });
+                    ga('send', 'event', 'Account', 'Pro', 'Cancellation');
                 {% endif %}
             }
         </script>
