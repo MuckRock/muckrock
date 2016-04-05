@@ -1,74 +1,48 @@
-/* Notifications */
-
 .notifications {
-    display: block;
-    width: 100%;
-    top: 0;
     margin-bottom: 0;
-    border-bottom: 1px solid $color-black;
-    padding: 0;
-    list-style-type: none;
-    box-shadow: 0 4px 4px rgba(0, 0, 0, .25);
-    .notification {
-        display: table;
-        width: 100%;
-        overflow: hidden;
-        span {
-            display: table-cell;
-            vertical-align: middle;
-            &.symbol {
-                height: 4em;
-                width: 4em;
-                color: $color-white;
-                text-align: center;
-                background-color: $color-black;
-            }
-            &.text {
-                color: $color-white;
-                background-color: $color-grey;
-                padding: $vertical-rhythm/2;
-                p {
-                    vertical-align: middle;
-                    font-size: 1.1em;
-                    margin: 0;
-                    color: $color-black;
-                }
-                a {
-                    color: $color-black;
-                    opacity: .7;
-                    text-decoration: underline;
-                    &:hover {
-                        opacity: 1;
-                    }
-                }
-            }
-            &.dismiss {
-                color: $color-white;
-                background-color: $color-grey;
-                text-align: center;
-                width: 6em;
-                button.close {
-                    @include button($color-grey-3);
-                    float: right;
-                    font-size: 0.8em;
-                    margin: 0 1.5em;
-                    padding: $vertical-rhythm/4 $vertical-rhythm/2;
-                    @include border-radius;
-                }
-            }
-        }
+}
 
-        @mixin colorize($color) {
-            span.text, span.dismiss { background-color: $color; }
-            span.symbol {
-                color: $color;
-                @include colorize-icon($color);
-            }
+@mixin notification-color($light, $normal, $dark) {
+    background: $light;
+    color: $dark;
+    .symbol {
+        background: $normal;
+        path, rect, circle {
+            fill: $dark;
         }
-
-        &.success { @include colorize($color-green); }
-        &.error { @include colorize($color-red); }
-        &.info { @include colorize($color-blue); }
-        &.warning { @include colorize($color-yellow); }
     }
+}
+
+.notification {
+    @include display(flex);
+    @include align-items(stretch);
+    @include notification-color($color-grey-7, $color-black, $color-black);
+    .symbol {
+        text-align: center;
+        svg {
+            width: 2.75em;
+            height: 2.75em;
+            padding: $vertical-rhythm/2;
+            vertical-align: middle;
+        }
+    }
+    .text {
+        padding: $vertical-rhythm/2;
+    }
+}
+
+.notification.info {
+    @include notification-color($color-blue-light, $color-blue, $color-blue-dark);
+}
+
+.notification.success {
+    @include notification-color($color-green-light, $color-green, $color-green-dark);
+}
+
+.notification.warning {
+    @include notification-color($color-yellow-light, $color-yellow, $color-yellow-dark);
+}
+
+.notification.error {
+    @include notification-color($color-red-light, $color-red, $color-red-dark);
 }

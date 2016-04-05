@@ -1,7 +1,6 @@
 """Context processors to ensure data is displayed in sidebar for all views"""
 
 from django.contrib.auth.forms import AuthenticationForm
-from django.db.models import Count
 
 from datetime import datetime, timedelta
 
@@ -16,20 +15,24 @@ def get_recent_articles():
     """Lists last five recent news articles"""
     return cache_get_or_set(
             'sb:recent_articles',
-            lambda: Article.objects.get_published().order_by('-pub_date')[:5],
+            lambda: Article.objects.get_published().order_by('-pub_date')[:10],
             600)
 
 def get_actionable_requests(user):
     """Gets requests that require action or attention"""
-    requests = FOIARequest.objects.filter(user=user)
+    requests = FOIARequest.objects.filter(user=user).select_related('jurisdiction')
     updates = requests.filter(updated=True)
-    actionable_requests = dict(requests
-            .filter(status__in=('fix', 'started', 'payment'))
-            .order_by('status')
-            .values_list('status')
-            .annotate(Count('status')))
-    actionable_requests.update({'updates': updates})
-    return actionable_requests
+    started = requests.filter(status='started')
+    payment = requests.filter(status='payment')
+    fix = requests.filter(status='fix')
+    return {
+        'count': updates.count() + started.count() + payment.count() + fix.count(),
+        'updates': updates,
+        'started': started,
+        'payment': payment,
+        'fix': fix,
+    }
+
 
 def get_organization(user):
     """Gets organization, if it exists"""

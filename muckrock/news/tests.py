@@ -33,9 +33,9 @@ class TestNewsUnit(TestCase):
     def test_article_model_url(self):
         """Test the Article model's get_absolute_url method"""
         eq_(self.article.get_absolute_url(), reverse('news-detail', kwargs={
-            'year': self.article.pub_date.year,
+            'year': self.article.pub_date.strftime('%Y'),
             'month': self.article.pub_date.strftime('%b').lower(),
-            'day': self.article.pub_date.day,
+            'day': self.article.pub_date.strftime('%d'),
             'slug': self.article.slug
         }))
 

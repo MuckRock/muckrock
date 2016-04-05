@@ -12,7 +12,9 @@
         });
 
         // track this event using Google Analytics
-        ga('send', 'event', 'Crowdfund', 'Donation', window.location.pathname);
+        if (typeof(ga) != "undefined") {
+            ga('send', 'event', 'Crowdfund', 'Donation', window.location.pathname);
+        }
 
         $(document).ajaxStart(function(){
             overlays.filter('.pending').addClass('visible');

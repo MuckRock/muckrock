@@ -26,14 +26,6 @@
     color: $color-black;
 }
 
-.tab .counter {
-    @include border-radius;
-    padding: 0 $vertical-rhythm/2;
-    background: $color-grey-7;
-    font-size: $font-size-2;
-    font-weight: $font-weight-bold;
-}
-
 .tab.alert {
     color: $color-red;
     .counter {

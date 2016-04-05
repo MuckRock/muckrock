@@ -33,9 +33,12 @@
 </section>
 {% else %}
 <div class="signup prompt">
-    <p>MuckRock users can create, duplicate, track, and share public records requests like this one.</p>
+    <p>MuckRock users can file, duplicate, track, and share public records requests like this one. <a href="/about/muckrock-101">Learn more.</a></p>
     <footer>
-        <a href="{% url 'accounts' %}" class="primary button">Sign Up Today</a>
+        <a href="{% url 'foia-create' %}" class="primary button">
+            {% include 'lib/icons/create-request.svg' %}
+            <span>File a Request</span>
+        </a>
     </footer>
 </div>
 {% endif %}

@@ -77,8 +77,8 @@
         {% include 'nav/sidebar.html' %}
         <div class="container">
             <div id="modal-overlay"></div>
-            {% include 'lib/notification.html' %}
             {% include 'nav/header.html' %}
+            {% include 'lib/notification.html' %}
             <div class="content">
             {% block content %}
             {% endblock content %}
@@ -164,6 +164,7 @@
         <script type="text/javascript" src="{% static 'js/muckrock.crowdfund.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/muckrock.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/muckrock.currencyfield.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/dropdown.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/tabs.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/notification.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/task.js' %}"></script>

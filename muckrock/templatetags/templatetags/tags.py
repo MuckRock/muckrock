@@ -11,7 +11,7 @@ from django.utils.html import escape
 from email.parser import Parser
 import re
 
-from muckrock.forms import TagManagerForm
+from muckrock.forms import NewsletterSignupForm, TagManagerForm
 from muckrock.project.forms import ProjectManagerForm
 
 register = Library()
@@ -201,6 +201,18 @@ def project_manager(context, mr_object):
         'form': form,
         'authorized': authorized,
         'endpoint': mr_object.get_absolute_url(),
+    }
+
+@register.inclusion_tag('lib/newsletter.html', takes_context=True)
+def newsletter(context, list_=None):
+    """Template tag to insert a newsletter signup form."""
+    if list_ is None:
+        list_ = settings.MAILCHIMP_LIST_DEFAULT
+    newsletter_form = NewsletterSignupForm(initial={'list': list_})
+    request = context['request']
+    return {
+        'request': request,
+        'newsletter_form': newsletter_form
     }
 
 @register.filter
