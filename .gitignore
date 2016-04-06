@@ -24,3 +24,4 @@ style.*.css
 node_modules
 .settings.sh
 webpack-stats.json
+npm-debug.log
