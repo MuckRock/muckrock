@@ -395,8 +395,11 @@ def homepage(request):
 def reset_homepage_cache(request):
     """Reset the homepage cache"""
     # pylint: disable=unused-argument
-    key = make_template_fragment_key('homepage')
-    cache.delete(key)
+
+    cache.delete(make_template_fragment_key('news'))
+    cache.delete(make_template_fragment_key('projects'))
+    cache.delete(make_template_fragment_key('recent_articles'))
+
     cache.set('hp:articles',
             Article.objects.get_published().prefetch_related(
                 'authors',
