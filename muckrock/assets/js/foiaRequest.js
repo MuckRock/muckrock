@@ -1,3 +1,5 @@
+import { modal } from './modal'
+
 $('.hidden-reply').hide();
 
 function textAreaModal(nextSelector) {
