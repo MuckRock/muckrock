@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
+from django.db.models import Count, Prefetch
 from django.http import Http404
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -14,6 +15,7 @@ from django.utils.decorators import method_decorator
 
 from actstream.models import followers
 
+from muckrock.crowdfund.models import Crowdfund
 from muckrock.project.models import Project
 from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm
 from muckrock.views import MRFilterableListView
@@ -27,7 +29,15 @@ class ProjectExploreView(View):
         # pylint: disable=no-self-use
         user = request.user
         visible_projects = Project.objects.get_visible(user)
-        featured_projects = visible_projects.filter(featured=True)
+        featured_projects = (visible_projects.filter(featured=True)
+                .annotate(request_count=Count('requests', distinct=True))
+                .annotate(article_count=Count('articles', distinct=True))
+                .prefetch_related(
+                    Prefetch('crowdfunds',
+                        queryset=Crowdfund.objects
+                            .order_by('-date_due')
+                            .annotate(contributors_count=Count('payments'))))
+                )
         actively_crowdfunding = visible_projects.filter(crowdfunds__closed=False)
         context = {
             'visible': visible_projects,

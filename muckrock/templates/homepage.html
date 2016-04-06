@@ -14,6 +14,7 @@
 <div class="homepage">
     <main>
         <section class="news">
+            {% cache 600 news %}
             <ul class="articles nostyle">
                 {% if lead_article %}
                 {% with lead_article as article %}
@@ -61,8 +62,10 @@
                 </li>
                 {% endfor %}
             </ul>
+            {% endcache %}
             {% newsletter %}
             {% if featured_projects %}
+            {% cache 600 projects %}
             <div class="projects">
                 <h2>Featured projects</h2>
                 <ul class="nostyle">
@@ -83,6 +86,7 @@
                 {% endfor %}
                 </ul>
             </div>
+            {% endcache %}
             {% endif %}
         </section>
         <section class="requests">
