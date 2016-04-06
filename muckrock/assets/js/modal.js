@@ -1,4 +1,4 @@
-function modal(nextSelector) {
+export function modal(nextSelector) {
     var overlay = '#modal-overlay';
     $(overlay).addClass('visible');
     $(nextSelector).addClass('visible');
@@ -11,5 +11,3 @@ function modal(nextSelector) {
         $(nextSelector).removeClass('visible');
     });
 }
-
-export var modal = modal;

@@ -1,4 +1,4 @@
-function showCommForm(selector) {
+export function showCommForm(selector) {
     $('.options.dropdown').removeClass('visible');
     $('.communication-actions').show();
     $(selector).addClass('visible').siblings().removeClass('visible');

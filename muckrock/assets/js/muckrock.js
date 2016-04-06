@@ -1,20 +1,19 @@
-import 'jquery-ui/datepicker'
+import 'jquery-ui/datepicker';
 
-import './account'
-import './checkout'
-import './communication'
-import './crowdfund'
-import './currencyField'
-import './dropdown'
-import './foiaRequest'
-import './formset'
-import './list'
-import './loupe'
-import { modal } from './modal'
-import './multiselect'
-import './quicksearch'
-import './tabs'
-import './task'
+import './account';
+import './checkout';
+import './communication';
+import './crowdfund';
+import './currencyField';
+import './dropdown';
+import './foiaRequest';
+import './formset';
+import './list';
+import './loupe';
+import './multiselect';
+import './quicksearch';
+import './tabs';
+import './task';
 
 // FLAG FORM
 $('#show-flag-form').click(function(){
@@ -79,32 +78,18 @@ $(function() {
 	$('.formset-container').formset();
 });
 
-function urlParam(sParam)
-{
-    var sPageURL = window.location.search.substring(1);
-    var sURLVariables = sPageURL.split('&');
-    for (var i = 0; i < sURLVariables.length; i++)
-    {
-        var sParameterName = sURLVariables[i].split('=');
-        if (sParameterName[0] == sParam)
-        {
-            return sParameterName[1];
-        }
-    }
-}
-
 $.expr[":"].icontains = $.expr.createPseudo(function(arg) {
     return function( elem ) {
         return $(elem).text().toUpperCase().indexOf(arg.toUpperCase()) >= 0;
     };
 });
 
-$('#sidebar-button').click(function(e){
+$('#sidebar-button').click(function(){
     var overlay = '#modal-overlay';
     var sidebar = '#website-sidebar';
     $(sidebar).addClass('visible');
     $(overlay).addClass('visible');
-    $(overlay).click(function(e){
+    $(overlay).click(function(){
         $(sidebar).removeClass('visible');
         $(overlay).removeClass('visible');
     });
@@ -120,6 +105,8 @@ function hideNav(nav, button) {
     $(button).removeClass('active');
 }
 
+/* eslint-disable no-unused-vars */
+// While this function is not used in our JS, it is used inline by our HTML
 function selectAll(source, name) {
     var checkboxes = $('input[type="checkbox"][name="' + name + '"]');
     $(checkboxes).each(function(){
@@ -127,6 +114,7 @@ function selectAll(source, name) {
         $(this).change();
     });
 }
+/* eslint-enable no-unused-vars */
 
 $('#show-sections').click(function(){
     var button = this;
@@ -146,7 +134,7 @@ $('#show-search').click(function(){
     if ($(search).hasClass('visible')) {
         searchInput.focus();
     } else {
-        searchInput.blur()
+        searchInput.blur();
     }
 });
 

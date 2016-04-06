@@ -38,7 +38,7 @@
 			prepareQuery: function (val) {
 				return val.toLowerCase().split(' ');
 			},
-			testQuery: function (query, txt, _row) {
+			testQuery: function (query, txt) {
 				for (var i = 0; i < query.length; i += 1) {
 					if (txt.indexOf(query[i]) === -1) {
 						return false;
@@ -250,7 +250,7 @@
 		};
 
 		this.results = function (bool) {
-			if (!!options.noResults.length) {
+			if (options.noResults.length) {
 				options.noResults[bool ? 'hide' : 'show']();
 			}
 
@@ -258,7 +258,7 @@
 		};
 
 		this.loader = function (bool) {
-			if (!!options.loader.length) {
+			if (options.loader.length) {
 				options.loader[bool ? 'show' : 'hide']();
 			}
 

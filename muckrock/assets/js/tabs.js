@@ -1,4 +1,4 @@
-import { displayFile } from './foiaRequest'
+import { displayFile } from './foiaRequest';
 
 /*
 
@@ -27,7 +27,7 @@ function showTab(id) {
     // if no id provided, use the id of the first panel
     id = !id ? tabTargets[0] : id;
     if (!id) {
-        return
+        return;
     }
     // remove the active class from the tabs,
     // and add it back to the one the user selected
@@ -38,19 +38,18 @@ function showTab(id) {
     // we're interested in and show it
     tabPanels.find('.tab-panel-heading').hide();
     tabPanels.hide().attr('aria-hidden', 'true').filter(id).show().attr('aria-hidden', 'false');
-    console.log('Switched to tab:', id);
 }
 
 function getTabId(id) {
     var hyphen = id.indexOf('-');
     var tabId = id.substring(0, hyphen != -1 ? hyphen : id.length) + 's';
-    return tabId
+    return tabId;
 }
 
 function deepLink(id) {
     // we expect a hyphen delimited id, e.g. #file-1
     if (!id || id.indexOf('-') === -1) {
-        return
+        return;
     }
     var tab = getTabId(id);
     showTab(tab);
@@ -63,7 +62,6 @@ function deepLink(id) {
         var elementOffset = deepItems.filter(id).first().offset();
         window.scrollTo(elementOffset.top, elementOffset.left);
     }
-    console.log('Deeplinked to:', id);
 }
 
 // Bind to hashchange event

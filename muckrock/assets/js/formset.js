@@ -152,7 +152,7 @@
         }
 
         return $$;
-    }
+    };
 
     /* Setup plugin defaults */
     $.fn.formset.defaults = {

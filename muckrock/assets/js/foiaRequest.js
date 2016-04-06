@@ -1,4 +1,4 @@
-import { modal } from './modal'
+import { modal } from './modal';
 
 $('.hidden-reply').hide();
 
@@ -6,7 +6,6 @@ function textAreaModal(nextSelector) {
     modal(nextSelector);
     $('<textarea name="text"></textarea>').insertBefore(nextSelector.children('button'));
     $('#modal-overlay').click(function(){
-        console.log('Click!');
         nextSelector.children('textarea').remove();
     });
     $('.close-modal').click(function(){
@@ -14,29 +13,15 @@ function textAreaModal(nextSelector) {
     });
 }
 
-function textAreaReply(nextSelector) {
-    console.log(nextSelector);
-    nextSelector.show();
-    $('.reply-button').hide();
-    $('.modal-button').hide();
-    nextSelector.siblings('.hidden-reply:visible').hide();
-    if (nextSelector.children('textarea').length == 0) {
-        $('<textarea name="text"></textarea>').insertBefore(nextSelector.children('.buttons'));
-    }
-    nextSelector.children('.buttons').children('.close-reply').click(function(){
-        nextSelector.hide();
-        nextSelector.children('textarea').remove();
-        $('.reply-button').show();
-        $('.modal-button').show();
-    });
-}
-
+/* eslint-disable no-unused-vars */
+// Let's keep this around for when we need to fetch thumbnails.
 function get_thumbnail(doc_id) {
         var idx = doc_id.indexOf('-');
         var num = doc_id.slice(0, idx);
         var name = doc_id.slice(idx + 1);
         return 'https://s3.amazonaws.com/s3.documentcloud.org/documents/' + num + '/pages/' + name + '-p1-small.gif';
 }
+/* eslint-enable no-unused-vars */
 
 /* Side Bar */
 
@@ -96,7 +81,6 @@ function showComposer(id) {
     // We also want to bring the composer's first input into focus
     // in order to make it clear to the user that this is actionable
     composer.find(':text,textarea,select').filter(':visible:first').focus();
-    console.log('Switched to composer: ', id);
 }
 
 // Bind to hashchange event
@@ -116,11 +100,11 @@ $(document).ready(function(){
 
 /* Documents */
 
-function displayFile(file) {
+export function displayFile(file) {
     var activeFile = $('.active-document');
     var files = $('.file');
     if (!file) {
-        return
+        return;
     }
     var title = file.data('title');
     var docId = file.data('doc-id');
@@ -133,6 +117,7 @@ function displayFile(file) {
     files.parent('li').removeClass('active');
     files.filter(file).parent('li').addClass('active');
     var docCloudSettings = {sidebar: false, container: "#viewer"};
+    /* DV is defined by the external DocumentCloud script at runtime. */
     DV.load('https://www.documentcloud.org/documents/' + docId + '.js', docCloudSettings);
     activeFile.addClass('visible');
     window.scrollTo(0, activeFile.offset().top);
@@ -151,7 +136,6 @@ $('.active-document').find('.cancel.button').click(function(){
     $('#viewer').empty();
     activeFile.removeClass('visible');
     files.parent('li').removeClass('active');
-    console.log('Closed file');
 });
 
 $('.toggle-embed').click(function(){
@@ -183,12 +167,12 @@ $('form.generate-private-link').submit(function(e){
         window.setTimeout(function(){
             $(linkDisplay).removeClass('success');
         }, 500);
-    }
-    var handleSuccess = function(data, status, jqXHR) {
+    };
+    var handleSuccess = function(data) {
         var newLink = window.location.origin + window.location.pathname + '?key=' + data.key;
         $(linkDisplay).val(newLink);
         flashLinkDisplay();
-    }
+    };
     $.ajax({
         method: 'POST',
         data: dataToSubmit,
@@ -203,5 +187,3 @@ $('.text-area.modal-button').click(function(e){
     textAreaModal($(this).next());
     return false;
 });
-
-export var displayFile = displayFile;
