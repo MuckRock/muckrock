@@ -27,6 +27,8 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 
+DEFAULT_FROM_EMAIL = 'info@muckrock.com'
+
 DOGSLOW = True
 DOGSLOW_LOG_TO_FILE = False
 DOGSLOW_TIMER = 25
