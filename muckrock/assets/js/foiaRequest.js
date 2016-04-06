@@ -130,7 +130,7 @@ function displayFile(file) {
     // then apply active class to this file's list item
     files.parent('li').removeClass('active');
     files.filter(file).parent('li').addClass('active');
-    docCloudSettings = {sidebar: false, container: "#viewer"}
+    var docCloudSettings = {sidebar: false, container: "#viewer"};
     DV.load('https://www.documentcloud.org/documents/' + docId + '.js', docCloudSettings);
     activeFile.addClass('visible');
     window.scrollTo(0, activeFile.offset().top);
@@ -201,3 +201,5 @@ $('.text-area.modal-button').click(function(e){
     textAreaModal($(this).next());
     return false;
 });
+
+export var displayFile = displayFile;
