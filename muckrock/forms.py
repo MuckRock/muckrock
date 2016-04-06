@@ -71,6 +71,7 @@ class NewsletterSignupForm(forms.Form):
 
 class PasswordResetForm(auth_forms.PasswordResetForm):
     """Password reset form - subclass to bcc emails to diagnostics"""
+    # pylint: disable=too-many-arguments
 
     def send_mail(self, subject_template_name, email_template_name,
                   context, from_email, to_email, html_email_template_name=None):
