@@ -26,19 +26,6 @@ $('#show-flag-form').click(function(){
     });
 });
 
-// SELECT ALL
-$('#toggle-all').click(function(){
-    var toggleAll = this;
-    $(':checkbox').not('#toggle-all').each(function(){
-        $(this).click(function(){
-            toggleAll.checked = false;
-        });
-        if (!$(this).data('ignore-toggle-all')) {
-            this.checked = toggleAll.checked;
-        }
-    });
-});
-
 // Manager Component
 // A manager presents a state and a form that can modify that state.
 $('.manager .edit').click(function(){
@@ -73,10 +60,7 @@ $('.message .visibility').click(function() {
     }
 });
 
-// formsets
-$(function() {
-	$('.formset-container').formset();
-});
+$('.formset-container').formset();
 
 $.expr[":"].icontains = $.expr.createPseudo(function(arg) {
     return function( elem ) {
@@ -105,48 +89,15 @@ function hideNav(nav, button) {
     $(button).removeClass('active');
 }
 
-/* eslint-disable no-unused-vars */
-// While this function is not used in our JS, it is used inline by our HTML
-function selectAll(source, name) {
+function selectAll() {
+    var source = $(this);
+    var name = source.data('name');
     var checkboxes = $('input[type="checkbox"][name="' + name + '"]');
     $(checkboxes).each(function(){
-        this.checked = source.checked;
+        this.checked = source.prop('checked');
         $(this).change();
     });
 }
-/* eslint-enable no-unused-vars */
-
-$('#show-sections').click(function(){
-    var button = this;
-    var sections = '#global-sections';
-    toggleNav(sections, button);
-});
-
-$('#show-search').click(function(){
-    var searchButton = this;
-    var search = '#global-search';
-    var closeSearch = '#hide-search';
-    var searchInput = $(search).children('input[type="search"]');
-    toggleNav(search, searchButton);
-    $(closeSearch).click(function(){
-        hideNav(search, searchButton);
-    });
-    if ($(search).hasClass('visible')) {
-        searchInput.focus();
-    } else {
-        searchInput.blur();
-    }
-});
-
-$('#quick-log-in').click(function(e){
-    e.preventDefault();
-    var quickLogin = $('#quick-log-in-form');
-    quickLogin.addClass('visible');
-    quickLogin.find('input[type=text]')[0].focus();
-    quickLogin.find('.cancel').click(function(){
-        quickLogin.removeClass('visible');
-    });
-});
 
 $('document').ready(function(){
 
@@ -172,6 +123,40 @@ $('document').ready(function(){
     $('.news--main img').loupe({
         height: 200,
         width: 200
+    });
+
+    $('.select-all').click(selectAll);
+
+    $('#show-sections').click(function(){
+        var button = this;
+        var sections = '#global-sections';
+        toggleNav(sections, button);
+    });
+
+    $('#show-search').click(function(){
+        var searchButton = this;
+        var search = '#global-search';
+        var closeSearch = '#hide-search';
+        var searchInput = $(search).children('input[type="search"]');
+        toggleNav(search, searchButton);
+        $(closeSearch).click(function(){
+            hideNav(search, searchButton);
+        });
+        if ($(search).hasClass('visible')) {
+            searchInput.focus();
+        } else {
+            searchInput.blur();
+        }
+    });
+
+    $('#quick-log-in').click(function(e){
+        e.preventDefault();
+        var quickLogin = $('#quick-log-in-form');
+        quickLogin.addClass('visible');
+        quickLogin.find('input[type=text]')[0].focus();
+        quickLogin.find('.cancel').click(function(){
+            quickLogin.removeClass('visible');
+        });
     });
 
 });
