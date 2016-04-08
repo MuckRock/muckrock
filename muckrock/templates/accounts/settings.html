@@ -99,18 +99,3 @@
     </main>
 </article>
 {% endblock %}
-
-{% block scripts %}
-<script type="text/javascript">
-    var email = $('#id_email').val();
-    var validateHref = $('#verify_email').attr('href');
-    $('#id_email').change(function(){
-        var newEmail = $('#id_email').val();
-        if (newEmail != email) {
-            $('#verify_email').addClass('disabled').removeAttr('href');
-        } else {
-            $('#verify_email').removeClass('disabled').attr('href', validateHref);
-        }
-    });
-</script>
-{% endblock %}

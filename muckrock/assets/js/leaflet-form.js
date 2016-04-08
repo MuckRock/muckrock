@@ -5,11 +5,11 @@ $(window).on('map:init', function (e) {
     var geocoder_settings = {
         'position': 'topright',
         'collapsed': false,
-        'placeholder': 'Address',
+        'placeholder': 'Address'
         // I am getting better results from the default geocoder than
         // I am getting from the Mapzen geocoder. ¯\_(ツ)_/¯
         // 'geocoder': new L.Control.Geocoder.Mapzen('search-npu9HYc')
-    }
+    };
     var geocoder = L.Control.geocoder(geocoder_settings).addTo(map);
     // Customize geocoder behavior
     geocoder.markGeocode = function(result) {

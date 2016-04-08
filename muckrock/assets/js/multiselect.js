@@ -84,7 +84,7 @@
 
         ms.on('focus', function(){
           that.$selectableUl.focus();
-        })
+        });
       }
 
       var selectedValues = ms.find('option:selected').map(function(){ return $(this).val(); }).get();
@@ -95,7 +95,7 @@
       }
     },
 
-    'generateLisFromOption' : function(option, index, $container){
+    'generateLisFromOption' : function(option, index){
       var that = this,
           ms = that.$element,
           attributes = "",
@@ -149,11 +149,11 @@
           $selectionOptgroup.append($(optgroupTpl));
           if (that.options.selectableOptgroup){
             $selectableOptgroup.find('.ms-optgroup-label').on('click', function(){
-              var values = $optgroup.children(':not(:selected, :disabled)').map(function(){ return $(this).val() }).get();
+              var values = $optgroup.children(':not(:selected, :disabled)').map(function(){ return $(this).val(); }).get();
               that.select(values);
             });
             $selectionOptgroup.find('.ms-optgroup-label').on('click', function(){
-              var values = $optgroup.children(':selected:not(:disabled)').map(function(){ return $(this).val() }).get();
+              var values = $optgroup.children(':selected:not(:disabled)').map(function(){ return $(this).val(); }).get();
               that.deselect(values);
             });
           }
@@ -175,16 +175,15 @@
       var that = this;
 
       if (options.value) options = [options];
-      $.each(options, function(index, option){
+      $.each(options, function(i, option){
         if (option.value && that.$element.find("option[value='"+option.value+"']").length === 0){
           var $option = $('<option value="'+option.value+'">'+option.text+'</option>'),
               index = parseInt((typeof option.index === 'undefined' ? that.$element.children().length : option.index)),
-              $container = option.nested == undefined ? that.$element : $("optgroup[label='"+option.nested+"']")
-
+              $container = option.nested == undefined ? that.$element : $("optgroup[label='"+option.nested+"']");
           $option.insertAt(index, $container);
           that.generateLisFromOption($option.get(0), index, option.nested);
         }
-      })
+      });
     },
 
     'removeOption' : function(options){
@@ -196,7 +195,7 @@
           that.$element.find("option[value='" + option.value + "']").remove();
           that.$container.find("ul.ms-list [id^='" + option.value + "']").remove();
         }
-      })
+      });
     },
 
     'escapeHTML' : function(text){
@@ -247,14 +246,14 @@
         }
       });
     },
-
+    /* eslint-disable no-redeclare */
+    /* This is vendor code that we adopted and trying to lint this issue cased more problems. */
     'moveHighlight': function($list, direction){
       var $elems = $list.find(this.elemsSelector),
           $currElem = $elems.filter('.ms-hover'),
           $nextElem = null,
           elemHeight = $elems.first().outerHeight(),
-          containerHeight = $list.height(),
-          containerSelector = '#'+this.$container.prop('id');
+          containerHeight = $list.height();
 
       $elems.removeClass('ms-hover');
       if (direction === 1){ // DOWN
@@ -304,7 +303,7 @@
         $list.scrollTop(scrollTo);
       }
     },
-
+    /* eslint-enable no-redeclare */
     'selectHighlighted' : function($list){
       var $elems = $list.find(this.elemsSelector),
           $highlightedElem = $elems.filter('.ms-hover').first();
@@ -329,7 +328,7 @@
       }
     },
 
-    'activeMouse' : function($list){
+    'activeMouse' : function(){
       var that = this;
 
       $('body').on('mouseenter', that.elemsSelector, function(){
@@ -338,7 +337,7 @@
       });
 
       $('body').on('mouseleave', that.elemsSelector, function () {
-          $(this).parents('.ms-container').find(that.elemsSelector).removeClass('ms-hover');;
+          $(this).parents('.ms-container').find(that.elemsSelector).removeClass('ms-hover');
       });
     },
 
@@ -349,7 +348,7 @@
 
     'destroy' : function(){
       $("#ms-"+this.$element.attr("id")).remove();
-      this.$element.css('position', '').css('left', '')
+      this.$element.css('position', '').css('left', '');
       this.$element.removeData('multiselect');
     },
 
@@ -539,6 +538,6 @@
         $parent.children().eq(index - 1).after(this);
       }
     });
-}
+  };
 
 }(window.jQuery);

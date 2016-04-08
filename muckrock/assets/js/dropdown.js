@@ -10,7 +10,7 @@ $('.dropdown .icon, .dropdown .dropdown-trigger').click(function(){
         thisDropdown.addClass('visible');
     }
     // If we click anywhere else on the document, the dropdown should hide.
-    $(document).click(function(e){
+    $(document).click(function(){
         dropdowns.removeClass('visible');
     });
     return false;
