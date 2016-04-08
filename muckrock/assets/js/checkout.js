@@ -17,7 +17,7 @@
         if (typeof newValue !== 'undefined') {
             element.val(newValue);
         }
-        return element.val()
+        return element.val();
     }
 
     function handleToken(token) {
@@ -31,8 +31,7 @@
         $form.submit();
     }
 
-    function handleCheckout(form) {
-        console.log('Using Stripe Checkout to obtain token...');
+    function handleCheckout() {
         var key         = formValue('stripe_pk'),
             image       = formValue('stripe_image'),
             label       = formValue('stripe_label'),
@@ -42,15 +41,15 @@
             email       = formValue('stripe_email'),
             bitcoin     = formValue('stripe_bitcoin'),
             name        = 'MuckRock';
-        amount = parseInt(amount)
-        fee = parseFloat(fee)
+        amount = parseInt(amount);
+        fee = parseFloat(fee);
         if (fee > 0) {
             amount += amount * fee;
         }
         var settings = {
             key: key,
             image: image,
-            name: 'MuckRock',
+            name: name,
             description: description,
             amount: amount,
             email: email,
@@ -58,6 +57,8 @@
             token: handleToken,
             bitcoin: bitcoin
         };
+        // We rely on an external script from Stripe to use Checkout
+        // so it will be undefined until runtime.
         StripeCheckout.open(settings);
     }
 
@@ -74,13 +75,12 @@
             // submission and call the handleCheckout method,
             // which will add a token before resubmitting the form.
             if (formValue('stripe_token')) {
-                console.log('Obtained Stripe token, submitting form...');
-                return true
+                return true;
             } else {
                 event.stopImmediatePropagation();
                 event.preventDefault();
-                handleCheckout(this);
-                return false
+                handleCheckout();
+                return false;
             }
         });
     };

@@ -19,12 +19,10 @@
         $(document).ajaxStart(function(){
             overlays.filter('.pending').addClass('visible');
         }).ajaxError(function(){
-            console.error('AJAX error!')
             overlays.filter('.pending').removeClass('visible');
             overlays.filter('.error').addClass('visible');
             $(document).off('ajaxStart').off('ajaxError').off('ajaxComplete');
-        }).ajaxComplete(function(e){
-            console.log('Contributed to crowdfund.')
+        }).ajaxComplete(function(){
             overlays.filter('.pending').removeClass('visible');
             overlays.filter('.complete').addClass('visible');
             $(document).off('ajaxStart').off('ajaxError').off('ajaxComplete');
@@ -39,11 +37,11 @@
         });
 
         event.preventDefault();
-        return false
+        return false;
     }
 
     $.fn.crowdfund = function() {
         $(this).submit(crowdfundAjax);
-    }
+    };
 
 })( jQuery );

@@ -26,14 +26,16 @@
   3. Pull the database, `fab populate-db`
   4. Pull files from S3, `fab sync-aws`
 
-5. Run the test server inside the virtual machine
-  1. Run `fab mail &` to start a background email server
-  2. Run `fab celery &` to start a background task queue
-  3. Run `fab runserver` to start a server instance
-  4. Navigate your web browser (from the host machine) to `localhost:8000`
-
 You should have a fully populated MuckRock site running locally now.
 The code checked out from GitHub is synced between the virtual machine and your host machine, so you may edit the code using your favorite text editor locally while running the code from within the virtual machine. To run the server again, just follow step 4.
+
+## Run
+
+1. Run `npm run watch &` to start a background Webpack instance
+1. Run `fab mail &` to start a background email server
+2. Run `fab celery &` to start a background task queue
+3. Run `fab runserver` to start a server instance
+4. Navigate your web browser (from the host machine) to `localhost:8000`
 
 ## Test and lint
 

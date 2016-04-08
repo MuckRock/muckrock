@@ -1,10 +1,12 @@
+import Cookie from 'js-cookie';
+
 // Task.js
 //
 // Logic for client interactions with the MuckRock task system.
 
 function authenticateAjax() {
     // Sets up authentication for AJAX transactions
-    var csrftoken = $.cookie('csrftoken');
+    var csrftoken = Cookie.get('csrftoken');
     function csrfSafeMethod(method) {
         // these HTTP methods do not require CSRF protection
         return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
@@ -23,7 +25,7 @@ function ajaxPost(task, endpoint, data) {
     var errorOverlay = $(task).children('.error.overlay');
     $(document).ajaxStart(function(){
         $(pendingOverlay).addClass('visible');
-    }).ajaxError(function(event, response){
+    }).ajaxError(function(){
         $(pendingOverlay).removeClass('visible');
         $(errorOverlay).addClass('visible');
         setTimeout(function(){
@@ -82,7 +84,7 @@ function formHasAction(taskForm, action) {
     // checks whether the task form has a 'Resolve' action or not
     var actionExists = false;
     var actionButton = 'button[name="' + action + '"]';
-    if (!!$(taskForm).children(actionButton).length) {
+    if ($(taskForm).children(actionButton).length) {
         actionExists = true;
     }
     return actionExists;
@@ -138,7 +140,6 @@ $('button[name="reject"]').click(function(e){
         forms.push($(this).closest('form'));
     }
     $(forms).each(function(){
-        console.log($(this));
         reject(this);
     });
     return false;
