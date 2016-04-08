@@ -192,15 +192,10 @@ def submit_multi_request(req_pk, **kwargs):
                 description=req.requested_docs,
                 )
 
-            FOIACommunication.objects.create(
-                foia=new_foia,
-                from_user=new_foia.user,
-                to_user=new_foia.contact,
-                date=datetime.now(),
-                response=False,
-                communication=foia_request,
-                )
-
+            new_foia.create_out_communication(
+                    from_user=new_foia.user,
+                    text=foia_request,
+                    )
             new_foia.submit()
     req.delete()
 
@@ -509,17 +504,13 @@ def autoimport():
             for foia_pk in foia_pks:
                 try:
                     foia = FOIARequest.objects.get(pk=foia_pk)
-                    comm = FOIACommunication.objects.create(
-                        foia=foia,
-                        from_user=foia.agency.get_address_user(), # XXX
-                        to_user=foia.user,
-                        response=True,
-                        date=file_date,
-                        full_html=False,
-                        delivered='mail',
-                        communication=body,
-                        status=status,
-                        )
+                    comm = foia.create_in_communication(
+                            from_user=foia.agency.get_address_user(), # XXX
+                            text=body,
+                            date=file_date,
+                            delivered='mail',
+                            status=status,
+                            )
 
                     foia.status = status or foia.status
                     if foia.status in ['partial', 'done', 'rejected', 'no_docs']:

@@ -85,23 +85,24 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             context = RequestContext(request, {'title': data['title'],
                                                'document_request': requested_docs,
                                                'jurisdiction': jurisdiction})
-            title, foia_request = \
-                (s.strip() for s in template.render(context).split('\n', 1))
-
+            title, foia_request = (
+                (s.strip() for s in template.render(context).split('\n', 1)))
 
             slug = slugify(title) or 'untitled'
-            foia = FOIARequest.objects.create(user=request.user, status='started', title=title,
-                                              jurisdiction=jurisdiction, slug=slug,
-                                              agency=agency, requested_docs=requested_docs,
-                                              description=requested_docs)
-            # XXX this should be a method on foia?
-            FOIACommunication.objects.create(
-                    foia=foia,
+            foia = FOIARequest.objects.create(
+                    user=request.user,
+                    status='started',
+                    title=title,
+                    jurisdiction=jurisdiction,
+                    slug=slug,
+                    agency=agency,
+                    requested_docs=requested_docs,
+                    description=requested_docs,
+                    )
+
+            foia.create_out_communication(
                     from_user=request.user,
-                    to_user=foia.contact,
-                    date=datetime.now(),
-                    response=False,
-                    communication=foia_request,
+                    text=foia_request,
                     )
 
             if request.user.profile.make_request():
@@ -130,14 +131,10 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             foia = FOIARequest.objects.get(pk=pk)
             self.check_object_permissions(request, foia)
 
-            FOIACommunication.objects.create(
-                foia=foia,
-                from_user=request.user,
-                to_user=foia.contact,
-                date=datetime.now(),
-                response=False,
-                communication=request.DATA['text'],
-                )
+            foia.create_out_communication(
+                    from_user=request.user,
+                    text=request.DATA['text'],
+                    )
 
             appeal = request.DATA.get('appeal', False) and foia.is_appealable()
             foia.submit(appeal=appeal)

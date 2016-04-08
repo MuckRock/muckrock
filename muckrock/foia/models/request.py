@@ -909,6 +909,28 @@ class FOIARequest(models.Model):
                 foia_file.save()
         return comm
 
+    def create_in_communication(self, from_user, text, date=None,
+            formset=None, **kwargs):
+        """Create an incoming message for the request"""
+        if date is None:
+            date = datetime.now()
+        comm = self.communications.create(
+            from_user=from_user,
+            to_user=self.user,
+            date=date,
+            response=True,
+            communication=text,
+            **kwargs,
+            )
+        if formset is not None:
+            foia_files = formset.save(commit=False)
+            for foia_file in foia_files:
+                foia_file.comm = comm
+                foia_file.title = foia_file.name()
+                foia_file.date = comm.date
+                foia_file.save()
+        return comm
+
 
     class Meta:
         # pylint: disable=too-few-public-methods

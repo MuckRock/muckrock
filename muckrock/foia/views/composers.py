@@ -126,15 +126,10 @@ def _make_request(request, foia_request, parent=None):
         parent=parent,
         missing_proxy=missing_proxy,
     )
-    foia_comm = FOIACommunication.objects.create(
-        foia=foia,
-        from_user=from_user,
-        to_user=foia.contact,
-        date=datetime.now(),
-        response=False,
-        full_html=False,
-        communication=_make_comm(foia, from_user, proxy=proxy)
-    )
+    foia_comm = foia.create_out_communication(
+            from_user=from_user,
+            text=_make_comm(foia, from_user, proxy=proxy),
+            )
     return foia, foia_comm
 
 def _make_user(request, data):

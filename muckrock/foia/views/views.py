@@ -41,7 +41,6 @@ from muckrock.foia.views.composers import get_foia
 from muckrock.foia.views.comms import (
         move_comm,
         delete_comm,
-        save_foia_comm,
         resend_comm,
         change_comm_status,
         )
@@ -448,7 +447,12 @@ class Detail(DetailView):
         text = request.POST.get('text')
         comm_sent = False
         if text and test:
-            save_foia_comm(foia, foia.user.get_full_name(), text, appeal=appeal, thanks=thanks)
+            foia.create_out_communication(
+                    from_user=foia.user,
+                    text=text,
+                    thanks=thanks,
+                    )
+            foia.submit(appeal=appeal, thanks=thanks)
             messages.success(request, success_msg)
             comm_sent = True
         return comm_sent

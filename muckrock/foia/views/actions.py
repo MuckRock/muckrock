@@ -26,7 +26,6 @@ from muckrock.foia.forms import (
     FOIAFileFormSet,
     )
 from muckrock.foia.models import FOIARequest, FOIAFile, END_STATUS
-from muckrock.foia.views.comms import save_foia_comm
 from muckrock.jurisdiction.models import Jurisdiction
 
 logger = logging.getLogger(__name__)
@@ -254,12 +253,12 @@ def agency_reply(request, jurisdiction, jidx, slug, idx):
         formset = FOIAFileFormSet(request.POST, request.FILES)
         if form.is_valid() and formset.is_valid():
             foia = form.save()
-            save_foia_comm( # XXX cant use save foia comm for incoming messages
-                foia,
-                request.user.get_full_name(),
-                form.cleaned_data['comm'],
-                formset,
-            )
+            # XXX mark foia as updated / email notify someone?
+            foia.create_in_communication(
+                    from_user=request.user,
+                    text=form.cleaned_data['comm'],
+                    formset=formset,
+                    )
             messages.success(request, 'Reply succesfully submitted')
             return redirect(foia)
     else:
@@ -288,6 +287,7 @@ def admin_fix(request, jurisdiction, jidx, slug, idx):
         formset = FOIAFileFormSet(request.POST, request.FILES)
         if form.is_valid() and formset.is_valid():
             if form.cleaned_data['email']:
+                # XXX - switch to users
                 foia.email = form.cleaned_data['email']
             if form.cleaned_data['other_emails']:
                 foia.other_emails = form.cleaned_data['other_emails']
@@ -295,13 +295,12 @@ def admin_fix(request, jurisdiction, jidx, slug, idx):
                 from_user = form.cleaned_data['from_email'] # XXX
             else:
                 from_user = foia.user
-            save_foia_comm(
-                foia,
-                from_user,
-                form.cleaned_data['comm'],
-                formset,
-                snail=form.cleaned_data['snail_mail']
-            )
+            foia.create_out_communication(
+                    from_user=from_user,
+                    text=form.cleaned_data['comm'],
+                    formset=formset,
+                    )
+            foia.submit(snail=form.cleaned_data['snail_mail'])
             messages.success(request, 'Admin Fix submitted')
             return redirect(foia)
     else:

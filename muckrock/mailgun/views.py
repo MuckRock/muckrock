@@ -180,16 +180,14 @@ def _handle_request(request, mail_id):
                 address=mail_id)
             return HttpResponse('WARNING')
 
-        comm = FOIACommunication.objects.create(
-                foia=foia,
+        comm = foia.create_in_communication(
                 from_user=from_user,
-                to_user=foia.user,
+                text='%s\n%s' % (
+                    post.get('stripped-text', ''),
+                    post.get('stripped-signature')),
                 subject=subject[:255],
-                response=True,
-                date=datetime.now(),
                 delivered='email',
-                communication='%s\n%s' %
-                    (post.get('stripped-text', ''), post.get('stripped-signature')))
+                )
         RawEmail.objects.create(
             communication=comm,
             raw_email='%s\n%s' % (post.get('message-headers', ''), post.get('body-plain', '')))
