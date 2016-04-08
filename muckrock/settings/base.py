@@ -27,6 +27,8 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 
+DEFAULT_FROM_EMAIL = 'info@muckrock.com'
+
 DOGSLOW = True
 DOGSLOW_LOG_TO_FILE = False
 DOGSLOW_TIMER = 25
@@ -58,7 +60,7 @@ SITE_ID = 1
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
-USE_I18N = True
+USE_I18N = False
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
@@ -81,6 +83,8 @@ COMPRESS_CSS_FILTERS = [
 COMPRESS_PRECOMPILERS = (
     ('text/x-scss', 'sass --sourcemap=none {infile} {outfile}'),
 )
+
+THUMBNAIL_CACHE_DIMENSIONS = True
 
 if AWS_DEBUG:
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
@@ -401,6 +405,10 @@ AWS_AUTOIMPORT_BUCKET_NAME = os.environ.get(
 
 STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
 STRIPE_PUB_KEY = os.environ.get('STRIPE_PUB_KEY')
+
+MAILCHIMP_API_KEY = os.environ.get('MAILCHIMP_API_KEY', '')
+MAILCHIMP_API_ROOT = 'https://us2.api.mailchimp.com/3.0'
+MAILCHIMP_LIST_DEFAULT = '20aa4a931d'
 
 MAILGUN_ACCESS_KEY = os.environ.get('MAILGUN_ACCESS_KEY')
 MAILGUN_SERVER_NAME = 'requests.muckrock.com'

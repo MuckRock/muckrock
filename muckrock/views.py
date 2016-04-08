@@ -1,6 +1,7 @@
 """
 Views for muckrock project
 """
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
@@ -11,17 +12,19 @@ from django.db.models import Sum, FieldDoesNotExist
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.utils.decorators import method_decorator
-from django.views.generic.list import ListView
+from django.views.generic import View, ListView
 
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAFile
-from muckrock.forms import MRFilterForm
+from muckrock.forms import MRFilterForm, NewsletterSignupForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.news.models import Article
 from muckrock.project.models import Project
 from muckrock.utils import cache_get_or_set
 
+import logging
 import re
+import requests
 from haystack.views import SearchView
 from haystack.query import RelatedSearchQuerySet
 
@@ -262,6 +265,87 @@ class MRSearchView(SearchView):
         self.results_per_page = self.get_paginate_by()
         return super(MRSearchView, self).build_page()
 
+
+class NewsletterSignupView(View):
+    """Allows users to signup for our MailChimp newsletter."""
+    def get(self, request, *args, **kwargs):
+        """Returns a signup form"""
+        template = 'forms/newsletter.html'
+        context = {'form': NewsletterSignupForm(initial={'list': settings.MAILCHIMP_LIST_DEFAULT})}
+        return render_to_response(template, context, context_instance=RequestContext(request))
+
+    def post(self, request, *args, **kwargs):
+        """
+        If given email address data, adds that email to our newsletter list.
+        Then it returns a thank you for signing up page.
+        In case of an error, we use the exception handler to populate the UI message.
+        ValueErrors are raised by us and contain custom language.
+        HTTPError are raised by the requests library and should use generic error language.
+        """
+        signup_form = NewsletterSignupForm(request.POST)
+        try:
+            if signup_form.is_valid():
+                # take the cleaned email and add it to our mailing list
+                # and redirect when successful
+                _email = signup_form.cleaned_data['email']
+                _list = signup_form.cleaned_data['list']
+                self.subscribe(_email, _list)
+                messages.success(request, ('Thank you for subscribing to our newsletter. '
+                                           'We sent a confirmation email to your inbox.'))
+            else:
+                _email = signup_form.data['email']
+                # if they provided an email, then it is invalid
+                # if they didn't, then they're just being dumb!
+                if _email:
+                    raise ValueError('%s is not a valid email address.' % _email)
+                else:
+                    raise ValueError('You forgot to enter an email!')
+        except ValueError as exception:
+            messages.error(request, exception)
+        except requests.exceptions.HTTPError as exception:
+            messages.error(request, 'Sorry, an error occurred while trying to subscribe you.')
+            logging.error(exception)
+        next_ = request.GET.get('next', 'index')
+        return redirect(next_)
+
+    def subscribe(self, _email, _list):
+        """Adds the email to the mailing list throught the MailChimp API.
+        http://developer.mailchimp.com/documentation/mailchimp/reference/lists/members/"""
+        # pylint: disable=no-self-use
+        api_url = settings.MAILCHIMP_API_ROOT + '/lists/' + _list + '/members/'
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': 'apikey %s' % settings.MAILCHIMP_API_KEY
+        }
+        data = {
+            'email_address': _email,
+            'status': 'pending',
+        }
+        response = requests.post(api_url, json=data, headers=headers)
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as exception:
+            # in the case of an error, the status will either be 4XX or 5XX
+            # if 4XX, the user did something wrong and should be notified
+            # if 5XX, MailChimp did something wrong and it's not our fault
+            status = response.status_code/100
+            if status == 4:
+                # MailChimp should have returned some data to us describing the error
+                error_data = response.json()
+                error_title = error_data['title']
+                if error_title == 'Member Exists':
+                    # the member already exists, so we should tell
+                    # the user they cannot use this email address
+                    raise ValueError('%s is already a subscriber.' % _email)
+                else:
+                    # we don't know how to specifically address this error
+                    # so we should just propagate the HTTPError
+                    raise exception
+            else:
+                # We did nothing wrong. Let's just allow the error to propagate.
+                raise exception
+        return response
+
 def homepage(request):
     """Get all the details needed for the homepage"""
     # pylint: disable=unused-variable
@@ -286,10 +370,6 @@ def homepage(request):
             'hp:featured_projects',
             lambda: Project.objects.get_public().filter(featured=True)[:4],
             600)
-    federal_government = cache_get_or_set(
-            'hp:federal_government',
-            lambda: Jurisdiction.objects.filter(level='f').first(),
-            None)
     completed_requests = cache_get_or_set(
             'hp:completed_requests',
             lambda: (FOIARequest.objects.get_public().get_done()
@@ -315,8 +395,11 @@ def homepage(request):
 def reset_homepage_cache(request):
     """Reset the homepage cache"""
     # pylint: disable=unused-argument
-    key = make_template_fragment_key('homepage')
-    cache.delete(key)
+
+    cache.delete(make_template_fragment_key('news'))
+    cache.delete(make_template_fragment_key('projects'))
+    cache.delete(make_template_fragment_key('recent_articles'))
+
     cache.set('hp:articles',
             Article.objects.get_published().prefetch_related(
                 'authors',
@@ -326,9 +409,6 @@ def reset_homepage_cache(request):
     cache.set('hp:featured_projects',
             Project.objects.get_public().filter(featured=True)[:4],
             600)
-    cache.set('hp:federal_government',
-            Jurisdiction.objects.filter(level='f').first(),
-            None)
     cache.set('hp:completed_requests',
             FOIARequest.objects.get_public().get_done()
                    .order_by('-date_done')

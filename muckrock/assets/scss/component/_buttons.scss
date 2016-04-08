@@ -15,6 +15,9 @@
   // Color
   background: $color;
   color: $color-white;
+  path, rect {
+    fill: $color-white;
+  }
   // Type
   font-weight: $font-weight-bold;
   text-align: center;
@@ -76,6 +79,27 @@
         @include transform(none);
         background: $color-black;
         border-color: $color-black;
+    }
+}
+
+button.basic {
+    margin: 0;
+    box-shadow: none;
+    transform: none;
+    transition: none;
+    border: none;
+    border-radius: 0;
+    &.blue {
+        background: $color-blue;
+        &:hover {
+            background: $color-blue-dark;
+        }
+    }
+    &.green {
+        background: $color-green;
+        &:hover {
+            background: $color-green-dark;
+        }
     }
 }
 

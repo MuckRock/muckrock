@@ -1,0 +1,5 @@
+<svg width="16px" height="16px" viewBox="0 0 16 16" class="create-request icon">
+    <title>Create Request</title>
+    <path d="M13,3.5 L13,8 L11,8 L11,4 L13,4 L13,3.5 Z M2,2 L13,2 L13,16 L2,16 L2,2 Z M4,4 L11,4 L11,14 L4,14 L4,4 Z M13,3.5 L13,3 L11,3 L11,4 L7,4 L7,2 L13,2 L13,3.5 Z"></path>
+    <path d="M13,2 L13,0 L11,0 L11,2 L9,2 L9,4 L11,4 L11,6 L13,6 L13,4 L15,4 L15,2 L13,2 Z"></path>
+</svg>

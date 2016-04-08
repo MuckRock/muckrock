@@ -30,6 +30,8 @@ class QuestionList(MRFilterableListView):
     model = Question
     title = 'Questions & Answers'
     template_name = 'lists/question_list.html'
+    default_sort = 'date'
+    default_order = 'desc'
 
     def get_queryset(self):
         """Hides hidden jurisdictions from list"""

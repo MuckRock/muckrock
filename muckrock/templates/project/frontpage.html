@@ -37,11 +37,11 @@
             <div class="overview">
 
                 <ul class="nostyle inline stats">
-                {% if project.requests.exists %}
-                    <li class="stat"><a href="{{project.get_absolute_url}}#requests"><span class="value">{{project.requests.count}}</span> request{{project.requests.count|pluralize}}</a></li>
+                {% if project.request_count %}
+                    <li class="stat"><a href="{{project.get_absolute_url}}#requests"><span class="value">{{project.request_count}}</span> request{{project.request_count|pluralize}}</a></li>
                 {% endif %}
-                {% if project.articles.exists %}
-                    <li class="stat"><a href="{{project.get_absolute_url}}#articles"><span class="value">{{project.articles.count}}</span> article{{project.articles.count|pluralize}}</a></li>
+                {% if project.article_count %}
+                    <li class="stat"><a href="{{project.get_absolute_url}}#articles"><span class="value">{{project.article_count}}</span> article{{project.article_count|pluralize}}</a></li>
                 {% endif %}
                 </ul>
                 <summary>
@@ -50,8 +50,8 @@
                 <p class="more"><a href="{{project.get_absolute_url}}">Learn more</a></p>
             </div>
             <div class="details">
-                {% if project.crowdfunds.exists %}
-                {% with project.crowdfunds.last as crowdfund %}
+                {% if project.crowdfunds %}
+                {% with project.crowdfunds.all.0 as crowdfund %}
                 <div class="crowdfund">
                     <div class="progress"><span class="meter" style="width: {{crowdfund.percent_funded}}%"></span></div>
                     <ul class="nostyle inline stats">
