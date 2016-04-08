@@ -1,10 +1,12 @@
+import 'autonumeric';
+
 // A jQuery function for turning a number
 // input into a pretty currency input.
 
 (function( $ ){
     $.fn.currencyField = function() {
         if (this.length < 1) {
-            return
+            return;
         }
         // we want to replace the input with a
         // currency input that automatically
@@ -28,7 +30,6 @@
         // swap out the input with the currency field
         $currency.insertBefore($input);
         $input.attr('hidden', true).hide();
-        console.log('Applied currency field to:', $input);
         return $input;
    };
 })( jQuery );

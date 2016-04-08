@@ -43,8 +43,9 @@ django-robots==2.0
 django-secure==1.0.1
 django-sslify==0.2.7
 django-storages==1.4
-django-taggit==0.18.0
-django==1.9.4
+django-taggit==0.18.1
+django-webpack-loader==0.3.0
+django==1.9.5
 djangorestframework==3.3.3
 dogslow==0.9.7
 easy-thumbnails==2.3
@@ -54,10 +55,10 @@ jsonfield==1.0.3
 kombu==3.0.35             # via celery
 lxml==3.6.0               # via premailer
 markdown2==2.3.1          # via django-markdown-deux
-newrelic==2.60.0.46
+newrelic==2.62.0.47
 numpy==1.9.1
 pascha==0.5
-pillow==3.1.1
+pillow==3.2.0
 premailer==2.10.1         # via django-premailer
 psycopg2==2.6.1
 pyimagediet==1.1.1        # via image-diet2
@@ -67,7 +68,7 @@ python-dateutil==2.5.2
 python-magic==0.4.11      # via pyimagediet
 pytz==2016.3              # via celery
 PyYAML==3.11              # via django-rest-swagger, pyimagediet
-raven==5.11.2
+raven==5.12.0
 rcssmin==1.0.6            # via django-compressor
 redis==2.10.5
 requests==2.9.1
@@ -79,5 +80,5 @@ semantic-version==2.5.0   # via django-package-monitor
 simplejson==3.8.2         # via django-lot
 six==1.10.0               # via django-appconf, django-autocomplete-light, django-geojson, python-dateutil
 sqlparse==0.1.19          # via django-debug-toolbar
-stripe==1.31.1
+stripe==1.32.0
 unidecode==0.4.19

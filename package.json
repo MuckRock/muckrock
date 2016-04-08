@@ -1,0 +1,48 @@
+{
+  "name": "muckrock",
+  "version": "1.0.0",
+  "description": "Frontend code for MuckRock",
+  "main": "muckrock/assets/entry.js",
+  "scripts": {
+    "build": "webpack --config config/webpack.config.js --progress --color",
+    "watch": "webpack --config config/webpack.config.js --progress --color --watch",
+    "lint": "eslint ./muckrock/assets/js -c config/.eslintrc",
+    "heroku-postbuild": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MuckRock/muckrock.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MuckRock/muckrock/issues"
+  },
+  "homepage": "https://github.com/MuckRock/muckrock#readme",
+  "engines": {
+    "node": "5.6.0"
+  },
+  "devDependencies": {
+    "babel": "^6.5.2",
+    "babel-core": "^6.5.2",
+    "babel-loader": "^6.2.3",
+    "babel-preset-es2015": "^6.5.0",
+    "babel-preset-react": "^6.5.0",
+    "css-loader": "^0.23.1",
+    "eslint": "^2.7.0",
+    "expose-loader": "^0.7.1",
+    "extract-text-webpack-plugin": "^1.0.1",
+    "node-sass": "^3.4.2",
+    "sass-loader": "^3.1.2",
+    "style-loader": "^0.13.0",
+    "webpack": "^1.12.14",
+    "webpack-bundle-tracker": "0.0.93"
+  },
+  "dependencies": {
+    "autonumeric": "^1.9.43",
+    "jquery-ui": "^1.10.5",
+    "js-cookie": "^2.1.0",
+    "react": "^0.14.7",
+    "react-dom": "^0.14.7"
+  }
+}

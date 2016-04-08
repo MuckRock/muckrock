@@ -1,0 +1,23 @@
+{
+    "extends": "eslint:recommended",
+    "globals": {
+        "ga": true,
+        "DV": true,
+        "L": true,
+        "StripeCheckout": true
+    },
+    "env": {
+        "browser": true,
+        "jquery": true
+    },
+    "parserOptions": {
+        "ecmaVersion": 6,
+        "sourceType": "module",
+        "ecmaFeatures": {
+            "jsx": true
+        }
+    },
+    "rules": {
+        "semi": "warn"
+    }
+}

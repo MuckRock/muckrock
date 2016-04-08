@@ -1,15 +1,16 @@
-var identifySortable = function() {
+function identifySortable() {
     $('.list-table-head th').each(function(){
-        if (!!$(this).data('sort')) {
+        var sort = $(this).data('sort');
+        if (typeof(sort) != "undefined") {
             $(this).addClass('sortable');
         }
     });
 }
 
-var tableHeadSortIndicator = function() {
+function tableHeadSortIndicator() {
     var sort = $('thead').data('activeSort');
     var order = $('thead').data('activeOrder');
-    if (!!sort) {
+    if (typeof(sort) != "undefined") {
         // find the right title and add the right arrow to it
         var arrow = (order == 'desc') ? '&#x25B2;' : '&#x25BC;';
         var inverseOrder = (order == 'desc') ? 'asc' : 'desc';
@@ -23,10 +24,10 @@ var tableHeadSortIndicator = function() {
     }
 }
 
-var sortListByHeader = function() {
+function sortListByHeader() {
     var sort = $(this).data('sort');
     var order = $(this).data('order');
-    if (!!sort) {
+    if (typeof(sort) != "undefined") {
         if (!order) {
             order = 'asc';
         }
@@ -36,11 +37,6 @@ var sortListByHeader = function() {
         var existingSort = existing.indexOf('sort');
         if (existingSort > 0) {
             existing = existing.substring(0, existingSort - 1);
-        }
-        // check for filter
-        var filterExists = false;
-        if (existing.length > 0) {
-            filterExists = true;
         }
         // add new sort and order
         // if adding to a filter use "&", otherwise use "?"
