@@ -7,6 +7,7 @@ from django.template.loader import get_template
 from django.template import RequestContext
 
 import actstream
+from datetime import datetime
 from rest_framework import decorators, status as http_status, viewsets
 from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from rest_framework.response import Response
@@ -86,7 +87,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                 'jurisdiction': jurisdiction,
                 'user_name': request.user.get_full_name,
                 })
-            foia_request = template.render(context)
+            text = template.render(context)
             title = data['title']
 
             slug = slugify(title) or 'untitled'
@@ -101,9 +102,13 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                     description=requested_docs,
                     )
 
-            foia.create_out_communication(
-                    from_user=request.user,
-                    text=foia_request,
+            FOIACommunication.objects.create(
+                    foia=foia,
+                    communication=text,
+                    from_who=request.user.get_full_name(),
+                    to_who=foia.get_to_who(),
+                    date=datetime.now(),
+                    response=False,
                     )
 
             if request.user.profile.make_request():
