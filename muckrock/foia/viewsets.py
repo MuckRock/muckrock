@@ -80,12 +80,14 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                 raise ValueError
 
             requested_docs = data['document_request']
-            template = get_template('request_templates/none.txt')
-            context = RequestContext(request, {'title': data['title'],
-                                               'document_request': requested_docs,
-                                               'jurisdiction': jurisdiction})
-            title, foia_request = (
-                (s.strip() for s in template.render(context).split('\n', 1)))
+            template = get_template('text/foia/request.txt')
+            context = RequestContext(request, {
+                'document_request': requested_docs,
+                'jurisdiction': jurisdiction,
+                'user_name': request.user.get_full_name,
+                })
+            foia_request = template.render(context)
+            title = data['title']
 
             slug = slugify(title) or 'untitled'
             foia = FOIARequest.objects.create(
