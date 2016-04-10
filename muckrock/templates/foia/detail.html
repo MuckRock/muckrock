@@ -471,8 +471,6 @@
 
 {% block scripts %}
 <script type="text/javascript">
-    $('#comms-filter').quicksearch('#comms .communications-list .communication');
-    $('#notes-filter').quicksearch('#notes .note');
     $('.datepicker').datepicker({
         maxDate: '+1m',
         minDate: 0,
@@ -483,15 +481,24 @@
         defaultDate: '{{ foia.date_embargo|date:"m/d/Y" }}'
         {% endif %}
     });
-    var datepicker_settings = {
+    $('#id_date_due').datepicker({
         dateFormat: 'yy-mm-dd',
         maxDate: '+1m',
         minDate: 0,
         firstDay: 1,
         hideIfNoPrevNext: true,
         numberOfMonths: 1,
-    };
-    $('input[name=payment_required]').currencyField();
-    $('#id_date_due').datepicker(datepicker_settings);
+    });
+    var foiaId = $('.request.detail').attr('id');
+    if (foiaId != undefined) {
+        foiaId = foiaId.substring(foiaId.indexOf('-') + 1);
+    }
+    if ($('#id_users-autocomplete').length) {
+        $('#id_users-autocomplete').yourlabsAutocomplete().data = {
+            foiaId: foiaId
+        }
+    }
+    $('#comms-filter').quicksearch('#comms .communications-list .communication');
+    $('#notes-filter').quicksearch('#notes .note');
 </script>
 {% endblock scripts %}

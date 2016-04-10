@@ -11,7 +11,7 @@ coverage==4.0.3
 decorator==4.0.9          # via ipython, traitlets
 dj-inmemorystorage==1.4.0
 django-nose==1.4.3
-django==1.9.4
+django==1.9.5
 ecdsa==0.13               # via paramiko
 fabric==1.10.2
 factory-boy==2.6.1
@@ -41,7 +41,7 @@ simplegeneric==0.8.1      # via ipython
 six==1.10.0               # via astroid, dj-inmemorystorage, fake-factory, mock, pip-tools, pylint, python-dateutil
 traitlets==4.2.1          # via ipython
 whoosh==2.7.3
-wrapt==1.10.6             # via astroid
+wrapt==1.10.7             # via astroid
 yet-another-django-profiler==1.0.3
 
 # The following packages are commented out because they are

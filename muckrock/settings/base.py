@@ -73,6 +73,13 @@ STATICFILES_DIRS = (
     os.path.join(SITE_ROOT, 'assets'),
 )
 
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'BUNDLE_DIR_NAME': 'bundles/',
+        'STATS_FILE': os.path.join(SITE_ROOT, 'assets/webpack-stats.json'),
+    }
+}
+
 COMPRESS_OFFLINE = True
 
 COMPRESS_STORAGE = 'compressor.storage.CompressorFileStorage'
@@ -80,9 +87,6 @@ COMPRESS_CSS_FILTERS = [
     'compressor.filters.css_default.CssAbsoluteFilter',
     'compressor.filters.cssmin.CSSMinFilter',
 ]
-COMPRESS_PRECOMPILERS = (
-    ('text/x-scss', 'sass --sourcemap=none {infile} {outfile}'),
-)
 
 THUMBNAIL_CACHE_DIMENSIONS = True
 
@@ -191,6 +195,7 @@ INSTALLED_APPS = (
     'robots',
     'storages',
     'taggit',
+    'webpack_loader',
     'lot',
     'package_monitor',
     'image_diet',
@@ -450,7 +455,8 @@ CACHES = {
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'muckrock.pagination.StandardPagination',
     'DEFAULT_FILTER_BACKENDS':
-        ('rest_framework.filters.DjangoFilterBackend',),
+        ('rest_framework.filters.DjangoFilterBackend',
+         'rest_framework.filters.OrderingFilter'),
     'DEFAULT_AUTHENTICATION_CLASSES':
         ('rest_framework.authentication.TokenAuthentication',
          'rest_framework.authentication.SessionAuthentication',),

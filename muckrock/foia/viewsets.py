@@ -73,7 +73,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
 
     def create(self, request):
         """Submit new request"""
-        data = request.DATA
+        data = request.data
         try:
             jurisdiction = Jurisdiction.objects.get(pk=int(data['jurisdiction']))
             agency = Agency.objects.get(pk=int(data['agency']))
@@ -81,12 +81,14 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                 raise ValueError
 
             requested_docs = data['document_request']
-            template = get_template('request_templates/none.txt')
-            context = RequestContext(request, {'title': data['title'],
-                                               'document_request': requested_docs,
-                                               'jurisdiction': jurisdiction})
-            title, foia_request = (
-                (s.strip() for s in template.render(context).split('\n', 1)))
+            template = get_template('text/foia/request.txt')
+            context = RequestContext(request, {
+                'document_request': requested_docs,
+                'jurisdiction': jurisdiction,
+                'user_name': request.user.get_full_name,
+                })
+            text = template.render(context)
+            title = data['title']
 
             slug = slugify(title) or 'untitled'
             foia = FOIARequest.objects.create(
@@ -102,7 +104,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
 
             foia.create_out_communication(
                     from_user=request.user,
-                    text=foia_request,
+                    text=text,
                     )
 
             if request.user.profile.make_request():
@@ -111,18 +113,24 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                                  'Location': foia.get_absolute_url()},
                                  status=http_status.HTTP_201_CREATED)
             else:
-                return Response({'status': 'Error - Out of requests.  FOI Request has been saved.',
-                                 'Location': foia.get_absolute_url()},
-                                 status=http_status.HTTP_402_PAYMENT_REQUIRED)
+                return Response(
+                    {'status':
+                        'Error - Out of requests.  FOI Request has been saved.',
+                     'Location': foia.get_absolute_url()},
+                    status=http_status.HTTP_402_PAYMENT_REQUIRED)
 
         except KeyError:
-            return Response({'status': 'Missing data - Please supply title, document_request, '
-                                       'jurisdiction, and agency'},
-                             status=http_status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'status':
+                    'Missing data - Please supply title, document_request, '
+                    'jurisdiction, and agency'},
+                status=http_status.HTTP_400_BAD_REQUEST)
         except (ValueError, Jurisdiction.DoesNotExist, Agency.DoesNotExist):
-            return Response({'status': 'Bad data - please supply jurisdiction and agency as the PK '
-                                       'of existing entities.  Agency must be in Jurisdiction.'},
-                             status=http_status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'status':
+                    'Bad data - please supply jurisdiction and agency as the PK'
+                    ' of existing entities.  Agency must be in Jurisdiction.'},
+                status=http_status.HTTP_400_BAD_REQUEST)
 
     @decorators.detail_route(permission_classes=(IsOwner,))
     def followup(self, request, pk=None):
