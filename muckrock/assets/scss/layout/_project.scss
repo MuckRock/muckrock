@@ -76,68 +76,46 @@
 .project.detail {
     .project-header {
         @include edge-to-edge;
-        margin-bottom: 0;
-    }
-    .project-header.with-image {
-        position: relative;
-        height: 20em;
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        @include media($medium-layout) {
-            height: 24em;
-        }
-        @include media($large-layout) {
-            height: 32em;
-        }
-        .project-admin {
-            position: absolute;
-            top: 0;
-        }
-        .project-title {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-        }
-    }
-    .project-admin {
-        width: 100%;
-        padding: $vertical-rhythm/2;
-        color: $color-white;
-        background-color: rgba(0, 0, 0, .75);
         @include display(flex);
-        @include flex-wrap(wrap);
-        @include justify-content(space-between);
-        @include align-items(center);
-        .project-controls, .project-private {
+        @include flex-flow(wrap row-reverse);
+        border-bottom: 1px solid $color-black-pure;
+        .image, .text {
+            @include flex(1 1 20em);
             margin-bottom: 0;
         }
-        .project-private {
+        .image {
+            min-height: 40vh;
+            background-size: cover;
+            background-position: center;
+        }
+        .text {
+            padding: $vertical-rhythm;
+            background: $color-black;
+            color: $color-white;
+            border-bottom: 1px solid $color-grey-3;
+            dfn {
+                color: $color-white;
+            }
+        }
+        @include media($medium-layout){
+            .title {
+                font-size: $font-size-9;
+                line-height: $font-line-height;
+            }
+        }
+        .toolbar {
+            @include flex(0 1 100%);
+            @include display(flex);
+            @include flex-wrap(wrap);
+            @include justify-content(space-between);
+            @include align-items(center);
+            background: $color-grey-2;
+            color: $color-white;
+            padding: $vertical-rhythm/2 $vertical-rhythm;
             font-weight: $font-weight-bold;
         }
-        @include media($medium-layout) {
-            padding: $vertical-rhythm/2 $vertical-rhythm;
-        }
     }
-    .project-gradient {
-        position: absolute;
-        bottom: 0;
-        width: 100%;
-        height: 75%;
-        margin-bottom: 0;
-        // rgba equivalent of $color-white
-        @include background(linear-gradient(rgba(247, 248, 250, 0), rgba(247, 248, 250, 100)));
-    }
-    .project-title {
-        font-size: $font-size-8;
-        font-weight: $font-weight-bold;
-        padding: 0 $vertical-rhythm/2;
-        @include media($medium-layout) {
-            padding: 0 $vertical-rhythm;
-            margin-bottom: $vertical-rhythm;
-        }
-    }
+
     .project-overview {
         @include display(flex);
         @include flex-wrap(wrap);

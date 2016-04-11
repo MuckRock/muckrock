@@ -53,10 +53,10 @@
 
 .button, button, input[type='submit'] {
     @include button($color-grey);
-    &.primary   { @include button($color-blue);     }
-    &.success   { @include button($color-green);    }
-    &.failure   { @include button($color-red);      }
-    &.warning   { @include button($color-yellow);   }
+    &.blue, &.primary   { @include button($color-blue);     }
+    &.green, &.success   { @include button($color-green);    }
+    &.red, &.failure   { @include button($color-red);      }
+    &.yellow, &.warning   { @include button($color-yellow);   }
     &.disabled, &:disabled  {
         @include button($color-disabled);
         background: $color-white;
@@ -82,7 +82,7 @@
     }
 }
 
-button.basic {
+button.basic, .button.basic {
     margin: 0;
     box-shadow: none;
     transform: none;
@@ -99,6 +99,12 @@ button.basic {
         background: $color-green;
         &:hover {
             background: $color-green-dark;
+        }
+    }
+    &.red {
+        background: $color-red;
+        &:hover {
+            background: $color-red-dark;
         }
     }
 }
