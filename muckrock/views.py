@@ -12,6 +12,7 @@ from django.db.models import Sum, FieldDoesNotExist
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.utils.decorators import method_decorator
+from django.utils.html import escape
 from django.views.generic import View, ListView
 
 from muckrock.agency.models import Agency
@@ -297,7 +298,11 @@ class NewsletterSignupView(View):
                 # if they provided an email, then it is invalid
                 # if they didn't, then they're just being dumb!
                 if _email:
-                    raise ValueError('%s is not a valid email address.' % _email)
+                    # _email needs to be escaped as messages are marked as safe
+                    # and _email is user supplied - failure to do so is a
+                    # XSS vulnerability
+                    raise ValueError('%s is not a valid email address.' %
+                            escape(_email))
                 else:
                     raise ValueError('You forgot to enter an email!')
         except ValueError as exception:
