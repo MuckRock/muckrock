@@ -898,7 +898,7 @@ class FOIARequest(models.Model):
             date=datetime.now(),
             response=False,
             communication=text,
-            **kwargs,
+            **kwargs
             )
         if formset is not None:
             foia_files = formset.save(commit=False)
@@ -920,7 +920,7 @@ class FOIARequest(models.Model):
             date=date,
             response=True,
             communication=text,
-            **kwargs,
+            **kwargs
             )
         if formset is not None:
             foia_files = formset.save(commit=False)

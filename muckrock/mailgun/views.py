@@ -99,6 +99,8 @@ def _get_user_from_addr(addr, trusted=True, foia=None):
     if updated:
         user.save()
     if created:
+        user.set_unusable_password()
+        user.save()
         Profile.objects.create(
             user=user,
             acct_type='agency' if trusted else 'unknown', # XXX doc the trust system here
