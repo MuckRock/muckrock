@@ -188,31 +188,40 @@
                 {% endif %}
                 {% endif %}
 
-                {% if user_can_edit %}
+                {% if user_can_edit or can_agency_reply %}
                 <div class="communications-composer">
                     <div class="composer-actions">
+                        {% if not can_agency_reply %}
                         <a href="#follow-up" class="primary button">Follow Up</a>
-                        {% if foia.is_payable %}
-                        <a href="#pay" class="success button">Pay Fees</a>
-                        {% if not foia.has_crowdfund %}
-                        <a href="#crowdfund" class="success button">Crowdfund</a>
                         {% endif %}
+                        {% if foia.is_payable %}
+                            <a href="#pay" class="success button">Pay Fees</a>
+                            {% if not foia.has_crowdfund %}
+                            <a href="#crowdfund" class="success button">Crowdfund</a>
+                            {% endif %}
                         {% endif %}
                         {% if is_thankable %}
                         <a href="#thanks" class="success button">Thank Agency</a>
                         {% endif %}
-                        {% if foia.is_appealable %}
+                        {% if foia.is_appealable and not can_agency_reply %}
                         <a href="#appeal" class="failure button">Appeal</a>
                         {% endif %}
                         {% if request.user.is_staff %}
                         <a href="{% url 'foia-admin-fix' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Make an admin fix" class="button">Admin Fix</a>
-                        {% else %}
+                        {% elif not can_agency_reply %}
                         <button id="get-advice">Get Advice</button>
+                        {% endif %}
+                        {% if can_agency_reply %}
+                        <a href="#agency-reply" class="success button">Reply</a>
                         {% endif %}
                     </div>
                     <div class="composer-inputs">
                         <div class="inactive composer-input" id="inactive">
-                            <p>You may <a href="#follow-up">follow up</a> {% if not foia.disable_autofollowups %}manually {% endif %}with the agency{% if foia.is_appealable %} or <a href="#appeal">appeal</a> their decision{% endif %}.</p>
+                            {% if can_agency_reply %}
+                                <p>You may <a href="#agency-reply">reply</a> directly to this request.</p>
+                            {% else %}
+                                <p>You may <a href="#follow-up">follow up</a> {% if not foia.disable_autofollowups %}manually {% endif %}with the agency{% if foia.is_appealable %} or <a href="#appeal">appeal</a> their decision{% endif %}.</p>
+                            {% endif %}
                         </div>
                         <form class="follow-up composer-input" id="follow-up" method="post">
                             <header>Send a follow up to the {{ foia.agency.name }}</header>
@@ -257,6 +266,37 @@
                             <div class="buttons">
                                 <button class="primary" type="submit" name="appeal" value="1">Send</button>
                                 <a href="#inactive" class="button">Cancel</a>
+                            </div>
+                        </form>
+                        {% endif %}
+                        {% if can_agency_reply %}
+                        <form class="agency-reply composer-input" id="agency-reply" method="post">
+                            <header>Reply directly to this request</header>
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="agency-reply" />
+
+                            <label for="status">Status:</label>
+                            <select name="status">
+                            {% for choice in status_choices %}
+                                <option value="{{ choice|first }}" {% if choice|first == foia.status %}selected{% endif %}>{{ choice|last }}</option>
+                            {% endfor %}
+                            </select>
+                            <br />
+
+                            <label for="tracking_id">Tracking ID:</label>
+                            <input type="text" name="tracking_id" id="tracking_id" />
+
+                            <label for="ecd">Estimated Completion Date:</label>
+                            <input type="text" name="ecd" id="ecd" />
+
+                            <label for="price">Price:</label>
+                            <input type="text" name="price" id="price" />
+
+                            <label for="agency-reply-composer">Reply:</label>
+                            <textarea name="text" id="agency-reply-composer"></textarea>
+                            <div class="buttons">
+                                <button class="primary" type="submit" name="agency-reply" value="1">Send</button>
+                                <a href="#inactive" class="button cancel">Cancel</a>
                             </div>
                         </form>
                         {% endif %}

@@ -78,7 +78,9 @@
         {% include 'nav/sidebar.html' %}
         <div class="container">
             <div id="modal-overlay"></div>
+            {% if request.user.profile.acct_type != "agency" %}
             {% include 'nav/header.html' %}
+            {% endif %}
             {% include 'lib/notification.html' %}
             <div class="content">
             {% block content %}

@@ -52,7 +52,9 @@
     <a class="your-organization" href="{{organization.get_absolute_url}}">Your Organization</a>
         {% endif %}
     <section class="requests">
+        {% if user.profile.acct_type != "agency" %}
         <a class="your-requests" href="{% url 'foia-mylist' %}">Your Requests</a>
+        {% endif %}
 
         {% if actionable_requests %}
             {% if actionable_requests.payment %}
@@ -111,6 +113,20 @@
                 {% endif %}
             </ul>
             {% endif %}
+            {% if actionable_requests.agency %}
+            <a class="actionable agency" href="{% url 'foia-list' %}?agency={{ user.agencyprofile.agency.pk }}&status=processed">
+                <span class="blue counter">{{ actionable_requests.agency|length }}</span>
+                Agency Request{{ actionable_requests.agency|length|pluralize }}
+            </a>
+            <ul class="actionable-request-list nostyle">
+                {% for foia in actionable_requests.agency|slice:":10" %}
+                <li><a class="truncate" href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}">{{ foia.title }}</a></li>
+                {% endfor %}
+                {% if actionable_requests.agency|length > 10 %}
+                <li><a class="more" href="{% url 'foia-list' %}?agency={{ user.agencyprofile.agency.pk }}&status=processed">{{actionable_requests.agency|slice:"10:"|length}} More</a></li>
+                {% endif %}
+            </ul>
+            {% endif %}
         {% endif %}
     </section>
     {% endif %}
@@ -122,7 +138,7 @@
     </section>
     {% endif %}
 
-    {% if recent_articles %}
+    {% if recent_articles and user.profile.acct_type != "agency" %}
     {% cache 600 recent_articles %}
     <section class="recent articles">
         {% for article in recent_articles %}

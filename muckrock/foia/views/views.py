@@ -257,7 +257,7 @@ class Detail(DetailView):
         context['user_can_edit'] = user_can_edit
         context['user_can_pay'] = user_can_edit and foia.is_payable()
         context['embargo'] = {
-            'show': ((user_can_edit and foia.user.profile.can_embargo)\
+            'show': ((user_can_edit and foia.user.profile.can_embargo)
                     or foia.embargo) or user.is_staff,
             'edit': user_can_edit and foia.user.profile.can_embargo,
             'add': user_can_edit and user.profile.can_embargo,
@@ -292,6 +292,8 @@ class Detail(DetailView):
         context['stripe_pk'] = settings.STRIPE_PUB_KEY
         context['sidebar_admin_url'] = reverse('admin:foia_foiarequest_change', args=(foia.pk,))
         context['is_thankable'] = foia.is_thankable()
+        context['can_agency_reply'] = (user.profile.acct_type =='agency' and
+                user.agencyprofile.agency == foia.agency)
         if foia.sidebar_html:
             messages.info(self.request, foia.sidebar_html)
         return context

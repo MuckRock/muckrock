@@ -39,6 +39,7 @@ ACCT_TYPES = [
     ('pro', 'Professional'),
     ('proxy', 'Proxy'),
     ('robot', 'Robot'),
+    ('agency', 'Agency'),
 ]
 
 PAYMENT_FEE = .05
@@ -422,6 +423,18 @@ class Profile(models.Model):
                 )
             extra.update({settings.LOT_MIDDLEWARE_PARAM_NAME: lot.uuid})
         return link + '?' + urlencode(extra)
+
+
+class AgencyProfile(models.Model):
+    """Extra profile for agency users"""
+
+    user = models.OneToOneField(User)
+    agency = models.ForeignKey(
+        'agency.Agency',
+        blank=True,
+        null=True,
+        related_name='members',
+        on_delete=models.PROTECT)
 
 
 class Statistics(models.Model):

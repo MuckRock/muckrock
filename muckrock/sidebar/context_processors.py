@@ -20,18 +20,28 @@ def get_recent_articles():
 
 def get_actionable_requests(user):
     """Gets requests that require action or attention"""
-    requests = FOIARequest.objects.filter(user=user).select_related('jurisdiction')
-    updates = requests.filter(updated=True)
-    started = requests.filter(status='started')
-    payment = requests.filter(status='payment')
-    fix = requests.filter(status='fix')
-    return {
-        'count': len(updates) + len(started) + len(payment) + len(fix),
-        'updates': updates,
-        'started': started,
-        'payment': payment,
-        'fix': fix,
-    }
+    if user.profile.acct_type == 'agency':
+        agency_requests = FOIARequest.objects.filter(
+                status__in=['ack', 'processed'],
+                agency=user.agencyprofile.agency,
+                ).select_related('jurisdiction')
+        return {
+                'agency': agency_requests,
+                }
+    else:
+        requests = (FOIARequest.objects.filter(user=user)
+                .select_related('jurisdiction'))
+        updates = requests.filter(updated=True)
+        started = requests.filter(status='started')
+        payment = requests.filter(status='payment')
+        fix = requests.filter(status='fix')
+        return {
+            'count': len(updates) + len(started) + len(payment) + len(fix),
+            'updates': updates,
+            'started': started,
+            'payment': payment,
+            'fix': fix,
+        }
 
 
 def get_organization(user):
