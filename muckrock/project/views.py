@@ -116,6 +116,10 @@ class ProjectDetailView(DetailView):
         context['articles'] = project.articles.get_published()
         context['contributors'] = project.contributors.select_related('profile')
         context['user_is_experimental'] = user.is_authenticated() and user.profile.experimental
+        context['newsletter_label'] = ('Subscribe to the project newsletter'
+                                      if not project.newsletter_label else project.newsletter_label)
+        context['newsletter_cta'] = ('Get updates delivered to your inbox'
+                                    if not project.newsletter_cta else project.newsletter_cta)
         return context
 
     def dispatch(self, *args, **kwargs):
