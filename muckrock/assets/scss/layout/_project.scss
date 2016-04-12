@@ -75,27 +75,23 @@
 
 .project.detail {
     .project-header {
-        @include edge-to-edge;
-        @include display(flex);
-        @include flex-flow(wrap row-reverse);
-        border-bottom: 1px solid $color-black-pure;
+        @include edge-to-edge($vertical-rhythm);
+        // @include display(flex);
+        // @include flex-flow(wrap row-reverse);
+
         .image, .text {
-            @include flex(1 1 20em);
+            // @include flex(1 1 20em);
             margin-bottom: 0;
         }
         .image {
             min-height: 40vh;
             background-size: cover;
             background-position: center;
+            background-color: $color-grey-5;
         }
         .text {
             padding: $vertical-rhythm;
-            background: $color-black;
-            color: $color-white;
-            border-bottom: 1px solid $color-grey-3;
-            dfn {
-                color: $color-white;
-            }
+            text-align: center;
         }
         @include media($medium-layout){
             .title {
@@ -104,105 +100,74 @@
             }
         }
         .toolbar {
-            @include flex(0 1 100%);
+            // @include flex(0 1 100%);
             @include display(flex);
             @include flex-wrap(wrap);
             @include justify-content(space-between);
             @include align-items(center);
             background: $color-grey-2;
             color: $color-white;
-            padding: $vertical-rhythm/2 $vertical-rhythm;
+            border-top: 1px solid $color-grey-3;
+            border-bottom: 1px solid $color-black;
+            padding: $vertical-rhythm/4 $vertical-rhythm/2;
             font-weight: $font-weight-bold;
         }
     }
 
-    .project-overview {
+    .project-intro {
         @include display(flex);
-        @include flex-wrap(wrap);
-        @include justify-content(space-between);
-        .project-summary, .project-quick-links {
-            @include flex(100%);
-        }
-        .project-quick-links {
-            @include display(flex);
-            border-bottom: 1px dashed $color-grey;
-            padding-bottom: $vertical-rhythm;
-            @include media($medium-layout) {
-                display: block;
-                border-bottom: 0;
-                padding-bottom: 0;
-            }
-            .project-contributors, .project-references {
-                margin-bottom: 0;
-                @include media($medium-layout) {
-                    margin-bottom: $vertical-rhythm;
-                }
-            }
-            .project-references {
-                margin-left: 2*$vertical-rhythm;;
-                @include media($medium-layout) {
-                    margin-left: 0;
-                }
-                .stats {
-                    @include display(flex);
-                    @include justify-content(flex-start);
-                }
-                .stat {
-                    @include flex(1);
-                    margin: 0;
-                    padding: $vertical-rhythm/2;
-                    color: $color-black;
-                    &:hover {
-                        text-decoration: none;
-                        background-color: $color-blue;
-                        color: $color-white;
-                        .label {
-                            color: $color-white;
-                        }
-                    }
-                    .value {
-                        font-size: $font-size-5;
-                        margin-bottom: 0;
-                        display: block;
-                    }
-                    .label {
-                        color: $color-grey;
-                    }
-                }
-
+        @include flex-flow(wrap);
+        .project-metadata {
+            @include flex(1 1 10em);
+            @media (min-width: 33.25em) {
+                padding: 0 $vertical-rhythm;
             }
         }
-        @include media($medium-layout) {
-            .project-summary {
-                @include flex(2);
-            }
-            .project-quick-links {
-                @include flex(1);
-                @include order(1);
-                margin-left: 2*$vertical-rhythm;
-            }
+        .project-summary {
+            @include flex(2 1 20em);
         }
-
     }
-    .project-contributors ul {
-        padding-left: 0;
-        list-style-type: none;
-    }
-    .project-body {
+
+    .overview {
         @include display(flex);
-        @include flex-wrap(wrap);
-        .project-description, .project-metadata {
-            @include flex(100%);
+        @include flex-flow(wrap);
+        .project-description {
+            @include flex(2 1 20em);
         }
-        @include media($medium-layout) {
-            .project-description {
-                @include flex(2);
+        .project-objects {
+            @include flex(1 1 10em);
+            @media (min-width: 33.25em) {
+                padding: 0 $vertical-rhythm;
             }
-            .project-metadata {
-                @include flex(1);
-                @include order(1);
-                margin-left: 2*$vertical-rhythm;
+        }
+    }
+
+    .articles .article {
+        @include display(flex);
+        @include align-items(center);
+        margin-bottom: $vertical-rhythm/2;
+        color: $color-black;
+        font-weight: $font-weight-bold;
+        font-size: $font-size-2;
+        line-height: $font-line-height;
+        &:hover {
+            color: $color-blue;
+            img {
+                opacity: 1;
             }
+        }
+        img {
+            display: block;
+            width: auto;
+            margin-bottom: 0;
+            margin-right: $vertical-rhythm/2;
+            opacity: .5;
+        }
+        .text > * {
+            margin-bottom: 0;
+        }
+        .date {
+            color: $color-grey;
         }
     }
 }

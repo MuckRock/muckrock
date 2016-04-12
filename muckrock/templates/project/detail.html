@@ -45,13 +45,6 @@
         {% if project.image %}
         <div class="image" style="background-image:url('{% thumbnail project.image 2000x1000 crop=smart %}');"></div>
         {% endif %}
-        <div class="text">
-            <h1 class="title">{{ project.title }}</h1>
-            <div class="project-summary">
-                {{ project.summary|markdown:"trusted" }}
-            </div>
-            {% include 'lib/social.html' with title=project.title %}
-        </div>
         {% if request.user.is_staff or request.user in contributors %}
         <div class="toolbar">
             {% if project.private %}
@@ -72,56 +65,65 @@
             </div>
         </div>
         {% endif %}
+        <div class="text">
+            <h1 class="title">{{ project.title }}</h1>
+        </div>
     </header>
-
-        <section class="project-overview">
-            <div class="project-quick-links">
-                <div class="project-references">
-                    <section class="stats">
-                        <a href="#articles" class="article stat">
-                            <span class="value">{{ articles|length }}</span>
-                            <span class="label">Article{{ articles|length|pluralize }}</spam>
-                        </a>
-                        <a href="#requests" class="request stat">
-                            <span class="value">{{ visible_requests|length }}</span>
-                            <span class="label">Request{{ visible_requests|length|pluralize }}</span>
-                        </a>
-                    </section>
-                </div>
-                <div class="project-contributors">
-                    <dfn>Contributors</dfn>
+    <section class="project-intro">
+        <div class="project-summary">
+            {{ project.summary|markdown:"trusted" }}
+        </div>
+        <aside class="project-metadata">
+            <div class="project-contributors">
+                <dfn>Contributors</dfn>
                 {% if not contributors %}
-                    <p>Nobody contributes to this project.</p>
+                <p>Nobody contributes to this project.</p>
                 {% else %}
-                    <ul>
-                        {% for contributor in contributors %}
-                        <li class="project-contributor"><a href="{{ contributor.get_absolute_url }}" title="{{ contributor}}'s profile page">{{ contributor.get_full_name }}</a></p>
-                        {% endfor %}
-                    </ul>
+                <ul class="nostyle">
+                    {% for contributor in contributors %}
+                    <li class="project-contributor"><a href="{{ contributor.get_absolute_url }}" title="{{ contributor}}'s profile page">{{ contributor.get_full_name }}</a></p>
+                    {% endfor %}
+                </ul>
                 {% endif %}
-                </div>
-
             </div>
-        </section>
-        <section class="project-crowdfunds">
-            {% with project.crowdfunds.all as crowdfunds %}
-            {% if crowdfunds %}
-                {% for crowdfund in crowdfunds %}
-                    {% crowdfund crowdfund=crowdfund %}
+            {% tag_manager project %}
+            {% include 'lib/social.html' with title=project.title %}
+        </aside>
+    </section>
+    {% if project.crowdfunds.exists %}
+    <section class="project-crowdfunds">
+        {% with project.crowdfunds.all as crowdfunds %}
+        {% if crowdfunds %}
+            {% for crowdfund in crowdfunds %}
+                {% crowdfund crowdfund=crowdfund %}
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </section>
+    {% endif %}
+
+    <section class="overview" id="overview">
+        <article class="project-description">
+            {{ project.description|markdown:"trusted" }}
+        </article>
+        <aside class="project-objects">
+            <div class="articles">
+                <h2>{{ articles|length }} Article{{ articles|length|pluralize }}</h2>
+                {% for article in project.articles.all %}
+                <a class="article" href="{{article.get_absolute_url}}">
+                    <img src="{% thumbnail article.image 75x75 crop %}">
+                    <div class="text">
+                        <div class="title">{{article.title}}</div>
+                        <div class="date">{{article.pub_date|date:"m/d/y"}}</div>
+                    </div>
+                </a>
                 {% endfor %}
-            {% endif %}
-            {% endwith %}
-        </section>
-        <section class="project-body">
-            <aside class="project-metadata">
-                {% tag_manager project %}
-            </aside>
-            <section class="project-description">
-                {{ project.description|markdown:"trusted" }}
-            </section>
-        </section>
+            </div>
+        </aside>
+    </section>
+
         {% if articles %}
-        <section class="project-articles" id="articles">
+        <section role="tabpanel" class="tab-panel articles" id="articles">
             <h2>Articles</h2>
             <table>
                 <thead>
@@ -142,18 +144,21 @@
         </section>
         {% endif %}
         {% if visible_requests %}
-        <section class="project-requests" id="requests">
+        <section role="tabpanel" class="tab-panel requests" id="requests">
             <h2>Requests</h2>
             {% include 'lib/foia_table.html' with requests=visible_requests %}
         </section>
         {% endif %}
         {% if project.maps.exists and user_is_experimental %}
-        <h2>Maps</h2>
-        <ul class="maps">
-            {% for map in project.maps.all %}
-            <li class="map"><a href="{{ map.get_absolute_url }}">{{ map.title }}</a></li>
-            {% endfor %}
-        </ul>
+        <section role="tabpanel" class="tab-panel maps" id="requests">
+            <h2>Maps</h2>
+            <ul>
+                {% for map in project.maps.all %}
+                <li class="map"><a href="{{ map.get_absolute_url }}">{{ map.title }}</a></li>
+                {% endfor %}
+            </ul>
+        </section>
         {% endif %}
+    </div>
 </div>
 {% endblock %}
