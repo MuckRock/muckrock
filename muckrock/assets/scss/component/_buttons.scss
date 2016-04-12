@@ -2,9 +2,9 @@
 
 @mixin button($color) {
   $color-dark: darken($color, $color-darken-amount);
-  $shadow-normal: 3px;
-  $shadow-hover: 5px;
-  $shadow-active: 2px;
+  $shadow-normal: 2px;
+  $shadow-hover: 4px;
+  $shadow-active: 0px;
   // Metrics
   display: inline-block;
   margin: $vertical-rhythm/4 0;
@@ -106,6 +106,10 @@ button.basic, .button.basic {
         &:hover {
             background: $color-red-dark;
         }
+    }
+    &:hover, &:active {
+        box-shadow: none;
+        @include transform(none);
     }
 }
 
