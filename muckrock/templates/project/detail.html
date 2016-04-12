@@ -72,6 +72,9 @@
             <summary>
                 {{ project.summary|markdown:"trusted" }}
             </summary>
+            {% if project.newsletter %}
+            {% newsletter list_id=project.newsletter label=newsletter_label cta=newsletter_cta %}
+            {% endif %}
             {% if project.crowdfunds.exists %}
             <section class="project-crowdfunds">
                 {% with project.crowdfunds.all as crowdfunds %}
