@@ -20,7 +20,7 @@
         margin-bottom: 0;
     }
 
-    .signup-form {
+    .signup-form .email-field {
         @include display(flex);
         @include flex-wrap(wrap);
         @include align-items(center);

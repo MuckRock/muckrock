@@ -275,43 +275,65 @@ class NewsletterSignupView(View):
         context = {'form': NewsletterSignupForm(initial={'list': settings.MAILCHIMP_LIST_DEFAULT})}
         return render_to_response(template, context, context_instance=RequestContext(request))
 
+    def redirect_url(self, request):
+        """If a next url is provided, redirect there. Otherwise, redirect to the index."""
+        # pylint: disable=no-self-use
+        next_ = request.GET.get('next', 'index')
+        return redirect(next_)
+
     def post(self, request, *args, **kwargs):
-        """
-        If given email address data, adds that email to our newsletter list.
-        Then it returns a thank you for signing up page.
-        In case of an error, we use the exception handler to populate the UI message.
-        ValueErrors are raised by us and contain custom language.
-        HTTPError are raised by the requests library and should use generic error language.
-        """
-        signup_form = NewsletterSignupForm(request.POST)
+        """Check if the form is valid and then pass it on to our form handling functions."""
+        form = NewsletterSignupForm(request.POST)
+        if not form.is_valid():
+            return self.form_invalid(request, form)
+        else:
+            return self.form_valid(request, form)
+
+    def form_invalid(self, request, form):
+        """If the form is invalid, then either a bad or no email was provided."""
+        _email = form.data['email']
+        # if they provided an email, then it is invalid
+        # if they didn't, then they're just being dumb!
+        if _email:
+            # _email needs to be escaped as messages are marked as safe
+            # and _email is user supplied - failure to do so is a
+            # XSS vulnerability
+            msg = '%s is not a valid email address.' % escape(_email)
+        else:
+            msg = 'You forgot to enter an email!'
+        messages.error(request, msg)
+        return self.redirect_url(request)
+
+    def form_valid(self, request, form):
+        """If the form is valid, try subscribing the email to our MailChimp newsletters."""
+        _email = form.cleaned_data['email']
+        _list = form.cleaned_data['list']
+        _default = form.cleaned_data['default']
+        default_list = settings.MAILCHIMP_LIST_DEFAULT if _default else None
+        # First try subscribing the user to the list they are signing up for.
+        primary_error = False
         try:
-            if signup_form.is_valid():
-                # take the cleaned email and add it to our mailing list
-                # and redirect when successful
-                _email = signup_form.cleaned_data['email']
-                _list = signup_form.cleaned_data['list']
-                self.subscribe(_email, _list)
-                messages.success(request, ('Thank you for subscribing to our newsletter. '
-                                           'We sent a confirmation email to your inbox.'))
-            else:
-                _email = signup_form.data['email']
-                # if they provided an email, then it is invalid
-                # if they didn't, then they're just being dumb!
-                if _email:
-                    # _email needs to be escaped as messages are marked as safe
-                    # and _email is user supplied - failure to do so is a
-                    # XSS vulnerability
-                    raise ValueError('%s is not a valid email address.' %
-                            escape(_email))
-                else:
-                    raise ValueError('You forgot to enter an email!')
+            self.subscribe(_email, _list)
+            messages.success(request, ('Thank you for subscribing to our newsletter. '
+                                       'We sent a confirmation email to your inbox.'))
         except ValueError as exception:
             messages.error(request, exception)
+            primary_error = True
         except requests.exceptions.HTTPError as exception:
             messages.error(request, 'Sorry, an error occurred while trying to subscribe you.')
             logging.error(exception)
-        next_ = request.GET.get('next', 'index')
-        return redirect(next_)
+            primary_error = True
+        # Add the user to the default list if they want to be added.
+        # If an error occurred with the first subscription,
+        # don't try signing up for the default list.
+        # IF an error occurs with this subscription, don't worry about it.
+        if default_list is not None and default_list != _list and not primary_error:
+            try:
+                self.subscribe(_email, default_list)
+            except (ValueError, requests.exceptions.HTTPError) as exception:
+                # suppress the error shown to the user, but still log it
+                logging.error(exception)
+        return self.redirect_url(request)
 
     def subscribe(self, _email, _list):
         """Adds the email to the mailing list throught the MailChimp API.
