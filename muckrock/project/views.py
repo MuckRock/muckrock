@@ -28,8 +28,8 @@ class ProjectExploreView(View):
         # pylint: disable=unused-argument
         # pylint: disable=no-self-use
         user = request.user
-        visible_projects = Project.objects.get_visible(user)
-        featured_projects = (visible_projects.filter(featured=True)
+        visible_projects = (Project.objects.get_visible(user)
+                .order_by('-featured', 'title')
                 .annotate(request_count=Count('requests', distinct=True))
                 .annotate(article_count=Count('articles', distinct=True))
                 .prefetch_related(

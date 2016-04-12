@@ -73,6 +73,32 @@
     }
 }
 
+.project {
+    .inline {
+        margin-bottom: 0;
+    }
+    .inline li {
+        display: inline-block;
+        vertical-align: top;
+        margin: 0 $vertical-rhythm/2 $vertical-rhythm/2 0;
+        @include media($medium-layout) {
+            margin: 0 $vertical-rhythm $vertical-rhythm 0;
+        }
+    }
+    .stats {
+        .stat {
+            font-size: $font-size-2;
+            line-height: $font-line-height;
+        }
+        .value {
+            display: block;
+            font-weight: $font-weight-bold;
+            font-size: $font-size-4;
+            line-height: $font-line-height;
+        }
+    }
+}
+
 .project.detail {
     .project-header {
         @include edge-to-edge($vertical-rhythm);
@@ -175,34 +201,50 @@
 
 .project.frontpage {
     @include edge-to-edge;
+    .frontpage-header {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        @include justify-content(space-between);
+        @include align-items(center);
+        margin-bottom: 0;
+        padding: $vertical-rhythm 0 0;
+        background: $color-blue-light;
+        & > * {
+            margin-bottom: 0;
+            padding: 0 $vertical-rhythm $vertical-rhythm;
+            @include flex(1 1 18rem);
+        }
+        h1, ul {
+            text-align: center;
+        }
+        p {
+            font-size: $font-size-2;
+            line-height: $font-line-height;
+        }
+        li {
+            margin-bottom: 0;
+        }
+    }
+    .projects {
+        @include display(flex);
+        @include flex-wrap(wrap);
+    }
+    .project {
+        @include flex(1 1 30em);
+        @include display(flex);
+        @include flex-wrap(wrap);
+        @include justify-content(space-between);
+        margin: $vertical-rhythm;
+        background: $color-white-pure;
+        border: 1px solid $color-grey;
+        @include border-radius;
+        overflow: hidden;
+    }
     h1 {
         font-size: $font-size-7;
         line-height: $font-line-height;
         @include media($medium-layout) {
             font-size: $font-size-9;
-            line-height: $font-line-height;
-        }
-    }
-    .inline {
-        margin-bottom: 0;
-    }
-    .inline li {
-        display: inline-block;
-        vertical-align: top;
-        margin: 0 $vertical-rhythm/2 $vertical-rhythm/2 0;
-        @include media($medium-layout) {
-            margin: 0 $vertical-rhythm $vertical-rhythm 0;
-        }
-    }
-    .stats {
-        .stat {
-            font-size: $font-size-2;
-            line-height: $font-line-height;
-        }
-        .value {
-            display: block;
-            font-weight: $font-weight-bold;
-            font-size: $font-size-4;
             line-height: $font-line-height;
         }
     }
@@ -212,26 +254,22 @@
     .frontpage-header .inline li {
         vertical-align: middle;
     }
-    .frontpage-header, .featured .project {
-        @include display(flex);
-        @include flex-wrap(wrap);
-        @include justify-content(space-between);
-        min-height: 15em;
-        margin-bottom: 0;
-    }
     .project-header {
         @include flex(0 1 100%);
+        @include display(flex);
+        min-height: 15em;
         margin-bottom: 0;
         background-position: center;
         background-size: cover;
         .project-header-wrapper {
-            display: block;
-            height: 100%;
+            @include display(inline-flex);
+            @include flex-direction(column);
+            @include justify-content(flex-end);
+            min-height: 100%;
             width: 100%;
             padding: $vertical-rhythm;
-            padding-top: 10*$vertical-rhythm;
-            background: rgb(43, 69, 104);
-            background: rgba(43, 69, 104, .8);
+            background: rgb(52, 61, 71);
+            background: rgba(52, 61, 71, .8);
         }
         h2 {
             max-width: 20em;
@@ -253,7 +291,6 @@
         }
     }
     .overview {
-        max-width: 40em;
         @include flex(1 1 20em);
         margin-bottom: 0;
         h2 a, .stat a {
@@ -265,8 +302,6 @@
     }
     .details {
         @include flex(1 1 10em);
-        max-width: 20em;
-
     }
     .create-project {
         p {
@@ -279,11 +314,6 @@
         @include flex-wrap(wrap);
         @include justify-content(space-between);
         @include align-items(flex-start);
-        /*
-        padding: $vertical-rhythm/2;
-        background: $color-white-pure;
-        border: 1px solid $color-grey;
-        */
         .progress {
             @include flex(0 1 100%);
         }

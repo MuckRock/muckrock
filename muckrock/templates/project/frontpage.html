@@ -7,35 +7,44 @@
 <div class="project frontpage">
     {# The header explains what projects are and calls users to create their own. #}
     <header class="frontpage-header">
-        <div class="overview">
-            <h1>Projects <span class="primary badge">BETA</span></h1>
-            <p>Projects collect requests and articles to tell larger stories. Using MuckRock to launch, fund, and manage your project gives your readers an easy way to support and follow along with your progress.</p>
-            <ul class="nostyle inline">
-                {% if request.user.is_staff %}
-                <li><a class="primary button" href="{% url 'project-create' %}">Create a project</a></li>
-                {% else %}
-                <li><a class="primary button" href="mailto:info@muckrock.com?subject=Projects%20Beta&body=I would like access to the projects beta.">Request beta access</a></li>
-                {% endif %}
-                <li><a href="{% url 'project-list' %}">See all projects</a></li>
-                <li><a href="https://www.muckrock.com/news/archives/2015/sep/03/muckrock-projects-organize-crowdfund-journalism/">Learn more</a></li>
-            </ul>
-        </div>
+        <h1>Projects <span class="blue badge">BETA</span></h1>
+        <ul class="nostyle inline">
+            {% if request.user.is_staff %}
+            <li><a class="blue button" href="{% url 'project-create' %}">Create a project</a></li>
+            {% else %}
+            <li><a class="blue button" href="mailto:info@muckrock.com?subject=Projects%20Beta&body=I would like access to the projects beta.">Request beta access</a></li>
+            {% endif %}
+            <!--<li><a href="{% url 'project-list' %}">See all projects</a></li>-->
+            <li><a href="https://www.muckrock.com/news/archives/2015/sep/03/muckrock-projects-organize-crowdfund-journalism/">Learn more</a></li>
+        </ul>
+        <p>Projects collect requests and articles to tell larger stories and give your audience an easy way to support your work and follow your progress.</p>
     </header>
     {% comment %}
     Featured projects are given top billing. If they have an active crowdfund, we place that on the right-hand
     side of the section and give it a call to action. If they don't, we display project stats and make following
     the call to action.
     {% endcomment %}
-    <div class="featured">
-        {% for project in featured %}
+    <div class="projects">
+        {% for project in visible %}
         <div class="project">
-            <header class="project-header" style="background-image: url('{% thumbnail project.image 400x300 crop %}');">
+            {% if project.image %}
+            <header class="project-header" style="background-image: url('{% thumbnail project.image 1200x600 crop %}');">
+            {% else %}
+            <header class="project-header">
+            {% endif %}
                 <a href="{{project.get_absolute_url}}" class="project-header-wrapper">
-                    <h2 class="title">{{project.title}}</h2>
+                    <div>
+                        {% if project.featured %}
+                        <span class="blue badge">&#9733; Featured</span>
+                        {% endif %}
+                        {% if project.private %}
+                        <span class="red badge">&empty; Private</span>
+                        {% endif %}
+                        <h2 class="title">{{project.title}}</h2>
+                    </div>
                 </a>
             </header>
             <div class="overview">
-
                 <ul class="nostyle inline stats">
                 {% if project.request_count %}
                     <li class="stat"><a href="{{project.get_absolute_url}}#requests"><span class="value">{{project.request_count}}</span> request{{project.request_count|pluralize}}</a></li>
@@ -45,12 +54,12 @@
                 {% endif %}
                 </ul>
                 <summary>
-                    {{project.summary|markdown}}
+                    {{project.summary|markdown|truncatewords_html:50}}
                 </summary>
                 <p class="more"><a href="{{project.get_absolute_url}}">Learn more</a></p>
             </div>
+            {% if project.crowdfunds.exists %}
             <div class="details">
-                {% if project.crowdfunds.exists %}
                 {% with project.crowdfunds.first as crowdfund %}
                 <div class="crowdfund">
                     <div class="progress"><span class="meter" style="width: {{crowdfund.percent_funded}}%"></span></div>
@@ -69,8 +78,8 @@
                     {% endif %}
                 </div>
                 {% endwith %}
-                {% endif %}
             </div>
+            {% endif %}
         </div>
         {% endfor %}
     </div>
