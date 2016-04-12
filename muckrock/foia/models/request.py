@@ -205,10 +205,12 @@ class FOIARequest(models.Model):
     contact = models.ForeignKey(
         User,
         on_delete=models.PROTECT,
+        related_name='+',
         )
     cc_contacts = models.ManyToManyField(
         User,
         blank=True,
+        related_name='+',
         )
     # XXX delete
     email = models.EmailField(blank=True)
