@@ -28,8 +28,8 @@ class ProjectExploreView(View):
         # pylint: disable=unused-argument
         # pylint: disable=no-self-use
         user = request.user
-        visible_projects = Project.objects.get_visible(user)
-        featured_projects = (visible_projects.filter(featured=True)
+        visible_projects = (Project.objects.get_visible(user)
+                .order_by('-featured', 'title')
                 .annotate(request_count=Count('requests', distinct=True))
                 .annotate(article_count=Count('articles', distinct=True))
                 .prefetch_related(
@@ -38,11 +38,8 @@ class ProjectExploreView(View):
                             .order_by('-date_due')
                             .annotate(contributors_count=Count('payments'))))
                 )
-        actively_crowdfunding = visible_projects.filter(crowdfunds__closed=False)
         context = {
             'visible': visible_projects,
-            'featured': featured_projects,
-            'crowdfunding': actively_crowdfunding,
         }
         return context
 
@@ -119,6 +116,10 @@ class ProjectDetailView(DetailView):
         context['articles'] = project.articles.get_published()
         context['contributors'] = project.contributors.select_related('profile')
         context['user_is_experimental'] = user.is_authenticated() and user.profile.experimental
+        context['newsletter_label'] = ('Subscribe to the project newsletter'
+                                      if not project.newsletter_label else project.newsletter_label)
+        context['newsletter_cta'] = ('Get updates delivered to your inbox'
+                                    if not project.newsletter_cta else project.newsletter_cta)
         return context
 
     def dispatch(self, *args, **kwargs):

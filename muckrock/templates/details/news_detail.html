@@ -13,7 +13,13 @@
 
 <article class="news detail news--article">
     <header class="news--header">
-        {% newsletter %}
+        {% with article.projects.last as project %}
+            {% if project.newsletter %}
+                {% newsletter list_id=project.newsletter label=project.newsletter_label cta=project.newsletter_cta %}
+            {% else %}
+                {% newsletter %}
+            {% endif %}
+        {% endwith %}
         {% if article.image %}
         <img src="{% thumbnail article.image 1200x400 crop %}">
         {% endif %}

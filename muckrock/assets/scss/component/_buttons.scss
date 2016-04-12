@@ -2,9 +2,9 @@
 
 @mixin button($color) {
   $color-dark: darken($color, $color-darken-amount);
-  $shadow-normal: 3px;
-  $shadow-hover: 5px;
-  $shadow-active: 2px;
+  $shadow-normal: 2px;
+  $shadow-hover: 4px;
+  $shadow-active: 0px;
   // Metrics
   display: inline-block;
   margin: $vertical-rhythm/4 0;
@@ -53,10 +53,10 @@
 
 .button, button, input[type='submit'] {
     @include button($color-grey);
-    &.primary   { @include button($color-blue);     }
-    &.success   { @include button($color-green);    }
-    &.failure   { @include button($color-red);      }
-    &.warning   { @include button($color-yellow);   }
+    &.blue, &.primary   { @include button($color-blue);     }
+    &.green, &.success   { @include button($color-green);    }
+    &.red, &.failure   { @include button($color-red);      }
+    &.yellow, &.warning   { @include button($color-yellow);   }
     &.disabled, &:disabled  {
         @include button($color-disabled);
         background: $color-white;
@@ -82,7 +82,7 @@
     }
 }
 
-button.basic {
+button.basic, .button.basic {
     margin: 0;
     box-shadow: none;
     transform: none;
@@ -100,6 +100,16 @@ button.basic {
         &:hover {
             background: $color-green-dark;
         }
+    }
+    &.red {
+        background: $color-red;
+        &:hover {
+            background: $color-red-dark;
+        }
+    }
+    &:hover, &:active {
+        box-shadow: none;
+        @include transform(none);
     }
 }
 
