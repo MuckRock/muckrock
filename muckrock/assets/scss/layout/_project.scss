@@ -102,11 +102,7 @@
 .project.detail {
     .project-header {
         @include edge-to-edge($vertical-rhythm);
-        // @include display(flex);
-        // @include flex-flow(wrap row-reverse);
-
-        .image, .text {
-            // @include flex(1 1 20em);
+        .image, .title {
             margin-bottom: 0;
         }
         .image {
@@ -114,16 +110,6 @@
             background-size: cover;
             background-position: center;
             background-color: $color-grey-5;
-        }
-        .text {
-            padding: $vertical-rhythm;
-            text-align: center;
-        }
-        @include media($medium-layout){
-            .title {
-                font-size: $font-size-9;
-                line-height: $font-line-height;
-            }
         }
         .toolbar {
             // @include flex(0 1 100%);
@@ -140,31 +126,74 @@
         }
     }
 
-    .project-intro {
-        @include display(flex);
-        @include flex-flow(wrap);
-        .project-metadata {
-            @include flex(1 1 10em);
-            @media (min-width: 33.25em) {
-                padding: 0 $vertical-rhythm;
-            }
-        }
-        .project-summary {
-            @include flex(2 1 20em);
-        }
-    }
-
     .overview {
         @include display(flex);
         @include flex-flow(wrap);
-        .project-description {
+        max-width: 60em;
+        margin: 0 auto $vertical-rhythm;
+        main {
             @include flex(2 1 20em);
         }
-        .project-objects {
+        aside {
             @include flex(1 1 10em);
             @media (min-width: 33.25em) {
                 padding: 0 $vertical-rhythm;
             }
+        }
+        .title {
+            @include media($medium-layout){
+                font-size: $font-size-9;
+                line-height: $font-line-height;
+            }
+        }
+        summary {
+            font-size: $font-size-4;
+            line-height: $font-line-height;
+        }
+        .contributor {
+            @include display(flex);
+            margin-bottom: $vertical-rhythm/2;
+            .avatar {
+                display: block;
+                @include border-radius;
+            }
+            .info {
+                padding: $vertical-rhythm/4 $vertical-rhythm/2;
+                p {
+                    margin-bottom: 0;
+
+                }
+                a {
+                    color: $color-black;
+                }
+                a:hover {
+                    color: $color-blue;
+                    path { fill: $color-blue; }
+                }
+                .name {
+                    font-weight: $font-weight-bold;
+                }
+                .icon {
+                    margin-left: $vertical-rhythm/2;
+                }
+            }
+        }
+        .stat a {
+            color: $color-black;
+            &:hover {
+                color: $color-blue;
+            }
+        }
+    }
+
+    .objects {
+        @include display(flex);
+        @include flex-flow(wrap row);
+        max-width: 60em;
+        margin: 0 auto $vertical-rhythm;
+        .articles, .requests {
+            @include flex(1 1 20em);
+            margin-right: $vertical-rhythm;
         }
     }
 
@@ -174,20 +203,15 @@
         margin-bottom: $vertical-rhythm/2;
         color: $color-black;
         font-weight: $font-weight-bold;
-        font-size: $font-size-2;
         line-height: $font-line-height;
         &:hover {
             color: $color-blue;
-            img {
-                opacity: 1;
-            }
         }
         img {
             display: block;
             width: auto;
             margin-bottom: 0;
             margin-right: $vertical-rhythm/2;
-            opacity: .5;
         }
         .text > * {
             margin-bottom: 0;

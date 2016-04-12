@@ -38,11 +38,8 @@ class ProjectExploreView(View):
                             .order_by('-date_due')
                             .annotate(contributors_count=Count('payments'))))
                 )
-        actively_crowdfunding = visible_projects.filter(crowdfunds__closed=False)
         context = {
             'visible': visible_projects,
-            'featured': featured_projects,
-            'crowdfunding': actively_crowdfunding,
         }
         return context
 
