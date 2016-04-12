@@ -277,6 +277,7 @@ class NewsletterSignupView(View):
 
     def redirect_url(self, request):
         """If a next url is provided, redirect there. Otherwise, redirect to the index."""
+        # pylint: disable=no-self-use
         next_ = request.GET.get('next', 'index')
         return redirect(next_)
 
@@ -300,7 +301,7 @@ class NewsletterSignupView(View):
             msg = '%s is not a valid email address.' % escape(_email)
         else:
             msg = 'You forgot to enter an email!'
-        messages.error(request, exception)
+        messages.error(request, msg)
         return self.redirect_url(request)
 
     def form_valid(self, request, form):
