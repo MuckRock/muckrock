@@ -106,7 +106,7 @@
             margin-bottom: 0;
         }
         .image {
-            min-height: 40vh;
+            min-height: 45vh;
             background-size: cover;
             background-position: center;
             background-color: $color-grey-5;
@@ -133,9 +133,11 @@
         margin: 0 auto $vertical-rhythm;
         main {
             @include flex(2 1 20em);
+            min-width: 0;
         }
         aside {
             @include flex(1 1 10em);
+            min-width: 0;
             @media (min-width: 33.25em) {
                 padding: 0 $vertical-rhythm;
             }
@@ -213,6 +215,9 @@
             margin-bottom: 0;
             margin-right: $vertical-rhythm/2;
         }
+        .text {
+            @include flex(1);
+        }
         .text > * {
             margin-bottom: 0;
         }
@@ -233,6 +238,7 @@
         margin-bottom: 0;
         padding: $vertical-rhythm 0 0;
         background: $color-blue-light;
+        border-bottom: 1px solid $color-blue;
         & > * {
             margin-bottom: 0;
             padding: 0 $vertical-rhythm $vertical-rhythm;
@@ -285,6 +291,7 @@
         margin-bottom: 0;
         background-position: center;
         background-size: cover;
+        background-color: $color-blue-dark;
         .project-header-wrapper {
             @include display(inline-flex);
             @include flex-direction(column);
@@ -294,6 +301,10 @@
             padding: $vertical-rhythm;
             background: rgb(52, 61, 71);
             background: rgba(52, 61, 71, .8);
+            &:hover {
+                background: rgba(52, 61, 71, .6);
+            }
+            transition: background .25s linear;
         }
         h2 {
             max-width: 20em;
