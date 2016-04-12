@@ -50,8 +50,8 @@
                 <p class="more"><a href="{{project.get_absolute_url}}">Learn more</a></p>
             </div>
             <div class="details">
-                {% if project.crowdfunds %}
-                {% with project.crowdfunds.all.0 as crowdfund %}
+                {% if project.crowdfunds.exists %}
+                {% with project.crowdfunds.first as crowdfund %}
                 <div class="crowdfund">
                     <div class="progress"><span class="meter" style="width: {{crowdfund.percent_funded}}%"></span></div>
                     <ul class="nostyle inline stats">
