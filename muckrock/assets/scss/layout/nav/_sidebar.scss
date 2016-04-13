@@ -61,6 +61,16 @@ The sidebar should use a dark UI.
             font-size: $font-size-5;
             font-weight: $font-weight-bold;
         }
+        a {
+            color: $color-blue-light;
+            &:hover {
+                color: $color-blue;
+            }
+        }
+        .forgot {
+            font-size: $font-size-2;
+            line-height: $font-line-height;
+        }
         input {
             width: 100%;
             margin-bottom: $vertical-rhythm;
@@ -70,11 +80,12 @@ The sidebar should use a dark UI.
             @include display(flex);
             @include justify-content(space-between);
         }
-        @include transition(transform .25s ease-in-out);
+
         @include transform(translateY(-100%));
         &.visible {
             @include transform(translateY(0));
         }
+        transition: transform .2s ease-out;
     }
 
     .account-links {
