@@ -16,7 +16,6 @@
 
 @mixin textbox() {
     @include box-sizing(border-box);
-    @include outer-container;
     @include border;
     @include border-radius;
     border-color: $color-grey;

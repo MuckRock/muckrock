@@ -9,6 +9,29 @@ from autocomplete_light.contrib.taggit_field import TaggitField, TaggitWidget
 
 from muckrock.project.models import Project
 
+class ProjectForm(forms.ModelForm):
+    """Form for the basic fields of a project."""
+
+    tags = TaggitField(
+        widget=TaggitWidget('TagAutocomplete', attrs={
+            'placeholder': 'Search tags',
+            'data-autocomplete-minimum-characters': 1
+        }),
+        help_text='Separate tags with commas.',
+        required=False
+    )
+
+    class Meta:
+        model = Project
+        fields = ['title', 'summary', 'image', 'tags', 'private']
+        help_texts = {
+            'summary': 'A short description of the project and its goals.',
+            'image': 'Image should be large and high-resolution.'
+        }
+        initial = {
+            'private': True
+        }
+
 class ProjectCreateForm(forms.ModelForm):
     """Form for creating a new project"""
 

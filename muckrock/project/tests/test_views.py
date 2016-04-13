@@ -4,13 +4,16 @@ topics and issues we cover and then provide them avenues for
 deeper, sustained involvement with our work on those topics.
 """
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AnonymousUser
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
-from django.test import TestCase, Client
+from django.test import TestCase, Client, RequestFactory
 
+from muckrock import factories
 from muckrock.project.models import Project
-from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm
+from muckrock.project.forms import ProjectForm, ProjectCreateForm, ProjectUpdateForm
+from muckrock.project.views import ProjectCreateView
+from muckrock.utils import mock_middleware
 
 import logging
 import nose
@@ -33,89 +36,79 @@ test_image = SimpleUploadedFile(
 class TestProjectCreateView(TestCase):
     """Tests creating a project as a user."""
 
-    fixtures = [
-        'test_users.json',
-        'test_profiles.json',
-        'test_news.json',
-        'test_foiarequests.json',
-        'test_agencies.json',
-        'agency_types.json',
-        'jurisdictions.json',
-        'holidays.json'
-    ]
-
     def setUp(self):
-        self.client = Client()
+        self.factory = RequestFactory()
+        self.view = ProjectCreateView.as_view()
         self.url = reverse('project-create')
 
-    def tearDown(self):
-        self.client.logout()
+    def get_helper(self, user):
+        """Helper to return a GET response."""
+        request = self.factory.get(self.url)
+        request = mock_middleware(request)
+        request.user = user
+        response = self.view(request)
+        return response
 
-    def test_create_project_functional(self):
-        """I want to create a project."""
-        # First things first I need to be logged in
-        self.client.login(username='adam', password='abc')
-        # I point my browser at the right webpage
-        response = self.client.get(self.url)
+    def post_helper(self, user, data):
+        """Helper to return a POST response."""
+        request = self.factory.post(self.url, data)
+        request = mock_middleware(request)
+        request.user = user
+        response = self.view(request)
+        return response
+
+    def test_staff_get(self):
+        """Staff users should be able to GET the ProjectCreateView."""
+        staff_user = factories.UserFactory(is_staff=True)
+        response = self.get_helper(staff_user)
         eq_(response.status_code, 200,
-            'Should load page to create a new project.')
-        ok_(isinstance(response.context['form'], ProjectCreateForm),
-            'Should load page with a ProjectCreateForm')
-        # Then I fill out a form with all the details of my project.
-        project_title = test_title
-        project_description = test_description
-        # project_image = test_image
-        new_project_form = ProjectCreateForm({
-            'title': project_title,
-            'description': project_description,
-            # 'image': project_image
-        })
-        logging.debug('The form is valid: %s.', new_project_form.is_valid())
-        eq_(Project.objects.count(), 0, 'There should be no projects.')
-        logging.debug('Projects: %s', Project.objects.all())
-        # When I submit the form, I expect the project to be made and to be redirected to it.
-        response = self.client.post(self.url, new_project_form.data, follow=False)
-        logging.debug('POST data: %s', new_project_form.data)
-        logging.debug('POST URL: %s', self.url)
-        logging.debug('POST status code: %s', response.status_code)
-        logging.debug('There are %s projects.', Project.objects.count())
-        logging.debug('Projects: %s', Project.objects.all())
-        eq_(Project.objects.count(), 1, 'There should now be one project.')
-        # An action should also be created with this project as the target
-        Project.objects.first()
-        logging.debug('Projects: %s', Project.objects.all())
+            'Staff users should be able to GET the ProjectCreateView.')
+
+    def test_experimental_get(self):
+        """Experimental users should be able to GET the ProjectCreateView."""
+        exp_user = factories.UserFactory(profile__experimental=True)
+        response = self.get_helper(exp_user)
+        eq_(response.status_code, 200,
+            'Experimental users should be able to GET the ProjectCreateView.')
+
+    def test_basic_get(self):
+        """Basic users should not be able to GET the ProjectCreateView."""
+        user = factories.UserFactory()
+        response = self.get_helper(user)
         eq_(response.status_code, 302,
-            'Should redirect to the newly created project.')
-        self.assertRedirects(response, list(Project.objects.all())[-1].get_absolute_url())
-
-    def test_requires_login(self):
-        """Logged out users cannot create projects."""
-        response = self.client.get(self.url)
+            'Basic users should not be able to GET the ProjectCreateView.')
         redirect_url = reverse('acct-login') + '?next=' + reverse('project-create')
-        self.assertRedirects(response, redirect_url)
+        eq_(response.url, redirect_url,
+            'The user should be redirected to the login page.')
 
-    def test_staff_only(self):
-        """For now, staff are the only ones who can create new projects."""
-        staff_user = User.objects.get(username='adam')
-        nonstaff_user = User.objects.get(username='bob')
-        ok_(staff_user.is_staff and not nonstaff_user.is_staff)
-        staff_client = Client()
-        staff_client.login(username='adam', password='abc')
-        staff_response = staff_client.get(self.url)
-        ok_(staff_response.status_code is 200)
-        nonstaff_client = Client()
-        nonstaff_client.login(username='bob', password='abc')
-        nonstaff_response = nonstaff_client.get(self.url)
-        ok_(nonstaff_response.status_code is not 200,
-            'Nonstaff users should not be able to create a new project at this time.')
+    def test_anonymous_get(self):
+        """Logged out users should not be able to GET the ProjectCreateView."""
+        response = self.get_helper(AnonymousUser())
+        eq_(response.status_code, 302,
+            'Anonymous users should not be able to GET the ProjectCreateView.')
+        redirect_url = reverse('acct-login') + '?next=' + reverse('project-create')
+        eq_(response.url, redirect_url,
+            'The user should be redirected to the login page.')
 
-    def test_creator_made_contributor(self):
-        """The creation form should set the current user as a contributor by default."""
-        self.client.login(username='adam', password='abc')
-        response = self.client.get(self.url)
-        project_create_form = response.context['form']
-        ok_(User.objects.get(username='adam') in project_create_form.initial['contributors'],
-            'Current user should be an initial value for the contributors field')
+    def test_post(self):
+        """Posting a valid ProjectForm should create the project."""
+        form = ProjectForm({
+            'title': 'Cool Project',
+            'summary': 'Yo my project is cooler than LIFE!',
+            'image': test_image,
+            'tags': 'dogs, cats',
+            'private': True,
+            'featured': True
+        })
+        ok_(form.is_valid(), 'The form should validate.')
+        staff_user = factories.UserFactory(is_staff=True)
+        response = self.post_helper(staff_user, form.data)
+        project = Project.objects.last()
+        eq_(response.status_code, 302,
+            'The response should redirect to the project when it is created.')
+        ok_(staff_user in project.contributors.all(),
+            'The current user should automatically be added as a contributor.')
+
 
 def staff_and_contributors_only(project, project_url, action='load'):
     """Tests that only staff and contributors can access a given URL."""

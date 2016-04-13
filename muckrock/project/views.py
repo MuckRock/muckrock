@@ -17,7 +17,7 @@ from actstream.models import followers
 
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.project.models import Project
-from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm
+from muckrock.project.forms import ProjectForm, ProjectUpdateForm
 from muckrock.views import MRFilterableListView
 
 
@@ -67,20 +67,24 @@ class ProjectListView(MRFilterableListView):
 
 class ProjectCreateView(CreateView):
     """Create a project instance"""
-    form_class = ProjectCreateForm
+    model = Project
+    form_class = ProjectForm
+    initial = {'private': True}
     template_name = 'project/create.html'
 
     @method_decorator(login_required)
-    @method_decorator(user_passes_test(lambda u: u.is_staff))
+    @method_decorator(user_passes_test(lambda u: u.is_staff or u.profile.experimental))
     def dispatch(self, *args, **kwargs):
         """At the moment, only staff are allowed to create a project."""
         return super(ProjectCreateView, self).dispatch(*args, **kwargs)
 
-    def get_initial(self):
-        """Sets current user as a default contributor"""
-        queryset = User.objects.filter(pk=self.request.user.pk)
-        return {'contributors': queryset}
-
+    def form_valid(self, form):
+        """Saves the current user as a contributor to the project."""
+        redirection = super(ProjectCreateView, self).form_valid(form)
+        project = self.object
+        project.contributors.add(self.request.user)
+        project.save()
+        return redirection
 
 class ProjectDetailView(DetailView):
     """View a project instance"""
