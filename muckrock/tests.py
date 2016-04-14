@@ -151,6 +151,23 @@ class TestNewsletterSignupView(TestCase):
         mock_subscribe.assert_called_with(form.data['email'], form.data['list'])
         eq_(response.status_code, 302, 'Should redirect upon successful submission.')
 
+    @patch('muckrock.views.NewsletterSignupView.subscribe')
+    def test_post_other_list(self, mock_subscribe):
+        """Posting to a list other than the default should optionally subscribe to the default."""
+        form = NewsletterSignupForm({
+            'email': 'test@muckrock.com',
+            'default': True,
+            'list': 'other'
+        })
+        ok_(form.is_valid(), 'The form should validate.')
+        request = self.factory.post(self.url, form.data)
+        request.user = AnonymousUser()
+        request = mock_middleware(request)
+        response = self.view(request)
+        mock_subscribe.assert_any_call(form.data['email'], form.data['list'])
+        mock_subscribe.assert_any_call(form.data['email'], settings.MAILCHIMP_LIST_DEFAULT)
+        eq_(response.status_code, 302, 'Should redirect upon successful submission.')
+
     @nottest
     def test_subscribe(self):
         """Tests the method for subscribing an email to a MailChimp list.

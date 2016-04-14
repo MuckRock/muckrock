@@ -9,30 +9,18 @@
     line-height: $font-line-height;
 }
 
-.failure.badge {
+.red.badge, .failure.badge, .inactive.badge {
     background: $color-red;
 }
 
-.success.badge {
+.green.badge, .success.badge, .active.badge {
     background: $color-green;
 }
 
-.featured.badge {
+.blue.badge, .primary.badge {
     background: $color-blue;
 }
 
-.primary.badge {
-    background: $color-blue;
-}
-
-.staff.badge {
+.blue-dark.badge, .staff.badge {
     background: $color-blue-dark;
-}
-
-.active.badge {
-    background: $color-green;
-}
-
-.inactive.badge {
-    background: $color-red;
 }

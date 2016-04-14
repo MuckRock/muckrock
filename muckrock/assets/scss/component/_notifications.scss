@@ -5,6 +5,7 @@
 @mixin notification-color($light, $normal, $dark) {
     background: $light;
     color: $dark;
+    border-bottom: 1px solid $normal;
     .symbol {
         background: $normal;
         path, rect, circle {
@@ -15,19 +16,29 @@
 
 .notification {
     @include display(flex);
+    @include flex-direction(column);
     @include align-items(stretch);
     @include notification-color($color-grey-7, $color-black, $color-black);
     .symbol {
-        text-align: center;
+        $svg-size: 2.75em;
+        flex: 0 0 $svg-size;
+        text-align: left;
         svg {
-            width: 2.75em;
-            height: 2.75em;
+            width: $svg-size;
+            height: $svg-size;
             padding: $vertical-rhythm/2;
             vertical-align: middle;
         }
     }
     .text {
+        flex: 1 1 auto;
         padding: $vertical-rhythm/2;
+    }
+    @include media($medium-layout) {
+        @include flex-direction(row);
+        .symbol {
+            text-align: center;
+        }
     }
 }
 

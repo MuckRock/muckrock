@@ -73,173 +73,7 @@
     }
 }
 
-.project.detail {
-    .project-header {
-        @include edge-to-edge;
-        margin-bottom: 0;
-    }
-    .project-header.with-image {
-        position: relative;
-        height: 20em;
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        @include media($medium-layout) {
-            height: 24em;
-        }
-        @include media($large-layout) {
-            height: 32em;
-        }
-        .project-admin {
-            position: absolute;
-            top: 0;
-        }
-        .project-title {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-        }
-    }
-    .project-admin {
-        width: 100%;
-        padding: $vertical-rhythm/2;
-        color: $color-white;
-        background-color: rgba(0, 0, 0, .75);
-        @include display(flex);
-        @include flex-wrap(wrap);
-        @include justify-content(space-between);
-        @include align-items(center);
-        .project-controls, .project-private {
-            margin-bottom: 0;
-        }
-        .project-private {
-            font-weight: $font-weight-bold;
-        }
-        @include media($medium-layout) {
-            padding: $vertical-rhythm/2 $vertical-rhythm;
-        }
-    }
-    .project-gradient {
-        position: absolute;
-        bottom: 0;
-        width: 100%;
-        height: 75%;
-        margin-bottom: 0;
-        // rgba equivalent of $color-white
-        @include background(linear-gradient(rgba(247, 248, 250, 0), rgba(247, 248, 250, 100)));
-    }
-    .project-title {
-        font-size: $font-size-8;
-        font-weight: $font-weight-bold;
-        padding: 0 $vertical-rhythm/2;
-        @include media($medium-layout) {
-            padding: 0 $vertical-rhythm;
-            margin-bottom: $vertical-rhythm;
-        }
-    }
-    .project-overview {
-        @include display(flex);
-        @include flex-wrap(wrap);
-        @include justify-content(space-between);
-        .project-summary, .project-quick-links {
-            @include flex(100%);
-        }
-        .project-quick-links {
-            @include display(flex);
-            border-bottom: 1px dashed $color-grey;
-            padding-bottom: $vertical-rhythm;
-            @include media($medium-layout) {
-                display: block;
-                border-bottom: 0;
-                padding-bottom: 0;
-            }
-            .project-contributors, .project-references {
-                margin-bottom: 0;
-                @include media($medium-layout) {
-                    margin-bottom: $vertical-rhythm;
-                }
-            }
-            .project-references {
-                margin-left: 2*$vertical-rhythm;;
-                @include media($medium-layout) {
-                    margin-left: 0;
-                }
-                .stats {
-                    @include display(flex);
-                    @include justify-content(flex-start);
-                }
-                .stat {
-                    @include flex(1);
-                    margin: 0;
-                    padding: $vertical-rhythm/2;
-                    color: $color-black;
-                    &:hover {
-                        text-decoration: none;
-                        background-color: $color-blue;
-                        color: $color-white;
-                        .label {
-                            color: $color-white;
-                        }
-                    }
-                    .value {
-                        font-size: $font-size-5;
-                        margin-bottom: 0;
-                        display: block;
-                    }
-                    .label {
-                        color: $color-grey;
-                    }
-                }
-
-            }
-        }
-        @include media($medium-layout) {
-            .project-summary {
-                @include flex(2);
-            }
-            .project-quick-links {
-                @include flex(1);
-                @include order(1);
-                margin-left: 2*$vertical-rhythm;
-            }
-        }
-
-    }
-    .project-contributors ul {
-        padding-left: 0;
-        list-style-type: none;
-    }
-    .project-body {
-        @include display(flex);
-        @include flex-wrap(wrap);
-        .project-description, .project-metadata {
-            @include flex(100%);
-        }
-        @include media($medium-layout) {
-            .project-description {
-                @include flex(2);
-            }
-            .project-metadata {
-                @include flex(1);
-                @include order(1);
-                margin-left: 2*$vertical-rhythm;
-            }
-        }
-    }
-}
-
-
-.project.frontpage {
-    @include edge-to-edge;
-    h1 {
-        font-size: $font-size-7;
-        line-height: $font-line-height;
-        @include media($medium-layout) {
-            font-size: $font-size-9;
-            line-height: $font-line-height;
-        }
-    }
+.project {
     .inline {
         margin-bottom: 0;
     }
@@ -263,32 +97,216 @@
             line-height: $font-line-height;
         }
     }
+}
+
+.project.detail {
+    overflow: hidden;
+    .project-header {
+        @include edge-to-edge($vertical-rhythm);
+        .image, .title {
+            margin-bottom: 0;
+        }
+        .image {
+            min-height: 45vh;
+            background-size: cover;
+            background-position: center;
+            background-color: $color-grey-5;
+        }
+        .toolbar {
+            // @include flex(0 1 100%);
+            @include display(flex);
+            @include flex-wrap(wrap);
+            @include justify-content(space-between);
+            @include align-items(center);
+            background: $color-grey-2;
+            color: $color-white;
+            border-top: 1px solid $color-grey-3;
+            border-bottom: 1px solid $color-black;
+            padding: $vertical-rhythm/4 $vertical-rhythm/2;
+            font-weight: $font-weight-bold;
+        }
+    }
+
+    .overview {
+        @include display(flex);
+        @include flex-flow(wrap);
+        max-width: 60em;
+        margin: 0 auto $vertical-rhythm;
+        main {
+            @include flex(2 1 20em);
+            min-width: 0;
+            margin-bottom: $vertical-rhythm;
+        }
+        aside {
+            @include flex(1 1 10em);
+            min-width: 0;
+            @media (min-width: 33.25em) {
+                padding: 0 $vertical-rhythm;
+            }
+        }
+        .title {
+            @include media($medium-layout){
+                font-size: $font-size-9;
+                line-height: $font-line-height;
+            }
+        }
+        summary {
+            font-size: $font-size-4;
+            line-height: $font-line-height;
+        }
+        .contributor {
+            @include display(flex);
+            margin-bottom: $vertical-rhythm/2;
+            .avatar {
+                display: block;
+                @include border-radius;
+            }
+            .info {
+                padding: $vertical-rhythm/4 $vertical-rhythm/2;
+                p {
+                    margin-bottom: 0;
+
+                }
+                a {
+                    color: $color-black;
+                }
+                a:hover {
+                    color: $color-blue;
+                    path { fill: $color-blue; }
+                }
+                .name {
+                    font-weight: $font-weight-bold;
+                }
+                .icon {
+                    margin-left: $vertical-rhythm/2;
+                }
+            }
+        }
+        .stat a {
+            color: $color-black;
+            &:hover {
+                color: $color-blue;
+            }
+        }
+    }
+
+    .objects {
+        @include display(flex);
+        @include flex-flow(wrap row);
+        max-width: 60em;
+        margin: 0 auto $vertical-rhythm;
+        .articles, .requests {
+            @include flex(1 1 20em);
+            margin-right: $vertical-rhythm;
+        }
+    }
+
+    .articles .article {
+        @include display(flex);
+        @include align-items(center);
+        margin-bottom: $vertical-rhythm/2;
+        color: $color-black;
+        font-weight: $font-weight-bold;
+        line-height: $font-line-height;
+        &:hover {
+            color: $color-blue;
+        }
+        img {
+            display: block;
+            width: auto;
+            margin-bottom: 0;
+            margin-right: $vertical-rhythm/2;
+        }
+        .text {
+            @include flex(1);
+        }
+        .text > * {
+            margin-bottom: 0;
+        }
+        .date {
+            color: $color-grey;
+        }
+    }
+}
+
+
+.project.frontpage {
+    @include edge-to-edge;
+    .frontpage-header {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        @include justify-content(space-between);
+        @include align-items(center);
+        margin-bottom: 0;
+        padding: $vertical-rhythm 0 0;
+        background: $color-blue-light;
+        border-bottom: 1px solid $color-blue;
+        & > * {
+            margin-bottom: 0;
+            padding: 0 $vertical-rhythm $vertical-rhythm;
+            @include flex(1 1 18rem);
+        }
+        h1, ul {
+            text-align: center;
+        }
+        p {
+            font-size: $font-size-2;
+            line-height: $font-line-height;
+        }
+        li {
+            margin-bottom: 0;
+        }
+    }
+    .projects {
+        @include display(flex);
+        @include flex-wrap(wrap);
+    }
+    .project {
+        @include flex(1 1 30em);
+        @include display(flex);
+        @include flex-wrap(wrap);
+        @include justify-content(space-between);
+        margin: $vertical-rhythm;
+        background: $color-white-pure;
+        border: 1px solid $color-grey;
+        @include border-radius;
+        overflow: hidden;
+    }
+    h1 {
+        font-size: $font-size-7;
+        line-height: $font-line-height;
+        @include media($medium-layout) {
+            font-size: $font-size-9;
+            line-height: $font-line-height;
+        }
+    }
     .more {
         font-weight: $font-weight-bold;
     }
     .frontpage-header .inline li {
         vertical-align: middle;
     }
-    .frontpage-header, .featured .project {
-        @include display(flex);
-        @include flex-wrap(wrap);
-        @include justify-content(space-between);
-        min-height: 15em;
-        margin-bottom: 0;
-    }
     .project-header {
         @include flex(0 1 100%);
+        @include display(flex);
+        min-height: 15em;
         margin-bottom: 0;
         background-position: center;
         background-size: cover;
+        background-color: $color-blue-dark;
         .project-header-wrapper {
-            display: block;
-            height: 100%;
+            @include display(inline-flex);
+            @include flex-direction(column);
+            @include justify-content(flex-end);
+            min-height: 100%;
             width: 100%;
             padding: $vertical-rhythm;
-            padding-top: 10*$vertical-rhythm;
-            background: rgb(43, 69, 104);
-            background: rgba(43, 69, 104, .8);
+            background: rgb(52, 61, 71);
+            background: rgba(52, 61, 71, .8);
+            &:hover {
+                background: rgba(52, 61, 71, .6);
+            }
+            transition: background .25s linear;
         }
         h2 {
             max-width: 20em;
@@ -310,7 +328,6 @@
         }
     }
     .overview {
-        max-width: 40em;
         @include flex(1 1 20em);
         margin-bottom: 0;
         h2 a, .stat a {
@@ -322,8 +339,6 @@
     }
     .details {
         @include flex(1 1 10em);
-        max-width: 20em;
-
     }
     .create-project {
         p {
@@ -336,11 +351,6 @@
         @include flex-wrap(wrap);
         @include justify-content(space-between);
         @include align-items(flex-start);
-        /*
-        padding: $vertical-rhythm/2;
-        background: $color-white-pure;
-        border: 1px solid $color-grey;
-        */
         .progress {
             @include flex(0 1 100%);
         }

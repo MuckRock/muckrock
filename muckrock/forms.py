@@ -67,6 +67,7 @@ class NewsletterSignupForm(forms.Form):
     """A form for adding an email to a MailChimp mailing list."""
     email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'email address'}))
     list = forms.CharField(widget=forms.HiddenInput)
+    default = forms.BooleanField(initial=True, required=False)
 
 
 class PasswordResetForm(auth_forms.PasswordResetForm):
