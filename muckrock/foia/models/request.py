@@ -657,6 +657,8 @@ class FOIARequest(models.Model):
 
         if from_addr == 'fax':
             subject = 'MR#%s-%s - %s' % (self.pk, comm.pk, subject)
+        # max database size
+        subject = subject[:255]
 
         cc_addrs = self.get_other_emails()
         from_email = '%s@%s' % (from_addr, settings.MAILGUN_SERVER_NAME)
