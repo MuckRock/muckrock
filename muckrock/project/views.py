@@ -124,6 +124,7 @@ class ProjectDetailView(DetailView):
                                       if not project.newsletter_label else project.newsletter_label)
         context['newsletter_cta'] = ('Get updates delivered to your inbox'
                                     if not project.newsletter_cta else project.newsletter_cta)
+        context['user_can_edit'] = user.is_staff or user in project.contributors.all()
         return context
 
     def dispatch(self, *args, **kwargs):
@@ -160,7 +161,7 @@ class ProjectPermissionsMixin(object):
         return super(ProjectPermissionsMixin, self).dispatch(*args, **kwargs)
 
 
-class ProjectUpdateView(ProjectPermissionsMixin, UpdateView):
+class ProjectEditView(ProjectPermissionsMixin, UpdateView):
     """Update a project instance"""
     model = Project
     form_class = ProjectUpdateForm
@@ -168,7 +169,7 @@ class ProjectUpdateView(ProjectPermissionsMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         """Add a list of viewable requests to the context data"""
-        context = super(ProjectUpdateView, self).get_context_data(**kwargs)
+        context = super(ProjectEditView, self).get_context_data(**kwargs)
         project = self.get_object()
         user = self.request.user
         viewable_requests = project.requests.get_viewable(user)

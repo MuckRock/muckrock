@@ -53,13 +53,13 @@
             <span class="project-private">This project is public.</span>
             {% endif %}
             <div class="project-controls">
-                <a href="{% url 'project-crowdfund' slug=project.slug pk=project.pk %}" class="crowdfund green button">
+                <a href="{% url 'project-crowdfund' slug=project.slug pk=project.pk %}" class="green button">
                     Crowdfund
                 </a>
-                <a href="{% url 'project-update' slug=project.slug pk=project.pk %}" class="update blue button">
-                    Update
+                <a href="{% url 'project-edit' slug=project.slug pk=project.pk %}" class="blue button">
+                    Edit
                 </a>
-                <a href="{% url 'project-delete' slug=project.slug pk=project.pk %}" class="delete red button">
+                <a href="{% url 'project-delete' slug=project.slug pk=project.pk %}" class="red button">
                     Delete
                 </a>
             </div>
@@ -89,7 +89,9 @@
             {% if project.description %}
             <section class="project-description">
                 {{ project.description|markdown:"trusted" }}
-            </article>
+            </section>
+            {% elif user_can_edit %}
+            <a href="edit#description" class="blue button">Add a description</a>
             {% endif %}
         </main>
         <aside>
