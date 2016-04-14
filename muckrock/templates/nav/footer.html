@@ -1,6 +1,8 @@
 {% load tags %}
 <footer class="website-footer">
+    {% if request.user.profile.acct_type != "agency" %}
     {% newsletter %}
+    {% endif %}
     <div class="footer">
         <div class="brand">
             <a href="{% url 'index'%}" class="logo">

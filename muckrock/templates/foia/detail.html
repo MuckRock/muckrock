@@ -116,7 +116,9 @@
             {% crowdfund foia.crowdfund.pk %}
         {% endif %}
 
+        {% if request.user.profile.acct_type != "agency" %}
         {% include 'foia/foia_actions.html' %}
+        {% endif %}
 
         <div class="tab-container">
             <ul role="tablist" class="tab-list">
@@ -152,7 +154,7 @@
                     </a>
                 </li>
                 {% endif %}
-                {% if user_can_edit %}
+                {% if user_can_edit or agency_owner %}
                 <li><a role="tab" class="tab" aria-controls="sharing" href="#sharing">Sharing</a></li>
                 {% endif %}
             </ul>
@@ -277,7 +279,7 @@
 
                             <label for="status">Status:</label>
                             <select name="status">
-                            {% for choice in status_choices %}
+                            {% for choice in agency_status_choices %}
                                 <option value="{{ choice|first }}" {% if choice|first == foia.status %}selected{% endif %}>{{ choice|last }}</option>
                             {% endfor %}
                             </select>
@@ -294,6 +296,9 @@
 
                             <label for="agency-reply-composer">Reply:</label>
                             <textarea name="text" id="agency-reply-composer"></textarea>
+                            <label for="attachments">Attachments:</label>
+                            <input type="file" name="attachments" id="attachments" multiple/>
+
                             <div class="buttons">
                                 <button class="primary" type="submit" name="agency-reply" value="1">Send</button>
                                 <a href="#inactive" class="button cancel">Cancel</a>
@@ -435,7 +440,7 @@
             </section>
             {% endif %}
 
-            {% if user_can_edit %}
+            {% if user_can_edit or agency_owner %}
             <!-- ACCESS -->
             <section role="tabpanel" class="tab-panel access" id="sharing">
                 <h2 class="tab-panel-heading">Sharing</h2>

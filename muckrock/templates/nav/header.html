@@ -9,6 +9,12 @@
                     {% include 'lib/icons/logo.svg' %}
                 </span>
             </a>
+            {% if request.user.profile.acct_type == "agency" %}
+            <span>
+            Need help?  Email us at &nbsp;<a href="mailto:info@muckrock.com">info@muckrock.com</a> or call at &nbsp;<a href="tel:+18574883081">(857) 488-3081</a>
+            </span>
+            {% endif %}
+            {% if request.user.profile.acct_type != "agency" %}
             <ul class="website-sections" id="global-sections">
                 <li><a class="nav-item" href="{% url 'news-index'%}">News</a></li>
                 <li><a class="nav-item" href="{% url 'project' %}">Projects</a></li>
@@ -23,7 +29,9 @@
                 {% include 'lib/icons/sections-dots.svg' %}
                 <span class="label">Sections</span>
             </div>
+            {% endif %}
         </div>
+        {% if request.user.profile.acct_type != "agency" %}
         <!-- We have to keep the search form in the middle, otherwise Firefox will mess up the flexbox justification -->
         <form action="/search" method="get" class="search-form" id="global-search">
             <div class="search-form-container">
@@ -32,7 +40,9 @@
                 <div class="search-cancel" id="hide-search">Cancel</div>
             </div>
         </form>
+        {% endif %}
         <div class="nav-section">
+            {% if request.user.profile.acct_type != "agency" %}
             <div class="nav-item search-button" id="show-search">
                 {% include 'lib/icons/search.svg' %}
                 <span class="label">Search</span>
@@ -41,6 +51,7 @@
                 {% include 'lib/icons/create-request.svg' %}
                 <span class="label">File<span class="extended"> Request</span></span>
             </a>
+            {% endif %}
             <div class="dark nav-item sidebar-toggle" id="sidebar-button">
                 {% if actionable_requests.count > 0 %}
                 <span class="blue counter">{{actionable_requests.count}}</span>

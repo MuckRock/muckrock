@@ -392,8 +392,10 @@ class FOIARequest(models.Model):
 
     def viewable_by(self, user):
         """Can this user view this request?"""
-        user_has_access = user.is_staff or self.created_by(user) \
-                          or self.has_editor(user) or self.has_viewer(user)
+        user_has_access = (user.is_staff or self.created_by(user)
+                or self.has_editor(user) or self.has_viewer(user)
+                or (user.profile.acct_type == 'agency' and
+                    user.agencyprofile.agency == self.agency))
         request_is_private = self.status == 'started' or self.embargo
         viewable_by_user = True
         if request_is_private and not user_has_access:
@@ -657,6 +659,8 @@ class FOIARequest(models.Model):
 
         if from_addr == 'fax':
             subject = 'MR#%s-%s - %s' % (self.pk, comm.pk, subject)
+        # max database size
+        subject = subject[:255]
 
         cc_addrs = self.get_other_emails()
         from_email = '%s@%s' % (from_addr, settings.MAILGUN_SERVER_NAME)
