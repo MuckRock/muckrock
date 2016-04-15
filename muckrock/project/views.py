@@ -10,7 +10,7 @@ from django.db.models import Count, Prefetch
 from django.http import Http404
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.views.generic import TemplateView, CreateView, DetailView, DeleteView
+from django.views.generic import TemplateView, CreateView, DetailView, UpdateView, DeleteView
 from django.views.generic.detail import SingleObjectMixin
 from django.utils.decorators import method_decorator
 
@@ -18,7 +18,7 @@ from actstream.models import followers
 
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.project.models import Project
-from muckrock.project.forms import ProjectForm, ProjectDescriptionForm
+from muckrock.project.forms import ProjectBasicsForm, ProjectDescriptionForm, ProjectUpdateForm
 from muckrock.views import MRFilterableListView
 
 
@@ -65,7 +65,7 @@ class ProjectListView(MRFilterableListView):
 class ProjectCreateView(CreateView):
     """Create a project instance"""
     model = Project
-    form_class = ProjectForm
+    form_class = ProjectBasicsForm
     initial = {'private': True}
     template_name = 'project/create.html'
 
@@ -158,40 +158,12 @@ class ProjectPermissionsMixin(object):
         return super(ProjectPermissionsMixin, self).dispatch(*args, **kwargs)
 
 
-class ProjectEditView(ProjectPermissionsMixin, SingleObjectMixin, TemplateView):
+class ProjectEditView(ProjectPermissionsMixin, UpdateView):
     """Update a project instance"""
     model = Project
     template_name = 'project/edit.html'
-    forms = {
-        'description': ProjectDescriptionForm
-    }
+    form_class = ProjectUpdateForm
 
-    def get_context_data(self, **kwargs):
-        """Adds forms to the context"""
-        context = super(ProjectEditView, self).get_context_data(**kwargs)
-        forms = {}
-        for key, val in self.forms.iteritems():
-            forms[key] = val(instance=self.object)
-        context['forms'] = forms
-        return context
-
-    def get(self, request, *args, **kwargs):
-        """Handles GET requests"""
-        self.object = self.get_object()
-        return super(ProjectEditView, self).get(request, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        """Handles POST requests"""
-        self.object = self.get_object()
-        context = self.get_context_data(**kwargs)
-        form_name = request.POST.get('edit')
-        form = self.forms.get(form_name)
-        if form:
-            form = form(request.POST, instance=self.object)
-            if form.is_valid():
-                form.save()
-            context['forms'][form_name] = form
-        return self.render_to_response(context)
 
 class ProjectDeleteView(ProjectPermissionsMixin, DeleteView):
     """Delete a project instance"""

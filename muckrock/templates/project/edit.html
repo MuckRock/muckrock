@@ -5,11 +5,30 @@
     <header>
         <a href="{% url 'project-detail' slug=project.slug pk=project.pk %}">Back to {{project.title}}</a>
         <h1>Edit Project</h1>
+        <button type="submit" form="update-project" class="primary">Save</button>
     </header>
-    <form class="description form" method="post">
+    <form class="project form" method="post" id="update-project">
         {% csrf_token %}
-        {% include 'component/form.html' with form=forms.description %}
-        <button type="save" name="edit" value="description" class="blue">Save</button>
+        <div class="tab-container">
+            <ul role="tablist" class="tab-list">
+                <li><a role="tab" class="tab" href="#basics">Basics</a></li>
+                <li><a role="tab" class="tab" href="#description">Description</a></li>
+                <li><a role="tab" class="tab" href="#contributors">Contributors</a></li>
+                <li><a role="tab" class="tab" href="#requests">Requests</a></li>
+                <li><a role="tab" class="tab" href="#articles">Articles</a></li>
+            </ul>
+            <div role="tabpanel" class="tab-panel" id="basics">
+                {% include 'component/field.html' with field=form.summary %}
+                {% include 'component/field.html' with field=form.image %}
+                {% include 'component/field.html' with field=form.tags %}
+            </div>
+            <div role="tabpanel" class="tab-panel" id="description">
+                {{form.description}}
+            </div>
+            <div role="tabpanel" class="tab-panel" id="contributors"></div>
+            <div role="tabpanel" class="tab-panel" id="requests"></div>
+            <div role="tabpanel" class="tab-panel" id="articles"></div>
+        </div>
     </form>
 </div>
 {% endblock %}

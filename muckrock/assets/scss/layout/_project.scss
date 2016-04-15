@@ -1,6 +1,8 @@
 .create.project {
     max-width: 40em;
     margin: 0 auto $vertical-rhythm;
+}
+.project form {
     .error input {
         border-color: $color-red;
     }

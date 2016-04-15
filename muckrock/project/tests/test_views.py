@@ -89,7 +89,7 @@ class TestProjectCreateView(TestCase):
 
     def test_post(self):
         """Posting a valid ProjectForm should create the project."""
-        form = forms.ProjectForm({
+        form = forms.ProjectBasicsForm({
             'title': 'Cool Project',
             'summary': 'Yo my project is cooler than LIFE!',
             'image': test_image,
@@ -160,8 +160,8 @@ class TestProjectEditView(TestCase):
             'description': desc,
             'edit': 'description'
         }
-        form = forms.ProjectDescriptionForm(data)
-        ok_(form.is_valid(), 'The form should validate.')
+        form = forms.ProjectUpdateForm(data)
+        ok_(form.is_valid(), 'The form should validate. %s' % form.errors)
         response = post_helper(self.view, self.url, data, self.contributor, **self.kwargs)
         self.project.refresh_from_db()
         eq_(self.project.description, desc,

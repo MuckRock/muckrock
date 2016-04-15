@@ -9,7 +9,7 @@ from autocomplete_light.contrib.taggit_field import TaggitField, TaggitWidget
 
 from muckrock.project.models import Project
 
-class ProjectForm(forms.ModelForm):
+class ProjectBasicsForm(forms.ModelForm):
     """Form for the basic fields of a project."""
 
     tags = TaggitField(
@@ -23,13 +23,10 @@ class ProjectForm(forms.ModelForm):
 
     class Meta:
         model = Project
-        fields = ['title', 'summary', 'image', 'tags', 'private']
+        fields = ['title', 'summary', 'image', 'tags']
         help_texts = {
             'summary': 'A short description of the project and its goals.',
             'image': 'Image should be large and high-resolution.'
-        }
-        initial = {
-            'private': True
         }
 
 
@@ -56,18 +53,15 @@ class ProjectUpdateForm(forms.ModelForm):
         model = Project
         fields = [
             'summary',
-            'description',
             'image',
-            'contributors',
             'tags',
+            'description',
+            'contributors',
             'requests',
             'articles',
-            'private'
         ]
         widgets = {
-            'contributors': autocomplete_light.MultipleChoiceWidget('UserAutocomplete'),
-            'requests': autocomplete_light.MultipleChoiceWidget('FOIARequestAutocomplete'),
-            'articles': autocomplete_light.MultipleChoiceWidget('ArticleAutocomplete'),
+            'description': forms.Textarea(attrs={'class': 'prose-editor'})
         }
 
 
