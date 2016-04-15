@@ -1,0 +1,27 @@
+/* Reset some visual bugs caused by overeager style on our part. Oops! */
+.ProseMirror-menubar,
+.ProseMirror-menu-dropdown-item,
+.ProseMirror-menu-submenu-label,
+.ProseMirror-prompt form,
+.ProseMirror-prompt form div {
+    margin-bottom: 0;
+}
+.ProseMirror-prompt button {
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    transform: none;
+    &:hover {
+        color: $color-blue;
+        transform: none;
+    }
+}
+/* Customize the ProseMirror style */
+.ProseMirror {
+    background: $color-white-pure;
+}
+.ProseMirror-content {
+    outline: none;
+    height: 25em;
+    overflow-y: scroll;
+}
