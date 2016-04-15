@@ -150,6 +150,23 @@ class TestProjectEditView(TestCase):
         eq_(response.url, redirect_url,
             'The user should be redirected to the login page.')
 
+    def test_edit_description(self):
+        """
+        The description should be editable.
+        When sending data, the 'edit' keyword should be set to 'description'.
+        """
+        desc = 'Lorem ipsum'
+        data = {
+            'description': desc,
+            'edit': 'description'
+        }
+        form = forms.ProjectDescriptionForm(data)
+        ok_(form.is_valid(), 'The form should validate.')
+        response = post_helper(self.view, self.url, data, self.contributor, **self.kwargs)
+        self.project.refresh_from_db()
+        eq_(self.project.description, desc,
+            'The description should be updated.')
+
 
 class TestProjectDeleteView(TestCase):
     """Tests deleting a project as a user."""

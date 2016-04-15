@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="project">
+    <header>
+        <a href="{% url 'project-detail' slug=project.slug pk=project.pk %}">Back to {{project.title}}</a>
+        <h1>Edit Project</h1>
+    </header>
+    <form class="description form" method="post">
+        {% csrf_token %}
+        {% include 'component/form.html' with form=forms.description %}
+        <button type="save" name="edit" value="description" class="blue">Save</button>
+    </form>
+</div>
+{% endblock %}

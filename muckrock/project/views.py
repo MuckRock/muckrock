@@ -10,24 +10,27 @@ from django.db.models import Count, Prefetch
 from django.http import Http404
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.views.generic import View, CreateView, DetailView, UpdateView, DeleteView
+from django.views.generic import TemplateView, CreateView, DetailView, DeleteView
+from django.views.generic.detail import SingleObjectMixin
 from django.utils.decorators import method_decorator
 
 from actstream.models import followers
 
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.project.models import Project
-from muckrock.project.forms import ProjectForm, ProjectUpdateForm
+from muckrock.project.forms import ProjectForm, ProjectDescriptionForm
 from muckrock.views import MRFilterableListView
 
 
-class ProjectExploreView(View):
+class ProjectExploreView(TemplateView):
     """Provides a space for exploring our different projects."""
-    def get_context_data(self, request, *args, **kwargs):
+    template_name = 'project/frontpage.html'
+
+    def get_context_data(self, **kwargs):
         """Gathers and returns a dictionary of context."""
         # pylint: disable=unused-argument
         # pylint: disable=no-self-use
-        user = request.user
+        user = self.request.user
         visible_projects = (Project.objects.get_visible(user)
                 .order_by('-featured', 'title')
                 .annotate(request_count=Count('requests', distinct=True))
@@ -42,12 +45,6 @@ class ProjectExploreView(View):
             'visible': visible_projects,
         }
         return context
-
-    def get(self, request, *args, **kwargs):
-        """Renders the template with the correct context."""
-        template = 'project/frontpage.html'
-        context = self.get_context_data(request, *args, **kwargs)
-        return render_to_response(template, context, context_instance=RequestContext(request))
 
 
 class ProjectListView(MRFilterableListView):
@@ -161,21 +158,40 @@ class ProjectPermissionsMixin(object):
         return super(ProjectPermissionsMixin, self).dispatch(*args, **kwargs)
 
 
-class ProjectEditView(ProjectPermissionsMixin, UpdateView):
+class ProjectEditView(ProjectPermissionsMixin, SingleObjectMixin, TemplateView):
     """Update a project instance"""
     model = Project
-    form_class = ProjectUpdateForm
-    template_name = 'project/update.html'
+    template_name = 'project/edit.html'
+    forms = {
+        'description': ProjectDescriptionForm
+    }
 
     def get_context_data(self, **kwargs):
-        """Add a list of viewable requests to the context data"""
+        """Adds forms to the context"""
         context = super(ProjectEditView, self).get_context_data(**kwargs)
-        project = self.get_object()
-        user = self.request.user
-        viewable_requests = project.requests.get_viewable(user)
-        context['viewable_request_ids'] = [request.id for request in viewable_requests]
+        forms = {}
+        for key, val in self.forms.iteritems():
+            forms[key] = val(instance=self.object)
+        context['forms'] = forms
         return context
 
+    def get(self, request, *args, **kwargs):
+        """Handles GET requests"""
+        self.object = self.get_object()
+        return super(ProjectEditView, self).get(request, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """Handles POST requests"""
+        self.object = self.get_object()
+        context = self.get_context_data(**kwargs)
+        form_name = request.POST.get('edit')
+        form = self.forms.get(form_name)
+        if form:
+            form = form(request.POST, instance=self.object)
+            if form.is_valid():
+                form.save()
+            context['forms'][form_name] = form
+        return self.render_to_response(context)
 
 class ProjectDeleteView(ProjectPermissionsMixin, DeleteView):
     """Delete a project instance"""

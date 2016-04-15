@@ -32,22 +32,14 @@ class ProjectForm(forms.ModelForm):
             'private': True
         }
 
-class ProjectCreateForm(forms.ModelForm):
-    """Form for creating a new project"""
 
-    tags = TaggitField(
-        widget=TaggitWidget('TagAutocomplete', attrs={'placeholder': 'Search tags'}),
-        help_text='Separate tags with commas.',
-        required=False
-    )
-
+class ProjectDescriptionForm(forms.ModelForm):
+    """Allows for the editing of the project description"""
     class Meta:
         model = Project
-        fields = ['title', 'summary', 'description', 'image', 'contributors', 'tags', 'private']
-        widgets = {'contributors': autocomplete_light.MultipleChoiceWidget('UserAutocomplete')}
-        help_texts = {
-            'contributors': ('As the project creator, you are'
-                            ' automatically listed as a contributor.'),
+        fields = ['description']
+        widgets = {
+            'description': forms.Textarea(attrs={'class': 'prose-editor'})
         }
 
 
