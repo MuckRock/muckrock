@@ -535,6 +535,7 @@ class FOIARequest(models.Model):
             self.date_processing = date.today()
             task.models.FlaggedTask.objects.create(
                     foia=self,
+                    user=self.user,
                     text='This request was filed for an agency requiring a '
                     'proxy, but no proxy was available.  Please add a suitable '
                     'proxy for the state and refile it with a note that the '
