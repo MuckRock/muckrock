@@ -204,14 +204,22 @@ def project_manager(context, mr_object):
     }
 
 @register.inclusion_tag('lib/newsletter.html', takes_context=True)
-def newsletter(context, list_=None):
+def newsletter(context, list_id=None, label=None, cta=None):
     """Template tag to insert a newsletter signup form."""
-    if list_ is None:
-        list_ = settings.MAILCHIMP_LIST_DEFAULT
-    newsletter_form = NewsletterSignupForm(initial={'list': list_})
+    list_id = settings.MAILCHIMP_LIST_DEFAULT if list_id is None else list_id
+    label = 'Newsletter' if label is None else label
+    cta = 'Want the latest investigative and FOIA news?' if cta is None else cta
+    is_default = list_id == settings.MAILCHIMP_LIST_DEFAULT
     request = context['request']
+    initial_data = {'list': list_id}
+    if request.user.is_authenticated():
+        initial_data['email'] = request.user.email
+    newsletter_form = NewsletterSignupForm(initial=initial_data)
     return {
         'request': request,
+        'label': label,
+        'cta': cta,
+        'is_default': is_default,
         'newsletter_form': newsletter_form
     }
 

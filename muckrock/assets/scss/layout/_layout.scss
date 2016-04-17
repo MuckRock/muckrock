@@ -24,10 +24,10 @@ html, body {
     @include media($medium-layout) { padding: $vertical-rhythm; }
 }
 
-@mixin edge-to-edge() {
+@mixin edge-to-edge($bottom: 0) {
     // Edge-to-edge negates the content padding
-    margin: -1*$vertical-rhythm/2 -1*$vertical-rhythm/2 0;
-    @include media($medium-layout) { margin: -1*$vertical-rhythm -1*$vertical-rhythm 0; }
+    margin: -1*$vertical-rhythm/2 -1*$vertical-rhythm/2 $bottom;
+    @include media($medium-layout) { margin: -1*$vertical-rhythm -1*$vertical-rhythm $bottom; }
 }
 
 section.error-404 {
