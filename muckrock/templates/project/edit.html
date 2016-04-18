@@ -1,11 +1,15 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="project">
+<div class="update project">
     <header>
-        <a href="{% url 'project-detail' slug=project.slug pk=project.pk %}">Back to {{project.title}}</a>
-        <h1>Edit Project</h1>
-        <button type="submit" form="update-project" class="primary">Save</button>
+        <div>
+            <a href="{% url 'project-detail' slug=project.slug pk=project.pk %}">Back to {{project.title}}</a>
+            <h1>Edit Project</h1>
+        </div>
+        <div>
+            <button type="submit" form="update-project" class="primary">Save Changes</button>
+        </div>
     </header>
     <form class="project form" method="post" id="update-project">
         {% csrf_token %}
@@ -25,9 +29,17 @@
             <div role="tabpanel" class="tab-panel" id="description">
                 {{form.description}}
             </div>
-            <div role="tabpanel" class="tab-panel" id="contributors"></div>
-            <div role="tabpanel" class="tab-panel" id="requests"></div>
-            <div role="tabpanel" class="tab-panel" id="articles"></div>
+            <div role="tabpanel" class="tab-panel" id="contributors">
+                {{form.contributors}}
+            </div>
+            <div role="tabpanel" class="tab-panel" id="requests">
+                {{form.requests}}
+            </div>
+            {% if request.user.is_staff %}
+            <div role="tabpanel" class="tab-panel" id="articles">
+                {{form.articles}}
+            </div>
+            {% endif %}
         </div>
     </form>
 </div>

@@ -89,7 +89,7 @@ class TestProjectCreateView(TestCase):
 
     def test_post(self):
         """Posting a valid ProjectForm should create the project."""
-        form = forms.ProjectBasicsForm({
+        form = forms.ProjectCreateForm({
             'title': 'Cool Project',
             'summary': 'Yo my project is cooler than LIFE!',
             'image': test_image,

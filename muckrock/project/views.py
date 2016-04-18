@@ -18,7 +18,7 @@ from actstream.models import followers
 
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.project.models import Project
-from muckrock.project.forms import ProjectBasicsForm, ProjectDescriptionForm, ProjectUpdateForm
+from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm
 from muckrock.views import MRFilterableListView
 
 
@@ -65,7 +65,7 @@ class ProjectListView(MRFilterableListView):
 class ProjectCreateView(CreateView):
     """Create a project instance"""
     model = Project
-    form_class = ProjectBasicsForm
+    form_class = ProjectCreateForm
     initial = {'private': True}
     template_name = 'project/create.html'
 
