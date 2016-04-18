@@ -215,6 +215,7 @@ INSTALLED_APPS = (
     'muckrock.organization',
     'muckrock.project',
     'muckrock.mailgun',
+    'muckrock.dashboard',
     'actstream'
 )
 
