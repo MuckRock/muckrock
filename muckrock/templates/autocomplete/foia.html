@@ -1,0 +1,16 @@
+{% load static from staticfiles %}
+{% load thumbnail %}
+{% load foia_tags %}
+
+<span class="block foia choice" data-value="{{choice.pk}}">
+    <div class="main">
+        <div class="title">
+            {{choice.title}}
+        </div>
+        <div class="meta">
+            <span class="agency">{{choice.agency}}</span>
+            &bull;
+            <span class="jurisdiction">{{choice.jurisdiction}}</span>
+        </div>
+    </div>
+</span>

@@ -13,11 +13,11 @@
 }
 
 .yourlabs-autocomplete {
+    overflow: hidden;
     padding: 0;
     left: 0;
     background-color: $color-white;
     @include border-radius;
-    overflow: hidden;
     .hilight {
         color: $color-white;
         background-color: $color-blue;
@@ -47,7 +47,22 @@ input.autocomplete.xhr-pending { background-image: none; }
     }
 }
 
+.autocomplete-light-widget .foia.choice {
+    .main {
+        padding: $vertical-rhythm/4 $vertical-rhythm/2;
+    }
+    .title {
+        margin-bottom: 0;
+    }
+    .meta {
+        font-size: $font-size-2;
+    }
+}
+
 .autocomplete-light-widget {
+    .choice {
+        padding: 0;
+    }
     .deck {
         display: block;
         .choice {
@@ -64,6 +79,9 @@ input.autocomplete.xhr-pending { background-image: none; }
             overflow: hidden;
             &.hilight {
                 color: $color-black;
+            }
+            &.foia {
+                @include display(flex);
             }
         }
     }
