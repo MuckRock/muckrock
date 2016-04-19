@@ -11,7 +11,7 @@
             <button type="submit" form="update-project" class="primary">Save Changes</button>
         </div>
     </header>
-    <form class="project form" method="post" id="update-project">
+    <form enctype="multipart/form-data" class="project form" method="post" id="update-project">
         {% csrf_token %}
         <div class="tab-container">
             <ul role="tablist" class="tab-list">
@@ -23,8 +23,12 @@
             </ul>
             <div role="tabpanel" class="tab-panel" id="basics">
                 {% include 'component/field.html' with field=form.summary %}
-                {% include 'component/field.html' with field=form.image %}
                 {% include 'component/field.html' with field=form.tags %}
+                {% if project.image %}
+                {% include 'component/imagefield.html' with field=form.image image=project.image %}
+                {% else %}
+                {% include 'component/imagefield.html' with field=form.image %}
+                {% endif %}
             </div>
             <div role="tabpanel" class="tab-panel" id="description">
                 {{form.description}}

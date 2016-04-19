@@ -8,7 +8,10 @@
         @include justify-content(flex-start);
     }
 }
-.project form {
+.project .field {
+    header {
+        margin-bottom: 0;
+    }
     .error input {
         border-color: $color-red;
     }
@@ -43,6 +46,25 @@
     }
     .help-text {
         margin-top: $vertical-rhythm/4;
+    }
+    &.image {
+        .preview {
+            display: block;
+            margin-bottom: $vertical-rhythm/2;
+            max-width: 20em;
+        }
+        input {
+            display: inline-block;
+            float: none;
+            width: auto;
+            margin-right: 0;
+        }
+        label[for*="clear_id"] {
+            font-weight: $font-weight-normal;
+        }
+        input[id*="clear_id"] {
+            margin-left: $vertical-rhythm;
+        }
     }
 }
 
