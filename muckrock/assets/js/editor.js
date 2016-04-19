@@ -1,7 +1,7 @@
 import { ProseMirror } from 'prosemirror';
 import "prosemirror/dist/inputrules/autoinput";
 import 'prosemirror/dist/markdown';
-import 'prosemirror/dist/menu/menubar';
+import 'prosemirror/dist/menu/tooltipMenu';
 
 let editor = document.querySelector('textarea.prose-editor');
 if (editor) {
@@ -13,7 +13,7 @@ if (editor) {
         doc: editor.value,
         autoInput: true,
         docFormat: 'markdown',
-        menuBar: true
+        tooltipMenu: true
     });
     pm.on('change', function(){
         editor.value = pm.getContent("markdown");
