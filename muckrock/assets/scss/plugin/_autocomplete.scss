@@ -1,17 +1,3 @@
-.autocomplete-light-widget {
-    font-family: $font-family;
-    color: $color-black;
-    .deck > span {
-        width: 100%;
-        display: block;
-        padding: 0;
-    }
-    .remove {
-        vertical-align: middle;
-        margin-right: $vertical-rhythm/4;
-    }
-}
-
 .yourlabs-autocomplete {
     overflow: hidden;
     padding: 0;
@@ -31,58 +17,71 @@
 
 input.autocomplete.xhr-pending { background-image: none; }
 
-.autocomplete-light-widget .user.choice {
-    padding: 0;
-    .avatar {
-        margin-bottom: 0;
-        vertical-align: middle;
-    }
-    .name {
-        display: inline-block;
-        margin-bottom: 0;
-        padding: $vertical-rhythm/2;
-    }
-    .username {
-        font-size: $font-size-2;
-    }
-}
-
-.autocomplete-light-widget .foia.choice {
-    .main {
-        padding: $vertical-rhythm/4 $vertical-rhythm/2;
-    }
-    .title {
-        margin-bottom: 0;
-    }
-    .meta {
-        font-size: $font-size-2;
-    }
-}
-
 .autocomplete-light-widget {
+    font-family: $font-family;
+    color: $color-black;
     .choice {
         padding: 0;
+    }
+    .user.choice {
+        .avatar {
+            margin-bottom: 0;
+            vertical-align: middle;
+        }
+        .name {
+            display: inline-block;
+            margin-bottom: 0;
+            padding: $vertical-rhythm/2;
+        }
+        .username {
+            font-size: $font-size-2;
+        }
+    }
+    .foia.choice {
+        .main {
+            padding: $vertical-rhythm/4 $vertical-rhythm/2;
+        }
+        .title {
+            margin-bottom: 0;
+        }
+        .meta {
+            font-size: $font-size-2;
+        }
+    }
+    .agency.choice {
+        .main {
+            padding: $vertical-rhythm/4 $vertical-rhythm/2;
+        }
+        .name {
+            margin-bottom: 0;
+        }
+        .jurisdiction {
+            font-size: $font-size-2;
+        }
     }
     .deck {
         display: block;
         .choice {
-            @include display(inline-flex);
+            @include display(flex);
             @include align-items(center);
             @include justify-content(space-between);
             .remove {
                 @include order(1);
+                margin-right: $vertical-rhythm/2;
             }
             margin-bottom: $vertical-rhythm/2;
             background: $color-white-pure;
             border: 1px solid $color-grey;
             @include border-radius;
             overflow: hidden;
-            &.hilight {
-                color: $color-black;
-            }
-            &.foia {
-                @include display(flex);
-            }
+
+
+        }
+        .hilight {
+            color: $color-black;
+        }
+        .user {
+            @include display(inline-flex);
         }
     }
 }
