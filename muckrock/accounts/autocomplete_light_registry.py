@@ -10,12 +10,13 @@ from autocomplete_light import shortcuts as autocomplete_light
 from muckrock.foia.models import FOIARequest
 from muckrock.organization.models import Organization
 
-class UserAutocomplete(autocomplete_light.AutocompleteModelBase):
+class UserAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     """Creates an autocomplete field for picking users"""
     choices = User.objects.all()
+    choice_template = 'autocomplete/user.html'
     search_fields = ['^username', '^first_name', '^last_name', '^email']
     attrs = {
-        'placeholder': 'Search users',
+        'placeholder': 'Search by name',
         'data-autocomplete-minimum-characters': 2
     }
 

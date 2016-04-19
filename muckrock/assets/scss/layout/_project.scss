@@ -92,6 +92,28 @@
             line-height: $font-line-height;
         }
     }
+    .autocomplete-light-widget {
+        width: 100%;
+        input {
+            width: 100%;
+        }
+        .deck {
+            display: block;
+            .choice {
+                display: inline-flex;
+                align-items: center;
+                width: auto;
+                margin-bottom: $vertical-rhythm/2;
+                border: 1px solid $color-grey;
+                background: $color-white-pure;
+                @include border-radius;
+                overflow: hidden;
+                .remove {
+                    order: 1;
+                }
+            }
+        }
+    }
 }
 
 .project.detail {
@@ -190,6 +212,8 @@
         margin: 0 auto $vertical-rhythm;
         .articles, .requests {
             @include flex(1 1 20em);
+        }
+        .articles {
             margin-right: $vertical-rhythm;
         }
     }
