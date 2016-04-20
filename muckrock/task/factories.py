@@ -52,6 +52,15 @@ class FlaggedTaskFactory(factory.django.DjangoModelFactory):
     foia = factory.SubFactory('muckrock.factories.FOIARequestFactory')
 
 
+class ProjectReviewTaskFactory(factory.django.DjangoModelFactory):
+    """A factory for creating ProjectReviewTask objects."""
+    class Meta:
+        model = task.models.ProjectReviewTask
+
+    project = factory.SubFactory('muckrock.factories.ProjectFactory')
+    explanation = factory.Faker('paragraph')
+
+
 class ResponseTaskFactory(factory.django.DjangoModelFactory):
     """A factory for creating ResponseTask objects."""
     class Meta:

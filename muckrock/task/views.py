@@ -22,7 +22,8 @@ from muckrock.task.forms import (
 from muckrock.task.models import (
     Task, OrphanTask, SnailMailTask, RejectedEmailTask,
     StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask,
-    CrowdfundTask, MultiRequestTask, StatusChangeTask, FailedFaxTask
+    CrowdfundTask, MultiRequestTask, StatusChangeTask, FailedFaxTask,
+    ProjectReviewTask
     )
 from muckrock.views import MRFilterableListView
 
@@ -393,6 +394,14 @@ class ResponseTaskList(TaskList):
         action_taken = move or status or tracking_number or price or proxy
         if action_taken and not error_happened:
             task.resolve(request.user)
+
+
+class ProjectReviewTaskList(TaskList):
+    title = 'Pending Projects'
+    queryset = (ProjectReviewTask.objects.select_related('project')
+                                        .prefetch_related('project__requests')
+                                        .prefetch_related('project__articles')
+                                        .prefetch_related('project__contributors'))
 
 
 class StatusChangeTaskList(TaskList):

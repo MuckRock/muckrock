@@ -13,7 +13,7 @@ import nose
 
 from muckrock import factories, task
 from muckrock.foia.models import FOIARequest, FOIANote
-from muckrock.task.factories import FlaggedTaskFactory
+from muckrock.task.factories import FlaggedTaskFactory, ProjectReviewTaskFactory
 from muckrock.task.signals import domain_blacklist
 
 ok_ = nose.tools.ok_
@@ -175,6 +175,45 @@ class FlaggedTaskTests(TestCase):
         flagged_task = FlaggedTaskFactory()
         flagged_task.reply('Lorem ipsum')
         mock_support_send.assert_called_with()
+
+@mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
+class ProjectReviewTaskTests(TestCase):
+    """
+    The ProjectReviewTask provides us a way to moderate community projects.
+    When it is created, it should notify Slack.
+    When it is approved, it should mark its project approved.
+    When it is rejected, it should mark its project private.
+    It should allow us a way to communicate with the users of this project.
+    """
+    def setUp(self):
+        self.task = ProjectReviewTaskFactory()
+        contributor = factories.UserFactory()
+        self.task.project.contributors.add(contributor)
+
+    def test_get_aboslute_url(self):
+        _url = reverse('projectreview-task', kwargs={'pk': self.task.pk})
+        eq_(self.task.get_absolute_url(), _url)
+
+    @mock.patch('muckrock.message.notifications.ProjectNotification.send')
+    def test_reply(self, mock_feedback_send):
+        self.task.reply('Lorem ipsum')
+        mock_feedback_send.assert_called_with()
+
+    @mock.patch('muckrock.message.notifications.ProjectNotification.send')
+    def test_approve(self, mock_notification_send):
+        """Approving the task should mark it approved and notify the contributors."""
+        self.task.approve('Lorem ipsum')
+        ok_(self.task.project.approved,
+            'The project should be approved')
+        mock_notification_send.assert_called_with()
+
+    @mock.patch('muckrock.message.notifications.ProjectNotification.send')
+    def test_reject(self, mock_notification_send):
+        """Rejecting the task should mark it private and notify the contributors."""
+        self.task.reject('Lorem ipsum')
+        ok_(self.task.project.private,
+            'The project should be made private.')
+        mock_notification_send.assert_called_with()
 
 
 class SnailMailTaskTests(TestCase):

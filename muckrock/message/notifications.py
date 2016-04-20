@@ -69,6 +69,13 @@ class SupportNotification(EmailNotification):
     text_template = 'message/notification/support.txt'
     subject = u'Support'
 
+
+class ProjectNotification(EmailNotification):
+    """Send a project email."""
+    text_template = 'message/notification/support.txt'
+    subject = u'Pending Project'
+
+
 class SlackNotification(object):
     """
     Sends a Slack notification, conforming to the platform's specification.

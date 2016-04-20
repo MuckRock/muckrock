@@ -15,7 +15,7 @@ import logging
 from muckrock.agency.models import Agency, STALE_DURATION
 from muckrock.foia.models import FOIACommunication, FOIAFile, FOIANote, FOIARequest, STATUS
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.message.notifications import SupportNotification
+from muckrock.message.notifications import SupportNotification, ProjectNotification
 from muckrock.models import ExtractDay, Now
 
 # pylint: disable=missing-docstring
@@ -367,6 +367,38 @@ class FlaggedTask(Task):
         support_email.send()
 
 
+class ProjectReviewTask(Task):
+    """Created when a project is published and needs approval."""
+    type = 'ProjectReviewTask'
+    project = models.ForeignKey('project.Project')
+    explanation = models.TextField()
+
+    def __unicode__(self):
+        return u'Project Review Task'
+
+    def get_absolute_url(self):
+        return reverse('projectreview-task', kwargs={'pk': self.pk})
+
+    def reply(self, text):
+        """Send an email reply to the user that raised the flag."""
+        creator = self.project.contributors.first()
+        project_email = ProjectNotification(creator, {'message': text, 'task': self})
+        project_email.send()
+        return project_email
+
+    def approve(self, text):
+        """Mark the project approved and notify the user."""
+        self.project.approved = True
+        self.project.save()
+        return self.reply(text)
+
+    def reject(self, text):
+        """Mark the project private and notify the user."""
+        self.project.private = True
+        self.project.save()
+        return self.reply(text)
+
+
 class NewAgencyTask(Task):
     """A new agency has been created and needs approval"""
     type = 'NewAgencyTask'
@@ -537,19 +569,6 @@ class MultiRequestTask(Task):
 
     def get_absolute_url(self):
         return reverse('multirequest-task', kwargs={'pk': self.pk})
-
-
-class ProjectReviewTask(Task):
-    """Created when a project is published and needs approval."""
-    type = 'ProjectReviewTask'
-    project = models.ForeignKey('project.Project')
-    explanation = models.TextField()
-
-    def __unicode__(self):
-        return u'Project Review Task'
-
-    def get_absolute_url(self):
-        return reverse('projectreview-task', kwargs={'pk': self.pk})
 
 
 # Not a task, but used by tasks
