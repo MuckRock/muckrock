@@ -8,6 +8,7 @@ from django.utils.text import slugify
 
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
+from muckrock.task.models import ProjectReviewTask
 
 import taggit
 
@@ -52,6 +53,9 @@ class Project(models.Model):
     private = models.BooleanField(
         default=False,
         help_text='If a project is private, it is only visible to its contributors.')
+    approved = models.BooleanField(
+        default=False,
+        help_text='If a project is approved, is is visible to everyone.')
     featured = models.BooleanField(
         default=False,
         help_text='Featured projects will appear on the homepage.')
@@ -137,6 +141,11 @@ class Project(models.Model):
             tags__name__in=self.tags.names(),
         ).exclude(projects=self))
         return articles
+
+    def publish(self, explanation):
+        """Publishing a project sets it public and returns a ProjectReviewTask."""
+        self.make_public()
+        return ProjectReviewTask.objects.create(project=self, explanation=explanation)
 
 
 class ProjectCrowdfunds(models.Model):

@@ -11,10 +11,10 @@ from django.test import TestCase
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
 from muckrock.project.models import Project
+from muckrock.task.models import ProjectReviewTask
 
 import logging
 import nose
-
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
@@ -122,6 +122,18 @@ class TestProject(TestCase):
         project.contributors.add(user1)
         ok_(project.has_contributor(user1))
         ok_(not project.has_contributor(user2))
+
+    def test_publish(self):
+        """Publishing a project should make it public and submit it for approval."""
+        project = self.basic_project
+        explanation = 'Test'
+        task = project.publish(explanation)
+        eq_(project.private, False,
+            'The project should be made public.')
+        eq_(project.approved, False,
+            'The project should be waiting approval.')
+        ok_(isinstance(task, ProjectReviewTask),
+            'A ProjectReviewTask should be created.\n\tTask: %s' % type(task))
 
     def test_suggest_requests(self):
         """

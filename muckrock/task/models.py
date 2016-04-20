@@ -539,6 +539,19 @@ class MultiRequestTask(Task):
         return reverse('multirequest-task', kwargs={'pk': self.pk})
 
 
+class ProjectReviewTask(Task):
+    """Created when a project is published and needs approval."""
+    type = 'ProjectReviewTask'
+    project = models.ForeignKey('project.Project')
+    explanation = models.TextField()
+
+    def __unicode__(self):
+        return u'Project Review Task'
+
+    def get_absolute_url(self):
+        return reverse('projectreview-task', kwargs={'pk': self.pk})
+
+
 # Not a task, but used by tasks
 class BlacklistDomain(models.Model):
     """A domain to be blacklisted from sending us emails"""
