@@ -80,7 +80,7 @@ class ProjectReviewTaskNode(TaskNode):
 
     def get_extra_context(self):
         """Adds a form for replying to the user"""
-        extra_context = super(FlaggedTaskNode, self).get_extra_context()
+        extra_context = super(ProjectReviewTaskNode, self).get_extra_context()
         extra_context['form'] = task.forms.ProjectReviewTaskForm()
         return extra_context
 
