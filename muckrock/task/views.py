@@ -17,7 +17,8 @@ from muckrock.agency.models import Agency, STALE_DURATION
 from muckrock.foia.models import STATUS, FOIARequest, FOIACommunication, FOIAFile
 from muckrock.models import ExtractDay, Now
 from muckrock.task.forms import (
-    TaskFilterForm, FlaggedTaskForm, StaleAgencyTaskForm, ResponseTaskForm
+    TaskFilterForm, FlaggedTaskForm, StaleAgencyTaskForm, ResponseTaskForm,
+    ProjectReviewTaskForm
     )
 from muckrock.task.models import (
     Task, OrphanTask, SnailMailTask, RejectedEmailTask,
@@ -302,6 +303,30 @@ class FlaggedTaskList(TaskList):
             task.resolve(request.user)
 
 
+class ProjectReviewTaskList(TaskList):
+    model = ProjectReviewTask
+    title = 'Pending Projects'
+    queryset = (ProjectReviewTask.objects.select_related('project')
+                                        .prefetch_related('project__requests')
+                                        .prefetch_related('project__articles')
+                                        .prefetch_related('project__contributors'))
+
+    def task_post_helper(self, request, task):
+        """Special post handler for ProjectReviewTasks"""
+        form = ProjectReviewTaskForm(request.POST)
+        if form.is_valid():
+            text = form.cleaned_data['reply']
+            action = request.POST.get('action', None)
+            if action == 'reply':
+                task.reply(text)
+            elif action == 'approve':
+                task.approve(text)
+                task.resolve(request.user)
+            elif action == 'reject':
+                task.reject(text)
+                task.resolve(request.user)
+
+
 class NewAgencyTaskList(TaskList):
     title = 'New Agencies'
     queryset = NewAgencyTask.objects.preload_list()
@@ -394,14 +419,6 @@ class ResponseTaskList(TaskList):
         action_taken = move or status or tracking_number or price or proxy
         if action_taken and not error_happened:
             task.resolve(request.user)
-
-
-class ProjectReviewTaskList(TaskList):
-    title = 'Pending Projects'
-    queryset = (ProjectReviewTask.objects.select_related('project')
-                                        .prefetch_related('project__requests')
-                                        .prefetch_related('project__articles')
-                                        .prefetch_related('project__contributors'))
 
 
 class StatusChangeTaskList(TaskList):

@@ -308,6 +308,73 @@ class FlaggedTaskViewTests(TestCase):
         ok_(self.task.resolved, 'The task should resolve.')
         mock_reply.assert_called_with(test_text)
 
+@mock.patch('muckrock.task.models.ProjectReviewTask.reply')
+class ProjectReviewTaskViewTests(TestCase):
+    """Tests FlaggedTask POST handlers"""
+    def setUp(self):
+        self.user = factories.UserFactory(is_staff=True)
+        self.url = reverse('projectreview-task-list')
+        self.view = task.views.ProjectReviewTaskList.as_view()
+        self.task = task.factories.ProjectReviewTaskFactory()
+        self.request_factory = RequestFactory()
+
+    def test_get_single(self, mock_reply):
+        """Should be able to view a single task"""
+        # pylint: disable=unused-argument
+        request = self.request_factory.get(reverse('projectreview-task', kwargs={'pk': self.task.pk}))
+        request.user = self.user
+        request = mock_middleware(request)
+        response = self.view(request)
+        eq_(response.status_code, 200)
+
+    def post_request(self, data):
+        """Helper to post data and get a response"""
+        request = self.request_factory.post(self.url, data)
+        request.user = self.user
+        request = mock_middleware(request)
+        response = self.view(request)
+        return response
+
+    def test_post_reply(self, mock_reply):
+        """Staff should be able to reply to the user who raised the flag"""
+        test_text = 'Lorem ipsum'
+        form = task.forms.ProjectReviewTaskForm({'reply': test_text})
+        ok_(form.is_valid())
+        post_data = form.cleaned_data
+        post_data.update({'action': 'reply', 'task': self.task.pk})
+        self.post_request(post_data)
+        self.task.refresh_from_db()
+        ok_(not self.task.resolved, 'The task should not automatically resolve when replying.')
+        mock_reply.assert_called_with(test_text)
+
+    def test_post_reply_approve(self, mock_reply):
+        """The task should optionally resolve when replying"""
+        test_text = 'Lorem ipsum'
+        form = task.forms.ProjectReviewTaskForm({'reply': test_text})
+        ok_(form.is_valid())
+        post_data = form.cleaned_data
+        post_data.update({'action': 'approve', 'task': self.task.pk})
+        self.post_request(post_data)
+        self.task.refresh_from_db()
+        self.task.project.refresh_from_db()
+        ok_(self.task.project.approved, 'The project should be approved.')
+        ok_(self.task.resolved, 'The task should be resolved.')
+        mock_reply.assert_called_with(test_text)
+
+    def test_post_reply_reject(self, mock_reply):
+        """The task should optionally resolve when replying"""
+        test_text = 'Lorem ipsum'
+        form = task.forms.ProjectReviewTaskForm({'reply': test_text})
+        ok_(form.is_valid())
+        post_data = form.cleaned_data
+        post_data.update({'action': 'reject', 'task': self.task.pk})
+        self.post_request(post_data)
+        self.task.refresh_from_db()
+        self.task.project.refresh_from_db()
+        ok_(self.task.project.private, 'The project should be made private.')
+        ok_(self.task.resolved, 'The task should be resolved.')
+        mock_reply.assert_called_with(test_text)
+
 
 class StaleAgencyTaskViewTests(TestCase):
     """Tests StaleAgencyTask POST handlers"""
