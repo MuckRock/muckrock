@@ -7,6 +7,9 @@
         @include display(flex);
         @include justify-content(flex-start);
     }
+    .tab-panel {
+        min-height: 30em;
+    }
 }
 .project .field {
     header {

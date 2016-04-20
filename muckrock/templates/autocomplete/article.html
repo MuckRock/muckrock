@@ -1,0 +1,18 @@
+{% load static from staticfiles %}
+{% load thumbnail %}
+
+<span class="block article choice" data-value="{{choice.pk}}">
+    <div class="main">
+        {% if choice.image %}
+        <img src="{% thumbnail choice.image 75x75 crop %}" class="image" />
+        {% endif %}
+        <div class="info">
+            <div class="title truncate">{{choice.title}}</div>
+            <div class="meta">
+                <span class="author">by {{choice.authors.first.get_full_name}}</span>
+                &bull;
+                <span class="date">{{choice.pub_date|date:"m/d/y"}}</span>
+            </div>
+        </div>
+    </div>
+</span>

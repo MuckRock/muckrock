@@ -7,9 +7,6 @@
             <a href="{% url 'project-detail' slug=project.slug pk=project.pk %}">Back to {{project.title}}</a>
             <h1>Edit Project</h1>
         </div>
-        <div>
-            <button type="submit" form="update-project" class="primary">Save Changes</button>
-        </div>
     </header>
     <form enctype="multipart/form-data" class="project form" method="post" id="update-project">
         {% csrf_token %}
@@ -45,6 +42,7 @@
             </div>
             {% endif %}
         </div>
+        <button type="submit" class="blue button">Save Changes</button>
     </form>
 </div>
 {% endblock %}
