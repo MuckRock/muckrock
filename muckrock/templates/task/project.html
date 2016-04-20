@@ -1,0 +1,31 @@
+{% extends 'task/default.html' %}
+
+{% block task-content %}
+<dl class="task-data">
+    <dt>Project</dt>
+    <dd><a href="{% url 'admin:project_project_change' task.project.pk %}">{{project}}</a></dd>
+    <dt>Contributors</dt>
+    <dd>{{task.project.contributors.all|join:", "}}</dd>
+    {% if task.explanation %}
+    <dt>Project Explanation</dt>
+    <dd>{{task.explanation}}</dd>
+    {% endif %}
+</dl>
+{% endblock %}
+{% block task-footer %}
+<footer class="task-actions">
+    <form method="POST" action="{{ endpoint }}" class="task-post-actions">
+        <header>
+            <p>&crarr; Reply</p>
+        </header>
+        {% csrf_token %}
+        {{ form }}
+        <input type="hidden" name="task" value="{{task.pk}}">
+        <footer class="submission-control">
+            <button type="submit" name="action" value="reply" class="blue">Reply</button>
+            <button type="submit" name="action" value="approve" class="green">Approve</button>
+            <button type="submit" name="action" value="reject" class="red">Reject</button>
+        </footer>
+    </form>
+</footer>
+{% endblock %}

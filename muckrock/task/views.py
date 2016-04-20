@@ -39,6 +39,7 @@ def count_tasks():
         rejected=Count('rejectedemailtask'),
         stale_agency=Count('staleagencytask'),
         flagged=Count('flaggedtask'),
+        projectreview=Count('projectreviewtask'),
         new_agency=Count('newagencytask'),
         response=Count('responsetask'),
         status_change=Count('statuschangetask'),
