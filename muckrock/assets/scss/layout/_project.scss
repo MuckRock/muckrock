@@ -92,26 +92,11 @@
             line-height: $font-line-height;
         }
     }
-    .autocomplete-light-widget {
-        width: 100%;
+    .autocomplete-light-widget, .requests .deck, .articles .deck {
+        @include display(flex);
+        @include flex-direction(column-reverse);
         input {
-            width: 100%;
-        }
-        .deck {
-            display: block;
-            .choice {
-                display: inline-flex;
-                align-items: center;
-                width: auto;
-                margin-bottom: $vertical-rhythm/2;
-                border: 1px solid $color-grey;
-                background: $color-white-pure;
-                @include border-radius;
-                overflow: hidden;
-                .remove {
-                    order: 1;
-                }
-            }
+            margin-bottom: $vertical-rhythm;
         }
     }
 }
