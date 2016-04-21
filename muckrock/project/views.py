@@ -22,10 +22,12 @@ from django.views.generic import (
 from django.views.generic.detail import SingleObjectMixin
 from django.utils.decorators import method_decorator
 
-from actstream.models import followers
+import actstream
+from datetime import date, timedelta
 
 from muckrock.crowdfund.models import Crowdfund
-from muckrock.project.models import Project
+from muckrock.crowdfund.forms import CrowdfundForm
+from muckrock.project.models import Project, ProjectCrowdfunds
 from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm, ProjectPublishForm
 from muckrock.views import MRFilterableListView
 
@@ -121,7 +123,7 @@ class ProjectDetailView(DetailView):
                     'jurisdiction__parent',
                     'jurisdiction__parent__parent',
                     ))
-        context['followers'] = followers(project)
+        context['followers'] = actstream.models.followers(project)
         context['articles'] = project.articles.get_published()
         context['contributors'] = project.contributors.select_related('profile')
         context['user_is_experimental'] = user.is_authenticated() and user.profile.experimental
@@ -155,7 +157,7 @@ class ProjectPermissionsMixin(object):
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         """Overrides the dispatch function to include permissions checking."""
-        self.object = get_object_or_404(self.model, pk=kwargs.get('pk', None))
+        self.object = get_object_or_404(Project, pk=kwargs.get('pk', None))
         if not self.object.editable_by(self.request.user):
             raise Http404()
         return super(ProjectPermissionsMixin, self).dispatch(*args, **kwargs)
@@ -179,9 +181,9 @@ class ProjectPublishView(ProjectPermissionsMixin, FormView):
     template_name = 'project/publish.html'
     form_class = ProjectPublishForm
 
-    def get(self, *args, **kwargs):
+    def dispatch(self, *args, **kwargs):
         """Prevents access to the view for projects that public or pending approval."""
-        project = self.object
+        project = get_object_or_404(self.model, pk=kwargs.get('pk', None))
         if not project.private:
             if project.approved:
                 messages.warning(self.request,
@@ -190,7 +192,7 @@ class ProjectPublishView(ProjectPermissionsMixin, FormView):
                 messages.warning(self.request,
                     'This project is already published and awaiting approval.')
             return redirect(project)
-        return super(ProjectPublishView, self).get(*args, **kwargs)
+        return super(ProjectPublishView, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(ProjectPublishView, self).get_context_data(**kwargs)
@@ -208,6 +210,55 @@ class ProjectPublishView(ProjectPermissionsMixin, FormView):
     def get_success_url(self):
         """Return the project url"""
         return self.object.get_absolute_url()
+
+
+class ProjectCrowdfundView(ProjectPermissionsMixin, CreateView):
+    """A creation view for project crowdfunding"""
+    model = Crowdfund
+    form_class = CrowdfundForm
+    template_name = 'project/crowdfund.html'
+
+    def dispatch(self, *args, **kwargs):
+        """Crowdfunds may only be started on public projects."""
+        project = self.get_project()
+        if project.private or not project.approved:
+            messages.warning(self.request, 'Crowdfunds may only be started on public requests.')
+            return redirect(project)
+        return super(ProjectCrowdfundView, self).dispatch(*args, **kwargs)
+
+    def get_project(self):
+        """Returns the project based on the URL keyword arguments"""
+        return self.get_object(queryset=Project.objects.all())
+
+    def get_initial(self):
+        """Sets defaults in crowdfund project form"""
+        project = self.get_project()
+        initial_name = 'Crowdfund the ' + project.title
+        initial_date = date.today() + timedelta(30)
+        return {
+            'name': initial_name,
+            'date_due': initial_date,
+            'project': project.id
+        }
+
+    def form_valid(self, form):
+        """Saves relationship and sends action before returning URL"""
+        redirection = super(ProjectCrowdfundView, self).form_valid(form)
+        crowdfund = self.object
+        project = self.get_project()
+        relationship = ProjectCrowdfunds.objects.create(project=project, crowdfund=crowdfund)
+        actstream.action.send(
+            self.request.user,
+            verb='started',
+            action_object=relationship.crowdfund,
+            target=relationship.project
+        )
+        return redirection
+
+    def get_success_url(self):
+        """Generates actions before returning URL"""
+        project = self.get_project()
+        return project.get_absolute_url()
 
 
 class ProjectDeleteView(ProjectPermissionsMixin, DeleteView):

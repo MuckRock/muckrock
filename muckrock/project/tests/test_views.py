@@ -10,13 +10,15 @@ from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.test import TestCase, Client, RequestFactory
 
-from muckrock import factories
-from muckrock.project import models, forms, views
-from muckrock.utils import mock_middleware
-
+from datetime import date, timedelta
+from decimal import Decimal
 import logging
 import mock
 import nose.tools
+
+from muckrock import factories
+from muckrock.project import models, forms, views
+from muckrock.utils import mock_middleware
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
@@ -233,6 +235,53 @@ class TestProjectPublishView(TestCase):
         eq_(response.url, self.project.get_absolute_url(),
             'The user should be redirected back to the project page.')
         mock_publish.assert_called_with(explanation)
+
+
+class TestProjectCrowdfundView(TestCase):
+    """Tests the creation of a crowdfund for a project."""
+    def setUp(self):
+        self.project = factories.ProjectFactory(private=False, approved=True)
+        self.url = reverse('project-crowdfund', kwargs={
+            'slug': self.project.slug,
+            'pk': self.project.pk
+        })
+        self.view = views.ProjectCrowdfundView.as_view()
+        self.request_factory = RequestFactory()
+
+    def test_post(self):
+        """Posting data for a crowdfund should create it."""
+        user = factories.UserFactory(is_staff=True)
+        name = 'Project Crowdfund'
+        description = 'A crowdfund'
+        payment_required = 100
+        payment_capped = True
+        date_due = date.today() + timedelta(20)
+        data = {
+            'name': name,
+            'description': description,
+            'payment_required': payment_required,
+            'payment_capped': payment_capped,
+            'date_due': date_due
+        }
+        request = self.request_factory.post(self.url, data)
+        request.user = user
+        request = mock_middleware(request)
+        response = self.view(request, slug=self.project.slug, pk=self.project.pk)
+        self.project.refresh_from_db()
+        eq_(self.project.crowdfunds.count(), 1,
+            'A crowdfund should be created and added to the project.')
+        crowdfund = self.project.crowdfunds.first()
+        eq_(crowdfund.name, name)
+        eq_(crowdfund.description, description)
+        expected_payment_required = Decimal(payment_required + payment_required * .15) / 100
+        eq_(crowdfund.payment_required, expected_payment_required,
+            'Expected payment of %(expected).2f, actually %(actual).2f' % {
+                'expected': expected_payment_required,
+                'actual': crowdfund.payment_required
+            })
+        eq_(crowdfund.payment_capped, payment_capped)
+        eq_(crowdfund.date_due, date_due)
+        eq_(response.status_code, 302)
 
 
 class TestProjectDeleteView(TestCase):
