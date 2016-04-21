@@ -156,11 +156,6 @@ class EvaluateNode(template.Node):
         except (template.VariableDoesNotExist, template.TemplateSyntaxError):
             return 'Error rendering', self.variable
 
-@register.assignment_tag
-def editable_by(foia, user):
-    """Template tag to call editable by on FOIAs"""
-    return foia.editable_by(user)
-
 @register.inclusion_tag('tags/tag_manager.html', takes_context=True)
 def tag_manager(context, mr_object):
     """Template tag to insert a tag manager component"""

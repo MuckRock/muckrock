@@ -319,7 +319,7 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
     if not foia.is_editable():
         messages.error(request, 'This is not a draft.')
         return redirect(foia)
-    if not foia.editable_by(request.user) and not request.user.is_staff:
+    if not request.user.has_perm('foia.change_foiarequest', foia):
         messages.error(request, 'You may only edit your own drafts.')
         return redirect(foia)
 
@@ -340,7 +340,8 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
             foia.title = data['title']
             foia.slug = slugify(foia.title) or 'untitled'
             foia.embargo = data['embargo']
-            if foia.embargo and not request.user.profile.can_embargo():
+            has_perm = request.user.has_perm('foia.embargo_foiarequest', foia):
+            if foia.embargo and not has_perm:
                 error_msg = 'Only Pro users may embargo their requests.'
                 messages.error(request, error_msg)
                 return redirect(foia)

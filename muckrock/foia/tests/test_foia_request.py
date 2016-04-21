@@ -671,7 +671,7 @@ class TestRequestSharing(TestCase):
         """Editors should have the same abilities and permissions as creators."""
         new_editor = self.editor
         self.foia.add_editor(new_editor)
-        nose.tools.ok_(self.foia.editable_by(new_editor))
+        nose.tools.ok_(new_editor.has_perm('foia.change_foiarequest', self.foia))
 
     def test_add_viewer(self):
         """Editors should be able to add viewers to the request."""
@@ -704,9 +704,9 @@ class TestRequestSharing(TestCase):
         viewer = UserFactory()
         embargoed_foia.add_viewer(viewer)
         nose.tools.assert_true(embargoed_foia.viewable_by(viewer))
-        nose.tools.assert_false(embargoed_foia.editable_by(viewer))
+        nose.tools.assert_false(viewer.has_perm('foia.change_foiarequest', embargoed_foia))
         embargoed_foia.promote_viewer(viewer)
-        nose.tools.assert_true(embargoed_foia.editable_by(viewer))
+        nose.tools.assert_true(viewer.has_perm('foia.change_foiarequest', embargoed_foia))
 
     def test_demote_editor(self):
         """Editors should be able to demote editors to viewers."""
@@ -714,9 +714,9 @@ class TestRequestSharing(TestCase):
         editor = UserFactory()
         embargoed_foia.add_editor(editor)
         nose.tools.assert_true(embargoed_foia.viewable_by(editor))
-        nose.tools.assert_true(embargoed_foia.editable_by(editor))
+        nose.tools.assert_true(editor.has_perm('foia.change_foiarequest', embargoed_foia))
         embargoed_foia.demote_editor(editor)
-        nose.tools.assert_false(embargoed_foia.editable_by(editor))
+        nose.tools.assert_false(editor.has_perm('foia.change_foiarequest', embargoed_foia))
 
     def test_access_key(self):
         """Editors should be able to generate a secure access key to view an embargoed request."""
@@ -735,7 +735,7 @@ class TestRequestSharing(TestCase):
         self.foia.add_viewer(self.creator)
         nose.tools.assert_false(self.foia.has_viewer(self.creator))
         # but the creator should still be able to both view and edit!
-        nose.tools.assert_true(self.foia.editable_by(self.creator))
+        nose.tools.assert_true(self.creator.has_perm('foia.change_foiarequest', self.foia))
         nose.tools.assert_true(self.foia.viewable_by(self.creator))
 
 

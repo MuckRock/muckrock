@@ -6,6 +6,9 @@
 {% load static from staticfiles %}
 {% load crowdfund_tags %}
 {% load tags %}
+{% load rules %}
+
+{% has_perm 'foia.appeal_foiarequest' request.user foia as can_appeal %}
 
 {% block title %}{{ foia.title }}{% endblock %}
 {% block type %}request{% endblock %}
@@ -201,7 +204,7 @@
                         {% if is_thankable %}
                         <a href="#thanks" class="success button">Thank Agency</a>
                         {% endif %}
-                        {% if foia.is_appealable %}
+                        {% if can_appeal %}
                         <a href="#appeal" class="failure button">Appeal</a>
                         {% endif %}
                         {% if request.user.is_staff %}
@@ -212,7 +215,7 @@
                     </div>
                     <div class="composer-inputs">
                         <div class="inactive composer-input" id="inactive">
-                            <p>You may <a href="#follow-up">follow up</a> {% if not foia.disable_autofollowups %}manually {% endif %}with the agency{% if foia.is_appealable %} or <a href="#appeal">appeal</a> their decision{% endif %}.</p>
+                            <p>You may <a href="#follow-up">follow up</a> {% if not foia.disable_autofollowups %}manually {% endif %}with the agency{% if can_appeal %} or <a href="#appeal">appeal</a> their decision{% endif %}.</p>
                         </div>
                         <form class="follow-up composer-input" id="follow-up" method="post">
                             <header>Send a follow up to the {{ foia.agency.name }}</header>
@@ -244,7 +247,7 @@
                             </div>
                         </form>
                         {% endif %}
-                        {% if foia.is_appealable %}
+                        {% if can_appeal %}
                         <form class="appeal composer-input" id="appeal" method="post">
                             {% if foia.agency.appeal_agency %}
                             <header>Send an appeal to the {{ foia.agency.appeal_agency.name }}</header>

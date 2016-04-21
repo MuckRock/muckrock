@@ -1,6 +1,7 @@
 {% extends 'forms/base_form.html' %}
 {% load static from staticfiles %}
 {% load mathfilters %}
+{% load rules %}
 
 {% block title %}MuckRock &bull; {{ action|title }}{% endblock %}
 {% block form-type %}multirequest-draft{% endblock %}
@@ -54,8 +55,8 @@ and
         </div>
                     {{field.errors}}
         {% else %}
-            {% if field.label == 'Embargo' and not profile.can_embargo %}
-            {% else %}
+            {% has_perm 'foia.embargo_foiarequest' request.user foia as can_embargo %}
+            {% if field.label != 'Embargo' or can_embargo %}
         <fieldset class="{{ field.label|lower }}{% if field.errors %} failure{% endif %}{% if field.field.required %} required{% endif %}">
             <label for="{{ field.auto_id }}">{{ field.label}}</label>
             {{ field }}
