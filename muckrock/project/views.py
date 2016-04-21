@@ -131,7 +131,7 @@ class ProjectDetailView(DetailView):
                                       if not project.newsletter_label else project.newsletter_label)
         context['newsletter_cta'] = ('Get updates delivered to your inbox'
                                     if not project.newsletter_cta else project.newsletter_cta)
-        context['user_can_edit'] = user.is_staff or user in project.contributors.all()
+        context['user_can_edit'] = project.editable_by(user)
         return context
 
     def dispatch(self, *args, **kwargs):
