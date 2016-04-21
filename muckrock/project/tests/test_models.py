@@ -124,6 +124,15 @@ class TestProject(TestCase):
         ok_(project.has_contributor(user1))
         ok_(not project.has_contributor(user2))
 
+    def test_editable_by(self):
+        """Projects should test to see if a given user can edit a request."""
+        project = self.basic_project
+        user1 = User.objects.get(pk=1)
+        user2 = User.objects.get(pk=2)
+        project.contributors.add(user1)
+        ok_(project.editable_by(user1))
+        ok_(not project.editable_by(user2))
+
     def test_publish(self):
         """Publishing a project should make it public and submit it for approval."""
         project = self.basic_project
