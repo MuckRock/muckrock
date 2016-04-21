@@ -96,7 +96,7 @@ def notify_project(sender, instance, created, **kwargs):
                 'task_url': task_url,
                 'text': task.explanation,
             })
-        contributors = ', '.join(task.project.contributors.all())
+        contributors = ', '.join([contributor.get_full_name() for contributor in task.project.contributors.all()])
         fields = [payload_field('Contributors', contributors, False)]
         attachments = [{
             'fallback': summary,
