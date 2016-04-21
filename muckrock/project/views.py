@@ -184,14 +184,15 @@ class ProjectPublishView(ProjectPermissionsMixin, FormView):
     def dispatch(self, *args, **kwargs):
         """Prevents access to the view for projects that public or pending approval."""
         project = get_object_or_404(self.model, pk=kwargs.get('pk', None))
-        if not project.private:
-            if project.approved:
-                messages.warning(self.request,
-                    'This project is already public.')
-            else:
-                messages.warning(self.request,
-                    'This project is already published and awaiting approval.')
-            return redirect(project)
+        if project.editable_by(self.request.user):
+            if not project.private:
+                if project.approved:
+                    messages.warning(self.request,
+                        'This project is already public.')
+                else:
+                    messages.warning(self.request,
+                        'This project is already published and awaiting approval.')
+                return redirect(project)
         return super(ProjectPublishView, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -221,9 +222,10 @@ class ProjectCrowdfundView(ProjectPermissionsMixin, CreateView):
     def dispatch(self, *args, **kwargs):
         """Crowdfunds may only be started on public projects."""
         project = self.get_project()
-        if project.private or not project.approved:
-            messages.warning(self.request, 'Crowdfunds may only be started on public requests.')
-            return redirect(project)
+        if project.editable_by(self.request.user):
+            if project.private or not project.approved:
+                messages.warning(self.request, 'Crowdfunds may only be started on public requests.')
+                return redirect(project)
         return super(ProjectCrowdfundView, self).dispatch(*args, **kwargs)
 
     def get_project(self):
