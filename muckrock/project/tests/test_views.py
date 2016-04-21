@@ -15,6 +15,7 @@ from muckrock.project import models, forms, views
 from muckrock.utils import mock_middleware
 
 import logging
+import mock
 import nose.tools
 
 ok_ = nose.tools.ok_
@@ -166,6 +167,60 @@ class TestProjectEditView(TestCase):
         self.project.refresh_from_db()
         eq_(self.project.description, desc,
             'The description should be updated.')
+
+
+class TestProjectPublishView(TestCase):
+    """Tests publishing a project."""
+    def setUp(self):
+        # We will start with a project that's already been made.
+        self.project = factories.ProjectFactory()
+        self.contributor = factories.UserFactory()
+        self.project.contributors.add(self.contributor)
+        self.kwargs = {
+            'slug': self.project.slug,
+            'pk': self.project.pk
+        }
+        self.url = reverse('project-publish', kwargs=self.kwargs)
+        self.view = views.ProjectPublishView.as_view()
+
+    def test_staff(self):
+        """Staff users should be able to publish projects."""
+        staff_user = factories.UserFactory(is_staff=True)
+        response = get_helper(self.view, self.url, staff_user, **self.kwargs)
+        eq_(response.status_code, 200)
+
+    def test_contributor(self):
+        """Contributors should be able to delete projects."""
+        response = get_helper(self.view, self.url, self.contributor, **self.kwargs)
+        eq_(response.status_code, 200)
+
+    @raises(Http404)
+    def test_basic(self):
+        """Basic users should not be able to delete projects."""
+        user = factories.UserFactory()
+        response = get_helper(self.view, self.url, user, **self.kwargs)
+
+    def test_anonymous(self):
+        """Anonymous users cannot delete projects."""
+        response = get_helper(self.view, self.url, AnonymousUser(), **self.kwargs)
+        redirect_url = reverse('acct-login') + '?next=' + self.url
+        eq_(response.status_code, 302,
+            'The user should be redirected.')
+        eq_(response.url, redirect_url,
+            'The user should be reidrected to the login screen.')
+
+    @mock.patch('muckrock.project.models.Project.publish')
+    def test_post(self, mock_publish):
+        """Posting a valid ProjectPublishForm should publish the project."""
+        explanation = 'Testing project publishing'
+        form = forms.ProjectPublishForm({'explanation': explanation})
+        ok_(form.is_valid(), 'The form should validate.')
+        response = post_helper(self.view, self.url, form.data, self.contributor, **self.kwargs)
+        eq_(response.status_code, 302,
+            'The user should be redirected.')
+        eq_(response.url, self.project.get_absolute_url(),
+            'The user should be redirected back to the project page.')
+        mock_publish.assert_called_with(explanation)
 
 
 class TestProjectDeleteView(TestCase):

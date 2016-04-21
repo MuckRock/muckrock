@@ -30,6 +30,7 @@ test_image = SimpleUploadedFile(
     content=(b'GIF87a\x01\x00\x01\x00\x80\x01\x00\x00\x00\x00ccc,'
     '\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00'))
 
+
 class TestProject(TestCase):
     """Projects are a mixture of general and specific information on a broad subject."""
 

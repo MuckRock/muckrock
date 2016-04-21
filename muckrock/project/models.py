@@ -17,7 +17,7 @@ class ProjectQuerySet(models.QuerySet):
     """Object manager for projects"""
     def get_public(self):
         """Only return nonprivate projects"""
-        return self.filter(private=False)
+        return self.filter(private=False, approved=True)
 
     def get_for_contributor(self, user):
         """Only return projects which the user is a contributor on"""
@@ -31,8 +31,10 @@ class ProjectQuerySet(models.QuerySet):
             projects = projects.get_public()
         elif not user.is_staff:
             # show public projects and projects the user is a contributor to
-            projects = projects.filter(models.Q(private=False)|models.Q(contributors=user))
-            projects = projects.distinct()
+            projects = projects.filter(
+                models.Q(private=False, approved=True)|
+                models.Q(contributors=user)
+            ).distinct()
         return projects
 
 
@@ -121,6 +123,13 @@ class Project(models.Model):
     def has_contributor(self, user):
         """Checks if the user is a contributor."""
         return user in self.contributors.all()
+
+    def editable_by(self, user):
+        """Checks whether the user can edit this project."""
+        if user.is_staff or self.has_contributor(user):
+            return True
+        else:
+            return False
 
     def active_crowdfunds(self):
         """Return all the active crowdfunds on this project."""

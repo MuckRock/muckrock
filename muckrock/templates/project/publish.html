@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}MuckRock &bull; Publish your project{% endblock %}
+
+{% block content %}
+<div class="publish project">
+    <header>
+        <div>
+            <a href="{% url 'project-detail' slug=project.slug pk=project.pk %}">Back to {{project.title}}</a>
+            <h1>Publish Project</h1>
+            <p>Publishing a project makes it publicly visible and allows you to start crowdfunding campaigns for it. Projects are pending publication until they are reviewed by a MuckRock staff member.</p>
+        </div>
+    </header>
+    <form method="post">
+        {% csrf_token %}
+        {% include 'component/form.html' %}
+        <button type="submit" class="blue">Publish this project</button>
+    </form>
+</div>
+{% endblock %}

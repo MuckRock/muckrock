@@ -39,6 +39,8 @@
                         {% endif %}
                         {% if project.private %}
                         <span class="red badge">&empty; Private</span>
+                        {% elif not project.approved %}
+                        <span class="badge">Pending Approval</span>
                         {% endif %}
                         <h2 class="title">{{project.title}}</h2>
                     </div>

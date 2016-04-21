@@ -58,6 +58,11 @@ class ProjectUpdateForm(forms.ModelForm):
         }
 
 
+class ProjectPublishForm(forms.Form):
+    """Form for publishing a project."""
+    explanation = forms.CharField(widget=forms.Textarea)
+
+
 class ProjectManagerForm(forms.Form):
     """Form for managing a list of projects"""
     projects = forms.ModelMultipleChoiceField(
