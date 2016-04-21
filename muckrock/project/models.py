@@ -151,10 +151,10 @@ class Project(models.Model):
         ).exclude(projects=self))
         return articles
 
-    def publish(self, explanation):
+    def publish(self, notes):
         """Publishing a project sets it public and returns a ProjectReviewTask."""
         self.make_public()
-        return ProjectReviewTask.objects.create(project=self, explanation=explanation)
+        return ProjectReviewTask.objects.create(project=self, notes=notes)
 
 
 class ProjectCrowdfunds(models.Model):

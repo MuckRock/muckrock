@@ -58,7 +58,7 @@ class ProjectReviewTaskFactory(factory.django.DjangoModelFactory):
         model = task.models.ProjectReviewTask
 
     project = factory.SubFactory('muckrock.factories.ProjectFactory')
-    explanation = factory.Faker('paragraph')
+    notes = factory.Faker('paragraph')
 
 
 class ResponseTaskFactory(factory.django.DjangoModelFactory):
@@ -85,4 +85,3 @@ class StatusChangeTaskFactory(factory.django.DjangoModelFactory):
     user = factory.SubFactory('muckrock.factories.UserFactory')
     old_status = 'done'
     foia = factory.SubFactory('muckrock.factories.FOIARequestFactory')
-

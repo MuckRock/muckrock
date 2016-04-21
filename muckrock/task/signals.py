@@ -92,15 +92,17 @@ def notify_project(sender, instance, created, **kwargs):
         base_url = 'https://www.muckrock.com'
         task_url = base_url + reverse('projectreview-task', args=(task.id,))
         summary = (
-            'A <%(task_url)s|project> was submitted for review: %(text)s' % {
-                'task_url': task_url,
-                'text': task.explanation,
+            '<%(url)s|%(title)s> was submitted for review.' % {
+                'url': task.project.get_absolute_url(),
+                'title': task.project.title,
             })
         contributors = ', '.join([contributor.get_full_name() for contributor in task.project.contributors.all()])
-        fields = [payload_field('Contributors', contributors, False)]
+        fields = [payload_field('Contributors', contributors)]
+        if task.notes:
+            fields.append(payload_field('Note', task.notes))
         attachments = [{
             'fallback': summary,
-            'text': task.explanation,
+            'text': summary,
             'fields': fields,
         }]
         return create_slack_payload(

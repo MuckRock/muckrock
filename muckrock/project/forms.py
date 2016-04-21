@@ -60,7 +60,7 @@ class ProjectUpdateForm(forms.ModelForm):
 
 class ProjectPublishForm(forms.Form):
     """Form for publishing a project."""
-    explanation = forms.CharField(widget=forms.Textarea)
+    notes = forms.CharField(required=False, widget=forms.Textarea)
 
 
 class ProjectManagerForm(forms.Form):

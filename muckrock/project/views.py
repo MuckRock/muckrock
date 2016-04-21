@@ -204,8 +204,8 @@ class ProjectPublishView(ProjectPermissionsMixin, FormView):
         """Call the Project.publish method using the valid form data."""
         self.object = get_object_or_404(self.model, pk=self.kwargs.get('pk', None))
         print form
-        explanation = form.cleaned_data['explanation']
-        self.object.publish(explanation)
+        notes = form.cleaned_data['notes']
+        self.object.publish(notes)
         return super(ProjectPublishView, self).form_valid(form)
 
     def get_success_url(self):

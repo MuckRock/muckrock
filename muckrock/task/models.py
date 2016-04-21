@@ -371,7 +371,7 @@ class ProjectReviewTask(Task):
     """Created when a project is published and needs approval."""
     type = 'ProjectReviewTask'
     project = models.ForeignKey('project.Project')
-    explanation = models.TextField()
+    notes = models.TextField(blank=True)
 
     def __unicode__(self):
         return u'Project Review Task'
@@ -379,10 +379,10 @@ class ProjectReviewTask(Task):
     def get_absolute_url(self):
         return reverse('projectreview-task', kwargs={'pk': self.pk})
 
-    def reply(self, text):
+    def reply(self, text, action='reply'):
         """Send an email reply to the user that raised the flag."""
         creator = self.project.contributors.first()
-        project_email = ProjectNotification(creator, {'message': text, 'task': self})
+        project_email = ProjectNotification(creator, {'action': action, 'message': text, 'task': self})
         project_email.send()
         return project_email
 
@@ -390,13 +390,13 @@ class ProjectReviewTask(Task):
         """Mark the project approved and notify the user."""
         self.project.approved = True
         self.project.save()
-        return self.reply(text)
+        return self.reply(text, 'approved')
 
     def reject(self, text):
         """Mark the project private and notify the user."""
         self.project.private = True
         self.project.save()
-        return self.reply(text)
+        return self.reply(text, 'rejected')
 
 
 class NewAgencyTask(Task):

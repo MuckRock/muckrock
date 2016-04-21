@@ -42,7 +42,7 @@ class FlaggedTaskAdmin(VersionAdmin):
 
 class ProjectReviewTaskAdmin(VersionAdmin):
     """Flagged Task Admin"""
-    readonly_fields = ['explanation', 'project']
+    readonly_fields = ['notes', 'project']
 
 class NewAgencyTaskAdmin(VersionAdmin):
     """New Agency Task Admin"""

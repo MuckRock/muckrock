@@ -6,9 +6,9 @@
     <dd><a href="{% url 'admin:project_project_change' task.project.pk %}">{{task.project}}</a></dd>
     <dt>Contributors</dt>
     <dd>{{task.project.contributors.all|join:", "}}</dd>
-    {% if task.explanation %}
-    <dt>Project Explanation</dt>
-    <dd>{{task.explanation}}</dd>
+    {% if task.notes %}
+    <dt>Project Notes</dt>
+    <dd>{{task.notes}}</dd>
     {% endif %}
 </dl>
 {% endblock %}

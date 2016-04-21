@@ -226,15 +226,15 @@ class TestProjectPublishView(TestCase):
     @mock.patch('muckrock.project.models.Project.publish')
     def test_post(self, mock_publish):
         """Posting a valid ProjectPublishForm should publish the project."""
-        explanation = 'Testing project publishing'
-        form = forms.ProjectPublishForm({'explanation': explanation})
+        notes = 'Testing project publishing'
+        form = forms.ProjectPublishForm({'notes': notes})
         ok_(form.is_valid(), 'The form should validate.')
         response = post_helper(self.view, self.url, form.data, self.contributor, **self.kwargs)
         eq_(response.status_code, 302,
             'The user should be redirected.')
         eq_(response.url, self.project.get_absolute_url(),
             'The user should be redirected back to the project page.')
-        mock_publish.assert_called_with(explanation)
+        mock_publish.assert_called_with(notes)
 
 
 class TestProjectCrowdfundView(TestCase):

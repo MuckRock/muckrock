@@ -359,7 +359,7 @@ class ProjectReviewTaskViewTests(TestCase):
         self.task.project.refresh_from_db()
         ok_(self.task.project.approved, 'The project should be approved.')
         ok_(self.task.resolved, 'The task should be resolved.')
-        mock_reply.assert_called_with(test_text)
+        mock_reply.assert_called_with(test_text, 'approved')
 
     def test_post_reply_reject(self, mock_reply):
         """The task should optionally resolve when replying"""
@@ -373,7 +373,7 @@ class ProjectReviewTaskViewTests(TestCase):
         self.task.project.refresh_from_db()
         ok_(self.task.project.private, 'The project should be made private.')
         ok_(self.task.resolved, 'The task should be resolved.')
-        mock_reply.assert_called_with(test_text)
+        mock_reply.assert_called_with(test_text, 'rejected')
 
 
 class StaleAgencyTaskViewTests(TestCase):
