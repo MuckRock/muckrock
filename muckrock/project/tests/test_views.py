@@ -173,7 +173,7 @@ class TestProjectPublishView(TestCase):
     """Tests publishing a project."""
     def setUp(self):
         # We will start with a project that's already been made.
-        self.project = factories.ProjectFactory()
+        self.project = factories.ProjectFactory(private=True, approved=False)
         self.contributor = factories.UserFactory()
         self.project.contributors.add(self.contributor)
         self.kwargs = {
@@ -208,6 +208,18 @@ class TestProjectPublishView(TestCase):
             'The user should be redirected.')
         eq_(response.url, redirect_url,
             'The user should be reidrected to the login screen.')
+
+    def test_pending(self):
+        """Projects that are pending review should reject access to the Publish view."""
+        pending_project = factories.ProjectFactory()
+        pending_project.contributors.add(self.contributor)
+        response = get_helper(self.view, self.url, self.contributor, **{
+            'slug': pending_project.slug,
+            'pk': pending_project.pk
+        })
+        eq_(response.status_code, 302)
+        eq_(response.url, pending_project.get_absolute_url(),
+            'The user should be redirected to the project.')
 
     @mock.patch('muckrock.project.models.Project.publish')
     def test_post(self, mock_publish):

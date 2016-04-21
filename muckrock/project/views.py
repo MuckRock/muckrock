@@ -2,13 +2,14 @@
 Views for the project application
 """
 
+from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
 from django.db.models import Count, Prefetch
 from django.http import Http404
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import redirect, render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.views.generic import (
     TemplateView,
@@ -166,12 +167,30 @@ class ProjectEditView(ProjectPermissionsMixin, UpdateView):
     template_name = 'project/edit.html'
     form_class = ProjectUpdateForm
 
+    def form_valid(self, form):
+        """Adds success message when form is valid."""
+        messages.success(self.request, 'Your edits were saved.')
+        return super(ProjectEditView, self).form_valid(form)
+
 
 class ProjectPublishView(ProjectPermissionsMixin, FormView):
     """Publish a project"""
     model = Project
     template_name = 'project/publish.html'
     form_class = ProjectPublishForm
+
+    def get(self, *args, **kwargs):
+        """Prevents access to the view for projects that public or pending approval."""
+        project = self.object
+        if not project.private:
+            if project.approved:
+                messages.warning(self.request,
+                    'This project is already public.')
+            else:
+                messages.warning(self.request,
+                    'This project is already published and awaiting approval.')
+            return redirect(project)
+        return super(ProjectPublishView, self).get(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(ProjectPublishView, self).get_context_data(**kwargs)
@@ -194,5 +213,5 @@ class ProjectPublishView(ProjectPermissionsMixin, FormView):
 class ProjectDeleteView(ProjectPermissionsMixin, DeleteView):
     """Delete a project instance"""
     model = Project
-    success_url = reverse_lazy('index')
+    success_url = reverse_lazy('project')
     template_name = 'project/delete.html'
