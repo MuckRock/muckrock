@@ -45,33 +45,6 @@
         {% if project.image %}
         <div class="image" style="background-image:url('{% thumbnail project.image 2000x1000 crop=smart %}');"></div>
         {% endif %}
-        {% if request.user.is_staff or request.user in contributors %}
-        <div class="toolbar">
-            {% if project.private %}
-            <span class="project-private">This project is private and only visible to its contributors.</span>
-            {% else %}
-            <span class="project-private">This project is public.</span>
-            {% endif %}
-            <div class="project-controls">
-                {% if project.approved and not project.private %}
-                <a href="{% url 'project-crowdfund' slug=project.slug pk=project.pk %}" class="green button">
-                    Crowdfund
-                </a>
-                {% endif %}
-                {% if not project.approved and project.private %}
-                <a href="{% url 'project-publish' slug=project.slug pk=project.pk %}" class="blue button">
-                    Publish
-                </a>
-                {% endif %}
-                <a href="{% url 'project-edit' slug=project.slug pk=project.pk %}" class="blue button">
-                    Edit
-                </a>
-                <a href="{% url 'project-delete' slug=project.slug pk=project.pk %}" class="red button">
-                    Delete
-                </a>
-            </div>
-        </div>
-        {% endif %}
     </header>
     <section class="overview">
         <main>
@@ -102,6 +75,23 @@
             {% endif %}
         </main>
         <aside>
+            {% if request.user.is_staff or request.user in contributors %}
+            <div class="project-controls">
+                <a href="{% url 'project-edit' slug=project.slug pk=project.pk %}" class="blue button">
+                    Edit
+                </a>
+                {% if project.approved and not project.private %}
+                <a href="{% url 'project-crowdfund' slug=project.slug pk=project.pk %}" class="green button">
+                    Crowdfund
+                </a>
+                {% endif %}
+                {% if not project.approved and project.private %}
+                <a href="{% url 'project-publish' slug=project.slug pk=project.pk %}" class="blue button">
+                    Publish
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
             <div class="badges">
             {% if project.featured %}
                 <span class="blue badge">&#9733; Featured</span>

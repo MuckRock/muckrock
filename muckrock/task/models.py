@@ -381,8 +381,10 @@ class ProjectReviewTask(Task):
 
     def reply(self, text, action='reply'):
         """Send an email reply to the user that raised the flag."""
-        creator = self.project.contributors.first()
-        project_email = ProjectNotification(creator, {'action': action, 'message': text, 'task': self})
+        contributors = list(self.project.contributors.all())
+        project_email = ProjectNotification(contributors, {
+            'action': action, 'message': text, 'task': self
+        })
         project_email.send()
         return project_email
 
