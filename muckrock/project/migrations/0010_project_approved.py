@@ -4,6 +4,12 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 
+def approve(apps, schema_editor):
+    """Migrate public projects by automatically approving them"""
+    Project = apps.get_model('project', 'Project')
+    for project in Project.objects.filter(private=False):
+        project.approved = True
+        project.save()
 
 class Migration(migrations.Migration):
 
@@ -17,4 +23,5 @@ class Migration(migrations.Migration):
             name='approved',
             field=models.BooleanField(default=False, help_text=b'If a project is approved, is is visible to everyone.'),
         ),
+        migrations.RunPython(approve),
     ]
