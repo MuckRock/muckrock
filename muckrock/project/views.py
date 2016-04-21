@@ -2,23 +2,33 @@
 Views for the project application
 """
 
+from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
 from django.db.models import Count, Prefetch
 from django.http import Http404
-from django.shortcuts import render_to_response
+from django.shortcuts import redirect, render_to_response, get_object_or_404
 from django.template import RequestContext
-from django.views.generic import TemplateView, CreateView, DetailView, UpdateView, DeleteView
+from django.views.generic import (
+    TemplateView,
+    FormView,
+    CreateView,
+    DetailView,
+    UpdateView,
+    DeleteView
+)
 from django.views.generic.detail import SingleObjectMixin
 from django.utils.decorators import method_decorator
 
-from actstream.models import followers
+import actstream
+from datetime import date, timedelta
 
 from muckrock.crowdfund.models import Crowdfund
-from muckrock.project.models import Project
-from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm
+from muckrock.crowdfund.forms import CrowdfundForm
+from muckrock.project.models import Project, ProjectCrowdfunds
+from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm, ProjectPublishForm
 from muckrock.views import MRFilterableListView
 
 
@@ -113,7 +123,7 @@ class ProjectDetailView(DetailView):
                     'jurisdiction__parent',
                     'jurisdiction__parent__parent',
                     ))
-        context['followers'] = followers(project)
+        context['followers'] = actstream.models.followers(project)
         context['articles'] = project.articles.get_published()
         context['contributors'] = project.contributors.select_related('profile')
         context['user_is_experimental'] = user.is_authenticated() and user.profile.experimental
@@ -121,7 +131,7 @@ class ProjectDetailView(DetailView):
                                       if not project.newsletter_label else project.newsletter_label)
         context['newsletter_cta'] = ('Get updates delivered to your inbox'
                                     if not project.newsletter_cta else project.newsletter_cta)
-        context['user_can_edit'] = user.is_staff or user in project.contributors.all()
+        context['user_can_edit'] = project.editable_by(user)
         return context
 
     def dispatch(self, *args, **kwargs):
@@ -144,16 +154,11 @@ class ProjectPermissionsMixin(object):
     Note: It must be included first when subclassing Django generic views
     because it overrides their dispatch method.
     """
-
-    def _is_editable_by(self, user):
-        """A project is editable by MuckRock staff and project contributors."""
-        project = self.get_object()
-        return project.has_contributor(user) or user.is_staff
-
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         """Overrides the dispatch function to include permissions checking."""
-        if not self._is_editable_by(self.request.user):
+        self.object = get_object_or_404(Project, pk=kwargs.get('pk', None))
+        if not self.object.editable_by(self.request.user):
             raise Http404()
         return super(ProjectPermissionsMixin, self).dispatch(*args, **kwargs)
 
@@ -164,9 +169,102 @@ class ProjectEditView(ProjectPermissionsMixin, UpdateView):
     template_name = 'project/edit.html'
     form_class = ProjectUpdateForm
 
+    def form_valid(self, form):
+        """Adds success message when form is valid."""
+        messages.success(self.request, 'Your edits were saved.')
+        return super(ProjectEditView, self).form_valid(form)
+
+
+class ProjectPublishView(ProjectPermissionsMixin, FormView):
+    """Publish a project"""
+    model = Project
+    template_name = 'project/publish.html'
+    form_class = ProjectPublishForm
+
+    def dispatch(self, *args, **kwargs):
+        """Prevents access to the view for projects that public or pending approval."""
+        project = get_object_or_404(self.model, pk=kwargs.get('pk', None))
+        if project.editable_by(self.request.user):
+            if not project.private:
+                if project.approved:
+                    messages.warning(self.request,
+                        'This project is already public.')
+                else:
+                    messages.warning(self.request,
+                        'This project is already published and awaiting approval.')
+                return redirect(project)
+        return super(ProjectPublishView, self).dispatch(*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(ProjectPublishView, self).get_context_data(**kwargs)
+        context['project'] = self.object
+        return context
+
+    def form_valid(self, form):
+        """Call the Project.publish method using the valid form data."""
+        self.object = get_object_or_404(self.model, pk=self.kwargs.get('pk', None))
+        print form
+        notes = form.cleaned_data['notes']
+        self.object.publish(notes)
+        return super(ProjectPublishView, self).form_valid(form)
+
+    def get_success_url(self):
+        """Return the project url"""
+        return self.object.get_absolute_url()
+
+
+class ProjectCrowdfundView(ProjectPermissionsMixin, CreateView):
+    """A creation view for project crowdfunding"""
+    model = Crowdfund
+    form_class = CrowdfundForm
+    template_name = 'project/crowdfund.html'
+
+    def dispatch(self, *args, **kwargs):
+        """Crowdfunds may only be started on public projects."""
+        project = self.get_project()
+        if project.editable_by(self.request.user):
+            if project.private or not project.approved:
+                messages.warning(self.request, 'Crowdfunds may only be started on public requests.')
+                return redirect(project)
+        return super(ProjectCrowdfundView, self).dispatch(*args, **kwargs)
+
+    def get_project(self):
+        """Returns the project based on the URL keyword arguments"""
+        return self.get_object(queryset=Project.objects.all())
+
+    def get_initial(self):
+        """Sets defaults in crowdfund project form"""
+        project = self.get_project()
+        initial_name = 'Crowdfund the ' + project.title
+        initial_date = date.today() + timedelta(30)
+        return {
+            'name': initial_name,
+            'date_due': initial_date,
+            'project': project.id
+        }
+
+    def form_valid(self, form):
+        """Saves relationship and sends action before returning URL"""
+        redirection = super(ProjectCrowdfundView, self).form_valid(form)
+        crowdfund = self.object
+        project = self.get_project()
+        relationship = ProjectCrowdfunds.objects.create(project=project, crowdfund=crowdfund)
+        actstream.action.send(
+            self.request.user,
+            verb='started',
+            action_object=relationship.crowdfund,
+            target=relationship.project
+        )
+        return redirection
+
+    def get_success_url(self):
+        """Generates actions before returning URL"""
+        project = self.get_project()
+        return project.get_absolute_url()
+
 
 class ProjectDeleteView(ProjectPermissionsMixin, DeleteView):
     """Delete a project instance"""
     model = Project
-    success_url = reverse_lazy('index')
+    success_url = reverse_lazy('project')
     template_name = 'project/delete.html'

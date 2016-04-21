@@ -131,6 +131,24 @@
         }
     }
 
+    .prompt {
+        box-shadow: 0px 4px 8px 0px $color-grey;
+        padding: $vertical-rhythm;
+        border: 1px solid $color-blue;
+        background: $color-blue-light;
+        color: $color-blue-dark;
+        font-weight: $font-weight-bold;
+        ol {
+            padding-left: $vertical-rhythm;
+        }
+        a {
+            text-decoration: underline;
+        }
+        .strikethrough {
+            text-decoration: line-through;
+        }
+    }
+
     .overview {
         @include display(flex);
         @include flex-flow(wrap);
@@ -156,6 +174,11 @@
         summary {
             font-size: $font-size-4;
             line-height: $font-line-height;
+        }
+        .contributors header {
+            @include display(flex);
+            @include justify-content(space-between);
+            margin-bottom: $vertical-rhythm/2;
         }
         .contributor {
             @include display(flex);

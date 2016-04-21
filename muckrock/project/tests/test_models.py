@@ -11,10 +11,10 @@ from django.test import TestCase
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
 from muckrock.project.models import Project
+from muckrock.task.models import ProjectReviewTask
 
 import logging
 import nose
-
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
@@ -29,6 +29,7 @@ test_image = SimpleUploadedFile(
     name='foo.gif',
     content=(b'GIF87a\x01\x00\x01\x00\x80\x01\x00\x00\x00\x00ccc,'
     '\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00'))
+
 
 class TestProject(TestCase):
     """Projects are a mixture of general and specific information on a broad subject."""
@@ -122,6 +123,27 @@ class TestProject(TestCase):
         project.contributors.add(user1)
         ok_(project.has_contributor(user1))
         ok_(not project.has_contributor(user2))
+
+    def test_editable_by(self):
+        """Projects should test to see if a given user can edit a request."""
+        project = self.basic_project
+        user1 = User.objects.get(pk=1)
+        user2 = User.objects.get(pk=2)
+        project.contributors.add(user1)
+        ok_(project.editable_by(user1))
+        ok_(not project.editable_by(user2))
+
+    def test_publish(self):
+        """Publishing a project should make it public and submit it for approval."""
+        project = self.basic_project
+        explanation = 'Test'
+        task = project.publish(explanation)
+        eq_(project.private, False,
+            'The project should be made public.')
+        eq_(project.approved, False,
+            'The project should be waiting approval.')
+        ok_(isinstance(task, ProjectReviewTask),
+            'A ProjectReviewTask should be created.\n\tTask: %s' % type(task))
 
     def test_suggest_requests(self):
         """

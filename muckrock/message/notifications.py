@@ -15,21 +15,29 @@ class EmailNotification(EmailMultiAlternatives):
     text_template = None
     subject = u'Notification'
 
-    def __init__(self, user, context):
+    def __init__(self, users, context):
         """Initialize the notification"""
         super(EmailNotification, self).__init__(subject=self.subject)
-        if isinstance(user, User):
-            self.user = user
-            self.to = [user.email]
+        if isinstance(users, User):
+            self.users = [users]
+            self.to = [users.email]
+        elif isinstance(users, list):
+            # check that all list members are users
+            # if not, raise TypeError
+            for user in users:
+                if not isinstance(user, User):
+                    raise TypeError('Notification expects a list of Users')
+            self.users = users
+            self.to = [user.email for user in users]
         else:
-            raise TypeError('Notification requires a User to receive it.')
+            raise TypeError('Notification requires at least one User to receive it.')
         self.from_email = 'MuckRock <info@muckrock.com>'
         self.bcc = ['diagnostics@muckrock.com']
         self.body = render_to_string(self.get_text_template(), self.get_context_data(context))
 
     def get_context_data(self, context):
         """Return init keywords and the user-to-notify as context."""
-        context['user'] = self.user
+        context['users'] = self.users
         return context
 
     def get_text_template(self):
@@ -68,6 +76,13 @@ class SupportNotification(EmailNotification):
     """Send a support email."""
     text_template = 'message/notification/support.txt'
     subject = u'Support'
+
+
+class ProjectNotification(EmailNotification):
+    """Send a project email."""
+    text_template = 'message/notification/support.txt'
+    subject = u'Pending Project'
+
 
 class SlackNotification(object):
     """

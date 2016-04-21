@@ -32,6 +32,14 @@ class FlaggedTaskForm(forms.Form):
     }))
 
 
+class ProjectReviewTaskForm(forms.Form):
+    """Simple form for acting on a FlaggedTask"""
+    reply = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'placeholder': 'Write your reply here'
+        }))
+
 class StaleAgencyTaskForm(forms.Form):
     """Simple form for acting on a StaleAgencyTask"""
     email = forms.EmailField()
