@@ -53,7 +53,7 @@ class Project(models.Model):
     description = models.TextField(blank=True, null=True)
     image = models.ImageField(upload_to='project_images/%Y/%m/%d', blank=True, null=True)
     private = models.BooleanField(
-        default=False,
+        default=True,
         help_text='If a project is private, it is only visible to its contributors.')
     approved = models.BooleanField(
         default=False,
