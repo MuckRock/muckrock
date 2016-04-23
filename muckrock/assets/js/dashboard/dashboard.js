@@ -49,7 +49,6 @@ const Chart = React.createClass({
                     width={600}
                     height={400}
                     title={this.props.title}
-                    yAxisLabel='Filed'
                     xAxisLabel='Date'
                 />
             </div>
@@ -66,6 +65,8 @@ const Dashboard = React.createClass({
         return (
             <div className="dashboard">
                 <Chart field="total_requests" title="Total Requests" data={this.props.data} />
+                <Chart field="total_pages" title="Total Pages" data={this.props.data} />
+                <Chart field="total_users" title="Total Users" data={this.props.data} />
             </div>
         )
     }

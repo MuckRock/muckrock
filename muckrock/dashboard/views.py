@@ -16,6 +16,6 @@ def dashboard(request):
 
 def dashboard_data(request):
     """Returns a week of statistics rendered into JSON."""
-    stats = Statistics.objects.all()[:7]
+    stats = Statistics.objects.all()[:30]
     data = serializers.serialize('json', stats)
     return HttpResponse(data, content_type='application/json')
