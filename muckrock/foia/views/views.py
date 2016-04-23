@@ -562,7 +562,6 @@ def redirect_old(request, jurisdiction, slug, idx, action):
 
     return redirect('/foi/%(jurisdiction)s-%(jidx)s/%(slug)s-%(idx)s/%(action)s/' % locals())
 
-@user_passes_test(lambda u: u.is_staff)
 def acronyms(request):
     """A page with all the acronyms explained"""
     status_dict = dict(STATUS)
