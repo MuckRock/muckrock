@@ -1,5 +1,5 @@
 const initialState = {
-    data: {}
+    data: []
 }
 
 const dashboardReducer = function(state = initialState, action) {
