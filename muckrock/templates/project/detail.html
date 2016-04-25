@@ -46,7 +46,7 @@
         <div class="image" style="background-image:url('{% thumbnail project.image 2000x1000 crop=smart %}');"></div>
         {% endif %}
     </header>
-    {% if user_can_edit and not project.approved %}
+    {% if user_can_edit and project.private and not project.approved %}
     <section class="launch prompt">
         <h3>Launch your project</h3>
         <ol>
@@ -125,7 +125,7 @@
             {% if project.private %}
                 <span class="red badge">&empty; Private</span>
             {% elif not project.private and not project.approved %}
-                <span class="grey badge">Pending Approval</span>
+                <span class="grey badge">Awaiting Review</span>
             {% endif %}
             </div>
             {% if visible_requests or articles %}
