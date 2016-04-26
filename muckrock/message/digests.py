@@ -312,9 +312,11 @@ class StaffDigest(Digest):
             stat('Stale Agencies', current.stale_agencies, previous.stale_agencies, False),
             stat('New Agencies', current.unapproved_agencies, previous.unapproved_agencies, False),
         ]
+        active_crowdfunds = Crowdfund.objects.filter(closed=False, date_due__gte=timezone.now())
         return {
             'stats': stats,
             'comms': get_comms(current_date, previous_date),
+            'crowdfunds': active_crowdfunds
         }
 
     def send(self, *args):

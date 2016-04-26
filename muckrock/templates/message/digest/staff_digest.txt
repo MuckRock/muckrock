@@ -2,7 +2,7 @@
 {% block body %}
 {{ salutation }}, {{ user.first_name }}. Here's what happened on MuckRock yesterday ({{ yesterday|date:'m/d/y' }}):
 
---------------------------
+-------------------------
 Stats
 - - - - - - - - - - - - -
 
@@ -11,7 +11,7 @@ Statistic, Today's value, Change from yesterday
 {{ stat.name }}, {{ stat.current }}, {% if stat.delta > 0 %}+{% endif %}{{stat.delta}}
 {% endfor %}
 
---------------------------
+-------------------------
 Communications
 - - - - - - - - - - - - -
 
@@ -28,6 +28,18 @@ Email, {{ sent.format.email }}, ${{ sent.cost.email }}, ${{ sent.expense.email }
 Fax, {{ sent.format.fax }}, ${{ sent.cost.fax }}, ${{ sent.expense.fax }}, ${{sent.trailing.fax}}
 Post, {{ sent.format.mail }}, ${{ sent.cost.mail }}, ${{ sent.expense.mail }}, ${{sent.trailing.mail}}
 {% endwith %}
+
+-------------------------
+Active Crowdfunds
+- - - - - - - - - - - - -
+
+{% for crowdfund in crowdfunds %}
+{% with crowdfund.get_crowdfund_object as object %}
+* {{object}} ({{object.get_aboslute_url}})
+{% endwith %}
+{% endfor %}
+
+=========================
 
 That's all for today. {{ signoff }} and see you tomorrow.
 {% endblock %}
