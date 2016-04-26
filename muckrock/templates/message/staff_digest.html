@@ -2,7 +2,7 @@
 
 {% block body %}
 <p>{{ salutation }}, {{ user.first_name }}.</p>
-<p>Here is what happened on MuckRock yesterday ({{ yesterday|date:'m/d/y' }}):</p>
+<p>Here is what happened on MuckRock yesterday ({{ last|date:'m/d/y' }}):</p>
 <h1>Stats</h1>
 <table>
     <thead>
