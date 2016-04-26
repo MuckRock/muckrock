@@ -26,16 +26,16 @@ class TestDailyDigest(TestCase):
 
     def test_init(self):
         """The email should create when given a User."""
-        ok_(self.digest(self.user))
+        ok_(self.digest(user=self.user))
 
     @raises(TypeError)
     def test_requires_user(self):
         """The email should raise an error when instantiated without a user."""
-        self.digest(None)
+        self.digest(user=None)
 
     def test_send_no_notifications(self):
         """The email shouldn't send if there's no notifications."""
-        email = self.digest(self.user)
+        email = self.digest(user=self.user)
         eq_(email.activity['count'], 0, 'There should be no activity.')
         eq_(email.send(), 0, 'The email should not send.')
 
@@ -47,7 +47,7 @@ class TestDailyDigest(TestCase):
         actstream.actions.follow(self.user, foia, actor_only=False)
         actstream.action.send(agency, verb='completed', action_object=foia)
         # generate the email, which should contain the generated action
-        email = self.digest(self.user)
+        email = self.digest(user=self.user)
         eq_(email.activity['count'], 1, 'There should be activity.')
         eq_(email.send(), 1, 'The email should send.')
 
@@ -59,7 +59,7 @@ class TestDailyDigest(TestCase):
         actstream.action.send(agency, verb='rejected', action_object=foia)
         actstream.action.send(self.user, verb='followed up on', action_object=foia)
         # generate the email, which should contain the generated action
-        email = self.digest(self.user)
+        email = self.digest(user=self.user)
         eq_(email.activity['count'], 1,
             'There should be activity that is not user initiated.')
         eq_(email.send(), 1, 'The email should send.')
@@ -73,7 +73,7 @@ class TestDailyDigest(TestCase):
         agency = factories.AgencyFactory()
         actstream.action.send(agency, verb='rejected', action_object=foia)
         # generate the email, which should contain the generated action
-        email = self.digest(self.user)
+        email = self.digest(user=self.user)
         eq_(email.activity['count'], 1, 'There should be activity.')
         eq_(email.send(), 1, 'The email should send.')
 
@@ -85,7 +85,7 @@ class TestDailyDigest(TestCase):
         factories.AnswerFactory(user=other_user, question=question)
         # creating an answer _should_ have created an action
         # so let's generate the email and see what happened
-        email = self.digest(self.user)
+        email = self.digest(user=self.user)
         eq_(email.activity['count'], 1, 'There should be activity that is not user initiated.')
         eq_(email.activity['questions']['mine'].first().actor, other_user)
         eq_(email.activity['questions']['mine'].first().verb, 'answered')
@@ -98,7 +98,7 @@ class TestDailyDigest(TestCase):
         actstream.actions.follow(self.user, question, actor_only=False)
         other_user = factories.UserFactory()
         factories.AnswerFactory(user=other_user, question=question)
-        email = self.digest(self.user)
+        email = self.digest(user=self.user)
         eq_(email.activity['count'], 1, 'There should be activity.')
         eq_(email.activity['questions']['following'].first().actor, other_user)
         eq_(email.activity['questions']['following'].first().action_object, question)
@@ -112,22 +112,22 @@ class TestDigestIntervals(TestCase):
 
     def test_hourly(self):
         """1 hour interval"""
-        digest = digests.HourlyDigest(self.user)
+        digest = digests.HourlyDigest(user=self.user)
         eq_(digest.interval, relativedelta(hours=1))
 
     def test_daily(self):
         """1 day interval"""
-        digest = digests.DailyDigest(self.user)
+        digest = digests.DailyDigest(user=self.user)
         eq_(digest.interval, relativedelta(days=1))
 
     def test_weekly(self):
         """1 week interval"""
-        digest = digests.WeeklyDigest(self.user)
+        digest = digests.WeeklyDigest(user=self.user)
         eq_(digest.interval, relativedelta(weeks=1))
 
     def test_monthly(self):
         """1 month interval"""
-        digest = digests.MonthlyDigest(self.user)
+        digest = digests.MonthlyDigest(user=self.user)
         eq_(digest.interval, relativedelta(months=1))
 
 
@@ -143,12 +143,12 @@ class TestStaffDigest(TestCase):
 
     def test_send(self):
         """The digest should send to staff members without errors."""
-        digest = digests.StaffDigest(self.user)
+        digest = digests.StaffDigest(user=self.user)
         eq_(digest.send(), 1)
 
     def test_not_staff(self):
         """The digest should not send to users who are not staff."""
         # pylint: disable=no-self-use
         not_staff = factories.UserFactory()
-        digest = digests.StaffDigest(not_staff)
+        digest = digests.StaffDigest(user=not_staff)
         eq_(digest.send(), 0)

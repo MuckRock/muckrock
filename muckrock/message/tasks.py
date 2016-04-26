@@ -22,7 +22,7 @@ def send_digest(preference, digest):
     for profile in profiles:
         # for now, only send experimental users the new updates
         if profile.experimental:
-            email = digest(profile.user)
+            email = digest(user=profile.user)
             email.send()
         else:
             profile.send_notifications()
@@ -61,7 +61,7 @@ def staff_digest():
     """Send out staff digest"""
     staff_users = User.objects.filter(is_staff=True).distinct()
     for staff_user in staff_users:
-        email = digests.StaffDigest(staff_user)
+        email = digests.StaffDigest(user=staff_user, subject=u'Daily Staff Digest')
         email.send()
 
 @task(name='muckrock.message.tasks.send_invoice_receipt')

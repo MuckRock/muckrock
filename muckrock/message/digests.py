@@ -129,14 +129,13 @@ class Digest(TemplateEmail):
         return self.interval
 
 
-class ActivityDigest(TemplateEmail):
+class ActivityDigest(Digest):
     """
     An ActivityDigest describes a collection of activity over a duration, which
     is then rendered into an email and delivered at a scheduled interval.
     """
     text_template = 'message/digest.txt'
     html_template = 'message/digest.html'
-    interval = None
 
     # Here we scaffold out the activity dictionary.
     # It is scaffolded to prevent key errors when counting
@@ -174,10 +173,23 @@ class ActivityDigest(TemplateEmail):
     # beyond specifically-defined subclasses.
 
     def __init__(self, **kwargs):
-        """Initialize the digest with activity and a custom subject"""
-        super(Digest, self).__init__(**kwargs)
-        self.activity = self.get_activity()
+        """Initialize the digest with a dynamic subject."""
+        super(ActivityDigest, self).__init__(**kwargs)
         self.subject = self.get_subject()
+
+    def get_subject(self):
+        """Summarizes the activities in the notification."""
+        count = self.activity['count']
+        subject = str(count) + ' Update'
+        if count > 1:
+            subject += 's'
+        return subject
+
+    def get_context_data(self, *args):
+        """Adds classified activity to the context."""
+        context = super(ActivityDigest, self).get_context_data(*args)
+        context['activity'] = self.get_activity()
+        return context
 
     def get_activity(self):
         """Returns a list of activities to be sent in the email"""
@@ -211,13 +223,6 @@ class ActivityDigest(TemplateEmail):
                                   self.activity['questions']['count'])
         return self.activity
 
-    def get_context_data(self, extra_context):
-        """Adds classified activity to the context"""
-        context = super(Digest, self).get_context_data(extra_context)
-        self.activity = self.get_activity()
-        context['activity'] = self.activity
-        return context
-
     def classify_foia_activity(self, stream):
         """Segment and classify the activity"""
         # pylint: disable=no-self-use
@@ -236,13 +241,6 @@ class ActivityDigest(TemplateEmail):
         classified['count'] = activity_count
         return classified
 
-    def get_subject(self):
-        """Summarizes the activities in the notification"""
-        subject = str(self.activity['count']) + ' Update'
-        if self.activity['count'] > 1:
-            subject += 's'
-        return subject
-
     def send(self, *args):
         """Don't send the email if there's no activity."""
         if self.activity['count'] < 1:
@@ -250,22 +248,22 @@ class ActivityDigest(TemplateEmail):
         return super(Digest, self).send(*args)
 
 
-class HourlyDigest(Digest):
+class HourlyDigest(ActivityDigest):
     """An hourly email digest"""
     interval = relativedelta(hours=1)
 
 
-class DailyDigest(Digest):
+class DailyDigest(ActivityDigest):
     """A daily email digest"""
     interval = relativedelta(days=1)
 
 
-class WeeklyDigest(Digest):
+class WeeklyDigest(ActivityDigest):
     """A weekly email digest"""
     interval = relativedelta(weeks=1)
 
 
-class MonthlyDigest(Digest):
+class MonthlyDigest(ActivityDigest):
     """A monthly email digest"""
     interval = relativedelta(months=1)
 
@@ -276,22 +274,22 @@ class StaffDigest(Digest):
     html_template = 'message/staff_digest.html'
     interval = relativedelta(days=1)
 
-    def get_subject(self):
-        """Does what it says on the box"""
-        return 'Daily Staff Digest'
+    def get_context_data(self, *args):
+        """Adds classified activity to the context"""
+        context = super(StaffDigest, self).get_context_data(*args)
+        self.activity = self.get_activity()
+        context['activity'] = self.activity
+        return context
 
     def get_activity(self):
         """Returns yesterday's statistics"""
-
-        # we overwrite the existing activity dictionary
-        # and we fix count at 1 so the digest will send
-        current_date = date.today() - self.interval
+        current_date = timezone.now() - self.interval
         previous_date = current_date - self.interval
         try:
             current = Statistics.objects.get(date=current_date)
             previous = Statistics.objects.get(date=previous_date)
         except Statistics.DoesNotExist:
-            return {'count': 0} # if statistics cannot be found, don't send anything
+            return None # if statistics cannot be found, don't send anything
         stats = [
             stat('Requests', current.total_requests, previous.total_requests),
             stat(
@@ -331,7 +329,6 @@ class StaffDigest(Digest):
             stat('New Agencies', current.unapproved_agencies, previous.unapproved_agencies, False),
         ]
         return {
-            'count': 1,
             'stats': stats,
             'comms': get_comms(current_date, previous_date),
         }

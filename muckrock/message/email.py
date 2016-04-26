@@ -4,6 +4,7 @@ Provides a base email class for messages.
 
 from django.contrib.auth.models import User
 from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 
 class TemplateEmail(EmailMultiAlternatives):
     """
@@ -21,18 +22,17 @@ class TemplateEmail(EmailMultiAlternatives):
     def __init__(self, user=None, extra_context=None, **kwargs):
         """Sets the universal attributes for all our email."""
         super(TemplateEmail, self).__init__(**kwargs)
-        if user:
-            if isinstance(user, User):
-                self.user = user
-                self.to.append(user.email)
-            else:
-                raise TypeError('"user" argument expects a User type')
+        if isinstance(user, User):
+            self.user = user
+            self.to.append(user.email)
+        else:
+            raise TypeError('"user" argument expects a User type')
         context = self.get_context_data(extra_context)
         content = {
             'text': render_to_string(self.get_text_template(), context),
             'html': render_to_string(self.get_html_template(), context),
         }
-        self.bcc = self.bcc.append('diagnostics@muckrock.com')
+        self.bcc.append('diagnostics@muckrock.com')
         self.body = content['text']
         self.attach_alternative(content['html'], 'text/html')
 
@@ -52,11 +52,12 @@ class TemplateEmail(EmailMultiAlternatives):
 
     def get_text_template(self):
         """Returns the template specified by the subclass."""
-        if text_template is None:
+        if self.text_template is None:
             raise NotImplementedError('A text template must be provided.')
+        return self.text_template
 
     def get_html_template(self):
         """Returns the template specified by the subclass."""
-        if html_template is None:
+        if self.html_template is None:
             raise NotImplementedError('An HTML template must be provided.')
-        return html_template
+        return self.html_template
