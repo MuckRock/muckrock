@@ -1,17 +1,24 @@
 {% load premailer %}
 {% spaceless %}
 {% premailer base_url %}
+<!DOCTYPE html>
 <html>
     <head>
-        <style>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <style type="text/css">
             body {
-                max-width: 600px;
-                margin: 0 auto;
-                padding: 1em;
+                background: #F7F8FA;
                 color: #21262E;
                 font-family: sans-serif;
                 font-size: 14px;
                 line-height: 1.3em;
+            }
+            .header, .body, .footer {
+                margin: 0 auto;
+            }
+            .body {
+                padding: 1em;
+                background: #FFFFFF;
             }
             h1 {
                 margin-top: 1.5em;
@@ -58,11 +65,16 @@
                 color: #CC5C52;
             }
         </style>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
     </head>
     <body>
-    {% block body %}
-    {% endblock body %}
+        <div class="header">
+        </div>
+        <div class="body">
+        {% block body %}
+        {% endblock body %}
+        </div>
+        <div class="footer">
+        </div>
     </body>
 </html>
 {% endpremailer %}
