@@ -40,12 +40,6 @@ class EmailNotification(EmailMultiAlternatives):
             return self.text_template
 
 
-class FailedPaymentNotification(EmailNotification):
-    """Sends a failed payment notification"""
-    text_template = 'message/notification/failed_payment.txt'
-    subject = u'Your payment failed'
-
-
 class WelcomeNotification(EmailNotification):
     """Sends a welcome notification"""
     text_template = 'text/user/welcome.txt'

@@ -12,6 +12,7 @@ import logging
 import stripe
 
 from muckrock.accounts.models import Profile
+from muckrock.message.email import TemplateEmail
 from muckrock.message import digests, notifications, receipts
 from muckrock.organization.models import Organization
 
@@ -150,6 +151,8 @@ def failed_payment(invoice_id):
     # raise the failed payment flag on the profile
     profile.payment_failed = True
     profile.save()
+    subject = u'Your payment has failed'
+    org = None
     if attempt == 4:
         # on last attempt, cancel the user's subscription and lower the failed payment flag
         if subscription_type == 'pro':
@@ -160,6 +163,7 @@ def failed_payment(invoice_id):
         profile.payment_failed = False
         profile.save()
         logger.info('%s subscription has been cancelled due to failed payment', user.username)
+        subject = u'Your %s account has been cancelled' % subscription_type
         context = {
             'attempt': 'final',
             'type': subscription_type
@@ -168,9 +172,16 @@ def failed_payment(invoice_id):
         logger.info('Failed payment by %s, attempt %s', user.username, attempt)
         context = {
             'attempt': attempt,
-            'type': subscription_type
+            'type': subscription_type,
+            'org': org
         }
-    notification = notifications.FailedPaymentNotification(user, context)
+    notification = TemplateEmail(
+        user=user,
+        extra_context=context,
+        text_template='message/notification/failed_payment.txt',
+        html_template='message/notification/failed_payment.html',
+        subject=subject
+    )
     notification.send(fail_silently=False)
 
 @task(name='muckrock.message.tasks.welcome')
