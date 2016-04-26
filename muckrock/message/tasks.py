@@ -7,6 +7,7 @@ from django.core.urlresolvers import reverse
 
 from celery.schedules import crontab
 from celery.task import periodic_task, task
+from dateutil.relativedelta import relativedelta
 import logging
 import stripe
 
@@ -16,13 +17,13 @@ from muckrock.organization.models import Organization
 
 logger = logging.getLogger(__name__)
 
-def send_digest(preference, digest):
+def send_activity_digest(preference, interval):
     """Helper to send out timed digests"""
     profiles = Profile.objects.select_related('user').filter(email_pref=preference).distinct()
     for profile in profiles:
         # for now, only send experimental users the new updates
         if profile.experimental:
-            email = digest(user=profile.user)
+            email = digests.ActivityDigest(user=profile.user, interval=interval)
             email.send()
         else:
             profile.send_notifications()
@@ -31,13 +32,13 @@ def send_digest(preference, digest):
 @periodic_task(run_every=crontab(hour='*/1', minute=0), name='muckrock.message.tasks.hourly_digest')
 def hourly_digest():
     """Send out hourly digest"""
-    send_digest('hourly', digests.HourlyDigest)
+    send_activity_digest('hourly', relativedelta(hours=1))
 
 # every day at 10am
 @periodic_task(run_every=crontab(hour=10, minute=0), name='muckrock.message.tasks.daily_digest')
 def daily_digest():
     """Send out daily digest"""
-    send_digest('daily', digests.DailyDigest)
+    send_activity_digest('daily', relativedelta(days=1))
 
 # every Monday at 10am
 @periodic_task(
@@ -45,7 +46,7 @@ def daily_digest():
     name='muckrock.message.tasks.weekly_digest')
 def weekly_digest():
     """Send out weekly digest"""
-    send_digest('weekly', digests.WeeklyDigest)
+    send_activity_digest('weekly', relativedelta(weeks=1))
 
 # first day of every month at 10am
 @periodic_task(
@@ -53,7 +54,7 @@ def weekly_digest():
     name='muckrock.message.tasks.monthly_digest')
 def monthly_digest():
     """Send out monthly digest"""
-    send_digest('monthly', digests.MonthlyDigest)
+    send_activity_digest('monthly', relativedelta(months=1))
 
 # every day at 9:30am
 @periodic_task(run_every=crontab(hour=9, minute=30), name='muckrock.message.tasks.staff_digest')

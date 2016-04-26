@@ -64,7 +64,7 @@ class TestDailyTask(TestCase):
         factories.UserFactory(profile__experimental=True)
         factories.UserFactory()
 
-    @mock.patch('muckrock.message.digests.DailyDigest.send')
+    @mock.patch('muckrock.message.digests.ActivityDigest.send')
     @mock.patch('muckrock.accounts.models.Profile.send_notifications')
     def test_daily_notification_task(self, mock_profile_send, mock_send):
         """Make sure the send method is called for the experimental user."""

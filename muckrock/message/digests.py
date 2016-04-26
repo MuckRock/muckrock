@@ -105,6 +105,17 @@ class Digest(TemplateEmail):
     """A digest is sent at a regular scheduled interval."""
     interval = None
 
+    def __init__(self, interval=None, **kwargs):
+        """Saves interval attribute if provided."""
+        if interval:
+            # we use relativedelta in addition to timedelta because it gives us a greater
+            # flexibility in the kinds of intervals we can define, e.g. weeks and months
+            if isinstance(interval, relativedelta) or isinstance(interval, timedelta):
+                self.interval = interval
+            else:
+                raise TypeError('Interval must be relativedelta or timedelta')
+        super(Digest, self).__init__(**kwargs)
+
     def get_context_data(self, *args):
         """Adds time-based salutation and signature context"""
         context = super(Digest, self).get_context_data(*args)
@@ -120,12 +131,7 @@ class Digest(TemplateEmail):
     def get_interval(self):
         """Gets the interval or raises an error if it is missing or an unexpected type."""
         if not self.interval:
-            raise NotImplementedError('Interval must be provided by subclass')
-        if (not isinstance(self.interval, relativedelta)
-            and not isinstance(self.interval, timedelta)):
-            # we use relativedelta in addition to timedelta because it gives us a greater
-            # flexibility in the kinds of intervals we can define, e.g. weeks and months
-            raise TypeError('Interval must be relativedelta or timedelta')
+            raise NotImplementedError('Interval must be provided by subclass or when initialized.')
         return self.interval
 
 
@@ -177,14 +183,6 @@ class ActivityDigest(Digest):
         super(ActivityDigest, self).__init__(**kwargs)
         self.subject = self.get_subject()
 
-    def get_subject(self):
-        """Summarizes the activities in the notification."""
-        count = self.activity['count']
-        subject = str(count) + ' Update'
-        if count > 1:
-            subject += 's'
-        return subject
-
     def get_context_data(self, *args):
         """Adds classified activity to the context."""
         context = super(ActivityDigest, self).get_context_data(*args)
@@ -197,8 +195,8 @@ class ActivityDigest(Digest):
         user_ct = ContentType.objects.get_for_model(self.user)
         following = (user_stream(self.user).filter(timestamp__gte=duration)
                                            .exclude(verb__icontains='following'))
-        foia_following = self.model_stream(FOIARequest, following)
-        question_following = self.model_stream(Question, following).exclude(verb='asked')
+        foia_following = model_stream(FOIARequest, following)
+        question_following = model_stream(Question, following).exclude(verb='asked')
         foia_stream = (Action.objects.owned_by(self.user, FOIARequest)
                                      .filter(timestamp__gte=duration)
                                      .exclude(actor_content_type=user_ct,
@@ -241,31 +239,19 @@ class ActivityDigest(Digest):
         classified['count'] = activity_count
         return classified
 
+    def get_subject(self):
+        """Summarizes the activities in the notification."""
+        count = self.activity['count']
+        subject = str(count) + ' Update'
+        if count > 1:
+            subject += 's'
+        return subject
+
     def send(self, *args):
         """Don't send the email if there's no activity."""
         if self.activity['count'] < 1:
             return 0
         return super(Digest, self).send(*args)
-
-
-class HourlyDigest(ActivityDigest):
-    """An hourly email digest"""
-    interval = relativedelta(hours=1)
-
-
-class DailyDigest(ActivityDigest):
-    """A daily email digest"""
-    interval = relativedelta(days=1)
-
-
-class WeeklyDigest(ActivityDigest):
-    """A weekly email digest"""
-    interval = relativedelta(weeks=1)
-
-
-class MonthlyDigest(ActivityDigest):
-    """A monthly email digest"""
-    interval = relativedelta(months=1)
 
 
 class StaffDigest(Digest):
