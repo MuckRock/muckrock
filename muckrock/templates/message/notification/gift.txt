@@ -1,7 +1,5 @@
-{% load humanize %}
-{% autoescape off %}
-Hi {{user.first_name}},
-
+{% extends 'message/base.txt' %}
+{% block body %}
 We are happy to tell you that {%if from.is_anonymous%}an anonymous user{%else%}{{from.get_full_name}}{%endif%} has gifted you {{gift}}. How sweet of them!
 
 Sincerely,

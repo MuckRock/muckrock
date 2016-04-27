@@ -1,7 +1,5 @@
-{% load humanize %}
-{% autoescape off %}
-Hi {{user.first_name}},
-
+{% extends 'message/base.txt' %}
+{% block body %}
 This mail is to let you know that the email associated with your MuckRock account has changed.
 If you did not make this change or something seems amiss, please contact us at info@muckrock.com.
 
