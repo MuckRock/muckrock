@@ -12,14 +12,18 @@ class TemplateEmail(EmailMultiAlternatives):
     It supports sending a templated email to a user and providing extra template context.
     It always adds the MuckRock diagnostic email as a BCC'd address.
     Both a HTML and a text template should be provided by subclasses or instances.
+    The summary attribute is blank by default and is a hack to populate the "email preview"
+    display within some (not all) email clients.
     Subjects are expected to be provided at initialization, however a subclass may provide
     a static subject attribute if it is provided to the super __init__ method as as kwarg.
     """
     user = None
     text_template = None
     html_template = None
+    summary = u''
 
-    def __init__(self, user=None, extra_context=None, text_template=None, html_template=None, **kwargs):
+    def __init__(self, user=None, extra_context=None, text_template=None, html_template=None,
+                 summary=None, **kwargs):
         """Sets the universal attributes for all our email."""
         super(TemplateEmail, self).__init__(**kwargs)
         if isinstance(user, User):
@@ -39,11 +43,17 @@ class TemplateEmail(EmailMultiAlternatives):
         self.bcc.append('diagnostics@muckrock.com')
         self.body = content['text']
         self.attach_alternative(content['html'], 'text/html')
+        if summary:
+            if isinstance(summary, basestring):
+                self.summary = summary
+            else:
+                raise TypeError('"summary" argument must be a string')
 
     def get_context_data(self, extra_context):
         """Sets basic context data and allow extra context to be passed in."""
         context = {
             'base_url': 'https://www.muckrock.com',
+            'summary': self.summary,
             'subject': self.subject,
             'user': self.user
         }
