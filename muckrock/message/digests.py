@@ -140,8 +140,8 @@ class ActivityDigest(Digest):
     An ActivityDigest describes a collection of activity over a duration, which
     is then rendered into an email and delivered at a scheduled interval.
     """
-    text_template = 'message/digest.txt'
-    html_template = 'message/digest.html'
+    text_template = 'message/digest/digest.txt'
+    html_template = 'message/digest/digest.html'
 
     # Here we scaffold out the activity dictionary.
     # It is scaffolded to prevent key errors when counting
@@ -187,6 +187,8 @@ class ActivityDigest(Digest):
         """Adds classified activity to the context."""
         context = super(ActivityDigest, self).get_context_data(*args)
         context['activity'] = self.get_activity()
+        context['subject'] = self.get_subject()
+        context['summary'] = self.summarize_activity()
         return context
 
     def get_activity(self):
@@ -245,7 +247,11 @@ class ActivityDigest(Digest):
         subject = str(count) + ' Update'
         if count > 1:
             subject += 's'
-        return subject
+        return self.subject + ': ' + subject
+
+    def summarize_activity(self):
+        """Summarizes the activity in the digest."""
+        return u''
 
     def send(self, *args):
         """Don't send the email if there's no activity."""
@@ -256,8 +262,8 @@ class ActivityDigest(Digest):
 
 class StaffDigest(Digest):
     """An email that digests other site stats for staff members."""
-    text_template = 'message/staff_digest.txt'
-    html_template = 'message/staff_digest.html'
+    text_template = 'message/digest/staff_digest.txt'
+    html_template = 'message/digest/staff_digest.html'
     interval = relativedelta(days=1)
 
     def get_context_data(self, *args):
