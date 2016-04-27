@@ -157,20 +157,22 @@ def failed_payment(invoice_id):
     profile.save()
     subject = u'Your payment has failed'
     org = None
+    if subscription_type == 'org':
+        org = Organization.objects.get(owner=user)
     if attempt == 4:
         # on last attempt, cancel the user's subscription and lower the failed payment flag
         if subscription_type == 'pro':
             profile.cancel_pro_subscription()
         elif subscription_type == 'org':
-            org = Organization.objects.get(owner=user)
             org.cancel_subscription()
         profile.payment_failed = False
         profile.save()
         logger.info('%s subscription has been cancelled due to failed payment', user.username)
-        subject = u'Your %s account has been cancelled' % subscription_type
+        subject = u'Your %s subscription has been cancelled' % subscription_type
         context = {
             'attempt': 'final',
-            'type': subscription_type
+            'type': subscription_type,
+            'org': org
         }
     else:
         logger.info('Failed payment by %s, attempt %s', user.username, attempt)
@@ -184,7 +186,8 @@ def failed_payment(invoice_id):
         extra_context=context,
         text_template='message/notification/failed_payment.txt',
         html_template='message/notification/failed_payment.html',
-        subject=subject
+        subject=subject,
+
     )
     notification.send(fail_silently=False)
 
