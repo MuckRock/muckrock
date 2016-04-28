@@ -105,9 +105,14 @@ class TestNotificationTasks(TestCase):
         tasks.gift(self.user, sender, gift)
         mock_send.assert_called_with(fail_silently=False)
 
-    def test_email_change_task(self, mock_send):
-        """Make sure the notification is actually sent."""
+    def test_email_change(self, mock_send):
+        """Notify the user of a change to their account email."""
         tasks.email_change(self.user, 'old.email@email.com')
+        mock_send.assert_called_with(fail_silently=False)
+
+    def test_email_verify(self, mock_send):
+        """Ask the user to verify their account email."""
+        tasks.email_verify(self.user)
         mock_send.assert_called_with(fail_silently=False)
 
 

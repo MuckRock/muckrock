@@ -50,6 +50,7 @@ from muckrock.message.tasks import (
         send_charge_receipt,
         send_invoice_receipt,
         failed_payment,
+        email_verify,
         welcome,
         gift,
         )
@@ -326,38 +327,26 @@ def buy_requests(request, username=None):
         logger.warn('Payment error: %s', exception, exc_info=sys.exc_info())
     return redirect(url_redirect)
 
-
 @login_required
 def verify_email(request):
     """Verifies a user's email address"""
     user = request.user
-    prof = user.profile
+    profile = user.profile
     key = request.GET.get('key')
-    if not prof.email_confirmed:
+    if not profile.email_confirmed:
         if key:
-            if key == prof.confirmation_key:
-                prof.email_confirmed = True
-                prof.save()
+            if key == profile.confirmation_key:
+                profile.email_confirmed = True
+                profile.save()
                 messages.success(request, 'Your email address has been confirmed.')
             else:
                 messages.error(request, 'Your confirmation key is invalid.')
         else:
-            send_mail(
-                'Verify Your MuckRock Email',
-                render_to_string('text/user/verify_email.txt', {
-                    'user': user,
-                    'verification_link': user.profile.wrap_url(
-                        reverse('acct-verify-email'),
-                        key=prof.generate_confirmation_key())
-                }),
-                'info@muckrock.com',
-                [user.email],
-                fail_silently=False
-            )
+            email_verify.delay(user)
             messages.info(request, 'We just sent you an email containing your verification link.')
     else:
         messages.warning(request, 'Your email is already confirmed, no need to verify again!')
-    return redirect(prof)
+    return redirect(profile)
 
 def profile(request, username=None):
     """View a user's profile"""

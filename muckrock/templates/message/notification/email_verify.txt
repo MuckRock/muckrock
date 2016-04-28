@@ -1,0 +1,12 @@
+{% extends 'message/base.txt' %}
+{% block body %}
+Hi {{ user.first_name }},
+
+This message is to verify the email associated with your MuckRock account.
+Follow this link to complete the verification process: {{base_url}}{{ verification_link|safe }}
+
+If you have any questions, send an email to info@muckrock.com and we'll help you out.
+
+Sincerely,
+The MuckRock Team
+{% endblock %}

@@ -240,3 +240,21 @@ def email_change(user, old_email):
     )
     notification.to.append(old_email) # Send to both the new and old email addresses
     notification.send(fail_silently=False)
+
+@task(name='muckrock.message.tasks.email_verify')
+def email_verify(user):
+    """Verify the user's email by sending them a message."""
+    url = reverse('acct-verify-email')
+    key = user.profile.generate_confirmation_key()
+    context = {
+        'user': user,
+        'verification_link': user.profile.wrap_url(url, key=key)
+    }
+    notification = TemplateEmail(
+        user=user,
+        extra_context=context,
+        text_template='message/notification/email_verify.txt',
+        html_template='message/notification/email_verify.html',
+        subject=u'Verify your email'
+    )
+    notification.send(fail_silently=False)
