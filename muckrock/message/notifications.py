@@ -40,12 +40,6 @@ class EmailNotification(EmailMultiAlternatives):
             return self.text_template
 
 
-class GiftNotification(EmailNotification):
-    """Sends a gift notification to the receipient"""
-    text_template = 'message/notification/gift.txt'
-    subject = u'You have a gift'
-
-
 class EmailChangeNotification(EmailNotification):
     """Sends an email confirming an email change"""
     text_template = 'message/notification/email_change.txt'

@@ -215,7 +215,13 @@ def gift(to_user, from_user, gift_description):
         'from': from_user,
         'gift': gift_description
     }
-    notification = notifications.GiftNotification(to_user, context)
+    notification = TemplateEmail(
+        user=to_user,
+        extra_context=context,
+        text_template='message/notification/gift.txt',
+        html_template='message/notification/gift.html',
+        subject=u'You got a gift!'
+    )
     notification.send(fail_silently=False)
 
 @task(name='muckrock.message.tasks.email_change')
