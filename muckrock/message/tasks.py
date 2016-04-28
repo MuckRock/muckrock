@@ -231,6 +231,12 @@ def email_change(user, old_email):
         'old_email': old_email,
         'new_email': user.email
     }
-    notification = notifications.EmailChangeNotification(user, context)
+    notification = TemplateEmail(
+        user=user,
+        extra_context=context,
+        text_template='message/notification/email_change.txt',
+        html_template='message/notification/email_change.html',
+        subject=u'Changed email address'
+    )
     notification.to.append(old_email) # Send to both the new and old email addresses
     notification.send(fail_silently=False)

@@ -40,12 +40,6 @@ class EmailNotification(EmailMultiAlternatives):
             return self.text_template
 
 
-class EmailChangeNotification(EmailNotification):
-    """Sends an email confirming an email change"""
-    text_template = 'message/notification/email_change.txt'
-    subject = u'Changed email address'
-
-
 class SupportNotification(EmailNotification):
     """Send a support email."""
     text_template = 'message/notification/support.txt'
