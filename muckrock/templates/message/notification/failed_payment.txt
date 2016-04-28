@@ -6,20 +6,20 @@ Hi {{user.first_name}},
 {% if type == 'pro' %}{% if attempt == "final" %}
 Your Pro subscription has been cancelled.
 
-Our final attempt to charge your card has failed and your account has been reverted back to a free Basic account. Resubscribe here: https://www.muckrock.com{% url 'accounts' %}
+Our final attempt to charge your card has failed and your account has been reverted back to a free Basic account. Resubscribe here: {{base_url}}{% url 'accounts' %}
 {% else %}
 Your Pro subscription payment has failed.
 
-This is the {{attempt|ordinal}} attempt. The payment will be retried up to 3 times. Update your billing information here:  https://www.muckrock.com{% url 'acct-settings' %}
+This is the {{attempt|ordinal}} attempt. The payment will be retried up to 3 times. Update your billing information here:  {{base_url}}{% url 'acct-settings' %}
 {% endif %}
 {% elif type == 'org' %}{% if attempt == "final" %}
 Your Organization has been deactivated.
 
-Our final attempt to charge your card has failed and your organization has been deactivated. Reactivate here: https://www.muckrock.com{% url 'org-activate' slug=org.slug %}
+Our final attempt to charge your card has failed and your organization has been deactivated. Reactivate here: {{base_url}}{% url 'org-activate' slug=org.slug %}
 {% else %}
 Your Organization subscription payment has failed.
 
-This is the {{attempt|ordinal}} attempt. The payment will be retried up to 3 times. Update your billing information here:  https://www.muckrock.com{% url 'acct-settings' %}
+This is the {{attempt|ordinal}} attempt. The payment will be retried up to 3 times. Update your billing information here:  {{base_url}}{% url 'acct-settings' %}
 {% endif %}
 {% endif %}
 

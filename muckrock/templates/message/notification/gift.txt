@@ -2,7 +2,7 @@
 {% block body %}
 Hi {{user.first_name}},
 
-We are pleased to tell you that {%if from.is_anonymous%}an anonymous user{%else%}{{from.get_full_name}} ({{from.get_absolute_url}}){%endif%} has sent you a gift of {{gift}}.
+We are pleased to tell you that {%if from.is_anonymous%}an anonymous user{%else%}{{from.get_full_name}} ({{base_url}}{{from.get_absolute_url}}){%endif%} has sent you a gift of {{gift}}.
 
 How sweet of them!
 

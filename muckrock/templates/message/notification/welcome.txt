@@ -6,10 +6,10 @@ Welcome to MuckRock!
 
 Just a reminder, your username is {{ user.username }}.
 {% if password_link %}
-Your account is almost set up, but we need you to set a password. You can set it here: https://www.muckrock.com{{ password_link }}
+Your account is almost set up, but we need you to set a password. You can set it here: {{base_url}}{{ password_link }}
 {% endif %}
-We ask that you please verify your email by following this link: https://www.muckrock.com{{ verification_link|safe }}
-You can also verify your email from your account settings page: https://www.muckrock.com{% url 'acct-settings' %}
+We ask that you please verify your email by following this link: {{base_url}}{{ verification_link|safe }}
+You can also verify your email from your account settings page: {{base_url}}{% url 'acct-settings' %}
 
 Have a technical support or customer service issue?
 
@@ -18,7 +18,7 @@ Have a technical support or customer service issue?
 
 Looking for FOIA advice?
 
-* Post your question to our forum to get invaluable insight from MuckRock's community of public records pros. https://www.muckrock.com/questions/
+* Post your question to our forum to get invaluable insight from MuckRock's community of public records pros. {{base_url}}{% url 'question-index' %}
 * Send us your question through Twitter. https://www.twitter.com/muckrock/
 
 Once again, welcome to the MuckRock community. We are excited to see what you do with the tools we've built.
