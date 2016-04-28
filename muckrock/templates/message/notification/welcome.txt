@@ -1,3 +1,5 @@
+{% extends 'message/base.txt' %}
+{% block body %}
 Hi {{user.first_name}},
 
 Welcome to MuckRock!
@@ -19,7 +21,8 @@ Looking for FOIA advice?
 * Post your question to our forum to get invaluable insight from MuckRock's community of public records pros. https://www.muckrock.com/questions/
 * Send us your question through Twitter. https://www.twitter.com/muckrock/
 
-Thank you so much for joining the MuckRock community. We are excited to see what you do with the tools we've built.
+Once again, welcome to the MuckRock community. We are excited to see what you do with the tools we've built.
 
 Sincerely,
 The MuckRock Team
+{% endblock %}

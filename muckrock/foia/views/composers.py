@@ -39,6 +39,7 @@ from muckrock.foia.models import (
     STATUS,
     )
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.message.tasks import welcome
 from muckrock.task.models import NewAgencyTask, MultiRequestTask
 
 # pylint: disable=too-many-ancestors
@@ -167,19 +168,7 @@ def _make_user(request, data):
     )
     # send the new user a welcome email
     password_link = user.profile.wrap_url(reverse('acct-change-pw'))
-    send_mail(
-        'Welcome to MuckRock',
-        render_to_string('text/user/welcome.txt', {
-            'user': user,
-            'password_link': password_link,
-            'verification_link': user.profile.wrap_url(
-                reverse('acct-verify-email'),
-                key=user.profile.generate_confirmation_key())
-        }),
-        'info@muckrock.com',
-        [data['email']],
-        fail_silently=False
-    )
+    welcome.delay(user, password_link)
     # login the new user
     user = authenticate(username=username, password=password)
     login(request, user)

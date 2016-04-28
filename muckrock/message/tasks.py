@@ -187,17 +187,25 @@ def failed_payment(invoice_id):
         text_template='message/notification/failed_payment.txt',
         html_template='message/notification/failed_payment.html',
         subject=subject,
-
     )
     notification.send(fail_silently=False)
 
 @task(name='muckrock.message.tasks.welcome')
-def welcome(user):
+def welcome(user, password_link=None):
     """Send a welcome notification to a new user. Hello!"""
     verification_url = reverse('acct-verify-email')
     key = user.profile.generate_confirmation_key()
-    context = {'verification_link': user.profile.wrap_url(verification_url, key=key)}
-    notification = notifications.WelcomeNotification(user, context)
+    context = {
+        'password_link': password_link,
+        'verification_link': user.profile.wrap_url(verification_url, key=key)
+    }
+    notification = TemplateEmail(
+        user=user,
+        extra_context=context,
+        text_template='message/notification/welcome.txt',
+        html_template='message/notification/welcome.html',
+        subject=u'Welcome to MuckRock!'
+    )
     notification.send(fail_silently=False)
 
 @task(name='muckrock.message.tasks.gift')

@@ -92,7 +92,7 @@ class TestWelcomeTask(TestCase):
     def setUp(self):
         self.user = factories.UserFactory()
 
-    @mock.patch('muckrock.message.notifications.WelcomeNotification.send')
+    @mock.patch('muckrock.message.email.TemplateEmail.send')
     def test_welcome_notification_task(self, mock_send):
         """Make sure the notification is actually sent!"""
         tasks.welcome(self.user)
