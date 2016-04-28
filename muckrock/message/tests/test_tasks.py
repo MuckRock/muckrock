@@ -11,6 +11,7 @@ import nose.tools
 
 from muckrock import factories
 from muckrock.message import tasks
+from muckrock.task.factories import FlaggedTaskFactory
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
@@ -113,6 +114,12 @@ class TestNotificationTasks(TestCase):
     def test_email_verify(self, mock_send):
         """Ask the user to verify their account email."""
         tasks.email_verify(self.user)
+        mock_send.assert_called_with(fail_silently=False)
+
+    def test_support(self, mock_send):
+        """Notifies the user with a support response."""
+        task = FlaggedTaskFactory()
+        tasks.support(self.user, 'Hello', task)
         mock_send.assert_called_with(fail_silently=False)
 
 

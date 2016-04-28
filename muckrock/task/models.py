@@ -15,7 +15,8 @@ import logging
 from muckrock.agency.models import Agency, STALE_DURATION
 from muckrock.foia.models import FOIACommunication, FOIAFile, FOIANote, FOIARequest, STATUS
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.message.notifications import SupportNotification
+from muckrock.message.tasks import support
+from muckrock.message.notifications import ProjectNotification
 from muckrock.models import ExtractDay, Now
 
 # pylint: disable=missing-docstring
@@ -363,8 +364,7 @@ class FlaggedTask(Task):
 
     def reply(self, text):
         """Send an email reply to the user that raised the flag."""
-        support_email = SupportNotification(self.user, {'message': text, 'task': self})
-        support_email.send()
+        support.delay(self.user, text, self)
 
 
 class NewAgencyTask(Task):

@@ -247,7 +247,6 @@ def email_verify(user):
     url = reverse('acct-verify-email')
     key = user.profile.generate_confirmation_key()
     context = {
-        'user': user,
         'verification_link': user.profile.wrap_url(url, key=key)
     }
     notification = TemplateEmail(
@@ -255,6 +254,22 @@ def email_verify(user):
         extra_context=context,
         text_template='message/notification/email_verify.txt',
         html_template='message/notification/email_verify.html',
+        subject=u'Verify your email'
+    )
+    notification.send(fail_silently=False)
+
+@task(name='muckrock.message.tasks.support')
+def support(user, message, task):
+    """Send a response to a user about a task."""
+    context = {
+        'message': message,
+        'task': task
+    }
+    notification = TemplateEmail(
+        user=user,
+        extra_context=context,
+        text_template='message/notification/support.txt',
+        html_template='message/notification/support.html',
         subject=u'Verify your email'
     )
     notification.send(fail_silently=False)
