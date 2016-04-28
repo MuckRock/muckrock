@@ -87,29 +87,22 @@ class TestStaffTask(TestCase):
         mock_send.assert_called_with()
 
 
-class TestWelcomeTask(TestCase):
-    """Tests the welcome email notification sent to new users."""
+@mock.patch('muckrock.message.email.TemplateEmail.send')
+class TestNotificationTasks(TestCase):
+    """Email notifications are sent to users upon key events."""
     def setUp(self):
         self.user = factories.UserFactory()
 
-    @mock.patch('muckrock.message.email.TemplateEmail.send')
-    def test_welcome_notification_task(self, mock_send):
-        """Make sure the notification is actually sent!"""
+    def test_welcome(self, mock_send):
+        """Welcomes a new user to the site."""
         tasks.welcome(self.user)
         mock_send.assert_called_with(fail_silently=False)
 
-
-class TestGiftTask(TestCase):
-    """Tests the gift email notification sent to gift recipients."""
-    def setUp(self):
-        self.user = factories.UserFactory()
-        self.sender = factories.UserFactory()
-        self.gift = '4 requests'
-
-    @mock.patch('muckrock.message.notifications.GiftNotification.send')
-    def test_gift_notification_task(self, mock_send):
-        """Make sure the notification is actually sent."""
-        tasks.gift(self.user, self.sender, self.gift)
+    def test_gift(self, mock_send):
+        """Tells the user when they have been given a gift."""
+        sender = factories.UserFactory()
+        gift = '4 requests'
+        tasks.gift(self.user, sender, gift)
         mock_send.assert_called_with(fail_silently=False)
 
 
