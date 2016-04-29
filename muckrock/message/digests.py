@@ -185,7 +185,6 @@ class ActivityDigest(Digest):
         context = super(ActivityDigest, self).get_context_data(*args)
         context['activity'] = self.get_activity()
         context['subject'] = self.get_subject()
-        context['summary'] = self.summarize_activity()
         return context
 
     def get_activity(self):
@@ -245,12 +244,6 @@ class ActivityDigest(Digest):
         if count > 1:
             subject += 's'
         return self.subject + ': ' + subject
-
-    # TODO summarize digest
-    def summarize_activity(self):
-        """Summarizes the activity in the digest."""
-        # pylint: disable=no-self-use
-        return u''
 
     def send(self, *args):
         """Don't send the email if there's no activity."""
