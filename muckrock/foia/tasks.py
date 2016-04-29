@@ -177,7 +177,7 @@ def submit_multi_request(req_pk, **kwargs):
             template = get_template('text/foia/request.txt')
             context = Context({'document_request': req.requested_docs,
                                'jurisdiction': agency.jurisdiction,
-                               'user': req.user})
+                               'user_name': req.user.get_full_name()})
             foia_request = template.render(context).split('\n', 1)[1].strip()
 
             new_foia = FOIARequest.objects.create(

@@ -41,7 +41,7 @@
     {# full letter here, hidden #}
     <header>Full letter</header>
     <textarea name="full-communication" id="full-letter-{{task.pk}}">
-{{foia.agency.address}}
+{{agency.address}}
 
 {% now "F j, Y" %}
 {% with foia as request %}{% include "text/foia/comms.txt" with show_all_comms=True %}{% endwith %}

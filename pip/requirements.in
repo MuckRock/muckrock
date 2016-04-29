@@ -1,6 +1,6 @@
 -e git://github.com/callowayproject/django-news-sitemaps.git@55da6b72580dd6d79380f2bb17240e7afa00555a#egg=django_news_sitemaps-master # Generates a news sitemap
 -e git://github.com/django-haystack/django-haystack.git@f1ed18313777005dd77ed724ecbfb27c0b03cad8#egg=django-haystack # django search engine
--e git://github.com/rentapplication/django-mailgun.git@2ec07afcda0db7dfe5588f83e9ed299bc04bb0b5#egg=django_mailgun # Mail backend used directly (on production)
+-e git://github.com/BradWhittington/django-mailgun.git@4f2edb9466f6245c3bbf501aab2681f0b3c71e0c#egg=django_mailgun # Mail backend used directly (on production)
 boto # Used to access AWS
 celery # Used to run async tasks
 celery-haystack # Integrate celery and haystack
