@@ -22,15 +22,26 @@ class TemplateEmail(EmailMultiAlternatives):
     html_template = None
     summary = u''
 
-    def __init__(self, user=None, extra_context=None, text_template=None, html_template=None,
-                 summary=None, **kwargs):
+    def __init__(self, user=None, **kwargs):
         """Sets the universal attributes for all our email."""
+        # Pop our expected keyword arguments to prevent base class init errors
+        extra_context = kwargs.pop('extra_context', None)
+        text_template = kwargs.pop('text_template', None)
+        html_template = kwargs.pop('html_template', None)
+        summary = kwargs.pop('summary', None)
+        # Initialize the base class
         super(TemplateEmail, self).__init__(**kwargs)
+        # Set the fields for the TemplateEmail
         if isinstance(user, User):
             self.user = user
             self.to.append(user.email)
         else:
             raise TypeError('"user" argument expects a User type')
+        if summary:
+            if isinstance(summary, basestring):
+                self.summary = summary
+            else:
+                raise TypeError('"summary" argument must be a string')
         if text_template:
             self.text_template = text_template
         if html_template:
@@ -43,11 +54,6 @@ class TemplateEmail(EmailMultiAlternatives):
         self.bcc.append('diagnostics@muckrock.com')
         self.body = content['text']
         self.attach_alternative(content['html'], 'text/html')
-        if summary:
-            if isinstance(summary, basestring):
-                self.summary = summary
-            else:
-                raise TypeError('"summary" argument must be a string')
 
     def get_context_data(self, extra_context):
         """Sets basic context data and allow extra context to be passed in."""
