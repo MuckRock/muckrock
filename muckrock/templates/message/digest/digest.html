@@ -47,3 +47,7 @@
         {% endif %}
     {% endif %}
 {% endblock body %}
+
+{% block settings %}
+<p>Change your digest frequency or disable digests from your <a href="{% url 'acct-settings' %}">account settings</a>.</p>
+{% endblock %}

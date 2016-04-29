@@ -1,8 +1,11 @@
-{% extends 'message/notification/base.txt' %}
-{% block message %}
-This mail is to let you know that the email associated with your MuckRock account has changed.
+{% extends 'message/base.txt' %}
+{% block body %}
+Hi {{user.first_name}},
+
+We wanted to let you know that the email associated with your MuckRock account has changed from {{old_email}} to {{new_email}}.
+
 If you did not make this change or something seems amiss, please contact us at info@muckrock.com.
 
-Old email: {{ old_email }}
-New email: {{ new_email }}
+Sincerely,
+The MuckRock Team
 {% endblock %}

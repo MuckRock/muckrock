@@ -7,6 +7,7 @@
         {% csrf_token %}
         <h1>Log In</h1>
         {{ login_form }}
+        <p><a class="forgot" href="{% url 'acct-reset-pw' %}">Forget your password?</a></p>
         <div class="row">
             <span class="cancel button">Cancel</span>
             <button type="submit" class="primary" onclick="ga('send', 'event', 'Account', 'Login', window.location.pathname)">Log In</button>

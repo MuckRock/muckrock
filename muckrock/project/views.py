@@ -122,6 +122,8 @@ class ProjectDetailView(DetailView):
                     'jurisdiction',
                     'jurisdiction__parent',
                     'jurisdiction__parent__parent',
+                    'agency__jurisdiction',
+                    'user__profile',
                     ))
         context['followers'] = actstream.models.followers(project)
         context['articles'] = project.articles.get_published()

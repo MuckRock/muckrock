@@ -5,7 +5,7 @@ Views for the FOIA application
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.db.models import Prefetch
@@ -562,7 +562,6 @@ def redirect_old(request, jurisdiction, slug, idx, action):
 
     return redirect('/foi/%(jurisdiction)s-%(jidx)s/%(slug)s-%(idx)s/%(action)s/' % locals())
 
-@user_passes_test(lambda u: u.is_staff)
 def acronyms(request):
     """A page with all the acronyms explained"""
     status_dict = dict(STATUS)

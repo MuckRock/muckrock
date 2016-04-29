@@ -535,6 +535,7 @@ class FOIARequest(models.Model):
             self.date_processing = date.today()
             task.models.FlaggedTask.objects.create(
                     foia=self,
+                    user=self.user,
                     text='This request was filed for an agency requiring a '
                     'proxy, but no proxy was available.  Please add a suitable '
                     'proxy for the state and refile it with a note that the '
@@ -657,6 +658,8 @@ class FOIARequest(models.Model):
 
         if from_addr == 'fax':
             subject = 'MR#%s-%s - %s' % (self.pk, comm.pk, subject)
+        # max database size
+        subject = subject[:255]
 
         cc_addrs = self.get_other_emails()
         from_email = '%s@%s' % (from_addr, settings.MAILGUN_SERVER_NAME)

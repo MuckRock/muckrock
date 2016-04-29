@@ -294,9 +294,12 @@ class FlaggedTaskList(TaskList):
         """Special post handler for FlaggedTasks"""
         if request.POST.get('reply'):
             reply_form = FlaggedTaskForm(request.POST)
-            if reply_form.is_valid():
+            if reply_form.is_valid() and task.user:
                 text = reply_form.cleaned_data['text']
                 task.reply(text)
+            elif reply_form.is_valid():
+                messages.error(request, 'Cannot reply - task has no user')
+                return
             else:
                 messages.error(request, 'The form is invalid')
                 return

@@ -1,8 +1,10 @@
+{% extends 'message/base.txt' %}
+{% block body %}
 {{ salutation }}, {{ user.first_name }}. Here's what happened on MuckRock yesterday ({{ yesterday|date:'m/d/y' }}):
 
 --------------------------
 Stats
-..........................
+- - - - - - - - - - - - -
 
 Statistic, Today's value, Change from yesterday
 {% for stat in activity.stats %}
@@ -11,7 +13,7 @@ Statistic, Today's value, Change from yesterday
 
 --------------------------
 Communications
-..........................
+- - - - - - - - - - - - -
 
 Sent, {{ activity.comms.sent }}
 Received, {{ activity.comms.received }}
@@ -28,3 +30,4 @@ Post, {{ sent.format.mail }}, ${{ sent.cost.mail }}, ${{ sent.expense.mail }}, $
 {% endwith %}
 
 That's all for today. {{ signoff }} and see you tomorrow.
+{% endblock %}
