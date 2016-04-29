@@ -1,0 +1,7 @@
+{% extends 'message/base.html' %}
+{% block body %}
+<p>Hi {{user.first_name}},</p>
+<p>We wanted to let you know that the email associated with your MuckRock account has changed from {{old_email}} to {{new_email}}.</p>
+<p>If you did not make this change or something seems amiss, please <a href="mailto:info@muckrock.com">contact us</a>.
+<p>Sincerely,<br/>The MuckRock Team</p>
+{% endblock %}
