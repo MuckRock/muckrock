@@ -177,6 +177,7 @@ class FlaggedTaskTests(TestCase):
         flagged_task.reply(reply)
         mock_support.assert_called_with(flagged_task.user, reply, flagged_task)
 
+
 @mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class ProjectReviewTaskTests(TestCase):
     """
@@ -195,26 +196,26 @@ class ProjectReviewTaskTests(TestCase):
         _url = reverse('projectreview-task', kwargs={'pk': self.task.pk})
         eq_(self.task.get_absolute_url(), _url)
 
-    @mock.patch('muckrock.message.notifications.ProjectNotification.send')
+    @mock.patch('muckrock.message.email.TemplateEmail.send')
     def test_reply(self, mock_feedback_send):
         self.task.reply('Lorem ipsum')
-        mock_feedback_send.assert_called_with()
+        mock_feedback_send.assert_called_with(fail_silently=False)
 
-    @mock.patch('muckrock.message.notifications.ProjectNotification.send')
+    @mock.patch('muckrock.message.email.TemplateEmail.send')
     def test_approve(self, mock_notification_send):
         """Approving the task should mark it approved and notify the contributors."""
         self.task.approve('Lorem ipsum')
         ok_(self.task.project.approved,
             'The project should be approved')
-        mock_notification_send.assert_called_with()
+        mock_notification_send.assert_called_with(fail_silently=False)
 
-    @mock.patch('muckrock.message.notifications.ProjectNotification.send')
+    @mock.patch('muckrock.message.email.TemplateEmail.send')
     def test_reject(self, mock_notification_send):
         """Rejecting the task should mark it private and notify the contributors."""
         self.task.reject('Lorem ipsum')
         ok_(self.task.project.private,
             'The project should be made private.')
-        mock_notification_send.assert_called_with()
+        mock_notification_send.assert_called_with(fail_silently=False)
 
 
 class SnailMailTaskTests(TestCase):

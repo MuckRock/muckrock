@@ -15,6 +15,7 @@ import logging
 from muckrock.agency.models import Agency, STALE_DURATION
 from muckrock.foia.models import FOIACommunication, FOIAFile, FOIANote, FOIARequest, STATUS
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import support
 from muckrock.models import ExtractDay, Now
 
@@ -380,11 +381,15 @@ class ProjectReviewTask(Task):
 
     def reply(self, text, action='reply'):
         """Send an email reply to the user that raised the flag."""
-        contributors = list(self.project.contributors.all())
-        project_email = ProjectNotification(contributors, {
-            'action': action, 'message': text, 'task': self
-        })
-        project_email.send()
+        to = [contributor.email for contributor in self.project.contributors.all()]
+        project_email = TemplateEmail(
+            to=to,
+            extra_context={'action': action, 'message': text, 'task': self},
+            subject=u'%s %s' % (self.project, action),
+            text_template='message/project/%s.txt' % action,
+            html_template='message/project/%s.html' % action
+        )
+        project_email.send(fail_silently=False)
         return project_email
 
     def approve(self, text):
