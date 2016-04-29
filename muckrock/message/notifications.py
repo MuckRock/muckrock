@@ -40,30 +40,6 @@ class EmailNotification(EmailMultiAlternatives):
             return self.text_template
 
 
-class FailedPaymentNotification(EmailNotification):
-    """Sends a failed payment notification"""
-    text_template = 'message/notification/failed_payment.txt'
-    subject = u'Your payment failed'
-
-
-class WelcomeNotification(EmailNotification):
-    """Sends a welcome notification"""
-    text_template = 'text/user/welcome.txt'
-    subject = u'Welcome to MuckRock'
-
-
-class GiftNotification(EmailNotification):
-    """Sends a gift notification to the receipient"""
-    text_template = 'message/notification/gift.txt'
-    subject = u'You have a gift'
-
-
-class EmailChangeNotification(EmailNotification):
-    """Sends an email confirming an email change"""
-    text_template = 'message/notification/email_change.txt'
-    subject = u'Changed email address'
-
-
 class SupportNotification(EmailNotification):
     """Send a support email."""
     text_template = 'message/notification/support.txt'

@@ -7,13 +7,12 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
-from django.template.loader import render_to_string, get_template
+from django.template.loader import get_template
 from django.template import RequestContext, Context
 from django.utils.encoding import smart_text
 
@@ -39,6 +38,7 @@ from muckrock.foia.models import (
     STATUS,
     )
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.message.tasks import welcome
 from muckrock.task.models import NewAgencyTask, MultiRequestTask
 
 # pylint: disable=too-many-ancestors
@@ -167,19 +167,7 @@ def _make_user(request, data):
     )
     # send the new user a welcome email
     password_link = user.profile.wrap_url(reverse('acct-change-pw'))
-    send_mail(
-        'Welcome to MuckRock',
-        render_to_string('text/user/welcome.txt', {
-            'user': user,
-            'password_link': password_link,
-            'verification_link': user.profile.wrap_url(
-                reverse('acct-verify-email'),
-                key=user.profile.generate_confirmation_key())
-        }),
-        'info@muckrock.com',
-        [data['email']],
-        fail_silently=False
-    )
+    welcome.delay(user, password_link)
     # login the new user
     user = authenticate(username=username, password=password)
     login(request, user)

@@ -1,3 +1,5 @@
+{% extends 'message/base.txt' %}
+{% block body %}
 {% if follow_foia.count > 0 or my_foia.count > 0 %}
 --------------------------
 Requests
@@ -39,3 +41,8 @@ Following
 {% endfor %}
 {% endif %}
 {% endif %}
+{% endblock %}
+
+{% block settings %}
+Change your digest frequency or disable digests from your account settings (https://www.muckrock.com{% url 'acct-settings' %}).</p>
+{% endblock %}

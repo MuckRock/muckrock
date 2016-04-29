@@ -1,0 +1,33 @@
+{% extends 'message/base.html' %}
+{% load markdown_deux_tags %}
+{% block body %}
+{{message|markdown}}
+{% if task %}
+{% if task.text %}
+<div>
+    <h2>Original Message</h2>
+    <div>
+        {{task.text|markdown}}
+    </div>
+</div>
+{% endif %}
+<table>
+    <thead>
+        <tr>
+            <th>Support #</th>
+            <th>Created</th>
+            {% if task.flagged_object %}<th>For</th>{% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{task.id}}</td>
+            <td>{{task.date_created|date:"m/d/y"}}</td>
+            {% if task.flagged_object %}
+            <td><a href="{{task.flagged_object.get_absolute_url}}">{{task.flagged_object}}</a></td>
+            {% endif %}
+        </tr>
+    </tbody>
+</table>
+{% endif %}
+{% endblock %}

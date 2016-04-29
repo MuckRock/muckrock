@@ -168,13 +168,14 @@ class FlaggedTaskTests(TestCase):
         flagged_task = self.task.objects.create(user=user, text=text)
         flagged_task.flagged_object()
 
-    @mock.patch('muckrock.message.notifications.SupportNotification.send')
-    def test_reply(self, mock_support_send):
+    @mock.patch('muckrock.message.tasks.support.delay')
+    def test_reply(self, mock_support):
         """Given a message, a support notification should be sent to the task's user."""
         # pylint: disable=no-self-use
         flagged_task = FlaggedTaskFactory()
-        flagged_task.reply('Lorem ipsum')
-        mock_support_send.assert_called_with()
+        reply = 'Lorem ipsum'
+        flagged_task.reply(reply)
+        mock_support.assert_called_with(flagged_task.user, reply, flagged_task)
 
 
 class SnailMailTaskTests(TestCase):

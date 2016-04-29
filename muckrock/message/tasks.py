@@ -7,22 +7,28 @@ from django.core.urlresolvers import reverse
 
 from celery.schedules import crontab
 from celery.task import periodic_task, task
+from dateutil.relativedelta import relativedelta
 import logging
 import stripe
 
 from muckrock.accounts.models import Profile
-from muckrock.message import digests, notifications, receipts
+from muckrock.message.email import TemplateEmail
+from muckrock.message import digests, receipts
 from muckrock.organization.models import Organization
 
 logger = logging.getLogger(__name__)
 
-def send_digest(preference, digest):
+def send_activity_digest(subject, preference, interval):
     """Helper to send out timed digests"""
     profiles = Profile.objects.select_related('user').filter(email_pref=preference).distinct()
     for profile in profiles:
         # for now, only send experimental users the new updates
         if profile.experimental:
-            email = digest(profile.user)
+            email = digests.ActivityDigest(
+                user=profile.user,
+                interval=interval,
+                subject=subject
+            )
             email.send()
         else:
             profile.send_notifications()
@@ -31,13 +37,13 @@ def send_digest(preference, digest):
 @periodic_task(run_every=crontab(hour='*/1', minute=0), name='muckrock.message.tasks.hourly_digest')
 def hourly_digest():
     """Send out hourly digest"""
-    send_digest('hourly', digests.HourlyDigest)
+    send_activity_digest(u'Hourly Digest', 'hourly', relativedelta(hours=1))
 
 # every day at 10am
 @periodic_task(run_every=crontab(hour=10, minute=0), name='muckrock.message.tasks.daily_digest')
 def daily_digest():
     """Send out daily digest"""
-    send_digest('daily', digests.DailyDigest)
+    send_activity_digest(u'Daily Digest', 'daily', relativedelta(days=1))
 
 # every Monday at 10am
 @periodic_task(
@@ -45,7 +51,7 @@ def daily_digest():
     name='muckrock.message.tasks.weekly_digest')
 def weekly_digest():
     """Send out weekly digest"""
-    send_digest('weekly', digests.WeeklyDigest)
+    send_activity_digest(u'Weekly Digest', 'weekly', relativedelta(weeks=1))
 
 # first day of every month at 10am
 @periodic_task(
@@ -53,7 +59,7 @@ def weekly_digest():
     name='muckrock.message.tasks.monthly_digest')
 def monthly_digest():
     """Send out monthly digest"""
-    send_digest('monthly', digests.MonthlyDigest)
+    send_activity_digest(u'Monthly Digest', 'monthly', relativedelta(months=1))
 
 # every day at 9:30am
 @periodic_task(run_every=crontab(hour=9, minute=30), name='muckrock.message.tasks.staff_digest')
@@ -61,7 +67,7 @@ def staff_digest():
     """Send out staff digest"""
     staff_users = User.objects.filter(is_staff=True).distinct()
     for staff_user in staff_users:
-        email = digests.StaffDigest(staff_user)
+        email = digests.StaffDigest(user=staff_user, subject=u'Daily Staff Digest')
         email.send()
 
 @task(name='muckrock.message.tasks.send_invoice_receipt')
@@ -149,36 +155,57 @@ def failed_payment(invoice_id):
     # raise the failed payment flag on the profile
     profile.payment_failed = True
     profile.save()
+    subject = u'Your payment has failed'
+    org = None
+    if subscription_type == 'org':
+        org = Organization.objects.get(owner=user)
     if attempt == 4:
         # on last attempt, cancel the user's subscription and lower the failed payment flag
         if subscription_type == 'pro':
             profile.cancel_pro_subscription()
         elif subscription_type == 'org':
-            org = Organization.objects.get(owner=user)
             org.cancel_subscription()
         profile.payment_failed = False
         profile.save()
         logger.info('%s subscription has been cancelled due to failed payment', user.username)
+        subject = u'Your %s subscription has been cancelled' % subscription_type
         context = {
             'attempt': 'final',
-            'type': subscription_type
+            'type': subscription_type,
+            'org': org
         }
     else:
         logger.info('Failed payment by %s, attempt %s', user.username, attempt)
         context = {
             'attempt': attempt,
-            'type': subscription_type
+            'type': subscription_type,
+            'org': org
         }
-    notification = notifications.FailedPaymentNotification(user, context)
+    notification = TemplateEmail(
+        user=user,
+        extra_context=context,
+        text_template='message/notification/failed_payment.txt',
+        html_template='message/notification/failed_payment.html',
+        subject=subject,
+    )
     notification.send(fail_silently=False)
 
 @task(name='muckrock.message.tasks.welcome')
-def welcome(user):
+def welcome(user, password_link=None):
     """Send a welcome notification to a new user. Hello!"""
     verification_url = reverse('acct-verify-email')
     key = user.profile.generate_confirmation_key()
-    context = {'verification_link': user.profile.wrap_url(verification_url, key=key)}
-    notification = notifications.WelcomeNotification(user, context)
+    context = {
+        'password_link': password_link,
+        'verification_link': user.profile.wrap_url(verification_url, key=key)
+    }
+    notification = TemplateEmail(
+        user=user,
+        extra_context=context,
+        text_template='message/notification/welcome.txt',
+        html_template='message/notification/welcome.html',
+        subject=u'Welcome to MuckRock!'
+    )
     notification.send(fail_silently=False)
 
 @task(name='muckrock.message.tasks.gift')
@@ -188,7 +215,13 @@ def gift(to_user, from_user, gift_description):
         'from': from_user,
         'gift': gift_description
     }
-    notification = notifications.GiftNotification(to_user, context)
+    notification = TemplateEmail(
+        user=to_user,
+        extra_context=context,
+        text_template='message/notification/gift.txt',
+        html_template='message/notification/gift.html',
+        subject=u'You got a gift!'
+    )
     notification.send(fail_silently=False)
 
 @task(name='muckrock.message.tasks.email_change')
@@ -198,6 +231,45 @@ def email_change(user, old_email):
         'old_email': old_email,
         'new_email': user.email
     }
-    notification = notifications.EmailChangeNotification(user, context)
+    notification = TemplateEmail(
+        user=user,
+        extra_context=context,
+        text_template='message/notification/email_change.txt',
+        html_template='message/notification/email_change.html',
+        subject=u'Changed email address'
+    )
     notification.to.append(old_email) # Send to both the new and old email addresses
+    notification.send(fail_silently=False)
+
+@task(name='muckrock.message.tasks.email_verify')
+def email_verify(user):
+    """Verify the user's email by sending them a message."""
+    url = reverse('acct-verify-email')
+    key = user.profile.generate_confirmation_key()
+    context = {
+        'verification_link': user.profile.wrap_url(url, key=key)
+    }
+    notification = TemplateEmail(
+        user=user,
+        extra_context=context,
+        text_template='message/notification/email_verify.txt',
+        html_template='message/notification/email_verify.html',
+        subject=u'Verify your email'
+    )
+    notification.send(fail_silently=False)
+
+@task(name='muckrock.message.tasks.support')
+def support(user, message, _task):
+    """Send a response to a user about a task."""
+    context = {
+        'message': message,
+        'task': _task
+    }
+    notification = TemplateEmail(
+        user=user,
+        extra_context=context,
+        text_template='message/notification/support.txt',
+        html_template='message/notification/support.html',
+        subject=u'Verify your email'
+    )
     notification.send(fail_silently=False)
