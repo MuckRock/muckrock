@@ -3,6 +3,14 @@
 {% block body %}
 {{message|markdown}}
 {% if task %}
+{% if task.text %}
+<div>
+    <h2>Original Message</h2>
+    <div>
+        {{task.text|markdown}}
+    </div>
+</div>
+{% endif %}
 <table>
     <thead>
         <tr>
