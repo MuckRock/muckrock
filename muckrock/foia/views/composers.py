@@ -340,7 +340,7 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
             foia.title = data['title']
             foia.slug = slugify(foia.title) or 'untitled'
             foia.embargo = data['embargo']
-            has_perm = request.user.has_perm('foia.embargo_foiarequest', foia):
+            has_perm = request.user.has_perm('foia.embargo_foiarequest', foia)
             if foia.embargo and not has_perm:
                 error_msg = 'Only Pro users may embargo their requests.'
                 messages.error(request, error_msg)

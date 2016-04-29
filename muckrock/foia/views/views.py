@@ -235,7 +235,7 @@ class Detail(DetailView):
         )
         user = self.request.user
         valid_access_key = self.request.GET.get('key') == foia.access_key
-        has_perm = request.user.has_perm('foia.view_foiarequest', foia)
+        has_perm = self.request.user.has_perm('foia.view_foiarequest', foia)
         if not has_perm and not valid_access_key:
             raise Http404()
         if foia.created_by(user):
@@ -250,8 +250,8 @@ class Detail(DetailView):
         context = super(Detail, self).get_context_data(**kwargs)
         foia = context['foia']
         user = self.request.user
-        user_can_edit = request.user.has_perm('foia.change_foiarequest', foia)
-        user_can_embargo = request.user.has_perm('foia.embargo_foiarequest', foia)
+        user_can_edit = self.request.user.has_perm('foia.change_foiarequest', foia)
+        user_can_embargo = self.request.user.has_perm('foia.embargo_foiarequest', foia)
         is_past_due = foia.date_due < datetime.now().date() if foia.date_due else False
         include_draft = user.is_staff or foia.status == 'started'
         context['all_tags'] = Tag.objects.all()
