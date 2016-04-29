@@ -126,10 +126,7 @@ class Project(models.Model):
 
     def editable_by(self, user):
         """Checks whether the user can edit this project."""
-        if user.is_staff or self.has_contributor(user):
-            return True
-        else:
-            return False
+        return bool(user.is_staff or self.has_contributor(user))
 
     def active_crowdfunds(self):
         """Return all the active crowdfunds on this project."""

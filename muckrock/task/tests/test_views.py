@@ -321,7 +321,8 @@ class ProjectReviewTaskViewTests(TestCase):
     def test_get_single(self, mock_reply):
         """Should be able to view a single task"""
         # pylint: disable=unused-argument
-        request = self.request_factory.get(reverse('projectreview-task', kwargs={'pk': self.task.pk}))
+        _url = reverse('projectreview-task', kwargs={'pk': self.task.pk})
+        request = self.request_factory.get(_url)
         request.user = self.user
         request = mock_middleware(request)
         response = self.view(request)

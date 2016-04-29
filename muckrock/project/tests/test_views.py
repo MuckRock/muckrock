@@ -4,15 +4,14 @@ topics and issues we cover and then provide them avenues for
 deeper, sustained involvement with our work on those topics.
 """
 
-from django.contrib.auth.models import User, AnonymousUser
+from django.contrib.auth.models import AnonymousUser
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 from django.http import Http404
-from django.test import TestCase, Client, RequestFactory
+from django.test import TestCase, RequestFactory
 
 from datetime import date, timedelta
 from decimal import Decimal
-import logging
 import mock
 import nose.tools
 
@@ -142,7 +141,7 @@ class TestProjectEditView(TestCase):
     def test_basic(self):
         """Basic users should not be able to edit projects."""
         user = factories.UserFactory()
-        response = get_helper(self.view, self.url, user, **self.kwargs)
+        get_helper(self.view, self.url, user, **self.kwargs)
 
     def test_anonymous(self):
         """Logged out users cannot edit projects."""
@@ -165,7 +164,7 @@ class TestProjectEditView(TestCase):
         }
         form = forms.ProjectUpdateForm(data)
         ok_(form.is_valid(), 'The form should validate. %s' % form.errors)
-        response = post_helper(self.view, self.url, data, self.contributor, **self.kwargs)
+        post_helper(self.view, self.url, data, self.contributor, **self.kwargs)
         self.project.refresh_from_db()
         eq_(self.project.description, desc,
             'The description should be updated.')
@@ -200,7 +199,7 @@ class TestProjectPublishView(TestCase):
     def test_basic(self):
         """Basic users should not be able to delete projects."""
         user = factories.UserFactory()
-        response = get_helper(self.view, self.url, user, **self.kwargs)
+        get_helper(self.view, self.url, user, **self.kwargs)
 
     def test_anonymous(self):
         """Anonymous users cannot delete projects."""
@@ -313,7 +312,7 @@ class TestProjectDeleteView(TestCase):
     def test_basic(self):
         """Basic users should not be able to delete projects."""
         user = factories.UserFactory()
-        response = get_helper(self.view, self.url, user, **self.kwargs)
+        get_helper(self.view, self.url, user, **self.kwargs)
 
     def test_anonymous(self):
         """Anonymous users cannot delete projects."""

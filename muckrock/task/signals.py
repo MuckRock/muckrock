@@ -9,9 +9,10 @@ from muckrock.task.models import FlaggedTask, ProjectReviewTask, OrphanTask, Bla
 
 logger = logging.getLogger(__name__)
 
+# pylint: disable=unused-argument
+
 def domain_blacklist(sender, instance, created, **kwargs):
     """Blacklist certain domains - automatically reject tasks from them"""
-    # pylint: disable=unused-argument
     if not created:
         # if this isn't being created for the first time, just return
         # to avoid an infinite loop from when we resolve the task
@@ -24,6 +25,30 @@ def domain_blacklist(sender, instance, created, **kwargs):
         instance.resolve()
     return
 
+def format_user(user):
+    """Format a user for inclusion in a Slack notification"""
+    return '<%(url)s|%(name)s>' % {
+        'url': user.get_absolute_url(),
+        'name': user.get_full_name(),
+    }
+
+def slack_message(icon, channel, text, attachments):
+    """Formats and returns data in a Slack message format."""
+    return {
+        'icon_emoji': icon,
+        'channel': channel,
+        'text': text,
+        'attachments': attachments
+    }
+
+def slack_attachment(field_title, field_value, field_short=True):
+    """Formats and returns data in in the Slack attachment format."""
+    return {
+        'title': field_title,
+        'value': field_value,
+        'short': field_short,
+    }
+
 def notify_flagged(sender, instance, created, **kwargs):
     """When a new flagged task is created, send a Slack notification."""
     def create_flagged_task_payload(flagged_task):
@@ -32,14 +57,7 @@ def notify_flagged(sender, instance, created, **kwargs):
         task_url = base_url + reverse('flagged-task', args=(flagged_task.id,))
         fields = []
         if flagged_task.user is not None:
-            author_url = base_url + flagged_task.user.profile.get_absolute_url()
-            author_name = flagged_task.user.get_full_name()
-            flagged_by = payload_field(
-                'Flagged by',
-                '<%(user_url)s|%(user_name)s>' % {
-                    'user_url': author_url,
-                    'user_name': author_name
-                })
+            flagged_by = slack_attachment('Flagged by', format_user(flagged_task.user))
             fields.append(flagged_by)
         flagged_object = {
             'title': '%s' % flagged_task.flagged_object().__class__.__name__,
@@ -50,17 +68,9 @@ def notify_flagged(sender, instance, created, **kwargs):
             'short': True
         }
         fields.append(flagged_object)
-        if flagged_task.user is not None:
-            created_by = ' by <%(user_url)s|%(user_name)s>' % {
-                'user_url': author_url,
-                'user_name': author_name,
-            }
-        else:
-            created_by = ''
         summary = (
-            'A <%(task_url)s|flagged task> was created%(created_by)s: %(text)s' % {
+            'New <%(task_url)s|flagged task>: %(text)s' % {
                 'task_url': task_url,
-                'created_by': created_by,
                 'text': flagged_task.text,
             })
         attachments = [
@@ -70,13 +80,12 @@ def notify_flagged(sender, instance, created, **kwargs):
                 'fields': fields,
             }
         ]
-        return create_slack_payload(
+        return slack_message(
             ':triangular_flag_on_post:',
             '#tasks',
             'New <%s|flagged task>' % task_url,
             attachments
         )
-    # pylint: disable=unused-argument
     if not created or kwargs.get('raw', False):
         # the raw test prevents text fixtures from creating any notifications
         return
@@ -86,7 +95,6 @@ def notify_flagged(sender, instance, created, **kwargs):
 
 def notify_project(sender, instance, created, **kwargs):
     """When a new project task is created, send a Slack notification."""
-    # pylint: disable=unused-argument
     def create_project_task_payload(task):
         """Create a Slack notification payload for a Project Review Task."""
         base_url = 'https://www.muckrock.com'
@@ -97,16 +105,17 @@ def notify_project(sender, instance, created, **kwargs):
                 'url': project_url,
                 'title': task.project.title,
             })
-        contributors = ', '.join([contributor.get_full_name() for contributor in task.project.contributors.all()])
-        fields = [payload_field('Contributors', contributors)]
+        names = [format_user(contributor) for contributor in task.project.contributors.all()]
+        contributors = ', '.join(names)
+        fields = [slack_attachment('Contributors', contributors)]
         if task.notes:
-            fields.append(payload_field('Note', task.notes))
+            fields.append(slack_attachment('Note', task.notes))
         attachments = [{
             'fallback': summary,
             'text': summary,
             'fields': fields,
         }]
-        return create_slack_payload(
+        return slack_message(
             ':file_cabinet:',
             '#tasks',
             'New <%s|pending project>' % task_url,
@@ -118,22 +127,6 @@ def notify_project(sender, instance, created, **kwargs):
     payload = create_project_task_payload(instance)
     slack = SlackNotification(payload)
     slack.send()
-
-
-def create_slack_payload(icon, channel, text, attachments):
-    return {
-        'icon_emoji': icon,
-        'channel': channel,
-        'text': text,
-        'attachments': attachments
-    }
-
-def payload_field(field_title, field_value, field_short=True):
-    return {
-        'title': field_title,
-        'value': field_value,
-        'short': field_short,
-    }
 
 post_save.connect(
     domain_blacklist,

@@ -47,6 +47,9 @@ class AgencyMultiRequestAutocomplete(autocomplete_light.AutocompleteModelTemplat
     }
 
     def complex_condition(self, string):
+        """Returns a complex set of database queries for getting agencies
+        by name, alias, jurisdiction, jurisdiction abbreviation, and type."""
+        # pylint: disable=no-self-use
         return (Q(name__icontains=string)|
                 Q(aliases__icontains=string)|
                 Q(jurisdiction__name__icontains=string)|
@@ -57,9 +60,6 @@ class AgencyMultiRequestAutocomplete(autocomplete_light.AutocompleteModelTemplat
     def choices_for_request(self):
         query = self.request.GET.get('q', '')
         split_query = query.split()
-        if len(split_query) > 1:
-            pass
-            # split_query.append(query)
         conditions = self.complex_condition(split_query[0])
         for string in split_query[1:]:
             conditions &= self.complex_condition(string)

@@ -5,21 +5,17 @@ Views for the crowdfund application
 from django.conf import settings
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import redirect
-from django.utils.decorators import method_decorator
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView
 
-import actstream
-from datetime import date, timedelta
+from datetime import date
 import logging
 import stripe
 
-from muckrock.crowdfund.forms import CrowdfundForm, CrowdfundPaymentForm
+from muckrock.crowdfund.forms import CrowdfundPaymentForm
 from muckrock.crowdfund.models import Crowdfund
-from muckrock.project.models import Project, ProjectCrowdfunds
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY

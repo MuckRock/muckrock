@@ -3,14 +3,12 @@ Views for the project application
 """
 
 from django.contrib import messages
-from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
 from django.db.models import Count, Prefetch
 from django.http import Http404
-from django.shortcuts import redirect, render_to_response, get_object_or_404
-from django.template import RequestContext
+from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import (
     TemplateView,
     FormView,
@@ -19,7 +17,6 @@ from django.views.generic import (
     UpdateView,
     DeleteView
 )
-from django.views.generic.detail import SingleObjectMixin
 from django.utils.decorators import method_decorator
 
 import actstream
@@ -183,9 +180,14 @@ class ProjectPublishView(ProjectPermissionsMixin, FormView):
     template_name = 'project/publish.html'
     form_class = ProjectPublishForm
 
+    def __init__(self, *args, **kwargs):
+        """Gets the Project instance"""
+        super(ProjectPublishView, self).__init__(*args, **kwargs)
+        self.object = get_object_or_404(self.model, pk=self.kwargs.get('pk', None))
+
     def dispatch(self, *args, **kwargs):
         """Prevents access to the view for projects that public or pending approval."""
-        project = get_object_or_404(self.model, pk=kwargs.get('pk', None))
+        project = self.object
         if project.editable_by(self.request.user):
             if not project.private:
                 if project.approved:
@@ -204,8 +206,6 @@ class ProjectPublishView(ProjectPermissionsMixin, FormView):
 
     def form_valid(self, form):
         """Call the Project.publish method using the valid form data."""
-        self.object = get_object_or_404(self.model, pk=self.kwargs.get('pk', None))
-        print form
         notes = form.cleaned_data['notes']
         self.object.publish(notes)
         return super(ProjectPublishView, self).form_valid(form)

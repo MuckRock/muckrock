@@ -381,9 +381,9 @@ class ProjectReviewTask(Task):
 
     def reply(self, text, action='reply'):
         """Send an email reply to the user that raised the flag."""
-        to = [contributor.email for contributor in self.project.contributors.all()]
+        send_to = [contributor.email for contributor in self.project.contributors.all()]
         project_email = TemplateEmail(
-            to=to,
+            to=send_to,
             extra_context={'action': action, 'message': text, 'task': self},
             subject=u'%s %s' % (self.project, action),
             text_template='message/project/%s.txt' % action,

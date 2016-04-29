@@ -8,8 +8,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.db.models import Q
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template.loader import get_template
@@ -18,7 +17,6 @@ from django.utils.encoding import smart_text
 
 import actstream
 from datetime import datetime, date
-import json
 import logging
 from random import choice
 import string
