@@ -2,15 +2,12 @@
 Digest objects for the messages app
 """
 
-from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
-from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
-from django.template.loader import render_to_string
 from django.utils import timezone
 
 from actstream.models import Action, user_stream
-from datetime import datetime, date, timedelta
+from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 
 from muckrock.accounts.models import Statistics
@@ -249,15 +246,17 @@ class ActivityDigest(Digest):
             subject += 's'
         return self.subject + ': ' + subject
 
+    # TODO summarize digest
     def summarize_activity(self):
         """Summarizes the activity in the digest."""
+        # pylint: disable=no-self-use
         return u''
 
     def send(self, *args):
         """Don't send the email if there's no activity."""
         if self.activity['count'] < 1:
             return 0
-        return super(Digest, self).send(*args)
+        return super(ActivityDigest, self).send(*args)
 
 
 class StaffDigest(Digest):

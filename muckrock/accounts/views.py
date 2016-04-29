@@ -8,7 +8,6 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.core.mail import send_mail
 from django.http import (
         HttpResponse,
         HttpResponseBadRequest,
@@ -17,7 +16,6 @@ from django.http import (
         )
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
-from django.template.loader import render_to_string
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView, FormView
@@ -331,13 +329,13 @@ def buy_requests(request, username=None):
 def verify_email(request):
     """Verifies a user's email address"""
     user = request.user
-    profile = user.profile
+    _profile = user.profile
     key = request.GET.get('key')
-    if not profile.email_confirmed:
+    if not _profile.email_confirmed:
         if key:
-            if key == profile.confirmation_key:
-                profile.email_confirmed = True
-                profile.save()
+            if key == _profile.confirmation_key:
+                _profile.email_confirmed = True
+                _profile.save()
                 messages.success(request, 'Your email address has been confirmed.')
             else:
                 messages.error(request, 'Your confirmation key is invalid.')
@@ -346,7 +344,7 @@ def verify_email(request):
             messages.info(request, 'We just sent you an email containing your verification link.')
     else:
         messages.warning(request, 'Your email is already confirmed, no need to verify again!')
-    return redirect(profile)
+    return redirect(_profile)
 
 def profile(request, username=None):
     """View a user's profile"""

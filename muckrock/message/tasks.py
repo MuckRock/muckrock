@@ -13,7 +13,7 @@ import stripe
 
 from muckrock.accounts.models import Profile
 from muckrock.message.email import TemplateEmail
-from muckrock.message import digests, notifications, receipts
+from muckrock.message import digests, receipts
 from muckrock.organization.models import Organization
 
 logger = logging.getLogger(__name__)
@@ -259,11 +259,11 @@ def email_verify(user):
     notification.send(fail_silently=False)
 
 @task(name='muckrock.message.tasks.support')
-def support(user, message, task):
+def support(user, message, _task):
     """Send a response to a user about a task."""
     context = {
         'message': message,
-        'task': task
+        'task': _task
     }
     notification = TemplateEmail(
         user=user,

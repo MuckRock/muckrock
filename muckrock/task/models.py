@@ -16,7 +16,6 @@ from muckrock.agency.models import Agency, STALE_DURATION
 from muckrock.foia.models import FOIACommunication, FOIAFile, FOIANote, FOIARequest, STATUS
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.tasks import support
-from muckrock.message.notifications import ProjectNotification
 from muckrock.models import ExtractDay, Now
 
 # pylint: disable=missing-docstring
