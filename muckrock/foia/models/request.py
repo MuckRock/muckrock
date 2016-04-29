@@ -678,7 +678,7 @@ class FOIARequest(models.Model):
             bcc=cc_addrs + ['diagnostics@muckrock.com'],
             headers={
                 'Cc': ','.join(cc_addrs),
-                'X-Mailgun-Variables': '{"comm_id": %s}' % comm.pk
+                'X-Mailgun-Variables': {'comm_id': comm.pk}
             }
         )
         if from_addr != 'fax':
