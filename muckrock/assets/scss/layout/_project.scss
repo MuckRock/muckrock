@@ -2,6 +2,10 @@
     max-width: 40em;
     margin: 0 auto $vertical-rhythm;
 }
+.publish.project {
+    max-width: 40em;
+    margin: 0 auto $vertical-rhythm;
+}
 .update.project {
     header {
         @include display(flex);

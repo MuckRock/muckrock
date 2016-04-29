@@ -91,9 +91,10 @@ def notify_project(sender, instance, created, **kwargs):
         """Create a Slack notification payload for a Project Review Task."""
         base_url = 'https://www.muckrock.com'
         task_url = base_url + reverse('projectreview-task', args=(task.id,))
+        project_url = base_url + task.project.get_absolute_url()
         summary = (
             '<%(url)s|%(title)s> was submitted for review.' % {
-                'url': task.project.get_absolute_url(),
+                'url': project_url,
                 'title': task.project.title,
             })
         contributors = ', '.join([contributor.get_full_name() for contributor in task.project.contributors.all()])
@@ -106,7 +107,7 @@ def notify_project(sender, instance, created, **kwargs):
             'fields': fields,
         }]
         return create_slack_payload(
-            ':parrot:',
+            ':file_cabinet:',
             '#tasks',
             'New <%s|pending project>' % task_url,
             attachments

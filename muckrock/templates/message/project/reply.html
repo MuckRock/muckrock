@@ -1,0 +1,16 @@
+{% extends 'message/base.html' %}
+{% load markdown_deux_tags %}
+{% block body %}
+{% if message %}
+<h2>Review Notes</h2>
+<div>
+    {{message|markdown}}
+</div>
+{% endif %}
+{% if task %}
+<hr/>
+<p><a href="{{task.project.get_absolute_url}}">{{task.project}}</a></p>
+<p>Project Review #{{task.id}}</p>
+<hr/>
+{% endif %}
+{% endblock %}
