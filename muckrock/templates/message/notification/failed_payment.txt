@@ -1,6 +1,5 @@
 {% extends 'message/base.txt' %}
 {% load humanize %}
-{% autoescape off %}
 {% block body %}
 Hi {{user.first_name}},
 {% if type == 'pro' %}{% if attempt == "final" %}
