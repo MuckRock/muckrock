@@ -106,14 +106,18 @@ class TestProject(TestCase):
         project.articles.clear()
         eq_(len(project.articles.all()), 0)
 
-    def test_make_private(self):
-        """Projects should be able to be made private."""
+    def test_private(self):
+        """Projects should be private by default."""
         project = self.basic_project
-        ok_(not project.private)
-        project.make_private()
+        ok_(project.private)
+
+    def test_make_public(self):
+        """Projects can be made public, but they shouldn't be approved."""
+        project = self.basic_project
         ok_(project.private)
         project.make_public()
         ok_(not project.private)
+        ok_(not project.approved)
 
     def test_has_contributors(self):
         """Projects should test to see if a given user is a contributor."""
