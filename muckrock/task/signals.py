@@ -27,8 +27,9 @@ def domain_blacklist(sender, instance, created, **kwargs):
 
 def format_user(user):
     """Format a user for inclusion in a Slack notification"""
+    base_url = 'https://www.muckrock.com'
     return '<%(url)s|%(name)s>' % {
-        'url': user.get_absolute_url(),
+        'url': base_url + user.get_absolute_url(),
         'name': user.get_full_name(),
     }
 
