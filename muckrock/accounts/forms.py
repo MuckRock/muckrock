@@ -20,7 +20,6 @@ class ProfileSettingsForm(forms.ModelForm):
     """A form for updating user information"""
     first_name = forms.CharField(max_length=30)
     last_name = forms.CharField(max_length=30)
-
     location = forms.ModelChoiceField(
         required=False,
         queryset=Jurisdiction.objects.all(),
@@ -29,8 +28,6 @@ class ProfileSettingsForm(forms.ModelForm):
     class Meta():
         model = Profile
         fields = ['first_name', 'last_name', 'avatar', 'twitter', 'location']
-
-
 
     def clean_twitter(self):
         """Stripe @ from beginning of Twitter name, if it exists."""

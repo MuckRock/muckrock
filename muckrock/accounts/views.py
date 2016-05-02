@@ -240,6 +240,14 @@ def profile_settings(request):
         'email': EmailSettingsForm,
         'billing': BillingPreferencesForm
     }
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action:
+            form = settings_forms[action]
+            form = form(request.POST, request.FILES, instance=user_profile)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Your settings have been updated.')
     profile_initial = {
         'first_name': request.user.first_name,
         'last_name': request.user.last_name,
@@ -257,18 +265,6 @@ def profile_settings(request):
         'current_plan': current_plan,
         'credit_card': user_profile.card()
     }
-
-    if request.method == 'POST':
-        action = request.POST.get('action')
-        if action:
-            form = settings_forms[action]
-            form = form(request.POST, instance=user_profile)
-            if form.is_valid():
-                form.save()
-                messages.success(request, 'Your settings have been updated.')
-            # override the existing form in the context
-            context[action + '_form'] = form
-
     return render_to_response(
         'accounts/settings.html',
         context,
