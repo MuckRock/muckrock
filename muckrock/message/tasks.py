@@ -270,6 +270,6 @@ def support(user, message, _task):
         extra_context=context,
         text_template='message/notification/support.txt',
         html_template='message/notification/support.html',
-        subject=u'Verify your email'
+        subject=u'Support #%d' % _task.id
     )
     notification.send(fail_silently=False)
