@@ -212,7 +212,7 @@ class TestProjectPublishView(TestCase):
 
     def test_pending(self):
         """Projects that are pending review should reject access to the Publish view."""
-        pending_project = factories.ProjectFactory()
+        pending_project = factories.ProjectFactory(private=False, approved=False)
         pending_project.contributors.add(self.contributor)
         response = get_helper(self.view, self.url, self.contributor, **{
             'slug': pending_project.slug,

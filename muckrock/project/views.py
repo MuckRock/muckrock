@@ -180,14 +180,9 @@ class ProjectPublishView(ProjectPermissionsMixin, FormView):
     template_name = 'project/publish.html'
     form_class = ProjectPublishForm
 
-    def __init__(self, *args, **kwargs):
-        """Gets the Project instance"""
-        super(ProjectPublishView, self).__init__(*args, **kwargs)
-        self.object = get_object_or_404(self.model, pk=self.kwargs.get('pk', None))
-
     def dispatch(self, *args, **kwargs):
         """Prevents access to the view for projects that public or pending approval."""
-        project = self.object
+        project = get_object_or_404(Project, pk=kwargs.get('pk', None))
         if project.editable_by(self.request.user):
             if not project.private:
                 if project.approved:
@@ -223,12 +218,13 @@ class ProjectCrowdfundView(ProjectPermissionsMixin, CreateView):
 
     def dispatch(self, *args, **kwargs):
         """Crowdfunds may only be started on public projects."""
+        return_value = super(ProjectCrowdfundView, self).dispatch(*args, **kwargs)
         project = self.get_project()
         if project.editable_by(self.request.user):
             if project.private or not project.approved:
                 messages.warning(self.request, 'Crowdfunds may only be started on public requests.')
                 return redirect(project)
-        return super(ProjectCrowdfundView, self).dispatch(*args, **kwargs)
+        return return_value
 
     def get_project(self):
         """Returns the project based on the URL keyword arguments"""
