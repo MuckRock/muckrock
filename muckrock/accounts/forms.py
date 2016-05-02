@@ -28,7 +28,7 @@ class ProfileSettingsForm(forms.ModelForm):
 
     class Meta():
         model = Profile
-        fields = ['first_name', 'last_name', 'twitter', 'location']
+        fields = ['first_name', 'last_name', 'avatar', 'twitter', 'location']
 
 
 
