@@ -14,6 +14,9 @@ import 'autonumeric';
         var $input = $(this);
         var $currency = $('<input type="text"/>');
         var amount = $input.attr('value');
+        if (typeof(amount) === "undefined") {
+            amount = 0;
+        }
         // set up the currency field with attributes
         // and use the autoNumeric plugin on it
         $currency.attr('name', 'pretty-input').addClass('currency');
