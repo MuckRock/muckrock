@@ -11,6 +11,7 @@ from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 
 from muckrock.accounts.models import Statistics
+from muckrock.crowdfund.models import Crowdfund
 from muckrock.message.email import TemplateEmail
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.qanda.models import Question
