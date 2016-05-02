@@ -3,9 +3,6 @@ Notification objects for the messages app
 """
 
 from django.conf import settings
-from django.contrib.auth.models import User
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
 
 import json
 import requests
