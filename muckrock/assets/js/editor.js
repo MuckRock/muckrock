@@ -1,7 +1,7 @@
 import { ProseMirror } from 'prosemirror';
 import "prosemirror/dist/inputrules/autoinput";
 import 'prosemirror/dist/markdown';
-import 'prosemirror/dist/menu/tooltipMenu';
+import 'prosemirror/dist/menu/tooltipmenu';
 
 let editor = document.querySelector('textarea.prose-editor');
 if (editor) {
