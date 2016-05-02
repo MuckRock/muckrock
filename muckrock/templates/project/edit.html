@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="update project">
+    <header>
+        <div>
+            <a href="{% url 'project-detail' slug=project.slug pk=project.pk %}">Back to {{project.title}}</a>
+            <h1>Edit Project</h1>
+        </div>
+    </header>
+    <form enctype="multipart/form-data" class="project form" method="post" id="update-project">
+        {% csrf_token %}
+        <div class="tab-container">
+            <ul role="tablist" class="tab-list">
+                <li><a role="tab" class="tab" href="#basics">Basics</a></li>
+                <li><a role="tab" class="tab" href="#description">Description</a></li>
+                <li><a role="tab" class="tab" href="#contributors">Contributors</a></li>
+                <li><a role="tab" class="tab" href="#requests">Requests</a></li>
+                <li><a role="tab" class="tab" href="#articles">Articles</a></li>
+            </ul>
+            <div role="tabpanel" class="tab-panel" id="basics">
+                {% include 'component/field.html' with field=form.summary %}
+                {% include 'component/field.html' with field=form.tags %}
+                {% if project.image %}
+                {% include 'component/imagefield.html' with field=form.image image=project.image %}
+                {% else %}
+                {% include 'component/imagefield.html' with field=form.image %}
+                {% endif %}
+            </div>
+            <div role="tabpanel" class="tab-panel" id="description">
+                {{form.description}}
+            </div>
+            <div role="tabpanel" class="tab-panel" id="contributors">
+                {{form.contributors}}
+            </div>
+            <div role="tabpanel" class="tab-panel" id="requests">
+                {{form.requests}}
+            </div>
+            {% if request.user.is_staff %}
+            <div role="tabpanel" class="tab-panel" id="articles">
+                {{form.articles}}
+            </div>
+            {% endif %}
+        </div>
+        <button type="submit" class="blue button">Save Changes</button>
+    </form>
+    <a href="{% url 'project-delete' slug=project.slug pk=project.pk %}">Delete {{project.title}}</a>
+</div>
+{% endblock %}

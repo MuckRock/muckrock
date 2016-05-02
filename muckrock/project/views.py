@@ -2,32 +2,42 @@
 Views for the project application
 """
 
-from django.contrib.auth.models import User
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
 from django.db.models import Count, Prefetch
 from django.http import Http404
-from django.shortcuts import render_to_response
-from django.template import RequestContext
-from django.views.generic import View, CreateView, DetailView, UpdateView, DeleteView
+from django.shortcuts import redirect, get_object_or_404
+from django.views.generic import (
+    TemplateView,
+    FormView,
+    CreateView,
+    DetailView,
+    UpdateView,
+    DeleteView
+)
 from django.utils.decorators import method_decorator
 
-from actstream.models import followers
+import actstream
+from datetime import date, timedelta
 
 from muckrock.crowdfund.models import Crowdfund
-from muckrock.project.models import Project
-from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm
+from muckrock.crowdfund.forms import CrowdfundForm
+from muckrock.project.models import Project, ProjectCrowdfunds
+from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm, ProjectPublishForm
 from muckrock.views import MRFilterableListView
 
 
-class ProjectExploreView(View):
+class ProjectExploreView(TemplateView):
     """Provides a space for exploring our different projects."""
-    def get_context_data(self, request, *args, **kwargs):
+    template_name = 'project/frontpage.html'
+
+    def get_context_data(self, **kwargs):
         """Gathers and returns a dictionary of context."""
         # pylint: disable=unused-argument
         # pylint: disable=no-self-use
-        user = request.user
+        user = self.request.user
         visible_projects = (Project.objects.get_visible(user)
                 .order_by('-featured', 'title')
                 .annotate(request_count=Count('requests', distinct=True))
@@ -42,12 +52,6 @@ class ProjectExploreView(View):
             'visible': visible_projects,
         }
         return context
-
-    def get(self, request, *args, **kwargs):
-        """Renders the template with the correct context."""
-        template = 'project/frontpage.html'
-        context = self.get_context_data(request, *args, **kwargs)
-        return render_to_response(template, context, context_instance=RequestContext(request))
 
 
 class ProjectListView(MRFilterableListView):
@@ -67,20 +71,24 @@ class ProjectListView(MRFilterableListView):
 
 class ProjectCreateView(CreateView):
     """Create a project instance"""
+    model = Project
     form_class = ProjectCreateForm
+    initial = {'private': True}
     template_name = 'project/create.html'
 
     @method_decorator(login_required)
-    @method_decorator(user_passes_test(lambda u: u.is_staff))
+    @method_decorator(user_passes_test(lambda u: u.is_staff or u.profile.experimental))
     def dispatch(self, *args, **kwargs):
         """At the moment, only staff are allowed to create a project."""
         return super(ProjectCreateView, self).dispatch(*args, **kwargs)
 
-    def get_initial(self):
-        """Sets current user as a default contributor"""
-        queryset = User.objects.filter(pk=self.request.user.pk)
-        return {'contributors': queryset}
-
+    def form_valid(self, form):
+        """Saves the current user as a contributor to the project."""
+        redirection = super(ProjectCreateView, self).form_valid(form)
+        project = self.object
+        project.contributors.add(self.request.user)
+        project.save()
+        return redirection
 
 class ProjectDetailView(DetailView):
     """View a project instance"""
@@ -114,7 +122,7 @@ class ProjectDetailView(DetailView):
                     'agency__jurisdiction',
                     'user__profile',
                     ))
-        context['followers'] = followers(project)
+        context['followers'] = actstream.models.followers(project)
         context['articles'] = project.articles.get_published()
         context['contributors'] = project.contributors.select_related('profile')
         context['user_is_experimental'] = user.is_authenticated() and user.profile.experimental
@@ -122,6 +130,7 @@ class ProjectDetailView(DetailView):
                                       if not project.newsletter_label else project.newsletter_label)
         context['newsletter_cta'] = ('Get updates delivered to your inbox'
                                     if not project.newsletter_cta else project.newsletter_cta)
+        context['user_can_edit'] = project.editable_by(user)
         return context
 
     def dispatch(self, *args, **kwargs):
@@ -144,38 +153,116 @@ class ProjectPermissionsMixin(object):
     Note: It must be included first when subclassing Django generic views
     because it overrides their dispatch method.
     """
-
-    def _is_editable_by(self, user):
-        """A project is editable by MuckRock staff and project contributors."""
-        project = self.get_object()
-        return project.has_contributor(user) or user.is_staff
-
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         """Overrides the dispatch function to include permissions checking."""
-        if not self._is_editable_by(self.request.user):
+        self.object = get_object_or_404(Project, pk=kwargs.get('pk', None))
+        if not self.object.editable_by(self.request.user):
             raise Http404()
         return super(ProjectPermissionsMixin, self).dispatch(*args, **kwargs)
 
 
-class ProjectUpdateView(ProjectPermissionsMixin, UpdateView):
+class ProjectEditView(ProjectPermissionsMixin, UpdateView):
     """Update a project instance"""
     model = Project
+    template_name = 'project/edit.html'
     form_class = ProjectUpdateForm
-    template_name = 'project/update.html'
+
+    def form_valid(self, form):
+        """Adds success message when form is valid."""
+        messages.success(self.request, 'Your edits were saved.')
+        return super(ProjectEditView, self).form_valid(form)
+
+
+class ProjectPublishView(ProjectPermissionsMixin, FormView):
+    """Publish a project"""
+    model = Project
+    template_name = 'project/publish.html'
+    form_class = ProjectPublishForm
+
+    def dispatch(self, *args, **kwargs):
+        """Prevents access to the view for projects that public or pending approval."""
+        project = get_object_or_404(Project, pk=kwargs.get('pk', None))
+        if project.editable_by(self.request.user):
+            if not project.private:
+                if project.approved:
+                    messages.warning(self.request,
+                        'This project is already public.')
+                else:
+                    messages.warning(self.request,
+                        'This project is already published and awaiting approval.')
+                return redirect(project)
+        return super(ProjectPublishView, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        """Add a list of viewable requests to the context data"""
-        context = super(ProjectUpdateView, self).get_context_data(**kwargs)
-        project = self.get_object()
-        user = self.request.user
-        viewable_requests = project.requests.get_viewable(user)
-        context['viewable_request_ids'] = [request.id for request in viewable_requests]
+        context = super(ProjectPublishView, self).get_context_data(**kwargs)
+        context['project'] = self.object
         return context
+
+    def form_valid(self, form):
+        """Call the Project.publish method using the valid form data."""
+        notes = form.cleaned_data['notes']
+        self.object.publish(notes)
+        return super(ProjectPublishView, self).form_valid(form)
+
+    def get_success_url(self):
+        """Return the project url"""
+        return self.object.get_absolute_url()
+
+
+class ProjectCrowdfundView(ProjectPermissionsMixin, CreateView):
+    """A creation view for project crowdfunding"""
+    model = Crowdfund
+    form_class = CrowdfundForm
+    template_name = 'project/crowdfund.html'
+
+    def dispatch(self, *args, **kwargs):
+        """Crowdfunds may only be started on public projects."""
+        return_value = super(ProjectCrowdfundView, self).dispatch(*args, **kwargs)
+        project = self.get_project()
+        if project.editable_by(self.request.user):
+            if project.private or not project.approved:
+                messages.warning(self.request, 'Crowdfunds may only be started on public requests.')
+                return redirect(project)
+        return return_value
+
+    def get_project(self):
+        """Returns the project based on the URL keyword arguments"""
+        return self.get_object(queryset=Project.objects.all())
+
+    def get_initial(self):
+        """Sets defaults in crowdfund project form"""
+        project = self.get_project()
+        initial_name = 'Crowdfund the ' + project.title
+        initial_date = date.today() + timedelta(30)
+        return {
+            'name': initial_name,
+            'date_due': initial_date,
+            'project': project.id
+        }
+
+    def form_valid(self, form):
+        """Saves relationship and sends action before returning URL"""
+        redirection = super(ProjectCrowdfundView, self).form_valid(form)
+        crowdfund = self.object
+        project = self.get_project()
+        relationship = ProjectCrowdfunds.objects.create(project=project, crowdfund=crowdfund)
+        actstream.action.send(
+            self.request.user,
+            verb='started',
+            action_object=relationship.crowdfund,
+            target=relationship.project
+        )
+        return redirection
+
+    def get_success_url(self):
+        """Generates actions before returning URL"""
+        project = self.get_project()
+        return project.get_absolute_url()
 
 
 class ProjectDeleteView(ProjectPermissionsMixin, DeleteView):
     """Delete a project instance"""
     model = Project
-    success_url = reverse_lazy('index')
+    success_url = reverse_lazy('project')
     template_name = 'project/delete.html'

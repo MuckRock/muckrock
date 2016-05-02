@@ -1,74 +1,76 @@
-.project-create.form {
-    fieldset {
-        &.title, &.description {
-            @include full;
-        }
+.create.project {
+    max-width: 40em;
+    margin: 0 auto $vertical-rhythm;
+}
+.publish.project {
+    max-width: 40em;
+    margin: 0 auto $vertical-rhythm;
+}
+.update.project {
+    header {
+        @include display(flex);
+        @include justify-content(flex-start);
     }
-    .social.preview {
-        @include row;
-        margin: 0 0 $vertical-rhythm;
-        padding: .5em;
-        border: 1px solid $color-grey;
-        section {
-            @include half;
-        }
-        .image {
-            height: 15em;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-        }
+    .tab-panel {
+        min-height: 30em;
     }
-
-    // We style the social previews like they would appear on their respective
-    // social networks.
-
-    .social.preview .facebook {
-        border: 1px solid $color-grey;
-        background: #FFF;
-        p { margin-top: 0; }
-        .textarea {
-            padding: .5em;
-        }
-        .title {
-            font-family: 'Georgia', serif;
-            font-size: 18px;
-            font-weight: 500;
-            line-height: 22px;
-        }
-        .description, .attribution {
-            font-family: 'Helvetica', sans-serif;
-        }
-        .description {
-            font-size: 12px;
-            line-height: 16px;
-        }
-        .attribution {
-            margin-bottom: 0;
-            font-size: 11px;
-            line-height: 11px;
-            text-transform: uppercase;
-            color: #9197a3;
-        }
+}
+.project .field {
+    header {
+        margin-bottom: 0;
     }
-
-    .social.preview .twitter {
-        padding: 1em;
-        padding-top: 0;
-        background-color: #FFF;
-        border: 1px solid #666;
-        border-radius: 6px;
-        .title {
-            font-family: 'Helvetica', sans-serif;
-            font-size: 16px;
+    .error input {
+        border-color: $color-red;
+    }
+    .required, .errorlist {
+        color: $color-red;
+        font-size: $font-size-2;
+    }
+    .errorlist {
+        display: inline-block;
+        margin-bottom: 0;
+        padding: 0;
+        list-style: none;
+    }
+    label {
+        margin-right: $vertical-rhythm/2;
+        font-weight: $font-weight-bold;
+    }
+    input {
+        display: block;
+        width: 100%;
+    }
+    input[type="checkbox"], input[type="radio"] {
+        width: auto;
+        margin-top: $vertical-rhythm/4;
+        margin-right: $vertical-rhythm/2;
+        float: left;
+    }
+    textarea {
+        display: block;
+        height: 5em;
+        margin-bottom: 0;
+    }
+    .help-text {
+        margin-top: $vertical-rhythm/4;
+    }
+    &.image {
+        .preview {
+            display: block;
+            margin-bottom: $vertical-rhythm/2;
+            max-width: 20em;
         }
-        .attribution {
-            font-family: 'Helvetica', sans-serif;
-            font-size: 13px;
-            color: #666;
+        input {
+            display: inline-block;
+            float: none;
+            width: auto;
+            margin-right: 0;
         }
-        .image {
-            border-radius: 6px;
+        label[for*="clear_id"] {
+            font-weight: $font-weight-normal;
+        }
+        input[id*="clear_id"] {
+            margin-left: $vertical-rhythm;
         }
     }
 }
@@ -95,6 +97,13 @@
             font-weight: $font-weight-bold;
             font-size: $font-size-4;
             line-height: $font-line-height;
+        }
+    }
+    .autocomplete-light-widget, .requests .deck, .articles .deck {
+        @include display(flex);
+        @include flex-direction(column-reverse);
+        input {
+            margin-bottom: $vertical-rhythm;
         }
     }
 }
@@ -127,6 +136,24 @@
         }
     }
 
+    .prompt {
+        box-shadow: 0px 4px 8px 0px $color-grey;
+        padding: $vertical-rhythm;
+        border: 1px solid $color-blue;
+        background: $color-blue-light;
+        color: $color-blue-dark;
+        font-weight: $font-weight-bold;
+        ol {
+            padding-left: $vertical-rhythm;
+        }
+        a {
+            text-decoration: underline;
+        }
+        .strikethrough {
+            text-decoration: line-through;
+        }
+    }
+
     .overview {
         @include display(flex);
         @include flex-flow(wrap);
@@ -153,6 +180,11 @@
         summary {
             font-size: $font-size-4;
             line-height: $font-line-height;
+        }
+        .contributors header {
+            @include display(flex);
+            @include justify-content(space-between);
+            margin-bottom: $vertical-rhythm/2;
         }
         .contributor {
             @include display(flex);
@@ -197,6 +229,8 @@
         margin: 0 auto $vertical-rhythm;
         .articles, .requests {
             @include flex(1 1 20em);
+        }
+        .articles {
             margin-right: $vertical-rhythm;
         }
     }

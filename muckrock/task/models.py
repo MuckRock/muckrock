@@ -15,6 +15,7 @@ import logging
 from muckrock.agency.models import Agency, STALE_DURATION
 from muckrock.foia.models import FOIACommunication, FOIAFile, FOIANote, FOIARequest, STATUS
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import support
 from muckrock.models import ExtractDay, Now
 
@@ -364,6 +365,44 @@ class FlaggedTask(Task):
     def reply(self, text):
         """Send an email reply to the user that raised the flag."""
         support.delay(self.user, text, self)
+
+
+class ProjectReviewTask(Task):
+    """Created when a project is published and needs approval."""
+    type = 'ProjectReviewTask'
+    project = models.ForeignKey('project.Project')
+    notes = models.TextField(blank=True)
+
+    def __unicode__(self):
+        return u'Project Review Task'
+
+    def get_absolute_url(self):
+        return reverse('projectreview-task', kwargs={'pk': self.pk})
+
+    def reply(self, text, action='reply'):
+        """Send an email reply to the user that raised the flag."""
+        send_to = [contributor.email for contributor in self.project.contributors.all()]
+        project_email = TemplateEmail(
+            to=send_to,
+            extra_context={'action': action, 'message': text, 'task': self},
+            subject=u'%s %s' % (self.project, action),
+            text_template='message/project/%s.txt' % action,
+            html_template='message/project/%s.html' % action
+        )
+        project_email.send(fail_silently=False)
+        return project_email
+
+    def approve(self, text):
+        """Mark the project approved and notify the user."""
+        self.project.approved = True
+        self.project.save()
+        return self.reply(text, 'approved')
+
+    def reject(self, text):
+        """Mark the project private and notify the user."""
+        self.project.private = True
+        self.project.save()
+        return self.reply(text, 'rejected')
 
 
 class NewAgencyTask(Task):

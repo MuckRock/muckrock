@@ -1,0 +1,15 @@
+{% extends 'message/base.txt' %}
+{% block body %}
+{% if message %}
+Review Notes
+--------------
+
+{{message}}
+{% endif %}
+{% if task %}
+--------------
+{% if task.project %} {{task.project}} ({{base_url}}{{task.project.get_absolute_url}}){% endif %}
+Project Review #{{task.id}}
+--------------
+{% endif %}
+{% endblock %}

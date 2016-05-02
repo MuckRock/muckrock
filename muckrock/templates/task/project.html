@@ -1,0 +1,87 @@
+{% extends 'task/default.html' %}
+{% load markdown_deux_tags %}
+{% load static from staticfiles %}
+
+{% block task-content %}
+{% with task.project as project %}
+<dl class="task-data">
+    <dt>Project</dt>
+    <dd><a href="{% url 'admin:project_project_change' project.pk %}">{{project}}</a></dd>
+    <dt>Contributors</dt>
+    <dd>{{project.contributors.all|join:", "}}</dd>
+    {% if task.notes %}
+    <dt>Project Notes</dt>
+    <dd>{{task.notes}}</dd>
+    {% endif %}
+</dl>
+<table>
+    <tbody>
+        <tr>
+            <td><strong>Title</strong></td>
+            <td><span class="h1">{{project.title}}</span></td>
+        </tr>
+        <tr>
+            <td><strong>Summary</strong></td>
+            <td>
+                {% if project.summary %}
+                {{project.summary}}
+                {% else %}
+                <span class="failure">No summary</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Image</strong></td>
+            <td>
+                {% if project.image %}
+                <img src="{% static project.image.url %}" />
+                {% else %}
+                <span class="failure">No image</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Description</strong></td>
+            <td>
+            {% if project.description %}
+                {{project.description|markdown}}
+            {% else %}
+                <span class="failure">No description</span>
+            {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Requests</strong></td>
+            <td>
+            {% if project.requests.exists %}
+                <ul>
+                {% for request in project.requests.all %}
+                    <li><a href="{{ request.get_absolute_url }}">{{request.title}}</a></li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <span class="failure">No requests</span>
+            {% endif %}
+            </td>
+        </tr>
+    </tbody>
+</table>
+{% endwith %}
+{% endblock %}
+{% block task-footer %}
+<footer class="task-actions">
+    <form method="POST" action="{{ endpoint }}" class="task-post-actions">
+        {% csrf_token %}
+        <label for="{{form.reply.id_for_label}}">&crarr; Reply</label>
+        {{ form.reply }}
+        <input type="hidden" name="task" value="{{task.pk}}">
+        <footer class="submission-control">
+            <button type="submit" name="action" value="reply" class="blue">Reply</button>
+            <div>
+                <button type="submit" name="action" value="approve" class="green">Approve</button>
+                <button type="submit" name="action" value="reject" class="red">Reject</button>
+            </div>
+        </footer>
+    </form>
+</footer>
+{% endblock %}

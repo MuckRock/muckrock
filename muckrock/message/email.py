@@ -32,11 +32,12 @@ class TemplateEmail(EmailMultiAlternatives):
         # Initialize the base class
         super(TemplateEmail, self).__init__(**kwargs)
         # Set the fields for the TemplateEmail
-        if isinstance(user, User):
-            self.user = user
-            self.to.append(user.email)
-        else:
-            raise TypeError('"user" argument expects a User type')
+        if user:
+            if isinstance(user, User):
+                self.user = user
+                self.to.append(user.email)
+            else:
+                raise TypeError('"user" argument expects a User type')
         if summary:
             if isinstance(summary, basestring):
                 self.summary = summary

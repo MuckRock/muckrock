@@ -58,6 +58,10 @@
             <span class="counter">{{ counters.failed_fax }}</span>
             <a href="{% url 'failed-fax-task-list' %}">Failed Fax</a>
         </li>
+        <li class="{% active request '^/task/project-review/$' %}">
+            <span class="counter">{{ counters.projectreview }}</span>
+            <a href="{% url 'projectreview-task-list' %}">Pending Projects</a>
+        </li>
     </ul>
 </section>
 {% endblock %}

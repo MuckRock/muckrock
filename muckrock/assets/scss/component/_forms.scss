@@ -1,7 +1,4 @@
 .form {
-    @include panel;
-    padding: $vertical-rhythm;
-
     header, form, .visible-fields, .buttons {
         @include row;
     }

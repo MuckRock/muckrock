@@ -2,6 +2,8 @@
 Autocomplete registry for Agency
 """
 
+from django.db.models import Q
+
 from autocomplete_light import shortcuts as autocomplete_light
 
 from muckrock.agency.models import Agency
@@ -33,6 +35,37 @@ class AgencyAutocomplete(autocomplete_light.AutocompleteModelBase):
         return choices.filter(jurisdiction_id=jurisdiction_id)
 
 
+class AgencyMultiRequestAutocomplete(autocomplete_light.AutocompleteModelTemplate):
+    """Provides an autocomplete field for picking multiple agencies."""
+    choices = (Agency.objects.get_approved().select_related('jurisdiction__parent')
+                                            .prefetch_related('types'))
+    choice_template = 'autocomplete/agency.html'
+    search_fields = ['name']
+    attrs = {
+        'placeholder': 'Search by agency or jurisdiction',
+        'data-autocomplete-minimum-characters': 2
+    }
+
+    def complex_condition(self, string):
+        """Returns a complex set of database queries for getting agencies
+        by name, alias, jurisdiction, jurisdiction abbreviation, and type."""
+        # pylint: disable=no-self-use
+        return (Q(name__icontains=string)|
+                Q(aliases__icontains=string)|
+                Q(jurisdiction__name__icontains=string)|
+                Q(jurisdiction__abbrev__iexact=string)|
+                Q(jurisdiction__parent__abbrev__iexact=string)|
+                Q(types__name__icontains=string))
+
+    def choices_for_request(self):
+        query = self.request.GET.get('q', '')
+        split_query = query.split()
+        conditions = self.complex_condition(split_query[0])
+        for string in split_query[1:]:
+            conditions &= self.complex_condition(string)
+        choices = self.choices.filter(conditions).distinct()
+        return self.order_choices(choices)[0:self.limit_choices]
+
 class AgencyAdminAutocomplete(AgencyAutocomplete):
     """Autocomplete for Agencies for FOIA admin page"""
     attrs = {'placeholder': 'Agency?'}
@@ -57,5 +90,6 @@ class AgencyAppealAdminAutocomplete(AgencyAdminAutocomplete):
 
 
 autocomplete_light.register(Agency, AgencyAutocomplete)
+autocomplete_light.register(Agency, AgencyMultiRequestAutocomplete)
 autocomplete_light.register(Agency, AgencyAdminAutocomplete)
 autocomplete_light.register(Agency, AgencyAppealAdminAutocomplete)
