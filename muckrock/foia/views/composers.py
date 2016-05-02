@@ -8,8 +8,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.db.models import Q
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template.loader import get_template
@@ -18,7 +17,6 @@ from django.utils.encoding import smart_text
 
 import actstream
 from datetime import datetime, date
-import json
 import logging
 from random import choice
 import string
@@ -373,32 +371,6 @@ def create_multirequest(request):
     if not request.user.profile.can_multirequest():
         messages.warning(request, 'Multirequesting is a Pro feature.')
         return redirect('accounts')
-
-    if request.method == 'GET' and request.is_ajax():
-        agency_queries = request.GET.get('query', '').split(' ')
-        agencies = {}
-        matching_agencies = []
-        # 1. get queryset
-        # 2. transform into listM
-        # 3. transform into set
-        # 4. listN.append(set(listM))
-        # 5. listN = list(reduce(set.intersection, listN))
-        for agency_query in agency_queries:
-            if len(agency_query) > 2:
-                matching_agencies.append(set(list(
-                    Agency.objects.filter(status='approved').filter(
-                        Q(name__icontains=agency_query)|
-                        Q(aliases__icontains=agency_query)|
-                        Q(jurisdiction__name__icontains=agency_query)|
-                        Q(types__name__exact=agency_query)
-                        ))))
-        try:
-            matching_agencies = list(reduce(set.intersection, matching_agencies))
-        except TypeError:
-            matching_agencies = []
-        for agency in matching_agencies:
-            agencies[agency.name] = agency.id
-        return HttpResponse(json.dumps(agencies), content_type='application/json')
 
     if request.method == 'POST':
         form = MultiRequestForm(request.POST)

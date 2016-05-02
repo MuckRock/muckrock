@@ -82,21 +82,9 @@
             }
             .autocomplete-light-widget {
                 display: block;
-            }
-            .deck > span {
-                position: relative;
-                width: 100%;
-                margin-top: $vertical-rhythm/2;
-                border-radius: $base-border-radius;
-                padding: .25em;
-                padding-left: 1.5em;
-                background: $color-blue;
-                color: $color-white;
-            }
-            .remove {
-                position: absolute;
-                top: .5em;
-                left: .25em;
+                .choice {
+                    margin-top: $vertical-rhythm/2;
+                }
             }
         }
         .list-filters-buttons {

@@ -1,0 +1,8 @@
+{% autoescape off %}
+Hi {% for user in users %}{{user.first_name}}, {% endfor %}
+
+{% block message %}{% endblock %}
+
+Sincerely,
+The MuckRock Team
+{% endautoescape %}

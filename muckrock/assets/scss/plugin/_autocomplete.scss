@@ -1,32 +1,116 @@
+input.autocomplete.xhr-pending { background-image: none; }
+
 .autocomplete-light-widget {
-    font-family: $font-family !important;
-    color: $color-black !important;
-    .deck > span {
+    width: 100%;
+    font-family: $font-family;
+    color: $color-black;
+    input {
         width: 100%;
-        display: block;
+    }
+    .choice {
         padding: 0;
     }
-    .remove {
-        vertical-align: middle;
-        margin-right: $vertical-rhythm/4;
-        &:hover {
-            background-position: 0 0;
+    .user.choice {
+        padding: 0;
+        .avatar {
+            margin-bottom: 0;
+            vertical-align: middle;
+        }
+        .name {
+            display: inline-block;
+            margin-bottom: 0;
+            padding: $vertical-rhythm/4 $vertical-rhythm/2;
+        }
+        .username {
+            font-size: $font-size-2;
+        }
+    }
+    .foia.choice {
+        .main {
+            padding: $vertical-rhythm/4 $vertical-rhythm/2;
+        }
+        .title {
+            margin-bottom: 0;
+        }
+        .meta {
+            font-size: $font-size-2;
+        }
+    }
+    .agency.choice {
+        .main {
+            padding: $vertical-rhythm/4 $vertical-rhythm/2;
+        }
+        .name {
+            margin-bottom: 0;
+        }
+        .jurisdiction {
+            font-size: $font-size-2;
+        }
+    }
+    .article.choice {
+        .image, .title {
+            margin-bottom: 0;
+        }
+        .image {
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .title {
+            font-weight: $font-weight-bold;
+        }
+        .info {
+            display: inline-block;
+            vertical-align: middle;
+            padding: $vertical-rhythm/4 $vertical-rhythm/2;
+        }
+        .meta {
+            font-size: $font-size-2;
+        }
+    }
+    .deck {
+        display: block;
+        .choice {
+            @include display(flex);
+            @include align-items(center);
+            @include justify-content(space-between);
+            .main {
+                @include flex(1 1 auto);
+            }
+            .remove {
+                @include order(1);
+                @include flex(0 1 1em);
+                margin-right: $vertical-rhythm/2;
+            }
+            margin-bottom: $vertical-rhythm/2;
+            padding: 0;
+            background: $color-white-pure;
+            border: 1px solid $color-grey;
+            @include border-radius;
+            overflow: hidden;
+        }
+        .hilight {
+            color: $color-black;
+        }
+        .user {
+            @include display(inline-flex);
         }
     }
 }
 
 .yourlabs-autocomplete {
+    width: auto;
+    overflow: hidden;
+    padding: 0;
     left: 0;
-    background-color: $color-white !important;
-    border-radius: $base-border-radius !important;
+    background-color: $color-white;
+    @include border-radius;
     .hilight {
-        background-color: $color-blue !important;
-        background-image: none !important;
+        color: $color-white;
+        background-color: $color-blue;
+        background-image: none;
     }
     .choice, [data-value], em {
-        color: $color-black !important;
+        color: $color-black;
         width: 100%;
     }
 }
-
-input.autocomplete.xhr-pending { background-image: none !important; }

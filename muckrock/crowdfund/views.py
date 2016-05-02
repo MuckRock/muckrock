@@ -5,21 +5,17 @@ Views for the crowdfund application
 from django.conf import settings
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import redirect
-from django.utils.decorators import method_decorator
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView
 
-import actstream
-from datetime import date, timedelta
+from datetime import date
 import logging
 import stripe
 
-from muckrock.crowdfund.forms import CrowdfundForm, CrowdfundPaymentForm
+from muckrock.crowdfund.forms import CrowdfundPaymentForm
 from muckrock.crowdfund.models import Crowdfund
-from muckrock.project.models import Project, ProjectCrowdfunds
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -121,50 +117,3 @@ class CrowdfundDetailView(DetailView):
                 messages.success(request, 'Thank you for your contribution!')
                 return redirect(self.get_redirect_url())
         return self.return_error(request)
-
-
-class CrowdfundProjectCreateView(CreateView):
-    """A creation view for project crowdfunding"""
-    model = Crowdfund
-    form_class = CrowdfundForm
-    template_name = 'project/crowdfund.html'
-
-    @method_decorator(login_required)
-    @method_decorator(user_passes_test(lambda u: u.is_staff))
-    def dispatch(self, *args, **kwargs):
-        """At the moment, only staff are allowed to create a project crowdfund."""
-        return super(CrowdfundProjectCreateView, self).dispatch(*args, **kwargs)
-
-    def get_project(self):
-        """Returns the project based on the URL keyword arguments"""
-        return self.get_object(queryset=Project.objects.all())
-
-    def get_initial(self):
-        """Sets defaults in crowdfund project form"""
-        project = self.get_project()
-        initial_name = 'Crowdfund the ' + project.title
-        initial_date = date.today() + timedelta(30)
-        return {
-            'name': initial_name,
-            'date_due': initial_date,
-            'project': project.id
-        }
-
-    def form_valid(self, form):
-        """Saves relationship and sends action before returning URL"""
-        redirection = super(CrowdfundProjectCreateView, self).form_valid(form)
-        crowdfund = self.object
-        project = self.get_project()
-        relationship = ProjectCrowdfunds.objects.create(project=project, crowdfund=crowdfund)
-        actstream.action.send(
-            self.request.user,
-            verb='started',
-            action_object=relationship.crowdfund,
-            target=relationship.project
-        )
-        return redirection
-
-    def get_success_url(self):
-        """Generates actions before returning URL"""
-        project = self.get_project()
-        return project.get_absolute_url()

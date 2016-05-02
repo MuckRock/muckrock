@@ -29,7 +29,7 @@ class TestDailyDigest(TestCase):
         """The email should create when given a User."""
         ok_(self.digest(user=self.user, interval=self.interval))
 
-    @raises(TypeError)
+    @raises(NotImplementedError)
     def test_requires_user(self):
         """The email should raise an error when instantiated without a user."""
         self.digest(user=None, interval=self.interval)

@@ -11,6 +11,7 @@ from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 
 from muckrock.accounts.models import Statistics
+from muckrock.crowdfund.models import Crowdfund
 from muckrock.message.email import TemplateEmail
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.qanda.models import Question
@@ -131,6 +132,12 @@ class Digest(TemplateEmail):
             raise NotImplementedError('Interval must be provided by subclass or when initialized.')
         return self.interval
 
+    def get_user(self):
+        """Gets the user or raises an error if it is missing."""
+        if not self.user:
+            raise NotImplementedError('User must be provided to a digest.')
+        return self.user
+
 
 class ActivityDigest(Digest):
     """
@@ -190,19 +197,20 @@ class ActivityDigest(Digest):
     def get_activity(self):
         """Returns a list of activities to be sent in the email"""
         duration = self.get_duration()
-        user_ct = ContentType.objects.get_for_model(self.user)
-        following = (user_stream(self.user).filter(timestamp__gte=duration)
+        user = self.get_user()
+        user_ct = ContentType.objects.get_for_model(user)
+        following = (user_stream(user).filter(timestamp__gte=duration)
                                            .exclude(verb__icontains='following'))
         foia_following = model_stream(FOIARequest, following)
         question_following = model_stream(Question, following).exclude(verb='asked')
-        foia_stream = (Action.objects.owned_by(self.user, FOIARequest)
+        foia_stream = (Action.objects.owned_by(user, FOIARequest)
                                      .filter(timestamp__gte=duration)
                                      .exclude(actor_content_type=user_ct,
-                                              actor_object_id=self.user.id))
-        question_stream = (Action.objects.owned_by(self.user, Question)
+                                              actor_object_id=user.id))
+        question_stream = (Action.objects.owned_by(user, Question)
                                          .filter(timestamp__gte=duration)
                                          .exclude(actor_content_type=user_ct,
-                                                  actor_object_id=self.user.id))
+                                                  actor_object_id=user.id))
         foia_stream = self.classify_foia_activity(foia_stream)
         foia_following = self.classify_foia_activity(foia_following)
         self.activity['requests'] = {
@@ -312,13 +320,16 @@ class StaffDigest(Digest):
             stat('Stale Agencies', current.stale_agencies, previous.stale_agencies, False),
             stat('New Agencies', current.unapproved_agencies, previous.unapproved_agencies, False),
         ]
+        active_crowdfunds = Crowdfund.objects.filter(closed=False, date_due__gte=timezone.now())
         return {
             'stats': stats,
             'comms': get_comms(current_date, previous_date),
+            'crowdfunds': active_crowdfunds
         }
 
     def send(self, *args):
         """Don't send to users who are not staff"""
-        if not self.user.is_staff:
+        user = self.get_user()
+        if not user.is_staff:
             return 0
         return super(StaffDigest, self).send(*args)
