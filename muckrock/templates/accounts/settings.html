@@ -18,7 +18,7 @@
         </dl>
     </header>
     <main>
-        <form enctype="multipart/form-data" method="post" action="?type=profile" class="profile form" id="profile">
+        <form enctype="multipart/form-data" method="post" class="profile form" id="profile">
             {% csrf_token %}
             <h2>Profile</h2>
             <input type="hidden" name="action" value="profile" />
