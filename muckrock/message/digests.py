@@ -233,11 +233,11 @@ class ActivityDigest(Digest):
         classified = {
             'completed': stream.filter(verb__icontains='completed'),
             'rejected': stream.filter(verb__icontains='rejected'),
-            'unsuccessful': stream.filter(verb__icontains='no responsive documents'),
-            'action_required': stream.filter(
-                Q(verb__icontains='payment')|Q(verb__icontains='fix')),
-            'response': stream.filter(
-                Q(verb__icontains='processing')|Q(verb__icontains='acknowledged')),
+            'no_documents': stream.filter(verb__icontains='no responsive documents'),
+            'require_payment': stream.filter(verb__icontains='payment'),
+            'require_fix': stream.filter(verb__icontains='require_fix'),
+            'interim_response': stream.filter(verb__icontains='processed'),
+            'acknowledged': stream.filter(verb__icontains='acknowledged')
         }
         activity_count = 0
         for _, classified_stream in classified.iteritems():
