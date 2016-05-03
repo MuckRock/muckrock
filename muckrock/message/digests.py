@@ -23,6 +23,53 @@ def model_stream(model, stream):
     target = Q(target_content_type=content_type)
     return stream.filter(action_object|target)
 
+def get_stats(start, end):
+    """Compares statistics between two dates"""
+    try:
+        current = Statistics.objects.get(date=end)
+        previous = Statistics.objects.get(date=start)
+    except Statistics.DoesNotExist:
+        return None # if statistics cannot be found, don't send anything
+    stats = [
+        stat('Requests', current.total_requests, previous.total_requests),
+        stat(
+            'Processing',
+            current.total_requests_submitted,
+            previous.total_requests_submitted,
+            False
+        ),
+        stat(
+            'Processing Time',
+            current.requests_processing_days,
+            previous.requests_processing_days,
+            False
+        ),
+        stat(
+            'Unresolved Tasks',
+            current.total_unresolved_tasks,
+            previous.total_unresolved_tasks,
+            False
+        ),
+        stat(
+            'Automatically Resolved',
+            current.daily_robot_response_tasks,
+            previous.daily_robot_response_tasks
+        ),
+        stat(
+            'Orphans',
+            current.total_unresolved_orphan_tasks,
+            previous.total_unresolved_orphan_tasks,
+            False
+        ),
+        stat('Pages', current.total_pages, previous.total_pages),
+        stat('Users', current.total_users, previous.total_users),
+        stat('Pro Users', current.pro_users, previous.pro_users),
+        stat('Agencies', current.total_agencies, previous.total_agencies),
+        stat('Stale Agencies', current.stale_agencies, previous.stale_agencies, False),
+        stat('New Agencies', current.unapproved_agencies, previous.unapproved_agencies, False),
+    ]
+    return stats
+
 def stat(name, current, previous, growth=True):
     """Returns a statistic dictionary"""
     return {
@@ -32,10 +79,10 @@ def stat(name, current, previous, growth=True):
         'growth': growth
     }
 
-def get_comms(current, previous):
-    """Returns a dictionary of communications"""
-    received = FOIACommunication.objects.filter(date__range=[previous, current], response=True)
-    sent = FOIACommunication.objects.filter(date__range=[previous, current], response=False)
+def get_comms(start, end):
+    """Returns communication data over a date range"""
+    received = FOIACommunication.objects.filter(date__range=[start, end], response=True)
+    sent = FOIACommunication.objects.filter(date__range=[start, end], response=False)
     delivered_by = {
         'email': sent.filter(delivered='email').count(),
         'fax': sent.filter(delivered='fax').count(),
@@ -58,7 +105,7 @@ def get_comms(current, previous):
             'format': delivered_by,
             'cost': cost_per,
             'expense': cost,
-            'trailing': get_trailing_cost(current, 30, cost_per)
+            'trailing': get_trailing_cost(end, 30, cost_per)
         }
     }
 
@@ -269,63 +316,12 @@ class StaffDigest(Digest):
     def get_context_data(self, *args):
         """Adds classified activity to the context"""
         context = super(StaffDigest, self).get_context_data(*args)
-        self.activity = self.get_activity()
-        context['activity'] = self.activity
+        end = timezone.now() - self.interval
+        start = end - self.interval
+        context['stats'] = get_stats(start, end)
+        context['comms'] = get_comms(start, end)
+        context['crowdfunds'] = list(Crowdfund.objects.filter(closed=False))
         return context
-
-    def get_activity(self):
-        """Returns yesterday's statistics"""
-        current_date = timezone.now() - self.interval
-        previous_date = current_date - self.interval
-        try:
-            current = Statistics.objects.get(date=current_date)
-            previous = Statistics.objects.get(date=previous_date)
-        except Statistics.DoesNotExist:
-            return None # if statistics cannot be found, don't send anything
-        stats = [
-            stat('Requests', current.total_requests, previous.total_requests),
-            stat(
-                'Processing',
-                current.total_requests_submitted,
-                previous.total_requests_submitted,
-                False
-            ),
-            stat(
-                'Processing Time',
-                current.requests_processing_days,
-                previous.requests_processing_days,
-                False
-            ),
-            stat(
-                'Unresolved Tasks',
-                current.total_unresolved_tasks,
-                previous.total_unresolved_tasks,
-                False
-            ),
-            stat(
-                'Automatically Resolved',
-                current.daily_robot_response_tasks,
-                previous.daily_robot_response_tasks
-            ),
-            stat(
-                'Orphans',
-                current.total_unresolved_orphan_tasks,
-                previous.total_unresolved_orphan_tasks,
-                False
-            ),
-            stat('Pages', current.total_pages, previous.total_pages),
-            stat('Users', current.total_users, previous.total_users),
-            stat('Pro Users', current.pro_users, previous.pro_users),
-            stat('Agencies', current.total_agencies, previous.total_agencies),
-            stat('Stale Agencies', current.stale_agencies, previous.stale_agencies, False),
-            stat('New Agencies', current.unapproved_agencies, previous.unapproved_agencies, False),
-        ]
-        active_crowdfunds = Crowdfund.objects.filter(closed=False, date_due__gte=timezone.now())
-        return {
-            'stats': stats,
-            'comms': get_comms(current_date, previous_date),
-            'crowdfunds': active_crowdfunds
-        }
 
     def send(self, *args):
         """Don't send to users who are not staff"""
