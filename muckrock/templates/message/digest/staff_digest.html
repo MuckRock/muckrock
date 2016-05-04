@@ -2,7 +2,7 @@
 
 {% block body %}
 <p>{{ salutation }}, {{ user.first_name }}.</p>
-<p>Here is what happened on MuckRock yesterday ({{ last|date:'m/d/y' }}):</p>
+{% if stats %}
 <h1>Stats</h1>
 <table>
     <thead>
@@ -13,7 +13,7 @@
         </tr>
     </thead>
     <tbody>
-        {% for stat in activity.stats %}
+        {% for stat in stats %}
         <tr>
             <td>{{ stat.name }}</td>
             <td>{{ stat.current }}</td>
@@ -40,21 +40,23 @@
         {% endfor %}
     <tbody>
 </table>
+{% endif %}
+{% if comms %}
 <h1>Communications</h1>
 <table>
     <tbody>
         <tr>
             <td>Sent</td>
-            <td>{{ activity.comms.sent }}</td>
+            <td>{{ comms.sent }}</td>
         </tr>
         <tr>
             <td>Received</td>
-            <td>{{ activity.comms.received }}</td>
+            <td>{{ comms.received }}</td>
         </tr>
     </tbody>
 </table>
 <h2>Sent</h2>
-{% with activity.comms.delivery as sent %}
+{% with comms.delivery as sent %}
 <table>
     <thead>
         <tr>
@@ -89,14 +91,21 @@
     </tbody>
 </table>
 {% endwith %}
-<h1>Crowdfunds</h1>
+{% endif %}
+{% if crowdfunds %}
+<h1>Active Crowdfunds</h1>
 <ul>
 {% for crowdfund in crowdfunds %}
 {% with crowdfund.get_crowdfund_object as object %}
-<li><a href="{{object.get_aboslute_url}}">{{object}}</a></li>
+<li>
+    <a href="{{object.get_absolute_url}}">{{object}}</a>
+    <br/>
+    <small>{{crowdfund.percent_funded}}% funded &bull; ${{crowdfund.amount_remaining}} remaining &bull; Ends on {{crowdfund.date_due|date:"m/d/y"}}</small>
+</li>
 {% endwith %}
 {% endfor %}
 </ul>
+{% endif %}
 <hr />
 <p>That is all for today. {{ signoff }} and see you tomorrow.</p>
 {% endblock %}

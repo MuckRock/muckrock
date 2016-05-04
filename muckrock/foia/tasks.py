@@ -12,7 +12,6 @@ from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string, get_template
 from django.template import Context
 
-import actstream
 import dill as pickle
 import dbsettings
 import base64
@@ -318,7 +317,6 @@ def embargo_expire():
                                            date_embargo__lt=date.today()):
         foia.embargo = False
         foia.save(comment='embargo expired')
-        actstream.action.send(foia, verb='embargo expired')
         send_mail('[MuckRock] Embargo expired for FOI Request "%s"' % foia.title,
                   render_to_string('text/foia/embargo_did_expire.txt', {'request': foia}),
                   'info@muckrock.com',
