@@ -107,13 +107,6 @@ def request_fee_receipt(user, charge):
     return Receipt(charge, items, user=user, subject=subject, extra_context=context, text_template=text, html_template=html)
 
 
-class MultiRequestReceipt(Receipt):
-    """A receipt for the purchase of a multirequest"""
-    subject = u'Payment received for multi request fee'
-    item = u'Multi-request fee'
-    text_template = 'message/receipt/request_multi.txt'
-
-
 class CrowdfundPaymentReceipt(Receipt):
     """A receipt for the payment to a crowdfund"""
     subject = u'Payment received for crowdfunding a request'

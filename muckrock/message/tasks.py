@@ -121,7 +121,6 @@ def send_charge_receipt(charge_id):
         receipt_classes = {
             'request-purchase': receipts.request_purchase_receipt,
             'request-fee': receipts.request_fee_receipt,
-            'request-multi': receipts.MultiRequestReceipt,
             'crowdfund-payment': receipts.CrowdfundPaymentReceipt,
         }
         receipt_class = receipt_classes[user_action]
