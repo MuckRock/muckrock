@@ -72,6 +72,14 @@ class Receipt(TemplateEmail):
             }
         }
 
+def generic_receipt(user, charge):
+    """Generates a very basic receipt. Should be used as a fallback."""
+    subject = u'Receipt'
+    text = 'message/receipt/base.txt'
+    html = 'message/receipt/base.html'
+    item = LineItem('Payment', charge.amount)
+    return Receipt(charge, [item], user=user, subject=subject, text_template=text, html_template=html)
+
 def request_purchase_receipt(user, charge):
     """Generates a receipt for a request purchase and then returns it."""
     subject = u'Request Bundle Receipt'

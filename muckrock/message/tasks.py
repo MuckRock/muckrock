@@ -118,15 +118,15 @@ def send_charge_receipt(charge_id):
     except User.DoesNotExist:
         user = None
     try:
-        receipt_classes = {
+        receipt_functions = {
             'request-purchase': receipts.request_purchase_receipt,
             'request-fee': receipts.request_fee_receipt,
             'crowdfund-payment': receipts.crowdfund_payment_receipt,
         }
-        receipt_class = receipt_classes[user_action]
+        receipt_function = receipt_functions[user_action]
     except KeyError:
-        receipt_class = receipts.GenericReceipt
-    receipt = receipt_class(user, charge)
+        receipt_function = receipts.generic_receipt
+    receipt = receipt_function(user, charge)
     receipt.send(fail_silently=False)
 
 def get_subscription_type(invoice):
