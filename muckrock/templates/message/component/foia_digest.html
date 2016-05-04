@@ -1,11 +1,20 @@
 {% if stream|length > 0 %}
-<h3 class="{{stream_name}}">{{stream_name}}</h3>
-<ul>
-    {% for action in stream %}
-    <li>
-        <a href="{{action.action_object.get_absolute_url}}">{{ action.action_object }}</a>
-        <span class="verb"> {{ action.verb }}</span>
-    </li>
-    {% endfor %}
-</ul>
+<tr>
+    <td class="request-category">
+        <small class="{{color}} badge">{{label}}</small>
+    </td>
+    <td>
+        {% for action in stream %}
+        {% with action.action_object as foia %}
+        <div>
+            <p>
+                <a href="{{foia.get_absolute_url}}">{{ foia }}</a>
+                <br/>
+                <small>{{foia.agency}}</small>
+            </p>
+        </div>
+        {% endwith %}
+        {% endfor %}
+    </td>
+</tr>
 {% endif %}
