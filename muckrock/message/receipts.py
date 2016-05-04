@@ -106,12 +106,21 @@ def request_fee_receipt(user, charge):
         logger.error('Could not find FOIARequest identified by Charge metadata.')
     return Receipt(charge, items, user=user, subject=subject, extra_context=context, text_template=text, html_template=html)
 
-
-class CrowdfundPaymentReceipt(Receipt):
-    """A receipt for the payment to a crowdfund"""
-    subject = u'Payment received for crowdfunding a request'
-    item = u'Crowdfund payment'
-    text_template = 'message/receipt/crowdfund.txt'
+def crowdfund_payment_receipt(user, charge):
+    """Generates a receipt for a payment on a crowdfund."""
+    subject = u'Crowdfund Payment Receipt'
+    text = 'message/receipt/crowdfund.txt'
+    html = 'message/receipt/crowdfund.html'
+    item = LineItem('Crowdfund Payment', charge.amount)
+    try:
+        crowdfund_pk = charge.metadata['crowdfund_id']
+        crowdfund = Crowdfund.objects.get(pk=crowdfund_pk)
+        context = {'crowdfund': crowdfund}
+    except KeyError:
+        logger.error('No Crowdfund identified in Charge metadata.')
+    except Crowdfund.DoesNotExist:
+        logger.error('Could not find Crowdfund identified by Charge metadata.')
+    return Receipt(charge, [item], user=user, subject=subject, extra_context=context, text_template=text, html_template=html)
 
 
 class ProSubscriptionReceipt(Receipt):

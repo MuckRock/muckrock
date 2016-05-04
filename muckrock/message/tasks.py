@@ -121,7 +121,7 @@ def send_charge_receipt(charge_id):
         receipt_classes = {
             'request-purchase': receipts.request_purchase_receipt,
             'request-fee': receipts.request_fee_receipt,
-            'crowdfund-payment': receipts.CrowdfundPaymentReceipt,
+            'crowdfund-payment': receipts.crowdfund_payment_receipt,
         }
         receipt_class = receipt_classes[user_action]
     except KeyError:
