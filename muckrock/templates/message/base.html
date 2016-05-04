@@ -103,6 +103,9 @@
                 font-size: .875em;
                 line-height: 1.5em;
             }
+            .footer p {
+                margin: 0;
+            }
             /* Utility */
             .hide {
                 display: none !important;
@@ -197,8 +200,7 @@
                                     <div class="footer">
                                         {% block settings %}{% endblock %}
                                         {% if user %}<p>This email was sent to <a href="mailto:{{user.email}}">{{user.email}}</a>.{% endif %}
-                                        <p>Add <a href="mailto:info@muckrock.com">info@muckrock.com</a> to your address book to prevent us from being marked as spam.</p>
-                                        <p>We always welcome your feedback. Simply reply to this email or write to <a href="mailto:info@muckrock.com">info@muckrock.com</a>.</p>
+                                        <p>Add <a href="mailto:info@muckrock.com">info@muckrock.com</a> to your address book to prevent our emails from being marked as spam.</p>
                                         <p>MuckRock, 411A Highland Avenue, Somerville, MA 02144</p>
                                     </div>
                                 </div>
