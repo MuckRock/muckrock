@@ -86,15 +86,15 @@ def send_invoice_receipt(invoice_id):
     customer = profile.customer()
     subscription = customer.subscriptions.retrieve(invoice.subscription)
     try:
-        receipt_classes = {
-            'pro': receipts.ProSubscriptionReceipt,
-            'org': receipts.OrgSubscriptionReceipt
+        receipt_functions = {
+            'pro': receipts.pro_subscription_receipt,
+            'org': receipts.org_subscription_receipt
         }
-        receipt_class = receipt_classes[subscription.plan.id]
+        receipt_function = receipt_functions[subscription.plan.id]
     except KeyError:
         logger.warning('Invoice charged for unrecognized plan: %s', subscription.plan.name)
-        receipt_class = receipts.GenericReceipt
-    receipt = receipt_class(profile.user, charge)
+        receipt_function = receipts.generic_receipt
+    receipt = receipt_function(profile.user, charge)
     receipt.send(fail_silently=False)
 
 @task(name='muckrock.message.tasks.send_charge_receipt')
@@ -125,6 +125,7 @@ def send_charge_receipt(charge_id):
         }
         receipt_function = receipt_functions[user_action]
     except KeyError:
+        logger.warning('Unrecognized charge: %s', user_action)
         receipt_function = receipts.generic_receipt
     receipt = receipt_function(user, charge)
     receipt.send(fail_silently=False)

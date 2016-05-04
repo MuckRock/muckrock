@@ -130,28 +130,27 @@ def crowdfund_payment_receipt(user, charge):
         logger.error('Could not find Crowdfund identified by Charge metadata.')
     return Receipt(charge, [item], user=user, subject=subject, extra_context=context, text_template=text, html_template=html)
 
+def pro_subscription_receipt(user, charge):
+    """Generates a receipt for a payment on a pro account."""
+    subject = u'Professional Account Receipt'
+    text = 'message/receipt/pro_subscription.txt'
+    html = 'message/receipt/pro_subscription.html'
+    item = LineItem('Professional Account', charge.amount)
+    context = {
+        'monthly_requests': settings.MONTHLY_REQUESTS['pro']
+    }
+    return Receipt(charge, [item], user=user, subject=subject, extra_context=context, text_template=text, html_template=html)
 
-class ProSubscriptionReceipt(Receipt):
-    """A receipt for a recurring pro subscription charge"""
-    subject = u'Payment received for professional account'
-    item = u'Professional subscription'
-    text_template = 'message/receipt/pro_subscription.txt'
-
-    def get_context_data(self, charge):
-        """Add monthly requests to context"""
-        context = super(ProSubscriptionReceipt, self).get_context_data(charge)
-        context['monthly_requests'] = settings.MONTHLY_REQUESTS['pro']
-        return context
-
-
-class OrgSubscriptionReceipt(Receipt):
-    """A receipt for a recurring org subscription charge"""
-    subject = u'Payment received dor organization account'
-    item = u'Organization subscription'
-    text_template = 'message/receipt/org_subscription.txt'
-
-    def get_context_data(self, charge):
-        """Add the organization to the context"""
-        context = super(OrgSubscriptionReceipt, self).get_context_data(charge)
-        context['org'] = Organization.objects.get(owner=self.user)
-        return context
+def org_subscription_receipt(user, charge):
+    """Generates a receipt for a payment on an org account."""
+    subject = u'Organization Account Receipt'
+    text = 'message/receipt/org_subscription.txt'
+    html = 'message/receipt/org_subscription.html'
+    item = LineItem('Organization Account', charge.amount)
+    try:
+        context = {'org': Organization.objects.get(owner=user)}
+    except Organization.DoesNotExist:
+        logger.warning('Org receipt generated for non-owner User.')
+        context = {'org': None}
+    return Receipt(charge, [item], user=user, subject=subject, extra_context=context, text_template=text, html_template=html)
+    
