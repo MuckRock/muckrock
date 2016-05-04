@@ -117,13 +117,10 @@ def send_charge_receipt(charge_id):
         user = User.objects.get(email=user_email)
     except User.DoesNotExist:
         user = None
-    # every charge type should have a corresponding receipt class
-    # if there is a charge type without a class, fallback to a generic receipt
-    # this list of receipt classes should be made into a setting...later
     try:
         receipt_classes = {
-            'request-purchase': receipts.RequestPurchaseReceipt,
-            'request-fee': receipts.RequestFeeReceipt,
+            'request-purchase': receipts.request_purchase_receipt,
+            'request-fee': receipts.request_fee_receipt,
             'request-multi': receipts.MultiRequestReceipt,
             'crowdfund-payment': receipts.CrowdfundPaymentReceipt,
         }

@@ -72,46 +72,39 @@ class Receipt(TemplateEmail):
             }
         }
 
+def request_purchase_receipt(user, charge):
+    """Generates a receipt for a request purchase and then returns it."""
+    subject = u'Request Bundle Receipt'
+    text = 'message/receipt/request_purchase.txt'
+    html = 'message/receipt/request_purchase.html'
+    item_name = u'4 requests'
+    if user:
+        bundle_size = settings.BUNDLED_REQUESTS.get(user.profile.acct_type, 4)
+        item_name = unicode(bundle_size) + u' requests'
+    item = LineItem(item_name, charge.amount)
+    return Receipt(charge, [item], user=user, subject=subject, text_template=text, html_template=html)
 
-class RequestPurchaseReceipt(Receipt):
-    """A receipt for request purchases"""
-    subject = u'Payment received for additional requests'
-    item = u'4 requests'
-    text_template = 'message/receipt/request_purchase.txt'
-
-    def get_context_data(self, charge):
-        """Adjusts the item description to account for variable request purchase amounts"""
-        context = super(RequestPurchaseReceipt, self).get_context_data(charge)
-        if self.user:
-            bundle_size = settings.BUNDLED_REQUESTS.get(self.user.profile.acct_type, 4)
-            item = unicode(bundle_size) + u' requests'
-            context['item'] = item
-        return context
-
-
-class RequestFeeReceipt(Receipt):
-    """A receipt for payment of request fees"""
-    subject = u'Payment received for request fee'
-    item = u'Request fee'
-    text_template = 'message/receipt/request_fees.txt'
-
-    def get_context_data(self, charge):
-        """Returns the context for the template"""
-        context = super(RequestFeeReceipt, self).get_context_data(charge)
-        amount = context['amount']
-        base_amount = amount / 1.05
-        fee_amount = amount - base_amount
-        context['base_amount'] = base_amount
-        context['fee_amount'] = fee_amount
-        try:
-            foia_pk = charge.metadata['foia']
-            foia = FOIARequest.objects.get(pk=foia_pk)
-            context['url'] = foia.get_absolute_url()
-        except KeyError:
-            logger.error('No FOIA identified in Charge metadata.')
-        except FOIARequest.DoesNotExist:
-            logger.error('Could not find FOIARequest identified by Charge metadata.')
-        return context
+def request_fee_receipt(user, charge):
+    """Generates a receipt for a payment of request fees."""
+    subject = u'Request Fee Receipt'
+    text = 'message/receipt/request_fees.txt'
+    html = 'message/receipt/request_fees.html'
+    amount = charge.amount
+    agency_amount = int(amount / 1.05)
+    muckrock_amount = amount - agency_amount
+    items = [
+        LineItem('Agency Fee', agency_amount),
+        LineItem('MuckRock Fee', muckrock_amount),
+    ]
+    try:
+        foia_pk = charge.metadata['foia']
+        foia = FOIARequest.objects.get(pk=foia_pk)
+        context = {'foia': foia}
+    except KeyError:
+        logger.error('No FOIA identified in Charge metadata.')
+    except FOIARequest.DoesNotExist:
+        logger.error('Could not find FOIARequest identified by Charge metadata.')
+    return Receipt(charge, items, user=user, subject=subject, extra_context=context, text_template=text, html_template=html)
 
 
 class MultiRequestReceipt(Receipt):
