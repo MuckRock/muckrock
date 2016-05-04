@@ -3,58 +3,57 @@ Receipt objects for the messages app
 """
 
 from django.conf import settings
-from django.contrib.auth.models import User
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
 
 from datetime import datetime
 import logging
 
 from muckrock.foia.models import FOIARequest
+from muckrock.message.email import TemplateEmail
 from muckrock.organization.models import Organization
 
 logger = logging.getLogger(__name__)
 
-class GenericReceipt(EmailMultiAlternatives):
-    """A basic receipt"""
-    item = u''
+class Receipt(TemplateEmail):
+    """Our basic receipt sends an email to a user detailing a Stripe charge for an item."""
     text_template = 'message/receipt/base.txt'
-    subject = u'Your Receipt'
+    html_template = 'message/receipt/base.html'
 
-    def __init__(self, user, charge, **kwargs):
-        super(GenericReceipt, self).__init__(subject=self.subject, **kwargs)
-        if isinstance(user, User):
-            self.user = user
-            self.to = [user.email]
-        else:
-            self.user = None
+    def __init__(self, charge, item, **kwargs):
+        # we assign charge and item to the instance first so
+        # they can be used by the get_context_data method
+        self.charge = charge
+        self.item = item
+        super(Receipt, self).__init__(**kwargs)
+        # if no user provided, send the email to the address on the charge
+        if not self.user:
             try:
-                user_email = charge.metadata['email']
-                self.to = [user_email]
+                user_email = self.charge.metadata['email']
+                self.to.append(user_email)
             except KeyError:
-                self.to = []
-        self.from_email = 'MuckRock <info@muckrock.com>'
-        self.bcc = ['diagnostics@muckrock.com']
-        self.body = render_to_string(
-            self.text_template,
-            self.get_context_data(charge)
-        )
+                raise ValueError('No user or email provided to receipt.')
 
-    def get_context_data(self, charge):
+    def get_context_data(self, *args):
         """Returns a dictionary of context for the template, given the charge object"""
-        amount = charge.amount / 100.0 # Stripe uses smallest-unit formatting
-        card = charge.source
+        context = super(Receipt, self).get_context_data(*args)
+        total = self.charge.amount / 100.0 # Stripe uses smallest-unit formatting
+        line_items = [{
+            'name': self.item,
+            'price': amount,
+        }]
         return {
-            'user': self.user,
-            'id': charge.id,
-            'date': datetime.fromtimestamp(charge.created),
-            'item': self.item,
-            'last4': card.get('last4'),
-            'amount': amount
+            'line_items': line_items,
+            'total': total,
+            'charge': {
+                'id': self.charge.id,
+                'name': self.charge.source.name,
+                'date': datetime.fromtimestamp(self.charge.created),
+                'card': self.charge.source.brand,
+                'last4': self.charge.source.last4,
+            }
         }
 
 
-class RequestPurchaseReceipt(GenericReceipt):
+class RequestPurchaseReceipt(Receipt):
     """A receipt for request purchases"""
     subject = u'Payment received for additional requests'
     item = u'4 requests'
@@ -70,7 +69,7 @@ class RequestPurchaseReceipt(GenericReceipt):
         return context
 
 
-class RequestFeeReceipt(GenericReceipt):
+class RequestFeeReceipt(Receipt):
     """A receipt for payment of request fees"""
     subject = u'Payment received for request fee'
     item = u'Request fee'
@@ -95,21 +94,21 @@ class RequestFeeReceipt(GenericReceipt):
         return context
 
 
-class MultiRequestReceipt(GenericReceipt):
+class MultiRequestReceipt(Receipt):
     """A receipt for the purchase of a multirequest"""
     subject = u'Payment received for multi request fee'
     item = u'Multi-request fee'
     text_template = 'message/receipt/request_multi.txt'
 
 
-class CrowdfundPaymentReceipt(GenericReceipt):
+class CrowdfundPaymentReceipt(Receipt):
     """A receipt for the payment to a crowdfund"""
     subject = u'Payment received for crowdfunding a request'
     item = u'Crowdfund payment'
     text_template = 'message/receipt/crowdfund.txt'
 
 
-class ProSubscriptionReceipt(GenericReceipt):
+class ProSubscriptionReceipt(Receipt):
     """A receipt for a recurring pro subscription charge"""
     subject = u'Payment received for professional account'
     item = u'Professional subscription'
@@ -122,7 +121,7 @@ class ProSubscriptionReceipt(GenericReceipt):
         return context
 
 
-class OrgSubscriptionReceipt(GenericReceipt):
+class OrgSubscriptionReceipt(Receipt):
     """A receipt for a recurring org subscription charge"""
     subject = u'Payment received dor organization account'
     item = u'Organization subscription'

@@ -1,0 +1,40 @@
+{% extends 'message/base.html' %}
+
+{% block body %}
+{% block receipt %}
+<div class="receipt">
+    <tr class="purchase-data">
+        <td>
+            <p>{{charge.name}}</p>
+            <p>{{charge.date|date:"m/d/Y"}}</p>
+        </td>
+        <td>
+            <p>Order {{charge.id}}</p>
+            <p>{{charge.card}} **** **** **** {{charge.last4}}</p>
+        </td>
+    </tr>
+    <table class="line-items">
+    {% for item in line_items %}
+        <tr>
+            <td>{{item.name}}</td>
+            <td>${{item.price|floatformat:2}}</td>
+        </tr>
+    {% endfor %}
+        <tr class="total">
+            <td>Total</td>
+            <td>${{total|floatformat:2}}</td>
+        </tr>
+    </table>
+</div>
+{% endblock %}
+{% block description %}
+<div>
+    {% if user %}<p>Hi {{ user.first_name }},</p>{% endif %}
+    <p>This email confirms your payment to MuckRock.</p>
+    {% block support %}
+    <p>For concerns or more information about this charge, please contact info@muckrock.com or call 1-857-488-3081.</p>
+    {% endblock %}
+    <p>Thank you,<br/>The MuckRock Team</p>
+</div>
+{% endblock %}
+{% endblock %}
