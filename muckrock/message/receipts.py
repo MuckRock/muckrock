@@ -47,7 +47,7 @@ class Receipt(TemplateEmail):
             if not isinstance(item, LineItem):
                 raise TypeError('Each item in the list should be a receipt LineItem.')
         self.items = items
-        super(Receipt, self).__init__(subject=self.subject, **kwargs)
+        super(Receipt, self).__init__(**kwargs)
         # if no user provided, send the email to the address on the charge
         if not self.user:
             try:
@@ -104,10 +104,11 @@ def request_fee_receipt(user, charge):
         LineItem('Agency Fee', agency_amount),
         LineItem('MuckRock Fee', muckrock_amount),
     ]
+    context = {}
     try:
         foia_pk = charge.metadata['foia']
         foia = FOIARequest.objects.get(pk=foia_pk)
-        context = {'foia': foia}
+        context.update({'foia': foia})
     except KeyError:
         logger.error('No FOIA identified in Charge metadata.')
     except FOIARequest.DoesNotExist:
@@ -120,10 +121,11 @@ def crowdfund_payment_receipt(user, charge):
     text = 'message/receipt/crowdfund.txt'
     html = 'message/receipt/crowdfund.html'
     item = LineItem('Crowdfund Payment', charge.amount)
+    context = {}
     try:
         crowdfund_pk = charge.metadata['crowdfund_id']
         crowdfund = Crowdfund.objects.get(pk=crowdfund_pk)
-        context = {'crowdfund': crowdfund}
+        context.update({'crowdfund': crowdfund})
     except KeyError:
         logger.error('No Crowdfund identified in Charge metadata.')
     except Crowdfund.DoesNotExist:
@@ -153,4 +155,3 @@ def org_subscription_receipt(user, charge):
         logger.warning('Org receipt generated for non-owner User.')
         context = {'org': None}
     return Receipt(charge, [item], user=user, subject=subject, extra_context=context, text_template=text, html_template=html)
-    

@@ -38,7 +38,11 @@ mock_charge.id = 'test-charge'
 mock_charge.invoice = False
 mock_charge.amount = 100
 mock_charge.created = 1446680016
-mock_charge.source = {'last4': '1234'}
+mock_charge.source.return_value = {
+    'brand': 'Visa',
+    'last4': '1234',
+    'name': 'Test'
+}
 MockCharge = mock.Mock()
 MockCharge.retrieve.return_value = mock_charge
 
@@ -124,6 +128,7 @@ class TestNotificationTasks(TestCase):
 
 
 @mock.patch('stripe.Charge', MockCharge)
+@mock.patch('muckrock.message.receipts.Receipt.send')
 class TestSendChargeReceiptTask(TestCase):
     """Tests the send charge receipt task."""
     # pylint: disable=no-self-use
@@ -135,14 +140,12 @@ class TestSendChargeReceiptTask(TestCase):
             'email': self.user.email
         }
 
-    @mock.patch('muckrock.message.receipts.RequestPurchaseReceipt.send')
     def test_request_purchase_receipt(self, mock_send):
         """A receipt should be sent after request bundle is purchased."""
         mock_charge.metadata['action'] = 'request-purchase'
         tasks.send_charge_receipt(mock_charge.id)
         mock_send.assert_called_with(fail_silently=False)
 
-    @mock.patch('muckrock.message.receipts.RequestFeeReceipt.send')
     def test_request_fee_receipt(self, mock_send):
         """A receipt should be sent after request fee is paid."""
         foia = factories.FOIARequestFactory()
@@ -151,28 +154,24 @@ class TestSendChargeReceiptTask(TestCase):
         tasks.send_charge_receipt(mock_charge.id)
         mock_send.assert_called_with(fail_silently=False)
 
-    @mock.patch('muckrock.message.receipts.MultiRequestReceipt.send')
     def test_multirequest_receipt(self, mock_send):
         """A receipt should be sent after a multi-request is purchased."""
         mock_charge.metadata['action'] = 'request-multi'
         tasks.send_charge_receipt(mock_charge.id)
         mock_send.assert_called_with(fail_silently=False)
 
-    @mock.patch('muckrock.message.receipts.CrowdfundPaymentReceipt.send')
     def test_crowdfund_payment_receipt(self, mock_send):
         """A receipt should be sent after a crowdfund payment is made."""
         mock_charge.metadata['action'] = 'crowdfund-payment'
         tasks.send_charge_receipt(mock_charge.id)
         mock_send.assert_called_with(fail_silently=False)
 
-    @mock.patch('muckrock.message.receipts.GenericReceipt.send')
     def test_other_receipt(self, mock_send):
         """A generic receipt should be sent for any other charges."""
         mock_charge.metadata['action'] = 'unknown-charge'
         tasks.send_charge_receipt(mock_charge.id)
         mock_send.assert_called_with(fail_silently=False)
 
-    @mock.patch('muckrock.message.receipts.GenericReceipt.send')
     def test_invoice_charge(self, mock_send):
         """A charge with an attachced invoice should not generate an email."""
         mock_charge.invoice = mock_invoice.id
@@ -184,11 +183,11 @@ class TestSendChargeReceiptTask(TestCase):
 @mock.patch('stripe.Invoice', MockInvoice)
 @mock.patch('stripe.Charge', MockCharge)
 @mock.patch('stripe.Customer', MockCustomer)
+@mock.patch('muckrock.message.receipts.Receipt.send')
 class TestSendInvoiceReceiptTask(TestCase):
     """Invoice receipts are send when an invoice payment succeeds."""
     # pylint: disable=no-self-use
 
-    @mock.patch('muckrock.message.receipts.ProSubscriptionReceipt.send')
     def test_pro_invoice_receipt(self, mock_send):
         """A receipt should be sent after a pro subscription payment is made."""
         mock_subscription.plan.id = 'pro'
@@ -198,7 +197,6 @@ class TestSendInvoiceReceiptTask(TestCase):
         tasks.send_invoice_receipt(mock_invoice.id)
         mock_send.assert_called_with(fail_silently=False)
 
-    @mock.patch('muckrock.message.receipts.OrgSubscriptionReceipt.send')
     def test_org_invoice_receipt(self, mock_send):
         """A receipt should be sent after an org subscription payment is made."""
         mock_subscription.plan.id = 'org'
