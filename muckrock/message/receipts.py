@@ -13,17 +13,41 @@ from muckrock.organization.models import Organization
 
 logger = logging.getLogger(__name__)
 
+class LineItem(object):
+    """A line item for a receipt"""
+    def __init__(self, name, price):
+        if not isinstance(name, basestring):
+            raise TypeError('Item name should be a string type')
+        if not isinstance(price, int):
+            # We basically want the cent representation of all our prices
+            # e.g. $1.00 = 100 cents
+            raise TypeError('Price should be an integer of the smallest currency unit')
+        self.name = name
+        self.price = price
+
+    @property
+    def formatted_price(self):
+        """Formats a price for display."""
+        return '$%.2f' % (self.price/100.0)
+
+
 class Receipt(TemplateEmail):
-    """Our basic receipt sends an email to a user detailing a Stripe charge for an item."""
+    """Our basic receipt sends an email to a user
+    detailing a Stripe charge for a list of LineItems."""
     text_template = 'message/receipt/base.txt'
     html_template = 'message/receipt/base.html'
 
-    def __init__(self, charge, item, **kwargs):
+    def __init__(self, charge, items, **kwargs):
         # we assign charge and item to the instance first so
         # they can be used by the get_context_data method
         self.charge = charge
-        self.item = item
-        super(Receipt, self).__init__(**kwargs)
+        if not isinstance(items, (list, tuple)):
+            items = list(items)
+        for item in items:
+            if not isinstance(item, LineItem):
+                raise TypeError('Each item in the list should be a receipt LineItem.')
+        self.items = items
+        super(Receipt, self).__init__(subject=self.subject, **kwargs)
         # if no user provided, send the email to the address on the charge
         if not self.user:
             try:
@@ -36,12 +60,8 @@ class Receipt(TemplateEmail):
         """Returns a dictionary of context for the template, given the charge object"""
         context = super(Receipt, self).get_context_data(*args)
         total = self.charge.amount / 100.0 # Stripe uses smallest-unit formatting
-        line_items = [{
-            'name': self.item,
-            'price': amount,
-        }]
         return {
-            'line_items': line_items,
+            'items': self.items,
             'total': total,
             'charge': {
                 'id': self.charge.id,

@@ -14,7 +14,7 @@
         </td>
     </tr>
     <table class="line-items">
-    {% for item in line_items %}
+    {% for item in items %}
         <tr>
             <td>{{item.name}}</td>
             <td>${{item.price|floatformat:2}}</td>

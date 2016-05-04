@@ -8,7 +8,7 @@
 Order {{charge.id}}
 {{charge.card}} **** **** **** {{charge.last4}}
 ------------
-{% for item in line_items %}
+{% for item in items %}
 {{item.name}}: {{item.price|floatformat:2}}
 {% endfor %}
 ------------
