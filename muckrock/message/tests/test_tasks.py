@@ -154,12 +154,6 @@ class TestSendChargeReceiptTask(TestCase):
         tasks.send_charge_receipt(mock_charge.id)
         mock_send.assert_called_with(fail_silently=False)
 
-    def test_multirequest_receipt(self, mock_send):
-        """A receipt should be sent after a multi-request is purchased."""
-        mock_charge.metadata['action'] = 'request-multi'
-        tasks.send_charge_receipt(mock_charge.id)
-        mock_send.assert_called_with(fail_silently=False)
-
     def test_crowdfund_payment_receipt(self, mock_send):
         """A receipt should be sent after a crowdfund payment is made."""
         mock_charge.metadata['action'] = 'crowdfund-payment'
