@@ -60,7 +60,7 @@ class Receipt(TemplateEmail):
         """Returns a dictionary of context for the template, given the charge object"""
         context = super(Receipt, self).get_context_data(*args)
         total = self.charge.amount / 100.0 # Stripe uses smallest-unit formatting
-        return {
+        context.update({
             'items': self.items,
             'total': total,
             'charge': {
@@ -70,7 +70,8 @@ class Receipt(TemplateEmail):
                 'card': self.charge.source.brand,
                 'last4': self.charge.source.last4,
             }
-        }
+        })
+        return context
 
 def generic_receipt(user, charge):
     """Generates a very basic receipt. Should be used as a fallback."""
@@ -101,8 +102,8 @@ def request_fee_receipt(user, charge):
     agency_amount = int(amount / 1.05)
     muckrock_amount = amount - agency_amount
     items = [
-        LineItem('Agency Fee', agency_amount),
-        LineItem('MuckRock Fee', muckrock_amount),
+        LineItem('Agency fee', agency_amount),
+        LineItem('Processing fee', muckrock_amount),
     ]
     context = {}
     try:
