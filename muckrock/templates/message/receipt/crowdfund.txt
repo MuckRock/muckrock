@@ -2,6 +2,6 @@
 
 {% block description %}
 {% with crowdfund.get_crowdfund_object as object %}
-This email confirms your payment to a MuckRock crowdfund for {{object}} ({{base_url}}{{object.get_absolute_url}}).
+{% if crowdfund %}This email confirms your payment to a MuckRock crowdfund for {{object}} ({{base_url}}{{object.get_absolute_url}}).{% else %}This email confirms your payment to a MuckRock crowdfund.{% endif %}
 {% endwith %}
 {% endblock %}

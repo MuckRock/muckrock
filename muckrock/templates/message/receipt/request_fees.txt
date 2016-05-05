@@ -1,5 +1,5 @@
 {% extends 'message/receipt/base.txt' %}
 
 {% block description %}
-This email confirms your payment of a request fee for {{foia}} ({{base_url}}{{foia.get_absolute_url}}) to {{foia.agency}} ({{base_url}}{{foia.agency.get_absolute_url}}) through MuckRock. No further action is required.
+{% if foia %}This email confirms your payment of a request fee for {{foia}} ({{base_url}}{{foia.get_absolute_url}}) to {{foia.agency}} ({{base_url}}{{foia.agency.get_absolute_url}}) through MuckRock. No further action is required.{% else %}This email confirms your payment of a request fee. No further action is required.{% endif %}
 {% endblock %}
