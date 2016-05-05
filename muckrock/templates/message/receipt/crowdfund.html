@@ -1,10 +1,7 @@
 {% extends 'message/receipt/base.html' %}
 
 {% block description %}
-<p>{% if user %}Hi {{ user.first_name }},{% else %}Hi {{charge.name}},{% endif %}</p>
 {% with crowdfund.get_crowdfund_object as object %}
 <p>This email confirms your payment to a MuckRock crowdfund for <a href="{{object.get_absolute_url}}">{{object}}</a>.</p>
 {% endwith %}
-<p>For concerns or more information about this charge, please contact info@muckrock.com or call 1-857-488-3081.</p>
-<p>Thank you,<br/>The MuckRock Team</p>
 {% endblock %}

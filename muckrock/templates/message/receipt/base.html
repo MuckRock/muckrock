@@ -1,7 +1,7 @@
 {% extends 'message/base.html' %}
 
 {% block body %}
-{% block receipt %}
+    {% block receipt %}
 <div class="receipt">
     <tr class="purchase-data">
         <td>
@@ -26,15 +26,13 @@
         </tr>
     </table>
 </div>
-{% endblock %}
-{% block description %}
+    {% endblock %}
 <div>
     {% if user %}<p>Hi {{ user.first_name }},</p>{% endif %}
+    {% block description %}
     <p>This email confirms your payment to MuckRock.</p>
-    {% block support %}
-    <p>For concerns or more information about this charge, please contact info@muckrock.com or call 1-857-488-3081.</p>
     {% endblock %}
+    <p>For concerns or more information about this charge, please contact info@muckrock.com or call 1-857-488-3081.</p>
     <p>Thank you,<br/>The MuckRock Team</p>
 </div>
-{% endblock %}
 {% endblock %}
