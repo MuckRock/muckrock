@@ -3,21 +3,17 @@
 {% block body %}
     {% block receipt %}
 <div class="receipt">
-    <tr class="purchase-data">
-        <td>
-            <p>{{charge.name}}</p>
-            <p>{{charge.date|date:"m/d/Y"}}</p>
-        </td>
-        <td>
-            <p>Order {{charge.id}}</p>
-            <p>{{charge.card}} **** **** **** {{charge.last4}}</p>
-        </td>
-    </tr>
+    <div class="purchase-data">
+        {% if charge.name %}<p>{{charge.name}}</p>{% endif %}
+        <p>{{charge.date|date:"m/d/Y"}}</p>
+        <p>Order {{charge.id}}</p>
+        <p>{{charge.card}} **** **** **** {{charge.last4}}</p>
+    </div>
     <table class="line-items">
     {% for item in items %}
         <tr>
             <td>{{item.name}}</td>
-            <td>${{item.price|floatformat:2}}</td>
+            <td>{{item.formatted_price}}</td>
         </tr>
     {% endfor %}
         <tr class="total">
@@ -28,7 +24,7 @@
 </div>
     {% endblock %}
 <div>
-    {% if user %}<p>Hi {{ user.first_name }},</p>{% endif %}
+    <p>{% if user %}Hi {{ user.first_name }},{% else %}Hi {{charge.name}},{% endif %}</p>
     {% block description %}
     <p>This email confirms your payment to MuckRock.</p>
     {% endblock %}

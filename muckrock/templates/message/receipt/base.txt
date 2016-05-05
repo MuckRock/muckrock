@@ -3,17 +3,17 @@
 {% block body %}
 {% block receipt %}
 ============
-{{charge.name}}
+{% if charge.name %}{{charge.name}}{% endif %}
 {{charge.date|date:"m/d/Y"}}
 Order {{charge.id}}
 {{charge.card}} **** **** **** {{charge.last4}}
 ------------
 {% for item in items %}
-{{item.name}}: {{item.price|floatformat:2}}
+{{item.name}}: {{item.formatted_price}}
 {% endfor %}
 ------------
 
-Total: ${{amount|floatformat:2}}
+Total: ${{total|floatformat:2}}
 
 ============
 {% endblock %}
