@@ -7,6 +7,7 @@ from django.conf import settings
 from datetime import datetime
 import logging
 
+from muckrock.crowdfund.models import Crowdfund
 from muckrock.foia.models import FOIARequest
 from muckrock.message.email import TemplateEmail
 from muckrock.organization.models import Organization
@@ -79,7 +80,8 @@ def generic_receipt(user, charge):
     text = 'message/receipt/base.txt'
     html = 'message/receipt/base.html'
     item = LineItem('Payment', charge.amount)
-    return Receipt(charge, [item], user=user, subject=subject, text_template=text, html_template=html)
+    return Receipt(charge, [item], user=user, subject=subject,
+        text_template=text, html_template=html)
 
 def request_purchase_receipt(user, charge):
     """Generates a receipt for a request purchase and then returns it."""
@@ -91,7 +93,8 @@ def request_purchase_receipt(user, charge):
         bundle_size = settings.BUNDLED_REQUESTS.get(user.profile.acct_type, 4)
         item_name = unicode(bundle_size) + u' requests'
     item = LineItem(item_name, charge.amount)
-    return Receipt(charge, [item], user=user, subject=subject, text_template=text, html_template=html)
+    return Receipt(charge, [item], user=user, subject=subject,
+        text_template=text, html_template=html)
 
 def request_fee_receipt(user, charge):
     """Generates a receipt for a payment of request fees."""
@@ -114,7 +117,8 @@ def request_fee_receipt(user, charge):
         logger.error('No FOIA identified in Charge metadata.')
     except FOIARequest.DoesNotExist:
         logger.error('Could not find FOIARequest identified by Charge metadata.')
-    return Receipt(charge, items, user=user, subject=subject, extra_context=context, text_template=text, html_template=html)
+    return Receipt(charge, items, user=user, subject=subject, extra_context=context,
+        text_template=text, html_template=html)
 
 def crowdfund_payment_receipt(user, charge):
     """Generates a receipt for a payment on a crowdfund."""
@@ -131,7 +135,8 @@ def crowdfund_payment_receipt(user, charge):
         logger.error('No Crowdfund identified in Charge metadata.')
     except Crowdfund.DoesNotExist:
         logger.error('Could not find Crowdfund identified by Charge metadata.')
-    return Receipt(charge, [item], user=user, subject=subject, extra_context=context, text_template=text, html_template=html)
+    return Receipt(charge, [item], user=user, subject=subject, extra_context=context,
+        text_template=text, html_template=html)
 
 def pro_subscription_receipt(user, charge):
     """Generates a receipt for a payment on a pro account."""
@@ -142,7 +147,8 @@ def pro_subscription_receipt(user, charge):
     context = {
         'monthly_requests': settings.MONTHLY_REQUESTS['pro']
     }
-    return Receipt(charge, [item], user=user, subject=subject, extra_context=context, text_template=text, html_template=html)
+    return Receipt(charge, [item], user=user, subject=subject, extra_context=context,
+        text_template=text, html_template=html)
 
 def org_subscription_receipt(user, charge):
     """Generates a receipt for a payment on an org account."""
@@ -155,4 +161,5 @@ def org_subscription_receipt(user, charge):
     except Organization.DoesNotExist:
         logger.warning('Org receipt generated for non-owner User.')
         context = {'org': None}
-    return Receipt(charge, [item], user=user, subject=subject, extra_context=context, text_template=text, html_template=html)
+    return Receipt(charge, [item], user=user, subject=subject, extra_context=context,
+        text_template=text, html_template=html)
