@@ -1,0 +1,5 @@
+{% extends 'message/receipt/base.html' %}
+
+{% block description %}
+<p>This email confirms your payment of a request fee for <a href="{{foia.get_absolute_url}}">{{foia}}</a> to <a href="{{foia.agency.get_absolute_url}}">{{foia.agency}}</a> through MuckRock. No further action is required.</p>
+{% endblock %}
