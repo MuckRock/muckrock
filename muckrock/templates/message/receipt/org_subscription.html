@@ -1,0 +1,6 @@
+{% extends 'message/receipt/base.html' %}
+
+{% block description %}
+<p>This e-mail confirms the monthly charge for your organization account on MuckRock.</p>
+<p>Your membership includes up to {{org.monthly_requests}} requests per month for up to {{org.max_users}} members, and includes the ability to embargo requests permanently. Manage your organization, including adding or removing users, from <a href="{{org.get_absolute_url}}">the organization page</a>.</p>
+{% endblock %}
