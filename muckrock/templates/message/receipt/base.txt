@@ -1,27 +1,28 @@
-{% if user %}Hi {{ user.first_name }},{% endif %}
+{% extends 'message/base.txt' %}
 
+{% block body %}
+{% block receipt %}
+============
+{% if charge.name %}{{charge.name}}{% endif %}
+{{charge.date|date:"m/d/Y"}}
+Order {{charge.id}}
+{{charge.card}} **** **** **** {{charge.last4}}
+------------
+{% for item in items %}
+{{item.name}}: {{item.formatted_price}}
+{% endfor %}
+------------
+
+Total: ${{total|floatformat:2}}
+
+============
+{% endblock %}
+{% if user %}Hi {{ user.first_name }},{% else %}Hi {{charge.name}},{% endif %}
 {% block description %}
 This email confirms your payment to MuckRock.
 {% endblock %}
-
-{% block receipt %}
-Your Receipt
-============
-{% if user %}Name: {{user.get_full_name}}{% endif %}
-{% if item %}Item: {{item}}{% endif %}
-{% if id %}Payment ID: {{id}}{% endif %}
-{% if date %}Payment Date: {{date|date}}{% endif %}
-{% if last4 %}Payment Card: **** **** **** {{last4}}{% endif %}
-------------
-{% block charge-breakdown %}{% endblock %}
-Total: ${{amount|floatformat:2}}
-============
-{% endblock %}
-
-{% block support %}
 For concerns or more information about this charge, please contact info@muckrock.com or call 1-857-488-3081.
-{% endblock %}
 
 Thank you,
-
 The MuckRock Team
+{% endblock %}

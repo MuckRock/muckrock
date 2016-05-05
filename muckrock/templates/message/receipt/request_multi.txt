@@ -1,5 +1,0 @@
-{% extends 'message/receipt/base.txt' %}
-
-{% block description %}
-This e-mail confirms your payment of a multi-request fee through MuckRock. No further action is required.
-{% endblock %}
