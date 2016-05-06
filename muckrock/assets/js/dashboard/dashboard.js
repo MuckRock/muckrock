@@ -2,8 +2,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider, connect } from 'react-redux';
 import { getData } from './api';
+import { setDates } from './actions';
 import store from './store';
 import rd3 from 'rd3';
+import DatePicker from 'react-datepicker';
+import moment from 'moment';
+
+import 'react-datepicker/dist/react-datepicker.css';
 
 function parseDate(string) {
     // date strings are formatted YYYY-MM-DD
@@ -56,16 +61,49 @@ const Chart = React.createClass({
     }
 })
 
-const DatePicker = React.createClass({
+const DateRange = React.createClass({
+    handleChange: function ({ startDate, endDate }) {
+        startDate = startDate || this.props.dates.min;
+        endDate = endDate || this.props.dates.max;
+        if (moment(startDate).isAfter(endDate)) {
+            var temp = startDate;
+            startDate = endDate;
+            endDate = temp;
+        }
+        store.dispatch(setDates(startDate, endDate));
+        getData({
+            'min_date': startDate.toISOString(),
+            'max_date': endDate.toISOString(),
+        });
+    },
+    handleChangeStart: function (startDate) {
+        this.handleChange({ startDate })
+    },
+    handleChangeEnd: function (endDate) {
+        this.handleChange({ endDate })
+    },
     render: function() {
-        var min = this.props.dates.min.toDateString();
-        var max = this.props.dates.max.toDateString();
+        var min = moment(this.props.dates.min);
+        var max = moment(this.props.dates.max);
+        var yesterday = moment().subtract(1, "days");
         return (
-            <div className="react-datepicker">
-                <p>Min: {min}</p>
-                <p>Max: {max}</p>
+            <div className="date-range">
+                <DatePicker
+                    selected={min}
+                    startDate={min}
+                    endDate={max}
+                    maxDate={yesterday}
+                    showYearDropdown
+                    onChange={this.handleChangeStart} />
+                <DatePicker
+                    selected={max}
+                    startDate={min}
+                    endDate={max}
+                    maxDate={yesterday}
+                    showYearDropdown
+                    onChange={this.handleChangeEnd} />
             </div>
-        )
+        );
     }
 });
 
@@ -93,6 +131,11 @@ const Dashboard = React.createClass({
             'max_date': this.props.dates.max.toISOString(),
         });
     },
+    /*
+    componentWillReceiveProps: function(nextProps) {
+        this.getData(nextProps);
+    },
+    */
     renderLoading: function() {
         return <Loader />
     },
@@ -132,7 +175,7 @@ const Dashboard = React.createClass({
         }
         return (
             <div className={"dashboard " + className}>
-                <DatePicker dates={this.props.dates} />
+                <DateRange dates={this.props.dates} />
                 {content}
             </div>
         )

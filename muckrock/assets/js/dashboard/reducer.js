@@ -33,6 +33,10 @@ export const dashboardReducer = function(state = initialState, action) {
                 loading: false,
                 error: action.error,
             });
+        case 'SET_DATES':
+            return Object.assign({}, state, {
+                dates: action.dates
+            });
     }
     return state;
 }

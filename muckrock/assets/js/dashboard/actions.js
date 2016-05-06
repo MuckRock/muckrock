@@ -15,3 +15,10 @@ export function getDataError(error) {
         error
     };
 }
+
+export function setDates(min, max) {
+    return {
+        type: 'SET_DATES',
+        dates: {min, max}
+    };
+}
