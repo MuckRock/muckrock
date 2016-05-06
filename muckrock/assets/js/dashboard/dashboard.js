@@ -56,17 +56,84 @@ const Chart = React.createClass({
     }
 })
 
-const Dashboard = React.createClass({
+const DatePicker = React.createClass({
+    render: function() {
+        var min = this.props.dates.min.toDateString();
+        var max = this.props.dates.max.toDateString();
+        return (
+            <div className="react-datepicker">
+                <p>Min: {min}</p>
+                <p>Max: {max}</p>
+            </div>
+        )
+    }
+});
 
-    componentDidMount: function() {
-        getData();
-    },
+const Loader = React.createClass({
     render: function() {
         return (
-            <div className="dashboard">
+            <div className="loader">
+                <div className="loader-inner line-scale-pulse-out-rapid">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+        )
+    }
+});
+
+const Dashboard = React.createClass({
+    componentDidMount: function() {
+        // Send min_date and max_date arguments as timestamps
+        getData({
+            'min_date': this.props.dates.min.toISOString(),
+            'max_date': this.props.dates.max.toISOString(),
+        });
+    },
+    renderLoading: function() {
+        return <Loader />
+    },
+    renderError: function() {
+        var error = this.props.error;
+        return (
+            <div className="error">
+                <p className="error-code">{error.status}</p>
+                <p className="error-message">{error.statusText}</p>
+            </div>
+        )
+    },
+    renderSuccess: function() {
+        var data = this.props.data;
+        return (
+            <div className="charts">
                 <Chart field="total_requests" title="Total Requests" data={this.props.data} />
                 <Chart field="total_pages" title="Total Pages" data={this.props.data} />
                 <Chart field="total_users" title="Total Users" data={this.props.data} />
+            </div>
+        )
+    },
+    render: function() {
+        var content;
+        var className;
+        if (this.props.loading) {
+            content = this.renderLoading();
+            className = 'loading';
+        }
+        else if (this.props.error != null) {
+            content = this.renderError();
+            className = 'error';
+        }
+        else {
+            content = this.renderSuccess();
+            className = '';
+        }
+        return (
+            <div className={"dashboard " + className}>
+                <DatePicker dates={this.props.dates} />
+                {content}
             </div>
         )
     }
@@ -74,7 +141,10 @@ const Dashboard = React.createClass({
 
 const mapStateToProps = function(store) {
     return {
-        data: store.data
+        loading: store.loading,
+        data: store.data,
+        error: store.error,
+        dates: store.dates
     };
 };
 

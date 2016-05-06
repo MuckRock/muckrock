@@ -1,0 +1,15 @@
+.dashboard {
+    &.loading {
+        text-align: center;
+        .line-scale-pulse-out-rapid > div {
+            background-color: $color-black;
+        }
+    }
+    &.error {
+        text-align: center;
+        .error-code {
+            font-size: $font-size-8;
+            font-weight: $font-weight-bold;
+        }
+    }
+}
