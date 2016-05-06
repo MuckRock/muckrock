@@ -82,6 +82,31 @@ const DateRange = React.createClass({
     handleChangeEnd: function (endDate) {
         this.handleChange({ endDate })
     },
+    lastPeriod: function(period) {
+        var startDate = moment().subtract(1, "days");
+        var endDate = moment(startDate).subtract(1, period);
+        this.handleChange({
+            startDate: startDate.toDate(),
+            endDate: endDate.toDate()
+        });
+    },
+    handleLastWeek: function () {
+        this.lastPeriod("weeks");
+    },
+    handleLastMonth: function () {
+        this.lastPeriod("months");
+    },
+    handleLastYear: function () {
+        this.lastPeriod("years");
+    },
+    handleForever: function() {
+        var startDate = moment().subtract(1, "days");
+        var endDate = moment('2010-01-01');
+        this.handleChange({
+            startDate: startDate.toDate(),
+            endDate: endDate.toDate()
+        });
+    },
     render: function() {
         var min = moment(this.props.dates.min);
         var max = moment(this.props.dates.max);
@@ -102,6 +127,10 @@ const DateRange = React.createClass({
                     maxDate={yesterday}
                     showYearDropdown
                     onChange={this.handleChangeEnd} />
+                <button onClick={this.handleLastWeek}>Last Week</button>
+                <button onClick={this.handleLastMonth}>Last Month</button>
+                <button onClick={this.handleLastYear}>Last Year</button>
+                <button onClick={this.handleForever}>Forever</button>
             </div>
         );
     }
