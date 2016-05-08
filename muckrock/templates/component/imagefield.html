@@ -1,5 +1,3 @@
-{% load static from staticfiles %}
-
 {% if field.errors %}
 <div class="error field">
 {% else %}
@@ -15,7 +13,7 @@
         {% endif %}
     </header>
     {% if image %}
-    <img src="{% static image.url %}" class="preview" />
+	<img src="{{ image.url }}" class="preview" />
     {% endif %}
     {{field}}
     <p class="help-text">{{field.help_text}}</p>
