@@ -12,6 +12,7 @@ from muckrock.task.models import (
         RejectedEmailTask,
         StaleAgencyTask,
         FlaggedTask,
+        ProjectReviewTask,
         NewAgencyTask,
         ResponseTask,
         GenericTask,
@@ -39,6 +40,10 @@ class FlaggedTaskAdmin(VersionAdmin):
     """Flagged Task Admin"""
     readonly_fields = ['user', 'foia', 'jurisdiction', 'agency']
 
+class ProjectReviewTaskAdmin(VersionAdmin):
+    """Flagged Task Admin"""
+    readonly_fields = ['notes', 'project']
+
 class NewAgencyTaskAdmin(VersionAdmin):
     """New Agency Task Admin"""
     readonly_fields = ['user', 'agency']
@@ -59,6 +64,7 @@ admin.site.register(SnailMailTask, SnailMailTaskAdmin)
 admin.site.register(RejectedEmailTask, RejectedEmailTaskAdmin)
 admin.site.register(StaleAgencyTask, StaleAgencyTaskAdmin)
 admin.site.register(FlaggedTask, FlaggedTaskAdmin)
+admin.site.register(ProjectReviewTask, ProjectReviewTaskAdmin)
 admin.site.register(NewAgencyTask, NewAgencyTaskAdmin)
 admin.site.register(ResponseTask, ResponseTaskAdmin)
 admin.site.register(GenericTask, GenericTaskAdmin)

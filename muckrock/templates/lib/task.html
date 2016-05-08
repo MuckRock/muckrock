@@ -9,6 +9,8 @@
     {% stale_agency_task task %}
 {% elif task.type == "FlaggedTask" %}
     {% flagged_task task %}
+{% elif task.type == "ProjectReviewTask" %}
+    {% project_review_task task %}
 {% elif task.type == "NewAgencyTask" %}
     {% new_agency_task task %}
 {% elif task.type == "ResponseTask" %}

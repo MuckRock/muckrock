@@ -321,7 +321,7 @@ class NewsletterSignupView(View):
             primary_error = True
         except requests.exceptions.HTTPError as exception:
             messages.error(request, 'Sorry, an error occurred while trying to subscribe you.')
-            logging.error(exception)
+            logging.warning(exception)
             primary_error = True
         # Add the user to the default list if they want to be added.
         # If an error occurred with the first subscription,
@@ -332,7 +332,7 @@ class NewsletterSignupView(View):
                 self.subscribe(_email, default_list)
             except (ValueError, requests.exceptions.HTTPError) as exception:
                 # suppress the error shown to the user, but still log it
-                logging.error(exception)
+                logging.warning('Secondary signup: ' + exception)
         return self.redirect_url(request)
 
     def subscribe(self, _email, _list):
@@ -363,7 +363,7 @@ class NewsletterSignupView(View):
                 if error_title == 'Member Exists':
                     # the member already exists, so we should tell
                     # the user they cannot use this email address
-                    raise ValueError('%s is already a subscriber.' % _email)
+                    raise ValueError('Email is already a member of the list.')
                 else:
                     # we don't know how to specifically address this error
                     # so we should just propagate the HTTPError

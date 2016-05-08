@@ -10,21 +10,23 @@ from autocomplete_light.contrib.taggit_field import TaggitField, TaggitWidget
 from muckrock.project.models import Project
 
 class ProjectCreateForm(forms.ModelForm):
-    """Form for creating a new project"""
+    """Form for the basic fields of a project."""
 
     tags = TaggitField(
-        widget=TaggitWidget('TagAutocomplete', attrs={'placeholder': 'Search tags'}),
+        widget=TaggitWidget('TagAutocomplete', attrs={
+            'placeholder': 'Search tags',
+            'data-autocomplete-minimum-characters': 1
+        }),
         help_text='Separate tags with commas.',
         required=False
     )
 
     class Meta:
         model = Project
-        fields = ['title', 'summary', 'description', 'image', 'contributors', 'tags', 'private']
-        widgets = {'contributors': autocomplete_light.MultipleChoiceWidget('UserAutocomplete')}
+        fields = ['title', 'summary', 'image', 'tags']
         help_texts = {
-            'contributors': ('As the project creator, you are'
-                            ' automatically listed as a contributor.'),
+            'summary': 'A short description of the project and its goals.',
+            'image': 'Image should be large and high-resolution.'
         }
 
 
@@ -41,19 +43,24 @@ class ProjectUpdateForm(forms.ModelForm):
         model = Project
         fields = [
             'summary',
-            'description',
             'image',
-            'contributors',
             'tags',
+            'description',
+            'contributors',
             'requests',
             'articles',
-            'private'
         ]
         widgets = {
+            'description': forms.Textarea(attrs={'class': 'prose-editor'}),
             'contributors': autocomplete_light.MultipleChoiceWidget('UserAutocomplete'),
             'requests': autocomplete_light.MultipleChoiceWidget('FOIARequestAutocomplete'),
             'articles': autocomplete_light.MultipleChoiceWidget('ArticleAutocomplete'),
         }
+
+
+class ProjectPublishForm(forms.Form):
+    """Form for publishing a project."""
+    notes = forms.CharField(required=False, widget=forms.Textarea)
 
 
 class ProjectManagerForm(forms.Form):

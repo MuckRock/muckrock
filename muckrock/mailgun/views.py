@@ -297,6 +297,7 @@ def opened(request):
     if not _verify(request.POST):
         return HttpResponseForbidden()
 
+    logger.info('Opened Webhook: %s', request.POST)
     comm_id = request.POST.get('comm_id')
     if comm_id:
         try:
@@ -305,6 +306,8 @@ def opened(request):
             comm.save()
         except FOIACommunication.DoesNotExist:
             logger.warning('Trying to mark missing communication as opened: %s', comm_id)
+    else:
+        logger.warning('No comm ID for opened webhook')
 
     return HttpResponse('OK')
 

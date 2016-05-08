@@ -1,13 +1,11 @@
-{% load humanize %}
-{% autoescape off %}
+{% extends 'message/base.txt' %}
+{% block body %}
 Hi {{user.first_name}},
 
-This mail is to let you know that the email associated with your MuckRock account has changed.
-If you did not make this change or something seems amiss, please contact us at info@muckrock.com.
+We wanted to let you know that the email associated with your MuckRock account has changed from {{old_email}} to {{new_email}}.
 
-Old email: {{ old_email }}
-New email: {{ new_email }}
+If you did not make this change or something seems amiss, please contact us at info@muckrock.com.
 
 Sincerely,
 The MuckRock Team
-{% endautoescape %}
+{% endblock %}

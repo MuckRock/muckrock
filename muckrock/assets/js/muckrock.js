@@ -6,6 +6,7 @@ import './communication';
 import './crowdfund';
 import './currencyField';
 import './dropdown';
+import './editor';
 import './foiaRequest';
 import './formset';
 import './list';

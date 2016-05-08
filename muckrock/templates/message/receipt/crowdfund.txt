@@ -1,18 +1,7 @@
-Hi,
+{% extends 'message/receipt/base.txt' %}
 
-Thank you for using MuckRock.  This e-mail confirms your payment towards crowdfunding a request through MuckRock.com.  No further action is required, and you can check the current status of the request here:
-https://www.muckrock.com{{ url }}
-
-Your Receipt Details:
-
-Payment ID: {{id}}
-Payment Date: {{date|date}}
-{% if last4 %}Payment Card: **** **** **** {{last4}}{% endif %}
-
-Total Charge: ${{amount|floatformat:2}}
-
-For concerns or more information about this charge, please contact info@muckrock.com or call 1-857-488-3081.
-
-Thanks again!
-
-- The MuckRock Team
+{% block description %}
+{% with crowdfund.get_crowdfund_object as object %}
+{% if crowdfund %}This email confirms your payment to a MuckRock crowdfund for {{object}} ({{base_url}}{{object.get_absolute_url}}).{% else %}This email confirms your payment to a MuckRock crowdfund.{% endif %}
+{% endwith %}
+{% endblock %}

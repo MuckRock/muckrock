@@ -1,7 +1,4 @@
 .form {
-    @include panel;
-    padding: $vertical-rhythm;
-
     header, form, .visible-fields, .buttons {
         @include row;
     }
@@ -94,6 +91,66 @@ fieldset {
 
     & > fieldset, & > fieldset + fieldset {
         margin: 0;
+    }
+}
+
+.field {
+    header {
+        margin-bottom: 0;
+    }
+    .error input {
+        border-color: $color-red;
+    }
+    .required, .errorlist {
+        color: $color-red;
+        font-size: $font-size-2;
+    }
+    .errorlist {
+        display: inline-block;
+        margin-bottom: 0;
+        padding: 0;
+        list-style: none;
+    }
+    label {
+        margin-right: $vertical-rhythm/2;
+        font-weight: $font-weight-bold;
+    }
+    input {
+        display: block;
+        width: 100%;
+    }
+    input[type="checkbox"], input[type="radio"] {
+        width: auto;
+        margin-top: $vertical-rhythm/4;
+        margin-right: $vertical-rhythm/2;
+        float: left;
+    }
+    textarea {
+        display: block;
+        height: 5em;
+        margin-bottom: 0;
+    }
+    .help-text {
+        margin-top: $vertical-rhythm/4;
+    }
+    &.image {
+        .preview {
+            display: block;
+            margin-bottom: $vertical-rhythm/2;
+            max-width: 20em;
+        }
+        input {
+            display: inline-block;
+            float: none;
+            width: auto;
+            margin-right: 0;
+        }
+        label[for*="clear_id"] {
+            font-weight: $font-weight-normal;
+        }
+        input[id*="clear_id"] {
+            margin-left: $vertical-rhythm;
+        }
     }
 }
 

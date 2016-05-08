@@ -235,5 +235,10 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
             }
         }
     }
-    .agencies > label { display: none; }
+    .autocomplete-light-widget {
+        width: 100%;
+        input {
+            width: 100%;
+        }
+    }
 }

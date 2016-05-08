@@ -121,29 +121,6 @@ $request-breakpoint: 768px;
         @include flex(1);
         margin-left: $vertical-rhythm;
     }
-    // overrides the autocomplete widget
-    .deck {
-        display: block;
-    }
-    span#id_members-deck .hilight {
-        background-color: $color-blue;
-        margin: 0 $vertical-rhythm/2 $vertical-rhythm/2 0;
-        padding: $vertical-rhythm/4 $vertical-rhythm/2;
-        color: $color-white;
-        &:hover {
-            background-color: $color-blue-dark;
-        }
-        .remove {
-            width: initial;
-            margin-right: $vertical-rhythm/2;
-            vertical-align: middle;
-            text-align: center;
-            font-size: $font-size-7;
-            text-indent: 0;
-            background: none;
-            color: $color-white;
-        }
-    }
 
     @include media($medium-layout) {
         .user.search.input {

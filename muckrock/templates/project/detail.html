@@ -45,27 +45,35 @@
         {% if project.image %}
         <div class="image" style="background-image:url('{% thumbnail project.image 2000x1000 crop=smart %}');"></div>
         {% endif %}
-        {% if request.user.is_staff or request.user in contributors %}
-        <div class="toolbar">
-            {% if project.private %}
-            <span class="project-private">This project is private and only visible to its contributors.</span>
-            {% else %}
-            <span class="project-private">This project is public.</span>
-            {% endif %}
-            <div class="project-controls">
-                <a href="{% url 'project-crowdfund' slug=project.slug pk=project.pk %}" class="crowdfund green button">
-                    Crowdfund
-                </a>
-                <a href="{% url 'project-update' slug=project.slug pk=project.pk %}" class="update blue button">
-                    Update
-                </a>
-                <a href="{% url 'project-delete' slug=project.slug pk=project.pk %}" class="delete red button">
-                    Delete
-                </a>
-            </div>
-        </div>
-        {% endif %}
     </header>
+    {% if user_can_edit and project.private and not project.approved %}
+    <section class="launch prompt">
+        <h3>Launch your project</h3>
+        <ol>
+            {% if project.image %}
+            <li class="strikethrough">Pick a cover image</li>
+            {% else %}
+            <li><a href="{% url 'project-edit' slug=project.slug pk=project.pk %}#basics">Pick a cover image</a></li>
+            {% endif %}
+            {% if project.description %}
+            <li class="strikethrough">Write a description</li>
+            {% else %}
+            <li><a href="{% url 'project-edit' slug=project.slug pk=project.pk %}#description">Write a description</a></li>
+            {% endif %}
+            {% if project.contributors.count > 1 %}
+            <li class="strikethrough">Add contributors</li>
+            {% else %}
+            <li><a href="{% url 'project-edit' slug=project.slug pk=project.pk %}#contributors">Add contributors</a></li>
+            {% endif %}
+            {% if project.requests.count > 1 %}
+            <li class="strikethrough">Attach requests</li>
+            {% else %}
+            <li><a href="{% url 'project-edit' slug=project.slug pk=project.pk %}#requests">Attach requests</a></li>
+            {% endif %}
+            <li><a href="{% url 'project-publish' slug=project.slug pk=project.pk %}">Publish!</a></li>
+        </ol>
+    </section>
+    {% endif %}
     <section class="overview">
         <main>
             <h1 class="title">{{ project.title }}</h1>
@@ -89,16 +97,35 @@
             {% if project.description %}
             <section class="project-description">
                 {{ project.description|markdown:"trusted" }}
-            </article>
+            </section>
             {% endif %}
         </main>
         <aside>
+            {% if user_can_edit %}
+            <div class="project-controls">
+                <a href="{% url 'project-edit' slug=project.slug pk=project.pk %}" class="blue button">
+                    Edit
+                </a>
+                {% if project.approved and not project.private %}
+                <a href="{% url 'project-crowdfund' slug=project.slug pk=project.pk %}" class="green button">
+                    Crowdfund
+                </a>
+                {% endif %}
+                {% if not project.approved and project.private %}
+                <a href="{% url 'project-publish' slug=project.slug pk=project.pk %}" class="blue button">
+                    Publish
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
             <div class="badges">
             {% if project.featured %}
                 <span class="blue badge">&#9733; Featured</span>
-                {% endif %}
-                {% if project.private %}
+            {% endif %}
+            {% if project.private %}
                 <span class="red badge">&empty; Private</span>
+            {% elif not project.private and not project.approved %}
+                <span class="grey badge">Awaiting Review</span>
             {% endif %}
             </div>
             {% if visible_requests or articles %}
@@ -113,7 +140,10 @@
             {% endif %}
             {% if contributors %}
             <div class="contributors">
-                <dfn>Contributors</dfn>
+                <header>
+                    <dfn>Contributors</dfn>
+                    <a href="{% url 'project-edit' slug=project.slug pk=project.pk %}#contributors" class="edit">Edit</a>
+                </header>
                 {% for contributor in contributors %}
                 <div class="contributor">
                     <a href="{{ contributor.get_absolute_url }}" title="{{ contributor}}'s profile page">
@@ -145,7 +175,9 @@
             </div>
             {% endif %}
             {% tag_manager project %}
+            {% if project.approved and not project.private %}
             {% include 'lib/social.html' with title=project.title %}
+            {% endif %}
         </aside>
     </section>
     <section class="objects">
