@@ -1,6 +1,7 @@
 import 'jquery-ui/datepicker';
 
 import './account';
+import './autocomplete';
 import './checkout';
 import './communication';
 import './crowdfund';

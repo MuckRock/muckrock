@@ -17,8 +17,11 @@ class FOIARequestAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     }
     def choices_for_request(self):
         query = self.request.GET.get('q', '')
+        exclude = self.request.GET.getlist('exclude')
         conditions = self._choices_for_request_conditions(query, self.search_fields)
         choices = self.choices.get_viewable(self.request.user).filter(conditions)
+        if exclude:
+            choices = choices.exclude(pk__in=exclude)
         return self.order_choices(choices)[0:self.limit_choices]
 
 autocomplete_light.register(FOIARequest, FOIARequestAutocomplete)
