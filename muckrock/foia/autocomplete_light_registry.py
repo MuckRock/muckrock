@@ -10,7 +10,7 @@ class FOIARequestAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     """Creates an autocomplete field for picking FOIA requests"""
     choices = FOIARequest.objects.all().select_related('agency__jurisdiction')
     choice_template = 'autocomplete/foia.html'
-    search_fields = ['title']
+    search_fields = ['title', 'pk']
     attrs = {
         'placeholder': 'Search for requests',
         'data-autocomplete-minimum-characters': 1
@@ -31,4 +31,3 @@ autocomplete_light.register(
     attrs={
         'placeholder': 'Search for requests',
         'data-autocomplete-minimum-characters': 1})
-

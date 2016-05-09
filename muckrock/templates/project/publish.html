@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% load markdown_deux_tags %}
-{% load static from staticfiles %}
 
 {% block title %}MuckRock &bull; Publish your project{% endblock %}
 
@@ -37,9 +36,9 @@
                 <td><strong>Image</strong></td>
                 <td>
                     {% if project.image %}
-                    <img src="{% static project.image.url %}" />
+                    <img src="{{project.image.url}}" />
                     {% else %}
-                    <a href="{% url 'project-edit' slug=project.slug pk=project.pk}#basics">Add an image</a>
+                    <a href="{% url 'project-edit' slug=project.slug pk=project.pk %}#basics">Add an image</a>
                     {% endif %}
                 </td>
             </tr>
