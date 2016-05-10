@@ -235,17 +235,9 @@
     .projects {
         @include display(flex);
         @include flex-wrap(wrap);
-    }
-    .project {
-        @include flex(1 1 30em);
-        @include display(flex);
-        @include flex-wrap(wrap);
-        @include justify-content(space-between);
-        margin: $vertical-rhythm;
-        background: $color-white-pure;
-        border: 1px solid $color-grey;
-        @include border-radius;
-        overflow: hidden;
+        .project {
+            margin: $vertical-rhythm;
+        }
     }
     h1 {
         font-size: $font-size-7;
@@ -255,12 +247,26 @@
             line-height: $font-line-height;
         }
     }
-    .more {
-        font-weight: $font-weight-bold;
-    }
     .frontpage-header .inline li {
         vertical-align: middle;
     }
+    .create-project {
+        p {
+            font-size: $font-size-2;
+            line-height: $font-line-height;
+        }
+    }
+}
+
+.project.component {
+    @include flex(1 1 30em);
+    @include display(flex);
+    @include flex-wrap(wrap);
+    @include justify-content(space-between);
+    background: $color-white-pure;
+    border: 1px solid $color-grey;
+    @include border-radius;
+    overflow: hidden;
     .project-header {
         @include flex(0 1 100%);
         @include display(flex);
@@ -311,26 +317,23 @@
                 color: $color-blue;
             }
         }
+        .more {
+            font-weight: $font-weight-bold;
+        }
     }
     .details {
         @include flex(1 1 10em);
-    }
-    .create-project {
-        p {
-            font-size: $font-size-2;
-            line-height: $font-line-height;
-        }
-    }
-    .crowdfund {
-        @include display(flex);
-        @include flex-wrap(wrap);
-        @include justify-content(space-between);
-        @include align-items(flex-start);
-        .progress {
-            @include flex(0 1 100%);
-        }
-        .stats, .button {
-            @include flex(1 1 auto);
+        .crowdfund {
+            @include display(flex);
+            @include flex-wrap(wrap);
+            @include justify-content(space-between);
+            @include align-items(flex-start);
+            .progress {
+                @include flex(0 1 100%);
+            }
+            .stats, .button {
+                @include flex(1 1 auto);
+            }
         }
     }
 }
