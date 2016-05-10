@@ -4,6 +4,7 @@ Views for the project application
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db.models import Count, Prefetch
 from django.http import Http404
@@ -65,6 +66,25 @@ class ProjectListView(MRFilterableListView):
             return Project.objects.get_public()
         else:
             return Project.objects.get_visible(user)
+
+
+class ProjectContributorView(TemplateView):
+    """Provides a list of projects that have the user as a contributor."""
+    template_name = 'project/contributor.html'
+
+    def get_context_data(self, **kwargs):
+        """Gathers and returns the project and the contributor as context."""
+        user = self.request.user
+        contributor = get_object_or_404(User, username=kwargs.get('username'))
+        # return all the contributor's projects that are visible to the user
+        projects = Project.objects.get_for_contributor(contributor).get_visible(user)
+        projects = projects.order_by('-featured', 'private', '-approved', 'title')
+        context = {
+            'user_is_contributor': user == contributor,
+            'contributor': contributor,
+            'projects': projects
+        }
+        return context
 
 
 class ProjectCreateView(CreateView):

@@ -363,7 +363,7 @@ def profile(request, username=None):
     recent_requests = requests.order_by('-date_submitted')[:5]
     recent_completed = requests.filter(status='done').order_by('-date_done')[:5]
     articles = Article.objects.get_published().filter(authors=user)[:5]
-    projects = Project.objects.get_for_contributor(user).get_visible(request.user)
+    projects = Project.objects.get_for_contributor(user).get_visible(request.user)[:3]
     context = {
         'user_obj': user,
         'profile': user_profile,

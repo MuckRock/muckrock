@@ -281,3 +281,23 @@ class TestProjectCrowdfundView(TestCase):
         eq_(crowdfund.payment_capped, payment_capped)
         eq_(crowdfund.date_due, date_due)
         eq_(response.status_code, 302)
+
+
+class TestProjectContributorView(TestCase):
+    """Provides a list of just projects the user contributes to."""
+    def setUp(self):
+        self.user = factories.UserFactory()
+        self.project = factories.ProjectFactory()
+        self.project.contributors.add(self.user)
+        self.kwargs = {
+            'username': self.user.username,
+        }
+        self.url = reverse('project-contributor', kwargs=self.kwargs)
+        self.view = views.ProjectContributorView.as_view()
+        self.request_factory = RequestFactory()
+
+    def test_get(self):
+        """The view should render, of course!"""
+        response = get_helper(self.view, self.url, self.user, **self.kwargs)
+        eq_(response.status_code, 200,
+            'The view should return 200.')
