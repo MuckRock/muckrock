@@ -4,7 +4,7 @@
 <div class="update project">
     <header>
         <div>
-            <a href="{% url 'project-detail' slug=project.slug pk=project.pk %}">Back to {{project.title}}</a>
+            <a href="{% url 'project-detail' slug=project.slug pk=project.pk %}">Back to project</a>
             <h1>Edit Project</h1>
         </div>
     </header>
@@ -27,8 +27,11 @@
                 {% include 'component/imagefield.html' with field=form.image %}
                 {% endif %}
             </div>
-            <div role="tabpanel" class="tab-panel" id="description">
-                <label for="toggle-prosemirror">WYSIWYG <input type="checkbox" id="toggle-prosemirror" checked /></label>
+            <div role="tabpanel" class="description tab-panel" id="description">
+                <header>
+                    <p>Use the description to expand upon what you hope to accomplish or to organize what you already have.</p>
+                    <label for="toggle-prosemirror">WYSIWYG <input type="checkbox" id="toggle-prosemirror" checked /></label>
+                </header>
                 {{form.description}}
             </div>
             <div role="tabpanel" class="tab-panel" id="contributors">

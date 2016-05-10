@@ -9,10 +9,20 @@
 .update.project {
     header {
         @include display(flex);
-        @include justify-content(flex-start);
+        @include justify-content(space-between);
+        p {
+            margin-bottom: 0;
+        }
     }
-    .tab-panel {
-        min-height: 30em;
+    textarea {
+        font-family: $font-monospace;
+        font-size: $font-size-2;
+    }
+    .description textarea {
+        min-height: 20em;
+    }
+    .description p {
+        max-width: 40em;
     }
 }
 
