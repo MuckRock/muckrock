@@ -28,7 +28,4 @@ urlpatterns = patterns('',
     url(r'^(?P<slug>[\w-]+)-(?P<pk>\d+)/crowdfund/$',
         views.ProjectCrowdfundView.as_view(),
         name='project-crowdfund'),
-    url(r'^(?P<slug>[\w-]+)-(?P<pk>\d+)/delete/$',
-        views.ProjectDeleteView.as_view(),
-        name='project-delete'),
 )

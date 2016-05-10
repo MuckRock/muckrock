@@ -5,7 +5,6 @@ Views for the project application
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.urlresolvers import reverse
-from django.core.urlresolvers import reverse_lazy
 from django.db.models import Count, Prefetch
 from django.http import Http404
 from django.shortcuts import redirect, get_object_or_404
@@ -15,7 +14,6 @@ from django.views.generic import (
     CreateView,
     DetailView,
     UpdateView,
-    DeleteView
 )
 from django.utils.decorators import method_decorator
 
@@ -259,10 +257,3 @@ class ProjectCrowdfundView(ProjectPermissionsMixin, CreateView):
         """Generates actions before returning URL"""
         project = self.get_project()
         return project.get_absolute_url()
-
-
-class ProjectDeleteView(ProjectPermissionsMixin, DeleteView):
-    """Delete a project instance"""
-    model = Project
-    success_url = reverse_lazy('project')
-    template_name = 'project/delete.html'
