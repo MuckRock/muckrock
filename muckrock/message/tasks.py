@@ -270,3 +270,19 @@ def support(user, message, _task):
         subject=u'Support #%d' % _task.id
     )
     notification.send(fail_silently=False)
+
+@task(name='muckrock.message.tasks.notify_project_contributor')
+def notify_project_contributor(user, project, added_by):
+    """Notify a user that they were added as a contributor to a project."""
+    context = {
+        'project': project,
+        'added_by': added_by
+    }
+    notification = TemplateEmail(
+        user=user,
+        extra_context=context,
+        text_template='message/notification/project.txt',
+        html_template='message/notification/project.html',
+        subject=u'Added to a project'
+    )
+    notification.send(fail_silently=False)

@@ -1,0 +1,11 @@
+{% extends 'message/base.html' %}
+
+{% block body %}
+<p>Hi {{user.first_name}},</p>
+
+<p><a href="{{added_by.get_absolute_url}}">{{added_by.get_full_name}}</a> has added you as a contributor to their project <a href="{{ project.get_absolute_url }}">{{ project.title }}</a>. This means that you have full access to this project, including the ability to edit and crowdfund, alongside your other contributors.</p>
+
+<p>You can see a list of all you projects <a href="{% url 'project-contributor' username=user.username %}">here</a> or from the sidebar menu.
+
+<p>Sincerely,<br />The MuckRock Team</p>
+{% endblock %}

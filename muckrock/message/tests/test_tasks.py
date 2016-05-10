@@ -126,6 +126,13 @@ class TestNotificationTasks(TestCase):
         tasks.support(self.user, 'Hello', task)
         mock_send.assert_called_with(fail_silently=False)
 
+    def test_notify_contributor(self, mock_send):
+        """Notifies a contributor that they were added to a project."""
+        project = factories.ProjectFactory()
+        added_by = factories.UserFactory()
+        tasks.notify_project_contributor(self.user, project, added_by)
+        mock_send.assert_called_with(fail_silently=False)
+
 
 @mock.patch('stripe.Charge', MockCharge)
 @mock.patch('muckrock.message.receipts.Receipt.send')

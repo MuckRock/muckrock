@@ -160,7 +160,6 @@ class TestProjectEditView(TestCase):
         desc = 'Lorem ipsum'
         data = {
             'description': desc,
-            'edit': 'description'
         }
         form = forms.ProjectUpdateForm(data)
         ok_(form.is_valid(), 'The form should validate. %s' % form.errors)
@@ -169,6 +168,20 @@ class TestProjectEditView(TestCase):
         eq_(self.project.description, desc,
             'The description should be updated.')
 
+    @mock.patch('muckrock.message.tasks.notify_project_contributor.delay')
+    def test_add_contributors(self, mock_notify):
+        """When adding contributors, each new contributor should get an email notification."""
+        new_contributor = factories.UserFactory()
+        data = {
+            'contributors': [self.contributor.pk, new_contributor.pk]
+        }
+        form = forms.ProjectUpdateForm(data)
+        ok_(form.is_valid(), 'The form should validate. %s' % form.errors)
+        post_helper(self.view, self.url, data, self.contributor, **self.kwargs)
+        self.project.refresh_from_db()
+        ok_(self.project.has_contributor(new_contributor))
+        ok_(self.project.has_contributor(self.contributor))
+        mock_notify.assert_called_once_with(new_contributor, self.project, self.contributor)
 
 class TestProjectPublishView(TestCase):
     """Tests publishing a project."""

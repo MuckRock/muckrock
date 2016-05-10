@@ -23,6 +23,7 @@ from datetime import date, timedelta
 
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.crowdfund.forms import CrowdfundForm
+from muckrock.message.tasks import notify_project_contributor
 from muckrock.project.models import Project, ProjectCrowdfunds
 from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm, ProjectPublishForm
 from muckrock.views import MRFilterableListView
@@ -188,8 +189,17 @@ class ProjectEditView(ProjectPermissionsMixin, UpdateView):
 
     def form_valid(self, form):
         """Adds success message when form is valid."""
+        existing_contributors = self.object.contributors.all()
+        new_contributors = form.cleaned_data['contributors']
+        self.notify_new_contributors(existing_contributors, new_contributors)
         messages.success(self.request, 'Your edits were saved.')
         return super(ProjectEditView, self).form_valid(form)
+
+    def notify_new_contributors(self, existing, new):
+        """Notify all newly added contributors."""
+        added_contributors = list(set(new)-set(existing))
+        for contributor in added_contributors:
+            notify_project_contributor.delay(contributor, self.object, self.request.user)
 
 
 class ProjectPublishView(ProjectPermissionsMixin, FormView):
