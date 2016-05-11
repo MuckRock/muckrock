@@ -53,7 +53,6 @@
 
 {% block activity %}
 <main class="activity">
-
     <section class="actions">
         <form action="{% url 'acct-buy-requests' username=user_obj.username %}" method="POST" class="stripe-checkout" id="buy-requests">
             {% csrf_token %}
@@ -103,11 +102,10 @@
     {% endif %}
     {% if articles %}
     <section class="articles">
-        {% if request.user == user_obj %}
-        <h3>Your Latest Articles</h3>
-        {% else %}
-        <h3>Latest Articles</h3>
-        {% endif %}
+        <h3>
+            {% if request.user == user_obj %}Your Latest Articles{% else %}Latest Articles{% endif %}
+            <small><a href="{% url 'news-author' username=user_obj.username %}">See all</a></small>
+        </h3>
         <ul class="article-list nostyle">
         {% for article in articles %}
             <li class="article-item">

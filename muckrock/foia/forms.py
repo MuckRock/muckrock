@@ -232,6 +232,7 @@ class FOIAAdminFixForm(forms.ModelForm):
 
     from_email = forms.CharField(
         label='From',
+        initial='MuckRock',
         required=False,
         help_text='Leaving blank will fill in with request owner.'
     )
