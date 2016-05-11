@@ -24,7 +24,7 @@ from muckrock.tags.models import Tag, parse_tags
 
 class NewsDetail(DateDetailView):
     """View for news detail"""
-    template_name='news/detail.html'
+    template_name = 'news/detail.html'
     date_field = 'pub_date'
 
     def get_queryset(self):
@@ -86,7 +86,7 @@ class NewsYear(YearArchiveView):
 
 class NewsListView(ListView):
     """List of news articles"""
-    template_name='news/list.html'
+    template_name = 'news/list.html'
     paginate_by = 10
     queryset = Article.objects.get_published().prefetch_related(
             Prefetch('authors', queryset=User.objects.select_related('profile')))
@@ -94,11 +94,11 @@ class NewsListView(ListView):
 
 class AuthorArchiveView(NewsListView):
     """List of news articles by author"""
-    template_name='news/author.html'
+    template_name = 'news/author.html'
 
     def get_author(self):
         """Return the author this view is referencing."""
-        return get_object_or_404(User, username=self.kwargs['username'])
+        return get_object_or_404(User, username=self.kwargs.get('username'))
 
     def get_queryset(self):
         """Returns just articles for the specific author."""

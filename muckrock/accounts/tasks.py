@@ -32,7 +32,8 @@ from muckrock.task.models import (
 
 logger = logging.getLogger(__name__)
 
-@periodic_task(run_every=crontab(hour=0, minute=30), name='muckrock.accounts.tasks.store_statistics')
+@periodic_task(run_every=crontab(hour=0, minute=30),
+    name='muckrock.accounts.tasks.store_statistics')
 def store_statistics():
     """Store the daily statistics"""
 
