@@ -160,7 +160,6 @@ class TestProjectEditView(TestCase):
         desc = 'Lorem ipsum'
         data = {
             'description': desc,
-            'edit': 'description'
         }
         form = forms.ProjectUpdateForm(data)
         ok_(form.is_valid(), 'The form should validate. %s' % form.errors)
@@ -169,6 +168,20 @@ class TestProjectEditView(TestCase):
         eq_(self.project.description, desc,
             'The description should be updated.')
 
+    @mock.patch('muckrock.message.tasks.notify_project_contributor.delay')
+    def test_add_contributors(self, mock_notify):
+        """When adding contributors, each new contributor should get an email notification."""
+        new_contributor = factories.UserFactory()
+        data = {
+            'contributors': [self.contributor.pk, new_contributor.pk]
+        }
+        form = forms.ProjectUpdateForm(data)
+        ok_(form.is_valid(), 'The form should validate. %s' % form.errors)
+        post_helper(self.view, self.url, data, self.contributor, **self.kwargs)
+        self.project.refresh_from_db()
+        ok_(self.project.has_contributor(new_contributor))
+        ok_(self.project.has_contributor(self.contributor))
+        mock_notify.assert_called_once_with(new_contributor, self.project, self.contributor)
 
 class TestProjectPublishView(TestCase):
     """Tests publishing a project."""
@@ -283,42 +296,21 @@ class TestProjectCrowdfundView(TestCase):
         eq_(response.status_code, 302)
 
 
-class TestProjectDeleteView(TestCase):
-    """Tests deleting a project as a user."""
+class TestProjectContributorView(TestCase):
+    """Provides a list of just projects the user contributes to."""
     def setUp(self):
-        # We will start with a project that's already been made.
+        self.user = factories.UserFactory()
         self.project = factories.ProjectFactory()
-        self.contributor = factories.UserFactory()
-        self.project.contributors.add(self.contributor)
+        self.project.contributors.add(self.user)
         self.kwargs = {
-            'slug': self.project.slug,
-            'pk': self.project.pk
+            'username': self.user.username,
         }
-        self.url = reverse('project-delete', kwargs=self.kwargs)
-        self.view = views.ProjectDeleteView.as_view()
+        self.url = reverse('project-contributor', kwargs=self.kwargs)
+        self.view = views.ProjectContributorView.as_view()
+        self.request_factory = RequestFactory()
 
-    def test_staff(self):
-        """Staff users should be able to delete projects."""
-        staff_user = factories.UserFactory(is_staff=True)
-        response = get_helper(self.view, self.url, staff_user, **self.kwargs)
-        eq_(response.status_code, 200)
-
-    def test_contributor(self):
-        """Contributors should be able to delete projects."""
-        response = get_helper(self.view, self.url, self.contributor, **self.kwargs)
-        eq_(response.status_code, 200)
-
-    @raises(Http404)
-    def test_basic(self):
-        """Basic users should not be able to delete projects."""
-        user = factories.UserFactory()
-        get_helper(self.view, self.url, user, **self.kwargs)
-
-    def test_anonymous(self):
-        """Anonymous users cannot delete projects."""
-        response = get_helper(self.view, self.url, AnonymousUser(), **self.kwargs)
-        redirect_url = reverse('acct-login') + '?next=' + self.url
-        eq_(response.status_code, 302,
-            'The user should be redirected.')
-        eq_(response.url, redirect_url,
-            'The user should be reidrected to the login screen.')
+    def test_get(self):
+        """The view should render, of course!"""
+        response = get_helper(self.view, self.url, self.user, **self.kwargs)
+        eq_(response.status_code, 200,
+            'The view should return 200.')

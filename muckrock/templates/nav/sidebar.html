@@ -52,6 +52,9 @@
         {% if organization %}
     <a class="your-organization" href="{{organization.get_absolute_url}}">Your Organization</a>
         {% endif %}
+        {% if my_projects %}
+    <a class="your-projects" href="{% url 'project-contributor' username=request.user.username %}">Your Projects</a>
+        {% endif %}
     <section class="requests">
         <a class="your-requests" href="{% url 'foia-mylist' %}">Your Requests</a>
 

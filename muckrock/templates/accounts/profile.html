@@ -90,14 +90,13 @@
     </section>
     {% if projects %}
     <section class="projects">
-        {% if request.user == user_obj %}
-        <h3>Your Projects</h3>
-        {% else %}
-        <h3>Projects</h3>
-        {% endif %}
+        <h3>
+            {% if request.user == user_obj %}Your Projects{% else %}Projects{% endif %}
+            <small><a href="{% url 'project-contributor' username=user_obj.username %}">See all</a></small>
+        </h3>
         <div class="project-group">
         {% for project in projects %}
-            {% include 'lib/project.html' %}
+            {% include 'component/project.html' %}
         {% endfor %}
         </div>
     </section>
