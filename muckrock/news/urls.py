@@ -24,31 +24,31 @@ urlpatterns = patterns(
     ),
     url(
         r'^archives/$',
-        views.List.as_view(template_name='lists/news_list.html'),
+        views.NewsListView.as_view(),
         name='news-archive'
     ),
     url(
         r'^archives/(?P<year>\d{4})/(?P<month>[a-z]{3})/(?P<day>\w{1,2})/(?P<slug>[-\w\d]+)/$',
-        views.NewsDetail.as_view(template_name='details/news_detail.html'),
+        views.NewsDetail.as_view(),
         name='news-detail'
     ),
     url(
         r'^archives/(?P<year>\d{4})/(?P<month>[a-z]{3})/(?P<day>\w{1,2})/$',
         DayArchiveView.as_view(
-            template_name='archives/day_archive.html',
+            template_name='news/archives/day_archive.html',
             **article_date_list_args),
         name='news-archive-day'
     ),
     url(
         r'^archives/(?P<year>\d{4})/(?P<month>[a-z]{3})/$',
         MonthArchiveView.as_view(
-            template_name='archives/month_archive.html',
+            template_name='news/archives/month_archive.html',
             **article_date_list_args),
         name='news-archive-month'
     ),
     url(
         r'^archives/(?P<year>\d{4})/$',
-        views.NewsYear.as_view(template_name='archives/year_archive.html'),
+        views.NewsYear.as_view(template_name='news/archives/year_archive.html'),
         name='news-archive-year'
     ),
     url(r'^author/(?P<username>[\w\-.@ ]+)/$',

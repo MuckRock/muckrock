@@ -24,6 +24,7 @@ from muckrock.tags.models import Tag, parse_tags
 
 class NewsDetail(DateDetailView):
     """View for news detail"""
+    template_name='news/detail.html'
     date_field = 'pub_date'
 
     def get_queryset(self):
