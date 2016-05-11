@@ -60,7 +60,6 @@
 }
 
 .project.detail {
-    overflow: hidden;
     .project-header {
         @include edge-to-edge($vertical-rhythm);
         .image, .title {
@@ -71,19 +70,6 @@
             background-size: cover;
             background-position: center;
             background-color: $color-grey-5;
-        }
-        .toolbar {
-            // @include flex(0 1 100%);
-            @include display(flex);
-            @include flex-wrap(wrap);
-            @include justify-content(space-between);
-            @include align-items(center);
-            background: $color-grey-2;
-            color: $color-white;
-            border-top: 1px solid $color-grey-3;
-            border-bottom: 1px solid $color-black;
-            padding: $vertical-rhythm/4 $vertical-rhythm/2;
-            font-weight: $font-weight-bold;
         }
     }
 
