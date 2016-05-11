@@ -4,6 +4,8 @@ $crowdfund-color-light: $color-green-light;
 $crowdfund-border: $base-border-width solid $crowdfund-color;
 
 .crowdfund.widget {
+    @include display(flex);
+    @include flex-direction(column);
     overflow: visible;
     margin: 0 auto $vertical-rhythm;
     border: $crowdfund-border;
@@ -32,16 +34,33 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
     }
 
     header, footer {
-        padding: $vertical-rhythm/2;
+        @include flex(0 0 auto);
+        margin-bottom: 0;
+        padding: $vertical-rhythm/4 $vertical-rhythm/2;
         color: $crowdfund-color-dark;
         background-color: $crowdfund-color-light;
     }
-
-    header {
+    main {
+        @include flex(auto);
+        overflow-y: scroll;
         @include display(flex);
         @include flex-direction(column);
         @include justify-content(space-between);
-        @include align-items(flex-start);
+        .row {
+            @include display(flex);
+            @include justify-content(space-between);
+            @include align-items(center);
+            & > * {
+                @include flex(1);
+                padding: $vertical-rhythm/2;
+                @include media($medium-layout) {
+                    margin-bottom: 0;
+                }
+            }
+        }
+    }
+
+    header {
         border-bottom: $crowdfund-border;
         h1 {
             font-size: $font-size-3;
@@ -49,44 +68,22 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
             font-weight: $font-weight-bold;
             margin: 0;
         }
-        @include media($medium-layout) {
-            @include flex-direction(row);
-            @include align-items(center);
-        }
-    }
-
-    .description, .stats {
-        padding: $vertical-rhythm/2;
     }
 
     .description {
-        padding-top: 0;
-        padding-bottom: 0;
+        padding: $vertical-rhythm/2;
     }
 
-    .progress {
+    .progress, .meter {
         margin-bottom: 0;
         border-radius: 0;
     }
 
     .stats {
-        @include display(flex);
-        @include flex-direction(column);
-        @include media($medium-layout) {
-            @include flex-direction(row);
-            @include justify-content(space-between);
-            @include align-items(center);
-        }
         margin-bottom: 0;
         text-align: center;
         font-size: $font-size-2;
         line-height: $font-line-height;
-        & > * {
-            @include flex(1);
-            @include media($medium-layout) {
-                margin-bottom: 0;
-            }
-        }
     }
 
     .contributor-list {
@@ -99,7 +96,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
 }
 
 .crowdfund.widget footer {
-    margin-bottom: 0;
+
     border-top: $crowdfund-border;
     form {
         @include display(flex);
@@ -227,23 +224,14 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
     }
 }
 
-.help {
-    border: 1px solid;
-    border-bottom-style: solid;
-    border-radius: 100%;
-    display: inline-block;
-    height: $font-size-4;
-    width: $font-size-4;
-    margin-left: $vertical-rhythm/2;
-    font-weight: $font-weight-bold;
-    line-height: $font-size-4;
-    text-align: center;
-    &:hover {
-        text-decoration: none;
-    }
+.embed {
+    margin-bottom: 0;
 }
-
-.crowdfund.widget .help:hover {
-    background: $crowdfund-color-dark;
-    color: $crowdfund-color-light;
+.embed .widget {
+    margin-bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    .overlay {
+        margin-bottom: 0;
+    }
 }

@@ -7,36 +7,41 @@
         <h1>{{ crowdfund.name }}</h1>
         <div>
             <a class="action" href="{{ request.path }}#crowdfund-{{ crowdfund.pk }}">Permalink</a>
-            <a class="help" href="https://www.muckrock.com/faq/#crowdfund">?</a>
+            <a class="action" href="https://www.muckrock.com/faq/#crowdfund">Help</a>
         </div>
     </header>
-    <section class="description">
-        {{ crowdfund.description|markdown }}
-    </section>
-    <div class="progress"><span class="meter" style="width: {{crowdfund.percent_funded}}%"></span></div>
-    <section class="stats">
-        <div class="contributors">
-            <p class="contributor summary">{{ contributor_summary }}</p>
-        {% if contributors_count > 0 %}
-            <ul class="contributor dropdown">
-            {% for contributor in named_contributors %}
-                <li>{{ contributor.get_full_name }}</li>
-            {% endfor %}
-			{% if anon_contributors_count %}
-				<li>{{ anon_contributors_count }} anonymous backer{{ anon_contributors_count|pluralize }}</li>
-			{% endif %}
-            </ul>
-        {% endif %}
-        </div>
-        <p class="amount-raised">${{ crowdfund.payment_received|intcomma }} raised out of ${{ crowdfund.payment_required|intcomma }}.</p>
-        <p class="time-remaining">
-        {% if not crowdfund.expired %}
-            {{ crowdfund.date_due|timeuntil }} remaining
-        {% else %}
-            This crowdfund has ended.
-        {% endif %}
-        </p>
-    </section>
+    <main>
+        <section class="description">
+            {{ crowdfund.description|markdown }}
+        </section>
+
+        <section class="stats">
+            <div class="progress"><span class="meter" style="width: {{crowdfund.percent_funded}}%"></span></div>
+            <div class="row">
+                <div class="contributors">
+                    <p class="contributor summary">{{ contributor_summary }}</p>
+                {% if contributors_count > 0 %}
+                    <ul class="contributor dropdown">
+                    {% for contributor in named_contributors %}
+                        <li>{{ contributor.get_full_name }}</li>
+                    {% endfor %}
+        			{% if anon_contributors_count %}
+        				<li>{{ anon_contributors_count }} anonymous backer{{ anon_contributors_count|pluralize }}</li>
+        			{% endif %}
+                    </ul>
+                {% endif %}
+                </div>
+                <p class="amount-raised">${{ crowdfund.payment_received|intcomma }} raised out of ${{ crowdfund.payment_required|intcomma }}.</p>
+                <p class="time-remaining">
+                {% if not crowdfund.expired %}
+                    {{ crowdfund.date_due|timeuntil }} remaining
+                {% else %}
+                    This crowdfund has ended.
+                {% endif %}
+                </p>
+            </div>
+        </section>
+    </main>
     {% if not crowdfund.expired %}
     <footer>
         <form method="POST" action="{{ endpoint }}" class="stripe-checkout crowdfund-form" id="crowdfund-form">
