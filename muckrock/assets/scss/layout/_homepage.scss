@@ -239,59 +239,6 @@
     .projects li {
         margin-bottom: $vertical-rhythm;
     }
-    .project {
-        border: 1px solid $color-grey;
-        background: $color-white-pure;
-    }
-    .project--header {
-        background-position: center;
-        background-size: cover;
-        .project--title {
-            display: block;
-            height: 100%;
-            width: 100%;
-            padding: $vertical-rhythm;
-            color: $color-white;
-            background-color: rgba(0,0,0,.5);
-            transition: background-color .25s linear;
-            &:hover {
-                background-color: rgba(0,0,0,.75);
-                text-decoration: none;
-                color: $color-white;
-                h3 {
-                    text-decoration: underline;
-                    color: $color-white;
-                }
-            }
-        }
-        .title {
-            font-size: $font-size-5;
-        }
-    }
-    .project--info {
-        max-width: 32em;
-        padding: 0 $vertical-rhythm;
-        font-size: $font-size-2;
-        p {
-            margin-bottom: $vertical-rhythm/2;
-            &:last-child {
-                margin-bottom: 0;
-            }
-        }
-    }
-    .project--footer {
-        display: block;
-        margin-bottom: 0;
-        padding: $vertical-rhythm/2 $vertical-rhythm;
-        border-top: 1px solid $color-grey;
-        font-weight: $font-weight-bold;
-        text-align: center;
-        &:hover {
-            background: $color-blue;
-            color: $color-white;
-            border-color: $color-blue-dark;
-        }
-    }
 }
 
 /* This knocks out the margin applied by the parent container */
