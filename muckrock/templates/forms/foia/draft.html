@@ -1,5 +1,6 @@
 {% extends 'forms/base_form.html' %}
 {% load static from staticfiles %}
+{% load rules %}
 
 {% block title %}MuckRock &bull; {{ action|title }}{% endblock %}
 {% block form-type %}foia-draft{% endblock %}
@@ -37,7 +38,8 @@
     {% endif %}
 
     <div class="bottom">
-        {% if foia.user.profile.can_embargo %}
+        {% has_perm 'foia.embargo_foiarequest' request.user foia as can_embargo %}
+        {% if can_embargo %}
         <section class="embargo">
             <div class="input">
                 {{ form.embargo }}

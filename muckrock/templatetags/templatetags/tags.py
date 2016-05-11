@@ -120,7 +120,7 @@ def redact_list(obj_list, user):
     redacted_list = []
     for item in obj_list:
         try:
-            if item.object.viewable_by(user):
+            if item.object.viewable_by(user): # XXX
                 redacted_list.append(item)
         except AttributeError:
             redacted_list.append(item)
@@ -155,11 +155,6 @@ class EvaluateNode(template.Node):
             return tmpl.render(context)
         except (template.VariableDoesNotExist, template.TemplateSyntaxError):
             return 'Error rendering', self.variable
-
-@register.assignment_tag
-def editable_by(foia, user):
-    """Template tag to call editable by on FOIAs"""
-    return foia.editable_by(user)
 
 @register.inclusion_tag('tags/tag_manager.html', takes_context=True)
 def tag_manager(context, mr_object):

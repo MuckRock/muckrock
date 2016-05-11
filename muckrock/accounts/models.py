@@ -165,14 +165,6 @@ class Profile(models.Model):
         """Answers whether the user is a member of an active organization"""
         return self.organization is not None and self.organization.active
 
-    def can_embargo(self):
-        """Is this user allowed to embargo?"""
-        return self.is_advanced()
-
-    def can_embargo_permanently(self):
-        """Is this user allowed to permanently embargo?"""
-        return self.acct_type in ['admin'] or self.is_member_of_active_org()
-
     def can_multirequest(self):
         """Is this user allowed to multirequest?"""
         return self.is_advanced()

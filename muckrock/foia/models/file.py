@@ -78,7 +78,8 @@ class FOIAFile(models.Model):
 
     def viewable_by(self, user):
         """Is this document viewable to user"""
-        return self.access == 'public' and self.foia.viewable_by(user)
+        return (self.access == 'public' and
+                user.has_perm('foia.view_foiarequest', self.foia))
 
     def is_public(self):
         """Is this document viewable to everyone"""

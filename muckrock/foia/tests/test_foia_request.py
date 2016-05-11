@@ -88,45 +88,45 @@ class TestFOIARequestUnit(TestCase):
         foias[4].date_embargo = datetime.date.today() - datetime.timedelta(10)
         foias[4].embargo = False
 
-        # check manager get_viewable against models viewable_by
+        # check manager get_viewable against view permission
         viewable_foias = FOIARequest.objects.get_viewable(user1)
         for foia in FOIARequest.objects.all():
             if foia in viewable_foias:
-                nose.tools.assert_true(foia.viewable_by(user1))
+                nose.tools.assert_true(user1.has_perm('foia.view_foiarequest', foia))
             else:
-                nose.tools.assert_false(foia.viewable_by(user1))
+                nose.tools.assert_false(user1.has_perm('foia.view_foiarequest', foia))
 
         viewable_foias = FOIARequest.objects.get_viewable(user2)
         for foia in FOIARequest.objects.all():
             if foia in viewable_foias:
-                nose.tools.assert_true(foia.viewable_by(user2))
+                nose.tools.assert_true(user2.has_perm('foia.view_foiarequest', foia))
             else:
-                nose.tools.assert_false(foia.viewable_by(user2))
+                nose.tools.assert_false(user2.has_perm('foia.view_foiarequest', foia))
 
         viewable_foias = FOIARequest.objects.get_public()
         for foia in FOIARequest.objects.all():
             if foia in viewable_foias:
-                nose.tools.assert_true(foia.viewable_by(AnonymousUser()))
+                nose.tools.assert_true(AnonymousUser().has_perm('foia.view_foiarequest', foia))
             else:
-                nose.tools.assert_false(foia.viewable_by(AnonymousUser()))
+                nose.tools.assert_false(AnonymousUser().has_perm('foia.view_foiarequest', foia))
 
-        nose.tools.assert_true(foias[0].viewable_by(user1))
-        nose.tools.assert_true(foias[1].viewable_by(user1))
-        nose.tools.assert_true(foias[2].viewable_by(user1))
-        nose.tools.assert_true(foias[3].viewable_by(user1))
-        nose.tools.assert_true(foias[4].viewable_by(user1))
+        nose.tools.assert_true(user1.has_perm('foia.view_foiarequest', foias[0]))
+        nose.tools.assert_true(user1.has_perm('foia.view_foiarequest', foias[1]))
+        nose.tools.assert_true(user1.has_perm('foia.view_foiarequest', foias[2]))
+        nose.tools.assert_true(user1.has_perm('foia.view_foiarequest', foias[3]))
+        nose.tools.assert_true(user1.has_perm('foia.view_foiarequest', foias[4]))
 
-        nose.tools.assert_false(foias[0].viewable_by(user2))
-        nose.tools.assert_true(foias[1].viewable_by(user2))
-        nose.tools.assert_false(foias[2].viewable_by(user2))
-        nose.tools.assert_true(foias[3].viewable_by(user2))
-        nose.tools.assert_true(foias[4].viewable_by(user2))
+        nose.tools.assert_false(user2.has_perm('foia.view_foiarequest', foias[0]))
+        nose.tools.assert_true(user2.has_perm('foia.view_foiarequest', foias[1]))
+        nose.tools.assert_false(user2.has_perm('foia.view_foiarequest', foias[2]))
+        nose.tools.assert_true(user2.has_perm('foia.view_foiarequest', foias[3]))
+        nose.tools.assert_true(user2.has_perm('foia.view_foiarequest', foias[4]))
 
-        nose.tools.assert_false(foias[0].viewable_by(AnonymousUser()))
-        nose.tools.assert_true(foias[1].viewable_by(AnonymousUser()))
-        nose.tools.assert_false(foias[2].viewable_by(AnonymousUser()))
-        nose.tools.assert_true(foias[3].viewable_by(AnonymousUser()))
-        nose.tools.assert_true(foias[4].viewable_by(AnonymousUser()))
+        nose.tools.assert_false(AnonymousUser().has_perm('foia.view_foiarequest', foias[0]))
+        nose.tools.assert_true(AnonymousUser().has_perm('foia.view_foiarequest', foias[1]))
+        nose.tools.assert_false(AnonymousUser().has_perm('foia.view_foiarequest', foias[2]))
+        nose.tools.assert_true(AnonymousUser().has_perm('foia.view_foiarequest', foias[3]))
+        nose.tools.assert_true(AnonymousUser().has_perm('foia.view_foiarequest', foias[4]))
 
     def test_foia_set_mail_id(self):
         """Test the set_mail_id function"""
@@ -671,7 +671,7 @@ class TestRequestSharing(TestCase):
         """Editors should have the same abilities and permissions as creators."""
         new_editor = self.editor
         self.foia.add_editor(new_editor)
-        nose.tools.ok_(self.foia.editable_by(new_editor))
+        nose.tools.ok_(new_editor.has_perm('foia.change_foiarequest', self.foia))
 
     def test_add_viewer(self):
         """Editors should be able to add viewers to the request."""
@@ -695,28 +695,28 @@ class TestRequestSharing(TestCase):
         viewer = UserFactory()
         normie = UserFactory()
         embargoed_foia.add_viewer(viewer)
-        nose.tools.assert_true(embargoed_foia.viewable_by(viewer))
-        nose.tools.assert_false(embargoed_foia.viewable_by(normie))
+        nose.tools.assert_true(viewer.has_perm('foia.view_foiarequest', embargoed_foia))
+        nose.tools.assert_false(normie.has_perm('foia.view_foiarequest', embargoed_foia))
 
     def test_promote_viewer(self):
         """Editors should be able to promote viewers to editors."""
         embargoed_foia = FOIARequestFactory(embargo=True)
         viewer = UserFactory()
         embargoed_foia.add_viewer(viewer)
-        nose.tools.assert_true(embargoed_foia.viewable_by(viewer))
-        nose.tools.assert_false(embargoed_foia.editable_by(viewer))
+        nose.tools.assert_true(viewer.has_perm('foia.view_foiarequest', embargoed_foia))
+        nose.tools.assert_false(viewer.has_perm('foia.change_foiarequest', embargoed_foia))
         embargoed_foia.promote_viewer(viewer)
-        nose.tools.assert_true(embargoed_foia.editable_by(viewer))
+        nose.tools.assert_true(viewer.has_perm('foia.change_foiarequest', embargoed_foia))
 
     def test_demote_editor(self):
         """Editors should be able to demote editors to viewers."""
         embargoed_foia = FOIARequestFactory(embargo=True)
         editor = UserFactory()
         embargoed_foia.add_editor(editor)
-        nose.tools.assert_true(embargoed_foia.viewable_by(editor))
-        nose.tools.assert_true(embargoed_foia.editable_by(editor))
+        nose.tools.assert_true(editor.has_perm('foia.view_foiarequest', embargoed_foia))
+        nose.tools.assert_true(editor.has_perm('foia.change_foiarequest', embargoed_foia))
         embargoed_foia.demote_editor(editor)
-        nose.tools.assert_false(embargoed_foia.editable_by(editor))
+        nose.tools.assert_false(editor.has_perm('foia.change_foiarequest', embargoed_foia))
 
     def test_access_key(self):
         """Editors should be able to generate a secure access key to view an embargoed request."""
@@ -735,8 +735,8 @@ class TestRequestSharing(TestCase):
         self.foia.add_viewer(self.creator)
         nose.tools.assert_false(self.foia.has_viewer(self.creator))
         # but the creator should still be able to both view and edit!
-        nose.tools.assert_true(self.foia.editable_by(self.creator))
-        nose.tools.assert_true(self.foia.viewable_by(self.creator))
+        nose.tools.assert_true(self.creator.has_perm('foia.change_foiarequest', self.foia))
+        nose.tools.assert_true(self.creator.has_perm('foia.view_foiarequest', self.foia))
 
 
 class TestRequestSharingViews(TestCase):

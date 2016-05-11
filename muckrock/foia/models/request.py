@@ -53,7 +53,14 @@ class FOIARequestQuerySet(models.QuerySet):
 
         # Requests are visible if you own them, have view or edit permissions,
         # or if they are not drafts and not embargoed
-        if user.is_authenticated():
+        if user.is_authenticated() and user.profile.acct_type == 'agency':
+            return self.filter(
+                    Q(user=user) |
+                    Q(edit_collaborators=user) |
+                    Q(read_collaborators=user) |
+                    Q(agency=user.agencyprofile.agency) |
+                    (~Q(status='started') & ~Q(embargo=True)))
+        elif user.is_authenticated():
             return self.filter(
                     Q(user=user) |
                     Q(edit_collaborators=user) |
@@ -285,32 +292,6 @@ class FOIARequest(models.Model):
         """Can this request be updated?"""
         return self.status == 'started'
 
-    def is_thankable(self):
-        """Should we show a send thank you button for this request?"""
-        has_thanks = self.communications.filter(thanks=True).exists()
-        valid_status = self.status in [
-            'done',
-            'partial',
-            'rejected',
-            'abandoned',
-            'no_docs',
-        ]
-        return not has_thanks and valid_status
-
-    def is_appealable(self):
-        """Can this request be appealed by the user?"""
-        if not self.jurisdiction.can_appeal():
-            return False
-
-        if self.status in ['processed', 'appealing']:
-            # can appeal these only if they are over due
-            if not self.date_due:
-                return False
-            return self.date_due < date.today()
-
-        # otherwise it can be appealed as long as it has actually been sent to the agency
-        return self.status not in ['started', 'submitted']
-
     def has_crowdfund(self):
         """Does this request have crowdfunding enabled?"""
         return bool(self.crowdfund)
@@ -325,13 +306,9 @@ class FOIARequest(models.Model):
         """Output a Stripe Checkout formatted price"""
         return int(self.price*100)
 
-    def is_deletable(self):
-        """Can this request be deleted?"""
-        return self.status == 'started'
-
     def is_public(self):
         """Is this document viewable to everyone"""
-        return self.viewable_by(AnonymousUser())
+        return AnonymousUser().has_perm('foia.view_foiarequest', self)
 
     # Request Sharing and Permissions
 
@@ -372,10 +349,6 @@ class FOIARequest(models.Model):
         self.add_viewer(user)
         return
 
-    def editable_by(self, user):
-        """Can this user edit this request?"""
-        return self.created_by(user) or self.has_editor(user) or user.is_staff
-
     ## Viewers
 
     def has_viewer(self, user):
@@ -406,16 +379,6 @@ class FOIARequest(models.Model):
         self.remove_viewer(user)
         self.add_editor(user)
         return
-
-    def viewable_by(self, user):
-        """Can this user view this request?"""
-        user_has_access = user.is_staff or self.created_by(user) \
-                          or self.has_editor(user) or self.has_viewer(user)
-        request_is_private = self.status == 'started' or self.embargo
-        viewable_by_user = True
-        if request_is_private and not user_has_access:
-            viewable_by_user = False
-        return viewable_by_user
 
     ## Access key
 
@@ -503,7 +466,7 @@ class FOIARequest(models.Model):
         self.user.profile.notify(self)
         # notify followers
         for user in actstream.models.followers(self):
-            if self.viewable_by(user):
+            if user.has_perm('foia.view_foiarequest', self):
                 user.profile.notify(self)
 
     def update(self, anchor=None):
@@ -552,7 +515,6 @@ class FOIARequest(models.Model):
             self.date_processing = date.today()
             task.models.FlaggedTask.objects.create(
                     foia=self,
-                    user=self.user,
                     text='This request was filed for an agency requiring a '
                     'proxy, but no proxy was available.  Please add a suitable '
                     'proxy for the state and refile it with a note that the '
@@ -819,7 +781,7 @@ class FOIARequest(models.Model):
     def contextual_request_actions(self, user, can_edit):
         '''Provides context-sensitive action interfaces for requests'''
         can_follow_up = can_edit and self.status != 'started'
-        can_appeal = can_edit and self.is_appealable()
+        can_appeal = user.has_perm('foia.appeal_foiarequest', self)
         kwargs = {
             'jurisdiction': self.jurisdiction.slug,
             'jidx': self.jurisdiction.pk,
@@ -942,5 +904,18 @@ class FOIARequest(models.Model):
         ordering = ['title']
         verbose_name = 'FOIA Request'
         app_label = 'foia'
+        permissions = (
+            ('view_foiarequest', 'Can view this request'),
+            ('embargo_foiarequest', 'Can embargo request to make it private'),
+            ('embargo_perm_foiarequest', 'Can embargo a request permananently'),
+            ('crowdfund_foiarequest',
+                'Can start a crowdfund campaign for the request'),
+            ('appeal_foiarequest', 'Can appeal the requests decision'),
+            ('thank_foiarequest', 'Can thank the FOI officer for their help'),
+            ('flag_foiarequest', 'Can flag the request for staff attention'),
+            ('followup_foiarequest', 'Can send a manual follow up'),
+            ('view_rawemail', 'Can view the raw email for communications'),
+            ('file_multirequest', 'Can submit requests to multiple agencies'),
+            )
 
 

@@ -144,7 +144,8 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                     text=request.DATA['text'],
                     )
 
-            appeal = request.DATA.get('appeal', False) and foia.is_appealable()
+            can_appeal = request.user.has_perm('foia.appeal_foiarequest', foia)
+            appeal = request.DATA.get('appeal', False) and can_appeal
             foia.submit(appeal=appeal)
 
             if appeal:

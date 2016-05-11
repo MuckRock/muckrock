@@ -2,16 +2,17 @@
 FOIA views for actions
 """
 
-from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response, get_object_or_404, redirect
+from django.shortcuts import (
+        render_to_response,
+        get_object_or_404,
+        redirect,
+        render,
+        )
 from django.template import RequestContext
 
 import actstream
-from collections import namedtuple
 from datetime import datetime, timedelta
 import logging
 import stripe
@@ -30,13 +31,6 @@ from muckrock.jurisdiction.models import Jurisdiction
 
 logger = logging.getLogger(__name__)
 
-RequestAction = namedtuple(
-    'RequestAction',
-    'form_actions msg tests form_class return_url heading value must_own template extra_context'
-)
-
-action_template = 'forms/base_form.html'
-
 # Helper Functions
 
 def _get_foia(jurisdiction, jidx, slug, idx):
@@ -45,70 +39,27 @@ def _get_foia(jurisdiction, jidx, slug, idx):
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
     return foia
 
-def _foia_action(request, foia, action):
-    """Generic helper for FOIA actions"""
-    form_class = action.form_class(request, foia)
-    # Check that the request belongs to the user
-    if action.must_own and not foia.editable_by(request.user) and not request.user.is_staff:
-        msg = 'You may only %s your own requests.' % action.msg
-        messages.error(request, msg)
-        return redirect(foia)
-    # Check that the action is valid
-    for test, msg in action.tests:
-        if not test(foia):
-            messages.error(request, msg)
-            return redirect(foia)
-
-    if request.method == 'POST':
-        form = form_class(request.POST)
-        if form.is_valid():
-            action.form_actions(request, foia, form)
-            return HttpResponseRedirect(action.return_url(request, foia))
-    else:
-        if isinstance(form_class, type) and issubclass(form_class, forms.ModelForm):
-            form = form_class(instance=foia)
-        else:
-            form = form_class()
-
-    context = action.extra_context(foia)
-    args = {
-        'form': form,
-        'foia': foia,
-        'heading': action.heading,
-        'action': action.value
-    }
-    context.update(args)
-    return render_to_response(
-        action.template,
-        context,
-        context_instance=RequestContext(request)
-    )
-
+# remove this view?
 @login_required
 def delete(request, jurisdiction, jidx, slug, idx):
     """Delete a non-submitted FOIA Request"""
-    def form_actions(request, foia, _):
-        """Helper class, passed to generic function"""
-        foia.delete()
-        messages.success(request, 'The draft has been deleted.')
     foia = _get_foia(jurisdiction, jidx, slug, idx)
-    action = RequestAction(
-        form_actions=form_actions,
-        msg='delete',
-        tests=[(
-            lambda f: f.is_deletable(),
-            'You can only delete drafts.'
-        )],
-        form_class=lambda r, f: FOIADeleteForm,
-        return_url=lambda r, f: reverse('foia-mylist'),
-        heading='Delete FOI Request',
-        value='Delete',
-        must_own=True,
-        template=action_template,
-        extra_context=lambda f: {}
-    )
-    return _foia_action(request, foia, action)
+    if not request.user.has_perm('foia.delete_foiarequest', foia):
+        messages.error(request, 'You may only delete your own drafts.')
+        return redirect(foia)
 
+    if request.method == 'POST':
+        form = FOIADeleteForm(request.POST)
+        if form.is_valid():
+            foia.delete()
+            messages.success(request, 'The draft has been deleted.')
+            return redirect('foia-mylist')
+    else:
+        form = FOIADeleteForm()
+
+    return render(request, 'forms/base_form.html', {'form': form})
+
+# remove this view?
 @login_required
 def embargo(request, jurisdiction, jidx, slug, idx):
     """Change the embargo on a request"""
@@ -124,7 +75,7 @@ def embargo(request, jurisdiction, jidx, slug, idx):
         if form.is_valid():
             permanent = form.cleaned_data['permanent_embargo']
             expiration = form.cleaned_data['date_embargo']
-            if request.user.profile.can_embargo_permanently():
+            if request.user.has_perm('foia.embargo_perm_foiarequest', foia):
                 foia.permanent_embargo = permanent
             if expiration and foia.status in END_STATUS:
                 foia.date_embargo = expiration
@@ -133,7 +84,7 @@ def embargo(request, jurisdiction, jidx, slug, idx):
 
     def create_embargo(request, foia):
         """Apply an embargo to the FOIA"""
-        if request.user.profile.can_embargo():
+        if request.user.has_perm('foia.embargo_foiarequest', foia):
             foia.embargo = True
             foia.save(comment='added embargo')
             logger.info('%s embargoed %s', request.user, foia)
@@ -151,7 +102,7 @@ def embargo(request, jurisdiction, jidx, slug, idx):
 
     def update_embargo(request, foia):
         """Update an embargo to the FOIA"""
-        if request.user.profile.can_embargo():
+        if request.user.has_perm('foia.embargo_foiarequest', foia):
             fine_tune_embargo(request, foia)
         else:
             logger.error('%s was forbidden from updating the embargo on %s', request.user, foia)
@@ -167,7 +118,8 @@ def embargo(request, jurisdiction, jidx, slug, idx):
         return
 
     foia = _get_foia(jurisdiction, jidx, slug, idx)
-    if request.method == 'POST' and foia.editable_by(request.user):
+    has_perm = request.user.has_perm('foia.change_foiarequest', foia)
+    if request.method == 'POST' and has_perm:
         embargo_action = request.POST.get('embargo')
         if embargo_action == 'create':
             create_embargo(request, foia)
@@ -230,7 +182,7 @@ def toggle_autofollowups(request, jurisdiction, jidx, slug, idx):
     """Toggle autofollowups"""
     foia = _get_foia(jurisdiction, jidx, slug, idx)
 
-    if foia.editable_by(request.user):
+    if request.user.has_perm('foia.change_foiarequest', foia):
         foia.disable_autofollowups = not foia.disable_autofollowups
         foia.save(comment='toggled autofollowups')
         action = 'disabled' if foia.disable_autofollowups else 'enabled'
@@ -324,16 +276,9 @@ def crowdfund_request(request, idx, **kwargs):
     """Crowdfund a request"""
     # pylint: disable=unused-argument
     foia = FOIARequest.objects.get(pk=idx)
-    owner_or_staff = request.user == foia.user or request.user.is_staff
     # check for unauthorized access
-    if not owner_or_staff:
-        messages.error(request, 'You may only crowdfund your own requests.')
-        return redirect(foia)
-    if foia.has_crowdfund():
-        messages.error(request, 'You may only run one crowdfund per request.')
-        return redirect(foia)
-    if foia.status != 'payment':
-        messages.error(request, 'You may only crowfund when payment is required.')
+    if not request.user.has_perm('foia.crowdfund_foiarequest', foia):
+        messages.error(request, 'You may not crowdfund this request.')
         return redirect(foia)
     if request.method == 'POST':
         # save crowdfund object

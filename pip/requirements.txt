@@ -75,6 +75,7 @@ redis==2.10.5
 requests==2.9.1
 requirements-parser==0.1.0  # via django-package-monitor
 rjsmin==1.0.12            # via django-compressor
+rules==1.1.1
 scikit-learn==0.16.1
 scipy==0.14.0
 semantic-version==2.5.0   # via django-package-monitor
