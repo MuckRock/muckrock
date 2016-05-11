@@ -56,29 +56,11 @@ class TestProjectCreateView(TestCase):
         self.view = views.ProjectCreateView.as_view()
         self.url = reverse('project-create')
 
-    def test_staff(self):
-        """Staff users should be able to GET the ProjectCreateView."""
-        staff_user = factories.UserFactory(is_staff=True)
-        response = get_helper(self.view, self.url, staff_user)
-        eq_(response.status_code, 200,
-            'Staff users should be able to GET the ProjectCreateView.')
-
-    def test_experimental(self):
-        """Experimental users should be able to GET the ProjectCreateView."""
-        exp_user = factories.UserFactory(profile__experimental=True)
-        response = get_helper(self.view, self.url, exp_user)
-        eq_(response.status_code, 200,
-            'Experimental users should be able to GET the ProjectCreateView.')
-
     def test_basic(self):
         """Basic users should not be able to GET the ProjectCreateView."""
         user = factories.UserFactory()
         response = get_helper(self.view, self.url, user)
-        eq_(response.status_code, 302,
-            'Basic users should not be able to GET the ProjectCreateView.')
-        redirect_url = reverse('acct-login') + '?next=' + reverse('project-create')
-        eq_(response.url, redirect_url,
-            'The user should be redirected to the login page.')
+        eq_(response.status_code, 200, 'Basic users should be able to GET the ProjectCreateView.')
 
     def test_anonymous(self):
         """Logged out users should not be able to GET the ProjectCreateView."""
