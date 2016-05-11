@@ -192,7 +192,7 @@ INSTALLED_APPS = (
     'rest_framework_swagger',
     'reversion',
     'robots',
-    'rules',
+    'rules.apps.AutodiscoverRulesConfig',
     'storages',
     'taggit',
     'webpack_loader',

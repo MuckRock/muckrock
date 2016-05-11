@@ -275,32 +275,6 @@ class FOIARequest(models.Model):
         """Can this request be updated?"""
         return self.status == 'started'
 
-    def is_thankable(self):
-        """Should we show a send thank you button for this request?"""
-        has_thanks = self.communications.filter(thanks=True).exists()
-        valid_status = self.status in [
-            'done',
-            'partial',
-            'rejected',
-            'abandoned',
-            'no_docs',
-        ]
-        return not has_thanks and valid_status
-
-    def is_appealable(self):
-        """Can this request be appealed by the user?"""
-        if not self.jurisdiction.can_appeal():
-            return False
-
-        if self.status in ['processed', 'appealing']:
-            # can appeal these only if they are over due
-            if not self.date_due:
-                return False
-            return self.date_due < date.today()
-
-        # otherwise it can be appealed as long as it has actually been sent to the agency
-        return self.status not in ['started', 'submitted']
-
     def has_crowdfund(self):
         """Does this request have crowdfunding enabled?"""
         return bool(self.crowdfund)
@@ -317,7 +291,7 @@ class FOIARequest(models.Model):
 
     def is_public(self):
         """Is this document viewable to everyone"""
-        return self.viewable_by(AnonymousUser())
+        return AnonymousUser().has_perm('foia.view_foiarequest', self)
 
     # Request Sharing and Permissions
 
@@ -388,17 +362,6 @@ class FOIARequest(models.Model):
         self.remove_viewer(user)
         self.add_editor(user)
         return
-
-    def viewable_by(self, user):
-        """Can this user view this request?"""
-        user_has_access = (user.is_staff or self.created_by(user)
-                or self.has_editor(user) or self.has_viewer(user)
-                or (user.is_authenticated() and
-                    user.profile.acct_type == 'agency' and
-                    user.agencyprofile.agency == self.agency))
-        request_is_private = self.status == 'started' or self.embargo
-
-        return user_has_access or not request_is_private
 
     ## Access key
 

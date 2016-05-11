@@ -292,7 +292,8 @@ class Detail(DetailView):
         context['open_tasks'] = open_tasks
         context['stripe_pk'] = settings.STRIPE_PUB_KEY
         context['sidebar_admin_url'] = reverse('admin:foia_foiarequest_change', args=(foia.pk,))
-        context['is_thankable'] = foia.is_thankable()
+        context['is_thankable'] = self.request.user.has_perm(
+                'foia.thank_foiarequest', foia)
         if foia.sidebar_html:
             messages.info(self.request, foia.sidebar_html)
         return context

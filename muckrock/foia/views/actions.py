@@ -2,16 +2,17 @@
 FOIA views for actions
 """
 
-from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response, get_object_or_404, redirect
+from django.shortcuts import (
+        render_to_response,
+        get_object_or_404,
+        redirect,
+        render,
+        )
 from django.template import RequestContext
 
 import actstream
-from collections import namedtuple
 from datetime import datetime, timedelta
 import logging
 import stripe
@@ -37,7 +38,7 @@ def _get_foia(jurisdiction, jidx, slug, idx):
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
     return foia
 
-# XXX remove this view?
+# remove this view?
 @login_required
 def delete(request, jurisdiction, jidx, slug, idx):
     """Delete a non-submitted FOIA Request"""
@@ -57,7 +58,7 @@ def delete(request, jurisdiction, jidx, slug, idx):
 
     return render(request, 'forms/base_form.html', {'form': form})
 
-# XXX remove this view?
+# remove this view?
 @login_required
 def embargo(request, jurisdiction, jidx, slug, idx):
     """Change the embargo on a request"""
@@ -239,7 +240,6 @@ def crowdfund_request(request, idx, **kwargs):
     """Crowdfund a request"""
     # pylint: disable=unused-argument
     foia = FOIARequest.objects.get(pk=idx)
-    owner_or_staff = request.user == foia.user or request.user.is_staff
     # check for unauthorized access
     if not request.user.has_perm('foia.crowdfund_foiarequest', foia):
         messages.error(request, 'You may not crowdfund this request.')

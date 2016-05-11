@@ -1,5 +1,8 @@
 """Rules based permissions for the FOIA app"""
 
+# needed for rules
+from __future__ import absolute_import
+
 from datetime import date
 from rules import (
         add_perm,
@@ -9,6 +12,9 @@ from rules import (
         )
 
 from muckrock.foia.models.request import END_STATUS
+
+# pylint: disable=missing-docstring
+# pylint: disable=unused-argument
 
 def has_status(*statuses):
     @predicate('has_status:%s' % ','.join(statuses))
@@ -48,11 +54,11 @@ is_thankable = ~has_thanks & has_status(*END_STATUS)
 
 @predicate
 def has_appealable_jurisdiction(user, foia):
-    return foia.agency.jurisdiction.can_appeal()
+    return foia.agency and foia.agency.jurisdiction.can_appeal()
 
 @predicate
 def is_overdue(user, foia):
-    return self.date_due is not None and self.date_due < date.today()
+    return foia.date_due is not None and foia.date_due < date.today()
 
 is_appealable = has_appealable_jurisdiction & (
         (has_status('processed', 'appealing') & is_overdue) |
@@ -71,7 +77,7 @@ def is_advanced_type(user):
 
 @predicate
 def is_admin(user):
-    return user.acct_type == 'admin'
+    return user.profile.acct_type == 'admin'
 
 @predicate
 def is_org_member(user):
@@ -89,11 +95,11 @@ add_perm('foia.delete_foiarequest', can_edit & is_deletable)
 add_perm('foia.view_foiarequest', can_edit | is_viewer | ~is_private)
 add_perm('foia.embargo_foiarequest', can_edit & can_embargo)
 add_perm('foia.embargo_perm_foiarequest', can_edit & can_embargo_permananently)
-add_perm('foia.crowdfund_foiarequest', # XXX why cant editors crowdfund?
+add_perm('foia.crowdfund_foiarequest', # why cant editors crowdfund?
         (is_owner | is_staff) & ~has_crowdfund & has_status('payment'))
 add_perm('foia.appeal_foiarequest', can_edit & is_appealable)
 add_perm('foia.thank_foiarequest', can_edit & is_thankable)
-add_perm('foia.flag_foiarequest', is_authenticated) # XXX Why must be authenticated for flag?
+add_perm('foia.flag_foiarequest', is_authenticated) # Why must be authenticated for flag?
 add_perm('foia.followup_foiarequest', can_edit & ~has_status('started'))
 add_perm('foia.view_rawemail', is_advanced)
 add_perm('foia.file_multirequest', is_advanced)

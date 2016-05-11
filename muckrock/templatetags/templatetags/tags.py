@@ -120,7 +120,7 @@ def redact_list(obj_list, user):
     redacted_list = []
     for item in obj_list:
         try:
-            if item.object.viewable_by(user):
+            if item.object.viewable_by(user): # XXX
                 redacted_list.append(item)
         except AttributeError:
             redacted_list.append(item)
