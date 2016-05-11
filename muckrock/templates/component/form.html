@@ -1,0 +1,15 @@
+{% if form.non_field_errors %}
+<div class="failure errorlist">
+{{ form.non_field_errors }}
+</div>
+{% endif %}
+<div class="hidden-fields">
+{% for field in form.hidden_fields %}
+    {{ field }}
+{% endfor %}
+</div>
+<div class="visible-fields">
+{% for field in form.visible_fields %}
+    {% include 'component/field.html' %}
+{% endfor %}
+</div>

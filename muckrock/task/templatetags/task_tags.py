@@ -71,6 +71,20 @@ class FlaggedTaskNode(TaskNode):
         return extra_context
 
 
+class ProjectReviewTaskNode(TaskNode):
+    """Renders a flagged task."""
+    model = task.models.ProjectReviewTask
+    task_template = 'task/project.html'
+    endpoint_name = 'projectreview-task-list'
+    class_name = 'project'
+
+    def get_extra_context(self):
+        """Adds a form for replying to the user"""
+        extra_context = super(ProjectReviewTaskNode, self).get_extra_context()
+        extra_context['form'] = task.forms.ProjectReviewTaskForm()
+        return extra_context
+
+
 class MultiRequestTaskNode(TaskNode):
     """Renders a multi-request task."""
     model = task.models.MultiRequestTask
@@ -230,6 +244,11 @@ def stale_agency_task(parser, token):
 def flagged_task(parser, token):
     """Returns a FlaggedTaskNode"""
     return FlaggedTaskNode(get_id(token))
+
+@register.tag
+def project_review_task(parser, token):
+    """Returns a ProjectReviewTaskNode"""
+    return ProjectReviewTaskNode(get_id(token))
 
 @register.tag
 def new_agency_task(parser, token):

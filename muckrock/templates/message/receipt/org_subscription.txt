@@ -1,11 +1,7 @@
 {% extends 'message/receipt/base.txt' %}
 
 {% block description %}
-This e-mail confirms the monthly renewal your organization subscription to MuckRock.
+This e-mail confirms the monthly charge for your organization account on MuckRock.
 
-Your membership includes up to {{org.monthly_requests}} requests per month and up to {{org.max_users}} users, and includes the ability to embargo requests permanently.
-{% endblock %}
-
-{% block support %}
-This charge will recur monthly. For concerns or more information about this charge, please contact info@muckrock.com or call 1-857-488-3081. To manage your organization, including adding or remove users, click here: https://www.muckrock.com/{{org.get_absolute_url}}
+Your membership includes up to {{org.monthly_requests}} requests per month for up to {{org.max_users}} members, and includes the ability to embargo requests permanently. Manage your organization, including adding or removing users, from the organization page ({{base_url}}{{org.get_absolute_url}}).
 {% endblock %}

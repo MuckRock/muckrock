@@ -12,7 +12,6 @@ from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string, get_template
 from django.template import Context
 
-import actstream
 import dill as pickle
 import dbsettings
 import base64
@@ -177,7 +176,7 @@ def submit_multi_request(req_pk, **kwargs):
             template = get_template('text/foia/request.txt')
             context = Context({'document_request': req.requested_docs,
                                'jurisdiction': agency.jurisdiction,
-                               'user': req.user})
+                               'user_name': req.user.get_full_name()})
             foia_request = template.render(context).split('\n', 1)[1].strip()
 
             new_foia = FOIARequest.objects.create(
@@ -324,7 +323,6 @@ def embargo_expire():
                                            date_embargo__lt=date.today()):
         foia.embargo = False
         foia.save(comment='embargo expired')
-        actstream.action.send(foia, verb='embargo expired')
         send_mail('[MuckRock] Embargo expired for FOI Request "%s"' % foia.title,
                   render_to_string('text/foia/embargo_did_expire.txt', {'request': foia}),
                   'info@muckrock.com',

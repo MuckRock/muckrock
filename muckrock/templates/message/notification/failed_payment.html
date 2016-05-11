@@ -1,0 +1,24 @@
+{% extends 'message/base.html' %}
+{% load humanize %}
+
+{% block body %}
+<p>Hi {{user.first_name}},</p>
+{% if type == 'pro' %}
+{% if attempt == "final" %}
+<p class="red">Your Pro subscription has been cancelled.</p>
+<p>Our final attempt to charge your card has failed and your account has been reverted back to a free Basic account. <a href="{% url 'accounts' %}">Resubscribe</a>.</p>
+{% else %}
+<p class="red">Your Pro subscription payment has failed.</p>
+<p>This is the {{attempt|ordinal}} attempt. The payment will be retried up to 3 times. <a href="{% url 'acct-settings' %}">Update your billing information</a>.</p>
+{% endif %}
+{% elif type == 'org' %}
+{% if attempt == "final" %}
+<p class="red">Your Organization has been deactivated.</p>
+<p>Our final attempt to charge your card has failed and your organization has been deactivated. <a href="{% url 'org-activate' slug=org.slug %}">Reactivate</a>.</p>
+{% else %}
+<p class="red">Your Organization subscription payment has failed.</p>
+<p>This is the {{attempt|ordinal}} attempt. The payment will be retried up to 3 times. <a href="{% url 'acct-settings' %}">Update your billing information</a>.</p>
+{% endif %}
+{% endif %}
+<p>Sincerely,<br />The MuckRock Team</p>
+{% endblock %}

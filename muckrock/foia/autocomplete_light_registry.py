@@ -6,8 +6,10 @@ from muckrock.foia.models import FOIARequest
 
 from autocomplete_light import shortcuts as autocomplete_light
 
-class FOIARequestAutocomplete(autocomplete_light.AutocompleteModelBase):
+class FOIARequestAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     """Creates an autocomplete field for picking FOIA requests"""
+    choices = FOIARequest.objects.all().select_related('agency__jurisdiction')
+    choice_template = 'autocomplete/foia.html'
     search_fields = ['title']
     attrs = {
         'placeholder': 'Search for requests',

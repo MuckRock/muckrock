@@ -1,9 +1,0 @@
-Hi {{ user.first_name }},
-
-This message is to verify the email associated with your account on MuckRock.com.
-Follow this link to complete the verification process: https://www.muckrock.com{{ verification_link|safe }}
-
-If you have any questions, send an email to info@muckrock.com and we'll help you out.
-
-Thank you!
-MuckRock Staff

@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load markdown_deux_tags %}
+{% load static from staticfiles %}
+
+{% block title %}MuckRock &bull; Publish your project{% endblock %}
+
+{% block content %}
+<div class="publish project">
+    <p><a href="{% url 'project-detail' slug=project.slug pk=project.pk %}">Back to project page</a></p>
+    <h1>Publish your project</h1>
+    <p>Publishing a project makes it publicly visible and allows you to start crowdfunding campaigns for it. Projects are pending publication until they are reviewed by a MuckRock staff member.</p>
+    <div class="info notification">
+        <span class="symbol">
+                {% include 'lib/icons/info.svg' %}
+        </span>
+        <span class="text">
+            <p>Before submitting your project for review, double check the details below. You can also add notes for our staff to consider. Then, click the button at the bottom of the page.</p>
+        </span>
+    </div>
+    <table>
+        <tbody>
+            <tr>
+                <td><strong>Title</strong></td>
+                <td><span class="h1">{{project.title}}</span></td>
+            </tr>
+            <tr>
+                <td><strong>Summary</strong></td>
+                <td>
+                    {% if project.summary %}
+                    {{project.summary}}
+                    {% else %}
+                    <a href="{% url 'project-edit' slug=project.slug pk=project.pk}#basics">Add a summary</a>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Image</strong></td>
+                <td>
+                    {% if project.image %}
+                    <img src="{% static project.image.url %}" />
+                    {% else %}
+                    <a href="{% url 'project-edit' slug=project.slug pk=project.pk}#basics">Add an image</a>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Description</strong></td>
+                <td>
+                {% if project.description %}
+                    {{project.description|markdown}}
+                {% else %}
+                    <a href="{% url 'project-edit' slug=project.slug pk=project.pk}#description">Add a description</a>
+                {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Requests</strong></td>
+                <td>
+                {% if project.requests.exists %}
+                    <ul>
+                    {% for request in project.requests.all %}
+                        <li><a href="{{ request.get_absolute_url }}">{{request.title}}</a></li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <a href="{% url 'project-edit' slug=project.slug pk=project.pk}#description">Add requests</a>
+                {% endif %}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <p>If there's anything else you want us to consider while reviewing, please leave notes for our reviewers.</p>
+    <form method="post">
+        {% csrf_token %}
+        {% include 'component/form.html' %}
+        <button type="submit" class="blue">Submit for review</button>
+    </form>
+</div>
+{% endblock %}

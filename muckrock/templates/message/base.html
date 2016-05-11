@@ -1,68 +1,241 @@
 {% load premailer %}
+{% load static from staticfiles %}
 {% spaceless %}
 {% premailer base_url %}
+<!DOCTYPE html>
 <html>
     <head>
-        <style>
-            body {
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <style type="text/css">
+            /* Base */
+            * {
+                box-sizing: border-box;
+            }
+            .html-rig {
                 max-width: 600px;
-                margin: 0 auto;
-                padding: 1em;
+            }
+            .body-rig {
+                max-width: 600px;
                 color: #21262E;
-                font-family: sans-serif;
-                font-size: 14px;
-                line-height: 1.3em;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+                font-size: 16px;
+                line-height: 1.5em;
             }
-            h1 {
-                margin-top: 1.5em;
-                padding: .5em 0;
-                border-top: 1px solid #21262E;
-                border-bottom: 1px dotted #21262E;
+            div {
+                margin-bottom: 1em;
             }
-            h2 {
-                padding: .5em 0;
-                border-bottom: 1px dotted #21262E;
+            h1, h2, h3, h4, h5, h6 {
+                font-size: 1em;
+                line-height: 1.5em;
             }
-            ul {
-                list-style: none;
-                padding-left: 1em;
+            h4, h6 {
+                color: #97A1AD;
+            }
+            h5, h6, small {
+                font-size: .875em;
+                line-height: 1.5em;
+                margin: 1.5em 0;
+            }
+            p {
+                margin-top: 0;
+            }
+            a {
+                color: #4582CC;
+            }
+            img {
+                max-width: 100%;
+            }
+            hr {
+                margin: 1em 0;
+                border: 1px solid #21262E;
             }
             li {
                 margin-bottom: 1em;
             }
-            table {
-                width: 100%;
-                border-collapse: collapse;
-                font-size: 1em;
+            /* Header */
+            .header {
+                margin-bottom: 1em;
             }
-            th, td {
+            .header--row {
+                width: 100%;
+                display: table-row;
+            }
+            .header--text {
+                display: table-cell;
+                max-width: 100%;
+                vertical-align: top;
+            }
+            .header--image {
+                display: table-cell;
+                padding-right: 1em;
+                vertical-align: top;
+            }
+            .header h1, .header p {
+                margin: 0;
+            }
+            /* Body */
+            .body h1 {
+                padding: .75em 0;
+                border-top: 2px solid #21262E;
+                border-bottom: 1px solid #97A1AD;
+            }
+            .body h2 {
+                padding: 0 0 .75em 0;
+                border-bottom: 1px solid #97A1AD;
+            }
+            .body table {
+                width: 100%;
+                margin: 1em 0;
+                border-collapse: collapse;
+            }
+            .body th, .body td {
                 padding: .5em;
                 text-align: left;
             }
-            td {
+            .body td {
                 padding: .5em;
                 border: 1px solid #B5BDC7;
             }
-            a {
-                font-weight: bold;
+            /* Footer */
+            .footer {
+                margin-top: 2em;
+                color: #97A1AD;
+                font-size: .875em;
+                line-height: 1.5em;
+            }
+            .footer p {
+                margin: 0;
+            }
+            /* Utility */
+            .hide {
+                display: none !important;
+            }
+            .row {
+                overflow: auto;
+                margin-bottom: 0;
+            }
+            .half {
+                width: 50%;
+            }
+            .right {
+                float: right;
+                margin-left: 1em;
+                margin-bottom: 1em;
+            }
+            .left {
+                float: left;
+                margin-right: 1em;
+                margin-bottom: 1em;
+            }
+            .grey {
+                color: #97A1AD;
+            }
+            .blue {
                 color: #4582CC;
             }
-            hr {
-                margin: 2em 0;
-                border: 2px solid #21262E;
+            .green {
+                color: #6ACC7A;
             }
-            .positive, .completed {
-                color: #52CC66;
-            }
-            .negative, .rejected, .unsuccessful, .require.action {
+            .red {
                 color: #CC5C52;
             }
+            .badge {
+                display: inline-block;
+                min-width: 6em;
+                padding: .25em .5em;
+                margin-bottom: .25em;
+                border-radius: 4px;
+                background: #97A1AD;
+                color: #F7F8FA;
+                text-align: center;
+                font-weight: bold;
+            }
+            .green.badge {
+                background: #6ACC7A;
+            }
+            .red.badge {
+                background: #CC5C52;
+            }
+            .blue.badge {
+                background: #4582CC;
+            }
+            /* Digest */
+            table.digest td {
+                padding: 0;
+                border: none;
+                vertical-align: top;
+            }
+            table.digest .request-category {
+                width: 25%;
+                padding-right: 1em;
+            }
+            table.digest .badge {
+                margin: 0;
+                padding: .2em;
+            }
+            /* Receipt */
+            .receipt {
+                border: 1px solid #B5BDC7;
+            }
+            .receipt table {
+                margin: 0;
+            }
+            .receipt td {
+                border: none;
+            }
+            .receipt td:last-child {
+                text-align: right;
+            }
+            .purchase-data {
+                padding: .5em;
+            }
+            .purchase-data p {
+                margin-bottom: 0;
+                font-size: 12px;
+                line-height: 1.5em;
+            }
+            .total {
+                font-weight: bold;
+                border-top: 1px solid #B5BDC7;
+            }
         </style>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
     </head>
     <body>
-    {% block body %}
-    {% endblock body %}
+        <table width="100%" height="100%" color="#21262E">
+            <tr>
+                <td width="100%" height="100%" color="#21262E">
+                    <table class="html-rig" align="center">
+                        <tr>
+                            <td>
+                                <div class="body-rig">
+                                    {% if summary %}<p class="hide">{{summary}}</p>{% endif %}
+                                    <div class="header">
+                                        <div class="header--row">
+                                            <a href="{% url 'index' %}" class="header--image">
+                                                <img src="{% static 'icons/logo_bw.png' %}" height="44px" width="44px" />
+                                            </a>
+                                            <div class="header--text">
+                                                <h1>MuckRock</h1>
+                                                <p>{{subject}}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="body">
+                                        {% block body %}{% endblock %}
+                                    </div>
+                                    <div class="footer">
+                                        {% block settings %}{% endblock %}
+                                        {% if user %}<p>This email was sent to <a href="mailto:{{user.email}}">{{user.email}}</a>.{% endif %}
+                                        <p>Add <a href="mailto:info@muckrock.com">info@muckrock.com</a> to your address book to prevent our emails from being marked as spam.</p>
+                                        <p>MuckRock, 411A Highland Avenue, Somerville, MA 02144</p>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
     </body>
 </html>
 {% endpremailer %}

@@ -1,0 +1,7 @@
+{% extends 'message/base.html' %}
+{% block body %}
+<p>Hi {{user.first_name}},</p>
+<p>This message is to verify the email associated with your MuckRock account. To verify your email, <a href="{{ verification_link|safe }}">click here</a>.</p>
+<p>If you have any questions, send an email to <a href="mailto:info@muckrock.com">info@muckrock.com</a> and we'll help you out.</p>
+<p>Sincerely,<br/>The MuckRock Team</p>
+{% endblock %}

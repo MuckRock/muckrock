@@ -1,0 +1,7 @@
+{% extends 'message/base.html' %}
+{% block body %}
+<p>Hi {{user.first_name}},</p>
+<p>We are pleased to tell you that {% if from.is_anonymous %}an anonymous user{% else %}<a href="{{form.get_absolute_url}}">{{from.get_full_name}}</a>{%endif%} has sent you a gift of {{gift}}.</p>
+<p>How sweet of them!</p>
+<p>Sincerly,<br/>The MuckRock Team</p>
+{% endblock %}

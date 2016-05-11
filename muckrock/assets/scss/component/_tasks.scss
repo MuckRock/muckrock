@@ -164,6 +164,21 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
     }
 }
 
+/* Project Review Task */
+
+.project.task {
+    .task-actions label {
+        text-align: left;
+    }
+    .task-actions textarea {
+        margin-bottom: 0;
+    }
+    .task-actions .submission-control {
+        @include display(flex);
+        @include justify-content(space-between);
+    }
+}
+
 /* Stale Agency Task */
 
 .stale-agency .task-data {

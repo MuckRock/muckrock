@@ -113,22 +113,19 @@ class AgencyMultipleChoiceField(forms.MultipleChoiceField):
 class MultiRequestForm(forms.ModelForm):
     """A form for a multi-request"""
 
-    title = forms.CharField(
-        widget=forms.TextInput(attrs={'placeholder': 'Pick a Title'})
-    )
     requested_docs = forms.CharField(
         label='Request',
         widget=forms.Textarea()
-    )
-    agencies = AgencyMultipleChoiceField(
-        label='Agencies',
-        choices=()
     )
 
     class Meta:
         # pylint: disable=too-few-public-methods
         model = FOIAMultiRequest
         fields = ['title', 'requested_docs', 'agencies']
+        widgets = {
+            'title': forms.TextInput(attrs={'placeholder': 'Pick a Title'}),
+            'agencies': autocomplete_light.MultipleChoiceWidget('AgencyMultiRequestAutocomplete')
+        }
 
 
 class MultiRequestDraftForm(forms.ModelForm):

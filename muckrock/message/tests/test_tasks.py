@@ -11,6 +11,7 @@ import nose.tools
 
 from muckrock import factories
 from muckrock.message import tasks
+from muckrock.task.factories import FlaggedTaskFactory
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
@@ -37,7 +38,11 @@ mock_charge.id = 'test-charge'
 mock_charge.invoice = False
 mock_charge.amount = 100
 mock_charge.created = 1446680016
-mock_charge.source = {'last4': '1234'}
+mock_charge.source.return_value = {
+    'brand': 'Visa',
+    'last4': '1234',
+    'name': 'Test'
+}
 MockCharge = mock.Mock()
 MockCharge.retrieve.return_value = mock_charge
 
@@ -64,7 +69,7 @@ class TestDailyTask(TestCase):
         factories.UserFactory(profile__experimental=True)
         factories.UserFactory()
 
-    @mock.patch('muckrock.message.digests.DailyDigest.send')
+    @mock.patch('muckrock.message.digests.ActivityDigest.send')
     @mock.patch('muckrock.accounts.models.Profile.send_notifications')
     def test_daily_notification_task(self, mock_profile_send, mock_send):
         """Make sure the send method is called for the experimental user."""
@@ -87,45 +92,43 @@ class TestStaffTask(TestCase):
         mock_send.assert_called_with()
 
 
-class TestWelcomeTask(TestCase):
-    """Tests the welcome email notification sent to new users."""
+@mock.patch('muckrock.message.email.TemplateEmail.send')
+class TestNotificationTasks(TestCase):
+    """Email notifications are sent to users upon key events."""
     def setUp(self):
         self.user = factories.UserFactory()
 
-    @mock.patch('muckrock.message.notifications.WelcomeNotification.send')
-    def test_welcome_notification_task(self, mock_send):
-        """Make sure the notification is actually sent!"""
+    def test_welcome(self, mock_send):
+        """Welcomes a new user to the site."""
         tasks.welcome(self.user)
         mock_send.assert_called_with(fail_silently=False)
 
-
-class TestGiftTask(TestCase):
-    """Tests the gift email notification sent to gift recipients."""
-    def setUp(self):
-        self.user = factories.UserFactory()
-        self.sender = factories.UserFactory()
-        self.gift = '4 requests'
-
-    @mock.patch('muckrock.message.notifications.GiftNotification.send')
-    def test_gift_notification_task(self, mock_send):
-        """Make sure the notification is actually sent."""
-        tasks.gift(self.user, self.sender, self.gift)
+    def test_gift(self, mock_send):
+        """Tells the user when they have been given a gift."""
+        sender = factories.UserFactory()
+        gift = '4 requests'
+        tasks.gift(self.user, sender, gift)
         mock_send.assert_called_with(fail_silently=False)
 
-
-class TestEmailChangeTask(TestCase):
-    """Tests the email change notification."""
-    def setUp(self):
-        self.user = factories.UserFactory()
-
-    @mock.patch('muckrock.message.notifications.EmailChangeNotification.send')
-    def test_email_change_task(self, mock_send):
-        """Make sure the notification is actually sent."""
+    def test_email_change(self, mock_send):
+        """Notify the user of a change to their account email."""
         tasks.email_change(self.user, 'old.email@email.com')
+        mock_send.assert_called_with(fail_silently=False)
+
+    def test_email_verify(self, mock_send):
+        """Ask the user to verify their account email."""
+        tasks.email_verify(self.user)
+        mock_send.assert_called_with(fail_silently=False)
+
+    def test_support(self, mock_send):
+        """Notifies the user with a support response."""
+        task = FlaggedTaskFactory()
+        tasks.support(self.user, 'Hello', task)
         mock_send.assert_called_with(fail_silently=False)
 
 
 @mock.patch('stripe.Charge', MockCharge)
+@mock.patch('muckrock.message.receipts.Receipt.send')
 class TestSendChargeReceiptTask(TestCase):
     """Tests the send charge receipt task."""
     # pylint: disable=no-self-use
@@ -137,14 +140,12 @@ class TestSendChargeReceiptTask(TestCase):
             'email': self.user.email
         }
 
-    @mock.patch('muckrock.message.receipts.RequestPurchaseReceipt.send')
     def test_request_purchase_receipt(self, mock_send):
         """A receipt should be sent after request bundle is purchased."""
         mock_charge.metadata['action'] = 'request-purchase'
         tasks.send_charge_receipt(mock_charge.id)
         mock_send.assert_called_with(fail_silently=False)
 
-    @mock.patch('muckrock.message.receipts.RequestFeeReceipt.send')
     def test_request_fee_receipt(self, mock_send):
         """A receipt should be sent after request fee is paid."""
         foia = factories.FOIARequestFactory()
@@ -153,28 +154,18 @@ class TestSendChargeReceiptTask(TestCase):
         tasks.send_charge_receipt(mock_charge.id)
         mock_send.assert_called_with(fail_silently=False)
 
-    @mock.patch('muckrock.message.receipts.MultiRequestReceipt.send')
-    def test_multirequest_receipt(self, mock_send):
-        """A receipt should be sent after a multi-request is purchased."""
-        mock_charge.metadata['action'] = 'request-multi'
-        tasks.send_charge_receipt(mock_charge.id)
-        mock_send.assert_called_with(fail_silently=False)
-
-    @mock.patch('muckrock.message.receipts.CrowdfundPaymentReceipt.send')
     def test_crowdfund_payment_receipt(self, mock_send):
         """A receipt should be sent after a crowdfund payment is made."""
         mock_charge.metadata['action'] = 'crowdfund-payment'
         tasks.send_charge_receipt(mock_charge.id)
         mock_send.assert_called_with(fail_silently=False)
 
-    @mock.patch('muckrock.message.receipts.GenericReceipt.send')
     def test_other_receipt(self, mock_send):
         """A generic receipt should be sent for any other charges."""
         mock_charge.metadata['action'] = 'unknown-charge'
         tasks.send_charge_receipt(mock_charge.id)
         mock_send.assert_called_with(fail_silently=False)
 
-    @mock.patch('muckrock.message.receipts.GenericReceipt.send')
     def test_invoice_charge(self, mock_send):
         """A charge with an attachced invoice should not generate an email."""
         mock_charge.invoice = mock_invoice.id
@@ -186,11 +177,11 @@ class TestSendChargeReceiptTask(TestCase):
 @mock.patch('stripe.Invoice', MockInvoice)
 @mock.patch('stripe.Charge', MockCharge)
 @mock.patch('stripe.Customer', MockCustomer)
+@mock.patch('muckrock.message.receipts.Receipt.send')
 class TestSendInvoiceReceiptTask(TestCase):
     """Invoice receipts are send when an invoice payment succeeds."""
     # pylint: disable=no-self-use
 
-    @mock.patch('muckrock.message.receipts.ProSubscriptionReceipt.send')
     def test_pro_invoice_receipt(self, mock_send):
         """A receipt should be sent after a pro subscription payment is made."""
         mock_subscription.plan.id = 'pro'
@@ -200,7 +191,6 @@ class TestSendInvoiceReceiptTask(TestCase):
         tasks.send_invoice_receipt(mock_invoice.id)
         mock_send.assert_called_with(fail_silently=False)
 
-    @mock.patch('muckrock.message.receipts.OrgSubscriptionReceipt.send')
     def test_org_invoice_receipt(self, mock_send):
         """A receipt should be sent after an org subscription payment is made."""
         mock_subscription.plan.id = 'org'
@@ -221,7 +211,7 @@ class TestFailedPaymentTask(TestCase):
         mock_invoice.attempt_count = 1
         self.profile = factories.ProfileFactory(customer_id=mock_invoice.customer)
 
-    @mock.patch('muckrock.message.notifications.FailedPaymentNotification.send')
+    @mock.patch('muckrock.message.email.TemplateEmail.send')
     def test_failed_invoice_charge(self, mock_send):
         """Make sure the send method is called for a failed payment notification"""
         tasks.failed_payment(mock_invoice.id)
@@ -229,7 +219,7 @@ class TestFailedPaymentTask(TestCase):
         self.profile.refresh_from_db()
         ok_(self.profile.payment_failed, 'The payment failed flag should be raised.')
 
-    @mock.patch('muckrock.message.notifications.FailedPaymentNotification.send')
+    @mock.patch('muckrock.message.email.TemplateEmail.send')
     @mock.patch('muckrock.accounts.models.Profile.cancel_pro_subscription')
     def test_last_attempt_pro(self, mock_cancel, mock_send):
         """After the last attempt at payment, cancel the user's pro subscription"""
@@ -244,7 +234,7 @@ class TestFailedPaymentTask(TestCase):
         mock_send.assert_called_with(fail_silently=False)
         ok_(not self.profile.payment_failed, 'The payment failed flag should be lowered.')
 
-    @mock.patch('muckrock.message.notifications.FailedPaymentNotification.send')
+    @mock.patch('muckrock.message.email.TemplateEmail.send')
     @mock.patch('muckrock.organization.models.Organization.cancel_subscription')
     def test_last_attempt_org(self, mock_cancel, mock_send):
         """After the last attempt at payment, cancel the user's org subscription"""

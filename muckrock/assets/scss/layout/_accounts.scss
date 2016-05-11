@@ -144,56 +144,41 @@
     main {
         @include flex(3);
     }
+    table {
+        p {
+            margin-bottom: 0;
+        }
+        tr {
+            border: none;
+        }
+        td {
+            padding: 0 0 $vertical-rhythm 0;
+        }
+    }
+    footer {
+        @include display(flex);
+        @include justify-content(space-between);
+        @include align-items(center);
+    }
     .form {
-        border-radius: 0;
-        max-width: 40em;
-        input {
-            width: 100%;
-        }
-        table {
-            p {
-                margin-bottom: 0;
-            }
-            tr {
-                border: none;
-            }
-            td {
-                padding: 0 0 $vertical-rhythm 0;
-            }
-        }
-        footer {
+        padding: $vertical-rhythm;
+        border: 1px solid $color-grey;
+        @include border-radius;
+        background: $color-white-pure;
+    }
+    .profile.form {
+        .full-name, .other-info {
             @include display(flex);
-            @include justify-content(space-between);
-            @include align-items(center);
-        }
-        .required label::after {
-            content: 'Required';
-            color: $color-blue;
-            margin-left: $vertical-rhythm/4;
-        }
-        .errors {
-            .errorlist {
-                margin-bottom: 0;
-                padding-left: 0;
-                list-style: none;
-                float: right;
+            margin-bottom: 0;
+            .field {
+                @include flex(1);
             }
-            label {
-                float: left;
-            }
-            label::after {
-                color: $color-red;
-            }
-            input {
-                background: $color-red-light;
-                color: $color-red-dark;
+            .field:first-child {
+                margin-right: $vertical-rhythm;
             }
         }
     }
     .billing td:nth-child(2n) {
         text-align: right;
-    }
-    .billing table {
-        background-color: initial;
     }
 }
