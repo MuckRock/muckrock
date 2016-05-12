@@ -35,6 +35,16 @@ class RequestHelper(object):
         avg = requests.filter(price__gt=0).aggregate(price=Avg('price'))['price']
         return avg if avg else 0
 
+    def fee_rate(self):
+        """Get the percentage of requests that have a fee."""
+        requests = self.get_requests()
+        filed = float(requests.get_submitted().count())
+        fee = float(requests.get_submitted().filter(price__gt=0).count())
+        rate = 0
+        if filed > 0:
+            rate = fee/filed * 100
+        return rate
+
     def success_rate(self):
         """Get the percentage of requests that are successful."""
         requests = self.get_requests()
