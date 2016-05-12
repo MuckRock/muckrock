@@ -77,10 +77,10 @@ class TestProfileUnit(TestCase):
 
     def test_monthly_requests_refresh(self):
         """Get number requests resets the number of requests if its been over a month"""
-        self.profile.date_update = datetime.now() - timedelta(32)
+        self.profile.date_update = date.today() - timedelta(32)
         monthly_requests = settings.MONTHLY_REQUESTS[self.profile.acct_type]
         eq_(self.profile.get_monthly_requests(), monthly_requests)
-        eq_(self.profile.date_update.date(), date.today())
+        eq_(self.profile.date_update, date.today())
 
     def test_make_request_refresh(self):
         """Make request resets count if it has been more than a month"""

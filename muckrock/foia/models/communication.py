@@ -5,16 +5,16 @@ Models for the FOIA application
 
 import datetime
 
-from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 from django.core.validators import validate_email
 from django.db import models
 from django.shortcuts import get_object_or_404
 
-import email
 import logging
 
 from muckrock.foia.models.request import FOIARequest, STATUS
+from muckrock.utils import unique_username
 
 logger = logging.getLogger(__name__)
 
@@ -169,6 +169,8 @@ class FOIACommunication(models.Model):
         """
         # avoid circular imports
         from muckrock.foia.tasks import upload_document_cloud
+        if not isinstance(foia_pks, list):
+            foia_pks = [foia_pks]
         request_list = FOIARequest.objects.filter(pk__in=foia_pks)
         if not request_list:
             raise ValueError('No valid request(s) provided for cloning.')
@@ -213,15 +215,20 @@ class FOIACommunication(models.Model):
             raise ValueError('This communication has no approved agency.', 'no_agency')
         snail = False
         self.date = datetime.datetime.now()
-        self.save()
         if email_address:
             # responsibility for handling validation errors
             # is on the caller of the resend method
             validate_email(email_address)
-            foia.email = email_address
+            user, _ = User.objects.get_or_create(
+                    email=email_address,
+                    defaults={'username': unique_username(email_address)},
+                    )
+            self.to_user = user
+            foia.contact = user
             foia.save(comment='new email from comm resend')
         else:
             snail = True
+        self.save()
         foia.submit(snail=snail)
         logging.info('Communication #%d resent.', self.id)
 

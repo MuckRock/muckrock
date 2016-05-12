@@ -195,7 +195,8 @@ class OrphanTaskViewTests(TestCase):
                 ' the communication to that FOIA'))
 
     def test_reject_and_blacklist(self):
-        self.task.communication.priv_from_who = 'Michael Morisy <michael@muckrock.com>'
+        self.task.communication.from_user = factories.UserFactory(
+                email='michael@muckrock.com')
         self.task.communication.save()
         self.client.post(self.url, {
             'reject': 'true',
@@ -652,7 +653,7 @@ class ResponseTaskListViewTests(TestCase):
         # first saving a comm
         foia = self.task.communication.foia
         num_comms = foia.communications.count()
-        save_foia_comm(foia, 'Testman', 'Just testing, u no')
+        save_foia_comm(foia, factories.UserFactory(), 'Just testing, u no')
         eq_(foia.communications.count(), num_comms + 1,
             'Should add a new communication to the FOIA.')
         num_comms = foia.communications.count()

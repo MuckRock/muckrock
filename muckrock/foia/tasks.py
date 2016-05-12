@@ -35,7 +35,6 @@ from muckrock.foia.models import (
     FOIAFile,
     FOIARequest,
     FOIAMultiRequest,
-    FOIACommunication,
     )
 from muckrock.foia.codes import CODES
 from muckrock.task.models import ResponseTask

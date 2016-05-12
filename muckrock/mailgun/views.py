@@ -3,6 +3,7 @@ Views for mailgun
 """
 
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.mail import EmailMessage
 from django.http import HttpResponse, HttpResponseForbidden
@@ -16,10 +17,11 @@ import os
 import re
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, date
 from email.utils import parseaddr, getaddresses
 from localflavor.us.us_states import STATE_CHOICES
 
+from muckrock.accounts.models import Profile, AgencyProfile
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, RawEmail
 from muckrock.foia.tasks import upload_document_cloud, classify_status
@@ -56,9 +58,15 @@ def _upload_file(foia, comm, file_, sender):
 
 def _make_orphan_comm(from_, to_, post, files, foia):
     """Make an orphan commuication"""
+    name, email = parseaddr(from_)
     to_ = to_[:255] if to_ else ''
+    agency = foia.agency if foia else None
     comm = FOIACommunication.objects.create(
-            from_user = _get_user_from_addr(from_, trusted=False, foia=foia),
+            from_user=_get_user_from_addr(
+                name,
+                email,
+                trusted=False,
+                agency=agency),
             priv_to_who=to_, # XXX
             response=True,
             date=datetime.now(),
@@ -76,9 +84,8 @@ def _make_orphan_comm(from_, to_, post, files, foia):
             _upload_file(None, comm, file_, from_)
     return comm
 
-def _get_user_from_addr(addr, trusted=True, foia=None):
+def _get_user_from_addr(name, email, trusted=True, agency=None):
     """Get a user account from a header address"""
-    name, email = parseaddr(addr)
     if ',' in name:
         last_name, first_name = name.split(',', 1)
     elif ' ' in name:
@@ -105,11 +112,12 @@ def _get_user_from_addr(addr, trusted=True, foia=None):
             user=user,
             acct_type='agency' if trusted else 'unknown', # XXX doc the trust system here
             email_pref='never',
+            date_update=date.today(),
             )
-        if foia:
+        if agency:
             AgencyProfile.objects.create(
                 user=user,
-                agency=foia.agency,
+                agency=agency,
                 )
     return user
 
@@ -166,8 +174,8 @@ def _handle_request(request, mail_id):
 
     try:
         foia = FOIARequest.objects.get(mail_id=mail_id)
-        from_realname, from_email = parseaddr(from_)
-        from_user = _get_user_from_addr(from_, foia=foia)
+        from_name, from_email = parseaddr(from_)
+        from_user = _get_user_from_addr(from_name, from_email, agency=foia.agency)
 
         if not _allowed_email(from_email, foia):
             msg, reason = ('Bad Sender', 'bs')
@@ -209,14 +217,13 @@ def _handle_request(request, mail_id):
             foia.agency.stale = False
             foia.agency.save()
 
-
-        foia.email = from_email
-        foia.other_emails = ','.join(email for name, email
-                                     in getaddresses([post.get('To', ''), post.get('Cc', '')])
-                                     if email and not email.endswith('muckrock.com'))
-        while len(foia.other_emails) > 255:
-            # drop emails until it fits in db
-            foia.other_emails = foia.other_emails[:foia.other_emails.rindex(',')]
+        foia.contact = from_user
+        # XXX should CC users be marked as from agency?
+        for name, email in getaddresses([post.get('To', ''), post.get('Cc', '')]):
+            if not email or email.endswith('muckrock.com'):
+                continue
+            user = _get_user_from_addr(name, email, agency=foia.agency)
+            foia.cc_contacts.add(user)
 
         if foia.status == 'ack':
             foia.status = 'processed'

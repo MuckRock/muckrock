@@ -41,21 +41,11 @@ class TestCommunication(test.TestCase):
         self.file.save()
         eq_(self.comm.files.count(), 1)
 
-    def test_get_sender_email(self):
-        """Returns the email address the communication came from."""
-        eq_(self.comm.get_sender_email(), 'test@email.com')
-
-    def test_get_bad_sender_email(self):
-        """If the sender email is invalid, get_sender_email should return None."""
-        self.comm.priv_from_who = u'Test Email <foobar>'
-        self.comm.save()
-        eq_(self.comm.get_sender_email(), None)
-
     def test_primary_contact(self):
         """Makes the primary email of the FOIA to the email the communication was sent from."""
         self.comm.make_sender_primary_contact()
         foia = FOIARequest.objects.get(pk=self.foia.pk)
-        eq_(foia.email, self.comm.get_sender_email())
+        eq_(foia.contact.email, self.comm.from_user.email)
 
     @raises(ValueError)
     def test_orphan_error(self):
@@ -65,8 +55,8 @@ class TestCommunication(test.TestCase):
 
     @raises(ValueError)
     def test_bad_sender_error(self):
-        """Comms with bad sender email should raise an error"""
-        self.comm.priv_from_who = u'Test Email <foobar>'
+        """Comms with bad sender should raise an error"""
+        self.comm.foia = None
         self.comm.save()
         self.comm.make_sender_primary_contact()
 
@@ -235,7 +225,7 @@ class TestCommunicationResend(test.TestCase):
         """Should resubmit the FOIA containing the communication automatically"""
         new_email = 'test@example.com'
         self.comm.resend(new_email)
-        eq_(self.comm.foia.email, new_email,
+        eq_(self.comm.foia.contact.email, new_email,
             'Resubmitting with a new email should update the email of the FOIA request.')
         eq_(self.comm.foia.status, 'ack',
             'Resubmitting with an email should resubmit its associated FOIARequest.')

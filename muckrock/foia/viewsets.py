@@ -7,7 +7,6 @@ from django.template.loader import get_template
 from django.template import RequestContext
 
 import actstream
-from datetime import datetime
 from rest_framework import decorators, status as http_status, viewsets
 from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from rest_framework.response import Response

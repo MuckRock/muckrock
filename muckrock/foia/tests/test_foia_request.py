@@ -151,7 +151,7 @@ class TestFOIARequestUnit(TestCase):
 
         num_days = 365
         foia.date_estimate = datetime.date.today() + datetime.timedelta(num_days)
-        foia.followup(automatic=True)
+        foia.followup()
         nose.tools.assert_in('I am still', mail.outbox[-1].body)
         nose.tools.eq_(foia._followup_days(), num_days)
 

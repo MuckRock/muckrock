@@ -211,12 +211,15 @@ class FOIARequest(models.Model):
     # these should generally be agency users
     contact = models.ForeignKey(
         User,
+        blank=True,
+        null=True,
         on_delete=models.PROTECT,
         related_name='+',
         )
     cc_contacts = models.ManyToManyField(
         User,
         blank=True,
+        null=True,
         related_name='+',
         )
     # XXX delete
@@ -876,15 +879,15 @@ class FOIARequest(models.Model):
                 foia_file.save()
         return comm
 
-    def create_in_communication(self, from_user, text, date=None,
+    def create_in_communication(self, from_user, text, comm_date=None,
             formset=None, **kwargs):
         """Create an incoming message for the request"""
-        if date is None:
-            date = datetime.now()
+        if comm_date is None:
+            comm_date = datetime.now()
         comm = self.communications.create(
             from_user=from_user,
             to_user=self.user,
-            date=date,
+            date=comm_date,
             response=True,
             communication=text,
             **kwargs

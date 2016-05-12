@@ -71,4 +71,5 @@ def unique_username(base_username):
         postfix = str(num)
         username = '%s%s' % (base_username[:30 - len(postfix)], postfix)
         num += 1
+    return username
 

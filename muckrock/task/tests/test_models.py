@@ -60,7 +60,8 @@ class OrphanTaskTests(TestCase):
     """Test the OrphanTask class"""
 
     def setUp(self):
-        self.comm = factories.FOIACommunicationFactory()
+        self.comm = factories.FOIACommunicationFactory(
+                from_user=factories.UserFactory(email='test@muckrock.com'))
         self.task = task.models.OrphanTask.objects.create(
             reason='ib',
             communication=self.comm,
@@ -313,7 +314,7 @@ class StaleAgencyTaskTests(TestCase):
         self.task.refresh_from_db()
         eq_(self.task.agency.email, new_email, 'The agency\'s email should be updated.')
         eq_(self.foia.email, new_email, 'The foia\'s email should be updated.')
-        mock_followup.assert_called_with(automatic=True, show_all_comms=False)
+        mock_followup.assert_called_with(show_all_comms=False)
 
     def test_resolve(self):
         """Resolving the task should lower the stale flag on the agency."""

@@ -89,9 +89,11 @@ class FOIACommunicationFactory(factory.django.DjangoModelFactory):
 
     foia = factory.SubFactory(FOIARequestFactory)
     from_who = factory.Sequence(lambda n: "From: %d" % n)
+    from_user = factory.SubFactory(UserFactory)
     priv_from_who = 'Test Sender <test@muckrock.com>'
     date = factory.LazyAttribute(lambda obj: datetime.datetime.now())
     rawemail = factory.RelatedFactory('muckrock.factories.RawEmailFactory', 'communication')
+
 
 class RawEmailFactory(factory.django.DjangoModelFactory):
     """A factory for creating  objects."""

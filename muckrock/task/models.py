@@ -9,7 +9,6 @@ from django.db.models import Max, Prefetch, Q
 
 import actstream
 from datetime import datetime
-import email
 import logging
 
 from muckrock.agency.models import Agency, STALE_DURATION
@@ -93,10 +92,9 @@ class TaskQuerySet(models.QuerySet):
 
 class OrphanTaskQuerySet(models.QuerySet):
     """Object manager for orphan tasks"""
-    def get_from_sender(self, sender):
-        """Get all orphan tasks from a specific sender"""
-        # XXX do this using users
-        return self.filter(communication__priv_from_who__icontains=sender)
+    def get_by_domain(self, domain):
+        """Get all orphan tasks from a specific domain"""
+        return self.filter(communication__from_user__email__endswith='@' + domain)
 
 
 class NewAgencyTaskQuerySet(models.QuerySet):
@@ -203,7 +201,6 @@ class OrphanTask(Task):
         except BlacklistDomain.MultipleObjectsReturned:
             blacklist = BlacklistDomain.objects.filter(domain=domain).first()
         blacklist.resolve_matches()
-        return
 
 
 class SnailMailTask(Task):
@@ -588,7 +585,7 @@ class BlacklistDomain(models.Model):
 
     def resolve_matches(self):
         """Resolves any orphan tasks that match this blacklisted domain."""
-        tasks_to_resolve = OrphanTask.objects.get_from_sender(self.domain)
+        tasks_to_resolve = OrphanTask.objects.get_by_domain(self.domain)
         for task in tasks_to_resolve:
             task.resolve()
         return

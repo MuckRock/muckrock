@@ -27,6 +27,12 @@ def is_owner(user, foia):
     return foia.user == user
 
 @predicate
+def from_agency(user, foia):
+    return (user.is_authenticated() and
+            user.profile.acct_type == 'agency' and
+            user.agencyprofile.agency == foia.agency)
+
+@predicate
 def is_editor(user, foia):
     return foia.edit_collaborators.filter(pk=user.pk).exists()
 
@@ -90,9 +96,14 @@ can_embargo = is_advanced
 
 can_embargo_permananently = is_admin | is_org_member
 
+agency_viewer = from_agency
+
 add_perm('foia.change_foiarequest', can_edit)
 add_perm('foia.delete_foiarequest', can_edit & is_deletable)
-add_perm('foia.view_foiarequest', can_edit | is_viewer | ~is_private)
+# being from the agency allows you to see embargoed requests, but not drafts
+add_perm('foia.view_foiarequest',
+        can_edit | is_viewer |
+        (~has_status('started') & (~is_embargoed | from_agency)))
 add_perm('foia.embargo_foiarequest', can_edit & can_embargo)
 add_perm('foia.embargo_perm_foiarequest', can_edit & can_embargo_permananently)
 add_perm('foia.crowdfund_foiarequest', # why cant editors crowdfund?
