@@ -13,7 +13,6 @@ import django_filters
 
 from muckrock.agency.models import Agency
 from muckrock.agency.serializers import AgencySerializer
-from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.views import collect_stats
 from muckrock.task.models import FlaggedTask
@@ -52,15 +51,16 @@ def detail(request, jurisdiction, jidx, slug, idx):
             pk=idx,
             status='approved')
 
-    foia_requests = (FOIARequest.objects
-            .get_viewable(request.user)
-            .filter(agency=agency)
-            .select_related(
-                'jurisdiction',
-                'jurisdiction__parent',
-                'jurisdiction__parent__parent',
-                )
-            .order_by('-date_submitted')[:5])
+    foia_requests = agency.get_requests()
+    foia_requests = (foia_requests.get_viewable(request.user)
+        .get_submitted()
+        .filter(agency=agency)
+        .select_related(
+          'jurisdiction',
+          'jurisdiction__parent',
+          'jurisdiction__parent__parent',
+        )
+        .order_by('-date_submitted')[:10])
 
     if request.method == 'POST':
         form = FlagForm(request.POST)

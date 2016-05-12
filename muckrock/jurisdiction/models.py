@@ -2,40 +2,54 @@
 Models for the Jurisdiction application
 """
 from django.db import models
-from django.db.models import Avg, Count, F, Sum
+from django.db.models import F, Q, Avg, Count, Sum
 from django.template.defaultfilters import slugify
 
 from easy_thumbnails.fields import ThumbnailerImageField
 from random import choice
 
 from muckrock.business_days.models import Holiday, HolidayCalendar, Calendar
+from muckrock.foia.models import FOIARequest
 
 # pylint: disable=bad-continuation
 
 class RequestHelper(object):
-    """Helper methods for classes that have a foiarequest_set"""
-
+    """Helper methods for classes that have a get_requests() method"""
     def exemptions(self):
         """Get a list of exemptions tagged for requests from this agency"""
-        return (self.foiarequest_set
-                .filter(tags__name__startswith='exemption')
-                .order_by('tags__name')
-                .values('tags__name')
-                .annotate(count=Count('tags')))
+        requests = self.get_requests()
+        return (requests.filter(tags__name__startswith='exemption')
+                        .order_by('tags__name')
+                        .values('tags__name')
+                        .annotate(count=Count('tags')))
 
     def average_response_time(self):
         """Get the average response time from a submitted to completed request"""
-        avg = (self.foiarequest_set.aggregate(
-                avg=Avg(F('date_done') - F('date_submitted')))['avg'])
+        requests = self.get_requests()
+        avg = (requests.aggregate(avg=Avg(F('date_done') - F('date_submitted')))['avg'])
         return int(avg) if avg else 0
+
+    def average_fee(self):
+        """Get the average fees required on requests that have a price."""
+        requests = self.get_requests()
+        avg = requests.filter(price__gt=0).aggregate(price=Avg('price'))['price']
+        return avg if avg else 0
+
+    def success_rate(self):
+        """Get the percentage of requests that are successful."""
+        requests = self.get_requests()
+        filed = float(requests.get_submitted().count())
+        completed = float(requests.get_done().count())
+        rate = 0
+        if filed > 0:
+            rate = completed/filed * 100
+        return rate
 
     def total_pages(self):
         """Total pages released"""
-
-        pages = self.foiarequest_set.aggregate(Sum('files__pages'))['files__pages__sum']
-        if pages is None:
-            return 0
-        return pages
+        requests = self.get_requests()
+        pages = requests.aggregate(Sum('files__pages'))['files__pages__sum']
+        return pages if pages else 0
 
 
 class Jurisdiction(models.Model, RequestHelper):
@@ -193,9 +207,18 @@ class Jurisdiction(models.Model, RequestHelper):
         else:
             return self.has_appeal
 
+    def get_requests(self):
+        """State level jurisdictions should return requests from their localities as well."""
+        if self.level == 's':
+            requests = FOIARequest.objects.filter(
+                Q(jurisdiction=self)|
+                Q(jurisdiction__parent=self)
+            )
+        else:
+            requests = FOIARequest.objects.filter(jurisdiction=self)
+        return requests.exclude(status='started')
+
     class Meta:
         # pylint: disable=too-few-public-methods
         ordering = ['name']
         unique_together = ('slug', 'parent')
-
-
