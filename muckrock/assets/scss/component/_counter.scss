@@ -6,8 +6,17 @@
     font-weight: $font-weight-bold;
     &.blue {
         background: $color-blue;
+        color: $color-white;
     }
     &.red {
         background: $color-red;
+        color: $color-white;
+    }
+    &.green {
+        background: $color-green;
+        color: $color-white;
+    }
+    &.yellow {
+        background: $color-yellow;
     }
 }

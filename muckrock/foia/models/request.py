@@ -20,8 +20,6 @@ from reversion import revisions as reversion
 from taggit.managers import TaggableManager
 from unidecode import unidecode
 
-from muckrock.agency.models import Agency
-from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.tags.models import Tag, TaggedItemBase, parse_tags
 from muckrock import task
 from muckrock import fields
@@ -174,8 +172,8 @@ class FOIARequest(models.Model):
     title = models.CharField(max_length=255, db_index=True)
     slug = models.SlugField(max_length=255)
     status = models.CharField(max_length=10, choices=STATUS, db_index=True)
-    jurisdiction = models.ForeignKey(Jurisdiction)
-    agency = models.ForeignKey(Agency, blank=True, null=True)
+    jurisdiction = models.ForeignKey('jurisdiction.Jurisdiction')
+    agency = models.ForeignKey('agency.Agency', blank=True, null=True)
     date_submitted = models.DateField(blank=True, null=True, db_index=True)
     date_updated = models.DateField(blank=True, null=True, db_index=True)
     date_done = models.DateField(blank=True, null=True, verbose_name='Date response received')
@@ -886,5 +884,3 @@ class FOIARequest(models.Model):
         ordering = ['title']
         verbose_name = 'FOIA Request'
         app_label = 'foia'
-
-
