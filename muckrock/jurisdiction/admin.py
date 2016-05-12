@@ -75,7 +75,7 @@ class JurisdictionAdmin(VersionAdmin):
         else:
             form = CSVImportForm()
 
-        fields = ['name', 'slug', 'level', 'parent']
+        fields = ['name', 'slug', 'full_name', 'level', 'parent']
         return render_to_response('admin/agency/import.html', {'form': form, 'fields': fields},
                                   context_instance=RequestContext(request))
 
