@@ -29,6 +29,22 @@ class RequestHelper(object):
         avg = (requests.aggregate(avg=Avg(F('date_done') - F('date_submitted')))['avg'])
         return int(avg) if avg else 0
 
+    def average_fee(self):
+        """Get the average fees required on requests that have a price."""
+        requests = self.get_requests()
+        avg = requests.filter(price__gt=0).aggregate(price=Avg('price'))['price']
+        return avg if avg else 0
+
+    def success_rate(self):
+        """Get the percentage of requests that are successful."""
+        requests = self.get_requests()
+        filed = float(requests.get_submitted().count())
+        completed = float(requests.get_done().count())
+        rate = 0
+        if filed > 0:
+            rate = completed/filed * 100
+        return rate
+
     def total_pages(self):
         """Total pages released"""
         requests = self.get_requests()
@@ -200,7 +216,7 @@ class Jurisdiction(models.Model, RequestHelper):
             )
         else:
             requests = FOIARequest.objects.filter(jurisdiction=self)
-        return requests
+        return requests.exclude(status='started')
 
     class Meta:
         # pylint: disable=too-few-public-methods

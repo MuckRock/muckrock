@@ -5,13 +5,13 @@ Views for the Jurisdiction application
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.db.models import Count, Sum
+from django.db.models import Count, Sum, Q
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 
 from rest_framework import viewsets
 
-from muckrock.foia.models import FOIARequest
+from muckrock.agency.models import Agency
 from muckrock.jurisdiction.forms import FlagForm, JurisdictionFilterForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.serializers import JurisdictionSerializer
@@ -22,19 +22,19 @@ from muckrock.views import MRFilterableListView
 def collect_stats(obj, context):
     """Helper for collecting stats"""
     statuses = ('rejected', 'ack', 'processed', 'fix', 'no_docs', 'done', 'appealing')
-    status_counts = (obj.foiarequest_set
+    requests = obj.get_requests()
+    status_counts = (requests
         .filter(status__in=statuses)
         .order_by('status')
         .values_list('status')
         .annotate(Count('status')))
     context.update({'num_%s' % s: c for s, c in status_counts})
-    context['num_overdue'] = obj.foiarequest_set.get_overdue().count()
-    context['num_submitted'] = obj.foiarequest_set.get_submitted().count()
+    context['num_overdue'] = requests.get_overdue().count()
+    context['num_submitted'] = requests.get_submitted().count()
 
 
 def detail(request, fed_slug, state_slug, local_slug):
     """Details for a jurisdiction"""
-
     if local_slug:
         jurisdiction = get_object_or_404(
                 Jurisdiction.objects.select_related(
@@ -53,17 +53,31 @@ def detail(request, fed_slug, state_slug, local_slug):
         jurisdiction = get_object_or_404(Jurisdiction,
                 slug=fed_slug)
 
-    foia_requests = (FOIARequest.objects.get_viewable(request.user)
-                                       .filter(jurisdiction=jurisdiction)
-                                       .order_by('-date_submitted')
-                                       .select_related_view()[:5])
+    foia_requests = jurisdiction.get_requests()
+    foia_requests = (foia_requests.get_viewable(request.user)
+                                  .order_by('-date_submitted')
+                                  .select_related_view()[:10])
 
-    agencies = (jurisdiction.agencies.get_approved()
-            .only('pk', 'slug', 'name', 'jurisdiction')
-            .annotate(foia_count=Count('foiarequest'))
-            .annotate(pages=Sum('foiarequest__files__pages'))
-            .order_by('-foia_count')
-            [:15])
+    if jurisdiction.level == 's':
+        agencies = Agency.objects.filter(
+            Q(jurisdiction=jurisdiction)|
+            Q(jurisdiction__parent=jurisdiction)
+        )
+    else:
+        agencies = jurisdiction.agencies
+    agencies = (agencies.get_approved()
+                        .only('pk', 'slug', 'name', 'jurisdiction')
+                        .annotate(foia_count=Count('foiarequest'))
+                        .annotate(pages=Sum('foiarequest__files__pages'))
+                        .order_by('-foia_count')[:10])
+
+    if jurisdiction.level == 's':
+        localities = (Jurisdiction.objects.filter(parent=jurisdiction)
+                                          .annotate(foia_count=Count('foiarequest'))
+                                          .annotate(pages=Sum('foiarequest__files__pages'))
+                                          .order_by('-foia_count')[:10])
+    else:
+        localities = None
 
     if request.method == 'POST':
         form = FlagForm(request.POST)
@@ -80,10 +94,11 @@ def detail(request, fed_slug, state_slug, local_slug):
     else:
         form = FlagForm()
 
-    admin_url = reverse('admin:jurisdiction_jurisdiction_change', args=(jurisdiction.pk))
+    admin_url = reverse('admin:jurisdiction_jurisdiction_change', args=(jurisdiction.pk,))
     context = {
         'jurisdiction': jurisdiction,
         'agencies': agencies,
+        'localities': localities,
         'foia_requests': foia_requests,
         'form': form,
         'sidebar_admin_url': admin_url,
