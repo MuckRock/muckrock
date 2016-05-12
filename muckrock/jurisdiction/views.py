@@ -80,13 +80,13 @@ def detail(request, fed_slug, state_slug, local_slug):
     else:
         form = FlagForm()
 
+    admin_url = reverse('admin:jurisdiction_jurisdiction_change', args=(jurisdiction.pk))
     context = {
         'jurisdiction': jurisdiction,
         'agencies': agencies,
         'foia_requests': foia_requests,
         'form': form,
-        'sidebar_admin_url': reverse('admin:jurisdiction_jurisdiction_change',
-            args=(jurisdiction.pk,)),
+        'sidebar_admin_url': admin_url,
     }
     if request.user.is_staff and jurisdiction.abbrev:
         context['proxies'] = User.objects.filter(

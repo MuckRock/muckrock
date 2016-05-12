@@ -14,8 +14,7 @@ from reversion.admin import VersionAdmin
 import logging
 import sys
 
-#from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.foia.models import Jurisdiction
+from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.forms import CSVImportForm
 
 logger = logging.getLogger(__name__)
