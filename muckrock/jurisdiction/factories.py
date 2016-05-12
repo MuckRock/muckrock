@@ -16,6 +16,9 @@ class FederalJurisdictionFactory(factory.django.DjangoModelFactory):
     slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
     days = 20
     level = 'f'
+    intro = factory.Faker('sentence')
+    law_name = factory.Faker('word')
+    waiver = factory.Faker('paragraph')
 
 
 class StateJurisdictionFactory(factory.django.DjangoModelFactory):
@@ -29,6 +32,9 @@ class StateJurisdictionFactory(factory.django.DjangoModelFactory):
     days = 20
     level = 's'
     parent = factory.SubFactory(FederalJurisdictionFactory)
+    intro = factory.Faker('sentence')
+    law_name = factory.Faker('word')
+    waiver = factory.Faker('paragraph')
 
 class LocalJurisdictionFactory(factory.django.DjangoModelFactory):
     """Local jurisdiction factory, always has StateJurisdictionFactory as parent."""

@@ -6,41 +6,85 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 
 from datetime import date, timedelta
-import nose.tools
+from nose.tools import eq_
 
-from .factories import StateJurisdictionFactory, LocalJurisdictionFactory
+from muckrock.jurisdiction import factories
 from muckrock.factories import FOIARequestFactory, FOIAFileFactory
 
 class TestJurisdictionUnit(TestCase):
     """Unit tests for Jurisdictions"""
     def setUp(self):
         """Set up tests"""
-        self.state = StateJurisdictionFactory()
-        self.local = LocalJurisdictionFactory(parent=self.state)
+        self.federal = factories.FederalJurisdictionFactory()
+        self.state = factories.StateJurisdictionFactory(parent=self.federal)
+        self.local = factories.LocalJurisdictionFactory(parent=self.state)
+
+    def test_jurisdiction_repr(self):
+        """Test Jurisdiction model's __repr__ method"""
+        pattern = '<Jurisdiction: %d>'
+        eq_(self.federal.__repr__(), pattern % self.federal.pk)
+        eq_(self.state.__repr__(), pattern % self.state.pk)
+        eq_(self.local.__repr__(), pattern % self.local.pk)
 
     def test_jurisdiction_unicode(self):
         """Test Jurisdiction model's __unicode__ method"""
-        nose.tools.eq_(unicode(self.state), u'Massachusetts')
-        nose.tools.eq_(unicode(self.local), u'Boston, MA')
+        eq_(unicode(self.federal), u'United States of America')
+        eq_(unicode(self.state), u'Massachusetts')
+        eq_(unicode(self.local), u'Boston, MA')
 
     def test_jurisdiction_url(self):
         """Test Jurisdiction model's get_absolute_url method"""
-        nose.tools.eq_(self.state.get_absolute_url(),
+        eq_(self.local.get_absolute_url(),
+            reverse('jurisdiction-detail', kwargs={
+                'local_slug': self.local.slug,
+                'state_slug': self.state.slug,
+                'fed_slug': self.federal.slug}
+            )
+        )
+        eq_(self.state.get_absolute_url(),
             reverse('jurisdiction-detail', kwargs={
                 'state_slug': self.state.slug,
-                'fed_slug': self.state.parent.slug}
+                'fed_slug': self.federal.slug}
+            )
+        )
+        eq_(self.federal.get_absolute_url(),
+            reverse('jurisdiction-detail', kwargs={
+                'fed_slug': self.federal.slug}
             )
         )
 
     def test_jurisdiction_legal(self):
-        """Test Jurisdiction model's legal method"""
-        nose.tools.eq_(self.state.legal(), 'MA')
-        nose.tools.eq_(self.local.legal(), 'MA')
+        """Local jurisdictions should return state law"""
+        eq_(self.federal.legal(), self.federal.abbrev)
+        eq_(self.state.legal(), self.state.abbrev)
+        eq_(self.local.legal(), self.state.abbrev)
+        eq_(self.federal.get_law_name(), self.federal.law_name)
+        eq_(self.state.get_law_name(), self.state.law_name)
+        eq_(self.local.get_law_name(), self.state.law_name)
+
+    def test_get_day_type(self):
+        """Local jurisdictions should return state day type"""
+        eq_(self.federal.get_day_type(), 'business')
+        eq_(self.state.get_day_type(), 'business')
+        eq_(self.local.get_day_type(), 'business')
 
     def test_jurisdiction_get_days(self):
-        """Test Jurisdiction model's get days method"""
-        nose.tools.eq_(self.state.get_days(), 20)
-        nose.tools.eq_(self.local.get_days(), 20)
+        """Local jurisdictions should return state days"""
+        eq_(self.federal.get_days(), self.federal.days)
+        eq_(self.state.get_days(), self.state.days)
+        eq_(self.local.get_days(), self.state.days)
+
+    def test_jurisdiction_get_intro(self):
+        """Local jurisdictions should return the state intro."""
+        eq_(self.federal.get_intro(), self.federal.intro)
+        eq_(self.state.get_intro(), self.state.intro)
+        eq_(self.local.get_intro(), self.state.intro)
+
+    def test_jurisdiction_get_waiver(self):
+        """Local jurisdictions should return the state waiver."""
+        eq_(self.federal.get_waiver(), self.federal.waiver)
+        eq_(self.state.get_waiver(), self.state.waiver)
+        eq_(self.local.get_waiver(), self.state.waiver)
 
     def test_exemptions(self):
         """
@@ -52,10 +96,10 @@ class TestJurisdictionUnit(TestCase):
         for tag in [u'exemption 42', u'exemption x']:
             foia1.tags.add(tag)
         foia2.tags.add(u'exemption x')
-        nose.tools.eq_(list(self.state.exemptions()),
+        eq_(list(self.state.exemptions()),
                 [{'tags__name': u'exemption 42', 'count': 1},
                  {'tags__name': u'exemption x', 'count': 2}])
-        nose.tools.eq_(list(self.local.exemptions()),
+        eq_(list(self.local.exemptions()),
                 [{'tags__name': u'exemption 42', 'count': 1},
                  {'tags__name': u'exemption x', 'count': 1}])
 
@@ -77,8 +121,8 @@ class TestJurisdictionUnit(TestCase):
             date_done=today,
             date_submitted=today-timedelta(local_duration)
         )
-        nose.tools.eq_(self.state.average_response_time(), (local_duration + state_duration)/2)
-        nose.tools.eq_(self.local.average_response_time(), local_duration)
+        eq_(self.state.average_response_time(), (local_duration + state_duration)/2)
+        eq_(self.local.average_response_time(), local_duration)
 
     def test_total_pages(self):
         """
@@ -90,5 +134,5 @@ class TestJurisdictionUnit(TestCase):
         state_foia = FOIARequestFactory(jurisdiction=self.state)
         local_foia.files.add(FOIAFileFactory(pages=page_count))
         state_foia.files.add(FOIAFileFactory(pages=page_count))
-        nose.tools.eq_(self.local.total_pages(), page_count)
-        nose.tools.eq_(self.state.total_pages(), 2*page_count)
+        eq_(self.local.total_pages(), page_count)
+        eq_(self.state.total_pages(), 2*page_count)
