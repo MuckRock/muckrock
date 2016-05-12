@@ -50,6 +50,7 @@
         {% if average_fee > 0 %}
         <dt>Average Fee</dt>
         <dd>${{ average_fee|floatformat:"2" }}</dd>
+        <dd>{{ jurisdiction.fee_rate|floatformat:"2" }}% of requests have a fee</dd>
         {% endif %}
         {% endwith %}
 
