@@ -82,7 +82,7 @@
                                 <form class="remove-member" method="post">
                                     {% csrf_token %}
                                     <input type="hidden" name="member" value="{{member.user.pk}}" />
-                                    <button class="simple failure" type="submit" name="action" value="remove_member">Remove</button>
+                                    <button class="basic red button" type="submit" name="action" value="remove_member">Remove</button>
                                 </form>
                             </td>
                             {% endif %}

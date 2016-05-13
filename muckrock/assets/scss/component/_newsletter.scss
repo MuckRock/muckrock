@@ -23,7 +23,6 @@
     .signup-form .email-field {
         @include display(flex);
         @include flex-wrap(wrap);
-        @include align-items(center);
         margin: $vertical-rhythm/2 0;
         border: 1px solid $color-blue;
         input[type="email"] {
