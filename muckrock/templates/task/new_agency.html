@@ -48,7 +48,7 @@
             </select>
         </main>
         <footer>
-            <button type="submit" name="reject" value="true" class="failure">Reject</button>
+            <button type="submit" name="reject" value="true" class="failure button">Reject</button>
         </footer>
     </form>
     <form method="POST" action="{{ endpoint }}" class="new-agency approval form collapsable">
@@ -68,7 +68,7 @@
             {% endfor %}
         </main>
         <footer>
-            <button type="submit" name="approve" value="true" class="success">Approve</button>
+            <button type="submit" name="approve" value="true" class="success button">Approve</button>
         </footer>
     </form>
     {% else %}
@@ -89,7 +89,7 @@
             {% endfor %}
         </main>
         <footer>
-            <button type="submit" name="action" value="update_new_agency" class="primary">Save</button>
+            <button type="submit" name="action" value="update_new_agency" class="primary button">Save</button>
         </footer>
     </form>
     {% endif %}

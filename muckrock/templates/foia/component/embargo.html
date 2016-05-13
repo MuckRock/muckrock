@@ -37,20 +37,20 @@
         </div>
         {% endif %}
         {% if not foia.embargo %}
-        <button class="primary" type="submit" name="embargo" value="create">Embargo</button>
+        <button class="primary button" type="submit" name="embargo" value="create">Embargo</button>
         {% else %}
             {% if embargo_needs_date or request.user.profile.can_embargo_permanently %}
-        <button class="primary" type="submit" name="embargo" value="update">Update</button>
+        <button class="primary button" type="submit" name="embargo" value="update">Update</button>
             {% endif %}
-        <button class="failure" type="submit" name="embargo" value="delete">Remove</button>
+        <button class="failure button" type="submit" name="embargo" value="delete">Remove</button>
         {% endif %}
-        <button class="cancel" id="cancel-embargo">Cancel</button>
+        <button class="cancel button" id="cancel-embargo">Cancel</button>
     </form>
     {% elif embargo.remove %}
     <form method="post" action="embargo/" class="embargo-form" id="embargo-form">
         {% csrf_token %}
-        <button class="failure" type="submit" name="embargo" value="delete">Remove</button>
-        <button class="cancel" id="cancel-embargo">Cancel</button>
+        <button class="failure button" type="submit" name="embargo" value="delete">Remove</button>
+        <button class="cancel button" id="cancel-embargo">Cancel</button>
     </form>
     {% endif %}
 </section>

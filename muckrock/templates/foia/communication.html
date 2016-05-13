@@ -78,16 +78,16 @@
             {% endfor %}
             </select>
             <p class="help-text">This will only change the status of the communication, it will not effect the status of the request.</p>
-            <button type="submit" name="action" value="status_comm" class="primary">Change</button>
-            <button class="cancel" id="cancel-status-communication">Close</button>
+            <button type="submit" name="action" value="status_comm" class="primary button">Change</button>
+            <button class="cancel button" id="cancel-status-communication">Close</button>
         </form>
         <form method="post" class="move-communication communication-action" id="move-{{comm.pk}}-form">
             {% csrf_token %}
             <input type="hidden" name="comm_pk" value="{{comm.pk}}" />
             <label for="new_foia_pk">Move to Requests</label>
             <input type="text" name="new_foia_pks" value="{{ foia.pk }}" placeholder="Enter MuckRock number" />
-            <button type="submit" name="action" value="move_comm" class="primary">Move</button>
-            <button class="cancel" id="cancel-move-communication">Close</button>
+            <button type="submit" name="action" value="move_comm" class="primary button">Move</button>
+            <button class="cancel button" id="cancel-move-communication">Close</button>
         </form>
         <form method="post" class="resend-communication communication-action" id="resend-{{comm.pk}}-form">
             {% csrf_token %}
@@ -95,15 +95,15 @@
             <label for="email">Resend to Email</label>
             <input type="text" name="email" value="{{foia.email}}" />
             <p class="help-text">This will become the new email address for the request. Leave the field blank to force a manual mailing. For faxes, enter the 10 digit fax number beginning with a leading 1 and ending with @fax2.faxaway.com.</p>
-            <button type="submit" name="action" value="resend_comm" class="primary">Resend</button>
-            <button class="cancel" id="cancel-resend-communication">Close</button>
+            <button type="submit" name="action" value="resend_comm" class="primary button">Resend</button>
+            <button class="cancel button" id="cancel-resend-communication">Close</button>
         </form>
         <form method="post" class="delete-communication communication-action" id="delete-{{comm.pk}}-form">
             {% csrf_token %}
             <input type="hidden" name="comm_pk" value="{{comm.pk}}" />
             <p>This will delete the communication. Are you sure you want to do this?</p>
-            <button type="submit" name="action" value="delete_comm" class="failure">Delete</button>
-            <button class="cancel" id="cancel-delete-communication">Close</button>
+            <button type="submit" name="action" value="delete_comm" class="failure button">Delete</button>
+            <button class="cancel button" id="cancel-delete-communication">Close</button>
         </form>
     </div>
     {% endif %}

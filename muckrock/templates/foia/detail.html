@@ -98,8 +98,8 @@
                 <label for="{{ change_estimated_date.date_estimate.id_for_label }}">{{ change_estimated_date.date_estimate.label }}</label>
                 {{ change_estimated_date.date_estimate }}
                 <p class="help-text">{{ change_estimated_date.date_estimate.help_text }}</p>
-                <button class="primary" type="submit" name="action" value="date_estimate">Save</button>
-                <button class="cancel" id="cancel-date-estimate">Cancel</button>
+                <button class="primary button" type="submit" name="action" value="date_estimate">Save</button>
+                <button class="cancel button" id="cancel-date-estimate">Cancel</button>
             </form>
             {% endif %}
             <section class="states">
@@ -164,7 +164,7 @@
                     <div class="communications filter">
                         <input id="comms-filter" type="search" placeholder="Filter communications" />
                     </div>
-                    <button id="toggle-communication-collapse" data-state="0">Collapse All</button>
+                    <button class="button" id="toggle-communication-collapse" data-state="0">Collapse All</button>
                 </div>
                 <div class="communications-list">
                 {% with foia_url=foia.get_absolute_url %}
@@ -207,7 +207,7 @@
                         {% if request.user.is_staff %}
                         <a href="{% url 'foia-admin-fix' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Make an admin fix" class="button">Admin Fix</a>
                         {% else %}
-                        <button id="get-advice">Get Advice</button>
+                        <button class="button" id="get-advice">Get Advice</button>
                         {% endif %}
                     </div>
                     <div class="composer-inputs">
@@ -220,7 +220,7 @@
                             <input type="hidden" name="action" value="follow_up" />
                             <textarea name="text" id="follow-up-composer"></textarea>
                             <div class="buttons">
-                                <button class="primary" type="submit" name="appeal" value="1">Send</button>
+                                <button class="primary button" type="submit" name="appeal" value="1">Send</button>
                                 <a href="#inactive" class="button cancel">Cancel</a>
                             </div>
                         </form>
@@ -239,7 +239,7 @@
         {{foia.user.get_full_name}}
                             </textarea>
                             <div class="buttons">
-                                <button class="primary" type="submit" name="thanks" value="1">Send</button>
+                                <button class="primary button" type="submit" name="thanks" value="1">Send</button>
                                 <a href="#inactive" class="button">Cancel</a>
                             </div>
                         </form>
@@ -255,7 +255,7 @@
                             <input type="hidden" name="action" value="appeal" />
                             <textarea name="text" id="appeal-composer"></textarea>
                             <div class="buttons">
-                                <button class="primary" type="submit" name="appeal" value="1">Send</button>
+                                <button class="primary button" type="submit" name="appeal" value="1">Send</button>
                                 <a href="#inactive" class="button">Cancel</a>
                             </div>
                         </form>
@@ -277,7 +277,7 @@
                             <input type="hidden" name="stripe_fee" value="0.05" />
                             <input type="number" name="stripe_amount" class="currency-field" id="stripe_amount" value="{{ foia.get_stripe_amount }}" />
                             <div class="buttons">
-                                <button type="submit" class="primary">Pay</button>
+                                <button type="submit" class="primary button">Pay</button>
                                 <a href="#inactive" class="button">Cancel</a>
                             </div>
                         </form>
@@ -287,7 +287,7 @@
                             {% csrf_token %}
                             {% include 'lib/pattern/form.html' %}
                             <div class="buttons">
-                                <button type="submit" class="primary">Create Crowdfund</button>
+                                <button type="submit" class="primary button">Create Crowdfund</button>
                                 <a href="#inactive" class="button">Cancel</a>
                             </div>
                         </form>
@@ -352,7 +352,7 @@
                     </header>
                     {{ note_form.note }}
                     <footer>
-                        <button class="primary" type="submit" name="action" value="add_note">Save</button>
+                        <button class="primary button" type="submit" name="action" value="add_note">Save</button>
                         <p>Your notes are visible to you and other editors of this request.</p>
                     </footer>
                 </form>
@@ -391,7 +391,7 @@
                     {% else %}
                     <input type="text" value="No private link" readonly />
                     {% endif %}
-                    <button type="submit" name="action" value="generate_key">Create new link</button>
+                    <button class="button" type="submit" name="action" value="generate_key">Create new link</button>
                     <p class="help-text">Share this private link with anyone you want to be able to see this request. If you regenerate this link, it will break any that you have already given out.</p>
                 </form>
                 {% endif %}
@@ -403,7 +403,7 @@
                         {{ access_form.users }}
                     </div>
                     {{ access_form.access }}
-                    <button class="primary" type="submit" name="action" value="grant_access">Save</button>
+                    <button class="primary button" type="submit" name="action" value="grant_access">Save</button>
                 </form>
                 <table class="people with-access">
                     <h3>People with access</h3>
@@ -421,8 +421,8 @@
                                 <form class="modify-access" method="post">
                                     {% csrf_token %}
                                     <input type="hidden" name="user" value="{{ user.id }}" />
-                                    <button type="submit" name="action" value="demote">Demote</button>
-                                    <button class="failure" type="submit" name="action" value="revoke_access">Revoke</button>
+                                    <button class="button" type="submit" name="action" value="demote">Demote</button>
+                                    <button class="failure button" type="submit" name="action" value="revoke_access">Revoke</button>
                                 </form>
                             </td>
                         </tr>
@@ -436,8 +436,8 @@
                                 <form class="modify-access" method="post">
                                     {% csrf_token %}
                                     <input type="hidden" name="user" value="{{ user.id }}" />
-                                    <button type="submit" name="action" value="promote">Promote</button>
-                                    <button class="failure" type="submit" name="action" value="revoke_access">Revoke</button>
+                                    <button class="button" type="submit" name="action" value="promote">Promote</button>
+                                    <button class="failure button" type="submit" name="action" value="revoke_access">Revoke</button>
                                 </form>
                             </td>
                         </tr>
