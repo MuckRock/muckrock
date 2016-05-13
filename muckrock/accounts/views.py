@@ -395,7 +395,7 @@ def stripe_webhook(request):
         logging.error('Error parsing JSON: %s', exception)
         return HttpResponseBadRequest()
     except KeyError as exception:
-        logging.error('Unexpected dictionary structure: %s', exception)
+        logging.error('Unexpected dictionary structure: %s in %s', exception, event_json)
         return HttpResponseBadRequest()
     # If we've made it this far, then the webhook message was successfully sent!
     # Now it's up to us to act on it.'
