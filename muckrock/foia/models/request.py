@@ -298,7 +298,7 @@ class FOIARequest(models.Model):
 
     def is_payable(self):
         """Can this request be payed for by the user?"""
-        has_open_crowdfund = self.has_crowdfund() and not self.crowdfund.closed
+        has_open_crowdfund = self.has_crowdfund() and not self.crowdfund.expired()
         has_payment_status = self.status == 'payment'
         return has_payment_status and not has_open_crowdfund
 

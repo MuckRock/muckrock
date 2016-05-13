@@ -139,7 +139,7 @@ class ProjectDetailView(DetailView):
                     'jurisdiction__parent__parent',
                     'agency__jurisdiction',
                     'user__profile',
-                    ))
+                ).get_public_file_count())
         context['followers'] = actstream.models.followers(project)
         context['articles'] = project.articles.get_published()
         context['contributors'] = project.contributors.select_related('profile')

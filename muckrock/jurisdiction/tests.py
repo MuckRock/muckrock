@@ -31,6 +31,10 @@ class TestJurisdictionUnit(TestCase):
         eq_(unicode(self.federal), u'United States of America')
         eq_(unicode(self.state), u'Massachusetts')
         eq_(unicode(self.local), u'Boston, MA')
+        self.local.full_name = u'Test!'
+        self.local.save()
+        eq_(unicode(self.local), u'Test!',
+            'If the locality has a hardcoded full_name, then always prefer that.')
 
     def test_jurisdiction_url(self):
         """Test Jurisdiction model's get_absolute_url method"""
@@ -86,6 +90,18 @@ class TestJurisdictionUnit(TestCase):
         eq_(self.state.get_waiver(), self.state.waiver)
         eq_(self.local.get_waiver(), self.state.waiver)
 
+    def test_jurisdiction_can_appeal(self):
+        """Local jurisdictions should return the state's appealability."""
+        eq_(self.federal.can_appeal(), self.federal.has_appeal)
+        eq_(self.state.can_appeal(), self.state.has_appeal)
+        eq_(self.local.can_appeal(), self.state.has_appeal)
+
+    def test_get_state(self):
+        """Local jurisdictions should return the state's name."""
+        eq_(self.federal.get_state(), self.federal.name)
+        eq_(self.state.get_state(), self.state.name)
+        eq_(self.local.get_state(), self.state.name)
+
     def test_exemptions(self):
         """
         Jurisdictions should report the exemptions on their requests.
@@ -123,6 +139,42 @@ class TestJurisdictionUnit(TestCase):
         )
         eq_(self.state.average_response_time(), (local_duration + state_duration)/2)
         eq_(self.local.average_response_time(), local_duration)
+
+    def test_success_rate(self):
+        """
+        Jurisdictions should report their success rate: completed/filed.
+        State jurisdictions should include success rates of local jurisdictions.
+        """
+        today = date.today()
+        FOIARequestFactory(
+            jurisdiction=self.state,
+            status='done',
+            date_done=today
+        )
+        FOIARequestFactory(
+            jurisdiction=self.local,
+            status='ack'
+        )
+        eq_(self.state.success_rate(), 50.0)
+        eq_(self.local.success_rate(), 0.0)
+
+    def test_fee_rate(self):
+        """
+        Jurisdictions should report the rate at which requests have fees.
+        State jurisdictions should include fee rates of local jurisdictions.
+        """
+        FOIARequestFactory(
+            jurisdiction=self.state,
+            status='ack',
+            price=0
+        )
+        FOIARequestFactory(
+            jurisdiction=self.local,
+            status='ack',
+            price=1.00
+        )
+        eq_(self.state.fee_rate(), 50.0)
+        eq_(self.local.fee_rate(), 100.0)
 
     def test_total_pages(self):
         """
