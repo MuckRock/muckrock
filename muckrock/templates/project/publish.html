@@ -10,7 +10,7 @@
     <p>Publishing a project makes it publicly visible and allows you to start crowdfunding campaigns for it. Projects are pending publication until they are reviewed by a MuckRock staff member.</p>
     <div class="info notification">
         <span class="symbol">
-                {% include 'lib/icons/info.svg' %}
+                {% include 'lib/component/icon/info.svg' %}
         </span>
         <span class="text">
             <p>Before submitting your project for review, double check the details below. You can also add notes for our staff to consider. Then, click the button at the bottom of the page.</p>
@@ -71,7 +71,7 @@
     <p>If there's anything else you want us to consider while reviewing, please leave notes for our reviewers.</p>
     <form method="post">
         {% csrf_token %}
-        {% include 'component/form.html' %}
+        {% include 'lib/pattern/form.html' %}
         <button type="submit" class="blue">Submit for review</button>
     </form>
 </div>

@@ -16,7 +16,7 @@
             {% if not hide_options %}
             {% if request.user.is_staff %}
             <div class="options dropdown">
-                {% include 'lib/icons/options.svg' %}
+                {% include 'lib/component/icon/options.svg' %}
                 <ul class="options dropdown-list">
                     {% if comm.rawemail %}<li><a href="{% url 'foia-raw' idx=comm.pk %}" class="option dropdown-list-item">Raw Email</a></li>{% endif %}
                     <li><a href="#status-{{comm.pk}}-form" class="option dropdown-list-item">Status</a></li>
@@ -27,7 +27,7 @@
             </div>
             {% elif request.user.profile.is_advanced and comm.rawemail.raw_email %}
             <div class="options dropdown">
-                {% include 'lib/icons/options.svg' %}
+                {% include 'lib/component/icon/options.svg' %}
                 <ul class="options dropdown-list">
                     <li><a href="{% url 'foia-raw' idx=comm.pk %}" class="option">Raw Email</a></li>
                 </ul>

@@ -24,14 +24,14 @@
             <input type="hidden" name="action" value="profile" />
             <div class="fields">
                 <div class="full-name">
-                    {% include 'component/field.html' with field=profile_form.first_name %}
-                    {% include 'component/field.html' with field=profile_form.last_name %}
+                    {% include 'lib/pattern/field.html' with field=profile_form.first_name %}
+                    {% include 'lib/pattern/field.html' with field=profile_form.last_name %}
                 </div>
                 <div class="other-info">
-                    {% include 'component/field.html' with field=profile_form.twitter %}
-                    {% include 'component/field.html' with field=profile_form.location %}
+                    {% include 'lib/pattern/field.html' with field=profile_form.twitter %}
+                    {% include 'lib/pattern/field.html' with field=profile_form.location %}
                 </div>
-                {% include 'component/imagefield.html' with field=profile_form.avatar image=request.user.profile.avatar %}
+                {% include 'lib/pattern/imagefield.html' with field=profile_form.avatar image=request.user.profile.avatar %}
             </div>
             <footer>
                 <button type="submit" class="primary">Update profile</button>
@@ -43,7 +43,7 @@
             <h2>Email</h2>
             <div class="fields">
             {% for field in email_form.visible_fields %}
-                {% include 'component/field.html' %}
+                {% include 'lib/pattern/field.html' %}
             {% endfor %}
             </div>
             <footer>

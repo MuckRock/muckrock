@@ -3,19 +3,19 @@
     <ul class="channels nostyle">
         <li class="channel">
             <a href="mailto:?subject={{ title }}&amp;body=http://{{ request.get_host }}{{ request.path }}" class="email" onclick="ga('send', 'event', 'Share', 'Email', window.location.pathname);">
-                {% include 'lib/icons/email.svg' %}
+                {% include 'lib/component/icon/email.svg' %}
                 <span class="label">Email</span>
             </a>
         </li>
         <li class="channel">
             <a href="javascript:window.open('http://twitter.com/intent/tweet?text={{ title|escapejs }}&amp;url=http://{{ request.get_host }}{{ request.path }}&amp;via=muckrock', 'Share on Twitter', 'width=500,height=253,location=no,menubar=no,status=no');" class="twitter" onclick="ga('send', 'event', 'Share', 'Twitter', window.location.pathname)">
-                {% include 'lib/icons/twitter.svg' %}
+                {% include 'lib/component/icon/twitter.svg' %}
                 <span class="label">Twitter</span>
             </a>
         </li>
         <li class="channel">
             <a href="javascript:window.open('https://www.facebook.com/sharer/sharer.php?u=http://{{ request.get_host }}{{ request.path }}', 'Share on Facebook', 'width=500,height=140,location=no,menubar=no,status=no');" class="facebook" onclick="ga('send', 'event', 'Share', 'Facebook', window.location.pathname)">
-                {% include 'lib/icons/facebook.svg' %}
+                {% include 'lib/component/icon/facebook.svg' %}
                 <span class="label">Facebook</span>
             </a>
         </li>

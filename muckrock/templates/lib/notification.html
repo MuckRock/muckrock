@@ -5,13 +5,13 @@
         {% if message.tags %}
         <span class="symbol">
             {% if message.tags == 'success' %}
-                {% include 'lib/icons/success.svg' %}
+                {% include 'lib/component/icon/success.svg' %}
             {% elif message.tags == 'error' %}
-                {% include 'lib/icons/error.svg' %}
+                {% include 'lib/component/icon/error.svg' %}
             {% elif message.tags == 'warning' %}
-                {% include 'lib/icons/warning.svg' %}
+                {% include 'lib/component/icon/warning.svg' %}
             {% elif message.tags == 'info' %}
-                {% include 'lib/icons/info.svg' %}
+                {% include 'lib/component/icon/info.svg' %}
             {% endif %}
         </span>
         {% endif %}
