@@ -97,7 +97,9 @@ class muckrock {
 
 	# nodejs
 
-    class { 'nodejs': }
+    class { 'nodejs':
+        repo_url_suffix => '4.x'
+    }
 
     # symlink the nodejs folder to node, since Ubuntu
     # has a weird legacy issue when installing NodeJS
