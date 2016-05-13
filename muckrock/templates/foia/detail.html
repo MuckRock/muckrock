@@ -285,24 +285,7 @@
                         <form class="crowdfund composer-input" id="crowdfund" method="post" action="{% url 'foia-crowdfund' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">
                             <header>Crowdfund your request fees</header>
                             {% csrf_token %}
-                            {% if form.non_field_errors %}
-                            <object class="failure panel">
-                            {{ form.non_field_errors }}
-                            </object>
-                            {% endif %}
-                            <div class="hidden-fields">
-                            {% for field in form.hidden_fields %}
-                                {{ field }}
-                            {% endfor %}
-                            </div>
-                            {% for field in crowdfund_form.visible_fields %}
-                            <fieldset class="{{ field.label|lower }}{% if field.field.required %} required{% endif %}">
-                                <label {% if field.errors %}class="failure"{% endif %} for="{{ field.auto_id }}">{{ field.label}}</label>
-                                {{ field.errors }}
-                                {{ field }}
-                                {% if field.help_text %}<p class="help-text">{{ field.help_text }}</p>{% endif %}
-                            </fieldset>
-                            {% endfor %}
+                            {% include 'lib/pattern/form.html' %}
                             <div class="buttons">
                                 <button type="submit" class="primary">Create Crowdfund</button>
                                 <a href="#inactive" class="button">Cancel</a>
