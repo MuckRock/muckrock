@@ -326,13 +326,13 @@ class NewsletterSignupView(View):
         # Add the user to the default list if they want to be added.
         # If an error occurred with the first subscription,
         # don't try signing up for the default list.
-        # IF an error occurs with this subscription, don't worry about it.
+        # If an error occurs with this subscription, don't worry about it.
         if default_list is not None and default_list != _list and not primary_error:
             try:
                 self.subscribe(_email, default_list)
             except (ValueError, requests.exceptions.HTTPError) as exception:
                 # suppress the error shown to the user, but still log it
-                logging.warning('Secondary signup: ' + exception)
+                logging.warning('Secondary signup: %s', exception)
         return self.redirect_url(request)
 
     def subscribe(self, _email, _list):
