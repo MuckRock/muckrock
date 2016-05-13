@@ -76,9 +76,9 @@
 }
 
 .account.signup {
-    .form {
+    form {
         margin-bottom: 0;
-        .fields {
+        .visible-fields {
             @include display(flex);
             @include flex-wrap(wrap);
             .field {

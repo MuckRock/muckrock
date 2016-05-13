@@ -51,6 +51,7 @@ The sidebar should use a dark UI.
 
     .quick-log-in {
         position: absolute;
+        width: 100%;
         z-index: 19;
         margin: 2.6875em 0 0 0;
         border-bottom: 1px solid $color-grey-3;
@@ -70,6 +71,9 @@ The sidebar should use a dark UI.
         .forgot {
             font-size: $font-size-2;
             line-height: $font-line-height;
+        }
+        .required {
+            visibility: hidden;
         }
         input {
             width: 100%;
