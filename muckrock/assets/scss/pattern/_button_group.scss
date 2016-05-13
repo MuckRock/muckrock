@@ -1,0 +1,15 @@
+.button-group {
+    @include display(flex);
+    .button {
+        border-radius: 0;
+    }
+    .button:first-child {
+        border-top-left-radius: $base-border-radius;
+        border-bottom-left-radius: $base-border-radius;
+    }
+    .button:last-child {
+        margin-bottom: $vertical-rhythm/4;
+        border-top-right-radius: $base-border-radius;
+        border-bottom-right-radius: $base-border-radius;
+    }
+}
