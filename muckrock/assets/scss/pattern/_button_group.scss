@@ -1,5 +1,6 @@
 .button-group {
-    @include display(flex);
+    @include display(inline-flex);
+    margin-bottom: 0;
     .button {
         border-radius: 0;
     }

@@ -185,78 +185,65 @@ $request-breakpoint: 768px;
             }
         }
     }
-    .communications-composer {
-        @include display(flex);
-        @include align-items(flex-start);
-        .composer-actions {
-            @include display(flex);
-            @include flex-direction(column);
-        }
-        .composer-inputs {
-            @include flex(1);
-            margin-left: $vertical-rhythm;
+    .composer-input {
+        @include border;
+        box-shadow: 0px 4px 8px 0px $color-grey;
+        header {
+            display: block;
             margin-bottom: 0;
+            padding: $vertical-rhythm/2;
+            border-bottom: 1px solid $color-grey;
+            p {
+                margin-bottom: 0;
+                &.help-text {
+                    padding: 0;
+                }
+            }
         }
-        .composer-input {
-            @include border;
-            box-shadow: 0px 4px 8px 0px $color-grey;
-            header {
-                display: block;
-                margin-bottom: 0;
-                padding: $vertical-rhythm/2;
-                border-bottom: 1px solid $color-grey;
-                p {
-                    margin-bottom: 0;
-                    &.help-text {
-                        padding: 0;
-                    }
-                }
+        input[type="number"], input[type="text"] {
+            display: block;
+            width: 100%;
+            border: none;
+            border-radius: 0;
+        }
+        label, .help-text {
+            padding: 0 $vertical-rhythm/2;
+        }
+        .limit.amount {
+            label, input {
+                display: inline-block;
+                vertical-align: middle;
             }
-            input[type="number"], input[type="text"] {
-                display: block;
-                width: 100%;
-                border: none;
-                border-radius: 0;
-            }
-            label, .help-text {
-                padding: 0 $vertical-rhythm/2;
-            }
-            .limit.amount {
-                label, input {
-                    display: inline-block;
-                    vertical-align: middle;
-                }
-            }
-            .currency {
-                font-size: $font-size-4;
-            }
-            textarea {
-                display: block;
+        }
+        .currency {
+            font-size: $font-size-4;
+        }
+        textarea {
+            display: block;
+            height: 15em;
+            margin-bottom: 0;
+            border: none;
+            border-radius: 0;
+        }
+        .buttons {
+            padding: $vertical-rhythm/2;
+            border-top: 1px solid $color-grey;
+            @include display(flex);
+            @include justify-content(space-between);
+        }
+        &.inactive {
+            p {
                 height: 15em;
-                margin-bottom: 0;
-                border: none;
-                border-radius: 0;
-            }
-            .buttons {
                 padding: $vertical-rhythm/2;
-                border-top: 1px solid $color-grey;
-                @include display(flex);
-                @include justify-content(space-between);
+                background-color: #FFF;
+                color: $color-grey;
             }
-            &.inactive {
-                p {
-                    height: 15em;
-                    padding: $vertical-rhythm/2;
-                    background-color: #FFF;
-                    color: $color-grey;
-                }
-                span {
-                    border-bottom: 1px dotted;
-                    cursor: pointer;
-                    &:hover {
-                        color: $color-blue;
-                        border-bottom: 1px solid;
-                    }
+            span {
+                border-bottom: 1px dotted;
+                cursor: pointer;
+                &:hover {
+                    color: $color-blue;
+                    border-bottom: 1px solid;
                 }
             }
         }

@@ -191,23 +191,24 @@
                 {% if user_can_edit %}
                 <div class="communications-composer">
                     <div class="composer-actions">
-                        <a href="#follow-up" class="primary button">Follow Up</a>
-                        {% if foia.is_payable %}
-                        <a href="#pay" class="success button">Pay Fees</a>
-                        {% if not foia.has_crowdfund %}
-                        <a href="#crowdfund" class="success button">Crowdfund</a>
-                        {% endif %}
-                        {% endif %}
-                        {% if is_thankable %}
-                        <a href="#thanks" class="success button">Thank Agency</a>
-                        {% endif %}
-                        {% if foia.is_appealable %}
-                        <a href="#appeal" class="failure button">Appeal</a>
-                        {% endif %}
+                        <div class="button-group">
+                            {% if is_thankable %}
+                            <a href="#thanks" class="blue button">Say Thanks</a>
+                            {% endif %}
+                            <a href="#follow-up" class="blue button">Follow Up</a>
+                            {% if foia.is_payable %}
+                            <a href="#pay" class="green button">Pay Fees</a>
+                            {% if not foia.has_crowdfund %}
+                            <a href="#crowdfund" class="green button">Crowdfund</a>
+                            {% endif %}
+                            {% endif %}
+                            <button class="button" id="get-advice">Get Advice</button>
+                            {% if foia.is_appealable %}
+                            <a href="#appeal" class="red button">Appeal</a>
+                            {% endif %}
+                        </div>
                         {% if request.user.is_staff %}
                         <a href="{% url 'foia-admin-fix' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Make an admin fix" class="button">Admin Fix</a>
-                        {% else %}
-                        <button class="button" id="get-advice">Get Advice</button>
                         {% endif %}
                     </div>
                     <div class="composer-inputs">
@@ -229,15 +230,14 @@
                             <header>Send a thank you note to the {{ foia.agency.name }}</header>
                             {% csrf_token %}
                             <input type="hidden" name="action" value="thanks" />
+<textarea name="text" id="thanks-composer">
+Hi,
 
-                            <textarea name="text" id="thanks-composer">
-        Hi,
+Thanks so much for your help with this request! I really appreciate it.
 
-        Thanks so much for your help with this request! I really appreciate it.
-
-        Sincerely,
-        {{foia.user.get_full_name}}
-                            </textarea>
+Sincerely,
+{{foia.user.get_full_name}}
+</textarea>
                             <div class="buttons">
                                 <button class="primary button" type="submit" name="thanks" value="1">Send</button>
                                 <a href="#inactive" class="button">Cancel</a>
