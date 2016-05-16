@@ -7,8 +7,7 @@
         <label for="{{field.id_for_label}}">{{field.label}}</label>
         {% if field.errors %}
             {{field.errors}}
-        {% endif %}
-        {% if field.field.required %}
+        {% elif field.field.required %}
         <span class="required">Required</span>
         {% endif %}
     </header>

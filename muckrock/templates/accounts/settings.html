@@ -24,17 +24,17 @@
             <input type="hidden" name="action" value="profile" />
             <div class="fields">
                 <div class="full-name">
-                    {% include 'component/field.html' with field=profile_form.first_name %}
-                    {% include 'component/field.html' with field=profile_form.last_name %}
+                    {% include 'lib/pattern/field.html' with field=profile_form.first_name %}
+                    {% include 'lib/pattern/field.html' with field=profile_form.last_name %}
                 </div>
                 <div class="other-info">
-                    {% include 'component/field.html' with field=profile_form.twitter %}
-                    {% include 'component/field.html' with field=profile_form.location %}
+                    {% include 'lib/pattern/field.html' with field=profile_form.twitter %}
+                    {% include 'lib/pattern/field.html' with field=profile_form.location %}
                 </div>
-                {% include 'component/imagefield.html' with field=profile_form.avatar image=request.user.profile.avatar %}
+                {% include 'lib/pattern/imagefield.html' with field=profile_form.avatar image=request.user.profile.avatar %}
             </div>
             <footer>
-                <button type="submit" class="primary">Update profile</button>
+                <button type="submit" class="primary button">Update profile</button>
             </footer>
         </form>
         <form method="post" class="email form" id="email">
@@ -43,11 +43,11 @@
             <h2>Email</h2>
             <div class="fields">
             {% for field in email_form.visible_fields %}
-                {% include 'component/field.html' %}
+                {% include 'lib/pattern/field.html' %}
             {% endfor %}
             </div>
             <footer>
-                <button type="submit" class="primary">Update email</button>
+                <button type="submit" class="primary button">Update email</button>
                 {% if request.user.profile.email_confirmed %}
                 <span>Verified</span>
                 {% else %}
@@ -85,7 +85,7 @@
                             <p>Expires {{credit_card.exp_month}}/{{credit_card.exp_year}}</p>
                         </td>
                         <td>
-                            <button type="submit">Update Credit Card</button>
+                            <button class="button" type="submit">Update Credit Card</button>
                         </td>
                     <tr>
                     {% endif %}

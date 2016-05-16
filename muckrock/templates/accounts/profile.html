@@ -16,13 +16,13 @@
     <ul class="links nostyle">
         {% if profile.twitter %}
         <li class="twitter">
-            {% include 'lib/icons/twitter.svg' %}
+            {% include 'lib/component/icon/twitter.svg' %}
             <a href="https://www.twitter.com/{{profile.twitter}}" title="{{user_obj.first_name}}'s Twitter profile">@{{profile.twitter}}</a>
         </li>
         {% endif %}
         {% if profile.location %}
         <li class="location">
-            {% include 'lib/icons/location.svg' %}
+            {% include 'lib/component/icon/location.svg' %}
             <a href="{{profile.location.get_absolute_url}}">{{profile.location}}</a>
         </li>
         {% endif %}
@@ -74,16 +74,18 @@
             <input type="hidden" name="stripe_fee" value="0" />
             <input type="hidden" name="stripe_amount" value="2000" />
         </form>
-        <div class="controls">
+        <div>
             {% if request.user == user_obj %}
-            <a href="{% url 'foia-create' %}" class="primary button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
-                {% include 'lib/icons/create-request.svg' %}
-                <span>File a Request</span>
-            </a>
-            <button class="primary" form="buy-requests" type="submit">Buy Requests</button>
+            <div class="button-group">
+                <a href="{% url 'foia-create' %}" class="primary button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
+                    {% include 'lib/component/icon/create-request.svg' %}
+                    <span>File a Request</span>
+                </a>
+                <button class="primary button" form="buy-requests" type="submit">Buy Requests</button>
+            </div>
             <a href="{% url 'acct-settings' %}" class="button">Settings</a>
             {% else %}
-            <button class="primary" form="buy-requests" type="submit">&hearts; Gift Requests</button>
+            <button class="primary button" form="buy-requests" type="submit">&hearts; Gift Requests</button>
             {% endif %}
         </div>
     </section>
@@ -95,7 +97,7 @@
         </h3>
         <div class="project-group">
         {% for project in projects %}
-            {% include 'component/project.html' %}
+            {% include 'lib/pattern/project.html' %}
         {% endfor %}
         </div>
     </section>

@@ -19,12 +19,12 @@
                 <li><a role="tab" class="tab" href="#articles">Articles</a></li>
             </ul>
             <div role="tabpanel" class="tab-panel" id="basics">
-                {% include 'component/field.html' with field=form.summary %}
-                {% include 'component/field.html' with field=form.tags %}
+                {% include 'lib/pattern/field.html' with field=form.summary %}
+                {% include 'lib/pattern/field.html' with field=form.tags %}
                 {% if project.image %}
-                {% include 'component/imagefield.html' with field=form.image image=project.image %}
+                {% include 'lib/pattern/imagefield.html' with field=form.image image=project.image %}
                 {% else %}
-                {% include 'component/imagefield.html' with field=form.image %}
+                {% include 'lib/pattern/imagefield.html' with field=form.image %}
                 {% endif %}
             </div>
             <div role="tabpanel" class="description tab-panel" id="description">

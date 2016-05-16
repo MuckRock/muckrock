@@ -23,7 +23,7 @@
         <table class="marker-table">
         {% for marker in map.markers.all %}
             <tr data-foia="{{marker.foia.id}}">
-                <td class="marker-icon {{marker.foia.status|classify_status}}">{% include 'lib/icons/location.svg' %}</td>
+                <td class="marker-icon {{marker.foia.status|classify_status}}">{% include 'lib/component/icon/location.svg' %}</td>
                 <td>
                     <p><a href="{{marker.foia.get_absolute_url}}">{{marker.foia}}</a></p>
                 </td>

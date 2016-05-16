@@ -3,14 +3,16 @@
     {% if is_authorized %}
     <header>
         <dfn>Tags</dfn>
-        <span class="edit" id="edit-tags">Edit</span>
+        <span class="small action" id="edit-tags">Edit</span>
     </header>
     <form method="post" action="{{endpoint}}" class="tag-form" id="tag-form">
         {% csrf_token %}
         {{form.tags}}
-        <p><small>Separate tags with commas</small></p>
-        <button type="submit" name="action" value="tags" class="tag-form-button primary">Save</button>
-        <button class="tag-form-button cancel" id="cancel-tags">Cancel</button>
+        <p class="help-text">Separate tags with commas</p>
+        <footer>
+            <button type="submit" name="action" value="tags" class="blue button">Save</button>
+            <button class="button cancel" id="cancel-tags">Cancel</button>
+        </footer>
     </form>
     {% else %}
     <header>
