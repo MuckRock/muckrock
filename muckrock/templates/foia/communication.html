@@ -4,7 +4,7 @@
 {% if communication %}
 <section class="{% if communication.response %}received{% else %}sent{% endif %} communication {% if communication.from_who == 'MuckRock.com' %}collapsed{% endif %}" id="{{ communication.anchor }}">
     <header class="communication-header">
-        <h1 class="from">From: {{ communication.from_who }}</h1>
+        <p class="from">From: {{ communication.from_who }}</p>
         <div class="actionables">
             {% if foia_url %}
             <a href="#{{ communication.anchor }}" class="permalink">
@@ -38,14 +38,12 @@
     </header>
     <section class="communication-metadata">
     {% if communication.subject %}
-        <p class="subject">Subject: {{ communication.subject }}</p>
+        <p class="small subject">Subject: {{ communication.subject }}</p>
     {% else %}
-        <p class="subject">Subject: None</p>
+        <p class="small subject">Subject: None</p>
     {% endif %}
     {% if communication.status and request.user.is_staff %}
-        <p class="status">
-            <span class="small badge {{communication.status|classify_status}}">{{communication.get_status_display}}</span>
-        </p>
+        <span class="small badge {{communication.status|classify_status}}">{{communication.get_status_display}}</span>
     {% endif %}
     </section>
     {% if communication.communication %}

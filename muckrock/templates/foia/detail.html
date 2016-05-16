@@ -200,11 +200,11 @@
                             <a href="#crowdfund" class="green button">Crowdfund</a>
                             {% endif %}
                             {% endif %}
-                            <button class="button" id="get-advice">Get Advice</button>
                             {% if foia.is_appealable %}
                             <a href="#appeal" class="red button">Appeal</a>
                             {% endif %}
                         </div>
+                        <button class="button" id="get-advice">Get Advice</button>
                         {% if request.user.is_staff %}
                         <a href="{% url 'foia-admin-fix' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Make an admin fix" class="button">Admin Fix</a>
                         {% endif %}

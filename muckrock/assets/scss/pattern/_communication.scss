@@ -58,17 +58,13 @@
         &:hover {
             cursor: default;
         }
-        font-size: $font-size-3;
         font-weight: $font-weight-bold;
-    }
-    .subject {
-        font-size: $font-size-2;
     }
     .communication-metadata {
         @include display(flex);
         @include justify-content(space-between);
+        @include align-items(center);
         margin-bottom: 0;
-        font-size: $font-size-2;
     }
     .communication-body {
         margin-bottom: 0;
