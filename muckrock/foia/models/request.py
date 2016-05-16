@@ -95,11 +95,13 @@ class FOIARequestQuerySet(models.QuerySet):
     def organization(self, organization):
         """Get requests belonging to an organization's members."""
         return (self.select_related(
+                        'agency',
                         'jurisdiction',
                         'jurisdiction__parent',
-                        'jurisdiction__parent__parent'
-                        )
-                    .filter(user__profile__organization=organization))
+                        'jurisdiction__parent__parent')
+                    .filter(user__profile__organization=organization)
+                    .exclude(status='started')
+                    .order_by('-date_submitted'))
 
     def select_related_view(self):
         """Select related models for viewing"""
