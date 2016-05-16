@@ -67,7 +67,7 @@ h6, .h6 { font-size: $font-size-1; }
 
 // Body
 
-article, aside, blockquote, body, br, button, caption, col, colgroup, div, dl, embed, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, hr, img, map, nav, object, ol, output, p, pre, section, summary, table, tbody, textarea, tfoot, th, thead, tr, ul, video {
+article, aside, blockquote, body, br, caption, col, colgroup, div, dl, embed, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, hr, img, map, nav, object, ol, output, p, pre, section, summary, table, tbody, textarea, tfoot, th, thead, tr, ul, video {
     @extend %vertical-rhythm;
 }
 
@@ -106,9 +106,10 @@ blockquote {
     i, em { font-style: normal; }
 }
 
-small {
+small, .small {
     font-size: 0.8125em;
     font-style: normal;
+    line-height: $font-line-height;
 }
 
 dfn, dt {
@@ -118,6 +119,7 @@ dfn, dt {
     font-weight: $font-weight-bold;
     text-transform: uppercase;
     letter-spacing: 2px;
+    line-height: $font-line-height;
 }
 
 dd {

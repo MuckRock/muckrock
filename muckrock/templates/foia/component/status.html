@@ -4,11 +4,11 @@
         <dfn>Status</dfn>
         {% if foia.status != 'started' and foia.status != 'submitted' %}
         {% if user_can_edit %}
-        <div class="edit" id="edit-status" data-manager=".status-manager">Edit</div>
+        <div class="small action" id="edit-status" data-manager=".status-manager">Edit</div>
         {% endif %}
         {% endif %}
     </header>
-    <p class="status state {{ foia.status|classify_status }}">{{foia.get_status_display}}</p>
+    <span class="badge state {{ foia.status|classify_status }}">{{foia.get_status_display}}</span>
     {% if foia.status != 'started' and foia.status != 'submitted' %}
     {% if user_can_edit %}
     <form method="post" class="status-form" id="status-form">
@@ -18,8 +18,10 @@
             <option value="{{ choice|first }}" {% if choice|first == foia.status %}selected{% endif %}>{{ choice|last }}</option>
         {% endfor %}
         </select>
-        <button type="submit" name="action" value="status" class="primary button">Save</button>
-        <button class="cancel button" id="cancel-status">Cancel</button>
+        <footer>
+            <button type="submit" name="action" value="status" class="primary button">Save</button>
+            <button class="cancel button" id="cancel-status">Cancel</button>
+        </footer>
     </form>
     {% endif %}
     {% endif %}

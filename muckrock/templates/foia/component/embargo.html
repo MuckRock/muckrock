@@ -3,7 +3,7 @@
     <header>
         <dfn>Embargo</dfn>
         {% if embargo.add or embargo.remove %}
-        <div class="edit" id="edit-embargo" data-manager=".embargo-manager">Edit</div>
+        <div class="small action" id="edit-embargo" data-manager=".embargo-manager">Edit</div>
         {% endif %}
     </header>
     <div class="embargo state">
@@ -24,33 +24,41 @@
         {{ embargo_form.non_field_errors }}
         {% if request.user.profile.can_embargo_permanently %}
         <div class="permanent">
-            {{ embargo_form.permanent_embargo.label_tag }}
-            {{ embargo_form.permanent_embargo }}
-            <p class="help-text">{{ embargo_form.permanent_embargo.help_text }}</p>
+            <span>
+                <label for={{embargo_form.permanent_embargo.id_for_label}}>Permanent</label>
+                <p class="help-text">{{ embargo_form.permanent_embargo.help_text }}</p>
+            </span>
+            {% include 'lib/component/switch.html' with field=embargo_form.permanent_embargo %}
         </div>
         {% endif %}
         {% if embargo_needs_date %}
         <div class="expiration">
-            {{ embargo_form.date_embargo.label_tag }}
+            <span>
+                <label for="{{ embargo_form.date_embargo.id_for_label }}">Expiration date</label>
+                <p class="help-text">{{ embargo_form.date_embargo.help_text }}</p>
+            </span>
             {{ embargo_form.date_embargo }}
-            <p class="help-text">{{ embargo_form.date_embargo.help_text }}</p>
         </div>
         {% endif %}
+        <footer>
         {% if not foia.embargo %}
-        <button class="primary button" type="submit" name="embargo" value="create">Embargo</button>
-        {% else %}
-            {% if embargo_needs_date or request.user.profile.can_embargo_permanently %}
-        <button class="primary button" type="submit" name="embargo" value="update">Update</button>
+            <button class="blue button" type="submit" name="embargo" value="create">Embargo</button>
+            {% else %}
+                {% if embargo_needs_date or request.user.profile.can_embargo_permanently %}
+            <button class="blue button" type="submit" name="embargo" value="update">Update</button>
+                {% endif %}
+            <button class="red button" type="submit" name="embargo" value="delete">Remove</button>
             {% endif %}
-        <button class="failure button" type="submit" name="embargo" value="delete">Remove</button>
-        {% endif %}
-        <button class="cancel button" id="cancel-embargo">Cancel</button>
+            <button class="cancel button" id="cancel-embargo">Cancel</button>
+        </footer>
     </form>
     {% elif embargo.remove %}
     <form method="post" action="embargo/" class="embargo-form" id="embargo-form">
         {% csrf_token %}
-        <button class="failure button" type="submit" name="embargo" value="delete">Remove</button>
-        <button class="cancel button" id="cancel-embargo">Cancel</button>
+        <footer>
+            <button class="red button" type="submit" name="embargo" value="delete">Remove</button>
+            <button class="cancel button" id="cancel-embargo">Cancel</button>
+        </footer>
     </form>
     {% endif %}
 </section>

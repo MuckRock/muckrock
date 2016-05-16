@@ -2,18 +2,18 @@
     header {
         @include display(flex);
         @include justify-content(space-between);
-        margin-bottom: 0;
+        margin-bottom: $vertical-rhythm/2;
+        border-bottom: 1px solid $color-grey-7;
     }
     form {
         display: none;
-        @include border;
-        padding: $vertical-rhythm/2;
         &.visible {
             display: block;
         }
         footer {
             @include display(flex);
             @include justify-content(space-between);
+            @include flex-direction(row-reverse);
         }
     }
     input[type="text"] {
@@ -26,62 +26,22 @@
     }
 }
 
-.status.manager {
-    .status {
-        display: inline-block;
-        margin-bottom: 0;
-        color: $color-grey-4;
-        font-weight: $font-weight-bold;
-        @mixin colorize($status, $color) {
-            &.#{$status} {
-                color: $color;
-                border-color: $color;
-            }
-        }
-        @include colorize(success, $color-green);
-        @include colorize(failure, $color-red);
-        @include colorize(warning, $color-yellow);
+.status.manager .status-form {
+    display: none;
+    margin-bottom: 0;
+    &.visible {
+        display: block;
     }
-    .status-form {
-        display: none;
-        @include flex-wrap(wrap);
-        @include justify-content(space-between);
-        margin-bottom: 0;
-        &.visible {
-            @include display(flex);
-        }
-        select {
-            @include flex(100%);
-            margin-bottom: $vertical-rhythm/2;
-        }
-        button {
-            margin-bottom: $vertical-rhythm/4;
-        }
-    }
-}
-
-.embargo.manager {
-    .expiration input {
+    select {
+        width: 100%;
         margin-bottom: $vertical-rhythm/2;
     }
 }
 
-.manager {
-    .tag-form {
-        display: none;
-        @include flex-wrap(wrap);
+.embargo.manager {
+    .permanent, .expiration {
+        @include display(flex);
         @include justify-content(space-between);
-        @include border;
-        padding: $vertical-rhythm/2;
-        &.visible {
-            @include display(flex);
-        }
-        input, p {
-            @include flex(100%);
-            margin-bottom: 0;
-        }
-        .tag-form-button {
-            margin-bottom: $vertical-rhythm/4;
-        }
+        @include align-items(flex-start);
     }
 }

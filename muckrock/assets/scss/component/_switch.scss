@@ -7,72 +7,64 @@ $switch-track-height: $switch-head-diameter + (2 * $switch-track-border-width);
 $switch-track-width: $switch-head-active-offset + $switch-head-diameter + (2 * $switch-track-border-width);
 $switch-track-radius: $switch-head-diameter + $switch-head-border-width;
 
-input[type="checkbox"].switch {
-    position: absolute;
-    opacity: 0;
-    -webkit-appearance: none;
-    & + label {
-        background: $color-white;
-        border: 2px solid $color-grey;
-        border-radius: $switch-track-radius;
-        height: $switch-track-height;
-        width: $switch-track-width;
-        display: block;
-        // box-shadow: 0 1px 1px 0 $color-grey inset;
-        position: relative;
-        transition-property: background, border;
-        transition-timing-function: linear;
-        transition-duration: .1s;
-        cursor: pointer;
-        background-clip: padding-box;
-        box-sizing: padding-box;
-        -webkit-touch-callout: none;
-        -webkit-user-select: none;
-        -khtml-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
+.switch {
+    input[type="checkbox"] {
+        position: absolute;
+        opacity: 0;
         -webkit-appearance: none;
-    }
-    &:checked + label,
-    &:checked + label:hover {
-        background: $color-green;
-        border-color: $color-green;
-    }
-    &:checked + label .checkbox-switch-head {
-        left: $switch-head-active-offset;
-        &:active {
-            $switch-head-active-width: $switch-head-diameter * .25;
-            left: $switch-head-active-offset - $switch-head-active-width;
-            width: $switch-head-diameter + $switch-head-active-width;
-        }
-    }
-    &.red {
         & + label {
-            background: $color-red;
-            border-color: $color-red;
+            background: $color-white;
+            border: 2px solid $color-grey-7;
+            border-radius: $switch-track-radius;
+            height: $switch-track-height;
+            width: $switch-track-width;
+            display: block;
+            // box-shadow: 0 1px 1px 0 $color-grey inset;
+            position: relative;
+            transition-property: background, border;
+            transition-timing-function: linear;
+            transition-duration: .1s;
+            cursor: pointer;
+            background-clip: padding-box;
+            box-sizing: padding-box;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-appearance: none;
         }
-        &:checked + label {
+        &:checked + label,
+        &:checked + label:hover {
             background: $color-green;
             border-color: $color-green;
         }
+        &:checked + label .checkbox-switch-head {
+            left: $switch-head-active-offset;
+            &:active {
+                $switch-head-active-width: $switch-head-diameter * .25;
+                left: $switch-head-active-offset - $switch-head-active-width;
+                width: $switch-head-diameter + $switch-head-active-width;
+            }
+        }
     }
-}
 
-.checkbox-switch-head {
-    display: block;
-    position: absolute;
-    z-index: 1;
-    top: 0;
-    left: 0;
-    width: $switch-head-diameter;
-    height: $switch-head-diameter;
-    border: 1px solid $color-grey;
-    border-radius: $switch-head-diameter;
-    background: $color-white;
-    box-shadow: 0 3px 2px 0 rgba(0,0,0,0.2);
-    transition: all ease-in-out .15s;
-    &:active {
-        width: $switch-head-diameter * 1.25;
+    .checkbox-switch-head {
+        display: block;
+        position: absolute;
+        z-index: 1;
+        top: 0;
+        left: 0;
+        width: $switch-head-diameter;
+        height: $switch-head-diameter;
+        border: 1px solid $color-grey;
+        border-radius: $switch-head-diameter;
+        background: $color-white;
+        box-shadow: 0 3px 2px 0 rgba(0,0,0,0.2);
+        transition: all ease-in-out .15s;
+        &:active {
+            width: $switch-head-diameter * 1.25;
+        }
     }
 }

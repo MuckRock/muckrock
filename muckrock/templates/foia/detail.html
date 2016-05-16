@@ -88,7 +88,7 @@
                 {% if show_estimated_date %}
                 <tr class="estimated-completion">
                     <td class="label">Est. Completion</td>
-                    <td class="date">{% if foia.date_estimate %}{{ foia.date_estimate|date }}{% else %}None{% endif %}{% if user_can_edit %}<span class="edit">Edit</span>{% endif %}</td>
+                    <td class="date">{% if foia.date_estimate %}{{ foia.date_estimate|date }}{% else %}None{% endif %}{% if user_can_edit %}<span class="small action">Edit</span>{% endif %}</td>
                 </tr>
                 {% endif %}
             </table>
@@ -102,12 +102,10 @@
                 <button class="cancel button" id="cancel-date-estimate">Cancel</button>
             </form>
             {% endif %}
-            <section class="states">
-                {% include 'foia/component/status.html' %}
-                {% include 'foia/component/embargo.html' %}
-                {% project_manager foia %}
-                {% tag_manager foia %}
-            </section>
+            {% include 'foia/component/status.html' %}
+            {% include 'foia/component/embargo.html' %}
+            {% project_manager foia %}
+            {% tag_manager foia %}
         </section>
     </section>
     <main class="request main">
@@ -409,13 +407,13 @@ Sincerely,
                     <h3>People with access</h3>
                     <tbody>
                         <tr class="person with-access">
-                            <td class="name"><p>{{ foia.user.get_full_name }} <span class="creator badge">Creator</span></p></td>
+                            <td class="name"><p>{{ foia.user.get_full_name }} <span class="small badge">Creator</span></p></td>
                             <td class="modify nostretch"></td>
                         </tr>
                         {% for user in foia.edit_collaborators.all %}
                         <tr class="person with-access">
                             <td class="name">
-                                <p>{{ user.get_full_name }} <span class="editor badge">Editor</span></p>
+                                <p>{{ user.get_full_name }} <span class="small badge">Editor</span></p>
                             </td>
                             <td class="modify nostretch">
                                 <form class="modify-access" method="post">
@@ -430,7 +428,7 @@ Sincerely,
                         {% for user in foia.read_collaborators.all %}
                         <tr class="person with-access">
                             <td class="name">
-                                <p>{{ user.get_full_name }} <span class="reader badge">Viewer</span></p>
+                                <p>{{ user.get_full_name }} <span class="small badge">Viewer</span></p>
                             </td>
                             <td class="modify nostretch">
                                 <form class="modify-access" method="post">

@@ -108,15 +108,3 @@ $shadow-active: 0px;
         @include transform(none);
     }
 }
-
-.edit {
-    display: inline-block;
-    font-size: $font-size-2;
-    font-weight: $font-weight-bold;
-    letter-spacing: 0;
-    cursor: pointer;
-    color: $color-blue;
-    &:hover {
-        color: $color-blue-dark;
-    }
-}
