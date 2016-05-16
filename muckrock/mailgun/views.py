@@ -17,11 +17,10 @@ import os
 import re
 import sys
 import time
-from datetime import datetime, date
+from datetime import datetime
 from email.utils import parseaddr, getaddresses
 from localflavor.us.us_states import STATE_CHOICES
 
-from muckrock.accounts.models import Profile, AgencyProfile
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, RawEmail
 from muckrock.foia.tasks import upload_document_cloud, classify_status
@@ -33,7 +32,6 @@ from muckrock.task.models import (
         ResponseTask,
         StaleAgencyTask,
         )
-from muckrock.utils import unique_username
 
 logger = logging.getLogger(__name__)
 
@@ -62,12 +60,12 @@ def _make_orphan_comm(from_, to_, post, files, foia):
     to_ = to_[:255] if to_ else ''
     agency = foia.agency if foia else None
     comm = FOIACommunication.objects.create(
-            from_user=_get_user_from_addr(
-                name,
+            from_user=User.agency_objects.get_or_create_agency_user(
                 email,
-                trusted=False,
-                agency=agency),
-            priv_to_who=to_, # XXX
+                name,
+                agency,
+                trusted=False),
+            priv_to_who=to_, # XXX where to record this?
             response=True,
             date=datetime.now(),
             delivered='email',
@@ -83,43 +81,6 @@ def _make_orphan_comm(from_, to_, post, files, foia):
         if type_ == 'file':
             _upload_file(None, comm, file_, from_)
     return comm
-
-def _get_user_from_addr(name, email, trusted=True, agency=None):
-    """Get a user account from a header address"""
-    if ',' in name:
-        last_name, first_name = name.split(',', 1)
-    elif ' ' in name:
-        first_name, last_name = name.rsplit(' ', 1)
-    else:
-        first_name, last_name = name, ''
-    user, created = User.objects.get_or_create(
-            email=email,
-            defaults={'username': unique_username(name)},
-            )
-    updated = False
-    if not user.first_name:
-        user.first_name = first_name[:30]
-        updated = True
-    if not user.last_name:
-        user.last_name = last_name[:30]
-        updated = True
-    if updated:
-        user.save()
-    if created:
-        user.set_unusable_password()
-        user.save()
-        Profile.objects.create(
-            user=user,
-            acct_type='agency' if trusted else 'unknown', # XXX doc the trust system here
-            email_pref='never',
-            date_update=date.today(),
-            )
-        if agency:
-            AgencyProfile.objects.create(
-                user=user,
-                agency=agency,
-                )
-    return user
 
 
 @csrf_exempt
@@ -175,7 +136,10 @@ def _handle_request(request, mail_id):
     try:
         foia = FOIARequest.objects.get(mail_id=mail_id)
         from_name, from_email = parseaddr(from_)
-        from_user = _get_user_from_addr(from_name, from_email, agency=foia.agency)
+        from_user = User.agency_objects.get_or_create_agency_user(
+                from_email,
+                from_name,
+                foia.agency)
 
         if not _allowed_email(from_email, foia):
             msg, reason = ('Bad Sender', 'bs')
@@ -219,10 +183,14 @@ def _handle_request(request, mail_id):
 
         foia.contact = from_user
         # XXX should CC users be marked as from agency?
+        foia.cc_contacts.clear()
         for name, email in getaddresses([post.get('To', ''), post.get('Cc', '')]):
             if not email or email.endswith('muckrock.com'):
                 continue
-            user = _get_user_from_addr(name, email, agency=foia.agency)
+            user = User.agency_objects.get_or_create_agency_user(
+                    email,
+                    name,
+                    foia.agency)
             foia.cc_contacts.add(user)
 
         if foia.status == 'ack':
@@ -407,8 +375,8 @@ def _allowed_email(email, foia=None):
         ] + state_tlds
 
     # from the same domain as the FOIA email
-    if foia and foia.email and '@' in foia.email and \
-            email.endswith(foia.email.split('@')[1].lower()):
+    if (foia and foia.contact and '@' in foia.contact.email and
+            email.endswith(foia.contact.email.split('@')[1].lower())):
         return True
 
     # the email is a known email for this FOIA's agency

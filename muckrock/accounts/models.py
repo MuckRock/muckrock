@@ -18,10 +18,7 @@ import stripe
 from urllib import urlencode
 
 from muckrock import utils
-from muckrock.agency.models import Agency
-from muckrock.foia.models import FOIARequest
-from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.organization.models import Organization
+from muckrock.utils import unique_username
 from muckrock.values import TextValue
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -80,13 +77,13 @@ class Profile(models.Model):
     zip_code = models.CharField(max_length=10, blank=True)
     phone = PhoneNumberField(blank=True)
     notifications = models.ManyToManyField(
-        FOIARequest,
+        'foia.FOIARequest',
         related_name='notify',
         blank=True
     )
     acct_type = models.CharField(max_length=10, choices=ACCT_TYPES)
     organization = models.ForeignKey(
-        Organization,
+        'organization.Organization',
         blank=True,
         null=True,
         related_name='members',
@@ -94,7 +91,10 @@ class Profile(models.Model):
 
     # extended information
     profile = models.TextField(blank=True)
-    location = models.ForeignKey(Jurisdiction, blank=True, null=True)
+    location = models.ForeignKey(
+            'jurisdiction.Jurisdiction',
+            blank=True,
+            null=True)
     public_email = models.EmailField(max_length=255, blank=True)
     pgp_public_key = models.TextField(blank=True)
     website = models.URLField(
@@ -430,7 +430,7 @@ class AgencyProfile(models.Model):
 
     user = models.OneToOneField(User)
     agency = models.ForeignKey(
-        Agency,
+        'agency.Agency',
         blank=True,
         null=True,
         related_name='members',
@@ -444,6 +444,28 @@ class AgencyProfile(models.Model):
             max_length=7,
             default='other',
             )
+
+    def __unicode__(self):
+        return u"%s's Profile" % unicode(self.user).capitalize()
+
+    def get_email(self):
+        """Get the email address to send to"""
+        if self.user.email:
+            return self.user.email
+        elif self.fax:
+            return '%s@fax2.faxaway.com' % self.normalize_fax()
+        else:
+            return ''
+
+    def normalize_fax(self):
+        """Return a fax number suitable for use in a faxaway email address"""
+
+        fax = ''.join(c for c in self.fax if c.isdigit())
+        if len(fax) == 10:
+            return '1' + fax
+        if len(fax) == 11 and fax[0] == '1':
+            return fax
+        return None
 
 
 class Statistics(models.Model):
@@ -528,4 +550,49 @@ class Statistics(models.Model):
         # pylint: disable=too-few-public-methods
         ordering = ['-date']
         verbose_name_plural = 'statistics'
+
+
+class UserManager(models.Manager):
+    """Custom user manager for agency user related methods"""
+
+    def get_or_create_agency_user(self, email, name='', agency=None, trusted=True):
+        """Get an agency user account from an email address"""
+        if ',' in name:
+            last_name, first_name = name.split(',', 1)
+        elif ' ' in name:
+            first_name, last_name = name.rsplit(' ', 1)
+        else:
+            first_name, last_name = name, ''
+        # XXX do we need to allow for a single user to belong to multiple agencies?
+        user, created = User.objects.get_or_create(
+                email=email,
+                defaults={'username': unique_username(name)},
+                )
+        updated = False
+        if not user.first_name:
+            user.first_name = first_name[:30]
+            updated = True
+        if not user.last_name:
+            user.last_name = last_name[:30]
+            updated = True
+        if updated:
+            user.save()
+        if created:
+            user.set_unusable_password()
+            user.save()
+            Profile.objects.create(
+                user=user,
+                acct_type='agency' if trusted else 'unknown', # XXX doc the trust system here
+                email_pref='never',
+                date_update=datetime.date.today(),
+                )
+            if agency:
+                AgencyProfile.objects.create(
+                    user=user,
+                    agency=agency,
+                    )
+        return user
+
+user_manager = UserManager()
+user_manager.contribute_to_class(User, 'agency_objects')
 

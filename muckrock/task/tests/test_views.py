@@ -139,7 +139,6 @@ class OrphanTaskViewTests(TestCase):
     def setUp(self):
         self.url = reverse('orphan-task-list')
         self.task = task.models.OrphanTask.objects.get(pk=2)
-        self.task.communication.priv_from_who = u'Test Email <test@email.com>'
         self.task.communication.save()
         self.client = Client()
         self.client.login(username='adam', password='abc')

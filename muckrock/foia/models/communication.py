@@ -36,6 +36,7 @@ class FOIACommunication(models.Model):
     to_who = models.CharField(max_length=255, blank=True)
     # from/to full email address
     priv_from_who = models.CharField(max_length=255, blank=True)
+    # XXX use this to record addr orphans were sent to
     priv_to_who = models.CharField(max_length=255, blank=True)
     # XXX
 

@@ -32,7 +32,6 @@ from muckrock.foia.forms import (
 from muckrock.foia.models import (
     FOIARequest,
     FOIAMultiRequest,
-    FOIACommunication,
     STATUS,
     )
 from muckrock.jurisdiction.models import Jurisdiction

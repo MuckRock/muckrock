@@ -8,7 +8,7 @@ from django.utils.text import slugify
 import datetime
 import factory
 
-from muckrock.accounts.models import Profile, Statistics
+from muckrock.accounts.models import AgencyProfile, Profile, Statistics
 from muckrock.agency.models import Agency, STALE_DURATION
 from muckrock.foia.models import FOIARequest, FOIACommunication, RawEmail
 from muckrock.jurisdiction.models import Jurisdiction
@@ -29,6 +29,18 @@ class ProfileFactory(factory.django.DjangoModelFactory):
     date_update = datetime.datetime.now()
 
 
+class AgencyProfileFactory(factory.django.DjangoModelFactory):
+    """A factory for creating AgencyProfile test objects."""
+    class Meta:
+        model = AgencyProfile
+
+    user = factory.SubFactory(
+            'muckrock.factories.AgencyUserFactory',
+            agency_profile=None)
+    agency = factory.SubFactory('muckrock.factories.AgencyFactory')
+    contact_type = 'primary'
+
+
 class UserFactory(factory.django.DjangoModelFactory):
     """A factory for creating User test objects."""
     class Meta:
@@ -37,6 +49,11 @@ class UserFactory(factory.django.DjangoModelFactory):
     username = factory.Sequence(lambda n: "user_%d" % n)
     email = factory.Faker('email')
     profile = factory.RelatedFactory(ProfileFactory, 'user')
+
+
+class AgencyUserFactory(UserFactory):
+    """A factory for creating agency user test objects"""
+    agencyprofile = factory.RelatedFactory(AgencyProfileFactory, 'user')
 
 
 class OrganizationFactory(factory.django.DjangoModelFactory):

@@ -25,7 +25,7 @@
 					<h3><a href="{% url 'admin:agency_agency_change' foi.agency.pk %}">{{foi.agency.name}}</a></h3>
 					<table>
 						<tr><td>Address:</td><td>{{foi.agency.address|linebreaksbr}}</td></tr>
-						<tr><td>Email:</td><td><a href="mailto:{{foi.agency.email}}?cc=michael@muckrock.com&subject={{foi.title|urlencode}}">{{foi.agency.email}}</a></td></tr>
+						<tr><td>Email:</td><td><a href="mailto:{{foi.agency.get_primary_contact.email}}?cc=michael@muckrock.com&subject={{foi.title|urlencode}}">{{foi.agency.get_primary_contact.email}}</a></td></tr>
 					</table>
 				{% endif %}
 			<hr />

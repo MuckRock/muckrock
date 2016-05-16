@@ -483,23 +483,27 @@ class FOIARequest(models.Model):
 
     def submit(self, appeal=False, snail=False, thanks=False):
         """The request has been submitted.  Notify admin and try to auto submit"""
+        # XXX
         from muckrock.task.models import FlaggedTask
         # can email appeal if the agency has an appeal agency which has an email address
         # and can accept emailed appeals
-        can_email_appeal = appeal and self.agency and \
-            self.agency.appeal_agency and self.agency.appeal_agency.email and \
-            self.agency.appeal_agency.can_email_appeals
+        can_email_appeal = (appeal and
+                self.agency and
+                self.agency.appeal_agency and
+                self.agency.appeal_agency.get_primary_contact().email and
+                self.agency.appeal_agency.can_email_appeals)
         # update email addresses for the request
         if can_email_appeal:
-            self.email = self.agency.appeal_agency.get_email()
-            self.other_emails = self.agency.appeal_agency.other_emails
-        elif not self.email and self.agency:
-            self.email = self.agency.get_email()
-            self.other_emails = self.agency.other_emails
+            self.contact = self.agency.appeal_agency.get_primary_contact()
+            self.cc_contacts = self.agency.appeal_agency.get_cc_contacts()
+        elif not self.contact and self.agency:
+            self.contact = self.agency.get_primary_contact()
+            self.cc_contacts = self.agency.get_cc_contacts()
         # if agency isnt approved, do not email or snail mail
         # it will be handled after agency is approved
         approved_agency = self.agency and self.agency.status == 'approved'
-        can_email = self.email and not appeal and not self.missing_proxy
+        can_email = (self.contact and self.contact.email and not
+                appeal and not self.missing_proxy)
         comm = self.last_comm()
         # if the request can be emailed, email it, otherwise send a notice to the admin
         # if this is a thanks, send it as normal but do not change the status
@@ -566,7 +570,7 @@ class FOIARequest(models.Model):
 
         # XXX
         # comm.send()
-        if self.email:
+        if self.get_email_addr():
             self._send_email(show_all_comms)
         else:
             self.status = 'submitted'
@@ -617,12 +621,20 @@ class FOIARequest(models.Model):
         # We return the communication we generated, in case the caller wants to do anything with it
         return comm
 
+    def get_email_addr(self):
+        """Get email address to send to"""
+        try:
+            return self.contact.agencyprofile.get_email()
+        except AttributeError:
+            return ''
+
     def _send_email(self, show_all_comms=True):
         """Send an email of the request to its email address"""
-        # self.email should be set before calling this method
+        # self.contact should be set before calling this method
         from muckrock.foia.tasks import send_fax
 
-        from_addr = 'fax' if self.email.endswith('faxaway.com') else self.get_mail_id()
+        contact_email = self.get_email_addr()
+        from_addr = 'fax' if contact_email.endswith('faxaway.com') else self.get_mail_id()
         law_name = self.jurisdiction.get_law_name()
         if self.tracking_id:
             subject = 'RE: %s Request #%s' % (law_name, self.tracking_id)
@@ -652,7 +664,7 @@ class FOIARequest(models.Model):
             subject=subject,
             body=body,
             from_email=from_email,
-            to=[self.email],
+            to=[contact_email],
             bcc=cc_addrs + ['diagnostics@muckrock.com'],
             headers={
                 'Cc': ','.join(cc_addrs),
@@ -671,7 +683,7 @@ class FOIARequest(models.Model):
 
         # update communication
         comm.set_raw_email(msg.message())
-        comm.delivered = 'fax' if self.email.endswith('faxaway.com') else 'email'
+        comm.delivered = 'fax' if contact_email.endswith('faxaway.com') else 'email'
         comm.subject = subject
         comm.save()
 

@@ -327,10 +327,13 @@ class StaleAgencyTask(Task):
 
     def update_email(self, new_email, foia_list=None):
         """Updates the email on the agency and the provided requests."""
-        self.agency.email = new_email
+        user = User.agency_objects.get_or_create_agency_user(
+                new_email,
+                agency=self.agency)
+        self.agency.set_primary_contact(user)
         self.agency.save()
         for foia in foia_list:
-            foia.email = new_email
+            foia.contact = user
             foia.followup(show_all_comms=False)
 
 
@@ -442,7 +445,7 @@ class NewAgencyTask(Task):
             comms = foia.communications.all()
             if comms.count():
                 first_comm = comms[0]
-                first_comm.resend(replacement_agency.email)
+                first_comm.resend(replacement_agency.get_email())
 
 
 class ResponseTask(Task):

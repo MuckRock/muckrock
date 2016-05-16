@@ -13,7 +13,12 @@ import nose.tools
 from operator import attrgetter
 import re
 
-from muckrock.factories import UserFactory, FOIARequestFactory, ProjectFactory
+from muckrock.factories import (
+        UserFactory,
+        FOIARequestFactory,
+        ProjectFactory,
+        AgencyUserFactory,
+        )
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.foia.views import Detail
 from muckrock.agency.models import Agency
@@ -142,6 +147,7 @@ class TestFOIARequestUnit(TestCase):
         """Make sure the follow up date is set correctly"""
         # pylint: disable=protected-access
         foia = FOIARequest.objects.get(pk=15)
+        foia.contact = AgencyUserFactory(email=foia.email)
         foia.followup()
         nose.tools.assert_in('I can expect', mail.outbox[-1].body)
         nose.tools.eq_(foia.date_followup,
@@ -441,7 +447,7 @@ class TestFOIAIntegration(TestCase):
             user=user, title='Test with no email', slug='test-with-no-email',
             status='submitted', jurisdiction=jurisdiction, agency=agency)
         comm = FOIACommunication.objects.create(
-            foia=foia, from_who='Muckrock', to_who='Test Agency', date=datetime.datetime.now(),
+            foia=foia, from_who='Muckrock', date=datetime.datetime.now(),
             response=False, communication=u'Test communication')
         foia.submit()
 
@@ -472,7 +478,7 @@ class TestFOIAIntegration(TestCase):
         ## after 5 days agency replies with a fix needed
         self.set_today(datetime.date.today() + datetime.timedelta(5))
         comm = FOIACommunication.objects.create(
-            foia=foia, from_who='Test Agency', to_who='Muckrock', date=datetime.datetime.now(),
+            foia=foia, from_who='Test Agency', date=datetime.datetime.now(),
             response=True, communication='Test communication')
         foia.status = 'fix'
         foia.save()
@@ -490,7 +496,7 @@ class TestFOIAIntegration(TestCase):
         ## after 10 days the user submits the fix and the admin submits it right away
         self.set_today(datetime.date.today() + datetime.timedelta(10))
         comm = FOIACommunication.objects.create(
-            foia=foia, from_who='Muckrock', to_who='Test Agency', date=datetime.datetime.now(),
+            foia=foia, from_who='Muckrock', date=datetime.datetime.now(),
             response=False, communication='Test communication')
         foia.status = 'submitted'
         foia.save()
@@ -520,7 +526,7 @@ class TestFOIAIntegration(TestCase):
         ## after 4 days agency replies with the documents
         self.set_today(datetime.date.today() + datetime.timedelta(4))
         comm = FOIACommunication.objects.create(
-            foia=foia, from_who='Test Agency', to_who='Muckrock', date=datetime.datetime.now(),
+            foia=foia, from_who='Test Agency', date=datetime.datetime.now(),
             response=True, communication='Test communication')
         foia.status = 'done'
         foia.save()

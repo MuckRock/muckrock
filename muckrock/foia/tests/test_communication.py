@@ -32,7 +32,6 @@ class TestCommunication(test.TestCase):
     def setUp(self):
         self.foia = FOIARequest.objects.get(id=1)
         self.comm = FOIACommunication.objects.get(id=1)
-        self.comm.priv_from_who = u'Test Email <test@email.com>'
         self.comm.save()
         # add a file to the communication
         self.file = FOIAFile.objects.get(id=1)

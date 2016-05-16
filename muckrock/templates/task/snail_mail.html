@@ -19,9 +19,9 @@
     {# agency info #}
     <dt>Agency</dt>
     <dd><a href="{% url 'admin:agency_agency_change' agency.pk %}">{{agency}}</a></dd>
-	{% if agency.email %}
+	{% if agency.get_primary_contact.email %}
     <dt>Agency Email</dt>
-    <dd>{{agency.email}}</dd>
+    <dd>{{agency.get_primary_contact.email}}</dd>
 	{% endif %}
 	{% if agency.fax %}
     <dt>Agency Fax</dt>
@@ -31,7 +31,7 @@
     <dt>Agency Address</dt>
     <dd>{{agency.address|linebreaks}}</dd>
 	{% endif %}
-	{% if agency.notes and not agency.email and not agency.fax %}
+	{% if agency.notes and not agency.get_primary_contact.email and not agency.fax %}
     <dt>Agency Notes</dt>
     <dd>{{agency.notes}}</dd>
 	{% endif %}

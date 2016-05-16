@@ -4,6 +4,7 @@ FOIA views for actions
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.models import User
 from django.shortcuts import (
         render_to_response,
         get_object_or_404,
@@ -232,6 +233,7 @@ def agency_reply(request, jurisdiction, jidx, slug, idx):
 @user_passes_test(lambda u: u.is_staff)
 def admin_fix(request, jurisdiction, jidx, slug, idx):
     """Send an email from the requests auto email address"""
+    # XXX test this with comm users
     foia = _get_foia(jurisdiction, jidx, slug, idx)
 
     if request.method == 'POST':
@@ -239,12 +241,20 @@ def admin_fix(request, jurisdiction, jidx, slug, idx):
         formset = FOIAFileFormSet(request.POST, request.FILES)
         if form.is_valid() and formset.is_valid():
             if form.cleaned_data['email']:
-                # XXX - switch to users
-                foia.email = form.cleaned_data['email']
+                foia.contact = User.agency_objects.get_or_create_agency_user(
+                        form.cleaned_data['email'],
+                        agency=foia.agency)
             if form.cleaned_data['other_emails']:
-                foia.other_emails = form.cleaned_data['other_emails']
+                foia.cc_contacts.clear()
+                for email in form.cleaned_data['other_emails']:
+                    user = User.agency_objects.get_or_create_agency_user(
+                            email,
+                            agency=foia.agency)
+                    foia.cc_contacts.add(user)
             if form.cleaned_data['from_email']:
-                from_user = form.cleaned_data['from_email'] # XXX
+                # XXX
+                from_user = User.agency_objects.get_or_create_agency_user(
+                        form.cleaned_data['from_email'])
             else:
                 from_user = foia.user
             foia.create_out_communication(

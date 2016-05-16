@@ -11,6 +11,7 @@ from datetime import date
 from djgeojson.fields import PointField
 from easy_thumbnails.fields import ThumbnailerImageField
 
+from muckrock.accounts.models import AgencyProfile
 from muckrock.jurisdiction.models import Jurisdiction, RequestHelper
 from muckrock import fields
 
@@ -59,6 +60,7 @@ class Agency(models.Model, RequestHelper):
         ), max_length=8, default='pending')
     user = models.ForeignKey(User, null=True, blank=True)
     appeal_agency = models.ForeignKey('self', null=True, blank=True)
+    # XXX
     can_email_appeals = models.BooleanField(default=False)
     payable_to = models.ForeignKey('self', related_name='receivable', null=True, blank=True)
     image = ThumbnailerImageField(
@@ -112,34 +114,21 @@ class Agency(models.Model, RequestHelper):
 
     def save(self, *args, **kwargs):
         """Save the agency"""
-        self.email = self.email.strip()
         self.slug = slugify(self.slug)
         self.name = self.name.strip()
         super(Agency, self).save(*args, **kwargs)
 
-    def normalize_fax(self):
-        """Return a fax number suitable for use in a faxaway email address"""
-
-        fax = ''.join(c for c in self.fax if c.isdigit())
-        if len(fax) == 10:
-            return '1' + fax
-        if len(fax) == 11 and fax[0] == '1':
-            return fax
-        return None
-
     def get_email(self):
         """Returns an email address to send to"""
-
-        if self.email:
-            return self.email
-        elif self.normalize_fax():
-            return '%s@fax2.faxaway.com' % self.normalize_fax()
+        contact = self.get_primary_contact()
+        if contact and contact.agencyprofile:
+            return contact.agencyprofile.get_email()
         else:
             return ''
 
     def get_other_emails(self):
         """Returns other emails as a list"""
-        return fields.email_separator_re.split(self.other_emails)
+        return self.get_cc_contacts().values_list('email', flat=True)
 
     def link_display(self):
         """Returns link if approved"""
@@ -176,6 +165,49 @@ class Agency(models.Model, RequestHelper):
                 .filter(communications__thanks=True)
                 .distinct()
                 .count())
+
+    def set_primary_contact(self, user):
+        """Set a user as the primary contact for this agency"""
+        if user.profile.acct_type != 'agency':
+            raise ValueError(
+                    'User must be an agency user to be the primary contact')
+        if user.agencyprofile.agency != self:
+            raise ValueError('User must be affiliated with this agency to '
+                    'be the primary contact')
+        for agencyprofile in AgencyProfile.objects.filter(
+                agency=self, contact_type='primary'):
+            agencyprofile.contact_type = 'other'
+            agencyprofile.save()
+
+        user.agencyprofile.contact_type = 'primary'
+        user.agencyprofile.save()
+
+    def get_primary_contact(self):
+        """Get the primary contact for this agency"""
+        # XXX multi primary contacts?
+        try:
+            return User.objects.get(
+                    agencyprofile__agency=self,
+                    agencyprofile__contact_type='primary')
+        except User.DoesNotExist:
+            return None
+
+    def get_cc_contacts(self):
+        """Get the CC contacts for this agency"""
+        return User.objects.filter(
+                agencyprofile__agency=self,
+                agencyprofile__contact_type='copy')
+
+    def get_appeal_contact(self):
+        """Get the appeal contact for this agency"""
+        # XXX multi primary contacts?
+        try:
+            return User.objects.get(
+                    agencyprofile__agency=self,
+                    agencyprofile__contact_type='appeal')
+        except User.DoesNotExist:
+            return None
+
 
     class Meta:
         # pylint: disable=too-few-public-methods
