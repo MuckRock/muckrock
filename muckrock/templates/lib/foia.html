@@ -2,14 +2,14 @@
 {% if foia %}
 <div class="foia-single">
     <div class="foia-info">
-        <p class="status {{ foia.status|classify_status }}">{{ foia.get_status_display }}</p>
+        <p class="small badge {{ foia.status|classify_status }}">{{ foia.get_status_display }}</p>
         {% if foia.public_file_count %}
-        <p class="files"><a href="{{foia.get_absolute_url}}#files">{{ foia.public_file_count }} file{{ foia.public_file_count|pluralize }}</a></p>
+        <p class="files"><a class="small action" href="{{foia.get_absolute_url}}#files">{{ foia.public_file_count }} file{{ foia.public_file_count|pluralize }}</a></p>
         {% else %}
         <p class="files">No files</p>
         {% endif %}
         <p class="title"><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></p>
-        <p class="summary"><a href="{% url 'acct-profile' username=foia.user.username %}">{{ foia.user.get_full_name }}</a> sent this request to the <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency }}</a> of {% if foia.jurisdiction.level == 'f' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% if foia.jurisdiction.parent and foia.jurisdiction.level == 'l' %}, <a href="{{ foia.jurisdiction.parent.get_absolute_url }}" title="{{ foia.jurisdiction.parent.name }}">{{ foia.jurisdiction.parent.abbrev }}</a>{% endif %}</p>
+        <p class="small summary"><a href="{% url 'acct-profile' username=foia.user.username %}">{{ foia.user.get_full_name }}</a> sent this request to the <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency }}</a> of {% if foia.jurisdiction.level == 'f' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% if foia.jurisdiction.parent and foia.jurisdiction.level == 'l' %}, <a href="{{ foia.jurisdiction.parent.get_absolute_url }}" title="{{ foia.jurisdiction.parent.name }}">{{ foia.jurisdiction.parent.abbrev }}</a>{% endif %}</p>
     </div>
     {% if not hide_actions %}
     <div class="foia-actions">

@@ -44,7 +44,7 @@
     {% endif %}
     {% if communication.status and request.user.is_staff %}
         <p class="status">
-            <span class="badge {{communication.status|classify_status}}">{{communication.get_status_display}}</span>
+            <span class="small badge {{communication.status|classify_status}}">{{communication.get_status_display}}</span>
         </p>
     {% endif %}
     </section>
