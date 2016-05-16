@@ -273,9 +273,6 @@ $request-breakpoint: 768px;
         padding-left: 0;
         .file {
             margin-bottom: $vertical-rhythm/2;
-            border: $base-border-width solid $color-blue;
-            @include border-radius;
-            padding: $vertical-rhythm/2;
         }
         .active .file {
             border-color: $color-blue-dark;

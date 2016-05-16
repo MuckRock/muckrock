@@ -11,18 +11,31 @@
         <p class="title">{{file.title}}</p>
         <ul class="file-actions">
             {% if file.is_doccloud and file.doc_id and file.is_public %}
-				{% if foia_url %}
-				{# if foia_url, then we are on the FOIA page already #}
-				<li><a href="#{{ file.anchor }}" class="view-file action">View</a></li>
-				{% else %}
-				<li><a href="{{ SITE_ROOT }}{{ file.foia.get_absolute_url }}#{{ file.anchor }}" class="view-file action">View</a></li>
-				{% endif %}
-            <li><span class="toggle-embed action">Embed</span></li>
+            <li>
+                {% if foia_url %}
+                {# if foia_url, then we are on the FOIA page already #}
+                <a href="#{{ file.anchor }}" class="view-file action">
+                {% else %}
+                <a href="{{ SITE_ROOT }}{{ file.foia.get_absolute_url }}#{{ file.anchor }}" class="view-file action">
+                {% endif %}
+                    {% include 'lib/component/icon/view.svg' %}
+                    <span class="label">View</span>
+                </a>
+            </li>
+            <li>
+                <span class="toggle-embed action">
+                    {% include 'lib/component/icon/embed.svg' %}
+                    <span class="label">Embed</span>
+                </span>
+            </li>
             {% endif %}
             {% if file.ffile %}
-            <li><a href="{{file.ffile.url}}" target="_blank" class="action">
-                <span class="label">Download</span>
-            </a></li>
+            <li>
+                <a href="{{file.ffile.url}}" target="_blank" class="action">
+                    {% include 'lib/component/icon/download.svg' %}
+                    <span class="label">Download</span>
+                </a>
+            </li>
             {% endif %}
         </ul>
         {% if file.is_doccloud and file.doc_id %}
@@ -31,4 +44,5 @@
         </div>
         {% endif %}
     </div>
+
 </div>

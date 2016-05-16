@@ -2,8 +2,24 @@
     font-weight: bold;
     color: $color-blue;
     cursor: pointer;
+    .icon {
+        position: relative;
+        top: 3px;
+    }
+    .icon path,
+    .icon polygon,
+    .icon rect,
+    .icon circle{
+        fill: $color-blue;
+    }
     &:hover {
         color: $color-blue-dark;
         text-decoration: underline;
+        .icon path,
+        .icon polygon,
+        .icon rect,
+        .icon circle{
+            fill: $color-blue-dark;
+        }
     }
 }
