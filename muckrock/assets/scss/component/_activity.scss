@@ -1,0 +1,15 @@
+.activity-container {
+    @include display(flex);
+    @include justify-content(space-between);
+    @include border;
+    @include border-radius;
+    padding: $vertical-rhythm/2;
+}
+
+.activity {
+    margin-bottom: 0;
+}
+
+.activity-time {
+    font-size: $font-size-2;
+}
