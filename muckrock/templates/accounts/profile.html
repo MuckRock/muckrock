@@ -74,13 +74,15 @@
             <input type="hidden" name="stripe_fee" value="0" />
             <input type="hidden" name="stripe_amount" value="2000" />
         </form>
-        <div class="controls">
+        <div>
             {% if request.user == user_obj %}
-            <a href="{% url 'foia-create' %}" class="primary button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
-                {% include 'lib/component/icon/create-request.svg' %}
-                <span>File a Request</span>
-            </a>
-            <button class="primary button" form="buy-requests" type="submit">Buy Requests</button>
+            <div class="button-group">
+                <a href="{% url 'foia-create' %}" class="primary button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
+                    {% include 'lib/component/icon/create-request.svg' %}
+                    <span>File a Request</span>
+                </a>
+                <button class="primary button" form="buy-requests" type="submit">Buy Requests</button>
+            </div>
             <a href="{% url 'acct-settings' %}" class="button">Settings</a>
             {% else %}
             <button class="primary button" form="buy-requests" type="submit">&hearts; Gift Requests</button>
