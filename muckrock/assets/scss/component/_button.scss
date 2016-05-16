@@ -1,0 +1,110 @@
+/* Buttons */
+
+$shadow-normal: 3px;
+$shadow-hover: 3px;
+$shadow-active: 0px;
+
+@mixin button-color($color) {
+    $color-light: lighten($color, $color-darken-amount/2);
+    $color-dark: darken($color, $color-darken-amount);
+    border-color: $color-dark;
+    background: $color;
+    box-shadow: 0px $shadow-normal 0px 0px $color-dark;
+    text-shadow: 0px -1px $color-dark;
+    &:link, &:visited {
+        box-shadow: 0px $shadow-normal 0px 0px $color-dark;
+    }
+    &:hover {
+        background: $color-light;
+        box-shadow: 0px $shadow-hover 0px 0px $color-dark;
+    }
+    &:active {
+        box-shadow: 0px $shadow-active 0px 0px $color-dark;
+    }
+}
+
+@mixin button($color) {
+    $color-light: lighten($color, $color-darken-amount);
+    $color-dark: darken($color, $color-darken-amount);
+    // Metrics
+    display: inline-block;
+    margin: $vertical-rhythm/4 0;
+    border: 1px solid $color-dark;
+    border-radius: $base-border-radius;
+    padding: $vertical-rhythm/6 $vertical-rhythm/3;
+    box-shadow: 0px $shadow-normal 0px 0px $color-dark;
+    text-shadow: 0px -1px $color-dark;
+    // Color
+    background: $color;
+    color: $color-white;
+    .icon {
+        vertical-align: text-top;
+        path, rect, polygon, circle {
+            fill: $color-white;
+        }
+    }
+    // Type
+    font-weight: $font-weight-bold;
+    text-align: center;
+    text-decoration: none;
+    text-shadow: inset 0px 1px $color;
+    // Transitions
+    transition-property: box-shadow transform;
+    transition-duration: .15s;
+    transition-timing-function: ease;
+    // Misc
+    cursor: pointer;
+    appearance: none;
+    outline: none;
+    // State
+    &:link, &:visited {
+        box-shadow: 0px $shadow-normal 0px 0px $color-dark;
+    }
+    &:hover {
+        @include transform(translateY($shadow-normal - $shadow-hover));
+        box-shadow: 0px $shadow-hover 0px 0px $color-dark;
+        color: $color-white;
+        background: $color-light;
+        text-decoration: none;
+    }
+    &:active {
+        @include transform(translateY($shadow-normal - $shadow-active));
+        box-shadow: 0px $shadow-active 0px 0px $color-dark;
+        color: $color-white;
+    }
+    &.disabled, &:disabled {
+        cursor: default;
+        background: $color-white;
+        color: $color-grey-6;
+        border-color: $color-grey-6;
+        box-shadow: 0 $shadow-normal 0 0 $color-grey-6;
+        text-shadow: none;
+        &:hover {
+            color: $color-grey-6;
+            transform: none;
+            box-shadow: 0 $shadow-normal 0 0 $color-grey-6;
+        }
+    }
+}
+
+.button {
+    @include button($color-grey);
+    &.blue, &.primary   { @include button-color($color-blue);     }
+    &.green, &.success  { @include button-color($color-green);    }
+    &.red, &.failure    { @include button-color($color-red);      }
+    &.yellow, &.warning { @include button-color($color-yellow);   }
+}
+
+.button.basic {
+    margin: 0;
+    box-shadow: none;
+    text-shadow: none;
+    transform: none;
+    transition: none;
+    border: none;
+    border-radius: 0;
+    &:hover, &:active {
+        box-shadow: none;
+        @include transform(none);
+    }
+}

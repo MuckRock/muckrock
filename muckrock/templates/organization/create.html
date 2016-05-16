@@ -15,7 +15,11 @@
         </ul>
         <p>Once you create your organization, you will be asked to activate it.</p>
     </aside>
-    {% include 'lib/form.html' with button_text="Create" %}
+    <form method="post">
+        {% csrf_token %}
+        {% include 'lib/pattern/form.html' %}
+        <button type="submit" class="blue button">Create Organization</button>
+    </form>
 </section>
 {% endblock content %}
 

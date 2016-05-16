@@ -1,0 +1,44 @@
+.file {
+    @include display(flex);
+    width: 100%;
+    padding: $vertical-rhythm/2;
+    background: $color-white-pure;
+    border: 1px solid $color-grey;
+    .file-image {
+        margin-bottom: 0;
+        max-width: 3em;
+        &.thumbnail img {
+            border: 1px solid $color-grey;
+        }
+    }
+    .file-info {
+        width: 100%;
+        margin-left: $vertical-rhythm;
+        .title {
+            margin-bottom: $vertical-rhythm/2;
+        }
+    }
+    .file-actions {
+        list-style-type: none;
+        margin-bottom: 0;
+        padding-left: 0;
+        li {
+            display: inline-block;
+            margin-right: $vertical-rhythm;
+        }
+    }
+    .file-embed {
+        display: none;
+        width: 100%;
+        margin-top: $vertical-rhythm/2;
+        &.visible {
+            display: block;
+        }
+        textarea {
+            display: block;
+            margin-bottom: 0;
+            border-radius: 0;
+            border-bottom: 1px solid $color-grey;
+        }
+    }
+}

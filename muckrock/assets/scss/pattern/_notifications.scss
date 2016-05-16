@@ -5,7 +5,6 @@
 @mixin notification-color($light, $normal, $dark) {
     background: $light;
     color: $dark;
-    border-bottom: 1px solid $normal;
     .symbol {
         background: $normal;
         path, rect, circle {

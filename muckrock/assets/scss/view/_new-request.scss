@@ -222,7 +222,16 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
 
 }
 
-.clone-candidates { @include outer-container; }
+.foia-group {
+    @include display(flex);
+    @include flex-wrap(wrap);
+    @include align-items(flex-start);
+    .foia-single {
+        @include flex(1 1 15em);
+        max-width: 20em;
+        margin-right: $vertical-rhythm;
+    }
+}
 
 .multirequest-create {
     @include outer-container;

@@ -71,7 +71,7 @@
                 <ul class="nostyle">
                 {% for project in featured_projects %}
                     <li>
-                        {% include 'component/project.html' %}
+                        {% include 'lib/pattern/project.html' %}
                     </li>
                 {% endfor %}
                 </ul>
@@ -84,7 +84,7 @@
                 <div class="about">
                     <h2>File, track, and share public records requests</h2>
                     <a href="{% url 'foia-create' %}" class="primary button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
-                        {% include 'lib/icons/create-request.svg' %}
+                        {% include 'lib/component/icon/create-request.svg' %}
                         <span class="label">File a Request</span>
                     </a>
                     <div class="call-to-action"><a href="/about/how-we-work/" id="learn-more">or learn how it works.</a></div>

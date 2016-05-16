@@ -10,8 +10,8 @@
     </header>
     <form enctype="multipart/form-data" method="post">
         {% csrf_token %}
-        {% include 'component/form.html' %}
-        <button type="submit" class="blue">Create the project</button>
+        {% include 'lib/pattern/form.html' %}
+        <button type="submit" class="blue button">Create the project</button>
     </form>
 </div>
 {% endblock %}

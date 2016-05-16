@@ -30,7 +30,7 @@ $('#show-flag-form').click(function(){
 
 // Manager Component
 // A manager presents a state and a form that can modify that state.
-$('.manager .edit').click(function(){
+$('.manager .action').click(function(){
     var editButton = this;
     var manager = $(editButton).closest('.manager');
     var form = $(manager).find('form');

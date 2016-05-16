@@ -3,10 +3,10 @@
         <div class="nav-section">
             <a href="{% url 'index'%}" class="nav-item brand">
                 <span class="logotype">
-                    {% include 'lib/icons/logotype.svg' %}
+                    {% include 'lib/component/icon/logotype.svg' %}
                 </span>
                 <span class="logo">
-                    {% include 'lib/icons/logo.svg' %}
+                    {% include 'lib/component/icon/logo.svg' %}
                 </span>
             </a>
             <ul class="website-sections" id="global-sections">
@@ -20,7 +20,7 @@
                 {% endif %}
             </ul>
             <div class="nav-item website-sections-button" id="show-sections">
-                {% include 'lib/icons/sections-dots.svg' %}
+                {% include 'lib/component/icon/sections-dots.svg' %}
                 <span class="label">Sections</span>
             </div>
         </div>
@@ -34,18 +34,18 @@
         </form>
         <div class="nav-section">
             <div class="nav-item search-button" id="show-search">
-                {% include 'lib/icons/search.svg' %}
+                {% include 'lib/component/icon/search.svg' %}
                 <span class="label">Search</span>
             </div>
             <a class="dark nav-item create-request-button" href="{% url 'foia-create'%}" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
-                {% include 'lib/icons/create-request.svg' %}
+                {% include 'lib/component/icon/create-request.svg' %}
                 <span class="label">File<span class="extended"> Request</span></span>
             </a>
             <div class="dark nav-item sidebar-toggle" id="sidebar-button">
                 {% if actionable_requests.count > 0 %}
                 <span class="blue counter">{{actionable_requests.count}}</span>
                 {% else %}
-                {% include 'lib/icons/sections-lines.svg' %}
+                {% include 'lib/component/icon/sections-lines.svg' %}
                 {% endif %}
                 <span class="label">Menu</span>
             </div>

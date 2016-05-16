@@ -53,18 +53,18 @@
     }
     .from, .subject {
         margin-bottom: 0;
+        margin-right: $vertical-rhythm/2;
         @include overflow-ellipsis;
         &:hover {
             cursor: default;
         }
-        font-size: $font-size-3;
         font-weight: $font-weight-bold;
     }
     .communication-metadata {
         @include display(flex);
         @include justify-content(space-between);
+        @include align-items(center);
         margin-bottom: 0;
-        font-size: $font-size-2;
     }
     .communication-body {
         margin-bottom: 0;
@@ -75,8 +75,10 @@
         padding-left: 0;
         & > li {
             display: block;
-            padding: $vertical-rhythm/2;
-            border-top: 1px dotted;
+            border-top: 1px dotted $color-grey;
+        }
+        .file {
+            border: none;
         }
     }
     .communication-actions, .communication-action {

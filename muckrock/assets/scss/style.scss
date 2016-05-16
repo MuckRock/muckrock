@@ -4,13 +4,10 @@
 @import 'framework/neat/neat';
 
 // MuckRock
-@import 'base/variables';
-@import 'base/mixins';
-@import 'base/grid';
-@import 'base/colors';
-@import 'base/typography';
+@import 'base/base';
 @import 'component/component';
-@import 'layout/layout';
+@import 'pattern/pattern';
+@import 'view/view';
 
 // Third Party Plugins
 @import 'plugin/autocomplete';

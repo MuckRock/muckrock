@@ -20,6 +20,10 @@
     }
 }
 
+.profile .stripe-checkout {
+    display: none;
+}
+
 .profile .image {
     margin: 0 0 $vertical-rhythm;
     .header-image {

@@ -269,8 +269,13 @@ class OrganizationDetailView(DetailView):
             context['is_staff'] = user.is_staff
             context['is_owner'] = organization.is_owned_by(user)
             context['is_member'] = user.profile.is_member_of(organization)
-        context['requests'] = (FOIARequest.objects
-                .organization(organization).get_viewable(user)[:99])
+        requests = FOIARequest.objects.organization(organization).get_viewable(user)
+        context['requests'] = {
+            'count': len(requests),
+            'filed': requests.order_by('-date_submitted')[:10],
+            'completed': requests.get_done().order_by('-date_done')[:10]
+        }
+
         context['members'] = organization.members.select_related('user')
         context['available'] = {
             'requests': organization.num_requests,

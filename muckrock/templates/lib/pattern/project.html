@@ -9,12 +9,12 @@
         <a href="{{project.get_absolute_url}}" class="project-header-wrapper">
             <div>
                 {% if project.featured %}
-                <span class="blue badge">&#9733; Featured</span>
+                <span class="small blue badge">&#9733; Featured</span>
                 {% endif %}
                 {% if project.private %}
-                <span class="red badge">&empty; Private</span>
+                <span class="small red badge">&empty; Private</span>
                 {% elif not project.approved %}
-                <span class="badge">Pending Approval</span>
+                <span class="small badge">Pending Approval</span>
                 {% endif %}
                 <h2 class="title">{{project.title}}</h2>
             </div>

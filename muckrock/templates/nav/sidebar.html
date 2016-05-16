@@ -6,11 +6,11 @@
     <form method="post" action="{% url 'acct-login' %}?next={{ request.get_full_path }}" class="quick-log-in" id="quick-log-in-form">
         {% csrf_token %}
         <h1>Log In</h1>
-        {{ login_form }}
+        {% include 'lib/pattern/form.html' with form=login_form %}
         <p><a class="forgot" href="{% url 'acct-reset-pw' %}">Forget your password?</a></p>
         <div class="row">
             <span class="cancel button">Cancel</span>
-            <button type="submit" class="primary" onclick="ga('send', 'event', 'Account', 'Login', window.location.pathname)">Log In</button>
+            <button type="submit" class="primary button" onclick="ga('send', 'event', 'Account', 'Login', window.location.pathname)">Log In</button>
         </div>
     </form>
     {% endif %}
@@ -19,7 +19,7 @@
         <a href="{% url 'acct-my-profile' %}" class="username">{{ user.get_full_name }}</a>
         <div class="dropdown">
             <div class="nav-item dropdown-trigger">
-                {% include 'lib/icons/options.svg' %}
+                {% include 'lib/component/icon/options.svg' %}
             </div>
             <ul class="dropdown-list">
                 {% if user.is_staff %}<li class="dropdown-list-item"><a class="admin" href="{% if sidebar_admin_url %}{{ sidebar_admin_url }}{% else %}/admin/{% endif %}" >Admin</a></li>{% endif %}
