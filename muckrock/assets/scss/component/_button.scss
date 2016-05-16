@@ -39,7 +39,7 @@ $shadow-active: 0px;
     color: $color-white;
     .icon {
         vertical-align: text-top;
-        path, rect {
+        path, rect, polygon, circle {
             fill: $color-white;
         }
     }
