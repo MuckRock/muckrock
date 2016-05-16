@@ -47,7 +47,7 @@ class FOIAFile(models.Model):
         return ext.lower() in ['.pdf', '.doc', '.docx']
 
     def get_thumbnail(self):
-        """Get the url to the thumbnail image"""
+        """Get the url to the thumbnail image. If document is not public, use a generic fallback."""
         mimetypes = {
             'avi': 'file-video.png',
             'bmp': 'file-image.png',
@@ -65,9 +65,18 @@ class FOIAFile(models.Model):
             'xlsx': 'file-spreadsheet.png',
             'zip': 'file-archive.png',
         }
-        ext = os.path.splitext(self.name())[1][1:]
-        filename = mimetypes.get(ext, 'file-document.png')
-        return '%simg/%s' % (settings.STATIC_URL, filename)
+        if self.is_public() and self.is_doccloud():
+            index = self.doc_id.index('-')
+            num = self.doc_id[0:index]
+            name = self.doc_id[index+1:]
+            return (
+                'https://s3.amazonaws.com/s3.documentcloud.org/documents/' +
+                num + '/pages/' + name + '-p1-small.gif'
+            )
+        else:
+            ext = os.path.splitext(self.name())[1][1:]
+            filename = mimetypes.get(ext, 'file-document.png')
+            return '%simg/%s' % (settings.STATIC_URL, filename)
 
     def get_foia(self):
         """Get FOIA - self.foia should be refactored out"""
