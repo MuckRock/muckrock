@@ -53,7 +53,7 @@ $request-breakpoint: 768px;
             max-width: 0;
             @include overflow-ellipsis;
         }
-        .edit {
+        .action {
             margin-left: $vertical-rhythm/2;
             float: right;
         }
@@ -310,11 +310,14 @@ $request-breakpoint: 768px;
 
     .add-note {
         @include border;
+        box-shadow: 0px 4px 8px 0px $color-grey;
         textarea {
             display: block;
             margin-bottom: 0;
             border: none;
             border-radius: 0;
+            font-family: $font-monospace;
+            font-size: $font-size-2;
         }
         h4 {
             margin-bottom: 0;
@@ -345,6 +348,7 @@ $request-breakpoint: 768px;
     .note {
         @include border;
         border-color: $color-grey;
+        background: $color-white-pure;
         .note-header {
             @include display(flex);
             @include justify-content(space-between);
@@ -373,9 +377,6 @@ $request-breakpoint: 768px;
 
 .request .access {
     .generate-private-link, .grant-access {
-        @include display(flex);
-        @include flex-wrap(wrap);
-        @include align-items(flex-start);
         padding: $vertical-rhythm;
         @include border;
         h3 {
@@ -387,6 +388,9 @@ $request-breakpoint: 768px;
         }
     }
     .generate-private-link {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        @include align-items(flex-start);
         input[type="text"] {
             @include flex(0 1 100%);
             margin-bottom: $vertical-rhythm;
@@ -404,10 +408,12 @@ $request-breakpoint: 768px;
             padding-left: $vertical-rhythm;
         }
     }
-    .grant-access {
-        @include align-items(center);
+    .grant-access .picker {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        @include align-items(flex-end);
         .user.search.input {
-            @include flex(0 1 100%);
+            margin-bottom: 0;
             .users {
                 width: 100%;
             }
@@ -423,32 +429,9 @@ $request-breakpoint: 768px;
             @include flex(0 1 100%);
             margin-bottom: $vertical-rhythm;
         }
-        button {
-            @include flex(1);
-        }
-        // overrides the autocomplete widget
-        .deck {
-            display: block;
-        }
-        span#id_users-deck .hilight {
-            background-color: $color-blue;
-            margin: 0 $vertical-rhythm/2 $vertical-rhythm/2 0;
-            padding: $vertical-rhythm/4 $vertical-rhythm/2;
-            color: $color-white;
-            &:hover {
-                background-color: $color-blue-dark;
-            }
-        }
 
-        span#id_users-deck .hilight .remove {
-            width: initial;
-            margin-right: $vertical-rhythm/2;
-            vertical-align: middle;
-            text-align: center;
-            font-size: $font-size-7;
-            text-indent: 0;
-            background: none;
-            color: $color-white;
+        .user.hilight {
+            width: 100%;
         }
 
         @include media($medium-layout) {

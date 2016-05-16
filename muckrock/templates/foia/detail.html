@@ -88,7 +88,7 @@
                 {% if show_estimated_date %}
                 <tr class="estimated-completion">
                     <td class="label">Est. Completion</td>
-                    <td class="date">{% if foia.date_estimate %}{{ foia.date_estimate|date }}{% else %}None{% endif %}{% if user_can_edit %}<span class="small action">Edit</span>{% endif %}</td>
+                    <td class="date">{% if foia.date_estimate %}{{ foia.date_estimate|date }}{% else %}None{% endif %}{% if user_can_edit %}<span class="action">Edit</span>{% endif %}</td>
                 </tr>
                 {% endif %}
             </table>
@@ -350,7 +350,7 @@ Sincerely,
                     </header>
                     {{ note_form.note }}
                     <footer>
-                        <button class="primary button" type="submit" name="action" value="add_note">Save</button>
+                        <button class="primary button" type="submit" name="action" value="add_note">Add Note</button>
                         <p>Your notes are visible to you and other editors of this request.</p>
                     </footer>
                 </form>
@@ -396,11 +396,13 @@ Sincerely,
                 <form class="grant-access" method="post">
                     {% csrf_token %}
                     <h3>Grant Access</h3>
-                    <div class="user search input">
-                        <label for="{{ access_form.users.id_for_label}}">Search for MuckRock users</label>
-                        {{ access_form.users }}
+                    <div class="picker">
+                        <div class="user search input">
+                            <label for="{{ access_form.users.id_for_label}}">Search for MuckRock users</label>
+                            {{ access_form.users }}
+                        </div>
+                        {{ access_form.access }}
                     </div>
-                    {{ access_form.access }}
                     <button class="primary button" type="submit" name="action" value="grant_access">Save</button>
                 </form>
                 <table class="people with-access">
@@ -419,8 +421,8 @@ Sincerely,
                                 <form class="modify-access" method="post">
                                     {% csrf_token %}
                                     <input type="hidden" name="user" value="{{ user.id }}" />
-                                    <button class="button" type="submit" name="action" value="demote">Demote</button>
-                                    <button class="failure button" type="submit" name="action" value="revoke_access">Revoke</button>
+                                    <button class="small basic button" type="submit" name="action" value="demote">Demote</button>
+                                    <button class="small basic red button" type="submit" name="action" value="revoke_access">Revoke</button>
                                 </form>
                             </td>
                         </tr>
