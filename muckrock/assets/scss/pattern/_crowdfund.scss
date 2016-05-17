@@ -15,22 +15,16 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
         @include border-bottom-radius($base-border-radius);
     }
 
-    a {
+    a, .action {
         color: $color-green-dark;
-    }
-
-    .action {
-        display: inline-block;
-        text-decoration: none;
-        border-bottom: 1px dotted;
         &:hover {
             color: $color-black;
-            border-bottom: 1px solid;
         }
     }
 
     header .action {
         font-size: $font-size-2;
+        margin-right: $vertical-rhythm/2;
     }
 
     header, footer {
@@ -116,7 +110,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
     .donate {
         @include display(flex);
         @include flex-wrap(wrap);
-        @include align-items(center);
+        @include align-items(stretch);
         margin: $vertical-rhythm/2 0;
         border: 1px solid $color-green;
         input {
@@ -146,7 +140,8 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
         &.dropdown {
             display: none;
             position: absolute;
-            top: $vertical-rhythm;
+            margin: $vertical-rhythm;
+            bottom: 0;
             z-index: 1;
             border-radius: $base-border-radius;
             padding: $vertical-rhythm/4 $vertical-rhythm/2;
@@ -172,40 +167,48 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
     .overlay {
         z-index: -1;
         opacity: 0;
-        display: block;
-        @include transition(opacity, .5s, linear);
+        @include display(flex);
+        @include justify-content(center);
+        @include align-items(center);
         position: absolute;
         top: 0;
         left: 0;
         height: 100%;
         width: 100%;
-
+        background-color: rgba(0, 0, 0, .8);
         color: $color-white;
         text-align: center;
         font-weight: $font-weight-bold;
-
-        a {
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        a, .action {
             color: $color-white;
+            &:hover {
+                color: $color-white-pure;
+            }
+        }
+
+        textarea {
+            color: $color-black;
+            width: 32em;
+            text-align: center;
+            font-weight: $font-weight-normal;
+            resize: none;
+            white-space: nowrap;
+            overflow-x: scroll;
         }
 
         &.visible {
             z-index: 1;
-            opacity: .9;
+            opacity: 1;
         }
 
-        &.pending  { background-color: $color-grey;    }
-        &.complete { background-color: $color-green;   }
-        &.error    { background-color: $color-red;     }
-
         .loader, .dialog {
-            width: 100%;
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
+            padding: $vertical-rhythm;
         }
 
         .sharing {
-            margin: 0 auto;
+            margin: 0 auto $vertical-rhythm;
             width: 22em;
             dfn {
                 display: none;
