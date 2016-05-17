@@ -103,7 +103,7 @@ $shadow-active: 0px;
     transition: none;
     border: none;
     border-radius: 0;
-    &:hover, &:active {
+    &:link, &:hover, &:active, &:visited {
         box-shadow: none;
         @include transform(none);
     }

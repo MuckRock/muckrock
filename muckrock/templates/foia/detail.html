@@ -303,17 +303,20 @@ Sincerely,
                 {% if foia.total_pages > 0 %}
                 <div class="active-document">
                     <header>
-                        <h3 id="doc-title"></h3>
-                        <div class="file-viewer-actions">
-                            <span class="cancel button">Close</span>
-                        </div>
+                        <span>
+                            <h3 id="doc-title"></h3>
+                            <p><small><span id="doc-pages"></span> pages</small></p>
+                        </span>
+                        <span>
+                            <span class="red cancel button">Close</span>
+                        </span>
                     </header>
                     <div class="viewer" id="viewer"></div>
                 </div>
                 {% endif %}
                 {% with foia.files.all as files %}
                 {% if files %}
-                <ul class="files-list" id="all-files">
+                <ul class="files-list nostyle" id="all-files">
                     {% with foia_url=foia.get_absolute_url %}
                     {% for file in files %}
                     <li>{% include "lib/file.html" %}</li>

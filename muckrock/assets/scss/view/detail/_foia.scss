@@ -253,13 +253,19 @@ $request-breakpoint: 768px;
 .request .files {
     .active-document {
         display: none;
+        @include border-radius;
+        border: 1px solid $color-black;
+        padding: $vertical-rhythm/4 $vertical-rhythm/2 $vertical-rhythm/2 $vertical-rhythm/2;
+        background: $color-grey-2;
+        color: $color-white;
         &.visible {
             display: block;
         }
         header {
             @include display(flex);
             @include justify-content(space-between);
-            @include align-items(baseline);
+            @include align-items(flex-start);
+            margin-bottom: $vertical-rhythm/2;
             h3 {
                 margin-bottom: 0;
             }
@@ -269,23 +275,13 @@ $request-breakpoint: 768px;
         }
     }
     .files-list {
-        list-style-type: none;
-        padding-left: 0;
         .file {
             margin-bottom: $vertical-rhythm/2;
         }
         .active .file {
-            border-color: $color-blue-dark;
-            background-color: lighten($color-blue, 30%);
-            color: $color-blue-dark;
-            a, span {
-                color: $color-blue-dark;
-                &:hover {
-                    color: $color-black;
-                }
-            }
+            border-color: $color-blue;
+            background-color: $color-blue-light;
             .file-embed {
-                border-color: $color-blue-dark;
                 color: $color-black;
                 background-color: $color-white;
             }

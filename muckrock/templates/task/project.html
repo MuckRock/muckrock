@@ -1,6 +1,5 @@
 {% extends 'task/default.html' %}
 {% load markdown_deux_tags %}
-{% load static from staticfiles %}
 
 {% block task-content %}
 {% with task.project as project %}
@@ -34,7 +33,7 @@
             <td><strong>Image</strong></td>
             <td>
                 {% if project.image %}
-                <img src="{% static project.image.url %}" />
+                <img src="{{project.image.url}}" />
                 {% else %}
                 <span class="failure">No image</span>
                 {% endif %}

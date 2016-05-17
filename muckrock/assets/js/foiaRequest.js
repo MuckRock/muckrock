@@ -106,12 +106,11 @@ export function displayFile(file) {
     if (!file) {
         return;
     }
-    var title = file.data('title');
     var docId = file.data('doc-id');
-    if (!title) {
-        title = 'Untitled';
-    }
+    var title = file.data('title') || 'Untitled';
+    var pages = file.data('pages') || 0;
     $('#doc-title').empty().text(title);
+    $('#doc-pages').empty().text(pages);
     // remove the active class from all the list items,
     // then apply active class to this file's list item
     files.parent('li').removeClass('active');
@@ -120,7 +119,7 @@ export function displayFile(file) {
     /* DV is defined by the external DocumentCloud script at runtime. */
     DV.load('https://www.documentcloud.org/documents/' + docId + '.js', docCloudSettings);
     activeFile.addClass('visible');
-    window.scrollTo(0, activeFile.offset().top);
+    window.scrollTo(0, 0);
 }
 
 $('.view-file').click(function() {
