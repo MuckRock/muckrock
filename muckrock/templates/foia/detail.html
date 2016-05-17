@@ -458,10 +458,9 @@ Sincerely,
 {% block scripts %}
 <script type="text/javascript">
     $('.datepicker').datepicker({
-        maxDate: '+1m',
+        maxDate: '+30d',
         minDate: 0,
         firstDay: 1,
-        hideIfNoPrevNext: true,
         numberOfMonths: 1,
         {% if foia.date_embargo %}
         defaultDate: '{{ foia.date_embargo|date:"m/d/Y" }}'
@@ -469,11 +468,9 @@ Sincerely,
     });
     $('#id_date_due').datepicker({
         dateFormat: 'yy-mm-dd',
-        maxDate: '+1m',
         minDate: 0,
         firstDay: 1,
         hideIfNoPrevNext: true,
-        numberOfMonths: 1,
     });
     var foiaId = $('.request.detail').attr('id');
     if (foiaId != undefined) {

@@ -96,12 +96,12 @@
         @include flex-flow(wrap);
         max-width: 60em;
         margin: 0 auto $vertical-rhythm;
-        main {
+        .overview__main {
             @include flex(2 1 20em);
             min-width: 0;
             margin-bottom: $vertical-rhythm;
         }
-        aside {
+        .overview__aside {
             @include flex(1 1 10em);
             min-width: 0;
             @media (min-width: 33.25em) {

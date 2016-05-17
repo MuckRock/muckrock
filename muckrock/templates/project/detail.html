@@ -75,7 +75,7 @@
     </section>
     {% endif %}
     <section class="overview">
-        <main>
+        <main class="overview__main">
             <h1 class="title">{{ project.title }}</h1>
             <summary>
                 {{ project.summary|markdown:"trusted" }}
@@ -100,7 +100,7 @@
             </section>
             {% endif %}
         </main>
-        <aside>
+        <aside class="overview__aside">
             {% if user_can_edit %}
             <div class="project-controls">
                 <a href="{% url 'project-edit' slug=project.slug pk=project.pk %}" class="blue button">

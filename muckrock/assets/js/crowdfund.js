@@ -40,8 +40,35 @@
         return false;
     }
 
+    function crowdfundEmbed() {
+        var trigger = $(this);
+        var overlays = trigger.parents('.crowdfund').children('.overlay');
+        var overlay = overlays.filter('.embed').addClass('visible');
+        overlay.find('textarea').select();
+        overlay.find('#hide-embed').click(()=>{
+            overlay.removeClass('visible');
+        });
+    }
+
+    function crowdfundShare() {
+        var trigger = $(this);
+        var overlays = trigger.parents('.crowdfund').children('.overlay');
+        var overlay = overlays.filter('.share').addClass('visible');
+        overlay.find('#hide-share').click(()=>{
+            overlay.removeClass('visible');
+        });
+    }
+
+    function closeCompleteOverlay() {
+        var overlays = $(this).parents('.crowdfund').children('.overlay');
+        overlays.filter('.complete').removeClass('visible');
+    }
+
     $.fn.crowdfund = function() {
-        $(this).submit(crowdfundAjax);
+        $(this).find('.crowdfund-form').submit(crowdfundAjax);
+        $(this).find('#show-embed').click(crowdfundEmbed);
+        $(this).find('#show-share').click(crowdfundShare);
+        $(this).find('#hide-complete').click(closeCompleteOverlay);
     };
 
 })( jQuery );
