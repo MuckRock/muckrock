@@ -23,4 +23,3 @@ class FileEmbedView(DetailView):
     """Presents an embeddable view for a single file."""
     model = FOIAFile
     template_name = 'foia/file/embed.html'
-    
