@@ -1,5 +1,5 @@
 {% load tags %}
-<div class="file" data-doc-id="{{file.doc_id}}" data-title="{{file.title}}" {% if not hide_id %}id="{{file.anchor}}{% endif %}">
+<div class="file" data-doc-id="{{file.doc_id}}" data-title="{{file.title}}" data-pages="{{file.pages}}" {% if not hide_id %}id="{{file.anchor}}"{% endif %}>
     {% if file.is_doccloud and file.doc_id and file.is_public %}
     <div class="file-image thumbnail">
     {% else %}
