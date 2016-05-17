@@ -40,7 +40,7 @@
         </ul>
         {% if file.is_doccloud and file.doc_id %}
         <div class="file-embed">
-            <textarea readonly><div class="viewer" id="viewer-{{ file.doc_id }}"></div><script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js"></script><script>DV.load("https://www.documentcloud.org/documents/{{ file.doc_id}}.js", {width: 600, height: 600, sidebar: false, container: "#viewer-{{ file.doc_id }}"});</script></textarea>
+            <textarea rows="1" readonly><iframe src="{{SITE_ROOT}}{% url 'file-embed' pk=file.pk %}" width="100%" height="600px" /></textarea>
         </div>
         {% endif %}
     </div>

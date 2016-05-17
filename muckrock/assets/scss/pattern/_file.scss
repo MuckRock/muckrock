@@ -36,9 +36,12 @@
         }
         textarea {
             display: block;
+            font-family: $font-monospace;
+            font-size: $font-size-2;
             margin-bottom: 0;
-            border-radius: 0;
-            border-bottom: 1px solid $color-grey;
+            resize: none;
+            white-space: nowrap;
+            overflow-x: scroll;
         }
     }
 }

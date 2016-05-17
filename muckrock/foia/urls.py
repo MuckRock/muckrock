@@ -99,6 +99,11 @@ urlpatterns = patterns(
     url(r'^feeds/(?P<username>[\w\d_.@ ]+)/$',
        UserUpdateFeed(), name='foia-user-feed'),
 
+    # Files
+    url(r'^file/(?P<pk>\d+)/embed/$',
+        views.FileEmbedView.as_view(),
+        name='file-embed'),
+
     # Old URLS
     url(r'^list/user/(?P<user_name>[\w\d_.@ ]+)/$',
         RedirectView.as_view(url='/foi/list/user-%(user_name)s')),
