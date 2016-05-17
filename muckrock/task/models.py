@@ -325,7 +325,10 @@ class StaleAgencyTask(Task):
         """Returns the latest response from the agency"""
         foias = self.agency.foiarequest_set.all()
         comms = [c for f in foias for c in f.communications.all() if c.response]
-        return max(comms, key=lambda x: x.date)
+        if len(comms) > 0:
+            return max(comms, key=lambda x: x.date)
+        else:
+            return None
 
     def update_email(self, new_email, foia_list=None):
         """Updates the email on the agency and the provided requests."""
