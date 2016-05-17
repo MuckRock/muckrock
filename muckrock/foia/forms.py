@@ -214,7 +214,15 @@ class FOIADeleteForm(forms.Form):
         help_text='This cannot be undone!'
     )
 
-FOIAFileFormSet = forms.models.modelformset_factory(FOIAFile, fields=('ffile',))
+class FOIAFileForm(forms.ModelForm):
+    """A form for a FOIA File"""
+    ffile = forms.FileField(label='File', required=False)
+
+    class Meta:
+        model = FOIAFile
+        fields = ['ffile']
+
+FOIAFileFormSet = forms.models.modelformset_factory(FOIAFile, form=FOIAFileForm)
 
 class FOIANoteForm(forms.ModelForm):
     """A form for a FOIA Note"""
