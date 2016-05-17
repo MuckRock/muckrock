@@ -40,6 +40,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
         @include display(flex);
         @include flex-direction(column);
         @include justify-content(space-between);
+        margin-bottom: 0;
         .row {
             @include display(flex);
             @include justify-content(space-between);
@@ -65,6 +66,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
     }
 
     .description {
+        margin-bottom: 0;
         padding: $vertical-rhythm/2;
     }
 
@@ -189,6 +191,8 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
         }
 
         textarea {
+            font-family: $font-monospace;
+            font-size: $font-size-2;
             color: $color-black;
             width: 32em;
             text-align: center;
@@ -224,17 +228,5 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
                 }
             }
         }
-    }
-}
-
-.embed {
-    margin-bottom: 0;
-}
-.embed .widget {
-    margin-bottom: 0;
-    width: 100vw;
-    height: 100vh;
-    .overlay {
-        margin-bottom: 0;
     }
 }

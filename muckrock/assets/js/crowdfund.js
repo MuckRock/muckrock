@@ -44,6 +44,7 @@
         var trigger = $(this);
         var overlays = trigger.parents('.crowdfund').children('.overlay');
         var overlay = overlays.filter('.embed').addClass('visible');
+        overlay.find('textarea').select();
         overlay.find('#hide-embed').click(()=>{
             overlay.removeClass('visible');
         });
