@@ -12,7 +12,6 @@ import './foiaRequest';
 import './formset';
 import './list';
 import './loupe';
-import './multiselect';
 import './quicksearch';
 import './tabs';
 import './task';

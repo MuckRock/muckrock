@@ -1,14 +1,5 @@
 $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
 
-.collapsable > header {
-    cursor: pointer;
-}
-
-.collapsable.collapsed {
-    & > * { display: none !important; }
-    & > header { @include display(flex !important); }
-}
-
 .task {
     position: relative;
     border: 1px solid $color-black;
