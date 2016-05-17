@@ -1,6 +1,11 @@
 """
 Site-wide context processors
 """
+from django.conf import settings
+
+def site_root(request):
+    """Add the site root to the context for constructing absolute urls."""
+    return {'SITE_ROOT': settings.SITE_ROOT }
 
 def google_analytics(request):
     """
