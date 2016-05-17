@@ -117,3 +117,8 @@ class CrowdfundDetailView(DetailView):
                 messages.success(request, 'Thank you for your contribution!')
                 return redirect(self.get_redirect_url())
         return self.return_error(request)
+
+
+class CrowdfundEmbedView(CrowdfundDetailView):
+    """Displays the crowdfund widget on a standalone page for embedding."""
+    template_name = 'crowdfund/embed.html'
