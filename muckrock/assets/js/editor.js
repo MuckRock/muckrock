@@ -17,7 +17,7 @@ function toTextArea(focus) {
     }
     getContent = function() {
         return te.value;
-    }
+    };
     $(te).change(function(){
         editor.value = getContent();
     });
@@ -37,7 +37,7 @@ function toProseMirror() {
     pm.focus();
     getContent = function() {
         return pm.getContent("markdown");
-    }
+    };
     pm.on('change', function(){
         editor.value = getContent();
     });

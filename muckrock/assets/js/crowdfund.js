@@ -40,7 +40,7 @@
         return false;
     }
 
-    function crowdfundEmbed(event) {
+    function crowdfundEmbed() {
         var trigger = $(this);
         var overlays = trigger.parents('.crowdfund').children('.overlay');
         var overlay = overlays.filter('.embed').addClass('visible');
@@ -50,7 +50,7 @@
         });
     }
 
-    function crowdfundShare(event) {
+    function crowdfundShare() {
         var trigger = $(this);
         var overlays = trigger.parents('.crowdfund').children('.overlay');
         var overlay = overlays.filter('.share').addClass('visible');
@@ -59,7 +59,7 @@
         });
     }
 
-    function closeCompleteOverlay(event) {
+    function closeCompleteOverlay() {
         var overlays = $(this).parents('.crowdfund').children('.overlay');
         overlays.filter('.complete').removeClass('visible');
     }
