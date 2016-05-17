@@ -187,7 +187,7 @@ $request-breakpoint: 768px;
     }
     .composer-input {
         @include border;
-        box-shadow: 0px 4px 8px 0px $color-grey;
+        @include box-shadow;
         header {
             display: block;
             margin-bottom: 0;
@@ -306,7 +306,7 @@ $request-breakpoint: 768px;
 
     .add-note {
         @include border;
-        box-shadow: 0px 4px 8px 0px $color-grey;
+        @include box-shadow;
         textarea {
             display: block;
             margin-bottom: 0;
