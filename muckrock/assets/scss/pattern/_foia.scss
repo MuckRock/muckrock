@@ -1,49 +1,34 @@
 .foia-single {
     width: 100%;
-    @include display(flex);
-    @include flex-direction(column);
-    @include border;
     overflow: hidden;
-    background-color: #fff;
-    .foia-info {
+    @include border;
+    @include border-radius;
+    background-color: $color-white-pure;
+    .title {
+        font-weight: $font-weight-bold;
+        margin-bottom: $vertical-rhythm/2;
+    }
+    .files {
+        font-weight: $font-weight-bold;
+    }
+    header {
         @include display(flex);
         @include flex-wrap(wrap);
-        padding: $vertical-rhythm/2;
+        @include justify-content(space-between);
+        @include align-items(center);
         margin-bottom: 0;
-        .status, .files {
-            @include flex(1 1 50%);
-        }
-        .title, .summary {
-            @include flex(2 2 100%);
-        }
-        .status, .title, .files {
-            margin-bottom: $vertical-rhythm/2;
-        }
-        .files {
-            text-align: right;
-        }
-        .title {
-            font-weight: $font-weight-bold;
+        padding: $vertical-rhythm/2;
+        .badge, .files {
+            margin-bottom: 0;
         }
     }
-    .foia-actions {
+    main {
+        padding: $vertical-rhythm/2;
+    }
+    footer {
         @include display(flex);
-        .clone, .view {
+        .basic.button {
             @include flex(1);
-            padding: $vertical-rhythm/2;
-            background-color: $color-blue;
-            color: $color-white;
-            font-weight: $font-weight-bold;
-            text-align: center;
-            @include transition(background-color .25s linear);
-            &:hover {
-                color: $color-white;
-                background-color: $color-blue-dark;
-                text-decoration: none;
-            }
-        }
-        .view {
-            border-right: 1px solid $color-blue-dark;
         }
     }
 }
