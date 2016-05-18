@@ -9,6 +9,7 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import DetailView, ListView
 
 from muckrock.foia.models import FOIAFile, FOIARequest
+from muckrock.views import MRFilterableListView
 
 @user_passes_test(lambda u: u.is_staff)
 def drag_drop(request):
@@ -29,7 +30,7 @@ class FileEmbedView(DetailView):
     template_name = 'foia/file/embed.html'
 
 
-class FOIAFileListView(ListView):
+class FOIAFileListView(MRFilterableListView):
     """Presents a paginated list of files."""
     model = FOIAFile
     template_name = 'foia/file/list.html'
@@ -47,7 +48,8 @@ class FOIAFileListView(ListView):
         try:
             foia = self.foia
         except AttributeError:
-            foia = get_object_or_404(FOIARequest, pk=self.kwargs['idx'])
+            foia = get_object_or_404(FOIARequest, pk=self.kwargs
+            ['idx'])
             self.foia = foia
         return foia
 
@@ -55,3 +57,8 @@ class FOIAFileListView(ListView):
         foia = self.get_foia()
         queryset = super(FOIAFileListView, self).get_queryset()
         return queryset.filter(foia=foia)
+
+    def get_context_data(self, **kwargs):
+        context = super(FOIAFileListView, self).get_context_data(**kwargs)
+        context['foia'] = self.get_foia()
+        return context

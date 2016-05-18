@@ -9,3 +9,8 @@ table {
         border: $base-border-width solid $color-grey-6;
     }
 }
+
+.file__cell .file {
+    border: none;
+    padding: 0;
+}
