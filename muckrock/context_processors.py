@@ -5,7 +5,8 @@ from django.conf import settings
 
 def site_root(request):
     """Add the site root to the context for constructing absolute urls."""
-    return {'SITE_ROOT': settings.SITE_ROOT }
+    # pylint: disable=unused-argument
+    return {'SITE_ROOT': settings.SITE_ROOT}
 
 def google_analytics(request):
     """
