@@ -4,7 +4,7 @@ Tests for crowdfund app
 
 from django.contrib.auth.models import AnonymousUser
 from django.core.urlresolvers import reverse
-from django.test import TestCase, RequestFactory
+from django.test import TestCase, RequestFactory, Client
 
 from datetime import datetime, date, timedelta
 from decimal import Decimal
@@ -12,8 +12,8 @@ from mock import Mock, patch
 from nose.tools import ok_, eq_
 
 from muckrock.crowdfund.forms import CrowdfundPaymentForm
-from muckrock.crowdfund.views import CrowdfundDetailView
 from muckrock.crowdfund.models import CrowdfundPayment
+from muckrock.crowdfund.views import CrowdfundDetailView, crowdfund_embed_view
 from muckrock.factories import UserFactory, FOIARequestFactory, ProjectFactory, CrowdfundFactory
 from muckrock.project.models import ProjectCrowdfunds
 from muckrock.utils import mock_middleware
@@ -189,3 +189,17 @@ class TestCrowdfundProjectDetailView(TestCase):
         request = self.request_factory.get(self.url)
         response = self.view(request, pk=self.crowdfund.pk)
         eq_(response.status_code, 200, 'The response should be 200 OK.')
+
+
+class TestCrowdfundEmbedView(TestCase):
+    """Tests the crowdfund embed view."""
+    def setUp(self):
+        self.crowdfund = CrowdfundFactory()
+        FOIARequestFactory(crowdfund=self.crowdfund)
+        self.url = reverse('crowdfund-embed', kwargs={'pk': self.crowdfund.pk})
+        self.client = Client()
+
+    def test_xframe_options(self):
+        """The embed view should have permissive X-Frame-Options"""
+        response = self.client.get(self.url)
+        eq_(response.status_code, 200)
