@@ -1,12 +1,13 @@
 """
 Site-wide context processors
 """
-from django.conf import settings
+from django.contrib.sites.models import Site
 
-def site_root(request):
-    """Add the site root to the context for constructing absolute urls."""
+def domain(request):
+    """Add the domain to the context for constructing absolute urls."""
     # pylint: disable=unused-argument
-    return {'SITE_ROOT': settings.SITE_ROOT}
+    current_site = Site.objects.get_current()
+    return {'domain': current_site.domain}
 
 def google_analytics(request):
     """

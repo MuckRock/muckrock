@@ -7,8 +7,8 @@ from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib import messages
 from django.db.models import Q
 from django.http import HttpResponse
-from django.shortcuts import redirect
-from django.utils.decorators import method_decorator
+from django.shortcuts import redirect, render_to_response, get_object_or_404
+from django.template import RequestContext
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import ListView, DetailView
 
@@ -120,7 +120,13 @@ class CrowdfundDetailView(DetailView):
                 return redirect(self.get_redirect_url())
         return self.return_error(request)
 
-@method_decorator(xframe_options_exempt, name='dispatch')
-class CrowdfundEmbedView(CrowdfundDetailView):
+@xframe_options_exempt
+def crowdfund_embed_view(request, pk):
     """Displays the crowdfund widget on a standalone page for embedding."""
-    template_name = 'crowdfund/embed.html'
+    template = 'crowdfund/embed.html'
+    crowdfund = get_object_or_404(Crowdfund, pk=pk)
+    context = {
+        'base_url': settings.SITE_ROOT,
+        'crowdfund': crowdfund
+    }
+    return render_to_response(template, context, context_instance=RequestContext(request))
