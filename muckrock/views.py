@@ -400,7 +400,7 @@ def homepage(request):
     completed_requests = cache_get_or_set(
             'hp:completed_requests',
             lambda: (FOIARequest.objects.get_public().get_done()
-                   .order_by('-date_done')
+                   .order_by('-date_done', 'pk')
                    .select_related_view()
                    .get_public_file_count(limit=6)),
             600)
@@ -438,7 +438,7 @@ def reset_homepage_cache(request):
             600)
     cache.set('hp:completed_requests',
             FOIARequest.objects.get_public().get_done()
-                   .order_by('-date_done')
+                   .order_by('-date_done', 'pk')
                    .select_related_view()
                    .get_public_file_count(limit=6),
             600)

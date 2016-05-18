@@ -119,8 +119,9 @@ class FOIARequestQuerySet(models.QuerySet):
         foia_qs = self
         count_qs = (self._clone()
                 .values_list('id')
+                .filter(files__access='public')
                 .annotate(Count('files'))
-                .extra(where=['"foia_foiafile"."access" = \'public\'']))
+                )
         if limit is not None:
             foia_qs = foia_qs[:limit]
             count_qs = count_qs[:limit]
