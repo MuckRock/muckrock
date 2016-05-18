@@ -314,7 +314,6 @@ Sincerely,
                     <div class="viewer" id="viewer"></div>
                 </div>
                 {% endif %}
-                {% with foia.files.all as files %}
                 {% if files %}
                 <ul class="files-list nostyle" id="all-files">
                     {% with foia_url=foia.get_absolute_url %}
@@ -326,7 +325,14 @@ Sincerely,
                 {% else %}
                 <p class="empty">There are no files associated with this request.</p>
                 {% endif %}
-                {% endwith %}
+                {% if foia.files.count > 50 %}
+                <div class="notification warning">
+                    <span class="symbol">{% include 'lib/component/icon/warning.svg' %}</span>
+                    <span class="text">
+                        <p>There are too many files to display on the request page. <a href="{% url 'foia-files' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">See all files</a>.</p>
+                    </span>
+                </div>
+                {% endif %}
             </section>
 
             {% if user_can_edit %}
