@@ -7,12 +7,12 @@ from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib import messages
 from django.db.models import Q
 from django.http import HttpResponse
-from django.shortcuts import redirect, render_to_response, get_object_or_404
-from django.template import RequestContext
-from django.views.decorators.clickjacking import xframe_options_exempt
+from django.shortcuts import redirect
+from django.utils.decorators import method_decorator
 from django.views.generic import ListView, DetailView
 
 from datetime import date
+from djangosecure.decorators import frame_deny_exempt
 import logging
 import stripe
 
@@ -120,13 +120,9 @@ class CrowdfundDetailView(DetailView):
                 return redirect(self.get_redirect_url())
         return self.return_error(request)
 
-@xframe_options_exempt
-def crowdfund_embed_view(request, pk):
-    """Displays the crowdfund widget on a standalone page for embedding."""
-    template = 'crowdfund/embed.html'
-    crowdfund = get_object_or_404(Crowdfund, pk=pk)
-    context = {
-        'base_url': settings.SITE_ROOT,
-        'crowdfund': crowdfund
-    }
-    return render_to_response(template, context, context_instance=RequestContext(request))
+
+@method_decorator(frame_deny_exempt, name='dispatch')
+class CrowdfundEmbedView(DetailView):
+    """Presents an embeddable view for a single file."""
+    model = Crowdfund
+    template_name = 'crowdfund/embed.html'

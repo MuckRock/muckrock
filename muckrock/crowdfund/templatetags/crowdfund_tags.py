@@ -4,6 +4,7 @@ Nodes and tags for rendering crowdfunds into templates
 
 from django import template
 from django.conf import settings
+from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 
@@ -89,6 +90,7 @@ def generate_crowdfund_context(the_crowdfund, the_url_name, the_form, the_contex
     """Generates context in a way that's agnostic towards the object being crowdfunded."""
     endpoint = reverse(the_url_name, kwargs={'pk': the_crowdfund.pk})
     payment_form = crowdfund_form(the_crowdfund, the_form)
+    current_site = Site.objects.get_current()
     logged_in, user_email = crowdfund_user(the_context)
     the_request = the_context.request
     named, contrib_count, anon_count = (
@@ -115,7 +117,8 @@ def generate_crowdfund_context(the_crowdfund, the_url_name, the_form, the_contex
         'user_email': user_email,
         'payment_form': payment_form,
         'request': the_request,
-        'stripe_pk': settings.STRIPE_PUB_KEY
+        'stripe_pk': settings.STRIPE_PUB_KEY,
+        'domain': current_site.domain
     }
 
 @register.inclusion_tag('crowdfund/widget.html', name='crowdfund', takes_context=True)
