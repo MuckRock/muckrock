@@ -10,6 +10,7 @@ import factory
 
 from muckrock.accounts.models import Profile, Statistics
 from muckrock.agency.models import Agency, STALE_DURATION
+from muckrock.crowdfund.models import Crowdfund
 from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, RawEmail
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.news.models import Article
@@ -120,6 +121,17 @@ class ProjectFactory(factory.django.DjangoModelFactory):
 
     title = factory.Sequence(lambda n: "Project %d" % n)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
+
+
+class CrowdfundFactory(factory.django.DjangoModelFactory):
+    """A factory for creating Crowdfund test objects."""
+    class Meta:
+        model = Crowdfund
+
+    name = factory.Sequence(lambda n: "Crowdfund %d" % n)
+    description = factory.Faker('paragraph')
+    payment_required = 100.00
+    date_due = factory.LazyAttribute(lambda obj: datetime.datetime.now() + datetime.timedelta(30))
 
 
 class QuestionFactory(factory.django.DjangoModelFactory):

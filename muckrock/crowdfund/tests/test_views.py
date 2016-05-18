@@ -12,34 +12,11 @@ from mock import Mock, patch
 from nose.tools import ok_, eq_
 
 from muckrock.crowdfund.forms import CrowdfundPaymentForm
-from muckrock.crowdfund.models import Crowdfund, CrowdfundPayment
 from muckrock.crowdfund.views import CrowdfundDetailView
-from muckrock.factories import UserFactory, FOIARequestFactory, ProjectFactory
+from muckrock.crowdfund.models import CrowdfundPayment
+from muckrock.factories import UserFactory, FOIARequestFactory, ProjectFactory, CrowdfundFactory
 from muckrock.project.models import ProjectCrowdfunds
 from muckrock.utils import mock_middleware
-
-
-class TestCrowdfundDetailView(TestCase):
-    """Tests the helper method in the DetailView subclass"""
-
-    def setUp(self):
-        self.view = CrowdfundDetailView()
-        self.mock_url = '/mock-123/'
-        self.crowdfund = Mock()
-        project = Mock()
-        project.get_absolute_url = Mock(return_value=self.mock_url)
-        self.crowdfund.get_crowdfund_object = Mock(return_value=project)
-        self.view.get_object = Mock(return_value=self.crowdfund)
-
-    def test_get_redirect_url(self):
-        """Should return a redirect url or the index url"""
-        eq_(self.view.get_redirect_url(), self.mock_url,
-            'The function should return the url of the crowdfund object.')
-        self.crowdfund.get_crowdfund_object = Mock(return_value=None)
-        self.view.get_object = Mock(return_value=self.crowdfund)
-        eq_(self.view.get_redirect_url(), reverse('index'),
-            ('The function should return the index url as a fallback '
-            'if the url cannot be reversed.'))
 
 
 @patch('stripe.Charge', Mock(create=Mock(return_value=Mock(id='stripe-charge-id'))))
@@ -47,15 +24,12 @@ class TestCrowdfundView(TestCase):
     """Tests the Detail view for Crowdfund objects"""
     def setUp(self):
         due = datetime.today() + timedelta(30)
-        self.crowdfund = Crowdfund.objects.create(
-            name='Test Crowdfund',
-            description='Testing contributions to this request',
-            payment_required=10.00,
-            date_due=due
+        self.crowdfund = CrowdfundFactory(date_due=due)
+        FOIARequestFactory(
+            status='payment',
+            price=self.crowdfund.payment_required,
+            crowdfund=self.crowdfund
         )
-        FOIARequestFactory(status='payment',
-                price=self.crowdfund.payment_required,
-                crowdfund=self.crowdfund)
         self.num_payments = self.crowdfund.payments.count()
         self.url = self.crowdfund.get_absolute_url()
         self.data = {
@@ -84,6 +58,10 @@ class TestCrowdfundView(TestCase):
         request.user = user
         response = self.view(request, pk=self.crowdfund.pk)
         ok_(response, 'There should be a response.')
+        eq_(response.status_code, 302,
+            'The response should be a redirection.')
+        eq_(response.url, self.crowdfund.get_crowdfund_object().get_absolute_url(),
+            'The response should redirect to the crowdfund object.')
         return response
 
     def test_anonymous_contribution(self):
@@ -192,12 +170,8 @@ class TestCrowdfundView(TestCase):
 
 class TestCrowdfundProjectDetailView(TestCase):
     """Tests for the crowdfund project detail view."""
-
     def setUp(self):
-        self.crowdfund = Crowdfund.objects.create(
-            name='Cool project please help',
-            date_due=date.today() + timedelta(30),
-        )
+        self.crowdfund = CrowdfundFactory()
         project = ProjectFactory()
         ProjectCrowdfunds.objects.create(crowdfund=self.crowdfund, project=project)
         self.url = self.crowdfund.get_absolute_url()
