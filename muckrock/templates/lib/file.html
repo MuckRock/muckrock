@@ -40,7 +40,7 @@
         </ul>
         {% if file.is_doccloud and file.doc_id %}
         <div class="file-embed">
-            <textarea rows="1" readonly><iframe src="https://www.muckrock.com{% url 'file-embed' pk=file.pk %}" width="100%" height="600px" /></textarea>
+            <textarea rows="1" readonly><iframe src="{{domain}}{% url 'file-embed' pk=file.pk %}" width="100%" height="600px"></iframe></textarea>
         </div>
         {% endif %}
     </div>
