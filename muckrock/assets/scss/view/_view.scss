@@ -1,0 +1,99 @@
+    ///////////////////////
+   //                   //
+  //      V I E W      //
+ //                   //
+///////////////////////
+
+html, body {
+    // Allows for full-height elements with CSS
+    min-height: 100%;
+}
+
+.container {
+    @include display(flex);
+    @include flex-direction(column);
+    min-height: 100vh;
+    margin-bottom: 0;
+    background-color: $color-white;
+}
+
+.content {
+    @include flex(1);
+    margin-bottom: 0;
+    padding: $vertical-rhythm/2;
+    @include media($medium-layout) { padding: $vertical-rhythm; }
+}
+
+@mixin edge-to-edge($bottom: 0) {
+    // Edge-to-edge negates the content padding
+    margin: -1*$vertical-rhythm/2 -1*$vertical-rhythm/2 $bottom;
+    @include media($medium-layout) { margin: -1*$vertical-rhythm -1*$vertical-rhythm $bottom; }
+}
+
+section.error-404 {
+    max-width: 100%;
+    width: 30em;
+    margin: 2*$vertical-rhythm auto;
+    margin-bottom: 2*$vertical-rhythm;
+    .redacted {
+        margin-left: $vertical-rhythm/4;
+        margin-right: $vertical-rhythm/4;
+        background-color: $color-black;
+        color: transparent;
+        &:first-child {
+            margin-left: 0;
+        }
+    }
+}
+
+article.error-500 {
+    height: 100%;
+    margin: 0 -1*$vertical-rhythm/2 -1*$vertical-rhythm;
+    background-size: cover;
+    background-position: top right;
+    @include media($medium-layout) {
+        height: 35em;
+        margin: 0 -1*$vertical-rhythm -1*$vertical-rhythm;
+    }
+    @media all and (min-height: 930px) {
+        height: 50em;
+    }
+    .text {
+        @include display(flex);
+        @include flex-direction(row);
+        @include flex-wrap(wrap);
+        @include justify-content(space-around);
+        @include align-items(center);
+        height: 100%;
+        padding: 2*$vertical-rhythm;
+        background-color: rgba(0, 0, 0, 0.6);
+        color: $color-white;
+        h1 {
+            font-size: 2*$font-size-8;
+        }
+        h2 {
+            max-width: 10em;
+            margin: 0 auto $vertical-rhythm;
+        }
+        .error-report {
+            max-width: 100%;
+            width: 20em;
+            padding: $vertical-rhythm;
+            background: rgba(0, 0, 0, 0.6);
+        }
+    }
+}
+
+@import 'profile';
+@import 'homepage';
+@import 'new-request';
+@import 'draft-request';
+@import 'crowdfund';
+@import 'map';
+@import 'project';
+@import 'accounts';
+@import 'organization';
+@import 'tag-master-detail';
+@import 'detail/detail';
+@import 'list/list';
+@import 'nav/nav';

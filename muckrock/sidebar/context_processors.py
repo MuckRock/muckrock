@@ -8,6 +8,7 @@ from muckrock.accounts.models import Profile
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
 from muckrock.organization.models import Organization
+from muckrock.project.models import Project
 from muckrock.sidebar.models import Broadcast
 from muckrock.utils import cache_get_or_set
 
@@ -92,6 +93,7 @@ def sidebar_info(request):
         sidebar_info_dict.update({
             'actionable_requests': get_actionable_requests(request.user),
             'organization': get_organization(request.user),
+            'my_projects': Project.objects.get_for_contributor(request.user).exists(),
             'payment_failed': request.user.profile.payment_failed
         })
     else:

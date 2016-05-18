@@ -1,0 +1,47 @@
+.manager {
+    header {
+        @include display(flex);
+        @include justify-content(space-between);
+        margin-bottom: $vertical-rhythm/2;
+        border-bottom: 1px solid $color-grey-7;
+    }
+    form {
+        display: none;
+        &.visible {
+            display: block;
+        }
+        footer {
+            @include display(flex);
+            @include justify-content(space-between);
+            @include flex-direction(row-reverse);
+        }
+    }
+    input[type="text"] {
+        width: 100%;
+    }
+    .deck {
+        display: block;
+        width: 100%;
+        margin-bottom: $vertical-rhythm;
+    }
+}
+
+.status.manager .status-form {
+    display: none;
+    margin-bottom: 0;
+    &.visible {
+        display: block;
+    }
+    select {
+        width: 100%;
+        margin-bottom: $vertical-rhythm/2;
+    }
+}
+
+.embargo.manager {
+    .permanent, .expiration {
+        @include display(flex);
+        @include justify-content(space-between);
+        @include align-items(flex-start);
+    }
+}

@@ -67,21 +67,11 @@
             {% if featured_projects %}
             {% cache 600 projects %}
             <div class="projects">
-                <h2>Featured projects</h2>
+                <h2>Projects <small><a href="{% url 'project' %}">See all</a></small></h2>
                 <ul class="nostyle">
                 {% for project in featured_projects %}
                     <li>
-                        <div class="project">
-                            <header class="project--header" {% if project.image %}style="background-image:url('{% thumbnail project.image 800x600 %}')"{% endif %}>
-                                <a href="{{project.get_absolute_url}}" title="{{project.title}}" class="project--title">
-                                    <h3 class="title">{{project.title}}</h3>
-                                </a>
-                            </header>
-                            <div class="project--info">
-                                {{project.summary|markdown}}
-                            </div>
-                            <a class="project--footer" href="{{project.get_absolute_url}}" title="{{project.title}}">Explore this project</a>
-                        </div>
+                        {% include 'lib/pattern/project.html' %}
                     </li>
                 {% endfor %}
                 </ul>
@@ -94,7 +84,7 @@
                 <div class="about">
                     <h2>File, track, and share public records requests</h2>
                     <a href="{% url 'foia-create' %}" class="primary button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
-                        {% include 'lib/icons/create-request.svg' %}
+                        {% include 'lib/component/icon/create-request.svg' %}
                         <span class="label">File a Request</span>
                     </a>
                     <div class="call-to-action"><a href="/about/how-we-work/" id="learn-more">or learn how it works.</a></div>

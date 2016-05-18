@@ -5,12 +5,19 @@
 {% block task-content %}
 <dl class="task-data">
     <dt>Agency</dt>
-    <dd><a href="{% url 'admin:agency_agency_change' task.agency.pk %}">{{task.agency}}</a></dd>
+    <dd><a href="{{task.agency.get_absolute_url}}">{{task.agency}}</a> (<a href="{% url 'admin:agency_agency_change' task.agency.pk %}">admin</a>)</dd>
     <dd>{{task.agency.phone}}</dd>
+    {% if stalest_request %}
     <dt>Stalest Request</dt>
-    <dd><a href="{{stale_requests.0.get_absolute_url}}">{{stale_requests.0}}</a> (<a href="{% url 'admin:foia_foiarequest_change' stale_requests.0.pk %}">admin</a>)</dd>
-    <dd>{{stale_requests.0.latest_response}} day{{stale_requests.0.latest_response|pluralize}} stale</dd>
+    <dd><a href="{{stalest_request.get_absolute_url}}">{{stalest_request}}</a> (<a href="{% url 'admin:foia_foiarequest_change' stalest_request.pk %}">admin</a>)</dd>
+    <dd>{{stalest_request.latest_response}} day{{stalest_request.latest_response|pluralize}} stale</dd>
+    {% endif %}
+    {% if latest_response %}
+    <dt>Latest response</p>
+    <dd>From {% if latest_response.priv_from_who %}{{latest_response.priv_from_who}}{% else %}{{latest_response.from_who}}{% endif %} on <a href="{{latest_response.foia.get_absolute_url}}">{{latest_response.foia}}</a> (<a href="{% url 'admin:foia_foiarequest_change' latest_response.foia.pk %}">admin</a>)</dd>
+    {% endif %}
 </dl>
+{% if stale_requests %}
 <div class="collapsable stale-requests">
     <header>
         <p>{{stale_requests|length}} request{{stale_requests|length|pluralize}} over 120 days stale</p>
@@ -42,18 +49,16 @@
         </tbody>
     </table>
 </div>
+{% endif %}
 {% endblock %}
 
 {% block task-actions %}
-    <div class="recent-response">
-        <p>Latest response received from:</p>
-        <p>{{latest_response.priv_from_who}} on <a href="{{latest_response.foia.get_absolute_url}}">{{latest_response.foia}}</a> (<a href="{% url 'admin:foia_foiarequest_change' latest_response.foia.pk %}">admin</a>)</p>
-    </div>
+    {% if stale_requests %}
     <div class="form-field">
         <label for="{{email_form.email.id_for_label}}">Update email on checked requests:</label>
         {{ email_form.email }}
     </div>
-    <input type="hidden" name="resolve" value="true" />
-    <button type="submit" name="update" value="true" class="primary">Update email</button>
-    <button type="submit" name="resolve" value="true">Resolve</button>
+    <button type="submit" name="update" value="true" class="primary button">Update email</button>
+    {% endif %}
+    <button class="button" type="submit" name="resolve" value="true">Resolve</button>
 {% endblock %}

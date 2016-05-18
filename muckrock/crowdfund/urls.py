@@ -14,4 +14,7 @@ urlpatterns = patterns(
     url(r'^(?P<pk>\d+)/$',
         views.CrowdfundDetailView.as_view(),
         name='crowdfund'),
+    url(r'^(?P<pk>\d+)/embed/$',
+        views.CrowdfundEmbedView.as_view(),
+        name='crowdfund-embed'),
 )

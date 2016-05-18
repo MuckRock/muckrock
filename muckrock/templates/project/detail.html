@@ -75,7 +75,7 @@
     </section>
     {% endif %}
     <section class="overview">
-        <main>
+        <main class="overview__main">
             <h1 class="title">{{ project.title }}</h1>
             <summary>
                 {{ project.summary|markdown:"trusted" }}
@@ -100,7 +100,7 @@
             </section>
             {% endif %}
         </main>
-        <aside>
+        <aside class="overview__aside">
             {% if user_can_edit %}
             <div class="project-controls">
                 <a href="{% url 'project-edit' slug=project.slug pk=project.pk %}" class="blue button">
@@ -120,12 +120,12 @@
             {% endif %}
             <div class="badges">
             {% if project.featured %}
-                <span class="blue badge">&#9733; Featured</span>
+                <span class="small blue badge">&#9733; Featured</span>
             {% endif %}
             {% if project.private %}
-                <span class="red badge">&empty; Private</span>
+                <span class="small red badge">&empty; Private</span>
             {% elif not project.private and not project.approved %}
-                <span class="grey badge">Awaiting Review</span>
+                <span class="small grey badge">Awaiting Review</span>
             {% endif %}
             </div>
             {% if visible_requests or articles %}
@@ -142,7 +142,7 @@
             <div class="contributors">
                 <header>
                     <dfn>Contributors</dfn>
-                    <a href="{% url 'project-edit' slug=project.slug pk=project.pk %}#contributors" class="edit">Edit</a>
+                    <a href="{% url 'project-edit' slug=project.slug pk=project.pk %}#contributors" class="small action">Edit</a>
                 </header>
                 {% for contributor in contributors %}
                 <div class="contributor">
@@ -165,7 +165,7 @@
                             {% endif %}
                             {% if contributor.profile.twitter %}
                             <a href="https://www.twitter.com/{{contributor.profile.twitter}}">
-                                {% include 'lib/icons/twitter.svg' %}
+                                {% include 'lib/component/icon/twitter.svg' %}
                             </a>
                             {% endif %}
                         </p>

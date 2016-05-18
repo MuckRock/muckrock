@@ -174,7 +174,10 @@ class Agency(models.Model, RequestHelper):
                 .distinct()
                 .count())
 
+    def get_requests(self):
+        """Just returns the foiareqest_set value. Used for compatability with RequestHeper mixin"""
+        return self.foiarequest_set
+
     class Meta:
         # pylint: disable=too-few-public-methods
         verbose_name_plural = 'agencies'
-

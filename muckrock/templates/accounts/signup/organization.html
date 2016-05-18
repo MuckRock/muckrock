@@ -6,21 +6,12 @@
         <h1>Create an Organization account</h1>
         <p>Looking to join an existing organization? <a href="mailto:info@muckrock.com">Contact us.</a></p>
     </header>
-    <form method="post" class="organization form">
+    <form method="post" class="signup__form--org">
         {% csrf_token %}
-        <div class="fields">
-            {% for field in form.visible_fields %}
-            <fieldset class="{{ field.label|lower }} field{% if field.field.required %} required{% endif %}">
-                <label {% if field.errors %}class="failure"{% endif %} for="{{ field.auto_id }}">{{ field.label}}</label>
-                {{ field.errors }}
-                {{ field }}
-                {% if field.help_text %}<p class="default"><small>{{ field.help_text }}</small></p>{% endif %}
-            </fieldset>
-            {% endfor %}
-        </div>
+        {% include 'lib/pattern/form.html' %}
         <footer>
             <a href="{% url 'accounts' %}" class="cancel">Pick a different plan</a>
-            <button type="submit" class="primary" onclick="ga('send', 'event', 'Account', 'Registration', window.location.pathname)">Create</button>
+            <button type="submit" class="primary button" onclick="ga('send', 'event', 'Account', 'Registration', window.location.pathname)">Create</button>
         </footer>
     </form>
 </article>

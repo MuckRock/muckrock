@@ -24,7 +24,7 @@
             {% csrf_token %}
             <input type="hidden" name="task" value="{{task.pk}}">
             {% block task-actions %}
-            <button type="submit" name="resolve" value="true" class="primary">Resolve</button>
+            <button type="submit" name="resolve" value="true" class="primary button">Resolve</button>
             {% endblock task-actions %}
         </form>
     </footer>

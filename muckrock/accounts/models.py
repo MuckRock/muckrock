@@ -428,9 +428,9 @@ class Statistics(models.Model):
     """Nightly statistics"""
     # pylint: disable=invalid-name
     date = models.DateField()
-    total_requests = models.IntegerField()
-    total_requests_success = models.IntegerField()
-    total_requests_denied = models.IntegerField()
+    total_requests = models.IntegerField(null=True, blank=True)
+    total_requests_success = models.IntegerField(null=True, blank=True)
+    total_requests_denied = models.IntegerField(null=True, blank=True)
     total_requests_draft = models.IntegerField(null=True, blank=True)
     total_requests_submitted = models.IntegerField(null=True, blank=True)
     total_requests_awaiting_ack = models.IntegerField(null=True, blank=True)
@@ -445,14 +445,14 @@ class Statistics(models.Model):
 
     orphaned_communications = models.IntegerField(null=True, blank=True)
 
-    total_agencies = models.IntegerField()
+    total_agencies = models.IntegerField(null=True, blank=True)
     stale_agencies = models.IntegerField(null=True, blank=True)
     unapproved_agencies = models.IntegerField(null=True, blank=True)
 
-    total_pages = models.IntegerField()
-    total_users = models.IntegerField()
+    total_pages = models.IntegerField(null=True, blank=True)
+    total_users = models.IntegerField(null=True, blank=True)
     users_today = models.ManyToManyField(User)
-    total_fees = models.IntegerField()
+    total_fees = models.IntegerField(null=True, blank=True)
     pro_users = models.IntegerField(null=True, blank=True)
     pro_user_names = models.TextField(blank=True)
     total_page_views = models.IntegerField(null=True, blank=True)
@@ -506,4 +506,3 @@ class Statistics(models.Model):
         # pylint: disable=too-few-public-methods
         ordering = ['-date']
         verbose_name_plural = 'statistics'
-

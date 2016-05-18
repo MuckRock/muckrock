@@ -363,7 +363,7 @@ def profile(request, username=None):
     recent_requests = requests.order_by('-date_submitted')[:5]
     recent_completed = requests.filter(status='done').order_by('-date_done')[:5]
     articles = Article.objects.get_published().filter(authors=user)[:5]
-    projects = Project.objects.get_for_contributor(user).get_visible(request.user)
+    projects = Project.objects.get_for_contributor(user).get_visible(request.user)[:3]
     context = {
         'user_obj': user,
         'profile': user_profile,
@@ -395,7 +395,7 @@ def stripe_webhook(request):
         logging.error('Error parsing JSON: %s', exception)
         return HttpResponseBadRequest()
     except KeyError as exception:
-        logging.error('Unexpected dictionary structure: %s', exception)
+        logging.error('Unexpected dictionary structure: %s in %s', exception, event_json)
         return HttpResponseBadRequest()
     # If we've made it this far, then the webhook message was successfully sent!
     # Now it's up to us to act on it.'

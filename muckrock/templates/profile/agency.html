@@ -21,9 +21,33 @@
     {% include 'lib/appeal_stats.html' %}
     <dl class="stats">
 
+        <dt>Allowed Response Time</dt>
+        {% with agency.jurisdiction.get_days as days %}
+            {% if days %}
+            <dd>{{days}} day{{days|pluralize}}</dd>
+            {% else %}
+            <dd>No limit</dd>
+            {% endif %}
+        {% endwith %}
+
         <dt>Average Response Time</dt>
         {% with agency.average_response_time as average_response_time %}
         <dd>{{average_response_time}} day{{average_response_time|pluralize}}</dd>
+        {% endwith %}
+
+        {% with agency.success_rate as success_rate %}
+        {% if success_rate > 0 %}
+        <dt>Success Rate</dt>
+        <dd>{{ success_rate|floatformat:"2" }}%</dd>
+        {% endif %}
+        {% endwith %}
+
+        {% with agency.average_fee as average_fee %}
+        {% if average_fee > 0 %}
+        <dt>Average Fee</dt>
+        <dd>${{ average_fee|floatformat:"2" }}</dd>
+        <dd>{{ agency.fee_rate|floatformat:"2" }}% of requests have a fee</dd>
+        {% endif %}
         {% endwith %}
 
         <dt>Commonly Cited Exemptions</dt>

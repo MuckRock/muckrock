@@ -1,6 +1,7 @@
 import 'jquery-ui/datepicker';
 
 import './account';
+import './autocomplete';
 import './checkout';
 import './communication';
 import './crowdfund';
@@ -11,7 +12,6 @@ import './foiaRequest';
 import './formset';
 import './list';
 import './loupe';
-import './multiselect';
 import './quicksearch';
 import './tabs';
 import './task';
@@ -29,7 +29,7 @@ $('#show-flag-form').click(function(){
 
 // Manager Component
 // A manager presents a state and a form that can modify that state.
-$('.manager .edit').click(function(){
+$('.manager .action').click(function(){
     var editButton = this;
     var manager = $(editButton).closest('.manager');
     var form = $(manager).find('form');
@@ -105,8 +105,8 @@ $('document').ready(function(){
     // Stripe Checkout
     $('form.stripe-checkout').checkout();
 
-    // Crowdfund form submission
-    $('form.crowdfund-form').crowdfund();
+    // Crowdfund
+    $('.crowdfund.widget').crowdfund();
 
     // Currency Field
     $('input.currency-field').currencyField();

@@ -20,8 +20,6 @@ from reversion import revisions as reversion
 from taggit.managers import TaggableManager
 from unidecode import unidecode
 
-from muckrock.agency.models import Agency
-from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.tags.models import Tag, TaggedItemBase, parse_tags
 from muckrock import task
 from muckrock import fields
@@ -97,11 +95,13 @@ class FOIARequestQuerySet(models.QuerySet):
     def organization(self, organization):
         """Get requests belonging to an organization's members."""
         return (self.select_related(
+                        'agency',
                         'jurisdiction',
                         'jurisdiction__parent',
-                        'jurisdiction__parent__parent'
-                        )
-                    .filter(user__profile__organization=organization))
+                        'jurisdiction__parent__parent')
+                    .filter(user__profile__organization=organization)
+                    .exclude(status='started')
+                    .order_by('-date_submitted'))
 
     def select_related_view(self):
         """Select related models for viewing"""
@@ -175,8 +175,8 @@ class FOIARequest(models.Model):
     title = models.CharField(max_length=255, db_index=True)
     slug = models.SlugField(max_length=255)
     status = models.CharField(max_length=10, choices=STATUS, db_index=True)
-    jurisdiction = models.ForeignKey(Jurisdiction)
-    agency = models.ForeignKey(Agency, blank=True, null=True)
+    jurisdiction = models.ForeignKey('jurisdiction.Jurisdiction')
+    agency = models.ForeignKey('agency.Agency', blank=True, null=True)
     date_submitted = models.DateField(blank=True, null=True, db_index=True)
     date_updated = models.DateField(blank=True, null=True, db_index=True)
     date_done = models.DateField(blank=True, null=True, verbose_name='Date response received')
@@ -301,7 +301,7 @@ class FOIARequest(models.Model):
 
     def is_payable(self):
         """Can this request be payed for by the user?"""
-        has_open_crowdfund = self.has_crowdfund() and not self.crowdfund.closed
+        has_open_crowdfund = self.has_crowdfund() and not self.crowdfund.expired()
         has_payment_status = self.status == 'payment'
         return has_payment_status and not has_open_crowdfund
 
@@ -679,7 +679,7 @@ class FOIARequest(models.Model):
             bcc=cc_addrs + ['diagnostics@muckrock.com'],
             headers={
                 'Cc': ','.join(cc_addrs),
-                'X-Mailgun-Variables': '{"comm_id": %s}' % comm.pk
+                'X-Mailgun-Variables': {'comm_id': comm.pk}
             }
         )
         if from_addr != 'fax':
@@ -887,5 +887,3 @@ class FOIARequest(models.Model):
         ordering = ['title']
         verbose_name = 'FOIA Request'
         app_label = 'foia'
-
-

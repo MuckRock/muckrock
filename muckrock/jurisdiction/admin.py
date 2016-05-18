@@ -14,8 +14,7 @@ from reversion.admin import VersionAdmin
 import logging
 import sys
 
-#from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.foia.models import Jurisdiction
+from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.forms import CSVImportForm
 
 logger = logging.getLogger(__name__)
@@ -76,7 +75,7 @@ class JurisdictionAdmin(VersionAdmin):
         else:
             form = CSVImportForm()
 
-        fields = ['name', 'slug', 'level', 'parent']
+        fields = ['name', 'slug', 'full_name', 'level', 'parent']
         return render_to_response('admin/agency/import.html', {'form': form, 'fields': fields},
                                   context_instance=RequestContext(request))
 

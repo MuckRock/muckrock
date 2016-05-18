@@ -1,0 +1,262 @@
+.banner
+{
+    @include display(flex);
+    @include flex-wrap(wrap);
+    @include align-items(center);
+    @include justify-content(center);
+    color: $color-white;
+
+    h2
+    {
+        font-size: $font-size-5;
+    }
+
+    .about
+    {
+        @include flex(3 1 500px);
+    }
+
+    .info
+    {
+        @include flex(1 1 200px);
+        max-width: 20em;
+        font-size: $font-size-2;
+    }
+
+    &.foia
+    {
+
+        background-size: cover;
+        background-position: right bottom;
+        padding: $vertical-rhythm;
+        @include border;
+        border-color: $color-red-dark;
+
+        h2
+        {
+            margin: 0 auto $vertical-rhythm;
+            max-width: 11em;
+            font-size: $font-size-5;
+            font-weight: $font-weight-bold;
+        }
+        .button {
+            margin-bottom: $vertical-rhythm;
+        }
+        .call-to-action {
+            a
+            {
+                color: $color-white;
+                font-weight: $font-weight-bold;
+                border-bottom: 1px dotted;
+            }
+            a:hover
+            {
+                color: $color-red-light;
+                text-decoration: none;
+                border-bottom: 1px solid;
+            }
+        }
+        .info
+        {
+            padding: $vertical-rhythm $vertical-rhythm 0 $vertical-rhythm;
+            @include border;
+            background-color: rgba(0,0,0,.4);
+        }
+        .stats
+        {
+            @include display(flex);
+            @include flex-wrap(wrap);
+            @include justify-content(space-around);
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .stat
+        {
+            @include flex(50%);
+            width: 7em;
+            margin: 0 0 $vertical-rhythm 0;
+            text-align: center;
+            .value
+            {
+                font-size: $font-size-5;
+                margin-bottom: $vertical-rhythm/2;
+            }
+            .key
+            {
+                line-height: 1em;
+            }
+        }
+
+        .about
+        {
+            text-align: center;
+            .button
+            {
+                display: inline-block;
+                @include media($small-layout)
+                {
+                    display: block;
+                    max-width: 20em;
+                    margin: 0 auto $vertical-rhythm;
+                }
+            }
+            #learn-more
+            {
+                display: inline-block;
+                margin-left: $vertical-rhythm/4;
+            }
+        }
+    }
+    &.mission
+    {
+        @include justify-content(space-between);
+        margin: 0 $vertical-rhythm $vertical-rhythm;
+        padding: 0;
+        color: $color-black;
+        h1
+        {
+            max-width: 21em;
+            margin-right: $vertical-rhythm;
+            font-size: $font-size-6;
+            font-weight: $font-weight-bold;
+        }
+    }
+}
+
+.homepage
+{
+    h2
+    {
+        font-size: $font-size-4;
+        font-weight: $font-weight-bold;
+    }
+    main
+    {
+        margin-bottom: 0;
+        @include display(flex);
+        @include flex-wrap(wrap);
+        .news
+        {
+            @include flex(2 1 400px);
+            .articles
+            {
+                @include display(flex);
+                @include flex-wrap(wrap);
+            }
+            .article
+            {
+                margin: 0 $vertical-rhythm $vertical-rhythm;
+            }
+            .lead.article
+            {
+                @include flex(0 1 100%);
+            }
+            .other.article
+            {
+                @include flex(1 1 275px);
+            }
+        }
+        .requests
+        {
+            @include flex(1 1 200px);
+            margin: 0 $vertical-rhythm $vertical-rhythm;
+        }
+    }
+    .news
+    {
+        .articles
+        {
+            margin-bottom: 0;
+        }
+        .article
+        {
+            margin: 0 0 $vertical-rhythm 0;
+            h1
+            {
+                margin-bottom: $vertical-rhythm/4;
+                font-size: $font-size-6;
+                font-weight: $font-weight-bold;
+                line-height: 1.2em;
+                a
+                {
+                    color: $color-black;
+                }
+            }
+            summary
+            {
+                max-width: 40em;
+            }
+            .article-image, img
+            {
+                display: block;
+                width: 100%;
+            }
+            .article-image
+            {
+                margin-bottom: $vertical-rhythm/2;
+            }
+            .article-authors, datetime
+            {
+                margin-bottom: 0;
+                font-size: $font-size-2;
+                &, a
+                {
+                    color: $color-grey-3;
+                }
+            }
+            .article-metadata
+            {
+                @include display(flex);
+                @include justify-content(space-between);
+                margin-bottom: $vertical-rhythm/4;
+                line-height: 1em;
+            }
+            .article-project a
+            {
+                color: $color-grey-3;
+            }
+        }
+        .other.article
+        {
+            h1
+            {
+                font-size: $font-size-3;
+            }
+            summary
+            {
+                font-size: $font-size-2;
+                line-height: $font-line-height;
+            }
+        }
+        .newsletter-widget {
+            margin: 0 $vertical-rhythm $vertical-rhythm;
+        }
+    }
+    .projects {
+        padding: 0 $vertical-rhythm;
+    }
+    .projects li {
+        margin-bottom: $vertical-rhythm;
+    }
+}
+
+/* This knocks out the margin applied by the parent container */
+.homepage
+{
+    overflow: hidden;
+    margin: 0 -.5 * $vertical-rhythm;
+    margin-bottom: 0;
+    section
+    {
+        margin-bottom: 0;
+    }
+    @include media($medium-layout)
+    {
+        margin: 0 -1 * $vertical-rhythm;
+    }
+    @include media($large-layout)
+    {
+        margin: 0 -24px 0 -1 * $vertical-rhythm;
+    }
+}

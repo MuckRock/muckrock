@@ -39,14 +39,14 @@
         {% else %}
             {% include 'lib/message.html' with user=comm.priv_from_who response=comm.response date=comm.date uid=comm.anchor files=comm.files.all body=comm.communication|redact_emails|urlize|linebreaks %}
         {% endif %}
-        
+
         {% include 'lib/comm_actions.html' with muckrock_number=comm.likely_foia.pk %}
         </div>
     </div>
     {% empty %}
     <h2>There&rsquo;s no orphans. Nice!</h2>
     {% endfor %}
-</article>    
+</article>
     {% with communications as page_obj %}
         {% include 'lib/pagination.html' %}
     {% endwith %}

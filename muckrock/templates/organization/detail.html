@@ -55,17 +55,24 @@
     </aside>
     <main>
         <ul class="tab-list">
-            <li><a class="tab" href="#requests">
-                <span class="counter">{{requests|length}}</span> Request{{requests|pluralize}}
-            </a></li>
             <li><a class="tab" href="#members">
                 <span class="counter">{{members|length}}</span> Member{{members|pluralize}}
+            </a></li>
+            <li><a class="tab" href="#requests">
+                <span class="counter">{{requests.count}}</span> Request{{requests.count|pluralize}}
             </a></li>
         </ul>
         <div class="tab-sections">
             <section class="active tab-section" id="requests">
-            {% if requests %}
-                {% include 'lib/foia_table.html' %}
+            {% if requests.count > 0 %}
+                {% if requests.filed %}
+                <h2>Recently Filed</h2>
+                {% include 'lib/foia_table.html' with requests=requests.filed %}
+                {% endif %}
+                {% if requests.completed %}
+                <h2>Recently Completed</h2>
+                {% include 'lib/foia_table.html' with requests=requests.completed %}
+                {% endif %}
             {% else %}
                 <p class="empty">This organization has no associated requests.</p>
             {% endif %}
@@ -82,7 +89,7 @@
                                 <form class="remove-member" method="post">
                                     {% csrf_token %}
                                     <input type="hidden" name="member" value="{{member.user.pk}}" />
-                                    <button class="simple failure" type="submit" name="action" value="remove_member">Remove</button>
+                                    <button class="small basic red button" type="submit" name="action" value="remove_member">Remove</button>
                                 </form>
                             </td>
                             {% endif %}
@@ -111,7 +118,7 @@
                             <label for="{{ add_members_form.members.id_for_label}}">Search for MuckRock users</label>
                             {{ add_members_form.members }}
                         </div>
-                        <button class="primary" type="submit" name="action" value="add_members">Add</button>
+                        <button class="primary button" type="submit" name="action" value="add_members">Add</button>
                     </div>
                 </form>
                 {% endif %}

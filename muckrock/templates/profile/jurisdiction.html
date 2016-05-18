@@ -7,7 +7,6 @@
 
 {% block metadata %}
 <aside class="metadata">
-    <dfn>{{ jurisdiction.get_level_display }} Jurisdiction</dfn>
     {% if jurisdiction.image %}
     <figure class="jurisdiction image">
         <img src="{% thumbnail jurisdiction.image 600x600 %}" class="header-image">
@@ -25,6 +24,7 @@
     {% include 'lib/appeal_stats.html' %}
 
     <dl class="stats">
+
         <dt>Allowed Response Time</dt>
         {% with jurisdiction.get_days as days %}
             {% if days %}
@@ -33,11 +33,28 @@
             <dd>No limit</dd>
             {% endif %}
         {% endwith %}
+
         <dt>Average Response Time</dt>
         {% with jurisdiction.average_response_time as average_response_time %}
         <dd>{{ average_response_time }} day{{ average_response_time|pluralize }}</dd>
         {% endwith %}
-		{% if proxies %}
+
+        {% with jurisdiction.success_rate as success_rate %}
+        {% if success_rate > 0 %}
+        <dt>Success Rate</dt>
+        <dd>{{ success_rate|floatformat:"2" }}%</dd>
+        {% endif %}
+        {% endwith %}
+
+        {% with jurisdiction.average_fee as average_fee %}
+        {% if average_fee > 0 %}
+        <dt>Average Fee</dt>
+        <dd>${{ average_fee|floatformat:"2" }}</dd>
+        <dd>{{ jurisdiction.fee_rate|floatformat:"2" }}% of requests have a fee</dd>
+        {% endif %}
+        {% endwith %}
+
+        {% if proxies %}
 		<dt>Proxies</dt>
 		{% for proxy in proxies %}
 		<dd><a href="{{proxy.get_absolute_url}}">{{proxy.get_full_name}}</a></dd>
@@ -61,7 +78,7 @@
     {% include 'lib/foia_table.html' with requests=foia_requests %}
 
     {% if agencies %}
-    <h3>Documented Agencies <small><a href="{% url 'agency-list' %}?jurisdiction={{ jurisdiction.pk }}">See All</a></small></h3>
+    <h3>Top Agencies <small><a href="{% url 'agency-list' %}?jurisdiction={{ jurisdiction.pk }}">See All</a></small></h3>
     <table>
         <tr>
             <th width="50%">Agency</th>
@@ -70,7 +87,7 @@
         </tr>
         {% for agency in agencies %}
         <tr>
-            <td><a href="{% url 'agency-detail' jurisdiction=jurisdiction.slug jidx=jurisdiction.pk slug=agency.slug idx=agency.pk %}">{{ agency.name }}</a></td>
+            <td><a href="{{agency.get_absolute_url}}">{{ agency.name }}</a></td>
             <td>{{ agency.foia_count|intcomma }}</td>
             <td>{% if agency.pages %}{{ agency.pages|intcomma }}{% else %}0{%endif %}</td>
         </tr>
@@ -78,6 +95,23 @@
     </table>
     {% else %}
     <h3>No agencies have been documented for this jurisdiction.</h3>
+    {% endif %}
+    {% if localities %}
+    <h3>Top Localities <small><a href="{% url 'jurisdiction-list' %}?parent={{ jurisdiction.pk }}">See All</a></small></h3>
+    <table>
+        <tr>
+            <th width="50%">Jurisdiction</th>
+            <th width="20%">Requests</th>
+            <th width="30%">Pages Released</th>
+        </tr>
+        {% for locality in localities %}
+        <tr>
+            <td><a href="{{locality.get_absolute_url}}">{{ locality }}</a></td>
+            <td>{{ locality.foia_count|intcomma }}</td>
+            <td>{% if locality.pages %}{{ locality.pages|intcomma }}{% else %}0{%endif %}</td>
+        </tr>
+        {% endfor %}
+    </table>
     {% endif %}
 </main>
 {% endblock activity %}

@@ -3,6 +3,11 @@
 from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render
+from django.utils.decorators import method_decorator
+from django.views.decorators.clickjacking import xframe_options_exempt
+from django.views.generic import DetailView
+
+from muckrock.foia.models import FOIAFile
 
 @user_passes_test(lambda u: u.is_staff)
 def drag_drop(request):
@@ -15,3 +20,9 @@ def drag_drop(request):
                 'access_key': settings.AWS_ACCESS_KEY_ID,
                 'secret_key': settings.AWS_SECRET_ACCESS_KEY,
             })
+
+@method_decorator(xframe_options_exempt, name='dispatch')
+class FileEmbedView(DetailView):
+    """Presents an embeddable view for a single file."""
+    model = FOIAFile
+    template_name = 'foia/file/embed.html'
