@@ -6,14 +6,14 @@ from django.contrib.auth.models import AnonymousUser
 from django.core.urlresolvers import reverse
 from django.test import TestCase, RequestFactory, Client
 
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 from decimal import Decimal
 from mock import Mock, patch
 from nose.tools import ok_, eq_
 
 from muckrock.crowdfund.forms import CrowdfundPaymentForm
 from muckrock.crowdfund.models import CrowdfundPayment
-from muckrock.crowdfund.views import CrowdfundDetailView, crowdfund_embed_view
+from muckrock.crowdfund.views import CrowdfundDetailView
 from muckrock.factories import UserFactory, FOIARequestFactory, ProjectFactory, CrowdfundFactory
 from muckrock.project.models import ProjectCrowdfunds
 from muckrock.utils import mock_middleware
@@ -127,12 +127,12 @@ class TestCrowdfundView(TestCase):
         self.data['show'] = True
         self.post(self.data, user2)
 
-        new_crowdfund = Crowdfund.objects.get(pk=self.crowdfund.pk)
-        eq_(new_crowdfund.contributors_count(), 3,
+        self.crowdfund.refresh_from_db()
+        eq_(self.crowdfund.contributors_count(), 3,
                 'All contributions should return some kind of user')
-        eq_(new_crowdfund.anonymous_contributors_count(), 2,
+        eq_(self.crowdfund.anonymous_contributors_count(), 2,
                 'There should be 2 anonymous contributors')
-        eq_(len(new_crowdfund.named_contributors()), 1,
+        eq_(len(self.crowdfund.named_contributors()), 1,
                 'There should be 1 named contributor')
 
     def test_unlimit_amount(self):
