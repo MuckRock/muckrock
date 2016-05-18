@@ -5,6 +5,7 @@ Tests using nose for the FOIA application
 from django.contrib.auth.models import User, AnonymousUser
 from django.core.urlresolvers import reverse
 from django.core import mail
+from django.http import Http404
 from django.test import TestCase, RequestFactory
 
 import datetime
@@ -15,7 +16,7 @@ import re
 
 from muckrock.factories import UserFactory, FOIARequestFactory, FOIAFileFactory, ProjectFactory
 from muckrock.foia.models import FOIARequest, FOIACommunication
-from muckrock.foia.views import Detail
+from muckrock.foia.views import Detail, FOIAFileListView
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.project.forms import ProjectManagerForm
@@ -25,6 +26,7 @@ from muckrock.utils import mock_middleware
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
+raises = nose.tools.raises
 
 # allow methods that could be functions and too many public methods in tests
 # pylint: disable=no-self-use
@@ -967,7 +969,7 @@ class TestRequestFilesView(TestCase):
             'idx': self.foia.pk,
             'slug': self.foia.slug,
             'jidx': self.foia.jurisdiction.pk,
-            'jurisdiction': self.foia.jurisdiction
+            'jurisdiction': self.foia.jurisdiction.slug
         }
         self.url = reverse('foia-files', kwargs=self.kwargs)
         self.view = FOIAFileListView.as_view()
@@ -979,9 +981,16 @@ class TestRequestFilesView(TestCase):
         request.user = self.foia.user
         request = mock_middleware(request)
         ok_(self.foia.viewable_by(request.user), 'The user should be able to view the request')
-        response = self.view(request, kwargs=self.kwargs)
+        response = self.view(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id
+        )
         eq_(response.status_code, 200, 'The view should return 200.')
 
+    @raises(Http404)
     def test_get_404(self):
         """The view should return 404 is the foia is not visible to the user."""
         self.foia.embargo = True
@@ -991,5 +1000,10 @@ class TestRequestFilesView(TestCase):
         request = self.factory.get(self.url)
         request.user = user
         request = mock_middleware(request)
-        response = self.view(request, kwargs=self.kwargs)
-        eq_(response.status_code, 404, 'The view should return 404.')
+        response = self.view(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id
+        )
