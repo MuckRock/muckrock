@@ -1000,7 +1000,7 @@ class TestRequestFilesView(TestCase):
         request = self.factory.get(self.url)
         request.user = user
         request = mock_middleware(request)
-        response = self.view(
+        self.view(
             request,
             jurisdiction=self.foia.jurisdiction.slug,
             jidx=self.foia.jurisdiction.id,

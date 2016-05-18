@@ -6,7 +6,7 @@ from django.http import Http404
 from django.shortcuts import render, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.clickjacking import xframe_options_exempt
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView
 
 from muckrock.foia.models import FOIAFile, FOIARequest
 from muckrock.views import MRFilterableListView
@@ -34,6 +34,7 @@ class FOIAFileListView(MRFilterableListView):
     """Presents a paginated list of files."""
     model = FOIAFile
     template_name = 'foia/file/list.html'
+    foia = None
 
     def dispatch(self, request, *args, **kwargs):
         """Prevent unauthorized users from viewing the files."""
@@ -44,19 +45,20 @@ class FOIAFileListView(MRFilterableListView):
 
     def get_foia(self):
         """Returns the FOIA Request for the files. Caches it as an attribute."""
-        foia = None
-        try:
-            foia = self.foia
-        except AttributeError:
-            foia = get_object_or_404(FOIARequest, pk=self.kwargs
-            ['idx'])
-            self.foia = foia
-        return foia
+        if self.foia is None:
+            self.foia = get_object_or_404(FOIARequest, pk=self.kwargs.get('idx'))
+        return self.foia
 
     def get_queryset(self):
         foia = self.get_foia()
         queryset = super(FOIAFileListView, self).get_queryset()
-        return queryset.filter(foia=foia)
+        return (queryset.filter(foia=foia)
+            .select_related('foia')
+            .select_related('foia__user')
+            .select_related('foia__agency')
+            .select_related('foia__jurisdiction')
+            .prefetch_related('foia__edit_collaborators')
+            .prefetch_related('foia__read_collaborators'))
 
     def get_context_data(self, **kwargs):
         context = super(FOIAFileListView, self).get_context_data(**kwargs)

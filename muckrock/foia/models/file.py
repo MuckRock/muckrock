@@ -4,7 +4,6 @@ Models for the FOIA application
 """
 
 from django.conf import settings
-from django.contrib.auth.models import AnonymousUser
 from django.db import models
 
 import logging
@@ -91,7 +90,7 @@ class FOIAFile(models.Model):
 
     def is_public(self):
         """Is this document viewable to everyone"""
-        return self.viewable_by(AnonymousUser())
+        return self.access == 'public'
 
     def is_eml(self):
         """Is this an eml file?"""

@@ -58,11 +58,21 @@
     {% if communication.files %}
     <ul class="files">
     {% with foia_url=communication.foia.get_absolute_url %}
-    {% for file in communication.files.all %}
+    {% with files=communication.files.all|slice:":50" %}
+    {% for file in files %}
         <li>{% include 'lib/file.html' with hide_id=True %}</li>
     {% endfor %}
     {% endwith %}
+    {% endwith %}
     </ul>
+    {% if communication.files.count > 50 %}
+    <span class="notification warning">
+        <span class="symbol">{% include 'lib/component/icon/warning.svg' %}</span>
+        <span class="text">
+            <p>There are too many files to display on this communication. <a class="action" href="{% url 'foia-files' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">See all files</a></p>
+        </span>
+    </span>
+    {% endif %}
     {% endif %}
     {% if request.user.is_staff %}
     <div class="communication-actions">

@@ -292,6 +292,7 @@ class Detail(DetailView):
         context['stripe_pk'] = settings.STRIPE_PUB_KEY
         context['sidebar_admin_url'] = reverse('admin:foia_foiarequest_change', args=(foia.pk,))
         context['is_thankable'] = foia.is_thankable()
+        context['files'] = foia.files.all()[:50]
         if foia.sidebar_html:
             messages.info(self.request, foia.sidebar_html)
         return context
