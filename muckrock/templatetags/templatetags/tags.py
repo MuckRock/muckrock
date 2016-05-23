@@ -243,6 +243,6 @@ def get_item(dictionary, key):
 @register.filter
 def smartypants(text):
     """Renders typographically-correct quotes with the smartpants library"""
-    import smartypants
-    smart_text = smartypants.smartypants(text)
+    import smartypants as _smartypants
+    smart_text = _smartypants.smartypants(text)
     return mark_safe(smart_text)
