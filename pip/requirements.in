@@ -50,5 +50,6 @@ redis # Redis integration - for use with celery
 requests # HTTP for humans
 scikit-learn==0.16.1 # Used for machine learning
 scipy==0.14.0 # Used for machine learning
+smartypants # Used for typographically-correct quotes
 stripe # Stripe payment processor integration
 unidecode # Used for unicode decoding

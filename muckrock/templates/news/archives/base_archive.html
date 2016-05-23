@@ -4,10 +4,6 @@
 {% block list-title %}News &bull; {% block date %}{% endblock date %}{% endblock %}
 {% block type %}news archive{% endblock type %}
 
-{% block list-item %}
-    {% with item as article %}
-    <h2><a href="{{ item.get_absolute_url }}">{{ article.title }}</a></h2>
-    <h3>by {{ article.get_authors_names }}
-        on {{ article.pub_date | date:"F j, Y"}}</h3>
-    {% endwith %}
-{% endblock list-item %}
+{% block list-table-item %}
+    <td>{% with item as article %}{% include 'lib/pattern/article.html' %}{% endwith %}</td>
+{% endblock %}

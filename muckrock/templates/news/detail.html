@@ -24,9 +24,9 @@
         <img src="{% thumbnail article.image 1200x400 crop %}">
         {% endif %}
         <time title="{{ article.pub_date|date:'c' }}" datetime="{{ article.pub_date|date:'c' }}">{{ article.pub_date | date:"F j, Y" }}</time>
-        <h1>{{ article.title }}</h1>
+        <h1>{{ article.title|smartypants }}</h1>
         {% if article.kicker %}
-        <summary class="kicker">{{ article.kicker }}</summary>
+        <summary class="kicker">{{ article.kicker|smartypants }}</summary>
         {% endif %}
         <div class="contributors">
             {% with article.authors.all as authors %}
@@ -50,7 +50,7 @@
         </div>
     </header>
     <main class="news--main">
-        {% with article.body|markdown:"trusted" as copy %}
+        {% with article.body|markdown:"trusted"|smartypants as copy %}
             {% evaluate copy %}
         {% endwith %}
     </main>
