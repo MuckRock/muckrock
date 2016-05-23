@@ -7,6 +7,7 @@ from django.conf import settings
 from django.template import Library, Node, TemplateSyntaxError
 from django.template.defaultfilters import stringfilter
 from django.utils.html import escape
+from django.utils.safestring import mark_safe
 
 from email.parser import Parser
 import re
@@ -238,3 +239,10 @@ def display_eml(foia_file):
 def get_item(dictionary, key):
     """Get an item from a dictionary template filter"""
     return dictionary.get(key)
+
+@register.filter
+def smartypants(text):
+    """Renders typographically-correct quotes with the smartpants library"""
+    import smartypants
+    smart_text = smartypants.smartypants(text)
+    return mark_safe(smart_text)
