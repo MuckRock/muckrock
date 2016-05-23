@@ -171,33 +171,6 @@
             margin-right: $vertical-rhythm;
         }
     }
-
-    .articles .article {
-        @include display(flex);
-        @include align-items(center);
-        margin-bottom: $vertical-rhythm/2;
-        color: $color-black;
-        font-weight: $font-weight-bold;
-        line-height: $font-line-height;
-        &:hover {
-            color: $color-blue;
-        }
-        img {
-            display: block;
-            width: auto;
-            margin-bottom: 0;
-            margin-right: $vertical-rhythm/2;
-        }
-        .text {
-            @include flex(1);
-        }
-        .text > * {
-            margin-bottom: 0;
-        }
-        .date {
-            color: $color-grey;
-        }
-    }
 }
 
 
