@@ -1,0 +1,45 @@
+{% load markdown_deux_tags %}
+{% load thumbnail %}
+{% load smartypants from tags %}
+
+{% if small %}
+<div class="small article">
+{% elif large %}
+<div class="large article">
+{% else %}
+<div class="article">
+{% endif %}
+    {% with article.image as image %}
+    {% if not hide_image and image %}
+    <a href="{{article.get_absolute_url}}" title="{{article.title}}" class="article__image">
+        {% if small %}
+        <img src="{% thumbnail article.image 300x300 crop %}" />
+        {% elif large %}
+        <img src="{% thumbnail article.image 900x300 %}" />
+        {% else %}
+        <img src="{% thumbnail article.image 400x300 crop %}" />
+        {% endif %}
+    </a>
+    {% endif %}
+    {% endwith %}
+    <div class="article__overview">
+        {% with article.projects.first as project %}
+        {% if not hide_project and project %}
+        <a class="nomargin article__overview__project" href="{{project.get_absolute_url}}">{{project.title}}</a>
+        {% endif %}
+        {% endwith %}
+        <h1 class="article__overview__title"><a href="{{ article.get_absolute_url }}" title="{{article.title}}">{{article.title|smartypants}}</a></h1>
+        <div class="article__overview__metadata">
+            {% if article.authors.all %}
+            <div class="nomargin article__overview__authors">by
+                {% for author in article.authors.all %}
+                    <a class="article__overview__author" href="{{ author.profile.get_absolute_url }}" title="{{ author.get_full_name }}">{{ author.get_full_name }}</a>{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
+            <datetime class="nomargin article__overview__datetime" title="{{article.pub_date|date:'c'}}">{{article.pub_date|date:'F d, Y'}}</datetime>
+        </div>
+        {% if article.summary %}<summary class="nomargin article__overview__summary">{{article.summary|markdown:"trusted"|smartypants}}</summary>{% endif %}
+        <p><a class="action article__overview__readmore" href="{{article.get_absolute_url}}">Read More</a></p>
+    </div>
+</div>

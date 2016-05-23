@@ -108,19 +108,9 @@
             {% if request.user == user_obj %}Your Latest Articles{% else %}Latest Articles{% endif %}
             <small><a href="{% url 'news-author' username=user_obj.username %}">See all</a></small>
         </h3>
-        <ul class="article-list nostyle">
         {% for article in articles %}
-            <li class="article-item">
-                <a href="{{article.get_absolute_url}}" title="{{article.title}}">
-                    {% if article.image %}<img src="{% thumbnail article.image 120x120 crop %}" class="article-image" />{% endif %}
-                    <div class="article-info truncate">
-                        <h4 class="title truncate">{{article.title}}</h4>
-                        <p class="date">{{article.pub_date|date:"F d, Y"}}</p>
-                    </div>
-                </a>
-            </li>
+        {% include 'lib/pattern/article.html' %}
         {% endfor %}
-        </ul>
     </section>
     {% endif %}
     {% if recent_requests or recent_completed %}

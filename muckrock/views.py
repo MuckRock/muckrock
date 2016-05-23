@@ -384,15 +384,8 @@ def homepage(request):
                                         'authors__profile',
                                         'projects',
                                     )
-                                   [:3],
+                                   [:7],
             600)
-    try:
-        lead_article = articles[0]
-        other_articles = articles[1:]
-    except IndexError:
-        # no published articles
-        lead_article = None
-        other_articles = None
     featured_projects = cache_get_or_set(
             'hp:featured_projects',
             lambda: Project.objects.get_public().filter(featured=True)[:4],
