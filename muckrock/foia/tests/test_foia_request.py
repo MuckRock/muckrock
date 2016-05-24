@@ -10,14 +10,17 @@ from django.test import TestCase, RequestFactory
 
 import datetime
 from datetime import date as real_date
+from mock import Mock, patch
 import nose.tools
 from operator import attrgetter
 import re
 
+from muckrock.accounts.models import Profile
+from muckrock.agency.models import Agency
 from muckrock.factories import UserFactory, FOIARequestFactory, FOIAFileFactory, ProjectFactory
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.foia.views import Detail, FOIAFileListView
-from muckrock.agency.models import Agency
+from muckrock.foia.views.composers import _make_user
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.task.models import SnailMailTask
@@ -1007,3 +1010,65 @@ class TestRequestFilesView(TestCase):
             slug=self.foia.slug,
             idx=self.foia.id
         )
+
+
+class TestMiniRegistration(TestCase):
+    """Miniregistration allows a user to sign up for an account with their full name and email."""
+    def setUp(self):
+        self.request = mock_middleware(Mock())
+        self.data = {
+            'full_name': 'Lou Reed',
+            'email': 'lou@hero.in'
+        }
+
+    @patch('muckrock.message.tasks.welcome.delay')
+    def test_expected_case(self, mock_welcome):
+        """
+        Giving the _make_user method a request and data should create a
+        user, create a profile, send them a welcome email, and log them in.
+        The method should return the authenticated user.
+        """
+        user = _make_user(self.request, self.data)
+        ok_(isinstance(user, User), 'A user should be created and returned.')
+        ok_(user.profile, 'A profile should be created for the user.')
+        ok_(user.is_authenticated(), 'The user should be logged in.')
+        mock_welcome.assert_called_once() # The user should get a welcome email
+        eq_(user.first_name, 'Lou', 'The first name should be extracted from the full name.')
+        eq_(user.last_name, 'Reed', 'The last name should be extracted from the full name.')
+        eq_(user.username, 'LouReed', 'The username should remove the spaces from the full name.')
+
+    def test_existing_username(self):
+        """
+        If the expected username is already registered,
+        the username should get a cool number appended to it.
+        If multiple sequential usernames exist, the number will
+        be incremented until a username is available.
+        """
+        UserFactory(username='LouReed')
+        user = _make_user(self.request, self.data)
+        eq_(user.username, 'LouReed1')
+        _make_user(self.request, self.data) # LouReed2
+        _make_user(self.request, self.data) # LouReed3
+        _make_user(self.request, self.data) # LouReed4
+        _make_user(self.request, self.data) # LouReed5
+        user = _make_user(self.request, self.data)
+        eq_(user.username, 'LouReed6')
+
+    def test_multi_space_name(self):
+        """
+        If the full name has more than two separate names in it,
+        the first name should include everything except the final name.
+        """
+        long_name = 'John Cougar Mellencamp'
+        self.data['full_name'] = long_name
+        user = _make_user(self.request, self.data)
+        eq_(user.first_name, 'John Cougar')
+        eq_(user.last_name, 'Mellencamp')
+
+    def test_single_name(self):
+        """If a single name is provided as the full name, then there should be no last name."""
+        short_name = 'Prince' # RIP Prince
+        self.data['full_name'] = short_name
+        user = _make_user(self.request, self.data)
+        eq_(user.first_name, 'Prince')
+        ok_(not user.last_name)

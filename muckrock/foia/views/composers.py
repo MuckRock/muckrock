@@ -38,6 +38,7 @@ from muckrock.foia.models import (
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.tasks import welcome
 from muckrock.task.models import NewAgencyTask, MultiRequestTask
+from muckrock.utils import generate_key
 
 # pylint: disable=too-many-ancestors
 
@@ -135,7 +136,19 @@ def _make_request(request, foia_request, parent=None):
     return foia, foia_comm
 
 def _make_user(request, data):
-    """Helper function to create a new user"""
+    """
+    Create a new user from just their full name and email and return the user.
+
+    - compress first and last name to create username
+        - username must be unique
+        - if the username already exists, add a number to the end
+    - create a password from a random string of letters and numbers
+    - given the username, email, and password, create a user
+    - split the full name string to get the first and last names
+    - create a Profile for the user
+    - send the user a welcome email with a link to reset their password
+    - log the user in to their new account
+    """
     # create unique username thats at most 30 characters
     base_username = data['full_name'].replace(' ', '')[:30]
     username = base_username
@@ -145,7 +158,7 @@ def _make_user(request, data):
         username = '%s%s' % (base_username[:30 - len(postfix)], postfix)
         num += 1
     # create random password
-    password = ''.join(choice(string.ascii_letters + string.digits) for _ in range(12))
+    password = generate_key(12)
     # create a new user
     user = User.objects.create_user(username, data['email'], password)
     full_name = data['full_name'].strip()
@@ -164,11 +177,13 @@ def _make_user(request, data):
         date_update=datetime.now()
     )
     # send the new user a welcome email
-    password_link = user.profile.wrap_url(reverse('acct-change-pw'))
+    password_link = user.profile.wrap_url(reverse('acct-reset-pw'))
     welcome.delay(user, password_link)
-    # login the new user
+    # log the new user in
     user = authenticate(username=username, password=password)
     login(request, user)
+    # return the user
+    return user
 
 def _process_request_form(request):
     """A helper function for getting info out of a request composer form"""
