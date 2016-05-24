@@ -50,9 +50,9 @@
         </div>
     </header>
     <main class="news--main">
-        {% with article.body|markdown:"trusted"|smartypants as copy %}
-            {% evaluate copy %}
-        {% endwith %}
+        {% filter markdown:"trusted"|smartypants %}
+        {% evaluate article.body %}
+        {% endfilter %}
     </main>
     <aside class="news--aside">
         {% include 'lib/social.html' with title=article.title %}
