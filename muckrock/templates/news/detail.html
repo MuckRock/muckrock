@@ -50,9 +50,14 @@
         </div>
     </header>
     <main class="news--main">
-        {% filter markdown:"trusted"|smartypants %}
-        {% evaluate article.body %}
-        {% endfilter %}
+{% comment %}
+We have to keep this code un-tabbed for dumb reasons!
+The markdown filter will transform the tabbed text into a line of <code>.
+Like  I said, real dumb stuff!
+{% endcomment %}
+{% filter markdown:"trusted"|smartypants %}
+{% evaluate article.body %}
+{% endfilter %}
     </main>
     <aside class="news--aside">
         {% include 'lib/social.html' with title=article.title %}
