@@ -94,3 +94,12 @@
     white-space: nowrap;
     text-overflow: ellipsis;
 }
+
+@mixin icon-color($color) {
+    .icon path,
+    .icon polygon,
+    .icon rect,
+    .icon circle {
+        fill: $color;
+    }
+}

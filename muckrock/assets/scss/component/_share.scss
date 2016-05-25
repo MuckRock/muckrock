@@ -17,14 +17,8 @@
         height: 1.25rem;
         width: 1.25rem;
         vertical-align: middle;
-        path {
-            fill: $color-white;
-        }
-        &.email path {
-            fill: none;
-            stroke: $color-white;
-        }
     }
+    @include icon-color($color-white);
     a {
         display: block;
         padding: $vertical-rhythm/2;
