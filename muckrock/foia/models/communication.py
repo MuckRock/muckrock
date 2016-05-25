@@ -13,6 +13,7 @@ from django.shortcuts import get_object_or_404
 
 import logging
 
+from muckrock.accounts.models import AgencyUser
 from muckrock.foia.models.request import FOIARequest, STATUS
 from muckrock.utils import unique_username
 
@@ -47,12 +48,10 @@ class FOIACommunication(models.Model):
             related_name='comms_from',
             on_delete=models.PROTECT,
             )
-    to_user = models.ForeignKey(
+    # XXX cc_users?
+    to_users = models.ManyToManyField(
             'auth.User',
-            blank=True,
-            null=True,
             related_name='comms_to',
-            on_delete=models.PROTECT,
             )
 
     subject = models.CharField(max_length=255, blank=True)
@@ -205,7 +204,7 @@ class FOIACommunication(models.Model):
             logging.info('Communication #%d cloned to request #%d', original_pk, this_clone.foia.id)
         return cloned_comms
 
-    def resend(self, email_address=None):
+    def resend(self, users):
         """Resend the communication"""
         foia = self.foia
         if not foia:
@@ -214,23 +213,14 @@ class FOIACommunication(models.Model):
         if not foia.agency or not foia.agency.status == 'approved':
             logging.error('Tried resending a communication with an unapproved agency')
             raise ValueError('This communication has no approved agency.', 'no_agency')
-        snail = False
         self.date = datetime.datetime.now()
-        if email_address:
-            # responsibility for handling validation errors
-            # is on the caller of the resend method
-            validate_email(email_address)
-            user, _ = User.objects.get_or_create(
-                    email=email_address,
-                    defaults={'username': unique_username(email_address)},
-                    )
-            self.to_user = user
-            foia.contact = user
-            foia.save(comment='new email from comm resend')
-        else:
-            snail = True
+        self.to_users.set(users)
         self.save()
-        foia.submit(snail=snail)
+
+        foia.contacts.set(users)
+        foia.save(comment='new email from comm resend')
+        foia.submit()
+
         logging.info('Communication #%d resent.', self.id)
 
     def set_raw_email(self, msg):
@@ -243,7 +233,8 @@ class FOIACommunication(models.Model):
         """Makes the communication's sender the primary email of its FOIA."""
         if not self.foia:
             raise ValueError('Communication is an orphan and has no associated request.')
-        self.foia.contact = self.from_user
+        # XXX reload to get instance of AgencyUser
+        self.foia.contacts.set([AgencyUser.objects.get(pk=self.from_user.pk)])
         self.foia.save(comment='update primary email from comm')
 
     def _presave_special_handling(self):

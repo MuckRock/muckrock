@@ -10,10 +10,12 @@ from django.core.urlresolvers import reverse
 from django.core.validators import ValidationError
 
 from muckrock import factories
+from muckrock.accounts.models import AgencyUser
 from muckrock.foia.models.communication import FOIACommunication
 from muckrock.foia.models.request import FOIARequest
 from muckrock.foia.models.file import FOIAFile
 from muckrock.foia.views import raw
+from muckrock.utils import unique_username
 
 import logging
 import nose
@@ -44,7 +46,7 @@ class TestCommunication(test.TestCase):
         """Makes the primary email of the FOIA to the email the communication was sent from."""
         self.comm.make_sender_primary_contact()
         foia = FOIARequest.objects.get(pk=self.foia.pk)
-        eq_(foia.contact.email, self.comm.from_user.email)
+        eq_(foia.get_emails(), ([self.comm.from_user.email], []))
 
     @raises(ValueError)
     def test_orphan_error(self):
@@ -214,6 +216,7 @@ class TestCommunicationResend(test.TestCase):
 
     def test_resend_sans_email(self):
         """Should resubmit the FOIA containing the communication as a snail mail"""
+        # XXX how do we want to do this
         self.comm.resend()
         ok_(self.comm.date > self.creation_date,
             'Resubmitting the communication should update the date.')
@@ -223,30 +226,35 @@ class TestCommunicationResend(test.TestCase):
     def test_resend_with_email(self):
         """Should resubmit the FOIA containing the communication automatically"""
         new_email = 'test@example.com'
-        self.comm.resend(new_email)
-        eq_(self.comm.foia.contact.email, new_email,
+        user, _ = AgencyUser.objects.get_or_create(
+                email=new_email,
+                defaults={'username': unique_username(new_email)})
+        self.comm.resend([user])
+        eq_(self.comm.foia.get_emails(), ([new_email], []),
             'Resubmitting with a new email should update the email of the FOIA request.')
         eq_(self.comm.foia.status, 'ack',
             'Resubmitting with an email should resubmit its associated FOIARequest.')
-
-    @raises(ValidationError)
-    def test_resend_bad_email(self):
-        """Should throw an error if given an invalid email"""
-        self.comm.resend('asdfads')
 
     @raises(ValueError)
     def test_resend_orphan_comm(self):
         """Should throw an error if the communication being resent is an orphan"""
         self.comm.foia = None
         self.comm.save()
-        self.comm.resend('hello@world.com')
+
+        user, _ = AgencyUser.objects.get_or_create(
+                email='hello@world.com',
+                defaults={'username': unique_username('hello@world.com')})
+        self.comm.resend([user])
 
     @raises(ValueError)
     def test_resend_unapproved_comm(self):
         """Should throw an error if the communication being resent has an unapproved agency"""
         self.comm.foia.agency.status = 'rejected'
         self.comm.foia.agency.save()
-        self.comm.resend('hello@world.com')
+        user, _ = AgencyUser.objects.get_or_create(
+                email='hello@world.com',
+                defaults={'username': unique_username('hello@world.com')})
+        self.comm.resend([user])
 
 
 class TestRawEmail(test.TestCase):

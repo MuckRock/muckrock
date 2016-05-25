@@ -58,7 +58,7 @@ class FOIARequestQuerySet(models.QuerySet):
                     Q(user=user) |
                     Q(edit_collaborators=user) |
                     Q(read_collaborators=user) |
-                    Q(agency=user.agencyprofile.agency) |
+                    Q(agency__in=user.agencies.all()) |
                     (~Q(status='started') & ~Q(embargo=True)))
         elif user.is_authenticated():
             return self.filter(
@@ -208,18 +208,12 @@ class FOIARequest(models.Model):
     # request
     # ie where new communications for this request should be sent
     # (to for contact, cc for cc_contacts)
-    # these should generally be agency users
-    contact = models.ForeignKey(
-        User,
-        blank=True,
-        null=True,
-        on_delete=models.PROTECT,
+    contacts = models.ManyToManyField(
+        'accounts.AgencyUser',
         related_name='+',
         )
     cc_contacts = models.ManyToManyField(
-        User,
-        blank=True,
-        null=True,
+        'accounts.AgencyUser',
         related_name='+',
         )
     # XXX delete
@@ -431,18 +425,6 @@ class FOIARequest(models.Model):
             self.set_mail_id()
         return self.mail_id
 
-    def get_other_emails(self):
-        """Get the other emails for this request as a list"""
-        # Adding blank emails here breaks mailgun backend
-        return [e for e in fields.email_separator_re.split(self.other_emails) if e]
-
-    def get_to_who(self):
-        """Who communications are to"""
-        if self.agency:
-            return self.agency.name
-        else:
-            return ''
-
     def get_saved(self):
         """Get the old model that is saved in the db"""
         try:
@@ -482,56 +464,34 @@ class FOIARequest(models.Model):
         self.update_dates()
 
     def submit(self, appeal=False, snail=False, thanks=False):
-        """The request has been submitted.  Notify admin and try to auto submit"""
-        # XXX
-        from muckrock.task.models import FlaggedTask
-        # can email appeal if the agency has an appeal agency which has an email address
-        # and can accept emailed appeals
-        can_email_appeal = (appeal and
-                self.agency and
-                self.agency.appeal_agency and
-                self.agency.appeal_agency.get_primary_contact().email and
-                self.agency.appeal_agency.can_email_appeals)
-        # update email addresses for the request
-        if can_email_appeal:
-            self.contact = self.agency.appeal_agency.get_primary_contact()
-            self.cc_contacts = self.agency.appeal_agency.get_cc_contacts()
-        elif not self.contact and self.agency:
-            self.contact = self.agency.get_primary_contact()
-            self.cc_contacts = self.agency.get_cc_contacts()
-        # if agency isnt approved, do not email or snail mail
-        # it will be handled after agency is approved
+        # update contacts
+        if appeal:
+            self.contacts.set(self.get_contacts('appeal'))
+            self.cc_contacts.set(self.get_contacts('appeal-copy'))
+        elif not self.contacts:
+            self.contacts.set(self.get_contacts('primary'))
+            self.cc_contacts.set(self.get_contacts('copy'))
+
+        has_email = bool(self.get_emails()[0])
         approved_agency = self.agency and self.agency.status == 'approved'
-        can_email = (self.contact and self.contact.email and not
-                appeal and not self.missing_proxy)
         comm = self.last_comm()
-        # if the request can be emailed, email it, otherwise send a notice to the admin
-        # if this is a thanks, send it as normal but do not change the status
-        if not snail and approved_agency and (can_email or can_email_appeal):
-            if appeal and not thanks:
-                self.status = 'appealing'
-            elif self.has_ack() and not thanks:
-                self.status = 'processed'
-            elif not thanks:
-                self.status = 'ack'
+        can_email = not snail and approved_agency and has_email
+
+        if can_email:
+            if not thanks:
+                if appeal:
+                    self.status = 'appealing'
+                elif self.has_ack():
+                    self.status = 'processed'
+                else:
+                    self.status = 'ack'
             self._send_email()
             self.update_dates()
         elif self.missing_proxy:
             # flag for proxy re-submitting
             self.status = 'submitted'
             self.date_processing = date.today()
-            task.models.FlaggedTask.objects.create(
-                    foia=self,
-                    text='This request was filed for an agency requiring a '
-                    'proxy, but no proxy was available.  Please add a suitable '
-                    'proxy for the state and refile it with a note that the '
-                    'request is being filed by a state citizen. Make sure the '
-                    'new request is associated with the original user\'s '
-                    'account. To add someone as a proxy, change their user type '
-                    'to "Proxy" and make sure they properly have their state '
-                    'set on the backend.  This message should only appear when '
-                    'a suitable proxy does not exist.'
-                    )
+            self.create_proxy_flag()
         elif approved_agency:
             # snail mail it
             if not thanks:
@@ -541,13 +501,41 @@ class FOIARequest(models.Model):
             notice = 'a' if appeal else notice
             comm.delivered = 'mail'
             comm.save()
-            task.models.SnailMailTask.objects.create(category=notice, communication=comm)
+            task.models.SnailMailTask.objects.create(
+                    category=notice, communication=comm)
         elif not thanks:
             # there should never be a thanks to an unapproved agency
             # not an approved agency, all we do is mark as submitted
             self.status = 'submitted'
             self.date_processing = date.today()
         self.save()
+
+    def create_proxy_flag(self):
+        """Flag this request as requiring a proxy"""
+        task.models.FlaggedTask.objects.create(
+                foia=self,
+                text='This request was filed for an agency requiring a '
+                'proxy, but no proxy was available.  Please add a suitable '
+                'proxy for the state and refile it with a note that the '
+                'request is being filed by a state citizen. Make sure the '
+                'new request is associated with the original user\'s '
+                'account. To add someone as a proxy, change their user type '
+                'to "Proxy" and make sure they properly have their state '
+                'set on the backend.  This message should only appear when '
+                'a suitable proxy does not exist.'
+                )
+
+    def get_contacts(self, type_):
+        """Get the contacts for a new request by type"""
+        try:
+            if type_ in ('appeal', 'appeal-copy'):
+                agency = self.agency.appeal_agency
+            else:
+                agency = self.agency
+        except AttributeError:
+            return []
+
+        return agency.get_contacts(type_)
 
     def followup(self, show_all_comms=True):
         """Send a follow up email for this request"""
@@ -570,7 +558,7 @@ class FOIARequest(models.Model):
 
         # XXX
         # comm.send()
-        if self.get_email_addr():
+        if self.get_emails()[0]:
             self._send_email(show_all_comms)
         else:
             self.status = 'submitted'
@@ -621,20 +609,25 @@ class FOIARequest(models.Model):
         # We return the communication we generated, in case the caller wants to do anything with it
         return comm
 
-    def get_email_addr(self):
-        """Get email address to send to"""
-        try:
-            return self.contact.agencyprofile.get_email()
-        except AttributeError:
-            return ''
+    def get_emails(self):
+        """Get emails to send to"""
+        # Adding blank emails here breaks mailgun backend
+        emails = [c.get_email() for c in self.contacts.all()]
+        cc_emails = [c.get_email() for c in self.cc_contacts.all()]
+        if not all(e.endswith('faxaway.com') for e in emails + cc_emails):
+            emails = [e for e in emails if not e.endswith('faxaway.com')]
+            cc_emails = [e for e in cc_emails if not e.endswith('faxaway.com')]
+
+        return (emails, cc_emails)
 
     def _send_email(self, show_all_comms=True):
         """Send an email of the request to its email address"""
         # self.contact should be set before calling this method
         from muckrock.foia.tasks import send_fax
 
-        contact_email = self.get_email_addr()
-        from_addr = 'fax' if contact_email.endswith('faxaway.com') else self.get_mail_id()
+        contact_emails, cc_emails = self.get_emails()
+        # XXX
+        from_addr = 'fax' if contact_emails[0].endswith('faxaway.com') else self.get_mail_id()
         law_name = self.jurisdiction.get_law_name()
         if self.tracking_id:
             subject = 'RE: %s Request #%s' % (law_name, self.tracking_id)
@@ -651,7 +644,6 @@ class FOIARequest(models.Model):
         # max database size
         subject = subject[:255]
 
-        cc_addrs = self.get_other_emails()
         from_email = '%s@%s' % (from_addr, settings.MAILGUN_SERVER_NAME)
         # pylint:disable=attribute-defined-outside-init
         self.reverse_communications = self.communications.reverse()
@@ -664,10 +656,10 @@ class FOIARequest(models.Model):
             subject=subject,
             body=body,
             from_email=from_email,
-            to=[contact_email],
-            bcc=cc_addrs + ['diagnostics@muckrock.com'],
+            to=contact_emails,
+            cc=cc_emails,
+            bcc=['diagnostics@muckrock.com'],
             headers={
-                'Cc': ','.join(cc_addrs),
                 'X-Mailgun-Variables': '{"comm_id": %s}' % comm.pk
             }
         )
@@ -683,7 +675,7 @@ class FOIARequest(models.Model):
 
         # update communication
         comm.set_raw_email(msg.message())
-        comm.delivered = 'fax' if contact_email.endswith('faxaway.com') else 'email'
+        comm.delivered = 'fax' if from_addr == 'fax' else 'email'
         comm.subject = subject
         comm.save()
 
@@ -847,7 +839,6 @@ class FOIARequest(models.Model):
 
     def proxy_reject(self):
         """Mark this request as being rejected due to a proxy being required"""
-        from muckrock.task.models import FlaggedTask
         # mark the agency as requiring a proxy going forward
         self.agency.requires_proxy = True
         self.agency.save()
@@ -876,12 +867,12 @@ class FOIARequest(models.Model):
         """Create an outgoing communication for the request"""
         comm = self.communications.create(
             from_user=from_user,
-            to_user=self.contact,
             date=datetime.now(),
             response=False,
             communication=text,
             **kwargs
             )
+        comm.to_users.set(self.contacts.all())
         if formset is not None:
             foia_files = formset.save(commit=False)
             for foia_file in foia_files:
@@ -898,12 +889,12 @@ class FOIARequest(models.Model):
             comm_date = datetime.now()
         comm = self.communications.create(
             from_user=from_user,
-            to_user=self.user,
             date=comm_date,
             response=True,
             communication=text,
             **kwargs
             )
+        comm.to_users.add(self.user)
         if formset is not None:
             foia_files = formset.save(commit=False)
             for foia_file in foia_files:
@@ -912,6 +903,22 @@ class FOIARequest(models.Model):
                 foia_file.date = comm.date
                 foia_file.save()
         return comm
+
+    def known_email(self, email):
+        """Is this email known to be related to this FOIA"""
+        if '@' not in email:
+            return False
+        domain = email.split('@')[1]
+        return (
+                # same domain as one of the primary contacts email
+                self.contacts.filter(email__iendswith=domain).exists() or
+                # it is an email that has been copied for this request
+                self.cc_contacts.filter(email__iexact=email).exists() or
+                # it is an email associated with this foia's agency
+                (
+                    self.agency and
+                    self.agency.users.known().filter(email__iexact=email).exists()))
+
 
 
     class Meta:

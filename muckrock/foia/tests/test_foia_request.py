@@ -147,7 +147,7 @@ class TestFOIARequestUnit(TestCase):
         """Make sure the follow up date is set correctly"""
         # pylint: disable=protected-access
         foia = FOIARequest.objects.get(pk=15)
-        foia.contact = AgencyUserFactory(email=foia.email)
+        foia.contacts.add(AgencyUserFactory(email=foia.email))
         foia.followup()
         nose.tools.assert_in('I can expect', mail.outbox[-1].body)
         nose.tools.eq_(foia.date_followup,

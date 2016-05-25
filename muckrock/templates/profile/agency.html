@@ -45,9 +45,9 @@
         {% endif %}
 
         <dt>E-mail Address</dt>
-        {% if agency.get_primary_contact.email %}
+        {% if agency.get_primary_emails %}
             {% if request.user.profile.can_view_emails %}
-        <dd>{{agency.get_primary__contact.email}}</dd>
+        <dd>{{agency.get_primary_emails|join:", "}}</dd>
             {% else %}
         <dd><a href="{% url 'accounts' %}">Available to Pro Users</a></dd>
             {% endif %}

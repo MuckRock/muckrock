@@ -312,7 +312,7 @@ class StaleAgencyTaskTests(TestCase):
         new_email = 'test@email.com'
         self.task.update_email(new_email, [self.foia])
         self.task.refresh_from_db()
-        eq_(self.task.agency.get_primary_contact().email, new_email, 'The agency\'s email should be updated.')
+        eq_(self.task.agency.get_emails(), [new_email], 'The agency\'s email should be updated.')
         eq_(self.foia.contact.email, new_email, 'The foia\'s email should be updated.')
         mock_followup.assert_called_with(show_all_comms=False)
 

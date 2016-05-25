@@ -224,8 +224,8 @@ class RejectedEmailTaskList(TaskList):
         email_filter = Q()
         all_emails = {t.email for t in context['object_list']}
         for email in all_emails:
-            email_filter |= Q(email__iexact=email)
-            email_filter |= Q(other_emails__icontains=email)
+            email_filter |= Q(contact__email__iexact=email)
+            email_filter |= Q(cc_contacts__email__iexact=email)
         agencies = Agency.objects.filter(email_filter)
         statuses = ('ack', 'processed', 'appealing', 'fix', 'payment')
         foias = (FOIARequest.objects.filter(email_filter)

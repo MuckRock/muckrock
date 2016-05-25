@@ -49,7 +49,7 @@ class TestAgencyUnit(TestCase):
         factories.AgencyUserFactory(
             agencyprofile__agency=self.agency2,
             agencyprofile__contact_type='primary',
-            agencyprofile__fax='987.654.3210',
+            profile__fax='987.654.3210',
             email='',
             )
         self.agency3 = factories.AgencyFactory()
@@ -74,14 +74,14 @@ class TestAgencyUnit(TestCase):
 
     def test_agency_get_email(self):
         """Test the get email method"""
-        eq_(self.agency1.get_email(), 'test@agency1.gov')
-        eq_(self.agency2.get_email(), '19876543210@fax2.faxaway.com')
-        eq_(self.agency3.get_email(), '')
+        eq_(self.agency1.get_emails(), ['test@agency1.gov'])
+        eq_(self.agency2.get_emails(), ['19876543210@fax2.faxaway.com'])
+        eq_(self.agency3.get_emails(), [])
 
     def test_agency_get_other_emails(self):
         """Test get other emails method"""
         eq_(
-            set(self.agency1.get_other_emails()),
+            set(self.agency1.get_emails('copy')),
             set(['other_a@agency1.gov', 'other_b@agency1.gov']),
             )
 

@@ -30,7 +30,7 @@ def is_owner(user, foia):
 def from_agency(user, foia):
     return (user.is_authenticated() and
             user.profile.acct_type == 'agency' and
-            user.agencyprofile.agency == foia.agency)
+            foia.agency.users.get(pk=user.pk).exists())
 
 @predicate
 def is_editor(user, foia):

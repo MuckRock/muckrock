@@ -11,7 +11,6 @@ from datetime import date
 from djgeojson.fields import PointField
 from easy_thumbnails.fields import ThumbnailerImageField
 
-from muckrock.accounts.models import AgencyProfile
 from muckrock.jurisdiction.models import Jurisdiction, RequestHelper
 from muckrock import fields
 
@@ -58,7 +57,12 @@ class Agency(models.Model, RequestHelper):
         ('approved', 'Approved'),
         ('rejected', 'Rejected'),
         ), max_length=8, default='pending')
-    user = models.ForeignKey(User, null=True, blank=True)
+    submitter = models.ForeignKey(User, null=True, blank=True, related_name='+')
+    users = models.ManyToManyField(
+            'accounts.AgencyUser',
+            through='AgencyProfile',
+            related_name='agencies')
+    # XXX set appeal agency to self if appeal to self?  if null does that mean no appeals?
     appeal_agency = models.ForeignKey('self', null=True, blank=True)
     # XXX
     can_email_appeals = models.BooleanField(default=False)
@@ -118,17 +122,14 @@ class Agency(models.Model, RequestHelper):
         self.name = self.name.strip()
         super(Agency, self).save(*args, **kwargs)
 
-    def get_email(self):
-        """Returns an email address to send to"""
-        contact = self.get_primary_contact()
-        if contact and contact.agencyprofile:
-            return contact.agencyprofile.get_email()
-        else:
-            return ''
+    def get_emails(self, type_='primary'):
+        """Returns the email addresses to send to"""
+        # XXX find get_email, get_other_emails
+        return [c.get_email() for c in self.get_contacts(type_)
+                if c.get_email()]
 
-    def get_other_emails(self):
-        """Returns other emails as a list"""
-        return self.get_cc_contacts().values_list('email', flat=True)
+    def get_primary_emails(self):
+        return self.get_emails('primary')
 
     def link_display(self):
         """Returns link if approved"""
@@ -171,45 +172,39 @@ class Agency(models.Model, RequestHelper):
         if user.profile.acct_type != 'agency':
             raise ValueError(
                     'User must be an agency user to be the primary contact')
-        if user.agencyprofile.agency != self:
-            raise ValueError('User must be affiliated with this agency to '
-                    'be the primary contact')
-        for agencyprofile in AgencyProfile.objects.filter(
-                agency=self, contact_type='primary'):
-            agencyprofile.contact_type = 'other'
-            agencyprofile.save()
 
-        user.agencyprofile.contact_type = 'primary'
-        user.agencyprofile.save()
+        self.agencyprofile_set.filter(contact_type='primary'
+                ).update(contact_type='other')
 
-    def get_primary_contact(self):
-        """Get the primary contact for this agency"""
-        # XXX multi primary contacts?
-        try:
-            return User.objects.get(
-                    agencyprofile__agency=self,
-                    agencyprofile__contact_type='primary')
-        except User.DoesNotExist:
-            return None
+        agencyprofile, _ = user.agencyprofile_set.get_or_create(agency=self)
+        agencyprofile.contact_type = 'primary'
+        agencyprofile.save()
 
-    def get_cc_contacts(self):
-        """Get the CC contacts for this agency"""
-        return User.objects.filter(
-                agencyprofile__agency=self,
-                agencyprofile__contact_type='copy')
-
-    def get_appeal_contact(self):
-        """Get the appeal contact for this agency"""
-        # XXX multi primary contacts?
-        try:
-            return User.objects.get(
-                    agencyprofile__agency=self,
-                    agencyprofile__contact_type='appeal')
-        except User.DoesNotExist:
-            return None
-
+    def get_contacts(self, type_):
+        """Get all contacts of a given type for this agency"""
+        # XXX replace get_primary_contact, get_cc_contacts, get_appeal_contact
+        return self.users.filter(agencyprofile__contact_type=type_)
 
     class Meta:
         # pylint: disable=too-few-public-methods
         verbose_name_plural = 'agencies'
 
+
+CONTACT_TYPES = (
+    ('primary', 'Primary'), # Send to this contact by default
+    ('copy', 'Copy'), # CC to this contact by default
+    ('appeal', 'Appeal'), # Send to this contact by default for appeals
+    ('appeal-copy', 'Appeal Copy'), # CC to this contact by default for appeals
+    ('other', 'Other'), # Only send to this contact when they reply to a message
+)
+
+
+class AgencyProfile(models.Model):
+    """Many to Many through model"""
+    user = models.ForeignKey('accounts.AgencyUser')
+    agency = models.ForeignKey('agency.Agency')
+    contact_type = models.CharField(
+            choices=CONTACT_TYPES,
+            max_length=11,
+            default='other',
+            )

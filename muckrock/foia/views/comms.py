@@ -10,29 +10,9 @@ from django.shortcuts import redirect, get_object_or_404
 
 from datetime import datetime
 
+from muckrock.accounts.models import AgencyUser
 from muckrock.foia.models import FOIACommunication, STATUS
-
-def save_foia_comm(foia, from_user, comm_text,
-        formset=None, appeal=False, snail=False, thanks=False):
-    """Save the FOI Communication"""
-    #pylint:disable=too-many-arguments
-    comm = FOIACommunication.objects.create(
-        foia=foia,
-        from_user=from_user,
-        to_user=foia.contact,
-        date=datetime.now(),
-        response=False,
-        communication=comm_text,
-        thanks=thanks,
-    )
-    if formset is not None:
-        foia_files = formset.save(commit=False)
-        for foia_file in foia_files:
-            foia_file.comm = comm
-            foia_file.title = foia_file.name()
-            foia_file.date = comm.date
-            foia_file.save()
-    foia.submit(appeal=appeal, snail=snail, thanks=thanks)
+from muckrock.utils import unique_username
 
 @user_passes_test(lambda u: u.is_staff)
 def move_comm(request, next_):
@@ -67,9 +47,17 @@ def delete_comm(request, next_):
 @user_passes_test(lambda u: u.is_staff)
 def resend_comm(request, next_):
     """Resend the FOI Communication"""
+    # XXX pick user instead of email?
+    # XXX snail mail?
     try:
         comm = FOIACommunication.objects.get(pk=request.POST['comm_pk'])
-        comm.resend(request.POST['email'])
+        email = request.POST['email']
+        validate_email(email)
+        user, _ = AgencyUser.objects.get_or_create(
+                email=email,
+                defaults={'username': unique_username(email)},
+                )
+        comm.resend([user])
         messages.success(request, 'The communication was resent.')
     except (KeyError, FOIACommunication.DoesNotExist):
         messages.error(request, 'The communication does not exist.')

@@ -18,6 +18,7 @@ import stripe
 from urllib import urlencode
 
 from muckrock import utils
+from muckrock.agency.models import AgencyProfile
 from muckrock.utils import unique_username
 from muckrock.values import TextValue
 
@@ -143,6 +144,13 @@ class Profile(models.Model):
     customer_id = models.CharField(max_length=255, blank=True)
     subscription_id = models.CharField(max_length=255, blank=True)
     payment_failed = models.BooleanField(default=False)
+
+    # for agency users
+    # XXX
+    #phone = models.CharField(blank=True, max_length=30)
+    fax = models.CharField(blank=True, max_length=30)
+    salutation = models.CharField(blank=True, max_length=30)
+    title = models.CharField(blank=True, max_length=255)
 
     def __unicode__(self):
         return u"%s's Profile" % unicode(self.user).capitalize()
@@ -422,50 +430,9 @@ CONTACT_TYPES = (
     ('primary', 'Primary'), # Send to this contact by default
     ('copy', 'Copy'), # CC to this contact by default
     ('appeal', 'Appeal'), # Send to this contact by default for appeals
+    ('appeal-copy', 'Appeal Copy'), # CC to this contact by default for appeals
     ('other', 'Other'), # Only send to this contact when they reply to a message
 )
-
-class AgencyProfile(models.Model):
-    """Extra profile for agency users"""
-
-    user = models.OneToOneField(User)
-    agency = models.ForeignKey(
-        'agency.Agency',
-        blank=True,
-        null=True,
-        related_name='members',
-        on_delete=models.PROTECT)
-    phone = models.CharField(blank=True, max_length=30)
-    fax = models.CharField(blank=True, max_length=30)
-    salutation = models.CharField(blank=True, max_length=30)
-    title = models.CharField(blank=True, max_length=255)
-    contact_type = models.CharField(
-            choices=CONTACT_TYPES,
-            max_length=7,
-            default='other',
-            )
-
-    def __unicode__(self):
-        return u"%s's Profile" % unicode(self.user).capitalize()
-
-    def get_email(self):
-        """Get the email address to send to"""
-        if self.user.email:
-            return self.user.email
-        elif self.fax:
-            return '%s@fax2.faxaway.com' % self.normalize_fax()
-        else:
-            return ''
-
-    def normalize_fax(self):
-        """Return a fax number suitable for use in a faxaway email address"""
-
-        fax = ''.join(c for c in self.fax if c.isdigit())
-        if len(fax) == 10:
-            return '1' + fax
-        if len(fax) == 11 and fax[0] == '1':
-            return fax
-        return None
 
 
 class Statistics(models.Model):
@@ -552,7 +519,7 @@ class Statistics(models.Model):
         verbose_name_plural = 'statistics'
 
 
-class UserManager(models.Manager):
+class AgencyUserQuerySet(models.QuerySet):
     """Custom user manager for agency user related methods"""
 
     def get_or_create_agency_user(self, email, name='', agency=None, trusted=True):
@@ -563,8 +530,7 @@ class UserManager(models.Manager):
             first_name, last_name = name.rsplit(' ', 1)
         else:
             first_name, last_name = name, ''
-        # XXX do we need to allow for a single user to belong to multiple agencies?
-        user, created = User.objects.get_or_create(
+        user, created = AgencyUser.objects.get_or_create(
                 email=email,
                 defaults={'username': unique_username(name)},
                 )
@@ -582,17 +548,46 @@ class UserManager(models.Manager):
             user.save()
             Profile.objects.create(
                 user=user,
-                acct_type='agency' if trusted else 'unknown', # XXX doc the trust system here
+                acct_type='agency' if trusted else 'unknown', # XXX doc the trust system here, switch from unkown to agency in a task
                 email_pref='never',
                 date_update=datetime.date.today(),
                 )
-            if agency:
-                AgencyProfile.objects.create(
-                    user=user,
-                    agency=agency,
-                    )
+        if agency and not user.agencies.filter(pk=agency.pk).exists():
+            AgencyProfile.objects.create(
+                user=user,
+                agency=agency,
+                )
         return user
 
-user_manager = UserManager()
-user_manager.contribute_to_class(User, 'agency_objects')
+    def known(self):
+        """Only return known agency users"""
+        return self.filter(profile__acct_type='agency')
+
+
+class AgencyUser(User):
+    """Proxy model for an agency user"""
+    class Meta:
+        proxy = True
+
+    objects = AgencyUserQuerySet.as_manager()
+
+    def get_email(self):
+        """Get the email address to send to"""
+        if self.email:
+            return self.email
+        elif self.profile.fax:
+            return '%s@fax2.faxaway.com' % self.normalize_fax()
+        else:
+            return ''
+
+    def normalize_fax(self):
+        """Return a fax number suitable for use in a faxaway email address"""
+
+        fax = ''.join(c for c in self.profile.fax if c.isdigit())
+        if len(fax) == 10:
+            return '1' + fax
+        if len(fax) == 11 and fax[0] == '1':
+            return fax
+        return None
+
 

@@ -59,10 +59,8 @@ class TestMailgunViews(TestCase):
         nose.tools.eq_(response.status_code, 200)
 
         foia = FOIARequest.objects.get(pk=1)
-        nose.tools.eq_(foia.contact.email, 'test@agency.gov')
-        nose.tools.eq_(
-                [c.email for c in foia.cc_contacts.all()],
-                ['other@agency.gov'])
+        nose.tools.eq_(foia.get_emails(),
+                (['test@agency.gov'], ['other@agency.gov']))
 
     def test_bad_sender(self):
         """Test a normal succesful response"""

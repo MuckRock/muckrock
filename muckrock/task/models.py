@@ -11,6 +11,7 @@ import actstream
 from datetime import datetime
 import logging
 
+from muckrock.accounts.models import AgencyUser
 from muckrock.agency.models import Agency, STALE_DURATION
 from muckrock.foia.models import FOIACommunication, FOIAFile, FOIANote, FOIARequest, STATUS
 from muckrock.jurisdiction.models import Jurisdiction
@@ -273,15 +274,14 @@ class RejectedEmailTask(Task):
 
     def agencies(self):
         """Get the agencies who use this email address"""
-        return Agency.objects.filter(Q(email__iexact=self.email) |
-                                     Q(other_emails__icontains=self.email))
+        return Agency.objects.filter(members__user__email__iexact=self.email)
 
     def foias(self):
         """Get the FOIAs who use this email address"""
         return (FOIARequest.objects
                 .select_related('jurisdiction')
-                .filter(Q(email__iexact=self.email) |
-                        Q(other_emails__icontains=self.email))
+                .filter(Q(contact__email__iexact=self.email) |
+                        Q(cc_contacts__email__iexact=self.email))
                 .filter(status__in=['ack', 'processed', 'appealing',
                                     'fix', 'payment']))
 
@@ -327,7 +327,8 @@ class StaleAgencyTask(Task):
 
     def update_email(self, new_email, foia_list=None):
         """Updates the email on the agency and the provided requests."""
-        user = User.agency_objects.get_or_create_agency_user(
+        # XXX user name
+        user = AgencyUser.objects.get_or_create_agency_user(
                 new_email,
                 agency=self.agency)
         self.agency.set_primary_contact(user)
@@ -432,7 +433,7 @@ class NewAgencyTask(Task):
             comms = foia.communications.all()
             if comms.count():
                 first_comm = comms[0]
-                first_comm.resend(self.agency.get_email())
+                first_comm.resend(self.agency.get_contacts('primary'))
 
     def reject(self, replacement_agency):
         """Resends pending requests to replacement agency"""
@@ -445,7 +446,7 @@ class NewAgencyTask(Task):
             comms = foia.communications.all()
             if comms.count():
                 first_comm = comms[0]
-                first_comm.resend(replacement_agency.get_email())
+                first_comm.resend(replacement_agency.get_contacts('primary'))
 
 
 class ResponseTask(Task):

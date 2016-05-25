@@ -21,6 +21,7 @@ from datetime import datetime
 from email.utils import parseaddr, getaddresses
 from localflavor.us.us_states import STATE_CHOICES
 
+from muckrock.accounts.models import AgencyUser
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, RawEmail
 from muckrock.foia.tasks import upload_document_cloud, classify_status
@@ -60,7 +61,7 @@ def _make_orphan_comm(from_, to_, post, files, foia):
     to_ = to_[:255] if to_ else ''
     agency = foia.agency if foia else None
     comm = FOIACommunication.objects.create(
-            from_user=User.agency_objects.get_or_create_agency_user(
+            from_user=AgencyUser.objects.get_or_create_agency_user(
                 email,
                 name,
                 agency,
@@ -136,7 +137,7 @@ def _handle_request(request, mail_id):
     try:
         foia = FOIARequest.objects.get(mail_id=mail_id)
         from_name, from_email = parseaddr(from_)
-        from_user = User.agency_objects.get_or_create_agency_user(
+        from_user = AgencyUser.objects.get_or_create_agency_user(
                 from_email,
                 from_name,
                 foia.agency)
@@ -181,13 +182,13 @@ def _handle_request(request, mail_id):
             foia.agency.stale = False
             foia.agency.save()
 
-        foia.contact = from_user
+        foia.contacts.set([from_user])
         # XXX should CC users be marked as from agency?
         foia.cc_contacts.clear()
         for name, email in getaddresses([post.get('To', ''), post.get('Cc', '')]):
             if not email or email.endswith('muckrock.com'):
                 continue
-            user = User.agency_objects.get_or_create_agency_user(
+            user = AgencyUser.objects.get_or_create_agency_user(
                     email,
                     name,
                     foia.agency)
@@ -366,35 +367,27 @@ def _allowed_email(email, foia=None):
 
     email = email.lower()
     state_tlds = ['.%s.us' % a.lower() for (a, _) in STATE_CHOICES
-                                      if a not in ('AS', 'DC', 'GU', 'MP', 'PR', 'VI')]
+            if a not in ('AS', 'DC', 'GU', 'MP', 'PR', 'VI')]
     allowed_tlds = [
         '.gov',
         '.mil',
-        '.muckrock.com',
-        '@muckrock.com',
+        # XXX muckrock emails should not be emailing requests
+        # this caused problem with mailing list confirmation emails
+        #'.muckrock.com',
+        #'@muckrock.com',
         ] + state_tlds
-
-    # from the same domain as the FOIA email
-    if (foia and foia.contact and '@' in foia.contact.email and
-            email.endswith(foia.contact.email.split('@')[1].lower())):
-        return True
-
-    # the email is a known email for this FOIA's agency
-    if foia and foia.agency and email in [i.lower() for i in foia.agency.get_other_emails()]:
-        return True
-
-    # the email is a known email for this FOIA
-    if foia and email in [i.lower() for i in foia.get_other_emails()]:
-        return True
 
     # it is from any known government TLD
     if any(email.endswith(tld) for tld in allowed_tlds):
         return True
 
+    if foia and foia.known_email(email):
+        return True
+
     # if not associated with any FOIA,
     # checked if the email is known for any agency
-    if not foia and (Agency.objects.filter(email__iexact=email).exists() or
-            Agency.objects.filter(other_emails__icontains=email).exists()):
+    if (not foia and 
+            AgencyUser.objects.known().filter(email__iexact=email).exists()):
         return True
 
     # check the email domain against the whitelist

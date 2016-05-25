@@ -36,7 +36,7 @@
                 <td>{{stale_request.date_estimate|date:"m/d/y"}}</td>
                 <td>{{stale_request.get_status_display}}</td>
                 <td><input type="text" value="{{stale_request.contact.email}}" readonly /></td>
-                <td><input type="text" value="{{stale_request.other_emails}}" readonly /></td>
+                <td><input type="text" value="{{stale_request.get_other_emails|join:", "}}" readonly /></td>
             </tr>
         {% endfor %}
         </tbody>
