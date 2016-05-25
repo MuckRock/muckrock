@@ -3,7 +3,7 @@ $crowdfund-color-dark: $color-green-dark;
 $crowdfund-color-light: $color-green-light;
 $crowdfund-border: $base-border-width solid $crowdfund-color;
 
-.crowdfund.widget {
+.crowdfund__widget {
     @include display(flex);
     @include flex-direction(column);
     overflow: visible;
@@ -22,21 +22,31 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
         }
     }
 
-    header .action {
-        font-size: $font-size-2;
-        margin-right: $vertical-rhythm/2;
-    }
-
-    header, footer {
+    .crowdfund__widget__header, .crowdfund__widget__footer {
         @include flex(0 0 auto);
         margin-bottom: 0;
         padding: $vertical-rhythm/4 $vertical-rhythm/2;
         color: $crowdfund-color-dark;
         background-color: $crowdfund-color-light;
     }
+
+    .crowdfund__widget__header {
+        border-bottom: $crowdfund-border;
+        h1 {
+            font-size: $font-size-3;
+            line-height: $font-line-height;
+            font-weight: $font-weight-bold;
+            margin: 0;
+        }
+        .action {
+            font-size: $font-size-2;
+            margin-right: $vertical-rhythm/2;
+        }
+    }
+
+
     main {
         @include flex(auto);
-        overflow-y: scroll;
         @include display(flex);
         @include flex-direction(column);
         @include justify-content(space-between);
@@ -52,16 +62,6 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
                     margin-bottom: 0;
                 }
             }
-        }
-    }
-
-    header {
-        border-bottom: $crowdfund-border;
-        h1 {
-            font-size: $font-size-3;
-            line-height: $font-line-height;
-            font-weight: $font-weight-bold;
-            margin: 0;
         }
     }
 
@@ -91,7 +91,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
     }
 }
 
-.crowdfund.widget footer {
+.crowdfund__widget__footer {
 
     border-top: $crowdfund-border;
     form {
@@ -129,7 +129,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
     }
 }
 
-.crowdfund.widget {
+.crowdfund__widget {
     .contributors {
         position: relative;
     }
@@ -161,14 +161,11 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
     }
 }
 
-/* Crowdfund state */
-
-.crowdfund.widget {
+.crowdfund__widget
+{
     position: relative;
-
-    .overlay {
-        z-index: -1;
-        opacity: 0;
+    .overlay
+    {
         @include display(flex);
         @include justify-content(center);
         @include align-items(center);
@@ -177,56 +174,81 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
         left: 0;
         height: 100%;
         width: 100%;
-        background-color: rgba(0, 0, 0, .8);
+        background-color: rgba(33, 38, 46, .9);
+    }
+    .overlay .dialog
+    {
+        width: 32em;
         color: $color-white;
-        text-align: center;
+        @include icon-color($color-white);
         font-weight: $font-weight-bold;
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        a, .action {
+        a, .action
+        {
             color: $color-white;
-            &:hover {
+            &:hover
+            {
                 color: $color-white-pure;
             }
         }
-
-        textarea {
+        p
+        {
+            margin-bottom: $vertical-rhythm/2;
+        }
+        textarea
+        {
+            color: $color-black;
             font-family: $font-monospace;
             font-size: $font-size-2;
-            color: $color-black;
-            width: 32em;
             text-align: center;
             font-weight: $font-weight-normal;
             resize: none;
             white-space: nowrap;
             overflow-x: scroll;
         }
-
-        &.visible {
-            z-index: 1;
-            opacity: 1;
+        .sharing dfn
+        {
+            display: none;
         }
-
-        .loader, .dialog {
-            padding: $vertical-rhythm;
-        }
-
-        .sharing {
-            margin: 0 auto $vertical-rhythm;
-            width: 22em;
-            dfn {
+        .newsletter-widget
+        {
+            padding: 0;
+            border: none;
+            background: none;
+            .call-to-action
+            {
                 display: none;
             }
-            .share {
-                border: 2px solid $color-white;
-                text-decoration: none;
-                &.twitter, &.facebook, &.email {
-                    background-color: transparent;
-                    &:hover {
-                        background-color: rgba(255, 255, 255, .25);
-                    }
-                }
+            .email-field {
+                margin: 0;
             }
         }
+    }
+    .overlay .dialog header {
+        @include display(flex);
+        @include justify-content(space-between);
+        @include align-items(baseline);
+        margin-bottom: 0;
+        .icon {
+            height: 1.5rem;
+            width: 1.5rem;
+            vertical-align: middle;
+        }
+    }
+}
+
+/* Crowdfund state */
+
+.crowdfund__widget .overlay
+{
+    z-index: -1;
+    opacity: 0;
+    &.visible
+    {
+        z-index: 1;
+        opacity: 1;
+    }
+    .loader, .dialog
+    {
+        padding: $vertical-rhythm;
     }
 }

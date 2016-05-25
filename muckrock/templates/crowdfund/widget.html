@@ -1,9 +1,10 @@
 {% load humanize %}
 {% load static from staticfiles %}
 {% load markdown_deux_tags %}
+{% load tags %}
 
-<section class="crowdfund widget" id="crowdfund-{{ crowdfund.pk }}">
-    <header>
+<section class="crowdfund__widget" id="crowdfund-{{ crowdfund.pk }}">
+    <header class="crowdfund__widget__header">
         <h1>{{ crowdfund.name }}</h1>
         <div>
             <span class="action" id="show-share">Share</span>
@@ -44,7 +45,7 @@
         </section>
     </main>
     {% if not crowdfund.expired %}
-    <footer>
+    <footer class="crowdfund__widget__footer">
         <form method="POST" action="{{ endpoint }}" class="stripe-checkout crowdfund-form" id="crowdfund-form">
             {% csrf_token %}
             <input type="hidden" name="stripe_token" value="" />
@@ -58,8 +59,8 @@
             {{ payment_form.crowdfund }}
             <section class="anonymity">
                 {% if logged_in %}
-                {{ payment_form.show }}
-                <label for="id_show">List me as a backer.</label>
+                <label for="id_show">{{ payment_form.show }} List me as a backer.</label>
+                <p>You are logged in as <a href="{{request.user.get_absolute_url}}">{{ request.user.get_full_name }}</a>.</p>
                 {% else %}
                 <p>To be listed as a backer,<br>please <a class="action" href="{% url 'acct-login' %}">log in</a> or <a class="action" href="{% url 'accounts' %}">sign up</a>.</p>
                 <input name="show" value="False" hidden>
@@ -74,20 +75,24 @@
     {% endif %}
     <div class="embed overlay">
         <div class="dialog">
-            <h1>Embed</h1>
+            <header>
+                <h1>{% include 'lib/component/icon/embed.svg' %} Embed</h1>
+                <div class="close action">Close</div>
+            </header>
             <textarea rows="1" readonly><iframe src="https://{{domain}}{% url 'crowdfund-embed' pk=crowdfund.pk %}" width="100%" height="450px"></iframe></textarea>
-            <div class="action" id="hide-embed">Close</div>
         </div>
     </div>
     <div class="share overlay">
         <div class="dialog">
-            <h1>Share</h1>
+            <header>
+                <h1>Share</h1>
+                <div class="close action">Close</div>
+            </header>
             {% if crowdfund.foia %}
             {% include 'lib/social.html' with title="Help free these docs" %}
             {% elif crowdfund.projects.exists %}
             {% include 'lib/social.html' with title="Help fund this project" %}
             {% endif %}
-            <div class="action" id="hide-share">Close</div>
         </div>
     </div>
     <div class="pending overlay">
@@ -104,20 +109,28 @@
     </div>
     <div class="complete overlay">
         <div class="dialog">
-            <h1>Thank you!</h1>
+            <header>
+                <h1>{% include 'lib/component/icon/success.svg' %} Thank you!</h1>
+                <div class="close action">Close</div>
+            </header>
+            <p id="complete-next-steps"></p>
+            <p>Subscribe to MuckRock&rsquo;s newsletter:</p>
+            {% newsletter %}
             <p>Help this crowdfund find more supporters:</p>
             {% if crowdfund.foia %}
             {% include 'lib/social.html' with title="Help me free these docs" %}
             {% elif crowdfund.projects.exists %}
             {% include 'lib/social.html' with title="I just funded this project" %}
             {% endif %}
-            <div class="action" id="hide-complete">Close</div>
         </div>
     </div>
     <div class="error overlay">
         <div class="dialog">
-            <h1>An error occurred.</h1>
-            <p>Don't worry, your card has not been charged.</p>
+            <header>
+                <h1>{% include 'lib/component/icon/error.svg' %} Error</h1>
+                <div class="close action">Close</div>
+            </header>
+            <p>An error occurred during payment. Don't worry, your card has not been charged.</p>
             <p>Refresh the page to try again. If the error persists, <a href="mailto:info@muckrock.com?subject=Crowdfund%20Error">contact us</a>.</p>
         </div>
     </div>

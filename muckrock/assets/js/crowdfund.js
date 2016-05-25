@@ -1,33 +1,31 @@
 (function( $ ){
 
-    function crowdfundAjax(event) {
-        // get the form and the widget state overlays
-        var form = $(this);
-        var overlays = form.parents('.crowdfund').children('.overlay');
+    var $crowdfund, $overlays;
 
+    function crowdfundAjax(event) {
+        // Transform the form's data into a dictionary
+        var form = $(this);
         var fields = form.serializeArray();
         var data = {};
         $(fields).map(function(index, field) {
             data[field.name] = field.value;
         });
-
+        var email = data['stripe_email'];
         // track this event using Google Analytics
         if (typeof(ga) != "undefined") {
             ga('send', 'event', 'Crowdfund', 'Donation', window.location.pathname);
         }
-
+        // bind AJAX events to the form to hide and show overlays
         $(document).ajaxStart(function(){
-            overlays.filter('.pending').addClass('visible');
+            $overlays.filter('.pending').addClass('visible');
         }).ajaxError(function(){
-            overlays.filter('.pending').removeClass('visible');
-            overlays.filter('.error').addClass('visible');
+            $overlays.removeClass('visible').filter('.error').addClass('visible');
             $(document).off('ajaxStart').off('ajaxError').off('ajaxComplete');
         }).ajaxComplete(function(){
-            overlays.filter('.pending').removeClass('visible');
-            overlays.filter('.complete').addClass('visible');
+            $overlays.removeClass('visible').filter('.complete').addClass('visible');
             $(document).off('ajaxStart').off('ajaxError').off('ajaxComplete');
         });
-
+        // submit the form via AJAX
         $.ajax({
             url: form.attr('action'),
             type: form.attr('method'),
@@ -35,40 +33,30 @@
             success: null,
             dataType: 'json'
         });
-
+        // prevent the form from submitting itself
         event.preventDefault();
         return false;
     }
 
     function crowdfundEmbed() {
-        var trigger = $(this);
-        var overlays = trigger.parents('.crowdfund').children('.overlay');
-        var overlay = overlays.filter('.embed').addClass('visible');
-        overlay.find('textarea').select();
-        overlay.find('#hide-embed').click(()=>{
-            overlay.removeClass('visible');
-        });
+        $overlays.filter('.embed').addClass('visible').find('textarea').select();
     }
 
     function crowdfundShare() {
-        var trigger = $(this);
-        var overlays = trigger.parents('.crowdfund').children('.overlay');
-        var overlay = overlays.filter('.share').addClass('visible');
-        overlay.find('#hide-share').click(()=>{
-            overlay.removeClass('visible');
-        });
+        $overlays.filter('.share').addClass('visible');
     }
 
-    function closeCompleteOverlay() {
-        var overlays = $(this).parents('.crowdfund').children('.overlay');
-        overlays.filter('.complete').removeClass('visible');
+    function closeOverlay() {
+        $overlays.removeClass('visible');
     }
 
     $.fn.crowdfund = function() {
-        $(this).find('.crowdfund-form').submit(crowdfundAjax);
-        $(this).find('#show-embed').click(crowdfundEmbed);
-        $(this).find('#show-share').click(crowdfundShare);
-        $(this).find('#hide-complete').click(closeCompleteOverlay);
+        $crowdfund = $(this);
+        $overlays = $crowdfund.children('.overlay');
+        $crowdfund.find('.crowdfund-form').submit(crowdfundAjax);
+        $crowdfund.find('#show-embed').click(crowdfundEmbed);
+        $crowdfund.find('#show-share').click(crowdfundShare);
+        $crowdfund.find('.close').click(closeOverlay);
     };
 
 })( jQuery );
