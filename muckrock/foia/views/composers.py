@@ -21,7 +21,7 @@ import logging
 from random import choice
 import string
 
-from muckrock.accounts.models import Profile
+from muckrock.accounts.models import Profile, miniregister
 from muckrock.agency.models import Agency
 from muckrock.foia.forms import (
     RequestForm,
@@ -36,7 +36,6 @@ from muckrock.foia.models import (
     STATUS,
     )
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.message.tasks import welcome
 from muckrock.task.models import NewAgencyTask, MultiRequestTask
 from muckrock.utils import generate_key
 
@@ -138,49 +137,16 @@ def _make_request(request, foia_request, parent=None):
 def _make_user(request, data):
     """
     Create a new user from just their full name and email and return the user.
-
-    - compress first and last name to create username
-        - username must be unique
-        - if the username already exists, add a number to the end
     - create a password from a random string of letters and numbers
-    - given the username, email, and password, create a user
-    - split the full name string to get the first and last names
-    - create a Profile for the user
-    - send the user a welcome email with a link to reset their password
     - log the user in to their new account
     """
-    # create unique username thats at most 30 characters
-    base_username = data['full_name'].replace(' ', '')[:30]
-    username = base_username
-    num = 1
-    while User.objects.filter(username__iexact=username).exists():
-        postfix = str(num)
-        username = '%s%s' % (base_username[:30 - len(postfix)], postfix)
-        num += 1
-    # create random password
+    full_name = data['full_name']
+    email = data['email']
     password = generate_key(12)
-    # create a new user
-    user = User.objects.create_user(username, data['email'], password)
-    full_name = data['full_name'].strip()
-    if ' ' in full_name:
-        first_name, last_name = full_name.rsplit(' ', 1)
-        user.first_name = first_name[:30]
-        user.last_name = last_name[:30]
-    else:
-        user.first_name = full_name[:30]
-    user.save()
-    # create a new profile
-    Profile.objects.create(
-        user=user,
-        acct_type='basic',
-        monthly_requests=settings.MONTHLY_REQUESTS.get('basic', 0),
-        date_update=datetime.now()
-    )
-    # send the new user a welcome email
-    password_link = user.profile.wrap_url(reverse('acct-reset-pw'))
-    welcome.delay(user, password_link)
+    # register a new user
+    user = miniregister(full_name, email, password)
     # log the new user in
-    user = authenticate(username=username, password=password)
+    user = authenticate(username=user.username, password=password)
     login(request, user)
     # return the user
     return user

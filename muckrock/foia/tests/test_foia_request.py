@@ -1011,64 +1011,16 @@ class TestRequestFilesView(TestCase):
             idx=self.foia.id
         )
 
-
-class TestMiniRegistration(TestCase):
-    """Miniregistration allows a user to sign up for an account with their full name and email."""
+class TestMakeUser(TestCase):
+    """The request composer should provide miniregistration functionality."""
     def setUp(self):
         self.request = mock_middleware(Mock())
         self.data = {
-            'full_name': 'Lou Reed',
-            'email': 'lou@hero.in'
+            'full_name': 'Mick Jagger',
+            'email': 'mick@hero.in'
         }
 
-    @patch('muckrock.message.tasks.welcome.delay')
-    def test_expected_case(self, mock_welcome):
-        """
-        Giving the _make_user method a request and data should create a
-        user, create a profile, send them a welcome email, and log them in.
-        The method should return the authenticated user.
-        """
+    def test_make_user(self):
+        """Should create the user, log them in, and return the user."""
         user = _make_user(self.request, self.data)
-        ok_(isinstance(user, User), 'A user should be created and returned.')
-        ok_(user.profile, 'A profile should be created for the user.')
-        ok_(user.is_authenticated(), 'The user should be logged in.')
-        mock_welcome.assert_called_once() # The user should get a welcome email
-        eq_(user.first_name, 'Lou', 'The first name should be extracted from the full name.')
-        eq_(user.last_name, 'Reed', 'The last name should be extracted from the full name.')
-        eq_(user.username, 'LouReed', 'The username should remove the spaces from the full name.')
-
-    def test_existing_username(self):
-        """
-        If the expected username is already registered,
-        the username should get a cool number appended to it.
-        If multiple sequential usernames exist, the number will
-        be incremented until a username is available.
-        """
-        UserFactory(username='LouReed')
-        user = _make_user(self.request, self.data)
-        eq_(user.username, 'LouReed1')
-        _make_user(self.request, self.data) # LouReed2
-        _make_user(self.request, self.data) # LouReed3
-        _make_user(self.request, self.data) # LouReed4
-        _make_user(self.request, self.data) # LouReed5
-        user = _make_user(self.request, self.data)
-        eq_(user.username, 'LouReed6')
-
-    def test_multi_space_name(self):
-        """
-        If the full name has more than two separate names in it,
-        the first name should include everything except the final name.
-        """
-        long_name = 'John Cougar Mellencamp'
-        self.data['full_name'] = long_name
-        user = _make_user(self.request, self.data)
-        eq_(user.first_name, 'John Cougar')
-        eq_(user.last_name, 'Mellencamp')
-
-    def test_single_name(self):
-        """If a single name is provided as the full name, then there should be no last name."""
-        short_name = 'Prince' # RIP Prince
-        self.data['full_name'] = short_name
-        user = _make_user(self.request, self.data)
-        eq_(user.first_name, 'Prince')
-        ok_(not user.last_name)
+        ok_(user)
