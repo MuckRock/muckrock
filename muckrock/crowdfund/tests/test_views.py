@@ -8,6 +8,7 @@ from django.test import TestCase, RequestFactory, Client
 
 from datetime import datetime, timedelta
 from decimal import Decimal
+import json
 from mock import Mock, patch
 from nose.tools import ok_, eq_
 
@@ -81,7 +82,7 @@ class TestCrowdfundView(TestCase):
             eq_(response.status_code, 200,
                 'If the request was AJAX then the response should return 200 OK.')
             eq_(response['Content-Type'], 'application/json',
-                'If the request was AJAX then the response should be JSON encoded.'')
+                'If the request was AJAX then the response should be JSON encoded.')
         else:
             eq_(response.status_code, 302, 'The response should be a redirection.')
             eq_(response.url, self.crowdfund.get_crowdfund_object().get_absolute_url(),
@@ -132,6 +133,39 @@ class TestCrowdfundView(TestCase):
     def test_ajax(self):
         """A contribution made via AJAX should respond with JSON."""
         self.post(self.data, ajax=True)
+
+    def test_logged_out_ajax(self):
+        """
+        A contribution made via AJAX while logged out should report that:
+        - the user is not authenticated
+        - the user was not registered
+        """
+        response = self.post(self.data, ajax=True)
+        data = json.loads(response.content)
+        eq_(data['authenticated'], False)
+        eq_(data['registered'], False)
+
+    def test_logged_in_ajax(self):
+        """
+        A contribution made via AJAX while logged in should report that:
+        - the user is authenticated
+        - the user was not registered
+        """
+        response = self.post(self.data, user=UserFactory(), ajax=True)
+        data = json.loads(response.content)
+        eq_(data['authenticated'], True)
+        eq_(data['registered'], False)
+
+    def test_registered_ajax(self):
+        """
+        A contribution made via AJAX while logged out, but registering, should report that:
+        - the user is authenticated
+        - the user was registered
+        """
+        response = self.post(self.data, ajax=True)
+        data = json.loads(response.content)
+        eq_(data['authenticated'], True)
+        eq_(data['registered'], True)
 
     def test_correct_amount(self):
         """

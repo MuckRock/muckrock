@@ -6,7 +6,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib import messages
 from django.db.models import Q
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, DetailView
@@ -80,7 +80,7 @@ class CrowdfundDetailView(DetailView):
             'Your card has not been charged.'
         )
         if request.is_ajax():
-            return HttpResponse(400, content_type='application/json')
+            return JsonResponse(error_msg, status=400)
         else:
             messages.error(request, error_msg)
             return redirect(self.get_redirect_url())
@@ -114,7 +114,11 @@ class CrowdfundDetailView(DetailView):
             # if AJAX, return HTTP 200 OK
             # else, return a redirection
             if request.is_ajax():
-                return HttpResponse(200, content_type='application/json')
+                data = {
+                    'authenticated': user.is_authenticated() if user else False,
+                    'registered': False
+                }
+                return JsonResponse(data, status=200)
             else:
                 messages.success(request, 'Thank you for your contribution!')
                 return redirect(self.get_redirect_url())
