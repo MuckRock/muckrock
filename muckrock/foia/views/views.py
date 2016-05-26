@@ -545,6 +545,7 @@ class Detail(DetailView):
             messages.success(request, '%s can now edit this request.' % user.first_name)
         return redirect(foia)
 
+
 def redirect_old(request, jurisdiction, slug, idx, action):
     """Redirect old urls to new urls"""
     # pylint: disable=unused-variable
@@ -562,6 +563,7 @@ def redirect_old(request, jurisdiction, slug, idx, action):
         action = 'admin_fix'
 
     return redirect('/foi/%(jurisdiction)s-%(jidx)s/%(slug)s-%(idx)s/%(action)s/' % locals())
+
 
 def acronyms(request):
     """A page with all the acronyms explained"""

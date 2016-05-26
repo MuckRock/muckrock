@@ -372,7 +372,7 @@ LOGGING = {
             'propagate': False,
         },
         'muckrock': {
-            'handlers': ['console', 'mail_admins', 'sentry'],
+            'handlers': ['console', 'sentry'],
             'level': 'INFO',
         },
         'django.db.backends': {
