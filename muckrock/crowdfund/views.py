@@ -5,6 +5,7 @@ Views for the crowdfund application
 from django.conf import settings
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib import messages
+from django.contrib.auth import authenticate, login
 from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect
@@ -16,8 +17,10 @@ from djangosecure.decorators import frame_deny_exempt
 import logging
 import stripe
 
+from muckrock.accounts.models import miniregister
 from muckrock.crowdfund.forms import CrowdfundPaymentForm
 from muckrock.crowdfund.models import Crowdfund
+from muckrock.utils import generate_key
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -100,15 +103,26 @@ class CrowdfundDetailView(DetailView):
             amount = cleaned_data['stripe_amount']
             show = cleaned_data['show']
             user = request.user if request.user.is_authenticated() else None
-            stripe_exceptions = (
+            registered = False
+            # If there is no user but the full_name field is filled in,
+            # create the user with our "miniregistration" functionality
+            # and then log them in
+            full_name = cleaned_data['full_name']
+            if user is None and full_name:
+                full_name = cleaned_data['full_name']
+                password = generate_key(12)
+                user = miniregister(full_name, email, password)
+                user = authenticate(username=user.username, password=password)
+                login(request, user)
+                registered = True
+            try:
+                crowdfund.make_payment(token, email, amount, show, user)
+            except (
                 stripe.InvalidRequestError,
                 stripe.CardError,
                 stripe.APIConnectionError,
                 stripe.AuthenticationError
-            )
-            try:
-                crowdfund.make_payment(token, email, amount, show, user)
-            except stripe_exceptions as payment_error:
+            ) as payment_error:
                 logging.warn(payment_error)
                 self.return_error(request)
             # if AJAX, return HTTP 200 OK
@@ -116,7 +130,7 @@ class CrowdfundDetailView(DetailView):
             if request.is_ajax():
                 data = {
                     'authenticated': user.is_authenticated() if user else False,
-                    'registered': False
+                    'registered': registered
                 }
                 return JsonResponse(data, status=200)
             else:
