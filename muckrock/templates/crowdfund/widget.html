@@ -73,6 +73,20 @@
         </form>
     </footer>
     {% endif %}
+    <div class="login overlay">
+        <form method="post" action="{% url 'acct-login' %}?next={{ request.get_full_path }}" class="quick-log-in dialog" id="quick-log-in-form">
+            {% csrf_token %}
+            <header>
+                <h1>{% include 'lib/component/icon/account.svg' %} Log In</h1>
+                <div class="close action">Close</div>
+            </header>
+            {% include 'lib/pattern/form.html' with form=login_form %}
+            <footer>
+                <p><a class="forgot" href="{% url 'acct-reset-pw' %}">Forget your password?</a></p>
+                <button type="submit" class="primary button" onclick="ga('send', 'event', 'Account', 'Login', window.location.pathname)">Log In</button>
+            </footer>
+        </form>
+    </div>
     <div class="embed overlay">
         <div class="dialog">
             <header>

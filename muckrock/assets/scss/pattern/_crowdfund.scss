@@ -107,7 +107,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
         margin: 0;
     }
     .anonymity input {
-        margin: $vertical-rhythm/4;
+        margin-right: $vertical-rhythm/4;
     }
     .donate {
         @include display(flex);
@@ -233,6 +233,11 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
             width: 1.5rem;
             vertical-align: middle;
         }
+    }
+    .overlay .dialog footer {
+        @include display(flex);
+        @include justify-content(space-between);
+        @include align-items(baseline);
     }
 }
 

@@ -46,6 +46,20 @@
         $overlays.filter('.share').addClass('visible');
     }
 
+    function crowdfundLogin() {
+        $overlays.filter('.login').addClass('visible');
+    }
+
+    function toggleAccount() {
+        var account = $crowdfund.find('.anonymity__account');
+        var checkbox = $crowdfund.find('.anonymity #id_show');
+        if (checkbox.is(':checked')) {
+            account.show();
+        } else {
+            account.hide();
+        }
+    }
+
     function closeOverlay() {
         $overlays.removeClass('visible');
     }
@@ -56,7 +70,10 @@
         $crowdfund.find('.crowdfund-form').submit(crowdfundAjax);
         $crowdfund.find('#show-embed').click(crowdfundEmbed);
         $crowdfund.find('#show-share').click(crowdfundShare);
+        $crowdfund.find('#show-login').click(crowdfundLogin);
         $crowdfund.find('.close').click(closeOverlay);
+        $crowdfund.find('#id_show').change(toggleAccount);
+        toggleAccount();
     };
 
 })( jQuery );
