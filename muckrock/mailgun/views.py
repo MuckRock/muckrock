@@ -353,8 +353,6 @@ def _allowed_email(email, foia=None):
     allowed_tlds = [
         '.gov',
         '.mil',
-        '.muckrock.com',
-        '@muckrock.com',
         ] + state_tlds
 
     # from the same domain as the FOIA email
