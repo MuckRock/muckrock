@@ -75,14 +75,14 @@ class CrowdfundDetailView(DetailView):
 
     def return_error(self, request):
         """If AJAX, return HTTP 400 ERROR. Else, add a message to the session."""
+        error_msg = (
+            'There was an error making your contribution. '
+            'Your card has not been charged.'
+        )
         if request.is_ajax():
-            return HttpResponse(400)
+            return HttpResponse(400, content_type='application/json')
         else:
-            messages.error(
-                request,
-                ('There was an error making your contribution. '
-                'Your card has not been charged.')
-            )
+            messages.error(request, error_msg)
             return redirect(self.get_redirect_url())
 
     def post(self, request, **kwargs):
@@ -112,9 +112,9 @@ class CrowdfundDetailView(DetailView):
                 logging.warn(payment_error)
                 self.return_error(request)
             # if AJAX, return HTTP 200 OK
-            # else, add a message to the session
+            # else, return a redirection
             if request.is_ajax():
-                return HttpResponse(200)
+                return HttpResponse(200, content_type='application/json')
             else:
                 messages.success(request, 'Thank you for your contribution!')
                 return redirect(self.get_redirect_url())
