@@ -390,7 +390,10 @@ def stripe_webhook(request):
         event_json = json.loads(request.body)
         event_id = event_json['id']
         event_type = event_json['type']
-        event_object_id = event_json['data']['object']['id']
+        if event_type.startswith(('charge', 'invoice')):
+            event_object_id = event_json['data']['object']['id']
+        else:
+            event_object_id = ''
     except (TypeError, ValueError, SyntaxError) as exception:
         logging.error('Error parsing JSON: %s', exception)
         return HttpResponseBadRequest()
@@ -398,7 +401,7 @@ def stripe_webhook(request):
         logging.error('Unexpected dictionary structure: %s in %s', exception, event_json)
         return HttpResponseBadRequest()
     # If we've made it this far, then the webhook message was successfully sent!
-    # Now it's up to us to act on it.'
+    # Now it's up to us to act on it.
     success_msg = (
         'Received Stripe webhook\n'
         '\tfrom:\t%(address)s\n'
