@@ -10,12 +10,11 @@ from django.test import TestCase, RequestFactory
 
 import datetime
 from datetime import date as real_date
-from mock import Mock, patch
+from mock import Mock
 import nose.tools
 from operator import attrgetter
 import re
 
-from muckrock.accounts.models import Profile
 from muckrock.agency.models import Agency
 from muckrock.factories import UserFactory, FOIARequestFactory, FOIAFileFactory, ProjectFactory
 from muckrock.foia.models import FOIARequest, FOIACommunication

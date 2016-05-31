@@ -1,6 +1,6 @@
 (function( $ ){
 
-    var $crowdfund, $overlays;
+    var $crowdfund, $overlays, email;
 
     function crowdfundAjax(event) {
         // Transform the form's data into a dictionary
@@ -10,32 +10,52 @@
         $(fields).map(function(index, field) {
             data[field.name] = field.value;
         });
-        var email = data['stripe_email'];
+        email = data['stripe_email'];
         // track this event using Google Analytics
         if (typeof(ga) != "undefined") {
             ga('send', 'event', 'Crowdfund', 'Donation', window.location.pathname);
         }
-        // bind AJAX events to the form to hide and show overlays
-        $(document).ajaxStart(function(){
-            $overlays.filter('.pending').addClass('visible');
-        }).ajaxError(function(){
-            $overlays.removeClass('visible').filter('.error').addClass('visible');
-            $(document).off('ajaxStart').off('ajaxError').off('ajaxComplete');
-        }).ajaxComplete(function(){
-            $overlays.removeClass('visible').filter('.complete').addClass('visible');
-            $(document).off('ajaxStart').off('ajaxError').off('ajaxComplete');
-        });
         // submit the form via AJAX
         $.ajax({
             url: form.attr('action'),
             type: form.attr('method'),
             data: data,
-            success: null,
+            beforeSend: showLoadingOverlay,
+            error: showErrorOverlay,
+            success: showSuccessOverlay,
             dataType: 'json'
         });
         // prevent the form from submitting itself
         event.preventDefault();
         return false;
+    }
+
+    function showOverlay(selector) {
+        return $overlays.removeClass('visible').filter(selector).addClass('visible');
+    }
+
+    function showLoadingOverlay() {
+        showOverlay('.pending');
+    }
+
+    function showErrorOverlay(response) {
+        showOverlay('.error');
+        var data = JSON.parse(response.responseText);
+        $('#error-details').text(data.error);
+    }
+
+    function showSuccessOverlay(response) {
+        var completeOverlay = showOverlay('.complete');
+        $('.newsletter-widget #id_email').val(email);
+        var nextStep;
+        if (response.authenticated === false) {
+            nextStep = 'Stay updated on our projects, reporting, and new requests by subscribing to our newsletter.';
+        }
+        else if (response.registered === true) {
+            nextStep = 'Welcome to MuckRock! Check your email to verify your address and set up your password.';
+        }
+        completeOverlay.find('#complete-next-steps').text(nextStep);
+        $crowdfund.find('.donate button').attr('disabled', true);
     }
 
     function crowdfundEmbed() {

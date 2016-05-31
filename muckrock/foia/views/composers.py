@@ -6,7 +6,6 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404, redirect
@@ -18,10 +17,8 @@ from django.utils.encoding import smart_text
 import actstream
 from datetime import datetime, date
 import logging
-from random import choice
-import string
 
-from muckrock.accounts.models import Profile, miniregister
+from muckrock.accounts.models import miniregister
 from muckrock.agency.models import Agency
 from muckrock.foia.forms import (
     RequestForm,

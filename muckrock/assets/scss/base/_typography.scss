@@ -76,6 +76,10 @@ article, aside, blockquote, body, br, caption, col, colgroup, div, dl, embed, fi
     margin-bottom: 0;
 }
 
+.mono {
+    font-family: $font-monospace;
+}
+
 body {
     font-size: 16px;
     font-family: $font-family;

@@ -89,7 +89,7 @@ class TestCrowdfundView(TestCase):
                 'The response should redirect to the crowdfund object.')
         return response
 
-    def test_anonymous_logged_out_contribution(self):
+    def test_anonymous_unauthenticated(self):
         """
         After posting the payment, the email, and the token, the server should process the
         payment before creating and returning a payment object.
@@ -102,7 +102,7 @@ class TestCrowdfundView(TestCase):
         eq_(self.crowdfund.payments.count(), self.num_payments + 1,
             'The crowdfund should have the payment added to it.')
 
-    def test_anonymous_logged_in_contribution(self):
+    def test_anonymous_authenticated(self):
         """
         An attributed contribution checks if the user is logged in, but still
         defaults to anonymity.
@@ -117,7 +117,7 @@ class TestCrowdfundView(TestCase):
         eq_(self.crowdfund.payments.count(), self.num_payments + 1,
             'The crowdfund should have the payment added to it.')
 
-    def test_onymous_logged_in_contribution(self):
+    def test_onymous_authenticated(self):
         """An attributed contribution is opted-in by the user"""
         user = UserFactory()
         self.data['show'] = True
@@ -181,7 +181,6 @@ class TestCrowdfundView(TestCase):
 
     def test_contributors(self):
         """The crowdfund can get a list of all its contibutors by parsing its list of payments."""
-        # TODO refactor into a model test, this doesn't really deal with view logic at all.
         # anonymous logged out payment
         self.post(self.data)
         # anonymous logged in payment

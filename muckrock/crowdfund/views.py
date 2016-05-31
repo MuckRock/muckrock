@@ -7,7 +7,7 @@ from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.db.models import Q
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, DetailView
@@ -77,14 +77,17 @@ class CrowdfundDetailView(DetailView):
             logging.error(exception)
         return redirect_url
 
-    def return_error(self, request):
+    def return_error(self, request, error=None):
         """If AJAX, return HTTP 400 ERROR. Else, add a message to the session."""
         error_msg = (
             'There was an error making your contribution. '
             'Your card has not been charged.'
         )
         if request.is_ajax():
-            return JsonResponse(error_msg, status=400)
+            return JsonResponse({
+                'message': error_msg,
+                'error':  str(error)
+            }, status=400)
         else:
             messages.error(request, error_msg)
             return redirect(self.get_redirect_url())
@@ -99,24 +102,21 @@ class CrowdfundDetailView(DetailView):
         email = request.POST.get('stripe_email')
         payment_form = CrowdfundPaymentForm(request.POST)
         if payment_form.is_valid() and token:
-            cleaned_data = payment_form.cleaned_data
-            crowdfund = cleaned_data['crowdfund']
-            amount = cleaned_data['stripe_amount']
-            show = cleaned_data['show']
+            amount = payment_form.cleaned_data['stripe_amount']
+            # If there is no user but the show and full_name fields are filled in,
+            # create the user with our "miniregistration" functionality and then log them in
             user = request.user if request.user.is_authenticated() else None
             registered = False
-            # If there is no user but the full_name field is filled in,
-            # create the user with our "miniregistration" functionality
-            # and then log them in
-            full_name = cleaned_data['full_name']
-            if user is None and full_name:
-                full_name = cleaned_data['full_name']
+            show = payment_form.cleaned_data['show']
+            full_name = payment_form.cleaned_data['full_name']
+            if user is None and show and full_name:
                 password = generate_key(12)
                 user = miniregister(full_name, email, password)
                 user = authenticate(username=user.username, password=password)
                 login(request, user)
                 registered = True
             try:
+                crowdfund = payment_form.cleaned_data['crowdfund']
                 crowdfund.make_payment(token, email, amount, show, user)
             except (
                 stripe.InvalidRequestError,
@@ -125,9 +125,7 @@ class CrowdfundDetailView(DetailView):
                 stripe.AuthenticationError
             ) as payment_error:
                 logging.warn(payment_error)
-                self.return_error(request)
-            # if AJAX, return HTTP 200 OK
-            # else, return a redirection
+                return self.return_error(request, payment_error)
             if request.is_ajax():
                 data = {
                     'authenticated': user.is_authenticated() if user else False,
