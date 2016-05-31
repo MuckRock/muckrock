@@ -13,6 +13,7 @@ from mock import Mock, patch
 from nose.tools import eq_, ok_, raises
 
 from muckrock.accounts import views
+from muckrock.accounts.forms import RegistrationCompletionForm
 from muckrock.factories import UserFactory, OrganizationFactory
 from muckrock.organization.models import Organization
 from muckrock.utils import mock_middleware
@@ -347,19 +348,18 @@ class TestRegistrationCompletionView(TestCase):
         """Only registered users may see the registration completion page."""
         response = http_get_response(
             reverse('accounts-complete-registration'),
-            views.AccountCompletionView.as_view())
+            views.RegistrationCompletionView.as_view())
         eq_(response.status_code, 302, 'Logged out users should be redirected.')
-        eq_(response.url, reverse('acct-login'),
+        ok_(reverse('acct-login') in response.url,
             'Logged out users should be redirected to the login view.')
 
     def test_get_and_verify(self):
         """Getting the view with a verification key should verify the user's email."""
         key = self.user.profile.generate_confirmation_key()
         response = http_get_response(
-            reverse('accounts-complete-registration', kwargs={'key': key}),
-            views.AccountCompletionView.as_view(),
-            user=self.user,
-            key=key
+            reverse('accounts-complete-registration') + '?key=' + key,
+            views.RegistrationCompletionView.as_view(),
+            user=self.user
         )
         self.user.profile.refresh_from_db()
         eq_(response.status_code, 200,
@@ -371,14 +371,15 @@ class TestRegistrationCompletionView(TestCase):
         """The user should be able to update their username and password after logging in."""
         username = 'TomWaits'
         password = 'swordfishtrombones'
-        form = RegistrationCompletionForm({
+        form = RegistrationCompletionForm(self.user, {
             'username': username,
-            'password': password
+            'new_password1': password,
+            'new_password2': password
         })
         ok_(form.is_valid(), 'The forms should validate.')
-        response = http_post_response(
+        http_post_response(
             reverse('accounts-complete-registration'),
-            views.AccountCompletionView.as_view(),
+            views.RegistrationCompletionView.as_view(),
             data=form.data,
             user=self.user,
         )

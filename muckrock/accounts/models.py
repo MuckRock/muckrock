@@ -15,6 +15,7 @@ from easy_thumbnails.fields import ThumbnailerImageField
 from itertools import groupby
 from localflavor.us.models import PhoneNumberField, USStateField
 from lot.models import LOT
+import re
 import stripe
 from urllib import urlencode
 
@@ -58,7 +59,8 @@ def miniregister(full_name, email, password):
     from muckrock.message.tasks import welcome
     full_name = full_name.strip()
     # create unique username thats at most 30 characters
-    base_username = full_name.replace(' ', '')[:30]
+    base_username = full_name.replace(' ', '')
+    base_username = re.sub(r'[^\w\-.@ ]', '', username) # strips illegal characters from username[:30]
     username = base_username
     num = 1
     while User.objects.filter(username__iexact=username).exists():

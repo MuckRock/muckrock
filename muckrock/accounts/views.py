@@ -37,6 +37,7 @@ from muckrock.accounts.forms import (
         BillingPreferencesForm,
         RegisterForm,
         RegisterOrganizationForm,
+        RegistrationCompletionForm
         )
 from muckrock.accounts.models import Profile, Statistics, ACCT_TYPES
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
@@ -419,6 +420,42 @@ def stripe_webhook(request):
     elif event_type == 'invoice.payment_failed':
         failed_payment.delay(event_object_id)
     return HttpResponse()
+
+@method_decorator(login_required, name='dispatch')
+class RegistrationCompletionView(FormView):
+    """Provides a form for a new user to change their username and password.
+    Will verify their email if a key is provided."""
+    template_name = 'forms/base_form.html'
+    form_class = RegistrationCompletionForm
+
+    def get_initial(self):
+        """Adds the username as an initial value."""
+        return {'username': self.request.user.username}
+
+    def get_form_kwargs(self):
+        """Adds the user to the form kwargs."""
+        kwargs = super(RegistrationCompletionView, self).get_form_kwargs()
+        kwargs.update({'user': self.request.user})
+        return kwargs
+
+    def get(self, request, *args, **kwargs):
+        profile = request.user.profile
+        if 'key' in request.GET:
+            key = request.GET['key']
+            if key == profile.confirmation_key:
+                profile.email_confirmed = True
+                profile.save()
+                messages.success(request, 'Your email is validated.')
+        return super(RegistrationCompletionView, self).get(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        """Saves the form and redirects to the success url."""
+        form.save(commit=True)
+        return redirect(self.get_success_url())
+
+    def get_success_url(self):
+        """Return the user's profile."""
+        return reverse('acct-profile', kwargs={'username': self.request.user.username})
 
 
 class UserViewSet(viewsets.ModelViewSet):
