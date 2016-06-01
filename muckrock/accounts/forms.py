@@ -135,7 +135,8 @@ class RegistrationCompletionForm(SetPasswordForm):
         """Do a case insensitive uniqueness check and clean username input"""
         username = self.cleaned_data['username']
         username = re.sub(r'[^\w\-.@ ]', '', username) # strips illegal characters from username
-        if User.objects.filter(username__iexact=username).exists():
+        existing_user = User.objects.filter(username__iexact=username)
+        if existing_user.exists() and existing_user.first() != self.user:
             raise forms.ValidationError("This username is taken.")
         return username
 
