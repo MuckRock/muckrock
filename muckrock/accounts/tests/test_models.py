@@ -182,7 +182,7 @@ class TestMiniregister(TestCase):
         self.email = 'lou@hero.in'
         self.password = 'password'
 
-    @patch('muckrock.message.tasks.welcome.delay')
+    @patch('muckrock.message.tasks.welcome_miniregister.delay')
     def test_expected_case(self, mock_welcome):
         """
         Giving the miniregister method a full name, email, and password should

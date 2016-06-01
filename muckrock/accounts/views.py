@@ -442,7 +442,7 @@ class RegistrationCompletionView(FormView):
         _profile = request.user.profile
         if 'key' in request.GET:
             key = request.GET['key']
-            if key == profile.confirmation_key:
+            if key == _profile.confirmation_key:
                 _profile.email_confirmed = True
                 _profile.save()
                 messages.success(request, 'Your email is validated.')

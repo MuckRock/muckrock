@@ -164,8 +164,10 @@ class TestCrowdfundView(TestCase):
         """
         # when registering, the full name should be present
         self.data['full_name'] = 'John Doe'
+        self.data['show'] = True
         response = self.post(self.data, ajax=True)
         data = json.loads(response.content)
+        print data
         eq_(data['authenticated'], True)
         eq_(data['registered'], True)
 
