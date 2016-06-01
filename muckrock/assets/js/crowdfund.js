@@ -2,6 +2,12 @@
 
     var $crowdfund, $overlays, email;
 
+    function gaEvent(category, action) {
+        if (typeof(ga) != "undefined") {
+            ga('send', 'event', category, action, window.location.pathname);
+        }
+    }
+
     function crowdfundAjax(event) {
         // Transform the form's data into a dictionary
         var form = $(this);
@@ -12,9 +18,7 @@
         });
         email = data['stripe_email'];
         // track this event using Google Analytics
-        if (typeof(ga) != "undefined") {
-            ga('send', 'event', 'Crowdfund', 'Donation', window.location.pathname);
-        }
+        gaEvent('Crowdfund', 'Donation');
         // submit the form via AJAX
         $.ajax({
             url: form.attr('action'),
@@ -52,6 +56,7 @@
             nextStep = 'Stay updated on our projects, reporting, and new requests by subscribing to our newsletter.';
         }
         else if (response.registered === true) {
+            gaEvent('Account', 'Registration');
             nextStep = 'Welcome to MuckRock! Check your email to verify your address and set up your password.';
         }
         completeOverlay.find('#complete-next-steps').text(nextStep);
