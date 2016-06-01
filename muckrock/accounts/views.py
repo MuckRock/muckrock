@@ -451,6 +451,7 @@ class RegistrationCompletionView(FormView):
     def form_valid(self, form):
         """Saves the form and redirects to the success url."""
         form.save(commit=True)
+        messages.success(self.request, 'Your account is now complete.')
         return redirect(self.get_success_url())
 
     def get_success_url(self):
