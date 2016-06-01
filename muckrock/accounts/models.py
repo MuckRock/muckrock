@@ -56,11 +56,11 @@ def miniregister(full_name, email, password):
     - create a Profile for the user
     - send the user a welcome email with a link to reset their password
     """
-    from muckrock.message.tasks import welcome
+    from muckrock.message.tasks import welcome_miniregister
     full_name = full_name.strip()
     # create unique username thats at most 30 characters
-    base_username = full_name.replace(' ', '')
-    base_username = re.sub(r'[^\w\-.@ ]', '', username) # strips illegal characters from username[:30]
+    # strips illegal characters from username
+    base_username = re.sub(r'[^\w\-.@]', '', full_name)[:30]
     username = base_username
     num = 1
     while User.objects.filter(username__iexact=username).exists():
