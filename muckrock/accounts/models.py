@@ -88,10 +88,7 @@ def miniregister(full_name, email, password):
         date_update=datetime.now()
     )
     # send the new user a welcome email
-    # TODO replace this welcome email with a miniregister-specific one
-    # TODO create a special landing page for finishing the signup process
-    password_link = profile.wrap_url(reverse('acct-reset-pw'))
-    welcome.delay(user, password_link)
+    welcome_miniregister.delay(user)
     return user
 
 class Profile(models.Model):
