@@ -5,7 +5,6 @@ Models for the accounts application
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.core.mail import EmailMessage
-from django.core.urlresolvers import reverse
 from django.db import models
 from django.template.loader import render_to_string
 
@@ -81,7 +80,7 @@ def miniregister(full_name, email, password):
     user.last_name = last_name
     user.save()
     # create a new Profile
-    profile = Profile.objects.create(
+    Profile.objects.create(
         user=user,
         acct_type='basic',
         monthly_requests=settings.MONTHLY_REQUESTS.get('basic', 0),

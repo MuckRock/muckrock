@@ -346,6 +346,7 @@ class TestRegistrationCompletionView(TestCase):
 
     def test_login_required(self):
         """Only registered users may see the registration completion page."""
+        # pylint: disable=no-self-use
         response = http_get_response(
             reverse('accounts-complete-registration'),
             views.RegistrationCompletionView.as_view())

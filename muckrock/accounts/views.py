@@ -439,12 +439,12 @@ class RegistrationCompletionView(FormView):
         return kwargs
 
     def get(self, request, *args, **kwargs):
-        profile = request.user.profile
+        _profile = request.user.profile
         if 'key' in request.GET:
             key = request.GET['key']
             if key == profile.confirmation_key:
-                profile.email_confirmed = True
-                profile.save()
+                _profile.email_confirmed = True
+                _profile.save()
                 messages.success(request, 'Your email is validated.')
         return super(RegistrationCompletionView, self).get(request, *args, **kwargs)
 
