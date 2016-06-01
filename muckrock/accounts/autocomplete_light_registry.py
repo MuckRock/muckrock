@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404
 
 from autocomplete_light import shortcuts as autocomplete_light
 
+from muckrock.accounts.models import AgencyUser
 from muckrock.foia.models import FOIARequest
 from muckrock.organization.models import Organization
 
@@ -24,6 +25,35 @@ class UserAutocomplete(autocomplete_light.AutocompleteModelTemplate):
         """Uses the user's full name and username as the choice label."""
         label = choice.get_full_name() + ' (' + choice.username + ')'
         return label
+
+
+class AgencyUserAutocomplete(autocomplete_light.AutocompleteModelBase):
+    """Agency user autocomplete"""
+    choices = AgencyUser.objects.all()
+    search_fields = ['^username', '^first_name', '^last_name', '^email']
+    attrs = {
+        'placeholder': 'Search by name or email',
+        'data-autocomplete-minimum-characters': 2
+    }
+
+    def choice_label(self, choice):
+        """Uses the user's username and email as the choice label."""
+        return '%s (%s)' % (choice.username, choice.email)
+
+
+class UserEmailAutocomplete(autocomplete_light.AutocompleteModelBase):
+    """User autocomplete for email situations"""
+    choices = User.objects.all()
+    search_fields = ['^username', '^first_name', '^last_name', '^email']
+    attrs = {
+        'placeholder': 'Search by name or email',
+        'data-autocomplete-minimum-characters': 2
+    }
+
+    def choice_label(self, choice):
+        """Uses the user's username and email as the choice label."""
+        return '%s (%s)' % (choice.username, choice.email)
+
 
 class RequestSharingAutocomplete(UserAutocomplete):
     """Adds request sharing filtering for users"""
@@ -46,6 +76,7 @@ class RequestSharingAutocomplete(UserAutocomplete):
             choices = choices.exclude(pk__in=exclude_pks)
         # return final list of choices
         return self.order_choices(choices)[0:self.limit_choices]
+
 
 class OrganizationAutocomplete(UserAutocomplete):
     """Adds organization-specific filtering for users"""
@@ -70,6 +101,9 @@ class OrganizationAutocomplete(UserAutocomplete):
         # return final list of choices
         return self.order_choices(choices)[0:self.limit_choices]
 
+
 autocomplete_light.register(User, UserAutocomplete)
+autocomplete_light.register(AgencyUser, AgencyUserAutocomplete)
+autocomplete_light.register(User, UserEmailAutocomplete)
 autocomplete_light.register(User, OrganizationAutocomplete)
 autocomplete_light.register(User, RequestSharingAutocomplete)

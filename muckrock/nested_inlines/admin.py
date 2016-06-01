@@ -62,7 +62,7 @@ class NestedModelAdmin(ModelAdmin):
             inline_admin_formset = helpers.InlineAdminFormSet(inline, formset,
                 fieldsets, readonly_fields=readonly, model_admin=admin)
             inline_admin_formsets.append(inline_admin_formset)
-            media.append(inline_admin_formset.media)
+            #media.append(inline_admin_formset.media)
 
             for form in formset.forms:
                 new_formsets, new_inline_admin_formsets, new_media = \

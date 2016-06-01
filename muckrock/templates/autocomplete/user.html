@@ -3,7 +3,7 @@
 
 <span class="block user choice" data-value="{{choice.pk}}">
     <div class="main">
-        {% if choice.profile.avatar %}
+        {% if 0 and choice.profile.avatar %}
         <img src="{% thumbnail choice.profile.avatar 50x50 %}" class="avatar" />
         {% else %}
         <img src="{% static 'icons/logo.png' %}" height="50" width="50" class="avatar" />

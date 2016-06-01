@@ -46,7 +46,7 @@ class ExceptionLoggingMiddleware(object):
 
 DEBUG_TOOLBAR_CONFIG = {
     # always show the toolbar locally
-    'SHOW_TOOLBAR_CALLBACK': lambda _: False,
+    'SHOW_TOOLBAR_CALLBACK': lambda _: True,
     'INTERCEPT_REDIRECTS': False,
     'JQUERY_URL': '',
 }

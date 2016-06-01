@@ -532,7 +532,7 @@ class AgencyUserQuerySet(models.QuerySet):
             first_name, last_name = name, ''
         user, created = AgencyUser.objects.get_or_create(
                 email=email,
-                defaults={'username': unique_username(name)},
+                defaults={'username': unique_username(name or email)},
                 )
         updated = False
         if not user.first_name:
@@ -570,6 +570,9 @@ class AgencyUser(User):
         proxy = True
 
     objects = AgencyUserQuerySet.as_manager()
+
+    def __unicode__(self):
+        return '%s (%s)' % (self.username, self.email)
 
     def get_email(self):
         """Get the email address to send to"""

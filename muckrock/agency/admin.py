@@ -18,7 +18,8 @@ from autocomplete_light import shortcuts as autocomplete_light
 import logging
 import sys
 
-from muckrock.agency.models import AgencyType, Agency
+from muckrock.accounts.models import AgencyUser
+from muckrock.agency.models import AgencyType, Agency, AgencyProfile
 from muckrock.agency.forms import CSVImportForm
 from muckrock.jurisdiction.models import Jurisdiction
 
@@ -33,9 +34,34 @@ class AgencyTypeAdmin(VersionAdmin):
     search_fields = ['name']
 
 
+class AgencyProfileAdminForm(forms.ModelForm):
+    """Agency profile admin form"""
+    user = autocomplete_light.ModelChoiceField(
+            'AgencyUserAutocomplete',
+            queryset=AgencyUser.objects.known(),
+            label='User',
+            required=True)
+
+    class Meta:
+        model = AgencyProfile
+        fields = ('user', 'contact_type')
+
+
+class AgencyProfileInline(admin.TabularInline):
+    """Agency profile inline"""
+    model = AgencyProfile
+    form = AgencyProfileAdminForm
+    extra = 0
+    readonly_fields = ('email',)
+
+    def email(self, instance):
+        """Get the email for the agency profile"""
+        return instance.user.email
+
+
 class AgencyAdminForm(forms.ModelForm):
     """Agency admin form to order users"""
-    user = autocomplete_light.ModelChoiceField(
+    submitter = autocomplete_light.ModelChoiceField(
             'UserAutocomplete',
             queryset=User.objects.all(),
             required=False)
@@ -70,6 +96,7 @@ class AgencyAdmin(VersionAdmin):
     search_fields = ['name']
     filter_horizontal = ('types',)
     form = AgencyAdminForm
+    inlines = (AgencyProfileInline,)
     formats = ['xls', 'csv']
 
     def get_urls(self):
@@ -126,6 +153,7 @@ def get_jurisdiction(full_name):
     else:
         return Jurisdiction.objects.exclude(level='l').get(name=full_name).pk
 
+
 class EmailValidator(object):
     """Class to validate emails"""
     def validate(self, value):
@@ -136,6 +164,7 @@ class EmailValidator(object):
         # validate email will throw a validation error on failure
         validate_email(value)
         return True
+
 
 class AgencyCsvModel(CsvModel):
     """CSV import model for agency"""
