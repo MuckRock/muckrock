@@ -5,7 +5,6 @@ Views for the crowdfund application
 from django.conf import settings
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib import messages
-from django.contrib.auth import authenticate, login
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import redirect
@@ -112,8 +111,6 @@ class CrowdfundDetailView(DetailView):
             if user is None and show and full_name:
                 password = generate_key(12)
                 user = miniregister(full_name, email, password)
-                user = authenticate(username=user.username, password=password)
-                login(request, user)
                 registered = True
             try:
                 crowdfund = payment_form.cleaned_data['crowdfund']
