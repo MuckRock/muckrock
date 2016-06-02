@@ -10,13 +10,15 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from autocomplete_light import shortcuts as autocomplete_light
 from reversion.admin import VersionAdmin
+import datetime
 import stripe
 
-from muckrock.accounts.models import Profile, Statistics
+from muckrock.accounts.models import Profile, Statistics, AgencyUser
 from muckrock.jurisdiction.models import Jurisdiction
 
 # These inhereit more than the allowed number of public methods
 # pylint: disable=too-many-public-methods
+
 
 class StatisticsAdmin(VersionAdmin):
     """Statistics admin options"""
@@ -37,14 +39,16 @@ class ProfileAdminForm(forms.ModelForm):
         model = Profile
         fields = '__all__'
 
+
 class ProfileInline(admin.StackedInline):
     """Profile admin options"""
     model = Profile
     search_fields = ('user__username', 'user__first_name', 'user__last_name')
     exclude = ('follows_foia', 'follows_question', 'notifications')
     form = ProfileAdminForm
-    extra = 0
+    extra = 1
     max_num = 1
+
 
 class MRUserAdmin(UserAdmin):
     """User admin options"""
@@ -85,6 +89,46 @@ class MRUserAdmin(UserAdmin):
         obj.save()
         super(MRUserAdmin, self).save_related(request, form, formsets, change)
 
+
+class AgencyProfileInline(ProfileInline):
+    fields = (
+            'phone',
+            'fax',
+            'salutation',
+            'title',
+            'address1',
+            'address2',
+            'city',
+            'state',
+            'zip_code',
+            )
+
+
+class AgencyUserAdmin(VersionAdmin):
+    """Agency user admin"""
+    list_display = ('username', 'first_name', 'last_name', 'email')
+    fields = ('username', 'first_name', 'last_name', 'email')
+    inlines = [AgencyProfileInline]
+
+    def save_related(self, request, form, formsets, change):
+        """Set account type on save"""
+        super(AgencyUserAdmin, self).save_related(request, form, formsets, change)
+        user = form.instance
+        try:
+            user.profile.acct_type = 'agency'
+            user.profile.email_pref = 'never'
+            user.profile.date_update = datetime.date.today()
+            user.profile.save()
+        except Profile.DoesNotExist:
+            Profile.objects.create(
+                    user=user,
+                    acct_type='agency',
+                    email_pref='never',
+                    date_update=datetime.date.today(),
+                    )
+        
+
 admin.site.register(Statistics, StatisticsAdmin)
 admin.site.unregister(User)
 admin.site.register(User, MRUserAdmin)
+admin.site.register(AgencyUser, AgencyUserAdmin)

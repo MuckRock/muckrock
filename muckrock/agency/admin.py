@@ -52,11 +52,6 @@ class AgencyProfileInline(admin.TabularInline):
     model = AgencyProfile
     form = AgencyProfileAdminForm
     extra = 0
-    readonly_fields = ('email',)
-
-    def email(self, instance):
-        """Get the email for the agency profile"""
-        return instance.user.email
 
 
 class AgencyAdminForm(forms.ModelForm):

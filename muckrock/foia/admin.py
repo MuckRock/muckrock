@@ -110,10 +110,10 @@ class FOIACommunicationInline(NestedTabularInline):
     extra = 1
     readonly_fields = ['opened']
     fields = (
-            'from_who',
-            'to_who',
-            'priv_from_who',
-            'priv_to_who',
+            #'from_who',
+            #'to_who',
+            #'priv_from_who',
+            #'priv_to_who',
             'from_user',
             'to_users',
             'subject',
@@ -160,6 +160,12 @@ class FOIARequestAdminForm(forms.ModelForm):
     cc_contacts = autocomplete_light.ModelMultipleChoiceField(
             'AgencyUserAutocomplete',
             queryset=AgencyUser.objects.all())
+    read_collaborators = autocomplete_light.ModelMultipleChoiceField(
+            'UserAutocomplete',
+            queryset=User.objects.all())
+    edit_collaborators = autocomplete_light.ModelMultipleChoiceField(
+            'UserAutocomplete',
+            queryset=User.objects.all())
 
     class Meta:
         # pylint: disable=too-few-public-methods

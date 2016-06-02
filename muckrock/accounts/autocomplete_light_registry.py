@@ -30,6 +30,7 @@ class UserAutocomplete(autocomplete_light.AutocompleteModelTemplate):
 class AgencyUserAutocomplete(autocomplete_light.AutocompleteModelBase):
     """Agency user autocomplete"""
     choices = AgencyUser.objects.all()
+    add_another_url_name = 'admin:accounts_agencyuser_add'
     search_fields = ['^username', '^first_name', '^last_name', '^email']
     attrs = {
         'placeholder': 'Search by name or email',

@@ -66,6 +66,7 @@ class AgencyMultiRequestAutocomplete(autocomplete_light.AutocompleteModelTemplat
         choices = self.choices.filter(conditions).distinct()
         return self.order_choices(choices)[0:self.limit_choices]
 
+
 class AgencyAdminAutocomplete(AgencyAutocomplete):
     """Autocomplete for Agencies for FOIA admin page"""
     attrs = {'placeholder': 'Agency?'}
