@@ -7,7 +7,7 @@
         overflow: hidden;
         @include flex(1);
         text-align: center;
-        transition: transform .1s ease-out;
+        transition: all .1s ease-out;
         &:hover {
             z-index: 1;
             transform: scale(1.15);
@@ -23,9 +23,12 @@
         display: block;
         padding: $vertical-rhythm/2;
         background: $color-grey;
+    }
+    a:hover {
         &.email { background: $color-email; }
         &.twitter { background: $color-twitter; }
         &.facebook { background: $color-facebook; }
+        &.reddit { background: $color-reddit; }
     }
     .label {
         display: none;

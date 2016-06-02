@@ -1,10 +1,9 @@
 <div class="social sharing">
-    <dfn>Share</dfn>
     <ul class="channels nostyle">
         <li class="channel">
-            <a href="mailto:?subject={{ title }}&amp;body=http://{{ request.get_host }}{{ request.path }}" class="email" onclick="ga('send', 'event', 'Share', 'Email', window.location.pathname);">
-                {% include 'lib/component/icon/email.svg' %}
-                <span class="label">Email</span>
+            <a href="javascript:window.open('https://www.facebook.com/sharer/sharer.php?u=http://{{ request.get_host }}{{ request.path }}', 'Share on Facebook', 'width=500,height=140,location=no,menubar=no,status=no');" class="facebook" onclick="ga('send', 'event', 'Share', 'Facebook', window.location.pathname)">
+                {% include 'lib/component/icon/facebook.svg' %}
+                <span class="label">Facebook</span>
             </a>
         </li>
         <li class="channel">
@@ -14,9 +13,15 @@
             </a>
         </li>
         <li class="channel">
-            <a href="javascript:window.open('https://www.facebook.com/sharer/sharer.php?u=http://{{ request.get_host }}{{ request.path }}', 'Share on Facebook', 'width=500,height=140,location=no,menubar=no,status=no');" class="facebook" onclick="ga('send', 'event', 'Share', 'Facebook', window.location.pathname)">
-                {% include 'lib/component/icon/facebook.svg' %}
-                <span class="label">Facebook</span>
+            <a href="mailto:?subject={{ title }}&amp;body=http://{{ request.get_host }}{{ request.path }}" class="email" onclick="ga('send', 'event', 'Share', 'Email', window.location.pathname);">
+                {% include 'lib/component/icon/email.svg' %}
+                <span class="label">Email</span>
+            </a>
+        </li>
+        <li class="channel">
+            <a href="javascript:window.open('http://www.reddit.com/submit?url=http://{{ request.get_host }}{{ request.path }}&amp;title={{ title|escapejs }}')" class="reddit" onclick="ga('send', 'event', 'Share', 'Reddit', window.location.pathname);">
+                {% include 'lib/component/icon/reddit.svg' %}
+                <span class="label">Reddit</span>
             </a>
         </li>
     </ul>
