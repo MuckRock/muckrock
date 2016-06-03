@@ -13,24 +13,25 @@ from mock import Mock, patch
 from nose.tools import eq_, ok_, raises
 
 from muckrock.accounts import views
+from muckrock.accounts.forms import RegistrationCompletionForm
 from muckrock.factories import UserFactory, OrganizationFactory
 from muckrock.organization.models import Organization
 from muckrock.utils import mock_middleware
 
 
-def http_get_response(url, view, user=AnonymousUser()):
+def http_get_response(url, view, user=AnonymousUser(), **kwargs):
     """Handles making GET requests, returns the response."""
     request_factory = RequestFactory()
-    request = request_factory.get(url)
+    request = request_factory.get(url, **kwargs)
     request = mock_middleware(request)
     request.user = user
     response = view(request)
     return response
 
-def http_post_response(url, view, data, user=AnonymousUser()):
+def http_post_response(url, view, data, user=AnonymousUser(), **kwargs):
     """Handles making POST requests, returns the response."""
     request_factory = RequestFactory()
-    request = request_factory.post(url, data)
+    request = request_factory.post(url, data, **kwargs)
     request = mock_middleware(request)
     request.user = user
     response = view(request)
@@ -334,6 +335,58 @@ class TestBuyRequestsView(TestCase):
         self.view(post_request, self.user.username)
         self.user.profile.refresh_from_db()
         eq_(self.user.profile.num_requests, existing_request_count)
+
+
+class TestRegistrationCompletionView(TestCase):
+    """The RegistrationCompletionView allows a user to verify their email,
+    change their password, and update their email after creating an
+    account through the miniregistration process."""
+    def setUp(self):
+        self.user = UserFactory()
+
+    def test_login_required(self):
+        """Only registered users may see the registration completion page."""
+        # pylint: disable=no-self-use
+        response = http_get_response(
+            reverse('accounts-complete-registration'),
+            views.RegistrationCompletionView.as_view())
+        eq_(response.status_code, 302, 'Logged out users should be redirected.')
+        ok_(reverse('acct-login') in response.url,
+            'Logged out users should be redirected to the login view.')
+
+    def test_get_and_verify(self):
+        """Getting the view with a verification key should verify the user's email."""
+        key = self.user.profile.generate_confirmation_key()
+        response = http_get_response(
+            reverse('accounts-complete-registration') + '?key=' + key,
+            views.RegistrationCompletionView.as_view(),
+            user=self.user
+        )
+        self.user.profile.refresh_from_db()
+        eq_(response.status_code, 200,
+            'The view should respond 200 OK')
+        ok_(self.user.profile.email_confirmed,
+            'The user\'s email address should be confirmed.')
+
+    def test_update_username_password(self):
+        """The user should be able to update their username and password after logging in."""
+        username = 'TomWaits'
+        password = 'swordfishtrombones'
+        form = RegistrationCompletionForm(self.user, {
+            'username': username,
+            'new_password1': password,
+            'new_password2': password
+        })
+        ok_(form.is_valid(), 'The forms should validate.')
+        http_post_response(
+            reverse('accounts-complete-registration'),
+            views.RegistrationCompletionView.as_view(),
+            data=form.data,
+            user=self.user,
+        )
+        self.user.refresh_from_db()
+        eq_(self.user.username, username, 'The username should be updated.')
+        ok_(self.user.check_password(password), 'The password should be updated.')
 
 
 class TestAccountFunctional(TestCase):

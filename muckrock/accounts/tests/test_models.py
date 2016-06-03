@@ -12,7 +12,6 @@ from nose.tools import ok_, eq_, assert_true, assert_false, raises, nottest
 from muckrock.factories import ProfileFactory, OrganizationFactory
 from muckrock.utils import get_stripe_token
 
-
 # Creates Mock items for testing methods that involve Stripe
 #
 # If you can't tell what's going on here, check out the Profile

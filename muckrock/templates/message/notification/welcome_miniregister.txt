@@ -1,13 +1,8 @@
 {% extends 'message/base.txt' %}
 {% block body %}
-Hi {{user.first_name}},
+Welcome to MuckRock, {{user.first_name}}!
 
-Welcome to MuckRock!
-
-Just a reminder, your username is {{ user.username }}.
-
-We ask that you please verify your email by following this link: {{base_url}}{{ verification_link|safe }}
-You can also verify your email from your account settings page: {{base_url}}{% url 'acct-settings' %}
+We'll need you to finish creating your account. Follow this link to set up your username and password, and to verify your email address: {{base_url}}{{completion_url|safe}}
 
 Have a technical support or customer service issue?
 

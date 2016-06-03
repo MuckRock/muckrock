@@ -8,7 +8,7 @@ from django.core.mail import EmailMessage
 from django.db import models
 from django.template.loader import render_to_string
 
-import datetime
+from datetime import datetime
 import dbsettings
 from easy_thumbnails.fields import ThumbnailerImageField
 from itertools import groupby
@@ -180,11 +180,11 @@ class Profile(models.Model):
 
     def get_monthly_requests(self):
         """Get the number of requests left for this month"""
-        not_this_month = self.date_update.month != datetime.datetime.now().month
-        not_this_year = self.date_update.year != datetime.datetime.now().year
+        not_this_month = self.date_update.month != datetime.now().month
+        not_this_year = self.date_update.year != datetime.now().year
         # update requests if they have not yet been updated this month
         if not_this_month or not_this_year:
-            self.date_update = datetime.datetime.now()
+            self.date_update = datetime.now()
             self.monthly_requests = settings.MONTHLY_REQUESTS.get(self.acct_type, 0)
             self.save()
         return self.monthly_requests
@@ -289,7 +289,7 @@ class Profile(models.Model):
         # modify the profile object (should this be part of a webhook callback?)
         self.subscription_id = subscription.id
         self.acct_type = 'pro'
-        self.date_update = datetime.datetime.now()
+        self.date_update = datetime.now()
         self.monthly_requests = settings.MONTHLY_REQUESTS.get('pro', 0)
         self.save()
         return subscription
