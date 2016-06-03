@@ -47,6 +47,7 @@ from muckrock.foia.views.comms import (
         )
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.qanda.models import Question
+from muckrock.qanda.forms import QuestionForm
 from muckrock.tags.models import Tag
 from muckrock.task.models import Task, FlaggedTask, StatusChangeTask
 from muckrock.views import class_view_decorator, MRFilterableListView
@@ -269,6 +270,7 @@ class Detail(DetailView):
         })
         context['note_form'] = FOIANoteForm()
         context['access_form'] = FOIAAccessForm()
+        context['question_form'] = QuestionForm(user=user, initial={'foia': foia})
         context['crowdfund_form'] = CrowdfundForm(initial={
             'name': u'Crowdfund Request: %s' % unicode(foia),
             'description': 'Help cover the request fees needed to free these docs!',

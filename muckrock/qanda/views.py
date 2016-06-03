@@ -139,7 +139,7 @@ class Detail(DetailView):
 def create_question(request):
     """Create a question"""
     if request.method == 'POST':
-        form = QuestionForm(request.POST)
+        form = QuestionForm(user=request.user, data=request.POST)
         if form.is_valid():
             question = form.save(commit=False)
             question.slug = slugify(question.title)
@@ -148,7 +148,7 @@ def create_question(request):
             question.save()
             return redirect(question)
     else:
-        form = QuestionForm()
+        form = QuestionForm(user=request.user)
     return render_to_response('forms/question.html', {'form': form},
                               context_instance=RequestContext(request))
 

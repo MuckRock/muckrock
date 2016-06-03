@@ -202,7 +202,7 @@
                             <a href="#appeal" class="red button">Appeal</a>
                             {% endif %}
                         </div>
-                        <button class="button" id="get-advice">Get Advice</button>
+                        <a href="#get-advice" class="button">Get Advice</a>
                         {% if request.user.is_staff %}
                         <a href="{% url 'foia-admin-fix' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Make an admin fix" class="button">Admin Fix</a>
                         {% endif %}
@@ -289,6 +289,15 @@ Sincerely,
                         </form>
                         {% endif %}
                         {% endif %}
+                        <form class="question composer-input" id="get-advice" method="post" action="{% url 'question-create' %}">
+                            <header>Ask a question about your request</header>
+                            {% csrf_token %}
+                            {% include 'lib/pattern/form.html' with form=question_form %}
+                            <div class="buttons">
+                                <button type="submit" class="primary button">Ask Question</button>
+                                <a href="#inactive" class="button">Cancel</a>
+                            </div>
+                        </form>
                     </div>
                 </div>
                 {% endif %}
