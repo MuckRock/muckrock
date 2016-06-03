@@ -281,7 +281,7 @@ Sincerely,
                         <form class="crowdfund composer-input" id="crowdfund" method="post" action="{% url 'foia-crowdfund' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">
                             <header>Crowdfund your request fees</header>
                             {% csrf_token %}
-                            {% include 'lib/pattern/form.html' %}
+                            {% include 'lib/pattern/form.html' with form=crowdfund_form %}
                             <div class="buttons">
                                 <button type="submit" class="primary button">Create Crowdfund</button>
                                 <a href="#inactive" class="button">Cancel</a>
@@ -472,6 +472,7 @@ Sincerely,
     });
     $('#id_date_due').datepicker({
         dateFormat: 'yy-mm-dd',
+        maxDate: '+30d',
         minDate: 0,
         firstDay: 1,
         hideIfNoPrevNext: true,
