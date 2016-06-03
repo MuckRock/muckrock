@@ -88,16 +88,14 @@
                 {% if show_estimated_date %}
                 <tr class="estimated-completion">
                     <td class="label">Est. Completion</td>
-                    <td class="date">{% if foia.date_estimate %}{{ foia.date_estimate|date }}{% else %}None{% endif %}{% if user_can_edit %}<span class="action">Edit</span>{% endif %}</td>
+                    <td class="date">{% if foia.date_estimate %}{{ foia.date_estimate|date }}{% else %}None{% endif %}{% if user_can_edit %}<span class="edit action">Edit</span>{% endif %}</td>
                 </tr>
                 {% endif %}
             </table>
             {% if user_can_edit %}
             <form class="change-date" id="change-estimated-completion-date" method="post">
                 {% csrf_token %}
-                <label for="{{ change_estimated_date.date_estimate.id_for_label }}">{{ change_estimated_date.date_estimate.label }}</label>
-                {{ change_estimated_date.date_estimate }}
-                <p class="help-text">{{ change_estimated_date.date_estimate.help_text }}</p>
+                {% include 'lib/pattern/form.html' with form=change_estimated_date %}
                 <button class="primary button" type="submit" name="action" value="date_estimate">Save</button>
                 <button class="cancel button" id="cancel-date-estimate">Cancel</button>
             </form>
