@@ -11,6 +11,8 @@ from nose.tools import ok_, eq_
 from muckrock.accounts.utils import miniregister, split_name, unique_username
 from muckrock.factories import UserFactory
 
+# pylint: disable=no-self-use
+
 class TestMiniregister(TestCase):
     """Miniregistration allows a user to sign up for an account with their full name and email."""
     def setUp(self):

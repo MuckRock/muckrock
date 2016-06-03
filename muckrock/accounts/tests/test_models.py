@@ -3,14 +3,13 @@ Tests accounts models
 """
 
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.test import TestCase
 
 from datetime import datetime, date, timedelta
 from mock import Mock, patch
 from nose.tools import ok_, eq_, assert_true, assert_false, raises, nottest
 
-from muckrock.factories import UserFactory, ProfileFactory, OrganizationFactory
+from muckrock.factories import ProfileFactory, OrganizationFactory
 from muckrock.utils import get_stripe_token
 
 # Creates Mock items for testing methods that involve Stripe
