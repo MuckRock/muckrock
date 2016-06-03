@@ -2,12 +2,15 @@
     margin-bottom: 0;
 }
 
-.embed .crowdfund.widget {
+.embed .crowdfund__widget {
     margin-bottom: 0;
     width: 100vw;
     height: 100vh;
     .overlay {
         margin-bottom: 0;
+    }
+    main {
+        overflow-y: scroll;
     }
 }
 

@@ -106,7 +106,7 @@ $('document').ready(function(){
     $('form.stripe-checkout').checkout();
 
     // Crowdfund
-    $('.crowdfund.widget').crowdfund();
+    $('.crowdfund__widget').crowdfund();
 
     // Currency Field
     $('input.currency-field').currencyField();

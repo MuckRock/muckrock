@@ -206,17 +206,24 @@ $request-breakpoint: 768px;
             border: none;
             border-radius: 0;
         }
-        label, .help-text {
+        .help-text{
             padding: 0 $vertical-rhythm/2;
         }
-        .limit.amount {
-            label, input {
-                display: inline-block;
-                vertical-align: middle;
-            }
+        input[type="checkbox"] {
+            margin-left: $vertical-rhythm/2;
         }
         .currency {
             font-size: $font-size-4;
+        }
+        .field {
+            margin-bottom: 0;
+            header {
+                border-bottom: 0;
+            }
+            input[type="text"], textarea {
+                border-top: 1px solid $color-grey;
+                border-bottom: 1px solid $color-grey;
+            }
         }
         textarea {
             display: block;

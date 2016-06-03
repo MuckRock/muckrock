@@ -10,14 +10,16 @@ from django.test import TestCase, RequestFactory
 
 import datetime
 from datetime import date as real_date
+from mock import Mock
 import nose.tools
 from operator import attrgetter
 import re
 
+from muckrock.agency.models import Agency
 from muckrock.factories import UserFactory, FOIARequestFactory, FOIAFileFactory, ProjectFactory
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.foia.views import Detail, FOIAFileListView
-from muckrock.agency.models import Agency
+from muckrock.foia.views.composers import _make_user
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.task.models import SnailMailTask
@@ -1007,3 +1009,17 @@ class TestRequestFilesView(TestCase):
             slug=self.foia.slug,
             idx=self.foia.id
         )
+
+class TestMakeUser(TestCase):
+    """The request composer should provide miniregistration functionality."""
+    def setUp(self):
+        self.request = mock_middleware(Mock())
+        self.data = {
+            'full_name': 'Mick Jagger',
+            'email': 'mick@hero.in'
+        }
+
+    def test_make_user(self):
+        """Should create the user, log them in, and return the user."""
+        user = _make_user(self.request, self.data)
+        ok_(user)

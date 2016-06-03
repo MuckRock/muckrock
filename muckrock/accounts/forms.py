@@ -3,7 +3,7 @@ Forms for accounts application
 """
 
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, SetPasswordForm
 from django.contrib.auth.models import User
 from django.utils.text import slugify
 
@@ -126,6 +126,27 @@ class RegisterForm(UserCreationForm):
             raise forms.ValidationError("An account with this email already exists.")
         return email
 
+
+class RegistrationCompletionForm(SetPasswordForm):
+    """Adds username to the SetPasswordForm"""
+    username = forms.CharField()
+
+    def clean_username(self):
+        """Do a case insensitive uniqueness check and clean username input"""
+        username = self.cleaned_data['username']
+        username = re.sub(r'[^\w\-.@ ]', '', username) # strips illegal characters from username
+        existing_user = User.objects.filter(username__iexact=username)
+        if existing_user.exists() and existing_user.first() != self.user:
+            raise forms.ValidationError("This username is taken.")
+        return username
+
+    def save(self, commit=True):
+        self.user = super(RegistrationCompletionForm, self).save(commit)
+        username = self.cleaned_data['username']
+        self.user.username = username
+        if commit:
+            self.user.save()
+        return self.user
 
 class RegisterOrganizationForm(RegisterForm):
     """Register for an organization account"""
