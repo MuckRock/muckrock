@@ -144,7 +144,7 @@ class ResponseTaskNode(TaskNode):
         communication = self.task.communication
         _foia = communication.foia
         if _foia:
-            form_initial['status'] = _foia.status
+            form_initial['status'] = self.task.predicted_status
             form_initial['tracking_number'] = _foia.tracking_id
             form_initial['date_estimate'] = _foia.date_estimate
             extra_context['previous_communications'] = _foia.reverse_communications
