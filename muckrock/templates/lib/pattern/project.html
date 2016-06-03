@@ -30,7 +30,7 @@
         {% endif %}
         </ul>
         <summary>
-            {{project.summary|truncatewords_html:50}}
+            {{project.summary|truncatewords:50}}
         </summary>
         <p class="more"><a href="{{project.get_absolute_url}}">Learn more</a></p>
     </div>
@@ -43,13 +43,13 @@
                 <li class="stat"><span class="value">{{crowdfund.percent_funded}}%</span> funded</li>
                 <li class="stat"><span class="value">${{crowdfund.payment_received}}</span> raised</li>
                 <li class="stat"><span class="value">{{crowdfund.contributors_count}}</span> backer{{crowdfund.contributors_count|pluralize}}</li>
-                {% if crowdfund.closed %}
+                {% if crowdfund.expired %}
                 <li class="stat"><span class="value">Ended</li>
                 {% else %}
                 <li class="stat"><span class="value">{{crowdfund.date_due|timeuntil}}</span> remaining</li>
                 {% endif %}
             </ul>
-            {% if not crowdfund.closed %}
+            {% if not crowdfund.expired %}
             <a class="success button" href="{{project.get_absolute_url}}#crowdfund-{{crowdfund.id}}">Contribute</a>
             {% endif %}
         </div>

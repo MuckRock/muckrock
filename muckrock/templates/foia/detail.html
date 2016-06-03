@@ -88,16 +88,14 @@
                 {% if show_estimated_date %}
                 <tr class="estimated-completion">
                     <td class="label">Est. Completion</td>
-                    <td class="date">{% if foia.date_estimate %}{{ foia.date_estimate|date }}{% else %}None{% endif %}{% if user_can_edit %}<span class="action">Edit</span>{% endif %}</td>
+                    <td class="date">{% if foia.date_estimate %}{{ foia.date_estimate|date }}{% else %}None{% endif %}{% if user_can_edit %}<span class="edit action">Edit</span>{% endif %}</td>
                 </tr>
                 {% endif %}
             </table>
             {% if user_can_edit %}
             <form class="change-date" id="change-estimated-completion-date" method="post">
                 {% csrf_token %}
-                <label for="{{ change_estimated_date.date_estimate.id_for_label }}">{{ change_estimated_date.date_estimate.label }}</label>
-                {{ change_estimated_date.date_estimate }}
-                <p class="help-text">{{ change_estimated_date.date_estimate.help_text }}</p>
+                {% include 'lib/pattern/form.html' with form=change_estimated_date %}
                 <button class="primary button" type="submit" name="action" value="date_estimate">Save</button>
                 <button class="cancel button" id="cancel-date-estimate">Cancel</button>
             </form>
@@ -204,7 +202,7 @@
                             <a href="#appeal" class="red button">Appeal</a>
                             {% endif %}
                         </div>
-                        <button class="button" id="get-advice">Get Advice</button>
+                        <a href="#get-advice" class="button">Get Advice</a>
                         {% if request.user.is_staff %}
                         <a href="{% url 'foia-admin-fix' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Make an admin fix" class="button">Admin Fix</a>
                         {% endif %}
@@ -283,7 +281,7 @@ Sincerely,
                         <form class="crowdfund composer-input" id="crowdfund" method="post" action="{% url 'foia-crowdfund' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">
                             <header>Crowdfund your request fees</header>
                             {% csrf_token %}
-                            {% include 'lib/pattern/form.html' %}
+                            {% include 'lib/pattern/form.html' with form=crowdfund_form %}
                             <div class="buttons">
                                 <button type="submit" class="primary button">Create Crowdfund</button>
                                 <a href="#inactive" class="button">Cancel</a>
@@ -291,6 +289,15 @@ Sincerely,
                         </form>
                         {% endif %}
                         {% endif %}
+                        <form class="question composer-input" id="get-advice" method="post" action="{% url 'question-create' %}">
+                            <header>Ask a question about your request</header>
+                            {% csrf_token %}
+                            {% include 'lib/pattern/form.html' with form=question_form %}
+                            <div class="buttons">
+                                <button type="submit" class="primary button">Ask Question</button>
+                                <a href="#inactive" class="button">Cancel</a>
+                            </div>
+                        </form>
                     </div>
                 </div>
                 {% endif %}
@@ -474,6 +481,7 @@ Sincerely,
     });
     $('#id_date_due').datepicker({
         dateFormat: 'yy-mm-dd',
+        maxDate: '+30d',
         minDate: 0,
         firstDay: 1,
         hideIfNoPrevNext: true,
