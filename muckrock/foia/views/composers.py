@@ -18,7 +18,7 @@ import actstream
 from datetime import datetime, date
 import logging
 
-from muckrock.accounts.models import miniregister
+from muckrock.accounts.utils import miniregister
 from muckrock.agency.models import Agency
 from muckrock.foia.forms import (
     RequestForm,

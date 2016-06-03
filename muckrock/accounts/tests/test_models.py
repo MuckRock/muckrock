@@ -10,7 +10,6 @@ from datetime import datetime, date, timedelta
 from mock import Mock, patch
 from nose.tools import ok_, eq_, assert_true, assert_false, raises, nottest
 
-from muckrock.accounts.models import miniregister
 from muckrock.factories import UserFactory, ProfileFactory, OrganizationFactory
 from muckrock.utils import get_stripe_token
 
@@ -173,64 +172,6 @@ class TestProfileUnit(TestCase):
         pro_profile.cancel_pro_subscription()
         eq_(pro_profile.acct_type, 'basic')
         eq_(pro_profile.monthly_requests, settings.MONTHLY_REQUESTS.get('basic'))
-
-
-class TestMiniregister(TestCase):
-    """Miniregistration allows a user to sign up for an account with their full name and email."""
-    def setUp(self):
-        self.full_name = 'Lou Reed'
-        self.email = 'lou@hero.in'
-        self.password = 'password'
-
-    @patch('muckrock.message.tasks.welcome_miniregister.delay')
-    def test_expected_case(self, mock_welcome):
-        """
-        Giving the miniregister method a full name, email, and password should
-        create a user, create a profile, send them a welcome email, and log them in.
-        The method should return the authenticated user.
-        """
-        user = miniregister(self.full_name, self.email, self.password)
-        ok_(isinstance(user, User), 'A user should be created and returned.')
-        ok_(user.profile, 'A profile should be created for the user.')
-        ok_(user.is_authenticated(), 'The user should be logged in.')
-        mock_welcome.assert_called_once() # The user should get a welcome email
-        eq_(user.first_name, 'Lou', 'The first name should be extracted from the full name.')
-        eq_(user.last_name, 'Reed', 'The last name should be extracted from the full name.')
-        eq_(user.username, 'LouReed', 'The username should remove the spaces from the full name.')
-
-    def test_existing_username(self):
-        """
-        If the expected username is already registered,
-        the username should get a cool number appended to it.
-        If multiple sequential usernames exist, the number will
-        be incremented until a username is available.
-        """
-        UserFactory(username='LouReed')
-        user = miniregister(self.full_name, self.email, self.password)
-        eq_(user.username, 'LouReed1')
-        miniregister(self.full_name, self.email, self.password) # LouReed2
-        miniregister(self.full_name, self.email, self.password) # LouReed3
-        miniregister(self.full_name, self.email, self.password) # LouReed4
-        miniregister(self.full_name, self.email, self.password) # LouReed5
-        user = miniregister(self.full_name, self.email, self.password)
-        eq_(user.username, 'LouReed6')
-
-    def test_multi_space_name(self):
-        """
-        If the full name has more than two separate names in it,
-        the first name should include everything except the final name.
-        """
-        long_name = 'John Cougar Mellencamp'
-        user = miniregister(long_name, self.email, self.password)
-        eq_(user.first_name, 'John Cougar')
-        eq_(user.last_name, 'Mellencamp')
-
-    def test_single_name(self):
-        """If a single name is provided as the full name, then there should be no last name."""
-        short_name = 'Prince' # RIP Prince
-        user = miniregister(short_name, self.email, self.password)
-        eq_(user.first_name, 'Prince')
-        ok_(not user.last_name)
 
 
 class TestStripeIntegration(TestCase):
