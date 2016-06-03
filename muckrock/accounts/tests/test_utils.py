@@ -35,7 +35,7 @@ class TestMiniregister(TestCase):
         eq_(user.username, 'LouReed', 'The username should remove the spaces from the full name.')
 
 
-class TestUniqueUsername:
+class TestUniqueUsername(TestCase):
     """The unique_username method should use a name to generate a unique username."""
     def test_clean_username(self):
         """The username should sanitize the input name."""
@@ -64,11 +64,9 @@ class TestUniqueUsername:
             'If previous user, the name should have a number appended.')
         eq_(unique_username('highlander'), 'highlander1',
             'Capitals should be ignored when determining uniqueness.')
-        # Delete the user from the database so that the test passes the next time it is run.
-        user.delete()
 
 
-class TestSplitName:
+class TestSplitName(TestCase):
     """The split_name method should split a full name into a first and last name."""
     def test_single_space_name(self):
         """If the full name has two names in it, the method should return a first and last name."""
