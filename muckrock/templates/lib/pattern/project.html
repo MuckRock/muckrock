@@ -30,7 +30,7 @@
         {% endif %}
         </ul>
         <summary>
-            {{project.summary|truncatewords_html:50}}
+            {{project.summary|truncatewords:50}}
         </summary>
         <p class="more"><a href="{{project.get_absolute_url}}">Learn more</a></p>
     </div>

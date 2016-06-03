@@ -78,7 +78,7 @@
         <main class="overview__main">
             <h1 class="title">{{ project.title }}</h1>
             <summary>
-                {{ project.summary|markdown:"trusted" }}
+                {{ project.summary }}
             </summary>
             {% if project.newsletter %}
             {% newsletter list_id=project.newsletter label=newsletter_label cta=newsletter_cta %}
