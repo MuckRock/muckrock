@@ -20,7 +20,7 @@
 <meta property="og:url" content="{{ project.get_absolute_url }}" />
 <meta property="og:site_name" content="MuckRock" />
 {% if article.image %}
-<meta property="og:image" content="{{ project.image }}" />
+<meta property="og:image" content="{{ project.image.url }}" />
 {% endif %}
 {% endblock open_graph %}
 
@@ -30,7 +30,7 @@
 <meta name="twitter:title" content="{{ project.title }}" />
 <meta name="twitter:description" content="{{ project.summary }}" />
 {% if project.image %}
-<meta name="twitter:image:src" content="{{ project.image }}" />
+<meta name="twitter:image:src" content="{{ project.image.url }}" />
 {% endif %}
 {% for contributor in contributors %}
 {% if contributor.profile.twitter %}
