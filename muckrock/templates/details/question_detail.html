@@ -54,7 +54,7 @@
 {% endblock main %}
 
 {% block aside %}
-{% include 'lib/social.html' with title=object.title %}
+{% social title=object.title url=object.get_absolute_url %}
 {% tag_manager object %}
 {% if object.foia %}
     <dfn>Related request</dfn>

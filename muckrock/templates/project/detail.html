@@ -176,7 +176,7 @@
             {% endif %}
             {% tag_manager project %}
             {% if project.approved and not project.private %}
-            {% include 'lib/social.html' with title=project.title %}
+            {% social title=project.title url=project.get_absolute_url %}
             {% endif %}
         </aside>
     </section>
