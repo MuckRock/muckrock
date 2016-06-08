@@ -370,8 +370,11 @@ def profile(request, username=None):
         'profile': user_profile,
         'org': org,
         'projects': projects,
-        'recent_requests': recent_requests,
-        'recent_completed': recent_completed,
+        'requests': {
+            'all': requests,
+            'recent': recent_requests,
+            'completed': recent_completed
+        },
         'articles': articles,
         'stripe_pk': settings.STRIPE_PUB_KEY,
         'sidebar_admin_url': reverse('admin:auth_user_change', args=(user.pk,)),

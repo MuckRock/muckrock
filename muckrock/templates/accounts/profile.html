@@ -3,8 +3,28 @@
 {% load markdown_deux_tags %}
 {% load static from staticfiles %}
 
-{% block title %}{{ user_obj.username }}&rsquo;s profile &bull; MuckRock{% endblock title %}
+{% block title %}{{user_obj.get_full_name}} ({{ user_obj.username }}) &bull; MuckRock{% endblock title %}
 {% block type %}account{% endblock type %}
+
+{% block open_graph %}
+<meta property="og:type" content="profile" />
+<meta property="og:url" content="{{user_obj.get_absolute_url}}" />
+<meta property="og:title" content="{{user_obj.get_full_name}} ({{user_obj.username}})" />
+<meta property="og:description" content="{{user_obj.first_name}} has filed {{requests.all.count}} public records requests on MuckRock." />
+<meta property="og:site_name" content="MuckRock" />
+{% if profile.avatar %}
+<meta property="og:image" content="{{ profile.avatar.url }}" />
+{% endif %}
+{% endblock open_graph %}
+
+{% block twitter_card %}
+<meta name="twitter:site" content="@muckrock" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="{{user_obj.get_full_name}} ({{user_obj.username}})" />
+<meta name="twitter:description" content="{{user_obj.first_name}} has filed {{requests.all.count}} public records requests on MuckRock." />
+{% if profile.image %}<meta name="twitter:image:src" content="{{ profile.avatar.url }}" />{% endif %}
+{% if profile.twitter %}<meta name="twitter:creator" content="{{ profile.twitter }}" />{% endif %}
+{% endblock twitter_card %}
 
 {% block metadata %}
 <aside class="metadata">
@@ -113,23 +133,23 @@
         {% endfor %}
     </section>
     {% endif %}
-    {% if recent_requests or recent_completed %}
+    {% if requests.recent or requests.completed %}
     <section class="requests">
-        {% if recent_requests %}
+        {% if requests.recent %}
             {% if request.user == user_obj %}
             <h3>Your Latest Requests <small><a href="{% url 'foia-mylist' %}">See all</a></small></h3>
             {% else %}
             <h3>Latest Requests <small><a href="{% url 'foia-list' %}?user={{user_obj.pk}}">See all</a></small></h3>
             {% endif %}
-            {% include 'lib/foia_table.html' with requests=recent_requests %}
+            {% include 'lib/foia_table.html' with requests=requests.recent %}
         {% endif %}
-        {% if recent_completed %}
+        {% if requests.completed %}
             {% if request.user == user_obj %}
             <h3>Your Recently Completed Requests <small><a href="{% url 'foia-mylist' %}?status=done">See all</a></small></h3>
             {% else %}
             <h3>Recently Completed Requests <small><a href="{% url 'foia-list' %}?user={{user_obj.pk}}&status=done">See all</a></small></h3>
             {% endif %}
-            {% include 'lib/foia_table.html' with requests=recent_completed %}
+            {% include 'lib/foia_table.html' with requests=requests.completed %}
         {% endif %}
     {% else %}
         {% if request.user == user_obj %}
