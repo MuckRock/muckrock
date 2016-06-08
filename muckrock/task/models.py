@@ -309,16 +309,17 @@ class StaleAgencyTask(Task):
         """Returns a list of stale requests associated with the task's agency"""
         if hasattr(self.agency, 'stale_requests_'):
             return self.agency.stale_requests_
-        requests = (FOIARequest.objects
-                .get_open()
-                .filter(agency=self.agency)
-                .select_related('jurisdiction')
-                .filter(communications__response=True)
-                .annotate(latest_response=ExtractDay(
-                    Now() - Max('communications__date')))
-                .filter(latest_response__gte=STALE_DURATION)
-                .order_by('-latest_response')
-                )
+        # a request is stale when it is open, its most recent
+        # communication is older than the STALE_DURATION, and
+        # if it has autofollowups enabled
+        requests = (FOIARequest.objects.filter(agency=self.agency)
+            .get_open()
+            .filter(disable_autofollowups=False)
+            .annotate(latest_communication=ExtractDay(Now() - Max('communications__date')))
+            .filter(latest_communication__gte=STALE_DURATION)
+            .order_by('-latest_communication')
+            .select_related('jurisdiction')
+        )
         return requests
 
     def latest_response(self):

@@ -60,7 +60,7 @@ Like  I said, real dumb stuff!
 {% endfilter %}
     </main>
     <aside class="news--aside">
-        {% include 'lib/social.html' with title=article.title %}
+        {% social title=article.title url=article.get_absolute_url %}
         {% project_manager article %}
         {% tag_manager article %}
         {% if foias %}
