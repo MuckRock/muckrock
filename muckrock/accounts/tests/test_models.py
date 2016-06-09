@@ -211,3 +211,18 @@ class TestStripeIntegration(TestCase):
         customer.save()
         self.profile.start_pro_subscription()
         self.profile.cancel_pro_subscription()
+
+
+class TestAgencyUser(TestCase):
+    """Unit tests for agency user"""
+
+    def test_normalize_fax(self):
+        """Test the normalize fax method"""
+        normalized = '19876543210'
+        eq_(AgencyUserFactory(
+            profile__fax='1-987-654-3210').normalize_fax(),
+            normalized)
+        eq_(AgencyUserFactory(
+            profile__fax='(987) 654.3210').normalize_fax(),
+            normalized)
+        eq_(AgencyUserFactory().normalize_fax(), None)

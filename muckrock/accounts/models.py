@@ -548,7 +548,7 @@ class AgencyUserQuerySet(models.QuerySet):
             user.save()
             Profile.objects.create(
                 user=user,
-                acct_type='agency' if trusted else 'unknown', # XXX doc the trust system here, switch from unkown to agency in a task
+                acct_type='agency' if trusted else 'unknown',
                 email_pref='never',
                 date_update=datetime.date.today(),
                 )

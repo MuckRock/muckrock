@@ -176,6 +176,7 @@ class OrphanTask(Task):
                 created_from_orphan=True
             )
             moved_comm.make_sender_primary_contact()
+            moved_comm.trust_sender()
         return
 
     def reject(self, blacklist=False):

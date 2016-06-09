@@ -64,7 +64,7 @@ class Agency(models.Model, RequestHelper):
             related_name='agencies')
     # XXX set appeal agency to self if appeal to self?  if null does that mean no appeals?
     appeal_agency = models.ForeignKey('self', null=True, blank=True)
-    # XXX
+    # XXX delete this
     can_email_appeals = models.BooleanField(default=False)
     payable_to = models.ForeignKey('self', related_name='receivable', null=True, blank=True)
     image = ThumbnailerImageField(
@@ -124,7 +124,6 @@ class Agency(models.Model, RequestHelper):
 
     def get_emails(self, type_='primary'):
         """Returns the email addresses to send to"""
-        # XXX find get_email, get_other_emails
         return [c.get_email() for c in self.get_contacts(type_)
                 if c.get_email()]
 
@@ -182,7 +181,6 @@ class Agency(models.Model, RequestHelper):
 
     def get_contacts(self, type_):
         """Get all contacts of a given type for this agency"""
-        # XXX replace get_primary_contact, get_cc_contacts, get_appeal_contact
         return self.users.filter(agencyprofile__contact_type=type_)
 
     class Meta:

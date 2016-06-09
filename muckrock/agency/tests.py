@@ -64,14 +64,6 @@ class TestAgencyUnit(TestCase):
             })
         )
 
-    def _test_agency_normalize_fax(self):
-        """Test the normalize fax method"""
-        # XXX
-        normalized = '19876543210'
-        eq_(self.agency1.normalize_fax(), normalized)
-        eq_(self.agency2.normalize_fax(), normalized)
-        eq_(self.agency3.normalize_fax(), None)
-
     def test_agency_get_email(self):
         """Test the get email method"""
         eq_(self.agency1.get_emails(), ['test@agency1.gov'])

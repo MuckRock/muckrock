@@ -862,7 +862,6 @@ class FOIARequest(models.Model):
             'in your account within a few days.',
             )
 
-    #XXX
     def create_out_communication(self, from_user, text, formset=None, **kwargs):
         """Create an outgoing communication for the request"""
         comm = self.communications.create(
@@ -873,6 +872,7 @@ class FOIARequest(models.Model):
             **kwargs
             )
         comm.to_users.set(self.contacts.all())
+        comm.cc_users.set(self.cc_contacts.all())
         if formset is not None:
             foia_files = formset.save(commit=False)
             for foia_file in foia_files:
@@ -883,10 +883,12 @@ class FOIARequest(models.Model):
         return comm
 
     def create_in_communication(self, from_user, text, comm_date=None,
-            formset=None, **kwargs):
+            formset=None, cc_users=None, **kwargs):
         """Create an incoming message for the request"""
         if comm_date is None:
             comm_date = datetime.now()
+        if cc_users is None:
+            cc_users = []
         comm = self.communications.create(
             from_user=from_user,
             date=comm_date,
@@ -895,6 +897,7 @@ class FOIARequest(models.Model):
             **kwargs
             )
         comm.to_users.add(self.user)
+        comm.cc_users.set(cc_users)
         if formset is not None:
             foia_files = formset.save(commit=False)
             for foia_file in foia_files:
@@ -918,8 +921,6 @@ class FOIARequest(models.Model):
                 (
                     self.agency and
                     self.agency.users.known().filter(email__iexact=email).exists()))
-
-
 
     class Meta:
         # pylint: disable=too-few-public-methods

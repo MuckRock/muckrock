@@ -194,8 +194,9 @@ def toggle_autofollowups(request, jurisdiction, jidx, slug, idx):
         messages.error(request, msg)
     return redirect(foia)
 
-# XXX check that the user is for the right agency
-@user_passes_test(lambda u: u.profile.acct_type == 'agency' or u.is_staff)
+# XXX move perm check inside, change this whole view to be part of detail
+# Redo all of this
+@user_passes_test(lambda u: u.has_perm('foia.agency_reply', foia))
 def agency_reply(request, jurisdiction, jidx, slug, idx):
     """Allow agency users to reply directly"""
     foia = _get_foia(jurisdiction, jidx, slug, idx)
@@ -229,6 +230,7 @@ def agency_reply(request, jurisdiction, jidx, slug, idx):
         context_instance=RequestContext(request)
     )
 
+
 # Staff Actions
 @user_passes_test(lambda u: u.is_staff)
 def admin_fix(request, jurisdiction, jidx, slug, idx):
@@ -246,13 +248,13 @@ def admin_fix(request, jurisdiction, jidx, slug, idx):
                         agency=foia.agency)
             if form.cleaned_data['other_emails']:
                 foia.cc_contacts.clear()
-                for email in form.cleaned_data['other_emails']:
+                for email in form.cleaned_data['other_emails'].split(','):
                     user = User.agency_objects.get_or_create_agency_user(
                             email,
                             agency=foia.agency)
                     foia.cc_contacts.add(user)
             if form.cleaned_data['from_email']:
-                # XXX
+                # XXX put in autocompletes
                 from_user = User.agency_objects.get_or_create_agency_user(
                         form.cleaned_data['from_email'])
             else:

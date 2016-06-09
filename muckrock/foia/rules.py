@@ -96,8 +96,6 @@ can_embargo = is_advanced
 
 can_embargo_permananently = is_admin | is_org_member
 
-agency_viewer = from_agency
-
 add_perm('foia.change_foiarequest', can_edit)
 add_perm('foia.delete_foiarequest', can_edit & is_deletable)
 # being from the agency allows you to see embargoed requests, but not drafts
@@ -114,4 +112,5 @@ add_perm('foia.flag_foiarequest', is_authenticated) # Why must be authenticated 
 add_perm('foia.followup_foiarequest', can_edit & ~has_status('started'))
 add_perm('foia.view_rawemail', is_advanced)
 add_perm('foia.file_multirequest', is_advanced)
+add_perm('foia.agency_reply', from_agency | is_staff)
 

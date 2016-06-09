@@ -176,9 +176,12 @@ def _process_request_form(request):
             jurisdiction = data['state']
         else:
             jurisdiction = data['local']
-        agency_query = Agency.objects.filter(name=data['agency'], jurisdiction=jurisdiction)
-        agency = agency_query[0] if agency_query \
-                 else _make_new_agency(request, data['agency'], jurisdiction)
+        try:
+            agency = Agency.objects.get(
+                    name=data['agency'],
+                    jurisdiction=jurisdiction)
+        except Agency.DoesNotExist:
+            agency = _make_new_agency(request, data['agency'], jurisdiction)
         foia_request.update({
             'title': title,
             'document': document,

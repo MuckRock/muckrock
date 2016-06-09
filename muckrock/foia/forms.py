@@ -240,6 +240,7 @@ class FOIAAdminFixForm(forms.ModelForm):
         model = FOIARequest
         fields = ['from_email', 'email', 'other_emails', 'comm']
 
+    # XXX auto auto complete for email fields?
     from_email = forms.CharField(
         label='From',
         required=False,

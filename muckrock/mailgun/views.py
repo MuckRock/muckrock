@@ -66,7 +66,7 @@ def _make_orphan_comm(from_, to_, post, files, foia):
                 name,
                 agency,
                 trusted=False),
-            priv_to_who=to_, # XXX where to record this?
+            priv_to_who=to_,
             response=True,
             date=datetime.now(),
             delivered='email',
@@ -125,6 +125,7 @@ def route_mailgun(request):
     return HttpResponse('OK')
 
 
+# XXX this function is too long, re-factor
 def _handle_request(request, mail_id):
     """Handle incoming mailgun FOI request messages"""
     # pylint: disable=broad-except
@@ -155,6 +156,7 @@ def _handle_request(request, mail_id):
                 address=mail_id)
             return HttpResponse('WARNING')
 
+        # XXX record cc users, other to users
         comm = foia.create_in_communication(
                 from_user=from_user,
                 text='%s\n%s' % (
