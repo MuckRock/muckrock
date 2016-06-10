@@ -2,6 +2,7 @@
     @include display(flex);
     @include justify-content(center);
     @include flex-wrap(wrap);
+    @include padding(0);
 }
 
 .news__image {
@@ -15,11 +16,10 @@
 }
 
 .news__article {
-    @include flex(3 1 24em);
     max-width: 42em;
-    padding: $vertical-rhythm/2;
+    @include flex(3 1 24em);
+    @include padding;
     @include media($medium-layout) {
-        padding: $vertical-rhythm;
         font-size: $font-size-4;
         line-height: $font-line-height;
     }
@@ -69,10 +69,7 @@
 }
 .news__aside {
     @include flex(1 1 16em);
-    padding: $vertical-rhythm/2;
-    @include media($medium-layout) {
-        padding: $vertical-rhythm;
-    }
+    @include padding;
     max-width: 24em;
     min-width: 0;
 }

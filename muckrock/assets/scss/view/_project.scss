@@ -49,21 +49,23 @@
 }
 
 .project.detail {
-    .project-header {
-        .image, .title {
-            margin-bottom: 0;
-        }
-        .image {
-            min-height: 45vh;
-            background-size: cover;
-            background-position: center;
-            background-color: $color-grey-5;
-        }
+    @include padding(0);
+
+    .project__image {
+        min-height: 45vh;
+        margin-bottom: 0;
+        background-size: cover;
+        background-position: center;
+        background-color: $color-grey-5;
+    }
+
+    .prompt, .overview, .objects {
+        margin: 0 auto $vertical-rhythm;
     }
 
     .prompt {
-        box-shadow: 0px 4px 8px 0px $color-grey;
-        padding: $vertical-rhythm;
+        @include padding;
+        @include box-shadow;
         border: 1px solid $color-blue;
         background: $color-blue-light;
         color: $color-blue-dark;
@@ -82,8 +84,8 @@
     .overview {
         @include display(flex);
         @include flex-flow(wrap);
+        @include padding;
         max-width: 60em;
-        margin: 0 auto $vertical-rhythm;
         .overview__main {
             @include flex(2 1 20em);
             min-width: 0;
@@ -150,8 +152,8 @@
     .objects {
         @include display(flex);
         @include flex-flow(wrap row);
+        @include padding;
         max-width: 60em;
-        margin: 0 auto $vertical-rhythm;
         .articles, .requests {
             @include flex(1 1 20em);
         }
