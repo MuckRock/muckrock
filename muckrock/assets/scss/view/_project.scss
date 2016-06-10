@@ -27,17 +27,6 @@
 }
 
 .project {
-    .inline {
-        margin-bottom: 0;
-    }
-    .inline li {
-        display: inline-block;
-        vertical-align: top;
-        margin: 0 $vertical-rhythm/2 $vertical-rhythm/2 0;
-        @include media($medium-layout) {
-            margin: 0 $vertical-rhythm $vertical-rhythm 0;
-        }
-    }
     .stats {
         .stat {
             font-size: $font-size-2;
@@ -168,59 +157,6 @@
         }
         .articles {
             margin-right: $vertical-rhythm;
-        }
-    }
-}
-
-
-.project.frontpage {
-    .frontpage-header {
-        @include display(flex);
-        @include flex-wrap(wrap);
-        @include justify-content(space-between);
-        @include align-items(center);
-        margin-bottom: 0;
-        padding: $vertical-rhythm 0 0;
-        background: $color-blue-light;
-        border-bottom: 1px solid $color-blue;
-        & > * {
-            margin-bottom: 0;
-            padding: 0 $vertical-rhythm $vertical-rhythm;
-            @include flex(1 1 18rem);
-        }
-        h1, ul {
-            text-align: center;
-        }
-        p {
-            font-size: $font-size-2;
-            line-height: $font-line-height;
-        }
-        li {
-            margin-bottom: 0;
-        }
-    }
-    .projects {
-        @include display(flex);
-        @include flex-wrap(wrap);
-        .project {
-            margin: $vertical-rhythm;
-        }
-    }
-    h1 {
-        font-size: $font-size-7;
-        line-height: $font-line-height;
-        @include media($medium-layout) {
-            font-size: $font-size-9;
-            line-height: $font-line-height;
-        }
-    }
-    .frontpage-header .inline li {
-        vertical-align: middle;
-    }
-    .create-project {
-        p {
-            font-size: $font-size-2;
-            line-height: $font-line-height;
         }
     }
 }

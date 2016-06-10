@@ -184,4 +184,8 @@ ul, ol {
         list-style: none;
         padding-left: 0;
     }
+    &.inline li {
+        display: inline-block;
+        margin: 0 $vertical-rhythm/2 $vertical-rhythm/2 0;
+    }
 }
