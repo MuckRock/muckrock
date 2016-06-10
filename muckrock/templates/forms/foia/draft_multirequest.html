@@ -87,7 +87,7 @@ and
     <input type="hidden" name="stripe_amount" value="{{ bundles|mul:'2000' }}" />
 </form>
 <p>You will be submitting {{ requests }} request{{ requests|pluralize }}, but {% if not remaining %}have no requests{% else %}only have {{ remaining }} remaining{%endif%}. You must purchase {{ bundles }} request bundle{{ bundles|pluralize }} before you can submit your request.</p>
-<button class="primary" form="buy-requests" type="submit">Buy Requests</button>
+<button class="primary button" form="buy-requests" type="submit">Buy Requests</button>
 {% else %}
 <p>You will be submitting {{ requests }} request{{ requests|pluralize }}, leaving
 you with {% if balance.monthly_requests %}{{ profile.monthly_requests|sub:balance.monthly_requests }}

@@ -1,0 +1,87 @@
+.profile {
+    @include row;
+    .metadata {
+        @include third;
+        dfn {
+            margin-bottom: $vertical-rhythm;
+            font-weight: $font-weight-bold;
+            font-size: $font-size-3;
+        }
+        h1 {
+            font-size: $font-size-6;
+            font-weight: $font-weight-bold;
+        }
+        h2 {
+            font-size: $font-size-5;
+        }
+    }
+    .activity {
+        @include two-thirds;
+    }
+}
+
+.profile .stripe-checkout {
+    display: none;
+}
+
+.profile .image {
+    margin: 0 0 $vertical-rhythm;
+    .header-image {
+        margin-bottom: 0;
+    }
+}
+
+.profile .flag {
+    form {
+        display: none;
+        &.visible {
+            display: block;
+        }
+        @include border;
+        header, footer, textarea {
+            margin: 0;
+            padding: $vertical-rhythm/2;
+        }
+        textarea {
+            display: block;
+            border-radius: 0;
+            border-left: none;
+            border-right: none;
+        }
+        footer {
+            @include display(flex);
+            @include justify-content(space-between);
+        }
+    }
+}
+
+.account.profile {
+    .fullname {
+        margin-bottom: 0;
+    }
+    .username {
+        color: $color-grey;
+    }
+    .avatar {
+        @include border-radius;
+        width: 100%;
+        max-width: 300px;
+    }
+    .title {
+        font-weight: $font-weight-bold;
+    }
+    .links svg {
+        margin-right: $vertical-rhythm/2;
+    }
+    .project-group {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        .project-item {
+            margin-right: $vertical-rhythm;
+        }
+    }
+}
+
+.georgia.profile {
+    font-family: "Georgia";
+}

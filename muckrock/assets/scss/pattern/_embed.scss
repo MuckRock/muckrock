@@ -1,0 +1,21 @@
+.embed {
+    margin-bottom: 0;
+}
+
+.embed .crowdfund__widget {
+    margin-bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    .overlay {
+        margin-bottom: 0;
+    }
+    main {
+        overflow-y: scroll;
+    }
+}
+
+.embed .viewer {
+    width: 100vw !important;
+    height: 100vh !important;
+    margin-bottom: 0;
+}

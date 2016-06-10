@@ -15,7 +15,7 @@
             <input type="text" name="new_foia_pks" value="{{ foia.pk }}" placeholder="Enter MuckRock number" />
         </fieldset>
         <input type="submit" name="submit" value="Submit" class="button" />
-        <button onClick="$(this).parent().hide(); return false;">Close</button>
+        <button class="button" onClick="$(this).parent().hide(); return false;">Close</button>
     </form>
     <form method="post" style="display:none" class="panel" id="resend-{{comm.pk}}-form">
         {% csrf_token %}
@@ -27,14 +27,14 @@
             <p><small>This will become this requests new email address.  Leave blank to force a manual mailing.  For faxes, enter the 10 digit fax number with a leading 1, @fax2.faxaway.com.</small></p>
         </fieldset>
         <input type="submit" name="submit" value="Submit" class="button" />
-        <button onclick="$(this).parent().hide(); return false;">Close</button>
+        <button class="button" onclick="$(this).parent().hide(); return false;">Close</button>
     </form>
     <form method="post" style="display:none;" class="panel delete-comm" id="delete-{{comm.pk}}-form">
         {% csrf_token %}
         <input type="hidden" name="action" value="delete_comm" />
         <input type="hidden" name="comm_pk" value="{{comm.pk}}" />
         <input type="submit" name="submit" value="Delete - Are you sure?" class="failure button" />
-        <button onclick="$(this).parent().hide(); return false;">Close</button>
+        <button class="button" onclick="$(this).parent().hide(); return false;">Close</button>
     </form>
 </div>
 {% endif %}

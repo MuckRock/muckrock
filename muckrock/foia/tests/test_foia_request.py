@@ -5,18 +5,21 @@ Tests using nose for the FOIA application
 from django.contrib.auth.models import User, AnonymousUser
 from django.core.urlresolvers import reverse
 from django.core import mail
+from django.http import Http404
 from django.test import TestCase, RequestFactory
 
 import datetime
 from datetime import date as real_date
+from mock import Mock
 import nose.tools
 from operator import attrgetter
 import re
 
-from muckrock.factories import UserFactory, FOIARequestFactory, ProjectFactory
-from muckrock.foia.models import FOIARequest, FOIACommunication
-from muckrock.foia.views import Detail
 from muckrock.agency.models import Agency
+from muckrock.factories import UserFactory, FOIARequestFactory, FOIAFileFactory, ProjectFactory
+from muckrock.foia.models import FOIARequest, FOIACommunication
+from muckrock.foia.views import Detail, FOIAFileListView
+from muckrock.foia.views.composers import _make_user
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.task.models import SnailMailTask
@@ -25,6 +28,7 @@ from muckrock.utils import mock_middleware
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
+raises = nose.tools.raises
 
 # allow methods that could be functions and too many public methods in tests
 # pylint: disable=no-self-use
@@ -956,3 +960,66 @@ class TestRequestSharingViews(TestCase):
         )
         nose.tools.eq_(response.status_code, 302)
         nose.tools.assert_false(self.foia.has_viewer(a_viewer))
+
+
+class TestRequestFilesView(TestCase):
+    """Files should render in a paginated list on a separate page."""
+    def setUp(self):
+        self.file = FOIAFileFactory()
+        self.foia = self.file.foia
+        self.kwargs = {
+            'idx': self.foia.pk,
+            'slug': self.foia.slug,
+            'jidx': self.foia.jurisdiction.pk,
+            'jurisdiction': self.foia.jurisdiction.slug
+        }
+        self.url = reverse('foia-files', kwargs=self.kwargs)
+        self.view = FOIAFileListView.as_view()
+        self.factory = RequestFactory()
+
+    def test_get_ok(self):
+        """The view should return 200 if the foia is viewable to the user."""
+        request = self.factory.get(self.url)
+        request.user = self.foia.user
+        request = mock_middleware(request)
+        ok_(self.foia.viewable_by(request.user), 'The user should be able to view the request')
+        response = self.view(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id
+        )
+        eq_(response.status_code, 200, 'The view should return 200.')
+
+    @raises(Http404)
+    def test_get_404(self):
+        """The view should return 404 is the foia is not visible to the user."""
+        self.foia.embargo = True
+        self.foia.save()
+        user = UserFactory()
+        ok_(not self.foia.viewable_by(user))
+        request = self.factory.get(self.url)
+        request.user = user
+        request = mock_middleware(request)
+        self.view(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id
+        )
+
+class TestMakeUser(TestCase):
+    """The request composer should provide miniregistration functionality."""
+    def setUp(self):
+        self.request = mock_middleware(Mock())
+        self.data = {
+            'full_name': 'Mick Jagger',
+            'email': 'mick@hero.in'
+        }
+
+    def test_make_user(self):
+        """Should create the user, log them in, and return the user."""
+        user = _make_user(self.request, self.data)
+        ok_(user)

@@ -4,7 +4,7 @@
 <div class="update project">
     <header>
         <div>
-            <a href="{% url 'project-detail' slug=project.slug pk=project.pk %}">Back to {{project.title}}</a>
+            <a href="{% url 'project-detail' slug=project.slug pk=project.pk %}">Back to project</a>
             <h1>Edit Project</h1>
         </div>
     </header>
@@ -19,15 +19,19 @@
                 <li><a role="tab" class="tab" href="#articles">Articles</a></li>
             </ul>
             <div role="tabpanel" class="tab-panel" id="basics">
-                {% include 'component/field.html' with field=form.summary %}
-                {% include 'component/field.html' with field=form.tags %}
+                {% include 'lib/pattern/field.html' with field=form.summary %}
+                {% include 'lib/pattern/field.html' with field=form.tags %}
                 {% if project.image %}
-                {% include 'component/imagefield.html' with field=form.image image=project.image %}
+                {% include 'lib/pattern/imagefield.html' with field=form.image image=project.image %}
                 {% else %}
-                {% include 'component/imagefield.html' with field=form.image %}
+                {% include 'lib/pattern/imagefield.html' with field=form.image %}
                 {% endif %}
             </div>
-            <div role="tabpanel" class="tab-panel" id="description">
+            <div role="tabpanel" class="description tab-panel" id="description">
+                <header>
+                    <p>Use the description to expand upon what you hope to accomplish or to organize what you already have.</p>
+                    <label for="toggle-prosemirror">WYSIWYG <input type="checkbox" id="toggle-prosemirror" checked /></label>
+                </header>
                 {{form.description}}
             </div>
             <div role="tabpanel" class="tab-panel" id="contributors">
@@ -44,6 +48,5 @@
         </div>
         <button type="submit" class="blue button">Save Changes</button>
     </form>
-    <a href="{% url 'project-delete' slug=project.slug pk=project.pk %}">Delete {{project.title}}</a>
 </div>
 {% endblock %}

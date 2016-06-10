@@ -9,12 +9,12 @@ register = template.Library()
 @register.filter
 def classify_status(status):
     """Returns a class corresponding to a status"""
-    class_stop = 'failure'
+    class_stop = 'red'
     class_wait = ''
-    class_go = 'success'
+    class_go = 'green'
     classes = {
         'started': class_wait,
-        'submitted': class_go,
+        'submitted': class_wait,
         'ack': class_wait,
         'fix': class_stop,
         'payment': class_stop,

@@ -3,8 +3,28 @@
 {% load markdown_deux_tags %}
 {% load static from staticfiles %}
 
-{% block title %}{{ user_obj.username }}&rsquo;s profile &bull; MuckRock{% endblock title %}
+{% block title %}{{user_obj.get_full_name}} ({{ user_obj.username }}) &bull; MuckRock{% endblock title %}
 {% block type %}account{% endblock type %}
+
+{% block open_graph %}
+<meta property="og:type" content="profile" />
+<meta property="og:url" content="{{user_obj.get_absolute_url}}" />
+<meta property="og:title" content="{{user_obj.get_full_name}} ({{user_obj.username}})" />
+<meta property="og:description" content="{{user_obj.first_name}} has filed {{requests.all.count}} public records requests on MuckRock." />
+<meta property="og:site_name" content="MuckRock" />
+{% if profile.avatar %}
+<meta property="og:image" content="{{ profile.avatar.url }}" />
+{% endif %}
+{% endblock open_graph %}
+
+{% block twitter_card %}
+<meta name="twitter:site" content="@muckrock" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="{{user_obj.get_full_name}} ({{user_obj.username}})" />
+<meta name="twitter:description" content="{{user_obj.first_name}} has filed {{requests.all.count}} public records requests on MuckRock." />
+{% if profile.image %}<meta name="twitter:image:src" content="{{ profile.avatar.url }}" />{% endif %}
+{% if profile.twitter %}<meta name="twitter:creator" content="{{ profile.twitter }}" />{% endif %}
+{% endblock twitter_card %}
 
 {% block metadata %}
 <aside class="metadata">
@@ -16,13 +36,13 @@
     <ul class="links nostyle">
         {% if profile.twitter %}
         <li class="twitter">
-            {% include 'lib/icons/twitter.svg' %}
+            {% include 'lib/component/icon/twitter.svg' %}
             <a href="https://www.twitter.com/{{profile.twitter}}" title="{{user_obj.first_name}}'s Twitter profile">@{{profile.twitter}}</a>
         </li>
         {% endif %}
         {% if profile.location %}
         <li class="location">
-            {% include 'lib/icons/location.svg' %}
+            {% include 'lib/component/icon/location.svg' %}
             <a href="{{profile.location.get_absolute_url}}">{{profile.location}}</a>
         </li>
         {% endif %}
@@ -53,7 +73,6 @@
 
 {% block activity %}
 <main class="activity">
-
     <section class="actions">
         <form action="{% url 'acct-buy-requests' username=user_obj.username %}" method="POST" class="stripe-checkout" id="buy-requests">
             {% csrf_token %}
@@ -75,72 +94,62 @@
             <input type="hidden" name="stripe_fee" value="0" />
             <input type="hidden" name="stripe_amount" value="2000" />
         </form>
-        <div class="controls">
+        <div>
             {% if request.user == user_obj %}
-            <a href="{% url 'foia-create' %}" class="primary button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
-                {% include 'lib/icons/create-request.svg' %}
-                <span>File a Request</span>
-            </a>
-            <button class="primary" form="buy-requests" type="submit">Buy Requests</button>
+            <div class="button-group">
+                <a href="{% url 'foia-create' %}" class="primary button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
+                    {% include 'lib/component/icon/create-request.svg' %}
+                    <span>File a Request</span>
+                </a>
+                <button class="primary button" form="buy-requests" type="submit">Buy Requests</button>
+            </div>
             <a href="{% url 'acct-settings' %}" class="button">Settings</a>
             {% else %}
-            <button class="primary" form="buy-requests" type="submit">&hearts; Gift Requests</button>
+            <button class="primary button" form="buy-requests" type="submit">&hearts; Gift Requests</button>
             {% endif %}
         </div>
     </section>
     {% if projects %}
     <section class="projects">
-        {% if request.user == user_obj %}
-        <h3>Your Projects</h3>
-        {% else %}
-        <h3>Projects</h3>
-        {% endif %}
+        <h3>
+            {% if request.user == user_obj %}Your Projects{% else %}Projects{% endif %}
+            <small><a href="{% url 'project-contributor' username=user_obj.username %}">See all</a></small>
+        </h3>
         <div class="project-group">
         {% for project in projects %}
-            {% include 'lib/project.html' %}
+            {% include 'lib/pattern/project.html' %}
         {% endfor %}
         </div>
     </section>
     {% endif %}
     {% if articles %}
     <section class="articles">
-        {% if request.user == user_obj %}
-        <h3>Your Latest Articles</h3>
-        {% else %}
-        <h3>Latest Articles</h3>
-        {% endif %}
-        <ul class="article-list nostyle">
+        <h3>
+            {% if request.user == user_obj %}Your Latest Articles{% else %}Latest Articles{% endif %}
+            <small><a href="{% url 'news-author' username=user_obj.username %}">See all</a></small>
+        </h3>
         {% for article in articles %}
-            <li class="article-item">
-                <a href="{{article.get_absolute_url}}" title="{{article.title}}">
-                    {% if article.image %}<img src="{% thumbnail article.image 120x120 crop %}" class="article-image" />{% endif %}
-                    <div class="article-info truncate">
-                        <h4 class="title truncate">{{article.title}}</h4>
-                        <p class="date">{{article.pub_date|date:"F d, Y"}}</p>
-                    </div>
-                </a>
-            </li>
+        {% include 'lib/pattern/article.html' %}
         {% endfor %}
-        </ul>
     </section>
     {% endif %}
-    {% if recent_requests or recent_completed %}
+    {% if requests.recent or requests.completed %}
     <section class="requests">
-        {% if recent_requests %}
+        {% if requests.recent %}
             {% if request.user == user_obj %}
             <h3>Your Latest Requests <small><a href="{% url 'foia-mylist' %}">See all</a></small></h3>
             {% else %}
             <h3>Latest Requests <small><a href="{% url 'foia-list' %}?user={{user_obj.pk}}">See all</a></small></h3>
             {% endif %}
-            {% include 'lib/foia_table.html' with requests=recent_requests %}
+            {% include 'lib/foia_table.html' with requests=requests.recent %}
         {% endif %}
-        {% if recent_completed %}
+        {% if requests.completed %}
             {% if request.user == user_obj %}
             <h3>Your Recently Completed Requests <small><a href="{% url 'foia-mylist' %}?status=done">See all</a></small></h3>
             {% else %}
             <h3>Recently Completed Requests <small><a href="{% url 'foia-list' %}?user={{user_obj.pk}}&status=done">See all</a></small></h3>
             {% endif %}
-            {% include 'lib/foia_table.html' with requests=recent_completed %}
+            {% include 'lib/foia_table.html' with requests=requests.completed %}
         {% endif %}
     {% else %}
         {% if request.user == user_obj %}

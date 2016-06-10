@@ -1,0 +1,253 @@
+$color-title: #F26C5A;
+$color-jurisdiction: #5A90F2;
+$color-jurisdiction-picker: darken($color-jurisdiction, 10%);
+$color-agency: darken($color-jurisdiction-picker, 10%);
+
+.new-request {
+    @include outer-container;
+    @include row;
+    header {
+        @include full;
+        h1 {
+            @include two-thirds;
+        }
+        summary {
+            @include third;
+        }
+    }
+    .create-request {
+        @include full;
+        @include border-radius;
+        background-color: $color-grey-7;
+    }
+    fieldset {
+        margin: 0;
+        padding: $vertical-rhythm;
+    }
+    .title {
+        @include border-top-radius($base-border-radius);
+        background-color: $color-title;
+        border: 2px solid $color-red-dark;
+        border-bottom: none;
+        label { display: none; }
+        input {
+            width: 100%;
+            background-color: $color-title;
+            padding: 0;
+            border: none;
+            border-radius: 0;
+            border-bottom: $base-border-width dotted lighten($color-title, 20%);
+            color: $color-white;
+            font-size: $font-size-6;
+            @include placeholder {
+                color: lighten($color-title, 15%);
+            }
+        }
+    }
+    .document {
+        border-left: 2px solid $color-grey;
+        border-right: 2px solid $color-grey;
+        padding: 0;
+        label { display: none; }
+        textarea {
+            display: block;
+            width: 100%;
+            height: 10em;
+            padding: $vertical-rhythm;
+            resize: none;
+            border: none;
+            border-radius: 0;
+            @include placeholder {
+                color: $color-grey;
+            }
+        }
+    }
+    fieldset.state, fieldset.local {
+        width: 100%;
+        background-color: $color-jurisdiction-picker;
+        border-left: 2px solid $color-blue-dark;
+        border-right: 2px solid $color-blue-dark;
+        label { display: none; }
+        input {
+            display: block;
+            width: 100%;
+        }
+        &.hidden { visibility: hidden; }
+        &.visible { visibility: visible; }
+    }
+
+    .jurisdiction {
+        padding: 0;
+        color: $color-white;
+        background-color: $color-jurisdiction;
+        border-left: 2px solid $color-blue-dark;
+        border-right: 2px solid $color-blue-dark;
+        width: 100%;
+        max-width: 100%;
+        h2 { margin: 0; }
+        ul {
+            display: table;
+            width: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        li {
+            display: table-cell;
+            text-align: center;
+            width: 33%;
+            padding: $vertical-rhythm/2;
+            border-right: $base-border-width solid lighten($color-jurisdiction, 10%);
+            &.active {
+                &:hover { background-color: $color-jurisdiction-picker; }
+                background-color: $color-jurisdiction-picker;
+            }
+            &:hover {
+                background-color: darken($color-jurisdiction, 5%);
+            }
+            &:last-child { border-right: none; }
+            svg {
+                display: block;
+                margin: 0 auto;
+                fill: $color-white;
+                width: auto;
+                &#icon-federal { height: 3em; }
+                &#icon-state { height: 2.5em; margin-top: 0.5em; }
+                &#icon-local { height: 2.25em; margin-top: 0.75em; }
+            }
+        }
+        label {
+            color: $color-white;
+            @include font-sizing(1);
+            font-weight: $font-weight-bold;
+            text-align: center;
+            cursor: pointer;
+        }
+        input[type="radio"] {
+            display: none;
+        }
+    }
+    .agency {
+        display: none;
+        margin: 0;
+        width: 100%;
+        color: $color-white;
+        background-color: $color-agency;
+
+        label { color: $color-white; }
+        input {
+            width: 100%;
+            background-color: $color-agency;
+            border: none;
+            border-bottom: 2*$base-border-width dotted lighten($color-agency, 20%);
+            padding-left: 0;
+            border-radius: 0;
+            @include font-sizing(1.25, 3);
+            color: $color-white;
+            display: block;
+            width: 100%;
+            margin: 0;
+            @include placeholder { color: $color-jurisdiction; }
+            &:disabled {
+                @include placeholder { color: darken($color-white, 2%); }
+                background: $color-disabled;
+                border-bottom: none;
+                text-align: left;
+                padding-left: 0;
+                &:hover { padding-left: 0; }
+            }
+        }
+
+    }
+
+    .state, .local { display: none; }
+
+    .full-name, .email {
+        float: left;
+        width: 50%;
+        input { width: 100%; }
+    }
+
+    .autocomplete-light-widget {
+        display: block;
+        width: 100%;
+        span.deck > span {
+            display: block;
+            width: 100%;
+            margin: 0;
+            color: $color-white;
+            font-size: $font-size-4;
+            &:before {
+                content: "Jurisdiction";
+                display: block;
+                @extend dfn;
+                color: $color-white;
+            }
+            span.remove {
+                float: right;
+                height: 24px !important;
+                width: 24px !important;
+                background-size: 90%;
+                background-position: center center !important;
+                &:hover { background-position: center center !important; }
+            }
+        }
+    }
+
+    footer {
+        padding: $vertical-rhythm;
+        @include border-bottom-radius($base-border-radius);
+        @include row;
+        border: 2px solid $color-grey-5;
+        border-top: none;
+        button {
+            @include quarter;
+        }
+        p {
+            @include three-quarters;
+            @include media($large-layout) {
+                padding-left: $vertical-rhythm;
+            }
+        }
+    }
+
+    .failure.panel {
+        ul {
+            padding-left: $vertical-rhythm;
+            list-style-type: disc;
+        }
+        ul li ul {
+            list-style-type: circle;
+        }
+    }
+
+}
+
+.foia-group {
+    @include display(flex);
+    @include flex-wrap(wrap);
+    @include align-items(flex-start);
+    .foia-single {
+        @include flex(1 1 15em);
+        max-width: 20em;
+        margin-right: $vertical-rhythm;
+    }
+}
+
+.multirequest-create {
+    @include outer-container;
+    form {
+        @include row;
+        .visible-fields fieldset {
+            @include full;
+            textarea {
+                width: 100%;
+            }
+        }
+    }
+    .autocomplete-light-widget {
+        width: 100%;
+        input {
+            width: 100%;
+        }
+    }
+}

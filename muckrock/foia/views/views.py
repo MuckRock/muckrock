@@ -47,6 +47,7 @@ from muckrock.foia.views.comms import (
         )
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.qanda.models import Question
+from muckrock.qanda.forms import QuestionForm
 from muckrock.tags.models import Tag
 from muckrock.task.models import Task, FlaggedTask, StatusChangeTask
 from muckrock.views import class_view_decorator, MRFilterableListView
@@ -269,6 +270,7 @@ class Detail(DetailView):
         })
         context['note_form'] = FOIANoteForm()
         context['access_form'] = FOIAAccessForm()
+        context['question_form'] = QuestionForm(user=user, initial={'foia': foia})
         context['crowdfund_form'] = CrowdfundForm(initial={
             'name': u'Crowdfund Request: %s' % unicode(foia),
             'description': 'Help cover the request fees needed to free these docs!',
@@ -292,6 +294,7 @@ class Detail(DetailView):
         context['stripe_pk'] = settings.STRIPE_PUB_KEY
         context['sidebar_admin_url'] = reverse('admin:foia_foiarequest_change', args=(foia.pk,))
         context['is_thankable'] = foia.is_thankable()
+        context['files'] = foia.files.all()[:50]
         if foia.sidebar_html:
             messages.info(self.request, foia.sidebar_html)
         return context
@@ -544,6 +547,7 @@ class Detail(DetailView):
             messages.success(request, '%s can now edit this request.' % user.first_name)
         return redirect(foia)
 
+
 def redirect_old(request, jurisdiction, slug, idx, action):
     """Redirect old urls to new urls"""
     # pylint: disable=unused-variable
@@ -561,6 +565,7 @@ def redirect_old(request, jurisdiction, slug, idx, action):
         action = 'admin_fix'
 
     return redirect('/foi/%(jurisdiction)s-%(jidx)s/%(slug)s-%(idx)s/%(action)s/' % locals())
+
 
 def acronyms(request):
     """A page with all the acronyms explained"""

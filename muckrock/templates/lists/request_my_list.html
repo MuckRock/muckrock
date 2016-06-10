@@ -8,9 +8,9 @@
 {% block list-actions %}
 <form method="POST" id="my-request-actions">
     {% csrf_token %}
-    <button name="submit" value="Mark as Read">Mark as Read</button>
-    <button name="submit" value="Mark as Unread">Mark as Unread</button>
-    <button name="submit" value="Mark All as Read">Mark All as Read</button>
+    <button class="button" name="submit" value="Mark as Read">Mark as Read</button>
+    <button class="button" name="submit" value="Mark as Unread">Mark as Unread</button>
+    <button class="button" name="submit" value="Mark All as Read">Mark All as Read</button>
 </form>
 {% endblock list-actions %}
 

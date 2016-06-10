@@ -1,8 +1,5 @@
 {% extends 'message/base.html' %}
 {% block body %}
-{% if password_link %}
-<h1>Your account is almost set up, but we need you to <a href="{{ password_link }}">set a password</a>.</h1>
-{% endif %}
 <p>Just a reminder, your username is <a href="{% url 'acct-my-profile' %}">{{ user.username }}</a>.</p>
 <p>We ask that you please <a href="{{ verification_link|safe }}">verify your email</a>. You can also verify your email from your <a href="{% url 'acct-settings' %}">account settings</a>.</p>
 <p><strong>Have a technical support or customer service issue? <a href="mailto:info@muckrock.com">Email us</a>.</strong></p>

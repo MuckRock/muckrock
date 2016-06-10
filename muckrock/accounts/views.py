@@ -37,6 +37,7 @@ from muckrock.accounts.forms import (
         BillingPreferencesForm,
         RegisterForm,
         RegisterOrganizationForm,
+        RegistrationCompletionForm
         )
 from muckrock.accounts.models import Profile, Statistics, ACCT_TYPES
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
@@ -363,14 +364,17 @@ def profile(request, username=None):
     recent_requests = requests.order_by('-date_submitted')[:5]
     recent_completed = requests.filter(status='done').order_by('-date_done')[:5]
     articles = Article.objects.get_published().filter(authors=user)[:5]
-    projects = Project.objects.get_for_contributor(user).get_visible(request.user)
+    projects = Project.objects.get_for_contributor(user).get_visible(request.user)[:3]
     context = {
         'user_obj': user,
         'profile': user_profile,
         'org': org,
         'projects': projects,
-        'recent_requests': recent_requests,
-        'recent_completed': recent_completed,
+        'requests': {
+            'all': requests,
+            'recent': recent_requests,
+            'completed': recent_completed
+        },
         'articles': articles,
         'stripe_pk': settings.STRIPE_PUB_KEY,
         'sidebar_admin_url': reverse('admin:auth_user_change', args=(user.pk,)),
@@ -390,15 +394,18 @@ def stripe_webhook(request):
         event_json = json.loads(request.body)
         event_id = event_json['id']
         event_type = event_json['type']
-        event_object_id = event_json['data']['object']['id']
+        if event_type.startswith(('charge', 'invoice')):
+            event_object_id = event_json['data']['object']['id']
+        else:
+            event_object_id = ''
     except (TypeError, ValueError, SyntaxError) as exception:
         logging.error('Error parsing JSON: %s', exception)
         return HttpResponseBadRequest()
     except KeyError as exception:
-        logging.error('Unexpected dictionary structure: %s', exception)
+        logging.error('Unexpected dictionary structure: %s in %s', exception, event_json)
         return HttpResponseBadRequest()
     # If we've made it this far, then the webhook message was successfully sent!
-    # Now it's up to us to act on it.'
+    # Now it's up to us to act on it.
     success_msg = (
         'Received Stripe webhook\n'
         '\tfrom:\t%(address)s\n'
@@ -419,6 +426,43 @@ def stripe_webhook(request):
     elif event_type == 'invoice.payment_failed':
         failed_payment.delay(event_object_id)
     return HttpResponse()
+
+@method_decorator(login_required, name='dispatch')
+class RegistrationCompletionView(FormView):
+    """Provides a form for a new user to change their username and password.
+    Will verify their email if a key is provided."""
+    template_name = 'forms/base_form.html'
+    form_class = RegistrationCompletionForm
+
+    def get_initial(self):
+        """Adds the username as an initial value."""
+        return {'username': self.request.user.username}
+
+    def get_form_kwargs(self):
+        """Adds the user to the form kwargs."""
+        kwargs = super(RegistrationCompletionView, self).get_form_kwargs()
+        kwargs.update({'user': self.request.user})
+        return kwargs
+
+    def get(self, request, *args, **kwargs):
+        _profile = request.user.profile
+        if 'key' in request.GET:
+            key = request.GET['key']
+            if key == _profile.confirmation_key:
+                _profile.email_confirmed = True
+                _profile.save()
+                messages.success(request, 'Your email is validated.')
+        return super(RegistrationCompletionView, self).get(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        """Saves the form and redirects to the success url."""
+        form.save(commit=True)
+        messages.success(self.request, 'Your account is now complete.')
+        return redirect(self.get_success_url())
+
+    def get_success_url(self):
+        """Return the user's profile."""
+        return reverse('acct-profile', kwargs={'username': self.request.user.username})
 
 
 class UserViewSet(viewsets.ModelViewSet):

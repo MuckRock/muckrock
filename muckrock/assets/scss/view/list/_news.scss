@@ -1,0 +1,3 @@
+.news.list .list-navigation, .news.list .list-content {
+    @include grid-columns(4, 6, 12);
+}

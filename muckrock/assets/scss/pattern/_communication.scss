@@ -1,0 +1,126 @@
+.communication {
+    @include border;
+    position: relative;
+    word-wrap: break-word;
+    header, section, footer {
+        padding: $vertical-rhythm/2;
+    }
+    background: #fff;
+    &.received {
+        border-color: $color-black;
+        .communication-header {
+            background-color: $color-black;
+        }
+    }
+    &.sent {
+        border-color: $color-blue;
+        .communication-header {
+            background-color: $color-blue;
+        }
+    }
+    .communication-header {
+        @include display(flex);
+        @include justify-content(space-between);
+        @include flex-direction(column);
+        @include media($medium-layout) {
+            @include flex-direction(row);
+        }
+        margin-bottom: 0;
+        color: $color-white;
+        p {
+            margin-bottom: 0;
+        }
+
+        .actionables {
+            @include display(flex);
+            @include justify-content(space-between);
+            @include align-items(center);
+        }
+        .permalink {
+            line-height: 1em;
+            color: $color-white;
+        }
+        .options .icon {
+            margin-left: $vertical-rhythm;
+            path {
+                fill: $color-white;
+            }
+            opacity: .7;
+            &:hover {
+                opacity: .9;
+            }
+        }
+    }
+    .from, .subject {
+        margin-bottom: 0;
+        margin-right: $vertical-rhythm/2;
+        @include overflow-ellipsis;
+        &:hover {
+            cursor: default;
+        }
+        font-weight: $font-weight-bold;
+    }
+    .communication-metadata {
+        @include display(flex);
+        @include justify-content(space-between);
+        @include align-items(center);
+        margin-bottom: 0;
+    }
+    .communication-body {
+        margin-bottom: 0;
+    }
+    .files {
+        list-style-type: none;
+        margin-bottom: 0;
+        padding-left: 0;
+        & > li {
+            display: block;
+            border-top: 1px dotted $color-grey;
+        }
+        .file {
+            border: none;
+        }
+    }
+    .communication-actions, .communication-action {
+        display: none;
+    }
+    .communication-actions {
+        position: relative;
+        z-index: 100;
+        top: 0;
+        left: 0;
+        width: 100%;
+        margin-bottom: 0;
+        color: $color-white;
+    }
+    .communication-action {
+        width: 100%;
+        height: 100%;
+        margin-bottom: 0;
+        padding: $vertical-rhythm;
+        background-color: $color-grey-2;
+        color: $color-white;
+        &.visible {
+            display: block;
+        }
+        label, input, select {
+            display: block;
+            width: 100%;
+            margin-bottom: $vertical-rhythm/2;
+        }
+        label {
+            font-weight: $font-weight-bold;
+        }
+        input {
+            color: $color-black;
+        }
+    }
+    &.collapsed {
+        & > * {
+            display: none;
+        }
+        .communication-header {
+            @include display(flex);
+        }
+    }
+}

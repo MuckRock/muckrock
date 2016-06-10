@@ -188,19 +188,32 @@ def failed_payment(invoice_id):
     notification.send(fail_silently=False)
 
 @task(name='muckrock.message.tasks.welcome')
-def welcome(user, password_link=None):
+def welcome(user):
     """Send a welcome notification to a new user. Hello!"""
     verification_url = reverse('acct-verify-email')
     key = user.profile.generate_confirmation_key()
-    context = {
-        'password_link': password_link,
-        'verification_link': user.profile.wrap_url(verification_url, key=key)
-    }
+    context = {'verification_link': user.profile.wrap_url(verification_url, key=key)}
     notification = TemplateEmail(
         user=user,
         extra_context=context,
         text_template='message/notification/welcome.txt',
         html_template='message/notification/welcome.html',
+        subject=u'Welcome to MuckRock!'
+    )
+    notification.send(fail_silently=False)
+
+@task(name='muckrock.message.tasks.welcome_miniregister')
+def welcome_miniregister(user):
+    """Send a welcome notification to a new users who signed up with miniregister.
+    Provide them a link to verify their email and update their username/password."""
+    completion_url = reverse('accounts-complete-registration')
+    key = user.profile.generate_confirmation_key()
+    context = {'completion_url': user.profile.wrap_url(completion_url, key=key)}
+    notification = TemplateEmail(
+        user=user,
+        extra_context=context,
+        text_template='message/notification/welcome_miniregister.txt',
+        html_template='message/notification/welcome_miniregister.html',
         subject=u'Welcome to MuckRock!'
     )
     notification.send(fail_silently=False)
@@ -268,5 +281,21 @@ def support(user, message, _task):
         text_template='message/notification/support.txt',
         html_template='message/notification/support.html',
         subject=u'Support #%d' % _task.id
+    )
+    notification.send(fail_silently=False)
+
+@task(name='muckrock.message.tasks.notify_project_contributor')
+def notify_project_contributor(user, project, added_by):
+    """Notify a user that they were added as a contributor to a project."""
+    context = {
+        'project': project,
+        'added_by': added_by
+    }
+    notification = TemplateEmail(
+        user=user,
+        extra_context=context,
+        text_template='message/notification/project.txt',
+        html_template='message/notification/project.html',
+        subject=u'Added to a project'
     )
     notification.send(fail_silently=False)

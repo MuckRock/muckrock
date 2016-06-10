@@ -1,0 +1,6 @@
+<svg width="16px" height="16px" viewBox="0 0 16 16" class="download icon">
+    <title>Download</title>
+    <desc>An arrow pointing down</desc>
+    <polygon points="13 9 13 12 15 12 12 16 9 12 11 12 11 9"></polygon>
+    <path d="M13,7 L13,0 L2,0 L2,14 L7,14 L7,12 L4,12 L4,2 L11,2 L11,7 L13,7 Z"></path>
+</svg>

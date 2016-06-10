@@ -17,6 +17,7 @@ class AgencySerializer(serializers.ModelSerializer):
     parent = serializers.PrimaryKeyRelatedField(
             queryset=Agency.objects.all(),
             style={'base_template': 'input.html'})
+    location = serializers.JSONField()
 
     def __init__(self, *args, **kwargs):
         """After initializing the serializer,
@@ -63,4 +64,3 @@ class AgencySerializer(serializers.ModelSerializer):
             # misc
             'public_notes',
         )
-

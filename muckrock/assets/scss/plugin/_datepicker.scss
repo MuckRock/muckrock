@@ -3,73 +3,96 @@
 .ui-datepicker {
     display: none;
     background: $color-white;
-    box-shadow: 1px 1px 1px $color-grey;
-    margin: 0.25em 0 0 0;
-    padding: 0.25em;
-    border: 1px solid $color-grey;
-    border-radius: 3px;
+    overflow: hidden;
+    @include border;
+    @include box-shadow;
+    background: $color-white;
 }
 
 .ui-datepicker-header {
-    display: table;
+    @include display(flex);
+    @include justify-content(space-between);
     width: 100%;
+    margin-bottom: 0;
+    padding: $vertical-rhythm/4;
+    text-align: center;
+    font-weight: $font-weight-bold;
+    a {
+        cursor: pointer;
+    }
 }
 
-.ui-datepicker-prev, .ui-datepicker-next, .ui-datepicker-title {
-    display: table-cell;
-}
-
-.ui-datepicker-prev, .ui-datepicker-next {
-    width: 25%;
+.ui-datepicker-prev {
+    @include order(-1);
 }
 
 .ui-datepicker-title {
-    width: 50%;
+    @include order(0);
+}
+
+.ui-datepicker-next {
+    @include order(1);
+}
+
+a.ui-state-disabled {
+    color: $color-disabled;
+    cursor: default;
+    &:hover {
+        color: $color-disabled;
+        text-decoration: none;
+    }
 }
 
 .ui-datepicker-calendar {
-    thead {
-        background-color: $color-grey;
-    }
-    tr {
-        background-color: $color-white !important;
+    text-align: center;
+    tbody tr, thead th {
+        border-left: none;
+        border-right: none;
     }
     td {
         cursor: pointer;
-        background-color: $color-white;
-        text-align: center;
-        @include transition(background-color 0.25s linear);
-        a { text-decoration: none; }
+        background-color: $color-white-pure;
+        a {
+            color: $color-black;
+            text-decoration: none;
+            &:hover {
+                color: $color-black;
+            }
+        }
         span { color: $color-grey; }
         &:hover {
-            background-color: lighten($color-blue, 30%);
+            background-color: $color-blue-light;
         }
     }
 
     .ui-datepicker-unselectable {
         cursor: default;
         &:hover {
-            background-color: $color-white;
+            background-color: $color-white-pure;
         }
     }
 
     .ui-datepicker-week-end {
-        background-color: darken($color-white, 5%);
+        background-color: $color-grey-8;
+        &.ui-datepicker-unselectable:hover {
+            background-color: $color-grey-8;
+        }
     }
     .ui-datepicker-other-month {
         cursor: default;
-        background-color: darken($color-white, 10%);
-        &:hover { background-color: darken($color-white, 10%); }
+        background-color: $color-grey-7;
+        &:hover { background-color: $color-grey-7; }
     }
 
     .ui-datepicker-today {
-        background-color: lighten($color-blue, 30%);
+        background-color: $color-blue-light;
     }
 
     .ui-datepicker-current-day {
         a { color: $color-white; }
         background-color: $color-blue;
         &:hover {
+            a { color: $color-white; }
             background-color: $color-blue;
         }
     }

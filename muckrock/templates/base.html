@@ -75,6 +75,7 @@
         {% endblock twitter_card %}
     </head>
     <body>
+        {% block body %}
         {% include 'nav/sidebar.html' %}
         <div class="container">
             <div id="modal-overlay"></div>
@@ -86,6 +87,7 @@
             </div>
             {% include 'nav/footer.html' %}
         </div>
+        {% endblock %}
         <!-- SCRIPTS -->
         <!-- Google Analytics -->
         <script>

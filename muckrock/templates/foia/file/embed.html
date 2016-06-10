@@ -1,0 +1,51 @@
+
+<!doctype html>
+<html>
+    <head>
+        <style>
+            html, body {
+                margin: 0;
+            }
+            .viewer {
+                width: 100vw !important;
+                height: 100vh !important;
+            }
+        </style>
+    </head>
+    <body>
+        {% with file=object %}
+        <div class="viewer" id="viewer-{{file.doc_id}}"></div>
+        <script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js"></script>
+        <script>
+            function getQueryVariable(variable) {
+                /*
+                getQueryVariable: return the value from the specified URL variable
+                Written by Chris Coyier for CSS-Tricks
+                https://css-tricks.com/snippets/javascript/get-url-variables/
+                */
+                var query = window.location.search.substring(1);
+                var vars = query.split("&");
+                for (var i = 0; i < vars.length; i++) {
+                    var pair = vars[i].split("=");
+                    if (pair[0] == variable) {
+                        return pair[1];
+                    }
+                }
+                return false;
+            }
+            function loadDocumentViewer(docId) {
+                /* Using the document id, load the DocumentCloud viewer.
+                If a page number was provided in the URL, start the document from that page. */
+                var url = "https://www.documentcloud.org/documents/" + docId + ".js";
+                var options = {width: 600, height: 600, sidebar: false, container: "#viewer-" + docId};
+                var page = getQueryVariable('page');
+                if (page) {
+                    options['page'] = page;
+                }
+                DV.load(url, options);
+            }
+            loadDocumentViewer('{{file.doc_id}}');
+        </script>
+        {% endwith %}
+    </body>
+</html>

@@ -326,13 +326,13 @@ class NewsletterSignupView(View):
         # Add the user to the default list if they want to be added.
         # If an error occurred with the first subscription,
         # don't try signing up for the default list.
-        # IF an error occurs with this subscription, don't worry about it.
+        # If an error occurs with this subscription, don't worry about it.
         if default_list is not None and default_list != _list and not primary_error:
             try:
                 self.subscribe(_email, default_list)
             except (ValueError, requests.exceptions.HTTPError) as exception:
                 # suppress the error shown to the user, but still log it
-                logging.warning('Secondary signup: ' + exception)
+                logging.warning('Secondary signup: %s', exception)
         return self.redirect_url(request)
 
     def subscribe(self, _email, _list):
@@ -384,15 +384,8 @@ def homepage(request):
                                         'authors__profile',
                                         'projects',
                                     )
-                                   [:3],
+                                   [:7],
             600)
-    try:
-        lead_article = articles[0]
-        other_articles = articles[1:]
-    except IndexError:
-        # no published articles
-        lead_article = None
-        other_articles = None
     featured_projects = cache_get_or_set(
             'hp:featured_projects',
             lambda: Project.objects.get_public().filter(featured=True)[:4],
@@ -400,7 +393,7 @@ def homepage(request):
     completed_requests = cache_get_or_set(
             'hp:completed_requests',
             lambda: (FOIARequest.objects.get_public().get_done()
-                   .order_by('-date_done')
+                   .order_by('-date_done', 'pk')
                    .select_related_view()
                    .get_public_file_count(limit=6)),
             600)
@@ -438,7 +431,7 @@ def reset_homepage_cache(request):
             600)
     cache.set('hp:completed_requests',
             FOIARequest.objects.get_public().get_done()
-                   .order_by('-date_done')
+                   .order_by('-date_done', 'pk')
                    .select_related_view()
                    .get_public_file_count(limit=6),
             600)

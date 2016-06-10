@@ -10,7 +10,8 @@ import factory
 
 from muckrock.accounts.models import Profile, Statistics
 from muckrock.agency.models import Agency, STALE_DURATION
-from muckrock.foia.models import FOIARequest, FOIACommunication, RawEmail
+from muckrock.crowdfund.models import Crowdfund
+from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, RawEmail
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.news.models import Article
 from muckrock.organization.models import Organization
@@ -93,6 +94,7 @@ class FOIACommunicationFactory(factory.django.DjangoModelFactory):
     date = factory.LazyAttribute(lambda obj: datetime.datetime.now())
     rawemail = factory.RelatedFactory('muckrock.factories.RawEmailFactory', 'communication')
 
+
 class RawEmailFactory(factory.django.DjangoModelFactory):
     """A factory for creating  objects."""
     class Meta:
@@ -102,6 +104,16 @@ class RawEmailFactory(factory.django.DjangoModelFactory):
     raw_email = factory.Faker('paragraph')
 
 
+class FOIAFileFactory(factory.django.DjangoModelFactory):
+    """A factory for creating FOIAFile test objects."""
+    class Meta:
+        model = FOIAFile
+
+    foia = factory.SubFactory(FOIARequestFactory)
+    comm = factory.SubFactory(FOIACommunicationFactory, foia=factory.SelfAttribute('..foia'))
+    title = factory.Faker('word')
+    ffile = factory.django.FileField(filename=factory.Faker('file_name'))
+
 class ProjectFactory(factory.django.DjangoModelFactory):
     """A factory for creating Project test objects."""
     class Meta:
@@ -109,6 +121,17 @@ class ProjectFactory(factory.django.DjangoModelFactory):
 
     title = factory.Sequence(lambda n: "Project %d" % n)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
+
+
+class CrowdfundFactory(factory.django.DjangoModelFactory):
+    """A factory for creating Crowdfund test objects."""
+    class Meta:
+        model = Crowdfund
+
+    name = factory.Sequence(lambda n: "Crowdfund %d" % n)
+    description = factory.Faker('paragraph')
+    payment_required = 100.00
+    date_due = factory.LazyAttribute(lambda obj: datetime.datetime.now() + datetime.timedelta(30))
 
 
 class QuestionFactory(factory.django.DjangoModelFactory):

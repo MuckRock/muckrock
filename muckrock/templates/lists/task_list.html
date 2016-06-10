@@ -82,10 +82,10 @@
             {% csrf_token %}
             {% if bulk_actions %}
                 {% for bulk_action in bulk_actions %}
-            <button type="submit" name="{{bulk_action}}" value="true" id="batched-{{bulk_action}}">{{bulk_action|title}}</button>
+            <button class="button" id="batched-{{bulk_action}}" type="submit" name="{{bulk_action}}" value="true">{{bulk_action|title}}</button>
                 {% endfor %}
             {% endif %}
-            <button id="collapse-all">Collapse All</button>
+            <button class="button" id="collapse-all">Collapse All</button>
         </form>
     </section>
     {% if object_list %}
@@ -96,4 +96,3 @@
         {% include 'lib/pagination.html' %}
     {% endif %}
 {% endblock list-content %}
-

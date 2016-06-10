@@ -7,6 +7,7 @@ from django.conf import settings
 from django.template import Library, Node, TemplateSyntaxError
 from django.template.defaultfilters import stringfilter
 from django.utils.html import escape
+from django.utils.safestring import mark_safe
 
 from email.parser import Parser
 import re
@@ -203,6 +204,19 @@ def project_manager(context, mr_object):
         'endpoint': mr_object.get_absolute_url(),
     }
 
+@register.inclusion_tag('lib/social.html', takes_context=True)
+def social(context, title=None, url=None):
+    """Template tag to insert a sharing widget. If url is none, use the request path."""
+    request = context['request']
+    title = context['title'] if title is None else title
+    url = request.path if url is None else url
+    url = 'https://' + request.get_host() + url
+    return {
+        'request': request,
+        'title': title,
+        'url': url,
+    }
+
 @register.inclusion_tag('lib/newsletter.html', takes_context=True)
 def newsletter(context, list_id=None, label=None, cta=None):
     """Template tag to insert a newsletter signup form."""
@@ -238,3 +252,10 @@ def display_eml(foia_file):
 def get_item(dictionary, key):
     """Get an item from a dictionary template filter"""
     return dictionary.get(key)
+
+@register.filter
+def smartypants(text):
+    """Renders typographically-correct quotes with the smartpants library"""
+    import smartypants as _smartypants
+    smart_text = _smartypants.smartypants(text)
+    return mark_safe(smart_text)

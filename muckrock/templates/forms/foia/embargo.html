@@ -11,14 +11,14 @@
 <p>
     Embargoing a request keeps it private.
     Embargoes are limited to 30 days past today’s date.
-</p>    
+</p>
 {% endblock form-info %}
 
 {% block scripts %}
 <script>
     $(document).ready(function(){
         $('.datepicker').datepicker({
-            maxDate: '+1m',
+            maxDate: '+30d',
             minDate: 0,
             firstDay: 1,
             hideIfNoPrevNext: true,
