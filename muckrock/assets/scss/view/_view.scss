@@ -20,8 +20,6 @@ html, body {
 .content {
     @include flex(1);
     margin-bottom: 0;
-    padding: $vertical-rhythm/2;
-    @include media($medium-layout) { padding: $vertical-rhythm; }
 }
 
 @mixin edge-to-edge($bottom: 0) {
