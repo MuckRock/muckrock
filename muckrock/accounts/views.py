@@ -21,6 +21,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView, FormView
 
 from datetime import date
+import django_filters
 from rest_framework import viewsets
 from rest_framework.permissions import (
         DjangoModelPermissions,
@@ -482,8 +483,17 @@ class StatisticsViewSet(viewsets.ModelViewSet):
     queryset = Statistics.objects.all()
     serializer_class = StatisticsSerializer
     permission_classes = (DjangoModelPermissionsOrAnonReadOnly,)
-    filter_fields = ('date',)
 
+    class Filter(django_filters.FilterSet):
+        """API Filter for FOIA Requests"""
+        min_date = django_filters.DateFilter(name='date', lookup_type='gte')
+        max_date = django_filters.DateFilter(name='date', lookup_type='lte')
+
+        class Meta:
+            model = Statistics
+            fields = ('date',)
+
+    filter_class = Filter
 
 class ProxyList(MRFilterableListView):
     """List of Proxies"""
