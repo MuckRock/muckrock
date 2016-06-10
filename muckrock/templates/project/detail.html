@@ -101,6 +101,9 @@
             {% endif %}
         </main>
         <aside class="overview__aside">
+            {% if project.approved and not project.private %}
+            {% social title=project.title url=project.get_absolute_url %}
+            {% endif %}
             {% if user_can_edit %}
             <div class="project-controls">
                 <a href="{% url 'project-edit' slug=project.slug pk=project.pk %}" class="blue button">
@@ -175,9 +178,6 @@
             </div>
             {% endif %}
             {% tag_manager project %}
-            {% if project.approved and not project.private %}
-            {% social title=project.title url=project.get_absolute_url %}
-            {% endif %}
         </aside>
     </section>
     <section class="objects">
