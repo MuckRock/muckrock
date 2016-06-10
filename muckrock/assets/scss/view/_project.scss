@@ -61,7 +61,6 @@
 
 .project.detail {
     .project-header {
-        @include edge-to-edge($vertical-rhythm);
         .image, .title {
             margin-bottom: 0;
         }
@@ -175,7 +174,6 @@
 
 
 .project.frontpage {
-    @include edge-to-edge;
     .frontpage-header {
         @include display(flex);
         @include flex-wrap(wrap);

@@ -22,12 +22,6 @@ html, body {
     margin-bottom: 0;
 }
 
-@mixin edge-to-edge($bottom: 0) {
-    // Edge-to-edge negates the content padding
-    margin: -1*$vertical-rhythm/2 -1*$vertical-rhythm/2 $bottom;
-    @include media($medium-layout) { margin: -1*$vertical-rhythm -1*$vertical-rhythm $bottom; }
-}
-
 section.error-404 {
     max-width: 100%;
     width: 30em;
