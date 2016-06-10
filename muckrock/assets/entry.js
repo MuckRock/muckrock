@@ -1,3 +1,3 @@
 import './js/muckrock.js'
-import './js/dashboard/dashboard'
+import './js/dashboard/app'
 import './scss/style.scss'

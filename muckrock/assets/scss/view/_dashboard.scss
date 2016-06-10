@@ -1,0 +1,25 @@
+.dashboard {
+    &.loading .loader {
+        text-align: center;
+        .line-scale-pulse-out-rapid > div {
+            background-color: $color-black;
+        }
+    }
+    &.error .error {
+        text-align: center;
+        .error-code {
+            font-size: $font-size-8;
+            font-weight: $font-weight-bold;
+        }
+    }
+}
+
+.react-datepicker div {
+    margin-bottom: 0;
+    &.react-datepicker__current-month--hasYearDropdown {
+        margin-bottom: 16px;
+    }
+    &.react-datepicker__month {
+        margin-bottom: 5px;
+    }
+}
