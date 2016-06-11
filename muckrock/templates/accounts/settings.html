@@ -4,7 +4,7 @@
 {% block title %}MuckRock &bull; Settings{% endblock title %}
 
 {% block content %}
-<article class="account settings">
+<article class="account settings detail">
     <header>
         <h1>Settings</h1>
         <dl>
@@ -49,7 +49,7 @@
             <footer>
                 <button type="submit" class="primary button">Update email</button>
                 {% if request.user.profile.email_confirmed %}
-                <span>Verified</span>
+                <span class="green badge">Verified</span>
                 {% else %}
                 <a href="{% url 'acct-verify-email' %}" id="verify_email">Verify your email</a>
                 {% endif %}
