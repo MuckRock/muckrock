@@ -32,12 +32,17 @@ class FOIARequestAutocomplete(autocomplete_light.AutocompleteModelTemplate):
         query = self.request.GET.get('q', '')
         split_query = query.split()
         exclude = self.request.GET.getlist('exclude')
-        conditions = self.complex_condition(split_query[0])
-        for string in split_query[1:]:
-            conditions &= self.complex_condition(string)
-        choices = (self.choices.get_viewable(self.request.user)
-            .select_related('jurisdiction').select_related('agency')
-            .filter(conditions).distinct())
+        # if query is an empty string, then split will produce an empty array
+        # if query is an empty string, then do nto filter the existing choices
+        if split_query:
+            conditions = self.complex_condition(split_query[0])
+            for string in split_query[1:]:
+                conditions &= self.complex_condition(string)
+            choices = (self.choices.get_viewable(self.request.user)
+                .select_related('jurisdiction').select_related('agency')
+                .filter(conditions).distinct())
+        else:
+            choices = self.choices
         if exclude:
             choices = choices.exclude(pk__in=exclude)
         return self.order_choices(choices)
