@@ -5,19 +5,15 @@ $request-breakpoint: 768px;
     @include flex-wrap(wrap);
     @include align-items(stretch);
     .request.properties {
-        @include flex(1 1 15em);
+        @include flex(1 1 13em);
     }
     .request.main {
-        @include flex(3 1 30em);
+        @include flex(3 1 32em);
         min-width: 0;
     }
     @media all and (min-width: $request-breakpoint) {
-        @include flex-direction(row);
         .request.properties {
-            max-width: 15em;
-        }
-        .request.main {
-            margin-left: $vertical-rhythm * 2;
+            padding-right: $vertical-rhythm;
         }
     }
 }
@@ -25,7 +21,6 @@ $request-breakpoint: 768px;
 .request.properties {
     @include display(flex);
     @include flex-direction(column);
-    margin-bottom: 0;
     h1 {
         font-size: $font-size-6;
         font-weight: $font-weight-bold;
@@ -71,30 +66,6 @@ $request-breakpoint: 768px;
         }
         &.visible {
             @include display(flex);
-        }
-    }
-    .toggle-details {
-        display: block;
-        margin-bottom: $vertical-rhythm;
-        border-bottom: 1px dotted;
-        color: $color-blue;
-        font-weight: $font-weight-bold;
-        cursor: pointer;
-        &:hover {
-            color: $color-blue-dark;
-            border-bottom: 1px solid;
-        }
-        @media screen and (min-width: $request-breakpoint) {
-            display: none;
-        }
-    }
-    .specific-information {
-        display: none;
-        &.visible {
-            display: block;
-        }
-        @media screen and (min-width: $request-breakpoint) {
-            display: block;
         }
     }
 }

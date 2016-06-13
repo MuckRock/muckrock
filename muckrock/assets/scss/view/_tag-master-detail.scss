@@ -6,16 +6,17 @@
         @include media($medium-layout) {
             @include flex(1);
         }
+        @include padding;
     }
     .detail {
         @include flex(0 0 100%);
         @include order(-1);
+        @include padding;
         margin-bottom: $vertical-rhythm;
         @include media($medium-layout) {
             @include flex(3);
             @include order(2);
             margin-bottom: 0;
-            margin-left: $vertical-rhythm;
         }
     }
 }

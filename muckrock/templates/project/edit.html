@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="update project">
-    <header>
+<div class="project__update">
+    <header class="project__update__header">
         <div>
             <a href="{% url 'project-detail' slug=project.slug pk=project.pk %}">Back to project</a>
             <h1>Edit Project</h1>

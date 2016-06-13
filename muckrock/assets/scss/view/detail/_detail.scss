@@ -1,7 +1,7 @@
 /* Details */
 
 .detail {
-
+    @include padding;
     .header-container {
         @include display(flex);
         @include flex-wrap(wrap);

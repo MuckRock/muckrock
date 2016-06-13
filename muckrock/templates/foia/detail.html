@@ -42,7 +42,6 @@
             <p>It is a clone of <a href="{{ foia.parent.get_absolute_url }}">this request</a>.</p>
             {% endif %}
         </section>
-        <span class="toggle-details" id="toggle-specific-information" data-state="0">Show details</span>
         <section class="specific-information">
             {% if request.user.is_staff or foia.tracking_id %}
             <table class="numbers">

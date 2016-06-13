@@ -3,12 +3,15 @@
 {% block content %}
 <div class="project frontpage">
     {# The header explains what projects are and calls users to create their own. #}
-    <header class="frontpage-header">
-        <h1>Projects</h1>
-        <ul class="nostyle inline">
-            <li><a class="blue button" href="{% url 'project-create' %}">Create Project</a></li>
-            <li><a href="https://www.muckrock.com/news/archives/2015/sep/03/muckrock-projects-organize-crowdfund-journalism/">Learn more</a></li>
-        </ul>
+    <header class="frontpage__header">
+        <div>
+            <h1>Projects</h1>
+            <ul class="nostyle inline">
+                <li><a class="blue button" href="{% url 'project-create' %}">Create Project</a></li>
+                <li><a class="action" href="{% url 'project-list' %}">Browse all projects</a></li>
+                <li><a class="action" href="https://www.muckrock.com/news/archives/2015/sep/03/muckrock-projects-organize-crowdfund-journalism/">Learn more</a></li>
+            </ul>
+        </div>
         <p>Projects collect requests and articles to tell larger stories and give your audience an easy way to support your work and follow your progress.</p>
     </header>
     {% comment %}
