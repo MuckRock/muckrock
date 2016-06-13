@@ -183,6 +183,7 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
                 color: $color-white;
             }
             span.remove {
+                font-size: 0;
                 float: right;
                 height: 24px !important;
                 width: 24px !important;
