@@ -78,7 +78,7 @@ Like  I said, real dumb stuff!
 <div class="articles__related">
     <h1 class="articles__related__header">Related Stories</h1>
     {% for article in related_articles %}
-    {% include 'lib/pattern/article.html' %}
+    {% include 'lib/pattern/article.html' with large=True hide_summary=True %}
     {% endfor %}
 </div>
 {% endif %}
@@ -86,7 +86,7 @@ Like  I said, real dumb stuff!
 <div class="articles__recent">
     <h1 class="articles__recent__header">Recently Published</h1>
     {% for article in recent_articles|slice:":4" %}
-    {% include 'lib/pattern/article.html' %}
+    {% include 'lib/pattern/article.html' with large=True hide_summary=True %}
     {% endfor %}
 </div>
 {% endif %}

@@ -34,7 +34,9 @@
             {% endif %}
             <datetime class="nomargin article__overview__datetime" title="{{article.pub_date|date:'c'}}">{{article.pub_date|date:'F d, Y'}}</datetime>
         </div>
-        {% if article.summary %}<summary class="nomargin article__overview__summary">{{article.summary|markdown:"trusted"|smartypants}}</summary>{% endif %}
+        {% if not hide_summary and article.summary %}
+        <summary class="nomargin article__overview__summary">{{article.summary|markdown:"trusted"|smartypants}}</summary>
         <p><a class="action article__overview__readmore" href="{{article.get_absolute_url}}">Read More</a></p>
+        {% endif %}
     </div>
 </div>
