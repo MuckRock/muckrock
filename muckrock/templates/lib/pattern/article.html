@@ -23,11 +23,6 @@
     {% endif %}
     {% endwith %}
     <div class="article__overview">
-        {% with article.projects.first as project %}
-        {% if not hide_project and project %}
-        <a class="nomargin article__overview__project" href="{{project.get_absolute_url}}">{{project.title}}</a>
-        {% endif %}
-        {% endwith %}
         <h1 class="article__overview__title"><a href="{{ article.get_absolute_url }}" title="{{article.title}}">{{article.title|smartypants}}</a></h1>
         <div class="article__overview__metadata">
             {% if article.authors.all %}
