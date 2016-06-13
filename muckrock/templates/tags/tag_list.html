@@ -34,8 +34,8 @@
         {% endif %}
         {% if tagged_requests %}
         <h2>{{ tagged_requests|length }} Request{{ tagged_requests|length|pluralize }}</h2>
-        {% for request in tagged_requests %}
-            {% include 'lib/pattern/foia.html' %}
+        {% for foia in tagged_requests %}
+            {% include 'lib/foia.html' %}
         {% endfor %}
         {% endif %}
         {% if tagged_articles %}

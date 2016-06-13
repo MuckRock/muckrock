@@ -74,6 +74,22 @@ Like  I said, real dumb stuff!
         {% endif %}
     </aside>
 </div>
+{% if related_articles %}
+<div class="articles__related">
+    <h1 class="articles__related__header">Related Stories</h1>
+    {% for article in related_articles %}
+    {% include 'lib/pattern/article.html' %}
+    {% endfor %}
+</div>
+{% endif %}
+{% if recent_articles %}
+<div class="articles__recent">
+    <h1 class="articles__recent__header">Recently Published</h1>
+    {% for article in recent_articles|slice:":4" %}
+    {% include 'lib/pattern/article.html' %}
+    {% endfor %}
+</div>
+{% endif %}
 {% endblock %}
 
 {% block open_graph %}
