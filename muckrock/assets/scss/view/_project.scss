@@ -6,13 +6,18 @@
     max-width: 40em;
     margin: 0 auto $vertical-rhythm;
 }
-.update.project {
-    header {
+.project__update {
+    .project__update__header {
         @include display(flex);
         @include justify-content(space-between);
+        @include padding;
+        margin-bottom: 0;
         p {
             margin-bottom: 0;
         }
+    }
+    .form {
+        padding-top: 0;
     }
     textarea {
         font-family: $font-monospace;

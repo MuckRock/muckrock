@@ -1,4 +1,5 @@
 .profile {
+    @include padding;
     @include row;
     .metadata {
         @include third;
