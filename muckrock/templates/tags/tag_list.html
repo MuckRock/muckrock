@@ -28,27 +28,21 @@
         <h1 class="tag-header">{{ tag.name }}</h1>
         {% if tagged_projects %}
         <h2>{{ tagged_projects|length }} Project{{ tagged_projects|length|pluralize }}</h2>
-        <table>
-            {% for project in tagged_projects %}
-            <tr><td><a href="{{ project.get_absolute_url }}">{{ project.title }}</a></td></tr>
-            {% endfor %}
-        </table>
+        {% for project in tagged_projects %}
+            {% include 'lib/pattern/project.html' %}
+        {% endfor %}
         {% endif %}
         {% if tagged_requests %}
         <h2>{{ tagged_requests|length }} Request{{ tagged_requests|length|pluralize }}</h2>
-        <table>
-            {% for request in tagged_requests %}
-            <tr><td><a href="{{ request.get_absolute_url }}">{{ request.title }}</a></td></tr>
-            {% endfor %}
-        </table>
+        {% for foia in tagged_requests %}
+            {% include 'lib/foia.html' %}
+        {% endfor %}
         {% endif %}
         {% if tagged_articles %}
         <h2>{{ tagged_articles|length }} Article{{ tagged_articles|length|pluralize }}</h2>
-        <table>
-            {% for article in tagged_articles %}
-            <tr><td><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></td></tr>
-            {% endfor %}
-        </table>
+        {% for article in tagged_articles %}
+            {% include 'lib/pattern/article.html' %}
+        {% endfor %}
         {% endif %}
         {% if tagged_questions %}
         <h2>{{ tagged_questions|length }} Question{{ tagged_questions|length|pluralize }}</h2>

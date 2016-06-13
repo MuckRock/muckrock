@@ -5,7 +5,7 @@
     @include align-content(flex-start);
     .article__image
     {
-        @include flex(1 1 6em);
+        @include flex(1 1 9em);
         margin: 0 $vertical-rhythm $vertical-rhythm/2 0;
         img
         {

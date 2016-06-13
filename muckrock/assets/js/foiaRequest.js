@@ -25,18 +25,6 @@ function get_thumbnail(doc_id) {
 
 /* Side Bar */
 
-$('#toggle-specific-information').click(function(e){
-    e.preventDefault();
-    $('.specific-information').toggleClass('visible');
-    if ($(this).data('state') == 0) {
-        $(this).data('state', 1);
-        $(this).text('Hide details');
-    } else {
-        $(this).data('state', 0);
-        $(this).text('Show details');
-    }
-});
-
 $('.estimated-completion .edit').click(function(){
     var button = $(this);
     $('.dates').hide();
