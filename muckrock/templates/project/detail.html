@@ -41,11 +41,9 @@
 
 {% block content %}
 <div class="project detail">
-    <header class="project-header">
-        {% if project.image %}
-        <div class="image" style="background-image:url('{% thumbnail project.image 2000x1000 crop=smart %}');"></div>
-        {% endif %}
-    </header>
+    {% if project.image %}
+    <div class="project__image" style="background-image:url('{% thumbnail project.image 2000x1000 crop=smart %}');"></div>
+    {% endif %}
     {% if user_can_edit and project.private and not project.approved %}
     <section class="launch prompt">
         <h3>Launch your project</h3>

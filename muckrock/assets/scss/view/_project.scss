@@ -6,13 +6,18 @@
     max-width: 40em;
     margin: 0 auto $vertical-rhythm;
 }
-.update.project {
-    header {
+.project__update {
+    .project__update__header {
         @include display(flex);
         @include justify-content(space-between);
+        @include padding;
+        margin-bottom: 0;
         p {
             margin-bottom: 0;
         }
+    }
+    .form {
+        padding-top: 0;
     }
     textarea {
         font-family: $font-monospace;
@@ -27,17 +32,6 @@
 }
 
 .project {
-    .inline {
-        margin-bottom: 0;
-    }
-    .inline li {
-        display: inline-block;
-        vertical-align: top;
-        margin: 0 $vertical-rhythm/2 $vertical-rhythm/2 0;
-        @include media($medium-layout) {
-            margin: 0 $vertical-rhythm $vertical-rhythm 0;
-        }
-    }
     .stats {
         .stat {
             font-size: $font-size-2;
@@ -60,22 +54,23 @@
 }
 
 .project.detail {
-    .project-header {
-        @include edge-to-edge($vertical-rhythm);
-        .image, .title {
-            margin-bottom: 0;
-        }
-        .image {
-            min-height: 45vh;
-            background-size: cover;
-            background-position: center;
-            background-color: $color-grey-5;
-        }
+    @include padding(0);
+
+    .project__image {
+        min-height: 45vh;
+        margin-bottom: 0;
+        background-size: cover;
+        background-position: center;
+        background-color: $color-grey-5;
+    }
+
+    .prompt, .overview, .objects {
+        margin: 0 auto $vertical-rhythm;
     }
 
     .prompt {
-        box-shadow: 0px 4px 8px 0px $color-grey;
-        padding: $vertical-rhythm;
+        @include padding;
+        @include box-shadow;
         border: 1px solid $color-blue;
         background: $color-blue-light;
         color: $color-blue-dark;
@@ -94,8 +89,8 @@
     .overview {
         @include display(flex);
         @include flex-flow(wrap);
+        @include padding;
         max-width: 60em;
-        margin: 0 auto $vertical-rhythm;
         .overview__main {
             @include flex(2 1 20em);
             min-width: 0;
@@ -162,67 +157,13 @@
     .objects {
         @include display(flex);
         @include flex-flow(wrap row);
+        @include padding;
         max-width: 60em;
-        margin: 0 auto $vertical-rhythm;
         .articles, .requests {
             @include flex(1 1 20em);
         }
         .articles {
             margin-right: $vertical-rhythm;
-        }
-    }
-}
-
-
-.project.frontpage {
-    @include edge-to-edge;
-    .frontpage-header {
-        @include display(flex);
-        @include flex-wrap(wrap);
-        @include justify-content(space-between);
-        @include align-items(center);
-        margin-bottom: 0;
-        padding: $vertical-rhythm 0 0;
-        background: $color-blue-light;
-        border-bottom: 1px solid $color-blue;
-        & > * {
-            margin-bottom: 0;
-            padding: 0 $vertical-rhythm $vertical-rhythm;
-            @include flex(1 1 18rem);
-        }
-        h1, ul {
-            text-align: center;
-        }
-        p {
-            font-size: $font-size-2;
-            line-height: $font-line-height;
-        }
-        li {
-            margin-bottom: 0;
-        }
-    }
-    .projects {
-        @include display(flex);
-        @include flex-wrap(wrap);
-        .project {
-            margin: $vertical-rhythm;
-        }
-    }
-    h1 {
-        font-size: $font-size-7;
-        line-height: $font-line-height;
-        @include media($medium-layout) {
-            font-size: $font-size-9;
-            line-height: $font-line-height;
-        }
-    }
-    .frontpage-header .inline li {
-        vertical-align: middle;
-    }
-    .create-project {
-        p {
-            font-size: $font-size-2;
-            line-height: $font-line-height;
         }
     }
 }

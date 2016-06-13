@@ -18,6 +18,13 @@
     box-shadow: 0px 4px 8px 0px $color-grey;
 }
 
+@mixin padding($padding: $vertical-rhythm) {
+    padding: $padding/2;
+    @include media($medium-layout) {
+        padding: $padding;
+    }
+}
+
 @mixin textbox() {
     @include box-sizing(border-box);
     @include border;
