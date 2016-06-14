@@ -191,8 +191,7 @@ def _submit_request(request, foia):
     actstream.action.send(
         request.user,
         verb='submitted',
-        action_object=foia,
-        target=foia.agency
+        target=foia,
     )
     return redirect(foia)
 

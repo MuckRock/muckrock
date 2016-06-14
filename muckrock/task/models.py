@@ -35,7 +35,7 @@ def generate_status_action(foia):
         'payment': 'requires payment',
     }
     verb = verbs.get(foia.status, 'is processing')
-    actstream.action.send(foia.agency, verb=verb, action_object=foia)
+    actstream.action.send(foia.agency, verb=verb, target=foia)
 
 class TaskQuerySet(models.QuerySet):
     """Object manager for all tasks"""

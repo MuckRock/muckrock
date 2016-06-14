@@ -636,7 +636,7 @@ class FOIARequest(models.Model):
         )
         # We perform some logging and activity generation
         logger.info('%s has paid %0.2f for request %s', user.username, amount, self.title)
-        actstream.action.send(user, verb='paid fees for', action_object=self, target=self.agency)
+        actstream.action.send(user, verb='paid fees', target=self)
         # We return the communication we generated, in case the caller wants to do anything with it
         return comm
 

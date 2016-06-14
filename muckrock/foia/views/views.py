@@ -400,7 +400,7 @@ class Detail(DetailView):
                 text=text,
                 foia=foia)
             messages.success(request, 'Problem succesfully reported')
-            actstream.action.send(request.user, verb='flagged', action_object=foia)
+            actstream.action.send(request.user, verb='flagged', target=foia)
         return redirect(foia)
 
     def _follow_up(self, request, foia):
@@ -413,8 +413,7 @@ class Detail(DetailView):
             actstream.action.send(
                 request.user,
                 verb='followed up on',
-                action_object=foia,
-                target=foia.agency
+                target=foia
             )
         return redirect(foia)
 
@@ -427,7 +426,7 @@ class Detail(DetailView):
             actstream.action.send(
                 request.user,
                 verb='thanked',
-                action_object=foia.agency
+                target=foia.agency
             )
         return redirect(foia)
 
@@ -440,8 +439,7 @@ class Detail(DetailView):
             actstream.action.send(
                 request.user,
                 verb='appealed',
-                action_object=foia,
-                target=foia.agency
+                target=foia,
             )
         return redirect(foia)
 

@@ -37,7 +37,7 @@ class Question(models.Model):
         is_new = True if self.pk is None else False
         super(Question, self).save(*args, **kwargs)
         if is_new:
-            actstream.action.send(self.user, verb='asked', action_object=self)
+            actstream.action.send(self.user, verb='asked', target=self)
 
     @models.permalink
     def get_absolute_url(self):
@@ -84,7 +84,7 @@ class Answer(models.Model):
         question.answer_authors.update([self.user])
         question.save()
         if is_new:
-            actstream.action.send(self.user, verb='answered', action_object=question)
+            actstream.action.send(self.user, verb='answered', action_object=self, target=question)
 
     class Meta:
         # pylint: disable=too-few-public-methods

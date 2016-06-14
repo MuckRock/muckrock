@@ -276,7 +276,7 @@ class ProjectCrowdfundView(ProjectPermissionsMixin, CreateView):
         relationship = ProjectCrowdfunds.objects.create(project=project, crowdfund=crowdfund)
         actstream.action.send(
             self.request.user,
-            verb='started',
+            verb='began crowdfunding',
             action_object=relationship.crowdfund,
             target=relationship.project
         )
