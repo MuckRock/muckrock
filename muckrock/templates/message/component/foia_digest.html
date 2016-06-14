@@ -5,7 +5,7 @@
     </td>
     <td>
         {% for action in stream %}
-        {% with action.action_object as foia %}
+        {% with action.target as foia %}
         <div>
             <p>
                 <a href="{{foia.get_absolute_url}}">{{ foia }}</a>
