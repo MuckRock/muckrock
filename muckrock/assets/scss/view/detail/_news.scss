@@ -17,6 +17,7 @@
 
 .news__article {
     max-width: 42em;
+    min-width: 0;
     @include flex(3 1 24em);
     @include padding;
     @include media($medium-layout) {
