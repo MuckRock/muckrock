@@ -98,11 +98,12 @@ class TestDailyDigest(TestCase):
         question = factories.QuestionFactory()
         actstream.actions.follow(self.user, question, actor_only=False)
         other_user = factories.UserFactory()
-        factories.AnswerFactory(user=other_user, question=question)
+        answer = factories.AnswerFactory(user=other_user, question=question)
         email = self.digest(user=self.user, interval=self.interval)
         eq_(email.activity['count'], 1, 'There should be activity.')
         eq_(email.activity['questions']['following'].first().actor, other_user)
-        eq_(email.activity['questions']['following'].first().action_object, question)
+        eq_(email.activity['questions']['following'].first().action_object, answer)
+        eq_(email.activity['questions']['following'].first().target, question)
         eq_(email.send(), 1, 'The email should send.')
 
 

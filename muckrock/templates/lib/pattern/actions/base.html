@@ -3,9 +3,9 @@
 {% block actor %}
     <span class="action actor">
     {% if action.actor.get_absolute_url %}
-        <a href="https://www.muckrock.com{{ action.actor.get_absolute_url }}">{{ action.actor }}</a>
+        <a href="{{ action.actor.get_absolute_url }}">{{ action.actor }}</a>
     {% else %}
-        <a href="https://www.muckrock.com{{ action.actor_url }}">{{ action.actor }}</a>
+        {{ action.actor }}
     {% endif %}
     </span>
 {% endblock actor %}
@@ -18,9 +18,9 @@
 {% if action.action_object %}
     <span class="action object">
     {% if action.action_object.get_absolute_url %}
-        <a href="https://www.muckrock.com{{ action.action_object.get_absolute_url }}"> {{ action.action_object }}</a>
+        <a href="{{ action.action_object.get_absolute_url }}"> {{ action.action_object }}</a>
     {% else %}
-        <a href="https://www.muckrock.com{{ action.action_object_url }}"> {{ action.action_object }}</a>
+        {{ action.action_object }}
     {% endif %}
     </span>
 {% endif %}
@@ -34,9 +34,9 @@
 {% if action.target %}
     <span class="action target">
     {% if action.target.get_absolute_url %}
-        <a href="https://www.muckrock.com{{ action.target.get_absolute_url }}"> {{ action.target }}</a>
+        <a href="{{ action.target.get_absolute_url }}"> {{ action.target }}</a>
     {% else %}
-        <a href="https://www.muckrock.com{{ action.target_url }}"> {{ action.target }}</a>
+         {{ action.target }}
     {% endif %}
     </span>
 {% endif %}
