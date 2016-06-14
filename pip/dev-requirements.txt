@@ -5,15 +5,15 @@
 #    pip-compile --output-file dev-requirements.txt dev-requirements.in
 #
 
-astroid==1.4.5            # via pylint, pylint-plugin-utils
+astroid==1.4.6            # via pylint, pylint-plugin-utils
 backports.shutil-get-terminal-size==1.0.0  # via ipython
 click==6.6                # via pip-tools
 colorama==0.3.7           # via pylint
 coverage==4.1
-decorator==4.0.9          # via ipython, traitlets
+decorator==4.0.10         # via ipython, traitlets
 dj-inmemorystorage==1.4.0
 django-nose==1.4.3
-django==1.9.6
+django==1.9.7
 ecdsa==0.13               # via paramiko
 fabric==1.11.1
 factory-boy==2.7.0
@@ -37,7 +37,7 @@ ptyprocess==0.5.1         # via pexpect
 pycrypto==2.6.1           # via paramiko
 pylint-django==0.7.1
 pylint-plugin-utils==0.2.3  # via pylint-django
-pylint==1.5.5             # via pylint-django, pylint-plugin-utils
+pylint==1.5.6             # via pylint-django, pylint-plugin-utils
 python-dateutil==2.5.3    # via fake-factory
 simplegeneric==0.8.1      # via ipython
 six==1.10.0               # via astroid, dj-inmemorystorage, fake-factory, mock, pathlib2, pip-tools, pylint, python-dateutil
