@@ -422,8 +422,16 @@ class NotificationQuerySet(models.QuerySet):
         """All notifications for a user"""
         return self.filter(user=user)
 
+    def for_model(self, model):
+        """All notifications for a model. Requires filtering the action."""
+        model_ct = ContentType.objects.get_for_model(model)
+        actor = models.Q(action__actor_content_type=model_ct)
+        action_object = models.Q(action__action_object_content_type=model_ct)
+        target = models.Q(action__target_content_type=model_ct)
+        return self.filter(actor|action_object|target)
+
     def for_object(self, object):
-        """All notifications for an object. Requires filtering the action"""
+        """All notifications for an object. Requires filtering the action."""
         object_pk = object.pk
         object_ct = ContentType.objects.get_for_model(object)
         actor = models.Q(

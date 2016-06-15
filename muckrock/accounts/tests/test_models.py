@@ -244,6 +244,17 @@ class TestNotifications(TestCase):
         ok_(self.notification not in user_notifications,
             'A notification for another user should not be in the set returned.')
 
+    def test_for_model(self):
+        """Notifications should be filterable by a model type."""
+        foia = factories.FOIARequestFactory()
+        _action = action.send(factories.UserFactory(), verb='submitted', target=foia)[0][1]
+        object_notification = factories.NotificationFactory(user=self.user, action=_action)
+        model_notifications = Notification.objects.for_model(foia)
+        ok_(object_notification in model_notifications,
+            'A notification for the model should be in the set returned.')
+        ok_(self.notification not in model_notifications,
+            'A notification not including the model should not be in the set returned.')
+
     def test_for_object(self):
         """Notifications should be filterable by a single object."""
         foia = factories.FOIARequestFactory()
