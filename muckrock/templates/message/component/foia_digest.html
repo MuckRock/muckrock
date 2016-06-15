@@ -1,11 +1,11 @@
-{% if stream|length > 0 %}
+{% if notifications|length > 0 %}
 <tr>
     <td class="request-category">
         <small class="{{color}} badge">{{label}}</small>
     </td>
     <td>
-        {% for action in stream %}
-        {% with action.target as foia %}
+        {% for notification in notifications %}
+        {% with notification.action.target as foia %}
         <div>
             <p>
                 <a href="{{foia.get_absolute_url}}">{{ foia }}</a>
