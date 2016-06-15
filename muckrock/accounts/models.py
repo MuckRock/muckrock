@@ -3,11 +3,13 @@ Models for the accounts application
 """
 
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 from django.core.mail import EmailMessage
 from django.db import models
 from django.template.loader import render_to_string
 
+from actstream.models import Action
 from datetime import datetime
 import dbsettings
 from easy_thumbnails.fields import ThumbnailerImageField
@@ -18,7 +20,6 @@ import stripe
 from urllib import urlencode
 
 from muckrock import utils
-from muckrock.foia.models import FOIARequest
 from muckrock.values import TextValue
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -74,11 +75,6 @@ class Profile(models.Model):
     )
     zip_code = models.CharField(max_length=10, blank=True)
     phone = PhoneNumberField(blank=True)
-    notifications = models.ManyToManyField(
-        FOIARequest,
-        related_name='notify',
-        blank=True
-    )
     acct_type = models.CharField(max_length=10, choices=ACCT_TYPES)
     organization = models.ForeignKey(
         'organization.Organization',
@@ -336,13 +332,12 @@ class Profile(models.Model):
         self.save()
         return key
 
-    def notify(self, foia):
-        """Queue up a notification for later"""
-        self.notifications.add(foia)
-        self.save()
+    def notify(self, action):
+        """Notify a user about an action"""
+        Notification.objects.create(user=self.user, action=action)
 
     def send_notifications(self):
-        """Send deferred notifications"""
+        """Send unread notifications from queue to user"""
 
         subjects = {
             'done': "you've got new MuckRock docs!",
@@ -419,6 +414,49 @@ class Profile(models.Model):
                 )
             extra.update({settings.LOT_MIDDLEWARE_PARAM_NAME: lot.uuid})
         return link + '?' + urlencode(extra)
+
+
+class NotificationQuerySet(models.QuerySet):
+    """Object manager for notifications"""
+    def for_user(self, user):
+        """All notifications for a user"""
+        return self.filter(user=user)
+
+    def for_object(self, object):
+        """All notifications for an object. Requires filtering the action"""
+        object_pk = object.pk
+        object_ct = ContentType.objects.get_for_model(object)
+        actor = models.Q(
+            action__actor_content_type=object_ct,
+            action__actor_object_id=object_pk)
+        action_object = models.Q(
+            action__action_object_content_type=object_ct,
+            action__action_object_object_id=object_pk)
+        target = models.Q(
+            action__target_content_type=object_ct,
+            action__target_object_id=object_pk)
+        return self.filter(actor|action_object|target)
+
+    def get_unread(self):
+        """All unread notifications"""
+        return self.filter(read=False)
+
+
+class Notification(models.Model):
+    """A notification connects an action to a user."""
+    datetime = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, related_name='notifications')
+    action = models.ForeignKey(Action)
+    read = models.BooleanField(default=False)
+    objects = NotificationQuerySet.as_manager()
+
+    def mark_read(self):
+        self.read = True
+        self.save()
+
+    def mark_unread(self):
+        self.read = False
+        self.save()
 
 
 class Statistics(models.Model):

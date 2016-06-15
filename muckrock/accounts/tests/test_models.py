@@ -5,11 +5,13 @@ Tests accounts models
 from django.conf import settings
 from django.test import TestCase
 
+from actstream import action
 from datetime import datetime, date, timedelta
 from mock import Mock, patch
 from nose.tools import ok_, eq_, assert_true, assert_false, raises, nottest
 
-from muckrock.factories import ProfileFactory, OrganizationFactory
+from muckrock.accounts.models import Notification
+from muckrock import factories
 from muckrock.utils import get_stripe_token
 
 # Creates Mock items for testing methods that involve Stripe
@@ -45,7 +47,7 @@ MockCustomer.retrieve.return_value = mock_customer
 class TestProfileUnit(TestCase):
     """Unit tests for profile model"""
     def setUp(self):
-        self.profile = ProfileFactory(monthly_requests=25, acct_type='pro')
+        self.profile = factories.ProfileFactory(monthly_requests=25, acct_type='pro')
 
     def test_unicode(self):
         """Test profile model's __unicode__ method"""
@@ -54,14 +56,14 @@ class TestProfileUnit(TestCase):
 
     def test_is_advanced(self):
         """Test whether the users are marked as advanced."""
-        beta = ProfileFactory(acct_type='beta')
-        proxy = ProfileFactory(acct_type='beta')
-        admin = ProfileFactory(acct_type='admin')
-        basic = ProfileFactory(acct_type='basic')
-        active_org = OrganizationFactory(active=True)
-        inactive_org = OrganizationFactory(active=False)
-        active_org_member = ProfileFactory(acct_type='basic', organization=active_org)
-        inactive_org_member = ProfileFactory(acct_type='basic', organization=inactive_org)
+        beta = factories.ProfileFactory(acct_type='beta')
+        proxy = factories.ProfileFactory(acct_type='beta')
+        admin = factories.ProfileFactory(acct_type='admin')
+        basic = factories.ProfileFactory(acct_type='basic')
+        active_org = factories.OrganizationFactory(active=True)
+        inactive_org = factories.OrganizationFactory(active=False)
+        active_org_member = factories.ProfileFactory(acct_type='basic', organization=active_org)
+        inactive_org_member = factories.ProfileFactory(acct_type='basic', organization=inactive_org)
         assert_true(self.profile.is_advanced())
         assert_true(beta.is_advanced())
         assert_true(proxy.is_advanced())
@@ -96,14 +98,14 @@ class TestProfileUnit(TestCase):
         """Make request call decrements number of requests if out of monthly requests"""
         # pylint:disable=no-self-use
         num_requests = 10
-        profile = ProfileFactory(num_requests=num_requests)
+        profile = factories.ProfileFactory(num_requests=num_requests)
         profile.make_request()
         eq_(profile.num_requests, num_requests - 1)
 
     def test_make_request_fail(self):
         """If out of requests, make request returns false"""
         # pylint:disable=no-self-use
-        profile = ProfileFactory(num_requests=0)
+        profile = factories.ProfileFactory(num_requests=0)
         profile.date_update = datetime.now()
         assert_false(profile.make_request())
 
@@ -165,7 +167,7 @@ class TestProfileUnit(TestCase):
     def test_cancel_legacy_subscription(self):
         """Test ending a pro subscription when missing a subscription ID"""
         # pylint:disable=no-self-use
-        pro_profile = ProfileFactory(acct_type='basic',
+        pro_profile = factories.ProfileFactory(acct_type='basic',
                                      monthly_requests=settings.MONTHLY_REQUESTS.get('pro'))
         ok_(not pro_profile.subscription_id)
         pro_profile.cancel_pro_subscription()
@@ -182,7 +184,7 @@ class TestStripeIntegration(TestCase):
     After testing your changes locally, enable the decorator again.
     """
     def setUp(self):
-        self.profile = ProfileFactory()
+        self.profile = factories.ProfileFactory()
 
     @nottest
     def test_pay(self):
@@ -210,3 +212,54 @@ class TestStripeIntegration(TestCase):
         customer.save()
         self.profile.start_pro_subscription()
         self.profile.cancel_pro_subscription()
+
+
+class TestNotifications(TestCase):
+    """Notifications connect actions to users and contain a read state."""
+    def setUp(self):
+        self.user = factories.UserFactory()
+        self.action = action.send(self.user, verb='acted')[0][1]
+        self.notification = factories.NotificationFactory()
+
+    def test_create_notification(self):
+        """Create a notification with a user and an action."""
+        notification = Notification.objects.create(user=self.user, action=self.action)
+        ok_(notification, 'Notification object should create without error.')
+        ok_(isinstance(notification, Notification), 'Object should be a Notification.')
+        ok_(notification.read is not True, 'Notification sould be unread by default.')
+
+    def test_mark_read(self):
+        """Notifications should be markable as read if unread and unread if read."""
+        self.notification.mark_read()
+        ok_(self.notification.read is True, 'Notification should be marked as read.')
+        self.notification.mark_unread()
+        ok_(self.notification.read is not True, 'Notification should be marked as unread.')
+
+    def test_for_user(self):
+        """Notifications should be filterable by a single user."""
+        user_notification = factories.NotificationFactory(user=self.user)
+        user_notifications = Notification.objects.for_user(self.user)
+        ok_(user_notification in user_notifications,
+            'A notification for the user should be in the set returned.')
+        ok_(self.notification not in user_notifications,
+            'A notification for another user should not be in the set returned.')
+
+    def test_for_object(self):
+        """Notifications should be filterable by a single object."""
+        foia = factories.FOIARequestFactory()
+        _action = action.send(factories.UserFactory(), verb='submitted', target=foia)[0][1]
+        object_notification = factories.NotificationFactory(user=self.user, action=_action)
+        object_notifications = Notification.objects.for_object(foia)
+        ok_(object_notification in object_notifications,
+            'A notification for the object should be in the set returned.')
+        ok_(self.notification not in object_notifications,
+            'A notification not including the object should not be in the set returned.')
+
+    def test_get_unread(self):
+        """Notifications should be filterable by their unread status."""
+        self.notification.mark_unread()
+        ok_(self.notification in Notification.objects.get_unread(),
+            'Unread notifications should be in the set returned.')
+        self.notification.mark_read()
+        ok_(self.notification not in Notification.objects.get_unread(),
+            'Read notifications should not be in the set returned.')

@@ -3,12 +3,14 @@ Factories generate objects during testing
 """
 
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 from django.utils.text import slugify
 
+import actstream
 import datetime
 import factory
 
-from muckrock.accounts.models import Profile, Statistics
+from muckrock.accounts.models import Profile, Notification, Statistics
 from muckrock.agency.models import Agency, STALE_DURATION
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, RawEmail
@@ -38,6 +40,15 @@ class UserFactory(factory.django.DjangoModelFactory):
     username = factory.Sequence(lambda n: "user_%d" % n)
     email = factory.Faker('email')
     profile = factory.RelatedFactory(ProfileFactory, 'user')
+
+
+class NotificationFactory(factory.django.DjangoModelFactory):
+    """A factory for creating Notification test objects."""
+    class Meta:
+        model = Notification
+
+    user = factory.SubFactory(UserFactory)
+    action = factory.LazyAttribute(lambda obj: actstream.action.send(obj.user, verb='acted')[0][1])
 
 
 class OrganizationFactory(factory.django.DjangoModelFactory):
