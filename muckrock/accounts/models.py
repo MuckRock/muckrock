@@ -19,8 +19,6 @@ from urllib import urlencode
 
 from muckrock import utils
 from muckrock.foia.models import FOIARequest
-from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.organization.models import Organization
 from muckrock.values import TextValue
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -83,7 +81,7 @@ class Profile(models.Model):
     )
     acct_type = models.CharField(max_length=10, choices=ACCT_TYPES)
     organization = models.ForeignKey(
-        Organization,
+        'organization.Organization',
         blank=True,
         null=True,
         related_name='members',
@@ -91,7 +89,7 @@ class Profile(models.Model):
 
     # extended information
     profile = models.TextField(blank=True)
-    location = models.ForeignKey(Jurisdiction, blank=True, null=True)
+    location = models.ForeignKey('jurisdiction.Jurisdiction', blank=True, null=True)
     public_email = models.EmailField(max_length=255, blank=True)
     pgp_public_key = models.TextField(blank=True)
     website = models.URLField(
@@ -113,7 +111,6 @@ class Profile(models.Model):
 
     # provide user access to experimental features
     experimental = models.BooleanField(default=False)
-
     # email confirmation
     email_confirmed = models.BooleanField(default=False)
     confirmation_key = models.CharField(max_length=24, blank=True)
