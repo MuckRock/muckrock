@@ -25,9 +25,11 @@ class Question(models.Model):
     foia = models.ForeignKey(FOIARequest, blank=True, null=True)
     question = models.TextField()
     date = models.DateTimeField()
+    # We store the date of the most recent answer on the question
+    # to increase performance when displaying questions in a list
+    # and using the most recent response as a sortable field.
     answer_date = models.DateTimeField(blank=True, null=True)
     tags = TaggableManager(through=TaggedItemBase, blank=True)
-    answer_authors = Set()
 
     def __unicode__(self):
         return self.title
@@ -43,6 +45,10 @@ class Question(models.Model):
     def get_absolute_url(self):
         """The url for this object"""
         return ('question-detail', [], {'slug': self.slug, 'pk': self.pk})
+
+    def answer_authors(self):
+        """Returns a list of users who have answered the question."""
+        return [answer.user for answer in self.answers.all()]
 
     def notify_update(self):
         """Email users who want to be notified of updates to this question"""
@@ -79,10 +85,8 @@ class Answer(models.Model):
         """Update the questions answer date when you save the answer"""
         is_new = True if self.pk is None else False
         super(Answer, self).save(*args, **kwargs)
-        question = self.question
-        question.answer_date = self.date
-        question.answer_authors.update([self.user])
-        question.save()
+        self.question.answer_date = self.date
+        self.question.save()
         if is_new:
             new_action(self.user, 'answered', action_object=self, target=question)
 

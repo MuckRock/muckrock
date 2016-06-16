@@ -11,7 +11,7 @@
     <h1>{{ object.title }}</h1>
     {% if answers %}
     <h2>and got {{ answers|length }} answer{{ answers|length|pluralize }} from
-        {% for user in answer_users %}
+        {% for user in object.answer_authors %}
             {% if forloop.first and forloop.last %}
                 <a href="{% url "acct-profile" user.username %}">{{ user.get_full_name }}</a>.
             {% else %}
