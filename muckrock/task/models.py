@@ -7,17 +7,25 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Max, Prefetch, Q
 
+from actstream.models import followers
 from datetime import datetime
 import email
 import logging
 
 from muckrock.agency.models import Agency, STALE_DURATION
-from muckrock.foia.models import FOIACommunication, FOIAFile, FOIANote, FOIARequest, STATUS
+from muckrock.foia.models import (
+    FOIACommunication,
+    FOIAFile,
+    FOIANote,
+    FOIARequest,
+    STATUS,
+    END_STATUS
+)
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import support
 from muckrock.models import ExtractDay, Now
-from muckrock.utils import new_action
+from muckrock.utils import new_action, notify
 
 # pylint: disable=missing-docstring
 
@@ -499,7 +507,13 @@ class ResponseTask(Task):
             foia.update()
             foia.save(comment='response task status')
             logging.info('Request #%d status changed to "%s"', foia.id, status)
-            generate_status_action(foia)
+            action = generate_status_action(foia)
+            # notify the owner for all statuses
+            # notify the followers only if the action reflects a terminal status:
+            # completed, rejected, no documents
+            notify(foia.user, action)
+            if foia.status in END_STATUS:
+                notify(followers(foia), action)
 
     def set_price(self, price):
         """Sets the price of the communication's request"""
