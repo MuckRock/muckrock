@@ -9,9 +9,13 @@ import random
 import string
 import stripe
 
+from django.contrib.auth.models import User, Group
+from django.core.cache import cache
 from django.template import Context
 from django.template.loader_tags import BlockNode, ExtendsNode
-from django.core.cache import cache
+
+
+from muckrock.accounts.models import Notification
 
 #From http://stackoverflow.com/questions/2687173/django-how-can-i-get-a-block-from-a-template
 
@@ -39,6 +43,20 @@ def new_action(actor, verb, action_object=None, target=None, public=True, descri
         description=description)
     # action_signal = ((action_handler, Action))
     return action_signal[0][1]
+
+def notify(users, action):
+    """Notify a set of users about an action and return the list of notifications."""
+    notifications = []
+    if isinstance(users, Group):
+        # If users is a group, get the queryset of users
+        users = users.user_set.all()
+    elif isinstance(users, User):
+        # If users is a single user, make it into a list
+        users = [users]
+    for user in users:
+        notification = Notification.objects.create(user=user, action=action)
+        notifications.append(notification)
+    return notifications
 
 def generate_key(size=6, chars=string.ascii_uppercase + string.digits):
     """Generates a random alphanumeric key"""
