@@ -2,6 +2,7 @@
 Miscellanous utilities
 """
 
+import actstream
 import datetime
 import mock
 import random
@@ -26,6 +27,18 @@ def get_node(template, context=Context(), name='subject'):
         elif isinstance(node, ExtendsNode):
             return get_node(node.nodelist, context, name)
     raise BlockNotFound("Node '%s' could not be found in template." % name)
+
+def new_action(actor, verb, action_object=None, target=None, public=True, description=None):
+    """Wrapper to send a new action and return the generated Action object."""
+    action_signal = actstream.action.send(
+        actor,
+        verb=verb,
+        action_object=action_object,
+        target=target,
+        public=public,
+        description=description)
+    # action_signal = ((action_handler, Action))
+    return action_signal[0][1]
 
 def generate_key(size=6, chars=string.ascii_uppercase + string.digits):
     """Generates a random alphanumeric key"""
