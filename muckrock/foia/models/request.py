@@ -481,22 +481,12 @@ class FOIARequest(models.Model):
             days_since = (date.today() - self.date_processing).days
         return days_since
 
-    def _notify(self):
-        """Notify request's creator and followers about the update"""
-        # notify creator
-        self.user.profile.notify(self)
-        # notify followers
-        for user in followers(self):
-            if self.viewable_by(user):
-                user.profile.notify(self)
-
     def update(self, anchor=None):
         """Various actions whenever the request has been updated"""
         # pylint: disable=unused-argument
         # Do something with anchor
         self.updated = True
         self.save()
-        self._notify()
         self.update_dates()
 
     def submit(self, appeal=False, snail=False, thanks=False):
