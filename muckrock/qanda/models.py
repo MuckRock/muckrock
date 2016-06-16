@@ -8,13 +8,13 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.template.loader import render_to_string
 
-import actstream
+from actstream.models import followers
 from sets import Set
 from taggit.managers import TaggableManager
 
 from muckrock.foia.models import FOIARequest
 from muckrock.tags.models import TaggedItemBase
-
+from muckrock.utils import new_action
 
 class Question(models.Model):
     """A question to which the community can respond"""
@@ -37,7 +37,7 @@ class Question(models.Model):
         is_new = True if self.pk is None else False
         super(Question, self).save(*args, **kwargs)
         if is_new:
-            actstream.action.send(self.user, verb='asked', target=self)
+            new_action(self.user, 'asked', target=self)
 
     @models.permalink
     def get_absolute_url(self):
@@ -47,7 +47,7 @@ class Question(models.Model):
     def notify_update(self):
         """Email users who want to be notified of updates to this question"""
         send_data = []
-        for user in actstream.models.followers(self):
+        for user in followers(self):
             link = user.profile.wrap_url(reverse(
                 'question-follow',
                 kwargs={'slug': self.slug, 'idx': self.pk}
@@ -84,7 +84,7 @@ class Answer(models.Model):
         question.answer_authors.update([self.user])
         question.save()
         if is_new:
-            actstream.action.send(self.user, verb='answered', action_object=self, target=question)
+            new_action(self.user, 'answered', action_object=self, target=question)
 
     class Meta:
         # pylint: disable=too-few-public-methods

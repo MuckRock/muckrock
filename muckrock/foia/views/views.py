@@ -15,7 +15,7 @@ from django.template.defaultfilters import slugify
 from django.template import RequestContext
 from django.views.generic.detail import DetailView
 
-import actstream
+from actstream.models import following
 from datetime import datetime, timedelta
 import json
 import logging
@@ -50,6 +50,7 @@ from muckrock.qanda.models import Question
 from muckrock.qanda.forms import QuestionForm
 from muckrock.tags.models import Tag
 from muckrock.task.models import Task, FlaggedTask, StatusChangeTask
+from muckrock.utils import new_action
 from muckrock.views import class_view_decorator, MRFilterableListView
 
 # pylint: disable=too-many-ancestors
@@ -134,7 +135,7 @@ class FollowingRequestList(RequestList):
     """List of all FOIA requests the user is following"""
     def get_queryset(self):
         """Limits FOIAs to those followed by the current user"""
-        objects = actstream.models.following(self.request.user, FOIARequest)
+        objects = following(self.request.user, FOIARequest)
         # actstream returns a list of objects, so we have to turn it into a queryset
         pk_list = [_object.pk for _object in objects if _object]
         objects = FOIARequest.objects.filter(pk__in=pk_list)
@@ -400,7 +401,7 @@ class Detail(DetailView):
                 text=text,
                 foia=foia)
             messages.success(request, 'Problem succesfully reported')
-            actstream.action.send(request.user, verb='flagged', target=foia)
+            new_action(request.user, 'flagged', target=foia)
         return redirect(foia)
 
     def _follow_up(self, request, foia):
@@ -410,11 +411,7 @@ class Detail(DetailView):
         success_msg = 'Your follow up has been sent.'
         comm_sent = self._new_comm(request, foia, test, success_msg)
         if comm_sent:
-            actstream.action.send(
-                request.user,
-                verb='followed up on',
-                target=foia
-            )
+            new_action(request.user, 'followed up on', target=foia)
         return redirect(foia)
 
     def _thank(self, request, foia):
@@ -423,11 +420,7 @@ class Detail(DetailView):
         success_msg = 'Your thank you has been sent.'
         comm_sent = self._new_comm(request, foia, test, success_msg, thanks=True)
         if comm_sent:
-            actstream.action.send(
-                request.user,
-                verb='thanked',
-                target=foia.agency
-            )
+            new_action(request.user, verb='thanked', target=foia.agency)
         return redirect(foia)
 
     def _appeal(self, request, foia):
@@ -436,11 +429,7 @@ class Detail(DetailView):
         success_msg = 'Appeal successfully sent.'
         comm_sent = self._new_comm(request, foia, test, success_msg, appeal=True)
         if comm_sent:
-            actstream.action.send(
-                request.user,
-                verb='appealed',
-                target=foia,
-            )
+            new_action(request.user, 'appealed', target=foia)
         return redirect(foia)
 
     def _new_comm(self, request, foia, test, success_msg, appeal=False, thanks=False):

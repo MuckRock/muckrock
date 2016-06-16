@@ -6,7 +6,6 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.utils.text import slugify
 
-import actstream
 import datetime
 import factory
 
@@ -19,6 +18,7 @@ from muckrock.news.models import Article
 from muckrock.organization.models import Organization
 from muckrock.project.models import Project
 from muckrock.qanda.models import Question, Answer
+from muckrock.utils import new_action
 
 # pylint:disable=too-many-instance-attributes
 
@@ -48,7 +48,7 @@ class NotificationFactory(factory.django.DjangoModelFactory):
         model = Notification
 
     user = factory.SubFactory(UserFactory)
-    action = factory.LazyAttribute(lambda obj: actstream.action.send(obj.user, verb='acted')[0][1])
+    action = factory.LazyAttribute(lambda obj: new_action(obj.user, 'acted'))
 
 
 class OrganizationFactory(factory.django.DjangoModelFactory):

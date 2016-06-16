@@ -12,7 +12,7 @@ from django.db.models import Q, Sum, Count
 from django.template.defaultfilters import escape, linebreaks, slugify
 from django.template.loader import render_to_string
 
-import actstream
+from actstream.models import followers
 from datetime import datetime, date, timedelta
 from hashlib import md5
 import logging
@@ -486,7 +486,7 @@ class FOIARequest(models.Model):
         # notify creator
         self.user.profile.notify(self)
         # notify followers
-        for user in actstream.models.followers(self):
+        for user in followers(self):
             if self.viewable_by(user):
                 user.profile.notify(self)
 
@@ -636,7 +636,7 @@ class FOIARequest(models.Model):
         )
         # We perform some logging and activity generation
         logger.info('%s has paid %0.2f for request %s', user.username, amount, self.title)
-        actstream.action.send(user, verb='paid fees', target=self)
+        utils.new_action(user, 'paid fees', target=self)
         # We return the communication we generated, in case the caller wants to do anything with it
         return comm
 
@@ -773,8 +773,7 @@ class FOIARequest(models.Model):
         '''Provides action interfaces for users'''
         is_owner = self.created_by(user)
         can_follow = user.is_authenticated() and not is_owner
-        followers = actstream.models.followers(self)
-        is_following = user in followers
+        is_following = user in followers(self)
         kwargs = {
             'jurisdiction': self.jurisdiction.slug,
             'jidx': self.jurisdiction.pk,

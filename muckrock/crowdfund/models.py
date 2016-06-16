@@ -7,13 +7,13 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
 
-import actstream
 from datetime import date
 from decimal import Decimal
 import logging
 import stripe
 
 from muckrock import task
+from muckrock.utils import new_action
 
 stripe.api_version = '2015-10-16'
 
@@ -77,7 +77,7 @@ class Crowdfund(models.Model):
         if succeeded:
             logging.info('Crowdfund %d reached its goal.', self.id)
             verb = 'succeeded'
-        actstream.action.send(self, verb=verb)
+        new_action(self, verb)
         return
 
     def contributors_count(self):

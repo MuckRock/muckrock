@@ -7,7 +7,6 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Max, Prefetch, Q
 
-import actstream
 from datetime import datetime
 import email
 import logging
@@ -18,11 +17,12 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import support
 from muckrock.models import ExtractDay, Now
+from muckrock.utils import new_action
 
 # pylint: disable=missing-docstring
 
 def generate_status_action(foia):
-    """Generate activity stream action for agency response"""
+    """Generate activity stream action for agency response and return it."""
     if not foia.agency:
         return
     verbs = {
@@ -35,7 +35,7 @@ def generate_status_action(foia):
         'payment': 'requires payment',
     }
     verb = verbs.get(foia.status, 'is processing')
-    actstream.action.send(foia.agency, verb=verb, target=foia)
+    return new_action(foia.agency, verb, target=foia)
 
 class TaskQuerySet(models.QuerySet):
     """Object manager for all tasks"""

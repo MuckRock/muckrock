@@ -5,14 +5,13 @@ Tests accounts models
 from django.conf import settings
 from django.test import TestCase
 
-from actstream import action
 from datetime import datetime, date, timedelta
 from mock import Mock, patch
 from nose.tools import ok_, eq_, assert_true, assert_false, raises, nottest
 
 from muckrock.accounts.models import Notification
 from muckrock import factories
-from muckrock.utils import get_stripe_token
+from muckrock.utils import new_action, get_stripe_token
 
 # Creates Mock items for testing methods that involve Stripe
 #
@@ -218,7 +217,7 @@ class TestNotifications(TestCase):
     """Notifications connect actions to users and contain a read state."""
     def setUp(self):
         self.user = factories.UserFactory()
-        self.action = action.send(self.user, verb='acted')[0][1]
+        self.action = new_action(self.user, 'acted')
         self.notification = factories.NotificationFactory()
 
     def test_create_notification(self):
@@ -247,7 +246,7 @@ class TestNotifications(TestCase):
     def test_for_model(self):
         """Notifications should be filterable by a model type."""
         foia = factories.FOIARequestFactory()
-        _action = action.send(factories.UserFactory(), verb='submitted', target=foia)[0][1]
+        _action = new_action(factories.UserFactory(), 'submitted', target=foia)
         object_notification = factories.NotificationFactory(user=self.user, action=_action)
         model_notifications = Notification.objects.for_model(foia)
         ok_(object_notification in model_notifications,
@@ -258,7 +257,7 @@ class TestNotifications(TestCase):
     def test_for_object(self):
         """Notifications should be filterable by a single object."""
         foia = factories.FOIARequestFactory()
-        _action = action.send(factories.UserFactory(), verb='submitted', target=foia)[0][1]
+        _action = new_action(factories.UserFactory(), 'submitted', target=foia)
         object_notification = factories.NotificationFactory(user=self.user, action=_action)
         object_notifications = Notification.objects.for_object(foia)
         ok_(object_notification in object_notifications,

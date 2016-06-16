@@ -6,13 +6,14 @@ correctly grabbing site activity.
 
 from django.test import TestCase
 
-import actstream
+from actstream.actions import follow
 from datetime import date
 from dateutil.relativedelta import relativedelta
 import nose.tools
 
 from muckrock import factories
 from muckrock.message import digests
+from muckrock.utils import new_action
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
@@ -45,7 +46,7 @@ class TestDailyDigest(TestCase):
         # generate an action on an actor the user follows
         agency = factories.AgencyFactory()
         foia = factories.FOIARequestFactory(agency=agency)
-        action = actstream.action.send(agency, verb='completed', target=foia)[0][1]
+        action = new_action(agency, 'completed', target=foia)
         self.user.profile.notify(action)
         # generate the email, which should contain the generated action
         email = self.digest(user=self.user, interval=self.interval)
@@ -58,7 +59,7 @@ class TestDailyDigest(TestCase):
         other_user = factories.UserFactory()
         foia = factories.FOIARequestFactory(user=other_user)
         agency = factories.AgencyFactory()
-        action = actstream.action.send(agency, verb='rejected', target=foia)[0][1]
+        action = new_action(agency, 'rejected', target=foia)
         self.user.profile.notify(action)
         # generate the email, which should contain the generated action
         email = self.digest(user=self.user, interval=self.interval)
@@ -83,7 +84,7 @@ class TestDailyDigest(TestCase):
         """Digests should include information on questions I follow."""
         # generate an action on a question that I follow
         question = factories.QuestionFactory()
-        actstream.actions.follow(self.user, question, actor_only=False)
+        follow(self.user, question, actor_only=False)
         other_user = factories.UserFactory()
         answer = factories.AnswerFactory(user=other_user, question=question)
         email = self.digest(user=self.user, interval=self.interval)
