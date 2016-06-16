@@ -12,9 +12,10 @@ from actstream.models import followers
 from sets import Set
 from taggit.managers import TaggableManager
 
+from muckrock.accounts.models import Profile
 from muckrock.foia.models import FOIARequest
 from muckrock.tags.models import TaggedItemBase
-from muckrock.utils import new_action
+from muckrock.utils import new_action, notify
 
 class Question(models.Model):
     """A question to which the community can respond"""
@@ -39,7 +40,11 @@ class Question(models.Model):
         is_new = True if self.pk is None else False
         super(Question, self).save(*args, **kwargs)
         if is_new:
-            new_action(self.user, 'asked', target=self)
+            action = new_action(self.user, 'asked', target=self)
+            # Notify users who subscribe to new question notifications
+            new_question_subscribers = Profile.objects.filter(new_question_notifications=True)
+            users_to_notify = [profile.user for profile in new_question_subscribers]
+            notify(users_to_notify, action)
 
     @models.permalink
     def get_absolute_url(self):
@@ -49,19 +54,6 @@ class Question(models.Model):
     def answer_authors(self):
         """Returns a list of users who have answered the question."""
         return [answer.user for answer in self.answers.all()]
-
-    def notify_update(self):
-        """Email users who want to be notified of updates to this question"""
-        send_data = []
-        for user in followers(self):
-            link = user.profile.wrap_url(reverse(
-                'question-follow',
-                kwargs={'slug': self.slug, 'idx': self.pk}
-            ))
-            subject = '[MuckRock] New answer to the question: %s' % self
-            msg = render_to_string('text/qanda/follow.txt', {'question': self, 'link': link})
-            send_data.append((subject, msg, 'info@muckrock.com', [user.email]))
-        send_mass_mail(send_data, fail_silently=False)
 
     class Meta:
         # pylint: disable=too-few-public-methods
@@ -88,7 +80,10 @@ class Answer(models.Model):
         self.question.answer_date = self.date
         self.question.save()
         if is_new:
-            new_action(self.user, 'answered', action_object=self, target=question)
+            action = new_action(self.user, 'answered', action_object=self, target=self.question)
+            # Notify the question's owner and its followers about the new answer
+            notify(self.question.user, action)
+            notify(followers(self.question), action)
 
     class Meta:
         # pylint: disable=too-few-public-methods
