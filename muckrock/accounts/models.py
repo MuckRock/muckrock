@@ -334,13 +334,8 @@ class Profile(models.Model):
         self.save()
         return key
 
-    def notify(self, action):
-        """Notify a user about an action"""
-        Notification.objects.create(user=self.user, action=action)
-
     def send_notifications(self):
         """Send unread notifications from queue to user"""
-
         subjects = {
             'done': "you've got new MuckRock docs!",
             'partial': "you've got new MuckRock docs!",

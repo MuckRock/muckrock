@@ -13,7 +13,7 @@ import nose.tools
 
 from muckrock import factories
 from muckrock.message import digests
-from muckrock.utils import new_action
+from muckrock.utils import new_action, notify
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
@@ -47,7 +47,7 @@ class TestDailyDigest(TestCase):
         agency = factories.AgencyFactory()
         foia = factories.FOIARequestFactory(agency=agency)
         action = new_action(agency, 'completed', target=foia)
-        self.user.profile.notify(action)
+        notify(self.user, action)
         # generate the email, which should contain the generated action
         email = self.digest(user=self.user, interval=self.interval)
         eq_(email.activity['count'], 1, 'There should be activity.')
@@ -60,7 +60,7 @@ class TestDailyDigest(TestCase):
         foia = factories.FOIARequestFactory(user=other_user)
         agency = factories.AgencyFactory()
         action = new_action(agency, 'rejected', target=foia)
-        self.user.profile.notify(action)
+        notify(self.user, action)
         # generate the email, which should contain the generated action
         email = self.digest(user=self.user, interval=self.interval)
         eq_(email.activity['count'], 1, 'There should be activity.')
