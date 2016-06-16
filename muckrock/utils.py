@@ -14,9 +14,6 @@ from django.core.cache import cache
 from django.template import Context
 from django.template.loader_tags import BlockNode, ExtendsNode
 
-
-from muckrock.accounts.models import Notification
-
 #From http://stackoverflow.com/questions/2687173/django-how-can-i-get-a-block-from-a-template
 
 class BlockNotFound(Exception):
@@ -46,6 +43,7 @@ def new_action(actor, verb, action_object=None, target=None, public=True, descri
 
 def notify(users, action):
     """Notify a set of users about an action and return the list of notifications."""
+    from muckrock.accounts.models import Notification
     notifications = []
     if isinstance(users, Group):
         # If users is a group, get the queryset of users

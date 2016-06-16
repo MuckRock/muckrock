@@ -19,7 +19,7 @@ from lot.models import LOT
 import stripe
 from urllib import urlencode
 
-from muckrock import utils
+from muckrock.utils import generate_key
 from muckrock.values import TextValue
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -327,7 +327,7 @@ class Profile(models.Model):
 
     def generate_confirmation_key(self):
         """Generate random key used for validating the email address"""
-        key = utils.generate_key(24)
+        key = generate_key(24)
         self.confirmation_key = key
         self.save()
         return key
