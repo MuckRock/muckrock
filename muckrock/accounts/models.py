@@ -123,6 +123,8 @@ class Profile(models.Model):
         help_text=('Links you receive in emails from us will contain'
                    ' a one time token to automatically log you in')
     )
+    # notification preferences
+    new_question_notifications = models.BooleanField(default=False)
 
     # paid for requests
     num_requests = models.IntegerField(default=0)
