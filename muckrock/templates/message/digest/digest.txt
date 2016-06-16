@@ -1,6 +1,5 @@
 {% extends 'message/base.txt' %}
 {% block body %}
-{% with }
 {% if activity.requests.count > 0 %}
 ---------------------------
 Requests
@@ -23,6 +22,7 @@ Following
 {% include 'message/component/foia_digest.txt' with notifications=follow_foia.rejected stream_name='Rejected' %}
 {% include 'message/component/foia_digest.txt' with notifications=follow_foia.no_documents stream_name='No Documents' %}
 {% endif %}{% endwith %}
+{% endif %}
 {% if activity.questions.count > 0 %}
 ---------------------------
 Questions

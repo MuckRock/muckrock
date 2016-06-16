@@ -10,7 +10,7 @@ from actstream.models import Action, user_stream
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 
-from muckrock.accounts.models import Statistics
+from muckrock.accounts.models import Notification, Statistics
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.message.email import TemplateEmail
 from muckrock.foia.models import FOIARequest, FOIACommunication
@@ -241,7 +241,7 @@ class ActivityDigest(Digest):
         model_notifications = notifications.for_model(model)
         own_model_actions = Action.objects.owned_by(user, model)
         own_model_notifications = model_notifications.filter(action__in=own_model_actions)
-        following_model_notifications = model_notifications.exclude(own_model_notifications)
+        following_model_notifications = model_notifications.exclude(action__in=own_model_actions)
         return {
             'count': model_notifications.count(),
             'mine': own_model_notifications,
@@ -266,7 +266,7 @@ class ActivityDigest(Digest):
 
     def foia_notifications(self, notifications):
         """Do some heavy filtering and classifying of foia notifications."""
-        filtered_notifications = notifications_for_model(notifications, FOIARequest)
+        filtered_notifications = self.notifications_for_model(notifications, FOIARequest)
         filtered_notifications['mine'] = self.classify_request_notifications(
             filtered_notifications['mine'],
             [
@@ -300,7 +300,7 @@ class ActivityDigest(Digest):
         # a classifier should be a tuple of a key and a verb phrase to filter by
         # e.g. ('no_documents', 'no responsive documents')
         for classifier in classifiers:
-            classified[classifier[0]] = notifications.filter(action__verb__icontains=classifer[1])
+            classified[classifier[0]] = notifications.filter(action__verb__icontains=classifier[1])
         activity_count = 0
         for _, classified_stream in classified.iteritems():
             activity_count += len(classified_stream)
