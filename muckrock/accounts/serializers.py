@@ -19,7 +19,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        exclude = ('user', 'notifications')
+        exclude = ('user',)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -143,4 +143,3 @@ class StatisticsSerializer(serializers.ModelSerializer):
                 'total_active_org_members',
                 'total_active_orgs',
                 )
-
