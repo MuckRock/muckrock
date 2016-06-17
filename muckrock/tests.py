@@ -8,13 +8,16 @@ from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.test import TestCase, RequestFactory
 
+from actstream.models import Action
 from mock import Mock, patch
 import logging
 import nose.tools
 
+from muckrock.accounts.models import Notification
+from muckrock.factories import UserFactory
 from muckrock.fields import EmailsListField
 from muckrock.forms import NewsletterSignupForm
-from muckrock.utils import mock_middleware
+from muckrock.utils import mock_middleware, new_action, notify
 from muckrock.views import NewsletterSignupView
 
 # pylint: disable=no-self-use
@@ -177,3 +180,40 @@ class TestNewsletterSignupView(TestCase):
         _list = settings.MAILCHIMP_LIST_DEFAULT
         response = NewsletterSignupView().subscribe(_email, _list)
         eq_(response.status_code, 200)
+
+
+class TestNewAction(TestCase):
+    """The new action function will create a new action and return it."""
+    def test_basic(self):
+        """An action only needs an actor and a verb."""
+        actor = UserFactory()
+        verb = 'acted'
+        action = new_action(actor, verb)
+        ok_(isinstance(action, Action), 'An Action should be returned.')
+        eq_(action.actor, actor)
+        eq_(action.verb, verb)
+
+class TestNotify(TestCase):
+    """The notify function will notify one or many users about an action."""
+    def setUp(self):
+        self.action = new_action(UserFactory(), 'acted')
+
+    def test_single_user(self):
+        """Notify a single user about an action."""
+        user = UserFactory()
+        notifications = notify(user, self.action)
+        ok_(isinstance(notifications, list),
+            'A list should be returned.')
+        ok_(isinstance(notifications[0], Notification),
+            'The list should contain notification objects.')
+
+    def test_many_users(self):
+        """Notify many users about an action."""
+        users = [UserFactory(), UserFactory(), UserFactory()]
+        notifications = notify(users, self.action)
+        eq_(len(notifications), len(users),
+            'There should be a notification for every user in the list.')
+        for user in users:
+            notification_for_user = any(notification.user == user for notification in notifications)
+            ok_(notification_for_user,
+                'Each user in the list should be notified.')
