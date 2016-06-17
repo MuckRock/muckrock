@@ -3,13 +3,9 @@ Models for the Q&A application
 """
 
 from django.contrib.auth.models import User
-from django.core.mail import send_mass_mail
-from django.core.urlresolvers import reverse
 from django.db import models
-from django.template.loader import render_to_string
 
 from actstream.models import followers
-from sets import Set
 from taggit.managers import TaggableManager
 
 from muckrock.accounts.models import Profile

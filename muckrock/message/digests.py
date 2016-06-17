@@ -2,11 +2,9 @@
 Digest objects for the messages app
 """
 
-from django.contrib.contenttypes.models import ContentType
-from django.db.models import Q
 from django.utils import timezone
 
-from actstream.models import Action, user_stream
+from actstream.models import Action
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 

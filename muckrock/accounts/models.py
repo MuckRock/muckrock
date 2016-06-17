@@ -425,12 +425,12 @@ class NotificationQuerySet(models.QuerySet):
         actor = models.Q(action__actor_content_type=model_ct)
         action_object = models.Q(action__action_object_content_type=model_ct)
         target = models.Q(action__target_content_type=model_ct)
-        return self.filter(actor|action_object|target)
+        return self.filter(actor | action_object | target)
 
-    def for_object(self, object):
+    def for_object(self, _object):
         """All notifications for an object. Requires filtering the action."""
-        object_pk = object.pk
-        object_ct = ContentType.objects.get_for_model(object)
+        object_pk = _object.pk
+        object_ct = ContentType.objects.get_for_model(_object)
         actor = models.Q(
             action__actor_content_type=object_ct,
             action__actor_object_id=object_pk)
@@ -440,7 +440,7 @@ class NotificationQuerySet(models.QuerySet):
         target = models.Q(
             action__target_content_type=object_ct,
             action__target_object_id=object_pk)
-        return self.filter(actor|action_object|target)
+        return self.filter(actor | action_object | target)
 
     def get_unread(self):
         """All unread notifications"""
@@ -455,11 +455,16 @@ class Notification(models.Model):
     read = models.BooleanField(default=False)
     objects = NotificationQuerySet.as_manager()
 
+    def __unicode__(self):
+        return u'<Notification for %s>' % unicode(self.user.username).capitalize()
+
     def mark_read(self):
+        """Marks notification as read."""
         self.read = True
         self.save()
 
     def mark_unread(self):
+        """Marks notification as unread."""
         self.read = False
         self.save()
 

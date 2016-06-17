@@ -31,6 +31,7 @@ def get_node(template, context=Context(), name='subject'):
 
 def new_action(actor, verb, action_object=None, target=None, public=True, description=None):
     """Wrapper to send a new action and return the generated Action object."""
+    # pylint: disable=too-many-arguments
     action_signal = actstream.action.send(
         actor,
         verb=verb,

@@ -14,7 +14,13 @@ from nose.tools import eq_, ok_, raises
 
 from muckrock.accounts import views
 from muckrock.accounts.forms import RegistrationCompletionForm
-from muckrock.factories import UserFactory, OrganizationFactory, FOIARequestFactory, QuestionFactory, AgencyFactory
+from muckrock.factories import (
+    UserFactory,
+    OrganizationFactory,
+    FOIARequestFactory,
+    QuestionFactory,
+    AgencyFactory
+)
 from muckrock.foia.views import Detail as FOIARequestDetail
 from muckrock.organization.models import Organization
 from muckrock.qanda.views import Detail as QuestionDetail
@@ -477,9 +483,6 @@ class TestNotificationRead(TestCase):
         notification = notify(self.user, action)[0]
         ok_(not notification.read, 'The notification should be unread.')
         # Try getting the view as the user
-        kwargs = {
-
-        }
         response = http_get_response(foia.get_absolute_url(), view, self.user,
             idx=foia.pk,
             slug=foia.slug,
@@ -500,9 +503,6 @@ class TestNotificationRead(TestCase):
         notification = notify(self.user, action)[0]
         ok_(not notification.read, 'The notification should be unread.')
         # Try getting the view as the user
-        kwargs = {
-
-        }
         response = http_get_response(question.get_absolute_url(), view, self.user,
             pk=question.pk,
             slug=question.slug

@@ -3,7 +3,6 @@ Factories generate objects during testing
 """
 
 from django.contrib.auth.models import User
-from django.contrib.contenttypes.models import ContentType
 from django.utils.text import slugify
 
 import datetime
