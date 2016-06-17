@@ -51,6 +51,9 @@ def notify(users, action):
     elif isinstance(users, User):
         # If users is a single user, make it into a list
         users = [users]
+    if action is None:
+        # If no action is provided, don't generate any notifications
+        return notifications
     for user in users:
         notification = Notification.objects.create(user=user, action=action)
         notifications.append(notification)
