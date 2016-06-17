@@ -18,6 +18,7 @@ from rest_framework.decorators import detail_route
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from muckrock.accounts.models import Notification
 from muckrock.foia.models import FOIAFile
 from muckrock.qanda.models import Question, Answer
 from muckrock.qanda.forms import QuestionForm, AnswerForm
@@ -73,6 +74,15 @@ class Detail(DetailView):
                 'foia__jurisdiction__parent__parent',
                 'foia__user',
                 )
+
+    def get(self, request, *args, **kwargs):
+        """Mark any unread notifications for this object as read."""
+        user = request.user
+        question = self.get_object()
+        notifications = Notification.objects.for_user(user).for_object(question).get_unread()
+        for notification in notifications:
+            notification.mark_read()
+        return super(Detail, self).get(request, *args, **kwargs)
 
     def post(self, request, **kwargs):
         """Edit the question or answer"""

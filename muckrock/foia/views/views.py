@@ -20,6 +20,7 @@ from datetime import datetime, timedelta
 import json
 import logging
 
+from muckrock.accounts.models import Notification
 from muckrock.agency.forms import AgencyForm
 from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.foia.codes import CODES
@@ -239,10 +240,6 @@ class Detail(DetailView):
         valid_access_key = self.request.GET.get('key') == foia.access_key
         if not foia.viewable_by(user) and not valid_access_key:
             raise Http404()
-        if foia.created_by(user):
-            if foia.updated:
-                foia.updated = False
-                foia.save(comment='remove updated flag since owner viewed')
         self._obj = foia
         return foia
 
@@ -299,6 +296,15 @@ class Detail(DetailView):
         if foia.sidebar_html:
             messages.info(self.request, foia.sidebar_html)
         return context
+
+    def get(self, request, *args, **kwargs):
+        """Mark any unread notifications for this object as read."""
+        user = request.user
+        foia = self.get_object()
+        notifications = Notification.objects.for_user(user).for_object(foia).get_unread()
+        for notification in notifications:
+            notification.mark_read()
+        return super(Detail, self).get(request, *args, **kwargs)
 
     def post(self, request):
         """Handle form submissions"""
