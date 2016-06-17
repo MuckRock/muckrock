@@ -193,6 +193,7 @@ class TestNewAction(TestCase):
         eq_(action.actor, actor)
         eq_(action.verb, verb)
 
+
 class TestNotify(TestCase):
     """The notify function will notify one or many users about an action."""
     def setUp(self):

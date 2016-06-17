@@ -14,9 +14,11 @@ from nose.tools import eq_, ok_, raises
 
 from muckrock.accounts import views
 from muckrock.accounts.forms import RegistrationCompletionForm
-from muckrock.factories import UserFactory, OrganizationFactory
+from muckrock.factories import UserFactory, OrganizationFactory, FOIARequestFactory, QuestionFactory, AgencyFactory
+from muckrock.foia.views import Detail as FOIARequestDetail
 from muckrock.organization.models import Organization
-from muckrock.utils import mock_middleware
+from muckrock.qanda.views import Detail as QuestionDetail
+from muckrock.utils import mock_middleware, new_action, notify
 
 
 def http_get_response(url, view, user=AnonymousUser(), **kwargs):
@@ -25,7 +27,7 @@ def http_get_response(url, view, user=AnonymousUser(), **kwargs):
     request = request_factory.get(url, **kwargs)
     request = mock_middleware(request)
     request.user = user
-    response = view(request)
+    response = view(request, **kwargs)
     return response
 
 def http_post_response(url, view, data, user=AnonymousUser(), **kwargs):
@@ -458,3 +460,54 @@ class TestAccountFunctional(TestCase):
                 eq_(val, getattr(self.user, key))
             else:
                 eq_(val, getattr(profile, key))
+
+
+class TestNotificationRead(TestCase):
+    """Getting an object view should read its notifications for that user."""
+    def setUp(self):
+        self.user = UserFactory()
+
+    def test_get_foia(self):
+        """Try getting the detail page for a FOIA Request with an unread notification."""
+        agency = AgencyFactory()
+        foia = FOIARequestFactory(agency=agency)
+        view = FOIARequestDetail.as_view()
+        # Create a notification for the request
+        action = new_action(agency, 'completed', target=foia)
+        notification = notify(self.user, action)[0]
+        ok_(not notification.read, 'The notification should be unread.')
+        # Try getting the view as the user
+        kwargs = {
+
+        }
+        response = http_get_response(foia.get_absolute_url(), view, self.user,
+            idx=foia.pk,
+            slug=foia.slug,
+            jidx=foia.jurisdiction.pk,
+            jurisdiction=foia.jurisdiction.slug
+        )
+        eq_(response.status_code, 200, 'The view should response 200 OK.')
+        # Check that the notification has been read.
+        notification.refresh_from_db()
+        ok_(notification.read, 'The notification should be marked as read.')
+
+    def test_get_question(self):
+        """Try getting the detail page for a Question with an unread notification."""
+        question = QuestionFactory()
+        view = QuestionDetail.as_view()
+        # Create a notification for the question
+        action = new_action(UserFactory(), 'answered', target=question)
+        notification = notify(self.user, action)[0]
+        ok_(not notification.read, 'The notification should be unread.')
+        # Try getting the view as the user
+        kwargs = {
+
+        }
+        response = http_get_response(question.get_absolute_url(), view, self.user,
+            pk=question.pk,
+            slug=question.slug
+        )
+        eq_(response.status_code, 200, 'The view should respond 200 OK.')
+        # Check that the notification has been read.
+        notification.refresh_from_db()
+        ok_(notification.read, 'The notification should be marked as read.')
