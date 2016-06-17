@@ -16,7 +16,7 @@ celery-haystack==0.10
 celery==3.1.23
 Click==6.6                # via pyimagediet
 contextlib2==0.5.3        # via raven
-cssselect==0.9.1          # via premailer
+cssselect==0.9.2          # via premailer
 cssutils==1.0.1           # via premailer
 dill==0.2.5
 django-activity-stream==0.6.2
@@ -39,7 +39,7 @@ django-premailer==0.1.0
 django-pylibmc==0.6.1
 django-querycount==0.4.1
 django-rest-swagger==0.3.7
-django-reversion==2.0.3
+django-reversion==1.10.2
 django-robots==2.0
 django-secure==1.0.1
 django-sslify==0.2.7
@@ -69,7 +69,7 @@ python-dateutil==2.5.3
 python-magic==0.4.11      # via pyimagediet
 pytz==2016.4              # via celery
 PyYAML==3.11              # via django-rest-swagger, pyimagediet
-raven==5.20.0
+raven==5.21.0
 rcssmin==1.0.6            # via django-compressor
 redis==2.10.5
 requests==2.10.0
