@@ -21,9 +21,10 @@
     .communication-header {
         @include display(flex);
         @include justify-content(space-between);
-        @include flex-direction(column);
-        @include media($medium-layout) {
-            @include flex-direction(row);
+        @include flex-wrap(wrap);
+        @include flex-direction(row);
+        .from, .actionables {
+            @include flex(1 1 auto);
         }
         margin-bottom: 0;
         color: $color-white;
@@ -33,7 +34,7 @@
 
         .actionables {
             @include display(flex);
-            @include justify-content(space-between);
+            @include justify-content(flex-end);
             @include align-items(center);
         }
         .permalink {
