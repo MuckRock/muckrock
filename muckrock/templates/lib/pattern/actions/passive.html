@@ -1,4 +1,4 @@
-<div class="passive action">
+<div class="notification__action--passive">
 
 {% block action_object %}
 {% if action.action_object %}
@@ -20,7 +20,7 @@
 {% if action.target %}
     <span class="target">
     {% if action.target.get_absolute_url %}
-        <a href="{{ action.target.get_absolute_url }}"> {{ action.target }}</a>
+        <a href="{{ action.target.get_absolute_url }}" class="action"> {{ action.target }}</a>
     {% else %}
         {{ action.target }}
     {% endif %}
@@ -35,7 +35,7 @@
 <span> by</span>
 
 {% block actor %}
-<span class="action actor">
+<span class="actor">
     {% if action.actor.get_absolute_url %}
     <a href="{{ action.actor.get_absolute_url }}"> {{ action.actor }}</a>
     {% else %}
@@ -43,5 +43,9 @@
     {% endif %}
 </span>
 {% endblock actor %}
+
+{% block extra %}
+    <time class="timestamp" title="{{ action.timestamp|date:'c' }}" datetime="{{ action.timestamp|date:'c' }}"> {{ action.timestamp|timesince }} ago</time>
+{% endblock extra %}
 
 </div>
