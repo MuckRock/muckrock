@@ -491,10 +491,19 @@ class NotificationList(ListView):
     template_name = 'accounts/notifications.html'
 
     def get_queryset(self):
-        """Return only notifications for the user making the request."""
+        """Return all notifications for the user making the request."""
         user = self.request.user
         notifications = super(NotificationList, self).get_queryset()
         return notifications.for_user(user)
+
+
+@method_decorator(login_required, name='dispatch')
+class UnreadNotificationList(NotificationList):
+    """List only unread notifications for a user."""
+    def get_queryset(self):
+        """Only return unread notifications."""
+        notifications = super(UnreadNotificationList, self).get_queryset()
+        return notifications.get_unread()
 
 
 class ProxyList(MRFilterableListView):
