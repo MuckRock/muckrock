@@ -2,10 +2,10 @@
 {% load foia_tags %}
 
 {% if communication %}
-<section class="{% if communication.response %}received{% else %}sent{% endif %} communication {% if communication.from_who == 'MuckRock.com' %}collapsed{% endif %}" id="{{ communication.anchor }}">
+<section class="{% if communication.response %}received{% else %}sent{% endif %} collapsable communication {% if communication.from_who == 'MuckRock.com' %}collapsed{% endif %}" id="{{ communication.anchor }}">
     <header class="communication-header">
         <p class="from">From: {{ communication.from_who }}</p>
-        <div class="actionables">
+        <div class="actionables nocollapse">
             {% if foia_url %}
             <a href="#{{ communication.anchor }}" class="permalink">
             {% else %}
