@@ -1,9 +1,26 @@
 {% extends 'base.html' %}
 
 {% block content %}
-{% for notification in object_list %}
-{% include 'lib/pattern/actions/base.html' with action=notification.action %}
-{% empty %}
-<h1>No unread notifications.</h1>
-{% endfor %}
+<div class="notifications--new detail">
+    <h1>Notifications</h1>
+    <ul class="nostyle notification__list">
+    {% for notification in object_list %}
+        <li class="notification__item" data-read="{{notification.read}}">
+            {% if notification.action.verb == 'completed' %}
+            {% include 'lib/component/icon/success.svg' %}
+            {% elif notification.action.verb == 'rejected' %}
+            {% include 'lib/component/icon/error.svg' %}
+            {% else %}
+            {% include 'lib/component/icon/info.svg' %}
+            {% endif %}
+            {% include 'lib/pattern/actions/base.html' with action=notification.action %}
+        </li>
+    {% empty %}
+        <li class="notification__list--empty">
+            {% include 'lib/component/icon/notification.svg' %}
+            <strong>No unread notifications.</strong>
+        </li>
+    {% endfor %}
+    </ul>
+</div>
 {% endblock %}
