@@ -4,6 +4,7 @@ import { getData } from '../api';
 
 import { Chart } from './Chart';
 import { DateRange } from './DateRange';
+import { Value } from './Value';
 import { Loader } from './Loader';
 
 export const Dashboard = React.createClass({
@@ -30,8 +31,11 @@ export const Dashboard = React.createClass({
         var data = this.props.data.results;
         return (
             <div className="charts">
+                <Value field="total_requests" title="Total Requests" data={this.props.data} />
                 <Chart field="total_requests" title="Total Requests" data={this.props.data} />
+                <Value field="total_pages" title="Total Pages" data={this.props.data} />
                 <Chart field="total_pages" title="Total Pages" data={this.props.data} />
+                <Value field="total_users" title="Total Users" data={this.props.data} />
                 <Chart field="total_users" title="Total Users" data={this.props.data} />
             </div>
         )

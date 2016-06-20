@@ -25,7 +25,7 @@ export const Chart = React.createClass({
         var data = this.collect(this.props.field);
         var chartData = [];
         if (data.length) {
-            var chartData = [
+            chartData = [
                 {
                     name: 'series1',
                     values: data.map(function(entry, index){
