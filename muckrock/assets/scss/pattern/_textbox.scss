@@ -1,0 +1,49 @@
+@mixin color-textbox($color) {
+    border-color: $color;
+    .textbox__header {
+        background: $color;
+    }
+}
+
+.textbox {
+    @include border;
+    position: relative;
+    word-wrap: break-word;
+    background: $color-white-pure;
+    .textbox__header, .textbox__section, .textbox__footer {
+        padding: $vertical-rhythm/4 $vertical-rhythm/2;
+    }
+    .textbox__header {
+        @include display(flex);
+        @include justify-content(space-between);
+        @include flex-wrap(wrap);
+        @include flex-direction(row);
+        margin-bottom: 0;
+        color: $color-white;
+        font-weight: $font-weight-bold;
+        a {
+            color: $color-white;
+        }
+    }
+}
+
+.textbox { @include color-textbox($color-black); }
+.blue.textbox { @include color-textbox($color-blue); }
+.green.textbox { @include color-textbox($color-green); }
+.red.textbox { @include color-textbox($color-red); }
+.yellow.textbox { @include color-textbox($color-yellow); }
+.grey.textbox { @include color-textbox($color-grey); }
+.yellow.textbox {
+    .textbox__header {
+        color: $color-black;
+    }
+}
+
+/*
+.blue.textbox {
+    border-color: $color-blue;
+    .textbox__header {
+        background: $color-blue;
+    }
+}
+*/

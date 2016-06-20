@@ -23,7 +23,7 @@
         @include justify-content(space-between);
         @include flex-wrap(wrap);
         @include flex-direction(row);
-        .from, .actionables {
+        & > * {
             @include flex(1 1 auto);
         }
         margin-bottom: 0;
