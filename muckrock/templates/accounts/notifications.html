@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% for notification in object_list %}
+{% include 'lib/pattern/actions/base.html' with action=notification.action %}
+{% empty %}
+<h1>No unread notifications.</h1>
+{% endfor %}
+{% endblock %}

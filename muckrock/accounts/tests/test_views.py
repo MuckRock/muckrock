@@ -16,6 +16,7 @@ from muckrock.accounts import views
 from muckrock.accounts.forms import RegistrationCompletionForm
 from muckrock.factories import (
     UserFactory,
+    NotificationFactory,
     OrganizationFactory,
     FOIARequestFactory,
     QuestionFactory,
@@ -466,6 +467,30 @@ class TestAccountFunctional(TestCase):
                 eq_(val, getattr(self.user, key))
             else:
                 eq_(val, getattr(profile, key))
+
+
+class TestNotificationList(TestCase):
+    """A user should be able to view lists of their notifications."""
+    def setUp(self):
+        self.user = UserFactory()
+        self.notification = NotificationFactory(user=self.user)
+        self.url = reverse('acct-notifications')
+        self.view = views.NotificationList.as_view()
+
+    def test_get(self):
+        """The view should provide a list of notifications for the user."""
+        response = http_get_response(self.url, self.view, self.user)
+        eq_(response.status_code, 200, 'The view should return OK.')
+        object_list = response.context_data['object_list']
+        ok_(self.notification in object_list, 'The context should contain the notification.')
+
+    def test_unauthorized_get(self):
+        """Logged out users trying to access the notifications
+        view should be redirected to the login view."""
+        response = http_get_response(self.url, self.view)
+        eq_(response.status_code, 302, 'The view should redirect.')
+        ok_(reverse('acct-login') in response.url,
+            'Logged out users should be redirected to the login view.')
 
 
 class TestNotificationRead(TestCase):
