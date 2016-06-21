@@ -1,3 +1,12 @@
+/*
+** Textbox
+**
+** The textbox component is used wherever we display a discrete unit of textual information.
+** It provides a colored header that contains metadata information and then sectional information.
+** When combined with the .collapsable class, textboxes can be reduced down to just their header.
+** Some implementations of this component are communications, questions, and task patterns.
+*/
+
 @mixin color-textbox($color) {
     border-color: $color;
     .textbox__header {
