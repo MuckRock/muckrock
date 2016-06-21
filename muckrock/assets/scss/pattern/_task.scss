@@ -230,27 +230,16 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
     }
 }
 
-.new-agency.rejection.form {
+.new-agency.red.textbox {
     background: $color-red-light;
-    border-color: $color-red;
-    header {
-        background: $color-red;
-    }
-    main {
-        padding: $task-padding;
-    }
     select {
         display: block;
         width: 100%;
     }
 }
 
-.new-agency.approval.form {
+.new-agency.green.textbox {
     background: $color-green-light;
-    border-color: $color-green;
-    header {
-        background: $color-green;
-    }
     .help-text {
         color: $color-green-dark;
     }
