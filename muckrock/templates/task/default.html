@@ -1,12 +1,17 @@
 <section class="{{class}} {% if task.resolved %}green{% endif %} collapsable task textbox" id="{{task.pk}}-task">
     <header class="textbox__header task__header">
-        <input type="checkbox" form="batched" name="tasks" value="{{task.pk}}" class="toggle checkbox nocollapse">
         {% if task.resolved %}
-        <span class="task-type">Resolved {{task}}</span>
-        <time class="task-date-done" datetime="{{task.date_done|date:'Y-m-d G:i::s'}}"><a class="permalink" href="{{task.get_absolute_url}}">Resolved {{task.date_done|date:'m/d/Y G:i'}}</a></time>
+        <span>
+            <input type="checkbox" form="batched" name="tasks" value="{{task.pk}}" class="toggle checkbox nocollapse">
+            <span class="task-type">Resolved {{task}}</span>
+        </span>
+        <a class="permalink" href="{{task.get_absolute_url}}"><time class="task-date-done" datetime="{{task.date_done|date:'Y-m-d G:i::s'}}">Resolved {{task.date_done|date:'m/d/Y G:i'}}</time></a>
         {% else %}
-        <span class="task-type">{{task}}</span>
-        <time class="task-date-created" datetime="{{task.date_created|date:'Y-m-d G:i::s'}}"><a class="nocollapse permalink" href="{{task.get_absolute_url}}">{{task.date_created|date:'m/d/Y G:i'}}</a></time>
+        <span>
+            <input type="checkbox" form="batched" name="tasks" value="{{task.pk}}" class="toggle checkbox nocollapse">
+            <span class="task-type">{{task}}</span>
+        </span>
+        <a class="nocollapse permalink" href="{{task.get_absolute_url}}"><time class="task-date-created" datetime="{{task.date_created|date:'Y-m-d G:i::s'}}">{{task.date_created|date:'m/d/Y G:i'}}</time></a>
         {% endif %}
     </header>
     {% block task-main %}
