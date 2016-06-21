@@ -5,7 +5,7 @@
 {% if task.created_from_orphan %}
 <p class="created-from-orphan">This response was created from an orphan task.</p>
 {% endif %}
-<dl class="task-data">
+<dl class="task__data">
     {% with task.communication as comm %}
     {% with comm.foia as foia %}
     {% if comm.priv_from_who %}

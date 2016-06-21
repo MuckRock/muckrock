@@ -1,44 +1,12 @@
 .communication {
-    @include border;
-    position: relative;
-    word-wrap: break-word;
-    header, section, footer {
-        padding: $vertical-rhythm/2;
-    }
-    background: #fff;
-    &.received {
-        border-color: $color-black;
-        .communication-header {
-            background-color: $color-black;
-        }
-    }
-    &.sent {
-        border-color: $color-blue;
-        .communication-header {
-            background-color: $color-blue;
-        }
-    }
     .communication-header {
-        @include display(flex);
-        @include justify-content(space-between);
-        @include flex-direction(column);
-        @include media($medium-layout) {
-            @include flex-direction(row);
+        & > * {
+            @include flex(1 1 auto);
         }
-        margin-bottom: 0;
-        color: $color-white;
-        p {
-            margin-bottom: 0;
-        }
-
         .actionables {
             @include display(flex);
-            @include justify-content(space-between);
+            @include justify-content(flex-end);
             @include align-items(center);
-        }
-        .permalink {
-            line-height: 1em;
-            color: $color-white;
         }
         .options .icon {
             margin-left: $vertical-rhythm;
@@ -51,13 +19,13 @@
             }
         }
     }
+    .dropdown a {
+        color: $color-black;
+    }
     .from, .subject {
         margin-bottom: 0;
         margin-right: $vertical-rhythm/2;
         @include overflow-ellipsis;
-        &:hover {
-            cursor: default;
-        }
         font-weight: $font-weight-bold;
     }
     .communication-metadata {
@@ -65,6 +33,7 @@
         @include justify-content(space-between);
         @include align-items(center);
         margin-bottom: 0;
+        background: $color-grey-7;
     }
     .communication-body {
         margin-bottom: 0;
