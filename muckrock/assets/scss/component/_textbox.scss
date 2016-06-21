@@ -20,7 +20,9 @@
         @include flex-direction(row);
         margin-bottom: 0;
         color: $color-white;
-        font-weight: $font-weight-bold;
+        p {
+            margin-bottom: 0;
+        }
         a {
             color: $color-white;
         }
@@ -39,11 +41,11 @@
     }
 }
 
-/*
-.blue.textbox {
-    border-color: $color-blue;
-    .textbox__header {
-        background: $color-blue;
-    }
+.collapsable > header {
+    cursor: pointer;
 }
-*/
+
+.collapsable.collapsed {
+    & > * { display: none !important; }
+    & > header { @include display(flex !important); }
+}
