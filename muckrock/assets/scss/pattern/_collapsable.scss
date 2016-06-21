@@ -1,8 +1,0 @@
-.collapsable > header {
-    cursor: pointer;
-}
-
-.collapsable.collapsed {
-    & > * { display: none !important; }
-    & > header { @include display(flex !important); }
-}

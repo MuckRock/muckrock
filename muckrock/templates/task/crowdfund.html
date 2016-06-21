@@ -1,7 +1,7 @@
 {% extends 'task/default.html' %}
 
 {% block task-content %}
-<summary class="task-data">
+<summary class="task__data">
     <p><a href="{% url 'admin:crowdfund_crowdfund_change' task.crowdfund.id %}">{{task.crowdfund}}</a> has closed. It was requesting {{task.crowdfund.payment_required}} and received {{task.crowdfund.payment_received}}.</p>
 </summary>
 {% endblock %}

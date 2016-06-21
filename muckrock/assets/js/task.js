@@ -145,18 +145,6 @@ $('button[name="reject"]').click(function(e){
     return false;
 });
 
-tasks.find('header').click(function() {
-    $(this).parent().toggleClass('collapsed');
-});
-
-$('.task .permalink').click(function(e) {
-    e.stopPropagation();
-});
-
-$('.task .checkbox').click(function(e) {
-    e.stopPropagation();
-});
-
 var checkboxes = $('.task header').find(':checkbox');
 var batchedButtons = $('#batched button').not('#collapse-all');
 function toggleBatchedButtons() {

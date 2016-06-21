@@ -3,7 +3,7 @@
 {% block title %}Stale Agency Tasks{%endblock %}
 
 {% block task-content %}
-<dl class="task-data">
+<dl class="task__data">
     <dt>Agency</dt>
     <dd><a href="{{task.agency.get_absolute_url}}">{{task.agency}}</a> (<a href="{% url 'admin:agency_agency_change' task.agency.pk %}">admin</a>)</dd>
     <dd>{{task.agency.phone}}</dd>

@@ -13,15 +13,6 @@ function showCommForm(id) {
     });
 }
 
-$('.communication-header').click(function(){
-    $(this).closest('.communication').toggleClass('collapsed');
-});
-
-$('.communication-header .dropdown-list').click(function(event){
-    // Prevent click from propagating up to the communication header.
-    event.stopPropagation();
-});
-
 var actions = $('.communication-action').map(function() {
     return '#' + $(this).attr('id');
 }).get();
