@@ -94,8 +94,6 @@ function formHasAction(taskForm, action) {
 
 authenticateAjax();
 
-var tasks = $('.task');
-
 // Hide all the resolved tasks
 $('.resolved.task')
     .each(function(){
