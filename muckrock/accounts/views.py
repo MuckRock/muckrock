@@ -484,6 +484,7 @@ class StatisticsViewSet(viewsets.ModelViewSet):
     permission_classes = (DjangoModelPermissionsOrAnonReadOnly,)
     filter_fields = ('date',)
 
+
 @method_decorator(login_required, name='dispatch')
 class NotificationList(ListView):
     """List of notifications for a user."""

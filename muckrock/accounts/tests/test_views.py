@@ -497,34 +497,6 @@ class TestNotificationList(TestCase):
             'Logged out users should be redirected to the login view.')
 
 
-class TestUnreadNotificationList(TestCase):
-    """A user should be able to view lists of their unread notifications."""
-    def setUp(self):
-        self.user = UserFactory()
-        self.unread_notification = NotificationFactory(user=self.user, read=False)
-        self.read_notification = NotificationFactory(user=self.user, read=True)
-        self.url = reverse('acct-notifications-unread')
-        self.view = views.UnreadNotificationList.as_view()
-
-    def test_get(self):
-        """The view should provide a list of notifications for the user."""
-        response = http_get_response(self.url, self.view, self.user)
-        eq_(response.status_code, 200, 'The view should return OK.')
-        object_list = response.context_data['object_list']
-        ok_(self.unread_notification in object_list,
-            'The context should contain the unread notification.')
-        ok_(self.read_notification not in object_list,
-            'The context should not contain the read notification.')
-
-    def test_unauthorized_get(self):
-        """Logged out users trying to access the notifications
-        view should be redirected to the login view."""
-        response = http_get_response(self.url, self.view)
-        eq_(response.status_code, 302, 'The view should redirect.')
-        ok_(reverse('acct-login') in response.url,
-            'Logged out users should be redirected to the login view.')
-
-
 class TestNotificationRead(TestCase):
     """Getting an object view should read its notifications for that user."""
     def setUp(self):

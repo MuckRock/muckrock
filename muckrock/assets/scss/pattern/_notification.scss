@@ -1,0 +1,50 @@
+@mixin notification-icon-color($color) {
+    path, rect, circle, polygon {
+        fill: $color;
+    }
+}
+
+.notification {
+    @include display(flex);
+    @include align-items(center);
+    .symbol {
+        margin-right: $vertical-rhythm/2;
+    }
+    .icon {
+        vertical-align: middle;
+        &.success { @include notification-icon-color($color-green); }
+        &.error { @include notification-icon-color($color-red); }
+        &.info { @include notification-icon-color($color-blue); }
+    }
+    .notification__action, .notification__action--passive {
+        display: inline-block;
+    }
+    .timestamp {
+        color: $color-grey;
+    }
+}
+
+.notifications__list {
+    @include border;
+}
+.notifications__list li {
+    padding: $vertical-rhythm/2;
+    background: $color-white-pure;
+    border-bottom: 1px solid $color-grey;
+    &:last-child {
+        border-bottom: 0;
+    }
+    &.unread {
+        background: lighten($color-blue-light, 10%);
+    }
+}
+
+.notifications--empty {
+    text-align: center;
+    padding: $vertical-rhythm;
+    .icon {
+        height: 4em;
+        width: 4em;
+        @include notification-icon-color($color-grey);
+    }
+}

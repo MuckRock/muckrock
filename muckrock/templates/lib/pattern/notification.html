@@ -1,0 +1,14 @@
+<div class="{% if not notification.read %}unread{% endif %} notification" data-read="{{notification.read}}">
+    <span class="symbol">
+        {% if notification.action.verb == 'completed' %}
+        {% include 'lib/component/icon/success.svg' %}
+        {% elif notification.action.verb == 'rejected' %}
+        {% include 'lib/component/icon/error.svg' %}
+        {% else %}
+        {% include 'lib/component/icon/info.svg' %}
+        {% endif %}
+    </span>
+    <span class="text">
+        {% include 'lib/pattern/actions/passive.html' with action=notification.action %}
+    </span>
+</div>
