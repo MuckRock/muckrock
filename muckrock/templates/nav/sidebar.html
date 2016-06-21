@@ -44,17 +44,15 @@
     </header>
 
     {% if payment_failed %}
-    <section class="payment failure notification">
-        <header>
-            <p>Your payment failed!</p>
-        </header>
-        <main>
-            <p>A recent charge made against<br>your credit card has failed.</p>
-        </main>
-        <footer>
-            <a class="failure button" href="{% url 'acct-settings' %}#billing">Update billing info</a>
-        </footer>
-    </section>
+    <div class="error message small">
+        <span class="symbol">
+            {% include 'lib/component/icon/error.svg' %}
+        </span>
+        <span class="text">
+            <p>Your payment failed! A recent charge made against your credit card has failed.</p>
+            <a class="basic red button" href="{% url 'acct-settings' %}#billing">Update your billing info</a>
+        </span>
+    </div>
     {% endif %}
 
 

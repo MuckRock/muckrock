@@ -1,0 +1,20 @@
+{% if message %}
+<div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+    {% if message.tags %}
+    <span class="symbol">
+        {% if message.tags == 'success' %}
+            {% include 'lib/component/icon/success.svg' %}
+        {% elif message.tags == 'error' %}
+            {% include 'lib/component/icon/error.svg' %}
+        {% elif message.tags == 'warning' %}
+            {% include 'lib/component/icon/warning.svg' %}
+        {% elif message.tags == 'info' %}
+            {% include 'lib/component/icon/info.svg' %}
+        {% endif %}
+    </span>
+    {% endif %}
+    <span class="text">
+        <p>{{ message|safe }}</p>
+    </span>
+</div>
+{% endif %}

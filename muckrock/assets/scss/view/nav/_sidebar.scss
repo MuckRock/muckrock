@@ -99,7 +99,7 @@ The sidebar should use a dark UI.
         right: 0;
         top: 0;
         & + * {
-            margin-top: 2.6875em;
+            margin-top: 2.6875rem;
         }
         width: $sidebar-width;
         margin-bottom: 0;
@@ -223,24 +223,6 @@ The sidebar should use a dark UI.
         }
         &:hover {
             background: $color-blue-dark;
-        }
-    }
-
-    .notification {
-        font-weight: $font-weight-bold;
-        text-align: center;
-        header, main, footer {
-            margin-bottom: 0;
-            padding: $vertical-rhythm/2;
-        }
-        main {
-            font-size: $font-size-2;
-            line-height: $font-line-height;
-        }
-        &.failure {
-            background: $color-red-dark;
-            color: $color-red-light;
-            border-bottom: 1px solid $color-red-dark;
         }
     }
 
