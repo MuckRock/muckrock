@@ -20,11 +20,17 @@
         {{ form.title }}
     </section>
 
-    <section class="request sent message">
-        <section class="meta">
-            <span class="date right">{% now "m/d/Y" %}</span>
+    <section class="sent communication">
+        <header class="communication-header">
+            <p class="from">From: {{foia.user.get_full_name}}</p>
+            <div class="actionable">
+                <time datetime="{% now 'c' %}" class="date">{% now 'm/d/Y' %}</time>
+            </div>
+        </header>
+        <section class="communication-metadata">
+            <p class="small subject">Subject: {{ foia.title }}</p>
         </section>
-        <section class="body">
+        <section class="communication-body">
             {{ form.request }}
         </section>
     </section>
