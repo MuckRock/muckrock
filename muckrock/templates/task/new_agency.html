@@ -2,7 +2,7 @@
 
 {% block task-content %}
 {% if user.is_staff %}
-<dl class="task-data">
+<dl class="task__data">
     {% if task.agency %}
     <dt>Agency</dt>
     <dd><a href="{% url 'admin:agency_agency_change' task.agency.pk %}">{{task.agency}}</a>, {{task.agency.jurisdiction}}</dd>
@@ -19,7 +19,7 @@
     {% endif %}
 </dl>
 {% else %}
-<dl class="task-data">
+<dl class="task__data">
     <dt>Instructions</dt>
     <dd>
         <p>

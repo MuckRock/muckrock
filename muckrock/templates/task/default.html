@@ -1,5 +1,5 @@
-<section class="{{class}} {% if task.resolved %}resolved{% endif %} task collapsable" id="{{task.pk}}-task">
-    <header class="task-header">
+<section class="{{class}} {% if task.resolved %}green{% endif %} collapsable task textbox" id="{{task.pk}}-task">
+    <header class="textbox__header task__header">
         <input type="checkbox" form="batched" name="tasks" value="{{task.pk}}" class="toggle checkbox nocollapse">
         {% if task.resolved %}
         <span class="task-type">Resolved {{task}}</span>
@@ -10,16 +10,16 @@
         {% endif %}
     </header>
     {% block task-main %}
-    <main>
+    <main class="textbox__section task__main">
         {% if task.resolved and task.resolved_by %}
-        <p class="task-data">Resolved by <a href="{% url 'acct-profile' username=task.resolved_by.username %}">{{ task.resolved_by.get_full_name }}</a>.</p>
+        <p class="task__data">Resolved by <a href="{% url 'acct-profile' username=task.resolved_by.username %}">{{ task.resolved_by.get_full_name }}</a>.</p>
         {% endif %}
         {% block task-content %}
         {% endblock %}
     </main>
     {% endblock %}
     {% block task-footer %}
-    <footer class="task-actions">
+    <footer class="textbox__footer task__actions">
         <form method="POST" action="{{ endpoint }}" class="task-post-actions" id="{{task.pk}}-form">
             {% csrf_token %}
             <input type="hidden" name="task" value="{{task.pk}}">

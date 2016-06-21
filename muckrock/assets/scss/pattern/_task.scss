@@ -1,43 +1,10 @@
 $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
 
-.task {
-    position: relative;
-    border: 1px solid $color-black;
-    background: $color-white-pure;
-    & > * {
-        padding: $task-padding;
-        margin-bottom: 0;
-    }
-    & > main {
-        padding: 0;
-    }
+.textbox__section.task__main {
+    padding: 0;
 }
 
-.task.resolved {
-    border-color: $color-green;
-    .task-header {
-        background: $color-green;
-    }
-}
-
-.task-header {
-    @include display(flex);
-    @include align-items(center);
-    background-color: $color-black;
-    color: $color-white;
-    a {
-        color: $color-white;
-    }
-    .task-type {
-        padding-left: $vertical-rhythm/2;
-    }
-    time {
-        @include flex(auto);
-        text-align: right;
-    }
-}
-
-.task-data {
+.task__data {
     padding: $vertical-rhythm/2;
     li {
         margin-left: $vertical-rhythm;
@@ -82,7 +49,7 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
     }
 }
 
-.task .task-actions {
+.task .task__actions {
     background: $color-grey-7;
     text-align: right;
     input, select, label {
@@ -158,13 +125,13 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
 /* Project Review Task */
 
 .project.task {
-    .task-actions label {
+    .task__actions label {
         text-align: left;
     }
-    .task-actions textarea {
+    .task__actions textarea {
         margin-bottom: 0;
     }
-    .task-actions .submission-control {
+    .task__actions .submission-control {
         @include display(flex);
         @include justify-content(space-between);
     }
@@ -172,7 +139,7 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
 
 /* Stale Agency Task */
 
-.stale-agency .task-data {
+.stale-agency .task__data {
     margin-bottom: 0;
 }
 
@@ -210,7 +177,7 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
     padding: 0 $vertical-rhythm/2;
 }
 
-.new-agency .task-data {
+.new-agency .task__data {
     margin-bottom: 0;
 }
 
@@ -300,7 +267,7 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
             font-size: $font-size-2;
         }
     }
-    .task-data {
+    .task__data {
         margin-bottom: 0;
     }
 	.proxy {

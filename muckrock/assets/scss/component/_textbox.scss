@@ -36,6 +36,9 @@
             color: $color-white;
         }
     }
+    .textbox__footer {
+        margin-bottom: 0;
+    }
 }
 
 .textbox { @include color-textbox($color-black); }
