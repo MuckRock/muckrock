@@ -176,6 +176,20 @@ def follow(request, slug, idx):
     return redirect(question)
 
 @login_required
+def follow_new(request):
+    """Follow or unfollow all new questions"""
+    profile = request.user.profile
+    if profile.new_question_notifications:
+        profile.new_question_notifications = False
+        profile.save()
+        messages.success(request, 'You will not be notified of any new questions.')
+    else:
+        profile.new_question_notifications = True
+        profile.save()
+        messages.success(request, 'You will be notified of all new questions.')
+    return redirect('question-index')
+
+@login_required
 def create_answer(request, slug, idx):
     """Create an answer"""
 
@@ -189,7 +203,6 @@ def create_answer(request, slug, idx):
             answer.date = datetime.now()
             answer.question = question
             answer.save()
-            answer.question.notify_update()
             return redirect(answer.question)
     else:
         form = AnswerForm()

@@ -67,7 +67,7 @@ class Answer(models.Model):
     reindex_related = ('question',)
 
     def __unicode__(self):
-        return "%s's answer to %s" % (self.user.username, self.question.title)
+        return "Answer to %s" % self.question.title
 
     def save(self, *args, **kwargs):
         """Update the questions answer date when you save the answer"""
