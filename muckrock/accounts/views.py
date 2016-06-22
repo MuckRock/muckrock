@@ -497,7 +497,7 @@ class NotificationList(ListView):
         """Return all notifications for the user making the request."""
         user = self.request.user
         notifications = super(NotificationList, self).get_queryset()
-        return notifications.for_user(user)
+        return notifications.for_user(user).order_by('-datetime')
 
     def get_paginate_by(self, queryset):
         """Paginates list by the return value"""

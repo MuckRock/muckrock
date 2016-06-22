@@ -1,21 +1,5 @@
 <div class="notification__action--passive">
 
-{% block action_object %}
-{% if action.action_object %}
-    <span class="object">
-    {% if action.action_object.get_absolute_url %}
-        <a href="{{ action.action_object.get_absolute_url }}">{{ action.action_object }}</a>
-    {% else %}
-        {{ action.action_object }}
-    {% endif %}
-    </span>
-{% endif %}
-{% endblock action_object %}
-
-{% block preposition %}
-{% if action.action_object and action.target %}<span class="preposition"> to</span>{% endif %}
-{% endblock preposition %}
-
 {% block target %}
 {% if action.target %}
     <span class="target">
