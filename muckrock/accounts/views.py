@@ -506,6 +506,21 @@ class NotificationList(ListView):
         except (ValueError, TypeError):
             return 25
 
+    def mark_all_read(self):
+        """Mark all notifications for the view as read."""
+        notifications = self.get_queryset()
+        # to be more efficient, let's just get the unread ones
+        notifications = notifications.get_unread()
+        for notification in notifications:
+            notification.mark_read()
+
+    def post(self, request, *args, **kwargs):
+        """Handle post actions to this view"""
+        action = request.POST.get('action')
+        if action == 'mark_all_read':
+            self.mark_all_read()
+        return self.get(request, *args, **kwargs)
+
 
 @method_decorator(login_required, name='dispatch')
 class UnreadNotificationList(NotificationList):

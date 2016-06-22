@@ -496,6 +496,15 @@ class TestNotificationList(TestCase):
         ok_(reverse('acct-login') in response.url,
             'Logged out users should be redirected to the login view.')
 
+    def test_mark_all_read(self):
+        """Users should be able to mark all their notifications as read."""
+        data = {'action': 'mark_all_read'}
+        ok_(self.unread_notification.read is not True)
+        response = http_post_response(self.url, self.view, data, self.user)
+        self.unread_notification.refresh_from_db()
+        ok_(self.unread_notification.read is True,
+            'The unread notification should be marked as read.')
+        
 
 class TestUnreadNotificationList(TestCase):
     """A user should be able to view lists of their unread notifications."""
