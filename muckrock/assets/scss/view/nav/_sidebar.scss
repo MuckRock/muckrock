@@ -118,15 +118,18 @@ The sidebar should use a dark UI.
             }
         }
         .nav-item {
-            width: 2.75em;
             text-align: center;
             .icon {
                 vertical-align: middle;
-                path {
-                    fill: $color-white;
-                }
+                @include svg-color($color-white);
             }
             text-decoration: none;
+            &.unread .notify.icon {
+                @include svg-color($color-white);
+            }
+            &.unread:hover .notify.icon {
+                @include svg-color($color-white);
+            }
         }
         .visible .nav-item {
             background: $color-blue;

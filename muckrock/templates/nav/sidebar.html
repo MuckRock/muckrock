@@ -17,8 +17,9 @@
     <header class="account-links">
         {% if user.is_authenticated %}
         {% if unread_notifications.count > 0 %}
-        <a href="{% url 'acct-notifications-unread' %}" class="nav-item">
+        <a href="{% url 'acct-notifications-unread' %}" class="unread nav-item">
             <span class="blue counter">{{unread_notifications.count}}</span>
+            {% include 'lib/component/icon/notification.svg' %}
         </a>
         {% else %}
         <a href="{% url 'acct-notifications' %}" class="nav-item">
