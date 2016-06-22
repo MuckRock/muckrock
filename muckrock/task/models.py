@@ -509,10 +509,11 @@ class ResponseTask(Task):
             logging.info('Request #%d status changed to "%s"', foia.id, status)
             action = generate_status_action(foia)
             # notify the owner for all statuses
+            # only notify followers if the foia is publicly viewable: this is important!!!!!!!
             # notify the followers only if the action reflects a terminal status:
             # completed, rejected, no documents
             notify(foia.user, action)
-            if foia.status in END_STATUS:
+            if foia.is_public() and foia.status in END_STATUS:
                 notify(followers(foia), action)
 
     def set_price(self, price):
