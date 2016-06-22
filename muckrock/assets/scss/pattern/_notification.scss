@@ -1,9 +1,3 @@
-@mixin notification-icon-color($color) {
-    path, rect, circle, polygon {
-        fill: $color;
-    }
-}
-
 .notification {
     @include display(flex);
     @include align-items(center);
@@ -12,9 +6,9 @@
     }
     .icon {
         vertical-align: middle;
-        &.success { @include notification-icon-color($color-green); }
-        &.error { @include notification-icon-color($color-red); }
-        &.info { @include notification-icon-color($color-blue); }
+        &.success { @include svg-color($color-green); }
+        &.error { @include svg-color($color-red); }
+        &.info { @include svg-color($color-blue); }
     }
     .notification__action, .notification__action--passive {
         display: inline-block;
@@ -45,6 +39,6 @@
     .icon {
         height: 4em;
         width: 4em;
-        @include notification-icon-color($color-grey);
+        @include svg-color($color-grey);
     }
 }

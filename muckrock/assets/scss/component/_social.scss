@@ -26,6 +26,7 @@
         height: 1.25rem;
         width: 1.25rem;
         vertical-align: middle;
+        @include svg-color($color-white);
     }
     .label {
         display: none;
@@ -39,7 +40,6 @@
         color: $color-white;
         text-decoration: none;
     }
-    @include icon-color($color-white);
     @include social-color(email, $color-email);
     @include social-color(twitter, $color-twitter);
     @include social-color(facebook, $color-facebook);
