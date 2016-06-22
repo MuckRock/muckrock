@@ -500,11 +500,11 @@ class TestNotificationList(TestCase):
         """Users should be able to mark all their notifications as read."""
         data = {'action': 'mark_all_read'}
         ok_(self.unread_notification.read is not True)
-        response = http_post_response(self.url, self.view, data, self.user)
+        http_post_response(self.url, self.view, data, self.user)
         self.unread_notification.refresh_from_db()
         ok_(self.unread_notification.read is True,
             'The unread notification should be marked as read.')
-        
+
 
 class TestUnreadNotificationList(TestCase):
     """A user should be able to view lists of their unread notifications."""
