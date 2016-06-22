@@ -2,12 +2,25 @@
 
 {% block content %}
 <div class="notifications detail">
-    {% block notifications-title %}
-    <div class="notifications__title">
-        <h1>All Notifications</h1>
-        <a href="{% url 'acct-notifications-unread' %}"><span class="counter">{{unread_notifications.count}}</span> Unread</a>
-    </div>
-    {% endblock %}
+    <header class="notifications__header">
+        <span class="notifications__title">
+            <h1>{{title}}</h1>
+            <ul class="nostyle inline">
+                <li><a href="{% url 'acct-notifications-unread' %}">
+                    <span class="counter {% if unread_notifications.count > 0 %}blue{% endif %}">{{unread_notifications.count}}</span> Unread
+                </a></li>
+                <li><a href="{% url 'acct-notifications' %}">All Notifications</a></li>
+            </ul>
+        </span>
+        <form method="post">
+            {% csrf_token %}
+            {% if unread_notifications.count > 0 %}
+            <button type="submit" name="action" value="mark_all_read" class="button">Mark all as read</button>
+            {% else %}
+            <button type="submit" name="action" value="mark_all_read" class="button" disabled>Mark all as read</button>
+            {% endif %}
+        </form>
+    </header>
     {% if notifications|length > 0 %}
     {% if page_obj.paginator.num_pages > 1 %}
     {% include 'lib/pagination.html' %}

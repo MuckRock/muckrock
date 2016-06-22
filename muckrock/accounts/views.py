@@ -491,6 +491,7 @@ class NotificationList(ListView):
     model = Notification
     template_name = 'accounts/notifications_all.html'
     context_object_name = 'notifications'
+    title = 'All Notifications'
 
     def get_queryset(self):
         """Return all notifications for the user making the request."""
@@ -505,6 +506,12 @@ class NotificationList(ListView):
             return max(min(per_page, 100), 5)
         except (ValueError, TypeError):
             return 25
+
+    def get_context_data(self, **kwargs):
+        """Add the title to the context"""
+        context = super(NotificationList, self).get_context_data(**kwargs)
+        context['title'] = self.title
+        return context
 
     def mark_all_read(self):
         """Mark all notifications for the view as read."""
@@ -526,6 +533,7 @@ class NotificationList(ListView):
 class UnreadNotificationList(NotificationList):
     """List only unread notifications for a user."""
     template_name = 'accounts/notifications_unread.html'
+    title = 'Unread Notifications'
 
     def get_queryset(self):
         """Only return unread notifications."""

@@ -1,12 +1,5 @@
 {% extends 'accounts/notifications_all.html' %}
 
-{% block notifications-title %}
-<div class="notifications__title">
-    <h1>Unread Notifications</h1>
-    <a href="{% url 'acct-notifications' %}">All Notifications</a>
-</div>
-{% endblock %}
-
 {% block notifications-empty %}
 <div class="notifications--empty">
     {% include 'lib/component/icon/notification.svg' %}
