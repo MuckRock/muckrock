@@ -42,7 +42,7 @@
                 <span class="label">File<span class="extended"> Request</span></span>
             </a>
             <div class="dark nav-item sidebar-toggle" id="sidebar-button">
-                {% if notifications.count > 0 %}
+                {% if unread_notifications.count > 0 %}
                 <span class="blue counter">{{notifications.count}}</span>
                 {% else %}
                 {% include 'lib/component/icon/sections-lines.svg' %}

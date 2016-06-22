@@ -489,7 +489,7 @@ class StatisticsViewSet(viewsets.ModelViewSet):
 class NotificationList(ListView):
     """List of notifications for a user."""
     model = Notification
-    template_name = 'accounts/notifications.html'
+    template_name = 'accounts/notifications_all.html'
     context_object_name = 'notifications'
 
     def get_queryset(self):
@@ -510,6 +510,8 @@ class NotificationList(ListView):
 @method_decorator(login_required, name='dispatch')
 class UnreadNotificationList(NotificationList):
     """List only unread notifications for a user."""
+    template_name = 'accounts/notifications_unread.html'
+
     def get_queryset(self):
         """Only return unread notifications."""
         notifications = super(UnreadNotificationList, self).get_queryset()

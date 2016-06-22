@@ -97,7 +97,7 @@ def sidebar_info(request):
     if request.user.is_authenticated():
         # content for logged in users
         sidebar_info_dict.update({
-            'notifications': get_unread_notifications(request.user),
+            'unread_notifications': get_unread_notifications(request.user),
             'actionable_requests': get_actionable_requests(request.user),
             'organization': get_organization(request.user),
             'my_projects': Project.objects.get_for_contributor(request.user).exists(),

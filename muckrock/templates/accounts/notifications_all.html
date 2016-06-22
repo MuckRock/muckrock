@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="notifications detail">
+    {% block notifications-title %}
+    <div class="notifications__title">
+        <h1>All Notifications</h1>
+        <a href="{% url 'acct-notifications-unread' %}"><span class="counter">{{unread_notifications.count}}</span> Unread</a>
+    </div>
+    {% endblock %}
+    {% if notifications|length > 0 %}
+    {% if page_obj.paginator.num_pages > 1 %}
+    {% include 'lib/pagination.html' %}
+    {% endif %}
+    <ul class="nostyle notifications__list">
+    {% for notification in notifications %}
+        <li {% if not notification.read %}class="unread"{% endif %}>{% include 'lib/pattern/notification.html' %}</li>
+    {% endfor %}
+    </ul>
+    {% if page_obj.paginator.count > 10 %}
+    {% include 'lib/pagination.html' %}
+    {% endif %}
+    {% else %}
+    {% block notifications-empty %}
+    <div class="notifications--empty">
+        {% include 'lib/component/icon/notification.svg' %}
+        <h2>No notifications</h2>
+        <p>Notifications about site activity will collect here.</p>
+    </div>
+    {% endblock %}
+    {% endif %}
+</div>
+{% endblock %}
