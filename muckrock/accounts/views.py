@@ -489,12 +489,21 @@ class NotificationList(ListView):
     """List of notifications for a user."""
     model = Notification
     template_name = 'accounts/notifications.html'
+    context_object_name = 'notifications'
 
     def get_queryset(self):
         """Return all notifications for the user making the request."""
         user = self.request.user
         notifications = super(NotificationList, self).get_queryset()
         return notifications.for_user(user)
+
+    def get_paginate_by(self, queryset):
+        """Paginates list by the return value"""
+        try:
+            per_page = int(self.request.GET.get('per_page'))
+            return max(min(per_page, 100), 5)
+        except (ValueError, TypeError):
+            return 25
 
 
 @method_decorator(login_required, name='dispatch')
