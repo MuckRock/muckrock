@@ -10,5 +10,6 @@
     </span>
     <span class="text">
         {% include 'lib/pattern/actions/passive.html' with action=notification.action %}
+        <time class="timestamp" datetime="{{notification.datetime|date:'c'}}">{{notification.datetime|timesince}} ago</time>
     </span>
 </div>

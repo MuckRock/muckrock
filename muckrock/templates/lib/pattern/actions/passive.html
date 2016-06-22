@@ -28,8 +28,4 @@
 </span>
 {% endblock actor %}
 
-{% block extra %}
-    <time class="small timestamp" title="{{ action.timestamp|date:'c' }}" datetime="{{ action.timestamp|date:'c' }}"> {{ action.timestamp|timesince }} ago</time>
-{% endblock extra %}
-
 </div>
