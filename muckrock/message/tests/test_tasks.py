@@ -64,19 +64,14 @@ MockInvoice.retrieve.return_value = mock_invoice
 class TestDailyTask(TestCase):
     """Tests the daily email notification task."""
     def setUp(self):
-        # create an experimental user to notify about an activity
-        # right now special emails are limited to experimental only
-        factories.UserFactory(profile__experimental=True)
         factories.UserFactory()
 
     @mock.patch('muckrock.message.digests.ActivityDigest.send')
-    @mock.patch('muckrock.accounts.models.Profile.send_notifications')
-    def test_daily_notification_task(self, mock_profile_send, mock_send):
-        """Make sure the send method is called for the experimental user."""
+    def test_daily_notification_task(self, mock_send):
+        """Make sure the send method is called for a regular user."""
         # pylint: disable=no-self-use
         tasks.daily_digest()
         mock_send.assert_called_with()
-        mock_profile_send.assert_called_with()
 
 
 class TestStaffTask(TestCase):

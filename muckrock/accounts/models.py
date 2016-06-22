@@ -2,18 +2,15 @@
 Models for the accounts application
 """
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
-from django.conf import settings
-from django.core.mail import EmailMessage
 from django.db import models
-from django.template.loader import render_to_string
 
 from actstream.models import Action
 from datetime import datetime
 import dbsettings
 from easy_thumbnails.fields import ThumbnailerImageField
-from itertools import groupby
 from localflavor.us.models import PhoneNumberField, USStateField
 from lot.models import LOT
 import stripe
@@ -333,74 +330,6 @@ class Profile(models.Model):
         self.confirmation_key = key
         self.save()
         return key
-
-    def send_notifications(self):
-        """Send unread notifications from queue to user"""
-        subjects = {
-            'done': "you've got new MuckRock docs!",
-            'partial': "you've got new MuckRock docs!",
-            'rejected': 'an agency rejected a MuckRock request - appeal?',
-            'fix': 'we need help fixing a MuckRock request.',
-            'payment': 'an agency wants payment for a MuckRock request.'
-        }
-        category = {
-            'done': 'Completed Requests',
-            'partial': 'Completed Requests',
-            'rejected': 'Rejected Requests',
-            'fix': 'Requests Needing Action',
-            'payment': 'Requests Needing Action',
-            'no_docs': 'No Responsive Documents',
-        }
-        status_order = ['done', 'partial', 'rejected', 'fix', 'payment',
-                        'no_docs', 'abandoned', 'appealing', 'started',
-                        'submitted', 'ack', 'processed']
-
-        def get_subject(status, total_foias):
-            """Get subject for a given status"""
-            if status in subjects:
-                return subjects[status]
-            elif total_foias > 1:
-                return '%d MuckRock requests have updates' % total_foias
-            else:
-                return 'a MuckRock request has been updated'
-
-        foias = sorted(
-            self.notifications.all(),
-            key=lambda f: status_order.index(f.status) if f.status in status_order else 100
-        )
-        grouped_foias = list((s, list(fs)) for s, fs in groupby(
-            foias,
-            lambda f: category.get(f.status, 'Recently Updated Requests')
-        ))
-        if not grouped_foias:
-            return
-        if len(grouped_foias) == 1:
-            subject = '%s, %s' % (
-                self.user.first_name,
-                get_subject(grouped_foias[0][1][0].status, len(foias))
-            )
-        else:
-            subject = '%s, %s  Plus, %s' % (
-                self.user.first_name,
-                get_subject(grouped_foias[0][1][0].status, len(foias)),
-                get_subject(grouped_foias[1][1][0].status, len(foias))
-            )
-
-        msg = render_to_string('text/user/notify_mail.txt', {
-            'name': self.user.get_full_name(),
-            'foias': grouped_foias,
-            'footer': options.email_footer
-        })
-        email = EmailMessage(
-            subject=subject,
-            body=msg,
-            from_email='info@muckrock.com',
-            to=[self.user.email],
-            bcc=['diagnostics@muckrock.com']
-        )
-        email.send(fail_silently=False)
-
-        self.notifications.clear()
 
     def wrap_url(self, link, **extra):
         """Wrap a URL for autologin"""
