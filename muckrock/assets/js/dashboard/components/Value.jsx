@@ -29,6 +29,8 @@ export const Value = React.createClass({
         var total = valueData[0];
         var relative = total - valueData[valueData.length-1];
         var positive = relative > 0;
+        var grow = this.props.grow;
+        var relativeClass = (positive && grow) || (!positive && !grow) ? 'positive' : 'negative';
         return (
             <div className={this.props.field + ' ' + 'value'}>
                 <div className="value__title">
@@ -37,7 +39,7 @@ export const Value = React.createClass({
                 <div className="value__total">
                     {total}
                 </div>
-                <div className="value__relative">
+                <div className={"value__relative" + " " + relativeClass}>
                     {relative}
                 </div>
             </div>

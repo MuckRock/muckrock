@@ -31,9 +31,16 @@ export const Dashboard = React.createClass({
         var data = this.props.data.results;
         return (
             <div className="values">
-                <Value field="total_requests" title="Total Requests" data={this.props.data} />
-                <Value field="total_pages" title="Total Pages" data={this.props.data} />
-                <Value field="total_users" title="Total Users" data={this.props.data} />
+                <div className="values values--request">
+                    <Value field="total_requests" title="Requests" data={this.props.data} grow={true} />
+                    <Value field="total_pages" title="Pages" data={this.props.data} grow={true} />
+                    <Value field="total_requests_submitted" title="Processing" data={this.props.data} grow={false} />
+                    <Value field="requests_processing_days" title="Total Days Processing" data={this.props.data} grow={false} />
+                </div>
+                <div className="values values--user">
+                    <Value field="total_users" title="Users" data={this.props.data} grow={true} />
+                    <Value field="pro_users" title="Pro Users" data={this.props.data} grow={true} />
+                </div>
             </div>
         )
     },

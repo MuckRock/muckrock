@@ -26,14 +26,31 @@
 .values {
     @include display(flex);
     @include flex-wrap(wrap);
+    @include align-items(flex-start);
 }
 
 .value {
-    @include flex(1 1 auto);
+    @include flex(1 1 10em);
     margin: 0 $vertical-rhythm $vertical-rhythm 0;
-    .value__total {
-        font-size: $font-size-6;
+    .value__title {
+        margin-bottom: $vertical-rhythm/2;
+        color: $color-grey-5;
         font-weight: $font-weight-bold;
+        // padding-bottom: $vertical-rhythm/2;
+        // border-bottom: 1px solid $color-white;
+    }
+    .value__total {
+        font-size: $font-size-7;
+        font-weight: $font-weight-bold;
+        margin-bottom: $vertical-rhythm/2;
+    }
+    .value__relative {
+        &.positive {
+            color: $color-green;
+        }
+        &.negative {
+            color: $color-red;
+        }
     }
 }
 
