@@ -69,6 +69,15 @@ $.expr[":"].icontains = $.expr.createPseudo(function(arg) {
     };
 });
 
+// COLLAPSABLE
+$('.collapsable header').click(function(){
+    $(this).parent().toggleClass('collapsed');
+});
+$('.collapsable header').children('.nocollapse').click(function(event){
+    // Prevent click from propagating up to the collapsable header.
+    event.stopPropagation();
+});
+
 $('#sidebar-button').click(function(){
     var overlay = '#modal-overlay';
     var sidebar = '#website-sidebar';
@@ -121,7 +130,7 @@ $('document').ready(function(){
         yearRange: '1776:+1'
     });
 
-    $('.news--main img').loupe({
+    $('.news__main img').loupe({
         height: 200,
         width: 200
     });

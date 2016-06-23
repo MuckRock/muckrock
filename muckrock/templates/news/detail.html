@@ -10,46 +10,46 @@
 {% block title %}{{ article.title }}{% endblock title %}
 
 {% block content %}
-
-<article class="news detail news--article">
-    <header class="news--header">
-        {% with article.projects.last as project %}
-            {% if project.newsletter %}
-                {% newsletter list_id=project.newsletter label=project.newsletter_label cta=project.newsletter_cta %}
-            {% else %}
-                {% newsletter %}
+{% with article.projects.last as project %}
+    {% if project.newsletter %}
+        {% newsletter list_id=project.newsletter label=project.newsletter_label cta=project.newsletter_cta %}
+    {% else %}
+        {% newsletter %}
+    {% endif %}
+{% endwith %}
+<div class="news detail">
+    {% if article.image %}
+    <div class="news__image"><img src="{% thumbnail article.image 1200x400 crop %}"></div>
+    {% endif %}
+    <article class="news__article">
+        <header class="news__article__header">
+            <time title="{{ article.pub_date|date:'c' }}" datetime="{{ article.pub_date|date:'c' }}">{{ article.pub_date | date:"F j, Y" }}</time>
+            <h1>{{ article.title|smartypants }}</h1>
+            {% if article.kicker %}
+            <summary class="kicker">{{ article.kicker|smartypants }}</summary>
             {% endif %}
-        {% endwith %}
-        {% if article.image %}
-        <img src="{% thumbnail article.image 1200x400 crop %}">
-        {% endif %}
-        <time title="{{ article.pub_date|date:'c' }}" datetime="{{ article.pub_date|date:'c' }}">{{ article.pub_date | date:"F j, Y" }}</time>
-        <h1>{{ article.title|smartypants }}</h1>
-        {% if article.kicker %}
-        <summary class="kicker">{{ article.kicker|smartypants }}</summary>
-        {% endif %}
-        <div class="contributors">
-            {% with article.authors.all as authors %}
-            {% if authors %}
-            <div class="authors">Written by
-                {% for author in authors %}
-                    <a href="{{ author.profile.get_absolute_url }}" title="{{ author.get_full_name }}">{{ author.get_full_name }}</a>{% if not forloop.last %}, {% endif %}
-                {% endfor %}
+            <div class="contributors">
+                {% with article.authors.all as authors %}
+                {% if authors %}
+                <div class="authors">Written by
+                    {% for author in authors %}
+                        <a href="{{ author.profile.get_absolute_url }}" title="{{ author.get_full_name }}">{{ author.get_full_name }}</a>{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% endwith %}
+                {% with article.editors.all as editors %}
+                {% if editors %}
+                <div class="editors">Edited by
+                    {% for editor in editors %}
+                        <a href="{{ editor.profile.get_absolute_url }}" title="{{ editor.get_full_name }}">{{ editor.get_full_name }}</a>{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% endwith %}
             </div>
-            {% endif %}
-            {% endwith %}
-            {% with article.editors.all as editors %}
-            {% if editors %}
-            <div class="editors">Edited by
-                {% for editor in editors %}
-                    <a href="{{ editor.profile.get_absolute_url }}" title="{{ editor.get_full_name }}">{{ editor.get_full_name }}</a>{% if not forloop.last %}, {% endif %}
-                {% endfor %}
-            </div>
-            {% endif %}
-            {% endwith %}
-        </div>
-    </header>
-    <main class="news--main">
+        </header>
+        <main class="news__article__main">
 {% comment %}
 We have to keep this code un-tabbed for dumb reasons!
 The markdown filter will transform the tabbed text into a line of <code>.
@@ -58,8 +58,9 @@ Like  I said, real dumb stuff!
 {% filter markdown:"trusted"|smartypants %}
 {% evaluate article.body %}
 {% endfilter %}
-    </main>
-    <aside class="news--aside">
+        </main>
+    </article>
+    <aside class="news__aside">
         {% social title=article.title url=article.get_absolute_url %}
         {% project_manager article %}
         {% tag_manager article %}
@@ -72,7 +73,23 @@ Like  I said, real dumb stuff!
         </div>
         {% endif %}
     </aside>
-</article>
+</div>
+{% if related_articles %}
+<div class="articles__related">
+    <h1 class="articles__related__header">Related Stories</h1>
+    {% for article in related_articles %}
+    {% include 'lib/pattern/article.html' with large=True hide_summary=True %}
+    {% endfor %}
+</div>
+{% endif %}
+{% if recent_articles %}
+<div class="articles__recent">
+    <h1 class="articles__recent__header">Recently Published</h1>
+    {% for article in recent_articles|slice:":4" %}
+    {% include 'lib/pattern/article.html' with large=True hide_summary=True %}
+    {% endfor %}
+</div>
+{% endif %}
 {% endblock %}
 
 {% block open_graph %}

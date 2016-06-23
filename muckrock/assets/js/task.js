@@ -94,8 +94,6 @@ function formHasAction(taskForm, action) {
 
 authenticateAjax();
 
-var tasks = $('.task');
-
 // Hide all the resolved tasks
 $('.resolved.task')
     .each(function(){
@@ -143,18 +141,6 @@ $('button[name="reject"]').click(function(e){
         reject(this);
     });
     return false;
-});
-
-tasks.find('header').click(function() {
-    $(this).parent().toggleClass('collapsed');
-});
-
-$('.task .permalink').click(function(e) {
-    e.stopPropagation();
-});
-
-$('.task .checkbox').click(function(e) {
-    e.stopPropagation();
 });
 
 var checkboxes = $('.task header').find(':checkbox');

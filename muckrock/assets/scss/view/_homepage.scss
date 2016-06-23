@@ -73,7 +73,7 @@
 
         .stat
         {
-            @include flex(50%);
+            @include flex(1 1 8em);
             width: 7em;
             margin: 0 0 $vertical-rhythm 0;
             text-align: center;
@@ -126,6 +126,7 @@
 
 .homepage
 {
+    @include padding;
     h2
     {
         font-size: $font-size-4;

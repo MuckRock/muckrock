@@ -37,11 +37,17 @@ and
     {% endfor %}
     {% for field in form.visible_fields %}
         {% if field.label == 'Request' %}
-        <div class="sent message request">
-            <section class="meta">
-                <span class="date right">{% now "m/d/Y" %}</span>
+        <div class="sent communication">
+            <header class="communication-header">
+                <p class="from">From: {{foia.user.get_full_name}}</p>
+                <div class="actionables">
+                    <time class="date" datetime="{% now 'c' %}">{% now 'm/d/Y' %}</time>
+                </div>
+            </header>
+            <section class="communication-metadata">
+                <p class="small subject">Subject: {{ foia.title }}</p>
             </section>
-            <section class="body">
+            <section class="communication-body">
                 <p>To Whom It May Concern:</p>
                 <p>This is a request under [Insert jurisdiction's applicable freedom of information law] for a copy of the following records:</p>
                 {{ field }}

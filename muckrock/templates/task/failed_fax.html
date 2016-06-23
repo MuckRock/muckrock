@@ -1,7 +1,7 @@
 {% extends 'task/default.html' %}
 
 {% block task-content %}
-<dl class="task-data">
+<dl class="task__data">
     {% with task.communication.foia as request %}
     <dt>Request</dt>
     <dd><a href="{{request.get_absolute_url}}">{{request}}</a> (<a href="{% url 'admin:foia_foiarequest_change' request.id %}">admin</a>)</dd>

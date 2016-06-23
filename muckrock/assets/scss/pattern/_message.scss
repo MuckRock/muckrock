@@ -1,8 +1,4 @@
-.notifications {
-    margin-bottom: 0;
-}
-
-@mixin notification-color($light, $normal, $dark) {
+@mixin message-color($light, $normal, $dark) {
     background: $light;
     color: $dark;
     .symbol {
@@ -13,11 +9,15 @@
     }
 }
 
-.notification {
+.messages {
+    margin-bottom: 0;
+}
+
+.message {
     @include display(flex);
     @include flex-direction(column);
     @include align-items(stretch);
-    @include notification-color($color-grey-7, $color-black, $color-black);
+    @include message-color($color-grey-7, $color-black, $color-black);
     .symbol {
         $svg-size: 2.75em;
         flex: 0 0 $svg-size;
@@ -38,21 +38,27 @@
         .symbol {
             text-align: center;
         }
+        &.small {
+            @include flex-direction(column);
+            .symbol {
+                text-align: left;
+            }
+        }
     }
 }
 
-.notification.info {
-    @include notification-color($color-blue-light, $color-blue, $color-blue-dark);
+.message.info {
+    @include message-color($color-blue-light, $color-blue, $color-blue-dark);
 }
 
-.notification.success {
-    @include notification-color($color-green-light, $color-green, $color-green-dark);
+.message.success {
+    @include message-color($color-green-light, $color-green, $color-green-dark);
 }
 
-.notification.warning {
-    @include notification-color($color-yellow-light, $color-yellow, $color-yellow-dark);
+.message.warning {
+    @include message-color($color-yellow-light, $color-yellow, $color-yellow-dark);
 }
 
-.notification.error {
-    @include notification-color($color-red-light, $color-red, $color-red-dark);
+.message.error {
+    @include message-color($color-red-light, $color-red, $color-red-dark);
 }
