@@ -30,13 +30,10 @@ export const Dashboard = React.createClass({
     renderSuccess: function() {
         var data = this.props.data.results;
         return (
-            <div className="charts">
+            <div className="values">
                 <Value field="total_requests" title="Total Requests" data={this.props.data} />
-                <Chart field="total_requests" title="Total Requests" data={this.props.data} />
                 <Value field="total_pages" title="Total Pages" data={this.props.data} />
-                <Chart field="total_pages" title="Total Pages" data={this.props.data} />
                 <Value field="total_users" title="Total Users" data={this.props.data} />
-                <Chart field="total_users" title="Total Users" data={this.props.data} />
             </div>
         )
     },
@@ -57,7 +54,10 @@ export const Dashboard = React.createClass({
         }
         return (
             <div className={"dashboard " + className}>
-                <DateRange dates={this.props.dates} />
+                <header className="dashboard__header">
+                    <h1>Dashboard</h1>
+                    <DateRange dates={this.props.dates} />
+                </header>
                 {content}
             </div>
         )

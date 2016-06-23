@@ -30,7 +30,7 @@ export const Value = React.createClass({
         var relative = total - valueData[valueData.length-1];
         var positive = relative > 0;
         return (
-            <div className={this.props.field}>
+            <div className={this.props.field + ' ' + 'value'}>
                 <div className="value__title">
                     {title}
                 </div>

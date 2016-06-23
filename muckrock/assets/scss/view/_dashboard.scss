@@ -1,8 +1,11 @@
 .dashboard {
+    @include padding;
+    background-color: $color-black;
+    color: $color-white;
     &.loading .loader {
         text-align: center;
         .line-scale-pulse-out-rapid > div {
-            background-color: $color-black;
+            background-color: $color-white;
         }
     }
     &.error .error {
@@ -11,6 +14,48 @@
             font-size: $font-size-8;
             font-weight: $font-weight-bold;
         }
+    }
+}
+
+.dashboard__header {
+    @include display(flex);
+    @include flex-wrap(wrap);
+    @include justify-content(space-between);
+}
+
+.values {
+    @include display(flex);
+    @include flex-wrap(wrap);
+}
+
+.value {
+    @include flex(1 1 auto);
+    margin: 0 $vertical-rhythm $vertical-rhythm 0;
+    .value__total {
+        font-size: $font-size-6;
+        font-weight: $font-weight-bold;
+    }
+}
+
+.date-range {
+    @include display(flex);
+    @include flex-wrap(wrap);
+    @include align-items(flex-start);
+    .date-pickers {
+        margin: 0 $vertical-rhythm $vertical-rhythm 0;
+    }
+    .button-group .button {
+        margin-top: 0;
+    }
+}
+
+.react-datepicker__input-container {
+    margin-bottom: 0;
+    input {
+        border: none;
+        border-radius: 0;
+        border-right: 1px solid $color-black;
+        background: $color-grey-3;
     }
 }
 

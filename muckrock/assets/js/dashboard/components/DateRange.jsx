@@ -60,24 +60,28 @@ export const DateRange = React.createClass({
         var yesterday = moment().subtract(1, "days");
         return (
             <div className="date-range">
-                <DatePicker
-                    selected={min}
-                    startDate={min}
-                    endDate={max}
-                    maxDate={yesterday}
-                    showYearDropdown
-                    onChange={this.handleChangeStart} />
-                <DatePicker
-                    selected={max}
-                    startDate={min}
-                    endDate={max}
-                    maxDate={yesterday}
-                    showYearDropdown
-                    onChange={this.handleChangeEnd} />
-                <button onClick={this.handleLastWeek}>Last Week</button>
-                <button onClick={this.handleLastMonth}>Last Month</button>
-                <button onClick={this.handleLastYear}>Last Year</button>
-                <button onClick={this.handleForever}>Forever</button>
+                <div className="date-pickers">
+                    <DatePicker
+                        selected={min}
+                        startDate={min}
+                        endDate={max}
+                        maxDate={yesterday}
+                        showYearDropdown
+                        onChange={this.handleChangeStart} />
+                    <DatePicker
+                        selected={max}
+                        startDate={min}
+                        endDate={max}
+                        maxDate={yesterday}
+                        showYearDropdown
+                        onChange={this.handleChangeEnd} />
+                </div>
+                <div className="button-group">
+                    <button className="button" onClick={this.handleLastWeek}>Last Week</button>
+                    <button className="button" onClick={this.handleLastMonth}>Last Month</button>
+                    <button className="button" onClick={this.handleLastYear}>Last Year</button>
+                    <button className="button" onClick={this.handleForever}>Forever</button>
+                </div>
             </div>
         );
     }
