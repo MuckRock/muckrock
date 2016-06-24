@@ -1,4 +1,5 @@
 import React from 'react';
+import { Chart } from './Chart';
 
 function parseDate(string) {
     // date strings are formatted YYYY-MM-DD
@@ -32,16 +33,17 @@ export const Value = React.createClass({
         var grow = this.props.grow;
         var relativeClass = (positive && grow) || (!positive && !grow) ? 'positive' : 'negative';
         return (
-            <div className={this.props.field + ' ' + 'value'}>
+            <div className={this.props.field + " value"}>
                 <div className="value__title">
                     {title}
                 </div>
                 <div className="value__total">
                     {total}
                 </div>
-                <div className={"value__relative" + " " + relativeClass}>
+                <div className={"value__relative " + relativeClass}>
                     {relative}
                 </div>
+                <Chart label={this.props.title} field={this.props.field} data={this.props.data} />
             </div>
         );
     }

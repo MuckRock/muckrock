@@ -1,5 +1,5 @@
 import React from 'react';
-import rd3 from 'rd3';
+var LineChart = require("react-chartjs").Line;
 
 function parseDate(string) {
     // date strings are formatted YYYY-MM-DD
@@ -21,33 +21,35 @@ export const Chart = React.createClass({
         });
     },
     render: function() {
-        const LineChart = rd3.LineChart;
         var data = this.collect(this.props.field);
-        var chartData = [];
-        if (data.length) {
-            chartData = [
+        var chartData = {
+            labels: [],
+            datasets: [
                 {
-                    name: 'series1',
-                    values: data.map(function(entry, index){
-                        return {
-                            x: entry.date,
-                            y: entry.data,
-                        }
-                    }),
+                    label: this.props.label,
+                    fill: true,
+                    lineTension: 0.4,
+                    pointColor: "rgba(72, 131, 207, 1)",
+                    strokeColor: "rgba(72, 131, 207, 1)",
+                    fillColor: "rgba(72, 131, 207, .5)",
+                    data: []
                 }
-            ];
+            ]
+        };
+        data.reverse().map(function(entry, index){
+            chartData.labels.push(entry.date.toDateString());
+            chartData.datasets[0].data.push(entry.data);
+        });
+        var chartOptions = {
+            showScale: false,
+            showTooltips: false,
+            scaleGridLineColor: "rgba(255, 255, 255, .1)",
+            scaleLineColor: "rgba(255, 255, 255, .1)",
+            scaleShowVerticalLines: false,
+            pointDot: false,
         }
         return (
-            <div className={this.props.field}>
-                <LineChart
-                    legend={false}
-                    data={chartData}
-                    width={600}
-                    height={400}
-                    title={this.props.title}
-                    xAxisLabel='Date'
-                />
-            </div>
+            <LineChart data={chartData} options={chartOptions} width="150px" height="50px" />
         );
     }
 });

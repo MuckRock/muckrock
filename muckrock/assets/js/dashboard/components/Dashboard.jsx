@@ -2,7 +2,6 @@ import React from 'react';
 
 import { getData } from '../api';
 
-import { Chart } from './Chart';
 import { DateRange } from './DateRange';
 import { Value } from './Value';
 import { Loader } from './Loader';
@@ -34,6 +33,8 @@ export const Dashboard = React.createClass({
                 <div className="values values--request">
                     <Value field="total_requests" title="Requests" data={this.props.data} grow={true} />
                     <Value field="total_pages" title="Pages" data={this.props.data} grow={true} />
+                </div>
+                <div className="values values--processing">
                     <Value field="total_requests_submitted" title="Processing" data={this.props.data} grow={false} />
                     <Value field="requests_processing_days" title="Total Days Processing" data={this.props.data} grow={false} />
                 </div>
