@@ -96,3 +96,10 @@ class PasswordResetForm(auth_forms.PasswordResetForm):
             email_message.attach_alternative(html_email, 'text/html')
 
         email_message.send()
+
+
+class StripeForm(forms.Form):
+    """A form to collect a stripe token for a given amount and email."""
+    token = forms.CharField(widget=forms.HiddenInput)
+    email = forms.EmailField(widget=forms.HiddenInput)
+    amount = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'currency-field'}))
