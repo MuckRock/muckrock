@@ -163,3 +163,13 @@ def org_subscription_receipt(user, charge):
         context = {'org': None}
     return Receipt(charge, [item], user=user, subject=subject, extra_context=context,
         text_template=text, html_template=html)
+
+def donation_receipt(user, charge):
+    """Generates a receipt for a donation."""
+    subject = u'Donation Receipt'
+    text = 'message/receipt/donation.txt'
+    html = 'message/receipt/donation.html'
+    item = LineItem('Tax Deductible Donation', charge.amount)
+    return Receipt(charge, [item], user=user, subject=subject,
+        text_template=text, html_template=html)
+    
