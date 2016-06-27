@@ -124,7 +124,8 @@ urlpatterns = patterns(
     ),
     url(r'^news-sitemaps/', include('news_sitemaps.urls')),
     url(r'^__debug__/', include(debug_toolbar.urls)),
-    url(r'^donate/$', views.donate, name='donate'),
+    url(r'^donate/$', views.DonationFormView.as_view(), name='donate'),
+    url(r'^donate/thanks/$', views.DonationThanksView.as_view(), name='donate-thanks'),
 )
 
 if settings.DEBUG:

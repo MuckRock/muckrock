@@ -16,12 +16,10 @@ from nose.tools import ok_
 from nose.tools import eq_
 import stripe
 
-from muckrock.settings import STRIPE_SECRET_KEY
-
 from muckrock.fields import EmailsListField
-from muckrock.forms import NewsletterSignupForm
-from muckrock.utils import mock_middleware
-from muckrock.views import NewsletterSignupView
+from muckrock.forms import NewsletterSignupForm, StripeForm
+from muckrock.test_utils import http_get_response, http_post_response
+from muckrock.views import NewsletterSignupView, DonationFormView
 
 # pylint: disable=no-self-use
 # pylint: disable=too-many-public-methods
@@ -136,10 +134,7 @@ class TestNewsletterSignupView(TestCase):
 
     def test_get_view(self):
         """Visiting the page should present a signup form."""
-        request = self.factory.get(self.url)
-        request.user = AnonymousUser()
-        request = mock_middleware(request)
-        response = self.view(request)
+        response = http_get_response(self.url, self.view)
         eq_(response.status_code, 200)
 
     @patch('muckrock.views.NewsletterSignupView.subscribe')
@@ -150,10 +145,7 @@ class TestNewsletterSignupView(TestCase):
             'list': settings.MAILCHIMP_LIST_DEFAULT
         })
         ok_(form.is_valid(), 'The form should validate.')
-        request = self.factory.post(self.url, form.data)
-        request.user = AnonymousUser()
-        request = mock_middleware(request)
-        response = self.view(request)
+        response = http_post_response(self.url, self.view, form.data)
         mock_subscribe.assert_called_with(form.data['email'], form.data['list'])
         eq_(response.status_code, 302, 'Should redirect upon successful submission.')
 
@@ -166,10 +158,7 @@ class TestNewsletterSignupView(TestCase):
             'list': 'other'
         })
         ok_(form.is_valid(), 'The form should validate.')
-        request = self.factory.post(self.url, form.data)
-        request.user = AnonymousUser()
-        request = mock_middleware(request)
-        response = self.view(request)
+        response = http_post_response(self.url, self.view, form.data)
         mock_subscribe.assert_any_call(form.data['email'], form.data['list'])
         mock_subscribe.assert_any_call(form.data['email'], settings.MAILCHIMP_LIST_DEFAULT)
         eq_(response.status_code, 302, 'Should redirect upon successful submission.')
@@ -185,91 +174,28 @@ class TestNewsletterSignupView(TestCase):
         eq_(response.status_code, 200)
 
 
+@patch('stripe.Charge', Mock())
 class TestDonations(TestCase):
     """Tests donation functionality"""
 
     def setUp(self):
-        self.client = Client()
         self.url = reverse('donate')
-        stripe.api_key = STRIPE_SECRET_KEY
-
-    # normally, the token should be generated on the frontend by Stripe Checkout
-    def new_token(self, card_number):
-        token = stripe.Token.create(card={
-            'number': card_number,
-            'exp_month': '6',
-            'exp_year': str(datetime.today().year + 1),
-            'cvc': '123',
-        })
-        ok_(token) # just checking that the token was created successfully
-        return token
+        self.view = DonationFormView.as_view()
+        self.form = StripeForm
 
     def test_url(self):
         ok_(self.url)
 
-    def test_donate(self):
-        token = self.new_token('4242424242424242')
-        response = self.client.post(self.url, {
-            'token':token.id,
-            'email':'example@test.com',
-            'amount':500
-        })
-        session = self.client.session
-        eq_(session.get('donated'), True,
-            'Donating should raise a flag in session data.')
-        eq_(session.get('ga'), 'donation',
-            'Donating should create an analytics event.')
+    @patch('muckrock.message.tasks.send_charge_receipt.delay')
+    def test_donate(self, mock_send):
+        token = 'test'
+        email = 'example@test.com'
+        amount = 500
+        data = {'stripe_token': token, 'stripe_email': email, 'stripe_amount': amount}
+        form = self.form(data)
+        form.is_valid()
+        ok_(form.is_valid(), 'The form should validate. %s' % form.errors)
+        response = http_post_response(self.url, self.view, data)
+        mock_send.assert_called_once()
         eq_(response.status_code, 302,
-            'A successful donation will redirect after completion.')
-
-    def test_donate_no_token(self):
-        """Bad data should be handled smoothly"""
-        response = self.client.post(self.url, {
-            'token':'bad_token',
-            'email':'example@test.com',
-            'amount':500
-        })
-        session = self.client.session
-        eq_(session.get('donated'), None)
-        eq_(session.get('ga'), None)
-        eq_(response.status_code, 302)
-
-    def test_donate_crazy_monies(self):
-        """Bad data should be handled smoothly"""
-        token = self.new_token('4242424242424242')
-        response = self.client.post(self.url, {
-            'token':token.id,
-            'email':'example@test.com',
-            'amount':54654645645465
-        })
-        session = self.client.session
-        eq_(session.get('donated'), None)
-        eq_(session.get('ga'), None)
-        eq_(response.status_code, 302)
-
-    def test_donate_zero_monies(self):
-        """Bad data should be handled smoothly"""
-        token = self.new_token('4242424242424242')
-        response = self.client.post(self.url, {
-            'token':token.id,
-            'email':'example@test.com',
-            'amount':0
-        })
-        session = self.client.session
-        eq_(session.get('donated'), None)
-        eq_(session.get('ga'), None)
-        eq_(response.status_code, 302)
-
-    def test_donate_broken_auth(self):
-        """Bad authentication should be handled smoothly"""
-        token = self.new_token('4242424242424242')
-        stripe.api_key = 'blah blah blah'
-        response = self.client.post(self.url, {
-            'token':token.id,
-            'email':'example@test.com',
-            'amount':100
-        })
-        session = self.client.session
-        eq_(session.get('donated'), None)
-        eq_(session.get('ga'), None)
-        eq_(response.status_code, 302)
+            'A successful donation will return a redirection.')
