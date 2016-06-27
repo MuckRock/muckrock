@@ -31,12 +31,6 @@ def generate_key(size=6, chars=string.ascii_uppercase + string.digits):
     """Generates a random alphanumeric key"""
     return ''.join(random.SystemRandom().choice(chars) for _ in range(size))
 
-def mock_middleware(request):
-    """Mocks the request with messages and session middleware"""
-    setattr(request, 'session', mock.MagicMock())
-    setattr(request, '_messages', mock.MagicMock())
-    return request
-
 def get_stripe_token(card_number='4242424242424242'):
     """
     Helper function for creating a dummy Stripe token.

@@ -15,7 +15,7 @@ from muckrock import agency, factories, task
 from muckrock.foia.models import FOIARequest, FOIANote
 from muckrock.foia.views import save_foia_comm
 from muckrock.task.factories import FlaggedTaskFactory, StaleAgencyTaskFactory
-from muckrock.utils import mock_middleware
+from muckrock.test_utils import mock_middleware
 from muckrock.views import MRFilterableListView
 
 eq_ = nose.tools.eq_

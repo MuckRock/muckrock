@@ -11,12 +11,7 @@ from nose.tools import ok_, eq_
 
 import muckrock.factories
 import muckrock.organization
-
-def mock_middleware(request):
-    """Mocks the request with messages and session middleware"""
-    setattr(request, 'session', Mock())
-    setattr(request, '_messages', Mock())
-    return request
+from muckrock.test_utils import mock_middleware
 
 
 class TestCreateView(TestCase):

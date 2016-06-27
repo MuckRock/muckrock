@@ -13,7 +13,7 @@ from muckrock.news.models import Article
 from muckrock.news.views import NewsDetail
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.tests import get_allowed, get_404
-from muckrock.utils import mock_middleware
+from muckrock.test_utils import mock_middleware
 
 # pylint: disable=no-self-use
 # pylint: disable=too-many-public-methods
