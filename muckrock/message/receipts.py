@@ -66,12 +66,15 @@ class Receipt(TemplateEmail):
             'total': total,
             'charge': {
                 'id': self.charge.id,
-                'name': self.charge.source.name,
                 'date': datetime.fromtimestamp(self.charge.created),
-                'card': self.charge.source.brand,
-                'last4': self.charge.source.last4,
             }
         })
+        if self.charge.source.object != 'bitcoin_receiver':
+            context['charge'].update({
+                'name': self.charge.source.name,
+                'card': self.charge.source.brand,
+                'last4': self.charge.source.last4,
+            })
         return context
 
 def generic_receipt(user, charge):
@@ -172,4 +175,3 @@ def donation_receipt(user, charge):
     item = LineItem('Tax Deductible Donation', charge.amount)
     return Receipt(charge, [item], user=user, subject=subject,
         text_template=text, html_template=html)
-    
