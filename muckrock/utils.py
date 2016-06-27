@@ -3,7 +3,6 @@ Miscellanous utilities
 """
 
 import datetime
-import mock
 import random
 import string
 import stripe

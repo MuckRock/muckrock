@@ -3,18 +3,15 @@ Tests for site level functionality and helper functions for application tests
 """
 
 from django.conf import settings
-from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
-from django.test import TestCase, RequestFactory, Client
+from django.test import TestCase, RequestFactory
 
 from mock import Mock, patch
-from datetime import datetime
 import logging
 import nose.tools
 from nose.tools import ok_
 from nose.tools import eq_
-import stripe
 
 from muckrock.fields import EmailsListField
 from muckrock.forms import NewsletterSignupForm, StripeForm
@@ -183,11 +180,10 @@ class TestDonations(TestCase):
         self.view = DonationFormView.as_view()
         self.form = StripeForm
 
-    def test_url(self):
-        ok_(self.url)
-
     @patch('muckrock.message.tasks.send_charge_receipt.delay')
     def test_donate(self, mock_send):
+        """Donations should have a token, email, and amount.
+        An email receipt should be sent for the donation."""
         token = 'test'
         email = 'example@test.com'
         amount = 500

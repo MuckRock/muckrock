@@ -15,8 +15,9 @@ from decimal import Decimal
 import mock
 import nose.tools
 
-from muckrock import factories, test_utils
+from muckrock import factories
 from muckrock.project import models, forms, views
+from muckrock.test_utils import mock_middleware, http_get_response, http_post_response
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
@@ -43,12 +44,13 @@ class TestProjectCreateView(TestCase):
     def test_basic(self):
         """Basic users should not be able to GET the ProjectCreateView."""
         user = factories.UserFactory()
-        response = test_utils.http_get_response(self.url, self.view, user)
-        eq_(response.status_code, 200, 'Basic users should be able to GET the ProjectCreateView.')
+        response = http_get_response(self.url, self.view, user)
+        eq_(response.status_code, 200,
+            'Basic users should be able to GET the ProjectCreateView.')
 
     def test_anonymous(self):
         """Logged out users should not be able to GET the ProjectCreateView."""
-        response = test_utils.http_get_response(self.url, self.view, AnonymousUser())
+        response = http_get_response(self.url, self.view, AnonymousUser())
         eq_(response.status_code, 302,
             'Anonymous users should not be able to GET the ProjectCreateView.')
         redirect_url = reverse('acct-login') + '?next=' + reverse('project-create')
@@ -67,7 +69,7 @@ class TestProjectCreateView(TestCase):
         })
         ok_(form.is_valid(), 'The form should validate.')
         staff_user = factories.UserFactory(is_staff=True)
-        response = test_utils.http_post_response(self.url, self.view, form.data, staff_user)
+        response = http_post_response(self.url, self.view, form.data, staff_user)
         project = models.Project.objects.last()
         eq_(response.status_code, 302,
             'The response should redirect to the project when it is created.')
@@ -95,23 +97,23 @@ class TestProjectEditView(TestCase):
     def test_staff(self):
         """Staff users should be able to edit projects."""
         staff_user = factories.UserFactory(is_staff=True)
-        response = test_utils.http_get_response(self.url, self.view, staff_user, **self.kwargs)
+        response = http_get_response(self.url, self.view, staff_user, **self.kwargs)
         eq_(response.status_code, 200)
 
     def test_contributor(self):
         """Contributors should be able to edit projects."""
-        response = test_utils.http_get_response(self.url, self.view, self.contributor, **self.kwargs)
+        response = http_get_response(self.url, self.view, self.contributor, **self.kwargs)
         eq_(response.status_code, 200)
 
     @raises(Http404)
     def test_basic(self):
         """Basic users should not be able to edit projects."""
         user = factories.UserFactory()
-        test_utils.http_get_response(self.url, self.view, user, **self.kwargs)
+        http_get_response(self.url, self.view, user, **self.kwargs)
 
     def test_anonymous(self):
         """Logged out users cannot edit projects."""
-        response = test_utils.http_get_response(self.url, self.view, AnonymousUser())
+        response = http_get_response(self.url, self.view, AnonymousUser())
         redirect_url = reverse('acct-login') + '?next=' + self.url
         eq_(response.status_code, 302,
             'The user should be redirected.')
@@ -129,7 +131,7 @@ class TestProjectEditView(TestCase):
         }
         form = forms.ProjectUpdateForm(data)
         ok_(form.is_valid(), 'The form should validate. %s' % form.errors)
-        test_utils.http_post_response(self.url, self.view, data, self.contributor, **self.kwargs)
+        http_post_response(self.url, self.view, data, self.contributor, **self.kwargs)
         self.project.refresh_from_db()
         eq_(self.project.description, desc,
             'The description should be updated.')
@@ -143,7 +145,7 @@ class TestProjectEditView(TestCase):
         }
         form = forms.ProjectUpdateForm(data)
         ok_(form.is_valid(), 'The form should validate. %s' % form.errors)
-        test_utils.http_post_response(self.url, self.view, data, self.contributor, **self.kwargs)
+        http_post_response(self.url, self.view, data, self.contributor, **self.kwargs)
         self.project.refresh_from_db()
         ok_(self.project.has_contributor(new_contributor))
         ok_(self.project.has_contributor(self.contributor))
@@ -166,23 +168,23 @@ class TestProjectPublishView(TestCase):
     def test_staff(self):
         """Staff users should be able to publish projects."""
         staff_user = factories.UserFactory(is_staff=True)
-        response = test_utils.http_get_response(self.url, self.view, staff_user, **self.kwargs)
+        response = http_get_response(self.url, self.view, staff_user, **self.kwargs)
         eq_(response.status_code, 200)
 
     def test_contributor(self):
         """Contributors should be able to delete projects."""
-        response = test_utils.http_get_response(self.url, self.view, self.contributor, **self.kwargs)
+        response = http_get_response(self.url, self.view, self.contributor, **self.kwargs)
         eq_(response.status_code, 200)
 
     @raises(Http404)
     def test_basic(self):
         """Basic users should not be able to delete projects."""
         user = factories.UserFactory()
-        test_utils.http_get_response(self.url, self.view, user, **self.kwargs)
+        http_get_response(self.url, self.view, user, **self.kwargs)
 
     def test_anonymous(self):
         """Anonymous users cannot delete projects."""
-        response = test_utils.http_get_response(self.url, self.view, AnonymousUser(), **self.kwargs)
+        response = http_get_response(self.url, self.view, AnonymousUser(), **self.kwargs)
         redirect_url = reverse('acct-login') + '?next=' + self.url
         eq_(response.status_code, 302,
             'The user should be redirected.')
@@ -193,7 +195,7 @@ class TestProjectPublishView(TestCase):
         """Projects that are pending review should reject access to the Publish view."""
         pending_project = factories.ProjectFactory(private=False, approved=False)
         pending_project.contributors.add(self.contributor)
-        response = test_utils.http_get_response(self.url, self.view, self.contributor, **{
+        response = http_get_response(self.url, self.view, self.contributor, **{
             'slug': pending_project.slug,
             'pk': pending_project.pk
         })
@@ -207,7 +209,7 @@ class TestProjectPublishView(TestCase):
         notes = 'Testing project publishing'
         form = forms.ProjectPublishForm({'notes': notes})
         ok_(form.is_valid(), 'The form should validate.')
-        response = test_utils.http_post_response(
+        response = http_post_response(
             self.url,
             self.view,
             form.data,
@@ -248,7 +250,7 @@ class TestProjectCrowdfundView(TestCase):
         }
         request = self.request_factory.post(self.url, data)
         request.user = user
-        request = test_utils.mock_middleware(request)
+        request = mock_middleware(request)
         response = self.view(request, slug=self.project.slug, pk=self.project.pk)
         self.project.refresh_from_db()
         eq_(self.project.crowdfunds.count(), 1,
@@ -281,6 +283,6 @@ class TestProjectContributorView(TestCase):
 
     def test_get(self):
         """The view should render, of course!"""
-        response = test_utils.http_get_response(self.url, self.view, self.user, **self.kwargs)
+        response = http_get_response(self.url, self.view, self.user, **self.kwargs)
         eq_(response.status_code, 200,
             'The view should return 200.')

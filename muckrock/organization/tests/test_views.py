@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase, RequestFactory
 
 import logging
-from mock import Mock, patch
+from mock import patch
 from nose.tools import ok_, eq_
 
 import muckrock.factories

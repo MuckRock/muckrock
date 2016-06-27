@@ -10,7 +10,6 @@ from django.core.cache.utils import make_template_fragment_key
 from django.core.exceptions import FieldError
 from django.core.urlresolvers import reverse
 from django.db.models import Sum, FieldDoesNotExist
-from django.http import HttpResponse, HttpResponseServerError
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.utils.decorators import method_decorator
@@ -490,6 +489,8 @@ class DonationFormView(StripeFormMixin, FormView):
         email = form.cleaned_data['stripe_email']
         amount = form.cleaned_data['stripe_amount']
         charge = self.make_charge(token, amount, email)
+        if charge is None:
+            return self.form_invalid(form)
         # Send the receipt
         send_charge_receipt.delay(charge.id)
         return super(DonationFormView, self).form_valid(form)
@@ -513,24 +514,24 @@ class DonationFormView(StripeFormMixin, FormView):
                     'action': 'donation'
                 }
             )
-        except stripe.error.InvalidRequestError, e:
+        except stripe.error.InvalidRequestError as exception:
             # Invalid parameters were supplied to Stripe's API
-            logger.error(e)
+            logger.error(exception)
             error_msg = ('Oops, something went wrong on our end.'
                         ' Sorry about that!')
-        except stripe.error.AuthenticationError, e:
+        except stripe.error.AuthenticationError as exception:
             # Authentication with Stripe's API failed
-            logger.error(e)
+            logger.error(exception)
             error_msg = ('Oops, something went wrong on our end.'
                         ' Sorry about that!')
-        except stripe.error.APIConnectionError, e:
+        except stripe.error.APIConnectionError as exception:
             # Network communication with Stripe failed
-            logger.error(e)
+            logger.error(exception)
             error_msg = ('Oops, something went wrong on our end.'
                         ' Sorry about that!')
-        except stripe.error.StripeError, e:
+        except stripe.error.StripeError as exception:
             # Generic error
-            logger.error(e)
+            logger.error(exception)
             error_msg = ('Oops, something went wrong on our end.'
                         ' Sorry about that!')
         finally:

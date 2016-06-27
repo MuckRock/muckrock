@@ -11,7 +11,7 @@ import nose.tools
 
 from muckrock import agency
 from muckrock import factories
-from muckrock.test_utils import mock_middleware, http_get_response
+from muckrock.test_utils import http_get_response
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
@@ -127,6 +127,7 @@ class TestAgencyViews(TestCase):
 
     def test_list(self):
         """The list should only contain approved agencies"""
+        # pylint: disable=no-self-use
         approved_agency = factories.AgencyFactory()
         unapproved_agency = factories.AgencyFactory(status='pending')
         response = http_get_response(reverse('agency-list'), agency.views.List.as_view())
