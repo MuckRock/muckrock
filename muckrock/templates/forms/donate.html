@@ -1,18 +1,27 @@
-{% extends 'forms/base_form.html' %}
+{% extends 'base.html' %}
 {% load static from staticfiles %}
 
-{% block form-head %}
-    <h1 class="form-title">Donate</h1>
-    <p>Make a tax deductible donation to MuckRock! You'll be supporting our awesome work!</p>
-{% endblock form-head %}
-
-{% block form-form %}
-<form method="post" class="stripe-checkout">
-    {% csrf_token %}
-    {% include 'lib/pattern/form.html' %}
-    <input type="hidden" name="stripe_image" value="{% static 'icons/logo.png' %}" />
-    <div class="buttons">
-        <button type="submit" class="green button">Donate</button>
+{% block content %}
+<div class="donate" style="background-image: url({% static 'img/donation.jpg' %});">
+    <div class="donate__form">
+        {% block donate-form %}
+        <h1 class="form-title">Donate</h1>
+        <p>MuckRock is a <strong>501(C)(3)</strong> organization. Our tax identification number is <strong>81-1485228</strong>. Your donation is fully tax deductible.</p>
+        <p><small>Donations may also be sent via PayPal to info@muckrock.com or mailed to:</small></p>
+        <p><small>
+        MuckRock<br>
+        411A Highland Ave<br>
+        Somerville, MA 02144<br>
+        </small></p>
+        <form method="post" class="stripe-checkout">
+            {% csrf_token %}
+            {% include 'lib/pattern/form.html' %}
+            <input type="hidden" name="stripe_image" value="{% static 'icons/logo.png' %}" />
+            <div class="buttons">
+                <button type="submit" class="green button">Donate</button>
+            </div>
+        </form>
+        {% endblock %}
     </div>
-</form>
-{% endblock form-form %}
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+.donate {
+    @include display(flex);
+    @include align-items(center);
+    @include justify-content(center);
+    @include padding;
+    min-height: 100vh;
+    background-color: $color-grey-3;
+    background-size: cover;
+    background-position: top center;
+    .donate__form {
+        max-width: 30em;
+        @include padding;
+        @include border;
+        @include border-radius;
+        background: rgba(247, 248, 250, .8);
+    }
+    .currency {
+        font-size: $font-size-5;
+        font-weight: $font-weight-bold;
+        color: $color-green;
+    }
+    .button {
+        width: 100%;
+    }
+}
