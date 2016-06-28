@@ -118,6 +118,7 @@ def send_charge_receipt(charge_id):
             'request-purchase': receipts.request_purchase_receipt,
             'request-fee': receipts.request_fee_receipt,
             'crowdfund-payment': receipts.crowdfund_payment_receipt,
+            'donation': receipts.donation_receipt,
         }
         receipt_function = receipt_functions[user_action]
     except KeyError:

@@ -26,7 +26,7 @@ import 'autonumeric';
         // back to the original amount field, since that is what
         // will ultimately be submitted
         function copyValue() {
-            var value = $currency.autoNumeric('get') * 100;
+            var value = ($currency.autoNumeric('get') * 100).toFixed(0);
             $input.attr('value', value);
         }
         $currency.keyup(copyValue);

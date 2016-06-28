@@ -11,7 +11,7 @@ import nose.tools
 
 from muckrock import agency
 from muckrock import factories
-from muckrock.utils import mock_middleware
+from muckrock.test_utils import http_get_response
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
@@ -103,21 +103,19 @@ class TestAgencyViews(TestCase):
     def setUp(self):
         self.request_factory = RequestFactory()
         self.agency = factories.AgencyFactory()
-        self.request = self.request_factory.get(self.agency.get_absolute_url())
-        self.request.user = factories.UserFactory()
-        self.request = mock_middleware(self.request)
+        self.url = self.agency.get_absolute_url()
         self.view = agency.views.detail
+        self.user = factories.UserFactory()
+        self.kwargs = {
+            'jurisdiction': self.agency.jurisdiction.slug,
+            'jidx': self.agency.jurisdiction.id,
+            'slug': self.agency.slug,
+            'idx': self.agency.id
+        }
 
     def test_approved_ok(self):
         """An approved agency should return an 200 response."""
-        jurisdiction = self.agency.jurisdiction
-        response = self.view(
-            self.request,
-            jurisdiction.slug,
-            jurisdiction.pk,
-            self.agency.slug,
-            self.agency.pk
-        )
+        response = http_get_response(self.url, self.view, self.user, **self.kwargs)
         eq_(response.status_code, 200)
 
     @nose.tools.raises(Http404)
@@ -125,22 +123,14 @@ class TestAgencyViews(TestCase):
         """An unapproved agency should return a 404 response."""
         self.agency.status = 'pending'
         self.agency.save()
-        jurisdiction = self.agency.jurisdiction
-        self.view(
-            self.request,
-            jurisdiction.slug,
-            jurisdiction.pk,
-            self.agency.slug,
-            self.agency.pk
-        )
+        http_get_response(self.url, self.view, self.user, **self.kwargs)
 
     def test_list(self):
         """The list should only contain approved agencies"""
+        # pylint: disable=no-self-use
         approved_agency = factories.AgencyFactory()
         unapproved_agency = factories.AgencyFactory(status='pending')
-        request = self.request_factory.get(reverse('agency-list'))
-        view = agency.views.List.as_view()
-        response = view(request)
+        response = http_get_response(reverse('agency-list'), agency.views.List.as_view())
         agency_list = response.context_data['object_list']
         ok_(approved_agency in agency_list, 'Approved agencies should be listed.')
         ok_(unapproved_agency not in agency_list, 'Unapproved agencies should not be listed.')

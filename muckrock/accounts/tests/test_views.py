@@ -25,26 +25,8 @@ from muckrock.factories import (
 from muckrock.foia.views import Detail as FOIARequestDetail
 from muckrock.organization.models import Organization
 from muckrock.qanda.views import Detail as QuestionDetail
-from muckrock.utils import mock_middleware, new_action, notify
-
-
-def http_get_response(url, view, user=AnonymousUser(), **kwargs):
-    """Handles making GET requests, returns the response."""
-    request_factory = RequestFactory()
-    request = request_factory.get(url, **kwargs)
-    request = mock_middleware(request)
-    request.user = user
-    response = view(request, **kwargs)
-    return response
-
-def http_post_response(url, view, data, user=AnonymousUser(), **kwargs):
-    """Handles making POST requests, returns the response."""
-    request_factory = RequestFactory()
-    request = request_factory.post(url, data, **kwargs)
-    request = mock_middleware(request)
-    request.user = user
-    response = view(request)
-    return response
+from muckrock.utils import new_action, notify
+from muckrock.test_utils import mock_middleware, http_get_response, http_post_response
 
 def http_get_post(url, view, data):
     """Performs both a GET and a POST on the same url and view."""

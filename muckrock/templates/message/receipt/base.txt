@@ -6,7 +6,7 @@
 {% if charge.name %}{{charge.name}}{% endif %}
 {{charge.date|date:"m/d/Y"}}
 Order {{charge.id}}
-{{charge.card}} **** **** **** {{charge.last4}}
+{% if charge.card %}{{charge.card}} **** **** **** {{charge.last4}}{% endif %}
 ------------
 {% for item in items %}
 {{item.name}}: {{item.formatted_price}}

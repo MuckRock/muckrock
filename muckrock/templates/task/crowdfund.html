@@ -3,5 +3,9 @@
 {% block task-content %}
 <summary class="task__data">
     <p><a href="{% url 'admin:crowdfund_crowdfund_change' task.crowdfund.id %}">{{task.crowdfund}}</a> has closed. It was requesting {{task.crowdfund.payment_required}} and received {{task.crowdfund.payment_received}}.</p>
+    <dl>
+        <dt>Crowdfund Object</dt>
+        <dd><a href="{{crowdfund_object.get_absolute_url}}">{{crowdfund_object}}</a></dd>
+    </dl>
 </summary>
 {% endblock %}
