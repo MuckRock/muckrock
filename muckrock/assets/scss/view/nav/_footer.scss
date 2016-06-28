@@ -28,6 +28,13 @@ footer.website-footer {
         }
     }
 
+    .button {
+        color: $color-white;
+        &:hover {
+            color: $color-white;
+        }
+    }
+
     dfn {
         margin-bottom: $vertical-rhythm/2;
         color: $color-white;
