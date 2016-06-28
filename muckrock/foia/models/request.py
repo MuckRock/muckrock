@@ -12,7 +12,7 @@ from django.db.models import Q, Sum, Count
 from django.template.defaultfilters import escape, linebreaks, slugify
 from django.template.loader import render_to_string
 
-import actstream
+from actstream.models import followers
 from datetime import datetime, date, timedelta
 from hashlib import md5
 import logging
@@ -481,23 +481,22 @@ class FOIARequest(models.Model):
             days_since = (date.today() - self.date_processing).days
         return days_since
 
-    def _notify(self):
-        """Notify request's creator and followers about the update"""
-        # notify creator
-        self.user.profile.notify(self)
-        # notify followers
-        for user in actstream.models.followers(self):
-            if self.viewable_by(user):
-                user.profile.notify(self)
-
     def update(self, anchor=None):
         """Various actions whenever the request has been updated"""
         # pylint: disable=unused-argument
         # Do something with anchor
         self.updated = True
         self.save()
-        self._notify()
         self.update_dates()
+
+    def notify(self, action):
+        """
+        Notify the owner of the request.
+        Notify followers if the request is not under embargo.
+        """
+        utils.notify(self.user, action)
+        if self.is_public():
+            utils.notify(followers(self), action)
 
     def submit(self, appeal=False, snail=False, thanks=False):
         """The request has been submitted.  Notify admin and try to auto submit"""
@@ -636,7 +635,7 @@ class FOIARequest(models.Model):
         )
         # We perform some logging and activity generation
         logger.info('%s has paid %0.2f for request %s', user.username, amount, self.title)
-        actstream.action.send(user, verb='paid fees for', action_object=self, target=self.agency)
+        utils.new_action(user, 'paid fees', target=self)
         # We return the communication we generated, in case the caller wants to do anything with it
         return comm
 
@@ -773,8 +772,7 @@ class FOIARequest(models.Model):
         '''Provides action interfaces for users'''
         is_owner = self.created_by(user)
         can_follow = user.is_authenticated() and not is_owner
-        followers = actstream.models.followers(self)
-        is_following = user in followers
+        is_following = user in followers(self)
         kwargs = {
             'jurisdiction': self.jurisdiction.slug,
             'jidx': self.jurisdiction.pk,

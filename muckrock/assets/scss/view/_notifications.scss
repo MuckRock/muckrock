@@ -1,0 +1,33 @@
+.notifications__list {
+    @include border;
+}
+
+.notifications__header {
+    @include display(flex);
+    @include justify-content(space-between);
+    h1 {
+        margin-bottom: 0;
+    }
+}
+
+.notifications__list li {
+    padding: $vertical-rhythm/2;
+    background: $color-white-pure;
+    border-bottom: 1px solid $color-grey;
+    &:last-child {
+        border-bottom: 0;
+    }
+    &.unread {
+        background: lighten($color-blue-light, 10%);
+    }
+}
+
+.notifications--empty {
+    text-align: center;
+    padding: $vertical-rhythm;
+    .icon {
+        height: 4em;
+        width: 4em;
+        @include svg-color($color-grey);
+    }
+}

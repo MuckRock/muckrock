@@ -1,48 +1,59 @@
 {% extends 'message/base.txt' %}
 {% block body %}
-{% if follow_foia.count > 0 or my_foia.count > 0 %}
---------------------------
+{% if activity.requests.count > 0 %}
+---------------------------
 Requests
-..........................
-{% if my_foia.count > 0 %}
+- - - - - - - - - - - - - -
+{% with activity.requests.mine as my_foia %}{% if my_foia.count > 0 %}
 Yours
-
-{{my_foia.count}} update{{my_foia.count|pluralize}} on your requests
-{% include 'message/component/foia_digest.txt' with stream=my_foia.completed stream_name='completed' %}
-{% include 'message/component/foia_digest.txt' with stream=my_foia.rejected stream_name='rejected' %}
-{% include 'message/component/foia_digest.txt' with stream=my_foia.unsuccessful stream_name='unsuccessful' %}
-{% include 'message/component/foia_digest.txt' with stream=my_foia.action_required stream_name='require action' %}
-{% include 'message/component/foia_digest.txt' with stream=my_foia.response stream_name='updated' %}
-{% endif %}
-{% if follow_foia.count > 0 %}
+- - - - - - - - - - - - - -
+{% include 'message/component/foia_digest.txt' with notifications=my_foia.completed stream_name='Completed' %}
+{% include 'message/component/foia_digest.txt' with notifications=my_foia.rejected stream_name='Rejected' %}
+{% include 'message/component/foia_digest.txt' with notifications=my_foia.no_documents stream_name='No Documents' %}
+{% include 'message/component/foia_digest.txt' with notifications=my_foia.payment_required label='Payment Required' %}
+{% include 'message/component/foia_digest.txt' with notifications=my_foia.fix_required label='Fix Required' %}
+{% include 'message/component/foia_digest.txt' with notifications=my_foia.acknowledged label='Acknowledged'%}
+{% include 'message/component/foia_digest.txt' with notifications=my_foia.interim_response label='Updated' %}
+{% include 'message/component/foia_digest.txt' with notifications=my_foia.received label='New Response' %}
+{% endif %}{% endwith %}
+{% with activity.requests.following as follow_foia %}{% if follow_foia.count > 0 %}
 Following
-
-{{follow_foia.count}} update{{follow_foia.count|pluralize}} on requests you follow
-{% include 'message/component/foia_digest.txt' with stream=follow_foia.completed stream_name='completed' %}
-{% include 'message/component/foia_digest.txt' with stream=follow_foia.rejected stream_name='rejected' %}
-{% include 'message/component/foia_digest.txt' with stream=follow_foia.unsuccessful stream_name='unsuccessful' %}
-{% include 'message/component/foia_digest.txt' with stream=follow_foia.action_required stream_name='require action' %}
-{% include 'message/component/foia_digest.txt' with stream=follow_foia.response stream_name='updated' %}
-{% endif %}{% endif %}
+- - - - - - - - - - - - - -
+{% include 'message/component/foia_digest.txt' with notifications=follow_foia.completed stream_name='Completed' %}
+{% include 'message/component/foia_digest.txt' with notifications=follow_foia.rejected stream_name='Rejected' %}
+{% include 'message/component/foia_digest.txt' with notifications=follow_foia.no_documents stream_name='No Documents' %}
+{% include 'message/component/foia_digest.txt' with notifications=follow_foia.payment_required label='Payment Required' %}
+{% include 'message/component/foia_digest.txt' with notifications=follow_foia.fix_required label='Fix Required' %}
+{% include 'message/component/foia_digest.txt' with notifications=follow_foia.acknowledged label='Acknowledged'%}
+{% include 'message/component/foia_digest.txt' with notifications=follow_foia.interim_response label='Updated' %}
+{% include 'message/component/foia_digest.txt' with notifications=follow_foia.received label='New Response' %}
+{% endif %}{% endwith %}
+{% endif %}
 {% if activity.questions.count > 0 %}
---------------------------
+---------------------------
 Questions
-..........................
+- - - - - - - - - - - - - -
 {% if activity.questions.mine|length > 0 %}
 Yours
-{% for action in activity.questions.mine %}
+- - - - - - - - - - - - - -
+{% for notification in activity.questions.mine %}
+{% with notification.action as action %}
 * {% if action.action_object %}{{ action.action_object }}{% if action.action_object.get_absolute_url %} <{{action.action_object.get_absolute_url }}>{% endif %}{% endif %}{% if action.action_object and action.target %} to{% endif %}{% if action.target %} {{ action.target }}{% if action.target.get_absolute_url %} <{{action.target.get_absolute_url }}>{% endif %}{% endif %} {{ action.verb }} by {{ action.actor }}{% if action.actor.get_absolute_url %} <{{action.actor.get_absolute_url }}>{% endif %}.
+{% endwith %}
 {% endfor %}
 {% endif %}
 {% if activity.questions.following|length > 0 %}
 Following
-{% for action in activity.questions.following %}
+- - - - - - - - - - - - - -
+{% for notification in activity.questions.following %}
+{% with notification.action as action %}
 * {% if action.action_object %}{{ action.action_object }}{% if action.action_object.get_absolute_url %} <{{action.action_object.get_absolute_url }}>{% endif %}{% endif %}{% if action.action_object and action.target %} to{% endif %}{% if action.target %} {{ action.target }}{% if action.target.get_absolute_url %} <{{action.target.get_absolute_url }}>{% endif %}{% endif %} {{ action.verb }} by {{ action.actor }}{% if action.actor.get_absolute_url %} <{{action.actor.get_absolute_url }}>{% endif %}.
+{% endwith %}
 {% endfor %}
 {% endif %}
 {% endif %}
 {% endblock %}
 
 {% block settings %}
-Change your digest frequency or disable digests from your account settings (https://www.muckrock.com{% url 'acct-settings' %}).</p>
+Change your digest frequency or disable digests from your account settings ({{base_url}}{% url 'acct-settings' %}).</p>
 {% endblock %}

@@ -2,26 +2,17 @@
 Digest objects for the messages app
 """
 
-from django.contrib.contenttypes.models import ContentType
-from django.db.models import Q
 from django.utils import timezone
 
-from actstream.models import Action, user_stream
+from actstream.models import Action
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 
-from muckrock.accounts.models import Statistics
+from muckrock.accounts.models import Notification, Statistics
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.message.email import TemplateEmail
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.qanda.models import Question
-
-def model_stream(model, stream):
-    """Filter stream by model"""
-    content_type = ContentType.objects.get_for_model(model)
-    action_object = Q(action_object_content_type=content_type)
-    target = Q(target_content_type=content_type)
-    return stream.filter(action_object|target)
 
 def get_stats(start, end):
     """Compares statistics between two dates"""
@@ -241,51 +232,79 @@ class ActivityDigest(Digest):
         context['subject'] = self.get_subject()
         return context
 
+    def notifications_for_model(self, notifications, model):
+        """Filter a list of notifications for a specific model,
+        split between objects owned by the user and objects followed by the user."""
+        user = self.get_user()
+        model_notifications = notifications.for_model(model)
+        own_model_actions = Action.objects.owned_by(user, model)
+        own_model_notifications = model_notifications.filter(action__in=own_model_actions)
+        following_model_notifications = model_notifications.exclude(action__in=own_model_actions)
+        return {
+            'count': model_notifications.count(),
+            'mine': own_model_notifications,
+            'following': following_model_notifications
+        }
+
     def get_activity(self):
         """Returns a list of activities to be sent in the email"""
         duration = self.get_duration()
         user = self.get_user()
-        user_ct = ContentType.objects.get_for_model(user)
-        following = (user_stream(user).filter(timestamp__gte=duration)
-                                           .exclude(verb__icontains='following'))
-        foia_following = model_stream(FOIARequest, following)
-        question_following = model_stream(Question, following).exclude(verb='asked')
-        foia_stream = (Action.objects.owned_by(user, FOIARequest)
-                                     .filter(timestamp__gte=duration)
-                                     .exclude(actor_content_type=user_ct,
-                                              actor_object_id=user.id))
-        question_stream = (Action.objects.owned_by(user, Question)
-                                         .filter(timestamp__gte=duration)
-                                         .exclude(actor_content_type=user_ct,
-                                                  actor_object_id=user.id))
-        foia_stream = self.classify_foia_activity(foia_stream)
-        foia_following = self.classify_foia_activity(foia_following)
-        self.activity['requests'] = {
-            'count': foia_stream['count'] + foia_following['count'],
-            'mine': foia_stream,
-            'following': foia_following
-        }
-        self.activity['questions'] = {
-            'count': question_stream.count() + question_following.count(),
-            'mine': question_stream,
-            'following': question_following
-        }
-        self.activity['count'] = (self.activity['requests']['count'] +
-                                  self.activity['questions']['count'])
+        # get unread notifications for the user that are new since the last email
+        notifications = (Notification.objects.for_user(user)
+                                             .get_unread()
+                                             .filter(datetime__gte=duration))
+        self.activity['requests'] = self.foia_notifications(notifications)
+        self.activity['questions'] = self.notifications_for_model(notifications, Question)
+        self.activity['count'] = (
+            self.activity['requests']['count'] +
+            self.activity['questions']['count']
+        )
         return self.activity
 
-    def classify_foia_activity(self, stream):
-        """Segment and classify the activity"""
+    def foia_notifications(self, notifications):
+        """Do some heavy filtering and classifying of foia notifications."""
+        filtered_notifications = self.notifications_for_model(notifications, FOIARequest)
+        filtered_notifications['mine'] = self.classify_request_notifications(
+            filtered_notifications['mine'],
+            [
+                ('completed', 'completed'),
+                ('rejected', 'rejected'),
+                ('no_documents', 'no responsive documents'),
+                ('require_payment', 'payment'),
+                ('require_fix', 'require_fix'),
+                ('interim_response', 'processing'),
+                ('acknowledged', 'acknowledged'),
+                ('received', 'sent a communication')
+            ]
+        )
+        filtered_notifications['following'] = self.classify_request_notifications(
+            filtered_notifications['following'],
+            [
+                ('completed', 'completed'),
+                ('rejected', 'rejected'),
+                ('no_documents', 'no responsive documents'),
+                ('require_payment', 'payment'),
+                ('require_fix', 'require_fix'),
+                ('interim_response', 'processing'),
+                ('acknowledged', 'acknowledged'),
+                ('received', 'sent a communication')
+            ]
+        )
+        filtered_notifications['count'] = (
+            filtered_notifications['mine']['count'] +
+            filtered_notifications['following']['count']
+        )
+        return filtered_notifications
+
+    def classify_request_notifications(self, notifications, classifiers):
+        """Break a single list of notifications into a classified dictionary."""
         # pylint: disable=no-self-use
-        classified = {
-            'completed': stream.filter(verb__icontains='completed'),
-            'rejected': stream.filter(verb__icontains='rejected'),
-            'no_documents': stream.filter(verb__icontains='no responsive documents'),
-            'require_payment': stream.filter(verb__icontains='payment'),
-            'require_fix': stream.filter(verb__icontains='require_fix'),
-            'interim_response': stream.filter(verb__icontains='processed'),
-            'acknowledged': stream.filter(verb__icontains='acknowledged')
-        }
+        classified = {}
+        # a classifier should be a tuple of a key and a verb phrase to filter by
+        # e.g. ('no_documents', 'no responsive documents')
+        for classifier in classifiers:
+            classified[classifier[0]] = notifications.filter(action__verb__icontains=classifier[1])
         activity_count = 0
         for _, classified_stream in classified.iteritems():
             activity_count += len(classified_stream)

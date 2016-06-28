@@ -24,7 +24,7 @@ django-premailer # Styles HTML emails
 django-pylibmc # Interface to memcache
 django-querycount # Counts queries for dev
 django-rest-swagger # API documentation
-django-reversion # Version history for models
+django-reversion==1.10.2 # Version history for models
 django-robots # Manage robots.txt file
 django-secure # Enforces security best practices
 django-sslify # Force SSL everywhere

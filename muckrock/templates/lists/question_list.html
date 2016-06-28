@@ -4,7 +4,7 @@
 {% block list-type %}question{% endblock list-type %}
 
 {% block list-sections %}
-<section class="list-sections"> 
+<section class="list-sections">
     <ul>
         <li class="{% active request '^/questions/$' %}"><a href="{% url 'question-index' %}">All</a></li>
         <li class="{% active request '^/questions/unanswered/$' %}"><a href="{% url 'question-unanswered' %}">Unanswered</a></li>
@@ -18,6 +18,13 @@
 
 {% block list-actions %}
 <a href="{% url 'question-create' %}" class="primary button">Ask a Question</a>
+{% if request.user.profile %}
+{% if request.user.profile.new_question_notifications %}
+<a href="{% url 'question-follow-new' %}" class="button">Unsubscribe from new questions</a>
+{% else %}
+<a href="{% url 'question-follow-new' %}" class="button">Subscribe to new questions</a>
+{% endif %}
+{% endif %}
 {% endblock list-actions %}
 
 {% block list-table-head %}

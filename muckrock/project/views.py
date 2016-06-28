@@ -18,7 +18,7 @@ from django.views.generic import (
 )
 from django.utils.decorators import method_decorator
 
-import actstream
+from actstream.models import followers
 from datetime import date, timedelta
 
 from muckrock.crowdfund.models import Crowdfund
@@ -27,7 +27,7 @@ from muckrock.message.tasks import notify_project_contributor
 from muckrock.project.models import Project, ProjectCrowdfunds
 from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm, ProjectPublishForm
 from muckrock.views import MRFilterableListView
-
+from muckrock.utils import new_action
 
 class ProjectExploreView(TemplateView):
     """Provides a space for exploring our different projects."""
@@ -140,7 +140,7 @@ class ProjectDetailView(DetailView):
                     'agency__jurisdiction',
                     'user__profile',
                 ).get_public_file_count())
-        context['followers'] = actstream.models.followers(project)
+        context['followers'] = followers(project)
         context['articles'] = project.articles.get_published()
         context['contributors'] = project.contributors.select_related('profile')
         context['user_is_experimental'] = user.is_authenticated() and user.profile.experimental
@@ -274,9 +274,9 @@ class ProjectCrowdfundView(ProjectPermissionsMixin, CreateView):
         crowdfund = self.object
         project = self.get_project()
         relationship = ProjectCrowdfunds.objects.create(project=project, crowdfund=crowdfund)
-        actstream.action.send(
+        new_action(
             self.request.user,
-            verb='started',
+            'began crowdfunding',
             action_object=relationship.crowdfund,
             target=relationship.project
         )
