@@ -33,7 +33,7 @@ class CrowdfundForm(forms.ModelForm):
     payment_required = forms.IntegerField(
         label='Amount',
         help_text='We will add 15% to this amount, which goes towards our operating costs.',
-        widget=NumberInput()
+        widget=NumberInput(attrs={'class': 'currency-field'})
     )
 
     payment_capped = forms.BooleanField(
