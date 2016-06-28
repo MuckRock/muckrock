@@ -14,6 +14,7 @@ Yours
 {% include 'message/component/foia_digest.txt' with notifications=my_foia.fix_required label='Fix Required' %}
 {% include 'message/component/foia_digest.txt' with notifications=my_foia.acknowledged label='Acknowledged'%}
 {% include 'message/component/foia_digest.txt' with notifications=my_foia.interim_response label='Updated' %}
+{% include 'message/component/foia_digest.txt' with notifications=my_foia.received label='New Response' %}
 {% endif %}{% endwith %}
 {% with activity.requests.following as follow_foia %}{% if follow_foia.count > 0 %}
 Following

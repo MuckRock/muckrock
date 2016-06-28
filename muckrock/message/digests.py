@@ -273,8 +273,9 @@ class ActivityDigest(Digest):
                 ('no_documents', 'no responsive documents'),
                 ('require_payment', 'payment'),
                 ('require_fix', 'require_fix'),
-                ('interim_response', 'processed'),
+                ('interim_response', 'processing'),
                 ('acknowledged', 'acknowledged'),
+                ('received', 'sent a communication')
             ]
         )
         filtered_notifications['following'] = self.classify_request_notifications(
