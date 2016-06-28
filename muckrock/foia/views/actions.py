@@ -26,7 +26,7 @@ from muckrock.foia.forms import \
 from muckrock.foia.models import FOIARequest, FOIAFile, END_STATUS
 from muckrock.foia.views.comms import save_foia_comm
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.utils import new_action, notify
+from muckrock.utils import new_action
 
 logger = logging.getLogger(__name__)
 
@@ -303,7 +303,7 @@ def crowdfund_request(request, idx, **kwargs):
             foia.crowdfund = crowdfund
             foia.save(comment='added a crowdfund')
             messages.success(request, 'Your crowdfund has started, spread the word!')
-            action = new_action(
+            new_action(
                 request.user,
                 'began crowdfunding',
                 action_object=crowdfund,
