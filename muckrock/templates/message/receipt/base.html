@@ -7,7 +7,9 @@
         {% if charge.name %}<p>{{charge.name}}</p>{% endif %}
         <p>{{charge.date|date:"m/d/Y"}}</p>
         <p>Order {{charge.id}}</p>
+        {% if charge.card %}
         <p>{{charge.card}} **** **** **** {{charge.last4}}</p>
+        {% endif %}
     </div>
     <table class="line-items">
     {% for item in items %}
@@ -24,7 +26,7 @@
 </div>
     {% endblock %}
 <div>
-    <p>{% if user %}Hi {{ user.first_name }},{% else %}Hi {{charge.name}},{% endif %}</p>
+    <p>{% if user %}Hi {{ user.first_name }},{% elif charge.name %}Hi {{charge.name}},{% else %}Hi,{% endif %}</p>
     {% block description %}
     <p>This email confirms your payment to MuckRock.</p>
     {% endblock %}

@@ -24,7 +24,7 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.task.models import SnailMailTask
 from muckrock.tests import get_allowed, post_allowed, get_post_unallowed, get_404
-from muckrock.utils import mock_middleware
+from muckrock.test_utils import mock_middleware
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
