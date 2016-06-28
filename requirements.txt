@@ -16,7 +16,7 @@ celery-haystack==0.10
 celery==3.1.23
 Click==6.6                # via pyimagediet
 contextlib2==0.5.3        # via raven
-cssselect==0.9.1          # via premailer
+cssselect==0.9.2          # via premailer
 cssutils==1.0.1           # via premailer
 dill==0.2.5
 django-activity-stream==0.6.2
@@ -25,7 +25,7 @@ django-appconf==1.0.2     # via celery-haystack, django-compressor
 django-autocomplete-light==2.3.3
 django-celery==3.1.17
 django-compressor==2.0
-django-dbsettings==0.9.2
+django-dbsettings==0.9.3
 django-debug-toolbar==1.4
 django-filter==0.13.0
 django-geojson==2.9.0
@@ -44,9 +44,9 @@ django-robots==2.0
 django-secure==1.0.1
 django-sslify==0.2.7
 django-storages==1.4.1
-django-taggit==0.19.0
+django-taggit==0.19.1
 django-webpack-loader==0.3.0
-django==1.9.6
+django==1.9.7
 djangorestframework==3.3.3
 dogslow==0.9.7
 easy-thumbnails==2.3
@@ -56,20 +56,20 @@ jsonfield==1.0.3
 kombu==3.0.35             # via celery
 lxml==3.6.0               # via premailer
 markdown2==2.3.1          # via django-markdown-deux
-newrelic==2.64.0.48
+newrelic==2.66.0.49
 numpy==1.9.1
 pascha==0.5
 pillow==3.2.0
-premailer==2.11.0         # via django-premailer
+premailer==3.0.0          # via django-premailer
 psycopg2==2.6.1
 pyimagediet==1.1.1        # via image-diet2
 pylibmc==1.5.1            # via django-pylibmc
-pysolr==3.4.0
+pysolr==3.5.0
 python-dateutil==2.5.3
 python-magic==0.4.11      # via pyimagediet
 pytz==2016.4              # via celery
 PyYAML==3.11              # via django-rest-swagger, pyimagediet
-raven==5.18.0
+raven==5.21.0
 rcssmin==1.0.6            # via django-compressor
 redis==2.10.5
 requests==2.10.0
@@ -82,5 +82,5 @@ simplejson==3.8.2         # via django-lot
 six==1.10.0               # via django-autocomplete-light, django-geojson, python-dateutil
 smartypants==1.8.6
 sqlparse==0.1.19          # via django-debug-toolbar
-stripe==1.34.0
+stripe==1.35.0
 unidecode==0.4.19

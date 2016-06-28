@@ -1,0 +1,31 @@
+<div class="notification__action--passive">
+
+{% block target %}
+{% if action.target %}
+    <span class="target">
+    {% if action.target.get_absolute_url %}
+        <a href="{{ action.target.get_absolute_url }}" class="action"> {{ action.target }}</a>
+    {% else %}
+        {{ action.target }}
+    {% endif %}
+    </span>
+{% endif %}
+{% endblock target %}
+
+{% block verb %}
+<span class="verb"> {{ action.verb }}</span>
+{% endblock verb %}
+
+<span> by</span>
+
+{% block actor %}
+<span class="actor">
+    {% if action.actor.get_absolute_url %}
+    <a href="{{ action.actor.get_absolute_url }}"> {{ action.actor }}</a>
+    {% else %}
+        {{ action.actor }}
+    {% endif %}
+</span>
+{% endblock actor %}
+
+</div>

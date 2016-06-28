@@ -14,8 +14,18 @@ from nose.tools import eq_, ok_, raises
 
 from muckrock.accounts import views
 from muckrock.accounts.forms import RegistrationCompletionForm
-from muckrock.factories import UserFactory, OrganizationFactory
+from muckrock.factories import (
+    UserFactory,
+    NotificationFactory,
+    OrganizationFactory,
+    FOIARequestFactory,
+    QuestionFactory,
+    AgencyFactory
+)
+from muckrock.foia.views import Detail as FOIARequestDetail
 from muckrock.organization.models import Organization
+from muckrock.qanda.views import Detail as QuestionDetail
+from muckrock.utils import new_action, notify
 from muckrock.test_utils import mock_middleware, http_get_response, http_post_response
 
 def http_get_post(url, view, data):
@@ -439,3 +449,113 @@ class TestAccountFunctional(TestCase):
                 eq_(val, getattr(self.user, key))
             else:
                 eq_(val, getattr(profile, key))
+
+
+class TestNotificationList(TestCase):
+    """A user should be able to view lists of their notifications."""
+    def setUp(self):
+        self.user = UserFactory()
+        self.unread_notification = NotificationFactory(user=self.user, read=False)
+        self.read_notification = NotificationFactory(user=self.user, read=True)
+        self.url = reverse('acct-notifications')
+        self.view = views.NotificationList.as_view()
+
+    def test_get(self):
+        """The view should provide a list of notifications for the user."""
+        response = http_get_response(self.url, self.view, self.user)
+        eq_(response.status_code, 200, 'The view should return OK.')
+        object_list = response.context_data['object_list']
+        ok_(self.unread_notification in object_list,
+            'The context should contain the unread notification.')
+        ok_(self.read_notification in object_list,
+            'The context should contain the read notification.')
+
+    def test_unauthorized_get(self):
+        """Logged out users trying to access the notifications
+        view should be redirected to the login view."""
+        response = http_get_response(self.url, self.view)
+        eq_(response.status_code, 302, 'The view should redirect.')
+        ok_(reverse('acct-login') in response.url,
+            'Logged out users should be redirected to the login view.')
+
+    def test_mark_all_read(self):
+        """Users should be able to mark all their notifications as read."""
+        data = {'action': 'mark_all_read'}
+        ok_(self.unread_notification.read is not True)
+        http_post_response(self.url, self.view, data, self.user)
+        self.unread_notification.refresh_from_db()
+        ok_(self.unread_notification.read is True,
+            'The unread notification should be marked as read.')
+
+
+class TestUnreadNotificationList(TestCase):
+    """A user should be able to view lists of their unread notifications."""
+    def setUp(self):
+        self.user = UserFactory()
+        self.unread_notification = NotificationFactory(user=self.user, read=False)
+        self.read_notification = NotificationFactory(user=self.user, read=True)
+        self.url = reverse('acct-notifications-unread')
+        self.view = views.UnreadNotificationList.as_view()
+
+    def test_get(self):
+        """The view should provide a list of notifications for the user."""
+        response = http_get_response(self.url, self.view, self.user)
+        eq_(response.status_code, 200, 'The view should return OK.')
+        object_list = response.context_data['object_list']
+        ok_(self.unread_notification in object_list,
+            'The context should contain the unread notification.')
+        ok_(self.read_notification not in object_list,
+            'The context should not contain the read notification.')
+
+    def test_unauthorized_get(self):
+        """Logged out users trying to access the notifications
+        view should be redirected to the login view."""
+        response = http_get_response(self.url, self.view)
+        eq_(response.status_code, 302, 'The view should redirect.')
+        ok_(reverse('acct-login') in response.url,
+            'Logged out users should be redirected to the login view.')
+
+
+class TestNotificationRead(TestCase):
+    """Getting an object view should read its notifications for that user."""
+    def setUp(self):
+        self.user = UserFactory()
+
+    def test_get_foia(self):
+        """Try getting the detail page for a FOIA Request with an unread notification."""
+        agency = AgencyFactory()
+        foia = FOIARequestFactory(agency=agency)
+        view = FOIARequestDetail.as_view()
+        # Create a notification for the request
+        action = new_action(agency, 'completed', target=foia)
+        notification = notify(self.user, action)[0]
+        ok_(not notification.read, 'The notification should be unread.')
+        # Try getting the view as the user
+        response = http_get_response(foia.get_absolute_url(), view, self.user,
+            idx=foia.pk,
+            slug=foia.slug,
+            jidx=foia.jurisdiction.pk,
+            jurisdiction=foia.jurisdiction.slug
+        )
+        eq_(response.status_code, 200, 'The view should response 200 OK.')
+        # Check that the notification has been read.
+        notification.refresh_from_db()
+        ok_(notification.read, 'The notification should be marked as read.')
+
+    def test_get_question(self):
+        """Try getting the detail page for a Question with an unread notification."""
+        question = QuestionFactory()
+        view = QuestionDetail.as_view()
+        # Create a notification for the question
+        action = new_action(UserFactory(), 'answered', target=question)
+        notification = notify(self.user, action)[0]
+        ok_(not notification.read, 'The notification should be unread.')
+        # Try getting the view as the user
+        response = http_get_response(question.get_absolute_url(), view, self.user,
+            pk=question.pk,
+            slug=question.slug
+        )
+        eq_(response.status_code, 200, 'The view should respond 200 OK.')
+        # Check that the notification has been read.
+        notification.refresh_from_db()
+        ok_(notification.read, 'The notification should be marked as read.')

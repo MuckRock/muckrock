@@ -13,3 +13,4 @@ class QuestionConfig(AppConfig):
         """Registers the application with the activity streams plugin"""
         from actstream import registry
         registry.register(self.get_model('Question'))
+        registry.register(self.get_model('Answer'))

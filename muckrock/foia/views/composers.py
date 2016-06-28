@@ -14,7 +14,6 @@ from django.template.loader import get_template
 from django.template import RequestContext, Context
 from django.utils.encoding import smart_text
 
-import actstream
 from datetime import datetime, date
 import logging
 
@@ -34,7 +33,7 @@ from muckrock.foia.models import (
     )
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import NewAgencyTask, MultiRequestTask
-from muckrock.utils import generate_key
+from muckrock.utils import new_action, generate_key
 
 # pylint: disable=too-many-ancestors
 
@@ -187,13 +186,7 @@ def _submit_request(request, foia):
     foia.submit()
     request.session['ga'] = 'request_submitted'
     messages.success(request, 'Your request was submitted.')
-    # generate action
-    actstream.action.send(
-        request.user,
-        verb='submitted',
-        action_object=foia,
-        target=foia.agency
-    )
+    new_action(request.user, 'submitted', target=foia)
     return redirect(foia)
 
 def clone_request(request, jurisdiction, jidx, slug, idx):

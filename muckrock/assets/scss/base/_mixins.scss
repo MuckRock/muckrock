@@ -102,11 +102,8 @@
     text-overflow: ellipsis;
 }
 
-@mixin icon-color($color) {
-    .icon path,
-    .icon polygon,
-    .icon rect,
-    .icon circle {
+@mixin svg-color($color) {
+    path, polygon, rect, circle {
         fill: $color;
     }
 }

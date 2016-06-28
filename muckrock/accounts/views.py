@@ -18,7 +18,7 @@ from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import TemplateView, FormView
+from django.views.generic import TemplateView, FormView, ListView
 
 from datetime import date
 from rest_framework import viewsets
@@ -39,7 +39,7 @@ from muckrock.accounts.forms import (
         RegisterOrganizationForm,
         RegistrationCompletionForm
         )
-from muckrock.accounts.models import Profile, Statistics, ACCT_TYPES
+from muckrock.accounts.models import Profile, Notification, Statistics, ACCT_TYPES
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
@@ -483,6 +483,62 @@ class StatisticsViewSet(viewsets.ModelViewSet):
     serializer_class = StatisticsSerializer
     permission_classes = (DjangoModelPermissionsOrAnonReadOnly,)
     filter_fields = ('date',)
+
+
+@method_decorator(login_required, name='dispatch')
+class NotificationList(ListView):
+    """List of notifications for a user."""
+    model = Notification
+    template_name = 'accounts/notifications_all.html'
+    context_object_name = 'notifications'
+    title = 'All Notifications'
+
+    def get_queryset(self):
+        """Return all notifications for the user making the request."""
+        user = self.request.user
+        notifications = super(NotificationList, self).get_queryset()
+        return notifications.for_user(user).order_by('-datetime')
+
+    def get_paginate_by(self, queryset):
+        """Paginates list by the return value"""
+        try:
+            per_page = int(self.request.GET.get('per_page'))
+            return max(min(per_page, 100), 5)
+        except (ValueError, TypeError):
+            return 25
+
+    def get_context_data(self, **kwargs):
+        """Add the title to the context"""
+        context = super(NotificationList, self).get_context_data(**kwargs)
+        context['title'] = self.title
+        return context
+
+    def mark_all_read(self):
+        """Mark all notifications for the view as read."""
+        notifications = self.get_queryset()
+        # to be more efficient, let's just get the unread ones
+        notifications = notifications.get_unread()
+        for notification in notifications:
+            notification.mark_read()
+
+    def post(self, request, *args, **kwargs):
+        """Handle post actions to this view"""
+        action = request.POST.get('action')
+        if action == 'mark_all_read':
+            self.mark_all_read()
+        return self.get(request, *args, **kwargs)
+
+
+@method_decorator(login_required, name='dispatch')
+class UnreadNotificationList(NotificationList):
+    """List only unread notifications for a user."""
+    template_name = 'accounts/notifications_unread.html'
+    title = 'Unread Notifications'
+
+    def get_queryset(self):
+        """Only return unread notifications."""
+        notifications = super(UnreadNotificationList, self).get_queryset()
+        return notifications.get_unread()
 
 
 class ProxyList(MRFilterableListView):

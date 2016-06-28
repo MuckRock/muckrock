@@ -2,25 +2,21 @@
 Models for the accounts application
 """
 
-from django.contrib.auth.models import User
 from django.conf import settings
-from django.core.mail import EmailMessage
+from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.template.loader import render_to_string
 
+from actstream.models import Action
 from datetime import datetime
 import dbsettings
 from easy_thumbnails.fields import ThumbnailerImageField
-from itertools import groupby
 from localflavor.us.models import PhoneNumberField, USStateField
 from lot.models import LOT
 import stripe
 from urllib import urlencode
 
-from muckrock import utils
-from muckrock.foia.models import FOIARequest
-from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.organization.models import Organization
+from muckrock.utils import generate_key
 from muckrock.values import TextValue
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -76,14 +72,9 @@ class Profile(models.Model):
     )
     zip_code = models.CharField(max_length=10, blank=True)
     phone = PhoneNumberField(blank=True)
-    notifications = models.ManyToManyField(
-        FOIARequest,
-        related_name='notify',
-        blank=True
-    )
     acct_type = models.CharField(max_length=10, choices=ACCT_TYPES)
     organization = models.ForeignKey(
-        Organization,
+        'organization.Organization',
         blank=True,
         null=True,
         related_name='members',
@@ -91,7 +82,7 @@ class Profile(models.Model):
 
     # extended information
     profile = models.TextField(blank=True)
-    location = models.ForeignKey(Jurisdiction, blank=True, null=True)
+    location = models.ForeignKey('jurisdiction.Jurisdiction', blank=True, null=True)
     public_email = models.EmailField(max_length=255, blank=True)
     pgp_public_key = models.TextField(blank=True)
     website = models.URLField(
@@ -113,7 +104,6 @@ class Profile(models.Model):
 
     # provide user access to experimental features
     experimental = models.BooleanField(default=False)
-
     # email confirmation
     email_confirmed = models.BooleanField(default=False)
     confirmation_key = models.CharField(max_length=24, blank=True)
@@ -130,6 +120,8 @@ class Profile(models.Model):
         help_text=('Links you receive in emails from us will contain'
                    ' a one time token to automatically log you in')
     )
+    # notification preferences
+    new_question_notifications = models.BooleanField(default=False)
 
     # paid for requests
     num_requests = models.IntegerField(default=0)
@@ -334,84 +326,10 @@ class Profile(models.Model):
 
     def generate_confirmation_key(self):
         """Generate random key used for validating the email address"""
-        key = utils.generate_key(24)
+        key = generate_key(24)
         self.confirmation_key = key
         self.save()
         return key
-
-    def notify(self, foia):
-        """Queue up a notification for later"""
-        self.notifications.add(foia)
-        self.save()
-
-    def send_notifications(self):
-        """Send deferred notifications"""
-
-        subjects = {
-            'done': "you've got new MuckRock docs!",
-            'partial': "you've got new MuckRock docs!",
-            'rejected': 'an agency rejected a MuckRock request - appeal?',
-            'fix': 'we need help fixing a MuckRock request.',
-            'payment': 'an agency wants payment for a MuckRock request.'
-        }
-        category = {
-            'done': 'Completed Requests',
-            'partial': 'Completed Requests',
-            'rejected': 'Rejected Requests',
-            'fix': 'Requests Needing Action',
-            'payment': 'Requests Needing Action',
-            'no_docs': 'No Responsive Documents',
-        }
-        status_order = ['done', 'partial', 'rejected', 'fix', 'payment',
-                        'no_docs', 'abandoned', 'appealing', 'started',
-                        'submitted', 'ack', 'processed']
-
-        def get_subject(status, total_foias):
-            """Get subject for a given status"""
-            if status in subjects:
-                return subjects[status]
-            elif total_foias > 1:
-                return '%d MuckRock requests have updates' % total_foias
-            else:
-                return 'a MuckRock request has been updated'
-
-        foias = sorted(
-            self.notifications.all(),
-            key=lambda f: status_order.index(f.status) if f.status in status_order else 100
-        )
-        grouped_foias = list((s, list(fs)) for s, fs in groupby(
-            foias,
-            lambda f: category.get(f.status, 'Recently Updated Requests')
-        ))
-        if not grouped_foias:
-            return
-        if len(grouped_foias) == 1:
-            subject = '%s, %s' % (
-                self.user.first_name,
-                get_subject(grouped_foias[0][1][0].status, len(foias))
-            )
-        else:
-            subject = '%s, %s  Plus, %s' % (
-                self.user.first_name,
-                get_subject(grouped_foias[0][1][0].status, len(foias)),
-                get_subject(grouped_foias[1][1][0].status, len(foias))
-            )
-
-        msg = render_to_string('text/user/notify_mail.txt', {
-            'name': self.user.get_full_name(),
-            'foias': grouped_foias,
-            'footer': options.email_footer
-        })
-        email = EmailMessage(
-            subject=subject,
-            body=msg,
-            from_email='info@muckrock.com',
-            to=[self.user.email],
-            bcc=['diagnostics@muckrock.com']
-        )
-        email.send(fail_silently=False)
-
-        self.notifications.clear()
 
     def wrap_url(self, link, **extra):
         """Wrap a URL for autologin"""
@@ -422,6 +340,62 @@ class Profile(models.Model):
                 )
             extra.update({settings.LOT_MIDDLEWARE_PARAM_NAME: lot.uuid})
         return link + '?' + urlencode(extra)
+
+
+class NotificationQuerySet(models.QuerySet):
+    """Object manager for notifications"""
+    def for_user(self, user):
+        """All notifications for a user"""
+        return self.filter(user=user)
+
+    def for_model(self, model):
+        """All notifications for a model. Requires filtering the action."""
+        model_ct = ContentType.objects.get_for_model(model)
+        actor = models.Q(action__actor_content_type=model_ct)
+        action_object = models.Q(action__action_object_content_type=model_ct)
+        target = models.Q(action__target_content_type=model_ct)
+        return self.filter(actor | action_object | target)
+
+    def for_object(self, _object):
+        """All notifications for an object. Requires filtering the action."""
+        object_pk = _object.pk
+        object_ct = ContentType.objects.get_for_model(_object)
+        actor = models.Q(
+            action__actor_content_type=object_ct,
+            action__actor_object_id=object_pk)
+        action_object = models.Q(
+            action__action_object_content_type=object_ct,
+            action__action_object_object_id=object_pk)
+        target = models.Q(
+            action__target_content_type=object_ct,
+            action__target_object_id=object_pk)
+        return self.filter(actor | action_object | target)
+
+    def get_unread(self):
+        """All unread notifications"""
+        return self.filter(read=False)
+
+
+class Notification(models.Model):
+    """A notification connects an action to a user."""
+    datetime = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, related_name='notifications')
+    action = models.ForeignKey(Action)
+    read = models.BooleanField(default=False)
+    objects = NotificationQuerySet.as_manager()
+
+    def __unicode__(self):
+        return u'<Notification for %s>' % unicode(self.user.username).capitalize()
+
+    def mark_read(self):
+        """Marks notification as read."""
+        self.read = True
+        self.save()
+
+    def mark_unread(self):
+        """Marks notification as unread."""
+        self.read = False
+        self.save()
 
 
 class Statistics(models.Model):

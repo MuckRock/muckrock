@@ -8,7 +8,7 @@ from django.utils.text import slugify
 import datetime
 import factory
 
-from muckrock.accounts.models import Profile, Statistics
+from muckrock.accounts.models import Profile, Notification, Statistics
 from muckrock.agency.models import Agency, STALE_DURATION
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, RawEmail
@@ -17,6 +17,7 @@ from muckrock.news.models import Article
 from muckrock.organization.models import Organization
 from muckrock.project.models import Project
 from muckrock.qanda.models import Question, Answer
+from muckrock.utils import new_action
 
 # pylint:disable=too-many-instance-attributes
 
@@ -38,6 +39,15 @@ class UserFactory(factory.django.DjangoModelFactory):
     username = factory.Sequence(lambda n: "user_%d" % n)
     email = factory.Faker('email')
     profile = factory.RelatedFactory(ProfileFactory, 'user')
+
+
+class NotificationFactory(factory.django.DjangoModelFactory):
+    """A factory for creating Notification test objects."""
+    class Meta:
+        model = Notification
+
+    user = factory.SubFactory(UserFactory)
+    action = factory.LazyAttribute(lambda obj: new_action(obj.user, 'acted'))
 
 
 class OrganizationFactory(factory.django.DjangoModelFactory):
