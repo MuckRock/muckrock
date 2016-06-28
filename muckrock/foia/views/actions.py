@@ -308,9 +308,6 @@ def crowdfund_request(request, idx, **kwargs):
                 'began crowdfunding',
                 action_object=crowdfund,
                 target=foia)
-            # notify followers of the request and followers of the user
-            notify(actstream.models.followers(request.user), action)
-            notify(actstream.models.followers(foia), action)
             return redirect(foia)
 
     elif request.method == 'GET':
