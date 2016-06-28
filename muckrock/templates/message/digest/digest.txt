@@ -22,6 +22,11 @@ Following
 {% include 'message/component/foia_digest.txt' with notifications=follow_foia.completed stream_name='Completed' %}
 {% include 'message/component/foia_digest.txt' with notifications=follow_foia.rejected stream_name='Rejected' %}
 {% include 'message/component/foia_digest.txt' with notifications=follow_foia.no_documents stream_name='No Documents' %}
+{% include 'message/component/foia_digest.txt' with notifications=follow_foia.payment_required label='Payment Required' %}
+{% include 'message/component/foia_digest.txt' with notifications=follow_foia.fix_required label='Fix Required' %}
+{% include 'message/component/foia_digest.txt' with notifications=follow_foia.acknowledged label='Acknowledged'%}
+{% include 'message/component/foia_digest.txt' with notifications=follow_foia.interim_response label='Updated' %}
+{% include 'message/component/foia_digest.txt' with notifications=follow_foia.received label='New Response' %}
 {% endif %}{% endwith %}
 {% endif %}
 {% if activity.questions.count > 0 %}

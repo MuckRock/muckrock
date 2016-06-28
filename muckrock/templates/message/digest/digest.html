@@ -26,6 +26,11 @@
             {% include 'message/component/foia_digest.html' with notifications=follow_foia.completed label='Completed' color='green' %}
             {% include 'message/component/foia_digest.html' with notifications=follow_foia.rejected label='Rejected' color='red' %}
             {% include 'message/component/foia_digest.html' with notifications=follow_foia.no_documents label='No Documents' color='red' %}
+            {% include 'message/component/foia_digest.html' with notifications=follow_foia.payment_required label='Payment Required' color='red' %}
+            {% include 'message/component/foia_digest.html' with notifications=follow_foia.fix_required label='Fix Required' color='red' %}
+            {% include 'message/component/foia_digest.html' with notifications=follow_foia.acknowledged label='Acknowledged' color='blue' %}
+            {% include 'message/component/foia_digest.html' with notifications=follow_foia.interim_response label='Updated' color='blue' %}
+            {% include 'message/component/foia_digest.html' with notifications=follow_foia.received label='New Response' color='grey' %}
         </table>
         {% endif %}
         {% endwith %}

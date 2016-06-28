@@ -284,6 +284,11 @@ class ActivityDigest(Digest):
                 ('completed', 'completed'),
                 ('rejected', 'rejected'),
                 ('no_documents', 'no responsive documents'),
+                ('require_payment', 'payment'),
+                ('require_fix', 'require_fix'),
+                ('interim_response', 'processing'),
+                ('acknowledged', 'acknowledged'),
+                ('received', 'sent a communication')
             ]
         )
         filtered_notifications['count'] = (
