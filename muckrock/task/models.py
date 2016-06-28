@@ -7,7 +7,6 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Max, Prefetch, Q
 
-from actstream.models import followers
 from datetime import datetime
 import email
 import logging
@@ -19,7 +18,6 @@ from muckrock.foia.models import (
     FOIANote,
     FOIARequest,
     STATUS,
-    END_STATUS
 )
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail

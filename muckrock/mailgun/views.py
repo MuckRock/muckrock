@@ -119,7 +119,7 @@ def route_mailgun(request):
 def _handle_request(request, mail_id):
     """Handle incoming mailgun FOI request messages"""
     # pylint: disable=broad-except
-
+    # pylint: disable=too-many-locals
     post = request.POST
     from_ = post.get('From')
     to_ = post.get('To') or post.get('to')
