@@ -31,6 +31,7 @@ from muckrock.task.models import (
         ResponseTask,
         StaleAgencyTask,
         )
+from muckrock.utils import new_action
 
 logger = logging.getLogger(__name__)
 
@@ -179,6 +180,12 @@ def _handle_request(request, mail_id):
         if foia.status == 'ack':
             foia.status = 'processed'
         foia.save(comment='incoming mail')
+        action = new_action(
+            foia.agency,
+            'sent a communication',
+            action_object=comm,
+            target=foia)
+        foia.notify(action)
         foia.update(comm.anchor())
 
     except FOIARequest.DoesNotExist:
@@ -394,4 +401,3 @@ def _file_type(file_):
         return 'ignore'
     else:
         return 'file'
-

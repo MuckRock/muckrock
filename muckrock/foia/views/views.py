@@ -382,7 +382,6 @@ class Detail(DetailView):
                 date=datetime.now()
             )
             messages.success(request, 'Your question has been posted.')
-            question.notify_new()
             return redirect(question)
         return redirect(foia)
 

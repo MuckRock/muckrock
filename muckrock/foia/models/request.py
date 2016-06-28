@@ -489,6 +489,15 @@ class FOIARequest(models.Model):
         self.save()
         self.update_dates()
 
+    def notify(self, action):
+        """
+        Notify the owner of the request.
+        Notify followers if the request is not under embargo.
+        """
+        utils.notify(self.user, action)
+        if self.is_public():
+            utils.notify(followers(self), action)
+
     def submit(self, appeal=False, snail=False, thanks=False):
         """The request has been submitted.  Notify admin and try to auto submit"""
         from muckrock.task.models import FlaggedTask

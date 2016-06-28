@@ -41,6 +41,22 @@ def new_action(actor, verb, action_object=None, target=None, public=True, descri
     # action_signal = ((action_handler, Action))
     return action_signal[0][1]
 
+def generate_status_action(foia):
+    """Generate activity stream action for agency response and return it."""
+    if not foia.agency:
+        return
+    verbs = {
+        'rejected': 'rejected',
+        'done': 'completed',
+        'partial': 'partially completed',
+        'processed': 'acknowledged',
+        'no_docs': 'has no responsive documents',
+        'fix': 'requires fix',
+        'payment': 'requires payment',
+    }
+    verb = verbs.get(foia.status, 'is processing')
+    return new_action(foia.agency, verb, target=foia)
+
 def notify(users, action):
     """Notify a set of users about an action and return the list of notifications."""
     from muckrock.accounts.models import Notification

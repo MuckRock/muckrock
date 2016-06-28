@@ -25,25 +25,9 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import support
 from muckrock.models import ExtractDay, Now
-from muckrock.utils import new_action, notify
+from muckrock.utils import generate_status_action
 
 # pylint: disable=missing-docstring
-
-def generate_status_action(foia):
-    """Generate activity stream action for agency response and return it."""
-    if not foia.agency:
-        return
-    verbs = {
-        'rejected': 'rejected',
-        'done': 'completed',
-        'partial': 'partially completed',
-        'processed': 'acknowledged',
-        'no_docs': 'has no responsive documents',
-        'fix': 'requires fix',
-        'payment': 'requires payment',
-    }
-    verb = verbs.get(foia.status, 'is processing')
-    return new_action(foia.agency, verb, target=foia)
 
 class TaskQuerySet(models.QuerySet):
     """Object manager for all tasks"""
@@ -508,13 +492,7 @@ class ResponseTask(Task):
             foia.save(comment='response task status')
             logging.info('Request #%d status changed to "%s"', foia.id, status)
             action = generate_status_action(foia)
-            # notify the owner for all statuses
-            # only notify followers if the foia is publicly viewable: this is important!!!!!!!
-            # notify the followers only if the action reflects a terminal status:
-            # completed, rejected, no documents
-            notify(foia.user, action)
-            if foia.is_public() and foia.status in END_STATUS:
-                notify(followers(foia), action)
+            foia.notify(action)
 
     def set_price(self, price):
         """Sets the price of the communication's request"""
@@ -538,11 +516,13 @@ class ResponseTask(Task):
         """Special handling for a proxy reject"""
         self.communication.status = 'rejected'
         self.communication.save()
-        self.communication.foia.status = 'rejected'
-        self.communication.foia.proxy_reject()
-        self.communication.foia.update()
-        self.communication.foia.save(comment='response task proxy reject')
-        generate_status_action(self.communication.foia)
+        foia = self.communication.foia
+        foia.status = 'rejected'
+        foia.proxy_reject()
+        foia.update()
+        foia.save(comment='response task proxy reject')
+        action = generate_status_action(foia)
+        foia.notify(action)
 
 
 class FailedFaxTask(Task):
