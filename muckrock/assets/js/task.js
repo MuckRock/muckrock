@@ -77,7 +77,7 @@ function getTaskID(taskFormData) {
 }
 
 function markAsResolved(task) {
-    $(task).addClass('resolved');
+    $(task).addClass('green');
 }
 
 function formHasAction(taskForm, action) {
