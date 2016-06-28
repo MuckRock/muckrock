@@ -8,17 +8,19 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.core.exceptions import FieldError
+from django.core.urlresolvers import reverse
 from django.db.models import Sum, FieldDoesNotExist
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.utils.decorators import method_decorator
 from django.utils.html import escape
-from django.views.generic import View, ListView
+from django.views.generic import View, ListView, FormView, TemplateView
 
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAFile
-from muckrock.forms import MRFilterForm, NewsletterSignupForm
+from muckrock.forms import MRFilterForm, NewsletterSignupForm, StripeForm
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.message.tasks import send_charge_receipt
 from muckrock.news.models import Article
 from muckrock.project.models import Project
 from muckrock.utils import cache_get_or_set
@@ -28,6 +30,9 @@ import re
 import requests
 from haystack.views import SearchView
 from haystack.query import RelatedSearchQuerySet
+import stripe
+
+logger = logging.getLogger(__name__)
 
 class MRFilterableListView(ListView):
     """
@@ -446,6 +451,103 @@ def reset_homepage_cache(request):
             },
             600)
     return redirect('index')
+
+
+class StripeFormMixin(object):
+    """Prefills the StripeForm values."""
+    def get_initial(self):
+        """Add initial data to the form."""
+        initial = super(StripeFormMixin, self).get_initial()
+        initial['stripe_pk'] = settings.STRIPE_PUB_KEY
+        initial['stripe_label'] = 'Buy'
+        initial['stripe_description'] = ''
+        initial['stripe_fee'] = 0
+        initial['stripe_bitcoin'] = True
+        return initial
+
+
+class DonationFormView(StripeFormMixin, FormView):
+    """Accepts donations from all users."""
+    form_class = StripeForm
+    template_name = 'forms/donate.html'
+
+    def get_initial(self):
+        """Adds the user's email to the form if they're logged in."""
+        user = self.request.user
+        email = ''
+        if user.is_authenticated():
+            email = user.email
+        return {
+            'stripe_email': email,
+            'stripe_label': 'Donate',
+            'stripe_description': 'Tax Deductible Donation'
+        }
+
+    def form_valid(self, form):
+        """If the form is valid, charge the token provided by the form, then send a receipt."""
+        token = form.cleaned_data['stripe_token']
+        email = form.cleaned_data['stripe_email']
+        amount = form.cleaned_data['stripe_amount']
+        charge = self.make_charge(token, amount, email)
+        if charge is None:
+            return self.form_invalid(form)
+        # Send the receipt
+        send_charge_receipt.delay(charge.id)
+        return super(DonationFormView, self).form_valid(form)
+
+    def get_success_url(self):
+        """Return a redirection the donation page, always."""
+        return reverse('donate-thanks')
+
+    def make_charge(self, token, amount, email):
+        """Make a Stripe charge and catch any errors."""
+        charge = None
+        error_msg = None
+        try:
+            charge = stripe.Charge.create(
+                amount=amount,
+                currency='usd',
+                source=token,
+                description='Donation from %s' % email,
+                metadata={
+                    'email': email,
+                    'action': 'donation'
+                }
+            )
+        except stripe.error.InvalidRequestError as exception:
+            # Invalid parameters were supplied to Stripe's API
+            logger.error(exception)
+            error_msg = ('Oops, something went wrong on our end.'
+                        ' Sorry about that!')
+        except stripe.error.AuthenticationError as exception:
+            # Authentication with Stripe's API failed
+            logger.error(exception)
+            error_msg = ('Oops, something went wrong on our end.'
+                        ' Sorry about that!')
+        except stripe.error.APIConnectionError as exception:
+            # Network communication with Stripe failed
+            logger.error(exception)
+            error_msg = ('Oops, something went wrong on our end.'
+                        ' Sorry about that!')
+        except stripe.error.StripeError as exception:
+            # Generic error
+            logger.error(exception)
+            error_msg = ('Oops, something went wrong on our end.'
+                        ' Sorry about that!')
+        finally:
+            if error_msg:
+                self.request.session['donated'] = False
+                messages.error(self.request, error_msg)
+            else:
+                self.request.session['donated'] = True
+                self.request.session['ga'] = 'donation'
+        return charge
+
+
+class DonationThanksView(TemplateView):
+    """Returns a thank you message to the user."""
+    template_name = 'forms/donate_thanks.html'
+
 
 def jurisdiction(request, jurisdiction=None, slug=None, idx=None, view=None):
     """Redirect to the jurisdiction page"""

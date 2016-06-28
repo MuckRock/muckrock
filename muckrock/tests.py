@@ -3,7 +3,6 @@ Tests for site level functionality and helper functions for application tests
 """
 
 from django.conf import settings
-from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.test import TestCase, RequestFactory
@@ -11,11 +10,13 @@ from django.test import TestCase, RequestFactory
 from mock import Mock, patch
 import logging
 import nose.tools
+from nose.tools import ok_
+from nose.tools import eq_
 
 from muckrock.fields import EmailsListField
-from muckrock.forms import NewsletterSignupForm
-from muckrock.utils import mock_middleware
-from muckrock.views import NewsletterSignupView
+from muckrock.forms import NewsletterSignupForm, StripeForm
+from muckrock.test_utils import http_get_response, http_post_response
+from muckrock.views import NewsletterSignupView, DonationFormView
 
 # pylint: disable=no-self-use
 # pylint: disable=too-many-public-methods
@@ -130,10 +131,7 @@ class TestNewsletterSignupView(TestCase):
 
     def test_get_view(self):
         """Visiting the page should present a signup form."""
-        request = self.factory.get(self.url)
-        request.user = AnonymousUser()
-        request = mock_middleware(request)
-        response = self.view(request)
+        response = http_get_response(self.url, self.view)
         eq_(response.status_code, 200)
 
     @patch('muckrock.views.NewsletterSignupView.subscribe')
@@ -144,10 +142,7 @@ class TestNewsletterSignupView(TestCase):
             'list': settings.MAILCHIMP_LIST_DEFAULT
         })
         ok_(form.is_valid(), 'The form should validate.')
-        request = self.factory.post(self.url, form.data)
-        request.user = AnonymousUser()
-        request = mock_middleware(request)
-        response = self.view(request)
+        response = http_post_response(self.url, self.view, form.data)
         mock_subscribe.assert_called_with(form.data['email'], form.data['list'])
         eq_(response.status_code, 302, 'Should redirect upon successful submission.')
 
@@ -160,10 +155,7 @@ class TestNewsletterSignupView(TestCase):
             'list': 'other'
         })
         ok_(form.is_valid(), 'The form should validate.')
-        request = self.factory.post(self.url, form.data)
-        request.user = AnonymousUser()
-        request = mock_middleware(request)
-        response = self.view(request)
+        response = http_post_response(self.url, self.view, form.data)
         mock_subscribe.assert_any_call(form.data['email'], form.data['list'])
         mock_subscribe.assert_any_call(form.data['email'], settings.MAILCHIMP_LIST_DEFAULT)
         eq_(response.status_code, 302, 'Should redirect upon successful submission.')
@@ -177,3 +169,29 @@ class TestNewsletterSignupView(TestCase):
         _list = settings.MAILCHIMP_LIST_DEFAULT
         response = NewsletterSignupView().subscribe(_email, _list)
         eq_(response.status_code, 200)
+
+
+@patch('stripe.Charge', Mock())
+class TestDonations(TestCase):
+    """Tests donation functionality"""
+
+    def setUp(self):
+        self.url = reverse('donate')
+        self.view = DonationFormView.as_view()
+        self.form = StripeForm
+
+    @patch('muckrock.message.tasks.send_charge_receipt.delay')
+    def test_donate(self, mock_send):
+        """Donations should have a token, email, and amount.
+        An email receipt should be sent for the donation."""
+        token = 'test'
+        email = 'example@test.com'
+        amount = 500
+        data = {'stripe_token': token, 'stripe_email': email, 'stripe_amount': amount}
+        form = self.form(data)
+        form.is_valid()
+        ok_(form.is_valid(), 'The form should validate. %s' % form.errors)
+        response = http_post_response(self.url, self.view, data)
+        mock_send.assert_called_once()
+        eq_(response.status_code, 302,
+            'A successful donation will return a redirection.')

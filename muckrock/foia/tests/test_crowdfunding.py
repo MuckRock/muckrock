@@ -12,7 +12,7 @@ import datetime
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.factories import UserFactory, FOIARequestFactory
 from muckrock.foia.views import crowdfund_request
-from muckrock.utils import mock_middleware
+from muckrock.test_utils import mock_middleware
 
 # pylint: disable=missing-docstring
 # pylint: disable=invalid-name
