@@ -119,7 +119,6 @@ $('document').ready(function(){
 
     // Currency Field
     $('input.currency-field').currencyField();
-    $('input[name=payment_required]').currencyField();
 
     // Date Picker
     $('.datepicker').datepicker({

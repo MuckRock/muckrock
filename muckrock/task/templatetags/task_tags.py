@@ -48,6 +48,12 @@ class CrowdfundTaskNode(TaskNode):
     endpoint_name = 'crowdfund-task-list'
     class_name = 'crowdfund'
 
+    def get_extra_context(self):
+        """Adds the crowdfund object to context."""
+        extra_context = super(CrowdfundTaskNode, self).get_extra_context()
+        extra_context['crowdfund_object'] = self.task.crowdfund.get_crowdfund_object()
+        return extra_context
+
 
 class FailedFaxTaskNode(TaskNode):
     """Renders a failed fax task."""

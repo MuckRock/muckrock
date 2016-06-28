@@ -88,14 +88,18 @@
                 }
             }
         }
-        .list-filters-buttons {
-            @include row;
-            margin-top: $vertical-rhythm/2;
-            font-size: 0.75em;
-            button, .button {
-                @include grid-columns(2, 3, 6);
+        .button-group {
+            width: 100%;
+            .button {
+                width: 50%;
             }
         }
+        /*
+        .list-filters-buttons {
+            @include display(flex);
+            @include justify-content(space-between);
+        }
+        */
         #list-filters-toggle-label, #list-filters-toggle {
             display: none;
         }
