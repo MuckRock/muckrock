@@ -28,8 +28,6 @@ from muckrock.utils import cache_get_or_set
 import logging
 import re
 import requests
-from haystack.views import SearchView
-from haystack.query import RelatedSearchQuerySet
 import stripe
 
 logger = logging.getLogger(__name__)
@@ -154,43 +152,9 @@ class MRFilterableListView(PaginationMixin, OrderedSortMixin, FilterMixin, ListV
         return context
 
 
-class MRSearchView(PaginationMixin, SearchView):
+class SearchView(View):
     """Always lower case queries for case insensitive searches"""
-
-    def __init__(self, *args, **kwargs):
-        kwargs['searchqueryset'] = RelatedSearchQuerySet()
-        super(MRSearchView, self).__init__(*args, **kwargs)
-
-    def get_query(self):
-        """Lower case the query"""
-        return super(MRSearchView, self).get_query().lower()
-
-    def get_results(self):
-        """Apply select related to results"""
-        results = super(MRSearchView, self).get_results()
-        try:
-            results = results.load_all_queryset(
-                FOIARequest, FOIARequest.objects.select_related('jurisdiction'))
-        except AttributeError:
-            pass
-
-        return results
-
-    def extra_context(self):
-        """Adds per_page to context data"""
-        # pylint: disable=not-callable
-        context = super(MRSearchView, self).extra_context()
-        context['per_page'] = int(self.request.GET.get('per_page', 25))
-        models = self.request.GET.getlist('models')
-        context['news_checked'] = 'news.article' in models
-        context['foia_checked'] = 'foia.foiarequest' in models
-        context['qanda_checked'] = 'qanda.question' in models
-        return context
-
-    def build_page(self):
-        """Circumvents the hard-coded haystack per page value."""
-        self.results_per_page = self.get_paginate_by()
-        return super(MRSearchView, self).build_page()
+    pass
 
 
 class NewsletterSignupView(View):

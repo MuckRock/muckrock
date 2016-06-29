@@ -110,7 +110,7 @@ urlpatterns = patterns(
     url(r'^project/', include('muckrock.project.urls')),
     url(r'^map/', include('muckrock.map.urls')),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^search/$', views.MRSearchView(), name='search'),
+    url(r'^search/$', views.SearchView.as_view(), name='search'),
     url(r'^settings/', include(dbsettings.urls)),
     url(r'^api_v1/', include(router.urls)),
     url(r'^api_v1/token-auth/', 'rest_framework.authtoken.views.obtain_auth_token'),
