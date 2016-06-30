@@ -7,12 +7,6 @@
         {% block donate-form %}
         <h1 class="form-title">Donate</h1>
         <p>MuckRock is a <strong>501(c)(3)</strong> organization. Our tax identification number is <strong>81-1485228</strong>. Your donation is fully tax deductible.</p>
-        <p><small>Donations may also be sent via PayPal to info@muckrock.com or mailed to:</small></p>
-        <p><small>
-        MuckRock<br>
-        411A Highland Ave<br>
-        Somerville, MA 02144<br>
-        </small></p>
         <form method="post" class="stripe-checkout">
             {% csrf_token %}
             {% include 'lib/pattern/form.html' %}
@@ -21,6 +15,12 @@
                 <button type="submit" class="green button">Donate</button>
             </div>
         </form>
+        <p><small>Donations may also be sent via PayPal to info@muckrock.com or mailed to:</small></p>
+        <p><small>
+        MuckRock<br>
+        411A Highland Ave<br>
+        Somerville, MA 02144<br>
+        </small></p>
         {% endblock %}
     </div>
 </div>
