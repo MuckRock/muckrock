@@ -118,7 +118,9 @@ $('document').ready(function(){
     $('.crowdfund__widget').crowdfund();
 
     // Currency Field
-    $('input.currency-field').currencyField();
+    $('input.currency-field').each(function(){
+        $(this).currencyField();
+    });
 
     // Date Picker
     $('.datepicker').datepicker({

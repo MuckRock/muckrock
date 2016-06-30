@@ -106,7 +106,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
     .anonymity p {
         margin-bottom: $vertical-rhythm/4;
     }
-    .donate {
+    .crowdfund__donate {
         @include display(flex);
         @include flex-wrap(wrap);
         @include align-items(stretch);

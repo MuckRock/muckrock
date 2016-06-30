@@ -11,7 +11,8 @@ from datetime import datetime
 import email
 import logging
 
-from muckrock.agency.models import Agency, STALE_DURATION
+from muckrock.accounts.models import Notification
+from muckrock.agency.models import Agency
 from muckrock.foia.models import (
     FOIACommunication,
     FOIAFile,
@@ -299,14 +300,12 @@ class StaleAgencyTask(Task):
         """Returns a list of stale requests associated with the task's agency"""
         if hasattr(self.agency, 'stale_requests_'):
             return self.agency.stale_requests_
-        # a request is stale when it is open, its most recent
-        # communication is older than the STALE_DURATION, and
-        # if it has autofollowups enabled
+        # a request is stale when it is open
+        # and it has autofollowups enabled
         requests = (FOIARequest.objects.filter(agency=self.agency)
             .get_open()
             .filter(disable_autofollowups=False)
             .annotate(latest_communication=ExtractDay(Now() - Max('communications__date')))
-            .filter(latest_communication__gte=STALE_DURATION)
             .order_by('-latest_communication')
             .select_related('jurisdiction')
         )
@@ -491,6 +490,12 @@ class ResponseTask(Task):
             logging.info('Request #%d status changed to "%s"', foia.id, status)
             action = generate_status_action(foia)
             foia.notify(action)
+            # Mark generic '<Agency> sent a communication to <FOIARequest> as read.'
+            # https://github.com/MuckRock/muckrock/issues/1003
+            generic_notifications = (Notification.objects.for_object(foia)
+                                    .get_unread().filter(action__verb='sent a communication'))
+            for generic_notification in generic_notifications:
+                generic_notification.mark_read()
 
     def set_price(self, price):
         """Sets the price of the communication's request"""
