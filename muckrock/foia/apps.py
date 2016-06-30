@@ -11,7 +11,12 @@ class FOIAConfig(AppConfig):
 
     def ready(self):
         """Registers requests and communications with the activity streams plugin"""
-        from actstream import registry
-        registry.register(self.get_model('FOIARequest'))
-        registry.register(self.get_model('FOIACommunication'))
-        registry.register(self.get_model('FOIANote'))
+        from actstream import registry as action
+        from watson import search
+        FOIARequest = self.get_model('FOIARequest')
+        FOIACommunication = self.get_model('FOIACommunication')
+        FOIANote = self.get_model('FOIANote')
+        action.register(FOIARequest)
+        action.register(FOIACommunication)
+        action.register(FOIANote)
+        search.register(FOIARequest)

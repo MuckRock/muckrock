@@ -11,5 +11,8 @@ class NewsConfig(AppConfig):
 
     def ready(self):
         """Registers articles with the activity streams plugin"""
-        from actstream import registry
-        registry.register(self.get_model('Article'))
+        from actstream import registry as action
+        from watson import search
+        Article = self.get_model('Article')
+        action.register(Article)
+        search.register(Article.objects.get_published())
