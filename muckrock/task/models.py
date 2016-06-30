@@ -12,7 +12,7 @@ import email
 import logging
 
 from muckrock.accounts.models import Notification
-from muckrock.agency.models import Agency, STALE_DURATION
+from muckrock.agency.models import Agency
 from muckrock.foia.models import (
     FOIACommunication,
     FOIAFile,
@@ -305,6 +305,7 @@ class StaleAgencyTask(Task):
         requests = (FOIARequest.objects.filter(agency=self.agency)
             .get_open()
             .filter(disable_autofollowups=False)
+            .annotate(latest_communication=ExtractDay(Now() - Max('communications__date')))
             .order_by('-latest_communication')
             .select_related('jurisdiction')
         )
