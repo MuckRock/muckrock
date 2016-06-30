@@ -193,6 +193,7 @@ INSTALLED_APPS = (
     'robots',
     'storages',
     'taggit',
+    'watson',
     'webpack_loader',
     'lot',
     'package_monitor',

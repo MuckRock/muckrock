@@ -28,6 +28,7 @@ django-secure # Enforces security best practices
 django-sslify # Force SSL everywhere
 django-storages # Store files on S3
 django-taggit # Used for tagging
+django-watson # Used for search
 django-webpack-loader==0.3.0 # Used for loading Webpack bundles
 django<1.10 # Django is kinda important...
 djangorestframework # The API framework

@@ -43,6 +43,7 @@ django-secure==1.0.1
 django-sslify==0.2.7
 django-storages==1.4.1
 django-taggit==0.20.1
+django-watson==1.2.1
 django-webpack-loader==0.3.0
 django==1.9.7
 djangorestframework==3.3.3
@@ -79,5 +80,5 @@ simplejson==3.8.2         # via django-lot
 six==1.10.0               # via django-autocomplete-light, django-geojson, python-dateutil
 smartypants==1.8.6
 sqlparse==0.1.19          # via django-debug-toolbar
-stripe==1.35.0
+stripe==1.36.0
 unidecode==0.4.19
