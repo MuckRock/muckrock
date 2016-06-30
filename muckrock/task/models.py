@@ -11,6 +11,7 @@ from datetime import datetime
 import email
 import logging
 
+from muckrock.accounts.models import Notification
 from muckrock.agency.models import Agency, STALE_DURATION
 from muckrock.foia.models import (
     FOIACommunication,
@@ -488,6 +489,12 @@ class ResponseTask(Task):
             logging.info('Request #%d status changed to "%s"', foia.id, status)
             action = generate_status_action(foia)
             foia.notify(action)
+            # Mark generic '<Agency> sent a communication to <FOIARequest> as read.'
+            # https://github.com/MuckRock/muckrock/issues/1003
+            generic_notifications = (Notification.objects.for_object(foia)
+                                    .get_unread().filter(action__verb='sent a communication'))
+            for generic_notification in generic_notifications:
+                generic_notification.mark_read()
 
     def set_price(self, price):
         """Sets the price of the communication's request"""
