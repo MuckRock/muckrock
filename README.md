@@ -26,6 +26,11 @@
   3. Pull the database, `fab populate-db`
   4. Pull files from S3, `fab sync-aws`
 
+5. Build the search index
+  1. Install watson with `fab manage:installwatson`
+  2. Build the search index with `fab manage:buildwatson`
+  3. After this, the index should stay updated. If a new model is registered with watson, then build the index (step 2).
+
 You should have a fully populated MuckRock site running locally now.
 The code checked out from GitHub is synced between the virtual machine and your host machine, so you may edit the code using your favorite text editor locally while running the code from within the virtual machine. To run the server again, just follow step 4.
 
