@@ -36,12 +36,6 @@ def get_stats(start, end):
             False
         ),
         stat(
-            'Unresolved Tasks',
-            current.total_unresolved_tasks,
-            previous.total_unresolved_tasks,
-            False
-        ),
-        stat(
             'Automatically Resolved',
             current.daily_robot_response_tasks,
             previous.daily_robot_response_tasks
@@ -55,7 +49,6 @@ def get_stats(start, end):
         stat('Pages', current.total_pages, previous.total_pages),
         stat('Users', current.total_users, previous.total_users),
         stat('Pro Users', current.pro_users, previous.pro_users),
-        stat('Agencies', current.total_agencies, previous.total_agencies),
         stat('Stale Agencies', current.stale_agencies, previous.stale_agencies, False),
         stat('New Agencies', current.unapproved_agencies, previous.unapproved_agencies, False),
     ]
