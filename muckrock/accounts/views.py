@@ -274,13 +274,14 @@ def profile_settings(request):
 def buy_requests(request, username=None):
     """A purchaser buys requests for a recipient. The recipient can even be themselves!"""
     url_redirect = request.GET.get('next', 'acct-my-profile')
+    bundles = int(request.POST.get('bundles', 1))
     recipient = get_object_or_404(User, username=username)
     purchaser = request.user
-    request_price = 2000
+    request_price = bundles * 2000
     if purchaser.is_authenticated():
-        request_count = purchaser.profile.bundled_requests()
+        request_count = bundles * purchaser.profile.bundled_requests()
     else:
-        request_count = 4
+        request_count = bundles * 4
     try:
         if request.POST:
             stripe_token = request.POST.get('stripe_token')
