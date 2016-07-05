@@ -2,6 +2,7 @@
 Digest objects for the messages app
 """
 
+from django.contrib.auth.models import User
 from django.utils import timezone
 
 from actstream.models import Action
@@ -13,101 +14,6 @@ from muckrock.crowdfund.models import Crowdfund
 from muckrock.message.email import TemplateEmail
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.qanda.models import Question
-
-def get_stats(start, end):
-    """Compares statistics between two dates"""
-    try:
-        current = Statistics.objects.get(date=end)
-        previous = Statistics.objects.get(date=start)
-    except Statistics.DoesNotExist:
-        return None # if statistics cannot be found, don't send anything
-    stats = [
-        stat('Requests', current.total_requests, previous.total_requests),
-        stat(
-            'Processing',
-            current.total_requests_submitted,
-            previous.total_requests_submitted,
-            False
-        ),
-        stat(
-            'Processing Time',
-            current.requests_processing_days,
-            previous.requests_processing_days,
-            False
-        ),
-        stat(
-            'Automatically Resolved',
-            current.daily_robot_response_tasks,
-            previous.daily_robot_response_tasks
-        ),
-        stat(
-            'Orphans',
-            current.total_unresolved_orphan_tasks,
-            previous.total_unresolved_orphan_tasks,
-            False
-        ),
-        stat('Pages', current.total_pages, previous.total_pages),
-        stat('Users', current.total_users, previous.total_users),
-        stat('Pro Users', current.pro_users, previous.pro_users),
-        stat('Stale Agencies', current.stale_agencies, previous.stale_agencies, False),
-        stat('New Agencies', current.unapproved_agencies, previous.unapproved_agencies, False),
-    ]
-    return stats
-
-def stat(name, current, previous, growth=True):
-    """Returns a statistic dictionary"""
-    return {
-        'name': name,
-        'current': current,
-        'delta': current - previous,
-        'growth': growth
-    }
-
-def get_comms(start, end):
-    """Returns communication data over a date range"""
-    received = FOIACommunication.objects.filter(date__range=[start, end], response=True)
-    sent = FOIACommunication.objects.filter(date__range=[start, end], response=False)
-    delivered_by = {
-        'email': sent.filter(delivered='email').count(),
-        'fax': sent.filter(delivered='fax').count(),
-        'mail': sent.filter(delivered='mail').count()
-    }
-    cost_per = {
-        'email': 0.00,
-        'fax': 0.12,
-        'mail': 0.54,
-    }
-    cost = {
-        'email': delivered_by['email'] * cost_per['email'],
-        'fax': delivered_by['fax'] * cost_per['fax'],
-        'mail': delivered_by['mail'] * cost_per['mail'],
-    }
-    return {
-        'sent': sent.count(),
-        'received': received.count(),
-        'delivery': {
-            'format': delivered_by,
-            'cost': cost_per,
-            'expense': cost,
-            'trailing': get_trailing_cost(end, 30, cost_per)
-        }
-    }
-
-def get_trailing_cost(current, duration, cost_per):
-    """Returns the trailing cost for communications over a period"""
-    period = [current - relativedelta(days=duration), current]
-    sent_comms = FOIACommunication.objects.filter(date__range=period, response=False)
-    trailing = {
-        'email': sent_comms.filter(delivered='email').count(),
-        'fax': sent_comms.filter(delivered='fax').count(),
-        'mail': sent_comms.filter(delivered='mail').count()
-    }
-    trailing_cost = {
-        'email': trailing['email'] * cost_per['email'],
-        'fax': trailing['fax'] * cost_per['fax'],
-        'mail': trailing['mail'] * cost_per['mail']
-    }
-    return trailing_cost
 
 def get_salutation():
     """Returns a time-appropriate salutation"""
@@ -325,14 +231,171 @@ class StaffDigest(Digest):
     html_template = 'message/digest/staff_digest.html'
     interval = relativedelta(days=1)
 
+    class DataPoint():
+        """Holds a data point for display in a digest."""
+        def __init__(self, name, current_value, previous_value, growth=True):
+            """Initialize the statistical object"""
+            self.name = name
+            self.current = current_value
+            self.previous = previous_value
+            if self.current and self.previous:
+                self.delta = self.current - self.previous
+            else:
+                self.delta = None
+            self.growth = growth
+
+    def get_trailing_cost(self, current, duration, cost_per):
+        """Returns the trailing cost for communications over a period"""
+        # pylint: disable=no-self-use
+        period = [current - relativedelta(days=duration), current]
+        sent_comms = FOIACommunication.objects.filter(date__range=period, response=False)
+        trailing = {
+            'email': sent_comms.filter(delivered='email').count(),
+            'fax': sent_comms.filter(delivered='fax').count(),
+            'mail': sent_comms.filter(delivered='mail').count()
+        }
+        trailing_cost = {
+            'email': trailing['email'] * cost_per['email'],
+            'fax': trailing['fax'] * cost_per['fax'],
+            'mail': trailing['mail'] * cost_per['mail']
+        }
+        return trailing_cost
+
+    def get_comms(self, start, end):
+        """Returns communication data over a date range"""
+        received = FOIACommunication.objects.filter(date__range=[start, end], response=True)
+        sent = FOIACommunication.objects.filter(date__range=[start, end], response=False)
+        delivered_by = {
+            'email': sent.filter(delivered='email').count(),
+            'fax': sent.filter(delivered='fax').count(),
+            'mail': sent.filter(delivered='mail').count()
+        }
+        cost_per = {
+            'email': 0.00,
+            'fax': 0.12,
+            'mail': 0.54,
+        }
+        cost = {
+            'email': delivered_by['email'] * cost_per['email'],
+            'fax': delivered_by['fax'] * cost_per['fax'],
+            'mail': delivered_by['mail'] * cost_per['mail'],
+        }
+        return {
+            'sent': sent.count(),
+            'received': received.count(),
+            'delivery': {
+                'format': delivered_by,
+                'cost': cost_per,
+                'expense': cost,
+                'trailing': self.get_trailing_cost(end, 30, cost_per)
+            }
+        }
+
+    def get_data(self, start, end):
+        """Compares statistics between two dates"""
+        try:
+            current = Statistics.objects.get(date=end)
+            previous = Statistics.objects.get(date=start)
+        except Statistics.DoesNotExist:
+            return None # if statistics cannot be found, don't send anything
+        data = {
+            'request': [
+                self.DataPoint('Requests', current.total_requests, previous.total_requests),
+                self.DataPoint('Pages', current.total_pages, previous.total_pages),
+                self.DataPoint(
+                    'Processing',
+                    current.total_requests_submitted,
+                    previous.total_requests_submitted,
+                    False
+                ),
+                self.DataPoint(
+                    'Processing Time',
+                    current.requests_processing_days,
+                    previous.requests_processing_days,
+                    False
+                ),
+                self.DataPoint(
+                    'Responses',
+                    current.total_unresolved_response_tasks,
+                    previous.total_unresolved_response_tasks,
+                    False
+                ),
+                self.DataPoint(
+                    'Automatically Resolved',
+                    current.daily_robot_response_tasks,
+                    previous.daily_robot_response_tasks
+                ),
+                self.DataPoint(
+                    'Orphans',
+                    current.total_unresolved_orphan_tasks,
+                    previous.total_unresolved_orphan_tasks,
+                    False
+                ),
+                self.DataPoint(
+                    'Stale Agencies',
+                    current.stale_agencies,
+                    previous.stale_agencies, False
+                ),
+                self.DataPoint(
+                    'New Agencies',
+                    current.unapproved_agencies,
+                    previous.unapproved_agencies,
+                    False
+                ),
+            ],
+            'user': [
+                self.DataPoint('Users', current.total_users, previous.total_users),
+                self.DataPoint('Pro Users', current.pro_users, previous.pro_users),
+                self.DataPoint(
+                    'Active Org Members',
+                    current.total_active_org_members,
+                    previous.total_active_org_members
+                ),
+            ],
+        }
+        return data
+
+    def get_pro_users(self, start, end):
+        """Compares pro users between two dates"""
+        # pylint: disable=no-self-use
+        try:
+            current = Statistics.objects.get(date=end)
+            previous = Statistics.objects.get(date=start)
+        except Statistics.DoesNotExist:
+            return None # if statistics cannot be found, don't send anything
+        current_pro = current.pro_user_names
+        if current_pro:
+            current_pro = set(current_pro.split(';'))
+        else:
+            current_pro = set([])
+        previous_pro = previous.pro_user_names
+        if previous_pro:
+            previous_pro = set(previous_pro.split(';'))
+        else:
+            previous_pro = set([])
+        pro_gained = [
+            User.objects.get(username=username) for username in list(current_pro - previous_pro)
+        ]
+        pro_lost = [
+            User.objects.get(username=username) for username in list(previous_pro - current_pro)
+        ]
+        data = {
+            'gained': pro_gained,
+            'lost': pro_lost
+        }
+        return data
+
     def get_context_data(self, *args):
         """Adds classified activity to the context"""
+        from muckrock.project.models import Project
         context = super(StaffDigest, self).get_context_data(*args)
         end = timezone.now() - self.interval
         start = end - self.interval
-        context['stats'] = get_stats(start, end)
-        context['comms'] = get_comms(start, end)
+        context['stats'] = self.get_data(start, end)
+        context['comms'] = self.get_comms(start, end)
+        context['pro_users'] = self.get_pro_users(end - relativedelta(days=5), end)
         context['crowdfunds'] = list(Crowdfund.objects.filter(closed=False))
+        context['projects'] = Project.objects.get_pending()
         return context
 
     def send(self, *args):
