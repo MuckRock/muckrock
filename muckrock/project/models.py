@@ -19,6 +19,10 @@ class ProjectQuerySet(models.QuerySet):
         """Only return nonprivate projects"""
         return self.filter(private=False, approved=True)
 
+    def get_pending(self):
+        """Only return projects pending approval"""
+        return self.filter(private=False, approved=False)
+
     def get_for_contributor(self, user):
         """Only return projects which the user is a contributor on"""
         return self.filter(contributors=user)
