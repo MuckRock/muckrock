@@ -86,10 +86,17 @@ class Agency(models.Model, RequestHelper):
     contact_last_name = models.CharField(blank=True, max_length=100)
     contact_title = models.CharField(blank=True, max_length=255)
     # XXX delete
-    url = models.URLField(blank=True, verbose_name='FOIA Web Page', help_text='Begin with http://')
+    url = models.URLField(
+            blank=True,
+            verbose_name='FOIA Web Page',
+            help_text='Begin with http://',
+            )
     phone = models.CharField(blank=True, max_length=30)
     # XXX maybe delete fax also?
-    fax = models.CharField(blank=True, max_length=30)
+    fax = models.CharField(
+            blank=True,
+            max_length=30,
+            )
     notes = models.TextField(blank=True)
     aliases = models.TextField(blank=True)
     parent = models.ForeignKey('self', null=True, blank=True, related_name='children')
@@ -122,9 +129,9 @@ class Agency(models.Model, RequestHelper):
         self.name = self.name.strip()
         super(Agency, self).save(*args, **kwargs)
 
-    def get_emails(self, type_='primary'):
+    def get_emails(self, type_='primary', subtype='to'):
         """Returns the email addresses to send to"""
-        return [c.get_email() for c in self.get_contacts(type_)
+        return [c.get_email() for c in self.get_contacts(type_, subtype)
                 if c.get_email()]
 
     def get_primary_emails(self):
@@ -179,30 +186,36 @@ class Agency(models.Model, RequestHelper):
         agencyprofile.contact_type = 'primary'
         agencyprofile.save()
 
-    def get_contacts(self, type_):
+    def get_contacts(self, type_, subtype):
         """Get all contacts of a given type for this agency"""
-        return self.users.filter(agencyprofile__contact_type=type_)
+        if type_ == 'primary':
+            return self.users.filter(agencyprofile__primary=subtype)
+        elif type_ == 'appeal':
+            return self.users.filter(agencyprofile__appeal=subtype)
 
     class Meta:
         # pylint: disable=too-few-public-methods
         verbose_name_plural = 'agencies'
 
 
-CONTACT_TYPES = (
-    ('primary', 'Primary'), # Send to this contact by default
-    ('copy', 'Copy'), # CC to this contact by default
-    ('appeal', 'Appeal'), # Send to this contact by default for appeals
-    ('appeal-copy', 'Appeal Copy'), # CC to this contact by default for appeals
-    ('other', 'Other'), # Only send to this contact when they reply to a message
-)
+EMAIL_TYPES = (
+    ('to', 'Primary'),
+    ('cc', 'CC'),
+    ('no', 'None'),
+    )
 
 
 class AgencyProfile(models.Model):
     """Many to Many through model"""
     user = models.ForeignKey('accounts.AgencyUser')
     agency = models.ForeignKey('agency.Agency')
-    contact_type = models.CharField(
-            choices=CONTACT_TYPES,
-            max_length=11,
-            default='other',
+    primary = models.CharField(
+            max_length=2,
+            default='no',
+            choices=EMAIL_TYPES,
+            )
+    appeal = models.CharField(
+            max_length=2,
+            default='no',
+            choices=EMAIL_TYPES,
             )

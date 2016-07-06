@@ -434,7 +434,7 @@ class NewAgencyTask(Task):
             comms = foia.communications.all()
             if comms.count():
                 first_comm = comms[0]
-                first_comm.resend(self.agency.get_contacts('primary'))
+                first_comm.resend(self.agency.get_contacts('primary', 'to'))
 
     def reject(self, replacement_agency):
         """Resends pending requests to replacement agency"""
@@ -447,7 +447,7 @@ class NewAgencyTask(Task):
             comms = foia.communications.all()
             if comms.count():
                 first_comm = comms[0]
-                first_comm.resend(replacement_agency.get_contacts('primary'))
+                first_comm.resend(replacement_agency.get_contacts('primary', 'to'))
 
 
 class ResponseTask(Task):

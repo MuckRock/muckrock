@@ -16,6 +16,13 @@ from django.db.models import CharField, FileField
 from django.forms.models import ModelChoiceIterator, ModelChoiceField
 from django.utils.translation import ugettext as _
 
+from phonenumbers import (
+        NumberParseException,
+        PhoneNumberFormat,
+        format_number,
+        parse,
+        )
+
 email_separator_re = re.compile(r'[^\w\.\-\+\&@_]+')
 
 # https://code.djangoproject.com/ticket/11027
@@ -33,7 +40,9 @@ def filefield_maxlength_validator(value):
         raise forms.ValidationError(_(u'File name too long.'))
     return value
 
+
 FileField.default_validators = FileField.default_validators[:] + [filefield_maxlength_validator]
+
 
 class EmailsListField(CharField):
     """Multi email field"""
@@ -70,6 +79,7 @@ class FullEmailValidator(EmailValidator):
             fullname, email = parseaddr(value)
             super(FullEmailValidator, self).__call__(email)
 
+
 validate_full_email = FullEmailValidator()
 
 
@@ -84,6 +94,7 @@ class FullEmailField(forms.EmailField):
         super(FullEmailField, self).clean(value)
         fullname, email = parseaddr(value)
         return email
+
 
 class GroupedModelChoiceField(ModelChoiceField):
     """Form field for grouped model choice"""
@@ -131,9 +142,24 @@ class GroupedModelChoiceIterator(ModelChoiceIterator):
             for group, choices in groupby(self.queryset.all(), key=lambda row: getattr(row, self.field.group_by_field)):
                 yield (self.field.group_label(group), [self.choice(ch) for ch in choices])
 
+
 # https://github.com/fusionbox/django-fusionbox/blob/master/fusionbox/forms/fields.py
 class USDCurrencyField(forms.DecimalField):
     """Form field for entering dollar amounts."""
     def clean(self, value):
         """Allows an optional leading dollar sign, which gets stripped."""
         return super(USDCurrencyField, self).clean(value.lstrip('$'))
+
+
+class PhoneNumberField(forms.CharField):
+    """Phone number field using google's phone number library"""
+
+    def clean(self, value):
+        """Parse and format using google's phone number library"""
+        try:
+            phone = parse(value, 'US')
+            return format_number(phone, PhoneNumberFormat.NATIONAL)
+        except NumberParseException:
+            raise ValidationError(
+                    '%(value)s is not a valid phone number',
+                    params={'value': value})

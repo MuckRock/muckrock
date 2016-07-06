@@ -21,6 +21,7 @@ import sys
 from muckrock.accounts.models import AgencyUser
 from muckrock.agency.models import AgencyType, Agency, AgencyProfile
 from muckrock.agency.forms import CSVImportForm
+from muckrock.fields import PhoneNumberField
 from muckrock.jurisdiction.models import Jurisdiction
 
 logger = logging.getLogger(__name__)
@@ -44,7 +45,7 @@ class AgencyProfileAdminForm(forms.ModelForm):
 
     class Meta:
         model = AgencyProfile
-        fields = ('user', 'contact_type')
+        fields = ('user', 'primary', 'appeal')
 
 
 class AgencyProfileInline(admin.TabularInline):
@@ -75,6 +76,7 @@ class AgencyAdminForm(forms.ModelForm):
             'AgencyAdminAutocomplete',
             queryset=Agency.objects.all(),
             required=False)
+    fax = PhoneNumberField()
 
     class Meta:
         # pylint: disable=too-few-public-methods

@@ -13,7 +13,6 @@ from django.shortcuts import get_object_or_404
 
 import logging
 
-from muckrock.accounts.models import AgencyUser
 from muckrock.foia.models.request import FOIARequest, STATUS
 from muckrock.utils import unique_username
 

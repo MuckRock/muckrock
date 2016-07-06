@@ -41,6 +41,7 @@ jsonfield # Used for storing JSON data, required by django-geojson
 newrelic # Interface to newrelic service
 numpy==1.9.1 # Used by machine learning
 pascha # Used by business days to calculate th date of Easter
+phonenumbers # Parse and format phone numbers
 pillow # Used by Django for image handling
 psycopg2 # Interface to postgres DB
 pysolr # Interface to Apache solr for search engine

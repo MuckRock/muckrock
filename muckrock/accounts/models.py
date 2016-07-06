@@ -76,7 +76,6 @@ class Profile(models.Model):
                    ' please leave blank.')
     )
     zip_code = models.CharField(max_length=10, blank=True)
-    phone = PhoneNumberField(blank=True)
     notifications = models.ManyToManyField(
         'foia.FOIARequest',
         related_name='notify',
@@ -146,8 +145,7 @@ class Profile(models.Model):
     payment_failed = models.BooleanField(default=False)
 
     # for agency users
-    # XXX
-    #phone = models.CharField(blank=True, max_length=30)
+    phone = models.CharField(blank=True, max_length=30)
     fax = models.CharField(blank=True, max_length=30)
     salutation = models.CharField(blank=True, max_length=30)
     title = models.CharField(blank=True, max_length=255)

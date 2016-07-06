@@ -38,7 +38,8 @@ class AgencyProfileFactory(factory.django.DjangoModelFactory):
             'muckrock.factories.AgencyUserFactory',
             agencyprofile=None)
     agency = factory.SubFactory('muckrock.factories.AgencyFactory')
-    contact_type = 'primary'
+    primary = 'to'
+    appeal = 'no'
 
 
 class UserFactory(factory.django.DjangoModelFactory):

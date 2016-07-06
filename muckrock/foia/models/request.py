@@ -466,11 +466,11 @@ class FOIARequest(models.Model):
     def submit(self, appeal=False, snail=False, thanks=False):
         # update contacts
         if appeal:
-            self.contacts.set(self.get_contacts('appeal'))
-            self.cc_contacts.set(self.get_contacts('appeal-copy'))
+            self.contacts.set(self.get_contacts('appeal', 'to'))
+            self.cc_contacts.set(self.get_contacts('appeal', 'cc'))
         elif not self.contacts:
-            self.contacts.set(self.get_contacts('primary'))
-            self.cc_contacts.set(self.get_contacts('copy'))
+            self.contacts.set(self.get_contacts('primary', 'to'))
+            self.cc_contacts.set(self.get_contacts('primary', 'cc'))
 
         has_email = bool(self.get_emails()[0])
         approved_agency = self.agency and self.agency.status == 'approved'
@@ -525,17 +525,17 @@ class FOIARequest(models.Model):
                 'a suitable proxy does not exist.'
                 )
 
-    def get_contacts(self, type_):
+    def get_contacts(self, type_, subtype):
         """Get the contacts for a new request by type"""
         try:
-            if type_ in ('appeal', 'appeal-copy'):
+            if type_ == 'appeal':
                 agency = self.agency.appeal_agency
             else:
                 agency = self.agency
         except AttributeError:
             return []
 
-        return agency.get_contacts(type_)
+        return agency.get_contacts(type_, subtype)
 
     def followup(self, show_all_comms=True):
         """Send a follow up email for this request"""
