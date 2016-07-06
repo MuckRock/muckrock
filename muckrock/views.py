@@ -212,7 +212,11 @@ class MRFilterableListView(ListView):
     def get_paginate_by(self, queryset):
         """Paginates list by the return value"""
         try:
-            per_page = int(self.request.GET.get('per_page'))
+            # clean per_page value so it only includes digits
+            # then convert it to an integer
+            per_page = self.request.GET.get('per_page')
+            per_page = re.sub(r'[^\d]', r'', per_page)
+            per_page = int(per_page)
             return max(min(per_page, 100), 5)
         except (ValueError, TypeError):
             return 25

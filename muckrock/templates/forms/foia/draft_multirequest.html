@@ -82,6 +82,7 @@ and
 {% if balance.extra_requests %}
 <form action="{% url 'acct-buy-requests' username=request.user.username %}?next={{ foia.get_absolute_url }}" method="POST" class="stripe-checkout" id="buy-requests">
     {% csrf_token %}
+    <input type="hidden" name="bundles" value="{{bundles}}" />
     <input type="hidden" name="stripe_token" value="" />
     <input type="hidden" name="stripe_pk" value="{{ stripe_pk }}" />
     <input type="hidden" name="stripe_image" value="{% static 'icons/logo.png' %}" />

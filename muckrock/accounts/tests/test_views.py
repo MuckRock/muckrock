@@ -234,12 +234,15 @@ class TestBuyRequestsView(TestCase):
     def setUp(self):
         self.user = UserFactory()
         self.factory = RequestFactory()
-        self.url = reverse('acct-buy-requests', kwargs={'username': self.user.username})
+        self.kwargs = {'username': self.user.username}
+        self.url = reverse('acct-buy-requests', kwargs=self.kwargs)
         self.view = views.buy_requests
         self.data = {
             'stripe_token': 'test',
             'stripe_email': self.user.email
         }
+
+
 
     def test_buy_requests(self):
         """A user should be able to buy themselves requests."""
@@ -304,6 +307,17 @@ class TestBuyRequestsView(TestCase):
         other_user.profile.refresh_from_db()
         requests_to_add = 4
         eq_(other_user.profile.num_requests, existing_request_count + requests_to_add)
+
+    def test_buy_multiple_bundles(self):
+        """Users should be able to buy multiple bundles of four requests."""
+        profile = self.user.profile
+        bundles_to_buy = 2
+        existing_request_count = profile.num_requests
+        self.data['bundles'] = bundles_to_buy
+        http_post_response(self.url, self.view, self.data, self.user, **self.kwargs)
+        profile.refresh_from_db()
+        requests_to_add = bundles_to_buy * self.user.profile.bundled_requests()
+        eq_(profile.num_requests, existing_request_count + requests_to_add)
 
     @raises(Http404)
     def test_nonexistant_user(self):
