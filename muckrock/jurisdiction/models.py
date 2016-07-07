@@ -232,3 +232,24 @@ class Jurisdiction(models.Model, RequestHelper):
         # pylint: disable=too-few-public-methods
         ordering = ['name']
         unique_together = ('slug', 'parent')
+
+
+class Law(models.Model):
+    """A law that allows for requests for public records from a jurisdiction."""
+    jurisdiction = models.ForeignKey(Jurisdiction, related_name='laws')
+    name = models.CharField(max_length=255, help_text='The common name of the law.')
+    shortname = models.CharField(blank=True, max_length=20,
+        help_text='Abbreviation or acronym, e.g. FOIA, FOIL, OPRA')
+    citation = models.CharField(max_length=255, help_text='The legal reference for this law.')
+    url = models.URLField(help_text='The URL of the full text of the law.')
+    summary = models.TextField(blank=True)
+
+    def __unicode__(self):
+        return self.name
+
+    def __repr__(self):
+        return '<Law: %d>' % self.pk
+
+    def get_absolute_url(self):
+        """Return the url for the jurisdiction."""
+        return self.jurisdiction.get_absolute_url()

@@ -26,8 +26,8 @@
                 <div class="jurisdiction__law">
                     <h1 class="jurisdiction__law__name">
                         {{law.name}}
-                        {% if law.acronym %}
-                        <span class="jurisdiction__law__acronym">({{law.acronym}})</span>
+                        {% if law.shortname %}
+                        <span class="jurisdiction__law__shortname">({{law.shortname}})</span>
                         {% endif %}
                     </h1>
                     <p class="jurisdiction__law__citation"><a href="{{law.url}}">{{law.citation}}</a></p>

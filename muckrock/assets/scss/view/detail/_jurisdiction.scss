@@ -1,0 +1,72 @@
+$left-column: 0 1 16em;
+$right-column: 1 1 32em;
+
+.jurisdiction.detail {
+    @include display(flex);
+    @include flex-wrap(wrap);
+    max-width: 64em;
+    margin: 0 auto;
+}
+.jurisdiction__header {
+    @include flex(0 1 100%);
+    @include display(flex);
+    @include flex-wrap(wrap);
+    .jurisdiction__image {
+        @include flex($left-column);
+        margin-bottom: 0;
+        margin-right: $vertical-rhythm;
+    }
+    .jurisdiction__name {
+        font-size: $font-size-5;
+        font-weight: $font-weight-bold;
+    }
+}
+.jurisdiction__aside {
+    @include flex($left-column);
+    margin-right: $vertical-rhythm;
+    .jurisdiction__actions {
+        .button {
+            display: block;
+        }
+        .flag .agency {
+            display: none;
+            &.visible {
+                display: block;
+            }
+        }
+    }
+}
+.jurisdiction__main {
+    @include flex($right-column);
+    min-width: 0;
+}
+.jurisdiction__toc {
+    display: inline-block;
+    @include border;
+    @include padding;
+    background: $color-white-pure;
+    p {
+        font-weight: $font-weight-bold;
+    }
+    ol {
+        padding-left: $vertical-rhythm;
+    }
+}
+.jurisdiction__points {
+    display: inline-block;
+    @include padding;
+    vertical-align: top;
+    p {
+        font-weight: $font-weight-bold;
+    }
+    .jurisdiction__point__symbol {
+        font-size: $font-size-5;
+        font-weight: $font-weight-bold;
+        &.red {
+            color: $color-red;
+        }
+        &.green {
+            color: $color-green;
+        }
+    }
+}
