@@ -23,30 +23,42 @@
             {% if jurisdiction.laws.exists %}
             <div class="jurisdiction__laws">
                 {% for law in jurisdiction.laws.all %}
-                <div class="jurisdiction__law">
-                    <h1 class="jurisdiction__law__name">
+                <div class="law">
+                    <h1 class="law__name">
                         {{law.name}}
                         {% if law.shortname %}
-                        <span class="jurisdiction__law__shortname">({{law.shortname}})</span>
+                        <span class="law__shortname">({{law.shortname}})</span>
                         {% endif %}
                     </h1>
-                    <p class="jurisdiction__law__citation"><a href="{{law.url}}">{{law.citation}}</a></p>
-                    <p class="jurisdiction__law__summary">{{law.summary}}</p>
+                    <p class="law__citation"><a href="{{law.url}}">{{law.citation}}</a></p>
+                    <p class="law__summary">{{law.summary}}</p>
                 </div>
                 {% endfor %}
             </div>
             {% endif %}
         </div>
+
     </header>
     <aside class="jurisdiction__aside">
         <div class="jurisdiction__actions">
-            <a href="{% url 'foia-create' %}" class="blue button">
-                {% include 'lib/component/icon/create-request.svg' %}
-                <span class="label">File a Request</span>
-            </a>
-            {% if user.is_authenticated %}
-            {% include 'lib/flag_form.html' %}
-            {% endif %}
+            <div class="button-group">
+                <a href="{% url 'foia-create' %}" class="blue button">
+                    {% include 'lib/component/icon/create-request.svg' %}
+                    <span class="label">File a Request</span>
+                </a>
+                {% if user.is_authenticated %}
+                <a href="#flag" class="button">Suggest Change</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="jurisdiction__toc">
+            <p>Table of Contents</p>
+            <ol>
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#law">The Law</a></li>
+                <li><a href="#resources">Resources</a></li>
+                <li><a href="#stats">Stats</a></li>
+            </ol>
         </div>
 
         {% include 'lib/request_stats.html' %}
@@ -92,43 +104,7 @@
         </dl>
     </aside>
     <main class="jurisdiction__main">
-        <div class="jurisdiction__toc">
-            <p>Table of Contents</p>
-            <ol>
-                <li><a href="#overview">Overview</a></li>
-                <li><a href="#law">The Law</a></li>
-                <li><a href="#resources">Resources</a></li>
-                <li><a href="#stats">Stats</a></li>
-            </ol>
-        </div>
-        <div class="jurisdiction__points">
-            <p>At a Glance</p>
-            <ul class="nostyle">
-                {% for point in jurisdiction.points %}
-                <li class="jurisdiction__point">
-                    {% if point.positive %}
-                    <span class="jurisdiction__point__symbol green">+</span>
-                    {% else %}
-                    <span class="jurisdiction__point__symbol red">&ndash;</span>
-                    {% endif %}
-                    <span class="jurisdiction__point__text">{{jurisdiction.point.text}}</span>
-                </li>
-                {% empty %}
-                <li class="jurisdiction__point">
-                    <span class="jurisdiction__point__symbol red">&ndash;</span>
-                    <span class="jurisdiction__point__text">Little to no penalties for agency violations</span>
-                </li>
-                <li class="jurisdiction__point">
-                    <span class="jurisdiction__point__symbol red">&ndash;</span>
-                    <span class="jurisdiction__point__text">Huge fees the norm</span>
-                </li>
-                <li class="jurisdiction__point">
-                    <span class="jurisdiction__point__symbol green">+</span>
-                    <span class="jurisdiction__point__text">Recent pushback gives some hope</span>
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
+
         {% if jurisdiction.public_notes %}
         <section class="notes">
             {{ jurisdiction.public_notes|markdown:"trusted" }}
