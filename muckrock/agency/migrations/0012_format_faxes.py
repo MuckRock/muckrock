@@ -39,5 +39,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(format_faxes),
+        migrations.RunPython(format_faxes, lambda a, s: None),
     ]
