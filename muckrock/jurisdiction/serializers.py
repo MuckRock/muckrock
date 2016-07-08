@@ -11,9 +11,28 @@ from muckrock.jurisdiction.models import Jurisdiction
 class JurisdictionSerializer(serializers.ModelSerializer):
     """Serializer for Jurisidction model"""
     parent = serializers.PrimaryKeyRelatedField(
-            queryset=Jurisdiction.objects.all(),
+            queryset=Jurisdiction.objects.order_by(),
             style={'base_template': 'input.html'})
+    absolute_url = serializers.ReadOnlyField(source='get_absolute_url')
+    average_response_time = serializers.ReadOnlyField()
+    fee_rate = serializers.ReadOnlyField()
+    success_rate = serializers.ReadOnlyField()
+
     class Meta:
         model = Jurisdiction
-        fields = ('id', 'name', 'slug', 'full_name', 'abbrev', 'level', 'parent', 'public_notes',
-                  'days')
+        fields = (
+                'id',
+                'name',
+                'slug',
+                'full_name',
+                'abbrev',
+                'level',
+                'parent',
+                'public_notes',
+                'days',
+                # computed fields
+                'absolute_url',
+                'average_response_time',
+                'fee_rate',
+                'success_rate',
+                 )
