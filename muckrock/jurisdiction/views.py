@@ -156,6 +156,6 @@ class JurisdictionViewSet(viewsets.ModelViewSet):
     """API views for Jurisdiction"""
     # pylint: disable=too-many-ancestors
     # pylint: disable=too-many-public-methods
-    queryset = Jurisdiction.objects.all()
+    queryset = Jurisdiction.objects.select_related('parent__parent').order_by()
     serializer_class = JurisdictionSerializer
     filter_fields = ('name', 'abbrev', 'level', 'parent')

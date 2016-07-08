@@ -6,10 +6,10 @@ env.cd = lcd
 env.base_path = os.path.dirname(env.real_fabfile)
 
 @task(alias='prod')
-def production():
+def production(force=False):
     """Merge the dev branch into master and push into production"""
     status = env.run('git s --porcelain', capture=True)
-    if '??' in status:
+    if '??' in status and not force:
         print 'Untracked files, exiting'
         exit()
     env.run('git pull origin dev', capture=False)

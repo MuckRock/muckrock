@@ -126,7 +126,10 @@ class AgencyViewSet(viewsets.ModelViewSet):
     """API views for Agency"""
     # pylint: disable=too-many-ancestors
     # pylint: disable=too-many-public-methods
-    queryset = Agency.objects.all().select_related('jurisdiction', 'parent', 'appeal_agency')
+    queryset = (Agency.objects
+            .select_related('jurisdiction', 'parent', 'appeal_agency')
+            .prefetch_related('types')
+            )
     serializer_class = AgencySerializer
 
     class Filter(django_filters.FilterSet):
