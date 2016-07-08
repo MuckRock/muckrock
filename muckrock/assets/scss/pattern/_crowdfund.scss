@@ -30,6 +30,9 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
             line-height: $font-line-height;
             font-weight: $font-weight-bold;
             margin: 0;
+            a {
+                color: $crowdfund-color-dark;
+            }
         }
         .action {
             font-size: $font-size-2;
@@ -103,7 +106,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
     .anonymity p {
         margin-bottom: $vertical-rhythm/4;
     }
-    .donate {
+    .crowdfund__donate {
         @include display(flex);
         @include flex-wrap(wrap);
         @include align-items(stretch);
@@ -180,8 +183,10 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
     {
         width: 32em;
         color: $color-white;
-        @include icon-color($color-white);
         font-weight: $font-weight-bold;
+        .icon {
+            @include svg-color($color-white);
+        }
         a, .action
         {
             color: $color-white;

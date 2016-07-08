@@ -1,0 +1,47 @@
+@mixin social-color($channel, $color) {
+    a.#{$channel} {
+        background: desaturate($color, 30%);
+    }
+    a:hover.#{$channel} {
+        background: $color;
+    }
+}
+
+.social {
+    .channels {
+        @include display(flex);
+        @include align-items(center);
+    }
+    .channel {
+        overflow: hidden;
+        @include flex(1);
+        text-align: center;
+        transition: all .1s ease-out;
+        &:hover {
+            z-index: 1;
+            transform: scale(1.15);
+        }
+    }
+    .icon {
+        height: 1.25rem;
+        width: 1.25rem;
+        vertical-align: middle;
+        @include svg-color($color-white);
+    }
+    .label {
+        display: none;
+        font-size: $font-size-1;
+        font-weight: $font-weight-bold;
+    }
+    a {
+        display: block;
+        padding: $vertical-rhythm/2;
+        background: $color-black;
+        color: $color-white;
+        text-decoration: none;
+    }
+    @include social-color(email, $color-email);
+    @include social-color(twitter, $color-twitter);
+    @include social-color(facebook, $color-facebook);
+    @include social-color(reddit, $color-reddit);
+}

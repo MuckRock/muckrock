@@ -13,122 +13,126 @@
 {% endblock styles %}
 
 {% block content %}
-<div class="new-request">
-    <header>
-        {% if clone %}
-        <h1>Clone a request</h1>
-        <summary>Make any changes to the request, then clone it.</summary>
-        {% else %}
-        <h1>File a request</h1>
-        <summary>
-            Not sure where to start? <a href="/about/foia-101/">We can help.</a>
-            <br>
-            Out of ideas? <a href="#clone">Try cloning a request.</a>
-            <br>
-            Want to send a multirequest?
-            {% if request.user.is_authenticated and request.user.profile.can_multirequest %}
-            <a href="{% url 'foia-create-multi' %}">Click here.</a>
+<div class="foia__create form">
+    <div class="new-request">
+        <header>
+            {% if clone %}
+            <h1>Clone a request</h1>
+            <summary>Make any changes to the request, then clone it.</summary>
             {% else %}
-            <a href="{% url 'accounts' %}">Go Pro!</a>
-            {% endif %}
-            <br>
-            <noscript>It looks like you have JavaScript turned off. This page requires JavaScript to function. If you are not willing to enable JavaScript, please send an email containing all necessary information to file and we will create your request for you.</noscript>
-        <summary>
-        {% endif %}
-    </header>
-    {% if form.non_field_errors or form.errors %}
-    <section class="failure panel">
-        <p>The form could not be submitted due to the following errors:</p>
-        {{ form.non_field_errors }}
-        <ul>
-        {% for field in form.visible_fields %}
-            {% if field.errors %}
-            <li>{{ field.label }} field: {{ field.errors }}</li>
-            {% endif %}
-        {% endfor %}
-        </ul>
-    </section>
-    {% endif %}
-    <form action="" method="post" class="create-request">
-        {% csrf_token %}
-        {% for field in form.hidden_fields %}
-            {{ field }}
-        {% endfor %}
-        {% for field in form.visible_fields %}
-            <fieldset class="{{ field.label|lower|slugify }}{% if field.errors %} failure{% endif %}{% if field.field.required %} required{% endif %}">
-                {% if field.label|lower == 'jurisdiction' %}
-                    <ul>
-                    {% for radio in field reversed %}
-                        <li class="{{ radio.choice_label|lower }}">
-                            <label for="j_{{ forloop.counter }}">
-                        {% if radio.choice_label|lower == 'federal' %}
-                            <svg viewBox="0 0 479 377" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="icon-federal">
-                                <title>Federal</title>
-                                <description>An icon depicting the U.S. Capitol Building</description>
-                                <g fill-rule="evenodd">
-                                    <path d="M145.524486,136 L145.482143,136 L145.482143,232 L0,232 L0,377 L479,377 L479,232 L333.517857,232 L333.517857,232 L333.517857,136 L333.475514,136 C333.503676,135.003636 333.517857,134.003562 333.517857,133 C333.517857,78.3238071 291.424631,34 239.5,34 C187.575369,34 145.482143,78.3238071 145.482143,133 C145.482143,134.003562 145.496324,135.003636 145.524486,136.000013 Z M333.517857,232 L145.482143,232 L145.482143,377 L333.517857,377 L333.517857,232 L333.517857,232 Z"></path>
-                                    <path d="M163,232 L163,376 L180,376 L180,232 L163,232 Z M197,232 L197,376 L214,376 L214,232 L197,232 Z M231,232 L231,376 L248,376 L248,232 L231,232 Z M265,232 L265,376 L282,376 L282,232 L265,232 Z M299,232 L299,376 L316,376 L316,232 L299,232 Z"></path>
-                                    <rect x="231" y="0" width="17" height="144"></rect>
-                                </g>
-                            </svg>
-                        {% endif %}
-                        {% if radio.choice_label|lower == 'state' %}
-                            <svg viewBox="0 0 383 317" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  id="icon-state">
-                                <title>State</title>
-                                <description>An icon depicting a state capitol building.</description>
-                                <g>
-                                    <path d="M97.0051333,198 L97.0073765,146 C97.0024636,145.500738 97,145.000731 97,144.5 C97,79.0542539 139.085231,26 191,26 C242.914769,26 285,79.0542539 285,144.5 C285,145.000731 284.997536,145.500738 284.992624,146 L285,146 L285,198 L383,198 L383,317 L0,317 L0,198 L97.0051333,198 Z M97.0051333,198 L97,317 L285,317 L285,198 L97.0051333,198 Z"></path>
-                                    <path d="M115,184 L115,316 L132,316 L132,184 L115,184 Z M149,184 L149,316 L166,316 L166,184 L149,184 Z M183,184 L183,316 L200,316 L200,184 L183,184 Z M217,184 L217,316 L234,316 L234,184 L217,184 Z M251,184 L251,316 L268,316 L268,184 L251,184 Z"></path>
-                                    <rect x="183" y="0" width="17" height="144"></rect>
-                                </g>
-                            </svg>
-                        {% endif %}
-                        {% if radio.choice_label|lower == 'local' %}
-                            <svg viewBox="0 0 277 257" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  id="icon-local">
-                                <title>Local</title>
-                                <description>An icon representing a local government courthouse.</description>
-                                <g>
-                                    <path d="M199,173 L277,173 L277,257 L0,257 L0,173 L79,173 L79,89 L199,89 L199,173 Z M199,173 L79,173 L79,257 L199,257 L199,173 Z M139,151 C150.045696,151 159,142.045696 159,131 C159,119.954304 150.045696,111 139,111 C127.954304,111 119,119.954304 119,131 C119,142.045696 127.954304,151 139,151 Z"></path>
-                                    <path d="M97,173 L97,256 L114,256 L114,173 L97,173 Z M131,173 L131,256 L148,256 L148,173 L131,173 Z M165,173 L165,256 L182,256 L182,173 L165,173 Z"></path>
-                                    <polygon points="139 0 199 83 79 83"></polygon>
-                                </g>
-                            </svg>
-                        {% endif %}
-                            {{ radio.choice_label }}</label>
-                            <input name="{{ radio.name }}" type="radio" id="j_{{ forloop.counter }}" value="{{ radio.choice_value }}" {% if field.value == radio.choice_value%}checked{% endif %}>
-                        </li>
-                    {% endfor %}
-                    </ul>
+            <h1>File a request</h1>
+            <summary>
+                Not sure where to start? <a href="/about/foia-101/">We can help.</a>
+                <br>
+                Out of ideas? <a href="#clone">Try cloning a request.</a>
+                <br>
+                Want to send a multirequest?
+                {% if request.user.is_authenticated and request.user.profile.can_multirequest %}
+                <a href="{% url 'foia-create-multi' %}">Click here.</a>
                 {% else %}
-                    <label for="{{ field.auto_id }}">{{ field.label}}</label>
-                    {{ field }}
+                <a href="{% url 'accounts' %}">Go Pro!</a>
                 {% endif %}
-            </fieldset>
+                <br>
+                <noscript>It looks like you have JavaScript turned off. This page requires JavaScript to function. If you are not willing to enable JavaScript, please send an email containing all necessary information to file and we will create your request for you.</noscript>
+            <summary>
+            {% endif %}
+        </header>
+        {% if form.non_field_errors or form.errors %}
+        <section class="failure panel">
+            <p>The form could not be submitted due to the following errors:</p>
+            {{ form.non_field_errors }}
+            <ul>
+            {% for field in form.visible_fields %}
+                {% if field.errors %}
+                <li>{{ field.label }} field: {{ field.errors }}</li>
+                {% endif %}
+            {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+        <form action="" method="post" class="create-request">
+            {% csrf_token %}
+            {% for field in form.hidden_fields %}
+                {{ field }}
+            {% endfor %}
+            {% for field in form.visible_fields %}
+                <fieldset class="{{ field.label|lower|slugify }}{% if field.errors %} failure{% endif %}{% if field.field.required %} required{% endif %}">
+                    {% if field.label|lower == 'jurisdiction' %}
+                        <ul>
+                        {% for radio in field reversed %}
+                            <li class="{{ radio.choice_label|lower }}">
+                                <label for="j_{{ forloop.counter }}">
+                            {% if radio.choice_label|lower == 'federal' %}
+                                <svg viewBox="0 0 479 377" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="icon-federal">
+                                    <title>Federal</title>
+                                    <description>An icon depicting the U.S. Capitol Building</description>
+                                    <g fill-rule="evenodd">
+                                        <path d="M145.524486,136 L145.482143,136 L145.482143,232 L0,232 L0,377 L479,377 L479,232 L333.517857,232 L333.517857,232 L333.517857,136 L333.475514,136 C333.503676,135.003636 333.517857,134.003562 333.517857,133 C333.517857,78.3238071 291.424631,34 239.5,34 C187.575369,34 145.482143,78.3238071 145.482143,133 C145.482143,134.003562 145.496324,135.003636 145.524486,136.000013 Z M333.517857,232 L145.482143,232 L145.482143,377 L333.517857,377 L333.517857,232 L333.517857,232 Z"></path>
+                                        <path d="M163,232 L163,376 L180,376 L180,232 L163,232 Z M197,232 L197,376 L214,376 L214,232 L197,232 Z M231,232 L231,376 L248,376 L248,232 L231,232 Z M265,232 L265,376 L282,376 L282,232 L265,232 Z M299,232 L299,376 L316,376 L316,232 L299,232 Z"></path>
+                                        <rect x="231" y="0" width="17" height="144"></rect>
+                                    </g>
+                                </svg>
+                            {% endif %}
+                            {% if radio.choice_label|lower == 'state' %}
+                                <svg viewBox="0 0 383 317" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  id="icon-state">
+                                    <title>State</title>
+                                    <description>An icon depicting a state capitol building.</description>
+                                    <g>
+                                        <path d="M97.0051333,198 L97.0073765,146 C97.0024636,145.500738 97,145.000731 97,144.5 C97,79.0542539 139.085231,26 191,26 C242.914769,26 285,79.0542539 285,144.5 C285,145.000731 284.997536,145.500738 284.992624,146 L285,146 L285,198 L383,198 L383,317 L0,317 L0,198 L97.0051333,198 Z M97.0051333,198 L97,317 L285,317 L285,198 L97.0051333,198 Z"></path>
+                                        <path d="M115,184 L115,316 L132,316 L132,184 L115,184 Z M149,184 L149,316 L166,316 L166,184 L149,184 Z M183,184 L183,316 L200,316 L200,184 L183,184 Z M217,184 L217,316 L234,316 L234,184 L217,184 Z M251,184 L251,316 L268,316 L268,184 L251,184 Z"></path>
+                                        <rect x="183" y="0" width="17" height="144"></rect>
+                                    </g>
+                                </svg>
+                            {% endif %}
+                            {% if radio.choice_label|lower == 'local' %}
+                                <svg viewBox="0 0 277 257" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  id="icon-local">
+                                    <title>Local</title>
+                                    <description>An icon representing a local government courthouse.</description>
+                                    <g>
+                                        <path d="M199,173 L277,173 L277,257 L0,257 L0,173 L79,173 L79,89 L199,89 L199,173 Z M199,173 L79,173 L79,257 L199,257 L199,173 Z M139,151 C150.045696,151 159,142.045696 159,131 C159,119.954304 150.045696,111 139,111 C127.954304,111 119,119.954304 119,131 C119,142.045696 127.954304,151 139,151 Z"></path>
+                                        <path d="M97,173 L97,256 L114,256 L114,173 L97,173 Z M131,173 L131,256 L148,256 L148,173 L131,173 Z M165,173 L165,256 L182,256 L182,173 L165,173 Z"></path>
+                                        <polygon points="139 0 199 83 79 83"></polygon>
+                                    </g>
+                                </svg>
+                            {% endif %}
+                                {{ radio.choice_label }}</label>
+                                <input name="{{ radio.name }}" type="radio" id="j_{{ forloop.counter }}" value="{{ radio.choice_value }}" {% if field.value == radio.choice_value%}checked{% endif %}>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        <label for="{{ field.auto_id }}">{{ field.label}}</label>
+                        {{ field }}
+                    {% endif %}
+                </fieldset>
+            {% endfor %}
+
+
+            <footer class="buttons">
+            {% if user.is_authenticated %}
+                {% if clone %}
+                <button type="submit" name="submit" value="Clone" class="primary button">File</button>
+                {% else %}
+                <button type="submit" name="submit" value="Create" class="primary button">File</button>
+                {% endif %}
+            {% else %}
+                {% if clone %}
+                <input type="submit" name="submit" value="Clone" class="primary button" onclick="ga('send', 'event', 'Account', 'Registration', window.location.pathname)" />
+                {% else %}
+                <input type="submit" name="submit" value="Create" class="primary button" onclick="ga('send', 'event', 'Account', 'Registration', window.location.pathname)" />
+                {% endif %}
+    		    <p>Create a MuckRock account and file up to four requests for just $20, or <a href="{% url 'accounts-signup-professional' %}" target="_blank">go Pro for 20 requests a month</a> with the option to keep your submissions private. Already have an account? <a href="{% url 'acct-login' %}">Log in</a>.</p>
+    		{% endif %}
+            </footer>
+        </form>
+    </div>
+    {% if featured and not clone %}
+    <div class="clone-candidates" id="clone">
+        <h2>Looking for inspiration? Clone a request below, then tweak it how you want.</h2>
+        {% for foia in featured %}
+            {% include 'lib/foia.html' with foia=foia %}
         {% endfor %}
-
-
-        <footer class="buttons">
-        {% if user.is_authenticated %}
-            {% if clone %}
-            <button type="submit" name="submit" value="Clone" class="primary button">File</button>
-            {% else %}
-            <button type="submit" name="submit" value="Create" class="primary button">File</button>
-            {% endif %}
-        {% else %}
-            {% if clone %}
-            <input type="submit" name="submit" value="Clone" class="primary button" onclick="ga('send', 'event', 'Account', 'Registration', window.location.pathname)" />
-            {% else %}
-            <input type="submit" name="submit" value="Create" class="primary button" onclick="ga('send', 'event', 'Account', 'Registration', window.location.pathname)" />
-            {% endif %}
-		    <p>Create a MuckRock account and file up to four requests for just $20, or <a href="{% url 'accounts-signup-professional' %}" target="_blank">go Pro for 20 requests a month</a> with the option to keep your submissions private. Already have an account? <a href="{% url 'acct-login' %}">Log in</a>.</p>
-		{% endif %}
-        </footer>
-    </form>
-</div>
-{% if featured and not clone %}
-<div class="clone-candidates" id="clone">
-    <h2>Looking for inspiration? Clone a request below, then tweak it how you want.</h2>
-    {% include 'lib/foia_group.html' with foias=featured %}
+    </div>
 </div>
 {% endif %}
 {% endblock %}

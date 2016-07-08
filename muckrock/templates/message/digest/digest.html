@@ -8,13 +8,14 @@
         {% if my_foia.count > 0 %}
         <h2>Yours</h2>
         <table class="digest">
-            {% include 'message/component/foia_digest.html' with stream=my_foia.completed label='Completed' color='green' %}
-            {% include 'message/component/foia_digest.html' with stream=my_foia.rejected label='Rejected' color='red' %}
-            {% include 'message/component/foia_digest.html' with stream=my_foia.no_documents label='No Documents' color='red' %}
-            {% include 'message/component/foia_digest.html' with stream=my_foia.payment_required label='Payment Required' color='red' %}
-            {% include 'message/component/foia_digest.html' with stream=my_foia.fix_required label='Fix Required' color='red' %}
-            {% include 'message/component/foia_digest.html' with stream=my_foia.acknowledged label='Acknowledged' color='blue' %}
-            {% include 'message/component/foia_digest.html' with stream=my_foia.interim_response label='Updated' color='blue' %}
+            {% include 'message/component/foia_digest.html' with notifications=my_foia.completed label='Completed' color='green' %}
+            {% include 'message/component/foia_digest.html' with notifications=my_foia.rejected label='Rejected' color='red' %}
+            {% include 'message/component/foia_digest.html' with notifications=my_foia.no_documents label='No Documents' color='red' %}
+            {% include 'message/component/foia_digest.html' with notifications=my_foia.payment_required label='Payment Required' color='red' %}
+            {% include 'message/component/foia_digest.html' with notifications=my_foia.fix_required label='Fix Required' color='red' %}
+            {% include 'message/component/foia_digest.html' with notifications=my_foia.acknowledged label='Acknowledged' color='blue' %}
+            {% include 'message/component/foia_digest.html' with notifications=my_foia.interim_response label='Updated' color='blue' %}
+            {% include 'message/component/foia_digest.html' with notifications=my_foia.received label='New Response' color='grey' %}
         </table>
         {% endif %}
         {% endwith %}
@@ -22,9 +23,14 @@
         {% if follow_foia.count > 0 %}
         <h2>Following</h2>
         <table class="digest">
-            {% include 'message/component/foia_digest.html' with stream=follow_foia.completed label='Completed' color='green' %}
-            {% include 'message/component/foia_digest.html' with stream=follow_foia.rejected label='Rejected' color='red' %}
-            {% include 'message/component/foia_digest.html' with stream=follow_foia.unsuccessful label='No Documents' color='red' %}
+            {% include 'message/component/foia_digest.html' with notifications=follow_foia.completed label='Completed' color='green' %}
+            {% include 'message/component/foia_digest.html' with notifications=follow_foia.rejected label='Rejected' color='red' %}
+            {% include 'message/component/foia_digest.html' with notifications=follow_foia.no_documents label='No Documents' color='red' %}
+            {% include 'message/component/foia_digest.html' with notifications=follow_foia.payment_required label='Payment Required' color='red' %}
+            {% include 'message/component/foia_digest.html' with notifications=follow_foia.fix_required label='Fix Required' color='red' %}
+            {% include 'message/component/foia_digest.html' with notifications=follow_foia.acknowledged label='Acknowledged' color='blue' %}
+            {% include 'message/component/foia_digest.html' with notifications=follow_foia.interim_response label='Updated' color='blue' %}
+            {% include 'message/component/foia_digest.html' with notifications=follow_foia.received label='New Response' color='grey' %}
         </table>
         {% endif %}
         {% endwith %}
@@ -34,16 +40,16 @@
         {% if activity.questions.mine|length > 0 %}
         <h2>Yours</h2>
         <ul>
-            {% for action in activity.questions.mine %}
-            <li>{% display_passive_action action %}</li>
+            {% for notification in activity.questions.mine %}
+            <li>{% display_passive_action notification.action %}</li>
             {% endfor %}
         </ul>
         {% endif %}
         {% if activity.questions.following|length > 0 %}
         <h2>Following</h2>
         <ul>
-            {% for action in activity.questions.following %}
-            <li>{% display_passive_action action %}</li>
+            {% for notification in activity.questions.following %}
+            <li>{% display_passive_action notification.action %}</li>
             {% endfor %}
         </ul>
         {% endif %}

@@ -6,7 +6,7 @@ from django.conf import settings
 from django.conf.urls import handler404 # pylint: disable=unused-import
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
-from django.views.generic.base import RedirectView
+from django.views.generic.base import RedirectView, TemplateView
 
 from rest_framework.routers import DefaultRouter
 import dbsettings.urls
@@ -124,6 +124,8 @@ urlpatterns = patterns(
     ),
     url(r'^news-sitemaps/', include('news_sitemaps.urls')),
     url(r'^__debug__/', include(debug_toolbar.urls)),
+    url(r'^donate/$', views.DonationFormView.as_view(), name='donate'),
+    url(r'^donate/thanks/$', views.DonationThanksView.as_view(), name='donate-thanks'),
 )
 
 if settings.DEBUG:
@@ -134,4 +136,6 @@ if settings.DEBUG:
             'django.views.static.serve',
             {'document_root': settings.MEDIA_ROOT}
         ),
+        url(r'^500/$', TemplateView.as_view(template_name='500.html')),
+        url(r'^404/$', TemplateView.as_view(template_name='404.html')),
     )

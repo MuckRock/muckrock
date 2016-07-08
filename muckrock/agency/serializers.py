@@ -17,6 +17,7 @@ class AgencySerializer(serializers.ModelSerializer):
     parent = serializers.PrimaryKeyRelatedField(
             queryset=Agency.objects.all(),
             style={'base_template': 'input.html'})
+    location = serializers.JSONField()
     absolute_url = serializers.ReadOnlyField(source='get_absolute_url')
     average_response_time = serializers.ReadOnlyField()
     fee_rate = serializers.ReadOnlyField()
@@ -72,4 +73,3 @@ class AgencySerializer(serializers.ModelSerializer):
             'fee_rate',
             'success_rate',
         )
-

@@ -1,4 +1,6 @@
 .form {
+    @include padding;
+    
     header, form, .visible-fields, .buttons {
         @include row;
     }

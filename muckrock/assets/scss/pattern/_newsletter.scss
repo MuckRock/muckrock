@@ -2,7 +2,7 @@
     @include display(flex);
     @include flex-wrap(wrap);
     @include justify-content(space-between);
-    border: 1px solid $color-blue;
+    margin-bottom: 0;
     background: $color-blue-light;
     color: $color-blue-dark;
     padding: $vertical-rhythm/2;

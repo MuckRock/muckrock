@@ -48,6 +48,12 @@ class CrowdfundTaskNode(TaskNode):
     endpoint_name = 'crowdfund-task-list'
     class_name = 'crowdfund'
 
+    def get_extra_context(self):
+        """Adds the crowdfund object to context."""
+        extra_context = super(CrowdfundTaskNode, self).get_extra_context()
+        extra_context['crowdfund_object'] = self.task.crowdfund.get_crowdfund_object()
+        return extra_context
+
 
 class FailedFaxTaskNode(TaskNode):
     """Renders a failed fax task."""
@@ -142,9 +148,11 @@ class ResponseTaskNode(TaskNode):
         extra_context = super(ResponseTaskNode, self).get_extra_context()
         form_initial = {}
         communication = self.task.communication
+        predicted_status = self.task.predicted_status
         _foia = communication.foia
         if _foia:
-            form_initial['status'] = self.task.predicted_status
+            initial_status = predicted_status if predicted_status else _foia.status
+            form_initial['status'] = initial_status
             form_initial['tracking_number'] = _foia.tracking_id
             form_initial['date_estimate'] = _foia.date_estimate
             extra_context['previous_communications'] = _foia.reverse_communications

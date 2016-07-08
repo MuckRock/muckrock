@@ -26,6 +26,7 @@ from muckrock.foia.forms import \
 from muckrock.foia.models import FOIARequest, FOIAFile, END_STATUS
 from muckrock.foia.views.comms import save_foia_comm
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.utils import new_action
 
 logger = logging.getLogger(__name__)
 
@@ -136,12 +137,7 @@ def embargo(request, jurisdiction, jidx, slug, idx):
             foia.embargo = True
             foia.save(comment='added embargo')
             logger.info('%s embargoed %s', request.user, foia)
-            # unsubscribe all followers of the request
-            # https://github.com/MuckRock/muckrock/issues/720
-            followers = actstream.models.followers(foia)
-            for follower in followers:
-                actstream.actions.unfollow(follower, foia)
-            actstream.action.send(request.user, verb='embargoed', action_object=foia)
+            new_action(request.user, 'embargoed', target=foia)
             fine_tune_embargo(request, foia)
         else:
             logger.error('%s was forbidden from embargoing %s', request.user, foia)
@@ -162,7 +158,7 @@ def embargo(request, jurisdiction, jidx, slug, idx):
         foia.embargo = False
         foia.save(comment='removed embargo')
         logger.info('%s unembargoed %s', request.user, foia)
-        actstream.action.send(request.user, verb='unembargoed', action_object=foia)
+        new_action(request.user, 'unembargoed', target=foia)
         return
 
     foia = _get_foia(jurisdiction, jidx, slug, idx)
@@ -307,12 +303,11 @@ def crowdfund_request(request, idx, **kwargs):
             foia.crowdfund = crowdfund
             foia.save(comment='added a crowdfund')
             messages.success(request, 'Your crowdfund has started, spread the word!')
-            actstream.action.send(
+            new_action(
                 request.user,
-                verb='started',
+                'began crowdfunding',
                 action_object=crowdfund,
-                target=foia
-            )
+                target=foia)
             return redirect(foia)
 
     elif request.method == 'GET':

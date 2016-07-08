@@ -33,6 +33,11 @@ urlpatterns = patterns(
         name='question-create'
     ),
     url(
+        r'^follow-new/$',
+        views.follow_new,
+        name='question-follow-new'
+    ),
+    url(
         r'^(?P<slug>[\w\d_-]+)-(?P<pk>\d+)$',
         views.Detail.as_view(template_name='details/question_detail.html'),
         name='question-detail'
@@ -43,7 +48,7 @@ urlpatterns = patterns(
         name='answer-create'
     ),
     url(
-        r'^(?P<slug>[\w\d_-]+)-(?P<idx>\d+)/change-follow$',
+        r'^(?P<slug>[\w\d_-]+)-(?P<idx>\d+)/follow$',
         views.follow,
         name='question-follow'
     ),

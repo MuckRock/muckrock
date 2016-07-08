@@ -3,7 +3,7 @@
 
 {% block task-content %}
 {% with task.project as project %}
-<dl class="task-data">
+<dl class="task__data">
     <dt>Project</dt>
     <dd><a href="{% url 'admin:project_project_change' project.pk %}">{{project}}</a></dd>
     <dt>Contributors</dt>
@@ -68,7 +68,7 @@
 {% endwith %}
 {% endblock %}
 {% block task-footer %}
-<footer class="task-actions">
+<footer class="textbox__footer task__actions">
     <form method="POST" action="{{ endpoint }}" class="task-post-actions">
         {% csrf_token %}
         <label for="{{form.reply.id_for_label}}">&crarr; Reply</label>

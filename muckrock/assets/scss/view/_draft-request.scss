@@ -9,10 +9,9 @@
     @include media($small-layout) { @include font-sizing(1.5); }
 }
 
-%draft-request {
-    @include span-columns(12);
-    @include shift(0);
-    .body {
+.foia-draft {
+    @include padding;
+    .communication-body {
         padding: 0;
         height: 100%;
         background-color: white;
@@ -23,26 +22,16 @@
             width: 100%;
             height: 20em;
             border: none;
+            border-top: 1px solid $color-grey;
             border-radius: 0;
-            padding: $vertical-rhythm $vertical-rhythm/2;
+            padding: $vertical-rhythm/2;
             font-family: $font-monospace;
+            font-size: $font-size-2;
         }
     }
-}
-
-.foia-draft {
-    overflow: hidden;
-    header, form { padding-left: 0; }
-    header, h1 { margin: 0; }
-    @include row;
-
     #id_title {
         @extend %draft-title;
     }
-    .request {
-        @extend %draft-request;
-    }
-
     .buy-requests {
         border-color: $color-green;
         @include row;
@@ -54,7 +43,6 @@
             }
         }
     }
-
     .bottom { @include row; }
     .embargo {
         @include three-quarters;
@@ -82,27 +70,16 @@
     }
 }
 
-
 .multirequest-draft {
-    @include outer-container;
-    form {
-        @include row;
-        .visible-fields fieldset { @include full; }
+    @include padding;
+    .communication-body textarea {
+        border-radius: 0;
+        font-family: $font-monospace;
+        font-size: $font-size-2;
     }
     .title {
         label { display: none; }
         input { @extend %draft-title; }
-    }
-    .request {
-        @extend %draft-request;
-        // .body { background-color: $color-white; }
-        p {
-            margin: $vertical-rhythm/2;
-            &:first-child {
-                margin-top: 0;
-                padding-top: $vertical-rhythm;
-            }
-        }
     }
     .request .body textarea {
         height: 7.5em;

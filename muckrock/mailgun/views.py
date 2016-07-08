@@ -31,6 +31,7 @@ from muckrock.task.models import (
         ResponseTask,
         StaleAgencyTask,
         )
+from muckrock.utils import new_action
 
 logger = logging.getLogger(__name__)
 
@@ -118,7 +119,7 @@ def route_mailgun(request):
 def _handle_request(request, mail_id):
     """Handle incoming mailgun FOI request messages"""
     # pylint: disable=broad-except
-
+    # pylint: disable=too-many-locals
     post = request.POST
     from_ = post.get('From')
     to_ = post.get('To') or post.get('to')
@@ -179,6 +180,12 @@ def _handle_request(request, mail_id):
         if foia.status == 'ack':
             foia.status = 'processed'
         foia.save(comment='incoming mail')
+        action = new_action(
+            foia.agency,
+            'sent a communication',
+            action_object=comm,
+            target=foia)
+        foia.notify(action)
         foia.update(comm.anchor())
 
     except FOIARequest.DoesNotExist:
@@ -394,4 +401,3 @@ def _file_type(file_):
         return 'ignore'
     else:
         return 'file'
-

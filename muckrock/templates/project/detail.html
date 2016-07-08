@@ -20,7 +20,7 @@
 <meta property="og:url" content="{{ project.get_absolute_url }}" />
 <meta property="og:site_name" content="MuckRock" />
 {% if article.image %}
-<meta property="og:image" content="{{ project.image }}" />
+<meta property="og:image" content="{{ project.image.url }}" />
 {% endif %}
 {% endblock open_graph %}
 
@@ -30,7 +30,7 @@
 <meta name="twitter:title" content="{{ project.title }}" />
 <meta name="twitter:description" content="{{ project.summary }}" />
 {% if project.image %}
-<meta name="twitter:image:src" content="{{ project.image }}" />
+<meta name="twitter:image:src" content="{{ project.image.url }}" />
 {% endif %}
 {% for contributor in contributors %}
 {% if contributor.profile.twitter %}
@@ -41,11 +41,9 @@
 
 {% block content %}
 <div class="project detail">
-    <header class="project-header">
-        {% if project.image %}
-        <div class="image" style="background-image:url('{% thumbnail project.image 2000x1000 crop=smart %}');"></div>
-        {% endif %}
-    </header>
+    {% if project.image %}
+    <div class="project__image" style="background-image:url('{% thumbnail project.image 2000x1000 crop=smart %}');"></div>
+    {% endif %}
     {% if user_can_edit and project.private and not project.approved %}
     <section class="launch prompt">
         <h3>Launch your project</h3>
@@ -101,6 +99,9 @@
             {% endif %}
         </main>
         <aside class="overview__aside">
+            {% if project.approved and not project.private %}
+            {% social title=project.title url=project.get_absolute_url %}
+            {% endif %}
             {% if user_can_edit %}
             <div class="project-controls">
                 <a href="{% url 'project-edit' slug=project.slug pk=project.pk %}" class="blue button">
@@ -175,9 +176,6 @@
             </div>
             {% endif %}
             {% tag_manager project %}
-            {% if project.approved and not project.private %}
-            {% include 'lib/social.html' with title=project.title %}
-            {% endif %}
         </aside>
     </section>
     <section class="objects">

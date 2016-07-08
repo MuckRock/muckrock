@@ -1,50 +1,47 @@
-article.news--article {
+.news.detail {
     @include display(flex);
     @include justify-content(center);
-    @include flex-wrap(wrap-reverse);
-    max-width: 48em;
-    margin: 0 auto $vertical-rhythm;
-    .news--header, .news--main, .news--aside {
-        padding: 0 $vertical-rhythm/2;
+    @include flex-wrap(wrap);
+    @include padding(0);
+}
+
+.news__image {
+    @include flex(0 1 100%);
+    margin-bottom: 0;
+    img {
+        display: block;
+        width: 100%;
+        margin-bottom: 0;
     }
-    .news--header {
-        @include flex(0 0 100%);
-        @include order(1);
-        min-width: 0;
-        time { @extend dfn; }
-        img {
-            margin-bottom: $vertical-rhythm/2;
+}
+
+.news__article {
+    max-width: 42em;
+    min-width: 0;
+    @include flex(3 1 24em);
+    @include padding;
+    @include media($medium-layout) {
+        font-size: $font-size-4;
+        line-height: $font-line-height;
+    }
+    .news__article__header {
+        time, .contributors {
+            color: $color-grey;
+            font-size: $font-size-2;
+            font-weight: $font-weight-bold;
         }
         h1, .kicker {
-            margin-bottom: $vertical-rhythm/2;
+            margin: $vertical-rhythm/2 0;
             font-weight: $font-weight-bold;
             line-height: 1.25em;
         }
         .contributors {
             @include display(flex);
             @include justify-content(space-between);
-            color: $color-grey;
-            font-size: $font-size-2;
-            font-weight: $font-weight-bold;
             .authors, .editors {
                 margin-bottom: 0;
             }
         }
-    }
-    .news--main {
-        @include flex(0 1 32em);
-        max-width: 32em;
-        min-width: 0;
-    }
-    .news--aside {
-        @include flex(1 1 12em);
-        @include order(-1);
-        max-width: 32em;
-        min-width: 0;
-    }
-    @include media(72rem) {
-        font-size: $font-size-4;
-        line-height: $font-line-height;
     }
     // Fixes for embedded content
     div[id^='viewer'] {
@@ -69,6 +66,29 @@ article.news--article {
             width: 100%;
             height: 100%;
         }
+    }
+}
+.news__aside {
+    @include flex(1 1 16em);
+    @include padding;
+    max-width: 24em;
+    min-width: 0;
+}
+.related-requests .foia__single:last-child {
+    margin-bottom: 0;
+}
+.articles__recent, .articles__related {
+    max-width: 72em;
+    @include display(flex);
+    @include flex-wrap(wrap);
+    margin: 0 auto;
+    @include padding;
+    .articles__recent__header, .articles__related__header {
+        @include flex(0 1 100%);
+    }
+    .article {
+        @include flex(1 1 24em);
+        margin-right: $vertical-rhythm;
     }
 }
 

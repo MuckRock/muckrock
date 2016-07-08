@@ -2,6 +2,5 @@ svg.icon {
     height: $font-size-3;
     width: $font-size-3;
     fill-rule: evenodd;
+    @include svg-color($color-black);
 }
-
-@include icon-color($color-black);

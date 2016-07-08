@@ -1,7 +1,9 @@
-{% if stream|length > 0 %}
+{% if notifications|length > 0 %}
 - - - - - - - - - - - - -
 {{stream_name}}
 - - - - - - - - - - - - -
-{% for action in stream %}
-* {{ action.action_object }}{% if action.action_object.get_absolute_url %} <{{action.action_object.get_absolute_url}}>{% endif %} {{ action.verb }}
+{% for notification in notifications %}
+{% with notification.action.target as foia %}
+* {{ foia }}{% if foia.get_absolute_url %} <{{base_url}}{{foia.get_absolute_url}}>{% endif %} {{ notification.action.verb }}
+{% endwith %}
 {% endfor %}{% endif %}

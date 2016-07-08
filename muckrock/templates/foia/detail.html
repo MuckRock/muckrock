@@ -14,7 +14,6 @@
 <meta property="og:title" content="{{ foia.title }}" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="{{ request.build_absolute_uri }}" />
-<meta property="og:image" content="{% static 'icons/logo.png' %}" />
 <meta property="og:description" content="{{ foia.user.get_full_name }} {% if foia.date_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to {{ foia.agency.name }} of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}{{ foia.jurisdiction.name }}.{% endif %}" />
 <meta property="og:site_name" content="MuckRock" />
 {% endblock open_graph %}
@@ -27,7 +26,6 @@
 {% endif %}
 <meta name="twitter:title" content="{{ foia.title }}" />
 <meta name="twitter:description" content="{{ foia.user.get_full_name }} {% if foia.date_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to {{ foia.agency.name }} of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}{{ foia.jurisdiction.name }}.{% endif %}" />
-<meta name="twitter:image:src" content="{% static 'icons/logo.png' %}" />
 {% endblock twitter_card %}
 
 {% block content %}
@@ -44,7 +42,6 @@
             <p>It is a clone of <a href="{{ foia.parent.get_absolute_url }}">this request</a>.</p>
             {% endif %}
         </section>
-        <span class="toggle-details" id="toggle-specific-information" data-state="0">Show details</span>
         <section class="specific-information">
             {% if request.user.is_staff or foia.tracking_id %}
             <table class="numbers">

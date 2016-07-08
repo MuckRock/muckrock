@@ -1,0 +1,38 @@
+.frontpage__header {
+    @include display(flex);
+    @include flex-wrap(wrap);
+    @include justify-content(space-between);
+    @include align-items(center);
+    margin-bottom: 0;
+    padding: $vertical-rhythm 0 0;
+    & > * {
+        margin-bottom: 0;
+        padding: 0 $vertical-rhythm $vertical-rhythm;
+        @include flex(1 1 18rem);
+    }
+    h1 {
+        font-size: $font-size-7;
+        line-height: $font-line-height;
+        @include media($medium-layout) {
+            font-size: $font-size-9;
+            line-height: $font-line-height;
+        }
+    }
+    .inline li {
+        vertical-align: middle;
+        margin-bottom: 0;
+    }
+}
+
+.project.frontpage {
+    .frontpage__header {
+        background: lighten($color-blue-light, 10%);
+    }
+    .projects {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        .project {
+            margin: $vertical-rhythm;
+        }
+    }
+}

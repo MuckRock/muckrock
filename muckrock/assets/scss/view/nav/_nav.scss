@@ -11,6 +11,7 @@ $sidebar-bp: "min-width:72em";
     path, circle { fill: $nav-background; }
     a:hover {
         color: $nav-background;
+        text-decoration: none;
     }
 }
 

@@ -17,7 +17,7 @@ from muckrock.crowdfund.models import CrowdfundPayment
 from muckrock.crowdfund.views import CrowdfundDetailView
 from muckrock.factories import UserFactory, FOIARequestFactory, ProjectFactory, CrowdfundFactory
 from muckrock.project.models import ProjectCrowdfunds
-from muckrock.utils import mock_middleware
+from muckrock.test_utils import mock_middleware
 
 
 @patch('stripe.Charge', Mock(create=Mock(return_value=Mock(id='stripe-charge-id'))))

@@ -1,7 +1,7 @@
 /* Details */
 
 .detail {
-
+    @include padding;
     .header-container {
         @include display(flex);
         @include flex-wrap(wrap);
@@ -44,6 +44,7 @@
 
     &.flatpage {
         max-width: 45em;
+        margin: 0 auto;
     }
 
     &.question {

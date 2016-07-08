@@ -138,11 +138,17 @@ dd {
     }
 }
 
+pre {
+    background-color: $color-grey-7;
+    @include border-radius;
+}
+
 code {
     padding: .2em .4em;
-    border-radius: $base-border-radius;
+    @include border-radius;
     font-family: $font-monospace;
     font-size: $font-size-2;
+    background-color: $color-grey-7;
 }
 
 hr {
@@ -177,5 +183,9 @@ ul, ol {
     &.nostyle {
         list-style: none;
         padding-left: 0;
+    }
+    &.inline li {
+        display: inline-block;
+        margin: 0 $vertical-rhythm/2 $vertical-rhythm/2 0;
     }
 }

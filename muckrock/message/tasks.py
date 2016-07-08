@@ -22,16 +22,12 @@ def send_activity_digest(subject, preference, interval):
     """Helper to send out timed digests"""
     profiles = Profile.objects.select_related('user').filter(email_pref=preference).distinct()
     for profile in profiles:
-        # for now, only send experimental users the new updates
-        if profile.experimental:
-            email = digests.ActivityDigest(
-                user=profile.user,
-                interval=interval,
-                subject=subject
-            )
-            email.send()
-        else:
-            profile.send_notifications()
+        email = digests.ActivityDigest(
+            user=profile.user,
+            interval=interval,
+            subject=subject
+        )
+        email.send()
 
 # every hour
 @periodic_task(run_every=crontab(hour='*/1', minute=0), name='muckrock.message.tasks.hourly_digest')
@@ -122,6 +118,7 @@ def send_charge_receipt(charge_id):
             'request-purchase': receipts.request_purchase_receipt,
             'request-fee': receipts.request_fee_receipt,
             'crowdfund-payment': receipts.crowdfund_payment_receipt,
+            'donation': receipts.donation_receipt,
         }
         receipt_function = receipt_functions[user_action]
     except KeyError:

@@ -80,7 +80,13 @@
         <div class="container">
             <div id="modal-overlay"></div>
             {% include 'nav/header.html' %}
-            {% include 'lib/notification.html' %}
+            {% if messages %}
+            <ul class="messages nostyle">
+                {% for message in messages %}
+                <li>{% include 'lib/pattern/message.html' %}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
             <div class="content">
             {% block content %}
             {% endblock content %}

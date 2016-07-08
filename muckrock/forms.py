@@ -3,6 +3,7 @@ Forms for MuckRock
 """
 
 from django import forms
+from django.conf import settings
 from django.contrib.auth import forms as auth_forms
 from django.contrib.auth.models import User
 from django.core.mail import EmailMultiAlternatives
@@ -96,3 +97,23 @@ class PasswordResetForm(auth_forms.PasswordResetForm):
             email_message.attach_alternative(html_email, 'text/html')
 
         email_message.send()
+
+
+class StripeForm(forms.Form):
+    """A form to collect a stripe token for a given amount and email."""
+    stripe_pk = forms.CharField(
+        initial=settings.STRIPE_PUB_KEY,
+        required=False,
+        widget=forms.HiddenInput)
+    stripe_token = forms.CharField(widget=forms.HiddenInput)
+    stripe_email = forms.EmailField(widget=forms.HiddenInput)
+    stripe_fee = forms.IntegerField(initial=0, required=False, widget=forms.HiddenInput)
+    stripe_label = forms.CharField(initial='Buy', required=False, widget=forms.HiddenInput)
+    stripe_description = forms.CharField(required=False, widget=forms.HiddenInput)
+    stripe_bitcoin = forms.BooleanField(initial=True, required=False, widget=forms.HiddenInput)
+    stripe_amount = forms.IntegerField(
+        min_value=100,
+        initial=2500,
+        label='Amount',
+        widget=forms.NumberInput(attrs={'class': 'currency-field'})
+    )

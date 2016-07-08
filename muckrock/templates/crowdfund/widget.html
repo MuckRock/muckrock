@@ -5,7 +5,7 @@
 
 <section class="crowdfund__widget" id="crowdfund-{{ crowdfund.pk }}">
     <header class="crowdfund__widget__header">
-        <h1>{{ crowdfund.name }}</h1>
+        <h1><a href="{{crowdfund.get_crowdfund_object.get_absolute_url}}">{{ crowdfund.name }}</a></h1>
         <div>
             <span class="action" id="show-share">Share</span>
             <span class="action" id="show-embed">Embed</span>
@@ -70,7 +70,7 @@
                 </div>
                 {% endif %}
             </section>
-            <section class="donate">
+            <section class="crowdfund__donate">
                 <input type="number" class="currency-field" name="stripe_amount" value="2500" />
                 <button type="submit" class="basic green button">Donate</button>
             </section>
@@ -107,9 +107,9 @@
                 <div class="close action">Close</div>
             </header>
             {% if crowdfund.foia %}
-            {% include 'lib/social.html' with title="Help free these docs" %}
+            {% social title="Help free these docs" url=crowdfund.foia.get_absolute_url %}
             {% elif crowdfund.projects.exists %}
-            {% include 'lib/social.html' with title="Help fund this project" %}
+            {% social title="Help fund this project" url=crowdfund.get_crowdfund_object.get_absolute_url %}
             {% endif %}
         </div>
     </div>
@@ -135,9 +135,9 @@
             {% newsletter %}
             <p>Help this crowdfund find more supporters:</p>
             {% if crowdfund.foia %}
-            {% include 'lib/social.html' with title="Help me free these docs" %}
+            {% social title="I helped free these docs" url=crowdfund.foia.get_absolute_url %}
             {% elif crowdfund.projects.exists %}
-            {% include 'lib/social.html' with title="I just funded this project" %}
+            {% social title="I just funded this project" url=crowdfund.get_crowdfund_object.get_absolute_url %}
             {% endif %}
         </div>
     </div>
