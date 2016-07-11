@@ -55,8 +55,10 @@ def detail(request, fed_slug, state_slug, local_slug):
 
     foia_requests = jurisdiction.get_requests()
     foia_requests = (foia_requests.get_viewable(request.user)
-                                  .order_by('-date_submitted')
-                                  .select_related_view()[:10])
+                                  .get_done()
+                                  .order_by('-date_done')
+                                  .select_related_view()
+                                  .get_public_file_count(limit=10)[:10])
 
     if jurisdiction.level == 's':
         agencies = Agency.objects.filter(
