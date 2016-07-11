@@ -12,16 +12,18 @@ $right-column: 4 1 32em;
     @include flex(0 1 100%);
     @include display(flex);
     @include flex-wrap(wrap);
-    margin: $vertical-rhythm;
+    @include align-items(flex-end);
+    margin-top: $vertical-rhythm;
+    margin-bottom: 0;
     .jurisdiction__image {
         @include flex(0 1 10em);
-        margin-bottom: 0;
-        margin-right: $vertical-rhythm;
+        margin: $vertical-rhythm;
+        margin-top: 0;
     }
     .jurisdiction__info {
         @include flex(1 1 20em);
-        margin-bottom: 0;
-        margin-right: $vertical-rhythm;
+        margin: $vertical-rhythm;
+        margin-top: 0;
     }
     .jurisdiction__name {
         font-size: $font-size-5;
@@ -32,7 +34,6 @@ $right-column: 4 1 32em;
         text-align: center;
         .jurisdiction__info, .jurisdiction__image {
             @include flex(0 1 100%);
-            margin-right: 0;
         }
         .jurisdiction__name {
             font-size: $font-size-4;
@@ -42,12 +43,17 @@ $right-column: 4 1 32em;
         }
     }
 }
+.jurisdiction--l .jurisdiction__header {
+    .jurisdiction__name {
+        font-size: $font-size-6;
+        line-height: $font-line-height;
+    }
+}
 .jurisdiction__aside {
     @include flex($left-column);
     @include display(flex);
     @include flex-wrap(wrap);
     @include flex-direction(row-reverse);
-    margin-bottom: 0;
     & > * {
         margin: 0 $vertical-rhythm $vertical-rhythm;
     }

@@ -71,13 +71,10 @@ def detail(request, fed_slug, state_slug, local_slug):
                         .annotate(pages=Sum('foiarequest__files__pages'))
                         .order_by('-foia_count')[:10])
 
-    if jurisdiction.level == 's':
-        localities = (Jurisdiction.objects.filter(parent=jurisdiction)
-                                          .annotate(foia_count=Count('foiarequest'))
-                                          .annotate(pages=Sum('foiarequest__files__pages'))
-                                          .order_by('-foia_count')[:10])
-    else:
-        localities = None
+    _children = Jurisdiction.objects.filter(parent=jurisdiction).select_related('parent__parent')
+    _top_children = (_children.annotate(foia_count=Count('foiarequest'))
+                              .annotate(pages=Sum('foiarequest__files__pages'))
+                              .order_by('-foia_count')[:10])
 
     if request.method == 'POST':
         form = FlagForm(request.POST)
@@ -98,7 +95,8 @@ def detail(request, fed_slug, state_slug, local_slug):
     context = {
         'jurisdiction': jurisdiction,
         'agencies': agencies,
-        'localities': localities,
+        'children': _children,
+        'top_children': _top_children,
         'foia_requests': foia_requests,
         'form': form,
         'sidebar_admin_url': admin_url,

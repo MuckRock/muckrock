@@ -7,7 +7,7 @@
 {% block type %}{% if jurisdiction.name == 'Georgia' %}georgia {% endif %}jurisdiction{% endblock type %}
 
 {% block content %}
-<div class="jurisdiction">
+<div class="jurisdiction jurisdiction--{{jurisdiction.level}}">
     <header class="jurisdiction__header">
         {% if jurisdiction.image %}
         <div class="jurisdiction__image">
@@ -16,10 +16,7 @@
         {% endif %}
         <div class="jurisdiction__info">
             <p class="jurisdiction__name">
-                {{jurisdiction.name}}
-                {% if jurisdiction.level == 'l' %}
-                , <a href="{{jurisdiction.parent.get_absolute_url}}" class="jurisdiction__parent">{{jurisdiction.parent.abbrev}}</a>
-                {% endif %}
+                {{jurisdiction.name}}{% if jurisdiction.level != 'f' %}, <a href="{{jurisdiction.parent.get_absolute_url}}" class="jurisdiction__parent">{{jurisdiction.parent.name}}</a>{% endif %}
             </p>
             {% if jurisdiction.laws.exists %}
             <div class="jurisdiction__laws">
@@ -35,6 +32,16 @@
                     <p class="law__summary">{{law.summary}}</p>
                 </div>
                 {% endfor %}
+            </div>
+            {% endif %}
+            {% if jurisdiction.level == 'l' %}
+            <div class="info message">
+                <span class="symbol">
+                    {% include 'lib/component/icon/info.svg' %}
+                </span>
+                <span class="text">
+                    <p>To learn more about public records in {{jurisdiction.name}}, visit the <a href="{{jurisdiction.parent.get_absolute_url}}"><strong>{{jurisdiction.parent.name}} jurisdiction page</a></strong>.</p>
+                </span>
             </div>
             {% endif %}
         </div>
@@ -53,7 +60,7 @@
             </div>
             {% social %}
         </div>
-
+        {% if jurisdiction.level == 's' %}
         <div class="jurisdiction__toc">
             <p>Table of Contents</p>
             <ol>
@@ -63,7 +70,8 @@
                 <li><a href="#stats">Stats</a></li>
             </ol>
         </div>
-
+        {% endif %}
+        {% comment %}
         <div class="jurisdiction__stats">
             {% include 'lib/request_stats.html' %}
             {% include 'lib/appeal_stats.html' %}
@@ -105,6 +113,7 @@
                 {% endif %}
             </dl>
         </div>
+        {% endcomment %}
     </aside>
     <main class="jurisdiction__main">
         {% if jurisdiction.public_notes %}
@@ -112,7 +121,6 @@
             {{ jurisdiction.public_notes|markdown:"trusted" }}
         </section>
         {% endif %}
-
         <h1 id="stats">Stats</h1>
         <div class="jurisdiction__stats">
             <div>
@@ -157,7 +165,6 @@
                 {% endif %}
             </dl>
         </div>
-
         {% if agencies %}
         <h3>Top Agencies <small><a href="{% url 'agency-list' %}?jurisdiction={{ jurisdiction.pk }}">See All</a></small></h3>
         <table>
@@ -177,7 +184,7 @@
         {% else %}
         <h3>No agencies have been documented for this jurisdiction.</h3>
         {% endif %}
-        {% if localities %}
+        {% if top_children %}
         <h3>Top Localities <small><a href="{% url 'jurisdiction-list' %}?parent={{ jurisdiction.pk }}">See All</a></small></h3>
         <table>
             <tr>
@@ -185,11 +192,11 @@
                 <th width="20%">Requests</th>
                 <th width="30%">Pages Released</th>
             </tr>
-            {% for locality in localities %}
+            {% for child in top_children %}
             <tr>
-                <td><a href="{{locality.get_absolute_url}}">{{ locality }}</a></td>
-                <td>{{ locality.foia_count|intcomma }}</td>
-                <td>{% if locality.pages %}{{ locality.pages|intcomma }}{% else %}0{%endif %}</td>
+                <td><a href="{{child.get_absolute_url}}">{{ child }}</a></td>
+                <td>{{ child.foia_count|intcomma }}</td>
+                <td>{% if child.pages %}{{ child.pages|intcomma }}{% else %}0{%endif %}</td>
             </tr>
             {% endfor %}
         </table>
