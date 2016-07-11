@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load tags %}
 {% load markdown_deux_tags %}
 {% load thumbnail %}
 {% load humanize %}
@@ -6,7 +7,7 @@
 {% block type %}{% if jurisdiction.name == 'Georgia' %}georgia {% endif %}jurisdiction{% endblock type %}
 
 {% block content %}
-<div class="jurisdiction detail">
+<div class="jurisdiction">
     <header class="jurisdiction__header">
         {% if jurisdiction.image %}
         <div class="jurisdiction__image">
@@ -37,9 +38,9 @@
             </div>
             {% endif %}
         </div>
-
     </header>
     <aside class="jurisdiction__aside">
+
         <div class="jurisdiction__actions">
             <div class="button-group">
                 <a href="{% url 'foia-create' %}" class="blue button">
@@ -50,7 +51,9 @@
                 <a href="#flag" class="button">Suggest Change</a>
                 {% endif %}
             </div>
+            {% social %}
         </div>
+
         <div class="jurisdiction__toc">
             <p>Table of Contents</p>
             <ol>
@@ -61,58 +64,99 @@
             </ol>
         </div>
 
-        {% include 'lib/request_stats.html' %}
-        {% include 'lib/appeal_stats.html' %}
+        <div class="jurisdiction__stats">
+            {% include 'lib/request_stats.html' %}
+            {% include 'lib/appeal_stats.html' %}
+            <dl>
+                <dt>Allowed Response Time</dt>
+                {% with jurisdiction.get_days as days %}
+                    {% if days %}
+                    <dd>{{days}} day{{days|pluralize}}</dd>
+                    {% else %}
+                    <dd>No limit</dd>
+                    {% endif %}
+                {% endwith %}
 
-        <dl class="jurisdiction__stats">
+                <dt>Average Response Time</dt>
+                {% with jurisdiction.average_response_time as average_response_time %}
+                <dd>{{ average_response_time }} day{{ average_response_time|pluralize }}</dd>
+                {% endwith %}
 
-            <dt>Allowed Response Time</dt>
-            {% with jurisdiction.get_days as days %}
-                {% if days %}
-                <dd>{{days}} day{{days|pluralize}}</dd>
-                {% else %}
-                <dd>No limit</dd>
+                {% with jurisdiction.success_rate as success_rate %}
+                {% if success_rate > 0 %}
+                <dt>Success Rate</dt>
+                <dd>{{ success_rate|floatformat:"2" }}%</dd>
                 {% endif %}
-            {% endwith %}
+                {% endwith %}
 
-            <dt>Average Response Time</dt>
-            {% with jurisdiction.average_response_time as average_response_time %}
-            <dd>{{ average_response_time }} day{{ average_response_time|pluralize }}</dd>
-            {% endwith %}
+                {% with jurisdiction.average_fee as average_fee %}
+                {% if average_fee > 0 %}
+                <dt>Average Fee</dt>
+                <dd>${{ average_fee|floatformat:"2" }}</dd>
+                <dd>{{ jurisdiction.fee_rate|floatformat:"2" }}% of requests have a fee</dd>
+                {% endif %}
+                {% endwith %}
 
-            {% with jurisdiction.success_rate as success_rate %}
-            {% if success_rate > 0 %}
-            <dt>Success Rate</dt>
-            <dd>{{ success_rate|floatformat:"2" }}%</dd>
-            {% endif %}
-            {% endwith %}
-
-            {% with jurisdiction.average_fee as average_fee %}
-            {% if average_fee > 0 %}
-            <dt>Average Fee</dt>
-            <dd>${{ average_fee|floatformat:"2" }}</dd>
-            <dd>{{ jurisdiction.fee_rate|floatformat:"2" }}% of requests have a fee</dd>
-            {% endif %}
-            {% endwith %}
-
-            {% if proxies %}
-            <dt>Proxies</dt>
-            {% for proxy in proxies %}
-            <dd><a href="{{proxy.get_absolute_url}}">{{proxy.get_full_name}}</a></dd>
-            {% endfor %}
-            {% endif %}
-        </dl>
+                {% if proxies %}
+                <dt>Proxies</dt>
+                {% for proxy in proxies %}
+                <dd><a href="{{proxy.get_absolute_url}}">{{proxy.get_full_name}}</a></dd>
+                {% endfor %}
+                {% endif %}
+            </dl>
+        </div>
     </aside>
     <main class="jurisdiction__main">
-
         {% if jurisdiction.public_notes %}
         <section class="notes">
             {{ jurisdiction.public_notes|markdown:"trusted" }}
         </section>
         {% endif %}
 
-        <h3>Recent Requests <small><a href="{% url 'foia-list' %}?jurisdiction={{ jurisdiction.pk }}">See All</a></small></h3>
-        {% include 'lib/foia_table.html' with requests=foia_requests %}
+        <h1 id="stats">Stats</h1>
+        <div class="jurisdiction__stats">
+            <div>
+            {% include 'lib/request_stats.html' %}
+            {% include 'lib/appeal_stats.html' %}
+            </div>
+            <dl>
+                <dt>Allowed Response Time</dt>
+                {% with jurisdiction.get_days as days %}
+                    {% if days %}
+                    <dd>{{days}} day{{days|pluralize}}</dd>
+                    {% else %}
+                    <dd>No limit</dd>
+                    {% endif %}
+                {% endwith %}
+
+                <dt>Average Response Time</dt>
+                {% with jurisdiction.average_response_time as average_response_time %}
+                <dd>{{ average_response_time }} day{{ average_response_time|pluralize }}</dd>
+                {% endwith %}
+
+                {% with jurisdiction.success_rate as success_rate %}
+                {% if success_rate > 0 %}
+                <dt>Success Rate</dt>
+                <dd>{{ success_rate|floatformat:"2" }}%</dd>
+                {% endif %}
+                {% endwith %}
+
+                {% with jurisdiction.average_fee as average_fee %}
+                {% if average_fee > 0 %}
+                <dt>Average Fee</dt>
+                <dd>${{ average_fee|floatformat:"2" }}</dd>
+                <dd>{{ jurisdiction.fee_rate|floatformat:"2" }}% of requests have a fee</dd>
+                {% endif %}
+                {% endwith %}
+
+                {% if proxies %}
+                <dt>Proxies</dt>
+                {% for proxy in proxies %}
+                <dd><a href="{{proxy.get_absolute_url}}">{{proxy.get_full_name}}</a></dd>
+                {% endfor %}
+                {% endif %}
+            </dl>
+        </div>
 
         {% if agencies %}
         <h3>Top Agencies <small><a href="{% url 'agency-list' %}?jurisdiction={{ jurisdiction.pk }}">See All</a></small></h3>
