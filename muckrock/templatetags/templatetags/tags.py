@@ -208,7 +208,7 @@ def project_manager(context, mr_object):
 def social(context, title=None, url=None):
     """Template tag to insert a sharing widget. If url is none, use the request path."""
     request = context['request']
-    title = context['title'] if title is None else title
+    title = context.get('title', '') if title is None else title
     url = request.path if url is None else url
     url = 'https://' + request.get_host() + url
     return {
