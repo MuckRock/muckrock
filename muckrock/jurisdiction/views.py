@@ -102,6 +102,7 @@ def detail(request, fed_slug, state_slug, local_slug):
         'foia_requests': foia_requests,
         'form': form,
         'sidebar_admin_url': admin_url,
+        'title': jurisdiction.name + ' Public Records Guide'
     }
     if request.user.is_staff and jurisdiction.abbrev:
         context['proxies'] = User.objects.filter(

@@ -3,7 +3,7 @@
 {% load markdown_deux_tags %}
 {% load thumbnail %}
 {% load humanize %}
-{% block title %}{{ jurisdiction.name }} &bull; MuckRock{% endblock title %}
+{% block title %}{{ title }} &bull; MuckRock{% endblock title %}
 {% block type %}{% if jurisdiction.name == 'Georgia' %}georgia {% endif %}jurisdiction{% endblock type %}
 
 {% block content %}
@@ -21,31 +21,24 @@
             <p class="jurisdiction__name">
                 {{jurisdiction.name}}{% if jurisdiction.level != 'f' %}, <a href="{{jurisdiction.parent.get_absolute_url}}" class="jurisdiction__parent">{{jurisdiction.parent.abbrev}}</a>{% endif %}
             </p>
+            <h1 class="jurisdiction__title">{{title}}</h1>
             {% if jurisdiction.laws.exists %}
             <div class="jurisdiction__laws">
                 {% for law in jurisdiction.laws.all %}
                 <div class="law">
-                    <h1 class="law__name">
+                    <h2 class="law__name">
                         {{law.name}}
                         {% if law.shortname %}
                         <span class="law__shortname">({{law.shortname}})</span>
                         {% endif %}
-                    </h1>
-                    <p class="law__citation"><a href="{{law.url}}">{{law.citation}}</a></p>
+                    </h2>
+                    <p class="bold law__citation"><a href="{{law.url}}">{{law.citation}}</a></p>
                     <p class="law__summary">{{law.summary}}</p>
                 </div>
                 {% endfor %}
             </div>
-            {% endif %}
-            {% if jurisdiction.level == 'l' %}
-            <div class="info message">
-                <span class="symbol">
-                    {% include 'lib/component/icon/info.svg' %}
-                </span>
-                <span class="text">
-                    <p>To learn more about public records in {{jurisdiction.name}}, visit the <a href="{{jurisdiction.parent.get_absolute_url}}"><strong>{{jurisdiction.parent.name}} jurisdiction page</a></strong>.</p>
-                </span>
-            </div>
+            {% elif jurisdiction.level == 'l' %}
+            <h2>Falls under <a href="{{jurisdiction.parent.get_absolute_url}}">{{jurisdiction.parent.laws.first.name}}</a></h2>
             {% endif %}
         </div>
     </header>
