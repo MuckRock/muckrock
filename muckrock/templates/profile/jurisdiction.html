@@ -47,17 +47,6 @@
         </div>
     </header>
     <main class="jurisdiction__main">
-        {% if jurisdiction.level == 's' %}
-        <div class="jurisdiction__toc">
-            <p>Table of Contents</p>
-            <ol>
-                <li><a href="#overview">Overview</a></li>
-                <li><a href="#law">The Law</a></li>
-                <li><a href="#resources">Resources</a></li>
-                <li><a href="#stats">Stats</a></li>
-            </ol>
-        </div>
-        {% endif %}
         {% if jurisdiction.public_notes %}
         <section class="notes">
             {{ jurisdiction.public_notes|markdown:"trusted" }}
