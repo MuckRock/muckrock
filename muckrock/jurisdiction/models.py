@@ -97,6 +97,8 @@ class Jurisdiction(models.Model, RequestHelper):
             default=True,
             help_text='Does this jurisdiction have an appeals process?')
     requires_proxy = models.BooleanField(default=False)
+    law_analysis = models.TextField(blank=True, help_text='Our analysis of the state FOIA law, '
+                                                'as a part of FOI95.')
 
     def __unicode__(self):
         if self.level == 'l' and not self.full_name and self.parent:

@@ -45,7 +45,7 @@ class JurisdictionAdmin(VersionAdmin):
         ('Options for states/federal', {
             'classes': ('collapse',),
             'fields': ('days', 'observe_sat', 'holidays', 'use_business_days',
-                       'intro', 'law_name', 'waiver', 'has_appeal')
+                       'intro', 'law_name', 'waiver', 'has_appeal', 'law_analysis')
         }),
     )
     formats = ['xls', 'csv']
