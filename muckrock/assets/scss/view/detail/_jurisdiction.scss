@@ -53,7 +53,7 @@ $right-column: 4 1 32em;
 .jurisdiction--l .jurisdiction__header {
     @include align-items(flex-end);
     .jurisdiction__name {
-        font-size: $font-size-6;
+        font-size: $font-size-8;
         line-height: $font-line-height;
     }
 }
@@ -67,6 +67,9 @@ $right-column: 4 1 32em;
     }
     .jurisdiction__requests {
         @include flex(1 1 10em);
+        .see-all {
+            float: right;
+        }
     }
     .jurisdiction__stats {
         @include flex(1);
@@ -113,14 +116,6 @@ $right-column: 4 1 32em;
         }
         .law__summary {
             font-size: $font-size-2;
-        }
-    }
-}
- .jurisdiction__actions {
-    .flag .agency {
-        display: none;
-        &.visible {
-            display: block;
         }
     }
 }

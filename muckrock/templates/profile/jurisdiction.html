@@ -159,52 +159,9 @@
             </div>
             {% social %}
         </div>
-        {% comment %}
-        <div class="jurisdiction__stats">
-            {% include 'lib/request_stats.html' %}
-            {% include 'lib/appeal_stats.html' %}
-            <dl>
-                <dt>Allowed Response Time</dt>
-                {% with jurisdiction.get_days as days %}
-                    {% if days %}
-                    <dd>{{days}} day{{days|pluralize}}</dd>
-                    {% else %}
-                    <dd>No limit</dd>
-                    {% endif %}
-                {% endwith %}
-
-                <dt>Average Response Time</dt>
-                {% with jurisdiction.average_response_time as average_response_time %}
-                <dd>{{ average_response_time }} day{{ average_response_time|pluralize }}</dd>
-                {% endwith %}
-
-                {% with jurisdiction.success_rate as success_rate %}
-                {% if success_rate > 0 %}
-                <dt>Success Rate</dt>
-                <dd>{{ success_rate|floatformat:"2" }}%</dd>
-                {% endif %}
-                {% endwith %}
-
-                {% with jurisdiction.average_fee as average_fee %}
-                {% if average_fee > 0 %}
-                <dt>Average Fee</dt>
-                <dd>${{ average_fee|floatformat:"2" }}</dd>
-                <dd>{{ jurisdiction.fee_rate|floatformat:"2" }}% of requests have a fee</dd>
-                {% endif %}
-                {% endwith %}
-
-                {% if proxies %}
-                <dt>Proxies</dt>
-                {% for proxy in proxies %}
-                <dd><a href="{{proxy.get_absolute_url}}">{{proxy.get_full_name}}</a></dd>
-                {% endfor %}
-                {% endif %}
-            </dl>
-        </div>
-        {% endcomment %}
         {% if foia_requests %}
         <div class="jurisdiction__requests">
-            <p><strong>Recently completed requests</strong></p>
+            <p class="bold nomargin">Recently completed requests <a class="see-all" href="{% url 'foia-list' %}?status=done&jurisdiction={{ jurisdiction.pk }}"><small>See All</small></a></p>
             {% for foia in foia_requests %}
                 {% include 'lib/foia.html' with hide_actions=True %}
             {% endfor %}

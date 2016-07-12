@@ -8,10 +8,6 @@
 }
 
 .social {
-    .social__label {
-        font-weight: $font-weight-bold;
-        margin-bottom: 0;
-    }
     .channels {
         @include display(flex);
         @include flex-wrap(wrap);
