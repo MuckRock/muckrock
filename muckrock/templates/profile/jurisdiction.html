@@ -9,7 +9,7 @@
 {% block content %}
 <div class="jurisdiction jurisdiction--{{jurisdiction.level}}">
     <header class="jurisdiction__header">
-        {% if jurisdiction.image %}
+        {% if jurisdiction.image and jurisdiction.level != 'l' %}
         <figure class="jurisdiction__image">
             <img src="{% thumbnail jurisdiction.image 600x600 %}" />
             {% if jurisdiction.image_attr_line %}

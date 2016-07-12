@@ -4,7 +4,6 @@ $right-column: 4 1 32em;
 .jurisdiction {
     @include display(flex);
     @include flex-wrap(wrap);
-    @include flex-direction(row-reverse);
     @include align-items(flex-start);
     max-width: 64em;
     margin: 0 auto;
@@ -126,6 +125,9 @@ $right-column: 4 1 32em;
     }
 }
 .jurisdiction__toc {
+    width: 10em;
+    float: left;
+    margin-right: 2*$vertical-rhythm;
     @include border;
     padding: $vertical-rhythm/2;
     background: $color-white-pure;
@@ -135,6 +137,10 @@ $right-column: 4 1 32em;
     }
     ol {
         padding-left: $vertical-rhythm;
+    }
+    @media (max-width: 35.625em) {
+        float: none;
+        width: 100%;
     }
 }
 .jurisdiction__point__symbol {
