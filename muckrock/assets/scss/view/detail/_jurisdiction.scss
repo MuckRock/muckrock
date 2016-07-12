@@ -19,6 +19,14 @@ $right-column: 4 1 32em;
         @include flex(0 1 10em);
         margin: $vertical-rhythm;
         margin-top: 0;
+        img {
+            margin-bottom: 0;
+        }
+        figcaption {
+            color: $color-grey;
+            font-size: $font-size-1;
+            line-height: $font-line-height;
+        }
     }
     .jurisdiction__info {
         @include flex(1 1 20em);

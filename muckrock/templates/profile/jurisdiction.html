@@ -10,9 +10,12 @@
 <div class="jurisdiction jurisdiction--{{jurisdiction.level}}">
     <header class="jurisdiction__header">
         {% if jurisdiction.image %}
-        <div class="jurisdiction__image">
+        <figure class="jurisdiction__image">
             <img src="{% thumbnail jurisdiction.image 600x600 %}" />
-        </div>
+            {% if jurisdiction.image_attr_line %}
+            <figcaption>{{jurisdiction.image_attr_line|safe}}</figcaption>
+            {% endif %}
+        </figure>
         {% endif %}
         <div class="jurisdiction__info">
             <p class="jurisdiction__name">
