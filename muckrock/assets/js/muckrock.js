@@ -125,7 +125,7 @@ $('document').ready(function(){
     });
 
     // Modal
-    $('.modal-trigger').click(function(e){
+    $('.modal-trigger').click(function(){
         modal(this.hash);
         return false
     });
