@@ -137,7 +137,16 @@
         {% endif %}
     </main>
     <aside class="jurisdiction__aside">
-
+        <div class="modal" id="flag">
+            <form method="post">
+                {% csrf_token %}
+                {% include 'lib/pattern/form.html' %}
+                <footer>
+                    <button type="submit" class="primary button">Submit</button>
+                    <span class="close-modal button">Cancel</span>
+                </footer>
+            </form>
+        </div>
         <div class="jurisdiction__actions">
             <div class="button-group">
                 <a href="{% url 'foia-create' %}" class="blue button">
@@ -145,7 +154,7 @@
                     <span class="label">File a Request</span>
                 </a>
                 {% if user.is_authenticated %}
-                <a href="#flag" class="button">Suggest Change</a>
+                <a href="#flag" class="modal-trigger button">Suggest Change</a>
                 {% endif %}
             </div>
             {% social %}

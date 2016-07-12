@@ -88,7 +88,7 @@ def detail(request, fed_slug, state_slug, local_slug):
                 user=user,
                 text=form.cleaned_data.get('reason'),
                 jurisdiction=jurisdiction)
-            messages.info(request, 'Correction submitted, thanks.')
+            messages.success(request, 'We received your feedback. Thanks!')
             return redirect(jurisdiction)
     else:
         form = FlagForm()
