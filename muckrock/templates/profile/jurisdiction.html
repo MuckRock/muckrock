@@ -55,6 +55,20 @@
             {{ jurisdiction.public_notes|markdown:"trusted" }}
         </section>
         {% endif %}
+        {% if jurisdiction.law_analysis %}
+        <section class="analysis">
+            {{ jurisdiction.law_analysis|markdown:"trusted" }}
+        </section>
+        {% elif jurisdiction.level == 's' %}
+        <div class="warning message">
+            <span class="symbol">
+                {% include 'lib/component/icon/warning.svg' %}
+            </span>
+            <span class="text">
+                <p>We need your help analyzing this jurisdiction's FOI law. If you're interested, <a href="">sign up here</a>.</p>
+            </span>
+        </div>
+        {% endif %}
         <h1 id="stats">Stats</h1>
         <div class="jurisdiction__stats">
             <div>
