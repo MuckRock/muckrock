@@ -92,7 +92,7 @@ p:empty {
     display: none;
 }
 
-b, strong { font-weight: $font-weight-bold; }
+b, strong, .bold { font-weight: $font-weight-bold; }
 
 a {
     text-decoration: none;

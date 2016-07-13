@@ -10,11 +10,12 @@
 .social {
     .channels {
         @include display(flex);
+        @include flex-wrap(wrap);
         @include align-items(center);
     }
     .channel {
         overflow: hidden;
-        @include flex(1);
+        @include flex(1 1 3em);
         text-align: center;
         transition: all .1s ease-out;
         &:hover {

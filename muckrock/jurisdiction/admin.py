@@ -14,13 +14,19 @@ from reversion.admin import VersionAdmin
 import logging
 import sys
 
-from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.jurisdiction.models import Jurisdiction, Law
 from muckrock.jurisdiction.forms import CSVImportForm
 
 logger = logging.getLogger(__name__)
 
 # These inhereit more than the allowed number of public methods
 # pylint: disable=too-many-public-methods
+
+class LawInline(admin.StackedInline):
+    """Law admin options"""
+    model = Law
+    extra = 0
+
 
 class JurisdictionAdmin(VersionAdmin):
     """Jurisdiction admin options"""
@@ -29,6 +35,7 @@ class JurisdictionAdmin(VersionAdmin):
     list_display = ('name', 'parent', 'level')
     list_filter = ['level']
     search_fields = ['name']
+    inlines = [LawInline]
     filter_horizontal = ('holidays', )
     fieldsets = (
         (None, {
@@ -38,7 +45,7 @@ class JurisdictionAdmin(VersionAdmin):
         ('Options for states/federal', {
             'classes': ('collapse',),
             'fields': ('days', 'observe_sat', 'holidays', 'use_business_days',
-                       'intro', 'law_name', 'waiver', 'has_appeal')
+                       'intro', 'law_name', 'waiver', 'has_appeal', 'law_analysis')
         }),
     )
     formats = ['xls', 'csv']

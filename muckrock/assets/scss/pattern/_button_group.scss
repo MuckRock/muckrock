@@ -2,6 +2,7 @@
     @include display(inline-flex);
     margin-bottom: 0;
     .button {
+        @include flex(1 1 auto);
         border-radius: 0;
     }
     .button:first-child {
