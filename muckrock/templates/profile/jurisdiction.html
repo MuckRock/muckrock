@@ -6,12 +6,32 @@
 {% block title %}{{ title }} &bull; MuckRock{% endblock title %}
 {% block type %}{% if jurisdiction.name == 'Georgia' %}georgia {% endif %}jurisdiction{% endblock type %}
 
+{% block open_graph %}
+<meta property="og:title" content="{{title}}" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="{{ request.build_absolute_uri }}" />
+<meta property="og:description" content="MuckRock's guide to public records in {{jurisdiction}}." />
+{% if jurisdiction.image and jurisdiction.level != 'l' %}
+<meta property="og:image" content="{% thumbnail jurisdiction.image 300x300 %}" />
+{% endif %}
+{% endblock open_graph %}
+
+{% block twitter_card %}
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@muckrock" />
+<meta name="twitter:title" content="{{title}}" />
+<meta name="twitter:description" content="MuckRock's guide to public records in {{jurisdiction}}." />
+{% if jurisdiction.image and jurisdiction.level != 'l' %}
+<meta name="twitter:image:src" content="{% thumbnail jurisdiction.image 300x300 %}" />
+{% endif %}
+{% endblock twitter_card %}
+
 {% block content %}
 <div class="jurisdiction jurisdiction--{{jurisdiction.level}}">
     <header class="jurisdiction__header">
         {% if jurisdiction.image and jurisdiction.level != 'l' %}
         <figure class="jurisdiction__image">
-            <img src="{% thumbnail jurisdiction.image 600x600 %}" />
+            <img src="{% thumbnail jurisdiction.image 300x300 %}" />
             {% if jurisdiction.image_attr_line %}
             <figcaption>{{jurisdiction.image_attr_line|safe}}</figcaption>
             {% endif %}
