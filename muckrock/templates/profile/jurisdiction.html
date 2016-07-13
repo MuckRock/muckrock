@@ -58,7 +58,7 @@
                 {% endfor %}
             </div>
             {% elif jurisdiction.level == 'l' %}
-            <h2>Falls under <a href="{{jurisdiction.parent.get_absolute_url}}">{{jurisdiction.parent.laws.first.name}}</a></h2>
+            <h2>Falls under <a href="{{jurisdiction.parent.get_absolute_url}}">{% if jurisdiction.parent.laws.exists %}{{jurisdiction.parent.laws.first.name}}{% else %}{{ jurisdiction.parent }} public records law{% endif %}</a></h2>
             {% endif %}
         </div>
     </header>
