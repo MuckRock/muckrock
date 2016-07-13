@@ -31,8 +31,7 @@ class FlagForm(forms.Form):
         widget=forms.Textarea(),
         label='Submit a Change',
         help_text=(
-            'Please describe the change, such as providing missing information '
-            'or correcting existing information, in sufficient detail below:'
+            'Please describe the change in sufficient detail.'
         )
     )
 

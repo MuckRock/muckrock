@@ -55,8 +55,10 @@ def detail(request, fed_slug, state_slug, local_slug):
 
     foia_requests = jurisdiction.get_requests()
     foia_requests = (foia_requests.get_viewable(request.user)
-                                  .order_by('-date_submitted')
-                                  .select_related_view()[:10])
+                                  .get_done()
+                                  .order_by('-date_done')
+                                  .select_related_view()
+                                  .get_public_file_count(limit=10)[:10])
 
     if jurisdiction.level == 's':
         agencies = Agency.objects.filter(
@@ -71,13 +73,10 @@ def detail(request, fed_slug, state_slug, local_slug):
                         .annotate(pages=Sum('foiarequest__files__pages'))
                         .order_by('-foia_count')[:10])
 
-    if jurisdiction.level == 's':
-        localities = (Jurisdiction.objects.filter(parent=jurisdiction)
-                                          .annotate(foia_count=Count('foiarequest'))
-                                          .annotate(pages=Sum('foiarequest__files__pages'))
-                                          .order_by('-foia_count')[:10])
-    else:
-        localities = None
+    _children = Jurisdiction.objects.filter(parent=jurisdiction).select_related('parent__parent')
+    _top_children = (_children.annotate(foia_count=Count('foiarequest'))
+                              .annotate(pages=Sum('foiarequest__files__pages'))
+                              .order_by('-foia_count')[:10])
 
     if request.method == 'POST':
         form = FlagForm(request.POST)
@@ -89,7 +88,7 @@ def detail(request, fed_slug, state_slug, local_slug):
                 user=user,
                 text=form.cleaned_data.get('reason'),
                 jurisdiction=jurisdiction)
-            messages.info(request, 'Correction submitted, thanks.')
+            messages.success(request, 'We received your feedback. Thanks!')
             return redirect(jurisdiction)
     else:
         form = FlagForm()
@@ -98,10 +97,12 @@ def detail(request, fed_slug, state_slug, local_slug):
     context = {
         'jurisdiction': jurisdiction,
         'agencies': agencies,
-        'localities': localities,
+        'children': _children,
+        'top_children': _top_children,
         'foia_requests': foia_requests,
         'form': form,
         'sidebar_admin_url': admin_url,
+        'title': jurisdiction.name + ' Public Records Guide'
     }
     if request.user.is_staff and jurisdiction.abbrev:
         context['proxies'] = User.objects.filter(

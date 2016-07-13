@@ -16,6 +16,8 @@ import './quicksearch';
 import './tabs';
 import './task';
 
+import { modal } from './modal';
+
 // FLAG FORM
 $('#show-flag-form').click(function(){
     var thisButton = $(this);
@@ -120,6 +122,12 @@ $('document').ready(function(){
     // Currency Field
     $('input.currency-field').each(function(){
         $(this).currencyField();
+    });
+
+    // Modal
+    $('.modal-trigger').click(function(){
+        modal(this.hash);
+        return false
     });
 
     // Date Picker
