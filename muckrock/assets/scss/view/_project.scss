@@ -118,7 +118,7 @@
             @include justify-content(space-between);
             margin-bottom: $vertical-rhythm/2;
         }
-        .contributor {
+        & > .contributor {
             @include display(flex);
             margin-bottom: $vertical-rhythm/2;
             .avatar {

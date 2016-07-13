@@ -7,6 +7,7 @@
 {% block type %}{% if jurisdiction.name == 'Georgia' %}georgia {% endif %}jurisdiction{% endblock type %}
 
 {% block open_graph %}
+<meta property="og:site_name" content="MuckRock" />
 <meta property="og:title" content="{{title}}" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="{{ request.build_absolute_uri }}" />
