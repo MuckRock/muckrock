@@ -84,8 +84,6 @@ urlpatterns = patterns(
     # Misc Views
     url(r'^(?P<jurisdiction>[\w\d_-]+)-(?P<idx>\d+)/$',
         jurisdiction, name='foia-jurisdiction'),
-    url(r'^orphans/$',
-        views.orphans, name='foia-orphans'),
     url(r'^acronyms/$',
         views.acronyms, name='foia-acronyms'),
     url(r'^drag_drop/$',
