@@ -94,6 +94,14 @@ $right-column: 4 1 32em;
             margin-right: $vertical-rhythm;
         }
     }
+    .analysis {
+        h2 {
+            font-size: $font-size-6;
+        }
+        h3 {
+            border-bottom: 1px solid $color-grey;
+        }
+    }
 }
 .law {
     .law__name, .law__citation {
