@@ -383,7 +383,8 @@ class ResponseTaskTests(TestCase):
     """Test the ResponseTask class"""
 
     def setUp(self):
-        comm = factories.FOIACommunicationFactory(response=True)
+        agency = factories.AgencyFactory()
+        comm = factories.FOIACommunicationFactory(response=True, foia__agency=agency)
         self.task = task.models.ResponseTask.objects.create(communication=comm)
 
     def test_get_absolute_url(self):

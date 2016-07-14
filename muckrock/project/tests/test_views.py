@@ -127,9 +127,10 @@ class TestProjectEditView(TestCase):
         """
         desc = 'Lorem ipsum'
         data = {
+            'title': self.project.title,
             'description': desc,
         }
-        form = forms.ProjectUpdateForm(data)
+        form = forms.ProjectUpdateForm(data, instance=self.project)
         ok_(form.is_valid(), 'The form should validate. %s' % form.errors)
         http_post_response(self.url, self.view, data, self.contributor, **self.kwargs)
         self.project.refresh_from_db()
@@ -141,9 +142,10 @@ class TestProjectEditView(TestCase):
         """When adding contributors, each new contributor should get an email notification."""
         new_contributor = factories.UserFactory()
         data = {
+            'title': self.project.title,
             'contributors': [self.contributor.pk, new_contributor.pk]
         }
-        form = forms.ProjectUpdateForm(data)
+        form = forms.ProjectUpdateForm(data, instance=self.project)
         ok_(form.is_valid(), 'The form should validate. %s' % form.errors)
         http_post_response(self.url, self.view, data, self.contributor, **self.kwargs)
         self.project.refresh_from_db()
