@@ -8,6 +8,7 @@ from django.core import mail
 from django.http import Http404
 from django.test import TestCase, RequestFactory
 
+from actstream.actions import follow
 import datetime
 from datetime import date as real_date
 from mock import Mock
@@ -16,7 +17,13 @@ from operator import attrgetter
 import re
 
 from muckrock.agency.models import Agency
-from muckrock.factories import UserFactory, FOIARequestFactory, FOIAFileFactory, ProjectFactory
+from muckrock.factories import (
+    UserFactory,
+    FOIARequestFactory,
+    FOIAFileFactory,
+    ProjectFactory,
+    AgencyFactory
+)
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.foia.views import Detail, FOIAFileListView
 from muckrock.foia.views.composers import _make_user
@@ -25,6 +32,7 @@ from muckrock.project.forms import ProjectManagerForm
 from muckrock.task.models import SnailMailTask
 from muckrock.tests import get_allowed, post_allowed, get_post_unallowed, get_404
 from muckrock.test_utils import mock_middleware
+from muckrock.utils import new_action
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
@@ -1023,3 +1031,83 @@ class TestMakeUser(TestCase):
         """Should create the user, log them in, and return the user."""
         user = _make_user(self.request, self.data)
         ok_(user)
+
+
+class TestFOIANotification(TestCase):
+    """The request should always notify its owner,
+    but only notify followers if its not embargoed."""
+    def setUp(self):
+        agency = AgencyFactory()
+        self.owner = UserFactory()
+        self.follower = UserFactory()
+        self.request = FOIARequestFactory(user=self.owner, agency=agency)
+        follow(self.follower, self.request)
+        self.action = new_action(agency, 'completed', target=self.request)
+
+    def test_owner_notified(self):
+        """The owner should always be notified."""
+        # unembargoed
+        notification_count = self.owner.notifications.count()
+        self.request.notify(self.action)
+        eq_(self.owner.notifications.count(), notification_count + 1,
+            'The owner should get a new notification.')
+        # embargoed
+        self.request.embargo = True
+        self.request.save()
+        notification_count = self.owner.notifications.count()
+        self.request.notify(self.action)
+        eq_(self.owner.notifications.count(), notification_count + 1,
+            'The owner should get a new notification.')
+
+    def test_follower_notified(self):
+        """The owner should always be notified."""
+        # unembargoed
+        notification_count = self.follower.notifications.count()
+        self.request.notify(self.action)
+        eq_(self.follower.notifications.count(), notification_count + 1,
+            'A follower should get a new notification when unembargoed.')
+        # embargoed
+        self.request.embargo = True
+        self.request.save()
+        notification_count = self.follower.notifications.count()
+        self.request.notify(self.action)
+        eq_(self.follower.notifications.count(), notification_count,
+            'A follower should not get a new notification when embargoed.')
+
+    def test_identical_notification(self):
+        """A new notification should mark any with identical language as read."""
+        unread_count = self.owner.notifications.get_unread().count()
+        self.request.notify(self.action)
+        eq_(self.owner.notifications.get_unread().count(), unread_count + 1)
+        unread_count = self.owner.notifications.get_unread().count()
+        self.request.notify(self.action)
+        eq_(self.owner.notifications.get_unread().count(), unread_count,
+            'Any similar notifications should be marked as read.')
+
+    def test_unidentical_notification(self):
+        """A new notification shoudl not mark any with unidentical language as read."""
+        first_action = new_action(self.request.agency, 'completed', target=self.request)
+        second_action = new_action(self.request.agency, 'rejected', target=self.request)
+        third_action = new_action(self.owner, 'completed', target=self.request)
+        unread_count = self.owner.notifications.get_unread().count()
+        self.request.notify(first_action)
+        eq_(self.owner.notifications.get_unread().count(), unread_count + 1,
+            'The user should have one unread notification.')
+        self.request.notify(second_action)
+        eq_(self.owner.notifications.get_unread().count(), unread_count + 2,
+            'The user should have two unread notifications.')
+        self.request.notify(third_action)
+        eq_(self.owner.notifications.get_unread().count(), unread_count + 3,
+            'The user should have three unread notifications.')
+
+    def test_idential_different_requests(self):
+        """An identical action on a different request should not mark anything as read."""
+        other_request = FOIARequestFactory(user=self.owner, agency=self.request.agency)
+        other_action = new_action(self.request.agency, 'completed', target=other_request)
+        unread_count = self.owner.notifications.get_unread().count()
+        self.request.notify(self.action)
+        eq_(self.owner.notifications.get_unread().count(), unread_count + 1,
+            'The user should have one unread notification.')
+        other_request.notify(other_action)
+        eq_(self.owner.notifications.get_unread().count(), unread_count + 2,
+            'The user should have two unread notifications.')

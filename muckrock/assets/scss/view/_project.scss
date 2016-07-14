@@ -19,12 +19,14 @@
     .form {
         padding-top: 0;
     }
-    textarea {
-        font-family: $font-monospace;
-        font-size: $font-size-2;
+    .switch, .wysiwyg-toggle__label {
+        display: inline-block;
+        vertical-align: middle;
     }
     .description textarea {
         min-height: 20em;
+        font-family: $font-monospace;
+        font-size: $font-size-2;
     }
     .description p {
         max-width: 40em;
