@@ -17,7 +17,13 @@ from operator import attrgetter
 import re
 
 from muckrock.agency.models import Agency
-from muckrock.factories import UserFactory, FOIARequestFactory, FOIAFileFactory, ProjectFactory, AgencyFactory
+from muckrock.factories import (
+    UserFactory,
+    FOIARequestFactory,
+    FOIAFileFactory,
+    ProjectFactory,
+    AgencyFactory
+)
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.foia.views import Detail, FOIAFileListView
 from muckrock.foia.views.composers import _make_user
