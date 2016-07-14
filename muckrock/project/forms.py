@@ -42,6 +42,7 @@ class ProjectUpdateForm(forms.ModelForm):
     class Meta:
         model = Project
         fields = [
+            'title',
             'summary',
             'image',
             'tags',
@@ -55,6 +56,9 @@ class ProjectUpdateForm(forms.ModelForm):
             'contributors': autocomplete_light.MultipleChoiceWidget('UserAutocomplete'),
             'requests': autocomplete_light.MultipleChoiceWidget('FOIARequestAutocomplete'),
             'articles': autocomplete_light.MultipleChoiceWidget('ArticleAutocomplete'),
+        }
+        help_texts = {
+            'title': 'Changing the title will change the URL of your project.',
         }
 
 

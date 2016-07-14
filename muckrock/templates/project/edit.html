@@ -19,6 +19,7 @@
                 <li><a role="tab" class="tab" href="#articles">Articles</a></li>
             </ul>
             <div role="tabpanel" class="tab-panel" id="basics">
+                {% include 'lib/pattern/field.html' with field=form.title %}
                 {% include 'lib/pattern/field.html' with field=form.summary %}
                 {% include 'lib/pattern/field.html' with field=form.tags %}
                 {% if project.image %}
@@ -30,9 +31,19 @@
             <div role="tabpanel" class="description tab-panel" id="description">
                 <header>
                     <p>Use the description to expand upon what you hope to accomplish or to organize what you already have.</p>
-                    <label for="toggle-prosemirror">WYSIWYG <input type="checkbox" id="toggle-prosemirror" checked /></label>
                 </header>
+                <div class="wysiwyg-toggle">
+                    <label class="wysiwyg-toggle__label bold" for="toggle-prosemirror">WYSIWYG</label>
+                    <span class="switch">
+                        <input type="checkbox" id="toggle-prosemirror" checked />
+                        <label for="toggle-prosemirror">
+                            <span class="checkbox-switch-head"></span>
+                        </label>
+                    </span>
+                    <p class="help-text">To compose in plaintext, disable the WYSIWYG interace.</p>
+                </div>
                 {{form.description}}
+                <p class="nomargin"><a href="http://daringfireball.net/projects/markdown/syntax">Markdown syntax supported</a></p>
             </div>
             <div role="tabpanel" class="tab-panel" id="contributors">
                 {{form.contributors}}
