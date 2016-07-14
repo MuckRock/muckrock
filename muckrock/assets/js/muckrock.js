@@ -139,7 +139,7 @@ $('document').ready(function(){
         yearRange: '1776:+1'
     });
 
-    $('.news__main img').loupe({
+    $('.news__article__main img').loupe({
         height: 200,
         width: 200
     });
