@@ -20,6 +20,7 @@ from reversion import revisions as reversion
 from taggit.managers import TaggableManager
 from unidecode import unidecode
 
+from muckrock.accounts.models import Notification
 from muckrock.tags.models import Tag, TaggedItemBase, parse_tags
 from muckrock import task
 from muckrock import fields
@@ -493,7 +494,13 @@ class FOIARequest(models.Model):
         """
         Notify the owner of the request.
         Notify followers if the request is not under embargo.
+        Mark any existing notifications with the same message as read,
+        to avoid notifying users with duplicated information.
         """
+        identical_notifications = (Notification.objects.for_object(self).get_unread()
+            .filter(action__actor_object_id=action.actor_object_id, action__verb=action.verb))
+        for notification in identical_notifications:
+            notification.mark_read()
         utils.notify(self.user, action)
         if self.is_public():
             utils.notify(followers(self), action)
