@@ -156,7 +156,7 @@ $('document').ready(function(){
         var searchButton = this;
         var search = '#global-search';
         var closeSearch = '#hide-search';
-        var searchInput = $(search).children('input[type="search"]');
+        var searchInput = $(search).find('input[type="search"]');
         toggleNav(search, searchButton);
         $(closeSearch).click(function(){
             hideNav(search, searchButton);
