@@ -11,6 +11,8 @@ import nose.tools
 
 from muckrock import agency
 from muckrock import factories
+from muckrock.task.models import StaleAgencyTask
+from muckrock.task.factories import StaleAgencyTaskFactory
 from muckrock.test_utils import http_get_response
 
 ok_ = nose.tools.ok_
@@ -72,6 +74,47 @@ class TestAgencyUnit(TestCase):
         )
         eq_(self.agency1.is_stale(), True,
             "The agency should report the days since its latest response.")
+
+    def test_agency_mark_stale(self):
+        """Should mark the agency as stale and return a stale agency task,
+        creating the task if one doesn't already exist."""
+        ok_(not StaleAgencyTask.objects.filter(resolved=False, agency=self.agency1).exists(),
+            'There should not be any unresolved StaleAgencyTasks for this request.')
+        task = self.agency1.mark_stale()
+        ok_(self.agency1.stale,
+            'The agency should be marked as stale.')
+        ok_(isinstance(task, StaleAgencyTask),
+            'A StaleAgencyTask should be returned.')
+        second_task = self.agency1.mark_stale()
+        eq_(task, second_task,
+            'Instead of creating another task, return the one that already exists.')
+
+    def test_agency_multiple_tasks(self):
+        """If multiple StaleAgencyTasks exist, only the first should be returned
+        when marking an agency as stale."""
+        stale_agency_tasks = [
+            StaleAgencyTaskFactory(agency=self.agency1),
+            StaleAgencyTaskFactory(agency=self.agency1),
+            StaleAgencyTaskFactory(agency=self.agency1),
+        ]
+        task = self.agency1.mark_stale()
+        eq_(task, stale_agency_tasks[0],
+            'The returned task should be the first stale agency task.')
+
+    def test_agency_unmark_stale(self):
+        """Unmark the agency as stale. Resolve and return all StaleAgencyTasks."""
+        # first mark it as stale and save the task it returns
+        task = self.agency1.mark_stale()
+        # then unmark it as stale and save the list of tasks it returns
+        tasks = self.agency1.unmark_stale()
+        ok_(not self.agency1.stale,
+            'The agency should no longer be marked as stale.')
+        ok_(task in tasks,
+            'The task should be in the list of returned tasks.')
+        task.refresh_from_db()
+        ok_(task.resolved,
+            'The task should be resolved.')
+
 
 class TestAgencyManager(TestCase):
     """Tests for the Agency object manager"""

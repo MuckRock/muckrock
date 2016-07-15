@@ -9,7 +9,6 @@ from django.db import models
 from taggit.managers import TaggableManager
 import logging
 
-from muckrock.agency.models import Agency
 from muckrock.foia.models.request import STATUS
 from muckrock.tags.models import TaggedItemBase
 
@@ -27,7 +26,7 @@ class FOIAMultiRequest(models.Model):
     embargo = models.BooleanField(default=False)
     requested_docs = models.TextField(blank=True)
     agencies = models.ManyToManyField(
-            Agency,
+            'agency.Agency',
             related_name='agencies',
             blank=True,
             )

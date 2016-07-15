@@ -12,7 +12,6 @@ import email
 import logging
 
 from muckrock.accounts.models import Notification
-from muckrock.agency.models import Agency
 from muckrock.foia.models import (
     FOIACommunication,
     FOIAFile,
@@ -93,6 +92,7 @@ class NewAgencyTaskQuerySet(models.QuerySet):
     """Object manager for new agency tasks"""
     def preload_list(self):
         """Preload relations for list display"""
+        from muckrock.agency.models import Agency
         return (self.select_related('agency__jurisdiction')
                 .prefetch_related(
                     Prefetch('agency__foiarequest_set',
@@ -266,6 +266,7 @@ class RejectedEmailTask(Task):
 
     def agencies(self):
         """Get the agencies who use this email address"""
+        from muckrock.agency.models import Agency
         return Agency.objects.filter(Q(email__iexact=self.email) |
                                      Q(other_emails__icontains=self.email))
 
@@ -282,7 +283,7 @@ class RejectedEmailTask(Task):
 class StaleAgencyTask(Task):
     """An agency has gone stale"""
     type = 'StaleAgencyTask'
-    agency = models.ForeignKey(Agency)
+    agency = models.ForeignKey('agency.Agency')
 
     def __unicode__(self):
         return u'Stale Agency Task'
@@ -335,7 +336,7 @@ class FlaggedTask(Task):
     text = models.TextField()
     user = models.ForeignKey(User, blank=True, null=True)
     foia = models.ForeignKey('foia.FOIARequest', blank=True, null=True)
-    agency = models.ForeignKey(Agency, blank=True, null=True)
+    agency = models.ForeignKey('agency.Agency', blank=True, null=True)
     jurisdiction = models.ForeignKey(Jurisdiction, blank=True, null=True)
 
     def __unicode__(self):
@@ -402,7 +403,7 @@ class NewAgencyTask(Task):
     """A new agency has been created and needs approval"""
     type = 'NewAgencyTask'
     user = models.ForeignKey(User, blank=True, null=True)
-    agency = models.ForeignKey(Agency)
+    agency = models.ForeignKey('agency.Agency')
     objects = NewAgencyTaskQuerySet.as_manager()
 
     def __unicode__(self):
