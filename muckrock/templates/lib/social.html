@@ -2,25 +2,25 @@
     <p class="bold nomargin">Share</p>
     <ul class="channels nostyle">
         <li class="channel">
-            <a href="javascript:window.open('https://www.facebook.com/sharer/sharer.php?u={{url}}', 'Share on Facebook', 'width=500,height=140,location=no,menubar=no,status=no');" class="facebook" onclick="ga('send', 'social', 'Facebook', 'share', window.location.pathname)">
+            <a class="facebook" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u={{url|escapejs}}', 'Share on Facebook', 'width=500,height=140,location=no,menubar=no,status=no'); ga('send', 'social', 'Facebook', 'share', window.location.pathname);">
                 {% include 'lib/component/icon/facebook.svg' %}
                 <span class="label">Facebook</span>
             </a>
         </li>
         <li class="channel">
-            <a href="javascript:window.open('http://twitter.com/intent/tweet?text={{ title|escapejs }}&amp;url={{url}}&amp;via=muckrock', 'Share on Twitter', 'width=500,height=253,location=no,menubar=no,status=no');" class="twitter" onclick="ga('send', 'social', 'Twitter', 'tweet', window.location.pathname)">
+            <a class="twitter" onclick="window.open('http://twitter.com/intent/tweet?text={{ title|escapejs }}&amp;url={{url|escapejs}}&amp;via=muckrock', 'Share on Twitter', 'width=500,height=253,location=no,menubar=no,status=no'); ga('send', 'social', 'Twitter', 'tweet', window.location.pathname);">
                 {% include 'lib/component/icon/twitter.svg' %}
                 <span class="label">Twitter</span>
             </a>
         </li>
         <li class="channel">
-            <a href="mailto:?subject={{ title }}&amp;body={{url}}" class="email" onclick="ga('send', 'social', 'Email', 'send', window.location.pathname);">
+            <a href="mailto:?subject={{title}}&amp;body={{url}}" class="email" onclick="ga('send', 'social', 'Email', 'send', window.location.pathname);">
                 {% include 'lib/component/icon/email.svg' %}
                 <span class="label">Email</span>
             </a>
         </li>
         <li class="channel">
-            <a href="javascript:window.open('http://www.reddit.com/submit?url={{url}}&amp;title={{ title|escapejs }}')" class="reddit" onclick="ga('send', 'social', 'Reddit', 'share', window.location.pathname);">
+            <a class="reddit" onclick="window.open('http://www.reddit.com/submit?url={{url}}&amp;title={{ title|escapejs }}'); ga('send', 'social', 'Reddit', 'share', window.location.pathname);">
                 {% include 'lib/component/icon/reddit.svg' %}
                 <span class="label">Reddit</span>
             </a>

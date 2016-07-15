@@ -40,6 +40,7 @@
         background: $color-black;
         color: $color-white;
         text-decoration: none;
+        cursor: default;
     }
     @include social-color(email, $color-email);
     @include social-color(twitter, $color-twitter);

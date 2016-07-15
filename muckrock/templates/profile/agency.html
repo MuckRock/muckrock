@@ -91,7 +91,30 @@
 {% block activity %}
 <main class="activity">
     {% if user.is_authenticated %}
-    {% include 'lib/flag_form.html' %}
+    {% if user.is_staff and not agency.stale %}
+    <form method="post" id="stale-form">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="mark_stale">
+    </form>
+    {% endif %}
+    <div class="modal" id="flag-form">
+        <form method="post">
+            {% csrf_token %}
+            {% include 'lib/pattern/form.html' %}
+            <footer>
+                <button type="submit" name="action" value="flag" class="primary button">Submit</button>
+                <span class="close-modal button">Cancel</span>
+            </footer>
+        </form>
+    </div>
+    {% endif %}
+    {% if user.is_authenticated %}
+    <div>
+        {% if user.is_staff and not agency.stale %}
+        <button type="submit" class="button" form="stale-form">Mark Stale</button>
+        {% endif %}
+        <a href="#flag-form" class="modal-trigger button">Suggest Change</a>
+    </div>
     {% endif %}
     {% if agency.public_notes %}
     <section class="notes">
