@@ -184,6 +184,8 @@ class Agency(models.Model, RequestHelper):
         self.save()
         try:
             task, created = StaleAgencyTask.objects.get_or_create(resolved=False, agency=self)
+            if created:
+                logger.info('Created new StaleAgencyTask <%d> for Agency <%d>', task.pk, self.pk)
         except MultipleObjectsReturned as exception:
             # If there are multiple StaleAgencyTasks returned, just return the first one.
             # We only want this method to return a single task.

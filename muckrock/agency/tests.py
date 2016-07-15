@@ -93,7 +93,7 @@ class TestAgencyUnit(TestCase):
 
     def test_agency_manual_stale(self):
         """Should be able to manually mark an agency as stale."""
-        task = self.agency1.mark_stale(manual=True)
+        self.agency1.mark_stale(manual=True)
         ok_(self.agency1.stale,
             'The agency should be marked as stale.')
         ok_(self.agency1.manual_stale,
