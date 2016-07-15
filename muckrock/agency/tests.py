@@ -114,20 +114,15 @@ class TestAgencyUnit(TestCase):
             'The returned task should be the first stale agency task.')
 
     def test_agency_unmark_stale(self):
-        """Unmark the agency as stale. Resolve and return all StaleAgencyTasks."""
-        # first mark it as stale and save the task it returns
-        task = self.agency1.mark_stale(manual=True)
-        # then unmark it as stale and save the list of tasks it returns
-        tasks = self.agency1.unmark_stale()
+        """Unmark the agency as stale."""
+        # first mark it as stale
+        self.agency1.mark_stale(manual=True)
+        # then unmark it as stale
+        self.agency1.unmark_stale()
         ok_(not self.agency1.stale,
             'The agency should no longer be marked as stale.')
         ok_(not self.agency1.manual_stale,
             'A manually stale agency should also be freed from staleness.')
-        ok_(task in tasks,
-            'The task should be in the list of returned tasks.')
-        task.refresh_from_db()
-        ok_(task.resolved,
-            'The task should be resolved.')
 
 
 class TestAgencyManager(TestCase):

@@ -16,3 +16,5 @@ def stale():
             agency.mark_stale()
         elif not is_stale and agency.stale:
             agency.unmark_stale()
+            for task in StaleAgencyTask.objects.filter(resolved=False, agency=agency):
+                task.resolve()

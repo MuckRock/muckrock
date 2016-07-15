@@ -197,10 +197,6 @@ class Agency(models.Model, RequestHelper):
         self.stale = False
         self.manual_stale = False
         self.save()
-        tasks = StaleAgencyTask.objects.filter(resolved=False, agency=self)
-        for task in tasks:
-            task.resolve()
-        return tasks
 
     def count_thanks(self):
         """Count how many thanks this agency has received"""
