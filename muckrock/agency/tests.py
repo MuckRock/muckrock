@@ -153,7 +153,6 @@ class TestAgencyManager(TestCase):
 class TestAgencyViews(TestCase):
     """Tests for Agency views"""
     def setUp(self):
-        self.request_factory = RequestFactory()
         self.agency = factories.AgencyFactory()
         self.url = self.agency.get_absolute_url()
         self.view = agency.views.detail
@@ -209,16 +208,17 @@ class TestAgencyForm(TestCase):
 class TestStaleAgency(TestCase):
     """Tests the stale agency task"""
     def setUp(self):
-        self.stale_agency = factories.StaleAgencyFactory()
+        self.stale_agency = factories.StaleAgencyFactory(stale=False)
+        self.unstale_agency = factories.AgencyFactory(stale=True)
+        self.task = StaleAgencyTaskFactory(agency=self.unstale_agency)
 
     def test_stale_task(self):
         """A stale agency should be marked as stale"""
         from muckrock.agency.tasks import stale
-        # The stale agency factory marks it as Stale by default, for convenience.
-        # So, we lower to stale flag to make sure it's actually raised!
-        self.stale_agency.stale = False
-        self.stale_agency.save()
-        ok_(not self.stale_agency.stale)
         stale()
         self.stale_agency.refresh_from_db()
-        ok_(self.stale_agency.stale, 'The agency should be marked as stale')
+        self.unstale_agency.refresh_from_db()
+        self.task.refresh_from_db()
+        ok_(self.stale_agency.stale, 'The stale agency should be marked as stale')
+        ok_(not self.unstale_agency.stale, 'The unstale agency should be unmarked as stale.')
+        ok_(self.task.resolved, 'The task for the unstale agency should be resolved automatically.')
