@@ -292,9 +292,8 @@ class StaleAgencyTask(Task):
         return reverse('stale-agency-task', kwargs={'pk': self.pk})
 
     def resolve(self, user=None):
-        """Mark the agency as stale when resolving"""
-        self.agency.stale = False
-        self.agency.save()
+        """Unmark the agency as stale when resolving"""
+        self.agency.unmark_stale()
         super(StaleAgencyTask, self).resolve(user)
 
     def stale_requests(self):
