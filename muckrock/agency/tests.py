@@ -83,11 +83,23 @@ class TestAgencyUnit(TestCase):
         task = self.agency1.mark_stale()
         ok_(self.agency1.stale,
             'The agency should be marked as stale.')
+        ok_(not self.agency1.manual_stale,
+            'The agency should not be marked as manually stale.')
         ok_(isinstance(task, StaleAgencyTask),
             'A StaleAgencyTask should be returned.')
         second_task = self.agency1.mark_stale()
         eq_(task, second_task,
             'Instead of creating another task, return the one that already exists.')
+
+    def test_agency_manual_stale(self):
+        """Should be able to manually mark an agency as stale."""
+        task = self.agency1.mark_stale(manual=True)
+        ok_(self.agency1.stale,
+            'The agency should be marked as stale.')
+        ok_(self.agency1.manual_stale,
+            'The agency should be marked as manually stale.')
+        ok_(self.agency1.is_stale(),
+            'An agency that is manually stale should always be stale.')
 
     def test_agency_multiple_tasks(self):
         """If multiple StaleAgencyTasks exist, only the first should be returned
@@ -104,11 +116,13 @@ class TestAgencyUnit(TestCase):
     def test_agency_unmark_stale(self):
         """Unmark the agency as stale. Resolve and return all StaleAgencyTasks."""
         # first mark it as stale and save the task it returns
-        task = self.agency1.mark_stale()
+        task = self.agency1.mark_stale(manual=True)
         # then unmark it as stale and save the list of tasks it returns
         tasks = self.agency1.unmark_stale()
         ok_(not self.agency1.stale,
             'The agency should no longer be marked as stale.')
+        ok_(not self.agency1.manual_stale,
+            'A manually stale agency should also be freed from staleness.')
         ok_(task in tasks,
             'The task should be in the list of returned tasks.')
         task.refresh_from_db()

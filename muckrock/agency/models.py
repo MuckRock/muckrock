@@ -75,6 +75,8 @@ class Agency(models.Model, RequestHelper):
     image_attr_line = models.CharField(blank=True, max_length=255, help_text='May use html')
     public_notes = models.TextField(blank=True, help_text='May use html')
     stale = models.BooleanField(default=False)
+    manual_stale = models.BooleanField(default=False,
+        help_text='For marking an agency stale by hand.')
     address = models.TextField(blank=True)
     location = PointField(blank=True)
     email = models.EmailField(blank=True)
@@ -157,7 +159,10 @@ class Agency(models.Model, RequestHelper):
         days ago, or if no responses to any open request, if the oldest open
         request was sent greater than STALE_DURATION days ago.  If no open requests,
         do not mark as stale."""
-        # first find any open requests, if none, not stale
+        # check if agency is manually marked as stale
+        if self.manual_stale:
+            return True
+        # find any open requests, if none, not stale
         foias = self.foiarequest_set.get_open().order_by('date_submitted')
         if not foias:
             return False
@@ -172,9 +177,10 @@ class Agency(models.Model, RequestHelper):
         # no response to open requests, use oldest open request submit date
         return (date.today() - foias[0].date_submitted).days >= STALE_DURATION
 
-    def mark_stale(self):
+    def mark_stale(self, manual=False):
         """Mark this agency as stale and create a StaleAgencyTask if one doesn't already exist."""
         self.stale = True
+        self.manual_stale = manual
         self.save()
         try:
             task, created = StaleAgencyTask.objects.get_or_create(resolved=False, agency=self)
@@ -189,6 +195,7 @@ class Agency(models.Model, RequestHelper):
     def unmark_stale(self):
         """Unmark this agency as stale and resolve all of its StaleAgencyTasks."""
         self.stale = False
+        self.manual_stale = False
         self.save()
         tasks = StaleAgencyTask.objects.filter(resolved=False, agency=self)
         for task in tasks:
