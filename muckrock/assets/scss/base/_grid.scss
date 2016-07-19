@@ -1,3 +1,10 @@
+/*
+** _grid.scss
+**
+** The grid is pretty janky and obsolete and needs to be refactored.
+** It is based on mixins obtained from the Bourbon Neat framework.
+*/
+
 @mixin grid-columns($small, $medium, $large) {
     // Conveniently set all grid column sizes at once.
     @include media($small-bp) { @include span-columns($small); }

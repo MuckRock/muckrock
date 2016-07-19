@@ -1,6 +1,11 @@
+/*
+** _base.scss
+**
+** The base establishes all of our SASS elements and the assumptions of our visual system.
+*/
+
 @import 'variables';
 @import 'mixins';
-
 @import 'colors';
 @import 'grid';
 @import 'typography';

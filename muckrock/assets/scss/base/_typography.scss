@@ -1,37 +1,11 @@
-    ///////////////////////////////
-   //                           //
-  //    T Y P O G R A P H Y    //
- //                           //
-///////////////////////////////
-
-// Headings
-
-h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
-    font-weight: $bold;
-    line-height: $lh;
-    @include vr;
-}
-h1, .h1 { font-size: $size-6; }
-h2, .h2 { font-size: $size-5; }
-h3, .h3 { font-size: $size-4; }
-h4, .h4 { font-size: $size-3; }
-h5, .h5 { font-size: $size-2; }
-h6, .h6 { font-size: $size-1; }
-
-// Body
-
-article, aside, blockquote, body, br, caption, col, colgroup, div, dl, embed, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, hr, img, map, nav, object, ol, output, p, pre, section, summary, table, tbody, textarea, tfoot, th, thead, tr, ul, video {
-    @include vr;
-}
-
-.nomargin {
-    margin: 0;
-    margin-bottom: 0;
-}
-
-.mono {
-    font-family: $monospace;
-}
+/*
+** _typography.scss
+**
+** MuckRock uses a single typeface, Source Sans Pro, in the vast majority of its layout.
+** The one exception is the use of the monospaced Source Code Pro when a monospaced font is required.
+** In addition to setting standard values and scales for the typography, this file also defines
+** a number of utility classes for modifying base classes.
+*/
 
 body {
     font-size: 16px;
@@ -40,6 +14,26 @@ body {
     line-height: $lh;
     @include font-feature-settings('liga', 'kern');
 }
+
+article, aside, blockquote, body, br, caption, col, colgroup, div, dl, embed, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, hr, img, map, nav, object, ol, output, p, pre, section, summary, table, tbody, textarea, tfoot, th, thead, tr, ul, video {
+    @include vr;
+}
+
+// Headings
+
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+    font-weight: $bold;
+    line-height: $lh;
+}
+
+h1, .h1 { font-size: $size-6; }
+h2, .h2 { font-size: $size-5; }
+h3, .h3 { font-size: $size-4; }
+h4, .h4 { font-size: $size-3; }
+h5, .h5 { font-size: $size-2; }
+h6, .h6 { font-size: $size-1; }
+
+// Paragraph
 
 p:empty {
     display: none;
@@ -141,4 +135,13 @@ ul, ol {
         display: inline-block;
         margin: 0 $vr/2 $vr/2 0;
     }
+}
+
+.nomargin {
+    margin: 0;
+    margin-bottom: 0;
+}
+
+.mono {
+    font-family: $monospace;
 }

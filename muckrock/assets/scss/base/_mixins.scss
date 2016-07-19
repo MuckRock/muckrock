@@ -1,3 +1,11 @@
+/*
+** _mixins.scss
+**
+** Mixins provide shortcuts to different declarations.
+** It is used to quickly apply a uniform value to an element.
+** At some point, mixins should be used to define utility classes to allow for quicker styling.
+*/
+
 @mixin vr {
     margin-top: 0;
     margin-bottom: $vr;
