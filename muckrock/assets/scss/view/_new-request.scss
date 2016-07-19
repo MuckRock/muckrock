@@ -7,16 +7,19 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
     @include outer-container;
     @include row;
     header {
-        @include full;
+        @include omega;
+        @include grid-columns(4, 6, 12);
         h1 {
-            @include two-thirds;
+            @include grid-columns(4, 4, 8);
         }
         summary {
-            @include third;
+            @include omega(3n);
+            @include grid-columns(4, 2, 4);
         }
     }
     .create-request {
-        @include full;
+        @include omega;
+        @include grid-columns(4, 6, 12);
         @include border-radius;
         background-color: $color-grey-7;
     }
@@ -204,7 +207,7 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
             @include quarter;
         }
         p {
-            @include three-quarters;
+            @include grid-columns(4, 6, 9);
             @include media($large-layout) {
                 padding-left: $vertical-rhythm;
             }
@@ -240,7 +243,8 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
     form {
         @include row;
         .visible-fields fieldset {
-            @include full;
+            @include omega;
+            @include grid-columns(4, 6, 12);
             textarea {
                 width: 100%;
             }

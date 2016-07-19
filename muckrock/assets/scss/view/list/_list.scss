@@ -194,7 +194,8 @@
         background: lighten($color-blue, 35%);
     }
     .list-empty {
-        @include full;
+        @include omega;
+        @include grid-columns(4, 6, 12);
         @extend h2;
         margin-top: 2em;
         font-weight: $font-weight-bold;

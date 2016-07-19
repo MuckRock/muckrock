@@ -39,7 +39,10 @@
     }
 
     &.agency {
-        aside dl { @include third; }
+        aside dl {
+            @include omega(3n);
+            @include grid-columns(4, 2, 4);
+        }
     }
 
     &.flatpage {

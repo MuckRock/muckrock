@@ -13,8 +13,8 @@
 }
 
 .pagination-info {
-    @include third;
     @include omega(3n);
+    @include grid-columns(4, 2, 4);
     @include media($medium-layout){
         &:nth-child(2) {
             text-align: center;

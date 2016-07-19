@@ -1,12 +1,13 @@
 .form {
     @include padding;
-    
+
     header, form, .visible-fields, .buttons {
         @include row;
     }
 
     .form-title, .form-info, .visible-fields fieldset {
-        @include half;
+        @include omega(2n);
+        @include grid-columns(4, 3, 6);
     }
 
     input[type="submit"] {
@@ -22,12 +23,16 @@
     &.update,
     &.password-change,
     &.foia-embargo {
-        .visible-fields fieldset { @include full; }
+        .visible-fields fieldset {
+            @include omega;
+            @include grid-columns(4, 6, 12);
+        }
     }
 
     &.admin-fix {
         .visible-fields fieldset {
-            @include full;
+            @include omega;
+            @include grid-columns(4, 6, 12);
             p { margin-bottom: 0; }
         }
         .snail.mail input { width: auto; }
@@ -180,7 +185,8 @@ fieldset {
     border-color: $color-red-dark;
     padding: 0;
     header {
-        @include full;
+        @include omega;
+        @include grid-columns(4, 6, 12);
         padding: $vertical-rhythm;
         color: $color-white;
         background-color: $color-red;
@@ -188,7 +194,10 @@ fieldset {
             color: $color-white;
             text-decoration: underline;
         }
-        .heading, .subheading { @include half; }
+        .heading, .subheading {
+            @include omega(2n);
+            @include grid-columns(4, 3, 6);
+        }
         .heading {
             font-size: $font-size-8;
         }

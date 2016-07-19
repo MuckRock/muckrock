@@ -2,7 +2,8 @@
     @include padding;
     @include row;
     .metadata {
-        @include third;
+        @include omega(3n);
+        @include grid-columns(4, 2, 4);
         dfn {
             margin-bottom: $vertical-rhythm;
             font-weight: $font-weight-bold;
@@ -17,7 +18,7 @@
         }
     }
     .activity {
-        @include two-thirds;
+        @include grid-columns(4, 4, 8);
     }
 }
 

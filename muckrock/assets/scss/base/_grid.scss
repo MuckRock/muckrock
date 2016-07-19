@@ -11,35 +11,6 @@
     &:nth-child(#{$nth}+1) { clear: none }
 }
 
-@mixin full() {
-    // Fills a row
-    @include omega;
-    @include grid-columns(4, 6, 12);
-}
-
-@mixin half() {
-    // Half of a row
-    @include omega(2n);
-    @include grid-columns(4, 3, 6);
-}
-
-@mixin half-flip() {
-    // Reverse order of row halves
-    &:nth-child(even) { clear: left; }
-    &:nth-child(odd) { clear: right; }
-}
-
-@mixin third() {
-    // Third of a row
-    @include omega(3n);
-    @include grid-columns(4, 2, 4);
-}
-
-@mixin two-thirds() {
-    // Two thirds of a row
-    @include grid-columns(4, 4, 8);
-}
-
 @mixin quarter() {
     // Quarter of a row
     @include omega(2n);
@@ -50,9 +21,4 @@
         @include span-columns(3);
         @include omega(4n);
     }
-}
-
-@mixin three-quarters() {
-    // Three quarters of a row
-    @include grid-columns(4, 6, 9);
 }

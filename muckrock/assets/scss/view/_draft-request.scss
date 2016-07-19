@@ -35,7 +35,9 @@
     .buy-requests {
         border-color: $color-green;
         @include row;
-        p { @include three-quarters; }
+        p {
+            @include grid-columns(4, 6, 9);
+        }
         button {
             @include quarter;
             @include media($small-layout) {
@@ -45,7 +47,7 @@
     }
     .bottom { @include row; }
     .embargo {
-        @include three-quarters;
+        @include grid-columns(4, 6, 9);
         .input {
             display: block;
             dfn, input {

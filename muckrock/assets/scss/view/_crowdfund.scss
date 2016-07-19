@@ -9,7 +9,8 @@
 
     form {
         @include row;
-        @include full;
+        @include omega;
+        @include grid-columns(4, 6, 12);
     }
 
     fieldset > p {
@@ -18,7 +19,8 @@
     }
 
     fieldset.name, fieldset.description {
-        @include full;
+        @include omega;
+        @include grid-columns(4, 6, 12);
     }
 
     fieldset.amount {
