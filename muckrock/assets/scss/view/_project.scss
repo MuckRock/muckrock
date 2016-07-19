@@ -25,8 +25,8 @@
     }
     .description textarea {
         min-height: 20em;
-        font-family: $font-monospace;
-        font-size: $font-size-2;
+        font-family: $monospace;
+        font-size: $size-2;
     }
     .description p {
         max-width: 40em;
@@ -36,14 +36,14 @@
 .project {
     .stats {
         .stat {
-            font-size: $font-size-2;
-            line-height: $font-line-height;
+            font-size: $size-2;
+            line-height: $lh;
         }
         .value {
             display: block;
-            font-weight: $font-weight-bold;
-            font-size: $font-size-4;
-            line-height: $font-line-height;
+            font-weight: $bold;
+            font-size: $size-4;
+            line-height: $lh;
         }
     }
     .autocomplete-light-widget, .requests .deck, .articles .deck {
@@ -76,7 +76,7 @@
         border: 1px solid $color-blue;
         background: $color-blue-light;
         color: $color-blue-dark;
-        font-weight: $font-weight-bold;
+        font-weight: $bold;
         ol {
             padding-left: $vr;
         }
@@ -106,14 +106,14 @@
             }
         }
         .title {
-            @include media($medium-layout){
-                font-size: $font-size-9;
-                line-height: $font-line-height;
+            @include media($medium-bp){
+                font-size: $size-9;
+                line-height: $lh;
             }
         }
         summary {
-            font-size: $font-size-4;
-            line-height: $font-line-height;
+            font-size: $size-4;
+            line-height: $lh;
         }
         .contributors header {
             @include display(flex);
@@ -141,7 +141,7 @@
                     path { fill: $color-blue; }
                 }
                 .name {
-                    font-weight: $font-weight-bold;
+                    font-weight: $bold;
                 }
                 .icon {
                     margin-left: $vr/2;
@@ -203,11 +203,11 @@
         }
         h2 {
             max-width: 20em;
-            font-size: $font-size-6;
-            line-height: $font-line-height;
-            @include media($medium-layout) {
-                font-size: $font-size-8;
-                line-height: $font-line-height;
+            font-size: $size-6;
+            line-height: $lh;
+            @include media($medium-bp) {
+                font-size: $size-8;
+                line-height: $lh;
             }
         }
         a {
@@ -216,7 +216,7 @@
     }
     .overview, .details {
         padding: $vr/2;
-        @include media($medium-layout) {
+        @include media($medium-bp) {
             padding: $vr;
         }
     }
@@ -230,7 +230,7 @@
             }
         }
         .more {
-            font-weight: $font-weight-bold;
+            font-weight: $bold;
         }
     }
     .details {

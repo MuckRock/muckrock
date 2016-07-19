@@ -22,12 +22,12 @@ $request-breakpoint: 768px;
     @include display(flex);
     @include flex-direction(column);
     h1 {
-        font-size: $font-size-6;
-        font-weight: $font-weight-bold;
+        font-size: $size-6;
+        font-weight: $bold;
     }
     .synopsis {
-        font-size: $font-size-4;
-        line-height: $font-line-height*1.2;
+        font-size: $size-4;
+        line-height: $lh*1.2;
         a {
             border-bottom: 1px dotted $color-blue;
             &:hover {
@@ -37,7 +37,7 @@ $request-breakpoint: 768px;
         }
     }
     .numbers, .dates {
-        font-size: $font-size-2;
+        font-size: $size-2;
         tr {
             background-color: $color-white;
         }
@@ -78,7 +78,7 @@ $request-breakpoint: 768px;
         @include align-items(center);
         @include border;
         padding: $vr/4 $vr/2;
-        font-weight: $font-weight-bold;
+        font-weight: $bold;
         p, footer {
             margin-bottom: 0;
         }
@@ -122,7 +122,7 @@ $request-breakpoint: 768px;
 
     .communications-actions {
         margin-bottom: 0;
-        @include media($medium-layout) {
+        @include media($medium-bp) {
             text-align: right;
         }
     }
@@ -184,7 +184,7 @@ $request-breakpoint: 768px;
             margin-left: $vr/2;
         }
         .currency {
-            font-size: $font-size-4;
+            font-size: $size-4;
         }
         .field {
             margin-bottom: 0;
@@ -290,8 +290,8 @@ $request-breakpoint: 768px;
             margin-bottom: 0;
             border: none;
             border-radius: 0;
-            font-family: $font-monospace;
-            font-size: $font-size-2;
+            font-family: $monospace;
+            font-size: $size-2;
         }
         h4 {
             margin-bottom: 0;
@@ -304,7 +304,7 @@ $request-breakpoint: 768px;
             padding: $vr/2;
             border-bottom: 1px solid $color-grey;
             p {
-                font-size: $font-size-2;
+                font-size: $size-2;
             }
         }
         footer {
@@ -337,7 +337,7 @@ $request-breakpoint: 768px;
                 color: $color-white;
             }
             .note-author {
-                font-weight: $font-weight-bold;
+                font-weight: $bold;
             }
         }
         .note-body {
@@ -396,7 +396,7 @@ $request-breakpoint: 768px;
             }
             label {
                 display: block;
-                font-size: $font-size-2;
+                font-size: $size-2;
             }
         }
         select[name="access"] {
@@ -408,7 +408,7 @@ $request-breakpoint: 768px;
             width: 100%;
         }
 
-        @include media($medium-layout) {
+        @include media($medium-bp) {
             .user.search.input {
                 @include flex(0 1 70%);
             }
@@ -429,7 +429,7 @@ $request-breakpoint: 768px;
             text-align: right;
             &.name {
                 text-align: left;
-                font-weight: $font-weight-bold;
+                font-weight: $bold;
             }
             &.access.nostretch {
                 width:1%;
@@ -438,7 +438,7 @@ $request-breakpoint: 768px;
             &.modify {
                 width: 5em;
             }
-            @include media($medium-layout) {
+            @include media($medium-bp) {
                 &.nostretch {
                     width:1%;
                     white-space:nowrap;
@@ -451,21 +451,21 @@ $request-breakpoint: 768px;
             background: $color-grey;
             color: $color-white;
             text-align: center;
-            font-size: $font-size-2;
+            font-size: $size-2;
             &.editor {
                 background: $color-green;
             }
             &.reader {
                 background: $color-blue;
             }
-            @include media($medium-layout) {
-                font-size: $font-size-3;
+            @include media($medium-bp) {
+                font-size: $size-3;
             }
         }
         button {
             padding: $vr/6 $vr/2;
             width: 5em;
-            @include media($medium-layout) {
+            @include media($medium-bp) {
                 margin: 0 0 4px;
             }
         }

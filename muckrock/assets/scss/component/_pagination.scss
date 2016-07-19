@@ -3,10 +3,10 @@
 }
 .pagination-form, .pagination-links {
     @include span-columns(6);
-    @include media($medium-layout) {
+    @include media($medium-bp) {
         @include span-columns(6);
     }
-    @include media($large-layout) {
+    @include media($large-bp) {
         @include span-columns(12);
     }
     margin-bottom: 0;
@@ -15,7 +15,7 @@
 .pagination-info {
     @include omega(3n);
     @include grid-columns(4, 2, 4);
-    @include media($medium-layout){
+    @include media($medium-bp){
         &:nth-child(2) {
             text-align: center;
         }
@@ -35,7 +35,7 @@
         display: table-row;
         border: 1px solid $color-grey;
         text-align: center;
-        @include media($medium-layout) {
+        @include media($medium-bp) {
             display: table-cell;
         }
     }

@@ -15,7 +15,7 @@
 
     background-color: $color-white;
 
-    @include media($medium-layout) {
+    @include media($medium-bp) {
         top: 25%;
         left: 50%;
         @include transform(translateX(-50%));

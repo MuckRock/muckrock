@@ -20,8 +20,8 @@
     .article__overview__title
     {
         margin-bottom: $vr/4;
-        font-size: $font-size-4;
-        font-weight: $font-weight-bold;
+        font-size: $size-4;
+        font-weight: $bold;
         line-height: 1.2em;
         a
         {
@@ -33,14 +33,14 @@
         @include display(flex);
         @include justify-content(space-between);
         margin-bottom: $vr/4;
-        font-size: $font-size-2;
+        font-size: $size-2;
         line-height: 1em;
         color: $color-grey-3;
     }
     .article__overview__project, .article__overview__author,
     {
         color: $color-grey-3;
-        font-weight: $font-weight-bold;
+        font-weight: $bold;
     }
 }
 
@@ -52,7 +52,7 @@
     }
     .article__overview__title
     {
-        font-size: $font-size-3;
+        font-size: $size-3;
         line-height: 1.2em;
     }
 }
@@ -65,7 +65,7 @@
     }
     .article__overview__title
     {
-        font-size: $font-size-5;
+        font-size: $size-5;
         line-height: 1.2em;
     }
 }

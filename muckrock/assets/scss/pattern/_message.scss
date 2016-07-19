@@ -33,7 +33,7 @@
         flex: 1 1 auto;
         padding: $vr/2;
     }
-    @include media($medium-layout) {
+    @include media($medium-bp) {
         @include flex-direction(row);
         .symbol {
             text-align: center;

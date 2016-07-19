@@ -1,7 +1,7 @@
 $crowdfund-color: $color-green;
 $crowdfund-color-dark: $color-green-dark;
 $crowdfund-color-light: $color-green-light;
-$crowdfund-border: $base-border-width solid $crowdfund-color;
+$crowdfund-border: $border-width solid $crowdfund-color;
 
 .crowdfund__widget {
     @include display(flex);
@@ -12,7 +12,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
     background: #FFF;
 
     & > *:last-child {
-        @include border-bottom-radius($base-border-radius);
+        @include border-bottom-radius($border-radius);
     }
 
     .crowdfund__widget__header, .crowdfund__widget__footer {
@@ -26,16 +26,16 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
     .crowdfund__widget__header {
         border-bottom: $crowdfund-border;
         h1 {
-            font-size: $font-size-3;
-            line-height: $font-line-height;
-            font-weight: $font-weight-bold;
+            font-size: $size-3;
+            line-height: $lh;
+            font-weight: $bold;
             margin: 0;
             a {
                 color: $crowdfund-color-dark;
             }
         }
         .action {
-            font-size: $font-size-2;
+            font-size: $size-2;
             margin-right: $vr/2;
         }
     }
@@ -57,7 +57,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
                 margin-bottom: 0;
                 text-align: left;
                 padding: $vr/2;
-                @include media($medium-layout) {
+                @include media($medium-bp) {
                     margin-bottom: 0;
                 }
             }
@@ -77,8 +77,8 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
     .stats {
         margin-bottom: 0;
         text-align: center;
-        font-size: $font-size-2;
-        line-height: $font-line-height;
+        font-size: $size-2;
+        line-height: $lh;
     }
 
     .contributor-list {
@@ -116,7 +116,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
             @include flex(3 1 auto);
             @include appearance(none);
             border: none;
-            line-height: $font-line-height;
+            line-height: $lh;
             border-radius: 0;
             color: $color-green-dark;
         }
@@ -139,7 +139,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
     .contributor {
         &.summary {
             margin-bottom: 0;
-            font-weight: $font-weight-bold;
+            font-weight: $bold;
             cursor: default;
         }
         &.dropdown {
@@ -148,13 +148,13 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
             margin: $vr;
             bottom: 0;
             z-index: 1;
-            border-radius: $base-border-radius;
+            border-radius: $border-radius;
             padding: $vr/4 $vr/2;
             background-color: $color-black;
             color: $color-white;
             opacity: 0;
             list-style-type: none;
-            font-size: $font-size-2;
+            font-size: $size-2;
             @include transition(opacity .25s .25s linear);
         }
         &.summary:hover + .dropdown, &.dropdown:hover {
@@ -183,7 +183,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
     {
         width: 32em;
         color: $color-white;
-        font-weight: $font-weight-bold;
+        font-weight: $bold;
         .icon {
             @include svg-color($color-white);
         }
@@ -205,10 +205,10 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
         textarea
         {
             color: $color-black;
-            font-family: $font-monospace;
-            font-size: $font-size-2;
+            font-family: $monospace;
+            font-size: $size-2;
             text-align: center;
-            font-weight: $font-weight-normal;
+            font-weight: $normal;
             resize: none;
             white-space: nowrap;
         }

@@ -8,7 +8,7 @@
 
     h2
     {
-        font-size: $font-size-5;
+        font-size: $size-5;
     }
 
     .about
@@ -20,7 +20,7 @@
     {
         @include flex(1 1 200px);
         max-width: 20em;
-        font-size: $font-size-2;
+        font-size: $size-2;
     }
 
     &.foia
@@ -36,8 +36,8 @@
         {
             margin: 0 auto $vr;
             max-width: 11em;
-            font-size: $font-size-5;
-            font-weight: $font-weight-bold;
+            font-size: $size-5;
+            font-weight: $bold;
         }
         .button {
             margin-bottom: $vr;
@@ -46,7 +46,7 @@
             a
             {
                 color: $color-white;
-                font-weight: $font-weight-bold;
+                font-weight: $bold;
                 border-bottom: 1px dotted;
             }
             a:hover
@@ -79,7 +79,7 @@
             text-align: center;
             .value
             {
-                font-size: $font-size-5;
+                font-size: $size-5;
                 margin-bottom: $vr/2;
             }
             .key
@@ -94,7 +94,7 @@
             .button
             {
                 display: inline-block;
-                @include media($small-layout)
+                @include media($small-bp)
                 {
                     display: block;
                     max-width: 20em;
@@ -118,8 +118,8 @@
         {
             max-width: 21em;
             margin-right: $vr;
-            font-size: $font-size-6;
-            font-weight: $font-weight-bold;
+            font-size: $size-6;
+            font-weight: $bold;
         }
     }
 }
@@ -129,8 +129,8 @@
     @include padding;
     h2
     {
-        font-size: $font-size-4;
-        font-weight: $font-weight-bold;
+        font-size: $size-4;
+        font-weight: $bold;
     }
     main
     {
@@ -206,11 +206,11 @@
     {
         margin-bottom: 0;
     }
-    @include media($medium-layout)
+    @include media($medium-bp)
     {
         margin: 0 -1 * $vr;
     }
-    @include media($large-layout)
+    @include media($large-bp)
     {
         margin: 0 -24px 0 -1 * $vr;
     }

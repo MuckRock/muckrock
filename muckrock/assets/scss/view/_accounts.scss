@@ -3,7 +3,7 @@
         @include display(flex);
         @include justify-content(space-between);
         @include flex-direction(column);
-        @include media($large-layout) {
+        @include media($large-bp) {
             @include flex-direction(row);
         }
         p {
@@ -44,7 +44,7 @@
             background: $color-blue-light;
             color: $color-blue-dark;
             h2 {
-                font-weight: $font-weight-bold;
+                font-weight: $bold;
             }
         }
         .superlative {
@@ -70,7 +70,7 @@
         border: 2px solid;
         @include border-radius;
         padding: $vr/4;
-        font-weight: $font-weight-bold;
+        font-weight: $bold;
         text-align: center;
     }
 }
@@ -89,7 +89,7 @@
                 margin-bottom: 0;
                 padding-left: 0;
             }
-            @include media($medium-layout) {
+            @include media($medium-bp) {
                 .field {
                     @include flex(1 0 50%);
                     &:nth-child(odd) {
@@ -109,7 +109,7 @@
             @include justify-content(space-between);
             @include align-items(center);
             @include flex-direction(column-reverse);
-            @include media($medium-layout) {
+            @include media($medium-bp) {
                 @include flex-direction(row);
             }
         }

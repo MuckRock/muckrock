@@ -2,7 +2,7 @@ input.autocomplete.xhr-pending { background-image: none; }
 
 .autocomplete-light-widget {
     width: 100%;
-    font-family: $font-family;
+    font-family: $sans-serif;
     color: $color-black;
     input {
         width: 100%;
@@ -22,7 +22,7 @@ input.autocomplete.xhr-pending { background-image: none; }
             padding: $vr/4 $vr/2;
         }
         .username {
-            font-size: $font-size-2;
+            font-size: $size-2;
         }
     }
     .foia.choice {
@@ -33,7 +33,7 @@ input.autocomplete.xhr-pending { background-image: none; }
             margin-bottom: 0;
         }
         .meta {
-            font-size: $font-size-2;
+            font-size: $size-2;
         }
     }
     .agency.choice {
@@ -44,7 +44,7 @@ input.autocomplete.xhr-pending { background-image: none; }
             margin-bottom: 0;
         }
         .jurisdiction {
-            font-size: $font-size-2;
+            font-size: $size-2;
         }
     }
     .article.choice {
@@ -56,7 +56,7 @@ input.autocomplete.xhr-pending { background-image: none; }
             vertical-align: middle;
         }
         .title {
-            font-weight: $font-weight-bold;
+            font-weight: $bold;
         }
         .info {
             display: inline-block;
@@ -64,7 +64,7 @@ input.autocomplete.xhr-pending { background-image: none; }
             padding: $vr/4 $vr/2;
         }
         .meta {
-            font-size: $font-size-2;
+            font-size: $size-2;
         }
     }
     .deck {

@@ -59,8 +59,8 @@ The sidebar should use a dark UI.
         background: $color-black;
         color: $color-white;
         h1 {
-            font-size: $font-size-5;
-            font-weight: $font-weight-bold;
+            font-size: $size-5;
+            font-weight: $bold;
         }
         a {
             color: $color-blue-light;
@@ -69,8 +69,8 @@ The sidebar should use a dark UI.
             }
         }
         .forgot {
-            font-size: $font-size-2;
-            line-height: $font-line-height;
+            font-size: $size-2;
+            line-height: $lh;
         }
         .required {
             visibility: hidden;
@@ -105,7 +105,7 @@ The sidebar should use a dark UI.
         margin-bottom: 0;
         border-bottom: 1px solid $color-grey-3;
         background-color: $color-black;
-        font-weight: $font-weight-bold;
+        font-weight: $bold;
         .username, .sign-up, .log-in {
             @include flex(1);
             @include overflow-ellipsis;
@@ -135,7 +135,7 @@ The sidebar should use a dark UI.
             background: $color-blue;
         }
         .dropdown-list-item {
-            font-size: $font-size-2;
+            font-size: $size-2;
         }
     }
 
@@ -144,7 +144,7 @@ The sidebar should use a dark UI.
             display: block;
             padding: $vr/2 $vr;
             color: $color-white;
-            font-weight: $font-weight-bold;
+            font-weight: $bold;
             text-decoration: none;
             &:hover {
                 background: $color-blue;
@@ -172,7 +172,7 @@ The sidebar should use a dark UI.
                     background: $color-blue;
                 }
                 &.more {
-                    font-weight: $font-weight-bold;
+                    font-weight: $bold;
                 }
 
             }
@@ -181,7 +181,7 @@ The sidebar should use a dark UI.
                     background: $color-red;
                 }
             }
-            @include media($large-layout){
+            @include media($large-bp){
                 li {
                     border: none;
                     &:last-child {
@@ -190,7 +190,7 @@ The sidebar should use a dark UI.
                 }
                 a {
                     padding: 0 $vr;
-                    font-size: $font-size-2;
+                    font-size: $size-2;
                 }
             }
         }
@@ -214,7 +214,7 @@ The sidebar should use a dark UI.
             z-index: 2;
             bottom: 0;
             padding: $vr/2;
-            font-weight: $font-weight-bold;
+            font-weight: $bold;
             color: $color-white;
             text-shadow: $color-black 1px 1px 1px;
         }
@@ -233,7 +233,7 @@ The sidebar should use a dark UI.
         display: block;
         padding: $vr/2 $vr;
         color: $color-white;
-        font-weight: $font-weight-bold;
+        font-weight: $bold;
         text-decoration: none;
         &:hover {
             background: $color-blue;
@@ -241,7 +241,7 @@ The sidebar should use a dark UI.
     }
 
 
-    @include media($large-layout) {
+    @include media($large-bp) {
         &, .article, .payment.failure {
             box-shadow: inset 4px 0px 8px rgba(0, 0, 0, 0.25);
         }

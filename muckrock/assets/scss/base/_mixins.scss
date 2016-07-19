@@ -1,17 +1,25 @@
+@mixin vr {
+    margin-top: 0;
+    margin-bottom: $vr;
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
 @mixin font-sizing($size-multiplier, $line-multiplier:3) {
     $size: 1em * $size-multiplier;
     $line: $vr;
     font-size: $size;
-    line-height: $font-line-height;
+    line-height: $lh;
     margin: 0 0 $vr 0;
 }
 
 @mixin border-radius() {
-    border-radius: $base-border-radius;
+    border-radius: $border-radius;
 }
 
 @mixin border() {
-    border: $base-border-width solid $color-grey;
+    border: $border-width solid $color-grey;
 }
 
 @mixin box-shadow() {
@@ -20,7 +28,7 @@
 
 @mixin padding($padding: $vr) {
     padding: $padding/2;
-    @include media($medium-layout) {
+    @include media($medium-bp) {
         padding: $padding;
     }
 }

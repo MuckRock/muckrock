@@ -1,20 +1,31 @@
-/* Borders */
-$base-border-width:     1px;
-$base-border-radius:    4px;
+// TYPOGRAPHY
 
-/* Breakpoints */
-$large-breakpoint:      1100px;
-$medium-breakpoint:     500px;
-$large-layout:          new-breakpoint(min-width $large-breakpoint 12);
-$medium-layout:         new-breakpoint(min-width $medium-breakpoint 6);
-$small-layout:          new-breakpoint(max-width $medium-breakpoint 4);
+$sans-serif:    'Source Sans Pro', 'Helvetica Neue', sans-serif;
+$monospace:     'Source Code Pro', 'Courier Prime', monospace;
 
-/* Menus */
-$menu-breakpoint:       1100px;
-$mobile-menu-width:     220px;
-$tablet-menu-width:     280px;
-$desktop-menu-width:    280px;
-$menu-animation:        all 0.25s ease;
+$bold:          500;
+$normal:        400;
 
-/* Animation */
-$base-duration:         0.25s;
+$size-1:        0.6875rem;
+$size-2:        0.8125rem;
+$size-3:        1.0000rem;
+$size-4:        1.1875rem;
+$size-5:        1.4375rem;
+$size-6:        1.6875rem;
+$size-7:        2.0625rem;
+$size-8:        2.5000rem;
+$size-9:        3.0000rem;
+
+$lh:            1.4375em;
+$vr:            1.1875rem;
+
+// BORDERS
+
+$border-width:  1px;
+$border-radius: 4px;
+
+// BREAKPOINTS
+
+$large-bp:      new-breakpoint(min-width 1100px 12);
+$medium-bp:     new-breakpoint(min-width 500px 6);
+$small-bp:      new-breakpoint(max-width 500px 4);

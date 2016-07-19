@@ -34,7 +34,7 @@
             }
             & li {
                 display: table-row;
-                border: $base-border-width solid $color-grey;
+                border: $border-width solid $color-grey;
                 padding-left: $vr;
                 text-align: left;
                 vertical-align: middle;
@@ -47,15 +47,15 @@
                 a {
                     display: table-cell;
                     padding: $vr/2;
-                    border-left: $base-border-width solid $color-grey;
+                    border-left: $border-width solid $color-grey;
                     &:hover {
                         text-decoration: none;
                         background: $color-grey-7;
                     }
                 }
                 &.current-tab {
-                    border-left: $base-border-width solid $color-blue;
-                    border-right: $base-border-width solid $color-blue;
+                    border-left: $border-width solid $color-blue;
+                    border-right: $border-width solid $color-blue;
                     background: $color-blue;
                     .counter {
                         background: $color-white;
@@ -103,7 +103,7 @@
         #list-filters-toggle-label, #list-filters-toggle {
             display: none;
         }
-        @include media($small-layout) {
+        @include media($small-bp) {
             .list-filters-fields, .list-filters-buttons {
                 display: none;
             }
@@ -117,7 +117,7 @@
                 float: right;
                 display: inline-block;
                 padding: .1em $vr/2;
-                border-radius: $base-border-radius;
+                border-radius: $border-radius;
                 background: $color-black;
                 color: $color-white;
                 font-size: .9em;
@@ -148,17 +148,17 @@
     .list-table {
         @include row;
         display: table;
-        border: $base-border-width solid $color-grey;
+        border: $border-width solid $color-grey;
         border-bottom: none;
-        border-radius: $base-border-radius;
+        border-radius: $border-radius;
         border-collapse: collapse;
         thead {
             display: table-header-group;
         }
         tbody {
             display: table-row-group;
-            @include media($medium-layout) {
-                border-bottom: $base-border-width solid $color-grey;
+            @include media($medium-bp) {
+                border-bottom: $border-width solid $color-grey;
             }
         }
         tr {
@@ -198,13 +198,13 @@
         @include grid-columns(4, 6, 12);
         @extend h2;
         margin-top: 2em;
-        font-weight: $font-weight-bold;
+        font-weight: $bold;
         color: $color-grey;
         text-align: center;
     }
 
     // Makes tables responsive
-    @include media($small-layout) {
+    @include media($small-bp) {
         .list-table {
             display: block;
             border: none;
@@ -215,7 +215,7 @@
                 width: 100%;
                 margin: $vr/2 0;
                 padding: $vr/2 0;
-                border: $base-border-width solid $color-grey;
+                border: $border-width solid $color-grey;
             }
             th, td {
                 display: block;

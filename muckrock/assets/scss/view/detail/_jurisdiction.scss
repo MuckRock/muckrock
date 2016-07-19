@@ -23,8 +23,8 @@ $right-column: 4 1 32em;
         }
         figcaption {
             color: $color-grey;
-            font-size: $font-size-1;
-            line-height: $font-line-height;
+            font-size: $size-1;
+            line-height: $lh;
         }
     }
     .jurisdiction__info {
@@ -33,12 +33,12 @@ $right-column: 4 1 32em;
         margin-top: 0;
     }
     .jurisdiction__name {
-        font-size: $font-size-4;
-        font-weight: $font-weight-bold;
+        font-size: $size-4;
+        font-weight: $bold;
     }
     .jurisdiction__title {
-        font-size: $font-size-8;
-        line-height: $font-line-height * .7;
+        font-size: $size-8;
+        line-height: $lh * .7;
     }
     @media (max-width: 35.625em) {
         @include justify-content(center);
@@ -47,7 +47,7 @@ $right-column: 4 1 32em;
             @include flex(0 1 100%);
         }
         .jurisdiction__name {
-            font-size: $font-size-4;
+            font-size: $size-4;
         }
         .jurisdiction__image img {
             max-width: 8em;
@@ -96,7 +96,7 @@ $right-column: 4 1 32em;
     }
     .analysis {
         h2 {
-            font-size: $font-size-6;
+            font-size: $size-6;
         }
         h3 {
             border-bottom: 1px solid $color-grey;
@@ -108,11 +108,11 @@ $right-column: 4 1 32em;
         margin-bottom: 0;
     }
     .law__summary {
-        font-size: $font-size-2;
+        font-size: $size-2;
     }
     @media (max-width: 35.625em) {
         .law__name {
-            font-size: $font-size-4;
+            font-size: $size-4;
         }
     }
 }
@@ -124,7 +124,7 @@ $right-column: 4 1 32em;
     padding: $vr/2;
     background: $color-white-pure;
     p {
-        font-weight: $font-weight-bold;
+        font-weight: $bold;
         margin-bottom: 0;
     }
     ol {
@@ -136,8 +136,8 @@ $right-column: 4 1 32em;
     }
 }
 .jurisdiction__point__symbol {
-    font-size: $font-size-5;
-    font-weight: $font-weight-bold;
+    font-size: $size-5;
+    font-weight: $bold;
     &.red {
         color: $color-red;
     }

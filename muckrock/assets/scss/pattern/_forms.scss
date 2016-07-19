@@ -58,9 +58,9 @@
 }
 
 .help-text {
-    font-size: $font-size-2;
+    font-size: $size-2;
     color: $color-grey;
-    line-height: $font-line-height;
+    line-height: $lh;
 }
 
 .hidden-stripe-handler {
@@ -82,7 +82,7 @@ fieldset {
         @extend dfn;
     }
 
-    @include media($large-layout) {
+    @include media($large-bp) {
         label.failure {
             float: left;
         }
@@ -110,7 +110,7 @@ fieldset {
     }
     .required, .errorlist {
         color: $color-red;
-        font-size: $font-size-2;
+        font-size: $size-2;
     }
     .errorlist {
         display: inline-block;
@@ -120,7 +120,7 @@ fieldset {
     }
     label {
         margin-right: $vr/2;
-        font-weight: $font-weight-bold;
+        font-weight: $bold;
     }
     input {
         display: block;
@@ -153,7 +153,7 @@ fieldset {
             margin-right: 0;
         }
         label[for*="clear_id"] {
-            font-weight: $font-weight-normal;
+            font-weight: $normal;
         }
         input[id*="clear_id"] {
             margin-left: $vr;
@@ -166,7 +166,7 @@ fieldset {
     border-color: $color-blue-dark;
     .form-head {
         padding: $vr;
-        @include border-top-radius($base-border-radius);
+        @include border-top-radius($border-radius);
         color: $color-white;
         background-color: $color-blue;
         a {
@@ -199,18 +199,18 @@ fieldset {
             @include grid-columns(4, 3, 6);
         }
         .heading {
-            font-size: $font-size-8;
+            font-size: $size-8;
         }
         .subheading .price {
-            font-size: $font-size-6;
+            font-size: $size-6;
             .amount {
-                font-size: $font-size-5;
+                font-size: $size-5;
             }
             sup {
                 margin-right: 0.1em;
             }
         }
-        @include media($medium-layout) {
+        @include media($medium-bp) {
             .subheading {
                 text-align: right;
             }
@@ -223,7 +223,7 @@ fieldset {
     .interaction {
         .button, button, input[type="submit"] {
             display: block;
-            @include media($medium-layout) {
+            @include media($medium-bp) {
                 display: inline-block;
             }
         }

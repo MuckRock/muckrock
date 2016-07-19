@@ -6,15 +6,15 @@
         @include grid-columns(4, 2, 4);
         dfn {
             margin-bottom: $vr;
-            font-weight: $font-weight-bold;
-            font-size: $font-size-3;
+            font-weight: $bold;
+            font-size: $size-3;
         }
         h1 {
-            font-size: $font-size-6;
-            font-weight: $font-weight-bold;
+            font-size: $size-6;
+            font-weight: $bold;
         }
         h2 {
-            font-size: $font-size-5;
+            font-size: $size-5;
         }
     }
     .activity {
@@ -70,7 +70,7 @@
         max-width: 300px;
     }
     .title {
-        font-weight: $font-weight-bold;
+        font-weight: $bold;
     }
     .links svg {
         margin-right: $vr/2;

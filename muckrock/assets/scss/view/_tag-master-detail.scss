@@ -3,7 +3,7 @@
     @include flex-wrap(wrap);
     .master {
         @include flex(0 0 100%);
-        @include media($medium-layout) {
+        @include media($medium-bp) {
             @include flex(1);
         }
         @include padding;
@@ -13,7 +13,7 @@
         @include order(-1);
         @include padding;
         margin-bottom: $vr;
-        @include media($medium-layout) {
+        @include media($medium-bp) {
             @include flex(3);
             @include order(2);
             margin-bottom: 0;
@@ -61,7 +61,7 @@
         }
     }
     .detail h1 {
-        font-weight: $font-weight-bold;
+        font-weight: $bold;
     }
 }
 
@@ -69,10 +69,10 @@
     @include align-self(center);
     text-align: center;
     .call-to-action {
-        font-size: $font-size-5;
+        font-size: $size-5;
     }
     .tag {
-        font-size: $font-size-3;
+        font-size: $size-3;
     }
     ul {
         list-style-type: none;

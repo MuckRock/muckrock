@@ -1,8 +1,8 @@
 @mixin grid-columns($small, $medium, $large) {
     // Conveniently set all grid column sizes at once.
-    @include media($small-layout) { @include span-columns($small); }
-    @include media($medium-layout) { @include span-columns($medium); }
-    @include media($large-layout) { @include span-columns($large); }
+    @include media($small-bp) { @include span-columns($small); }
+    @include media($medium-bp) { @include span-columns($medium); }
+    @include media($large-bp) { @include span-columns($large); }
 }
 
 @mixin omega-reset($nth) {
@@ -14,9 +14,9 @@
 @mixin quarter() {
     // Quarter of a row
     @include omega(2n);
-    @include media($small-layout) { @include span-columns(2); }
-    @include media($medium-layout) { @include span-columns(3); }
-    @include media($large-layout) {
+    @include media($small-bp) { @include span-columns(2); }
+    @include media($medium-bp) { @include span-columns(3); }
+    @include media($large-bp) {
         @include omega-reset(2n);
         @include span-columns(3);
         @include omega(4n);

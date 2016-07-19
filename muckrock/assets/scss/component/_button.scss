@@ -30,7 +30,7 @@ $shadow-active: 0px;
     display: inline-block;
     margin: $vr/4 0;
     border: 1px solid $color-dark;
-    border-radius: $base-border-radius;
+    border-radius: $border-radius;
     padding: $vr/6 $vr/3;
     box-shadow: 0px $shadow-normal 0px 0px $color-dark;
     text-shadow: 0px -1px $color-dark;
@@ -44,7 +44,7 @@ $shadow-active: 0px;
         }
     }
     // Type
-    font-weight: $font-weight-bold;
+    font-weight: $bold;
     text-align: center;
     text-decoration: none;
     text-shadow: inset 0px 1px $color;

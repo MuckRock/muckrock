@@ -26,7 +26,7 @@
         margin-bottom: 0;
         margin-right: $vr/2;
         @include overflow-ellipsis;
-        font-weight: $font-weight-bold;
+        font-weight: $bold;
     }
     .communication-metadata {
         @include display(flex);
@@ -78,7 +78,7 @@
             margin-bottom: $vr/2;
         }
         label {
-            font-weight: $font-weight-bold;
+            font-weight: $bold;
         }
         input {
             color: $color-black;

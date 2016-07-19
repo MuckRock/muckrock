@@ -7,7 +7,7 @@
         @include flex-wrap(wrap);
         @include align-items(stretch);
         @include justify-content(space-between);
-        @include media($medium-layout) {
+        @include media($medium-bp) {
             .aside .button {
                 float: right;
                 clear: right;

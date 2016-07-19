@@ -50,7 +50,7 @@
     .search-cancel {
         width: auto;
         padding: $vr/2 $vr;
-        font-weight: $font-weight-bold;
+        font-weight: $bold;
         text-align: right;
         cursor: pointer;
         color: $color-blue;
@@ -96,7 +96,7 @@
     padding: $vr/2;
     margin-bottom: 0;
     vertical-align: middle;
-    font-weight: $font-weight-bold;
+    font-weight: $bold;
     text-align: center;
     cursor: pointer;
     @include nav-item-color;
@@ -111,7 +111,7 @@
         display: none;
         margin: 0 $vr/4;
         vertical-align: middle;
-        line-height: $font-line-height;
+        line-height: $lh;
     }
     &.dark {
         background: $color-grey-2;
@@ -128,7 +128,7 @@
             display: inline;
         }
     }
-    @include media($medium-layout) {
+    @include media($medium-bp) {
         padding: $vr/2;
         .icon {
             margin-top: 0;

@@ -4,68 +4,24 @@
  //                           //
 ///////////////////////////////
 
-// Font Families
-
-$font-sans-serif:       'Source Sans Pro', 'Helvetica Neue', sans-serif;
-$font-monospace:        'Source Code Pro', 'Courier Prime', monospace;
-$font-family:           $font-sans-serif;
-
-// Font Weights
-
-$font-weight-bold:      500;
-$font-weight-normal:    400;
-$font-weight:           $font-weight-normal;
-
-// Type Scale
-
-$font-size-1:           0.6875rem;
-$font-size-2:           0.8125rem;
-$font-size-3:           1.0000rem;
-$font-size-4:           1.1875rem;
-$font-size-5:           1.4375rem;
-$font-size-6:           1.6875rem;
-$font-size-7:           2.0625rem;
-$font-size-8:           2.5000rem;
-$font-size-9:           3.0000rem;
-
-$font-size:             $font-size-3;
-
-// Type Vertical Rhythm
-
-$font-line-height:      1.4375em;
-$vr:                    1.1875rem;
-%vr {
-    margin-top: 0;
-    margin-bottom: $vr;
-    &:last-child {
-        margin-bottom: 0;
-    }
-}
-
-// Display Sizes
-
-$font-size-display-1:   $font-size-7;
-$font-size-display-2:   $font-size-8;
-$font-size-display-3:   $font-size-9;
-
 // Headings
 
 h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
-    font-weight: $font-weight-bold;
-    line-height: $font-line-height;
-    @extend %vr;
+    font-weight: $bold;
+    line-height: $lh;
+    @include vr;
 }
-h1, .h1 { font-size: $font-size-6; }
-h2, .h2 { font-size: $font-size-5; }
-h3, .h3 { font-size: $font-size-4; }
-h4, .h4 { font-size: $font-size-3; }
-h5, .h5 { font-size: $font-size-2; }
-h6, .h6 { font-size: $font-size-1; }
+h1, .h1 { font-size: $size-6; }
+h2, .h2 { font-size: $size-5; }
+h3, .h3 { font-size: $size-4; }
+h4, .h4 { font-size: $size-3; }
+h5, .h5 { font-size: $size-2; }
+h6, .h6 { font-size: $size-1; }
 
 // Body
 
 article, aside, blockquote, body, br, caption, col, colgroup, div, dl, embed, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, hr, img, map, nav, object, ol, output, p, pre, section, summary, table, tbody, textarea, tfoot, th, thead, tr, ul, video {
-    @extend %vr;
+    @include vr;
 }
 
 .nomargin {
@@ -74,14 +30,14 @@ article, aside, blockquote, body, br, caption, col, colgroup, div, dl, embed, fi
 }
 
 .mono {
-    font-family: $font-monospace;
+    font-family: $monospace;
 }
 
 body {
     font-size: 16px;
-    font-family: $font-family;
-    font-weight: $font-weight;
-    line-height: $font-line-height;
+    font-family: $sans-serif;
+    font-weight: $normal;
+    line-height: $lh;
     @include font-feature-settings('liga', 'kern');
 }
 
@@ -89,7 +45,7 @@ p:empty {
     display: none;
 }
 
-b, strong, .bold { font-weight: $font-weight-bold; }
+b, strong, .bold { font-weight: $bold; }
 
 a {
     text-decoration: none;
@@ -115,17 +71,17 @@ blockquote {
 small, .small {
     font-size: 0.8125em;
     font-style: normal;
-    line-height: $font-line-height;
+    line-height: $lh;
 }
 
 dfn, dt {
     display: block;
-    font-size: $font-size-1;
+    font-size: $size-1;
     font-style: normal;
-    font-weight: $font-weight-bold;
+    font-weight: $bold;
     text-transform: uppercase;
     letter-spacing: 2px;
-    line-height: $font-line-height;
+    line-height: $lh;
 }
 
 dd {
@@ -143,8 +99,8 @@ pre {
 code {
     padding: .2em .4em;
     @include border-radius;
-    font-family: $font-monospace;
-    font-size: $font-size-2;
+    font-family: $monospace;
+    font-size: $size-2;
     background-color: $color-grey-7;
 }
 
@@ -158,12 +114,12 @@ img, audio, video, embed, iframe {
 }
 
 figcaption {
-    font-size: $font-size-2;
+    font-size: $size-2;
 }
 
 th {
-    font-size: $font-size-2;
-    font-weight: $font-weight-bold;
+    font-size: $size-2;
+    font-weight: $bold;
     text-align: left;
     vertical-align: top;
 }
