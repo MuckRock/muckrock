@@ -19,34 +19,34 @@
             /* Typefaces are loaded inside the base template so that they can be referenced
             by the correct URL. In production, the typefaces should be served from a CDN. */
             @font-face {
+                font-family: 'Source Sans Pro';
+                src: url("{% static 'fonts/SourceSansPro-Regular.ttf' %}");
+                font-weight: 400;
+                font-style: normal;
+            }
+            @font-face {
+                font-family: 'Source Sans Pro';
+                src: url("{% static 'fonts/SourceSansPro-Italic.ttf' %}");
+                font-weight: 400;
+                font-style: italic;
+            }
+            @font-face {
+                font-family: 'Source Sans Pro';
+                src: url("{% static 'fonts/SourceSansPro-Semibold.ttf' %}");
+                font-weight: 500;
+                font-style: normal;
+            }
+            @font-face {
+                font-family: 'Source Sans Pro';
+                src: url("{% static 'fonts/SourceSansPro-SemiboldItalic.ttf' %}");
+                font-weight: 500;
+                font-style: italic;
+            }
+            @font-face {
                 font-family: 'Source Code Pro';
-                src: url("{% static 'fonts/SourceCodePro-Regular.ttf' %}") format('ttf');
+                src: url("{% static 'fonts/SourceCodePro-Regular.ttf' %}");
                 font-weight: normal;
                 font-style: normal;
-            }
-            @font-face {
-                font-family: 'Source Sans Pro';
-                src: url("{% static 'fonts/SourceSansPro-Regular.ttf' %}") format('ttf');
-                font-weight: 400;
-                font-style: normal;
-            }
-            @font-face {
-                font-family: 'Source Sans Pro';
-                src: url("{% static 'fonts/SourceSansPro-Italic.ttf' %}") format('ttf');
-                font-weight: 400;
-                font-style: italic;
-            }
-            @font-face {
-                font-family: 'Source Sans Pro';
-                src: url("{% static 'fonts/SourceSansPro-Semibold.ttf' %}") format('ttf');
-                font-weight: 500;
-                font-style: normal;
-            }
-            @font-face {
-                font-family: 'Source Sans Pro';
-                src: url("{% static 'fonts/SourceSansPro-SemiboldItalic.ttf' %}") format('ttf');
-                font-weight: 500;
-                font-style: italic;
             }
         </style>
         <link rel="stylesheet" type="text/css" href="{% static 'autocomplete_light/style.css' %}" />
