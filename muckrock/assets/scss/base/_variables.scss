@@ -1,6 +1,11 @@
 // TYPOGRAPHY
-
-$sans-serif:    'Source Sans Pro', 'Helvetica Neue', sans-serif;
+/*
+First we try to load our own font. If that doesn't work,
+then we try loading the native system font. If that doesn't work,
+then we fall back to good ol' Helvetica Neue. And if THAT doesn't
+work, then we fall back to the browser's default sans-serif font.
+*/
+$sans-serif:    'Source Sans Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
 $monospace:     'Source Code Pro', 'Courier Prime', monospace;
 
 $bold:          500;
