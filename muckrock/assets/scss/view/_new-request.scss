@@ -99,7 +99,7 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
             text-align: center;
             width: 33%;
             padding: $vr/2;
-            border-right: $border-width solid lighten($color-jurisdiction, 10%);
+            border-right: $border lighten($color-jurisdiction, 10%);
             &.active {
                 &:hover { background-color: $color-jurisdiction-picker; }
                 background-color: $color-jurisdiction-picker;

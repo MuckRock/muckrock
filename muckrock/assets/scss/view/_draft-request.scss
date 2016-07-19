@@ -85,7 +85,7 @@
     }
     .request .body textarea {
         height: 7.5em;
-        border-top: $border-width solid $color-grey;
-        border-bottom: $border-width solid $color-grey;
+        border-top: $border $color-grey;
+        border-bottom: $border $color-grey;
     }
 }

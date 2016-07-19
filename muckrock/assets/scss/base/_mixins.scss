@@ -19,7 +19,7 @@
 }
 
 @mixin border() {
-    border: $border-width solid $color-grey;
+    border: $border $color-grey;
 }
 
 @mixin box-shadow() {

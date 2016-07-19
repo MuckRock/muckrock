@@ -34,7 +34,7 @@
             }
             & li {
                 display: table-row;
-                border: $border-width solid $color-grey;
+                border: $border $color-grey;
                 padding-left: $vr;
                 text-align: left;
                 vertical-align: middle;
@@ -47,15 +47,15 @@
                 a {
                     display: table-cell;
                     padding: $vr/2;
-                    border-left: $border-width solid $color-grey;
+                    border-left: $border $color-grey;
                     &:hover {
                         text-decoration: none;
                         background: $color-grey-7;
                     }
                 }
                 &.current-tab {
-                    border-left: $border-width solid $color-blue;
-                    border-right: $border-width solid $color-blue;
+                    border-left: $border $color-blue;
+                    border-right: $border $color-blue;
                     background: $color-blue;
                     .counter {
                         background: $color-white;
@@ -148,7 +148,7 @@
     .list-table {
         @include row;
         display: table;
-        border: $border-width solid $color-grey;
+        border: $border $color-grey;
         border-bottom: none;
         border-radius: $border-radius;
         border-collapse: collapse;
@@ -158,7 +158,7 @@
         tbody {
             display: table-row-group;
             @include media($medium-bp) {
-                border-bottom: $border-width solid $color-grey;
+                border-bottom: $border $color-grey;
             }
         }
         tr {
@@ -215,7 +215,7 @@
                 width: 100%;
                 margin: $vr/2 0;
                 padding: $vr/2 0;
-                border: $border-width solid $color-grey;
+                border: $border $color-grey;
             }
             th, td {
                 display: block;

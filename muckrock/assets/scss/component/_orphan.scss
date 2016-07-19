@@ -14,7 +14,7 @@
         @include row;
         .orphan-head {
             margin-top: $vr/2;
-            border-top: $border-width solid $color-grey;
+            border-top: $border $color-grey;
             padding-top: $vr/2;
             div {
                 float: left;

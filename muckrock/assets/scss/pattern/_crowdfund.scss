@@ -1,7 +1,7 @@
 $crowdfund-color: $color-green;
 $crowdfund-color-dark: $color-green-dark;
 $crowdfund-color-light: $color-green-light;
-$crowdfund-border: $border-width solid $crowdfund-color;
+$crowdfund-border: $border $crowdfund-color;
 
 .crowdfund__widget {
     @include display(flex);
