@@ -4,10 +4,10 @@
     @include justify-content(space-between);
     @include align-items(center);
     margin-bottom: 0;
-    padding: $vertical-rhythm 0 0;
+    padding: $vr 0 0;
     & > * {
         margin-bottom: 0;
-        padding: 0 $vertical-rhythm $vertical-rhythm;
+        padding: 0 $vr $vr;
         @include flex(1 1 18rem);
     }
     h1 {
@@ -32,7 +32,7 @@
         @include display(flex);
         @include flex-wrap(wrap);
         .project {
-            margin: $vertical-rhythm;
+            margin: $vr;
         }
     }
 }

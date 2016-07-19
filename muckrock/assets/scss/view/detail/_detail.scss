@@ -11,7 +11,7 @@
             .aside .button {
                 float: right;
                 clear: right;
-                margin-bottom: $vertical-rhythm/2;
+                margin-bottom: $vr/2;
             }
             .tag-manager {
                 margin-bottom: 0;
@@ -24,7 +24,7 @@
             @include justify-content(space-between);
             max-width:38rem;
             margin-bottom: 0;
-            padding-right: $vertical-rhythm;
+            padding-right: $vr;
         }
         .aside {
             @include flex(1);

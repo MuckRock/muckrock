@@ -7,7 +7,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
     @include display(flex);
     @include flex-direction(column);
     overflow: visible;
-    margin: 0 auto $vertical-rhythm;
+    margin: 0 auto $vr;
     border: $crowdfund-border;
     background: #FFF;
 
@@ -18,7 +18,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
     .crowdfund__widget__header, .crowdfund__widget__footer {
         @include flex(0 0 auto);
         margin-bottom: 0;
-        padding: $vertical-rhythm/4 $vertical-rhythm/2;
+        padding: $vr/4 $vr/2;
         color: $crowdfund-color-dark;
         background-color: $crowdfund-color-light;
     }
@@ -36,7 +36,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
         }
         .action {
             font-size: $font-size-2;
-            margin-right: $vertical-rhythm/2;
+            margin-right: $vr/2;
         }
     }
 
@@ -56,7 +56,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
                 @include flex(1 1 25);
                 margin-bottom: 0;
                 text-align: left;
-                padding: $vertical-rhythm/2;
+                padding: $vr/2;
                 @include media($medium-layout) {
                     margin-bottom: 0;
                 }
@@ -66,7 +66,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
 
     .description {
         margin-bottom: 0;
-        padding: $vertical-rhythm/2;
+        padding: $vr/2;
     }
 
     .progress, .meter {
@@ -85,7 +85,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
         margin-top: 0;
         li {
             display: inline-block;
-            padding: 0 $vertical-rhythm/2 0 0;
+            padding: 0 $vr/2 0 0;
         }
     }
 }
@@ -96,7 +96,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
         margin-bottom: 0;
     }
     .anonymity input[type="checkbox"] {
-        margin-right: $vertical-rhythm/4;
+        margin-right: $vr/4;
     }
     .anonymity input[type="text"] {
         width: 100%;
@@ -104,13 +104,13 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
         border: 1px solid $color-green;
     }
     .anonymity p {
-        margin-bottom: $vertical-rhythm/4;
+        margin-bottom: $vr/4;
     }
     .crowdfund__donate {
         @include display(flex);
         @include flex-wrap(wrap);
         @include align-items(stretch);
-        margin: $vertical-rhythm/2 0;
+        margin: $vr/2 0;
         border: 1px solid $color-green;
         input {
             @include flex(3 1 auto);
@@ -145,11 +145,11 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
         &.dropdown {
             display: none;
             position: absolute;
-            margin: $vertical-rhythm;
+            margin: $vr;
             bottom: 0;
             z-index: 1;
             border-radius: $base-border-radius;
-            padding: $vertical-rhythm/4 $vertical-rhythm/2;
+            padding: $vr/4 $vr/2;
             background-color: $color-black;
             color: $color-white;
             opacity: 0;
@@ -197,7 +197,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
         }
         p
         {
-            margin-bottom: $vertical-rhythm/2;
+            margin-bottom: $vr/2;
         }
         input {
             color: $color-black;
@@ -263,6 +263,6 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
     }
     .loader, .dialog
     {
-        padding: $vertical-rhythm;
+        padding: $vr;
     }
 }

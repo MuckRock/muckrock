@@ -36,10 +36,10 @@
         background: #fff;
         border-color: $color-blue-dark;
         main, footer {
-            padding: $vertical-rhythm;
+            padding: $vr;
         }
         header {
-            padding: $vertical-rhythm 0;
+            padding: $vr 0;
             text-align: center;
             background: $color-blue-light;
             color: $color-blue-dark;
@@ -59,7 +59,7 @@
         }
         @media all and (min-width: 768px) {
             margin-bottom: 0;
-            margin-right: $vertical-rhythm;
+            margin-right: $vr;
             &:last-child {
                 margin-right: 0;
             }
@@ -69,7 +69,7 @@
         color: $color-green;
         border: 2px solid;
         @include border-radius;
-        padding: $vertical-rhythm/4;
+        padding: $vr/4;
         font-weight: $font-weight-bold;
         text-align: center;
     }
@@ -93,7 +93,7 @@
                 .field {
                     @include flex(1 0 50%);
                     &:nth-child(odd) {
-                        padding-right: $vertical-rhythm;
+                        padding-right: $vr;
                     }
                     &:last-child {
                         padding-right: 0;
@@ -135,7 +135,7 @@
     @media all and (min-width: $breakpoint) {
         @include flex-direction(row);
         .request.main {
-            margin-left: $vertical-rhythm * 2;
+            margin-left: $vr * 2;
         }
     }
     header {
@@ -152,7 +152,7 @@
             border: none;
         }
         td {
-            padding: 0 0 $vertical-rhythm 0;
+            padding: 0 0 $vr 0;
         }
     }
     footer {
@@ -161,7 +161,7 @@
         @include align-items(center);
     }
     .form {
-        padding: $vertical-rhythm;
+        padding: $vr;
         border: 1px solid $color-grey;
         @include border-radius;
         background: $color-white-pure;
@@ -174,7 +174,7 @@
                 @include flex(1);
             }
             .field:first-child {
-                margin-right: $vertical-rhythm;
+                margin-right: $vr;
             }
         }
     }

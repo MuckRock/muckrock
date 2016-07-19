@@ -1,10 +1,10 @@
 .create.project {
     max-width: 40em;
-    margin: 0 auto $vertical-rhythm;
+    margin: 0 auto $vr;
 }
 .publish.project {
     max-width: 40em;
-    margin: 0 auto $vertical-rhythm;
+    margin: 0 auto $vr;
 }
 .project__update {
     .project__update__header {
@@ -50,7 +50,7 @@
         @include display(flex);
         @include flex-direction(column-reverse);
         input {
-            margin-bottom: $vertical-rhythm;
+            margin-bottom: $vr;
         }
     }
 }
@@ -67,7 +67,7 @@
     }
 
     .prompt, .overview, .objects {
-        margin: 0 auto $vertical-rhythm;
+        margin: 0 auto $vr;
     }
 
     .prompt {
@@ -78,7 +78,7 @@
         color: $color-blue-dark;
         font-weight: $font-weight-bold;
         ol {
-            padding-left: $vertical-rhythm;
+            padding-left: $vr;
         }
         a {
             text-decoration: underline;
@@ -96,13 +96,13 @@
         .overview__main {
             @include flex(2 1 20em);
             min-width: 0;
-            margin-bottom: $vertical-rhythm;
+            margin-bottom: $vr;
         }
         .overview__aside {
             @include flex(1 1 10em);
             min-width: 0;
             @media (min-width: 33.25em) {
-                padding: 0 $vertical-rhythm;
+                padding: 0 $vr;
             }
         }
         .title {
@@ -118,17 +118,17 @@
         .contributors header {
             @include display(flex);
             @include justify-content(space-between);
-            margin-bottom: $vertical-rhythm/2;
+            margin-bottom: $vr/2;
         }
         & > .contributor {
             @include display(flex);
-            margin-bottom: $vertical-rhythm/2;
+            margin-bottom: $vr/2;
             .avatar {
                 display: block;
                 @include border-radius;
             }
             .info {
-                padding: $vertical-rhythm/4 $vertical-rhythm/2;
+                padding: $vr/4 $vr/2;
                 p {
                     margin-bottom: 0;
 
@@ -144,7 +144,7 @@
                     font-weight: $font-weight-bold;
                 }
                 .icon {
-                    margin-left: $vertical-rhythm/2;
+                    margin-left: $vr/2;
                 }
             }
         }
@@ -165,7 +165,7 @@
             @include flex(1 1 20em);
         }
         .articles {
-            margin-right: $vertical-rhythm;
+            margin-right: $vr;
         }
     }
 }
@@ -193,7 +193,7 @@
             @include justify-content(flex-end);
             min-height: 100%;
             width: 100%;
-            padding: $vertical-rhythm;
+            padding: $vr;
             background: rgb(52, 61, 71);
             background: rgba(52, 61, 71, .8);
             &:hover {
@@ -215,9 +215,9 @@
         }
     }
     .overview, .details {
-        padding: $vertical-rhythm/2;
+        padding: $vr/2;
         @include media($medium-layout) {
-            padding: $vertical-rhythm;
+            padding: $vr;
         }
     }
     .overview {

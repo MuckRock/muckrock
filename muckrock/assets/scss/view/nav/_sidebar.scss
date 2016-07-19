@@ -55,7 +55,7 @@ The sidebar should use a dark UI.
         z-index: 19;
         margin: 2.6875em 0 0 0;
         border-bottom: 1px solid $color-grey-3;
-        padding: $vertical-rhythm;
+        padding: $vr;
         background: $color-black;
         color: $color-white;
         h1 {
@@ -77,7 +77,7 @@ The sidebar should use a dark UI.
         }
         input {
             width: 100%;
-            margin-bottom: $vertical-rhythm;
+            margin-bottom: $vr;
             color: $color-black;
         }
         .row {
@@ -109,7 +109,7 @@ The sidebar should use a dark UI.
         .username, .sign-up, .log-in {
             @include flex(1);
             @include overflow-ellipsis;
-            padding: $vertical-rhythm/2;
+            padding: $vr/2;
             text-align: center;
             color: $color-white;
             text-decoration: none;
@@ -142,7 +142,7 @@ The sidebar should use a dark UI.
     .requests {
         .actionable {
             display: block;
-            padding: $vertical-rhythm/2 $vertical-rhythm;
+            padding: $vr/2 $vr;
             color: $color-white;
             font-weight: $font-weight-bold;
             text-decoration: none;
@@ -156,7 +156,7 @@ The sidebar should use a dark UI.
             }
         }
         .actionable-request-list {
-            margin-bottom: $vertical-rhythm/2;
+            margin-bottom: $vr/2;
             li {
                 border-top: 1px solid $color-grey-1;
                 &:last-child {
@@ -165,7 +165,7 @@ The sidebar should use a dark UI.
             }
             a {
                 display: block;
-                padding: $vertical-rhythm/2 $vertical-rhythm;
+                padding: $vr/2 $vr;
                 color: $color-white;
                 text-decoration: none;
                 &:hover {
@@ -189,7 +189,7 @@ The sidebar should use a dark UI.
                     }
                 }
                 a {
-                    padding: 0 $vertical-rhythm;
+                    padding: 0 $vr;
                     font-size: $font-size-2;
                 }
             }
@@ -198,7 +198,7 @@ The sidebar should use a dark UI.
     }
 
     dfn {
-        padding: 0 $vertical-rhythm/2;
+        padding: 0 $vr/2;
         color: $color-white;
     }
 
@@ -213,7 +213,7 @@ The sidebar should use a dark UI.
             position: absolute;
             z-index: 2;
             bottom: 0;
-            padding: $vertical-rhythm/2;
+            padding: $vr/2;
             font-weight: $font-weight-bold;
             color: $color-white;
             text-shadow: $color-black 1px 1px 1px;
@@ -231,7 +231,7 @@ The sidebar should use a dark UI.
 
     .your-requests, .your-organization, .your-projects {
         display: block;
-        padding: $vertical-rhythm/2 $vertical-rhythm;
+        padding: $vr/2 $vr;
         color: $color-white;
         font-weight: $font-weight-bold;
         text-decoration: none;

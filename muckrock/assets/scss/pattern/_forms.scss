@@ -39,15 +39,15 @@
     }
 
     &.search {
-        dfn { margin: $vertical-rhythm/2 $vertical-rhythm/4; }
+        dfn { margin: $vr/2 $vr/4; }
         .search-filters {
             margin: 0;
             li {
                 display: inline-block;
-                padding: 0 $vertical-rhythm/4;
+                padding: 0 $vr/4;
             }
             label {
-                padding-left: $vertical-rhythm/6;
+                padding-left: $vr/6;
             }
         }
     }
@@ -93,7 +93,7 @@ fieldset {
 
     input + label {
         float: left;
-        margin-right: $vertical-rhythm;
+        margin-right: $vr;
     }
 
     & > fieldset, & > fieldset + fieldset {
@@ -119,7 +119,7 @@ fieldset {
         list-style: none;
     }
     label {
-        margin-right: $vertical-rhythm/2;
+        margin-right: $vr/2;
         font-weight: $font-weight-bold;
     }
     input {
@@ -128,8 +128,8 @@ fieldset {
     }
     input[type="checkbox"], input[type="radio"] {
         width: auto;
-        margin-top: $vertical-rhythm/4;
-        margin-right: $vertical-rhythm/2;
+        margin-top: $vr/4;
+        margin-right: $vr/2;
         float: left;
     }
     textarea {
@@ -138,12 +138,12 @@ fieldset {
         margin-bottom: 0;
     }
     .help-text {
-        margin-top: $vertical-rhythm/4;
+        margin-top: $vr/4;
     }
     &.image {
         .preview {
             display: block;
-            margin-bottom: $vertical-rhythm/2;
+            margin-bottom: $vr/2;
             max-width: 20em;
         }
         input {
@@ -156,7 +156,7 @@ fieldset {
             font-weight: $font-weight-normal;
         }
         input[id*="clear_id"] {
-            margin-left: $vertical-rhythm;
+            margin-left: $vr;
         }
     }
 }
@@ -165,7 +165,7 @@ fieldset {
     padding: 0;
     border-color: $color-blue-dark;
     .form-head {
-        padding: $vertical-rhythm;
+        padding: $vr;
         @include border-top-radius($base-border-radius);
         color: $color-white;
         background-color: $color-blue;
@@ -177,7 +177,7 @@ fieldset {
             list-style-type: disc;
         }
     }
-    form { margin: $vertical-rhythm; }
+    form { margin: $vr; }
 }
 
 .subscribe.page {
@@ -187,7 +187,7 @@ fieldset {
     header {
         @include omega;
         @include grid-columns(4, 6, 12);
-        padding: $vertical-rhythm;
+        padding: $vr;
         color: $color-white;
         background-color: $color-red;
         a {
@@ -219,7 +219,7 @@ fieldset {
     }
     .interaction, .body {
         @include grid-columns(4, 6, 6);
-        padding: 0 $vertical-rhythm;
+        padding: 0 $vr;
     }
     .interaction {
         .button, button, input[type="submit"] {
@@ -230,7 +230,7 @@ fieldset {
         }
     }
     .body {
-        margin-bottom: $vertical-rhythm;
+        margin-bottom: $vr;
         clear: none !important;
     }
 }

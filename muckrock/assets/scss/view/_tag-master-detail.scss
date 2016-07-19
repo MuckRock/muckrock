@@ -12,7 +12,7 @@
         @include flex(0 0 100%);
         @include order(-1);
         @include padding;
-        margin-bottom: $vertical-rhythm;
+        margin-bottom: $vr;
         @include media($medium-layout) {
             @include flex(3);
             @include order(2);
@@ -25,7 +25,7 @@
     input.search {
         width: 100%;
         display: block;
-        margin-bottom: $vertical-rhythm;
+        margin-bottom: $vr;
         border-radius: 0;
         outline: none;
     }
@@ -50,7 +50,7 @@
             padding: 0;
             a {
                 display: block;
-                padding: $vertical-rhythm/2;
+                padding: $vr/2;
                 background-color: $color-white;
                 &.active, &:hover {
                     text-decoration: none;

@@ -36,10 +36,10 @@ $font-size:             $font-size-3;
 // Type Vertical Rhythm
 
 $font-line-height:      1.4375em;
-$vertical-rhythm:       1.1875rem;
-%vertical-rhythm {
+$vr:                    1.1875rem;
+%vr {
     margin-top: 0;
-    margin-bottom: $vertical-rhythm;
+    margin-bottom: $vr;
     &:last-child {
         margin-bottom: 0;
     }
@@ -56,7 +56,7 @@ $font-size-display-3:   $font-size-9;
 h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
     font-weight: $font-weight-bold;
     line-height: $font-line-height;
-    @extend %vertical-rhythm;
+    @extend %vr;
 }
 h1, .h1 { font-size: $font-size-6; }
 h2, .h2 { font-size: $font-size-5; }
@@ -68,7 +68,7 @@ h6, .h6 { font-size: $font-size-1; }
 // Body
 
 article, aside, blockquote, body, br, caption, col, colgroup, div, dl, embed, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, hr, img, map, nav, object, ol, output, p, pre, section, summary, table, tbody, textarea, tfoot, th, thead, tr, ul, video {
-    @extend %vertical-rhythm;
+    @extend %vr;
 }
 
 .nomargin {
@@ -109,7 +109,7 @@ a.disabled {
 
 blockquote {
     margin-left: 0;
-    padding-left: $vertical-rhythm;
+    padding-left: $vr;
     border-left: 1px solid $color-grey;
     font-style: italic;
     i, em { font-style: normal; }
@@ -134,7 +134,7 @@ dfn, dt {
 dd {
     -webkit-margin-start: 0;
     & + dt {
-        margin-top: $vertical-rhythm;
+        margin-top: $vr;
     }
 }
 
@@ -186,6 +186,6 @@ ul, ol {
     }
     &.inline li {
         display: inline-block;
-        margin: 0 $vertical-rhythm/2 $vertical-rhythm/2 0;
+        margin: 0 $vr/2 $vr/2 0;
     }
 }

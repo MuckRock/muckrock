@@ -6,7 +6,7 @@
         }
         input[type=search] {
             width: 75%;
-            margin-right: $vertical-rhythm;
+            margin-right: $vr;
         }
         input[type=submit] {
             @include flex(auto);
@@ -15,11 +15,11 @@
     }
     .list-filters {
         label {
-            padding-left: $vertical-rhythm/4;
+            padding-left: $vr/4;
         }
         li {
             display: inline-block;
-            padding-right: $vertical-rhythm;
+            padding-right: $vr;
             &:last-child {
                 padding-right: 0;
             }

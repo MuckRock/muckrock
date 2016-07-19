@@ -26,7 +26,7 @@
             @extend h1;
         }
         .list-sections {
-            margin-bottom: $vertical-rhythm/2;
+            margin-bottom: $vr/2;
             & ul {
                 display: table;
                 width: 100%;
@@ -35,7 +35,7 @@
             & li {
                 display: table-row;
                 border: $base-border-width solid $color-grey;
-                padding-left: $vertical-rhythm;
+                padding-left: $vr;
                 text-align: left;
                 vertical-align: middle;
                 line-height: 1em;
@@ -46,7 +46,7 @@
                 }
                 a {
                     display: table-cell;
-                    padding: $vertical-rhythm/2;
+                    padding: $vr/2;
                     border-left: $base-border-width solid $color-grey;
                     &:hover {
                         text-decoration: none;
@@ -73,18 +73,18 @@
         }
         .list-filters {
             background: $color-odd-background;
-            margin-bottom: $vertical-rhythm/2;
+            margin-bottom: $vr/2;
             @include border;
-            padding: $vertical-rhythm/2;
+            padding: $vr/2;
             & select, & input[type=text] {
                 width: 100%;
-                margin-top: $vertical-rhythm/2;
+                margin-top: $vr/2;
                 border-radius: 0;
             }
             .autocomplete-light-widget {
                 display: block;
                 .choice {
-                    margin-top: $vertical-rhythm/2;
+                    margin-top: $vr/2;
                 }
             }
         }
@@ -116,7 +116,7 @@
             #list-filters-toggle-label {
                 float: right;
                 display: inline-block;
-                padding: .1em $vertical-rhythm/2;
+                padding: .1em $vr/2;
                 border-radius: $base-border-radius;
                 background: $color-black;
                 color: $color-white;
@@ -184,7 +184,7 @@
         }
         .arrow {
             font-size: .8em;
-            margin-right: $vertical-rhythm/2;
+            margin-right: $vr/2;
         }
     }
     .list-table-body tr:hover {
@@ -213,8 +213,8 @@
                 position: relative;
                 display: block;
                 width: 100%;
-                margin: $vertical-rhythm/2 0;
-                padding: $vertical-rhythm/2 0;
+                margin: $vr/2 0;
+                padding: $vr/2 0;
                 border: $base-border-width solid $color-grey;
             }
             th, td {
@@ -225,13 +225,13 @@
             }
             thead, tbody {
                 display: block;
-                margin: $vertical-rhythm/2 0;
+                margin: $vr/2 0;
             }
             .list-table-checkbox {
                 width: auto;
                 position: absolute;
-                top: $vertical-rhythm/2;
-                left: $vertical-rhythm/2;
+                top: $vr/2;
+                left: $vr/2;
                 margin-left: 0;
             }
         }

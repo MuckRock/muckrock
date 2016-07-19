@@ -1,7 +1,7 @@
 .pullquote {
     @include display(flex);
     @include align-items(flex-start);
-    margin: 2*$vertical-rhythm 0;
+    margin: 2*$vr 0;
     blockquote {
         margin-bottom: 0;
         border-left: 4px solid $color-black;

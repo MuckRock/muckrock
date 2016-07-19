@@ -23,12 +23,12 @@
             text-align: right;
         }
     }
-    margin-bottom: $vertical-rhythm/2;
+    margin-bottom: $vr/2;
 }
 
 .pagination-links {
     display: table;
-    margin-bottom: $vertical-rhythm;
+    margin-bottom: $vr;
     border-collapse: collapse;
     a, span {
         width: 25%;

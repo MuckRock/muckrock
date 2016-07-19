@@ -25,7 +25,7 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
     }
     fieldset {
         margin: 0;
-        padding: $vertical-rhythm;
+        padding: $vr;
     }
     .title {
         @include border-top-radius($base-border-radius);
@@ -56,7 +56,7 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
             display: block;
             width: 100%;
             height: 10em;
-            padding: $vertical-rhythm;
+            padding: $vr;
             resize: none;
             border: none;
             border-radius: 0;
@@ -98,7 +98,7 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
             display: table-cell;
             text-align: center;
             width: 33%;
-            padding: $vertical-rhythm/2;
+            padding: $vr/2;
             border-right: $base-border-width solid lighten($color-jurisdiction, 10%);
             &.active {
                 &:hover { background-color: $color-jurisdiction-picker; }
@@ -198,7 +198,7 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
     }
 
     footer {
-        padding: $vertical-rhythm;
+        padding: $vr;
         @include border-bottom-radius($base-border-radius);
         @include row;
         border: 2px solid $color-grey-5;
@@ -209,14 +209,14 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
         p {
             @include grid-columns(4, 6, 9);
             @include media($large-layout) {
-                padding-left: $vertical-rhythm;
+                padding-left: $vr;
             }
         }
     }
 
     .failure.panel {
         ul {
-            padding-left: $vertical-rhythm;
+            padding-left: $vr;
             list-style-type: disc;
         }
         ul li ul {
@@ -232,9 +232,9 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
 .foia__single {
     display: inline-block;
     max-width: 20em;
-    margin-right: $vertical-rhythm;
+    margin-right: $vr;
     &:last-child {
-        margin-bottom: $vertical-rhythm;
+        margin-bottom: $vr;
     }
 }
 

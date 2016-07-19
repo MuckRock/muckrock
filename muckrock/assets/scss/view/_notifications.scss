@@ -11,7 +11,7 @@
 }
 
 .notifications__list li {
-    padding: $vertical-rhythm/2;
+    padding: $vr/2;
     background: $color-white-pure;
     border-bottom: 1px solid $color-grey;
     &:last-child {
@@ -24,7 +24,7 @@
 
 .notifications--empty {
     text-align: center;
-    padding: $vertical-rhythm;
+    padding: $vr;
     .icon {
         height: 4em;
         width: 4em;

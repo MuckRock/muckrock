@@ -3,7 +3,7 @@ table {
     border-collapse: collapse;
     background: #fff;
     td, th {
-        padding: $vertical-rhythm/2;
+        padding: $vr/2;
     }
     tbody tr, thead th {
         border: $base-border-width solid $color-grey-6;

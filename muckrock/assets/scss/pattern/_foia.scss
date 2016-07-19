@@ -7,7 +7,7 @@
     text-align: left;
     .title {
         font-weight: $font-weight-bold;
-        margin-bottom: $vertical-rhythm/2;
+        margin-bottom: $vr/2;
     }
     .files {
         font-weight: $font-weight-bold;
@@ -19,14 +19,14 @@
         @include justify-content(space-between);
         @include align-items(center);
         margin-bottom: 0;
-        padding: $vertical-rhythm/2;
+        padding: $vr/2;
         p {
             @include flex(1);
             margin-bottom: 0;
         }
     }
     .foia__single__main {
-        padding: $vertical-rhythm/2;
+        padding: $vr/2;
     }
     .foia__single__footer {
         @include display(flex);

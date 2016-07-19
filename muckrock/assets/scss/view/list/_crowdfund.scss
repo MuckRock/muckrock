@@ -5,12 +5,12 @@
         @include display(flex);
         @include flex-direction(column);
         @include justify-content(space-between);
-        margin-bottom: $vertical-rhythm;
+        margin-bottom: $vr;
         @include border;
         @include border-radius;
         .left, .right {
             margin-bottom: 0;
-            padding: $vertical-rhythm;
+            padding: $vr;
         }
         .left {
             @include flex(1);

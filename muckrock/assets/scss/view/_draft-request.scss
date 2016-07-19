@@ -24,7 +24,7 @@
             border: none;
             border-top: 1px solid $color-grey;
             border-radius: 0;
-            padding: $vertical-rhythm/2;
+            padding: $vr/2;
             font-family: $font-monospace;
             font-size: $font-size-2;
         }
@@ -55,7 +55,7 @@
                 width: auto;
             }
             input {
-                margin: $vertical-rhythm/4 $vertical-rhythm/6 $vertical-rhythm/6 0;
+                margin: $vr/4 $vr/6 $vr/6 0;
             }
         }
         small {

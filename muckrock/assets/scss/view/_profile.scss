@@ -5,7 +5,7 @@
         @include omega(3n);
         @include grid-columns(4, 2, 4);
         dfn {
-            margin-bottom: $vertical-rhythm;
+            margin-bottom: $vr;
             font-weight: $font-weight-bold;
             font-size: $font-size-3;
         }
@@ -27,7 +27,7 @@
 }
 
 .profile .image {
-    margin: 0 0 $vertical-rhythm;
+    margin: 0 0 $vr;
     .header-image {
         margin-bottom: 0;
     }
@@ -42,7 +42,7 @@
         @include border;
         header, footer, textarea {
             margin: 0;
-            padding: $vertical-rhythm/2;
+            padding: $vr/2;
         }
         textarea {
             display: block;
@@ -73,13 +73,13 @@
         font-weight: $font-weight-bold;
     }
     .links svg {
-        margin-right: $vertical-rhythm/2;
+        margin-right: $vr/2;
     }
     .project-group {
         @include display(flex);
         @include flex-wrap(wrap);
         .project-item {
-            margin-right: $vertical-rhythm;
+            margin-right: $vr;
         }
     }
 }
