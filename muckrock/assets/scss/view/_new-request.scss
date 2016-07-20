@@ -4,22 +4,7 @@ $color-jurisdiction-picker: darken($color-jurisdiction, 10%);
 $color-agency: darken($color-jurisdiction-picker, 10%);
 
 .new-request {
-    @include outer-container;
-    @include row;
-    header {
-        @include omega;
-        @include grid-columns(4, 6, 12);
-        h1 {
-            @include grid-columns(4, 4, 8);
-        }
-        summary {
-            @include omega(3n);
-            @include grid-columns(4, 2, 4);
-        }
-    }
     .create-request {
-        @include omega;
-        @include grid-columns(4, 6, 12);
         @include border-radius;
         background-color: $color-grey-7;
     }
@@ -200,18 +185,8 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
     footer {
         padding: $vr;
         @include border-bottom-radius($border-radius);
-        @include row;
         border: 2px solid $color-grey-5;
         border-top: none;
-        button {
-            @include quarter;
-        }
-        p {
-            @include grid-columns(4, 6, 9);
-            @include media($large-bp) {
-                padding-left: $vr;
-            }
-        }
     }
 
     .failure.panel {
@@ -239,17 +214,6 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
 }
 
 .multirequest-create {
-    @include outer-container;
-    form {
-        @include row;
-        .visible-fields fieldset {
-            @include omega;
-            @include grid-columns(4, 6, 12);
-            textarea {
-                width: 100%;
-            }
-        }
-    }
     .autocomplete-light-widget {
         width: 100%;
         input {

@@ -34,41 +34,9 @@
     }
     .buy-requests {
         border-color: $color-green;
-        @include row;
-        p {
-            @include grid-columns(4, 6, 9);
-        }
-        button {
-            @include quarter;
-            @include media($small-bp) {
-                @include span-columns(4);
-            }
-        }
     }
-    .bottom { @include row; }
-    .embargo {
-        @include grid-columns(4, 6, 9);
-        .input {
-            display: block;
-            dfn, input {
-                display: inline-block;
-                width: auto;
-            }
-            input {
-                margin: $vr/4 $vr/6 $vr/6 0;
-            }
-        }
-        small {
-            display: block;
-            max-width: 30em;
-        }
-    }
-    .buttons {
-        @include quarter;
-        input {
-            display: block;
-            width: 100%;
-        }
+    .button-group {
+        width: 100%;
     }
 }
 

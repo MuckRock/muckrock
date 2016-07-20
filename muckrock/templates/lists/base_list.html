@@ -9,10 +9,10 @@ This is the parent style for a collection of objects: a collection of blog posts
 
 {% block content %}
 
-    <section class="{% block list-type %}object{% endblock %} list">
+    <section class="{% block list-type %}object{% endblock %} list grid__row">
     {% block list %}
 
-        <nav class="list-navigation">
+        <nav class="list-navigation grid__column quarter">
         {% block list-navigation %}
             <header class="list-head">
             {% block list-head %}
@@ -49,7 +49,7 @@ This is the parent style for a collection of objects: a collection of blog posts
             {% endif %}
         {% endblock list-navigation %}
         </nav>
-        <div class="list-content">
+        <div class="list-content grid__column three-quarters">
         {% block list-content %}
             <section class="list-actions">
                 {% block list-actions %}

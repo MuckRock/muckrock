@@ -20,17 +20,17 @@
         {{ form.title }}
     </section>
 
-    <section class="sent communication">
-        <header class="communication-header">
+    <section class="blue communication textbox">
+        <header class="textbox__header communication-header">
             <p class="from">From: {{foia.user.get_full_name}}</p>
-            <div class="actionable">
+            <div class="actionables">
                 <time datetime="{% now 'c' %}" class="date">{% now 'm/d/Y' %}</time>
             </div>
         </header>
-        <section class="communication-metadata">
+        <section class="textbox__section communication-metadata">
             <p class="small subject">Subject: {{ foia.title }}</p>
         </section>
-        <section class="communication-body">
+        <section class="textbox__section communication-body">
             {{ form.request }}
         </section>
     </section>
@@ -44,17 +44,10 @@
 
     <div class="bottom">
         {% if foia.user.profile.can_embargo %}
-        <section class="embargo">
-            <div class="input">
-                {{ form.embargo }}
-                <label for="id_embargo">Embargo</dfn>
-            </div>
-            <small>{{ form.embargo.help_text }}</small>
-        </section>
+        {% include 'lib/pattern/field.html' with field=form.embargo %}
         {% endif %}
 
-        <section class="buttons">
-
+        <section class="button-group">
             <input type="submit"
                 name="submit"
                 value="Save"
@@ -65,7 +58,6 @@
                class="primary button"
                {% if not remaining %}disabled{% endif %}
             />
-
             <input type="submit"
                    name="submit"
                    value="Delete"

@@ -34,17 +34,6 @@
         }
     }
 
-    .body {
-        @include row;
-    }
-
-    &.agency {
-        aside dl {
-            @include omega(3n);
-            @include grid-columns(4, 2, 4);
-        }
-    }
-
     &.flatpage {
         max-width: 45em;
         margin: 0 auto;

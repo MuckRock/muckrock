@@ -1,23 +1,5 @@
 $request-breakpoint: 768px;
 
-.request.detail {
-    @include display(flex);
-    @include flex-wrap(wrap);
-    @include align-items(stretch);
-    .request.properties {
-        @include flex(1 1 13em);
-    }
-    .request.main {
-        @include flex(3 1 32em);
-        min-width: 0;
-    }
-    @media all and (min-width: $request-breakpoint) {
-        .request.properties {
-            padding-right: $vr;
-        }
-    }
-}
-
 .request.properties {
     @include display(flex);
     @include flex-direction(column);

@@ -19,9 +19,7 @@
 
 .list {
     @include padding;
-    @include row;
     .list-navigation {
-        @include grid-columns(4, 2, 3);
         .list-head .list-title {
             @extend h1;
         }
@@ -131,7 +129,6 @@
 
     }
     .list-content {
-        @include grid-columns(4, 4, 9);
         font-size: .9em;
     }
     .list-actions {
@@ -143,6 +140,9 @@
         @include justify-content(space-between);
         & > * {
             margin-bottom: 0;
+        }
+        &:empty {
+            display: none;
         }
     }
     .list-table {
@@ -194,13 +194,13 @@
         background: lighten($color-blue, 35%);
     }
     .list-empty {
-        @include omega;
-        @include grid-columns(4, 6, 12);
         @extend h2;
-        margin-top: 2em;
-        font-weight: $bold;
+        height: 100%;
+        @include display(flex);
+        @include justify-content(center);
+        @include align-items(center);
         color: $color-grey;
-        text-align: center;
+        padding: $vr;
     }
 
     // Makes tables responsive
@@ -240,4 +240,3 @@
 
 @import 'crowdfund';
 @import 'search';
-@import 'news';

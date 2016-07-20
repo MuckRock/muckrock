@@ -1,31 +1,63 @@
 /*
 ** _grid.scss
 **
-** The grid is pretty janky and obsolete and needs to be refactored.
-** It is based on mixins obtained from the Bourbon Neat framework.
+** 4 column grid when large
+** 2 column grid when medium
+** 1 column grid when small
 */
 
-@mixin grid-columns($small, $medium, $large) {
-    // Conveniently set all grid column sizes at once.
-    @include media($small-bp) { @include span-columns($small); }
-    @include media($medium-bp) { @include span-columns($medium); }
-    @include media($large-bp) { @include span-columns($large); }
+.grid__row {
+    @include display(flex);
+    @include flex-wrap(wrap);
+    @include align-items(stretch);
+    // max-width: 75em;
 }
 
-@mixin omega-reset($nth) {
-    // Reset the omega math mid-row
-    &:nth-child(#{$nth}) { margin-right: flex-gutter(); }
-    &:nth-child(#{$nth}+1) { clear: none }
-}
-
-@mixin quarter() {
-    // Quarter of a row
-    @include omega(2n);
-    @include media($small-bp) { @include span-columns(2); }
-    @include media($medium-bp) { @include span-columns(3); }
-    @include media($large-bp) {
-        @include omega-reset(2n);
-        @include span-columns(3);
-        @include omega(4n);
+.grid__column {
+    @include flex(1 1 auto);
+    min-width: 0;
+    padding-left: $vr;
+    &:first-child {
+        padding-left: 0;
+    }
+    &.quarter, &.one-quarter {
+        @include flex-basis(25%);
+    }
+    &.half, &.two-quarters {
+        @include flex-basis(50%);
+    }
+    &.three-quarters {
+        @include flex-basis(75%);
+    }
+    &.third, &.one-third {
+        @include flex-basis(33%);
+    }
+    &.two-thirds {
+        @include flex-basis(66%);
+    }
+    &.full, &.four-quarters, &.three-thirds {
+        @include flex-basis(100%);
+        padding-left: 0;
+    }
+    @media (max-width: 48em) {
+        &.quarter, &.one-quarter {
+            @include flex-basis(50%);
+        }
+        &.half, &.two-quarters, &.three-quarters {
+            @include flex-basis(100%);
+            padding-left: 0;
+        }
+    }
+    @media (max-width: 38em) {
+        &.third, &.one-third, &.two-thirds {
+            @include flex-basis(100%);
+            padding-left: 0;
+        }
+    }
+    @media (max-width: 28em) {
+        &.quarter, &.one-quarter {
+            @include flex-basis(100%);
+            padding-left: 0;
+        }
     }
 }

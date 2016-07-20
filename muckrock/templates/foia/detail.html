@@ -29,8 +29,8 @@
 {% endblock twitter_card %}
 
 {% block content %}
-<article class="request detail" id="foia-{{ foia.id }}">
-    <section class="request properties">
+<article class="request detail grid__row" id="foia-{{ foia.id }}">
+    <section class="request properties grid__column one-quarter">
         <header>
             <section class="identity">
                 <h1>{{ foia.title }}</h1>
@@ -103,7 +103,7 @@
             {% tag_manager foia %}
         </section>
     </section>
-    <main class="request main">
+    <main class="request main grid__column three-quarters">
 
         {% if foia.has_crowdfund %}
             {% crowdfund foia.crowdfund.pk %}

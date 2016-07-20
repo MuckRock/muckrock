@@ -1,9 +1,6 @@
 .profile {
     @include padding;
-    @include row;
     .metadata {
-        @include omega(3n);
-        @include grid-columns(4, 2, 4);
         dfn {
             margin-bottom: $vr;
             font-weight: $bold;
@@ -16,9 +13,6 @@
         h2 {
             font-size: $size-5;
         }
-    }
-    .activity {
-        @include grid-columns(4, 4, 8);
     }
 }
 
@@ -82,8 +76,4 @@
             margin-right: $vr;
         }
     }
-}
-
-.georgia.profile {
-    font-family: "Georgia";
 }
