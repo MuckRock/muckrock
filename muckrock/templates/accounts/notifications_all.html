@@ -23,7 +23,7 @@
     </header>
     {% if notifications|length > 0 %}
     {% if page_obj.paginator.num_pages > 1 %}
-    {% include 'lib/pagination.html' %}
+    {% include 'lib/component/pagination.html' %}
     {% endif %}
     <ul class="nostyle notifications__list">
     {% for notification in notifications %}
@@ -31,7 +31,7 @@
     {% endfor %}
     </ul>
     {% if page_obj.paginator.count > 10 %}
-    {% include 'lib/pagination.html' %}
+    {% include 'lib/component/pagination.html' %}
     {% endif %}
     {% else %}
     {% block notifications-empty %}

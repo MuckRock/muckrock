@@ -56,7 +56,7 @@ This is the parent style for a collection of objects: a collection of blog posts
                 {% endblock list-actions %}
             </section>
             {% if object_list %}
-            {% include 'lib/pagination.html' %}
+            {% include 'lib/component/pagination.html' %}
             <table class="list-table">
             {% block list-table %}
                 <thead class="list-table-head" data-active-sort="{{active_sort}}" data-active-order="{{active_order}}">
@@ -79,7 +79,7 @@ This is the parent style for a collection of objects: a collection of blog posts
                 </tbody>
             {% endblock list-table %}
             </table>
-            {% include 'lib/pagination.html' %}
+            {% include 'lib/component/pagination.html' %}
             {% else %}
             <p class="list-empty">No Results</p>
             {% endif %}

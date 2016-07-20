@@ -1,33 +1,22 @@
-.pagination {
-    @include row;
-}
-.pagination-form, .pagination-links {
-    @include span-columns(6);
-    @include media($medium-bp) {
-        @include span-columns(6);
-    }
-    @include media($large-bp) {
-        @include span-columns(12);
-    }
+.pagination__control, .pagination__links {
     margin-bottom: 0;
 }
 
-.pagination-info {
-    @include omega(3n);
-    @include grid-columns(4, 2, 4);
-    @include media($medium-bp){
-        &:nth-child(2) {
-            text-align: center;
-        }
-        &:nth-child(3) {
-            text-align: right;
-        }
-    }
-    margin-bottom: $vr/2;
+.pagination__control {
+    @include display(flex);
+    @include flex-wrap(wrap);
+    @include justify-content(space-between);
 }
 
-.pagination-links {
+.pagination__control__item {
+    @include flex(1 1 10em);
+    margin-bottom: $vr/2;
+    text-align: center;
+}
+
+.pagination__links {
     display: table;
+    width: 100%;
     margin-bottom: $vr;
     border-collapse: collapse;
     a, span {

@@ -2,9 +2,9 @@
 
 {% if page_obj %}
 <nav class="pagination">
-    <form method="get" class="pagination-form">
-        <p class="pagination-info">Showing {{page_obj.start_index}} to {{page_obj.end_index}} of {{page_obj.paginator.count}}</p>
-        <p class="pagination-info">
+    <form method="get" class="pagination__control">
+        <p class="pagination__control__item">Showing {{page_obj.start_index}} to {{page_obj.end_index}} of {{page_obj.paginator.count}}</p>
+        <p class="pagination__control__item">
             Page
             <select name="page" onchange="this.form.submit()">
             {% for page_num in page_obj.paginator.page_range %}
@@ -13,7 +13,7 @@
             </select>
             of {{ page_obj.paginator.num_pages }}
         </p>
-        <p class="pagination-info">
+        <p class="pagination__control__item">
             <select name="per_page" onchange="this.form.submit()">
                 {% if per_page and per_page != 25 and per_page != 50 and per_page != 100 %}
                 <option value="{{per_page}}" selected>{{per_page}}</option>
@@ -25,13 +25,13 @@
             items per page
         </p>
         {% for key, value in request.GET.iteritems %}
-            {% if value and key != 'page' and key != 'per_page' %}
-            <input type="hidden" name="{{key}}" value="{{value}}">
-            {% endif %}
+        {% if value and key != 'page' and key != 'per_page' %}
+        <input type="hidden" name="{{key}}" value="{{value}}">
+        {% endif %}
         {% endfor %}
         <noscript><button class="button" type="submit">Update</button></noscript>
     </form>
-    <div class="pagination-links">
+    <div class="pagination__links">
     {% if page_obj.has_previous %}
         <a href="{% page_link request 1 %}">First Page</a>
         <a href="{% page_link request page_obj.previous_page_number %}">Previous Page</a>
