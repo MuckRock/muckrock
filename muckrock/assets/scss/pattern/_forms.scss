@@ -1,41 +1,21 @@
 .form {
     @include padding;
-
-    header, form, .visible-fields, .buttons {
-        @include row;
-    }
-
-    .form-title, .form-info, .visible-fields fieldset {
-        @include omega(2n);
-        @include grid-columns(4, 3, 6);
-    }
-
-    input[type="submit"] {
-        @include quarter;
-    }
-
     .visible-fields fieldset input {
         width: 100%;
     }
 
-    &.question,
-    &.reply,
-    &.update,
-    &.password-change,
-    &.foia-embargo {
-        .visible-fields fieldset {
-            @include omega;
-            @include grid-columns(4, 6, 12);
-        }
-    }
-
     &.admin-fix {
-        .visible-fields fieldset {
-            @include omega;
-            @include grid-columns(4, 6, 12);
+        .visible-fields {
             p { margin-bottom: 0; }
         }
         .snail.mail input { width: auto; }
+        .formset-forms .visible-fields {
+            margin-bottom: 0;
+        }
+        .formset-container {
+            display: block;
+            margin-bottom: $vr;
+        }
     }
 
     &.search {
@@ -53,55 +33,8 @@
     }
 }
 
-.hidden-fields {
-    display: none;
-}
-
-.help-text {
-    font-size: $size-2;
-    color: $color-grey;
-    line-height: $lh;
-}
-
-.hidden-stripe-handler {
-    display: none;
-}
-
-textarea, #{$all-text-inputs} {
-    @include input;
-}
-
-textarea {
-    width: 100%;
-    resize: vertical;
-}
-
-fieldset {
-
-    label, .errorlist {
-        @extend dfn;
-    }
-
-    @include media($large-bp) {
-        label.failure {
-            float: left;
-        }
-        .errorlist {
-            float: right;
-        }
-    }
-
-    input + label {
-        float: left;
-        margin-right: $vr;
-    }
-
-    & > fieldset, & > fieldset + fieldset {
-        margin: 0;
-    }
-}
-
 .field {
+    overflow: hidden;
     header {
         margin-bottom: 0;
     }
@@ -161,75 +94,46 @@ fieldset {
     }
 }
 
-.register.form {
-    padding: 0;
-    border-color: $color-blue-dark;
-    .form-head {
-        padding: $vr;
-        @include border-top-radius($border-radius);
-        color: $color-white;
-        background-color: $color-blue;
-        a {
-            color: $color-white;
-            text-decoration: underline;
-        }
-        ul {
-            list-style-type: disc;
-        }
-    }
-    form { margin: $vr; }
+.hidden-fields {
+    display: none;
 }
 
-.subscribe.page {
-    @include panel;
-    border-color: $color-red-dark;
-    padding: 0;
-    header {
-        @include omega;
-        @include grid-columns(4, 6, 12);
-        padding: $vr;
-        color: $color-white;
-        background-color: $color-red;
-        a {
-            color: $color-white;
-            text-decoration: underline;
+.help-text {
+    font-size: $size-2;
+    line-height: $lh;
+    color: $color-grey;
+}
+
+textarea, #{$all-text-inputs} {
+    @include input;
+}
+
+textarea {
+    width: 100%;
+    resize: vertical;
+}
+
+fieldset {
+
+    label, .errorlist {
+        @extend dfn;
+    }
+
+    @include media($large-bp) {
+        label.failure {
+            float: left;
         }
-        .heading, .subheading {
-            @include omega(2n);
-            @include grid-columns(4, 3, 6);
-        }
-        .heading {
-            font-size: $size-8;
-        }
-        .subheading .price {
-            font-size: $size-6;
-            .amount {
-                font-size: $size-5;
-            }
-            sup {
-                margin-right: 0.1em;
-            }
-        }
-        @include media($medium-bp) {
-            .subheading {
-                text-align: right;
-            }
+        .errorlist {
+            float: right;
         }
     }
-    .interaction, .body {
-        @include grid-columns(4, 6, 6);
-        padding: 0 $vr;
+
+    input + label {
+        float: left;
+        margin-right: $vr;
     }
-    .interaction {
-        .button, button, input[type="submit"] {
-            display: block;
-            @include media($medium-bp) {
-                display: inline-block;
-            }
-        }
-    }
-    .body {
-        margin-bottom: $vr;
-        clear: none !important;
+
+    & > fieldset, & > fieldset + fieldset {
+        margin: 0;
     }
 }

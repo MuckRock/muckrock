@@ -1,4 +1,5 @@
 .account.plans {
+    @include padding;
     & > header {
         @include display(flex);
         @include justify-content(space-between);
@@ -75,45 +76,42 @@
     }
 }
 
-.account.signup {
-    form {
-        margin-bottom: 0;
-        .visible-fields {
-            @include display(flex);
-            @include flex-wrap(wrap);
+.account.signup.form {
+    margin-bottom: 0;
+    .visible-fields {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        .field {
+            @include flex(1 0 100%);
+        }
+        .errorlist {
+            list-style: none;
+            margin-bottom: 0;
+            padding-left: 0;
+        }
+        @include media($medium-bp) {
             .field {
-                @include flex(1 0 100%);
-            }
-            .errorlist {
-                list-style: none;
-                margin-bottom: 0;
-                padding-left: 0;
-            }
-            @include media($medium-bp) {
-                .field {
-                    @include flex(1 0 50%);
-                    &:nth-child(odd) {
-                        padding-right: $vr;
-                    }
-                    &:last-child {
-                        padding-right: 0;
-                    }
+                @include flex(1 0 50%);
+                &:nth-child(odd) {
+                    padding-right: $vr;
+                }
+                &:last-child {
+                    padding-right: 0;
                 }
             }
-            input {
-                width: 100%;
-            }
         }
-        footer {
-            @include display(flex);
-            @include justify-content(space-between);
-            @include align-items(center);
-            @include flex-direction(column-reverse);
-            @include media($medium-bp) {
-                @include flex-direction(row);
-            }
+        input {
+            width: 100%;
         }
-
+    }
+    footer {
+        @include display(flex);
+        @include justify-content(space-between);
+        @include align-items(center);
+        @include flex-direction(column-reverse);
+        @include media($medium-bp) {
+            @include flex-direction(row);
+        }
     }
     .cancel {
         cursor: pointer;

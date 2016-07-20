@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<article class="account signup">
+<article class="account signup form">
     <header>
         <h1>Sign up for a Basic account</h1>
     </header>
-    <form method="post" class="signup__form--basic">
+    <form method="post" class="signup--basic">
         {% csrf_token %}
         {% include 'lib/pattern/form.html' %}
         <footer>
