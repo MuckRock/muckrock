@@ -8,12 +8,13 @@ from django.core.urlresolvers import reverse
 from django.db.models import Count, Sum, Q
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
+from django.views.generic import DetailView
 
 from rest_framework import viewsets
 
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.forms import FlagForm, JurisdictionFilterForm
-from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.jurisdiction.models import Jurisdiction, Exemption
 from muckrock.jurisdiction.serializers import JurisdictionSerializer
 from muckrock.task.models import FlaggedTask
 from muckrock.views import MRFilterableListView
@@ -160,3 +161,9 @@ class JurisdictionViewSet(viewsets.ModelViewSet):
     queryset = Jurisdiction.objects.select_related('parent__parent').order_by()
     serializer_class = JurisdictionSerializer
     filter_fields = ('name', 'abbrev', 'level', 'parent')
+
+
+class ExemptionDetailView(DetailView):
+    """Detail view for an individual exemption"""
+    model = Exemption
+    template_name = 'exemption/detail.html'

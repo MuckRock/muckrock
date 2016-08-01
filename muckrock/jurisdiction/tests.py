@@ -102,23 +102,6 @@ class TestJurisdictionUnit(TestCase):
         eq_(self.state.get_state(), self.state.name)
         eq_(self.local.get_state(), self.state.name)
 
-    def test_exemptions(self):
-        """
-        Jurisdictions should report the exemptions on their requests.
-        State jurisdictions should include exemptions on their local jurisdictions.
-        """
-        foia1 = FOIARequestFactory(jurisdiction=self.local)
-        foia2 = FOIARequestFactory(jurisdiction=self.state)
-        for tag in [u'exemption 42', u'exemption x']:
-            foia1.tags.add(tag)
-        foia2.tags.add(u'exemption x')
-        eq_(list(self.state.exemptions()),
-                [{'tags__name': u'exemption 42', 'count': 1},
-                 {'tags__name': u'exemption x', 'count': 2}])
-        eq_(list(self.local.exemptions()),
-                [{'tags__name': u'exemption 42', 'count': 1},
-                 {'tags__name': u'exemption x', 'count': 1}])
-
     def test_average_response_time(self):
         """
         Jurisdictions should report their average response time.
@@ -209,3 +192,26 @@ class TestLawModel(TestCase):
             'The absolute url of the law should match the url of its jurisdicition.')
 
 
+class TestExemptionModel(TestCase):
+    """
+    The Exemption model should contain information about a single kind of exemption.
+    For example, the Public Employment Applications for Washtington state.
+    """
+    def setUp(self):
+        self.exemption = factories.ExemptionFactory()
+
+    def test_unicode(self):
+        """The text representation should be the name of the exemption and its jurisdiction."""
+        eq_(unicode(self.exemption),
+            u'%s exemption of %s' % (self.exemption.name, self.exemption.jurisdiction),
+            'Should include the name of the exemption and the name of the jurisdiction.')
+
+    def test_absolute_url(self):
+        """The absolute url of the exemption should be a standalone exemption detail page."""
+        kwargs = self.exemption.jurisdiction.get_slugs()
+        kwargs['slug'] = self.exemption.slug
+        kwargs['idx'] = self.exemption.pk
+        expected_url = reverse('exemption-detail', kwargs=kwargs)
+        actual_url = self.exemption.get_absolute_url()
+        eq_(actual_url, expected_url, ('The exemption should return the exemption-detail url.\n'
+             'Actual url: %s\nExpected url: %s') % (actual_url, expected_url))

@@ -14,7 +14,7 @@ from reversion.admin import VersionAdmin
 import logging
 import sys
 
-from muckrock.jurisdiction.models import Jurisdiction, Law
+from muckrock.jurisdiction.models import Jurisdiction, Law, Exemption
 from muckrock.jurisdiction.forms import CSVImportForm
 
 logger = logging.getLogger(__name__)
@@ -27,6 +27,10 @@ class LawInline(admin.StackedInline):
     model = Law
     extra = 0
 
+class ExemptionInline(admin.StackedInline):
+    """Exemption admin options"""
+    model = Exemption
+    extra = 0
 
 class JurisdictionAdmin(VersionAdmin):
     """Jurisdiction admin options"""
@@ -35,7 +39,7 @@ class JurisdictionAdmin(VersionAdmin):
     list_display = ('name', 'parent', 'level')
     list_filter = ['level']
     search_fields = ['name']
-    inlines = [LawInline]
+    inlines = [LawInline, ExemptionInline]
     filter_horizontal = ('holidays', )
     fieldsets = (
         (None, {
