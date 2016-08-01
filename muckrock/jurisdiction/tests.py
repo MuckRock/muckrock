@@ -188,3 +188,24 @@ class TestJurisdictionUnit(TestCase):
         state_foia.files.add(FOIAFileFactory(pages=page_count))
         eq_(self.local.total_pages(), page_count)
         eq_(self.state.total_pages(), 2*page_count)
+
+
+class TestLawModel(TestCase):
+    """
+    The Law model contains information about a jurisdiction's law concerning public records.
+    It should contain outside references to information on the law.
+    """
+    def setUp(self):
+        self.law = factories.LawFactory()
+
+    def test_unicode(self):
+        """The text representation of the law should be the name of the law."""
+        eq_(unicode(self.law), self.law.name,
+            'The text representation of the law should match the name of the law.')
+
+    def test_absolute_url(self):
+        """The absolute url of the law should be the url of its jurisdiction."""
+        eq_(self.law.get_absolute_url(), self.law.jurisdiction.get_absolute_url(),
+            'The absolute url of the law should match the url of its jurisdicition.')
+
+
