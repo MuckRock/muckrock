@@ -7,11 +7,11 @@
         @include flex-wrap(wrap);
         @include align-items(stretch);
         @include justify-content(space-between);
-        @include media($medium-layout) {
+        @include media($medium-bp) {
             .aside .button {
                 float: right;
                 clear: right;
-                margin-bottom: $vertical-rhythm/2;
+                margin-bottom: $vr/2;
             }
             .tag-manager {
                 margin-bottom: 0;
@@ -24,7 +24,7 @@
             @include justify-content(space-between);
             max-width:38rem;
             margin-bottom: 0;
-            padding-right: $vertical-rhythm;
+            padding-right: $vr;
         }
         .aside {
             @include flex(1);
@@ -32,14 +32,6 @@
             @include flex-direction(column);
             @include justify-content(flex-end);
         }
-    }
-
-    .body {
-        @include row;
-    }
-
-    &.agency {
-        aside dl { @include third; }
     }
 
     &.flatpage {

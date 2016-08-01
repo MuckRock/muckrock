@@ -4,9 +4,9 @@
     padding: 0;
     border: none;
     border-radius: 0;
-    border-bottom: 2*$base-border-width dotted $color-grey-4;
+    border-bottom: 2*$border-width dotted $color-grey-4;
     @include font-sizing(2);
-    @include media($small-layout) { @include font-sizing(1.5); }
+    @include media($small-bp) { @include font-sizing(1.5); }
 }
 
 .foia-draft {
@@ -24,9 +24,9 @@
             border: none;
             border-top: 1px solid $color-grey;
             border-radius: 0;
-            padding: $vertical-rhythm/2;
-            font-family: $font-monospace;
-            font-size: $font-size-2;
+            padding: $vr/2;
+            font-family: $monospace;
+            font-size: $size-2;
         }
     }
     #id_title {
@@ -34,39 +34,9 @@
     }
     .buy-requests {
         border-color: $color-green;
-        @include row;
-        p { @include three-quarters; }
-        button {
-            @include quarter;
-            @include media($small-layout) {
-                @include span-columns(4);
-            }
-        }
     }
-    .bottom { @include row; }
-    .embargo {
-        @include three-quarters;
-        .input {
-            display: block;
-            dfn, input {
-                display: inline-block;
-                width: auto;
-            }
-            input {
-                margin: $vertical-rhythm/4 $vertical-rhythm/6 $vertical-rhythm/6 0;
-            }
-        }
-        small {
-            display: block;
-            max-width: 30em;
-        }
-    }
-    .buttons {
-        @include quarter;
-        input {
-            display: block;
-            width: 100%;
-        }
+    .button-group {
+        width: 100%;
     }
 }
 
@@ -74,8 +44,8 @@
     @include padding;
     .communication-body textarea {
         border-radius: 0;
-        font-family: $font-monospace;
-        font-size: $font-size-2;
+        font-family: $monospace;
+        font-size: $size-2;
     }
     .title {
         label { display: none; }
@@ -83,7 +53,7 @@
     }
     .request .body textarea {
         height: 7.5em;
-        border-top: $base-border-width solid $color-grey;
-        border-bottom: $base-border-width solid $color-grey;
+        border-top: $border $color-grey;
+        border-bottom: $border $color-grey;
     }
 }

@@ -9,10 +9,10 @@ This is the parent style for a collection of objects: a collection of blog posts
 
 {% block content %}
 
-    <section class="{% block list-type %}object{% endblock %} list">
+    <section class="{% block list-type %}object{% endblock %} list grid__row">
     {% block list %}
 
-        <nav class="list-navigation">
+        <nav class="list-navigation grid__column quarter">
         {% block list-navigation %}
             <header class="list-head">
             {% block list-head %}
@@ -49,14 +49,14 @@ This is the parent style for a collection of objects: a collection of blog posts
             {% endif %}
         {% endblock list-navigation %}
         </nav>
-        <div class="list-content">
+        <div class="list-content grid__column three-quarters">
         {% block list-content %}
             <section class="list-actions">
                 {% block list-actions %}
                 {% endblock list-actions %}
             </section>
             {% if object_list %}
-            {% include 'lib/pagination.html' %}
+            {% include 'lib/component/pagination.html' %}
             <table class="list-table">
             {% block list-table %}
                 <thead class="list-table-head" data-active-sort="{{active_sort}}" data-active-order="{{active_order}}">
@@ -79,7 +79,7 @@ This is the parent style for a collection of objects: a collection of blog posts
                 </tbody>
             {% endblock list-table %}
             </table>
-            {% include 'lib/pagination.html' %}
+            {% include 'lib/component/pagination.html' %}
             {% else %}
             <p class="list-empty">No Results</p>
             {% endif %}

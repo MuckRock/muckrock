@@ -42,15 +42,15 @@
     input[type="search"] {
         max-width: 100%;
         width: 100%;
-        padding: 0 $vertical-rhythm;
+        padding: 0 $vr;
         border: none;
         border-radius: 0;
         outline: none;
     }
     .search-cancel {
         width: auto;
-        padding: $vertical-rhythm/2 $vertical-rhythm;
-        font-weight: $font-weight-bold;
+        padding: $vr/2 $vr;
+        font-weight: $bold;
         text-align: right;
         cursor: pointer;
         color: $color-blue;
@@ -93,10 +93,10 @@
     width: auto;
     min-width: 2.75em;
     height: 42px;
-    padding: $vertical-rhythm/2;
+    padding: $vr/2;
     margin-bottom: 0;
     vertical-align: middle;
-    font-weight: $font-weight-bold;
+    font-weight: $bold;
     text-align: center;
     cursor: pointer;
     @include nav-item-color;
@@ -104,14 +104,14 @@
         display: block;
     }
     .icon {
-        // margin-top: $vertical-rhythm/8;
+        // margin-top: $vr/8;
         vertical-align: middle;
     }
     .label {
         display: none;
-        margin: 0 $vertical-rhythm/4;
+        margin: 0 $vr/4;
         vertical-align: middle;
-        line-height: $font-line-height;
+        line-height: $lh;
     }
     &.dark {
         background: $color-grey-2;
@@ -128,8 +128,8 @@
             display: inline;
         }
     }
-    @include media($medium-layout) {
-        padding: $vertical-rhythm/2;
+    @include media($medium-bp) {
+        padding: $vr/2;
         .icon {
             margin-top: 0;
         }

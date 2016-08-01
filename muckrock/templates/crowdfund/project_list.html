@@ -2,7 +2,7 @@
 {% load markdown_deux_tags %}
 
 {% block list-content %}
-{% include 'lib/pagination.html' %}
+{% include 'lib/component/pagination.html' %}
 <ul class="crowdfund-list">
     {% for crowdfund in object_list %}
     <li class="crowdfund">
@@ -20,5 +20,5 @@
     </li>
     {% endfor %}
 </ul>
-{% include 'lib/pagination.html' %}
+{% include 'lib/component/pagination.html' %}
 {% endblock %}

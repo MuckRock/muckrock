@@ -1,26 +1,42 @@
+/*
+** _mixins.scss
+**
+** Mixins provide shortcuts to different declarations.
+** It is used to quickly apply a uniform value to an element.
+** At some point, mixins should be used to define utility classes to allow for quicker styling.
+*/
+
+@mixin vr {
+    margin-top: 0;
+    margin-bottom: $vr;
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
 @mixin font-sizing($size-multiplier, $line-multiplier:3) {
     $size: 1em * $size-multiplier;
-    $line: $vertical-rhythm;
+    $line: $vr;
     font-size: $size;
-    line-height: $font-line-height;
-    margin: 0 0 $vertical-rhythm 0;
+    line-height: $lh;
+    margin: 0 0 $vr 0;
 }
 
 @mixin border-radius() {
-    border-radius: $base-border-radius;
+    border-radius: $border-radius;
 }
 
 @mixin border() {
-    border: $base-border-width solid $color-grey;
+    border: $border $color-grey;
 }
 
 @mixin box-shadow() {
     box-shadow: 0px 4px 8px 0px $color-grey;
 }
 
-@mixin padding($padding: $vertical-rhythm) {
+@mixin padding($padding: $vr) {
     padding: $padding/2;
-    @include media($medium-layout) {
+    @include media($medium-bp) {
         padding: $padding;
     }
 }
@@ -37,15 +53,15 @@
     overflow: hidden;
     display: block;
     width: 100%;
-    margin:  $vertical-rhythm/2 0;
-    padding: $vertical-rhythm/6 $vertical-rhythm/3;
+    margin:  $vr/2 0;
+    padding: $vr/6 $vr/3;
 
 }
 
 @mixin input() {
     @include textbox;
     display: inline-block;
-    padding: $vertical-rhythm/4 $vertical-rhythm/3 $vertical-rhythm/4 $vertical-rhythm/2;
+    padding: $vr/4 $vr/3 $vr/4 $vr/2;
     &:disabled {
         background-color: lighten($color-disabled, 25%);
         border: 1px solid $color-disabled;
@@ -57,7 +73,7 @@
     form {
         display: block;
         width: 100%;
-        height: 2*$vertical-rhythm;
+        height: 2*$vr;
         background-color: $background;
         @include border-radius;
         border-color: $background;

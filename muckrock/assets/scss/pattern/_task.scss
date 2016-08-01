@@ -1,13 +1,13 @@
-$task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
+$task-padding: $vr/4 $vr/2;
 
 .textbox__section.task__main {
     padding: 0;
 }
 
 .task__data {
-    padding: $vertical-rhythm/2;
+    padding: $vr/2;
     li {
-        margin-left: $vertical-rhythm;
+        margin-left: $vr;
     }
 }
 
@@ -27,9 +27,9 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
         border-bottom: 1px solid $color-grey;
         max-width: 100%;
         height: 20em;
-        padding: $vertical-rhythm/2;
-        font-family: $font-monospace;
-        font-size: $font-size-2;
+        padding: $vr/2;
+        font-family: $monospace;
+        font-size: $size-2;
     }
 }
 
@@ -45,7 +45,7 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
     }
     main {
         border-bottom: 1px solid $color-grey;
-        padding: $vertical-rhythm/2;
+        padding: $vr/2;
     }
 }
 
@@ -55,7 +55,7 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
     input, select, label {
         display: block;
         width: 100%;
-        margin-bottom: $vertical-rhythm;
+        margin-bottom: $vr;
     }
     input[type="checkbox"] {
         width: auto;
@@ -75,7 +75,7 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
     width: 100%;
     color: $color-white;
     text-align: center;
-    font-weight: $font-weight-bold;
+    font-weight: $bold;
     a {
         color: $color-white;
     }
@@ -118,7 +118,7 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
     }
     .checkbox-field {
         margin-bottom: 0;
-        margin-left: $vertical-rhythm;
+        margin-left: $vr;
     }
 }
 
@@ -147,7 +147,7 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
     border-bottom: 1px solid $color-grey;
     header {
         margin-bottom: 0;
-        padding: $vertical-rhythm/2;
+        padding: $vr/2;
         background: $color-grey-7;
     }
     input[type="text"] {
@@ -174,7 +174,7 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
 /* New Agency Task */
 
 .new-agency-forms {
-    padding: 0 $vertical-rhythm/2;
+    padding: 0 $vr/2;
 }
 
 .new-agency .task__data {
@@ -183,7 +183,7 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
 
 .new-agency.form {
     margin-top: 0;
-    margin-bottom: $vertical-rhythm/2;
+    margin-bottom: $vr/2;
     padding: 0;
     border-radius: 0;
     background: $color-white;
@@ -192,8 +192,8 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
         margin-bottom: 0;
     }
     header {
-        font-weight: $font-weight-bold;
-        font-size: $font-size-2;
+        font-weight: $bold;
+        font-size: $size-2;
         color: $color-white;
         background: $color-grey-6;
     }
@@ -216,8 +216,8 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
     }
     fieldset {
         @include flex(1 0 50%);
-        margin-bottom: $vertical-rhythm/2;
-        padding: 0 $vertical-rhythm/2;
+        margin-bottom: $vr/2;
+        padding: 0 $vr/2;
     }
     fieldset.id_name {
         @include flex(1 0 100%);
@@ -226,7 +226,7 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
     }
     .help-text {
         color: $color-grey-3;
-        line-height: $font-line-height;
+        line-height: $lh;
     }
 }
 
@@ -253,7 +253,7 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
         text-align: left;
         @include columns(3 12em);
         label {
-            font-size: $font-size-2;
+            font-size: $size-2;
         }
     }
     .task__data {
@@ -269,7 +269,7 @@ $task-padding: $vertical-rhythm/4 $vertical-rhythm/2;
 .task .task-post-actions input[type="checkbox"] {
     float: none;
     display: inline-block;
-    margin: 0 $vertical-rhythm/2;
+    margin: 0 $vr/2;
 }
 
 .snail-mail.task .task-post-actions {

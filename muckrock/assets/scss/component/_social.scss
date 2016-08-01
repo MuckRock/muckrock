@@ -31,12 +31,12 @@
     }
     .label {
         display: none;
-        font-size: $font-size-1;
-        font-weight: $font-weight-bold;
+        font-size: $size-1;
+        font-weight: $bold;
     }
     a {
         display: block;
-        padding: $vertical-rhythm/2;
+        padding: $vr/2;
         background: $color-black;
         color: $color-white;
         text-decoration: none;

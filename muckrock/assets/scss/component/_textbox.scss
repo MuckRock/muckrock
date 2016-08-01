@@ -20,7 +20,7 @@
     word-wrap: break-word;
     background: $color-white-pure;
     .textbox__header, .textbox__section, .textbox__footer {
-        padding: $vertical-rhythm/4 $vertical-rhythm/2;
+        padding: $vr/4 $vr/2;
     }
     .textbox__header {
         @include display(flex);

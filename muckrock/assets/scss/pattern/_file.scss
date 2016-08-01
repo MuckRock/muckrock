@@ -1,7 +1,7 @@
 .file {
     @include display(flex);
     width: 100%;
-    padding: $vertical-rhythm/2;
+    padding: $vr/2;
     background: $color-white-pure;
     border: 1px solid $color-grey;
     .file-image {
@@ -13,9 +13,9 @@
     }
     .file-info {
         width: 100%;
-        margin-left: $vertical-rhythm;
+        margin-left: $vr;
         .title {
-            margin-bottom: $vertical-rhythm/2;
+            margin-bottom: $vr/2;
         }
     }
     .file-actions {
@@ -24,20 +24,20 @@
         padding-left: 0;
         li {
             display: inline-block;
-            margin-right: $vertical-rhythm;
+            margin-right: $vr;
         }
     }
     .file-embed {
         display: none;
         width: 100%;
-        margin-top: $vertical-rhythm/2;
+        margin-top: $vr/2;
         &.visible {
             display: block;
         }
         textarea {
             display: block;
-            font-family: $font-monospace;
-            font-size: $font-size-2;
+            font-family: $monospace;
+            font-size: $size-2;
             margin-bottom: 0;
             resize: none;
             white-space: nowrap;

@@ -6,7 +6,7 @@
     .article__image
     {
         @include flex(1 1 9em);
-        margin: 0 $vertical-rhythm $vertical-rhythm/2 0;
+        margin: 0 $vr $vr/2 0;
         img
         {
             display: block;
@@ -19,9 +19,9 @@
     }
     .article__overview__title
     {
-        margin-bottom: $vertical-rhythm/4;
-        font-size: $font-size-4;
-        font-weight: $font-weight-bold;
+        margin-bottom: $vr/4;
+        font-size: $size-4;
+        font-weight: $bold;
         line-height: 1.2em;
         a
         {
@@ -32,15 +32,15 @@
     {
         @include display(flex);
         @include justify-content(space-between);
-        margin-bottom: $vertical-rhythm/4;
-        font-size: $font-size-2;
+        margin-bottom: $vr/4;
+        font-size: $size-2;
         line-height: 1em;
         color: $color-grey-3;
     }
     .article__overview__project, .article__overview__author,
     {
         color: $color-grey-3;
-        font-weight: $font-weight-bold;
+        font-weight: $bold;
     }
 }
 
@@ -48,11 +48,11 @@
 {
     .article__image
     {
-        margin: 0 $vertical-rhythm/2 $vertical-rhythm/2 0;
+        margin: 0 $vr/2 $vr/2 0;
     }
     .article__overview__title
     {
-        font-size: $font-size-3;
+        font-size: $size-3;
         line-height: 1.2em;
     }
 }
@@ -61,11 +61,11 @@
 {
     .article__image {
         @include flex(0 1 100%);
-        margin: 0 0 $vertical-rhythm/2;
+        margin: 0 0 $vr/2;
     }
     .article__overview__title
     {
-        font-size: $font-size-5;
+        font-size: $size-5;
         line-height: 1.2em;
     }
 }

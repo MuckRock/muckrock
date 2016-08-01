@@ -2,7 +2,7 @@
     header {
         @include display(flex);
         @include justify-content(space-between);
-        margin-bottom: $vertical-rhythm/2;
+        margin-bottom: $vr/2;
         border-bottom: 1px solid $color-grey-7;
     }
     form {
@@ -22,7 +22,7 @@
     .deck {
         display: block;
         width: 100%;
-        margin-bottom: $vertical-rhythm;
+        margin-bottom: $vr;
     }
 }
 
@@ -34,7 +34,7 @@
     }
     select {
         width: 100%;
-        margin-bottom: $vertical-rhythm/2;
+        margin-bottom: $vr/2;
     }
 }
 

@@ -12,33 +12,33 @@ $right-column: 4 1 32em;
     @include flex(0 1 100%);
     @include display(flex);
     @include flex-wrap(wrap);
-    margin-top: $vertical-rhythm;
+    margin-top: $vr;
     margin-bottom: 0;
     .jurisdiction__image {
         @include flex(0 1 12em);
-        margin: $vertical-rhythm;
+        margin: $vr;
         margin-top: 0;
         img {
             margin-bottom: 0;
         }
         figcaption {
             color: $color-grey;
-            font-size: $font-size-1;
-            line-height: $font-line-height;
+            font-size: $size-1;
+            line-height: $lh;
         }
     }
     .jurisdiction__info {
         @include flex(1 1 20em);
-        margin: $vertical-rhythm;
+        margin: $vr;
         margin-top: 0;
     }
     .jurisdiction__name {
-        font-size: $font-size-4;
-        font-weight: $font-weight-bold;
+        font-size: $size-4;
+        font-weight: $bold;
     }
     .jurisdiction__title {
-        font-size: $font-size-8;
-        line-height: $font-line-height * .7;
+        font-size: $size-8;
+        line-height: $lh * .7;
     }
     @media (max-width: 35.625em) {
         @include justify-content(center);
@@ -47,7 +47,7 @@ $right-column: 4 1 32em;
             @include flex(0 1 100%);
         }
         .jurisdiction__name {
-            font-size: $font-size-4;
+            font-size: $size-4;
         }
         .jurisdiction__image img {
             max-width: 8em;
@@ -57,7 +57,7 @@ $right-column: 4 1 32em;
 .jurisdiction__aside {
     @include flex($left-column);
     & > * {
-        margin: 0 $vertical-rhythm $vertical-rhythm;
+        margin: 0 $vr $vr;
     }
     .jurisdiction__actions {
         @include flex(1 1 20em);
@@ -73,7 +73,7 @@ $right-column: 4 1 32em;
     }
     .button-group {
         width: 100%;
-        margin-bottom: $vertical-rhythm;
+        margin-bottom: $vr;
         @include justify-content(center);
     }
     @media (max-width: 54.3125em) {
@@ -85,18 +85,18 @@ $right-column: 4 1 32em;
 .jurisdiction__main {
     @include flex($right-column);
     min-width: 0;
-    margin: 0 $vertical-rhythm $vertical-rhythm;
+    margin: 0 $vr $vr;
     .jurisdiction__stats {
         @include display(flex);
         @include flex-wrap(wrap);
         & > * {
             @include flex(1 1 auto);
-            margin-right: $vertical-rhythm;
+            margin-right: $vr;
         }
     }
     .analysis {
         h2 {
-            font-size: $font-size-6;
+            font-size: $size-6;
         }
         h3 {
             border-bottom: 1px solid $color-grey;
@@ -108,27 +108,27 @@ $right-column: 4 1 32em;
         margin-bottom: 0;
     }
     .law__summary {
-        font-size: $font-size-2;
+        font-size: $size-2;
     }
     @media (max-width: 35.625em) {
         .law__name {
-            font-size: $font-size-4;
+            font-size: $size-4;
         }
     }
 }
 .jurisdiction__toc {
     width: 12em;
     float: left;
-    margin-right: 2*$vertical-rhythm;
+    margin-right: 2*$vr;
     @include border;
-    padding: $vertical-rhythm/2;
+    padding: $vr/2;
     background: $color-white-pure;
     p {
-        font-weight: $font-weight-bold;
+        font-weight: $bold;
         margin-bottom: 0;
     }
     ol {
-        padding-left: $vertical-rhythm;
+        padding-left: $vr;
     }
     @media (max-width: 35.625em) {
         float: none;
@@ -136,8 +136,8 @@ $right-column: 4 1 32em;
     }
 }
 .jurisdiction__point__symbol {
-    font-size: $font-size-5;
-    font-weight: $font-weight-bold;
+    font-size: $size-5;
+    font-weight: $bold;
     &.red {
         color: $color-red;
     }

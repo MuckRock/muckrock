@@ -4,28 +4,16 @@ $color-jurisdiction-picker: darken($color-jurisdiction, 10%);
 $color-agency: darken($color-jurisdiction-picker, 10%);
 
 .new-request {
-    @include outer-container;
-    @include row;
-    header {
-        @include full;
-        h1 {
-            @include two-thirds;
-        }
-        summary {
-            @include third;
-        }
-    }
     .create-request {
-        @include full;
         @include border-radius;
         background-color: $color-grey-7;
     }
     fieldset {
         margin: 0;
-        padding: $vertical-rhythm;
+        padding: $vr;
     }
     .title {
-        @include border-top-radius($base-border-radius);
+        @include border-top-radius($border-radius);
         background-color: $color-title;
         border: 2px solid $color-red-dark;
         border-bottom: none;
@@ -36,9 +24,9 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
             padding: 0;
             border: none;
             border-radius: 0;
-            border-bottom: $base-border-width dotted lighten($color-title, 20%);
+            border-bottom: $border-width dotted lighten($color-title, 20%);
             color: $color-white;
-            font-size: $font-size-6;
+            font-size: $size-6;
             @include placeholder {
                 color: lighten($color-title, 15%);
             }
@@ -53,7 +41,7 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
             display: block;
             width: 100%;
             height: 10em;
-            padding: $vertical-rhythm;
+            padding: $vr;
             resize: none;
             border: none;
             border-radius: 0;
@@ -95,8 +83,8 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
             display: table-cell;
             text-align: center;
             width: 33%;
-            padding: $vertical-rhythm/2;
-            border-right: $base-border-width solid lighten($color-jurisdiction, 10%);
+            padding: $vr/2;
+            border-right: $border lighten($color-jurisdiction, 10%);
             &.active {
                 &:hover { background-color: $color-jurisdiction-picker; }
                 background-color: $color-jurisdiction-picker;
@@ -118,7 +106,7 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
         label {
             color: $color-white;
             @include font-sizing(1);
-            font-weight: $font-weight-bold;
+            font-weight: $bold;
             text-align: center;
             cursor: pointer;
         }
@@ -138,7 +126,7 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
             width: 100%;
             background-color: $color-agency;
             border: none;
-            border-bottom: 2*$base-border-width dotted lighten($color-agency, 20%);
+            border-bottom: 2*$border-width dotted lighten($color-agency, 20%);
             padding-left: 0;
             border-radius: 0;
             @include font-sizing(1.25, 3);
@@ -175,7 +163,7 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
             width: 100%;
             margin: 0;
             color: $color-white;
-            font-size: $font-size-4;
+            font-size: $size-4;
             &:before {
                 content: "Jurisdiction";
                 display: block;
@@ -195,25 +183,15 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
     }
 
     footer {
-        padding: $vertical-rhythm;
-        @include border-bottom-radius($base-border-radius);
-        @include row;
+        padding: $vr;
+        @include border-bottom-radius($border-radius);
         border: 2px solid $color-grey-5;
         border-top: none;
-        button {
-            @include quarter;
-        }
-        p {
-            @include three-quarters;
-            @include media($large-layout) {
-                padding-left: $vertical-rhythm;
-            }
-        }
     }
 
     .failure.panel {
         ul {
-            padding-left: $vertical-rhythm;
+            padding-left: $vr;
             list-style-type: disc;
         }
         ul li ul {
@@ -229,23 +207,13 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
 .foia__single {
     display: inline-block;
     max-width: 20em;
-    margin-right: $vertical-rhythm;
+    margin-right: $vr;
     &:last-child {
-        margin-bottom: $vertical-rhythm;
+        margin-bottom: $vr;
     }
 }
 
 .multirequest-create {
-    @include outer-container;
-    form {
-        @include row;
-        .visible-fields fieldset {
-            @include full;
-            textarea {
-                width: 100%;
-            }
-        }
-    }
     .autocomplete-light-widget {
         width: 100%;
         input {
