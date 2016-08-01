@@ -4,14 +4,14 @@
     margin: 0 auto;
     .error-404__page {
         @include box-shadow;
-        margin: $vertical-rhythm;
-        padding: $vertical-rhythm*4 $vertical-rhythm $vertical-rhythm;
+        margin: $vr;
+        padding: $vr*4 $vr $vr;
         background: $color-white-pure;
         border: 1px solid $color-grey;
     }
     .redacted {
-        margin-left: $vertical-rhythm/4;
-        margin-right: $vertical-rhythm/4;
+        margin-left: $vr/4;
+        margin-right: $vr/4;
         background-color: $color-black;
         color: transparent;
         &:first-child {
@@ -31,20 +31,20 @@
         @include justify-content(space-around);
         @include align-items(center);
         height: 100%;
-        padding: 2*$vertical-rhythm;
+        padding: 2*$vr;
         background-color: rgba(0, 0, 0, 0.6);
         color: $color-white;
         h1 {
-            font-size: 2*$font-size-8;
+            font-size: 2*$size-8;
         }
         h2 {
             max-width: 10em;
-            margin: 0 auto $vertical-rhythm;
+            margin: 0 auto $vr;
         }
         .error-report {
             max-width: 100%;
             width: 20em;
-            padding: $vertical-rhythm;
+            padding: $vr;
             background: rgba(0, 0, 0, 0.6);
             border: 1px solid $color-black-pure;
         }

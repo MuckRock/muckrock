@@ -37,17 +37,17 @@ and
     {% endfor %}
     {% for field in form.visible_fields %}
         {% if field.label == 'Request' %}
-        <div class="sent communication">
-            <header class="communication-header">
+        <div class="blue textbox communication">
+            <header class="textbox__header communication-header">
                 <p class="from">From: {{foia.user.get_full_name}}</p>
                 <div class="actionables">
                     <time class="date" datetime="{% now 'c' %}">{% now 'm/d/Y' %}</time>
                 </div>
             </header>
-            <section class="communication-metadata">
+            <section class="textbox__section communication-metadata">
                 <p class="small subject">Subject: {{ foia.title }}</p>
             </section>
-            <section class="communication-body">
+            <section class="textbox__section communication-body">
                 <p>To Whom It May Concern:</p>
                 <p>This is a request under [Insert jurisdiction's applicable freedom of information law] for a copy of the following records:</p>
                 {{ field }}
@@ -60,15 +60,7 @@ and
         </div>
                     {{field.errors}}
         {% else %}
-            {% if field.label == 'Embargo' and not profile.can_embargo %}
-            {% else %}
-        <fieldset class="{{ field.label|lower }}{% if field.errors %} failure{% endif %}{% if field.field.required %} required{% endif %}">
-            <label for="{{ field.auto_id }}">{{ field.label}}</label>
-            {{ field }}
-            {% if field.help_text %}<p class="default"><small>{{ field.help_text }}</small></p>{% endif %}
-            {% if field.errors %}<p class="failure"><small>{{ field.errors }}</small></p>{% endif %}
-        </fieldset>
-            {% endif %}
+        {% include 'lib/pattern/field.html' %}
         {% endif %}
     {% endfor %}
     {% if not balance.extra_requests %}

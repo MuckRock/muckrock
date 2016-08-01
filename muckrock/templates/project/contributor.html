@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<div class="detail">
     <header>
         {% if user_is_contributor %}
         <h1>Your Projects</h1>
@@ -20,4 +21,5 @@
         </div>
     {% endfor %}
     </div>
+</div>
 {% endblock %}

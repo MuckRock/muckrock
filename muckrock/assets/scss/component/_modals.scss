@@ -11,11 +11,11 @@
     max-width: 100%;
     margin: 5%;
     @include border-radius;
-    padding: $vertical-rhythm;
+    padding: $vr;
 
     background-color: $color-white;
 
-    @include media($medium-layout) {
+    @include media($medium-bp) {
         top: 25%;
         left: 50%;
         @include transform(translateX(-50%));
@@ -29,7 +29,7 @@
         resize: vertical;
         width: 100%;
         height: 10em;
-        margin-top: $vertical-rhythm/2;
+        margin-top: $vr/2;
     }
     &.embed textarea {
         text-align: left;

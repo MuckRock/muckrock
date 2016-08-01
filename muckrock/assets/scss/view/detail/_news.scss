@@ -20,19 +20,19 @@
     min-width: 0;
     @include flex(3 1 24em);
     @include padding;
-    @include media($medium-layout) {
-        font-size: $font-size-4;
-        line-height: $font-line-height;
+    @include media($medium-bp) {
+        font-size: $size-4;
+        line-height: $lh;
     }
     .news__article__header {
         time, .contributors {
             color: $color-grey;
-            font-size: $font-size-2;
-            font-weight: $font-weight-bold;
+            font-size: $size-2;
+            font-weight: $bold;
         }
         h1, .kicker {
-            margin: $vertical-rhythm/2 0;
-            font-weight: $font-weight-bold;
+            margin: $vr/2 0;
+            font-weight: $bold;
             line-height: 1.25em;
         }
         .contributors {
@@ -45,13 +45,13 @@
     }
     // Fixes for embedded content
     div[id^='viewer'] {
-        margin: $vertical-rhythm auto;
-        @include media($large-layout) {
-            margin: $vertical-rhythm auto $vertical-rhythm 0;
+        margin: $vr auto;
+        @include media($large-bp) {
+            margin: $vr auto $vr 0;
         }
     }
     iframe {
-        margin-bottom: $vertical-rhythm;
+        margin-bottom: $vr;
         border: none;
     }
     .iframe-container {
@@ -88,7 +88,7 @@
     }
     .article {
         @include flex(1 1 24em);
-        margin-right: $vertical-rhythm;
+        margin-right: $vr;
     }
 }
 

@@ -2,7 +2,7 @@ input.autocomplete.xhr-pending { background-image: none; }
 
 .autocomplete-light-widget {
     width: 100%;
-    font-family: $font-family;
+    font-family: $sans-serif;
     color: $color-black;
     input {
         width: 100%;
@@ -19,32 +19,32 @@ input.autocomplete.xhr-pending { background-image: none; }
         .name {
             display: inline-block;
             margin-bottom: 0;
-            padding: $vertical-rhythm/4 $vertical-rhythm/2;
+            padding: $vr/4 $vr/2;
         }
         .username {
-            font-size: $font-size-2;
+            font-size: $size-2;
         }
     }
     .foia.choice {
         .main {
-            padding: $vertical-rhythm/4 $vertical-rhythm/2;
+            padding: $vr/4 $vr/2;
         }
         .title {
             margin-bottom: 0;
         }
         .meta {
-            font-size: $font-size-2;
+            font-size: $size-2;
         }
     }
     .agency.choice {
         .main {
-            padding: $vertical-rhythm/4 $vertical-rhythm/2;
+            padding: $vr/4 $vr/2;
         }
         .name {
             margin-bottom: 0;
         }
         .jurisdiction {
-            font-size: $font-size-2;
+            font-size: $size-2;
         }
     }
     .article.choice {
@@ -56,15 +56,15 @@ input.autocomplete.xhr-pending { background-image: none; }
             vertical-align: middle;
         }
         .title {
-            font-weight: $font-weight-bold;
+            font-weight: $bold;
         }
         .info {
             display: inline-block;
             vertical-align: middle;
-            padding: $vertical-rhythm/4 $vertical-rhythm/2;
+            padding: $vr/4 $vr/2;
         }
         .meta {
-            font-size: $font-size-2;
+            font-size: $size-2;
         }
     }
     .deck {
@@ -79,9 +79,9 @@ input.autocomplete.xhr-pending { background-image: none; }
             .remove {
                 @include order(1);
                 @include flex(0 1 1em);
-                margin-right: $vertical-rhythm/2;
+                margin-right: $vr/2;
             }
-            margin-bottom: $vertical-rhythm/2;
+            margin-bottom: $vr/2;
             padding: 0;
             background: $color-white-pure;
             border: 1px solid $color-grey;

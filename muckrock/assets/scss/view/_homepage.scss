@@ -8,7 +8,7 @@
 
     h2
     {
-        font-size: $font-size-5;
+        font-size: $size-5;
     }
 
     .about
@@ -20,7 +20,7 @@
     {
         @include flex(1 1 200px);
         max-width: 20em;
-        font-size: $font-size-2;
+        font-size: $size-2;
     }
 
     &.foia
@@ -28,25 +28,25 @@
 
         background-size: cover;
         background-position: right bottom;
-        padding: $vertical-rhythm;
+        padding: $vr;
         @include border;
         border-color: $color-red-dark;
 
         h2
         {
-            margin: 0 auto $vertical-rhythm;
+            margin: 0 auto $vr;
             max-width: 11em;
-            font-size: $font-size-5;
-            font-weight: $font-weight-bold;
+            font-size: $size-5;
+            font-weight: $bold;
         }
         .button {
-            margin-bottom: $vertical-rhythm;
+            margin-bottom: $vr;
         }
         .call-to-action {
             a
             {
                 color: $color-white;
-                font-weight: $font-weight-bold;
+                font-weight: $bold;
                 border-bottom: 1px dotted;
             }
             a:hover
@@ -58,7 +58,7 @@
         }
         .info
         {
-            padding: $vertical-rhythm $vertical-rhythm 0 $vertical-rhythm;
+            padding: $vr $vr 0 $vr;
             @include border;
             background-color: rgba(0,0,0,.4);
         }
@@ -75,12 +75,12 @@
         {
             @include flex(1 1 8em);
             width: 7em;
-            margin: 0 0 $vertical-rhythm 0;
+            margin: 0 0 $vr 0;
             text-align: center;
             .value
             {
-                font-size: $font-size-5;
-                margin-bottom: $vertical-rhythm/2;
+                font-size: $size-5;
+                margin-bottom: $vr/2;
             }
             .key
             {
@@ -94,32 +94,32 @@
             .button
             {
                 display: inline-block;
-                @include media($small-layout)
+                @include media($small-bp)
                 {
                     display: block;
                     max-width: 20em;
-                    margin: 0 auto $vertical-rhythm;
+                    margin: 0 auto $vr;
                 }
             }
             #learn-more
             {
                 display: inline-block;
-                margin-left: $vertical-rhythm/4;
+                margin-left: $vr/4;
             }
         }
     }
     &.mission
     {
         @include justify-content(space-between);
-        margin: 0 $vertical-rhythm $vertical-rhythm;
+        margin: 0 $vr $vr;
         padding: 0;
         color: $color-black;
         h1
         {
             max-width: 21em;
-            margin-right: $vertical-rhythm;
-            font-size: $font-size-6;
-            font-weight: $font-weight-bold;
+            margin-right: $vr;
+            font-size: $size-6;
+            font-weight: $bold;
         }
     }
 }
@@ -129,8 +129,8 @@
     @include padding;
     h2
     {
-        font-size: $font-size-4;
-        font-weight: $font-weight-bold;
+        font-size: $size-4;
+        font-weight: $bold;
     }
     main
     {
@@ -147,7 +147,7 @@
             }
             .article
             {
-                margin: 0 $vertical-rhythm $vertical-rhythm;
+                margin: 0 $vr $vr;
             }
             .lead.article
             {
@@ -161,20 +161,20 @@
         .requests
         {
             @include flex(1 1 200px);
-            margin: 0 $vertical-rhythm $vertical-rhythm;
+            margin: 0 $vr $vr;
         }
     }
     .news
     {
         .newsletter-widget {
-            margin: 0 $vertical-rhythm $vertical-rhythm;
+            margin: 0 $vr $vr;
         }
     }
     .projects {
-        padding: 0 $vertical-rhythm;
+        padding: 0 $vr;
     }
     .projects li {
-        margin-bottom: $vertical-rhythm;
+        margin-bottom: $vr;
     }
 }
 
@@ -200,18 +200,18 @@
 .homepage
 {
     overflow: hidden;
-    margin: 0 -.5 * $vertical-rhythm;
+    margin: 0 -.5 * $vr;
     margin-bottom: 0;
     section
     {
         margin-bottom: 0;
     }
-    @include media($medium-layout)
+    @include media($medium-bp)
     {
-        margin: 0 -1 * $vertical-rhythm;
+        margin: 0 -1 * $vr;
     }
-    @include media($large-layout)
+    @include media($large-bp)
     {
-        margin: 0 -24px 0 -1 * $vertical-rhythm;
+        margin: 0 -24px 0 -1 * $vr;
     }
 }

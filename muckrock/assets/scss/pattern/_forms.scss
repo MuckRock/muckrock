@@ -1,49 +1,95 @@
 .form {
     @include padding;
-    
-    header, form, .visible-fields, .buttons {
-        @include row;
-    }
-
-    .form-title, .form-info, .visible-fields fieldset {
-        @include half;
-    }
-
-    input[type="submit"] {
-        @include quarter;
-    }
-
     .visible-fields fieldset input {
         width: 100%;
     }
 
-    &.question,
-    &.reply,
-    &.update,
-    &.password-change,
-    &.foia-embargo {
-        .visible-fields fieldset { @include full; }
-    }
-
     &.admin-fix {
-        .visible-fields fieldset {
-            @include full;
+        .visible-fields {
             p { margin-bottom: 0; }
         }
         .snail.mail input { width: auto; }
+        .formset-forms .visible-fields {
+            margin-bottom: 0;
+        }
+        .formset-container {
+            display: block;
+            margin-bottom: $vr;
+        }
     }
 
     &.search {
-        dfn { margin: $vertical-rhythm/2 $vertical-rhythm/4; }
+        dfn { margin: $vr/2 $vr/4; }
         .search-filters {
             margin: 0;
             li {
                 display: inline-block;
-                padding: 0 $vertical-rhythm/4;
+                padding: 0 $vr/4;
             }
             label {
-                padding-left: $vertical-rhythm/6;
+                padding-left: $vr/6;
             }
+        }
+    }
+}
+
+.field {
+    overflow: hidden;
+    header {
+        margin-bottom: 0;
+    }
+    .error input {
+        border-color: $color-red;
+    }
+    .required, .errorlist {
+        color: $color-red;
+        font-size: $size-2;
+    }
+    .errorlist {
+        display: inline-block;
+        margin-bottom: 0;
+        padding: 0;
+        list-style: none;
+    }
+    label {
+        margin-right: $vr/2;
+        font-weight: $bold;
+    }
+    input {
+        display: block;
+        width: 100%;
+    }
+    input[type="checkbox"], input[type="radio"] {
+        width: auto;
+        margin-top: $vr/4;
+        margin-right: $vr/2;
+        float: left;
+    }
+    textarea {
+        display: block;
+        height: 5em;
+        margin-bottom: 0;
+    }
+    .help-text {
+        margin-top: $vr/4;
+    }
+    &.image {
+        .preview {
+            display: block;
+            margin-bottom: $vr/2;
+            max-width: 20em;
+        }
+        input {
+            display: inline-block;
+            float: none;
+            width: auto;
+            margin-right: 0;
+        }
+        label[for*="clear_id"] {
+            font-weight: $normal;
+        }
+        input[id*="clear_id"] {
+            margin-left: $vr;
         }
     }
 }
@@ -53,13 +99,9 @@
 }
 
 .help-text {
-    font-size: $font-size-2;
+    font-size: $size-2;
+    line-height: $lh;
     color: $color-grey;
-    line-height: $font-line-height;
-}
-
-.hidden-stripe-handler {
-    display: none;
 }
 
 textarea, #{$all-text-inputs} {
@@ -77,7 +119,7 @@ fieldset {
         @extend dfn;
     }
 
-    @include media($large-layout) {
+    @include media($large-bp) {
         label.failure {
             float: left;
         }
@@ -88,140 +130,10 @@ fieldset {
 
     input + label {
         float: left;
-        margin-right: $vertical-rhythm;
+        margin-right: $vr;
     }
 
     & > fieldset, & > fieldset + fieldset {
         margin: 0;
-    }
-}
-
-.field {
-    header {
-        margin-bottom: 0;
-    }
-    .error input {
-        border-color: $color-red;
-    }
-    .required, .errorlist {
-        color: $color-red;
-        font-size: $font-size-2;
-    }
-    .errorlist {
-        display: inline-block;
-        margin-bottom: 0;
-        padding: 0;
-        list-style: none;
-    }
-    label {
-        margin-right: $vertical-rhythm/2;
-        font-weight: $font-weight-bold;
-    }
-    input {
-        display: block;
-        width: 100%;
-    }
-    input[type="checkbox"], input[type="radio"] {
-        width: auto;
-        margin-top: $vertical-rhythm/4;
-        margin-right: $vertical-rhythm/2;
-        float: left;
-    }
-    textarea {
-        display: block;
-        height: 5em;
-        margin-bottom: 0;
-    }
-    .help-text {
-        margin-top: $vertical-rhythm/4;
-    }
-    &.image {
-        .preview {
-            display: block;
-            margin-bottom: $vertical-rhythm/2;
-            max-width: 20em;
-        }
-        input {
-            display: inline-block;
-            float: none;
-            width: auto;
-            margin-right: 0;
-        }
-        label[for*="clear_id"] {
-            font-weight: $font-weight-normal;
-        }
-        input[id*="clear_id"] {
-            margin-left: $vertical-rhythm;
-        }
-    }
-}
-
-.register.form {
-    padding: 0;
-    border-color: $color-blue-dark;
-    .form-head {
-        padding: $vertical-rhythm;
-        @include border-top-radius($base-border-radius);
-        color: $color-white;
-        background-color: $color-blue;
-        a {
-            color: $color-white;
-            text-decoration: underline;
-        }
-        ul {
-            list-style-type: disc;
-        }
-    }
-    form { margin: $vertical-rhythm; }
-}
-
-.subscribe.page {
-    @include panel;
-    border-color: $color-red-dark;
-    padding: 0;
-    header {
-        @include full;
-        padding: $vertical-rhythm;
-        color: $color-white;
-        background-color: $color-red;
-        a {
-            color: $color-white;
-            text-decoration: underline;
-        }
-        .heading, .subheading { @include half; }
-        .heading {
-            font-size: $font-size-8;
-        }
-        .subheading .price {
-            font-size: $font-size-6;
-            .amount {
-                font-size: $font-size-5;
-                font-weight: $font-weight-light;
-            }
-            sup {
-                margin-right: 0.1em;
-            }
-        }
-        @include media($medium-layout) {
-            .subheading {
-                text-align: right;
-            }
-        }
-    }
-    .interaction, .body {
-        @include grid-columns(4, 6, 6);
-        padding: 0 $vertical-rhythm;
-    }
-    .interaction {
-        .button, button, input[type="submit"] {
-            display: block;
-            @include media($medium-layout) {
-                display: inline-block;
-            }
-        }
-    }
-    .body {
-        margin-bottom: $vertical-rhythm;
-        clear: none !important;
     }
 }

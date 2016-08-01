@@ -15,13 +15,13 @@
 {% block content %}
 <div class="foia__create form">
     <div class="new-request">
-        <header>
+        <header class="grid__row">
             {% if clone %}
-            <h1>Clone a request</h1>
-            <summary>Make any changes to the request, then clone it.</summary>
+            <h1 class="grid__column half">Clone a request</h1>
+            <summary class="grid__column half">Make any changes to the request, then clone it.</summary>
             {% else %}
-            <h1>File a request</h1>
-            <summary>
+            <h1 class="grid__column half">File a request</h1>
+            <summary class="grid__column half">
                 Not sure where to start? <a href="/about/foia-101/">We can help.</a>
                 <br>
                 Out of ideas? <a href="#clone">Try cloning a request.</a>
@@ -111,17 +111,17 @@
             <footer class="buttons">
             {% if user.is_authenticated %}
                 {% if clone %}
-                <button type="submit" name="submit" value="Clone" class="primary button">File</button>
+                <button type="submit" name="submit" value="Clone" class="primary button">Save Draft</button>
                 {% else %}
-                <button type="submit" name="submit" value="Create" class="primary button">File</button>
+                <button type="submit" name="submit" value="Create" class="primary button">Save Draft</button>
                 {% endif %}
             {% else %}
+                <p>Create a MuckRock account and file up to four requests for just $20, or <a href="{% url 'accounts-signup-professional' %}" target="_blank">go Pro for 20 requests a month</a> with the option to keep your submissions private. Already have an account? <a href="{% url 'acct-login' %}">Log in</a>.</p>
                 {% if clone %}
-                <input type="submit" name="submit" value="Clone" class="primary button" onclick="ga('send', 'event', 'Account', 'Registration', window.location.pathname)" />
+                <button type="submit" name="submit" value="Clone" class="primary button" onclick="ga('send', 'event', 'Account', 'Registration', window.location.pathname)">Create Account and Save Draft</button>
                 {% else %}
-                <input type="submit" name="submit" value="Create" class="primary button" onclick="ga('send', 'event', 'Account', 'Registration', window.location.pathname)" />
+                <button type="submit" name="submit" value="Create" class="primary button" onclick="ga('send', 'event', 'Account', 'Registration', window.location.pathname)">Create Account and Save Draft</button>
                 {% endif %}
-    		    <p>Create a MuckRock account and file up to four requests for just $20, or <a href="{% url 'accounts-signup-professional' %}" target="_blank">go Pro for 20 requests a month</a> with the option to keep your submissions private. Already have an account? <a href="{% url 'acct-login' %}">Log in</a>.</p>
     		{% endif %}
             </footer>
         </form>

@@ -1,9 +1,10 @@
 .account.plans {
+    @include padding;
     & > header {
         @include display(flex);
         @include justify-content(space-between);
         @include flex-direction(column);
-        @include media($large-layout) {
+        @include media($large-bp) {
             @include flex-direction(row);
         }
         p {
@@ -36,15 +37,15 @@
         background: #fff;
         border-color: $color-blue-dark;
         main, footer {
-            padding: $vertical-rhythm;
+            padding: $vr;
         }
         header {
-            padding: $vertical-rhythm 0;
+            padding: $vr 0;
             text-align: center;
             background: $color-blue-light;
             color: $color-blue-dark;
             h2 {
-                font-weight: $font-weight-bold;
+                font-weight: $bold;
             }
         }
         .superlative {
@@ -59,7 +60,7 @@
         }
         @media all and (min-width: 768px) {
             margin-bottom: 0;
-            margin-right: $vertical-rhythm;
+            margin-right: $vr;
             &:last-child {
                 margin-right: 0;
             }
@@ -69,51 +70,48 @@
         color: $color-green;
         border: 2px solid;
         @include border-radius;
-        padding: $vertical-rhythm/4;
-        font-weight: $font-weight-bold;
+        padding: $vr/4;
+        font-weight: $bold;
         text-align: center;
     }
 }
 
-.account.signup {
-    form {
-        margin-bottom: 0;
-        .visible-fields {
-            @include display(flex);
-            @include flex-wrap(wrap);
+.account.signup.form {
+    margin-bottom: 0;
+    .visible-fields {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        .field {
+            @include flex(1 0 100%);
+        }
+        .errorlist {
+            list-style: none;
+            margin-bottom: 0;
+            padding-left: 0;
+        }
+        @include media($medium-bp) {
             .field {
-                @include flex(1 0 100%);
-            }
-            .errorlist {
-                list-style: none;
-                margin-bottom: 0;
-                padding-left: 0;
-            }
-            @include media($medium-layout) {
-                .field {
-                    @include flex(1 0 50%);
-                    &:nth-child(odd) {
-                        padding-right: $vertical-rhythm;
-                    }
-                    &:last-child {
-                        padding-right: 0;
-                    }
+                @include flex(1 0 50%);
+                &:nth-child(odd) {
+                    padding-right: $vr;
+                }
+                &:last-child {
+                    padding-right: 0;
                 }
             }
-            input {
-                width: 100%;
-            }
         }
-        footer {
-            @include display(flex);
-            @include justify-content(space-between);
-            @include align-items(center);
-            @include flex-direction(column-reverse);
-            @include media($medium-layout) {
-                @include flex-direction(row);
-            }
+        input {
+            width: 100%;
         }
-
+    }
+    footer {
+        @include display(flex);
+        @include justify-content(space-between);
+        @include align-items(center);
+        @include flex-direction(column-reverse);
+        @include media($medium-bp) {
+            @include flex-direction(row);
+        }
     }
     .cancel {
         cursor: pointer;
@@ -135,7 +133,7 @@
     @media all and (min-width: $breakpoint) {
         @include flex-direction(row);
         .request.main {
-            margin-left: $vertical-rhythm * 2;
+            margin-left: $vr * 2;
         }
     }
     header {
@@ -152,7 +150,7 @@
             border: none;
         }
         td {
-            padding: 0 0 $vertical-rhythm 0;
+            padding: 0 0 $vr 0;
         }
     }
     footer {
@@ -161,7 +159,7 @@
         @include align-items(center);
     }
     .form {
-        padding: $vertical-rhythm;
+        padding: $vr;
         border: 1px solid $color-grey;
         @include border-radius;
         background: $color-white-pure;
@@ -174,7 +172,7 @@
                 @include flex(1);
             }
             .field:first-child {
-                margin-right: $vertical-rhythm;
+                margin-right: $vr;
             }
         }
     }

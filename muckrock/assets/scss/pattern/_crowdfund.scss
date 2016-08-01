@@ -1,24 +1,24 @@
 $crowdfund-color: $color-green;
 $crowdfund-color-dark: $color-green-dark;
 $crowdfund-color-light: $color-green-light;
-$crowdfund-border: $base-border-width solid $crowdfund-color;
+$crowdfund-border: $border $crowdfund-color;
 
 .crowdfund__widget {
     @include display(flex);
     @include flex-direction(column);
     overflow: visible;
-    margin: 0 auto $vertical-rhythm;
+    margin: 0 auto $vr;
     border: $crowdfund-border;
     background: #FFF;
 
     & > *:last-child {
-        @include border-bottom-radius($base-border-radius);
+        @include border-bottom-radius($border-radius);
     }
 
     .crowdfund__widget__header, .crowdfund__widget__footer {
         @include flex(0 0 auto);
         margin-bottom: 0;
-        padding: $vertical-rhythm/4 $vertical-rhythm/2;
+        padding: $vr/4 $vr/2;
         color: $crowdfund-color-dark;
         background-color: $crowdfund-color-light;
     }
@@ -26,17 +26,17 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
     .crowdfund__widget__header {
         border-bottom: $crowdfund-border;
         h1 {
-            font-size: $font-size-3;
-            line-height: $font-line-height;
-            font-weight: $font-weight-bold;
+            font-size: $size-3;
+            line-height: $lh;
+            font-weight: $bold;
             margin: 0;
             a {
                 color: $crowdfund-color-dark;
             }
         }
         .action {
-            font-size: $font-size-2;
-            margin-right: $vertical-rhythm/2;
+            font-size: $size-2;
+            margin-right: $vr/2;
         }
     }
 
@@ -56,8 +56,8 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
                 @include flex(1 1 25);
                 margin-bottom: 0;
                 text-align: left;
-                padding: $vertical-rhythm/2;
-                @include media($medium-layout) {
+                padding: $vr/2;
+                @include media($medium-bp) {
                     margin-bottom: 0;
                 }
             }
@@ -66,7 +66,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
 
     .description {
         margin-bottom: 0;
-        padding: $vertical-rhythm/2;
+        padding: $vr/2;
     }
 
     .progress, .meter {
@@ -77,15 +77,15 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
     .stats {
         margin-bottom: 0;
         text-align: center;
-        font-size: $font-size-2;
-        line-height: $font-line-height;
+        font-size: $size-2;
+        line-height: $lh;
     }
 
     .contributor-list {
         margin-top: 0;
         li {
             display: inline-block;
-            padding: 0 $vertical-rhythm/2 0 0;
+            padding: 0 $vr/2 0 0;
         }
     }
 }
@@ -96,7 +96,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
         margin-bottom: 0;
     }
     .anonymity input[type="checkbox"] {
-        margin-right: $vertical-rhythm/4;
+        margin-right: $vr/4;
     }
     .anonymity input[type="text"] {
         width: 100%;
@@ -104,19 +104,19 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
         border: 1px solid $color-green;
     }
     .anonymity p {
-        margin-bottom: $vertical-rhythm/4;
+        margin-bottom: $vr/4;
     }
     .crowdfund__donate {
         @include display(flex);
         @include flex-wrap(wrap);
         @include align-items(stretch);
-        margin: $vertical-rhythm/2 0;
+        margin: $vr/2 0;
         border: 1px solid $color-green;
         input {
             @include flex(3 1 auto);
             @include appearance(none);
             border: none;
-            line-height: $font-line-height;
+            line-height: $lh;
             border-radius: 0;
             color: $color-green-dark;
         }
@@ -139,22 +139,22 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
     .contributor {
         &.summary {
             margin-bottom: 0;
-            font-weight: $font-weight-bold;
+            font-weight: $bold;
             cursor: default;
         }
         &.dropdown {
             display: none;
             position: absolute;
-            margin: $vertical-rhythm;
+            margin: $vr;
             bottom: 0;
             z-index: 1;
-            border-radius: $base-border-radius;
-            padding: $vertical-rhythm/4 $vertical-rhythm/2;
+            border-radius: $border-radius;
+            padding: $vr/4 $vr/2;
             background-color: $color-black;
             color: $color-white;
             opacity: 0;
             list-style-type: none;
-            font-size: $font-size-2;
+            font-size: $size-2;
             @include transition(opacity .25s .25s linear);
         }
         &.summary:hover + .dropdown, &.dropdown:hover {
@@ -183,7 +183,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
     {
         width: 32em;
         color: $color-white;
-        font-weight: $font-weight-bold;
+        font-weight: $bold;
         .icon {
             @include svg-color($color-white);
         }
@@ -197,7 +197,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
         }
         p
         {
-            margin-bottom: $vertical-rhythm/2;
+            margin-bottom: $vr/2;
         }
         input {
             color: $color-black;
@@ -205,10 +205,10 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
         textarea
         {
             color: $color-black;
-            font-family: $font-monospace;
-            font-size: $font-size-2;
+            font-family: $monospace;
+            font-size: $size-2;
             text-align: center;
-            font-weight: $font-weight-normal;
+            font-weight: $normal;
             resize: none;
             white-space: nowrap;
         }
@@ -263,6 +263,6 @@ $crowdfund-border: $base-border-width solid $crowdfund-color;
     }
     .loader, .dialog
     {
-        padding: $vertical-rhythm;
+        padding: $vr;
     }
 }

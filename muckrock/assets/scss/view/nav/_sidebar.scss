@@ -55,12 +55,12 @@ The sidebar should use a dark UI.
         z-index: 19;
         margin: 2.6875em 0 0 0;
         border-bottom: 1px solid $color-grey-3;
-        padding: $vertical-rhythm;
+        padding: $vr;
         background: $color-black;
         color: $color-white;
         h1 {
-            font-size: $font-size-5;
-            font-weight: $font-weight-bold;
+            font-size: $size-5;
+            font-weight: $bold;
         }
         a {
             color: $color-blue-light;
@@ -69,15 +69,15 @@ The sidebar should use a dark UI.
             }
         }
         .forgot {
-            font-size: $font-size-2;
-            line-height: $font-line-height;
+            font-size: $size-2;
+            line-height: $lh;
         }
         .required {
             visibility: hidden;
         }
         input {
             width: 100%;
-            margin-bottom: $vertical-rhythm;
+            margin-bottom: $vr;
             color: $color-black;
         }
         .row {
@@ -105,11 +105,11 @@ The sidebar should use a dark UI.
         margin-bottom: 0;
         border-bottom: 1px solid $color-grey-3;
         background-color: $color-black;
-        font-weight: $font-weight-bold;
+        font-weight: $bold;
         .username, .sign-up, .log-in {
             @include flex(1);
             @include overflow-ellipsis;
-            padding: $vertical-rhythm/2;
+            padding: $vr/2;
             text-align: center;
             color: $color-white;
             text-decoration: none;
@@ -135,16 +135,16 @@ The sidebar should use a dark UI.
             background: $color-blue;
         }
         .dropdown-list-item {
-            font-size: $font-size-2;
+            font-size: $size-2;
         }
     }
 
     .requests {
         .actionable {
             display: block;
-            padding: $vertical-rhythm/2 $vertical-rhythm;
+            padding: $vr/2 $vr;
             color: $color-white;
-            font-weight: $font-weight-bold;
+            font-weight: $bold;
             text-decoration: none;
             &:hover {
                 background: $color-blue;
@@ -156,7 +156,7 @@ The sidebar should use a dark UI.
             }
         }
         .actionable-request-list {
-            margin-bottom: $vertical-rhythm/2;
+            margin-bottom: $vr/2;
             li {
                 border-top: 1px solid $color-grey-1;
                 &:last-child {
@@ -165,14 +165,14 @@ The sidebar should use a dark UI.
             }
             a {
                 display: block;
-                padding: $vertical-rhythm/2 $vertical-rhythm;
+                padding: $vr/2 $vr;
                 color: $color-white;
                 text-decoration: none;
                 &:hover {
                     background: $color-blue;
                 }
                 &.more {
-                    font-weight: $font-weight-bold;
+                    font-weight: $bold;
                 }
 
             }
@@ -181,7 +181,7 @@ The sidebar should use a dark UI.
                     background: $color-red;
                 }
             }
-            @include media($large-layout){
+            @include media($large-bp){
                 li {
                     border: none;
                     &:last-child {
@@ -189,8 +189,8 @@ The sidebar should use a dark UI.
                     }
                 }
                 a {
-                    padding: 0 $vertical-rhythm;
-                    font-size: $font-size-2;
+                    padding: 0 $vr;
+                    font-size: $size-2;
                 }
             }
         }
@@ -198,7 +198,7 @@ The sidebar should use a dark UI.
     }
 
     dfn {
-        padding: 0 $vertical-rhythm/2;
+        padding: 0 $vr/2;
         color: $color-white;
     }
 
@@ -213,8 +213,8 @@ The sidebar should use a dark UI.
             position: absolute;
             z-index: 2;
             bottom: 0;
-            padding: $vertical-rhythm/2;
-            font-weight: $font-weight-bold;
+            padding: $vr/2;
+            font-weight: $bold;
             color: $color-white;
             text-shadow: $color-black 1px 1px 1px;
         }
@@ -231,9 +231,9 @@ The sidebar should use a dark UI.
 
     .your-requests, .your-organization, .your-projects {
         display: block;
-        padding: $vertical-rhythm/2 $vertical-rhythm;
+        padding: $vr/2 $vr;
         color: $color-white;
-        font-weight: $font-weight-bold;
+        font-weight: $bold;
         text-decoration: none;
         &:hover {
             background: $color-blue;
@@ -241,7 +241,7 @@ The sidebar should use a dark UI.
     }
 
 
-    @include media($large-layout) {
+    @include media($large-bp) {
         &, .article, .payment.failure {
             box-shadow: inset 4px 0px 8px rgba(0, 0, 0, 0.25);
         }

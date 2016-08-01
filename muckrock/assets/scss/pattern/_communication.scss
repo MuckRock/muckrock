@@ -9,7 +9,7 @@
             @include align-items(center);
         }
         .options .icon {
-            margin-left: $vertical-rhythm;
+            margin-left: $vr;
             path {
                 fill: $color-white;
             }
@@ -24,9 +24,9 @@
     }
     .from, .subject {
         margin-bottom: 0;
-        margin-right: $vertical-rhythm/2;
+        margin-right: $vr/2;
         @include overflow-ellipsis;
-        font-weight: $font-weight-bold;
+        font-weight: $bold;
     }
     .communication-metadata {
         @include display(flex);
@@ -66,7 +66,7 @@
         width: 100%;
         height: 100%;
         margin-bottom: 0;
-        padding: $vertical-rhythm;
+        padding: $vr;
         background-color: $color-grey-2;
         color: $color-white;
         &.visible {
@@ -75,10 +75,10 @@
         label, input, select {
             display: block;
             width: 100%;
-            margin-bottom: $vertical-rhythm/2;
+            margin-bottom: $vr/2;
         }
         label {
-            font-weight: $font-weight-bold;
+            font-weight: $bold;
         }
         input {
             color: $color-black;

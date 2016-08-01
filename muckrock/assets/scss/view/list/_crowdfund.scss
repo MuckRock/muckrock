@@ -5,12 +5,12 @@
         @include display(flex);
         @include flex-direction(column);
         @include justify-content(space-between);
-        margin-bottom: $vertical-rhythm;
+        margin-bottom: $vr;
         @include border;
         @include border-radius;
         .left, .right {
             margin-bottom: 0;
-            padding: $vertical-rhythm;
+            padding: $vr;
         }
         .left {
             @include flex(1);
@@ -24,14 +24,14 @@
                 margin-bottom: 0;
             }
         }
-        @include media($medium-layout) {
+        @include media($medium-bp) {
             @include flex-direction(row);
             .right {
                 border-top: none;
                 border-left: 1px solid $color-grey;
             }
             .view {
-                font-size: $font-size-4;
+                font-size: $size-4;
             }
         }
     }

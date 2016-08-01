@@ -1,10 +1,10 @@
 .create.project {
     max-width: 40em;
-    margin: 0 auto $vertical-rhythm;
+    margin: 0 auto $vr;
 }
 .publish.project {
     max-width: 40em;
-    margin: 0 auto $vertical-rhythm;
+    margin: 0 auto $vr;
 }
 .project__update {
     .project__update__header {
@@ -25,8 +25,8 @@
     }
     .description textarea {
         min-height: 20em;
-        font-family: $font-monospace;
-        font-size: $font-size-2;
+        font-family: $monospace;
+        font-size: $size-2;
     }
     .description p {
         max-width: 40em;
@@ -36,21 +36,21 @@
 .project {
     .stats {
         .stat {
-            font-size: $font-size-2;
-            line-height: $font-line-height;
+            font-size: $size-2;
+            line-height: $lh;
         }
         .value {
             display: block;
-            font-weight: $font-weight-bold;
-            font-size: $font-size-4;
-            line-height: $font-line-height;
+            font-weight: $bold;
+            font-size: $size-4;
+            line-height: $lh;
         }
     }
     .autocomplete-light-widget, .requests .deck, .articles .deck {
         @include display(flex);
         @include flex-direction(column-reverse);
         input {
-            margin-bottom: $vertical-rhythm;
+            margin-bottom: $vr;
         }
     }
 }
@@ -67,7 +67,7 @@
     }
 
     .prompt, .overview, .objects {
-        margin: 0 auto $vertical-rhythm;
+        margin: 0 auto $vr;
     }
 
     .prompt {
@@ -76,9 +76,9 @@
         border: 1px solid $color-blue;
         background: $color-blue-light;
         color: $color-blue-dark;
-        font-weight: $font-weight-bold;
+        font-weight: $bold;
         ol {
-            padding-left: $vertical-rhythm;
+            padding-left: $vr;
         }
         a {
             text-decoration: underline;
@@ -96,39 +96,39 @@
         .overview__main {
             @include flex(2 1 20em);
             min-width: 0;
-            margin-bottom: $vertical-rhythm;
+            margin-bottom: $vr;
         }
         .overview__aside {
             @include flex(1 1 10em);
             min-width: 0;
             @media (min-width: 33.25em) {
-                padding: 0 $vertical-rhythm;
+                padding: 0 $vr;
             }
         }
         .title {
-            @include media($medium-layout){
-                font-size: $font-size-9;
-                line-height: $font-line-height;
+            @include media($medium-bp){
+                font-size: $size-9;
+                line-height: $lh;
             }
         }
         summary {
-            font-size: $font-size-4;
-            line-height: $font-line-height;
+            font-size: $size-4;
+            line-height: $lh;
         }
         .contributors header {
             @include display(flex);
             @include justify-content(space-between);
-            margin-bottom: $vertical-rhythm/2;
+            margin-bottom: $vr/2;
         }
         & > .contributor {
             @include display(flex);
-            margin-bottom: $vertical-rhythm/2;
+            margin-bottom: $vr/2;
             .avatar {
                 display: block;
                 @include border-radius;
             }
             .info {
-                padding: $vertical-rhythm/4 $vertical-rhythm/2;
+                padding: $vr/4 $vr/2;
                 p {
                     margin-bottom: 0;
 
@@ -141,10 +141,10 @@
                     path { fill: $color-blue; }
                 }
                 .name {
-                    font-weight: $font-weight-bold;
+                    font-weight: $bold;
                 }
                 .icon {
-                    margin-left: $vertical-rhythm/2;
+                    margin-left: $vr/2;
                 }
             }
         }
@@ -165,7 +165,7 @@
             @include flex(1 1 20em);
         }
         .articles {
-            margin-right: $vertical-rhythm;
+            margin-right: $vr;
         }
     }
 }
@@ -193,7 +193,7 @@
             @include justify-content(flex-end);
             min-height: 100%;
             width: 100%;
-            padding: $vertical-rhythm;
+            padding: $vr;
             background: rgb(52, 61, 71);
             background: rgba(52, 61, 71, .8);
             &:hover {
@@ -203,11 +203,11 @@
         }
         h2 {
             max-width: 20em;
-            font-size: $font-size-6;
-            line-height: $font-line-height;
-            @include media($medium-layout) {
-                font-size: $font-size-8;
-                line-height: $font-line-height;
+            font-size: $size-6;
+            line-height: $lh;
+            @include media($medium-bp) {
+                font-size: $size-8;
+                line-height: $lh;
             }
         }
         a {
@@ -215,9 +215,9 @@
         }
     }
     .overview, .details {
-        padding: $vertical-rhythm/2;
-        @include media($medium-layout) {
-            padding: $vertical-rhythm;
+        padding: $vr/2;
+        @include media($medium-bp) {
+            padding: $vr;
         }
     }
     .overview {
@@ -230,7 +230,7 @@
             }
         }
         .more {
-            font-weight: $font-weight-bold;
+            font-weight: $bold;
         }
     }
     .details {

@@ -9,7 +9,7 @@
 
 {% block list-content %}
 {% if object_list %}
-    {% include 'lib/pagination.html' %}
+    {% include 'lib/component/pagination.html' %}
     <ul class="nostyle">
         {% for article in object_list %}
         <li class="news-list-article">
@@ -17,7 +17,7 @@
         </li>
         {% endfor %}
     </ul>
-    {% include 'lib/pagination.html' %}
+    {% include 'lib/component/pagination.html' %}
 {% else %}
     <p class="list-empty">No Results</p>
 {% endif %}

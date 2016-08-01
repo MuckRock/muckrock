@@ -28,10 +28,10 @@ $shadow-active: 0px;
     $color-dark: darken($color, $color-darken-amount);
     // Metrics
     display: inline-block;
-    margin: $vertical-rhythm/4 0;
+    margin: $vr/4 0;
     border: 1px solid $color-dark;
-    border-radius: $base-border-radius;
-    padding: $vertical-rhythm/6 $vertical-rhythm/3;
+    border-radius: $border-radius;
+    padding: $vr/6 $vr/3;
     box-shadow: 0px $shadow-normal 0px 0px $color-dark;
     text-shadow: 0px -1px $color-dark;
     // Color
@@ -44,7 +44,7 @@ $shadow-active: 0px;
         }
     }
     // Type
-    font-weight: $font-weight-bold;
+    font-weight: $bold;
     text-align: center;
     text-decoration: none;
     text-shadow: inset 0px 1px $color;

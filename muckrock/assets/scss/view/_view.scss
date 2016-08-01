@@ -13,6 +13,7 @@ html, body {
     @include display(flex);
     @include flex-direction(column);
     min-height: 100vh;
+    overflow: hidden;
     margin-bottom: 0;
     background-color: $color-white;
 }
@@ -29,7 +30,6 @@ html, body {
 @import 'new-request';
 @import 'donate';
 @import 'draft-request';
-@import 'crowdfund';
 @import 'map';
 @import 'project';
 @import 'accounts';

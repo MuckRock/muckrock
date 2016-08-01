@@ -14,9 +14,9 @@
     @include justify-content(space-between);
     width: 100%;
     margin-bottom: 0;
-    padding: $vertical-rhythm/4;
+    padding: $vr/4;
     text-align: center;
-    font-weight: $font-weight-bold;
+    font-weight: $bold;
     a {
         cursor: pointer;
     }

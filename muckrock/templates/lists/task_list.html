@@ -89,10 +89,10 @@
         </form>
     </section>
     {% if object_list %}
-        {% include 'lib/pagination.html' %}
+        {% include 'lib/component/pagination.html' %}
         {% for task in object_list %}
             {% include 'lib/task.html' %}
         {% endfor %}
-        {% include 'lib/pagination.html' %}
+        {% include 'lib/component/pagination.html' %}
     {% endif %}
 {% endblock list-content %}

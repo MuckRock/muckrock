@@ -2,11 +2,11 @@
 {% load static from staticfiles %}
 
 {% block content %}
-<article class="account signup">
+<article class="account signup form">
     <header>
         <h1>Subscribe to a Professional account</h1>
     </header>
-    <form method="post" class="signup__form--pro" id="subscribe">
+    <form method="post" class="signup--pro" id="subscribe">
         {% csrf_token %}
         <input type="hidden" name="stripe_token" value="" />
         <input type="hidden" name="stripe_pk" value="{{ stripe_pk }}" />

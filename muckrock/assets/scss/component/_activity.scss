@@ -3,7 +3,7 @@
     @include justify-content(space-between);
     @include border;
     @include border-radius;
-    padding: $vertical-rhythm/2;
+    padding: $vr/2;
 }
 
 .activity {
@@ -11,5 +11,5 @@
 }
 
 .activity-time {
-    font-size: $font-size-2;
+    font-size: $size-2;
 }

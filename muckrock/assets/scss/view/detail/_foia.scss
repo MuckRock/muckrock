@@ -1,33 +1,15 @@
 $request-breakpoint: 768px;
 
-.request.detail {
-    @include display(flex);
-    @include flex-wrap(wrap);
-    @include align-items(stretch);
-    .request.properties {
-        @include flex(1 1 13em);
-    }
-    .request.main {
-        @include flex(3 1 32em);
-        min-width: 0;
-    }
-    @media all and (min-width: $request-breakpoint) {
-        .request.properties {
-            padding-right: $vertical-rhythm;
-        }
-    }
-}
-
 .request.properties {
     @include display(flex);
     @include flex-direction(column);
     h1 {
-        font-size: $font-size-6;
-        font-weight: $font-weight-bold;
+        font-size: $size-6;
+        font-weight: $bold;
     }
     .synopsis {
-        font-size: $font-size-4;
-        line-height: $font-line-height*1.2;
+        font-size: $size-4;
+        line-height: $lh*1.2;
         a {
             border-bottom: 1px dotted $color-blue;
             &:hover {
@@ -37,7 +19,7 @@ $request-breakpoint: 768px;
         }
     }
     .numbers, .dates {
-        font-size: $font-size-2;
+        font-size: $size-2;
         tr {
             background-color: $color-white;
         }
@@ -49,20 +31,20 @@ $request-breakpoint: 768px;
             @include overflow-ellipsis;
         }
         .action {
-            margin-left: $vertical-rhythm/2;
+            margin-left: $vr/2;
             float: right;
         }
     }
     .change-date {
         display: none;
         @include border;
-        padding: $vertical-rhythm/2;
+        padding: $vr/2;
         @include align-items(flex-start);
         @include flex-wrap(wrap);
         @include justify-content(space-between);
         label, input[type="text"] {
             @include flex(0 1 100%);
-            margin-bottom: $vertical-rhythm/2;
+            margin-bottom: $vr/2;
         }
         &.visible {
             @include display(flex);
@@ -77,8 +59,8 @@ $request-breakpoint: 768px;
         @include flex-wrap(wrap);
         @include align-items(center);
         @include border;
-        padding: $vertical-rhythm/4 $vertical-rhythm/2;
-        font-weight: $font-weight-bold;
+        padding: $vr/4 $vr/2;
+        font-weight: $bold;
         p, footer {
             margin-bottom: 0;
         }
@@ -122,13 +104,13 @@ $request-breakpoint: 768px;
 
     .communications-actions {
         margin-bottom: 0;
-        @include media($medium-layout) {
+        @include media($medium-bp) {
             text-align: right;
         }
     }
     .communications-settings {
         margin-bottom: 0;
-        margin-top: $vertical-rhythm;
+        margin-top: $vr;
         p {
             margin-bottom: 0;
         }
@@ -140,7 +122,7 @@ $request-breakpoint: 768px;
     .auto-follow-up {
         @include display(flex);
         @include justify-content(space-between);
-        padding: $vertical-rhythm/2;
+        padding: $vr/2;
         border: 1px solid $color-blue;
         color: $color-blue;
         p {
@@ -162,7 +144,7 @@ $request-breakpoint: 768px;
         header {
             display: block;
             margin-bottom: 0;
-            padding: $vertical-rhythm/2;
+            padding: $vr/2;
             border-bottom: 1px solid $color-grey;
             p {
                 margin-bottom: 0;
@@ -178,13 +160,13 @@ $request-breakpoint: 768px;
             border-radius: 0;
         }
         .help-text{
-            padding: 0 $vertical-rhythm/2;
+            padding: 0 $vr/2;
         }
         input[type="checkbox"] {
-            margin-left: $vertical-rhythm/2;
+            margin-left: $vr/2;
         }
         .currency {
-            font-size: $font-size-4;
+            font-size: $size-4;
         }
         .field {
             margin-bottom: 0;
@@ -204,7 +186,7 @@ $request-breakpoint: 768px;
             border-radius: 0;
         }
         .buttons {
-            padding: $vertical-rhythm/2;
+            padding: $vr/2;
             border-top: 1px solid $color-grey;
             @include display(flex);
             @include justify-content(space-between);
@@ -212,7 +194,7 @@ $request-breakpoint: 768px;
         &.inactive {
             p {
                 height: 15em;
-                padding: $vertical-rhythm/2;
+                padding: $vr/2;
                 background-color: #FFF;
                 color: $color-grey;
             }
@@ -233,7 +215,7 @@ $request-breakpoint: 768px;
         display: none;
         @include border-radius;
         border: 1px solid $color-black;
-        padding: $vertical-rhythm/4 $vertical-rhythm/2 $vertical-rhythm/2 $vertical-rhythm/2;
+        padding: $vr/4 $vr/2 $vr/2 $vr/2;
         background: $color-grey-2;
         color: $color-white;
         &.visible {
@@ -243,18 +225,18 @@ $request-breakpoint: 768px;
             @include display(flex);
             @include justify-content(space-between);
             @include align-items(flex-start);
-            margin-bottom: $vertical-rhythm/2;
+            margin-bottom: $vr/2;
             h3 {
                 margin-bottom: 0;
             }
             .cancel.button {
-                margin-left: $vertical-rhythm;
+                margin-left: $vr;
             }
         }
     }
     .files-list {
         .file {
-            margin-bottom: $vertical-rhythm/2;
+            margin-bottom: $vr/2;
         }
         .active .file {
             border-color: $color-blue;
@@ -290,8 +272,8 @@ $request-breakpoint: 768px;
             margin-bottom: 0;
             border: none;
             border-radius: 0;
-            font-family: $font-monospace;
-            font-size: $font-size-2;
+            font-family: $monospace;
+            font-size: $size-2;
         }
         h4 {
             margin-bottom: 0;
@@ -301,20 +283,20 @@ $request-breakpoint: 768px;
             @include justify-content(space-between);
             @include align-items(flex-end);
             margin-bottom: 0;
-            padding: $vertical-rhythm/2;
+            padding: $vr/2;
             border-bottom: 1px solid $color-grey;
             p {
-                font-size: $font-size-2;
+                font-size: $size-2;
             }
         }
         footer {
             @include display(flex);
             @include justify-content(space-between);
             @include align-items(center);
-            padding: $vertical-rhythm/2;
+            padding: $vr/2;
             border-top: 1px solid $color-grey;
             p {
-                padding-left: $vertical-rhythm;
+                padding-left: $vr;
             }
         }
     }
@@ -327,7 +309,7 @@ $request-breakpoint: 768px;
             @include display(flex);
             @include justify-content(space-between);
             margin-bottom: 0;
-            padding: $vertical-rhythm/2;
+            padding: $vr/2;
             background-color: $color-grey;
             color: $color-white;
             p {
@@ -337,11 +319,11 @@ $request-breakpoint: 768px;
                 color: $color-white;
             }
             .note-author {
-                font-weight: $font-weight-bold;
+                font-weight: $bold;
             }
         }
         .note-body {
-            padding: $vertical-rhythm/2;
+            padding: $vr/2;
         }
         &.collapsed .note-body {
             display: none;
@@ -351,7 +333,7 @@ $request-breakpoint: 768px;
 
 .request .access {
     .generate-private-link, .grant-access {
-        padding: $vertical-rhythm;
+        padding: $vr;
         @include border;
         h3 {
             @include flex(0 1 100%);
@@ -367,7 +349,7 @@ $request-breakpoint: 768px;
         @include align-items(flex-start);
         input[type="text"] {
             @include flex(0 1 100%);
-            margin-bottom: $vertical-rhythm;
+            margin-bottom: $vr;
             @include transition(background-color 1s ease-out);
             background-color: #FFF;
             &.success {
@@ -379,7 +361,7 @@ $request-breakpoint: 768px;
             @include flex(1);
         }
         .help-text {
-            padding-left: $vertical-rhythm;
+            padding-left: $vr;
         }
     }
     .grant-access .picker {
@@ -396,19 +378,19 @@ $request-breakpoint: 768px;
             }
             label {
                 display: block;
-                font-size: $font-size-2;
+                font-size: $size-2;
             }
         }
         select[name="access"] {
             @include flex(0 1 100%);
-            margin-bottom: $vertical-rhythm;
+            margin-bottom: $vr;
         }
 
         .user.hilight {
             width: 100%;
         }
 
-        @include media($medium-layout) {
+        @include media($medium-bp) {
             .user.search.input {
                 @include flex(0 1 70%);
             }
@@ -424,12 +406,12 @@ $request-breakpoint: 768px;
             background-color: $color-white;
         }
         .person td {
-            padding: $vertical-rhythm/2;
+            padding: $vr/2;
             vertical-align: middle;
             text-align: right;
             &.name {
                 text-align: left;
-                font-weight: $font-weight-bold;
+                font-weight: $bold;
             }
             &.access.nostretch {
                 width:1%;
@@ -438,7 +420,7 @@ $request-breakpoint: 768px;
             &.modify {
                 width: 5em;
             }
-            @include media($medium-layout) {
+            @include media($medium-bp) {
                 &.nostretch {
                     width:1%;
                     white-space:nowrap;
@@ -447,25 +429,25 @@ $request-breakpoint: 768px;
         }
         .access-badge {
             width: 5em;
-            padding: $vertical-rhythm/4 $vertical-rhythm/2;
+            padding: $vr/4 $vr/2;
             background: $color-grey;
             color: $color-white;
             text-align: center;
-            font-size: $font-size-2;
+            font-size: $size-2;
             &.editor {
                 background: $color-green;
             }
             &.reader {
                 background: $color-blue;
             }
-            @include media($medium-layout) {
-                font-size: $font-size-3;
+            @include media($medium-bp) {
+                font-size: $size-3;
             }
         }
         button {
-            padding: $vertical-rhythm/6 $vertical-rhythm/2;
+            padding: $vr/6 $vr/2;
             width: 5em;
-            @include media($medium-layout) {
+            @include media($medium-bp) {
                 margin: 0 0 4px;
             }
         }

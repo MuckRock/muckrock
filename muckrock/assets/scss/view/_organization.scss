@@ -15,15 +15,15 @@
     aside {
         @include border;
         @include border-radius;
-        margin-right: $vertical-rhythm;
-        padding: $vertical-rhythm;
+        margin-right: $vr;
+        padding: $vr;
     }
     label {
         @extend dfn;
     }
     form input {
         display: block;
-        margin-bottom: $vertical-rhythm;
+        margin-bottom: $vr;
         width: 100%;
     }
     .errorlist {
@@ -32,7 +32,7 @@
         margin-bottom: 0;
         color: $color-red;
         li {
-            margin-bottom: $vertical-rhythm;
+            margin-bottom: $vr;
         }
         & + input {
             color: $color-red-dark;
@@ -50,7 +50,7 @@ $request-breakpoint: 768px;
     @media all and (min-width: $request-breakpoint) {
         @include flex-direction(row);
         & > * {
-            margin-left: $vertical-rhythm;
+            margin-left: $vr;
             &:first-child {
                 margin-left: 0;
             }
@@ -66,8 +66,8 @@ $request-breakpoint: 768px;
 
 .organization.detail .sidebar {
     h1 {
-        // font-size: $font-size-6;
-        font-weight: $font-weight-bold;
+        // font-size: $size-6;
+        font-weight: $bold;
     }
     form {
         display: inline-block;
@@ -78,7 +78,7 @@ $request-breakpoint: 768px;
 }
 
 .organization.detail .tab-sections {
-    margin-bottom: $vertical-rhythm;
+    margin-bottom: $vr;
     .tab-section {
         display: none;
         margin-bottom: 0;
@@ -87,17 +87,17 @@ $request-breakpoint: 768px;
         display: block;
     }
     .empty {
-        margin: 2*$vertical-rhythm auto;
+        margin: 2*$vr auto;
         color: $color-grey;
-        font-size: $font-size-5;
-        font-weight: $font-weight-bold;
+        font-size: $size-5;
+        font-weight: $bold;
         text-align: center;
     }
 }
 
 .organization.detail .add-members {
     border: 1px solid $color-grey;
-    padding: $vertical-rhythm;
+    padding: $vr;
     .add-members-input {
         @include display(flex);
         @include align-items(flex-end);
@@ -110,19 +110,19 @@ $request-breakpoint: 768px;
         }
         input {
             width: 100%;
-            padding: $vertical-rhythm/2;
+            padding: $vr/2;
         }
         label {
             display: block;
-            font-size: $font-size-2;
+            font-size: $size-2;
         }
     }
     button {
         @include flex(1);
-        margin-left: $vertical-rhythm;
+        margin-left: $vr;
     }
 
-    @include media($medium-layout) {
+    @include media($medium-bp) {
         .user.search.input {
             @include flex(0 1 70%);
         }

@@ -25,15 +25,15 @@
         svg {
             width: $svg-size;
             height: $svg-size;
-            padding: $vertical-rhythm/2;
+            padding: $vr/2;
             vertical-align: middle;
         }
     }
     .text {
         flex: 1 1 auto;
-        padding: $vertical-rhythm/2;
+        padding: $vr/2;
     }
-    @include media($medium-layout) {
+    @include media($medium-bp) {
         @include flex-direction(row);
         .symbol {
             text-align: center;

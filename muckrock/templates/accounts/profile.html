@@ -27,142 +27,138 @@
 {% endblock twitter_card %}
 
 {% block metadata %}
-<aside class="metadata">
-    <section class="identity">
-        {% if profile.avatar %}<img src="{% thumbnail profile.avatar 600x600 %}" class="avatar">{% endif %}
-        <h1 class="fullname">{{user_obj.get_full_name}}</h1>
-        <p class="username">{{user_obj.username}}</p>
-    </section>
-    <ul class="links nostyle">
-        {% if profile.twitter %}
-        <li class="twitter">
-            {% include 'lib/component/icon/twitter.svg' %}
-            <a href="https://www.twitter.com/{{profile.twitter}}" title="{{user_obj.first_name}}'s Twitter profile">@{{profile.twitter}}</a>
-        </li>
-        {% endif %}
-        {% if profile.location %}
-        <li class="location">
-            {% include 'lib/component/icon/location.svg' %}
-            <a href="{{profile.location.get_absolute_url}}">{{profile.location}}</a>
-        </li>
-        {% endif %}
-    </ul>
-    {% if user == user_obj %}
-    <dl class="stats">
-        {% if user.profile.acct_type != 'basic' %}
-        <dt>Monthly Requests</dt>
-            {% if user_obj.profile.get_monthly_requests %}
-        <dd>{{ user_obj.profile.get_monthly_requests }}</dd>
-            {% else %}
-        <dd>0</dd>
-            {% endif %}
-        {% endif %}
-        <dt>Requests Remaining</dt>
-        {% if user_obj.profile.num_requests %}
-        <dd>{{ user_obj.profile.num_requests }}</dd>
+<section class="identity">
+    {% if profile.avatar %}<img src="{% thumbnail profile.avatar 600x600 %}" class="avatar">{% endif %}
+    <h1 class="fullname">{{user_obj.get_full_name}}</h1>
+    <p class="username">{{user_obj.username}}</p>
+</section>
+<ul class="links nostyle">
+    {% if profile.twitter %}
+    <li class="twitter">
+        {% include 'lib/component/icon/twitter.svg' %}
+        <a href="https://www.twitter.com/{{profile.twitter}}" title="{{user_obj.first_name}}'s Twitter profile">@{{profile.twitter}}</a>
+    </li>
+    {% endif %}
+    {% if profile.location %}
+    <li class="location">
+        {% include 'lib/component/icon/location.svg' %}
+        <a href="{{profile.location.get_absolute_url}}">{{profile.location}}</a>
+    </li>
+    {% endif %}
+</ul>
+{% if user == user_obj %}
+<dl class="stats">
+    {% if user.profile.acct_type != 'basic' %}
+    <dt>Monthly Requests</dt>
+        {% if user_obj.profile.get_monthly_requests %}
+    <dd>{{ user_obj.profile.get_monthly_requests }}</dd>
         {% else %}
-        <dd>0</dd>
+    <dd>0</dd>
         {% endif %}
-    </dl>
     {% endif %}
-    {% if org %}
-    <p class="organization">{% if org.owner == user_obj %}Owner{% else %}Member{% endif %} of <a href="{% url 'org-detail' org.slug %}" title="{{org}}'s organization page">{{org}}</a></p>
+    <dt>Requests Remaining</dt>
+    {% if user_obj.profile.num_requests %}
+    <dd>{{ user_obj.profile.num_requests }}</dd>
+    {% else %}
+    <dd>0</dd>
     {% endif %}
-</aside>
+</dl>
+{% endif %}
+{% if org %}
+<p class="organization">{% if org.owner == user_obj %}Owner{% else %}Member{% endif %} of <a href="{% url 'org-detail' org.slug %}" title="{{org}}'s organization page">{{org}}</a></p>
+{% endif %}
 {% endblock metadata %}
 
 {% block activity %}
-<main class="activity">
-    <section class="actions">
-        <form action="{% url 'acct-buy-requests' username=user_obj.username %}" method="POST" class="stripe-checkout" id="buy-requests">
-            {% csrf_token %}
-            <input type="hidden" name="stripe_token" value="" />
-            <input type="hidden" name="stripe_pk" value="{{ stripe_pk }}" />
-            <input type="hidden" name="stripe_image" value="{% static 'icons/logo.png' %}" />
-            <input type="hidden" name="stripe_email" value="{{request.user.email}}" />
-            {% if request.user == user_obj %}
-            <input type="hidden" name="stripe_label" value="Buy" />
-            {% else %}
-            <input type="hidden" name="stripe_label" value="Gift" />
-            {% endif %}
-            {% if request.user.is_authenticated %}
-            <input type="hidden" name="stripe_description" value="{{request.user.profile.bundled_requests}} requests ($20.00)" />
-            {% else %}
-            <input type="hidden" name="stripe_description" value="4 requests ($20.00)" />
-            {% endif %}
-            <input type="hidden" name="stripe_bitcoin" value="true" />
-            <input type="hidden" name="stripe_fee" value="0" />
-            <input type="hidden" name="stripe_amount" value="2000" />
-        </form>
-        <div>
-            {% if request.user == user_obj %}
-            <div class="button-group">
-                <a href="{% url 'foia-create' %}" class="primary button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
-                    {% include 'lib/component/icon/create-request.svg' %}
-                    <span>File a Request</span>
-                </a>
-                <button class="primary button" form="buy-requests" type="submit">Buy Requests</button>
-            </div>
-            <a href="{% url 'acct-settings' %}" class="button">Settings</a>
-            {% else %}
-            <button class="primary button" form="buy-requests" type="submit">&hearts; Gift Requests</button>
-            {% endif %}
-        </div>
-    </section>
-    {% if projects %}
-    <section class="projects">
-        <h3>
-            {% if request.user == user_obj %}Your Projects{% else %}Projects{% endif %}
-            <small><a href="{% url 'project-contributor' username=user_obj.username %}">See all</a></small>
-        </h3>
-        <div class="project-group">
-        {% for project in projects %}
-            {% include 'lib/pattern/project.html' %}
-        {% endfor %}
-        </div>
-    </section>
-    {% endif %}
-    {% if articles %}
-    <section class="articles">
-        <h3>
-            {% if request.user == user_obj %}Your Latest Articles{% else %}Latest Articles{% endif %}
-            <small><a href="{% url 'news-author' username=user_obj.username %}">See all</a></small>
-        </h3>
-        {% for article in articles %}
-        {% include 'lib/pattern/article.html' %}
-        {% endfor %}
-    </section>
-    {% endif %}
-    {% if requests.recent or requests.completed %}
-    <section class="requests">
-        {% if requests.recent %}
-            {% if request.user == user_obj %}
-            <h3>Your Latest Requests <small><a href="{% url 'foia-mylist' %}">See all</a></small></h3>
-            {% else %}
-            <h3>Latest Requests <small><a href="{% url 'foia-list' %}?user={{user_obj.pk}}">See all</a></small></h3>
-            {% endif %}
-            {% include 'lib/foia_table.html' with requests=requests.recent %}
-        {% endif %}
-        {% if requests.completed %}
-            {% if request.user == user_obj %}
-            <h3>Your Recently Completed Requests <small><a href="{% url 'foia-mylist' %}?status=done">See all</a></small></h3>
-            {% else %}
-            <h3>Recently Completed Requests <small><a href="{% url 'foia-list' %}?user={{user_obj.pk}}&status=done">See all</a></small></h3>
-            {% endif %}
-            {% include 'lib/foia_table.html' with requests=requests.completed %}
-        {% endif %}
-    {% else %}
+<section class="actions">
+    <form action="{% url 'acct-buy-requests' username=user_obj.username %}" method="POST" class="stripe-checkout" id="buy-requests">
+        {% csrf_token %}
+        <input type="hidden" name="stripe_token" value="" />
+        <input type="hidden" name="stripe_pk" value="{{ stripe_pk }}" />
+        <input type="hidden" name="stripe_image" value="{% static 'icons/logo.png' %}" />
+        <input type="hidden" name="stripe_email" value="{{request.user.email}}" />
         {% if request.user == user_obj %}
-        <h3>You haven&rsquo;t filed any requests. <small><a href="{% url 'foia-create'%}">Create one now.</a></small></h3>
+        <input type="hidden" name="stripe_label" value="Buy" />
         {% else %}
-        <h3>{{user_obj.first_name}} hasn&rsquo;t filed any requests.</h3>
+        <input type="hidden" name="stripe_label" value="Gift" />
         {% endif %}
+        {% if request.user.is_authenticated %}
+        <input type="hidden" name="stripe_description" value="{{request.user.profile.bundled_requests}} requests ($20.00)" />
+        {% else %}
+        <input type="hidden" name="stripe_description" value="4 requests ($20.00)" />
+        {% endif %}
+        <input type="hidden" name="stripe_bitcoin" value="true" />
+        <input type="hidden" name="stripe_fee" value="0" />
+        <input type="hidden" name="stripe_amount" value="2000" />
+    </form>
+    <div>
+        {% if request.user == user_obj %}
+        <div class="button-group">
+            <a href="{% url 'foia-create' %}" class="primary button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
+                {% include 'lib/component/icon/create-request.svg' %}
+                <span>File a Request</span>
+            </a>
+            <button class="primary button" form="buy-requests" type="submit">Buy Requests</button>
+        </div>
+        <a href="{% url 'acct-settings' %}" class="button">Settings</a>
+        {% else %}
+        <button class="primary button" form="buy-requests" type="submit">&hearts; Gift Requests</button>
+        {% endif %}
+    </div>
+</section>
+{% if projects %}
+<section class="projects">
+    <h3>
+        {% if request.user == user_obj %}Your Projects{% else %}Projects{% endif %}
+        <small><a href="{% url 'project-contributor' username=user_obj.username %}">See all</a></small>
+    </h3>
+    <div class="project-group">
+    {% for project in projects %}
+        {% include 'lib/pattern/project.html' %}
+    {% endfor %}
+    </div>
+</section>
+{% endif %}
+{% if articles %}
+<section class="articles">
+    <h3>
+        {% if request.user == user_obj %}Your Latest Articles{% else %}Latest Articles{% endif %}
+        <small><a href="{% url 'news-author' username=user_obj.username %}">See all</a></small>
+    </h3>
+    {% for article in articles %}
+    {% include 'lib/pattern/article.html' %}
+    {% endfor %}
+</section>
+{% endif %}
+{% if requests.recent or requests.completed %}
+<section class="requests">
+    {% if requests.recent %}
+        {% if request.user == user_obj %}
+        <h3>Your Latest Requests <small><a href="{% url 'foia-mylist' %}">See all</a></small></h3>
+        {% else %}
+        <h3>Latest Requests <small><a href="{% url 'foia-list' %}?user={{user_obj.pk}}">See all</a></small></h3>
+        {% endif %}
+        {% include 'lib/foia_table.html' with requests=requests.recent %}
     {% endif %}
+    {% if requests.completed %}
+        {% if request.user == user_obj %}
+        <h3>Your Recently Completed Requests <small><a href="{% url 'foia-mylist' %}?status=done">See all</a></small></h3>
+        {% else %}
+        <h3>Recently Completed Requests <small><a href="{% url 'foia-list' %}?user={{user_obj.pk}}&status=done">See all</a></small></h3>
+        {% endif %}
+        {% include 'lib/foia_table.html' with requests=requests.completed %}
+    {% endif %}
+{% else %}
+    {% if request.user == user_obj %}
+    <h3>You haven&rsquo;t filed any requests. <small><a href="{% url 'foia-create'%}">Create one now.</a></small></h3>
+    {% else %}
+    <h3>{{user_obj.first_name}} hasn&rsquo;t filed any requests.</h3>
+    {% endif %}
+{% endif %}
 
-    {% if user == user_obj and user_obj.profile.follows_foia.all %}
-        <h3>Requests You Follow</h3>
-        {% include 'lib/foia_table.html' with requests=user_obj.profile.follows_foia.all %}
-    {% endif %}
-    </section>
-</main>
+{% if user == user_obj and user_obj.profile.follows_foia.all %}
+    <h3>Requests You Follow</h3>
+    {% include 'lib/foia_table.html' with requests=user_obj.profile.follows_foia.all %}
+{% endif %}
+</section>
 {% endblock activity %}

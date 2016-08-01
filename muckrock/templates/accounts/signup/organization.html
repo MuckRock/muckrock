@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<article class="account signup">
+<article class="account signup form">
     <header>
         <h1>Create an Organization account</h1>
         <p>Looking to join an existing organization? <a href="mailto:info@muckrock.com">Contact us.</a></p>
     </header>
-    <form method="post" class="signup__form--org">
+    <form method="post" class="signup--org">
         {% csrf_token %}
         {% include 'lib/pattern/form.html' %}
         <footer>
