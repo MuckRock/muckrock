@@ -277,6 +277,12 @@ class Exemption(models.Model):
         help_text='Sample language used for appealing the exemption.')
     # Optional fields
     tags = TaggableManager(through=TaggedItemBase, blank=True)
+    requests = models.ManyToManyField(
+        FOIARequest,
+        through='jurisdiction.InvokedExemption',
+        related_name='exemptions',
+        blank=True
+    )
     contributors = models.ManyToManyField(User, related_name='exemptions', blank=True)
     use_language = models.TextField(blank=True,
         help_text='Sample language used by agencies when invoking the exemption.')
@@ -305,3 +311,35 @@ class Exemption(models.Model):
         kwargs['idx'] = self.pk
         return reverse('exemption-detail', kwargs=kwargs)
 
+
+class InvokedExemption(models.Model):
+    """An invoked exemption tracks the use of an exemption in the course of fulfilling
+    (or rejecting!) a FOIA request. It should connect a request to an exemption and contain
+    information particular to the invocation of the exemption to the request.
+
+    It augments the Exemption model by providing specific examples of situations
+    where the exemption was invoked, i.e. there should only ever be 1 exemption
+    but there can be many invocations of that exemption."""
+    exemption = models.ForeignKey(Exemption, related_name='invokations')
+    request = models.ForeignKey(FOIARequest)
+    use_language = models.TextField(blank=True,
+        help_text='What language did the aguency use to invoke the exemption?')
+    properly_invoked = models.BooleanField(default=True,
+        help_text='Did the agency properly invoke the exemption to the request?')
+    appealed = models.BooleanField(default=False,
+        help_text='Was the exemption appealed?')
+    appeal_language = models.TextField(blank=True,
+        help_text='What language was used to appeal?')
+
+    def __unicode__(self):
+        return u'%s exemption of %s' % (self.exemption, self.request)
+
+    def __repr__(self):
+        return '%d' % self.pk
+
+    def get_absolute_url(self):
+        """Return the url for the exemption detail page, targeting the invokation."""
+        kwargs = self.exemption.jurisdiction.get_slugs()
+        kwargs['slug'] = self.exemption.slug
+        kwargs['idx'] = self.exemption.pk
+        return reverse('exemption-detail', kwargs=kwargs) + '#invoked-%d' % self.pk
