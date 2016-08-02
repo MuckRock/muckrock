@@ -277,6 +277,7 @@ class Exemption(models.Model):
         help_text='Sample language used for appealing the exemption.')
     # Optional fields
     tags = TaggableManager(through=TaggedItemBase, blank=True)
+    contributors = models.ManyToManyField(User, related_name='exemptions', blank=True)
     use_language = models.TextField(blank=True,
         help_text='Sample language used by agencies when invoking the exemption.')
     proper_use = models.TextField(blank=True,
