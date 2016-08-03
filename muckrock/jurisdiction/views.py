@@ -167,3 +167,15 @@ class ExemptionDetailView(DetailView):
     """Detail view for an individual exemption"""
     model = Exemption
     template_name = 'exemption/detail.html'
+
+    def get_queryset(self):
+        """Adds some database optimizations for getting the Exemption queryset."""
+        _queryset = super(ExemptionDetailView, self).get_queryset()
+        _queryset = _queryset.select_related('jurisdiction__parent__parent')
+        return _queryset
+
+    def get_context_data(self, **kwargs):
+        """Adds a flag form to the context."""
+        context = super(ExemptionDetailView, self).get_context_data(**kwargs)
+        context['flag_form'] = FlagForm()
+        return context

@@ -1,0 +1,47 @@
+{% extends 'base_detail.html' %}
+{% load markdown_deux_tags %}
+
+{% block title %}{{exemption.name}} &bull; MuckRock{% endblock title %}
+
+{% block type %}exemption{% endblock %}
+
+{% block header %}
+<p><a href="{{exemption.jurisdiction.get_absolute_url}}">{{exemption.jurisdiction}}</a></p>
+<h1>{{exemption.name}}</h1>
+{% endblock %}
+
+{% block aside %}
+<a href="#flag-form" class="modal-trigger button">Suggest Change</a>
+<div class="modal" id="flag-form">
+    <form method="post">
+        {% csrf_token %}
+        {% include 'lib/pattern/form.html' with form=flag_form %}
+        <footer>
+            <button type="submit" name="action" value="flag" class="primary button">Submit</button>
+            <span class="close-modal button">Cancel</span>
+        </footer>
+    </form>
+</div>
+{% endblock %}
+
+{% block main %}
+<div class="grid__row">
+    <div class="grid__column two-thirds">
+        {{exemption.basis|markdown}}
+    </div>
+    <div class="grid__column third">
+        <div>
+            <h2>Proper Use</h2>
+            {{exemption.proper_use|markdown}}
+        </div>
+        <div>
+            <h2>Improper Use</h2>
+            {{exemption.improper_use|markdown}}
+        </div>
+        <div class="small">
+            <h2>Key Citations</h2>
+            {{exemption.key_citations|markdown}}
+        </div>
+    </div>
+</div>
+{% endblock %}
