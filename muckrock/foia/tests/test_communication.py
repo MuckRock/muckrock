@@ -221,7 +221,8 @@ class TestCommunicationResend(test.TestCase):
         ok_(self.comm.date > self.creation_date,
             'Resubmitting the communication should update the date.')
         eq_(self.comm.foia.status, 'submitted',
-            'Resubmitting the communication should resubmit its associated FOIARequest.')
+            'Resubmitting the communication should resubmit its associated '
+            'FOIARequest.')
 
     def test_resend_with_email(self):
         """Should resubmit the FOIA containing the communication automatically"""

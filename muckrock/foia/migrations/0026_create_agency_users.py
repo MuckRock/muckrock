@@ -6,6 +6,8 @@ from django.db import migrations
 
 from email.utils import parseaddr
 import datetime
+import phonenumbers
+import re
 
 
 def unique_username(base_username, AgencyUser):
@@ -32,9 +34,16 @@ def create_agency_users(apps, schema_editor):
 
     def create_agency_user(email, agency, name=''):
         email = email.strip()
-        if not email:
+        if not email or email.endswith('muckrock.com'):
             return
+        if email.endswith('@fax2.faxaway.com'):
+            number = phonenumbers.parse(email.split('@')[0], 'US')
+            fax = phonenumbers.format_number(number,
+                    phonenumbers.PhoneNumberFormat.NATIONAL)
+        else:
+            fax = None
         exists = AgencyUser.objects.filter(email=email).exists()
+        fax_exists = fax and AgencyUser.objects.filter(profile__fax=fax).exists()
         if name:
             if ',' in name:
                 last_name, first_name = name.split(',', 1)
@@ -42,10 +51,13 @@ def create_agency_users(apps, schema_editor):
                 first_name, last_name = name.rsplit(' ', 1)
             else:
                 first_name, last_name = name, ''
-        if exists:
-            user = AgencyUser.objects.get(email=email)
-            user.profile.acct_type = 'agency'
-            user.profile.save()
+        if exists or fax_exists:
+            if exists:
+                user = AgencyUser.objects.get(email=email)
+            elif fax_exists:
+                user = AgencyUser.objects.get(profile__fax=fax)
+            if user.profile.acct_type != 'agency':
+                return user
 
             if name and (not user.first_name or not user.last_name):
                 user.first_name = first_name[:30]
@@ -59,24 +71,29 @@ def create_agency_users(apps, schema_editor):
             return user
         else:
             if name:
-                name_args = {
+                user_args = {
                     'first_name': first_name[:30],
                     'last_name': last_name[:30],
                     }
             else:
-                name_args = {}
+                user_args = {}
 
-            print 'email', len(email), email
+            if fax:
+                profile_args = {'fax': fax}
+            else:
+                user_args['email'] = email
+                profile_args = {}
             user = AgencyUser.objects.create(
-                    email=email,
                     username=unique_username(email, AgencyUser),
-                    **name_args
+                    **user_args
                     )
+
             Profile.objects.create(
                     user=user,
                     acct_type='agency',
                     email_pref='never',
                     date_update=datetime.date.today(),
+                    **profile_args
                     )
             AgencyProfile.objects.create(
                     user=user,
@@ -84,19 +101,31 @@ def create_agency_users(apps, schema_editor):
                     )
             return user
 
-    for foia in FOIARequest.objects.exclude(agency=None):
+    foias = FOIARequest.objects.exclude(agency=None)
+    total = len(foias)
+    for i, foia in enumerate(foias):
+        if i % 10 == 0:
+            print '{} out of {} foias'.format(i, total)
         if foia.email:
             user = create_agency_user(foia.email, foia.agency)
-            foia.contacts.add(user)
+            if user:
+                foia.contacts.add(user)
         for email in foia.other_emails.split(','):
+            if not email:
+                continue
             user = create_agency_user(email, foia.agency)
-            foia.cc_contacts.add(user)
+            if user:
+                foia.cc_contacts.add(user)
 
-    for comm in (FOIACommunication.objects
+    comms = (FOIACommunication.objects
             .exclude(foia=None)
             .exclude(foia__agency=None)
-            .exclude(priv_from_who='')):
+            .exclude(priv_from_who=''))
+    total = len(comms)
 
+    for i, comm in enumerate(comms):
+        if i % 10 == 0:
+            print '{} out of {} comms'.format(i, total)
         name, email = parseaddr(comm.priv_from_who)
         user = create_agency_user(email, comm.foia.agency, name=name)
         comm.from_user = user

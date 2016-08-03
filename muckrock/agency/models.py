@@ -62,10 +62,8 @@ class Agency(models.Model, RequestHelper):
             'accounts.AgencyUser',
             through='AgencyProfile',
             related_name='agencies')
-    # XXX set appeal agency to self if appeal to self?  if null does that mean no appeals?
+    # appeal agency must be set to auto send appeals
     appeal_agency = models.ForeignKey('self', null=True, blank=True)
-    # XXX delete this
-    can_email_appeals = models.BooleanField(default=False)
     payable_to = models.ForeignKey('self', related_name='receivable', null=True, blank=True)
     image = ThumbnailerImageField(
         upload_to='agency_images',
@@ -78,21 +76,13 @@ class Agency(models.Model, RequestHelper):
     stale = models.BooleanField(default=False)
     address = models.TextField(blank=True)
     location = PointField(blank=True)
-    # XXX delete
-    email = models.EmailField(blank=True) # maybe leave email
-    other_emails = fields.EmailsListField(blank=True, max_length=255)
-    contact_salutation = models.CharField(blank=True, max_length=30)
-    contact_first_name = models.CharField(blank=True, max_length=100)
-    contact_last_name = models.CharField(blank=True, max_length=100)
-    contact_title = models.CharField(blank=True, max_length=255)
-    # XXX delete
+    email = models.EmailField(blank=True)
     url = models.URLField(
             blank=True,
             verbose_name='FOIA Web Page',
             help_text='Begin with http://',
             )
     phone = models.CharField(blank=True, max_length=30)
-    # XXX maybe delete fax also?
     fax = models.CharField(
             blank=True,
             max_length=30,

@@ -30,15 +30,14 @@ class FOIACommunication(models.Model):
 
     foia = models.ForeignKey(FOIARequest, related_name='communications', blank=True, null=True)
 
-    # XXX these become deprecated
+    # these become deprecated
     # from/to names
     from_who = models.CharField(max_length=255)
     to_who = models.CharField(max_length=255, blank=True)
     # from/to full email address
     priv_from_who = models.CharField(max_length=255, blank=True)
-    # XXX use this to record addr orphans were sent to
+    # still use this to record addr orphans were sent to
     priv_to_who = models.CharField(max_length=255, blank=True)
-    # XXX
 
     from_user = models.ForeignKey(
             'auth.User',
@@ -88,7 +87,6 @@ class FOIACommunication(models.Model):
                       'If faxed, did we recieve a confirmation?')
 
     # only used for orphans
-    # XXX approved bool instead of seprate FK?
     likely_foia = models.ForeignKey(
         FOIARequest,
         related_name='likely_communications',

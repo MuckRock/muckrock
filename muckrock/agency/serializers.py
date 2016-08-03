@@ -55,7 +55,6 @@ class AgencySerializer(serializers.ModelSerializer):
             # connects to other agencies
             'parent',
             'appeal_agency',
-            'can_email_appeals',
             # describes agency foia process
             'url',
             'foia_logs',

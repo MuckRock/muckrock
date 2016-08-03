@@ -6,8 +6,6 @@ from django.db import migrations
 
 import phonenumbers
 
-# XXX move this in front of other migrations
-
 def format_faxes(apps, schema_editor):
     """Normalize faxes"""
     Agency = apps.get_model('agency', 'Agency')

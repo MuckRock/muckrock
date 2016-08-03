@@ -272,7 +272,6 @@ class FOIARequestAdmin(NestedModelAdmin, VersionAdmin):
 
     def _list_helper(self, request, foias, action):
         """List all the requests that need to be processed"""
-        # XXX do we use any of these any more?
         # pylint: disable=no-self-use
         paginator = Paginator(foias, 10)
         try:
