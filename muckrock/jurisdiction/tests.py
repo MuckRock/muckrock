@@ -215,3 +215,40 @@ class TestExemptionModel(TestCase):
         actual_url = self.exemption.get_absolute_url()
         eq_(actual_url, expected_url, ('The exemption should return the exemption-detail url.\n'
              'Actual url: %s\nExpected url: %s') % (actual_url, expected_url))
+
+
+class TestInvokedExemptionModel(TestCase):
+    """
+    The InvokedExemption model should contain information about a single invocation
+    of an exemption. For example, when an agency in Washington state uses the
+    Public Employment Applications exemption to withhold records from a request.
+    """
+    def setUp(self):
+        self.invoked_exemption = factories.InvokedExemptionFactory()
+
+    def test_unicode(self):
+        """The text representation should be the names of the exemption and the request."""
+        actual = unicode(self.invoked_exemption)
+        expected = u'%s exemption of %s' % (
+            self.invoked_exemption.exemption.name,
+            self.invoked_exemption.request,
+        )
+        eq_(actual,
+            expected,
+            ('Should include the name of the exemption and the request.\n'
+            'Actual: %s\nExpected: %s' % (actual, expected)))
+
+    def test_absolute_url(self):
+        """The absolute url of the invoked exemption should be the absolute url of the
+        exemption with the invokation pk appended as a target."""
+        exemption = self.invoked_exemption.exemption
+        kwargs = exemption.jurisdiction.get_slugs()
+        kwargs['slug'] = exemption.slug
+        kwargs['idx'] = exemption.pk
+        expected_url = (reverse('exemption-detail', kwargs=kwargs) +
+                        '#invoked-%d' % self.invoked_exemption.pk)
+        actual_url = self.invoked_exemption.get_absolute_url()
+        eq_(actual_url,
+            expected_url,
+            ('The exemption should return the exemption-detail url.\n'
+             'Actual url: %s\nExpected url: %s') % (actual_url, expected_url))

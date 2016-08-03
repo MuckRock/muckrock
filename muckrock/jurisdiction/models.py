@@ -332,7 +332,7 @@ class InvokedExemption(models.Model):
         help_text='What language was used to appeal?')
 
     def __unicode__(self):
-        return u'%s exemption of %s' % (self.exemption, self.request)
+        return u'%s exemption of %s' % (self.exemption.name, self.request)
 
     def __repr__(self):
         return '%d' % self.pk
