@@ -19,14 +19,14 @@ class TestJurisdictionUnit(TestCase):
         self.state = factories.StateJurisdictionFactory(parent=self.federal)
         self.local = factories.LocalJurisdictionFactory(parent=self.state)
 
-    def test_jurisdiction_repr(self):
+    def test_repr(self):
         """Test Jurisdiction model's __repr__ method"""
         pattern = '<Jurisdiction: %d>'
         eq_(self.federal.__repr__(), pattern % self.federal.pk)
         eq_(self.state.__repr__(), pattern % self.state.pk)
         eq_(self.local.__repr__(), pattern % self.local.pk)
 
-    def test_jurisdiction_unicode(self):
+    def test_unicode(self):
         """Test Jurisdiction model's __unicode__ method"""
         eq_(unicode(self.federal), u'United States of America')
         eq_(unicode(self.state), u'Massachusetts')
