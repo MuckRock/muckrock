@@ -2,6 +2,7 @@
 Admin registration for Jurisdiction models
 """
 
+from django import forms
 from django.conf.urls import patterns, url
 from django.contrib import admin, messages
 from django.shortcuts import render_to_response, redirect
@@ -10,11 +11,12 @@ from django.template import RequestContext
 
 from adaptor.model import CsvModel
 from adaptor.fields import CharField, DjangoModelField
+from autocomplete_light import shortcuts as autocomplete_light
 from reversion.admin import VersionAdmin
 import logging
 import sys
 
-from muckrock.jurisdiction.models import Jurisdiction, Law, Exemption
+from muckrock.jurisdiction.models import Jurisdiction, Law, Exemption, InvokedExemption
 from muckrock.jurisdiction.forms import CSVImportForm
 
 logger = logging.getLogger(__name__)
@@ -27,10 +29,22 @@ class LawInline(admin.StackedInline):
     model = Law
     extra = 0
 
-class ExemptionInline(admin.StackedInline):
-    """Exemption admin options"""
-    model = Exemption
+
+class InvokedExemptionAdminForm(forms.ModelForm):
+    """Adds an autocomplete to the invoked exemption request field."""
+    request = autocomplete_light.ModelChoiceField('FOIARequestAdminAutocomplete')
+
+    class Meta:
+        model = InvokedExemption
+        fields = '__all__'
+
+
+class InvokedExemptionInline(admin.StackedInline):
+    """Invoked exemption options"""
+    form = InvokedExemptionAdminForm
+    model = InvokedExemption
     extra = 0
+
 
 class JurisdictionAdmin(VersionAdmin):
     """Jurisdiction admin options"""
@@ -39,7 +53,7 @@ class JurisdictionAdmin(VersionAdmin):
     list_display = ('name', 'parent', 'level')
     list_filter = ['level']
     search_fields = ['name']
-    inlines = [LawInline, ExemptionInline]
+    inlines = [LawInline]
     filter_horizontal = ('holidays', )
     fieldsets = (
         (None, {
@@ -90,6 +104,17 @@ class JurisdictionAdmin(VersionAdmin):
         return render_to_response('admin/agency/import.html', {'form': form, 'fields': fields},
                                   context_instance=RequestContext(request))
 
+
+class ExemptionAdmin(VersionAdmin):
+    """Provides a way to create and modify exemption information."""
+    prepopulated_fields = {'slug': ('name',)}
+    list_display = ('name', 'jurisdiction')
+    list_filter = ['jurisdiction']
+    search_fields = ['name', 'basis']
+    inlines = [InvokedExemptionInline]
+
+
+admin.site.register(Exemption, ExemptionAdmin)
 admin.site.register(Jurisdiction, JurisdictionAdmin)
 
 
