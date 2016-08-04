@@ -7,11 +7,14 @@
 
 {% block header %}
 <p><a href="{{exemption.jurisdiction.get_absolute_url}}">{{exemption.jurisdiction}}</a></p>
-<h1>{{exemption.name}}</h1>
+<h1>{{exemption.name}} Exemption</h1>
 {% endblock %}
 
 {% block aside %}
 <a href="#flag-form" class="modal-trigger button">Suggest Change</a>
+{% endblock %}
+
+{% block main %}
 <div class="modal" id="flag-form">
     <form method="post">
         {% csrf_token %}
@@ -22,12 +25,23 @@
         </footer>
     </form>
 </div>
-{% endblock %}
-
-{% block main %}
 <div class="grid__row">
     <div class="grid__column two-thirds">
         {{exemption.basis|markdown}}
+        <h2>Appeal Language</h2>
+        {{exemption.appeal_language|markdown}}
+        {% if exemption.invokations.exists %}
+        <h2>Invokations</h2>
+        <ul>
+        {% for invokation in exemption.invokations.all %}
+            <li>
+                <div class="invoked-exmption">
+                    <a href="{{invokation.request.agency.get_absolute_url}}">{{invokation.request.agency}}</a> invoked the exemption on <a href="{{invokation.request.get_absolute_url}}">{{invokation.request}}</a>
+                </div>
+            </li>
+        {% endfor %}
+        </ul>
+        {% endif %}
     </div>
     <div class="grid__column third">
         <div>

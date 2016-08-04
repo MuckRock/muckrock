@@ -171,7 +171,8 @@ class ExemptionDetailView(DetailView):
     def get_queryset(self):
         """Adds some database optimizations for getting the Exemption queryset."""
         _queryset = super(ExemptionDetailView, self).get_queryset()
-        _queryset = _queryset.select_related('jurisdiction__parent__parent')
+        _queryset = (_queryset.select_related('jurisdiction__parent__parent')
+                              .prefetch_related('requests', 'requests__agency'))
         return _queryset
 
     def get_context_data(self, **kwargs):
