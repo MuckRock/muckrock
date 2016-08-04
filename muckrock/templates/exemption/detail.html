@@ -36,7 +36,7 @@
         {% for invokation in exemption.invokations.all %}
             <li>
                 <div class="invoked-exmption">
-                    <a href="{{invokation.request.agency.get_absolute_url}}">{{invokation.request.agency}}</a> invoked the exemption on <a href="{{invokation.request.get_absolute_url}}">{{invokation.request}}</a>
+                    <p><a href="{{invokation.request.agency.get_absolute_url}}">{{invokation.request.agency}}</a> invoked the exemption on <a href="{{invokation.request.get_absolute_url}}">{{invokation.request}}</a>. The exemption was invoked <strong>{% if not invokation.proper %}im{% endif %}properly</strong> and <strong>has {% if not invokation.appealed %}not {% endif %}been appealed</strong>.</p>
                 </div>
             </li>
         {% endfor %}
