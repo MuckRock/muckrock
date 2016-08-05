@@ -273,8 +273,6 @@ class Exemption(models.Model):
     slug = models.SlugField(max_length=255)
     jurisdiction = models.ForeignKey(Jurisdiction, related_name='exemptions')
     basis = models.TextField(help_text='The legal or contextual basis for the exemption.')
-    appeal_language = models.TextField(
-        help_text='Sample language used for appealing the exemption.')
     # Optional fields
     tags = TaggableManager(through=TaggedItemBase, blank=True)
     requests = models.ManyToManyField(
@@ -284,8 +282,6 @@ class Exemption(models.Model):
         blank=True
     )
     contributors = models.ManyToManyField(User, related_name='exemptions', blank=True)
-    use_language = models.TextField(blank=True,
-        help_text='Sample language used by agencies when invoking the exemption.')
     proper_use = models.TextField(blank=True,
         help_text='An editorialized description of cases when the exemption is properly used.')
     improper_use = models.TextField(blank=True,
@@ -326,10 +322,6 @@ class InvokedExemption(models.Model):
         help_text='What language did the aguency use to invoke the exemption?')
     properly_invoked = models.BooleanField(default=True,
         help_text='Did the agency properly invoke the exemption to the request?')
-    appealed = models.BooleanField(default=False,
-        help_text='Was the exemption appealed?')
-    appeal_language = models.TextField(blank=True,
-        help_text='What language was used to appeal?')
 
     def __unicode__(self):
         return u'%s exemption of %s' % (self.exemption.name, self.request)
@@ -345,12 +337,12 @@ class InvokedExemption(models.Model):
         return reverse('exemption-detail', kwargs=kwargs) + '#invoked-%d' % self.pk
 
 
-class AppealLanguage(models.Model):
-    """Exemptions should contain sample appeal language for users to reference.
+class ExampleAppeal(models.Model):
+    """Exemptions should contain example appeal language for users to reference.
     This language will be curated by staff and contain the language as well as
-    the context when the language is most effective. Each AppealLanguage instance
+    the context when the language is most effective. Each ExampleAppeal instance
     should connect to an Exemption."""
-    exemption = models.ForeignKey(Exemption, related_name='sample_appeals')
+    exemption = models.ForeignKey(Exemption, related_name='example_appeals')
     language = models.TextField()
     context = models.TextField(blank=True,
         help_text='Under what circumstances is this appeal language most effective?')
@@ -362,7 +354,7 @@ class AppealLanguage(models.Model):
         return '%d' % self.pk
 
     def get_absolute_url(self):
-        """Return the url for the exemption detail page, targeting the language."""
+        """Return the url for the exemption detail page, targeting the appeal."""
         kwargs = self.exemption.jurisdiction.get_slugs()
         kwargs['slug'] = self.exemption.slug
         kwargs['idx'] = self.exemption.pk
