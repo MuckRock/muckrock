@@ -16,7 +16,7 @@ from reversion.admin import VersionAdmin
 import logging
 import sys
 
-from muckrock.jurisdiction.models import Jurisdiction, Law, Exemption, InvokedExemption
+from muckrock.jurisdiction import models as JurisdictionModels
 from muckrock.jurisdiction.forms import CSVImportForm
 
 logger = logging.getLogger(__name__)
@@ -26,7 +26,13 @@ logger = logging.getLogger(__name__)
 
 class LawInline(admin.StackedInline):
     """Law admin options"""
-    model = Law
+    model = JurisdictionModels.Law
+    extra = 0
+
+
+class ExampleAppealInline(admin.TabularInline):
+    """Example appeal inline"""
+    model = JurisdictionModels.ExampleAppeal
     extra = 0
 
 
@@ -35,14 +41,14 @@ class InvokedExemptionAdminForm(forms.ModelForm):
     request = autocomplete_light.ModelChoiceField('FOIARequestAdminAutocomplete')
 
     class Meta:
-        model = InvokedExemption
+        model = JurisdictionModels.InvokedExemption
         fields = '__all__'
 
 
 class InvokedExemptionInline(admin.StackedInline):
     """Invoked exemption options"""
     form = InvokedExemptionAdminForm
-    model = InvokedExemption
+    model = JurisdictionModels.InvokedExemption
     extra = 0
 
 
@@ -111,11 +117,11 @@ class ExemptionAdmin(VersionAdmin):
     list_display = ('name', 'jurisdiction')
     list_filter = ['jurisdiction']
     search_fields = ['name', 'basis']
-    inlines = [InvokedExemptionInline]
+    inlines = [ExampleAppealInline, InvokedExemptionInline]
 
 
-admin.site.register(Exemption, ExemptionAdmin)
-admin.site.register(Jurisdiction, JurisdictionAdmin)
+admin.site.register(JurisdictionModels.Exemption, ExemptionAdmin)
+admin.site.register(JurisdictionModels.Jurisdiction, JurisdictionAdmin)
 
 
 class JurisdictionCsvModel(CsvModel):
@@ -124,10 +130,10 @@ class JurisdictionCsvModel(CsvModel):
     name = CharField()
     slug = CharField()
     level = CharField(transform=lambda x: x.lower()[0])
-    parent = DjangoModelField(Jurisdiction, pk='name')
+    parent = DjangoModelField(JurisdictionModels.Jurisdiction, pk='name')
 
     class Meta:
         # pylint: disable=too-few-public-methods
-        dbModel = Jurisdiction
+        dbModel = JurisdictionModels.Jurisdiction
         delimiter = ','
         update = {'keys': ['slug', 'parent']}
