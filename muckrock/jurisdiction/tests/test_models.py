@@ -252,3 +252,36 @@ class TestInvokedExemptionModel(TestCase):
             expected_url,
             ('The exemption should return the exemption-detail url.\n'
              'Actual url: %s\nExpected url: %s') % (actual_url, expected_url))
+
+
+class TestAppealLanguageModel(TestCase):
+    """
+    The AppealLanguage model should contain sample language for appealing an exemption.
+    Additionally, it should contain the context in which this language is most effective.
+    """
+    def setUp(self):
+        self.appeal_language = factories.AppealLanguageFactory()
+
+    def test_unicode(self):
+        """The text representation should be the appeal's context and exemption."""
+        actual = unicode(self.appeal_language)
+        expected = u'%s for %s' % (self.appeal_language.context, self.appeal_language.exemption)
+        eq_(actual,
+            expected,
+            ('Should include the name of the exemption and the request.\n'
+            'Actual: %s\nExpected: %s' % (actual, expected)))
+
+    def test_absolute_url(self):
+        """The absolute url of the appeal language should be the absolute url of the exemption
+        with the appeal pk appeneded as a target."""
+        exemption = self.appeal_language.exemption
+        kwargs = exemption.jurisdiction.get_slugs()
+        kwargs['slug'] = exemption.slug
+        kwargs['idx'] = exemption.pk
+        expected_url = (reverse('exemption-detail', kwargs=kwargs) +
+                        '#appeal-%d' % self.appeal_language.pk)
+        actual_url = self.appeal_language.get_absolute_url()
+        eq_(actual_url,
+            expected_url,
+            ('The exemption should return the exemption-detail url.\n'
+             'Actual url: %s\nExpected url: %s') % (actual_url, expected_url))

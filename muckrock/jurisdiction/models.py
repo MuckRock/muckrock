@@ -343,3 +343,28 @@ class InvokedExemption(models.Model):
         kwargs['slug'] = self.exemption.slug
         kwargs['idx'] = self.exemption.pk
         return reverse('exemption-detail', kwargs=kwargs) + '#invoked-%d' % self.pk
+
+
+class AppealLanguage(models.Model):
+    """Exemptions should contain sample appeal language for users to reference.
+    This language will be curated by staff and contain the language as well as
+    the context when the language is most effective. Each AppealLanguage instance
+    should connect to an Exemption."""
+    exemption = models.ForeignKey(Exemption, related_name='sample_appeals')
+    language = models.TextField()
+    context = models.TextField(blank=True,
+        help_text='Under what circumstances is this appeal language most effective?')
+
+    def __unicode__(self):
+        return u'%s for %s' % (self.context, self.exemption)
+
+    def __repr__(self):
+        return '%d' % self.pk
+
+    def get_absolute_url(self):
+        """Return the url for the exemption detail page, targeting the language."""
+        kwargs = self.exemption.jurisdiction.get_slugs()
+        kwargs['slug'] = self.exemption.slug
+        kwargs['idx'] = self.exemption.pk
+        return reverse('exemption-detail', kwargs=kwargs) + '#appeal-%d' % self.pk
+
