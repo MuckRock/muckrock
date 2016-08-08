@@ -28,7 +28,15 @@
 <div class="grid__row">
     <div class="grid__column two-thirds">
         {{exemption.basis|markdown}}
-        <h2>Appeal Language</h2>
+        {% if exemption.example_appeals.exists %}
+        <h2>Example Appeals</h2>
+        {% for appeal in exemption.example_appeals.all %}
+        <div class="example-appeal">
+            {{appeal.context|markdown}}
+            <textarea readonly>{{appeal.language}}</textarea>
+        </div>
+        {% endfor %}
+        {% endif %}
         {{exemption.appeal_language|markdown}}
         {% if exemption.invokations.exists %}
         <h2>Invokations</h2>
