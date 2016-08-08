@@ -14,7 +14,8 @@ class JurisdictionViewSet(viewsets.ModelViewSet):
 
 class ExemptionViewSet(viewsets.ModelViewSet):
     """API views for Exemption"""
-    queryset = Exemption.objects.select_related('jurisdiction__parent__parent')
+    queryset = (Exemption.objects.select_related('jurisdiction__parent__parent')
+                                 .prefetch_related('example_appeals'))
     serializer_class = ExemptionSerializer
     filter_fields = ('name', 'jurisdiction')
 
