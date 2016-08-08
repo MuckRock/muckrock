@@ -4,7 +4,7 @@ Serilizers for the Jurisdiction application API
 
 from rest_framework import serializers
 
-from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.jurisdiction.models import Jurisdiction, Exemption
 
 # pylint: disable=too-few-public-methods
 
@@ -36,3 +36,24 @@ class JurisdictionSerializer(serializers.ModelSerializer):
                 'fee_rate',
                 'success_rate',
                  )
+
+
+class ExemptionSerializer(serializers.ModelSerializer):
+    """Serializer for Exemption model"""
+    jurisdiction = serializers.PrimaryKeyRelatedField(
+        queryset=Jurisdiction.objects.order_by(),
+        style={'base_template': 'input.html'}
+    )
+    absolute_url = serializers.ReadOnlyField(source='get_absolute_url')
+
+    class Meta:
+        model = Exemption
+        fields = (
+            'id',
+            'name',
+            'slug',
+            'jurisdiction',
+            'basis',
+            # computed fields
+            'absolute_url',
+        )
