@@ -5,6 +5,7 @@ Admin registration for Jurisdiction models
 from django import forms
 from django.conf.urls import patterns, url
 from django.contrib import admin, messages
+from django.contrib.auth.models import User
 from django.shortcuts import render_to_response, redirect
 from django.template.defaultfilters import slugify
 from django.template import RequestContext
@@ -111,6 +112,23 @@ class JurisdictionAdmin(VersionAdmin):
                                   context_instance=RequestContext(request))
 
 
+class ExemptionAdminForm(forms.ModelForm):
+    """Form to include a jurisdiction and contributor autocomplete"""
+    jurisdiction = autocomplete_light.ModelChoiceField(
+        'JurisdictionAdminAutocomplete',
+        queryset=JurisdictionModels.Jurisdiction.objects.all()
+    )
+    contributors = autocomplete_light.ModelMultipleChoiceField(
+        'UserAutocomplete',
+        queryset=User.objects.all(),
+        required=False
+    )
+
+    class Meta:
+        model = JurisdictionModels.Exemption
+        fields = '__all__'
+
+
 class ExemptionAdmin(VersionAdmin):
     """Provides a way to create and modify exemption information."""
     prepopulated_fields = {'slug': ('name',)}
@@ -118,6 +136,7 @@ class ExemptionAdmin(VersionAdmin):
     list_filter = ['jurisdiction']
     search_fields = ['name', 'basis']
     inlines = [ExampleAppealInline, InvokedExemptionInline]
+    form = ExemptionAdminForm
 
 
 admin.site.register(JurisdictionModels.Exemption, ExemptionAdmin)
