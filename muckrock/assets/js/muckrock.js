@@ -1,4 +1,19 @@
+/* muckrock.js
+**
+** This file is the "keystone" of MuckRock's Javascript assets.
+** It is responsible for importing other JS modules.
+** It is also responsbile for initializing many of the JQuery components.
+**
+** Known issues:
+** - Some JQuery components may be initialized in other templates, mostly due to
+**   those initializations requiring variables defined by the template context.
+** - Some JQuery logic is defined here, and those definitions should be moved to
+**   standalone files and then imported back into here.
+*/
+
 import 'jquery-ui/datepicker';
+import '../vendor/loupe';
+import '../vendor/quicksearch';
 
 import './account';
 import './autocomplete';
@@ -11,8 +26,6 @@ import './editor';
 import './foiaRequest';
 import './formset';
 import './list';
-import './loupe';
-import './quicksearch';
 import './tabs';
 import './task';
 
@@ -178,4 +191,7 @@ $('document').ready(function(){
         });
     });
 
+    $('#comms-filter').quicksearch('#comms .communications-list .communication');
+    $('#notes-filter').quicksearch('#notes .note');
+    $('#tags .search').quicksearch('.tag-table tr');
 });
