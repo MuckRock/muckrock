@@ -12,6 +12,7 @@
 */
 
 import 'jquery-ui/datepicker';
+import '../vendor/formset';
 import '../vendor/loupe';
 import '../vendor/quicksearch';
 
@@ -24,7 +25,6 @@ import './currencyField';
 import './dropdown';
 import './editor';
 import './foiaRequest';
-import './formset';
 import './list';
 import './tabs';
 import './task';
