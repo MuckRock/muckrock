@@ -26,6 +26,7 @@ import './dropdown';
 import './editor';
 import './foiaRequest';
 import './list';
+import modal from './modal';
 import './nav';
 import './tabs';
 import './task';
@@ -58,7 +59,7 @@ $('document').ready(function(){
     // Modal
     $('.modal-trigger').click(function(){
         modal(this.hash);
-        return false
+        return false;
     });
 
     // Date Picker
