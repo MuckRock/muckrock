@@ -1,17 +1,14 @@
-import { displayFile } from './foiaRequest';
-
-/*
-
-tabs.js
-
-Tabbed-based navigation using Javascript
-and the manipulation of URL hashes.
-
-Turn classed anchor links into tabs,
-and allow elements within those tabs to
-be accessible by hash as well.
-
+/* tabs.js
+**
+** Tabbed-based navigation using Javascript
+** and the manipulation of URL hashes.
+**
+** Turn classed anchor links into tabs,
+** and allow elements within those tabs to
+** be accessible by hash as well.
 */
+
+import { displayFile } from './foiaRequest';
 
 var tabs = $('.tab').attr('tabindex', '0');         // collect all the tabs and set tabindex to 0
 var tabTargets = tabs.map(function() {              // get an array of tab-panel ids

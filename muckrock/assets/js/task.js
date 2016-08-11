@@ -1,8 +1,10 @@
-import Cookie from 'js-cookie';
+/* Task.js
+**
+** Logic for client interactions with the MuckRock task system.
+** Mostly involves submitting task forms via AJAX and handling successful responses.
+*/
 
-// Task.js
-//
-// Logic for client interactions with the MuckRock task system.
+import Cookie from 'js-cookie';
 
 function authenticateAjax() {
     // Sets up authentication for AJAX transactions
@@ -101,6 +103,10 @@ $('.resolved.task')
     })
     .addClass('collapsed');
 
+/* TODO
+** This should be rewritten to bind to the task's form submission event,
+** not the form's resolve button click.
+*/
 $('button[name="resolve"]').click(function(e){
     /* If the button clicked is the "resolve all" button, then get forms
     for all the currently checked tasks. Else, just get the form for the
