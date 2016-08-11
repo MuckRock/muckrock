@@ -238,6 +238,7 @@ Sincerely,
                         </form>
                         {% endif %}
                         {% if foia.is_appealable %}
+                        <div id="exemption-browser"></div>
                         <form class="appeal composer-input" id="appeal" method="post">
                             {% if foia.agency.appeal_agency %}
                             <header>Send an appeal to the {{ foia.agency.appeal_agency.name }}</header>

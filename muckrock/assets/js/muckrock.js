@@ -24,6 +24,7 @@ import './crowdfund';
 import './currencyField';
 import './dropdown';
 import './editor';
+import './exemptionBrowser';
 import './foiaRequest';
 import './list';
 import modal from './modal';
@@ -159,4 +160,7 @@ $('document').ready(function(){
             $(overlay).removeClass('visible');
         });
     });
+
+    // Exemption Browser
+    $('#exemption-browser').exemptionBrowser();
 });
