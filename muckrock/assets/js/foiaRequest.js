@@ -1,6 +1,29 @@
-import { modal } from './modal';
+/* foiaRequest.js
+**
+** Provides functionality on the request page.
+**
+** TODO:
+** Much of this can and should be refactored into more general functions,
+** then applied to the specific selectors.
+*/
 
 $('.hidden-reply').hide();
+
+// MODAL
+
+function modal(nextSelector) {
+    var overlay = '#modal-overlay';
+    $(overlay).addClass('visible');
+    $(nextSelector).addClass('visible');
+    $(overlay).click(function(){
+        $(overlay).removeClass('visible');
+        $(nextSelector).removeClass('visible');
+    });
+    $('.close-modal').click(function(){
+        $(overlay).removeClass('visible');
+        $(nextSelector).removeClass('visible');
+    });
+}
 
 function textAreaModal(nextSelector) {
     modal(nextSelector);

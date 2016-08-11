@@ -1,9 +1,12 @@
-// A jQuery function for handling the submission
-// of forms that require a Stripe token.
-// Tokens are obtained by using the Stripe Checkout library.
-// When the form is submitted, we want to raise a Stripe Checkout window.
-// The successful submission of this form will return a token, which we will
-// add back to the form before resubmitting it.
+/* checkout.js
+**
+** A jQuery plugin for handling the submission
+** of forms that require a Stripe token.
+** Tokens are obtained by using the Stripe Checkout library.
+** When the form is submitted, we want to raise a Stripe Checkout window.
+** The successful submission of this form will return a token, which we will
+** add back to the form before resubmitting it.
+*/
 
 (function( $ ){
 

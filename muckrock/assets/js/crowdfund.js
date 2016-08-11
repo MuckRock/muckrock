@@ -1,3 +1,10 @@
+/* crowdfund.js
+**
+** A JQuery plugin to handle the logic when interacting with a crowdfund:
+** - Submits data via AJAX and displaying feedback to the user.
+** - Manages the different states of the widget
+*/
+
 (function( $ ){
 
     var $crowdfund, $overlays, email;

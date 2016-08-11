@@ -1,3 +1,9 @@
+/* communication.js
+**
+** This handles the logic on the communication pattern.
+** It toggles the display of forms on the commmunication when targeted by the URL.
+*/
+
 function showCommForm(id) {
     if (!id) {
         return;
