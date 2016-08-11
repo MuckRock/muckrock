@@ -67,14 +67,14 @@ $('#toggle-communication-collapse').click(function(){
 
 /* Request action composer */
 
-var composerInputs = $('.composer-input');
+var composers = $('.composer');
 
 function showComposer(id) {
     // if no id provided, use the inactive panel
     id = !id ? '#inactive' : id;
     // hide all the composers, then filter to
     // the one we're interested in and show it
-    var composer = composerInputs.hide().filter(id).show();
+    var composer = composers.hide().filter(id).show();
     // We also want to bring the composer's first input into focus
     // in order to make it clear to the user that this is actionable
     composer.find(':text,textarea,select').filter(':visible:first').focus();
@@ -84,15 +84,15 @@ function showComposer(id) {
 $(window).on('hashchange', function () {
     // check if the hash is a target
     var hash = location.hash;
-    var composers = composerInputs.filter(hash);
-    if (composers.length > 0) {
+    var targetComposer = composers.filter(hash);
+    if (targetComposer.length > 0) {
         showComposer(hash);
     }
 });
 
 // Initialize
 $(document).ready(function(){
-    showComposer(composerInputs.filter(location.hash).length > 0 ? location.hash : '');
+    showComposer(composers.filter(location.hash).length > 0 ? location.hash : '');
 });
 
 /* Documents */
