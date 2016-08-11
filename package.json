@@ -43,6 +43,6 @@
     "autonumeric": "^1.9.43",
     "jquery-ui": "^1.10.5",
     "js-cookie": "^2.1.0",
-    "prosemirror": "^0.6.0",
+    "prosemirror": "^0.6.0"
   }
 }
