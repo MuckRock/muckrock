@@ -245,6 +245,9 @@ Sincerely,
                         {% endif %}
                         {% if foia.is_appealable %}
                         <div class="composer" id="appeal">
+                            <noscript>
+                                <p class="failure">Exemption searching requires Javascript.</p>
+                            </noscript>
                             <div class="exemption-browser" id="exemption-browser">
                                 <form method="get" action="/api_v1/exemption/search/">
                                     <div class="field">
@@ -254,9 +257,6 @@ Sincerely,
                                         <button type="submit" class="basic blue button">Search</button>
                                     </div>
                                 </form>
-                                <noscript>
-                                    <p class="failure">You'll need to enable Javascript to search for exemptions.</p>
-                                </noscript>
                             </div>
                             <form class="composer-input" method="post">
                                 {% if foia.agency.appeal_agency %}
