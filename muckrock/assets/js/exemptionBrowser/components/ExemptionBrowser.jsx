@@ -7,19 +7,17 @@
 
 import React, { PropTypes } from 'react';
 
-const ExemptionBrowser = ({foo, onIncrementClick, onDecrementClick}) => (
+import ExemptionSearch from './ExemptionSearchInput';
+
+const ExemptionBrowser = ({onExemptionSearch, exemptionQuery}) => (
     <div className="exemptionBrowser">
-        <h1>Hello world!</h1>
-        <p>Foo: {foo}</p>
-        <button onClick={onIncrementClick}>Increment</button>
-        <button onClick={onDecrementClick}>Decrement</button>
+        <ExemptionSearch query={exemptionQuery} onSubmit={onExemptionSearch} />
     </div>
 );
 
 ExemptionBrowser.propTypes = {
-    foo: PropTypes.number.isRequired,
-    onIncrementClick: PropTypes.func.isRequired,
-    onDecrementClick: PropTypes.func.isRequired,
+    onExemptionSearch: PropTypes.func.isRequired,
+    exemptionQuery: PropTypes.string,
 };
 
 export default ExemptionBrowser
