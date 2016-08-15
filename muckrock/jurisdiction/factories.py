@@ -70,7 +70,6 @@ class ExemptionFactory(factory.django.DjangoModelFactory):
     slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
     jurisdiction = factory.SubFactory(StateJurisdictionFactory, name=u'Washington', abbrev=u'WA')
     basis = factory.Faker('paragraph')
-    appeal_language = factory.Faker('sentence')
 
 
 class InvokedExemptionFactory(factory.django.DjangoModelFactory):
