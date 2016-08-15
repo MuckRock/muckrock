@@ -7,17 +7,17 @@
 
 import React, { PropTypes } from 'react';
 
-import ExemptionSearch from './ExemptionSearchInput';
+import ExemptionSearch from './ExemptionSearch';
 
-const ExemptionBrowser = ({onExemptionSearch, exemptionQuery}) => (
+const ExemptionBrowser = ({exemptionQuery, onQueryChange, onExemptionSearch}) => (
     <div className="exemptionBrowser">
         <ExemptionSearch query={exemptionQuery} onSubmit={onExemptionSearch} />
     </div>
 );
 
 ExemptionBrowser.propTypes = {
+    exemptionQuery: PropTypes.string.isRequired,
     onExemptionSearch: PropTypes.func.isRequired,
-    exemptionQuery: PropTypes.string,
 };
 
 export default ExemptionBrowser

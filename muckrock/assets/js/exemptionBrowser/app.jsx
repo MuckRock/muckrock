@@ -22,32 +22,27 @@ and use them to create the container component.*/
 // We create the store and reducer in this file while it's still simple
 // Later on, we should refactor these out.
 
-const initialState = {foo: 1}; // Dummy initial state
+const initialState = {query: ''}; // Dummy initial state
 const rootReducer = function(state=initialState, action) {
     // Dummy reducer case: we'll fill this in later
     switch(action.type) {
-        case 'FOO_UP':
-            const moreFoo = state.foo + 1
+        case 'EXEMPTION_SEARCH':
+            const query = action.data.query;
             return Object.assign({}, state, {
-                foo: moreFoo
-            })
-        case 'FOO_DOWN':
-            const lessFoo = state.foo - 1
-            return Object.assign({}, state, {
-                foo: lessFoo
-            })
+                query: query
+            });
     }
     return state;
 };
 
-// We create a dummy action to make sure actions work right!
-
-const incrementFoo = () => (
-    {type: 'FOO_UP'}
+const searchExemptions = (query) => (
+    {
+        type: 'EXEMPTION_SEARCH',
+        data: {
+            query: query,
+        }
+    }
 );
-const decrementFoo = () => (
-    {type: 'FOO_DOWN'}
-)
 
 // TODO We initialize the devtool here, but this should be removed in production settings
 const devTool = window.devToolsExtension ? window.devToolsExtension() : undefined;
@@ -55,15 +50,12 @@ const store = createStore(rootReducer, initialState, devTool); // Create store f
 
 // More dummy values
 const mapStateToProps = function(store) {
-    return {foo: store.foo};
+    return {exemptionQuery: store.query};
 };
 const mapDispatchToProps = (dispatch) => {
     return {
-        onIncrementClick: () => {
-            dispatch(incrementFoo());
-        },
-        onDecrementClick: () => {
-            dispatch(decrementFoo());
+        onExemptionSearch: (query) => {
+            dispatch(searchExemptions(query));
         }
     }
 }
