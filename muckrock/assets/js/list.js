@@ -1,3 +1,10 @@
+/* list.js
+**
+** This handles the logic for displaying an UP or DOWN arrow on a list,
+** depending on how it is sorted.
+** It examines the query arguments to figure out where and how to place the arrow.
+*/
+
 function identifySortable() {
     $('.list-table-head th').each(function(){
         var sort = $(this).data('sort');

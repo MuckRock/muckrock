@@ -1,7 +1,7 @@
 // Third Party Frameworks
-@import 'framework/normalize';
-@import 'framework/bourbon/bourbon';
-@import 'framework/neat/neat';
+@import '../vendor/normalize';
+@import '../vendor/bourbon/bourbon';
+@import '../vendor/neat/neat';
 
 // MuckRock
 @import 'base/base';
@@ -9,8 +9,5 @@
 @import 'pattern/pattern';
 @import 'view/view';
 
-// Third Party Plugins
-@import 'plugin/autocomplete';
-@import 'plugin/datepicker';
-@import 'plugin/leaflet';
-@import 'plugin/loader';
+// Third Party Styles
+@import '../vendor/loader';

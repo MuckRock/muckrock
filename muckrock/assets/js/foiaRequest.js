@@ -1,4 +1,13 @@
-import { modal } from './modal';
+/* foiaRequest.js
+**
+** Provides functionality on the request page.
+**
+** TODO:
+** Much of this can and should be refactored into more general functions,
+** then applied to the specific selectors.
+*/
+
+import modal from './modal';
 
 $('.hidden-reply').hide();
 

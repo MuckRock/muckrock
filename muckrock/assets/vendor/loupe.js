@@ -1,8 +1,13 @@
-/**
- * Loupe: a jQuery image magnifier
- * (C) 2010 Joe Bartlett, MIT license
- * http://redoPop.com/loupe
- */
+/* loupe.js
+**
+** Loupe: a jQuery image magnifier
+** (C) 2010 Joe Bartlett, MIT license
+** http://redoPop.com/loupe
+**
+** The loupe is used to magnify images.
+** Primarily for use in the news application.
+*/
+
 (function ($) {
 	$.fn.loupe = function (arg) {
 		var options = $.extend({

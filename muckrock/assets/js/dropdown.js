@@ -1,3 +1,8 @@
+/* dropdown.js
+**
+** Provides the logic for displaying dropdown menus.
+*/
+
 var dropdowns = $('.dropdown');
 
 $('.dropdown .icon, .dropdown .dropdown-trigger').click(function(){

@@ -1,7 +1,12 @@
-import 'autonumeric';
+/* currencyField.js
+**
+** A jQuery plugin for turning a simple number input into a logical currency input.
+** Uses the autonumeric library to format the display of the currency value.
+** When the currency value is changed, it also updates the value of the underlying number input.
+** Assumes the value contained in the number input is a 1-cent delimited value, e.g. $1.00 -> 100
+*/
 
-// A jQuery function for turning a number
-// input into a pretty currency input.
+import 'autonumeric';
 
 (function( $ ){
     $.fn.currencyField = function() {

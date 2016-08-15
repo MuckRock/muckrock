@@ -1,3 +1,11 @@
+/* editor.js
+**
+** This provides a WYSIWYG/Markdown editor using the ProseMirror library.
+** Currently only in use on the Project description field editor, but could
+** be expanded to other fields that store Markdown in the future.
+** Just apply the '.prose-editor' class to a textarea!
+*/
+
 import { ProseMirror } from 'prosemirror';
 import {elt} from 'prosemirror/dist/dom';
 import "prosemirror/dist/inputrules/autoinput";
