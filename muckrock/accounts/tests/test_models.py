@@ -163,6 +163,16 @@ class TestProfileUnit(TestCase):
         ok_(not self.profile.subscription_id)
         eq_(self.profile.monthly_requests, settings.MONTHLY_REQUESTS.get('basic'))
 
+    def test_cancel_pro_missing_sub(self):
+        """Test cancelling a pro subscription without a subscription_id."""
+        self.profile.customer().subscriptions.data = []
+        self.profile.acct_type = 'pro'
+        self.profile.save()
+        ok_(not self.profile.subscription_id)
+        self.profile.cancel_pro_subscription()
+        self.profile.refresh_from_db()
+        ok_(self.profile.acct_type, 'basic')
+
     def test_cancel_legacy_subscription(self):
         """Test ending a pro subscription when missing a subscription ID"""
         # pylint:disable=no-self-use

@@ -128,19 +128,22 @@ class ProfessionalSignupView(SignupView):
             new_user.profile.start_pro_subscription(self.request.POST['stripe_token'])
             success_msg = 'Your professional account was successfully created. Welcome to MuckRock!'
             messages.success(self.request, success_msg)
-        except KeyError:
+        except (KeyError, AttributeError):
             # no payment information provided
+            logger.error('No payment information provided.')
             error_msg = ('Your account was successfully created, '
                          'but you did not provide payment information. '
                          'You can subscribe from the account management page.')
             messages.error(self.request, error_msg)
         except stripe.error.CardError:
             # card declined
+            logger.error('Card was declined.')
             error_msg = ('Your account was successfully created, but your card was declined. '
                          'You can subscribe from the account management page.')
             messages.error(self.request, error_msg)
         except (stripe.error.InvalidRequestError, stripe.error.APIError):
             # invalid request made to stripe
+            logger.error('No payment information provided.')
             error_msg = ('Your account was successfully created, '
                          'but we could not contact our payment provider. '
                          'You can subscribe from the account management page.')

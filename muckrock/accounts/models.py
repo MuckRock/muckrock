@@ -12,6 +12,7 @@ from datetime import datetime
 import dbsettings
 from easy_thumbnails.fields import ThumbnailerImageField
 from localflavor.us.models import PhoneNumberField, USStateField
+import logging
 from lot.models import LOT
 import stripe
 from urllib import urlencode
@@ -19,6 +20,7 @@ from urllib import urlencode
 from muckrock.utils import generate_key
 from muckrock.values import TextValue
 
+logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
 stripe.api_version = '2015-10-16'
 
@@ -289,17 +291,24 @@ class Profile(models.Model):
     def cancel_pro_subscription(self):
         """Unsubscribe this profile from a professional plan. Return the cancelled subscription."""
         customer = self.customer()
+        subscription = None
         # subscription reference either exists as a saved field or inside the Stripe customer
-        # if it isn't, then they probably don't have a subscription
-        if not self.subscription_id and not len(customer.subscriptions.data) > 0:
-            raise AttributeError('There is no subscription to cancel.')
-        if self.subscription_id:
-            subscription_id = self.subscription_id
-        else:
-            subscription_id = customer.subscriptions.data[0].id
-        subscription = customer.subscriptions.retrieve(subscription_id)
-        subscription = subscription.delete()
-        customer = customer.save()
+        # if it isn't, then they probably don't have a subscription. in that case, just make
+        # sure that we demote their account and reset them back to basic.
+        try:
+            if not self.subscription_id and not len(customer.subscriptions.data) > 0:
+                raise AttributeError('There is no subscription to cancel.')
+            if self.subscription_id:
+                subscription_id = self.subscription_id
+            else:
+                subscription_id = customer.subscriptions.data[0].id
+            subscription = customer.subscriptions.retrieve(subscription_id)
+            subscription = subscription.delete()
+            customer = customer.save()
+        except AttributeError as exception:
+            logger.error(exception)
+        except stripe.error.StripeError as exception:
+            logger.error(exception)
         self.subscription_id = ''
         self.acct_type = 'basic'
         self.monthly_requests = settings.MONTHLY_REQUESTS.get('basic', 0)
