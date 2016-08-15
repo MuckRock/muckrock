@@ -1,3 +1,7 @@
+"""
+Provides Jurisdiction application API views
+"""
+
 from django.db.models import Q
 
 from rest_framework.decorators import list_route

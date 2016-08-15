@@ -4,7 +4,7 @@ Models for the Jurisdiction application
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import models
-from django.db.models import F, Q, Avg, Count, Sum
+from django.db.models import F, Q, Avg, Sum
 from django.template.defaultfilters import slugify
 
 from easy_thumbnails.fields import ThumbnailerImageField
@@ -13,7 +13,7 @@ from taggit.managers import TaggableManager
 
 from muckrock.business_days.models import Holiday, HolidayCalendar, Calendar
 from muckrock.foia.models import FOIARequest
-from muckrock.tags.models import Tag, TaggedItemBase
+from muckrock.tags.models import TaggedItemBase
 
 # pylint: disable=bad-continuation
 
@@ -359,4 +359,3 @@ class ExampleAppeal(models.Model):
         kwargs['slug'] = self.exemption.slug
         kwargs['idx'] = self.exemption.pk
         return reverse('exemption-detail', kwargs=kwargs) + '#appeal-%d' % self.pk
-

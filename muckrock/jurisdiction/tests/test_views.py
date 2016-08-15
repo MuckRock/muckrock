@@ -6,9 +6,8 @@ from django.test import TestCase
 
 from nose.tools import eq_
 
-from muckrock.factories import UserFactory
 from muckrock.jurisdiction import factories, views
-from muckrock.test_utils import http_get_response, http_post_response
+from muckrock.test_utils import http_get_response
 
 class TestExemptionDetailView(TestCase):
     """The exemption detail view provides information about the exemption at a standalone url."""
