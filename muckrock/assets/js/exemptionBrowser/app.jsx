@@ -51,7 +51,10 @@ const devTool = window.devToolsExtension ? window.devToolsExtension() : undefine
 const store = createStore(rootReducer, initialState, devTool); // Create store from the root reducer
 
 const mapStateToProps = function(store) {
-    return {exemptionQuery: store.query};
+    return {
+        exemptionQuery: store.query,
+        exemptionResults: store.results,
+    };
 };
 const mapDispatchToProps = (dispatch) => {
     return {

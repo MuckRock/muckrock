@@ -8,15 +8,18 @@
 import React, { PropTypes } from 'react';
 
 import ExemptionSearch from './ExemptionSearch';
+import ExemptionList from './ExemptionList';
 
-const ExemptionBrowser = ({exemptionQuery, onQueryChange, onExemptionSearch}) => (
+const ExemptionBrowser = ({exemptionQuery, exemptionResults, onQueryChange, onExemptionSearch}) => (
     <div className="exemptionBrowser">
         <ExemptionSearch query={exemptionQuery} onSubmit={onExemptionSearch} />
+        <ExemptionList exemptions={exemptionResults} />
     </div>
 );
 
 ExemptionBrowser.propTypes = {
     exemptionQuery: PropTypes.string.isRequired,
+    exemptionResults: PropTypes.array.isRequired,
     onExemptionSearch: PropTypes.func.isRequired,
 };
 
