@@ -9,18 +9,30 @@ import React, { PropTypes } from 'react';
 
 import ExemptionSearch from './ExemptionSearch';
 import ExemptionList from './ExemptionList';
+import ExemptionDetail from './ExemptionDetail';
 
-const ExemptionBrowser = ({exemptionQuery, exemptionResults, onQueryChange, onExemptionSearch}) => (
-    <div className="exemptionBrowser">
-        <ExemptionSearch query={exemptionQuery} onSubmit={onExemptionSearch} />
-        <ExemptionList exemptions={exemptionResults} />
-    </div>
-);
+const ExemptionBrowser = ({exemptionQuery, exemptionResults, activeExemption, onQueryChange, searchExemptions, displayExemptionDetail, displayExemptionList}) => {
+    let resultDisplay;
+    if (!activeExemption) {
+        resultDisplay = <ExemptionList exemptions={exemptionResults} onExemptionClick={displayExemptionDetail} />;
+    } else {
+        resultDisplay = <ExemptionDetail exemption={activeExemption} onBackClick={displayExemptionList} />;
+    }
+    return (
+        <div className="exemptionBrowser">
+            <ExemptionSearch query={exemptionQuery} onSubmit={searchExemptions} />
+            {resultDisplay}
+        </div>
+    )
+};
 
 ExemptionBrowser.propTypes = {
     exemptionQuery: PropTypes.string.isRequired,
     exemptionResults: PropTypes.array.isRequired,
-    onExemptionSearch: PropTypes.func.isRequired,
+    activeExemption: PropTypes.object,
+    searchExemptions: PropTypes.func.isRequired,
+    displayExemptionDetail: PropTypes.func.isRequired,
+    displayExemptionList: PropTypes.func.isRequired,
 };
 
 export default ExemptionBrowser

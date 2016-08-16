@@ -16,7 +16,12 @@ import { Provider, connect } from 'react-redux';
 import axios from 'axios';
 
 import ExemptionBrowser from './components/ExemptionBrowser';
-import {updateExemptionQuery, updateExemptionResults} from './actions';
+import {
+    updateExemptionQuery,
+    updateExemptionResults,
+    displayExemptionDetail,
+    displayExemptionList,
+} from './actions';
 
 /* First define the initial state, reducer, store, actions,
 and use them to create the container component.*/
@@ -28,7 +33,8 @@ const exemptionSearchAPI = '/api_v1/exemption/search/';
 
 const initialState = {
     query: '',
-    results: []
+    results: [],
+    exemption: null,
 };
 
 const rootReducer = function(state=initialState, action) {
@@ -36,11 +42,19 @@ const rootReducer = function(state=initialState, action) {
     switch(action.type) {
         case 'UPDATE_EXEMPTION_QUERY':
             return Object.assign({}, state, {
-                query: action.data.query
+                query: action.query
             });
         case 'UPDATE_EXEMPTION_RESULTS':
             return Object.assign({}, state, {
-                results: action.data
+                results: action.results
+            });
+        case 'DISPLAY_EXEMPTION_DETAIL':
+            return Object.assign({}, state, {
+                exemption: action.exemption
+            });
+        case 'DISPLAY_EXEMPTION_LIST':
+            return Object.assign({}, state, {
+                exemption: null
             });
     }
     return state;
@@ -54,21 +68,32 @@ const mapStateToProps = function(store) {
     return {
         exemptionQuery: store.query,
         exemptionResults: store.results,
+        activeExemption: store.exemption,
     };
 };
 const mapDispatchToProps = (dispatch) => {
     return {
-        onExemptionSearch: (query) => {
+        searchExemptions: (query) => {
             dispatch(updateExemptionQuery(query));
-            axios.get(exemptionSearchAPI, {
-                params: {
-                    q: query
-                }
-            }).then(response => {
-                const results = response.data.results;
-                dispatch(updateExemptionResults(results));
-            });
-        }
+            if (query == '') {
+                dispatch(updateExemptionResults([]));
+            } else {
+                axios.get(exemptionSearchAPI, {
+                    params: {
+                        q: query
+                    }
+                }).then(response => {
+                    const results = response.data.results;
+                    dispatch(updateExemptionResults(results));
+                });
+            }
+        },
+        displayExemptionDetail: (exemption) => {
+            dispatch(displayExemptionDetail(exemption));
+        },
+        displayExemptionList: () => {
+            dispatch(displayExemptionList());
+        },
     }
 }
 const ExemptionBrowserContainer = connect(mapStateToProps, mapDispatchToProps)(ExemptionBrowser);

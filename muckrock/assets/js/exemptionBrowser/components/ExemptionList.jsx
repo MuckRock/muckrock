@@ -5,23 +5,22 @@
 
 import React, { PropTypes } from 'react';
 
-const Exemption = ({id, name}) => (
-    <div className="exemption" id={"exemption." + id}>
-        <p className="exemption__name">
-            {name}
-        </p>
-    </div>
-);
+const ExemptionListItem = ({exemption, onClick}) => {
+    const handleClick = (e) => {
+        e.preventDefault();
+        console.log(exemption);
+        onClick(exemption);
+    }
+    return (
+        <li className="exemption__list__item" onClick={handleClick}>
+            <p className="exemption__name">{exemption.name} &rarr;</p>
+        </li>
+    )
+};
 
-const ExemptionListItem = ({exemption}) => (
-    <li className="exemption__list__item">
-        <Exemption id={exemption.id} name={exemption.name} />
-    </li>
-)
-
-const ExemptionList = ({exemptions}) => {
+const ExemptionList = ({exemptions, onExemptionClick}) => {
     const exemptionListItems = exemptions.map((exemption, i) => (
-        <ExemptionListItem key={i} exemption={exemption} />
+        <ExemptionListItem key={i} exemption={exemption} onClick={onExemptionClick} />
     ));
     return (
         <ul className="exemption__list">
@@ -32,6 +31,7 @@ const ExemptionList = ({exemptions}) => {
 
 ExemptionList.propTypes = {
     exemptions: PropTypes.array.isRequired,
+    onExemptionClick: PropTypes.func.isRequired,
 }
 
 export default ExemptionList

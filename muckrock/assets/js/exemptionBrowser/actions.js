@@ -6,15 +6,26 @@
 export const updateExemptionQuery = (query) => (
     {
         type: 'UPDATE_EXEMPTION_QUERY',
-        data: {
-            query: query,
-        }
+        query: query,
     }
 );
 
 export const updateExemptionResults = (results) => (
     {
         type: 'UPDATE_EXEMPTION_RESULTS',
-        data: results,
+        results: results,
+    }
+);
+
+export const displayExemptionDetail = (exemption) => (
+    {
+        type: 'DISPLAY_EXEMPTION_DETAIL',
+        exemption: exemption,
+    }
+);
+
+export const displayExemptionList = () => (
+    {
+        type: 'DISPLAY_EXEMPTION_LIST',
     }
 );

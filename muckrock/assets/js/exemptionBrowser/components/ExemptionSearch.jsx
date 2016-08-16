@@ -9,13 +9,16 @@ import React, { PropTypes } from 'react';
 
 const ExemptionSearch = ({onSubmit, query}) => {
     let input;
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (input.value != query) {
+          onSubmit(input.value);
+        }
+    }
     return (
         <form method="get"
               className="exemption-search"
-              onSubmit={e => {
-                  e.preventDefault();
-                  onSubmit(input.value);
-              }}>
+              onSubmit={handleSubmit}>
             <input type="search" name="q" ref={node => { input = node }}/>
             <button type="submit" className="basic blue button">Search</button>
         </form>
