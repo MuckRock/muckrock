@@ -14,7 +14,7 @@ import ExemptionDetail from './ExemptionDetail';
 const ExemptionBrowser = ({exemptionQuery, exemptionResults, activeExemption, onQueryChange, searchExemptions, displayExemptionDetail, displayExemptionList}) => {
     let resultDisplay;
     if (!activeExemption) {
-        resultDisplay = <ExemptionList exemptions={exemptionResults} onExemptionClick={displayExemptionDetail} />;
+        resultDisplay = <ExemptionList query={exemptionQuery} exemptions={exemptionResults} onExemptionClick={displayExemptionDetail} />;
     } else {
         resultDisplay = <ExemptionDetail exemption={activeExemption} onBackClick={displayExemptionList} />;
     }
