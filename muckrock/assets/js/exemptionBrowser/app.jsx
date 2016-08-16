@@ -16,6 +16,7 @@ import { Provider, connect } from 'react-redux';
 import axios from 'axios';
 
 import ExemptionBrowser from './components/ExemptionBrowser';
+import {updateExemptionQuery, updateExemptionResults} from './actions';
 
 /* First define the initial state, reducer, store, actions,
 and use them to create the container component.*/
@@ -45,27 +46,10 @@ const rootReducer = function(state=initialState, action) {
     return state;
 };
 
-const updateExemptionQuery = (query) => (
-    {
-        type: 'UPDATE_EXEMPTION_QUERY',
-        data: {
-            query: query,
-        }
-    }
-);
-
-const updateExemptionResults = (results) => (
-    {
-        type: 'UPDATE_EXEMPTION_RESULTS',
-        data: results,
-    }
-)
-
 // TODO We initialize the devtool here, but this should be removed in production settings
 const devTool = window.devToolsExtension ? window.devToolsExtension() : undefined;
 const store = createStore(rootReducer, initialState, devTool); // Create store from the root reducer
 
-// More dummy values
 const mapStateToProps = function(store) {
     return {exemptionQuery: store.query};
 };
@@ -79,7 +63,6 @@ const mapDispatchToProps = (dispatch) => {
                 }
             }).then(response => {
                 const results = response.data.results;
-                console.debug(response);
                 dispatch(updateExemptionResults(results));
             });
         }

@@ -7,13 +7,10 @@
 
 import React, { PropTypes } from 'react';
 
-const exemptionSearchAPI = '/api_v1/exemption/search/';
-
 const ExemptionSearch = ({onSubmit, query}) => {
     let input;
     return (
         <form method="get"
-              action={exemptionSearchAPI}
               className="exemption-search"
               onSubmit={e => {
                   e.preventDefault();
