@@ -11,8 +11,6 @@
 **   standalone files and then imported back into here.
 */
 
-import 'babel-polyfill';
-
 import 'jquery-ui/datepicker';
 import '../vendor/formset';
 import '../vendor/loupe';
