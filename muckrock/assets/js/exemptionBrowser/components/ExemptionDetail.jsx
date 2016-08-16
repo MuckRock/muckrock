@@ -5,13 +5,29 @@
 
 import React, { PropTypes } from 'react';
 
-const ExemptionDetail = ({exemption, onBackClick}) => (
-    <div className="exemption__detail">
-        <p onClick={onBackClick}>&larr; Back to results</p>
-        <h1>{exemption.name}</h1>
-        <p>{exemption.basis}</p>
+const AppealLanguage = ({appeal}) => (
+    <div className="exemption__detail__appeal">
+        <p>{appeal.context}</p>
+        <textarea readOnly value={appeal.language}></textarea>
+        <p className="small">Use this language in your appeal</p>
+        <button onClick={e=>{alert('do something!');}}>Sample</button>
     </div>
-);
+)
+
+const ExemptionDetail = ({exemption, onBackClick}) => {
+    const appeals = exemption.example_appeals.map((appeal, i) => (
+        <AppealLanguage key={i} appeal={appeal} />
+    ));
+    return (
+        <div className="exemption__detail">
+            <p onClick={onBackClick}>&larr; Back to results</p>
+            <h1>{exemption.name}</h1>
+            <p>{exemption.basis}</p>
+            <h2>Sample Apppeals</h2>
+            {appeals}
+        </div>
+    )
+};
 
 ExemptionDetail.propTypes = {
     exemption: PropTypes.object.isRequired,
