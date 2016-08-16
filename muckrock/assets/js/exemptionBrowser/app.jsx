@@ -13,6 +13,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { createStore } from 'redux';
 import { Provider, connect } from 'react-redux';
+import axios from 'axios';
 
 import ExemptionBrowser from './components/ExemptionBrowser';
 
@@ -22,27 +23,43 @@ and use them to create the container component.*/
 // We create the store and reducer in this file while it's still simple
 // Later on, we should refactor these out.
 
-const initialState = {query: ''}; // Dummy initial state
+const exemptionSearchAPI = '/api_v1/exemption/search/';
+
+const initialState = {
+    query: '',
+    results: []
+};
+
 const rootReducer = function(state=initialState, action) {
     // Dummy reducer case: we'll fill this in later
     switch(action.type) {
-        case 'EXEMPTION_SEARCH':
-            const query = action.data.query;
+        case 'UPDATE_EXEMPTION_QUERY':
             return Object.assign({}, state, {
-                query: query
+                query: action.data.query
+            });
+        case 'UPDATE_EXEMPTION_RESULTS':
+            return Object.assign({}, state, {
+                results: action.data
             });
     }
     return state;
 };
 
-const searchExemptions = (query) => (
+const updateExemptionQuery = (query) => (
     {
-        type: 'EXEMPTION_SEARCH',
+        type: 'UPDATE_EXEMPTION_QUERY',
         data: {
             query: query,
         }
     }
 );
+
+const updateExemptionResults = (results) => (
+    {
+        type: 'UPDATE_EXEMPTION_RESULTS',
+        data: results,
+    }
+)
 
 // TODO We initialize the devtool here, but this should be removed in production settings
 const devTool = window.devToolsExtension ? window.devToolsExtension() : undefined;
@@ -55,7 +72,16 @@ const mapStateToProps = function(store) {
 const mapDispatchToProps = (dispatch) => {
     return {
         onExemptionSearch: (query) => {
-            dispatch(searchExemptions(query));
+            dispatch(updateExemptionQuery(query));
+            axios.get(exemptionSearchAPI, {
+                params: {
+                    q: query
+                }
+            }).then(response => {
+                const results = response.data.results;
+                console.debug(response);
+                dispatch(updateExemptionResults(results));
+            });
         }
     }
 }
