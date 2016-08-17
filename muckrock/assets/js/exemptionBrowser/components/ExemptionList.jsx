@@ -12,6 +12,18 @@ function truncateString(string, maxLength) {
     return string
 }
 
+const Loader = () => (
+    <div className="loader">
+        <div className="loader-inner line-scale-pulse-out-rapid">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </div>
+)
+
 const ExemptionListItem = ({exemption, onClick}) => {
     const basisMaxLength = 300;
     const truncatedBasis = truncateString(exemption.basis, basisMaxLength);
@@ -27,7 +39,7 @@ const ExemptionListItem = ({exemption, onClick}) => {
     )
 };
 
-const ExemptionList = ({query, exemptions, onExemptionClick, displayExemptionForm}) => {
+const ExemptionList = ({query, loading, exemptions, onExemptionClick, displayExemptionForm}) => {
     const exemptionListItems = exemptions.map((exemption, i) => (
         <ExemptionListItem key={i} exemption={exemption} onClick={onExemptionClick} />
     ));
@@ -37,8 +49,8 @@ const ExemptionList = ({query, exemptions, onExemptionClick, displayExemptionFor
         if (exemptions.length > 0) {
             emptyResults = (
                 <div className="exemption__empty small">
-                    <p className="bold">Are these results unhelpful?</p>
-                    <p>Tell us more about your exemption and we'll help you appeal it.</p>
+                    <p className="bold nomargin">Are these results unhelpful?</p>
+                    <p className="nomargin">Tell us more about your exemption and we'll help you appeal it.</p>
                     <button onClick={displayExemptionForm} className="button">Submit Exemption</button>
                 </div>
             )
@@ -50,10 +62,16 @@ const ExemptionList = ({query, exemptions, onExemptionClick, displayExemptionFor
                     {emptyResults}
                 </div>
             )
+        } else if (loading) {
+            renderedList = (
+                <div className="exemption__results--loading">
+                    <Loader />
+                </div>
+            )
         } else {
             emptyResults = (
                 <div className="exemption__empty">
-                    <p className="bold">We can't find anything related to "{query}"</p>
+                    <p className="bold nomargin">We can't find anything related to "{query}"</p>
                     <p>Tell us more about your exemption and we'll help you appeal it.</p>
                     <button onClick={displayExemptionForm} className="button">Submit Exemption</button>
                 </div>
@@ -70,6 +88,7 @@ const ExemptionList = ({query, exemptions, onExemptionClick, displayExemptionFor
 
 ExemptionList.propTypes = {
     query: PropTypes.string.isRequired,
+    loading: PropTypes.bool.isRequired,
     exemptions: PropTypes.array.isRequired,
     onExemptionClick: PropTypes.func.isRequired,
     displayExemptionForm: PropTypes.func.isRequired,

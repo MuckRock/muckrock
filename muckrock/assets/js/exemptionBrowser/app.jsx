@@ -22,6 +22,8 @@ import {
     displayExemptionDetail,
     displayExemptionList,
     displayExemptionForm,
+    displayLoadingIndicator,
+    resetExemptionState,
 } from './actions';
 
 /* First define the initial state, reducer, store, actions,
@@ -34,6 +36,7 @@ const exemptionSearchAPI = '/api_v1/exemption/search/';
 
 const initialState = {
     query: '',
+    loading: false,
     results: [],
     exemption: null,
     formIsVisible: false,
@@ -48,7 +51,12 @@ const rootReducer = function(state=initialState, action) {
             });
         case 'UPDATE_EXEMPTION_RESULTS':
             return Object.assign({}, state, {
-                results: action.results
+                results: action.results,
+                loading: false,
+            });
+        case 'DISPLAY_LOADING_INDICATOR':
+            return Object.assign({}, state, {
+                loading: true,
             });
         case 'DISPLAY_EXEMPTION_DETAIL':
             return Object.assign({}, state, {
@@ -57,12 +65,15 @@ const rootReducer = function(state=initialState, action) {
         case 'DISPLAY_EXEMPTION_LIST':
             return Object.assign({}, state, {
                 exemption: null,
-                formIsVisible: false
+                formIsVisible: false,
+                loading: false,
             });
         case 'DISPLAY_EXEMPTION_FORM':
             return Object.assign({}, state, {
                 formIsVisible: true
             });
+        case 'RESET_EXEMPTION_STATE':
+            return Object.assign({}, state, initialState);
     }
     return state;
 };
@@ -74,6 +85,7 @@ const store = createStore(rootReducer, initialState, devTool); // Create store f
 const mapStateToProps = function(store) {
     return {
         exemptionQuery: store.query,
+        loadingResults: store.loading,
         exemptionResults: store.results,
         activeExemption: store.exemption,
         formIsVisible: store.formIsVisible,
@@ -82,10 +94,11 @@ const mapStateToProps = function(store) {
 const mapDispatchToProps = (dispatch) => {
     return {
         searchExemptions: (query) => {
-            dispatch(updateExemptionQuery(query));
             if (query == '') {
-                dispatch(updateExemptionResults([]));
+                dispatch(resetExemptionState());
             } else {
+                dispatch(displayLoadingIndicator());
+                dispatch(updateExemptionQuery(query));
                 axios.get(exemptionSearchAPI, {
                     params: {
                         q: query
@@ -93,7 +106,6 @@ const mapDispatchToProps = (dispatch) => {
                 }).then(response => {
                     const results = response.data.results;
                     dispatch(updateExemptionResults(results));
-                    dispatch(displayExemptionList());
                 });
             }
         },

@@ -35,3 +35,15 @@ export const displayExemptionForm = () => (
         type: 'DISPLAY_EXEMPTION_FORM',
     }
 );
+
+export const displayLoadingIndicator = () => (
+    {
+        type: 'DISPLAY_LOADING_INDICATOR',
+    }
+);
+
+export const resetExemptionState = () => (
+    {
+        type: 'RESET_EXEMPTION_STATE',
+    }
+);
