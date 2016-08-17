@@ -10,22 +10,26 @@ import React, { PropTypes } from 'react';
 import ExemptionSearch from './ExemptionSearch';
 import ExemptionList from './ExemptionList';
 import ExemptionDetail from './ExemptionDetail';
+import ExemptionForm from './ExemptionForm';
 
-const ExemptionBrowser = ({exemptionQuery, exemptionResults, activeExemption, onQueryChange, searchExemptions, displayExemptionDetail, displayExemptionList}) => {
+const ExemptionBrowser = ({exemptionQuery, exemptionResults, activeExemption, formIsVisible, onQueryChange, searchExemptions, displayExemptionDetail, displayExemptionList, displayExemptionForm}) => {
     let resultDisplay;
-    if (!activeExemption) {
+    if (formIsVisible) {
+        resultDisplay = <ExemptionForm onCancel={displayExemptionList} onSubmit={()=>{alert('Handle submit!')}}/>;
+    } else if (activeExemption) {
+        resultDisplay = <ExemptionDetail exemption={activeExemption} onBackClick={displayExemptionList} />;
+    } else {
         resultDisplay = (
             <div>
+                <p className="bold">Search for exemptions and appeals</p>
                 <ExemptionSearch query={exemptionQuery} onSubmit={searchExemptions} />
-                <ExemptionList query={exemptionQuery} exemptions={exemptionResults} onExemptionClick={displayExemptionDetail} />
+                <ExemptionList query={exemptionQuery} exemptions={exemptionResults} onExemptionClick={displayExemptionDetail}
+                displayExemptionForm={displayExemptionForm} />
             </div>
         );
-    } else {
-        resultDisplay = <ExemptionDetail exemption={activeExemption} onBackClick={displayExemptionList} />;
     }
     return (
         <div className="exemptionBrowser">
-            <p className="bold">Search for exemptions and appeals</p>
             {resultDisplay}
         </div>
     )
@@ -35,9 +39,11 @@ ExemptionBrowser.propTypes = {
     exemptionQuery: PropTypes.string.isRequired,
     exemptionResults: PropTypes.array.isRequired,
     activeExemption: PropTypes.object,
+    formIsVisible: PropTypes.bool.isRequired,
     searchExemptions: PropTypes.func.isRequired,
     displayExemptionDetail: PropTypes.func.isRequired,
     displayExemptionList: PropTypes.func.isRequired,
+    displayExemptionForm: PropTypes.func.isRequired,
 };
 
 export default ExemptionBrowser

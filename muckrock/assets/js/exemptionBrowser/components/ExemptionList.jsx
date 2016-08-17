@@ -27,7 +27,7 @@ const ExemptionListItem = ({exemption, onClick}) => {
     )
 };
 
-const ExemptionList = ({query, exemptions, onExemptionClick}) => {
+const ExemptionList = ({query, exemptions, onExemptionClick, displayExemptionForm}) => {
     const exemptionListItems = exemptions.map((exemption, i) => (
         <ExemptionListItem key={i} exemption={exemption} onClick={onExemptionClick} />
     ));
@@ -39,7 +39,7 @@ const ExemptionList = ({query, exemptions, onExemptionClick}) => {
                 <div className="exemption__empty small">
                     <p className="bold">Are these results unhelpful?</p>
                     <p>Tell us more about your exemption and we'll help you appeal it.</p>
-                    <button onClick={e => { alert('Do something!')}} className="button">Submit Exemption</button>
+                    <button onClick={displayExemptionForm} className="button">Submit Exemption</button>
                 </div>
             )
             renderedList = (
@@ -55,7 +55,7 @@ const ExemptionList = ({query, exemptions, onExemptionClick}) => {
                 <div className="exemption__empty">
                     <p className="bold">We can't find anything related to "{query}"</p>
                     <p>Tell us more about your exemption and we'll help you appeal it.</p>
-                    <button onClick={e => { alert('Do something!')}} className="button">Submit Exemption</button>
+                    <button onClick={displayExemptionForm} className="button">Submit Exemption</button>
                 </div>
             )
             renderedList = (
@@ -72,6 +72,7 @@ ExemptionList.propTypes = {
     query: PropTypes.string.isRequired,
     exemptions: PropTypes.array.isRequired,
     onExemptionClick: PropTypes.func.isRequired,
+    displayExemptionForm: PropTypes.func.isRequired,
 }
 
 export default ExemptionList

@@ -29,3 +29,9 @@ export const displayExemptionList = () => (
         type: 'DISPLAY_EXEMPTION_LIST',
     }
 );
+
+export const displayExemptionForm = () => (
+    {
+        type: 'DISPLAY_EXEMPTION_FORM',
+    }
+);

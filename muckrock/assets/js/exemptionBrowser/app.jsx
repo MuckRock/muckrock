@@ -21,6 +21,7 @@ import {
     updateExemptionResults,
     displayExemptionDetail,
     displayExemptionList,
+    displayExemptionForm,
 } from './actions';
 
 /* First define the initial state, reducer, store, actions,
@@ -35,6 +36,7 @@ const initialState = {
     query: '',
     results: [],
     exemption: null,
+    formIsVisible: false,
 };
 
 const rootReducer = function(state=initialState, action) {
@@ -54,7 +56,12 @@ const rootReducer = function(state=initialState, action) {
             });
         case 'DISPLAY_EXEMPTION_LIST':
             return Object.assign({}, state, {
-                exemption: null
+                exemption: null,
+                formIsVisible: false
+            });
+        case 'DISPLAY_EXEMPTION_FORM':
+            return Object.assign({}, state, {
+                formIsVisible: true
             });
     }
     return state;
@@ -69,6 +76,7 @@ const mapStateToProps = function(store) {
         exemptionQuery: store.query,
         exemptionResults: store.results,
         activeExemption: store.exemption,
+        formIsVisible: store.formIsVisible,
     };
 };
 const mapDispatchToProps = (dispatch) => {
@@ -95,6 +103,9 @@ const mapDispatchToProps = (dispatch) => {
         displayExemptionList: () => {
             dispatch(displayExemptionList());
         },
+        displayExemptionForm: () => {
+            dispatch(displayExemptionForm());
+        }
     }
 }
 const ExemptionBrowserContainer = connect(mapStateToProps, mapDispatchToProps)(ExemptionBrowser);
