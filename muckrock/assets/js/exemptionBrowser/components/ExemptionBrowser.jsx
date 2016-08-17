@@ -20,6 +20,7 @@ const ExemptionBrowser = ({exemptionQuery, exemptionResults, activeExemption, on
     }
     return (
         <div className="exemptionBrowser">
+            <p>Search for exemptions and appeals</p>
             <ExemptionSearch query={exemptionQuery} onSubmit={searchExemptions} />
             {resultDisplay}
         </div>
