@@ -1,0 +1,37 @@
+.exemption-browser {
+    .exemption-search {
+        @include border;
+        @include display(flex);
+        input {
+            @include flex(4 1 auto);
+            border-radius: 0;
+            border: none;
+        }
+        .button {
+            @include flex(1 1 auto);
+        }
+    }
+}
+
+.exemption__empty {
+    @include padding;
+    @include border;
+    background: $color-grey-7;
+    text-align: center;
+}
+
+.exemption__list__item, .exemption__detail {
+    @include padding;
+    border-color: $color-grey;
+}
+
+.exemption__list__item, .exemption__empty {
+    border-top: none;
+}
+
+.exemption__detail__appeal {
+    .button {
+        display: block;
+        width: 100%;
+    }
+}
