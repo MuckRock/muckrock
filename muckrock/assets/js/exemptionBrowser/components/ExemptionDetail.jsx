@@ -13,13 +13,28 @@ const AppealLanguage = ({appeal}) => {
         Hopefully we'll migrate most of the composer over to React/Redux also! But until that happens, we'll just use jQuery to pop it in.
         */
         const language = appeal.language;
-        const $appealComposer = $('#appeal-composer');
+        const id = appeal.id;
+        const $appealForm = $('#appeal .composer-input');
+        const $appealComposer = $appealForm.find('#appeal-composer');
+        /*
+        Insert the language into the textarea
+        If there's nothing else in the textarea, don't pad it with spacing.
+        But if there is, give a clean linebreak between whatever exists and
+        What we're adding.
+        */
         const currentValue = $appealComposer.val();
         let spacing = '\n\n';
         if (currentValue.length == 0) {
             spacing = '';
         }
         $appealComposer.val(currentValue + spacing + language);
+        /*
+        Insert the appeal id as a hidden value into the form.
+        This way, we can track what appeal language is being
+        used and how frequently.
+        */
+        const $appealInputElement = $('<input type="hidden" name="appeal_language" value="' + id + '"/>');
+        $appealInputElement.insertAfter($appealComposer);
     }
     return (
         <div className="exemption__detail__appeal">
