@@ -14,14 +14,18 @@ import ExemptionDetail from './ExemptionDetail';
 const ExemptionBrowser = ({exemptionQuery, exemptionResults, activeExemption, onQueryChange, searchExemptions, displayExemptionDetail, displayExemptionList}) => {
     let resultDisplay;
     if (!activeExemption) {
-        resultDisplay = <ExemptionList query={exemptionQuery} exemptions={exemptionResults} onExemptionClick={displayExemptionDetail} />;
+        resultDisplay = (
+            <div>
+                <ExemptionSearch query={exemptionQuery} onSubmit={searchExemptions} />
+                <ExemptionList query={exemptionQuery} exemptions={exemptionResults} onExemptionClick={displayExemptionDetail} />
+            </div>
+        );
     } else {
         resultDisplay = <ExemptionDetail exemption={activeExemption} onBackClick={displayExemptionList} />;
     }
     return (
         <div className="exemptionBrowser">
-            <p>Search for exemptions and appeals</p>
-            <ExemptionSearch query={exemptionQuery} onSubmit={searchExemptions} />
+            <p className="bold">Search for exemptions and appeals</p>
             {resultDisplay}
         </div>
     )

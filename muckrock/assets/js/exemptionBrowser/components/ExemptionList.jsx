@@ -5,14 +5,24 @@
 
 import React, { PropTypes } from 'react';
 
+function truncateString(string, maxLength) {
+    if (string.length > maxLength) {
+        string = string.substring(0, maxLength) + '...';
+    }
+    return string
+}
+
 const ExemptionListItem = ({exemption, onClick}) => {
+    const basisMaxLength = 300;
+    const truncatedBasis = truncateString(exemption.basis, basisMaxLength);
     const handleClick = (e) => {
         e.preventDefault();
         onClick(exemption);
     }
     return (
-        <li className="exemption__list__item" onClick={handleClick}>
-            <p className="exemption__name">{exemption.name} &rarr;</p>
+        <li className="exemption__list__item textbox nomargin" onClick={handleClick}>
+            <p className="exemption__name bold">{exemption.name} &rarr;</p>
+            <p className="exemption__basis">{truncatedBasis}</p>
         </li>
     )
 };
@@ -26,14 +36,15 @@ const ExemptionList = ({query, exemptions, onExemptionClick}) => {
     if (query != '') {
         if (exemptions.length > 0) {
             emptyResults = (
-                <div className="exemption__empty">
-                    <p>Can't find what you're looking for?</p>
+                <div className="exemption__empty small">
+                    <p className="bold">Are these results unhelpful?</p>
+                    <p>Tell us more about your exemption and we'll help you appeal it.</p>
                     <button onClick={e => { alert('Do something!')}} className="button">Submit Exemption</button>
                 </div>
             )
             renderedList = (
                 <div className="exemption__results">
-                    <ul className="exemption__list">
+                    <ul className="exemption__list nostyle nomargin">
                         {exemptionListItems}
                     </ul>
                     {emptyResults}
@@ -42,7 +53,8 @@ const ExemptionList = ({query, exemptions, onExemptionClick}) => {
         } else {
             emptyResults = (
                 <div className="exemption__empty">
-                    <p>Sorry, we did not find any results for "{query}"</p>
+                    <p className="bold">We can't find anything related to "{query}"</p>
+                    <p>Tell us more about your exemption and we'll help you appeal it.</p>
                     <button onClick={e => { alert('Do something!')}} className="button">Submit Exemption</button>
                 </div>
             )

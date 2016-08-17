@@ -77,7 +77,6 @@ const mapDispatchToProps = (dispatch) => {
             dispatch(updateExemptionQuery(query));
             if (query == '') {
                 dispatch(updateExemptionResults([]));
-                dispatch(displayExemptionList());
             } else {
                 axios.get(exemptionSearchAPI, {
                     params: {

@@ -39,9 +39,15 @@ const AppealLanguage = ({appeal}) => {
     return (
         <div className="exemption__detail__appeal">
             <p>{appeal.context}</p>
-            <textarea readOnly value={appeal.language}></textarea>
-            <p className="small">Use this language in your appeal</p>
-            <button className="button" onClick={handleClick}>Sample</button>
+            <div className="grid__row">
+                <div className="grid__column three-quarters">
+                    <textarea readOnly rows="3" value={appeal.language}></textarea>
+                </div>
+                <div className="grid__column quarter">
+                    <p className="small nomargin">Use this language in your appeal.</p>
+                    <button className="button" onClick={handleClick}>Sample</button>
+                </div>
+            </div>
         </div>
     )
 };
@@ -51,11 +57,11 @@ const ExemptionDetail = ({exemption, onBackClick}) => {
         <AppealLanguage key={i} appeal={appeal} />
     ));
     return (
-        <div className="exemption__detail">
-            <p onClick={onBackClick}>&larr; Back to results</p>
+        <div className="exemption__detail textbox">
+            <p onClick={onBackClick}>&larr; Back to search results</p>
             <h1>{exemption.name}</h1>
             <p>{exemption.basis}</p>
-            <h2>Sample Apppeals</h2>
+            <h2>Sample Appeals</h2>
             {appeals}
         </div>
     )

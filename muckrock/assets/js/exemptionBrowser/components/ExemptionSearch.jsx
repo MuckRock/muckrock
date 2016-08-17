@@ -17,7 +17,7 @@ const ExemptionSearch = ({onSubmit, query}) => {
     }
     return (
         <form method="get"
-              className="exemption-search"
+              className="exemption-search nomargin"
               onSubmit={handleSubmit}>
             <input type="search" name="q" ref={node => { input = node }}/>
             <button type="submit" className="basic blue button">Search</button>
