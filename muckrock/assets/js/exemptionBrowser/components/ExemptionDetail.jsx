@@ -14,7 +14,12 @@ const AppealLanguage = ({appeal}) => {
         */
         const language = appeal.language;
         const $appealComposer = $('#appeal-composer');
-        $appealComposer.val($appealComposer.val() + '\n\n' + language);
+        const currentValue = $appealComposer.val();
+        let spacing = '\n\n';
+        if (currentValue.length == 0) {
+            spacing = '';
+        }
+        $appealComposer.val(currentValue + spacing + language);
     }
     return (
         <div className="exemption__detail__appeal">
