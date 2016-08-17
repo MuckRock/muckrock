@@ -13,11 +13,16 @@
     }
 }
 
-.exemption__empty {
+.exemption__empty, .exemption__results--loading {
     @include padding;
     @include border;
+    border-top: none;
     background: $color-grey-7;
     text-align: center;
+}
+
+.exemption__list__item {
+    border-top: none;
 }
 
 .exemption__list__item, .exemption__detail {
@@ -25,13 +30,24 @@
     border-color: $color-grey;
 }
 
-.exemption__list__item, .exemption__empty {
-    border-top: none;
+.exemption__list__item {
+    cursor: default;
+    &:hover {
+        background: $color-blue;
+        color: $color-white;
+    }
 }
 
 .exemption__detail__appeal {
     .button {
         display: block;
         width: 100%;
+    }
+}
+
+.exemption__form {
+    footer {
+        @include display(flex);
+        @include justify-content(space-between);
     }
 }

@@ -17,10 +17,13 @@ const ExemptionSearch = ({onSubmit, query}) => {
     }
     return (
         <form method="get"
-              className="exemption-search nomargin"
+              className="nomargin"
               onSubmit={handleSubmit}>
-            <input type="search" name="q" ref={node => { input = node }}/>
-            <button type="submit" className="basic blue button">Search</button>
+            <label htmlFor="exemptionSearch" className="bold">Search for exemptions and appeals</label>
+            <div className="exemption-search">
+                <input type="search" name="q" id="exemptionSearch" ref={node => { input = node }}/>
+                <button type="submit" className="basic blue button">Search</button>
+            </div>
         </form>
     );
 };

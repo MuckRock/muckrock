@@ -57,12 +57,14 @@ const ExemptionDetail = ({exemption, onBackClick}) => {
         <AppealLanguage key={i} appeal={appeal} />
     ));
     return (
-        <div className="exemption__detail textbox">
-            <p onClick={onBackClick}>&larr; Back to search results</p>
-            <h1>{exemption.name}</h1>
-            <p>{exemption.basis}</p>
-            <h2>Sample Appeals</h2>
-            {appeals}
+        <div>
+            <button className="basic button" onClick={onBackClick}>&larr; Back to search results</button>
+            <div className="exemption__detail textbox">
+                <h1>{exemption.name}</h1>
+                <p>{exemption.basis}</p>
+                <h2>Sample Appeals</h2>
+                {appeals}
+            </div>
         </div>
     )
 };

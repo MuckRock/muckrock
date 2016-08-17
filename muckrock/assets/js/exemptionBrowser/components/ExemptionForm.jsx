@@ -17,7 +17,8 @@ const ExemptionForm = ({onCancel, onSubmit}) => {
         return false;
     }
     return (
-        <form className="exemption__form form" method="post" onSubmit={handleSubmit}>
+        <form className="exemption__form form panel" method="post" onSubmit={handleSubmit}>
+            <h2>Submit a new exemption</h2>
             <div className="field">
                 <label htmlFor="languageInput">What language did the agency use to invoke the exemption?</label>
                 <textarea id="languageInput"></textarea>
