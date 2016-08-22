@@ -7,7 +7,7 @@
 
 import React, { PropTypes } from 'react';
 
-const ExemptionSearch = ({onSubmit, query}) => {
+const ExemptionSearch = ({query, onSubmit}) => {
     let input;
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -29,8 +29,8 @@ const ExemptionSearch = ({onSubmit, query}) => {
 };
 
 ExemptionSearch.propTypes = {
-    onSubmit: PropTypes.func.isRequired,
     query: PropTypes.string.isRequired,
+    onSubmit: PropTypes.func.isRequired,
 }
 
-export default ExemptionSearch
+export default ExemptionSearch;

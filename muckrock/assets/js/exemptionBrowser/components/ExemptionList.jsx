@@ -39,9 +39,9 @@ const ExemptionListItem = ({exemption, onClick}) => {
     )
 };
 
-const ExemptionList = ({query, loading, exemptions, onExemptionClick, displayExemptionForm}) => {
+const ExemptionList = ({query, loading, exemptions, showExemptionDetail, showExemptionForm}) => {
     const exemptionListItems = exemptions.map((exemption, i) => (
-        <ExemptionListItem key={i} exemption={exemption} onClick={onExemptionClick} />
+        <ExemptionListItem key={i} exemption={exemption} onClick={showExemptionDetail} />
     ));
     let emptyResults = null;
     let renderedList = null;
@@ -51,7 +51,7 @@ const ExemptionList = ({query, loading, exemptions, onExemptionClick, displayExe
                 <div className="exemption__empty small">
                     <p className="bold nomargin">Are these results unhelpful?</p>
                     <p className="nomargin">Tell us more about your exemption and we'll help you appeal it.</p>
-                    <button onClick={displayExemptionForm} className="button">Submit Exemption</button>
+                    <button onClick={showExemptionForm} className="button">Submit Exemption</button>
                 </div>
             )
             renderedList = (
@@ -73,7 +73,7 @@ const ExemptionList = ({query, loading, exemptions, onExemptionClick, displayExe
                 <div className="exemption__empty">
                     <p className="bold nomargin">We can't find anything related to "{query}"</p>
                     <p>Tell us more about your exemption and we'll help you appeal it.</p>
-                    <button onClick={displayExemptionForm} className="button">Submit Exemption</button>
+                    <button onClick={showExemptionForm} className="button">Submit Exemption</button>
                 </div>
             )
             renderedList = (
@@ -90,8 +90,8 @@ ExemptionList.propTypes = {
     query: PropTypes.string.isRequired,
     loading: PropTypes.bool.isRequired,
     exemptions: PropTypes.array.isRequired,
-    onExemptionClick: PropTypes.func.isRequired,
-    displayExemptionForm: PropTypes.func.isRequired,
+    showExemptionDetail: PropTypes.func.isRequired,
+    showExemptionForm: PropTypes.func.isRequired,
 }
 
 export default ExemptionList

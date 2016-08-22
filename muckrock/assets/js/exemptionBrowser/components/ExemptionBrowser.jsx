@@ -7,12 +7,12 @@
 
 import React, { PropTypes } from 'react';
 
-import ExemptionSearch from './ExemptionSearch';
-import ExemptionList from './ExemptionList';
+import ExemptionSearchContainer from '../containers/ExemptionSearchContainer';
+import ExemptionListContainer from '../containers/ExemptionListContainer';
 import ExemptionDetail from './ExemptionDetail';
 import ExemptionForm from './ExemptionForm';
 
-const ExemptionBrowser = ({exemptionQuery, exemptionResults, activeExemption, formIsVisible, loadingResults, onQueryChange, searchExemptions, displayExemptionDetail, displayExemptionList, displayExemptionForm}) => {
+const ExemptionBrowser = ({activeExemption, formIsVisible, displayExemptionList}) => {
     let resultDisplay;
     if (formIsVisible) {
         resultDisplay = <ExemptionForm onCancel={displayExemptionList} onSubmit={()=>{alert('Handle submit!')}}/>;
@@ -21,9 +21,8 @@ const ExemptionBrowser = ({exemptionQuery, exemptionResults, activeExemption, fo
     } else {
         resultDisplay = (
             <div>
-                <ExemptionSearch query={exemptionQuery} onSubmit={searchExemptions} />
-                <ExemptionList query={exemptionQuery} exemptions={exemptionResults} loading={loadingResults} onExemptionClick={displayExemptionDetail}
-                displayExemptionForm={displayExemptionForm} />
+                <ExemptionSearchContainer />
+                <ExemptionListContainer />
             </div>
         );
     }
@@ -35,15 +34,9 @@ const ExemptionBrowser = ({exemptionQuery, exemptionResults, activeExemption, fo
 };
 
 ExemptionBrowser.propTypes = {
-    exemptionQuery: PropTypes.string.isRequired,
-    exemptionResults: PropTypes.array.isRequired,
     activeExemption: PropTypes.object,
     formIsVisible: PropTypes.bool.isRequired,
-    loadingResults: PropTypes.bool.isRequired,
-    searchExemptions: PropTypes.func.isRequired,
-    displayExemptionDetail: PropTypes.func.isRequired,
     displayExemptionList: PropTypes.func.isRequired,
-    displayExemptionForm: PropTypes.func.isRequired,
 };
 
 export default ExemptionBrowser
