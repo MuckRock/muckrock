@@ -4,45 +4,56 @@
 ** to a dispatched action.
 */
 
+import {
+    UPDATE_VISIBILITY_FILTER,
+    UPDATE_EXEMPTION_QUERY,
+    UPDATE_EXEMPTION_RESULTS,
+    LOAD_EXEMPTION_RESULTS,
+    SELECT_EXEMPTION,
+    RESET_EXEMPTION_STATE,
+} from './actions';
+
+export const ExemptionVisibilityFilters = {
+    SHOW_SEARCH: 'SHOW_SEARCH',
+    SHOW_DETAIL: 'SHOW_DETAIL',
+    SHOW_FORM: 'SHOW_FORM,'
+}
+
 const initialState = {
     query: '',
     loading: false,
     results: [],
     exemption: null,
-    formIsVisible: false,
+    filter: 'SHOW_SEARCH',
 };
 
 const exemptionReducer = function(state=initialState, action) {
     switch(action.type) {
-        case 'UPDATE_EXEMPTION_QUERY':
+        case UPDATE_VISIBILITY_FILTER:
             return Object.assign({}, state, {
-                query: action.query
+                filter: action.filter,
+            })
+        case UPDATE_EXEMPTION_QUERY:
+            return Object.assign({}, state, {
+                query: action.query,
             });
-        case 'UPDATE_EXEMPTION_RESULTS':
+        case UPDATE_EXEMPTION_RESULTS:
             return Object.assign({}, state, {
                 results: action.results,
                 loading: false,
             });
-        case 'DISPLAY_LOADING_INDICATOR':
+        case LOAD_EXEMPTION_RESULTS:
             return Object.assign({}, state, {
                 loading: true,
             });
-        case 'DISPLAY_EXEMPTION_DETAIL':
+        case SELECT_EXEMPTION:
             return Object.assign({}, state, {
                 exemption: action.exemption
             });
-        case 'DISPLAY_EXEMPTION_LIST':
-            return Object.assign({}, state, {
-                exemption: null,
-                formIsVisible: false,
-                loading: false,
-            });
-        case 'DISPLAY_EXEMPTION_FORM':
-            return Object.assign({}, state, {
-                formIsVisible: true
-            });
-        case 'RESET_EXEMPTION_STATE':
+        case RESET_EXEMPTION_STATE:
             return Object.assign({}, state, initialState);
+        default:
+            return state;
     }
     return state;
 };

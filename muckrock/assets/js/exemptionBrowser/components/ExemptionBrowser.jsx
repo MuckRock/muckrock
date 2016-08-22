@@ -12,19 +12,21 @@ import ExemptionListContainer from '../containers/ExemptionListContainer';
 import ExemptionDetail from './ExemptionDetail';
 import ExemptionForm from './ExemptionForm';
 
-const ExemptionBrowser = ({activeExemption, formIsVisible, displayExemptionList}) => {
+const ExemptionBrowser = ({filter, activeExemption, displayExemptionList}) => {
     let resultDisplay;
-    if (formIsVisible) {
-        resultDisplay = <ExemptionForm onCancel={displayExemptionList} onSubmit={()=>{alert('Handle submit!')}}/>;
-    } else if (activeExemption) {
-        resultDisplay = <ExemptionDetail exemption={activeExemption} onBackClick={displayExemptionList} />;
-    } else {
+    if (filter == 'SHOW_SEARCH') {
         resultDisplay = (
             <div>
                 <ExemptionSearchContainer />
                 <ExemptionListContainer />
             </div>
         );
+    } else if (filter == 'SHOW_DETAIL') {
+        resultDisplay = <ExemptionDetail exemption={activeExemption} onBackClick={displayExemptionList} />;
+    } else if (filter == 'SHOW_FORM') {
+        resultDisplay = <ExemptionForm onCancel={displayExemptionList} onSubmit={()=>{alert('Handle submit!')}}/>;
+    } else {
+        resultDisplay = <ExemptionSearchContainer />
     }
     return (
         <div className="exemptionBrowser">
@@ -34,8 +36,8 @@ const ExemptionBrowser = ({activeExemption, formIsVisible, displayExemptionList}
 };
 
 ExemptionBrowser.propTypes = {
+    filter: PropTypes.string.isRequired,
     activeExemption: PropTypes.object,
-    formIsVisible: PropTypes.bool.isRequired,
     displayExemptionList: PropTypes.func.isRequired,
 };
 

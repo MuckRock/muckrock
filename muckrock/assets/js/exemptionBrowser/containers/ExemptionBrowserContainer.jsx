@@ -6,20 +6,16 @@
 import { connect } from 'react-redux';
 
 import ExemptionBrowser from '../components/ExemptionBrowser';
-import {
-    displayExemptionDetail,
-    displayExemptionList,
-    displayExemptionForm,
-} from '../actions';
+import { updateVisibilityFilter } from '../actions';
 
 const mapStateToProps = (store) => ({
+    filter: store.exemptions.filter,
     activeExemption: store.exemptions.exemption,
-    formIsVisible: store.exemptions.formIsVisible,
 });
 
 const mapDispatchToProps = (dispatch) => ({
     displayExemptionList: () => {
-        dispatch(displayExemptionList());
+        dispatch(updateVisibilityFilter('SHOW_SEARCH'));
     },
 });
 

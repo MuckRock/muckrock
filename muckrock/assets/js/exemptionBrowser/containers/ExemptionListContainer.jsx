@@ -6,7 +6,7 @@
 import { connect } from 'react-redux';
 
 import ExemptionList from '../components/ExemptionList';
-import { displayExemptionDetail, displayExemptionForm } from '../actions';
+import { selectExemption, updateVisibilityFilter } from '../actions';
 
 const mapStateToProps = (store) => ({
     loading: store.exemptions.loading,
@@ -16,10 +16,11 @@ const mapStateToProps = (store) => ({
 
 const mapDispatchToProps = (dispatch) => ({
     showExemptionDetail: (exemption) => {
-        dispatch(displayExemptionDetail(exemption));
+        dispatch(selectExemption(exemption));
+        dispatch(updateVisibilityFilter('SHOW_DETAIL'));
     },
     showExemptionForm: () => {
-        dispatch(displayExemptionForm());
+        dispatch(updateVisibilityFilter('SHOW_FORM'));
     },
 });
 

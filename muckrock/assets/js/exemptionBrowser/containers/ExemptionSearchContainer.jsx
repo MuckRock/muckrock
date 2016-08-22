@@ -10,7 +10,7 @@ import ExemptionSearch from '../components/ExemptionSearch';
 import {
     updateExemptionQuery,
     updateExemptionResults,
-    displayLoadingIndicator,
+    loadExemptionResults,
     resetExemptionState,
 } from '../actions';
 
@@ -30,7 +30,7 @@ const mapDispatchToProps = (dispatch) => ({
         if (query == '') {
             dispatch(resetExemptionState());
         } else {
-            dispatch(displayLoadingIndicator());
+            dispatch(loadExemptionResults());
             dispatch(updateExemptionQuery(query));
             axios.get(exemptionSearchAPI, {
                 params: {
