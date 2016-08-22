@@ -9,10 +9,10 @@ import React, { PropTypes } from 'react';
 
 import ExemptionSearchContainer from '../containers/ExemptionSearchContainer';
 import ExemptionListContainer from '../containers/ExemptionListContainer';
-import ExemptionDetail from './ExemptionDetail';
-import ExemptionForm from './ExemptionForm';
+import ExemptionDetailContainer from '../containers/ExemptionDetailContainer';
+import ExemptionFormContainer from '../containers/ExemptionFormContainer';
 
-const ExemptionBrowser = ({filter, activeExemption, displayExemptionList}) => {
+const ExemptionBrowser = ({filter}) => {
     let resultDisplay;
     if (filter == 'SHOW_SEARCH') {
         resultDisplay = (
@@ -22,11 +22,11 @@ const ExemptionBrowser = ({filter, activeExemption, displayExemptionList}) => {
             </div>
         );
     } else if (filter == 'SHOW_DETAIL') {
-        resultDisplay = <ExemptionDetail exemption={activeExemption} onBackClick={displayExemptionList} />;
+        resultDisplay = <ExemptionDetailContainer />;
     } else if (filter == 'SHOW_FORM') {
-        resultDisplay = <ExemptionForm onCancel={displayExemptionList} onSubmit={()=>{alert('Handle submit!')}}/>;
+        resultDisplay = <ExemptionFormContainer />;
     } else {
-        resultDisplay = <ExemptionSearchContainer />
+        resultDisplay = <ExemptionSearchContainer />;
     }
     return (
         <div className="exemptionBrowser">
@@ -36,9 +36,7 @@ const ExemptionBrowser = ({filter, activeExemption, displayExemptionList}) => {
 };
 
 ExemptionBrowser.propTypes = {
-    filter: PropTypes.string.isRequired,
-    activeExemption: PropTypes.object,
-    displayExemptionList: PropTypes.func.isRequired,
+    filter: PropTypes.string.isRequired
 };
 
 export default ExemptionBrowser
