@@ -13,12 +13,14 @@ import React from 'react';
 import { render } from 'react-dom';
 import { combineReducers, createStore } from 'redux';
 import { Provider } from 'react-redux';
+import { reducer as formReducer } from 'redux-form';
 
 import exemptionReducer from './reducer'
 import ExemptionBrowserContainer from './containers/ExemptionBrowserContainer';
 
 
 const reducer = combineReducers({
+    form: formReducer,
     exemptions: exemptionReducer
 })
 // TODO We initialize the devtool here, but this should be removed in production settings
