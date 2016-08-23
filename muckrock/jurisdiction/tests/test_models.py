@@ -19,14 +19,14 @@ class TestJurisdictionUnit(TestCase):
         self.state = factories.StateJurisdictionFactory(parent=self.federal)
         self.local = factories.LocalJurisdictionFactory(parent=self.state)
 
-    def test_jurisdiction_repr(self):
+    def test_repr(self):
         """Test Jurisdiction model's __repr__ method"""
         pattern = '<Jurisdiction: %d>'
         eq_(self.federal.__repr__(), pattern % self.federal.pk)
         eq_(self.state.__repr__(), pattern % self.state.pk)
         eq_(self.local.__repr__(), pattern % self.local.pk)
 
-    def test_jurisdiction_unicode(self):
+    def test_unicode(self):
         """Test Jurisdiction model's __unicode__ method"""
         eq_(unicode(self.federal), u'United States of America')
         eq_(unicode(self.state), u'Massachusetts')
@@ -102,23 +102,6 @@ class TestJurisdictionUnit(TestCase):
         eq_(self.state.get_state(), self.state.name)
         eq_(self.local.get_state(), self.state.name)
 
-    def test_exemptions(self):
-        """
-        Jurisdictions should report the exemptions on their requests.
-        State jurisdictions should include exemptions on their local jurisdictions.
-        """
-        foia1 = FOIARequestFactory(jurisdiction=self.local)
-        foia2 = FOIARequestFactory(jurisdiction=self.state)
-        for tag in [u'exemption 42', u'exemption x']:
-            foia1.tags.add(tag)
-        foia2.tags.add(u'exemption x')
-        eq_(list(self.state.exemptions()),
-                [{'tags__name': u'exemption 42', 'count': 1},
-                 {'tags__name': u'exemption x', 'count': 2}])
-        eq_(list(self.local.exemptions()),
-                [{'tags__name': u'exemption 42', 'count': 1},
-                 {'tags__name': u'exemption x', 'count': 1}])
-
     def test_average_response_time(self):
         """
         Jurisdictions should report their average response time.
@@ -188,3 +171,117 @@ class TestJurisdictionUnit(TestCase):
         state_foia.files.add(FOIAFileFactory(pages=page_count))
         eq_(self.local.total_pages(), page_count)
         eq_(self.state.total_pages(), 2*page_count)
+
+
+class TestLawModel(TestCase):
+    """
+    The Law model contains information about a jurisdiction's law concerning public records.
+    It should contain outside references to information on the law.
+    """
+    def setUp(self):
+        self.law = factories.LawFactory()
+
+    def test_unicode(self):
+        """The text representation of the law should be the name of the law."""
+        eq_(unicode(self.law), self.law.name,
+            'The text representation of the law should match the name of the law.')
+
+    def test_absolute_url(self):
+        """The absolute url of the law should be the url of its jurisdiction."""
+        eq_(self.law.get_absolute_url(), self.law.jurisdiction.get_absolute_url(),
+            'The absolute url of the law should match the url of its jurisdicition.')
+
+
+class TestExemptionModel(TestCase):
+    """
+    The Exemption model should contain information about a single kind of exemption.
+    For example, the Public Employment Applications for Washtington state.
+    """
+    def setUp(self):
+        self.exemption = factories.ExemptionFactory()
+
+    def test_unicode(self):
+        """The text representation should be the name of the exemption and its jurisdiction."""
+        eq_(unicode(self.exemption),
+            u'%s exemption of %s' % (self.exemption.name, self.exemption.jurisdiction),
+            'Should include the name of the exemption and the name of the jurisdiction.')
+
+    def test_absolute_url(self):
+        """The absolute url of the exemption should be a standalone exemption detail page."""
+        kwargs = self.exemption.jurisdiction.get_slugs()
+        kwargs['slug'] = self.exemption.slug
+        kwargs['idx'] = self.exemption.pk
+        expected_url = reverse('exemption-detail', kwargs=kwargs)
+        actual_url = self.exemption.get_absolute_url()
+        eq_(actual_url, expected_url, ('The exemption should return the exemption-detail url.\n'
+             'Actual url: %s\nExpected url: %s') % (actual_url, expected_url))
+
+
+class TestInvokedExemptionModel(TestCase):
+    """
+    The InvokedExemption model should contain information about a single invocation
+    of an exemption. For example, when an agency in Washington state uses the
+    Public Employment Applications exemption to withhold records from a request.
+    """
+    def setUp(self):
+        self.invoked_exemption = factories.InvokedExemptionFactory()
+
+    def test_unicode(self):
+        """The text representation should be the names of the exemption and the request."""
+        actual = unicode(self.invoked_exemption)
+        expected = u'%s exemption of %s' % (
+            self.invoked_exemption.exemption.name,
+            self.invoked_exemption.request,
+        )
+        eq_(actual,
+            expected,
+            ('Should include the name of the exemption and the request.\n'
+            'Actual: %s\nExpected: %s' % (actual, expected)))
+
+    def test_absolute_url(self):
+        """The absolute url of the invoked exemption should be the absolute url of the
+        exemption with the invokation pk appended as a target."""
+        exemption = self.invoked_exemption.exemption
+        kwargs = exemption.jurisdiction.get_slugs()
+        kwargs['slug'] = exemption.slug
+        kwargs['idx'] = exemption.pk
+        expected_url = (reverse('exemption-detail', kwargs=kwargs) +
+                        '#invoked-%d' % self.invoked_exemption.pk)
+        actual_url = self.invoked_exemption.get_absolute_url()
+        eq_(actual_url,
+            expected_url,
+            ('The exemption should return the exemption-detail url.\n'
+             'Actual url: %s\nExpected url: %s') % (actual_url, expected_url))
+
+
+class TestExampleAppealModel(TestCase):
+    """
+    The ExampleAppeal model should contain sample language for appealing an exemption.
+    Additionally, it should contain the context in which this language is most effective.
+    """
+    def setUp(self):
+        self.example_appeal = factories.ExampleAppealFactory()
+
+    def test_unicode(self):
+        """The text representation should be the appeal's context and exemption."""
+        actual = unicode(self.example_appeal)
+        expected = u'%s for %s' % (self.example_appeal.context, self.example_appeal.exemption)
+        eq_(actual,
+            expected,
+            ('Should include the name of the exemption and the request.\n'
+            'Actual: %s\nExpected: %s' % (actual, expected)))
+
+    def test_absolute_url(self):
+        """The absolute url of the appeal language should be the absolute url of the exemption
+        with the appeal pk appeneded as a target."""
+        exemption = self.example_appeal.exemption
+        kwargs = exemption.jurisdiction.get_slugs()
+        kwargs['slug'] = exemption.slug
+        kwargs['idx'] = exemption.pk
+        expected_url = (reverse('exemption-detail', kwargs=kwargs) +
+                        '#appeal-%d' % self.example_appeal.pk)
+        actual_url = self.example_appeal.get_absolute_url()
+        eq_(actual_url,
+            expected_url,
+            ('The exemption should return the exemption-detail url.\n'
+             'Actual url: %s\nExpected url: %s') % (actual_url, expected_url))

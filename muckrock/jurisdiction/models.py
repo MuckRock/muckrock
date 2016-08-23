@@ -1,28 +1,24 @@
 """
 Models for the Jurisdiction application
 """
+from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.db import models
-from django.db.models import F, Q, Avg, Count, Sum
+from django.db.models import F, Q, Avg, Sum
 from django.template.defaultfilters import slugify
 
 from easy_thumbnails.fields import ThumbnailerImageField
 from random import choice
+from taggit.managers import TaggableManager
 
 from muckrock.business_days.models import Holiday, HolidayCalendar, Calendar
 from muckrock.foia.models import FOIARequest
+from muckrock.tags.models import TaggedItemBase
 
 # pylint: disable=bad-continuation
 
 class RequestHelper(object):
     """Helper methods for classes that have a get_requests() method"""
-    def exemptions(self):
-        """Get a list of exemptions tagged for requests from this agency"""
-        requests = self.get_requests()
-        return (requests.filter(tags__name__startswith='exemption')
-                        .order_by('tags__name')
-                        .values('tags__name')
-                        .annotate(count=Count('tags')))
-
     def average_response_time(self):
         """Get the average response time from a submitted to completed request"""
         requests = self.get_requests()
@@ -117,19 +113,32 @@ class Jurisdiction(models.Model, RequestHelper):
         """The url for this object"""
         return self.get_url('detail')
 
+    def get_slugs(self):
+        """Return a dictionary of slugs for this jurisdiction, for constructing URLs."""
+        slugs = {}
+        if self.level == 'l':
+            slugs.update({
+                'fed_slug': self.parent.parent.slug,
+                'state_slug': self.parent.slug,
+                'local_slug': self.slug
+            })
+        elif self.level == 's':
+            slugs.update({
+                'fed_slug': self.parent.slug,
+                'state_slug': self.slug
+            })
+        elif self.level == 'f':
+            slugs.update({
+                'fed_slug': self.slug
+            })
+        return slugs
+
     @models.permalink
     def get_url(self, view):
         """The url for this object"""
         view = 'jurisdiction-%s' % view
-        if self.level == 'l':
-            return (view, [], {'fed_slug': self.parent.parent.slug,
-                               'state_slug': self.parent.slug,
-                               'local_slug': self.slug})
-        elif self.level == 's':
-            return (view, [], {'fed_slug': self.parent.slug,
-                               'state_slug': self.slug})
-        elif self.level == 'f':
-            return (view, [], {'fed_slug': self.slug})
+        slugs = self.get_slugs()
+        return (view, [], slugs)
 
     def save(self, *args, **kwargs):
         """Normalize fields before saving"""
@@ -250,8 +259,103 @@ class Law(models.Model):
         return self.name
 
     def __repr__(self):
-        return '<Law: %d>' % self.pk
+        return '%d' % self.pk
 
     def get_absolute_url(self):
         """Return the url for the jurisdiction."""
         return self.jurisdiction.get_absolute_url()
+
+
+class Exemption(models.Model):
+    """An exemption describes a reason for not releasing documents or information inside them."""
+    # Required fields
+    name = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=255)
+    jurisdiction = models.ForeignKey(Jurisdiction, related_name='exemptions')
+    basis = models.TextField(help_text='The legal or contextual basis for the exemption.')
+    # Optional fields
+    tags = TaggableManager(through=TaggedItemBase, blank=True)
+    requests = models.ManyToManyField(
+        FOIARequest,
+        through='jurisdiction.InvokedExemption',
+        related_name='exemptions',
+        blank=True
+    )
+    contributors = models.ManyToManyField(User, related_name='exemptions', blank=True)
+    proper_use = models.TextField(blank=True,
+        help_text='An editorialized description of cases when the exemption is properly used.')
+    improper_use = models.TextField(blank=True,
+        help_text='An editorialized description of cases when the exemption is improperly used.')
+    key_citations = models.TextField(blank=True,
+        help_text='Significant references to the exemption in caselaw or previous appeals.')
+
+    def __unicode__(self):
+        return u'%s exemption of %s' % (self.name, self.jurisdiction)
+
+    def __repr__(self):
+        return '%s' % self.slug
+
+    def save(self, *args, **kwargs):
+        """Normalize fields before saving"""
+        self.slug = slugify(self.name)
+        super(Exemption, self).save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        """Return the url for the exemption detail page"""
+        kwargs = self.jurisdiction.get_slugs()
+        kwargs['slug'] = self.slug
+        kwargs['idx'] = self.pk
+        return reverse('exemption-detail', kwargs=kwargs)
+
+
+class InvokedExemption(models.Model):
+    """An invoked exemption tracks the use of an exemption in the course of fulfilling
+    (or rejecting!) a FOIA request. It should connect a request to an exemption and contain
+    information particular to the invocation of the exemption to the request.
+
+    It augments the Exemption model by providing specific examples of situations
+    where the exemption was invoked, i.e. there should only ever be 1 exemption
+    but there can be many invocations of that exemption."""
+    exemption = models.ForeignKey(Exemption, related_name='invokations')
+    request = models.ForeignKey(FOIARequest)
+    use_language = models.TextField(blank=True,
+        help_text='What language did the aguency use to invoke the exemption?')
+    properly_invoked = models.BooleanField(default=True,
+        help_text='Did the agency properly invoke the exemption to the request?')
+
+    def __unicode__(self):
+        return u'%s exemption of %s' % (self.exemption.name, self.request)
+
+    def __repr__(self):
+        return '%d' % self.pk
+
+    def get_absolute_url(self):
+        """Return the url for the exemption detail page, targeting the invokation."""
+        kwargs = self.exemption.jurisdiction.get_slugs()
+        kwargs['slug'] = self.exemption.slug
+        kwargs['idx'] = self.exemption.pk
+        return reverse('exemption-detail', kwargs=kwargs) + '#invoked-%d' % self.pk
+
+
+class ExampleAppeal(models.Model):
+    """Exemptions should contain example appeal language for users to reference.
+    This language will be curated by staff and contain the language as well as
+    the context when the language is most effective. Each ExampleAppeal instance
+    should connect to an Exemption."""
+    exemption = models.ForeignKey(Exemption, related_name='example_appeals')
+    language = models.TextField()
+    context = models.TextField(blank=True,
+        help_text='Under what circumstances is this appeal language most effective?')
+
+    def __unicode__(self):
+        return u'%s for %s' % (self.context, self.exemption)
+
+    def __repr__(self):
+        return '%d' % self.pk
+
+    def get_absolute_url(self):
+        """Return the url for the exemption detail page, targeting the appeal."""
+        kwargs = self.exemption.jurisdiction.get_slugs()
+        kwargs['slug'] = self.exemption.slug
+        kwargs['idx'] = self.exemption.pk
+        return reverse('exemption-detail', kwargs=kwargs) + '#appeal-%d' % self.pk

@@ -2,19 +2,22 @@
 Admin registration for Jurisdiction models
 """
 
+from django import forms
 from django.conf.urls import patterns, url
 from django.contrib import admin, messages
+from django.contrib.auth.models import User
 from django.shortcuts import render_to_response, redirect
 from django.template.defaultfilters import slugify
 from django.template import RequestContext
 
 from adaptor.model import CsvModel
 from adaptor.fields import CharField, DjangoModelField
+from autocomplete_light import shortcuts as autocomplete_light
 from reversion.admin import VersionAdmin
 import logging
 import sys
 
-from muckrock.jurisdiction.models import Jurisdiction, Law
+from muckrock.jurisdiction import models as JurisdictionModels
 from muckrock.jurisdiction.forms import CSVImportForm
 
 logger = logging.getLogger(__name__)
@@ -24,7 +27,29 @@ logger = logging.getLogger(__name__)
 
 class LawInline(admin.StackedInline):
     """Law admin options"""
-    model = Law
+    model = JurisdictionModels.Law
+    extra = 0
+
+
+class ExampleAppealInline(admin.TabularInline):
+    """Example appeal inline"""
+    model = JurisdictionModels.ExampleAppeal
+    extra = 0
+
+
+class InvokedExemptionAdminForm(forms.ModelForm):
+    """Adds an autocomplete to the invoked exemption request field."""
+    request = autocomplete_light.ModelChoiceField('FOIARequestAdminAutocomplete')
+
+    class Meta:
+        model = JurisdictionModels.InvokedExemption
+        fields = '__all__'
+
+
+class InvokedExemptionInline(admin.StackedInline):
+    """Invoked exemption options"""
+    form = InvokedExemptionAdminForm
+    model = JurisdictionModels.InvokedExemption
     extra = 0
 
 
@@ -86,7 +111,36 @@ class JurisdictionAdmin(VersionAdmin):
         return render_to_response('admin/agency/import.html', {'form': form, 'fields': fields},
                                   context_instance=RequestContext(request))
 
-admin.site.register(Jurisdiction, JurisdictionAdmin)
+
+class ExemptionAdminForm(forms.ModelForm):
+    """Form to include a jurisdiction and contributor autocomplete"""
+    jurisdiction = autocomplete_light.ModelChoiceField(
+        'JurisdictionAdminAutocomplete',
+        queryset=JurisdictionModels.Jurisdiction.objects.all()
+    )
+    contributors = autocomplete_light.ModelMultipleChoiceField(
+        'UserAutocomplete',
+        queryset=User.objects.all(),
+        required=False
+    )
+
+    class Meta:
+        model = JurisdictionModels.Exemption
+        fields = '__all__'
+
+
+class ExemptionAdmin(VersionAdmin):
+    """Provides a way to create and modify exemption information."""
+    prepopulated_fields = {'slug': ('name',)}
+    list_display = ('name', 'jurisdiction')
+    list_filter = ['jurisdiction']
+    search_fields = ['name', 'basis']
+    inlines = [ExampleAppealInline, InvokedExemptionInline]
+    form = ExemptionAdminForm
+
+
+admin.site.register(JurisdictionModels.Exemption, ExemptionAdmin)
+admin.site.register(JurisdictionModels.Jurisdiction, JurisdictionAdmin)
 
 
 class JurisdictionCsvModel(CsvModel):
@@ -95,10 +149,10 @@ class JurisdictionCsvModel(CsvModel):
     name = CharField()
     slug = CharField()
     level = CharField(transform=lambda x: x.lower()[0])
-    parent = DjangoModelField(Jurisdiction, pk='name')
+    parent = DjangoModelField(JurisdictionModels.Jurisdiction, pk='name')
 
     class Meta:
         # pylint: disable=too-few-public-methods
-        dbModel = Jurisdiction
+        dbModel = JurisdictionModels.Jurisdiction
         delimiter = ','
         update = {'keys': ['slug', 'parent']}
