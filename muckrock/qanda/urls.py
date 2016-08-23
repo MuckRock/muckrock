@@ -39,7 +39,7 @@ urlpatterns = patterns(
     ),
     url(
         r'^(?P<slug>[\w\d_-]+)-(?P<pk>\d+)$',
-        views.Detail.as_view(template_name='details/question_detail.html'),
+        views.Detail.as_view(template_name='qanda/detail.html'),
         name='question-detail'
     ),
     url(
