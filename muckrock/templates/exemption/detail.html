@@ -54,18 +54,24 @@
         {% endif %}
     </div>
     <div class="grid__column third">
+        {% if exemption.proper_use %}
         <div>
             <h2>Proper Use</h2>
             {{exemption.proper_use|markdown}}
         </div>
+        {% endif %}
+        {% if exemption.improper_use %}
         <div>
             <h2>Improper Use</h2>
             {{exemption.improper_use|markdown}}
         </div>
+        {% endif %}
+        {% if exemption.key_citations %}
         <div class="small">
             <h2>Key Citations</h2>
             {{exemption.key_citations|markdown}}
         </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
