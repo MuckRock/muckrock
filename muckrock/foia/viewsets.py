@@ -46,11 +46,10 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
         agency = django_filters.NumberFilter(name='agency__id')
         jurisdiction = django_filters.NumberFilter(name='jurisdiction__id')
         user = django_filters.CharFilter(name='user__username')
-        tags = django_filters.CharFilter(name='tags__name')
 
         class Meta:
             model = FOIARequest
-            fields = ('user', 'title', 'status', 'embargo', 'jurisdiction', 'agency', 'tags')
+            fields = ('user', 'title', 'status', 'embargo', 'jurisdiction', 'agency')
 
     filter_class = Filter
 

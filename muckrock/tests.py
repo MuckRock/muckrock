@@ -12,6 +12,7 @@ from mock import Mock, patch
 import logging
 import nose.tools
 
+from muckrock.factories import UserFactory
 from muckrock.fields import EmailsListField
 from muckrock.forms import NewsletterSignupForm
 from muckrock.utils import mock_middleware
@@ -39,6 +40,7 @@ def get_allowed(client, url, redirect=None):
 
     return response
 
+
 def post_allowed(client, url, data, redirect):
     """Test an allowed post with the given data and redirect location"""
     response = client.post(url, data, follow=True, **kwargs)
@@ -46,6 +48,7 @@ def post_allowed(client, url, data, redirect):
     nose.tools.eq_(response.redirect_chain, [(redirect, 302)])
 
     return response
+
 
 def post_allowed_bad(client, url, templates, data=None):
     """Test an allowed post with bad data"""
@@ -56,6 +59,7 @@ def post_allowed_bad(client, url, templates, data=None):
     # make sure first 3 match (4th one might be form.html, not important
     nose.tools.eq_([t.name for t in response.templates][:3], templates + ['base.html'])
 
+
 def get_post_unallowed(client, url):
     """Test an unauthenticated get and post on a url that is allowed
     to be viewed only by authenticated users"""
@@ -63,6 +67,7 @@ def get_post_unallowed(client, url):
     response = client.get(url, **kwargs)
     nose.tools.eq_(response.status_code, 302)
     nose.tools.eq_(response['Location'], redirect)
+
 
 def get_404(client, url):
     """Test a get on a url that is allowed with the users current credntials"""
@@ -74,28 +79,17 @@ def get_404(client, url):
 
 class TestFunctional(TestCase):
     """Functional tests for top level"""
-    fixtures = [
-            'holidays.json',
-            'jurisdictions.json',
-            'agency_types.json',
-            'test_agencies.json',
-            'test_users.json',
-            'test_profiles.json',
-            'test_foiarequests.json',
-            'test_foiacommunications.json',
-            'test_news.json',
-            ]
 
     # tests for base level views
     def test_views(self):
         """Test views"""
-
         get_allowed(self.client, reverse('index'))
         get_allowed(self.client, '/sitemap.xml')
         get_allowed(self.client, '/search/')
 
     def test_api_views(self):
         """Test API views"""
+        UserFactory(username='super', password='abc', is_superuser=True)
         self.client.login(username='super', password='abc')
         api_objs = ['jurisdiction', 'agency', 'foia', 'question', 'statistics',
                 'communication', 'user', 'news', 'task', 'orphantask',
@@ -120,6 +114,7 @@ class TestUnit(TestCase):
             field.clean('', model_instance)
 
         field.clean('a@example.com,an.email@foo.net', model_instance)
+
 
 class TestNewsletterSignupView(TestCase):
     """By submitting an email, users can subscribe to our MailChimp newsletter list."""

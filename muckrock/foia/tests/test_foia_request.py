@@ -20,7 +20,7 @@ from muckrock.factories import (
         ProjectFactory,
         AgencyFactory,
         AgencyUserFactory,
-        JurisdictionFactory,
+        FederalJurisdictionFactory,
         )
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.foia.views import Detail
@@ -391,7 +391,6 @@ class TestFOIAFunctional(TestCase):
                 'idx': foia.pk, 'slug': foia.slug}))
 
 
-# XXX long msg
 class TestFOIAIntegration(TestCase):
     """Integration tests for FOIA"""
 
@@ -402,9 +401,9 @@ class TestFOIAIntegration(TestCase):
 
         mail.outbox = []
 
-        user = UserFactory() #(username='adam')
-        agency = AgencyFactory() #(pk=3)
-        jurisdiction = JurisdictionFactory() #(pk=1)
+        user = UserFactory()
+        agency = AgencyFactory()
+        jurisdiction = FederalJurisdictionFactory()
         cal = jurisdiction.get_calendar()
 
         with freeze_time('2010-02-01'):

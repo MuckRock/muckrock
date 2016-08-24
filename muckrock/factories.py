@@ -78,11 +78,28 @@ class JurisdictionFactory(factory.django.DjangoModelFactory):
     """A factory for creating Jurisdiction test objects."""
     class Meta:
         model = Jurisdiction
+        abstract = True
 
     name = factory.Sequence(lambda n: "Jurisdiction %d" % n)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
     days = 20
+
+
+class FederalJurisdictionFactory(JurisdictionFactory):
+    """A factory for federal jurisdictions"""
     level = 'f'
+
+
+class StateJurisdictionFactory(JurisdictionFactory):
+    """A factory for state jurisdictions"""
+    level = 's'
+    parent = factory.SubFactory(FederalJurisdictionFactory)
+
+
+class LocalJurisdictionFactory(JurisdictionFactory):
+    """A factory for local jurisdictions"""
+    level = 'l'
+    parent = factory.SubFactory(StateJurisdictionFactory)
 
 
 class AgencyFactory(factory.django.DjangoModelFactory):
@@ -92,7 +109,7 @@ class AgencyFactory(factory.django.DjangoModelFactory):
 
     name = factory.Sequence(lambda n: "Agency %d" % n)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
-    jurisdiction = factory.SubFactory('muckrock.factories.JurisdictionFactory')
+    jurisdiction = factory.SubFactory('muckrock.factories.FederalJurisdictionFactory')
     status = 'approved'
 
 
@@ -104,7 +121,7 @@ class FOIARequestFactory(factory.django.DjangoModelFactory):
     title = factory.Sequence(lambda n: "FOIA Request %d" % n)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
     user = factory.SubFactory(UserFactory)
-    jurisdiction = factory.SubFactory('muckrock.factories.JurisdictionFactory')
+    jurisdiction = factory.SubFactory('muckrock.factories.FederalJurisdictionFactory')
 
     @factory.post_generation
     def contacts(self, create, extracted, **kwargs):
@@ -133,6 +150,7 @@ class FOIAFileFactory(factory.django.DjangoModelFactory):
     """A factory for creating FOIAFile test objects"""
     class Meta:
         model = FOIAFile
+    foia = factory.SubFactory(FOIARequestFactory)
     comm = factory.SubFactory(FOIACommunicationFactory)
     date = factory.LazyAttribute(lambda obj: datetime.datetime.now())
     ffile = factory.django.FileField(filename='foo.txt', data='bar 42')

@@ -111,7 +111,6 @@ urlpatterns = patterns(
     url(r'^settings/', include(dbsettings.urls)),
     url(r'^api_v1/', include(router.urls)),
     url(r'^api_v1/token-auth/', 'rest_framework.authtoken.views.obtain_auth_token'),
-    url(r'^api_doc/', include('rest_framework_swagger.urls')),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^package_monitor/', include('package_monitor.urls', namespace='package_monitor')),
     url(r'^robots\.txt$', include('robots.urls')),
