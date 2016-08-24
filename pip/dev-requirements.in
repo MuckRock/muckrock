@@ -4,6 +4,7 @@ django-nose # Used for testing
 django<1.10 # django
 fabric # Used for dev scripts
 factory-boy # Used for creating test data
+freezegun # Used for controlling time during tests
 ipdb # interactive debugger
 ipython # Interactive python shell
 mock # Used for mocking objects during test

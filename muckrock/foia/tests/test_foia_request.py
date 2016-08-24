@@ -8,10 +8,10 @@ from django.core import mail
 from django.test import TestCase, RequestFactory
 
 import datetime
-from datetime import date as real_date
 import nose.tools
 from operator import attrgetter
 import re
+from freezegun import freeze_time
 
 from muckrock.factories import (
         UserFactory,
@@ -20,6 +20,7 @@ from muckrock.factories import (
         ProjectFactory,
         AgencyFactory,
         AgencyUserFactory,
+        JurisdictionFactory,
         )
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.foia.views import Detail
@@ -390,187 +391,135 @@ class TestFOIAFunctional(TestCase):
                 'idx': foia.pk, 'slug': foia.slug}))
 
 
+# XXX long msg
 class TestFOIAIntegration(TestCase):
     """Integration tests for FOIA"""
-    # rewrite this with freezeray
-
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
-                'test_foiacommunications.json']
-
-    def setUp(self):
-        """Set up tests"""
-        # pylint: disable=bad-super-call
-
-        mail.outbox = []
-
-        import muckrock.foia.models.request
-
-        # Replace real date and time with mock ones so we can control today's/now's value
-        # Unfortunately need to monkey patch this a lot of places, and it gets rather ugly
-        #http://tech.yunojuno.com/mocking-dates-with-django
-        # pylint: disable=missing-docstring
-        class MockDate(datetime.date):
-            def __add__(self, other):
-                d = super(MockDate, self).__add__(other)
-                return MockDate(d.year, d.month, d.day)
-            class MockDateType(type):
-                "Used to ensure the FakeDate returns True to function calls."
-                def __instancecheck__(self, instance):
-                    return isinstance(instance, real_date)
-            # this forces the FakeDate to return True to the isinstance date check
-            __metaclass__ = MockDateType
-        class MockDateTime(datetime.datetime):
-            def date(self):
-                return MockDate(self.year, self.month, self.day)
-
-        self.orig_date = datetime.date
-        self.orig_datetime = datetime.datetime
-        datetime.date = MockDate
-        datetime.datetime = MockDateTime
-        muckrock.foia.models.request.date = datetime.date
-        muckrock.foia.models.request.datetime = datetime.datetime
-        def save(self, *args, **kwargs):
-            if self.date_followup:
-                self.date_followup = MockDateTime(self.date_followup.year,
-                                                  self.date_followup.month,
-                                                  self.date_followup.day)
-            if self.date_done:
-                self.date_done = MockDateTime(self.date_done.year,
-                                              self.date_done.month,
-                                              self.date_done.day)
-            if 'comment' in kwargs:
-                kwargs.pop('comment')
-            super(FOIARequest, self).save(*args, **kwargs)
-        self.FOIARequest_save = muckrock.foia.models.FOIARequest.save
-        muckrock.foia.models.FOIARequest.save = save
-        self.set_today(datetime.date(2010, 1, 1))
-
-    def tearDown(self):
-        """Tear down tests"""
-
-        import muckrock.foia.models
-
-        # restore the original date and datetime for other tests
-        datetime.date = self.orig_date
-        datetime.datetime = self.orig_datetime
-        muckrock.foia.models.request.date = datetime.date
-        muckrock.foia.models.request.datetime = datetime.datetime
-        muckrock.foia.models.FOIARequest.save = self.FOIARequest_save
-
-    def set_today(self, date):
-        """Set what datetime thinks today is"""
-        datetime.date.today = classmethod(lambda cls: cls(date.year, date.month, date.day))
-        datetime.datetime.now = classmethod(lambda cls: cls(date.year, date.month, date.day))
 
     def test_request_lifecycle_no_email(self):
         """Test a request going through the full cycle as if we had to physically mail it"""
         # pylint: disable=too-many-statements
         # pylint: disable=protected-access
 
-        user = User.objects.get(username='adam')
-        agency = Agency.objects.get(pk=3)
-        jurisdiction = Jurisdiction.objects.get(pk=1)
+        mail.outbox = []
+
+        user = UserFactory() #(username='adam')
+        agency = AgencyFactory() #(pk=3)
+        jurisdiction = JurisdictionFactory() #(pk=1)
         cal = jurisdiction.get_calendar()
 
-        self.set_today(datetime.date(2010, 2, 1))
-        nose.tools.eq_(len(mail.outbox), 0)
+        with freeze_time('2010-02-01'):
+            nose.tools.eq_(len(mail.outbox), 0)
 
-        ## create and submit request
-        foia = FOIARequest.objects.create(
-            user=user, title='Test with no email', slug='test-with-no-email',
-            status='submitted', jurisdiction=jurisdiction, agency=agency)
-        comm = FOIACommunication.objects.create(
-            foia=foia, from_who='Muckrock', date=datetime.datetime.now(),
-            response=False, communication=u'Test communication')
-        foia.submit()
+            ## create and submit request
+            foia = FOIARequest.objects.create(
+                user=user, title='Test with no email', slug='test-with-no-email',
+                status='submitted', jurisdiction=jurisdiction, agency=agency)
+            comm = FOIACommunication.objects.create(
+                foia=foia, from_who='Muckrock', date=datetime.datetime.now(),
+                response=False, communication=u'Test communication')
+            foia.submit()
 
-        # check that a snail mail task was created
-        nose.tools.ok_(
-            SnailMailTask.objects.filter(
-                communication=comm, category='n').exists())
+            # check that a snail mail task was created
+            nose.tools.ok_(
+                SnailMailTask.objects.filter(
+                    communication=comm, category='n').exists())
 
         ## two days pass, then the admin mails in the request
-        self.set_today(datetime.date.today() + datetime.timedelta(2))
-        foia.status = 'processed'
-        foia.update_dates()
-        foia.save()
+        with freeze_time('2010-02-03'):
+            foia.status = 'processed'
+            foia.update_dates()
+            foia.save()
 
-        # make sure dates were set correctly
-        nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 3))
-        nose.tools.eq_(foia.date_due, cal.business_days_from(datetime.date.today(),
-                                                             jurisdiction.get_days()))
-        nose.tools.eq_(foia.date_followup.date(),
-                       max(foia.date_due, foia.last_comm().date.date() +
-                                          datetime.timedelta(foia._followup_days())))
-        nose.tools.ok_(foia.days_until_due is None)
-        # no more mail should have been sent
-        nose.tools.eq_(len(mail.outbox), 0)
+            # make sure dates were set correctly
+            nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 3))
+            nose.tools.eq_(
+                    foia.date_due,
+                    cal.business_days_from(
+                        datetime.date.today(),
+                        jurisdiction.get_days()))
+            nose.tools.eq_(
+                    foia.date_followup,
+                    max(
+                        foia.date_due,
+                        foia.last_comm().date.date() +
+                            datetime.timedelta(foia._followup_days())))
+            nose.tools.assert_is_none(foia.days_until_due)
+            # no more mail should have been sent
+            nose.tools.eq_(len(mail.outbox), 0)
 
-        old_date_due = foia.date_due
+            old_date_due = foia.date_due
 
         ## after 5 days agency replies with a fix needed
-        self.set_today(datetime.date.today() + datetime.timedelta(5))
-        comm = FOIACommunication.objects.create(
-            foia=foia, from_who='Test Agency', date=datetime.datetime.now(),
-            response=True, communication='Test communication')
-        foia.status = 'fix'
-        foia.save()
-        foia.update(comm.anchor())
+        with freeze_time('2010-02-08'):
+            comm = FOIACommunication.objects.create(
+                foia=foia, from_who='Test Agency', date=datetime.datetime.now(),
+                response=True, communication='Test communication')
+            foia.status = 'fix'
+            foia.save()
+            foia.update(comm.anchor())
 
-        # make sure dates were set correctly
-        nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 3))
-        nose.tools.ok_(foia.date_due is None)
-        nose.tools.ok_(foia.date_followup is None)
-        nose.tools.eq_(foia.days_until_due, cal.business_days_between(datetime.date(2010, 2, 8),
-                                                                      old_date_due))
+            # make sure dates were set correctly
+            nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 3))
+            nose.tools.assert_is_none(foia.date_due)
+            nose.tools.assert_is_none(foia.date_followup)
+            nose.tools.eq_(
+                    foia.days_until_due,
+                    cal.business_days_between(
+                        datetime.date(2010, 2, 8),
+                        old_date_due))
 
-        old_days_until_due = foia.days_until_due
+            old_days_until_due = foia.days_until_due
 
         ## after 10 days the user submits the fix and the admin submits it right away
-        self.set_today(datetime.date.today() + datetime.timedelta(10))
-        comm = FOIACommunication.objects.create(
-            foia=foia, from_who='Muckrock', date=datetime.datetime.now(),
-            response=False, communication='Test communication')
-        foia.status = 'submitted'
-        foia.save()
-        foia.submit()
+        with freeze_time('2010-02-18'):
+            comm = FOIACommunication.objects.create(
+                foia=foia, from_who='Muckrock', date=datetime.datetime.now(),
+                response=False, communication='Test communication')
+            foia.status = 'submitted'
+            foia.save()
+            foia.submit()
 
-        # check that another snail mail task is created
-        nose.tools.ok_(
-            SnailMailTask.objects.filter(
-                communication=comm, category='u').exists())
+            # check that another snail mail task is created
+            nose.tools.ok_(
+                SnailMailTask.objects.filter(
+                    communication=comm, category='u').exists())
 
-        foia.status = 'processed'
+            foia.status = 'processed'
 
-        foia.update_dates()
-        foia.save()
+            foia.update_dates()
+            foia.save()
 
-        # make sure dates were set correctly
-        nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 3))
-        nose.tools.eq_(foia.date_due, cal.business_days_from(datetime.date.today(),
-                                                             old_days_until_due))
-        nose.tools.eq_(foia.date_followup.date(),
-                       max(foia.date_due, foia.last_comm().date.date() +
-                                          datetime.timedelta(foia._followup_days())))
-        nose.tools.ok_(foia.days_until_due is None)
+            # make sure dates were set correctly
+            nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 3))
+            nose.tools.eq_(
+                    foia.date_due,
+                    cal.business_days_from(
+                        datetime.date.today(),
+                        old_days_until_due))
+            nose.tools.eq_(
+                    foia.date_followup,
+                    max(
+                        foia.date_due,
+                        foia.last_comm().date.date() +
+                            datetime.timedelta(foia._followup_days())))
+            nose.tools.assert_is_none(foia.days_until_due)
 
-        old_date_due = foia.date_due
+            old_date_due = foia.date_due
 
         ## after 4 days agency replies with the documents
-        self.set_today(datetime.date.today() + datetime.timedelta(4))
-        comm = FOIACommunication.objects.create(
-            foia=foia, from_who='Test Agency', date=datetime.datetime.now(),
-            response=True, communication='Test communication')
-        foia.status = 'done'
-        foia.save()
-        foia.update(comm.anchor())
+        with freeze_time('2010-02-22'):
+            comm = FOIACommunication.objects.create(
+                foia=foia, from_who='Test Agency', date=datetime.datetime.now(),
+                response=True, communication='Test communication')
+            foia.status = 'done'
+            foia.save()
+            foia.update(comm.anchor())
 
-        # make sure dates were set correctly
-        nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 3))
-        nose.tools.eq_(foia.date_due, old_date_due)
-        nose.tools.ok_(foia.date_followup is None)
-        nose.tools.ok_(foia.days_until_due is None)
+            # make sure dates were set correctly
+            nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 3))
+            nose.tools.eq_(foia.date_due, old_date_due)
+            nose.tools.assert_is_none(foia.date_followup)
+            nose.tools.assert_is_none(foia.days_until_due)
 
 
 class TestFOIANotes(TestCase):
