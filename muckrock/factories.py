@@ -51,6 +51,11 @@ class UserFactory(factory.django.DjangoModelFactory):
     email = factory.Faker('email')
     profile = factory.RelatedFactory(ProfileFactory, 'user')
 
+    @factory.post_generation
+    def password(obj, create, extracted, **kwargs):
+        if extracted:
+            obj.set_password(extracted)
+
 
 class AgencyUserFactory(UserFactory):
     """A factory for creating agency user test objects"""
@@ -100,7 +105,15 @@ class FOIARequestFactory(factory.django.DjangoModelFactory):
     slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
     user = factory.SubFactory(UserFactory)
     jurisdiction = factory.SubFactory('muckrock.factories.JurisdictionFactory')
-    agency = factory.SubFactory('muckrock.factories.AgencyFactory')
+
+    @factory.post_generation
+    def contacts(self, create, extracted, **kwargs):
+        """Create contacts"""
+        if not create:
+            return
+        if extracted:
+            for contact in extracted:
+                self.contacts.add(contact)
 
 
 class FOIACommunicationFactory(factory.django.DjangoModelFactory):

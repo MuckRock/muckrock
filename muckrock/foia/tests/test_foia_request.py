@@ -16,7 +16,9 @@ import re
 from muckrock.factories import (
         UserFactory,
         FOIARequestFactory,
+        FOIACommunicationFactory,
         ProjectFactory,
+        AgencyFactory,
         AgencyUserFactory,
         )
 from muckrock.foia.models import FOIARequest, FOIACommunication
@@ -28,9 +30,6 @@ from muckrock.task.models import SnailMailTask
 from muckrock.tests import get_allowed, post_allowed, get_post_unallowed, get_404
 from muckrock.utils import mock_middleware
 
-ok_ = nose.tools.ok_
-eq_ = nose.tools.eq_
-
 # allow methods that could be functions and too many public methods in tests
 # pylint: disable=no-self-use
 # pylint: disable=too-many-public-methods
@@ -40,58 +39,51 @@ eq_ = nose.tools.eq_
 
 class TestFOIARequestUnit(TestCase):
     """Unit tests for FOIARequests"""
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
-                'test_foiacommunications.json']
-
-    def setUp(self):
-        """Set up tests"""
-
-        mail.outbox = []
-
-        self.foia = FOIARequest.objects.get(pk=1)
 
     # models
     def test_foia_model_unicode(self):
         """Test FOIA Request model's __unicode__ method"""
-        nose.tools.eq_(unicode(self.foia), 'Test 1')
+        foia = FOIARequestFactory.build(title='Test 1')
+        nose.tools.eq_(unicode(foia), 'Test 1')
 
     def test_foia_model_url(self):
         """Test FOIA Request model's get_absolute_url method"""
-
-        nose.tools.eq_(self.foia.get_absolute_url(),
-            reverse('foia-detail', kwargs={'idx': self.foia.pk, 'slug': 'test-1',
+        foia = FOIARequestFactory(
+                slug='test-1', jurisdiction__slug='massachusetts')
+        nose.tools.eq_(foia.get_absolute_url(),
+            reverse('foia-detail', kwargs={'idx': foia.pk, 'slug': 'test-1',
                                            'jurisdiction': 'massachusetts',
-                                           'jidx': self.foia.jurisdiction.pk}))
+                                           'jidx': foia.jurisdiction.pk}))
 
     def test_foia_model_editable(self):
         """Test FOIA Request model's is_editable method"""
-
-        foias = FOIARequest.objects.all().order_by('id')[:5]
-        for foia in foias[:5]:
-            if foia.status in ['started']:
-                nose.tools.assert_true(foia.is_editable())
-            else:
-                nose.tools.assert_false(foia.is_editable())
+        foia1 = FOIARequestFactory.build(status='started')
+        foia2 = FOIARequestFactory.build(status='done')
+        nose.tools.assert_true(foia1.is_editable())
+        nose.tools.assert_false(foia2.is_editable())
 
     def test_foia_viewable(self):
         """Test all the viewable and embargo functions"""
 
-        user1 = User.objects.get(pk=1)
-        user2 = User.objects.get(pk=2)
+        user1 = UserFactory()
+        user2 = UserFactory()
 
         foias = list(FOIARequest.objects.filter(id__in=[1, 5, 11, 12, 13, 14]).order_by('id'))
-        # 0 = draft
-        # 1 = completed, no embargo
-        # 2 = completed, embargoed, no expiration
-        # 3 = completed, embargoed, no expiration
-        # 4 = completed, embargoed, no expiration
-        foias[1].date_embargo = datetime.date.today() + datetime.timedelta(10)
-        foias[2].date_embargo = datetime.date.today()
-        foias[3].date_embargo = datetime.date.today() - datetime.timedelta(1)
-        foias[3].embargo = False
-        foias[4].date_embargo = datetime.date.today() - datetime.timedelta(10)
-        foias[4].embargo = False
+        foia0 = FOIARequestFactory(status='started', user=user1)
+        foia1 = FOIARequestFactory(
+                status='done', embargo=False, user=user1,
+                date_embargo=datetime.date.today() + datetime.timedelta(10))
+        foia2 = FOIARequestFactory(
+                status='done', embargo=True, user=user1,
+                date_embargo=datetime.date.today())
+        foia3 = FOIARequestFactory(
+                status='done', embargo=False, user=user1,
+                date_embargo=datetime.date.today() - datetime.timedelta(1))
+        foia4 = FOIARequestFactory(
+                status='done', embargo=False, user=user1)
+        foia5 = FOIARequestFactory(
+                status='submitted', embargo=True, user=user1,
+                date_embargo=datetime.date.today() - datetime.timedelta(10))
 
         # check manager get_viewable against view permission
         viewable_foias = FOIARequest.objects.get_viewable(user1)
@@ -115,27 +107,27 @@ class TestFOIARequestUnit(TestCase):
             else:
                 nose.tools.assert_false(AnonymousUser().has_perm('foia.view_foiarequest', foia))
 
-        nose.tools.assert_true(user1.has_perm('foia.view_foiarequest', foias[0]))
-        nose.tools.assert_true(user1.has_perm('foia.view_foiarequest', foias[1]))
-        nose.tools.assert_true(user1.has_perm('foia.view_foiarequest', foias[2]))
-        nose.tools.assert_true(user1.has_perm('foia.view_foiarequest', foias[3]))
-        nose.tools.assert_true(user1.has_perm('foia.view_foiarequest', foias[4]))
+        nose.tools.assert_true(user1.has_perm('foia.view_foiarequest', foia0))
+        nose.tools.assert_true(user1.has_perm('foia.view_foiarequest', foia1))
+        nose.tools.assert_true(user1.has_perm('foia.view_foiarequest', foia2))
+        nose.tools.assert_true(user1.has_perm('foia.view_foiarequest', foia3))
+        nose.tools.assert_true(user1.has_perm('foia.view_foiarequest', foia4))
 
-        nose.tools.assert_false(user2.has_perm('foia.view_foiarequest', foias[0]))
-        nose.tools.assert_true(user2.has_perm('foia.view_foiarequest', foias[1]))
-        nose.tools.assert_false(user2.has_perm('foia.view_foiarequest', foias[2]))
-        nose.tools.assert_true(user2.has_perm('foia.view_foiarequest', foias[3]))
-        nose.tools.assert_true(user2.has_perm('foia.view_foiarequest', foias[4]))
+        nose.tools.assert_false(user2.has_perm('foia.view_foiarequest', foia0))
+        nose.tools.assert_true(user2.has_perm('foia.view_foiarequest', foia1))
+        nose.tools.assert_false(user2.has_perm('foia.view_foiarequest', foia2))
+        nose.tools.assert_true(user2.has_perm('foia.view_foiarequest', foia3))
+        nose.tools.assert_true(user2.has_perm('foia.view_foiarequest', foia4))
 
-        nose.tools.assert_false(AnonymousUser().has_perm('foia.view_foiarequest', foias[0]))
-        nose.tools.assert_true(AnonymousUser().has_perm('foia.view_foiarequest', foias[1]))
-        nose.tools.assert_false(AnonymousUser().has_perm('foia.view_foiarequest', foias[2]))
-        nose.tools.assert_true(AnonymousUser().has_perm('foia.view_foiarequest', foias[3]))
-        nose.tools.assert_true(AnonymousUser().has_perm('foia.view_foiarequest', foias[4]))
+        nose.tools.assert_false(AnonymousUser().has_perm('foia.view_foiarequest', foia0))
+        nose.tools.assert_true(AnonymousUser().has_perm('foia.view_foiarequest', foia1))
+        nose.tools.assert_false(AnonymousUser().has_perm('foia.view_foiarequest', foia2))
+        nose.tools.assert_true(AnonymousUser().has_perm('foia.view_foiarequest', foia3))
+        nose.tools.assert_true(AnonymousUser().has_perm('foia.view_foiarequest', foia4))
 
     def test_foia_set_mail_id(self):
         """Test the set_mail_id function"""
-        foia = FOIARequest.objects.get(pk=17)
+        foia = FOIARequestFactory()
         foia.set_mail_id()
         mail_id = foia.mail_id
         nose.tools.ok_(re.match(r'\d{1,4}-\d{8}', mail_id))
@@ -146,14 +138,18 @@ class TestFOIARequestUnit(TestCase):
     def test_foia_followup(self):
         """Make sure the follow up date is set correctly"""
         # pylint: disable=protected-access
-        foia = FOIARequest.objects.get(pk=15)
-        foia.contacts.add(AgencyUserFactory(email=foia.email))
+        mail.outbox = []
+        UserFactory(username='MuckrockStaff')
+        foia = FOIARequestFactory(status='processed',
+                contacts=(AgencyUserFactory(email='test@agency.gov'),))
+
         foia.followup()
         nose.tools.assert_in('I can expect', mail.outbox[-1].body)
-        nose.tools.eq_(foia.date_followup,
-                       datetime.date.today() + datetime.timedelta(foia._followup_days()))
+        nose.tools.eq_(
+                foia.date_followup,
+                datetime.date.today() + datetime.timedelta(foia._followup_days()))
 
-        nose.tools.eq_(foia._followup_days(), 15)
+        nose.tools.eq_(foia._followup_days(), 30)
 
         num_days = 365
         foia.date_estimate = datetime.date.today() + datetime.timedelta(num_days)
@@ -164,19 +160,22 @@ class TestFOIARequestUnit(TestCase):
         foia.date_estimate = datetime.date.today()
         foia.followup()
         nose.tools.assert_in('check on the status', mail.outbox[-1].body)
-        nose.tools.eq_(foia._followup_days(), 15)
+        nose.tools.eq_(foia._followup_days(), 30)
 
     def test_foia_followup_estimated(self):
         """If request has an estimated date, returns number of days until the estimated date"""
         # pylint: disable=protected-access
         num_days = 365
-        foia = FOIARequest.objects.get(pk=15)
+        foia = FOIARequestFactory(status='processed')
         foia.date_estimate = datetime.date.today() + datetime.timedelta(num_days)
         nose.tools.eq_(foia._followup_days(), num_days)
 
      # manager
     def test_manager_get_submitted(self):
         """Test the FOIA Manager's get_submitted method"""
+
+        for status in ('started', 'ack', 'done'):
+            FOIARequestFactory(status=status)
 
         submitted_foias = FOIARequest.objects.get_submitted()
         for foia in FOIARequest.objects.all():
@@ -187,53 +186,73 @@ class TestFOIARequestUnit(TestCase):
 
     def test_manager_get_done(self):
         """Test the FOIA Manager's get_done method"""
+        for status in ('started', 'submitted', 'processed'):
+            FOIARequestFactory(status=status)
+        FOIARequestFactory(status='done', date_done=datetime.date.today())
 
         done_foias = FOIARequest.objects.get_done()
         for foia in FOIARequest.objects.all():
             if foia in done_foias:
-                nose.tools.ok_(foia.status == 'done')
+                nose.tools.eq_(foia.status, 'done')
             else:
-                nose.tools.ok_(
-                        foia.status in ['started', 'submitted', 'processed',
-                                        'fix', 'rejected', 'payment'])
+                nose.tools.assert_in(foia.status,
+                        ['started', 'submitted', 'processed',
+                            'fix', 'rejected', 'payment'])
 
 
 class TestFOIAFunctional(TestCase):
     """Functional tests for FOIA"""
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_profiles.json', 'test_foiarequests.json', 'test_foiacommunications.json',
-                'test_agencies.json']
 
     # views
     def test_foia_list(self):
         """Test the foia-list view"""
-
         response = get_allowed(self.client, reverse('foia-list'))
-        nose.tools.eq_(set(response.context['object_list']),
-            set(FOIARequest.objects.get_viewable(AnonymousUser()).order_by('-date_submitted')[:12]))
+        nose.tools.eq_(
+                set(response.context['object_list']),
+                set(FOIARequest.objects
+                    .get_viewable(AnonymousUser())
+                    .order_by('-date_submitted')[:12]))
 
     def test_foia_list_user(self):
         """Test the foia-list-user view"""
-
-        for user_pk in [1, 2]:
+        users = UserFactory.create_batch(2)
+        FOIARequestFactory.create_batch(3, user=users[0])
+        FOIARequestFactory.create_batch(3, user=users[1])
+        for user in users:
             response = get_allowed(self.client,
-                    reverse('foia-list-user', kwargs={'user_pk': user_pk}))
-            user = User.objects.get(pk=user_pk)
-            nose.tools.eq_(set(response.context['object_list']),
-                           set(FOIARequest.objects.get_viewable(AnonymousUser()).filter(user=user)))
-            nose.tools.ok_(all(foia.user == user for foia in response.context['object_list']))
+                    reverse('foia-list-user', kwargs={'user_pk': user.pk}))
+            nose.tools.eq_(
+                    set(response.context['object_list']),
+                    set(FOIARequest.objects
+                        .get_viewable(AnonymousUser())
+                        .filter(user=user)))
+            nose.tools.ok_(all(foia.user == user
+                for foia in response.context['object_list']))
 
     def test_foia_sorted_list(self):
         """Test sorting on foia-list view"""
+        for days_ago, status in (
+                (1, 'submitted'),
+                (5, 'fix'),
+                (25, 'rejected'),
+                (300, 'submitted')):
+            FOIARequestFactory(
+                    date_submitted=datetime.date.today() -
+                        datetime.timedelta(days_ago),
+                    status=status)
 
         for field in ['title', 'date_submitted', 'status']:
             for order in ['asc', 'desc']:
-                response = get_allowed(self.client, reverse('foia-list') +
+                response = get_allowed(self.client,
+                        reverse('foia-list') +
                         '?sort=%s&order=%s' % (field, order))
-                nose.tools.eq_([f.title for f in response.context['object_list']],
-                               [f.title for f in sorted(response.context['object_list'],
-                                                        key=attrgetter(field),
-                                                        reverse=(order == 'desc'))])
+                nose.tools.eq_(
+                        [f.title for f in response.context['object_list']],
+                        [f.title for f in
+                            sorted(response.context['object_list'],
+                                key=attrgetter(field),
+                                reverse=(order == 'desc'))])
+
     def test_foia_bad_sort(self):
         """Test sorting against a non-existant field"""
         response = get_allowed(self.client, reverse('foia-list') + '?sort=test')
@@ -241,8 +260,7 @@ class TestFOIAFunctional(TestCase):
 
     def test_foia_detail(self):
         """Test the foia-detail view"""
-
-        foia = FOIARequest.objects.get(pk=2)
+        foia = FOIARequestFactory()
         get_allowed(self.client,
                     reverse('foia-detail',
                         kwargs={'idx': foia.pk, 'slug': foia.slug,
@@ -251,33 +269,38 @@ class TestFOIAFunctional(TestCase):
 
     def test_feeds(self):
         """Test the RSS feed views"""
-
         get_allowed(self.client, reverse('foia-submitted-feed'))
         get_allowed(self.client, reverse('foia-done-feed'))
 
     def test_404_views(self):
         """Test views that should give a 404 error"""
-
-        get_404(self.client, reverse('foia-detail', kwargs={'idx': 1, 'slug': 'test-c',
-                                                       'jurisdiction': 'massachusetts',
-                                                       'jidx': 1}))
-        get_404(self.client, reverse('foia-detail', kwargs={'idx': 2, 'slug': 'test-c',
-                                                       'jurisdiction': 'massachusetts',
-                                                       'jidx': 1}))
+        get_404(self.client,
+                reverse('foia-detail',
+                    kwargs={'idx': 1, 'slug': 'test-c',
+                        'jurisdiction': 'massachusetts',
+                        'jidx': 1}))
+        get_404(self.client,
+                reverse('foia-detail',
+                    kwargs={'idx': 2, 'slug': 'test-c',
+                        'jurisdiction': 'massachusetts',
+                        'jidx': 1}))
 
     def test_unallowed_views(self):
         """Test private views while not logged in"""
-
-        foia = FOIARequest.objects.get(pk=2)
-        get_post_unallowed(self.client, reverse('foia-draft',
-                                           kwargs={'jurisdiction': foia.jurisdiction.slug,
-                                                   'jidx': foia.jurisdiction.pk,
-                                                   'idx': foia.pk, 'slug': foia.slug}))
+        foia = FOIARequestFactory()
+        get_post_unallowed(self.client,
+                reverse('foia-draft',
+                    kwargs={
+                        'jurisdiction': foia.jurisdiction.slug,
+                        'jidx': foia.jurisdiction.pk,
+                        'idx': foia.pk,
+                        'slug': foia.slug}))
 
     def test_auth_views(self):
         """Test private views while logged in"""
 
-        foia = FOIARequest.objects.get(pk=1)
+        foia = FOIARequestFactory(
+                status='started', user__username='adam', user__password='abc')
         self.client.login(username='adam', password='abc')
 
         # get authenticated pages
@@ -293,19 +316,23 @@ class TestFOIAFunctional(TestCase):
                                         'jidx': foia.jurisdiction.pk,
                                         'idx': foia.pk, 'slug': 'bad_slug'}))
 
-
     def test_foia_submit_views(self):
         """Test submitting a FOIA request"""
 
-        foia = FOIARequest.objects.get(pk=1)
-        agency = Agency.objects.get(pk=3)
+        foia = FOIARequestFactory(
+                status='started', user__username='adam', user__password='abc')
+        FOIACommunicationFactory(foia=foia)
+        agency = AgencyFactory()
         self.client.login(username='adam', password='abc')
 
         # test for submitting a foia request for enough credits
-        # tests for the wizard
 
-        foia_data = {'title': 'test a', 'request': 'updated request', 'submit': 'Submit',
-                     'agency': agency.pk, 'combo-name': agency.name}
+        foia_data = {
+                'title': 'test a',
+                'request': 'updated request',
+                'submit': 'Submit',
+                'agency': agency.pk,
+                'combo-name': agency.name}
 
         kwargs = {'jurisdiction': foia.jurisdiction.slug,
                   'jidx': foia.jurisdiction.pk,
@@ -324,32 +351,39 @@ class TestFOIAFunctional(TestCase):
     def test_foia_save_views(self):
         """Test saving a FOIA request"""
 
-        foia = FOIARequest.objects.get(pk=6)
+        foia = FOIARequestFactory(
+                status='started', user__username='bob', user__password='abc')
+        FOIACommunicationFactory(foia=foia)
         self.client.login(username='bob', password='abc')
 
-        foia_data = {'title': 'Test 6', 'request': 'saved request', 'submit': 'Save'}
+        foia_data = {
+                'title': foia.title,
+                'request': 'saved request',
+                'submit': 'Save'}
 
         kwargs = {'jurisdiction': foia.jurisdiction.slug,
                   'jidx': foia.jurisdiction.pk,
                   'idx': foia.pk, 'slug': foia.slug}
-        draft = reverse('foia-draft', kwargs=kwargs).replace('http://testserver', '')
-        detail = reverse('foia-detail', kwargs=kwargs).replace('http://testserver', '')
+        draft = (reverse('foia-draft', kwargs=kwargs)
+                .replace('http://testserver', ''))
+        detail = (reverse('foia-detail', kwargs=kwargs)
+                .replace('http://testserver', ''))
         chain = [(url, 302) for url in (detail, draft)]
         response = self.client.post(draft, foia_data, follow=True)
         nose.tools.eq_(response.status_code, 200)
         nose.tools.eq_(response.redirect_chain, chain)
 
-        foia = FOIARequest.objects.get(title='Test 6')
+        foia = FOIARequest.objects.get(title=foia.title)
         nose.tools.ok_(foia.first_request().startswith('saved request'))
         nose.tools.eq_(foia.status, 'started')
 
     def test_action_views(self):
         """Test action views"""
 
-        foia = FOIARequest.objects.get(pk=1)
+        foia = FOIARequestFactory()
         self.client.login(username='adam', password='abc')
 
-        foia = FOIARequest.objects.get(pk=18)
+        foia = FOIARequestFactory(status='payment')
         get_allowed(self.client, reverse('foia-pay',
             kwargs={'jurisdiction': foia.jurisdiction.slug,
                 'jidx': foia.jurisdiction.pk,
@@ -612,19 +646,19 @@ class TestRequestDetailView(TestCase):
         tags = 'foo, bar'
         self.post_helper({'action': 'tags', 'tags': tags}, self.foia.user)
         self.foia.refresh_from_db()
-        ok_('foo' in [tag.name for tag in self.foia.tags.all()])
-        ok_('bar' in [tag.name for tag in self.foia.tags.all()])
+        nose.tools.ok_('foo' in [tag.name for tag in self.foia.tags.all()])
+        nose.tools.ok_('bar' in [tag.name for tag in self.foia.tags.all()])
 
     def test_add_projects(self):
         """Posting a collection of projects to a request should add it to those projects."""
         project = ProjectFactory()
         form = ProjectManagerForm({'projects': [project.pk]})
-        ok_(form.is_valid())
+        nose.tools.ok_(form.is_valid())
         data = {'action': 'projects'}
         data.update(form.data)
         self.post_helper(data, self.foia.user)
         project.refresh_from_db()
-        ok_(self.foia in project.requests.all())
+        nose.tools.ok_(self.foia in project.requests.all())
 
 
 class TestRequestPayment(TestCase):
@@ -638,16 +672,16 @@ class TestRequestPayment(TestCase):
         amount = 100.0
         comm = self.foia.pay(user, amount)
         self.foia.refresh_from_db()
-        eq_(self.foia.status, 'submitted',
+        nose.tools.eq_(self.foia.status, 'submitted',
             'The request should be set to processing.')
-        eq_(self.foia.date_processing, datetime.date.today(),
+        nose.tools.eq_(self.foia.date_processing, datetime.date.today(),
             'The request should start tracking its days processing.')
-        ok_(comm, 'The function should return a communication.')
-        eq_(comm.delivered, 'mail', 'The communication should be mailed.')
+        nose.tools.ok_(comm, 'The function should return a communication.')
+        nose.tools.eq_(comm.delivered, 'mail', 'The communication should be mailed.')
         task = SnailMailTask.objects.filter(communication=comm).first()
-        ok_(task, 'A snail mail task should be created.')
-        eq_(task.user, user, 'The task should be attributed to the user.')
-        eq_(task.amount, amount, 'The task should contain the amount of the request.')
+        nose.tools.ok_(task, 'A snail mail task should be created.')
+        nose.tools.eq_(task.user, user, 'The task should be attributed to the user.')
+        nose.tools.eq_(task.amount, amount, 'The task should contain the amount of the request.')
 
 
 class TestRequestSharing(TestCase):
