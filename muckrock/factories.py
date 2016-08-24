@@ -10,7 +10,7 @@ import factory
 
 from muckrock.accounts.models import Profile, Statistics, AgencyUser
 from muckrock.agency.models import Agency, STALE_DURATION, AgencyProfile
-from muckrock.foia.models import FOIARequest, FOIACommunication, RawEmail
+from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, RawEmail
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.news.models import Article
 from muckrock.organization.models import Organization
@@ -100,6 +100,7 @@ class FOIARequestFactory(factory.django.DjangoModelFactory):
     slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
     user = factory.SubFactory(UserFactory)
     jurisdiction = factory.SubFactory('muckrock.factories.JurisdictionFactory')
+    agency = factory.SubFactory('muckrock.factories.AgencyFactory')
 
 
 class FOIACommunicationFactory(factory.django.DjangoModelFactory):
@@ -113,6 +114,15 @@ class FOIACommunicationFactory(factory.django.DjangoModelFactory):
     priv_from_who = 'Test Sender <test@muckrock.com>'
     date = factory.LazyAttribute(lambda obj: datetime.datetime.now())
     rawemail = factory.RelatedFactory('muckrock.factories.RawEmailFactory', 'communication')
+
+
+class FOIAFileFactory(factory.django.DjangoModelFactory):
+    """A factory for creating FOIAFile test objects"""
+    class Meta:
+        model = FOIAFile
+    comm = factory.SubFactory(FOIACommunicationFactory)
+    date = factory.LazyAttribute(lambda obj: datetime.datetime.now())
+    ffile = factory.django.FileField(filename='foo.txt', data='bar 42')
 
 
 class RawEmailFactory(factory.django.DjangoModelFactory):
