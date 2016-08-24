@@ -277,7 +277,7 @@ class FOIARequest(models.Model):
         # add a reversion comment if possible
         if 'comment' in kwargs:
             comment = kwargs.pop('comment')
-            if reversion.revision_context_manager.is_active():
+            if reversion.is_active():
                 reversion.set_comment(comment)
         super(FOIARequest, self).save(*args, **kwargs)
 
