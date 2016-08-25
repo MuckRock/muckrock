@@ -237,7 +237,7 @@ class FOIACommunication(models.Model):
         self.foia.contacts.set([self.from_user.pk])
         self.foia.save(comment='update primary email from comm')
 
-    def trusted_sender(self):
+    def trust_sender(self):
         """Mark the sender of the request as being trusted"""
         self.from_user.profile.acct_type = 'agency'
         self.from_user.profile.save()

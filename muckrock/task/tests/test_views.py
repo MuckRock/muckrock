@@ -10,16 +10,28 @@ from django.test import TestCase, Client, RequestFactory
 import logging
 import mock
 import nose
+from nose.tools import (
+        eq_,
+        ok_,
+        raises,
+        assert_is_instance,
+        assert_false,
+        assert_not_equal,
+        )
 
 from muckrock import agency, factories, task
 from muckrock.foia.models import FOIARequest, FOIANote
-from muckrock.task.factories import FlaggedTaskFactory, StaleAgencyTaskFactory
+from muckrock.task.factories import (
+        FlaggedTaskFactory,
+        StaleAgencyTaskFactory,
+        OrphanTaskFactory,
+        SnailMailTaskFactory,
+        ResponseTaskFactory,
+        NewAgencyTaskFactory,
+        )
 from muckrock.utils import mock_middleware
 from muckrock.views import MRFilterableListView
 
-eq_ = nose.tools.eq_
-ok_ = nose.tools.ok_
-raises = nose.tools.raises
 mock_send = mock.Mock()
 
 # pylint: disable=missing-docstring
@@ -27,10 +39,6 @@ mock_send = mock.Mock()
 @mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class TaskListViewTests(TestCase):
     """Test that the task list view resolves and renders correctly."""
-
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
-                'test_foiacommunications.json', 'test_task.json']
 
     def setUp(self):
         self.url = reverse('task-list')
@@ -51,6 +59,7 @@ class TaskListViewTests(TestCase):
         self.assertRedirects(response, '/accounts/login/?next=%s' % self.url)
 
     def test_staff_ok(self):
+        factories.UserFactory(username='adam', password='abc', is_staff=True)
         self.client.login(username='adam', password='abc')
         response = self.client.get(self.url)
         eq_(response.status_code, 200,
@@ -58,88 +67,83 @@ class TaskListViewTests(TestCase):
             ' Actually responds with %d' % response.status_code))
 
     def test_class_inheritance(self):
+        """Task list should inherit from MRFilterableListView class"""
         # pylint: disable=no-self-use
-        actual = task.views.TaskList.__bases__
-        expected = MRFilterableListView().__class__
-        ok_(expected in actual,
-            'Task list should inherit from MRFilterableListView class')
+        assert_is_instance(task.views.TaskList(), MRFilterableListView)
 
     def test_render_task_list(self):
         """The list should have rendered task widgets in its object_list context variable"""
+        factories.UserFactory(username='adam', password='abc', is_staff=True)
         self.client.login(username='adam', password='abc')
         response = self.client.get(self.url)
         obj_list = response.context['object_list']
-        ok_(obj_list,
-            'Object list should not be empty.')
+        ok_(obj_list, 'Object list should not be empty.')
+
 
 @mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class TaskListViewPOSTTests(TestCase):
     """Tests POST requests to the Task list view"""
     # we have to get the task again if we want to see the updated value
 
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
-                'test_foiacommunications.json', 'test_task.json']
-
     def setUp(self):
         self.url = reverse('task-list')
-        self.task = task.models.Task.objects.get(pk=1)
+        self.task = task.models.Task.objects.create()
         self.client = Client()
+        self.user = factories.UserFactory(
+                username='adam', password='abc', is_staff=True)
         self.client.login(username='adam', password='abc')
 
     def test_post_resolve_task(self):
         self.client.post(self.url, {'resolve': True, 'task': self.task.pk})
-        updated_task = task.models.Task.objects.get(pk=self.task.pk)
-        user = User.objects.get(username='adam')
-        eq_(updated_task.resolved, True,
+        self.task.refresh_from_db()
+        ok_(self.task.resolved,
             'Tasks should be resolved by posting the task ID with a "resolve" request.')
-        eq_(updated_task.resolved_by, user,
+        eq_(self.task.resolved_by, self.user,
             'Task should record the logged in user who resolved it.')
 
     def test_post_do_not_resolve_task(self):
         self.client.post(self.url, {'task': self.task.pk})
-        updated_task = task.models.Task.objects.get(pk=self.task.pk)
-        eq_(updated_task.resolved, False,
+        self.task.refresh_from_db()
+        assert_false(self.task.resolved,
             'Tasks should not be resolved when no "resolve" data is POSTed.')
+
 
 @mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class TaskListViewBatchedPOSTTests(TestCase):
     """Tests batched POST requests for all tasks"""
     # we have to get the task again if we want to see the updated value
 
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
-                'test_foiacommunications.json', 'test_task.json']
-
     def setUp(self):
         self.url = reverse('task-list')
-        task1 = task.models.Task.objects.get(pk=1)
-        task2 = task.models.Task.objects.get(pk=2)
-        task3 = task.models.Task.objects.get(pk=3)
-        self.tasks = [task1, task2, task3]
+        self.tasks = [
+            task.models.Task.objects.create(),
+            task.models.Task.objects.create(),
+            task.models.Task.objects.create()]
         self.client = Client()
+        self.user = factories.UserFactory(
+                username='adam', password='abc', is_staff=True)
         self.client.login(username='adam', password='abc')
 
     def test_batch_resolve_tasks(self):
-        self.client.post(self.url, {'resolve': 'true', 'tasks': [1, 2, 3]})
-        updated_tasks = [task.models.Task.objects.get(pk=t.pk) for t in self.tasks]
-        for updated_task in updated_tasks:
-            eq_(updated_task.resolved, True,
-                'Task %d should be resolved when doing a batched resolve' % updated_task.pk)
+        self.client.post(self.url,
+                {'resolve': 'true', 'tasks': [t.pk for t in self.tasks]})
+        for task in self.tasks:
+            task.refresh_from_db()
+            ok_(task.resolved,
+                'Task %d should be resolved when doing a batched resolve' % task.pk)
+
 
 @mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class OrphanTaskViewTests(TestCase):
     """Tests OrphanTask-specific POST handlers"""
 
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
-                'test_foiacommunications.json', 'test_task.json']
-
     def setUp(self):
         self.url = reverse('orphan-task-list')
-        self.task = task.models.OrphanTask.objects.get(pk=2)
+        self.task = OrphanTaskFactory()
         self.task.communication.save()
         self.client = Client()
+        self.user = factories.UserFactory(
+                username='adam', password='abc', is_staff=True)
         self.client.login(username='adam', password='abc')
 
     def test_get_single(self):
@@ -153,15 +157,18 @@ class OrphanTaskViewTests(TestCase):
         eq_(response.status_code, 404)
 
     def test_move(self):
-        foia_1_comm_count = FOIARequest.objects.get(pk=1).communications.all().count()
-        foia_2_comm_count = FOIARequest.objects.get(pk=2).communications.all().count()
+        foias = factories.FOIARequestFactory.create_batch(2)
+        foia_1_comm_count = foias[0].communications.all().count()
+        foia_2_comm_count = foias[1].communications.all().count()
         starting_date = self.task.communication.date
-        self.client.post(self.url, {'move': '1, 2', 'task': self.task.pk})
-        updated_foia_1_comm_count = FOIARequest.objects.get(pk=1).communications.all().count()
-        updated_foia_2_comm_count = FOIARequest.objects.get(pk=2).communications.all().count()
-        updated_task = task.models.OrphanTask.objects.get(pk=self.task.pk)
-        ending_date = updated_task.communication.date
-        eq_(updated_task.resolved, True,
+        self.client.post(self.url, {
+            'move': ', '.join(str(f.pk) for f in foias),
+            'task': self.task.pk})
+        updated_foia_1_comm_count = foias[0].communications.all().count()
+        updated_foia_2_comm_count = foias[1].communications.all().count()
+        self.task.refresh_from_db()
+        ending_date = self.task.communication.date
+        ok_(self.task.resolved,
             'Orphan task should be moved by posting the FOIA pks and task ID.')
         eq_(updated_foia_1_comm_count, foia_1_comm_count + 1,
             'Communication should be added to FOIA')
@@ -172,25 +179,24 @@ class OrphanTaskViewTests(TestCase):
 
     def test_reject(self):
         self.client.post(self.url, {'reject': True, 'task': self.task.pk})
-        updated_task = task.models.OrphanTask.objects.get(pk=self.task.pk)
-        eq_(updated_task.resolved, True,
-                ('Orphan task should be rejected by posting any'
-                ' truthy value to the "reject" parameter and task ID.'))
+        self.task.refresh_from_db()
+        ok_(self.task.resolved,
+                'Orphan task should be rejected by posting any'
+                ' truthy value to the "reject" parameter and task ID.')
 
     def test_reject_despite_likely_foia(self):
-        likely_foia_pk = self.task.communication.likely_foia.pk
-        likely_foia = FOIARequest.objects.get(pk=likely_foia_pk)
+        likely_foia = factories.FOIARequestFactory()
+        task = OrphanTaskFactory(communication__likely_foia=likely_foia)
         likely_foia_comm_count = likely_foia.communications.all().count()
-        ok_(likely_foia_pk,
-                'Communication should have a likely FOIA for this test')
+
         self.client.post(self.url, {
-            'move': str(likely_foia_pk),
+            'move': likely_foia.pk,
             'reject': 'true',
-            'task': self.task.pk})
+            'task': task.pk})
         updated_likely_foia_comm_count = likely_foia.communications.all().count()
         eq_(likely_foia_comm_count, updated_likely_foia_comm_count,
-                ('Rejecting an orphan with a likely FOIA should not move'
-                ' the communication to that FOIA'))
+                'Rejecting an orphan with a likely FOIA should not move'
+                ' the communication to that FOIA')
 
     def test_reject_and_blacklist(self):
         self.task.communication.from_user = factories.UserFactory(
@@ -202,18 +208,17 @@ class OrphanTaskViewTests(TestCase):
             'task': self.task.pk})
         ok_(task.models.BlacklistDomain.objects.filter(domain='muckrock.com'))
 
+
 @mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class SnailMailTaskViewTests(TestCase):
     """Tests SnailMailTask-specific POST handlers"""
 
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
-                'test_foiacommunications.json', 'test_task.json']
-
     def setUp(self):
         self.url = reverse('snail-mail-task-list')
-        self.task = task.models.SnailMailTask.objects.get(pk=3)
+        self.task = SnailMailTaskFactory()
         self.client = Client()
+        self.user = factories.UserFactory(
+                username='adam', password='abc', is_staff=True)
         self.client.login(username='adam', password='abc')
 
     def test_get_single(self):
@@ -306,6 +311,7 @@ class FlaggedTaskViewTests(TestCase):
         self.task.refresh_from_db()
         ok_(self.task.resolved, 'The task should resolve.')
         mock_reply.assert_called_with(test_text)
+
 
 @mock.patch('muckrock.task.models.ProjectReviewTask.reply')
 class ProjectReviewTaskViewTests(TestCase):
@@ -465,16 +471,13 @@ class StaleAgencyTaskViewTests(TestCase):
 class NewAgencyTaskViewTests(TestCase):
     """Tests NewAgencyTask-specific POST handlers"""
 
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
-                'test_foiacommunications.json', 'test_task.json']
-
     def setUp(self):
         self.url = reverse('new-agency-task-list')
-        self.task = task.models.NewAgencyTask.objects.get(pk=7)
+        self.task = NewAgencyTaskFactory()
         self.task.agency.status = 'pending'
         self.task.agency.save()
         self.client = Client()
+        factories.UserFactory(username='adam', password='abc', is_staff=True)
         self.client.login(username='adam', password='abc')
 
     def test_get_single(self):
@@ -503,7 +506,7 @@ class NewAgencyTaskViewTests(TestCase):
 
     def test_post_reject(self):
         """Rejecting the agency requires a replacement agency"""
-        replacement = agency.models.Agency.objects.get(id=2)
+        replacement = factories.AgencyFactory()
         self.client.post(self.url, {
             'reject': 'truthy',
             'task': self.task.id,
@@ -517,18 +520,16 @@ class NewAgencyTaskViewTests(TestCase):
                 ('New agency task should resolve when given any'
                 ' truthy value for the "reject" data field'))
 
+
 @mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class ResponseTaskListViewTests(TestCase):
     """Tests ResponseTask-specific POST handlers"""
 
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
-                'test_foiacommunications.json', 'test_task.json']
-
     def setUp(self):
         self.url = reverse('response-task-list')
-        self.task = task.models.ResponseTask.objects.get(pk=8)
+        self.task = ResponseTaskFactory()
         self.client = Client()
+        factories.UserFactory(username='adam', password='abc', is_staff=True)
         self.client.login(username='adam', password='abc')
 
     def test_get_single(self):
@@ -599,13 +600,14 @@ class ResponseTaskListViewTests(TestCase):
 
     def test_post_move(self):
         """Moving the response should save it to a new request."""
-        move_to_id = 2
+        foia = factories.FOIARequestFactory()
         starting_date = self.task.communication.date
-        self.client.post(self.url, {'move': move_to_id, 'status': 'done', 'task': self.task.pk})
+        self.client.post(self.url,
+                {'move': foia.pk, 'status': 'done', 'task': self.task.pk})
         updated_task = task.models.ResponseTask.objects.get(pk=self.task.pk)
         foia_id = updated_task.communication.foia.id
         ending_date = updated_task.communication.date
-        eq_(foia_id, move_to_id,
+        eq_(foia_id, foia.pk,
             'The response should be moved to a different FOIA.')
         ok_(updated_task.resolved,
             'Moving the status should resolve the task')
@@ -614,7 +616,8 @@ class ResponseTaskListViewTests(TestCase):
 
     def test_post_move_multiple(self):
         """Moving the response to multiple requests should only modify the first request."""
-        move_to_ids = '2, 3, 4'
+        foias = factories.FOIARequestFactory.create_batch(3, status='processed')
+        move_to_ids = ', '.join(str(f.pk) for f in foias)
         change_status = 'done'
         change_tracking = 'DEADBEEF'
         self.client.post(self.url, {
@@ -623,15 +626,14 @@ class ResponseTaskListViewTests(TestCase):
             'tracking_number': change_tracking,
             'task': self.task.pk
         })
-        foia2 = FOIARequest.objects.get(pk=2)
-        foia3 = FOIARequest.objects.get(pk=3)
-        foia4 = FOIARequest.objects.get(pk=4)
-        # foia 2 should get updated status, tracking number
-        # foia 3 & 4 should stay just the way they are
-        eq_(change_tracking, foia2.tracking_id,
+        for foia in foias:
+            foia.refresh_from_db()
+        # first foia should get updated status, tracking number
+        # rest should stay just the way they are
+        eq_(change_tracking, foias[0].tracking_id,
             'Tracking should update for first request in move list.')
-        ok_(change_tracking is not foia3.tracking_id and change_tracking is not foia4.tracking_id,
-            'Tracking should not update for subsequent requests in list.')
+        assert_not_equal(change_tracking, foias[1].tracking_id)
+        assert_not_equal(change_tracking, foias[2].tracking_id)
 
     def test_terrible_data(self):
         """Posting awful data shouldn't cause everything to collapse."""

@@ -27,7 +27,6 @@ class AgencySerializer(serializers.ModelSerializer):
         request = self.context.get('request', None)
         if request is None or not request.user.is_staff:
             self.fields.pop('email')
-            self.fields.pop('other_emails')
 
     class Meta:
         model = Agency
@@ -46,7 +45,6 @@ class AgencySerializer(serializers.ModelSerializer):
             'location',
             # contact info
             'email',
-            'other_emails',
             'phone',
             'fax',
             'website',

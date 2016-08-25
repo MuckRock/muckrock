@@ -85,3 +85,13 @@ class StatusChangeTaskFactory(factory.django.DjangoModelFactory):
     user = factory.SubFactory('muckrock.factories.UserFactory')
     old_status = 'done'
     foia = factory.SubFactory('muckrock.factories.FOIARequestFactory')
+
+
+class NewAgencyTaskFactory(factory.django.DjangoModelFactory):
+    """A factory for creating NewAgencyTask objects."""
+    class Meta:
+        model = task.models.NewAgencyTask
+
+    user = factory.SubFactory('muckrock.factories.UserFactory')
+    agency = factory.SubFactory('muckrock.factories.AgencyFactory')
+

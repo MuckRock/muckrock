@@ -7,14 +7,11 @@ from django.http import Http404
 from django.test import TestCase, RequestFactory
 
 from datetime import datetime, timedelta
-import nose.tools
+from nose.tools import ok_, eq_, raises
 
 from muckrock import agency
 from muckrock import factories
 from muckrock.utils import mock_middleware
-
-ok_ = nose.tools.ok_
-eq_ = nose.tools.eq_
 
 
 class TestAgencyUnit(TestCase):
@@ -25,21 +22,20 @@ class TestAgencyUnit(TestCase):
         self.agency1 = factories.AgencyFactory(
             fax='1-987-654-3210',
             email='test@agency1.gov',
-            other_emails='other_a@agency1.gov, other_b@agency1.gov'
         )
         factories.AgencyUserFactory(
             agencyprofile__agency=self.agency1,
-            agencyprofile__contact_type='primary',
+            agencyprofile__primary='to',
             email='test@agency1.gov',
             )
         factories.AgencyUserFactory(
             agencyprofile__agency=self.agency1,
-            agencyprofile__contact_type='copy',
+            agencyprofile__primary='cc',
             email='other_a@agency1.gov',
             )
         factories.AgencyUserFactory(
             agencyprofile__agency=self.agency1,
-            agencyprofile__contact_type='copy',
+            agencyprofile__primary='cc',
             email='other_b@agency1.gov',
             )
         self.agency2 = factories.AgencyFactory(
@@ -48,7 +44,7 @@ class TestAgencyUnit(TestCase):
         )
         factories.AgencyUserFactory(
             agencyprofile__agency=self.agency2,
-            agencyprofile__contact_type='primary',
+            agencyprofile__primary='to',
             profile__fax='987.654.3210',
             email='',
             )
@@ -73,7 +69,7 @@ class TestAgencyUnit(TestCase):
     def test_agency_get_other_emails(self):
         """Test get other emails method"""
         eq_(
-            set(self.agency1.get_emails('copy')),
+            set(self.agency1.get_emails('primary', 'cc')),
             set(['other_a@agency1.gov', 'other_b@agency1.gov']),
             )
 
@@ -138,7 +134,7 @@ class TestAgencyViews(TestCase):
         )
         eq_(response.status_code, 200)
 
-    @nose.tools.raises(Http404)
+    @raises(Http404)
     def test_unapproved_not_found(self):
         """An unapproved agency should return a 404 response."""
         self.agency.status = 'pending'

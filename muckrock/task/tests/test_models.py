@@ -152,7 +152,7 @@ class FlaggedTaskTests(TestCase):
         user = factories.UserFactory()
         foia = factories.FOIARequestFactory()
         agency = factories.AgencyFactory()
-        jurisdiction = factories.JurisdictionFactory()
+        jurisdiction = factories.FederalJurisdictionFactory()
         flagged_foia_task = self.task.objects.create(user=user, foia=foia, text=text)
         flagged_agency_task = self.task.objects.create(user=user, agency=agency, text=text)
         flagged_jurisdiction_task = self.task.objects.create(

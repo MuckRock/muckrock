@@ -169,11 +169,10 @@ class Agency(models.Model, RequestHelper):
             raise ValueError(
                     'User must be an agency user to be the primary contact')
 
-        self.agencyprofile_set.filter(contact_type='primary'
-                ).update(contact_type='other')
+        self.agencyprofile_set.filter(primary='to').update(primary='no')
 
         agencyprofile, _ = user.agencyprofile_set.get_or_create(agency=self)
-        agencyprofile.contact_type = 'primary'
+        agencyprofile.primary = 'to'
         agencyprofile.save()
 
     def get_contacts(self, type_, subtype):

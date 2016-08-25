@@ -14,6 +14,7 @@ import nose.tools
 import os
 import time
 
+from muckrock.factories import FOIARequestFactory
 from muckrock.foia.models import FOIARequest
 
 # pylint: disable=no-self-use
@@ -21,8 +22,6 @@ from muckrock.foia.models import FOIARequest
 
 class TestMailgunViews(TestCase):
     """Tests for Mailgun views"""
-    fixtures = ['holidays.json', 'agency_types.json', 'test_agencies.json', 'test_users.json',
-                'test_profiles.json', 'jurisdictions.json', 'test_foiarequests.json']
 
     def setUp(self):
         """Set up tests"""
@@ -43,7 +42,7 @@ class TestMailgunViews(TestCase):
     def test_normal(self):
         """Test a normal succesful response"""
 
-        foia = FOIARequest.objects.get(pk=1)
+        foia = FOIARequestFactory()
         data = {
             'From': 'test@agency.gov',
             'To':   '%s@requests.muckrock.com, "Doe, John" <other@agency.gov>' % foia.get_mail_id(),
@@ -58,14 +57,14 @@ class TestMailgunViews(TestCase):
                 **self.kwargs)
         nose.tools.eq_(response.status_code, 200)
 
-        foia = FOIARequest.objects.get(pk=1)
+        foia = FOIARequest.objects.get(pk=foia.pk)
         nose.tools.eq_(foia.get_emails(),
                 (['test@agency.gov'], ['other@agency.gov']))
 
     def test_bad_sender(self):
         """Test a normal succesful response"""
 
-        foia = FOIARequest.objects.get(pk=1)
+        foia = FOIARequestFactory()
         data = {
             'from': 'test@example.com',
             'From': 'test@example.com',
@@ -103,7 +102,7 @@ class TestMailgunViews(TestCase):
         """Test a message with an attachment"""
 
         try:
-            foia = FOIARequest.objects.get(pk=1)
+            foia = FOIARequestFactory()
             with open('data.xls', 'w') as file_:
                 file_.write('abc123')
             data = {
@@ -122,7 +121,7 @@ class TestMailgunViews(TestCase):
                     **self.kwargs)
             nose.tools.eq_(response.status_code, 200)
 
-            foia = FOIARequest.objects.get(pk=1)
+            foia.refresh_from_db()
             file_path = date.today().strftime('foia_files/%Y/%m/%d/data.xls')
             nose.tools.eq_(foia.files.all()[0].ffile.name, file_path)
 

@@ -44,7 +44,7 @@ class TestFOIARequestUnit(TestCase):
     # models
     def test_foia_model_unicode(self):
         """Test FOIA Request model's __unicode__ method"""
-        foia = FOIARequestFactory.build(title='Test 1')
+        foia = FOIARequestFactory(title='Test 1')
         nose.tools.eq_(unicode(foia), 'Test 1')
 
     def test_foia_model_url(self):
@@ -58,8 +58,8 @@ class TestFOIARequestUnit(TestCase):
 
     def test_foia_model_editable(self):
         """Test FOIA Request model's is_editable method"""
-        foia1 = FOIARequestFactory.build(status='started')
-        foia2 = FOIARequestFactory.build(status='done')
+        foia1 = FOIARequestFactory(status='started')
+        foia2 = FOIARequestFactory(status='done')
         nose.tools.assert_true(foia1.is_editable())
         nose.tools.assert_false(foia2.is_editable())
 

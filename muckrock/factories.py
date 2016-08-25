@@ -122,6 +122,7 @@ class FOIARequestFactory(factory.django.DjangoModelFactory):
     slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
     user = factory.SubFactory(UserFactory)
     jurisdiction = factory.SubFactory('muckrock.factories.FederalJurisdictionFactory')
+    agency = factory.SubFactory('muckrock.factories.AgencyFactory')
 
     @factory.post_generation
     def contacts(self, create, extracted, **kwargs):
@@ -131,6 +132,15 @@ class FOIARequestFactory(factory.django.DjangoModelFactory):
         if extracted:
             for contact in extracted:
                 self.contacts.add(contact)
+
+    @factory.post_generation
+    def tags(self, create, extracted, **kwargs):
+        """Create tags"""
+        if not create:
+            return
+        if extracted:
+            for tag in extracted:
+                self.tags.add(tag)
 
 
 class FOIACommunicationFactory(factory.django.DjangoModelFactory):
@@ -172,6 +182,15 @@ class ProjectFactory(factory.django.DjangoModelFactory):
 
     title = factory.Sequence(lambda n: "Project %d" % n)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
+
+    @factory.post_generation
+    def tags(self, create, extracted, **kwargs):
+        """Create tags"""
+        if not create:
+            return
+        if extracted:
+            for tag in extracted:
+                self.tags.add(tag)
 
 
 class QuestionFactory(factory.django.DjangoModelFactory):
@@ -218,11 +237,19 @@ class ArticleFactory(factory.django.DjangoModelFactory):
             # A list of authors were passed in, use them
             for author in extracted:
                 self.authors.add(author)
+        else:
+            # In all other cases, add at least one author
+            author = UserFactory()
+            self.authors.add(author)
+
+    @factory.post_generation
+    def tags(self, create, extracted, **kwargs):
+        """Create tags"""
+        if not create:
             return
-        # In all other cases, add at least one author
-        author = UserFactory()
-        self.authors.add(author)
-        return
+        if extracted:
+            for tag in extracted:
+                self.tags.add(tag)
 
 
 class StatisticsFactory(factory.django.DjangoModelFactory):

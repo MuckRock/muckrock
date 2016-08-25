@@ -9,7 +9,11 @@ from datetime import datetime, date, timedelta
 from mock import Mock, patch
 from nose.tools import ok_, eq_, assert_true, assert_false, raises, nottest
 
-from muckrock.factories import ProfileFactory, OrganizationFactory
+from muckrock.factories import (
+        ProfileFactory,
+        OrganizationFactory,
+        AgencyUserFactory,
+        )
 from muckrock.utils import get_stripe_token
 
 
