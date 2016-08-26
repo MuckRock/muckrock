@@ -42,8 +42,8 @@ def coverage(settings='test'):
     """Run the tests and generate a coverage report"""
     with env.cd(env.base_path):
         env.run('coverage erase')
-        env.run('coverage run --branch --source muckrock manage.py test --settings=muckrock.settings.%s' % settings)
-        env.run('coverage html')
+        env.run('coverage run --branch --source muckrock --omit="muckrock/*/migrations/*,muckrock/settings/*,*/__init__.py,muckrock/wsgi.py" manage.py test --settings=muckrock.settings.%s' % settings)
+        env.run('coverage html --ignore-errors')
 
 @task
 def pylint():
