@@ -94,4 +94,3 @@ class NewAgencyTaskFactory(factory.django.DjangoModelFactory):
 
     user = factory.SubFactory('muckrock.factories.UserFactory')
     agency = factory.SubFactory('muckrock.factories.AgencyFactory')
-

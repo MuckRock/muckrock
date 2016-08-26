@@ -36,7 +36,6 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.nested_inlines.admin import (
         NestedModelAdmin,
         NestedTabularInline,
-        NestedStackedInline,
         )
 
 # These inhereit more than the allowed number of public methods

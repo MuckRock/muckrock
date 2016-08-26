@@ -3,24 +3,21 @@ Tests for Tasks views
 """
 from datetime import datetime
 
-from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase, Client, RequestFactory
 
 import logging
 import mock
-import nose
 from nose.tools import (
         eq_,
         ok_,
-        raises,
         assert_is_instance,
         assert_false,
         assert_not_equal,
         )
 
 from muckrock import agency, factories, task
-from muckrock.foia.models import FOIARequest, FOIANote
+from muckrock.foia.models import FOIANote
 from muckrock.task.factories import (
         FlaggedTaskFactory,
         StaleAgencyTaskFactory,
@@ -127,9 +124,9 @@ class TaskListViewBatchedPOSTTests(TestCase):
     def test_batch_resolve_tasks(self):
         self.client.post(self.url,
                 {'resolve': 'true', 'tasks': [t.pk for t in self.tasks]})
-        for task in self.tasks:
-            task.refresh_from_db()
-            ok_(task.resolved,
+        for task_ in self.tasks:
+            task_.refresh_from_db()
+            ok_(task_.resolved,
                 'Task %d should be resolved when doing a batched resolve' % task.pk)
 
 
@@ -186,13 +183,13 @@ class OrphanTaskViewTests(TestCase):
 
     def test_reject_despite_likely_foia(self):
         likely_foia = factories.FOIARequestFactory()
-        task = OrphanTaskFactory(communication__likely_foia=likely_foia)
+        task_ = OrphanTaskFactory(communication__likely_foia=likely_foia)
         likely_foia_comm_count = likely_foia.communications.all().count()
 
         self.client.post(self.url, {
             'move': likely_foia.pk,
             'reject': 'true',
-            'task': task.pk})
+            'task': task_.pk})
         updated_likely_foia_comm_count = likely_foia.communications.all().count()
         eq_(likely_foia_comm_count, updated_likely_foia_comm_count,
                 'Rejecting an orphan with a likely FOIA should not move'

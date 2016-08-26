@@ -197,5 +197,3 @@ class Jurisdiction(models.Model, RequestHelper):
         # pylint: disable=too-few-public-methods
         ordering = ['name']
         unique_together = ('slug', 'parent')
-
-

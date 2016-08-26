@@ -80,5 +80,3 @@ if 'MEMCACHIER_SERVERS' in os.environ:
             }
         }
     }
-
-

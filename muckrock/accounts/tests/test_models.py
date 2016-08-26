@@ -44,6 +44,7 @@ MockCustomer = Mock()
 MockCustomer.create.return_value = mock_customer
 MockCustomer.retrieve.return_value = mock_customer
 
+# pylint: disable=no-self-use
 
 @patch('stripe.Customer', MockCustomer)
 @patch('stripe.Charge', mock_charge)

@@ -3,7 +3,6 @@ Views for mailgun
 """
 
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.mail import EmailMessage
 from django.http import HttpResponse, HttpResponseForbidden
@@ -22,7 +21,6 @@ from email.utils import parseaddr, getaddresses
 from localflavor.us.us_states import STATE_CHOICES
 
 from muckrock.accounts.models import AgencyUser
-from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, RawEmail
 from muckrock.foia.tasks import upload_document_cloud, classify_status
 from muckrock.mailgun.models import WhitelistDomain
@@ -388,7 +386,7 @@ def _allowed_email(email, foia=None):
 
     # if not associated with any FOIA,
     # checked if the email is known for any agency
-    if (not foia and 
+    if (not foia and
             AgencyUser.objects.known().filter(email__iexact=email).exists()):
         return True
 
@@ -408,4 +406,3 @@ def _file_type(file_):
         return 'ignore'
     else:
         return 'file'
-

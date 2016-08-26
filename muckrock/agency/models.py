@@ -12,7 +12,6 @@ from djgeojson.fields import PointField
 from easy_thumbnails.fields import ThumbnailerImageField
 
 from muckrock.jurisdiction.models import Jurisdiction, RequestHelper
-from muckrock import fields
 
 STALE_DURATION = 120
 
@@ -125,6 +124,7 @@ class Agency(models.Model, RequestHelper):
                 if c.get_email()]
 
     def get_primary_emails(self):
+        """Return the primary email addresses for this agency"""
         return self.get_emails('primary')
 
     def link_display(self):
@@ -208,3 +208,7 @@ class AgencyProfile(models.Model):
             default='no',
             choices=EMAIL_TYPES,
             )
+
+    def __unicode__(self):
+        return 'User: %s, Agency %s, Primary: %s, Appeal: %s' % (
+                self.user, self.agency, self.primary, self.appeal)

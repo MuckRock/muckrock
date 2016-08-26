@@ -52,9 +52,11 @@ class UserFactory(factory.django.DjangoModelFactory):
     profile = factory.RelatedFactory(ProfileFactory, 'user')
 
     @factory.post_generation
-    def password(obj, create, extracted, **kwargs):
+    def password(self, create, extracted, **kwargs):
+        """Set the password"""
+        # pylint: disable=unused-argument
         if extracted:
-            obj.set_password(extracted)
+            self.set_password(extracted)
 
 
 class AgencyUserFactory(UserFactory):
@@ -127,6 +129,7 @@ class FOIARequestFactory(factory.django.DjangoModelFactory):
     @factory.post_generation
     def contacts(self, create, extracted, **kwargs):
         """Create contacts"""
+        # pylint: disable=unused-argument
         if not create:
             return
         if extracted:
@@ -136,6 +139,7 @@ class FOIARequestFactory(factory.django.DjangoModelFactory):
     @factory.post_generation
     def tags(self, create, extracted, **kwargs):
         """Create tags"""
+        # pylint: disable=unused-argument
         if not create:
             return
         if extracted:
@@ -186,6 +190,7 @@ class ProjectFactory(factory.django.DjangoModelFactory):
     @factory.post_generation
     def tags(self, create, extracted, **kwargs):
         """Create tags"""
+        # pylint: disable=unused-argument
         if not create:
             return
         if extracted:
@@ -245,6 +250,7 @@ class ArticleFactory(factory.django.DjangoModelFactory):
     @factory.post_generation
     def tags(self, create, extracted, **kwargs):
         """Create tags"""
+        # pylint: disable=unused-argument
         if not create:
             return
         if extracted:

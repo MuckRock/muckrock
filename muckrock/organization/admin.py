@@ -42,4 +42,3 @@ class OrganizationAdmin(VersionAdmin):
 
 
 admin.site.register(Organization, OrganizationAdmin)
-

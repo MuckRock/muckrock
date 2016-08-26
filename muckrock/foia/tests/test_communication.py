@@ -5,21 +5,16 @@ Tests for the FOIACommunication model
 import datetime
 
 from django import test
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
-from django.core.validators import ValidationError
 
 from muckrock import factories
-from muckrock.accounts.models import AgencyUser
 from muckrock.foia.models.communication import FOIACommunication
-from muckrock.foia.models.request import FOIARequest
-from muckrock.foia.models.file import FOIAFile
 from muckrock.foia.views import raw
-from muckrock.utils import unique_username
 
 import logging
 from nose.tools import ok_, eq_, raises, assert_raises
 
+# pylint: disable=no-self-use
 
 class TestCommunication(test.TestCase):
     """Tests communication methods"""

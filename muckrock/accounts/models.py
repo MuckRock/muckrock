@@ -12,7 +12,7 @@ import datetime
 import dbsettings
 from easy_thumbnails.fields import ThumbnailerImageField
 from itertools import groupby
-from localflavor.us.models import PhoneNumberField, USStateField
+from localflavor.us.models import USStateField
 from lot.models import LOT
 import stripe
 from urllib import urlencode
@@ -522,6 +522,7 @@ class AgencyUserQuerySet(models.QuerySet):
 
     def get_or_create_agency_user(self, email, name='', agency=None, trusted=True):
         """Get an agency user account from an email address"""
+        # pylint: disable=no-self-use
         if ',' in name:
             last_name, first_name = name.split(',', 1)
         elif ' ' in name:
@@ -590,5 +591,3 @@ class AgencyUser(User):
         if len(fax) == 11 and fax[0] == '1':
             return fax
         return None
-
-

@@ -2,7 +2,7 @@
 Tests using nose for the FOIA application
 """
 
-from django.contrib.auth.models import User, AnonymousUser
+from django.contrib.auth.models import AnonymousUser
 from django.core.urlresolvers import reverse
 from django.core import mail
 from django.test import TestCase, RequestFactory
@@ -24,8 +24,6 @@ from muckrock.factories import (
         )
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.foia.views import Detail
-from muckrock.agency.models import Agency
-from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.task.models import SnailMailTask
 from muckrock.tests import get_allowed, post_allowed, get_post_unallowed, get_404
@@ -69,7 +67,6 @@ class TestFOIARequestUnit(TestCase):
         user1 = UserFactory()
         user2 = UserFactory()
 
-        foias = list(FOIARequest.objects.filter(id__in=[1, 5, 11, 12, 13, 14]).order_by('id'))
         foia0 = FOIARequestFactory(status='started', user=user1)
         foia1 = FOIARequestFactory(
                 status='done', embargo=False, user=user1,
@@ -82,7 +79,7 @@ class TestFOIARequestUnit(TestCase):
                 date_embargo=datetime.date.today() - datetime.timedelta(1))
         foia4 = FOIARequestFactory(
                 status='done', embargo=False, user=user1)
-        foia5 = FOIARequestFactory(
+        FOIARequestFactory(
                 status='submitted', embargo=True, user=user1,
                 date_embargo=datetime.date.today() - datetime.timedelta(10))
 

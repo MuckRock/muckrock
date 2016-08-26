@@ -91,6 +91,7 @@ class MRUserAdmin(UserAdmin):
 
 
 class AgencyProfileInline(ProfileInline):
+    """Agency Profile admin inline options"""
     fields = (
             'phone',
             'fax',
@@ -126,7 +127,7 @@ class AgencyUserAdmin(VersionAdmin):
                     email_pref='never',
                     date_update=datetime.date.today(),
                     )
-        
+
 
 admin.site.register(Statistics, StatisticsAdmin)
 admin.site.unregister(User)

@@ -5,16 +5,13 @@ Models for the FOIA application
 
 import datetime
 
-from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
-from django.core.validators import validate_email
 from django.db import models
 from django.shortcuts import get_object_or_404
 
 import logging
 
 from muckrock.foia.models.request import FOIARequest, STATUS
-from muckrock.utils import unique_username
 
 logger = logging.getLogger(__name__)
 

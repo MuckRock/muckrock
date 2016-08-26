@@ -9,13 +9,11 @@ import nose.tools
 from datetime import date, timedelta
 
 from muckrock.factories import (
-        FederalJurisdictionFactory,
         StateJurisdictionFactory,
         LocalJurisdictionFactory,
         FOIARequestFactory,
         FOIAFileFactory,
         )
-from muckrock.jurisdiction.models import Jurisdiction
 
 # allow methods that could be functions and too many public methods in tests
 # pylint: disable=no-self-use

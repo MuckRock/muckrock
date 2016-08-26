@@ -143,4 +143,3 @@ class StatisticsSerializer(serializers.ModelSerializer):
                 'total_active_org_members',
                 'total_active_orgs',
                 )
-

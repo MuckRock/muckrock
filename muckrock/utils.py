@@ -72,4 +72,3 @@ def unique_username(base_username):
         username = '%s%s' % (base_username[:30 - len(postfix)], postfix)
         num += 1
     return username
-

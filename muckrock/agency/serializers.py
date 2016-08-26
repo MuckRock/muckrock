@@ -60,4 +60,3 @@ class AgencySerializer(serializers.ModelSerializer):
             # misc
             'public_notes',
         )
-

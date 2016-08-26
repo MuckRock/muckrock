@@ -7,7 +7,7 @@ from django.test import TestCase
 from datetime import datetime, timedelta
 from decimal import Decimal
 from mock import Mock
-from nose.tools import ok_, eq_, assert_false
+from nose.tools import ok_, assert_false
 
 from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.foia.models import FOIARequest

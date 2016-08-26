@@ -31,4 +31,3 @@ autocomplete_light.register(
     attrs={
         'placeholder': 'Search for requests',
         'data-autocomplete-minimum-characters': 1})
-

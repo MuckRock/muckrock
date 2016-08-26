@@ -24,7 +24,6 @@ from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.tags.models import Tag, TaggedItemBase, parse_tags
 from muckrock import task
-from muckrock import fields
 from muckrock import utils
 
 logger = logging.getLogger(__name__)
@@ -460,6 +459,7 @@ class FOIARequest(models.Model):
         self.update_dates()
 
     def submit(self, appeal=False, snail=False, thanks=False):
+        """Send out the latest communication for the request"""
         # update contacts
         if appeal:
             self.contacts.set(self.get_contacts('appeal', 'to'))
@@ -524,6 +524,7 @@ class FOIARequest(models.Model):
 
     def get_contacts(self, type_, subtype):
         """Get the contacts for a new request by type"""
+        # pylint: disable=redefined-variable-type
         try:
             if type_ == 'appeal':
                 agency = self.agency.appeal_agency
@@ -842,7 +843,7 @@ class FOIARequest(models.Model):
         self.agency.requires_proxy = True
         self.agency.save()
         # mark to re-file with a proxy
-        FlaggedTask.objects.create(
+        task.models.FlaggedTask.objects.create(
             foia=self,
             text='This request was rejected as requiring a proxy; please refile'
             ' it with one of our volunteers names and a note that the request is'
@@ -884,6 +885,7 @@ class FOIARequest(models.Model):
     def create_in_communication(self, from_user, text, comm_date=None,
             formset=None, cc_users=None, **kwargs):
         """Create an incoming message for the request"""
+        # pylint: disable=too-many-arguments
         if comm_date is None:
             comm_date = datetime.now()
         if cc_users is None:
@@ -939,5 +941,3 @@ class FOIARequest(models.Model):
             ('view_rawemail', 'Can view the raw email for communications'),
             ('file_multirequest', 'Can submit requests to multiple agencies'),
             )
-
-

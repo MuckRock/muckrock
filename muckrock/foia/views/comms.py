@@ -4,11 +4,9 @@ Comm helper functions for FOIA views
 
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.core.validators import ValidationError
+from django.core.validators import ValidationError, validate_email
 from django.http import HttpResponse, Http404
 from django.shortcuts import redirect, get_object_or_404
-
-from datetime import datetime
 
 from muckrock.accounts.models import AgencyUser
 from muckrock.foia.models import FOIACommunication, STATUS

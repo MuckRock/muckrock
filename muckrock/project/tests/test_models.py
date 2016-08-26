@@ -4,7 +4,6 @@ topics and issues we cover and then provide them avenues for
 deeper, sustained involvement with our work on those topics.
 """
 
-from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 
@@ -15,9 +14,6 @@ from muckrock.factories import (
         FOIARequestFactory,
         )
 
-from muckrock.foia.models import FOIARequest
-from muckrock.news.models import Article
-from muckrock.project.models import Project
 from muckrock.task.models import ProjectReviewTask
 
 import logging
@@ -29,6 +25,8 @@ from nose.tools import (
         assert_false,
         assert_is_instance,
         )
+
+# pylint: disable=no-self-use
 
 
 class TestProject(TestCase):
