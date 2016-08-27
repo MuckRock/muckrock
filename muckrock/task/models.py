@@ -328,7 +328,6 @@ class StaleAgencyTask(Task):
 
     def update_email(self, new_email, foia_list=None):
         """Updates the email on the agency and the provided requests."""
-        # XXX user name
         user = AgencyUser.objects.get_or_create_agency_user(
                 new_email,
                 agency=self.agency)

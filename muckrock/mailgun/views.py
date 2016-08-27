@@ -29,10 +29,14 @@ from muckrock.task.models import (
         OrphanTask,
         RejectedEmailTask,
         ResponseTask,
-        StaleAgencyTask,
         )
 
 logger = logging.getLogger(__name__)
+
+
+class OrphanError(Exception):
+    """Raised if the incoming message is an orphan"""
+
 
 def _upload_file(foia, comm, file_, sender):
     """Upload a file to attach to a FOIA request"""
@@ -52,6 +56,7 @@ def _upload_file(foia, comm, file_, sender):
     foia_file.save()
     if foia:
         upload_document_cloud.apply_async(args=[foia_file.pk, False], countdown=3)
+
 
 def _make_orphan_comm(from_, to_, post, files, foia):
     """Make an orphan commuication"""
@@ -141,20 +146,8 @@ def _handle_request(request, mail_id):
                 from_name,
                 foia.agency)
 
-        if not _allowed_email(from_email, foia):
-            msg, reason = ('Bad Sender', 'bs')
-        if foia.block_incoming:
-            msg, reason = ('Incoming Blocked', 'ib')
-        if not _allowed_email(from_email, foia) or foia.block_incoming:
-            logger.warning('%s: %s', msg, from_)
-            comm = _make_orphan_comm(from_, to_, post, request.FILES, foia)
-            OrphanTask.objects.create(
-                reason=reason,
-                communication=comm,
-                address=mail_id)
-            return HttpResponse('WARNING')
+        _check_orphan(request, from_email, foia, mail_id)
 
-        # XXX record cc users, other to users
         comm = foia.create_in_communication(
                 from_user=from_user,
                 text='%s\n%s' % (
@@ -165,7 +158,9 @@ def _handle_request(request, mail_id):
                 )
         RawEmail.objects.create(
             communication=comm,
-            raw_email='%s\n%s' % (post.get('message-headers', ''), post.get('body-plain', '')))
+            raw_email='%s\n%s' % (
+                post.get('message-headers', ''),
+                post.get('body-plain', '')))
 
         # handle attachments
         for file_ in request.FILES.itervalues():
@@ -175,24 +170,11 @@ def _handle_request(request, mail_id):
 
         task = ResponseTask.objects.create(communication=comm)
         classify_status.apply_async(args=(task.pk,), countdown=30 * 60)
-        # resolve any stale agency tasks for this agency
-        if foia.agency:
-            StaleAgencyTask.objects.filter(resolved=False, agency=foia.agency)\
-                                   .update(resolved=True)
-            foia.agency.stale = False
-            foia.agency.save()
 
-        foia.contacts.set([from_user])
-        # XXX should CC users be marked as from agency?
-        foia.cc_contacts.clear()
-        for name, email in getaddresses([post.get('To', ''), post.get('Cc', '')]):
-            if not email or email.endswith('muckrock.com'):
-                continue
-            user = AgencyUser.objects.get_or_create_agency_user(
-                    email,
-                    name,
-                    foia.agency)
-            foia.cc_contacts.add(user)
+        if foia.agency:
+            foia.agency.resolve_stale()
+
+        _set_foia_contacts(foia, from_user, post)
 
         if foia.status == 'ack':
             foia.status = 'processed'
@@ -201,17 +183,15 @@ def _handle_request(request, mail_id):
 
     except FOIARequest.DoesNotExist:
         logger.warning('Invalid Address: %s', mail_id)
-        foia = None
-        try:
-            # try to get the foia by the PK before the dash
-            foia = FOIARequest.objects.get(pk=mail_id.split('-')[0])
-        except FOIARequest.DoesNotExist:
-            pass
+        # try to get the foia by the PK before the dash
+        foia = FOIARequest.objects.filter(pk=mail_id.split('-')[0]).first()
         comm = _make_orphan_comm(from_, to_, post, request.FILES, foia)
         OrphanTask.objects.create(
             reason='ia',
             communication=comm,
             address=mail_id)
+        return HttpResponse('WARNING')
+    except OrphanError:
         return HttpResponse('WARNING')
     except Exception:
         # If anything I haven't accounted for happens, at the very least forward
@@ -221,6 +201,42 @@ def _handle_request(request, mail_id):
         return HttpResponse('ERROR')
 
     return HttpResponse('OK')
+
+
+def _check_orphan(request, from_email, foia, mail_id):
+    """Check if incoming communication is an orphan"""
+    if not _allowed_email(from_email, foia):
+        msg, reason = ('Bad Sender', 'bs')
+    if foia.block_incoming:
+        msg, reason = ('Incoming Blocked', 'ib')
+    if not _allowed_email(from_email, foia) or foia.block_incoming:
+        logger.warning('%s: %s', msg, request.POST.get('From'))
+        comm = _make_orphan_comm(
+                request.POST.get('From'),
+                request.POST.get('To') or request.POST.get('to'),
+                request.POST,
+                request.FILES,
+                foia)
+        OrphanTask.objects.create(
+            reason=reason,
+            communication=comm,
+            address=mail_id)
+        raise OrphanError
+
+
+def _set_foia_contacts(foia, from_user, post):
+    """Set the new contacts for the FOIA Request from an incoming message"""
+    foia.contacts.set([from_user])
+    foia.cc_contacts.clear()
+    for name, email in getaddresses([post.get('To', ''), post.get('Cc', '')]):
+        if not email or email.endswith('muckrock.com'):
+            continue
+        user = AgencyUser.objects.get_or_create_agency_user(
+                email,
+                name,
+                foia.agency)
+        foia.cc_contacts.add(user)
+
 
 def _fax(request):
     """Handle fax confirmations"""
@@ -257,6 +273,7 @@ def _fax(request):
     _forward(request.POST, request.FILES)
     return HttpResponse('OK')
 
+
 def _catch_all(request, address):
     """Handle emails sent to other addresses"""
 
@@ -274,6 +291,7 @@ def _catch_all(request, address):
             address=address)
 
     return HttpResponse('OK')
+
 
 @csrf_exempt
 def bounces(request):
@@ -308,6 +326,7 @@ def bounces(request):
 
     return HttpResponse('OK')
 
+
 @csrf_exempt
 def opened(request):
     """Notify when an email has been opened"""
@@ -329,6 +348,7 @@ def opened(request):
 
     return HttpResponse('OK')
 
+
 def _verify(post):
     """Verify that the message is from mailgun"""
     token = post.get('token')
@@ -338,6 +358,7 @@ def _verify(post):
                                   msg='%s%s' % (timestamp, token),
                                   digestmod=hashlib.sha256).hexdigest()) \
            and int(timestamp) + 300 > time.time()
+
 
 def _forward(post, files, title='', extra_content='', info=False):
     """Forward an email from mailgun to admin"""
@@ -360,6 +381,7 @@ def _forward(post, files, title='', extra_content='', info=False):
         email.attach(file_.name, file_.read(), file_.content_type)
 
     email.send(fail_silently=False)
+
 
 def _allowed_email(email, foia=None):
     """Is this an allowed email?"""
@@ -396,6 +418,7 @@ def _allowed_email(email, foia=None):
         return True
 
     return False
+
 
 def _file_type(file_):
     """Determine the attachment's file type"""

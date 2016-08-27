@@ -127,7 +127,8 @@ class TaskListViewBatchedPOSTTests(TestCase):
         for task_ in self.tasks:
             task_.refresh_from_db()
             ok_(task_.resolved,
-                'Task %d should be resolved when doing a batched resolve' % task.pk)
+                'Task %d should be resolved when doing a batched resolve' %
+                task_.pk)
 
 
 @mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)

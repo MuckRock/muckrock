@@ -12,6 +12,7 @@ from djgeojson.fields import PointField
 from easy_thumbnails.fields import ThumbnailerImageField
 
 from muckrock.jurisdiction.models import Jurisdiction, RequestHelper
+from muckrock.task.models import StaleAgencyTask
 
 STALE_DURATION = 120
 
@@ -181,6 +182,14 @@ class Agency(models.Model, RequestHelper):
             return self.users.filter(agencyprofile__primary=subtype)
         elif type_ == 'appeal':
             return self.users.filter(agencyprofile__appeal=subtype)
+
+    def resolve_stale(self):
+        """Mark the agency as no longer stale"""
+        (StaleAgencyTask.objects
+                .filter(resolved=False, agency=self)
+                .update(resolved=True))
+        self.stale = False
+        self.save()
 
     class Meta:
         # pylint: disable=too-few-public-methods
