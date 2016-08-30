@@ -5,23 +5,19 @@
 */
 
 import React, { PropTypes } from 'react';
+import { Field, reduxForm } from 'redux-form';
 
-const ExemptionForm = ({onCancel, onSubmit}) => {
+const ExemptionForm = ({onCancel, onSubmit, handleSubmit}) => {
     const handleCancel = (e) => {
         e.preventDefault();
         onCancel();
-    }
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        onSubmit();
-        return false;
     }
     return (
         <form className="exemption__form form panel" method="post" onSubmit={handleSubmit}>
             <h2>Submit a new exemption</h2>
             <div className="field">
                 <label htmlFor="languageInput">What language did the agency use to invoke the exemption?</label>
-                <textarea id="languageInput"></textarea>
+                <Field name="languageInput" component="textarea" />
             </div>
             <footer>
                 <span onClick={handleCancel} className="button">Cancel</span>
@@ -31,9 +27,6 @@ const ExemptionForm = ({onCancel, onSubmit}) => {
     )
 };
 
-ExemptionForm.propTypes = {
-    onCancel: PropTypes.func.isRequired,
-    onSubmit: PropTypes.func.isRequired,
-}
-
-export default ExemptionForm
+export default reduxForm({
+    form: 'exemptionSubmit'
+})(ExemptionForm);
