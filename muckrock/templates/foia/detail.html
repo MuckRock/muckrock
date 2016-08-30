@@ -248,6 +248,10 @@ Sincerely,
                             <noscript>
                                 <p class="failure">Exemption searching requires Javascript.</p>
                             </noscript>
+                            <div id="dom-data" style="display: none;"
+                                data-request="{{foia.pk}}"
+                                data-jurisdiction="{% if foia.jurisdiction.level == 'l' %}{{foia.jurisdiction.parent.pk}}{% else %}{{foia.jurisdiction.pk}}{% endif %}"
+                                data-agency="{{foia.agency.pk}}"></div>
                             <div class="exemption-browser" id="exemptionBrowser">
                                 <form method="get" action="/api_v1/exemption/search/">
                                     <div class="field">

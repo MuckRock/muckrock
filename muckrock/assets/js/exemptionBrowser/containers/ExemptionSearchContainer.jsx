@@ -19,10 +19,14 @@ const exemptionSearchAPI = '/api_v1/exemption/search/';
 // Get initial values for the search form
 // Right now we need to pull them from the DOM,
 // since we're only layering this React appliaction.
-
 const jurisdictionId = $('#dom-data').data('jurisdiction');
 
-const mapStateToProps = (store) => ({});
+const mapStateToProps = (store) => ({
+    initialValues: {
+        'q': store.exemptions.query,
+        'jurisdiction': jurisdictionId
+    }
+});
 
 const mapDispatchToProps = (dispatch) => ({
     onSubmit: (data) => {
@@ -39,11 +43,14 @@ const mapDispatchToProps = (dispatch) => ({
             dispatch(updateExemptionQuery(q));
             axios.get(exemptionSearchAPI, {
                 params: {
-                    q: q
+                    q: q,
+                    jurisdiction: data.jurisdiction,
                 }
             }).then(response => {
                 const results = response.data.results;
                 dispatch(updateExemptionResults(results));
+            }).catch(error => {
+                console.error(error);
             });
         }
     },
