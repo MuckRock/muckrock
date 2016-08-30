@@ -20,12 +20,12 @@ import ExemptionBrowserContainer from './containers/ExemptionBrowserContainer';
 
 
 const reducer = combineReducers({
+    exemptions: exemptionReducer,
     form: formReducer,
-    exemptions: exemptionReducer
 })
 // TODO We initialize the devtool here, but this should be removed in production settings
 const devTool = window.devToolsExtension ? window.devToolsExtension() : undefined;
-const store = createStore(reducer, {}, devTool); // Create store from the root reducer
+const store = createStore(reducer, devTool); // Create store from the root reducer
 
 /* Next we render the component onto the selected element */
 

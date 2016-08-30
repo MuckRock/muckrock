@@ -45,7 +45,7 @@ const ExemptionList = ({query, loading, exemptions, showExemptionDetail, showExe
     ));
     let emptyResults = null;
     let renderedList = null;
-    if (query != '') {
+    if (query !== undefined) {
         if (exemptions.length > 0) {
             emptyResults = (
                 <div className="exemption__empty small">
@@ -87,7 +87,7 @@ const ExemptionList = ({query, loading, exemptions, showExemptionDetail, showExe
 };
 
 ExemptionList.propTypes = {
-    query: PropTypes.string.isRequired,
+    query: PropTypes.string,
     loading: PropTypes.bool.isRequired,
     exemptions: PropTypes.array.isRequired,
     showExemptionDetail: PropTypes.func.isRequired,

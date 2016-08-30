@@ -5,32 +5,25 @@
 ** to the exemption search API.
 */
 
-import React, { PropTypes } from 'react';
+import React from 'react';
+import { Field, reduxForm } from 'redux-form';
 
-const ExemptionSearch = ({query, onSubmit}) => {
-    let input;
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (input.value != query) {
-          onSubmit(input.value);
-        }
-    }
+const ExemptionSearch = ({handleSubmit, onSubmit}) => {
+    // handleSubmit is provided by reduxForm, and it calls
+    // onSubmit with the data from the form fields
     return (
         <form method="get"
               className="nomargin"
               onSubmit={handleSubmit}>
-            <label htmlFor="exemptionSearch" className="bold">Search for exemptions and appeals</label>
+            <label htmlFor="q" className="bold">Search for exemptions and appeals</label>
             <div className="exemption-search">
-                <input type="search" name="q" id="exemptionSearch" ref={node => { input = node }}/>
+                <Field name="q" component="input" type="search" />
                 <button type="submit" className="basic blue button">Search</button>
             </div>
         </form>
     );
 };
 
-ExemptionSearch.propTypes = {
-    query: PropTypes.string.isRequired,
-    onSubmit: PropTypes.func.isRequired,
-}
-
-export default ExemptionSearch;
+export default reduxForm({
+    form: 'exemptionSearch'
+})(ExemptionSearch);
