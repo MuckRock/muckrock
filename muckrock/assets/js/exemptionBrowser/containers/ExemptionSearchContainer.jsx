@@ -36,7 +36,7 @@ const mapDispatchToProps = (dispatch) => ({
         Once we get a response, we dispatch another action with the results of the search.
         */
         const q = data.q;
-        if (q === undefined) {
+        if (q === undefined || q == '') {
             dispatch(resetExemptionState());
         } else {
             dispatch(loadExemptionResults());

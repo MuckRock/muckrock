@@ -45,7 +45,7 @@ const ExemptionList = ({query, loading, exemptions, showExemptionDetail, showExe
     ));
     let emptyResults = null;
     let renderedList = null;
-    if (query !== undefined) {
+    if (query !== null) {
         if (exemptions.length > 0) {
             emptyResults = (
                 <div className="exemption__empty small">

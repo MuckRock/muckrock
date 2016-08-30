@@ -20,7 +20,7 @@ export const ExemptionVisibilityFilters = {
 }
 
 const initialState = {
-    query: undefined,
+    query: null,
     loading: false,
     results: [],
     exemption: null,
