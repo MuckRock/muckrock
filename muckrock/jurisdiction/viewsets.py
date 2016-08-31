@@ -43,7 +43,12 @@ class ExemptionViewSet(ModelViewSet):
         jurisdiction = request.query_params.get('jurisdiction')
         if query is None:
             raise ValidationError({'Error': 'Must provide a query'})
-        results = self.queryset.filter(Q(name__contains=query)|Q(basis__contains=query))
+        results = self.queryset.filter(
+            Q(name__icontains=query)|
+            Q(basis__icontains=query)|
+            Q(example_appeals__language__icontains=query)|
+            Q(tags__name__icontains=query)
+        ).distinct()
         if jurisdiction:
             results = results.filter(jurisdiction__pk=jurisdiction)
         page = self.paginate_queryset(results)
