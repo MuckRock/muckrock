@@ -68,3 +68,18 @@ export const searchExemptions = (searchQuery) => {
         })
     }
 };
+
+export const submitExemption = (exemptionData) => {
+    const endpoint = 'exemptions/submit';
+    return axios.post(endpoint, {
+        data: exemptionData,
+        xsrfCookieName: 'csrftoken',
+        xsrfHeaderName: 'X-CSRFToken',
+    }).then(response => {
+        // TODO Hanel successful submission
+        console.debug('Posted successfully:', response);
+    }).catch(error => {
+        // TODO Handle submission error
+        console.debug('Posted unsuccessfully:', error);
+    })
+};
