@@ -5,8 +5,9 @@ Test the API viewsets for the Jurisdiction application.
 from django.test import TestCase
 
 from nose.tools import eq_, ok_
-from rest_framework.test import APIRequestFactory
+from rest_framework.test import APIRequestFactory, APIClient, force_authenticate
 
+from muckrock.factories import UserFactory, FOIARequestFactory
 from muckrock.jurisdiction.factories import StateJurisdictionFactory, ExemptionFactory
 from muckrock.jurisdiction.serializers import ExemptionSerializer
 from muckrock.jurisdiction.viewsets import ExemptionViewSet
@@ -56,3 +57,32 @@ class TestExemptionList(TestCase):
             'An exemption for the jurisdiction should be included in the list.')
         ok_(ExemptionSerializer(exemption_wa).data not in response.data['results'],
             'An exemption not for the jurisdiction should not be included in the list.')
+
+
+class TestExemptionCreation(TestCase):
+    """
+    The exemption creation view allows new exemptions to be submitted for staff review.
+    When an exemption is submitted, we need to know the request it was invoked on and the
+    language the agency used to invoke it. Then, we should create both an InvokedExemption
+    and a NewExemptionTask. Finally, this view should be usable via AJAX (accomodating our
+    fancy new exemption browser and submission interface!).
+    """
+    def setUp(self):
+        self.user = UserFactory()
+        self.endpoint = '/exemption/'
+        self.factory = APIRequestFactory()
+        self.view = ExemptionViewSet.as_view({'post': 'create'})
+
+    def test_unauthenticated(self):
+        """If the request is unauthenticated, the view should return a 401 status."""
+        request = self.factory.post(self.endpoint, {}, format='json')
+        response = self.view(request)
+        eq_(response.status_code, 401)
+
+    def test_authenticated(self):
+        """If the request is authenticated, the view should return a 200 status."""
+        request = self.factory.post(self.endpoint, {}, format='json')
+        force_authenticate(request, user=self.user)
+        response = self.view(request)
+        eq_(response.status_code, 200)
+

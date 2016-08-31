@@ -4,8 +4,8 @@ Provides Jurisdiction application API views
 
 from django.db.models import Q
 
-from rest_framework.decorators import list_route
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
@@ -21,17 +21,27 @@ class JurisdictionViewSet(ModelViewSet):
     filter_fields = ('name', 'abbrev', 'level', 'parent')
 
 
+class ExemptionPermissions(DjangoModelPermissionsOrAnonReadOnly):
+    """
+    Allows authenticated users to submit exemptions.
+    """
+    def has_permission(self, request, view):
+        """Allow authenticated users to submit exemptions."""
+        if request.user.is_authenticated() and request.method in ['POST']:
+            return True
+        return super(ExemptionPermissions, self).has_permission(request, view)
+
+
 class ExemptionViewSet(ModelViewSet):
     """
     The Exemption model provides a list of individual exemption cases along with some
     example appeal language.
-
-    Search exemptions with the API at the `/exemption/search/` endpoint.
     """
     queryset = (Exemption.objects.all().select_related('jurisdiction__parent__parent')
                                        .prefetch_related('example_appeals'))
     serializer_class = ExemptionSerializer
     filter_fields = ('name', 'jurisdiction')
+    permission_classes = [ExemptionPermissions]
 
     def list(self, request):
         """
@@ -57,3 +67,12 @@ class ExemptionViewSet(ModelViewSet):
             return self.get_paginated_response(serializer.data)
         serializer = self.get_serializer(results, many=True)
         return Response(serializer.data)
+
+    def create(self, request):
+        """
+        The exemption submission endpoint allows new exemptions to be submitted for staff review.
+        When an exemption is submitted, we need to know the request it was invoked on and the
+        language the agency used to invoke it. Then, we should create both an InvokedExemption
+        and a NewExemptionTask.
+        """
+        return Response({})
