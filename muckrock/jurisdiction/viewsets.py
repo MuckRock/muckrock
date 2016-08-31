@@ -28,27 +28,27 @@ class ExemptionViewSet(ModelViewSet):
 
     Search exemptions with the API at the `/exemption/search/` endpoint.
     """
-    queryset = (Exemption.objects.select_related('jurisdiction__parent__parent')
-                                 .prefetch_related('example_appeals'))
+    queryset = (Exemption.objects.all().select_related('jurisdiction__parent__parent')
+                                       .prefetch_related('example_appeals'))
     serializer_class = ExemptionSerializer
     filter_fields = ('name', 'jurisdiction')
 
-    @list_route()
-    def search(self, request):
+    def list(self, request):
         """
-        Allow searches against the collection of exemptions.
+        Allows filtering against the collection of exemptions.
+        Query is an optional filter.
         Jurisdiction is an optional filter.
         """
+        results = self.queryset
         query = request.query_params.get('q')
         jurisdiction = request.query_params.get('jurisdiction')
-        if query is None:
-            raise ValidationError({'Error': 'Must provide a query'})
-        results = self.queryset.filter(
-            Q(name__icontains=query)|
-            Q(basis__icontains=query)|
-            Q(example_appeals__language__icontains=query)|
-            Q(tags__name__icontains=query)
-        ).distinct()
+        if query:
+            results = self.queryset.filter(
+                Q(name__icontains=query)|
+                Q(basis__icontains=query)|
+                Q(example_appeals__language__icontains=query)|
+                Q(tags__name__icontains=query)
+            ).distinct()
         if jurisdiction:
             results = results.filter(jurisdiction__pk=jurisdiction)
         page = self.paginate_queryset(results)
