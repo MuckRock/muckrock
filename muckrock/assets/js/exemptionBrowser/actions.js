@@ -3,6 +3,8 @@
 ** Exports actions for use by the exemption browser.
 */
 
+import axios from 'axios';
+
 export const UPDATE_EXEMPTION_QUERY = 'UPDATE_EXEMPTION_QUERY';
 export const UPDATE_EXEMPTION_RESULTS = 'UPDATE_EXEMPTION_RESULTS';
 export const LOAD_EXEMPTION_RESULTS = 'LOAD_EXEMPTION_RESULTS';
@@ -49,3 +51,20 @@ export const resetExemptionState = () => (
         type: RESET_EXEMPTION_STATE,
     }
 );
+
+export const searchExemptions = (searchQuery) => {
+    const endpoint = '/api_v1/exemption/search/';
+    return (dispatch) => {
+        dispatch(loadExemptionResults());
+        dispatch(updateExemptionQuery(searchQuery.q));
+        return axios.get(endpoint, {
+            params: searchQuery
+        }).then(response => {
+            const results = response.data.results;
+            dispatch(updateExemptionResults(results));
+        }).catch(error => {
+            // TODO Handle errors by dispatching another action
+            console.error(error);
+        })
+    }
+};

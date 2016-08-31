@@ -11,7 +11,8 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { combineReducers, createStore } from 'redux';
+import { combineReducers, createStore, applyMiddleware } from 'redux';
+import thunk from 'redux-thunk';
 import { Provider } from 'react-redux';
 import { reducer as formReducer } from 'redux-form';
 
@@ -25,7 +26,11 @@ const reducer = combineReducers({
 })
 // TODO We initialize the devtool here, but this should be removed in production settings
 const devTool = window.devToolsExtension ? window.devToolsExtension() : undefined;
-const store = createStore(reducer, devTool); // Create store from the root reducer
+const store = createStore(
+    reducer,
+    devTool,
+    applyMiddleware(thunk)
+); // Create store from the root reducer
 
 /* Next we render the component onto the selected element */
 
