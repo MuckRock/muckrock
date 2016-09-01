@@ -11,6 +11,7 @@ from muckrock.factories import UserFactory, FOIARequestFactory
 from muckrock.jurisdiction.factories import StateJurisdictionFactory, ExemptionFactory
 from muckrock.jurisdiction.serializers import ExemptionSerializer
 from muckrock.jurisdiction.viewsets import ExemptionViewSet
+from muckrock.task.models import NewExemptionTask
 
 class TestExemptionList(TestCase):
     """
@@ -63,26 +64,40 @@ class TestExemptionCreation(TestCase):
     """
     The exemption creation view allows new exemptions to be submitted for staff review.
     When an exemption is submitted, we need to know the request it was invoked on and the
-    language the agency used to invoke it. Then, we should create both an InvokedExemption
-    and a NewExemptionTask. Finally, this view should be usable via AJAX (accomodating our
-    fancy new exemption browser and submission interface!).
+    language the agency used to invoke it. Then, we should create a NewExemptionTask.
     """
     def setUp(self):
-        self.user = UserFactory()
         self.endpoint = '/exemption/'
         self.factory = APIRequestFactory()
         self.view = ExemptionViewSet.as_view({'post': 'create'})
+        self.user = UserFactory()
+        self.foia = FOIARequestFactory(user=self.user)
+        self.data = {
+            'foia': self.foia.id,
+            'language': 'Lorem ipsum',
+        }
 
     def test_unauthenticated(self):
         """If the request is unauthenticated, the view should return a 401 status."""
-        request = self.factory.post(self.endpoint, {}, format='json')
+        request = self.factory.post(self.endpoint, self.data, format='json')
         response = self.view(request)
         eq_(response.status_code, 401)
 
     def test_authenticated(self):
         """If the request is authenticated, the view should return a 200 status."""
-        request = self.factory.post(self.endpoint, {}, format='json')
+        request = self.factory.post(self.endpoint, self.data, format='json')
         force_authenticate(request, user=self.user)
         response = self.view(request)
         eq_(response.status_code, 200)
 
+    def test_task_created(self):
+        """A NewExemptionTask should be created."""
+        eq_(NewExemptionTask.objects.count(), 0)
+        request = self.factory.post(self.endpoint, self.data, format='json')
+        force_authenticate(request, user=self.user)
+        response = self.view(request)
+        eq_(response.status_code, 200)
+        eq_(NewExemptionTask.objects.count(), 1)
+        task = NewExemptionTask.objects.first()
+        eq_(task.foia, self.foia)
+        eq_(task.language, self.data['language'])

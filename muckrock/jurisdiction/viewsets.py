@@ -9,8 +9,10 @@ from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
+from muckrock.jurisdiction.forms import ExemptionSubmissionForm
 from muckrock.jurisdiction.models import Jurisdiction, Exemption
 from muckrock.jurisdiction.serializers import JurisdictionSerializer, ExemptionSerializer
+from muckrock.task.models import NewExemptionTask
 
 class JurisdictionViewSet(ModelViewSet):
     """API views for Jurisdiction"""
@@ -75,4 +77,16 @@ class ExemptionViewSet(ModelViewSet):
         language the agency used to invoke it. Then, we should create both an InvokedExemption
         and a NewExemptionTask.
         """
+        # foia_id = request.data.get('foia')
+        # language = request.data.get('language')
+        form = ExemptionSubmissionForm(request.data)
+        if not form.is_valid():
+            raise ValidationError(form.errors.as_json())
+        foia = form.cleaned_data['foia']
+        language = form.cleaned_data['language']
+        task = NewExemptionTask.objects.create(
+            foia=foia,
+            language=language,
+            user=request.user
+        )
         return Response({})
