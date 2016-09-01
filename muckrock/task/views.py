@@ -24,7 +24,7 @@ from muckrock.task.models import (
     Task, OrphanTask, SnailMailTask, RejectedEmailTask,
     StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask,
     CrowdfundTask, MultiRequestTask, StatusChangeTask, FailedFaxTask,
-    ProjectReviewTask
+    ProjectReviewTask, NewExemptionTask
     )
 from muckrock.views import MRFilterableListView
 
@@ -454,6 +454,11 @@ class FailedFaxTaskList(TaskList):
                     'communication__foia__communications',
                     queryset=FOIACommunication.objects.order_by('-date'),
                     to_attr='reverse_communications')))
+
+
+class NewExemptionTaskList(TaskList):
+    title = 'New Exemptions'
+    queryset = NewExemptionTask.objects.select_related('foia')
 
 
 class RequestTaskList(TaskList):
