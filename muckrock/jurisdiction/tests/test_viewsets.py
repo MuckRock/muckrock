@@ -12,6 +12,7 @@ from muckrock.jurisdiction.factories import StateJurisdictionFactory, ExemptionF
 from muckrock.jurisdiction.serializers import ExemptionSerializer
 from muckrock.jurisdiction.viewsets import ExemptionViewSet
 from muckrock.task.models import NewExemptionTask
+from muckrock.task.serializers import NewExemptionTaskSerializer
 
 class TestExemptionList(TestCase):
     """
@@ -96,8 +97,11 @@ class TestExemptionCreation(TestCase):
         request = self.factory.post(self.endpoint, self.data, format='json')
         force_authenticate(request, user=self.user)
         response = self.view(request)
-        eq_(response.status_code, 200)
+        # Check that the task was created
         eq_(NewExemptionTask.objects.count(), 1)
         task = NewExemptionTask.objects.first()
         eq_(task.foia, self.foia)
         eq_(task.language, self.data['language'])
+        eq_(task.user, self.user)
+        # Check that the task was included in the response
+        eq_(NewExemptionTaskSerializer(task).data, response.data)

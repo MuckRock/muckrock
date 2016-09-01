@@ -13,6 +13,7 @@ from muckrock.jurisdiction.forms import ExemptionSubmissionForm
 from muckrock.jurisdiction.models import Jurisdiction, Exemption
 from muckrock.jurisdiction.serializers import JurisdictionSerializer, ExemptionSerializer
 from muckrock.task.models import NewExemptionTask
+from muckrock.task.serializers import NewExemptionTaskSerializer
 
 class JurisdictionViewSet(ModelViewSet):
     """API views for Jurisdiction"""
@@ -89,4 +90,4 @@ class ExemptionViewSet(ModelViewSet):
             language=language,
             user=request.user
         )
-        return Response({})
+        return Response(NewExemptionTaskSerializer(task).data)
