@@ -53,7 +53,7 @@ export const resetExemptionState = () => (
 );
 
 export const searchExemptions = (searchQuery) => {
-    const endpoint = '/api_v1/exemption/search/';
+    const endpoint = '/api_v1/exemption/';
     return (dispatch) => {
         dispatch(loadExemptionResults());
         dispatch(updateExemptionQuery(searchQuery.q));
@@ -70,7 +70,7 @@ export const searchExemptions = (searchQuery) => {
 };
 
 export const submitExemption = (exemptionData) => {
-    const endpoint = 'exemptions/submit';
+    const endpoint = '/api_v1/exemption/';
     return axios.post(endpoint, {
         data: exemptionData,
         xsrfCookieName: 'csrftoken',
