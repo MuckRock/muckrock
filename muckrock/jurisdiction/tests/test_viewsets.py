@@ -4,7 +4,8 @@ Test the API viewsets for the Jurisdiction application.
 
 from django.test import TestCase
 
-from nose.tools import eq_, ok_
+from nose.tools import eq_, ok_, raises
+from rest_framework.exceptions import ValidationError
 from rest_framework.test import APIRequestFactory, force_authenticate
 
 from muckrock.factories import UserFactory, FOIARequestFactory
@@ -105,3 +106,11 @@ class TestExemptionCreation(TestCase):
         eq_(task.user, self.user)
         # Check that the task was included in the response
         eq_(NewExemptionTaskSerializer(task).data, response.data)
+
+    def test_missing_data(self):
+        """If the request is missing data, the form should return a validation error."""
+        # we are missing the foia here
+        request = self.factory.post(self.endpoint, {'language': 'Lorem Ipsum'}, format='json')
+        force_authenticate(request, user=self.user)
+        response = self.view(request)
+        eq_(response.status_code, 400)

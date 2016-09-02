@@ -80,13 +80,11 @@ class ExemptionViewSet(ModelViewSet):
         language the agency used to invoke it. Then, we should create both an InvokedExemption
         and a NewExemptionTask.
         """
-        # foia_id = request.data.get('foia')
-        # language = request.data.get('language')
         form = ExemptionSubmissionForm(request.data)
         if not form.is_valid():
             raise ValidationError(form.errors.as_json())
-        foia = form.cleaned_data['foia']
-        language = form.cleaned_data['language']
+        foia = form.cleaned_data.get('foia')
+        language = form.cleaned_data.get('language')
         task = NewExemptionTask.objects.create(
             foia=foia,
             language=language,
