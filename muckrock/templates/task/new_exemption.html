@@ -1,0 +1,18 @@
+{% extends 'task/default.html' %}
+
+{% block task-content %}
+<dl class="task__data">
+    <dt>FOIA Request</dt>
+    <dd><a href="{{task.foia.get_absolute_url}}">{{task.foia}}</a></dd>
+    <dt>Agency</dt>
+    <dd><a href="{{task.foia.agency.get_absolute_url}}">{{task.foia.agency}}</a></dd>
+    <dt>Jurisdiction</dt>
+    <dd><a href="{{task.foia.agency.jurisdiction.get_absolute_url}}">{{task.foia.agency.jurisdiction}}</a></dd>
+    <dt>Submitted by</dt>
+    <dd><a href="{{task.user.get_absolute_url}}">{{task.user}}</a></dd>
+    <dt>Exemption Language</dt>
+    <dd>
+        <p>{{task.language}}</p>
+    </dd>
+</dl>
+{% endblock %}

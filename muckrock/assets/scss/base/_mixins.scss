@@ -123,3 +123,7 @@
         fill: $color;
     }
 }
+
+@mixin background-blur($amount:4px) {
+    backdrop-filter: blur($amount);
+}

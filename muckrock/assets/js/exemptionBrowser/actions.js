@@ -3,13 +3,14 @@
 ** Exports actions for use by the exemption browser.
 */
 
-import axios from 'axios';
+import api from './api';
 
 export const UPDATE_EXEMPTION_QUERY = 'UPDATE_EXEMPTION_QUERY';
 export const UPDATE_EXEMPTION_RESULTS = 'UPDATE_EXEMPTION_RESULTS';
 export const LOAD_EXEMPTION_RESULTS = 'LOAD_EXEMPTION_RESULTS';
 export const UPDATE_VISIBILITY_FILTER = 'UPDATE_VISIBILITY_FILTER';
 export const SELECT_EXEMPTION = 'SELECT_EXEMPTION';
+export const SUBMIT_EXEMPTION = 'SUBMIT_EXEMPTION';
 export const RESET_EXEMPTION_STATE = 'RESET_EXEMPTION_STATE';
 
 export const updateExemptionQuery = (query) => (
@@ -52,12 +53,19 @@ export const resetExemptionState = () => (
     }
 );
 
+export const submitExemptionState = (state, response) => (
+    {
+        type: SUBMIT_EXEMPTION,
+        state: state,
+        response: response,
+    }
+);
+
 export const searchExemptions = (searchQuery) => {
-    const endpoint = '/api_v1/exemption/search/';
     return (dispatch) => {
         dispatch(loadExemptionResults());
         dispatch(updateExemptionQuery(searchQuery.q));
-        return axios.get(endpoint, {
+        return api.get('exemption/', {
             params: searchQuery
         }).then(response => {
             const results = response.data.results;
@@ -65,21 +73,18 @@ export const searchExemptions = (searchQuery) => {
         }).catch(error => {
             // TODO Handle errors by dispatching another action
             console.error(error);
-        })
+        });
     }
 };
 
 export const submitExemption = (exemptionData) => {
-    const endpoint = 'exemptions/submit';
-    return axios.post(endpoint, {
-        data: exemptionData,
-        xsrfCookieName: 'csrftoken',
-        xsrfHeaderName: 'X-CSRFToken',
-    }).then(response => {
-        // TODO Hanel successful submission
-        console.debug('Posted successfully:', response);
-    }).catch(error => {
-        // TODO Handle submission error
-        console.debug('Posted unsuccessfully:', error);
-    })
+    return (dispatch) => {
+        dispatch(submitExemptionState('LOADING'));
+        return api.post('exemption/submit/', exemptionData)
+            .then(response => {
+                dispatch(submitExemptionState('SUCCESS', response));
+            }).catch(error => {
+                dispatch(submitExemptionState('FAILURE'), error.response);
+            });
+    }
 };

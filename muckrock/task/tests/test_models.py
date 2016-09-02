@@ -471,6 +471,18 @@ class ResponseTaskTests(TestCase):
         self.task.set_price('foo')
 
 
+class TestNewExemptionTask(TestCase):
+    """The NewExemptionTask allows staff to review user-submitted exemptions,
+    document the use of exemptions, and use them to create new ones."""
+    def setUp(self):
+        self.task = task.factories.NewExemptionTaskFactory()
+
+    def test_get_absolute_url(self):
+        eq_(self.task.get_absolute_url(), reverse('newexemption-task', kwargs={'pk': self.task.pk}))
+
+
+
+
 class TestTaskManager(TestCase):
     """Tests for a helpful and handy task object manager."""
     @mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
