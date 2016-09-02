@@ -459,7 +459,7 @@ class FailedFaxTaskList(TaskList):
 
 class NewExemptionTaskList(TaskList):
     title = 'New Exemptions'
-    queryset = NewExemptionTask.objects.select_related('foia')
+    queryset = NewExemptionTask.objects.select_related('foia__agency__jurisdiction__parent')
 
 
 class RequestTaskList(TaskList):
