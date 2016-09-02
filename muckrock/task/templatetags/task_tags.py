@@ -306,5 +306,5 @@ def failed_fax_task(parser, token):
 @register.tag
 def new_exemption_task(parser, token):
     """Returns a NewExemptionTaskNode"""
-    return NewExemptionTasknode(get_id(token))
+    return NewExemptionTaskNode(get_id(token))
 

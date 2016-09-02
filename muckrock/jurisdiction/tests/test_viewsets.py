@@ -5,7 +5,7 @@ Test the API viewsets for the Jurisdiction application.
 from django.test import TestCase
 
 from nose.tools import eq_, ok_
-from rest_framework.test import APIRequestFactory, APIClient, force_authenticate
+from rest_framework.test import APIRequestFactory, force_authenticate
 
 from muckrock.factories import UserFactory, FOIARequestFactory
 from muckrock.jurisdiction.factories import StateJurisdictionFactory, ExemptionFactory

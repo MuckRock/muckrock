@@ -4,7 +4,7 @@ from django import forms
 
 from muckrock.foia.models import FOIARequest
 from muckrock.forms import MRFilterForm
-from muckrock.jurisdiction.models import Jurisdiction, Exemption
+from muckrock.jurisdiction.models import Jurisdiction
 
 from autocomplete_light import shortcuts as autocomplete_light
 
