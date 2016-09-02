@@ -16,9 +16,9 @@ const ExemptionForm = ({onCancel, onSubmit, handleSubmit}) => {
         <form className="exemption__form form panel" method="post" onSubmit={handleSubmit}>
             <h2>Submit a new exemption</h2>
             <div className="field">
-                <label htmlFor="languageInput">What language did the agency use to invoke the exemption?</label>
-                <Field name="languageInput" component="textarea" />
-                <Field name="request" component="input" type="hidden" />
+                <label htmlFor="language">What language did the agency use to invoke the exemption?</label>
+                <Field name="language" component="textarea" />
+                <Field name="foia" component="input" type="hidden" />
             </div>
             <footer>
                 <span onClick={handleCancel} className="button">Cancel</span>

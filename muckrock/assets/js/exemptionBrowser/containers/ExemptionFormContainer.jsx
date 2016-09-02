@@ -9,11 +9,13 @@ import { connect } from 'react-redux';
 import ExemptionForm from '../components/ExemptionForm';
 import { updateVisibilityFilter, submitExemption } from '../actions';
 
-const requestId = $('#dom-data').data('request');
+// We get the FOIA ID from the DOM because this
+// application cannot see the entire request page
+const foiaID = $('#dom-data').data('request');
 
 const mapStateToProps = (state) => ({
     initialValues: {
-        request: requestId
+        foia: foiaID
     }
 });
 
