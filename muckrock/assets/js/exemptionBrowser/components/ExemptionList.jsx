@@ -5,24 +5,14 @@
 
 import React, { PropTypes } from 'react';
 
+import Loader from './Loader';
+
 function truncateString(string, maxLength) {
     if (string.length > maxLength) {
         string = string.substring(0, maxLength) + '...';
     }
     return string
 }
-
-const Loader = () => (
-    <div className="loader">
-        <div className="loader-inner line-scale-pulse-out-rapid">
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
-        </div>
-    </div>
-)
 
 const ExemptionListItem = ({exemption, onClick}) => {
     const basisMaxLength = 300;
