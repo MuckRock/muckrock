@@ -10,6 +10,7 @@ import {
     UPDATE_EXEMPTION_RESULTS,
     LOAD_EXEMPTION_RESULTS,
     SELECT_EXEMPTION,
+    SUBMIT_EXEMPTION,
     RESET_EXEMPTION_STATE,
 } from './actions';
 
@@ -25,6 +26,10 @@ const initialState = {
     results: [],
     exemption: null,
     filter: 'SHOW_SEARCH',
+    submission_form: {
+        state: 'DEFAULT',
+        response: null,
+    },
 };
 
 const exemptionReducer = function(state=initialState, action) {
@@ -50,6 +55,36 @@ const exemptionReducer = function(state=initialState, action) {
             return Object.assign({}, state, {
                 exemption: action.exemption
             });
+        case SUBMIT_EXEMPTION:
+            switch(action.state) {
+                case 'LOADING':
+                    return Object.assign({}, state, {
+                        submission_form: {
+                            state: 'LOADING'
+                        }
+                    });
+                case 'SUCCESS':
+                    return Object.assign({}, state, {
+                        submission_form: {
+                            state: 'SUCCESS',
+                            response: action.response
+                        }
+                    });
+                case 'FAILURE':
+                    return Object.assign({}, state, {
+                        submission_form: {
+                            state: 'FAILURE',
+                            response: action.response
+                        }
+                    });
+                default:
+                    return Object.assign({}, state, {
+                        submission_form: {
+                            state: 'DEFAULT',
+                            response: null
+                        }
+                    });
+            }
         case RESET_EXEMPTION_STATE:
             return Object.assign({}, state, initialState);
         default:
