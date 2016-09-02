@@ -4,6 +4,7 @@ Provides Jurisdiction application API views
 
 from django.db.models import Q
 
+from rest_framework.decorators import list_route
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 from rest_framework.response import Response
@@ -71,7 +72,8 @@ class ExemptionViewSet(ModelViewSet):
         serializer = self.get_serializer(results, many=True)
         return Response(serializer.data)
 
-    def create(self, request):
+    @list_route(methods=['post'])
+    def submit(self, request):
         """
         The exemption submission endpoint allows new exemptions to be submitted for staff review.
         When an exemption is submitted, we need to know the request it was invoked on and the

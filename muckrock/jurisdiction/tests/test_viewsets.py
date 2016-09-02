@@ -68,9 +68,9 @@ class TestExemptionCreation(TestCase):
     language the agency used to invoke it. Then, we should create a NewExemptionTask.
     """
     def setUp(self):
-        self.endpoint = '/exemption/'
+        self.endpoint = '/exemption/submit/'
         self.factory = APIRequestFactory()
-        self.view = ExemptionViewSet.as_view({'post': 'create'})
+        self.view = ExemptionViewSet.as_view({'post': 'submit'})
         self.user = UserFactory()
         self.foia = FOIARequestFactory(user=self.user)
         self.data = {
