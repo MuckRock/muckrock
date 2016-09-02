@@ -46,6 +46,7 @@ def count_tasks():
         crowdfund=Count('crowdfundtask'),
         multirequest=Count('multirequesttask'),
         failed_fax=Count('failedfaxtask'),
+        new_exemption=Count('newexemptiontask'),
         )
     return count
 
