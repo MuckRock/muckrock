@@ -58,13 +58,14 @@ const ExemptionDetail = ({exemption, onBackClick}) => {
     ));
     return (
         <div>
-            <button className="basic button" onClick={onBackClick}>&larr; Back to search results</button>
-            <div className="exemption__detail textbox">
+            <button className="basic button w100 exemption__backButton" onClick={onBackClick}>&larr; Back to search results</button>
+            <div className="exemption__detail textbox nomargin">
                 <h1>{exemption.name}</h1>
                 <p>{exemption.basis}</p>
                 <h2>Sample Appeals</h2>
                 {appeals}
             </div>
+            <button className="basic button w100 exemption__backButton" onClick={onBackClick}>&larr; Back to search results</button>
         </div>
     )
 };
