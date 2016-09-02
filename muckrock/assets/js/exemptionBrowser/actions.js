@@ -3,7 +3,7 @@
 ** Exports actions for use by the exemption browser.
 */
 
-import axios from 'axios';
+import api from './api';
 
 export const UPDATE_EXEMPTION_QUERY = 'UPDATE_EXEMPTION_QUERY';
 export const UPDATE_EXEMPTION_RESULTS = 'UPDATE_EXEMPTION_RESULTS';
@@ -53,11 +53,10 @@ export const resetExemptionState = () => (
 );
 
 export const searchExemptions = (searchQuery) => {
-    const endpoint = '/api_v1/exemption/';
     return (dispatch) => {
         dispatch(loadExemptionResults());
         dispatch(updateExemptionQuery(searchQuery.q));
-        return axios.get(endpoint, {
+        return api.get('exemption/', {
             params: searchQuery
         }).then(response => {
             const results = response.data.results;
@@ -65,21 +64,28 @@ export const searchExemptions = (searchQuery) => {
         }).catch(error => {
             // TODO Handle errors by dispatching another action
             console.error(error);
-        })
+        });
     }
 };
 
 export const submitExemption = (exemptionData) => {
-    const endpoint = '/api_v1/exemption/';
-    return axios.post(endpoint, {
-        data: exemptionData,
-        xsrfCookieName: 'csrftoken',
-        xsrfHeaderName: 'X-CSRFToken',
-    }).then(response => {
-        // TODO Hanel successful submission
-        console.debug('Posted successfully:', response);
-    }).catch(error => {
-        // TODO Handle submission error
-        console.debug('Posted unsuccessfully:', error);
-    })
+    return api.post('exemption/submit/', exemptionData)
+        .then(response => {
+            // TODO Hanel successful submission
+            console.debug('Posted successfully:', response);
+        }).catch(error => {
+            // TODO Handle submission error
+            console.debug('Posted unsuccessfully:', error);
+            if (error.response) {
+              // The request was made, but the server responded with a status code
+              // that falls out of the range of 2xx
+              console.log(error.response.data);
+              console.log(error.response.status);
+              console.log(error.response.headers);
+            } else {
+              // Something happened in setting up the request that triggered an Error
+              console.log('Error', error.message);
+            }
+            console.log(error.config);
+        });
 };
