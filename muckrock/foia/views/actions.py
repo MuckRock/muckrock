@@ -254,7 +254,6 @@ def admin_fix(request, jurisdiction, jidx, slug, idx):
                             agency=foia.agency)
                     foia.cc_contacts.add(user)
             if form.cleaned_data['from_email']:
-                # XXX put in autocompletes
                 from_user = User.agency_objects.get_or_create_agency_user(
                         form.cleaned_data['from_email'])
             else:
