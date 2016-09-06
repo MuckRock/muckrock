@@ -64,6 +64,7 @@ const ExemptionDetail = ({exemption, onBackClick}) => {
                 <p>{exemption.basis}</p>
                 <h2>Sample Appeals</h2>
                 {appeals}
+                <a href={exemption.absolute_url} target="_blank">View more details</a>
             </div>
             <button className="basic button w100 exemption__backButton" onClick={onBackClick}>&larr; Back to search results</button>
         </div>
