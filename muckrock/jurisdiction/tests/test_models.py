@@ -210,7 +210,7 @@ class TestExemptionModel(TestCase):
         """The absolute url of the exemption should be a standalone exemption detail page."""
         kwargs = self.exemption.jurisdiction.get_slugs()
         kwargs['slug'] = self.exemption.slug
-        kwargs['idx'] = self.exemption.pk
+        kwargs['pk'] = self.exemption.pk
         expected_url = reverse('exemption-detail', kwargs=kwargs)
         actual_url = self.exemption.get_absolute_url()
         eq_(actual_url, expected_url, ('The exemption should return the exemption-detail url.\n'
@@ -244,7 +244,7 @@ class TestInvokedExemptionModel(TestCase):
         exemption = self.invoked_exemption.exemption
         kwargs = exemption.jurisdiction.get_slugs()
         kwargs['slug'] = exemption.slug
-        kwargs['idx'] = exemption.pk
+        kwargs['pk'] = exemption.pk
         expected_url = (reverse('exemption-detail', kwargs=kwargs) +
                         '#invoked-%d' % self.invoked_exemption.pk)
         actual_url = self.invoked_exemption.get_absolute_url()
@@ -277,7 +277,7 @@ class TestExampleAppealModel(TestCase):
         exemption = self.example_appeal.exemption
         kwargs = exemption.jurisdiction.get_slugs()
         kwargs['slug'] = exemption.slug
-        kwargs['idx'] = exemption.pk
+        kwargs['pk'] = exemption.pk
         expected_url = (reverse('exemption-detail', kwargs=kwargs) +
                         '#appeal-%d' % self.example_appeal.pk)
         actual_url = self.example_appeal.get_absolute_url()

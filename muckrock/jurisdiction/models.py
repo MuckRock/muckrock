@@ -333,7 +333,7 @@ class InvokedExemption(models.Model):
         """Return the url for the exemption detail page, targeting the invokation."""
         kwargs = self.exemption.jurisdiction.get_slugs()
         kwargs['slug'] = self.exemption.slug
-        kwargs['idx'] = self.exemption.pk
+        kwargs['pk'] = self.exemption.pk
         return reverse('exemption-detail', kwargs=kwargs) + '#invoked-%d' % self.pk
 
 
@@ -357,5 +357,5 @@ class ExampleAppeal(models.Model):
         """Return the url for the exemption detail page, targeting the appeal."""
         kwargs = self.exemption.jurisdiction.get_slugs()
         kwargs['slug'] = self.exemption.slug
-        kwargs['idx'] = self.exemption.pk
+        kwargs['pk'] = self.exemption.pk
         return reverse('exemption-detail', kwargs=kwargs) + '#appeal-%d' % self.pk
