@@ -11,7 +11,7 @@
 **   standalone files and then imported back into here.
 */
 
-import 'jquery-ui/ui/widgets/datepicker';
+import 'jquery-ui';
 import '../vendor/formset';
 import '../vendor/loupe';
 import '../vendor/quicksearch';
