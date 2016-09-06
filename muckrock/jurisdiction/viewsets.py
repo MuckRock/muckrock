@@ -80,6 +80,7 @@ class ExemptionViewSet(ModelViewSet):
         language the agency used to invoke it. Then, we should create both an InvokedExemption
         and a NewExemptionTask.
         """
+        # pylint: disable=no-self-use
         form = ExemptionSubmissionForm(request.data)
         if not form.is_valid():
             raise ValidationError(form.errors.as_json())
