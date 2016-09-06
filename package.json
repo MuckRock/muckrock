@@ -43,7 +43,7 @@
   "dependencies": {
     "autonumeric": "^1.9.43",
     "axios": "^0.13.1",
-    "jquery-ui": "^1.10.5",
+    "jquery-ui": "1.10.x",
     "js-cookie": "^2.1.0",
     "lodash": "^4.14.2",
     "prosemirror": "^0.6.0",
