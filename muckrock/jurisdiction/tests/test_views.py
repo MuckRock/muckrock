@@ -34,3 +34,10 @@ class TestExemptionDetailView(TestCase):
         another_exemption = factories.ExemptionFactory(jurisdiction=another_jurisdiction)
         response = http_get_response(self.url, self.view, **self.kwargs)
         eq_(response.status_code, 200)
+
+    def test_federal_exemptions(self):
+        """An exemption at the federal level should return 200."""
+        fed = factories.FederalJurisdictionFactory()
+        exemption = factories.ExemptionFactory(jurisdiction=fed)
+        response =http_get_response(self.url, self.view, **self.kwargs)
+        eq_(response.status_code, 200)
