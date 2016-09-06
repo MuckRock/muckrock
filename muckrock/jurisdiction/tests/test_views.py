@@ -31,7 +31,7 @@ class TestExemptionDetailView(TestCase):
         as long as they belong to different jurisdictions."""
         another_jurisdiction = factories.StateJurisdictionFactory()
         ok_(self.exemption.jurisdiction is not another_jurisdiction)
-        another_exemption = factories.ExemptionFactory(jurisdiction=another_jurisdiction)
+        factories.ExemptionFactory(jurisdiction=another_jurisdiction)
         response = http_get_response(self.url, self.view, **self.kwargs)
         eq_(response.status_code, 200)
 
@@ -39,5 +39,11 @@ class TestExemptionDetailView(TestCase):
         """An exemption at the federal level should return 200."""
         fed = factories.FederalJurisdictionFactory()
         exemption = factories.ExemptionFactory(jurisdiction=fed)
-        response =http_get_response(self.url, self.view, **self.kwargs)
+        url = exemption.get_absolute_url()
+        kwargs = exemption.jurisdiction.get_slugs()
+        kwargs.update({
+            'slug': exemption.slug,
+            'pk': exemption.pk,
+        })
+        response = http_get_response(url, self.view, **kwargs)
         eq_(response.status_code, 200)
