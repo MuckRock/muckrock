@@ -23,7 +23,7 @@ urlpatterns = patterns(
         views.detail,
         name='jurisdiction-detail'
     ),
-    url(r'^%s/exemption/(?P<slug>[\w-]+)-(?P<idx>\d+)/$' % jur_url,
+    url(r'^%s/exemption/(?P<slug>[\w-]+)-(?P<pk>\d+)/$' % jur_url,
         views.ExemptionDetailView.as_view(),
         name='exemption-detail',
     ),

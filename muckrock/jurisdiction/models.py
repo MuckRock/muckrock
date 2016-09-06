@@ -304,7 +304,7 @@ class Exemption(models.Model):
         """Return the url for the exemption detail page"""
         kwargs = self.jurisdiction.get_slugs()
         kwargs['slug'] = self.slug
-        kwargs['idx'] = self.pk
+        kwargs['pk'] = self.pk
         return reverse('exemption-detail', kwargs=kwargs)
 
 
