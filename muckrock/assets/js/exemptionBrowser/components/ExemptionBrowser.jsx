@@ -12,6 +12,13 @@ import ExemptionListContainer from '../containers/ExemptionListContainer';
 import ExemptionDetailContainer from '../containers/ExemptionDetailContainer';
 import ExemptionFormContainer from '../containers/ExemptionFormContainer';
 
+const ExemptionSearchError = () => (
+    <div className="exemption__empty">
+        <p className="bold">An error occurred.</p>
+        <p>We're very sorry! We've already been notified and are looking into it.</p>
+    </div>
+);
+
 const ExemptionBrowser = ({filter}) => {
     let resultDisplay;
     if (filter == 'SHOW_SEARCH') {
@@ -25,6 +32,13 @@ const ExemptionBrowser = ({filter}) => {
         resultDisplay = <ExemptionDetailContainer />;
     } else if (filter == 'SHOW_FORM') {
         resultDisplay = <ExemptionFormContainer />;
+    } else if (filter == 'SHOW_ERROR') {
+        resultDisplay = (
+            <div>
+                <ExemptionSearchContainer />
+                <ExemptionSearchError />
+            </div>
+        )
     } else {
         resultDisplay = <ExemptionSearchContainer />;
     }

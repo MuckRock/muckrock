@@ -70,9 +70,9 @@ export const searchExemptions = (searchQuery) => {
         }).then(response => {
             const results = response.data.results;
             dispatch(updateExemptionResults(results));
+            dispatch(updateVisibilityFilter('SHOW_SEARCH'));
         }).catch(error => {
-            // TODO Handle errors by dispatching another action
-            console.error(error);
+            dispatch(updateVisibilityFilter('SHOW_ERROR'));
         });
     }
 };
