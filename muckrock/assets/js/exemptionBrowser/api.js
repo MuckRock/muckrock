@@ -8,7 +8,7 @@ import axios from 'axios';
 const api = axios.create({
     baseURL: '/api_v1/',
     xsrfCookieName: 'csrftoken',
-    xsrfHeaderName: 'X-CSRFToken',
+    xsrfHeaderName: 'X-CSRFToken'
 });
 
 export default api;

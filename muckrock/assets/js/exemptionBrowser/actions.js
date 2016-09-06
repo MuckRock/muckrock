@@ -16,40 +16,40 @@ export const RESET_EXEMPTION_STATE = 'RESET_EXEMPTION_STATE';
 export const updateExemptionQuery = (query) => (
     {
         type: UPDATE_EXEMPTION_QUERY,
-        query: query,
+        query: query
     }
 );
 
 export const updateExemptionResults = (results) => (
     {
         type: UPDATE_EXEMPTION_RESULTS,
-        results: results,
+        results: results
     }
 );
 
 export const loadExemptionResults = () => (
     {
-        type: LOAD_EXEMPTION_RESULTS,
+        type: LOAD_EXEMPTION_RESULTS
     }
 );
 
 export const updateVisibilityFilter = (filter) => (
     {
         type: UPDATE_VISIBILITY_FILTER,
-        filter: filter,
+        filter: filter
     }
 );
 
 export const selectExemption = (exemption) => (
     {
         type: SELECT_EXEMPTION,
-        exemption: exemption,
+        exemption: exemption
     }
 );
 
 export const resetExemptionState = () => (
     {
-        type: RESET_EXEMPTION_STATE,
+        type: RESET_EXEMPTION_STATE
     }
 );
 
@@ -57,7 +57,7 @@ export const submitExemptionState = (state, response) => (
     {
         type: SUBMIT_EXEMPTION,
         state: state,
-        response: response,
+        response: response
     }
 );
 
@@ -71,10 +71,10 @@ export const searchExemptions = (searchQuery) => {
             const results = response.data.results;
             dispatch(updateExemptionResults(results));
             dispatch(updateVisibilityFilter('SHOW_SEARCH'));
-        }).catch(error => {
+        }).catch(() => {
             dispatch(updateVisibilityFilter('SHOW_ERROR'));
         });
-    }
+    };
 };
 
 export const submitExemption = (exemptionData) => {
@@ -86,5 +86,5 @@ export const submitExemption = (exemptionData) => {
             }).catch(error => {
                 dispatch(submitExemptionState('FAILURE'), error.response);
             });
-    }
+    };
 };
