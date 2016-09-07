@@ -29,7 +29,7 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.task.models import SnailMailTask
 from muckrock.tests import get_allowed, post_allowed, get_post_unallowed, get_404
-from muckrock.test_utils import mock_middleware
+from muckrock.test_utils import mock_middleware, http_post_response
 from muckrock.utils import new_action
 
 ok_ = nose.tools.ok_
@@ -545,30 +545,21 @@ class TestFOIAIntegration(TestCase):
 
 class TestRequestDetailView(TestCase):
     """Request detail views support a wide variety of interactions"""
-
     def setUp(self):
         self.foia = FOIARequestFactory()
-        self.request_factory = RequestFactory()
         self.view = Detail.as_view()
         self.url = self.foia.get_absolute_url()
-
-    def post_helper(self, data, user):
-        """Returns post responses"""
-        request = self.request_factory.post(self.url, data)
-        request.user = user
-        request = mock_middleware(request)
-        return self.view(
-            request,
-            jurisdiction=self.foia.jurisdiction.slug,
-            jidx=self.foia.jurisdiction.id,
-            slug=self.foia.slug,
-            idx=self.foia.id
-        )
+        self.kwargs = {
+            'jurisdiction': self.foia.jurisdiction.slug,
+            'jidx': self.foia.jurisdiction.id,
+            'slug': self.foia.slug,
+            'idx': self.foia.id
+        }
 
     def test_add_tags(self):
         """Posting a collection of tags to a request should update its tags."""
-        tags = 'foo, bar'
-        self.post_helper({'action': 'tags', 'tags': tags}, self.foia.user)
+        data = {'action': 'tags', 'tags': 'foo, bar'}
+        http_post_response(self.url, self.view, data, self.foia.user, **self.kwargs)
         self.foia.refresh_from_db()
         ok_('foo' in [tag.name for tag in self.foia.tags.all()])
         ok_('bar' in [tag.name for tag in self.foia.tags.all()])
@@ -580,7 +571,7 @@ class TestRequestDetailView(TestCase):
         ok_(form.is_valid())
         data = {'action': 'projects'}
         data.update(form.data)
-        self.post_helper(data, self.foia.user)
+        http_post_response(self.url, self.view, data, self.foia.user, **self.kwargs)
         project.refresh_from_db()
         ok_(self.foia in project.requests.all())
 
