@@ -543,6 +543,26 @@ class TestFOIAIntegration(TestCase):
         nose.tools.ok_(foia.days_until_due is None)
 
 
+class TestFOIARequestAppeal(TestCase):
+    """A request should be able to send an appeal to the agency that receives them."""
+    def setUp(self):
+        self.agency = AgencyFactory()
+        self.foia = FOIARequestFactory(agency=self.agency, status='rejected')
+
+    def test_send_appeal(self):
+        """Sending an appeal to the agency should require the message for the appeal,
+        which is then turned into a communication to the correct agency. In this case,
+        the correct agency is the same one that received the message."""
+        appeal_message = 'Lorem ipsum'
+        appeal_comm = self.foia.appeal(appeal_message)
+        eq_(self.foia.status, 'appealing',
+            'The status of the request should be updated.')
+        eq_(appeal_comm.comm, appeal_message,
+            'The appeal message parameter should be used as the body of the communication.')
+        eq_(appeal_comm.to_who, self.agency.name,
+            'The appeal should be addressed to the agency.')
+
+
 class TestRequestDetailView(TestCase):
     """Request detail views support a wide variety of interactions"""
     def setUp(self):
@@ -574,6 +594,14 @@ class TestRequestDetailView(TestCase):
         http_post_response(self.url, self.view, data, self.foia.user, **self.kwargs)
         project.refresh_from_db()
         ok_(self.foia in project.requests.all())
+
+    def test_appeal(self):
+        """Appealing a request should send a new communication,
+        record the details of the appeal, and update the status of the request."""
+        data = {'action': 'appeal'}
+        http_post_response(self.url, self.view, data, self.foia.user, **self.kwargs)
+        self.foia.refresh_from_db()
+        eq_(self.foia.status, 'appealing')
 
 
 class TestRequestPayment(TestCase):
