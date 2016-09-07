@@ -545,52 +545,6 @@ class TestFOIAIntegration(TestCase):
         nose.tools.ok_(foia.days_until_due is None)
 
 
-class TestFOIANotes(TestCase):
-    """Allow editors to attach notes to a request."""
-    def setUp(self):
-        self.factory = RequestFactory()
-        self.foia = FOIARequestFactory()
-        self.creator = self.foia.user
-        self.editor = UserFactory()
-        self.viewer = UserFactory()
-        self.foia.add_editor(self.editor)
-        self.foia.add_viewer(self.viewer)
-        self.note_text = u'Lorem ipsum dolor su ament.'
-        self.note_data = {'action': 'add_note', 'note': self.note_text}
-
-    def test_add_note(self):
-        """User with edit permission should be able to create a note."""
-        request = self.factory.post(self.foia.get_absolute_url(), self.note_data)
-        request = mock_middleware(request)
-        request.user = self.editor
-        response = Detail.as_view()(
-            request,
-            jurisdiction=self.foia.jurisdiction.slug,
-            jidx=self.foia.jurisdiction.id,
-            slug=self.foia.slug,
-            idx=self.foia.id
-        )
-        self.foia.refresh_from_db()
-        nose.tools.eq_(response.status_code, 302)
-        nose.tools.assert_true(self.foia.notes.count() > 0)
-
-    def test_add_note_without_permission(self):
-        """Normies and viewers cannot add notes."""
-        request = self.factory.post(self.foia.get_absolute_url(), self.note_data)
-        request = mock_middleware(request)
-        request.user = self.viewer
-        response = Detail.as_view()(
-            request,
-            jurisdiction=self.foia.jurisdiction.slug,
-            jidx=self.foia.jurisdiction.id,
-            slug=self.foia.slug,
-            idx=self.foia.id
-        )
-        self.foia.refresh_from_db()
-        nose.tools.eq_(response.status_code, 302)
-        nose.tools.assert_true(self.foia.notes.count() == 0)
-
-
 class TestRequestDetailView(TestCase):
     """Request detail views support a wide variety of interactions"""
 
