@@ -35,6 +35,32 @@ class TestExemptionDetailView(TestCase):
         response = http_get_response(self.url, self.view, **self.kwargs)
         eq_(response.status_code, 200)
 
+    def test_local_exemptions(self):
+        """An exemption at the local level should return 200."""
+        local = factories.LocalJurisdictionFactory()
+        exemption = factories.ExemptionFactory(jurisdiction=local)
+        url = exemption.get_absolute_url()
+        kwargs = exemption.jurisdiction.get_slugs()
+        kwargs.update({
+            'slug': exemption.slug,
+            'pk': exemption.pk
+        })
+        response = http_get_response(url, self.view, **kwargs)
+        eq_(response.status_code, 200)
+
+    def test_state_exemptions(self):
+        """An exemption at the state level should return 200."""
+        state = factories.StateJurisdictionFactory()
+        exemption = factories.ExemptionFactory(jurisdiction=state)
+        url = exemption.get_absolute_url()
+        kwargs = exemption.jurisdiction.get_slugs()
+        kwargs.update({
+            'slug': exemption.slug,
+            'pk': exemption.pk
+        })
+        response = http_get_response(url, self.view, **kwargs)
+        eq_(response.status_code, 200)
+
     def test_federal_exemptions(self):
         """An exemption at the federal level should return 200."""
         fed = factories.FederalJurisdictionFactory()
