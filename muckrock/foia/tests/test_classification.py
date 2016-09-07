@@ -8,7 +8,7 @@ import nose.tools
 
 from muckrock.factories import FOIACommunicationFactory
 from muckrock.foia.tasks import classify_status
-from muckrock.task.models import ResponseTask
+from muckrock.task.factories import ResponseTaskFactory
 
 class TestFOIAClassify(TestCase):
     """Test the classification of a new communication"""
@@ -18,8 +18,8 @@ class TestFOIAClassify(TestCase):
         # pylint: disable=no-self-use
         comm = FOIACommunicationFactory(
                 communication="Here are your responsive documents")
-        task = ResponseTask.objects.create(communication=comm)
+        task = ResponseTaskFactory(communication=comm)
         classify_status.apply(args=(task.pk,), throw=True)
-        task = ResponseTask.objects.get(pk=task.pk)
+        task.refresh_from_db()
         nose.tools.ok_(task.predicted_status)
         nose.tools.ok_(task.status_probability)
