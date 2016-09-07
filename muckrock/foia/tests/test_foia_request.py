@@ -610,54 +610,6 @@ class TestRequestPayment(TestCase):
         eq_(task.amount, amount, 'The task should contain the amount of the request.')
 
 
-class TestRequestFilesView(TestCase):
-    """Files should render in a paginated list on a separate page."""
-    def setUp(self):
-        self.file = FOIAFileFactory()
-        self.foia = self.file.foia
-        self.kwargs = {
-            'idx': self.foia.pk,
-            'slug': self.foia.slug,
-            'jidx': self.foia.jurisdiction.pk,
-            'jurisdiction': self.foia.jurisdiction.slug
-        }
-        self.url = reverse('foia-files', kwargs=self.kwargs)
-        self.view = FOIAFileListView.as_view()
-        self.factory = RequestFactory()
-
-    def test_get_ok(self):
-        """The view should return 200 if the foia is viewable to the user."""
-        request = self.factory.get(self.url)
-        request.user = self.foia.user
-        request = mock_middleware(request)
-        ok_(self.foia.viewable_by(request.user), 'The user should be able to view the request')
-        response = self.view(
-            request,
-            jurisdiction=self.foia.jurisdiction.slug,
-            jidx=self.foia.jurisdiction.id,
-            slug=self.foia.slug,
-            idx=self.foia.id
-        )
-        eq_(response.status_code, 200, 'The view should return 200.')
-
-    @raises(Http404)
-    def test_get_404(self):
-        """The view should return 404 is the foia is not visible to the user."""
-        self.foia.embargo = True
-        self.foia.save()
-        user = UserFactory()
-        ok_(not self.foia.viewable_by(user))
-        request = self.factory.get(self.url)
-        request.user = user
-        request = mock_middleware(request)
-        self.view(
-            request,
-            jurisdiction=self.foia.jurisdiction.slug,
-            jidx=self.foia.jurisdiction.id,
-            slug=self.foia.slug,
-            idx=self.foia.id
-        )
-
 class TestMakeUser(TestCase):
     """The request composer should provide miniregistration functionality."""
     def setUp(self):
