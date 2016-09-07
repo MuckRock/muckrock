@@ -5,7 +5,6 @@ Tests using nose for the FOIA application
 from django.contrib.auth.models import User, AnonymousUser
 from django.core.urlresolvers import reverse
 from django.core import mail
-from django.http import Http404
 from django.test import TestCase, RequestFactory
 
 from actstream.actions import follow
@@ -20,12 +19,11 @@ from muckrock.agency.models import Agency
 from muckrock.factories import (
     UserFactory,
     FOIARequestFactory,
-    FOIAFileFactory,
     ProjectFactory,
     AgencyFactory
 )
 from muckrock.foia.models import FOIARequest, FOIACommunication
-from muckrock.foia.views import Detail, FOIAFileListView
+from muckrock.foia.views import Detail
 from muckrock.foia.views.composers import _make_user
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.project.forms import ProjectManagerForm

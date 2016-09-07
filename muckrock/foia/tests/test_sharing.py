@@ -10,6 +10,8 @@ from muckrock.factories import FOIARequestFactory, UserFactory
 from muckrock.foia.views import Detail
 from muckrock.test_utils import mock_middleware
 
+# pylint: disable=no-self-use
+
 class TestRequestSharing(TestCase):
     """Allow people to edit and view another user's request."""
     def setUp(self):
@@ -94,7 +96,7 @@ class TestRequestSharing(TestCase):
         assert_false(access_key == embargoed_foia.access_key,
             'After regenerating the link, the key should no longer match.')
 
-    def test_do_not_grant_creator_access(self):
+    def test_creator_access(self):
         """Creators should not be granted access as editors or viewers"""
         self.foia.add_editor(self.creator)
         assert_false(self.foia.has_editor(self.creator))

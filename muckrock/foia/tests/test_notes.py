@@ -1,3 +1,7 @@
+"""
+Users should be able to attach notes to requests
+"""
+
 from django.test import TestCase
 
 from nose.tools import eq_
@@ -31,7 +35,7 @@ class TestFOIANotes(TestCase):
         eq_(response.status_code, 302)
         eq_(self.foia.notes.count() > 0, True)
 
-    def test_add_note_without_permission(self):
+    def test_add_sans_permission(self):
         """Normies and viewers cannot add notes."""
         response = http_post_response(self.url, self.view, self.data, self.viewer, **self.kwargs)
         self.foia.refresh_from_db()

@@ -1,3 +1,7 @@
+"""
+Files should be added to communications
+"""
+
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.test import TestCase
