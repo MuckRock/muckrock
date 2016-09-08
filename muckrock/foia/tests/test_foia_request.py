@@ -20,7 +20,8 @@ from muckrock.factories import (
     UserFactory,
     FOIARequestFactory,
     ProjectFactory,
-    AgencyFactory
+    AgencyFactory,
+    AppealAgencyFactory
 )
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.foia.views import Detail
@@ -546,21 +547,66 @@ class TestFOIAIntegration(TestCase):
 class TestFOIARequestAppeal(TestCase):
     """A request should be able to send an appeal to the agency that receives them."""
     def setUp(self):
-        self.agency = AgencyFactory()
+        self.appeal_agency = AppealAgencyFactory()
+        self.agency = AgencyFactory(status='approved', appeal_agency=self.appeal_agency)
         self.foia = FOIARequestFactory(agency=self.agency, status='rejected')
 
-    def test_send_appeal(self):
+    def test_appeal(self):
         """Sending an appeal to the agency should require the message for the appeal,
         which is then turned into a communication to the correct agency. In this case,
         the correct agency is the same one that received the message."""
+        ok_(self.foia.is_appealable(),
+            'The request should be appealable.')
+        ok_(self.agency and self.agency.status == 'approved',
+            'The agency should be approved.')
+        ok_(self.appeal_agency.email and self.appeal_agency.can_email_appeals,
+            'The appeal agency should accept email.')
+        # Create the appeal message and submit it
         appeal_message = 'Lorem ipsum'
         appeal_comm = self.foia.appeal(appeal_message)
+        # Check that everything happened like we expected
+        self.foia.refresh_from_db()
+        appeal_comm.refresh_from_db()
+        eq_(self.foia.email, self.appeal_agency.email,
+            'The FOIA primary email should be set to the appeal agency\'s email.')
         eq_(self.foia.status, 'appealing',
-            'The status of the request should be updated.')
-        eq_(appeal_comm.comm, appeal_message,
+            'The status of the request should be updated. Actually: %s' % self.foia.status)
+        eq_(appeal_comm.communication, appeal_message,
             'The appeal message parameter should be used as the body of the communication.')
+        eq_(appeal_comm.from_who, self.foia.user.get_full_name(),
+            'The appeal should be addressed from the request owner.')
         eq_(appeal_comm.to_who, self.agency.name,
             'The appeal should be addressed to the agency.')
+        eq_(appeal_comm.delivered, 'email',
+            'The appeal should be marked as delivered via email, not %s.' % appeal_comm.delivered)
+
+    def test_mailed_appeal(self):
+        """Sending an appeal to an agency via mail should set the request to 'submitted',
+        create a snail mail task with the 'a' category, and set the appeal communication
+        delivery method to 'mail'."""
+        # Make the appeal agency unreceptive to emails
+        self.appeal_agency.email = ''
+        self.appeal_agency.can_email_appeals = False
+        self.appeal_agency.save()
+        # Create the appeal message and submit it
+        appeal_message = 'Lorem ipsum'
+        appeal_comm = self.foia.appeal(appeal_message)
+        # Check that everything happened like we expected
+        self.foia.refresh_from_db()
+        appeal_comm.refresh_from_db()
+        eq_(self.foia.status, 'submitted',
+            'The status of the request should be updated. Actually: %s' % self.foia.status)
+        eq_(appeal_comm.communication, appeal_message,
+            'The appeal message parameter should be used as the body of the communication.')
+        eq_(appeal_comm.from_who, self.foia.user.get_full_name(),
+            'The appeal should be addressed from the request owner.')
+        eq_(appeal_comm.to_who, self.agency.name,
+            'The appeal should be addressed to the agency.')
+        eq_(appeal_comm.delivered, 'mail',
+            'The appeal should be marked as delivered via mail, not %s.' % appeal_comm.delivered)
+        task = SnailMailTask.objects.get(communication=appeal_comm)
+        ok_(task, 'A snail mail task should be created.')
+        eq_(task.category, 'a', 'The task should be in the appeal category.')
 
 
 class TestRequestDetailView(TestCase):
