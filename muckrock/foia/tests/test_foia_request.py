@@ -612,7 +612,8 @@ class TestFOIARequestAppeal(TestCase):
 class TestRequestDetailView(TestCase):
     """Request detail views support a wide variety of interactions"""
     def setUp(self):
-        self.foia = FOIARequestFactory()
+        agency = AgencyFactory(appeal_agency=AppealAgencyFactory())
+        self.foia = FOIARequestFactory(agency=agency)
         self.view = Detail.as_view()
         self.url = self.foia.get_absolute_url()
         self.kwargs = {
@@ -644,10 +645,13 @@ class TestRequestDetailView(TestCase):
     def test_appeal(self):
         """Appealing a request should send a new communication,
         record the details of the appeal, and update the status of the request."""
-        data = {'action': 'appeal'}
+        data = {'action': 'appeal', 'text': 'Lorem ipsum'}
         http_post_response(self.url, self.view, data, self.foia.user, **self.kwargs)
         self.foia.refresh_from_db()
+        appeal_comm = self.foia.last_comm()
         eq_(self.foia.status, 'appealing')
+        eq_(appeal_comm.communication, data['text'],
+            'The appeal should use the language provided by the user.')
 
 
 class TestRequestPayment(TestCase):
