@@ -656,9 +656,9 @@ class TestRequestDetailView(TestCase):
 
     def test_unauthorized_appeal(self):
         """Appealing a request without permission should not do anything."""
+        unauth_user = UserFactory()
         comm_count = self.foia.communications.count()
         previous_status = self.foia.status
-        unauth_user = UserFactory()
         data = {'action': 'appeal', 'text': 'Lorem ipsum'}
         http_post_response(self.url, self.view, data, unauth_user, **self.kwargs)
         self.foia.refresh_from_db()
@@ -666,6 +666,34 @@ class TestRequestDetailView(TestCase):
             'The status of the request should not be changed.')
         eq_(self.foia.communications.count(), comm_count,
             'No communication should be added to the request.')
+
+    def test_missing_appeal(self):
+        """An appeal that is missing its language should not do anything."""
+        comm_count = self.foia.communications.count()
+        previous_status = self.foia.status
+        data = {'action': 'appeal', 'text': ''}
+        http_post_response(self.url, self.view, data, self.foia.user, **self.kwargs)
+        self.foia.refresh_from_db()
+        eq_(self.foia.status, previous_status,
+            'The status of the request should not be changed.')
+        eq_(self.foia.communications.count(), comm_count,
+            'No communication should be added to the request.')
+
+    def test_unappealable_request(self):
+        """An appeal on a request that cannot be appealed should not do anything."""
+        self.foia.jurisdiction.has_appeal = False
+        self.foia.jurisdiction.save()
+        nose.tools.assert_false(self.foia.is_appealable())
+        comm_count = self.foia.communications.count()
+        previous_status = self.foia.status
+        data = {'action': 'appeal', 'text': 'Lorem ipsum'}
+        http_post_response(self.url, self.view, data, self.foia.user, **self.kwargs)
+        self.foia.refresh_from_db()
+        eq_(self.foia.status, previous_status,
+            'The status of the request should not be changed.')
+        eq_(self.foia.communications.count(), comm_count,
+            'No communication should be added to the request.')
+
 
 class TestRequestPayment(TestCase):
     """Allow users to pay fees on a request"""
