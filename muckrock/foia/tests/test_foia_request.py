@@ -645,14 +645,27 @@ class TestRequestDetailView(TestCase):
     def test_appeal(self):
         """Appealing a request should send a new communication,
         record the details of the appeal, and update the status of the request."""
+        comm_count = self.foia.communications.count()
         data = {'action': 'appeal', 'text': 'Lorem ipsum'}
         http_post_response(self.url, self.view, data, self.foia.user, **self.kwargs)
         self.foia.refresh_from_db()
-        appeal_comm = self.foia.last_comm()
         eq_(self.foia.status, 'appealing')
-        eq_(appeal_comm.communication, data['text'],
+        eq_(self.foia.communications.count(), comm_count + 1)
+        eq_(self.foia.last_comm().communication, data['text'],
             'The appeal should use the language provided by the user.')
 
+    def test_unauthorized_appeal(self):
+        """Appealing a request without permission should not do anything."""
+        comm_count = self.foia.communications.count()
+        previous_status = self.foia.status
+        unauth_user = UserFactory()
+        data = {'action': 'appeal', 'text': 'Lorem ipsum'}
+        http_post_response(self.url, self.view, data, unauth_user, **self.kwargs)
+        self.foia.refresh_from_db()
+        eq_(self.foia.status, previous_status,
+            'The status of the request should not be changed.')
+        eq_(self.foia.communications.count(), comm_count,
+            'No communication should be added to the request.')
 
 class TestRequestPayment(TestCase):
     """Allow users to pay fees on a request"""
