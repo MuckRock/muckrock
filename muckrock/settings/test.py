@@ -30,5 +30,6 @@ MIDDLEWARE_CLASSES = (
 )
 
 BROKER_BACKEND = 'memory'
+CELERY_ALWAYS_EAGER = True
 
 DEFAULT_FILE_STORAGE = 'inmemorystorage.InMemoryStorage'

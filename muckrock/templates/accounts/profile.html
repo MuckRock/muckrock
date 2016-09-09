@@ -93,12 +93,15 @@
     </form>
     <div>
         {% if request.user == user_obj %}
+        {% if user.profile.acct_type == 'basic' and not user.profile.organization %}
+        <a href="{% url 'accounts' %}" class="blue button">Go Pro!</a>
+        {% endif %}
         <div class="button-group">
-            <a href="{% url 'foia-create' %}" class="primary button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
+            <a href="{% url 'foia-create' %}" class="blue button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
                 {% include 'lib/component/icon/create-request.svg' %}
                 <span>File a Request</span>
             </a>
-            <button class="primary button" form="buy-requests" type="submit">Buy Requests</button>
+            <button class="blue button" form="buy-requests" type="submit">Buy Requests</button>
         </div>
         <a href="{% url 'acct-settings' %}" class="button">Settings</a>
         {% else %}
