@@ -309,23 +309,24 @@ class TestAppealModel(TestCase):
         actual = self.appeal.get_absolute_url()
         eq_(expected, actual)
 
-    def test_was_unsuccessful_default(self):
-        """By default, an appeal should be unsuccessful."""
-        eq_(self.appeal.was_successful(), False)
+    def test_unsuccessful_by_default(self):
+        """By default, an appeal should be not be successful."""
+        eq_(self.appeal.is_successful(), False)
 
-    def test_was_successful(self):
-        """The appeal is successful if a subsequent communication has a 'Completed' status."""
+    def test_successful(self):
+        """The appeal was successful if a subsequent communication has a 'Completed' status."""
         subsequent_communication = FOIACommunicationFactory(
             foia=self.appeal.communication.foia,
             status='done'
         )
-        eq_(self.appeal.was_successful(), True)
+        eq_(self.appeal.is_successful(), True)
 
     def test_another_appeal(self):
-        """The appeal is unsuccessful if a subsequent communication has an Appeal as well."""
+        """The appeal was unsuccessful if a subsequent communication has an Appeal as well."""
         subsequent_communication = FOIACommunicationFactory(
             foia=self.appeal.communication.foia,
             status='done'
         )
         subsequent_appeal = factories.AppealFactory(communication=subsequent_communication)
-        eq_(self.appeal.was_successful(), False)
+        eq_(self.appeal.is_successful(), False)
+

@@ -378,8 +378,8 @@ class Appeal(models.Model):
         """Return the url for the communication."""
         return self.communication.get_absolute_url()
 
-    def was_successful(self):
-        """Evaluate the FOIARequest communications to judge whether the appeal was successful."""
+    def is_successful(self):
+        """Evaluate the FOIARequest communications to judge whether the appeal is successful."""
         foia = self.communication.foia
         subsequent_comms = (foia.communications.filter(date__gt=self.communication.date)
                                                .annotate(appeal__count=Count('appeals')))
