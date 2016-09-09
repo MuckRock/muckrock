@@ -97,5 +97,3 @@ class AppealFactory(factory.django.DjangoModelFactory):
         model = Appeal
 
     communication = factory.SubFactory('muckrock.factories.FOIACommunicationFactory')
-
-
