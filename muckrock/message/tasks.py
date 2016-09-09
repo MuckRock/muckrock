@@ -18,28 +18,33 @@ from muckrock.organization.models import Organization
 
 logger = logging.getLogger(__name__)
 
-def send_activity_digest(subject, preference, interval):
+@task(name='muckrock.message.tasks.send_activity_digest')
+def send_activity_digest(user, subject, interval):
+    """Individual task to create and send an activity digest to a user."""
+    email = digests.ActivityDigest(
+        user=user,
+        subject=subject,
+        interval=interval,
+    )
+    email.send()
+
+def send_digests(preference, subject, interval):
     """Helper to send out timed digests"""
     profiles = Profile.objects.select_related('user').filter(email_pref=preference).distinct()
     for profile in profiles:
-        email = digests.ActivityDigest(
-            user=profile.user,
-            interval=interval,
-            subject=subject
-        )
-        email.send()
+        send_activity_digest.delay(profile.user, subject, interval)
 
 # every hour
 @periodic_task(run_every=crontab(hour='*/1', minute=0), name='muckrock.message.tasks.hourly_digest')
 def hourly_digest():
     """Send out hourly digest"""
-    send_activity_digest(u'Hourly Digest', 'hourly', relativedelta(hours=1))
+    send_digests('hourly', u'Hourly Digest', relativedelta(hours=1))
 
 # every day at 10am
 @periodic_task(run_every=crontab(hour=10, minute=0), name='muckrock.message.tasks.daily_digest')
 def daily_digest():
     """Send out daily digest"""
-    send_activity_digest(u'Daily Digest', 'daily', relativedelta(days=1))
+    send_digests('daily', u'Daily Digest', relativedelta(days=1))
 
 # every Monday at 10am
 @periodic_task(
@@ -47,7 +52,7 @@ def daily_digest():
     name='muckrock.message.tasks.weekly_digest')
 def weekly_digest():
     """Send out weekly digest"""
-    send_activity_digest(u'Weekly Digest', 'weekly', relativedelta(weeks=1))
+    send_digests('weekly', u'Weekly Digest', relativedelta(weeks=1))
 
 # first day of every month at 10am
 @periodic_task(
@@ -55,7 +60,7 @@ def weekly_digest():
     name='muckrock.message.tasks.monthly_digest')
 def monthly_digest():
     """Send out monthly digest"""
-    send_activity_digest(u'Monthly Digest', 'monthly', relativedelta(months=1))
+    send_digests('monthly', u'Monthly Digest', relativedelta(months=1))
 
 # every day at 9:30am
 @periodic_task(run_every=crontab(hour=9, minute=30), name='muckrock.message.tasks.staff_digest')
