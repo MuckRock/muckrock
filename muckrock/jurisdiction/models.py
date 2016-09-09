@@ -12,7 +12,7 @@ from random import choice
 from taggit.managers import TaggableManager
 
 from muckrock.business_days.models import Holiday, HolidayCalendar, Calendar
-from muckrock.foia.models import FOIARequest
+from muckrock.foia.models import FOIARequest, END_STATUS
 from muckrock.tags.models import TaggedItemBase
 
 # pylint: disable=bad-continuation
@@ -387,3 +387,11 @@ class Appeal(models.Model):
         successful = successful or subsequent_comms.filter(status='done').exists()
         successful = successful and not subsequent_comms.filter(appeal__count__gt=0).exists()
         return successful
+
+    def is_finished(self):
+        """Evaluate the FOIARequest communications to judge whether teh appeal is finished."""
+        foia = self.communication.foia
+        subsequent_comms = foia.communications.filter(date__gt=self.communication.date)
+        finished = False
+        finished = finished or subsequent_comms.filter(status__in=END_STATUS).exists()
+        return finished
