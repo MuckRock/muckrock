@@ -5,7 +5,7 @@ Tests using nose for the FOIA application
 from django.contrib.auth.models import User, AnonymousUser
 from django.core.urlresolvers import reverse
 from django.core import mail
-from django.test import TestCase, RequestFactory
+from django.test import TestCase
 
 from actstream.actions import follow
 import datetime

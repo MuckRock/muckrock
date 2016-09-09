@@ -46,7 +46,7 @@ from muckrock.foia.views.comms import (
         resend_comm,
         change_comm_status,
         )
-from muckrock.jurisdiction.models import Appeal, ExampleAppeal
+from muckrock.jurisdiction.models import Appeal
 from muckrock.jurisdiction.forms import AppealForm
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.qanda.models import Question

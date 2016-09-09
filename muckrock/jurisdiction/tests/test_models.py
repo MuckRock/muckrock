@@ -315,7 +315,7 @@ class TestAppealModel(TestCase):
 
     def test_successful(self):
         """The appeal was successful if a subsequent communication has a 'Completed' status."""
-        subsequent_communication = FOIACommunicationFactory(
+        FOIACommunicationFactory(
             foia=self.appeal.communication.foia,
             status='done'
         )
@@ -327,7 +327,7 @@ class TestAppealModel(TestCase):
             foia=self.appeal.communication.foia,
             status='done'
         )
-        subsequent_appeal = factories.AppealFactory(communication=subsequent_communication)
+        factories.AppealFactory(communication=subsequent_communication)
         eq_(self.appeal.is_successful(), False)
 
     def test_unfinished_by_default(self):
@@ -336,7 +336,7 @@ class TestAppealModel(TestCase):
 
     def test_finished(self):
         """The appeal was finished if a subsequent communication has a terminal status."""
-        subsequent_communication = FOIACommunicationFactory(
+        FOIACommunicationFactory(
             foia=self.appeal.communication.foia,
             status='rejected'
         )
