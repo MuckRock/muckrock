@@ -5,7 +5,7 @@ from django.utils.text import slugify
 
 import factory
 
-from .models import Jurisdiction, Law, Exemption, InvokedExemption, ExampleAppeal
+from .models import Jurisdiction, Law, Exemption, InvokedExemption, ExampleAppeal, Appeal
 
 class FederalJurisdictionFactory(factory.django.DjangoModelFactory):
     """Federal jurisdiction factory"""
@@ -89,3 +89,11 @@ class ExampleAppealFactory(factory.django.DjangoModelFactory):
     language = factory.Faker('paragraph')
     context = factory.Faker('paragraph')
     exemption = factory.SubFactory(ExemptionFactory)
+
+
+class AppealFactory(factory.django.DjangoModelFactory):
+    """Appeal factory"""
+    class Meta:
+        model = Appeal
+
+    communication = factory.SubFactory('muckrock.factories.FOIACommunicationFactory')

@@ -269,11 +269,10 @@ Sincerely,
                                 <header>Send an appeal to the {{ foia.agency.name }}</header>
                                 {% endif %}
                                 {% csrf_token %}
-                                <input type="hidden" name="action" value="appeal" />
                                 <textarea name="text" id="appeal-composer"></textarea>
                                 <div class="buttons">
                                     <a href="#inactive" class="button">Cancel</a>
-                                    <button class="primary button" type="submit" name="appeal" value="1">Send Appeal</button>
+                                    <button class="primary button" type="submit" name="action" value="appeal">Send Appeal</button>
                                 </div>
                             </form>
                         </div>
