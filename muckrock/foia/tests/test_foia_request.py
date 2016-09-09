@@ -26,7 +26,8 @@ from muckrock.factories import (
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.foia.views import Detail
 from muckrock.foia.views.composers import _make_user
-from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.jurisdiction.models import Jurisdiction, Appeal
+from muckrock.jurisdiction.factories import ExampleAppealFactory
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.task.models import SnailMailTask
 from muckrock.tests import get_allowed, post_allowed, get_post_unallowed, get_404
@@ -653,6 +654,21 @@ class TestRequestDetailView(TestCase):
         eq_(self.foia.communications.count(), comm_count + 1)
         eq_(self.foia.last_comm().communication, data['text'],
             'The appeal should use the language provided by the user.')
+        appeal = Appeal.objects.last()
+        ok_(appeal, 'An Appeal object should be created.')
+        eq_(self.foia.last_comm(), appeal.communication,
+            'The appeal should reference the communication that was created.')
+
+    def test_appeal_example(self):
+        """If an example appeal is used to base the appeal off of,
+        then the examples should be recorded to the appeal object as well."""
+        example_appeal = ExampleAppealFactory()
+        data = {'action': 'appeal', 'text': 'Lorem ipsum', 'base_language': example_appeal.pk}
+        http_post_response(self.url, self.view, data, self.foia.user, **self.kwargs)
+        self.foia.refresh_from_db()
+        appeal = Appeal.objects.last()
+        ok_(appeal.base_language, 'The appeal should record its base language.')
+        ok_(appeal.base_language.count(), 1)
 
     def test_unauthorized_appeal(self):
         """Appealing a request without permission should not do anything."""

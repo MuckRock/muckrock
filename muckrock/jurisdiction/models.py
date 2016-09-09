@@ -351,7 +351,7 @@ class ExampleAppeal(models.Model):
         return u'%s for %s' % (self.context, self.exemption)
 
     def __repr__(self):
-        return '%d' % self.pk
+        return '<ExampleAppeal: %d>' % self.pk
 
     def get_absolute_url(self):
         """Return the url for the exemption detail page, targeting the appeal."""
@@ -359,3 +359,21 @@ class ExampleAppeal(models.Model):
         kwargs['slug'] = self.exemption.slug
         kwargs['pk'] = self.exemption.pk
         return reverse('exemption-detail', kwargs=kwargs) + '#appeal-%d' % self.pk
+
+
+class Appeal(models.Model):
+    """Appeals should capture information about appeals submitted to agencies.
+    It should capture the communication used to appeal, as well as the base language
+    used to write the appeal, if any was used."""
+    communication = models.ForeignKey('foia.FOIACommunication', related_name='appeals')
+    base_language = models.ManyToManyField(ExampleAppeal, related_name='appeals', blank=True)
+
+    def __unicode__(self):
+        return u'Appeal: %s' % self.communication
+
+    def __repr__(self):
+        return '<Appeal: %d>' % self.pk
+
+    def get_absolute_url(self):
+        """Return the url for the communication."""
+        return self.communication.get_absolute_url()

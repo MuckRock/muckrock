@@ -270,7 +270,3 @@ class FOIAAccessForm(forms.Form):
         ('view', 'Can View'),
     ]
     access = forms.ChoiceField(choices=access_choices)
-
-class AppealForm(forms.Form):
-    """Appeals take a language input."""
-    text = forms.CharField(widget=forms.Textarea())
