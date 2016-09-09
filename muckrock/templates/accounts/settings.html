@@ -75,7 +75,11 @@
                             <dfn>Current plan</dfn>
                             <p>{{current_plan}}</p>
                         </td>
+                        {% if user.profile.acct_type == 'basic' and not user.profile.organization %}
+                        <td><a href="{% url 'accounts' %}" class="blue button">Go Pro!</a></td>
+                        {% else %}
                         <td><a href="{% url 'accounts' %}" class="button">Change Plan</a></td>
+                        {% endif %}
                     </tr>
                     {% if credit_card and request.user.profile.has_subscription %}
                     <tr>
