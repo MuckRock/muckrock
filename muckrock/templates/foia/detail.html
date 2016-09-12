@@ -245,9 +245,16 @@ Sincerely,
                         {% endif %}
                         {% if foia.is_appealable %}
                         <div class="composer" id="appeal">
-                            <noscript>
-                                <p class="failure">Exemption searching requires Javascript.</p>
-                            </noscript>
+                            {% if not foia.jurisdiction.can_appeal %}
+                            <div class="message warning">
+                                <span class="symbol">
+                                    {% include 'lib/component/icon/warning.svg' %}
+                                </span>
+                                <span class="text">
+                                    <p>{% if foia.jurisdiction.level == 'l' %}{{foia.jurisdiction.parent.name}}{% else %}{{foia.jurisdiction.name}}{% endif %} does not have a formal appeals process open to requesters. However, you can ask an agency to reconsider its determination or find ways to reword your request. If you're looking for legal resources, <a href="{% if foia.jurisdiction.level == 'l' %}{{foia.jurisdiction.parent.get_absolute_url}}{% else %}{{foia.jurisdiction.get_absolute_url}}{% endif %}">check out our {% if foia.jurisdiction.level == 'l' %}{{foia.jurisdiction.parent.name}}{% else %}{{foia.jurisdiction.name}}{% endif %} public records guide</a>.</p>
+                                </span>
+                            </div>
+                            {% endif %}
                             <div id="dom-data" style="display: none;"
                                 data-request="{{foia.pk}}"
                                 data-jurisdiction="{% if foia.jurisdiction.level == 'l' %}{{foia.jurisdiction.parent.pk}}{% else %}{{foia.jurisdiction.pk}}{% endif %}"

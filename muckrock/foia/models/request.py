@@ -284,15 +284,11 @@ class FOIARequest(models.Model):
 
     def is_appealable(self):
         """Can this request be appealed by the user?"""
-        if not self.jurisdiction.can_appeal():
-            return False
-
         if self.status in ['processed', 'appealing']:
             # can appeal these only if they are over due
             if not self.date_due:
                 return False
             return self.date_due < date.today()
-
         # otherwise it can be appealed as long as it has actually been sent to the agency
         return self.status not in ['started', 'submitted']
 
