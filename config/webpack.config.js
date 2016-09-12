@@ -1,12 +1,13 @@
 var path = require('path')
 var webpack = require('webpack')
+var validate = require('webpack-validator')
 var BundleTracker = require('webpack-bundle-tracker')
 var ExtractText = require('extract-text-webpack-plugin')
 
 // paths are absolute to the root of the project, where we run `npm` commands
 var root = './muckrock/'
 
-module.exports = {
+var config = {
     devtool: 'source-map',
     entry: path.resolve(root + 'assets/entry'),
     output: {
@@ -47,10 +48,11 @@ module.exports = {
         }),
     ],
     resolve: {
-        moduleDirectories: ['node_modules'],
         extensions: ['', '.js', '.jsx']
     },
     watchOptions: {
 	poll: true,
     },
 }
+
+module.exports = validate(config);
