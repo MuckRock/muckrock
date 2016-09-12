@@ -23,8 +23,7 @@ import ExemptionBrowserContainer from './containers/ExemptionBrowserContainer';
 const reducer = combineReducers({
     exemptions: exemptionReducer,
     form: formReducer,
-})
-// TODO We initialize the devtool here, but this should be removed in production settings
+});
 const devTool = window.devToolsExtension ? window.devToolsExtension() : undefined;
 const store = createStore(
     reducer,
