@@ -253,14 +253,7 @@ Sincerely,
                                 data-jurisdiction="{% if foia.jurisdiction.level == 'l' %}{{foia.jurisdiction.parent.pk}}{% else %}{{foia.jurisdiction.pk}}{% endif %}"
                                 data-agency="{{foia.agency.pk}}"></div>
                             <div class="exemption-browser" id="exemptionBrowser">
-                                <form method="get" action="/api_v1/exemption/search/">
-                                    <div class="field">
-                                        <label for="exemption-search" class="label">Search exemptions and appeals in {{foia.jurisdiction}}</label>
-                                        <input type="hidden" name="jurisdiction" value="{{foia.jurisdiction.pk}}" />
-                                        <input type="search" name="q" id="exemption-search" placeholder="(b)(6)" />
-                                        <button type="submit" class="basic blue button">Search</button>
-                                    </div>
-                                </form>
+                              <noscript>To search for exemptions and appeals, please enable Javascript.</noscript>
                             </div>
                             <form class="composer-input" method="post">
                                 {% if foia.agency.appeal_agency %}
