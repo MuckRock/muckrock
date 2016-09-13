@@ -270,6 +270,10 @@ class Profile(models.Model):
         customer = self.customer()
         return customer.subscriptions.total_count > 0
 
+    def has_unread_notifications(self):
+        """Check whether this user has unread notifications"""
+        return Notification.objects.for_user(self.user).get_unread().exists()
+
     def start_pro_subscription(self, token=None):
         """Subscribe this profile to a professional plan. Return the subscription."""
         # create the stripe subscription

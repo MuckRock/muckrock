@@ -13,6 +13,7 @@ import stripe
 
 from muckrock.accounts.models import Profile
 from muckrock.message.email import TemplateEmail
+from muckrock.message.notifications import SlackNotification
 from muckrock.message import digests, receipts
 from muckrock.organization.models import Organization
 
@@ -30,9 +31,13 @@ def send_activity_digest(user, subject, interval):
 
 def send_digests(preference, subject, interval):
     """Helper to send out timed digests"""
-    profiles = Profile.objects.select_related('user').filter(email_pref=preference).distinct()
+    profiles = (Profile.objects.select_related('user')
+                               .prefetch_related('user__notifications')
+                               .filter(email_pref=preference)
+                               .distinct())
     for profile in profiles:
-        send_activity_digest.delay(profile.user, subject, interval)
+        if profile.has_unread_notifications():
+            send_activity_digest.delay(profile.user, subject, interval)
 
 # every hour
 @periodic_task(run_every=crontab(hour='*/1', minute=0), name='muckrock.message.tasks.hourly_digest')
@@ -301,3 +306,9 @@ def notify_project_contributor(user, project, added_by):
         subject=u'Added to a project'
     )
     notification.send(fail_silently=False)
+
+@task(name='muckrock.message.tasks.slack')
+def slack(payload):
+    """Send a Slack notification using the provided payload."""
+    notification = SlackNotification(payload)
+    notification.send()
