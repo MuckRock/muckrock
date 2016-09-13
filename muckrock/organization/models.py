@@ -225,16 +225,17 @@ class Organization(models.Model):
         if not self.active:
             raise AttributeError('Cannot cancel an inactive subscription.')
         customer = self.owner.profile.customer()
-        subscription = customer.subscriptions.retrieve(self.stripe_id)
         try:
+            subscription = customer.subscriptions.retrieve(self.stripe_id)
             subscription = subscription.delete()
-            self.stripe_id = ''
-            self.owner.profile.subscription_id = ''
-            self.owner.profile.payment_failed = False
         except stripe.InvalidRequestError:
-            logger.error(('No subscription is associated with organization '
+            subscription = None
+            logger.warning(('No subscription is associated with organization '
                          'owner %s.'), self.owner.username)
+        self.stripe_id = ''
         self.active = False
+        self.owner.profile.subscription_id = ''
+        self.owner.profile.payment_failed = False
         self.save()
         self.owner.profile.save()
         return subscription
