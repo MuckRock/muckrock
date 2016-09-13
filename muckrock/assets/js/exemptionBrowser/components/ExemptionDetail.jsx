@@ -33,8 +33,10 @@ const AppealLanguage = ({appeal}) => {
         This way, we can track what appeal language is being
         used and how frequently.
         */
-        const $appealInputElement = $('<input type="hidden" name="appeal_language" value="' + id + '"/>');
+        const $appealInputElement = $('<input type="hidden" name="base_language" value="' + id + '"/>');
         $appealInputElement.insertAfter($appealComposer);
+        /* Scroll down to the appeal composer to show the filled input. */
+        window.scrollTo(0, $appealComposer.offset().top);
     }
     return (
         <div className="exemption__detail__appeal">
@@ -64,7 +66,7 @@ const ExemptionDetail = ({exemption, onBackClick}) => {
                 <p>{exemption.basis}</p>
                 <h2>Sample Appeals</h2>
                 {appeals}
-                <a href={exemption.absolute_url} target="_blank">View more details</a>
+                <a href={exemption.absolute_url} target="_blank">Learn more about this exemption</a>
             </div>
             <button className="basic button w100 exemption__backButton" onClick={onBackClick}>&larr; Back to search results</button>
         </div>
