@@ -697,8 +697,8 @@ class TestRequestDetailView(TestCase):
 
     def test_unappealable_request(self):
         """An appeal on a request that cannot be appealed should not do anything."""
-        self.foia.jurisdiction.has_appeal = False
-        self.foia.jurisdiction.save()
+        self.foia.status = 'submitted'
+        self.foia.save()
         nose.tools.assert_false(self.foia.is_appealable())
         comm_count = self.foia.communications.count()
         previous_status = self.foia.status
