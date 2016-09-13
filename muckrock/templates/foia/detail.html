@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load compress %}
+{% load render_bundle from webpack_loader %}
 {% load humanize %}
 {% load markdown_deux_tags %}
 {% load mathfilters %}
@@ -496,6 +497,7 @@ Sincerely,
 {% endblock content %}
 
 {% block scripts %}
+{% render_bundle 'exemption' 'js' %}
 <script type="text/javascript">
     $('.datepicker').datepicker({
         maxDate: '+30d',

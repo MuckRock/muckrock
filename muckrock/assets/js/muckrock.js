@@ -24,7 +24,6 @@ import './crowdfund';
 import './currencyField';
 import './dropdown';
 import './editor';
-import './exemptionBrowser/app';
 import './foiaRequest';
 import './list';
 import modal from './modal';
