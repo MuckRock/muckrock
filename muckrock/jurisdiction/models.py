@@ -389,9 +389,7 @@ class Appeal(models.Model):
         return successful
 
     def is_finished(self):
-        """Evaluate the FOIARequest communications to judge whether teh appeal is finished."""
+        """Evaluate the FOIARequest communications to judge whether the appeal is finished."""
         foia = self.communication.foia
         subsequent_comms = foia.communications.filter(date__gt=self.communication.date)
-        finished = False
-        finished = finished or subsequent_comms.filter(status__in=END_STATUS).exists()
-        return finished
+        return subsequent_comms.filter(status__in=END_STATUS).exists()
