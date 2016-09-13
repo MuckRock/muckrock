@@ -13,6 +13,7 @@ import stripe
 
 from muckrock.accounts.models import Profile
 from muckrock.message.email import TemplateEmail
+from muckrock.message.notifications import SlackNotification
 from muckrock.message import digests, receipts
 from muckrock.organization.models import Organization
 
@@ -305,3 +306,9 @@ def notify_project_contributor(user, project, added_by):
         subject=u'Added to a project'
     )
     notification.send(fail_silently=False)
+
+@task(name='muckrock.message.tasks.slack')
+def slack(payload):
+    """Send a Slack notification using the provided payload."""
+    notification = SlackNotification(payload)
+    notification.send()

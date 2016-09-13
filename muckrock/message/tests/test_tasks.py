@@ -70,7 +70,7 @@ class TestDailyTask(TestCase):
     @mock.patch('muckrock.message.tasks.send_activity_digest.delay')
     def test_when_unread(self, mock_send):
         """The send method should be called when a user has unread notifications."""
-        notification = factories.NotificationFactory(user=self.user)
+        factories.NotificationFactory(user=self.user)
         tasks.daily_digest()
         mock_send.assert_called_with(self.user, u'Daily Digest', relativedelta(days=1))
 
