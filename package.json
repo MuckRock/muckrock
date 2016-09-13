@@ -5,9 +5,10 @@
   "main": "muckrock/assets/entry.js",
   "scripts": {
     "build": "webpack --config config/webpack.config.js --progress --color",
+    "build:production": "NODE_ENV=production webpack --config config/webpack.config.production.js --color",
     "watch": "webpack --config config/webpack.config.js --progress --color --watch",
     "lint": "eslint ./muckrock/assets/js -c config/.eslintrc",
-    "heroku-postbuild": "npm run build"
+    "heroku-postbuild": "npm run build:production"
   },
   "repository": {
     "type": "git",
@@ -39,6 +40,7 @@
     "style-loader": "^0.13.0",
     "webpack": "^1.12.14",
     "webpack-bundle-tracker": "0.0.93",
+    "webpack-merge": "^0.14.1",
     "webpack-validator": "^2.2.7"
   },
   "dependencies": {
