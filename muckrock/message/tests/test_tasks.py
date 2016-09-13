@@ -6,6 +6,7 @@ object cannot be instantiated.
 
 from django.test import TestCase
 
+from dateutil.relativedelta import relativedelta
 import mock
 import nose.tools
 
@@ -64,14 +65,21 @@ MockInvoice.retrieve.return_value = mock_invoice
 class TestDailyTask(TestCase):
     """Tests the daily email notification task."""
     def setUp(self):
-        factories.UserFactory()
+        self.user = factories.UserFactory()
 
-    @mock.patch('muckrock.message.digests.ActivityDigest.send')
-    def test_daily_notification_task(self, mock_send):
-        """Make sure the send method is called for a regular user."""
+    @mock.patch('muckrock.message.tasks.send_activity_digest.delay')
+    def test_when_unread(self, mock_send):
+        """The send method should be called when a user has unread notifications."""
+        notification = factories.NotificationFactory(user=self.user)
+        tasks.daily_digest()
+        mock_send.assert_called_with(self.user, u'Daily Digest', relativedelta(days=1))
+
+    @mock.patch('muckrock.message.tasks.send_activity_digest.delay')
+    def test_when_no_unread(self, mock_send):
+        """The send method should not be called when a user does not have unread notifications."""
         # pylint: disable=no-self-use
         tasks.daily_digest()
-        mock_send.assert_called_with()
+        mock_send.assert_not_called()
 
 
 class TestStaffTask(TestCase):
