@@ -10,8 +10,7 @@ var root = './muckrock/'
 var config = {
     devtool: 'source-map',
     entry: {
-        main: path.resolve(root + 'assets/entry'),
-        exemption: path.resolve(root + 'assets/js/exemptionBrowser/app'),
+        main: path.resolve(root + 'assets/entry')
     },
     output: {
         path: path.resolve(root + 'assets/bundles/'),
@@ -51,8 +50,7 @@ var config = {
         }),
         new webpack.DefinePlugin({
             'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
-        }),
-        new webpack.optimize.CommonsChunkPlugin({names: ["main"], minChunks: 2})
+        })
     ],
     resolve: {
         extensions: ['', '.js', '.jsx']
