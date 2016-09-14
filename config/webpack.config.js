@@ -52,7 +52,7 @@ var config = {
         new webpack.DefinePlugin({
             'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
         }),
-        new webpack.optimize.CommonsChunkPlugin('main', 'main.js'),
+        new webpack.optimize.CommonsChunkPlugin({names: ["main"], minChunks: 2})
     ],
     resolve: {
         extensions: ['', '.js', '.jsx']
