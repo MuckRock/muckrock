@@ -9,7 +9,10 @@ var root = './muckrock/'
 
 var config = {
     devtool: 'source-map',
-    entry: path.resolve(root + 'assets/entry'),
+    entry: {
+        main: path.resolve(root + 'assets/entry'),
+        exemption: path.resolve(root + 'assets/js/exemptionBrowser/app'),
+    },
     output: {
         path: path.resolve(root + 'assets/bundles/'),
         filename: '[name].js',
@@ -46,13 +49,17 @@ var config = {
             jQuery: "jquery",
             "window.jQuery": "jquery"
         }),
+        new webpack.DefinePlugin({
+            'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
+        }),
+        new webpack.optimize.CommonsChunkPlugin('main', 'main.js'),
     ],
     resolve: {
         extensions: ['', '.js', '.jsx']
     },
     watchOptions: {
-	poll: true,
+	    poll: true,
     },
-}
+};
 
 module.exports = validate(config);
