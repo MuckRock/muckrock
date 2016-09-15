@@ -35,6 +35,9 @@
     &:hover {
         background: $color-blue;
         color: $color-white;
+        .link {
+            color: $color-white;
+        }
     }
 }
 

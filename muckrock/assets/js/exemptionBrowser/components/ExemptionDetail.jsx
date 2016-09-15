@@ -47,7 +47,7 @@ const AppealLanguage = ({appeal}) => {
                 </div>
                 <div className="grid__column quarter">
                     <p className="small nomargin">Use this language in your appeal.</p>
-                    <button className="button" onClick={handleClick}>Sample</button>
+                    <button className="blue button" onClick={handleClick}>Use Language</button>
                 </div>
             </div>
         </div>
@@ -55,6 +55,7 @@ const AppealLanguage = ({appeal}) => {
 };
 
 const ExemptionDetail = ({exemption, onBackClick}) => {
+    const appealHeading = exemption.example_appeals ? <h2>Sample Appeals</h2> : null;
     const appeals = exemption.example_appeals.map((appeal, i) => (
         <AppealLanguage key={i} appeal={appeal} />
     ));
@@ -64,9 +65,9 @@ const ExemptionDetail = ({exemption, onBackClick}) => {
             <div className="exemption__detail textbox nomargin">
                 <h1>{exemption.name}</h1>
                 <p>{exemption.basis}</p>
-                <h2>Sample Appeals</h2>
+                <p><a href={exemption.absolute_url} target="_blank">Learn more</a></p>
+                {appealHeading}
                 {appeals}
-                <a href={exemption.absolute_url} target="_blank">Learn more about this exemption</a>
             </div>
             <button className="basic button w100 exemption__backButton" onClick={onBackClick}>&larr; Back to search results</button>
         </div>

@@ -67,7 +67,7 @@ const ExemptionForm = ({currentState, response, onDismiss, onCancel, handleSubmi
             </div>
             <footer>
                 <span onClick={handleCancel} className="button">Cancel</span>
-                <button type="submit" className="blue button">Submit</button>
+                <button type="submit" className="blue button">Submit Exemption</button>
             </footer>
         </form>
     )

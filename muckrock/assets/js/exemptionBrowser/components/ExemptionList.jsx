@@ -25,6 +25,7 @@ const ExemptionListItem = ({exemption, onClick}) => {
         <li className="exemption__list__item textbox nomargin" onClick={handleClick}>
             <p className="exemption__name bold">{exemption.name} &rarr;</p>
             <p className="exemption__basis">{truncatedBasis}</p>
+            <p className="link">See More</p>
         </li>
     )
 };
@@ -40,8 +41,8 @@ const ExemptionList = ({query, loading, exemptions, showExemptionDetail, showExe
             emptyResults = (
                 <div className="exemption__empty small">
                     <p className="bold nomargin">Are these results unhelpful?</p>
-                    <p className="nomargin">Tell us more about your exemption and we'll help you appeal it.</p>
-                    <button onClick={showExemptionForm} className="button">Submit Exemption</button>
+                    <p className="nomargin">Tell us how your request was rejected and we'll help you appeal it.</p>
+                    <button onClick={showExemptionForm} className="button">Submit Information</button>
                 </div>
             )
             renderedList = (
@@ -61,9 +62,9 @@ const ExemptionList = ({query, loading, exemptions, showExemptionDetail, showExe
         } else {
             emptyResults = (
                 <div className="exemption__empty">
-                    <p className="bold nomargin">We can't find anything related to "{query}"</p>
-                    <p>Tell us more about your exemption and we'll help you appeal it.</p>
-                    <button onClick={showExemptionForm} className="button">Submit Exemption</button>
+                    <p className="bold nomargin">We don't have anything in our database yet for "{query}".</p>
+                    <p>Tell us how your request was rejected and we'll help you appeal it.</p>
+                    <button onClick={showExemptionForm} className="button">Submit Information</button>
                 </div>
             )
             renderedList = (
