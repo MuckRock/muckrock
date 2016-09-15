@@ -9,7 +9,7 @@
     <dt>Jurisdiction</dt>
     <dd><a href="{{task.foia.agency.jurisdiction.get_absolute_url}}">{{task.foia.agency.jurisdiction}}</a></dd>
     <dt>Submitted by</dt>
-    <dd><a href="{{task.user.get_absolute_url}}">{{task.user}}</a></dd>
+    <dd><a href="{{task.user.get_absolute_url}}">{{task.user}}</a><br /><a href="mailto:{{task.user.email}}">{{task.user.email}}</a></dd>
     <dt>Exemption Language</dt>
     <dd>
         <p>{{task.language}}</p>

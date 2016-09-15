@@ -43,7 +43,7 @@ const AppealLanguage = ({appeal}) => {
             <p>{appeal.context}</p>
             <div className="grid__row">
                 <div className="grid__column three-quarters">
-                    <textarea readOnly rows="3" value={appeal.language}></textarea>
+                    <blockquote className="force-select">{appeal.language}</blockquote>
                 </div>
                 <div className="grid__column quarter">
                     <p className="small nomargin">Use this language in your appeal.</p>

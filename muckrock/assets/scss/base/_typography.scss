@@ -145,3 +145,8 @@ ul, ol {
 .mono {
     font-family: $monospace;
 }
+
+.force-select {
+    -webkit-user-select: all;
+    user-select: all;
+}
