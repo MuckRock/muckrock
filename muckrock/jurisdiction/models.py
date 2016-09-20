@@ -4,7 +4,7 @@ Models for the Jurisdiction application
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import models
-from django.db.models import F, Q, Avg, Sum
+from django.db.models import F, Q, Avg, Sum, Count
 from django.template.defaultfilters import slugify
 
 from easy_thumbnails.fields import ThumbnailerImageField
@@ -12,7 +12,7 @@ from random import choice
 from taggit.managers import TaggableManager
 
 from muckrock.business_days.models import Holiday, HolidayCalendar, Calendar
-from muckrock.foia.models import FOIARequest
+from muckrock.foia.models import FOIARequest, END_STATUS
 from muckrock.tags.models import TaggedItemBase
 
 # pylint: disable=bad-continuation
@@ -304,7 +304,7 @@ class Exemption(models.Model):
         """Return the url for the exemption detail page"""
         kwargs = self.jurisdiction.get_slugs()
         kwargs['slug'] = self.slug
-        kwargs['idx'] = self.pk
+        kwargs['pk'] = self.pk
         return reverse('exemption-detail', kwargs=kwargs)
 
 
@@ -333,7 +333,7 @@ class InvokedExemption(models.Model):
         """Return the url for the exemption detail page, targeting the invokation."""
         kwargs = self.exemption.jurisdiction.get_slugs()
         kwargs['slug'] = self.exemption.slug
-        kwargs['idx'] = self.exemption.pk
+        kwargs['pk'] = self.exemption.pk
         return reverse('exemption-detail', kwargs=kwargs) + '#invoked-%d' % self.pk
 
 
@@ -351,11 +351,45 @@ class ExampleAppeal(models.Model):
         return u'%s for %s' % (self.context, self.exemption)
 
     def __repr__(self):
-        return '%d' % self.pk
+        return '<ExampleAppeal: %d>' % self.pk
 
     def get_absolute_url(self):
         """Return the url for the exemption detail page, targeting the appeal."""
         kwargs = self.exemption.jurisdiction.get_slugs()
         kwargs['slug'] = self.exemption.slug
-        kwargs['idx'] = self.exemption.pk
+        kwargs['pk'] = self.exemption.pk
         return reverse('exemption-detail', kwargs=kwargs) + '#appeal-%d' % self.pk
+
+
+class Appeal(models.Model):
+    """Appeals should capture information about appeals submitted to agencies.
+    It should capture the communication used to appeal, as well as the base language
+    used to write the appeal, if any was used."""
+    communication = models.ForeignKey('foia.FOIACommunication', related_name='appeals')
+    base_language = models.ManyToManyField(ExampleAppeal, related_name='appeals', blank=True)
+
+    def __unicode__(self):
+        return u'Appeal of %s' % self.communication.foia
+
+    def __repr__(self):
+        return '<Appeal: %d>' % self.pk
+
+    def get_absolute_url(self):
+        """Return the url for the communication."""
+        return self.communication.get_absolute_url()
+
+    def is_successful(self):
+        """Evaluate the FOIARequest communications to judge whether the appeal is successful."""
+        foia = self.communication.foia
+        subsequent_comms = (foia.communications.filter(date__gt=self.communication.date)
+                                               .annotate(appeal__count=Count('appeals')))
+        successful = False
+        successful = successful or subsequent_comms.filter(status='done').exists()
+        successful = successful and not subsequent_comms.filter(appeal__count__gt=0).exists()
+        return successful
+
+    def is_finished(self):
+        """Evaluate the FOIARequest communications to judge whether the appeal is finished."""
+        foia = self.communication.foia
+        subsequent_comms = foia.communications.filter(date__gt=self.communication.date)
+        return subsequent_comms.filter(status__in=END_STATUS).exists()

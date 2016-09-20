@@ -82,6 +82,12 @@ class AgencyFactory(factory.django.DjangoModelFactory):
     status = 'approved'
 
 
+class AppealAgencyFactory(AgencyFactory):
+    """A factory for creating an Agency that accepts email appeals."""
+    email = factory.Faker('email')
+    can_email_appeals = True
+
+
 class FOIARequestFactory(factory.django.DjangoModelFactory):
     """A factory for creating FOIARequest test objects."""
     class Meta:

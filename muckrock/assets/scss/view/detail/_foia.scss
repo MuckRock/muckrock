@@ -191,20 +191,20 @@ $request-breakpoint: 768px;
             @include display(flex);
             @include justify-content(space-between);
         }
-        &.inactive {
-            p {
-                height: 15em;
-                padding: $vr/2;
-                background-color: #FFF;
-                color: $color-grey;
-            }
-            span {
-                border-bottom: 1px dotted;
-                cursor: pointer;
-                &:hover {
-                    color: $color-blue;
-                    border-bottom: 1px solid;
-                }
+    }
+    #inactive .composer-input {
+        p {
+            height: 15em;
+            padding: $vr/2;
+            background-color: #FFF;
+            color: $color-grey;
+        }
+        span {
+            border-bottom: 1px dotted;
+            cursor: pointer;
+            &:hover {
+                color: $color-blue;
+                border-bottom: 1px solid;
             }
         }
     }

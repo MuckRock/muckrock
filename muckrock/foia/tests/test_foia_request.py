@@ -5,8 +5,7 @@ Tests using nose for the FOIA application
 from django.contrib.auth.models import User, AnonymousUser
 from django.core.urlresolvers import reverse
 from django.core import mail
-from django.http import Http404
-from django.test import TestCase, RequestFactory
+from django.test import TestCase
 
 from actstream.actions import follow
 import datetime
@@ -20,18 +19,19 @@ from muckrock.agency.models import Agency
 from muckrock.factories import (
     UserFactory,
     FOIARequestFactory,
-    FOIAFileFactory,
     ProjectFactory,
-    AgencyFactory
+    AgencyFactory,
+    AppealAgencyFactory
 )
 from muckrock.foia.models import FOIARequest, FOIACommunication
-from muckrock.foia.views import Detail, FOIAFileListView
+from muckrock.foia.views import Detail
 from muckrock.foia.views.composers import _make_user
-from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.jurisdiction.models import Jurisdiction, Appeal
+from muckrock.jurisdiction.factories import ExampleAppealFactory
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.task.models import SnailMailTask
 from muckrock.tests import get_allowed, post_allowed, get_post_unallowed, get_404
-from muckrock.test_utils import mock_middleware
+from muckrock.test_utils import mock_middleware, http_post_response
 from muckrock.utils import new_action
 
 ok_ = nose.tools.ok_
@@ -545,78 +545,89 @@ class TestFOIAIntegration(TestCase):
         nose.tools.ok_(foia.days_until_due is None)
 
 
-class TestFOIANotes(TestCase):
-    """Allow editors to attach notes to a request."""
+class TestFOIARequestAppeal(TestCase):
+    """A request should be able to send an appeal to the agency that receives them."""
     def setUp(self):
-        self.factory = RequestFactory()
-        self.foia = FOIARequestFactory()
-        self.creator = self.foia.user
-        self.editor = UserFactory()
-        self.viewer = UserFactory()
-        self.foia.add_editor(self.editor)
-        self.foia.add_viewer(self.viewer)
-        self.note_text = u'Lorem ipsum dolor su ament.'
-        self.note_data = {'action': 'add_note', 'note': self.note_text}
+        self.appeal_agency = AppealAgencyFactory()
+        self.agency = AgencyFactory(status='approved', appeal_agency=self.appeal_agency)
+        self.foia = FOIARequestFactory(agency=self.agency, status='rejected')
 
-    def test_add_note(self):
-        """User with edit permission should be able to create a note."""
-        request = self.factory.post(self.foia.get_absolute_url(), self.note_data)
-        request = mock_middleware(request)
-        request.user = self.editor
-        response = Detail.as_view()(
-            request,
-            jurisdiction=self.foia.jurisdiction.slug,
-            jidx=self.foia.jurisdiction.id,
-            slug=self.foia.slug,
-            idx=self.foia.id
-        )
+    def test_appeal(self):
+        """Sending an appeal to the agency should require the message for the appeal,
+        which is then turned into a communication to the correct agency. In this case,
+        the correct agency is the same one that received the message."""
+        ok_(self.foia.is_appealable(),
+            'The request should be appealable.')
+        ok_(self.agency and self.agency.status == 'approved',
+            'The agency should be approved.')
+        ok_(self.appeal_agency.email and self.appeal_agency.can_email_appeals,
+            'The appeal agency should accept email.')
+        # Create the appeal message and submit it
+        appeal_message = 'Lorem ipsum'
+        appeal_comm = self.foia.appeal(appeal_message)
+        # Check that everything happened like we expected
         self.foia.refresh_from_db()
-        nose.tools.eq_(response.status_code, 302)
-        nose.tools.assert_true(self.foia.notes.count() > 0)
+        appeal_comm.refresh_from_db()
+        eq_(self.foia.email, self.appeal_agency.email,
+            'The FOIA primary email should be set to the appeal agency\'s email.')
+        eq_(self.foia.status, 'appealing',
+            'The status of the request should be updated. Actually: %s' % self.foia.status)
+        eq_(appeal_comm.communication, appeal_message,
+            'The appeal message parameter should be used as the body of the communication.')
+        eq_(appeal_comm.from_who, self.foia.user.get_full_name(),
+            'The appeal should be addressed from the request owner.')
+        eq_(appeal_comm.to_who, self.agency.name,
+            'The appeal should be addressed to the agency.')
+        eq_(appeal_comm.delivered, 'email',
+            'The appeal should be marked as delivered via email, not %s.' % appeal_comm.delivered)
 
-    def test_add_note_without_permission(self):
-        """Normies and viewers cannot add notes."""
-        request = self.factory.post(self.foia.get_absolute_url(), self.note_data)
-        request = mock_middleware(request)
-        request.user = self.viewer
-        response = Detail.as_view()(
-            request,
-            jurisdiction=self.foia.jurisdiction.slug,
-            jidx=self.foia.jurisdiction.id,
-            slug=self.foia.slug,
-            idx=self.foia.id
-        )
+    def test_mailed_appeal(self):
+        """Sending an appeal to an agency via mail should set the request to 'submitted',
+        create a snail mail task with the 'a' category, and set the appeal communication
+        delivery method to 'mail'."""
+        # Make the appeal agency unreceptive to emails
+        self.appeal_agency.email = ''
+        self.appeal_agency.can_email_appeals = False
+        self.appeal_agency.save()
+        # Create the appeal message and submit it
+        appeal_message = 'Lorem ipsum'
+        appeal_comm = self.foia.appeal(appeal_message)
+        # Check that everything happened like we expected
         self.foia.refresh_from_db()
-        nose.tools.eq_(response.status_code, 302)
-        nose.tools.assert_true(self.foia.notes.count() == 0)
+        appeal_comm.refresh_from_db()
+        eq_(self.foia.status, 'submitted',
+            'The status of the request should be updated. Actually: %s' % self.foia.status)
+        eq_(appeal_comm.communication, appeal_message,
+            'The appeal message parameter should be used as the body of the communication.')
+        eq_(appeal_comm.from_who, self.foia.user.get_full_name(),
+            'The appeal should be addressed from the request owner.')
+        eq_(appeal_comm.to_who, self.agency.name,
+            'The appeal should be addressed to the agency.')
+        eq_(appeal_comm.delivered, 'mail',
+            'The appeal should be marked as delivered via mail, not %s.' % appeal_comm.delivered)
+        task = SnailMailTask.objects.get(communication=appeal_comm)
+        ok_(task, 'A snail mail task should be created.')
+        eq_(task.category, 'a', 'The task should be in the appeal category.')
 
 
 class TestRequestDetailView(TestCase):
     """Request detail views support a wide variety of interactions"""
-
     def setUp(self):
-        self.foia = FOIARequestFactory()
-        self.request_factory = RequestFactory()
+        agency = AgencyFactory(appeal_agency=AppealAgencyFactory())
+        self.foia = FOIARequestFactory(agency=agency)
         self.view = Detail.as_view()
         self.url = self.foia.get_absolute_url()
-
-    def post_helper(self, data, user):
-        """Returns post responses"""
-        request = self.request_factory.post(self.url, data)
-        request.user = user
-        request = mock_middleware(request)
-        return self.view(
-            request,
-            jurisdiction=self.foia.jurisdiction.slug,
-            jidx=self.foia.jurisdiction.id,
-            slug=self.foia.slug,
-            idx=self.foia.id
-        )
+        self.kwargs = {
+            'jurisdiction': self.foia.jurisdiction.slug,
+            'jidx': self.foia.jurisdiction.id,
+            'slug': self.foia.slug,
+            'idx': self.foia.id
+        }
 
     def test_add_tags(self):
         """Posting a collection of tags to a request should update its tags."""
-        tags = 'foo, bar'
-        self.post_helper({'action': 'tags', 'tags': tags}, self.foia.user)
+        data = {'action': 'tags', 'tags': 'foo, bar'}
+        http_post_response(self.url, self.view, data, self.foia.user, **self.kwargs)
         self.foia.refresh_from_db()
         ok_('foo' in [tag.name for tag in self.foia.tags.all()])
         ok_('bar' in [tag.name for tag in self.foia.tags.all()])
@@ -628,9 +639,76 @@ class TestRequestDetailView(TestCase):
         ok_(form.is_valid())
         data = {'action': 'projects'}
         data.update(form.data)
-        self.post_helper(data, self.foia.user)
+        http_post_response(self.url, self.view, data, self.foia.user, **self.kwargs)
         project.refresh_from_db()
         ok_(self.foia in project.requests.all())
+
+    def test_appeal(self):
+        """Appealing a request should send a new communication,
+        record the details of the appeal, and update the status of the request."""
+        comm_count = self.foia.communications.count()
+        data = {'action': 'appeal', 'text': 'Lorem ipsum'}
+        http_post_response(self.url, self.view, data, self.foia.user, **self.kwargs)
+        self.foia.refresh_from_db()
+        eq_(self.foia.status, 'appealing')
+        eq_(self.foia.communications.count(), comm_count + 1)
+        eq_(self.foia.last_comm().communication, data['text'],
+            'The appeal should use the language provided by the user.')
+        appeal = Appeal.objects.last()
+        ok_(appeal, 'An Appeal object should be created.')
+        eq_(self.foia.last_comm(), appeal.communication,
+            'The appeal should reference the communication that was created.')
+
+    def test_appeal_example(self):
+        """If an example appeal is used to base the appeal off of,
+        then the examples should be recorded to the appeal object as well."""
+        example_appeal = ExampleAppealFactory()
+        data = {'action': 'appeal', 'text': 'Lorem ipsum', 'base_language': example_appeal.pk}
+        http_post_response(self.url, self.view, data, self.foia.user, **self.kwargs)
+        self.foia.refresh_from_db()
+        appeal = Appeal.objects.last()
+        ok_(appeal.base_language, 'The appeal should record its base language.')
+        ok_(appeal.base_language.count(), 1)
+
+    def test_unauthorized_appeal(self):
+        """Appealing a request without permission should not do anything."""
+        unauth_user = UserFactory()
+        comm_count = self.foia.communications.count()
+        previous_status = self.foia.status
+        data = {'action': 'appeal', 'text': 'Lorem ipsum'}
+        http_post_response(self.url, self.view, data, unauth_user, **self.kwargs)
+        self.foia.refresh_from_db()
+        eq_(self.foia.status, previous_status,
+            'The status of the request should not be changed.')
+        eq_(self.foia.communications.count(), comm_count,
+            'No communication should be added to the request.')
+
+    def test_missing_appeal(self):
+        """An appeal that is missing its language should not do anything."""
+        comm_count = self.foia.communications.count()
+        previous_status = self.foia.status
+        data = {'action': 'appeal', 'text': ''}
+        http_post_response(self.url, self.view, data, self.foia.user, **self.kwargs)
+        self.foia.refresh_from_db()
+        eq_(self.foia.status, previous_status,
+            'The status of the request should not be changed.')
+        eq_(self.foia.communications.count(), comm_count,
+            'No communication should be added to the request.')
+
+    def test_unappealable_request(self):
+        """An appeal on a request that cannot be appealed should not do anything."""
+        self.foia.status = 'submitted'
+        self.foia.save()
+        nose.tools.assert_false(self.foia.is_appealable())
+        comm_count = self.foia.communications.count()
+        previous_status = self.foia.status
+        data = {'action': 'appeal', 'text': 'Lorem ipsum'}
+        http_post_response(self.url, self.view, data, self.foia.user, **self.kwargs)
+        self.foia.refresh_from_db()
+        eq_(self.foia.status, previous_status,
+            'The status of the request should not be changed.')
+        eq_(self.foia.communications.count(), comm_count,
+            'No communication should be added to the request.')
 
 
 class TestRequestPayment(TestCase):
@@ -655,368 +733,6 @@ class TestRequestPayment(TestCase):
         eq_(task.user, user, 'The task should be attributed to the user.')
         eq_(task.amount, amount, 'The task should contain the amount of the request.')
 
-
-class TestRequestSharing(TestCase):
-    """Allow people to edit and view another user's request."""
-    def setUp(self):
-        self.foia = FOIARequestFactory()
-        self.editor = UserFactory()
-        self.creator = self.foia.user
-
-    def test_add_editor(self):
-        """Editors should be able to add editors to the request."""
-        new_editor = self.editor
-        self.foia.add_editor(new_editor)
-        nose.tools.assert_true(self.foia.has_editor(new_editor))
-
-    def test_remove_editor(self):
-        """Editors should be able to remove editors from the request."""
-        editor_to_remove = self.editor
-        # first we add the editor, otherwise we would have nothing to remove!
-        self.foia.add_editor(editor_to_remove)
-        nose.tools.assert_true(self.foia.has_editor(editor_to_remove))
-        # now we remove the editor we just added
-        self.foia.remove_editor(editor_to_remove)
-        nose.tools.assert_false(self.foia.has_editor(editor_to_remove))
-
-    def test_editor_permission(self):
-        """Editors should have the same abilities and permissions as creators."""
-        new_editor = self.editor
-        self.foia.add_editor(new_editor)
-        nose.tools.ok_(self.foia.editable_by(new_editor))
-
-    def test_add_viewer(self):
-        """Editors should be able to add viewers to the request."""
-        new_viewer = UserFactory()
-        self.foia.add_viewer(new_viewer)
-        nose.tools.ok_(self.foia.has_viewer(new_viewer))
-
-    def test_remove_viewer(self):
-        """Editors should be able to remove viewers from the request."""
-        viewer_to_remove = UserFactory()
-        # first we add the viewer, otherwise we would have nothing to remove!
-        self.foia.add_viewer(viewer_to_remove)
-        nose.tools.ok_(self.foia.has_viewer(viewer_to_remove))
-        # now we remove the viewer we just added
-        self.foia.remove_viewer(viewer_to_remove)
-        nose.tools.assert_false(self.foia.has_viewer(viewer_to_remove))
-
-    def test_viewer_permission(self):
-        """Viewers should be able to see the request if it is embargoed."""
-        embargoed_foia = FOIARequestFactory(embargo=True)
-        viewer = UserFactory()
-        normie = UserFactory()
-        embargoed_foia.add_viewer(viewer)
-        nose.tools.assert_true(embargoed_foia.viewable_by(viewer))
-        nose.tools.assert_false(embargoed_foia.viewable_by(normie))
-
-    def test_promote_viewer(self):
-        """Editors should be able to promote viewers to editors."""
-        embargoed_foia = FOIARequestFactory(embargo=True)
-        viewer = UserFactory()
-        embargoed_foia.add_viewer(viewer)
-        nose.tools.assert_true(embargoed_foia.viewable_by(viewer))
-        nose.tools.assert_false(embargoed_foia.editable_by(viewer))
-        embargoed_foia.promote_viewer(viewer)
-        nose.tools.assert_true(embargoed_foia.editable_by(viewer))
-
-    def test_demote_editor(self):
-        """Editors should be able to demote editors to viewers."""
-        embargoed_foia = FOIARequestFactory(embargo=True)
-        editor = UserFactory()
-        embargoed_foia.add_editor(editor)
-        nose.tools.assert_true(embargoed_foia.viewable_by(editor))
-        nose.tools.assert_true(embargoed_foia.editable_by(editor))
-        embargoed_foia.demote_editor(editor)
-        nose.tools.assert_false(embargoed_foia.editable_by(editor))
-
-    def test_access_key(self):
-        """Editors should be able to generate a secure access key to view an embargoed request."""
-        embargoed_foia = FOIARequestFactory(embargo=True)
-        access_key = embargoed_foia.generate_access_key()
-        nose.tools.assert_true(access_key == embargoed_foia.access_key,
-            'The key in the URL should match the key saved to the request.')
-        embargoed_foia.generate_access_key()
-        nose.tools.assert_false(access_key == embargoed_foia.access_key,
-            'After regenerating the link, the key should no longer match.')
-
-    def test_do_not_grant_creator_access(self):
-        """Creators should not be granted access as editors or viewers"""
-        self.foia.add_editor(self.creator)
-        nose.tools.assert_false(self.foia.has_editor(self.creator))
-        self.foia.add_viewer(self.creator)
-        nose.tools.assert_false(self.foia.has_viewer(self.creator))
-        # but the creator should still be able to both view and edit!
-        nose.tools.assert_true(self.foia.editable_by(self.creator))
-        nose.tools.assert_true(self.foia.viewable_by(self.creator))
-
-
-class TestRequestSharingViews(TestCase):
-    """Tests access and implementation of view methods for sharing requests."""
-    def setUp(self):
-        self.factory = RequestFactory()
-        self.foia = FOIARequestFactory()
-        self.creator = self.foia.user
-        self.editor = UserFactory()
-        self.viewer = UserFactory()
-        self.staff = UserFactory(is_staff=True)
-        self.normie = UserFactory()
-        self.foia.add_editor(self.editor)
-        self.foia.add_viewer(self.viewer)
-        self.foia.save()
-
-    def reset_access_key(self):
-        """Simple helper to reset access key betweeen tests"""
-        self.foia.access_key = None
-        nose.tools.assert_false(self.foia.access_key)
-
-    def test_access_key_allowed(self):
-        """
-        A POST request for a private share link should generate and return an access key.
-        Editors and staff should be allowed to do this.
-        """
-        self.reset_access_key()
-        data = {'action': 'generate_key'}
-        request = self.factory.post(self.foia.get_absolute_url(), data)
-        request = mock_middleware(request)
-        # editors should be able to generate the key
-        request.user = self.editor
-        response = Detail.as_view()(
-            request,
-            jurisdiction=self.foia.jurisdiction.slug,
-            jidx=self.foia.jurisdiction.id,
-            slug=self.foia.slug,
-            idx=self.foia.id
-        )
-        self.foia.refresh_from_db()
-        nose.tools.eq_(response.status_code, 302)
-        nose.tools.assert_true(self.foia.access_key)
-        # staff should be able to generate the key
-        self.reset_access_key()
-        request.user = self.staff
-        response = Detail.as_view()(
-            request,
-            jurisdiction=self.foia.jurisdiction.slug,
-            jidx=self.foia.jurisdiction.id,
-            slug=self.foia.slug,
-            idx=self.foia.id
-        )
-        self.foia.refresh_from_db()
-        nose.tools.eq_(response.status_code, 302)
-        nose.tools.assert_true(self.foia.access_key)
-
-    def test_access_key_not_allowed(self):
-        """Visitors and normies should not be allowed to generate an access key."""
-        self.reset_access_key()
-        data = {'action': 'generate_key'}
-        request = self.factory.post(self.foia.get_absolute_url(), data)
-        request = mock_middleware(request)
-        # viewers should not be able to generate the key
-        request.user = self.viewer
-        response = Detail.as_view()(
-            request,
-            jurisdiction=self.foia.jurisdiction.slug,
-            jidx=self.foia.jurisdiction.id,
-            slug=self.foia.slug,
-            idx=self.foia.id
-        )
-        self.foia.refresh_from_db()
-        nose.tools.eq_(response.status_code, 302)
-        nose.tools.assert_false(self.foia.access_key)
-        # normies should not be able to generate the key
-        self.reset_access_key()
-        request.user = self.normie
-        response = Detail.as_view()(
-            request,
-            jurisdiction=self.foia.jurisdiction.slug,
-            jidx=self.foia.jurisdiction.id,
-            slug=self.foia.slug,
-            idx=self.foia.id
-        )
-        self.foia.refresh_from_db()
-        nose.tools.eq_(response.status_code, 302)
-        nose.tools.assert_false(self.foia.access_key)
-
-    def test_grant_edit_access(self):
-        """Editors should be able to add editors."""
-        user1 = UserFactory()
-        user2 = UserFactory()
-        edit_data = {
-            'action': 'grant_access',
-            'users': [user1.pk, user2.pk],
-            'access': 'edit'
-        }
-        edit_request = self.factory.post(self.foia.get_absolute_url(), edit_data)
-        edit_request = mock_middleware(edit_request)
-        edit_request.user = self.editor
-        edit_response = Detail.as_view()(
-            edit_request,
-            jurisdiction=self.foia.jurisdiction.slug,
-            jidx=self.foia.jurisdiction.id,
-            slug=self.foia.slug,
-            idx=self.foia.id
-        )
-        nose.tools.eq_(edit_response.status_code, 302)
-        nose.tools.assert_true(self.foia.has_editor(user1) and self.foia.has_editor(user2))
-
-    def test_grant_view_access(self):
-        """Editors should be able to add viewers."""
-        user1 = UserFactory()
-        user2 = UserFactory()
-        view_data = {
-            'action': 'grant_access',
-            'users': [user1.pk, user2.pk],
-            'access': 'view'
-        }
-        view_request = self.factory.post(self.foia.get_absolute_url(), view_data)
-        view_request = mock_middleware(view_request)
-        view_request.user = self.editor
-        view_response = Detail.as_view()(
-            view_request,
-            jurisdiction=self.foia.jurisdiction.slug,
-            jidx=self.foia.jurisdiction.id,
-            slug=self.foia.slug,
-            idx=self.foia.id
-        )
-        nose.tools.eq_(view_response.status_code, 302)
-        nose.tools.assert_true(self.foia.has_viewer(user1) and self.foia.has_viewer(user2))
-
-    def test_demote_editor(self):
-        """Editors should be able to demote editors to viewers."""
-        user = UserFactory()
-        self.foia.add_editor(user)
-        nose.tools.assert_true(self.foia.has_editor(user))
-        data = {
-            'action': 'demote',
-            'user': user.pk
-        }
-        request = self.factory.post(self.foia.get_absolute_url(), data)
-        request = mock_middleware(request)
-        request.user = self.editor
-        response = Detail.as_view()(
-            request,
-            jurisdiction=self.foia.jurisdiction.slug,
-            jidx=self.foia.jurisdiction.id,
-            slug=self.foia.slug,
-            idx=self.foia.id
-        )
-        nose.tools.eq_(response.status_code, 302)
-        nose.tools.assert_false(self.foia.has_editor(user))
-        nose.tools.assert_true(self.foia.has_viewer(user))
-
-    def test_promote_viewer(self):
-        """Editors should be able to promote viewers to editors."""
-        user = UserFactory()
-        self.foia.add_viewer(user)
-        nose.tools.assert_true(self.foia.has_viewer(user))
-        data = {
-            'action': 'promote',
-            'user': user.pk
-        }
-        request = self.factory.post(self.foia.get_absolute_url(), data)
-        request = mock_middleware(request)
-        request.user = self.editor
-        response = Detail.as_view()(
-            request,
-            jurisdiction=self.foia.jurisdiction.slug,
-            jidx=self.foia.jurisdiction.id,
-            slug=self.foia.slug,
-            idx=self.foia.id
-        )
-        nose.tools.eq_(response.status_code, 302)
-        nose.tools.assert_false(self.foia.has_viewer(user))
-        nose.tools.assert_true(self.foia.has_editor(user))
-
-    def test_revoke_edit_access(self):
-        """Editors should be able to revoke access from an editor."""
-        an_editor = UserFactory()
-        self.foia.add_editor(an_editor)
-        data = {
-            'action': 'revoke_access',
-            'user': an_editor.pk
-        }
-        request = self.factory.post(self.foia.get_absolute_url(), data)
-        request = mock_middleware(request)
-        request.user = self.editor
-        response = Detail.as_view()(
-            request,
-            jurisdiction=self.foia.jurisdiction.slug,
-            jidx=self.foia.jurisdiction.id,
-            slug=self.foia.slug,
-            idx=self.foia.id
-        )
-        nose.tools.eq_(response.status_code, 302)
-        nose.tools.assert_false(self.foia.has_editor(an_editor))
-
-    def test_revoke_view_access(self):
-        """Editors should be able to revoke access from a viewer."""
-        a_viewer = UserFactory()
-        self.foia.add_viewer(a_viewer)
-        data = {
-            'action': 'revoke_access',
-            'user': a_viewer.pk
-        }
-        request = self.factory.post(self.foia.get_absolute_url(), data)
-        request = mock_middleware(request)
-        request.user = self.editor
-        response = Detail.as_view()(
-            request,
-            jurisdiction=self.foia.jurisdiction.slug,
-            jidx=self.foia.jurisdiction.id,
-            slug=self.foia.slug,
-            idx=self.foia.id
-        )
-        nose.tools.eq_(response.status_code, 302)
-        nose.tools.assert_false(self.foia.has_viewer(a_viewer))
-
-
-class TestRequestFilesView(TestCase):
-    """Files should render in a paginated list on a separate page."""
-    def setUp(self):
-        self.file = FOIAFileFactory()
-        self.foia = self.file.foia
-        self.kwargs = {
-            'idx': self.foia.pk,
-            'slug': self.foia.slug,
-            'jidx': self.foia.jurisdiction.pk,
-            'jurisdiction': self.foia.jurisdiction.slug
-        }
-        self.url = reverse('foia-files', kwargs=self.kwargs)
-        self.view = FOIAFileListView.as_view()
-        self.factory = RequestFactory()
-
-    def test_get_ok(self):
-        """The view should return 200 if the foia is viewable to the user."""
-        request = self.factory.get(self.url)
-        request.user = self.foia.user
-        request = mock_middleware(request)
-        ok_(self.foia.viewable_by(request.user), 'The user should be able to view the request')
-        response = self.view(
-            request,
-            jurisdiction=self.foia.jurisdiction.slug,
-            jidx=self.foia.jurisdiction.id,
-            slug=self.foia.slug,
-            idx=self.foia.id
-        )
-        eq_(response.status_code, 200, 'The view should return 200.')
-
-    @raises(Http404)
-    def test_get_404(self):
-        """The view should return 404 is the foia is not visible to the user."""
-        self.foia.embargo = True
-        self.foia.save()
-        user = UserFactory()
-        ok_(not self.foia.viewable_by(user))
-        request = self.factory.get(self.url)
-        request.user = user
-        request = mock_middleware(request)
-        self.view(
-            request,
-            jurisdiction=self.foia.jurisdiction.slug,
-            jidx=self.foia.jurisdiction.id,
-            slug=self.foia.slug,
-            idx=self.foia.id
-        )
 
 class TestMakeUser(TestCase):
     """The request composer should provide miniregistration functionality."""

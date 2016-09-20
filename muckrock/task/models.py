@@ -579,6 +579,20 @@ class MultiRequestTask(Task):
         return reverse('multirequest-task', kwargs={'pk': self.pk})
 
 
+class NewExemptionTask(Task):
+    """Created when a new exemption is submitted for our review."""
+    type = 'NewExemptionTask'
+    foia = models.ForeignKey('foia.FOIARequest')
+    language = models.TextField()
+    user = models.ForeignKey(User)
+
+    def __unicode__(self):
+        return u'New Exemption Task'
+
+    def get_absolute_url(self):
+        return reverse('newexemption-task', kwargs={'pk': self.pk})
+
+
 # Not a task, but used by tasks
 class BlacklistDomain(models.Model):
     """A domain to be blacklisted from sending us emails"""

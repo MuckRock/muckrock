@@ -19,13 +19,13 @@ urlpatterns = patterns(
     url(r'^%s/flag/$' % jur_url,
         views.redirect_flag
     ),
+    url(r'^%s/exemption/(?P<slug>[\w-]+)-(?P<pk>\d+)/$' % jur_url,
+        views.ExemptionDetailView.as_view(),
+        name='exemption-detail',
+    ),
     url(r'^%s/$' % jur_url,
         views.detail,
         name='jurisdiction-detail'
-    ),
-    url(r'^%s/exemption/(?P<slug>[\w-]+)-(?P<idx>\d+)/$' % jur_url,
-        views.ExemptionDetailView.as_view(),
-        name='exemption-detail',
     ),
 )
 
