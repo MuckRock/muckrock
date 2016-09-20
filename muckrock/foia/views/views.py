@@ -46,6 +46,8 @@ from muckrock.foia.views.comms import (
         resend_comm,
         change_comm_status,
         )
+from muckrock.jurisdiction.models import Appeal
+from muckrock.jurisdiction.forms import AppealForm
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.qanda.models import Question
 from muckrock.qanda.forms import QuestionForm
@@ -430,12 +432,23 @@ class Detail(DetailView):
         return redirect(foia)
 
     def _appeal(self, request, foia):
-        """Handle submitting an appeal"""
-        test = foia.editable_by(request.user) and foia.is_appealable()
-        success_msg = 'Appeal successfully sent.'
-        comm_sent = self._new_comm(request, foia, test, success_msg, appeal=True)
-        if comm_sent:
-            new_action(request.user, 'appealed', target=foia)
+        """Handle submitting an appeal, then create an Appeal from the returned communication."""
+        form = AppealForm(request.POST)
+        if not foia.editable_by(request.user):
+            messages.error(request, 'You do not have permission to submit an appeal.')
+            return redirect(foia)
+        if not form.is_valid():
+            messages.error(request, 'You did not submit an appeal.')
+            return redirect(foia)
+        if not foia.is_appealable():
+            messages.error(request, 'This request cannot be appealed.')
+            return redirect(foia)
+        communication = foia.appeal(form.cleaned_data['text'])
+        base_language = form.cleaned_data['base_language']
+        appeal = Appeal.objects.create(communication=communication)
+        appeal.base_language.set(base_language)
+        new_action(request.user, 'appealed', target=foia)
+        messages.success(request, 'Your appeal has been sent.')
         return redirect(foia)
 
     def _new_comm(self, request, foia, test, success_msg, appeal=False, thanks=False):

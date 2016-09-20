@@ -133,8 +133,8 @@ class ExemptionAdmin(VersionAdmin):
     """Provides a way to create and modify exemption information."""
     prepopulated_fields = {'slug': ('name',)}
     list_display = ('name', 'jurisdiction')
-    list_filter = ['jurisdiction']
-    search_fields = ['name', 'basis']
+    list_filter = ['jurisdiction__level']
+    search_fields = ['name', 'basis', 'jurisdiction__name']
     inlines = [ExampleAppealInline, InvokedExemptionInline]
     form = ExemptionAdminForm
 

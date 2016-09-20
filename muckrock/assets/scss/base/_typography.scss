@@ -41,16 +41,16 @@ p:empty {
 
 b, strong, .bold { font-weight: $bold; }
 
-a {
+a, .link {
+    color: $color-blue;
     text-decoration: none;
     &:hover { text-decoration: underline; }
-}
-
-a.disabled {
-    color: $color-grey;
-    &:hover {
+    &.disabled {
         color: $color-grey;
-        text-decoration: none;
+        &:hover {
+            color: $color-grey;
+            text-decoration: none;
+        }
     }
 }
 
@@ -144,4 +144,9 @@ ul, ol {
 
 .mono {
     font-family: $monospace;
+}
+
+.force-select {
+    -webkit-user-select: all;
+    user-select: all;
 }

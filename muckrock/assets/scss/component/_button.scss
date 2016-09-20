@@ -108,3 +108,7 @@ $shadow-active: 0px;
         @include transform(none);
     }
 }
+
+.button.w100 {
+    width: 100%;
+}

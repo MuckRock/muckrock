@@ -62,6 +62,10 @@
             <span class="counter">{{ counters.projectreview }}</span>
             <a href="{% url 'projectreview-task-list' %}">Pending Projects</a>
         </li>
+        <li class="{% active request '^/task/new-exemption/$' %}">
+            <span class="counter">{{ counters.new_exemption }}</span>
+            <a href="{% url 'newexemption-task-list' %}">New Exemptions</a>
+        </li>
     </ul>
 </section>
 {% endblock %}

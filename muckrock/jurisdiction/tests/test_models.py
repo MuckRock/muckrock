@@ -9,7 +9,7 @@ from datetime import date, timedelta
 from nose.tools import eq_
 
 from muckrock.jurisdiction import factories
-from muckrock.factories import FOIARequestFactory, FOIAFileFactory
+from muckrock.factories import FOIARequestFactory, FOIACommunicationFactory, FOIAFileFactory
 
 class TestJurisdictionUnit(TestCase):
     """Unit tests for Jurisdictions"""
@@ -210,7 +210,7 @@ class TestExemptionModel(TestCase):
         """The absolute url of the exemption should be a standalone exemption detail page."""
         kwargs = self.exemption.jurisdiction.get_slugs()
         kwargs['slug'] = self.exemption.slug
-        kwargs['idx'] = self.exemption.pk
+        kwargs['pk'] = self.exemption.pk
         expected_url = reverse('exemption-detail', kwargs=kwargs)
         actual_url = self.exemption.get_absolute_url()
         eq_(actual_url, expected_url, ('The exemption should return the exemption-detail url.\n'
@@ -244,7 +244,7 @@ class TestInvokedExemptionModel(TestCase):
         exemption = self.invoked_exemption.exemption
         kwargs = exemption.jurisdiction.get_slugs()
         kwargs['slug'] = exemption.slug
-        kwargs['idx'] = exemption.pk
+        kwargs['pk'] = exemption.pk
         expected_url = (reverse('exemption-detail', kwargs=kwargs) +
                         '#invoked-%d' % self.invoked_exemption.pk)
         actual_url = self.invoked_exemption.get_absolute_url()
@@ -277,7 +277,7 @@ class TestExampleAppealModel(TestCase):
         exemption = self.example_appeal.exemption
         kwargs = exemption.jurisdiction.get_slugs()
         kwargs['slug'] = exemption.slug
-        kwargs['idx'] = exemption.pk
+        kwargs['pk'] = exemption.pk
         expected_url = (reverse('exemption-detail', kwargs=kwargs) +
                         '#appeal-%d' % self.example_appeal.pk)
         actual_url = self.example_appeal.get_absolute_url()
@@ -285,3 +285,59 @@ class TestExampleAppealModel(TestCase):
             expected_url,
             ('The exemption should return the exemption-detail url.\n'
              'Actual url: %s\nExpected url: %s') % (actual_url, expected_url))
+
+
+class TestAppealModel(TestCase):
+    """
+    The Appeal model is used to track information about appeals when they are filed.
+    An appeal should be able to judge whether or not it was successful.
+    It should do this by analyzing the request's communication chain
+    following the communication it corresponds to.
+    """
+    def setUp(self):
+        self.appeal = factories.AppealFactory()
+
+    def test_unicode(self):
+        """The text representation should say which request the appeal is of."""
+        actual = unicode(self.appeal)
+        expected = u'Appeal of %s' % self.appeal.communication.foia
+        eq_(actual, expected)
+
+    def test_absolute_url(self):
+        """The absolute url for the appeal should be the absolute url of the communication."""
+        expected = self.appeal.communication.get_absolute_url()
+        actual = self.appeal.get_absolute_url()
+        eq_(expected, actual)
+
+    def test_unsuccessful_by_default(self):
+        """By default, an appeal should be not be successful."""
+        eq_(self.appeal.is_successful(), False)
+
+    def test_successful(self):
+        """The appeal was successful if a subsequent communication has a 'Completed' status."""
+        FOIACommunicationFactory(
+            foia=self.appeal.communication.foia,
+            status='done'
+        )
+        eq_(self.appeal.is_successful(), True)
+
+    def test_another_appeal(self):
+        """The appeal was unsuccessful if a subsequent communication has an Appeal as well."""
+        subsequent_communication = FOIACommunicationFactory(
+            foia=self.appeal.communication.foia,
+            status='done'
+        )
+        factories.AppealFactory(communication=subsequent_communication)
+        eq_(self.appeal.is_successful(), False)
+
+    def test_unfinished_by_default(self):
+        """By default, an appeal should not be finished."""
+        eq_(self.appeal.is_finished(), False)
+
+    def test_finished(self):
+        """The appeal was finished if a subsequent communication has a terminal status."""
+        FOIACommunicationFactory(
+            foia=self.appeal.communication.foia,
+            status='rejected'
+        )
+        eq_(self.appeal.is_finished(), True)

@@ -35,7 +35,7 @@
         {% for appeal in exemption.example_appeals.all %}
         <div class="example-appeal">
             {{appeal.context|markdown}}
-            <textarea readonly>{{appeal.language}}</textarea>
+            <blockquote class="force-select">{{appeal.language}}</blockquote>
         </div>
         {% endfor %}
         {% endif %}

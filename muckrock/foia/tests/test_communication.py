@@ -5,14 +5,11 @@ Tests for the FOIACommunication model
 import datetime
 
 from django import test
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 from django.core.validators import ValidationError
 
 from muckrock import factories
 from muckrock.foia.models.communication import FOIACommunication
-from muckrock.foia.models.request import FOIARequest
-from muckrock.foia.models.file import FOIAFile
 from muckrock.foia.views import raw
 
 import logging
@@ -24,21 +21,13 @@ raises = nose.tools.raises
 
 class TestCommunication(test.TestCase):
     """Tests communication methods"""
-
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
-                'test_foiacommunications.json', 'test_foiafiles.json']
-
     def setUp(self):
-        self.foia = FOIARequest.objects.get(id=1)
-        self.comm = FOIACommunication.objects.get(id=1)
-        self.comm.priv_from_who = u'Test Email <test@email.com>'
-        self.comm.save()
-        # add a file to the communication
-        self.file = FOIAFile.objects.get(id=1)
-        self.file.comm = self.comm
-        self.file.ffile = SimpleUploadedFile('test_file.txt', 'This is a test file.')
-        self.file.save()
+        self.foia = factories.FOIARequestFactory()
+        self.comm = factories.FOIACommunicationFactory(
+            foia=self.foia,
+            priv_from_who=u'Test Email <test@email.com>'
+        )
+        self.file = factories.FOIAFileFactory(comm=self.comm)
         eq_(self.comm.files.count(), 1)
 
     def test_get_sender_email(self):
@@ -54,8 +43,8 @@ class TestCommunication(test.TestCase):
     def test_primary_contact(self):
         """Makes the primary email of the FOIA to the email the communication was sent from."""
         self.comm.make_sender_primary_contact()
-        foia = FOIARequest.objects.get(pk=self.foia.pk)
-        eq_(foia.email, self.comm.get_sender_email())
+        self.foia.refresh_from_db()
+        eq_(self.foia.email, self.comm.get_sender_email())
 
     @raises(ValueError)
     def test_orphan_error(self):
@@ -72,20 +61,11 @@ class TestCommunication(test.TestCase):
 
 class TestCommunicationMove(test.TestCase):
     """Tests the move method"""
-
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
-                'test_foiacommunications.json', 'test_foiafiles.json']
-
     def setUp(self):
-        self.foia1 = FOIARequest.objects.get(id=1)
-        self.foia2 = FOIARequest.objects.get(id=2)
-        self.comm = FOIACommunication.objects.get(id=1)
-        # add a file to the communication
-        self.file = FOIAFile.objects.get(id=1)
-        self.file.comm = self.comm
-        self.file.ffile = SimpleUploadedFile('test_file.txt', 'This is a test file.')
-        self.file.save()
+        self.foia1 = factories.FOIARequestFactory()
+        self.foia2 = factories.FOIARequestFactory()
+        self.comm = factories.FOIACommunicationFactory(foia=self.foia1)
+        self.file = factories.FOIAFileFactory(comm=self.comm)
         eq_(self.comm.files.count(), 1)
 
     def test_move_single_comm(self):
@@ -111,16 +91,16 @@ class TestCommunicationMove(test.TestCase):
         comm_count = FOIACommunication.objects.count()
         comms = self.comm.move([self.foia1.id, self.foia2.id])
         # + 1 communications created
-        updated_comm = FOIACommunication.objects.get(pk=self.comm.pk)
-        eq_(updated_comm.foia.id, self.foia1.id,
+        self.comm.refresh_from_db()
+        eq_(self.comm.foia.id, self.foia1.id,
             'The communication should be moved to the first listed request.')
         eq_(FOIACommunication.objects.count(), comm_count + 1,
             'A clone should be made for each additional request in the list.')
         eq_(len(comms), 2,
             'Two communications should be returned, since two were operated on.')
-        eq_(updated_comm.pk, comms[0].pk,
+        eq_(self.comm.pk, comms[0].pk,
             'The first communication in the list should be this one.')
-        ok_(comms[1].pk is not updated_comm.pk,
+        ok_(comms[1].pk is not self.comm.pk,
             'The second communication should be a new one, since it was cloned.')
 
     @raises(ValueError)
@@ -128,7 +108,8 @@ class TestCommunicationMove(test.TestCase):
         """Should raise an error if trying to call move on invalid request pks."""
         original_request = self.comm.foia.id
         self.comm.move('abc')
-        eq_(FOIACommunication.objects.get(pk=self.comm.pk).foia.id, original_request,
+        self.comm.refresh_from_db()
+        eq_(self.comm.foia.id, original_request,
             'If something goes wrong, the move should not complete.')
 
     @raises(ValueError)
@@ -136,7 +117,8 @@ class TestCommunicationMove(test.TestCase):
         """Should raise an error if trying to call move on an empty list."""
         original_request = self.comm.foia.id
         self.comm.move([])
-        eq_(FOIACommunication.objects.get(pk=self.comm.pk).foia.id, original_request,
+        self.comm.refresh_from_db()
+        eq_(self.comm.foia.id, original_request,
             'If something goes wrong, the move should not complete.')
 
     def test_move_missing_ffile(self):
@@ -150,33 +132,30 @@ class TestCommunicationMove(test.TestCase):
 
 class TestCommunicationClone(test.TestCase):
     """Tests the clone method"""
-
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
-                'test_foiacommunications.json', 'test_foiafiles.json']
-
     def setUp(self):
-        self.comm = FOIACommunication.objects.get(id=1)
-        self.file = FOIAFile.objects.get(id=1)
-        self.file.comm = self.comm
-        self.file.ffile = SimpleUploadedFile('test_file.txt', 'This is a test file.')
-        self.file.save()
+        self.comm = factories.FOIACommunicationFactory()
+        self.file = factories.FOIAFileFactory(comm=self.comm)
         ok_(self.file in self.comm.files.all())
 
     def test_clone_single(self):
         """Should duplicate the communication to the request."""
+        other_foia = factories.FOIARequestFactory()
         comm_count = FOIACommunication.objects.count()
-        self.comm.clone(2)
+        comm_pk = self.comm.pk
+        self.comm.clone(other_foia.pk)
         # + 1 communications
         eq_(FOIACommunication.objects.count(), comm_count + 1,
             'Should clone the request once.')
-        eq_(self.comm.pk, 1,
+        eq_(self.comm.pk, comm_pk,
             'The identity of the communication that calls clone should not change.')
 
     def test_clone_multi(self):
         """Should duplicate the communication to each request in the list."""
+        first_foia = factories.FOIARequestFactory()
+        second_foia = factories.FOIARequestFactory()
+        third_foia = factories.FOIARequestFactory()
         comm_count = FOIACommunication.objects.count()
-        clones = self.comm.clone([2, 3, 4])
+        clones = self.comm.clone([first_foia.pk, second_foia.pk, third_foia.pk])
         # + 3 communications
         eq_(FOIACommunication.objects.count(), comm_count + 3,
             'Should clone the request twice.')
@@ -185,11 +164,14 @@ class TestCommunicationClone(test.TestCase):
 
     def test_clone_files(self):
         """Should duplicate all the files for each communication."""
+        first_foia = factories.FOIARequestFactory()
+        second_foia = factories.FOIARequestFactory()
+        third_foia = factories.FOIARequestFactory()
         file_count = self.comm.files.count()
-        clones = self.comm.clone([2, 3, 4])
+        clones = self.comm.clone([first_foia.pk, second_foia.pk, third_foia.pk])
         for each_clone in clones:
             eq_(each_clone.files.count(), file_count,
-                'Each clone should have its own set of files')
+                'Each clone should have its own set of files.')
 
     @raises(ValueError)
     def test_clone_empty_list(self):
@@ -208,24 +190,21 @@ class TestCommunicationClone(test.TestCase):
         self.file.ffile = None
         self.file.save()
         ok_(not self.comm.files.all()[0].ffile)
-        self.comm.clone(2)
+        other_foia = factories.FOIARequestFactory()
+        self.comm.clone(other_foia.pk)
 
 class TestCommunicationResend(test.TestCase):
     """Tests the resend method"""
-
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
-                'test_foiacommunications.json']
-
     def setUp(self):
         self.creation_date = datetime.datetime.now() - datetime.timedelta(1)
-        self.comm = FOIACommunication.objects.get(id=2)
-        self.comm.date = self.creation_date
-        self.comm.save()
+        agency = factories.AgencyFactory()
+        foia = factories.FOIARequestFactory(agency=agency)
+        self.comm = factories.FOIACommunicationFactory(foia=foia, date=self.creation_date)
 
     def test_resend_sans_email(self):
         """Should resubmit the FOIA containing the communication as a snail mail"""
         self.comm.resend()
+        self.comm.refresh_from_db()
         ok_(self.comm.date > self.creation_date,
             'Resubmitting the communication should update the date.')
         eq_(self.comm.foia.status, 'submitted',
@@ -235,6 +214,7 @@ class TestCommunicationResend(test.TestCase):
         """Should resubmit the FOIA containing the communication automatically"""
         new_email = 'test@example.com'
         self.comm.resend(new_email)
+        self.comm.refresh_from_db()
         eq_(self.comm.foia.email, new_email,
             'Resubmitting with a new email should update the email of the FOIA request.')
         eq_(self.comm.foia.status, 'ack',
