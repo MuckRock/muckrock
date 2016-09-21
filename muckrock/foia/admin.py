@@ -110,10 +110,6 @@ class FOIACommunicationAdmin(VersionAdmin):
     form = FOIACommunicationAdminForm
     readonly_fields = ('foia_link', 'opened')
     fields = (
-            #'from_who',
-            #'to_who',
-            #'priv_from_who',
-            #'priv_to_who',
             'foia_link',
             ('from_user', 'to_users'),
             ('subject', 'date'),
@@ -128,8 +124,9 @@ class FOIACommunicationAdmin(VersionAdmin):
 
     def foia_link(self, obj):
         """Link to this communication's FOIA admin"""
-        url = reverse('admin:foia_foiarequest_change', args=(obj.foia.pk,))
-        return '<a href="%s">%s</a>' % (url, obj.foia.title)
+        # pylint: disable=no-self-use
+        link = reverse('admin:foia_foiarequest_change', args=(obj.foia.pk,))
+        return '<a href="%s">%s</a>' % (link, obj.foia.title)
     foia_link.allow_tags = True
     foia_link.short_description = 'FOIA Request'
 
@@ -143,10 +140,6 @@ class FOIACommunicationInline(admin.StackedInline):
     readonly_fields = ('opened', 'file_count', 'file_names')
     show_change_link = True
     fields = (
-            #'from_who',
-            #'to_who',
-            #'priv_from_who',
-            #'priv_to_who',
             ('from_user', 'to_users'),
             ('subject', 'date'),
             'communication',
@@ -160,12 +153,12 @@ class FOIACommunicationInline(admin.StackedInline):
 
     def file_count(self, instance):
         """File count for this communication"""
-        # pylint: disable=no-self-user
+        # pylint: disable=no-self-use
         return instance.files.count()
 
     def file_names(self, instance):
         """All file's names for this communication"""
-        # pylint: disable=no-self-user
+        # pylint: disable=no-self-use
         return ', '.join(os.path.basename(f.ffile.name) for f in
                 instance.files.all())
 

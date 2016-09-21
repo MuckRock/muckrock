@@ -45,7 +45,6 @@ def delete_comm(request, next_):
 @user_passes_test(lambda u: u.is_staff)
 def resend_comm(request, next_):
     """Resend the FOI Communication"""
-    # XXX pick user instead of email?
     # XXX snail mail?
     try:
         comm = FOIACommunication.objects.get(pk=request.POST['comm_pk'])

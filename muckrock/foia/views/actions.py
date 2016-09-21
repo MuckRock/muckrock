@@ -194,42 +194,6 @@ def toggle_autofollowups(request, jurisdiction, jidx, slug, idx):
         messages.error(request, msg)
     return redirect(foia)
 
-# XXX move perm check inside, change this whole view to be part of detail
-# Redo all of this
-@user_passes_test(lambda u: u.has_perm('foia.agency_reply', foia))
-def agency_reply(request, jurisdiction, jidx, slug, idx):
-    """Allow agency users to reply directly"""
-    foia = _get_foia(jurisdiction, jidx, slug, idx)
-    # XXX check status
-
-    if request.method == 'POST':
-        form = FOIAAgencyReplyForm(request.POST, instance=foia)
-        formset = FOIAFileFormSet(request.POST, request.FILES)
-        if form.is_valid() and formset.is_valid():
-            foia = form.save()
-            # XXX mark foia as updated / email notify someone?
-            foia.create_in_communication(
-                    from_user=request.user,
-                    text=form.cleaned_data['comm'],
-                    formset=formset,
-                    )
-            messages.success(request, 'Reply succesfully submitted')
-            return redirect(foia)
-    else:
-        form = FOIAAgencyReplyForm(instance=foia)
-        formset = FOIAFileFormSet(queryset=FOIAFile.objects.none())
-    context = {
-        'form': form,
-        'foia': foia,
-        'formset': formset,
-        'action': 'Submit'
-    }
-    return render_to_response(
-        'forms/foia/admin_fix.html',
-        context,
-        context_instance=RequestContext(request)
-    )
-
 
 # Staff Actions
 @user_passes_test(lambda u: u.is_staff)

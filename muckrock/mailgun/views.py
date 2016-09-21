@@ -128,7 +128,6 @@ def route_mailgun(request):
     return HttpResponse('OK')
 
 
-# XXX this function is too long, re-factor
 def _handle_request(request, mail_id):
     """Handle incoming mailgun FOI request messages"""
     # pylint: disable=broad-except
@@ -393,10 +392,6 @@ def _allowed_email(email, foia=None):
     allowed_tlds = [
         '.gov',
         '.mil',
-        # XXX muckrock emails should not be emailing requests
-        # this caused problem with mailing list confirmation emails
-        #'.muckrock.com',
-        #'@muckrock.com',
         ] + state_tlds
 
     # it is from any known government TLD
