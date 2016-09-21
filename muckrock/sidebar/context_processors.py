@@ -81,6 +81,10 @@ def sidebar_broadcast(user):
 
 def sidebar_info(request):
     """Displays info about a user's requsts in the sidebar"""
+    if request.path.startswith('/admin/'):
+        # if we are on the admin we don't need any of the sidebar context
+        return {}
+
     # content for all users
     sidebar_info_dict = {
         'recent_articles': get_recent_articles(),
@@ -94,7 +98,4 @@ def sidebar_info(request):
             'organization': get_organization(request.user),
             'payment_failed': request.user.profile.payment_failed
         })
-    else:
-        # content for logged out users
-        pass
     return sidebar_info_dict
