@@ -131,6 +131,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 )
 
 MIDDLEWARE_CLASSES = (
+    'django_hosts.middleware.HostsRequestMiddleware',
     'djangosecure.middleware.SecurityMiddleware',
     'dogslow.WatchdogMiddleware',
     'django.middleware.gzip.GZipMiddleware',
@@ -144,6 +145,7 @@ MIDDLEWARE_CLASSES = (
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'reversion.middleware.RevisionMiddleware',
+    'django_hosts.middleware.HostsResponseMiddleware',
 )
 
 INTERNAL_IPS = ('127.0.0.1',)
@@ -199,6 +201,7 @@ INSTALLED_APPS = (
     'lot',
     'package_monitor',
     'image_diet',
+    'django_hosts',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
@@ -216,6 +219,7 @@ INSTALLED_APPS = (
     'muckrock.organization',
     'muckrock.project',
     'muckrock.mailgun',
+    'muckrock.foiamachine',
     'actstream'
 )
 
@@ -490,6 +494,9 @@ PACKAGE_MONITOR_REQUIREMENTS_FILE = os.path.join(SITE_ROOT, '../requirements.txt
 
 TAGGIT_CASE_INSENSITIVE = True
 TAGGIT_TAGS_FROM_STRING = 'muckrock.tags.models.parse_tags'
+
+ROOT_HOSTCONF = 'muckrock.hosts'
+DEFAULT_HOST = 'default'
 
 # Organization Settings
 
