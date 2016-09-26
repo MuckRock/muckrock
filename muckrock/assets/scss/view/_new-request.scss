@@ -189,6 +189,10 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
         border-top: none;
     }
 
+    .footer--submit {
+        text-align: right;
+    }
+
     .failure.panel {
         ul {
             padding-left: $vr;
