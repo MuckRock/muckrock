@@ -129,6 +129,7 @@ urlpatterns = patterns(
     url(r'^__debug__/', include(debug_toolbar.urls)),
     url(r'^donate/$', views.DonationFormView.as_view(), name='donate'),
     url(r'^donate/thanks/$', views.DonationThanksView.as_view(), name='donate-thanks'),
+    url(r'^landing/$', views.LandingView.as_view(), name='landing'),
 )
 
 if settings.DEBUG:
