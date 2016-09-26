@@ -420,6 +420,11 @@ def homepage(request):
     return render_to_response('homepage.html', locals(),
                               context_instance=RequestContext(request))
 
+
+class LandingView(TemplateView):
+    template_name = 'flatpages/landing.html'
+
+
 @user_passes_test(lambda u: u.is_staff)
 def reset_homepage_cache(request):
     """Reset the homepage cache"""
