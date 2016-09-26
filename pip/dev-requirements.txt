@@ -4,44 +4,50 @@
 #
 #    pip-compile --output-file dev-requirements.txt dev-requirements.in
 #
-
-astroid==1.4.6            # via pylint, pylint-plugin-utils
+astroid==1.4.8            # via pylint, pylint-plugin-utils
+backports.functools-lru-cache==1.2.1  # via pylint
 backports.shutil-get-terminal-size==1.0.0  # via ipython
 click==6.6                # via pip-tools
-colorama==0.3.7           # via pylint
-coverage==4.1
+configparser==3.5.0       # via pylint
+coverage==4.2
 decorator==4.0.10         # via ipython, traitlets
 dj-inmemorystorage==1.4.0
-django-nose==1.4.3
-django==1.9.7
+django-nose==1.4.4
+django==1.9.9
 ecdsa==0.13               # via paramiko
-fabric==1.11.1
+enum34==1.1.6             # via traitlets
+fabric==1.12.0
 factory-boy==2.7.0
-fake-factory==0.5.7       # via factory-boy
+fake-factory==0.7.2       # via factory-boy
 first==2.0.1              # via pip-tools
 funcsigs==1.0.2           # via mock
-ipaddress==1.0.16         # via fake-factory
+ipaddress==1.0.17         # via fake-factory
 ipdb==0.10.1
 ipython-genutils==0.1.0   # via traitlets
-ipython==4.2.0
+ipython==5.1.0
+isort==4.2.5              # via pylint
 lazy-object-proxy==1.2.2  # via astroid
+mccabe==0.5.2             # via pylint
 mock==2.0.0
 nose==1.3.7               # via django-nose
-paramiko==1.17.0          # via fabric
-pathlib2==2.1.0           # via pickleshare
+paramiko==1.17.2          # via fabric
+pathlib2==2.1.0           # via ipython, pickleshare
 pbr==1.10.0               # via mock
-pexpect==4.1.0            # via ipython
-pickleshare==0.7.2        # via ipython
-pip-tools==1.6.5
+pexpect==4.2.1            # via ipython
+pickleshare==0.7.4        # via ipython
+pip-tools==1.7.0
+prompt-toolkit==1.0.7     # via ipython
 ptyprocess==0.5.1         # via pexpect
 pycrypto==2.6.1           # via paramiko
+pygments==2.1.3           # via ipython
 pylint-django==0.7.2
-pylint-plugin-utils==0.2.3  # via pylint-django
-pylint==1.5.6             # via pylint-django, pylint-plugin-utils
+pylint-plugin-utils==0.2.4  # via pylint-django
+pylint==1.6.4             # via pylint-django, pylint-plugin-utils
 python-dateutil==2.5.3    # via fake-factory
 simplegeneric==0.8.1      # via ipython
-six==1.10.0               # via astroid, dj-inmemorystorage, fake-factory, mock, pathlib2, pip-tools, pylint, python-dateutil
-traitlets==4.2.1          # via ipython
+six==1.10.0               # via astroid, dj-inmemorystorage, fake-factory, mock, pathlib2, pip-tools, prompt-toolkit, pylint, python-dateutil, traitlets
+traitlets==4.3.0          # via ipython
+wcwidth==0.1.7            # via prompt-toolkit
 whoosh==2.7.4
 wrapt==1.10.8             # via astroid
 yet-another-django-profiler==1.0.3
