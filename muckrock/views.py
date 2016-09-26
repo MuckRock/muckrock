@@ -422,6 +422,7 @@ def homepage(request):
 
 
 class LandingView(TemplateView):
+    """Renders the landing page template."""
     template_name = 'flatpages/landing.html'
 
 
