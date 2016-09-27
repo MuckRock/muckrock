@@ -3,9 +3,9 @@ Views for the project application
 """
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.core.urlresolvers import reverse_lazy
 from django.db.models import Count, Prefetch
 from django.http import Http404
 from django.shortcuts import redirect, get_object_or_404
@@ -15,19 +15,19 @@ from django.views.generic import (
     CreateView,
     DetailView,
     UpdateView,
-    DeleteView
 )
 from django.utils.decorators import method_decorator
 
-import actstream
+from actstream.models import followers
 from datetime import date, timedelta
 
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.crowdfund.forms import CrowdfundForm
+from muckrock.message.tasks import notify_project_contributor
 from muckrock.project.models import Project, ProjectCrowdfunds
 from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm, ProjectPublishForm
 from muckrock.views import MRFilterableListView
-
+from muckrock.utils import new_action
 
 class ProjectExploreView(TemplateView):
     """Provides a space for exploring our different projects."""
@@ -69,6 +69,25 @@ class ProjectListView(MRFilterableListView):
             return Project.objects.get_visible(user)
 
 
+class ProjectContributorView(TemplateView):
+    """Provides a list of projects that have the user as a contributor."""
+    template_name = 'project/contributor.html'
+
+    def get_context_data(self, **kwargs):
+        """Gathers and returns the project and the contributor as context."""
+        user = self.request.user
+        contributor = get_object_or_404(User, username=kwargs.get('username'))
+        # return all the contributor's projects that are visible to the user
+        projects = Project.objects.get_for_contributor(contributor).get_visible(user)
+        projects = projects.order_by('-featured', 'private', '-approved', 'title')
+        context = {
+            'user_is_contributor': user == contributor,
+            'contributor': contributor,
+            'projects': projects
+        }
+        return context
+
+
 class ProjectCreateView(CreateView):
     """Create a project instance"""
     model = Project
@@ -77,7 +96,6 @@ class ProjectCreateView(CreateView):
     template_name = 'project/create.html'
 
     @method_decorator(login_required)
-    @method_decorator(user_passes_test(lambda u: u.is_staff or u.profile.experimental))
     def dispatch(self, *args, **kwargs):
         """At the moment, only staff are allowed to create a project."""
         return super(ProjectCreateView, self).dispatch(*args, **kwargs)
@@ -121,8 +139,8 @@ class ProjectDetailView(DetailView):
                     'jurisdiction__parent__parent',
                     'agency__jurisdiction',
                     'user__profile',
-                    ))
-        context['followers'] = actstream.models.followers(project)
+                ).get_public_file_count())
+        context['followers'] = followers(project)
         context['articles'] = project.articles.get_published()
         context['contributors'] = project.contributors.select_related('profile')
         context['user_is_experimental'] = user.is_authenticated() and user.profile.experimental
@@ -170,8 +188,17 @@ class ProjectEditView(ProjectPermissionsMixin, UpdateView):
 
     def form_valid(self, form):
         """Adds success message when form is valid."""
+        existing_contributors = self.object.contributors.all()
+        new_contributors = form.cleaned_data['contributors']
+        self.notify_new_contributors(existing_contributors, new_contributors)
         messages.success(self.request, 'Your edits were saved.')
         return super(ProjectEditView, self).form_valid(form)
+
+    def notify_new_contributors(self, existing, new):
+        """Notify all newly added contributors."""
+        added_contributors = list(set(new)-set(existing))
+        for contributor in added_contributors:
+            notify_project_contributor.delay(contributor, self.object, self.request.user)
 
 
 class ProjectPublishView(ProjectPermissionsMixin, FormView):
@@ -247,9 +274,9 @@ class ProjectCrowdfundView(ProjectPermissionsMixin, CreateView):
         crowdfund = self.object
         project = self.get_project()
         relationship = ProjectCrowdfunds.objects.create(project=project, crowdfund=crowdfund)
-        actstream.action.send(
+        new_action(
             self.request.user,
-            verb='started',
+            'began crowdfunding',
             action_object=relationship.crowdfund,
             target=relationship.project
         )
@@ -259,10 +286,3 @@ class ProjectCrowdfundView(ProjectPermissionsMixin, CreateView):
         """Generates actions before returning URL"""
         project = self.get_project()
         return project.get_absolute_url()
-
-
-class ProjectDeleteView(ProjectPermissionsMixin, DeleteView):
-    """Delete a project instance"""
-    model = Project
-    success_url = reverse_lazy('project')
-    template_name = 'project/delete.html'

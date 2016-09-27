@@ -1,0 +1,5 @@
+{% extends 'message/receipt/base.txt' %}
+
+{% block description %}
+Thank you for your recent donation to MuckRock. Your support is deeply appreciated, and your contribution is tax-deductible. MuckRock Foundation, Inc. is a 501c3 registered non-profit (our EIN is 81-1485228). Please keep this receipt for your records.
+{% endblock %}

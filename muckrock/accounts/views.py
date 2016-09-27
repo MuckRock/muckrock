@@ -18,7 +18,7 @@ from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import TemplateView, FormView
+from django.views.generic import TemplateView, FormView, ListView
 
 from datetime import date
 from rest_framework import viewsets
@@ -37,8 +37,9 @@ from muckrock.accounts.forms import (
         BillingPreferencesForm,
         RegisterForm,
         RegisterOrganizationForm,
+        RegistrationCompletionForm
         )
-from muckrock.accounts.models import Profile, Statistics, ACCT_TYPES
+from muckrock.accounts.models import Profile, Notification, Statistics, ACCT_TYPES
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
@@ -127,19 +128,22 @@ class ProfessionalSignupView(SignupView):
             new_user.profile.start_pro_subscription(self.request.POST['stripe_token'])
             success_msg = 'Your professional account was successfully created. Welcome to MuckRock!'
             messages.success(self.request, success_msg)
-        except KeyError:
+        except (KeyError, AttributeError):
             # no payment information provided
+            logger.error('No payment information provided.')
             error_msg = ('Your account was successfully created, '
                          'but you did not provide payment information. '
                          'You can subscribe from the account management page.')
             messages.error(self.request, error_msg)
         except stripe.error.CardError:
             # card declined
+            logger.error('Card was declined.')
             error_msg = ('Your account was successfully created, but your card was declined. '
                          'You can subscribe from the account management page.')
             messages.error(self.request, error_msg)
         except (stripe.error.InvalidRequestError, stripe.error.APIError):
             # invalid request made to stripe
+            logger.error('No payment information provided.')
             error_msg = ('Your account was successfully created, '
                          'but we could not contact our payment provider. '
                          'You can subscribe from the account management page.')
@@ -273,13 +277,14 @@ def profile_settings(request):
 def buy_requests(request, username=None):
     """A purchaser buys requests for a recipient. The recipient can even be themselves!"""
     url_redirect = request.GET.get('next', 'acct-my-profile')
+    bundles = int(request.POST.get('bundles', 1))
     recipient = get_object_or_404(User, username=username)
     purchaser = request.user
-    request_price = 2000
+    request_price = bundles * 2000
     if purchaser.is_authenticated():
-        request_count = purchaser.profile.bundled_requests()
+        request_count = bundles * purchaser.profile.bundled_requests()
     else:
-        request_count = 4
+        request_count = bundles * 4
     try:
         if request.POST:
             stripe_token = request.POST.get('stripe_token')
@@ -363,14 +368,17 @@ def profile(request, username=None):
     recent_requests = requests.order_by('-date_submitted')[:5]
     recent_completed = requests.filter(status='done').order_by('-date_done')[:5]
     articles = Article.objects.get_published().filter(authors=user)[:5]
-    projects = Project.objects.get_for_contributor(user).get_visible(request.user)
+    projects = Project.objects.get_for_contributor(user).get_visible(request.user)[:3]
     context = {
         'user_obj': user,
         'profile': user_profile,
         'org': org,
         'projects': projects,
-        'recent_requests': recent_requests,
-        'recent_completed': recent_completed,
+        'requests': {
+            'all': requests,
+            'recent': recent_requests,
+            'completed': recent_completed
+        },
         'articles': articles,
         'stripe_pk': settings.STRIPE_PUB_KEY,
         'sidebar_admin_url': reverse('admin:auth_user_change', args=(user.pk,)),
@@ -390,15 +398,18 @@ def stripe_webhook(request):
         event_json = json.loads(request.body)
         event_id = event_json['id']
         event_type = event_json['type']
-        event_object_id = event_json['data']['object']['id']
+        if event_type.startswith(('charge', 'invoice')):
+            event_object_id = event_json['data']['object']['id']
+        else:
+            event_object_id = ''
     except (TypeError, ValueError, SyntaxError) as exception:
         logging.error('Error parsing JSON: %s', exception)
         return HttpResponseBadRequest()
     except KeyError as exception:
-        logging.error('Unexpected dictionary structure: %s', exception)
+        logging.error('Unexpected dictionary structure: %s in %s', exception, event_json)
         return HttpResponseBadRequest()
     # If we've made it this far, then the webhook message was successfully sent!
-    # Now it's up to us to act on it.'
+    # Now it's up to us to act on it.
     success_msg = (
         'Received Stripe webhook\n'
         '\tfrom:\t%(address)s\n'
@@ -420,6 +431,43 @@ def stripe_webhook(request):
         failed_payment.delay(event_object_id)
     return HttpResponse()
 
+@method_decorator(login_required, name='dispatch')
+class RegistrationCompletionView(FormView):
+    """Provides a form for a new user to change their username and password.
+    Will verify their email if a key is provided."""
+    template_name = 'forms/base_form.html'
+    form_class = RegistrationCompletionForm
+
+    def get_initial(self):
+        """Adds the username as an initial value."""
+        return {'username': self.request.user.username}
+
+    def get_form_kwargs(self):
+        """Adds the user to the form kwargs."""
+        kwargs = super(RegistrationCompletionView, self).get_form_kwargs()
+        kwargs.update({'user': self.request.user})
+        return kwargs
+
+    def get(self, request, *args, **kwargs):
+        _profile = request.user.profile
+        if 'key' in request.GET:
+            key = request.GET['key']
+            if key == _profile.confirmation_key:
+                _profile.email_confirmed = True
+                _profile.save()
+                messages.success(request, 'Your email is validated.')
+        return super(RegistrationCompletionView, self).get(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        """Saves the form and redirects to the success url."""
+        form.save(commit=True)
+        messages.success(self.request, 'Your account is now complete.')
+        return redirect(self.get_success_url())
+
+    def get_success_url(self):
+        """Return the user's profile."""
+        return reverse('acct-profile', kwargs={'username': self.request.user.username})
+
 
 class UserViewSet(viewsets.ModelViewSet):
     """API views for User"""
@@ -439,6 +487,62 @@ class StatisticsViewSet(viewsets.ModelViewSet):
     serializer_class = StatisticsSerializer
     permission_classes = (DjangoModelPermissionsOrAnonReadOnly,)
     filter_fields = ('date',)
+
+
+@method_decorator(login_required, name='dispatch')
+class NotificationList(ListView):
+    """List of notifications for a user."""
+    model = Notification
+    template_name = 'accounts/notifications_all.html'
+    context_object_name = 'notifications'
+    title = 'All Notifications'
+
+    def get_queryset(self):
+        """Return all notifications for the user making the request."""
+        user = self.request.user
+        notifications = super(NotificationList, self).get_queryset()
+        return notifications.for_user(user).order_by('-datetime')
+
+    def get_paginate_by(self, queryset):
+        """Paginates list by the return value"""
+        try:
+            per_page = int(self.request.GET.get('per_page'))
+            return max(min(per_page, 100), 5)
+        except (ValueError, TypeError):
+            return 25
+
+    def get_context_data(self, **kwargs):
+        """Add the title to the context"""
+        context = super(NotificationList, self).get_context_data(**kwargs)
+        context['title'] = self.title
+        return context
+
+    def mark_all_read(self):
+        """Mark all notifications for the view as read."""
+        notifications = self.get_queryset()
+        # to be more efficient, let's just get the unread ones
+        notifications = notifications.get_unread()
+        for notification in notifications:
+            notification.mark_read()
+
+    def post(self, request, *args, **kwargs):
+        """Handle post actions to this view"""
+        action = request.POST.get('action')
+        if action == 'mark_all_read':
+            self.mark_all_read()
+        return self.get(request, *args, **kwargs)
+
+
+@method_decorator(login_required, name='dispatch')
+class UnreadNotificationList(NotificationList):
+    """List only unread notifications for a user."""
+    template_name = 'accounts/notifications_unread.html'
+    title = 'Unread Notifications'
+
+    def get_queryset(self):
+        """Only return unread notifications."""
+        notifications = super(UnreadNotificationList, self).get_queryset()
+        return notifications.get_unread()
 
 
 class ProxyList(MRFilterableListView):

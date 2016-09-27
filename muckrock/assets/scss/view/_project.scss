@@ -1,0 +1,251 @@
+.create.project {
+    max-width: 40em;
+    margin: 0 auto $vr;
+}
+.publish.project {
+    max-width: 40em;
+    margin: 0 auto $vr;
+}
+.project__update {
+    .project__update__header {
+        @include display(flex);
+        @include justify-content(space-between);
+        @include padding;
+        margin-bottom: 0;
+        p {
+            margin-bottom: 0;
+        }
+    }
+    .form {
+        padding-top: 0;
+    }
+    .switch, .wysiwyg-toggle__label {
+        display: inline-block;
+        vertical-align: middle;
+    }
+    .description textarea {
+        min-height: 20em;
+        font-family: $monospace;
+        font-size: $size-2;
+    }
+    .description p {
+        max-width: 40em;
+    }
+}
+
+.project {
+    .stats {
+        .stat {
+            font-size: $size-2;
+            line-height: $lh;
+        }
+        .value {
+            display: block;
+            font-weight: $bold;
+            font-size: $size-4;
+            line-height: $lh;
+        }
+    }
+    .autocomplete-light-widget, .requests .deck, .articles .deck {
+        @include display(flex);
+        @include flex-direction(column-reverse);
+        input {
+            margin-bottom: $vr;
+        }
+    }
+}
+
+.project.detail {
+    @include padding(0);
+
+    .project__image {
+        min-height: 45vh;
+        margin-bottom: 0;
+        background-size: cover;
+        background-position: center;
+        background-color: $color-grey-5;
+    }
+
+    .prompt, .overview, .objects {
+        margin: 0 auto $vr;
+    }
+
+    .prompt {
+        @include padding;
+        @include box-shadow;
+        border: 1px solid $color-blue;
+        background: $color-blue-light;
+        color: $color-blue-dark;
+        font-weight: $bold;
+        ol {
+            padding-left: $vr;
+        }
+        a {
+            text-decoration: underline;
+        }
+        .strikethrough {
+            text-decoration: line-through;
+        }
+    }
+
+    .overview {
+        @include display(flex);
+        @include flex-flow(wrap);
+        @include padding;
+        max-width: 60em;
+        .overview__main {
+            @include flex(2 1 20em);
+            min-width: 0;
+            margin-bottom: $vr;
+        }
+        .overview__aside {
+            @include flex(1 1 10em);
+            min-width: 0;
+            @media (min-width: 33.25em) {
+                padding: 0 $vr;
+            }
+        }
+        .title {
+            @include media($medium-bp){
+                font-size: $size-9;
+                line-height: $lh;
+            }
+        }
+        summary {
+            font-size: $size-4;
+            line-height: $lh;
+        }
+        .contributors header {
+            @include display(flex);
+            @include justify-content(space-between);
+            margin-bottom: $vr/2;
+        }
+        & > .contributor {
+            @include display(flex);
+            margin-bottom: $vr/2;
+            .avatar {
+                display: block;
+                @include border-radius;
+            }
+            .info {
+                padding: $vr/4 $vr/2;
+                p {
+                    margin-bottom: 0;
+
+                }
+                a {
+                    color: $color-black;
+                }
+                a:hover {
+                    color: $color-blue;
+                    path { fill: $color-blue; }
+                }
+                .name {
+                    font-weight: $bold;
+                }
+                .icon {
+                    margin-left: $vr/2;
+                }
+            }
+        }
+        .stat a {
+            color: $color-black;
+            &:hover {
+                color: $color-blue;
+            }
+        }
+    }
+
+    .objects {
+        @include display(flex);
+        @include flex-flow(wrap row);
+        @include padding;
+        max-width: 60em;
+        .articles, .requests {
+            @include flex(1 1 20em);
+        }
+        .articles {
+            margin-right: $vr;
+        }
+    }
+}
+
+.project.component {
+    @include flex(1 1 30em);
+    @include display(flex);
+    @include flex-wrap(wrap);
+    @include justify-content(space-between);
+    background: $color-white-pure;
+    border: 1px solid $color-grey;
+    @include border-radius;
+    overflow: hidden;
+    .project-header {
+        @include flex(0 1 100%);
+        @include display(flex);
+        min-height: 15em;
+        margin-bottom: 0;
+        background-position: center;
+        background-size: cover;
+        background-color: $color-blue-dark;
+        .project-header-wrapper {
+            @include display(inline-flex);
+            @include flex-direction(column);
+            @include justify-content(flex-end);
+            min-height: 100%;
+            width: 100%;
+            padding: $vr;
+            background: rgb(52, 61, 71);
+            background: rgba(52, 61, 71, .8);
+            &:hover {
+                background: rgba(52, 61, 71, .6);
+            }
+            transition: background .25s linear;
+        }
+        h2 {
+            max-width: 20em;
+            font-size: $size-6;
+            line-height: $lh;
+            @include media($medium-bp) {
+                font-size: $size-8;
+                line-height: $lh;
+            }
+        }
+        a {
+            color: $color-white;
+        }
+    }
+    .overview, .details {
+        padding: $vr/2;
+        @include media($medium-bp) {
+            padding: $vr;
+        }
+    }
+    .overview {
+        @include flex(1 1 20em);
+        margin-bottom: 0;
+        h2 a, .stat a {
+            color: $color-black;
+            &:hover {
+                color: $color-blue;
+            }
+        }
+        .more {
+            font-weight: $bold;
+        }
+    }
+    .details {
+        @include flex(1 1 10em);
+        .crowdfund {
+            @include display(flex);
+            @include flex-wrap(wrap);
+            @include justify-content(space-between);
+            @include align-items(flex-start);
+            .progress {
+                @include flex(0 1 100%);
+            }
+            .stats, .button {
+                @include flex(1 1 auto);
+            }
+        }
+    }
+}

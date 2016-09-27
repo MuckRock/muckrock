@@ -61,6 +61,16 @@ class ProjectReviewTaskFactory(factory.django.DjangoModelFactory):
     notes = factory.Faker('paragraph')
 
 
+class NewExemptionTaskFactory(factory.django.DjangoModelFactory):
+    """A factory for creating NewExemptionTask objects."""
+    class Meta:
+        model = task.models.NewExemptionTask
+
+    foia = factory.SubFactory('muckrock.factories.FOIARequestFactory')
+    user = factory.SubFactory('muckrock.factories.UserFactory')
+    language = factory.Faker('paragraph')
+
+
 class ResponseTaskFactory(factory.django.DjangoModelFactory):
     """A factory for creating ResponseTask objects."""
     class Meta:

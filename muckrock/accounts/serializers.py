@@ -19,7 +19,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        exclude = ('user', 'notifications')
+        exclude = ('user',)
 
 
 class UserSerializer(serializers.ModelSerializer):

@@ -39,7 +39,7 @@
         </form>
     </section>
     {% if object_list %}
-    {% include 'lib/pagination.html' %}
+    {% include 'lib/component/pagination.html' %}
     <table class="list-table tablesaw tablesaw-stack" data-tablesaw-mode="stack">
         <thead class="list-table-head">
             <tr>
@@ -64,7 +64,7 @@
             {% endfor %}
         </tbody>
     </table>
-    {% if object_list|length > per_page|div:2 %}{% include 'lib/pagination.html' %}{% endif %}
+    {% if object_list|length > per_page|div:2 %}{% include 'lib/component/pagination.html' %}{% endif %}
     {% else %}
     <p class="list-empty">No Results</p>
     {% endif %}

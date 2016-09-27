@@ -1,0 +1,24 @@
+{% extends 'lists/base_list.html' %}
+
+{% load markdown_deux_tags %}
+{% load thumbnail %}
+
+{% block title %}MuckRock &bull; News{% endblock title %}
+{% block list-title %}News{% endblock list-title %}
+{% block list-type %}news{% endblock list-type %}
+
+{% block list-content %}
+{% if object_list %}
+    {% include 'lib/component/pagination.html' %}
+    <ul class="nostyle">
+        {% for article in object_list %}
+        <li class="news-list-article">
+            {% include 'lib/pattern/article.html' %}
+        </li>
+        {% endfor %}
+    </ul>
+    {% include 'lib/component/pagination.html' %}
+{% else %}
+    <p class="list-empty">No Results</p>
+{% endif %}
+{% endblock list-content %}

@@ -1,42 +1,21 @@
 """
 Models for the Jurisdiction application
 """
+from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.db import models
-from django.db.models import Avg, Count, F, Sum
+from django.db.models import Count, Q
 from django.template.defaultfilters import slugify
 
 from easy_thumbnails.fields import ThumbnailerImageField
 from random import choice
+from taggit.managers import TaggableManager
 
+from muckrock.accounts.models import Profile
 from muckrock.business_days.models import Holiday, HolidayCalendar, Calendar
-
-# pylint: disable=bad-continuation
-
-class RequestHelper(object):
-    """Helper methods for classes that have a foiarequest_set"""
-
-    def exemptions(self):
-        """Get a list of exemptions tagged for requests from this agency"""
-        return (self.foiarequest_set
-                .filter(tags__name__startswith='exemption')
-                .order_by('tags__name')
-                .values('tags__name')
-                .annotate(count=Count('tags')))
-
-    def average_response_time(self):
-        """Get the average response time from a submitted to completed request"""
-        avg = (self.foiarequest_set.aggregate(
-                avg=Avg(F('date_done') - F('date_submitted')))['avg'])
-        return int(avg) if avg else 0
-
-    def total_pages(self):
-        """Total pages released"""
-
-        pages = self.foiarequest_set.aggregate(Sum('files__pages'))['files__pages__sum']
-        if pages is None:
-            return 0
-        return pages
-
+from muckrock.foia.mixins import RequestHelper
+from muckrock.foia.models import FOIARequest, END_STATUS
+from muckrock.tags.models import TaggedItemBase
 
 class Jurisdiction(models.Model, RequestHelper):
     """A jursidiction that you may file FOIA requests in"""
@@ -73,6 +52,8 @@ class Jurisdiction(models.Model, RequestHelper):
             default=True,
             help_text='Does this jurisdiction have an appeals process?')
     requires_proxy = models.BooleanField(default=False)
+    law_analysis = models.TextField(blank=True, help_text='Our analysis of the state FOIA law, '
+                                                'as a part of FOI95.')
 
     def __unicode__(self):
         if self.level == 'l' and not self.full_name and self.parent:
@@ -91,19 +72,32 @@ class Jurisdiction(models.Model, RequestHelper):
         """The url for this object"""
         return self.get_url('detail')
 
+    def get_slugs(self):
+        """Return a dictionary of slugs for this jurisdiction, for constructing URLs."""
+        slugs = {}
+        if self.level == 'l':
+            slugs.update({
+                'fed_slug': self.parent.parent.slug,
+                'state_slug': self.parent.slug,
+                'local_slug': self.slug
+            })
+        elif self.level == 's':
+            slugs.update({
+                'fed_slug': self.parent.slug,
+                'state_slug': self.slug
+            })
+        elif self.level == 'f':
+            slugs.update({
+                'fed_slug': self.slug
+            })
+        return slugs
+
     @models.permalink
     def get_url(self, view):
         """The url for this object"""
         view = 'jurisdiction-%s' % view
-        if self.level == 'l':
-            return (view, [], {'fed_slug': self.parent.parent.slug,
-                               'state_slug': self.parent.slug,
-                               'local_slug': self.slug})
-        elif self.level == 's':
-            return (view, [], {'fed_slug': self.parent.slug,
-                               'state_slug': self.slug})
-        elif self.level == 'f':
-            return (view, [], {'fed_slug': self.slug})
+        slugs = self.get_slugs()
+        return (view, [], slugs)
 
     def save(self, *args, **kwargs):
         """Normalize fields before saving"""
@@ -170,7 +164,6 @@ class Jurisdiction(models.Model, RequestHelper):
 
     def get_proxy(self):
         """Get a random proxy user for this jurisdiction"""
-        from muckrock.accounts.models import Profile
         try:
             proxy = choice(Profile.objects.filter(
                 acct_type='proxy', state=self.legal()))
@@ -193,7 +186,168 @@ class Jurisdiction(models.Model, RequestHelper):
         else:
             return self.has_appeal
 
+    def get_requests(self):
+        """State level jurisdictions should return requests from their localities as well."""
+        if self.level == 's':
+            requests = FOIARequest.objects.filter(
+                Q(jurisdiction=self)|
+                Q(jurisdiction__parent=self)
+            )
+        else:
+            requests = FOIARequest.objects.filter(jurisdiction=self)
+        return requests.exclude(status='started')
+
     class Meta:
         # pylint: disable=too-few-public-methods
         ordering = ['name']
         unique_together = ('slug', 'parent')
+
+
+class Law(models.Model):
+    """A law that allows for requests for public records from a jurisdiction."""
+    jurisdiction = models.ForeignKey(Jurisdiction, related_name='laws')
+    name = models.CharField(max_length=255, help_text='The common name of the law.')
+    shortname = models.CharField(blank=True, max_length=20,
+        help_text='Abbreviation or acronym, e.g. FOIA, FOIL, OPRA')
+    citation = models.CharField(max_length=255, help_text='The legal reference for this law.')
+    url = models.URLField(help_text='The URL of the full text of the law.')
+    summary = models.TextField(blank=True)
+
+    def __unicode__(self):
+        return self.name
+
+    def __repr__(self):
+        return '%d' % self.pk
+
+    def get_absolute_url(self):
+        """Return the url for the jurisdiction."""
+        return self.jurisdiction.get_absolute_url()
+
+
+class Exemption(models.Model):
+    """An exemption describes a reason for not releasing documents or information inside them."""
+    # Required fields
+    name = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=255)
+    jurisdiction = models.ForeignKey(Jurisdiction, related_name='exemptions')
+    basis = models.TextField(help_text='The legal or contextual basis for the exemption.')
+    # Optional fields
+    tags = TaggableManager(through=TaggedItemBase, blank=True)
+    requests = models.ManyToManyField(
+        FOIARequest,
+        through='jurisdiction.InvokedExemption',
+        related_name='exemptions',
+        blank=True
+    )
+    contributors = models.ManyToManyField(User, related_name='exemptions', blank=True)
+    proper_use = models.TextField(blank=True,
+        help_text='An editorialized description of cases when the exemption is properly used.')
+    improper_use = models.TextField(blank=True,
+        help_text='An editorialized description of cases when the exemption is improperly used.')
+    key_citations = models.TextField(blank=True,
+        help_text='Significant references to the exemption in caselaw or previous appeals.')
+
+    def __unicode__(self):
+        return u'%s exemption of %s' % (self.name, self.jurisdiction)
+
+    def __repr__(self):
+        return '%s' % self.slug
+
+    def save(self, *args, **kwargs):
+        """Normalize fields before saving"""
+        self.slug = slugify(self.name)
+        super(Exemption, self).save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        """Return the url for the exemption detail page"""
+        kwargs = self.jurisdiction.get_slugs()
+        kwargs['slug'] = self.slug
+        kwargs['pk'] = self.pk
+        return reverse('exemption-detail', kwargs=kwargs)
+
+
+class InvokedExemption(models.Model):
+    """An invoked exemption tracks the use of an exemption in the course of fulfilling
+    (or rejecting!) a FOIA request. It should connect a request to an exemption and contain
+    information particular to the invocation of the exemption to the request.
+
+    It augments the Exemption model by providing specific examples of situations
+    where the exemption was invoked, i.e. there should only ever be 1 exemption
+    but there can be many invocations of that exemption."""
+    exemption = models.ForeignKey(Exemption, related_name='invokations')
+    request = models.ForeignKey(FOIARequest)
+    use_language = models.TextField(blank=True,
+        help_text='What language did the aguency use to invoke the exemption?')
+    properly_invoked = models.BooleanField(default=True,
+        help_text='Did the agency properly invoke the exemption to the request?')
+
+    def __unicode__(self):
+        return u'%s exemption of %s' % (self.exemption.name, self.request)
+
+    def __repr__(self):
+        return '%d' % self.pk
+
+    def get_absolute_url(self):
+        """Return the url for the exemption detail page, targeting the invokation."""
+        kwargs = self.exemption.jurisdiction.get_slugs()
+        kwargs['slug'] = self.exemption.slug
+        kwargs['pk'] = self.exemption.pk
+        return reverse('exemption-detail', kwargs=kwargs) + '#invoked-%d' % self.pk
+
+
+class ExampleAppeal(models.Model):
+    """Exemptions should contain example appeal language for users to reference.
+    This language will be curated by staff and contain the language as well as
+    the context when the language is most effective. Each ExampleAppeal instance
+    should connect to an Exemption."""
+    exemption = models.ForeignKey(Exemption, related_name='example_appeals')
+    language = models.TextField()
+    context = models.TextField(blank=True,
+        help_text='Under what circumstances is this appeal language most effective?')
+
+    def __unicode__(self):
+        return u'%s for %s' % (self.context, self.exemption)
+
+    def __repr__(self):
+        return '<ExampleAppeal: %d>' % self.pk
+
+    def get_absolute_url(self):
+        """Return the url for the exemption detail page, targeting the appeal."""
+        kwargs = self.exemption.jurisdiction.get_slugs()
+        kwargs['slug'] = self.exemption.slug
+        kwargs['pk'] = self.exemption.pk
+        return reverse('exemption-detail', kwargs=kwargs) + '#appeal-%d' % self.pk
+
+
+class Appeal(models.Model):
+    """Appeals should capture information about appeals submitted to agencies.
+    It should capture the communication used to appeal, as well as the base language
+    used to write the appeal, if any was used."""
+    communication = models.ForeignKey('foia.FOIACommunication', related_name='appeals')
+    base_language = models.ManyToManyField(ExampleAppeal, related_name='appeals', blank=True)
+
+    def __unicode__(self):
+        return u'Appeal of %s' % self.communication.foia
+
+    def __repr__(self):
+        return '<Appeal: %d>' % self.pk
+
+    def get_absolute_url(self):
+        """Return the url for the communication."""
+        return self.communication.get_absolute_url()
+
+    def is_successful(self):
+        """Evaluate the FOIARequest communications to judge whether the appeal is successful."""
+        foia = self.communication.foia
+        subsequent_comms = (foia.communications.filter(date__gt=self.communication.date)
+                                               .annotate(appeal__count=Count('appeals')))
+        successful = False
+        successful = successful or subsequent_comms.filter(status='done').exists()
+        successful = successful and not subsequent_comms.filter(appeal__count__gt=0).exists()
+        return successful
+
+    def is_finished(self):
+        """Evaluate the FOIARequest communications to judge whether the appeal is finished."""
+        foia = self.communication.foia
+        subsequent_comms = foia.communications.filter(date__gt=self.communication.date)
+        return subsequent_comms.filter(status__in=END_STATUS).exists()

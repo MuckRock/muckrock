@@ -1,4 +1,3 @@
-
 """
 Tasks for the account application
 """
@@ -33,8 +32,9 @@ from muckrock.task.models import (
 
 logger = logging.getLogger(__name__)
 
-@periodic_task(run_every=crontab(hour=0, minute=30), name='muckrock.accounts.tasks.store_statstics')
-def store_statstics():
+@periodic_task(run_every=crontab(hour=0, minute=30),
+    name='muckrock.accounts.tasks.store_statistics')
+def store_statistics():
     """Store the daily statistics"""
 
     yesterday = date.today() - timedelta(1)
@@ -152,18 +152,6 @@ def store_statstics():
                                             last_login__month=yesterday.month,
                                             last_login__day=yesterday.day)
     stats.save()
-
-def _notices(email_pref):
-    """Send out notices"""
-    profiles_to_notify = Profile.objects.filter(email_pref=email_pref).distinct()
-    for profile in profiles_to_notify:
-        profile.send_notifications()
-
-@periodic_task(run_every=crontab(day_of_week='mon', hour=10, minute=0),
-               name='muckrock.accounts.tasks.weekly')
-def weekly_notices():
-    """Send out weekly notices"""
-    _notices('weekly')
 
 @periodic_task(run_every=crontab(day_of_week='sun', hour=1, minute=0),
                name='muckrock.accounts.tasks.db_cleanup')

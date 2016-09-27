@@ -1,0 +1,71 @@
+.article
+{
+    @include display(flex);
+    @include flex-wrap(wrap);
+    @include align-content(flex-start);
+    .article__image
+    {
+        @include flex(1 1 9em);
+        margin: 0 $vr $vr/2 0;
+        img
+        {
+            display: block;
+            width: 100%;
+        }
+    }
+    .article__overview
+    {
+        @include flex(3 1 18em);
+    }
+    .article__overview__title
+    {
+        margin-bottom: $vr/4;
+        font-size: $size-4;
+        font-weight: $bold;
+        line-height: 1.2em;
+        a
+        {
+            color: $color-black;
+        }
+    }
+    .article__overview__metadata
+    {
+        @include display(flex);
+        @include justify-content(space-between);
+        margin-bottom: $vr/4;
+        font-size: $size-2;
+        line-height: 1em;
+        color: $color-grey-3;
+    }
+    .article__overview__project, .article__overview__author,
+    {
+        color: $color-grey-3;
+        font-weight: $bold;
+    }
+}
+
+.small.article
+{
+    .article__image
+    {
+        margin: 0 $vr/2 $vr/2 0;
+    }
+    .article__overview__title
+    {
+        font-size: $size-3;
+        line-height: 1.2em;
+    }
+}
+
+.large.article
+{
+    .article__image {
+        @include flex(0 1 100%);
+        margin: 0 0 $vr/2;
+    }
+    .article__overview__title
+    {
+        font-size: $size-5;
+        line-height: 1.2em;
+    }
+}

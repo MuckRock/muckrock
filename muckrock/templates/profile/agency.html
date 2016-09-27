@@ -5,76 +5,130 @@
 {% block type %}agency{% endblock type %}
 
 {% block metadata %}
-<aside class="metadata">
-    <dfn>Agency</dfn>
-    {% if agency.image %}
-    <figure class="agency image">
-        <img src="{% thumbnail agency.image 600x600 %}" class="header-image">
-        {% if agency.image_attr_line %}
-        <figcaption>{{ agency.image_attr_line | safe }}</figcaption>
-        {% endif %}
-    </figure>
+{% if agency.image %}
+<figure class="agency image">
+    <img src="{% thumbnail agency.image 600x600 %}" class="header-image">
+    {% if agency.image_attr_line %}
+    <figcaption>{{ agency.image_attr_line | safe }}</figcaption>
     {% endif %}
-    <h1>{{agency.name}}</h1>
-    <h2><a href="{{ agency.jurisdiction.get_absolute_url }}">{{ agency.jurisdiction }}</a></h2>
-    {% include 'lib/request_stats.html' %}
-    {% include 'lib/appeal_stats.html' %}
-    <dl class="stats">
+</figure>
+{% endif %}
+<h1>{{agency.name}}</h1>
+<h2><a href="{{ agency.jurisdiction.get_absolute_url }}">{{ agency.jurisdiction }}</a></h2>
+{% include 'lib/request_stats.html' %}
+{% include 'lib/appeal_stats.html' %}
+<dl class="stats">
 
-        <dt>Average Response Time</dt>
-        {% with agency.average_response_time as average_response_time %}
-        <dd>{{average_response_time}} day{{average_response_time|pluralize}}</dd>
-        {% endwith %}
-
-        <dt>Commonly Cited Exemptions</dt>
-        {% with agency.exemptions as exemptions %}
-        {% if exemptions %}
-            {% for exmp in exemptions %}
-        <dd>{{exmp.tags__name|capfirst}} <small>{{exmp.count}} time{{exmp.count|pluralize}}</small></dd>
-            {% endfor %}
+    <dt>Allowed Response Time</dt>
+    {% with agency.jurisdiction.get_days as days %}
+        {% if days %}
+        <dd>{{days}} day{{days|pluralize}}</dd>
         {% else %}
-        <dd>None</dd>
+        <dd>No limit</dd>
         {% endif %}
-        {% endwith %}
+    {% endwith %}
 
-        <dt>Mailing Address</dt>
-        {% if agency.address %}
-        <dd>{{ agency.address|linebreaks }}</dd>
-        {% else %}
-        <dd>Unknown</dd>
-        {% endif %}
+    <dt>Average Response Time</dt>
+    {% with agency.average_response_time as average_response_time %}
+    <dd>{{average_response_time}} day{{average_response_time|pluralize}}</dd>
+    {% endwith %}
 
-        <dt>E-mail Address</dt>
-        {% if agency.get_primary_emails %}
-            {% if request.user.profile.can_view_emails %}
-        <dd>{{agency.get_primary_emails|join:", "}}</dd>
-            {% else %}
-        <dd><a href="{% url 'accounts' %}">Available to Pro Users</a></dd>
-            {% endif %}
-        {% else %}
-        <dd>Unknown</dd>
-        {% endif %}
+	<dt>E-mail Address</dt>
+	{% if agency.get_primary_emails %}
+		{% if request.user.profile.can_view_emails %}
+	<dd>{{agency.get_primary_emails|join:", "}}</dd>
+		{% else %}
+	<dd><a href="{% url 'accounts' %}">Available to Pro Users</a></dd>
+		{% endif %}
+	{% else %}
+	<dd>Unknown</dd>
+	{% endif %}
 
-        <dt>Fax Number</dt>
-        {% if agency.fax %}
-        <dd>{{agency.fax}}</dd>
+    {% with agency.success_rate as success_rate %}
+    {% if success_rate > 0 %}
+    <dt>Success Rate</dt>
+    <dd>{{ success_rate|floatformat:"2" }}%</dd>
+    {% endif %}
+    {% endwith %}
+
+    {% with agency.average_fee as average_fee %}
+    {% if average_fee > 0 %}
+    <dt>Average Fee</dt>
+    <dd>${{ average_fee|floatformat:"2" }}</dd>
+    <dd>{{ agency.fee_rate|floatformat:"2" }}% of requests have a fee</dd>
+    {% endif %}
+    {% endwith %}
+
+    <dt>Commonly Cited Exemptions</dt>
+    {% with agency.exemptions as exemptions %}
+    {% if exemptions %}
+        {% for exmp in exemptions %}
+    <dd>{{exmp.tags__name|capfirst}} <small>{{exmp.count}} time{{exmp.count|pluralize}}</small></dd>
+        {% endfor %}
+    {% else %}
+    <dd>None</dd>
+    {% endif %}
+    {% endwith %}
+
+    <dt>Mailing Address</dt>
+    {% if agency.address %}
+    <dd>{{ agency.address|linebreaks }}</dd>
+    {% else %}
+    <dd>Unknown</dd>
+    {% endif %}
+
+    <dt>E-mail Address</dt>
+    {% if agency.email %}
+        {% if request.user.profile.can_view_emails %}
+    <dd>{{agency.email}}</dd>
         {% else %}
-        <dd>Unknown</dd>
+    <dd><a href="{% url 'accounts' %}">Available to Pro Users</a></dd>
         {% endif %}
-    </dl>
-</aside>
+    {% else %}
+    <dd>Unknown</dd>
+    {% endif %}
+
+    <dt>Fax Number</dt>
+    {% if agency.fax %}
+    <dd>{{agency.fax}}</dd>
+    {% else %}
+    <dd>Unknown</dd>
+    {% endif %}
+</dl>
 {% endblock metadata %}
+
 {% block activity %}
-<main class="activity">
-    {% if user.is_authenticated %}
-    {% include 'lib/flag_form.html' %}
+{% if user.is_authenticated %}
+{% if user.is_staff and not agency.stale %}
+<form method="post" id="stale-form">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="mark_stale">
+</form>
+{% endif %}
+<div class="modal" id="flag-form">
+    <form method="post">
+        {% csrf_token %}
+        {% include 'lib/pattern/form.html' %}
+        <footer>
+            <button type="submit" name="action" value="flag" class="primary button">Submit</button>
+            <span class="close-modal button">Cancel</span>
+        </footer>
+    </form>
+</div>
+{% endif %}
+{% if user.is_authenticated %}
+<div>
+    {% if user.is_staff and not agency.stale %}
+    <button type="submit" class="button" form="stale-form">Mark Stale</button>
     {% endif %}
-    {% if agency.public_notes %}
-    <section class="notes">
-        {{ agency.public_notes|markdown:"trusted" }}
-    </section>
-    {% endif %}
-    <h3>Recent Requests <small><a href="{% url 'foia-list' %}?agency={{ agency.pk }}">See All</a></small></h3>
-    {% include 'lib/foia_table.html' with requests=foia_requests %}
-</main>
+    <a href="#flag-form" class="modal-trigger button">Suggest Change</a>
+</div>
+{% endif %}
+{% if agency.public_notes %}
+<section class="notes">
+    {{ agency.public_notes|markdown:"trusted" }}
+</section>
+{% endif %}
+<h3>Recent Requests <small><a href="{% url 'foia-list' %}?agency={{ agency.pk }}">See All</a></small></h3>
+{% include 'lib/foia_table.html' with requests=foia_requests %}
 {% endblock activity %}

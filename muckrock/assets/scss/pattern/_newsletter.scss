@@ -1,0 +1,46 @@
+.newsletter-widget {
+    @include display(flex);
+    @include flex-wrap(wrap);
+    @include justify-content(space-between);
+    margin-bottom: 0;
+    background: $color-blue-light;
+    color: $color-blue-dark;
+    padding: $vr/2;
+
+    .label {
+        display: none;
+    }
+
+    .call-to-action, .signup-form {
+        @include flex(1 1 20em);
+        margin-bottom: 0;
+    }
+
+    .call-to-action p {
+        margin-bottom: 0;
+    }
+
+    .signup-form .email-field {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        margin: $vr/2 0;
+        border: 1px solid $color-blue;
+        input[type="email"] {
+            @include flex(3 1 auto);
+            border: none;
+            line-height: $lh;
+            border-radius: 0;
+            color: $color-black;
+        }
+        button {
+            @include flex(1 1 auto);
+        }
+    }
+
+    @include media($medium-bp){
+        padding: $vr/2 $vr;
+        .label {
+            display: block;
+        }
+    }
+}

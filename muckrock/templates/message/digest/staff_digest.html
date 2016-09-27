@@ -3,7 +3,7 @@
 {% block body %}
 <p>{{ salutation }}, {{ user.first_name }}.</p>
 {% if stats %}
-<h1>Stats</h1>
+<h1>Requests</h1>
 <table>
     <thead>
         <tr>
@@ -13,7 +13,7 @@
         </tr>
     </thead>
     <tbody>
-        {% for stat in stats %}
+        {% for stat in stats.request %}
         <tr>
             <td>{{ stat.name }}</td>
             <td>{{ stat.current }}</td>
@@ -92,6 +92,64 @@
 </table>
 {% endwith %}
 {% endif %}
+{% if stats %}
+<h1>Users</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Statistic</th>
+            <th>Current value</th>
+            <th>Change from day before</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for stat in stats.user %}
+        <tr>
+            <td>{{ stat.name }}</td>
+            <td>{{ stat.current }}</td>
+            {% if stat.delta > 0 %}
+                {% if stat.growth %}
+            <td class="green">
+                {% else %}
+            <td class="red">
+                {% endif %}
+                +{{ stat.delta }}
+            </td>
+            {% elif stat.delta < 0 %}
+                {% if stat.growth %}
+            <td class="red">
+                {% else %}
+            <td class="green">
+                {% endif %}
+                {{ stat.delta }}
+            </td>
+            {% else %}
+            <td>{{ stat.delta }}</td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    <tbody>
+</table>
+{% endif %}
+{% if pro_users.gained or pro_users.lost %}
+<h1>Pro Users (last 5 days)</h1>
+{% if pro_users.gained %}
+<h2>{{pro_users.gained|length}} Gained</h2>
+<ul>
+{% for user in pro_users.gained %}
+    <li><a href="{{user.get_absolute_url}}">{{user.get_full_name}}</a></li>
+{% endfor %}
+</ul>
+{% endif %}
+{% if pro_users.lost %}
+<h2>{{pro_users.lost|length}} Lost</h2>
+<ul>
+{% for user in pro_users.lost %}
+    <li><a href="{{user.get_absolute_url}}">{{user.get_full_name}}</a></li>
+{% endfor %}
+</ul>
+{% endif %}
+{% endif %}
 {% if crowdfunds %}
 <h1>Active Crowdfunds</h1>
 <ul>
@@ -104,6 +162,14 @@
 </li>
 {% endwith %}
 {% endfor %}
+</ul>
+{% endif %}
+{% if projects %}
+<h1>Pending Projects</h1>
+<ul>
+    {% for project in projects %}
+    <li><a href="{{project.get_absolute_url}}">{{project.title}}</a></li>
+    {% endfor %}
 </ul>
 {% endif %}
 <hr />

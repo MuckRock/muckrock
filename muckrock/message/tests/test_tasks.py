@@ -6,6 +6,7 @@ object cannot be instantiated.
 
 from django.test import TestCase
 
+from dateutil.relativedelta import relativedelta
 import mock
 import nose.tools
 
@@ -64,19 +65,21 @@ MockInvoice.retrieve.return_value = mock_invoice
 class TestDailyTask(TestCase):
     """Tests the daily email notification task."""
     def setUp(self):
-        # create an experimental user to notify about an activity
-        # right now special emails are limited to experimental only
-        factories.UserFactory(profile__experimental=True)
-        factories.UserFactory()
+        self.user = factories.UserFactory()
 
-    @mock.patch('muckrock.message.digests.ActivityDigest.send')
-    @mock.patch('muckrock.accounts.models.Profile.send_notifications')
-    def test_daily_notification_task(self, mock_profile_send, mock_send):
-        """Make sure the send method is called for the experimental user."""
+    @mock.patch('muckrock.message.tasks.send_activity_digest.delay')
+    def test_when_unread(self, mock_send):
+        """The send method should be called when a user has unread notifications."""
+        factories.NotificationFactory(user=self.user)
+        tasks.daily_digest()
+        mock_send.assert_called_with(self.user, u'Daily Digest', relativedelta(days=1))
+
+    @mock.patch('muckrock.message.tasks.send_activity_digest.delay')
+    def test_when_no_unread(self, mock_send):
+        """The send method should not be called when a user does not have unread notifications."""
         # pylint: disable=no-self-use
         tasks.daily_digest()
-        mock_send.assert_called_with()
-        mock_profile_send.assert_called_with()
+        mock_send.assert_not_called()
 
 
 class TestStaffTask(TestCase):
@@ -124,6 +127,13 @@ class TestNotificationTasks(TestCase):
         """Notifies the user with a support response."""
         task = FlaggedTaskFactory()
         tasks.support(self.user, 'Hello', task)
+        mock_send.assert_called_with(fail_silently=False)
+
+    def test_notify_contributor(self, mock_send):
+        """Notifies a contributor that they were added to a project."""
+        project = factories.ProjectFactory()
+        added_by = factories.UserFactory()
+        tasks.notify_project_contributor(self.user, project, added_by)
         mock_send.assert_called_with(fail_silently=False)
 
 

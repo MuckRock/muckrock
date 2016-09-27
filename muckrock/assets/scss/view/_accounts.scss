@@ -1,0 +1,182 @@
+.account.plans {
+    @include padding;
+    & > header {
+        @include display(flex);
+        @include justify-content(space-between);
+        @include flex-direction(column);
+        @include media($large-bp) {
+            @include flex-direction(row);
+        }
+        p {
+            max-width: 20em;
+        }
+    }
+    & > main {
+        @include display(flex);
+        &.hidden {
+            display: none;
+        }
+        @include flex-direction(column);
+        @include align-items(center);
+        @media all and (min-width: 768px) {
+            @include flex-direction(row);
+            @include align-items(stretch);
+            @include justify-content(space-around);
+        }
+    }
+    .plan {
+        @include flex(1);
+        @include display(flex);
+        @include flex-direction(column);
+        @include justify-content(space-between);
+        @include border;
+        @include border-radius;
+        overflow: hidden;
+        width: 100%;
+        max-width: 40em;
+        background: #fff;
+        border-color: $color-blue-dark;
+        main, footer {
+            padding: $vr;
+        }
+        header {
+            padding: $vr 0;
+            text-align: center;
+            background: $color-blue-light;
+            color: $color-blue-dark;
+            h2 {
+                font-weight: $bold;
+            }
+        }
+        .superlative {
+            @extend dfn;
+            padding: 2px;
+            background: $color-grey-7;
+            // margin-bottom: 0;
+            text-align: center;
+        }
+        .button, button {
+            width: 100%;
+        }
+        @media all and (min-width: 768px) {
+            margin-bottom: 0;
+            margin-right: $vr;
+            &:last-child {
+                margin-right: 0;
+            }
+        }
+    }
+    .current-plan {
+        color: $color-green;
+        border: 2px solid;
+        @include border-radius;
+        padding: $vr/4;
+        font-weight: $bold;
+        text-align: center;
+    }
+}
+
+.account.signup.form {
+    margin-bottom: 0;
+    .visible-fields {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        .field {
+            @include flex(1 0 100%);
+        }
+        .errorlist {
+            list-style: none;
+            margin-bottom: 0;
+            padding-left: 0;
+        }
+        @include media($medium-bp) {
+            .field {
+                @include flex(1 0 50%);
+                &:nth-child(odd) {
+                    padding-right: $vr;
+                }
+                &:last-child {
+                    padding-right: 0;
+                }
+            }
+        }
+        input {
+            width: 100%;
+        }
+    }
+    footer {
+        @include display(flex);
+        @include justify-content(space-between);
+        @include align-items(center);
+        @include flex-direction(column-reverse);
+        @include media($medium-bp) {
+            @include flex-direction(row);
+        }
+    }
+    .cancel {
+        cursor: pointer;
+        color: $color-blue;
+        border-bottom: 1px dotted;
+        &:hover {
+            text-decoration: none;
+            color: $color-blue-dark;
+            border-bottom-style: solid;
+        }
+    }
+}
+
+.account.settings {
+    $breakpoint: 768px;
+    @include display(flex);
+    @include align-items(stretch);
+    @include flex-direction(column);
+    @media all and (min-width: $breakpoint) {
+        @include flex-direction(row);
+        .request.main {
+            margin-left: $vr * 2;
+        }
+    }
+    header {
+        @include flex(1);
+    }
+    main {
+        @include flex(3);
+    }
+    table {
+        p {
+            margin-bottom: 0;
+        }
+        tr {
+            border: none;
+        }
+        td {
+            padding: 0 0 $vr 0;
+        }
+    }
+    footer {
+        @include display(flex);
+        @include justify-content(space-between);
+        @include align-items(center);
+    }
+    .form {
+        padding: $vr;
+        border: 1px solid $color-grey;
+        @include border-radius;
+        background: $color-white-pure;
+    }
+    .profile.form {
+        .full-name, .other-info {
+            @include display(flex);
+            margin-bottom: 0;
+            .field {
+                @include flex(1);
+            }
+            .field:first-child {
+                margin-right: $vr;
+            }
+        }
+    }
+    .billing td:nth-child(2n) {
+        text-align: right;
+    }
+}

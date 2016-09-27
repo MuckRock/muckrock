@@ -10,7 +10,7 @@
         color: $color;
         background: none;
     }
-    padding: $vertical-rhythm;
+    padding: $vr;
     border-color: darken($color, $color-darken-amount);
     a {
         text-decoration: underline;

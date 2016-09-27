@@ -1,7 +1,7 @@
 {% extends 'task/default.html' %}
 
 {% block task-content %}
-<dl class="task-data">
+<dl class="task__data">
 {% with task.communication.foia as foia %}
     <dt>Category</dt>
     <dd>{{task.get_category_display}}</dd>
@@ -73,6 +73,6 @@
         </label>
     </div>
     <div class="button-group">
-        <button class="primary" type="submit" name="resolve" value="true">Save & Resolve</button>
+        <button class="primary button" type="submit" name="resolve" value="true">Save & Resolve</button>
     </div>
 {% endblock %}

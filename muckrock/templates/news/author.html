@@ -1,0 +1,3 @@
+{% extends 'news/list.html' %}
+
+{% block list-title %}{{block.super}} &bull; {{ author.get_full_name }}{% endblock %}

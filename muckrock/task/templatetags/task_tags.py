@@ -48,6 +48,12 @@ class CrowdfundTaskNode(TaskNode):
     endpoint_name = 'crowdfund-task-list'
     class_name = 'crowdfund'
 
+    def get_extra_context(self):
+        """Adds the crowdfund object to context."""
+        extra_context = super(CrowdfundTaskNode, self).get_extra_context()
+        extra_context['crowdfund_object'] = self.task.crowdfund.get_crowdfund_object()
+        return extra_context
+
 
 class FailedFaxTaskNode(TaskNode):
     """Renders a failed fax task."""
@@ -142,9 +148,11 @@ class ResponseTaskNode(TaskNode):
         extra_context = super(ResponseTaskNode, self).get_extra_context()
         form_initial = {}
         communication = self.task.communication
+        predicted_status = self.task.predicted_status
         _foia = communication.foia
         if _foia:
-            form_initial['status'] = _foia.status
+            initial_status = predicted_status if predicted_status else _foia.status
+            form_initial['status'] = initial_status
             form_initial['tracking_number'] = _foia.tracking_id
             form_initial['date_estimate'] = _foia.date_estimate
             extra_context['previous_communications'] = _foia.reverse_communications
@@ -185,11 +193,18 @@ class StaleAgencyTaskNode(TaskNode):
         """Adds a form for updating the email"""
         extra_context = super(StaleAgencyTaskNode, self).get_extra_context()
         latest_response = self.task.latest_response()
-        initial = {'email': latest_response.from_user.email}
+        if latest_response:
+            initial = {'email': latest_response.from_user.email}
+        else:
+            initial = {}
         extra_context['email_form'] = task.forms.StaleAgencyTaskForm(initial=initial)
         extra_context['latest_response'] = latest_response
-        extra_context['stale_requests'] = self.task.stale_requests()
-        extra_context['stalest_request'] = list(extra_context['stale_requests'])[0]
+        stale_requests = list(self.task.stale_requests())
+        extra_context['stale_requests'] = stale_requests
+        if len(stale_requests) > 0:
+            extra_context['stalest_request'] = stale_requests[0]
+        else:
+            extra_context['stalest_request'] = None
         return extra_context
 
 
@@ -199,6 +214,14 @@ class StatusChangeTaskNode(TaskNode):
     task_template = 'task/status_change.html'
     endpoint_name = 'status-change-task-list'
     class_name = 'status-change'
+
+
+class NewExemptionTaskNode(TaskNode):
+    """Renders a new exemption task."""
+    model = task.models.NewExemptionTask
+    task_template = 'task/new_exemption.html'
+    endpoint_name = 'newexemption-task-list'
+    class_name = 'new-exemption'
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -279,3 +302,9 @@ def multi_request_task(parser, token):
 def failed_fax_task(parser, token):
     """Returns a FailedFaxTaskNode"""
     return FailedFaxTaskNode(get_id(token))
+
+@register.tag
+def new_exemption_task(parser, token):
+    """Returns a NewExemptionTaskNode"""
+    return NewExemptionTaskNode(get_id(token))
+

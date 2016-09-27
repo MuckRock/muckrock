@@ -1,0 +1,23 @@
+.project-item a {
+    display: block;
+    max-width: 15em;
+    border: 1px solid $color-black;
+    color: $color-white;
+    background: $color-blue;
+    .project-image {
+        display: block;
+        width: 100%;
+        height: auto;
+        margin-bottom: 0;
+        opacity: .75;
+    }
+    .project-info {
+        display: block;
+        margin-bottom: 0;
+        padding: $vr/2;
+    }
+    &:hover {
+        text-decoration: none;
+        background: $color-blue-dark;
+    }
+}

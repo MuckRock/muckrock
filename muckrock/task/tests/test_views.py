@@ -26,7 +26,7 @@ from muckrock.task.factories import (
         ResponseTaskFactory,
         NewAgencyTaskFactory,
         )
-from muckrock.utils import mock_middleware
+from muckrock.test_utils import mock_middleware
 from muckrock.views import MRFilterableListView
 
 mock_send = mock.Mock()

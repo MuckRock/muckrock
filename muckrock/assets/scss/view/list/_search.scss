@@ -1,0 +1,34 @@
+.search.list {
+    .list-actions {
+        #global-search {
+            @include display(flex);
+            width: 100%;
+        }
+        input[type=search] {
+            width: 75%;
+            margin-right: $vr;
+        }
+        input[type=submit] {
+            @include flex(auto);
+            margin: 0;
+        }
+    }
+    .list-filters {
+        label {
+            padding-left: $vr/4;
+        }
+        li {
+            display: inline-block;
+            padding-right: $vr;
+            &:last-child {
+                padding-right: 0;
+            }
+        }
+        @include media($large-bp) {
+            li {
+                display: block;
+                padding-right: 0;
+            }
+        }
+    }
+}

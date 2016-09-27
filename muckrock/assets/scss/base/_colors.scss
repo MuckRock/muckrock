@@ -1,46 +1,14 @@
-    ///////////////////////////////
-   //                           //
-  //        C O L O R S        //
- //                           //
-///////////////////////////////
-
-$color-grey-0: #21262E;
-$color-grey-1: #333C47;
-$color-grey-2: #495361;
-$color-grey-3: #616C7A;
-$color-grey-4: #7B8694;
-$color-grey-5: #97A1AD;
-$color-grey-6: #B5BDC7;
-$color-grey-7: #D5DAE0;
-$color-grey-8: #F7F8FA;
-
-$color-black: $color-grey-1;
-$color-white: $color-grey-8;
-$color-grey: $color-grey-5;
-$color-black-pure: #000000;
-$color-white-pure: #FFFFFF;
-
-$color-red:          #CC5C52;
-$color-red-light:    #FACAC8;
-$color-red-dark:     #662C29;
-$color-yellow-light: #F8E8CA;
-$color-yellow:       #D3BC35;
-$color-yellow-dark:  #947026;
-$color-green:        #52CC66;
-$color-green-light:  #BBFAC6;
-$color-green-dark:   #296633;
-$color-blue:         #4582CC;
-$color-blue-light:   #BBD6FA;
-$color-blue-dark:    #294366;
-
-$color-disabled: $color-grey-7;
-
-$color-facebook: #3B5998;
-$color-twitter: #55ACEE;
-$color-email: #7294D8;
-
-$color-darken-amount: 10%;
-$color-odd-background:  darken($color-grey-8, 5%);
+/*
+** _colors.scss
+**
+** Here is where we define our color scheme, and any additional colors.
+** The MuckRock color scheme contains 8 shades of grey, from black (1) to white (8).
+** It contains a family of four colors, along with light and dark variants: red, yellow, green, and blue.
+** Blue is the primary color and signals action.
+** Red is the accent color signals an error.
+** Yellow signals a warning.
+** Green signals success or payment.
+*/
 
 body {
     color: $color-black;
@@ -53,7 +21,6 @@ a {
 }
 
 code {
-    background-color: $color-grey-7;
     color: $color-black;
     i, em { color: $color-blue; }
     b, strong { color: $color-red; }

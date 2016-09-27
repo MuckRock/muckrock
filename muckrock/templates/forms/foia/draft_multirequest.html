@@ -38,11 +38,17 @@ and
     {% endfor %}
     {% for field in form.visible_fields %}
         {% if field.label == 'Request' %}
-        <div class="sent message request">
-            <section class="meta">
-                <span class="date right">{% now "m/d/Y" %}</span>
+        <div class="blue textbox communication">
+            <header class="textbox__header communication-header">
+                <p class="from">From: {{foia.user.get_full_name}}</p>
+                <div class="actionables">
+                    <time class="date" datetime="{% now 'c' %}">{% now 'm/d/Y' %}</time>
+                </div>
+            </header>
+            <section class="textbox__section communication-metadata">
+                <p class="small subject">Subject: {{ foia.title }}</p>
             </section>
-            <section class="body">
+            <section class="textbox__section communication-body">
                 <p>To Whom It May Concern:</p>
                 <p>This is a request under [Insert jurisdiction's applicable freedom of information law] for a copy of the following records:</p>
                 {{ field }}
@@ -57,12 +63,7 @@ and
         {% else %}
             {% has_perm 'foia.embargo_foiarequest' request.user foia as can_embargo %}
             {% if field.label != 'Embargo' or can_embargo %}
-        <fieldset class="{{ field.label|lower }}{% if field.errors %} failure{% endif %}{% if field.field.required %} required{% endif %}">
-            <label for="{{ field.auto_id }}">{{ field.label}}</label>
-            {{ field }}
-            {% if field.help_text %}<p class="default"><small>{{ field.help_text }}</small></p>{% endif %}
-            {% if field.errors %}<p class="failure"><small>{{ field.errors }}</small></p>{% endif %}
-        </fieldset>
+				{% include 'lib/pattern/field.html' %}
             {% endif %}
         {% endif %}
     {% endfor %}
@@ -77,6 +78,7 @@ and
 {% if balance.extra_requests %}
 <form action="{% url 'acct-buy-requests' username=request.user.username %}?next={{ foia.get_absolute_url }}" method="POST" class="stripe-checkout" id="buy-requests">
     {% csrf_token %}
+    <input type="hidden" name="bundles" value="{{bundles}}" />
     <input type="hidden" name="stripe_token" value="" />
     <input type="hidden" name="stripe_pk" value="{{ stripe_pk }}" />
     <input type="hidden" name="stripe_image" value="{% static 'icons/logo.png' %}" />
@@ -88,7 +90,7 @@ and
     <input type="hidden" name="stripe_amount" value="{{ bundles|mul:'2000' }}" />
 </form>
 <p>You will be submitting {{ requests }} request{{ requests|pluralize }}, but {% if not remaining %}have no requests{% else %}only have {{ remaining }} remaining{%endif%}. You must purchase {{ bundles }} request bundle{{ bundles|pluralize }} before you can submit your request.</p>
-<button class="primary" form="buy-requests" type="submit">Buy Requests</button>
+<button class="primary button" form="buy-requests" type="submit">Buy Requests</button>
 {% else %}
 <p>You will be submitting {{ requests }} request{{ requests|pluralize }}, leaving
 you with {% if balance.monthly_requests %}{{ profile.monthly_requests|sub:balance.monthly_requests }}

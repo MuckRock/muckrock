@@ -1,0 +1,217 @@
+.banner
+{
+    @include display(flex);
+    @include flex-wrap(wrap);
+    @include align-items(center);
+    @include justify-content(center);
+    color: $color-white;
+
+    h2
+    {
+        font-size: $size-5;
+    }
+
+    .about
+    {
+        @include flex(3 1 500px);
+    }
+
+    .info
+    {
+        @include flex(1 1 200px);
+        max-width: 20em;
+        font-size: $size-2;
+    }
+
+    &.foia
+    {
+
+        background-size: cover;
+        background-position: right bottom;
+        padding: $vr;
+        @include border;
+        border-color: $color-red-dark;
+
+        h2
+        {
+            margin: 0 auto $vr;
+            max-width: 11em;
+            font-size: $size-5;
+            font-weight: $bold;
+        }
+        .button {
+            margin-bottom: $vr;
+        }
+        .call-to-action {
+            a
+            {
+                color: $color-white;
+                font-weight: $bold;
+                border-bottom: 1px dotted;
+            }
+            a:hover
+            {
+                color: $color-red-light;
+                text-decoration: none;
+                border-bottom: 1px solid;
+            }
+        }
+        .info
+        {
+            padding: $vr $vr 0 $vr;
+            @include border;
+            background-color: rgba(0,0,0,.4);
+        }
+        .stats
+        {
+            @include display(flex);
+            @include flex-wrap(wrap);
+            @include justify-content(space-around);
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .stat
+        {
+            @include flex(1 1 8em);
+            width: 7em;
+            margin: 0 0 $vr 0;
+            text-align: center;
+            .value
+            {
+                font-size: $size-5;
+                margin-bottom: $vr/2;
+            }
+            .key
+            {
+                line-height: 1em;
+            }
+        }
+
+        .about
+        {
+            text-align: center;
+            .button
+            {
+                display: inline-block;
+                @include media($small-bp)
+                {
+                    display: block;
+                    max-width: 20em;
+                    margin: 0 auto $vr;
+                }
+            }
+            #learn-more
+            {
+                display: inline-block;
+                margin-left: $vr/4;
+            }
+        }
+    }
+    &.mission
+    {
+        @include justify-content(space-between);
+        margin: 0 $vr $vr;
+        padding: 0;
+        color: $color-black;
+        h1
+        {
+            max-width: 21em;
+            margin-right: $vr;
+            font-size: $size-6;
+            font-weight: $bold;
+        }
+    }
+}
+
+.homepage
+{
+    @include padding;
+    h2
+    {
+        font-size: $size-4;
+        font-weight: $bold;
+    }
+    main
+    {
+        margin-bottom: 0;
+        @include display(flex);
+        @include flex-wrap(wrap);
+        .news
+        {
+            @include flex(2 1 400px);
+            .articles
+            {
+                @include display(flex);
+                @include flex-wrap(wrap);
+            }
+            .article
+            {
+                margin: 0 $vr $vr;
+            }
+            .lead.article
+            {
+                @include flex(0 1 100%);
+            }
+            .other.article
+            {
+                @include flex(1 1 275px);
+            }
+        }
+        .requests
+        {
+            @include flex(1 1 200px);
+            margin: 0 $vr $vr;
+        }
+    }
+    .news
+    {
+        .newsletter-widget {
+            margin: 0 $vr $vr;
+        }
+    }
+    .projects {
+        padding: 0 $vr;
+    }
+    .projects li {
+        margin-bottom: $vr;
+    }
+}
+
+.homepage .news .articles
+{
+    @include display(flex);
+    @include flex-flow(wrap);
+    .articles--high
+    {
+        @include flex(0 1 100%);
+    }
+    .articles--med
+    {
+        @include flex(2 1 30em);
+    }
+    .articles--low
+    {
+        @include flex(1 1 15em);
+    }
+}
+
+/* This knocks out the margin applied by the parent container */
+.homepage
+{
+    overflow: hidden;
+    margin: 0 -.5 * $vr;
+    margin-bottom: 0;
+    section
+    {
+        margin-bottom: 0;
+    }
+    @include media($medium-bp)
+    {
+        margin: 0 -1 * $vr;
+    }
+    @include media($large-bp)
+    {
+        margin: 0 -24px 0 -1 * $vr;
+    }
+}

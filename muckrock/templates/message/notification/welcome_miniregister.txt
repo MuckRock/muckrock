@@ -1,0 +1,21 @@
+{% extends 'message/base.txt' %}
+{% block body %}
+Welcome to MuckRock, {{user.first_name}}!
+
+We'll need you to finish creating your account. Follow this link to set up your username and password, and to verify your email address: {{base_url}}{{completion_url|safe}}
+
+Have a technical support or customer service issue?
+
+* Click the "Get Help" button on the request page.
+* Email us at info@muckrock.com
+
+Looking for FOIA advice?
+
+* Post your question to our forum to get invaluable insight from MuckRock's community of public records pros. {{base_url}}{% url 'question-index' %}
+* Send us your question through Twitter. https://www.twitter.com/muckrock/
+
+Once again, welcome to the MuckRock community. We are excited to see what you do with the tools we've built.
+
+Sincerely,
+The MuckRock Team
+{% endblock %}

@@ -11,7 +11,7 @@ register = template.Library()
 
 class Action(AsNode):
     """Basic action rendering"""
-    template = 'actions/base.html'
+    template = 'lib/pattern/actions/base.html'
 
     def render_result(self, context):
         """Renders actions using our own template"""
@@ -23,7 +23,7 @@ class Action(AsNode):
 
 class PassiveAction(Action):
     """Renders an action with emphasis on the object"""
-    template = 'actions/passive.html'
+    template = 'lib/pattern/actions/passive.html'
 
 
 @register.tag

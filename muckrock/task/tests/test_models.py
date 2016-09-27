@@ -283,14 +283,30 @@ class StaleAgencyTaskTests(TestCase):
     def test_stale_requests(self):
         """
         The stale agency task should provide a list of open requests which have not
-        recieved any response since the stale duration.
+        recieved any response since the stale duration and have autofollowups enabled.
         """
-        closed_foia = factories.StaleFOIARequestFactory(agency=self.task.agency, status='done')
-        stale_requests = self.task.stale_requests()
+        closed_foia = factories.StaleFOIARequestFactory(
+            agency=self.task.agency,
+            status='done'
+        )
+        no_response = factories.StaleFOIARequestFactory(
+            agency=self.task.agency,
+            stale_comm__response=False
+        )
+        disabled_autofollowups = factories.StaleFOIARequestFactory(
+            agency=self.task.agency,
+            status='ack',
+            disable_autofollowups=True
+        )
+        stale_requests = list(self.task.stale_requests())
         ok_(self.foia in stale_requests,
             'Open requests should be considered stale.')
+        ok_(no_response in stale_requests,
+            'Requests without any response should be considered stale.')
         ok_(closed_foia not in stale_requests,
             'Closed requests should not be considered stale.')
+        ok_(disabled_autofollowups not in stale_requests,
+            'Open requests with autofollowups disabled should not be considered stale.')
 
     def test_latest_response(self):
         """
@@ -368,7 +384,8 @@ class ResponseTaskTests(TestCase):
     """Test the ResponseTask class"""
 
     def setUp(self):
-        comm = factories.FOIACommunicationFactory(response=True)
+        agency = factories.AgencyFactory()
+        comm = factories.FOIACommunicationFactory(response=True, foia__agency=agency)
         self.task = task.models.ResponseTask.objects.create(communication=comm)
 
     def test_get_absolute_url(self):
@@ -453,6 +470,18 @@ class ResponseTaskTests(TestCase):
         self.task.set_price(1)
         self.task.set_price('1')
         self.task.set_price('foo')
+
+
+class TestNewExemptionTask(TestCase):
+    """The NewExemptionTask allows staff to review user-submitted exemptions,
+    document the use of exemptions, and use them to create new ones."""
+    def setUp(self):
+        self.task = task.factories.NewExemptionTaskFactory()
+
+    def test_get_absolute_url(self):
+        eq_(self.task.get_absolute_url(), reverse('newexemption-task', kwargs={'pk': self.task.pk}))
+
+
 
 
 class TestTaskManager(TestCase):

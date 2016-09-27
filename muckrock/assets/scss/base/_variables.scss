@@ -1,20 +1,99 @@
-/* Borders */
-$base-border-width:     1px;
-$base-border-radius:    4px;
+/*
+** _variables.scss
+**
+** The variables file should contain all the variable values used in this project.
+** That way, they can be changed and seen from a single place and allow the styles
+** to be modified very easily in the future.
+**
+** However, that being said, not all variables are currently located here. Oops!
+*/
 
-/* Breakpoints */
-$large-breakpoint:      1100px;
-$medium-breakpoint:     500px;
-$large-layout:          new-breakpoint(min-width $large-breakpoint 12);
-$medium-layout:         new-breakpoint(min-width $medium-breakpoint 6);
-$small-layout:          new-breakpoint(max-width $medium-breakpoint 4);
+/*
+** Typography Variables
+**
+** First we try to load our own font. If that doesn't work,
+** then we try loading the native system font. If that doesn't work,
+** then we fall back to good ol' Helvetica Neue. And if THAT doesn't
+** work, then we fall back to the browser's default sans-serif font.
+*/
 
-/* Menus */
-$menu-breakpoint:       1100px;
-$mobile-menu-width:     220px;
-$tablet-menu-width:     280px;
-$desktop-menu-width:    280px;
-$menu-animation:        all 0.25s ease;
+$sans-serif:    'Source Sans Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+$monospace:     'Source Code Pro', 'Courier Prime', monospace;
 
-/* Animation */
-$base-duration:         0.25s;
+$bold:          500;
+$normal:        400;
+
+$size-1:        0.6875rem;
+$size-2:        0.8125rem;
+$size-3:        1.0000rem;
+$size-4:        1.1875rem;
+$size-5:        1.4375rem;
+$size-6:        1.6875rem;
+$size-7:        2.0625rem;
+$size-8:        2.5000rem;
+$size-9:        3.0000rem;
+
+$lh:            1.4375em;
+$vr:            1.1875rem;
+
+/*
+** Color Variables
+**
+** Here is where we define our color scheme, and any additional colors.
+** The MuckRock color scheme contains 8 shades of grey, from black (1) to white (8).
+** It contains a family of four colors, along with light and dark variants: red, yellow, green, and blue.
+*/
+
+$color-grey-1: #333C47;
+$color-grey-2: #495361;
+$color-grey-3: #616C7A;
+$color-grey-4: #7B8694;
+$color-grey-5: #97A1AD;
+$color-grey-6: #B5BDC7;
+$color-grey-7: #D5DAE0;
+$color-grey-8: #F7F8FA;
+
+$color-black: $color-grey-1;
+$color-white: $color-grey-8;
+$color-grey: $color-grey-5;
+$color-black-pure: #000000;
+$color-white-pure: #FFFFFF;
+
+$color-red:          #CC5C52;
+$color-red-light:    #FACAC8;
+$color-red-dark:     #662C29;
+$color-yellow-light: #F8E8CA;
+$color-yellow:       #D3BC35;
+$color-yellow-dark:  #947026;
+$color-green:        #52CC66;
+$color-green-light:  #BBFAC6;
+$color-green-dark:   #296633;
+$color-blue:         #4582CC;
+$color-blue-light:   #BBD6FA;
+$color-blue-dark:    #294366;
+
+$color-disabled: $color-grey-7;
+
+$color-facebook: #3B5998;
+$color-twitter: #55ACEE;
+$color-reddit: #FF4500;
+$color-email: #981e1e;
+
+$color-darken-amount: 10%;
+$color-odd-background:  darken($color-grey-8, 5%);
+
+/*
+** Border Variables
+*/
+
+$border-width:  1px;
+$border-radius: 4px;
+$border:        $border-width solid;
+
+/*
+** Breakpoint Variables
+*/
+
+$large-bp:      new-breakpoint(min-width 1100px 12);
+$medium-bp:     new-breakpoint(min-width 500px 6);
+$small-bp:      new-breakpoint(max-width 500px 4);

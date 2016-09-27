@@ -15,13 +15,11 @@ from django.template.loader import get_template
 from django.template import RequestContext, Context
 from django.utils.encoding import smart_text
 
-import actstream
 from datetime import datetime, date
+from math import ceil
 import logging
-from random import choice
-import string
 
-from muckrock.accounts.models import Profile
+from muckrock.accounts.utils import miniregister
 from muckrock.agency.models import Agency
 from muckrock.foia.forms import (
     RequestForm,
@@ -35,9 +33,8 @@ from muckrock.foia.models import (
     STATUS,
     )
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.message.tasks import welcome
 from muckrock.task.models import NewAgencyTask, MultiRequestTask
-from muckrock.utils import unique_username
+from muckrock.utils import new_action, generate_key
 
 # pylint: disable=too-many-ancestors
 
@@ -130,34 +127,21 @@ def _make_request(request, foia_request, parent=None):
     return foia, foia_comm
 
 def _make_user(request, data):
-    """Helper function to create a new user"""
-    # create unique username thats at most 30 characters
-    username = unique_username(data['full_name'])
-    # create random password
-    password = ''.join(choice(string.ascii_letters + string.digits) for _ in range(12))
-    # create a new user
-    user = User.objects.create_user(username, data['email'], password)
-    full_name = data['full_name'].strip()
-    if ' ' in full_name:
-        first_name, last_name = full_name.rsplit(' ', 1)
-        user.first_name = first_name[:30]
-        user.last_name = last_name[:30]
-    else:
-        user.first_name = full_name[:30]
-    user.save()
-    # create a new profile
-    Profile.objects.create(
-        user=user,
-        acct_type='basic',
-        monthly_requests=settings.MONTHLY_REQUESTS.get('basic', 0),
-        date_update=datetime.now()
-    )
-    # send the new user a welcome email
-    password_link = user.profile.wrap_url(reverse('acct-change-pw'))
-    welcome.delay(user, password_link)
-    # login the new user
-    user = authenticate(username=username, password=password)
+    """
+    Create a new user from just their full name and email and return the user.
+    - create a password from a random string of letters and numbers
+    - log the user in to their new account
+    """
+    full_name = data['full_name']
+    email = data['email']
+    password = generate_key(12)
+    # register a new user
+    user = miniregister(full_name, email, password)
+    # log the new user in
+    user = authenticate(username=user.username, password=password)
     login(request, user)
+    # return the user
+    return user
 
 def _process_request_form(request):
     """A helper function for getting info out of a request composer form"""
@@ -201,13 +185,7 @@ def _submit_request(request, foia):
     foia.submit()
     request.session['ga'] = 'request_submitted'
     messages.success(request, 'Your request was submitted.')
-    # generate action
-    actstream.action.send(
-        request.user,
-        verb='submitted',
-        action_object=foia,
-        target=foia.agency
-    )
+    new_action(request.user, 'submitted', target=foia)
     return redirect(foia)
 
 def clone_request(request, jurisdiction, jidx, slug, idx):
@@ -388,8 +366,6 @@ def create_multirequest(request):
 @login_required
 def draft_multirequest(request, slug, idx):
     """Update a started FOIA MultiRequest"""
-    from math import ceil
-
     foia = get_object_or_404(FOIAMultiRequest, slug=slug, pk=idx)
 
     if foia.user != request.user:

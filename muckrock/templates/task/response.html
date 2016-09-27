@@ -5,8 +5,10 @@
 {% if task.created_from_orphan %}
 <p class="created-from-orphan">This response was created from an orphan task.</p>
 {% endif %}
-<dl class="task-data">
+<dl class="task__data">
     {% with task.communication as comm %}
+    {% with comm.foia as foia %}
+    {% if comm.priv_from_who %}
     <dt>From</dt>
     <dd>
         {{ task.communication.from_user.get_full_name }}
@@ -17,7 +19,6 @@
     <dt>Subject</dt>
     <dd>{{comm.subject}}</dd>
     {% endif %}
-    {% with comm.foia as foia %}
     {% if foia %}
     <dt>Request</dt>
     <dd><a href="{{foia.get_absolute_url}}">{{foia}}</a> (<a href="{% url 'admin:foia_foiarequest_change' foia.pk %}">admin</a>)</dd>
@@ -30,22 +31,26 @@
     <dd>None</dd>
     {% endif %}
     {% endif %}
-    {% endwith %}
     {% if attachments %}
     <dt>Attachments</dt>
-        {% with foia_url=comm.foia.get_absolute_url %}
+        {% with foia_url=foia.get_absolute_url %}
         {% for file in attachments %}
     <dd>{% include "lib/file.html" %}</dd>
         {% endfor %}
         {% endwith %}
     {% endif %}
-    {% endwith %}
+    {% if foia %}
+    <dt>Current Status</dt>
+    <dd>{{foia.get_status_display}}</dd>
+    {% endif %}
     {% if task.predicted_status %}
     <dt>Predicted Status</dt>
     <dd>{{task.get_predicted_status_display}}</dd>
     <dt>Probability</dt>
     <dd>{{task.status_probability}}%</dd>
     {% endif %}
+    {% endwith %}
+    {% endwith %}
 </dl>
 <div class="collapsable full-communication">
     <header>This communication</header>
@@ -69,6 +74,6 @@
     <div class="response-input">
         {{ response_form }}
     </div>
-    <button type="submit" name="proxy" value="true" class="proxy">Proxy Rejection</button>
-    <button type="submit" name="resolve" value="true" class="primary">Save & Resolve</button>
+    <button type="submit" name="proxy" value="true" class="proxy button">Proxy Rejection</button>
+    <button type="submit" name="resolve" value="true" class="primary button">Save & Resolve</button>
 {% endblock %}

@@ -1,0 +1,126 @@
+{% extends 'base_detail.html' %}
+{% load markdown_deux_tags %}
+{% load thumbnail %}
+{% load static from staticfiles %}
+{% load thumbnail %}
+{% load tags %}
+
+{% with object as article %}
+
+{% block title %}{{ article.title }}{% endblock title %}
+
+{% block content %}
+{% with article.projects.last as project %}
+    {% if project.newsletter %}
+        {% newsletter list_id=project.newsletter label=project.newsletter_label cta=project.newsletter_cta %}
+    {% else %}
+        {% newsletter %}
+    {% endif %}
+{% endwith %}
+<div class="news detail">
+    {% if article.image %}
+    <div class="news__image"><img src="{% thumbnail article.image 1200x400 crop %}"></div>
+    {% endif %}
+    <article class="news__article">
+        <header class="news__article__header">
+            <time title="{{ article.pub_date|date:'c' }}" datetime="{{ article.pub_date|date:'c' }}">{{ article.pub_date | date:"F j, Y" }}</time>
+            <h1>{{ article.title|smartypants }}</h1>
+            {% if article.kicker %}
+            <summary class="kicker">{{ article.kicker|smartypants }}</summary>
+            {% endif %}
+            <div class="contributors">
+                {% with article.authors.all as authors %}
+                {% if authors %}
+                <div class="authors">Written by
+                    {% for author in authors %}
+                        <a href="{{ author.profile.get_absolute_url }}" title="{{ author.get_full_name }}">{{ author.get_full_name }}</a>{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% endwith %}
+                {% with article.editors.all as editors %}
+                {% if editors %}
+                <div class="editors">Edited by
+                    {% for editor in editors %}
+                        <a href="{{ editor.profile.get_absolute_url }}" title="{{ editor.get_full_name }}">{{ editor.get_full_name }}</a>{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% endwith %}
+            </div>
+        </header>
+        <main class="news__article__main">
+{% comment %}
+We have to keep this code un-tabbed for dumb reasons!
+The markdown filter will transform the tabbed text into a line of <code>.
+Like  I said, real dumb stuff!
+{% endcomment %}
+{% filter markdown:"trusted"|smartypants %}
+{% evaluate article.body %}
+{% endfilter %}
+        </main>
+    </article>
+    <aside class="news__aside">
+        {% social title=article.title url=article.get_absolute_url %}
+        {% project_manager article %}
+        {% tag_manager article %}
+        {% if foias %}
+        <div class="related-requests">
+            <dfn>Related Requests</dfn>
+            {% for foia in foias %}
+            {% include 'lib/foia.html' with hide_actions=True %}
+            {% endfor %}
+        </div>
+        {% endif %}
+    </aside>
+</div>
+{% if related_articles %}
+<div class="articles__related">
+    <h1 class="articles__related__header">Related Stories</h1>
+    {% for article in related_articles %}
+    {% include 'lib/pattern/article.html' with large=True hide_summary=True %}
+    {% endfor %}
+</div>
+{% endif %}
+{% if recent_articles %}
+<div class="articles__recent">
+    <h1 class="articles__recent__header">Recently Published</h1>
+    {% for article in recent_articles|slice:":4" %}
+    {% include 'lib/pattern/article.html' with large=True hide_summary=True %}
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block open_graph %}
+<meta property="og:title" content="{{ article.title }}" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="{{ request.build_absolute_uri }}" />
+{% if article.image %}
+<meta property="og:image" content="{% thumbnail article.image 1200x400 %}" />
+{% else %}
+<meta property="og:image" content="{% static 'icons/logo.png' %}" />
+{% endif %}
+<meta property="og:description" content="{{ article.summary }}" />
+<meta property="og:site_name" content="MuckRock" />
+<meta property="og:article:published_time" content="{{ article.date }}" />
+{% endblock open_graph %}
+
+{% block twitter_card %}
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:site" content="@muckrock" />
+{% with article.authors.all|first as author %}
+    {% if author.profile.twitter %}
+<meta name="twitter:creator" content="{{ author.profile.twitter }}" />
+    {% endif %}
+{% endwith %}
+<meta name="twitter:title" content="{{ article.title }}" />
+<meta name="twitter:description" content="{{ article.summary }}" />
+{% if article.image %}
+<meta name="twitter:image:src" content="{% thumbnail article.image 1200x400 %}" />
+{% else %}
+<meta name="twitter:image:src" content="{% static 'icons/logo.png' %}" />
+{% endif %}
+{% endblock twitter_card %}
+
+{% endwith %}

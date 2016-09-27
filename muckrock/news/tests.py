@@ -13,7 +13,7 @@ from muckrock.news.models import Article
 from muckrock.news.views import NewsDetail
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.tests import get_allowed, get_404
-from muckrock.utils import mock_middleware
+from muckrock.test_utils import mock_middleware
 
 # pylint: disable=no-self-use
 # pylint: disable=too-many-public-methods
@@ -98,6 +98,15 @@ class TestNewsFunctional(TestCase):
                 reverse('news-archive-day',
                     kwargs={'year': 1999, 'month': 'mar', 'day': 1}))
         eq_(len(response.context['object_list']), 0)
+
+    def test_news_archive_author(self):
+        """Should return all articles for the given author"""
+        author = Article.objects.get(slug='test-article-5').authors.first()
+        response = get_allowed(
+            self.client,
+            reverse('news-author', kwargs={'username': author.username})
+        )
+        eq_(len(response.context['object_list']), Article.objects.filter(authors=author).count())
 
     def test_news_detail(self):
         """News detail should display the given article"""

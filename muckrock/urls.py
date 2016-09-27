@@ -6,7 +6,7 @@ from django.conf import settings
 from django.conf.urls import handler404 # pylint: disable=unused-import
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
-from django.views.generic.base import RedirectView
+from django.views.generic.base import RedirectView, TemplateView
 
 from rest_framework.routers import DefaultRouter
 import dbsettings.urls
@@ -15,7 +15,7 @@ import debug_toolbar
 import muckrock.accounts.views
 import muckrock.agency.views
 import muckrock.foia.viewsets
-import muckrock.jurisdiction.views
+import muckrock.jurisdiction.viewsets
 import muckrock.jurisdiction.urls
 import muckrock.news.views
 import muckrock.qanda.views
@@ -38,7 +38,7 @@ sitemaps = {
 
 router = DefaultRouter()
 router.register(r'jurisdiction',
-        muckrock.jurisdiction.views.JurisdictionViewSet,
+        muckrock.jurisdiction.viewsets.JurisdictionViewSet,
         'api-jurisdiction')
 router.register(r'agency',
         muckrock.agency.views.AgencyViewSet,
@@ -46,6 +46,9 @@ router.register(r'agency',
 router.register(r'foia',
         muckrock.foia.viewsets.FOIARequestViewSet,
         'api-foia')
+router.register(r'exemption',
+        muckrock.jurisdiction.viewsets.ExemptionViewSet,
+        'api-exemption')
 router.register(r'question',
         muckrock.qanda.views.QuestionViewSet,
         'api-question')
@@ -123,6 +126,8 @@ urlpatterns = patterns(
     ),
     url(r'^news-sitemaps/', include('news_sitemaps.urls')),
     url(r'^__debug__/', include(debug_toolbar.urls)),
+    url(r'^donate/$', views.DonationFormView.as_view(), name='donate'),
+    url(r'^donate/thanks/$', views.DonationThanksView.as_view(), name='donate-thanks'),
 )
 
 if settings.DEBUG:
@@ -133,4 +138,6 @@ if settings.DEBUG:
             'django.views.static.serve',
             {'document_root': settings.MEDIA_ROOT}
         ),
+        url(r'^500/$', TemplateView.as_view(template_name='500.html')),
+        url(r'^404/$', TemplateView.as_view(template_name='404.html')),
     )

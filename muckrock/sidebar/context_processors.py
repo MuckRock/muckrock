@@ -8,6 +8,7 @@ from muckrock.accounts.models import Profile
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
 from muckrock.organization.models import Organization
+from muckrock.project.models import Project
 from muckrock.sidebar.models import Broadcast
 from muckrock.utils import cache_get_or_set
 
@@ -27,12 +28,18 @@ def get_actionable_requests(user):
     fix = requests.filter(status='fix')
     return {
         'count': len(updates) + len(started) + len(payment) + len(fix),
-        'updates': updates,
         'started': started,
         'payment': payment,
         'fix': fix,
     }
 
+
+def get_unread_notifications(user):
+    """Gets unread notifiations for user, if they're logged in."""
+    if user.is_authenticated():
+        return user.notifications.get_unread()
+    else:
+        return None
 
 def get_organization(user):
     """Gets organization, if it exists"""
@@ -94,8 +101,10 @@ def sidebar_info(request):
     if request.user.is_authenticated():
         # content for logged in users
         sidebar_info_dict.update({
+            'unread_notifications': get_unread_notifications(request.user),
             'actionable_requests': get_actionable_requests(request.user),
             'organization': get_organization(request.user),
+            'my_projects': Project.objects.get_for_contributor(request.user).exists(),
             'payment_failed': request.user.profile.payment_failed
         })
     return sidebar_info_dict

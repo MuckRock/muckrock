@@ -1,0 +1,77 @@
+{% extends 'base_detail.html' %}
+{% load markdown_deux_tags %}
+
+{% block title %}{{exemption.name}} &bull; MuckRock{% endblock title %}
+
+{% block type %}exemption{% endblock %}
+
+{% block header %}
+<p><a href="{{exemption.jurisdiction.get_absolute_url}}">{{exemption.jurisdiction}}</a></p>
+<h1>{{exemption.name}} Exemption</h1>
+{% endblock %}
+
+{% block aside %}
+<!--<a href="#flag-form" class="modal-trigger button">Suggest Change</a>-->
+{% endblock %}
+
+{% block main %}
+{% comment %}
+<div class="modal" id="flag-form">
+    <form method="post">
+        {% csrf_token %}
+        {% include 'lib/pattern/form.html' with form=flag_form %}
+        <footer>
+            <button type="submit" name="action" value="flag" class="primary button">Submit</button>
+            <span class="close-modal button">Cancel</span>
+        </footer>
+    </form>
+</div>
+{% endcomment %}
+<div class="grid__row">
+    <div class="grid__column two-thirds">
+        {{exemption.basis|markdown}}
+        {% if exemption.example_appeals.exists %}
+        <h2>Example Appeals</h2>
+        {% for appeal in exemption.example_appeals.all %}
+        <div class="example-appeal">
+            {{appeal.context|markdown}}
+            <blockquote class="force-select">{{appeal.language}}</blockquote>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {{exemption.appeal_language|markdown}}
+        {% if exemption.invokations.exists %}
+        <h2>Invokations</h2>
+        <ul>
+        {% for invokation in exemption.invokations.all %}
+            <li>
+                <div class="invoked-exmption">
+                    <p><a href="{{invokation.request.agency.get_absolute_url}}">{{invokation.request.agency}}</a> invoked the exemption on <a href="{{invokation.request.get_absolute_url}}">{{invokation.request}}</a>. The exemption was invoked <strong>{% if not invokation.proper %}im{% endif %}properly</strong> and <strong>has {% if not invokation.appealed %}not {% endif %}been appealed</strong>.</p>
+                </div>
+            </li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+    <div class="grid__column third">
+        {% if exemption.proper_use %}
+        <div>
+            <h2>Proper Use</h2>
+            {{exemption.proper_use|markdown}}
+        </div>
+        {% endif %}
+        {% if exemption.improper_use %}
+        <div>
+            <h2>Improper Use</h2>
+            {{exemption.improper_use|markdown}}
+        </div>
+        {% endif %}
+        {% if exemption.key_citations %}
+        <div class="small">
+            <h2>Key Citations</h2>
+            {{exemption.key_citations|markdown}}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -164,8 +164,8 @@ class FOIACommunication(models.Model):
         the clone will be cloned along with its data, and so on. Same thing
         goes for each file attached to the communication.
         """
-        # avoid circular imports
         from muckrock.foia.tasks import upload_document_cloud
+
         if not isinstance(foia_pks, list):
             foia_pks = [foia_pks]
         request_list = FOIARequest.objects.filter(pk__in=foia_pks)

@@ -1,8 +1,14 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<article class="{% block type %}{% endblock %} profile">
-    {% block metadata %}{% endblock %}
-    {% block activity %}{% endblock %}
+<article class="{% block type %}{% endblock %} profile grid__row">
+    <aside class="metadata grid__column quarter">
+    {% block metadata %}
+    {% endblock %}
+    </aside>
+    <main class="activity grid__column three-quarters">
+    {% block activity %}
+    {% endblock %}
+    </main>
 </article>
 {% endblock %}

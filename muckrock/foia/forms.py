@@ -221,8 +221,15 @@ class FOIADeleteForm(forms.Form):
         help_text='This cannot be undone!'
     )
 
+class FOIAFileForm(forms.ModelForm):
+    """A form for a FOIA File"""
+    ffile = forms.FileField(label='File', required=False)
 
-FOIAFileFormSet = forms.models.modelformset_factory(FOIAFile, fields=('ffile',))
+    class Meta:
+        model = FOIAFile
+        fields = ['ffile']
+
+FOIAFileFormSet = forms.models.modelformset_factory(FOIAFile, form=FOIAFileForm)
 
 
 class FOIANoteForm(forms.ModelForm):
@@ -242,6 +249,7 @@ class FOIAAdminFixForm(forms.ModelForm):
 
     from_email = forms.CharField(
         label='From',
+        initial='MuckRock',
         required=False,
         help_text='Leaving blank will fill in with request owner.'
     )

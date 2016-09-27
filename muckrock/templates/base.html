@@ -16,34 +16,36 @@
         <link rel="apple-touch-icon"    href="{% static 'icons/logo.png' %}" />
         {% compress css %}
         <style type="text/css">
-            @font-face {
-                font-family: 'Source Code Pro';
-                src: url("{% static 'fonts/sourcecodepro-regular.woff' %}") format('woff');
-                font-weight: normal;
-                font-style: normal;
-            }
+            /* Typefaces are loaded inside the base template so that they can be referenced
+            by the correct URL. In production, the typefaces should be served from a CDN. */
             @font-face {
                 font-family: 'Source Sans Pro';
-                src: url("{% static 'fonts/sourcesanspro-light.woff' %}") format('woff');
-                font-weight: 300;
-                font-style: normal;
-            }
-            @font-face {
-                font-family: 'Source Sans Pro';
-                src: url("{% static 'fonts/sourcesanspro-regular.woff' %}") format('woff');
+                src: url("{% static 'fonts/SourceSansPro-Regular.ttf' %}");
                 font-weight: 400;
                 font-style: normal;
             }
             @font-face {
                 font-family: 'Source Sans Pro';
-                src: url("{% static 'fonts/sourcesanspro-it.woff' %}") format('woff');
+                src: url("{% static 'fonts/SourceSansPro-Italic.ttf' %}");
                 font-weight: 400;
                 font-style: italic;
             }
             @font-face {
                 font-family: 'Source Sans Pro';
-                src: url("{% static 'fonts/sourcesanspro-semibold.woff' %}") format('woff');
+                src: url("{% static 'fonts/SourceSansPro-Semibold.ttf' %}");
                 font-weight: 500;
+                font-style: normal;
+            }
+            @font-face {
+                font-family: 'Source Sans Pro';
+                src: url("{% static 'fonts/SourceSansPro-SemiboldItalic.ttf' %}");
+                font-weight: 500;
+                font-style: italic;
+            }
+            @font-face {
+                font-family: 'Source Code Pro';
+                src: url("{% static 'fonts/SourceCodePro-Regular.ttf' %}");
+                font-weight: normal;
                 font-style: normal;
             }
         </style>
@@ -60,6 +62,7 @@
         <!-- Facebook and Twitter Integration -->
         <!-- http://ogp.me & https://dev.twitter.com/docs/cards -->
         {% block open_graph %}
+        <meta property="og:site_name" content="MuckRock" />
         <meta property="og:title" content="MuckRock" />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="{{ request.build_absolute_uri }}" />
@@ -75,17 +78,25 @@
         {% endblock twitter_card %}
     </head>
     <body>
+        {% block body %}
         {% include 'nav/sidebar.html' %}
         <div class="container">
             <div id="modal-overlay"></div>
             {% include 'nav/header.html' %}
-            {% include 'lib/notification.html' %}
+            {% if messages %}
+            <ul class="messages nostyle">
+                {% for message in messages %}
+                <li>{% include 'lib/pattern/message.html' %}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
             <div class="content">
             {% block content %}
             {% endblock content %}
             </div>
             {% include 'nav/footer.html' %}
         </div>
+        {% endblock %}
         <!-- SCRIPTS -->
         <!-- Google Analytics -->
         <script>

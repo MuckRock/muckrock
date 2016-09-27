@@ -1,11 +1,11 @@
 .tag {
     display: inline-block;
-    margin-bottom: $vertical-rhythm/6;
-    padding: 0 $vertical-rhythm/4;
+    margin-bottom: $vr/6;
+    padding: 0 $vr/4;
     background: $color-blue;
     color: $color-white;
-    font-size: $font-size-3;
-    line-height: $font-line-height;
+    font-size: $size-3;
+    line-height: $lh;
     &:hover {
         color: $color-white;
         background: $color-blue-dark;
@@ -14,7 +14,7 @@
 }
 
 .tag-list {
-    margin-bottom: $vertical-rhythm;
+    margin-bottom: $vr;
 }
 .tag-list li {
     display: inline-block;

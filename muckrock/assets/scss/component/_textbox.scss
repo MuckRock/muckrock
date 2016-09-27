@@ -1,0 +1,63 @@
+/*
+** Textbox
+**
+** The textbox component is used wherever we display a discrete unit of textual information.
+** It provides a colored header that contains metadata information and then sectional information.
+** When combined with the .collapsable class, textboxes can be reduced down to just their header.
+** Some implementations of this component are communications, questions, and task patterns.
+*/
+
+@mixin color-textbox($color) {
+    border-color: $color;
+    .textbox__header {
+        background: $color;
+    }
+}
+
+.textbox {
+    @include border;
+    position: relative;
+    word-wrap: break-word;
+    background: $color-white-pure;
+    .textbox__header, .textbox__section, .textbox__footer {
+        padding: $vr/4 $vr/2;
+    }
+    .textbox__header {
+        @include display(flex);
+        @include justify-content(space-between);
+        @include flex-wrap(wrap);
+        @include flex-direction(row);
+        margin-bottom: 0;
+        color: $color-white;
+        p {
+            margin-bottom: 0;
+        }
+        a {
+            color: $color-white;
+        }
+    }
+    .textbox__footer {
+        margin-bottom: 0;
+    }
+}
+
+.textbox { @include color-textbox($color-black); }
+.blue.textbox { @include color-textbox($color-blue); }
+.green.textbox { @include color-textbox($color-green); }
+.red.textbox { @include color-textbox($color-red); }
+.yellow.textbox { @include color-textbox($color-yellow); }
+.grey.textbox { @include color-textbox($color-grey); }
+.yellow.textbox {
+    .textbox__header {
+        color: $color-black;
+    }
+}
+
+.collapsable > header {
+    cursor: pointer;
+}
+
+.collapsable.collapsed {
+    & > * { display: none !important; }
+    & > header { @include display(flex !important); }
+}

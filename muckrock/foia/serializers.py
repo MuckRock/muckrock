@@ -85,6 +85,7 @@ class FOIARequestSerializer(serializers.ModelSerializer):
     tags = serializers.StringRelatedField(many=True)
     communications = FOIACommunicationSerializer(many=True)
     notes = FOIANoteSerializer(many=True)
+    absolute_url = serializers.ReadOnlyField(source='get_absolute_url')
 
     def __init__(self, *args, **kwargs):
         # pylint: disable=super-on-old-class
@@ -145,4 +146,6 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             'tags',
             'notes',
             'communications',
+            # computed fields
+            'absolute_url',
 	    )

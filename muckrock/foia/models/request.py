@@ -12,7 +12,7 @@ from django.db.models import Q, Sum, Count
 from django.template.defaultfilters import escape, linebreaks, slugify
 from django.template.loader import render_to_string
 
-import actstream
+from actstream.models import followers
 from datetime import datetime, date, timedelta
 from hashlib import md5
 import logging
@@ -20,11 +20,9 @@ from reversion import revisions as reversion
 from taggit.managers import TaggableManager
 from unidecode import unidecode
 
-from muckrock.agency.models import Agency
-from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.tags.models import Tag, TaggedItemBase, parse_tags
-from muckrock import task
 from muckrock import utils
+from muckrock.accounts.models import Notification
+from muckrock.tags.models import Tag, TaggedItemBase, parse_tags
 
 logger = logging.getLogger(__name__)
 
@@ -103,11 +101,13 @@ class FOIARequestQuerySet(models.QuerySet):
     def organization(self, organization):
         """Get requests belonging to an organization's members."""
         return (self.select_related(
+                        'agency',
                         'jurisdiction',
                         'jurisdiction__parent',
-                        'jurisdiction__parent__parent'
-                        )
-                    .filter(user__profile__organization=organization))
+                        'jurisdiction__parent__parent')
+                    .filter(user__profile__organization=organization)
+                    .exclude(status='started')
+                    .order_by('-date_submitted'))
 
     def select_related_view(self):
         """Select related models for viewing"""
@@ -125,8 +125,9 @@ class FOIARequestQuerySet(models.QuerySet):
         foia_qs = self
         count_qs = (self._clone()
                 .values_list('id')
+                .filter(files__access='public')
                 .annotate(Count('files'))
-                .extra(where=['"foia_foiafile"."access" = \'public\'']))
+                )
         if limit is not None:
             foia_qs = foia_qs[:limit]
             count_qs = count_qs[:limit]
@@ -180,8 +181,8 @@ class FOIARequest(models.Model):
     title = models.CharField(max_length=255, db_index=True)
     slug = models.SlugField(max_length=255)
     status = models.CharField(max_length=10, choices=STATUS, db_index=True)
-    jurisdiction = models.ForeignKey(Jurisdiction)
-    agency = models.ForeignKey(Agency, blank=True, null=True)
+    jurisdiction = models.ForeignKey('jurisdiction.Jurisdiction')
+    agency = models.ForeignKey('agency.Agency', blank=True, null=True)
     date_submitted = models.DateField(blank=True, null=True, db_index=True)
     date_updated = models.DateField(blank=True, null=True, db_index=True)
     date_done = models.DateField(blank=True, null=True, verbose_name='Date response received')
@@ -290,7 +291,7 @@ class FOIARequest(models.Model):
 
     def is_payable(self):
         """Can this request be payed for by the user?"""
-        has_open_crowdfund = self.has_crowdfund() and not self.crowdfund.closed
+        has_open_crowdfund = self.has_crowdfund() and not self.crowdfund.expired()
         has_payment_status = self.status == 'payment'
         return has_payment_status and not has_open_crowdfund
 
@@ -325,7 +326,6 @@ class FOIARequest(models.Model):
             self.edit_collaborators.add(user)
             self.save()
             logger.info('%s granted edit access to %s', user, self)
-        return
 
     def remove_editor(self, user):
         """Revokes the user's permission to edit this request."""
@@ -333,22 +333,17 @@ class FOIARequest(models.Model):
             self.edit_collaborators.remove(user)
             self.save()
             logger.info('%s revoked edit access from %s', user, self)
-        return
 
     def demote_editor(self, user):
         """Reduces the editor's access to that of a viewer."""
         self.remove_editor(user)
         self.add_viewer(user)
-        return
 
     ## Viewers
 
     def has_viewer(self, user):
         """Checks whether the given user is a viewer."""
-        user_is_viewer = False
-        if self.read_collaborators.filter(pk=user.pk).exists():
-            user_is_viewer = True
-        return user_is_viewer
+        return self.read_collaborators.filter(pk=user.pk).exists()
 
     def add_viewer(self, user):
         """Grants the user permission to view this request."""
@@ -356,7 +351,6 @@ class FOIARequest(models.Model):
             self.read_collaborators.add(user)
             self.save()
             logger.info('%s granted view access to %s', user, self)
-        return
 
     def remove_viewer(self, user):
         """Revokes the user's permission to view this request."""
@@ -364,13 +358,11 @@ class FOIARequest(models.Model):
             self.read_collaborators.remove(user)
             logger.info('%s revoked view access from %s', user, self)
             self.save()
-        return
 
     def promote_viewer(self, user):
         """Enhances the viewer's access to that of an editor."""
         self.remove_viewer(user)
         self.add_editor(user)
-        return
 
     ## Access key
 
@@ -440,38 +432,57 @@ class FOIARequest(models.Model):
             days_since = (date.today() - self.date_processing).days
         return days_since
 
-    def _notify(self):
-        """Notify request's creator and followers about the update"""
-        # notify creator
-        self.user.profile.notify(self)
-        # notify followers
-        for user in actstream.models.followers(self):
-            if user.has_perm('foia.view_foiarequest', self):
-                user.profile.notify(self)
-
     def update(self, anchor=None):
         """Various actions whenever the request has been updated"""
         # pylint: disable=unused-argument
         # Do something with anchor
         self.updated = True
         self.save()
-        self._notify()
         self.update_dates()
 
+    def notify(self, action):
+        """
+        Notify the owner of the request.
+        Notify followers if the request is not under embargo.
+        Mark any existing notifications with the same message as read,
+        to avoid notifying users with duplicated information.
+        """
+        identical_notifications = (Notification.objects.for_object(self).get_unread()
+            .filter(action__actor_object_id=action.actor_object_id, action__verb=action.verb))
+        for notification in identical_notifications:
+            notification.mark_read()
+        utils.notify(self.user, action)
+        if self.is_public():
+            utils.notify(followers(self), action)
+
     def submit(self, appeal=False, snail=False, thanks=False):
-        """Send out the latest communication for the request"""
+        """
+        The request has been submitted.
+        Notify admin and try to auto submit.
+        There is functionally no difference between appeals and other submissions
+        besides the receiving agency.
+        The only difference between a thanks andother submissions is that we do
+        not set the request status, unless the request requires a proxy.
+        """
+        comm = self.last_comm()
         # update contacts
         if appeal:
             self.contacts.set(self.get_contacts('appeal', 'to'))
             self.cc_contacts.set(self.get_contacts('appeal', 'cc'))
+            comm.to_users.set(self.contacts.all())
+            comm.cc_users.set(self.cc_contacts.all())
         elif not self.contacts:
             self.contacts.set(self.get_contacts('primary', 'to'))
             self.cc_contacts.set(self.get_contacts('primary', 'cc'))
+            comm.to_users.set(self.contacts.all())
+            comm.cc_users.set(self.cc_contacts.all())
+            # XXX
 
         contact_emails, _ = self.get_emails()
         has_email = bool(contact_emails)
+        # if agency isnt approved, do not email or snail mail
+        # it will be handled after agency is approved
         approved_agency = self.agency and self.agency.status == 'approved'
-        comm = self.last_comm()
         can_email = not snail and approved_agency and has_email
 
         if can_email:
@@ -498,8 +509,7 @@ class FOIARequest(models.Model):
             notice = 'a' if appeal else notice
             comm.delivered = 'mail'
             comm.save()
-            task.models.SnailMailTask.objects.create(
-                    category=notice, communication=comm)
+            comm.snailmailtask_set.create(category=notice)
         elif not thanks:
             # there should never be a thanks to an unapproved agency
             # not an approved agency, all we do is mark as submitted
@@ -509,8 +519,7 @@ class FOIARequest(models.Model):
 
     def create_proxy_flag(self):
         """Flag this request as requiring a proxy"""
-        task.models.FlaggedTask.objects.create(
-                foia=self,
+        self.flaggedtask_set.create(
                 text='This request was filed for an agency requiring a '
                 'proxy, but no proxy was available.  Please add a suitable '
                 'proxy for the state and refile it with a note that the '
@@ -565,10 +574,19 @@ class FOIARequest(models.Model):
             self.save()
             comm.delivered = 'mail'
             comm.save()
-            task.models.SnailMailTask.objects.create(category='f', communication=comm)
+            comm.snailmailtask_set.create(category='f')
 
         # Do not self.update() here for now to avoid excessive emails
         self.update_dates()
+
+    def appeal(self, appeal_message):
+        """Send a followup to the agency or its appeal agency."""
+        communication = self.create_out_communication(
+                self.user,
+                appeal_message,
+                )
+        self.submit(appeal=True)
+        return communication
 
     def pay(self, user, amount):
         """
@@ -578,7 +596,6 @@ class FOIARequest(models.Model):
         Since collaborators may make payments, we do not assume the user is the request creator.
         Returns the communication that was generated.
         """
-        from muckrock.task.models import SnailMailTask
         # XX move some of this into comm.send
         # We mark the request as processing
         self.status = 'submitted'
@@ -596,15 +613,14 @@ class FOIARequest(models.Model):
                 delivered='mail', # XX move into comm.send?
                 )
         # XX comm.send?
-        SnailMailTask.objects.create(
-            communication=comm,
+        comm.snailmailtask_set.create(
             category='p',
             user=user,
             amount=amount
         )
         # We perform some logging and activity generation
         logger.info('%s has paid %0.2f for request %s', user.username, amount, self.title)
-        actstream.action.send(user, verb='paid fees for', action_object=self, target=self.agency)
+        utils.new_action(user, 'paid fees', target=self)
         # We return the communication we generated, in case the caller wants to do anything with it
         return comm
 
@@ -660,7 +676,7 @@ class FOIARequest(models.Model):
             cc=cc_emails,
             bcc=['diagnostics@muckrock.com'],
             headers={
-                'X-Mailgun-Variables': '{"comm_id": %s}' % comm.pk
+                'X-Mailgun-Variables': '{"comm_id": %s}' % comm.pk,
             }
         )
         if from_addr != 'fax':
@@ -754,8 +770,7 @@ class FOIARequest(models.Model):
         '''Provides action interfaces for users'''
         is_owner = self.created_by(user)
         can_follow = user.is_authenticated() and not is_owner
-        followers = actstream.models.followers(self)
-        is_following = user in followers
+        is_following = user in followers(self)
         kwargs = {
             'jurisdiction': self.jurisdiction.slug,
             'jidx': self.jurisdiction.pk,
@@ -843,8 +858,7 @@ class FOIARequest(models.Model):
         self.agency.requires_proxy = True
         self.agency.save()
         # mark to re-file with a proxy
-        task.models.FlaggedTask.objects.create(
-            foia=self,
+        self.flaggedtask_set.create(
             text='This request was rejected as requiring a proxy; please refile'
             ' it with one of our volunteers names and a note that the request is'
             ' being filed by a state citizen. Make sure the new request is'

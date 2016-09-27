@@ -7,7 +7,7 @@ from django.test import TestCase, RequestFactory
 import datetime
 from nose.tools import assert_false, assert_true, eq_, ok_
 
-from muckrock import factories, foia, utils
+from muckrock import factories, foia, test_utils
 
 
 class TestEmbargo(TestCase):
@@ -21,7 +21,7 @@ class TestEmbargo(TestCase):
 
     def get_response(self, request):
         """Utility function for calling the embargo view function"""
-        request = utils.mock_middleware(request)
+        request = test_utils.mock_middleware(request)
         return foia.views.embargo(
             request,
             self.foia.jurisdiction.slug,

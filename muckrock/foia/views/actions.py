@@ -23,7 +23,6 @@ from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.foia.forms import (
     FOIADeleteForm,
     FOIAAdminFixForm,
-    FOIAAgencyReplyForm,
     FOIAEmbargoForm,
     FOIAFileFormSet,
     )

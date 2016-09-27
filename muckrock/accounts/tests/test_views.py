@@ -13,28 +13,20 @@ from mock import Mock, patch
 from nose.tools import eq_, ok_, raises
 
 from muckrock.accounts import views
-from muckrock.factories import UserFactory, OrganizationFactory
+from muckrock.accounts.forms import RegistrationCompletionForm
+from muckrock.factories import (
+    UserFactory,
+    NotificationFactory,
+    OrganizationFactory,
+    FOIARequestFactory,
+    QuestionFactory,
+    AgencyFactory
+)
+from muckrock.foia.views import Detail as FOIARequestDetail
 from muckrock.organization.models import Organization
-from muckrock.utils import mock_middleware
-
-
-def http_get_response(url, view, user=AnonymousUser()):
-    """Handles making GET requests, returns the response."""
-    request_factory = RequestFactory()
-    request = request_factory.get(url)
-    request = mock_middleware(request)
-    request.user = user
-    response = view(request)
-    return response
-
-def http_post_response(url, view, data, user=AnonymousUser()):
-    """Handles making POST requests, returns the response."""
-    request_factory = RequestFactory()
-    request = request_factory.post(url, data)
-    request = mock_middleware(request)
-    request.user = user
-    response = view(request)
-    return response
+from muckrock.qanda.views import Detail as QuestionDetail
+from muckrock.utils import new_action, notify
+from muckrock.test_utils import mock_middleware, http_get_response, http_post_response
 
 def http_get_post(url, view, data):
     """Performs both a GET and a POST on the same url and view."""
@@ -242,12 +234,15 @@ class TestBuyRequestsView(TestCase):
     def setUp(self):
         self.user = UserFactory()
         self.factory = RequestFactory()
-        self.url = reverse('acct-buy-requests', kwargs={'username': self.user.username})
+        self.kwargs = {'username': self.user.username}
+        self.url = reverse('acct-buy-requests', kwargs=self.kwargs)
         self.view = views.buy_requests
         self.data = {
             'stripe_token': 'test',
             'stripe_email': self.user.email
         }
+
+
 
     def test_buy_requests(self):
         """A user should be able to buy themselves requests."""
@@ -313,6 +308,17 @@ class TestBuyRequestsView(TestCase):
         requests_to_add = 4
         eq_(other_user.profile.num_requests, existing_request_count + requests_to_add)
 
+    def test_buy_multiple_bundles(self):
+        """Users should be able to buy multiple bundles of four requests."""
+        profile = self.user.profile
+        bundles_to_buy = 2
+        existing_request_count = profile.num_requests
+        self.data['bundles'] = bundles_to_buy
+        http_post_response(self.url, self.view, self.data, self.user, **self.kwargs)
+        profile.refresh_from_db()
+        requests_to_add = bundles_to_buy * self.user.profile.bundled_requests()
+        eq_(profile.num_requests, existing_request_count + requests_to_add)
+
     @raises(Http404)
     def test_nonexistant_user(self):
         """Buying requests for nonexistant user should return a 404."""
@@ -334,6 +340,58 @@ class TestBuyRequestsView(TestCase):
         self.view(post_request, self.user.username)
         self.user.profile.refresh_from_db()
         eq_(self.user.profile.num_requests, existing_request_count)
+
+
+class TestRegistrationCompletionView(TestCase):
+    """The RegistrationCompletionView allows a user to verify their email,
+    change their password, and update their email after creating an
+    account through the miniregistration process."""
+    def setUp(self):
+        self.user = UserFactory()
+
+    def test_login_required(self):
+        """Only registered users may see the registration completion page."""
+        # pylint: disable=no-self-use
+        response = http_get_response(
+            reverse('accounts-complete-registration'),
+            views.RegistrationCompletionView.as_view())
+        eq_(response.status_code, 302, 'Logged out users should be redirected.')
+        ok_(reverse('acct-login') in response.url,
+            'Logged out users should be redirected to the login view.')
+
+    def test_get_and_verify(self):
+        """Getting the view with a verification key should verify the user's email."""
+        key = self.user.profile.generate_confirmation_key()
+        response = http_get_response(
+            reverse('accounts-complete-registration') + '?key=' + key,
+            views.RegistrationCompletionView.as_view(),
+            user=self.user
+        )
+        self.user.profile.refresh_from_db()
+        eq_(response.status_code, 200,
+            'The view should respond 200 OK')
+        ok_(self.user.profile.email_confirmed,
+            'The user\'s email address should be confirmed.')
+
+    def test_update_username_password(self):
+        """The user should be able to update their username and password after logging in."""
+        username = 'TomWaits'
+        password = 'swordfishtrombones'
+        form = RegistrationCompletionForm(self.user, {
+            'username': username,
+            'new_password1': password,
+            'new_password2': password
+        })
+        ok_(form.is_valid(), 'The forms should validate.')
+        http_post_response(
+            reverse('accounts-complete-registration'),
+            views.RegistrationCompletionView.as_view(),
+            data=form.data,
+            user=self.user,
+        )
+        self.user.refresh_from_db()
+        eq_(self.user.username, username, 'The username should be updated.')
+        ok_(self.user.check_password(password), 'The password should be updated.')
 
 
 class TestAccountFunctional(TestCase):
@@ -405,3 +463,113 @@ class TestAccountFunctional(TestCase):
                 eq_(val, getattr(self.user, key))
             else:
                 eq_(val, getattr(profile, key))
+
+
+class TestNotificationList(TestCase):
+    """A user should be able to view lists of their notifications."""
+    def setUp(self):
+        self.user = UserFactory()
+        self.unread_notification = NotificationFactory(user=self.user, read=False)
+        self.read_notification = NotificationFactory(user=self.user, read=True)
+        self.url = reverse('acct-notifications')
+        self.view = views.NotificationList.as_view()
+
+    def test_get(self):
+        """The view should provide a list of notifications for the user."""
+        response = http_get_response(self.url, self.view, self.user)
+        eq_(response.status_code, 200, 'The view should return OK.')
+        object_list = response.context_data['object_list']
+        ok_(self.unread_notification in object_list,
+            'The context should contain the unread notification.')
+        ok_(self.read_notification in object_list,
+            'The context should contain the read notification.')
+
+    def test_unauthorized_get(self):
+        """Logged out users trying to access the notifications
+        view should be redirected to the login view."""
+        response = http_get_response(self.url, self.view)
+        eq_(response.status_code, 302, 'The view should redirect.')
+        ok_(reverse('acct-login') in response.url,
+            'Logged out users should be redirected to the login view.')
+
+    def test_mark_all_read(self):
+        """Users should be able to mark all their notifications as read."""
+        data = {'action': 'mark_all_read'}
+        ok_(self.unread_notification.read is not True)
+        http_post_response(self.url, self.view, data, self.user)
+        self.unread_notification.refresh_from_db()
+        ok_(self.unread_notification.read is True,
+            'The unread notification should be marked as read.')
+
+
+class TestUnreadNotificationList(TestCase):
+    """A user should be able to view lists of their unread notifications."""
+    def setUp(self):
+        self.user = UserFactory()
+        self.unread_notification = NotificationFactory(user=self.user, read=False)
+        self.read_notification = NotificationFactory(user=self.user, read=True)
+        self.url = reverse('acct-notifications-unread')
+        self.view = views.UnreadNotificationList.as_view()
+
+    def test_get(self):
+        """The view should provide a list of notifications for the user."""
+        response = http_get_response(self.url, self.view, self.user)
+        eq_(response.status_code, 200, 'The view should return OK.')
+        object_list = response.context_data['object_list']
+        ok_(self.unread_notification in object_list,
+            'The context should contain the unread notification.')
+        ok_(self.read_notification not in object_list,
+            'The context should not contain the read notification.')
+
+    def test_unauthorized_get(self):
+        """Logged out users trying to access the notifications
+        view should be redirected to the login view."""
+        response = http_get_response(self.url, self.view)
+        eq_(response.status_code, 302, 'The view should redirect.')
+        ok_(reverse('acct-login') in response.url,
+            'Logged out users should be redirected to the login view.')
+
+
+class TestNotificationRead(TestCase):
+    """Getting an object view should read its notifications for that user."""
+    def setUp(self):
+        self.user = UserFactory()
+
+    def test_get_foia(self):
+        """Try getting the detail page for a FOIA Request with an unread notification."""
+        agency = AgencyFactory()
+        foia = FOIARequestFactory(agency=agency)
+        view = FOIARequestDetail.as_view()
+        # Create a notification for the request
+        action = new_action(agency, 'completed', target=foia)
+        notification = notify(self.user, action)[0]
+        ok_(not notification.read, 'The notification should be unread.')
+        # Try getting the view as the user
+        response = http_get_response(foia.get_absolute_url(), view, self.user,
+            idx=foia.pk,
+            slug=foia.slug,
+            jidx=foia.jurisdiction.pk,
+            jurisdiction=foia.jurisdiction.slug
+        )
+        eq_(response.status_code, 200, 'The view should response 200 OK.')
+        # Check that the notification has been read.
+        notification.refresh_from_db()
+        ok_(notification.read, 'The notification should be marked as read.')
+
+    def test_get_question(self):
+        """Try getting the detail page for a Question with an unread notification."""
+        question = QuestionFactory()
+        view = QuestionDetail.as_view()
+        # Create a notification for the question
+        action = new_action(UserFactory(), 'answered', target=question)
+        notification = notify(self.user, action)[0]
+        ok_(not notification.read, 'The notification should be unread.')
+        # Try getting the view as the user
+        response = http_get_response(question.get_absolute_url(), view, self.user,
+            pk=question.pk,
+            slug=question.slug
+        )
+        eq_(response.status_code, 200, 'The view should respond 200 OK.')
+        # Check that the notification has been read.
+        notification.refresh_from_db()
+        ok_(notification.read, 'The notification should be marked as read.')

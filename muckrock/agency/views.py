@@ -13,7 +13,6 @@ import django_filters
 
 from muckrock.agency.models import Agency
 from muckrock.agency.serializers import AgencySerializer
-from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.views import collect_stats
 from muckrock.task.models import FlaggedTask
@@ -52,25 +51,32 @@ def detail(request, jurisdiction, jidx, slug, idx):
             pk=idx,
             status='approved')
 
-    foia_requests = (FOIARequest.objects
-            .get_viewable(request.user)
-            .filter(agency=agency)
-            .select_related(
-                'jurisdiction',
-                'jurisdiction__parent',
-                'jurisdiction__parent__parent',
-                )
-            .order_by('-date_submitted')[:5])
+    foia_requests = agency.get_requests()
+    foia_requests = (foia_requests.get_viewable(request.user)
+        .get_submitted()
+        .filter(agency=agency)
+        .select_related(
+          'jurisdiction',
+          'jurisdiction__parent',
+          'jurisdiction__parent__parent',
+        )
+        .order_by('-date_submitted')[:10])
 
     if request.method == 'POST':
+        action = request.POST.get('action')
         form = FlagForm(request.POST)
-        if form.is_valid():
-            FlaggedTask.objects.create(
-                user=request.user,
-                text=form.cleaned_data.get('reason'),
-                agency=agency)
-            messages.info(request, 'Correction submitted. Thanks!')
-            return redirect(agency)
+        if action == 'flag':
+            if form.is_valid():
+                FlaggedTask.objects.create(
+                    user=request.user,
+                    text=form.cleaned_data.get('reason'),
+                    agency=agency)
+                messages.success(request, 'Correction submitted. Thanks!')
+                return redirect(agency)
+        elif action == 'mark_stale' and request.user.is_staff:
+            task = agency.mark_stale(manual=True)
+            messages.success(request, 'Agency marked as stale.')
+            return redirect(reverse('stale-agency-task', kwargs={'pk': task.pk}))
     else:
         form = FlagForm()
 
@@ -126,7 +132,10 @@ class AgencyViewSet(viewsets.ModelViewSet):
     """API views for Agency"""
     # pylint: disable=too-many-ancestors
     # pylint: disable=too-many-public-methods
-    queryset = Agency.objects.all().select_related('jurisdiction', 'parent', 'appeal_agency')
+    queryset = (Agency.objects
+            .select_related('jurisdiction', 'parent', 'appeal_agency')
+            .prefetch_related('types')
+            )
     serializer_class = AgencySerializer
 
     class Filter(django_filters.FilterSet):

@@ -1,8 +1,10 @@
-import Cookie from 'js-cookie';
+/* Task.js
+**
+** Logic for client interactions with the MuckRock task system.
+** Mostly involves submitting task forms via AJAX and handling successful responses.
+*/
 
-// Task.js
-//
-// Logic for client interactions with the MuckRock task system.
+import Cookie from 'js-cookie';
 
 function authenticateAjax() {
     // Sets up authentication for AJAX transactions
@@ -77,7 +79,7 @@ function getTaskID(taskFormData) {
 }
 
 function markAsResolved(task) {
-    $(task).addClass('resolved');
+    $(task).addClass('green');
 }
 
 function formHasAction(taskForm, action) {
@@ -94,8 +96,6 @@ function formHasAction(taskForm, action) {
 
 authenticateAjax();
 
-var tasks = $('.task');
-
 // Hide all the resolved tasks
 $('.resolved.task')
     .each(function(){
@@ -103,6 +103,10 @@ $('.resolved.task')
     })
     .addClass('collapsed');
 
+/* TODO
+** This should be rewritten to bind to the task's form submission event,
+** not the form's resolve button click.
+*/
 $('button[name="resolve"]').click(function(e){
     /* If the button clicked is the "resolve all" button, then get forms
     for all the currently checked tasks. Else, just get the form for the
@@ -143,18 +147,6 @@ $('button[name="reject"]').click(function(e){
         reject(this);
     });
     return false;
-});
-
-tasks.find('header').click(function() {
-    $(this).parent().toggleClass('collapsed');
-});
-
-$('.task .permalink').click(function(e) {
-    e.stopPropagation();
-});
-
-$('.task .checkbox').click(function(e) {
-    e.stopPropagation();
 });
 
 var checkboxes = $('.task header').find(':checkbox');

@@ -2,26 +2,26 @@
 Models for the accounts application
 """
 
-from django.contrib.auth.models import User
 from django.conf import settings
-from django.core.mail import EmailMessage
+from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.template.loader import render_to_string
 
-import datetime
+from actstream.models import Action
+from datetime import datetime, date
 import dbsettings
 from easy_thumbnails.fields import ThumbnailerImageField
-from itertools import groupby
 from localflavor.us.models import USStateField
+import logging
 from lot.models import LOT
 import stripe
 from urllib import urlencode
 
-from muckrock import utils
 from muckrock.agency.models import AgencyProfile
-from muckrock.utils import unique_username
+from muckrock.utils import unique_username, generate_key
 from muckrock.values import TextValue
 
+logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
 stripe.api_version = '2015-10-16'
 
@@ -76,11 +76,6 @@ class Profile(models.Model):
                    ' please leave blank.')
     )
     zip_code = models.CharField(max_length=10, blank=True)
-    notifications = models.ManyToManyField(
-        'foia.FOIARequest',
-        related_name='notify',
-        blank=True
-    )
     acct_type = models.CharField(max_length=10, choices=ACCT_TYPES)
     organization = models.ForeignKey(
         'organization.Organization',
@@ -116,7 +111,6 @@ class Profile(models.Model):
 
     # provide user access to experimental features
     experimental = models.BooleanField(default=False)
-
     # email confirmation
     email_confirmed = models.BooleanField(default=False)
     confirmation_key = models.CharField(max_length=24, blank=True)
@@ -133,6 +127,8 @@ class Profile(models.Model):
         help_text=('Links you receive in emails from us will contain'
                    ' a one time token to automatically log you in')
     )
+    # notification preferences
+    new_question_notifications = models.BooleanField(default=False)
 
     # paid for requests
     num_requests = models.IntegerField(default=0)
@@ -181,11 +177,11 @@ class Profile(models.Model):
 
     def get_monthly_requests(self):
         """Get the number of requests left for this month"""
-        not_this_month = self.date_update.month != datetime.datetime.now().month
-        not_this_year = self.date_update.year != datetime.datetime.now().year
+        not_this_month = self.date_update.month != datetime.now().month
+        not_this_year = self.date_update.year != datetime.now().year
         # update requests if they have not yet been updated this month
         if not_this_month or not_this_year:
-            self.date_update = datetime.date.today()
+            self.date_update = date.today()
             self.monthly_requests = settings.MONTHLY_REQUESTS.get(self.acct_type, 0)
             self.save()
         return self.monthly_requests
@@ -277,6 +273,10 @@ class Profile(models.Model):
         customer = self.customer()
         return customer.subscriptions.total_count > 0
 
+    def has_unread_notifications(self):
+        """Check whether this user has unread notifications"""
+        return Notification.objects.for_user(self.user).get_unread().exists()
+
     def start_pro_subscription(self, token=None):
         """Subscribe this profile to a professional plan. Return the subscription."""
         # create the stripe subscription
@@ -290,7 +290,7 @@ class Profile(models.Model):
         # modify the profile object (should this be part of a webhook callback?)
         self.subscription_id = subscription.id
         self.acct_type = 'pro'
-        self.date_update = datetime.date.today()
+        self.date_update = date.today()
         self.monthly_requests = settings.MONTHLY_REQUESTS.get('pro', 0)
         self.save()
         return subscription
@@ -298,17 +298,24 @@ class Profile(models.Model):
     def cancel_pro_subscription(self):
         """Unsubscribe this profile from a professional plan. Return the cancelled subscription."""
         customer = self.customer()
+        subscription = None
         # subscription reference either exists as a saved field or inside the Stripe customer
-        # if it isn't, then they probably don't have a subscription
-        if not self.subscription_id and not len(customer.subscriptions.data) > 0:
-            raise AttributeError('There is no subscription to cancel.')
-        if self.subscription_id:
-            subscription_id = self.subscription_id
-        else:
-            subscription_id = customer.subscriptions.data[0].id
-        subscription = customer.subscriptions.retrieve(subscription_id)
-        subscription = subscription.delete()
-        customer = customer.save()
+        # if it isn't, then they probably don't have a subscription. in that case, just make
+        # sure that we demote their account and reset them back to basic.
+        try:
+            if not self.subscription_id and not len(customer.subscriptions.data) > 0:
+                raise AttributeError('There is no subscription to cancel.')
+            if self.subscription_id:
+                subscription_id = self.subscription_id
+            else:
+                subscription_id = customer.subscriptions.data[0].id
+            subscription = customer.subscriptions.retrieve(subscription_id)
+            subscription = subscription.delete()
+            customer = customer.save()
+        except AttributeError as exception:
+            logger.error(exception)
+        except stripe.error.StripeError as exception:
+            logger.error(exception)
         self.subscription_id = ''
         self.acct_type = 'basic'
         self.monthly_requests = settings.MONTHLY_REQUESTS.get('basic', 0)
@@ -335,84 +342,10 @@ class Profile(models.Model):
 
     def generate_confirmation_key(self):
         """Generate random key used for validating the email address"""
-        key = utils.generate_key(24)
+        key = generate_key(24)
         self.confirmation_key = key
         self.save()
         return key
-
-    def notify(self, foia):
-        """Queue up a notification for later"""
-        self.notifications.add(foia)
-        self.save()
-
-    def send_notifications(self):
-        """Send deferred notifications"""
-
-        subjects = {
-            'done': "you've got new MuckRock docs!",
-            'partial': "you've got new MuckRock docs!",
-            'rejected': 'an agency rejected a MuckRock request - appeal?',
-            'fix': 'we need help fixing a MuckRock request.',
-            'payment': 'an agency wants payment for a MuckRock request.'
-        }
-        category = {
-            'done': 'Completed Requests',
-            'partial': 'Completed Requests',
-            'rejected': 'Rejected Requests',
-            'fix': 'Requests Needing Action',
-            'payment': 'Requests Needing Action',
-            'no_docs': 'No Responsive Documents',
-        }
-        status_order = ['done', 'partial', 'rejected', 'fix', 'payment',
-                        'no_docs', 'abandoned', 'appealing', 'started',
-                        'submitted', 'ack', 'processed']
-
-        def get_subject(status, total_foias):
-            """Get subject for a given status"""
-            if status in subjects:
-                return subjects[status]
-            elif total_foias > 1:
-                return '%d MuckRock requests have updates' % total_foias
-            else:
-                return 'a MuckRock request has been updated'
-
-        foias = sorted(
-            self.notifications.all(),
-            key=lambda f: status_order.index(f.status) if f.status in status_order else 100
-        )
-        grouped_foias = list((s, list(fs)) for s, fs in groupby(
-            foias,
-            lambda f: category.get(f.status, 'Recently Updated Requests')
-        ))
-        if not grouped_foias:
-            return
-        if len(grouped_foias) == 1:
-            subject = '%s, %s' % (
-                self.user.first_name,
-                get_subject(grouped_foias[0][1][0].status, len(foias))
-            )
-        else:
-            subject = '%s, %s  Plus, %s' % (
-                self.user.first_name,
-                get_subject(grouped_foias[0][1][0].status, len(foias)),
-                get_subject(grouped_foias[1][1][0].status, len(foias))
-            )
-
-        msg = render_to_string('text/user/notify_mail.txt', {
-            'name': self.user.get_full_name(),
-            'foias': grouped_foias,
-            'footer': options.email_footer
-        })
-        email = EmailMessage(
-            subject=subject,
-            body=msg,
-            from_email='info@muckrock.com',
-            to=[self.user.email],
-            bcc=['diagnostics@muckrock.com']
-        )
-        email.send(fail_silently=False)
-
-        self.notifications.clear()
 
     def wrap_url(self, link, **extra):
         """Wrap a URL for autologin"""
@@ -433,13 +366,69 @@ CONTACT_TYPES = (
 )
 
 
+class NotificationQuerySet(models.QuerySet):
+    """Object manager for notifications"""
+    def for_user(self, user):
+        """All notifications for a user"""
+        return self.filter(user=user)
+
+    def for_model(self, model):
+        """All notifications for a model. Requires filtering the action."""
+        model_ct = ContentType.objects.get_for_model(model)
+        actor = models.Q(action__actor_content_type=model_ct)
+        action_object = models.Q(action__action_object_content_type=model_ct)
+        target = models.Q(action__target_content_type=model_ct)
+        return self.filter(actor | action_object | target)
+
+    def for_object(self, _object):
+        """All notifications for an object. Requires filtering the action."""
+        object_pk = _object.pk
+        object_ct = ContentType.objects.get_for_model(_object)
+        actor = models.Q(
+            action__actor_content_type=object_ct,
+            action__actor_object_id=object_pk)
+        action_object = models.Q(
+            action__action_object_content_type=object_ct,
+            action__action_object_object_id=object_pk)
+        target = models.Q(
+            action__target_content_type=object_ct,
+            action__target_object_id=object_pk)
+        return self.filter(actor | action_object | target)
+
+    def get_unread(self):
+        """All unread notifications"""
+        return self.filter(read=False)
+
+
+class Notification(models.Model):
+    """A notification connects an action to a user."""
+    datetime = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, related_name='notifications')
+    action = models.ForeignKey(Action)
+    read = models.BooleanField(default=False)
+    objects = NotificationQuerySet.as_manager()
+
+    def __unicode__(self):
+        return u'<Notification for %s>' % unicode(self.user.username).capitalize()
+
+    def mark_read(self):
+        """Marks notification as read."""
+        self.read = True
+        self.save()
+
+    def mark_unread(self):
+        """Marks notification as unread."""
+        self.read = False
+        self.save()
+
+
 class Statistics(models.Model):
     """Nightly statistics"""
     # pylint: disable=invalid-name
     date = models.DateField()
-    total_requests = models.IntegerField()
-    total_requests_success = models.IntegerField()
-    total_requests_denied = models.IntegerField()
+    total_requests = models.IntegerField(null=True, blank=True)
+    total_requests_success = models.IntegerField(null=True, blank=True)
+    total_requests_denied = models.IntegerField(null=True, blank=True)
     total_requests_draft = models.IntegerField(null=True, blank=True)
     total_requests_submitted = models.IntegerField(null=True, blank=True)
     total_requests_awaiting_ack = models.IntegerField(null=True, blank=True)
@@ -454,14 +443,14 @@ class Statistics(models.Model):
 
     orphaned_communications = models.IntegerField(null=True, blank=True)
 
-    total_agencies = models.IntegerField()
+    total_agencies = models.IntegerField(null=True, blank=True)
     stale_agencies = models.IntegerField(null=True, blank=True)
     unapproved_agencies = models.IntegerField(null=True, blank=True)
 
-    total_pages = models.IntegerField()
-    total_users = models.IntegerField()
+    total_pages = models.IntegerField(null=True, blank=True)
+    total_users = models.IntegerField(null=True, blank=True)
     users_today = models.ManyToManyField(User)
-    total_fees = models.IntegerField()
+    total_fees = models.IntegerField(null=True, blank=True)
     pro_users = models.IntegerField(null=True, blank=True)
     pro_user_names = models.TextField(blank=True)
     total_page_views = models.IntegerField(null=True, blank=True)
@@ -549,7 +538,7 @@ class AgencyUserQuerySet(models.QuerySet):
                 user=user,
                 acct_type='agency' if trusted else 'unknown',
                 email_pref='never',
-                date_update=datetime.date.today(),
+                date_update=date.today(),
                 )
         if agency and not user.agencies.filter(pk=agency.pk).exists():
             AgencyProfile.objects.create(

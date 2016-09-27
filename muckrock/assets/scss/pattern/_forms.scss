@@ -1,0 +1,138 @@
+.form {
+    @include padding;
+    .visible-fields fieldset input {
+        width: 100%;
+    }
+
+    &.admin-fix {
+        .visible-fields {
+            p { margin-bottom: 0; }
+        }
+        .snail.mail input { width: auto; }
+        .formset-forms .visible-fields {
+            margin-bottom: 0;
+        }
+        .formset-container {
+            display: block;
+            margin-bottom: $vr;
+        }
+    }
+
+    &.search {
+        dfn { margin: $vr/2 $vr/4; }
+        .search-filters {
+            margin: 0;
+            li {
+                display: inline-block;
+                padding: 0 $vr/4;
+            }
+            label {
+                padding-left: $vr/6;
+            }
+        }
+    }
+}
+
+.field {
+    header {
+        margin-bottom: 0;
+    }
+    .error input {
+        border-color: $color-red;
+    }
+    .required, .errorlist {
+        color: $color-red;
+        font-size: $size-2;
+    }
+    .errorlist {
+        display: inline-block;
+        margin-bottom: 0;
+        padding: 0;
+        list-style: none;
+    }
+    label {
+        margin-right: $vr/2;
+        font-weight: $bold;
+    }
+    input {
+        display: block;
+        width: 100%;
+    }
+    input[type="checkbox"], input[type="radio"] {
+        width: auto;
+        margin-top: $vr/4;
+        margin-right: $vr/2;
+        float: left;
+    }
+    textarea {
+        display: block;
+        height: 5em;
+        margin-bottom: 0;
+    }
+    .help-text {
+        margin-top: $vr/4;
+    }
+    &.image {
+        .preview {
+            display: block;
+            margin-bottom: $vr/2;
+            max-width: 20em;
+        }
+        input {
+            display: inline-block;
+            float: none;
+            width: auto;
+            margin-right: 0;
+        }
+        label[for*="clear_id"] {
+            font-weight: $normal;
+        }
+        input[id*="clear_id"] {
+            margin-left: $vr;
+        }
+    }
+}
+
+.hidden-fields {
+    display: none;
+}
+
+.help-text {
+    font-size: $size-2;
+    line-height: $lh;
+    color: $color-grey;
+}
+
+textarea, #{$all-text-inputs} {
+    @include input;
+}
+
+textarea {
+    width: 100%;
+    resize: vertical;
+}
+
+fieldset {
+
+    label, .errorlist {
+        @extend dfn;
+    }
+
+    @include media($large-bp) {
+        label.failure {
+            float: left;
+        }
+        .errorlist {
+            float: right;
+        }
+    }
+
+    input + label {
+        float: left;
+        margin-right: $vr;
+    }
+
+    & > fieldset, & > fieldset + fieldset {
+        margin: 0;
+    }
+}

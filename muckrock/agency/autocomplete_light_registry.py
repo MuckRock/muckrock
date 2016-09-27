@@ -60,10 +60,15 @@ class AgencyMultiRequestAutocomplete(autocomplete_light.AutocompleteModelTemplat
     def choices_for_request(self):
         query = self.request.GET.get('q', '')
         split_query = query.split()
-        conditions = self.complex_condition(split_query[0])
-        for string in split_query[1:]:
-            conditions &= self.complex_condition(string)
-        choices = self.choices.filter(conditions).distinct()
+        # if query is an empty string, then split will produce an empty array
+        # if query is an empty string, then do nto filter the existing choices
+        if split_query:
+            conditions = self.complex_condition(split_query[0])
+            for string in split_query[1:]:
+                conditions &= self.complex_condition(string)
+            choices = self.choices.filter(conditions).distinct()
+        else:
+            choices = self.choices
         return self.order_choices(choices)[0:self.limit_choices]
 
 

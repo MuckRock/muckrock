@@ -3,6 +3,7 @@ Models for the Agency application
 """
 
 from django.contrib.auth.models import User
+from django.core.exceptions import MultipleObjectsReturned
 from django.db import models
 from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
@@ -10,8 +11,11 @@ from django.utils.safestring import mark_safe
 from datetime import date
 from djgeojson.fields import PointField
 from easy_thumbnails.fields import ThumbnailerImageField
+import logging
 
-from muckrock.jurisdiction.models import Jurisdiction, RequestHelper
+from muckrock.foia.mixins import RequestHelper
+
+logger = logging.getLogger(__name__)
 
 STALE_DURATION = 120
 
@@ -49,7 +53,8 @@ class Agency(models.Model, RequestHelper):
 
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)
-    jurisdiction = models.ForeignKey(Jurisdiction, related_name='agencies')
+    jurisdiction = models.ForeignKey('jurisdiction.Jurisdiction',
+            related_name='agencies')
     types = models.ManyToManyField(AgencyType, blank=True)
     status = models.CharField(choices=(
         ('pending', 'Pending'),
@@ -73,6 +78,8 @@ class Agency(models.Model, RequestHelper):
     image_attr_line = models.CharField(blank=True, max_length=255, help_text='May use html')
     public_notes = models.TextField(blank=True, help_text='May use html')
     stale = models.BooleanField(default=False)
+    manual_stale = models.BooleanField(default=False,
+        help_text='For marking an agency stale by hand.')
     address = models.TextField(blank=True)
     location = PointField(blank=True)
     email = models.EmailField(blank=True)
@@ -141,7 +148,10 @@ class Agency(models.Model, RequestHelper):
         days ago, or if no responses to any open request, if the oldest open
         request was sent greater than STALE_DURATION days ago.  If no open requests,
         do not mark as stale."""
-        # first find any open requests, if none, not stale
+        # check if agency is manually marked as stale
+        if self.manual_stale:
+            return True
+        # find any open requests, if none, not stale
         foias = self.foiarequest_set.get_open().order_by('date_submitted')
         if not foias:
             return False
@@ -155,6 +165,30 @@ class Agency(models.Model, RequestHelper):
             return min(latest_responses) >= STALE_DURATION
         # no response to open requests, use oldest open request submit date
         return (date.today() - foias[0].date_submitted).days >= STALE_DURATION
+
+    def mark_stale(self, manual=False):
+        """Mark this agency as stale and create a StaleAgencyTask if one doesn't already exist."""
+        self.stale = True
+        self.manual_stale = manual
+        self.save()
+        try:
+            task, created = self.staleagencytask_set.get_or_create(resolved=False)
+            if created:
+                logger.info('Created new StaleAgencyTask <%d> for Agency <%d>',
+                        task.pk, self.pk)
+        except MultipleObjectsReturned as exception:
+            # If there are multiple StaleAgencyTasks returned, just return the first one.
+            # We only want this method to return a single task.
+            # Also, log the exception as a warning.
+            task = self.staleagencytask_set.filter(resolved=False).first()
+            logger.warning(exception)
+        return task
+
+    def unmark_stale(self):
+        """Unmark this agency as stale and resolve all of its StaleAgencyTasks."""
+        self.stale = False
+        self.manual_stale = False
+        self.save()
 
     def count_thanks(self):
         """Count how many thanks this agency has received"""
@@ -187,6 +221,10 @@ class Agency(models.Model, RequestHelper):
         self.staleagencytask_set.filter(resolved=False).update(resolved=True)
         self.stale = False
         self.save()
+
+    def get_requests(self):
+        """Just returns the foiareqest_set value. Used for compatability with RequestHeper mixin"""
+        return self.foiarequest_set
 
     class Meta:
         # pylint: disable=too-few-public-methods

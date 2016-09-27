@@ -44,7 +44,6 @@ class ProfileInline(admin.StackedInline):
     """Profile admin options"""
     model = Profile
     search_fields = ('user__username', 'user__first_name', 'user__last_name')
-    exclude = ('follows_foia', 'follows_question', 'notifications')
     form = ProfileAdminForm
     extra = 1
     max_num = 1

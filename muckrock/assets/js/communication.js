@@ -1,3 +1,9 @@
+/* communication.js
+**
+** This handles the logic on the communication pattern.
+** It toggles the display of forms on the commmunication when targeted by the URL.
+*/
+
 function showCommForm(id) {
     if (!id) {
         return;
@@ -12,15 +18,6 @@ function showCommForm(id) {
         $('.communication-actions').hide();
     });
 }
-
-$('.communication-header').click(function(){
-    $(this).closest('.communication').toggleClass('collapsed');
-});
-
-$('.communication-header .dropdown-list').click(function(event){
-    // Prevent click from propagating up to the communication header.
-    event.stopPropagation();
-});
 
 var actions = $('.communication-action').map(function() {
     return '#' + $(this).attr('id');

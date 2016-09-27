@@ -1,0 +1,59 @@
+{% extends 'base_detail.html' %}
+{% load activity_tags %}
+{% load markdown_deux_tags %}
+{% load tags %}
+
+{% block title %}{{ object.title }}{% endblock title %}
+{% block type %}question{% endblock type %}
+
+{% block header %}
+<h2>On {{ object.date | date:"F j, Y" }}, <a href="{% url "acct-profile" object.user.username %}">{{ object.user.get_full_name }}</a> asked</h2>
+    <h1>{{ object.title }}</h1>
+    {% if answers %}
+    <h2>and got {{ answers|length }} answer{{ answers|length|pluralize }} from
+        {% for user in object.answer_authors %}
+            {% if forloop.first and forloop.last %}
+                <a href="{% url "acct-profile" user.username %}">{{ user.get_full_name }}</a>.
+            {% else %}
+                {% if forloop.last %}
+					and <a href="{% url "acct-profile" user.username %}">{{ user.get_full_name }}</a>.
+                {% else %}
+                    {% if forloop.revcounter0 == 1 %}
+						<a href="{% url "acct-profile" user.username %}">{{ user.get_full_name }}</a>
+                    {% else %}
+						<a href="{% url "acct-profile" user.username %}">{{ user.get_full_name }}</a>,
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    </h2>
+    {% endif %}
+{% endblock header %}
+
+{% block main %}
+    <article>
+    {% include 'qanda/question.html' with question=object %}
+    {% for answer in answers %}
+        {% include 'qanda/answer.html' %}
+    {% endfor %}
+    </article>
+    <section class="actions">
+    {% if request.user != object.user %}
+        {% if request.user|is_following:object %}
+        <a href="{% url 'question-follow' slug=object.slug idx=object.pk %}" class="failure button">Unfollow</a>
+        {% else %}
+        <a href="{% url 'question-follow' slug=object.slug idx=object.pk %}" class="primary button">Follow</a>
+        {% endif %}
+    {% endif %}
+        <a class="button" href="{% url 'answer-create' slug=object.slug idx=object.pk %}">Reply</a>
+    </section>
+{% endblock main %}
+
+{% block aside %}
+{% social title=object.title url=object.get_absolute_url %}
+{% tag_manager object %}
+{% if object.foia %}
+    <dfn>Related request</dfn>
+    {% include 'lib/foia.html' with foia=object.foia %}
+{% endif %}
+{% endblock aside %}

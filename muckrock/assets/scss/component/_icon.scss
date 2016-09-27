@@ -1,13 +1,6 @@
 svg.icon {
-    height: $font-size-3;
-    width: $font-size-3;
+    height: $size-3;
+    width: $size-3;
     fill-rule: evenodd;
-    path, polygon, rect, circle {
-        fill: $color-black;
-    }
-}
-
-svg.email.icon path {
-    fill: none;
-    stroke: $color-black;
+    @include svg-color($color-black);
 }

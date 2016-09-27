@@ -24,7 +24,7 @@ from muckrock.task.models import (
     Task, OrphanTask, SnailMailTask, RejectedEmailTask,
     StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask,
     CrowdfundTask, MultiRequestTask, StatusChangeTask, FailedFaxTask,
-    ProjectReviewTask
+    ProjectReviewTask, NewExemptionTask
     )
 from muckrock.views import MRFilterableListView
 
@@ -46,6 +46,7 @@ def count_tasks():
         crowdfund=Count('crowdfundtask'),
         multirequest=Count('multirequesttask'),
         failed_fax=Count('failedfaxtask'),
+        new_exemption=Count('newexemptiontask'),
         )
     return count
 
@@ -454,6 +455,11 @@ class FailedFaxTaskList(TaskList):
                     'communication__foia__communications',
                     queryset=FOIACommunication.objects.order_by('-date'),
                     to_attr='reverse_communications')))
+
+
+class NewExemptionTaskList(TaskList):
+    title = 'New Exemptions'
+    queryset = NewExemptionTask.objects.select_related('foia__agency__jurisdiction__parent')
 
 
 class RequestTaskList(TaskList):

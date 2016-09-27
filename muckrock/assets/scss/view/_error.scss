@@ -1,0 +1,52 @@
+.error-404 {
+    max-width: 100%;
+    width: 30em;
+    margin: 0 auto;
+    .error-404__page {
+        @include box-shadow;
+        margin: $vr;
+        padding: $vr*4 $vr $vr;
+        background: $color-white-pure;
+        border: 1px solid $color-grey;
+    }
+    .redacted {
+        margin-left: $vr/4;
+        margin-right: $vr/4;
+        background-color: $color-black;
+        color: transparent;
+        &:first-child {
+            margin-left: 0;
+        }
+    }
+}
+
+.error-500 {
+    min-height: 100vh;
+    background-size: cover;
+    background-position: top right;
+    .text {
+        @include display(flex);
+        @include flex-direction(row);
+        @include flex-wrap(wrap);
+        @include justify-content(space-around);
+        @include align-items(center);
+        height: 100%;
+        padding: 2*$vr;
+        background-color: rgba(0, 0, 0, 0.6);
+        color: $color-white;
+        h1 {
+            font-size: 2*$size-8;
+        }
+        h2 {
+            max-width: 10em;
+            margin: 0 auto $vr;
+        }
+        .error-report {
+            max-width: 100%;
+            width: 20em;
+            padding: $vr;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid $color-black-pure;
+        }
+    }
+}

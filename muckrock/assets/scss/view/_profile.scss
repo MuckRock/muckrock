@@ -1,0 +1,79 @@
+.profile {
+    @include padding;
+    .metadata {
+        dfn {
+            margin-bottom: $vr;
+            font-weight: $bold;
+            font-size: $size-3;
+        }
+        h1 {
+            font-size: $size-6;
+            font-weight: $bold;
+        }
+        h2 {
+            font-size: $size-5;
+        }
+    }
+}
+
+.profile .stripe-checkout {
+    display: none;
+}
+
+.profile .image {
+    margin: 0 0 $vr;
+    .header-image {
+        margin-bottom: 0;
+    }
+}
+
+.profile .flag {
+    form {
+        display: none;
+        &.visible {
+            display: block;
+        }
+        @include border;
+        header, footer, textarea {
+            margin: 0;
+            padding: $vr/2;
+        }
+        textarea {
+            display: block;
+            border-radius: 0;
+            border-left: none;
+            border-right: none;
+        }
+        footer {
+            @include display(flex);
+            @include justify-content(space-between);
+        }
+    }
+}
+
+.account.profile {
+    .fullname {
+        margin-bottom: 0;
+    }
+    .username {
+        color: $color-grey;
+    }
+    .avatar {
+        @include border-radius;
+        width: 100%;
+        max-width: 300px;
+    }
+    .title {
+        font-weight: $bold;
+    }
+    .links svg {
+        margin-right: $vr/2;
+    }
+    .project-group {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        .project-item {
+            margin-right: $vr;
+        }
+    }
+}

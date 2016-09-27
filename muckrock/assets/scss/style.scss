@@ -1,20 +1,13 @@
 // Third Party Frameworks
-@import 'framework/normalize';
-@import 'framework/bourbon/bourbon';
-@import 'framework/neat/neat';
+@import '../vendor/normalize';
+@import '../vendor/bourbon/bourbon';
+@import '../vendor/neat/neat';
 
 // MuckRock
-@import 'base/variables';
-@import 'base/mixins';
-@import 'base/grid';
-@import 'base/colors';
-@import 'base/typography';
+@import 'base/base';
 @import 'component/component';
-@import 'layout/layout';
+@import 'pattern/pattern';
+@import 'view/view';
 
-// Third Party Plugins
-@import 'plugin/autocomplete';
-@import 'plugin/datepicker';
-@import 'plugin/leaflet';
-@import 'plugin/multiselect';
-@import 'plugin/loader';
+// Third Party Styles
+@import '../vendor/loader';

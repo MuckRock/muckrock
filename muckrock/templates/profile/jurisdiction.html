@@ -1,83 +1,200 @@
-{% extends 'base_profile.html' %}
+{% extends 'base.html' %}
+{% load tags %}
 {% load markdown_deux_tags %}
 {% load thumbnail %}
 {% load humanize %}
-{% block title %}MuckRock &bull; {{ jurisdiction.name }}{% endblock title %}
+{% block title %}{{ title }} &bull; MuckRock{% endblock title %}
 {% block type %}{% if jurisdiction.name == 'Georgia' %}georgia {% endif %}jurisdiction{% endblock type %}
 
-{% block metadata %}
-<aside class="metadata">
-    <dfn>{{ jurisdiction.get_level_display }} Jurisdiction</dfn>
-    {% if jurisdiction.image %}
-    <figure class="jurisdiction image">
-        <img src="{% thumbnail jurisdiction.image 600x600 %}" class="header-image">
-        {% if jurisdiction.image_attr_line %}
-        <figcaption>{{ jurisdiction.image_attr_line | safe }}</figcaption>
-        {% endif %}
-    </figure>
-    {% endif %}
-    <h1>{{jurisdiction.name}}</h1>
-    {% if jurisdiction.parent and jurisdiction.level != 'f' %}
-    <h2><a href="{{ jurisdiction.parent.get_absolute_url }}">{{ jurisdiction.parent }}</a></h2>
-    {% endif %}
+{% block open_graph %}
+<meta property="og:site_name" content="MuckRock" />
+<meta property="og:title" content="{{title}}" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="{{ request.build_absolute_uri }}" />
+<meta property="og:description" content="MuckRock's guide to public records in {{jurisdiction}}." />
+{% if jurisdiction.image and jurisdiction.level != 'l' %}
+<meta property="og:image" content="{% thumbnail jurisdiction.image 300x300 %}" />
+{% endif %}
+{% endblock open_graph %}
 
-    {% include 'lib/request_stats.html' %}
-    {% include 'lib/appeal_stats.html' %}
+{% block twitter_card %}
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@muckrock" />
+<meta name="twitter:title" content="{{title}}" />
+<meta name="twitter:description" content="MuckRock's guide to public records in {{jurisdiction}}." />
+{% if jurisdiction.image and jurisdiction.level != 'l' %}
+<meta name="twitter:image:src" content="{% thumbnail jurisdiction.image 300x300 %}" />
+{% endif %}
+{% endblock twitter_card %}
 
-    <dl class="stats">
-        <dt>Allowed Response Time</dt>
-        {% with jurisdiction.get_days as days %}
-            {% if days %}
-            <dd>{{days}} day{{days|pluralize}}</dd>
-            {% else %}
-            <dd>No limit</dd>
+{% block content %}
+<div class="jurisdiction jurisdiction--{{jurisdiction.level}}">
+    <header class="jurisdiction__header">
+        {% if jurisdiction.image and jurisdiction.level != 'l' %}
+        <figure class="jurisdiction__image">
+            <img src="{% thumbnail jurisdiction.image 300x300 %}" />
+            {% if jurisdiction.image_attr_line %}
+            <figcaption>{{jurisdiction.image_attr_line|safe}}</figcaption>
             {% endif %}
-        {% endwith %}
-        <dt>Average Response Time</dt>
-        {% with jurisdiction.average_response_time as average_response_time %}
-        <dd>{{ average_response_time }} day{{ average_response_time|pluralize }}</dd>
-        {% endwith %}
-		{% if proxies %}
-		<dt>Proxies</dt>
-		{% for proxy in proxies %}
-		<dd><a href="{{proxy.get_absolute_url}}">{{proxy.get_full_name}}</a></dd>
-		{% endfor %}
-		{% endif %}
-    </dl>
-</aside>
-{% endblock metadata %}
-{% block activity %}
-<main class="activity">
-    {% if user.is_authenticated %}
-    {% include 'lib/flag_form.html' %}
-    {% endif %}
-    {% if jurisdiction.public_notes %}
-    <section class="notes">
-        {{ jurisdiction.public_notes|markdown:"trusted" }}
-    </section>
-    {% endif %}
+        </figure>
+        {% endif %}
+        <div class="jurisdiction__info">
+            <p class="jurisdiction__name">
+                {{jurisdiction.name}}{% if jurisdiction.level != 'f' %}, <a href="{{jurisdiction.parent.get_absolute_url}}" class="jurisdiction__parent">{{jurisdiction.parent.abbrev}}</a>{% endif %}
+            </p>
+            <h1 class="jurisdiction__title">{{title}}</h1>
+            {% if jurisdiction.laws.exists %}
+            <div class="jurisdiction__laws">
+                {% for law in jurisdiction.laws.all %}
+                <div class="law">
+                    <h2 class="law__name">
+                        {{law.name}}
+                        {% if law.shortname %}
+                        <span class="law__shortname">({{law.shortname}})</span>
+                        {% endif %}
+                    </h2>
+                    <p class="bold law__citation"><a href="{{law.url}}">{{law.citation}}</a></p>
+                    <p class="law__summary">{{law.summary}}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% elif jurisdiction.level == 'l' %}
+            <h2>Falls under <a href="{{jurisdiction.parent.get_absolute_url}}">{% if jurisdiction.parent.laws.exists %}{{jurisdiction.parent.laws.first.name}}{% else %}{{ jurisdiction.parent }} public records law{% endif %}</a></h2>
+            {% endif %}
+        </div>
+    </header>
+    <main class="jurisdiction__main">
+        {% if jurisdiction.public_notes %}
+        <section class="notes">
+            {{ jurisdiction.public_notes|markdown:"trusted" }}
+        </section>
+        {% endif %}
+        {% if jurisdiction.law_analysis %}
+        <section class="analysis">
+            {{ jurisdiction.law_analysis|markdown:"trusted" }}
+        </section>
+        {% elif jurisdiction.level == 's' %}
+        <div class="warning message">
+            <span class="symbol">
+                {% include 'lib/component/icon/warning.svg' %}
+            </span>
+            <span class="text">
+                <p>MuckRock wants to put together the best guides for every state's public records laws, including details on what each law covers, tips and tricks, and more. If you're interested in helping, you can have a major impact in improving public records access in {{jurisdiction.name}}. <a class="action" href="https://docs.google.com/forms/d/e/1FAIpQLSfgN6jPN_5o1ebpk1em3LKAWNvfCxMJc8XP7SX1Kj3Q8YbF1g/viewform">Sign up here.</a></p>
+            </span>
+        </div>
+        {% endif %}
+        <h1 id="stats">Stats</h1>
+        <div class="jurisdiction__stats">
+            <div>
+            {% include 'lib/request_stats.html' %}
+            {% include 'lib/appeal_stats.html' %}
+            </div>
+            <dl>
+                <dt>Allowed Response Time</dt>
+                {% with jurisdiction.get_days as days %}
+                    {% if days %}
+                    <dd>{{days}} day{{days|pluralize}}</dd>
+                    {% else %}
+                    <dd>No limit</dd>
+                    {% endif %}
+                {% endwith %}
 
-    <h3>Recent Requests <small><a href="{% url 'foia-list' %}?jurisdiction={{ jurisdiction.pk }}">See All</a></small></h3>
-    {% include 'lib/foia_table.html' with requests=foia_requests %}
+                <dt>Average Response Time</dt>
+                {% with jurisdiction.average_response_time as average_response_time %}
+                <dd>{{ average_response_time }} day{{ average_response_time|pluralize }}</dd>
+                {% endwith %}
 
-    {% if agencies %}
-    <h3>Documented Agencies <small><a href="{% url 'agency-list' %}?jurisdiction={{ jurisdiction.pk }}">See All</a></small></h3>
-    <table>
-        <tr>
-            <th width="50%">Agency</th>
-            <th width="20%">Requests</th>
-            <th width="30%">Pages Released</th>
-        </tr>
-        {% for agency in agencies %}
-        <tr>
-            <td><a href="{% url 'agency-detail' jurisdiction=jurisdiction.slug jidx=jurisdiction.pk slug=agency.slug idx=agency.pk %}">{{ agency.name }}</a></td>
-            <td>{{ agency.foia_count|intcomma }}</td>
-            <td>{% if agency.pages %}{{ agency.pages|intcomma }}{% else %}0{%endif %}</td>
-        </tr>
-        {% endfor %}
-    </table>
-    {% else %}
-    <h3>No agencies have been documented for this jurisdiction.</h3>
-    {% endif %}
-</main>
-{% endblock activity %}
+                {% with jurisdiction.success_rate as success_rate %}
+                {% if success_rate > 0 %}
+                <dt>Success Rate</dt>
+                <dd>{{ success_rate|floatformat:"2" }}%</dd>
+                {% endif %}
+                {% endwith %}
+
+                {% with jurisdiction.average_fee as average_fee %}
+                {% if average_fee > 0 %}
+                <dt>Average Fee</dt>
+                <dd>${{ average_fee|floatformat:"2" }}</dd>
+                <dd>{{ jurisdiction.fee_rate|floatformat:"2" }}% of requests have a fee</dd>
+                {% endif %}
+                {% endwith %}
+
+                {% if proxies %}
+                <dt>Proxies</dt>
+                {% for proxy in proxies %}
+                <dd><a href="{{proxy.get_absolute_url}}">{{proxy.get_full_name}}</a></dd>
+                {% endfor %}
+                {% endif %}
+            </dl>
+        </div>
+        {% if agencies %}
+        <h3>Top Agencies <small><a href="{% url 'agency-list' %}?jurisdiction={{ jurisdiction.pk }}">See All</a></small></h3>
+        <table>
+            <tr>
+                <th width="50%">Agency</th>
+                <th width="20%">Requests</th>
+                <th width="30%">Pages Released</th>
+            </tr>
+            {% for agency in agencies %}
+            <tr>
+                <td><a href="{{agency.get_absolute_url}}">{{ agency.name }}</a></td>
+                <td>{{ agency.foia_count|intcomma }}</td>
+                <td>{% if agency.pages %}{{ agency.pages|intcomma }}{% else %}0{%endif %}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <h3>No agencies have been documented for this jurisdiction.</h3>
+        {% endif %}
+        {% if top_children %}
+        <h3>Top Localities <small><a href="{% url 'jurisdiction-list' %}?parent={{ jurisdiction.pk }}">See All</a></small></h3>
+        <table>
+            <tr>
+                <th width="50%">Jurisdiction</th>
+                <th width="20%">Requests</th>
+                <th width="30%">Pages Released</th>
+            </tr>
+            {% for child in top_children %}
+            <tr>
+                <td><a href="{{child.get_absolute_url}}">{{ child }}</a></td>
+                <td>{{ child.foia_count|intcomma }}</td>
+                <td>{% if child.pages %}{{ child.pages|intcomma }}{% else %}0{%endif %}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+    </main>
+    <aside class="jurisdiction__aside">
+        <div class="modal" id="flag">
+            <form method="post">
+                {% csrf_token %}
+                {% include 'lib/pattern/form.html' %}
+                <footer>
+                    <button type="submit" class="primary button">Submit</button>
+                    <span class="close-modal button">Cancel</span>
+                </footer>
+            </form>
+        </div>
+        <div class="jurisdiction__actions">
+            <div class="button-group">
+                <a href="{% url 'foia-create' %}" class="blue button">
+                    {% include 'lib/component/icon/create-request.svg' %}
+                    <span class="label">File a Request</span>
+                </a>
+                {% if user.is_authenticated %}
+                <a href="#flag" class="modal-trigger button">Suggest Change</a>
+                {% endif %}
+            </div>
+            {% social %}
+        </div>
+        {% if foia_requests %}
+        <div class="jurisdiction__requests">
+            <p class="bold nomargin">Recently completed requests <a class="see-all" href="{% url 'foia-list' %}?status=done&jurisdiction={{ jurisdiction.pk }}"><small>See All</small></a></p>
+            {% for foia in foia_requests %}
+                {% include 'lib/foia.html' with hide_actions=True %}
+            {% endfor %}
+        </div>
+        {% endif %}
+    </aside>
+</div>
+{% endblock %}

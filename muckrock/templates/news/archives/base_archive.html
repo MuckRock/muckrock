@@ -1,0 +1,9 @@
+{% extends 'lists/base_list.html' %}
+
+{% block title %}MuckRock &bull; Archives{% endblock title %}
+{% block list-title %}News &bull; {% block date %}{% endblock date %}{% endblock %}
+{% block type %}news archive{% endblock type %}
+
+{% block list-table-item %}
+    <td>{% with item as article %}{% include 'lib/pattern/article.html' %}{% endwith %}</td>
+{% endblock %}

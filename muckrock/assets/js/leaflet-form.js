@@ -1,3 +1,12 @@
+/* leaflet-form.js
+**
+** This attaches a geocoding plugin to a Leaflet map when it is initialized.
+**
+** TODO:
+** This functionality is related to the now-defunct mapping application,
+** all the code for which should probably be torn out at some point :\
+*/
+
 $(window).on('map:init', function (e) {
     var detail = e.originalEvent ? e.originalEvent.detail : e.detail;
     var map = detail.map;

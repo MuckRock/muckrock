@@ -74,9 +74,9 @@ class TestCommunicationMove(test.TestCase):
             'A clone should be made for each additional request in the list.')
         eq_(len(comms), 2,
             'Two communications should be returned, since two were operated on.')
-        eq_(updated_comm.pk, comms[0].pk,
+        eq_(comm.pk, comms[0].pk,
             'The first communication in the list should be this one.')
-        ok_(comms[1].pk is not updated_comm.pk,
+        ok_(comms[1].pk is not comm.pk,
             'The second communication should be a new one, since it was cloned.')
 
     def test_move_invalid_foia(self):

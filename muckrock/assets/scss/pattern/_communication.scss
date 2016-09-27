@@ -1,0 +1,95 @@
+.communication {
+    .communication-header {
+        & > * {
+            @include flex(1 1 auto);
+        }
+        .actionables {
+            @include display(flex);
+            @include justify-content(flex-end);
+            @include align-items(center);
+        }
+        .options .icon {
+            margin-left: $vr;
+            path {
+                fill: $color-white;
+            }
+            opacity: .7;
+            &:hover {
+                opacity: .9;
+            }
+        }
+    }
+    .dropdown a {
+        color: $color-black;
+    }
+    .from, .subject {
+        margin-bottom: 0;
+        margin-right: $vr/2;
+        @include overflow-ellipsis;
+        font-weight: $bold;
+    }
+    .communication-metadata {
+        @include display(flex);
+        @include justify-content(space-between);
+        @include align-items(center);
+        margin-bottom: 0;
+        background: $color-grey-7;
+    }
+    .communication-body {
+        margin-bottom: 0;
+    }
+    .files {
+        list-style-type: none;
+        margin-bottom: 0;
+        padding-left: 0;
+        & > li {
+            display: block;
+            border-top: 1px dotted $color-grey;
+        }
+        .file {
+            border: none;
+        }
+    }
+    .communication-actions, .communication-action {
+        display: none;
+    }
+    .communication-actions {
+        position: relative;
+        z-index: 100;
+        top: 0;
+        left: 0;
+        width: 100%;
+        margin-bottom: 0;
+        color: $color-white;
+    }
+    .communication-action {
+        width: 100%;
+        height: 100%;
+        margin-bottom: 0;
+        padding: $vr;
+        background-color: $color-grey-2;
+        color: $color-white;
+        &.visible {
+            display: block;
+        }
+        label, input, select {
+            display: block;
+            width: 100%;
+            margin-bottom: $vr/2;
+        }
+        label {
+            font-weight: $bold;
+        }
+        input {
+            color: $color-black;
+        }
+    }
+    &.collapsed {
+        & > * {
+            display: none;
+        }
+        .communication-header {
+            @include display(flex);
+        }
+    }
+}

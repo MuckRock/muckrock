@@ -1,0 +1,270 @@
+/*
+This set of declarations controls the positioning of the sidebar and of the container.
+At small screen sizes, the sidebar is hidden underneath the container.
+When the sidebar is made visible, it moves the container out of the way using a transform;
+At large screen sizes, the sidebar is fixed to the right side of the window.
+It assumes a fixed width and applies a right margin of equal width to the container.
+*/
+
+.website-sidebar {
+    width: $sidebar-width;
+    position: fixed;
+    z-index: -100;
+    top: 0;
+    right: -9999px;             // We change the right and transition properties
+    transition: right 0s .3s;   // when the sidebar is visible to create the
+    &.visible {                 // impression the contain is sliding over it.
+        z-index: 0;
+        right: 0;
+        transition: right 0s 0s;
+    }
+    & + .container {
+        transition: transform .25s ease-in-out;
+    }
+    &.visible + .container {
+        @include transform(translateX(-1 * $sidebar-width));
+    }
+    @media($sidebar-bp) {
+        z-index: 100;
+        right: 0;
+        & + .container {
+            margin-right: $sidebar-width;
+        }
+        &.visible + .container {
+            @include transform(translateX(0));
+        }
+    }
+}
+
+/*
+This set of declarations controls the style and appearance of the sidebar's contents.
+The sidebar should use a dark UI.
+*/
+
+.website-sidebar {
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    background-color: $color-grey-2;
+    color: $color-grey-5;
+
+    .quick-log-in {
+        position: absolute;
+        width: 100%;
+        z-index: 19;
+        margin: 2.6875em 0 0 0;
+        border-bottom: 1px solid $color-grey-3;
+        padding: $vr;
+        background: $color-black;
+        color: $color-white;
+        h1 {
+            font-size: $size-5;
+            font-weight: $bold;
+        }
+        a {
+            color: $color-blue-light;
+            &:hover {
+                color: $color-blue;
+            }
+        }
+        .forgot {
+            font-size: $size-2;
+            line-height: $lh;
+        }
+        .required {
+            visibility: hidden;
+        }
+        input {
+            width: 100%;
+            margin-bottom: $vr;
+            color: $color-black;
+        }
+        .row {
+            @include display(flex);
+            @include justify-content(space-between);
+        }
+
+        @include transform(translateY(-100%));
+        &.visible {
+            @include transform(translateY(0));
+        }
+        transition: transform .2s ease-out;
+    }
+
+    .account-links {
+        @include display(flex);
+        position: fixed;
+        z-index: 20;
+        right: 0;
+        top: 0;
+        & + * {
+            margin-top: 2.6875rem;
+        }
+        width: $sidebar-width;
+        margin-bottom: 0;
+        border-bottom: 1px solid $color-grey-3;
+        background-color: $color-black;
+        font-weight: $bold;
+        .username, .sign-up, .log-in {
+            @include flex(1);
+            @include overflow-ellipsis;
+            padding: $vr/2;
+            text-align: center;
+            color: $color-white;
+            text-decoration: none;
+            &:hover {
+                background-color: $color-blue;
+            }
+        }
+        .nav-item {
+            text-align: center;
+            .icon {
+                vertical-align: middle;
+                @include svg-color($color-white);
+            }
+            text-decoration: none;
+            &.unread .notify.icon {
+                @include svg-color($color-white);
+            }
+            &.unread:hover .notify.icon {
+                @include svg-color($color-white);
+            }
+        }
+        .visible .nav-item {
+            background: $color-blue;
+        }
+        .dropdown-list-item {
+            font-size: $size-2;
+        }
+    }
+
+    .requests {
+        .actionable {
+            display: block;
+            padding: $vr/2 $vr;
+            color: $color-white;
+            font-weight: $bold;
+            text-decoration: none;
+            &:hover {
+                background: $color-blue;
+            }
+            &.payment, &.fix {
+                &:hover {
+                    background: $color-red;
+                }
+            }
+        }
+        .actionable-request-list {
+            margin-bottom: $vr/2;
+            li {
+                border-top: 1px solid $color-grey-1;
+                &:last-child {
+                    border-bottom: 1px solid $color-grey-1;
+                }
+            }
+            a {
+                display: block;
+                padding: $vr/2 $vr;
+                color: $color-white;
+                text-decoration: none;
+                &:hover {
+                    background: $color-blue;
+                }
+                &.more {
+                    font-weight: $bold;
+                }
+
+            }
+            &.payment, &.fix {
+                a:hover {
+                    background: $color-red;
+                }
+            }
+            @include media($large-bp){
+                li {
+                    border: none;
+                    &:last-child {
+                        border: none;
+                    }
+                }
+                a {
+                    padding: 0 $vr;
+                    font-size: $size-2;
+                }
+            }
+        }
+
+    }
+
+    dfn {
+        padding: 0 $vr/2;
+        color: $color-white;
+    }
+
+    .article {
+        display: block;
+        height: 6.25em;
+        position: relative;
+        background: $color-black;
+        color: $color-grey-6;
+        text-decoration: none;
+        p {
+            position: absolute;
+            z-index: 2;
+            bottom: 0;
+            padding: $vr/2;
+            font-weight: $bold;
+            color: $color-white;
+            text-shadow: $color-black 1px 1px 1px;
+        }
+        img {
+            position: absolute;
+            z-index: 1;
+            opacity: .15;
+            margin-bottom: 0;
+        }
+        &:hover {
+            background: $color-blue-dark;
+        }
+    }
+
+    .your-requests, .your-organization, .your-projects {
+        display: block;
+        padding: $vr/2 $vr;
+        color: $color-white;
+        font-weight: $bold;
+        text-decoration: none;
+        &:hover {
+            background: $color-blue;
+        }
+    }
+
+
+    @include media($large-bp) {
+        &, .article, .payment.failure {
+            box-shadow: inset 4px 0px 8px rgba(0, 0, 0, 0.25);
+        }
+    }
+}
+
+#modal-overlay {
+    position: fixed;
+    top: -9999px;
+    left: 0;
+    right: $sidebar-width;
+    height: 110%;
+    width: 100%;
+    z-index: 200;
+    background-color: $color-black;
+    opacity: 0;
+    transition: top 0s .25s, opacity .25s linear;
+    &.visible {
+        top: 0;
+        opacity: .9;
+        transition: top 0s 0s, opacity .25s linear;
+    }
+    &:hover {
+        cursor: pointer;
+    }
+}

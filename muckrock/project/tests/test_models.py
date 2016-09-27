@@ -37,8 +37,12 @@ class TestProject(TestCase):
         project = ProjectFactory()
         eq_(unicode(project), project.title)
 
-    def test_ideal_project(self):
+
+    def test_project_attributes(self):
         """
+        All projects need at least a title.
+        Projects should be private by default.
+        Projects should be unapproved by default.
         Projects should have a statement describing their purpose
         and an image or illustration to accompany them.
         """
@@ -51,12 +55,22 @@ class TestProject(TestCase):
             name='foo.gif',
             content=(b'GIF87a\x01\x00\x01\x00\x80\x01\x00\x00\x00\x00ccc,'
             '\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00'))
+        test_summary = u'The private prison project is fanstastic.'
         ideal_project = ProjectFactory(
                 description=test_description,
                 image=test_image)
         ok_(ideal_project)
 
-    def test_add_contributors(self):
+        ok_(ideal_project.private)
+        assert_false(ideal_project.approved)
+
+        ideal_project.summary = test_summary
+        ideal_project.description = test_description
+        ideal_project.image = test_image
+        ideal_project.save()
+        ok_(ideal_project)
+
+    def test_contributors(self):
         """
         A project should keep a list of contributors,
         but a list of contributors should not be required.

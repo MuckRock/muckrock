@@ -8,7 +8,6 @@ from django.utils.text import slugify
 
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
-from muckrock.task.models import ProjectReviewTask
 
 import taggit
 
@@ -18,6 +17,10 @@ class ProjectQuerySet(models.QuerySet):
     def get_public(self):
         """Only return nonprivate projects"""
         return self.filter(private=False, approved=True)
+
+    def get_pending(self):
+        """Only return projects pending approval"""
+        return self.filter(private=False, approved=False)
 
     def get_for_contributor(self, user):
         """Only return projects which the user is a contributor on"""
@@ -151,7 +154,7 @@ class Project(models.Model):
     def publish(self, notes):
         """Publishing a project sets it public and returns a ProjectReviewTask."""
         self.make_public()
-        return ProjectReviewTask.objects.create(project=self, notes=notes)
+        return self.projectreviewtask_set.create(notes=notes)
 
 
 class ProjectCrowdfunds(models.Model):

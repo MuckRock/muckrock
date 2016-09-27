@@ -1,15 +1,25 @@
-.action-container {
-    @include display(flex);
-    @include justify-content(space-between);
-    @include border;
-    @include border-radius;
-    padding: $vertical-rhythm/2;
-}
-
 .action {
-    margin-bottom: 0;
-}
-
-.action-time {
-    font-size: $font-size-2;
+    font-weight: $bold;
+    color: $color-blue;
+    cursor: pointer;
+    .icon {
+        position: relative;
+        top: 3px;
+    }
+    .icon path,
+    .icon polygon,
+    .icon rect,
+    .icon circle{
+        fill: $color-blue;
+    }
+    &:hover {
+        color: $color-blue-dark;
+        text-decoration: underline;
+        .icon path,
+        .icon polygon,
+        .icon rect,
+        .icon circle{
+            fill: $color-blue-dark;
+        }
+    }
 }

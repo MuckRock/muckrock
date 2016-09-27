@@ -3,15 +3,15 @@
 {% block title %}MuckRock &bull; Create a project{% endblock %}
 
 {% block content %}
-<div class="create project">
+<div class="create project form">
     <header>
         <h1>Create a new project</h1>
         <p>Projects help you tell larger stories and connect with your audience.</p>
     </header>
     <form enctype="multipart/form-data" method="post">
         {% csrf_token %}
-        {% include 'component/form.html' %}
-        <button type="submit" class="blue">Create the project</button>
+        {% include 'lib/pattern/form.html' %}
+        <button type="submit" class="blue button">Create the project</button>
     </form>
 </div>
 {% endblock %}
