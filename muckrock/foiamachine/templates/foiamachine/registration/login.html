@@ -1,0 +1,19 @@
+{% extends 'foiamachine/base.html' %}
+
+{% load hosts %}
+
+{% block body %}
+<body>
+    <h1><a href="{% host_url 'index' host 'foiamachine' %}">FOIA Machine</a></h1>
+    <h2>Log in</h2>
+    <form method="post" class="form">
+        {% csrf_token %}
+        {% include 'lib/pattern/form.html' %}
+        <button type="submit" class="button">Submit</button>
+    </form>
+    <p>New to FOIA Machine? <a href="{% host_url 'signup' host 'foiamachine' %}">Sign up &rarr;</a></p>
+    {% comment %}
+    <p>Forgot your password? <a href="{% host_url 'password-reset' host 'foiamachine' %}">Reset it &rarr;</a></p>
+    {% endcomment %}
+</body>
+{% endblock body %}

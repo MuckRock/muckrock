@@ -1,6 +1,13 @@
+{% extends 'foiamachine/base.html' %}
 
-<html>
-  <body>
-    I'm FOIA Machine!
-  </body>
-</html>
+{% load hosts %}
+
+{% block body %}
+<body>
+    <h1><a href="{% host_url 'index' host 'foiamachine' %}">FOIA Machine</a></h1>
+    <ul>
+        <li><a href="{% host_url 'signup' host 'foiamachine' %}">Sign up</a></li>
+        <li><a href="{% host_url 'login' host 'foiamachine' %}">Log in</a></li>
+    </ul>
+</body>
+{% endblock %}
