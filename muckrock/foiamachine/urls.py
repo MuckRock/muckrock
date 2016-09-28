@@ -1,3 +1,6 @@
+"""
+FOIA Machine urls
+"""
 
 from django.conf.urls import patterns, include, url
 from django.contrib.auth import views as auth_views
@@ -19,5 +22,8 @@ urlpatterns = patterns(
         auth_views.logout,
         {'next_page': 'index'},
         name='logout'),
+    url(r'^accounts/profile/$',
+        views.Profile.as_view(),
+        name='profile'),
     url(r'^__debug__/', include(debug_toolbar.urls)),
 )
