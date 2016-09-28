@@ -307,4 +307,3 @@ def failed_fax_task(parser, token):
 def new_exemption_task(parser, token):
     """Returns a NewExemptionTaskNode"""
     return NewExemptionTaskNode(get_id(token))
-

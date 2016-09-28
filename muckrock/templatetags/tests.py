@@ -30,4 +30,3 @@ class TestTemplatetagsFunctional(TestCase):
 
         nose.tools.eq_(tags.company_title('one\ntwo\nthree'), 'one, et al')
         nose.tools.eq_(tags.company_title('company'), 'company')
-

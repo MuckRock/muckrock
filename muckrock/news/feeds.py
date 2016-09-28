@@ -23,4 +23,3 @@ class LatestEntries(Feed):
         """The description of each rss item"""
         # pylint: disable=no-self-use
         return linebreaks(escape(item.summary))
-

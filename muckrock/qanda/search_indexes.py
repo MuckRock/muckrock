@@ -15,4 +15,3 @@ class QuestionIndex(CelerySearchIndex, Indexable):
     def get_model(self):
         """Return model for index"""
         return Question
-

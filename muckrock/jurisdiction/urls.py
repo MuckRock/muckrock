@@ -35,6 +35,3 @@ old_urlpatterns = patterns(
     url(r'^view/%s/$' % old_jur_url, jurisdiction),
     url(r'^flag/%s/$' % old_jur_url, jurisdiction, {'view': 'flag'}),
 )
-
-
-

@@ -56,4 +56,3 @@ EMAIL_PORT = 1025
 QUERYCOUNT = {
         'DISPLAY_DUPLICATES': 10,
         }
-
