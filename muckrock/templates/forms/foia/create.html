@@ -38,16 +38,21 @@
             {% endif %}
         </header>
         {% if form.non_field_errors or form.errors %}
-        <section class="failure panel">
-            <p>The form could not be submitted due to the following errors:</p>
-            {{ form.non_field_errors }}
-            <ul>
-            {% for field in form.visible_fields %}
-                {% if field.errors %}
-                <li>{{ field.label }} field: {{ field.errors }}</li>
-                {% endif %}
-            {% endfor %}
-            </ul>
+        <div class="error message">
+            <span class="symbol">
+                {% include 'lib/component/icon/error.svg' %}
+            </span>
+            <span class="text">
+                <p>The form could not be submitted due to the following errors:</p>
+                {{ form.non_field_errors }}
+                {% for field in form.visible_fields %}
+                    {% if field.errors %}
+                    <p><strong>{{ field.label }}:</strong> {{field.errors.as_text|cut:"* "}}</p>
+                    {% endif %}
+                {% endfor %}
+                </dl>
+            </span>
+        </div>
         </section>
         {% endif %}
         <form action="" method="post" class="create-request">
@@ -201,7 +206,7 @@ $(document).ready(function(){
         $(this).parent().siblings().removeClass('active');
         localField.show();
         stateField.hide();
-        agencyToggle(localSelect.val());
+        agencyToggle(localSelect.val().length);
         agencyInput.val('');
     });
 
@@ -210,7 +215,7 @@ $(document).ready(function(){
         $(this).parent().siblings().removeClass('active');
         localField.hide();
         stateField.show();
-        agencyToggle(stateSelect.val());
+        agencyToggle(stateSelect.val().length);
         agencyInput.val('');
     });
 
@@ -226,7 +231,7 @@ $(document).ready(function(){
 
     function selectChange(select) {
         agencyByJurisdiction(select);
-        agencyToggle(select.val());
+        agencyToggle(select.val().length);
         agencyInput.val('');
     }
 
