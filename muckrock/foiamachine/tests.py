@@ -86,3 +86,18 @@ class TestProfile(TestCase):
         user = UserFactory()
         response = http_get_response(self.url, self.view, user)
         eq_(response.status_code, 200)
+
+
+class TestPasswordReset(TestCase):
+    """Users should be able to reset their passwords using the built-in Django functionality."""
+    def setUp(self):
+        self.user = UserFactory()
+        self.view = auth.views.password_reset
+        self.url = reverse('password-reset', host='foiamachine')
+
+    def test_reset(self):
+        data = {'email': self.user.email}
+        response = http_post_response(self.url, self.view, data, self.user)
+        eq_(response.status_code, 302, 'The view should redirect upon success. %s' % response.status_code)
+        eq_(response.url, reverse('password-reset-done', host='foiamachine'),
+            'The view should redirect to the password reset confirmation screen.')
