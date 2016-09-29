@@ -1,12 +1,58 @@
+{% load hosts %}
+
 <!doctype html>
 <html>
     {% block head %}
     <head>
         <title>FOIA Machine</title>
+        <style>
+            body {
+                font-family: sans-serif;
+            }
+            .topnav {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+            }
+            .bold {
+                font-weight: bold;
+            }
+            .nostyle {
+                list-style: none;
+                padding-left: 0;
+            }
+            .inline li {
+                display: inline-block;
+                margin-left: 1em;
+            }
+            .field input {
+                width: 100%;
+            }
+            .field label {
+                font-weight: bold;
+            }
+        </style>
     </head>
     {% endblock head %}
     {% block body %}
     <body>
+        <nav class="topnav">
+            <p class="bold"><a href="{% host_url 'index' host 'foiamachine' %}">FOIA Machine</a></p>
+            {% if request.user.is_authenticated %}
+            <ul class="nostyle inline">
+                <li>You are logged in as <a href="{% host_url 'profile' host 'foiamachine' %}">{{user}}</a>.</li>
+                <li><a href="{% host_url 'logout' host 'foiamachine' %}">Log out</a></li>
+            </ul>
+            {% else %}
+            <ul class="nostyle inline">
+                <li><a href="{% host_url 'signup' host 'foiamachine' %}">Sign up</a></li>
+                <li><a href="{% host_url 'login' host 'foiamachine' %}">Log in</a></li>
+            </ul>
+            {% endif %}
+        </nav>
+        {% block main %}
+        <main></main>
+        {% endblock main %}
     </body>
     {% endblock body %}
 </html>

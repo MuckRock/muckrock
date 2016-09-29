@@ -1,20 +1,7 @@
 {% extends 'foiamachine/base.html' %}
 
-{% load hosts %}
-
-{% block body %}
-<body>
-    <h1><a href="{% host_url 'index' host 'foiamachine' %}">FOIA Machine</a></h1>
-    {% if request.user.is_authenticated %}
-    <ul>
-        <li>You are logged in as <a href="{% host_url 'profile' host 'foiamachine' %}">{{user}}</a>.</li>
-        <li><a href="{% host_url 'logout' host 'foiamachine' %}">Log out</a></li>
-    </ul>
-    {% else %}
-    <ul>
-        <li><a href="{% host_url 'signup' host 'foiamachine' %}">Sign up</a></li>
-        <li><a href="{% host_url 'login' host 'foiamachine' %}">Log in</a></li>
-    </ul>
-    {% endif %}
-</body>
+{% block main %}
+<main>
+    <h1>Welcome to FOIA Machine</h1>
+</main>
 {% endblock %}
