@@ -11,6 +11,7 @@ from django.utils.decorators import method_decorator
 from django_hosts.resolvers import reverse
 
 from muckrock.accounts.forms import RegisterForm
+from muckrock.accounts.views import create_new_user
 
 
 class Homepage(TemplateView):
@@ -23,18 +24,12 @@ class Signup(FormView):
     template_name = 'foiamachine/registration/signup.html'
     form_class = RegisterForm
 
-    def create_user(self, form):
-        """Create the user from the valid form, then sign them in to their account."""
-        form.save()
-        username = form.cleaned_data['username']
-        password = form.cleaned_data['password1']
-        user = authenticate(username, password)
-        login(self.request, user)
-        return user
+    def get_success_url(self):
+        return reverse('profile', host='foiamachine')
 
     def form_valid(self, form):
         """Create the user and sign them in."""
-        user = self.create_user(form)
+        user = create_new_user(self.request, form)
         return super(Signup, self).form_valid(form)
 
 

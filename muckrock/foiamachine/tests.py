@@ -6,11 +6,11 @@ from django.test import TestCase
 from django.contrib import auth
 
 from django_hosts.resolvers import reverse
-from nose.tools import eq_
+from nose.tools import eq_, ok_
 
 from muckrock.factories import UserFactory
 from muckrock.foiamachine.views import Homepage, Signup, Profile
-from muckrock.test_utils import http_get_response
+from muckrock.test_utils import http_get_response, http_post_response
 
 
 class TestHomepage(TestCase):
@@ -47,6 +47,25 @@ class TestSignup(TestCase):
         """Signup should return 200."""
         response = http_get_response(self.url, self.view)
         eq_(response.status_code, 200)
+
+    def test_signup(self):
+        """Posting the required information to sign up should create an account,
+        log the user into the account, create a profile for their account,
+        and return a redirect to the profile page."""
+        data = {
+            'username': 'TestUser',
+            'email': 'test@email.com',
+            'first_name': 'Test',
+            'last_name': 'User',
+            'password1': 'test',
+            'password2': 'test',
+        }
+        response = http_post_response(self.url, self.view, data)
+        eq_(response.status_code, 302, 'The response should redirect.')
+        eq_(response.url, reverse('profile', host='foiamachine'))
+        user = auth.models.User.objects.get(username=data['username'])
+        ok_(user, 'The user should be created.')
+        ok_(user.profile, 'The user should be given a profile.')
 
 
 class TestProfile(TestCase):
