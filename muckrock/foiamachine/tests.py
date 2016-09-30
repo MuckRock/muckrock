@@ -8,7 +8,9 @@ from django.contrib import auth
 from django_hosts.resolvers import reverse
 from nose.tools import eq_, ok_
 
-from muckrock.factories import UserFactory
+from muckrock.factories import UserFactory, AgencyFactory
+from muckrock.foiamachine.factories import FoiaMachineRequestFactory
+from muckrock.foiamachine.models import FoiaMachineRequest
 from muckrock.foiamachine.views import Homepage, Signup, Profile
 from muckrock.test_utils import http_get_response, http_post_response
 
@@ -86,3 +88,46 @@ class TestProfile(TestCase):
         user = UserFactory()
         response = http_get_response(self.url, self.view, user)
         eq_(response.status_code, 200)
+
+
+class TestFoiaMachineRequest(TestCase):
+    """The FOIA Machine Request should store information we need to send a request."""
+    def setUp(self):
+        self.user = UserFactory()
+        self.title = 'Test Request'
+        self.request_language = 'Lorem ipsum'
+        self.agency = AgencyFactory()
+        self.jurisdiction = self.agency.jurisdiction
+        self.foi = FoiaMachineRequestFactory(
+            user=self.user,
+            title=self.title,
+            request_language=self.request_language,
+            jurisdiction=self.jurisdiction,
+        )
+
+    def test_create_FoiaMachineRequest(self):
+        """Requests should only require a user, a title,
+        request language, and a jurisdiction to be created."""
+        foi = FoiaMachineRequest.objects.create(
+            user=self.user,
+            title=self.title,
+            request_language=self.request_language,
+            jurisdiction=self.jurisdiction,
+        )
+        ok_(foi, 'The request should be created.')
+        ok_(foi.slug, 'The slug should be created automatically.')
+
+    def test_unicode(self):
+        """Requests should use their titles when converted to unicode."""
+        eq_(unicode(self.foi), self.foi.title,
+            'The Unicode representation should be the title.')
+
+    def test_get_absolute_url(self):
+        """Request urls should include their slug and their id."""
+        kwargs = {
+            'slug': self.foi.slug,
+            'pk': self.foi.pk,
+        }
+        actual_url = self.foi.get_absolute_url()
+        expected_url = reverse('foi-detail', host='foiamachine', kwargs=kwargs)
+        eq_(actual_url, expected_url)

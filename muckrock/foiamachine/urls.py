@@ -54,5 +54,8 @@ urlpatterns = patterns(
         auth_views.password_reset_complete,
         {'template_name': 'foiamachine/registration/password_reset_complete.html'},
         name='password-reset-complete'),
+    url(r'^foi/(?P<slug>[\w-]+)-(?P<pk>\d+)/$',
+        views.FoiaMachineRequestDetailView.as_view(),
+        name='foi-detail'),
     url(r'^__debug__/', include(debug_toolbar.urls)),
 )
