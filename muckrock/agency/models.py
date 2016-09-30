@@ -9,6 +9,7 @@ from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
 
 from datetime import date
+from django_hosts.resolvers import reverse as host_reverse
 from djgeojson.fields import PointField
 from easy_thumbnails.fields import ThumbnailerImageField
 import logging
@@ -107,12 +108,15 @@ class Agency(models.Model, RequestHelper):
     def __unicode__(self):
         return self.name
 
-    @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
-        return ('agency-detail', [], {'jurisdiction': self.jurisdiction.slug,
-                                      'jidx': self.jurisdiction.pk,
-                                      'slug': self.slug, 'idx': self.pk})
+        kwargs = {
+            'jurisdiction': self.jurisdiction.slug,
+            'jidx': self.jurisdiction.id,
+            'slug': self.slug,
+            'idx': self.id
+        }
+        return host_reverse('agency-detail', host='default', kwargs=kwargs)
 
     def save(self, *args, **kwargs):
         """Save the agency"""
