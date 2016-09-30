@@ -5,23 +5,17 @@
 {% block main %}
 <main class="profile">
     <header>
-        <h1>{{user}}</h1>
-        <p><a href="{% host_url 'logout' host 'foiamachine' %}">Log out</a></p>
+        <h2>Your Requests</h2>
+        <p><a href="{% host_url 'foi-create' host 'foiamachine' %}">Create request</a></p>
     </header>
-    <div>
-        <header>
-            <h2>Your Requests</h2>
-            <p><a href="{% host_url 'foi-create' host 'foiamachine' %}">Create request</a></p>
-        </header>
-        <ul>
-            {% for foi in user.foiamachinerequest_set.all %}
-            <li><a href="{{foi.get_absolute_url}}">{{foi.title}}</a></li>
-            {% empty %}
-            <li class="empty">
-                <p class="bold">You have not created any public records requests. <a href="{% host_url 'foi-create' host 'foiamachine' %}">Create a new request</a></p>
-            </li>
-            {% endfor %}
-        </ul>
-    </div>
+    <ul>
+        {% for foi in user.foiamachinerequest_set.all %}
+        <li><a href="{{foi.get_absolute_url}}">{{foi.title}}</a></li>
+        {% empty %}
+        <li class="empty">
+            <p class="bold">You have not created any public records requests. <a href="{% host_url 'foi-create' host 'foiamachine' %}">Create a new request</a></p>
+        </li>
+        {% endfor %}
+    </ul>
 </main>
 {% endblock %}
