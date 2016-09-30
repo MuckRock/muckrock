@@ -14,7 +14,8 @@ class AgencyAutocomplete(autocomplete_light.AutocompleteModelBase):
     """Creates an autocomplete field for picking agencies"""
     search_fields = ['name', 'aliases']
     attrs = {
-        'data-autocomplete-minimum-characters': 0
+        'data-autocomplete-minimum-characters': 1,
+        'placeholder': 'Search agencies'
     }
     def choices_for_request(self):
         query = self.request.GET.get('q', '')

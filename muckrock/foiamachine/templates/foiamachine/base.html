@@ -50,12 +50,15 @@
                 width: 100%;
                 font-size: 1rem;
             }
-            input {
+            input, textarea {
                 border: 1px solid #ccc;
+                padding: .25em;
             }
             textarea {
                 resize: vertical;
-                border: 1px solid #ccc;
+            }
+            .field.disabled {
+                opacity: .5;
             }
             .field header {
                 margin-bottom: .25em;
@@ -105,6 +108,28 @@
                 justify-content: space-between;
                 align-items: baseline;
             }
+            .autocomplete-light-widget {
+                width: 100%;
+            }
+            .autocomplete-light-widget.yourlabs-autocomplete {
+                width: auto;
+                max-height: 20em;
+                overflow: hidden;
+                overflow-y: scroll;
+                padding: 0;
+                left: 0;
+            }
+            .autocomplete-light-widget .deck .hilight {
+                display: block;
+                width: 100%;
+                padding: .25em;
+                border: 1px solid #ccc;
+                background: #fff;
+            }
+            .autocomplete-light-widget .remove {
+                vertical-align: middle;
+                margin-right: .25em;
+            }
         </style>
     </head>
     {% endblock head %}
@@ -137,6 +162,11 @@
             </ul>
             <p>&copy; MuckRock Foundation, Inc. {% now "Y" %}</p>
         </nav>
+        <!-- Scripts -->
+        {% block scripts %}
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.js" type="text/javascript"></script>
+        {% include 'autocomplete_light/static.html' %}
+        {% endblock %}
     </body>
     {% endblock body %}
 </html>
