@@ -11,16 +11,15 @@ from django_hosts.resolvers import reverse
 from nose.tools import eq_, ok_
 
 from muckrock.factories import UserFactory, AgencyFactory
-from muckrock.foiamachine.factories import FoiaMachineRequestFactory
-from muckrock.foiamachine.models import FoiaMachineRequest
-from muckrock.foiamachine.views import Homepage, Signup, Profile
+from muckrock.foiamachine import factories, forms, models, views
+from muckrock.jurisdiction.factories import StateJurisdictionFactory
 from muckrock.test_utils import http_get_response, http_post_response
 
 
 class TestHomepage(TestCase):
     """The homepage should provide information about FOIAMachine and helpful links."""
     def setUp(self):
-        self.view = Homepage.as_view()
+        self.view = views.Homepage.as_view()
         self.url = reverse('index', host='foiamachine')
 
     def test_ok(self):
@@ -44,7 +43,7 @@ class TestLogin(TestCase):
 class TestSignup(TestCase):
     """Users should be able to sign up."""
     def setUp(self):
-        self.view = Signup.as_view()
+        self.view = views.Signup.as_view()
         self.url = reverse('signup', host='foiamachine')
 
     def test_ok(self):
@@ -75,7 +74,7 @@ class TestSignup(TestCase):
 class TestProfile(TestCase):
     """Users should be able to view their profile once they're logged in."""
     def setUp(self):
-        self.view = Profile.as_view()
+        self.view = views.Profile.as_view()
         self.url = reverse('profile', host='foiamachine')
 
     def test_unauthenticated(self):
@@ -92,6 +91,60 @@ class TestProfile(TestCase):
         eq_(response.status_code, 200)
 
 
+class TestFoiaMachineRequestCreateView(TestCase):
+    """Users should be able to create a new request, as long as they are logged in."""
+    def setUp(self):
+        self.view = views.FoiaMachineRequestCreateView.as_view()
+        self.url = reverse('foi-create', host='foiamachine')
+        self.user = UserFactory()
+
+    def test_unauthenticated(self):
+        """Unauthenticated users should be redirected to the login screen."""
+        response = http_get_response(self.url, self.view)
+        eq_(response.status_code, 302, 'The view should redirect.')
+        eq_(response.url, reverse('login', host='foiamachine'),
+            'The redirect should point to the login view.')
+
+    def test_authenticated(self):
+        """When authenticated, the view should return 200."""
+        user = UserFactory()
+        response = http_get_response(self.url, self.view, user)
+        eq_(response.status_code, 200)
+
+    def test_create(self):
+        """Posting a valid creation form should create a request and redirect to it."""
+        title = 'Test Request'
+        request_language = 'Lorem ipsum'
+        jurisdiction = StateJurisdictionFactory().id
+        form = forms.FoiaMachineRequestForm({
+            'title': title,
+            'request_language': request_language,
+            'jurisdiction': jurisdiction
+        })
+        ok_(form.is_valid())
+        response = http_post_response(self.url, self.view, form.data, self.user)
+        eq_(response.status_code, 302, 'When successful the view should redirect to the request.')
+        foi = models.FoiaMachineRequest.objects.first()
+        eq_(response.url, foi.get_absolute_url())
+
+
+class TestFoiaMachineRequestDetailView(TestCase):
+    """Anyone can see the request, as long as they have the link."""
+    def setUp(self):
+        self.foi = factories.FoiaMachineRequestFactory()
+        self.view = views.FoiaMachineRequestDetailView.as_view()
+        self.kwargs = {
+            'slug': self.foi.slug,
+            'pk': self.foi.pk,
+        }
+        self.url = reverse('foi-detail', host='foiamachine', kwargs=self.kwargs)
+
+    def test_get(self):
+        """Anyone can see the request page."""
+        response = http_get_response(self.url, self.view, **self.kwargs)
+        eq_(response.status_code, 200)
+
+
 class TestFoiaMachineRequest(TestCase):
     """The FOIA Machine Request should store information we need to send a request."""
     def setUp(self):
@@ -100,7 +153,7 @@ class TestFoiaMachineRequest(TestCase):
         self.request_language = 'Lorem ipsum'
         self.agency = AgencyFactory()
         self.jurisdiction = self.agency.jurisdiction
-        self.foi = FoiaMachineRequestFactory(
+        self.foi = factories.FoiaMachineRequestFactory(
             user=self.user,
             title=self.title,
             request_language=self.request_language,
@@ -110,7 +163,7 @@ class TestFoiaMachineRequest(TestCase):
     def test_create(self):
         """Requests should only require a user, a title,
         request language, and a jurisdiction to be created."""
-        foi = FoiaMachineRequest.objects.create(
+        foi = models.FoiaMachineRequest.objects.create(
             user=self.user,
             title=self.title,
             request_language=self.request_language,

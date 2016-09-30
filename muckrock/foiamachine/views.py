@@ -45,6 +45,28 @@ class Profile(TemplateView):
         return super(Profile, self).dispatch(*args, **kwargs)
 
 
+class FoiaMachineRequestCreateView(CreateView):
+    """Create a new request."""
+    form_class = FoiaMachineRequestForm
+    template_name = 'foiamachine/foi/create.html'
+
+    def dispatch(self, *args, **kwargs):
+        """If the user is unauthenticated, redirect them to the login view."""
+        if self.request.user.is_anonymous():
+            return redirect(reverse('login', host='foiamachine'))
+        return super(FoiaMachineRequestCreateView, self).dispatch(*args, **kwargs)
+
+    def form_valid(self, form):
+        """Create the request then redirect to it."""
+        foi = form.save(commit=False)
+        foi.user = self.request.user
+        foi.save()
+        return redirect(reverse('foi-detail', host='foiamachine', kwargs={
+            'slug': foi.slug,
+            'pk': foi.pk,
+        }))
+
+
 class FoiaMachineRequestDetailView(DetailView):
     """Show the detail of a FOIA Machine request."""
     model = FoiaMachineRequest
