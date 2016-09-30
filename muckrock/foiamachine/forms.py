@@ -11,3 +11,11 @@ class FoiaMachineRequestForm(forms.ModelForm):
     class Meta:
         model = FoiaMachineRequest
         fields = ['title', 'request_language', 'jurisdiction', 'agency']
+
+    def clean(self):
+        cleaned_data = super(FoiaMachineRequestForm, self).clean()
+        jurisdiction = cleaned_data.get('jurisdiction')
+        agency = cleaned_data.get('agency')
+        if agency and agency.jurisdiction != jurisdiction:
+            raise forms.ValidationError('This agency does not belong to the jurisdiction.')
+        return cleaned_data
