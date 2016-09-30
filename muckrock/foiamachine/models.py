@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.template.loader import render_to_string
 from django.utils.text import slugify
 
 from django_hosts.resolvers import reverse
@@ -36,3 +37,13 @@ class FoiaMachineRequest(models.Model):
             'slug': self.slug,
             'pk': self.pk,
         })
+
+    def generate_letter(self):
+        """Returns a public records request letter for the request's jurisdiction."""
+        template = 'text/foia/request.txt'
+        context = {
+            'jurisdiction': self.jurisdiction,
+            'document_request': self.request_language,
+            'user_name': self.user.get_full_name()
+        }
+        return render_to_string(template, context=context)

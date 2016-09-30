@@ -2,8 +2,10 @@
 Tests for the FOIAMachine application.
 """
 
-from django.test import TestCase
 from django.contrib import auth
+from django.template.loader import render_to_string
+from django.test import TestCase
+
 
 from django_hosts.resolvers import reverse
 from nose.tools import eq_, ok_
@@ -105,7 +107,7 @@ class TestFoiaMachineRequest(TestCase):
             jurisdiction=self.jurisdiction,
         )
 
-    def test_create_FoiaMachineRequest(self):
+    def test_create(self):
         """Requests should only require a user, a title,
         request language, and a jurisdiction to be created."""
         foi = FoiaMachineRequest.objects.create(
@@ -131,3 +133,15 @@ class TestFoiaMachineRequest(TestCase):
         actual_url = self.foi.get_absolute_url()
         expected_url = reverse('foi-detail', host='foiamachine', kwargs=kwargs)
         eq_(actual_url, expected_url)
+
+    def test_generate_letter(self):
+        """Using default information, the request should be able to generate a letter."""
+        template = 'text/foia/request.txt'
+        context = {
+            'jurisdiction': self.foi.jurisdiction,
+            'document_request': self.foi.request_language,
+            'user_name': self.foi.user.get_full_name()
+        }
+        expected_letter = render_to_string(template, context=context)
+        actual_letter = self.foi.generate_letter()
+        eq_(actual_letter, expected_letter)
