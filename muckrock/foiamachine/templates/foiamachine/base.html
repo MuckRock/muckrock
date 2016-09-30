@@ -14,11 +14,14 @@
             * {
                 box-sizing: border-box;
             }
-            html, body {
+            body {
                 margin: 0;
                 padding: 0;
                 font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
                 text-rendering: optimizeLegibility;
+                line-height: 1.4;
+                background: #f8f8f8;
+                color: #202020;
             }
             main {
                 max-width: 40em;
@@ -36,9 +39,20 @@
                 display: inline-block;
                 margin-left: 1em;
             }
-            .field input {
+            .button {
+                font-size: 1rem;
+                font-weight: bold;
+            }
+            .field input, .field textarea, .field select {
                 width: 100%;
                 font-size: 1rem;
+            }
+            .field input {
+                border: 1px solid #ccc;
+            }
+            .field textarea {
+                resize: vertical;
+                border: 1px solid #ccc;
             }
             .field header {
                 margin-bottom: .25em;
@@ -56,13 +70,36 @@
                 list-style: none;
                 color: red;
             }
-            .topnav {
+            .topnav, .bottomnav {
                 width: 100%;
-                max-width: 40em;
+                max-width: 40rem;
                 margin: 0 auto;
+                padding: 0 1rem;
+            }
+            .topnav {
                 display: flex;
                 justify-content: space-between;
-                padding: 0 1em;
+                border-bottom: 1px solid #ccc;
+            }
+            .bottomnav {
+                margin-top: 2rem;
+                border-top: 1px solid #ccc;
+                font-size: .75rem;
+            }
+            .letter {
+                padding: 1em 2em;
+                border: 1px solid #ccc;
+                font-family: "Iowan Old Style", "Georgia", serif;
+                background: #fff;
+                overflow: hidden;
+                user-select: all;
+                -webkit-user-select: all;
+                -mox-user-select: all;
+            }
+            .profile header {
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
             }
         </style>
     </head>
@@ -73,8 +110,7 @@
             <p class="bold"><a href="{% host_url 'index' host 'foiamachine' %}">FOIA Machine</a> <span class="beta badge">Beta</span></p>
             {% if request.user.is_authenticated %}
             <ul class="nostyle inline">
-                <li>You are logged in as <a href="{% host_url 'profile' host 'foiamachine' %}">{{user}}</a>.</li>
-                <li><a href="{% host_url 'logout' host 'foiamachine' %}">Log out</a></li>
+                <li><a href="{% host_url 'profile' host 'foiamachine' %}">{{user}}</a></li>
             </ul>
             {% else %}
             <ul class="nostyle inline">
@@ -86,6 +122,16 @@
         {% block main %}
         <main></main>
         {% endblock main %}
+        <nav class="bottomnav">
+            <ul class="nostyle inline">
+                <li class="bold"><a href="{% host_url 'index' host 'foiamachine' %}">FOIA Machine</a> Beta</li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/tos">Terms of Service</a></li>
+                <li><a href="/privacy">Privacy Policy</a></li>
+                <li><a href="/feedback">Feedback</a></li>
+            </ul>
+            <p>&copy; MuckRock Foundation, Inc. {% now "Y" %}</p>
+        </nav>
     </body>
     {% endblock body %}
 </html>
