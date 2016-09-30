@@ -41,7 +41,8 @@ class Profile(TemplateView):
     def dispatch(self, *args, **kwargs):
         """If the user is unauthenticated, redirect them to the login view."""
         if self.request.user.is_anonymous():
-            return redirect(reverse('login', host='foiamachine'))
+            return redirect(reverse('login', host='foiamachine') +
+                '?next=' + reverse('profile', host='foiamachine'))
         return super(Profile, self).dispatch(*args, **kwargs)
 
 
@@ -53,7 +54,8 @@ class FoiaMachineRequestCreateView(CreateView):
     def dispatch(self, *args, **kwargs):
         """If the user is unauthenticated, redirect them to the login view."""
         if self.request.user.is_anonymous():
-            return redirect(reverse('login', host='foiamachine'))
+            return redirect(reverse('login', host='foiamachine') +
+                '?next=' + reverse('foi-create', host='foiamachine'))
         return super(FoiaMachineRequestCreateView, self).dispatch(*args, **kwargs)
 
     def form_valid(self, form):

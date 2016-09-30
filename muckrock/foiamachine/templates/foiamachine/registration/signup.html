@@ -10,6 +10,6 @@
         {% include 'lib/pattern/form.html' %}
         <button type="submit" class="button">Submit</button>
     </form>
-    <p>Already have an account? <a href="{% host_url 'login' host 'foiamachine' %}">Log in &rarr;</a></p>
+    <p>Already have an account? <a href="{% host_url 'login' host 'foiamachine' %}?{{request.GET.urlencode}}">Log in &rarr;</a></p>
 </main>
 {% endblock main %}
