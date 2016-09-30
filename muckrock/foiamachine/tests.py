@@ -22,10 +22,17 @@ class TestHomepage(TestCase):
         self.view = views.Homepage.as_view()
         self.url = reverse('index', host='foiamachine')
 
-    def test_ok(self):
+    def test_unauthenticated(self):
         """The homepage should return 200."""
         response = http_get_response(self.url, self.view)
         eq_(response.status_code, 200)
+
+    def test_authenticated(self):
+        """If the user is authenticated, the homepage should redirect to their profile."""
+        user = UserFactory()
+        response = http_get_response(self.url, self.view, user)
+        eq_(response.status_code, 302)
+        eq_(response.url, reverse('profile', host='foiamachine'))
 
 
 class TestLogin(TestCase):
@@ -81,8 +88,8 @@ class TestProfile(TestCase):
         """Authentication should be required to view the profile page."""
         response = http_get_response(self.url, self.view)
         eq_(response.status_code, 302, 'The view should redirect.')
-        eq_(response.url, reverse('login', host='foiamachine'),
-            'The redirect should point to the login view.')
+        eq_(response.url, reverse('login', host='foiamachine') + '?next=' + self.url,
+            'The redirect should point to the login view, with this as the next view.')
 
     def test_authenticated(self):
         """When authenticated, the view should return 200."""
@@ -102,8 +109,8 @@ class TestFoiaMachineRequestCreateView(TestCase):
         """Unauthenticated users should be redirected to the login screen."""
         response = http_get_response(self.url, self.view)
         eq_(response.status_code, 302, 'The view should redirect.')
-        eq_(response.url, reverse('login', host='foiamachine'),
-            'The redirect should point to the login view.')
+        eq_(response.url, reverse('login', host='foiamachine') + '?next=' + self.url,
+            'The redirect should point to the login view, with this as the next view.')
 
     def test_authenticated(self):
         """When authenticated, the view should return 200."""

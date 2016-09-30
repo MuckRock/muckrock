@@ -19,6 +19,12 @@ class Homepage(TemplateView):
     """FOIAMachine homepage"""
     template_name = 'foiamachine/homepage.html'
 
+    def dispatch(self, *args, **kwargs):
+        """If the user is authenticated, redirect to their profile."""
+        if self.request.user.is_authenticated():
+            return redirect(reverse('profile', host='foiamachine'))
+        return super(Homepage, self).dispatch(*args, **kwargs)
+
 
 class Signup(FormView):
     """Signs up new users"""
