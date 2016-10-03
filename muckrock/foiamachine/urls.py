@@ -66,6 +66,9 @@ urlpatterns = patterns(
     url(r'^foi/(?P<slug>[\w-]+)-(?P<pk>\d+)/delete/$',
         views.FoiaMachineRequestDeleteView.as_view(),
         name='foi-delete'),
+    url(r'^foi/(?P<foi_slug>[\w-]+)-(?P<foi_pk>\d+)/comms/create/$',
+        views.FoiaMachineCommunicationCreateView.as_view(),
+        name='comm-create'),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^__debug__/', include(debug_toolbar.urls)),
 )

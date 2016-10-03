@@ -12,7 +12,7 @@ from django_hosts.resolvers import reverse
 
 from muckrock.accounts.forms import RegisterForm
 from muckrock.accounts.views import create_new_user
-from muckrock.foiamachine.forms import FoiaMachineRequestForm
+from muckrock.foiamachine.forms import FoiaMachineRequestForm, FoiaMachineCommunicationForm
 from muckrock.foiamachine.models import FoiaMachineRequest, FoiaMachineCommunication
 
 class Homepage(TemplateView):
@@ -125,3 +125,32 @@ class FoiaMachineRequestDeleteView(DeleteView):
     def get_success_url(self):
         """The success url is the user profile."""
         return reverse('profile', host='foiamachine')
+
+
+class FoiaMachineCommunicationCreateView(CreateView):
+    """Create a new communication on a request."""
+    form_class = FoiaMachineCommunicationForm
+    template_name = 'foiamachine/comm/create.html'
+
+    def get_foi(self, **kwargs):
+        """Given a set of kwargs, return the FOI object for this view."""
+        foi_pk = kwargs.pop('foi_pk')
+        self.foi = FoiaMachineRequest.objects.get(pk=foi_pk)
+        return self.foi
+
+    def dispatch(self, *args, **kwargs):
+        """Only the request's owner can add a new communication."""
+        foi = self.get_foi(**kwargs)
+        # Redirect logged out users to the login page
+        if self.request.user.is_anonymous():
+            return redirect(reverse('login', host='foiamachine') +
+                '?next=' + reverse('comm-create', host='foiamachine', kwargs=kwargs))
+        # Redirect non-owner users to the detail page
+        if self.request.user != foi.user:
+            return redirect(self.foi.get_absolute_url())
+        return super(FoiaMachineCommunicationCreateView, self).dispatch(*args, **kwargs)
+
+    def get_success_url(self):
+        """Upon success, return to the request."""
+        return self.foi.get_absolute_url()
+

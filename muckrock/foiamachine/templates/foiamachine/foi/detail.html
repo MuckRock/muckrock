@@ -44,7 +44,7 @@
     <div class="communications">
         <header class="space-between align-center">
             <h2>Communications</h2>
-            <a href="{# host_url 'comm-create' host 'foiamachine' #}">Add a communication</a>
+            <a href="{% host_url 'comm-create' foi_slug=object.slug foi_pk=object.pk host 'foiamachine' %}">Add a communication</a>
         </header>
         {% for communication in object.communications.all %}
         {% if communication.received %}

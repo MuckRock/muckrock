@@ -203,7 +203,7 @@ class TestFoiaMachineRequestUpdateView(TestCase):
         eq_(self.foi.jurisdiction, new_jurisdiction)
 
 
-class TestFoiaMachineDeleteView(TestCase):
+class TestFoiaMachineRequestDeleteView(TestCase):
     """The owner should be able to delete the request, if they really want to."""
     def setUp(self):
         self.foi = factories.FoiaMachineRequestFactory()
@@ -241,4 +241,32 @@ class TestFoiaMachineDeleteView(TestCase):
         self.foi.refresh_from_db()
 
 
+class TestFoiaMachineCommunicationCreateView(TestCase):
+    """The owner of the request should be able to add a communication to the request."""
+    def setUp(self):
+        self.foi = factories.FoiaMachineRequestFactory()
+        self.view = views.FoiaMachineCommunicationCreateView.as_view()
+        self.kwargs = {
+            'foi_slug': self.foi.slug,
+            'foi_pk': self.foi.pk,
+        }
+        self.url = reverse('comm-create', host='foiamachine', kwargs=self.kwargs)
 
+    def test_anonymous(self):
+        """Logged out users should be redirected to the login view."""
+        response = http_get_response(self.url, self.view, **self.kwargs)
+        eq_(response.status_code, 302)
+        eq_(response.url, (reverse('login', host='foiamachine') +
+            '?next=' + reverse('comm-create', host='foiamachine', kwargs=self.kwargs)))
+
+    def test_not_owner(self):
+        """Users who are not the owner should be redirected to the FOI detail view."""
+        not_owner = UserFactory()
+        response = http_get_response(self.url, self.view, not_owner, **self.kwargs)
+        eq_(response.status_code, 302)
+        eq_(response.url, self.foi.get_absolute_url())
+
+    def test_owner(self):
+        """The owner should be able to get the request."""
+        response = http_get_response(self.url, self.view, self.foi.user, **self.kwargs)
+        eq_(response.status_code, 200)

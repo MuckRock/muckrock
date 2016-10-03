@@ -1,0 +1,12 @@
+{% include 'foiamachine/base.html' %}
+
+{% block main %}
+<main>
+    <h1>Create a new communication</h1>
+    <form method="post" class="form">
+        {% csrf_token %}
+        {% include 'lib/pattern/form.html' %}
+        <button type="submit" class="button">Create communication</button>
+    </form>
+</main>
+{% endblock %}
