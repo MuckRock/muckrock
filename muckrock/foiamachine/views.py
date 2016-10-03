@@ -5,7 +5,7 @@ FOIAMachine views
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
-from django.views.generic import TemplateView, FormView, CreateView, DetailView
+from django.views.generic import TemplateView, FormView, CreateView, DetailView, UpdateView
 from django.utils.decorators import method_decorator
 
 from django_hosts.resolvers import reverse
@@ -79,3 +79,24 @@ class FoiaMachineRequestDetailView(DetailView):
     """Show the detail of a FOIA Machine request."""
     model = FoiaMachineRequest
     template_name = 'foiamachine/foi/detail.html'
+
+
+class FoiaMachineRequestUpdateView(UpdateView):
+    """Update the information saved to a FOIA Machine request."""
+    model = FoiaMachineRequest
+    form_class = FoiaMachineRequestForm
+    template_name = 'foiamachine/foi/update.html'
+
+    def dispatch(self, *args, **kwargs):
+        """Only the request's owner may update it."""
+        foi = self.get_object()
+        # Redirect logged out users to the login page
+        if self.request.user.is_anonymous():
+            return redirect(reverse('login', host='foiamachine') +
+                '?next=' + reverse('foi-update', host='foiamachine', kwargs=kwargs))
+        # Redirect non-owner users to the detail page
+        if self.request.user != foi.user:
+            return redirect(reverse('foi-detail', host='foiamachine', kwargs=kwargs))
+        return super(FoiaMachineRequestUpdateView, self).dispatch(*args, **kwargs)
+
+

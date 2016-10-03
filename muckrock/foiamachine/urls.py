@@ -60,6 +60,9 @@ urlpatterns = patterns(
     url(r'^foi/(?P<slug>[\w-]+)-(?P<pk>\d+)/$',
         views.FoiaMachineRequestDetailView.as_view(),
         name='foi-detail'),
+    url(r'^foi/(?P<slug>[\w-]+)-(?P<pk>\d+)/update/$',
+        views.FoiaMachineRequestUpdateView.as_view(),
+        name='foi-update'),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^__debug__/', include(debug_toolbar.urls)),
 )

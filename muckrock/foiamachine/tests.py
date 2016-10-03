@@ -152,6 +152,57 @@ class TestFoiaMachineRequestDetailView(TestCase):
         eq_(response.status_code, 200)
 
 
+class TestFoiaMachineRequestUpdateView(TestCase):
+    """Only the creator of the request may update it."""
+    def setUp(self):
+        self.foi = factories.FoiaMachineRequestFactory()
+        self.view = views.FoiaMachineRequestUpdateView.as_view()
+        self.kwargs = {
+            'slug': self.foi.slug,
+            'pk': self.foi.pk,
+        }
+        self.url = reverse('foi-update', host='foiamachine', kwargs=self.kwargs)
+
+    def test_anonymous(self):
+        """Logged out users should be redirected to the login view."""
+        response = http_get_response(self.url, self.view, **self.kwargs)
+        eq_(response.status_code, 302)
+        eq_(response.url, (reverse('login', host='foiamachine') +
+            '?next=' + reverse('foi-update', host='foiamachine', kwargs=self.kwargs)))
+
+    def test_not_owner(self):
+        """Users who are not the owner should be redirected to the FOI detail view."""
+        not_owner = UserFactory()
+        response = http_get_response(self.url, self.view, not_owner, **self.kwargs)
+        eq_(response.status_code, 302)
+        eq_(response.url, self.foi.get_absolute_url())
+
+    def test_owner(self):
+        """The owner should be able to get the request."""
+        response = http_get_response(self.url, self.view, self.foi.user, **self.kwargs)
+        eq_(response.status_code, 200)
+
+    def test_post(self):
+        """Posting updated request info should update the request!"""
+        new_jurisdiction = StateJurisdictionFactory()
+        data = {
+            'title': 'New Title',
+            'request_language': 'Foo bar baz!',
+            'jurisdiction': new_jurisdiction.id
+        }
+        form = forms.FoiaMachineRequestForm(data, instance=self.foi)
+        ok_(form.is_valid())
+        response = http_post_response(self.url, self.view, data, self.foi.user, **self.kwargs)
+        self.foi.refresh_from_db()
+        # we have to update the slug, because the title changed
+        self.kwargs['slug'] = self.foi.slug
+        eq_(response.status_code, 302)
+        eq_(response.url, reverse('foi-detail', host='foiamachine', kwargs=self.kwargs))
+        eq_(self.foi.title, data['title'])
+        eq_(self.foi.request_language, data['request_language'])
+        eq_(self.foi.jurisdiction, new_jurisdiction)
+
+
 class TestFoiaMachineRequest(TestCase):
     """The FOIA Machine Request should store information we need to send a request."""
     def setUp(self):

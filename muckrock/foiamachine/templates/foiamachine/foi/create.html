@@ -46,9 +46,8 @@ function clearAgencyAutocomplete() {
 
 // Functions for responding to changes on the jurisdiction input
 
-function jurisdictionChange(e) {
-    var jurisdiction = $(e.target).val();
-    console.log(jurisdiction);
+function agencyInput(jurisdictionInput) {
+    var jurisdiction = $(jurisdictionInput).val();
     if (jurisdiction) {
         disableAgencyAutocomplete(false);
         updateAgencyAutocompleteJurisdiction(jurisdiction);
@@ -58,9 +57,15 @@ function jurisdictionChange(e) {
     }
 }
 
-$('#id_jurisdiction').change(jurisdictionChange);
+function handleJurisdictionChange(e) {
+    agencyInput(e.target);
+}
 
-disableAgencyAutocomplete(true);
+var $jurisdiction = $('#id_jurisdiction');
+// We listen to when the jurisdiction input is changed
+$jurisdiction.change(handleJurisdictionChange);
+// We call it once, just to initialize everything
+agencyInput($jurisdiction);
 
 </script>
 {% endblock %}
