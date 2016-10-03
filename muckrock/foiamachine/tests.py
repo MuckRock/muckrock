@@ -3,12 +3,13 @@ Tests for the FOIAMachine application.
 """
 
 from django.contrib import auth
+from django.core.exceptions import ObjectDoesNotExist
 from django.template.loader import render_to_string
 from django.test import TestCase
 
 
 from django_hosts.resolvers import reverse
-from nose.tools import eq_, ok_
+from nose.tools import eq_, ok_, raises
 
 from muckrock.factories import UserFactory, AgencyFactory
 from muckrock.foiamachine import factories, forms, models, views
@@ -201,6 +202,44 @@ class TestFoiaMachineRequestUpdateView(TestCase):
         eq_(self.foi.title, data['title'])
         eq_(self.foi.request_language, data['request_language'])
         eq_(self.foi.jurisdiction, new_jurisdiction)
+
+
+class TestFoiaMachineDeleteView(TestCase):
+    """The owner should be able to delete the request, if they really want to."""
+    def setUp(self):
+        self.foi = factories.FoiaMachineRequestFactory()
+        self.view = views.FoiaMachineRequestDeleteView.as_view()
+        self.kwargs = {
+            'slug': self.foi.slug,
+            'pk': self.foi.pk,
+        }
+        self.url = reverse('foi-delete', host='foiamachine', kwargs=self.kwargs)
+
+    def test_anonymous(self):
+        """Logged out users should be redirected to the login view."""
+        response = http_get_response(self.url, self.view, **self.kwargs)
+        eq_(response.status_code, 302)
+        eq_(response.url, (reverse('login', host='foiamachine') +
+            '?next=' + reverse('foi-delete', host='foiamachine', kwargs=self.kwargs)))
+
+    def test_not_owner(self):
+        """Users who are not the owner should be redirected to the FOI detail view."""
+        not_owner = UserFactory()
+        response = http_get_response(self.url, self.view, not_owner, **self.kwargs)
+        eq_(response.status_code, 302)
+        eq_(response.url, self.foi.get_absolute_url())
+
+    def test_owner(self):
+        """The owner should be able to get the request."""
+        response = http_get_response(self.url, self.view, self.foi.user, **self.kwargs)
+        eq_(response.status_code, 200)
+
+    @raises(ObjectDoesNotExist)
+    def test_post(self):
+        """Posting updated request info should update the request!"""
+        data = {}
+        response = http_post_response(self.url, self.view, data, self.foi.user, **self.kwargs)
+        self.foi.refresh_from_db()
 
 
 class TestFoiaMachineRequest(TestCase):

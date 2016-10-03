@@ -10,9 +10,7 @@
             <h1>{{object.title}}</h1>
             <p>{% if object.agency %}<a href="{{object.agency.get_absolute_url}}">{{object.agency}}</a> &bull; {% endif %}<a href="{{object.jurisdiction.get_absolute_url}}">{{object.jurisdiction}}</a></p>
         </div>
-        <ul class="nostyle inline">
-            <li><a href="{% host_url 'foi-update' slug=object.slug pk=object.pk host 'foiamachine'%}">Edit</a></li>
-        </ul>
+        <p><a href="{% host_url 'foi-update' slug=object.slug pk=object.pk host 'foiamachine'%}">Edit</a> &bull; <a href="{% host_url 'foi-delete' slug=object.slug pk=object.pk host 'foiamachine'%}">Delete</a></p>
     </header>
     <div class="letter">
         {{object.generate_letter|markdown}}

@@ -63,6 +63,9 @@ urlpatterns = patterns(
     url(r'^foi/(?P<slug>[\w-]+)-(?P<pk>\d+)/update/$',
         views.FoiaMachineRequestUpdateView.as_view(),
         name='foi-update'),
+    url(r'^foi/(?P<slug>[\w-]+)-(?P<pk>\d+)/delete/$',
+        views.FoiaMachineRequestDeleteView.as_view(),
+        name='foi-delete'),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^__debug__/', include(debug_toolbar.urls)),
 )

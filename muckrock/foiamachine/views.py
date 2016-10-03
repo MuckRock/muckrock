@@ -5,7 +5,7 @@ FOIAMachine views
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
-from django.views.generic import TemplateView, FormView, CreateView, DetailView, UpdateView
+from django.views.generic import TemplateView, FormView, CreateView, DetailView, UpdateView, DeleteView
 from django.utils.decorators import method_decorator
 
 from django_hosts.resolvers import reverse
@@ -100,3 +100,23 @@ class FoiaMachineRequestUpdateView(UpdateView):
         return super(FoiaMachineRequestUpdateView, self).dispatch(*args, **kwargs)
 
 
+class FoiaMachineRequestDeleteView(DeleteView):
+    """Confirm the delete action."""
+    model = FoiaMachineRequest
+    template_name = 'foiamachine/foi/delete.html'
+
+    def dispatch(self, *args, **kwargs):
+        """Only the request's owner may delete it."""
+        foi = self.get_object()
+        # Redirect logged out users to the login page
+        if self.request.user.is_anonymous():
+            return redirect(reverse('login', host='foiamachine') +
+                '?next=' + reverse('foi-delete', host='foiamachine', kwargs=kwargs))
+        # Redirect non-owner users to the detail page
+        if self.request.user != foi.user:
+            return redirect(reverse('foi-detail', host='foiamachine', kwargs=kwargs))
+        return super(FoiaMachineRequestDeleteView, self).dispatch(*args, **kwargs)
+
+    def get_success_url(self):
+        """The success url is the user profile."""
+        return reverse('profile', host='foiamachine')
