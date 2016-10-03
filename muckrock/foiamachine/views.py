@@ -13,7 +13,7 @@ from django_hosts.resolvers import reverse
 from muckrock.accounts.forms import RegisterForm
 from muckrock.accounts.views import create_new_user
 from muckrock.foiamachine.forms import FoiaMachineRequestForm
-from muckrock.foiamachine.models import FoiaMachineRequest
+from muckrock.foiamachine.models import FoiaMachineRequest, FoiaMachineCommunication
 
 class Homepage(TemplateView):
     """FOIAMachine homepage"""
@@ -69,6 +69,11 @@ class FoiaMachineRequestCreateView(CreateView):
         foi = form.save(commit=False)
         foi.user = self.request.user
         foi.save()
+        comm = FoiaMachineCommunication.objects.create(
+            request=foi,
+            sender=(unicode(foi.user) + ' <' + foi.user.email + '>'),
+            message=foi.generate_letter()
+        )
         return redirect(reverse('foi-detail', host='foiamachine', kwargs={
             'slug': foi.slug,
             'pk': foi.pk,

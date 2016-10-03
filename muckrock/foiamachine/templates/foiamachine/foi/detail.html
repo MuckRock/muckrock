@@ -5,15 +5,74 @@
 
 {% block main %}
 <main>
-    <header class="space-between">
+    <header class="space-between align-bottom">
         <div>
             <h1>{{object.title}}</h1>
             <p>{% if object.agency %}<a href="{{object.agency.get_absolute_url}}">{{object.agency}}</a> &bull; {% endif %}<a href="{{object.jurisdiction.get_absolute_url}}">{{object.jurisdiction}}</a></p>
         </div>
         <p><a href="{% host_url 'foi-update' slug=object.slug pk=object.pk host 'foiamachine'%}">Edit</a> &bull; <a href="{% host_url 'foi-delete' slug=object.slug pk=object.pk host 'foiamachine'%}">Delete</a></p>
     </header>
-    <div class="letter">
-        {{object.generate_letter|markdown}}
+    {% with object.agency as agency %}
+    {% if agency %}
+    <div class="agency">
+        <h2>Contacts</h2>
+        <table>
+            <tbody>
+                {% if agency.email %}
+                <tr>
+                    <td class="bold top">Email</td>
+                    <td><a href="mailto:{{agency.email}}?subject={{object.title}}&body={{object.generate_letter|urlencode}}">{{agency.email}}</a></td>
+                </tr>
+                {% endif %}
+                {% if agency.phone %}
+                <tr>
+                    <td class="bold top">Phone</td>
+                    <td>{{object.agency.phone}}</td>
+                </tr>
+                {% endif %}
+                {% if agency.address %}
+                <tr>
+                    <td class="bold top">Address</td>
+                    <td><address>{{object.agency.address|linebreaks}}</address></td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    {% endwith %}
+    <div class="communications">
+        <header class="space-between align-center">
+            <h2>Communications</h2>
+            <a href="{# host_url 'comm-create' host 'foiamachine' #}">Add a communication</a>
+        </header>
+        {% for communication in object.communications.all %}
+        {% if communication.received %}
+        <div class="received communication">
+        {% else %}
+        <div class="sent communication">
+        {% endif %}
+            <table>
+                <tr>
+                    <td class="bold">From</td>
+                    <td>{{communication.sender}}</td>
+                </tr>
+                {% if communication.receiver %}
+                <tr>
+                    <td class="bold">To</td>
+                    <td>{{communication.receiver}}</td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <td class="bold">Date</td>
+                    <td>{{communication.date|date:"F d, Y"}}</td>
+                </tr>
+            </table>
+            <div class="communication__message">
+                {{communication.message|markdown}}
+            </div>
+        </div>
+        {% endfor %}
     </div>
 </main>
 {% endblock %}

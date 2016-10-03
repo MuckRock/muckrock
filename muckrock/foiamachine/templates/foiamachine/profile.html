@@ -6,16 +6,35 @@
 <main class="profile">
     <header>
         <h2>Your Requests</h2>
-        <p><a href="{% host_url 'foi-create' host 'foiamachine' %}">Create request</a></p>
+        <p><a href="{% host_url 'foi-create' host 'foiamachine' %}" class="bold">Create request</a></p>
     </header>
-    <ul>
-        {% for foi in user.foiamachinerequest_set.all %}
-        <li><a href="{{foi.get_absolute_url}}">{{foi.title}}</a></li>
-        {% empty %}
-        <li class="empty">
-            <p class="bold">You have not created any public records requests. <a href="{% host_url 'foi-create' host 'foiamachine' %}">Create a new request</a></p>
-        </li>
-        {% endfor %}
-    </ul>
+    {% with user.foiamachinerequest_set.all as requests %}
+    {% if requests %}
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th class="small">Jurisdiction</th>
+                <th class="small">Agency</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for foi in requests %}
+            <tr>
+                <td><a href="{{foi.get_absolute_url}}">{{foi.title}}</a></td>
+                <td class="small"><a href="{{foi.jurisdiction.get_absolute_url}}">{{foi.jurisdiction}}</a></td>
+                {% if foi.agency %}
+                <td class="small"><a href="{{foi.agency.get_absolute_url}}">{{foi.agency}}</a></td>
+                {% else %}
+                <td class="small">None</td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="bold">You have not created any public records requests. <a href="{% host_url 'foi-create' host 'foiamachine' %}">Create a new request</a></p>
+    {% endif %}
+    {% endwith %}
 </main>
 {% endblock %}

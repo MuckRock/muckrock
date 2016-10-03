@@ -134,6 +134,7 @@ class TestFoiaMachineRequestCreateView(TestCase):
         eq_(response.status_code, 302, 'When successful the view should redirect to the request.')
         foi = models.FoiaMachineRequest.objects.first()
         eq_(response.url, foi.get_absolute_url())
+        ok_(foi.communications.count() == 1, 'A communication should be created.')
 
 
 class TestFoiaMachineRequestDetailView(TestCase):
@@ -341,3 +342,26 @@ class TestFoiaMachineRequestForm(TestCase):
             'agency': self.agency.id,
         })
         ok_(not form.is_valid())
+
+
+class TestFoiaMachineCommunication(TestCase):
+    """The FOIA Machine Communication should store information
+    about communications between users and agencies."""
+    def setUp(self):
+        self.foi = factories.FoiaMachineRequestFactory()
+        self.comm = factories.FoiaMachineCommunicationFactory(request=self.foi)
+
+    def test_create(self):
+        """A request, sender, and message should be required to create a request."""
+        comm = models.FoiaMachineCommunication(
+            request=self.foi,
+            sender=unicode(self.foi.user),
+            message='Lorem ipsum dolor su amit.'
+        )
+        ok_(comm)
+
+    def test_unicode(self):
+        """The string representation of a communication includes sender and receiver info."""
+        eq_(unicode(self.comm),
+            'Communication from %s to %s' % (self.comm.sender, self.comm.receiver))
+

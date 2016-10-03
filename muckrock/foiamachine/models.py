@@ -47,3 +47,27 @@ class FoiaMachineRequest(models.Model):
             'user_name': self.user.get_full_name()
         }
         return render_to_string(template, context=context)
+
+class FoiaMachineCommunication(models.Model):
+    """
+    A FOIA Machine Communication stores information about an exchange between a user and an agency.
+    It is based on the MuckRock existing FOIACommunication object, and also
+    loosely mimics the structure of an email.
+    """
+    request = models.ForeignKey(FoiaMachineRequest, related_name='communications')
+    sender = models.CharField(max_length=255)
+    receiver = models.CharField(max_length=255, blank=True)
+    message = models.TextField()
+    date = models.DateField(auto_now_add=True)
+    received = models.BooleanField(default=False)
+
+    def __unicode__(self):
+        return u'Communication from %s to %s' % (self.sender, self.receiver)
+
+    def get_absolute_url(self):
+        return reverse('comm-detail', host='foiamachine', kwargs={
+            'foi-slug': self.request.slug,
+            'foi-pk': self.request.pk,
+            'pk': self.pk,
+        })
+

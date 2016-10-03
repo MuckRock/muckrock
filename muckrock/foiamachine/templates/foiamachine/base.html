@@ -37,6 +37,24 @@
             a:visited {
                 color: blue;
             }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            th {
+                text-align: left;
+            }
+            td {
+                vertical-align: center;
+                padding: .25em;
+                border-top: 1px solid #ccc;
+            }
+            td.top {
+                vertical-align: top;
+            }
+            td p {
+                margin: 0;
+            }
             .bold {
                 font-weight: bold;
             }
@@ -55,6 +73,14 @@
                 display: flex;
                 justify-content: space-between;
                 align-items: flex-end;
+            }
+            .align-bottom {
+                display: flex;
+                align-items: flex-end;
+            }
+            .align-center {
+                display: flex;
+                align-items: center;
             }
             .button {
                 font-size: 1rem;
@@ -109,15 +135,12 @@
                 margin-top: 2rem;
                 border-top: 1px solid #ccc;
             }
-            .letter {
+            .communication__message {
                 padding: 1em 2em;
                 border: 1px solid #ccc;
                 font-family: "Georgia", serif;
                 background: #fff;
                 overflow: hidden;
-                user-select: all;
-                -webkit-user-select: all;
-                -mox-user-select: all;
             }
             .profile header {
                 display: flex;
