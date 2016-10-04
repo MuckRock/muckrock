@@ -270,3 +270,35 @@ class TestFoiaMachineCommunicationCreateView(TestCase):
         """The owner should be able to get the request."""
         response = http_get_response(self.url, self.view, self.foi.user, **self.kwargs)
         eq_(response.status_code, 200)
+
+
+class TestFoiaMachineCommunicationUpdateView(TestCase):
+    """The owner of the request should be able to update a communication on the request."""
+    def setUp(self):
+        self.comm = factories.FoiaMachineCommunicationFactory()
+        self.view = views.FoiaMachineCommunicationUpdateView.as_view()
+        self.kwargs = {
+            'foi_slug': self.comm.request.slug,
+            'foi_pk': self.comm.request.pk,
+            'pk': self.comm.pk,
+        }
+        self.url = reverse('comm-update', host='foiamachine', kwargs=self.kwargs)
+
+    def test_anonymous(self):
+        """Logged out users should be redirected to the login view."""
+        response = http_get_response(self.url, self.view, **self.kwargs)
+        eq_(response.status_code, 302)
+        eq_(response.url, (reverse('login', host='foiamachine') +
+            '?next=' + reverse('comm-update', host='foiamachine', kwargs=self.kwargs)))
+
+    def test_not_owner(self):
+        """Users who are not the owner should be redirected to the FOI detail view."""
+        not_owner = UserFactory()
+        response = http_get_response(self.url, self.view, not_owner, **self.kwargs)
+        eq_(response.status_code, 302)
+        eq_(response.url, self.comm.request.get_absolute_url())
+
+    def test_owner(self):
+        """The owner should be able to get the request."""
+        response = http_get_response(self.url, self.view, self.comm.request.user, **self.kwargs)
+        eq_(response.status_code, 200)

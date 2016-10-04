@@ -69,6 +69,9 @@ urlpatterns = patterns(
     url(r'^foi/(?P<foi_slug>[\w-]+)-(?P<foi_pk>\d+)/comms/create/$',
         views.FoiaMachineCommunicationCreateView.as_view(),
         name='comm-create'),
+    url(r'^foi/(?P<foi_slug>[\w-]+)-(?P<foi_pk>\d+)/comms/(?P<pk>\d+)/update/$',
+        views.FoiaMachineCommunicationUpdateView.as_view(),
+        name='comm-update'),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^__debug__/', include(debug_toolbar.urls)),
 )
