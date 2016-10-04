@@ -1,0 +1,13 @@
+{% extends 'foiamachine/base.html' %}
+
+{% block main %}
+<main>
+    <h1>Delete communication</h1>
+    <p>This action is permanent. Are you sure?</p>
+    <form method="post" class="form">
+        {% csrf_token %}
+        {% include 'lib/pattern/form.html' %}
+        <button type="submit" class="button">Delete communication</button>
+    </form>
+</main>
+{% endblock %}

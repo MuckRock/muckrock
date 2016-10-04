@@ -71,7 +71,7 @@
                         <td>{{communication.date|date:"F d, Y"}}</td>
                     </tr>
                 </table>
-                <p class="nomargin"><a href="{% host_url 'comm-update' foi_slug=object.slug foi_pk=object.pk pk=communication.pk host 'foiamachine' %}">Edit</a></p>
+                <p class="nomargin"><a href="{% host_url 'comm-update' foi_slug=object.slug foi_pk=object.pk pk=communication.pk host 'foiamachine' %}">Edit</a> &bull; <a href="{% host_url 'comm-delete' foi_slug=object.slug foi_pk=object.pk pk=communication.pk host 'foiamachine' %}">Delete</a></p>
             </header>
             <div class="communication__message">
                 {{communication.message|markdown}}

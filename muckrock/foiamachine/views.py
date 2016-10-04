@@ -174,7 +174,7 @@ class FoiaMachineCommunicationCreateView(CreateView):
 
 
 class FoiaMachineCommunicationUpdateView(UpdateView):
-    """Create a new communication on a request."""
+    """Update a communication on a request."""
     model = FoiaMachineCommunication
     form_class = FoiaMachineCommunicationForm
     template_name = 'foiamachine/comm/update.html'
@@ -191,7 +191,7 @@ class FoiaMachineCommunicationUpdateView(UpdateView):
         return _queryset.filter(request=self.foi)
 
     def dispatch(self, *args, **kwargs):
-        """Only the request's owner can add a new communication."""
+        """Only the request's owner can update a communication."""
         foi = self.get_foi(**kwargs)
         # Redirect logged out users to the login page
         if self.request.user.is_anonymous():
@@ -207,6 +207,39 @@ class FoiaMachineCommunicationUpdateView(UpdateView):
         initial = super(FoiaMachineCommunicationUpdateView, self).get_initial()
         initial['request'] = self.foi
         return initial
+
+    def get_success_url(self):
+        """Upon success, return to the request."""
+        return self.foi.get_absolute_url()
+
+
+class FoiaMachineCommunicationDeleteView(DeleteView):
+    """Delete a communication on a request."""
+    model = FoiaMachineCommunication
+    template_name = 'foiamachine/comm/delete.html'
+
+    def get_foi(self, **kwargs):
+        """Given a set of kwargs, return the FOI object for this view."""
+        foi_pk = kwargs.get('foi_pk')
+        self.foi = FoiaMachineRequest.objects.get(pk=foi_pk)
+        return self.foi
+
+    def get_queryset(self):
+        """Only include communications on the request in the queryset."""
+        _queryset = super(FoiaMachineCommunicationDeleteView, self).get_queryset()
+        return _queryset.filter(request=self.foi)
+
+    def dispatch(self, *args, **kwargs):
+        """Only the request's owner can delete a communication."""
+        foi = self.get_foi(**kwargs)
+        # Redirect logged out users to the login page
+        if self.request.user.is_anonymous():
+            return redirect(reverse('login', host='foiamachine') +
+                '?next=' + reverse('comm-delete', host='foiamachine', kwargs=kwargs))
+        # Redirect non-owner users to the detail page
+        if self.request.user != foi.user:
+            return redirect(self.foi.get_absolute_url())
+        return super(FoiaMachineCommunicationDeleteView, self).dispatch(*args, **kwargs)
 
     def get_success_url(self):
         """Upon success, return to the request."""

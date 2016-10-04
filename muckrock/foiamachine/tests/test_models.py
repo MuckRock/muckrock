@@ -61,7 +61,7 @@ class TestFoiaMachineRequest(TestCase):
             'document_request': self.foi.request_language,
             'user_name': self.foi.user.get_full_name()
         }
-        expected_letter = render_to_string(template, context=context)
+        expected_letter = render_to_string(template, context=context).strip()
         actual_letter = self.foi.generate_letter()
         eq_(actual_letter, expected_letter)
 
