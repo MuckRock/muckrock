@@ -46,7 +46,7 @@ class FoiaMachineRequest(models.Model):
             'document_request': self.request_language,
             'user_name': self.user.get_full_name()
         }
-        return render_to_string(template, context=context)
+        return render_to_string(template, context=context).strip()
 
 class FoiaMachineCommunication(models.Model):
     """
