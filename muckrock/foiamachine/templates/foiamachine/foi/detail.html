@@ -14,15 +14,17 @@
     </header>
     {% with object.agency as agency %}
     {% if agency %}
-    <div class="agency">
+    <div class="agency margin-bottom">
         <h2>Contacts</h2>
-        <table>
+        <table class="ruled">
             <tbody>
                 {% if agency.email %}
+                {% with object.communications.first as first_comm %}
                 <tr>
                     <td class="bold top">Email</td>
-                    <td><a href="mailto:{{agency.email}}?subject={{object.title}}&body={{object.generate_letter|urlencode}}">{{agency.email}}</a></td>
+                    <td class="select-all"><a href="mailto:{{agency.email}}?subject={{object.title}}&body={{first_comm.message|urlencode}}">{{agency.email}}</a></td>
                 </tr>
+                {% endwith %}
                 {% endif %}
                 {% if agency.phone %}
                 <tr>
@@ -42,8 +44,8 @@
     {% endif %}
     {% endwith %}
     <div class="communications">
-        <header class="space-between align-center">
-            <h2>Communications</h2>
+        <header class="space-between align-center margin-bottom">
+            <h2 class="nomargin">Communications</h2>
             <a href="{% host_url 'comm-create' foi_slug=object.slug foi_pk=object.pk host 'foiamachine' %}">Add a communication</a>
         </header>
         {% for communication in object.communications.all %}
@@ -52,22 +54,25 @@
         {% else %}
         <div class="sent communication">
         {% endif %}
-            <table>
-                <tr>
-                    <td class="bold">From</td>
-                    <td>{{communication.sender}}</td>
-                </tr>
-                {% if communication.receiver %}
-                <tr>
-                    <td class="bold">To</td>
-                    <td>{{communication.receiver}}</td>
-                </tr>
-                {% endif %}
-                <tr>
-                    <td class="bold">Date</td>
-                    <td>{{communication.date|date:"F d, Y"}}</td>
-                </tr>
-            </table>
+            <header class="small space-between align-top">
+                <table>
+                    {% if communication.receiver %}
+                    <tr>
+                        <td class="bold">To</td>
+                        <td>{{communication.receiver}}</td>
+                    </tr>
+                    {% endif %}
+                    <tr>
+                        <td class="bold">From</td>
+                        <td>{{communication.sender}}</td>
+                    </tr>
+                    <tr>
+                        <td class="bold">Date</td>
+                        <td>{{communication.date|date:"F d, Y"}}</td>
+                    </tr>
+                </table>
+                <p class="nomargin"><a href="{% host_url 'comm-update' foi_slug=object.slug foi_pk=object.pk pk=communication.pk host 'foiamachine' %}">Edit</a></p>
+            </header>
             <div class="communication__message">
                 {{communication.message|markdown}}
             </div>

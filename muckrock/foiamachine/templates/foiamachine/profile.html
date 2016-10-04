@@ -4,13 +4,13 @@
 
 {% block main %}
 <main class="profile">
-    <header>
+    <header class="space-between align-baseline">
         <h2>Your Requests</h2>
-        <p><a href="{% host_url 'foi-create' host 'foiamachine' %}" class="bold">Create request</a></p>
+        <p class="margin-bottom"><a href="{% host_url 'foi-create' host 'foiamachine' %}" class="bold">Create request</a></p>
     </header>
     {% with user.foiamachinerequest_set.all as requests %}
     {% if requests %}
-    <table>
+    <table class="ruled">
         <thead>
             <tr>
                 <th>Title</th>

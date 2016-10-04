@@ -15,8 +15,24 @@
                 box-sizing: border-box;
             }
             html {
-                font-size: 20px;
+                font-size: 14px;
             }
+            @media (min-width: 400px) {
+                html {
+                    font-size: 16px;
+                }
+            }
+            @media (min-width: 600px) {
+                html {
+                    font-size: 18px;
+                }
+            }
+            @media (min-width: 800px) {
+                html {
+                    font-size: 20px;
+                }
+            }
+
             body {
                 margin: 0;
                 padding: 0;
@@ -28,7 +44,7 @@
                     'segoe ui', arial,
                     sans-serif;
                 text-rendering: optimizeLegibility;
-                line-height: 1.4;
+                line-height: 1.6;
                 background: #f8f8f8;
                 color: #202020;
             }
@@ -50,6 +66,8 @@
             td {
                 vertical-align: center;
                 padding: .25em;
+            }
+            table.ruled td {
                 border-top: 1px solid #ccc;
             }
             td.top {
@@ -68,14 +86,23 @@
                 list-style: none;
                 padding-left: 0;
             }
+            .nomargin {
+                margin: 0;
+            }
+            .margin-bottom {
+                margin-bottom: 1em;
+            }
             .inline li {
                 display: inline-block;
-                margin-left: 1em;
+                margin-right: 1em;
+            }
+            .inline li:last-child {
+                margin-right: 0;
             }
             .space-between {
                 display: flex;
+                flex-wrap: wrap;
                 justify-content: space-between;
-                align-items: flex-end;
             }
             .align-bottom {
                 display: flex;
@@ -84,6 +111,19 @@
             .align-center {
                 display: flex;
                 align-items: center;
+            }
+            .align-top {
+                display: flex;
+                align-items: flex-start;
+            }
+            .align-baseline {
+                display: flex;
+                align-items: baseline;
+            }
+            .select-all {
+                -webkit-user-select: all;
+                -moz-user-select: all;
+                user-select: all;
             }
             .button {
                 font-size: 1rem;
@@ -144,25 +184,28 @@
                 padding: 0 1rem;
             }
             .topnav {
-                display: flex;
-                justify-content: space-between;
                 border-bottom: 1px solid #ccc;
             }
             .bottomnav {
                 margin-top: 2rem;
                 border-top: 1px solid #ccc;
             }
-            .communication__message {
-                padding: 1em 2em;
+            .communication {
+                margin-bottom: 1em;
                 border: 1px solid #ccc;
-                font-family: "Georgia", serif;
-                background: #fff;
-                overflow: hidden;
+                background: #ffffff;
             }
-            .profile header {
-                display: flex;
-                justify-content: space-between;
-                align-items: baseline;
+            .communication table {
+                width: auto;
+            }
+            .communication header {
+                padding: 1em;
+                border-bottom: 1px solid #ccc;
+            }
+            .communication__message {
+                overflow: hidden;
+                padding: 0 1em;
+                font-family: "Georgia", serif;
             }
             .autocomplete-light-widget {
                 width: 100%;
@@ -191,7 +234,7 @@
     {% endblock head %}
     {% block body %}
     <body>
-        <nav class="topnav">
+        <nav class="topnav space-between">
             <p class="bold"><a href="{% host_url 'index' host 'foiamachine' %}">FOIA Machine</a> <span class="beta badge">Beta</span></p>
             {% if request.user.is_authenticated %}
             <ul class="nostyle inline">
