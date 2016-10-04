@@ -150,6 +150,12 @@ class FoiaMachineCommunicationCreateView(CreateView):
             return redirect(self.foi.get_absolute_url())
         return super(FoiaMachineCommunicationCreateView, self).dispatch(*args, **kwargs)
 
+    def get_initial(self):
+        """Adds foi to initial form data."""
+        initial = super(FoiaMachineCommunicationCreateView, self).get_initial()
+        initial['request'] = self.foi
+        return initial
+
     def get_success_url(self):
         """Upon success, return to the request."""
         return self.foi.get_absolute_url()

@@ -34,4 +34,12 @@ class FoiaMachineCommunicationForm(forms.ModelForm):
     """The FOIA Machine Communication form allows for creating and updating communications."""
     class Meta:
         model = FoiaMachineCommunication
-        fields = ['sender', 'receiver', 'message', 'received',]
+        fields = ['request', 'sender', 'receiver', 'message', 'received',]
+        widgets = {
+            'request': forms.HiddenInput(),
+        }
+        help_texts = {
+            'sender': 'What is the name or email of who sent the message?',
+            'receiver': 'What is the name or email of who the message was sent to?',
+            'received': 'Was this message sent to you?'
+        }
