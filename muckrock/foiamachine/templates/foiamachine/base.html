@@ -14,6 +14,9 @@
             * {
                 box-sizing: border-box;
             }
+            html {
+                font-size: 20px;
+            }
             body {
                 margin: 0;
                 padding: 0;
@@ -59,7 +62,7 @@
                 font-weight: bold;
             }
             .small {
-                font-size: .75rem;
+                font-size: .8rem;
             }
             .nostyle {
                 list-style: none;
@@ -97,7 +100,17 @@
                 padding: .25em;
             }
             textarea {
+                display: block;
                 resize: vertical;
+            }
+            input[type="checkbox"], input[type="radio"] {
+                width: auto;
+                float: left;
+                margin: .1em .5em 0 0;
+                line-height: 1em;
+            }
+            .field {
+                margin-bottom: 1em;
             }
             .field.disabled {
                 opacity: .5;
@@ -110,7 +123,11 @@
             }
             .field .required {
                 color: #666;
-                font-size: .75rem;
+                font-size: .8rem;
+            }
+            .field .help-text {
+                margin: .25em 0 0;
+                font-size: .8rem;
             }
             .field .errorlist {
                 display: inline-block;
@@ -118,7 +135,7 @@
                 padding: 0;
                 list-style: none;
                 color: red;
-                font-size: .75rem;
+                font-size: .8rem;
             }
             .topnav, .bottomnav {
                 width: 100%;
