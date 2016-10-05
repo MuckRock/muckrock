@@ -4,6 +4,7 @@ Tests for FOIA Machine views.
 
 from django.contrib import auth
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import Http404
 from django.template.loader import render_to_string
 from django.test import TestCase
 
@@ -146,10 +147,74 @@ class TestFoiaMachineRequestDetailView(TestCase):
         }
         self.url = reverse('foi-detail', host='foiamachine', kwargs=self.kwargs)
 
-    def test_get(self):
-        """Anyone can see the request page."""
-        response = http_get_response(self.url, self.view, **self.kwargs)
+    def test_owner_get(self):
+        """Only the owner can see the post without a share url."""
+        response = http_get_response(self.url, self.view, self.foi.user, **self.kwargs)
         eq_(response.status_code, 200)
+
+    def test_shared_get(self):
+        """Anyone else can see the request if it has the share url."""
+        sharing_code = self.foi.generate_sharing_code()
+        sharing_url = self.url + '?sharing=' + sharing_code
+        response = http_get_response(sharing_url, self.view, **self.kwargs)
+        eq_(response.status_code, 200)
+
+    @raises(Http404)
+    def test_deny_others(self):
+        """Anyone else should not be able to see the request."""
+        http_get_response(self.url, self.view, **self.kwargs)
+
+
+class TestFoiaMachineRequestShareView(TestCase):
+    """Only the owner may enable or disable the sharing on a request."""
+    def setUp(self):
+        self.foi = factories.FoiaMachineRequestFactory()
+        self.view = views.FoiaMachineRequestShareView.as_view()
+        self.kwargs = {
+            'slug': self.foi.slug,
+            'pk': self.foi.pk,
+        }
+        self.url = reverse('foi-share', host='foiamachine', kwargs=self.kwargs)
+
+    def test_anonymous(self):
+        """Logged out users should be redirected to the login view."""
+        response = http_get_response(self.url, self.view, **self.kwargs)
+        eq_(response.status_code, 302)
+        eq_(response.url, (reverse('login', host='foiamachine') +
+            '?next=' + reverse('foi-share', host='foiamachine', kwargs=self.kwargs)))
+
+    def test_not_owner(self):
+        """Users who are not the owner should be redirected to the FOI detail view."""
+        not_owner = UserFactory()
+        response = http_get_response(self.url, self.view, not_owner, **self.kwargs)
+        eq_(response.status_code, 302)
+        eq_(response.url, self.foi.get_absolute_url())
+
+    def test_owner(self):
+        """Getting the share view should just redirect to the request detail view."""
+        response = http_get_response(self.url, self.view, self.foi.user, **self.kwargs)
+        eq_(response.status_code, 302)
+        eq_(response.url, self.foi.get_absolute_url())
+
+    def test_post_enable(self):
+        """Posting enable should turn on link sharing."""
+        data = {
+            'action': 'enable'
+        }
+        http_post_response(self.url, self.view, data, self.foi.user, **self.kwargs)
+        self.foi.refresh_from_db()
+        ok_(self.foi.sharing_code)
+
+    def test_post_enable(self):
+        """Posting enable should turn on link sharing."""
+        self.foi.generate_sharing_code()
+        ok_(self.foi.sharing_code)
+        data = {
+            'action': 'disable'
+        }
+        http_post_response(self.url, self.view, data, self.foi.user, **self.kwargs)
+        self.foi.refresh_from_db()
+        ok_(not self.foi.sharing_code)
 
 
 class TestFoiaMachineRequestUpdateView(TestCase):

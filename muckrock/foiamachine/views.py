@@ -4,8 +4,10 @@ FOIAMachine views
 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
+from django.http import Http404
 from django.shortcuts import redirect
-from django.views.generic import TemplateView, FormView, CreateView, DetailView, UpdateView, DeleteView
+from django.views.generic import TemplateView, FormView, CreateView, DetailView, UpdateView, DeleteView, View
+from django.views.generic.detail import SingleObjectMixin
 from django.utils.decorators import method_decorator
 
 from django_hosts.resolvers import reverse
@@ -96,6 +98,15 @@ class FoiaMachineRequestDetailView(DetailView):
     """Show the detail of a FOIA Machine request."""
     model = FoiaMachineRequest
     template_name = 'foiamachine/foi/detail.html'
+
+    def dispatch(self, *args, **kwargs):
+        """Only the request's owner may update it."""
+        foi = self.get_object()
+        if self.request.user != foi.user:
+            sharing_code = self.request.GET.get('sharing')
+            if sharing_code != foi.sharing_code:
+                raise Http404()
+        return super(FoiaMachineRequestDetailView, self).dispatch(*args, **kwargs)
 
 
 class FoiaMachineRequestUpdateView(UpdateView):
@@ -244,3 +255,35 @@ class FoiaMachineCommunicationDeleteView(DeleteView):
     def get_success_url(self):
         """Upon success, return to the request."""
         return self.foi.get_absolute_url()
+
+
+class FoiaMachineRequestShareView(SingleObjectMixin, View):
+    """Allows a request owner to enable or disable request sharing."""
+    model = FoiaMachineRequest
+
+    def dispatch(self, *args, **kwargs):
+        """Only the request's owner may change the request sharing preference."""
+        foi = self.get_object()
+        # Redirect logged out users to the login page
+        if self.request.user.is_anonymous():
+            return redirect(reverse('login', host='foiamachine') +
+                '?next=' + reverse('foi-share', host='foiamachine', kwargs=kwargs))
+        # Redirect non-owner users to the detail page
+        if self.request.user != foi.user:
+            return redirect(reverse('foi-detail', host='foiamachine', kwargs=kwargs))
+        return super(FoiaMachineRequestShareView, self).dispatch(*args, **kwargs)
+
+    def get(self, *args, **kwargs):
+        """Just redirect to the request detail page."""
+        return redirect(reverse('foi-detail', host='foiamachine', kwargs=kwargs))
+
+    def post(self, *args, **kwargs):
+        """Generate or delete the sharing code based on the action."""
+        foi = self.get_object()
+        action = self.request.POST.get('action')
+        if action == 'enable':
+            foi.generate_sharing_code()
+        elif action == 'disable':
+            foi.sharing_code = ''
+            foi.save()
+        return redirect(reverse('foi-detail', host='foiamachine', kwargs=kwargs))
