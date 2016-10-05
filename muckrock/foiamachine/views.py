@@ -68,7 +68,8 @@ class Profile(TemplateView):
         """Gets context data for the profile."""
         context = super(Profile, self).get_context_data(**kwargs)
         requests = (FoiaMachineRequest.objects.filter(user=self.request.user)
-                                              .order_by('-date_created'))
+                                              .order_by('-date_created')
+                                              .select_related('jurisdiction', 'agency'))
         context.update({
             'requests': requests,
         })
@@ -307,4 +308,4 @@ class FoiaMachineRequestShareView(SingleObjectMixin, View):
         elif action == 'disable':
             foi.sharing_code = ''
             foi.save()
-        return redirect(reverse('foi-detail', host='foiamachine', kwargs=kwargs))
+        return redirect(reverse('foi-detail', host='foiamachine', kwargs=kwargs) + '#share')

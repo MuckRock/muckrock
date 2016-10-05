@@ -11,7 +11,7 @@
             <p>{% if object.agency %}<a href="{{object.agency.get_absolute_url}}">{{object.agency}}</a> &bull; {% endif %}<a href="{{object.jurisdiction.get_absolute_url}}">{{object.jurisdiction}}</a></p>
         </div>
         {% if request.user == object.user %}
-        <p><a href="{% host_url 'foi-update' slug=object.slug pk=object.pk host 'foiamachine'%}">Edit</a> &bull; <a href="{% host_url 'foi-delete' slug=object.slug pk=object.pk host 'foiamachine'%}">Delete</a></p>
+        <p><a href="#share">Share</a> &bull; <a href="{% host_url 'foi-update' slug=object.slug pk=object.pk host 'foiamachine'%}">Edit</a> &bull; <a href="{% host_url 'foi-delete' slug=object.slug pk=object.pk host 'foiamachine'%}">Delete</a></p>
         {% endif %}
     </header>
     {% if object.sent_communications.exists %}
@@ -31,32 +31,6 @@
                 <td>{{object.date_due}}</td>
             </tr>
         </table>
-    </div>
-    {% endif %}
-    {% if request.user == object.user %}
-    <div class="margin-bottom" id="sharing">
-        <header class="space-between align-bottom margin-bottom">
-            <h2 class="nomargin">
-                Sharing
-                {% if object.sharing_code %}
-                <span class="red badge">On</span>
-                {% else %}
-                <span class="badge">Off</span>
-                {% endif %}
-            </h2>
-            <form method="post" action="{% host_url 'foi-share' slug=object.slug pk=object.pk host 'foiamachine'%}">
-                {% csrf_token %}
-                {% if object.sharing_code %}
-                <button type="submit" class="button" name="action" value="disable">Disable link sharing</button>
-                {% else %}
-                <button type="submit" class="button" name="action" value="enable">Enable link sharing</button>
-                {% endif %}
-            </form>
-        </header>
-        {% if object.sharing_code %}
-        <textarea readonly class="select-all" style="resize:none;" rows="1">{{request.get_host}}{{request.get_full_path}}?sharing={{object.sharing_code}}</textarea>
-        {% endif %}
-        <p>All of your FOIA Machine requests are private, except for a sharing link. The link contains a code that is changed every time link sharing is enabled.</p>
     </div>
     {% endif %}
     {% with object.agency as agency %}
@@ -130,5 +104,31 @@
         </div>
         {% endfor %}
     </div>
+    {% if request.user == object.user %}
+    <div class="margin-bottom" id="share">
+        <header class="space-between align-bottom margin-bottom">
+            <h2 class="nomargin">
+                Sharing
+                {% if object.sharing_code %}
+                <span class="red badge">On</span>
+                {% else %}
+                <span class="badge">Off</span>
+                {% endif %}
+            </h2>
+            <form method="post" action="{% host_url 'foi-share' slug=object.slug pk=object.pk host 'foiamachine'%}">
+                {% csrf_token %}
+                {% if object.sharing_code %}
+                <button type="submit" class="button" name="action" value="disable">Disable link sharing</button>
+                {% else %}
+                <button type="submit" class="button" name="action" value="enable">Enable link sharing</button>
+                {% endif %}
+            </form>
+        </header>
+        {% if object.sharing_code %}
+        <textarea readonly class="select-all" style="resize:none;" rows="1">{{request.get_host}}{{request.get_full_path}}?sharing={{object.sharing_code}}</textarea>
+        {% endif %}
+        <p class="small">All of your FOIA Machine requests are private, except for when you enable link sharing. The link contains a special code that is changed every time link sharing is enabled. Every time link sharing is disabled, the code is deleted.</p>
+    </div>
+    {% endif %}
 </main>
 {% endblock %}
