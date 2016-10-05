@@ -10,6 +10,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.text import slugify
 
+from datetime import timedelta
 from django_hosts.resolvers import reverse
 
 from muckrock.utils import generate_key
@@ -57,6 +58,50 @@ class FoiaMachineRequest(models.Model):
         self.sharing_code = generate_key(12)
         self.save()
         return self.sharing_code
+
+    @property
+    def sent_communications(self):
+        """Return all communications sent by the user."""
+        return self.communications.filter(received=False).order_by('date')
+
+    @property
+    def date_submitted(self):
+        """The submission date is the date of the first communication."""
+        first_comm = self.sent_communications.first()
+        if first_comm:
+            return first_comm.date
+        else:
+            raise AttributeError('No communications to track dates on.')
+
+    @property
+    def date_due(self):
+        """Date due is the date of the last communication plus the jurisdiction response time."""
+        last_comm = self.sent_communications.last()
+        response_time = self.jurisdiction.get_days()
+        if last_comm:
+            return last_comm.date + timedelta(response_time)
+        else:
+            raise AttributeError('No communications to track dates on.')
+
+    @property
+    def days_until_due(self):
+        """Compare the date of the last sent communication to the jurisdiction's response time."""
+        try:
+            # this subtraction produces a timedelta object, so we need to get the days from it
+            days_until_due = self.date_due - timezone.now().date()
+            return days_until_due.days
+        except AttributeError:
+            return 0
+
+    @property
+    def is_overdue(self):
+        """A request is overdue if its days_until_due is negative."""
+        return self.days_until_due < 0
+
+    @property
+    def days_overdue(self):
+        """Days overdue is the inverse of days_until_due."""
+        return -1 * self.days_until_due
 
 
 class FoiaMachineCommunication(models.Model):

@@ -14,8 +14,27 @@
         <p><a href="{% host_url 'foi-update' slug=object.slug pk=object.pk host 'foiamachine'%}">Edit</a> &bull; <a href="{% host_url 'foi-delete' slug=object.slug pk=object.pk host 'foiamachine'%}">Delete</a></p>
         {% endif %}
     </header>
+    {% if object.sent_communications.exists %}
+    <div class="margin-bottom" id="dates">
+        {% if object.is_overdue %}
+        <p class="bold">This request is {{object.days_overdue}} day{{object.days_overdue|pluralize}} overdue.</p>
+        {% else %}
+        <p class="bold">This request is due in {{object.days_until_due}} day{{object.days_until_due|pluralize}}.</p>
+        {% endif %}
+        <table class="ruled">
+            <tr>
+                <td class="bold">Date Submitted</td>
+                <td>{{object.date_submitted}}</td>
+            </tr>
+            <tr>
+                <td class="bold">Date Due</td>
+                <td>{{object.date_due}}</td>
+            </tr>
+        </table>
+    </div>
+    {% endif %}
     {% if request.user == object.user %}
-    <div class="sharing margin-bottom">
+    <div class="margin-bottom" id="sharing">
         <header class="space-between align-bottom margin-bottom">
             <h2 class="nomargin">
                 Sharing
@@ -42,7 +61,7 @@
     {% endif %}
     {% with object.agency as agency %}
     {% if agency %}
-    <div class="agency margin-bottom">
+    <div class="margin-bottom" id="agency">
         <h2>Contacts</h2>
         <table class="ruled">
             <tbody>
@@ -71,7 +90,7 @@
     </div>
     {% endif %}
     {% endwith %}
-    <div class="communications">
+    <div id="communications">
         <header class="space-between align-center margin-bottom">
             <h2 class="nomargin">Communications</h2>
             {% if request.user == object.user %}

@@ -4,9 +4,11 @@ Tests for FOIA Machine models.
 
 from django.template.loader import render_to_string
 from django.test import TestCase
+from django.utils import timezone
 
+from datetime import timedelta
 from django_hosts.resolvers import reverse
-from nose.tools import eq_, ok_
+from nose.tools import eq_, ok_, raises
 
 from muckrock.factories import UserFactory, AgencyFactory
 from muckrock.foiamachine import factories, models
@@ -68,6 +70,51 @@ class TestFoiaMachineRequest(TestCase):
     def test_generate_sharing_code(self):
         """The request should be able to generate a code for privately sharing urls."""
         ok_(self.foi.generate_sharing_code())
+
+    def test_date_submitted(self):
+        """The date submitted should be the first communication date or None."""
+        comm = factories.FoiaMachineCommunicationFactory(request=self.foi)
+        eq_(self.foi.date_submitted, comm.date.date())
+
+    def test_date_due(self):
+        """The date due should be the date submitted plus the jurisdiction's response time."""
+        comm = factories.FoiaMachineCommunicationFactory(request=self.foi)
+        expected_date_due = comm.date.date() + timedelta(self.foi.jurisdiction.get_days())
+        eq_(self.foi.date_due, expected_date_due)
+
+    @raises(AttributeError)
+    def test_date_submitted_no_comms(self):
+        """A request with no sent communications should raise an error."""
+        self.foi.date_submitted
+
+    @raises(AttributeError)
+    def test_date_due_no_comms(self):
+        """A request with no sent communications should raise an error."""
+        self.foi.date_due
+
+    def test_days_until_due(self):
+        """The days until due should compare the date due to today's date."""
+        comm = factories.FoiaMachineCommunicationFactory(request=self.foi)
+        eq_(self.foi.days_until_due, (self.foi.date_due - timezone.now().date()).days)
+        # If there is no communication, the default should be 0
+        comm.delete()
+        eq_(self.foi.days_until_due, 0)
+
+    def test_is_overdue(self):
+        """The request should be overdue if days_until_due is negative."""
+        overdue_date = timezone.now().date() - timedelta(self.foi.jurisdiction.get_days() + 10)
+        comm = factories.FoiaMachineCommunicationFactory(request=self.foi, date=overdue_date)
+        ok_(self.foi.is_overdue)
+        # Now let's make it not overdue
+        comm.date = timezone.now().date()
+        comm.save()
+        ok_(not self.foi.is_overdue)
+
+    def test_days_overdue(self):
+        """Days overdue should just be the inverse of days_until_due."""
+        overdue_date = timezone.now().date() - timedelta(self.foi.jurisdiction.get_days() + 10)
+        comm = factories.FoiaMachineCommunicationFactory(request=self.foi, date=overdue_date)
+        eq_(self.foi.days_overdue, self.foi.days_until_due * -1)
 
 
 class TestFoiaMachineCommunication(TestCase):
