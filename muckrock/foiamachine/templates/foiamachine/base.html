@@ -49,7 +49,7 @@
                 color: #202020;
             }
             main {
-                max-width: 40em;
+                max-width: 40rem;
                 margin: 0 auto;
                 padding: 0 1em;
             }
@@ -198,12 +198,12 @@
             }
             .topnav, .bottomnav {
                 width: 100%;
-                max-width: 40rem;
                 margin: 0 auto;
                 padding: 0 1rem;
             }
             .topnav {
                 border-bottom: 1px solid #ccc;
+                background: #fff;
             }
             .bottomnav {
                 margin-top: 2rem;
@@ -253,32 +253,36 @@
     {% endblock head %}
     {% block body %}
     <body>
-        <nav class="topnav space-between">
-            <p class="bold"><a href="{% host_url 'index' host 'foiamachine' %}">FOIA Machine</a> <span class="badge">Beta</span></p>
-            {% if request.user.is_authenticated %}
-            <ul class="nostyle inline">
-                <li class="bold"><a href="{% host_url 'profile' host 'foiamachine' %}">{{user}}</a></li>
-                <li class="small"><a href="{% host_url 'logout' host 'foiamachine' %}">Log out</a></li>
-            </ul>
-            {% else %}
-            <ul class="nostyle inline">
-                <li><a href="{% host_url 'signup' host 'foiamachine' %}">Sign up</a></li>
-                <li><a href="{% host_url 'login' host 'foiamachine' %}">Log in</a></li>
-            </ul>
-            {% endif %}
+        <nav class="topnav">
+            <main class="space-between">
+                <p class="bold"><a href="{% host_url 'index' host 'foiamachine' %}">FOIA Machine</a> <span class="badge">Beta</span></p>
+                {% if request.user.is_authenticated %}
+                <ul class="nostyle inline">
+                    <li class="bold"><a href="{% host_url 'profile' host 'foiamachine' %}">{{user}}</a></li>
+                    <li class="small"><a href="{% host_url 'logout' host 'foiamachine' %}">Log out</a></li>
+                </ul>
+                {% else %}
+                <ul class="nostyle inline">
+                    <li><a href="{% host_url 'signup' host 'foiamachine' %}">Sign up</a></li>
+                    <li><a href="{% host_url 'login' host 'foiamachine' %}">Log in</a></li>
+                </ul>
+                {% endif %}
+            </main>
         </nav>
         {% block main %}
         <main></main>
         {% endblock main %}
         <nav class="bottomnav small">
-            <ul class="nostyle inline">
-                <li class="bold"><a href="{% host_url 'index' host 'foiamachine' %}">FOIA Machine</a> <span class="badge">Beta</span></li>
-                <li><a href="/about">About</a></li>
-                <li><a href="/tos">Terms of Service</a></li>
-                <li><a href="/privacy">Privacy Policy</a></li>
-                <li><a href="/feedback">Feedback</a></li>
-            </ul>
-            <p>&copy; MuckRock Foundation, Inc. {% now "Y" %}</p>
+            <main>
+                <ul class="nostyle inline">
+                    <li class="bold"><a href="{% host_url 'index' host 'foiamachine' %}">FOIA Machine</a> <span class="badge">Beta</span></li>
+                    <li><a href="/about">About</a></li>
+                    <li><a href="/tos">Terms of Service</a></li>
+                    <li><a href="/privacy">Privacy Policy</a></li>
+                    <li><a href="/feedback">Feedback</a></li>
+                </ul>
+                <p>&copy; MuckRock Foundation, Inc. {% now "Y" %}</p>
+            </main>
         </nav>
         <!-- Scripts -->
         {% block scripts %}
