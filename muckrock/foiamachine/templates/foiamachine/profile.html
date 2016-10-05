@@ -8,11 +8,15 @@
         <h2>Your Requests</h2>
         <p class="margin-bottom"><a href="{% host_url 'foi-create' host 'foiamachine' %}" class="bold">Create request</a></p>
     </header>
-    {% with user.foiamachinerequest_set.all as requests %}
     {% if requests %}
+    <form method="post" id="request-manager">
+        {% csrf_token %}
+        <button class="button" type="submit" name="action" value="delete">Delete</button>
+    </form>
     <table class="ruled">
         <thead>
             <tr>
+                <th><input type="checkbox" form="request-manager" /></th>
                 <th>Title</th>
                 <th class="small">Jurisdiction</th>
                 <th class="small">Agency</th>
@@ -21,6 +25,7 @@
         <tbody>
             {% for foi in requests %}
             <tr>
+                <td><input type="checkbox" form="request-manager" name="request" value="{{foi.id}}"/></th>
                 <td><a href="{{foi.get_absolute_url}}">{{foi.title}}</a></td>
                 <td class="small"><a href="{{foi.jurisdiction.get_absolute_url}}">{{foi.jurisdiction}}</a></td>
                 {% if foi.agency %}
@@ -33,8 +38,62 @@
         </tbody>
     </table>
     {% else %}
-    <p class="bold">You have not created any public records requests. <a href="{% host_url 'foi-create' host 'foiamachine' %}">Create a new request</a></p>
+    <p class="bold">You have not created any public records requests.</p>
     {% endif %}
-    {% endwith %}
 </main>
+{% endblock %}
+
+{% block scripts %}
+{{block.super}}
+<script type="text/javascript">
+var toolbar = $('#request-manager :button');
+toolbar.attr('disabled', true);
+$('th input:checkbox').change(function(){
+    var table = $(this).closest('table');
+    var headerCheckbox = $(this);
+    var bodyCheckboxes = $(table).find('td input:checkbox');
+    var checked = this.checked;
+    bodyCheckboxes.each(function(){
+        this.checked = checked;
+    });
+    if (checked) {
+        toolbar.attr('disabled', false);
+    } else {
+        toolbar.attr('disabled', true);
+    }
+});
+$('td input:checkbox').change(function(){
+    var table = $(this).closest('table');
+    var headerCheckbox = $(table).find('th input:checkbox');
+    var bodyCheckboxes = $(table).find('td input:checkbox');
+    var checkedBoxes = bodyCheckboxes.filter(':checked');
+    if (checkedBoxes.length == bodyCheckboxes.length) {
+        headerCheckbox[0].indeterminate = false;
+        headerCheckbox[0].checked = true;
+    } else {
+        headerCheckbox[0].indeterminate = true;
+    }
+    if (checkedBoxes.length == 0) {
+        headerCheckbox[0].indeterminate = false;
+        headerCheckbox[0].checked = false;
+        toolbar.attr('disabled', true);
+    } else {
+        toolbar.attr('disabled', false);
+    }
+});
+/*
+    checkboxes.change(function() {
+        var oppositeCheckboxes = $(this).filter(function(index, element){
+            return element.checked != checked
+        });
+        console.log(oppositeCheckboxes);
+        if (oppositeCheckboxes.length > 0) {
+            headerCheckbox.indeterminate = true;
+        } else {
+            headerCheckbox.indeterminate = false;
+        }
+    });
+});
+*/
+</script>
 {% endblock %}
