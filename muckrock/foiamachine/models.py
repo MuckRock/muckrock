@@ -24,6 +24,7 @@ class FoiaMachineRequest(models.Model):
     user = models.ForeignKey(User)
     title = models.CharField(max_length=255, db_index=True)
     slug = models.SlugField(max_length=255)
+    date_created = models.DateTimeField(auto_now_add=True)
     request_language = models.TextField()
     jurisdiction = models.ForeignKey('jurisdiction.Jurisdiction')
     agency = models.ForeignKey('agency.Agency', blank=True, null=True)
