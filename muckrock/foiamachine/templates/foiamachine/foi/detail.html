@@ -17,7 +17,7 @@
     {% if object.sent_communications.exists %}
     <div class="margin-bottom" id="dates">
         {% if object.is_overdue %}
-        <p class="bold">This request is {{object.days_overdue}} day{{object.days_overdue|pluralize}} overdue.</p>
+        <p class="bold red">This request is {{object.days_overdue}} day{{object.days_overdue|pluralize}} overdue.</p>
         {% else %}
         <p class="bold">This request is due in {{object.days_until_due}} day{{object.days_until_due|pluralize}}.</p>
         {% endif %}
@@ -39,7 +39,7 @@
             <h2 class="nomargin">
                 Sharing
                 {% if object.sharing_code %}
-                <span class="blue badge">On</span>
+                <span class="red badge">On</span>
                 {% else %}
                 <span class="badge">Off</span>
                 {% endif %}

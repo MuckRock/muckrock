@@ -62,6 +62,7 @@
             }
             th {
                 text-align: left;
+                padding: .25em;
             }
             td {
                 vertical-align: center;
@@ -69,6 +70,7 @@
             }
             table.ruled td {
                 border-top: 1px solid #ccc;
+                border-bottom: 1px solid #ccc;
             }
             td.top {
                 vertical-align: top;
@@ -125,6 +127,9 @@
                 -moz-user-select: all;
                 user-select: all;
             }
+            .red {
+                color: red;
+            }
             .button {
                 font-size: 1rem;
                 line-height: 1.4;
@@ -135,12 +140,9 @@
                 padding: .25em .5em;
                 border-radius: 4px;
                 font-weight: bold;
-                font-size: .8rem;
+                font-size: .6em;
                 background: #666;
                 color: #fff;
-            }
-            .green.badge {
-                background: green;
             }
             .red.badge {
                 background: red;
@@ -252,7 +254,7 @@
     {% block body %}
     <body>
         <nav class="topnav space-between">
-            <p class="bold"><a href="{% host_url 'index' host 'foiamachine' %}">FOIA Machine</a> <span class="blue badge">Beta</span></p>
+            <p class="bold"><a href="{% host_url 'index' host 'foiamachine' %}">FOIA Machine</a> <span class="badge">Beta</span></p>
             {% if request.user.is_authenticated %}
             <ul class="nostyle inline">
                 <li class="bold"><a href="{% host_url 'profile' host 'foiamachine' %}">{{user}}</a></li>
@@ -270,7 +272,7 @@
         {% endblock main %}
         <nav class="bottomnav small">
             <ul class="nostyle inline">
-                <li class="bold"><a href="{% host_url 'index' host 'foiamachine' %}">FOIA Machine</a> Beta</li>
+                <li class="bold"><a href="{% host_url 'index' host 'foiamachine' %}">FOIA Machine</a> <span class="badge">Beta</span></li>
                 <li><a href="/about">About</a></li>
                 <li><a href="/tos">Terms of Service</a></li>
                 <li><a href="/privacy">Privacy Policy</a></li>
