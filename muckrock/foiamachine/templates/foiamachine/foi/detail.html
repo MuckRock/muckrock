@@ -10,8 +10,36 @@
             <h1>{{object.title}}</h1>
             <p>{% if object.agency %}<a href="{{object.agency.get_absolute_url}}">{{object.agency}}</a> &bull; {% endif %}<a href="{{object.jurisdiction.get_absolute_url}}">{{object.jurisdiction}}</a></p>
         </div>
+        {% if request.user == object.user %}
         <p><a href="{% host_url 'foi-update' slug=object.slug pk=object.pk host 'foiamachine'%}">Edit</a> &bull; <a href="{% host_url 'foi-delete' slug=object.slug pk=object.pk host 'foiamachine'%}">Delete</a></p>
+        {% endif %}
     </header>
+    {% if request.user == object.user %}
+    <div class="sharing margin-bottom">
+        <header class="space-between align-bottom margin-bottom">
+            <h2 class="nomargin">
+                Sharing
+                {% if object.sharing_code %}
+                <span class="blue badge">On</span>
+                {% else %}
+                <span class="badge">Off</span>
+                {% endif %}
+            </h2>
+            <form method="post" action="{% host_url 'foi-share' slug=object.slug pk=object.pk host 'foiamachine'%}">
+                {% csrf_token %}
+                {% if object.sharing_code %}
+                <button type="submit" class="button" name="action" value="disable">Disable link sharing</button>
+                {% else %}
+                <button type="submit" class="button" name="action" value="enable">Enable link sharing</button>
+                {% endif %}
+            </form>
+        </header>
+        {% if object.sharing_code %}
+        <textarea readonly class="select-all" style="resize:none;" rows="1">{{request.get_host}}{{request.get_full_path}}?sharing={{object.sharing_code}}</textarea>
+        {% endif %}
+        <p>All of your FOIA Machine requests are private, except for a sharing link. The link contains a code that is changed every time link sharing is enabled.</p>
+    </div>
+    {% endif %}
     {% with object.agency as agency %}
     {% if agency %}
     <div class="agency margin-bottom">
@@ -46,7 +74,9 @@
     <div class="communications">
         <header class="space-between align-center margin-bottom">
             <h2 class="nomargin">Communications</h2>
+            {% if request.user == object.user %}
             <a href="{% host_url 'comm-create' foi_slug=object.slug foi_pk=object.pk host 'foiamachine' %}">Add a communication</a>
+            {% endif %}
         </header>
         {% for communication in object.communications.all %}
         {% if communication.received %}
@@ -71,7 +101,9 @@
                         <td>{{communication.date|date:"F d, Y"}}</td>
                     </tr>
                 </table>
+                {% if request.user == object.user %}
                 <p class="nomargin"><a href="{% host_url 'comm-update' foi_slug=object.slug foi_pk=object.pk pk=communication.pk host 'foiamachine' %}">Edit</a> &bull; <a href="{% host_url 'comm-delete' foi_slug=object.slug foi_pk=object.pk pk=communication.pk host 'foiamachine' %}">Delete</a></p>
+                {% endif %}
             </header>
             <div class="communication__message">
                 {{communication.message|markdown}}
