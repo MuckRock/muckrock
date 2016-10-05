@@ -53,6 +53,27 @@ class Profile(TemplateView):
                 '?next=' + reverse('profile', host='foiamachine'))
         return super(Profile, self).dispatch(*args, **kwargs)
 
+    def post(self, *args, **kwargs):
+        """Handle bulk actions on requests"""
+        action = self.request.POST.get('action')
+        requests = self.request.POST.getlist('request')
+        if requests:
+            requests = FoiaMachineRequest.objects.filter(user=self.request.user, id__in=requests)
+        if action == 'delete':
+            for foi in requests:
+                foi.delete()
+        return super(Profile, self).get(*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        """Gets context data for the profile."""
+        context = super(Profile, self).get_context_data(**kwargs)
+        requests = (FoiaMachineRequest.objects.filter(user=self.request.user)
+                                              .order_by('-date_created'))
+        context.update({
+            'requests': requests,
+        })
+        return context
+
 
 class FoiaMachineRequestCreateView(CreateView):
     """Create a new request."""
