@@ -34,7 +34,7 @@ class FoiaMachineCommunicationForm(forms.ModelForm):
     """The FOIA Machine Communication form allows for creating and updating communications."""
     class Meta:
         model = FoiaMachineCommunication
-        fields = ['request', 'sender', 'receiver', 'message', 'received',]
+        fields = ['request', 'date', 'sender', 'receiver', 'message', 'received',]
         widgets = {
             'request': forms.HiddenInput(),
         }

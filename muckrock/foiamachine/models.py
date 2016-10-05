@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 from django.contrib.auth.models import User
 from django.db import models
 from django.template.loader import render_to_string
+from django.utils import timezone
 from django.utils.text import slugify
 
 from django_hosts.resolvers import reverse
@@ -68,7 +69,7 @@ class FoiaMachineCommunication(models.Model):
     sender = models.CharField(max_length=255)
     receiver = models.CharField(max_length=255, blank=True)
     message = models.TextField()
-    date = models.DateField(auto_now_add=True)
+    date = models.DateField(default=timezone.now)
     received = models.BooleanField(default=False)
 
     def __unicode__(self):
