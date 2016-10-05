@@ -11,6 +11,8 @@ from django.utils.text import slugify
 
 from django_hosts.resolvers import reverse
 
+from muckrock.utils import generate_key
+
 class FoiaMachineRequest(models.Model):
     """
     A FOIA Machine Request stores information about the request.
@@ -23,6 +25,7 @@ class FoiaMachineRequest(models.Model):
     request_language = models.TextField()
     jurisdiction = models.ForeignKey('jurisdiction.Jurisdiction')
     agency = models.ForeignKey('agency.Agency', blank=True, null=True)
+    sharing_code = models.CharField(max_length=255, blank=True)
 
     def save(self, *args, **kwargs):
         """Automatically update the slug field."""
@@ -47,6 +50,13 @@ class FoiaMachineRequest(models.Model):
             'user_name': self.user.get_full_name()
         }
         return render_to_string(template, context=context).strip()
+
+    def generate_sharing_code(self):
+        """Generate a new sharing code, save it to the request, and then return a URL."""
+        self.sharing_code = generate_key(12)
+        self.save()
+        return self.sharing_code
+
 
 class FoiaMachineCommunication(models.Model):
     """

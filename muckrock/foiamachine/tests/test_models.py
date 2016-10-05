@@ -65,6 +65,10 @@ class TestFoiaMachineRequest(TestCase):
         actual_letter = self.foi.generate_letter()
         eq_(actual_letter, expected_letter)
 
+    def test_generate_sharing_code(self):
+        """The request should be able to generate a code for privately sharing urls."""
+        ok_(self.foi.generate_sharing_code())
+
 
 class TestFoiaMachineCommunication(TestCase):
     """The FOIA Machine Communication should store information
