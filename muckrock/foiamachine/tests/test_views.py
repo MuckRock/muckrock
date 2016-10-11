@@ -125,6 +125,7 @@ class TestFoiaMachineRequestCreateView(TestCase):
         jurisdiction = StateJurisdictionFactory().id
         form = forms.FoiaMachineRequestForm({
             'title': title,
+            'status': 'started',
             'request_language': request_language,
             'jurisdiction': jurisdiction
         })
@@ -252,6 +253,7 @@ class TestFoiaMachineRequestUpdateView(TestCase):
         new_jurisdiction = StateJurisdictionFactory()
         data = {
             'title': 'New Title',
+            'status': 'done',
             'request_language': 'Foo bar baz!',
             'jurisdiction': new_jurisdiction.id
         }
@@ -264,6 +266,7 @@ class TestFoiaMachineRequestUpdateView(TestCase):
         eq_(response.status_code, 302)
         eq_(response.url, reverse('foi-detail', host='foiamachine', kwargs=self.kwargs))
         eq_(self.foi.title, data['title'])
+        eq_(self.foi.status, data['status'])
         eq_(self.foi.request_language, data['request_language'])
         eq_(self.foi.jurisdiction, new_jurisdiction)
 

@@ -13,6 +13,7 @@ from django.utils.text import slugify
 from datetime import timedelta
 from django_hosts.resolvers import reverse
 
+from muckrock.foia.models import STATUS
 from muckrock.utils import generate_key
 
 class FoiaMachineRequest(models.Model):
@@ -25,6 +26,7 @@ class FoiaMachineRequest(models.Model):
     title = models.CharField(max_length=255, db_index=True)
     slug = models.SlugField(max_length=255)
     date_created = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=10, choices=STATUS, default='started', db_index=True)
     request_language = models.TextField()
     jurisdiction = models.ForeignKey('jurisdiction.Jurisdiction')
     agency = models.ForeignKey('agency.Agency', blank=True, null=True)

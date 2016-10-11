@@ -26,9 +26,10 @@ class TestFoiaMachineRequestForm(TestCase):
         )
 
     def test_basic(self):
-        """A form should validate when given a title, a request, and a jurisdiction."""
+        """A form should validate when given a title, a status, a request, and a jurisdiction."""
         form = forms.FoiaMachineRequestForm({
             'title': self.title,
+            'status': 'started',
             'request_language': self.request_language,
             'jurisdiction': self.jurisdiction.id
         })
@@ -38,6 +39,7 @@ class TestFoiaMachineRequestForm(TestCase):
         """The form should also accept an agency input."""
         form = forms.FoiaMachineRequestForm({
             'title': self.title,
+            'status': 'started',
             'request_language': self.request_language,
             'jurisdiction': self.jurisdiction.id,
             'agency': self.agency.id,
@@ -49,6 +51,7 @@ class TestFoiaMachineRequestForm(TestCase):
         jurisdiction = StateJurisdictionFactory()
         form = forms.FoiaMachineRequestForm({
             'title': self.title,
+            'status': 'started',
             'request_language': self.request_language,
             'jurisdiction': jurisdiction.id,
             'agency': self.agency.id,

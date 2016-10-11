@@ -12,7 +12,7 @@ class FoiaMachineRequestForm(autocomplete_light.ModelForm):
     """The FOIA Machine Request form provides a basis for creating and updating requests."""
     class Meta:
         model = FoiaMachineRequest
-        fields = ['title', 'request_language', 'jurisdiction', 'agency']
+        fields = ['title', 'status', 'request_language', 'jurisdiction', 'agency']
         autocomplete_names = {
             'jurisdiction': 'JurisdictionAutocomplete',
             'agency': 'AgencyAutocomplete',
