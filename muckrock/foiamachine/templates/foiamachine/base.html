@@ -53,6 +53,12 @@
                 margin: 0 auto;
                 padding: 0 1em;
             }
+            a {
+                opacity: .8;
+            }
+            a:hover {
+                opacity: .6;
+            }
             a:visited {
                 color: blue;
             }
@@ -134,7 +140,37 @@
                 font-size: 1rem;
                 line-height: 1.4;
                 font-weight: bold;
-                padding: .25em;
+                padding: .25em .75em;
+                border: none;
+                border-radius: 9999px;
+                background: blue;
+                color: white;
+                opacity: .8;
+                cursor: pointer;
+                text-decoration: none;
+            }
+            .button:hover {
+                color: white;
+                opacity: .6;
+            }
+            .button:active {
+                color: white;
+            }
+            .button:visited {
+                color: white;
+            }
+            .button:disabled {
+                opacity: .4;
+                cursor: pointer;
+            }
+            .blue.button {
+                background: blue;
+            }
+            .red.button {
+                background: red;
+            }
+            .small.button {
+                font-size: .8rem;
             }
             .badge {
                 padding: .25em .5em;

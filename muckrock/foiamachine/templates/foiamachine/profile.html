@@ -12,8 +12,8 @@
     <form method="post" class="toolbar" id="request-manager">
         {% csrf_token %}
         {% include 'lib/pattern/form.html' %}
-        <button class="button" type="submit" name="action" value="set_status">Set Status</button>
-        <button class="button" type="submit" name="action" value="delete">Delete</button>
+        <button class="small button" type="submit" name="action" value="set_status">Set Status</button>
+        <button class="small red button" type="submit" name="action" value="delete">Delete</button>
     </form>
     <table class="ruled">
         <thead>

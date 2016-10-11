@@ -68,7 +68,7 @@
         <header class="space-between align-center margin-bottom">
             <h2 class="nomargin">Communications</h2>
             {% if request.user == object.user %}
-            <a href="{% host_url 'comm-create' foi_slug=object.slug foi_pk=object.pk host 'foiamachine' %}">Add a communication</a>
+            <a class="blue button" href="{% host_url 'comm-create' foi_slug=object.slug foi_pk=object.pk host 'foiamachine' %}">Add a communication</a>
             {% endif %}
         </header>
         {% for communication in object.communications.all %}
@@ -118,9 +118,9 @@
             <form method="post" action="{% host_url 'foi-share' slug=object.slug pk=object.pk host 'foiamachine'%}">
                 {% csrf_token %}
                 {% if object.sharing_code %}
-                <button type="submit" class="button" name="action" value="disable">Disable link sharing</button>
+                <button type="submit" class="blue button" name="action" value="disable">Disable link sharing</button>
                 {% else %}
-                <button type="submit" class="button" name="action" value="enable">Enable link sharing</button>
+                <button type="submit" class="blue button" name="action" value="enable">Enable link sharing</button>
                 {% endif %}
             </form>
         </header>
