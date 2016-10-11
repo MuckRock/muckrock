@@ -6,7 +6,13 @@ from django import forms
 
 from autocomplete_light import shortcuts as autocomplete_light
 
-from muckrock.foiamachine.models import FoiaMachineRequest, FoiaMachineCommunication
+from muckrock.foiamachine.models import FoiaMachineRequest, FoiaMachineCommunication, STATUS
+
+
+class FoiaMachineBulkRequestForm(forms.Form):
+    """This allows a basic mechanism for bulk-updating requests."""
+    status = forms.ChoiceField(choices=STATUS, required=False)
+
 
 class FoiaMachineRequestForm(autocomplete_light.ModelForm):
     """The FOIA Machine Request form provides a basis for creating and updating requests."""

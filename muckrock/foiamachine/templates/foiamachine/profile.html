@@ -11,6 +11,8 @@
     {% if requests %}
     <form method="post" id="request-manager">
         {% csrf_token %}
+        {% include 'lib/pattern/form.html' %}
+        <button class="button" type="submit" name="action" value="set_status">Set Status</button>
         <button class="button" type="submit" name="action" value="delete">Delete</button>
     </form>
     <table class="ruled">
@@ -18,6 +20,7 @@
             <tr>
                 <th><input type="checkbox" form="request-manager" /></th>
                 <th>Title</th>
+                <th class="small">Status</th>
                 <th class="small">Jurisdiction</th>
                 <th class="small">Agency</th>
             </tr>
@@ -27,6 +30,7 @@
             <tr>
                 <td><input type="checkbox" form="request-manager" name="request" value="{{foi.id}}"/></th>
                 <td><a href="{{foi.get_absolute_url}}">{{foi.title}}</a></td>
+                <td class="small">{{foi.get_status_display}}</td>
                 <td class="small"><a href="{{foi.jurisdiction.get_absolute_url}}">{{foi.jurisdiction}}</a></td>
                 {% if foi.agency %}
                 <td class="small"><a href="{{foi.agency.get_absolute_url}}">{{foi.agency}}</a></td>
@@ -46,8 +50,15 @@
 {% block scripts %}
 {{block.super}}
 <script type="text/javascript">
-var toolbar = $('#request-manager :button');
-toolbar.attr('disabled', true);
+var toolbar = $('#request-manager :button, #request-manager :input');
+function disableToolbar() {
+    toolbar.attr('disabled', true).closest('.field').addClass('disabled');
+}
+function enableToolbar() {
+    toolbar.attr('disabled', false).closest('.field').removeClass('disabled');
+}
+
+disableToolbar();
 $('th input:checkbox').change(function(){
     var table = $(this).closest('table');
     var headerCheckbox = $(this);
@@ -57,9 +68,9 @@ $('th input:checkbox').change(function(){
         this.checked = checked;
     });
     if (checked) {
-        toolbar.attr('disabled', false);
+        enableToolbar();
     } else {
-        toolbar.attr('disabled', true);
+        disableToolbar();
     }
 });
 $('td input:checkbox').change(function(){
@@ -76,24 +87,10 @@ $('td input:checkbox').change(function(){
     if (checkedBoxes.length == 0) {
         headerCheckbox[0].indeterminate = false;
         headerCheckbox[0].checked = false;
-        toolbar.attr('disabled', true);
+        disableToolbar();
     } else {
-        toolbar.attr('disabled', false);
+        enableToolbar();
     }
 });
-/*
-    checkboxes.change(function() {
-        var oppositeCheckboxes = $(this).filter(function(index, element){
-            return element.checked != checked
-        });
-        console.log(oppositeCheckboxes);
-        if (oppositeCheckboxes.length > 0) {
-            headerCheckbox.indeterminate = true;
-        } else {
-            headerCheckbox.indeterminate = false;
-        }
-    });
-});
-*/
 </script>
 {% endblock %}

@@ -15,8 +15,12 @@ from django_hosts.resolvers import reverse
 
 from muckrock.accounts.forms import RegisterForm
 from muckrock.accounts.views import create_new_user
-from muckrock.foiamachine.forms import FoiaMachineRequestForm, FoiaMachineCommunicationForm
-from muckrock.foiamachine.models import FoiaMachineRequest, FoiaMachineCommunication
+from muckrock.foiamachine.forms import (
+    FoiaMachineBulkRequestForm,
+    FoiaMachineRequestForm,
+    FoiaMachineCommunicationForm
+)
+from muckrock.foiamachine.models import FoiaMachineRequest, FoiaMachineCommunication, STATUS
 
 class Homepage(TemplateView):
     """FOIAMachine homepage"""
@@ -63,14 +67,22 @@ class Profile(TemplateView):
         """Handle bulk actions on requests"""
         action = self.request.POST.get('action')
         requests = self.request.POST.getlist('request')
+        form = FoiaMachineBulkRequestForm(self.request.POST)
         if requests:
             requests = FoiaMachineRequest.objects.filter(user=self.request.user, id__in=requests)
         if action == 'delete':
-            deletion_count = 0
             for foi in requests:
                 foi.delete()
-                deletion_count += 1
-            message.success(self.request, '%d requests have been deleted.' % deletion_count)
+            message.success(self.request, '%d requests have been deleted.' % requests.count())
+        elif action == 'set_status' and form.is_valid():
+            status = form.cleaned_data['status']
+            for foi in requests:
+                foi.status = status
+                foi.save()
+            success_msg = 'Request status changed to %(status)s.' % {
+                'status': dict(STATUS)[status],
+            }
+            messages.success(self.request, success_msg)
         return super(Profile, self).get(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -79,8 +91,10 @@ class Profile(TemplateView):
         requests = (FoiaMachineRequest.objects.filter(user=self.request.user)
                                               .order_by('-date_created')
                                               .select_related('jurisdiction', 'agency'))
+        form = FoiaMachineBulkRequestForm()
         context.update({
             'requests': requests,
+            'form': form,
         })
         return context
 
