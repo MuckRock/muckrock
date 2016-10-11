@@ -15,6 +15,7 @@ from django_hosts.resolvers import reverse
 
 from muckrock.accounts.forms import RegisterForm
 from muckrock.accounts.views import create_new_user
+from muckrock.foiamachine.filters import FoiaMachineRequestFilter
 from muckrock.foiamachine.forms import (
     FoiaMachineBulkRequestForm,
     FoiaMachineRequestForm,
@@ -92,9 +93,11 @@ class Profile(TemplateView):
                                               .order_by('-date_created')
                                               .select_related('jurisdiction', 'agency'))
         form = FoiaMachineBulkRequestForm()
+        filter_ = FoiaMachineRequestFilter(self.request.GET, queryset=requests)
         context.update({
             'requests': requests,
             'form': form,
+            'filter': filter_,
         })
         return context
 

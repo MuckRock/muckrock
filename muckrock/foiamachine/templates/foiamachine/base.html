@@ -49,7 +49,7 @@
                 color: #202020;
             }
             main {
-                max-width: 40rem;
+                max-width: 50rem;
                 margin: 0 auto;
                 padding: 0 1em;
             }
@@ -90,6 +90,14 @@
             .small {
                 font-size: .8rem;
             }
+            .red {
+                color: red;
+            }
+            .select-all {
+                -webkit-user-select: all;
+                -moz-user-select: all;
+                user-select: all;
+            }
             .nostyle {
                 list-style: none;
                 padding-left: 0;
@@ -97,8 +105,14 @@
             .nomargin {
                 margin: 0;
             }
+            .padding {
+                padding: 1em;
+            }
             .margin-bottom {
                 margin-bottom: 1em;
+            }
+            .margin-right {
+                margin-right: 1em;
             }
             .inline li {
                 display: inline-block;
@@ -106,6 +120,18 @@
             }
             .inline li:last-child {
                 margin-right: 0;
+            }
+
+            /* Grid and layout */
+
+            .row {
+                display: flex;
+            }
+            .row .column {
+                flex: 1 1 auto;
+            }
+            .row .column__wide {
+                flex: 5 1 auto;
             }
             .space-between {
                 display: flex;
@@ -128,17 +154,11 @@
                 display: flex;
                 align-items: baseline;
             }
-            .select-all {
-                -webkit-user-select: all;
-                -moz-user-select: all;
-                user-select: all;
-            }
-            .red {
-                color: red;
-            }
+
+            /* Buttons */
+
             .button {
                 font-size: 1rem;
-                line-height: 1.4;
                 font-weight: bold;
                 padding: .25em .75em;
                 border: none;
@@ -172,6 +192,9 @@
             .small.button {
                 font-size: .8rem;
             }
+
+            /* Badges */
+
             .badge {
                 padding: .25em .5em;
                 border-radius: 4px;
@@ -186,9 +209,15 @@
             .blue.badge {
                 background: blue;
             }
+
+            /* Forms and fields */
+
             input, textarea, select {
                 width: 100%;
                 font-size: 1rem;
+            }
+            .small input, .small textarea, .small select {
+                font-size: .8rem;
             }
             input, textarea {
                 border: 1px solid #ccc;
@@ -235,10 +264,13 @@
                 color: red;
                 font-size: .8rem;
             }
+
+            /* Messages */
+
             .message {
                 display: flex;
                 align-items: center;
-                max-width: 40rem;
+                max-width: 50rem;
                 margin: 0 auto;
                 padding: 1em;
             }
@@ -249,6 +281,9 @@
                 margin: 0 0 0 .5em;
                 font-weight: bold;
             }
+
+            /* Icons */
+
             .icon {
                 display: inline;
                 width: 1.25em;
@@ -258,6 +293,9 @@
             .icon path, .icon rect, .icon circle {
                 fill: #202020;
             }
+
+            /* Global nav */
+
             .topnav, .bottomnav {
                 width: 100%;
                 margin: 0 auto;
@@ -270,17 +308,45 @@
                 margin-top: 2rem;
                 border-top: 1px solid #ccc;
             }
+
+            /* Toolbar */
+
             .toolbar {
                 display: flex;
                 align-items: flex-end;
             }
             .toolbar .field, .toolbar .button {
-                margin: 0 1em 0 0;
-            }
-            .toolbar .field header {
-                font-size: .8em;
                 margin-bottom: 0;
             }
+            .toolbar .button {
+                margin-right: 1em;
+            }
+            .toolbar .field {
+                margin-right: .5em;
+            }
+            .toolbar .field header {
+                display: none;
+            }
+
+            /* Filter form */
+            .filter.form {
+                background: #fff;
+                border: 1px solid #ccc;
+            }
+            .filter.form .help-text {
+                display: none;
+            }
+
+            .empty {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 100%;
+                color: #666;
+            }
+
+            /* Communication object */
+
             .communication {
                 margin-bottom: 1em;
                 border: 1px solid #ccc;
@@ -298,6 +364,9 @@
                 padding: 0 1em;
                 font-family: "Georgia", serif;
             }
+
+            /* Autocomplete widget */
+
             .autocomplete-light-widget {
                 width: 100%;
             }
