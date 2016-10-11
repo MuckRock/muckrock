@@ -9,7 +9,7 @@
         <p class="margin-bottom"><a href="{% host_url 'foi-create' host 'foiamachine' %}" class="bold">Create request</a></p>
     </header>
     {% if requests %}
-    <form method="post" id="request-manager">
+    <form method="post" class="toolbar" id="request-manager">
         {% csrf_token %}
         {% include 'lib/pattern/form.html' %}
         <button class="button" type="submit" name="action" value="set_status">Set Status</button>
@@ -50,7 +50,7 @@
 {% block scripts %}
 {{block.super}}
 <script type="text/javascript">
-var toolbar = $('#request-manager :button, #request-manager :input');
+var toolbar = $('.toolbar :button, .toolbar :input');
 function disableToolbar() {
     toolbar.attr('disabled', true).closest('.field').addClass('disabled');
 }

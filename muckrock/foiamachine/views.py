@@ -73,7 +73,7 @@ class Profile(TemplateView):
         if action == 'delete':
             for foi in requests:
                 foi.delete()
-            message.success(self.request, '%d requests have been deleted.' % requests.count())
+            message.success(self.request, 'Requests were deleted.')
         elif action == 'set_status' and form.is_valid():
             status = form.cleaned_data['status']
             for foi in requests:

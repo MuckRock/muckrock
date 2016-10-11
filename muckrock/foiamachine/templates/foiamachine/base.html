@@ -188,6 +188,9 @@
                 margin: .25em 0 0;
                 font-size: .8rem;
             }
+            .field .help-text:empty {
+                display: none;
+            }
             .field .errorlist {
                 display: inline-block;
                 margin: 0;
@@ -230,6 +233,17 @@
             .bottomnav {
                 margin-top: 2rem;
                 border-top: 1px solid #ccc;
+            }
+            .toolbar {
+                display: flex;
+                align-items: flex-end;
+            }
+            .toolbar .field, .toolbar .button {
+                margin: 0 1em 0 0;
+            }
+            .toolbar .field header {
+                font-size: .8em;
+                margin-bottom: 0;
             }
             .communication {
                 margin-bottom: 1em;
