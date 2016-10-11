@@ -196,10 +196,32 @@
                 color: red;
                 font-size: .8rem;
             }
+            .message {
+                display: flex;
+                align-items: center;
+                max-width: 40rem;
+                margin: 0 auto;
+                padding: 1em;
+            }
+            .message .symbol {
+                line-height: 0;
+            }
+            .message p {
+                margin: 0 0 0 .5em;
+                font-weight: bold;
+            }
+            .icon {
+                display: inline;
+                width: 1.25em;
+                height: 1.25em;
+                shape-rendering: geometricPrecision;
+            }
+            .icon path, .icon rect, .icon circle {
+                fill: #202020;
+            }
             .topnav, .bottomnav {
                 width: 100%;
                 margin: 0 auto;
-                padding: 0 1rem;
             }
             .topnav {
                 border-bottom: 1px solid #ccc;
@@ -269,6 +291,11 @@
                 {% endif %}
             </main>
         </nav>
+        {% block messages %}
+        {% for message in messages %}
+        {% include 'lib/pattern/message.html' %}
+        {% endfor %}
+        {% endblock %}
         {% block main %}
         <main></main>
         {% endblock main %}

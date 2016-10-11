@@ -194,7 +194,7 @@ class TestFoiaMachineRequestShareView(TestCase):
         """Getting the share view should just redirect to the request detail view."""
         response = http_get_response(self.url, self.view, self.foi.user, **self.kwargs)
         eq_(response.status_code, 302)
-        eq_(response.url, self.foi.get_absolute_url())
+        eq_(response.url, self.foi.get_absolute_url() + '#share')
 
     def test_post_enable(self):
         """Posting enable should turn on link sharing."""
