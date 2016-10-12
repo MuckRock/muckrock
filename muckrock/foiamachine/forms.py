@@ -8,6 +8,9 @@ from autocomplete_light import shortcuts as autocomplete_light
 
 from muckrock.foiamachine.models import FoiaMachineRequest, FoiaMachineCommunication, STATUS
 
+MAX_UPLOAD_SIZE = "10485760" # 10mB
+ALLOWED_CONTENT_TYPES = ['application', 'image', 'video', 'text']
+
 
 class FoiaMachineBulkRequestForm(forms.Form):
     """This allows a basic mechanism for bulk-updating requests."""
@@ -37,7 +40,26 @@ class FoiaMachineRequestForm(autocomplete_light.ModelForm):
 
 
 class FoiaMachineCommunicationForm(forms.ModelForm):
-    """The FOIA Machine Communication form allows for creating and updating communications."""
+    """
+    The FOIA Machine Communication form allows for creating and updating communications.
+    Also allows files to be attached to the request.
+    """
+    files = forms.FileField(
+        help_text='The maximum upload size is 10mB.',
+        widget=forms.ClearableFileInput(attrs={'multiple': True}))
+
+    def clean_files(self):
+        """Enforces a size and filetype limit on uploaded files."""
+        files = self.cleaned_data['files']
+        for file in files:
+            content_type = file.content_type.split('/')[0]
+            if content_type in ALLOWED_CONTENT_TYPES:
+                if file._size > MAX_UPLOAD_SIZE:
+                    raise forms.ValidationError('This file is too large.')
+            else:
+                raise forms.ValidationError('Unsupported filetype.')
+        return files
+
     class Meta:
         model = FoiaMachineCommunication
         fields = ['request', 'date', 'sender', 'receiver', 'message', 'received',]

@@ -2,6 +2,7 @@
 Tests for FOIA Machine models.
 """
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.template.loader import render_to_string
 from django.test import TestCase
 from django.utils import timezone
@@ -138,3 +139,21 @@ class TestFoiaMachineCommunication(TestCase):
         eq_(unicode(self.comm),
             'Communication from %s to %s' % (self.comm.sender, self.comm.receiver))
 
+
+class TestFoiaMachineFile(TestCase):
+    """The FOIA Machine File should attach files to communications."""
+    def setUp(self):
+        self.comm = factories.FoiaMachineCommunicationFactory()
+        self.file = factories.FoiaMachineFileFactory(communication=self.comm)
+
+    def test_create(self):
+        """A communication, a file, and a filename should be required to create a new file."""
+        file = models.FoiaMachineFile(
+            communication=self.comm,
+            file=SimpleUploadedFile('filename.txt', 'Test file contents'),
+            name='filename.txt')
+        ok_(file)
+
+    def test_unicode(self):
+        """The string representation of a file should be its name."""
+        eq_(unicode(self.file), u'%s' % self.file.name)

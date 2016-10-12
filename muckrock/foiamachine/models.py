@@ -130,3 +130,18 @@ class FoiaMachineCommunication(models.Model):
             'pk': self.pk,
         })
 
+
+class FoiaMachineFile(models.Model):
+    """
+    A FOIA Machine File stores files that are created in the course of fulfilling a request.
+    Files are uploaded by users and are attached to communications, like in an email.
+    """
+    communication = models.ForeignKey(FoiaMachineCommunication, related_name='files')
+    file = models.FileField(upload_to='foia_files/%Y/%m/%d', verbose_name='File', max_length=255)
+    name = models.CharField(max_length=255)
+    comment = models.TextField(blank=True)
+    date_added = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
+
+    def __unicode__(self):
+        return u'%s' % self.name
