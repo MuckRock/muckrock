@@ -21,7 +21,12 @@ from muckrock.foiamachine.forms import (
     FoiaMachineRequestForm,
     FoiaMachineCommunicationForm
 )
-from muckrock.foiamachine.models import FoiaMachineRequest, FoiaMachineCommunication, STATUS
+from muckrock.foiamachine.models import (
+    FoiaMachineRequest,
+    FoiaMachineCommunication,
+    FoiaMachineFile,
+    STATUS
+)
 
 class Homepage(TemplateView):
     """FOIAMachine homepage"""
@@ -241,6 +246,14 @@ class FoiaMachineCommunicationCreateView(CreateView):
         initial['request'] = self.foi
         return initial
 
+    def form_valid(self, form):
+        """Make sure to create files when the form is valid."""
+        comm = form.save()
+        files = form.cleaned_data['files']
+        for file in files:
+            FoiaMachineFile.objects.create(communication=comm, file=file, name=file.name)
+        return super(FoiaMachineCommunicationCreateView, self).form_valid(form)
+
     def get_success_url(self):
         """Upon success, return to the request."""
         messages.success(self.request, 'The communication was created.')
@@ -283,6 +296,14 @@ class FoiaMachineCommunicationUpdateView(UpdateView):
         initial = super(FoiaMachineCommunicationUpdateView, self).get_initial()
         initial['request'] = self.foi
         return initial
+
+    def form_valid(self, form):
+        """Make sure to create files when the form is valid."""
+        comm = form.save()
+        files = form.cleaned_data['files']
+        for file in files:
+            FoiaMachineFile.objects.create(communication=comm, file=file, name=file.name)
+        return super(FoiaMachineCommunicationUpdateView, self).form_valid(form)
 
     def get_success_url(self):
         """Upon success, return to the request."""

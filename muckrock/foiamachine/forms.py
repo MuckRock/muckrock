@@ -45,12 +45,13 @@ class FoiaMachineCommunicationForm(forms.ModelForm):
     Also allows files to be attached to the request.
     """
     files = forms.FileField(
-        help_text='The maximum upload size is 10mB.',
+        required=False,
+        help_text='The maximum upload size is 10MB.',
         widget=forms.ClearableFileInput(attrs={'multiple': True}))
 
     def clean_files(self):
         """Enforces a size and filetype limit on uploaded files."""
-        files = self.cleaned_data['files']
+        files = self.files.getlist('files')
         for file in files:
             content_type = file.content_type.split('/')[0]
             if content_type in ALLOWED_CONTENT_TYPES:
