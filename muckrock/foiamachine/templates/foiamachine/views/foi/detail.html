@@ -1,4 +1,4 @@
-{% extends 'foiamachine/base.html' %}
+{% extends 'foiamachine/base/base.html' %}
 
 {% load hosts %}
 {% load markdown_deux_tags %}
@@ -72,36 +72,9 @@
             {% endif %}
         </header>
         {% for communication in object.communications.all %}
-        {% if communication.received %}
-        <div class="received communication">
-        {% else %}
-        <div class="sent communication">
-        {% endif %}
-            <header class="small space-between align-top">
-                <table>
-                    {% if communication.receiver %}
-                    <tr>
-                        <td class="bold">To</td>
-                        <td>{{communication.receiver}}</td>
-                    </tr>
-                    {% endif %}
-                    <tr>
-                        <td class="bold">From</td>
-                        <td>{{communication.sender}}</td>
-                    </tr>
-                    <tr>
-                        <td class="bold">Date</td>
-                        <td>{{communication.date|date:"F d, Y"}}</td>
-                    </tr>
-                </table>
-                {% if request.user == object.user %}
-                <p class="nomargin"><a href="{% host_url 'comm-update' foi_slug=object.slug foi_pk=object.pk pk=communication.pk host 'foiamachine' %}">Edit</a> &bull; <a href="{% host_url 'comm-delete' foi_slug=object.slug foi_pk=object.pk pk=communication.pk host 'foiamachine' %}">Delete</a></p>
-                {% endif %}
-            </header>
-            <div class="communication__message">
-                {{communication.message|markdown}}
-            </div>
-        </div>
+        {% include 'foiamachine/patterns/communication.html' %}
+        {% empty %}
+        <p class="grey bold">This request has no communications.</p>
         {% endfor %}
     </div>
     {% if request.user == object.user %}

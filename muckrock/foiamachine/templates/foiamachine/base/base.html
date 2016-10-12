@@ -93,6 +93,9 @@
             .red {
                 color: red;
             }
+            .grey {
+                color: #666;
+            }
             .select-all {
                 -webkit-user-select: all;
                 -moz-user-select: all;
@@ -126,12 +129,13 @@
 
             .row {
                 display: flex;
+                flex-wrap: wrap;
             }
             .row .column {
-                flex: 1 1 auto;
+                flex: 1 1 10em;
             }
             .row .column__wide {
-                flex: 5 1 auto;
+                flex: 3 1 30em;
             }
             .space-between {
                 display: flex;
@@ -154,11 +158,16 @@
                 display: flex;
                 align-items: baseline;
             }
+            .horizontal-overflow {
+                overflow: hidden;
+                overflow-x: scroll;
+            }
 
             /* Buttons */
 
             .button {
                 font-size: 1rem;
+                line-height: 1.6;
                 font-weight: bold;
                 padding: .25em .75em;
                 border: none;
@@ -332,6 +341,13 @@
             .filter.form {
                 background: #fff;
                 border: 1px solid #ccc;
+            }
+            .filter.form .visible-fields {
+                display: flex;
+                flex-wrap: wrap;
+            }
+            .filter.form .field {
+                margin-right: 1em;
             }
             .filter.form .help-text {
                 display: none;

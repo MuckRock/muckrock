@@ -1,4 +1,4 @@
-{% extends 'foiamachine/base.html' %}
+{% extends 'foiamachine/base/base.html' %}
 
 {% load hosts %}
 
@@ -20,9 +20,9 @@
                 </div>
             </form>
         </div>
-        <div class="column column__wide margin-bottom">
+        <div class="column column__wide horizontal-overflow">
             {% if filter.qs %}
-            <form method="post" class="small toolbar" id="request-manager">
+            <form method="post" class="small toolbar margin-bottom" id="request-manager">
                 {% csrf_token %}
                 {% include 'lib/pattern/form.html' %}
                 <button class="small button" type="submit" name="action" value="set_status">Set Status</button>

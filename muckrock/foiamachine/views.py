@@ -25,7 +25,7 @@ from muckrock.foiamachine.models import FoiaMachineRequest, FoiaMachineCommunica
 
 class Homepage(TemplateView):
     """FOIAMachine homepage"""
-    template_name = 'foiamachine/homepage.html'
+    template_name = 'foiamachine/views/homepage.html'
 
     def dispatch(self, *args, **kwargs):
         """If the user is authenticated, redirect to their profile."""
@@ -36,7 +36,7 @@ class Homepage(TemplateView):
 
 class Signup(FormView):
     """Signs up new users"""
-    template_name = 'foiamachine/registration/signup.html'
+    template_name = 'foiamachine/views/registration/signup.html'
     form_class = RegisterForm
 
     def get_success_url(self):
@@ -54,7 +54,7 @@ class Signup(FormView):
 
 class Profile(TemplateView):
     """Detail for a user."""
-    template_name = 'foiamachine/profile.html'
+    template_name = 'foiamachine/views/profile.html'
 
     def dispatch(self, *args, **kwargs):
         """If the user is unauthenticated, redirect them to the login view."""
@@ -105,7 +105,7 @@ class Profile(TemplateView):
 class FoiaMachineRequestCreateView(CreateView):
     """Create a new request."""
     form_class = FoiaMachineRequestForm
-    template_name = 'foiamachine/foi/create.html'
+    template_name = 'foiamachine/views/foi/create.html'
 
     def dispatch(self, *args, **kwargs):
         """If the user is unauthenticated, redirect them to the login view."""
@@ -147,7 +147,7 @@ class FoiaMachineRequestCreateView(CreateView):
 class FoiaMachineRequestDetailView(DetailView):
     """Show the detail of a FOIA Machine request."""
     model = FoiaMachineRequest
-    template_name = 'foiamachine/foi/detail.html'
+    template_name = 'foiamachine/views/foi/detail.html'
 
     def dispatch(self, *args, **kwargs):
         """Only the request's owner may update it."""
@@ -188,7 +188,7 @@ class FoiaMachineRequestUpdateView(UpdateView):
 class FoiaMachineRequestDeleteView(DeleteView):
     """Confirm the delete action."""
     model = FoiaMachineRequest
-    template_name = 'foiamachine/foi/delete.html'
+    template_name = 'foiamachine/views/foi/delete.html'
 
     def dispatch(self, *args, **kwargs):
         """Only the request's owner may delete it."""
@@ -213,7 +213,7 @@ class FoiaMachineRequestDeleteView(DeleteView):
 class FoiaMachineCommunicationCreateView(CreateView):
     """Create a new communication on a request."""
     form_class = FoiaMachineCommunicationForm
-    template_name = 'foiamachine/comm/create.html'
+    template_name = 'foiamachine/views/comm/create.html'
 
     def get_foi(self, **kwargs):
         """Given a set of kwargs, return the FOI object for this view."""
@@ -251,7 +251,7 @@ class FoiaMachineCommunicationUpdateView(UpdateView):
     """Update a communication on a request."""
     model = FoiaMachineCommunication
     form_class = FoiaMachineCommunicationForm
-    template_name = 'foiamachine/comm/update.html'
+    template_name = 'foiamachine/views/comm/update.html'
 
     def get_foi(self, **kwargs):
         """Given a set of kwargs, return the FOI object for this view."""
@@ -293,7 +293,7 @@ class FoiaMachineCommunicationUpdateView(UpdateView):
 class FoiaMachineCommunicationDeleteView(DeleteView):
     """Delete a communication on a request."""
     model = FoiaMachineCommunication
-    template_name = 'foiamachine/comm/delete.html'
+    template_name = 'foiamachine/views/comm/delete.html'
 
     def get_foi(self, **kwargs):
         """Given a set of kwargs, return the FOI object for this view."""
