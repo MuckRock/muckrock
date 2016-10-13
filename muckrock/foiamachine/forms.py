@@ -31,6 +31,7 @@ class FoiaMachineRequestForm(autocomplete_light.ModelForm):
         }
 
     def clean(self):
+        """Ensures the agency belongs to the jurisdiction."""
         cleaned_data = super(FoiaMachineRequestForm, self).clean()
         jurisdiction = cleaned_data.get('jurisdiction')
         agency = cleaned_data.get('agency')
@@ -52,13 +53,14 @@ class FoiaMachineCommunicationForm(forms.ModelForm):
 
     def clean_files(self):
         """Enforces a size and filetype limit on uploaded files."""
+        # pylint: disable=protected-access
         if not self.files:
             return []
         files = self.files.getlist('files')
-        for file in files:
-            content_type = file.content_type.split('/')[0]
+        for _file in files:
+            content_type = _file.content_type.split('/')[0]
             if content_type in ALLOWED_CONTENT_TYPES:
-                if file._size > MAX_UPLOAD_SIZE:
+                if _file._size > MAX_UPLOAD_SIZE:
                     raise forms.ValidationError('This file is too large.')
             else:
                 raise forms.ValidationError('Unsupported filetype.')

@@ -5,7 +5,6 @@ Tests for FOIA Machine views.
 from django.contrib import auth
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
-from django.template.loader import render_to_string
 from django.test import TestCase
 
 from django_hosts.resolvers import reverse
@@ -206,8 +205,8 @@ class TestFoiaMachineRequestShareView(TestCase):
         self.foi.refresh_from_db()
         ok_(self.foi.sharing_code)
 
-    def test_post_enable(self):
-        """Posting enable should turn on link sharing."""
+    def test_post_disable(self):
+        """Posting disable should turn off link sharing."""
         self.foi.generate_sharing_code()
         ok_(self.foi.sharing_code)
         data = {
@@ -305,7 +304,7 @@ class TestFoiaMachineRequestDeleteView(TestCase):
     def test_post(self):
         """Posting to the delete view should delete the request."""
         data = {}
-        response = http_post_response(self.url, self.view, data, self.foi.user, **self.kwargs)
+        http_post_response(self.url, self.view, data, self.foi.user, **self.kwargs)
         self.foi.refresh_from_db()
 
 
@@ -408,5 +407,5 @@ class TestFoiaMachineCommunicationDeleteView(TestCase):
         """Posting to the delete view should delete the communication."""
         data = {}
         user = self.comm.request.user
-        response = http_post_response(self.url, self.view, data, user, **self.kwargs)
+        http_post_response(self.url, self.view, data, user, **self.kwargs)
         self.comm.refresh_from_db()

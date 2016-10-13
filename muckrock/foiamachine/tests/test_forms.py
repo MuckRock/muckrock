@@ -4,7 +4,7 @@ Tests for FOIA Machine forms.
 
 from django.test import TestCase
 
-from nose.tools import eq_, ok_
+from nose.tools import ok_
 
 from muckrock.factories import UserFactory, AgencyFactory
 from muckrock.foiamachine import factories, forms
@@ -57,4 +57,3 @@ class TestFoiaMachineRequestForm(TestCase):
             'agency': self.agency.id,
         })
         ok_(not form.is_valid())
-

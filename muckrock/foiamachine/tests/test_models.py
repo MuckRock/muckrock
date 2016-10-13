@@ -86,11 +86,13 @@ class TestFoiaMachineRequest(TestCase):
     @raises(AttributeError)
     def test_date_submitted_no_comms(self):
         """A request with no sent communications should raise an error."""
+        # pylint: disable=pointless-statement
         self.foi.date_submitted
 
     @raises(AttributeError)
     def test_date_due_no_comms(self):
         """A request with no sent communications should raise an error."""
+        # pylint: disable=pointless-statement
         self.foi.date_due
 
     def test_days_until_due(self):
@@ -114,7 +116,7 @@ class TestFoiaMachineRequest(TestCase):
     def test_days_overdue(self):
         """Days overdue should just be the inverse of days_until_due."""
         overdue_date = timezone.now().date() - timedelta(self.foi.jurisdiction.get_days() + 10)
-        comm = factories.FoiaMachineCommunicationFactory(request=self.foi, date=overdue_date)
+        factories.FoiaMachineCommunicationFactory(request=self.foi, date=overdue_date)
         eq_(self.foi.days_overdue, self.foi.days_until_due * -1)
 
 
@@ -148,11 +150,11 @@ class TestFoiaMachineFile(TestCase):
 
     def test_create(self):
         """A communication, a file, and a filename should be required to create a new file."""
-        file = models.FoiaMachineFile(
+        _file = models.FoiaMachineFile(
             communication=self.comm,
             file=SimpleUploadedFile('filename.txt', 'Test file contents'),
             name='filename.txt')
-        ok_(file)
+        ok_(_file)
 
     def test_unicode(self):
         """The string representation of a file should be its name."""

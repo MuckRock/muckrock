@@ -41,6 +41,7 @@ class FoiaMachineRequest(models.Model):
         return unicode(self.title)
 
     def get_absolute_url(self):
+        """Returns the request detail url."""
         return reverse('foi-detail', host='foiamachine', kwargs={
             'slug': self.slug,
             'pk': self.pk,
@@ -124,6 +125,7 @@ class FoiaMachineCommunication(models.Model):
         return u'Communication from %s to %s' % (self.sender, self.receiver)
 
     def get_absolute_url(self):
+        """Returns the communication detail url."""
         return reverse('comm-detail', host='foiamachine', kwargs={
             'foi-slug': self.request.slug,
             'foi-pk': self.request.pk,

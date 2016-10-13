@@ -3,13 +3,17 @@ FOIAMachine views
 """
 
 from django.contrib import messages
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.shortcuts import redirect
-from django.views.generic import TemplateView, FormView, CreateView, DetailView, UpdateView, DeleteView, View
+from django.views.generic import (
+    View,
+    TemplateView,
+    FormView,
+    CreateView,
+    DetailView,
+    UpdateView,
+    DeleteView)
 from django.views.generic.detail import SingleObjectMixin
-from django.utils.decorators import method_decorator
 
 from django_hosts.resolvers import reverse
 
@@ -79,7 +83,7 @@ class Profile(TemplateView):
         if action == 'delete':
             for foi in requests:
                 foi.delete()
-            message.success(self.request, 'Requests were deleted.')
+            messages.success(self.request, 'Requests were deleted.')
         elif action == 'set_status' and form.is_valid():
             status = form.cleaned_data['status']
             for foi in requests:
@@ -122,6 +126,7 @@ class FoiaMachineRequestCreateView(CreateView):
 
     def get_receiver(self, agency):
         """Create the agency name from its name and email, if it exists."""
+        # pylint: disable=no-self-use
         receiver_string = ''
         if not agency:
             return receiver_string
@@ -136,7 +141,7 @@ class FoiaMachineRequestCreateView(CreateView):
         foi = form.save(commit=False)
         foi.user = self.request.user
         foi.save()
-        comm = FoiaMachineCommunication.objects.create(
+        FoiaMachineCommunication.objects.create(
             request=foi,
             sender=(unicode(foi.user) + ' <' + foi.user.email + '>'),
             receiver=self.get_receiver(foi.agency),
@@ -220,22 +225,25 @@ class FoiaMachineCommunicationCreateView(CreateView):
     form_class = FoiaMachineCommunicationForm
     template_name = 'foiamachine/views/comm/create.html'
 
+    def __init__(self, *args, **kwargs):
+        """Adds foi to the object"""
+        super(FoiaMachineCommunicationCreateView, self).__init__(*args, **kwargs)
+        self.foi = self.get_foi(**kwargs)
+
     def get_foi(self, **kwargs):
         """Given a set of kwargs, return the FOI object for this view."""
         foi_pk = kwargs.get('foi_pk')
-        self.foi = FoiaMachineRequest.objects.get(pk=foi_pk)
-        return self.foi
+        return FoiaMachineRequest.objects.get(pk=foi_pk)
 
     def dispatch(self, *args, **kwargs):
         """Only the request's owner can add a new communication."""
-        foi = self.get_foi(**kwargs)
         # Redirect logged out users to the login page
         if self.request.user.is_anonymous():
             messages.warning(self.request, 'You will need to log in first.')
             return redirect(reverse('login', host='foiamachine') +
                 '?next=' + reverse('comm-create', host='foiamachine', kwargs=kwargs))
         # Redirect non-owner users to the detail page
-        if self.request.user != foi.user:
+        if self.request.user != self.foi.user:
             messages.error(self.request, 'You do not have permission to do that.')
             return redirect(self.foi.get_absolute_url())
         return super(FoiaMachineCommunicationCreateView, self).dispatch(*args, **kwargs)
@@ -255,8 +263,8 @@ class FoiaMachineCommunicationCreateView(CreateView):
             comm.request.status = status
             comm.request.save()
         files = form.cleaned_data['files']
-        for file in files:
-            FoiaMachineFile.objects.create(communication=comm, file=file, name=file.name)
+        for _file in files:
+            FoiaMachineFile.objects.create(communication=comm, file=_file, name=_file.name)
         return super(FoiaMachineCommunicationCreateView, self).form_valid(form)
 
     def get_success_url(self):
@@ -271,11 +279,15 @@ class FoiaMachineCommunicationUpdateView(UpdateView):
     form_class = FoiaMachineCommunicationForm
     template_name = 'foiamachine/views/comm/update.html'
 
+    def __init__(self, *args, **kwargs):
+        """Adds foi to the object"""
+        super(FoiaMachineCommunicationUpdateView, self).__init__(*args, **kwargs)
+        self.foi = self.get_foi(**kwargs)
+
     def get_foi(self, **kwargs):
         """Given a set of kwargs, return the FOI object for this view."""
         foi_pk = kwargs.get('foi_pk')
-        self.foi = FoiaMachineRequest.objects.get(pk=foi_pk)
-        return self.foi
+        return FoiaMachineRequest.objects.get(pk=foi_pk)
 
     def get_queryset(self):
         """Only include communications on the request in the queryset."""
@@ -284,14 +296,13 @@ class FoiaMachineCommunicationUpdateView(UpdateView):
 
     def dispatch(self, *args, **kwargs):
         """Only the request's owner can update a communication."""
-        foi = self.get_foi(**kwargs)
         # Redirect logged out users to the login page
         if self.request.user.is_anonymous():
             messages.warning(self.request, 'You will need to log in first.')
             return redirect(reverse('login', host='foiamachine') +
                 '?next=' + reverse('comm-update', host='foiamachine', kwargs=kwargs))
         # Redirect non-owner users to the detail page
-        if self.request.user != foi.user:
+        if self.request.user != self.foi.user:
             messages.error(self.request, 'You do not have permission to do that.')
             return redirect(self.foi.get_absolute_url())
         return super(FoiaMachineCommunicationUpdateView, self).dispatch(*args, **kwargs)
@@ -312,8 +323,8 @@ class FoiaMachineCommunicationUpdateView(UpdateView):
             comm.request.status = status
             comm.request.save()
         files = form.cleaned_data['files']
-        for file in files:
-            FoiaMachineFile.objects.create(communication=comm, file=file, name=file.name)
+        for _file in files:
+            FoiaMachineFile.objects.create(communication=comm, file=_file, name=_file.name)
         return super(FoiaMachineCommunicationUpdateView, self).form_valid(form)
 
     def get_success_url(self):
@@ -327,11 +338,15 @@ class FoiaMachineCommunicationDeleteView(DeleteView):
     model = FoiaMachineCommunication
     template_name = 'foiamachine/views/comm/delete.html'
 
+    def __init__(self, *args, **kwargs):
+        """Adds foi to the object"""
+        super(FoiaMachineCommunicationDeleteView, self).__init__(*args, **kwargs)
+        self.foi = self.get_foi(**kwargs)
+
     def get_foi(self, **kwargs):
         """Given a set of kwargs, return the FOI object for this view."""
         foi_pk = kwargs.get('foi_pk')
-        self.foi = FoiaMachineRequest.objects.get(pk=foi_pk)
-        return self.foi
+        return FoiaMachineRequest.objects.get(pk=foi_pk)
 
     def get_queryset(self):
         """Only include communications on the request in the queryset."""
@@ -340,14 +355,13 @@ class FoiaMachineCommunicationDeleteView(DeleteView):
 
     def dispatch(self, *args, **kwargs):
         """Only the request's owner can delete a communication."""
-        foi = self.get_foi(**kwargs)
         # Redirect logged out users to the login page
         if self.request.user.is_anonymous():
             messages.warning(self.request, 'You will need to log in first.')
             return redirect(reverse('login', host='foiamachine') +
                 '?next=' + reverse('comm-delete', host='foiamachine', kwargs=kwargs))
         # Redirect non-owner users to the detail page
-        if self.request.user != foi.user:
+        if self.request.user != self.foi.user:
             messages.error(self.request, 'You do not have permission to do that.')
             return redirect(self.foi.get_absolute_url())
         return super(FoiaMachineCommunicationDeleteView, self).dispatch(*args, **kwargs)
@@ -378,6 +392,8 @@ class FoiaMachineRequestShareView(SingleObjectMixin, View):
 
     def get_redirect_url(self, *args, **kwargs):
         """Redirect the user to the correct view."""
+        # pylint: disable=unused-argument
+        # pylint: disable=no-self-use
         return reverse('foi-detail', host='foiamachine', kwargs=kwargs) + '#share'
 
     def get(self, *args, **kwargs):
