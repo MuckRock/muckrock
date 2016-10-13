@@ -2,8 +2,10 @@
 FOIA Machine urls
 """
 
+from django.conf import settings
 from django.conf.urls import patterns, include, url
 from django.contrib.auth import views as auth_views
+from django.views.generic import TemplateView
 
 import debug_toolbar
 
@@ -81,3 +83,16 @@ urlpatterns = patterns(
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^__debug__/', include(debug_toolbar.urls)),
 )
+
+if settings.DEBUG:
+    urlpatterns += patterns(
+        '',
+        url(
+            r'^media/(?P<path>.*)$',
+            'django.views.static.serve',
+            {'document_root': settings.MEDIA_ROOT}
+        ),
+        url(r'^500/$', TemplateView.as_view(template_name='500.html')),
+        url(r'^404/$', TemplateView.as_view(template_name='404.html')),
+    )
+

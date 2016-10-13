@@ -294,6 +294,7 @@ class FoiaMachineCommunicationUpdateView(UpdateView):
     def get_initial(self):
         """Adds foi to initial form data."""
         initial = super(FoiaMachineCommunicationUpdateView, self).get_initial()
+        initial['files'] = self.object.files.all()
         initial['request'] = self.foi
         return initial
 

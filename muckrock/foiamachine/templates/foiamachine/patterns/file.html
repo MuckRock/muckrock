@@ -1,0 +1,6 @@
+<div class="file">
+    <p class="nomargin"><a href="{{file.file.url}}" target="_blank">{{file.name}}</a> <span class="small grey">{{file.file.size|filesizeformat}}</span></p>
+    {% if file.comment %}
+    <p class="nomargin grey">{{file.comment}}</p>
+    {% endif %}
+</div>

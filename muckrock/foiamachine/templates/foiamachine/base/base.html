@@ -376,13 +376,38 @@
                 width: auto;
             }
             .communication header {
-                padding: 1em;
+                padding: .5rem 1rem;
                 border-bottom: 1px solid #ccc;
+            }
+            .communication header .badge {
+                display: block;
+                text-align: center;
+            }
+            .sent.communication header {
+                border-bottom-color: #ccccff;
             }
             .communication__message {
                 overflow: hidden;
                 padding: 0 1em;
                 font-family: "Georgia", serif;
+            }
+            .communication.sent {
+                color: #000350;
+                border-color: #ccccff;
+                background: #f5f5ff;
+            }
+
+            /* File object */
+
+            .file {
+                padding: .5rem 1rem;
+                border-top: 1px solid #ccc;
+            }
+            .sent .file {
+                border-top-color: #ccccff;
+            }
+            .sent .grey {
+                color: #6666ff;
             }
 
             /* Autocomplete widget */

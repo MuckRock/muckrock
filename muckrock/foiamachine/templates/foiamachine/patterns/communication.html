@@ -6,7 +6,7 @@
 {% else %}
 <div class="sent communication">
 {% endif %}
-    <header class="small space-between align-top">
+    <header class="space-between align-top">
         <table>
             {% if communication.receiver %}
             <tr>
@@ -23,11 +23,20 @@
                 <td>{{communication.date|date:"F d, Y"}}</td>
             </tr>
         </table>
-        {% if request.user == object.user %}
-        <p class="nomargin"><a href="{% host_url 'comm-update' foi_slug=communication.request.slug foi_pk=communication.request.pk pk=communication.pk host 'foiamachine' %}">Edit</a> &bull; <a href="{% host_url 'comm-delete' foi_slug=communication.request.slug foi_pk=communication.request.pk pk=communication.pk host 'foiamachine' %}">Delete</a></p>
-        {% endif %}
+        <div>
+            {% if request.user == object.user %}
+            <p class="nomargin"><a href="{% host_url 'comm-update' foi_slug=communication.request.slug foi_pk=communication.request.pk pk=communication.pk host 'foiamachine' %}">Edit</a> &bull; <a href="{% host_url 'comm-delete' foi_slug=communication.request.slug foi_pk=communication.request.pk pk=communication.pk host 'foiamachine' %}">Delete</a></p>
+            {% endif %}
+        </div>
     </header>
     <div class="communication__message">
         {{communication.message|markdown}}
     </div>
+    {% if communication.files.exists %}
+    <div class="communication__files">
+        {% for file in communication.files.all %}
+        {% include 'foiamachine/patterns/file.html' %}
+        {% endfor %}
+    </div>
+    {% endif %}
 </div>
