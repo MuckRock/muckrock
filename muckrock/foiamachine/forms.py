@@ -48,6 +48,7 @@ class FoiaMachineCommunicationForm(forms.ModelForm):
         required=False,
         help_text='The maximum upload size is 10MB.',
         widget=forms.ClearableFileInput(attrs={'multiple': True}))
+    status = forms.ChoiceField(choices=STATUS, required=False, label='Update request status')
 
     def clean_files(self):
         """Enforces a size and filetype limit on uploaded files."""

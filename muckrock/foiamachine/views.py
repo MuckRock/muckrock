@@ -244,11 +244,16 @@ class FoiaMachineCommunicationCreateView(CreateView):
         """Adds foi to initial form data."""
         initial = super(FoiaMachineCommunicationCreateView, self).get_initial()
         initial['request'] = self.foi
+        initial['status'] = self.foi.status
         return initial
 
     def form_valid(self, form):
-        """Make sure to create files when the form is valid."""
+        """Make sure to set request status and create files when the form is valid."""
         comm = form.save()
+        status = form.cleaned_data['status']
+        if status:
+            comm.request.status = status
+            comm.request.save()
         files = form.cleaned_data['files']
         for file in files:
             FoiaMachineFile.objects.create(communication=comm, file=file, name=file.name)
@@ -296,11 +301,16 @@ class FoiaMachineCommunicationUpdateView(UpdateView):
         initial = super(FoiaMachineCommunicationUpdateView, self).get_initial()
         initial['files'] = self.object.files.all()
         initial['request'] = self.foi
+        initial['status'] = self.foi.status
         return initial
 
     def form_valid(self, form):
-        """Make sure to create files when the form is valid."""
+        """Make sure to set request status and create files when the form is valid."""
         comm = form.save()
+        status = form.cleaned_data['status']
+        if status:
+            comm.request.status = status
+            comm.request.save()
         files = form.cleaned_data['files']
         for file in files:
             FoiaMachineFile.objects.create(communication=comm, file=file, name=file.name)
