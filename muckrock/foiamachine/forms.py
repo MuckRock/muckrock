@@ -51,6 +51,8 @@ class FoiaMachineCommunicationForm(forms.ModelForm):
 
     def clean_files(self):
         """Enforces a size and filetype limit on uploaded files."""
+        if not self.files:
+            return []
         files = self.files.getlist('files')
         for file in files:
             content_type = file.content_type.split('/')[0]
