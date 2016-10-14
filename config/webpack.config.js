@@ -10,7 +10,8 @@ var root = './muckrock/'
 var config = {
     devtool: 'source-map',
     entry: {
-        main: path.resolve(root + 'assets/entry')
+        main: path.resolve(root + 'assets/entry'),
+        foiamachine: path.resolve(root + 'foiamachine/assets/entry'),
     },
     output: {
         path: path.resolve(root + 'assets/bundles/'),
