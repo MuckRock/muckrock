@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 
 from datetime import date, timedelta
+from django_hosts.resolvers import reverse as host_reverse
 from nose.tools import eq_
 
 from muckrock.jurisdiction import factories
@@ -39,20 +40,20 @@ class TestJurisdictionUnit(TestCase):
     def test_jurisdiction_url(self):
         """Test Jurisdiction model's get_absolute_url method"""
         eq_(self.local.get_absolute_url(),
-            reverse('jurisdiction-detail', kwargs={
+            host_reverse('jurisdiction-detail', kwargs={
                 'local_slug': self.local.slug,
                 'state_slug': self.state.slug,
                 'fed_slug': self.federal.slug}
             )
         )
         eq_(self.state.get_absolute_url(),
-            reverse('jurisdiction-detail', kwargs={
+            host_reverse('jurisdiction-detail', kwargs={
                 'state_slug': self.state.slug,
                 'fed_slug': self.federal.slug}
             )
         )
         eq_(self.federal.get_absolute_url(),
-            reverse('jurisdiction-detail', kwargs={
+            host_reverse('jurisdiction-detail', kwargs={
                 'fed_slug': self.federal.slug}
             )
         )
