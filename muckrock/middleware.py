@@ -18,4 +18,3 @@ class RemoveTokenMiddleware(object):
             params.pop(settings.LOT_MIDDLEWARE_PARAM_NAME)
             return HttpResponseRedirect(
                     '%s?%s' % (request.path, urlencode(params)))
-

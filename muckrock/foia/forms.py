@@ -23,7 +23,7 @@ class RequestForm(forms.Form):
     ]
 
     title = forms.CharField(
-            widget=forms.TextInput(attrs={'placeholder': 'Pick a Title'}),
+            widget=forms.TextInput(attrs={'placeholder': 'Add a subject'}),
             max_length=255,
             )
     document_placeholder = (
@@ -66,10 +66,10 @@ class RequestForm(forms.Form):
         state = data.get('state')
         local = data.get('local')
         if jurisdiction == 's' and not state:
-            error_msg = 'No state was selected'
+            error_msg = 'No state was selected.'
             self._errors['state'] = self.error_class([error_msg])
         if jurisdiction == 'l' and not local:
-            error_msg = 'No locality was selected'
+            error_msg = 'No locality was selected.'
             self._errors['local'] = self.error_class([error_msg])
         return self.cleaned_data
 

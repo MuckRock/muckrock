@@ -36,12 +36,14 @@
 .field {
     header {
         margin-bottom: 0;
+        @include display(flex);
+        @include justify-content(space-between);
     }
     .error input {
         border-color: $color-red;
     }
-    .required, .errorlist {
-        color: $color-red;
+    .required {
+        color: $color-grey;
         font-size: $size-2;
     }
     .errorlist {
@@ -49,6 +51,8 @@
         margin-bottom: 0;
         padding: 0;
         list-style: none;
+        color: $color-red;
+        font-size: $size-2;
     }
     label {
         margin-right: $vr/2;

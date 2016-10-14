@@ -510,7 +510,6 @@ class FOIARequest(models.Model):
         The only difference between a thanks andother submissions is that we do
         not set the request status, unless the request requires a proxy.
         """
-        from muckrock.task.models import FlaggedTask
         # can email appeal if the agency has an appeal agency which has an email address
         # and can accept emailed appeals
         can_email_appeal = appeal and self.agency and \
