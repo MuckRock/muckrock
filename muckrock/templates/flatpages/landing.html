@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% load static from staticfiles %}
+
+{% block styles %}
+<style>
+    .black {
+        color: #333C47;
+    }
+    .white {
+        color: #F7F8FA;
+    }
+    .bg--white {
+        background: #F7F8FA;
+    }
+    .bg--black {
+        background: #333C47;
+    }
+    .bg--blue {
+        background: #4582CC;
+    }
+    .bg--image {
+        background-position: center;
+        background-size: cover;
+    }
+
+    .billboard, .billboard__description, .billboard__features {
+        padding: 1rem;
+    }
+
+    .bg--black.billboard--image {
+        background: rgba(51, 60, 71, .9);
+    }
+    .bg--white.billboard--image {
+        background: rgba(247, 248, 250, .8);
+    }
+
+    .billboard .grid__row {
+        max-width: 50em;
+        margin: 0 auto;
+        align-items: flex-end;
+    }
+
+    @media(min-width: 768px) {
+        .billboard__description h1 {
+            font-size: 2.0625rem;
+        }
+    }
+
+    .billboard__description .button {
+        display: block;
+        width: 100%;
+    }
+
+    .basic.button {
+        border-radius: 4px;
+    }
+
+    .basic.button:hover {
+        opacity: .8;
+    }
+
+    .basic.white.button {
+        background: #F7F8FA;
+        color: #333C47;
+    }
+
+    .basic.black.button {
+        background: #333C47;
+        color: #F7F8FA;
+    }
+
+    .billboard__features h2 {
+        font-size: 1rem;
+        margin-bottom: 0;
+    }
+
+    #why-muckrock .basic.white.button {
+        color: #4582CC;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="nomargin bg--image" id="why-public-records" style="background-image:url({% static 'img/fingerprinting.jpg' %});">
+    <div class="bg--black white billboard billboard--image">
+        <div class="grid__row">
+            <div class="billboard__description grid__column half nomargin">
+                <h1>Public records keep the government accessible.</h1>
+                <p>Government perfers to talk about itself through propaganda and press releases. As security tightens around whistleblowers and confidential informants, public records are consistently the most trustworthy, proactive source of information on what government agencies are doing and thinking.</p>
+            </div>
+            <div class="grid__column half nomargin"></div>
+        </div>
+    </div>
+</div>
+<div class="nomargin" id="why-muckrock">
+    <div class="bg--blue white billboard">
+        <div class="grid__row">
+            <div class="billboard__description grid__column half nomargin">
+                <h1>We simplify everything about public records.</h1>
+                <p>MuckRock allows you to file more requests, faster, while keeping them all organized. MuckRock turns requesting public records into a simpler and more organized process than it ordinarily is.</p>
+                <p>Not only MuckRock is the best way to file, but we also offer a 30-day money-back guarantee.</p>
+                <a href="{% url 'foia-create' %}" class="basic white button">Try it free &rarr;</a>
+            </div>
+            <div class="billboard__features small grid__column half nomargin">
+                <h2>Automatic</h2>
+                <p>Once you've decided what to request, we'll add all the legal boilerplate you need. And as soon as the agency has exhausted its time to respond, we'll automatically message it, reminding it of its responsibility.</p>
+                <h2>Organized</h2>
+                <p>View and download responsive documents from the request page. Track the progress of ongoing requests. Send follow up messages. Challenge delays and appeal rejections. All from one place.</p>
+                <h2>Paperless</h2>
+                <p>It's 2016, but many government agencies still only accept requests by mail. Fortunately, MuckRock will print, stamp, and mail your requests to these snails. When they respond, we scan and upload everything to the request, so all you deal with are the digital files. </p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="nomargin bg--image" id="why-pro" style="background-image:url({% static 'img/newsroom.jpg' %});">
+    <div class="bg--white black billboard billboard--image">
+        <div class="grid__row">
+            <div class="billboard__description grid__column half nomargin">
+                <h1>Pro features make it even faster and easier.</h1>
+                <p>MuckRock has an extra set of features intended for journalists or researchers who file requests as part of their job. It’s like having a team of researchers who are doing the work for you.</p>
+                <a href="{% url 'accounts' %}" class="basic black button">Learn more &rarr;</a>
+            </div>
+            <div class="billboard__features small grid__column half nomargin">
+                <h2>Keep requests private</h2>
+                <p>Embargo requests to keep them private, up to 30 days after they’re completed. Use a private link to share with others.</p>
+                <h2>Multiply requests</h2>
+                <p>Send the same request to multiple agencies—even ones in different jurisdictions—all at once.</p>
+                <h2>Get priority support</h2>
+                <p>Get priority support from the public records experts on MuckRock’s staff, from composing your request to dealing with agencies.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

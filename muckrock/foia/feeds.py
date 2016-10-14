@@ -190,4 +190,3 @@ class UserUpdateFeed(Feed):
     def item_description(self, item):
         """The description of each rss item"""
         return linebreaks(escape(item.communication))
-

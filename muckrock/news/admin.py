@@ -60,4 +60,3 @@ class ArticleAdmin(VersionAdmin):
 
 admin.site.register(Article, ArticleAdmin)
 admin.site.register(Photo)
-

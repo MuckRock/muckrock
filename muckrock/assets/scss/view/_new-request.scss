@@ -104,9 +104,10 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
             }
         }
         label {
+            font-size: $size-3;
+            letter-spacing: 0;
+            text-transform: initial;
             color: $color-white;
-            @include font-sizing(1);
-            font-weight: $bold;
             text-align: center;
             cursor: pointer;
         }
@@ -187,6 +188,10 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
         @include border-bottom-radius($border-radius);
         border: 2px solid $color-grey-5;
         border-top: none;
+    }
+
+    .footer--submit {
+        text-align: right;
     }
 
     .failure.panel {

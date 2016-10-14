@@ -12,4 +12,3 @@ def make_template_choices(template_dict, level):
         choices.append((category, [(t.slug, t) for t in cat_templates]))
 
     return choices
-

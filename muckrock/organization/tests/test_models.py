@@ -303,4 +303,3 @@ class TestMembership(TestCase):
         self.org.save()
         ok_(not self.org.active)
         self.org.add_member(muckrock.factories.UserFactory())
-

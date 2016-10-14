@@ -38,16 +38,21 @@
             {% endif %}
         </header>
         {% if form.non_field_errors or form.errors %}
-        <section class="failure panel">
-            <p>The form could not be submitted due to the following errors:</p>
-            {{ form.non_field_errors }}
-            <ul>
-            {% for field in form.visible_fields %}
-                {% if field.errors %}
-                <li>{{ field.label }} field: {{ field.errors }}</li>
-                {% endif %}
-            {% endfor %}
-            </ul>
+        <div class="error message">
+            <span class="symbol">
+                {% include 'lib/component/icon/error.svg' %}
+            </span>
+            <span class="text">
+                <p>The form could not be submitted due to the following errors:</p>
+                {{ form.non_field_errors }}
+                {% for field in form.visible_fields %}
+                    {% if field.errors %}
+                    <p><strong>{{ field.label }}:</strong> {{field.errors.as_text|cut:"* "}}</p>
+                    {% endif %}
+                {% endfor %}
+                </dl>
+            </span>
+        </div>
         </section>
         {% endif %}
         <form action="" method="post" class="create-request">
@@ -107,23 +112,26 @@
                 </fieldset>
             {% endfor %}
 
-
-            <footer class="buttons">
             {% if user.is_authenticated %}
+            <footer class="footer--submit">
                 {% if clone %}
-                <button type="submit" name="submit" value="Clone" class="primary button">Save Draft</button>
+                <button type="submit" name="submit" value="Clone" class="primary button">Submit</button>
                 {% else %}
-                <button type="submit" name="submit" value="Create" class="primary button">Save Draft</button>
+                <button type="submit" name="submit" value="Create" class="primary button">Submit</button>
                 {% endif %}
-            {% else %}
-                <p>Create a MuckRock account and file up to four requests for just $20, or <a href="{% url 'accounts-signup-professional' %}" target="_blank">go Pro for 20 requests a month</a> with the option to keep your submissions private. Already have an account? <a href="{% url 'acct-login' %}">Log in</a>.</p>
-                {% if clone %}
-                <button type="submit" name="submit" value="Clone" class="primary button" onclick="ga('send', 'event', 'Account', 'Registration', window.location.pathname)">Create Account and Save Draft</button>
-                {% else %}
-                <button type="submit" name="submit" value="Create" class="primary button" onclick="ga('send', 'event', 'Account', 'Registration', window.location.pathname)">Create Account and Save Draft</button>
-                {% endif %}
-    		{% endif %}
             </footer>
+            {% else %}
+            <footer class="footer--signup">
+                <p>Create a MuckRock account and file up to four requests for just $20, or <a href="{% url 'accounts-signup-professional' %}" target="_blank">go Pro for 20 requests a month</a> with the option to keep your submissions private. Already have an account? <a href="{% url 'acct-login' %}">Log in</a>.</p>
+                <div class="footer--submit">
+                    {% if clone %}
+                    <button type="submit" name="submit" value="Clone" class="primary button" onclick="ga('send', 'event', 'Account', 'Registration', window.location.pathname)">Create Account and Submit</button>
+                    {% else %}
+                    <button type="submit" name="submit" value="Create" class="primary button" onclick="ga('send', 'event', 'Account', 'Registration', window.location.pathname)">Create Account and Submit</button>
+                    {% endif %}
+                </div>
+            </footer>
+    		{% endif %}
         </form>
     </div>
     {% if featured and not clone %}
@@ -198,7 +206,7 @@ $(document).ready(function(){
         $(this).parent().siblings().removeClass('active');
         localField.show();
         stateField.hide();
-        agencyToggle(localSelect.val());
+        agencyToggle(localSelect.val().length);
         agencyInput.val('');
     });
 
@@ -207,7 +215,7 @@ $(document).ready(function(){
         $(this).parent().siblings().removeClass('active');
         localField.hide();
         stateField.show();
-        agencyToggle(stateSelect.val());
+        agencyToggle(stateSelect.val().length);
         agencyInput.val('');
     });
 
@@ -223,7 +231,7 @@ $(document).ready(function(){
 
     function selectChange(select) {
         agencyByJurisdiction(select);
-        agencyToggle(select.val());
+        agencyToggle(select.val().length);
         agencyInput.val('');
     }
 

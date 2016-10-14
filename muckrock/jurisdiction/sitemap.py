@@ -16,4 +16,3 @@ class JurisdictionSitemap(Sitemap):
     def items(self):
         """Return all non hidden Jurisdictions"""
         return Jurisdiction.objects.filter(hidden=False)
-
