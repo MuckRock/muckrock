@@ -34,199 +34,79 @@ import stripe
 
 logger = logging.getLogger(__name__)
 
-class MRFilterableListView(ListView):
-    """
-    The main feature of MRFilterableListView is the ability to filter
-    a set of request objects by a dynamic dictionary of filters and
-    lookup conditions. MRFilterableListView should be used in conjunction
-    with MRFilterForm, available in the `muckrock.forms` module.
 
-    To see an example of a subclass of MRFilterableListView that adds new
-    filter fields, look at `muckrock.foia.views.RequestList`.
-    """
-
-    title = ''
-    template_name = 'lists/base_list.html'
-    default_sort = 'title'
+class OrderedSortMixin(object):
+    """Sorts and orders a queryset given some inputs."""
+    default_sort = 'id'
     default_order = 'asc'
 
-    def get_filters(self):
+    def sort_queryset(self, queryset):
         """
-        Filters should be the same as the fields in MRFilterForm, or whichever
-        subclass of MRFilterForm is being used in as this class's `filter_form`.
-        Filters are an array of key-value pairs.
-        Required pairs are the field name and the [lookup condition][a].
+        Sorts a queryset of objects.
 
-        [a]: https://docs.djangoproject.com/en/1.7/ref/models/querysets/#field-lookups
+        We need to make sure the field to sort by actually exists.
+        If the field doesn't exist, return the unordered queryset.
         """
-        # pylint: disable=no-self-use
-        return [
-            {
-                'field': 'user',
-                'lookup': 'exact',
-            },
-            {
-                'field': 'agency',
-                'lookup': 'exact',
-            },
-            {
-                'field': 'jurisdiction',
-                'lookup': 'exact',
-            },
-            {
-                'field': 'tags',
-                'lookup': 'name__in',
-            },
-        ]
-
-    def clean_filter_value(self, filter_key, filter_value):
-        """Cleans filter inputs to their expected values if detected as incorrect"""
-        # pylint:disable=no-self-use
-        # pylint:disable=too-many-branches
-        if not filter_value:
-            return None
-
-        # tags need to be parsed into an array before filtering
-        if filter_key == 'tags':
-            filter_value = filter_value.split(',')
-        if filter_key == 'user':
-            # if looking up by PK, then result will be empty
-            # if looking up by username, then result will have length
-            if len(re.findall(r'\D+', filter_value)) > 0:
-                try:
-                    filter_value = User.objects.get(username=filter_value).pk
-                except User.DoesNotExist:
-                    filter_value = None
-                # username is unique so only one result should be returned by get
-        if filter_key == 'agency':
-            if len(re.findall(r'\D+', filter_value)) > 0:
-                try:
-                    filter_value = Agency.objects.get(slug=filter_value).pk
-                except Agency.DoesNotExist:
-                    filter_value = None
-                except Agency.MultipleObjectsReturned:
-                    filter_value = Agency.objects.filter(slug=filter_value)[0]
-        if filter_key == 'jurisdiction':
-            if len(re.findall(r'\D+', filter_value)) > 0:
-                try:
-                    filter_value = Jurisdiction.objects.get(slug=filter_value).pk
-                except Jurisdiction.DoesNotExist:
-                    filter_value = None
-                except Jurisdiction.MultipleObjectsReturned:
-                    filter_value = Jurisdiction.objects.filter(slug=filter_value)[0]
-
-        return filter_value
-
-    def get_filter_data(self):
-        """Returns a list of filter values and a url query for the filter."""
-        get = self.request.GET
-        filter_initials = {}
-        filter_url = ''
-        for filter_by in self.get_filters():
-            filter_key = filter_by['field']
-            filter_value = get.get(filter_key, None)
-            filter_value = self.clean_filter_value(filter_key, filter_value)
-            if filter_value:
-                if isinstance(filter_value, list):
-                    try:
-                        filter_value = ', '.join(filter_value)
-                    except TypeError:
-                        filter_value = str(filter_value)
-                kwarg = {filter_key: filter_value}
-                try:
-                    filter_initials.update(kwarg)
-                    filter_url += '&' + str(filter_key) + '=' + str(filter_value)
-                except ValueError:
-                    pass
-        return {
-            'filter_initials': filter_initials,
-            'filter_url': filter_url
-        }
-
-    def filter_list(self, objects):
-        """Filters a list of objects"""
-        get = self.request.GET
-        kwargs = {}
-        for filter_by in self.get_filters():
-            filter_key = filter_by['field']
-            filter_lookup = filter_by['lookup']
-            filter_value = get.get(filter_key, None)
-            filter_value = self.clean_filter_value(filter_key, filter_value)
-            if filter_value:
-                kwargs.update({'{0}__{1}'.format(filter_key, filter_lookup): filter_value})
-        # tag filtering could add duplicate items to results, so .distinct()
-        # is used only if there are tags, as adding distinct can cause
-        # performance issues
-        if get.get('tags'):
-            objects = objects.distinct()
-        try:
-            objects = objects.filter(**kwargs)
-        except FieldError:
-            pass
-        except ValueError:
-            error_msg = "Sorry, there was a problem with your filters. Please try filtering again."
-            messages.error(self.request, error_msg)
-        return objects
-
-    def sort_list(self, objects):
-        """Sorts the list of objects"""
+        # pylint:disable=protected-access
         sort = self.request.GET.get('sort', self.default_sort)
         order = self.request.GET.get('order', self.default_order)
-        # We need to make sure the field to sort by actually exists.
-        # If the field doesn't exist, revert to the default field.
-        # Otherwise, Django will throw a hard-to-catch FieldError.
-        # It's hard to catch because the error isn't raised until
-        # the QuerySet is evaluated. <Insert poop emoji here>
         try:
-            # pylint:disable=protected-access
-            self.get_model()._meta.get_field_by_name(sort)
-            # pylint:enable=protected-access
+            queryset.model._meta.get_field(sort)
         except FieldDoesNotExist:
             sort = self.default_sort
         if order != 'asc':
             sort = '-' + sort
-        objects = objects.order_by(sort)
-        return objects
-
-    def get_context_data(self, **kwargs):
-        """Gets basic context, including title, form, and url"""
-        context = super(MRFilterableListView, self).get_context_data(**kwargs)
-        filter_data = self.get_filter_data()
-        context['title'] = self.title
-        context['per_page'] = int(self.get_paginate_by(context['object_list']))
-        try:
-            context['filter_form'] = MRFilterForm(initial=filter_data['filter_initials'])
-        except ValueError:
-            context['filter_form'] = MRFilterForm()
-        context['filter_url'] = filter_data['filter_url']
-        context['active_sort'] = self.request.GET.get('sort', self.default_sort)
-        context['active_order'] = self.request.GET.get('order', self.default_order)
-        return context
+        return queryset.order_by(sort)
 
     def get_queryset(self):
-        objects = super(MRFilterableListView, self).get_queryset()
-        objects = self.filter_list(objects)
-        objects = self.sort_list(objects)
-        return objects
+        """Sorts the queryset before returning it."""
+        return self.sort_queryset(super(OrderedSortMixin, self).get_queryset())
 
-    def get_paginate_by(self, queryset):
-        """Paginates list by the return value"""
-        try:
-            # clean per_page value so it only includes digits
-            # then convert it to an integer
-            per_page = self.request.GET.get('per_page')
-            per_page = re.sub(r'[^\d]', r'', per_page)
-            per_page = int(per_page)
-            return max(min(per_page, 100), 5)
-        except (ValueError, TypeError):
-            return 25
+    def get_context_data(self, **kwargs):
+        """Adds sort and order data to the context."""
+        context = super(OrderedSortMixin, self).get_context_data(**kwargs)
+        context['sort'] = self.request.GET.get('sort', self.default_sort)
+        context['order'] = self.request.GET.get('order', self.default_order)
+        return context
 
-    def get_model(self):
-        """Get the model for this view - directly or from the queryset"""
-        if self.queryset is not None:
-            return self.queryset.model
-        if self.model is not None:
-            return self.model
+
+class FilterMixin(object):
+    """
+    The FilterMixin gives the ability to filter a list
+    of objects with the help of the django_filters library.
+
+    It requires a filter_class be defined.
+    """
+    filter_class = None
+
+    def get_filter(self):
+        """Returns the filter, if a filter_class is defined. If it isn't, an error is raised."""
+        if self.filter_class is None:
+            raise AttributeError('Missing a filter class.')
+        return self.filter_class(self.request.GET, queryset=self.get_queryset())
+
+    def get_context_data(self, **kwargs):
+        """
+        Adds the filter to the context and overrides the
+        object_list value with the filter's queryset.
+        """
+        context = super(FilterMixin, self).get_context_data(**kwargs)
+        _filter = self.get_filter()
+        context['filter'] = _filter
+        context['object_list'] = _filter.qs
+        return context
+
+
+class MRFilterableListView(OrderedSortMixin, FilterMixin, ListView):
+    """Allows for list views that are filterable and orderable."""
+    title = ''
+    template_name = 'base_list.html'
+
+    def get_context_data(self, **kwargs):
+        """Adds title to the context data."""
+        context = super(MRFilterableListView, self).get_context_data(**kwargs)
+        context['title'] = self.title
+        return context
 
 
 class MRSearchView(SearchView):

@@ -24,6 +24,7 @@ from muckrock.accounts.models import Notification
 from muckrock.agency.forms import AgencyForm
 from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.foia.codes import CODES
+from muckrock.foia.filters import FOIARequestFilterSet
 from muckrock.foia.forms import (
     RequestFilterForm,
     FOIAEmbargoForm,
@@ -65,22 +66,9 @@ STATUS_NODRAFT = [st for st in STATUS if st != ('started', 'Draft')]
 class RequestList(MRFilterableListView):
     """Base list view for other list views to inherit from"""
     model = FOIARequest
-    title = 'Requests'
+    filter_class = FOIARequestFilterSet
     template_name = 'lists/request_list.html'
     default_sort = 'title'
-
-    def get_filters(self):
-        """Adds request-specific filter fields"""
-        base_filters = super(RequestList, self).get_filters()
-        new_filters = [{'field': 'status', 'lookup': 'exact'}]
-        return base_filters + new_filters
-
-    def get_context_data(self, **kwargs):
-        """Changes filter_form to use RequestFilterForm instead of the default"""
-        context = super(RequestList, self).get_context_data(**kwargs)
-        filter_data = self.get_filter_data()
-        context['filter_form'] = RequestFilterForm(initial=filter_data['filter_initials'])
-        return context
 
     def get_queryset(self):
         """Limits requests to those visible by current user"""
