@@ -1,0 +1,21 @@
+/*
+The Sortable pattern provides the styling for a sortable table.
+*/
+
+.sortable {
+  .sort-by {
+    /* A header that the table could be sorted by. */
+    cursor: pointer;
+    &:hover {
+      background-color: $color-grey-7;
+    }
+  }
+  .sorted-by {
+    /* The header that the table is currently sorted by. */
+    font-weight: $bold;
+  }
+  .arrow {
+    margin-right: .5em;
+    transform: scale(1.5);
+  }
+}
