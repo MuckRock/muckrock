@@ -1,16 +1,14 @@
-{% extends 'lists/base_list.html' %}
+{% extends 'base_list.html' %}
 {% block title %}MuckRock &bull; Agencies{% endblock title %}
 {% block list-type %}agency{% endblock list-type %}
 
-{% block list-filters %}
-{{ filter_form.jurisdiction }}
-{% endblock list-filters %}
-
 {% block list-table-head %}
-<tr>
-    <th data-sort="name">Name</th>
-    <th data-sort="jurisdiction">Jurisdiction</th>
-</tr>
+<thead>
+    <tr>
+        <th data-sort="name">Name</th>
+        <th data-sort="jurisdiction">Jurisdiction</th>
+    </tr>
+</thead>
 {% endblock list-table-head %}
 
 {% block list-table-item %}

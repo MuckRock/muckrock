@@ -18,7 +18,10 @@
 */
 
 .list {
-    @include padding;
+  @include padding;
+}
+
+/*
     .list-navigation {
         .list-head .list-title {
             @extend h1;
@@ -92,12 +95,6 @@
                 width: 50%;
             }
         }
-        /*
-        .list-filters-buttons {
-            @include display(flex);
-            @include justify-content(space-between);
-        }
-        */
         #list-filters-toggle-label, #list-filters-toggle {
             display: none;
         }
@@ -237,6 +234,7 @@
         }
     }
 }
+*/
 
 @import 'crowdfund';
 @import 'search';
