@@ -3,7 +3,7 @@
 {% load foia_tags %}
 
 {% block list-actions %}
-<form method="POST" id="my-request-actions">
+<form method="POST" class="toolbar" id="my-request-actions">
     {% csrf_token %}
     <button class="button" name="submit" value="Mark as Read">Mark as Read</button>
     <button class="button" name="submit" value="Mark as Unread">Mark as Unread</button>
@@ -14,11 +14,12 @@
 {% block list-table-head %}
 <thead>
     <tr>
-        <th width="3%" class="list-table-checkbox"><input type="checkbox" class="select-all" data-name="foia" /></th>
-        <th class="sort-by" data-sort="title">Title</th>
-        <th class="sort-by" width="20%" data-sort="status">Status</th>
-        <th class="sort-by" width="20%" data-sort="date_submitted">Created</th>
-        <th class="sort-by" width="20%" data-sort="date_updated">Updated</th>
+        <th width="3%" class="list-table-checkbox"><input type="checkbox" class="select-all" data-name="foia" data-toolbar="#my-request-actions" /></th>
+        <th data-sort="title">Title</th>
+        <th width="5%" data-sort="status">Status</th>
+        <th width="20%" data-sort="agency">Agency</th>
+        <th width="20%" data-sort="jurisdiction">Jurisdiction</th>
+        <th width="10%" data-sort="date_updated">Updated</th>
     </tr>
 </thead>
 {% endblock list-table-head %}
@@ -29,7 +30,8 @@
     <td class="list-table-checkbox"><input type="checkbox" name="{{foia.foia_type}}" value="{{foia.pk}}" form="my-request-actions"></td>
     <td><a href="{{foia.get_absolute_url}}">{{foia.title}}</a></td>
     <td><span class="small badge state {{ foia.status|classify_status }}">{{foia.get_status_display}}</span></td>
-    <td>{{foia.date_submitted|date:"m/d/Y"}}</td>
+    <td>{{ foia.agency }}</td>
+    <td>{{ foia.jurisdiction }}</td>
     <td>{{foia.date_updated|date:"m/d/Y"}}</td>
 </tr>
 {% endwith %}

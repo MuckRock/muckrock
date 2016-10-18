@@ -22,8 +22,8 @@ This is the base style for a list of objects: a collection of FOIA requests, age
         {% endblock list-header %}
         {% block list-sections %}
         {% endblock list-sections %}
-        {% if filter %}
-        <form method="GET" class="list-filters">
+        {% if filter.form %}
+        <form method="GET" class="filter form">
             {% include 'lib/pattern/form.html' with form=filter.form %}
             <div class="button-group">
                 <button class="button" action="apply-filters">Filter</button>
@@ -60,7 +60,6 @@ This is the base style for a list of objects: a collection of FOIA requests, age
                     {% endfor %}
                 </tbody>
                 {% endblock list-table-body %}
-
             </table>
             {% endblock list-table %}
             {% include 'lib/component/pagination.html' %}
