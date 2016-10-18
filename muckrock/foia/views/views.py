@@ -24,7 +24,7 @@ from muckrock.accounts.models import Notification
 from muckrock.agency.forms import AgencyForm
 from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.foia.codes import CODES
-from muckrock.foia.filters import FOIARequestFilterSet
+from muckrock.foia.filters import FOIARequestFilterSet, MyFOIARequestFilterSet
 from muckrock.foia.forms import (
     RequestFilterForm,
     FOIAEmbargoForm,
@@ -84,7 +84,9 @@ class RequestList(MRFilterableListView):
 @class_view_decorator(login_required)
 class MyRequestList(RequestList):
     """View requests owned by current user"""
-    template_name = 'lists/request_my_list.html'
+    filter_class = MyFOIARequestFilterSet
+    title = 'Your Requests'
+    template_name = 'foia/my_list.html'
 
     def post(self, request):
         """Handle updating read status"""
@@ -102,24 +104,16 @@ class MyRequestList(RequestList):
             pass
         return redirect('foia-mylist')
 
-    def get_filters(self):
-        """Removes the 'users' filter, because its _my_ requests"""
-        filters = super(MyRequestList, self).get_filters()
-        for filter_dict in filters:
-            if 'user' in filter_dict.values():
-                filters.pop(filters.index(filter_dict))
-        return filters
-
     def get_queryset(self):
-        """Gets multirequests as well, limits to just those by the current user"""
-        single_req = (FOIARequest.objects
-                .filter(user=self.request.user)
-                .select_related('jurisdiction')
-                .prefetch_related('communications')
-                )
-        multi_req = FOIAMultiRequest.objects.filter(user=self.request.user)
-        single_req = self.sort_list(self.filter_list(single_req))
-        return list(single_req) + list(multi_req)
+        """Limit to just requests owned by the current user."""
+        queryset = super(MyRequestList, self).get_queryset()
+        return queryset.filter(user=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        """Adds multirequests owned by the user to the context."""
+        context = super(MyRequestList, self).get_context_data(**kwargs)
+        context['multirequests'] = FOIAMultiRequest.objects.filter(user=self.request.user)
+        return context
 
 
 @class_view_decorator(login_required)
