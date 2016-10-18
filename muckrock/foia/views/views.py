@@ -67,7 +67,8 @@ class RequestList(MRFilterableListView):
     """Base list view for other list views to inherit from"""
     model = FOIARequest
     filter_class = FOIARequestFilterSet
-    template_name = 'lists/request_list.html'
+    title = 'All Requests'
+    template_name = 'foia/list.html'
     default_sort = 'title'
 
     def get_queryset(self):

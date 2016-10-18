@@ -1,0 +1,53 @@
+{% extends 'base_list.html' %}
+{% load tags %}
+{% load foia_tags %}
+{% load mathfilters %}
+{% load static from staticfiles %}
+{% block title %}MuckRock &bull; Requests{% endblock title %}
+{% block list-title %}Requests{% endblock list-title %}
+{% block list-type %}request{% endblock list-type %}
+
+{% block list-header %}
+<header>
+    <h1>{{title}}</h1>
+    <a href="{% url 'foia-create' %}" class="blue button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
+        {% include 'lib/component/icon/create-request.svg' %}
+        <span>File a Request</span>
+    </a>
+</header>
+{% endblock %}
+
+{% block list-table-head %}
+<thead>
+    <tr>
+        <th class="sort-by" data-sort="title">Title</th>
+        <th class="sort-by" width="15%" data-sort="status">Status</th>
+        <th class="sort-by" width="10%" data-sort="date_submitted">Created</th>
+        <th class="sort-by" width="10%" data-sort="date_updated">Updated</th>
+    </tr>
+</thead>
+{% endblock list-table-head %}
+
+{% block list-table-row %}
+{% with object as foia %}
+<tr>
+    <td><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></td>
+    <td><span class="small badge state {{ foia.status|classify_status }}">{{foia.get_status_display}}</span></td>
+    <td>{{ foia.date_submitted|date:"m/d/Y" }}</td>
+    <td>{{ foia.date_updated|date:"m/d/Y" }}</td>
+</tr>
+{% endwith %}
+{% endblock list-table-row %}
+
+{% block list-sections %}
+{% if user.is_authenticated %}
+<ul class="nostyle list__sections">
+    <li class="{% active request '^/foi/list/$' %}"><a href="{% url 'foia-list' %}">All</a></li>
+    <li class="{% active request '^/foi/mylist/$' %}"><a href="{% url 'foia-mylist' %}">Yours</a></li>
+    <li class="{% active request '^/foi/list/following/$' %}"><a href="{% url 'foia-list-following' %}">Following</a></li>
+    {% if user.is_staff %}
+    <li class="{% active request '^/foi/list/processing/$' %}"><a href="{% url 'foia-list-processing' %}">Processing</a></li>
+    {% endif %}
+</ul>
+{% endif %}
+{% endblock list-sections %}

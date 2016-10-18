@@ -7,6 +7,8 @@ This is the base style for a list of objects: a collection of FOIA requests, age
 {% load static from staticfiles %}
 {% load mathfilters %}
 
+{% block title %}{{title}} &bull; MuckRock{% endblock title %}
+
 {% block content %}
 <div class="list grid__row">
     {% block list-navigation %}
@@ -48,11 +50,11 @@ This is the base style for a list of objects: a collection of FOIA requests, age
                 {% endblock list-table-head %}
                 {% block list-table-body %}
                 <tbody>
-                    {% for item in object_list %}
+                    {% for object in object_list %}
                     {% block list-table-row %}
                     <tr>
-                        <td>{{item.id}}
-                        <td><a href="{{item.get_absolute_url}}">{{item}}</a></td>
+                        <td>{{object.id}}
+                        <td><a href="{{object.get_absolute_url}}">{{object}}</a></td>
                     </tr>
                     {% endblock list-table-row %}
                     {% endfor %}
