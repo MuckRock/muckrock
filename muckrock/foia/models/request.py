@@ -134,7 +134,7 @@ class FOIARequestQuerySet(models.QuerySet):
         return foias
 
 
-STATUS = (
+STATUS = [
     ('started', 'Draft'),
     ('submitted', 'Processing'),
     ('ack', 'Awaiting Acknowledgement'),
@@ -147,7 +147,7 @@ STATUS = (
     ('done', 'Completed'),
     ('partial', 'Partially Completed'),
     ('abandoned', 'Withdrawn'),
-)
+]
 
 END_STATUS = ['rejected', 'no_docs', 'done', 'partial', 'abandoned']
 
