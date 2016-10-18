@@ -525,3 +525,8 @@ LEAFLET_CONFIG = {
         }
     }
 }
+
+# Django Filter settings
+
+FILTERS_HELP_TEXT_EXCLUDE = False
+FILTERS_HELP_TEXT_FILTER = False
