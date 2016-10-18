@@ -40,7 +40,49 @@ function sortListByHeader() {
   }
 }
 
+const toolbar = $('.toolbar :button, .toolbar :input');
+function disableToolbar() {
+    toolbar.attr('disabled', true).closest('.field').addClass('disabled');
+}
+function enableToolbar() {
+    toolbar.attr('disabled', false).closest('.field').removeClass('disabled');
+}
+$('th input:checkbox').change(function(){
+    var table = $(this).closest('table');
+    var headerCheckbox = $(this);
+    var bodyCheckboxes = $(table).find('td input:checkbox');
+    var checked = this.checked;
+    bodyCheckboxes.each(function(){
+        this.checked = checked;
+    });
+    if (checked) {
+        enableToolbar();
+    } else {
+        disableToolbar();
+    }
+});
+$('td input:checkbox').change(function(){
+    var table = $(this).closest('table');
+    var headerCheckbox = $(table).find('th input:checkbox');
+    var bodyCheckboxes = $(table).find('td input:checkbox');
+    var checkedBoxes = bodyCheckboxes.filter(':checked');
+    if (checkedBoxes.length == bodyCheckboxes.length) {
+        headerCheckbox[0].indeterminate = false;
+        headerCheckbox[0].checked = true;
+    } else {
+        headerCheckbox[0].indeterminate = true;
+    }
+    if (checkedBoxes.length == 0) {
+        headerCheckbox[0].indeterminate = false;
+        headerCheckbox[0].checked = false;
+        disableToolbar();
+    } else {
+        enableToolbar();
+    }
+});
+
 $(document).ready(() => {
   tableHeadSortIndicator();
+  disableToolbar();
   $('.sortable th').click(sortListByHeader);
 });

@@ -32,16 +32,6 @@ import './nav';
 import './tabs';
 import './task';
 
-function selectAll() {
-    var source = $(this);
-    var name = source.data('name');
-    var checkboxes = $('input[type="checkbox"][name="' + name + '"]');
-    $(checkboxes).each(function(){
-        this.checked = source.prop('checked');
-        $(this).change();
-    });
-}
-
 /* Bind plugins and event handlers to frontend elements. */
 
 $('document').ready(function(){
@@ -77,9 +67,6 @@ $('document').ready(function(){
         height: 200,
         width: 200
     });
-
-    // Select-all checkbox behavior
-    $('.select-all').click(selectAll);
 
     // Quicksearch
     $('#comms-filter').quicksearch('#comms .communications-list .communication');
