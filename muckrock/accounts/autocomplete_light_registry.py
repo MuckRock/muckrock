@@ -16,7 +16,7 @@ class UserAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     choice_template = 'autocomplete/user.html'
     search_fields = ['^username', '^first_name', '^last_name', '^email']
     attrs = {
-        'placeholder': 'Search by name',
+        'placeholder': 'Search users',
         'data-autocomplete-minimum-characters': 2
     }
 

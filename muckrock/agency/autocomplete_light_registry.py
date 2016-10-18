@@ -12,7 +12,8 @@ from muckrock.jurisdiction.models import Jurisdiction
 
 class AgencyAutocomplete(autocomplete_light.AutocompleteModelBase):
     """Creates an autocomplete field for picking agencies"""
-    choices = Agency.objects.filter(status='approved')
+    choices = Agency.objects.filter(status='approved').select_related('jurisdiction')
+    choice_template = 'autocomplete/agency.html'
     search_fields = ['name', 'aliases']
     attrs = {
         'data-autocomplete-minimum-characters': 1,
