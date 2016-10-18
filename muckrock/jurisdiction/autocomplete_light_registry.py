@@ -39,9 +39,10 @@ autocomplete_light.register(
 class JurisdictionAutocomplete(autocomplete_light.AutocompleteModelBase):
     """Allows autocompletes against all visible jurisdictions in database"""
     choices = Jurisdiction.objects.filter(hidden=False)
-    search_fields = ['^name']
+    search_fields = ['^name', 'abbrev']
     attrs = {
-        'data-autocomplete-minimum-characters': 2
+        'data-autocomplete-minimum-characters': 1,
+        'placeholder': 'Search jurisdictions',
     }
 
 autocomplete_light.register(Jurisdiction, JurisdictionAutocomplete)
