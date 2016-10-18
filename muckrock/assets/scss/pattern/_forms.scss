@@ -58,7 +58,7 @@
         margin-right: $vr/2;
         font-weight: $bold;
     }
-    input {
+    input, select, textarea {
         display: block;
         width: 100%;
     }

@@ -3,7 +3,7 @@ The Sortable pattern provides the styling for a sortable table.
 */
 
 .sortable {
-  .sort-by {
+  [data-sort] {
     /* A header that the table could be sorted by. */
     cursor: pointer;
     &:hover {

@@ -19,6 +19,48 @@
 
 .list {
   @include padding;
+  .empty {
+    @include display(flex);
+    @include justify-content(center);
+    @include align-items(center);
+    min-height: 100%;
+    color: $color-grey;
+    font-weight: $bold;
+    text-align: center;
+  }
+  .filter.form {
+    @include border;
+    background-color: $color-grey-7;
+    .button-group {
+      width: 100%;
+    }
+  }
+}
+
+.list__sections li {
+  @include border;
+  border-bottom: 0;
+  &:last-child {
+    border-bottom: 1px solid $color-grey;
+  }
+}
+.list__sections a {
+  display: block;
+  width: 100%;
+  padding: $vr/4 $vr/2;
+  font-weight: $bold;
+  text-decoration: none;
+  &:hover {
+    background: $color-blue;
+    color: $color-white;
+  }
+}
+.list__sections .current-tab a {
+  background: $color-blue;
+  color: $color-white;
+}
+.list-table-checkbox {
+  font-size: 1rem;
 }
 
 /*
