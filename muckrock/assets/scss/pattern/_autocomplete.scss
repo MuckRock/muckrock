@@ -1,118 +1,105 @@
 input.autocomplete.xhr-pending { background-image: none; }
 
 .autocomplete-light-widget {
-    width: 100%;
-    font-family: $sans-serif;
-    color: $color-black;
-    input {
-        width: 100%;
+  .user.choice {
+    padding: 0;
+  }
+  .foia.choice {
+    .main {
+      padding: $vr/4 $vr/2;
     }
-    .choice {
-        padding: 0;
+    .title {
+      margin-bottom: 0;
     }
-    .user.choice {
-        padding: 0;
-        .avatar {
-            margin-bottom: 0;
-            vertical-align: middle;
-        }
-        .name {
-            display: inline-block;
-            margin-bottom: 0;
-            padding: $vr/4 $vr/2;
-        }
-        .username {
-            font-size: $size-2;
-        }
+    .meta {
+      font-size: $size-2;
     }
-    .foia.choice {
-        .main {
-            padding: $vr/4 $vr/2;
-        }
-        .title {
-            margin-bottom: 0;
-        }
-        .meta {
-            font-size: $size-2;
-        }
+  }
+  .agency.choice {
+    .main {
+      padding: $vr/4 $vr/2;
     }
-    .agency.choice {
-        .main {
-            padding: $vr/4 $vr/2;
-        }
-        .name {
-            margin-bottom: 0;
-        }
-        .jurisdiction {
-            font-size: $size-2;
-        }
+    .name {
+      margin-bottom: 0;
     }
-    .article.choice {
-        .image, .title {
-            margin-bottom: 0;
-        }
-        .image {
-            display: inline-block;
-            vertical-align: middle;
-        }
-        .title {
-            font-weight: $bold;
-        }
-        .info {
-            display: inline-block;
-            vertical-align: middle;
-            padding: $vr/4 $vr/2;
-        }
-        .meta {
-            font-size: $size-2;
-        }
+    .jurisdiction {
+      font-size: $size-2;
     }
-    .deck {
-        display: block;
-        .choice {
-            @include display(flex);
-            @include align-items(center);
-            @include justify-content(space-between);
-            .main {
-                @include flex(1 1 auto);
-            }
-            .remove {
-                @include order(1);
-                @include flex(0 1 1em);
-                margin-right: $vr/2;
-            }
-            margin-bottom: $vr/2;
-            padding: 0;
-            background: $color-white-pure;
-            border: 1px solid $color-grey;
-            @include border-radius;
-            overflow: hidden;
-        }
-        .hilight {
-            color: $color-black;
-        }
-        .user {
-            @include display(inline-flex);
-        }
+  }
+  .article.choice {
+    .image, .title {
+      margin-bottom: 0;
     }
+    .image {
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .title {
+      font-weight: $bold;
+    }
+    .info {
+      display: inline-block;
+      vertical-align: middle;
+      padding: $vr/4 $vr/2;
+    }
+    .meta {
+      font-size: $size-2;
+    }
+  }
+}
+
+.autocomplete-light-widget .choice {
+  .choice__text {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0;
+  }
+}
+
+.autocomplete-light-widget {
+  width: 100%;
+  font-family: $sans-serif;
+  color: $color-black;
+}
+.autocomplete-light-widget.yourlabs-autocomplete {
+  width: auto;
+  max-height: 20em;
+  overflow: hidden;
+  overflow-y: scroll;
+  padding: 0;
+  left: 0;
+}
+.autocomplete-light-widget .deck {
+  width: 100%;
+}
+.autocomplete-light-widget .deck > span {
+  display: block;
+  width: 100%;
+  padding: $vr/4;
+  @include border;
+  background: $color-white-pure;
+}
+.autocomplete-light-widget .remove {
+  vertical-align: middle;
+  margin-right: $vr/2;
 }
 
 .yourlabs-autocomplete {
-    width: auto;
-    max-height: 20em;
-    overflow: hidden;
-    overflow-y: scroll;
-    padding: 0;
-    left: 0;
-    background-color: $color-white;
-    @include border-radius;
-    .hilight {
-        color: $color-white;
-        background-color: $color-blue;
-        background-image: none;
-    }
-    .choice, [data-value], em {
-        color: $color-black;
-        width: 100%;
-    }
+  width: auto;
+  max-height: 20em;
+  overflow: hidden;
+  overflow-y: scroll;
+  padding: 0;
+  left: 0;
+  background-color: $color-white;
+  @include border-radius;
+  .hilight {
+    color: $color-white;
+    background-color: $color-blue;
+    background-image: none;
+  }
+  .choice, [data-value], em {
+    color: $color-black;
+    width: 100%;
+  }
 }
