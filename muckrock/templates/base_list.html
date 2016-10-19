@@ -43,7 +43,7 @@ This is the base style for a list of objects: a collection of FOIA requests, age
                 {% block list-table-head %}
                 <thead>
                     <tr>
-                        <th class="sort-by" data-sort="id">ID</th>
+                        <th data-sort="id">ID</th>
                         <th>Object</th>
                     </tr>
                 </thead>
@@ -64,7 +64,13 @@ This is the base style for a list of objects: a collection of FOIA requests, age
             {% endblock list-table %}
             {% include 'lib/component/pagination.html' %}
         {% else %}
+            {% block empty %}
+            {% if request.GET %}
+            <p class="empty">No results given this filter.</p>
+            {% else %}
             <p class="empty">No Results</p>
+            {% endif %}
+            {% endblock %}
         {% endif %}
     {% endblock list-content %}
     </div>
