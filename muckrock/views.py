@@ -97,7 +97,31 @@ class FilterMixin(object):
         return context
 
 
-class MRFilterableListView(OrderedSortMixin, FilterMixin, ListView):
+class PaginationMixin(object):
+    """
+    The PaginationMixin provides pagination support on a generic ListView,
+    but also allows the per_page value to be adjusted with URL arguments.
+    """
+    paginate_by = 25
+    min_per_page = 5
+    max_per_page = 100
+
+    def get_paginate_by(self, queryset):
+        """Allows paginate_by to be set by a query argument."""
+        try:
+            per_page = int(self.request.GET.get('per_page'))
+            return max(min(per_page, self.max_per_page), self.min_per_page)
+        except (ValueError, TypeError):
+            return self.paginate_by
+
+    def get_context_data(self, **kwargs):
+        """Adds per_page to the context"""
+        context = super(PaginationMixin, self).get_context_data(**kwargs)
+        context['per_page'] = self.get_paginate_by(self.get_queryset())
+        return context
+
+
+class MRFilterableListView(PaginationMixin, OrderedSortMixin, FilterMixin, ListView):
     """Allows for list views that are filterable and orderable."""
     title = ''
     template_name = 'base_list.html'
@@ -109,7 +133,7 @@ class MRFilterableListView(OrderedSortMixin, FilterMixin, ListView):
         return context
 
 
-class MRSearchView(SearchView):
+class MRSearchView(PaginationMixin, SearchView):
     """Always lower case queries for case insensitive searches"""
 
     def __init__(self, *args, **kwargs):
@@ -141,14 +165,6 @@ class MRSearchView(SearchView):
         context['foia_checked'] = 'foia.foiarequest' in models
         context['qanda_checked'] = 'qanda.question' in models
         return context
-
-    def get_paginate_by(self):
-        """Gets per_page the right way"""
-        try:
-            per_page = int(self.request.GET.get('per_page'))
-            return max(min(per_page, 100), 5)
-        except (ValueError, TypeError):
-            return 25
 
     def build_page(self):
         """Circumvents the hard-coded haystack per page value."""
