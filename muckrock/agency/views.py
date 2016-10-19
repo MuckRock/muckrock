@@ -24,7 +24,7 @@ class AgencyList(MRFilterableListView):
     model = Agency
     filter_class = AgencyFilterSet
     title = 'Agencies'
-    # template = 'agency/list.html'
+    template_name = 'agency/list.html'
     default_sort = 'name'
 
     def get_queryset(self):

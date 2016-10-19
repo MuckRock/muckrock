@@ -1,6 +1,4 @@
 {% extends 'base_list.html' %}
-{% block title %}MuckRock &bull; Agencies{% endblock title %}
-{% block list-type %}agency{% endblock list-type %}
 
 {% block list-table-head %}
 <thead>
@@ -9,7 +7,7 @@
         <th data-sort="jurisdiction">Jurisdiction</th>
     </tr>
 </thead>
-{% endblock list-table-head %}
+{% endblock %}
 
 {% block list-table-row %}
 {% with object as agency %}
