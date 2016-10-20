@@ -25,29 +25,21 @@ from muckrock.crowdfund.models import Crowdfund
 from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.message.tasks import notify_project_contributor
 from muckrock.project.models import Project, ProjectCrowdfunds
+from muckrock.project.filters import ProjectFilterSet
 from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm, ProjectPublishForm
 from muckrock.views import MRFilterableListView
 from muckrock.utils import new_action
 
 class ProjectExploreView(TemplateView):
     """Provides a space for exploring our different projects."""
-    template_name = 'project/frontpage.html'
+    template_name = 'project/explore.html'
 
     def get_context_data(self, **kwargs):
         """Gathers and returns a dictionary of context."""
         # pylint: disable=unused-argument
         # pylint: disable=no-self-use
         user = self.request.user
-        visible_projects = (Project.objects.get_visible(user)
-                .order_by('-featured', 'title')
-                .annotate(request_count=Count('requests', distinct=True))
-                .annotate(article_count=Count('articles', distinct=True))
-                .prefetch_related(
-                    Prefetch('crowdfunds',
-                        queryset=Crowdfund.objects
-                            .order_by('-date_due')
-                            .annotate(contributors_count=Count('payments'))))
-                )
+        visible_projects = Project.objects.get_visible(user).optimize().order_by('-featured', 'title')
         context = {
             'visible': visible_projects,
         }
@@ -57,34 +49,45 @@ class ProjectExploreView(TemplateView):
 class ProjectListView(MRFilterableListView):
     """List all projects"""
     model = Project
+    title = 'Projects'
     template_name = 'project/list.html'
-    paginate_by = 25
+    filter_class = ProjectFilterSet
+    default_sort = 'title'
 
     def get_queryset(self):
         """Only returns projects that are visible to the current user."""
+        queryset = super(ProjectListView, self).get_queryset()
         user = self.request.user
         if user.is_anonymous():
-            return Project.objects.get_public()
+            queryset = queryset.get_public()
         else:
-            return Project.objects.get_visible(user)
+            queryset = queryset.get_visible(user)
+        return queryset.optimize()
 
 
-class ProjectContributorView(TemplateView):
+class ProjectContributorView(ProjectListView):
     """Provides a list of projects that have the user as a contributor."""
     template_name = 'project/contributor.html'
 
+    def get_contributor(self, **kwargs):
+        """Returns the contributor for the view."""
+        return get_object_or_404(User, username=kwargs.get('username'))
+
+    def get_queryset(self, **kwargs):
+        """Returns all the contributor's projects that are visible to the user."""
+        queryset = super(ProjectContributorView, self).get_queryset()
+        queryset.get_for_contributor(self.get_contributor(**self.kwargs)).get_visible(self.request.user)
+        return queryset
+
     def get_context_data(self, **kwargs):
         """Gathers and returns the project and the contributor as context."""
-        user = self.request.user
-        contributor = get_object_or_404(User, username=kwargs.get('username'))
-        # return all the contributor's projects that are visible to the user
-        projects = Project.objects.get_for_contributor(contributor).get_visible(user)
-        projects = projects.order_by('-featured', 'private', '-approved', 'title')
-        context = {
-            'user_is_contributor': user == contributor,
+        context = super(ProjectContributorView, self).get_context_data(**kwargs)
+        contributor = self.get_contributor(**kwargs)
+        context.update({
+            'user_is_contributor': self.request.user == contributor,
             'contributor': contributor,
-            'projects': projects
-        }
+            'projects': self.get_queryset(**kwargs)
+        })
         return context
 
 

@@ -66,6 +66,9 @@
 .list .badge {
   opacity: .8;
 }
+.list .project .badge {
+  opacity: 1;
+}
 
 .news-list-article .article__overview {
   margin-bottom: $vr;
