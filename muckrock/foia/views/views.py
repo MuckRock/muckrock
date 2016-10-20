@@ -15,7 +15,7 @@ from django.template.defaultfilters import slugify
 from django.template import RequestContext
 from django.views.generic.detail import DetailView
 
-from actstream.models import following
+from actstream.models import Follow
 from datetime import datetime, timedelta
 import json
 import logging
@@ -119,18 +119,13 @@ class MyRequestList(RequestList):
 @class_view_decorator(login_required)
 class FollowingRequestList(RequestList):
     """List of all FOIA requests the user is following"""
+    title = 'Requests You Follow'
+
     def get_queryset(self):
         """Limits FOIAs to those followed by the current user"""
-        objects = following(self.request.user, FOIARequest)
-        # actstream returns a list of objects, so we have to turn it into a queryset
-        pk_list = [_object.pk for _object in objects if _object]
-        objects = FOIARequest.objects.filter(pk__in=pk_list)
-        objects = objects.select_related('jurisdiction')
-        # now we filter and sort the list like in the parent class
-        objects = self.filter_list(objects)
-        objects = self.sort_list(objects)
-        # finally, we can only show requests visible to that user
-        return objects.get_viewable(self.request.user)
+        queryset = super(FollowingRequestList, self).get_queryset()
+        following = Follow.objects.following_qs(self.request.user, FOIARequest)
+        return queryset.filter(id__in=following)
 
 
 class ProcessingRequestList(RequestList):
