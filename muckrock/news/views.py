@@ -103,6 +103,7 @@ class NewsYear(YearArchiveView):
 
 class NewsListView(MRFilterableListView):
     """List of news articles"""
+    model = Article
     title = 'Articles'
     filter_class = ArticleFilterSet
     template_name = 'news/list.html'
@@ -110,6 +111,19 @@ class NewsListView(MRFilterableListView):
     default_order = 'desc'
     queryset = Article.objects.get_published().prefetch_related(
             Prefetch('authors', queryset=User.objects.select_related('profile')))
+
+    def get_context_data(self, **kwargs):
+        """Add a list of all the years we've published to the context."""
+        context = super(NewsListView, self).get_context_data(**kwargs)
+        articles_by_date = self.queryset.order_by('pub_date')
+        years = range(
+            articles_by_date.first().pub_date.year,
+            articles_by_date.last().pub_date.year + 1, # the range function stops at n - 1
+        )
+        print years
+        years.reverse()
+        context['years'] = years
+        return context
 
 
 class AuthorArchiveView(NewsListView):

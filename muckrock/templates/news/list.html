@@ -3,6 +3,16 @@
 {% load markdown_deux_tags %}
 {% load thumbnail %}
 
+{% block list-sections %}
+{% if years %}
+<ul class="nostyle list__sections">
+    {% for year in years %}
+    <li><a href="{% url 'news-archive-year' year=year %}">{{year}}</a></li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}
+
 {% block list-content %}
 <div class="grid__column three-quarters">
 {% if object_list %}
