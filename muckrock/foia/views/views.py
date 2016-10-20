@@ -73,15 +73,13 @@ class RequestList(MRFilterableListView):
     filter_class = FOIARequestFilterSet
     title = 'All Requests'
     template_name = 'foia/list.html'
-    default_sort = 'title'
+    default_sort = 'date_updated'
+    default_order = 'desc'
 
     def get_queryset(self):
         """Limits requests to those visible by current user"""
         objects = super(RequestList, self).get_queryset()
-        objects = objects.select_related('jurisdiction')
-        objects = objects.only(
-                'title', 'slug', 'status', 'date_submitted', 'date_due',
-                'date_updated', 'date_processing', 'jurisdiction__slug')
+        objects = objects.select_related_view()
         return objects.get_viewable(self.request.user)
 
 
