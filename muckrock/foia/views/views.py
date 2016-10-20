@@ -24,7 +24,11 @@ from muckrock.accounts.models import Notification
 from muckrock.agency.forms import AgencyForm
 from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.foia.codes import CODES
-from muckrock.foia.filters import FOIARequestFilterSet, MyFOIARequestFilterSet
+from muckrock.foia.filters import (
+    FOIARequestFilterSet,
+    MyFOIARequestFilterSet,
+    ProcessingFOIARequestFilterSet,
+)
 from muckrock.foia.forms import (
     RequestFilterForm,
     FOIAEmbargoForm,
@@ -130,8 +134,11 @@ class FollowingRequestList(RequestList):
 
 class ProcessingRequestList(RequestList):
     """List all of the currently processing FOIA requests."""
-    template_name = 'lists/request_processing_list.html'
+    title = 'Processing Requests'
+    filter_class = ProcessingFOIARequestFilterSet
+    template_name = 'foia/processing_list.html'
     default_sort = 'date_processing'
+    default_order = 'asc'
 
     def dispatch(self, *args, **kwargs):
         """Only staff can see the list of processing requests."""
@@ -139,24 +146,10 @@ class ProcessingRequestList(RequestList):
             raise Http404()
         return super(ProcessingRequestList, self).dispatch(*args, **kwargs)
 
-    def filter_list(self, objects):
-        """Gets all processing requests"""
-        objects = super(ProcessingRequestList, self).filter_list(objects)
-        return objects.filter(status='submitted')
-
-    def get_filters(self):
-        """Removes the 'status' filter, because its only processing requests"""
-        filters = super(ProcessingRequestList, self).get_filters()
-        for filter_dict in filters:
-            if 'status' in filter_dict.values():
-                filters.pop(filters.index(filter_dict))
-        return filters
-
     def get_queryset(self):
         """Apply select and prefetch related"""
         objects = super(ProcessingRequestList, self).get_queryset()
-        return (objects
-                .prefetch_related('communications'))
+        return (objects.prefetch_related('communications').filter(status='submitted'))
 
 
 # pylint: disable=no-self-use

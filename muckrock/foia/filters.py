@@ -62,3 +62,28 @@ class MyFOIARequestFilterSet(django_filters.FilterSet):
     class Meta:
         model = FOIARequest
         fields = ['status', 'agency', 'jurisdiction', 'tags']
+
+
+class ProcessingFOIARequestFilterSet(django_filters.FilterSet):
+    """Allows filtering a request by user, agency, jurisdiction, or tags."""
+    user = django_filters.ModelChoiceFilter(
+        queryset=User.objects.all(),
+        widget=autocomplete_light.ChoiceWidget('UserAutocomplete')
+    )
+    agency = django_filters.ModelChoiceFilter(
+        queryset=Agency.objects.get_approved(),
+        widget=autocomplete_light.ChoiceWidget('AgencyAutocomplete')
+    )
+    jurisdiction = django_filters.ModelChoiceFilter(
+        queryset=Jurisdiction.objects.filter(hidden=False),
+        widget=autocomplete_light.ChoiceWidget('JurisdictionAutocomplete')
+    )
+    tags = django_filters.ModelMultipleChoiceFilter(
+        name='tags__name',
+        queryset=Tag.objects.all(),
+        widget=autocomplete_light.MultipleChoiceWidget('TagAutocomplete'),
+    )
+
+    class Meta:
+        model = FOIARequest
+        fields = ['user', 'agency', 'jurisdiction', 'tags']
