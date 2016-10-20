@@ -75,6 +75,7 @@ input.autocomplete.xhr-pending { background-image: none; }
 .autocomplete-light-widget .deck > span {
   display: block;
   width: 100%;
+  margin-bottom: $vr/4;
   padding: $vr/4;
   @include border;
   background: $color-white-pure;

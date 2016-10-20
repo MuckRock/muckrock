@@ -3,6 +3,7 @@ Autocomplete registry for Accounts
 """
 
 from django.contrib.auth.models import User
+from django.db.models import Count
 from django.shortcuts import get_object_or_404
 
 from autocomplete_light import shortcuts as autocomplete_light
@@ -24,6 +25,17 @@ class UserAutocomplete(autocomplete_light.AutocompleteModelTemplate):
         """Uses the user's full name and username as the choice label."""
         label = choice.get_full_name() + ' (' + choice.username + ')'
         return label
+
+
+class AuthorAutocomplete(UserAutocomplete):
+    """Limits choices to just users with more than 1 authored article."""
+    choices = (User.objects.annotate(article_count=Count('authored_articles'))
+        .filter(article_count__gt=0))
+    attrs = {
+        'placeholder': 'Search authors',
+        'data-autocomplete-minimum-characters': 1
+    }
+
 
 class RequestSharingAutocomplete(UserAutocomplete):
     """Adds request sharing filtering for users"""
@@ -73,3 +85,4 @@ class OrganizationAutocomplete(UserAutocomplete):
 autocomplete_light.register(User, UserAutocomplete)
 autocomplete_light.register(User, OrganizationAutocomplete)
 autocomplete_light.register(User, RequestSharingAutocomplete)
+autocomplete_light.register(User, AuthorAutocomplete)
