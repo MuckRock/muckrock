@@ -15,10 +15,12 @@ from rest_framework import viewsets
 from rest_framework.permissions import DjangoModelPermissions
 import django_filters
 
+from muckrock.news.filters import ArticleFilterSet
 from muckrock.news.models import Article
 from muckrock.news.serializers import ArticleSerializer
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.tags.models import Tag, parse_tags
+from muckrock.views import MRFilterableListView
 
 # pylint: disable=too-many-ancestors
 
@@ -99,11 +101,11 @@ class NewsYear(YearArchiveView):
     queryset = Article.objects.get_published()
 
 
-class NewsListView(ListView):
+class NewsListView(MRFilterableListView):
     """List of news articles"""
-    title = 'News'
+    title = 'Articles'
+    filter_class = ArticleFilterSet
     template_name = 'news/list.html'
-    paginate_by = 10
     queryset = Article.objects.get_published().prefetch_related(
             Prefetch('authors', queryset=User.objects.select_related('profile')))
 

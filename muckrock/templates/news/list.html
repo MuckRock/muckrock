@@ -3,11 +3,8 @@
 {% load markdown_deux_tags %}
 {% load thumbnail %}
 
-{% block title %}MuckRock &bull; News{% endblock title %}
-{% block list-title %}News{% endblock list-title %}
-{% block list-type %}news{% endblock list-type %}
-
 {% block list-content %}
+<div class="grid__column three-quarters"
 {% if object_list %}
     {% include 'lib/component/pagination.html' %}
     <ul class="nostyle">
