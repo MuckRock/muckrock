@@ -68,11 +68,13 @@
 }
 
 .news-list-article .article__overview {
-  margin-bottom: $vr/2;
-  padding-bottom: $vr/2;
+  margin-bottom: $vr;
+  padding-bottom: $vr;
   border-bottom: 1px solid $color-grey;
 }
 .news-list-article:last-child .article__overview {
+  margin-bottom: 0;
+  padding-bottom: 0;
   border-bottom: none;
 }
 

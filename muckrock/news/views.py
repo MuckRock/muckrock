@@ -106,6 +106,8 @@ class NewsListView(MRFilterableListView):
     title = 'Articles'
     filter_class = ArticleFilterSet
     template_name = 'news/list.html'
+    default_sort = 'pub_date'
+    default_order = 'desc'
     queryset = Article.objects.get_published().prefetch_related(
             Prefetch('authors', queryset=User.objects.select_related('profile')))
 

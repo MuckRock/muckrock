@@ -4,7 +4,7 @@
 {% load thumbnail %}
 
 {% block list-content %}
-<div class="grid__column three-quarters"
+<div class="grid__column three-quarters">
 {% if object_list %}
     {% include 'lib/component/pagination.html' %}
     <ul class="nostyle">
@@ -16,6 +16,11 @@
     </ul>
     {% include 'lib/component/pagination.html' %}
 {% else %}
-    <p class="list-empty">No Results</p>
+    {% if request.GET %}
+    <p class="empty">No results given this filter.</p>
+    {% else %}
+    <p class="empty">No Results</p>
+    {% endif %}
 {% endif %}
+</div>
 {% endblock list-content %}

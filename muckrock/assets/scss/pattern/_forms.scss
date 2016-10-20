@@ -140,3 +140,18 @@ fieldset {
         margin: 0;
     }
 }
+
+.input-range input, .input-range label {
+  width: 50%;
+  margin-right: 0;
+  float: left;
+  &:first-child {
+    @include border-right-radius(0);
+  }
+  &:last-child {
+    @include border-left-radius(0);
+  }
+}
+.input-range, .input-range .labels {
+  overflow: hidden;
+}
