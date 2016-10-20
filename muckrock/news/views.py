@@ -101,6 +101,7 @@ class NewsYear(YearArchiveView):
 
 class NewsListView(ListView):
     """List of news articles"""
+    title = 'News'
     template_name = 'news/list.html'
     paginate_by = 10
     queryset = Article.objects.get_published().prefetch_related(
