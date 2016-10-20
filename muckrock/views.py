@@ -89,11 +89,32 @@ class FilterMixin(object):
         """
         Adds the filter to the context and overrides the
         object_list value with the filter's queryset.
+        We also apply pagination to the filter queryset.
         """
         context = super(FilterMixin, self).get_context_data(**kwargs)
         _filter = self.get_filter()
-        context['filter'] = _filter
-        context['object_list'] = _filter.qs
+        queryset = _filter.qs
+        try:
+            page_size = self.get_paginate_by(queryset)
+        except AttributeError:
+            page_size = 0
+        if page_size:
+            paginator, page, queryset, is_paginated = self.paginate_queryset(queryset, page_size)
+            context.update({
+                'filter': _filter,
+                'paginator': paginator,
+                'page_obj': page,
+                'is_paginated': is_paginated,
+                'object_list': queryset
+            })
+        else:
+            context.update({
+                'filter': _filter,
+                'paginator': None,
+                'page_obj': None,
+                'is_paginated': False,
+                'object_list': queryset
+            })
         return context
 
 
