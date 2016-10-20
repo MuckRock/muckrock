@@ -9,18 +9,27 @@ from django.db.models import Prefetch, Q
 from django.http import HttpResponseForbidden
 from django.shortcuts import redirect, get_object_or_404
 from django.views.generic.list import ListView
-from django.views.generic.dates import YearArchiveView, DateDetailView
+from django.views.generic.dates import (
+    YearArchiveView,
+    MonthArchiveView,
+    DayArchiveView,
+    DateDetailView
+)
 
 from rest_framework import viewsets
 from rest_framework.permissions import DjangoModelPermissions
 import django_filters
 
-from muckrock.news.filters import ArticleFilterSet
+from muckrock.news.filters import (
+    ArticleFilterSet,
+    ArticleDateRangeFilterSet,
+    ArticleAuthorFilterSet
+)
 from muckrock.news.models import Article
 from muckrock.news.serializers import ArticleSerializer
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.tags.models import Tag, parse_tags
-from muckrock.views import MRFilterableListView
+from muckrock.views import MRFilterableListView, PaginationMixin, FilterMixin
 
 # pylint: disable=too-many-ancestors
 
@@ -93,19 +102,41 @@ class NewsDetail(DateDetailView):
         return redirect(article)
 
 
-class NewsYear(YearArchiveView):
+class NewsYear(PaginationMixin, YearArchiveView):
     """View for year archive"""
     allow_empty = True
     date_field = 'pub_date'
     make_object_list = True
-    queryset = Article.objects.get_published()
+    queryset = Article.objects.get_published().prefetch_related(
+            Prefetch('authors', queryset=User.objects.select_related('profile')))
+    template_name = 'news/archives/year_archive.html'
+
+
+class NewsMonth(PaginationMixin, MonthArchiveView):
+    """View for month archive"""
+    allow_empty = True
+    date_field = 'pub_date'
+    make_object_list = True
+    queryset = Article.objects.get_published().prefetch_related(
+            Prefetch('authors', queryset=User.objects.select_related('profile')))
+    template_name = 'news/archives/month_archive.html'
+
+
+class NewsDay(PaginationMixin, DayArchiveView):
+    """View for day archive"""
+    allow_empty = True
+    date_field = 'pub_date'
+    make_object_list = True
+    queryset = Article.objects.get_published().prefetch_related(
+            Prefetch('authors', queryset=User.objects.select_related('profile')))
+    template_name = 'news/archives/day_archive.html'
 
 
 class NewsListView(MRFilterableListView):
     """List of news articles"""
     model = Article
-    title = 'Articles'
-    filter_class = ArticleFilterSet
+    title = 'News'
+    filter_class = ArticleDateRangeFilterSet
     template_name = 'news/list.html'
     default_sort = 'pub_date'
     default_order = 'desc'
@@ -120,7 +151,6 @@ class NewsListView(MRFilterableListView):
             articles_by_date.first().pub_date.year,
             articles_by_date.last().pub_date.year + 1, # the range function stops at n - 1
         )
-        print years
         years.reverse()
         context['years'] = years
         return context
@@ -128,6 +158,7 @@ class NewsListView(MRFilterableListView):
 
 class AuthorArchiveView(NewsListView):
     """List of news articles by author"""
+    filter_class = ArticleAuthorFilterSet
     template_name = 'news/author.html'
 
     def get_author(self):

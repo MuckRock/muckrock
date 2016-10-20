@@ -1,2 +1,2 @@
 {% extends 'news/archives/base_archive.html' %}
-{% block date %}{{ day | date }}{% endblock date %}
+{% block date %}<a href="{% url 'news-archive-month' year=day.year month=day|date:'b' %}">{{day|date:"F"}}</a> {{day|date:"jS"}}, <a href="{% url 'news-archive-year' year=day.year %}">{{day|date:"Y"}}</a>{% endblock date %}

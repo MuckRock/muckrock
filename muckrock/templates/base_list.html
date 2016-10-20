@@ -15,9 +15,7 @@ This is the base style for a list of objects: a collection of FOIA requests, age
     <nav class="grid__column quarter">
         {% block list-header %}
         <header>
-            {% block list-title %}
-            <h1>{{title}}</h1>
-            {% endblock list-title %}
+            <h1>{% block list-title %}{{title}}{% endblock list-title %}</h1>
         </header>
         {% endblock list-header %}
         {% block list-sections %}

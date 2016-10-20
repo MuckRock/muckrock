@@ -1,9 +1,26 @@
 {% extends 'base_list.html' %}
 
-{% block title %}MuckRock &bull; Archives{% endblock title %}
-{% block list-title %}News &bull; {% block date %}{% endblock date %}{% endblock %}
-{% block type %}news archive{% endblock type %}
+{% block title %}News {{block.super}}{% endblock title %}
+{% block list-title %}<a href="{% url 'news-archive' %}">News</a> <span class="small">from</span><br><span class="small">{% block date %}{% endblock date %}</span>{% endblock %}
 
-{% block list-table-item %}
-    <td>{% with item as article %}{% include 'lib/pattern/article.html' %}{% endwith %}</td>
-{% endblock %}
+{% block list-content %}
+<div class="grid__column three-quarters">
+{% if object_list %}
+    {% include 'lib/component/pagination.html' %}
+    <ul class="nostyle">
+        {% for article in object_list %}
+        <li class="news-list-article">
+            {% include 'lib/pattern/article.html' %}
+        </li>
+        {% endfor %}
+    </ul>
+    {% include 'lib/component/pagination.html' %}
+{% else %}
+    {% if request.GET %}
+    <p class="empty">No results given this filter.</p>
+    {% else %}
+    <p class="empty">No Results</p>
+    {% endif %}
+{% endif %}
+</div>
+{% endblock list-content %}
