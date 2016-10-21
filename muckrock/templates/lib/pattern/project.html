@@ -19,6 +19,7 @@
     <div class="grid__column two-thirds">
         {% if project.crowdfunds.exists %}
         {% with project.crowdfunds.first as crowdfund %}
+        {% if not crowdfund.expired %}
             <div class="project__crowdfund nomargin">
                 <div class="progress"><span class="meter" style="width: {{crowdfund.percent_funded}}%"></span></div>
                 <ul class="nostyle inline stats nomargin">
@@ -34,8 +35,8 @@
                     <li class="stat"><span class="value">{{crowdfund.date_due|timeuntil}}</span> remaining</li>
                     {% endif %}
                 </ul>
-
             </div>
+        {% endif %}
         {% endwith %}
         {% endif %}
         <div class="project__overview">

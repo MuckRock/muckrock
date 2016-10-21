@@ -25,7 +25,7 @@
         </ul>
         <div class="recent-articles grid__row">
             {% for article in recent_articles %}
-            {% if forloop.counter0 < 1 %}
+            {% if forloop.first %}
             <div class="grid__column two-thirds">
                 {% include 'lib/pattern/article.html' with large=True %}
             </div>
@@ -35,10 +35,6 @@
             </div>
             {% endif %}
             {% endfor %}
-        </div>
-        <div class="project-articles grid__row">
-            <div class="grid__column half"></div>
-            <div class="grid__column half"></div>
         </div>
     </main>
 </div>

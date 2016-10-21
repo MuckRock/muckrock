@@ -180,7 +180,11 @@
 .project.component .grid__column {
   padding: 0;
 }
+.project.component .grid__column.third.project__header {
+  @include flex-basis(10em);
+}
 .project__header {
+  @include flex-basis(10em);
   min-height: 10em;
   margin-bottom: 0;
   background-position: center;
@@ -192,9 +196,6 @@
   @include display(inline-flex);
   @include flex-direction(column);
   @include justify-content(flex-start);
-  @media (max-width: 38em) {
-    @include justify-content(flex-end);
-  }
   min-height: 100%;
   width: 100%;
   padding: $vr;

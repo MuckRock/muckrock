@@ -23,10 +23,26 @@
     side of the section and give it a call to action. If they don't, we display project stats and make following
     the call to action.
     {% endcomment %}
-    <div class="projects">
-        {% for project in visible %}
+    <div class="explore__main">
+        {% for project in featured %}
         {% include 'lib/pattern/project.html' %}
         {% endfor %}
     </div>
+
+    <main class="explore__main">
+        <div class="featured-projects grid__row">
+            {% for project in featured_projects %}
+            {% if forloop.first %}
+            <div class="grid__column full">
+                {% include 'lib/pattern/project.html' %}
+            </div>
+            {% else %}
+            <div class="grid__column half">
+                {% include 'lib/pattern/project.html' %}
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </main>
 </div>
 {% endblock %}

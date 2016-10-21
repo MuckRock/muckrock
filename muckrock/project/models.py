@@ -46,9 +46,12 @@ class ProjectQuerySet(models.QuerySet):
         """Annotate, select, and prefetch data."""
         return (self.annotate(request_count=models.Count('requests', distinct=True))
                     .annotate(article_count=models.Count('articles', distinct=True))
+                    .prefetch_related('articles__authors')
                     .prefetch_related(models.Prefetch('crowdfunds',
                         queryset=Crowdfund.objects.order_by('-date_due')
-                        .annotate(contributors_count=models.Count('payments')))))
+                        .annotate(contributors_count=models.Count('payments'))))
+                    .prefetch_related('crowdfunds__payments')
+        )
 
 
 class Project(models.Model):

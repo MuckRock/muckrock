@@ -36,13 +36,12 @@ class ProjectExploreView(TemplateView):
 
     def get_context_data(self, **kwargs):
         """Gathers and returns a dictionary of context."""
-        # pylint: disable=unused-argument
-        # pylint: disable=no-self-use
+        context = super(ProjectExploreView, self).get_context_data(**kwargs)
         user = self.request.user
-        visible_projects = Project.objects.get_visible(user).optimize().order_by('-featured', 'title')
-        context = {
-            'visible': visible_projects,
-        }
+        featured_projects = Project.objects.get_visible(user).filter(featured=True).optimize()
+        context.update({
+            'featured_projects': featured_projects,
+        })
         return context
 
 
