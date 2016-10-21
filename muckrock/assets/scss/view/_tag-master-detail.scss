@@ -31,6 +31,8 @@
     }
     .tag-table {
         @include border;
+        border-left: none;
+        border-right: none;
         max-height: 25em;
         overflow-y: scroll;
         -webkit-overflow-scrolling: touch;
