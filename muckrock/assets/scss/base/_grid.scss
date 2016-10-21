@@ -60,4 +60,18 @@
             padding-left: 0;
         }
     }
+    &.nopadding {
+      padding: 0;
+    }
+}
+
+.space-between {
+  @include display(flex);
+  @include flex-wrap(wrap);
+  @include justify-content(space-between);
+}
+
+.align-baseline {
+  @include display(flex);
+  @include align-items(baseline);
 }

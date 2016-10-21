@@ -5,7 +5,7 @@ Views for the news application
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.db.models import Prefetch, Q
+from django.db.models import Prefetch, Q, Count
 from django.http import HttpResponseForbidden
 from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import ListView, TemplateView
@@ -28,6 +28,7 @@ from muckrock.news.filters import (
 from muckrock.news.models import Article
 from muckrock.news.serializers import ArticleSerializer
 from muckrock.project.forms import ProjectManagerForm
+from muckrock.project.models import Project
 from muckrock.tags.models import Tag, parse_tags
 from muckrock.utils import cache_get_or_set
 from muckrock.views import MRFilterableListView, PaginationMixin, FilterMixin
@@ -117,6 +118,8 @@ class NewsExploreView(TemplateView):
                 'projects',
             )[:5]),
             600)
+        context['featured_projects'] = (Project.objects.get_visible(self.request.user)
+            .filter(featured=True).optimize())
         context['recent_articles'] = recent_articles
         context['top_tags'] = Article.tags.most_common()[:15]
         return context

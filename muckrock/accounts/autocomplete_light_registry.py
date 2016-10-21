@@ -30,7 +30,7 @@ class UserAutocomplete(autocomplete_light.AutocompleteModelTemplate):
 class AuthorAutocomplete(UserAutocomplete):
     """Limits choices to just users with more than 1 authored article."""
     choices = (User.objects.annotate(article_count=Count('authored_articles'))
-        .filter(article_count__gt=0))
+        .exclude(article_count=0))
     attrs = {
         'placeholder': 'Search authors',
         'data-autocomplete-minimum-characters': 1
