@@ -1,18 +1,22 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="project frontpage">
+<div class="project explore">
     {# The header explains what projects are and calls users to create their own. #}
-    <header class="frontpage__header">
-        <div>
-            <h1>Projects</h1>
-            <ul class="nostyle inline">
-                <li><a class="blue button" href="{% url 'project-create' %}">Create Project</a></li>
-                <li><a class="action" href="{% url 'project-list' %}">Browse all projects</a></li>
-                <li><a class="action" href="https://www.muckrock.com/news/archives/2015/sep/03/muckrock-projects-organize-crowdfund-journalism/">Learn more</a></li>
-            </ul>
+    <header class="explore__header__wrapper">
+        <div class="explore__header grid__row">
+            <div class="grid__column two-thirds">
+                <h1>Projects</h1>
+                <p>Projects collect requests and articles to tell larger stories and give your audience an easy way to support your work and follow your progress.</p>
+            </div>
+            <div class="grid__column third">
+                <ul class="nostyle">
+                    <li><a class="blue button" href="{% url 'project-create' %}">Create Project</a></li>
+                    <li><a class="action" href="{% url 'project-list' %}">Browse all projects</a></li>
+                    <li><a class="action" href="https://www.muckrock.com/news/archives/2015/sep/03/muckrock-projects-organize-crowdfund-journalism/">Learn more</a></li>
+                </ul>
+            </div>
         </div>
-        <p>Projects collect requests and articles to tell larger stories and give your audience an easy way to support your work and follow your progress.</p>
     </header>
     {% comment %}
     Featured projects are given top billing. If they have an active crowdfund, we place that on the right-hand

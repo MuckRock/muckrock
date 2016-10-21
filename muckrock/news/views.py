@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse
 from django.db.models import Prefetch, Q
 from django.http import HttpResponseForbidden
 from django.shortcuts import redirect, get_object_or_404
-from django.views.generic.list import ListView
+from django.views.generic import ListView, TemplateView
 from django.views.generic.dates import (
     YearArchiveView,
     MonthArchiveView,
@@ -29,6 +29,7 @@ from muckrock.news.models import Article
 from muckrock.news.serializers import ArticleSerializer
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.tags.models import Tag, parse_tags
+from muckrock.utils import cache_get_or_set
 from muckrock.views import MRFilterableListView, PaginationMixin, FilterMixin
 
 # pylint: disable=too-many-ancestors
@@ -100,6 +101,25 @@ class NewsDetail(DateDetailView):
                 tag_set.add(new_tag)
             article.tags.set(*tag_set)
         return redirect(article)
+
+
+class NewsExploreView(TemplateView):
+    """Shows the most interesting and worthwhile articles."""
+    template_name = 'news/explore.html'
+
+    def get_context_data(self, **kwargs):
+        """Adds interesting articles to the explore page."""
+        context = super(NewsExploreView, self).get_context_data(**kwargs)
+        recent_articles = cache_get_or_set('hp:articles',
+            lambda: (Article.objects.get_published().prefetch_related(
+                'authors',
+                'authors__profile',
+                'projects',
+            )[:5]),
+            600)
+        context['recent_articles'] = recent_articles
+        context['top_tags'] = Article.tags.most_common()[:15]
+        return context
 
 
 class NewsYear(PaginationMixin, YearArchiveView):
