@@ -34,6 +34,11 @@
 }
 
 .field {
+    transition: opacity .1s linear;
+    &.disabled {
+        color: initial;
+        opacity: .5;
+    }
     header {
         margin-bottom: 0;
         @include display(flex);

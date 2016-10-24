@@ -47,7 +47,6 @@ class JurisdictionAutocomplete(autocomplete_light.AutocompleteModelBase):
 
 autocomplete_light.register(Jurisdiction, JurisdictionAutocomplete)
 autocomplete_light.register(Jurisdiction, LocalAutocomplete)
-
 autocomplete_light.register(Jurisdiction, name='JurisdictionAdminAutocomplete',
                             choices=Jurisdiction.objects.all(),
                             search_fields=['name', 'full_name'],
