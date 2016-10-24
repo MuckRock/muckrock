@@ -26,9 +26,10 @@
 .explore__main {
   margin-bottom: $vr;
 }
-.explore__main > * {
+.explore__section {
   margin: 0 auto $vr;
   max-width: 50em;
+  padding-left: $vr;
 }
 
 .project.explore {
@@ -42,9 +43,6 @@
 }
 
 .news.explore {
-  .recent-articles, .featured-project {
-    padding-left: $vr;
-  }
   .featured-project {
     border-top: 1px solid $color-grey;
     padding-top: $vr;
@@ -56,11 +54,14 @@
       }
     }
   }
-  /*
-  .featured-project__overview {
-    @include padding;
-    background-color: $color-black;
-    color: $color-white;
+}
+
+.foia.explore {
+  .news-request {
+    padding-top: $vr;
+    border-top: 1px solid $color-grey;
   }
-  */
+  .news-request__article__title {
+    line-height: $vr;
+  }
 }

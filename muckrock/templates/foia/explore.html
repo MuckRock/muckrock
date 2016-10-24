@@ -1,0 +1,85 @@
+{% extends 'base_explore.html' %}
+{% load foia_tags %}
+{% load thumbnail %}
+
+{% block classes %}foia{% endblock %}
+
+{% block explore_header_description %}
+<h1>Requests</h1>
+<p>We track all public records requests filed through our system, adding correspondence and responsive records to the public domain.</p>
+{% endblock %}
+
+{% block explore_header_links %}
+<ul class="nostyle">
+    <li class="mb1">
+        <a class="blue button" href="{% url 'foia-create'%}" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
+            {% include 'lib/component/icon/create-request.svg' %}
+            <span class="label">File Request</span>
+        </a>
+    </li>
+    <li><a class="bold" href="{% url 'foia-list' %}">Browse the archive &rarr;</a></li>
+    <li><a class="bold" href="/muckrock-101">Learn more &rarr;</a></li>
+</ul>
+{% endblock %}
+
+{% block explore_header %}
+{{block.super}}
+<div class="grid__column full">
+    <ul class="nostyle inline">
+        {% for agency in top_agencies %}
+        <li><a class="tag" href="{% url 'foia-list' %}?agency={{agency.id}}">{{agency}}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
+
+{% block explore_main %}
+<div class="explore__section news-requests">
+    <div class="align-baseline">
+        <h1 class="mr1 mb0">In the News</h1>
+        <p class="grey">Requests that have informed our most recent reporting.</p>
+    </div>
+    {% for article in recent_news %}
+    <div class="grid__row news-request">
+        <div class="news-request__article grid__column quarter">
+            <a href="{{article.get_absolute_url}}"><img class="nomargin" src="{% thumbnail article.image 600x200 %}" /></a>
+            <p class="bold nomargin news-request__article__title"><a class="black" href="{{article.get_absolute_url}}">{{article.title}}</a></p>
+            <p class="small grey mb0">by {{article.get_authors_names}}</p>
+            <p class="small grey mb0"><datetime title="{{article.pub_date|date:'c'}}">{{article.pub_date|date:'F d, Y'}}</datetime></p>
+        </div>
+        <div class="news-request__foias grid__column three-quarters">
+            {% for foia in article.foias.all %}
+            {% include 'lib/foia.html' with hide_actions=True %}
+            {% comment %}
+            <div class="news-request__foia">
+                <p class="mb0"><span class="small badge {{ foia.status|classify_status }}">{{ foia.get_status_display }}</span></p>
+                <p class="h2 mb0"><a class="black" href="{{foia.get_absolute_url}}">{{foia.title}}</a></p>
+                <p><a href="{% url 'acct-profile' username=foia.user.username %}">{{ foia.user.get_full_name }}</a> sent this request to the <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency }}</a> of {% if foia.jurisdiction.level == 'f' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% if foia.jurisdiction.parent and foia.jurisdiction.level == 'l' %}, <a href="{{ foia.jurisdiction.parent.get_absolute_url }}" title="{{ foia.jurisdiction.parent.name }}">{{ foia.jurisdiction.parent.abbrev }}</a>{% endif %}</p>
+            </div>
+            {% endcomment %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<div class="explore__section grid__row">
+    <div class="grid__column half recently-completed">
+        <div class="align-baseline mb0">
+            <h2 class="mr1">Recently completed</h2>
+            <a class="bold" href="{% url 'foia-list' %}?status=done">See all &rarr;</a>
+        </div>
+        {% for foia in recently_completed %}
+        {% include 'lib/foia.html' with hide_actions=True %}
+        {% endfor %}
+    </div>
+    <div class="grid__column half recently-completed">
+        <div class="align-baseline mb0">
+            <h2 class="mr1">Recently rejected</h2>
+            <p><a class="bold" href="{% url 'foia-list' %}?status=rejected">See all &rarr;</a></p>
+        </div>
+        {% for foia in recently_rejected %}
+        {% include 'lib/foia.html' with hide_actions=True %}
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

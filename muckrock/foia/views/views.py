@@ -8,12 +8,12 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Count
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template import RequestContext
-from django.views.generic.detail import DetailView
+from django.views.generic import DetailView, TemplateView
 
 from actstream.models import Follow
 from datetime import datetime, timedelta
@@ -22,6 +22,7 @@ import logging
 
 from muckrock.accounts.models import Notification
 from muckrock.agency.forms import AgencyForm
+from muckrock.agency.models import Agency
 from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.foia.codes import CODES
 from muckrock.foia.filters import (
@@ -53,7 +54,9 @@ from muckrock.foia.views.comms import (
         )
 from muckrock.jurisdiction.models import Appeal
 from muckrock.jurisdiction.forms import AppealForm
+from muckrock.news.models import Article
 from muckrock.project.forms import ProjectManagerForm
+from muckrock.project.models import Project
 from muckrock.qanda.models import Question
 from muckrock.qanda.forms import QuestionForm
 from muckrock.tags.models import Tag
@@ -66,6 +69,69 @@ from muckrock.views import class_view_decorator, MRFilterableListView
 logger = logging.getLogger(__name__)
 STATUS_NODRAFT = [st for st in STATUS if st != ('started', 'Draft')]
 
+
+class RequestExploreView(TemplateView):
+    """Provides a top-level page for exploring interesting requests."""
+    template_name = 'foia/explore.html'
+
+    def get_context_data(self, **kwargs):
+        """Adds interesting data to the context for rendering."""
+        context = super(RequestExploreView, self).get_context_data(**kwargs)
+        user = self.request.user
+        visible_requests = FOIARequest.objects.get_viewable(user)
+        context['top_agencies'] = (
+            Agency.objects
+            .get_approved()
+            .annotate(foia_count=Count('foiarequest'))
+            .order_by('-foia_count')
+        )[:9]
+        context['featured_requests'] = (
+            visible_requests
+            .filter(featured=True)
+            .order_by('featured')
+            .select_related_view()
+        )
+        context['recent_news'] = (
+            Article.objects
+            .get_published()
+            .annotate(foia_count=Count('foias'))
+            .exclude(foia_count__lt=2)
+            .exclude(foia_count__gt=9)
+            .prefetch_related(
+                'authors',
+                'foias',
+                'foias__user',
+                'foias__user__profile',
+                'foias__agency',
+                'foias__agency__jurisdiction',
+                'foias__jurisdiction__parent__parent')
+            .order_by('-pub_date')
+        )[:3]
+        context['featured_projects'] = (
+            Project.objects
+            .get_visible(user)
+            .filter(featured=True)
+            .prefetch_related(
+                'requests',
+                'requests__user',
+                'requests__user__profile',
+                'requests__agency',
+                'requests__agency__jurisdiction',
+                'requests__jurisdiction__parent__parent')
+        )
+        context['recently_completed'] = (
+            visible_requests
+            .get_done()
+            .order_by('-date_done', 'pk')
+            .select_related_view()
+            .get_public_file_count(limit=5))
+        context['recently_rejected'] = (
+            visible_requests
+            .filter(status__in=['rejected', 'no_docs'])
+            .order_by('-date_updated', 'pk')
+            .select_related_view()
+            .get_public_file_count(limit=5))
+        return context
 
 class RequestList(MRFilterableListView):
     """Base list view for other list views to inherit from"""

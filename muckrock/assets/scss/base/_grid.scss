@@ -73,9 +73,18 @@
 
 .align-baseline {
   @include display(flex);
+  @include flex-wrap(wrap);
   @include align-items(baseline);
+}
+
+.mb0 {
+  margin-bottom: 0;
 }
 
 .mb1 {
   margin-bottom: $vr;
+}
+
+.mr1 {
+  margin-right: $vr;
 }

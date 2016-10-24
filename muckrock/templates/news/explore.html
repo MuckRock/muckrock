@@ -27,7 +27,7 @@
 {% endblock %}
 
 {% block explore_main %}
-<div class="recent-articles grid__row">
+<div class="explore__section recent-articles grid__row">
     {% for article in recent_articles %}
     {% if forloop.first %}
     <div class="grid__column two-thirds">
@@ -40,7 +40,7 @@
     {% endif %}
     {% endfor %}
 </div>
-<div class="featured-projects">
+<div class="explore__section featured-projects">
     {% for project in featured_projects %}
     <div class="featured-project grid__row nomargin">
         <div class="grid__column two-thirds">

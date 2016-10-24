@@ -21,11 +21,10 @@ old_foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
 
 urlpatterns = patterns(
     '',
+    url(r'^$', views.RequestExploreView.as_view(), name='foia-root'),
+    
     # Redirects
-    url(r'^$',
-        RedirectView.as_view(url='list'), name='foia-root'),
-    url(r'^multi/$',
-        RedirectView.as_view(url='/foia/create_multi')),
+    url(r'^multi/$', RedirectView.as_view(url='/foia/create_multi')),
 
     # List Views
     url(r'^list/$',
