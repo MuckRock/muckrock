@@ -75,3 +75,7 @@
   @include display(flex);
   @include align-items(baseline);
 }
+
+.mb1 {
+  margin-bottom: $vr;
+}

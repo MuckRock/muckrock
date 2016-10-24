@@ -16,10 +16,9 @@
   }
   h1 {
     font-size: $size-7;
-    line-height: $lh;
+    line-height: 1em;
     @include media($medium-bp) {
       font-size: $size-9;
-      line-height: $lh;
     }
   }
 }
