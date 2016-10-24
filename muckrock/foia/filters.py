@@ -12,6 +12,7 @@ from muckrock.agency.models import Agency
 from muckrock.filters import RangeWidget
 from muckrock.foia.models import FOIARequest, STATUS
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.project.models import Project
 from muckrock.tags.models import Tag
 
 BLANK_STATUS = [('', 'All')] + STATUS
@@ -40,6 +41,11 @@ class FOIARequestFilterSet(django_filters.FilterSet):
             'placeholder': 'MM/DD/YYYY',
         }),
     )
+    projects = django_filters.ModelMultipleChoiceFilter(
+        name="projects",
+        queryset=Project.objects.get_public(),
+        widget=autocomplete_light.MultipleChoiceWidget('ProjectAutocomplete'),
+    )
     tags = django_filters.ModelMultipleChoiceFilter(
         name='tags__name',
         queryset=Tag.objects.all(),
@@ -48,7 +54,7 @@ class FOIARequestFilterSet(django_filters.FilterSet):
 
     class Meta:
         model = FOIARequest
-        fields = ['status', 'user', 'agency', 'jurisdiction', 'tags']
+        fields = ['status', 'user', 'agency', 'jurisdiction', 'projects', 'tags']
 
 
 
