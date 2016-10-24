@@ -1,7 +1,7 @@
 {% load tags %}
 
 {% if page_obj %}
-<nav class="pagination">
+<nav class="pagination small">
     <form method="get" class="pagination__control">
         <p class="pagination__control__item">Showing {{page_obj.start_index}} to {{page_obj.end_index}} of {{page_obj.paginator.count}}</p>
         <p class="pagination__control__item">

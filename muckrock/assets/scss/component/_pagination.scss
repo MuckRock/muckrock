@@ -22,6 +22,7 @@
     a, span {
         width: 25%;
         display: table-row;
+        padding: $vr/4 $vr/2;
         border: 1px solid $color-grey;
         text-align: center;
         @include media($medium-bp) {
