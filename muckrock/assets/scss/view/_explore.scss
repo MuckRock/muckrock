@@ -37,9 +37,6 @@
     margin-bottom: $vr;
     padding-right: $vr;
   }
-  .featured-projects > .grid__column:first-child {
-    padding-left: $vr;
-  }
   .featured-projects .project {
     height: 100%;
   }
@@ -47,13 +44,10 @@
 
 .news.explore {
   .recent-articles, .featured-project {
-    padding-right: $vr;
-    & > .grid__column:first-child {
-      padding-left: $vr;
-    }
+    padding-left: $vr;
   }
   .featured-project {
-    border-top: 1px solid;
+    border-top: 1px solid $color-grey;
     padding-top: $vr;
     .featured-project__overview .h2 a {
       color: $color-black;
