@@ -9,6 +9,7 @@ from autocomplete_light import shortcuts as autocomplete_light
 import django_filters
 
 from muckrock.agency.models import Agency
+from muckrock.filters import RangeWidget
 from muckrock.foia.models import FOIARequest, STATUS
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.tags.models import Tag
@@ -29,6 +30,15 @@ class FOIARequestFilterSet(django_filters.FilterSet):
     jurisdiction = django_filters.ModelChoiceFilter(
         queryset=Jurisdiction.objects.filter(hidden=False),
         widget=autocomplete_light.ChoiceWidget('JurisdictionAutocomplete')
+    )
+    date_range = django_filters.DateFromToRangeFilter(
+        name='communications__date',
+        label='Date Range',
+        lookup_expr='contains',
+        widget=RangeWidget(attrs={
+            'class': 'datepicker',
+            'placeholder': 'MM/DD/YYYY',
+        }),
     )
     tags = django_filters.ModelMultipleChoiceFilter(
         name='tags__name',

@@ -8,25 +8,10 @@ import django_filters
 
 from autocomplete_light import shortcuts as autocomplete_light
 
+from muckrock.filters import RangeWidget
 from muckrock.news.models import Article
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag
-
-class RangeWidget(django_filters.widgets.RangeWidget):
-    """Customizes the rendered output of the RangeWidget"""
-    def format_output(self, rendered_widgets):
-        return ("""
-            <div class="input-range">
-                <div class="small labels nomargin">
-                    <label>Start</label>
-                    <label>End</label>
-                </div>
-                <div class="inputs">
-                    %(inputs)s
-                </div>
-            </div>
-        """ % {'inputs': '\n'.join(rendered_widgets)})
-
 
 class ArticleFilterSet(django_filters.FilterSet):
     """Allows filtering a list of news articles by author or tags"""
