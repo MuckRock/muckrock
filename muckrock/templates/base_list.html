@@ -11,13 +11,13 @@ This is the base style for a list of objects: a collection of FOIA requests, age
 
 {% block content %}
 <div class="list grid__row">
-    {% block list-navigation %}
     <nav class="grid__column quarter">
-        {% block list-header %}
+        {% block list-navigation %}
         <header>
+            {% block list-header %}
             <h1>{% block list-title %}{{title}}{% endblock list-title %}</h1>
+            {% endblock list-header %}
         </header>
-        {% endblock list-header %}
         {% block list-sections %}
         {% endblock list-sections %}
         {% if filter.form %}
@@ -29,37 +29,39 @@ This is the base style for a list of objects: a collection of FOIA requests, age
             </div>
         </form>
         {% endif %}
+        {% endblock list-navigation %}
     </nav>
-    {% endblock list-navigation %}
-    {% block list-content %}
     <div class="grid__column three-quarters">
+    {% block list-content %}
         {% block list-actions %}{% endblock %}
         {% if object_list %}
             {% include 'lib/component/pagination.html' %}
-            {% block list-table %}
+            {% block list-objects %}
             <table class="sortable" data-sort-by="{{sort}}" data-order-by="{{order}}">
-                {% block list-table-head %}
+                {% block list-table %}
                 <thead>
                     <tr>
+                        {% block list-table-head %}
                         <th data-sort="id">ID</th>
                         <th>Object</th>
+                        {% endblock list-table-head %}
                     </tr>
                 </thead>
-                {% endblock list-table-head %}
-                {% block list-table-body %}
                 <tbody>
+                    {% block list-table-body %}
                     {% for object in object_list %}
-                    {% block list-table-row %}
                     <tr>
+                        {% block list-table-row %}
                         <td>{{object.id}}
                         <td><a href="{{object.get_absolute_url}}">{{object}}</a></td>
+                        {% endblock list-table-row %}
                     </tr>
-                    {% endblock list-table-row %}
                     {% endfor %}
+                    {% endblock list-table-body %}
                 </tbody>
-                {% endblock list-table-body %}
+                {% endblock list-table %}
             </table>
-            {% endblock list-table %}
+            {% endblock %}
             {% include 'lib/component/pagination.html' %}
         {% else %}
             {% block empty %}

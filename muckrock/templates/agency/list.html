@@ -1,19 +1,13 @@
 {% extends 'base_list.html' %}
 
 {% block list-table-head %}
-<thead>
-    <tr>
-        <th data-sort="name">Name</th>
-        <th data-sort="jurisdiction">Jurisdiction</th>
-    </tr>
-</thead>
+<th data-sort="name">Name</th>
+<th data-sort="jurisdiction">Jurisdiction</th>
 {% endblock %}
 
 {% block list-table-row %}
 {% with object as agency %}
-<tr>
-    <td><a href="{{ agency.get_absolute_url }}">{{ agency }}</a></td>
-    <td><a href="{{ agency.jurisdiction.get_absolute_url }}">{{ agency.jurisdiction }}</a></td>
-</tr>
+<td><a href="{{ agency.get_absolute_url }}">{{ agency }}</a></td>
+<td><a href="{{ agency.jurisdiction.get_absolute_url }}">{{ agency.jurisdiction }}</a></td>
 {% endwith %}
 {% endblock list-table-row %}

@@ -3,31 +3,26 @@
 {% load foia_tags %}
 
 {% block list-actions %}
+{{block.super}}
 <form method="POST" class="toolbar" id="my-request-actions">
     {% csrf_token %}
 </form>
 {% endblock list-actions %}
 
 {% block list-table-head %}
-<thead>
-    <tr>
-        <th width="3%" class="list-table-checkbox"><input type="checkbox" class="select-all" data-name="foia" data-toolbar="#my-request-actions" /></th>
-        <th data-sort="title">Title</th>
-        <th width="20%" data-sort="agency">Agency</th>
-        <th width="20%" data-sort="jurisdiction">Jurisdiction</th>
-        <th width="10%" data-sort="date_updated">Updated</th>
-    </tr>
-</thead>
+<th width="3%" class="list-table-checkbox"><input type="checkbox" class="select-all" data-name="foia" data-toolbar="#my-request-actions" /></th>
+<th data-sort="title">Title</th>
+<th width="20%" data-sort="agency">Agency</th>
+<th width="20%" data-sort="jurisdiction">Jurisdiction</th>
+<th width="10%" data-sort="date_updated">Updated</th>
 {% endblock list-table-head %}
 
 {% block list-table-row %}
 {% with object as foia %}
-<tr>
-    <td class="list-table-checkbox"><input type="checkbox" name="{{foia.foia_type}}" value="{{foia.pk}}" form="my-request-actions"></td>
-    <td><a class="bold" href="{{foia.get_absolute_url}}">{{foia.title}}</a><br><span class="small badge state {{ foia.status|classify_status }}">{{foia.get_status_display}}</span></td>
-    <td>{{ foia.agency }}</td>
-    <td>{{ foia.jurisdiction }}</td>
-    <td>{{foia.date_updated|date:"m/d/Y"}}</td>
-</tr>
+<td class="list-table-checkbox"><input type="checkbox" name="{{foia.foia_type}}" value="{{foia.pk}}" form="my-request-actions"></td>
+<td><a class="bold" href="{{foia.get_absolute_url}}">{{foia.title}}</a><br><span class="small badge state {{ foia.status|classify_status }}">{{foia.get_status_display}}</span></td>
+<td>{{ foia.agency }}</td>
+<td>{{ foia.jurisdiction }}</td>
+<td>{{foia.date_updated|date:"m/d/Y"}}</td>
 {% endwith %}
 {% endblock %}

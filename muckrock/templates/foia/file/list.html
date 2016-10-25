@@ -1,10 +1,14 @@
 {% extends 'base_list.html' %}
 
-{% block list-navigation %}
-    <p><a href="{{foia.get_absolute_url}}">{{foia}}</a></p>
-    <h1 class="list-title">Files</h1>
-{% endblock list-navigation %}
+{% block list-header %}
+<p><a href="{{foia.get_absolute_url}}">{{foia}}</a></p>
+<h1 class="list-title">Files</h1>
+{% endblock list-header %}
 
-{% block list-table-item %}
-    <td class="file__cell">{% include 'lib/file.html' with file=item %}</td>
-{% endblock list-table-item %}
+{% block list-objects %}
+<ul class="nostyle">
+    {% for file in object_list %}
+    <li>{% include 'lib/file.html' %}</li>
+    {% endfor %}
+</ul>
+{% endblock list-objects %}

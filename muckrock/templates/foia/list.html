@@ -1,63 +1,49 @@
 {% extends 'base_list.html' %}
 {% load tags %}
 {% load foia_tags %}
-{% load mathfilters %}
 {% load static from staticfiles %}
-{% block title %}MuckRock &bull; Requests{% endblock title %}
-{% block list-title %}Requests{% endblock list-title %}
-{% block list-type %}request{% endblock list-type %}
 
-{% block list-navigation %}
-<nav class="grid__column quarter">
-    <header>
-        <h1>Requests</h1>
-        {% if user.is_authenticated %}
-        <ul class="nostyle list__sections">
-            <li class="{% active request '^/foi/list/$' %}"><a href="{% url 'foia-list' %}">All</a></li>
-            <li class="{% active request '^/foi/mylist/$' %}"><a href="{% url 'foia-mylist' %}">Yours</a></li>
-            <li class="{% active request '^/foi/list/following/$' %}"><a href="{% url 'foia-list-following' %}">Following</a></li>
-            {% if user.is_staff %}
-            <li class="{% active request '^/foi/list/processing/$' %}"><a href="{% url 'foia-list-processing' %}">Processing</a></li>
-            {% endif %}
-        </ul>
-        {% endif %}
-        {% comment %}
+{% block list-header %}
+{# we hard-code the title here because the subsection is defined by the active section item #}
+<h1>Requests</h1>
+{% endblock %}
+
+{% block list-sections %}
+{% if user.is_authenticated %}
+<ul class="nostyle list__sections">
+    <li class="{% active request '^/foi/list/$' %}"><a href="{% url 'foia-list' %}">All</a></li>
+    <li class="{% active request '^/foi/mylist/$' %}"><a href="{% url 'foia-mylist' %}">Yours</a></li>
+    <li class="{% active request '^/foi/list/following/$' %}"><a href="{% url 'foia-list-following' %}">Following</a></li>
+    {% if user.is_staff %}
+    <li class="{% active request '^/foi/list/processing/$' %}"><a href="{% url 'foia-list-processing' %}">Processing</a></li>
+    {% endif %}
+</ul>
+{% endif %}
+{% endblock %}
+
+{% block list-actions %}
+<div class="space-between">
+    <div class="button-group">
         <a href="{% url 'foia-create' %}" class="blue button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
             {% include 'lib/component/icon/create-request.svg' %}
             <span>File a Request</span>
         </a>
-        {% endcomment %}
-    </header>
-    {% if filter.form %}
-    <form method="GET" class="filter form">
-        {% include 'lib/pattern/form.html' with form=filter.form %}
-        <div class="button-group">
-            <button class="button" action="apply-filters">Filter</button>
-            <a class="button" href="{{ request.path }}">Clear</a>
-        </div>
-    </form>
-    {% endif %}
-</nav>
-{% endblock list-navigation %}
+    </div>
+</div>
+{% endblock %}
 
 {% block list-table-head %}
-<thead>
-    <tr>
-        <th data-sort="title">Title</th>
-        <th width="10%" data-sort="agency">Agency</th>
-        <th width="20%" data-sort="jurisdiction">Jurisdiction</th>
-        <th width="20%" data-sort="date_updated">Updated</th>
-    </tr>
-</thead>
+<th data-sort="title">Title</th>
+<th width="10%" data-sort="agency">Agency</th>
+<th width="20%" data-sort="jurisdiction">Jurisdiction</th>
+<th width="20%" data-sort="date_updated">Updated</th>
 {% endblock list-table-head %}
 
 {% block list-table-row %}
 {% with object as foia %}
-<tr>
-    <td><a class="bold" href="{{ foia.get_absolute_url }}">{{ foia.title }}</a><br><span class="small badge state {{ foia.status|classify_status }}">{{foia.get_status_display}}</span></td>
-    <td>{{ foia.agency }}</td>
-    <td>{{ foia.jurisdiction }}</td>
-    <td>{{ foia.date_updated|date:"m/d/Y" }}</td>
-</tr>
+<td><a class="bold" href="{{ foia.get_absolute_url }}">{{ foia.title }}</a><br><span class="small badge state {{ foia.status|classify_status }}">{{foia.get_status_display}}</span></td>
+<td>{{ foia.agency }}</td>
+<td>{{ foia.jurisdiction }}</td>
+<td>{{ foia.date_updated|date:"m/d/Y" }}</td>
 {% endwith %}
 {% endblock list-table-row %}
