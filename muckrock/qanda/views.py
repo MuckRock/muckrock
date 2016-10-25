@@ -20,8 +20,9 @@ from rest_framework.response import Response
 
 from muckrock.accounts.models import Notification
 from muckrock.foia.models import FOIAFile
-from muckrock.qanda.models import Question, Answer
+from muckrock.qanda.filters import QuestionFilterSet
 from muckrock.qanda.forms import QuestionForm, AnswerForm
+from muckrock.qanda.models import Question, Answer
 from muckrock.qanda.serializers import QuestionSerializer, QuestionPermissions
 from muckrock.tags.models import Tag, parse_tags
 from muckrock.views import MRFilterableListView
@@ -29,8 +30,9 @@ from muckrock.views import MRFilterableListView
 class QuestionList(MRFilterableListView):
     """List of unanswered questions"""
     model = Question
-    title = 'Questions & Answers'
-    template_name = 'lists/question_list.html'
+    filter_class = QuestionFilterSet
+    title = 'Q&A Forum'
+    template_name = 'qanda/list.html'
     default_sort = 'date'
     default_order = 'desc'
 

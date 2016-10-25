@@ -102,6 +102,13 @@
     }
 }
 
+.CheckboxInput.field {
+    overflow: hidden;
+    header {
+        float: left;
+    }
+}
+
 .hidden-fields {
     display: none;
 }
