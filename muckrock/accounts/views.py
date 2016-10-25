@@ -31,6 +31,7 @@ import logging
 import stripe
 import sys
 
+from muckrock.accounts.filters import ProxyFilterSet
 from muckrock.accounts.forms import (
         ProfileSettingsForm,
         EmailSettingsForm,
@@ -548,6 +549,7 @@ class UnreadNotificationList(NotificationList):
 class ProxyList(MRFilterableListView):
     """List of Proxies"""
     model = User
+    filter_class = ProxyFilterSet
     title = 'Proxies'
     template_name = 'lists/proxy_list.html'
     default_sort = 'profile__state'
