@@ -59,7 +59,7 @@ class ExemptionViewSet(ModelViewSet):
         if query:
             results = self.queryset.filter(
                 Q(name__icontains=query)|
-                Q(basis__icontains=query)|
+                Q(aliases__icontains=query)|
                 Q(example_appeals__language__icontains=query)|
                 Q(tags__name__icontains=query)
             ).distinct()

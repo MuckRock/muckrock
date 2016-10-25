@@ -6,8 +6,9 @@
 {% block type %}exemption{% endblock %}
 
 {% block header %}
+<h1>{{exemption.name}}</h1>
+{% if exemption.aliases %}<p>Also known as {{exemption.aliases}}.</p>{% endif %}
 <p><a href="{{exemption.jurisdiction.get_absolute_url}}">{{exemption.jurisdiction}}</a></p>
-<h1>{{exemption.name}} Exemption</h1>
 {% endblock %}
 
 {% block aside %}

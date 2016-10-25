@@ -86,6 +86,7 @@ class ExampleAppealFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = ExampleAppeal
 
+    title = factory.Faker('words')
     language = factory.Faker('paragraph')
     context = factory.Faker('paragraph')
     exemption = factory.SubFactory(ExemptionFactory)
