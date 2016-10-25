@@ -7,7 +7,34 @@
 <form method="POST" class="toolbar" id="my-request-actions">
     {% csrf_token %}
 </form>
-{% endblock list-actions %}
+{% endblock %}
+
+{% block list-content %}
+{{block.super}}
+{% if multirequests %}
+<h2>Multirequests</h2>
+<table class="multirequests">
+    <thead>
+        <th>Title</th>
+        <th>Agencies</th>
+        <th>Status</th>
+    </thead>
+    <tbody>
+        {% for multirequest in multirequests %}
+        <tr>
+            {% if multirequest.status == 'started' %}
+            <td><a href="{{multirequest.get_absolute_url}}">{{multirequest.title}}</a></td>
+            {% else %}
+            <td>{{multirequest.title}}</td>
+            {% endif %}
+            <td>{{multirequest.agencies.count}}</td>
+            <td><span class="small badge {{multirequest.status|classify_status}}">{{multirequest.get_status_display}}</span></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+{% endblock %}
 
 {% block list-table-head %}
 <th width="3%" class="list-table-checkbox"><input type="checkbox" class="select-all" data-name="foia" data-toolbar="#my-request-actions" /></th>

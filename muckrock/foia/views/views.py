@@ -13,7 +13,7 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template import RequestContext
-from django.views.generic import DetailView, TemplateView
+from django.views.generic import DetailView, ListView, TemplateView
 
 from actstream.models import Follow
 from datetime import datetime, timedelta
@@ -28,6 +28,7 @@ from muckrock.foia.codes import CODES
 from muckrock.foia.filters import (
     FOIARequestFilterSet,
     MyFOIARequestFilterSet,
+    MyFOIAMultiRequestFilterSet,
     ProcessingFOIARequestFilterSet,
 )
 from muckrock.foia.forms import (
@@ -62,7 +63,7 @@ from muckrock.qanda.forms import QuestionForm
 from muckrock.tags.models import Tag
 from muckrock.task.models import Task, FlaggedTask, StatusChangeTask
 from muckrock.utils import new_action
-from muckrock.views import class_view_decorator, MRFilterableListView
+from muckrock.views import class_view_decorator, MRFilterableListView, PaginationMixin
 
 # pylint: disable=too-many-ancestors
 
@@ -156,32 +157,37 @@ class MyRequestList(RequestList):
     title = 'Your Requests'
     template_name = 'foia/my_list.html'
 
-    def post(self, request):
-        """Handle updating read status"""
-        try:
-            post = request.POST
-            foia_pks = post.getlist('foia')
-            if post.get('submit') == 'Mark as Read':
-                FOIARequest.objects.filter(pk__in=foia_pks).update(updated=False)
-            elif post.get('submit') == 'Mark as Unread':
-                FOIARequest.objects.filter(pk__in=foia_pks).update(updated=True)
-            elif post.get('submit') == 'Mark All as Read':
-                FOIARequest.objects.filter(user=self.request.user, updated=True)\
-                                   .update(updated=False)
-        except FOIARequest.DoesNotExist:
-            pass
-        return redirect('foia-mylist')
-
     def get_queryset(self):
         """Limit to just requests owned by the current user."""
         queryset = super(MyRequestList, self).get_queryset()
         return queryset.filter(user=self.request.user)
 
-    def get_context_data(self, **kwargs):
-        """Adds multirequests owned by the user to the context."""
-        context = super(MyRequestList, self).get_context_data(**kwargs)
-        context['multirequests'] = FOIAMultiRequest.objects.filter(user=self.request.user)
-        return context
+
+@class_view_decorator(login_required)
+class MyMultiRequestList(MRFilterableListView):
+    """View requests owned by current user"""
+    model = FOIAMultiRequest
+    filter_class = MyFOIAMultiRequestFilterSet
+    title = 'Multirequests'
+    template_name = 'foia/multirequest_list.html'
+
+    def dispatch(self, *args, **kwargs):
+        """Basic users cannot access this view"""
+        if self.request.user.is_authenticated and not self.request.user.profile.is_advanced():
+            err_msg = (
+                'Multirequests are a pro feature. '
+                '<a href="%(settings_url)s">Upgrade today!</a>' % {
+                    'settings_url': reverse('accounts')
+                }
+            )
+            messages.error(self.request, err_msg)
+            return redirect('foia-mylist')
+        return super(MyMultiRequestList, self).dispatch(*args, **kwargs)
+
+    def get_queryset(self):
+        """Limit to just requests owned by the current user."""
+        queryset = super(MyMultiRequestList, self).get_queryset()
+        return queryset.filter(user=self.request.user)
 
 
 @class_view_decorator(login_required)

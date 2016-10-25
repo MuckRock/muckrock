@@ -67,12 +67,14 @@
         display: block;
         width: 100%;
     }
+    /*
     input[type="checkbox"], input[type="radio"] {
         width: auto;
         margin-top: $vr/4;
         margin-right: $vr/2;
         float: left;
     }
+    */
     textarea {
         display: block;
         height: 5em;
@@ -106,6 +108,7 @@
     overflow: hidden;
     header {
         float: left;
+        margin-right: $vr/2;
     }
 }
 

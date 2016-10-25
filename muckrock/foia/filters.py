@@ -10,7 +10,7 @@ import django_filters
 
 from muckrock.agency.models import Agency
 from muckrock.filters import RangeWidget
-from muckrock.foia.models import FOIARequest, STATUS
+from muckrock.foia.models import FOIARequest, FOIAMultiRequest, STATUS
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag
@@ -78,6 +78,15 @@ class MyFOIARequestFilterSet(django_filters.FilterSet):
     class Meta:
         model = FOIARequest
         fields = ['status', 'agency', 'jurisdiction', 'tags']
+
+
+class MyFOIAMultiRequestFilterSet(django_filters.FilterSet):
+    """Allows multirequests to be filtered by status."""
+    status = django_filters.ChoiceFilter(choices=BLANK_STATUS[:3])
+
+    class Meta:
+        model = FOIAMultiRequest
+        fields = ['status']
 
 
 class ProcessingFOIARequestFilterSet(django_filters.FilterSet):

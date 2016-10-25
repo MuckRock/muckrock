@@ -22,7 +22,7 @@ old_foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
 urlpatterns = patterns(
     '',
     url(r'^$', views.RequestExploreView.as_view(), name='foia-root'),
-    
+
     # Redirects
     url(r'^multi/$', RedirectView.as_view(url='/foia/create_multi')),
 
@@ -33,6 +33,9 @@ urlpatterns = patterns(
     url(r'^mylist/$',
         views.MyRequestList.as_view(),
         name='foia-mylist'),
+    url(r'^mylist/multirequest/$',
+        views.MyMultiRequestList.as_view(),
+        name='foia-mymulti'),
     url(r'^list/following/$',
         views.FollowingRequestList.as_view(),
         name='foia-list-following'),
