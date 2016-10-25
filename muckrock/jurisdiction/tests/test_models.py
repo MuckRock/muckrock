@@ -265,7 +265,7 @@ class TestExampleAppealModel(TestCase):
     def test_unicode(self):
         """The text representation should be the appeal's context and exemption."""
         actual = unicode(self.example_appeal)
-        expected = u'%s for %s' % (self.example_appeal.context, self.example_appeal.exemption)
+        expected = u'%s for %s' % (self.example_appeal.title, self.example_appeal.exemption)
         eq_(actual,
             expected,
             ('Should include the name of the exemption and the request.\n'
