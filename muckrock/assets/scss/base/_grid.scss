@@ -77,6 +77,12 @@
   @include align-items(baseline);
 }
 
+.align-center {
+  @include display(flex);
+  @include flex-wrap(wrap);
+  @include align-items(center);
+}
+
 .mb0 {
   margin-bottom: 0;
 }

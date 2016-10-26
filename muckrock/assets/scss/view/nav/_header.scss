@@ -2,7 +2,7 @@
     box-shadow: 0px 2px 8px rgba(0, 0, 0, .2);
 }
 
-.website-header {
+.global-header {
     @include drop-shadow;
     margin-bottom: 0;
     position: fixed;
@@ -12,15 +12,12 @@
     background-color: $nav-background;
     border-bottom: $nav-border;
     & + * {
-        // The top margin accounts for the fixed header
+        /* The top margin accounts for the fixed header. */
         margin-top: 2.6875em;
-    }
-    @media($sidebar-bp) {
-        right: 15.625em;
     }
 }
 
-.website-header .search-form {
+.global-header .search-form {
     @include drop-shadow;
     display: none;
     width: 100%;
@@ -60,8 +57,8 @@
     }
 }
 
-// Logo visibility depends on viewport size
-.website-header .brand {
+/* Logo visibility depends on viewport size */
+.global-header .brand {
     .logotype {
         display: none;
         visibility: hidden;
@@ -82,16 +79,10 @@
     }
 }
 
-.nav-section {
-    @include display(flex);
-    @include align-items(center);
-    margin-bottom: 0;
-}
-
 .nav-item {
     display: inline-block;
     width: auto;
-    min-width: 2.75em;
+    min-width: 42px;
     height: 42px;
     padding: $vr/2;
     margin-bottom: 0;
@@ -113,19 +104,21 @@
         vertical-align: middle;
         line-height: $lh;
     }
-    &.dark {
-        background: $color-grey-2;
+    &.blue {
+        background: $color-blue;
+        color: $color-white;
+        svg path {
+            fill: $color-white;
+        }
+    }
+    &.black {
+        background: $color-black;
         color: $color-white;
         svg path {
             fill: $color-white;
         }
         &:hover {
             background: $color-blue;
-        }
-    }
-    @media(min-width:18em) {
-        &.website-sections-button .label {
-            display: inline;
         }
     }
     @include media($medium-bp) {
@@ -137,21 +130,18 @@
             display: inline;
         }
     }
-    &.create-request-button {
-        background: $color-blue;
-    }
 }
 
-nav.website-navigation {
+#nav {
     @include display(flex);
     @include justify-content(space-between);
     max-height: 42px;
     ul {
+        display: flex;
+        align-items: center;
         margin-bottom: 0;
         padding-left: 0;
-    }
-    li {
-        display: inline-block;
+        list-style-type: none;
     }
     a {
         text-decoration: none;
@@ -180,61 +170,33 @@ nav.website-navigation {
             @include nav-item-hover;
         }
     }
-
-
-    .website-sections-button {
-        display: none;
-        .icon {
-            display: none;
-        }
-    }
-
-    @media($nav-bp) {
-        padding-left: 0;
-        .website-sections {
-            @include drop-shadow;
-            display: none;
-            width: 100%;
-            background: $nav-background;
-            border-top: $nav-border;
-            border-bottom: $nav-border;
-            li {
-                display: block;
-            }
-        }
-        .website-sections-button {
-            display: inline-block;
+    .avatar-container {
+        position: relative;
+        .avatar {
+            @include border-radius;
             margin-bottom: 0;
-            &.active {
-                @include nav-item-hover;
-            }
-        }
-        .website-sections.visible {
-            display: block;
             position: absolute;
-            z-index: 100;
-            left: 0;
-            top: 100%;
+            top: 6px;
+            left: 6px;
+            opacity: .9;
         }
-        .website-sections .nav-item {
-            width: auto;
-            display: block;
-            text-align: center;
+        .round.avatar {
+            border-radius: 9999px;
         }
-    }
-
-    @media($sidebar-bp) {
-        .sidebar-toggle {
-            display: none;
-        }
-        .create-request-button {
-            border-right: 1px solid $color-grey-3;
+        .label {
+            margin-left: 2*$vr;
         }
     }
 }
 
+.dropdown--right {
+    position: relative;
+    ul {
+        right: 0;
+    }
+}
 
-#global-sections li ul {
+#nav li ul {
     display: none;
     min-width: 5em;
     position: absolute;
@@ -253,8 +215,24 @@ nav.website-navigation {
         text-align: left;
     }
 }
-#global-sections li:hover ul {
-    display: block;
+#nav li:hover {
+    & > .nav-item {
+        background: $color-blue;
+        color: $color-white;
+        .icon {
+            @include svg-color($color-white);
+        }
+    }
+    ul {
+        display: block;
+    }
+}
+#nav .black.nav-item + ul {
+    background: $color-black;
+    border-color: $color-black-pure;
+    .nav-item {
+        color: $color-white;
+    }
 }
 
 #more-sections .icon {

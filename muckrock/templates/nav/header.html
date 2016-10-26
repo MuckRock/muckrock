@@ -1,6 +1,8 @@
-<header class="website-header">
-    <nav class="website-navigation">
-        <div class="nav-section">
+{% load thumbnail %}
+
+<header class="global-header">
+    <nav class="space-between mb0" id="nav">
+        <div class="align-center mb0">
             <a href="{% url 'index'%}" class="nav-item brand">
                 <span class="logotype">
                     {% include 'lib/component/icon/logotype.svg' %}
@@ -9,7 +11,7 @@
                     {% include 'lib/component/icon/logo.svg' %}
                 </span>
             </a>
-            <ul class="website-sections" id="global-sections">
+            <ul>
                 <li>
                     <a class="nav-item" href="{% url 'news-index' %}">News</a>
                     <ul>
@@ -75,10 +77,6 @@
                     </ul>
                 </li>
             </ul>
-            <div class="nav-item website-sections-button" id="show-sections">
-                {% include 'lib/component/icon/sections-dots.svg' %}
-                <span class="label">Sections</span>
-            </div>
         </div>
         <!-- We have to keep the search form in the middle, otherwise Firefox will mess up the flexbox justification -->
         <form action="/search" method="get" class="search-form" id="global-search">
@@ -88,23 +86,114 @@
                 <div class="search-cancel" id="hide-search">Cancel</div>
             </div>
         </form>
-        <div class="nav-section">
-            <div class="nav-item search-button" id="show-search">
-                {% include 'lib/component/icon/search.svg' %}
-                <span class="label">Search</span>
-            </div>
-            <a class="dark nav-item create-request-button" href="{% url 'foia-create'%}" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
+        <div>
+            <ul>
+                <li>
+                    <span class="nav-item search-button" id="show-search">
+                        {% include 'lib/component/icon/search.svg' %}
+                        <span class="label">Search</span>
+                    </span>
+                </li>
+                <li>
+                    <a class="blue nav-item" href="{% url 'foia-create'%}" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
                 {% include 'lib/component/icon/create-request.svg' %}
                 <span class="label">File<span class="extended"> Request</span></span>
-            </a>
-            <div class="dark nav-item sidebar-toggle" id="sidebar-button">
-                {% if unread_notifications.count > 0 %}
-                <span class="blue counter">{{unread_notifications.count}}</span>
-                {% else %}
-                {% include 'lib/component/icon/sections-lines.svg' %}
-                {% endif %}
-                <span class="label">Menu</span>
-            </div>
+                    </a>
+                </li>
+            {% if user.is_authenticated %}
+                <li class="dropdown--right">
+                    <a href="{% url 'acct-my-profile' %}" class="black nav-item align-center avatar-container">
+                        <img class="round avatar mb0" src="{% thumbnail user.profile.avatar 31x31 %}">
+                        <span class="label">{{ user.get_full_name }}
+                    </a>
+                    <ul>
+                        {% if payment_failed %}
+                        <li class="error message small">
+                            <span class="symbol">
+                                {% include 'lib/component/icon/error.svg' %}
+                            </span>
+                            <span class="text">
+                                <p>Your payment failed! A recent charge made against your credit card has failed.</p>
+                                <a class="basic red button" href="{% url 'acct-settings' %}#billing">Update your billing info</a>
+                            </span>
+                        </li>
+                        {% endif %}
+                        {% if broadcast %}
+                        <li class="broadcast">
+                            <dfn>Announcement</dfn>
+                            <p>{{ broadcast|safe }}</p>
+                        </li>
+                        {% endif %}
+                        {% if organization %}
+                        <li><a class="nav-item" href="{{organization.get_absolute_url}}">Your&nbsp;Organization</a></li>
+                        {% endif %}
+                        {% if my_projects %}
+                        <li><a class="nav-item" href="{% url 'project-contributor' username=request.user.username %}">Your&nbsp;Projects</a></li>
+                        {% endif %}
+                        <li><a class="nav-item" href="{% url 'foia-mylist' %}">Your&nbsp;Requests</a></li>
+                        {% if actionable_requests %}
+                        {% if actionable_requests.payment %}
+                        <li>
+                            <a class="nav-item" href="{% url 'foia-mylist' %}?status=payment">
+                                <span class="red counter">{{ actionable_requests.payment|length }}</span>
+                                &nbsp;Payment{{ actionable_requests.payment|length|pluralize }}&nbsp;Required
+                            </a>
+                        </li>
+                        {% endif %}
+                        {% if actionable_requests.fix %}
+                        <li>
+                            <a class="nav-item" href="{% url 'foia-mylist' %}?status=fix">
+                                <span class="red counter">{{ actionable_requests.fix|length }}</span>
+                                &nbsp;Fix{{ actionable_requests.fix|length|pluralize:"es" }}&nbsp;Required
+                            </a>
+                        </li>
+                        {% endif %}
+                        {% if actionable_requests.started %}
+                        <li>
+                            <a class="nav-item drafts" href="{% url 'foia-mylist' %}?status=started">
+                                <span class="blue counter">{{ actionable_requests.started|length }}</span>
+                                &nbsp;Draft{{ actionable_requests.started|length|pluralize }}
+                            </a>
+                        </li>
+                        {% endif %}
+                        {% endif %}
+                    </ul>
+                </li>
+                <li>
+                    {% if unread_notifications.count > 0 %}
+                    <a href="{% url 'acct-notifications-unread' %}" class="black unread nav-item">
+                        <span class="blue counter">{{unread_notifications.count}}</span>
+                    {% else %}
+                    <a href="{% url 'acct-notifications' %}" class="black nav-item">
+                    {% endif %}
+                        {% include 'lib/component/icon/notification.svg' %}
+                    </a>
+                </li>
+                <li class="dropdown--right">
+                    <span class="black nav-item">{% include 'lib/component/icon/options.svg' %}</span>
+                    <ul>
+                        {% if user.is_staff %}
+                        <li>
+                            <a class="nav-item" href="{% if sidebar_admin_url %}{{ sidebar_admin_url }}{% else %}/admin/{% endif %}">Admin</a>
+                        </li>
+                        {% endif %}
+                        <li>
+                            <a class="nav-item" href="{% url 'acct-settings' %}">Settings</a>
+                        </li>
+                        <li>
+                            <a class="nav-item" href="{% url 'acct-logout' %}" onclick="ga('send', 'event', 'Account', 'Logout', window.location.pathname)">Log&nbsp;Out</a>
+                        </li>
+                    </ul>
+                </li>
+            {% else %}
+                <li><a href="{% url 'accounts' %}" class="sign-up nav-item">Sign&nbsp;Up</a></li>
+                <li>
+                    <a href="{% url 'acct-login' %}?next={{ request.get_full_path }}" class="log-in nav-item" id="quick-log-in">Log&nbsp;In</a>
+                    <ul>
+                    </ul>
+                </li>
+            {% endif %}
+            </ul>
         </div>
     </nav>
 </header>
