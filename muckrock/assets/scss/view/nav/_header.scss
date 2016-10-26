@@ -232,3 +232,31 @@ nav.website-navigation {
         }
     }
 }
+
+
+#global-sections li ul {
+    display: none;
+    min-width: 5em;
+    position: absolute;
+    top: 100%;
+    @include border;
+    @include drop-shadow;
+    background: $color-white-pure;
+    li {
+        display: block;
+        &.separator {
+            border-bottom: 1px solid $color-grey;
+        }
+    }
+    .nav-item {
+        width: 100%;
+        text-align: left;
+    }
+}
+#global-sections li:hover ul {
+    display: block;
+}
+
+#more-sections .icon {
+    transform: scale(1.5);
+}

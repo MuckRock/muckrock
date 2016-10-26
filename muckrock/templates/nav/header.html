@@ -10,14 +10,70 @@
                 </span>
             </a>
             <ul class="website-sections" id="global-sections">
-                <li><a class="nav-item" href="{% url 'news-index' %}">News</a></li>
-                <li><a class="nav-item" href="{% url 'project' %}">Projects</a></li>
-                <li><a class="nav-item" href="{% url 'foia-root' %}">Requests</a></li>
-                <li><a class="nav-item" href="{% url 'agency-list' %}">Agencies</a></li>
-                <li><a class="nav-item" href="{% url 'question-index' %}">Q&amp;A Forum</a></li>
+                <li>
+                    <a class="nav-item" href="{% url 'news-index' %}">News</a>
+                    <ul>
+                        <li><a class="nav-item" href="{% url 'news-archive' %}">Archive</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a class="nav-item" href="{% url 'project' %}">Projects</a>
+                    <ul>
+                        {% if user.is_authenticated %}
+                        <li><a class="nav-item" href="{% url 'project-contributor' username=user.username %}">Yours</a></li>
+                        {% endif %}
+                        <li><a class="nav-item" href="{% url 'project-list' %}">Archive</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a class="nav-item" href="{% url 'foia-root' %}">Requests</a>
+                    <ul>
+                        <li><a class="nav-item" href="{% url 'foia-list' %}">All</a></li>
+                        {% if user.is_authenticated %}
+                        <li><a class="nav-item" class="nav-item" href="{% url 'foia-mylist' %}">Yours</a></li>
+                            {% if user.profile.is_advanced %}
+                        <li><a class="nav-item" href="{% url 'foia-mymulti' %}">Multirequests</a></li>
+                            {% endif %}
+                            {% if user.is_staff %}
+                        <li><a class="nav-item" href="{% url 'foia-list-processing' %}">Processing</a></li>
+                            {% endif %}
+                        {% endif %}
+                    </ul>
+                </li>
                 {% if user.is_staff %}
-                <li><a class="nav-item" href="{% url 'task-list' %}">Tasks</a></li>
+                <li>
+                    <a class="nav-item" href="{% url 'task-list' %}">Tasks</a>
+                    <ul>
+                        <li><a class="nav-item" href="{% url 'response-task-list' %}">Response</a></li>
+                        <li class="separator"><a class="nav-item" href="{% url 'foia-list-processing' %}">Processing</a></li>
+                        <li><a class="nav-item" href="{% url 'new-agency-task-list' %}">New Agency</a></li>
+                        <li><a class="nav-item" href="{% url 'orphan-task-list' %}">Orphan</a></li>
+                        <li><a class="nav-item" href="{% url 'snail-mail-task-list' %}">Snail Mail</a></li>
+                        <li><a class="nav-item" href="{% url 'flagged-task-list' %}">Flagged</a></li>
+                        <li class="separator"><a class="nav-item" href="{% url 'newexemption-task-list' %}">New Exemptions</a></li>
+                        <li><a class="nav-item" href="{% url 'stale-agency-task-list' %}">Stale Agency</a></li>
+                        <li><a class="nav-item" href="{% url 'rejected-email-task-list' %}">Rejected Email</a></li>
+                        <li class="separator"><a class="nav-item" href="{% url 'failed-fax-task-list' %}">Failed Fax</a></li>
+                        <li><a class="nav-item" href="{% url 'multirequest-task-list' %}">Multirequest</a></li>
+                        <li><a class="nav-item" href="{% url 'projectreview-task-list' %}">Pending Projects</a></li>
+                        <li><a class="nav-item" href="{% url 'crowdfund-task-list' %}">Crowdfund</a></li>
+                        <li><a class="nav-item" href="{% url 'status-change-task-list' %}">Status Change</a></li>
+                    </ul>
+                </li>
                 {% endif %}
+                <li id="more-sections">
+                    <span class="nav-item">{% include 'lib/component/icon/sections-dots.svg' %}</span>
+                    <ul>
+                        <li><a class="nav-item" href="{% url 'jurisdiction-list' %}">Jurisdictions</a></li>
+                        <li><a class="nav-item" href="{% url 'agency-list' %}">Agencies</a></li>
+                        <li class="separator"><a class="nav-item" href="{% url 'question-index' %}">Q&amp;A Forum</a></li>
+                        <li class="separator"><a class="nav-item" href="{% url 'donate' %}">Donate</a></li>
+                        <li><a class="nav-item" href="/about/">About Us</a></li>
+                        <li><a class="nav-item" href="/staff/">Staff</a></li>
+                        <li><a class="nav-item" href="/faq/">FAQ</a></li>
+                        <li><a class="nav-item" href="/api/">API</a></li>
+                    </ul>
+                </li>
             </ul>
             <div class="nav-item website-sections-button" id="show-sections">
                 {% include 'lib/component/icon/sections-dots.svg' %}
