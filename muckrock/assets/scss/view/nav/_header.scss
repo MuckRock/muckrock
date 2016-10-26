@@ -90,13 +90,18 @@
     font-weight: $bold;
     text-align: center;
     cursor: pointer;
-    @include nav-item-color;
+    color: $color-black;
     a {
         display: block;
+        color: $color-black;
     }
     .icon {
         // margin-top: $vr/8;
         vertical-align: middle;
+        @include svg-color($color-black);
+    }
+    &:hover {
+        background: $color-grey-7;
     }
     .label {
         display: none;
@@ -110,6 +115,9 @@
         svg path {
             fill: $color-white;
         }
+        &:hover {
+            background: $color-blue-dark;
+        }
     }
     &.black {
         background: $color-black;
@@ -118,7 +126,7 @@
             fill: $color-white;
         }
         &:hover {
-            background: $color-blue;
+            background: $color-black-pure;
         }
     }
     @include media($medium-bp) {
@@ -167,7 +175,7 @@
         margin-bottom: 0;
         cursor: pointer;
         &.active {
-            @include nav-item-hover;
+            background: $color-grey-7;
         }
     }
     .avatar-container {
@@ -191,6 +199,7 @@
 
 .dropdown--right {
     position: relative;
+    overflow: visible;
     ul {
         right: 0;
     }
@@ -217,10 +226,12 @@
 }
 #nav li:hover {
     & > .nav-item {
-        background: $color-blue;
-        color: $color-white;
-        .icon {
-            @include svg-color($color-white);
+        background: $color-grey-7;
+        &.blue {
+            background: darken($color-blue, $color-darken-amount);
+        }
+        &.black {
+            background: $color-black-pure;
         }
     }
     ul {
@@ -232,6 +243,9 @@
     border-color: $color-black-pure;
     .nav-item {
         color: $color-white;
+        &:hover {
+            background: $color-black-pure;
+        }
     }
 }
 

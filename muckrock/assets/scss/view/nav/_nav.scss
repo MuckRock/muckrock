@@ -5,27 +5,6 @@ $nav-background: #FFFFFF;
 $sidebar-width: 15.625em;
 $sidebar-bp: "min-width:72em";
 
-@mixin nav-item-hover {
-    color: $nav-background;
-    background: $color-blue;
-    path, circle { fill: $nav-background; }
-    a:hover {
-        color: $nav-background;
-        text-decoration: none;
-    }
-}
-
-@mixin nav-item-color {
-    color: $color-black;
-    path, circle { fill: $color-black; }
-    a {
-        color: $color-black;
-    }
-    &:hover {
-        @include nav-item-hover;
-    }
-}
-
 @import 'header';
 @import 'sidebar';
 @import 'footer';

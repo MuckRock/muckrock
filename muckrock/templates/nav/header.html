@@ -134,18 +134,12 @@
                         {% if actionable_requests %}
                         {% if actionable_requests.payment %}
                         <li>
-                            <a class="nav-item" href="{% url 'foia-mylist' %}?status=payment">
-                                <span class="red counter">{{ actionable_requests.payment|length }}</span>
-                                &nbsp;Payment{{ actionable_requests.payment|length|pluralize }}&nbsp;Required
-                            </a>
+                            <a class="nav-item" href="{% url 'foia-mylist' %}?status=payment"><span class="red counter">{{ actionable_requests.payment|length }}</span>&nbsp;Payment{{ actionable_requests.payment|length|pluralize }}&nbsp;Required</a>
                         </li>
                         {% endif %}
                         {% if actionable_requests.fix %}
                         <li>
-                            <a class="nav-item" href="{% url 'foia-mylist' %}?status=fix">
-                                <span class="red counter">{{ actionable_requests.fix|length }}</span>
-                                &nbsp;Fix{{ actionable_requests.fix|length|pluralize:"es" }}&nbsp;Required
-                            </a>
+                            <a class="nav-item" href="{% url 'foia-mylist' %}?status=fix"><span class="red counter">{{ actionable_requests.fix|length }}</span>&nbsp;Fix{{ actionable_requests.fix|length|pluralize:"es" }}&nbsp;Required</a>
                         </li>
                         {% endif %}
                         {% if actionable_requests.started %}
