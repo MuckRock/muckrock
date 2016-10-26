@@ -16,6 +16,7 @@ from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency, STALE_DURATION
 from muckrock.foia.models import STATUS, FOIARequest, FOIACommunication, FOIAFile
 from muckrock.models import ExtractDay, Now
+from muckrock.task.filters import TaskFilterSet
 from muckrock.task.forms import (
     TaskFilterForm, FlaggedTaskForm, StaleAgencyTaskForm, ResponseTaskForm,
     ProjectReviewTaskForm
@@ -55,7 +56,8 @@ class TaskList(MRFilterableListView):
     """List of tasks"""
     title = 'Tasks'
     model = Task
-    template_name = 'lists/task_list.html'
+    filter_class = TaskFilterSet
+    template_name = 'task/list.html'
     default_sort = 'pk'
     bulk_actions = ['resolve'] # bulk actions have to be lowercase and 1 word
 
@@ -63,8 +65,6 @@ class TaskList(MRFilterableListView):
         """Apply query parameters to the queryset"""
         queryset = super(TaskList, self).get_queryset()
         task_pk = self.kwargs.get('pk')
-        show_resolved = self.request.GET.get('show_resolved')
-        resolved_by = self.request.GET.get('resolved_by')
         if task_pk:
             # when we are looking for a specific task,
             # we filter the queryset for that task's pk
@@ -72,29 +72,14 @@ class TaskList(MRFilterableListView):
             queryset = queryset.filter(pk=task_pk)
             if queryset.count() == 0:
                 raise Http404()
-            show_resolved = True
-            resolved_by = None
-        if not show_resolved:
-            queryset = queryset.exclude(resolved=True)
-        if resolved_by:
-            queryset = queryset.filter(resolved_by__pk=resolved_by)
-        # order queryset
-        queryset = queryset.order_by('date_done', 'date_created')
         return queryset
 
     def get_context_data(self, **kwargs):
-        """Adds counters for each of the sections (except all) and uses TaskFilterForm"""
+        """Adds counters for each of the sections and for processing requests."""
         context = super(TaskList, self).get_context_data(**kwargs)
-        filter_initial = {}
-        show_resolved = self.request.GET.get('show_resolved')
-        if show_resolved:
-            filter_initial['show_resolved'] = True
-        resolved_by = self.request.GET.get('resolved_by')
-        if resolved_by:
-            filter_initial['resolved_by'] = resolved_by
-        context['filter_form'] = TaskFilterForm(initial=filter_initial)
         context['counters'] = count_tasks()
         context['bulk_actions'] = self.bulk_actions
+        context['processing_count'] = FOIARequest.objects.filter(status='submitted').count()
         return context
 
     @method_decorator(user_passes_test(lambda u: u.is_staff))

@@ -59,6 +59,13 @@
   background: $color-blue;
   color: $color-white;
 }
+.list__sections .counter {
+    min-width: 3em;
+    display: inline-block;
+    margin-right: $vr/4;
+    text-align: center;
+}
+
 .list-table-checkbox {
   font-size: 1rem;
 }

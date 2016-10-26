@@ -37,6 +37,12 @@ class AuthorAutocomplete(UserAutocomplete):
     }
 
 
+class UserTaskAutocomplete(UserAutocomplete):
+    """Limits choices to just users with more than 1 authored article."""
+    choices = (User.objects.annotate(resolved_task_count=Count('resolved_tasks'))
+        .exclude(resolved_task_count=0))
+
+
 class RequestSharingAutocomplete(UserAutocomplete):
     """Adds request sharing filtering for users"""
     def choices_for_request(self):
@@ -86,3 +92,4 @@ autocomplete_light.register(User, UserAutocomplete)
 autocomplete_light.register(User, OrganizationAutocomplete)
 autocomplete_light.register(User, RequestSharingAutocomplete)
 autocomplete_light.register(User, AuthorAutocomplete)
+autocomplete_light.register(User, UserTaskAutocomplete)

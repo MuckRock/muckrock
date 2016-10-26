@@ -67,14 +67,12 @@
         display: block;
         width: 100%;
     }
-    /*
     input[type="checkbox"], input[type="radio"] {
         width: auto;
         margin-top: $vr/4;
         margin-right: $vr/2;
         float: left;
     }
-    */
     textarea {
         display: block;
         height: 5em;
@@ -82,6 +80,7 @@
     }
     .help-text {
         margin-top: $vr/4;
+        clear: left;
     }
     &.image {
         .preview {
@@ -108,7 +107,6 @@
     overflow: hidden;
     header {
         float: left;
-        margin-right: $vr/2;
     }
 }
 
@@ -119,7 +117,7 @@
 .help-text {
     font-size: $size-2;
     line-height: $lh;
-    color: $color-grey;
+    opacity: .75;
 }
 
 textarea, #{$all-text-inputs} {
