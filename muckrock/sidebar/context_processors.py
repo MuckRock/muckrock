@@ -21,7 +21,7 @@ def get_recent_articles():
 
 def get_actionable_requests(user):
     """Gets requests that require action or attention"""
-    requests = FOIARequest.objects.filter(user=user).select_related('jurisdiction')
+    requests = FOIARequest.objects.filter(user=user).select_related_view()
     updates = requests.filter(updated=True)
     started = requests.filter(status='started')
     payment = requests.filter(status='payment')
@@ -90,7 +90,8 @@ def sidebar_info(request):
     """Displays info about a user's requsts in the sidebar"""
     # content for all users
     sidebar_info_dict = {
-        'recent_articles': get_recent_articles(),
+        'dropdown_recent_articles': get_recent_articles(),
+        'dropdown_featured_projects': Project.objects.filter(featured=True).optimize(),
         'broadcast': sidebar_broadcast(request.user),
         'login_form': AuthenticationForm()
     }
