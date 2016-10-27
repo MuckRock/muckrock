@@ -2,9 +2,9 @@
 {% load cache %}
 
 <header class="global-header">
-    <nav class="space-between mb0" id="nav">
-        <div class="align-center mb0">
-            <a href="{% url 'index'%}" class="nav-item brand">
+    <nav class="global-navigation space-between mb0" id="nav">
+        <div class="nav-section align-center mb0" id="site-nav">
+            <a href="{% url 'index'%}" class="nav-item brand" id="nav-brand">
                 <span class="logotype">
                     {% include 'lib/component/icon/logotype.svg' %}
                 </span>
@@ -12,12 +12,15 @@
                     {% include 'lib/component/icon/logo.svg' %}
                 </span>
             </a>
-            <ul>
+            <span class="nav-item section-toggle" id="toggle-sections">
+                {% include 'lib/component/icon/sections-lines.svg' %}
+            </span>
+            <ul class="sections" id="nav-list-sections">
                 <li>
                     <a class="nav-item" href="{% url 'news-index' %}">News</a>
                     {% if user.is_authenticated %}
                     <ul>
-                        {# cache 600 dropdown_recent_articles #}
+                        {% cache 600 dropdown_recent_articles %}
                         {% for article in dropdown_recent_articles|slice:":5" %}
                         <li class="rich-nav-item" style="background-image:url('{% thumbnail article.image 300x100 crop %}');">
                             <a href="{{article.get_absolute_url}}" title="{{article.summary}}">
@@ -25,7 +28,7 @@
                             </a>
                         </li>
                         {% endfor %}
-                        {# endcache #}
+                        {% endcache %}
                         <li><a class="nav-item" href="{% url 'news-archive' %}">Archive</a></li>
                     </ul>
                     {% endif %}
@@ -101,8 +104,11 @@
                     </ul>
                 </li>
             </ul>
+            <span class="nav-item search-toggle" id="show-search">
+                {% include 'lib/component/icon/search.svg' %}
+                <span class="label">Search</span>
+            </span>
         </div>
-        <!-- We have to keep the search form in the middle, otherwise Firefox will mess up the flexbox justification -->
         <form action="/search" method="get" class="search-form" id="global-search">
             <div class="search-form-container">
                 <input type="search" name="q" placeholder="Search">
@@ -110,21 +116,15 @@
                 <div class="search-cancel" id="hide-search">Cancel</div>
             </div>
         </form>
-        <div>
+        <div class="nav-section" id="user-nav">
             <ul>
-                <li>
-                    <span class="nav-item search-button" id="show-search">
-                        {% include 'lib/component/icon/search.svg' %}
-                        <span class="label">Search</span>
-                    </span>
-                </li>
                 <li>
                     <a class="blue nav-item" href="{% url 'foia-create'%}" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
                 {% include 'lib/component/icon/create-request.svg' %}
                 <span class="label">File<span class="extended"> Request</span></span>
                     </a>
                 </li>
-            {% if user.is_authenticated %}
+                {% if user.is_authenticated %}
                 <li class="dropdown--right">
                     <a href="{% url 'acct-my-profile' %}" class="black nav-item align-center avatar-container">
                         <img class="round avatar mb0" src="{% thumbnail user.profile.avatar 31x31 crop %}">
@@ -148,32 +148,32 @@
                             <p>{{ broadcast|safe }}</p>
                         </li>
                         {% endif %}
-                        {% if organization %}
-                        <li><a class="nav-item" href="{{organization.get_absolute_url}}">Your&nbsp;Organization</a></li>
-                        {% endif %}
-                        {% if my_projects %}
-                        <li><a class="nav-item" href="{% url 'project-contributor' username=request.user.username %}">Your&nbsp;Projects</a></li>
-                        {% endif %}
                         <li><a class="nav-item" href="{% url 'foia-mylist' %}">Your&nbsp;Requests</a></li>
                         {% if actionable_requests %}
                         {% if actionable_requests.payment %}
                         <li>
-                            <a class="nav-item" href="{% url 'foia-mylist' %}?status=payment"><span class="red counter">{{ actionable_requests.payment|length }}</span>&nbsp;Payment{{ actionable_requests.payment|length|pluralize }}&nbsp;Required</a>
+                            <a class="small nav-item" href="{% url 'foia-mylist' %}?status=payment"><span class="red counter">{{ actionable_requests.payment|length }}</span>&nbsp;Payment{{ actionable_requests.payment|length|pluralize }}&nbsp;Required</a>
                         </li>
                         {% endif %}
                         {% if actionable_requests.fix %}
                         <li>
-                            <a class="nav-item" href="{% url 'foia-mylist' %}?status=fix"><span class="red counter">{{ actionable_requests.fix|length }}</span>&nbsp;Fix{{ actionable_requests.fix|length|pluralize:"es" }}&nbsp;Required</a>
+                            <a class="small nav-item" href="{% url 'foia-mylist' %}?status=fix"><span class="red counter">{{ actionable_requests.fix|length }}</span>&nbsp;Fix{{ actionable_requests.fix|length|pluralize:"es" }}&nbsp;Required</a>
                         </li>
                         {% endif %}
                         {% if actionable_requests.started %}
                         <li>
-                            <a class="nav-item drafts" href="{% url 'foia-mylist' %}?status=started">
+                            <a class="small nav-item" href="{% url 'foia-mylist' %}?status=started">
                                 <span class="blue counter">{{ actionable_requests.started|length }}</span>
                                 &nbsp;Draft{{ actionable_requests.started|length|pluralize }}
                             </a>
                         </li>
                         {% endif %}
+                        {% endif %}
+                        {% if my_projects %}
+                        <li><a class="nav-item" href="{% url 'project-contributor' username=request.user.username %}">Your&nbsp;Projects</a></li>
+                        {% endif %}
+                        {% if organization %}
+                        <li><a class="nav-item" href="{{organization.get_absolute_url}}">Your&nbsp;Organization</a></li>
                         {% endif %}
                     </ul>
                 </li>
@@ -203,7 +203,7 @@
                         </li>
                     </ul>
                 </li>
-            {% else %}
+                {% else %}
                 <li><a href="{% url 'accounts' %}" class="sign-up black nav-item">Sign&nbsp;Up</a></li>
                 <li class="dropdown--right">
                     <a href="{% url 'acct-login' %}?next={{ request.get_full_path }}" class="log-in black nav-item" id="quick-log-in">Log&nbsp;In</a>
@@ -218,7 +218,7 @@
                         </div>
                     </form>
                 </li>
-            {% endif %}
+                {% endif %}
             </ul>
         </div>
     </nav>

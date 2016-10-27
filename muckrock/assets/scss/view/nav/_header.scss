@@ -1,5 +1,5 @@
 @mixin drop-shadow() {
-    box-shadow: 0px 2px 8px rgba(0, 0, 0, .2);
+    box-shadow: 0px 2px 8px rgba($color-black-pure, .25);
 }
 
 .global-header {
@@ -12,8 +12,19 @@
     background-color: $nav-background;
     border-bottom: $nav-border;
     & + * {
-        /* The top margin accounts for the fixed header. */
-        margin-top: 2.6875em;
+        /* The top margin accounts for the fixed top navigation. */
+        margin-top: 2.6875em !important;
+    }
+}
+
+#modal-overlay {
+    margin-bottom: 0;
+}
+
+@media($bottom-nav-bp) {
+    .website-footer {
+        /* The bottom is added when we have a fixed bottom navigation. */
+        margin-bottom: 42px !important;
     }
 }
 
@@ -129,7 +140,7 @@
             background: $color-black-pure;
         }
     }
-    @include media($medium-bp) {
+    @media($label-bp) {
         padding: $vr/2;
         .icon {
             margin-top: 0;
@@ -170,7 +181,7 @@
         }
     }
 
-    .search-button {
+    .search-toggle {
         display: inline-block;
         margin-bottom: 0;
         cursor: pointer;
@@ -179,20 +190,15 @@
         }
     }
     .avatar-container {
-        position: relative;
+        padding:6px;
         .avatar {
             @include border-radius;
             margin-bottom: 0;
-            position: absolute;
-            top: 6px;
-            left: 6px;
             opacity: .9;
+            vertical-align: middle;
         }
         .round.avatar {
             border-radius: 9999px;
-        }
-        .label {
-            margin-left: 2*$vr;
         }
     }
 }
@@ -268,7 +274,7 @@
         height: 100%;
         background: $color-black;
         background: rgba($color-black, .8);
-        background: linear-gradient(180deg, rgba($color-black, 0), rgba($color-black, 1));
+        background: linear-gradient(180deg, rgba($color-black-pure, .3), rgba($color-black-pure, 1));
         opacity: 1;
         transition: opacity .2s ease-in-out;
         &:hover {
@@ -316,4 +322,81 @@
 
 .sign-up, .log-in {
     width: 6em;
+}
+
+#site-nav {
+    flex: 1 1 auto;
+    position: relative;
+    .search-toggle {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+    .section-toggle {
+        display: block;
+    }
+    ul.sections {
+        display: none;
+    }
+    @media($section-bp){
+        .section-toggle {
+            display: none;
+        }
+        ul.sections {
+            display: flex;
+        }
+    }
+    @media($bottom-nav-bp) {
+        /* When the user navigation is on the bottom, put the logo in the middle. */
+        justify-content: space-between;
+        .section-toggle {
+            order: -1;
+        }
+        .search-toggle {
+            position: relative;
+        }
+        .logotype {
+            display: block;
+            visibility: visible;
+            transform: none;
+        }
+        .logo {
+            display: none;
+            visibility: hidden;
+        }
+    }
+}
+
+#user-nav {
+    flex: 0 1 auto;
+    @media($bottom-nav-bp) {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        ul {
+            width: 100%;
+        }
+        li {
+            flex: 1;
+        }
+        li ul {
+            top: initial;
+            bottom: 100%;
+        }
+        .nav-item {
+            width: 100%;
+            text-align: center;
+            border-top: 1px solid $color-black-pure;
+            &.blue {
+                border-top: 1px solid $color-blue-dark;
+            }
+        }
+        .avatar-container {
+            padding:6px;
+            .avatar {
+                position: relative;
+            }
+        }
+    }
 }

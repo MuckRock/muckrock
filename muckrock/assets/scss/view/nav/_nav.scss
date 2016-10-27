@@ -1,9 +1,9 @@
 $logo-bp: "min-width:64em";
-$nav-bp: "max-width:54em";
+$label-bp: "min-width:54em";
+$section-bp: "min-width:36em";
+$bottom-nav-bp: "max-width:27em";
 $nav-border: 1px solid $color-grey;
 $nav-background: #FFFFFF;
-$sidebar-width: 15.625em;
-$sidebar-bp: "min-width:72em";
 
 @import 'header';
 @import 'footer';
