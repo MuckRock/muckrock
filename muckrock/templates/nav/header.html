@@ -15,6 +15,7 @@
             <ul>
                 <li>
                     <a class="nav-item" href="{% url 'news-index' %}">News</a>
+                    {% if user.is_authenticated %}
                     <ul>
                         {# cache 600 dropdown_recent_articles #}
                         {% for article in dropdown_recent_articles|slice:":5" %}
@@ -27,9 +28,11 @@
                         {# endcache #}
                         <li><a class="nav-item" href="{% url 'news-archive' %}">Archive</a></li>
                     </ul>
+                    {% endif %}
                 </li>
                 <li>
                     <a class="nav-item" href="{% url 'project' %}">Projects</a>
+                    {% if user.is_authenticated %}
                     <ul>
                         {% for project in dropdown_featured_projects %}
                         <li class="rich-nav-item" style="background-image:url('{% thumbnail project.image 300x100 crop %}');">
@@ -43,9 +46,11 @@
                         {% endif %}
                         <li><a class="nav-item" href="{% url 'project-list' %}">Archive</a></li>
                     </ul>
+                    {% endif %}
                 </li>
                 <li>
                     <a class="nav-item" href="{% url 'foia-root' %}">Requests</a>
+                    {% if user.is_authenticated %}
                     <ul>
                         <li><a class="nav-item" href="{% url 'foia-list' %}">All</a></li>
                         {% if user.is_authenticated %}
@@ -53,11 +58,13 @@
                             {% if user.profile.is_advanced %}
                         <li><a class="nav-item" href="{% url 'foia-mymulti' %}">Multirequests</a></li>
                             {% endif %}
+                        <li><a class="nav-item" href="{% url 'foia-list-following' %}">Following</a></li>
                             {% if user.is_staff %}
                         <li><a class="nav-item" href="{% url 'foia-list-processing' %}">Processing</a></li>
                             {% endif %}
                         {% endif %}
                     </ul>
+                    {% endif %}
                 </li>
                 {% if user.is_staff %}
                 <li>
@@ -197,11 +204,19 @@
                     </ul>
                 </li>
             {% else %}
-                <li><a href="{% url 'accounts' %}" class="sign-up nav-item">Sign&nbsp;Up</a></li>
-                <li>
-                    <a href="{% url 'acct-login' %}?next={{ request.get_full_path }}" class="log-in nav-item" id="quick-log-in">Log&nbsp;In</a>
-                    <ul>
-                    </ul>
+                <li><a href="{% url 'accounts' %}" class="sign-up black nav-item">Sign&nbsp;Up</a></li>
+                <li class="dropdown--right">
+                    <a href="{% url 'acct-login' %}?next={{ request.get_full_path }}" class="log-in black nav-item" id="quick-log-in">Log&nbsp;In</a>
+                    <form method="post" action="{% url 'acct-login' %}?next={{ request.get_full_path }}" class="quick-log-in" id="quick-log-in-form">
+                        {% csrf_token %}
+                        <h1>Log In</h1>
+                        {% include 'lib/pattern/form.html' with form=login_form %}
+                        <p><a class="forgot" href="{% url 'acct-reset-pw' %}">Forget your password?</a></p>
+                        <div class="button-group">
+                            <span class="cancel button">Cancel</span>
+                            <button type="submit" class="primary button" onclick="ga('send', 'event', 'Account', 'Login', window.location.pathname)">Log In</button>
+                        </div>
+                    </form>
                 </li>
             {% endif %}
             </ul>

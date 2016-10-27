@@ -234,7 +234,7 @@
             background: $color-black-pure;
         }
     }
-    ul {
+    ul:not(.no-hover-display) {
         display: block;
     }
 }
@@ -284,4 +284,32 @@
         color: $color-white-pure;
         text-shadow: $color-black 1px 1px 1px;
     }
+}
+
+#nav .quick-log-in {
+    display: none;
+    position: absolute;
+    right: 0;
+    width: 15em;
+    @include padding;
+    @include box-shadow;
+    background: $color-black;
+    border: 1px solid $color-black-pure;
+    color: $color-white;
+    a {
+        color: $color-blue;
+        &:hover {
+            color: $color-blue-light;
+        }
+    }
+    &.visible {
+        display: block;
+    }
+    .button-group {
+        width: 100%;
+    }
+}
+
+.sign-up, .log-in {
+    width: 6em;
 }

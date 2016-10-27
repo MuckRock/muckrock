@@ -38,12 +38,21 @@ $('#show-search').click(function(){
 });
 
 // Global nav quick login
+function showLogin(login, trigger) {
+    $(trigger).addClass('active')
+    $(login).addClass('visible').find('input[type=text]')[0].focus();
+}
+
+function hideLogin(login, trigger) {
+    $(trigger).removeClass('active');
+    $(login).removeClass('visible');
+}
 $('#quick-log-in').click(function(e){
     e.preventDefault();
+    var button = $(this);
     var quickLogin = $('#quick-log-in-form');
-    quickLogin.addClass('visible');
-    quickLogin.find('input[type=text]')[0].focus();
-    quickLogin.find('.cancel').click(function(){
-        quickLogin.removeClass('visible');
+    showLogin(quickLogin, button);
+    quickLogin.find('.cancel').click(()=>{
+        hideLogin(quickLogin, button);
     });
 });
