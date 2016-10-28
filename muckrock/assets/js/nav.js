@@ -44,14 +44,10 @@ $('#user-nav > ul > li').on('click', function(e){
     }
     var target = this;
     $(target).siblings().removeClass('hover');
-    $(target).toggleClass('hover');
-    if ($(target).hasClass('hover')) {
-        $('#modal-overlay').addClass('visible').on('click', function() {
-            $(this).removeClass('visible');
-            $(target).removeClass('hover');
-        });
-    } else {
-        $('#modal-overlay').removeClass('visible');
-    }
+    $(target).addClass('hover');
+    $('#modal-overlay').addClass('visible').on('click', function() {
+        $(this).removeClass('visible');
+        $(target).removeClass('hover');
+    });
 });
 

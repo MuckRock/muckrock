@@ -268,7 +268,7 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
         Also, if it has a .hover class (we do this on mobile).
         Except, don't do this on mobile, since it behaves in a dumb way.
         */
-        &:hover, .hover {
+        &:hover, &.hover {
             ul:not(.no-hover-display) {
                 display: block;
                 @media($bottom-nav-bp){
@@ -301,14 +301,6 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
             }
         }
     }
-}
-
-/*
-We disable hovers on user items since they
-have a .hover class applied instead.
-*/
-#user-nav li:hover ul {
-    display: none;
 }
 
 /*
