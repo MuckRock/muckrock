@@ -282,6 +282,11 @@
         display: block;
     }
 }
+#user-nav li:hover {
+    ul {
+        display: none;
+    }
+}
 
 #nav .black.nav-item + ul {
     background: $color-black;

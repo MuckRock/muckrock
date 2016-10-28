@@ -59,13 +59,14 @@ $('#quick-log-in').click(function(e){
 
 // Handle touch events on mobile
 $('#user-nav > ul > li').on('touchend', function(e){
+    if (e.target.nodeName == 'A') {
+        return
+    }
     var target = this;
-    console.log(e);
-    console.log(target)
     $(target).siblings().removeClass('hover');
     $(target).toggleClass('hover');
     if ($(target).hasClass('hover')) {
-        $('#modal-overlay').addClass('visible').on('touchend', function() {
+        $('#modal-overlay').addClass('visible').on('click', function() {
             $(this).removeClass('visible');
             $(target).removeClass('hover');
         });
