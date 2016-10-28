@@ -58,7 +58,7 @@ $('#quick-log-in').click(function(e){
 });
 
 // Handle touch events on mobile
-$('#user-nav > ul > li').on('touchend', function(e){
+$('#user-nav > ul > li').on('click', function(e){
     if (e.target.nodeName == 'A') {
         return
     }
