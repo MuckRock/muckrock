@@ -206,18 +206,7 @@
                 </li>
                 {% else %}
                 <li><a href="{% url 'accounts' %}" class="sign-up black nav-item">Sign&nbsp;Up</a></li>
-                <li class="dropdown--right">
-                    <a href="{% url 'acct-login' %}?next={{ request.get_full_path }}" class="log-in black nav-item" id="quick-log-in">Log&nbsp;In</a>
-                    <form method="post" action="{% url 'acct-login' %}?next={{ request.get_full_path }}" class="quick-log-in" id="quick-log-in-form">
-                        {% csrf_token %}
-                        {% include 'lib/pattern/form.html' with form=login_form %}
-                        <p><a class="forgot" href="{% url 'acct-reset-pw' %}">Forget your password?</a></p>
-                        <div class="button-group">
-                            <span class="cancel button">Cancel</span>
-                            <button type="submit" class="primary button" onclick="ga('send', 'event', 'Account', 'Login', window.location.pathname)">Log In</button>
-                        </div>
-                    </form>
-                </li>
+                <li><a href="{% url 'acct-login' %}?next={{ request.get_full_path }}" class="log-in black nav-item">Log&nbsp;In</a></li>
                 {% endif %}
             </ul>
         </div>

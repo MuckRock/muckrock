@@ -1,7 +1,16 @@
+$nav-border: 1px solid $color-grey;
+$nav-background: #FFFFFF;
+
 @mixin drop-shadow() {
     box-shadow: 0px 2px 8px rgba($color-black-pure, .25);
 }
 
+/*
+We establish some basic rules for the global navigation, as well as rules for things it effects.
+The header is fixed, so we add a margin to whatever comes after it. Since this rule uses a *
+rule, it is easily overridable. We add a margin to the footer when the header is small enough,
+since we break it into two pieces.
+*/
 .global-header {
     @include drop-shadow;
     margin-bottom: 0;
@@ -16,7 +25,18 @@
         margin-top: 2.6875em !important;
     }
 }
+@media($bottom-nav-bp) {
+    .website-footer {
+        /* The bottom is added when we have a fixed bottom navigation. */
+        margin-bottom: 42px !important;
+    }
+}
 
+/*
+The modal overlay is used to obscure the body when a pop-up or other piece of UI commanding
+user attention appears. It is given a top position and an opacity of 0 in order to transition
+smoothly over the content.
+*/
 #modal-overlay {
     position: fixed;
     top: -9999px;
@@ -37,13 +57,139 @@
     }
 }
 
-@media($bottom-nav-bp) {
-    .website-footer {
-        /* The bottom is added when we have a fixed bottom navigation. */
-        margin-bottom: 42px !important;
+/*
+The nav-item controls the style for most items in the header navigation.
+They supply the sizing for the element and the hover behaviors.
+Nav items usually contain just an anchor or a span element, sometimes with an icon and a label.
+*/
+.nav-item {
+    display: inline-block;
+    width: auto;
+    height: 42px;
+    min-width: 42px;
+    margin-bottom: 0;
+    padding: $vr/2;
+    vertical-align: middle;
+    font-weight: $bold;
+    text-align: center;
+    cursor: pointer;
+    color: $color-black;
+    &:hover {
+        background: darken($nav-background, $color-darken-amount);
+    }
+    a {
+        display: block;
+        color: $color-black;
+    }
+    .icon {
+        vertical-align: middle;
+        @include svg-color($color-black);
+    }
+    .label {
+        display: none;
+        margin: 0 $vr/4;
+        vertical-align: middle;
+        line-height: $lh;
+    }
+    &.blue {
+        background: $color-blue;
+        color: $color-white;
+        .icon {
+            @include svg-color($color-white);
+        }
+        &:hover {
+            background: darken($color-blue, $color-darken-amount);
+        }
+    }
+    &.black {
+        background: $color-black;
+        color: $color-white;
+        .icon {
+            @include svg-color($color-white);
+        }
+        &:hover {
+            background: darken($color-black, $color-darken-amount)
+        }
+    }
+    /* The label is hidden until the viewport is wide enough. */
+    @media($label-bp) {
+        padding: $vr/2;
+        .icon {
+            margin-top: 0;
+        }
+        .label {
+            display: inline;
+        }
     }
 }
 
+/* Logo visibility depends on viewport size. */
+.nav-item.brand {
+    svg {
+        height: 22px;
+        width: auto;
+        vertical-align: middle;
+    }
+    .logo svg {
+        transform: scale(1.3);
+    }
+    .logotype {
+        display: none;
+        visibility: hidden;
+    }
+    .logo {
+        display: block;
+        visibility: visible;
+    }
+    @media($logo-bp) {
+        .logotype {
+            display: block;
+            visibility: visible;
+        }
+        .logo {
+            display: none;
+            visibility: hidden;
+        }
+    }
+}
+
+/* The avatar container displays a user's avatar as an icon. */
+.nav-item.avatar-container {
+    padding:6px;
+    .avatar {
+        @include border-radius;
+        margin-bottom: 0;
+        opacity: .9;
+        vertical-align: middle;
+    }
+    .round.avatar {
+        border-radius: 9999px;
+    }
+}
+
+/* The search toggle is a button for activating the search field. */
+.nav-item.search-toggle {
+    display: inline-block;
+    margin-bottom: 0;
+    cursor: pointer;
+    &.active {
+        background: $color-grey-7;
+    }
+}
+
+/* If a black-colored nav item is followed by a list, also color the list black. */
+.black.nav-item + ul {
+    background: $color-black;
+    border-color: $color-black-pure;
+    .nav-item {
+        color: $color-white;
+        &:hover {
+            background: $color-black-pure;
+        }
+    }
+}
+
+/* We drop down a search form when search is triggered, by using the .visible trigger. */
 .global-header .search-form {
     @include drop-shadow;
     display: none;
@@ -84,97 +230,7 @@
     }
 }
 
-/* Logo visibility depends on viewport size */
-.global-header .brand {
-    .logotype {
-        display: none;
-        visibility: hidden;
-    }
-    .logo {
-        display: block;
-        visibility: visible;
-    }
-    @media($logo-bp) {
-        .logotype {
-            display: block;
-            visibility: visible;
-        }
-        .logo {
-            display: none;
-            visibility: hidden;
-        }
-    }
-}
-
-.nav-item {
-    display: inline-block;
-    width: auto;
-    min-width: 42px;
-    height: 42px;
-    padding: $vr/2;
-    margin-bottom: 0;
-    vertical-align: middle;
-    font-weight: $bold;
-    text-align: center;
-    cursor: pointer;
-    color: $color-black;
-    a {
-        display: block;
-        color: $color-black;
-    }
-    .icon {
-        // margin-top: $vr/8;
-        vertical-align: middle;
-        @include svg-color($color-black);
-    }
-    &:hover {
-        background: $color-grey-7;
-    }
-    .label {
-        display: none;
-        margin: 0 $vr/4;
-        vertical-align: middle;
-        line-height: $lh;
-    }
-    &.blue {
-        background: $color-blue;
-        color: $color-white;
-        svg path {
-            fill: $color-white;
-        }
-        &:hover {
-            background: $color-blue-dark;
-        }
-    }
-    &.black {
-        background: $color-black;
-        color: $color-white;
-        svg path {
-            fill: $color-white;
-        }
-        &:hover {
-            background: $color-black-pure;
-        }
-    }
-    @media($label-bp) {
-        padding: $vr/2;
-        .icon {
-            margin-top: 0;
-        }
-        .label {
-            display: inline;
-        }
-    }
-    @media($bottom-nav-bp){
-        &:hover {
-            background: inherit;
-        }
-    }
-}
-
-#nav {
-    @include display(flex);
-    @include justify-content(space-between);
+.global-navigation {
     max-height: 42px;
     ul {
         display: flex;
@@ -186,124 +242,79 @@
     a {
         text-decoration: none;
     }
-    .brand {
-
-        @include display(flex);
-        @include align-items(center);
-        @include justify-content(center);
-        margin-bottom: 0;
-        svg {
-            height: 22px;
-            width: auto;
-            vertical-align: middle;
-        }
-        .logo svg {
-            transform: scale(1.3);
-        }
-    }
-
-    .search-toggle {
-        display: inline-block;
-        margin-bottom: 0;
-        cursor: pointer;
-        &.active {
-            background: $color-grey-7;
-        }
-    }
-    .avatar-container {
-        padding:6px;
-        .avatar {
-            @include border-radius;
-            margin-bottom: 0;
-            opacity: .9;
-            vertical-align: middle;
-        }
-        .round.avatar {
-            border-radius: 9999px;
-        }
-    }
-}
-
-.dropdown--right {
-    position: relative;
-    overflow: visible;
-    ul {
-        right: 0;
-    }
-}
-
-#nav li ul {
-    display: none;
-    min-width: 5em;
-    position: absolute;
-    top: 100%;
-    @include border;
-    @include drop-shadow;
-    background: $color-white-pure;
+    /* If a list item contains a list itself, then that list becomes a dropdown. */
     li {
-        display: block;
-        &.separator {
-            border-bottom: 1px solid $color-grey;
-        }
-    }
-    .nav-item {
-        width: 100%;
-        text-align: left;
-    }
-}
-#nav li:hover {
-    & > .nav-item {
-        background: $color-grey-7;
-        &.blue {
-            background: darken($color-blue, $color-darken-amount);
-        }
-        &.black {
-            background: $color-black-pure;
-        }
-    }
-    ul:not(.no-hover-display) {
-        display: block;
-        @media($bottom-nav-bp){
+        ul {
             display: none;
+            min-width: 5em;
+            position: absolute;
+            top: 100%;
+            @include border;
+            @include drop-shadow;
+            background: $color-white-pure;
+            li {
+                display: block;
+                &.separator {
+                    border-bottom: 1px solid $color-grey;
+                }
+            }
+            .nav-item {
+                width: 100%;
+                text-align: left;
+            }
         }
-    }
-}
-#user-nav li.hover {
-    & > .nav-item {
-        background: $color-grey-7;
-        &.blue {
-            background: darken($color-blue, $color-darken-amount);
+        /*
+        When a list item is hovered, display the dropdown.
+        Also, if it has a .hover class (we do this on mobile).
+        Except, don't do this on mobile, since it behaves in a dumb way.
+        */
+        &:hover, .hover {
+            ul:not(.no-hover-display) {
+                display: block;
+                @media($bottom-nav-bp){
+                    display: none;
+                }
+            }
+            /*
+            If a list item is hovered, also change the color of the dropdown.
+            This helps maintain context for dropdowns, since the hover on a nav-item can disappear.
+            */
+            & > .nav-item {
+                background: darken($nav-background, $color-darken-amount);
+                &.blue {
+                    background: darken($color-blue, $color-darken-amount);
+                }
+                &.black {
+                    background: darken($color-black, $color-darken-amount);
+                }
+            }
         }
-        &.black {
-            background: $color-black-pure;
+        /*
+        Normally dropdowns appear left-aligned, but if it's too close to the right edge
+        we'll want it to be right-aligned instead.
+        */
+        &.dropdown--right {
+            position: relative;
+            overflow: visible;
+            ul {
+                right: 0;
+            }
         }
-    }
-    ul:not(.no-hover-display) {
-        display: block;
-    }
-}
-#user-nav li:hover {
-    ul {
-        display: none;
     }
 }
 
-#nav .black.nav-item + ul {
-    background: $color-black;
-    border-color: $color-black-pure;
-    .nav-item {
-        color: $color-white;
-        &:hover {
-            background: $color-black-pure;
-        }
-    }
+/*
+We disable hovers on user items since they
+have a .hover class applied instead.
+*/
+#user-nav li:hover ul {
+    display: none;
 }
 
-#more-sections .icon {
-    transform: scale(1.5);
-}
-
-#nav .rich-nav-item {
+/*
+We use rich nav items to display images behind nav items, like for news articles.
+*/
+.rich-nav-item {
     display: block;
     width: 20em;
     height: 6.66em;
@@ -336,41 +347,18 @@
     }
 }
 
-#nav .message span {
+/* Miscellaneous fixes and tweaks. */
+#user-nav .message span {
     display: block;
 }
-
-#nav .quick-log-in {
-    display: none;
-    position: absolute;
-    right: 0;
-    width: 15em;
-    @include padding;
-    @include box-shadow;
-    background: $color-black;
-    border: 1px solid $color-black-pure;
-    color: $color-white;
-    a {
-        color: $color-blue;
-        &:hover {
-            color: $color-blue-light;
-        }
-    }
-    &.visible {
-        display: block;
-    }
-    .button-group {
-        width: 100%;
-    }
-    input {
-        color: $color-black;
-    }
+.sections.icon {
+    transform: scale(1.5);
 }
-
 .sign-up, .log-in {
     width: 6em;
 }
 
+/* We apply some specific styling to the portion of the header used for site navigation. */
 #site-nav {
     flex: 1 1 auto;
     position: relative;
@@ -414,6 +402,7 @@
     }
 }
 
+/* We apply some specific styling to the portion of the header used for account navigation. */
 #user-nav {
     flex: 0 1 auto;
     @media($bottom-nav-bp) {
@@ -447,11 +436,6 @@
             .avatar {
                 position: relative;
             }
-        }
-        .quick-log-in {
-            bottom: 100%;
-            width: 100%;
-            box-shadow: none;
         }
     }
 }
