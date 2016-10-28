@@ -126,10 +126,10 @@
                 </li>
                 {% if user.is_authenticated %}
                 <li class="dropdown--right">
-                    <a href="{% url 'acct-my-profile' %}" class="black nav-item align-center avatar-container">
-                        <img class="round avatar mb0" src="{% thumbnail user.profile.avatar 31x31 crop %}">
-                        <span class="label">{{ user.get_full_name }}
-                    </a>
+                    <span class="black nav-item align-center avatar-container">
+                        <img class="round avatar mb0" src="{% thumbnail user.profile.avatar 62x62 crop %}" height="31" width="31">
+                        <span class="label">{{ user.get_full_name }}</span>
+                    </span>
                     <ul>
                         {% if payment_failed %}
                         <li class="error message small">
@@ -175,6 +175,7 @@
                         {% if organization %}
                         <li><a class="nav-item" href="{{organization.get_absolute_url}}">Your&nbsp;Organization</a></li>
                         {% endif %}
+                        <li><a class="nav-item" href="{% url 'acct-my-profile' %}">Your&nbsp;Profile</a></li>
                     </ul>
                 </li>
                 <li>
@@ -209,7 +210,6 @@
                     <a href="{% url 'acct-login' %}?next={{ request.get_full_path }}" class="log-in black nav-item" id="quick-log-in">Log&nbsp;In</a>
                     <form method="post" action="{% url 'acct-login' %}?next={{ request.get_full_path }}" class="quick-log-in" id="quick-log-in-form">
                         {% csrf_token %}
-                        <h1>Log In</h1>
                         {% include 'lib/pattern/form.html' with form=login_form %}
                         <p><a class="forgot" href="{% url 'acct-reset-pw' %}">Forget your password?</a></p>
                         <div class="button-group">

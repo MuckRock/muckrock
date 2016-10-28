@@ -56,3 +56,21 @@ $('#quick-log-in').click(function(e){
         hideLogin(quickLogin, button);
     });
 });
+
+// Handle touch events on mobile
+$('#user-nav > ul > li').on('touchend', function(e){
+    var target = this;
+    console.log(e);
+    console.log(target)
+    $(target).siblings().removeClass('hover');
+    $(target).toggleClass('hover');
+    if ($(target).hasClass('hover')) {
+        $('#modal-overlay').addClass('visible').on('touchend', function() {
+            $(this).removeClass('visible');
+            $(target).removeClass('hover');
+        });
+    } else {
+        $('#modal-overlay').removeClass('visible');
+    }
+});
+

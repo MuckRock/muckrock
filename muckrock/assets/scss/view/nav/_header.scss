@@ -18,7 +18,23 @@
 }
 
 #modal-overlay {
-    margin-bottom: 0;
+    position: fixed;
+    top: -9999px;
+    left: 0;
+    height: 110%;
+    width: 100%;
+    z-index: 100;
+    background-color: $color-black;
+    opacity: 0;
+    transition: top 0s .25s, opacity .25s linear;
+    &.visible {
+        top: 0;
+        opacity: .9;
+        transition: top 0s 0s, opacity .25s linear;
+    }
+    &:hover {
+        cursor: pointer;
+    }
 }
 
 @media($bottom-nav-bp) {
@@ -149,6 +165,11 @@
             display: inline;
         }
     }
+    @media($bottom-nav-bp){
+        &:hover {
+            background: inherit;
+        }
+    }
 }
 
 #nav {
@@ -242,8 +263,26 @@
     }
     ul:not(.no-hover-display) {
         display: block;
+        @media($bottom-nav-bp){
+            display: none;
+        }
     }
 }
+#user-nav li.hover {
+    & > .nav-item {
+        background: $color-grey-7;
+        &.blue {
+            background: darken($color-blue, $color-darken-amount);
+        }
+        &.black {
+            background: $color-black-pure;
+        }
+    }
+    ul:not(.no-hover-display) {
+        display: block;
+    }
+}
+
 #nav .black.nav-item + ul {
     background: $color-black;
     border-color: $color-black-pure;
@@ -318,6 +357,9 @@
     .button-group {
         width: 100%;
     }
+    input {
+        color: $color-black;
+    }
 }
 
 .sign-up, .log-in {
@@ -384,6 +426,9 @@
             top: initial;
             bottom: 100%;
         }
+        .dropdown--right {
+            position: initial;
+        }
         .nav-item {
             width: 100%;
             text-align: center;
@@ -397,6 +442,11 @@
             .avatar {
                 position: relative;
             }
+        }
+        .quick-log-in {
+            bottom: 100%;
+            width: 100%;
+            box-shadow: none;
         }
     }
 }
