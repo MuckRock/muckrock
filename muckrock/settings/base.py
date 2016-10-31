@@ -533,4 +533,4 @@ LEAFLET_CONFIG = {
     }
 }
 
-FOIAMACHINE_URL = 'www.foiamachine.org:8000'
+FOIAMACHINE_URL = 'dev.foiamachine.org:8000'
