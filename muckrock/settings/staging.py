@@ -7,3 +7,5 @@ Imports from the heroku settings
 from muckrock.settings.heroku import *
 
 EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
+
+FOIAMACHINE_URL = 'staging.foiamachine.org'

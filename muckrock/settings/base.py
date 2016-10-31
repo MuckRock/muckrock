@@ -532,3 +532,5 @@ LEAFLET_CONFIG = {
         }
     }
 }
+
+FOIAMACHINE_URL = 'www.foiamachine.org:8000'
