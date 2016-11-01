@@ -29,8 +29,9 @@ function toggleOverlay(overlay) {
   }
 }
 
-function setMaxHeight(element, offset) {
+function setMaxHeight(element, maxHeight) {
   /* Set the max height of an element, in case when we render it it will go off the page. */
+  return $(element).css('maxHeight', maxHeight);
 }
 
 // Handle touch events on mobile
@@ -51,6 +52,10 @@ navTriggers.on('click touchend', function(e){
     showOverlay($overlay);
   } else {
     hideOverlay($overlay);
+  }
+  // Only set max height on user nav dropdowns. The site-nav dropdowns handle this differently.
+  if ($thisElement.is('#user-nav .dropdown ul')) {
+    setMaxHeight($thisElement, window.innerHeight - 42); // Only 1 nav-bar high
   }
   e.preventDefault();
   return false;
@@ -79,10 +84,8 @@ $('.section-list .dropdown .nav-item').click(function(){
   if (menuIsVisible && dropdown.length > 0) {
     otherSections.toggleClass('hidden');
     toggleNav(dropdown, section);
-
     var offsetTop = 42 * 2; // The dropdown is always beneath two 42px tall menus
-    var maxHeight = window.innerHeight - offsetTop;
-    $(dropdown).css('maxHeight', maxHeight);
+    setMaxHeight(dropdown, window.innerHeight - offsetTop);
   }
 });
 

@@ -240,6 +240,9 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
       @include border;
       @include drop-shadow;
       background: $color-white-pure;
+      z-index: 200;
+      overflow-y: scroll;
+      -webkit-overflow-scrolling: touch;
       li {
         display: block;
         &.separator {
@@ -390,9 +393,6 @@ We use rich nav items to display images behind nav items, like for news articles
     }
     .section-list .dropdown ul {
       width: 100%;
-      z-index: 200;
-      overflow-y: scroll;
-      -webkit-overflow-scrolling: touch;
     }
     .section-list .hidden.dropdown {
       display: none;
