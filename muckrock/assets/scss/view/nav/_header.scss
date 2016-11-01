@@ -310,7 +310,8 @@ We use rich nav items to display images behind nav items, like for news articles
 */
 .rich-nav-item {
   display: block;
-  width: 20em;
+  max-width: 30em;
+  min-width: 20em;
   height: 6.66em;
   position: relative;
   background-color: $color-blue;
