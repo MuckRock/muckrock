@@ -21,7 +21,7 @@
             on any top-level item. Staff users see an additional 'Tasks' section.
             On small screens we hide the navigation behind a toggle button.
             {% endcomment %}
-            <span class="nav-item section-toggle" id="toggle-sections">
+            <span class="nav-item section-toggle" id="toggle-sections" data-for="#nav-list-sections">
                 {% include 'lib/component/icon/sections-lines.svg' %}
             </span>
             {% if not user.is_authenticated %}
@@ -32,7 +32,7 @@
             {% else %}
             <ul class="authenticated section-list" id="nav-list-sections">
                 <li class="dropdown">
-                    <span class="nav-item"">News</span>
+                    <span class="nav-item">News</span>
                     <ul>
                         {% cache 600 dropdown_recent_articles %}
                         {% for article in dropdown_recent_articles|slice:":5" %}
@@ -135,17 +135,17 @@
             <ul>
                 <li>
                     <a class="blue nav-item" href="{% url 'foia-create'%}" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
-                {% include 'lib/component/icon/create-request.svg' %}
-                <span class="label">File<span class="extended"> Request</span></span>
+                        {% include 'lib/component/icon/create-request.svg' %}
+                        <span class="label">File<span class="extended"> Request</span></span>
                     </a>
                 </li>
                 {% if user.is_authenticated %}
                 <li class="dropdown dropdown--right">
-                    <span class="black nav-item align-center avatar-container">
+                    <span class="black nav-item align-center avatar-container" data-for="#profile-dropdown">
                         <img class="round avatar mb0" src="{% thumbnail user.profile.avatar 62x62 crop %}" height="31" width="31">
                         <span class="label">{{ user.get_full_name }}</span>
                     </span>
-                    <ul>
+                    <ul id="profile-dropdown">
                         {% if payment_failed %}
                         <li class="error message small">
                             <span class="symbol">
@@ -204,8 +204,8 @@
                     </a>
                 </li>
                 <li class="dropdown dropdown--right">
-                    <span class="black nav-item">{% include 'lib/component/icon/options.svg' %}</span>
-                    <ul>
+                    <span class="black nav-item" data-for="#options-dropdown">{% include 'lib/component/icon/options.svg' %}</span>
+                    <ul id="options-dropdown">
                         {% if user.is_staff %}
                         <li>
                             <a class="nav-item" href="{% if sidebar_admin_url %}{{ sidebar_admin_url }}{% else %}/admin/{% endif %}">Admin</a>
