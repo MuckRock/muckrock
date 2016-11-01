@@ -91,7 +91,6 @@ def sidebar_info(request):
     # content for all users
     sidebar_info_dict = {
         'dropdown_recent_articles': get_recent_articles(),
-        'dropdown_featured_projects': Project.objects.filter(featured=True).optimize(),
         'broadcast': sidebar_broadcast(request.user),
         'login_form': AuthenticationForm()
     }
@@ -101,7 +100,7 @@ def sidebar_info(request):
             'unread_notifications': get_unread_notifications(request.user),
             'actionable_requests': get_actionable_requests(request.user),
             'organization': get_organization(request.user),
-            'my_projects': Project.objects.get_for_contributor(request.user).exists(),
+            'my_projects': Project.objects.get_for_contributor(request.user).optimize()[:4],
             'payment_failed': request.user.profile.payment_failed
         })
     else:

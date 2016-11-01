@@ -271,9 +271,6 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
         &:hover, &.hover {
             ul:not(.no-hover-display) {
                 display: block;
-                @media($bottom-nav-bp){
-                    display: none;
-                }
             }
             /*
             If a list item is hovered, also change the color of the dropdown.
@@ -343,9 +340,11 @@ We use rich nav items to display images behind nav items, like for news articles
 #user-nav .message span {
     display: block;
 }
-.sections.icon {
+
+#more-sections .icon {
     transform: scale(1.5);
 }
+
 .sign-up, .log-in {
     width: 6em;
 }
@@ -360,17 +359,53 @@ We use rich nav items to display images behind nav items, like for news articles
         right: 0;
     }
     .section-toggle {
-        display: block;
+        display: none;
     }
-    ul.sections {
+    #more-sections .label {
         display: none;
     }
     @media($section-bp){
         .section-toggle {
+            display: block;
+        }
+        .section-list {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            left: 0;
+            background: $color-white-pure;
+            @include drop-shadow;
+            &.visible {
+                display: block;
+            }
+            .nav-item {
+                width: 100%;
+            }
+            #more-sections .label {
+                display: inline;
+            }
+        }
+        .section-list .dropdown ul {
+            width: 100%;
+            z-index: 200;
+            overflow-y: scroll;
+            -webkit-overflow-scrolling: touch;
+        }
+        .section-list .dropdown:hover ul {
             display: none;
         }
-        ul.sections {
-            display: flex;
+        .section-list .dropdown.active ul {
+            display: block;
+        }
+        /* Show a back arrow on active dropdown items. */
+        .section-list .active.dropdown > .nav-item::before {
+            content: '\2190';
+            width: 0;
+            font-size: 2em;
+            font-weight: bold;
+            float: left;
+            transform: translateY(-2px);
         }
     }
     @media($bottom-nav-bp) {
@@ -402,13 +437,16 @@ We use rich nav items to display images behind nav items, like for news articles
         bottom: 0;
         left: 0;
         right: 0;
+        /*
+        At small sizes, we want the dropdowns to be full width and be attached from the bottom.
+        */
         ul {
             width: 100%;
         }
         li {
             flex: 1;
         }
-        li ul {
+        .dropdown ul {
             top: initial;
             bottom: 100%;
         }

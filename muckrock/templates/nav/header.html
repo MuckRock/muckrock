@@ -12,13 +12,27 @@
                     {% include 'lib/component/icon/logo.svg' %}
                 </span>
             </a>
+
+            {% comment %}
+            Here we have the section navigation.
+            It behaves differently for logged out and logged in users.
+            Logged out users do not see any dropdowns for primary sections,
+            just top-level links. Logged in users see dropdowns when tapping
+            on any top-level item. Staff users see an additional 'Tasks' section.
+            On small screens we hide the navigation behind a toggle button.
+            {% endcomment %}
             <span class="nav-item section-toggle" id="toggle-sections">
                 {% include 'lib/component/icon/sections-lines.svg' %}
             </span>
-            <ul class="sections" id="nav-list-sections">
-                <li>
-                    <a class="nav-item" href="{% url 'news-index' %}">News</a>
-                    {% if user.is_authenticated %}
+            {% if not user.is_authenticated %}
+            <ul class="unauthenticated section-list" id="nav-list-sections">
+                <li><a class="nav-item" href="{% url 'news-index' %}">News</a></li>
+                <li><a class="nav-item" href="{% url 'project' %}">Projects</a></li>
+                <li><a class="nav-item" href="{% url 'foia-root' %}">Requests</a></li>
+            {% else %}
+            <ul class="authenticated section-list" id="nav-list-sections">
+                <li class="dropdown">
+                    <span class="nav-item"">News</span>
                     <ul>
                         {% cache 600 dropdown_recent_articles %}
                         {% for article in dropdown_recent_articles|slice:":5" %}
@@ -29,15 +43,14 @@
                         </li>
                         {% endfor %}
                         {% endcache %}
+                        <li><a class="nav-item" href="{% url 'news-index' %}">Explore</a></li>
                         <li><a class="nav-item" href="{% url 'news-archive' %}">Archive</a></li>
                     </ul>
-                    {% endif %}
                 </li>
-                <li>
-                    <a class="nav-item" href="{% url 'project' %}">Projects</a>
-                    {% if user.is_authenticated %}
+                <li class="dropdown">
+                    <span class="nav-item"">Projects</span>
                     <ul>
-                        {% for project in dropdown_featured_projects %}
+                        {% for project in my_projects %}
                         <li class="rich-nav-item" style="background-image:url('{% thumbnail project.image 300x100 crop %}');">
                             <a href="{{project.get_absolute_url}}" title="{{project.summary}}">
                                 <p>{{project.title}}</p>
@@ -47,51 +60,49 @@
                         {% if user.is_authenticated %}
                         <li><a class="nav-item" href="{% url 'project-contributor' username=user.username %}">Yours</a></li>
                         {% endif %}
-                        <li><a class="nav-item" href="{% url 'project-list' %}">Archive</a></li>
+                        <li><a class="nav-item" href="{% url 'project' %}">Explore</a></li>
+                        <li><a class="nav-item" href="{% url 'project-list' %}">All&nbsp;Projects</a></li>
                     </ul>
-                    {% endif %}
                 </li>
-                <li>
-                    <a class="nav-item" href="{% url 'foia-root' %}">Requests</a>
-                    {% if user.is_authenticated %}
+                <li class="dropdown">
+                    <span class="nav-item"">Requests</span>
                     <ul>
-                        <li><a class="nav-item" href="{% url 'foia-list' %}">All</a></li>
-                        {% if user.is_authenticated %}
-                        <li><a class="nav-item" class="nav-item" href="{% url 'foia-mylist' %}">Yours</a></li>
-                            {% if user.profile.is_advanced %}
+                        <li><a class="nav-item" href="{% url 'foia-list' %}">Explore</a></li>
+                        <li><a class="nav-item" href="{% url 'foia-list' %}">All&nbsp;Requests</a></li>
+                        <li><a class="nav-item" class="nav-item" href="{% url 'foia-mylist' %}">Your&nbsp;Requests</a></li>
+                        {% if user.profile.is_advanced %}
                         <li><a class="nav-item" href="{% url 'foia-mymulti' %}">Multirequests</a></li>
-                            {% endif %}
+                        {% endif %}
                         <li><a class="nav-item" href="{% url 'foia-list-following' %}">Following</a></li>
-                            {% if user.is_staff %}
+                        {% if user.is_staff %}
                         <li><a class="nav-item" href="{% url 'foia-list-processing' %}">Processing</a></li>
-                            {% endif %}
                         {% endif %}
                     </ul>
-                    {% endif %}
                 </li>
                 {% if user.is_staff %}
-                <li>
-                    <a class="nav-item" href="{% url 'task-list' %}">Tasks</a>
+                <li class="dropdown">
+                    <span class="nav-item">Tasks</span>
                     <ul>
                         <li><a class="nav-item" href="{% url 'response-task-list' %}">Response</a></li>
                         <li class="separator"><a class="nav-item" href="{% url 'foia-list-processing' %}">Processing</a></li>
-                        <li><a class="nav-item" href="{% url 'new-agency-task-list' %}">New Agency</a></li>
+                        <li><a class="nav-item" href="{% url 'new-agency-task-list' %}">New&nbsp;Agency</a></li>
                         <li><a class="nav-item" href="{% url 'orphan-task-list' %}">Orphan</a></li>
-                        <li><a class="nav-item" href="{% url 'snail-mail-task-list' %}">Snail Mail</a></li>
+                        <li><a class="nav-item" href="{% url 'snail-mail-task-list' %}">Snail&nbsp;Mail</a></li>
                         <li><a class="nav-item" href="{% url 'flagged-task-list' %}">Flagged</a></li>
-                        <li class="separator"><a class="nav-item" href="{% url 'newexemption-task-list' %}">New Exemptions</a></li>
-                        <li><a class="nav-item" href="{% url 'stale-agency-task-list' %}">Stale Agency</a></li>
-                        <li><a class="nav-item" href="{% url 'rejected-email-task-list' %}">Rejected Email</a></li>
-                        <li class="separator"><a class="nav-item" href="{% url 'failed-fax-task-list' %}">Failed Fax</a></li>
+                        <li class="separator"><a class="nav-item" href="{% url 'newexemption-task-list' %}">New&nbsp;Exemptions</a></li>
+                        <li><a class="nav-item" href="{% url 'stale-agency-task-list' %}">Stale&nbsp;Agency</a></li>
+                        <li><a class="nav-item" href="{% url 'rejected-email-task-list' %}">Rejected&nbsp;Email</a></li>
+                        <li class="separator"><a class="nav-item" href="{% url 'failed-fax-task-list' %}">Failed&nbsp;Fax</a></li>
                         <li><a class="nav-item" href="{% url 'multirequest-task-list' %}">Multirequest</a></li>
-                        <li><a class="nav-item" href="{% url 'projectreview-task-list' %}">Pending Projects</a></li>
+                        <li><a class="nav-item" href="{% url 'projectreview-task-list' %}">Pending&nbsp;Projects</a></li>
                         <li><a class="nav-item" href="{% url 'crowdfund-task-list' %}">Crowdfund</a></li>
-                        <li><a class="nav-item" href="{% url 'status-change-task-list' %}">Status Change</a></li>
+                        <li><a class="nav-item" href="{% url 'status-change-task-list' %}">Status&nbsp;Change</a></li>
                     </ul>
                 </li>
                 {% endif %}
-                <li id="more-sections">
-                    <span class="nav-item">{% include 'lib/component/icon/sections-dots.svg' %}</span>
+            {% endif %}
+                <li class="dropdown" id="more-sections">
+                    <span class="nav-item">{% include 'lib/component/icon/sections-dots.svg' %} <span class="label">More</span></span>
                     <ul>
                         <li><a class="nav-item" href="{% url 'jurisdiction-list' %}">Jurisdictions</a></li>
                         <li><a class="nav-item" href="{% url 'agency-list' %}">Agencies</a></li>
@@ -104,6 +115,10 @@
                     </ul>
                 </li>
             </ul>
+
+            {% comment %}
+            This contains the toggle for the global search, which appears below the top header.
+            {% endcomment %}
             <span class="nav-item search-toggle" id="show-search">
                 {% include 'lib/component/icon/search.svg' %}
                 <span class="label">Search</span>
@@ -125,7 +140,7 @@
                     </a>
                 </li>
                 {% if user.is_authenticated %}
-                <li class="dropdown--right">
+                <li class="dropdown dropdown--right">
                     <span class="black nav-item align-center avatar-container">
                         <img class="round avatar mb0" src="{% thumbnail user.profile.avatar 62x62 crop %}" height="31" width="31">
                         <span class="label">{{ user.get_full_name }}</span>
@@ -188,7 +203,7 @@
                         {% include 'lib/component/icon/notification.svg' %}
                     </a>
                 </li>
-                <li class="dropdown--right">
+                <li class="dropdown dropdown--right">
                     <span class="black nav-item">{% include 'lib/component/icon/options.svg' %}</span>
                     <ul>
                         {% if user.is_staff %}
