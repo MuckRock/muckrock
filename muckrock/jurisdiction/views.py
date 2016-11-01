@@ -164,5 +164,7 @@ class ExemptionDetailView(DetailView):
     def get_context_data(self, **kwargs):
         """Adds a flag form to the context."""
         context = super(ExemptionDetailView, self).get_context_data(**kwargs)
+        admin_url = reverse('admin:jurisdiction_exemption_change', args=(self.object.pk,))
         context['flag_form'] = FlagForm()
+        context['sidebar_admin_url'] = admin_url
         return context

@@ -21,6 +21,7 @@ http {
 	<% ENV.fetch('DENY_IPS', '').split(',').each do |ip| %>
 		deny <%= ip %>;
 	<% end %>
+	include block_nobis.conf;
 
 	limit_req_zone $binary_remote_addr zone=one:10m rate=1r/s;
 
@@ -47,6 +48,7 @@ http {
 		listen <%= ENV["PORT"] %>;
 		server_name _;
 		keepalive_timeout 5;
+		limit_req zone=one burst=5;
 
 		location / {
 			proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
