@@ -367,6 +367,12 @@ We use rich nav items to display images behind nav items, like for news articles
   .section-toggle {
     display: none;
   }
+  .visible {
+    display: none;
+  }
+  li:hover .visible {
+    display: block;
+  }
   #more-sections .label {
     display: none;
   }
@@ -431,6 +437,22 @@ We use rich nav items to display images behind nav items, like for news articles
     .logo {
       display: none;
       visibility: hidden;
+    }
+  }
+}
+
+.touch {
+  .global-navigation .dropdown:hover ul {
+    display: none;
+    &.visible {
+      display: block;
+    }
+  }
+}
+@media($section-bp) {
+  body:not(.touch) {
+    #site-nav .section-toggle:hover + .section-list, #site-nav .section-list:hover {
+      display: block;
     }
   }
 }

@@ -36,6 +36,10 @@ import './task';
 
 $('document').ready(function(){
 
+    if (!!('ontouchstart' in window)) {
+      $('body').addClass('touch');
+    }
+
     // Stripe Checkout
     $('form.stripe-checkout').checkout();
 
