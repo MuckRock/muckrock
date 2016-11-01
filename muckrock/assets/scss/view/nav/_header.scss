@@ -250,6 +250,9 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
         width: 100%;
         text-align: left;
       }
+      &.visible {
+        display: block;
+      }
     }
     /*
     When a list item is hovered, display the dropdown.
@@ -451,9 +454,6 @@ We use rich nav items to display images behind nav items, like for news articles
     .dropdown ul {
       top: initial;
       bottom: 100%;
-    }
-    .dropdown ul.visible {
-      display: block;
     }
     .dropdown--right {
       position: initial;
