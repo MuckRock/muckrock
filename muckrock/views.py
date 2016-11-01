@@ -29,6 +29,7 @@ import logging
 import re
 import requests
 import stripe
+from watson.views import SearchMixin
 
 logger = logging.getLogger(__name__)
 
@@ -152,9 +153,17 @@ class MRFilterableListView(PaginationMixin, OrderedSortMixin, FilterMixin, ListV
         return context
 
 
-class SearchView(View):
+class SearchView(PaginationMixin, SearchMixin, ListView):
     """Always lower case queries for case insensitive searches"""
-    pass
+    title = 'Search'
+    template_name = 'search.html'
+    context_object_name = 'object_list'
+
+    def get_context_data(self, **kwargs):
+        """Adds a title to the context data."""
+        context = super(SearchView, self).get_context_data(**kwargs)
+        context['title'] = self.title
+        return context
 
 
 class NewsletterSignupView(View):

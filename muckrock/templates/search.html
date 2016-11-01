@@ -1,0 +1,36 @@
+{% extends 'base_list.html' %}
+
+{% block list-header %}
+<h1>{{title}}</h1>
+{% if query %}
+{% if object_list %}
+<p><span class="green">{{object_list|length}} result{{object_list|pluralize}}</span> for {{query}}</p>
+{% else %}
+<p><span class="red">No results</span> for {{query}}</p>
+{% endif %}
+{% endif %}
+<form method="get">
+    <input type="search" name="q" value="{{query}}" class="bold">
+    <button type="submit" class="blue button">Search</button>
+</form>
+{% endblock %}
+
+{% block list-table-head %}
+<th>Result</th>
+<th>Type</th>
+{% endblock %}
+
+{% block list-table-row %}
+{% with object as result %}
+<td><a href="{{result.url}}">{{result}}</a></td>
+<td width="25%">{{result.content_type|capfirst}}</td>
+{% endwith %}
+{% endblock %}
+
+{% block empty %}
+{% if query %}
+<p class="empty">No results for "{{query}}".</p>
+{% else %}
+<p class="empty">Start searching!</p>
+{% endif %}
+{% endblock %}
