@@ -1,5 +1,6 @@
-{% load thumbnail %}
 {% load cache %}
+{% load static from staticfiles %}
+{% load thumbnail %}
 
 <header class="global-header">
     <nav class="global-navigation space-between mb0" id="nav">
@@ -36,7 +37,7 @@
                     <ul>
                         {% cache 600 dropdown_recent_articles %}
                         {% for article in dropdown_recent_articles|slice:":5" %}
-                        <li class="rich-nav-item" style="background-image:url('{% thumbnail article.image 300x100 crop %}');">
+                        <li class="rich-nav-item" {% if article.image %}style="background-image:url('{% thumbnail article.image 300x100 crop %}');"{% endif %}>
                             <a href="{{article.get_absolute_url}}" title="{{article.summary}}">
                                 <p>{{ article.title }}</p>
                             </a>
@@ -51,7 +52,7 @@
                     <span class="nav-item"">Projects</span>
                     <ul>
                         {% for project in my_projects %}
-                        <li class="rich-nav-item" style="background-image:url('{% thumbnail project.image 300x100 crop %}');">
+                        <li class="rich-nav-item" {% if project.image %}style="background-image:url('{% thumbnail project.image 300x100 crop %}');"{% endif %}>
                             <a href="{{project.get_absolute_url}}" title="{{project.summary}}">
                                 <p>{{project.title}}</p>
                             </a>
@@ -142,7 +143,7 @@
                 {% if user.is_authenticated %}
                 <li class="dropdown dropdown--right">
                     <span class="black nav-item align-center avatar-container" data-for="#profile-dropdown">
-                        <img class="round avatar mb0" src="{% thumbnail user.profile.avatar 62x62 crop %}" height="31" width="31">
+                        <img class="round avatar mb0" src="{% if user.profile.avatar %}{% thumbnail user.profile.avatar 62x62 crop %}{% else %}{% static 'img/defaultavatar.png' %}{% endif %}" height="31" width="31">
                         <span class="label">{{ user.get_full_name }}</span>
                     </span>
                     <ul id="profile-dropdown">
