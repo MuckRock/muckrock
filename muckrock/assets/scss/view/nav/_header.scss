@@ -182,8 +182,21 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
 .global-search {
     display: flex;
     background: $nav-background;
+    width: 42px;
+    margin-bottom: 0;
+    transition: width .25s ease-in-out;
+    overflow: hidden;
+    @media($label-bp) {
+        width: 6em;
+        .search-toggle {
+            width: 6em;
+        }
+    }
     &.visible {
         width: 100%;
+        .search-toggle {
+            width: auto;
+        }
     }
     .search-form {
         display: none;
@@ -194,6 +207,9 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
     }
     .search-container {
         height: 100%;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
         input {
             flex: 1 1 auto;
             height: 100%;
@@ -203,6 +219,11 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
     }
     .search-cancel {
         cursor: pointer;
+    }
+    & + .search-placeholder {
+        display: none;
+        width: 42px;
+        margin-bottom: 0;
     }
 }
 
@@ -414,11 +435,10 @@ We use rich nav items to display images behind nav items, like for news articles
     .section-toggle {
       order: -1;
     }
-    .global-search {
-      position: relative;
-      &.visible {
-          position: absolute;
-      }
+    .global-search + .search-placeholder {
+      display: block;
+      visibility: hidden;
+      margin-bottom: 0;
     }
     .logotype {
       display: block;
