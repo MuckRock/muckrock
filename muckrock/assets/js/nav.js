@@ -74,7 +74,7 @@ On smaller screen sizes, the list of dropdowns is hidden behind a toggle.
 Then, each dropdown menu is displayed by hiding the other dropdown options
 while showing the elements present in that dropdown.
 */
-$('.section-list .dropdown .nav-item').click(function(e){
+$('.section-list .dropdown > .nav-item').click(function(e){
   // We only want the nav-item to be triggerable when the dropdown is visible
   // and if it contains some list to drop down.
   var menuIsVisible = $(this).closest('.section-list').is(':visible');
