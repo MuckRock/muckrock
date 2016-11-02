@@ -20,8 +20,12 @@ This is the base style for a list of objects: a collection of FOIA requests, age
         </header>
         {% block list-sections %}
         {% endblock list-sections %}
+
         {% if filter.form %}
         <form method="GET" class="filter form">
+            {% if search_form %}
+            {% include 'lib/pattern/field.html' with field=search_form.q label='Keywords' %}
+            {% endif %}
             {% include 'lib/pattern/form.html' with form=filter.form %}
             <div class="button-group">
                 <button class="button" action="apply-filters">Filter</button>

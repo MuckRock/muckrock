@@ -18,7 +18,7 @@ from django.views.generic import View, ListView, FormView, TemplateView
 
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAFile
-from muckrock.forms import MRFilterForm, NewsletterSignupForm, StripeForm
+from muckrock.forms import MRFilterForm, NewsletterSignupForm, SearchForm, StripeForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.tasks import send_charge_receipt
 from muckrock.news.models import Article
@@ -29,6 +29,7 @@ import logging
 import re
 import requests
 import stripe
+from watson import search as watson
 from watson.views import SearchMixin
 
 logger = logging.getLogger(__name__)
@@ -138,6 +139,37 @@ class PaginationMixin(object):
         """Adds per_page to the context"""
         context = super(PaginationMixin, self).get_context_data(**kwargs)
         context['per_page'] = self.get_paginate_by(self.get_queryset())
+        return context
+
+
+class ModelSearchMixin(object):
+    """
+    The ModelSearchMixin allows a queryset provided by a list view to be
+    searched, using the watson library.
+    """
+    search_form = SearchForm
+
+    def get_query(self):
+        """Gets the query from the request, if it exists."""
+        return self.request.GET.get('q')
+
+    def get_queryset(self):
+        """
+        If there is a search query provided in the request,
+        then filter the queryset with a search.
+        """
+        queryset = super(ModelSearchMixin, self).get_queryset()
+        query = self.get_query()
+        if query:
+            queryset = watson.filter(queryset.model, query)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        """Adds the query to the context."""
+        context = super(ModelSearchMixin, self).get_context_data(**kwargs)
+        query = self.get_query()
+        context['query'] = query
+        context['search_form'] = self.search_form(initial={'q': query})
         return context
 
 

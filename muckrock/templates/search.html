@@ -4,9 +4,9 @@
 <h1>{{title}}</h1>
 {% if query %}
 {% if object_list %}
-<p><span class="green">{{object_list|length}} result{{object_list|pluralize}}</span> for {{query}}</p>
+<p><span class="green">{{object_list|length}} result{{object_list|pluralize}}</span> for &ldquo;{{query}}&rdquo;</p>
 {% else %}
-<p><span class="red">No results</span> for {{query}}</p>
+<p><span class="red">No results</span> for &ldquo;{{query}}&rdquo;</p>
 {% endif %}
 {% endif %}
 <form method="get">
