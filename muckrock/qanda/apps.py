@@ -12,5 +12,9 @@ class QuestionConfig(AppConfig):
     def ready(self):
         """Registers the application with the activity streams plugin"""
         from actstream import registry
-        registry.register(self.get_model('Question'))
-        registry.register(self.get_model('Answer'))
+        from watson import search
+        Question = self.get_model('Question')
+        Answer = self.get_model('Answer')
+        registry.register(Question)
+        registry.register(Answer)
+        search.register(Question)
