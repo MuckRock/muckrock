@@ -31,7 +31,7 @@ from muckrock.project.forms import ProjectManagerForm
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag, parse_tags
 from muckrock.utils import cache_get_or_set
-import muckrock.views as muckrock_views
+from muckrock.views import PaginationMixin, MRSearchFilterListView
 
 # pylint: disable=too-many-ancestors
 
@@ -125,7 +125,7 @@ class NewsExploreView(TemplateView):
         return context
 
 
-class NewsYear(muckrock_views.PaginationMixin, YearArchiveView):
+class NewsYear(PaginationMixin, YearArchiveView):
     """View for year archive"""
     allow_empty = True
     date_field = 'pub_date'
@@ -135,7 +135,7 @@ class NewsYear(muckrock_views.PaginationMixin, YearArchiveView):
     template_name = 'news/archives/year_archive.html'
 
 
-class NewsMonth(muckrock_views.PaginationMixin, MonthArchiveView):
+class NewsMonth(PaginationMixin, MonthArchiveView):
     """View for month archive"""
     allow_empty = True
     date_field = 'pub_date'
@@ -145,7 +145,7 @@ class NewsMonth(muckrock_views.PaginationMixin, MonthArchiveView):
     template_name = 'news/archives/month_archive.html'
 
 
-class NewsDay(muckrock_views.PaginationMixin, DayArchiveView):
+class NewsDay(PaginationMixin, DayArchiveView):
     """View for day archive"""
     allow_empty = True
     date_field = 'pub_date'
@@ -155,11 +155,7 @@ class NewsDay(muckrock_views.PaginationMixin, DayArchiveView):
     template_name = 'news/archives/day_archive.html'
 
 
-class NewsListView(
-    muckrock_views.OrderedSortMixin,
-    muckrock_views.ModelSearchMixin,
-    muckrock_views.ModelFilterMixin,
-    muckrock_views.MRListView):
+class NewsListView(MRSearchFilterListView):
     """List of news articles"""
     model = Article
     title = 'News'
