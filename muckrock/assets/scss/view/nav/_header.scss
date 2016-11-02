@@ -172,50 +172,38 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
   display: inline-block;
   margin-bottom: 0;
   cursor: pointer;
-  &.active {
-    background: $color-grey-7;
+  &.active .label {
+    display: none;
   }
 }
 
 /* We drop down a search form when search is triggered, by using the .visible trigger. */
-.global-header .search-form {
-  @include drop-shadow;
-  display: none;
-  width: 100%;
-  position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 100;
-  margin-bottom: 0;
-  border-top: $nav-border;
-  border-bottom: $nav-border;
-  background-color: $nav-background;
-  &.visible {
-    display: block;
-  }
-  .search-form-container {
-    @include display(flex);
-    @include align-items(center);
-  }
-  input[type="search"] {
-    max-width: 100%;
-    width: 100%;
-    padding: 0 $vr;
-    border: none;
-    border-radius: 0;
-    outline: none;
-  }
-  .search-cancel {
-    width: auto;
-    padding: $vr/2 $vr;
-    font-weight: $bold;
-    text-align: right;
-    cursor: pointer;
-    color: $color-blue;
-    &:hover {
-      color: $color-blue-dark;
+
+.global-search {
+    display: flex;
+    background: $nav-background;
+    &.visible {
+        width: 100%;
     }
-  }
+    .search-form {
+        display: none;
+    }
+    .search-toggle.active + .search-form {
+        display: block;
+        width: 100%;
+    }
+    .search-container {
+        height: 100%;
+        input {
+            flex: 1 1 auto;
+            height: 100%;
+            border: none;
+            border-radius: 0;
+        }
+    }
+    .search-cancel {
+        cursor: pointer;
+    }
 }
 
 .global-navigation {
@@ -359,7 +347,7 @@ We use rich nav items to display images behind nav items, like for news articles
 #site-nav {
   flex: 1 1 auto;
   position: relative;
-  .search-toggle {
+  .global-search {
     position: absolute;
     top: 0;
     right: 0;
@@ -367,10 +355,10 @@ We use rich nav items to display images behind nav items, like for news articles
   .section-toggle {
     display: none;
   }
-  .visible {
+  ul.visible {
     display: none;
   }
-  li:hover .visible {
+  li:hover ul.visible {
     display: block;
   }
   #more-sections .label {
@@ -426,8 +414,11 @@ We use rich nav items to display images behind nav items, like for news articles
     .section-toggle {
       order: -1;
     }
-    .search-toggle {
+    .global-search {
       position: relative;
+      &.visible {
+          position: absolute;
+      }
     }
     .logotype {
       display: block;

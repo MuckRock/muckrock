@@ -120,18 +120,20 @@
             {% comment %}
             This contains the toggle for the global search, which appears below the top header.
             {% endcomment %}
-            <span class="nav-item search-toggle" id="show-search">
-                {% include 'lib/component/icon/search.svg' %}
-                <span class="label">Search</span>
-            </span>
-        </div>
-        <form action="/search" method="get" class="search-form" id="global-search">
-            <div class="search-form-container">
-                <input type="search" name="q" placeholder="Search">
-                <input type="submit" style="display: none;">
-                <div class="search-cancel" id="hide-search">Cancel</div>
+            <div class="global-search">
+                <span class="nav-item search-toggle" id="show-search">
+                    {% include 'lib/component/icon/search.svg' %}
+                    <span class="label">Search</span>
+                </span>
+                <form action="/search" method="get" class="search-form" id="global-search">
+                    <div class="align-center search-container">
+                        <input type="search" name="q" placeholder="Search">
+                        <div class="nav-item search-cancel" id="hide-search">Cancel</div>
+                    </div>
+                </form>
             </div>
-        </form>
+        </div>
+
         <div class="nav-section" id="user-nav">
             <ul>
                 <li>

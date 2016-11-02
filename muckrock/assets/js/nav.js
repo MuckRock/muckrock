@@ -94,7 +94,7 @@ $('.section-list .dropdown > .nav-item').click(function(e){
 // Global nav search field
 $('#show-search').click(function(){
   var searchButton = this;
-  var search = '#global-search';
+  var search = '.global-search';
   var closeSearch = '#hide-search';
   var searchInput = $(search).find('input[type="search"]');
   toggleNav(search, searchButton);
