@@ -19,4 +19,4 @@ class FOIAConfig(AppConfig):
         action.register(FOIARequest)
         action.register(FOIACommunication)
         action.register(FOIANote)
-        search.register(FOIARequest)
+        search.register(FOIARequest.objects.get_public())
