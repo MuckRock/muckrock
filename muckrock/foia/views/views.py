@@ -63,7 +63,12 @@ from muckrock.qanda.forms import QuestionForm
 from muckrock.tags.models import Tag
 from muckrock.task.models import Task, FlaggedTask, StatusChangeTask
 from muckrock.utils import new_action
-from muckrock.views import class_view_decorator, MRFilterableListView, PaginationMixin
+from muckrock.views import (
+    class_view_decorator,
+    MRFilterableListView,
+    PaginationMixin,
+    ModelSearchMixin
+)
 
 # pylint: disable=too-many-ancestors
 
@@ -134,7 +139,7 @@ class RequestExploreView(TemplateView):
             .get_public_file_count(limit=5))
         return context
 
-class RequestList(MRFilterableListView):
+class RequestList(ModelSearchMixin, MRFilterableListView):
     """Base list view for other list views to inherit from"""
     model = FOIARequest
     filter_class = FOIARequestFilterSet
