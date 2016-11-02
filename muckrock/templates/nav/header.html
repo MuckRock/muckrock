@@ -68,7 +68,7 @@
                 <li class="dropdown">
                     <span class="nav-item"">Requests</span>
                     <ul>
-                        <li><a class="nav-item" href="{% url 'foia-list' %}">Explore</a></li>
+                        <li><a class="nav-item" href="{% url 'foia-root' %}">Explore</a></li>
                         <li><a class="nav-item" href="{% url 'foia-list' %}">All&nbsp;Requests</a></li>
                         <li><a class="nav-item" class="nav-item" href="{% url 'foia-mylist' %}">Your&nbsp;Requests</a></li>
                         {% if user.profile.is_advanced %}

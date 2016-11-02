@@ -24,6 +24,14 @@
         {% endfor %}
     </ul>
 </div>
+<div class="grid__column full nopadding">
+    <form method="GET" class="oneline-form" action="{% url 'news-archive' %}">
+        <div class="field">
+            <input type="search" name="q" placeholder="Search articles">
+        	<button class="basic blue button" type="submit">Search</button>
+        </div>
+    </form>
+</div>
 {% endblock %}
 
 {% block explore_main %}

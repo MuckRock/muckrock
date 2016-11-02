@@ -15,6 +15,21 @@
 </ul>
 {% endblock %}
 
+{% block explore_header %}
+{{block.super}}
+<div class="grid__column full nopadding">
+    <form method="GET" class="oneline-form" action="{% url 'project-list' %}">
+        <div class="field">
+            <input type="search" name="q" placeholder="Search projects">
+        	<button class="basic blue button" type="submit">
+        	    {% include 'lib/component/icon/search.svg' %}
+        	    <span class="label">Search</span>
+        	</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
 {% block explore_main %}
 <div class="explore__section featured-projects grid__row">
     {% for project in featured_projects %}
