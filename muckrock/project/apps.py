@@ -15,4 +15,4 @@ class ProjectConfig(AppConfig):
         from watson import search
         Project = self.get_model('Project')
         action.register(Project)
-        search.register(Project)
+        search.register(Project.objects.get_public())
