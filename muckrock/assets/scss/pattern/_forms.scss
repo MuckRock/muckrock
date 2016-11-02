@@ -103,6 +103,29 @@
     }
 }
 
+.oneline-form .field {
+    @include display(flex);
+    @include flex-wrap(wrap);
+    margin: $vr/2 0;
+    border: 1px solid $color-blue;
+    input {
+        @include flex(3 1 auto);
+        width: auto;
+        border: none;
+        line-height: $lh;
+        border-radius: 0;
+        color: $color-black;
+    }
+    .button {
+        @include flex(1 1 auto);
+    }
+    .icon {
+        @include svg-color($color-white);
+        margin-right: $vr/4;
+        vertical-align: middle;
+    }
+}
+
 .CheckboxInput.field {
     overflow: hidden;
     header {
