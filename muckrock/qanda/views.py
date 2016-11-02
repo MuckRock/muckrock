@@ -25,9 +25,9 @@ from muckrock.qanda.forms import QuestionForm, AnswerForm
 from muckrock.qanda.models import Question, Answer
 from muckrock.qanda.serializers import QuestionSerializer, QuestionPermissions
 from muckrock.tags.models import Tag, parse_tags
-from muckrock.views import MRFilterableListView
+from muckrock.views import MRSearchFilterListView
 
-class QuestionList(MRFilterableListView):
+class QuestionList(MRSearchFilterListView):
     """List of unanswered questions"""
     model = Question
     filter_class = QuestionFilterSet

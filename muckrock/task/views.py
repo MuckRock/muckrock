@@ -27,7 +27,7 @@ from muckrock.task.models import (
     CrowdfundTask, MultiRequestTask, StatusChangeTask, FailedFaxTask,
     ProjectReviewTask, NewExemptionTask
     )
-from muckrock.views import MRFilterableListView
+from muckrock.views import MRFilterListView
 
 # pylint:disable=missing-docstring
 
@@ -52,7 +52,7 @@ def count_tasks():
     return count
 
 
-class TaskList(MRFilterableListView):
+class TaskList(MRFilterListView):
     """List of tasks"""
     title = 'Tasks'
     model = Task

@@ -17,9 +17,9 @@ from muckrock.agency.serializers import AgencySerializer
 from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.views import collect_stats
 from muckrock.task.models import FlaggedTask
-from muckrock.views import MRFilterableListView
+from muckrock.views import MRSearchFilterListView
 
-class AgencyList(MRFilterableListView):
+class AgencyList(MRSearchFilterListView):
     """Filterable list of agencies"""
     model = Agency
     filter_class = AgencyFilterSet

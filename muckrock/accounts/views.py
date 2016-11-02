@@ -54,7 +54,7 @@ from muckrock.message.tasks import (
         welcome,
         gift,
         )
-from muckrock.views import MRFilterableListView
+from muckrock.views import MRFilterListView
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -546,7 +546,7 @@ class UnreadNotificationList(NotificationList):
         return notifications.get_unread()
 
 
-class ProxyList(MRFilterableListView):
+class ProxyList(MRFilterListView):
     """List of Proxies"""
     model = User
     filter_class = ProxyFilterSet

@@ -27,7 +27,7 @@ from muckrock.message.tasks import notify_project_contributor
 from muckrock.project.models import Project, ProjectCrowdfunds
 from muckrock.project.filters import ProjectFilterSet
 from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm, ProjectPublishForm
-from muckrock.views import MRFilterableListView
+from muckrock.views import MRSearchFilterListView
 from muckrock.utils import new_action
 
 class ProjectExploreView(TemplateView):
@@ -45,7 +45,7 @@ class ProjectExploreView(TemplateView):
         return context
 
 
-class ProjectListView(MRFilterableListView):
+class ProjectListView(MRSearchFilterListView):
     """List all projects"""
     model = Project
     title = 'Projects'

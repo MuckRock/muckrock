@@ -16,7 +16,7 @@ from muckrock.foia.models import FOIARequest, FOIANote
 from muckrock.foia.views import save_foia_comm
 from muckrock.task.factories import FlaggedTaskFactory, StaleAgencyTaskFactory
 from muckrock.test_utils import mock_middleware
-from muckrock.views import MRFilterableListView
+from muckrock.views import MRFilterListView
 
 eq_ = nose.tools.eq_
 ok_ = nose.tools.ok_
@@ -61,9 +61,9 @@ class TaskListViewTests(TestCase):
     def test_class_inheritance(self):
         # pylint: disable=no-self-use
         actual = task.views.TaskList.__bases__
-        expected = MRFilterableListView().__class__
+        expected = MRFilterListView().__class__
         ok_(expected in actual,
-            'Task list should inherit from MRFilterableListView class')
+            'Task list should inherit from MRFilterListView class')
 
     def test_render_task_list(self):
         """The list should have rendered task widgets in its object_list context variable"""

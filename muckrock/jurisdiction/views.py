@@ -18,7 +18,7 @@ from muckrock.jurisdiction.forms import FlagForm, JurisdictionFilterForm
 from muckrock.jurisdiction.models import Jurisdiction, Exemption
 from muckrock.jurisdiction.serializers import JurisdictionSerializer
 from muckrock.task.models import FlaggedTask
-from muckrock.views import MRFilterableListView
+from muckrock.views import MRFilterListView
 
 
 def collect_stats(obj, context):
@@ -117,7 +117,7 @@ def detail(request, fed_slug, state_slug, local_slug):
                               context_instance=RequestContext(request))
 
 
-class List(MRFilterableListView):
+class List(MRFilterListView):
     """Filterable list of jurisdictions"""
     model = Jurisdiction
     filter_class = JurisdictionFilterSet

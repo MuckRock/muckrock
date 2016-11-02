@@ -70,9 +70,9 @@ class OrderedSortMixin(object):
         return context
 
 
-class FilterMixin(object):
+class ModelFilterMixin(object):
     """
-    The FilterMixin gives the ability to filter a list
+    The ModelFilterMixin gives the ability to filter a list
     of objects with the help of the django_filters library.
 
     It requires a filter_class be defined.
@@ -91,7 +91,7 @@ class FilterMixin(object):
         object_list value with the filter's queryset.
         We also apply pagination to the filter queryset.
         """
-        context = super(FilterMixin, self).get_context_data(**kwargs)
+        context = super(ModelFilterMixin, self).get_context_data(**kwargs)
         _filter = self.get_filter()
         queryset = _filter.qs
         try:
@@ -173,29 +173,38 @@ class ModelSearchMixin(object):
         return context
 
 
-class MRFilterableListView(PaginationMixin, OrderedSortMixin, FilterMixin, ListView):
-    """Allows for list views that are filterable and orderable."""
+class MRListView(PaginationMixin, ListView):
+    """Defines a title and base template for our list views."""
     title = ''
     template_name = 'base_list.html'
 
     def get_context_data(self, **kwargs):
         """Adds title to the context data."""
-        context = super(MRFilterableListView, self).get_context_data(**kwargs)
+        context = super(MRListView, self).get_context_data(**kwargs)
         context['title'] = self.title
         return context
 
 
-class SearchView(PaginationMixin, SearchMixin, ListView):
+class MROrderedListView(OrderedSortMixin, MRListView):
+    """Adds ordering to a list view."""
+    pass
+
+
+class MRFilterListView(OrderedSortMixin, ModelFilterMixin, MRListView):
+    """Adds ordered sorting and filtering to a MRListView."""
+    pass
+
+
+class MRSearchFilterListView(OrderedSortMixin, ModelSearchMixin, ModelFilterMixin, MRListView):
+    """Adds ordered sorting, searching, and filtering to a MRListView."""
+    pass
+
+
+class SearchView(SearchMixin, MRListView):
     """Always lower case queries for case insensitive searches"""
     title = 'Search'
     template_name = 'search.html'
     context_object_name = 'object_list'
-
-    def get_context_data(self, **kwargs):
-        """Adds a title to the context data."""
-        context = super(SearchView, self).get_context_data(**kwargs)
-        context['title'] = self.title
-        return context
 
 
 class NewsletterSignupView(View):
