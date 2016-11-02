@@ -5,8 +5,6 @@
 {% if query %}
 {% if object_list %}
 <p><span class="green">{{object_list|length}} result{{object_list|pluralize}}</span> for &ldquo;{{query}}&rdquo;</p>
-{% else %}
-<p><span class="red">No results</span> for &ldquo;{{query}}&rdquo;</p>
 {% endif %}
 {% endif %}
 <form method="get">
@@ -29,7 +27,7 @@
 
 {% block empty %}
 {% if query %}
-<p class="empty">No results for "{{query}}".</p>
+<p class="empty">No results for &ldquo;{{query}}&rdquo;</p>
 {% else %}
 <p class="empty">Start searching!</p>
 {% endif %}
