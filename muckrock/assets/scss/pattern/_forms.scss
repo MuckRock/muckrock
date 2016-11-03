@@ -115,6 +115,8 @@
         line-height: $lh;
         border-radius: 0;
         color: $color-black;
+        appearance: none;
+        -webkit-appearance: none;
     }
     .button {
         @include flex(1 1 auto);

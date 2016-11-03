@@ -2,15 +2,31 @@
 
 {% block list-header %}
 <h1>{{title}}</h1>
+{% endblock %}
+
+{% block list-sections %}
+<p class="bold">Narrow your search to a single section to get more detailed results and more advanced filters:</p>
+<ul class="nostyle list__sections">
+    <li><a href="{% url 'news-archive' %}?q={{query}}">Search news</a></li>
+    <li><a href="{% url 'project-list' %}?q={{query}}">Search projects</a></li>
+    <li><a href="{% url 'foia-list' %}?q={{query}}">Search requests</a></li>
+    <li><a href="{% url 'agency-list' %}?q={{query}}">Search agencies</a></li>
+    <li><a href="{% url 'question-index' %}?q={{query}}">Search questions</a></li>
+</ul>
+{% endblock %}
+
+{% block list-actions %}
+<form method="get" class="oneline-form">
+    <div class="field">
+        <input type="search" name="q" value="{{query}}" class="bold">
+        <button type="submit" class="basic blue button">Search</button>
+    </div>
+</form>
 {% if query %}
 {% if object_list %}
 <p><span class="green">{{object_list|length}} result{{object_list|pluralize}}</span> for &ldquo;{{query}}&rdquo;</p>
 {% endif %}
 {% endif %}
-<form method="get">
-    <input type="search" name="q" value="{{query}}" class="bold">
-    <button type="submit" class="blue button">Search</button>
-</form>
 {% endblock %}
 
 {% block list-table-head %}
