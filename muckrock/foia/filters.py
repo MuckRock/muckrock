@@ -32,15 +32,6 @@ class FOIARequestFilterSet(django_filters.FilterSet):
         queryset=Jurisdiction.objects.filter(hidden=False),
         widget=autocomplete_light.MultipleChoiceWidget('JurisdictionAutocomplete')
     )
-    date_range = django_filters.DateFromToRangeFilter(
-        name='communications__date',
-        label='Date Range',
-        lookup_expr='contains',
-        widget=RangeWidget(attrs={
-            'class': 'datepicker',
-            'placeholder': 'MM/DD/YYYY',
-        }),
-    )
     projects = django_filters.ModelMultipleChoiceFilter(
         name="projects",
         queryset=Project.objects.get_public(),
@@ -63,6 +54,15 @@ class FOIARequestFilterSet(django_filters.FilterSet):
         label='Min. Pages',
         distinct=True,
         widget=forms.NumberInput(),
+    )
+    date_range = django_filters.DateFromToRangeFilter(
+        name='communications__date',
+        label='Date Range',
+        lookup_expr='contains',
+        widget=RangeWidget(attrs={
+            'class': 'datepicker',
+            'placeholder': 'MM/DD/YYYY',
+        }),
     )
 
 
@@ -100,6 +100,15 @@ class MyFOIARequestFilterSet(django_filters.FilterSet):
         label='Min. Pages',
         distinct=True,
         widget=forms.NumberInput(),
+    )
+    date_range = django_filters.DateFromToRangeFilter(
+        name='communications__date',
+        label='Date Range',
+        lookup_expr='contains',
+        widget=RangeWidget(attrs={
+            'class': 'datepicker',
+            'placeholder': 'MM/DD/YYYY',
+        }),
     )
 
     class Meta:

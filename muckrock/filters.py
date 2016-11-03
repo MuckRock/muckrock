@@ -10,8 +10,8 @@ class RangeWidget(django_filters.widgets.RangeWidget):
         return ("""
             <div class="input-range">
                 <div class="small labels nomargin">
-                    <label>Start</label>
-                    <label>End</label>
+                    <label>Since</label>
+                    <label>Until</label>
                 </div>
                 <div class="inputs">
                     %(inputs)s
