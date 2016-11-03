@@ -59,3 +59,11 @@ We're gonna hide these checkboxes until the view supports bulk actions on reques
 <td>{{foia.date_updated|date:"m/d/Y"}}</td>
 {% endwith %}
 {% endblock %}
+
+{% block empty %}
+{% if request.GET %}
+<p class="empty">None of your requests match this filter.</p>
+{% else %}
+<p class="empty">You haven&rsquo;t filed any requests! Get started by clicking the &ldquo;File Request&rdquo; button above.</p>
+{% endif %}
+{% endblock %}
