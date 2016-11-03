@@ -29,12 +29,20 @@
 5. Build the search index
   1. Install watson with `fab manage:installwatson`
   2. Build the search index with `fab manage:buildwatson`
-  3. After this, the index should stay updated. If a new model is registered with watson, then build the index (step 2).
+  3. After this, the index should stay updated. If a new model is registered with watson, then build the index (step 2). This command should be run on any staging or production servers when pushing code that updates the registration.
 
 You should have a fully populated MuckRock site running locally now.
-The code checked out from GitHub is synced between the virtual machine and your host machine, so you may edit the code using your favorite text editor locally while running the code from within the virtual machine. To run the server again, just follow step 4.
+The code checked out from GitHub is synced between the virtual machine and your host machine, so you may edit the code using your favorite text editor locally while running the code from within the virtual machine.
 
 ## Develop
+
+### Run
+
+1. Run `npm run watch &` to start a background Webpack instance
+1. Run `fab mail &` to start a background email server
+2. Run `fab celery &` to start a background task queue
+3. Run `fab runserver` to start a server instance
+4. Navigate your web browser (from the host machine) to `localhost:8000`
 
 ### Add dependencies
 
@@ -47,21 +55,14 @@ This is hugely helpful when it comes to navigating dependency hell.
 
 After entering your dependency in the `.in` file, run `fab pip-compile` to canonize your change.
 
-### Run
-
-1. Run `npm run watch &` to start a background Webpack instance
-1. Run `fab mail &` to start a background email server
-2. Run `fab celery &` to start a background task queue
-3. Run `fab runserver` to start a server instance
-4. Navigate your web browser (from the host machine) to `localhost:8000`
-
 ### Test and lint
 
 * Test your code in one of two ways:
     * Run `fab test` to run all the tests.
     * Run `fab test:muckrock.<app>` to test a particular application.
     * Run `fab test:muckrock,1` to reuse the database between tests, which saves a ton of time.
-* Lint your code by running `fab pylint`.
+* Lint your Python by running `fab pylint`.
+* Lint your Javascript by running `npm run lint`.
 
 ## Deploy
 
