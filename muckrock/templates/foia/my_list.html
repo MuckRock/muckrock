@@ -53,7 +53,7 @@ We're gonna hide these checkboxes until the view supports bulk actions on reques
 We're gonna hide these checkboxes until the view supports bulk actions on requests.
 <td class="list-table-checkbox"><input type="checkbox" name="{{foia.foia_type}}" value="{{foia.pk}}" form="my-request-actions"></td>
 {% endcomment %}
-<td><a class="bold" href="{{foia.get_absolute_url}}">{{foia.title}}</a><br><span class="small badge state {{ foia.status|classify_status }}">{{foia.get_status_display}}</span></td>
+<td><a class="bold" href="{{foia.get_absolute_url}}">{{foia.title}}</a><br><span class="small badge state {{ foia.status|classify_status }}">{{foia.get_status_display}}</span>{% if foia.embargo %}<br><span class="small red badge">Under Embargo</span>{% endif %}</td>
 <td>{{ foia.agency }}</td>
 <td>{{ foia.jurisdiction }}</td>
 <td>{{foia.date_updated|date:"m/d/Y"}}</td>

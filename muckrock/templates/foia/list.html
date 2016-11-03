@@ -39,6 +39,7 @@
 
 {% block list-table-head %}
 <th data-sort="title">Title</th>
+<th width="10%" data-sort="user">User</th>
 <th width="10%" data-sort="agency">Agency</th>
 <th width="20%" data-sort="jurisdiction">Jurisdiction</th>
 <th width="20%" data-sort="date_updated">Updated</th>
@@ -46,7 +47,8 @@
 
 {% block list-table-row %}
 {% with object as foia %}
-<td><a class="bold" href="{{ foia.get_absolute_url }}">{{ foia.title }}</a><br><span class="small badge state {{ foia.status|classify_status }}">{{foia.get_status_display}}</span></td>
+<td><a class="bold" href="{{ foia.get_absolute_url }}">{{ foia.title }}</a><br><span class="small badge state {{ foia.status|classify_status }}">{{foia.get_status_display}}</span>{% if foia.embargo %}<br><span class="small red badge">Under Embargo</span>{% endif %}</td>
+<td>{{ foia.user.get_full_name }}</td>
 <td>{{ foia.agency }}</td>
 <td>{{ foia.jurisdiction }}</td>
 <td>{{ foia.date_updated|date:"m/d/Y" }}</td>
