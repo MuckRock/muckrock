@@ -57,6 +57,14 @@ class FOIARequestFilterSet(django_filters.FilterSet):
         exclude=True,
         widget=forms.NullBooleanSelect(),
     )
+    minimum_pages = django_filters.NumberFilter(
+        name='communications__files__pages',
+        lookup_expr='gte',
+        label='Min. Pages',
+        distinct=True,
+        widget=forms.NumberInput(),
+    )
+
 
     class Meta:
         model = FOIARequest
@@ -79,6 +87,19 @@ class MyFOIARequestFilterSet(django_filters.FilterSet):
         name='tags__name',
         queryset=Tag.objects.all(),
         widget=autocomplete_light.MultipleChoiceWidget('TagAutocomplete'),
+    )
+    has_crowdfund = django_filters.BooleanFilter(
+        name='crowdfund',
+        lookup_expr='isnull',
+        exclude=True,
+        widget=forms.NullBooleanSelect(),
+    )
+    minimum_pages = django_filters.NumberFilter(
+        name='communications__files__pages',
+        lookup_expr='gte',
+        label='Min. Pages',
+        distinct=True,
+        widget=forms.NumberInput(),
     )
 
     class Meta:
