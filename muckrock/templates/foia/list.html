@@ -47,7 +47,7 @@
 
 {% block list-table-row %}
 {% with object as foia %}
-<td><a class="bold" href="{{ foia.get_absolute_url }}">{{ foia.title }}</a><br><span class="small badge state {{ foia.status|classify_status }}">{{foia.get_status_display}}</span>{% if foia.embargo %}<br><span class="small red badge">Under Embargo</span>{% endif %}</td>
+<td><a class="bold" href="{{ foia.get_absolute_url }}">{{ foia.title }}</a><br><span class="small badge state {{ foia.status|classify_status }}">{{foia.get_status_display}}</span>{% if foia.embargo %}<span class="small red badge">Under Embargo</span>{% endif %}{% if foia.crowdfund and not foia.crowdfund.expired %}<span class="small green badge">Active Crowdfund</span>{% endif %}</td>
 <td>{{ foia.user.get_full_name }}</td>
 <td>{{ foia.agency }}</td>
 <td>{{ foia.jurisdiction }}</td>

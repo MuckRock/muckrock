@@ -51,6 +51,12 @@ class FOIARequestFilterSet(django_filters.FilterSet):
         queryset=Tag.objects.all(),
         widget=autocomplete_light.MultipleChoiceWidget('TagAutocomplete'),
     )
+    has_crowdfund = django_filters.BooleanFilter(
+        name='crowdfund',
+        lookup_expr='isnull',
+        exclude=True,
+        widget=forms.NullBooleanSelect(),
+    )
 
     class Meta:
         model = FOIARequest
