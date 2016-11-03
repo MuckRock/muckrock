@@ -37,7 +37,10 @@
 {% endblock %}
 
 {% block list-table-head %}
+{% comment %}
+We're gonna hide these checkboxes until the view supports bulk actions on requests.
 <th width="3%" class="list-table-checkbox"><input type="checkbox" class="select-all" data-name="foia" data-toolbar="#my-request-actions" /></th>
+{% endcomment %}
 <th data-sort="title">Title</th>
 <th width="20%" data-sort="agency">Agency</th>
 <th width="20%" data-sort="jurisdiction">Jurisdiction</th>
@@ -46,7 +49,10 @@
 
 {% block list-table-row %}
 {% with object as foia %}
+{% comment %}
+We're gonna hide these checkboxes until the view supports bulk actions on requests.
 <td class="list-table-checkbox"><input type="checkbox" name="{{foia.foia_type}}" value="{{foia.pk}}" form="my-request-actions"></td>
+{% endcomment %}
 <td><a class="bold" href="{{foia.get_absolute_url}}">{{foia.title}}</a><br><span class="small badge state {{ foia.status|classify_status }}">{{foia.get_status_display}}</span></td>
 <td>{{ foia.agency }}</td>
 <td>{{ foia.jurisdiction }}</td>
