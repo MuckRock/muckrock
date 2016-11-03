@@ -10,7 +10,7 @@ from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 
 
-class AgencyAutocomplete(autocomplete_light.AutocompleteModelBase):
+class AgencyAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     """Creates an autocomplete field for picking agencies"""
     choices = Agency.objects.filter(status='approved').select_related('jurisdiction')
     choice_template = 'autocomplete/agency.html'
