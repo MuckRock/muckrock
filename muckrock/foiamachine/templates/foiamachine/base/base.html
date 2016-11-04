@@ -1,5 +1,6 @@
 {% load hosts %}
 {% load compress %}
+{% load static from staticfiles %}
 {% load render_bundle from webpack_loader %}
 
 <!doctype html>
@@ -14,6 +15,7 @@
         <title>{% block title %}FOIA Machine{% endblock %}</title>
         {% compress css %}
             {% block styles %}
+                <link rel="stylesheet" type="text/css" href="{% static 'autocomplete_light/style.css' %}" />
                 {% render_bundle 'foiamachine' 'css' %}
             {% endblock %}
         {% endcompress %}
@@ -62,7 +64,9 @@
         {% compress js %}
             {% block scripts %}
                 {% render_bundle 'foiamachine' 'js' %}
-                {% include 'autocomplete_light/static.html' %}
+                <script type="text/javascript" src="{% static 'autocomplete_light/autocomplete.js' %}"></script>
+                <script type="text/javascript" src="{% static 'autocomplete_light/widget.js' %}"></script>
+                <script type="text/javascript" src="{% static 'autocomplete_light/remote.js' %}"></script>
             {% endblock %}
         {% endcompress %}
     </body>
