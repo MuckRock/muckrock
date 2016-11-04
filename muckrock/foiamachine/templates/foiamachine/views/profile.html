@@ -3,14 +3,14 @@
 {% load hosts %}
 
 {% block main %}
-<main class="profile">
-    <header class="space-between align-baseline">
+<main class="profile padding norightpadding">
+    <header class="space-between align-baseline margin-right">
         <h2>Your Requests</h2>
         <p class="margin-bottom"><a href="{% host_url 'foi-create' host 'foiamachine' %}" class="button">Create request</a></p>
     </header>
     <div class="row">
         <div class="column margin-right margin-bottom">
-            <form method="get" class="padding small filter form" id="request-filter">
+            <form method="get" class="padding norightpadding small filter form" id="request-filter">
                 {% include 'lib/pattern/form.html' with form=filter.form %}
                 <div class="space-between">
                     <button class="button" type="submit">Filter</button>
@@ -66,52 +66,4 @@
         </div>
     </div>
 </main>
-{% endblock %}
-
-{% block scripts %}
-{{block.super}}
-<script type="text/javascript">
-var toolbar = $('.toolbar :button, .toolbar :input');
-function disableToolbar() {
-    toolbar.attr('disabled', true).closest('.field').addClass('disabled');
-}
-function enableToolbar() {
-    toolbar.attr('disabled', false).closest('.field').removeClass('disabled');
-}
-
-disableToolbar();
-$('th input:checkbox').change(function(){
-    var table = $(this).closest('table');
-    var headerCheckbox = $(this);
-    var bodyCheckboxes = $(table).find('td input:checkbox');
-    var checked = this.checked;
-    bodyCheckboxes.each(function(){
-        this.checked = checked;
-    });
-    if (checked) {
-        enableToolbar();
-    } else {
-        disableToolbar();
-    }
-});
-$('td input:checkbox').change(function(){
-    var table = $(this).closest('table');
-    var headerCheckbox = $(table).find('th input:checkbox');
-    var bodyCheckboxes = $(table).find('td input:checkbox');
-    var checkedBoxes = bodyCheckboxes.filter(':checked');
-    if (checkedBoxes.length == bodyCheckboxes.length) {
-        headerCheckbox[0].indeterminate = false;
-        headerCheckbox[0].checked = true;
-    } else {
-        headerCheckbox[0].indeterminate = true;
-    }
-    if (checkedBoxes.length == 0) {
-        headerCheckbox[0].indeterminate = false;
-        headerCheckbox[0].checked = false;
-        disableToolbar();
-    } else {
-        enableToolbar();
-    }
-});
-</script>
 {% endblock %}
