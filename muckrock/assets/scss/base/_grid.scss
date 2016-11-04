@@ -10,6 +10,7 @@
     @include display(flex);
     @include flex-wrap(wrap);
     @include align-items(stretch);
+    padding-right: 0 !important;
     // max-width: 75em;
 }
 
@@ -17,7 +18,10 @@
     @include flex(1 1 auto);
     min-width: 0;
     height: 100%;
-    padding-right: $vr;
+    padding-right: $vr/2;
+    @include media($medium-bp) {
+        padding-right: $vr;
+    }
     &:first-child {
         padding-left: 0;
     }
