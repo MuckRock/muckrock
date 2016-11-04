@@ -6,7 +6,7 @@ from django.contrib.sites.models import Site
 def domain(request):
     """Add the domain to the context for constructing absolute urls."""
     # pylint: disable=unused-argument
-    current_site = Site.objects.get_current()
+    current_site = Site.objects.get_current(request)
     return {'domain': current_site.domain}
 
 def google_analytics(request):
