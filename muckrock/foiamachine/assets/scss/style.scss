@@ -98,6 +98,9 @@ td p {
 .padding {
     padding: 1em;
 }
+.norightpadding {
+    padding-right: 0;
+}
 .margin-bottom {
     margin-bottom: 1em;
 }
@@ -237,6 +240,7 @@ input[type="file"] {
     line-height: initial;
 }
 .field {
+    width: 100%;
     margin-bottom: 1em;
 }
 .field.disabled {
@@ -316,7 +320,7 @@ input[type="file"] {
 
 .toolbar {
     display: flex;
-    align-items: flex-end;
+    align-items: center;
 }
 .toolbar .field, .toolbar .button {
     margin-bottom: 0;
@@ -324,7 +328,7 @@ input[type="file"] {
 .toolbar .button {
     margin-right: 1em;
 }
-.toolbar .field {
+.toolbar .visible-fields {
     margin-right: .5em;
 }
 .toolbar .field header {
