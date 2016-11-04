@@ -9,34 +9,31 @@
 }
 
 .pagination__control__item {
-    @include flex(1 1 10em);
+    @include flex(1 1 15em);
     margin-bottom: $vr/2;
     text-align: center;
 }
 
 .pagination__links {
-    display: table;
-    width: 100%;
-    margin-bottom: $vr;
-    border-collapse: collapse;
-    a, span {
-        width: 25%;
-        display: table-row;
+    @include display(flex);
+    @include flex-wrap(wrap);
+    @include border;
+    border-right: none;
+    border-bottom: none;
+    & > span {
+        flex: 1 1 5em;
+        @include display(flex);
+        @include flex-wrap(wrap);
+    }
+    .pagination__link {
+        flex: 1 1 5em;
         padding: $vr/4 $vr/2;
-        border: 1px solid $color-grey;
         text-align: center;
-        @include media($medium-bp) {
-            display: table-cell;
-        }
+        border-right: 1px solid $color-grey;
+        border-bottom: 1px solid $color-grey;
     }
-    span {
-        cursor: default;
-        color: $color-grey;
-    }
-    a:hover {
-        text-decoration: none;
-        background: $color-blue;
-        color: $color-white;
-        border-color: $color-blue;
-    }
+}
+
+.pagination__link {
+
 }
