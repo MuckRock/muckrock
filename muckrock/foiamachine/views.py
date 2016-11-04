@@ -199,7 +199,7 @@ class FoiaMachineRequestUpdateView(RequestOwnerRequiredMixin, UpdateView):
     """Update the information saved to a FOIA Machine request."""
     model = FoiaMachineRequest
     form_class = FoiaMachineRequestForm
-    template_name = 'foiamachine/foi/update.html'
+    template_name = 'foiamachine/views/foi/update.html'
 
     def get_success_url(self):
         messages.success(self.request, 'Your edits to this request were saved.')
