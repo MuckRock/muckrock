@@ -6,21 +6,23 @@
 {% block main %}
 <main>
     <header class="space-between align-bottom">
-        <div>
-            <h1>{{object.title}}</h1>
-            <p class="bold">{{object.get_status_display}}</p>
-            <p>{% if object.agency %}<a href="{{object.agency.get_absolute_url}}">{{object.agency}}</a> &bull; {% endif %}<a href="{{object.jurisdiction.get_absolute_url}}">{{object.jurisdiction}}</a></p>
-        </div>
-        {% if request.user == object.user %}
-        <p><a href="#share">Share</a> &bull; <a href="{% host_url 'foi-update' slug=object.slug pk=object.pk host 'foiamachine'%}">Edit</a> &bull; <a href="{% host_url 'foi-delete' slug=object.slug pk=object.pk host 'foiamachine'%}">Delete</a></p>
-        {% endif %}
+            <div class="space-between align-baseline w100">
+                <h1>{{object.title}}</h1>
+                {% if request.user == object.user %}
+                <p><a href="#share">Share</a> &bull; <a href="{% host_url 'foi-update' slug=object.slug pk=object.pk host 'foiamachine'%}">Edit</a> &bull; <a href="{% host_url 'foi-delete' slug=object.slug pk=object.pk host 'foiamachine'%}">Delete</a></p>
+                {% endif %}
+            </div>
+            <div class="space-between align-baseline w100">
+                <h2>{{object.get_status_display}}</h2>
+                <p>{% if object.agency %}<a href="{{object.agency.get_absolute_url}}">{{object.agency}}</a> &bull; {% endif %}<a href="{{object.jurisdiction.get_absolute_url}}">{{object.jurisdiction}}</a></p>
+            </div>
     </header>
     {% if object.sent_communications.exists %}
     <div class="margin-bottom" id="dates">
         {% if object.is_overdue %}
-        <p class="bold red">This request is {{object.days_overdue}} day{{object.days_overdue|pluralize}} overdue.</p>
+        <p class="bold red">A response is {{object.days_overdue}} day{{object.days_overdue|pluralize}} overdue.</p>
         {% else %}
-        <p class="bold">This request is due in {{object.days_until_due}} day{{object.days_until_due|pluralize}}.</p>
+        <p class="bold">A response will be due in {{object.days_until_due}} day{{object.days_until_due|pluralize}}.</p>
         {% endif %}
         <table class="ruled">
             <tr>
