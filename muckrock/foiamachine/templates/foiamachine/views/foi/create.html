@@ -45,9 +45,9 @@
 
     function agencyInput(jurisdictionInput) {
         var jurisdiction = $(jurisdictionInput).val();
-        if (jurisdiction.length > 0) {
+        if (jurisdiction && jurisdiction.length > 0) {
             disableAgencyAutocomplete(false);
-            updateAgencyAutocompleteJurisdiction(jurisdiction);
+            updateAgencyAutocompleteJurisdiction(jurisdiction[0]);
         } else {
             clearAgencyAutocomplete();
             disableAgencyAutocomplete(true);
