@@ -5,12 +5,29 @@ FOIA Machine urls
 from django.conf import settings
 from django.conf.urls import patterns, include, url
 from django.contrib.auth import views as auth_views
+from django.views.defaults import page_not_found, server_error
 from django.views.generic import TemplateView
 
 import debug_toolbar
 
 from muckrock.foiamachine import views
 from muckrock.forms import PasswordResetForm
+
+
+def handler404(request, exception):
+    """404 handler"""
+    return page_not_found(
+            request,
+            exception,
+            template_name='foiamachine/404.html')
+
+
+def handler500(request):
+    """500 handler"""
+    return server_error(
+            request,
+            template_name='foiamachine/500.html')
+
 
 urlpatterns = patterns(
     '',

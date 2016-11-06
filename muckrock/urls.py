@@ -3,7 +3,6 @@ URL mappings for muckrock project
 """
 
 from django.conf import settings
-from django.conf.urls import handler404 # pylint: disable=unused-import
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from django.views.generic.base import RedirectView, TemplateView
