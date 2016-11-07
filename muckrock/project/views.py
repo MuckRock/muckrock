@@ -68,20 +68,21 @@ class ProjectContributorView(ProjectListView):
     """Provides a list of projects that have the user as a contributor."""
     template_name = 'project/contributor.html'
 
-    def get_contributor(self, **kwargs):
+    def get_contributor(self):
         """Returns the contributor for the view."""
-        return get_object_or_404(User, username=kwargs.get('username'))
+        return get_object_or_404(User, username=self.kwargs.get('username'))
 
-    def get_queryset(self, **kwargs):
+    def get_queryset(self):
         """Returns all the contributor's projects that are visible to the user."""
         queryset = super(ProjectContributorView, self).get_queryset()
-        queryset.get_for_contributor(self.get_contributor(**self.kwargs)).get_visible(self.request.user)
+        queryset = (queryset.get_for_contributor(self.get_contributor())
+                    .get_visible(self.request.user))
         return queryset
 
     def get_context_data(self, **kwargs):
         """Gathers and returns the project and the contributor as context."""
         context = super(ProjectContributorView, self).get_context_data(**kwargs)
-        contributor = self.get_contributor(**kwargs)
+        contributor = self.get_contributor()
         context.update({
             'user_is_contributor': self.request.user == contributor,
             'contributor': contributor,

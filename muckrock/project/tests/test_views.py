@@ -277,14 +277,11 @@ class TestProjectContributorView(TestCase):
         self.user = factories.UserFactory()
         project = factories.ProjectFactory()
         project.contributors.add(self.user)
-        self.kwargs = {
-            'username': self.user.username,
-        }
+        self.kwargs = {'username': self.user.username}
         self.url = reverse('project-contributor', kwargs=self.kwargs)
         self.view = views.ProjectContributorView.as_view()
 
     def test_get(self):
         """The view should render, of course!"""
         response = http_get_response(self.url, self.view, self.user, **self.kwargs)
-        eq_(response.status_code, 200,
-            'The view should return 200.')
+        eq_(response.status_code, 200, 'The view should return 200.')
