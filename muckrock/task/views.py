@@ -74,6 +74,14 @@ class TaskList(MRFilterListView):
                 raise Http404()
         return queryset
 
+    def get_model(self):
+        """Returns the model from the class"""
+        if self.queryset is not None:
+            return self.queryset.model
+        if self.model is not None:
+            return self.model
+        raise AttributeError('No model or queryset have been defined for this view.')
+
     def get_context_data(self, **kwargs):
         """Adds counters for each of the sections and for processing requests."""
         context = super(TaskList, self).get_context_data(**kwargs)
@@ -100,7 +108,8 @@ class TaskList(MRFilterListView):
         task_pks = [int(task_pk) for task_pk in task_pks if task_pk is not None]
         if not task_pks:
             raise ValueError('No tasks were selected, so there\'s nothing to do!')
-        tasks = [get_object_or_404(self.get_model(), pk=each_pk) for each_pk in task_pks]
+        task_model = self.get_model()
+        tasks = task_model.objects.filter(pk__in=task_pks)
         return tasks
 
     def task_post_helper(self, request, task):
@@ -108,7 +117,7 @@ class TaskList(MRFilterListView):
         # pylint: disable=no-self-use
         if request.POST.get('resolve'):
             task.resolve(request.user)
-        return
+        return task
 
     def post(self, request):
         """Handle general cases for updating Task objects"""
@@ -155,7 +164,7 @@ class OrphanTaskList(TaskList):
             except Http404:
                 messages.error(request, 'Tried to move to a nonexistant request.')
                 logging.debug('Tried to move to a nonexistant request.')
-        return
+        return super(OrphanTaskList, self).task_post_helper(request, task)
 
 
 class SnailMailTaskList(TaskList):
@@ -196,7 +205,7 @@ class SnailMailTaskList(TaskList):
             check_number = int(request.POST.get('check_number'))
             task.record_check(check_number, request.user)
         task.resolve(request.user)
-        return
+        return super(SnailMailTaskList, self).task_post_helper(request, task)
 
 
 class RejectedEmailTaskList(TaskList):
@@ -266,8 +275,7 @@ class StaleAgencyTaskList(TaskList):
             else:
                 messages.error(request, 'The email is invalid.')
                 return
-        if request.POST.get('resolve'):
-            task.resolve(request.user)
+        return super(StaleAgencyTaskList, self).task_post_helper(request, task)
 
 
 class FlaggedTaskList(TaskList):
@@ -291,6 +299,7 @@ class FlaggedTaskList(TaskList):
                 return
         if request.POST.get('resolve'):
             task.resolve(request.user)
+        return super(FlaggedTaskList, self).task_post_helper(request, task)
 
 
 class ProjectReviewTaskList(TaskList):
@@ -315,6 +324,7 @@ class ProjectReviewTaskList(TaskList):
             elif action == 'reject':
                 task.reject(text)
                 task.resolve(request.user)
+        return super(ProjectReviewTaskList, self).task_post_helper(request, task)
 
 
 class NewAgencyTaskList(TaskList):
@@ -337,7 +347,7 @@ class NewAgencyTaskList(TaskList):
             replacement_agency = get_object_or_404(Agency, id=replacement_agency_id)
             task.reject(replacement_agency)
             task.resolve(request.user)
-        return
+        return super(NewAgencyTaskList, self).task_post_helper(request, task)
 
 
 class ResponseTaskList(TaskList):
@@ -358,6 +368,7 @@ class ResponseTaskList(TaskList):
     def task_post_helper(self, request, task):
         """Special post helper exclusive to ResponseTask"""
         # pylint: disable=too-many-branches
+        task = super(ResponseTaskList, self).task_post_helper(request, task)
         error_happened = False
         form = ResponseTaskForm(request.POST)
         if not form.is_valid():
