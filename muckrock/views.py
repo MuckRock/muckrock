@@ -137,7 +137,7 @@ class PaginationMixin(object):
     def get_context_data(self, **kwargs):
         """Adds per_page to the context"""
         context = super(PaginationMixin, self).get_context_data(**kwargs)
-        context['per_page'] = self.get_paginate_by()
+        context['per_page'] = self.get_paginate_by(self.get_queryset())
         return context
 
 
