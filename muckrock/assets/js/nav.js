@@ -21,14 +21,6 @@ function hideOverlay(overlay) {
   return $(overlay).removeClass('visible');
 }
 
-function toggleOverlay(overlay) {
-  if ($(overlay).hasClass('visible')) {
-    return $(overlay).removeClass('visible');
-  } else {
-    return $(overlay).addClass('visible');
-  }
-}
-
 function setMaxHeight(element, maxHeight) {
   /* Set the max height of an element, in case when we render it it will go off the page. */
   return $(element).css('maxHeight', maxHeight);

@@ -51,7 +51,7 @@ $('th input:checkbox').change(function(){
     var table = $(this).closest('table');
     var headerCheckbox = $(this);
     var bodyCheckboxes = $(table).find('td input:checkbox');
-    var checked = this.checked;
+    var checked = headerCheckbox.checked;
     bodyCheckboxes.each(function(){
         this.checked = checked;
     });

@@ -36,7 +36,7 @@ import './task';
 
 $('document').ready(function(){
 
-    if (!!('ontouchstart' in window)) {
+    if ('ontouchstart' in window) {
       $('body').addClass('touch');
     }
 
