@@ -78,7 +78,7 @@ class ModelFilterMixin(object):
 
     def get_filter(self):
         """Initializes and returns the filter, if a filter_class is defined."""
-        # pylint: disable=not-callable
+        # pylint:disable=not-callable
         if self.filter_class is None:
             raise AttributeError('Missing a filter class.')
         return self.filter_class(self.request.GET, queryset=self.get_queryset())
@@ -91,7 +91,6 @@ class ModelFilterMixin(object):
         """
         context = super(ModelFilterMixin, self).get_context_data(**kwargs)
         _filter = self.get_filter()
-        _filter = _filter
         queryset = _filter.qs
         try:
             page_size = self.get_paginate_by(queryset)
@@ -126,9 +125,9 @@ class PaginationMixin(object):
     min_per_page = 5
     max_per_page = 100
 
-    def get_paginate_by(self):
+    def get_paginate_by(self, queryset):
         """Allows paginate_by to be set by a query argument."""
-        # pylint:
+        # pylint:disable=unused-argument
         try:
             per_page = int(self.request.GET.get('per_page'))
             return max(min(per_page, self.max_per_page), self.min_per_page)
