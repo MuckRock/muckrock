@@ -31,9 +31,9 @@ var navItems = $('#site-nav .section-list, #user-nav .dropdown ul');
 var navTriggers = $('#site-nav #toggle-sections, #user-nav .dropdown > .nav-item');
 var $overlay = $('#modal-overlay');
 navTriggers.on('click touchend', function(e){
-  if (!('ontouchstart' in window)) { // Test for non-touch device
-    e.preventDefault();
-    return false;
+  if (!('ontouchstart' in window)) { // Test for non-touch devices
+    // Non-touch devices should use the standard behavior! Since they have hover.
+    return
   }
   // First hide all other navs, then show this one
   var $thisElement = $($(this).data('for'));
@@ -69,7 +69,8 @@ while showing the elements present in that dropdown.
 $('.section-list .dropdown > .nav-item').click(function(e){
   // We only want the nav-item to be triggerable when the dropdown is visible
   // and if it contains some list to drop down.
-  var menuIsVisible = $(this).closest('.section-list').is(':visible');
+  var menuIsVisible = $('#toggle-sections').is('.active');
+  console.log('menuIsVisible:', menuIsVisible);
   var section = $(this).parent();
   var otherSections = section.siblings();
   var dropdown = section.children('ul');
@@ -78,9 +79,9 @@ $('.section-list .dropdown > .nav-item').click(function(e){
     toggleNav(dropdown, section);
     var offsetTop = 42 * 2; // The dropdown is always beneath two 42px tall menus
     setMaxHeight(dropdown, window.innerHeight - offsetTop);
+    e.preventDefault();
+    return false;
   }
-  e.preventDefault();
-  return false;
 });
 
 // Global nav search field

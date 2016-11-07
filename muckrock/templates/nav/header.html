@@ -33,7 +33,7 @@
             {% else %}
             <ul class="authenticated section-list" id="nav-list-sections">
                 <li class="dropdown">
-                    <span class="nav-item">News</span>
+                    <a class="nav-item" href="{% url 'news-index' %}">News</a>
                     <ul>
                         {% cache 600 dropdown_recent_articles %}
                         {% for article in dropdown_recent_articles|slice:":5" %}
@@ -44,12 +44,12 @@
                         </li>
                         {% endfor %}
                         {% endcache %}
-                        <li><a class="nav-item" href="{% url 'news-index' %}">Explore</a></li>
+                        <li class="touch--show"><a class="nav-item" href="{% url 'news-index' %}">Explore</a></li>
                         <li><a class="nav-item" href="{% url 'news-archive' %}">Archive</a></li>
                     </ul>
                 </li>
                 <li class="dropdown">
-                    <span class="nav-item"">Projects</span>
+                    <a class="nav-item" href="{% url 'project' %}">Projects</a>
                     <ul>
                         {% for project in my_projects %}
                         <li class="rich-nav-item" {% if project.image %}style="background-image:url('{% thumbnail project.image 300x100 crop %}');"{% endif %}>
@@ -57,18 +57,20 @@
                                 <p>{{project.title}}</p>
                             </a>
                         </li>
+                        {% empty %}
+                        <li><a class="nav-item" href="{% url 'project-create' %}">Create&nbsp;a&nbsp;Project</a></li>
                         {% endfor %}
                         {% if user.is_authenticated %}
-                        <li><a class="nav-item" href="{% url 'project-contributor' username=user.username %}">Yours</a></li>
+                        <li><a class="nav-item" href="{% url 'project-contributor' username=user.username %}">Your&nbsp;Projects</a></li>
                         {% endif %}
-                        <li><a class="nav-item" href="{% url 'project' %}">Explore</a></li>
+                        <li class="touch--show"><a class="nav-item" href="{% url 'project' %}">Explore</a></li>
                         <li><a class="nav-item" href="{% url 'project-list' %}">All&nbsp;Projects</a></li>
                     </ul>
                 </li>
                 <li class="dropdown">
-                    <span class="nav-item"">Requests</span>
+                    <a class="nav-item" href="{% url 'foia-root' %}">Requests</a>
                     <ul>
-                        <li><a class="nav-item" href="{% url 'foia-root' %}">Explore</a></li>
+                        <li class="touch--show"><a class="nav-item" href="{% url 'foia-root' %}">Explore</a></li>
                         <li><a class="nav-item" href="{% url 'foia-list' %}">All&nbsp;Requests</a></li>
                         <li><a class="nav-item" class="nav-item" href="{% url 'foia-mylist' %}">Your&nbsp;Requests</a></li>
                         {% if user.profile.is_advanced %}
@@ -132,6 +134,7 @@
                     </div>
                 </form>
             </div>
+            {# We need the search placeholder to retain the shape of the nav on mobile. #}
             <div class="search-placeholder"></div>
         </div>
 
@@ -145,10 +148,10 @@
                 </li>
                 {% if user.is_authenticated %}
                 <li class="dropdown dropdown--right">
-                    <span class="black nav-item align-center avatar-container" data-for="#profile-dropdown">
+                    <a href="{% url 'acct-my-profile' %}" class="black nav-item align-center avatar-container" data-for="#profile-dropdown">
                         <img class="round avatar mb0" src="{% if user.profile.avatar %}{% thumbnail user.profile.avatar 62x62 crop %}{% else %}{% static 'img/defaultavatar.png' %}{% endif %}" height="31" width="31">
                         <span class="label">{{ user.get_full_name }}</span>
-                    </span>
+                    </a>
                     <ul id="profile-dropdown">
                         {% if payment_failed %}
                         <li class="error message small">

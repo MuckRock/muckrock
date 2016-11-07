@@ -257,6 +257,9 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
         &.separator {
           border-bottom: 1px solid $color-grey;
         }
+        &.touch--show {
+            display: none;
+        }
       }
       .nav-item {
         width: 100%;
@@ -458,6 +461,9 @@ We use rich nav items to display images behind nav items, like for news articles
     &.visible {
       display: block;
     }
+  }
+  .global-navigation .dropdown ul li.touch--show {
+    display: block;
   }
 }
 @media($section-bp) {
