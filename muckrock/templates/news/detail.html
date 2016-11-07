@@ -11,7 +11,7 @@
 {% block title %}{{ article.title }}{% endblock title %}
 
 {% block content %}
-{% cache 900 article_detail article.pk %}
+{% cache cache_timeout article_detail article.pk %}
 {% with article.projects.last as project %}
     {% if project.newsletter %}
         {% newsletter list_id=project.newsletter label=project.newsletter_label cta=project.newsletter_cta %}

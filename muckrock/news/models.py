@@ -3,7 +3,10 @@ Models for the News application
 """
 
 from django.contrib.auth.models import User
+from django.core.cache import cache
+from django.core.cache.utils import make_template_fragment_key
 from django.db import models
+from django.db.models import Prefetch
 
 from datetime import datetime
 from easy_thumbnails.fields import ThumbnailerImageField
@@ -23,6 +26,20 @@ class ArticleQuerySet(models.QuerySet):
     def get_drafts(self):
         """Get all draft news articles"""
         return self.filter(publish=False)
+
+    def _prefetch_users(self, field):
+        """Prefetch authors or editors"""
+        return self.prefetch_related(
+                Prefetch(field,
+                    queryset=User.objects.select_related('profile')))
+
+    def prefetch_authors(self):
+        """Prefetch authors"""
+        return self._prefetch_users('authors')
+
+    def prefetch_editors(self):
+        """Prefetch editors"""
+        return self._prefetch_users('editors')
 
 
 class Article(models.Model):
@@ -78,6 +95,9 @@ class Article(models.Model):
         """Save the news article"""
         # epiceditor likes to stick non breaking spaces in here for some reason
         self.body = self.body.replace(u'\xa0', ' ')
+        # invalidate the template cache for the page on a save
+        if self.pk:
+            cache.delete(make_template_fragment_key('article_detail', [self.pk]))
         super(Article, self).save(*args, **kwargs)
 
     def get_authors_names(self):

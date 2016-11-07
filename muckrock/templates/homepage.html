@@ -8,11 +8,11 @@
 {% load cache %}
 
 {% block content %}
-{# cache 600 homepage #}
+{# cache cache_timeout homepage #}
 <div class="homepage">
     <main>
         <section class="news">
-            {% cache 600 news %}
+            {% cache cache_timeout news %}
             <ul class="articles nostyle">
                 {% for article in articles %}
                 {% if forloop.counter0 < 1 %}
@@ -33,7 +33,7 @@
             {% endcache %}
             {% newsletter %}
             {% if featured_projects %}
-            {% cache 600 projects %}
+            {% cache cache_timeout projects %}
             <div class="projects">
                 <h2>Projects <small><a href="{% url 'project' %}">See all</a></small></h2>
                 <ul class="nostyle">
