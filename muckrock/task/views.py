@@ -18,7 +18,7 @@ from muckrock.foia.models import STATUS, FOIARequest, FOIACommunication, FOIAFil
 from muckrock.models import ExtractDay, Now
 from muckrock.task.filters import TaskFilterSet
 from muckrock.task.forms import (
-    TaskFilterForm, FlaggedTaskForm, StaleAgencyTaskForm, ResponseTaskForm,
+    FlaggedTaskForm, StaleAgencyTaskForm, ResponseTaskForm,
     ProjectReviewTaskForm
     )
 from muckrock.task.models import (

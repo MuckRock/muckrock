@@ -4,6 +4,7 @@ App config for agency
 
 from django.apps import AppConfig
 
+# pylint: disable=invalid-name
 
 class AgencyConfig(AppConfig):
     """Configures the agency application to use activity streams"""

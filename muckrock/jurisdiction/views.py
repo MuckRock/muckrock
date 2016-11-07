@@ -14,7 +14,7 @@ from rest_framework import viewsets
 
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.filters import JurisdictionFilterSet
-from muckrock.jurisdiction.forms import FlagForm, JurisdictionFilterForm
+from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction, Exemption
 from muckrock.jurisdiction.serializers import JurisdictionSerializer
 from muckrock.task.models import FlaggedTask

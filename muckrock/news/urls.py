@@ -3,8 +3,6 @@ URL mappings for the News application
 """
 
 from django.conf.urls import patterns, url
-from django.views.generic.base import RedirectView
-from django.views.generic.dates import DayArchiveView, MonthArchiveView
 
 from muckrock.news import views
 from muckrock.news.models import Article

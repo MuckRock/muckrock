@@ -7,7 +7,7 @@ import django_filters
 class RangeWidget(django_filters.widgets.RangeWidget):
     """Customizes the rendered output of the RangeWidget"""
     def format_output(self, rendered_widgets):
-        return ("""
+        return """
             <div class="input-range">
                 <div class="small labels nomargin">
                     <label>Since</label>
@@ -17,4 +17,4 @@ class RangeWidget(django_filters.widgets.RangeWidget):
                     %(inputs)s
                 </div>
             </div>
-        """ % {'inputs': '\n'.join(rendered_widgets)})
+        """ % {'inputs': '\n'.join(rendered_widgets)}

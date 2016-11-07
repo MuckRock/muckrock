@@ -73,6 +73,7 @@ class NewsletterSignupForm(forms.Form):
 
 class SearchForm(forms.Form):
     """A form for searching a single model."""
+    # pylint: disable=invalid-name
     q = forms.CharField(
         required=False,
         label='Search',

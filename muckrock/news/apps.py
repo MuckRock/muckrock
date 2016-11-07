@@ -4,6 +4,7 @@ App config for news
 
 from django.apps import AppConfig
 
+# pylint: disable=invalid-name
 
 class NewsConfig(AppConfig):
     """Configures the agency application to use activity streams"""

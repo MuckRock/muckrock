@@ -4,6 +4,7 @@ App config for foia
 
 from django.apps import AppConfig
 
+# pylint: disable=invalid-name
 
 class FOIAConfig(AppConfig):
     """Configures the foia application to use activity streams"""

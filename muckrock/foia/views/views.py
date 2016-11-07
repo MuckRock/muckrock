@@ -13,7 +13,7 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template import RequestContext
-from django.views.generic import DetailView, ListView, TemplateView
+from django.views.generic import DetailView, TemplateView
 
 from actstream.models import Follow
 from datetime import datetime, timedelta
@@ -32,7 +32,6 @@ from muckrock.foia.filters import (
     ProcessingFOIARequestFilterSet,
 )
 from muckrock.foia.forms import (
-    RequestFilterForm,
     FOIAEmbargoForm,
     FOIANoteForm,
     FOIAEstimatedCompletionDateForm,
@@ -219,7 +218,7 @@ class ProcessingRequestList(RequestList):
     def get_queryset(self):
         """Apply select and prefetch related"""
         objects = super(ProcessingRequestList, self).get_queryset()
-        return (objects.prefetch_related('communications').filter(status='submitted'))
+        return objects.prefetch_related('communications').filter(status='submitted')
 
 
 # pylint: disable=no-self-use

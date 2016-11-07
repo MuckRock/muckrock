@@ -4,6 +4,7 @@ App config for qanda
 
 from django.apps import AppConfig
 
+# pylint: disable=invalid-name
 
 class QuestionConfig(AppConfig):
     """Configures the project application to use activity streams"""

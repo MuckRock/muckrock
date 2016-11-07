@@ -4,10 +4,8 @@ Views for muckrock project
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
-from django.core.exceptions import FieldError
 from django.core.urlresolvers import reverse
 from django.db.models import Sum, FieldDoesNotExist
 from django.shortcuts import render_to_response, get_object_or_404, redirect
@@ -18,7 +16,7 @@ from django.views.generic import View, ListView, FormView, TemplateView
 
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAFile
-from muckrock.forms import MRFilterForm, NewsletterSignupForm, SearchForm, StripeForm
+from muckrock.forms import NewsletterSignupForm, SearchForm, StripeForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.tasks import send_charge_receipt
 from muckrock.news.models import Article
@@ -26,7 +24,6 @@ from muckrock.project.models import Project
 from muckrock.utils import cache_get_or_set
 
 import logging
-import re
 import requests
 import stripe
 from watson import search as watson
@@ -80,7 +77,8 @@ class ModelFilterMixin(object):
     filter_class = None
 
     def get_filter(self):
-        """Returns the filter, if a filter_class is defined. If it isn't, an error is raised."""
+        """Initializes and returns the filter, if a filter_class is defined."""
+        # pylint: disable=not-callable
         if self.filter_class is None:
             raise AttributeError('Missing a filter class.')
         return self.filter_class(self.request.GET, queryset=self.get_queryset())
@@ -93,6 +91,7 @@ class ModelFilterMixin(object):
         """
         context = super(ModelFilterMixin, self).get_context_data(**kwargs)
         _filter = self.get_filter()
+        _filter = _filter
         queryset = _filter.qs
         try:
             page_size = self.get_paginate_by(queryset)
@@ -127,8 +126,9 @@ class PaginationMixin(object):
     min_per_page = 5
     max_per_page = 100
 
-    def get_paginate_by(self, queryset):
+    def get_paginate_by(self):
         """Allows paginate_by to be set by a query argument."""
+        # pylint:
         try:
             per_page = int(self.request.GET.get('per_page'))
             return max(min(per_page, self.max_per_page), self.min_per_page)
@@ -138,7 +138,7 @@ class PaginationMixin(object):
     def get_context_data(self, **kwargs):
         """Adds per_page to the context"""
         context = super(PaginationMixin, self).get_context_data(**kwargs)
-        context['per_page'] = self.get_paginate_by(self.get_queryset())
+        context['per_page'] = self.get_paginate_by()
         return context
 
 

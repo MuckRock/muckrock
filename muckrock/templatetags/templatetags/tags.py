@@ -109,6 +109,7 @@ def email_redactor(match):
 
 @register.filter('fieldtype')
 def fieldtype(field):
+    """Returns the name of the class."""
     return field.field.widget.__class__.__name__
 
 @register.filter

@@ -3,7 +3,6 @@ Tests for Tasks views
 """
 from datetime import datetime
 
-from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase, Client, RequestFactory
 
@@ -109,12 +108,12 @@ class TaskListViewBatchedPOSTTests(TestCase):
         self.tasks = [task1, task2, task3]
 
     def test_batch_resolve_tasks(self):
-        data = {'resolve': 'truthy', 'tasks': [task.id for task in self.tasks]}
+        data = {'resolve': 'truthy', 'tasks': [_task.id for _task in self.tasks]}
         http_post_response(self.url, self.view, data, self.user)
-        for task in self.tasks:
-            task.refresh_from_db()
-            eq_(task.resolved, True,
-                'Task %d should be resolved when doing a batched resolve' % task.pk)
+        for _task in self.tasks:
+            _task.refresh_from_db()
+            eq_(_task.resolved, True,
+                'Task %d should be resolved when doing a batched resolve' % _task.pk)
 
 @mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class OrphanTaskViewTests(TestCase):

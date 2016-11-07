@@ -4,6 +4,7 @@ App config for tags
 
 from django.apps import AppConfig
 
+# pylint: disable=invalid-name
 
 class TagConfig(AppConfig):
     """Configures the project application to use activity streams"""

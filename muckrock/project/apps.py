@@ -4,6 +4,7 @@ App config for projects
 
 from django.apps import AppConfig
 
+# pylint: disable=invalid-name
 
 class ProjectConfig(AppConfig):
     """Configures the project application to use activity streams"""
