@@ -17,7 +17,7 @@
 
 {% block explore_header %}
 {{block.super}}
-<div class="grid__column full nopadding">
+<div class="grid__column full">
     <form method="GET" class="oneline-form" action="{% url 'project-list' %}">
         <div class="field">
             <input type="search" name="q" placeholder="Search projects">

@@ -17,18 +17,21 @@
 
 {% block explore_header %}
 {{block.super}}
-<div class="grid__column full nopadding">
+<div class="grid__column full">
     <ul class="tag-list nostyle inline">
         {% for tag in top_tags %}
         <li><a class="tag" href="{% url 'news-archive'%}?tags={{tag.id}}">{{tag}}</a></li>
         {% endfor %}
     </ul>
 </div>
-<div class="grid__column full nopadding">
+<div class="grid__column full">
     <form method="GET" class="oneline-form" action="{% url 'news-archive' %}">
         <div class="field">
             <input type="search" name="q" placeholder="Search articles">
-        	<button class="basic blue button" type="submit">Search</button>
+        	<button class="basic blue button" type="submit">
+        	    {% include 'lib/component/icon/search.svg' %}
+        	    <span class="label">Search</span>
+        	</button>
         </div>
     </form>
 </div>
