@@ -81,6 +81,12 @@ $('td input:checkbox').change(function(){
     }
 });
 
+// Prevent the active element in a list section from trigger a load on touch
+$('.list__sections .current-tab a').on('click', function(e){
+    console.log(e);
+    e.preventDefault();
+});
+
 $(document).ready(() => {
   tableHeadSortIndicator();
   disableToolbar();

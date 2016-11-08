@@ -35,6 +35,49 @@
       width: 100%;
     }
   }
+  .list__toggle {
+    display: none;
+    width: 100%;
+    text-align: center;
+    @include padding;
+    .icon {
+        @include svg-color($color-blue);
+    }
+  }
+
+  @media(max-width:48em) {
+    .list__toggle {
+        display: block;
+        &.list__toggle--hide {
+            display: none;
+        }
+        & ~ * {
+            display: none;
+        }
+        &:target {
+            display: none;
+            &.list__toggle--hide {
+                display: block;
+            }
+            & ~ * {
+                display: block;
+            }
+        }
+    }
+    .list__sections li {
+        display: none;
+        &.current-tab {
+            display: block;
+        }
+    }
+    .list__sections:hover li {
+        display: block;
+    }
+    .list__sections .current-tab a::after {
+        content: "\25BC";
+        float: right;
+    }
+  }
 }
 
 .list__sections li {
