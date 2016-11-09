@@ -31,17 +31,9 @@
 {% endblock %}
 
 {% block explore_main %}
-<div class="explore__section featured-projects grid__row">
+<div class="explore__section">
     {% for project in featured_projects %}
-    {% if forloop.first %}
-    <div class="grid__column full">
-        {% include 'lib/pattern/project.html' %}
-    </div>
-    {% else %}
-    <div class="grid__column half">
-        {% include 'lib/pattern/project.html' %}
-    </div>
-    {% endif %}
+    {% include 'lib/pattern/project.html' %}
     {% endfor %}
 </div>
 {% endblock %}

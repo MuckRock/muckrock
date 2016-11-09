@@ -30,7 +30,7 @@ function setMaxHeight(element, maxHeight) {
 var navItems = $('#site-nav .section-list, #user-nav .dropdown ul');
 var navTriggers = $('#site-nav #toggle-sections, #user-nav .dropdown > .nav-item');
 var $overlay = $('#modal-overlay');
-navTriggers.on('click touchend', function(e){
+navTriggers.on('click', function(e){
   if (!('ontouchstart' in window)) { // Test for non-touch devices
     // Non-touch devices should use the standard behavior! Since they have hover.
     return;

@@ -323,7 +323,7 @@ def homepage(request):
                                         'authors__profile',
                                         'projects',
                                     )
-                                   [:7],
+                                   [:5],
             600)
     featured_projects = cache_get_or_set(
             'hp:featured_projects',
