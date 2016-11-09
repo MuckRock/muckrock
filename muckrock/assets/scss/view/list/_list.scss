@@ -39,13 +39,25 @@
     display: none;
     width: 100%;
     text-align: center;
-    @include padding;
+    padding: $vr/4 $vr/2;
+    @include border;
     .icon {
+        vertical-align: middle;
         @include svg-color($color-blue);
+    }
+    &:hover {
+        color: $color-white;
+        background: $color-blue;
+        .icon {
+            @include svg-color($color-white);
+        }
     }
   }
 
   @media(max-width:48em) {
+    .grid__column {
+        margin-bottom: $vr/2;
+    }
     .list__toggle {
         display: block;
         &.list__toggle--hide {
@@ -64,6 +76,9 @@
             }
         }
     }
+    .list__sections {
+        margin-bottom: $vr/2;
+    }
     .list__sections li {
         display: none;
         &.current-tab {
@@ -76,6 +91,9 @@
     .list__sections .current-tab a::after {
         content: "\25BC";
         float: right;
+    }
+    .button-group {
+        width: 100%;
     }
   }
 }

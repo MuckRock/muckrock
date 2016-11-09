@@ -14,3 +14,44 @@ table {
     border: none;
     padding: 0;
 }
+
+table.sortable .sorted-by {
+    &.desc::after {
+        content: "\25B2";
+        float: right;
+        margin-left: $vr/2;
+    }
+    &.asc::after {
+        content: "\25BC";
+        float: right;
+        margin-left: $vr/2;
+    }
+}
+
+/* We use the stacktable.js library to make our tables responsive. */
+
+.cardtable {
+    &.large-only {
+        display: none;
+    }
+    @media(min-width:48em){
+        &.small-only {
+            display: none;
+        }
+        &.large-only {
+            display: table;
+        }
+    }
+    .st-head-row-main {
+        display: none;
+    }
+    .st-key, .st-val {
+        display: table-cell;
+        font-size: $size-2;
+    }
+    .st-key {
+        width: 25%;
+        font-weight: $bold;
+        font-size: $size-2;
+    }
+}

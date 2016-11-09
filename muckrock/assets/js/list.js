@@ -10,12 +10,10 @@ function tableHeadSortIndicator() {
   const orderBy = $('.sortable').data('orderBy');
   if (typeof(sortBy) != "undefined") {
     // find the right title and add the right arrow to it
-    const arrowSymbol = (orderBy == 'desc') ? '&#x25B2;' : '&#x25BC;';
-    const arrowElement = $('<span class="arrow">' + arrowSymbol + '</span>');
     const inverseOrder = (orderBy == 'desc') ? 'asc' : 'desc';
     $('.sortable th').filter((index, element) => {
       return $(element).data('sort') == sortBy;
-    }).prepend(arrowElement).data('order', inverseOrder).addClass('sorted-by');
+    }).data('order', inverseOrder).addClass('sorted-by').addClass(orderBy);
   }
 }
 
@@ -83,7 +81,6 @@ $('td input:checkbox').change(function(){
 
 // Prevent the active element in a list section from trigger a load on touch
 $('.list__sections .current-tab a').on('click', function(e){
-    console.log(e);
     e.preventDefault();
 });
 
@@ -91,4 +88,5 @@ $(document).ready(() => {
   tableHeadSortIndicator();
   disableToolbar();
   $('.sortable th').click(sortListByHeader);
+  $('table.cardtable').cardtable();
 });

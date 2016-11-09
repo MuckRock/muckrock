@@ -45,7 +45,7 @@ This is the base style for a list of objects: a collection of FOIA requests, age
         {% if object_list %}
             {% include 'lib/component/pagination.html' %}
             {% block list-objects %}
-            <table class="sortable" data-sort-by="{{sort}}" data-order-by="{{order}}">
+            <table class="sortable cardtable" data-sort-by="{{sort}}" data-order-by="{{order}}">
                 {% block list-table %}
                 <thead>
                     <tr>

@@ -21,7 +21,7 @@
     border-right: none;
     border-bottom: none;
     & > span {
-        flex: 1 1 5em;
+        flex: 1 1 15em;
         @include display(flex);
         @include flex-wrap(wrap);
     }

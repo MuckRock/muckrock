@@ -15,6 +15,7 @@ import 'jquery-ui/datepicker';
 import '../vendor/formset';
 import '../vendor/loupe';
 import '../vendor/quicksearch';
+import '../vendor/stacktable';
 
 import './account';
 import './autocomplete';

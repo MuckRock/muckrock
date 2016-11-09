@@ -33,7 +33,7 @@ var $overlay = $('#modal-overlay');
 navTriggers.on('click touchend', function(e){
   if (!('ontouchstart' in window)) { // Test for non-touch devices
     // Non-touch devices should use the standard behavior! Since they have hover.
-    return
+    return;
   }
   // First hide all other navs, then show this one
   var $thisElement = $($(this).data('for'));
@@ -70,7 +70,6 @@ $('.section-list .dropdown > .nav-item').click(function(e){
   // We only want the nav-item to be triggerable when the dropdown is visible
   // and if it contains some list to drop down.
   var menuIsVisible = $('#toggle-sections').is('.active');
-  console.log('menuIsVisible:', menuIsVisible);
   var section = $(this).parent();
   var otherSections = section.siblings();
   var dropdown = section.children('ul');
