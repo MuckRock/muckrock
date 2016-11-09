@@ -17,7 +17,6 @@
 .grid__column {
     @include flex(1 1 auto);
     min-width: 0;
-    height: 100%;
     padding-right: $vr/2;
     @include media($medium-bp) {
         padding-right: $vr;
