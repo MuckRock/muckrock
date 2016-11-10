@@ -334,7 +334,7 @@ def homepage(request):
             lambda: (FOIARequest.objects.get_public().get_done()
                    .order_by('-date_done', 'pk')
                    .select_related_view()
-                   .get_public_file_count(limit=6)),
+                   .get_public_file_count(limit=5))[:5],
             600)
     stats = cache_get_or_set(
             'hp:stats',

@@ -7,11 +7,11 @@
 {% block list-sections %}
 <p class="bold">Narrow your search to a single section to get more detailed results and more advanced filters:</p>
 <ul class="nostyle list__sections">
-    <li><a href="{% url 'news-archive' %}?q={{query}}">Search news</a></li>
-    <li><a href="{% url 'project-list' %}?q={{query}}">Search projects</a></li>
-    <li><a href="{% url 'foia-list' %}?q={{query}}">Search requests</a></li>
-    <li><a href="{% url 'agency-list' %}?q={{query}}">Search agencies</a></li>
-    <li><a href="{% url 'question-index' %}?q={{query}}">Search questions</a></li>
+    <li><a href="{% url 'news-archive' %}?q={{query}}">News</a></li>
+    <li><a href="{% url 'project-list' %}?q={{query}}">Projects</a></li>
+    <li><a href="{% url 'foia-list' %}?q={{query}}">Requests</a></li>
+    <li><a href="{% url 'agency-list' %}?q={{query}}">Agencies</a></li>
+    <li><a href="{% url 'question-index' %}?q={{query}}">Questions</a></li>
 </ul>
 {% endblock %}
 
@@ -19,7 +19,10 @@
 <form method="get" class="oneline-form">
     <div class="field">
         <input type="search" name="q" value="{{query}}" class="bold">
-        <button type="submit" class="basic blue button">Search</button>
+        <button type="submit" class="basic blue button">
+            {% include 'lib/component/icon/search.svg' %}
+            <span class="label">Search</span>
+        </button>
     </div>
 </form>
 {% if query %}

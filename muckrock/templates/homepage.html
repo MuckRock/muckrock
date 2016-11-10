@@ -11,39 +11,47 @@
 {# cache 600 homepage #}
 <div class="homepage">
     <div class="banner-wrapper mb0" style="background-image: url('{% static 'img/fingerprinting.jpg' %}');">
-        <div class="foia banner grid__row">
-            <div class="grid__column full">
+        <div class="foia banner">
+            <div class="banner-container">
                 <h1>File, track, and share public records requests.</h1>
             </div>
-            <div class="grid__column half">
-                <div class="about">
-                    <a href="{% url 'foia-create' %}" class="primary button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
-                        {% include 'lib/component/icon/create-request.svg' %}
-                        <span class="label">File a Request</span>
-                    </a>
-                    <div class="call-to-action"><a href="{% url 'foia-root' %}">Explore filed requests</a> or <a href="/about/how-we-work/" id="learn-more">learn how it works</a>.</div>
-                </div>
+            <div class="about banner-container">
+                <a href="{% url 'foia-create' %}" class="primary button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
+                    {% include 'lib/component/icon/create-request.svg' %}
+                    <span class="label">File a Request</span>
+                </a>
+                <div class="call-to-action"><a href="{% url 'foia-root' %}">Explore filed requests</a> or <a href="/about/how-we-work/" id="learn-more">learn how it works</a>.</div>
             </div>
-            <div class="grid__column full">
-                <ul class="stats">
-                    <li class="stat">
-                        <div class="value">{{ stats.request_count|intcomma }}</div>
-                        <div class="key">filed request{{ stats.request_count|pluralize }}</div>
-                    </li>
-                    <li class="stat">
-                        <div class="value">{{ stats.agency_count|intcomma }}</div>
-                        <div class="key">agenc{{ stats.agency_count|pluralize:"y,ies" }}</div>
-                    </li>
-                    <li class="stat">
-                        <div class="value">{{ stats.completed_count|intcomma }}</div>
-                        <div class="key">fulfilled request{{ stats.completed_count|pluralize }}</div>
-                    </li>
-                    <li class="stat">
-                        <div class="value">{{ stats.page_count|intcomma }}</div>
-                        <div class="key">released page{{ stats.page_count|pluralize }}</div>
-                    </li>
-                </ul>
+            <ul class="stats banner-container">
+                <li class="stat">
+                    <div class="value">{{ stats.request_count|intcomma }}</div>
+                    <div class="key">filed request{{ stats.request_count|pluralize }}</div>
+                </li>
+                <li class="stat">
+                    <div class="value">{{ stats.agency_count|intcomma }}</div>
+                    <div class="key">agenc{{ stats.agency_count|pluralize:"y,ies" }}</div>
+                </li>
+                <li class="stat">
+                    <div class="value">{{ stats.completed_count|intcomma }}</div>
+                    <div class="key">fulfilled request{{ stats.completed_count|pluralize }}</div>
+                </li>
+                <li class="stat">
+                    <div class="value">{{ stats.page_count|intcomma }}</div>
+                    <div class="key">released page{{ stats.page_count|pluralize }}</div>
+                </li>
+            </ul>
+            {% if completed_requests %}
+            <div class="completed-requests black">
+                <header>
+                    <h2>Recently completed requests</h2>
+                    <a href="{% url 'foia-list' %}?status=done" title="See all the completed requests in our archive">See all &rarr;</a>
+                </header>
+                {% for foia in completed_requests %}
+                {% include 'lib/foia.html' with hide_actions=True %}
+                {% endfor %}
+                <div class="spacer"></div>
             </div>
+            {% endif %}
         </div>
     </div>
     {% newsletter %}
