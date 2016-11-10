@@ -43,6 +43,7 @@
 <th width="10%" data-sort="agency">Agency</th>
 <th width="20%" data-sort="jurisdiction">Jurisdiction</th>
 <th width="20%" data-sort="date_updated">Updated</th>
+<th width="10%" data-sort="date_submitted">Submitted</th>
 {% endblock list-table-head %}
 
 {% block list-table-row %}
@@ -52,5 +53,6 @@
 <td>{{ foia.agency }}</td>
 <td>{{ foia.jurisdiction }}</td>
 <td>{{ foia.date_updated|date:"m/d/Y" }}</td>
+<td>{{ foia.date_submitted|date:"m/d/Y" }}</td>
 {% endwith %}
 {% endblock list-table-row %}
