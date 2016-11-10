@@ -185,6 +185,9 @@
 }
 .project__header {
   @include flex-basis(10em);
+  @include display(flex);
+  @include flex-direction(column);
+  @include justify-content(flex-start);
   min-height: 10em;
   margin-bottom: 0;
   background-position: center;
@@ -193,9 +196,7 @@
   background-blend-mode: multiply;
 }
 .project__header__wrapper {
-  @include display(inline-flex);
-  @include flex-direction(column);
-  @include justify-content(flex-start);
+  @include flex(1 1 100%);
   min-height: 100%;
   width: 100%;
   padding: $vr;
