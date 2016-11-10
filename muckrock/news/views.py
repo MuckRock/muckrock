@@ -41,6 +41,7 @@ class NewsDetail(DateDetailView):
 
     def get_related_articles(self, article):
         """Get articles related to the current one."""
+        # pylint: disable=no-self-use
         # articles in the same project as this one
         project_filter = Q(projects__in=article.projects.all())
         # articles with the same tag as this one

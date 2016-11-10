@@ -18,4 +18,5 @@ def google_analytics(request):
 
 def cache_timeout(request):
     """Cache timeout settings"""
+    # pylint: disable=unused-argument
     return {'cache_timeout': settings.DEFAULT_CACHE_TIMEOUT}

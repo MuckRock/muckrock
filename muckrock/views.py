@@ -11,7 +11,6 @@ from django.core.exceptions import FieldError
 from django.core.urlresolvers import reverse
 from django.db.models import Sum, FieldDoesNotExist
 from django.shortcuts import render, get_object_or_404, redirect
-from django.template import RequestContext
 from django.utils.decorators import method_decorator
 from django.utils.html import escape
 from django.views.generic import View, ListView, FormView, TemplateView
@@ -390,6 +389,7 @@ class LandingView(TemplateView):
 
 class Homepage(object):
     """Control caching for the homepage"""
+    # pylint: disable=no-self-use
 
     def get_cached_values(self):
         """Return all the methods used to generate the cached values"""
