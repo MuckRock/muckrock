@@ -5,7 +5,7 @@ Views for the news application
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.db.models import Prefetch, Q
+from django.db.models import Q
 from django.http import HttpResponseForbidden
 from django.shortcuts import redirect, get_object_or_404
 from django.views.generic.list import ListView
@@ -29,11 +29,7 @@ class NewsDetail(DateDetailView):
 
     def get_queryset(self):
         """Get articles for this view"""
-        queryset = Article.objects.prefetch_related(
-                Prefetch('authors',
-                    queryset=User.objects.select_related('profile')),
-                Prefetch('editors',
-                    queryset=User.objects.select_related('profile')))
+        queryset = Article.objects.prefetch_authors().prefetch_editors()
         if self.request.user.is_staff:
             return queryset.all()
         else:
@@ -43,18 +39,22 @@ class NewsDetail(DateDetailView):
         """Can future posts be seen?"""
         return self.request.user.is_staff
 
-    def get_related_articles(self):
+    def get_related_articles(self, article):
         """Get articles related to the current one."""
-        article = self.get_object()
+        # pylint: disable=no-self-use
         # articles in the same project as this one
         project_filter = Q(projects__in=article.projects.all())
         # articles with the same tag as this one
         tag_filter = Q(tags__in=article.tags.all())
         # articles in projects with the same tag as this one
         project_tag_filter = Q(projects__tags__in=article.tags.all())
-        related_articles = Article.objects.get_published().filter(
-            project_filter|tag_filter|project_tag_filter
-        ).distinct().exclude(pk=article.pk)
+        related_articles = (Article.objects
+                .get_published()
+                .filter(project_filter | tag_filter | project_tag_filter)
+                .exclude(pk=article.pk)
+                .distinct()
+                .prefetch_authors()
+                .prefetch_editors())
         return related_articles[:4]
 
     def get_context_data(self, **kwargs):
@@ -62,7 +62,7 @@ class NewsDetail(DateDetailView):
         context['projects'] = context['object'].projects.all()
         context['foias'] = (context['object'].foias
                 .select_related_view().get_public_file_count())
-        context['related_articles'] = self.get_related_articles()
+        context['related_articles'] = self.get_related_articles(context['object'])
         context['sidebar_admin_url'] = reverse('admin:news_article_change',
             args=(context['object'].pk,))
         context['stripe_pk'] = settings.STRIPE_PUB_KEY
@@ -103,8 +103,7 @@ class NewsListView(ListView):
     """List of news articles"""
     template_name = 'news/list.html'
     paginate_by = 10
-    queryset = Article.objects.get_published().prefetch_related(
-            Prefetch('authors', queryset=User.objects.select_related('profile')))
+    queryset = Article.objects.get_published().prefetch_authors()
 
 
 class AuthorArchiveView(NewsListView):

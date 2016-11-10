@@ -98,7 +98,7 @@
     {% endif %}
 
     {% if recent_articles %}
-    {% cache 600 recent_articles %}
+    {% cache cache_timeout recent_articles %}
     <section class="recent articles">
         {% for article in recent_articles %}
         <a href="{{article.get_absolute_url}}" title="{{article.summary}}" class="article">

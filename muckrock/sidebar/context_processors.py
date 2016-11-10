@@ -1,5 +1,6 @@
 """Context processors to ensure data is displayed in sidebar for all views"""
 
+from django.conf import settings
 from django.contrib.auth.forms import AuthenticationForm
 
 from datetime import datetime, timedelta
@@ -16,8 +17,13 @@ def get_recent_articles():
     """Lists last five recent news articles"""
     return cache_get_or_set(
             'sb:recent_articles',
-            lambda: Article.objects.get_published().order_by('-pub_date')[:10],
-            600)
+            lambda: list(Article.objects
+                .get_published()
+                .order_by('-pub_date')
+                .prefetch_authors()
+                .prefetch_editors()
+                [:10]),
+            settings.DEFAULT_CACHE_TIMEOUT)
 
 def get_actionable_requests(user):
     """Gets requests that require action or attention"""
@@ -41,6 +47,7 @@ def get_unread_notifications(user):
     else:
         return None
 
+
 def get_organization(user):
     """Gets organization, if it exists"""
     def load_organization(user):
@@ -56,10 +63,11 @@ def get_organization(user):
                 org = owned_org.first()
             return org
         return inner
+
     return cache_get_or_set(
             'sb:%s:user_org' % user.username,
             load_organization(user),
-            600)
+            settings.DEFAULT_CACHE_TIMEOUT)
 
 def sidebar_broadcast(user):
     """Displays a broadcast to a given usertype"""
@@ -84,7 +92,7 @@ def sidebar_broadcast(user):
     return cache_get_or_set(
             'sb:%s:broadcast' % user_class,
             load_broadcast(user_class),
-            600)
+            settings.DEFAULT_CACHE_TIMEOUT)
 
 def sidebar_info(request):
     """Displays info about a user's requsts in the sidebar"""
