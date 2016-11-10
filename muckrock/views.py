@@ -327,7 +327,7 @@ def homepage(request):
             600)
     featured_projects = cache_get_or_set(
             'hp:featured_projects',
-            lambda: Project.objects.get_public().filter(featured=True)[:4],
+            lambda: Project.objects.get_public().optimize().filter(featured=True)[:4],
             600)
     completed_requests = cache_get_or_set(
             'hp:completed_requests',

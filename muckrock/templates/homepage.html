@@ -10,78 +10,72 @@
 {% block content %}
 {# cache 600 homepage #}
 <div class="homepage">
-    <main>
-        <section class="news">
-            {# cache 600 news #}
-            <div class="articles grid__row">
-                {% for article in articles %}
-                {% if forloop.first %}
-                <div class="grid__column two-thirds">
-                    {% include 'lib/pattern/article.html' with large=True %}
-                </div>
-                {% else %}
-                <div class="grid__column third">
-                    {% include 'lib/pattern/article.html' with small=True %}
-                </div>
-                {% endif %}
-                {% endfor %}
+    <div class="banner-wrapper mb0" style="background-image: url('{% static 'img/fingerprinting.jpg' %}');">
+        <div class="foia banner grid__row">
+            <div class="grid__column full">
+                <h1>File, track, and share public records requests.</h1>
             </div>
-            {# endcache #}
-            {% newsletter %}
-            {% if featured_projects %}
-            {% cache 600 projects %}
-            <div class="projects">
-                <h2>Projects <small><a href="{% url 'project' %}">See all</a></small></h2>
-                <ul class="nostyle">
-                {% for project in featured_projects %}
-                    <li>
-                        {% include 'lib/pattern/project.html' %}
-                    </li>
-                {% endfor %}
-                </ul>
-            </div>
-            {% endcache %}
-            {% endif %}
-        </section>
-        <section class="requests">
-            <div class="foia banner" style="background-image: url('{% static 'img/homepage/requests.jpg' %}');">
+            <div class="grid__column half">
                 <div class="about">
-                    <h2>File, track, and share public records requests</h2>
                     <a href="{% url 'foia-create' %}" class="primary button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
                         {% include 'lib/component/icon/create-request.svg' %}
                         <span class="label">File a Request</span>
                     </a>
-                    <div class="call-to-action"><a href="/about/how-we-work/" id="learn-more">or learn how it works.</a></div>
-                </div>
-                <div class="info">
-                    <ul class="stats">
-                        <li class="stat">
-                            <div class="value">{{ stats.request_count|intcomma }}</div>
-                            <div class="key">filed request{{ stats.request_count|pluralize }}</div>
-                        </li>
-                        <li class="stat">
-                            <div class="value">{{ stats.agency_count|intcomma }}</div>
-                            <div class="key">agenc{{ stats.agency_count|pluralize:"y,ies" }}</div>
-                        </li>
-                        <li class="stat">
-                            <div class="value">{{ stats.completed_count|intcomma }}</div>
-                            <div class="key">fulfilled request{{ stats.completed_count|pluralize }}</div>
-                        </li>
-                        <li class="stat">
-                            <div class="value">{{ stats.page_count|intcomma }}</div>
-                            <div class="key">released page{{ stats.page_count|pluralize }}</div>
-                        </li>
-                    </ul>
+                    <div class="call-to-action"><a href="{% url 'foia-root' %}">Explore filed requests</a> or <a href="/about/how-we-work/" id="learn-more">learn how it works</a>.</div>
                 </div>
             </div>
-            <h2>Recent completed requests</h2>
-            {% for foia in completed_requests %}
-                {% include 'lib/foia.html' with hide_actions=True %}
-            {% endfor %}
-            <a href="{% url 'foia-list' %}?status=done&sort=date_submitted&order=desc">See more</a>
-        </section>
-    </main>
-
+            <div class="grid__column full">
+                <ul class="stats">
+                    <li class="stat">
+                        <div class="value">{{ stats.request_count|intcomma }}</div>
+                        <div class="key">filed request{{ stats.request_count|pluralize }}</div>
+                    </li>
+                    <li class="stat">
+                        <div class="value">{{ stats.agency_count|intcomma }}</div>
+                        <div class="key">agenc{{ stats.agency_count|pluralize:"y,ies" }}</div>
+                    </li>
+                    <li class="stat">
+                        <div class="value">{{ stats.completed_count|intcomma }}</div>
+                        <div class="key">fulfilled request{{ stats.completed_count|pluralize }}</div>
+                    </li>
+                    <li class="stat">
+                        <div class="value">{{ stats.page_count|intcomma }}</div>
+                        <div class="key">released page{{ stats.page_count|pluralize }}</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% newsletter %}
+    {% cache 600 news %}
+    <div class="articles grid__row">
+        {% for article in articles %}
+        {% if forloop.first %}
+        <div class="grid__column two-thirds">
+            {% include 'lib/pattern/article.html' with large=True %}
+        </div>
+        {% else %}
+        <div class="grid__column third">
+            {% include 'lib/pattern/article.html' with small=True %}
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+    {% endcache %}
+    {% if featured_projects %}
+    {% cache 600 projects %}
+    <div class="projects">
+        <h2>Projects <small><a href="{% url 'project' %}">See all</a></small></h2>
+        <ul class="nostyle">
+        {% for project in featured_projects %}
+            <li>
+                {% include 'lib/pattern/project.html' %}
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+    {% endcache %}
+    {% endif %}
 </div>
 {# endcache #}
 {% endblock content %}
