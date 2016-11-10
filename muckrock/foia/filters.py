@@ -16,6 +16,7 @@ from muckrock.project.models import Project
 from muckrock.tags.models import Tag
 
 BLANK_STATUS = [('', 'All')] + STATUS
+NULL_BOOLEAN_CHOICES = [(None, '----------'), (True, 'Yes'), (False, 'No')]
 
 class FOIARequestFilterSet(django_filters.FilterSet):
     """Allows filtering a request by status, agency, jurisdiction, user, or tags."""
@@ -42,11 +43,15 @@ class FOIARequestFilterSet(django_filters.FilterSet):
         queryset=Tag.objects.all(),
         widget=autocomplete_light.MultipleChoiceWidget('TagAutocomplete'),
     )
+    has_embargo = django_filters.BooleanFilter(
+        name='embargo',
+        widget=forms.Select(choices=NULL_BOOLEAN_CHOICES),
+    )
     has_crowdfund = django_filters.BooleanFilter(
         name='crowdfund',
         lookup_expr='isnull',
         exclude=True,
-        widget=forms.NullBooleanSelect(),
+        widget=forms.Select(choices=NULL_BOOLEAN_CHOICES),
     )
     minimum_pages = django_filters.NumberFilter(
         name='communications__files__pages',
@@ -88,11 +93,15 @@ class MyFOIARequestFilterSet(django_filters.FilterSet):
         queryset=Tag.objects.all(),
         widget=autocomplete_light.MultipleChoiceWidget('TagAutocomplete'),
     )
+    has_embargo = django_filters.BooleanFilter(
+        name='embargo',
+        widget=forms.Select(choices=NULL_BOOLEAN_CHOICES),
+    )
     has_crowdfund = django_filters.BooleanFilter(
         name='crowdfund',
         lookup_expr='isnull',
         exclude=True,
-        widget=forms.NullBooleanSelect(),
+        widget=forms.Select(choices=NULL_BOOLEAN_CHOICES),
     )
     minimum_pages = django_filters.NumberFilter(
         name='communications__files__pages',
