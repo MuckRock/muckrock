@@ -12,9 +12,15 @@
     @media(min-width: 48em) {
         min-height: 23em;
     }
+    @include media($small-bp) {
+        padding-top: 1.5em;
+    }
     h1 {
         font-size: $size-7;
         text-align: center;
+        @include media($small-bp) {
+            font-size: $size-6;
+        }
     }
     .banner-container {
         max-width: 45rem;
@@ -78,6 +84,9 @@
                 max-width: 20em;
                 margin: 0 auto $vr;
             }
+        }
+        @include media($small-bp) {
+            margin: 1.5em auto;
         }
     }
 

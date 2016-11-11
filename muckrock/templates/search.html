@@ -2,6 +2,15 @@
 
 {% block list-header %}
 <h1>{{title}}</h1>
+<form method="get" class="oneline-form">
+    <div class="field">
+        <input type="search" name="q" value="{{query}}" class="bold">
+        <button type="submit" class="basic blue button">
+            {% include 'lib/component/icon/search.svg' %}
+            <span class="label">Search</span>
+        </button>
+    </div>
+</form>
 {% endblock %}
 
 {% block list-sections %}
@@ -13,23 +22,6 @@
     <li><a href="{% url 'agency-list' %}?q={{query}}">Agencies</a></li>
     <li><a href="{% url 'question-index' %}?q={{query}}">Questions</a></li>
 </ul>
-{% endblock %}
-
-{% block list-actions %}
-<form method="get" class="oneline-form">
-    <div class="field">
-        <input type="search" name="q" value="{{query}}" class="bold">
-        <button type="submit" class="basic blue button">
-            {% include 'lib/component/icon/search.svg' %}
-            <span class="label">Search</span>
-        </button>
-    </div>
-</form>
-{% if query %}
-{% if object_list %}
-<p><span class="green">{{object_list|length}} result{{object_list|pluralize}}</span> for &ldquo;{{query}}&rdquo;</p>
-{% endif %}
-{% endif %}
 {% endblock %}
 
 {% block list-table-head %}
