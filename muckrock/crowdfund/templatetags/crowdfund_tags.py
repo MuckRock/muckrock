@@ -98,11 +98,11 @@ def generate_crowdfund_context(the_crowdfund, the_url_name, the_form, the_contex
             cache_get_or_set(
                 'cf:%s:crowdfund_widget_data' % the_crowdfund.pk,
                 lambda: (
-                    the_crowdfund.named_contributors(),
+                    list(the_crowdfund.named_contributors()),
                     the_crowdfund.contributors_count(),
                     the_crowdfund.anonymous_contributors_count(),
                     ),
-                600))
+                settings.DEFAULT_CACHE_TIMEOUT))
     contrib_sum = contributor_summary(
             named,
             contrib_count,

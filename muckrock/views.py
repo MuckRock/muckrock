@@ -8,8 +8,7 @@ from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.core.urlresolvers import reverse
 from django.db.models import Sum, FieldDoesNotExist
-from django.shortcuts import render_to_response, get_object_or_404, redirect
-from django.template import RequestContext
+from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.decorators import method_decorator
 from django.utils.html import escape
 from django.views.generic import View, ListView, FormView, TemplateView
@@ -212,7 +211,7 @@ class NewsletterSignupView(View):
         """Returns a signup form"""
         template = 'forms/newsletter.html'
         context = {'form': NewsletterSignupForm(initial={'list': settings.MAILCHIMP_LIST_DEFAULT})}
-        return render_to_response(template, context, context_instance=RequestContext(request))
+        return render(request, template, context)
 
     def redirect_url(self, request):
         """If a next url is provided, redirect there. Otherwise, redirect to the index."""
@@ -312,48 +311,73 @@ class NewsletterSignupView(View):
                 raise exception
         return response
 
-def homepage(request):
-    """Get all the details needed for the homepage"""
-    # pylint: disable=unused-variable
-    articles = cache_get_or_set(
-            'hp:articles',
-            lambda: Article.objects.get_published()
-                                   .prefetch_related(
-                                        'authors',
-                                        'authors__profile',
-                                        'projects',
-                                    )
-                                   [:5],
-            600)
-    featured_projects = cache_get_or_set(
-            'hp:featured_projects',
-            lambda: Project.objects.get_public().optimize().filter(featured=True)[:4],
-            600)
-    completed_requests = cache_get_or_set(
-            'hp:completed_requests',
-            lambda: (FOIARequest.objects.get_public().get_done()
-                   .order_by('-date_done', 'pk')
-                   .select_related_view()
-                   .get_public_file_count(limit=5))[:5],
-            600)
-    stats = cache_get_or_set(
-            'hp:stats',
-            lambda: {
-                'request_count': FOIARequest.objects
-                    .exclude(status='started').count(),
-                'completed_count': FOIARequest.objects.get_done().count(),
-                'page_count': FOIAFile.objects
-                    .aggregate(Sum('pages'))['pages__sum'],
-                'agency_count': Agency.objects.get_approved().count()
-            },
-            600)
-    return render_to_response('homepage.html', locals(),
-                              context_instance=RequestContext(request))
-
 
 class LandingView(TemplateView):
     """Renders the landing page template."""
     template_name = 'flatpages/landing.html'
+
+
+class Homepage(object):
+    """Control caching for the homepage"""
+    # pylint: disable=no-self-use
+
+    def get_cached_values(self):
+        """Return all the methods used to generate the cached values"""
+        return [
+                ('articles', self.articles),
+                ('featured_projects', self.featured_projects),
+                ('completed_requests', self.completed_requests),
+                ('stats', self.stats),
+                ]
+
+    def articles(self):
+        """Get the articles for the front page"""
+        return list(Article.objects
+                .get_published()
+                .prefetch_authors()
+                .prefetch_related('projects')
+                [:5])
+
+    def featured_projects(self):
+        """Get the featured projects for the front page"""
+        return list(Project.objects
+                .get_public()
+                .optimize()
+                .filter(featured=True)
+                [:4])
+
+    def completed_requests(self):
+        """Get recently completed requests"""
+        return list(FOIARequest.objects
+                .get_public()
+                .get_done()
+                .order_by('-date_done', 'pk')
+                .select_related_view()
+                .get_public_file_count(limit=6))
+
+    def stats(self):
+        """Get some stats to show on the front page"""
+        return {
+                'request_count':
+                    FOIARequest.objects.exclude(status='started').count(),
+                'completed_count':
+                    FOIARequest.objects.get_done().count(),
+                'page_count':
+                    FOIAFile.objects.aggregate(pages=Sum('pages'))['pages'],
+                'agency_count':
+                    Agency.objects.get_approved().count(),
+                }
+
+
+def homepage(request):
+    """Get all the details needed for the homepage"""
+    context = {}
+    for name, value in Homepage().get_cached_values():
+        context[name] = cache_get_or_set(
+                'hp:%s' % name,
+                value,
+                settings.DEFAULT_CACHE_TIMEOUT)
+    return render(request, 'homepage.html', context)
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -361,35 +385,13 @@ def reset_homepage_cache(request):
     """Reset the homepage cache"""
     # pylint: disable=unused-argument
 
-    cache.delete(make_template_fragment_key('news'))
-    cache.delete(make_template_fragment_key('projects'))
-    cache.delete(make_template_fragment_key('recent_articles'))
+    template_keys = ('news', 'projects', 'recent_articles')
+    for key in template_keys:
+        cache.delete(make_template_fragment_key(key))
 
-    cache.set('hp:articles',
-            Article.objects.get_published().prefetch_related(
-                'authors',
-                'authors__profile',
-                'projects')[:3],
-            600)
-    cache.set('hp:featured_projects',
-            Project.objects.get_public().filter(featured=True)[:4],
-            600)
-    cache.set('hp:completed_requests',
-            FOIARequest.objects.get_public().get_done()
-                   .order_by('-date_done', 'pk')
-                   .select_related_view()
-                   .get_public_file_count(limit=6),
-            600)
-    cache.set('hp:stats',
-            {
-                'request_count': FOIARequest.objects
-                    .exclude(status='started').count(),
-                'completed_count': FOIARequest.objects.get_done().count(),
-                'page_count': FOIAFile.objects
-                    .aggregate(Sum('pages'))['pages__sum'],
-                'agency_count': Agency.objects.get_approved().count()
-            },
-            600)
+    for name, value in Homepage().get_cached_values():
+        cache.set('hp:%s' % name, value(), settings.DEFAULT_CACHE_TIMEOUT)
+
     return redirect('index')
 
 
@@ -504,6 +506,7 @@ def jurisdiction(request, jurisdiction=None, slug=None, idx=None, view=None):
     else:
         return redirect(jmodel.get_url(view))
 
+
 def handler500(request):
     """
     500 error handler which includes request in the context.
@@ -511,9 +514,8 @@ def handler500(request):
     Templates: `500.html`
     Context: None
     """
-    response = render_to_response('500.html', {}, context_instance=RequestContext(request))
-    response.status_code = 500
-    return response
+    return render(request, '500.html', status=500)
+
 
 # http://stackoverflow.com/a/8429311
 def class_view_decorator(function_decorator):

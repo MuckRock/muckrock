@@ -128,6 +128,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'muckrock.sidebar.context_processors.sidebar_info',
     'muckrock.context_processors.google_analytics',
     'muckrock.context_processors.domain',
+    'muckrock.context_processors.cache_timeout',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -417,7 +418,7 @@ PUBLICATION_NAME = 'MuckRock'
 # Register database schemes in URLs.
 urlparse.uses_netloc.append('postgres')
 
-url = urlparse.urlparse(os.environ.get('DATABASE_URL', 'postgres://vagrant@localhost/muckrock'))
+url = urlparse.urlparse(os.environ.get('DATABASE_URL', 'postgres://vagrant@localhost/muckrock2'))
 
 # Update with environment configuration.
 DATABASES = {
@@ -437,6 +438,7 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     }
 }
+DEFAULT_CACHE_TIMEOUT = 15 * 60
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'muckrock.pagination.StandardPagination',

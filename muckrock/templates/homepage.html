@@ -8,7 +8,7 @@
 {% load cache %}
 
 {% block content %}
-{# cache 600 homepage #}
+{# cache cache_timeout homepage #}
 <div class="homepage">
     <div class="banner-wrapper mb0" style="background-image: url('{% static 'img/fingerprinting.jpg' %}');">
         <div class="foia banner">
@@ -47,7 +47,7 @@
                     <a href="{% url 'foia-list' %}?status=done" title="See all the completed requests in our archive">See all &rarr;</a>
                 </header>
                 {% for foia in completed_requests %}
-                {% include 'lib/foia.html' with hide_actions=True %}
+                    {% include 'lib/foia.html' with hide_actions=True %}
                 {% endfor %}
                 <div class="spacer"></div>
             </div>
@@ -55,7 +55,7 @@
         </div>
     </div>
     {% newsletter %}
-    {% cache 600 news %}
+    {% cache cache_timeout news %}
     <div class="articles grid__row">
         {% for article in articles %}
         {% if forloop.first %}
@@ -71,7 +71,7 @@
     </div>
     {% endcache %}
     {% if featured_projects %}
-    {% cache 600 projects %}
+    {% cache cache_timeout projects %}
     <div class="projects">
         <h2>Projects <small><a href="{% url 'project' %}">See all</a></small></h2>
         <ul class="nostyle">

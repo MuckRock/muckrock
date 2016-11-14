@@ -344,7 +344,7 @@ class ExampleAppeal(models.Model):
     the context when the language is most effective. Each ExampleAppeal instance
     should connect to an Exemption."""
     exemption = models.ForeignKey(Exemption, related_name='example_appeals')
-    title = models.TextField(blank=True)
+    title = models.TextField(default='Untitled Example')
     language = models.TextField()
     context = models.TextField(blank=True,
         help_text='Under what circumstances is this appeal language most effective?')
