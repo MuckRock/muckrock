@@ -418,7 +418,7 @@ PUBLICATION_NAME = 'MuckRock'
 # Register database schemes in URLs.
 urlparse.uses_netloc.append('postgres')
 
-url = urlparse.urlparse(os.environ.get('DATABASE_URL', 'postgres://vagrant@localhost/muckrock2'))
+url = urlparse.urlparse(os.environ.get('DATABASE_URL', 'postgres://vagrant@localhost/muckrock'))
 
 # Update with environment configuration.
 DATABASES = {
