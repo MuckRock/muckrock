@@ -129,8 +129,7 @@ class NewsYear(PaginationMixin, YearArchiveView):
     allow_empty = True
     date_field = 'pub_date'
     make_object_list = True
-    queryset = Article.objects.get_published().prefetch_related(
-            Prefetch('authors', queryset=User.objects.select_related('profile')))
+    queryset = Article.objects.get_published().prefetch_authors()
     template_name = 'news/archives/year_archive.html'
 
 
@@ -139,8 +138,7 @@ class NewsMonth(PaginationMixin, MonthArchiveView):
     allow_empty = True
     date_field = 'pub_date'
     make_object_list = True
-    queryset = Article.objects.get_published().prefetch_related(
-            Prefetch('authors', queryset=User.objects.select_related('profile')))
+    queryset = Article.objects.get_published().prefetch_authors()
     template_name = 'news/archives/month_archive.html'
 
 
@@ -149,8 +147,7 @@ class NewsDay(PaginationMixin, DayArchiveView):
     allow_empty = True
     date_field = 'pub_date'
     make_object_list = True
-    queryset = Article.objects.get_published().prefetch_related(
-            Prefetch('authors', queryset=User.objects.select_related('profile')))
+    queryset = Article.objects.get_published().prefetch_authors()
     template_name = 'news/archives/day_archive.html'
 
 
