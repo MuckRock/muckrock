@@ -34,6 +34,11 @@
 }
 
 .field {
+    transition: opacity .1s linear;
+    &.disabled {
+        color: initial;
+        opacity: .5;
+    }
     header {
         margin-bottom: 0;
         @include display(flex);
@@ -58,7 +63,7 @@
         margin-right: $vr/2;
         font-weight: $bold;
     }
-    input {
+    input, select, textarea {
         display: block;
         width: 100%;
     }
@@ -75,6 +80,7 @@
     }
     .help-text {
         margin-top: $vr/4;
+        clear: left;
     }
     &.image {
         .preview {
@@ -97,6 +103,38 @@
     }
 }
 
+.oneline-form .field {
+    @include display(flex);
+    @include flex-wrap(wrap);
+    margin: $vr/2 0;
+    border: 1px solid $color-blue;
+    input {
+        @include flex(3 1 auto);
+        width: auto;
+        border: none;
+        line-height: $lh;
+        border-radius: 0;
+        color: $color-black;
+        appearance: none;
+        -webkit-appearance: none;
+    }
+    .button {
+        @include flex(1 1 auto);
+    }
+    .icon {
+        @include svg-color($color-white);
+        margin-right: $vr/4;
+        vertical-align: middle;
+    }
+}
+
+.CheckboxInput.field {
+    overflow: hidden;
+    header {
+        float: left;
+    }
+}
+
 .hidden-fields {
     display: none;
 }
@@ -104,7 +142,7 @@
 .help-text {
     font-size: $size-2;
     line-height: $lh;
-    color: $color-grey;
+    opacity: .75;
 }
 
 textarea, #{$all-text-inputs} {
@@ -139,4 +177,21 @@ fieldset {
     & > fieldset, & > fieldset + fieldset {
         margin: 0;
     }
+}
+
+.input-range input, .input-range label {
+  width: 50%;
+  margin-right: 0;
+  float: left;
+  &:first-child {
+    @include border-right-radius(0);
+    border-right-color: $color-grey-6;
+  }
+  &:last-child {
+    @include border-left-radius(0);
+    border-left-color: $color-grey-6;
+  }
+}
+.input-range, .input-range .labels {
+  overflow: hidden;
 }

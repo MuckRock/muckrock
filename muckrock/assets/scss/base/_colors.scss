@@ -17,7 +17,7 @@ body {
 
 a {
     color: $color-blue;
-    &:hover { color: $color-blue-dark; }
+    &:hover { color: $color-black; }
 }
 
 code {
@@ -37,3 +37,13 @@ dfn, dt {
 .warning { color: $color-yellow; }
 .failure { color: $color-red; }
 .disabled { color: $color-grey-7; }
+
+.black {
+  color: $color-black;
+}
+.grey {
+  color: $color-grey;
+}
+.white {
+  color: $color-white;
+}

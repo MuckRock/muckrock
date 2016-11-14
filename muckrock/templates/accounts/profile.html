@@ -28,7 +28,11 @@
 
 {% block metadata %}
 <section class="identity">
-    {% if profile.avatar %}<img src="{% thumbnail profile.avatar 600x600 %}" class="avatar">{% endif %}
+    {% if profile.avatar %}
+    <img src="{% thumbnail profile.avatar 300x300 %}" class="avatar">
+    {% else %}
+    <img src="{% static 'img/defaultavatar.png' %}" class="avatar">
+    {% endif %}
     <h1 class="fullname">{{user_obj.get_full_name}}</h1>
     <p class="username">{{user_obj.username}}</p>
 </section>

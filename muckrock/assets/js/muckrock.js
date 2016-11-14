@@ -15,6 +15,7 @@ import 'jquery-ui/datepicker';
 import '../vendor/formset';
 import '../vendor/loupe';
 import '../vendor/quicksearch';
+import '../vendor/stacktable';
 
 import './account';
 import './autocomplete';
@@ -32,19 +33,13 @@ import './nav';
 import './tabs';
 import './task';
 
-function selectAll() {
-    var source = $(this);
-    var name = source.data('name');
-    var checkboxes = $('input[type="checkbox"][name="' + name + '"]');
-    $(checkboxes).each(function(){
-        this.checked = source.prop('checked');
-        $(this).change();
-    });
-}
-
 /* Bind plugins and event handlers to frontend elements. */
 
 $('document').ready(function(){
+
+    if ('ontouchstart' in window) {
+      $('body').addClass('touch');
+    }
 
     // Stripe Checkout
     $('form.stripe-checkout').checkout();
@@ -67,9 +62,9 @@ $('document').ready(function(){
     $('.datepicker').datepicker({
         changeMonth: true,
         changeYear: true,
-        minDate: new Date(1776, 6, 4),
+        minDate: new Date(2010, 0, 1),
         maxDate: '+1y',
-        yearRange: '1776:+1'
+        yearRange: '2010:+1'
     });
 
     // Loupe
@@ -77,9 +72,6 @@ $('document').ready(function(){
         height: 200,
         width: 200
     });
-
-    // Select-all checkbox behavior
-    $('.select-all').click(selectAll);
 
     // Quicksearch
     $('#comms-filter').quicksearch('#comms .communications-list .communication');

@@ -8,17 +8,29 @@ from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponseForbidden
 from django.shortcuts import redirect, get_object_or_404
-from django.views.generic.list import ListView
-from django.views.generic.dates import YearArchiveView, DateDetailView
+from django.views.generic import TemplateView
+from django.views.generic.dates import (
+    YearArchiveView,
+    MonthArchiveView,
+    DayArchiveView,
+    DateDetailView
+)
 
 from rest_framework import viewsets
 from rest_framework.permissions import DjangoModelPermissions
 import django_filters
 
+from muckrock.news.filters import (
+    ArticleDateRangeFilterSet,
+    ArticleAuthorFilterSet
+)
 from muckrock.news.models import Article
 from muckrock.news.serializers import ArticleSerializer
 from muckrock.project.forms import ProjectManagerForm
+from muckrock.project.models import Project
 from muckrock.tags.models import Tag, parse_tags
+from muckrock.utils import cache_get_or_set
+from muckrock.views import PaginationMixin, MRSearchFilterListView
 
 # pylint: disable=too-many-ancestors
 
@@ -91,23 +103,81 @@ class NewsDetail(DateDetailView):
         return redirect(article)
 
 
-class NewsYear(YearArchiveView):
+class NewsExploreView(TemplateView):
+    """Shows the most interesting and worthwhile articles."""
+    template_name = 'news/explore.html'
+
+    def get_context_data(self, **kwargs):
+        """Adds interesting articles to the explore page."""
+        context = super(NewsExploreView, self).get_context_data(**kwargs)
+        recent_articles = cache_get_or_set('hp:articles',
+            lambda: (Article.objects.get_published().prefetch_related(
+                'authors',
+                'authors__profile',
+                'projects',
+            )[:5]),
+            600)
+        context['featured_projects'] = (Project.objects.get_visible(self.request.user)
+            .filter(featured=True).optimize())
+        context['recent_articles'] = recent_articles
+        context['top_tags'] = Article.tags.most_common()[:15]
+        return context
+
+
+class NewsYear(PaginationMixin, YearArchiveView):
     """View for year archive"""
     allow_empty = True
     date_field = 'pub_date'
     make_object_list = True
-    queryset = Article.objects.get_published()
-
-
-class NewsListView(ListView):
-    """List of news articles"""
-    template_name = 'news/list.html'
-    paginate_by = 10
     queryset = Article.objects.get_published().prefetch_authors()
+    template_name = 'news/archives/year_archive.html'
+
+
+class NewsMonth(PaginationMixin, MonthArchiveView):
+    """View for month archive"""
+    allow_empty = True
+    date_field = 'pub_date'
+    make_object_list = True
+    queryset = Article.objects.get_published().prefetch_authors()
+    template_name = 'news/archives/month_archive.html'
+
+
+class NewsDay(PaginationMixin, DayArchiveView):
+    """View for day archive"""
+    allow_empty = True
+    date_field = 'pub_date'
+    make_object_list = True
+    queryset = Article.objects.get_published().prefetch_authors()
+    template_name = 'news/archives/day_archive.html'
+
+
+class NewsListView(MRSearchFilterListView):
+    """List of news articles"""
+    model = Article
+    title = 'News'
+    filter_class = ArticleDateRangeFilterSet
+    template_name = 'news/list.html'
+    default_sort = 'pub_date'
+    default_order = 'desc'
+    queryset = Article.objects.get_published().prefetch_authors()
+    paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        """Add a list of all the years we've published to the context."""
+        context = super(NewsListView, self).get_context_data(**kwargs)
+        articles_by_date = self.queryset.order_by('pub_date')
+        years = range(
+            articles_by_date.first().pub_date.year,
+            articles_by_date.last().pub_date.year + 1, # the range function stops at n - 1
+        )
+        years.reverse()
+        context['years'] = years
+        return context
 
 
 class AuthorArchiveView(NewsListView):
     """List of news articles by author"""
+    filter_class = ArticleAuthorFilterSet
     template_name = 'news/author.html'
 
     def get_author(self):

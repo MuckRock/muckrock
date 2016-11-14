@@ -1,10 +1,12 @@
+{% load tags %}
+
 {% if field.errors %}
 <div class="error field">
 {% else %}
-<div class="field {{field_class}}">
+<div class="{{field|fieldtype}} field {{field_class}}">
 {% endif %}
     <header>
-        <label for="{{field.id_for_label}}">{{field.label}}</label>
+        <label for="{{field.id_for_label}}">{% if label %}{{label}}{% else %}{{field.label}}{% endif %}</label>
         {% if field.errors %}
             {{field.errors}}
         {% elif field.field.required %}

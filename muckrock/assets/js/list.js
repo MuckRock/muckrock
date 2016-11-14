@@ -5,64 +5,88 @@
 ** It examines the query arguments to figure out where and how to place the arrow.
 */
 
-function identifySortable() {
-    $('.list-table-head th').each(function(){
-        var sort = $(this).data('sort');
-        if (typeof(sort) != "undefined") {
-            $(this).addClass('sortable');
-        }
-    });
-}
-
 function tableHeadSortIndicator() {
-    var sort = $('thead').data('activeSort');
-    var order = $('thead').data('activeOrder');
-    if (typeof(sort) != "undefined") {
-        // find the right title and add the right arrow to it
-        var arrow = (order == 'desc') ? '&#x25B2;' : '&#x25BC;';
-        var inverseOrder = (order == 'desc') ? 'asc' : 'desc';
-        $('th').each(function(){
-            if ($(this).data('sort') == sort) {
-                $(this).prepend('<span class="arrow">' + arrow + '</span>')
-                       .data('order', inverseOrder)
-                       .addClass('sorted_by');
-            }
-        });
-    }
+  const sortBy = $('.sortable').data('sortBy');
+  const orderBy = $('.sortable').data('orderBy');
+  if (typeof(sortBy) != "undefined") {
+    // find the right title and add the right arrow to it
+    const inverseOrder = (orderBy == 'desc') ? 'asc' : 'desc';
+    $('.sortable th').filter((index, element) => {
+      return $(element).data('sort') == sortBy;
+    }).data('order', inverseOrder).addClass('sorted-by').addClass(orderBy);
+  }
 }
 
 function sortListByHeader() {
-    var sort = $(this).data('sort');
-    var order = $(this).data('order');
-    if (typeof(sort) != "undefined") {
-        if (!order) {
-            order = 'asc';
-        }
-        var existing = window.location.search;
-        // check for existing sort and remove it if it exists
-        // there will always be "?" or "&" before "sort"
-        var existingSort = existing.indexOf('sort');
-        if (existingSort > 0) {
-            existing = existing.substring(0, existingSort - 1);
-        }
-        // add new sort and order
-        // if adding to a filter use "&", otherwise use "?"
-        var newSearch = existing.length > 0 ? existing + "&" : existing + "?";
-        newSearch += "sort=" + sort;
-        newSearch += "&order=" + order;
-        window.location = window.location.origin + window.location.pathname + newSearch;
+  const sort = $(this).data('sort');
+  let order = $(this).data('order');
+  if (typeof(sort) != "undefined") {
+    order = typeof(order) == "undefined" ? 'asc' : order;
+    let existing = window.location.search;
+    // check for existing sort and remove it if it exists
+    // there will always be "?" or "&" before "sort"
+    const existingSort = existing.indexOf('sort');
+    if (existingSort > 0) {
+      existing = existing.substring(0, existingSort - 1);
     }
+    // add new sort and order
+    // if adding to a filter use "&", otherwise use "?"
+    let newSearch = existing.length > 0 ? existing + "&" : existing + "?";
+    newSearch += "sort=" + sort;
+    newSearch += "&order=" + order;
+    window.location = window.location.origin + window.location.pathname + newSearch;
+  }
 }
 
-identifySortable();
-tableHeadSortIndicator();
-$('.list-table-head th').click(sortListByHeader);
-
-$('#list-filters-toggle').change(function(){
-    var label = $('#list-filters-toggle-label')[0];
-    if (this.checked) {
-        label.innerText = 'Hide';
+const toolbar = $('.toolbar :button, .toolbar :input');
+function disableToolbar() {
+    toolbar.attr('disabled', true).closest('.field').addClass('disabled');
+}
+function enableToolbar() {
+    toolbar.attr('disabled', false).closest('.field').removeClass('disabled');
+}
+$('th input:checkbox').change(function(){
+    var table = $(this).closest('table');
+    var headerCheckbox = $(this);
+    var bodyCheckboxes = $(table).find('td input:checkbox');
+    var checked = headerCheckbox.checked;
+    bodyCheckboxes.each(function(){
+        this.checked = checked;
+    });
+    if (checked) {
+        enableToolbar();
     } else {
-        label.innerText = 'Show';
+        disableToolbar();
     }
+});
+$('td input:checkbox').change(function(){
+    var table = $(this).closest('table');
+    var headerCheckbox = $(table).find('th input:checkbox');
+    var bodyCheckboxes = $(table).find('td input:checkbox');
+    var checkedBoxes = bodyCheckboxes.filter(':checked');
+    if (checkedBoxes.length == bodyCheckboxes.length) {
+        headerCheckbox[0].indeterminate = false;
+        headerCheckbox[0].checked = true;
+    } else {
+        headerCheckbox[0].indeterminate = true;
+    }
+    if (checkedBoxes.length == 0) {
+        headerCheckbox[0].indeterminate = false;
+        headerCheckbox[0].checked = false;
+        disableToolbar();
+    } else {
+        enableToolbar();
+    }
+});
+
+// Prevent the active element in a list section from trigger a load on touch
+$('.list__sections .current-tab a').on('click', function(e){
+    e.preventDefault();
+});
+
+$(document).ready(() => {
+  tableHeadSortIndicator();
+  disableToolbar();
+  $('.sortable th').click(sortListByHeader);
+  $('table.cardtable').cardtable();
 });

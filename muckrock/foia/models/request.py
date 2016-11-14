@@ -107,13 +107,14 @@ class FOIARequestQuerySet(models.QuerySet):
     def select_related_view(self):
         """Select related models for viewing"""
         return self.select_related(
-                'agency',
-                'agency__jurisdiction',
-                'jurisdiction',
-                'jurisdiction__parent',
-                'jurisdiction__parent__parent',
-                'user',
-                )
+            'agency',
+            'agency__jurisdiction',
+            'jurisdiction',
+            'jurisdiction__parent',
+            'jurisdiction__parent__parent',
+            'user',
+            'crowdfund',
+        )
 
     def get_public_file_count(self, limit=None):
         """Annotate the public file count"""
@@ -134,7 +135,7 @@ class FOIARequestQuerySet(models.QuerySet):
         return foias
 
 
-STATUS = (
+STATUS = [
     ('started', 'Draft'),
     ('submitted', 'Processing'),
     ('ack', 'Awaiting Acknowledgement'),
@@ -147,7 +148,7 @@ STATUS = (
     ('done', 'Completed'),
     ('partial', 'Partially Completed'),
     ('abandoned', 'Withdrawn'),
-)
+]
 
 END_STATUS = ['rejected', 'no_docs', 'done', 'partial', 'abandoned']
 

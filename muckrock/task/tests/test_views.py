@@ -3,7 +3,6 @@ Tests for Tasks views
 """
 from datetime import datetime
 
-from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase, Client, RequestFactory
 
@@ -14,9 +13,14 @@ import nose
 from muckrock import agency, factories, task
 from muckrock.foia.models import FOIARequest, FOIANote
 from muckrock.foia.views import save_foia_comm
-from muckrock.task.factories import FlaggedTaskFactory, StaleAgencyTaskFactory
-from muckrock.test_utils import mock_middleware
-from muckrock.views import MRFilterableListView
+from muckrock.task.factories import (
+    FlaggedTaskFactory,
+    StaleAgencyTaskFactory,
+    ResponseTaskFactory,
+)
+from muckrock.task.views import ResponseTaskList
+from muckrock.test_utils import mock_middleware, http_get_response, http_post_response
+from muckrock.views import MRFilterListView
 
 eq_ = nose.tools.eq_
 ok_ = nose.tools.ok_
@@ -28,32 +32,24 @@ mock_send = mock.Mock()
 @mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class TaskListViewTests(TestCase):
     """Test that the task list view resolves and renders correctly."""
-
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
-                'test_foiacommunications.json', 'test_task.json']
-
     def setUp(self):
-        self.url = reverse('task-list')
-        self.client = Client()
-        self.task = task.models.Task.objects.create()
-
-    def test_url(self):
-        eq_(self.url, '/task/',
-            'The task list should be the base task URL')
+        self.url = reverse('response-task-list')
+        self.view = ResponseTaskList.as_view()
+        self.user = factories.UserFactory(is_staff=True)
+        self.task = ResponseTaskFactory()
 
     def test_login_required(self):
-        response = self.client.get(self.url, follow=True)
-        self.assertRedirects(response, '/accounts/login/?next=%s' % self.url)
+        response = http_get_response(self.url, self.view, follow=True)
+        eq_(response.status_code, 302)
+        eq_(response.url, '/accounts/login/?next=%s' % self.url)
 
     def test_not_staff_not_ok(self):
-        self.client.login(username='bob', password='abc')
-        response = self.client.get(self.url, follow=True)
-        self.assertRedirects(response, '/accounts/login/?next=%s' % self.url)
+        response = http_get_response(self.url, self.view, factories.UserFactory(), follow=True)
+        eq_(response.status_code, 302)
+        eq_(response.url, '/accounts/login/?next=%s' % self.url)
 
     def test_staff_ok(self):
-        self.client.login(username='adam', password='abc')
-        response = self.client.get(self.url)
+        response = http_get_response(self.url, self.view, self.user, follow=True)
         eq_(response.status_code, 200,
             ('Should respond to staff requests for task list page with 200.'
             ' Actually responds with %d' % response.status_code))
@@ -61,46 +57,40 @@ class TaskListViewTests(TestCase):
     def test_class_inheritance(self):
         # pylint: disable=no-self-use
         actual = task.views.TaskList.__bases__
-        expected = MRFilterableListView().__class__
+        expected = MRFilterListView().__class__
         ok_(expected in actual,
-            'Task list should inherit from MRFilterableListView class')
+            'Task list should inherit from MRFilterListView class')
 
     def test_render_task_list(self):
         """The list should have rendered task widgets in its object_list context variable"""
-        self.client.login(username='adam', password='abc')
-        response = self.client.get(self.url)
-        obj_list = response.context['object_list']
-        ok_(obj_list,
-            'Object list should not be empty.')
+        response = http_get_response(self.url, self.view, self.user, follow=True)
+        obj_list = response.context_data['object_list']
+        ok_(obj_list, 'Object list should not be empty.')
 
 @mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class TaskListViewPOSTTests(TestCase):
     """Tests POST requests to the Task list view"""
     # we have to get the task again if we want to see the updated value
 
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
-                'test_foiacommunications.json', 'test_task.json']
-
     def setUp(self):
-        self.url = reverse('task-list')
-        self.task = task.models.Task.objects.get(pk=1)
-        self.client = Client()
-        self.client.login(username='adam', password='abc')
+        self.url = reverse('response-task-list')
+        self.view = ResponseTaskList.as_view()
+        self.user = factories.UserFactory(is_staff=True)
+        self.task = ResponseTaskFactory()
 
     def test_post_resolve_task(self):
-        self.client.post(self.url, {'resolve': True, 'task': self.task.pk})
-        updated_task = task.models.Task.objects.get(pk=self.task.pk)
-        user = User.objects.get(username='adam')
-        eq_(updated_task.resolved, True,
+        data = {'resolve': 'truthy', 'task': self.task.pk}
+        http_post_response(self.url, self.view, data, self.user)
+        self.task.refresh_from_db()
+        eq_(self.task.resolved, True,
             'Tasks should be resolved by posting the task ID with a "resolve" request.')
-        eq_(updated_task.resolved_by, user,
+        eq_(self.task.resolved_by, self.user,
             'Task should record the logged in user who resolved it.')
 
     def test_post_do_not_resolve_task(self):
         self.client.post(self.url, {'task': self.task.pk})
-        updated_task = task.models.Task.objects.get(pk=self.task.pk)
-        eq_(updated_task.resolved, False,
+        self.task.refresh_from_db()
+        eq_(self.task.resolved, False,
             'Tasks should not be resolved when no "resolve" data is POSTed.')
 
 @mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
@@ -108,25 +98,22 @@ class TaskListViewBatchedPOSTTests(TestCase):
     """Tests batched POST requests for all tasks"""
     # we have to get the task again if we want to see the updated value
 
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
-                'test_foiacommunications.json', 'test_task.json']
-
     def setUp(self):
-        self.url = reverse('task-list')
-        task1 = task.models.Task.objects.get(pk=1)
-        task2 = task.models.Task.objects.get(pk=2)
-        task3 = task.models.Task.objects.get(pk=3)
+        self.url = reverse('response-task-list')
+        self.view = ResponseTaskList.as_view()
+        self.user = factories.UserFactory(is_staff=True)
+        task1 = ResponseTaskFactory()
+        task2 = ResponseTaskFactory()
+        task3 = ResponseTaskFactory()
         self.tasks = [task1, task2, task3]
-        self.client = Client()
-        self.client.login(username='adam', password='abc')
 
     def test_batch_resolve_tasks(self):
-        self.client.post(self.url, {'resolve': 'true', 'tasks': [1, 2, 3]})
-        updated_tasks = [task.models.Task.objects.get(pk=t.pk) for t in self.tasks]
-        for updated_task in updated_tasks:
-            eq_(updated_task.resolved, True,
-                'Task %d should be resolved when doing a batched resolve' % updated_task.pk)
+        data = {'resolve': 'truthy', 'tasks': [_task.id for _task in self.tasks]}
+        http_post_response(self.url, self.view, data, self.user)
+        for _task in self.tasks:
+            _task.refresh_from_db()
+            eq_(_task.resolved, True,
+                'Task %d should be resolved when doing a batched resolve' % _task.pk)
 
 @mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class OrphanTaskViewTests(TestCase):

@@ -1,0 +1,39 @@
+{% extends 'base_explore.html' %}
+
+{% block classes %}project{% endblock %}
+
+{% block explore_header_description %}
+<h1>Projects</h1>
+<p>Projects collect requests and articles to tell larger stories and give your audience an easy way to support your work and follow your progress.</p>
+{% endblock %}
+
+{% block explore_header_links %}
+<ul class="nostyle">
+    <li class="mb1"><a class="blue button" href="{% url 'project-create' %}">Create Project</a></li>
+    <li><a class="action" href="{% url 'project-list' %}">Browse all projects &rarr;</a></li>
+    <li><a class="action" href="https://www.muckrock.com/news/archives/2015/sep/03/muckrock-projects-organize-crowdfund-journalism/">Learn more &rarr;</a></li>
+</ul>
+{% endblock %}
+
+{% block explore_header %}
+{{block.super}}
+<div class="grid__column full">
+    <form method="GET" class="oneline-form" action="{% url 'project-list' %}">
+        <div class="field">
+            <input type="search" name="q" placeholder="Search projects">
+        	<button class="basic blue button" type="submit">
+        	    {% include 'lib/component/icon/search.svg' %}
+        	    <span class="label">Search</span>
+        	</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block explore_main %}
+<div class="explore__section">
+    {% for project in featured_projects %}
+    {% include 'lib/pattern/project.html' %}
+    {% endfor %}
+</div>
+{% endblock %}

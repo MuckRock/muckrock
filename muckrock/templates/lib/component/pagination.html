@@ -1,7 +1,7 @@
 {% load tags %}
 
 {% if page_obj %}
-<nav class="pagination">
+<nav class="pagination small">
     <form method="get" class="pagination__control">
         <p class="pagination__control__item">Showing {{page_obj.start_index}} to {{page_obj.end_index}} of {{page_obj.paginator.count}}</p>
         <p class="pagination__control__item">
@@ -32,20 +32,24 @@
         <noscript><button class="button" type="submit">Update</button></noscript>
     </form>
     <div class="pagination__links">
-    {% if page_obj.has_previous %}
-        <a href="{% page_link request 1 %}">First Page</a>
-        <a href="{% page_link request page_obj.previous_page_number %}">Previous Page</a>
-    {% else %}
-        <span>First Page</span>
-        <span>Previous Page</span>
-    {% endif %}
-    {% if page_obj.has_next %}
-        <a href="{% page_link request page_obj.next_page_number %}">Next Page</a>
-        <a href="{% page_link request page_obj.paginator.num_pages %}">Last Page</a>
-    {% else %}
-        <span>Next Page</span>
-        <span>Last Page</span>
-    {% endif %}
+        <span>
+        {% if page_obj.has_previous %}
+            <a class="pagination__link" href="{% page_link request 1 %}">First Page</a>
+            <a class="pagination__link" href="{% page_link request page_obj.previous_page_number %}">Previous Page</a>
+        {% else %}
+            <span class="pagination__link">First Page</span>
+            <span class="pagination__link">Previous Page</span>
+        {% endif %}
+        </span>
+        <span>
+        {% if page_obj.has_next %}
+            <a class="pagination__link" href="{% page_link request page_obj.next_page_number %}">Next Page</a>
+            <a class="pagination__link" href="{% page_link request page_obj.paginator.num_pages %}">Last Page</a>
+        {% else %}
+            <span class="pagination__link">Next Page</span>
+            <span class="pagination__link">Last Page</span>
+        {% endif %}
+        </span>
     </div>
 </nav>
 {% endif %}

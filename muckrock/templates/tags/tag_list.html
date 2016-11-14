@@ -32,16 +32,16 @@
             {% include 'lib/pattern/project.html' %}
         {% endfor %}
         {% endif %}
-        {% if tagged_requests %}
-        <h2>{{ tagged_requests|length }} Request{{ tagged_requests|length|pluralize }}</h2>
-        {% for foia in tagged_requests %}
-            {% include 'lib/foia.html' %}
-        {% endfor %}
-        {% endif %}
         {% if tagged_articles %}
         <h2>{{ tagged_articles|length }} Article{{ tagged_articles|length|pluralize }}</h2>
         {% for article in tagged_articles %}
             {% include 'lib/pattern/article.html' %}
+        {% endfor %}
+        {% endif %}
+        {% if tagged_requests %}
+        <h2>{{ tagged_requests|length }} Request{{ tagged_requests|length|pluralize }}</h2>
+        {% for foia in tagged_requests %}
+            {% include 'lib/foia.html' %}
         {% endfor %}
         {% endif %}
         {% if tagged_questions %}
