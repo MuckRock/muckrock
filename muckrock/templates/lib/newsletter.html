@@ -3,12 +3,15 @@
         <p class="label"><strong>{{label}}</strong></p>
         <p class="cta">{{cta}}</p>
     </div>
-    <form class="signup-form" method="post" action="{% url 'newsletter' %}?next={{request.get_full_path}}" onsubmit="ga('send', 'event', 'Newsletter', 'Subscription', window.location.pathname)">
+    <form class="oneline-form" method="post" action="{% url 'newsletter' %}?next={{request.get_full_path}}" onsubmit="ga('send', 'event', 'Newsletter', 'Subscription', window.location.pathname)">
         {% csrf_token %}
         {{newsletter_form.list}}
-        <div class="email-field">
+        <div class="field">
             {{newsletter_form.email}}
-            <button class="basic blue button" type="submit">Subscribe</button>
+            <button class="basic blue button" type="submit">
+                {% include 'lib/component/icon/email.svg' %}
+        	    <span class="label">Subscribe</span>
+            </button>
         </div>
         {% if not is_default %}
         <label for="{{newsletter_form.default.label_id}}">

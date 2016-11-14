@@ -1,2 +1,5 @@
 {% extends 'news/archives/base_archive.html' %}
-{% block date %}{{ month|date:"F Y" }}{% endblock date %}
+{% block title %}{{month|date:"F Y"}} &bull; {{block.super}}{% endblock %}
+{% block date %}{{month|date:"F"}} <a href="{% url 'news-archive-year' year=month.year %}">{{month|date:"Y"}}</a>{% endblock date %}
+
+{% block list-sections %}{% endblock %}

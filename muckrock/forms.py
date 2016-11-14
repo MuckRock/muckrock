@@ -71,6 +71,18 @@ class NewsletterSignupForm(forms.Form):
     default = forms.BooleanField(initial=True, required=False)
 
 
+class SearchForm(forms.Form):
+    """A form for searching a single model."""
+    # pylint: disable=invalid-name
+    q = forms.CharField(
+        required=False,
+        label='Search',
+        widget=forms.TextInput(attrs={
+            'type': 'search',
+        })
+    )
+
+
 class PasswordResetForm(auth_forms.PasswordResetForm):
     """Password reset form - subclass to bcc emails to diagnostics"""
     # pylint: disable=too-many-arguments

@@ -21,8 +21,15 @@ from muckrock.foia.models import FOIARequest
 
 class TestMailgunViews(TestCase):
     """Tests for Mailgun views"""
-    fixtures = ['holidays.json', 'agency_types.json', 'test_agencies.json', 'test_users.json',
-                'test_profiles.json', 'jurisdictions.json', 'test_foiarequests.json']
+    fixtures = [
+        'holidays.json',
+        'jurisdictions.json',
+        'agency_types.json',
+        'test_agencies.json',
+        'test_users.json',
+        'test_profiles.json',
+        'test_foiarequests.json'
+    ]
 
     def setUp(self):
         """Set up tests"""

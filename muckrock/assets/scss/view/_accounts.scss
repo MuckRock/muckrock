@@ -125,6 +125,11 @@
     }
 }
 
+.login.form, .signup.form {
+    max-width: 40em;
+    margin: 0 auto;
+}
+
 .account.settings {
     $breakpoint: 768px;
     @include display(flex);

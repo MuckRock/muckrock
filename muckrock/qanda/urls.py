@@ -19,7 +19,7 @@ urlpatterns = patterns(
     ),
     url(
         r'^unanswered/$',
-        views.UnansweredQuestionList.as_view(),
+        RedirectView.as_view(url='/questions/?unanswered=on'),
         name='question-unanswered'
     ),
     url(

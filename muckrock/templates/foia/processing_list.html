@@ -1,0 +1,16 @@
+{% extends 'foia/list.html' %}
+{% load tags %}
+
+{% block list-table-head %}
+<th data-sort="title">Title</th>
+<th width="20%" data-sort="date_submitted">Created</th>
+<th width="20%" data-sort="date_processing">Processing</th>
+{% endblock list-table-head %}
+
+{% block list-table-row %}
+{% with object as foia %}
+<td><a class="bold" href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></td>
+<td>{{ foia.communications.all.0.date|date:"m/d/Y" }}</td>
+<td>{{ foia.processing_length }} days</td>
+{% endwith %}
+{% endblock list-table-row %}

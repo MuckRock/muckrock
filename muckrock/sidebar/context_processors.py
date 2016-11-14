@@ -27,7 +27,7 @@ def get_recent_articles():
 
 def get_actionable_requests(user):
     """Gets requests that require action or attention"""
-    requests = FOIARequest.objects.filter(user=user).select_related('jurisdiction')
+    requests = FOIARequest.objects.filter(user=user).select_related_view()
     updates = requests.filter(updated=True)
     started = requests.filter(status='started')
     payment = requests.filter(status='payment')
@@ -98,7 +98,7 @@ def sidebar_info(request):
     """Displays info about a user's requsts in the sidebar"""
     # content for all users
     sidebar_info_dict = {
-        'recent_articles': get_recent_articles(),
+        'dropdown_recent_articles': get_recent_articles(),
         'broadcast': sidebar_broadcast(request.user),
         'login_form': AuthenticationForm()
     }
@@ -108,7 +108,7 @@ def sidebar_info(request):
             'unread_notifications': get_unread_notifications(request.user),
             'actionable_requests': get_actionable_requests(request.user),
             'organization': get_organization(request.user),
-            'my_projects': Project.objects.get_for_contributor(request.user).exists(),
+            'my_projects': Project.objects.get_for_contributor(request.user).optimize()[:4],
             'payment_failed': request.user.profile.payment_failed
         })
     else:

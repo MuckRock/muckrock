@@ -172,7 +172,6 @@ INSTALLED_APPS = (
     'django.contrib.flatpages',
     'django.contrib.humanize',
     'django.contrib.staticfiles',
-    'celery_haystack',
     'compressor',
     'debug_toolbar',
     'django_premailer',
@@ -181,7 +180,6 @@ INSTALLED_APPS = (
     'djgeojson',
     'easy_thumbnails',
     'gunicorn',
-    'haystack',
     'dbsettings',
     'leaflet',
     'localflavor',
@@ -196,6 +194,7 @@ INSTALLED_APPS = (
     'robots',
     'storages',
     'taggit',
+    'watson',
     'webpack_loader',
     'lot',
     'package_monitor',
@@ -262,19 +261,6 @@ ABSOLUTE_URL_OVERRIDES = {
 }
 
 DBSETTINGS_USE_SITES = True
-
-HAYSTACK_CONNECTIONS = {
-    'default': {
-        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
-        'PATH': os.path.join(SITE_ROOT, 'whoosh/mysite_index'),
-        'STORAGE': 'file',
-        'POST_LIMIT': 128 * 1024 * 1024,
-        'INCLUDE_SPELLING': True,
-        'BATCH_SIZE': 100,
-    },
-}
-
-HAYSTACK_SIGNAL_PROCESSOR = 'muckrock.signals.RelatedCelerySignalProcessor'
 
 SESAME_MAX_AGE = 60 * 60 * 24 * 2
 
@@ -432,7 +418,7 @@ PUBLICATION_NAME = 'MuckRock'
 # Register database schemes in URLs.
 urlparse.uses_netloc.append('postgres')
 
-url = urlparse.urlparse(os.environ.get('DATABASE_URL', 'postgres://vagrant@localhost/muckrock2'))
+url = urlparse.urlparse(os.environ.get('DATABASE_URL', 'postgres://vagrant@localhost/muckrock'))
 
 # Update with environment configuration.
 DATABASES = {
@@ -527,3 +513,8 @@ LEAFLET_CONFIG = {
         }
     }
 }
+
+# Django Filter settings
+
+FILTERS_HELP_TEXT_EXCLUDE = False
+FILTERS_HELP_TEXT_FILTER = False

@@ -1,0 +1,45 @@
+{% extends 'base_list.html' %}
+
+{% block list-header %}
+<h1>{{title}}</h1>
+<form method="get" class="oneline-form">
+    <div class="field">
+        <input type="search" name="q" value="{{query}}" class="bold">
+        <button type="submit" class="basic blue button">
+            {% include 'lib/component/icon/search.svg' %}
+            <span class="label">Search</span>
+        </button>
+    </div>
+</form>
+{% endblock %}
+
+{% block list-sections %}
+<p class="bold">Narrow your search to a single section to get more detailed results and more advanced filters:</p>
+<ul class="nostyle list__sections">
+    <li><a href="{% url 'news-archive' %}?q={{query}}">News</a></li>
+    <li><a href="{% url 'project-list' %}?q={{query}}">Projects</a></li>
+    <li><a href="{% url 'foia-list' %}?q={{query}}">Requests</a></li>
+    <li><a href="{% url 'agency-list' %}?q={{query}}">Agencies</a></li>
+    <li><a href="{% url 'question-index' %}?q={{query}}">Questions</a></li>
+</ul>
+{% endblock %}
+
+{% block list-table-head %}
+<th>Result</th>
+<th>Type</th>
+{% endblock %}
+
+{% block list-table-row %}
+{% with object as result %}
+<td><a href="{{result.url}}">{{result}}</a></td>
+<td width="25%">{{result.content_type|capfirst}}</td>
+{% endwith %}
+{% endblock %}
+
+{% block empty %}
+{% if query %}
+<p class="empty">No results for &ldquo;{{query}}&rdquo;</p>
+{% else %}
+<p class="empty">Start searching!</p>
+{% endif %}
+{% endblock %}

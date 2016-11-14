@@ -1,13 +1,20 @@
-{% extends 'lists/base_list.html' %}
+{% extends 'base_list.html' %}
 
 {% load markdown_deux_tags %}
 {% load thumbnail %}
 
-{% block title %}MuckRock &bull; News{% endblock title %}
-{% block list-title %}News{% endblock list-title %}
-{% block list-type %}news{% endblock list-type %}
+{% block list-sections %}
+{% if years %}
+<ul class="nostyle list__sections">
+    {% for year in years %}
+    <li><a href="{% url 'news-archive-year' year=year %}">{{year}}</a></li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}
 
 {% block list-content %}
+<div class="grid__column three-quarters">
 {% if object_list %}
     {% include 'lib/component/pagination.html' %}
     <ul class="nostyle">
@@ -19,6 +26,11 @@
     </ul>
     {% include 'lib/component/pagination.html' %}
 {% else %}
-    <p class="list-empty">No Results</p>
+    {% if request.GET %}
+    <p class="empty">No results given this filter.</p>
+    {% else %}
+    <p class="empty">No Results</p>
+    {% endif %}
 {% endif %}
+</div>
 {% endblock list-content %}

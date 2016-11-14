@@ -13,7 +13,7 @@
     {% if not hide_image and image %}
     <a href="{{article.get_absolute_url}}" title="{{article.title}}" class="article__image">
         {% if small %}
-        <img src="{% thumbnail article.image 300x300 crop %}" />
+        <img src="{% thumbnail article.image 300x100 crop %}" />
         {% elif large %}
         <img src="{% thumbnail article.image 900x300 %}" />
         {% else %}

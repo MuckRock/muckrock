@@ -5,8 +5,6 @@
         <p><span class="small badge {{ foia.status|classify_status }}">{{ foia.get_status_display }}</span></p>
         {% if foia.public_file_count %}
         <p class="small files"><a href="{{foia.get_absolute_url}}#files">{{ foia.public_file_count }} file{{ foia.public_file_count|pluralize }}</a></p>
-        {% else %}
-        <p class="small files">No files</p>
         {% endif %}
     </header>
     <main class="foia__single__main">

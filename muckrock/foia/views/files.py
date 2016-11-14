@@ -5,12 +5,12 @@ from django.contrib.auth.decorators import user_passes_test
 from django.http import Http404
 from django.shortcuts import render, get_object_or_404
 from django.utils.decorators import method_decorator
-from django.views.generic import DetailView
+from django.views.generic import DetailView, ListView
 
 from djangosecure.decorators import frame_deny_exempt
 
 from muckrock.foia.models import FOIAFile, FOIARequest
-from muckrock.views import MRFilterableListView
+from muckrock.views import PaginationMixin
 
 @user_passes_test(lambda u: u.is_staff)
 def drag_drop(request):
@@ -31,7 +31,7 @@ class FileEmbedView(DetailView):
     template_name = 'foia/file/embed.html'
 
 
-class FOIAFileListView(MRFilterableListView):
+class FOIAFileListView(PaginationMixin, ListView):
     """Presents a paginated list of files."""
     model = FOIAFile
     template_name = 'foia/file/list.html'

@@ -171,6 +171,59 @@
 }
 
 .project.component {
+  width: 100%;
+  background: $color-white-pure;
+  border: 1px solid $color-grey;
+  @include border-radius;
+  overflow: hidden;
+}
+.project.component .grid__column {
+  padding: 0;
+}
+.project.component .grid__column.third.project__header {
+  @include flex-basis(10em);
+}
+.project__header {
+  @include flex-basis(10em);
+  @include display(flex);
+  @include flex-direction(column);
+  @include justify-content(flex-start);
+  min-height: 10em;
+  margin-bottom: 0;
+  background-position: center;
+  background-size: cover;
+  background-color: $color-blue-light;
+  background-blend-mode: multiply;
+}
+.project__header__wrapper {
+  @include flex(1 1 100%);
+  min-height: 100%;
+  width: 100%;
+  padding: $vr;
+  color: $color-white;
+  background: $color-black;
+  background: rgba($color-black, .75);
+  transition: background .25s linear;
+  &:hover {
+    color: $color-white;
+  }
+}
+.project__crowdfund {
+  padding: $vr $vr 0;
+  .stat {
+    vertical-align: top;
+    margin-right: $vr;
+  }
+}
+.project__overview {
+  padding: $vr;
+  summary:empty {
+    display: none;
+  }
+}
+
+/*
+.project.component {
     @include flex(1 1 30em);
     @include display(flex);
     @include flex-wrap(wrap);
@@ -249,3 +302,4 @@
         }
     }
 }
+*/

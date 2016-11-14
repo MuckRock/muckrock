@@ -107,6 +107,11 @@ def email_redactor(match):
     else:
         return 'requests@muckrock.com'
 
+@register.filter('fieldtype')
+def fieldtype(field):
+    """Returns the name of the class."""
+    return field.field.widget.__class__.__name__
+
 @register.filter
 def redact_emails(text):
     """Redact emails from text"""

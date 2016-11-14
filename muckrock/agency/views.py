@@ -11,31 +11,31 @@ from django.template import RequestContext
 from rest_framework import viewsets
 import django_filters
 
+from muckrock.agency.filters import AgencyFilterSet
 from muckrock.agency.models import Agency
 from muckrock.agency.serializers import AgencySerializer
 from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.views import collect_stats
 from muckrock.task.models import FlaggedTask
-from muckrock.views import MRFilterableListView
+from muckrock.views import MRSearchFilterListView
 
-class List(MRFilterableListView):
+class AgencyList(MRSearchFilterListView):
     """Filterable list of agencies"""
     model = Agency
+    filter_class = AgencyFilterSet
     title = 'Agencies'
-    template_name = 'lists/agency_list.html'
+    template_name = 'agency/list.html'
     default_sort = 'name'
 
     def get_queryset(self):
         """Limit agencies to only approved ones."""
-        objects = (super(List, self)
-                .get_queryset()
-                .get_approved()
-                .select_related(
-                    'jurisdiction',
-                    'jurisdiction__parent',
-                    'jurisdiction__parent__parent',
-                    ))
-        return objects
+        approved = super(AgencyList, self).get_queryset().get_approved()
+        approved = approved.select_related(
+            'jurisdiction',
+            'jurisdiction__parent',
+            'jurisdiction__parent__parent',
+        )
+        return approved
 
 def detail(request, jurisdiction, jidx, slug, idx):
     """Details for an agency"""

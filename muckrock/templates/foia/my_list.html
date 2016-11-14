@@ -1,0 +1,71 @@
+{% extends 'foia/list.html' %}
+{% load tags %}
+{% load foia_tags %}
+
+{% block list-actions %}
+{{block.super}}
+<form method="POST" class="toolbar" id="my-request-actions">
+    {% csrf_token %}
+</form>
+{% endblock %}
+
+{% block list-content %}
+{{block.super}}
+{% if multirequests %}
+<h2>Multirequests</h2>
+<table class="multirequests">
+    <thead>
+        <th>Title</th>
+        <th>Agencies</th>
+        <th>Status</th>
+    </thead>
+    <tbody>
+        {% for multirequest in multirequests %}
+        <tr>
+            {% if multirequest.status == 'started' %}
+            <td><a href="{{multirequest.get_absolute_url}}">{{multirequest.title}}</a></td>
+            {% else %}
+            <td>{{multirequest.title}}</td>
+            {% endif %}
+            <td>{{multirequest.agencies.count}}</td>
+            <td><span class="small badge {{multirequest.status|classify_status}}">{{multirequest.get_status_display}}</span></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+{% endblock %}
+
+{% block list-table-head %}
+{% comment %}
+We're gonna hide these checkboxes until the view supports bulk actions on requests.
+<th width="3%" class="list-table-checkbox"><input type="checkbox" class="select-all" data-name="foia" data-toolbar="#my-request-actions" /></th>
+{% endcomment %}
+<th data-sort="title">Title</th>
+<th width="20%" data-sort="agency">Agency</th>
+<th width="20%" data-sort="jurisdiction">Jurisdiction</th>
+<th width="10%" data-sort="date_updated">Updated</th>
+<th width="10%" data-sort="date_submitted">Submitted</th>
+{% endblock list-table-head %}
+
+{% block list-table-row %}
+{% with object as foia %}
+{% comment %}
+We're gonna hide these checkboxes until the view supports bulk actions on requests.
+<td class="list-table-checkbox"><input type="checkbox" name="{{foia.foia_type}}" value="{{foia.pk}}" form="my-request-actions"></td>
+{% endcomment %}
+<td><a class="bold" href="{{foia.get_absolute_url}}">{{foia.title}}</a><br><span class="small badge state {{ foia.status|classify_status }}">{{foia.get_status_display}}</span>{% if foia.embargo %}<span class="small red badge">Under Embargo</span>{% endif %}{% if foia.crowdfund and not foia.crowdfund.expired %}<span class="small green badge">Active Crowdfund</span>{% endif %}</td>
+<td>{{ foia.agency }}</td>
+<td>{{ foia.jurisdiction }}</td>
+<td>{{foia.date_updated|date:"m/d/Y"}}</td>
+<td>{{ foia.date_submitted|date:"m/d/Y" }}</td>
+{% endwith %}
+{% endblock %}
+
+{% block empty %}
+{% if request.GET %}
+<p class="empty">None of your requests match this filter.</p>
+{% else %}
+<p class="empty">You haven&rsquo;t filed any requests! Get started by clicking the &ldquo;File Request&rdquo; button above.</p>
+{% endif %}
+{% endblock %}

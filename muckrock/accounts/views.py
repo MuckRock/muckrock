@@ -31,6 +31,7 @@ import logging
 import stripe
 import sys
 
+from muckrock.accounts.filters import ProxyFilterSet
 from muckrock.accounts.forms import (
         ProfileSettingsForm,
         EmailSettingsForm,
@@ -53,7 +54,7 @@ from muckrock.message.tasks import (
         welcome,
         gift,
         )
-from muckrock.views import MRFilterableListView
+from muckrock.views import MRFilterListView
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -545,9 +546,10 @@ class UnreadNotificationList(NotificationList):
         return notifications.get_unread()
 
 
-class ProxyList(MRFilterableListView):
+class ProxyList(MRFilterListView):
     """List of Proxies"""
     model = User
+    filter_class = ProxyFilterSet
     title = 'Proxies'
     template_name = 'lists/proxy_list.html'
     default_sort = 'profile__state'

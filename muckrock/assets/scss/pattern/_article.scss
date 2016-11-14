@@ -48,7 +48,8 @@
 {
     .article__image
     {
-        margin: 0 $vr/2 $vr/2 0;
+        @include flex(1 1 100%);
+        margin: 0 0 $vr/2 0;
     }
     .article__overview__title
     {
