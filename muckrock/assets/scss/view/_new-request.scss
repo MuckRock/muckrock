@@ -164,6 +164,8 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
             width: 100%;
             margin: 0;
             color: $color-white;
+            background: transparent;
+            border: none;
             font-size: $size-4;
             &:before {
                 content: "Jurisdiction";
