@@ -9,6 +9,24 @@ from autocomplete_light import shortcuts as autocomplete_light
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 
+class SimpleAgencyAutocomplete(autocomplete_light.AutocompleteModelBase):
+    """Creates an autocomplete field for picking agencies"""
+    choices = Agency.objects.filter(status='approved').select_related('jurisdiction')
+    search_fields = ['name', 'aliases']
+    attrs = {
+        'data-autocomplete-minimum-characters': 1,
+        'placeholder': 'Search agencies',
+    }
+
+    def choices_for_request(self):
+        """Additionally filter choices by jurisdiction."""
+        jurisdiction_id = self.request.GET.get('jurisdiction_id')
+        if jurisdiction_id:
+            if jurisdiction_id == 'f':
+                jurisdiction_id = Jurisdiction.objects.get(level='f').id
+            self.choices = self.choices.filter(jurisdiction__id=jurisdiction_id)
+        return super(SimpleAgencyAutocomplete, self).choices_for_request()
+
 
 class AgencyAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     """Creates an autocomplete field for picking agencies"""
@@ -93,3 +111,5 @@ autocomplete_light.register(Agency, AgencyAutocomplete)
 autocomplete_light.register(Agency, AgencyMultiRequestAutocomplete)
 autocomplete_light.register(Agency, AgencyAdminAutocomplete)
 autocomplete_light.register(Agency, AgencyAppealAdminAutocomplete)
+autocomplete_light.register(Agency, SimpleAgencyAutocomplete)
+

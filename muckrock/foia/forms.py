@@ -47,7 +47,7 @@ class RequestForm(forms.Form):
     agency = forms.CharField(
         label='Agency',
         widget=autocomplete_light.TextWidget(
-            'AgencyAutocomplete',
+            'AgencySimpleAgencyAutocomplete',
             attrs={'placeholder': 'Type the agency\'s name'}),
         max_length=255)
     full_name = forms.CharField()
