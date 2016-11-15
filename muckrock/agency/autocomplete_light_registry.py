@@ -106,10 +106,8 @@ class AgencyAppealAdminAutocomplete(AgencyAdminAutocomplete):
             return choices.filter(jurisdiction=jurisdiction)
 
 
-
 autocomplete_light.register(Agency, AgencyAutocomplete)
 autocomplete_light.register(Agency, AgencyMultiRequestAutocomplete)
 autocomplete_light.register(Agency, AgencyAdminAutocomplete)
 autocomplete_light.register(Agency, AgencyAppealAdminAutocomplete)
 autocomplete_light.register(Agency, SimpleAgencyAutocomplete)
-

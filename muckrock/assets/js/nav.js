@@ -78,6 +78,7 @@ $('.section-list .dropdown > .nav-item').click(function(e){
     toggleNav(dropdown, section);
     var offsetTop = 42 * 2; // The dropdown is always beneath two 42px tall menus
     setMaxHeight(dropdown, window.innerHeight - offsetTop);
+    $(dropdown).css('overflow-y', 'scroll');
     e.preventDefault();
     return false;
   }
