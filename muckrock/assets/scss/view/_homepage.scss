@@ -153,6 +153,12 @@ If the browser support multiplying backgrounds, use that instead of the banner b
             padding-left: $vr;
         }
     }
+    .small.article {
+        font-size: 1rem;
+        .article__overview__title {
+            font-size: large;
+        }
+    }
     .requests {
         @include flex(1 1 200px);
         margin: 0 $vr $vr;

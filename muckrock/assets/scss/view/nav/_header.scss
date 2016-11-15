@@ -251,7 +251,6 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
       @include drop-shadow;
       background: $color-white-pure;
       z-index: 200;
-      overflow-y: scroll;
       -webkit-overflow-scrolling: touch;
       li {
         display: block;
