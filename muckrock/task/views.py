@@ -9,6 +9,7 @@ from django.db.models import Count, Prefetch, Q, Max
 from django.http import HttpResponse, Http404
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
+from django.views.generic import TemplateView
 
 import logging
 
@@ -458,7 +459,7 @@ class NewExemptionTaskList(TaskList):
     queryset = NewExemptionTask.objects.select_related('foia__agency__jurisdiction__parent')
 
 
-class RequestTaskList(TaskList):
+class RequestTaskList(TemplateView):
     """Displays all the tasks for a given request."""
     title = 'Request Tasks'
     template_name = 'lists/request_task_list.html'
@@ -481,7 +482,9 @@ class RequestTaskList(TaskList):
         # we purposely call super on TaskList here, as we do want the generic
         # list views method to be called, but we don't need any of the
         # data calculated in the TaskList method, so using it just slows us down
-        context = super(TaskList, self).get_context_data(**kwargs)
+        context = super(RequestTaskList, self).get_context_data(**kwargs)
+        context['title'] = self.title
+        context['object_list'] = self.get_queryset()
         context['foia'] = self.foia_request
         context['foia_url'] = self.foia_request.get_absolute_url()
         return context
