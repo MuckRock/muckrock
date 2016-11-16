@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.db.models import Prefetch
 from django.http import Http404
 from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import (
@@ -110,6 +111,7 @@ class ProjectCreateView(CreateView):
         project.save()
         return redirection
 
+
 class ProjectDetailView(DetailView):
     """View a project instance"""
     model = Project
@@ -143,7 +145,12 @@ class ProjectDetailView(DetailView):
                     'user__profile',
                 ).get_public_file_count())
         context['followers'] = followers(project)
-        context['articles'] = project.articles.get_published()
+        context['articles'] = (project.articles
+                .get_published()
+                .prefetch_related(
+                    Prefetch(
+                        'authors',
+                        queryset=User.objects.select_related('profile'))))
         context['contributors'] = project.contributors.select_related('profile')
         context['user_is_experimental'] = user.is_authenticated() and user.profile.experimental
         context['newsletter_label'] = ('Subscribe to the project newsletter'

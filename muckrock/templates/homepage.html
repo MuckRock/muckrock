@@ -8,8 +8,8 @@
 {% load cache %}
 
 {% block content %}
-{# cache cache_timeout homepage #}
 <div class="homepage">
+	{% cache cache_timeout homepage_top %}
     <div class="banner-wrapper mb0" style="background-image: url('{% static 'img/fingerprinting.jpg' %}');">
         <div class="foia banner">
             <div class="banner-container">
@@ -23,23 +23,26 @@
                 <div class="call-to-action"><a href="{% url 'foia-root' %}">Explore filed requests</a> or <a href="/about/how-we-work/" id="learn-more">learn how it works</a>.</div>
             </div>
             <ul class="stats banner-container">
+			{% with request_count=stats.request_count agency_count=stats.agency_count completed_count=stats.completed_count page_count=stats.page_count %}
                 <li class="stat">
-                    <div class="value">{{ stats.request_count|intcomma }}</div>
-                    <div class="key">filed request{{ stats.request_count|pluralize }}</div>
+                    <div class="value">{{ request_count|intcomma }}</div>
+                    <div class="key">filed request{{ request_count|pluralize }}</div>
                 </li>
                 <li class="stat">
-                    <div class="value">{{ stats.agency_count|intcomma }}</div>
-                    <div class="key">agenc{{ stats.agency_count|pluralize:"y,ies" }}</div>
+                    <div class="value">{{ agency_count|intcomma }}</div>
+                    <div class="key">agenc{{ agency_count|pluralize:"y,ies" }}</div>
                 </li>
                 <li class="stat">
-                    <div class="value">{{ stats.completed_count|intcomma }}</div>
-                    <div class="key">fulfilled request{{ stats.completed_count|pluralize }}</div>
+                    <div class="value">{{ completed_count|intcomma }}</div>
+                    <div class="key">fulfilled request{{ completed_count|pluralize }}</div>
                 </li>
                 <li class="stat">
-                    <div class="value">{{ stats.page_count|intcomma }}</div>
-                    <div class="key">released page{{ stats.page_count|pluralize }}</div>
+                    <div class="value">{{ page_count|intcomma }}</div>
+                    <div class="key">released page{{ page_count|pluralize }}</div>
                 </li>
+			{% endwith %}
             </ul>
+			{% with completed_requests=completed_requests %}
             {% if completed_requests %}
             <div class="completed-requests black">
                 <header>
@@ -52,10 +55,12 @@
                 <div class="spacer"></div>
             </div>
             {% endif %}
+			{% endwith %}
         </div>
     </div>
+    {% endcache %}
     {% newsletter %}
-    {% cache cache_timeout news %}
+    {% cache cache_timeout homepage_bottom %}
     <div class="articles grid__row">
         {% for article in articles %}
         {% if forloop.first %}
@@ -69,9 +74,7 @@
         {% endif %}
         {% endfor %}
     </div>
-    {% endcache %}
     {% if featured_projects %}
-    {% cache cache_timeout projects %}
     <div class="projects">
         <h2>Projects <small><a href="{% url 'project' %}">See all</a></small></h2>
         <ul class="nostyle">
@@ -82,8 +85,7 @@
         {% endfor %}
         </ul>
     </div>
-    {% endcache %}
     {% endif %}
+    {% endcache %}
 </div>
-{# endcache #}
 {% endblock content %}

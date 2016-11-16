@@ -140,11 +140,14 @@ class Crowdfund(models.Model):
     def project(self):
         """Get the project for this crowdfund if it exists"""
         # there will never be more than one project due to unique constraint
+        if hasattr(self, '_project'):
+            return self._project
         projects = self.projects.all()
         if projects:
-            return projects[0]
+            self._project = projects[0]
         else:
-            return None
+            self._project = None
+        return self._project
 
 
 class CrowdfundPayment(models.Model):

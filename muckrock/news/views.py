@@ -5,7 +5,7 @@ Views for the news application
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from django.http import HttpResponseForbidden
 from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import TemplateView
@@ -117,8 +117,12 @@ class NewsExploreView(TemplateView):
                 'projects',
             )[:5]),
             600)
-        context['featured_projects'] = (Project.objects.get_visible(self.request.user)
-            .filter(featured=True).optimize())
+        context['featured_projects'] = (Project.objects
+                .get_visible(self.request.user)
+                .filter(featured=True)
+                .prefetch_related(Prefetch('articles__authors',
+                    queryset=User.objects.select_related('profile')))
+                .optimize())
         context['recent_articles'] = recent_articles
         context['top_tags'] = Article.tags.most_common()[:15]
         return context

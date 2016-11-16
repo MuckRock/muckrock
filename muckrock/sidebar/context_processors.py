@@ -15,25 +15,19 @@ from muckrock.utils import cache_get_or_set
 
 def get_recent_articles():
     """Lists last five recent news articles"""
-    return cache_get_or_set(
-            'sb:recent_articles',
-            lambda: list(Article.objects
+    return (Article.objects
                 .get_published()
                 .order_by('-pub_date')
-                .prefetch_authors()
-                .prefetch_editors()
-                [:10]),
-            settings.DEFAULT_CACHE_TIMEOUT)
+                [:5])
+
 
 def get_actionable_requests(user):
     """Gets requests that require action or attention"""
-    requests = FOIARequest.objects.filter(user=user).select_related_view()
-    updates = requests.filter(updated=True)
-    started = requests.filter(status='started')
-    payment = requests.filter(status='payment')
-    fix = requests.filter(status='fix')
+    requests = FOIARequest.objects.filter(user=user)
+    started = requests.filter(status='started').count()
+    payment = requests.filter(status='payment').count()
+    fix = requests.filter(status='fix').count()
     return {
-        'count': len(updates) + len(started) + len(payment) + len(fix),
         'started': started,
         'payment': payment,
         'fix': fix,
@@ -69,6 +63,7 @@ def get_organization(user):
             load_organization(user),
             settings.DEFAULT_CACHE_TIMEOUT)
 
+
 def sidebar_broadcast(user):
     """Displays a broadcast to a given usertype"""
 
@@ -93,6 +88,7 @@ def sidebar_broadcast(user):
             'sb:%s:broadcast' % user_class,
             load_broadcast(user_class),
             settings.DEFAULT_CACHE_TIMEOUT)
+
 
 def sidebar_info(request):
     """Displays info about a user's requsts in the sidebar"""
