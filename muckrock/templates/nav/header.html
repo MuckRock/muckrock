@@ -36,7 +36,7 @@
                     <a class="nav-item" href="{% url 'news-index' %}">News</a>
                     <ul>
                         {% cache 600 dropdown_recent_articles %}
-                        {% for article in dropdown_recent_articles|slice:":5" %}
+                        {% for article in dropdown_recent_articles %}
                         <li class="rich-nav-item" {% if article.image %}style="background-image:url('{% thumbnail article.image 300x100 crop %}');"{% endif %}>
                             <a href="{{article.get_absolute_url}}" title="{{article.summary}}">
                                 <p>{{ article.title }}</p>
@@ -174,19 +174,19 @@
                         {% if actionable_requests %}
                         {% if actionable_requests.payment %}
                         <li>
-                            <a class="small nav-item" href="{% url 'foia-mylist' %}?status=payment"><span class="red counter">{{ actionable_requests.payment|length }}</span>&nbsp;Payment{{ actionable_requests.payment|length|pluralize }}&nbsp;Required</a>
+                            <a class="small nav-item" href="{% url 'foia-mylist' %}?status=payment"><span class="red counter">{{ actionable_requests.payment}}</span>&nbsp;Payment{{ actionable_requests.payment|pluralize }}&nbsp;Required</a>
                         </li>
                         {% endif %}
                         {% if actionable_requests.fix %}
                         <li>
-                            <a class="small nav-item" href="{% url 'foia-mylist' %}?status=fix"><span class="red counter">{{ actionable_requests.fix|length }}</span>&nbsp;Fix{{ actionable_requests.fix|length|pluralize:"es" }}&nbsp;Required</a>
+                            <a class="small nav-item" href="{% url 'foia-mylist' %}?status=fix"><span class="red counter">{{ actionable_requests.fix}}</span>&nbsp;Fix{{ actionable_requests.fix|pluralize:"es" }}&nbsp;Required</a>
                         </li>
                         {% endif %}
                         {% if actionable_requests.started %}
                         <li>
                             <a class="small nav-item" href="{% url 'foia-mylist' %}?status=started">
-                                <span class="blue counter">{{ actionable_requests.started|length }}</span>
-                                &nbsp;Draft{{ actionable_requests.started|length|pluralize }}
+                                <span class="blue counter">{{ actionable_requests.started}}</span>
+                                &nbsp;Draft{{ actionable_requests.started|pluralize }}
                             </a>
                         </li>
                         {% endif %}
@@ -201,12 +201,14 @@
                     </ul>
                 </li>
                 <li>
-                    {% if unread_notifications.count > 0 %}
+					{% with unread_notifications_count=unread_notifications.count %}
+                    {% if unread_notifications_count > 0 %}
                     <a href="{% url 'acct-notifications-unread' %}" class="black unread nav-item">
-                        <span class="blue counter">{{unread_notifications.count}}</span>
+                        <span class="blue counter">{{unread_notifications_count}}</span>
                     {% else %}
                     <a href="{% url 'acct-notifications' %}" class="black nav-item">
                     {% endif %}
+					{% endwith %}
                         {% include 'lib/component/icon/notification.svg' %}
                     </a>
                 </li>

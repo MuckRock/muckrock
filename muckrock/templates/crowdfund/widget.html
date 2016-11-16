@@ -5,7 +5,7 @@
 
 <section class="crowdfund__widget" id="crowdfund-{{ crowdfund.pk }}">
     <header class="crowdfund__widget__header">
-        <h1><a href="{{crowdfund.get_crowdfund_object.get_absolute_url}}">{{ crowdfund.name }}</a></h1>
+        <h1><a href="{{obj_url}}">{{ crowdfund.name }}</a></h1>
         <div>
             <span class="action" id="show-share">Share</span>
             <span class="action" id="show-embed">Embed</span>
@@ -107,9 +107,9 @@
                 <div class="close action">Close</div>
             </header>
             {% if crowdfund.foia %}
-            {% social title="Help free these docs" url=crowdfund.foia.get_absolute_url %}
-            {% elif crowdfund.projects.exists %}
-            {% social title="Help fund this project" url=crowdfund.get_crowdfund_object.get_absolute_url %}
+            {% social title="Help free these docs" url=obj_url %}
+            {% elif crowdfund.project %}
+            {% social title="Help fund this project" url=obj_url %}
             {% endif %}
         </div>
     </div>
@@ -135,9 +135,9 @@
             {% newsletter %}
             <p>Help this crowdfund find more supporters:</p>
             {% if crowdfund.foia %}
-            {% social title="I helped free these docs" url=crowdfund.foia.get_absolute_url %}
-            {% elif crowdfund.projects.exists %}
-            {% social title="I just funded this project" url=crowdfund.get_crowdfund_object.get_absolute_url %}
+            {% social title="I helped free these docs" url=obj_url %}
+            {% elif crowdfund.project %}
+            {% social title="I just funded this project" url=obj_url %}
             {% endif %}
         </div>
     </div>

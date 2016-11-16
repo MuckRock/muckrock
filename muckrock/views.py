@@ -332,15 +332,14 @@ class Homepage(object):
 
     def articles(self):
         """Get the articles for the front page"""
-        return list(Article.objects
+        return (Article.objects
                 .get_published()
                 .prefetch_authors()
-                .prefetch_related('projects')
                 [:5])
 
     def featured_projects(self):
         """Get the featured projects for the front page"""
-        return list(Project.objects
+        return (Project.objects
                 .get_public()
                 .optimize()
                 .filter(featured=True)
@@ -348,7 +347,7 @@ class Homepage(object):
 
     def completed_requests(self):
         """Get recently completed requests"""
-        return list(FOIARequest.objects
+        return lambda: (FOIARequest.objects
                 .get_public()
                 .get_done()
                 .order_by('-date_done', 'pk')
@@ -359,13 +358,13 @@ class Homepage(object):
         """Get some stats to show on the front page"""
         return {
                 'request_count':
-                    FOIARequest.objects.exclude(status='started').count(),
+                    lambda: FOIARequest.objects.exclude(status='started').count(),
                 'completed_count':
-                    FOIARequest.objects.get_done().count(),
+                    lambda: FOIARequest.objects.get_done().count(),
                 'page_count':
-                    FOIAFile.objects.aggregate(pages=Sum('pages'))['pages'],
+                    lambda: FOIAFile.objects.aggregate(pages=Sum('pages'))['pages'],
                 'agency_count':
-                    Agency.objects.get_approved().count(),
+                    lambda: Agency.objects.get_approved().count(),
                 }
 
 
@@ -373,10 +372,7 @@ def homepage(request):
     """Get all the details needed for the homepage"""
     context = {}
     for name, value in Homepage().get_cached_values():
-        context[name] = cache_get_or_set(
-                'hp:%s' % name,
-                value,
-                settings.DEFAULT_CACHE_TIMEOUT)
+        context[name] = value()
     return render(request, 'homepage.html', context)
 
 
@@ -385,12 +381,13 @@ def reset_homepage_cache(request):
     """Reset the homepage cache"""
     # pylint: disable=unused-argument
 
-    template_keys = ('news', 'projects', 'recent_articles')
+    template_keys = (
+            'homepage_top',
+            'homepage_bottom',
+            'dropdown_recent_articles',
+            )
     for key in template_keys:
         cache.delete(make_template_fragment_key(key))
-
-    for name, value in Homepage().get_cached_values():
-        cache.set('hp:%s' % name, value(), settings.DEFAULT_CACHE_TIMEOUT)
 
     return redirect('index')
 
