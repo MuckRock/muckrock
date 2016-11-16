@@ -17,11 +17,6 @@ var tabTargets = tabs.map(function() {              // get an array of tab-panel
 var tabPanels = $(tabTargets.join(','));            // use those ids to get the actual tab-panels
 
 function showTab(hash) {
-    // if no id provided, use the id of the first panel
-    hash = !hash ? tabTargets[0] : hash;
-    if (!hash) {
-        return;
-    }
     // remove the active class from the tabs,
     // and add it back to the one the user selected
     tabs.removeClass('active').attr('aria-selected', 'false').filter(function() {
@@ -34,8 +29,14 @@ function showTab(hash) {
 }
 
 function handleHashChange() {
-    // check if the hash is a target
+    // Check if the hash is a target.
+    // If there's no hash, show the first tab.
     var hash = location.hash;
+    hash = !hash ? tabTargets[0] : hash;
+    // If there's no tabs to show, just return.
+    if (!hash) {
+        return;
+    }
     if (tabTargets.includes(hash)) {
         showTab(hash);
         return;
