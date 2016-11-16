@@ -1,8 +1,9 @@
 {% extends 'message/receipt/base.txt' %}
+{% load tags %}
 
 {% block description %}
 This e-mail confirms the monthly charge for your professional account on MuckRock.
 
 Your account includes up to {{monthly_requests}} requests per month, the ability to embargo requests, and priority support.
-You can manage your account from your settings ({{base_url}}{% url 'acct-settings' %}).
+You can manage your account from your settings ({{base_url}}{% url 'acct-settings' %}?{% autologin user %}).
 {% endblock %}

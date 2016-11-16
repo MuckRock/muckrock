@@ -1,4 +1,5 @@
 {% extends 'message/base.txt' %}
+{% load tags %}
 {% block body %}
 Welcome to MuckRock, {{user.first_name}}!
 
@@ -11,7 +12,7 @@ Have a technical support or customer service issue?
 
 Looking for FOIA advice?
 
-* Post your question to our forum to get invaluable insight from MuckRock's community of public records pros. {{base_url}}{% url 'question-index' %}
+* Post your question to our forum to get invaluable insight from MuckRock's community of public records pros. {{base_url}}{% url 'question-index' %}?{% autologin user %}
 * Send us your question through Twitter. https://www.twitter.com/muckrock/
 
 Once again, welcome to the MuckRock community. We are excited to see what you do with the tools we've built.
