@@ -20,7 +20,6 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.tasks import send_charge_receipt
 from muckrock.news.models import Article
 from muckrock.project.models import Project
-from muckrock.utils import cache_get_or_set
 
 import logging
 import requests
