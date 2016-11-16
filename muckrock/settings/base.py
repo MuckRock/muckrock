@@ -428,7 +428,7 @@ DATABASES = {
             'PASSWORD': url.password,
             'HOST': url.hostname,
             'PORT': url.port,
-            'CONN_MAX_AGE': os.environ.get('CONN_MAX_AGE', 500),
+            'CONN_MAX_AGE': int(os.environ.get('CONN_MAX_AGE', 500)),
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             }
         }
