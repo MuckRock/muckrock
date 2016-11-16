@@ -140,6 +140,8 @@ class Crowdfund(models.Model):
     def project(self):
         """Get the project for this crowdfund if it exists"""
         # there will never be more than one project due to unique constraint
+        # pylint: disable=access-member-before-definition
+        # pylint: disable=attribute-defined-outside-init
         if hasattr(self, '_project'):
             return self._project
         projects = self.projects.all()
