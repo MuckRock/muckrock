@@ -30,6 +30,7 @@ import './foiaRequest';
 import './list';
 import modal from './modal';
 import './nav';
+import './selectAll';
 import './tabs';
 import './task';
 
@@ -57,6 +58,9 @@ $('document').ready(function(){
         modal(this.hash);
         return false;
     });
+
+    // Select All
+    $('.select-all').selectAll();
 
     // Date Picker
     $('.datepicker').datepicker({
@@ -137,7 +141,7 @@ $('document').ready(function(){
     $('.collapsable header').click(function(){
         $(this).parent().toggleClass('collapsed');
     });
-    $('.collapsable header').children('.nocollapse').click(function(event){
+    $('.collapsable header').find('.nocollapse').click(function(event){
         // Prevent click from propagating up to the collapsable header.
         event.stopPropagation();
     });
