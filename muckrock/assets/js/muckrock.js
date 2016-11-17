@@ -30,6 +30,7 @@ import './foiaRequest';
 import './list';
 import modal from './modal';
 import './nav';
+import './selectAll';
 import './tabs';
 import './task';
 
@@ -57,6 +58,9 @@ $('document').ready(function(){
         modal(this.hash);
         return false;
     });
+
+    // Select All
+    $('.select-all').selectAll();
 
     // Date Picker
     $('.datepicker').datepicker({
