@@ -246,6 +246,12 @@ class FoiaMachineCommunicationCreateView(CommunicationOwnerRequiredMixin, Create
         messages.success(self.request, 'The communication was created.')
         return self.foi.get_absolute_url()
 
+    def get_context_data(self, **kwargs):
+        """Add the jurisdiction to the context for exemption filtering."""
+        context = super(FoiaMachineCommunicationCreateView, self).get_context_data(**kwargs)
+        context['jurisdiction'] = self.foi.jurisdiction
+        return context
+
 
 class FoiaMachineCommunicationUpdateView(CommunicationOwnerRequiredMixin, UpdateView):
     """Update a communication on a request."""

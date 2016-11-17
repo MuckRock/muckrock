@@ -16,8 +16,7 @@ const AppealLanguage = ({appeal}) => {
         */
         const language = appeal.language;
         const id = appeal.id;
-        const $appealForm = $('#appeal .composer-input');
-        const $appealComposer = $appealForm.find('#appeal-composer');
+        const $appealComposer = $('textarea:visible');
         /*
         Insert the language into the textarea
         If there's nothing else in the textarea, don't pad it with spacing.
