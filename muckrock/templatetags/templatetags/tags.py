@@ -11,11 +11,19 @@ from django.utils.safestring import mark_safe
 
 from email.parser import Parser
 import re
+from urllib import urlencode
 
 from muckrock.forms import NewsletterSignupForm, TagManagerForm
 from muckrock.project.forms import ProjectManagerForm
 
 register = Library()
+
+@register.simple_tag
+def autologin(user):
+    """Generate an autologin token for the user."""
+    if user.is_authenticated():
+        return urlencode(user.profile.autologin())
+    return ''
 
 @register.simple_tag
 def active(request, pattern):

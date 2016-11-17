@@ -98,11 +98,12 @@ $(document).ready(function(){
 /* Documents */
 
 export function displayFile(file) {
-    var activeFile = $('.active-document');
-    var files = $('.file');
     if (!file) {
         return;
     }
+    file = $(file);
+    var activeFile = $('.active-document');
+    var files = $('.file');
     var docId = file.data('doc-id');
     var title = file.data('title') || 'Untitled';
     var pages = file.data('pages') || 0;

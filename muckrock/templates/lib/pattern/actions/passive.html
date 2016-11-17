@@ -1,10 +1,10 @@
+{% load tags %}
 <div class="notification__action--passive">
-
 {% block target %}
 {% if action.target %}
     <span class="target">
     {% if action.target.get_absolute_url %}
-        <a href="{{ action.target.get_absolute_url }}" class="action"> {{ action.target }}</a>
+    <a href="{{ action.target.get_absolute_url }}?{% autologin user %}" class="action"> {{ action.target }}</a>
     {% else %}
         {{ action.target }}
     {% endif %}
@@ -21,7 +21,7 @@
 {% block actor %}
 <span class="actor">
     {% if action.actor.get_absolute_url %}
-    <a href="{{ action.actor.get_absolute_url }}"> {{ action.actor }}</a>
+    <a href="{{ action.actor.get_absolute_url }}?{% autologin user %}"> {{ action.actor }}</a>
     {% else %}
         {{ action.actor }}
     {% endif %}

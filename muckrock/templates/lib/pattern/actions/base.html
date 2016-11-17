@@ -1,8 +1,9 @@
+{% load tags %}
 <div class="notification__action">
 {% block actor %}
     <span class="actor">
     {% if action.actor.get_absolute_url %}
-        <a href="{{ action.actor.get_absolute_url }}">{{ action.actor }}</a>
+        <a href="{{ action.actor.get_absolute_url }}?{% autologin user %}">{{ action.actor }}</a>
     {% else %}
         {{ action.actor }}
     {% endif %}
@@ -17,7 +18,7 @@
 {% if action.action_object %}
     <span class="action-object">
     {% if action.action_object.get_absolute_url %}
-        <a href="{{ action.action_object.get_absolute_url }}"> {{ action.action_object }}</a>
+        <a href="{{ action.action_object.get_absolute_url }}?{% autologin user %}"> {{ action.action_object }}</a>
     {% else %}
         {{ action.action_object }}
     {% endif %}
@@ -33,7 +34,7 @@
 {% if action.target %}
     <span class="target">
     {% if action.target.get_absolute_url %}
-        <a href="{{ action.target.get_absolute_url }}"> {{ action.target }}</a>
+        <a href="{{ action.target.get_absolute_url }}?{% autologin user %}"> {{ action.target }}</a>
     {% else %}
          {{ action.target }}
     {% endif %}

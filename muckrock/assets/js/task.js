@@ -152,7 +152,7 @@ $('button[name="reject"]').click(function(e){
 var checkboxes = $('.task header').find(':checkbox');
 var batchedButtons = $('#batched button').not('#collapse-all');
 function toggleBatchedButtons() {
-    if ($('.task header').find(':checkbox:checked').length > 0) {
+    if ($('.task header').find(':checked').length > 0) {
         batchedButtons.attr('disabled', false);
     } else {
         batchedButtons.attr('disabled', true);

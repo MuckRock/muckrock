@@ -29,10 +29,13 @@ class ProjectManagerAutocomplete(autocomplete_light.AutocompleteModelBase):
     def choices_for_request(self):
         """
         When showing possible requests to add, only show projects the user is a contributor to.
+        If the user is unauthenticated, only return public choices.
         However, if the user is staff, then show them all the available projects.
         """
         user = self.request.user
-        if not user.is_staff:
+        if not user.is_authenticated():
+            self.choices = self.choices.get_public()
+        elif not user.is_staff:
             self.choices = self.choices.filter(contributors=user)
         return super(ProjectManagerAutocomplete, self).choices_for_request()
 

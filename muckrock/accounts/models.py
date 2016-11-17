@@ -344,14 +344,17 @@ class Profile(models.Model):
         self.save()
         return key
 
+    def autologin(self):
+        """Generate an autologin key and value for this user if they set this preference."""
+        autologin_dict = {}
+        if self.use_autologin:
+            lot = LOT.objects.create(user=self.user, type='slow-login')
+            autologin_dict = {settings.LOT_MIDDLEWARE_PARAM_NAME: lot.uuid}
+        return autologin_dict
+
     def wrap_url(self, link, **extra):
         """Wrap a URL for autologin"""
-        if self.use_autologin:
-            lot = LOT.objects.create(
-                user=self.user,
-                type='slow-login',
-                )
-            extra.update({settings.LOT_MIDDLEWARE_PARAM_NAME: lot.uuid})
+        extra.update(self.autologin())
         return link + '?' + urlencode(extra)
 
 
