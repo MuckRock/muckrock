@@ -5,6 +5,8 @@
 
 import React, { PropTypes } from 'react';
 
+import { rootDomain } from '../api';
+
 const AppealLanguage = ({appeal}) => {
     const handleClick = (e) => {
         /*
@@ -65,7 +67,7 @@ const ExemptionDetail = ({exemption, onBackClick}) => {
             <div className="exemption__detail textbox nomargin">
                 <h1>{exemption.name}</h1>
                 <p>{exemption.basis}</p>
-                <p><a href={exemption.absolute_url} target="_blank">Learn more</a></p>
+                <p><a href={rootDomain + exemption.absolute_url} target="_blank">Learn more</a></p>
                 {appealHeading}
                 {appeals}
             </div>

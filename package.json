@@ -6,6 +6,7 @@
   "scripts": {
     "build": "webpack --config config/webpack.config.js --progress --color",
     "build:production": "NODE_ENV=production webpack --config config/webpack.config.production.js --color",
+    "build:staging": "NODE_ENV=staging webpack --config config/webpack.config.production.js --color",
     "watch": "webpack --config config/webpack.config.js --progress --color --watch",
     "lint": "eslint ./muckrock/assets/js -c config/.eslintrc",
     "heroku-postbuild": "npm run build:production"
