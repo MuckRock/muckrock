@@ -4,6 +4,11 @@
 <h1>Create a new communication</h1>
 {% endblock %}
 
+{% block form %}
+<div id="exemptionBrowser"></div>
+{{block.super}}
+{% endblock %}
+
 {% block submit %}
 <button type="submit" class="button">Create communication</button>
 {% endblock %}
