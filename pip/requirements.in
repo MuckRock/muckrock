@@ -10,6 +10,7 @@ django-adaptors # Used for model import
 django-autocomplete-light<3 # Autocomplete drop down inputs
 django-celery # Integrate celery with django
 django-compressor # Compress all JS and CSS assets into a single file
+django-cors-headers # Allows access to API endpoints from non-MuckRock domains
 django-dbsettings # DB stored configurations
 django-debug-toolbar # Toolbar for debugging
 django-filter==0.13.0 # Used for filtering in viewsets
