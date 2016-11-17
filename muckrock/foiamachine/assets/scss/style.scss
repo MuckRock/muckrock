@@ -1,3 +1,30 @@
+/* Colors */
+
+$pure-black: #000000;
+$black: #202020;
+$dark-grey: #666666;
+$light-grey: #CCCCCC;
+$white: #f8f8f8;
+$pure-white: #FFFFFF;
+
+$blue: blue;
+$red: red;
+
+$primary: $blue;
+
+/* Typography */
+
+$lh: 1.6;
+$serif: "Georgia", serif;
+$system: -apple-system, BlinkMacSystemFont,
+        'avenir next', avenir,
+        helvetica, 'helvetica neue',
+        ubuntu,
+        roboto, noto,
+        'segoe ui', arial,
+        sans-serif;
+
+
 * {
     box-sizing: border-box;
 }
@@ -23,17 +50,11 @@ html {
 body {
     margin: 0;
     padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont,
-        'avenir next', avenir,
-        helvetica, 'helvetica neue',
-        ubuntu,
-        roboto, noto,
-        'segoe ui', arial,
-        sans-serif;
+    font-family: $system;
     text-rendering: optimizeLegibility;
-    line-height: 1.6;
-    background: #f8f8f8;
-    color: #202020;
+    line-height: $lh;
+    background: $white;
+    color: $black;
 }
 main {
     max-width: 50rem;
@@ -41,13 +62,14 @@ main {
     padding: 0 1em;
 }
 a {
+    color: $primary;
     opacity: .8;
 }
 a:hover {
     opacity: .6;
 }
 a:visited {
-    color: blue;
+    color: $primary;
 }
 table {
     width: 100%;
@@ -62,8 +84,8 @@ td {
     padding: .25em;
 }
 table.ruled td {
-    border-top: 1px solid #ccc;
-    border-bottom: 1px solid #ccc;
+    border-top: 1px solid $light-grey;
+    border-bottom: 1px solid $light-grey;
 }
 td.top {
     vertical-align: top;
@@ -78,10 +100,10 @@ td p {
     font-size: .8rem;
 }
 .red {
-    color: red;
+    color: $red;
 }
 .grey {
-    color: #666;
+    color: $dark-grey;
 }
 .select-all {
     -webkit-user-select: all;
@@ -160,38 +182,38 @@ td p {
 
 .button {
     font-size: 1rem;
-    line-height: 1.6;
+    line-height: $lh;
     font-weight: bold;
     padding: .25em .75em;
     border: none;
     border-radius: 9999px;
-    background: blue;
-    color: white;
+    background: $primary;
+    color: $pure-white;
     opacity: .8;
     cursor: pointer;
     text-decoration: none;
 }
 .button:hover {
-    color: white;
+    color: $pure-white;
     opacity: .6;
 }
 .button:active {
-    color: white;
+    color: $pure-white;
 }
 .button:visited {
-    color: white;
+    color: $pure-white;
 }
 .button:disabled {
     opacity: .4;
     cursor: pointer;
 }
 .blue.button {
-    background: blue;
+    background: $blue;
 }
 .red.button {
-    background: red;
+    background: $red;
 }
-.small.button {
+.small.button, .small .button {
     font-size: .8rem;
 }
 
@@ -203,13 +225,13 @@ td p {
     font-weight: bold;
     font-size: .6em;
     background: #666;
-    color: #fff;
+    color: $pure-white;
 }
 .red.badge {
-    background: red;
+    background: $red;
 }
 .blue.badge {
-    background: blue;
+    background: $blue;
 }
 
 /* Forms and fields */
@@ -222,7 +244,7 @@ input, textarea, select {
     font-size: .8rem;
 }
 input, textarea {
-    border: 1px solid #ccc;
+    border: 1px solid $light-grey;
     padding: .25em;
 }
 textarea {
@@ -253,7 +275,7 @@ input[type="file"] {
     font-weight: bold;
 }
 .field .required {
-    color: #666;
+    color: $dark-grey;
     font-size: .8rem;
 }
 .field .help-text {
@@ -268,7 +290,7 @@ input[type="file"] {
     margin: 0;
     padding: 0;
     list-style: none;
-    color: red;
+    color: $red;
     font-size: .8rem;
 }
 
@@ -296,9 +318,13 @@ input[type="file"] {
     width: 1.25em;
     height: 1.25em;
     shape-rendering: geometricPrecision;
+    fill-rule: evenodd;
 }
 .icon path, .icon rect, .icon circle {
-    fill: #202020;
+    fill: $black;
+}
+.error.icon path {
+    fill: $red;
 }
 
 /* Global nav */
@@ -308,12 +334,12 @@ input[type="file"] {
     margin: 0 auto;
 }
 .topnav {
-    border-bottom: 1px solid #ccc;
-    background: #fff;
+    border-bottom: 1px solid $light-grey;
+    background: $pure-white;
 }
 .bottomnav {
     margin-top: 2rem;
-    border-top: 1px solid #ccc;
+    border-top: 1px solid $light-grey;
 }
 
 /* Toolbar */
@@ -337,8 +363,8 @@ input[type="file"] {
 
 /* Filter form */
 .filter.form {
-    background: #fff;
-    border: 1px solid #ccc;
+    background: $pure-white;
+    border: 1px solid $light-grey;
 }
 .filter.form .visible-fields {
     display: flex;
@@ -356,22 +382,22 @@ input[type="file"] {
     align-items: center;
     justify-content: center;
     min-height: 100%;
-    color: #666;
+    color: $dark-grey;
 }
 
 /* Communication object */
 
 .communication {
     margin-bottom: 1em;
-    border: 1px solid #ccc;
-    background: #ffffff;
+    border: 1px solid $light-grey;
+    background: $pure-white;
 }
 .communication table {
     width: auto;
 }
 .communication header {
     padding: .5rem 1rem;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid $light-grey;
 }
 .communication header .badge {
     display: block;
@@ -383,7 +409,7 @@ input[type="file"] {
 .communication__message {
     overflow: hidden;
     padding: 0 1em;
-    font-family: "Georgia", serif;
+    font-family: $serif;
 }
 .communication.sent {
     color: #000350;
@@ -395,7 +421,7 @@ input[type="file"] {
 
 .file {
     padding: .5rem 1rem;
-    border-top: 1px solid #ccc;
+    border-top: 1px solid $light-grey;
 }
 .sent .file {
     border-top-color: #ccccff;
@@ -421,8 +447,8 @@ input[type="file"] {
     display: block;
     width: 100%;
     padding: .25em;
-    border: 1px solid #ccc;
-    background: #fff;
+    border: 1px solid $light-grey;
+    background: $pure-white;
 }
 .autocomplete-light-widget .remove {
     vertical-align: middle;
