@@ -454,3 +454,94 @@ input[type="file"] {
     vertical-align: middle;
     margin-right: .25em;
 }
+
+/* Exemption Browser */
+
+.exemptionBrowser label {
+    display: block;
+    margin-bottom: .25em;
+}
+
+.exemption-search {
+    @extend .align-center;
+    margin-bottom: 1rem;
+    input {
+        flex: 1 1 auto;
+        padding-left: 1rem;
+        line-height: $lh;
+        border-top-left-radius: 9999px;
+        border-bottom-left-radius: 9999px;
+    }
+    button {
+        flex: 1 1 25%;
+        border: 1px solid $primary;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+}
+
+.exemption__results {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid $dark-grey;
+    background: $light-grey;
+}
+
+.exemption__empty {
+    text-align: center;
+    .button {
+        display: none;
+    }
+}
+
+.exemption__detail {
+    margin: 1rem 0;
+    padding: 0 .5em;
+    border: 1px solid $light-grey;
+    background: $pure-white;
+}
+
+.exemption__list__item {
+    margin-bottom: 1rem;
+    padding: 0 .5em;
+    border: 1px solid $dark-grey;
+    background: $white;
+    cursor: pointer;
+    &:hover {
+        background: $primary;
+        color: $pure-white;
+        .link {
+            color: $pure-white;
+            text-decoration: underline;
+        }
+    }
+    .link {
+        color: $primary;
+    }
+}
+
+.exemption__detail__appeal {
+    blockquote {
+        font-style: italic;
+        white-space: pre-line;
+        user-select: all;
+    }
+    .quarter {
+        margin: 1rem;
+    }
+    .quarter p {
+        float: right;
+    }
+}
+
+.exemption__form {
+    margin-bottom: 1rem;
+    padding: 0 1rem;
+    border: 1px solid $light-grey;
+    background: $pure-white;
+    footer {
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+    }
+}
