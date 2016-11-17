@@ -141,7 +141,7 @@ $('document').ready(function(){
     $('.collapsable header').click(function(){
         $(this).parent().toggleClass('collapsed');
     });
-    $('.collapsable header').children('.nocollapse').click(function(event){
+    $('.collapsable header').find('.nocollapse').click(function(event){
         // Prevent click from propagating up to the collapsable header.
         event.stopPropagation();
     });

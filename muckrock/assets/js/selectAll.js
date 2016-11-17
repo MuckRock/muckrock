@@ -57,5 +57,5 @@
         $(selectAllCheckbox).click(handleSelectAllCheckboxClick);
         // Disable the toolbar to start.
         disableToolbar();
-    }
+    };
 })( jQuery );
