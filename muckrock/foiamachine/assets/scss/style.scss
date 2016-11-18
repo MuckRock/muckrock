@@ -489,7 +489,7 @@ input[type="file"] {
 
 .exemption__empty {
     text-align: center;
-    .button {
+    .exemption__empty__submit {
         display: none;
     }
 }
@@ -512,11 +512,11 @@ input[type="file"] {
         color: $pure-white;
         .link {
             color: $pure-white;
-            text-decoration: underline;
         }
     }
     .link {
         color: $primary;
+        text-decoration: underline;
     }
 }
 
@@ -539,9 +539,27 @@ input[type="file"] {
     padding: 0 1rem;
     border: 1px solid $light-grey;
     background: $pure-white;
+    position: relative;
     footer {
         margin-bottom: 1rem;
         display: flex;
         justify-content: space-between;
+    }
+    .overlay {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1;
+        background: rgba($white, .9);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        .icon {
+            height: 2rem;
+            width: 2rem;
+        }
     }
 }

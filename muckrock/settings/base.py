@@ -539,3 +539,4 @@ FOIAMACHINE_URL = 'dev.foiamachine.org:8000'
 CORS_URLS_REGEX = r'^/api(_v\d)?/.*$'
 # Limit CORS origin to just FOIA machine
 CORS_ORIGIN_REGEX_WHITELIST = (r'^(https?://)?(\w+\.)?foiamachine\.org(:\d+)?$', )
+CORS_ALLOW_CREDENTIALS = True
