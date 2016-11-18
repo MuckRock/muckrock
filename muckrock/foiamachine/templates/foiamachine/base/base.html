@@ -19,13 +19,19 @@
                 {% render_bundle 'foiamachine' 'css' %}
             {% endblock %}
         {% endcompress %}
+        <link rel="shortcut icon" href="{% static 'foiamachine/icons/favicon.ico' %}" />
+        <link rel="apple-touch-icon-precomposed" href="{% static 'foiamachine/icons/favicon-152.png' %}">
+        <link rel="mask-icon" href="{% static 'foiamachine/icons/favicon.svg' %}" color="#fb5238" />
     </head>
     {% endblock head %}
     {% block body %}
     <body>
         <nav class="topnav">
             <main class="space-between">
-                <p class="bold"><a href="{% host_url 'index' host 'foiamachine' %}">FOIA Machine</a> <span class="badge">Beta</span></p>
+                <p class="bold">
+                    <a href="{% host_url 'index' host 'foiamachine' %}">FOIA Machine</a>
+                    <span class="badge">Beta</span>
+                </p>
                 {% if request.user.is_authenticated %}
                 <ul class="nostyle inline">
                     <li class="bold"><a href="{% host_url 'profile' host 'foiamachine' %}">{{user}}</a></li>

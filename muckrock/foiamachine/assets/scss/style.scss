@@ -1,16 +1,16 @@
 /* Colors */
 
 $pure-black: #000000;
-$black: #202020;
-$dark-grey: #666666;
-$light-grey: #CCCCCC;
-$white: #f8f8f8;
+$black: #362522;
+$dark-grey: #84625d;
+$light-grey: #d5b3ae;
+$white: #f8f7f6;
 $pure-white: #FFFFFF;
 
 $blue: blue;
 $red: red;
 
-$primary: $blue;
+$primary: #fb5238;
 
 /* Typography */
 
@@ -135,6 +135,9 @@ td p {
 }
 .inline li:last-child {
     margin-right: 0;
+}
+.text-center {
+    text-align: center;
 }
 
 /* Grid and layout */
@@ -383,6 +386,55 @@ input[type="file"] {
     justify-content: center;
     min-height: 100%;
     color: $dark-grey;
+}
+
+/* Homepage */
+
+.homepage-header {
+    margin-bottom: 1rem;
+    padding: 2rem;
+    background: $primary;
+    // color: $white;
+    text-align: center;
+    .mascot.icon {
+        height: 4em;
+        width: 4em;
+        path {
+            // fill: $pure-white;
+        }
+    }
+    .button {
+        background: $black;
+        color: $primary;
+        opacity: 1;
+        &:hover {
+            background: $white;
+        }
+    }
+    .badge {
+        background: transparent;
+        color: $black;
+        border: 3px solid;
+    }
+        h1 {
+        margin-top: 0;
+        font-size: 2em;
+        text-align: center;
+    }
+}
+
+.homepage {
+    h2, p {
+        margin-top: 0;
+    }
+    .row:not(:first-child) {
+        margin-bottom: 1rem;
+        padding-top: 1rem;
+        border-top: 3px solid $light-grey;
+    }
+    h2 {
+        padding-right: 1rem;
+    }
 }
 
 /* Communication object */
