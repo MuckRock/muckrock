@@ -5,6 +5,7 @@ Models for the News application
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Prefetch
 
@@ -80,16 +81,15 @@ class Article(models.Model):
     def __unicode__(self):
         return self.title
 
-    @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
         kwargs = {
             'year': self.pub_date.strftime('%Y'),
             'month': self.pub_date.strftime('%b').lower(),
             'day': self.pub_date.strftime('%d'),
-            'slug': self.slug
+            'slug': self.slug,
         }
-        return ('news-detail', (), kwargs)
+        return reverse('news-detail', kwargs=kwargs)
 
     def save(self, *args, **kwargs):
         """Save the news article"""

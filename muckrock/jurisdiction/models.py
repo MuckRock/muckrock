@@ -133,12 +133,11 @@ class Jurisdiction(models.Model, RequestHelper):
             })
         return slugs
 
-    @models.permalink
     def get_url(self, view):
         """The url for this object"""
         view = 'jurisdiction-%s' % view
         slugs = self.get_slugs()
-        return (view, [], slugs)
+        return reverse(view, kwargs=slugs)
 
     def save(self, *args, **kwargs):
         """Normalize fields before saving"""

@@ -3,6 +3,7 @@ Models for the Q&A application
 """
 
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.db import models
 
 from actstream.models import followers
@@ -42,10 +43,11 @@ class Question(models.Model):
             users_to_notify = [profile.user for profile in new_question_subscribers]
             notify(users_to_notify, action)
 
-    @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
-        return ('question-detail', [], {'slug': self.slug, 'pk': self.pk})
+        return reverse(
+                'question-detail',
+                kwargs={'slug': self.slug, 'pk': self.pk})
 
     def answer_authors(self):
         """Returns a list of users who have answered the question."""
