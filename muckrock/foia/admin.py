@@ -112,7 +112,7 @@ class FOIARequestAdmin(NestedModelAdmin, VersionAdmin):
     prepopulated_fields = {'slug': ('title',)}
     list_display = ('title', 'user', 'status', 'agency', 'jurisdiction')
     list_filter = ['status']
-    list_select_related = True
+    list_select_related = ('agency', 'jurisdiction', 'user')
     search_fields = ['title', 'description', 'tracking_id', 'mail_id']
     readonly_fields = ['mail_id']
     filter_horizontal = ('read_collaborators', 'edit_collaborators')
