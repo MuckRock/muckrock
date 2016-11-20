@@ -4,6 +4,7 @@ Models for the FOIA application
 """
 
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.db import models
 
 from taggit.managers import TaggableManager
@@ -38,10 +39,11 @@ class FOIAMultiRequest(models.Model):
     def __unicode__(self):
         return self.title
 
-    @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
-        return ('foia-multi-draft', [], {'slug': self.slug, 'idx': self.pk})
+        return reverse(
+                'foia-multi-draft',
+                kwargs={'slug': self.slug, 'idx': self.pk})
 
     class Meta:
         # pylint: disable=too-few-public-methods

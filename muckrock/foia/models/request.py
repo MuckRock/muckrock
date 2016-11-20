@@ -236,15 +236,16 @@ class FOIARequest(models.Model):
     def __unicode__(self):
         return self.title
 
-    @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
-        return ('foia-detail', [], {
-            'jurisdiction': self.jurisdiction.slug,
-            'jidx': self.jurisdiction.pk,
-            'slug': self.slug,
-            'idx': self.pk
-        })
+        return reverse(
+                'foia-detail',
+                kwargs={
+                    'jurisdiction': self.jurisdiction.slug,
+                    'jidx': self.jurisdiction.pk,
+                    'slug': self.slug,
+                    'idx': self.pk,
+                    })
 
     def save(self, *args, **kwargs):
         """Normalize fields before saving and set the embargo expiration if necessary"""
