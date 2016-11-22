@@ -97,6 +97,10 @@ class FOIARequestFactory(factory.django.DjangoModelFactory):
     slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
     user = factory.SubFactory(UserFactory)
     jurisdiction = factory.SubFactory('muckrock.factories.JurisdictionFactory')
+    agency = factory.SubFactory(
+        'muckrock.factories.AgencyFactory',
+        jurisdiction=factory.SelfAttribute('..jurisdiction')
+    )
 
 
 class FOIACommunicationFactory(factory.django.DjangoModelFactory):
