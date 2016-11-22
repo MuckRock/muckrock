@@ -461,73 +461,85 @@ class ResponseTask(Task):
         """Moves the associated communication to a new request"""
         return self.communication.move(foia_pks)
 
-    def set_tracking_id(self, tracking_id):
+    def set_tracking_id(self, tracking_id, comms=None):
         """Sets the tracking ID of the communication's request"""
         if type(tracking_id) is not type(unicode()):
             raise ValueError('Tracking ID should be a unicode string.')
-        comm = self.communication
-        if not comm.foia:
-            raise ValueError('The task communication is an orphan.')
-        foia = comm.foia
-        foia.tracking_id = tracking_id
-        foia.save(comment='response task tracking id')
+        if comms is None:
+            comms = [self.communication]
+        for comm in comms:
+            if not comm.foia:
+                raise ValueError('The task communication is an orphan.')
+            foia = comm.foia
+            foia.tracking_id = tracking_id
+            foia.save(comment='response task tracking id')
 
-    def set_status(self, status, set_foia=True):
+    def set_status(self, status, set_foia=True, comms=None):
         """Sets status of comm and foia, with option for only setting comm stats"""
-        comm = self.communication
         # check that status is valid
         if status not in [status_set[0] for status_set in STATUS]:
             raise ValueError('Invalid status.')
-        # save comm first
-        comm.status = status
-        comm.save()
-        # save foia next, unless just updating comm status
-        if set_foia:
-            foia = comm.foia
-            foia.status = status
-            if status in ['rejected', 'no_docs', 'done', 'abandoned']:
-                foia.date_done = comm.date
-            foia.update()
-            foia.save(comment='response task status')
-            logging.info('Request #%d status changed to "%s"', foia.id, status)
-            action = generate_status_action(foia)
-            foia.notify(action)
-            # Mark generic '<Agency> sent a communication to <FOIARequest> as read.'
-            # https://github.com/MuckRock/muckrock/issues/1003
-            generic_notifications = (Notification.objects.for_object(foia)
-                                    .get_unread().filter(action__verb='sent a communication'))
-            for generic_notification in generic_notifications:
-                generic_notification.mark_read()
+        if comms is None:
+            comms = [self.communication]
+        for comm in comms:
+            # save comm first
+            comm.status = status
+            comm.save()
+            # save foia next, unless just updating comm status
+            if set_foia:
+                foia = comm.foia
+                foia.status = status
+                if status in ['rejected', 'no_docs', 'done', 'abandoned']:
+                    foia.date_done = comm.date
+                foia.update()
+                foia.save(comment='response task status')
+                logging.info('Request #%d status changed to "%s"', foia.id, status)
+                action = generate_status_action(foia)
+                foia.notify(action)
+                # Mark generic '<Agency> sent a communication to <FOIARequest> as read.'
+                # https://github.com/MuckRock/muckrock/issues/1003
+                generic_notifications = (Notification.objects.for_object(foia)
+                                        .get_unread().filter(action__verb='sent a communication'))
+                for generic_notification in generic_notifications:
+                    generic_notification.mark_read()
 
-    def set_price(self, price):
+    def set_price(self, price, comms=None):
         """Sets the price of the communication's request"""
         price = float(price)
-        comm = self.communication
-        if not comm.foia:
-            raise ValueError('This tasks\'s communication is an orphan.')
-        foia = comm.foia
-        foia.price = price
-        foia.save(comment='response task price')
+        if comms is None:
+            comms = [self.communication]
+        for comm in comms:
+            if not comm.foia:
+                raise ValueError('This tasks\'s communication is an orphan.')
+            foia = comm.foia
+            foia.price = price
+            foia.save(comment='response task price')
 
-    def set_date_estimate(self, date_estimate):
+    def set_date_estimate(self, date_estimate, comms=None):
         """Sets the estimated completion date of the communication's request."""
-        foia = self.communication.foia
-        foia.date_estimate = date_estimate
-        foia.update()
-        foia.save(comment='response task date estimate')
-        logging.info('Estimated completion date set to %s', date_estimate)
+        if comms is None:
+            comms = [self.communication]
+        for comm in comms:
+            foia = comm.foia
+            foia.date_estimate = date_estimate
+            foia.update()
+            foia.save(comment='response task date estimate')
+            logging.info('Estimated completion date set to %s', date_estimate)
 
-    def proxy_reject(self):
+    def proxy_reject(self, comms=None):
         """Special handling for a proxy reject"""
-        self.communication.status = 'rejected'
-        self.communication.save()
-        foia = self.communication.foia
-        foia.status = 'rejected'
-        foia.proxy_reject()
-        foia.update()
-        foia.save(comment='response task proxy reject')
-        action = generate_status_action(foia)
-        foia.notify(action)
+        if comms is None:
+            comms = [self.communication]
+        for comm in comms:
+            comm.status = 'rejected'
+            comm.save()
+            foia = comm.foia
+            foia.status = 'rejected'
+            foia.proxy_reject()
+            foia.update()
+            foia.save(comment='response task proxy reject')
+            action = generate_status_action(foia)
+            foia.notify(action)
 
 
 class FailedFaxTask(Task):

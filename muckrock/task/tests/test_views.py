@@ -611,7 +611,7 @@ class ResponseTaskListViewTests(TestCase):
             'Moving the communication should not change its date.')
 
     def test_post_move_multiple(self):
-        """Moving the response to multiple requests should only modify the first request."""
+        """Moving the response to multiple requests modify all the requests."""
         other_foias = [
             factories.FOIARequestFactory(),
             factories.FOIARequestFactory(),
