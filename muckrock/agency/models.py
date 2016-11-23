@@ -4,7 +4,6 @@ Models for the Agency application
 
 from django.contrib.auth.models import User
 from django.core.exceptions import MultipleObjectsReturned
-from django.core.urlresolvers import reverse
 from django.db import models
 from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
