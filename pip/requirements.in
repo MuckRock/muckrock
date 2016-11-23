@@ -8,10 +8,12 @@ django-adaptors # Used for model import
 django-autocomplete-light<3 # Autocomplete drop down inputs
 django-celery # Integrate celery with django
 django-compressor # Compress all JS and CSS assets into a single file
+django-cors-headers # Allows access to API endpoints from non-MuckRock domains
 django-dbsettings # DB stored configurations
 django-debug-toolbar # Toolbar for debugging
-django-filter # Used for filtering in viewsets
+django-filter==0.13.0 # Used for filtering in viewsets
 django-geojson # Used for storing geographic data
+django-hosts # Used for multi-domain routing
 django-leaflet # Used for plotting geographic data
 django-localflavor # Used for phone numbers and state list
 django-lot # Used for Log On Tokens
@@ -21,7 +23,7 @@ django-package-monitor # Keeps track of which packages need upgrading
 django-premailer # Styles HTML emails
 django-pylibmc # Interface to memcache
 django-querycount # Counts queries for dev
-django-rest-swagger # API documentation
+django-rest-swagger==0.3.7 # API documentation
 django-reversion==1.10.2 # Version history for models
 django-robots # Manage robots.txt file
 django-secure # Enforces security best practices

@@ -16,6 +16,8 @@ INSTALLED_APPS += ('django_nose',)
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
+SITE_ID = 1
+
 # minimal middleware for speed
 # can I disable more?
 MIDDLEWARE_CLASSES = (

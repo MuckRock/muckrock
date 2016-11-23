@@ -55,8 +55,6 @@ USE_TZ = False
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
 
-SITE_ID = 1
-
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
 USE_I18N = False
@@ -132,6 +130,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 )
 
 MIDDLEWARE_CLASSES = (
+    'corsheaders.middleware.CorsMiddleware',
+    'django_hosts.middleware.HostsRequestMiddleware',
     'djangosecure.middleware.SecurityMiddleware',
     'dogslow.WatchdogMiddleware',
     'django.middleware.gzip.GZipMiddleware',
@@ -145,6 +145,7 @@ MIDDLEWARE_CLASSES = (
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'reversion.middleware.RevisionMiddleware',
+    'django_hosts.middleware.HostsResponseMiddleware',
 )
 
 INTERNAL_IPS = ('127.0.0.1',)
@@ -173,6 +174,7 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
     'django.contrib.staticfiles',
     'compressor',
+    'corsheaders',
     'debug_toolbar',
     'django_premailer',
     'djangosecure',
@@ -199,6 +201,7 @@ INSTALLED_APPS = (
     'lot',
     'package_monitor',
     'image_diet',
+    'django_hosts',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
@@ -216,6 +219,7 @@ INSTALLED_APPS = (
     'muckrock.organization',
     'muckrock.project',
     'muckrock.mailgun',
+    'muckrock.foiamachine',
     'actstream'
 )
 
@@ -479,6 +483,9 @@ PACKAGE_MONITOR_REQUIREMENTS_FILE = os.path.join(SITE_ROOT, '../requirements.txt
 TAGGIT_CASE_INSENSITIVE = True
 TAGGIT_TAGS_FROM_STRING = 'muckrock.tags.models.parse_tags'
 
+ROOT_HOSTCONF = 'muckrock.hosts'
+DEFAULT_HOST = 'default'
+
 # Organization Settings
 
 ORG_MIN_SEATS = 3
@@ -514,7 +521,14 @@ LEAFLET_CONFIG = {
     }
 }
 
-# Django Filter settings
+FOIAMACHINE_URL = 'dev.foiamachine.org:8000'
 
+# Limit CORS support to just API endpoints
+CORS_URLS_REGEX = r'^/api(_v\d)?/.*$'
+# Limit CORS origin to just FOIA machine
+CORS_ORIGIN_REGEX_WHITELIST = (r'^(https?://)?(\w+\.)?foiamachine\.org(:\d+)?$', )
+CORS_ALLOW_CREDENTIALS = True
+
+# Django Filter settings
 FILTERS_HELP_TEXT_EXCLUDE = False
 FILTERS_HELP_TEXT_FILTER = False

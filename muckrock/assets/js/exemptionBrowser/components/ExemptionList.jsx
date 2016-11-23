@@ -40,9 +40,11 @@ const ExemptionList = ({query, loading, exemptions, showExemptionDetail, showExe
         if (exemptions.length > 0) {
             emptyResults = (
                 <div className="exemption__empty small">
-                    <p className="bold nomargin">Are these results unhelpful?</p>
-                    <p className="nomargin">Tell us how your request was rejected and we'll help you appeal it.</p>
-                    <button onClick={showExemptionForm} className="button">Submit Information</button>
+                    <div className="exemption__empty__submit">
+                        <p className="bold nomargin">Are these results unhelpful?</p>
+                        <p className="nomargin">Tell us how your request was rejected and we'll help you appeal it.</p>
+                        <button onClick={showExemptionForm} className="button">Submit Information</button>
+                    </div>
                 </div>
             )
             renderedList = (
@@ -63,8 +65,10 @@ const ExemptionList = ({query, loading, exemptions, showExemptionDetail, showExe
             emptyResults = (
                 <div className="exemption__empty">
                     <p className="bold nomargin">We don't have anything in our database yet for "{query}".</p>
-                    <p>Tell us how your request was rejected and we'll help you appeal it.</p>
-                    <button onClick={showExemptionForm} className="button">Submit Information</button>
+                    <div className="exemption__empty__submit">
+                        <p>Tell us how your request was rejected and we'll help you appeal it.</p>
+                        <button onClick={showExemptionForm} className="button">Submit Information</button>
+                    </div>
                 </div>
             )
             renderedList = (

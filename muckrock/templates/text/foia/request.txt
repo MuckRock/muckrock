@@ -1,6 +1,4 @@
-{% autoescape off%}
-{% block title %}{% endblock %}
-
+{% autoescape off%}{% block title %}{% endblock %}
 To Whom It May Concern:
 
 {{ jurisdiction.get_intro }}

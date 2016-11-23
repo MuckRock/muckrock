@@ -1,0 +1,16 @@
+{% extends 'foiamachine/base/base_form.html' %}
+
+{% load hosts %}
+
+{% block header %}
+<h1>Log in</h1>
+{% endblock %}
+
+{% block submit %}
+<button type="submit" class="button">Submit</button>
+{% endblock %}
+
+{% block footer %}
+<p>New to FOIA Machine? <a href="{% host_url 'signup' host 'foiamachine' %}?{{request.GET.urlencode}}">Sign up &rarr;</a></p>
+<p>Forgot your password? <a href="{% host_url 'password-reset' host 'foiamachine' %}">Reset it &rarr;</a></p>
+{% endblock %}

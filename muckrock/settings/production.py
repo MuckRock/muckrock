@@ -19,3 +19,5 @@ SESSION_COOKIE_SECURE = True
 PREPEND_WWW = True
 
 EMAIL_BACKEND = 'django_mailgun.MailgunBackend'
+
+FOIAMACHINE_URL = 'beta.foiamachine.org'
