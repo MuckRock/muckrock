@@ -1,0 +1,80 @@
+{% load hosts %}
+{% load compress %}
+{% load static from staticfiles %}
+{% load render_bundle from webpack_loader %}
+
+<!doctype html>
+<html>
+    {% block head %}
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="{% block description %}{% endblock %}">
+        <meta name="author" content="{% block content_author %}FOIA Machine{% endblock %}">
+        <title>{% block title %}FOIA Machine{% endblock %}</title>
+        {% compress css %}
+            {% block styles %}
+                <link rel="stylesheet" type="text/css" href="{% static 'autocomplete_light/style.css' %}" />
+                {% render_bundle 'foiamachine' 'css' %}
+            {% endblock %}
+        {% endcompress %}
+        <link rel="shortcut icon" href="{% static 'foiamachine/icons/favicon.ico' %}" />
+        <link rel="apple-touch-icon-precomposed" href="{% static 'foiamachine/icons/favicon-152.png' %}">
+        <link rel="mask-icon" href="{% static 'foiamachine/icons/favicon.svg' %}" color="#fb5238" />
+    </head>
+    {% endblock head %}
+    {% block body %}
+    <body>
+        <nav class="topnav">
+            <main class="space-between">
+                <p class="bold">
+                    <a href="{% host_url 'index' host 'foiamachine' %}">FOIA Machine</a>
+                    <span class="badge">Beta</span>
+                </p>
+                {% if request.user.is_authenticated %}
+                <ul class="nostyle inline">
+                    <li class="bold"><a href="{% host_url 'profile' host 'foiamachine' %}">{{user}}</a></li>
+                    <li class="small"><a href="{% host_url 'logout' host 'foiamachine' %}">Log out</a></li>
+                </ul>
+                {% else %}
+                <ul class="nostyle inline">
+                    <li><a href="{% host_url 'signup' host 'foiamachine' %}">Sign up</a></li>
+                    <li><a href="{% host_url 'login' host 'foiamachine' %}">Log in</a></li>
+                </ul>
+                {% endif %}
+            </main>
+        </nav>
+        {% block messages %}
+        {% for message in messages %}
+        {% include 'lib/pattern/message.html' %}
+        {% endfor %}
+        {% endblock %}
+        {% block main %}
+        <main></main>
+        {% endblock main %}
+        <nav class="bottomnav small">
+            <main>
+                <ul class="nostyle inline">
+                    <li class="bold"><a href="{% host_url 'index' host 'foiamachine' %}">FOIA Machine</a> <span class="badge">Beta</span></li>
+                    <li><a href="/about">About</a></li>
+                    <li><a href="/tos">Terms of Service</a></li>
+                    <li><a href="/privacy">Privacy Policy</a></li>
+                    <li><a href="/feedback">Feedback</a></li>
+                </ul>
+                <p>&copy; MuckRock Foundation, Inc. {% now "Y" %}</p>
+            </main>
+        </nav>
+        <!-- Scripts -->
+
+        {% compress js %}
+            {% block scripts %}
+                {% render_bundle 'foiamachine' 'js' %}
+                <script type="text/javascript" src="{% static 'autocomplete_light/autocomplete.js' %}"></script>
+                <script type="text/javascript" src="{% static 'autocomplete_light/widget.js' %}"></script>
+                <script type="text/javascript" src="{% static 'autocomplete_light/remote.js' %}"></script>
+            {% endblock %}
+        {% endcompress %}
+    </body>
+    {% endblock body %}
+</html>

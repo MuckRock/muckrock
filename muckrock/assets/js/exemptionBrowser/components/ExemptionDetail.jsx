@@ -5,6 +5,8 @@
 
 import React, { PropTypes } from 'react';
 
+import { rootDomain } from '../api';
+
 const AppealLanguage = ({appeal}) => {
     const handleClick = (e) => {
         /*
@@ -14,8 +16,7 @@ const AppealLanguage = ({appeal}) => {
         */
         const language = appeal.language;
         const id = appeal.id;
-        const $appealForm = $('#appeal .composer-input');
-        const $appealComposer = $appealForm.find('#appeal-composer');
+        const $appealComposer = $('textarea:visible');
         /*
         Insert the language into the textarea
         If there's nothing else in the textarea, don't pad it with spacing.
@@ -65,7 +66,7 @@ const ExemptionDetail = ({exemption, onBackClick}) => {
             <div className="exemption__detail textbox nomargin">
                 <h1>{exemption.name}</h1>
                 <p>{exemption.basis}</p>
-                <p><a href={exemption.absolute_url} target="_blank">Learn more</a></p>
+                <p><a href={rootDomain + exemption.absolute_url} target="_blank">Learn more</a></p>
                 {appealHeading}
                 {appeals}
             </div>

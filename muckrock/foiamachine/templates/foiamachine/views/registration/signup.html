@@ -1,0 +1,11 @@
+{% extends 'foiamachine/base/base_form.html' %}
+
+{% load hosts %}
+
+{% block header %}
+<h1>Sign up</h1>
+{% endblock %}
+
+{% block footer %}
+<p>Already have an account? <a href="{% host_url 'login' host 'foiamachine' %}?{{request.GET.urlencode}}">Log in &rarr;</a></p>
+{% endblock %}

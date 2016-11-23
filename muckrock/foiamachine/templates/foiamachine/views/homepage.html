@@ -1,0 +1,28 @@
+{% extends 'foiamachine/base/base.html' %}
+{% load hosts %}
+{% load static from staticfiles %}
+
+{% block main %}
+<header class="homepage-header">
+    {% include 'foiamachine/icons/mascot.svg' %}
+    <h1>FOIA Machine <span class="small badge">Beta</span></h1>
+    <div>
+        <a class="button" href="{% host_url 'signup' host 'foiamachine' %}">Sign up</a>
+        <a class="button" href="{% host_url 'login' host 'foiamachine' %}">Log In</a>
+    </div>
+</header>
+<main class="homepage">
+    <div class="row">
+        <h2 class="column">Automatically generate public records requests</h2>
+        <p class="column">Our simple tool allows anyone to generate a public records request with all the legal boilerplate you need.</p>
+    </div>
+    <div class="row">
+        <h2 class="column">Track the progess of your requests</h2>
+        <p class="column">Use your FOIA Machine account to track the progress of your requests, all from one place.</p>
+    </div>
+    <div class="row">
+        <h2 class="column">Powered by MuckRock</h2>
+        <p class="column">Access an extensive database of jurisdictions and government agencies.</p>
+    </div>
+</main>
+{% endblock %}
