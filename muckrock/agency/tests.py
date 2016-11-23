@@ -181,7 +181,7 @@ class TestAgencyViews(TestCase):
         # pylint: disable=no-self-use
         approved_agency = factories.AgencyFactory()
         unapproved_agency = factories.AgencyFactory(status='pending')
-        response = http_get_response(reverse('agency-list'), agency.views.List.as_view())
+        response = http_get_response(reverse('agency-list'), agency.views.AgencyList.as_view())
         agency_list = response.context_data['object_list']
         ok_(approved_agency in agency_list, 'Approved agencies should be listed.')
         ok_(unapproved_agency not in agency_list, 'Unapproved agencies should not be listed.')

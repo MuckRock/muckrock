@@ -8,84 +8,84 @@
 {% load cache %}
 
 {% block content %}
-{# cache 600 homepage #}
 <div class="homepage">
-    <main>
-        <section class="news">
-            {% cache 600 news %}
-            <ul class="articles nostyle">
-                {% for article in articles %}
-                {% if forloop.counter0 < 1 %}
-                <li class="articles--high">
-                    {% include 'lib/pattern/article.html' with large=True %}
+	{% cache cache_timeout homepage_top %}
+    <div class="banner-wrapper mb0" style="background-image: url('{% static 'img/fingerprinting.jpg' %}');">
+        <div class="foia banner">
+            <div class="banner-container">
+                <h1>File, track, and share public records requests.</h1>
+            </div>
+            <div class="about banner-container">
+                <a href="{% url 'foia-create' %}" class="primary button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
+                    {% include 'lib/component/icon/create-request.svg' %}
+                    <span class="label">File a Request</span>
+                </a>
+                <div class="call-to-action"><a href="{% url 'foia-root' %}">Explore filed requests</a> or <a href="/about/how-we-work/" id="learn-more">learn how it works</a>.</div>
+            </div>
+            <ul class="stats banner-container">
+			{% with request_count=stats.request_count agency_count=stats.agency_count completed_count=stats.completed_count page_count=stats.page_count %}
+                <li class="stat">
+                    <div class="value">{{ request_count|intcomma }}</div>
+                    <div class="key">filed request{{ request_count|pluralize }}</div>
                 </li>
-                {% elif forloop.counter0 < 3 %}
-                <li class="articles--med">
-                    {% include 'lib/pattern/article.html' %}
+                <li class="stat">
+                    <div class="value">{{ agency_count|intcomma }}</div>
+                    <div class="key">agenc{{ agency_count|pluralize:"y,ies" }}</div>
                 </li>
-                {% else %}
-                <li class="articles--low">
-                    {% include 'lib/pattern/article.html' with small=True hide_image=True %}
+                <li class="stat">
+                    <div class="value">{{ completed_count|intcomma }}</div>
+                    <div class="key">fulfilled request{{ completed_count|pluralize }}</div>
                 </li>
-                {% endif %}
-                {% endfor %}
+                <li class="stat">
+                    <div class="value">{{ page_count|intcomma }}</div>
+                    <div class="key">released page{{ page_count|pluralize }}</div>
+                </li>
+			{% endwith %}
             </ul>
-            {% endcache %}
-            {% newsletter %}
-            {% if featured_projects %}
-            {% cache 600 projects %}
-            <div class="projects">
-                <h2>Projects <small><a href="{% url 'project' %}">See all</a></small></h2>
-                <ul class="nostyle">
-                {% for project in featured_projects %}
-                    <li>
-                        {% include 'lib/pattern/project.html' %}
-                    </li>
+			{% with completed_requests=completed_requests %}
+            {% if completed_requests %}
+            <div class="completed-requests black">
+                <header>
+                    <h2>Recently completed requests</h2>
+                    <a href="{% url 'foia-list' %}?status=done" title="See all the completed requests in our archive">See all &rarr;</a>
+                </header>
+                {% for foia in completed_requests %}
+                    {% include 'lib/foia.html' with hide_actions=True %}
                 {% endfor %}
-                </ul>
+                <div class="spacer"></div>
             </div>
-            {% endcache %}
             {% endif %}
-        </section>
-        <section class="requests">
-            <div class="foia banner" style="background-image: url('{% static 'img/homepage/requests.jpg' %}');">
-                <div class="about">
-                    <h2>File, track, and share public records requests</h2>
-                    <a href="{% url 'foia-create' %}" class="primary button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
-                        {% include 'lib/component/icon/create-request.svg' %}
-                        <span class="label">File a Request</span>
-                    </a>
-                    <div class="call-to-action"><a href="/about/how-we-work/" id="learn-more">or learn how it works.</a></div>
-                </div>
-                <div class="info">
-                    <ul class="stats">
-                        <li class="stat">
-                            <div class="value">{{ stats.request_count|intcomma }}</div>
-                            <div class="key">filed request{{ stats.request_count|pluralize }}</div>
-                        </li>
-                        <li class="stat">
-                            <div class="value">{{ stats.agency_count|intcomma }}</div>
-                            <div class="key">agenc{{ stats.agency_count|pluralize:"y,ies" }}</div>
-                        </li>
-                        <li class="stat">
-                            <div class="value">{{ stats.completed_count|intcomma }}</div>
-                            <div class="key">fulfilled request{{ stats.completed_count|pluralize }}</div>
-                        </li>
-                        <li class="stat">
-                            <div class="value">{{ stats.page_count|intcomma }}</div>
-                            <div class="key">released page{{ stats.page_count|pluralize }}</div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <h2>Recent completed requests</h2>
-            {% for foia in completed_requests %}
-                {% include 'lib/foia.html' with hide_actions=True %}
-            {% endfor %}
-            <a href="{% url 'foia-list' %}?status=done&sort=date_submitted&order=desc">See more</a>
-        </section>
-    </main>
-
+			{% endwith %}
+        </div>
+    </div>
+    {% endcache %}
+    {% newsletter %}
+    {% cache cache_timeout homepage_bottom %}
+    <div class="articles grid__row">
+        {% for article in articles %}
+        {% if forloop.first %}
+        <div class="grid__column two-thirds">
+            {% include 'lib/pattern/article.html' with large=True %}
+        </div>
+        {% else %}
+        <div class="grid__column third">
+            {% include 'lib/pattern/article.html' with small=True %}
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+    {% if featured_projects %}
+    <div class="projects">
+        <h2>Projects <small><a href="{% url 'project' %}">See all</a></small></h2>
+        <ul class="nostyle">
+        {% for project in featured_projects %}
+            <li>
+                {% include 'lib/pattern/project.html' %}
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    {% endcache %}
 </div>
-{# endcache #}
 {% endblock content %}

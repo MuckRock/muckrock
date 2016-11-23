@@ -164,6 +164,8 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
             width: 100%;
             margin: 0;
             color: $color-white;
+            background: transparent;
+            border: none;
             font-size: $size-4;
             &:before {
                 content: "Jurisdiction";
@@ -203,19 +205,18 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
             list-style-type: circle;
         }
     }
+    .foia__single {
+        display: inline-block;
+        max-width: 20em;
+        margin-right: $vr;
+        &:last-child {
+            margin-bottom: $vr;
+        }
+    }
 }
 
 .clone-candidates {
     text-align: center;
-}
-
-.foia__single {
-    display: inline-block;
-    max-width: 20em;
-    margin-right: $vr;
-    &:last-child {
-        margin-bottom: $vr;
-    }
 }
 
 .multirequest-create {

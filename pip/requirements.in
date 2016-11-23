@@ -1,9 +1,7 @@
 -e git://github.com/callowayproject/django-news-sitemaps.git@55da6b72580dd6d79380f2bb17240e7afa00555a#egg=django_news_sitemaps-master # Generates a news sitemap
--e git://github.com/django-haystack/django-haystack.git@f1ed18313777005dd77ed724ecbfb27c0b03cad8#egg=django-haystack # django search engine
 -e git://github.com/BradWhittington/django-mailgun.git@4f2edb9466f6245c3bbf501aab2681f0b3c71e0c#egg=django_mailgun # Mail backend used directly (on production)
 boto # Used to access AWS
 celery # Used to run async tasks
-celery-haystack # Integrate celery and haystack
 dill # Used to serialize machine learning data
 django-activity-stream # Used for notifications
 django-adaptors # Used for model import
@@ -32,6 +30,7 @@ django-secure # Enforces security best practices
 django-sslify # Force SSL everywhere
 django-storages # Store files on S3
 django-taggit # Used for tagging
+django-watson # Used for search
 django-webpack-loader==0.3.0 # Used for loading Webpack bundles
 django<1.10 # Django is kinda important...
 djangorestframework # The API framework
@@ -45,7 +44,6 @@ numpy==1.9.1 # Used by machine learning
 pascha # Used by business days to calculate th date of Easter
 pillow # Used by Django for image handling
 psycopg2 # Interface to postgres DB
-pysolr # Interface to Apache solr for search engine
 python-dateutil # Used for relative time deltas
 raven # Sentry integration
 redis # Redis integration - for use with celery

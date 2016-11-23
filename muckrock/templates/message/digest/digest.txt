@@ -1,4 +1,5 @@
 {% extends 'message/base.txt' %}
+{% load tags %}
 {% block body %}
 {% if activity.requests.count > 0 %}
 ---------------------------
@@ -38,7 +39,7 @@ Yours
 - - - - - - - - - - - - - -
 {% for notification in activity.questions.mine %}
 {% with notification.action as action %}
-* {% if action.action_object %}{{ action.action_object }}{% if action.action_object.get_absolute_url %} <{{action.action_object.get_absolute_url }}>{% endif %}{% endif %}{% if action.action_object and action.target %} to{% endif %}{% if action.target %} {{ action.target }}{% if action.target.get_absolute_url %} <{{action.target.get_absolute_url }}>{% endif %}{% endif %} {{ action.verb }} by {{ action.actor }}{% if action.actor.get_absolute_url %} <{{action.actor.get_absolute_url }}>{% endif %}.
+* {% include 'lib/pattern/actions/passive.txt' %}
 {% endwith %}
 {% endfor %}
 {% endif %}
@@ -47,7 +48,7 @@ Following
 - - - - - - - - - - - - - -
 {% for notification in activity.questions.following %}
 {% with notification.action as action %}
-* {% if action.action_object %}{{ action.action_object }}{% if action.action_object.get_absolute_url %} <{{action.action_object.get_absolute_url }}>{% endif %}{% endif %}{% if action.action_object and action.target %} to{% endif %}{% if action.target %} {{ action.target }}{% if action.target.get_absolute_url %} <{{action.target.get_absolute_url }}>{% endif %}{% endif %} {{ action.verb }} by {{ action.actor }}{% if action.actor.get_absolute_url %} <{{action.actor.get_absolute_url }}>{% endif %}.
+* {% include 'lib/pattern/actions/passive.txt' %}
 {% endwith %}
 {% endfor %}
 {% endif %}
@@ -55,5 +56,5 @@ Following
 {% endblock %}
 
 {% block settings %}
-Change your digest frequency or disable digests from your account settings ({{base_url}}{% url 'acct-settings' %}).</p>
+Change your digest frequency or disable digests from your account settings ({{base_url}}{% url 'acct-settings' %}?{% autologin user %}).</p>
 {% endblock %}

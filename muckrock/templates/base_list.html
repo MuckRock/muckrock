@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% comment %}
+This is the base style for a list of objects: a collection of FOIA requests, agencies, jurisdictions, users, etc.
+{% endcomment %}
+
+{% load static from staticfiles %}
+{% load mathfilters %}
+
+{% block title %}{{title}} &bull; MuckRock{% endblock title %}
+
+{% block content %}
+<div class="list grid__row">
+    <nav class="grid__column quarter">
+        {% block list-navigation %}
+        <header>
+            {% block list-header %}
+            <h1>{% block list-title %}{{title}}{% endblock list-title %}</h1>
+            {% endblock list-header %}
+        </header>
+        {% block list-sections %}
+        {% endblock list-sections %}
+
+        {% if filter.form %}
+        <div class="nomargins">
+            <a href="#filter-toggle" class="bold list__toggle" id="filter-toggle">{% include 'lib/component/icon/search.svg' %}Show Filters &amp; Search</a>
+            <a href="#" class="bold list__toggle list__toggle--hide">&times; Hide Filters</a>
+            <form method="GET" class="filter form" id="filter-form">
+                {% if search_form %}
+                {% include 'lib/pattern/field.html' with field=search_form.q %}
+                {% endif %}
+                {% include 'lib/pattern/form.html' with form=filter.form %}
+                <div class="button-group">
+                    <button class="button" action="apply-filters">Filter</button>
+                    <a class="button" href="{{ request.path }}">Clear</a>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+        {% endblock list-navigation %}
+    </nav>
+    <div class="grid__column three-quarters">
+    {% block list-content %}
+        {% block list-actions %}{% endblock %}
+        {% if object_list %}
+            {% include 'lib/component/pagination.html' %}
+            {% block list-objects %}
+            <table class="sortable cardtable" data-sort-by="{{sort}}" data-order-by="{{order}}">
+                {% block list-table %}
+                <thead>
+                    <tr>
+                        {% block list-table-head %}
+                        <th data-sort="id">ID</th>
+                        <th>Object</th>
+                        {% endblock list-table-head %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% block list-table-body %}
+                    {% for object in object_list %}
+                    <tr>
+                        {% block list-table-row %}
+                        <td>{{object.id}}
+                        <td><a href="{{object.get_absolute_url}}">{{object}}</a></td>
+                        {% endblock list-table-row %}
+                    </tr>
+                    {% endfor %}
+                    {% endblock list-table-body %}
+                </tbody>
+                {% endblock list-table %}
+            </table>
+            {% endblock %}
+            {% include 'lib/component/pagination.html' %}
+        {% else %}
+            {% block empty %}
+            {% if request.GET %}
+            <p class="empty">No results given this filter.</p>
+            {% else %}
+            <p class="empty">No Results</p>
+            {% endif %}
+            {% endblock %}
+        {% endif %}
+    {% endblock list-content %}
+    </div>
+</div>
+{% endblock %}

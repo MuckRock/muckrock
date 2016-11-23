@@ -5,7 +5,6 @@ Nodes and tags for rendering crowdfunds into templates
 from django import template
 from django.conf import settings
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 
@@ -91,22 +90,22 @@ def generate_crowdfund_context(the_crowdfund, the_url_name, the_form, the_contex
     """Generates context in a way that's agnostic towards the object being crowdfunded."""
     endpoint = reverse(the_url_name, kwargs={'pk': the_crowdfund.pk})
     payment_form = crowdfund_form(the_crowdfund, the_form)
-    current_site = Site.objects.get_current()
     logged_in, user_email = crowdfund_user(the_context)
     the_request = the_context.request
     named, contrib_count, anon_count = (
             cache_get_or_set(
                 'cf:%s:crowdfund_widget_data' % the_crowdfund.pk,
                 lambda: (
-                    the_crowdfund.named_contributors(),
+                    list(the_crowdfund.named_contributors()),
                     the_crowdfund.contributors_count(),
                     the_crowdfund.anonymous_contributors_count(),
                     ),
-                600))
+                settings.DEFAULT_CACHE_TIMEOUT))
     contrib_sum = contributor_summary(
             named,
             contrib_count,
             anon_count)
+    obj_url = the_crowdfund.get_crowdfund_object().get_absolute_url()
     return {
         'crowdfund': the_crowdfund,
         'named_contributors': named,
@@ -120,7 +119,7 @@ def generate_crowdfund_context(the_crowdfund, the_url_name, the_form, the_contex
         'payment_form': payment_form,
         'request': the_request,
         'stripe_pk': settings.STRIPE_PUB_KEY,
-        'domain': current_site.domain
+        'obj_url': obj_url,
     }
 
 @register.inclusion_tag('crowdfund/widget.html', name='crowdfund', takes_context=True)

@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.text import slugify
 
+from muckrock.crowdfund.models import Crowdfund
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
 from muckrock.task.models import ProjectReviewTask
@@ -40,6 +41,15 @@ class ProjectQuerySet(models.QuerySet):
                 models.Q(contributors=user)
             ).distinct()
         return projects
+
+    def optimize(self):
+        """Annotate, select, and prefetch data."""
+        return (self.annotate(request_count=models.Count('requests', distinct=True))
+                    .annotate(article_count=models.Count('articles', distinct=True))
+                    .prefetch_related(models.Prefetch('crowdfunds',
+                        queryset=Crowdfund.objects.order_by('-date_due')
+                        .annotate(contributors_count=models.Count('payments'))))
+        )
 
 
 class Project(models.Model):

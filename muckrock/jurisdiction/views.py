@@ -13,11 +13,12 @@ from django.views.generic import DetailView
 from rest_framework import viewsets
 
 from muckrock.agency.models import Agency
-from muckrock.jurisdiction.forms import FlagForm, JurisdictionFilterForm
+from muckrock.jurisdiction.filters import JurisdictionFilterSet
+from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction, Exemption
 from muckrock.jurisdiction.serializers import JurisdictionSerializer
 from muckrock.task.models import FlaggedTask
-from muckrock.views import MRFilterableListView
+from muckrock.views import MRFilterListView
 
 
 def collect_stats(obj, context):
@@ -112,38 +113,23 @@ def detail(request, fed_slug, state_slug, local_slug):
             )
     collect_stats(jurisdiction, context)
 
-    return render_to_response('profile/jurisdiction.html', context,
+    return render_to_response('jurisdiction/detail.html', context,
                               context_instance=RequestContext(request))
 
 
-class List(MRFilterableListView):
+class List(MRFilterListView):
     """Filterable list of jurisdictions"""
     model = Jurisdiction
+    filter_class = JurisdictionFilterSet
     title = 'Jurisdictions'
-    template_name = 'lists/jurisdiction_list.html'
+    template_name = 'jurisdiction/list.html'
     default_sort = 'name'
 
     def get_queryset(self):
         """Hides hidden jurisdictions from list"""
         objects = super(List, self).get_queryset()
-        objects = (objects
-                .exclude(hidden=True)
-                .select_related('parent', 'parent__parent'))
+        objects = objects.exclude(hidden=True).select_related('parent', 'parent__parent')
         return objects
-
-    def get_filters(self):
-        base_filters = super(List, self).get_filters()
-        new_filters = [
-            {'field': 'level', 'lookup': 'exact'},
-            {'field': 'parent', 'lookup': 'exact'},
-        ]
-        return base_filters + new_filters
-
-    def get_context_data(self, **kwargs):
-        context = super(List, self).get_context_data(**kwargs)
-        filter_data = self.get_filter_data()
-        context['filter_form'] = JurisdictionFilterForm(initial=filter_data['filter_initials'])
-        return context
 
 
 def redirect_flag(request, **kwargs):
@@ -178,5 +164,7 @@ class ExemptionDetailView(DetailView):
     def get_context_data(self, **kwargs):
         """Adds a flag form to the context."""
         context = super(ExemptionDetailView, self).get_context_data(**kwargs)
+        admin_url = reverse('admin:jurisdiction_exemption_change', args=(self.object.pk,))
         context['flag_form'] = FlagForm()
+        context['sidebar_admin_url'] = admin_url
         return context

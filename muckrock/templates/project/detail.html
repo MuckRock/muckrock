@@ -81,17 +81,15 @@
             {% if project.newsletter %}
             {% newsletter list_id=project.newsletter label=newsletter_label cta=newsletter_cta %}
             {% endif %}
-            {% if project.crowdfunds.exists %}
+			{% with project.crowdfunds.all as crowdfunds %}
+            {% if crowdfunds %}
             <section class="project-crowdfunds">
-                {% with project.crowdfunds.all as crowdfunds %}
-                {% if crowdfunds %}
-                    {% for crowdfund in crowdfunds %}
-                        {% crowdfund crowdfund=crowdfund %}
-                    {% endfor %}
-                {% endif %}
-                {% endwith %}
+				{% for crowdfund in crowdfunds %}
+					{% crowdfund crowdfund=crowdfund %}
+				{% endfor %}
             </section>
             {% endif %}
+			{% endwith %}
             {% if project.description %}
             <section class="project-description">
                 {{ project.description|markdown:"trusted" }}
@@ -151,7 +149,7 @@
                         {% if contributor.profile.avatar %}
                         <img class="avatar" src="{% thumbnail contributor.profile.avatar 50x50 %}">
                         {% else %}
-                        <img class="avatar" src="{% static 'icons/logo.png' %}" height="50" width="50">
+                        <img class="avatar" src="{% static 'img/defaultavatar.png' %}" height="50" width="50">
                         {% endif %}
                     </a>
                     <div class="info">
@@ -182,7 +180,7 @@
         {% if articles %}
         <section class="articles" id="articles">
             <h2>{{ articles|length }} Article{{ articles|length|pluralize }}</h2>
-            {% for article in project.articles.all %}
+            {% for article in articles %}
             {% include 'lib/pattern/article.html' with small=True hide_project=True %}
             {% endfor %}
         </section>

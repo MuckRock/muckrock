@@ -19,11 +19,11 @@ html, body {
 }
 
 .content {
-    @include flex(1);
+    @include flex(1 1 auto);
     margin-bottom: 0;
 }
 
-@import 'frontpage';
+@import 'explore';
 @import 'error';
 @import 'profile';
 @import 'homepage';

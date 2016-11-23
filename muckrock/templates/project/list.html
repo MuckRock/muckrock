@@ -1,3 +1,9 @@
-{% extends 'lists/base_list.html' %}
+{% extends 'base_list.html' %}
 
 {% block list-title %}Projects{% endblock %}
+
+{% block list-table %}
+{% for project in object_list %}
+    {% include 'lib/pattern/project.html' %}
+{% endfor %}
+{% endblock %}

@@ -179,14 +179,15 @@ def _submit_request(request, foia):
     """Submit request for user"""
     if not foia.user == request.user:
         messages.error(request, 'Only a request\'s owner may submit it.')
-    if not request.user.profile.make_request():
+    elif not request.user.profile.make_request():
         error_msg = ('You do not have any requests remaining. '
                      'Please purchase more requests and then resubmit.')
         messages.error(request, error_msg)
-    foia.submit()
-    request.session['ga'] = 'request_submitted'
-    messages.success(request, 'Your request was submitted.')
-    new_action(request.user, 'submitted', target=foia)
+    else:
+        foia.submit()
+        request.session['ga'] = 'request_submitted'
+        messages.success(request, 'Your request was submitted.')
+        new_action(request.user, 'submitted', target=foia)
     return redirect(foia)
 
 def clone_request(request, jurisdiction, jidx, slug, idx):

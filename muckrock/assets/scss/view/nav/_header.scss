@@ -1,234 +1,519 @@
+$nav-border: 1px solid $color-grey;
+$nav-background: #FFFFFF;
+
 @mixin drop-shadow() {
-    box-shadow: 0px 2px 8px rgba(0, 0, 0, .2);
+  box-shadow: 0px 2px 8px rgba($color-black-pure, .25);
 }
 
-.website-header {
-    @include drop-shadow;
-    margin-bottom: 0;
-    position: fixed;
-    z-index: 100;
-    left: 0;
-    right: 0;
-    background-color: $nav-background;
-    border-bottom: $nav-border;
-    & + * {
-        // The top margin accounts for the fixed header
-        margin-top: 2.6875em;
-    }
-    @media($sidebar-bp) {
-        right: 15.625em;
-    }
+/*
+We establish some basic rules for the global navigation, as well as rules for things it effects.
+The header is fixed, so we add a margin to whatever comes after it. Since this rule uses a *
+rule, it is easily overridable. We add a margin to the footer when the header is small enough,
+since we break it into two pieces.
+*/
+.global-header {
+  @include drop-shadow;
+  margin-bottom: 0;
+  position: fixed;
+  z-index: 100;
+  left: 0;
+  right: 0;
+  background-color: $nav-background;
+  border-bottom: $nav-border;
+  & + * {
+    /* The top margin accounts for the fixed top navigation. */
+    margin-top: 2.6875em !important;
+  }
+}
+@media($bottom-nav-bp) {
+  .website-footer {
+    /* The bottom is added when we have a fixed bottom navigation. */
+    margin-bottom: 42px !important;
+  }
 }
 
-.website-header .search-form {
-    @include drop-shadow;
-    display: none;
-    width: 100%;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    z-index: 100;
-    margin-bottom: 0;
-    border-top: $nav-border;
-    border-bottom: $nav-border;
-    background-color: $nav-background;
-    &.visible {
-        display: block;
-    }
-    .search-form-container {
-        @include display(flex);
-        @include align-items(center);
-    }
-    input[type="search"] {
-        max-width: 100%;
-        width: 100%;
-        padding: 0 $vr;
-        border: none;
-        border-radius: 0;
-        outline: none;
-    }
-    .search-cancel {
-        width: auto;
-        padding: $vr/2 $vr;
-        font-weight: $bold;
-        text-align: right;
-        cursor: pointer;
-        color: $color-blue;
-        &:hover {
-            color: $color-blue-dark;
-        }
-    }
-}
-
-// Logo visibility depends on viewport size
-.website-header .brand {
-    .logotype {
-        display: none;
-        visibility: hidden;
-    }
-    .logo {
-        display: block;
-        visibility: visible;
-    }
-    @media($logo-bp) {
-        .logotype {
-            display: block;
-            visibility: visible;
-        }
-        .logo {
-            display: none;
-            visibility: hidden;
-        }
-    }
-}
-
-.nav-section {
-    @include display(flex);
-    @include align-items(center);
-    margin-bottom: 0;
-}
-
-.nav-item {
-    display: inline-block;
-    width: auto;
-    min-width: 2.75em;
-    height: 42px;
-    padding: $vr/2;
-    margin-bottom: 0;
-    vertical-align: middle;
-    font-weight: $bold;
-    text-align: center;
+/*
+The modal overlay is used to obscure the body when a pop-up or other piece of UI commanding
+user attention appears. It is given a top position and an opacity of 0 in order to transition
+smoothly over the content.
+*/
+#modal-overlay {
+  position: fixed;
+  top: -9999px;
+  left: 0;
+  height: 110%;
+  width: 100%;
+  z-index: 100;
+  background-color: $color-black;
+  opacity: 0;
+  transition: top 0s .25s, opacity .25s linear;
+  &.visible {
+    top: 0;
+    opacity: .9;
+    transition: top 0s 0s, opacity .25s linear;
+  }
+  &:hover {
     cursor: pointer;
-    @include nav-item-color;
-    a {
-        display: block;
-    }
+  }
+}
+
+/*
+The nav-item controls the style for most items in the header navigation.
+They supply the sizing for the element and the hover behaviors.
+Nav items usually contain just an anchor or a span element, sometimes with an icon and a label.
+*/
+.nav-item {
+  display: inline-block;
+  width: auto;
+  height: 42px;
+  min-width: 42px;
+  margin-bottom: 0;
+  padding: $vr/2;
+  vertical-align: middle;
+  font-weight: $bold;
+  text-align: center;
+  cursor: pointer;
+  color: $color-black;
+  &:hover {
+    background: darken($nav-background, $color-darken-amount);
+  }
+  a {
+    display: block;
+    color: $color-black;
+  }
+  .icon {
+    vertical-align: middle;
+    @include svg-color($color-black);
+  }
+  .label {
+    display: none;
+    margin: 0 $vr/4;
+    vertical-align: middle;
+    line-height: $lh;
+  }
+  &.blue {
+    background: $color-blue;
+    color: $color-white;
     .icon {
-        // margin-top: $vr/8;
-        vertical-align: middle;
+      @include svg-color($color-white);
+    }
+    &:hover {
+      background: darken($color-blue, $color-darken-amount);
+    }
+  }
+  &.black {
+    background: $color-black;
+    color: $color-white;
+    .icon {
+      @include svg-color($color-white);
+    }
+    &:hover {
+      background: darken($color-black, $color-darken-amount)
+    }
+  }
+  /* The label is hidden until the viewport is wide enough. */
+  @media($label-bp) {
+    padding: $vr/2;
+    .icon {
+      margin-top: 0;
     }
     .label {
+      display: inline;
+    }
+  }
+}
+
+/* Logo visibility depends on viewport size. */
+.nav-item.brand {
+  svg {
+    height: 22px;
+    width: auto;
+    vertical-align: middle;
+  }
+  .logo svg {
+    transform: scale(1.3);
+  }
+  .logotype {
+    display: none;
+    visibility: hidden;
+  }
+  .logo {
+    display: block;
+    visibility: visible;
+  }
+  @media($logo-bp) {
+    .logotype {
+      display: block;
+      visibility: visible;
+    }
+    .logo {
+      display: none;
+      visibility: hidden;
+    }
+  }
+}
+
+/* The avatar container displays a user's avatar as an icon. */
+.nav-item.avatar-container {
+  padding:6px;
+  .avatar {
+    @include border-radius;
+    margin-bottom: 0;
+    opacity: .9;
+    vertical-align: middle;
+  }
+  .round.avatar {
+    border-radius: 9999px;
+  }
+}
+
+/* The search toggle is a button for activating the search field. */
+.nav-item.search-toggle {
+  display: inline-block;
+  margin-bottom: 0;
+  cursor: pointer;
+  &.active .label {
+    display: none;
+  }
+}
+
+/* We drop down a search form when search is triggered, by using the .visible trigger. */
+
+.global-search {
+    display: flex;
+    background: $nav-background;
+    width: 42px;
+    margin-bottom: 0;
+    transition: width .25s ease-in-out;
+    overflow: hidden;
+    @media($label-bp) {
+        width: 6em;
+        .search-toggle {
+            width: 6em;
+        }
+    }
+    &.visible {
+        width: 100%;
+        .search-toggle {
+            width: auto;
+        }
+    }
+    .search-form {
         display: none;
-        margin: 0 $vr/4;
-        vertical-align: middle;
-        line-height: $lh;
     }
-    &.dark {
-        background: $color-grey-2;
-        color: $color-white;
-        svg path {
-            fill: $color-white;
-        }
-        &:hover {
-            background: $color-blue;
-        }
+    .search-toggle.active + .search-form {
+        display: block;
+        width: 100%;
     }
-    @media(min-width:18em) {
-        &.website-sections-button .label {
-            display: inline;
+    .search-container {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        input {
+            flex: 1 1 auto;
+            height: 100%;
+            border: none;
+            border-radius: 0;
         }
     }
-    @include media($medium-bp) {
-        padding: $vr/2;
-        .icon {
-            margin-top: 0;
-        }
-        .label {
-            display: inline;
-        }
+    .search-cancel {
+        cursor: pointer;
     }
-    &.create-request-button {
-        background: $color-blue;
+    & + .search-placeholder {
+        display: none;
+        width: 42px;
+        height: 42px;
+        margin-bottom: 0;
     }
 }
 
-nav.website-navigation {
-    @include display(flex);
-    @include justify-content(space-between);
-    max-height: 42px;
+.global-navigation {
+  max-height: 42px;
+  ul {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0;
+    padding-left: 0;
+    list-style-type: none;
+  }
+  a {
+    text-decoration: none;
+  }
+  /* If a list item contains a list itself, then that list becomes a dropdown. */
+  .dropdown {
     ul {
-        margin-bottom: 0;
-        padding-left: 0;
+      display: none;
+      min-width: 5em;
+      position: absolute;
+      top: 100%;
+      @include border;
+      @include drop-shadow;
+      background: $color-white-pure;
+      z-index: 200;
+      -webkit-overflow-scrolling: touch;
+      li {
+        display: block;
+        &.separator {
+          border-bottom: 1px solid $color-grey;
+        }
+        &.touch--show {
+            display: none;
+        }
+      }
+      .nav-item {
+        width: 100%;
+        text-align: left;
+      }
+      &.visible {
+        display: block;
+      }
+    }
+    /*
+    When a list item is hovered, display the dropdown.
+    Also, if it has a .hover class (we do this on mobile).
+    Except, don't do this on mobile, since it behaves in a dumb way.
+    */
+    &:hover, &.hover {
+      ul:not(.no-hover-display) {
+        display: block;
+      }
+      /*
+      If a list item is hovered, also change the color of the dropdown.
+      This helps maintain context for dropdowns, since the hover on a nav-item can disappear.
+      */
+      & > .nav-item {
+        background: darken($nav-background, $color-darken-amount);
+        &.blue {
+          background: darken($color-blue, $color-darken-amount);
+        }
+        &.black {
+          background: darken($color-black, $color-darken-amount);
+        }
+      }
+    }
+    /*
+    Normally dropdowns appear left-aligned, but if it's too close to the right edge
+    we'll want it to be right-aligned instead.
+    */
+    &.dropdown--right {
+      position: relative;
+      overflow: visible;
+      ul {
+        right: 0;
+      }
+    }
+  }
+  /* If a black-colored nav item is followed by a list, also color the list black. */
+  .black.nav-item + ul {
+    background: $color-black;
+    border-color: $color-black-pure;
+    .nav-item {
+      color: $color-white;
+      &:hover {
+        background: $color-black-pure;
+      }
+    }
+  }
+}
+
+/*
+We use rich nav items to display images behind nav items, like for news articles.
+*/
+.rich-nav-item {
+  display: block;
+  max-width: 30em;
+  min-width: 20em;
+  height: 6.66em;
+  position: relative;
+  background-color: $color-blue;
+  background-size: cover;
+  background-position: center;
+  color: $color-grey-6;
+  a {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: $color-black;
+    background: rgba($color-black, .8);
+    background: linear-gradient(180deg, rgba($color-black-pure, .3), rgba($color-black-pure, 1));
+    opacity: 1;
+    transition: opacity .2s ease-in-out;
+    &:hover {
+      opacity: .75;
+    }
+  }
+  p {
+    position: absolute;
+    z-index: 2;
+    bottom: 0;
+    padding: $vr/2;
+    font-weight: $bold;
+    color: $color-white-pure;
+    text-shadow: $color-black 1px 1px 1px;
+  }
+}
+
+/* Miscellaneous fixes and tweaks. */
+#user-nav .message span {
+  display: block;
+}
+
+#more-sections .icon {
+  transform: scale(1.5);
+}
+
+.sign-up, .log-in {
+  width: 6em;
+}
+
+/* We apply some specific styling to the portion of the header used for site navigation. */
+#site-nav {
+  flex: 1 1 auto;
+  position: relative;
+  .global-search {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+  .section-toggle {
+    display: none;
+  }
+  ul.visible {
+    display: none;
+  }
+  li:hover ul.visible {
+    display: block;
+  }
+  #more-sections .label {
+    display: none;
+  }
+  @media($section-bp){
+    .section-toggle {
+      display: block;
+    }
+    .section-list {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      left: 0;
+      background: $color-white-pure;
+      @include drop-shadow;
+      &.visible {
+        display: block;
+      }
+      .nav-item {
+        width: 100%;
+      }
+      #more-sections .label {
+        display: inline;
+      }
+    }
+    .section-list .dropdown ul {
+      width: 100%;
+    }
+    .section-list .hidden {
+      display: none;
+    }
+    .section-list .dropdown:hover ul {
+      display: none;
+    }
+    .section-list .dropdown.active ul {
+      display: block;
+    }
+    /* Show a back arrow on active dropdown items. */
+    .section-list .active.dropdown > .nav-item::before {
+      content: '\2190';
+      width: 0;
+      font-size: 2em;
+      font-weight: bold;
+      float: left;
+      transform: translateY(-2px);
+    }
+  }
+  @media($bottom-nav-bp) {
+    /* When the user navigation is on the bottom, put the logo in the middle. */
+    justify-content: space-between;
+    .brand {
+      @include flex(1 1 auto);
+    }
+    .section-toggle {
+      order: -1;
+    }
+    .global-search + .search-placeholder {
+      display: block;
+      visibility: hidden;
+      margin-bottom: 0;
+    }
+    .logotype {
+      display: block;
+      visibility: visible;
+      transform: none;
+    }
+    .logo {
+      display: none;
+      visibility: hidden;
+    }
+  }
+}
+
+.touch {
+  .global-navigation .dropdown:hover ul {
+    display: none;
+    &.visible {
+      display: block;
+    }
+  }
+  .global-navigation .dropdown ul li.touch--show {
+    display: block;
+  }
+}
+@media($section-bp) {
+  body:not(.touch) {
+    #site-nav .section-toggle:hover + .section-list, #site-nav .section-list:hover {
+      display: block;
+    }
+  }
+}
+
+/* We apply some specific styling to the portion of the header used for account navigation. */
+#user-nav {
+  flex: 0 1 auto;
+  @media($bottom-nav-bp) {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    /*
+    At small sizes, we want the dropdowns to be full width and be attached from the bottom.
+    */
+    ul {
+      width: 100%;
     }
     li {
-        display: inline-block;
+      flex: 1;
     }
-    a {
-        text-decoration: none;
+    .dropdown ul {
+      top: initial;
+      bottom: 100%;
     }
-    .brand {
-
-        @include display(flex);
-        @include align-items(center);
-        @include justify-content(center);
-        margin-bottom: 0;
-        svg {
-            height: 22px;
-            width: auto;
-            vertical-align: middle;
-        }
-        .logo svg {
-            transform: scale(1.3);
-        }
+    .dropdown--right {
+      position: initial;
     }
-
-    .search-button {
-        display: inline-block;
-        margin-bottom: 0;
-        cursor: pointer;
-        &.active {
-            @include nav-item-hover;
-        }
+    .nav-item {
+      width: 100%;
+      text-align: center;
+      border-top: 1px solid $color-black-pure;
+      &.blue {
+        border-top: 1px solid $color-blue-dark;
+      }
     }
-
-
-    .website-sections-button {
-        display: none;
-        .icon {
-            display: none;
-        }
+    .avatar-container {
+      padding:6px;
+      .avatar {
+        position: relative;
+      }
     }
-
-    @media($nav-bp) {
-        padding-left: 0;
-        .website-sections {
-            @include drop-shadow;
-            display: none;
-            width: 100%;
-            background: $nav-background;
-            border-top: $nav-border;
-            border-bottom: $nav-border;
-            li {
-                display: block;
-            }
-        }
-        .website-sections-button {
-            display: inline-block;
-            margin-bottom: 0;
-            &.active {
-                @include nav-item-hover;
-            }
-        }
-        .website-sections.visible {
-            display: block;
-            position: absolute;
-            z-index: 100;
-            left: 0;
-            top: 100%;
-        }
-        .website-sections .nav-item {
-            width: auto;
-            display: block;
-            text-align: center;
-        }
-    }
-
-    @media($sidebar-bp) {
-        .sidebar-toggle {
-            display: none;
-        }
-        .create-request-button {
-            border-right: 1px solid $color-grey-3;
-        }
-    }
+  }
 }

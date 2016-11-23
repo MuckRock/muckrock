@@ -273,6 +273,7 @@ class Exemption(models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)
     jurisdiction = models.ForeignKey(Jurisdiction, related_name='exemptions')
+    aliases = models.TextField(blank=True)
     basis = models.TextField(help_text='The legal or contextual basis for the exemption.')
     # Optional fields
     tags = TaggableManager(through=TaggedItemBase, blank=True)
@@ -344,12 +345,16 @@ class ExampleAppeal(models.Model):
     the context when the language is most effective. Each ExampleAppeal instance
     should connect to an Exemption."""
     exemption = models.ForeignKey(Exemption, related_name='example_appeals')
+    title = models.TextField(default='Untitled Example')
     language = models.TextField()
     context = models.TextField(blank=True,
         help_text='Under what circumstances is this appeal language most effective?')
 
     def __unicode__(self):
-        return u'%s for %s' % (self.context, self.exemption)
+        return u'%(name)s for %(exemption)s' % {
+            'name': self.title if self.title else 'Example appeal',
+            'exemption': self.exemption
+        }
 
     def __repr__(self):
         return '<ExampleAppeal: %d>' % self.pk

@@ -1,5 +1,6 @@
 """Context processors to ensure data is displayed in sidebar for all views"""
 
+from django.conf import settings
 from django.contrib.auth.forms import AuthenticationForm
 
 from datetime import datetime, timedelta
@@ -14,20 +15,19 @@ from muckrock.utils import cache_get_or_set
 
 def get_recent_articles():
     """Lists last five recent news articles"""
-    return cache_get_or_set(
-            'sb:recent_articles',
-            lambda: Article.objects.get_published().order_by('-pub_date')[:10],
-            600)
+    return (Article.objects
+                .get_published()
+                .order_by('-pub_date')
+                [:5])
+
 
 def get_actionable_requests(user):
     """Gets requests that require action or attention"""
-    requests = FOIARequest.objects.filter(user=user).select_related('jurisdiction')
-    updates = requests.filter(updated=True)
-    started = requests.filter(status='started')
-    payment = requests.filter(status='payment')
-    fix = requests.filter(status='fix')
+    requests = FOIARequest.objects.filter(user=user)
+    started = requests.filter(status='started').count()
+    payment = requests.filter(status='payment').count()
+    fix = requests.filter(status='fix').count()
     return {
-        'count': len(updates) + len(started) + len(payment) + len(fix),
         'started': started,
         'payment': payment,
         'fix': fix,
@@ -40,6 +40,7 @@ def get_unread_notifications(user):
         return user.notifications.get_unread()
     else:
         return None
+
 
 def get_organization(user):
     """Gets organization, if it exists"""
@@ -56,10 +57,12 @@ def get_organization(user):
                 org = owned_org.first()
             return org
         return inner
+
     return cache_get_or_set(
             'sb:%s:user_org' % user.username,
             load_organization(user),
-            600)
+            settings.DEFAULT_CACHE_TIMEOUT)
+
 
 def sidebar_broadcast(user):
     """Displays a broadcast to a given usertype"""
@@ -84,13 +87,14 @@ def sidebar_broadcast(user):
     return cache_get_or_set(
             'sb:%s:broadcast' % user_class,
             load_broadcast(user_class),
-            600)
+            settings.DEFAULT_CACHE_TIMEOUT)
+
 
 def sidebar_info(request):
     """Displays info about a user's requsts in the sidebar"""
     # content for all users
     sidebar_info_dict = {
-        'recent_articles': get_recent_articles(),
+        'dropdown_recent_articles': get_recent_articles(),
         'broadcast': sidebar_broadcast(request.user),
         'login_form': AuthenticationForm()
     }
@@ -100,7 +104,7 @@ def sidebar_info(request):
             'unread_notifications': get_unread_notifications(request.user),
             'actionable_requests': get_actionable_requests(request.user),
             'organization': get_organization(request.user),
-            'my_projects': Project.objects.get_for_contributor(request.user).exists(),
+            'my_projects': Project.objects.get_for_contributor(request.user).optimize()[:4],
             'payment_failed': request.user.profile.payment_failed
         })
     else:

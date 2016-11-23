@@ -1,0 +1,123 @@
+{% extends 'base_list.html' %}
+{% load static from staticfiles %}
+{% load task_tags %}
+{% load tags %}
+
+{% block list-sections %}
+<ul class="nostyle list__sections">
+    <li class="{% active request '^/task/response/$' %}">
+        <a href="{% url 'response-task-list' %}">
+            <span class="red counter">{{ counters.response }}</span>
+            Response
+        </a>
+    </li>
+    <li class="{% active request '^/foia/list/processing/$' %}">
+        <a href="{% url 'foia-list-processing' %}">
+            <span class="red counter">{{ processing_count }}</span>
+            Processing
+        </a>
+    </li>
+</ul>
+<ul class="nostyle list__sections">
+    <li class="{% active request '^/task/new-agency/$' %}">
+        <a href="{% url 'new-agency-task-list' %}">
+            <span class="blue counter">{{ counters.new_agency }}</span>
+            New Agency
+        </a>
+    </li>
+    <li class="{% active request '^/task/orphan/$' %}">
+        <a href="{% url 'orphan-task-list' %}">
+            <span class="blue counter">{{ counters.orphan }}</span>
+            Orphan
+        </a>
+    </li>
+    <li class="{% active request '^/task/snail-mail/$' %}">
+        <a href="{% url 'snail-mail-task-list' %}">
+            <span class="blue counter">{{ counters.snail_mail }}</span>
+            Snail Mail
+        </a>
+    </li>
+    <li class="{% active request '^/task/flagged/$' %}">
+        <a href="{% url 'flagged-task-list' %}">
+            <span class="blue counter">{{ counters.flagged }}</span>
+            Flagged
+        </a>
+    </li>
+    <li class="{% active request '^/task/new-exemption/$' %}">
+        <a href="{% url 'newexemption-task-list' %}">
+            <span class="blue counter">{{ counters.new_exemption }}</span>
+            New Exemptions
+        </a>
+    </li>
+</ul>
+<ul class="nostyle list__sections">
+    <li class="{% active request '^/task/stale-agency/$' %}">
+        <a href="{% url 'stale-agency-task-list' %}">
+            <span class="counter">{{ counters.stale_agency }}</span>
+            Stale Agency
+        </a>
+    </li>
+    <li class="{% active request '^/task/rejected-email/$' %}">
+        <a href="{% url 'rejected-email-task-list' %}">
+            <span class="counter">{{ counters.rejected }}</span>
+            Rejected Email
+        </a>
+    </li>
+    <li class="{% active request '^/task/failed-fax/$' %}">
+        <a href="{% url 'failed-fax-task-list' %}">
+            <span class="counter">{{ counters.failed_fax }}</span>
+            Failed Fax
+        </a>
+    </li>
+</ul>
+<ul class="nostyle list__sections">
+    <li class="{% active request '^/task/multirequest/$' %}">
+        <a href="{% url 'multirequest-task-list' %}">
+            <span class="yellow counter">{{ counters.multirequest }}</span>
+            Multirequest
+        </a>
+    </li>
+    <li class="{% active request '^/task/project-review/$' %}">
+        <a href="{% url 'projectreview-task-list' %}">
+            <span class="yellow counter">{{ counters.projectreview }}</span>
+            Pending Projects
+        </a>
+    </li>
+    <li class="{% active request '^/task/crowdfund/$' %}">
+        <a href="{% url 'crowdfund-task-list' %}">
+            <span class="yellow counter">{{ counters.crowdfund }}</span>
+            Crowdfund
+        </a>
+    </li>
+    <li class="{% active request '^/task/status-change/$' %}">
+        <a href="{% url 'status-change-task-list' %}">
+            <span class="yellow counter">{{ counters.status_change }}</span>
+            Status Change
+        </a>
+    </li>
+</ul>
+{% endblock %}
+
+{% block list-actions %}
+<div class="list-actions">
+    <div>
+        <input type="checkbox" class="select-all" data-name="tasks" />
+        <label for="toggle-all">Select/Unselect All</label>
+    </div>
+    <form method="POST" id="batched">
+        {% csrf_token %}
+        {% if bulk_actions %}
+            {% for bulk_action in bulk_actions %}
+        <button class="button" id="batched-{{bulk_action}}" type="submit" name="{{bulk_action}}" value="true">{{bulk_action|title}}</button>
+            {% endfor %}
+        {% endif %}
+        <button class="button" id="collapse-all">Collapse All</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block list-objects %}
+{% for task in object_list %}
+    {% include 'lib/task.html' %}
+{% endfor %}
+{% endblock %}

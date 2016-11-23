@@ -10,13 +10,17 @@
     @include display(flex);
     @include flex-wrap(wrap);
     @include align-items(stretch);
+    padding-right: 0 !important;
     // max-width: 75em;
 }
 
 .grid__column {
     @include flex(1 1 auto);
     min-width: 0;
-    padding-left: $vr;
+    padding-right: $vr/2;
+    @include media($medium-bp) {
+        padding-right: $vr;
+    }
     &:first-child {
         padding-left: 0;
     }
@@ -60,4 +64,37 @@
             padding-left: 0;
         }
     }
+    &.nopadding {
+      padding: 0;
+    }
+}
+
+.space-between {
+  @include display(flex);
+  @include flex-wrap(wrap);
+  @include justify-content(space-between);
+}
+
+.align-baseline {
+  @include display(flex);
+  @include flex-wrap(wrap);
+  @include align-items(baseline);
+}
+
+.align-center {
+  @include display(flex);
+  @include flex-wrap(wrap);
+  @include align-items(center);
+}
+
+.mb0 {
+  margin-bottom: 0;
+}
+
+.mb1 {
+  margin-bottom: $vr;
+}
+
+.mr1 {
+  margin-right: $vr;
 }

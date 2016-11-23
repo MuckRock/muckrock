@@ -4,14 +4,12 @@
 #
 #    pip-compile --output-file pip/requirements.txt pip/requirements.in
 #
--e git+git://github.com/django-haystack/django-haystack.git@f1ed18313777005dd77ed724ecbfb27c0b03cad8#egg=django-haystack
 -e git+git://github.com/BradWhittington/django-mailgun.git@4f2edb9466f6245c3bbf501aab2681f0b3c71e0c#egg=django_mailgun
 -e git+git://github.com/callowayproject/django-news-sitemaps.git@55da6b72580dd6d79380f2bb17240e7afa00555a#egg=django_news_sitemaps-master
 amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu
 billiard==3.3.0.23        # via celery
 boto==2.42.0
-celery-haystack==0.10
 celery==3.1.23
 Click==6.6                # via pyimagediet
 contextlib2==0.5.4        # via raven
@@ -20,7 +18,7 @@ cssutils==1.0.1           # via premailer
 dill==0.2.5
 django-activity-stream==0.6.3
 django-adaptors==0.2.5
-django-appconf==1.0.2     # via celery-haystack, django-compressor
+django-appconf==1.0.2     # via django-compressor
 django-autocomplete-light==2.3.3
 django-celery==3.1.17
 django-compressor==2.1
@@ -39,13 +37,14 @@ django-package-monitor==0.3.5
 django-premailer==0.2.0
 django-pylibmc==0.6.1
 django-querycount==0.4.1
-django-rest-swagger==0.3.7
+django-rest-swagger==0.3.8
 django-reversion==1.10.2
 django-robots==2.0
 django-secure==1.0.1
 django-sslify==0.2.7
 django-storages==1.5.1
 django-taggit==0.21.2
+django-watson==1.2.1
 django-webpack-loader==0.3.0
 django==1.9.9
 djangorestframework==3.4.7
@@ -65,7 +64,6 @@ premailer==3.0.0          # via django-premailer
 psycopg2==2.6.2
 pyimagediet==1.1.1        # via image-diet2
 pylibmc==1.5.1            # via django-pylibmc
-pysolr==3.5.0
 python-dateutil==2.5.3
 python-magic==0.4.12      # via pyimagediet
 pytz==2016.6.1            # via celery

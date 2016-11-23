@@ -39,13 +39,18 @@ class TagDetailView(DetailView):
         """Adds all tags to context data"""
         context = super(TagDetailView, self).get_context_data(**kwargs)
         context['tags'] = list_all_tags()
-        this_tag = self.get_object().name
-        context['tagged_projects'] = Project.objects\
-                                    .filter(tags__name__in=[this_tag], private=False)
-        context['tagged_requests'] = FOIARequest.objects\
-                                    .filter(tags__name__in=[this_tag])\
-                                    .get_viewable(self.request.user)
-        context['tagged_articles'] = Article.objects\
-                                    .filter(tags__name__in=[this_tag], publish=True)
+        user = self.request.user
+        this_tag = self.get_object()
+        context['tagged_projects'] = (Project.objects.get_visible(user)
+            .filter(tags=this_tag).optimize())
+        context['tagged_requests'] = (FOIARequest.objects.get_viewable(self.request.user)
+            .filter(tags=this_tag).select_related_view())
+        context['tagged_articles'] = (Article.objects.get_published()
+            .filter(tags=this_tag).prefetch_related(
+                'authors',
+                'authors__profile',
+                'projects',
+            )
+        )
         context['tagged_questions'] = Question.objects.filter(tags__name__in=[this_tag])
         return context

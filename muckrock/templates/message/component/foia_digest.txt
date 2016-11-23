@@ -1,9 +1,10 @@
+{% load tags %}
 {% if notifications|length > 0 %}
 - - - - - - - - - - - - -
 {{stream_name}}
 - - - - - - - - - - - - -
 {% for notification in notifications %}
 {% with notification.action.target as foia %}
-* {{ foia }}{% if foia.get_absolute_url %} <{{base_url}}{{foia.get_absolute_url}}>{% endif %} {{ notification.action.verb }}
+* {{ foia }}{% if foia.get_absolute_url %} <{{base_url}}{{foia.get_absolute_url}}?{% autologin user %}>{% endif %} {{ notification.action.verb }}
 {% endwith %}
 {% endfor %}{% endif %}

@@ -1,0 +1,4 @@
+{% load tags %}
+{% if action %}
+{% if action.action_object %}{{ action.action_object }}{% if action.action_object.get_absolute_url %} <{{action.action_object.get_absolute_url }}?{% autologin user %}>{% endif %}{% endif %}{% if action.action_object and action.target %} to{% endif %}{% if action.target %} {{ action.target }}{% if action.target.get_absolute_url %} <{{action.target.get_absolute_url }}?{% autologin user %}>{% endif %}{% endif %} {{ action.verb }} by {{ action.actor }}{% if action.actor.get_absolute_url %} <{{action.actor.get_absolute_url }}?{% autologin user %}>{% endif %}
+{% endif %}

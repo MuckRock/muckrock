@@ -1,7 +1,7 @@
 {% extends 'message/receipt/base.txt' %}
-
+{% load tags %}
 {% block description %}
 {% with crowdfund.get_crowdfund_object as object %}
-{% if crowdfund %}This email confirms your payment to a MuckRock crowdfund for {{object}} ({{base_url}}{{object.get_absolute_url}}).{% else %}This email confirms your payment to a MuckRock crowdfund.{% endif %}
+{% if crowdfund %}This email confirms your payment to a MuckRock crowdfund for {{object}} ({{base_url}}{{object.get_absolute_url}}?{% autologin user %}).{% else %}This email confirms your payment to a MuckRock crowdfund.{% endif %}
 {% endwith %}
 {% endblock %}

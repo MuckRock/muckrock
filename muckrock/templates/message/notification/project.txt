@@ -1,11 +1,12 @@
 {% extends 'message/base.txt' %}
+{% load tags %}
 
 {% block body %}
 Hi {{user.first_name}},
 
-{{added_by.get_full_name}} ({{base_url}}{{added_by.get_absolute_url}}) has added you as a contributor to their project {{ project.title }} ({{base_url}}{{ project.get_absolute_url }}). This means that you have full access to this project, including the ability to edit and crowdfund, alongside your other contributors.
+{{added_by.get_full_name}} ({{base_url}}{{added_by.get_absolute_url}}) has added you as a contributor to their project {{ project.title }} ({{base_url}}{{ project.get_absolute_url }}?{% autologin user %}). This means that you have full access to this project, including the ability to edit and crowdfund, alongside your other contributors.
 
-You can see a list of all you projects here ({{base_url}}{% url 'project-contributor' username=user.username %}) or from the sidebar menu.
+You can see a list of all you projects here ({{base_url}}{% url 'project-contributor' username=user.username %}?{% autologin user %}) or from the sidebar menu.
 
 Sincerely,
 The MuckRock Team

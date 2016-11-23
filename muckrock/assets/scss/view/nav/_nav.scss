@@ -1,31 +1,7 @@
 $logo-bp: "min-width:64em";
-$nav-bp: "max-width:54em";
-$nav-border: 1px solid $color-grey;
-$nav-background: #FFFFFF;
-$sidebar-width: 15.625em;
-$sidebar-bp: "min-width:72em";
-
-@mixin nav-item-hover {
-    color: $nav-background;
-    background: $color-blue;
-    path, circle { fill: $nav-background; }
-    a:hover {
-        color: $nav-background;
-        text-decoration: none;
-    }
-}
-
-@mixin nav-item-color {
-    color: $color-black;
-    path, circle { fill: $color-black; }
-    a {
-        color: $color-black;
-    }
-    &:hover {
-        @include nav-item-hover;
-    }
-}
+$label-bp: "min-width:54em";
+$section-bp: "max-width:36em";
+$bottom-nav-bp: "max-width:27em";
 
 @import 'header';
-@import 'sidebar';
 @import 'footer';

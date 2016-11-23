@@ -8,24 +8,30 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Count
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template import RequestContext
-from django.views.generic.detail import DetailView
+from django.views.generic import DetailView, TemplateView
 
-from actstream.models import following
+from actstream.models import Follow
 from datetime import datetime, timedelta
 import json
 import logging
 
 from muckrock.accounts.models import Notification
 from muckrock.agency.forms import AgencyForm
+from muckrock.agency.models import Agency
 from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.foia.codes import CODES
+from muckrock.foia.filters import (
+    FOIARequestFilterSet,
+    MyFOIARequestFilterSet,
+    MyFOIAMultiRequestFilterSet,
+    ProcessingFOIARequestFilterSet,
+)
 from muckrock.foia.forms import (
-    RequestFilterForm,
     FOIAEmbargoForm,
     FOIANoteForm,
     FOIAEstimatedCompletionDateForm,
@@ -48,13 +54,15 @@ from muckrock.foia.views.comms import (
         )
 from muckrock.jurisdiction.models import Appeal
 from muckrock.jurisdiction.forms import AppealForm
+from muckrock.news.models import Article
 from muckrock.project.forms import ProjectManagerForm
+from muckrock.project.models import Project
 from muckrock.qanda.models import Question
 from muckrock.qanda.forms import QuestionForm
 from muckrock.tags.models import Tag
 from muckrock.task.models import Task, FlaggedTask, StatusChangeTask
 from muckrock.utils import new_action
-from muckrock.views import class_view_decorator, MRFilterableListView
+from muckrock.views import class_view_decorator, MRFilterListView, MRSearchFilterListView
 
 # pylint: disable=too-many-ancestors
 
@@ -62,98 +70,144 @@ logger = logging.getLogger(__name__)
 STATUS_NODRAFT = [st for st in STATUS if st != ('started', 'Draft')]
 
 
-class RequestList(MRFilterableListView):
-    """Base list view for other list views to inherit from"""
-    model = FOIARequest
-    title = 'Requests'
-    template_name = 'lists/request_list.html'
-    default_sort = 'title'
-
-    def get_filters(self):
-        """Adds request-specific filter fields"""
-        base_filters = super(RequestList, self).get_filters()
-        new_filters = [{'field': 'status', 'lookup': 'exact'}]
-        return base_filters + new_filters
+class RequestExploreView(TemplateView):
+    """Provides a top-level page for exploring interesting requests."""
+    template_name = 'foia/explore.html'
 
     def get_context_data(self, **kwargs):
-        """Changes filter_form to use RequestFilterForm instead of the default"""
-        context = super(RequestList, self).get_context_data(**kwargs)
-        filter_data = self.get_filter_data()
-        context['filter_form'] = RequestFilterForm(initial=filter_data['filter_initials'])
+        """Adds interesting data to the context for rendering."""
+        context = super(RequestExploreView, self).get_context_data(**kwargs)
+        user = self.request.user
+        visible_requests = FOIARequest.objects.get_viewable(user)
+        context['top_agencies'] = (
+            Agency.objects
+            .get_approved()
+            .annotate(foia_count=Count('foiarequest'))
+            .order_by('-foia_count')
+        )[:9]
+        context['featured_requests'] = (
+            visible_requests
+            .filter(featured=True)
+            .order_by('featured')
+            .select_related_view()
+        )
+        context['recent_news'] = (
+            Article.objects
+            .get_published()
+            .annotate(foia_count=Count('foias'))
+            .exclude(foia_count__lt=2)
+            .exclude(foia_count__gt=9)
+            .prefetch_related(
+                'authors',
+                'foias',
+                'foias__user',
+                'foias__user__profile',
+                'foias__agency',
+                'foias__agency__jurisdiction',
+                'foias__jurisdiction__parent__parent')
+            .order_by('-pub_date')
+        )[:3]
+        context['featured_projects'] = (
+            Project.objects
+            .get_visible(user)
+            .filter(featured=True)
+            .prefetch_related(
+                'requests',
+                'requests__user',
+                'requests__user__profile',
+                'requests__agency',
+                'requests__agency__jurisdiction',
+                'requests__jurisdiction__parent__parent')
+        )
+        context['recently_completed'] = (
+            visible_requests
+            .get_done()
+            .order_by('-date_done', 'pk')
+            .select_related_view()
+            .get_public_file_count(limit=5))
+        context['recently_rejected'] = (
+            visible_requests
+            .filter(status__in=['rejected', 'no_docs'])
+            .order_by('-date_updated', 'pk')
+            .select_related_view()
+            .get_public_file_count(limit=5))
         return context
+
+class RequestList(MRSearchFilterListView):
+    """Base list view for other list views to inherit from"""
+    model = FOIARequest
+    filter_class = FOIARequestFilterSet
+    title = 'All Requests'
+    template_name = 'foia/list.html'
+    default_sort = 'date_updated'
+    default_order = 'desc'
 
     def get_queryset(self):
         """Limits requests to those visible by current user"""
         objects = super(RequestList, self).get_queryset()
-        objects = objects.select_related('jurisdiction')
-        objects = objects.only(
-                'title', 'slug', 'status', 'date_submitted', 'date_due',
-                'date_updated', 'date_processing', 'jurisdiction__slug')
+        objects = objects.select_related_view()
         return objects.get_viewable(self.request.user)
 
 
 @class_view_decorator(login_required)
 class MyRequestList(RequestList):
     """View requests owned by current user"""
-    template_name = 'lists/request_my_list.html'
-
-    def post(self, request):
-        """Handle updating read status"""
-        try:
-            post = request.POST
-            foia_pks = post.getlist('foia')
-            if post.get('submit') == 'Mark as Read':
-                FOIARequest.objects.filter(pk__in=foia_pks).update(updated=False)
-            elif post.get('submit') == 'Mark as Unread':
-                FOIARequest.objects.filter(pk__in=foia_pks).update(updated=True)
-            elif post.get('submit') == 'Mark All as Read':
-                FOIARequest.objects.filter(user=self.request.user, updated=True)\
-                                   .update(updated=False)
-        except FOIARequest.DoesNotExist:
-            pass
-        return redirect('foia-mylist')
-
-    def get_filters(self):
-        """Removes the 'users' filter, because its _my_ requests"""
-        filters = super(MyRequestList, self).get_filters()
-        for filter_dict in filters:
-            if 'user' in filter_dict.values():
-                filters.pop(filters.index(filter_dict))
-        return filters
+    filter_class = MyFOIARequestFilterSet
+    title = 'Your Requests'
+    template_name = 'foia/my_list.html'
 
     def get_queryset(self):
-        """Gets multirequests as well, limits to just those by the current user"""
-        single_req = (FOIARequest.objects
-                .filter(user=self.request.user)
-                .select_related('jurisdiction')
-                .prefetch_related('communications')
-                )
-        multi_req = FOIAMultiRequest.objects.filter(user=self.request.user)
-        single_req = self.sort_list(self.filter_list(single_req))
-        return list(single_req) + list(multi_req)
+        """Limit to just requests owned by the current user."""
+        queryset = super(MyRequestList, self).get_queryset()
+        return queryset.filter(user=self.request.user)
+
+
+@class_view_decorator(login_required)
+class MyMultiRequestList(MRFilterListView):
+    """View requests owned by current user"""
+    model = FOIAMultiRequest
+    filter_class = MyFOIAMultiRequestFilterSet
+    title = 'Multirequests'
+    template_name = 'foia/multirequest_list.html'
+
+    def dispatch(self, *args, **kwargs):
+        """Basic users cannot access this view"""
+        if self.request.user.is_authenticated and not self.request.user.profile.is_advanced():
+            err_msg = (
+                'Multirequests are a pro feature. '
+                '<a href="%(settings_url)s">Upgrade today!</a>' % {
+                    'settings_url': reverse('accounts')
+                }
+            )
+            messages.error(self.request, err_msg)
+            return redirect('foia-mylist')
+        return super(MyMultiRequestList, self).dispatch(*args, **kwargs)
+
+    def get_queryset(self):
+        """Limit to just requests owned by the current user."""
+        queryset = super(MyMultiRequestList, self).get_queryset()
+        return queryset.filter(user=self.request.user)
 
 
 @class_view_decorator(login_required)
 class FollowingRequestList(RequestList):
     """List of all FOIA requests the user is following"""
+    title = 'Requests You Follow'
+
     def get_queryset(self):
         """Limits FOIAs to those followed by the current user"""
-        objects = following(self.request.user, FOIARequest)
-        # actstream returns a list of objects, so we have to turn it into a queryset
-        pk_list = [_object.pk for _object in objects if _object]
-        objects = FOIARequest.objects.filter(pk__in=pk_list)
-        objects = objects.select_related('jurisdiction')
-        # now we filter and sort the list like in the parent class
-        objects = self.filter_list(objects)
-        objects = self.sort_list(objects)
-        # finally, we can only show requests visible to that user
-        return objects.get_viewable(self.request.user)
+        queryset = super(FollowingRequestList, self).get_queryset()
+        following = Follow.objects.following_qs(self.request.user, FOIARequest)
+        return queryset.filter(id__in=following)
 
 
 class ProcessingRequestList(RequestList):
     """List all of the currently processing FOIA requests."""
-    template_name = 'lists/request_processing_list.html'
+    title = 'Processing Requests'
+    filter_class = ProcessingFOIARequestFilterSet
+    template_name = 'foia/processing_list.html'
     default_sort = 'date_processing'
+    default_order = 'asc'
 
     def dispatch(self, *args, **kwargs):
         """Only staff can see the list of processing requests."""
@@ -161,24 +215,10 @@ class ProcessingRequestList(RequestList):
             raise Http404()
         return super(ProcessingRequestList, self).dispatch(*args, **kwargs)
 
-    def filter_list(self, objects):
-        """Gets all processing requests"""
-        objects = super(ProcessingRequestList, self).filter_list(objects)
-        return objects.filter(status='submitted')
-
-    def get_filters(self):
-        """Removes the 'status' filter, because its only processing requests"""
-        filters = super(ProcessingRequestList, self).get_filters()
-        for filter_dict in filters:
-            if 'status' in filter_dict.values():
-                filters.pop(filters.index(filter_dict))
-        return filters
-
     def get_queryset(self):
         """Apply select and prefetch related"""
         objects = super(ProcessingRequestList, self).get_queryset()
-        return (objects
-                .prefetch_related('communications'))
+        return objects.prefetch_related('communications').filter(status='submitted')
 
 
 # pylint: disable=no-self-use

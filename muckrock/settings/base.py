@@ -119,13 +119,14 @@ AWS_HEADERS = {
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
     'django.core.context_processors.debug',
-    'django.core.context_processors.i18n',
+    #'django.core.context_processors.i18n',
     'django.core.context_processors.media',
     'django.core.context_processors.request',
     'django.contrib.messages.context_processors.messages',
     'muckrock.sidebar.context_processors.sidebar_info',
     'muckrock.context_processors.google_analytics',
     'muckrock.context_processors.domain',
+    'muckrock.context_processors.cache_timeout',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -172,7 +173,6 @@ INSTALLED_APPS = (
     'django.contrib.flatpages',
     'django.contrib.humanize',
     'django.contrib.staticfiles',
-    'celery_haystack',
     'compressor',
     'corsheaders',
     'debug_toolbar',
@@ -182,7 +182,6 @@ INSTALLED_APPS = (
     'djgeojson',
     'easy_thumbnails',
     'gunicorn',
-    'haystack',
     'dbsettings',
     'leaflet',
     'localflavor',
@@ -197,6 +196,7 @@ INSTALLED_APPS = (
     'robots',
     'storages',
     'taggit',
+    'watson',
     'webpack_loader',
     'lot',
     'package_monitor',
@@ -265,19 +265,6 @@ ABSOLUTE_URL_OVERRIDES = {
 }
 
 DBSETTINGS_USE_SITES = True
-
-HAYSTACK_CONNECTIONS = {
-    'default': {
-        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
-        'PATH': os.path.join(SITE_ROOT, 'whoosh/mysite_index'),
-        'STORAGE': 'file',
-        'POST_LIMIT': 128 * 1024 * 1024,
-        'INCLUDE_SPELLING': True,
-        'BATCH_SIZE': 100,
-    },
-}
-
-HAYSTACK_SIGNAL_PROCESSOR = 'muckrock.signals.RelatedCelerySignalProcessor'
 
 SESAME_MAX_AGE = 60 * 60 * 24 * 2
 
@@ -445,7 +432,7 @@ DATABASES = {
             'PASSWORD': url.password,
             'HOST': url.hostname,
             'PORT': url.port,
-            'CONN_MAX_AGE': os.environ.get('CONN_MAX_AGE', 500),
+            'CONN_MAX_AGE': int(os.environ.get('CONN_MAX_AGE', 500)),
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             }
         }
@@ -455,6 +442,7 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     }
 }
+DEFAULT_CACHE_TIMEOUT = 15 * 60
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'muckrock.pagination.StandardPagination',
@@ -540,3 +528,7 @@ CORS_URLS_REGEX = r'^/api(_v\d)?/.*$'
 # Limit CORS origin to just FOIA machine
 CORS_ORIGIN_REGEX_WHITELIST = (r'^(https?://)?(\w+\.)?foiamachine\.org(:\d+)?$', )
 CORS_ALLOW_CREDENTIALS = True
+
+# Django Filter settings
+FILTERS_HELP_TEXT_EXCLUDE = False
+FILTERS_HELP_TEXT_FILTER = False
