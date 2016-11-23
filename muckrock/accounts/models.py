@@ -5,6 +5,7 @@ Models for the accounts application
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
+from django.core.urlresolvers import reverse
 from django.db import models
 
 from actstream.models import Action
@@ -138,10 +139,9 @@ class Profile(models.Model):
     def __unicode__(self):
         return u"%s's Profile" % unicode(self.user).capitalize()
 
-    @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
-        return ('acct-profile', [], {'username': self.user.username})
+        return reverse('acct-profile', kwargs={'username': self.user.username})
 
     def is_advanced(self):
         """Advanced users can access features basic users cannot."""

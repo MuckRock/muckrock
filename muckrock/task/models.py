@@ -60,7 +60,9 @@ class TaskQuerySet(models.QuerySet):
                         Prefetch('communication__files',
                             queryset=FOIAFile.objects.select_related('foia__jurisdiction')),
                         Prefetch('communication__foia__communications',
-                            queryset=FOIACommunication.objects.order_by('-date'),
+                            queryset=FOIACommunication.objects
+                                .order_by('-date')
+                                .prefetch_related('files'),
                             to_attr='reverse_communications'),
                         'communication__foia__communications__files',
                         )

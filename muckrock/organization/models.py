@@ -5,6 +5,7 @@ Models for the organization application
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.template.loader import render_to_string
 from django.utils.text import slugify
@@ -39,10 +40,9 @@ class Organization(models.Model):
     def __unicode__(self):
         return self.name
 
-    @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
-        return ('org-detail', [], {'slug': self.slug})
+        return reverse('org-detail', kwargs={'slug': self.slug})
 
     def restore_requests(self):
         """Restore the number of requests credited to the org."""

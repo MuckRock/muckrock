@@ -117,7 +117,8 @@ urlpatterns = patterns(
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^package_monitor/', include('package_monitor.urls', namespace='package_monitor')),
     url(r'^robots\.txt$', include('robots.urls')),
-    url(r'^favicon.ico$', RedirectView.as_view(url=settings.STATIC_URL + 'favicon.ico')),
+    url(r'^favicon.ico$', RedirectView.as_view(
+        url=settings.STATIC_URL + 'icons/favicon.ico')),
     url(r'^sitemap\.xml$', 'django.contrib.sitemaps.views.index', {'sitemaps': sitemaps}),
     url(
         r'^sitemap-(?P<section>.+)\.xml$',

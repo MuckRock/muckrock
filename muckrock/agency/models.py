@@ -4,6 +4,7 @@ Models for the Agency application
 
 from django.contrib.auth.models import User
 from django.core.exceptions import MultipleObjectsReturned
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
@@ -110,13 +111,14 @@ class Agency(models.Model, RequestHelper):
 
     def get_absolute_url(self):
         """The url for this object"""
-        kwargs = {
-            'jurisdiction': self.jurisdiction.slug,
-            'jidx': self.jurisdiction.id,
-            'slug': self.slug,
-            'idx': self.id
-        }
-        return host_reverse('agency-detail', host='default', kwargs=kwargs)
+        return reverse(
+                'agency-detail',
+                kwargs={
+                    'jurisdiction': self.jurisdiction.slug,
+                    'jidx': self.jurisdiction.pk,
+                    'slug': self.slug,
+                    'idx': self.pk,
+                    })
 
     def save(self, *args, **kwargs):
         """Save the agency"""
