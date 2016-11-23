@@ -111,8 +111,9 @@ class Agency(models.Model, RequestHelper):
 
     def get_absolute_url(self):
         """The url for this object"""
-        return reverse(
+        return host_reverse(
                 'agency-detail',
+                host='default',
                 kwargs={
                     'jurisdiction': self.jurisdiction.slug,
                     'jidx': self.jurisdiction.pk,
