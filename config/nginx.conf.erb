@@ -46,6 +46,12 @@ http {
 
 	server {
 		listen <%= ENV["PORT"] %>;
+		server_name muckrock.com;
+		return 301 $scheme://www.muckrock.com$request_uri;
+	}
+
+	server {
+		listen <%= ENV["PORT"] %>;
 		server_name _;
 		keepalive_timeout 5;
 		limit_req zone=one burst=5;
