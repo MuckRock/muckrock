@@ -46,15 +46,12 @@ http {
 
 	server {
 		listen <%= ENV["PORT"] %>;
-		server_name muckrock.com;
-		return 301 https://www.muckrock.com$request_uri;
-	}
-
-	server {
-		listen <%= ENV["PORT"] %>;
 		server_name _;
 		keepalive_timeout 5;
 		limit_req zone=one burst=5;
+		if ($host = 'muckrock.com') {
+			rewrite ^ https://www.muckrock.com$request_uri? permanent;
+		}
 
 		location / {
 			proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
