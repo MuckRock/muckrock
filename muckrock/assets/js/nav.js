@@ -31,7 +31,7 @@ var isTouch = 'ontouchstart' in window;
 var navItems = $('#site-nav .section-list, #user-nav .dropdown ul');
 var navTriggers = $('#site-nav #toggle-sections, #user-nav .dropdown > .nav-item');
 var $overlay = $('#modal-overlay');
-navTriggers.on('click', function(e){
+navTriggers.on('click touchend', function(e){
   if (!isTouch) { // Test for non-touch devices
     // Non-touch devices should use the standard behavior! Since they have hover.
     return;
@@ -86,11 +86,13 @@ function toggleDropdown(e){
     return false;
   } else if (isTouch) {
     $(dropdown).addClass('visible');
+    showOverlay($overlay);
+    e.preventDefault();
     return false;
   }
 }
 
-$('.section-list .dropdown > .nav-item').click(toggleDropdown);
+$('.section-list .dropdown > .nav-item').on('click touchend', toggleDropdown);
 
 // Global nav search field
 
@@ -110,4 +112,4 @@ function toggleSearch(){
   }
 }
 
-$('#show-search').click(toggleSearch);
+$('#show-search').on('click touchend', toggleSearch);
