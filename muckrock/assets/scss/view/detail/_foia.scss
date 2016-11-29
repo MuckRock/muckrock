@@ -267,11 +267,14 @@ $request-breakpoint: 768px;
     .add-note {
         @include border;
         @include box-shadow;
-        textarea {
+        .ProseMirror, textarea {
             display: block;
+            overflow: hidden;
             margin-bottom: 0;
             border: none;
             border-radius: 0;
+        }
+        textarea {
             font-family: $monospace;
             font-size: $size-2;
         }
