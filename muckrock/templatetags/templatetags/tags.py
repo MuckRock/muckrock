@@ -9,7 +9,9 @@ from django.template.defaultfilters import stringfilter
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
+import bleach
 from email.parser import Parser
+import markdown
 import re
 from urllib import urlencode
 
@@ -52,54 +54,6 @@ def company_title(companies):
     else:
         return companies
 
-class TableHeaderNode(Node):
-    """Tag to create table headers"""
-
-    def __init__(self, get, args):
-        # pylint: disable=super-init-not-called
-        self.get = get
-        self.args = args
-
-    def render(self, context):
-        """Render the table headers"""
-
-        get = self.get.resolve(context, True)
-
-        def get_args(*args):
-            """Append get args to url if they are present"""
-            return ''.join('&amp;%s=%s' % (arg, escape(get[arg])) for arg in args if arg in get)
-
-        html = ''
-        for width, field in self.args:
-            field = field.resolve(context, True)
-            html += '<th width="%s%%">' % width
-            if field:
-                if get.get('field') == field and get.get('order') == 'asc':
-                    order = 'desc'
-                    img = '&nbsp;<img src="%simg/down-arrow.png" />' % settings.STATIC_URL
-                elif get.get('field') == field and get.get('order') == 'desc':
-                    order = 'asc'
-                    img = '&nbsp;<img src="%simg/up-arrow.png" />' % settings.STATIC_URL
-                else:
-                    order = 'asc'
-                    img = ''
-                html += '<a href="?order=%s&amp;field=%s%s">%s%s</a>' % \
-                        (order, field, get_args('page', 'per_page'), field.capitalize(), img)
-            html += '</th>'
-        return html
-
-@register.tag
-def table_header(parser, token):
-    """Tag to create table headers"""
-
-    get = token.split_contents()[1]
-    bits = token.split_contents()[2:]
-    if len(bits) % 2 != 0:
-        raise TemplateSyntaxError("'table_header' statement requires matching number "
-                                  "of width and fields")
-    bits = zip(*[bits[i::2] for i in range(2)])
-    return TableHeaderNode(parser.compile_filter(get),
-                           [(a, parser.compile_filter(b)) for a, b in bits])
 
 @register.filter(name='abs')
 def abs_filter(value):
@@ -271,4 +225,39 @@ def smartypants(text):
     """Renders typographically-correct quotes with the smartpants library"""
     import smartypants as _smartypants
     smart_text = _smartypants.smartypants(text)
-    return mark_safe(smart_text)
+    return mark_safe(bleach.clean(smart_text))
+
+@register.filter(name='markdown')
+@stringfilter
+def markdown_filter(text, _safe=None):
+    """Take the provided markdown-formatted text and convert it to HTML."""
+    # First render Markdown
+    extensions = ['markdown.extensions.smarty', 'pymdownx.magiclink']
+    markdown_text = markdown.markdown(text, extensions=extensions)
+    # Next bleach the markdown
+    ALLOWED_TAGS = bleach.ALLOWED_TAGS + [
+        u'h1',
+        u'h2',
+        u'h3',
+        u'h4',
+        u'h5',
+        u'h6',
+        u'p',
+        u'img',
+        u'iframe'
+    ]
+    ALLOWED_ATTRIBUTES = bleach.ALLOWED_ATTRIBUTES.copy()
+    ALLOWED_ATTRIBUTES.update({
+        'iframe': ['src', 'width', 'height', 'frameborder', 'marginheight', 'marginwidth'],
+        'img': ['src', 'alt', 'title', 'width', 'height'],
+    })
+    # allows bleaching to be avoided
+    if _safe == 'safe':
+        bleached_text = markdown_text
+    else:
+        bleached_text = bleach.clean(
+            markdown_text,
+            tags=ALLOWED_TAGS,
+            attributes=ALLOWED_ATTRIBUTES
+        )
+    return mark_safe(bleached_text)

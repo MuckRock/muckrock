@@ -32,18 +32,20 @@
                 <header>
                     <p>Use the description to expand upon what you hope to accomplish or to organize what you already have.</p>
                 </header>
-                <div class="wysiwyg-toggle">
-                    <label class="wysiwyg-toggle__label bold" for="toggle-prosemirror">WYSIWYG</label>
-                    <span class="switch">
-                        <input type="checkbox" id="toggle-prosemirror" checked />
-                        <label for="toggle-prosemirror">
-                            <span class="checkbox-switch-head"></span>
-                        </label>
-                    </span>
-                    <p class="help-text">To compose in plaintext, disable the WYSIWYG interace.</p>
+                <div class="space-between align-center mb0">
+                    <div class="wysiwyg-toggle mb0">
+                        <label class="wysiwyg-toggle__label bold" for="toggle-prosemirror">Live Preview</label>
+                        <span class="switch">
+                            <input type="checkbox" id="toggle-prosemirror" checked />
+                            <label for="toggle-prosemirror">
+                                <span class="checkbox-switch-head"></span>
+                            </label>
+                        </span>
+                        <p class="help-text">To compose in plaintext, disable the live preview.</p>
+                    </div>
+                    <p class="nomargin"><a href="http://daringfireball.net/projects/markdown/syntax" target="_blank">Markdown syntax supported</a></p>
                 </div>
                 {{form.description}}
-                <p class="nomargin"><a href="http://daringfireball.net/projects/markdown/syntax" target="_blank">Markdown syntax supported</a></p>
             </div>
             <div role="tabpanel" class="tab-panel" id="contributors">
                 {{form.contributors}}
