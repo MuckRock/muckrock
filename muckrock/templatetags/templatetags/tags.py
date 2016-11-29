@@ -227,12 +227,27 @@ def smartypants(text):
     smart_text = _smartypants.smartypants(text)
     return mark_safe(bleach.clean(smart_text))
 
-@register.filter(name='markdown')
+@register.filter(name='markdown', is_safe=True)
 @stringfilter
-def markdown_filter(text, trusted=None):
+def markdown_filter(text, _safe=None):
     """Take the provided markdown-formatted text and convert it to HTML."""
-    markdown_text = markdown.markdown(text, extensions=['markdown.extensions.smarty'])
-    bleached_text = bleach.clean(markdown_text)
-    if trusted:
-        return markdown_text
+    # First render Markdown
+    extensions = ['markdown.extensions.smarty', 'pymdownx.magiclink']
+    markdown_text = markdown.markdown(text, extensions=extensions)
+    # Next bleach the markdown
+    ALLOWED_TAGS = bleach.ALLOWED_TAGS + [u'p', u'img', u'iframe']
+    ALLOWED_ATTRIBUTES = bleach.ALLOWED_ATTRIBUTES.copy()
+    ALLOWED_ATTRIBUTES.update({
+        'iframe': ['src', 'width', 'height', 'frameborder', 'marginheight', 'marginwidth'],
+        'img': ['src', 'alt', 'title', 'width', 'height'],
+    })
+    # allows bleaching to be avoided
+    if _safe == 'safe':
+        bleached_text = markdown_text
+    else:
+        bleached_text = bleach.clean(
+            markdown_text,
+            tags=ALLOWED_TAGS,
+            attributes=ALLOWED_ATTRIBUTES
+        )
     return mark_safe(bleached_text)

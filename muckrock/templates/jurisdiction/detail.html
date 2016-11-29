@@ -65,12 +65,12 @@
     <main class="jurisdiction__main">
         {% if jurisdiction.public_notes %}
         <section class="notes">
-            {{ jurisdiction.public_notes|markdown:"trusted" }}
+            {{ jurisdiction.public_notes|markdown }}
         </section>
         {% endif %}
         {% if jurisdiction.law_analysis %}
         <section class="analysis">
-            {{ jurisdiction.law_analysis|markdown:"trusted" }}
+            {{ jurisdiction.law_analysis|markdown }}
         </section>
         {% elif jurisdiction.level == 's' %}
         <div class="warning message">

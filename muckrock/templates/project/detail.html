@@ -91,7 +91,7 @@
 			{% endwith %}
             {% if project.description %}
             <section class="project-description">
-                {{ project.description|markdown:"trusted" }}
+                {{ project.description|markdown }}
             </section>
             {% endif %}
         </main>
