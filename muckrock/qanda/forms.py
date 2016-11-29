@@ -26,7 +26,7 @@ class QuestionForm(forms.ModelForm):
 
 class AnswerForm(forms.ModelForm):
     """A form for an Answer"""
-    answer = forms.CharField(widget=forms.Textarea(), label='')
+    answer = forms.CharField(widget=forms.Textarea(attrs={'placeholder': 'Write an answer here'}))
     class Meta:
         # pylint: disable=too-few-public-methods
         model = Answer

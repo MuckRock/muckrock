@@ -3,26 +3,30 @@
 {% load static from staticfiles %}
 
 {% block main %}
-<header class="homepage-header">
+<header class="homepage-header" style="background-image:url({% static 'foiamachine/images/gears.png' %});">
     {% include 'foiamachine/icons/mascot.svg' %}
     <h1>FOIA Machine <span class="small badge">Beta</span></h1>
     <div>
         <a class="button" href="{% host_url 'signup' host 'foiamachine' %}">Sign up</a>
-        <a class="button" href="{% host_url 'login' host 'foiamachine' %}">Log In</a>
+        <a class="button" href="{% host_url 'login' host 'foiamachine' %}">Log in</a>
     </div>
 </header>
 <main class="homepage">
     <div class="row">
         <h2 class="column">Automatically generate public records requests</h2>
-        <p class="column">Our simple tool allows anyone to generate a public records request with all the legal boilerplate you need.</p>
+        <p class="column">Our simple tool allows anyone to generate a public records request with all the necessary legal boilerplate, <strong>all for free</strong>.</p>
     </div>
     <div class="row">
         <h2 class="column">Track the progess of your requests</h2>
         <p class="column">Use your FOIA Machine account to track the progress of your requests, all from one place.</p>
     </div>
     <div class="row">
-        <h2 class="column">Powered by MuckRock</h2>
-        <p class="column">Access an extensive database of jurisdictions and government agencies.</p>
+        <h2 class="column">Powered by <a href="https://www.muckrock.com/">MuckRock</a></h2>
+        <p class="column">Access an extensive database of jurisdictions and government agencies to find out where, and how, to send your request.</p>
     </div>
 </main>
+<footer class="homepage-footer align-center">
+    <h2>Start filing today!</h2>
+    <a class="button" href="{% host_url 'signup' host 'foiamachine' %}">Sign up for free</a>
+</footer>
 {% endblock %}

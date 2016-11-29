@@ -33,12 +33,6 @@
         margin: 0 auto;
     }
 
-    &.question {
-        .messages-container {
-            @include row;
-        }
-    }
-
 }
 
 @import 'news';

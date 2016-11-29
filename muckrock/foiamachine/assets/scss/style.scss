@@ -2,8 +2,8 @@
 
 $pure-black: #000000;
 $black: #362522;
-$dark-grey: #84625d;
-$light-grey: #d5b3ae;
+$dark-grey: #666;
+$light-grey: #ccc;
 $white: #f8f7f6;
 $pure-white: #FFFFFF;
 
@@ -97,7 +97,7 @@ td p {
     font-weight: bold;
 }
 .small {
-    font-size: .8rem;
+    font-size: .8em;
 }
 .red {
     color: $red;
@@ -343,6 +343,18 @@ input[type="file"] {
 .bottomnav {
     margin-top: 2rem;
     border-top: 1px solid $light-grey;
+    text-align: center;
+    .mascot.icon {
+        margin-top: 1em;
+        height: 2em;
+        width: 2em;
+        path {
+            fill: $dark-grey;
+        }
+    }
+}
+.topnav .inline li {
+    margin-right: .25em;
 }
 
 /* Toolbar */
@@ -392,8 +404,10 @@ input[type="file"] {
 
 .homepage-header {
     margin-bottom: 1rem;
-    padding: 2rem;
+    padding: 3rem 0;
     background: $primary;
+    background-position: center;
+    background-size: cover;
     // color: $white;
     text-align: center;
     .mascot.icon {
@@ -416,16 +430,37 @@ input[type="file"] {
         color: $black;
         border: 3px solid;
     }
-        h1 {
+    h1 {
         margin-top: 0;
         font-size: 2em;
         text-align: center;
     }
 }
 
+.homepage-footer {
+    padding: 1rem;
+    justify-content: center;
+    background: $primary;
+    h2 {
+        margin-right: .5em;
+    }
+    .button {
+        background: $black;
+        color: $primary;
+        opacity: 1;
+        &:hover {
+            background: $white;
+        }
+    }
+    & + .bottomnav {
+        margin-top: 0;
+    }
+}
+
 .homepage {
     h2, p {
         margin-top: 0;
+        line-height: $lh;
     }
     .row:not(:first-child) {
         margin-bottom: 1rem;

@@ -12,6 +12,7 @@ var config = {
     entry: {
         main: path.resolve(root + 'assets/entry'),
         foiamachine: path.resolve(root + 'foiamachine/assets/entry'),
+        docViewer: path.resolve(root + 'assets/js/docViewer'),
     },
     output: {
         path: path.resolve(root + 'assets/bundles/'),
