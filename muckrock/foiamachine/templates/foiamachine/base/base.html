@@ -22,6 +22,16 @@
         <link rel="shortcut icon" href="{% static 'foiamachine/icons/favicon.ico' %}" />
         <link rel="apple-touch-icon-precomposed" href="{% static 'foiamachine/icons/favicon-152.png' %}">
         <link rel="mask-icon" href="{% static 'foiamachine/icons/favicon.svg' %}" color="#fb5238" />
+        <!-- Begin Google Analytics -->
+        <script>
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+            ga('create', 'UA-88189607-1', 'auto');
+            ga('send', 'pageview');
+        </script>
+        <!-- End Google Analytics -->
     </head>
     {% endblock head %}
     {% block body %}
@@ -39,8 +49,8 @@
                 </ul>
                 {% else %}
                 <ul class="nostyle inline">
-                    <li><a href="{% host_url 'signup' host 'foiamachine' %}">Sign up</a></li>
-                    <li><a href="{% host_url 'login' host 'foiamachine' %}">Log in</a></li>
+                    <li><a class="button" href="{% host_url 'signup' host 'foiamachine' %}">Sign up</a></li>
+                    <li><a class="button" href="{% host_url 'login' host 'foiamachine' %}">Log in</a></li>
                 </ul>
                 {% endif %}
             </main>
@@ -55,14 +65,15 @@
         {% endblock main %}
         <nav class="bottomnav small">
             <main>
-                <ul class="nostyle inline">
-                    <li class="bold"><a href="{% host_url 'index' host 'foiamachine' %}">FOIA Machine</a> <span class="badge">Beta</span></li>
+                {% include 'foiamachine/icons/mascot.svg' %}
+                <p class="bold"><a href="{% host_url 'index' host 'foiamachine' %}">FOIA Machine</a> <span class="badge">Beta</span></p>
+                <ul class="nostyle inline small">
                     <li><a href="/about">About</a></li>
                     <li><a href="/tos">Terms of Service</a></li>
                     <li><a href="/privacy">Privacy Policy</a></li>
                     <li><a href="/feedback">Feedback</a></li>
                 </ul>
-                <p>&copy; MuckRock Foundation, Inc. {% now "Y" %}</p>
+                <p class="small grey">&copy; MuckRock Foundation, Inc. {% now "Y" %}</p>
             </main>
         </nav>
         <!-- Scripts -->
