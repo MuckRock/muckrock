@@ -22,6 +22,46 @@
 }
 .ProseMirror-content {
     outline: none;
-    // height: 25em;
-    // overflow-y: scroll;
+    min-height: 10em;
+    margin-bottom: 0;
+}
+
+/* Customize the display of some elements */
+.ProseMirror
+.ProseMirror
+.ProseMirror h3::before {
+    content: '### ';
+    color: $color-grey;
+}
+.ProseMirror h4::before {
+    content: '#### ';
+    color: $color-grey;
+}
+.ProseMirror h5::before {
+    content: '##### ';
+    color: $color-grey;
+}
+.ProseMirror h6::before {
+    content: '###### ';
+    color: $color-grey;
+}
+.ProseMirror {
+    *::before, *::after {
+        color: $color-grey;
+    }
+    h1::before { content: '# '; }
+    h2::before { content: '## '; }
+    h3::before { content: '### '; }
+    h4::before { content: '#### '; }
+    h5::before { content: '##### '; }
+    h6::before { content: '###### '; }
+    b::before,  b::after, strong::before, strong::after { content: '**'; }
+    i::before, i::after, em::before, em::after { content: '_'; }
+    code::before, code::after { content: '`'; }
+    a::before { content: '['; }
+    a::after { content: ']'; }
+    .ProseMirror-tooltipmenu-linktext {
+        a::before { content: '('; }
+        a::after { content: ')'; }
+    }
 }

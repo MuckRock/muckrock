@@ -1,3 +1,4 @@
+{% load tags %}
 {% if question %}
 <div class="collapsable blue textbox">
     <header class="textbox__header">
@@ -5,7 +6,7 @@
         <a href="{{question.get_absolute_url}}" class="nocollapse"><time class="date" datetime="{{question.date|date:'c'}}">{{question.date|date:'m/d/Y'}}</time></a>
     </header>
     <section class="textbox__section">
-        {{question.question|urlize}}
+        {{question.question|markdown}}
     </section>
 </div>
 {% endif %}

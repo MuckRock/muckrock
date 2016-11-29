@@ -1,5 +1,6 @@
 -e git://github.com/callowayproject/django-news-sitemaps.git@55da6b72580dd6d79380f2bb17240e7afa00555a#egg=django_news_sitemaps-master # Generates a news sitemap
 -e git://github.com/BradWhittington/django-mailgun.git@4f2edb9466f6245c3bbf501aab2681f0b3c71e0c#egg=django_mailgun # Mail backend used directly (on production)
+bleach # Used to sanitize any HTML we're rendering
 boto # Used to access AWS
 celery # Used to run async tasks
 dill # Used to serialize machine learning data
@@ -17,7 +18,6 @@ django-hosts # Used for multi-domain routing
 django-leaflet # Used for plotting geographic data
 django-localflavor # Used for phone numbers and state list
 django-lot # Used for Log On Tokens
-django-markdown-deux # Used for markdown
 django-mathfilters # Mathematical template filters
 django-package-monitor # Keeps track of which packages need upgrading
 django-premailer # Styles HTML emails
@@ -39,11 +39,13 @@ easy-thumbnails # Used for thumbnailing images
 gunicorn # Python WSGI app server
 image-diet2 # Used to compress images on upload
 jsonfield # Used for storing JSON data, required by django-geojson
+markdown # Used for rendering Markdown, obviously!
 newrelic # Interface to newrelic service
 numpy==1.9.1 # Used by machine learning
 pascha # Used by business days to calculate th date of Easter
 pillow # Used by Django for image handling
 psycopg2 # Interface to postgres DB
+pymdown-extensions # Adds more helpful Markdown extensions
 python-dateutil # Used for relative time deltas
 raven # Sentry integration
 redis # Redis integration - for use with celery
