@@ -174,6 +174,14 @@ def pip_compile():
         env.run('pip-compile dev-requirements.in')
         env.run('cp -f requirements.txt ../')
 
+@task(name='pip-upgrade')
+def pip_upgrade():
+    """Update and upgrade requirements"""
+    with env.cd(os.path.join(env.base_path, 'pip')):
+        env.run('pip-compile --upgrade requirements.in')
+        env.run('pip-compile --upgrade dev-requirements.in')
+        env.run('cp -f requirements.txt ../')
+
 @task(name='pip-sync')
 def pip_sync():
     """sync requirements"""
