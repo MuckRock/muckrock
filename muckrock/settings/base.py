@@ -289,22 +289,6 @@ BUNDLED_REQUESTS = {
     'robot': 0,
 }
 
-MARKDOWN_DEUX_STYLES = {
-    "default": {
-        "extras": {
-            "code-friendly": None,
-        },
-        "safe_mode": "escape",
-    },
-    "trusted": {
-        "extras": {
-            "code-friendly": None,
-        },
-        "safe_mode": False,
-    }
-}
-
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
