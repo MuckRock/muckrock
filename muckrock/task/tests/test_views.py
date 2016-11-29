@@ -599,7 +599,7 @@ class ResponseTaskListViewTests(TestCase):
         other_foia = factories.FOIARequestFactory()
         starting_date = self.task.communication.date
         data = {'move': other_foia.id, 'status': 'done', 'task': self.task.pk}
-        response = http_post_response(self.url, self.view, data, self.user)
+        http_post_response(self.url, self.view, data, self.user)
         self.task.refresh_from_db()
         self.task.communication.refresh_from_db()
         ending_date = self.task.communication.date
