@@ -230,7 +230,7 @@ class FOIANoteForm(forms.ModelForm):
         # pylint: disable=too-few-public-methods
         model = FOIANote
         fields = ['note']
-        widgets = {'note': forms.Textarea()}
+        widgets = {'note': forms.Textarea(attrs={'class': 'prose-editor'})}
 
 class FOIAAdminFixForm(forms.ModelForm):
     """Form to email from the request's address"""

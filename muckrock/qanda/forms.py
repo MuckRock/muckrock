@@ -23,11 +23,28 @@ class QuestionForm(forms.ModelForm):
         # pylint: disable=too-few-public-methods
         model = Question
         fields = ['title', 'question', 'foia']
+        widgets = {
+            'question': forms.Textarea(attrs={
+                'placeholder': 'Write your question here',
+                'class': 'prose-editor'
+            })
+        }
+        help_texts = {
+            'question': 'Markdown syntax supported'
+        }
 
 class AnswerForm(forms.ModelForm):
     """A form for an Answer"""
-    answer = forms.CharField(widget=forms.Textarea(attrs={'placeholder': 'Write an answer here'}))
     class Meta:
         # pylint: disable=too-few-public-methods
         model = Answer
         fields = ['answer']
+        widgets = {
+            'answer': forms.Textarea(attrs={
+                'placeholder': 'Write an answer here',
+                'class': 'prose-editor'
+            })
+        }
+        help_texts = {
+            'answer': 'Markdown syntax supported'
+        }
