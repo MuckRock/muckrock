@@ -227,7 +227,7 @@ def smartypants(text):
     smart_text = _smartypants.smartypants(text)
     return mark_safe(bleach.clean(smart_text))
 
-@register.filter(name='markdown', is_safe=True)
+@register.filter(name='markdown')
 @stringfilter
 def markdown_filter(text, _safe=None):
     """Take the provided markdown-formatted text and convert it to HTML."""
