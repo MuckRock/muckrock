@@ -28,6 +28,7 @@ header {
 .viewer {
     @include flex(1 1 auto);
     margin-bottom: 0;
+    height: auto !important;
 }
 
 svg {
