@@ -235,7 +235,17 @@ def markdown_filter(text, _safe=None):
     extensions = ['markdown.extensions.smarty', 'pymdownx.magiclink']
     markdown_text = markdown.markdown(text, extensions=extensions)
     # Next bleach the markdown
-    ALLOWED_TAGS = bleach.ALLOWED_TAGS + [u'p', u'img', u'iframe']
+    ALLOWED_TAGS = bleach.ALLOWED_TAGS + [
+        u'h1',
+        u'h2',
+        u'h3',
+        u'h4',
+        u'h5',
+        u'h6',
+        u'p',
+        u'img',
+        u'iframe'
+    ]
     ALLOWED_ATTRIBUTES = bleach.ALLOWED_ATTRIBUTES.copy()
     ALLOWED_ATTRIBUTES.update({
         'iframe': ['src', 'width', 'height', 'frameborder', 'marginheight', 'marginwidth'],
