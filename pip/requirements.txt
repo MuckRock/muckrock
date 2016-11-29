@@ -65,6 +65,7 @@ premailer==3.0.0          # via django-premailer
 psycopg2==2.6.2
 pyimagediet==1.1.1        # via image-diet2
 pylibmc==1.5.1            # via django-pylibmc
+pymdown-extensions==1.2
 python-dateutil==2.5.3
 python-magic==0.4.12      # via pyimagediet
 pytz==2016.6.1            # via celery
