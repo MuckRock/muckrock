@@ -54,54 +54,6 @@ def company_title(companies):
     else:
         return companies
 
-class TableHeaderNode(Node):
-    """Tag to create table headers"""
-
-    def __init__(self, get, args):
-        # pylint: disable=super-init-not-called
-        self.get = get
-        self.args = args
-
-    def render(self, context):
-        """Render the table headers"""
-
-        get = self.get.resolve(context, True)
-
-        def get_args(*args):
-            """Append get args to url if they are present"""
-            return ''.join('&amp;%s=%s' % (arg, escape(get[arg])) for arg in args if arg in get)
-
-        html = ''
-        for width, field in self.args:
-            field = field.resolve(context, True)
-            html += '<th width="%s%%">' % width
-            if field:
-                if get.get('field') == field and get.get('order') == 'asc':
-                    order = 'desc'
-                    img = '&nbsp;<img src="%simg/down-arrow.png" />' % settings.STATIC_URL
-                elif get.get('field') == field and get.get('order') == 'desc':
-                    order = 'asc'
-                    img = '&nbsp;<img src="%simg/up-arrow.png" />' % settings.STATIC_URL
-                else:
-                    order = 'asc'
-                    img = ''
-                html += '<a href="?order=%s&amp;field=%s%s">%s%s</a>' % \
-                        (order, field, get_args('page', 'per_page'), field.capitalize(), img)
-            html += '</th>'
-        return html
-
-@register.tag
-def table_header(parser, token):
-    """Tag to create table headers"""
-
-    get = token.split_contents()[1]
-    bits = token.split_contents()[2:]
-    if len(bits) % 2 != 0:
-        raise TemplateSyntaxError("'table_header' statement requires matching number "
-                                  "of width and fields")
-    bits = zip(*[bits[i::2] for i in range(2)])
-    return TableHeaderNode(parser.compile_filter(get),
-                           [(a, parser.compile_filter(b)) for a, b in bits])
 
 @register.filter(name='abs')
 def abs_filter(value):
