@@ -1,5 +1,4 @@
 {% extends 'base_detail.html' %}
-{% load markdown_deux_tags %}
 {% load thumbnail %}
 {% load static from staticfiles %}
 {% load thumbnail %}
@@ -28,7 +27,7 @@
             <time title="{{ article.pub_date|date:'c' }}" datetime="{{ article.pub_date|date:'c' }}">{{ article.pub_date | date:"F j, Y" }}</time>
             <h1>{{ article.title|smartypants }}</h1>
             {% if article.kicker %}
-            <summary class="kicker">{{ article.kicker|smartypants }}</summary>
+            <summary class="kicker">{{ article.kicker|markdown }}</summary>
             {% endif %}
             <div class="contributors">
                 {% with article.authors.all as authors %}
@@ -57,7 +56,7 @@ We have to keep this code un-tabbed for dumb reasons!
 The markdown filter will transform the tabbed text into a line of <code>.
 Like  I said, real dumb stuff!
 {% endcomment %}
-{% filter markdown:"trusted"|smartypants %}
+{% filter markdown:"safe" %}
 {% evaluate article.body %}
 {% endfilter %}
         </main>

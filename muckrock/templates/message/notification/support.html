@@ -1,5 +1,5 @@
 {% extends 'message/base.html' %}
-{% load markdown_deux_tags %}
+{% load tags %}
 {% block body %}
 {{message|markdown}}
 {% if task %}

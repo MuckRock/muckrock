@@ -1,5 +1,5 @@
 {% extends 'base_profile.html' %}
-{% load markdown_deux_tags %}
+{% load tags %}
 {% load thumbnail %}
 {% block title %}MuckRock &bull; {{ agency.name }}{% endblock title %}
 {% block type %}agency{% endblock type %}
@@ -115,7 +115,7 @@
 {% endif %}
 {% if agency.public_notes %}
 <section class="notes">
-    {{ agency.public_notes|markdown:"trusted" }}
+    {{ agency.public_notes|markdown }}
 </section>
 {% endif %}
 <h3>Recent Requests <small><a href="{% url 'foia-list' %}?agency={{ agency.pk }}">See All</a></small></h3>
