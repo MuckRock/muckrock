@@ -4,7 +4,7 @@ General temaplate tags
 
 from django import template
 from django.conf import settings
-from django.template import Library, Node, TemplateSyntaxError
+from django.template import Library
 from django.template.defaultfilters import stringfilter
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
@@ -235,7 +235,7 @@ def markdown_filter(text, _safe=None):
     extensions = ['markdown.extensions.smarty', 'pymdownx.magiclink']
     markdown_text = markdown.markdown(text, extensions=extensions)
     # Next bleach the markdown
-    ALLOWED_TAGS = bleach.ALLOWED_TAGS + [
+    allowed_tags = bleach.ALLOWED_TAGS + [
         u'h1',
         u'h2',
         u'h3',
@@ -246,8 +246,8 @@ def markdown_filter(text, _safe=None):
         u'img',
         u'iframe'
     ]
-    ALLOWED_ATTRIBUTES = bleach.ALLOWED_ATTRIBUTES.copy()
-    ALLOWED_ATTRIBUTES.update({
+    allowed_attributes = bleach.ALLOWED_ATTRIBUTES.copy()
+    allowed_attributes.update({
         'iframe': ['src', 'width', 'height', 'frameborder', 'marginheight', 'marginwidth'],
         'img': ['src', 'alt', 'title', 'width', 'height'],
     })
@@ -257,7 +257,7 @@ def markdown_filter(text, _safe=None):
     else:
         bleached_text = bleach.clean(
             markdown_text,
-            tags=ALLOWED_TAGS,
-            attributes=ALLOWED_ATTRIBUTES
+            tags=allowed_tags,
+            attributes=allowed_attributes
         )
     return mark_safe(bleached_text)
