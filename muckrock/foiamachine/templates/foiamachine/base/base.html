@@ -39,8 +39,8 @@
                 </ul>
                 {% else %}
                 <ul class="nostyle inline">
-                    <li><a href="{% host_url 'signup' host 'foiamachine' %}">Sign up</a></li>
-                    <li><a href="{% host_url 'login' host 'foiamachine' %}">Log in</a></li>
+                    <li><a class="button" href="{% host_url 'signup' host 'foiamachine' %}">Sign up</a></li>
+                    <li><a class="button" href="{% host_url 'login' host 'foiamachine' %}">Log in</a></li>
                 </ul>
                 {% endif %}
             </main>
@@ -55,14 +55,15 @@
         {% endblock main %}
         <nav class="bottomnav small">
             <main>
-                <ul class="nostyle inline">
-                    <li class="bold"><a href="{% host_url 'index' host 'foiamachine' %}">FOIA Machine</a> <span class="badge">Beta</span></li>
+                {% include 'foiamachine/icons/mascot.svg' %}
+                <p class="bold"><a href="{% host_url 'index' host 'foiamachine' %}">FOIA Machine</a> <span class="badge">Beta</span></p>
+                <ul class="nostyle inline small">
                     <li><a href="/about">About</a></li>
                     <li><a href="/tos">Terms of Service</a></li>
                     <li><a href="/privacy">Privacy Policy</a></li>
                     <li><a href="/feedback">Feedback</a></li>
                 </ul>
-                <p>&copy; MuckRock Foundation, Inc. {% now "Y" %}</p>
+                <p class="small grey">&copy; MuckRock Foundation, Inc. {% now "Y" %}</p>
             </main>
         </nav>
         <!-- Scripts -->
