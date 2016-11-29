@@ -508,20 +508,21 @@ class NewAgencyTaskViewTests(TestCase):
 @mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class ResponseTaskListViewTests(TestCase):
     """Tests ResponseTask-specific POST handlers"""
-
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
-                'test_foiacommunications.json', 'test_task.json']
-
     def setUp(self):
+        self.user = factories.UserFactory(is_staff=True)
         self.url = reverse('response-task-list')
-        self.task = task.models.ResponseTask.objects.get(pk=8)
-        self.client = Client()
-        self.client.login(username='adam', password='abc')
+        self.view = ResponseTaskList.as_view()
+        self.task = ResponseTaskFactory()
+
+    def test_get_list(self):
+        """Staff users should be able to view a list of tasks."""
+        response = http_get_response(self.url, self.view, self.user)
+        eq_(response.status_code, 200)
 
     def test_get_single(self):
-        """Should be able to view a single task"""
-        response = self.client.get(reverse('response-task', kwargs={'pk': self.task.pk}))
+        """Staff users should be able to view a single task"""
+        url = reverse('response-task', kwargs={'pk': self.task.pk})
+        response = http_get_response(url, self.view, self.user)
         eq_(response.status_code, 200)
 
     def test_post_set_price(self):
@@ -529,29 +530,32 @@ class ResponseTaskListViewTests(TestCase):
         price = 1
         foia = self.task.communication.foia
         logging.info(foia.agency)
-        self.client.post(self.url, {
+        data = {
             'status': 'done',
             'price': price,
             'task': self.task.pk
-        })
-        updated_task = task.models.ResponseTask.objects.get(pk=self.task.pk)
-        foia_price = updated_task.communication.foia.price
-        eq_(foia_price, float(price), 'The price on the FOIA should be set.')
-        ok_(updated_task.resolved, 'Setting the price should resolve the task.')
+        }
+        http_post_response(self.url, self.view, data, self.user)
+        self.task.refresh_from_db()
+        foia.refresh_from_db()
+        eq_(foia.price, float(price), 'The price on the FOIA should be set.')
+        ok_(self.task.resolved, 'Setting the price should resolve the task.')
 
     def test_post_set_status(self):
         """Setting the status should save it to the response and request, then resolve task."""
         status_change = 'done'
         data = {'status': status_change, 'set_foia': True, 'task': self.task.pk}
-        self.client.post(self.url, data)
-        updated_task = task.models.ResponseTask.objects.get(pk=self.task.pk)
-        comm_status = updated_task.communication.status
-        foia_status = updated_task.communication.foia.status
+        http_post_response(self.url, self.view, data, self.user)
+        self.task.refresh_from_db()
+        self.task.communication.refresh_from_db()
+        self.task.communication.foia.refresh_from_db()
+        comm_status = self.task.communication.status
+        foia_status = self.task.communication.foia.status
         eq_(comm_status, status_change,
             'The status change should be saved to the communication.')
         eq_(foia_status, status_change,
             'The status of the FOIA should be set.')
-        eq_(updated_task.resolved, True,
+        eq_(self.task.resolved, True,
             'Setting the status should resolve the task')
 
     def test_post_set_comm_status(self):
@@ -559,76 +563,84 @@ class ResponseTaskListViewTests(TestCase):
         status_change = 'done'
         existing_foia_status = self.task.communication.foia.status
         data = {'status': status_change, 'set_foia': False, 'task': self.task.pk}
-        self.client.post(self.url, data)
-        updated_task = task.models.ResponseTask.objects.get(pk=self.task.pk)
-        comm_status = updated_task.communication.status
-        foia_status = updated_task.communication.foia.status
+        http_post_response(self.url, self.view, data, self.user)
+        self.task.refresh_from_db()
+        self.task.communication.refresh_from_db()
+        self.task.communication.foia.refresh_from_db()
+        comm_status = self.task.communication.status
+        foia_status = self.task.communication.foia.status
         eq_(comm_status, status_change,
             'The status change should be saved to the communication.')
         eq_(foia_status, existing_foia_status,
             'The status of the FOIA should not be changed.')
-        eq_(updated_task.resolved, True,
+        eq_(self.task.resolved, True,
             'Settings the status should resolve the task.')
 
     def test_post_tracking_number(self):
         """Setting the tracking number should save it to the response's request."""
         new_tracking_id = 'ABC123OMGWTF'
-        self.client.post(self.url, {
+        data = {
             'tracking_number': new_tracking_id,
             'status': 'done',
             'task': self.task.pk
-        })
-        updated_task = task.models.ResponseTask.objects.get(pk=self.task.pk)
-        foia_tracking = updated_task.communication.foia.tracking_id
+        }
+        http_post_response(self.url, self.view, data, self.user)
+        self.task.refresh_from_db()
+        self.task.communication.refresh_from_db()
+        self.task.communication.foia.refresh_from_db()
+        foia_tracking = self.task.communication.foia.tracking_id
         eq_(foia_tracking, new_tracking_id,
             'The new tracking number should be saved to the associated request.')
-        ok_(updated_task.resolved,
+        ok_(self.task.resolved,
             'Setting the tracking number should resolve the task')
 
     def test_post_move(self):
         """Moving the response should save it to a new request."""
-        move_to_id = 2
+        other_foia = factories.FOIARequestFactory()
         starting_date = self.task.communication.date
-        self.client.post(self.url, {'move': move_to_id, 'status': 'done', 'task': self.task.pk})
-        updated_task = task.models.ResponseTask.objects.get(pk=self.task.pk)
-        foia_id = updated_task.communication.foia.id
-        ending_date = updated_task.communication.date
-        eq_(foia_id, move_to_id,
+        data = {'move': other_foia.id, 'status': 'done', 'task': self.task.pk}
+        response = http_post_response(self.url, self.view, data, self.user)
+        self.task.refresh_from_db()
+        self.task.communication.refresh_from_db()
+        ending_date = self.task.communication.date
+        eq_(self.task.communication.foia, other_foia,
             'The response should be moved to a different FOIA.')
-        ok_(updated_task.resolved,
+        ok_(self.task.resolved,
             'Moving the status should resolve the task')
         eq_(starting_date, ending_date,
             'Moving the communication should not change its date.')
 
     def test_post_move_multiple(self):
-        """Moving the response to multiple requests should only modify the first request."""
-        move_to_ids = '2, 3, 4'
+        """Moving the response to multiple requests modify all the requests."""
+        other_foias = [
+            factories.FOIARequestFactory(),
+            factories.FOIARequestFactory(),
+            factories.FOIARequestFactory()
+        ]
+        move_to_ids = ', '.join([str(foia.id) for foia in other_foias])
         change_status = 'done'
         change_tracking = 'DEADBEEF'
-        self.client.post(self.url, {
+        data = {
             'move': move_to_ids,
             'status': change_status,
             'tracking_number': change_tracking,
             'task': self.task.pk
-        })
-        foia2 = FOIARequest.objects.get(pk=2)
-        foia3 = FOIARequest.objects.get(pk=3)
-        foia4 = FOIARequest.objects.get(pk=4)
-        # foia 2 should get updated status, tracking number
-        # foia 3 & 4 should stay just the way they are
-        eq_(change_tracking, foia2.tracking_id,
-            'Tracking should update for first request in move list.')
-        ok_(change_tracking is not foia3.tracking_id and change_tracking is not foia4.tracking_id,
-            'Tracking should not update for subsequent requests in list.')
+        }
+        http_post_response(self.url, self.view, data, self.user)
+        for foia in other_foias:
+            foia.refresh_from_db()
+            eq_(change_tracking, foia.tracking_id,
+              'Tracking should update for each request in move list.')
 
     def test_terrible_data(self):
         """Posting awful data shouldn't cause everything to collapse."""
-        response = self.client.post(self.url, {
+        data = {
             'move': 'omglol, howru',
             'status': 'notastatus',
             'tracking_number': ['wtf'],
             'task': self.task.pk
-        })
+        }
+        response = http_post_response(self.url, self.view, data, self.user)
         ok_(response)
 
     def test_foia_integrity(self):
@@ -644,10 +656,12 @@ class ResponseTaskListViewTests(TestCase):
             'Should add a new communication to the FOIA.')
         num_comms = foia.communications.count()
         # next try resolving the task with a tracking number set
-        self.client.post(self.url, {
+        data = {
             'resolve': 'true',
             'tracking_number': u'12345',
             'task': self.task.pk
-        })
+        }
+        http_post_response(self.url, self.view, data, self.user)
+        foia.refresh_from_db()
         eq_(foia.communications.count(), num_comms,
             'The number of communications should not have changed from before.')

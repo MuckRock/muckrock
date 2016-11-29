@@ -140,8 +140,8 @@ class Detail(DetailView):
         context['sidebar_admin_url'] = reverse('admin:qanda_question_change',
             args=(context['object'].pk,))
         context['answers'] = context['object'].answers.select_related('user')
-        context['answer_users'] = set(a.user for a in context['answers'])
-        foia = context['object'].foia
+        context['answer_form'] = AnswerForm()
+        foia = self.object.foia
         if foia is not None:
             foia.public_file_count = (FOIAFile.objects
                     .filter(foia=foia, access='public')

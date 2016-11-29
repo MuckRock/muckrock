@@ -51,7 +51,9 @@ class Question(models.Model):
 
     def answer_authors(self):
         """Returns a list of users who have answered the question."""
-        return [answer.user for answer in self.answers.all()]
+        authors = self.answers.order_by('user').values('user').distinct()
+        author_ids = [author['user'] for author in authors]
+        return User.objects.filter(id__in=author_ids)
 
     class Meta:
         # pylint: disable=too-few-public-methods

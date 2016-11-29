@@ -38,10 +38,7 @@ $shadow-active: 0px;
     background: $color;
     color: $color-white;
     .icon {
-        vertical-align: text-top;
-        path, rect, polygon, circle {
-            fill: $color-white;
-        }
+        @include svg-color($color-white);
     }
     // Type
     font-weight: $bold;

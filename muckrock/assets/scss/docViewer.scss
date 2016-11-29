@@ -1,0 +1,99 @@
+// Third Party Frameworks
+@import '../vendor/normalize';
+@import '../vendor/bourbon/bourbon';
+@import '../vendor/neat/neat';
+
+@import 'base/base';
+@import 'component/button';
+@import 'component/viewer';
+@import 'pattern/button_group';
+
+body {
+    background: $color-black;
+    color: $color-white;
+    @include display(flex);
+    @include flex-direction(column);
+    height: 100vh;
+}
+
+header {
+    @include flex(0 0 auto);
+    @include display(flex);
+    @include flex-wrap(wrap);
+    @include align-items(center);
+    @include justify-content(space-between);
+    padding: $vr/2;
+}
+
+.viewer {
+    @include flex(1 1 auto);
+    margin-bottom: 0;
+}
+
+svg {
+    vertical-align: middle;
+    fill-rule: evenodd;
+    @include svg-color($color-white);
+}
+
+.info {
+    @include display(flex);
+    @include align-items(center);
+    margin-bottom: 0;
+    a {
+        color: $color-white;
+        &:hover {
+            color: $color-blue;
+        }
+    }
+}
+
+.logo {
+    margin-right: $vr/2;
+    svg {
+        height: 2em;
+        width: 2em;
+    }
+    &:hover svg {
+        @include svg-color($color-blue);
+    }
+}
+
+.file-embed {
+    display: none;
+    width: 100%;
+    padding: $vr;
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba($color-black, .8);
+    &.visible {
+        @include display(flex);
+        @include flex-direction(column);
+        @include align-items(center);
+        @include justify-content(center);
+    }
+    div {
+        width: 100%;
+    }
+    textarea {
+        display: block;
+        color: $color-black;
+        width: 100%;
+        font-family: $monospace;
+        font-size: $size-2;
+        resize: none;
+        white-space: nowrap;
+        overflow-x: scroll;
+    }
+    .close-embed {
+        width: 100%;
+        cursor: pointer;
+        &:hover {
+            color: $color-blue;
+        }
+    }
+}

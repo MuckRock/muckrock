@@ -27,11 +27,12 @@ function setMaxHeight(element, maxHeight) {
 }
 
 // Handle touch events on mobile
+var isTouch = 'ontouchstart' in window;
 var navItems = $('#site-nav .section-list, #user-nav .dropdown ul');
 var navTriggers = $('#site-nav #toggle-sections, #user-nav .dropdown > .nav-item');
 var $overlay = $('#modal-overlay');
 navTriggers.on('click', function(e){
-  if (!('ontouchstart' in window)) { // Test for non-touch devices
+  if (!isTouch) { // Test for non-touch devices
     // Non-touch devices should use the standard behavior! Since they have hover.
     return;
   }
@@ -66,11 +67,13 @@ On smaller screen sizes, the list of dropdowns is hidden behind a toggle.
 Then, each dropdown menu is displayed by hiding the other dropdown options
 while showing the elements present in that dropdown.
 */
-$('.section-list .dropdown > .nav-item').click(function(e){
+
+function toggleDropdown(e){
   // We only want the nav-item to be triggerable when the dropdown is visible
   // and if it contains some list to drop down.
   var menuIsVisible = $('#toggle-sections').is('.active');
-  var section = $(this).parent();
+  var trigger = $(this);
+  var section = $(trigger).parent();
   var otherSections = section.siblings();
   var dropdown = section.children('ul');
   if (menuIsVisible && dropdown.length > 0) {
@@ -81,14 +84,20 @@ $('.section-list .dropdown > .nav-item').click(function(e){
     $(dropdown).css('overflow-y', 'scroll');
     e.preventDefault();
     return false;
+  } else if (isTouch) {
+    $(dropdown).addClass('visible');
+    return false;
   }
-});
+}
+
+$('.section-list .dropdown > .nav-item').click(toggleDropdown);
 
 // Global nav search field
-$('#show-search').click(function(){
-  var searchButton = this;
-  var search = '.global-search';
-  var closeSearch = '#hide-search';
+
+function toggleSearch(){
+  var searchButton = $('#show-search');
+  var search = $('.global-search');
+  var closeSearch = $('#hide-search');
   var searchInput = $(search).find('input[type="search"]');
   toggleNav(search, searchButton);
   $(closeSearch).click(function(){
@@ -99,4 +108,6 @@ $('#show-search').click(function(){
   } else {
     searchInput.blur();
   }
-});
+}
+
+$('#show-search').click(toggleSearch);

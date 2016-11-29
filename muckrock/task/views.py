@@ -385,39 +385,40 @@ class ResponseTaskList(TaskList):
         proxy = cleaned_data['proxy']
         # move is executed first, so that the status and tracking
         # operations are applied to the correct FOIA request
+        comms = None
         if move:
             try:
-                task.move(move)
+                comms = task.move(move)
             except (Http404, ValueError):
                 messages.error(request, 'No valid destination for moving the request.')
                 error_happened = True
         if status:
             try:
-                task.set_status(status, set_foia)
+                task.set_status(status, set_foia, comms)
             except ValueError:
                 messages.error(request, 'You tried to set the request to an invalid status.')
                 error_happened = True
         if tracking_number:
             try:
-                task.set_tracking_id(tracking_number)
+                task.set_tracking_id(tracking_number, comms)
             except ValueError:
                 messages.error(request,
                     'You tried to set an invalid tracking id. Just use a string of characters.')
                 error_happened = True
         if date_estimate:
             try:
-                task.set_date_estimate(date_estimate)
+                task.set_date_estimate(date_estimate, comms)
             except ValueError:
                 messages.error(request, 'You tried to set the request to an invalid date.')
                 error_happened = True
         if price:
             try:
-                task.set_price(price)
+                task.set_price(price, comms)
             except ValueError:
                 messages.error(request, 'You tried to set a non-numeric price.')
                 error_happened = True
         if proxy:
-            task.proxy_reject()
+            task.proxy_reject(comms)
         action_taken = move or status or tracking_number or price or proxy
         if action_taken and not error_happened:
             task.resolve(request.user)
