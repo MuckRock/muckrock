@@ -9,7 +9,9 @@ from django.template.defaultfilters import stringfilter
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
+import bleach
 from email.parser import Parser
+import markdown
 import re
 from urllib import urlencode
 
@@ -271,4 +273,14 @@ def smartypants(text):
     """Renders typographically-correct quotes with the smartpants library"""
     import smartypants as _smartypants
     smart_text = _smartypants.smartypants(text)
-    return mark_safe(smart_text)
+    return mark_safe(bleach.clean(smart_text))
+
+@register.filter(name='markdown')
+@stringfilter
+def markdown_filter(text, trusted=None):
+    """Take the provided markdown-formatted text and convert it to HTML."""
+    markdown_text = markdown.markdown(text, extensions=['markdown.extensions.smarty'])
+    bleached_text = bleach.clean(markdown_text)
+    if trusted:
+        return markdown_text
+    return mark_safe(bleached_text)

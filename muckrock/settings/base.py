@@ -185,7 +185,6 @@ INSTALLED_APPS = (
     'dbsettings',
     'leaflet',
     'localflavor',
-    'markdown_deux',
     'mathfilters',
     'news_sitemaps',
     'raven.contrib.django',

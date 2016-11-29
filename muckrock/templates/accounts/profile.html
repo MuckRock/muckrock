@@ -1,6 +1,6 @@
 {% extends 'base_profile.html' %}
 {% load thumbnail %}
-{% load markdown_deux_tags %}
+{% load tags %}
 {% load static from staticfiles %}
 
 {% block title %}{{user_obj.get_full_name}} ({{ user_obj.username }}) &bull; MuckRock{% endblock title %}
