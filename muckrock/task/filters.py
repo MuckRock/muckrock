@@ -73,6 +73,7 @@ class SnailMailTaskFilterSet(TaskFilterSet):
 
     def blank_choice(self, queryset, name, value):
         """Check if the value is blank"""
+        # pylint: disable=no-self-use
         if value == 'True':
             return queryset.exclude(**{name: ''})
         elif value == 'False':

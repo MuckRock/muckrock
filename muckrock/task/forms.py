@@ -3,13 +3,8 @@ Forms for Task app
 """
 
 from django import forms
-from django.contrib.auth.models import User
 
-from autocomplete_light import shortcuts as autocomplete_light
-
-from muckrock.forms import MRFilterForm
-from muckrock import foia
-
+from muckrock.foia import STATUS
 
 class FlaggedTaskForm(forms.Form):
     """Simple form for acting on a FlaggedTask"""
@@ -53,7 +48,7 @@ class ResponseTaskForm(forms.Form):
             '%d %B %Y',      # '25 October 2006'
             '%d %B, %Y']     # '25 October, 2006'
     )
-    status = forms.ChoiceField(choices=foia.models.STATUS)
+    status = forms.ChoiceField(choices=STATUS)
     set_foia = forms.BooleanField(label='Set request status', initial=True, required=False)
     proxy = forms.BooleanField(required=False, widget=forms.HiddenInput())
 
