@@ -20,6 +20,7 @@ from muckrock.models import ExtractDay, Now
 from muckrock.task.filters import (
     TaskFilterSet,
     ResponseTaskFilterSet,
+    NewAgencyTaskFilterSet,
 )
 from muckrock.task.forms import (
     FlaggedTaskForm, StaleAgencyTaskForm, ResponseTaskForm,
@@ -333,6 +334,7 @@ class ProjectReviewTaskList(TaskList):
 
 class NewAgencyTaskList(TaskList):
     title = 'New Agencies'
+    filter_class = NewAgencyTaskFilterSet
     queryset = NewAgencyTask.objects.preload_list()
 
     def task_post_helper(self, request, task):

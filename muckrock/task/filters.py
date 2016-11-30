@@ -11,6 +11,7 @@ import django_filters
 from muckrock.task.models import (
     Task,
     ResponseTask,
+    NewAgencyTask
 )
 
 class TaskFilterSet(django_filters.FilterSet):
@@ -27,7 +28,17 @@ class TaskFilterSet(django_filters.FilterSet):
         model = Task
         fields = ['resolved', 'resolved_by']
 
+
 class ResponseTaskFilterSet(TaskFilterSet):
+    """Allows response tasks to be filtered by predicted status."""
     class Meta:
         model = ResponseTask
         fields = ['predicted_status', 'resolved', 'resolved_by']
+
+
+
+class NewAgencyTaskFilterSet(TaskFilterSet):
+    """Allows new agency tasks to be filtered by jurisdiction."""
+    class Meta:
+        model = NewAgencyTask
+        fields = ['agency__jurisdiction__level', 'resolved', 'resolved_by']
