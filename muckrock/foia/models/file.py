@@ -64,7 +64,7 @@ class FOIAFile(models.Model):
             'xlsx': 'file-spreadsheet.png',
             'zip': 'file-archive.png',
         }
-        if self.is_public() and self.is_doccloud():
+        if self.is_public() and self.is_doccloud() and self.doc_id:
             index = self.doc_id.index('-')
             num = self.doc_id[0:index]
             name = self.doc_id[index+1:]

@@ -27,6 +27,14 @@ from muckrock.utils import generate_status_action
 
 # pylint: disable=missing-docstring
 
+SNAIL_MAIL_CATEGORIES = [
+    ('a', 'Appeal'),
+    ('n', 'New'),
+    ('u', 'Update'),
+    ('f', 'Followup'),
+    ('p', 'Payment'),
+]
+
 class TaskQuerySet(models.QuerySet):
     """Object manager for all tasks"""
     def get_unresolved(self):
@@ -201,13 +209,7 @@ class OrphanTask(Task):
 class SnailMailTask(Task):
     """A communication that needs to be snail mailed"""
     type = 'SnailMailTask'
-    categories = (
-        ('a', 'Appeal'),
-        ('n', 'New'),
-        ('u', 'Update'),
-        ('f', 'Followup'),
-    )
-    category = models.CharField(max_length=1, choices=categories)
+    category = models.CharField(max_length=1, choices=SNAIL_MAIL_CATEGORIES)
     communication = models.ForeignKey('foia.FOIACommunication')
     user = models.ForeignKey(User, blank=True, null=True)
     amount = models.DecimalField(default=0.00, max_digits=8, decimal_places=2)
