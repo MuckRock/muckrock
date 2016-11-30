@@ -4,7 +4,7 @@ Forms for Task app
 
 from django import forms
 
-from muckrock.foia import STATUS
+from muckrock.foia.models import STATUS
 
 class FlaggedTaskForm(forms.Form):
     """Simple form for acting on a FlaggedTask"""
