@@ -138,12 +138,12 @@
             {% endif %}
             {% if contributors %}
             <div class="contributors">
-                <header>
+                <header class="space-between mb0">
                     <dfn>Contributors</dfn>
                     <a href="{% url 'project-edit' slug=project.slug pk=project.pk %}#contributors" class="small action">Edit</a>
                 </header>
                 {% for contributor in contributors %}
-                <div class="contributor">
+                <div class="contributor align-center">
                     <a href="{{ contributor.get_absolute_url }}" title="{{ contributor}}'s profile page">
                         {% if contributor.profile.avatar %}
                         <img class="avatar" src="{% thumbnail contributor.profile.avatar 50x50 %}">
@@ -152,10 +152,10 @@
                         {% endif %}
                     </a>
                     <div class="info">
-                        <p class="name"><a href="{{ contributor.get_absolute_url }}" title="{{ contributor}}'s profile page">
+                        <p class="name bold mb0"><a href="{{ contributor.get_absolute_url }}" title="{{ contributor}}'s profile page">
                             {{ contributor.get_full_name }}
                         </a></p>
-                        <p class="links">
+                        <p class="small links space-between">
                             {% if contributor.profile.organization %}
                             <a href="{{ contributor.profile.organization.get_absolute_url }}">
                                 {{ contributor.profile.organization }}

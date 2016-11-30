@@ -115,43 +115,30 @@
             font-size: $size-4;
             line-height: $lh;
         }
-        .contributors header {
-            @include display(flex);
-            @include justify-content(space-between);
-            margin-bottom: $vr/2;
-        }
-        & > .contributor {
-            @include display(flex);
-            margin-bottom: $vr/2;
-            .avatar {
-                display: block;
-                @include border-radius;
-            }
-            .info {
-                padding: $vr/4 $vr/2;
-                p {
-                    margin-bottom: 0;
-
-                }
-                a {
-                    color: $color-black;
-                }
-                a:hover {
-                    color: $color-blue;
-                    path { fill: $color-blue; }
-                }
-                .name {
-                    font-weight: $bold;
-                }
-                .icon {
-                    margin-left: $vr/2;
-                }
-            }
-        }
-        .stat a {
+        stat a {
             color: $color-black;
             &:hover {
                 color: $color-blue;
+            }
+        }
+        .contributor {
+            margin-bottom: $vr/4;
+            @include border;
+            @include border-radius;
+            overflow: hidden;
+            background: $color-white-pure;
+            a, img {
+                display: block;
+            }
+            .info {
+                @include flex(1 1 auto);
+                padding: 0 $vr/4;
+            }
+            a .icon {
+                @include svg-color($color-blue);
+                &:hover {
+                    @include svg-color($color-black);
+                }
             }
         }
     }

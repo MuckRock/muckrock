@@ -9,6 +9,7 @@ from django.views.defaults import page_not_found, server_error
 from django.views.generic import TemplateView
 
 import debug_toolbar
+from django_hosts.resolvers import reverse_lazy
 
 from muckrock.foiamachine import views
 from muckrock.forms import PasswordResetForm
@@ -47,7 +48,7 @@ urlpatterns = patterns(
     url(r'^accounts/password_change/$',
         auth_views.password_change,
         {'template_name': 'foiamachine/views/registration/password_change.html',
-         'post_change_redirect': 'password-change-done'},
+         'post_change_redirect': reverse_lazy('password-change-done', host='foiamachine')},
         name='password-change'),
     url(r'^accounts/password_change/done/$',
         auth_views.password_change_done,
@@ -55,15 +56,19 @@ urlpatterns = patterns(
         name='password-change-done'),
     url(r'^accounts/password_reset/$',
         auth_views.password_reset,
-        {'template_name': 'foiamachine/views/registration/password_reset.html',
-         'email_template_name': 'foiamachine/email/password_reset_email.html',
-         'post_reset_redirect': 'password-reset-done',
-         'password_reset_form': PasswordResetForm},
+        {
+            'template_name': 'foiamachine/views/registration/password_reset.html',
+            'email_template_name': 'foiamachine/emails/password_reset_email.html',
+            'post_reset_redirect': reverse_lazy('password-reset-done', host='foiamachine'),
+            'password_reset_form': PasswordResetForm
+        },
         name='password-reset'),
     url(r'^accounts/password_reset/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
         auth_views.password_reset_confirm,
-        {'template_name': 'foiamachine/views/registration/password_reset_confirm.html',
-         'post_reset_redirect': 'password-reset-complete'},
+        {
+            'template_name': 'foiamachine/views/registration/password_reset_confirm.html',
+            'post_reset_redirect': reverse_lazy('password_reset_complete', host='foiamachine'),
+        },
         name='password-reset-confirm'),
     url(r'^accounts/password_reset/done/$',
         auth_views.password_reset_done,
