@@ -67,7 +67,7 @@ urlpatterns = patterns(
         auth_views.password_reset_confirm,
         {
             'template_name': 'foiamachine/views/registration/password_reset_confirm.html',
-            'post_reset_redirect': reverse_lazy('password_reset_complete', host='foiamachine'),
+            'post_reset_redirect': reverse_lazy('password-reset-complete', host='foiamachine'),
         },
         name='password-reset-confirm'),
     url(r'^accounts/password_reset/done/$',
