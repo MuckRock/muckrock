@@ -9,6 +9,7 @@ from autocomplete_light import shortcuts as autocomplete_light
 import django_filters
 
 from muckrock.filters import BLANK_STATUS, NULL_BOOLEAN_CHOICES
+from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import (
     SNAIL_MAIL_CATEGORIES,
     Task,
@@ -16,6 +17,7 @@ from muckrock.task.models import (
     NewAgencyTask,
     SnailMailTask,
     FlaggedTask,
+    StaleAgencyTask,
 )
 
 class TaskFilterSet(django_filters.FilterSet):
@@ -103,3 +105,15 @@ class FlaggedTaskFilterSet(TaskFilterSet):
     class Meta:
         model = FlaggedTask
         fields = ['user', 'resolved', 'resolved_by']
+
+
+class StaleAgencyTaskFilterSet(TaskFilterSet):
+    """Allows a stale agency task to be filtered by jurisdiction."""
+    jurisdiction = django_filters.ModelMultipleChoiceFilter(
+        name='agency__jurisdiction',
+        queryset=Jurisdiction.objects.filter(hidden=False),
+        widget=autocomplete_light.MultipleChoiceWidget('JurisdictionAutocomplete')
+    )
+    class Meta:
+        model = StaleAgencyTask
+        fields = ['jurisdiction', 'resolved', 'resolved_by']

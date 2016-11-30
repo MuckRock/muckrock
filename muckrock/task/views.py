@@ -23,6 +23,7 @@ from muckrock.task.filters import (
     NewAgencyTaskFilterSet,
     SnailMailTaskFilterSet,
     FlaggedTaskFilterSet,
+    StaleAgencyTaskFilterSet,
 )
 from muckrock.task.forms import (
     FlaggedTaskForm, StaleAgencyTaskForm, ResponseTaskForm,
@@ -254,6 +255,7 @@ class RejectedEmailTaskList(TaskList):
 
 class StaleAgencyTaskList(TaskList):
     model = StaleAgencyTask
+    filter_class = StaleAgencyTaskFilterSet
     title = 'Stale Agencies'
     queryset = (StaleAgencyTask.objects
             .select_related('agency')
