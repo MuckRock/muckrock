@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from autocomplete_light import shortcuts as autocomplete_light
 import django_filters
 
+from muckrock.agency.models import Agency
 from muckrock.filters import BLANK_STATUS, NULL_BOOLEAN_CHOICES
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import (
@@ -19,6 +20,7 @@ from muckrock.task.models import (
     FlaggedTask,
     StaleAgencyTask,
     RejectedEmailTask,
+    FailedFaxTask,
 )
 
 class TaskFilterSet(django_filters.FilterSet):
@@ -125,3 +127,15 @@ class RejectedEmailTaskFilterSet(TaskFilterSet):
     class Meta:
         model = RejectedEmailTask
         fields = ['email', 'resolved', 'resolved_by']
+
+
+class FailedFaxTaskFilterSet(TaskFilterSet):
+    """Allows a failed fax task to be filtered by the agency."""
+    agency = django_filters.ModelMultipleChoiceFilter(
+        name='communication__foia__agency',
+        queryset=Agency.objects.get_approved(),
+        widget=autocomplete_light.MultipleChoiceWidget('AgencyAutocomplete')
+    )
+    class Meta:
+        model = FailedFaxTask
+        fields = ['agency', 'resolved', 'resolved_by']

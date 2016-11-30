@@ -25,6 +25,7 @@ from muckrock.task.filters import (
     FlaggedTaskFilterSet,
     StaleAgencyTaskFilterSet,
     RejectedEmailTaskFilterSet,
+    FailedFaxTaskFilterSet,
 )
 from muckrock.task.forms import (
     FlaggedTaskForm, StaleAgencyTaskForm, ResponseTaskForm,
@@ -458,6 +459,7 @@ class MultiRequestTaskList(TaskList):
 
 class FailedFaxTaskList(TaskList):
     title = 'Failed Faxes'
+    filter_class = FailedFaxTaskFilterSet
     queryset = (FailedFaxTask.objects
             .select_related('communication__foia__agency')
             .select_related('communication__foia__user')
