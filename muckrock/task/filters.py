@@ -15,6 +15,7 @@ from muckrock.task.models import (
     ResponseTask,
     NewAgencyTask,
     SnailMailTask,
+    FlaggedTask,
 )
 
 class TaskFilterSet(django_filters.FilterSet):
@@ -38,7 +39,6 @@ class ResponseTaskFilterSet(TaskFilterSet):
     class Meta:
         model = ResponseTask
         fields = ['predicted_status', 'resolved', 'resolved_by']
-
 
 
 class NewAgencyTaskFilterSet(TaskFilterSet):
@@ -91,3 +91,15 @@ class SnailMailTaskFilterSet(TaskFilterSet):
             'resolved',
             'resolved_by',
         ]
+
+
+class FlaggedTaskFilterSet(TaskFilterSet):
+    """Allows a flagged task to be filtered by a user."""
+    user = django_filters.ModelMultipleChoiceFilter(
+        queryset=User.objects.all(),
+        widget=autocomplete_light.MultipleChoiceWidget('UserAutocomplete')
+    )
+
+    class Meta:
+        model = FlaggedTask
+        fields = ['user', 'resolved', 'resolved_by']

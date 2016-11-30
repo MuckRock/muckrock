@@ -21,7 +21,8 @@ from muckrock.task.filters import (
     TaskFilterSet,
     ResponseTaskFilterSet,
     NewAgencyTaskFilterSet,
-    SnailMailTaskFilterSet
+    SnailMailTaskFilterSet,
+    FlaggedTaskFilterSet,
 )
 from muckrock.task.forms import (
     FlaggedTaskForm, StaleAgencyTaskForm, ResponseTaskForm,
@@ -287,6 +288,7 @@ class StaleAgencyTaskList(TaskList):
 
 class FlaggedTaskList(TaskList):
     model = FlaggedTask
+    filter_class = FlaggedTaskFilterSet
     title = 'Flagged'
     queryset = FlaggedTask.objects.select_related(
             'user', 'foia__jurisdiction', 'agency', 'jurisdiction')
