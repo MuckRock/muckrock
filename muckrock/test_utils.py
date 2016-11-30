@@ -11,6 +11,7 @@ def mock_middleware(request):
     """Mocks the request with messages and session middleware"""
     setattr(request, 'session', MagicMock())
     setattr(request, '_messages', MagicMock())
+    setattr(request, '_dont_enforce_csrf_checks', True)
     return request
 
 def http_get_response(url, view, user=AnonymousUser(), **kwargs):
