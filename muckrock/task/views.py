@@ -24,6 +24,7 @@ from muckrock.task.filters import (
     SnailMailTaskFilterSet,
     FlaggedTaskFilterSet,
     StaleAgencyTaskFilterSet,
+    RejectedEmailTaskFilterSet,
 )
 from muckrock.task.forms import (
     FlaggedTaskForm, StaleAgencyTaskForm, ResponseTaskForm,
@@ -219,6 +220,7 @@ class SnailMailTaskList(TaskList):
 
 class RejectedEmailTaskList(TaskList):
     model = RejectedEmailTask
+    filter_class = RejectedEmailTaskFilterSet
     title = 'Rejected Emails'
     queryset = RejectedEmailTask.objects.select_related('foia__jurisdiction')
 

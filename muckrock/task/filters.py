@@ -18,6 +18,7 @@ from muckrock.task.models import (
     SnailMailTask,
     FlaggedTask,
     StaleAgencyTask,
+    RejectedEmailTask,
 )
 
 class TaskFilterSet(django_filters.FilterSet):
@@ -117,3 +118,10 @@ class StaleAgencyTaskFilterSet(TaskFilterSet):
     class Meta:
         model = StaleAgencyTask
         fields = ['jurisdiction', 'resolved', 'resolved_by']
+
+
+class RejectedEmailTaskFilterSet(TaskFilterSet):
+    """Allows a rejected email task to be filtered by the to: email"""
+    class Meta:
+        model = RejectedEmailTask
+        fields = ['email', 'resolved', 'resolved_by']
