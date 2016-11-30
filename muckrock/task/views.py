@@ -17,7 +17,16 @@ from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency, STALE_DURATION
 from muckrock.foia.models import STATUS, FOIARequest, FOIACommunication, FOIAFile
 from muckrock.models import ExtractDay, Now
-from muckrock.task.filters import TaskFilterSet
+from muckrock.task.filters import (
+    TaskFilterSet,
+    ResponseTaskFilterSet,
+    NewAgencyTaskFilterSet,
+    SnailMailTaskFilterSet,
+    FlaggedTaskFilterSet,
+    StaleAgencyTaskFilterSet,
+    RejectedEmailTaskFilterSet,
+    FailedFaxTaskFilterSet,
+)
 from muckrock.task.forms import (
     FlaggedTaskForm, StaleAgencyTaskForm, ResponseTaskForm,
     ProjectReviewTaskForm
@@ -170,6 +179,7 @@ class OrphanTaskList(TaskList):
 
 class SnailMailTaskList(TaskList):
     model = SnailMailTask
+    filter_class = SnailMailTaskFilterSet
     title = 'Snail Mails'
     queryset = (SnailMailTask.objects
             .select_related(
@@ -211,6 +221,7 @@ class SnailMailTaskList(TaskList):
 
 class RejectedEmailTaskList(TaskList):
     model = RejectedEmailTask
+    filter_class = RejectedEmailTaskFilterSet
     title = 'Rejected Emails'
     queryset = RejectedEmailTask.objects.select_related('foia__jurisdiction')
 
@@ -247,6 +258,7 @@ class RejectedEmailTaskList(TaskList):
 
 class StaleAgencyTaskList(TaskList):
     model = StaleAgencyTask
+    filter_class = StaleAgencyTaskFilterSet
     title = 'Stale Agencies'
     queryset = (StaleAgencyTask.objects
             .select_related('agency')
@@ -281,6 +293,7 @@ class StaleAgencyTaskList(TaskList):
 
 class FlaggedTaskList(TaskList):
     model = FlaggedTask
+    filter_class = FlaggedTaskFilterSet
     title = 'Flagged'
     queryset = FlaggedTask.objects.select_related(
             'user', 'foia__jurisdiction', 'agency', 'jurisdiction')
@@ -330,6 +343,7 @@ class ProjectReviewTaskList(TaskList):
 
 class NewAgencyTaskList(TaskList):
     title = 'New Agencies'
+    filter_class = NewAgencyTaskFilterSet
     queryset = NewAgencyTask.objects.preload_list()
 
     def task_post_helper(self, request, task):
@@ -353,6 +367,7 @@ class NewAgencyTaskList(TaskList):
 
 class ResponseTaskList(TaskList):
     title = 'Responses'
+    filter_class = ResponseTaskFilterSet
     queryset = (ResponseTask.objects
             .select_related('communication__foia__agency')
             .select_related('communication__foia__jurisdiction')
@@ -444,6 +459,7 @@ class MultiRequestTaskList(TaskList):
 
 class FailedFaxTaskList(TaskList):
     title = 'Failed Faxes'
+    filter_class = FailedFaxTaskFilterSet
     queryset = (FailedFaxTask.objects
             .select_related('communication__foia__agency')
             .select_related('communication__foia__user')

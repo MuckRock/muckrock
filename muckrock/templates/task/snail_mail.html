@@ -16,6 +16,10 @@
     <dd><a href="{% url 'admin:auth_user_change' foia.user.pk %}">{{foia.user}}</a></dd>
     <dt>Request</dt>
     <dd><a href="{{foia.get_absolute_url}}">{{foia}}</a> (<a href="{% url 'admin:foia_foiarequest_change' foia.pk %}">admin</a>)</dd>
+    {% if foia.tracking_id %}
+    <dt>Tracking #</dt>
+    <dd>{{foia.tracking_id}}</dd>
+    {% endif %}
     {# agency info #}
     <dt>Agency</dt>
     <dd><a href="{% url 'admin:agency_agency_change' agency.pk %}">{{agency}}</a></dd>
