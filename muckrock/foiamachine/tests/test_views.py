@@ -7,11 +7,12 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 from django.test import TestCase
 
-from django_hosts.resolvers import reverse
+from django_hosts.resolvers import reverse, reverse_lazy
 from nose.tools import eq_, ok_, raises
 
 from muckrock.factories import UserFactory
 from muckrock.foiamachine import factories, forms, models, views
+from muckrock.forms import PasswordResetForm
 from muckrock.jurisdiction.factories import StateJurisdictionFactory
 from muckrock.test_utils import http_get_response, http_post_response
 
@@ -39,11 +40,42 @@ class TestLogin(TestCase):
     def setUp(self):
         self.view = auth.views.login
         self.url = reverse('login', host='foiamachine')
+        self.password = 'Free the docs.'
+        self.user = UserFactory(password=self.password)
 
-    def test_ok(self):
+    def test_get_ok(self):
         """Login should return 200."""
         response = http_get_response(self.url, self.view)
         eq_(response.status_code, 200)
+
+    def test_post_ok(self):
+        """Logging in should redirect to the profile page."""
+        data = {
+            'username': self.user.username,
+            'password': self.password,
+        }
+        response = http_post_response(self.url, self.view, data)
+        eq_(response.status_code, 200)
+
+
+class TestPasswordReset(TestCase):
+    """Submitting an email to password reset for a user should send an email."""
+    def setUp(self):
+        self.view = auth.views.password_reset
+        self.url = reverse('password-reset', host='foiamachine')
+        self.user = UserFactory()
+
+    def test_post(self):
+        """A user who posts their email should be sent an email."""
+        data = {'email': self.user.email}
+        kwargs = {
+            'template_name': 'foiamachine/views/registration/password_reset.html',
+            'email_template_name': 'foiamachine/emails/password_reset_email.html',
+            'post_reset_redirect': reverse_lazy('password-reset-done', host='foiamachine'),
+            'password_reset_form': PasswordResetForm
+        }
+        response = http_post_response(self.url, self.view, data, **kwargs)
+        eq_(response.status_code, 302)
 
 
 class TestSignup(TestCase):
