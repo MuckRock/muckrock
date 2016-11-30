@@ -17,7 +17,10 @@ from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency, STALE_DURATION
 from muckrock.foia.models import STATUS, FOIARequest, FOIACommunication, FOIAFile
 from muckrock.models import ExtractDay, Now
-from muckrock.task.filters import TaskFilterSet
+from muckrock.task.filters import (
+    TaskFilterSet,
+    ResponseTaskFilterSet,
+)
 from muckrock.task.forms import (
     FlaggedTaskForm, StaleAgencyTaskForm, ResponseTaskForm,
     ProjectReviewTaskForm
@@ -353,6 +356,7 @@ class NewAgencyTaskList(TaskList):
 
 class ResponseTaskList(TaskList):
     title = 'Responses'
+    filter_class = ResponseTaskFilterSet
     queryset = (ResponseTask.objects
             .select_related('communication__foia__agency')
             .select_related('communication__foia__jurisdiction')
