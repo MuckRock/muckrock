@@ -9,14 +9,12 @@ from autocomplete_light import shortcuts as autocomplete_light
 import django_filters
 
 from muckrock.agency.models import Agency
-from muckrock.filters import RangeWidget
-from muckrock.foia.models import FOIARequest, FOIAMultiRequest, STATUS
+from muckrock.filters import RangeWidget, BLANK_STATUS, NULL_BOOLEAN_CHOICES
+from muckrock.foia.models import FOIARequest, FOIAMultiRequest
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag
 
-BLANK_STATUS = [('', 'All')] + STATUS
-NULL_BOOLEAN_CHOICES = [(None, '----------'), (True, 'Yes'), (False, 'No')]
 
 class FOIARequestFilterSet(django_filters.FilterSet):
     """Allows filtering a request by status, agency, jurisdiction, user, or tags."""

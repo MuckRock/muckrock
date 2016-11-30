@@ -9,6 +9,8 @@
     {% if task.communication.priv_from_who %}
     <dt>From</dt>
     <dd>{{ task.communication.priv_from_who }}</dd>
+    {% endif %}
+    {% if task.communication.subject %}
     <dt>Subject</dt>
     <dd>{{ task.communication.subject }}</dd>
     {% endif %}
