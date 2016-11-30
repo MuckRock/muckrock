@@ -21,6 +21,7 @@ from muckrock.task.filters import (
     TaskFilterSet,
     ResponseTaskFilterSet,
     NewAgencyTaskFilterSet,
+    SnailMailTaskFilterSet
 )
 from muckrock.task.forms import (
     FlaggedTaskForm, StaleAgencyTaskForm, ResponseTaskForm,
@@ -174,6 +175,7 @@ class OrphanTaskList(TaskList):
 
 class SnailMailTaskList(TaskList):
     model = SnailMailTask
+    filter_class = SnailMailTaskFilterSet
     title = 'Snail Mails'
     queryset = (SnailMailTask.objects
             .select_related(
