@@ -341,8 +341,8 @@ LOGGING = {
             'level': 'WARNING',
         },
         'django.request': {
-            'handlers': ['sentry'],
-            'level': 'ERROR',
+            'handlers': ['console', 'sentry'],
+            'level': 'WARNING',
             'propagate': False,
         },
         'muckrock': {
