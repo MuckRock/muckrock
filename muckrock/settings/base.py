@@ -96,6 +96,7 @@ if AWS_DEBUG:
     COMPRESS_URL = STATIC_URL
     MEDIA_URL = 'https://muckrock-devel2.s3.amazonaws.com/media/'
     CLEAN_S3_ON_FOIA_DELETE = True
+    USE_QUEUED_STORAGE = True
 else:
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
     STATIC_URL = '/static/'
@@ -201,6 +202,7 @@ INSTALLED_APPS = (
     'package_monitor',
     'image_diet',
     'django_hosts',
+    'queued_storage',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',

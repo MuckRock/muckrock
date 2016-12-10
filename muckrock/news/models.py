@@ -2,19 +2,30 @@
 Models for the News application
 """
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Prefetch
+from django.utils.module_loading import import_string
 
 from datetime import datetime
 from easy_thumbnails.fields import ThumbnailerImageField
 from taggit.managers import TaggableManager
+from queued_storage.backends import QueuedStorage
 
 from muckrock.foia.models import FOIARequest
 from muckrock.tags.models import TaggedItemBase
+
+
+if settings.USE_QUEUED_STORAGE:
+    IMAGE_STORAGE = QueuedStorage(
+            settings.DEFAULT_FILE_STORAGE,
+            'image_diet.storage.DietStorage')
+else:
+    IMAGE_STORAGE = import_string(settings.DEFAULT_FILE_STORAGE)
 
 class ArticleQuerySet(models.QuerySet):
     """Object manager for news articles"""
@@ -73,7 +84,8 @@ class Article(models.Model):
         upload_to='news_images/%Y/%m/%d',
         blank=True,
         null=True,
-        resize_source={'size': (1600, 1200), 'crop': 'smart'}
+        resize_source={'size': (1600, 1200), 'crop': 'smart'},
+        storage=IMAGE_STORAGE,
     )
     objects = ArticleQuerySet.as_manager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
@@ -119,7 +131,10 @@ class Article(models.Model):
 class Photo(models.Model):
     """A photograph to embed in a news article"""
 
-    image = models.ImageField(upload_to='news_photos/%Y/%m/%d')
+    image = models.ImageField(
+            upload_to='news_photos/%Y/%m/%d',
+            storage=IMAGE_STORAGE,
+            )
 
     def __unicode__(self):
         return self.image.name
