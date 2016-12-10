@@ -18,7 +18,7 @@ DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 EMAIL_DEBUG = DEBUG
 THUMBNAIL_DEBUG = DEBUG
-AWS_DEBUG = False
+AWS_DEBUG = True
 
 SITE_ROOT = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
 
@@ -97,6 +97,8 @@ if AWS_DEBUG:
     MEDIA_URL = 'https://muckrock-devel2.s3.amazonaws.com/media/'
     CLEAN_S3_ON_FOIA_DELETE = True
     USE_QUEUED_STORAGE = True
+    DIET_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    DIET_CONFIG = os.path.join(SITE_ROOT, '../config/image_diet.yaml')
 else:
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
     STATIC_URL = '/static/'
@@ -407,7 +409,7 @@ PUBLICATION_NAME = 'MuckRock'
 # Register database schemes in URLs.
 urlparse.uses_netloc.append('postgres')
 
-url = urlparse.urlparse(os.environ.get('DATABASE_URL', 'postgres://vagrant@localhost/muckrock'))
+url = urlparse.urlparse(os.environ.get('DATABASE_URL', 'postgres://vagrant@localhost/muckrock2'))
 
 # Update with environment configuration.
 DATABASES = {

@@ -10,6 +10,7 @@ from muckrock.crowdfund.models import Crowdfund
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
 from muckrock.task.models import ProjectReviewTask
+from muckrock.utils import get_image_storage
 
 import taggit
 
@@ -65,7 +66,12 @@ class Project(models.Model):
         help_text='The slug is automatically generated based on the title.')
     summary = models.TextField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
-    image = models.ImageField(upload_to='project_images/%Y/%m/%d', blank=True, null=True)
+    image = models.ImageField(
+            upload_to='project_images/%Y/%m/%d',
+            blank=True,
+            null=True,
+            storage=get_image_storage(),
+            )
     private = models.BooleanField(
         default=True,
         help_text='If a project is private, it is only visible to its contributors.')

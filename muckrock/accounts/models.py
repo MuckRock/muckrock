@@ -18,7 +18,7 @@ from lot.models import LOT
 import stripe
 from urllib import urlencode
 
-from muckrock.utils import generate_key
+from muckrock.utils import generate_key, get_image_storage
 from muckrock.values import TextValue
 
 logger = logging.getLogger(__name__)
@@ -102,7 +102,8 @@ class Profile(models.Model):
     avatar = ThumbnailerImageField(
         upload_to='account_images',
         blank=True, null=True,
-        resize_source={'size': (600, 600), 'crop': 'smart'}
+        resize_source={'size': (600, 600), 'crop': 'smart'},
+        storage=get_image_storage(),
     )
 
     # provide user access to experimental features

@@ -8,7 +8,7 @@ from muckrock.settings.base import *
 
 # media and static asset handling
 BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
-DEFAULT_FILE_STORAGE = 'image_diet.storage.DietStorage'
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 DIET_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 DIET_CONFIG = os.path.join(SITE_ROOT, '../config/image_diet.yaml')
 THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
@@ -22,6 +22,7 @@ else:
 COMPRESS_URL = STATIC_URL
 MEDIA_URL = STATIC_URL + 'media/'
 CLEAN_S3_ON_FOIA_DELETE = True
+USE_QUEUED_STORAGE = True
 
 TEMPLATE_LOADERS = (
     ('django.template.loaders.cached.Loader', (
