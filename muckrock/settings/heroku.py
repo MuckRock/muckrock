@@ -22,6 +22,7 @@ else:
 COMPRESS_URL = STATIC_URL
 MEDIA_URL = STATIC_URL + 'media/'
 CLEAN_S3_ON_FOIA_DELETE = True
+USE_QUEUED_STORAGE = True
 
 TEMPLATE_LOADERS = (
     ('django.template.loaders.cached.Loader', (

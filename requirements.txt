@@ -4,6 +4,7 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
+
 -e git+git://github.com/BradWhittington/django-mailgun.git@4f2edb9466f6245c3bbf501aab2681f0b3c71e0c#egg=django_mailgun
 -e git+git://github.com/callowayproject/django-news-sitemaps.git@55da6b72580dd6d79380f2bb17240e7afa00555a#egg=django_news_sitemaps-master
 amqp==1.4.9               # via kombu
@@ -19,7 +20,7 @@ cssutils==1.0.1           # via premailer
 dill==0.2.5
 django-activity-stream==0.6.3
 django-adaptors==0.2.5
-django-appconf==1.0.2     # via django-compressor
+django-appconf==1.0.2     # via django-compressor, django-queued-storage
 django-autocomplete-light==2.3.3
 django-celery==3.1.17
 django-compressor==2.1
@@ -37,6 +38,7 @@ django-package-monitor==0.3.5
 django-premailer==0.2.0
 django-pylibmc==0.6.1
 django-querycount==0.4.1
+django-queued-storage==0.8.0
 django-rest-swagger==0.3.7
 django-reversion==1.10.2
 django-robots==2.0
@@ -80,7 +82,7 @@ scikit-learn==0.16.1
 scipy==0.14.0
 semantic-version==2.6.0   # via django-package-monitor
 simplejson==3.8.2         # via django-lot
-six==1.10.0               # via bleach, django-autocomplete-light, django-geojson, html5lib, python-dateutil
+six==1.10.0               # via bleach, django-autocomplete-light, django-geojson, django-queued-storage, html5lib, python-dateutil
 smartypants==1.8.6
 sqlparse==0.2.1           # via django-debug-toolbar
 stripe==1.38.0

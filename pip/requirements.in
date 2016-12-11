@@ -1,5 +1,5 @@
--e git://github.com/callowayproject/django-news-sitemaps.git@55da6b72580dd6d79380f2bb17240e7afa00555a#egg=django_news_sitemaps-master # Generates a news sitemap
 -e git://github.com/BradWhittington/django-mailgun.git@4f2edb9466f6245c3bbf501aab2681f0b3c71e0c#egg=django_mailgun # Mail backend used directly (on production)
+-e git://github.com/callowayproject/django-news-sitemaps.git@55da6b72580dd6d79380f2bb17240e7afa00555a#egg=django_news_sitemaps-master # Generates a news sitemap
 bleach # Used to sanitize any HTML we're rendering
 boto # Used to access AWS
 celery # Used to run async tasks
@@ -23,6 +23,7 @@ django-package-monitor # Keeps track of which packages need upgrading
 django-premailer # Styles HTML emails
 django-pylibmc # Interface to memcache
 django-querycount # Counts queries for dev
+django-queued-storage # For delayed uploading of files
 django-rest-swagger==0.3.7 # API documentation
 django-reversion==1.10.2 # Version history for models
 django-robots # Manage robots.txt file

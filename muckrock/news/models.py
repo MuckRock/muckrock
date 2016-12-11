@@ -15,6 +15,8 @@ from taggit.managers import TaggableManager
 
 from muckrock.foia.models import FOIARequest
 from muckrock.tags.models import TaggedItemBase
+from muckrock.utils import get_image_storage
+
 
 class ArticleQuerySet(models.QuerySet):
     """Object manager for news articles"""
@@ -73,7 +75,8 @@ class Article(models.Model):
         upload_to='news_images/%Y/%m/%d',
         blank=True,
         null=True,
-        resize_source={'size': (1600, 1200), 'crop': 'smart'}
+        resize_source={'size': (1600, 1200), 'crop': 'smart'},
+        storage=get_image_storage(),
     )
     objects = ArticleQuerySet.as_manager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
@@ -119,7 +122,10 @@ class Article(models.Model):
 class Photo(models.Model):
     """A photograph to embed in a news article"""
 
-    image = models.ImageField(upload_to='news_photos/%Y/%m/%d')
+    image = models.ImageField(
+            upload_to='news_photos/%Y/%m/%d',
+            storage=get_image_storage(),
+            )
 
     def __unicode__(self):
         return self.image.name

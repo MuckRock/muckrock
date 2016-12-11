@@ -96,11 +96,15 @@ if AWS_DEBUG:
     COMPRESS_URL = STATIC_URL
     MEDIA_URL = 'https://muckrock-devel2.s3.amazonaws.com/media/'
     CLEAN_S3_ON_FOIA_DELETE = True
+    USE_QUEUED_STORAGE = True
+    DIET_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    DIET_CONFIG = os.path.join(SITE_ROOT, '../config/image_diet.yaml')
 else:
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
     STATIC_URL = '/static/'
     MEDIA_URL = '/media/'
     CLEAN_S3_ON_FOIA_DELETE = False
+    USE_QUEUED_STORAGE = False
 
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -201,6 +205,7 @@ INSTALLED_APPS = (
     'package_monitor',
     'image_diet',
     'django_hosts',
+    'queued_storage',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
@@ -239,7 +244,8 @@ DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
 urlparse.uses_netloc.append('redis')
 
-BROKER_URL = os.environ.get('REDISTOGO_URL', 'redis://localhost:6379/0')
+BROKER_URL = os.environ.get('REDISTOGO_URL',
+        os.environ.get('REDIS_URL', 'redis://localhost:6379/0'))
 
 djcelery.setup_loader()
 
@@ -405,7 +411,7 @@ PUBLICATION_NAME = 'MuckRock'
 # Register database schemes in URLs.
 urlparse.uses_netloc.append('postgres')
 
-url = urlparse.urlparse(os.environ.get('DATABASE_URL', 'postgres://vagrant@localhost/muckrock'))
+url = urlparse.urlparse(os.environ.get('DATABASE_URL', 'postgres://vagrant@localhost/muckrock2'))
 
 # Update with environment configuration.
 DATABASES = {
