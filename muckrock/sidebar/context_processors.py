@@ -93,6 +93,8 @@ def sidebar_broadcast(user):
 def sidebar_info(request):
     """Displays info about a user's requsts in the sidebar"""
     # content for all users
+    if request.path.startswith('/admin/'):
+        return {}
     sidebar_info_dict = {
         'dropdown_recent_articles': get_recent_articles(),
         'broadcast': sidebar_broadcast(request.user),
@@ -107,7 +109,5 @@ def sidebar_info(request):
             'my_projects': Project.objects.get_for_contributor(request.user).optimize()[:4],
             'payment_failed': request.user.profile.payment_failed
         })
-    else:
-        # content for logged out users
-        pass
+
     return sidebar_info_dict
