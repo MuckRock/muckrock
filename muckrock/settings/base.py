@@ -269,7 +269,7 @@ ABSOLUTE_URL_OVERRIDES = {
     'auth.user': lambda u: reverse('acct-profile', kwargs={'username': u.username}),
 }
 
-DBSETTINGS_USE_SITES = True
+DBSETTINGS_USE_SITES = False
 
 SESAME_MAX_AGE = 60 * 60 * 24 * 2
 
