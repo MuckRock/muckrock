@@ -3,6 +3,7 @@
 {% load crowdfund_tags %}
 {% load tags %}
 {% load thumbnail %}
+{% load cache %}
 
 {% block title %}
 {{ project.title }}
@@ -175,6 +176,7 @@
             {% tag_manager project %}
         </aside>
     </section>
+	{% cache cache_timeout project_detail_objects project.pk %}
     <section class="objects">
         {% if articles %}
         <section class="articles" id="articles">
@@ -193,6 +195,7 @@
         </section>
         {% endif %}
     </section>
+	{% endcache %}
 
     {% if project.maps.exists and user_is_experimental %}
     <section role="tabpanel" class="tab-panel maps" id="requests">
