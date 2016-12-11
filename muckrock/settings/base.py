@@ -244,7 +244,8 @@ DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
 urlparse.uses_netloc.append('redis')
 
-BROKER_URL = os.environ.get('REDISTOGO_URL', 'redis://localhost:6379/0')
+BROKER_URL = os.environ.get('REDISTOGO_URL',
+        os.environ.get('REDIS_URL', 'redis://localhost:6379/0'))
 
 djcelery.setup_loader()
 
