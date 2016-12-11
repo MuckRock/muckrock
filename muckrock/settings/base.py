@@ -104,6 +104,7 @@ else:
     STATIC_URL = '/static/'
     MEDIA_URL = '/media/'
     CLEAN_S3_ON_FOIA_DELETE = False
+    USE_QUEUED_STORAGE = False
 
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
