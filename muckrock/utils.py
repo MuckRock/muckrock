@@ -118,7 +118,9 @@ def get_image_storage():
     """Return the storage class to use for images we want optimized"""
     if settings.USE_QUEUED_STORAGE:
         return QueuedStorage(
-                'django.core.files.storage.FileSystemStorage',
-                'image_diet.storage.DietStorage')
+                'storages.backends.s3boto.S3BotoStorage',
+                'image_diet.storage.DietStorage',
+                remote_options={'file_overwrite': True},
+                task='queued_storage.tasks.Transfer')
     else:
         return import_string(settings.DEFAULT_FILE_STORAGE)()
