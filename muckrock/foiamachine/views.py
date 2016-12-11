@@ -4,7 +4,7 @@ FOIAMachine views
 
 from django.contrib import messages
 from django.http import Http404
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import (
     View,
     TemplateView,
@@ -57,7 +57,7 @@ class RequestOwnerRequiredMixin(LoginRequiredMixin):
     def get_foi(self, **kwargs):
         """Returns the object on the view."""
         foi_pk = kwargs.get(self.foi_pk_kwarg)
-        return FoiaMachineRequest.objects.get(pk=foi_pk)
+        return get_object_or_404(FoiaMachineRequest, pk=foi_pk)
 
     def dispatch(self, *args, **kwargs):
         """Checks if the user is the owner"""
