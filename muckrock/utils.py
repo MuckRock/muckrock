@@ -121,4 +121,4 @@ def get_image_storage():
                 'django.core.files.storage.FileSystemStorage',
                 'image_diet.storage.DietStorage')
     else:
-        return import_string(settings.DEFAULT_FILE_STORAGE)
+        return import_string(settings.DEFAULT_FILE_STORAGE)()
