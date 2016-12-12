@@ -44,7 +44,7 @@ class QueuedS3DietStorage(QueuedStorage):
     Since all files live on S3 we don't need to cache which storage the file is on
     """
     def __init__(self,
-            local='django.core.files.storage.FileSystemStorage',
+            local='storages.backends.s3boto.S3BotoStorage',
             remote='image_diet.storage.DietStorage',
             remote_options=None,
             *args, **kwargs):
