@@ -46,8 +46,10 @@ class QueuedS3DietStorage(QueuedStorage):
     def __init__(self,
             local='django.core.files.storage.FileSystemStorage',
             remote='image_diet.storage.DietStorage',
-            remote_options={'file_overwrite': True},
+            remote_options=None,
             *args, **kwargs):
+        if remote_options is None:
+            remote_options = {'file_overwrite': True}
         super(QueuedS3DietStorage, self).__init__(
                 local=local, remote=remote, remote_options=remote_options,
                 *args, **kwargs)
@@ -55,6 +57,3 @@ class QueuedS3DietStorage(QueuedStorage):
     def get_storage(self, name):
         """No need to check cache, just always return local"""
         return self.local
-
-
-
