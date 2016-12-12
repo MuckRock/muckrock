@@ -7,7 +7,6 @@ import datetime
 import random
 import string
 import stripe
-from queued_storage.backends import QueuedStorage
 
 from django.conf import settings
 from django.contrib.auth.models import User, Group
@@ -15,6 +14,8 @@ from django.core.cache import cache
 from django.template import Context
 from django.template.loader_tags import BlockNode, ExtendsNode
 from django.utils.module_loading import import_string
+
+from muckrock.storage import QueuedS3DietStorage
 
 #From http://stackoverflow.com/questions/2687173/django-how-can-i-get-a-block-from-a-template
 
@@ -117,10 +118,6 @@ def cache_get_or_set(key, update, timeout):
 def get_image_storage():
     """Return the storage class to use for images we want optimized"""
     if settings.USE_QUEUED_STORAGE:
-        return QueuedStorage(
-                'storages.backends.s3boto.S3BotoStorage',
-                'image_diet.storage.DietStorage',
-                remote_options={'file_overwrite': True},
-                task='queued_storage.tasks.Transfer')
+        return QueuedS3DietStorage()
     else:
         return import_string(settings.DEFAULT_FILE_STORAGE)()
