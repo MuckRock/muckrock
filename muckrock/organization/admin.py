@@ -37,7 +37,7 @@ class OrganizationAdmin(VersionAdmin):
     """Organization Admin"""
     prepopulated_fields = {'slug': ('name',)}
     list_display = ('name', 'owner')
-    search_fields = ('name', 'owner')
+    search_fields = ('name', 'owner__username')
     form = OrganizationAdminForm
 
 
