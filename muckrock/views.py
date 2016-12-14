@@ -203,6 +203,10 @@ class SearchView(SearchMixin, MRListView):
     template_name = 'search.html'
     context_object_name = 'object_list'
 
+    def get_queryset(self):
+        """Select related content types"""
+        return super(SearchView, self).get_queryset().select_related('content_type')
+
 
 class NewsletterSignupView(View):
     """Allows users to signup for our MailChimp newsletter."""
