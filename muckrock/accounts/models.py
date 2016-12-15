@@ -137,6 +137,12 @@ class Profile(models.Model):
     subscription_id = models.CharField(max_length=255, blank=True)
     payment_failed = models.BooleanField(default=False)
 
+    preferred_proxy = models.BooleanField(
+            default=False,
+            help_text='This user will be used over other proxies in the same '
+            'state.  The account must still be set to type proxy for this to '
+            'take affect')
+
     def __unicode__(self):
         return u"%s's Profile" % unicode(self.user).capitalize()
 

@@ -10,7 +10,12 @@ from django_hosts.resolvers import reverse as host_reverse
 from nose.tools import eq_
 
 from muckrock.jurisdiction import factories
-from muckrock.factories import FOIARequestFactory, FOIACommunicationFactory, FOIAFileFactory
+from muckrock.factories import (
+        FOIARequestFactory,
+        FOIACommunicationFactory,
+        FOIAFileFactory,
+        UserFactory,
+        )
 
 class TestJurisdictionUnit(TestCase):
     """Unit tests for Jurisdictions"""
@@ -172,6 +177,21 @@ class TestJurisdictionUnit(TestCase):
         state_foia.files.add(FOIAFileFactory(pages=page_count))
         eq_(self.local.total_pages(), page_count)
         eq_(self.state.total_pages(), 2*page_count)
+
+    def test_get_proxy(self):
+        """Test getting the proxy user for a state"""
+        eq_(self.state.get_proxy(), None)
+        UserFactory(
+                profile__acct_type='proxy',
+                profile__state=self.state.abbrev,
+                profile__preferred_proxy=False,
+                )
+        preferred_proxy = UserFactory(
+                profile__acct_type='proxy',
+                profile__state=self.state.abbrev,
+                profile__preferred_proxy=True,
+                )
+        eq_(self.state.get_proxy(), preferred_proxy)
 
 
 class TestLawModel(TestCase):
