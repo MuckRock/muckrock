@@ -9,7 +9,6 @@ from django.template.defaultfilters import slugify
 
 from django_hosts.resolvers import reverse as host_reverse
 from easy_thumbnails.fields import ThumbnailerImageField
-from random import choice
 from taggit.managers import TaggableManager
 
 from muckrock.business_days.models import Holiday, HolidayCalendar, Calendar
@@ -206,11 +205,13 @@ class Jurisdiction(models.Model, RequestHelper):
     def get_proxy(self):
         """Get a random proxy user for this jurisdiction"""
         from muckrock.accounts.models import Profile
-        try:
-            proxy = choice(Profile.objects.filter(
-                acct_type='proxy', state=self.legal()))
+        proxy = (Profile.objects
+                .filter(acct_type='proxy', state=self.legal())
+                .order_by('-preferred_proxy')
+                .first())
+        if proxy:
             return proxy.user
-        except IndexError:
+        else:
             return None
 
     def get_state(self):

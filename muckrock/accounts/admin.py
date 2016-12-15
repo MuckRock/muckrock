@@ -37,6 +37,7 @@ class ProfileAdminForm(forms.ModelForm):
         model = Profile
         fields = '__all__'
 
+
 class ProfileInline(admin.StackedInline):
     """Profile admin options"""
     model = Profile
@@ -44,6 +45,7 @@ class ProfileInline(admin.StackedInline):
     form = ProfileAdminForm
     extra = 0
     max_num = 1
+
 
 class MRUserAdmin(UserAdmin):
     """User admin options"""
@@ -83,6 +85,7 @@ class MRUserAdmin(UserAdmin):
                 messages.error(request, exception)
         obj.save()
         super(MRUserAdmin, self).save_related(request, form, formsets, change)
+
 
 admin.site.register(Statistics, StatisticsAdmin)
 admin.site.unregister(User)
