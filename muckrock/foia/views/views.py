@@ -15,7 +15,7 @@ from django.template.defaultfilters import slugify
 from django.template import RequestContext
 from django.views.generic import DetailView, TemplateView
 
-from actstream.models import Follow
+from actstream.models import following
 from datetime import datetime, timedelta
 import json
 import logging
@@ -197,8 +197,8 @@ class FollowingRequestList(RequestList):
     def get_queryset(self):
         """Limits FOIAs to those followed by the current user"""
         queryset = super(FollowingRequestList, self).get_queryset()
-        following = Follow.objects.following_qs(self.request.user, FOIARequest)
-        return queryset.filter(id__in=following)
+        followed = [f.pk for f in following(self.request.user, FOIARequest)]
+        return queryset.filter(pk__in=followed)
 
 
 class ProcessingRequestList(RequestList):

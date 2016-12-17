@@ -5,9 +5,9 @@ Tests using nose for the FOIA application
 from django.contrib.auth.models import User, AnonymousUser
 from django.core.urlresolvers import reverse
 from django.core import mail
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 
-from actstream.actions import follow
+from actstream.actions import follow, unfollow
 import datetime
 from datetime import date as real_date
 from mock import Mock
@@ -24,7 +24,7 @@ from muckrock.factories import (
     AppealAgencyFactory
 )
 from muckrock.foia.models import FOIARequest, FOIACommunication
-from muckrock.foia.views import Detail
+from muckrock.foia.views import Detail, FollowingRequestList
 from muckrock.foia.views.composers import _make_user
 from muckrock.jurisdiction.models import Jurisdiction, Appeal
 from muckrock.jurisdiction.factories import ExampleAppealFactory
@@ -709,6 +709,30 @@ class TestRequestDetailView(TestCase):
             'The status of the request should not be changed.')
         eq_(self.foia.communications.count(), comm_count,
             'No communication should be added to the request.')
+
+
+class TestFollowingRequestList(TestCase):
+    """Test to make sure following request list shows correct requests"""
+
+    def test_following_request_list(self):
+        """Test to make sure following request list shows correct requests"""
+        user = UserFactory()
+        factory = RequestFactory()
+        request = factory.get(reverse('foia-list-following'))
+        request.user = user
+        foias = FOIARequestFactory.create_batch(7)
+        for foia in foias[::2]:
+            follow(user, foia)
+        response = FollowingRequestList.as_view()(request)
+        eq_(len(response.context_data['object_list']), 4)
+        for foia in foias[::2]:
+            nose.tools.assert_in(foia, response.context_data['object_list'])
+
+        unfollow(user, foias[2])
+        response = FollowingRequestList.as_view()(request)
+        eq_(len(response.context_data['object_list']), 3)
+        for foia in (foias[0], foias[4], foias[6]):
+            nose.tools.assert_in(foia, response.context_data['object_list'])
 
 
 class TestRequestPayment(TestCase):
