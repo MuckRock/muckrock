@@ -340,6 +340,8 @@ def _forward(post, files, title='', extra_content='', info=False):
         body = '%s\n\n%s' % (extra_content, post.get('body-plain'))
     else:
         body = post.get('body-plain')
+    if not body:
+        body = 'This email intentionally left blank'
 
     to_addresses = ['requests@muckrock.com']
     if info:
