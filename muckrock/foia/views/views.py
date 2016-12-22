@@ -197,7 +197,8 @@ class FollowingRequestList(RequestList):
     def get_queryset(self):
         """Limits FOIAs to those followed by the current user"""
         queryset = super(FollowingRequestList, self).get_queryset()
-        followed = [f.pk for f in following(self.request.user, FOIARequest)]
+        followed = [f.pk for f in following(self.request.user, FOIARequest)
+                if f is not None]
         return queryset.filter(pk__in=followed)
 
 
