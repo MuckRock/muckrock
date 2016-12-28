@@ -43,35 +43,60 @@ def store_statistics():
     stats = Statistics.objects.create(
         date=yesterday,
         total_requests=FOIARequest.objects.count(),
-        total_requests_success=FOIARequest.objects.filter(status='done').count(),
-        total_requests_denied=FOIARequest.objects.filter(status='rejected').count(),
-        total_requests_draft=FOIARequest.objects.filter(status='started').count(),
-        total_requests_submitted=FOIARequest.objects.filter(status='submitted').count(),
-        total_requests_awaiting_ack=FOIARequest.objects.filter(status='ack').count(),
-        total_requests_awaiting_response=FOIARequest.objects.filter(status='processed').count(),
-        total_requests_awaiting_appeal=FOIARequest.objects.filter(status='appealing').count(),
-        total_requests_fix_required=FOIARequest.objects.filter(status='fix').count(),
-        total_requests_payment_required=FOIARequest.objects.filter(status='payment').count(),
-        total_requests_no_docs=FOIARequest.objects.filter(status='no_docs').count(),
-        total_requests_partial=FOIARequest.objects.filter(status='partial').count(),
-        total_requests_abandoned=FOIARequest.objects.filter(status='abandoned').count(),
+        total_requests_success=
+            FOIARequest.objects.filter(status='done').count(),
+        total_requests_denied=
+            FOIARequest.objects.filter(status='rejected').count(),
+        total_requests_draft=
+            FOIARequest.objects.filter(status='started').count(),
+        total_requests_submitted=
+            FOIARequest.objects.filter(status='submitted').count(),
+        total_requests_awaiting_ack=
+            FOIARequest.objects.filter(status='ack').count(),
+        total_requests_awaiting_response=
+            FOIARequest.objects.filter(status='processed').count(),
+        total_requests_awaiting_appeal=
+            FOIARequest.objects.filter(status='appealing').count(),
+        total_requests_fix_required=
+            FOIARequest.objects.filter(status='fix').count(),
+        total_requests_payment_required=
+            FOIARequest.objects.filter(status='payment').count(),
+        total_requests_no_docs=
+            FOIARequest.objects.filter(status='no_docs').count(),
+        total_requests_partial=
+            FOIARequest.objects.filter(status='partial').count(),
+        total_requests_abandoned=
+            FOIARequest.objects.filter(status='abandoned').count(),
         requests_processing_days=(FOIARequest.objects
             .filter(status='submitted')
             .exclude(date_processing=None)
             .aggregate(days=Sum(date.today() - F('date_processing')))['days']),
-        machine_requests=FoiaMachineRequest.objects.count(),
-        machine_requests_success=FoiaMachineRequest.objects.filter(status='done').count(),
-        machine_requests_denied=FoiaMachineRequest.objects.filter(status='rejected').count(),
-        machine_requests_draft=FoiaMachineRequest.objects.filter(status='started').count(),
-        machine_requests_submitted=FoiaMachineRequest.objects.filter(status='submitted').count(),
-        machine_requests_awaiting_ack=FoiaMachineRequest.objects.filter(status='ack').count(),
-        machine_requests_awaiting_response=FoiaMachineRequest.objects.filter(status='processed').count(),
-        machine_requests_awaiting_appeal=FoiaMachineRequest.objects.filter(status='appealing').count(),
-        machine_requests_fix_required=FoiaMachineRequest.objects.filter(status='fix').count(),
-        machine_requests_payment_required=FoiaMachineRequest.objects.filter(status='payment').count(),
-        machine_requests_no_docs=FoiaMachineRequest.objects.filter(status='no_docs').count(),
-        machine_requests_partial=FoiaMachineRequest.objects.filter(status='partial').count(),
-        machine_requests_abandoned=FoiaMachineRequest.objects.filter(status='abandoned').count(),
+        machine_requests=
+            FoiaMachineRequest.objects.count(),
+        machine_requests_success=
+            FoiaMachineRequest.objects.filter(status='done').count(),
+        machine_requests_denied=
+            FoiaMachineRequest.objects.filter(status='rejected').count(),
+        machine_requests_draft=
+            FoiaMachineRequest.objects.filter(status='started').count(),
+        machine_requests_submitted=
+            FoiaMachineRequest.objects.filter(status='submitted').count(),
+        machine_requests_awaiting_ack=
+            FoiaMachineRequest.objects.filter(status='ack').count(),
+        machine_requests_awaiting_response=
+            FoiaMachineRequest.objects.filter(status='processed').count(),
+        machine_requests_awaiting_appeal=
+            FoiaMachineRequest.objects.filter(status='appealing').count(),
+        machine_requests_fix_required=
+            FoiaMachineRequest.objects.filter(status='fix').count(),
+        machine_requests_payment_required=
+            FoiaMachineRequest.objects.filter(status='payment').count(),
+        machine_requests_no_docs=
+            FoiaMachineRequest.objects.filter(status='no_docs').count(),
+        machine_requests_partial=
+            FoiaMachineRequest.objects.filter(status='partial').count(),
+        machine_requests_abandoned=
+            FoiaMachineRequest.objects.filter(status='abandoned').count(),
         total_pages=FOIAFile.objects.aggregate(Sum('pages'))['pages__sum'],
         total_users=User.objects.count(),
         total_agencies=Agency.objects.count(),
@@ -118,32 +143,41 @@ def store_statistics():
             user__profile__organization__monthly_cost__gt=0,
             date_submitted=yesterday
         ).count(),
-        daily_articles=Article.objects.filter(pub_date__gte=yesterday,
-                                              pub_date__lt=date.today()).count(),
-        orphaned_communications=FOIACommunication.objects.filter(foia=None).count(),
+        daily_articles=Article.objects.filter(
+                pub_date__gte=yesterday, pub_date__lt=date.today()).count(),
+        orphaned_communications=
+            FOIACommunication.objects.filter(foia=None).count(),
         stale_agencies=Agency.objects.filter(stale=True).count(),
         unapproved_agencies=Agency.objects.filter(status='pending').count(),
         total_tasks=Task.objects.count(),
         total_unresolved_tasks=Task.objects.filter(resolved=False).count(),
         total_generic_tasks=GenericTask.objects.count(),
-        total_unresolved_generic_tasks=GenericTask.objects.filter(resolved=False).count(),
+        total_unresolved_generic_tasks=
+            GenericTask.objects.filter(resolved=False).count(),
         total_orphan_tasks=OrphanTask.objects.count(),
-        total_unresolved_orphan_tasks=OrphanTask.objects.filter(resolved=False).count(),
+        total_unresolved_orphan_tasks=
+            OrphanTask.objects.filter(resolved=False).count(),
         total_snailmail_tasks=SnailMailTask.objects.count(),
-        total_unresolved_snailmail_tasks=SnailMailTask.objects.filter(resolved=False).count(),
+        total_unresolved_snailmail_tasks=
+            SnailMailTask.objects.filter(resolved=False).count(),
         total_rejected_tasks=RejectedEmailTask.objects.count(),
         total_unresolved_rejected_tasks=
             RejectedEmailTask.objects.filter(resolved=False).count(),
         total_staleagency_tasks=StaleAgencyTask.objects.count(),
-        total_unresolved_staleagency_tasks=StaleAgencyTask.objects.filter(resolved=False).count(),
+        total_unresolved_staleagency_tasks=
+            StaleAgencyTask.objects.filter(resolved=False).count(),
         total_flagged_tasks=FlaggedTask.objects.count(),
-        total_unresolved_flagged_tasks=FlaggedTask.objects.filter(resolved=False).count(),
+        total_unresolved_flagged_tasks=
+            FlaggedTask.objects.filter(resolved=False).count(),
         total_newagency_tasks=NewAgencyTask.objects.count(),
-        total_unresolved_newagency_tasks=NewAgencyTask.objects.filter(resolved=False).count(),
+        total_unresolved_newagency_tasks=
+            NewAgencyTask.objects.filter(resolved=False).count(),
         total_response_tasks=ResponseTask.objects.count(),
-        total_unresolved_response_tasks=ResponseTask.objects.filter(resolved=False).count(),
+        total_unresolved_response_tasks=
+            ResponseTask.objects.filter(resolved=False).count(),
         total_faxfail_tasks=FailedFaxTask.objects.count(),
-        total_unresolved_faxfail_tasks=FailedFaxTask.objects.filter(resolved=False).count(),
+        total_unresolved_faxfail_tasks=
+            FailedFaxTask.objects.filter(resolved=False).count(),
         total_crowdfundpayment_tasks=CrowdfundTask.objects.count(),
         total_unresolved_crowdfundpayment_tasks=
             CrowdfundTask.objects.filter(resolved=False).count(),
