@@ -11,7 +11,10 @@ def google_analytics(request):
     """
     Retrieve and delete any google analytics session data and send it to the template
     """
-    return {'ga': request.session.pop('ga', None)}
+    return {
+            'ga': request.session.pop('ga', None),
+            'donated': request.session.pop('donated', 0),
+            }
 
 def cache_timeout(request):
     """Cache timeout settings"""

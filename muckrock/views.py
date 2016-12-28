@@ -456,32 +456,24 @@ class DonationFormView(StripeFormMixin, FormView):
                     'action': 'donation'
                 }
             )
-        except stripe.error.InvalidRequestError as exception:
-            # Invalid parameters were supplied to Stripe's API
-            logger.error(exception)
-            error_msg = ('Oops, something went wrong on our end.'
-                        ' Sorry about that!')
-        except stripe.error.AuthenticationError as exception:
-            # Authentication with Stripe's API failed
-            logger.error(exception)
-            error_msg = ('Oops, something went wrong on our end.'
-                        ' Sorry about that!')
-        except stripe.error.APIConnectionError as exception:
-            # Network communication with Stripe failed
-            logger.error(exception)
-            error_msg = ('Oops, something went wrong on our end.'
-                        ' Sorry about that!')
-        except stripe.error.StripeError as exception:
-            # Generic error
+        except (
+                stripe.error.InvalidRequestError,
+                # Invalid parameters were supplied to Stripe's API
+                stripe.error.AuthenticationError,
+                # Authentication with Stripe's API failed
+                stripe.error.APIConnectionError,
+                # Network communication with Stripe failed
+                stripe.error.StripeError,
+                # Generic error
+                ) as exception:
             logger.error(exception)
             error_msg = ('Oops, something went wrong on our end.'
                         ' Sorry about that!')
         finally:
             if error_msg:
-                self.request.session['donated'] = False
                 messages.error(self.request, error_msg)
             else:
-                self.request.session['donated'] = True
+                self.request.session['donated'] = amount
                 self.request.session['ga'] = 'donation'
         return charge
 
