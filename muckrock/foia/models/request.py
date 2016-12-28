@@ -800,6 +800,7 @@ class FOIARequest(models.Model):
         is_owner = self.created_by(user)
         can_follow = user.is_authenticated() and not is_owner
         is_following = user in followers(self)
+        is_admin = user.is_staff
         kwargs = {
             'jurisdiction': self.jurisdiction.slug,
             'jidx': self.jurisdiction.pk,
@@ -826,6 +827,13 @@ class FOIARequest(models.Model):
                 action='flag',
                 desc=u'Something broken, buggy, or off?  Let us know and we’ll fix it',
                 class_name='failure modal'
+            ),
+            Action(
+                test=is_admin,
+                title='Contact User',
+                action='contact_user',
+                desc=u'Send this request\'s owner an email',
+                class_name='modal'
             ),
         ]
 

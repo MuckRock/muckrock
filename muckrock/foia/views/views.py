@@ -54,6 +54,7 @@ from muckrock.foia.views.comms import (
         )
 from muckrock.jurisdiction.models import Appeal
 from muckrock.jurisdiction.forms import AppealForm
+from muckrock.message.email import TemplateEmail
 from muckrock.news.models import Article
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.project.models import Project
@@ -362,6 +363,7 @@ class Detail(DetailView):
             'question': self._question,
             'add_note': self._add_note,
             'flag': self._flag,
+            'contact_user': self._contact_user,
             'appeal': self._appeal,
             'date_estimate': self._update_estimate,
             'status_comm': change_comm_status,
@@ -451,6 +453,26 @@ class Detail(DetailView):
                 foia=foia)
             messages.success(request, 'Problem succesfully reported')
             new_action(request.user, 'flagged', target=foia)
+        return redirect(foia)
+
+    def _contact_user(self, request, foia):
+        """Allow an admin to message the foia's owner"""
+        text = request.POST.get('text')
+        if request.user.is_staff and text:
+            context = {
+                    'text': text,
+                    'foia_url': foia.user.profile.wrap_url(foia.get_absolute_url()),
+                    'foia_title': foia.title,
+                    }
+            email = TemplateEmail(
+                user=foia.user,
+                extra_context=context,
+                text_template='message/notification/contact_user.txt',
+                html_template='message/notification/contact_user.html',
+                subject='Message from MuckRock',
+                )
+            email.send(fail_silently=False)
+            messages.success(request, 'Email sent to %s' % foia.user.email)
         return redirect(foia)
 
     def _follow_up(self, request, foia):
