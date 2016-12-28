@@ -132,6 +132,9 @@
                 {% if ga == "pro_cancelled" %}
                     ga('send', 'event', 'Account', 'Pro', 'Cancellation');
                 {% endif %}
+                {% if ga == "donation" %}
+                    ga('send', 'event', 'Donations', 'Donated', '', {{donated}});
+                {% endif %}
             }
         </script>
         <!-- End Google Analytics -->
