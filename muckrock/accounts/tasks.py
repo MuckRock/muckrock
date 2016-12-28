@@ -14,6 +14,7 @@ from datetime import date, timedelta
 from muckrock.accounts.models import Profile, Statistics
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAFile, FOIACommunication
+from muckrock.foiamachine.models import FoiaMachineRequest
 from muckrock.news.models import Article
 from muckrock.organization.models import Organization
 from muckrock.task.models import (
@@ -58,6 +59,19 @@ def store_statistics():
             .filter(status='submitted')
             .exclude(date_processing=None)
             .aggregate(days=Sum(date.today() - F('date_processing')))['days']),
+        machine_requests=FoiaMachineRequest.objects.count(),
+        machine_requests_success=FoiaMachineRequest.objects.filter(status='done').count(),
+        machine_requests_denied=FoiaMachineRequest.objects.filter(status='rejected').count(),
+        machine_requests_draft=FoiaMachineRequest.objects.filter(status='started').count(),
+        machine_requests_submitted=FoiaMachineRequest.objects.filter(status='submitted').count(),
+        machine_requests_awaiting_ack=FoiaMachineRequest.objects.filter(status='ack').count(),
+        machine_requests_awaiting_response=FoiaMachineRequest.objects.filter(status='processed').count(),
+        machine_requests_awaiting_appeal=FoiaMachineRequest.objects.filter(status='appealing').count(),
+        machine_requests_fix_required=FoiaMachineRequest.objects.filter(status='fix').count(),
+        machine_requests_payment_required=FoiaMachineRequest.objects.filter(status='payment').count(),
+        machine_requests_no_docs=FoiaMachineRequest.objects.filter(status='no_docs').count(),
+        machine_requests_partial=FoiaMachineRequest.objects.filter(status='partial').count(),
+        machine_requests_abandoned=FoiaMachineRequest.objects.filter(status='abandoned').count(),
         total_pages=FOIAFile.objects.aggregate(Sum('pages'))['pages__sum'],
         total_users=User.objects.count(),
         total_agencies=Agency.objects.count(),

@@ -425,6 +425,8 @@ class Statistics(models.Model):
     """Nightly statistics"""
     # pylint: disable=invalid-name
     date = models.DateField()
+
+    # FOIA Requests
     total_requests = models.IntegerField(null=True, blank=True)
     total_requests_success = models.IntegerField(null=True, blank=True)
     total_requests_denied = models.IntegerField(null=True, blank=True)
@@ -439,6 +441,21 @@ class Statistics(models.Model):
     total_requests_partial = models.IntegerField(null=True, blank=True)
     total_requests_abandoned = models.IntegerField(null=True, blank=True)
     requests_processing_days = models.IntegerField(null=True, blank=True)
+
+    # FOIA Machine Requests
+    machine_requests = models.IntegerField(null=True, blank=True)
+    machine_requests_success = models.IntegerField(null=True, blank=True)
+    machine_requests_denied = models.IntegerField(null=True, blank=True)
+    machine_requests_draft = models.IntegerField(null=True, blank=True)
+    machine_requests_submitted = models.IntegerField(null=True, blank=True)
+    machine_requests_awaiting_ack = models.IntegerField(null=True, blank=True)
+    machine_requests_awaiting_response = models.IntegerField(null=True, blank=True)
+    machine_requests_awaiting_appeal = models.IntegerField(null=True, blank=True)
+    machine_requests_fix_required = models.IntegerField(null=True, blank=True)
+    machine_requests_payment_required = models.IntegerField(null=True, blank=True)
+    machine_requests_no_docs = models.IntegerField(null=True, blank=True)
+    machine_requests_partial = models.IntegerField(null=True, blank=True)
+    machine_requests_abandoned = models.IntegerField(null=True, blank=True)
 
     orphaned_communications = models.IntegerField(null=True, blank=True)
 
