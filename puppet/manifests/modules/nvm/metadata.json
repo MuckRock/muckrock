@@ -1,0 +1,79 @@
+{
+  "name": "artberri-nvm",
+  "version": "1.1.1",
+  "author": "artberri",
+  "summary": "Puppet Module to install Node.js with Node Version Manager (NVM)",
+  "license": "Apache-2.0",
+  "source": "https://github.com/artberri/puppet-nvm",
+  "project_page": "https://github.com/artberri/puppet-nvm",
+  "issues_url": "https://github.com/artberri/puppet-nvm/issues",
+  "description": "A puppet module to install (multiple versions of) Node.js with NVM (Node Version Manager).",
+  "tags": [
+    "nvm",
+    "nodejs",
+    "node.js",
+    "node",
+    "npm"
+  ],
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "RedHat",
+      "operatingsystemrelease": [
+        "5",
+        "6",
+        "7"
+      ]
+    },
+    {
+      "operatingsystem": "CentOS",
+      "operatingsystemrelease": [
+        "5",
+        "6",
+        "7"
+      ]
+    },
+    {
+      "operatingsystem": "OracleLinux",
+      "operatingsystemrelease": [
+        "5",
+        "6",
+        "7"
+      ]
+    },
+    {
+      "operatingsystem": "Scientific",
+      "operatingsystemrelease": [
+        "5",
+        "6",
+        "7"
+      ]
+    },
+    {
+      "operatingsystem": "Debian",
+      "operatingsystemrelease": [
+        "7"
+      ]
+    },
+    {
+      "operatingsystem": "Ubuntu",
+      "operatingsystemrelease": [
+        "10.04",
+        "12.04",
+        "14.04"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "name": "pe",
+      "version_requirement": "3.x"
+    },
+    {
+      "name": "puppet",
+      "version_requirement": ">=2.7.20 <5.0.0"
+    }
+  ],
+  "dependencies": [
+    {"name":"puppetlabs-stdlib","version_requirement":">=3.2.0 <5.0.0"}
+  ]
+}

@@ -97,17 +97,10 @@ class muckrock {
 
 	# nodejs
 
-    class { 'nodejs': 
-		repo_url_suffix => '5.x',
+    class { 'nvm': 
+		user => 'vagrant',
+		install_node => '5.6.0',
 	}
-
-    # symlink the nodejs folder to node, since Ubuntu
-    # has a weird legacy issue when installing NodeJS
-    file { '/usr/bin/node':
-        ensure => 'link',
-        target => '/usr/bin/nodejs'
-    }
-
 
 	# postgresql
 
