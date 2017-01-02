@@ -31,7 +31,7 @@ from muckrock.jurisdiction.models import Jurisdiction, Appeal
 from muckrock.jurisdiction.factories import ExampleAppealFactory
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.task.factories import ResponseTaskFactory
-from muckrock.task.models import SnailMailTask, ResponseTask, StatusChangeTask
+from muckrock.task.models import SnailMailTask, StatusChangeTask
 from muckrock.tests import get_allowed, post_allowed, get_post_unallowed, get_404
 from muckrock.test_utils import mock_middleware, http_post_response
 from muckrock.utils import new_action
