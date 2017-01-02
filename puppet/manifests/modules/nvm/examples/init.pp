@@ -1,0 +1,3 @@
+class { 'nvm':
+  user => 'foo',
+}

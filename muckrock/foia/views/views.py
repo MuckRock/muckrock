@@ -61,7 +61,7 @@ from muckrock.project.models import Project
 from muckrock.qanda.models import Question
 from muckrock.qanda.forms import QuestionForm
 from muckrock.tags.models import Tag
-from muckrock.task.models import Task, FlaggedTask, StatusChangeTask
+from muckrock.task.models import Task, FlaggedTask, StatusChangeTask, ResponseTask
 from muckrock.utils import new_action
 from muckrock.views import class_view_decorator, MRFilterListView, MRSearchFilterListView
 
@@ -411,6 +411,12 @@ class Detail(DetailView):
                 old_status=old_status,
                 foia=foia,
             )
+            response_tasks = ResponseTask.objects.filter(
+                    resolved=False,
+                    communication__foia=foia,
+                    )
+            for task in response_tasks:
+                task.resolve(request.user)
         return redirect(foia)
 
     def _question(self, request, foia):
