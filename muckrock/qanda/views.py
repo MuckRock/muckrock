@@ -19,7 +19,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from muckrock.accounts.models import Notification
-from muckrock.foia.models import FOIAFile
 from muckrock.qanda.filters import QuestionFilterSet
 from muckrock.qanda.forms import QuestionForm, AnswerForm
 from muckrock.qanda.models import Question, Answer
