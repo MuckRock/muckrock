@@ -149,9 +149,9 @@ class Detail(DetailView):
         context['answer_form'] = AnswerForm()
         foia = self.object.foia
         if foia is not None:
-            foia.public_file_count = (FOIAFile.objects
-                    .filter(foia=foia, access='public')
-                    .aggregate(count=Count('id'))['count'])
+            foia.public_file_count = foia.files.filter(access='public').count()
+        context['foia_viewable'] = (foia is not None and
+                foia.viewable_by(self.request.user))
         return context
 
 
