@@ -19,6 +19,7 @@ from muckrock.agency.models import Agency
 from muckrock.factories import (
     UserFactory,
     FOIARequestFactory,
+    FOIACommunicationFactory,
     ProjectFactory,
     AgencyFactory,
     AppealAgencyFactory
@@ -29,7 +30,8 @@ from muckrock.foia.views.composers import _make_user
 from muckrock.jurisdiction.models import Jurisdiction, Appeal
 from muckrock.jurisdiction.factories import ExampleAppealFactory
 from muckrock.project.forms import ProjectManagerForm
-from muckrock.task.models import SnailMailTask
+from muckrock.task.factories import ResponseTaskFactory
+from muckrock.task.models import SnailMailTask, StatusChangeTask
 from muckrock.tests import get_allowed, post_allowed, get_post_unallowed, get_404
 from muckrock.test_utils import mock_middleware, http_post_response
 from muckrock.utils import new_action
@@ -709,6 +711,32 @@ class TestRequestDetailView(TestCase):
             'The status of the request should not be changed.')
         eq_(self.foia.communications.count(), comm_count,
             'No communication should be added to the request.')
+
+    def test_post_status(self):
+        """A user updating the status of their request should update the status,
+        open a status change task, and close any open response tasks"""
+        nose.tools.assert_not_equal(self.foia.status, 'done')
+        eq_(len(StatusChangeTask.objects.filter(
+            foia=self.foia,
+            user=self.foia.user,
+            resolved=False,
+            )), 0)
+        communication = FOIACommunicationFactory(foia=self.foia)
+        response_task = ResponseTaskFactory(
+                communication=communication,
+                resolved=False,
+                )
+        data = {'action': 'status', 'status': 'done'}
+        http_post_response(self.url, self.view, data, self.foia.user, **self.kwargs)
+        self.foia.refresh_from_db()
+        eq_(self.foia.status, 'done')
+        eq_(len(StatusChangeTask.objects.filter(
+            foia=self.foia,
+            user=self.foia.user,
+            resolved=False,
+            )), 1)
+        response_task.refresh_from_db()
+        ok_(response_task.resolved)
 
 
 class TestFollowingRequestList(TestCase):

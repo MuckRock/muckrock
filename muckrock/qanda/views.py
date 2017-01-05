@@ -19,13 +19,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from muckrock.accounts.models import Notification
-from muckrock.foia.models import FOIAFile
 from muckrock.qanda.filters import QuestionFilterSet
 from muckrock.qanda.forms import QuestionForm, AnswerForm
 from muckrock.qanda.models import Question, Answer
 from muckrock.qanda.serializers import QuestionSerializer, QuestionPermissions
 from muckrock.tags.models import Tag, parse_tags
 from muckrock.views import MRSearchFilterListView
+
 
 class QuestionList(MRSearchFilterListView):
     """List of unanswered questions"""
@@ -39,7 +39,10 @@ class QuestionList(MRSearchFilterListView):
     def get_queryset(self):
         """Hides hidden jurisdictions from list"""
         objects = super(QuestionList, self).get_queryset()
-        objects = objects.select_related('user').prefetch_related('answers')
+        objects = (objects
+                .select_related('user')
+                .prefetch_related('answers')
+                .distinct())
         return objects
 
     def get_context_data(self, **kwargs):
@@ -55,11 +58,13 @@ class QuestionList(MRSearchFilterListView):
         messages.info(self.request, info_msg)
         return context
 
+
 class UnansweredQuestionList(QuestionList):
     """List of unanswered questions"""
     def get_queryset(self):
         objects = super(UnansweredQuestionList, self).get_queryset()
         return objects.annotate(num_answers=Count('answers')).filter(num_answers=0)
+
 
 class Detail(DetailView):
     """Question detail view"""
@@ -143,10 +148,11 @@ class Detail(DetailView):
         context['answer_form'] = AnswerForm()
         foia = self.object.foia
         if foia is not None:
-            foia.public_file_count = (FOIAFile.objects
-                    .filter(foia=foia, access='public')
-                    .aggregate(count=Count('id'))['count'])
+            foia.public_file_count = foia.files.filter(access='public').count()
+        context['foia_viewable'] = (foia is not None and
+                foia.viewable_by(self.request.user))
         return context
+
 
 @login_required
 def create_question(request):
@@ -165,6 +171,7 @@ def create_question(request):
     return render_to_response('forms/question.html', {'form': form},
                               context_instance=RequestContext(request))
 
+
 @login_required
 def follow(request, slug, idx):
     """Follow or unfollow a question"""
@@ -176,6 +183,7 @@ def follow(request, slug, idx):
         actstream.actions.follow(request.user, question, actor_only=False)
         messages.success(request, 'You are now following this question.')
     return redirect(question)
+
 
 @login_required
 def follow_new(request):
@@ -190,6 +198,7 @@ def follow_new(request):
         profile.save()
         messages.success(request, 'You will be notified of all new questions.')
     return redirect('question-index')
+
 
 @login_required
 def create_answer(request, slug, idx):
@@ -214,6 +223,7 @@ def create_answer(request, slug, idx):
         {'form': form, 'question': question},
         context_instance=RequestContext(request)
     )
+
 
 class QuestionViewSet(viewsets.ModelViewSet):
     """API views for Question"""

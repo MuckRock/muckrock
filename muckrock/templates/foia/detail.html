@@ -315,7 +315,7 @@ Sincerely,
                         {% endif %}
                         <div class="composer" id="get-advice">
                             <form class="composer-input" method="post" action="{% url 'question-create' %}">
-                                <header>Ask a question about your request</header>
+                                <header>Ask the MuckRock FOIA community for advice. This question will be public, or you can <a href="#" data-modal="#flag-modal" class="modal-link">flag your request</a> and staff can help you directly.</header>
                                 {% csrf_token %}
                                 {% include 'lib/pattern/form.html' with form=question_form %}
                                 <div class="buttons">

@@ -184,3 +184,9 @@ $('.text-area.modal-button').click(function(e){
     textAreaModal($(this).next());
     return false;
 });
+
+$('.modal-link').click(function(e){
+    e.preventDefault();
+    textAreaModal($($(this).data('modal')));
+    return false;
+});

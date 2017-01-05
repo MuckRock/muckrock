@@ -16,7 +16,7 @@
         {% endif %}
         {% social title=question.title url=question.get_absolute_url %}
         {% tag_manager question %}
-        {% if question.foia %}
+        {% if foia_viewable %}
             <dfn>Related request</dfn>
             {% include 'lib/foia.html' with foia=question.foia %}
         {% endif %}
