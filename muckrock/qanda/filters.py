@@ -33,6 +33,7 @@ class QuestionFilterSet(django_filters.FilterSet):
 
     def unanswered_filter(self, queryset, value):
         """Filter to show either only unanswered questions or all questions"""
+        # pylint: disable=no-self-user
         if value:
             return queryset.filter(answers__isnull=True)
         else:
