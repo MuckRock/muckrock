@@ -42,7 +42,7 @@ class QuestionList(MRSearchFilterListView):
         objects = (objects
                 .select_related('user')
                 .prefetch_related('answers')
-                .distinct())
+                )
         return objects
 
     def get_context_data(self, **kwargs):
