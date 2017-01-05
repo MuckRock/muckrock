@@ -92,14 +92,28 @@ class muckrock {
 		group        => 'vagrant',
 		requirements => '/home/vagrant/muckrock/requirements.txt',
 		require      => [File['/home/vagrant/ve'],
-                         Package['zlib1g-dev'],],
+		                 Package['zlib1g-dev'],],
+	}
+
+	python::requirements {'/home/vagrant/muckrock/pip/dev-requirements.txt' :
+		virtualenv => '/home/vagrant/ve/muckrock',
+		owner      => 'vagrant',
+		group      => 'vagrant',
 	}
 
 	# nodejs
 
-    class { 'nvm': 
+	class { 'nvm':
 		user => 'vagrant',
 		install_node => '5.6.0',
+		manage_dependencies => false,
+		profile_path => '/home/vagrant/.nvm.sh',
+	} ->
+	exec { 'install node requirements':
+		command => 'npm install',
+		cwd     => '/home/vagrant/muckrock',
+		creates => '/home/vagrant/muckrock/node_modules',
+		path    => '/home/vagrant/.nvm/versions/node/v5.6.0/bin/',
 	}
 
 	# postgresql

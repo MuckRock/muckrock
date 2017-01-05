@@ -26,11 +26,18 @@ class QuestionFilterSet(django_filters.FilterSet):
             'placeholder': 'MM/DD/YYYY',
         }),
     )
-    unanswered = django_filters.BooleanFilter(
-        name='answers',
-        lookup_expr='isnull',
+    unanswered = django_filters.MethodFilter(
+        action='unanswered_filter',
         widget=forms.CheckboxInput()
     )
+
+    def unanswered_filter(self, queryset, value):
+        """Filter to show either only unanswered questions or all questions"""
+        if value:
+            return queryset.filter(answers__isnull=True)
+        else:
+            return queryset
+
     class Meta:
         model = Question
         fields = ['user', 'date']
