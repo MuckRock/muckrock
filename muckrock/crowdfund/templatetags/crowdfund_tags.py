@@ -120,6 +120,7 @@ def generate_crowdfund_context(the_crowdfund, the_url_name, the_form, the_contex
         'request': the_request,
         'stripe_pk': settings.STRIPE_PUB_KEY,
         'obj_url': obj_url,
+        'domain': the_context['domain'],
     }
 
 @register.inclusion_tag('crowdfund/widget.html', name='crowdfund', takes_context=True)
