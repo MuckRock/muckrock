@@ -39,6 +39,7 @@ def requests_from_pks(foia_pks):
             continue
     return foias
 
+
 class FOIACommunication(models.Model):
     """A single communication of a FOIA request"""
 
@@ -258,7 +259,6 @@ class FOIACommunication(models.Model):
         for test, modify in special_cases:
             if test:
                 modify()
-
 
     class Meta:
         # pylint: disable=too-few-public-methods

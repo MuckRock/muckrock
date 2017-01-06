@@ -672,16 +672,10 @@ class FOIARequest(models.Model):
         from muckrock.foia.tasks import send_fax
 
         from_addr = 'fax' if self.email.endswith('faxaway.com') else self.get_mail_id()
-        law_name = self.jurisdiction.get_law_name()
-        if self.tracking_id:
-            subject = 'RE: %s Request #%s' % (law_name, self.tracking_id)
-        elif self.communications.count() > 1:
-            subject = 'RE: %s Request: %s' % (law_name, self.title)
-        else:
-            subject = '%s Request: %s' % (law_name, self.title)
 
         # get last comm to set delivered and raw_email
         comm = self.communications.reverse()[0]
+        subject = comm.subject or self.default_subject()
 
         if from_addr == 'fax':
             subject = 'MR#%s-%s - %s' % (self.pk, comm.pk, subject)
@@ -914,6 +908,16 @@ class FOIARequest(models.Model):
             'in-state volunteers to refile this request, and it should appear '
             'in your account within a few days.',
             )
+
+    def default_subject(self):
+        """Make a subject line for a communication for this request"""
+        law_name = self.jurisdiction.get_law_name()
+        if self.tracking_id:
+            return 'RE: %s Request #%s' % (law_name, self.tracking_id)
+        elif self.communications.count() > 1:
+            return 'RE: %s Request: %s' % (law_name, self.title)
+        else:
+            return '%s Request: %s' % (law_name, self.title)
 
     class Meta:
         # pylint: disable=too-few-public-methods

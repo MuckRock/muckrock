@@ -236,7 +236,14 @@ class FOIAAdminFixForm(forms.ModelForm):
     """Form to email from the request's address"""
     class Meta:
         model = FOIARequest
-        fields = ['from_email', 'email', 'other_emails', 'comm']
+        fields = [
+                'from_email',
+                'email',
+                'other_emails',
+                'subject',
+                'comm',
+                'snail_mail',
+                ]
 
     from_email = forms.CharField(
         label='From',
@@ -250,6 +257,7 @@ class FOIAAdminFixForm(forms.ModelForm):
         help_text='Leave blank to send to agency default.'
     )
     other_emails = forms.CharField(label='CC', required=False)
+    subject = forms.CharField(max_length=255)
     comm = forms.CharField(label='Body', widget=forms.Textarea())
     snail_mail = forms.BooleanField(required=False, label='Snail Mail Only')
 
