@@ -259,12 +259,16 @@ def admin_fix(request, jurisdiction, jidx, slug, idx):
                 from_who,
                 form.cleaned_data['comm'],
                 formset,
-                snail=form.cleaned_data['snail_mail']
+                snail=form.cleaned_data['snail_mail'],
+                subject=form.cleaned_data['subject'],
             )
             messages.success(request, 'Admin Fix submitted')
             return redirect(foia)
     else:
-        form = FOIAAdminFixForm(instance=foia)
+        form = FOIAAdminFixForm(
+                instance=foia,
+                initial={'subject': foia.default_subject()},
+                )
         formset = FOIAFileFormSet(queryset=FOIAFile.objects.none())
     context = {
         'form': form,
