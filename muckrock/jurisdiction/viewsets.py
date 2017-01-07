@@ -23,6 +23,14 @@ class JurisdictionViewSet(ModelViewSet):
     queryset = Jurisdiction.objects.select_related('parent__parent').order_by()
     serializer_class = JurisdictionSerializer
     filter_fields = ('name', 'abbrev', 'level', 'parent')
+    # don't allow ordering by computed fields
+    ordering_fields = [f for f in JurisdictionSerializer.Meta.fields
+            if f not in (
+                'absolute_url',
+                'average_response_time',
+                'fee_rate',
+                'success_rate',
+                )]
 
 
 class ExemptionPermissions(DjangoModelPermissionsOrAnonReadOnly):
