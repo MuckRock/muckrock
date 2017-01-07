@@ -37,6 +37,7 @@ class AgencyList(MRSearchFilterListView):
         )
         return approved
 
+
 def detail(request, jurisdiction, jidx, slug, idx):
     """Details for an agency"""
 
@@ -92,6 +93,7 @@ def detail(request, jurisdiction, jidx, slug, idx):
     return render_to_response('profile/agency.html', context,
                               context_instance=RequestContext(request))
 
+
 def redirect_old(request, jurisdiction, slug, idx, action):
     """Redirect old urls to new urls"""
     # pylint: disable=unused-variable
@@ -107,25 +109,11 @@ def redirect_old(request, jurisdiction, slug, idx, action):
 
     return redirect('/agency/%(jurisdiction)s-%(jidx)s/%(slug)s-%(idx)s/%(action)s/' % locals())
 
+
 def redirect_flag(request, jurisdiction, jidx, slug, idx):
     #pylint: disable=unused-argument
     """Redirect flag urls to base agency"""
     return redirect('agency-detail', jurisdiction, jidx, slug, idx)
-
-def stale(request):
-    """List all stale agencies"""
-
-    agencies = Agency.objects.filter(stale=True)
-    paginator = Paginator(agencies, 15)
-    try:
-        page = paginator.page(request.GET.get('page'))
-    except PageNotAnInteger:
-        page = paginator.page(1)
-    except EmptyPage:
-        page = paginator.page(paginator.num_pages)
-    return render_to_response('lists/agency_stale_list.html',
-                              {'object_list': page},
-                              context_instance=RequestContext(request))
 
 
 class AgencyViewSet(viewsets.ModelViewSet):
