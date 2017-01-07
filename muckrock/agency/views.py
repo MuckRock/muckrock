@@ -125,6 +125,14 @@ class AgencyViewSet(viewsets.ModelViewSet):
             .prefetch_related('types')
             )
     serializer_class = AgencySerializer
+    # don't allow ordering by computed fields
+    ordering_fields = [f for f in AgencySerializer.Meta.fields
+            if f not in (
+                'absolute_url',
+                'average_response_time',
+                'fee_rate',
+                'success_rate',
+                )]
 
     class Filter(django_filters.FilterSet):
         """API Filter for Agencies"""
