@@ -131,20 +131,20 @@ class ProfessionalSignupView(SignupView):
             messages.success(self.request, success_msg)
         except (KeyError, AttributeError):
             # no payment information provided
-            logger.error('No payment information provided.')
+            logger.warn('No payment information provided.')
             error_msg = ('Your account was successfully created, '
                          'but you did not provide payment information. '
                          'You can subscribe from the account management page.')
             messages.error(self.request, error_msg)
         except stripe.error.CardError:
             # card declined
-            logger.error('Card was declined.')
+            logger.warn('Card was declined.')
             error_msg = ('Your account was successfully created, but your card was declined. '
                          'You can subscribe from the account management page.')
             messages.error(self.request, error_msg)
         except (stripe.error.InvalidRequestError, stripe.error.APIError):
             # invalid request made to stripe
-            logger.error('No payment information provided.')
+            logger.warn('No payment information provided.')
             error_msg = ('Your account was successfully created, '
                          'but we could not contact our payment provider. '
                          'You can subscribe from the account management page.')
