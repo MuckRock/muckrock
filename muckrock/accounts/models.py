@@ -317,9 +317,9 @@ class Profile(models.Model):
             subscription = subscription.delete()
             customer = customer.save()
         except AttributeError as exception:
-            logger.error(exception)
+            logger.warn(exception)
         except stripe.error.StripeError as exception:
-            logger.error(exception)
+            logger.warn(exception)
         self.subscription_id = ''
         self.acct_type = 'basic'
         self.monthly_requests = settings.MONTHLY_REQUESTS.get('basic', 0)
