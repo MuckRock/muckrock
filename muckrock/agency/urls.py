@@ -16,8 +16,6 @@ urlpatterns = patterns(
     '',
     url(r'^$', views.AgencyList.as_view(), name='agency-list'),
     url(r'^%s/$' % agency_url, views.detail, name='agency-detail'),
-    # url(r'^%s/update/$' % agency_url, views.update, name='agency-update'),
-    url(r'^stale/$', views.stale, name='agency-stale'),
     url(r'^(?P<action>\w+)/%s/$' % old_agency_url, views.redirect_old),
     url(
         r'^(?P<jurisdiction>[\w\d_-]+)-(?P<idx>\d+)/$',
