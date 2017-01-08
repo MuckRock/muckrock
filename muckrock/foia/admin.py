@@ -111,6 +111,30 @@ class FOIACommunicationAdmin(VersionAdmin):
     foia_link.allow_tags = True
     foia_link.short_description = 'FOIA Request'
 
+    def save_formset(self, request, form, formset, change):
+        """Actions to take while saving inline instances"""
+
+        instances = formset.save(commit=False)
+        for instance in instances:
+            # only way to tell if its new or not is to check the db
+            change = True
+            try:
+                formset.model.objects.get(pk=instance.pk)
+            except formset.model.DoesNotExist:
+                change = False
+
+            instance.foia = instance.comm.foia
+            instance.save()
+
+            # its new, so notify the user about it
+            if not change:
+                instance.comm.foia.update(instance.anchor())
+
+            upload_document_cloud.apply_async(
+                    args=[instance.pk, change], countdown=30)
+
+        formset.save_m2m()
+
 
 class FOIACommunicationInline(admin.StackedInline):
     """FOIA Communication Inline admin options"""
@@ -242,7 +266,7 @@ class FOIARequestAdmin(VersionAdmin):
             foia.save()
             return
 
-        # check communications and files for new ones to notify the user of an update
+        # check communications for new ones to notify the user of an update
         instances = formset.save(commit=False)
         for instance in instances:
             # only way to tell if its new or not is to check the db
@@ -252,18 +276,10 @@ class FOIARequestAdmin(VersionAdmin):
             except formset.model.DoesNotExist:
                 change = False
 
-            if formset.model == FOIAFile:
-                instance.foia = instance.comm.foia
-
             instance.save()
             # its new, so notify the user about it
-            if not change and formset.model == FOIACommunication:
+            if not change:
                 instance.foia.update(instance.anchor())
-            if not change and formset.model == FOIAFile:
-                instance.comm.foia.update(instance.anchor())
-
-            if formset.model == FOIAFile:
-                upload_document_cloud.apply_async(args=[instance.pk, change], countdown=30)
 
         formset.save_m2m()
 
