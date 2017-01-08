@@ -290,7 +290,7 @@ def buy_requests(request, username=None):
         if request.POST:
             stripe_token = request.POST.get('stripe_token')
             stripe_email = request.POST.get('stripe_email')
-            if not stripe_token and not stripe_email:
+            if not stripe_token or not stripe_email:
                 raise KeyError('Missing Stripe payment data.')
             # take from the purchaser
             stripe.Charge.create(

@@ -35,7 +35,7 @@ def requests_from_pks(foia_pks):
             foia = FOIARequest.objects.get(pk=foia_pk)
             foias.append(foia)
         except (FOIARequest.DoesNotExist, ValueError):
-            logging.error('FOIA %s does not exist', foia_pk)
+            logger.error('FOIA %s does not exist', foia_pk)
             continue
     return foias
 
@@ -124,7 +124,7 @@ class FOIACommunication(models.Model):
             each_file.foia = move_to_request
             each_file.save()
         self.save()
-        logging.info('Communication #%d moved to request #%d', self.id, self.foia.id)
+        logger.info('Communication #%d moved to request #%d', self.id, self.foia.id)
         # if cloning happens, self gets overwritten. so we save it to a variable here
         this_comm = FOIACommunication.objects.get(pk=self.pk)
         moved = [this_comm]
@@ -168,7 +168,7 @@ class FOIACommunication(models.Model):
                 except ValueError:
                     error_msg = ('FOIAFile #%s has no data in its ffile field. '
                                 'It has not been cloned.')
-                    logging.error(error_msg, original_file_id)
+                    logger.error(error_msg, original_file_id)
                     continue
                 new_ffile.name = file_.ffile.name
                 file_.ffile = new_ffile
@@ -176,17 +176,17 @@ class FOIACommunication(models.Model):
                 upload_document_cloud.apply_async(args=[file_.pk, False], countdown=3)
             # for each clone, self gets overwritten. each clone needs to be stored explicitly.
             cloned_comms.append(this_clone)
-            logging.info('Communication #%d cloned to request #%d', original_pk, this_clone.foia.id)
+            logger.info('Communication #%d cloned to request #%d', original_pk, this_clone.foia.id)
         return cloned_comms
 
     def resend(self, email_address=None):
         """Resend the communication"""
         foia = self.foia
         if not foia:
-            logging.error('Tried resending an orphaned communication.')
+            logger.warn('Tried resending an orphaned communication.')
             raise ValueError('This communication has no FOIA to submit.', 'no_foia')
         if not foia.agency or not foia.agency.status == 'approved':
-            logging.error('Tried resending a communication with an unapproved agency')
+            logger.warn('Tried resending a communication with an unapproved agency')
             raise ValueError('This communication has no approved agency.', 'no_agency')
         snail = False
         self.date = datetime.datetime.now()
@@ -200,7 +200,7 @@ class FOIACommunication(models.Model):
         else:
             snail = True
         foia.submit(snail=snail)
-        logging.info('Communication #%d resent.', self.id)
+        logger.info('Communication #%d resent.', self.id)
 
     def set_raw_email(self, msg):
         """Set the raw email for this communication"""

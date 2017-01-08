@@ -272,7 +272,10 @@ def classify_status(task_pk, **kwargs):
 
     resp_task.save()
 
-@periodic_task(run_every=crontab(hour=5, minute=0), name='muckrock.foia.tasks.followup_requests')
+@periodic_task(
+        run_every=crontab(hour=5, minute=0),
+        time_limit=10 * 60,
+        name='muckrock.foia.tasks.followup_requests')
 def followup_requests():
     """Follow up on any requests that need following up on"""
     log = []

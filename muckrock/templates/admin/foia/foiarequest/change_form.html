@@ -2,8 +2,8 @@
 {% extends "admin/change_form.html" %}
 
 {% block form_top %}
-	{% if object_id %}
-		<p><a href="{% url 'admin:foia-admin-send-update' idx=object_id %}">Send user an update notification</a></p>
-		<p><a href="{% url 'admin:foia-admin-retry-pages' idx=object_id %}">Retry setting the page count on the documents</a></p>
-		{% endif %}
+    {% if original %}
+        <p><a href="{% url 'admin:foia-admin-send-update' idx=original.pk %}">Send user an update notification</a></p>
+        <p><a href="{% url 'admin:foia-admin-retry-pages' idx=original.pk %}">Retry setting the page count on the documents</a></p>
+    {% endif %}
 {% endblock %}
