@@ -9,12 +9,12 @@ from autocomplete_light import shortcuts as autocomplete_light
 from reversion.admin import VersionAdmin
 
 from muckrock.foiamachine import models
-from muckrock.nested_inlines.admin import NestedModelAdmin, NestedTabularInline
 
 
 class FoiaMachineRequestAdminForm(forms.ModelForm):
     """Form to include custom choice fields"""
-    jurisdiction = autocomplete_light.ModelChoiceField('JurisdictionAdminAutocomplete')
+    jurisdiction = autocomplete_light.ModelChoiceField(
+            'JurisdictionAdminAutocomplete')
     agency = autocomplete_light.ModelChoiceField('AgencyAdminAutocomplete')
     user = autocomplete_light.ModelChoiceField('UserAutocomplete')
 
@@ -24,21 +24,40 @@ class FoiaMachineRequestAdminForm(forms.ModelForm):
         fields = '__all__'
 
 
-class FoiaMachineFileInline(NestedTabularInline):
+class FoiaMachineFileInline(admin.TabularInline):
     """FOIA Machine file inline"""
     model = models.FoiaMachineFile
-    exclude = ['communication']
     extra = 0
 
 
-class FoiaMachineComunicationInline(NestedTabularInline):
+class FoiaMachineCommunicationInline(admin.StackedInline):
     """FOIA Machine communication inline"""
     model = models.FoiaMachineCommunication
     extra = 1
-    inlines = [FoiaMachineFileInline]
+    inlines = (FoiaMachineFileInline,)
+    show_change_link = True
+    readonly_fields = ('file_count',)
+    fields = (
+            ('sender', 'receiver'),
+            ('date', 'received'),
+            'message',
+            'file_count',
+            )
+
+    def file_count(self, instance):
+        """File count for this communication"""
+        # pylint: disable=no-self-use
+        return instance.files.count()
 
 
-class FoiaMachineRequestAdmin(NestedModelAdmin, VersionAdmin):
+
+class FoiaMachineCommunicationAdmin(VersionAdmin):
+    """FOIA Machine communication admin"""
+    model = models.FoiaMachineCommunication
+    inlines = (FoiaMachineFileInline,)
+
+
+class FoiaMachineRequestAdmin(VersionAdmin):
     """FOIA Machine request inline"""
     model = models.FoiaMachineRequest
     prepopulated_fields = {'slug': ('title',)}
@@ -46,8 +65,9 @@ class FoiaMachineRequestAdmin(NestedModelAdmin, VersionAdmin):
     list_filter = ['status']
     list_select_related = True
     search_fields = ['title', 'user']
-    inlines = [FoiaMachineComunicationInline]
+    inlines = [FoiaMachineCommunicationInline]
     save_on_top = True
     form = FoiaMachineRequestAdminForm
 
 admin.site.register(models.FoiaMachineRequest, FoiaMachineRequestAdmin)
+admin.site.register(models.FoiaMachineCommunication, FoiaMachineCommunicationAdmin)

@@ -49,8 +49,8 @@ def coverage(settings='test'):
 def pylint():
     """Run pylint"""
     with env.cd(env.base_path):
-        excludes = ['migrations', '__init__.py', 'manage.py', 'formwizard',
-                    'vendor', 'fabfile', 'static', 'nested_inlines', 'node_modules']
+        excludes = ['migrations', '__init__.py', 'manage.py',
+                    'vendor', 'fabfile', 'static', 'node_modules']
         stmt = ('find ./muckrock -name "*.py"' +
                 ''.join(' | grep -v %s' % e for e in excludes) +
                 ' | xargs pylint --load-plugins=pylint_django '
