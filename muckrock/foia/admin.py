@@ -211,10 +211,12 @@ class FOIARequestAdminForm(forms.ModelForm):
             required=False)
     read_collaborators = autocomplete_light.ModelMultipleChoiceField(
             'UserAutocomplete',
-            queryset=User.objects.all())
+            queryset=User.objects.all(),
+            required=False)
     edit_collaborators = autocomplete_light.ModelMultipleChoiceField(
             'UserAutocomplete',
-            queryset=User.objects.all())
+            queryset=User.objects.all(),
+            required=False)
 
     class Meta:
         # pylint: disable=too-few-public-methods
