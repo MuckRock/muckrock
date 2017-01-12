@@ -35,6 +35,7 @@ from muckrock.utils import new_action
 
 logger = logging.getLogger(__name__)
 
+
 def _upload_file(foia, comm, file_, sender):
     """Upload a file to attach to a FOIA request"""
 
@@ -54,6 +55,7 @@ def _upload_file(foia, comm, file_, sender):
     if foia:
         upload_document_cloud.apply_async(args=[foia_file.pk, False], countdown=3)
 
+
 def _make_orphan_comm(from_, to_, post, files, foia):
     """Make an orphan commuication"""
     from_realname, _ = parseaddr(from_)
@@ -62,8 +64,7 @@ def _make_orphan_comm(from_, to_, post, files, foia):
             priv_from_who=from_[:255], from_who=from_realname[:255],
             priv_to_who=to_, response=True,
             date=datetime.now(), full_html=False, delivered='email',
-            communication='%s\n%s' %
-                (post.get('stripped-text', ''), post.get('stripped-signature')),
+            communication=_get_mail_body(post),
             likely_foia=foia)
     RawEmail.objects.create(
         communication=comm,
@@ -74,6 +75,28 @@ def _make_orphan_comm(from_, to_, post, files, foia):
         if type_ == 'file':
             _upload_file(None, comm, file_, from_)
     return comm
+
+
+def _get_mail_body(post):
+    """Try to get the stripped-text unless it looks like that parsing failed,
+    then get the full plain body"""
+    stripped_text = post.get('stripped-text', '')
+    bad_text = [
+            # if stripped-text is blank or not present
+            '',
+            '\n',
+            # the following are form Seattle's automated system
+            # they seem to confuse mailgun's parser
+            '--- Please respond above this line ---',
+            '--- Please respond above this line ---\n',
+            ]
+    if stripped_text in bad_text:
+        return post.get('body-plain')
+    else:
+        return '%s\n%s' % (
+                post.get('stripped-text', ''),
+                post.get('stripped-signature'))
+
 
 @csrf_exempt
 def route_mailgun(request):
@@ -147,8 +170,8 @@ def _handle_request(request, mail_id):
                 to_who=foia.user.get_full_name(),
                 subject=subject[:255], response=True,
                 date=datetime.now(), full_html=False, delivered='email',
-                communication='%s\n%s' %
-                    (post.get('stripped-text', ''), post.get('stripped-signature')))
+                communication=_get_mail_body(post),
+                )
         RawEmail.objects.create(
             communication=comm,
             raw_email='%s\n%s' % (post.get('message-headers', ''), post.get('body-plain', '')))
