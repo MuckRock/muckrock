@@ -60,10 +60,11 @@ function resolve(taskForm) {
     ajaxPost(taskID, taskEndpoint, taskData);
 }
 
-function batchResolve(forms) {
+function batchAction(forms, action) {
     var taskID;
     var taskIDs = [];
-    var taskData = {'resolve': true, 'tasks': []}
+    var taskData = {'tasks': []}
+    taskData[action] = true;
     $(forms).each(function() {
         taskID = getTaskID($(this).serializeArray());
         taskIDs.push('#' + taskID + '-task');
@@ -139,7 +140,7 @@ $('button[name="resolve"]').click(function(e){
     } else {
         forms.push($(this).closest('form'));
     }
-    batchResolve(forms);
+    batchAction(forms, 'resolve');
     return false;
 });
 
@@ -156,9 +157,7 @@ $('button[name="reject"]').click(function(e){
     } else {
         forms.push($(this).closest('form'));
     }
-    $(forms).each(function(){
-        reject(this);
-    });
+    batchAction(forms, 'reject');
     return false;
 });
 
