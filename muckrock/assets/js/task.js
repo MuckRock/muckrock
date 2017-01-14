@@ -53,17 +53,10 @@ Need to add the action as a value since the button is being overridden.
 In a non-JS form submission, the button would also include its value in the posted data.
 */
 
-function resolve(taskForm) {
-    var taskID = '#' + getTaskID($(taskForm).serializeArray()) + '-task';
-    var taskData = $(taskForm).serialize() + '&resolve=true';
-    var taskEndpoint = $(taskForm).attr('action');
-    ajaxPost(taskID, taskEndpoint, taskData);
-}
-
 function batchAction(forms, action) {
     var taskID;
     var taskIDs = [];
-    var taskData = {'tasks': []}
+    var taskData = {'tasks': []};
     taskData[action] = true;
     $(forms).each(function() {
         taskID = getTaskID($(this).serializeArray());
@@ -74,13 +67,6 @@ function batchAction(forms, action) {
         var taskEndpoint = $(forms[0]).attr('action');
         ajaxPost(taskIDs.join(', '), taskEndpoint, taskData);
     }
-}
-
-function reject(taskForm) {
-    var taskID = '#' + getTaskID($(taskForm).serializeArray()) + '-task';
-    var taskData = $(taskForm).serialize() + '&reject=true';
-    var taskEndpoint = $(taskForm).attr('action');
-    ajaxPost(taskID, taskEndpoint, taskData);
 }
 
 function getTaskID(taskFormData) {
