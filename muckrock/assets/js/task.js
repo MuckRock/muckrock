@@ -60,6 +60,22 @@ function resolve(taskForm) {
     ajaxPost(taskID, taskEndpoint, taskData);
 }
 
+function batchAction(forms, action) {
+    var taskID;
+    var taskIDs = [];
+    var taskData = {'tasks': []}
+    taskData[action] = true;
+    $(forms).each(function() {
+        taskID = getTaskID($(this).serializeArray());
+        taskIDs.push('#' + taskID + '-task');
+        taskData['tasks'].push(taskID);
+    });
+    if (forms.length > 0) {
+        var taskEndpoint = $(forms[0]).attr('action');
+        ajaxPost(taskIDs.join(', '), taskEndpoint, taskData);
+    }
+}
+
 function reject(taskForm) {
     var taskID = '#' + getTaskID($(taskForm).serializeArray()) + '-task';
     var taskData = $(taskForm).serialize() + '&reject=true';
@@ -124,9 +140,7 @@ $('button[name="resolve"]').click(function(e){
     } else {
         forms.push($(this).closest('form'));
     }
-    $(forms).each(function(){
-        resolve(this);
-    });
+    batchAction(forms, 'resolve');
     return false;
 });
 
@@ -143,9 +157,7 @@ $('button[name="reject"]').click(function(e){
     } else {
         forms.push($(this).closest('form'));
     }
-    $(forms).each(function(){
-        reject(this);
-    });
+    batchAction(forms, 'reject');
     return false;
 });
 
