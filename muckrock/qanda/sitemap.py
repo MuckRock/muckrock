@@ -15,10 +15,10 @@ class QuestionSitemap(Sitemap):
 
     def items(self):
         """Return all questions"""
+        # pylint: disable=no-self-use
         return Question.objects.all()
 
     def lastmod(self, obj):
         """Last modified?"""
         last_answer = obj.answers.last()
         return last_answer.date if last_answer else obj.date
-
