@@ -33,7 +33,7 @@ class Crowdfund(models.Model):
         decimal_places=2,
         default='0.00'
     )
-    date_due = models.DateField()
+    date_due = models.DateField(blank=True, null=True)
     closed = models.BooleanField(default=False)
 
     def __unicode__(self):
@@ -45,7 +45,8 @@ class Crowdfund(models.Model):
 
     def expired(self):
         """Has this crowdfund run out of time?"""
-        return date.today() >= self.date_due or self.closed
+        return ((self.date_due is not None and date.today() >= self.date_due)
+                or self.closed)
 
     def amount_remaining(self):
         """Reports the amount still needed to be raised as a decimal."""
