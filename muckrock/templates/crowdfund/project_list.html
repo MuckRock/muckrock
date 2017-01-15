@@ -12,7 +12,7 @@
         <div class="right">
             <div>
                 <p>Raised ${{ crowdfund.payment_received }} of ${{ crowdfund.payment_required }}</p>
-                <p>{{ crowdfund.date_due | timeuntil }} remaining</p>
+                {% if crowdfund.date_due %}<p>{{ crowdfund.date_due | timeuntil }} remaining</p>{% endif %}
             </div>
             <p class="view"><a href="{{ crowdfund.project.get_absolute_url }}">View this project</a></p>
         </div>

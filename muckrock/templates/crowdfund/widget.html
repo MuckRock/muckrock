@@ -34,9 +34,9 @@
                 </div>
                 <p class="amount-raised">${{ crowdfund.payment_received|intcomma }} raised out of ${{ crowdfund.payment_required|intcomma }}.</p>
                 <p class="time-remaining">
-                {% if not crowdfund.expired %}
+                {% if not crowdfund.expired and crowdfund.date_due %}
                     {{ crowdfund.date_due|timeuntil }} remaining
-                {% else %}
+                {% elif crowdfund.expired %}
                     This crowdfund has ended.
                 {% endif %}
                 </p>

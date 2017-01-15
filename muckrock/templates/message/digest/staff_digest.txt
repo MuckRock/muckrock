@@ -71,7 +71,7 @@ Active Crowdfunds
 {% for crowdfund in crowdfunds %}
 {% with crowdfund.get_crowdfund_object as object %}
 {{object}} ({{base_url}}{{object.get_absolute_url}})
-{{crowdfund.percent_funded}}% funded / ${{crowdfund.amount_remaining}} remaining / Ends on {{crowdfund.date_due|date:"m/d/y"}}
+{{crowdfund.percent_funded}}% funded / ${{crowdfund.amount_remaining}} remaining / {% if crowdfund.date_due %}Ends on {{crowdfund.date_due|date:"m/d/y"}}{% else %}No end date{% endif %}
 {% endwith %}
 {% endfor %}
 {% endif %}

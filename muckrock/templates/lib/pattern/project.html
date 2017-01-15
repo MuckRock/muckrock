@@ -26,7 +26,7 @@
                     <li class="stat"><span class="value">{{crowdfund.percent_funded}}%</span> funded</li>
                     <li class="stat"><span class="value">${{crowdfund.payment_received}}</span> raised</li>
                     <li class="stat"><span class="value">{{crowdfund.contributors_count}}</span> backer{{crowdfund.contributors_count|pluralize}}</li>
-                    <li class="stat"><span class="value">{{crowdfund.date_due|timeuntil}}</span> remaining</li>
+                    {% if crowdfund.date_due %}<li class="stat"><span class="value">{{crowdfund.date_due|timeuntil}}</span> remaining</li>{% endif %}
                 </ul>
             </div>
         {% endif %}

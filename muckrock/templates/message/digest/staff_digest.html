@@ -158,7 +158,7 @@
 <li>
     <a href="{{object.get_absolute_url}}">{{object}}</a>
     <br/>
-    <small>{{crowdfund.percent_funded}}% funded &bull; ${{crowdfund.amount_remaining}} remaining &bull; Ends on {{crowdfund.date_due|date:"m/d/y"}}</small>
+    <small>{{crowdfund.percent_funded}}% funded &bull; ${{crowdfund.amount_remaining}} remaining &bull; {% if crowdfund.date_due %}Ends on {{crowdfund.date_due|date:"m/d/y"}}{% else %}No end date{% endif %}</small>
 </li>
 {% endwith %}
 {% endfor %}
