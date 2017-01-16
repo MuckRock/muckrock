@@ -10,6 +10,7 @@ import django_filters
 
 from muckrock.filters import RangeWidget
 from muckrock.qanda.models import Question
+from muckrock.tags.models import Tag
 
 
 class QuestionFilterSet(django_filters.FilterSet):
@@ -29,6 +30,11 @@ class QuestionFilterSet(django_filters.FilterSet):
     unanswered = django_filters.MethodFilter(
         action='unanswered_filter',
         widget=forms.CheckboxInput()
+    )
+    tags = django_filters.ModelMultipleChoiceFilter(
+        name='tags__name',
+        queryset=Tag.objects.all(),
+        widget=autocomplete_light.MultipleChoiceWidget('TagAutocomplete'),
     )
 
     def unanswered_filter(self, queryset, value):

@@ -1,8 +1,10 @@
 {% extends 'base.html' %}
 
 {% load static from staticfiles %}
+{% load cache %}
 
 {% block content %}
+{% cache cache_timeout tag_detail tag.pk %}
 <div class="tag-list master-detail">
     <section class="master">
         <h1>{{ tags|length }} Tag{{ tags|length|pluralize }}</h1>
@@ -27,25 +29,29 @@
     <section class="detail">
         <h1 class="tag-header">{{ tag.name }}</h1>
         {% if tagged_projects %}
-        <h2>{{ tagged_projects|length }} Project{{ tagged_projects|length|pluralize }}</h2>
+        <h2>{{ tagged_projects_count }} Project{{ tagged_projects_count|pluralize }}</h2>
+        <p><a href="{% url "project-list" %}?tags={{ tag.pk }}">View all...</a></p>
         {% for project in tagged_projects %}
             {% include 'lib/pattern/project.html' %}
         {% endfor %}
         {% endif %}
         {% if tagged_articles %}
-        <h2>{{ tagged_articles|length }} Article{{ tagged_articles|length|pluralize }}</h2>
+        <h2>{{ tagged_articles_count }} Article{{ tagged_articles_count|pluralize }}</h2>
+        <p><a href="{% url "news-archive" %}?tags={{ tag.pk }}">View all...</a></p>
         {% for article in tagged_articles %}
             {% include 'lib/pattern/article.html' %}
         {% endfor %}
         {% endif %}
         {% if tagged_requests %}
-        <h2>{{ tagged_requests|length }} Request{{ tagged_requests|length|pluralize }}</h2>
+        <h2>{{ tagged_requests_count }} Request{{ tagged_requests_count|pluralize }}</h2>
+        <p><a href="{% url "foia-list" %}?tags={{ tag.pk }}">View all...</a></p>
         {% for foia in tagged_requests %}
             {% include 'lib/foia.html' %}
         {% endfor %}
         {% endif %}
         {% if tagged_questions %}
-        <h2>{{ tagged_questions|length }} Question{{ tagged_questions|length|pluralize }}</h2>
+        <h2>{{ tagged_questions_count }} Question{{ tagged_questions_count|pluralize }}</h2>
+        <p><a href="{% url "question-index" %}?tags={{ tag.pk }}">View all...</a></p>
         <table>
             {% for question in tagged_questions %}
             <tr><td><a href="{{ question.get_absolute_url }}">{{ question.title }}</a></td></tr>
@@ -65,4 +71,5 @@
     </section>
     {% endif %}
 </div>
+{% endcache %}
 {% endblock content %}
