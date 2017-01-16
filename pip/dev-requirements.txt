@@ -4,7 +4,6 @@
 #
 #    pip-compile --output-file dev-requirements.txt dev-requirements.in
 #
-
 astroid==1.4.8            # via pylint, pylint-plugin-utils
 backports.functools-lru-cache==1.2.1  # via pylint
 backports.shutil-get-terminal-size==1.0.0  # via ipython
