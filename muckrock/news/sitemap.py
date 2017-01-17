@@ -37,7 +37,7 @@ class ArticleNewsSitemap(NewsSitemap):
     def lastmod(self, obj):
         """When was the article last modified?"""
         # pylint: disable=no-self-use
-        return obj.pub_date
+        return obj.pub_date.date()
 
     def keywords(self, obj):
         """Keywords for the article"""
