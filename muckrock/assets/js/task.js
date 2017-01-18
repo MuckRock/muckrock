@@ -69,6 +69,13 @@ function batchAction(forms, action) {
     }
 }
 
+function singleAction(taskForm, action) {
+    var taskID = '#' + getTaskID($(taskForm).serializeArray()) + '-task';
+    var taskData = $(taskForm).serialize() + '&' + action + '=true';
+    var taskEndpoint = $(taskForm).attr('action');
+    ajaxPost(taskID, taskEndpoint, taskData);
+}
+
 function getTaskID(taskFormData) {
     // Gets the task ID from a task form
     var taskID;
@@ -123,10 +130,10 @@ $('button[name="resolve"]').click(function(e){
                 forms.push(taskForm);
             }
         });
+        batchAction(forms, 'resolve');
     } else {
-        forms.push($(this).closest('form'));
+        singleAction($(this).closest('form'), 'resolve');
     }
-    batchAction(forms, 'resolve');
     return false;
 });
 
@@ -140,10 +147,10 @@ $('button[name="reject"]').click(function(e){
                 forms.push(taskForm);
             }
         });
+        batchAction(forms, 'reject');
     } else {
-        forms.push($(this).closest('form'));
+        singleAction($(this).closest('form'), 'reject');
     }
-    batchAction(forms, 'reject');
     return false;
 });
 
