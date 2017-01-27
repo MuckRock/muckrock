@@ -59,9 +59,20 @@ class FOIACommunication(models.Model):
     delivered = models.CharField(max_length=10, choices=DELIVERED, blank=True, null=True)
     # what status this communication should set the request to - used for machine learning
     status = models.CharField(max_length=10, choices=STATUS, blank=True, null=True)
+
+    # confirmed:
+    #   datetime of when:
+    #  - email: mailgun delivered it
+    #  - fax: faxaway confirms it sent
+    #  - snail: snailmail task is closed (it was placed in the mail)
+    confirmed = models.DateTimeField(blank=True, null=True)
+
+    # This field is deprecated by a combination of the confirmed field (for faxes)
+    # and open models for emails
+    # Should this be removed (would lose some data)
     opened = models.BooleanField(default=False,
-            help_text='If emailed, did we receive an open notification? '
-                      'If faxed, did we recieve a confirmation?')
+            help_text='DEPRECATED: If emailed, did we receive an open notification?'
+                      ' If faxed, did we recieve a confirmation?')
 
     # only used for orphans
     likely_foia = models.ForeignKey(
@@ -300,4 +311,55 @@ class FOIANote(models.Model):
         # pylint: disable=too-few-public-methods
         ordering = ['foia', 'datetime']
         verbose_name = 'FOIA Note'
+        app_label = 'foia'
+
+
+class CommunicationError(models.Model):
+    """An error has occured delivering this communication"""
+    communication = models.ForeignKey(
+            FOIACommunication,
+            related_name='errors',
+            )
+    date = models.DateTimeField()
+
+    recipient = models.CharField(max_length=255)
+    code = models.CharField(max_length=10)
+    error = models.TextField(blank=True)
+    event = models.CharField(max_length=10)
+    reason = models.CharField(max_length=255)
+
+    def __unicode__(self):
+        return u'CommunicationError: %s - %s' % (self.communication.pk, self.date)
+
+    class Meta:
+        ordering = ['date']
+        app_label = 'foia'
+
+
+class CommunicationOpen(models.Model):
+    """A communication has been opened"""
+    communication = models.ForeignKey(
+            FOIACommunication,
+            related_name='opens',
+            )
+    date = models.DateTimeField()
+
+    recipient = models.EmailField()
+    city = models.CharField(max_length=50)
+    region = models.CharField(max_length=10)
+    country = models.CharField(max_length=10)
+
+    client_type = models.CharField(max_length=15)
+    client_name = models.CharField(max_length=15)
+    client_os = models.CharField(max_length=10, verbose_name='Client OS')
+
+    device_type = models.CharField(max_length=10)
+    user_agent = models.CharField(max_length=255)
+    ip_address = models.CharField(max_length=15, verbose_name='IP Address')
+
+    def __unicode__(self):
+        return u'CommunicationOpen: %s - %s' % (self.communication.pk, self.date)
+
+    class Meta:
+        ordering = ['date']
         app_label = 'foia'
