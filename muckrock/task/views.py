@@ -12,6 +12,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 
 import logging
+from datetime import datetime
 
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency, STALE_DURATION
@@ -215,6 +216,8 @@ class SnailMailTaskList(TaskList):
         if request.POST.get('check_number') and task.category == 'p':
             check_number = int(request.POST.get('check_number'))
             task.record_check(check_number, request.user)
+        task.communication.confirmed = datetime.now()
+        task.communication.save()
         task.resolve(request.user)
         return super(SnailMailTaskList, self).task_post_helper(request, task)
 
