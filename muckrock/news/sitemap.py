@@ -28,11 +28,11 @@ class ArticleSitemap(Sitemap):
 
 class ArticleNewsSitemap(NewsSitemap):
     """Article sitemap for Google News"""
-    limit = 5000
+    limit = 500
 
     def items(self):
         """Return all news articles"""
-        return Article.objects.get_published()
+        return Article.objects.get_published().prefetch_related('tags')
 
     def lastmod(self, obj):
         """When was the article last modified?"""

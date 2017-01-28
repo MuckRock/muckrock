@@ -15,7 +15,7 @@ from nose.tools import ok_
 from nose.tools import eq_
 
 from muckrock.accounts.models import Notification
-from muckrock.factories import UserFactory
+from muckrock.factories import UserFactory, AnswerFactory
 from muckrock.fields import EmailsListField
 from muckrock.forms import NewsletterSignupForm, StripeForm
 from muckrock.utils import new_action, notify
@@ -94,9 +94,20 @@ class TestFunctional(TestCase):
     # tests for base level views
     def test_views(self):
         """Test views"""
+        # we have no question fixtures
+        # should move all fixtures to factories
+
+        AnswerFactory()
 
         get_allowed(self.client, reverse('index'))
         get_allowed(self.client, '/sitemap.xml')
+        get_allowed(self.client, '/sitemap-News.xml')
+        get_allowed(self.client, '/sitemap-Jurisdiction.xml')
+        get_allowed(self.client, '/sitemap-Agency.xml')
+        get_allowed(self.client, '/sitemap-Question.xml')
+        get_allowed(self.client, '/sitemap-FOIA.xml')
+        get_allowed(self.client, '/news-sitemaps/index.xml')
+        get_allowed(self.client, '/news-sitemaps/articles.xml')
         get_allowed(self.client, '/search/')
 
     def test_api_views(self):
@@ -125,6 +136,7 @@ class TestUnit(TestCase):
             field.clean('', model_instance)
 
         field.clean('a@example.com,an.email@foo.net', model_instance)
+
 
 class TestNewsletterSignupView(TestCase):
     """By submitting an email, users can subscribe to our MailChimp newsletter list."""
