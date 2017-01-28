@@ -12,20 +12,22 @@ rule, it is easily overridable. We add a margin to the footer when the header is
 since we break it into two pieces.
 */
 .global-header {
-  @include drop-shadow;
   margin-bottom: 0;
-  position: fixed;
-  z-index: 100;
-  left: 0;
-  right: 0;
-  background-color: $nav-background;
-  border-bottom: $nav-border;
   & + * {
     /* The top margin accounts for the fixed top navigation. */
     margin-top: 2.6875em !important;
   }
+  @media($bottom-nav-bp-min) {
+    position: fixed;
+    z-index: 100;
+    top: 0;
+    left: 0;
+    right: 0;
+    border-bottom: $nav-border;
+    @include drop-shadow;
+  }
 }
-@media($bottom-nav-bp) {
+@media($bottom-nav-bp-max) {
   .website-footer {
     /* The bottom is added when we have a fixed bottom navigation. */
     margin-bottom: 42px !important;
@@ -371,6 +373,16 @@ We use rich nav items to display images behind nav items, like for news articles
 #site-nav {
   flex: 1 1 auto;
   position: relative;
+  background-color: $nav-background;
+  @media($bottom-nav-bp-max) {
+    position: fixed;
+    z-index: 100;
+    top: 0;
+    left: 0;
+    right: 0;
+    border-bottom: $nav-border;
+    @include drop-shadow;
+  }
   .global-search {
     position: absolute;
     top: 0;
@@ -432,7 +444,7 @@ We use rich nav items to display images behind nav items, like for news articles
       transform: translateY(-2px);
     }
   }
-  @media($bottom-nav-bp) {
+  @media($bottom-nav-bp-max) {
     /* When the user navigation is on the bottom, put the logo in the middle. */
     justify-content: space-between;
     .brand {
@@ -480,8 +492,9 @@ We use rich nav items to display images behind nav items, like for news articles
 /* We apply some specific styling to the portion of the header used for account navigation. */
 #user-nav {
   flex: 0 1 auto;
-  @media($bottom-nav-bp) {
+  @media($bottom-nav-bp-max) {
     position: fixed;
+    z-index: 100;
     bottom: 0;
     left: 0;
     right: 0;
