@@ -338,16 +338,18 @@ class FoiaMachineRequestShareView(RequestOwnerRequiredMixin, SingleObjectMixin, 
 
 # redirect views for agencies and jurisdictions
 
-def agency_detail(self, **kwargs):
+def agency_detail(request, **kwargs):
     """Redirect to muckrock agency detail page"""
+    # pylint: disable=unused-argument
     return redirect(reverse(
         'agency-detail',
         host='default',
         kwargs=kwargs,
         ))
 
-def jurisdiction_detail(self, **kwargs):
+def jurisdiction_detail(request, **kwargs):
     """Redirect to muckrock jurisdiction detail page"""
+    # pylint: disable=unused-argument
     # remove kwargs that were not filled in
     kwargs = {k: v for k, v in kwargs.iteritems() if v is not None}
     return redirect(reverse(

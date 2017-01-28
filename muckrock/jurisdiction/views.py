@@ -136,7 +136,7 @@ def redirect_flag(request, **kwargs):
     """Redirect flag urls to base agency"""
     # pylint: disable=unused-argument
     # filter None from kwargs
-    kwargs = dict((key, kwargs[key]) for key in kwargs if kwargs[key] is not None)
+    kwargs = {k: v for k, v in kwargs.iteritems() if v is not None}
     return redirect('jurisdiction-detail', **kwargs)
 
 
