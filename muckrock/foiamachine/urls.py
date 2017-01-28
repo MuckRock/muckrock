@@ -11,8 +11,10 @@ from django.views.generic import TemplateView
 import debug_toolbar
 from django_hosts.resolvers import reverse_lazy
 
+from muckrock.agency.urls import agency_url
 from muckrock.foiamachine import views
 from muckrock.forms import PasswordResetForm
+from muckrock.jurisdiction.urls import jur_url
 
 
 def handler404(request, exception):
@@ -102,6 +104,12 @@ urlpatterns = patterns(
     url(r'^foi/(?P<foi_slug>[\w-]+)-(?P<foi_pk>\d+)/comms/(?P<pk>\d+)/delete/$',
         views.FoiaMachineCommunicationDeleteView.as_view(),
         name='comm-delete'),
+    url(r'^agency/%s/$' % agency_url,
+        views.agency_detail,
+        name='agency-detail'),
+    url(r'^jurisdiction/%s/$' % jur_url,
+        views.jurisdiction_detail,
+        name='jurisdiction-detail'),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^__debug__/', include(debug_toolbar.urls)),
 )

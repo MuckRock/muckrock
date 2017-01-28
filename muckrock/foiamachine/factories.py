@@ -23,6 +23,7 @@ class FoiaMachineRequestFactory(factory.django.DjangoModelFactory):
     slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
     user = factory.SubFactory(muckrock_factories.UserFactory)
     jurisdiction = factory.SubFactory(jurisdiction_factories.StateJurisdictionFactory)
+    agency = factory.SubFactory(muckrock_factories.AgencyFactory)
 
 
 class FoiaMachineCommunicationFactory(factory.django.DjangoModelFactory):

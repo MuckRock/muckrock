@@ -512,6 +512,8 @@ LEAFLET_CONFIG = {
     }
 }
 
+# development urls
+MUCKROCK_URL = 'localhost:8000'
 FOIAMACHINE_URL = 'dev.foiamachine.org:8000'
 
 # Limit CORS support to just API endpoints

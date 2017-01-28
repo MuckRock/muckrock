@@ -335,3 +335,23 @@ class FoiaMachineRequestShareView(RequestOwnerRequiredMixin, SingleObjectMixin, 
             self.foi.save()
             messages.success(self.request, 'Link sharing is now disabled on this request.')
         return redirect(self.get_redirect_url(*args, **kwargs))
+
+# redirect views for agencies and jurisdictions
+
+def agency_detail(self, **kwargs):
+    """Redirect to muckrock agency detail page"""
+    return redirect(reverse(
+        'agency-detail',
+        host='default',
+        kwargs=kwargs,
+        ))
+
+def jurisdiction_detail(self, **kwargs):
+    """Redirect to muckrock jurisdiction detail page"""
+    # remove kwargs that were not filled in
+    kwargs = {k: v for k, v in kwargs.iteritems() if v is not None}
+    return redirect(reverse(
+        'jurisdiction-detail',
+        host='default',
+        kwargs=kwargs,
+        ))
