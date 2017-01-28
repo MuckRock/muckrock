@@ -4,12 +4,12 @@ Models for the Agency application
 
 from django.contrib.auth.models import User
 from django.core.exceptions import MultipleObjectsReturned
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
 
 from datetime import date
-from django_hosts.resolvers import reverse as host_reverse
 from djgeojson.fields import PointField
 from easy_thumbnails.fields import ThumbnailerImageField
 import logging
@@ -110,9 +110,8 @@ class Agency(models.Model, RequestHelper):
 
     def get_absolute_url(self):
         """The url for this object"""
-        return host_reverse(
+        return reverse(
                 'agency-detail',
-                host='default',
                 kwargs={
                     'jurisdiction': self.jurisdiction.slug,
                     'jidx': self.jurisdiction.pk,

@@ -2,11 +2,11 @@
 Tests for Agency application
 """
 
+from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.test import TestCase
 
 from datetime import datetime, timedelta
-from django_hosts.resolvers import reverse
 import nose.tools
 
 from muckrock import agency

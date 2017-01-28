@@ -7,7 +7,6 @@ from django.db import models
 from django.db.models import F, Q, Avg, Sum, Count
 from django.template.defaultfilters import slugify
 
-from django_hosts.resolvers import reverse as host_reverse
 from easy_thumbnails.fields import ThumbnailerImageField
 from taggit.managers import TaggableManager
 
@@ -111,7 +110,7 @@ class Jurisdiction(models.Model, RequestHelper):
 
     def get_absolute_url(self):
         """The url for this object"""
-        return host_reverse('jurisdiction-detail', host='default', kwargs=self.get_slugs())
+        return reverse('jurisdiction-detail', kwargs=self.get_slugs())
 
     def get_slugs(self):
         """Return a dictionary of slugs for this jurisdiction, for constructing URLs."""
