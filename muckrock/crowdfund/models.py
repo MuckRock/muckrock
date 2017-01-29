@@ -3,6 +3,7 @@ Models for the crowdfund application
 """
 
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
@@ -133,6 +134,7 @@ class Crowdfund(models.Model):
             show=show,
             charge_id=charge.id
         )
+        cache.delete('cf:%s:crowdfund_widget_data' % self.pk)
         logging.info(payment)
         self.update_payment_received()
         return payment
