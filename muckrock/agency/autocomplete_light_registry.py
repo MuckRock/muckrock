@@ -48,6 +48,7 @@ class AgencyAutocomplete(autocomplete_light.AutocompleteModelTemplate):
 
     def _filter_by_jurisdiction(self, choices, jurisdiction_id):
         """Do the filtering here so subclasses can override this method"""
+        #pylint: disable=no-self-use
         if jurisdiction_id == 'f':
             jurisdiction_id = Jurisdiction.objects.get(level='f').id
         return choices.filter(jurisdiction__id=jurisdiction_id)
