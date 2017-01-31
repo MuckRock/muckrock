@@ -42,10 +42,15 @@ class AgencyAutocomplete(autocomplete_light.AutocompleteModelTemplate):
         """Additionally filter choices by jurisdiction."""
         jurisdiction_id = self.request.GET.get('jurisdiction_id')
         if jurisdiction_id:
-            if jurisdiction_id == 'f':
-                jurisdiction_id = Jurisdiction.objects.get(level='f').id
-            self.choices = self.choices.filter(jurisdiction__id=jurisdiction_id)
+            self.choices = self._filter_by_jurisdiction(
+                    self.choices, jurisdiction_id)
         return super(AgencyAutocomplete, self).choices_for_request()
+
+    def _filter_by_jurisdiction(self, choices, jurisdiction_id):
+        """Do the filtering here so subclasses can override this method"""
+        if jurisdiction_id == 'f':
+            jurisdiction_id = Jurisdiction.objects.get(level='f').id
+        return choices.filter(jurisdiction__id=jurisdiction_id)
 
 
 class AgencyMultiRequestAutocomplete(autocomplete_light.AutocompleteModelTemplate):
@@ -83,6 +88,7 @@ class AgencyMultiRequestAutocomplete(autocomplete_light.AutocompleteModelTemplat
         else:
             choices = self.choices
         return self.order_choices(choices)[0:self.limit_choices]
+
 
 class AgencyAdminAutocomplete(AgencyAutocomplete):
     """Autocomplete for Agencies for FOIA admin page"""
