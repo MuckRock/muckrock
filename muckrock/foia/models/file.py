@@ -69,7 +69,7 @@ class FOIAFile(models.Model):
             num = self.doc_id[0:index]
             name = self.doc_id[index+1:]
             return (
-                'https://s3.amazonaws.com/s3.documentcloud.org/documents/' +
+                'https://assets.documentcloud.org/documents/' +
                 num + '/pages/' + name + '-p1-small.gif'
             )
         else:

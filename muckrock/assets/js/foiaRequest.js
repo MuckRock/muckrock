@@ -28,7 +28,7 @@ function get_thumbnail(doc_id) {
         var idx = doc_id.indexOf('-');
         var num = doc_id.slice(0, idx);
         var name = doc_id.slice(idx + 1);
-        return 'https://s3.amazonaws.com/s3.documentcloud.org/documents/' + num + '/pages/' + name + '-p1-small.gif';
+        return 'https://assets.documentcloud.org/documents/' + num + '/pages/' + name + '-p1-small.gif';
 }
 /* eslint-enable no-unused-vars */
 
