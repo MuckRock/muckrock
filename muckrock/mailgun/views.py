@@ -63,19 +63,29 @@ def _upload_file(foia, comm, file_, sender):
         upload_document_cloud.apply_async(args=[foia_file.pk, False], countdown=3)
 
 
-def _make_orphan_comm(from_, to_, post, files, foia):
+def _make_orphan_comm(from_, to_, subject, post, files, foia):
     """Make an orphan communication"""
+    # pylint: disable=too-many-arguments
     from_realname, _ = parseaddr(from_)
     to_ = to_[:255] if to_ else ''
     comm = FOIACommunication.objects.create(
-            priv_from_who=from_[:255], from_who=from_realname[:255],
-            priv_to_who=to_, response=True,
-            date=datetime.now(), full_html=False, delivered='email',
+            priv_from_who=from_[:255],
+            from_who=from_realname[:255],
+            priv_to_who=to_,
+            response=True,
+            subject=subject[:255],
+            date=datetime.now(),
+            full_html=False,
+            delivered='email',
             communication=_get_mail_body(post),
-            likely_foia=foia)
+            likely_foia=foia,
+            )
     RawEmail.objects.create(
         communication=comm,
-        raw_email='%s\n%s' % (post.get('message-headers', ''), post.get('body-plain', '')))
+        raw_email='%s\n%s' % (
+            post.get('message-headers', ''),
+            post.get('body-plain', '')),
+        )
     _process_attachments(files, comm)
 
     return comm
@@ -196,7 +206,7 @@ def _handle_request(request, mail_id):
             msg, reason = ('Incoming Blocked', 'ib')
         if not _allowed_email(from_email, foia) or foia.block_incoming:
             logger.warning('%s: %s', msg, from_)
-            comm = _make_orphan_comm(from_, to_, post, request.FILES, foia)
+            comm = _make_orphan_comm(from_, to_, subject, post, request.FILES, foia)
             OrphanTask.objects.create(
                 reason=reason,
                 communication=comm,
@@ -260,7 +270,7 @@ def _handle_request(request, mail_id):
             foia = FOIARequest.objects.get(pk=mail_id.split('-')[0])
         except FOIARequest.DoesNotExist:
             pass
-        comm = _make_orphan_comm(from_, to_, post, request.FILES, foia)
+        comm = _make_orphan_comm(from_, to_, subject, post, request.FILES, foia)
         OrphanTask.objects.create(
             reason='ia',
             communication=comm,
@@ -357,9 +367,10 @@ def _catch_all(request, address):
     from_ = post.get('From')
     to_ = post.get('To') or post.get('to')
     _, from_email = parseaddr(from_)
+    subject = post.get('Subject') or post.get('subject', '')
 
     if _allowed_email(from_email):
-        comm = _make_orphan_comm(from_, to_, post, request.FILES, None)
+        comm = _make_orphan_comm(from_, to_, subject, post, request.FILES, None)
         OrphanTask.objects.create(
             reason='ia',
             communication=comm,
