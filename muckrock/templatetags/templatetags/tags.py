@@ -232,7 +232,11 @@ def smartypants(text):
 def markdown_filter(text, _safe=None):
     """Take the provided markdown-formatted text and convert it to HTML."""
     # First render Markdown
-    extensions = ['markdown.extensions.smarty', 'pymdownx.magiclink']
+    extensions = [
+            'markdown.extensions.smarty',
+            'markdown.extensions.tables',
+            'pymdownx.magiclink',
+            ]
     markdown_text = markdown.markdown(text, extensions=extensions)
     # Next bleach the markdown
     allowed_tags = bleach.ALLOWED_TAGS + [

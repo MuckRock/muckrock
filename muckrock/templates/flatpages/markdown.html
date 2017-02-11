@@ -1,0 +1,13 @@
+
+
+{% extends "base.html" %}
+{% load tags %} 
+
+{% block title %} {{ flatpage.title }} {% endblock %}
+{% block headline %} About {% endblock %}
+
+{% block content %}
+<article class="flatpage detail">
+    {{ flatpage.content|markdown:"safe" }}
+</article>
+{% endblock %}
