@@ -42,7 +42,8 @@ function toProseMirror() {
         tooltipMenu: true
     });
     if (te) te.remove();
-    pm.focus();
+    // this was causing firefox to scroll to the prose mirror editor on page load
+    //pm.focus();
     getContent = function() {
         return pm.getContent("markdown");
     };
