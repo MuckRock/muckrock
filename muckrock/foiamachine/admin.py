@@ -34,12 +34,12 @@ class FoiaMachineCommunicationInline(admin.StackedInline):
     """FOIA Machine communication inline"""
     model = models.FoiaMachineCommunication
     extra = 1
-    inlines = (FoiaMachineFileInline,)
     show_change_link = True
     readonly_fields = ('file_count',)
     fields = (
             ('sender', 'receiver'),
             ('date', 'received'),
+            'subject',
             'message',
             'file_count',
             )
@@ -48,7 +48,6 @@ class FoiaMachineCommunicationInline(admin.StackedInline):
         """File count for this communication"""
         # pylint: disable=no-self-use
         return instance.files.count()
-
 
 
 class FoiaMachineCommunicationAdmin(VersionAdmin):
@@ -68,6 +67,7 @@ class FoiaMachineRequestAdmin(VersionAdmin):
     inlines = [FoiaMachineCommunicationInline]
     save_on_top = True
     form = FoiaMachineRequestAdminForm
+
 
 admin.site.register(models.FoiaMachineRequest, FoiaMachineRequestAdmin)
 admin.site.register(models.FoiaMachineCommunication, FoiaMachineCommunicationAdmin)
