@@ -24,6 +24,7 @@ from muckrock.agency.sitemap import AgencySitemap
 from muckrock.foia.sitemap import FoiaSitemap
 from muckrock.jurisdiction.sitemap import JurisdictionSitemap
 from muckrock.news.sitemap import ArticleSitemap
+from muckrock.project.sitemap import ProjectSitemap
 from muckrock.qanda.sitemap import QuestionSitemap
 from muckrock.views import handler500 # pylint: disable=unused-import
 
@@ -35,6 +36,7 @@ sitemaps = {
     'Agency': AgencySitemap,
     'Jurisdiction': JurisdictionSitemap,
     'Question': QuestionSitemap,
+    'Project': ProjectSitemap,
 }
 
 router = DefaultRouter()
