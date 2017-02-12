@@ -117,8 +117,9 @@ class FoiaMachineCommunication(models.Model):
     request = models.ForeignKey(FoiaMachineRequest, related_name='communications')
     sender = models.CharField(max_length=255)
     receiver = models.CharField(max_length=255, blank=True)
+    subject = models.CharField(max_length=255, blank=True)
     message = models.TextField()
-    date = models.DateField(default=timezone.now)
+    date = models.DateTimeField(default=timezone.now)
     received = models.BooleanField(default=False)
 
     def __unicode__(self):
@@ -139,11 +140,10 @@ class FoiaMachineFile(models.Model):
     Files are uploaded by users and are attached to communications, like in an email.
     """
     communication = models.ForeignKey(FoiaMachineCommunication, related_name='files')
-    file = models.FileField(upload_to='foia_files/%Y/%m/%d', verbose_name='File', max_length=255)
+    file = models.FileField(upload_to='foiamachine_files/%Y/%m/%d', verbose_name='File', max_length=255)
     name = models.CharField(max_length=255)
     comment = models.TextField(blank=True)
     date_added = models.DateTimeField(auto_now_add=True)
-    date_modified = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
         return u'%s' % self.name
