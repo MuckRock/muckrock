@@ -238,6 +238,13 @@ def markdown_filter(text, _safe=None):
     # allows bleaching to be avoided
     if _safe == 'safe':
         bleached_text = markdown_text
+    elif _safe == 'strip':
+        bleached_text = bleach.clean(
+            markdown_text,
+            tags=allowed_tags,
+            attributes=allowed_attributes,
+            strip=True,
+        )
     else:
         bleached_text = bleach.clean(
             markdown_text,

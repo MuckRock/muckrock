@@ -8,9 +8,11 @@
 -e git+git://github.com/mitchelljkotler/django-news-sitemaps.git@50f198287868612f2d34bc4306e0e95308f942a3#egg=django_news_sitemaps
 amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu
+appdirs==1.4.0            # via setuptools
 billiard==3.3.0.23        # via celery
 bleach==1.5.0
 boto==2.42.0
+bz2file==0.98             # via smart-open
 celery==3.1.23
 Click==6.6                # via pyimagediet
 contextlib2==0.5.4        # via raven
@@ -51,6 +53,7 @@ django==1.9.9
 djangorestframework==3.4.7
 dogslow==0.9.7
 easy-thumbnails==2.3
+fuzzywuzzy==0.14.0
 gunicorn==19.6.0
 html5lib==0.9999999       # via bleach
 image-diet2==1.0
@@ -60,6 +63,7 @@ lxml==3.6.4               # via premailer
 markdown==2.6.7
 newrelic==2.70.0.51
 numpy==1.9.1
+packaging==16.8           # via setuptools
 pascha==0.5
 pillow==3.3.1
 premailer==3.0.0          # via django-premailer
@@ -68,7 +72,9 @@ pyimagediet==1.1.1        # via image-diet2
 pylibmc==1.5.1            # via django-pylibmc
 pymdown-extensions==1.2
 pyphaxio==0.11
+pyparsing==2.1.10         # via packaging
 python-dateutil==2.5.3
+python-Levenshtein==0.12.0
 python-magic==0.4.12      # via pyimagediet
 pytz==2016.6.1            # via celery
 PyYAML==3.12              # via django-rest-swagger, pyimagediet
@@ -83,8 +89,13 @@ scikit-learn==0.16.1
 scipy==0.14.0
 semantic-version==2.6.0   # via django-package-monitor
 simplejson==3.8.2         # via django-lot
-six==1.10.0               # via bleach, django-autocomplete-light, django-geojson, django-queued-storage, html5lib, python-dateutil
+six==1.10.0               # via bleach, django-autocomplete-light, django-geojson, django-queued-storage, html5lib, packaging, python-dateutil, setuptools
+smart-open==1.4.0
 smartypants==1.8.6
 sqlparse==0.2.1           # via django-debug-toolbar
 stripe==1.38.0
 unidecode==0.4.19
+
+# The following packages are commented out because they are
+# considered to be unsafe in a requirements file:
+# setuptools                # via python-levenshtein
