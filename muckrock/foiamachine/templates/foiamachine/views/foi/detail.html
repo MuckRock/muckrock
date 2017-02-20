@@ -14,7 +14,7 @@
             </div>
             <div class="space-between align-baseline w100">
                 <h2>{{object.get_status_display}}</h2>
-                <p>{% if object.agency %}<a href="{{object.agency.get_absolute_url}}">{{object.agency}}</a> &bull; {% endif %}<a href="{{object.jurisdiction.get_absolute_url}}">{{object.jurisdiction}}</a></p>
+                <p>{% if object.agency %}<a href="{{object.agency.get_absolute_url}}">{{object.agency}}</a> &bull; {% endif %}{% if object.jurisdiction %}<a href="{{object.jurisdiction.get_absolute_url}}">{{object.jurisdiction}}</a>{% endif %}</p>
             </div>
     </header>
     {% if object.sent_communications.exists %}

@@ -42,9 +42,14 @@
                     {% for foi in filter.qs %}
                     <tr>
                         <td><input type="checkbox" form="request-manager" name="request" value="{{foi.id}}"/></th>
-                        <td><a href="{{foi.get_absolute_url}}">{{foi.title}}</a></td>
+                        <td><a href="{{foi.get_absolute_url}}">{{foi.title|default:"(untitled)"}}</a></td>
                         <td class="small">{{foi.get_status_display}}</td>
-                        <td class="small"><a href="{{foi.jurisdiction.get_absolute_url}}">{{foi.jurisdiction}}</a></td>
+                        <td class="small">
+                            {% if foi.jurisdiction %}
+                                <a href="{{foi.jurisdiction.get_absolute_url}}">{{foi.jurisdiction}}</a></td>
+                            {% else %}
+                                None
+                            {% endif %}
                         {% if foi.agency %}
                         <td class="small"><a href="{{foi.agency.get_absolute_url}}">{{foi.agency}}</a></td>
                         {% else %}

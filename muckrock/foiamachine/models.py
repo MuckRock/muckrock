@@ -26,15 +26,24 @@ class FoiaMachineRequest(models.Model):
     title = models.CharField(max_length=255, db_index=True)
     slug = models.SlugField(max_length=255)
     date_created = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=10, choices=STATUS, default='started', db_index=True)
+    status = models.CharField(
+            max_length=10,
+            choices=STATUS,
+            default='started',
+            db_index=True,
+            )
     request_language = models.TextField()
-    jurisdiction = models.ForeignKey('jurisdiction.Jurisdiction')
+    jurisdiction = models.ForeignKey(
+            'jurisdiction.Jurisdiction',
+            blank=True,
+            null=True,
+            )
     agency = models.ForeignKey('agency.Agency', blank=True, null=True)
     sharing_code = models.CharField(max_length=255, blank=True)
 
     def save(self, *args, **kwargs):
         """Automatically update the slug field."""
-        self.slug = slugify(self.title)
+        # self.slug = slugify(self.title)
         super(FoiaMachineRequest, self).save(*args, **kwargs)
 
     def __unicode__(self):
@@ -92,7 +101,7 @@ class FoiaMachineRequest(models.Model):
         """Compare the date of the last sent communication to the jurisdiction's response time."""
         try:
             # this subtraction produces a timedelta object, so we need to get the days from it
-            days_until_due = self.date_due - timezone.now().date()
+            days_until_due = self.date_due - timezone.now()
             return days_until_due.days
         except AttributeError:
             return 0
