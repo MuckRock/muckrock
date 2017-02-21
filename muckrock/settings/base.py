@@ -406,6 +406,9 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 DOCUMENTCLOUD_USERNAME = os.environ.get('DOCUMENTCLOUD_USERNAME')
 DOCUMENTCLOUD_PASSWORD = os.environ.get('DOCUMENTCLOUD_PASSWORD')
 
+PHAXIO_KEY = os.environ.get('PHAXIO_KEY')
+PHAXIO_SECRET = os.environ.get('PHAXIO_SECRET')
+
 SLACK_WEBHOOK_URL = os.environ.get('SLACK_WEBHOOK_URL', '')
 
 PUBLICATION_NAME = 'MuckRock'
