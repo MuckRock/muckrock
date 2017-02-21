@@ -253,7 +253,7 @@ class Law(models.Model):
         help_text='Abbreviation or acronym, e.g. FOIA, FOIL, OPRA')
     citation = models.CharField(max_length=255, help_text='The legal reference for this law.')
     url = models.URLField(help_text='The URL of the full text of the law.')
-    summary = models.TextField(blank=True)
+    summary = models.CharField(blank=True, max_length=255, verbose_name='Major Dates')
 
     def __unicode__(self):
         return self.name
