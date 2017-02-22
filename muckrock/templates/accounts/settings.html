@@ -12,6 +12,7 @@
             <dd><a href="#profile">Profile</a></dd>
             <dd><a href="#email">Email</a></dd>
             <dd><a href="#billing">Billing</a></dd>
+            <dd><a href="#receipts">Receipts</a></dd>
             <dt>Password</dt>
             <dd><a href="{% url 'acct-change-pw' %}">Change Password</a></dd>
             <dd><a href="{% url 'acct-reset-pw' %}">Reset Password</a></dd>
@@ -95,6 +96,19 @@
                     {% endif %}
                 </tbody>
             </table>
+        </form>
+        <form method="post" class="receipt form" id="receipts">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="receipt" />
+            <h2>Receipts</h2>
+            <div class="fields">
+            {% for field in receipt_form.visible_fields %}
+                {% include 'lib/pattern/field.html' %}
+            {% endfor %}
+            </div>
+            <footer>
+                <button type="submit" class="primary button">Update receipt emails</button>
+            </footer>
         </form>
     </main>
 </article>

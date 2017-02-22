@@ -5,6 +5,7 @@ Forms for accounts application
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, SetPasswordForm
 from django.contrib.auth.models import User
+from django.core.validators import validate_email
 from django.utils.text import slugify
 
 from autocomplete_light import shortcuts as autocomplete_light
@@ -97,6 +98,30 @@ class BillingPreferencesForm(forms.ModelForm):
         customer.source = token
         customer.save()
         return profile
+
+
+class ReceiptForm(forms.Form):
+    """Form for setting receipt emails"""
+    emails = forms.CharField(
+            widget=forms.Textarea,
+            required=False,
+            help_text='Additional email addresses to send receipts to.  '
+            'One per line.',
+            )
+
+    def clean_emails(self):
+        """Make sure each line is a valid email"""
+        emails = self.cleaned_data['emails'].split('\n')
+        bad_emails = []
+        for email in emails:
+            try:
+                validate_email(email.strip())
+            except forms.ValidationError:
+                bad_emails.append(email)
+        if bad_emails:
+            raise forms.ValidationError(
+                    'Invalid email: %s' % ', '.join(bad_emails))
+        return self.cleaned_data['emails']
 
 
 class RegisterForm(UserCreationForm):
