@@ -373,6 +373,9 @@ class ReceiptEmail(models.Model):
             on_delete=models.CASCADE)
     email = models.EmailField()
 
+    def __unicode__(self):
+        return u'Receipt Email: <%s>' % self.email
+
 
 class NotificationQuerySet(models.QuerySet):
     """Object manager for notifications"""
