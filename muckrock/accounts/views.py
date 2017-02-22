@@ -36,11 +36,18 @@ from muckrock.accounts.forms import (
         ProfileSettingsForm,
         EmailSettingsForm,
         BillingPreferencesForm,
+        ReceiptForm,
         RegisterForm,
         RegisterOrganizationForm,
         RegistrationCompletionForm
         )
-from muckrock.accounts.models import Profile, Notification, Statistics, ACCT_TYPES
+from muckrock.accounts.models import (
+        Profile,
+        Notification,
+        Statistics,
+        ReceiptEmail,
+        ACCT_TYPES,
+        )
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
@@ -243,16 +250,34 @@ def profile_settings(request):
     settings_forms = {
         'profile': ProfileSettingsForm,
         'email': EmailSettingsForm,
-        'billing': BillingPreferencesForm
+        'billing': BillingPreferencesForm,
     }
+    receipt_form = None
     if request.method == 'POST':
         action = request.POST.get('action')
-        if action:
+        if action == 'receipt':
+            receipt_form = ReceiptForm(request.POST)
+            if receipt_form.is_valid():
+                new_emails = receipt_form.cleaned_data['emails'].split('\n')
+                new_emails = {e.strip() for e in new_emails}
+                old_emails = {r.email for r in
+                        request.user.receipt_emails.all()}
+                ReceiptEmail.objects.filter(
+                        user=request.user,
+                        email__in=(old_emails - new_emails),
+                        ).delete()
+                ReceiptEmail.objects.bulk_create(
+                        [ReceiptEmail(user=request.user, email=e)
+                            for e in (new_emails - old_emails)])
+                messages.success(request, 'Your settings have been updated.')
+                return redirect('acct-settings')
+        elif action:
             form = settings_forms[action]
             form = form(request.POST, request.FILES, instance=user_profile)
             if form.is_valid():
                 form.save()
                 messages.success(request, 'Your settings have been updated.')
+                return redirect('acct-settings')
     profile_initial = {
         'first_name': request.user.first_name,
         'last_name': request.user.last_name,
@@ -260,13 +285,18 @@ def profile_settings(request):
     email_initial = {
         'email': request.user.email
     }
+    receipt_initial = {
+        'emails': '\n'.join(r.email for r in request.user.receipt_emails.all())
+        }
     profile_form = ProfileSettingsForm(initial=profile_initial, instance=user_profile)
     email_form = EmailSettingsForm(initial=email_initial, instance=user_profile)
+    receipt_form = receipt_form or ReceiptForm(initial=receipt_initial)
     current_plan = dict(ACCT_TYPES)[user_profile.acct_type]
     context = {
         'stripe_pk': settings.STRIPE_PUB_KEY,
         'profile_form': profile_form,
         'email_form': email_form,
+        'receipt_form': receipt_form,
         'current_plan': current_plan,
         'credit_card': user_profile.card()
     }

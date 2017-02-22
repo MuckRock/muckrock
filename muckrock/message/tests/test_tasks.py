@@ -4,6 +4,7 @@ These will usually tell us if a message
 object cannot be instantiated.
 """
 
+from django.core import mail
 from django.test import TestCase
 
 from dateutil.relativedelta import relativedelta
@@ -11,6 +12,7 @@ import mock
 import nose.tools
 
 from muckrock import factories
+from muckrock.accounts.models import ReceiptEmail
 from muckrock.message import tasks
 from muckrock.task.factories import FlaggedTaskFactory
 
@@ -182,6 +184,29 @@ class TestSendChargeReceiptTask(TestCase):
         mock_charge.metadata['action'] = 'unknown-charge'
         tasks.send_charge_receipt(mock_charge.id)
         mock_send.assert_not_called()
+
+@mock.patch('stripe.Charge', MockCharge)
+class TestSendChargeReceiptRecipient(TestCase):
+    """Tests the send charge receipt recipients."""
+    # pylint: disable=no-self-use
+
+    def setUp(self):
+        self.user = factories.UserFactory()
+        mock_charge.invoice = None
+        mock_charge.metadata = {
+            'email': self.user.email
+        }
+        mail.outbox = []
+
+    def test_receipt_recipients(self):
+        """Receipt should be to the user and CC'd to their receipt emails"""
+        ReceiptEmail.objects.create(user=self.user, email='receipt1@gmail.com')
+        ReceiptEmail.objects.create(user=self.user, email='receipt2@hotmail.com')
+        mock_charge.metadata['action'] = 'unknown-charge'
+        tasks.send_charge_receipt(mock_charge.id)
+        eq_(len(mail.outbox), 1)
+        eq_(mail.outbox[0].to, [self.user.email])
+        eq_(set(mail.outbox[0].cc), {'receipt1@gmail.com', 'receipt2@hotmail.com'})
 
 
 @mock.patch('stripe.Invoice', MockInvoice)

@@ -365,6 +365,15 @@ class Profile(models.Model):
         return link + '?' + urlencode(extra)
 
 
+class ReceiptEmail(models.Model):
+    """An additional email address to send receipts to"""
+    user = models.ForeignKey(
+            User,
+            related_name='receipt_emails',
+            on_delete=models.CASCADE)
+    email = models.EmailField()
+
+
 class NotificationQuerySet(models.QuerySet):
     """Object manager for notifications"""
     def for_user(self, user):
