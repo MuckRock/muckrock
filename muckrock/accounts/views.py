@@ -246,6 +246,7 @@ def downgrade(request):
 @login_required
 def profile_settings(request):
     """Update a users information"""
+    # pylint: disable=too-many-locals
     user_profile = request.user.profile
     settings_forms = {
         'profile': ProfileSettingsForm,
@@ -268,7 +269,7 @@ def profile_settings(request):
                         ).delete()
                 ReceiptEmail.objects.bulk_create(
                         [ReceiptEmail(user=request.user, email=e)
-                            for e in (new_emails - old_emails)])
+                            for e in new_emails - old_emails])
                 messages.success(request, 'Your settings have been updated.')
                 return redirect('acct-settings')
         elif action:
