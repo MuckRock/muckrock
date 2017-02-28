@@ -161,7 +161,7 @@ def create_question(request):
         form = QuestionForm(user=request.user, data=request.POST)
         if form.is_valid():
             question = form.save(commit=False)
-            question.slug = slugify(question.title)
+            question.slug = slugify(question.title) or 'untitled'
             question.user = request.user
             question.date = datetime.now()
             question.save()

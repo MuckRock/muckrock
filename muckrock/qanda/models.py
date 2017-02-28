@@ -7,6 +7,7 @@ from django.core.urlresolvers import reverse
 from django.db import models
 
 from actstream.models import followers
+from autocomplete_light import shortcuts as autocomplete_light
 from taggit.managers import TaggableManager
 
 from muckrock.accounts.models import Profile
