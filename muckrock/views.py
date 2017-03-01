@@ -89,7 +89,7 @@ class ModelFilterMixin(object):
         """
         context = super(ModelFilterMixin, self).get_context_data(**kwargs)
         _filter = self.get_filter()
-        queryset = _filter.qs
+        queryset = _filter.qs.distinct()
         try:
             page_size = self.get_paginate_by(queryset)
         except AttributeError:
