@@ -158,6 +158,9 @@ class FOIACommunicationAdmin(VersionAdmin):
 
         formset.save_m2m()
 
+        for obj in formset.deleted_objects:
+            obj.delete()
+
 
 class FOIACommunicationInline(admin.StackedInline):
     """FOIA Communication Inline admin options"""
