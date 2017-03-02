@@ -1,4 +1,4 @@
-{% extends 'lists/base_list.html' %}
+{% extends 'base_list.html' %}
 {% block title %}MuckRock &bull; Organizations{% endblock title %}
 {% block list-title %}Organizations{% endblock list-title %}
 {% block list-type %}organization{% endblock list-type %}
@@ -12,9 +12,9 @@
 <th data-sort="owner">Owner</th>
 {% endblock list-table-head %}
 
-{% block list-table-item %}
-{% with item as organization %}
+{% block list-table-row %}
+{% with object as organization %}
 <td><a href="{{ organization.get_absolute_url }}">{{ organization.name }}</a></td>
 <td>{{ organization.owner }}</td>
 {% endwith %}
-{% endblock list-table-item %}
+{% endblock list-table-row %}

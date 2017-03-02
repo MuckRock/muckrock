@@ -1,0 +1,22 @@
+.newsletter-widget {
+    @include display(flex);
+    @include flex-wrap(wrap);
+    @include justify-content(space-between);
+    margin-bottom: 0;
+    background: $color-blue-light;
+    color: $color-blue-dark;
+    padding: $vr/2;
+
+    .call-to-action, .oneline-form {
+        @include flex(1 1 20em);
+        margin-bottom: 0;
+    }
+
+    .call-to-action p {
+        margin-bottom: 0;
+    }
+
+    @include media($medium-bp){
+        padding: $vr/2 $vr;
+    }
+}

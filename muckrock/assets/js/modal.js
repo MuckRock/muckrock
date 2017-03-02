@@ -1,4 +1,9 @@
-export function modal(nextSelector) {
+/* modal.js
+**
+** Pops a modal dialog up on screen.
+*/
+
+export default function modal(nextSelector) {
     var overlay = '#modal-overlay';
     $(overlay).addClass('visible');
     $(nextSelector).addClass('visible');

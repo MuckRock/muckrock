@@ -35,9 +35,10 @@ def requests_from_pks(foia_pks):
             foia = FOIARequest.objects.get(pk=foia_pk)
             foias.append(foia)
         except (FOIARequest.DoesNotExist, ValueError):
-            logging.error('FOIA %s does not exist', foia_pk)
+            logger.error('FOIA %s does not exist', foia_pk)
             continue
     return foias
+
 
 class FOIACommunication(models.Model):
     """A single communication of a FOIA request"""
@@ -58,9 +59,20 @@ class FOIACommunication(models.Model):
     delivered = models.CharField(max_length=10, choices=DELIVERED, blank=True, null=True)
     # what status this communication should set the request to - used for machine learning
     status = models.CharField(max_length=10, choices=STATUS, blank=True, null=True)
+
+    # confirmed:
+    #   datetime of when:
+    #  - email: mailgun delivered it
+    #  - fax: faxaway confirms it sent
+    #  - snail: snailmail task is closed (it was placed in the mail)
+    confirmed = models.DateTimeField(blank=True, null=True)
+
+    # This field is deprecated by a combination of the confirmed field (for faxes)
+    # and open models for emails
+    # Should this be removed (would lose some data)
     opened = models.BooleanField(default=False,
-            help_text='If emailed, did we receive an open notification? '
-                      'If faxed, did we recieve a confirmation?')
+            help_text='DEPRECATED: If emailed, did we receive an open notification?'
+                      ' If faxed, did we recieve a confirmation?')
 
     # only used for orphans
     likely_foia = models.ForeignKey(
@@ -123,7 +135,7 @@ class FOIACommunication(models.Model):
             each_file.foia = move_to_request
             each_file.save()
         self.save()
-        logging.info('Communication #%d moved to request #%d', self.id, self.foia.id)
+        logger.info('Communication #%d moved to request #%d', self.id, self.foia.id)
         # if cloning happens, self gets overwritten. so we save it to a variable here
         this_comm = FOIACommunication.objects.get(pk=self.pk)
         moved = [this_comm]
@@ -167,7 +179,7 @@ class FOIACommunication(models.Model):
                 except ValueError:
                     error_msg = ('FOIAFile #%s has no data in its ffile field. '
                                 'It has not been cloned.')
-                    logging.error(error_msg, original_file_id)
+                    logger.error(error_msg, original_file_id)
                     continue
                 new_ffile.name = file_.ffile.name
                 file_.ffile = new_ffile
@@ -175,17 +187,17 @@ class FOIACommunication(models.Model):
                 upload_document_cloud.apply_async(args=[file_.pk, False], countdown=3)
             # for each clone, self gets overwritten. each clone needs to be stored explicitly.
             cloned_comms.append(this_clone)
-            logging.info('Communication #%d cloned to request #%d', original_pk, this_clone.foia.id)
+            logger.info('Communication #%d cloned to request #%d', original_pk, this_clone.foia.id)
         return cloned_comms
 
     def resend(self, email_address=None):
         """Resend the communication"""
         foia = self.foia
         if not foia:
-            logging.error('Tried resending an orphaned communication.')
+            logger.warn('Tried resending an orphaned communication.')
             raise ValueError('This communication has no FOIA to submit.', 'no_foia')
         if not foia.agency or not foia.agency.status == 'approved':
-            logging.error('Tried resending a communication with an unapproved agency')
+            logger.warn('Tried resending a communication with an unapproved agency')
             raise ValueError('This communication has no approved agency.', 'no_agency')
         snail = False
         self.date = datetime.datetime.now()
@@ -199,7 +211,7 @@ class FOIACommunication(models.Model):
         else:
             snail = True
         foia.submit(snail=snail)
-        logging.info('Communication #%d resent.', self.id)
+        logger.info('Communication #%d resent.', self.id)
 
     def set_raw_email(self, msg):
         """Set the raw email for this communication"""
@@ -259,7 +271,6 @@ class FOIACommunication(models.Model):
             if test:
                 modify()
 
-
     class Meta:
         # pylint: disable=too-few-public-methods
         ordering = ['date']
@@ -278,6 +289,9 @@ class RawEmail(models.Model):
 
     class Meta:
         app_label = 'foia'
+        permissions = (
+            ('view_rawemail', 'Can view the raw email for communications'),
+            )
 
 
 class FOIANote(models.Model):
@@ -300,4 +314,55 @@ class FOIANote(models.Model):
         # pylint: disable=too-few-public-methods
         ordering = ['foia', 'datetime']
         verbose_name = 'FOIA Note'
+        app_label = 'foia'
+
+
+class CommunicationError(models.Model):
+    """An error has occured delivering this communication"""
+    communication = models.ForeignKey(
+            FOIACommunication,
+            related_name='errors',
+            )
+    date = models.DateTimeField()
+
+    recipient = models.CharField(max_length=255)
+    code = models.CharField(max_length=10)
+    error = models.TextField(blank=True)
+    event = models.CharField(max_length=10)
+    reason = models.CharField(max_length=255)
+
+    def __unicode__(self):
+        return u'CommunicationError: %s - %s' % (self.communication.pk, self.date)
+
+    class Meta:
+        ordering = ['date']
+        app_label = 'foia'
+
+
+class CommunicationOpen(models.Model):
+    """A communication has been opened"""
+    communication = models.ForeignKey(
+            FOIACommunication,
+            related_name='opens',
+            )
+    date = models.DateTimeField()
+
+    recipient = models.EmailField()
+    city = models.CharField(max_length=50)
+    region = models.CharField(max_length=10)
+    country = models.CharField(max_length=10)
+
+    client_type = models.CharField(max_length=15)
+    client_name = models.CharField(max_length=15)
+    client_os = models.CharField(max_length=10, verbose_name='Client OS')
+
+    device_type = models.CharField(max_length=10)
+    user_agent = models.CharField(max_length=255)
+    ip_address = models.CharField(max_length=15, verbose_name='IP Address')
+
+    def __unicode__(self):
+        return u'CommunicationOpen: %s - %s' % (self.communication.pk, self.date)
+
+    class Meta:
+        ordering = ['date']
         app_label = 'foia'

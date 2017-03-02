@@ -1,0 +1,21 @@
+{% extends 'foiamachine/base/base.html' %}
+
+{% block main %}
+<main>
+    {% block header %}{% endblock %}
+    {% block form %}
+    {% if form.is_multipart %}
+    <form method="post" class="form" enctype="multipart/form-data">
+    {% else %}
+    <form method="post" class="form">
+    {% endif %}
+        {% csrf_token %}
+        {% include 'lib/pattern/form.html' %}
+        {% block submit %}
+        <button type="submit" class="button">Submit</button>
+        {% endblock %}
+    </form>
+    {% endblock %}
+    {% block footer %}{% endblock %}
+</main>
+{% endblock %}

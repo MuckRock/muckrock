@@ -3,18 +3,16 @@ Models for the Q&A application
 """
 
 from django.contrib.auth.models import User
-from django.core.mail import send_mass_mail
 from django.core.urlresolvers import reverse
 from django.db import models
-from django.template.loader import render_to_string
 
-import actstream
-from sets import Set
+from actstream.models import followers
 from taggit.managers import TaggableManager
 
+from muckrock.accounts.models import Profile
 from muckrock.foia.models import FOIARequest
 from muckrock.tags.models import TaggedItemBase
-
+from muckrock.utils import new_action, notify
 
 class Question(models.Model):
     """A question to which the community can respond"""
@@ -25,9 +23,11 @@ class Question(models.Model):
     foia = models.ForeignKey(FOIARequest, blank=True, null=True)
     question = models.TextField()
     date = models.DateTimeField()
+    # We store the date of the most recent answer on the question
+    # to increase performance when displaying questions in a list
+    # and using the most recent response as a sortable field.
     answer_date = models.DateTimeField(blank=True, null=True)
     tags = TaggableManager(through=TaggedItemBase, blank=True)
-    answer_authors = Set()
 
     def __unicode__(self):
         return self.title
@@ -37,25 +37,23 @@ class Question(models.Model):
         is_new = True if self.pk is None else False
         super(Question, self).save(*args, **kwargs)
         if is_new:
-            actstream.action.send(self.user, verb='asked', action_object=self)
+            action = new_action(self.user, 'asked', target=self)
+            # Notify users who subscribe to new question notifications
+            new_question_subscribers = Profile.objects.filter(new_question_notifications=True)
+            users_to_notify = [profile.user for profile in new_question_subscribers]
+            notify(users_to_notify, action)
 
-    @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
-        return ('question-detail', [], {'slug': self.slug, 'pk': self.pk})
+        return reverse(
+                'question-detail',
+                kwargs={'slug': self.slug, 'pk': self.pk})
 
-    def notify_update(self):
-        """Email users who want to be notified of updates to this question"""
-        send_data = []
-        for user in actstream.models.followers(self):
-            link = user.profile.wrap_url(reverse(
-                'question-follow',
-                kwargs={'slug': self.slug, 'idx': self.pk}
-            ))
-            subject = '[MuckRock] New answer to the question: %s' % self
-            msg = render_to_string('text/qanda/follow.txt', {'question': self, 'link': link})
-            send_data.append((subject, msg, 'info@muckrock.com', [user.email]))
-        send_mass_mail(send_data, fail_silently=False)
+    def answer_authors(self):
+        """Returns a list of users who have answered the question."""
+        authors = self.answers.order_by('user').values('user').distinct()
+        author_ids = [author['user'] for author in authors]
+        return User.objects.filter(id__in=author_ids)
 
     class Meta:
         # pylint: disable=too-few-public-methods
@@ -73,18 +71,19 @@ class Answer(models.Model):
     reindex_related = ('question',)
 
     def __unicode__(self):
-        return "%s's answer to %s" % (self.user.username, self.question.title)
+        return "Answer to %s" % self.question.title
 
     def save(self, *args, **kwargs):
         """Update the questions answer date when you save the answer"""
         is_new = True if self.pk is None else False
         super(Answer, self).save(*args, **kwargs)
-        question = self.question
-        question.answer_date = self.date
-        question.answer_authors.update([self.user])
-        question.save()
+        self.question.answer_date = self.date
+        self.question.save()
         if is_new:
-            actstream.action.send(self.user, verb='answered', action_object=question)
+            action = new_action(self.user, 'answered', action_object=self, target=self.question)
+            # Notify the question's owner and its followers about the new answer
+            notify(self.question.user, action)
+            notify(followers(self.question), action)
 
     class Meta:
         # pylint: disable=too-few-public-methods

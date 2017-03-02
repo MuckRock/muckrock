@@ -26,10 +26,17 @@
   3. Pull the database, `fab populate-db`
   4. Pull files from S3, `fab sync-aws`
 
-You should have a fully populated MuckRock site running locally now.
-The code checked out from GitHub is synced between the virtual machine and your host machine, so you may edit the code using your favorite text editor locally while running the code from within the virtual machine. To run the server again, just follow step 4.
+5. Build the search index
+  1. Install watson with `fab manage:installwatson`
+  2. Build the search index with `fab manage:buildwatson`
+  3. After this, the index should stay updated. If a new model is registered with watson, then build the index (step 2). This command should be run on any staging or production servers when pushing code that updates the registration.
 
-## Run
+You should have a fully populated MuckRock site running locally now.
+The code checked out from GitHub is synced between the virtual machine and your host machine, so you may edit the code using your favorite text editor locally while running the code from within the virtual machine.
+
+## Develop
+
+### Run
 
 1. Run `npm run watch &` to start a background Webpack instance
 1. Run `fab mail &` to start a background email server
@@ -37,15 +44,27 @@ The code checked out from GitHub is synced between the virtual machine and your 
 3. Run `fab runserver` to start a server instance
 4. Navigate your web browser (from the host machine) to `localhost:8000`
 
-## Test and lint
+### Add dependencies
+
+To add a dependency, list it in one of the two `.in` files inside the `pip` folder.
+The `dev-requirements.in` file is used for local libraries, like testing suites.
+The `requirements.in` file is used for production libraries—stuff that should run on Heroku.
+
+When entering a dependency, make sure to append a comment explaining its purpose.
+This is hugely helpful when it comes to navigating dependency hell.
+
+After entering your dependency in the `.in` file, run `fab pip-compile` to canonize your change.
+
+### Test and lint
 
 * Test your code in one of two ways:
     * Run `fab test` to run all the tests.
     * Run `fab test:muckrock.<app>` to test a particular application.
     * Run `fab test:muckrock,1` to reuse the database between tests, which saves a ton of time.
-* Lint your code by running `fab pylint`.
+* Lint your Python by running `fab pylint`.
+* Lint your Javascript by running `npm run lint`.
 
-## Push and deploy
+## Deploy
 
 The `master` branch represents our product code. `master` should only ever be updated by merges from the `dev` branch, which tracks it. New features should be branched from `dev`, then merged back into `dev` once they are tested and linted. Any feature branch pushed to GitHub will be evaluated by Codeship. If the `staging` branch is pushed, the [staging server][staging] will be updated. If the `master` branch is pushed, the [production server][production] will be updated.
 

@@ -8,23 +8,30 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Count
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template import RequestContext
-from django.views.generic.detail import DetailView
+from django.views.generic import DetailView, TemplateView
 
-import actstream
+from actstream.models import following
 from datetime import datetime, timedelta
 import json
 import logging
 
+from muckrock.accounts.models import Notification
 from muckrock.agency.forms import AgencyForm
+from muckrock.agency.models import Agency
 from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.foia.codes import CODES
+from muckrock.foia.filters import (
+    FOIARequestFilterSet,
+    MyFOIARequestFilterSet,
+    MyFOIAMultiRequestFilterSet,
+    ProcessingFOIARequestFilterSet,
+)
 from muckrock.foia.forms import (
-    RequestFilterForm,
     FOIAEmbargoForm,
     FOIANoteForm,
     FOIAEstimatedCompletionDateForm,
@@ -45,11 +52,18 @@ from muckrock.foia.views.comms import (
         resend_comm,
         change_comm_status,
         )
+from muckrock.jurisdiction.models import Appeal
+from muckrock.jurisdiction.forms import AppealForm
+from muckrock.message.email import TemplateEmail
+from muckrock.news.models import Article
 from muckrock.project.forms import ProjectManagerForm
+from muckrock.project.models import Project
 from muckrock.qanda.models import Question
+from muckrock.qanda.forms import QuestionForm
 from muckrock.tags.models import Tag
-from muckrock.task.models import Task, FlaggedTask, StatusChangeTask
-from muckrock.views import class_view_decorator, MRFilterableListView
+from muckrock.task.models import Task, FlaggedTask, StatusChangeTask, ResponseTask
+from muckrock.utils import new_action
+from muckrock.views import class_view_decorator, MRFilterListView, MRSearchFilterListView
 
 # pylint: disable=too-many-ancestors
 
@@ -57,98 +71,145 @@ logger = logging.getLogger(__name__)
 STATUS_NODRAFT = [st for st in STATUS if st != ('started', 'Draft')]
 
 
-class RequestList(MRFilterableListView):
-    """Base list view for other list views to inherit from"""
-    model = FOIARequest
-    title = 'Requests'
-    template_name = 'lists/request_list.html'
-    default_sort = 'title'
-
-    def get_filters(self):
-        """Adds request-specific filter fields"""
-        base_filters = super(RequestList, self).get_filters()
-        new_filters = [{'field': 'status', 'lookup': 'exact'}]
-        return base_filters + new_filters
+class RequestExploreView(TemplateView):
+    """Provides a top-level page for exploring interesting requests."""
+    template_name = 'foia/explore.html'
 
     def get_context_data(self, **kwargs):
-        """Changes filter_form to use RequestFilterForm instead of the default"""
-        context = super(RequestList, self).get_context_data(**kwargs)
-        filter_data = self.get_filter_data()
-        context['filter_form'] = RequestFilterForm(initial=filter_data['filter_initials'])
+        """Adds interesting data to the context for rendering."""
+        context = super(RequestExploreView, self).get_context_data(**kwargs)
+        user = self.request.user
+        visible_requests = FOIARequest.objects.get_viewable(user)
+        context['top_agencies'] = (
+            Agency.objects
+            .get_approved()
+            .annotate(foia_count=Count('foiarequest'))
+            .order_by('-foia_count')
+        )[:9]
+        context['featured_requests'] = (
+            visible_requests
+            .filter(featured=True)
+            .order_by('featured')
+            .select_related_view()
+        )
+        context['recent_news'] = (
+            Article.objects
+            .get_published()
+            .annotate(foia_count=Count('foias'))
+            .exclude(foia_count__lt=2)
+            .exclude(foia_count__gt=9)
+            .prefetch_related(
+                'authors',
+                'foias',
+                'foias__user',
+                'foias__user__profile',
+                'foias__agency',
+                'foias__agency__jurisdiction',
+                'foias__jurisdiction__parent__parent')
+            .order_by('-pub_date')
+        )[:3]
+        context['featured_projects'] = (
+            Project.objects
+            .get_visible(user)
+            .filter(featured=True)
+            .prefetch_related(
+                'requests',
+                'requests__user',
+                'requests__user__profile',
+                'requests__agency',
+                'requests__agency__jurisdiction',
+                'requests__jurisdiction__parent__parent')
+        )
+        context['recently_completed'] = (
+            visible_requests
+            .get_done()
+            .order_by('-date_done', 'pk')
+            .select_related_view()
+            .get_public_file_count(limit=5))
+        context['recently_rejected'] = (
+            visible_requests
+            .filter(status__in=['rejected', 'no_docs'])
+            .order_by('-date_updated', 'pk')
+            .select_related_view()
+            .get_public_file_count(limit=5))
         return context
+
+class RequestList(MRSearchFilterListView):
+    """Base list view for other list views to inherit from"""
+    model = FOIARequest
+    filter_class = FOIARequestFilterSet
+    title = 'All Requests'
+    template_name = 'foia/list.html'
+    default_sort = 'date_updated'
+    default_order = 'desc'
 
     def get_queryset(self):
         """Limits requests to those visible by current user"""
         objects = super(RequestList, self).get_queryset()
-        objects = objects.select_related('jurisdiction')
-        objects = objects.only(
-                'title', 'slug', 'status', 'date_submitted', 'date_due',
-                'date_updated', 'date_processing', 'jurisdiction__slug')
+        objects = objects.select_related_view()
         return objects.get_viewable(self.request.user)
 
 
 @class_view_decorator(login_required)
 class MyRequestList(RequestList):
     """View requests owned by current user"""
-    template_name = 'lists/request_my_list.html'
-
-    def post(self, request):
-        """Handle updating read status"""
-        try:
-            post = request.POST
-            foia_pks = post.getlist('foia')
-            if post.get('submit') == 'Mark as Read':
-                FOIARequest.objects.filter(pk__in=foia_pks).update(updated=False)
-            elif post.get('submit') == 'Mark as Unread':
-                FOIARequest.objects.filter(pk__in=foia_pks).update(updated=True)
-            elif post.get('submit') == 'Mark All as Read':
-                FOIARequest.objects.filter(user=self.request.user, updated=True)\
-                                   .update(updated=False)
-        except FOIARequest.DoesNotExist:
-            pass
-        return redirect('foia-mylist')
-
-    def get_filters(self):
-        """Removes the 'users' filter, because its _my_ requests"""
-        filters = super(MyRequestList, self).get_filters()
-        for filter_dict in filters:
-            if 'user' in filter_dict.values():
-                filters.pop(filters.index(filter_dict))
-        return filters
+    filter_class = MyFOIARequestFilterSet
+    title = 'Your Requests'
+    template_name = 'foia/my_list.html'
 
     def get_queryset(self):
-        """Gets multirequests as well, limits to just those by the current user"""
-        single_req = (FOIARequest.objects
-                .filter(user=self.request.user)
-                .select_related('jurisdiction')
-                .prefetch_related('communications')
-                )
-        multi_req = FOIAMultiRequest.objects.filter(user=self.request.user)
-        single_req = self.sort_list(self.filter_list(single_req))
-        return list(single_req) + list(multi_req)
+        """Limit to just requests owned by the current user."""
+        queryset = super(MyRequestList, self).get_queryset()
+        return queryset.filter(user=self.request.user)
+
+
+@class_view_decorator(login_required)
+class MyMultiRequestList(MRFilterListView):
+    """View requests owned by current user"""
+    model = FOIAMultiRequest
+    filter_class = MyFOIAMultiRequestFilterSet
+    title = 'Multirequests'
+    template_name = 'foia/multirequest_list.html'
+
+    def dispatch(self, *args, **kwargs):
+        """Basic users cannot access this view"""
+        if self.request.user.is_authenticated and not self.request.user.profile.is_advanced():
+            err_msg = (
+                'Multirequests are a pro feature. '
+                '<a href="%(settings_url)s">Upgrade today!</a>' % {
+                    'settings_url': reverse('accounts')
+                }
+            )
+            messages.error(self.request, err_msg)
+            return redirect('foia-mylist')
+        return super(MyMultiRequestList, self).dispatch(*args, **kwargs)
+
+    def get_queryset(self):
+        """Limit to just requests owned by the current user."""
+        queryset = super(MyMultiRequestList, self).get_queryset()
+        return queryset.filter(user=self.request.user)
 
 
 @class_view_decorator(login_required)
 class FollowingRequestList(RequestList):
     """List of all FOIA requests the user is following"""
+    title = 'Requests You Follow'
+
     def get_queryset(self):
         """Limits FOIAs to those followed by the current user"""
-        objects = actstream.models.following(self.request.user, FOIARequest)
-        # actstream returns a list of objects, so we have to turn it into a queryset
-        pk_list = [_object.pk for _object in objects if _object]
-        objects = FOIARequest.objects.filter(pk__in=pk_list)
-        objects = objects.select_related('jurisdiction')
-        # now we filter and sort the list like in the parent class
-        objects = self.filter_list(objects)
-        objects = self.sort_list(objects)
-        # finally, we can only show requests visible to that user
-        return objects.get_viewable(self.request.user)
+        queryset = super(FollowingRequestList, self).get_queryset()
+        followed = [f.pk for f in following(self.request.user, FOIARequest)
+                if f is not None]
+        return queryset.filter(pk__in=followed)
 
 
 class ProcessingRequestList(RequestList):
     """List all of the currently processing FOIA requests."""
-    template_name = 'lists/request_processing_list.html'
+    title = 'Processing Requests'
+    filter_class = ProcessingFOIARequestFilterSet
+    template_name = 'foia/processing_list.html'
     default_sort = 'date_processing'
+    default_order = 'asc'
 
     def dispatch(self, *args, **kwargs):
         """Only staff can see the list of processing requests."""
@@ -156,24 +217,10 @@ class ProcessingRequestList(RequestList):
             raise Http404()
         return super(ProcessingRequestList, self).dispatch(*args, **kwargs)
 
-    def filter_list(self, objects):
-        """Gets all processing requests"""
-        objects = super(ProcessingRequestList, self).filter_list(objects)
-        return objects.filter(status='submitted')
-
-    def get_filters(self):
-        """Removes the 'status' filter, because its only processing requests"""
-        filters = super(ProcessingRequestList, self).get_filters()
-        for filter_dict in filters:
-            if 'status' in filter_dict.values():
-                filters.pop(filters.index(filter_dict))
-        return filters
-
     def get_queryset(self):
         """Apply select and prefetch related"""
         objects = super(ProcessingRequestList, self).get_queryset()
-        return (objects
-                .prefetch_related('communications'))
+        return objects.prefetch_related('communications').filter(status='submitted')
 
 
 # pylint: disable=no-self-use
@@ -233,15 +280,10 @@ class Detail(DetailView):
                 Prefetch('communications__rawemail', RawEmail.objects.defer('raw_email')),
                 ),
         )
-        user = self.request.user
         valid_access_key = self.request.GET.get('key') == foia.access_key
-        has_perm = self.request.user.has_perm('foia.view_foiarequest', foia)
+        has_perm = foia.has_perm(self.request.user, 'view')
         if not has_perm and not valid_access_key:
             raise Http404()
-        if foia.created_by(user):
-            if foia.updated:
-                foia.updated = False
-                foia.save(comment='remove updated flag since owner viewed')
         self._obj = foia
         return foia
 
@@ -250,8 +292,8 @@ class Detail(DetailView):
         context = super(Detail, self).get_context_data(**kwargs)
         foia = context['foia']
         user = self.request.user
-        user_can_edit = self.request.user.has_perm('foia.change_foiarequest', foia)
-        user_can_embargo = self.request.user.has_perm('foia.embargo_foiarequest', foia)
+        user_can_edit = foia.has_perm(self.request.user, 'change')
+        user_can_embargo = foia.has_perm(self.request.user, 'embargo')
         is_past_due = foia.date_due < datetime.now().date() if foia.date_due else False
         include_draft = user.is_staff or foia.status == 'started'
         context['all_tags'] = Tag.objects.all()
@@ -270,6 +312,7 @@ class Detail(DetailView):
         })
         context['note_form'] = FOIANoteForm()
         context['access_form'] = FOIAAccessForm()
+        context['question_form'] = QuestionForm(user=user, initial={'foia': foia})
         context['crowdfund_form'] = CrowdfundForm(initial={
             'name': u'Crowdfund Request: %s' % unicode(foia),
             'description': 'Help cover the request fees needed to free these docs!',
@@ -294,9 +337,20 @@ class Detail(DetailView):
         context['sidebar_admin_url'] = reverse('admin:foia_foiarequest_change', args=(foia.pk,))
         context['is_thankable'] = self.request.user.has_perm(
                 'foia.thank_foiarequest', foia)
+        context['files'] = foia.files.all()[:50]
         if foia.sidebar_html:
             messages.info(self.request, foia.sidebar_html)
         return context
+
+    def get(self, request, *args, **kwargs):
+        """Mark any unread notifications for this object as read."""
+        user = request.user
+        if user.is_authenticated():
+            foia = self.get_object()
+            notifications = Notification.objects.for_user(user).for_object(foia).get_unread()
+            for notification in notifications:
+                notification.mark_read()
+        return super(Detail, self).get(request, *args, **kwargs)
 
     def post(self, request):
         """Handle form submissions"""
@@ -310,6 +364,7 @@ class Detail(DetailView):
             'question': self._question,
             'add_note': self._add_note,
             'flag': self._flag,
+            'contact_user': self._contact_user,
             'appeal': self._appeal,
             'date_estimate': self._update_estimate,
             'status_comm': change_comm_status,
@@ -331,14 +386,14 @@ class Detail(DetailView):
     def _tags(self, request, foia):
         """Handle updating tags"""
         # pylint: disable=no-self-use
-        if request.user.has_perm('foia.change_foiarequest', foia):
+        if foia.has_perm(request.user, 'change'):
             foia.update_tags(request.POST.get('tags'))
         return redirect(foia)
 
     def _projects(self, request, foia):
         """Handle updating projects"""
         form = ProjectManagerForm(request.POST)
-        has_perm = request.user.has_perm('foia.change_foiarequest', foia)
+        has_perm = foia.has_perm(request.user, 'change')
         if has_perm and form.is_valid():
             projects = form.cleaned_data['projects']
             foia.projects = projects
@@ -348,7 +403,7 @@ class Detail(DetailView):
         """Handle updating status"""
         status = request.POST.get('status')
         old_status = foia.get_status_display()
-        has_perm = request.user.has_perm('foia.change_foiarequest', foia)
+        has_perm = foia.has_perm(request.user, 'change')
         user_editable = has_perm and status in [s for s, _ in STATUS_NODRAFT]
         staff_editable = request.user.is_staff and status in [s for s, _ in STATUS]
         if foia.status not in ['started', 'submitted'] and (user_editable or staff_editable):
@@ -359,12 +414,18 @@ class Detail(DetailView):
                 old_status=old_status,
                 foia=foia,
             )
+            response_tasks = ResponseTask.objects.filter(
+                    resolved=False,
+                    communication__foia=foia,
+                    )
+            for task in response_tasks:
+                task.resolve(request.user)
         return redirect(foia)
 
     def _question(self, request, foia):
         """Handle asking a question"""
         text = request.POST.get('text')
-        has_perm = request.user.has_perm('foia.change_foiarequest', foia)
+        has_perm = foia.has_perm(request.user, 'change')
         if has_perm and text:
             title = 'Question about request: %s' % foia.title
             question = Question.objects.create(
@@ -376,14 +437,13 @@ class Detail(DetailView):
                 date=datetime.now()
             )
             messages.success(request, 'Your question has been posted.')
-            question.notify_new()
             return redirect(question)
         return redirect(foia)
 
     def _add_note(self, request, foia):
         """Adds a note to the request"""
         note_form = FOIANoteForm(request.POST)
-        has_perm = request.user.has_perm('foia.change_foiarequest', foia)
+        has_perm = foia.has_perm(request.user, 'change')
         if has_perm and note_form.is_valid():
             foia_note = note_form.save(commit=False)
             foia_note.foia = foia
@@ -397,57 +457,71 @@ class Detail(DetailView):
     def _flag(self, request, foia):
         """Allow a user to notify us of a problem with the request"""
         text = request.POST.get('text')
-        has_perm = request.user.has_perm('foia.flag_foiarequest', foia)
+        has_perm = foia.has_perm(request.user, 'flag')
         if has_perm and text:
             FlaggedTask.objects.create(
                 user=request.user,
                 text=text,
                 foia=foia)
             messages.success(request, 'Problem succesfully reported')
-            actstream.action.send(request.user, verb='flagged', action_object=foia)
+            new_action(request.user, 'flagged', target=foia)
+        return redirect(foia)
+
+    def _contact_user(self, request, foia):
+        """Allow an admin to message the foia's owner"""
+        text = request.POST.get('text')
+        if request.user.is_staff and text:
+            context = {
+                    'text': text,
+                    'foia_url': foia.user.profile.wrap_url(foia.get_absolute_url()),
+                    'foia_title': foia.title,
+                    }
+            email = TemplateEmail(
+                user=foia.user,
+                extra_context=context,
+                text_template='message/notification/contact_user.txt',
+                html_template='message/notification/contact_user.html',
+                subject='Message from MuckRock',
+                )
+            email.send(fail_silently=False)
+            messages.success(request, 'Email sent to %s' % foia.user.email)
         return redirect(foia)
 
     def _follow_up(self, request, foia):
         """Handle submitting follow ups"""
         success_msg = 'Your follow up has been sent.'
-        has_perm = request.user.has_perm('foia.followup_foiarequest', foia)
+        has_perm = foia.has_perm(request.user, 'followup')
         comm_sent = self._new_comm(request, foia, has_perm, success_msg)
         if comm_sent:
-            actstream.action.send(
-                request.user,
-                verb='followed up on',
-                action_object=foia,
-                target=foia.agency
-            )
+            new_action(request.user, 'followed up on', target=foia)
         return redirect(foia)
 
     def _thank(self, request, foia):
         """Handle submitting a thank you follow up"""
         success_msg = 'Your thank you has been sent.'
-        has_perm = request.user.has_perm('foia.thank_foiarequest', foia)
+        has_perm = foia.has_perm(request.user, 'thank')
         comm_sent = self._new_comm(
                 request, foia, has_perm, success_msg, thanks=True)
         if comm_sent:
-            actstream.action.send(
-                request.user,
-                verb='thanked',
-                action_object=foia.agency
-            )
+            new_action(request.user, verb='thanked', target=foia.agency)
         return redirect(foia)
 
     def _appeal(self, request, foia):
-        """Handle submitting an appeal"""
-        success_msg = 'Appeal successfully sent.'
-        has_perm = request.user.has_perm('foia.appeal_foiarequest', foia)
-        comm_sent = self._new_comm(
-                request, foia, has_perm, success_msg, appeal=True)
-        if comm_sent:
-            actstream.action.send(
-                request.user,
-                verb='appealed',
-                action_object=foia,
-                target=foia.agency
-            )
+        """Handle submitting an appeal, then create an Appeal from the returned communication."""
+        form = AppealForm(request.POST)
+        has_perm = foia.has_perm(request.user, 'appeal')
+        if not has_perm:
+            messages.error(request, 'You do not have permission to submit an appeal.')
+            return redirect(foia)
+        if not form.is_valid():
+            messages.error(request, 'You did not submit an appeal.')
+            return redirect(foia)
+        communication = foia.appeal(form.cleaned_data['text'])
+        base_language = form.cleaned_data['base_language']
+        appeal = Appeal.objects.create(communication=communication)
+        appeal.base_language.set(base_language)
+        new_action(request.user, 'appealed', target=foia)
+        messages.success(request, 'Your appeal has been sent.')
         return redirect(foia)
 
     def _new_comm(self, request, foia, test, success_msg, appeal=False, thanks=False):
@@ -464,7 +538,7 @@ class Detail(DetailView):
     def _update_estimate(self, request, foia):
         """Change the estimated completion date"""
         form = FOIAEstimatedCompletionDateForm(request.POST, instance=foia)
-        if request.user.has_perm('foia.change_foiarequest', foia):
+        if foia.has_perm(request.user, 'change'):
             if form.is_valid():
                 form.save()
                 messages.success(request, 'Successfully changed the estimated completion date.')
@@ -477,7 +551,7 @@ class Detail(DetailView):
     def _update_new_agency(self, request, foia):
         """Update the new agency"""
         form = AgencyForm(request.POST, instance=foia.agency)
-        if request.user.has_perm('foia.change_foiarequest', foia):
+        if foia.has_perm(request.user, 'change'):
             if form.is_valid():
                 form.save()
                 messages.success(request, 'Agency info saved. Thanks for your help!')
@@ -489,7 +563,7 @@ class Detail(DetailView):
 
     def _generate_key(self, request, foia):
         """Generate and return an access key, with support for AJAX."""
-        if not request.user.has_perm('foia.change_foiarequest', foia):
+        if not foia.has_perm(request.user, 'change'):
             if request.is_ajax():
                 return PermissionDenied
             else:
@@ -505,7 +579,7 @@ class Detail(DetailView):
     def _grant_access(self, request, foia):
         """Grant editor access to the specified users."""
         form = FOIAAccessForm(request.POST)
-        has_perm = request.user.has_perm('foia.change_foiarequest', foia)
+        has_perm = foia.has_perm(request.user, 'change')
         if not has_perm or not form.is_valid():
             return redirect(foia)
         access = form.cleaned_data['access']
@@ -527,7 +601,7 @@ class Detail(DetailView):
         """Revoke access from a user."""
         user_pk = request.POST.get('user')
         user = User.objects.get(pk=user_pk)
-        has_perm = request.user.has_perm('foia.change_foiarequest', foia)
+        has_perm = foia.has_perm(request.user, 'change')
         if has_perm and user:
             if foia.has_editor(user):
                 foia.remove_editor(user)
@@ -540,7 +614,7 @@ class Detail(DetailView):
         """Demote user from editor access to viewer access"""
         user_pk = request.POST.get('user')
         user = User.objects.get(pk=user_pk)
-        has_perm = request.user.has_perm('foia.change_foiarequest', foia)
+        has_perm = foia.has_perm(request.user, 'change')
         if has_perm and user:
             foia.demote_editor(user)
             messages.success(request, '%s can now only view this request.' % user.first_name)
@@ -550,11 +624,12 @@ class Detail(DetailView):
         """Promote user from viewer access to editor access"""
         user_pk = request.POST.get('user')
         user = User.objects.get(pk=user_pk)
-        has_perm = request.user.has_perm('foia.change_foiarequest', foia)
+        has_perm = foia.has_perm(request.user, 'change')
         if has_perm and user:
             foia.promote_viewer(user)
             messages.success(request, '%s can now edit this request.' % user.first_name)
         return redirect(foia)
+
 
 def redirect_old(request, jurisdiction, slug, idx, action):
     """Redirect old urls to new urls"""
@@ -573,6 +648,7 @@ def redirect_old(request, jurisdiction, slug, idx, action):
         action = 'admin_fix'
 
     return redirect('/foi/%(jurisdiction)s-%(jidx)s/%(slug)s-%(idx)s/%(action)s/' % locals())
+
 
 def acronyms(request):
     """A page with all the acronyms explained"""

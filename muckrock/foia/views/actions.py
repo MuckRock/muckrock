@@ -27,6 +27,7 @@ from muckrock.foia.forms import \
 from muckrock.foia.models import FOIARequest, FOIAFile, END_STATUS
 from muckrock.foia.views.comms import save_foia_comm
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.utils import new_action
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +44,7 @@ def _get_foia(jurisdiction, jidx, slug, idx):
 def delete(request, jurisdiction, jidx, slug, idx):
     """Delete a non-submitted FOIA Request"""
     foia = _get_foia(jurisdiction, jidx, slug, idx)
-    if not request.user.has_perm('foia.delete_foiarequest', foia):
+    if not foia.has_perm(request.user, 'delete'):
         messages.error(request, 'You may only delete your own drafts.')
         return redirect(foia)
 
@@ -74,7 +75,7 @@ def embargo(request, jurisdiction, jidx, slug, idx):
         if form.is_valid():
             permanent = form.cleaned_data['permanent_embargo']
             expiration = form.cleaned_data['date_embargo']
-            if request.user.has_perm('foia.embargo_perm_foiarequest', foia):
+            if foia.has_perm(request.user, 'embargo_perm'):
                 foia.permanent_embargo = permanent
             if expiration and foia.status in END_STATUS:
                 foia.date_embargo = expiration
@@ -83,16 +84,11 @@ def embargo(request, jurisdiction, jidx, slug, idx):
 
     def create_embargo(request, foia):
         """Apply an embargo to the FOIA"""
-        if request.user.has_perm('foia.embargo_foiarequest', foia):
+        if foia.has_perm(request.user, 'embargo'):
             foia.embargo = True
             foia.save(comment='added embargo')
             logger.info('%s embargoed %s', request.user, foia)
-            # unsubscribe all followers of the request
-            # https://github.com/MuckRock/muckrock/issues/720
-            followers = actstream.models.followers(foia)
-            for follower in followers:
-                actstream.actions.unfollow(follower, foia)
-            actstream.action.send(request.user, verb='embargoed', action_object=foia)
+            new_action(request.user, 'embargoed', target=foia)
             fine_tune_embargo(request, foia)
         else:
             logger.error('%s was forbidden from embargoing %s', request.user, foia)
@@ -101,7 +97,7 @@ def embargo(request, jurisdiction, jidx, slug, idx):
 
     def update_embargo(request, foia):
         """Update an embargo to the FOIA"""
-        if request.user.has_perm('foia.embargo_foiarequest', foia):
+        if foia.has_perm(request.user, 'embargo'):
             fine_tune_embargo(request, foia)
         else:
             logger.error('%s was forbidden from updating the embargo on %s', request.user, foia)
@@ -113,11 +109,11 @@ def embargo(request, jurisdiction, jidx, slug, idx):
         foia.embargo = False
         foia.save(comment='removed embargo')
         logger.info('%s unembargoed %s', request.user, foia)
-        actstream.action.send(request.user, verb='unembargoed', action_object=foia)
+        new_action(request.user, 'unembargoed', target=foia)
         return
 
     foia = _get_foia(jurisdiction, jidx, slug, idx)
-    has_perm = request.user.has_perm('foia.change_foiarequest', foia)
+    has_perm = foia.has_perm(request.user, 'change')
     if request.method == 'POST' and has_perm:
         embargo_action = request.POST.get('embargo')
         if embargo_action == 'create':
@@ -181,7 +177,7 @@ def toggle_autofollowups(request, jurisdiction, jidx, slug, idx):
     """Toggle autofollowups"""
     foia = _get_foia(jurisdiction, jidx, slug, idx)
 
-    if request.user.has_perm('foia.change_foiarequest', foia):
+    if foia.has_perm(request.user, 'change'):
         foia.disable_autofollowups = not foia.disable_autofollowups
         foia.save(comment='toggled autofollowups')
         action = 'disabled' if foia.disable_autofollowups else 'enabled'
@@ -215,12 +211,16 @@ def admin_fix(request, jurisdiction, jidx, slug, idx):
                 from_who,
                 form.cleaned_data['comm'],
                 formset,
-                snail=form.cleaned_data['snail_mail']
+                snail=form.cleaned_data['snail_mail'],
+                subject=form.cleaned_data['subject'],
             )
             messages.success(request, 'Admin Fix submitted')
             return redirect(foia)
     else:
-        form = FOIAAdminFixForm(instance=foia)
+        form = FOIAAdminFixForm(
+                instance=foia,
+                initial={'subject': foia.default_subject()},
+                )
         formset = FOIAFileFormSet(queryset=FOIAFile.objects.none())
     context = {
         'form': form,
@@ -241,7 +241,7 @@ def crowdfund_request(request, idx, **kwargs):
     # pylint: disable=unused-argument
     foia = FOIARequest.objects.get(pk=idx)
     # check for unauthorized access
-    if not request.user.has_perm('foia.crowdfund_foiarequest', foia):
+    if not foia.has_perm(request.user, 'crowdfund'):
         messages.error(request, 'You may not crowdfund this request.')
         return redirect(foia)
     if request.method == 'POST':
@@ -252,12 +252,11 @@ def crowdfund_request(request, idx, **kwargs):
             foia.crowdfund = crowdfund
             foia.save(comment='added a crowdfund')
             messages.success(request, 'Your crowdfund has started, spread the word!')
-            actstream.action.send(
+            new_action(
                 request.user,
-                verb='started',
+                'began crowdfunding',
                 action_object=crowdfund,
-                target=foia
-            )
+                target=foia)
             return redirect(foia)
 
     elif request.method == 'GET':

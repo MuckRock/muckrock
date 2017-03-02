@@ -1,0 +1,35 @@
+$overlay-opacity: 0.9;
+
+.overlay__container {
+    position: relative;
+}
+
+.overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    text-align: center;
+    @include display(flex);
+    @include justify-content(center);
+    @include align-items(center);
+    color: $color-white;
+    background: rgba(0, 0, 0, $overlay-opacity);
+    .icon {
+        height: 1.5rem;
+        width: 1.5rem;
+        vertical-align: middle;
+        @include svg-color($color-white);
+    }
+}
+
+.green.overlay {
+    background: rgb(41, 102, 51);
+    background: rgba(41, 102, 51, $overlay-opacity);
+}
+
+.red.overlay {
+    background: rgb(102, 44, 41);
+    background: rgba(102, 44, 41, $overlay-opacity);
+}

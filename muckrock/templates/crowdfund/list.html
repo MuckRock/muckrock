@@ -1,8 +1,7 @@
-{% extends 'lists/base_list.html' %}
-{% load markdown_deux_tags %}
+{% extends 'base_list.html' %}
+{% load tags %}
 
-{% block list-content %}
-{% include 'lib/pagination.html' %}
+{% block list-objects %}
 <ul class="crowdfund-list">
     {% for crowdfund in object_list %}
     <li class="crowdfund">
@@ -13,12 +12,11 @@
         <div class="right">
             <div>
                 <p>Raised ${{ crowdfund.payment_received }} of ${{ crowdfund.payment_required }}</p>
-                <p>{{ crowdfund.date_due | timeuntil }} remaining</p>
+                {% if crowdfund.date_due %}<p>{{ crowdfund.date_due | timeuntil }} remaining</p>{% endif %}
             </div>
             <p class="view"><a href="{{ crowdfund.get_crowdfund_object.get_absolute_url }}">View this {% if self.foia %}request{% else %}project{% endif %}</a></p>
         </div>
     </li>
     {% endfor %}
 </ul>
-{% include 'lib/pagination.html' %}
 {% endblock %}

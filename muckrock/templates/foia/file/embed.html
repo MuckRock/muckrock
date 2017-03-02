@@ -1,0 +1,103 @@
+{% load compress %}
+{% load render_bundle from webpack_loader %}
+{% load static from staticfiles %}
+{% with file=object %}
+<!doctype html>
+<html>
+    <head>
+        <title>{{file.title}} &bull; MuckRock</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {% compress css %}
+        {% render_bundle 'docViewer' 'css' %}
+        <style type="text/css">
+            /* Typefaces are loaded inside the base template so that they can be referenced
+            by the correct URL. In production, the typefaces should be served from a CDN. */
+            @font-face {
+                font-family: 'Source Sans Pro';
+                src: url("{% static 'fonts/SourceSansPro-Regular.ttf' %}");
+                font-weight: 400;
+                font-style: normal;
+            }
+            @font-face {
+                font-family: 'Source Sans Pro';
+                src: url("{% static 'fonts/SourceSansPro-Semibold.ttf' %}");
+                font-weight: 500;
+                font-style: normal;
+            }
+        </style>
+        {% endcompress %}
+    </head>
+    <body>
+        <header class="mb0">
+            <div class="info">
+                <a class="logo" href="{% url 'index' %}" target="_blank">{% include 'lib/component/icon/logo.svg' %}</a>
+                <div>
+                    <p class="h3 mb0"><a href="{{file.foia.get_absolute_url}}" target="_blank">{{file.title}}</a></p>
+                    <p class="small">{% if file.pages %}{{file.pages}} page{{file.pages|pluralize}} &bull;{% endif %} {{file.date|date:"F d, Y"}}</p>
+                </div>
+            </div>
+            <div class="header__section">
+                <div class="file-actions button-group">
+                    {% if file.is_doccloud and file.doc_id and file.is_public %}
+                    <span class="toggle-embed button action">
+                        {% include 'lib/component/icon/embed.svg' %}
+                        <span class="label">Embed</span>
+                    </span>
+                    {% endif %}
+                    {% if file.ffile %}
+                    <a href="{{file.ffile.url}}" target="_blank" class="button action">
+                        {% include 'lib/component/icon/download.svg' %}
+                        <span class="label">Download</span>
+                    </a>
+                    {% endif %}
+                </div>
+                {% if file.is_doccloud and file.doc_id %}
+                <div class="file-embed">
+                    <div>
+                        <h1>Embed</h1>
+                        <p>Copy and paste the HTML into your own website.</p>
+                    </div>
+                    <textarea rows="1" readonly><iframe src="https://{{domain}}{% url 'file-embed' pk=file.pk %}" width="100%" height="600px"></iframe></textarea>
+                    <p class="bold close-embed">&times; Close</p>
+                </div>
+                {% endif %}
+            </div>
+        </header>
+        <div class="viewer" id="viewer" data-docid="{{file.doc_id}}"></div>
+        <script src="https://assets.documentcloud.org/viewer/loader.js"></script>
+        {% compress js %}
+        {% render_bundle 'docViewer' 'js' %}
+        <script type="text/javascript">
+            function getQueryVariable(variable) {
+                /*
+                getQueryVariable: return the value from the specified URL variable
+                Written by Chris Coyier for CSS-Tricks
+                https://css-tricks.com/snippets/javascript/get-url-variables/
+                */
+                var query = window.location.search.substring(1);
+                var vars = query.split("&");
+                for (var i = 0; i < vars.length; i++) {
+                    var pair = vars[i].split("=");
+                    if (pair[0] == variable) {
+                        return pair[1];
+                    }
+                }
+                return false;
+            }
+            function loadDocumentViewer(docId) {
+                /* Using the document id, load the DocumentCloud viewer.
+                If a page number was provided in the URL, start the document from that page. */
+                var url = "https://www.documentcloud.org/documents/" + docId + ".js";
+                var options = {width: 600, height: 600, sidebar: false, container: "#viewer"};
+                var page = getQueryVariable('page');
+                if (page) {
+                    options['page'] = page;
+                }
+                DV.load(url, options);
+            }
+            loadDocumentViewer($('#viewer').data('docid'));
+        </script>
+        {% endcompress %}
+    </body>
+</html>
+{% endwith %}

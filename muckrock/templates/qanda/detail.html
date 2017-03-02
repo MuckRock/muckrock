@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load activity_tags %}
+{% load tags %}
+
+{% block title %}{{ object.title }}{% endblock title %}
+{% block type %}question{% endblock type %}
+
+{% block content %}
+{% with object as question %}
+<div class="question detail grid__row">
+    <div class="grid__column quarter">
+        <h1>{{question.title}}</h1>
+        <p>Asked by <a href="{{question.user.get_absolute_url}}">{{object.user.get_full_name}}</a> on <a href="{{question.get_absolute_url}}">{{question.date|date:"F j, Y"}}</a>.</p>
+        {% if answers %}
+        <p>{{answers|length}} answer{{answers|length|pluralize}} from {% for user in question.answer_authors %}{% if not forloop.first and forloop.revcounter > 1 %},{% endif %} {% if forloop.last and forloop.counter0 > 0 %}and {% endif %}<a href="{% url "acct-profile" user.username %}">{{user.get_full_name}}</a>{% endfor %}.</p>
+        {% endif %}
+        {% social title=question.title url=question.get_absolute_url %}
+        {% tag_manager question %}
+        {% if foia_viewable %}
+            <dfn>Related request</dfn>
+            {% include 'lib/foia.html' with foia=question.foia %}
+        {% endif %}
+    </div>
+    <div class="grid__column three-quarters">
+        <div class="toolbar">
+            {% if request.user != question.user %}
+            <a class="blue button" href="{% url 'answer-create' slug=question.slug idx=question.pk %}">Answer</a>
+            {% if request.user|is_following:question %}
+            <a href="{% url 'question-follow' slug=object.slug idx=object.pk %}" class="red button">Unfollow</a>
+            {% else %}
+            <a href="{% url 'question-follow' slug=object.slug idx=object.pk %}" class="button">Follow</a>
+            {% endif %}
+            {% else %}
+            <a class="blue button" href="{% url 'answer-create' slug=question.slug idx=question.pk %}">Reply</a>
+            {% endif %}
+        </div>
+        <div class="question__question">
+            {% include 'qanda/question.html' %}
+        </div>
+        <div class="question__answers">
+        {% for answer in answers %}
+            {% include 'qanda/answer.html' %}
+        {% endfor %}
+        </div>
+        <form class="question__answer__form" method="post" action="{% url 'answer-create' slug=question.slug idx=question.pk %}">
+            {% csrf_token %}
+            {% include 'lib/pattern/form.html' with form=answer_form %}
+            {% if request.user == question.user %}
+            <button class="blue button" type="submit">Submit Reply</button>
+            {% else %}
+            <button class="blue button" type="submit">Submit Answer</button>
+            {% endif %}
+        </form>
+    </div>
+</div>
+{% endwith %}
+{% endblock content %}

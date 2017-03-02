@@ -16,6 +16,8 @@ INSTALLED_APPS += ('django_nose',)
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
+SITE_ID = 1
+
 # minimal middleware for speed
 # can I disable more?
 MIDDLEWARE_CLASSES = (
@@ -30,5 +32,8 @@ MIDDLEWARE_CLASSES = (
 )
 
 BROKER_BACKEND = 'memory'
+CELERY_ALWAYS_EAGER = True
 
 DEFAULT_FILE_STORAGE = 'inmemorystorage.InMemoryStorage'
+
+LOGGING = {}

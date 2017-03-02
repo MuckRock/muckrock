@@ -6,9 +6,11 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.text import slugify
 
+from muckrock.crowdfund.models import Crowdfund
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
 from muckrock.task.models import ProjectReviewTask
+from muckrock.utils import get_image_storage
 
 import taggit
 
@@ -18,6 +20,10 @@ class ProjectQuerySet(models.QuerySet):
     def get_public(self):
         """Only return nonprivate projects"""
         return self.filter(private=False, approved=True)
+
+    def get_pending(self):
+        """Only return projects pending approval"""
+        return self.filter(private=False, approved=False)
 
     def get_for_contributor(self, user):
         """Only return projects which the user is a contributor on"""
@@ -37,6 +43,15 @@ class ProjectQuerySet(models.QuerySet):
             ).distinct()
         return projects
 
+    def optimize(self):
+        """Annotate, select, and prefetch data."""
+        return (self.annotate(request_count=models.Count('requests', distinct=True))
+                    .annotate(article_count=models.Count('articles', distinct=True))
+                    .prefetch_related(models.Prefetch('crowdfunds',
+                        queryset=Crowdfund.objects.order_by('-date_due')
+                        .annotate(contributors_count=models.Count('payments'))))
+        )
+
 
 class Project(models.Model):
     """Projects are a mixture of general and specific information on a broad subject."""
@@ -51,7 +66,12 @@ class Project(models.Model):
         help_text='The slug is automatically generated based on the title.')
     summary = models.TextField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
-    image = models.ImageField(upload_to='project_images/%Y/%m/%d', blank=True, null=True)
+    image = models.ImageField(
+            upload_to='project_images/%Y/%m/%d',
+            blank=True,
+            null=True,
+            storage=get_image_storage(),
+            )
     private = models.BooleanField(
         default=True,
         help_text='If a project is private, it is only visible to its contributors.')

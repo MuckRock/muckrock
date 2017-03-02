@@ -4,7 +4,7 @@
 {% block title %}MuckRock &bull; Settings{% endblock title %}
 
 {% block content %}
-<article class="account settings">
+<article class="account settings detail">
     <header>
         <h1>Settings</h1>
         <dl>
@@ -12,6 +12,7 @@
             <dd><a href="#profile">Profile</a></dd>
             <dd><a href="#email">Email</a></dd>
             <dd><a href="#billing">Billing</a></dd>
+            <dd><a href="#receipts">Receipts</a></dd>
             <dt>Password</dt>
             <dd><a href="{% url 'acct-change-pw' %}">Change Password</a></dd>
             <dd><a href="{% url 'acct-reset-pw' %}">Reset Password</a></dd>
@@ -24,17 +25,17 @@
             <input type="hidden" name="action" value="profile" />
             <div class="fields">
                 <div class="full-name">
-                    {% include 'component/field.html' with field=profile_form.first_name %}
-                    {% include 'component/field.html' with field=profile_form.last_name %}
+                    {% include 'lib/pattern/field.html' with field=profile_form.first_name %}
+                    {% include 'lib/pattern/field.html' with field=profile_form.last_name %}
                 </div>
                 <div class="other-info">
-                    {% include 'component/field.html' with field=profile_form.twitter %}
-                    {% include 'component/field.html' with field=profile_form.location %}
+                    {% include 'lib/pattern/field.html' with field=profile_form.twitter %}
+                    {% include 'lib/pattern/field.html' with field=profile_form.location %}
                 </div>
-                {% include 'component/imagefield.html' with field=profile_form.avatar image=request.user.profile.avatar %}
+                {% include 'lib/pattern/imagefield.html' with field=profile_form.avatar image=request.user.profile.avatar %}
             </div>
             <footer>
-                <button type="submit" class="primary">Update profile</button>
+                <button type="submit" class="primary button">Update profile</button>
             </footer>
         </form>
         <form method="post" class="email form" id="email">
@@ -43,13 +44,13 @@
             <h2>Email</h2>
             <div class="fields">
             {% for field in email_form.visible_fields %}
-                {% include 'component/field.html' %}
+                {% include 'lib/pattern/field.html' %}
             {% endfor %}
             </div>
             <footer>
-                <button type="submit" class="primary">Update email</button>
+                <button type="submit" class="primary button">Update email</button>
                 {% if request.user.profile.email_confirmed %}
-                <span>Verified</span>
+                <span class="green badge">Verified</span>
                 {% else %}
                 <a href="{% url 'acct-verify-email' %}" id="verify_email">Verify your email</a>
                 {% endif %}
@@ -75,7 +76,11 @@
                             <dfn>Current plan</dfn>
                             <p>{{current_plan}}</p>
                         </td>
+                        {% if user.profile.acct_type == 'basic' and not user.profile.organization %}
+                        <td><a href="{% url 'accounts' %}" class="blue button">Go Pro!</a></td>
+                        {% else %}
                         <td><a href="{% url 'accounts' %}" class="button">Change Plan</a></td>
+                        {% endif %}
                     </tr>
                     {% if credit_card and request.user.profile.has_subscription %}
                     <tr>
@@ -85,12 +90,25 @@
                             <p>Expires {{credit_card.exp_month}}/{{credit_card.exp_year}}</p>
                         </td>
                         <td>
-                            <button type="submit">Update Credit Card</button>
+                            <button class="button" type="submit">Update Credit Card</button>
                         </td>
                     <tr>
                     {% endif %}
                 </tbody>
             </table>
+        </form>
+        <form method="post" class="receipt form" id="receipts">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="receipt" />
+            <h2>Receipts</h2>
+            <div class="fields">
+            {% for field in receipt_form.visible_fields %}
+                {% include 'lib/pattern/field.html' %}
+            {% endfor %}
+            </div>
+            <footer>
+                <button type="submit" class="primary button">Update receipt emails</button>
+            </footer>
         </form>
     </main>
 </article>

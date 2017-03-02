@@ -1,0 +1,176 @@
+.banner-wrapper {
+    background-size: cover;
+    background-position: right center;
+}
+
+.foia.banner {
+    @include align-items(center);
+    @include justify-content(center);
+    background: rgba($color-blue-dark, 0.8);
+    color: $color-white;
+    padding-top: 3em;
+    @media(min-width: 48em) {
+        min-height: 23em;
+    }
+    @include media($small-bp) {
+        padding-top: 1.5em;
+    }
+    h1 {
+        font-size: $size-7;
+        text-align: center;
+        @include media($small-bp) {
+            font-size: $size-6;
+        }
+    }
+    .banner-container {
+        max-width: 45rem;
+        margin: 0 auto $vr;
+        padding: 0 $vr;
+    }
+    .button {
+        display: block;
+        margin-bottom: $vr;
+    }
+    .call-to-action {
+        font-weight: $bold;
+        @include media($small-bp) {
+            font-size: $size-2;
+        }
+        a {
+            color: $color-white;
+            border-bottom: 1px dotted;
+        }
+        a:hover {
+            text-decoration: none;
+            border-bottom: 1px solid;
+        }
+    }
+    .stats
+    {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        @include justify-content(space-around);
+        list-style: none;
+        padding-left: 0;
+    }
+
+    .stat
+    {
+        @include flex(1 1 8em);
+        width: 7em;
+        margin: 0 0 $vr 0;
+        text-align: center;
+        .value
+        {
+            font-weight: $bold;
+            font-size: $size-5;
+            margin-bottom: $vr/2;
+        }
+        .key
+        {
+            line-height: 1em;
+        }
+    }
+
+    .about {
+        max-width: 23em;
+        margin: 3em auto;
+        text-align: center;
+        .button {
+            display: block;
+            @include media($small-bp)
+            {
+                display: block;
+                max-width: 20em;
+                margin: 0 auto $vr;
+            }
+        }
+        @include media($small-bp) {
+            margin: 1.5em auto;
+        }
+    }
+
+    .completed-requests {
+        @include display(flex);
+        @include justify-content(flex-start);
+        overflow-x: scroll;
+        -webkit-overflow-scrolling: touch;
+        padding: $vr $vr 0;
+        border-top: 1px solid rgba($color-white, .35);
+        background: rgba($color-white, .1);
+        & > header {
+            color: $color-white;
+            min-width: 10rem;
+            width: 10rem;
+            margin: 0 $vr $vr 0;
+            a {
+                font-weight: $bold;
+                color: $color-white;
+                border-bottom: 1px dotted;
+            }
+            a:hover {
+                text-decoration: none;
+                border-bottom: 1px solid;
+            }
+        }
+        .foia__single {
+            min-width: 18em;
+            width: 18em;
+            display: inline-block;
+            margin-right: $vr;
+            &:last-of-type {
+                margin-right: 0;
+            }
+        }
+        /* This spacer is a bit of a hack, due to the way we're overflowing this container. */
+        .spacer {
+            padding-right: 1px;
+        }
+    }
+}
+
+/*
+If the browser support multiplying backgrounds, use that instead of the banner background.
+@supports(background-blend-mode: multiply){
+    .banner-wrapper {
+        background-color: $color-blue-dark;
+        background-blend-mode: multiply;
+    }
+    .foia.banner {
+        background: none;
+    }
+}
+*/
+
+.newsletter-widget {
+    margin-bottom: $vr;
+}
+
+.homepage {
+    .articles {
+        padding-left: $vr/2;
+        @include media($medium-bp) {
+            padding-left: $vr;
+        }
+    }
+    .small.article {
+        font-size: 1rem;
+        .article__overview__title {
+            font-size: large;
+        }
+    }
+    .requests {
+        @include flex(1 1 200px);
+        margin: 0 $vr $vr;
+    }
+    .projects {
+        padding: 0 $vr/2;
+        @include media($medium-bp) {
+            padding: 0 $vr;
+        }
+    }
+    .projects li {
+        margin-bottom: $vr;
+    }
+}
+

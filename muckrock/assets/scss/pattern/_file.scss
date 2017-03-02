@@ -1,0 +1,47 @@
+.file {
+    @include display(flex);
+    width: 100%;
+    padding: $vr/2;
+    background: $color-white-pure;
+    border: 1px solid $color-grey;
+    .file-image {
+        margin-bottom: 0;
+        max-width: 3em;
+        &.thumbnail img {
+            border: 1px solid $color-grey;
+        }
+    }
+    .file-info {
+        width: 100%;
+        margin-left: $vr;
+        .title {
+            margin-bottom: $vr/2;
+        }
+    }
+    .file-actions {
+        list-style-type: none;
+        margin-bottom: 0;
+        padding-left: 0;
+        li {
+            display: inline-block;
+            margin-right: $vr;
+        }
+    }
+    .file-embed {
+        display: none;
+        width: 100%;
+        margin-top: $vr/2;
+        &.visible {
+            display: block;
+        }
+        textarea {
+            display: block;
+            font-family: $monospace;
+            font-size: $size-2;
+            margin-bottom: 0;
+            resize: none;
+            white-space: nowrap;
+            overflow-x: scroll;
+        }
+    }
+}

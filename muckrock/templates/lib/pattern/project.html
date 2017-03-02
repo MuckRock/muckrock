@@ -1,0 +1,53 @@
+{% load thumbnail %}
+
+<div class="project component grid__row">
+    <header class="project__header grid__column third" {% if project.image %}style="background-image: url('{% thumbnail project.image 1200x600 crop %}');"{% endif %}>
+        <a href="{% url 'project-detail' pk=project.pk slug=project.slug %}" class="project__header__wrapper">
+            <div>
+                <h2 class="title">{{project.title}}</h2>
+                {% if project.featured %}
+                <span class="small blue badge">&#9733; Featured</span>
+                {% endif %}
+                {% if project.private %}
+                <span class="small red badge">&empty; Private</span>
+                {% elif not project.approved %}
+                <span class="small badge">Pending Approval</span>
+                {% endif %}
+            </div>
+        </a>
+    </header>
+    <div class="grid__column two-thirds">
+        {% with project.crowdfunds.all.0 as crowdfund %}
+        {% if crowdfund and not crowdfund.expired %}
+            <div class="project__crowdfund nomargin">
+                <div class="progress"><span class="meter" style="width: {{crowdfund.percent_funded}}%"></span></div>
+                <ul class="nostyle inline stats nomargin">
+                    <li><a class="success button" href="{% url 'project-detail' pk=project.pk slug=project.slug %}#crowdfund-{{crowdfund.id}}">Contribute</a></li>
+                    <li class="stat"><span class="value">{{crowdfund.percent_funded}}%</span> funded</li>
+                    <li class="stat"><span class="value">${{crowdfund.payment_received}}</span> raised</li>
+                    <li class="stat"><span class="value">{{crowdfund.contributors_count}}</span> backer{{crowdfund.contributors_count|pluralize}}</li>
+                    {% if crowdfund.date_due %}<li class="stat"><span class="value">{{crowdfund.date_due|timeuntil}}</span> remaining</li>{% endif %}
+                </ul>
+            </div>
+        {% endif %}
+        {% endwith %}
+        <div class="project__overview">
+            {% if project.request_count or project.article_count %}
+            <ul class="nostyle inline">
+            {% if project.request_count %}
+                <li><a href="{% url 'project-detail' pk=project.pk slug=project.slug %}#requests"><span class="blue counter">{{project.request_count}}</span> request{{project.request_count|pluralize}}</a></li>
+            {% endif %}
+            {% if project.article_count %}
+                <li><a href="{% url 'project-detail' pk=project.pk slug=project.slug %}#articles"><span class="blue counter">{{project.article_count}}</span> article{{project.article_count|pluralize}}</a></li>
+            {% endif %}
+            </ul>
+            {% endif %}
+            {% if project.summary %}
+            <summary>
+                {{project.summary}}
+            </summary>
+            <p class="bold"><a href="{% url 'project-detail' pk=project.pk slug=project.slug %}">Learn more</a></p>
+            {% endif %}
+        </div>
+    </div>
+</div>

@@ -2,8 +2,8 @@
 {% load static from staticfiles %}
 {% load crowdfund_tags %}
 {% load tags %}
-{% load markdown_deux_tags %}
 {% load thumbnail %}
+{% load cache %}
 
 {% block title %}
 {{ project.title }}
@@ -20,7 +20,7 @@
 <meta property="og:url" content="{{ project.get_absolute_url }}" />
 <meta property="og:site_name" content="MuckRock" />
 {% if article.image %}
-<meta property="og:image" content="{{ project.image }}" />
+<meta property="og:image" content="{{ project.image.url }}" />
 {% endif %}
 {% endblock open_graph %}
 
@@ -30,7 +30,7 @@
 <meta name="twitter:title" content="{{ project.title }}" />
 <meta name="twitter:description" content="{{ project.summary }}" />
 {% if project.image %}
-<meta name="twitter:image:src" content="{{ project.image }}" />
+<meta name="twitter:image:src" content="{{ project.image.url }}" />
 {% endif %}
 {% for contributor in contributors %}
 {% if contributor.profile.twitter %}
@@ -41,11 +41,9 @@
 
 {% block content %}
 <div class="project detail">
-    <header class="project-header">
-        {% if project.image %}
-        <div class="image" style="background-image:url('{% thumbnail project.image 2000x1000 crop=smart %}');"></div>
-        {% endif %}
-    </header>
+    {% if project.image %}
+    <div class="project__image" style="background-image:url('{% thumbnail project.image 2000x1000 crop=smart %}');"></div>
+    {% endif %}
     {% if user_can_edit and project.private and not project.approved %}
     <section class="launch prompt">
         <h3>Launch your project</h3>
@@ -75,32 +73,33 @@
     </section>
     {% endif %}
     <section class="overview">
-        <main>
+        <main class="overview__main">
             <h1 class="title">{{ project.title }}</h1>
             <summary>
-                {{ project.summary|markdown:"trusted" }}
+                {{ project.summary }}
             </summary>
             {% if project.newsletter %}
             {% newsletter list_id=project.newsletter label=newsletter_label cta=newsletter_cta %}
             {% endif %}
-            {% if project.crowdfunds.exists %}
+			{% with project.crowdfunds.all as crowdfunds %}
+            {% if crowdfunds %}
             <section class="project-crowdfunds">
-                {% with project.crowdfunds.all as crowdfunds %}
-                {% if crowdfunds %}
-                    {% for crowdfund in crowdfunds %}
-                        {% crowdfund crowdfund=crowdfund %}
-                    {% endfor %}
-                {% endif %}
-                {% endwith %}
+				{% for crowdfund in crowdfunds %}
+					{% crowdfund crowdfund=crowdfund %}
+				{% endfor %}
             </section>
             {% endif %}
+			{% endwith %}
             {% if project.description %}
             <section class="project-description">
-                {{ project.description|markdown:"trusted" }}
+                {{ project.description|markdown }}
             </section>
             {% endif %}
         </main>
-        <aside>
+        <aside class="overview__aside">
+            {% if project.approved and not project.private %}
+            {% social title=project.title url=project.get_absolute_url %}
+            {% endif %}
             {% if user_can_edit %}
             <div class="project-controls">
                 <a href="{% url 'project-edit' slug=project.slug pk=project.pk %}" class="blue button">
@@ -120,12 +119,12 @@
             {% endif %}
             <div class="badges">
             {% if project.featured %}
-                <span class="blue badge">&#9733; Featured</span>
+                <span class="small blue badge">&#9733; Featured</span>
             {% endif %}
             {% if project.private %}
-                <span class="red badge">&empty; Private</span>
+                <span class="small red badge">&empty; Private</span>
             {% elif not project.private and not project.approved %}
-                <span class="grey badge">Awaiting Review</span>
+                <span class="small grey badge">Awaiting Review</span>
             {% endif %}
             </div>
             {% if visible_requests or articles %}
@@ -140,24 +139,24 @@
             {% endif %}
             {% if contributors %}
             <div class="contributors">
-                <header>
+                <header class="space-between mb0">
                     <dfn>Contributors</dfn>
-                    <a href="{% url 'project-edit' slug=project.slug pk=project.pk %}#contributors" class="edit">Edit</a>
+                    <a href="{% url 'project-edit' slug=project.slug pk=project.pk %}#contributors" class="small action">Edit</a>
                 </header>
                 {% for contributor in contributors %}
-                <div class="contributor">
+                <div class="contributor align-center">
                     <a href="{{ contributor.get_absolute_url }}" title="{{ contributor}}'s profile page">
                         {% if contributor.profile.avatar %}
                         <img class="avatar" src="{% thumbnail contributor.profile.avatar 50x50 %}">
                         {% else %}
-                        <img class="avatar" src="{% static 'icons/logo.png' %}" height="50" width="50">
+                        <img class="avatar" src="{% static 'img/defaultavatar.png' %}" height="50" width="50">
                         {% endif %}
                     </a>
                     <div class="info">
-                        <p class="name"><a href="{{ contributor.get_absolute_url }}" title="{{ contributor}}'s profile page">
+                        <p class="name bold mb0"><a href="{{ contributor.get_absolute_url }}" title="{{ contributor}}'s profile page">
                             {{ contributor.get_full_name }}
                         </a></p>
-                        <p class="links">
+                        <p class="small links space-between">
                             {% if contributor.profile.organization %}
                             <a href="{{ contributor.profile.organization.get_absolute_url }}">
                                 {{ contributor.profile.organization }}
@@ -165,7 +164,7 @@
                             {% endif %}
                             {% if contributor.profile.twitter %}
                             <a href="https://www.twitter.com/{{contributor.profile.twitter}}">
-                                {% include 'lib/icons/twitter.svg' %}
+                                {% include 'lib/component/icon/twitter.svg' %}
                             </a>
                             {% endif %}
                         </p>
@@ -175,23 +174,15 @@
             </div>
             {% endif %}
             {% tag_manager project %}
-            {% if project.approved and not project.private %}
-            {% include 'lib/social.html' with title=project.title %}
-            {% endif %}
         </aside>
     </section>
+	{% cache cache_timeout project_detail_objects project.pk %}
     <section class="objects">
         {% if articles %}
         <section class="articles" id="articles">
             <h2>{{ articles|length }} Article{{ articles|length|pluralize }}</h2>
-            {% for article in project.articles.all %}
-            <a class="article" href="{{article.get_absolute_url}}">
-                <img src="{% thumbnail article.image 100x100 crop %}">
-                <div class="text">
-                    <div class="title">{{article.title}}</div>
-                    <div class="date">{{article.pub_date|date:"m/d/y"}}</div>
-                </div>
-            </a>
+            {% for article in articles %}
+            {% include 'lib/pattern/article.html' with small=True hide_project=True %}
             {% endfor %}
         </section>
         {% endif %}
@@ -204,6 +195,7 @@
         </section>
         {% endif %}
     </section>
+	{% endcache %}
 
     {% if project.maps.exists and user_is_experimental %}
     <section role="tabpanel" class="tab-panel maps" id="requests">

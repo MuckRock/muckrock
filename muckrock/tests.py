@@ -3,19 +3,24 @@ Tests for site level functionality and helper functions for application tests
 """
 
 from django.conf import settings
-from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.test import TestCase, RequestFactory
 
+from actstream.models import Action
 from mock import Mock, patch
 import logging
 import nose.tools
+from nose.tools import ok_
+from nose.tools import eq_
 
+from muckrock.accounts.models import Notification
+from muckrock.factories import UserFactory, AnswerFactory
 from muckrock.fields import EmailsListField
-from muckrock.forms import NewsletterSignupForm
-from muckrock.utils import mock_middleware
-from muckrock.views import NewsletterSignupView
+from muckrock.forms import NewsletterSignupForm, StripeForm
+from muckrock.utils import new_action, notify
+from muckrock.test_utils import http_get_response, http_post_response
+from muckrock.views import NewsletterSignupView, DonationFormView
 
 # pylint: disable=no-self-use
 # pylint: disable=too-many-public-methods
@@ -89,9 +94,20 @@ class TestFunctional(TestCase):
     # tests for base level views
     def test_views(self):
         """Test views"""
+        # we have no question fixtures
+        # should move all fixtures to factories
+
+        AnswerFactory()
 
         get_allowed(self.client, reverse('index'))
         get_allowed(self.client, '/sitemap.xml')
+        get_allowed(self.client, '/sitemap-News.xml')
+        get_allowed(self.client, '/sitemap-Jurisdiction.xml')
+        get_allowed(self.client, '/sitemap-Agency.xml')
+        get_allowed(self.client, '/sitemap-Question.xml')
+        get_allowed(self.client, '/sitemap-FOIA.xml')
+        get_allowed(self.client, '/news-sitemaps/index.xml')
+        get_allowed(self.client, '/news-sitemaps/articles.xml')
         get_allowed(self.client, '/search/')
 
     def test_api_views(self):
@@ -121,6 +137,7 @@ class TestUnit(TestCase):
 
         field.clean('a@example.com,an.email@foo.net', model_instance)
 
+
 class TestNewsletterSignupView(TestCase):
     """By submitting an email, users can subscribe to our MailChimp newsletter list."""
     def setUp(self):
@@ -130,10 +147,7 @@ class TestNewsletterSignupView(TestCase):
 
     def test_get_view(self):
         """Visiting the page should present a signup form."""
-        request = self.factory.get(self.url)
-        request.user = AnonymousUser()
-        request = mock_middleware(request)
-        response = self.view(request)
+        response = http_get_response(self.url, self.view)
         eq_(response.status_code, 200)
 
     @patch('muckrock.views.NewsletterSignupView.subscribe')
@@ -144,10 +158,7 @@ class TestNewsletterSignupView(TestCase):
             'list': settings.MAILCHIMP_LIST_DEFAULT
         })
         ok_(form.is_valid(), 'The form should validate.')
-        request = self.factory.post(self.url, form.data)
-        request.user = AnonymousUser()
-        request = mock_middleware(request)
-        response = self.view(request)
+        response = http_post_response(self.url, self.view, form.data)
         mock_subscribe.assert_called_with(form.data['email'], form.data['list'])
         eq_(response.status_code, 302, 'Should redirect upon successful submission.')
 
@@ -160,10 +171,7 @@ class TestNewsletterSignupView(TestCase):
             'list': 'other'
         })
         ok_(form.is_valid(), 'The form should validate.')
-        request = self.factory.post(self.url, form.data)
-        request.user = AnonymousUser()
-        request = mock_middleware(request)
-        response = self.view(request)
+        response = http_post_response(self.url, self.view, form.data)
         mock_subscribe.assert_any_call(form.data['email'], form.data['list'])
         mock_subscribe.assert_any_call(form.data['email'], settings.MAILCHIMP_LIST_DEFAULT)
         eq_(response.status_code, 302, 'Should redirect upon successful submission.')
@@ -177,3 +185,67 @@ class TestNewsletterSignupView(TestCase):
         _list = settings.MAILCHIMP_LIST_DEFAULT
         response = NewsletterSignupView().subscribe(_email, _list)
         eq_(response.status_code, 200)
+
+
+class TestNewAction(TestCase):
+    """The new action function will create a new action and return it."""
+    def test_basic(self):
+        """An action only needs an actor and a verb."""
+        actor = UserFactory()
+        verb = 'acted'
+        action = new_action(actor, verb)
+        ok_(isinstance(action, Action), 'An Action should be returned.')
+        eq_(action.actor, actor)
+        eq_(action.verb, verb)
+
+
+class TestNotify(TestCase):
+    """The notify function will notify one or many users about an action."""
+    def setUp(self):
+        self.action = new_action(UserFactory(), 'acted')
+
+    def test_single_user(self):
+        """Notify a single user about an action."""
+        user = UserFactory()
+        notifications = notify(user, self.action)
+        ok_(isinstance(notifications, list),
+            'A list should be returned.')
+        ok_(isinstance(notifications[0], Notification),
+            'The list should contain notification objects.')
+
+    def test_many_users(self):
+        """Notify many users about an action."""
+        users = [UserFactory(), UserFactory(), UserFactory()]
+        notifications = notify(users, self.action)
+        eq_(len(notifications), len(users),
+            'There should be a notification for every user in the list.')
+        for user in users:
+            notification_for_user = any(notification.user == user for notification in notifications)
+            ok_(notification_for_user,
+                'Each user in the list should be notified.')
+
+
+@patch('stripe.Charge', Mock())
+class TestDonations(TestCase):
+    """Tests donation functionality"""
+
+    def setUp(self):
+        self.url = reverse('donate')
+        self.view = DonationFormView.as_view()
+        self.form = StripeForm
+
+    @patch('muckrock.message.tasks.send_charge_receipt.delay')
+    def test_donate(self, mock_send):
+        """Donations should have a token, email, and amount.
+        An email receipt should be sent for the donation."""
+        token = 'test'
+        email = 'example@test.com'
+        amount = 500
+        data = {'stripe_token': token, 'stripe_email': email, 'stripe_amount': amount}
+        form = self.form(data)
+        form.is_valid()
+        ok_(form.is_valid(), 'The form should validate. %s' % form.errors)
+        response = http_post_response(self.url, self.view, data)
+        mock_send.assert_called_once()
+        eq_(response.status_code, 302,
+            'A successful donation will return a redirection.')

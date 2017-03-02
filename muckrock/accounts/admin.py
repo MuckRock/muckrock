@@ -12,7 +12,7 @@ from autocomplete_light import shortcuts as autocomplete_light
 from reversion.admin import VersionAdmin
 import stripe
 
-from muckrock.accounts.models import Profile, Statistics
+from muckrock.accounts.models import Profile, Statistics, ReceiptEmail
 from muckrock.jurisdiction.models import Jurisdiction
 
 # These inhereit more than the allowed number of public methods
@@ -37,19 +37,26 @@ class ProfileAdminForm(forms.ModelForm):
         model = Profile
         fields = '__all__'
 
+
 class ProfileInline(admin.StackedInline):
     """Profile admin options"""
     model = Profile
     search_fields = ('user__username', 'user__first_name', 'user__last_name')
-    exclude = ('follows_foia', 'follows_question', 'notifications')
     form = ProfileAdminForm
     extra = 0
     max_num = 1
 
+
+class ReceiptEmailInline(admin.StackedInline):
+    """Receipt emails admin inline"""
+    model = ReceiptEmail
+    extra = 1
+
+
 class MRUserAdmin(UserAdmin):
     """User admin options"""
     list_display = ('username', 'date_joined',)
-    inlines = [ProfileInline]
+    inlines = [ProfileInline, ReceiptEmailInline]
 
     def save_related(self, request, form, formsets, change):
         """Creates/cancels a pro subscription if changing to/from pro acct_type"""
@@ -84,6 +91,7 @@ class MRUserAdmin(UserAdmin):
                 messages.error(request, exception)
         obj.save()
         super(MRUserAdmin, self).save_related(request, form, formsets, change)
+
 
 admin.site.register(Statistics, StatisticsAdmin)
 admin.site.unregister(User)

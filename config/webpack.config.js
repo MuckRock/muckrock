@@ -1,14 +1,19 @@
 var path = require('path')
 var webpack = require('webpack')
+var validate = require('webpack-validator')
 var BundleTracker = require('webpack-bundle-tracker')
 var ExtractText = require('extract-text-webpack-plugin')
 
 // paths are absolute to the root of the project, where we run `npm` commands
 var root = './muckrock/'
 
-module.exports = {
+var config = {
     devtool: 'source-map',
-    entry: path.resolve(root + 'assets/entry'),
+    entry: {
+        main: path.resolve(root + 'assets/entry'),
+        foiamachine: path.resolve(root + 'foiamachine/assets/entry'),
+        docViewer: path.resolve(root + 'assets/js/docViewer'),
+    },
     output: {
         path: path.resolve(root + 'assets/bundles/'),
         filename: '[name].js',
@@ -45,12 +50,16 @@ module.exports = {
             jQuery: "jquery",
             "window.jQuery": "jquery"
         }),
+        new webpack.DefinePlugin({
+            'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
+        })
     ],
     resolve: {
-        moduleDirectories: ['node_modules'],
         extensions: ['', '.js', '.jsx']
     },
     watchOptions: {
-	poll: true,
+	    poll: true,
     },
-}
+};
+
+module.exports = validate(config);

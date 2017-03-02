@@ -1,4 +1,4 @@
-{% extends 'lists/base_list.html' %}
+{% extends 'base_list.html' %}
 {% load tags %}
 {% load mathfilters %}
 {% block title %}MuckRock &bull; Search{% endblock %}
@@ -25,7 +25,7 @@
 {% endblock list-navigation %}
 
 {% block list-content %}
-{% with page.object_list|redact_list:request.user as object_list %}
+{% with page.object_list as object_list %}
 {% with page as page_obj %}
     <section class="list-actions">
         <form method="GET" id="global-search">
@@ -39,7 +39,7 @@
         </form>
     </section>
     {% if object_list %}
-    {% include 'lib/pagination.html' %}
+    {% include 'lib/component/pagination.html' %}
     <table class="list-table tablesaw tablesaw-stack" data-tablesaw-mode="stack">
         <thead class="list-table-head">
             <tr>
@@ -64,7 +64,7 @@
             {% endfor %}
         </tbody>
     </table>
-    {% if object_list|length > per_page|div:2 %}{% include 'lib/pagination.html' %}{% endif %}
+    {% if object_list|length > per_page|div:2 %}{% include 'lib/component/pagination.html' %}{% endif %}
     {% else %}
     <p class="list-empty">No Results</p>
     {% endif %}

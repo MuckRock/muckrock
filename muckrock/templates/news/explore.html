@@ -1,0 +1,74 @@
+{% extends 'base_explore.html' %}
+{% load thumbnail %}
+
+{% block classes %}news{% endblock %}
+
+{% block explore_header_description %}
+<h1>News</h1>
+<p>Original reporting, commentary, and analysis of public records by MuckRock&rsquo;s staff and affiliates, with new articles every weekday.</p>
+{% endblock %}
+
+{% block explore_header_links %}
+<ul class="nostyle">
+    <li><a class="bold" href="{% url 'news-archive' %}">Browse our archive &rarr;</a></li>
+    <li><a class="bold" href="mailto:info@muckrock.com">Send us a tip &rarr;</a></li>
+</ul>
+{% endblock %}
+
+{% block explore_header %}
+{{block.super}}
+<div class="grid__column full">
+    <ul class="tag-list nostyle inline">
+        {% for tag in top_tags %}
+        <li><a class="tag" href="{% url 'news-archive'%}?tags={{tag.id}}">{{tag}}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+<div class="grid__column full">
+    <form method="GET" class="oneline-form" action="{% url 'news-archive' %}">
+        <div class="field">
+            <input type="search" name="q" placeholder="Search articles">
+        	<button class="basic blue button" type="submit">
+        	    {% include 'lib/component/icon/search.svg' %}
+        	    <span class="label">Search</span>
+        	</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block explore_main %}
+<div class="explore__section recent-articles grid__row">
+    {% for article in recent_articles %}
+    {% if forloop.first %}
+    <div class="grid__column two-thirds">
+        {% include 'lib/pattern/article.html' with large=True %}
+    </div>
+    {% else %}
+    <div class="grid__column third">
+        {% include 'lib/pattern/article.html' with small=True %}
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+<div class="explore__section featured-projects">
+    {% for project in featured_projects %}
+    <div class="featured-project grid__row nomargin">
+        <div class="grid__column two-thirds">
+            <div class="featured-project__overview">
+                <p class="h2"><a href="{% url 'news-archive' %}?projects={{project.id}}">{{project.title}}</a></p>
+                <summary class="nomargin">
+                    {{project.summary}}
+                </summary>
+                <p class="bold"><a href="{% url 'news-archive' %}?projects={{project.id}}">See all {{project.article_count}} articles</a></p>
+            </div>
+        </div>
+        {% for article in project.articles.all|slice:":4" %}
+        <div class="grid__column third">
+            {% include 'lib/pattern/article.html' with small=True %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

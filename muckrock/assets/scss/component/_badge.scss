@@ -1,12 +1,11 @@
 .badge {
     display: inline-block;
-    padding: 0 $vertical-rhythm/4;
+    padding: 0 $vr/4;
     border-radius: 4px;
-    background: $color-grey-3;
+    background: $color-grey;
     color: $color-white;
-    font-size: $font-size-2;
-    font-weight: $font-weight-bold;
-    line-height: $font-line-height;
+    font-weight: $bold;
+    white-space: nowrap;
 }
 
 .red.badge, .failure.badge, .inactive.badge {
@@ -23,4 +22,8 @@
 
 .blue-dark.badge, .staff.badge {
     background: $color-blue-dark;
+}
+
+.yellow.badge, .warning.badge {
+    background: $color-yellow;
 }

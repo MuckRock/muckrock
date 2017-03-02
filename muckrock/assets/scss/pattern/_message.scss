@@ -1,0 +1,64 @@
+@mixin message-color($light, $normal, $dark) {
+    background: $light;
+    color: $dark;
+    .symbol {
+        background: $normal;
+        path, rect, circle {
+            fill: $dark;
+        }
+    }
+}
+
+.messages {
+    margin-bottom: 0;
+}
+
+.message {
+    @include display(flex);
+    @include flex-direction(column);
+    @include align-items(stretch);
+    @include message-color($color-grey-7, $color-black, $color-black);
+    .symbol {
+        $svg-size: 2.75em;
+        flex: 0 0 $svg-size;
+        text-align: left;
+        svg {
+            width: $svg-size;
+            height: $svg-size;
+            padding: $vr/2;
+            vertical-align: middle;
+        }
+    }
+    .text {
+        flex: 1 1 auto;
+        padding: $vr/2;
+    }
+    @include media($medium-bp) {
+        @include flex-direction(row);
+        .symbol {
+            text-align: center;
+        }
+        &.small {
+            @include flex-direction(column);
+            .symbol {
+                text-align: left;
+            }
+        }
+    }
+}
+
+.message.info {
+    @include message-color($color-blue-light, $color-blue, $color-blue-dark);
+}
+
+.message.success {
+    @include message-color($color-green-light, $color-green, $color-green-dark);
+}
+
+.message.warning {
+    @include message-color($color-yellow-light, $color-yellow, $color-yellow-dark);
+}
+
+.message.error {
+    @include message-color($color-red-light, $color-red, $color-red-dark);
+}

@@ -1,44 +1,50 @@
 {% load humanize %}
 {% load static from staticfiles %}
-{% load markdown_deux_tags %}
+{% load tags %}
 
-<section class="crowdfund widget" id="crowdfund-{{ crowdfund.pk }}">
-    <header>
-        <h1>{{ crowdfund.name }}</h1>
+<section class="crowdfund__widget" id="crowdfund-{{ crowdfund.pk }}">
+    <header class="crowdfund__widget__header">
+        <h1><a href="{{obj_url}}">{{ crowdfund.name }}</a></h1>
         <div>
-            <a class="action" href="{{ request.path }}#crowdfund-{{ crowdfund.pk }}">Permalink</a>
-            <a class="help" href="https://www.muckrock.com/faq/#crowdfund">?</a>
+            <span class="action" id="show-share">Share</span>
+            <span class="action" id="show-embed">Embed</span>
+            <a class="action" href="/faq/#crowdfund" target="_blank">Help</a>
         </div>
     </header>
-    <section class="description">
-        {{ crowdfund.description|markdown }}
-    </section>
-    <div class="progress"><span class="meter" style="width: {{crowdfund.percent_funded}}%"></span></div>
-    <section class="stats">
-        <div class="contributors">
-            <p class="contributor summary">{{ contributor_summary }}</p>
-        {% if contributors_count > 0 %}
-            <ul class="contributor dropdown">
-            {% for contributor in named_contributors %}
-                <li>{{ contributor.get_full_name }}</li>
-            {% endfor %}
-			{% if anon_contributors_count %}
-				<li>{{ anon_contributors_count }} anonymous backer{{ anon_contributors_count|pluralize }}</li>
-			{% endif %}
-            </ul>
-        {% endif %}
-        </div>
-        <p class="amount-raised">${{ crowdfund.payment_received|intcomma }} raised out of ${{ crowdfund.payment_required|intcomma }}.</p>
-        <p class="time-remaining">
-        {% if not crowdfund.expired %}
-            {{ crowdfund.date_due|timeuntil }} remaining
-        {% else %}
-            This crowdfund has ended.
-        {% endif %}
-        </p>
-    </section>
+    <main>
+        <section class="description">
+            {{ crowdfund.description|markdown }}
+        </section>
+
+        <section class="stats">
+            <div class="progress"><span class="meter" style="width: {{crowdfund.percent_funded}}%"></span></div>
+            <div class="row">
+                <div class="contributors">
+                    <p class="contributor summary">{{ contributor_summary }}</p>
+                {% if contributors_count > 0 %}
+                    <ul class="contributor dropdown">
+                    {% for contributor in named_contributors %}
+                        <li>{{ contributor.get_full_name }}</li>
+                    {% endfor %}
+        			{% if anon_contributors_count %}
+        				<li>{{ anon_contributors_count }} anonymous backer{{ anon_contributors_count|pluralize }}</li>
+        			{% endif %}
+                    </ul>
+                {% endif %}
+                </div>
+                <p class="amount-raised">${{ crowdfund.payment_received|intcomma }} raised out of ${{ crowdfund.payment_required|intcomma }}.</p>
+                <p class="time-remaining">
+                {% if not crowdfund.expired and crowdfund.date_due %}
+                    {{ crowdfund.date_due|timeuntil }} remaining
+                {% elif crowdfund.expired %}
+                    This crowdfund has ended.
+                {% endif %}
+                </p>
+            </div>
+        </section>
+    </main>
     {% if not crowdfund.expired %}
-    <footer>
+    <footer class="crowdfund__widget__footer">
         <form method="POST" action="{{ endpoint }}" class="stripe-checkout crowdfund-form" id="crowdfund-form">
             {% csrf_token %}
             <input type="hidden" name="stripe_token" value="" />
@@ -51,21 +57,61 @@
             <input type="hidden" name="stripe_fee" value="0" />
             {{ payment_form.crowdfund }}
             <section class="anonymity">
+                <label for="id_show">{{ payment_form.show }} <strong>List me as a backer</strong></label>
                 {% if logged_in %}
-                {{ payment_form.show }}
-                <label for="id_show">List me as a backer.</label>
+                <div class="anonymity__account anonymity__account--authenticated">
+                    <p class="small">You are logged in as <a class="action" href="{{request.user.get_absolute_url}}" target="_blank">{{ request.user.get_full_name }}</a>.</p>
+                </div>
                 {% else %}
-                <p>To be listed as a backer,<br>please <a class="action" href="{% url 'acct-login' %}">log in</a> or <a class="action" href="{% url 'accounts' %}">sign up</a>.</p>
-                <input name="show" value="False" hidden>
+                <div class="anonymity__account anonymity__account--unauthenticated">
+                    <p>To be listed, you need a <a href="{% url 'accounts' %}" target="_blank">MuckRock account</a>. <span class="action" id="show-login">Log in</span> or sign up with just your full name:</p>
+                    {{payment_form.full_name}}
+                </div>
                 {% endif %}
             </section>
-            <section class="donate">
+            <section class="crowdfund__donate">
                 <input type="number" class="currency-field" name="stripe_amount" value="2500" />
-                <button type="submit" class="basic green">Donate</button>
+                <button type="submit" class="basic green button">Donate</button>
             </section>
         </form>
     </footer>
     {% endif %}
+    <div class="login overlay">
+        <form method="post" action="{% url 'acct-login' %}?next={{ request.get_full_path }}" class="quick-log-in dialog" id="quick-log-in-form">
+            {% csrf_token %}
+            <header>
+                <h1>{% include 'lib/component/icon/account.svg' %} Log In</h1>
+                <div class="close action">Close</div>
+            </header>
+            {% include 'lib/pattern/form.html' with form=login_form %}
+            <footer>
+                <p><a class="forgot" href="{% url 'acct-reset-pw' %}" target="_blank">Forget your password?</a></p>
+                <button type="submit" class="primary button" onclick="ga('send', 'event', 'Account', 'Login', window.location.pathname)">Log In</button>
+            </footer>
+        </form>
+    </div>
+    <div class="embed overlay">
+        <div class="dialog">
+            <header>
+                <h1>{% include 'lib/component/icon/embed.svg' %} Embed</h1>
+                <div class="close action">Close</div>
+            </header>
+            <textarea rows="1" readonly><iframe src="https://{{domain}}{% url 'crowdfund-embed' pk=crowdfund.pk %}" width="100%" height="450px"></iframe></textarea>
+        </div>
+    </div>
+    <div class="share overlay">
+        <div class="dialog">
+            <header>
+                <h1>Share</h1>
+                <div class="close action">Close</div>
+            </header>
+            {% if crowdfund.foia %}
+            {% social title="Help free these docs" url=obj_url %}
+            {% elif crowdfund.project %}
+            {% social title="Help fund this project" url=obj_url %}
+            {% endif %}
+        </div>
+    </div>
     <div class="pending overlay">
         <!-- Loader animation via https://github.com/ConnorAtherton/loaders.css -->
         <div class="loader">
@@ -80,20 +126,29 @@
     </div>
     <div class="complete overlay">
         <div class="dialog">
-            <h1>Thank you!</h1>
+            <header>
+                <h1>{% include 'lib/component/icon/success.svg' %} Thank you!</h1>
+            </header>
+            <p id="complete-next-steps"></p>
+            <p>Subscribe to MuckRock&rsquo;s newsletter:</p>
+            {% newsletter %}
             <p>Help this crowdfund find more supporters:</p>
             {% if crowdfund.foia %}
-            {% include 'lib/social.html' with title="Help me free these docs" %}
-            {% elif crowdfund.projects.exists %}
-            {% include 'lib/social.html' with title="I just funded this project" %}
+            {% social title="I helped free these docs" url=obj_url %}
+            {% elif crowdfund.project %}
+            {% social title="I just funded this project" url=obj_url %}
             {% endif %}
         </div>
     </div>
     <div class="error overlay">
         <div class="dialog">
-            <h1>An error occurred.</h1>
-            <p>Don't worry, your card has not been charged.</p>
+            <header>
+                <h1>{% include 'lib/component/icon/error.svg' %} Error</h1>
+            </header>
+            <p>An error occurred during payment (don't worry, your card has not been charged).</p>
+            <p class="mono" id="error-details"></p>
             <p>Refresh the page to try again. If the error persists, <a href="mailto:info@muckrock.com?subject=Crowdfund%20Error">contact us</a>.</p>
+
         </div>
     </div>
 </section>

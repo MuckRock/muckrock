@@ -1,0 +1,42 @@
+    ///////////////////////
+   //                   //
+  //      V I E W      //
+ //                   //
+///////////////////////
+
+html, body {
+    // Allows for full-height elements with CSS
+    min-height: 100%;
+}
+
+.container {
+    @include display(flex);
+    @include flex-direction(column);
+    min-height: 100vh;
+    overflow: hidden;
+    margin-bottom: 0;
+    background-color: $color-white;
+}
+
+.content {
+    @include flex(1 1 auto);
+    margin-bottom: 0;
+}
+
+@import 'explore';
+@import 'error';
+@import 'profile';
+@import 'homepage';
+@import 'new-request';
+@import 'donate';
+@import 'draft-request';
+@import 'map';
+@import 'project';
+@import 'accounts';
+@import 'exemptionBrowser';
+@import 'organization';
+@import 'tag-master-detail';
+@import 'notifications';
+@import 'detail/detail';
+@import 'list/list';
+@import 'nav/nav';

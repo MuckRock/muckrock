@@ -7,35 +7,33 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Max, Prefetch, Q
 
-import actstream
 from datetime import datetime
 import email
 import logging
 
-from muckrock.agency.models import Agency, STALE_DURATION
-from muckrock.foia.models import FOIACommunication, FOIAFile, FOIANote, FOIARequest, STATUS
+from muckrock.accounts.models import Notification
+from muckrock.foia.models import (
+    FOIACommunication,
+    FOIAFile,
+    FOIANote,
+    FOIARequest,
+    STATUS,
+)
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import support
 from muckrock.models import ExtractDay, Now
+from muckrock.utils import generate_status_action
 
 # pylint: disable=missing-docstring
 
-def generate_status_action(foia):
-    """Generate activity stream action for agency response"""
-    if not foia.agency:
-        return
-    verbs = {
-        'rejected': 'rejected',
-        'done': 'completed',
-        'partial': 'partially completed',
-        'processed': 'acknowledged',
-        'no_docs': 'has no responsive documents',
-        'fix': 'requires fix',
-        'payment': 'requires payment',
-    }
-    verb = verbs.get(foia.status, 'is processing')
-    actstream.action.send(foia.agency, verb=verb, action_object=foia)
+SNAIL_MAIL_CATEGORIES = [
+    ('a', 'Appeal'),
+    ('n', 'New'),
+    ('u', 'Update'),
+    ('f', 'Followup'),
+    ('p', 'Payment'),
+]
 
 class TaskQuerySet(models.QuerySet):
     """Object manager for all tasks"""
@@ -70,7 +68,9 @@ class TaskQuerySet(models.QuerySet):
                         Prefetch('communication__files',
                             queryset=FOIAFile.objects.select_related('foia__jurisdiction')),
                         Prefetch('communication__foia__communications',
-                            queryset=FOIACommunication.objects.order_by('-date'),
+                            queryset=FOIACommunication.objects
+                                .order_by('-date')
+                                .prefetch_related('files'),
                             to_attr='reverse_communications'),
                         'communication__foia__communications__files',
                         )
@@ -102,6 +102,7 @@ class NewAgencyTaskQuerySet(models.QuerySet):
     """Object manager for new agency tasks"""
     def preload_list(self):
         """Preload relations for list display"""
+        from muckrock.agency.models import Agency
         return (self.select_related('agency__jurisdiction')
                 .prefetch_related(
                     Prefetch('agency__foiarequest_set',
@@ -208,13 +209,7 @@ class OrphanTask(Task):
 class SnailMailTask(Task):
     """A communication that needs to be snail mailed"""
     type = 'SnailMailTask'
-    categories = (
-        ('a', 'Appeal'),
-        ('n', 'New'),
-        ('u', 'Update'),
-        ('f', 'Followup'),
-    )
-    category = models.CharField(max_length=1, choices=categories)
+    category = models.CharField(max_length=1, choices=SNAIL_MAIL_CATEGORIES)
     communication = models.ForeignKey('foia.FOIACommunication')
     user = models.ForeignKey(User, blank=True, null=True)
     amount = models.DecimalField(default=0.00, max_digits=8, decimal_places=2)
@@ -275,6 +270,7 @@ class RejectedEmailTask(Task):
 
     def agencies(self):
         """Get the agencies who use this email address"""
+        from muckrock.agency.models import Agency
         return Agency.objects.filter(Q(email__iexact=self.email) |
                                      Q(other_emails__icontains=self.email))
 
@@ -291,7 +287,7 @@ class RejectedEmailTask(Task):
 class StaleAgencyTask(Task):
     """An agency has gone stale"""
     type = 'StaleAgencyTask'
-    agency = models.ForeignKey(Agency)
+    agency = models.ForeignKey('agency.Agency')
 
     def __unicode__(self):
         return u'Stale Agency Task'
@@ -300,32 +296,33 @@ class StaleAgencyTask(Task):
         return reverse('stale-agency-task', kwargs={'pk': self.pk})
 
     def resolve(self, user=None):
-        """Mark the agency as stale when resolving"""
-        self.agency.stale = False
-        self.agency.save()
+        """Unmark the agency as stale when resolving"""
+        self.agency.unmark_stale()
         super(StaleAgencyTask, self).resolve(user)
 
     def stale_requests(self):
         """Returns a list of stale requests associated with the task's agency"""
         if hasattr(self.agency, 'stale_requests_'):
             return self.agency.stale_requests_
-        requests = (FOIARequest.objects
-                .get_open()
-                .filter(agency=self.agency)
-                .select_related('jurisdiction')
-                .filter(communications__response=True)
-                .annotate(latest_response=ExtractDay(
-                    Now() - Max('communications__date')))
-                .filter(latest_response__gte=STALE_DURATION)
-                .order_by('-latest_response')
-                )
+        # a request is stale when it is open
+        # and it has autofollowups enabled
+        requests = (FOIARequest.objects.filter(agency=self.agency)
+            .get_open()
+            .filter(disable_autofollowups=False)
+            .annotate(latest_communication=ExtractDay(Now() - Max('communications__date')))
+            .order_by('-latest_communication')
+            .select_related('jurisdiction')
+        )
         return requests
 
     def latest_response(self):
         """Returns the latest response from the agency"""
         foias = self.agency.foiarequest_set.all()
         comms = [c for f in foias for c in f.communications.all() if c.response]
-        return max(comms, key=lambda x: x.date)
+        if len(comms) > 0:
+            return max(comms, key=lambda x: x.date)
+        else:
+            return None
 
     def update_email(self, new_email, foia_list=None):
         """Updates the email on the agency and the provided requests."""
@@ -342,7 +339,7 @@ class FlaggedTask(Task):
     text = models.TextField()
     user = models.ForeignKey(User, blank=True, null=True)
     foia = models.ForeignKey('foia.FOIARequest', blank=True, null=True)
-    agency = models.ForeignKey(Agency, blank=True, null=True)
+    agency = models.ForeignKey('agency.Agency', blank=True, null=True)
     jurisdiction = models.ForeignKey(Jurisdiction, blank=True, null=True)
 
     def __unicode__(self):
@@ -409,7 +406,7 @@ class NewAgencyTask(Task):
     """A new agency has been created and needs approval"""
     type = 'NewAgencyTask'
     user = models.ForeignKey(User, blank=True, null=True)
-    agency = models.ForeignKey(Agency)
+    agency = models.ForeignKey('agency.Agency')
     objects = NewAgencyTaskQuerySet.as_manager()
 
     def __unicode__(self):
@@ -466,64 +463,85 @@ class ResponseTask(Task):
         """Moves the associated communication to a new request"""
         return self.communication.move(foia_pks)
 
-    def set_tracking_id(self, tracking_id):
+    def set_tracking_id(self, tracking_id, comms=None):
         """Sets the tracking ID of the communication's request"""
         if type(tracking_id) is not type(unicode()):
             raise ValueError('Tracking ID should be a unicode string.')
-        comm = self.communication
-        if not comm.foia:
-            raise ValueError('The task communication is an orphan.')
-        foia = comm.foia
-        foia.tracking_id = tracking_id
-        foia.save(comment='response task tracking id')
+        if comms is None:
+            comms = [self.communication]
+        for comm in comms:
+            if not comm.foia:
+                raise ValueError('The task communication is an orphan.')
+            foia = comm.foia
+            foia.tracking_id = tracking_id
+            foia.save(comment='response task tracking id')
 
-    def set_status(self, status, set_foia=True):
+    def set_status(self, status, set_foia=True, comms=None):
         """Sets status of comm and foia, with option for only setting comm stats"""
-        comm = self.communication
         # check that status is valid
         if status not in [status_set[0] for status_set in STATUS]:
             raise ValueError('Invalid status.')
-        # save comm first
-        comm.status = status
-        comm.save()
-        # save foia next, unless just updating comm status
-        if set_foia:
-            foia = comm.foia
-            foia.status = status
-            if status in ['rejected', 'no_docs', 'done', 'abandoned']:
-                foia.date_done = comm.date
-            foia.update()
-            foia.save(comment='response task status')
-            logging.info('Request #%d status changed to "%s"', foia.id, status)
-            generate_status_action(foia)
+        if comms is None:
+            comms = [self.communication]
+        for comm in comms:
+            # save comm first
+            comm.status = status
+            comm.save()
+            # save foia next, unless just updating comm status
+            if set_foia:
+                foia = comm.foia
+                foia.status = status
+                if status in ['rejected', 'no_docs', 'done', 'abandoned']:
+                    foia.date_done = comm.date
+                foia.update()
+                foia.save(comment='response task status')
+                logging.info('Request #%d status changed to "%s"', foia.id, status)
+                action = generate_status_action(foia)
+                foia.notify(action)
+                # Mark generic '<Agency> sent a communication to <FOIARequest> as read.'
+                # https://github.com/MuckRock/muckrock/issues/1003
+                generic_notifications = (Notification.objects.for_object(foia)
+                                        .get_unread().filter(action__verb='sent a communication'))
+                for generic_notification in generic_notifications:
+                    generic_notification.mark_read()
 
-    def set_price(self, price):
+    def set_price(self, price, comms=None):
         """Sets the price of the communication's request"""
         price = float(price)
-        comm = self.communication
-        if not comm.foia:
-            raise ValueError('This tasks\'s communication is an orphan.')
-        foia = comm.foia
-        foia.price = price
-        foia.save(comment='response task price')
+        if comms is None:
+            comms = [self.communication]
+        for comm in comms:
+            if not comm.foia:
+                raise ValueError('This tasks\'s communication is an orphan.')
+            foia = comm.foia
+            foia.price = price
+            foia.save(comment='response task price')
 
-    def set_date_estimate(self, date_estimate):
+    def set_date_estimate(self, date_estimate, comms=None):
         """Sets the estimated completion date of the communication's request."""
-        foia = self.communication.foia
-        foia.date_estimate = date_estimate
-        foia.update()
-        foia.save(comment='response task date estimate')
-        logging.info('Estimated completion date set to %s', date_estimate)
+        if comms is None:
+            comms = [self.communication]
+        for comm in comms:
+            foia = comm.foia
+            foia.date_estimate = date_estimate
+            foia.update()
+            foia.save(comment='response task date estimate')
+            logging.info('Estimated completion date set to %s', date_estimate)
 
-    def proxy_reject(self):
+    def proxy_reject(self, comms=None):
         """Special handling for a proxy reject"""
-        self.communication.status = 'rejected'
-        self.communication.save()
-        self.communication.foia.status = 'rejected'
-        self.communication.foia.proxy_reject()
-        self.communication.foia.update()
-        self.communication.foia.save(comment='response task proxy reject')
-        generate_status_action(self.communication.foia)
+        if comms is None:
+            comms = [self.communication]
+        for comm in comms:
+            comm.status = 'rejected'
+            comm.save()
+            foia = comm.foia
+            foia.status = 'rejected'
+            foia.proxy_reject()
+            foia.update()
+            foia.save(comment='response task proxy reject')
+            action = generate_status_action(foia)
+            foia.notify(action)
 
 
 class FailedFaxTask(Task):
@@ -575,6 +593,20 @@ class MultiRequestTask(Task):
 
     def get_absolute_url(self):
         return reverse('multirequest-task', kwargs={'pk': self.pk})
+
+
+class NewExemptionTask(Task):
+    """Created when a new exemption is submitted for our review."""
+    type = 'NewExemptionTask'
+    foia = models.ForeignKey('foia.FOIARequest')
+    language = models.TextField()
+    user = models.ForeignKey(User)
+
+    def __unicode__(self):
+        return u'New Exemption Task'
+
+    def get_absolute_url(self):
+        return reverse('newexemption-task', kwargs={'pk': self.pk})
 
 
 # Not a task, but used by tasks

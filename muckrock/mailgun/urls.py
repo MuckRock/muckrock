@@ -23,4 +23,9 @@ urlpatterns = patterns(
         views.opened,
         name='mailgun-opened'
     ),
+    url(
+        r'^delivered/$',
+        views.delivered,
+        name='mailgun-delivered'
+    ),
 )

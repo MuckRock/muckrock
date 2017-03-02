@@ -4,6 +4,7 @@ Nodes and tags for rendering crowdfunds into templates
 
 from django import template
 from django.conf import settings
+from django.contrib.auth.forms import AuthenticationForm
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 
@@ -95,15 +96,16 @@ def generate_crowdfund_context(the_crowdfund, the_url_name, the_form, the_contex
             cache_get_or_set(
                 'cf:%s:crowdfund_widget_data' % the_crowdfund.pk,
                 lambda: (
-                    the_crowdfund.named_contributors(),
+                    list(the_crowdfund.named_contributors()),
                     the_crowdfund.contributors_count(),
                     the_crowdfund.anonymous_contributors_count(),
                     ),
-                600))
+                settings.DEFAULT_CACHE_TIMEOUT))
     contrib_sum = contributor_summary(
             named,
             contrib_count,
             anon_count)
+    obj_url = the_crowdfund.get_crowdfund_object().get_absolute_url()
     return {
         'crowdfund': the_crowdfund,
         'named_contributors': named,
@@ -111,11 +113,14 @@ def generate_crowdfund_context(the_crowdfund, the_url_name, the_form, the_contex
         'anon_contributors_count': anon_count,
         'contributor_summary': contrib_sum,
         'endpoint': endpoint,
+        'login_form': AuthenticationForm(),
         'logged_in': logged_in,
         'user_email': user_email,
         'payment_form': payment_form,
         'request': the_request,
-        'stripe_pk': settings.STRIPE_PUB_KEY
+        'stripe_pk': settings.STRIPE_PUB_KEY,
+        'obj_url': obj_url,
+        'domain': the_context['domain'],
     }
 
 @register.inclusion_tag('crowdfund/widget.html', name='crowdfund', takes_context=True)

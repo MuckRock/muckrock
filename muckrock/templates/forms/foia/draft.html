@@ -21,11 +21,17 @@
         {{ form.title }}
     </section>
 
-    <section class="request sent message">
-        <section class="meta">
-            <span class="date right">{% now "m/d/Y" %}</span>
+    <section class="blue communication textbox">
+        <header class="textbox__header communication-header">
+            <p class="from">From: {{foia.user.get_full_name}}</p>
+            <div class="actionables">
+                <time datetime="{% now 'c' %}" class="date">{% now 'm/d/Y' %}</time>
+            </div>
+        </header>
+        <section class="textbox__section communication-metadata">
+            <p class="small subject">Subject: {{ foia.title }}</p>
         </section>
-        <section class="body">
+        <section class="textbox__section communication-body">
             {{ form.request }}
         </section>
     </section>
@@ -33,24 +39,17 @@
     {% if not remaining %}
     <div class="buy-requests panel">
         <p>You have no requests credited to your account. You must purchase requests before you can submit your request.</p>
-        <button type="submit" class="success" form="buy-requests">Buy Requests</button>
+        <button type="submit" class="success button" form="buy-requests">Buy Requests</button>
     </div>
     {% endif %}
 
     <div class="bottom">
         {% has_perm 'foia.embargo_foiarequest' request.user foia as can_embargo %}
         {% if can_embargo %}
-        <section class="embargo">
-            <div class="input">
-                {{ form.embargo }}
-                <label for="id_embargo">Embargo</dfn>
-            </div>
-            <small>{{ form.embargo.help_text }}</small>
-        </section>
+            {% include 'lib/pattern/field.html' with field=form.embargo %}
         {% endif %}
 
-        <section class="buttons">
-
+        <section class="button-group">
             <input type="submit"
                 name="submit"
                 value="Save"
@@ -61,7 +60,6 @@
                class="primary button"
                {% if not remaining %}disabled{% endif %}
             />
-
             <input type="submit"
                    name="submit"
                    value="Delete"

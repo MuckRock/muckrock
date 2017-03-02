@@ -1,0 +1,197 @@
+.form {
+    @include padding;
+    .visible-fields fieldset input {
+        width: 100%;
+    }
+
+    &.admin-fix {
+        .visible-fields {
+            p { margin-bottom: 0; }
+        }
+        .snail.mail input { width: auto; }
+        .formset-forms .visible-fields {
+            margin-bottom: 0;
+        }
+        .formset-container {
+            display: block;
+            margin-bottom: $vr;
+        }
+    }
+
+    &.search {
+        dfn { margin: $vr/2 $vr/4; }
+        .search-filters {
+            margin: 0;
+            li {
+                display: inline-block;
+                padding: 0 $vr/4;
+            }
+            label {
+                padding-left: $vr/6;
+            }
+        }
+    }
+}
+
+.field {
+    transition: opacity .1s linear;
+    &.disabled {
+        color: initial;
+        opacity: .5;
+    }
+    header {
+        margin-bottom: 0;
+        @include display(flex);
+        @include justify-content(space-between);
+    }
+    .error input {
+        border-color: $color-red;
+    }
+    .required {
+        color: $color-grey;
+        font-size: $size-2;
+    }
+    .errorlist {
+        display: inline-block;
+        margin-bottom: 0;
+        padding: 0;
+        list-style: none;
+        color: $color-red;
+        font-size: $size-2;
+    }
+    label {
+        margin-right: $vr/2;
+        font-weight: $bold;
+    }
+    input, select, textarea {
+        display: block;
+        width: 100%;
+    }
+    input[type="checkbox"], input[type="radio"] {
+        width: auto;
+        margin-top: $vr/4;
+        margin-right: $vr/2;
+        float: left;
+    }
+    textarea {
+        display: block;
+        height: 5em;
+        margin-bottom: 0;
+    }
+    .help-text {
+        margin-top: $vr/4;
+        clear: left;
+    }
+    &.image {
+        .preview {
+            display: block;
+            margin-bottom: $vr/2;
+            max-width: 20em;
+        }
+        input {
+            display: inline-block;
+            float: none;
+            width: auto;
+            margin-right: 0;
+        }
+        label[for*="clear_id"] {
+            font-weight: $normal;
+        }
+        input[id*="clear_id"] {
+            margin-left: $vr;
+        }
+    }
+}
+
+.oneline-form .field {
+    @include display(flex);
+    @include flex-wrap(wrap);
+    margin: $vr/2 0;
+    border: 1px solid $color-blue;
+    input {
+        @include flex(3 1 auto);
+        width: auto;
+        border: none;
+        line-height: $lh;
+        border-radius: 0;
+        color: $color-black;
+        appearance: none;
+        -webkit-appearance: none;
+    }
+    .button {
+        @include flex(1 1 auto);
+    }
+    .icon {
+        @include svg-color($color-white);
+        margin-right: $vr/4;
+        vertical-align: middle;
+    }
+}
+
+.CheckboxInput.field {
+    overflow: hidden;
+    header {
+        float: left;
+    }
+}
+
+.hidden-fields {
+    display: none;
+}
+
+.help-text {
+    font-size: $size-2;
+    line-height: $lh;
+    opacity: .75;
+}
+
+textarea, #{$all-text-inputs} {
+    @include input;
+}
+
+textarea {
+    width: 100%;
+    resize: vertical;
+}
+
+fieldset {
+
+    label, .errorlist {
+        @extend dfn;
+    }
+
+    @include media($large-bp) {
+        label.failure {
+            float: left;
+        }
+        .errorlist {
+            float: right;
+        }
+    }
+
+    input + label {
+        float: left;
+        margin-right: $vr;
+    }
+
+    & > fieldset, & > fieldset + fieldset {
+        margin: 0;
+    }
+}
+
+.input-range input, .input-range label {
+  width: 50%;
+  margin-right: 0;
+  float: left;
+  &:first-child {
+    @include border-right-radius(0);
+    border-right-color: $color-grey-6;
+  }
+  &:last-child {
+    @include border-left-radius(0);
+    border-left-color: $color-grey-6;
+  }
+}
+.input-range, .input-range .labels {
+  overflow: hidden;
+}

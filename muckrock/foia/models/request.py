@@ -12,7 +12,7 @@ from django.db.models import Q, Sum, Count
 from django.template.defaultfilters import escape, linebreaks, slugify
 from django.template.loader import render_to_string
 
-import actstream
+from actstream.models import followers
 from datetime import datetime, date, timedelta
 from hashlib import md5
 import logging
@@ -20,8 +20,7 @@ from reversion import revisions as reversion
 from taggit.managers import TaggableManager
 from unidecode import unidecode
 
-from muckrock.agency.models import Agency
-from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.accounts.models import Notification
 from muckrock.tags.models import Tag, TaggedItemBase, parse_tags
 from muckrock import task
 from muckrock import fields
@@ -104,30 +103,34 @@ class FOIARequestQuerySet(models.QuerySet):
     def organization(self, organization):
         """Get requests belonging to an organization's members."""
         return (self.select_related(
+                        'agency',
                         'jurisdiction',
                         'jurisdiction__parent',
-                        'jurisdiction__parent__parent'
-                        )
-                    .filter(user__profile__organization=organization))
+                        'jurisdiction__parent__parent')
+                    .filter(user__profile__organization=organization)
+                    .exclude(status='started')
+                    .order_by('-date_submitted'))
 
     def select_related_view(self):
         """Select related models for viewing"""
         return self.select_related(
-                'agency',
-                'agency__jurisdiction',
-                'jurisdiction',
-                'jurisdiction__parent',
-                'jurisdiction__parent__parent',
-                'user',
-                )
+            'agency',
+            'agency__jurisdiction',
+            'jurisdiction',
+            'jurisdiction__parent',
+            'jurisdiction__parent__parent',
+            'user',
+            'crowdfund',
+        )
 
     def get_public_file_count(self, limit=None):
         """Annotate the public file count"""
         foia_qs = self
         count_qs = (self._clone()
                 .values_list('id')
+                .filter(files__access='public')
                 .annotate(Count('files'))
-                .extra(where=['"foia_foiafile"."access" = \'public\'']))
+                )
         if limit is not None:
             foia_qs = foia_qs[:limit]
             count_qs = count_qs[:limit]
@@ -139,7 +142,7 @@ class FOIARequestQuerySet(models.QuerySet):
         return foias
 
 
-STATUS = (
+STATUS = [
     ('started', 'Draft'),
     ('submitted', 'Processing'),
     ('ack', 'Awaiting Acknowledgement'),
@@ -152,7 +155,7 @@ STATUS = (
     ('done', 'Completed'),
     ('partial', 'Partially Completed'),
     ('abandoned', 'Withdrawn'),
-)
+]
 
 END_STATUS = ['rejected', 'no_docs', 'done', 'partial', 'abandoned']
 
@@ -181,8 +184,8 @@ class FOIARequest(models.Model):
     title = models.CharField(max_length=255, db_index=True)
     slug = models.SlugField(max_length=255)
     status = models.CharField(max_length=10, choices=STATUS, db_index=True)
-    jurisdiction = models.ForeignKey(Jurisdiction)
-    agency = models.ForeignKey(Agency, blank=True, null=True)
+    jurisdiction = models.ForeignKey('jurisdiction.Jurisdiction')
+    agency = models.ForeignKey('agency.Agency', blank=True, null=True)
     date_submitted = models.DateField(blank=True, null=True, db_index=True)
     date_updated = models.DateField(blank=True, null=True, db_index=True)
     date_done = models.DateField(blank=True, null=True, verbose_name='Date response received')
@@ -240,15 +243,16 @@ class FOIARequest(models.Model):
     def __unicode__(self):
         return self.title
 
-    @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
-        return ('foia-detail', [], {
-            'jurisdiction': self.jurisdiction.slug,
-            'jidx': self.jurisdiction.pk,
-            'slug': self.slug,
-            'idx': self.pk
-        })
+        return reverse(
+                'foia-detail',
+                kwargs={
+                    'jurisdiction': self.jurisdiction.slug,
+                    'jidx': self.jurisdiction.pk,
+                    'slug': self.slug,
+                    'idx': self.pk,
+                    })
 
     def save(self, *args, **kwargs):
         """Normalize fields before saving and set the embargo expiration if necessary"""
@@ -281,7 +285,7 @@ class FOIARequest(models.Model):
 
     def is_payable(self):
         """Can this request be payed for by the user?"""
-        has_open_crowdfund = self.has_crowdfund() and not self.crowdfund.closed
+        has_open_crowdfund = self.has_crowdfund() and not self.crowdfund.expired()
         has_payment_status = self.status == 'payment'
         return has_payment_status and not has_open_crowdfund
 
@@ -291,9 +295,13 @@ class FOIARequest(models.Model):
 
     def is_public(self):
         """Is this document viewable to everyone"""
-        return AnonymousUser().has_perm('foia.view_foiarequest', self)
+        return self.has_perm(AnonymousUser(), 'view')
 
     # Request Sharing and Permissions
+
+    def has_perm(self, user, perm):
+        """Short cut for checking a FOIA permission"""
+        return user.has_perm('foia.%s_foiarequest' % perm, self)
 
     ## Creator
 
@@ -443,27 +451,38 @@ class FOIARequest(models.Model):
             days_since = (date.today() - self.date_processing).days
         return days_since
 
-    def _notify(self):
-        """Notify request's creator and followers about the update"""
-        # notify creator
-        self.user.profile.notify(self)
-        # notify followers
-        for user in actstream.models.followers(self):
-            if user.has_perm('foia.view_foiarequest', self):
-                user.profile.notify(self)
-
     def update(self, anchor=None):
         """Various actions whenever the request has been updated"""
         # pylint: disable=unused-argument
         # Do something with anchor
         self.updated = True
         self.save()
-        self._notify()
         self.update_dates()
 
+    def notify(self, action):
+        """
+        Notify the owner of the request.
+        Notify followers if the request is not under embargo.
+        Mark any existing notifications with the same message as read,
+        to avoid notifying users with duplicated information.
+        """
+        identical_notifications = (Notification.objects.for_object(self).get_unread()
+            .filter(action__actor_object_id=action.actor_object_id, action__verb=action.verb))
+        for notification in identical_notifications:
+            notification.mark_read()
+        utils.notify(self.user, action)
+        if self.is_public():
+            utils.notify(followers(self), action)
+
     def submit(self, appeal=False, snail=False, thanks=False):
-        """The request has been submitted.  Notify admin and try to auto submit"""
-        from muckrock.task.models import FlaggedTask
+        """
+        The request has been submitted.
+        Notify admin and try to auto submit.
+        There is functionally no difference between appeals and other submissions
+        besides the receiving agency.
+        The only difference between a thanks andother submissions is that we do
+        not set the request status, unless the request requires a proxy.
+        """
         # can email appeal if the agency has an appeal agency which has an email address
         # and can accept emailed appeals
         can_email_appeal = appeal and self.agency and \
@@ -560,6 +579,22 @@ class FOIARequest(models.Model):
         # Do not self.update() here for now to avoid excessive emails
         self.update_dates()
 
+    def appeal(self, appeal_message):
+        """Send a followup to the agency or its appeal agency."""
+        from muckrock.foia.models.communication import FOIACommunication
+        communication = FOIACommunication.objects.create(
+            foia=self,
+            from_who=self.user.get_full_name(),
+            to_who=self.get_to_who(),
+            date=datetime.now(),
+            communication=appeal_message,
+            response=False,
+            full_html=False,
+            autogenerated=False
+        )
+        self.submit(appeal=True)
+        return communication
+
     def pay(self, user, amount):
         """
         Users can make payments for request fees.
@@ -597,7 +632,7 @@ class FOIARequest(models.Model):
         )
         # We perform some logging and activity generation
         logger.info('%s has paid %0.2f for request %s', user.username, amount, self.title)
-        actstream.action.send(user, verb='paid fees for', action_object=self, target=self.agency)
+        utils.new_action(user, 'paid fees', target=self)
         # We return the communication we generated, in case the caller wants to do anything with it
         return comm
 
@@ -607,16 +642,10 @@ class FOIARequest(models.Model):
         from muckrock.foia.tasks import send_fax
 
         from_addr = 'fax' if self.email.endswith('faxaway.com') else self.get_mail_id()
-        law_name = self.jurisdiction.get_law_name()
-        if self.tracking_id:
-            subject = 'RE: %s Request #%s' % (law_name, self.tracking_id)
-        elif self.communications.count() > 1:
-            subject = 'RE: %s Request: %s' % (law_name, self.title)
-        else:
-            subject = '%s Request: %s' % (law_name, self.title)
 
         # get last comm to set delivered and raw_email
         comm = self.communications.reverse()[0]
+        subject = comm.subject or self.default_subject()
 
         if from_addr == 'fax':
             subject = 'MR#%s-%s - %s' % (self.pk, comm.pk, subject)
@@ -640,7 +669,7 @@ class FOIARequest(models.Model):
             bcc=cc_addrs + ['diagnostics@muckrock.com'],
             headers={
                 'Cc': ','.join(cc_addrs),
-                'X-Mailgun-Variables': '{"comm_id": %s}' % comm.pk
+                'X-Mailgun-Variables': {'comm_id': comm.pk}
             }
         )
         if from_addr != 'fax':
@@ -734,8 +763,8 @@ class FOIARequest(models.Model):
         '''Provides action interfaces for users'''
         is_owner = self.created_by(user)
         can_follow = user.is_authenticated() and not is_owner
-        followers = actstream.models.followers(self)
-        is_following = user in followers
+        is_following = user in followers(self)
+        is_admin = user.is_staff
         kwargs = {
             'jurisdiction': self.jurisdiction.slug,
             'jidx': self.jurisdiction.pk,
@@ -763,12 +792,19 @@ class FOIARequest(models.Model):
                 desc=u'Something broken, buggy, or off?  Let us know and we’ll fix it',
                 class_name='failure modal'
             ),
+            Action(
+                test=is_admin,
+                title='Contact User',
+                action='contact_user',
+                desc=u'Send this request\'s owner an email',
+                class_name='modal'
+            ),
         ]
 
     def contextual_request_actions(self, user, can_edit):
         '''Provides context-sensitive action interfaces for requests'''
         can_follow_up = can_edit and self.status != 'started'
-        can_appeal = user.has_perm('foia.appeal_foiarequest', self)
+        can_appeal = self.has_perm(user, 'appeal')
         kwargs = {
             'jurisdiction': self.jurisdiction.slug,
             'jidx': self.jurisdiction.pk,
@@ -843,6 +879,16 @@ class FOIARequest(models.Model):
             'in your account within a few days.',
             )
 
+    def default_subject(self):
+        """Make a subject line for a communication for this request"""
+        law_name = self.jurisdiction.get_law_name()
+        if self.tracking_id:
+            return 'RE: %s Request #%s' % (law_name, self.tracking_id)
+        elif self.communications.count() > 1:
+            return 'RE: %s Request: %s' % (law_name, self.title)
+        else:
+            return '%s Request: %s' % (law_name, self.title)
+
     class Meta:
         # pylint: disable=too-few-public-methods
         ordering = ['title']
@@ -858,8 +904,4 @@ class FOIARequest(models.Model):
             ('thank_foiarequest', 'Can thank the FOI officer for their help'),
             ('flag_foiarequest', 'Can flag the request for staff attention'),
             ('followup_foiarequest', 'Can send a manual follow up'),
-            ('view_rawemail', 'Can view the raw email for communications'),
-            ('file_multirequest', 'Can submit requests to multiple agencies'),
             )
-
-

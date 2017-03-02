@@ -1,0 +1,67 @@
+{% extends 'foiamachine/base/base_form.html' %}
+
+{% block header %}
+<h1>Create a public records request</h1>
+{% endblock %}
+
+{% block submit %}
+<button type="submit" class="button">Create request</button>
+{% endblock %}
+
+{% block scripts %}
+{{block.super}}
+<script type="text/javascript">
+    /*
+    These functions modify the behavior of the Jurisdiction and Agency autocomplete inputs.
+    When there is no jurisdiction selected, we want to disable the agency input.
+    When there is a jurisdiction selected, we want to enable the agency input and only allow
+    autocomplete results to come from the selected jurisdiction.
+    When the jurisdiction selection is removed, we want to clear and disable the agency input.
+    */
+
+    // Functions for modifying the agency input
+
+    function disableAgencyAutocomplete(disabled) {
+        $('#id_agency-autocomplete').attr('disabled', disabled);
+        $('#id_agency').attr('disabled', disabled);
+        var agencyField = $('#id_agency').closest('.field');
+        if (disabled) {
+            agencyField.addClass('disabled');
+        } else {
+            agencyField.removeClass('disabled');
+        }
+    }
+    function updateAgencyAutocompleteJurisdiction(id) {
+        $('#id_agency-autocomplete').yourlabsAutocomplete().data = {
+            jurisdiction_id: id
+        }
+    }
+    function clearAgencyAutocomplete() {
+        var widget = $('#id_agency-wrapper').yourlabsWidget()
+        widget.freeDeck();
+    }
+
+    // Functions for responding to changes on the jurisdiction input
+
+    function agencyInput(jurisdictionInput) {
+        var jurisdiction = $(jurisdictionInput).val();
+        if (jurisdiction && jurisdiction.length > 0) {
+            disableAgencyAutocomplete(false);
+            updateAgencyAutocompleteJurisdiction(jurisdiction[0]);
+        } else {
+            clearAgencyAutocomplete();
+            disableAgencyAutocomplete(true);
+        }
+    }
+
+    function handleJurisdictionChange(e) {
+        agencyInput(e.target);
+    }
+
+    var $jurisdiction = $('#id_jurisdiction');
+    // We listen to when the jurisdiction input is changed
+    $jurisdiction.change(handleJurisdictionChange);
+    // We call it once, just to initialize everything
+    agencyInput($jurisdiction);
+</script>
+{% endblock %}

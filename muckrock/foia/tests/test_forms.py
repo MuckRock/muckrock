@@ -18,7 +18,8 @@ class TestAdminFixForm(test.TestCase):
             'from_email': 'tester@tester.com',
             'email': 'extra@space.com',
             'other_emails': 'one@test.com, two@test.com ',
-            'comm': 'Test'
+            'comm': 'Test',
+            'subject': 'This is the subject',
         }
         form = FOIAAdminFixForm(data)
         ok_(form.is_valid(), 'The form should validate. %s' % form.errors)
@@ -26,3 +27,4 @@ class TestAdminFixForm(test.TestCase):
             'Extra space should be stripped from the email address.')
         eq_(form.cleaned_data['other_emails'], 'one@test.com, two@test.com',
             'Extra space should be stripped from the CC address list.')
+        eq_(form.cleaned_data['subject'], 'This is the subject')

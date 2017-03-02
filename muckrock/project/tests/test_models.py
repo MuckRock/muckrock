@@ -4,22 +4,16 @@ topics and issues we cover and then provide them avenues for
 deeper, sustained involvement with our work on those topics.
 """
 
-from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 
-from muckrock.foia.models import FOIARequest
-from muckrock.news.models import Article
-from muckrock.project.models import Project
+from nose.tools import eq_, ok_
+
+from muckrock.factories import ProjectFactory, ArticleFactory, FOIARequestFactory, UserFactory
 from muckrock.task.models import ProjectReviewTask
 
-import logging
-import nose
-
-ok_ = nose.tools.ok_
-eq_ = nose.tools.eq_
-
 test_title = u'Private Prisons'
+test_summary = u'The private prison project is fanstastic.'
 test_description = (
     u'The prison industry is growing at an alarming rate. '
     'Even more alarming? The conditions inside prisions '
@@ -34,117 +28,92 @@ test_image = SimpleUploadedFile(
 class TestProject(TestCase):
     """Projects are a mixture of general and specific information on a broad subject."""
 
-    fixtures = [
-        'test_users.json',
-        'test_profiles.json',
-        'test_news.json',
-        'test_foiarequests.json',
-        'test_agencies.json',
-        'agency_types.json',
-        'jurisdictions.json',
-        'holidays.json'
-    ]
-
     def setUp(self):
-        self.basic_project = Project(title=test_title)
-        self.basic_project.save()
+        self.project = ProjectFactory(title=test_title)
 
-    def tearDown(self):
-        self.basic_project.delete()
-
-    def test_basic_project(self):
-        """All projects need at least a title."""
-        ok_(self.basic_project)
-
-    def test_project_unicode(self):
-        """Projects should default to printing their title."""
-        eq_(self.basic_project.__unicode__(), test_title)
-
-    def test_ideal_project(self):
+    def test_project_attributes(self):
         """
+        All projects need at least a title.
+        Projects should be private by default.
+        Projects should be unapproved by default.
         Projects should have a statement describing their purpose
         and an image or illustration to accompany them.
         """
-        ideal_project = self.basic_project
-        ideal_project.description = test_description
-        ideal_project.image = test_image
-        ideal_project.save()
-        ok_(ideal_project)
+        ok_(self.project)
+        eq_(self.project.title, test_title)
+        ok_(self.project.private)
+        ok_(not self.project.approved)
+        self.project.summary = test_summary
+        self.project.description = test_description
+        self.project.image = test_image
+        self.project.save()
+        ok_(self.project)
 
-    def test_add_contributors(self):
+    def test_project_unicode(self):
+        """Projects should default to printing their title."""
+        eq_(self.project.__unicode__(), test_title)
+
+    def test_contributors(self):
         """
         A project should keep a list of contributors,
         but a list of contributors should not be required.
         """
-        project = self.basic_project
-        user1 = User.objects.get(pk=1)
-        user2 = User.objects.get(pk=2)
-        project.contributors.add(user1, user2)
-        ok_(user1 in project.contributors.all() and user2 in project.contributors.all())
-        project.contributors.clear()
-        eq_(len(project.contributors.all()), 0)
+        user1 = UserFactory()
+        user2 = UserFactory()
+        self.project.contributors.add(user1, user2)
+        ok_(user1 in self.project.contributors.all() and user2 in self.project.contributors.all())
+        self.project.contributors.clear()
+        eq_(len(self.project.contributors.all()), 0)
 
-    def test_add_articles(self):
+    def test_articles(self):
         """Projects should keep a list of relevant articles."""
-        project = self.basic_project
-        article1 = Article.objects.get(pk=1)
-        article2 = Article.objects.get(pk=2)
-        project.articles.add(article1, article2)
-        ok_(article1 in project.articles.all())
-        ok_(article2 in project.articles.all())
-        project.articles.clear()
-        eq_(len(project.articles.all()), 0)
+        article1 = ArticleFactory()
+        article2 = ArticleFactory()
+        self.project.articles.add(article1, article2)
+        ok_(article1 in self.project.articles.all())
+        ok_(article2 in self.project.articles.all())
+        self.project.articles.clear()
+        eq_(len(self.project.articles.all()), 0)
 
-    def test_add_requests(self):
+    def test_requests(self):
         """Projects should keep a list of relevant FOIA requests."""
-        project = self.basic_project
-        request1 = FOIARequest.objects.get(pk=1)
-        request2 = FOIARequest.objects.get(pk=2)
-        project.requests.add(request1, request2)
-        ok_(request1 in project.requests.all())
-        ok_(request2 in project.requests.all())
-        project.articles.clear()
-        eq_(len(project.articles.all()), 0)
-
-    def test_private(self):
-        """Projects should be private by default."""
-        project = self.basic_project
-        ok_(project.private)
+        request1 = FOIARequestFactory()
+        request2 = FOIARequestFactory()
+        self.project.requests.add(request1, request2)
+        ok_(request1 in self.project.requests.all())
+        ok_(request2 in self.project.requests.all())
+        self.project.articles.clear()
+        eq_(len(self.project.articles.all()), 0)
 
     def test_make_public(self):
         """Projects can be made public, but they shouldn't be approved."""
-        project = self.basic_project
-        ok_(project.private)
-        project.make_public()
-        ok_(not project.private)
-        ok_(not project.approved)
+        self.project.make_public()
+        ok_(not self.project.private)
+        ok_(not self.project.approved)
 
     def test_has_contributors(self):
         """Projects should test to see if a given user is a contributor."""
-        project = self.basic_project
-        user1 = User.objects.get(pk=1)
-        user2 = User.objects.get(pk=2)
-        project.contributors.add(user1)
-        ok_(project.has_contributor(user1))
-        ok_(not project.has_contributor(user2))
+        user1 = UserFactory()
+        user2 = UserFactory()
+        self.project.contributors.add(user1)
+        ok_(self.project.has_contributor(user1))
+        ok_(not self.project.has_contributor(user2))
 
     def test_editable_by(self):
         """Projects should test to see if a given user can edit a request."""
-        project = self.basic_project
-        user1 = User.objects.get(pk=1)
-        user2 = User.objects.get(pk=2)
-        project.contributors.add(user1)
-        ok_(project.editable_by(user1))
-        ok_(not project.editable_by(user2))
+        user1 = UserFactory()
+        user2 = UserFactory()
+        self.project.contributors.add(user1)
+        ok_(self.project.editable_by(user1))
+        ok_(not self.project.editable_by(user2))
 
     def test_publish(self):
         """Publishing a project should make it public and submit it for approval."""
-        project = self.basic_project
         explanation = 'Test'
-        task = project.publish(explanation)
-        eq_(project.private, False,
+        task = self.project.publish(explanation)
+        eq_(self.project.private, False,
             'The project should be made public.')
-        eq_(project.approved, False,
+        eq_(self.project.approved, False,
             'The project should be waiting approval.')
         ok_(isinstance(task, ProjectReviewTask),
             'A ProjectReviewTask should be created.\n\tTask: %s' % type(task))
@@ -158,20 +127,16 @@ class TestProject(TestCase):
         """
         # set up data
         tags = u'a'
-        user = User.objects.get(pk=1)
-        project = self.basic_project
-        project.contributors.add(user)
-        project.tags.add(tags)
-        test_request = FOIARequest.objects.get(pk=1)
-        test_request.user = user
+        user = UserFactory()
+        self.project.contributors.add(user)
+        self.project.tags.add(tags)
+        test_request = FOIARequestFactory(user=user)
         test_request.tags.add(tags)
         # since they have the same user and tags, the project should suggest the request
-        ok_(test_request in project.suggest_requests())
-        logging.debug(project.suggest_requests())
+        ok_(test_request in self.project.suggest_requests())
         # add the request to the project, then try again. it should not be suggested
-        project.requests.add(test_request)
-        ok_(test_request not in project.suggest_requests())
-        logging.debug(project.suggest_requests())
+        self.project.requests.add(test_request)
+        ok_(test_request not in self.project.suggest_requests())
 
     def test_suggest_articles(self):
         """
@@ -182,57 +147,50 @@ class TestProject(TestCase):
         """
         # set up data
         tags = u'a'
-        user = User.objects.get(pk=1)
-        project = self.basic_project
-        project.contributors.add(user)
-        project.tags.add(tags)
-        test_article = Article.objects.get(pk=1)
+        user = UserFactory()
+        self.project.contributors.add(user)
+        self.project.tags.add(tags)
+        test_article = ArticleFactory()
         test_article.authors.add(user)
         test_article.tags.add(tags)
         # since they have the same user and tags, the project should suggest the article.
-        ok_(test_article in project.suggest_articles())
-        logging.debug(project.suggest_articles())
+        ok_(test_article in self.project.suggest_articles())
         # add the article to the project, then try again. it should not be suggested
-        project.articles.add(test_article)
-        ok_(test_article not in project.suggest_articles())
-        logging.debug(project.suggest_articles())
+        self.project.articles.add(test_article)
+        ok_(test_article not in self.project.suggest_articles())
+
 
 class TestProjectTagging(TestCase):
     """Tests for the tagging feature of projects"""
 
     def setUp(self):
-        self.basic_project = Project(title=test_title)
-        self.basic_project.save()
+        self.project = ProjectFactory()
 
     def test_add_tags(self):
         """Projects should keep a list of relevant tags."""
-        project = self.basic_project
-        eq_(len(project.tags.all()), 0)
-        project.tags.add(u'prison', u'privatization', u'corrections')
-        eq_(len(project.tags.all()), 3)
+        eq_(len(self.project.tags.all()), 0)
+        self.project.tags.add(u'prison', u'privatization', u'corrections')
+        eq_(len(self.project.tags.all()), 3)
 
     def test_add_existing_tags(self):
         """Projects should not contain duplicate tags."""
-        project = self.basic_project
-        eq_(len(project.tags.all()), 0)
-        project.tags.add(u'prison', u'privatization', u'corrections')
-        project.tags.add(u'prison', u'privatization', u'corrections')
-        eq_(len(project.tags.all()), 3)
+        eq_(len(self.project.tags.all()), 0)
+        self.project.tags.add(u'prison', u'privatization', u'corrections')
+        self.project.tags.add(u'prison', u'privatization', u'corrections')
+        eq_(len(self.project.tags.all()), 3)
 
     def test_remove_existing_tag(self):
         """Tags should be easily removed from projects."""
-        project = self.basic_project
-        eq_(len(project.tags.all()), 0)
-        project.tags.add(u'prison', u'privatization', u'corrections')
-        eq_(len(project.tags.all()), 3)
-        project.tags.remove(u'prison')
-        eq_(len(project.tags.all()), 2)
+        eq_(len(self.project.tags.all()), 0)
+        self.project.tags.add(u'prison', u'privatization', u'corrections')
+        eq_(len(self.project.tags.all()), 3)
+        self.project.tags.remove(u'prison')
+        eq_(len(self.project.tags.all()), 2)
 
     def test_remove_nonexisting_tag(self):
         """Nonexisting tags cannot be removed from a project."""
-        project = self.basic_project
-        eq_(len(project.tags.all()), 0)
-        project.tags.add(u'prison', u'privatization', u'corrections')
-        eq_(len(project.tags.all()), 3)
-        project.tags.remove(u'spongebob')
-        eq_(len(project.tags.all()), 3)
+        eq_(len(self.project.tags.all()), 0)
+        self.project.tags.add(u'prison', u'privatization', u'corrections')
+        eq_(len(self.project.tags.all()), 3)
+        self.project.tags.remove(u'spongebob')
+        eq_(len(self.project.tags.all()), 3)

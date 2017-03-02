@@ -4,11 +4,11 @@
 
 {% if stats %}
 -------------------------
-Stats
+Requests
 - - - - - - - - - - - - -
 
 Statistic, Today's value, Change from yesterday
-{% for stat in stats %}
+{% for stat in stats.request %}
 {{ stat.name }}, {{ stat.current }}, {% if stat.delta > 0 %}+{% endif %}{{stat.delta}}
 {% endfor %}
 {% endif %}
@@ -31,6 +31,38 @@ Fax, {{ sent.format.fax }}, ${{ sent.cost.fax }}, ${{ sent.expense.fax }}, ${{se
 Post, {{ sent.format.mail }}, ${{ sent.cost.mail }}, ${{ sent.expense.mail }}, ${{sent.trailing.mail}}
 {% endwith %}
 {% endif %}
+
+{% if stats %}
+-------------------------
+Users
+- - - - - - - - - - - - -
+
+Statistic, Today's value, Change from yesterday
+{% for stat in stats.user %}
+{{ stat.name }}, {{ stat.current }}, {% if stat.delta > 0 %}+{% endif %}{{stat.delta}}
+{% endfor %}
+{% endif %}
+{% if pro_users.gained or pro_users.lost %}
+-------------------------
+Pro Users (last 5 days)
+{% if pro_users.gained|length > 0 %}
+- - - - - - - - - - - - -
+{{ pro_users.gained|length }} Gained
+- - - - - - - - - - - - -
+{% for user in pro_users.gained %}
+* {{user.get_full_name}} ({{base_url}}{{user.get_absolute_url}})
+{% endfor %}
+{% endif %}
+{% if pro_users.lost|length > 0 %}
+- - - - - - - - - - - - -
+{{ pro_users.lost|length }} Lost
+- - - - - - - - - - - - -
+{% for user in pro_users.lost %}
+* {{user.get_full_name}} ({{base_url}}{{user.get_absolute_url}})
+{% endfor %}
+{% endif %}
+{% endif %}
+
 {% if crowdfunds %}
 -------------------------
 Active Crowdfunds
@@ -38,9 +70,17 @@ Active Crowdfunds
 
 {% for crowdfund in crowdfunds %}
 {% with crowdfund.get_crowdfund_object as object %}
-{{object}} ({{object.get_absolute_url}})
-{{crowdfund.percent_funded}}% funded / ${{crowdfund.amount_remaining}} remaining / Ends on {{crowdfund.date_due|date:"m/d/y"}}
+{{object}} ({{base_url}}{{object.get_absolute_url}})
+{{crowdfund.percent_funded}}% funded / ${{crowdfund.amount_remaining}} remaining / {% if crowdfund.date_due %}Ends on {{crowdfund.date_due|date:"m/d/y"}}{% else %}No end date{% endif %}
 {% endwith %}
+{% endfor %}
+{% endif %}
+{% if projects %}
+-------------------------
+Pending Projects
+- - - - - - - - - - - - -
+{% for project in projects %}
+* {{project.title}} ({{base_url}}{{project.get_absolute_url}})
 {% endfor %}
 {% endif %}
 =========================

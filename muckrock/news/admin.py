@@ -29,7 +29,7 @@ class AuthorListFilter(admin.SimpleListFilter):
 
 
 class ArticleAdminForm(forms.ModelForm):
-    """Form with EpicEditor"""
+    """Form with autocompletes"""
     # pylint: disable=too-few-public-methods
 
     authors = forms.ModelMultipleChoiceField(
@@ -60,4 +60,3 @@ class ArticleAdmin(VersionAdmin):
 
 admin.site.register(Article, ArticleAdmin)
 admin.site.register(Photo)
-

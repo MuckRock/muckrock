@@ -1,7 +1,7 @@
 {% extends 'message/receipt/base.html' %}
-
+{% load tags %}
 {% block description %}
 <p>This e-mail confirms the monthly charge for your professional account on MuckRock.</p>
 <p>Your account includes up to {{monthly_requests}} requests per month, the ability to embargo requests, and priority support.
-You can manage your account from <a href="{% url 'acct-settings' %}">your settings</a>.</p>
+You can manage your account from <a href="{% url 'acct-settings' %}?{% autologin user %}">your settings</a>.</p>
 {% endblock %}

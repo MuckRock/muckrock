@@ -7,7 +7,7 @@ from django.test import TestCase, RequestFactory
 import datetime
 from nose.tools import assert_false, assert_true, eq_, ok_
 
-from muckrock import factories, foia, utils
+from muckrock import factories, foia, test_utils
 
 
 class TestEmbargo(TestCase):
@@ -21,7 +21,7 @@ class TestEmbargo(TestCase):
 
     def get_response(self, request):
         """Utility function for calling the embargo view function"""
-        request = utils.mock_middleware(request)
+        request = test_utils.mock_middleware(request)
         return foia.views.embargo(
             request,
             self.foia.jurisdiction.slug,
@@ -32,9 +32,9 @@ class TestEmbargo(TestCase):
 
     def test_basic_embargo(self):
         """The embargo should be accepted if the owner can embargo and edit the request."""
-        ok_(self.user.has_perm('foia.change_foiarequest', self.foia),
+        ok_(self.foia.has_perm(self.user, 'change'),
                 'The request should be editable by the user.')
-        ok_(self.user.has_perm('foia.embargo_foiarequest', self.foia),
+        ok_(self.foia.has_perm(self.user, 'embargo'),
                 'The user should be allowed to embargo.')
         ok_(self.foia.status not in foia.models.END_STATUS,
                 'The request should not be closed.')
@@ -49,7 +49,7 @@ class TestEmbargo(TestCase):
     def test_no_permission_to_edit(self):
         """Users without permission to edit the request should not be able to change the embargo"""
         user_without_permission = factories.UserFactory(profile__acct_type='pro')
-        assert_false(user_without_permission.has_perm('foia.change_foiarequest', self.foia))
+        assert_false(self.foia.has_perm(user_without_permission, 'change'))
         data = {'embargo': 'create'}
         request = self.request_factory.post(self.url, data)
         request.user = user_without_permission
@@ -63,8 +63,8 @@ class TestEmbargo(TestCase):
         user_without_permission = factories.UserFactory()
         self.foia.user = user_without_permission
         self.foia.save()
-        ok_(user_without_permission.has_perm('foia.change_foiarequest', self.foia))
-        assert_false(user_without_permission.has_perm('foia.embargo_foiarequest', self.foia))
+        ok_(self.foia.has_perm(user_without_permission, 'change'))
+        assert_false(self.foia.has_perm(user_without_permission, 'embargo'))
         data = {'embargo': 'create'}
         request = self.request_factory.post(self.url, data)
         request.user = user_without_permission
@@ -83,8 +83,8 @@ class TestEmbargo(TestCase):
         self.foia.embargo = True
         self.foia.save()
         assert_true(self.foia.embargo)
-        assert_true(user_without_permission.has_perm('foia.change_foiarequest', self.foia))
-        assert_false(user_without_permission.has_perm('foia.embargo_foiarequest', self.foia))
+        assert_true(self.foia.has_perm(user_without_permission, 'change'))
+        assert_false(self.foia.has_perm(user_without_permission, 'embargo'))
         data = {'embargo': 'delete'}
         request = self.request_factory.post(self.url, data)
         request.user = user_without_permission
@@ -106,7 +106,7 @@ class TestEmbargo(TestCase):
             'date_embargo': default_expiration_date
         })
         assert_true(embargo_form.is_valid(), 'Form should validate.')
-        assert_true(self.user.has_perm('foia.embargo_perm_foiarequest', self.foia))
+        assert_true(self.foia.has_perm(self.user, 'embargo_perm'))
         data = {'embargo': 'create'}
         data.update(embargo_form.data)
         request = self.request_factory.post(self.url, data)
@@ -126,9 +126,9 @@ class TestEmbargo(TestCase):
         user_without_permission = factories.UserFactory(profile__acct_type='pro')
         self.foia.user = user_without_permission
         self.foia.save()
-        assert_true(user_without_permission.has_perm('foia.embargo_foiarequest', self.foia))
-        assert_false(user_without_permission.has_perm('foia.embargo_perm_foiarequest', self.foia))
-        assert_true(user_without_permission.has_perm('foia.change_foiarequest', self.foia))
+        assert_true(self.foia.has_perm(user_without_permission, 'embargo'))
+        assert_false(self.foia.has_perm(user_without_permission, 'embargo_perm'))
+        assert_true(self.foia.has_perm(user_without_permission, 'change'))
         embargo_form = foia.forms.FOIAEmbargoForm({'permanent_embargo': True})
         assert_true(embargo_form.is_valid(), 'Form should validate.')
         data = {'embargo': 'create'}

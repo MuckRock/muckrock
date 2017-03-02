@@ -34,18 +34,51 @@ class TagDetailView(DetailView):
     """Presents the details of a tag"""
     model = models.Tag
     template_name = 'tags/tag_list.html'
+    max_per_type = 5
+
+    def _get_and_count(self, context, name, queryset):
+        """Get the max items per type and a total count for the queyseta
+        and store into the context dictionary"""
+        context[name] = queryset[:self.max_per_type]
+        context[name + '_count'] = queryset.count()
 
     def get_context_data(self, **kwargs):
         """Adds all tags to context data"""
         context = super(TagDetailView, self).get_context_data(**kwargs)
         context['tags'] = list_all_tags()
-        this_tag = self.get_object().name
-        context['tagged_projects'] = Project.objects\
-                                    .filter(tags__name__in=[this_tag], private=False)
-        context['tagged_requests'] = FOIARequest.objects\
-                                    .filter(tags__name__in=[this_tag])\
-                                    .get_viewable(self.request.user)
-        context['tagged_articles'] = Article.objects\
-                                    .filter(tags__name__in=[this_tag], publish=True)
-        context['tagged_questions'] = Question.objects.filter(tags__name__in=[this_tag])
+        user = self.request.user
+        this_tag = self.get_object()
+
+        self._get_and_count(
+                context,
+                'tagged_projects',
+                Project.objects
+                    .get_visible(user)
+                    .filter(tags=this_tag)
+                    .optimize(),
+                )
+        self._get_and_count(
+                context,
+                'tagged_requests',
+                FOIARequest.objects
+                    .get_viewable(self.request.user)
+                    .filter(tags=this_tag)
+                    .select_related_view()
+                )
+        self._get_and_count(
+                context,
+                'tagged_articles',
+                Article.objects
+                    .get_published()
+                    .filter(tags=this_tag)
+                    .prefetch_related(
+                        'authors',
+                        'authors__profile',
+                        'projects',
+                    ))
+        self._get_and_count(
+                context,
+                'tagged_questions',
+                Question.objects.filter(tags__name__in=[this_tag]),
+                )
         return context

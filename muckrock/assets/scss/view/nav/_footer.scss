@@ -1,0 +1,77 @@
+footer.website-footer {
+    display: block;
+    width: 100%;
+    margin: 0;
+    color: $color-grey-6;
+    background-color: $color-black;
+
+    .logo {
+        display: inline-block;
+        margin-bottom: $vr;
+        svg {
+            fill: $color-white;
+            height: 2rem;
+            width: 2rem;
+        }
+        &:hover {
+            svg {
+                fill: $color-blue;
+            }
+        }
+    }
+
+    a {
+        color: $color-grey-6;
+        &:hover {
+            color: $color-blue;
+            text-decoration: none;
+        }
+    }
+
+    .button {
+        color: $color-white;
+        &:hover {
+            color: $color-white;
+        }
+    }
+
+    dfn {
+        margin-bottom: $vr/2;
+        color: $color-white;
+    }
+
+    ul {
+        list-style-type: none;
+        padding-left: 0;
+    }
+
+    li {
+        font-size: $size-3;
+        line-height: $lh;
+        margin-bottom: $vr/2;
+    }
+
+    .footer {
+        padding: $vr 0;
+    }
+
+    .footer, .links {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        @include justify-content(space-between);
+    }
+
+    .brand, .link-group {
+        padding: 0 $vr;
+    }
+
+    .brand {
+        @include flex(1 1 20em);
+        max-width: 20em;
+    }
+
+    .link-group {
+        @include flex(1 1 10em);
+        margin-bottom: 0;
+    }
+}

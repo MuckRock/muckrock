@@ -39,6 +39,7 @@ from muckrock.foia.models import (
     )
 from muckrock.foia.codes import CODES
 from muckrock.task.models import ResponseTask
+from muckrock.utils import generate_status_action
 from muckrock.vendor import MultipartPostHandler
 
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)'
@@ -271,7 +272,10 @@ def classify_status(task_pk, **kwargs):
 
     resp_task.save()
 
-@periodic_task(run_every=crontab(hour=5, minute=0), name='muckrock.foia.tasks.followup_requests')
+@periodic_task(
+        run_every=crontab(hour=5, minute=0),
+        time_limit=10 * 60,
+        name='muckrock.foia.tasks.followup_requests')
 def followup_requests():
     """Follow up on any requests that need following up on"""
     log = []
@@ -516,6 +520,8 @@ def autoimport():
                         import_key(key, storage_bucket, comm, log, title=title)
 
                     foia.save(comment='updated from autoimport files')
+                    action = generate_status_action(foia)
+                    foia.notify(action)
                     foia.update(comm.anchor())
 
                 except FOIARequest.DoesNotExist:

@@ -1,9 +1,9 @@
 <dl class="appeal-stats">
     <dt>Appeals</dt>
     {% if num_appealing or num_appeals_done or num_appeals_rejected or num_appeals_response_time %}
-    {% if num_appealing %}<dd class="default">{{num_appealing}} appeal{{ num_appealing | pluralize }} awaiting response</dd>{% endif %}
-    {% if num_appeals_done %}<dd class="success">{{num_appeals_done}} successful appeals</dd>{% endif %}
-    {% if num_appeals_rejected %}<dd class="failure">{{num_appeals_rejected}} denied appeals</dd>{% endif %}
+    {% if num_appealing %}<dd><span class="counter">{{num_appealing}}</span> appeal{{ num_appealing | pluralize }} awaiting response</dd>{% endif %}
+    {% if num_appeals_done %}<dd><span class="green counter">{{num_appeals_done}}</span> successful appeals</dd>{% endif %}
+    {% if num_appeals_rejected %}<dd><span class="red counter">{{num_appeals_rejected}}</span> denied appeals</dd>{% endif %}
     {% if num_appeals_response_time %}<dd>{{num_appeals_response_time}} day{{ num_appeals_response_time | pluralize %} average response time</dd>{% endif %}
     {% else %}
     <dd>None</dd>

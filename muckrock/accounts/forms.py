@@ -3,8 +3,9 @@ Forms for accounts application
 """
 
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, SetPasswordForm
 from django.contrib.auth.models import User
+from django.core.validators import validate_email
 from django.utils.text import slugify
 
 from autocomplete_light import shortcuts as autocomplete_light
@@ -99,6 +100,30 @@ class BillingPreferencesForm(forms.ModelForm):
         return profile
 
 
+class ReceiptForm(forms.Form):
+    """Form for setting receipt emails"""
+    emails = forms.CharField(
+            widget=forms.Textarea,
+            required=False,
+            help_text='Additional email addresses to send receipts to.  '
+            'One per line.',
+            )
+
+    def clean_emails(self):
+        """Make sure each line is a valid email"""
+        emails = self.cleaned_data['emails'].split('\n')
+        bad_emails = []
+        for email in emails:
+            try:
+                validate_email(email.strip())
+            except forms.ValidationError:
+                bad_emails.append(email)
+        if bad_emails:
+            raise forms.ValidationError(
+                    'Invalid email: %s' % ', '.join(bad_emails))
+        return self.cleaned_data['emails']
+
+
 class RegisterForm(UserCreationForm):
     """Register for a basic account"""
     class Meta(UserCreationForm.Meta):
@@ -126,6 +151,27 @@ class RegisterForm(UserCreationForm):
             raise forms.ValidationError("An account with this email already exists.")
         return email
 
+
+class RegistrationCompletionForm(SetPasswordForm):
+    """Adds username to the SetPasswordForm"""
+    username = forms.CharField()
+
+    def clean_username(self):
+        """Do a case insensitive uniqueness check and clean username input"""
+        username = self.cleaned_data['username']
+        username = re.sub(r'[^\w\-.@ ]', '', username) # strips illegal characters from username
+        existing_user = User.objects.filter(username__iexact=username)
+        if existing_user.exists() and existing_user.first() != self.user:
+            raise forms.ValidationError("This username is taken.")
+        return username
+
+    def save(self, commit=True):
+        self.user = super(RegistrationCompletionForm, self).save(commit)
+        username = self.cleaned_data['username']
+        self.user.username = username
+        if commit:
+            self.user.save()
+        return self.user
 
 class RegisterOrganizationForm(RegisterForm):
     """Register for an organization account"""

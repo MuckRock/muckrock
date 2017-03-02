@@ -1,0 +1,41 @@
+/* Details */
+
+.detail {
+    @include padding;
+    .header-container {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        @include align-items(flex-end);
+        @include justify-content(space-between);
+        @include media($medium-bp) {
+            .aside .button {
+                float: right;
+                clear: right;
+                margin-bottom: $vr/2;
+            }
+            .tag-manager {
+                margin-bottom: 0;
+            }
+        }
+        .main {
+            @include flex(2);
+            @include display(flex);
+            @include flex-direction(column);
+            @include justify-content(space-between);
+            max-width:38rem;
+            margin-bottom: 0;
+            padding-right: $vr;
+        }
+    }
+
+    &.flatpage {
+        max-width: 45em;
+        margin: 0 auto;
+    }
+
+}
+
+@import 'news';
+@import 'foia';
+@import 'jurisdiction';
+@import 'exemption';

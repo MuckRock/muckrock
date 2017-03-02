@@ -1,10 +1,9 @@
 {% extends 'task/default.html' %}
-{% load markdown_deux_tags %}
-{% load static from staticfiles %}
+{% load tags %}
 
 {% block task-content %}
 {% with task.project as project %}
-<dl class="task-data">
+<dl class="task__data">
     <dt>Project</dt>
     <dd><a href="{% url 'admin:project_project_change' project.pk %}">{{project}}</a></dd>
     <dt>Contributors</dt>
@@ -34,7 +33,7 @@
             <td><strong>Image</strong></td>
             <td>
                 {% if project.image %}
-                <img src="{% static project.image.url %}" />
+                <img src="{{project.image.url}}" />
                 {% else %}
                 <span class="failure">No image</span>
                 {% endif %}
@@ -69,17 +68,17 @@
 {% endwith %}
 {% endblock %}
 {% block task-footer %}
-<footer class="task-actions">
+<footer class="textbox__footer task__actions">
     <form method="POST" action="{{ endpoint }}" class="task-post-actions">
         {% csrf_token %}
         <label for="{{form.reply.id_for_label}}">&crarr; Reply</label>
         {{ form.reply }}
         <input type="hidden" name="task" value="{{task.pk}}">
         <footer class="submission-control">
-            <button type="submit" name="action" value="reply" class="blue">Reply</button>
+            <button type="submit" name="action" value="reply" class="blue button">Reply</button>
             <div>
-                <button type="submit" name="action" value="approve" class="green">Approve</button>
-                <button type="submit" name="action" value="reject" class="red">Reject</button>
+                <button type="submit" name="action" value="approve" class="green button">Approve</button>
+                <button type="submit" name="action" value="reject" class="red button">Reject</button>
             </div>
         </footer>
     </form>

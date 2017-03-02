@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="{% block classes %}{% endblock %} explore">
+    <header class="explore__header__wrapper">
+        <div class="explore__header grid__row">
+            {% block explore_header %}
+            <div class="grid__column two-thirds">
+                {% block explore_header_description %}
+                <h1>{{title}}</h1>
+                <p>{{description}}</p>
+                {% endblock %}
+            </div>
+            <div class="grid__column third">
+                {% block explore_header_links %}
+                {% endblock %}
+            </div>
+            {% endblock %}
+        </div>
+    </header>
+    <main class="explore__main">
+        {% block explore_main %}
+        {% endblock %}
+    </main>
+{% endblock %}

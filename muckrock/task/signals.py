@@ -4,7 +4,7 @@ from django.db.models.signals import post_save
 
 import logging
 
-from muckrock.message.notifications import SlackNotification
+from muckrock.message.tasks import slack
 from muckrock.task.models import FlaggedTask, ProjectReviewTask, OrphanTask, BlacklistDomain
 
 logger = logging.getLogger(__name__)
@@ -91,8 +91,7 @@ def notify_flagged(sender, instance, created, **kwargs):
         # the raw test prevents text fixtures from creating any notifications
         return
     payload = create_flagged_task_payload(instance)
-    slack = SlackNotification(payload)
-    slack.send()
+    slack.delay(payload)
 
 def notify_project(sender, instance, created, **kwargs):
     """When a new project task is created, send a Slack notification."""
@@ -126,8 +125,7 @@ def notify_project(sender, instance, created, **kwargs):
         # the raw test prevents text fixtures from creating any notifications
         return
     payload = create_project_task_payload(instance)
-    slack = SlackNotification(payload)
-    slack.send()
+    slack.delay(payload)
 
 post_save.connect(
     domain_blacklist,

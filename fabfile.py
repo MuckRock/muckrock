@@ -6,10 +6,10 @@ env.cd = lcd
 env.base_path = os.path.dirname(env.real_fabfile)
 
 @task(alias='prod')
-def production():
+def production(force=False):
     """Merge the dev branch into master and push into production"""
     status = env.run('git s --porcelain', capture=True)
-    if '??' in status:
+    if '??' in status and not force:
         print 'Untracked files, exiting'
         exit()
     env.run('git pull origin dev', capture=False)
@@ -49,8 +49,8 @@ def coverage(settings='test'):
 def pylint():
     """Run pylint"""
     with env.cd(env.base_path):
-        excludes = ['migrations', '__init__.py', 'manage.py', 'formwizard',
-                    'vendor', 'fabfile', 'static', 'nested_inlines', 'node_modules']
+        excludes = ['migrations', '__init__.py', 'manage.py',
+                    'vendor', 'fabfile', 'static', 'node_modules']
         stmt = ('find ./muckrock -name "*.py"' +
                 ''.join(' | grep -v %s' % e for e in excludes) +
                 ' | xargs pylint --load-plugins=pylint_django '
@@ -169,6 +169,14 @@ def update_staging_db():
 @task(name='pip-compile')
 def pip_compile():
     """Update requirements"""
+    with env.cd(os.path.join(env.base_path, 'pip')):
+        env.run('pip-compile requirements.in')
+        env.run('pip-compile dev-requirements.in')
+        env.run('cp -f requirements.txt ../')
+
+@task(name='pip-upgrade')
+def pip_upgrade():
+    """Update and upgrade requirements"""
     with env.cd(os.path.join(env.base_path, 'pip')):
         env.run('pip-compile --upgrade requirements.in')
         env.run('pip-compile --upgrade dev-requirements.in')

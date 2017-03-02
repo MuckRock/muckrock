@@ -4,12 +4,15 @@ These will usually tell us if a message
 object cannot be instantiated.
 """
 
+from django.core import mail
 from django.test import TestCase
 
+from dateutil.relativedelta import relativedelta
 import mock
 import nose.tools
 
 from muckrock import factories
+from muckrock.accounts.models import ReceiptEmail
 from muckrock.message import tasks
 from muckrock.task.factories import FlaggedTaskFactory
 
@@ -64,19 +67,21 @@ MockInvoice.retrieve.return_value = mock_invoice
 class TestDailyTask(TestCase):
     """Tests the daily email notification task."""
     def setUp(self):
-        # create an experimental user to notify about an activity
-        # right now special emails are limited to experimental only
-        factories.UserFactory(profile__experimental=True)
-        factories.UserFactory()
+        self.user = factories.UserFactory()
 
-    @mock.patch('muckrock.message.digests.ActivityDigest.send')
-    @mock.patch('muckrock.accounts.models.Profile.send_notifications')
-    def test_daily_notification_task(self, mock_profile_send, mock_send):
-        """Make sure the send method is called for the experimental user."""
+    @mock.patch('muckrock.message.tasks.send_activity_digest.delay')
+    def test_when_unread(self, mock_send):
+        """The send method should be called when a user has unread notifications."""
+        factories.NotificationFactory(user=self.user)
+        tasks.daily_digest()
+        mock_send.assert_called_with(self.user, u'Daily Digest', relativedelta(days=1))
+
+    @mock.patch('muckrock.message.tasks.send_activity_digest.delay')
+    def test_when_no_unread(self, mock_send):
+        """The send method should not be called when a user does not have unread notifications."""
         # pylint: disable=no-self-use
         tasks.daily_digest()
-        mock_send.assert_called_with()
-        mock_profile_send.assert_called_with()
+        mock_send.assert_not_called()
 
 
 class TestStaffTask(TestCase):
@@ -126,6 +131,13 @@ class TestNotificationTasks(TestCase):
         tasks.support(self.user, 'Hello', task)
         mock_send.assert_called_with(fail_silently=False)
 
+    def test_notify_contributor(self, mock_send):
+        """Notifies a contributor that they were added to a project."""
+        project = factories.ProjectFactory()
+        added_by = factories.UserFactory()
+        tasks.notify_project_contributor(self.user, project, added_by)
+        mock_send.assert_called_with(fail_silently=False)
+
 
 @mock.patch('stripe.Charge', MockCharge)
 @mock.patch('muckrock.message.receipts.Receipt.send')
@@ -172,6 +184,29 @@ class TestSendChargeReceiptTask(TestCase):
         mock_charge.metadata['action'] = 'unknown-charge'
         tasks.send_charge_receipt(mock_charge.id)
         mock_send.assert_not_called()
+
+@mock.patch('stripe.Charge', MockCharge)
+class TestSendChargeReceiptRecipient(TestCase):
+    """Tests the send charge receipt recipients."""
+    # pylint: disable=no-self-use
+
+    def setUp(self):
+        self.user = factories.UserFactory()
+        mock_charge.invoice = None
+        mock_charge.metadata = {
+            'email': self.user.email
+        }
+        mail.outbox = []
+
+    def test_receipt_recipients(self):
+        """Receipt should be to the user and CC'd to their receipt emails"""
+        ReceiptEmail.objects.create(user=self.user, email='receipt1@gmail.com')
+        ReceiptEmail.objects.create(user=self.user, email='receipt2@hotmail.com')
+        mock_charge.metadata['action'] = 'unknown-charge'
+        tasks.send_charge_receipt(mock_charge.id)
+        eq_(len(mail.outbox), 1)
+        eq_(mail.outbox[0].to, [self.user.email])
+        eq_(set(mail.outbox[0].cc), {'receipt1@gmail.com', 'receipt2@hotmail.com'})
 
 
 @mock.patch('stripe.Invoice', MockInvoice)

@@ -6,13 +6,14 @@ correctly grabbing site activity.
 
 from django.test import TestCase
 
-import actstream
+from actstream.actions import follow
 from datetime import date
 from dateutil.relativedelta import relativedelta
 import nose.tools
 
 from muckrock import factories
 from muckrock.message import digests
+from muckrock.utils import new_action, notify
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
@@ -45,24 +46,11 @@ class TestDailyDigest(TestCase):
         # generate an action on an actor the user follows
         agency = factories.AgencyFactory()
         foia = factories.FOIARequestFactory(agency=agency)
-        actstream.actions.follow(self.user, foia, actor_only=False)
-        actstream.action.send(agency, verb='completed', action_object=foia)
+        action = new_action(agency, 'completed', target=foia)
+        notify(self.user, action)
         # generate the email, which should contain the generated action
         email = self.digest(user=self.user, interval=self.interval)
         eq_(email.activity['count'], 1, 'There should be activity.')
-        eq_(email.send(), 1, 'The email should send.')
-
-    def test_digest_user_requests(self):
-        """Digests should include information on requests I own."""
-        # generate an action on a request the user owns
-        foia = factories.FOIARequestFactory(user=self.user)
-        agency = factories.AgencyFactory()
-        actstream.action.send(agency, verb='rejected', action_object=foia)
-        actstream.action.send(self.user, verb='followed up on', action_object=foia)
-        # generate the email, which should contain the generated action
-        email = self.digest(user=self.user, interval=self.interval)
-        eq_(email.activity['count'], 1,
-            'There should be activity that is not user initiated.')
         eq_(email.send(), 1, 'The email should send.')
 
     def test_digest_follow_requests(self):
@@ -70,9 +58,9 @@ class TestDailyDigest(TestCase):
         # generate an action on a request the user owns
         other_user = factories.UserFactory()
         foia = factories.FOIARequestFactory(user=other_user)
-        actstream.actions.follow(self.user, foia, actor_only=False)
         agency = factories.AgencyFactory()
-        actstream.action.send(agency, verb='rejected', action_object=foia)
+        action = new_action(agency, 'rejected', target=foia)
+        notify(self.user, action)
         # generate the email, which should contain the generated action
         email = self.digest(user=self.user, interval=self.interval)
         eq_(email.activity['count'], 1, 'There should be activity.')
@@ -84,25 +72,26 @@ class TestDailyDigest(TestCase):
         question = factories.QuestionFactory(user=self.user)
         other_user = factories.UserFactory()
         factories.AnswerFactory(user=other_user, question=question)
-        # creating an answer _should_ have created an action
+        # creating an answer _should_ have created a notification
         # so let's generate the email and see what happened
         email = self.digest(user=self.user, interval=self.interval)
         eq_(email.activity['count'], 1, 'There should be activity that is not user initiated.')
-        eq_(email.activity['questions']['mine'].first().actor, other_user)
-        eq_(email.activity['questions']['mine'].first().verb, 'answered')
+        eq_(email.activity['questions']['mine'].first().action.actor, other_user)
+        eq_(email.activity['questions']['mine'].first().action.verb, 'answered')
         eq_(email.send(), 1, 'The email should send.')
 
     def test_digest_follow_questions(self):
         """Digests should include information on questions I follow."""
         # generate an action on a question that I follow
         question = factories.QuestionFactory()
-        actstream.actions.follow(self.user, question, actor_only=False)
+        follow(self.user, question, actor_only=False)
         other_user = factories.UserFactory()
-        factories.AnswerFactory(user=other_user, question=question)
+        answer = factories.AnswerFactory(user=other_user, question=question)
         email = self.digest(user=self.user, interval=self.interval)
         eq_(email.activity['count'], 1, 'There should be activity.')
-        eq_(email.activity['questions']['following'].first().actor, other_user)
-        eq_(email.activity['questions']['following'].first().action_object, question)
+        eq_(email.activity['questions']['following'].first().action.actor, other_user)
+        eq_(email.activity['questions']['following'].first().action.action_object, answer)
+        eq_(email.activity['questions']['following'].first().action.target, question)
         eq_(email.send(), 1, 'The email should send.')
 
 

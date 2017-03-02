@@ -9,6 +9,7 @@
         <meta charset="utf-8" />
         {% block description %}<meta name="description" content=""/>{% endblock description %}
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="google-site-verification" content="j3QyPvF_0QX1v2YTWeY0Al5JCiBVdxhDjJM5JgFkxVE" />
         <meta name="google-site-verification" content="4KnIEDr5Fi-PUL9klVnMlC2BMcStrUwQIj-4gMVfqjk" />
         <!-- Load Assets -->
         <link rel="shortcut icon"       href="{% static 'icons/favicon.ico' %}" />
@@ -16,34 +17,36 @@
         <link rel="apple-touch-icon"    href="{% static 'icons/logo.png' %}" />
         {% compress css %}
         <style type="text/css">
-            @font-face {
-                font-family: 'Source Code Pro';
-                src: url("{% static 'fonts/sourcecodepro-regular.woff' %}") format('woff');
-                font-weight: normal;
-                font-style: normal;
-            }
+            /* Typefaces are loaded inside the base template so that they can be referenced
+            by the correct URL. In production, the typefaces should be served from a CDN. */
             @font-face {
                 font-family: 'Source Sans Pro';
-                src: url("{% static 'fonts/sourcesanspro-light.woff' %}") format('woff');
-                font-weight: 300;
-                font-style: normal;
-            }
-            @font-face {
-                font-family: 'Source Sans Pro';
-                src: url("{% static 'fonts/sourcesanspro-regular.woff' %}") format('woff');
+                src: url("{% static 'fonts/SourceSansPro-Regular.ttf' %}");
                 font-weight: 400;
                 font-style: normal;
             }
             @font-face {
                 font-family: 'Source Sans Pro';
-                src: url("{% static 'fonts/sourcesanspro-it.woff' %}") format('woff');
+                src: url("{% static 'fonts/SourceSansPro-Italic.ttf' %}");
                 font-weight: 400;
                 font-style: italic;
             }
             @font-face {
                 font-family: 'Source Sans Pro';
-                src: url("{% static 'fonts/sourcesanspro-semibold.woff' %}") format('woff');
+                src: url("{% static 'fonts/SourceSansPro-Semibold.ttf' %}");
                 font-weight: 500;
+                font-style: normal;
+            }
+            @font-face {
+                font-family: 'Source Sans Pro';
+                src: url("{% static 'fonts/SourceSansPro-SemiboldItalic.ttf' %}");
+                font-weight: 500;
+                font-style: italic;
+            }
+            @font-face {
+                font-family: 'Source Code Pro';
+                src: url("{% static 'fonts/SourceCodePro-Regular.ttf' %}");
+                font-weight: normal;
                 font-style: normal;
             }
         </style>
@@ -60,6 +63,7 @@
         <!-- Facebook and Twitter Integration -->
         <!-- http://ogp.me & https://dev.twitter.com/docs/cards -->
         {% block open_graph %}
+        <meta property="og:site_name" content="MuckRock" />
         <meta property="og:title" content="MuckRock" />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="{{ request.build_absolute_uri }}" />
@@ -75,17 +79,24 @@
         {% endblock twitter_card %}
     </head>
     <body>
-        {% include 'nav/sidebar.html' %}
+        {% block body %}
         <div class="container">
             <div id="modal-overlay"></div>
             {% include 'nav/header.html' %}
-            {% include 'lib/notification.html' %}
+            {% if messages %}
+            <ul class="messages nostyle">
+                {% for message in messages %}
+                <li>{% include 'lib/pattern/message.html' %}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
             <div class="content">
             {% block content %}
             {% endblock content %}
             </div>
             {% include 'nav/footer.html' %}
         </div>
+        {% endblock %}
         <!-- SCRIPTS -->
         <!-- Google Analytics -->
         <script>
@@ -122,10 +133,13 @@
                 {% if ga == "pro_cancelled" %}
                     ga('send', 'event', 'Account', 'Pro', 'Cancellation');
                 {% endif %}
+                {% if ga == "donation" %}
+                    ga('send', 'event', 'Donations', 'Donated', '', {{donated}});
+                {% endif %}
             }
         </script>
         <!-- End Google Analytics -->
-        <script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js" type="text/javascript"></script>
+        <script src="https://assets.documentcloud.org/viewer/loader.js" type="text/javascript"></script>
         {% compress js %}
         {% render_bundle 'main' 'js' %}
         <script type="text/javascript" src="{% static 'autocomplete_light/django_admin.js' %}"></script>

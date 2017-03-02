@@ -1,52 +1,39 @@
-.pagination {
-    @include row;
-}
-.pagination-form, .pagination-links {
-    @include span-columns(6);
-    @include media($medium-layout) {
-        @include span-columns(6);
-    }
-    @include media($large-layout) {
-        @include span-columns(12);
-    }
+.pagination__control, .pagination__links {
     margin-bottom: 0;
 }
 
-.pagination-info {
-    @include third;
-    @include omega(3n);
-    @include media($medium-layout){
-        &:nth-child(2) {
-            text-align: center;
-        }
-        &:nth-child(3) {
-            text-align: right;
-        }
-    }
-    margin-bottom: $vertical-rhythm/2;
+.pagination__control {
+    @include display(flex);
+    @include flex-wrap(wrap);
+    @include justify-content(space-between);
 }
 
-.pagination-links {
-    display: table;
-    margin-bottom: $vertical-rhythm;
-    border-collapse: collapse;
-    a, span {
-        width: 25%;
-        display: table-row;
-        border: 1px solid $color-grey;
+.pagination__control__item {
+    @include flex(1 1 15em);
+    margin-bottom: $vr/2;
+    text-align: center;
+}
+
+.pagination__links {
+    @include display(flex);
+    @include flex-wrap(wrap);
+    @include border;
+    border-right: none;
+    border-bottom: none;
+    & > span {
+        flex: 1 1 15em;
+        @include display(flex);
+        @include flex-wrap(wrap);
+    }
+    .pagination__link {
+        flex: 1 1 5em;
+        padding: $vr/4 $vr/2;
         text-align: center;
-        @include media($medium-layout) {
-            display: table-cell;
-        }
+        border-right: 1px solid $color-grey;
+        border-bottom: 1px solid $color-grey;
     }
-    span {
-        cursor: default;
-        color: $color-grey;
-    }
-    a:hover {
-        text-decoration: none;
-        background: $color-blue;
-        color: $color-white;
-        border-color: $color-blue;
-    }
+}
+
+.pagination__link {
+
 }

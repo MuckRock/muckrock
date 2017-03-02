@@ -1,0 +1,69 @@
+{% extends 'foiamachine/base/base.html' %}
+
+{% load hosts %}
+
+{% block main %}
+<main class="profile padding norightpadding">
+    <header class="space-between align-baseline margin-right">
+        <h2>Your Requests</h2>
+        <p class="margin-bottom"><a href="{% host_url 'foi-create' host 'foiamachine' %}" class="button">Create request</a></p>
+    </header>
+    <div class="row">
+        <div class="column margin-right margin-bottom">
+            <form method="get" class="padding norightpadding small filter form" id="request-filter">
+                {% include 'lib/pattern/form.html' with form=filter.form %}
+                <div class="space-between">
+                    <button class="button" type="submit">Filter</button>
+                    {% if request.GET %}
+                    <a class="button" href="{{ request.path }}">Clear</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+        <div class="column column__wide horizontal-overflow">
+            {% if filter.qs %}
+            <form method="post" class="small toolbar margin-bottom" id="request-manager">
+                {% csrf_token %}
+                {% include 'lib/pattern/form.html' %}
+                <button class="small button" type="submit" name="action" value="set_status">Set Status</button>
+                <button class="small red button" type="submit" name="action" value="delete">Delete</button>
+            </form>
+            <table class="ruled">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" form="request-manager" /></th>
+                        <th>Title</th>
+                        <th class="small">Status</th>
+                        <th class="small">Jurisdiction</th>
+                        <th class="small">Agency</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for foi in filter.qs %}
+                    <tr>
+                        <td><input type="checkbox" form="request-manager" name="request" value="{{foi.id}}"/></th>
+                        <td><a href="{{foi.get_absolute_url}}">{{foi.title}}</a></td>
+                        <td class="small">{{foi.get_status_display}}</td>
+                        <td class="small"><a href="{{foi.jurisdiction.get_absolute_url}}">{{foi.jurisdiction}}</a></td>
+                        {% if foi.agency %}
+                        <td class="small"><a href="{{foi.agency.get_absolute_url}}">{{foi.agency}}</a></td>
+                        {% else %}
+                        <td class="small">None</td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty">
+                {% if request.GET %}
+                <p class="bold">You have no requests matching this filter.</p>
+                {% else %}
+                <p class="bold">You have not created any public records requests.</p>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</main>
+{% endblock %}

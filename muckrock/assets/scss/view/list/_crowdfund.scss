@@ -1,0 +1,38 @@
+.crowdfund-list {
+    list-style-type: none;
+    padding-left: 0;
+    .crowdfund {
+        @include display(flex);
+        @include flex-direction(column);
+        @include justify-content(space-between);
+        margin-bottom: $vr;
+        @include border;
+        @include border-radius;
+        .left, .right {
+            margin-bottom: 0;
+            padding: $vr;
+        }
+        .left {
+            @include flex(1);
+        }
+        .right {
+            @include display(flex);
+            @include flex-direction(column);
+            @include justify-content(space-between);
+            border-top: 1px solid $color-grey;
+            p {
+                margin-bottom: 0;
+            }
+        }
+        @include media($medium-bp) {
+            @include flex-direction(row);
+            .right {
+                border-top: none;
+                border-left: 1px solid $color-grey;
+            }
+            .view {
+                font-size: $size-4;
+            }
+        }
+    }
+}

@@ -26,8 +26,7 @@ class FOIAPermissions(permissions.DjangoModelPermissionsOrAnonReadOnly):
     def has_object_permission(self, request, view, obj):
         """Grant permission?"""
         # Instance must have an attribute named `user`.
-        has_perm = request.user.has_perm('foia.change_foiarequest', obj)
-        if has_perm and request.method == 'PATCH':
+        if obj.has_perm(request.user, 'change') and request.method == 'PATCH':
             return True
 
         # check non-object has permission here if the user doesn't own the object
@@ -42,7 +41,7 @@ class IsOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         """Grant permission?"""
         # Instance must have an attribute named `user`.
-        return request.user.has_perm('foia.change_foiarequest', obj)
+        return obj.has_perm(request.user, 'change')
 
 
 class FOIAFileSerializer(serializers.ModelSerializer):
@@ -85,6 +84,7 @@ class FOIARequestSerializer(serializers.ModelSerializer):
     tags = serializers.StringRelatedField(many=True)
     communications = FOIACommunicationSerializer(many=True)
     notes = FOIANoteSerializer(many=True)
+    absolute_url = serializers.ReadOnlyField(source='get_absolute_url')
 
     def __init__(self, *args, **kwargs):
         # pylint: disable=super-on-old-class
@@ -106,7 +106,7 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             if not foia:
                 self.fields.pop('notes')
             else:
-                has_perm = request.user.has_perm('foia.change_foiarequest', foia)
+                has_perm = foia.has_perm(request.user, 'change')
                 if not has_perm:
                     self.fields.pop('notes')
                 if request.method == 'PATCH' and has_perm:
@@ -148,4 +148,6 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             'tags',
             'notes',
             'communications',
-	    )
+            # computed fields
+            'absolute_url',
+            )

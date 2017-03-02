@@ -38,16 +38,16 @@
             {% if logged_in %}
             <footer>
                 {% if org %}
-                <button disabled>You own an organization</button>
+                <button class="button" disabled>You own an organization</button>
                 {% elif acct_type == 'proxy' %}
-                <button disabled>You are a proxy requester</button>
+                <button class="button" disabled>You are a proxy requester</button>
                 {% elif acct_type == 'admin' %}
-                <button disabled>You are staff</button>
+                <button class="button" disabled>You are staff</button>
                 {% elif acct_type == 'pro' %}
                 <form method="post">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="downgrade" />
-                    <button type="submit">Downgrade to Basic</button>
+                    <button type="submit" class="button">Downgrade to Basic</button>
                 </form>
                 {% else %}
                 <p class="current-plan">Your Current Plan</p>
@@ -75,9 +75,9 @@
             {% if logged_in %}
             <footer>
                 {% if org %}
-                <button disabled>You own an organization</button>
+                <button class="button" disabled>You own an organization</button>
                 {% elif acct_type == 'admin' %}
-                <button disabled>You are staff</button>
+                <button class="button" disabled>You are staff</button>
                 {% elif acct_type == 'pro' or acct_type == 'proxy' %}
                 <p class="current-plan">Your Current Plan</p>
                 {% else %}
@@ -93,7 +93,7 @@
                     <input type="hidden" name="stripe_bitcoin" value="false" />
                     <input type="hidden" name="stripe_fee" value="0" />
                     <input type="hidden" name="stripe_amount" value="0" />
-                    <button class="primary" type="submit">Subscribe</button>
+                    <button class="primary button" type="submit">Subscribe</button>
                 </form>
                 {% endif %}
             </footer>

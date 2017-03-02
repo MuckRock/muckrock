@@ -3,10 +3,9 @@ URL mappings for muckrock project
 """
 
 from django.conf import settings
-from django.conf.urls import handler404 # pylint: disable=unused-import
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
-from django.views.generic.base import RedirectView
+from django.views.generic.base import RedirectView, TemplateView
 
 from rest_framework.routers import DefaultRouter
 import dbsettings.urls
@@ -15,7 +14,7 @@ import debug_toolbar
 import muckrock.accounts.views
 import muckrock.agency.views
 import muckrock.foia.viewsets
-import muckrock.jurisdiction.views
+import muckrock.jurisdiction.viewsets
 import muckrock.jurisdiction.urls
 import muckrock.news.views
 import muckrock.qanda.views
@@ -25,6 +24,8 @@ from muckrock.agency.sitemap import AgencySitemap
 from muckrock.foia.sitemap import FoiaSitemap
 from muckrock.jurisdiction.sitemap import JurisdictionSitemap
 from muckrock.news.sitemap import ArticleSitemap
+from muckrock.project.sitemap import ProjectSitemap
+from muckrock.qanda.sitemap import QuestionSitemap
 from muckrock.views import handler500 # pylint: disable=unused-import
 
 admin.site.index_template = 'admin/custom_index.html'
@@ -33,12 +34,14 @@ sitemaps = {
     'FOIA': FoiaSitemap,
     'News': ArticleSitemap,
     'Agency': AgencySitemap,
-    'Jurisdiction': JurisdictionSitemap
+    'Jurisdiction': JurisdictionSitemap,
+    'Question': QuestionSitemap,
+    'Project': ProjectSitemap,
 }
 
 router = DefaultRouter()
 router.register(r'jurisdiction',
-        muckrock.jurisdiction.views.JurisdictionViewSet,
+        muckrock.jurisdiction.viewsets.JurisdictionViewSet,
         'api-jurisdiction')
 router.register(r'agency',
         muckrock.agency.views.AgencyViewSet,
@@ -46,6 +49,9 @@ router.register(r'agency',
 router.register(r'foia',
         muckrock.foia.viewsets.FOIARequestViewSet,
         'api-foia')
+router.register(r'exemption',
+        muckrock.jurisdiction.viewsets.ExemptionViewSet,
+        'api-exemption')
 router.register(r'question',
         muckrock.qanda.views.QuestionViewSet,
         'api-question')
@@ -107,7 +113,7 @@ urlpatterns = patterns(
     url(r'^project/', include('muckrock.project.urls')),
     url(r'^map/', include('muckrock.map.urls')),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^search/$', views.MRSearchView(), name='search'),
+    url(r'^search/$', views.SearchView.as_view(), name='search'),
     url(r'^settings/', include(dbsettings.urls)),
     url(r'^api_v1/', include(router.urls)),
     url(r'^api_v1/token-auth/', 'rest_framework.authtoken.views.obtain_auth_token'),
@@ -115,7 +121,8 @@ urlpatterns = patterns(
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^package_monitor/', include('package_monitor.urls', namespace='package_monitor')),
     url(r'^robots\.txt$', include('robots.urls')),
-    url(r'^favicon.ico$', RedirectView.as_view(url=settings.STATIC_URL + 'favicon.ico')),
+    url(r'^favicon.ico$', RedirectView.as_view(
+        url=settings.STATIC_URL + 'icons/favicon.ico')),
     url(r'^sitemap\.xml$', 'django.contrib.sitemaps.views.index', {'sitemaps': sitemaps}),
     url(
         r'^sitemap-(?P<section>.+)\.xml$',
@@ -124,6 +131,9 @@ urlpatterns = patterns(
     ),
     url(r'^news-sitemaps/', include('news_sitemaps.urls')),
     url(r'^__debug__/', include(debug_toolbar.urls)),
+    url(r'^donate/$', views.DonationFormView.as_view(), name='donate'),
+    url(r'^donate/thanks/$', views.DonationThanksView.as_view(), name='donate-thanks'),
+    url(r'^landing/$', views.LandingView.as_view(), name='landing'),
 )
 
 if settings.DEBUG:
@@ -134,4 +144,6 @@ if settings.DEBUG:
             'django.views.static.serve',
             {'document_root': settings.MEDIA_ROOT}
         ),
+        url(r'^500/$', TemplateView.as_view(template_name='500.html')),
+        url(r'^404/$', TemplateView.as_view(template_name='404.html')),
     )

@@ -1,0 +1,106 @@
+input.autocomplete.xhr-pending { background-image: none; }
+
+.autocomplete-light-widget {
+  .user.choice {
+    padding: 0;
+  }
+  .foia.choice {
+    .main {
+      padding: $vr/4 $vr/2;
+    }
+    .title {
+      margin-bottom: 0;
+    }
+    .meta {
+      font-size: $size-2;
+    }
+  }
+  .agency.choice {
+    .main {
+      padding: $vr/4 $vr/2;
+    }
+    .name {
+      margin-bottom: 0;
+    }
+    .jurisdiction {
+      font-size: $size-2;
+    }
+  }
+  .article.choice {
+    .image, .title {
+      margin-bottom: 0;
+    }
+    .image {
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .title {
+      font-weight: $bold;
+    }
+    .info {
+      display: inline-block;
+      vertical-align: middle;
+      padding: $vr/4 $vr/2;
+    }
+    .meta {
+      font-size: $size-2;
+    }
+  }
+}
+
+.autocomplete-light-widget .choice {
+  .choice__text {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0;
+  }
+}
+
+.autocomplete-light-widget {
+  width: 100%;
+  font-family: $sans-serif;
+  color: $color-black;
+}
+.autocomplete-light-widget.yourlabs-autocomplete {
+  width: auto;
+  max-height: 20em;
+  overflow: hidden;
+  overflow-y: scroll;
+  padding: 0;
+  left: 0;
+}
+.autocomplete-light-widget .deck {
+  width: 100%;
+}
+.autocomplete-light-widget .deck > span {
+  display: block;
+  width: 100%;
+  margin-bottom: $vr/4;
+  padding: $vr/4;
+  @include border;
+  background: $color-white-pure;
+}
+.autocomplete-light-widget .remove {
+  vertical-align: middle;
+  margin-right: $vr/2;
+}
+
+.yourlabs-autocomplete {
+  width: auto;
+  max-height: 20em;
+  overflow: hidden;
+  overflow-y: scroll;
+  padding: 0;
+  left: 0;
+  background-color: $color-white;
+  @include border-radius;
+  .hilight {
+    color: $color-white;
+    background-color: $color-blue;
+    background-image: none;
+  }
+  .choice, [data-value], em {
+    color: $color-black;
+    width: 100%;
+  }
+}

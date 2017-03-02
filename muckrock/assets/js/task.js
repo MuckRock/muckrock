@@ -1,8 +1,10 @@
-import Cookie from 'js-cookie';
+/* Task.js
+**
+** Logic for client interactions with the MuckRock task system.
+** Mostly involves submitting task forms via AJAX and handling successful responses.
+*/
 
-// Task.js
-//
-// Logic for client interactions with the MuckRock task system.
+import Cookie from 'js-cookie';
 
 function authenticateAjax() {
     // Sets up authentication for AJAX transactions
@@ -51,16 +53,25 @@ Need to add the action as a value since the button is being overridden.
 In a non-JS form submission, the button would also include its value in the posted data.
 */
 
-function resolve(taskForm) {
-    var taskID = '#' + getTaskID($(taskForm).serializeArray()) + '-task';
-    var taskData = $(taskForm).serialize() + '&resolve=true';
-    var taskEndpoint = $(taskForm).attr('action');
-    ajaxPost(taskID, taskEndpoint, taskData);
+function batchAction(forms, action) {
+    var taskID;
+    var taskIDs = [];
+    var taskData = {'tasks': []};
+    taskData[action] = true;
+    $(forms).each(function() {
+        taskID = getTaskID($(this).serializeArray());
+        taskIDs.push('#' + taskID + '-task');
+        taskData['tasks'].push(taskID);
+    });
+    if (forms.length > 0) {
+        var taskEndpoint = $(forms[0]).attr('action');
+        ajaxPost(taskIDs.join(', '), taskEndpoint, taskData);
+    }
 }
 
-function reject(taskForm) {
+function singleAction(taskForm, action) {
     var taskID = '#' + getTaskID($(taskForm).serializeArray()) + '-task';
-    var taskData = $(taskForm).serialize() + '&reject=true';
+    var taskData = $(taskForm).serialize() + '&' + action + '=true';
     var taskEndpoint = $(taskForm).attr('action');
     ajaxPost(taskID, taskEndpoint, taskData);
 }
@@ -77,7 +88,7 @@ function getTaskID(taskFormData) {
 }
 
 function markAsResolved(task) {
-    $(task).addClass('resolved');
+    $(task).addClass('green');
 }
 
 function formHasAction(taskForm, action) {
@@ -94,8 +105,6 @@ function formHasAction(taskForm, action) {
 
 authenticateAjax();
 
-var tasks = $('.task');
-
 // Hide all the resolved tasks
 $('.resolved.task')
     .each(function(){
@@ -103,6 +112,10 @@ $('.resolved.task')
     })
     .addClass('collapsed');
 
+/* TODO
+** This should be rewritten to bind to the task's form submission event,
+** not the form's resolve button click.
+*/
 $('button[name="resolve"]').click(function(e){
     /* If the button clicked is the "resolve all" button, then get forms
     for all the currently checked tasks. Else, just get the form for the
@@ -117,12 +130,10 @@ $('button[name="resolve"]').click(function(e){
                 forms.push(taskForm);
             }
         });
+        batchAction(forms, 'resolve');
     } else {
-        forms.push($(this).closest('form'));
+        singleAction($(this).closest('form'), 'resolve');
     }
-    $(forms).each(function(){
-        resolve(this);
-    });
     return false;
 });
 
@@ -136,31 +147,17 @@ $('button[name="reject"]').click(function(e){
                 forms.push(taskForm);
             }
         });
+        batchAction(forms, 'reject');
     } else {
-        forms.push($(this).closest('form'));
+        singleAction($(this).closest('form'), 'reject');
     }
-    $(forms).each(function(){
-        reject(this);
-    });
     return false;
-});
-
-tasks.find('header').click(function() {
-    $(this).parent().toggleClass('collapsed');
-});
-
-$('.task .permalink').click(function(e) {
-    e.stopPropagation();
-});
-
-$('.task .checkbox').click(function(e) {
-    e.stopPropagation();
 });
 
 var checkboxes = $('.task header').find(':checkbox');
 var batchedButtons = $('#batched button').not('#collapse-all');
 function toggleBatchedButtons() {
-    if ($('.task header').find(':checkbox:checked').length > 0) {
+    if ($('.task header').find(':checked').length > 0) {
         batchedButtons.attr('disabled', false);
     } else {
         batchedButtons.attr('disabled', true);

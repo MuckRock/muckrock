@@ -1,0 +1,8 @@
+$logo-bp: "min-width:64em";
+$label-bp: "min-width:54em";
+$section-bp: "max-width:36em";
+$bottom-nav-bp-max: "max-width:27em";
+$bottom-nav-bp-min: "min-width: 27em";
+
+@import 'header';
+@import 'footer';

@@ -8,14 +8,16 @@ from django.utils.text import slugify
 import datetime
 import factory
 
-from muckrock.accounts.models import Profile, Statistics
+from muckrock.accounts.models import Profile, Notification, Statistics
 from muckrock.agency.models import Agency, STALE_DURATION
-from muckrock.foia.models import FOIARequest, FOIACommunication, RawEmail
+from muckrock.crowdfund.models import Crowdfund
+from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, RawEmail
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.news.models import Article
 from muckrock.organization.models import Organization
 from muckrock.project.models import Project
 from muckrock.qanda.models import Question, Answer
+from muckrock.utils import new_action
 
 # pylint:disable=too-many-instance-attributes
 
@@ -37,6 +39,15 @@ class UserFactory(factory.django.DjangoModelFactory):
     username = factory.Sequence(lambda n: "user_%d" % n)
     email = factory.Faker('email')
     profile = factory.RelatedFactory(ProfileFactory, 'user')
+
+
+class NotificationFactory(factory.django.DjangoModelFactory):
+    """A factory for creating Notification test objects."""
+    class Meta:
+        model = Notification
+
+    user = factory.SubFactory(UserFactory)
+    action = factory.LazyAttribute(lambda obj: new_action(obj.user, 'acted'))
 
 
 class OrganizationFactory(factory.django.DjangoModelFactory):
@@ -71,6 +82,12 @@ class AgencyFactory(factory.django.DjangoModelFactory):
     status = 'approved'
 
 
+class AppealAgencyFactory(AgencyFactory):
+    """A factory for creating an Agency that accepts email appeals."""
+    email = factory.Faker('email')
+    can_email_appeals = True
+
+
 class FOIARequestFactory(factory.django.DjangoModelFactory):
     """A factory for creating FOIARequest test objects."""
     class Meta:
@@ -80,6 +97,10 @@ class FOIARequestFactory(factory.django.DjangoModelFactory):
     slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
     user = factory.SubFactory(UserFactory)
     jurisdiction = factory.SubFactory('muckrock.factories.JurisdictionFactory')
+    agency = factory.SubFactory(
+        'muckrock.factories.AgencyFactory',
+        jurisdiction=factory.SelfAttribute('..jurisdiction')
+    )
 
 
 class FOIACommunicationFactory(factory.django.DjangoModelFactory):
@@ -93,6 +114,7 @@ class FOIACommunicationFactory(factory.django.DjangoModelFactory):
     date = factory.LazyAttribute(lambda obj: datetime.datetime.now())
     rawemail = factory.RelatedFactory('muckrock.factories.RawEmailFactory', 'communication')
 
+
 class RawEmailFactory(factory.django.DjangoModelFactory):
     """A factory for creating  objects."""
     class Meta:
@@ -102,6 +124,16 @@ class RawEmailFactory(factory.django.DjangoModelFactory):
     raw_email = factory.Faker('paragraph')
 
 
+class FOIAFileFactory(factory.django.DjangoModelFactory):
+    """A factory for creating FOIAFile test objects."""
+    class Meta:
+        model = FOIAFile
+
+    foia = factory.SubFactory(FOIARequestFactory)
+    comm = factory.SubFactory(FOIACommunicationFactory, foia=factory.SelfAttribute('..foia'))
+    title = factory.Faker('word')
+    ffile = factory.django.FileField(filename=factory.Faker('file_name'))
+
 class ProjectFactory(factory.django.DjangoModelFactory):
     """A factory for creating Project test objects."""
     class Meta:
@@ -109,6 +141,17 @@ class ProjectFactory(factory.django.DjangoModelFactory):
 
     title = factory.Sequence(lambda n: "Project %d" % n)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
+
+
+class CrowdfundFactory(factory.django.DjangoModelFactory):
+    """A factory for creating Crowdfund test objects."""
+    class Meta:
+        model = Crowdfund
+
+    name = factory.Sequence(lambda n: "Crowdfund %d" % n)
+    description = factory.Faker('paragraph')
+    payment_required = 100.00
+    date_due = factory.LazyAttribute(lambda obj: datetime.datetime.now() + datetime.timedelta(30))
 
 
 class QuestionFactory(factory.django.DjangoModelFactory):

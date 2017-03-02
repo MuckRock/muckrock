@@ -1,8 +1,7 @@
-{% extends 'lists/base_list.html' %}
-{% load markdown_deux_tags %}
+{% extends 'base_list.html' %}
+{% load tags %}
 
-{% block list-content %}
-{% include 'lib/pagination.html' %}
+{% block list-objects %}
 <ul class="crowdfund-list">
     {% for crowdfund in object_list %}
     <li class="crowdfund">
@@ -20,5 +19,4 @@
     </li>
     {% endfor %}
 </ul>
-{% include 'lib/pagination.html' %}
 {% endblock %}

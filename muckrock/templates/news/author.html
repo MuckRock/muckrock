@@ -1,0 +1,6 @@
+{% extends 'news/list.html' %}
+
+{% block title %}{{author.get_full_name}} &bull; {{block.super}}{% endblock %}
+{% block list-title %}<a href="{% url 'news-archive' %}">News</a> <span class="small">by</span><br><a class="small" href="{{author.get_absolute_url}}">{{ author.get_full_name }}</a>{% endblock %}
+
+{% block list-sections %}{% endblock %}

@@ -18,25 +18,31 @@ from rest_framework.decorators import detail_route
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from muckrock.foia.models import FOIAFile
-from muckrock.qanda.models import Question, Answer
+from muckrock.accounts.models import Notification
+from muckrock.qanda.filters import QuestionFilterSet
 from muckrock.qanda.forms import QuestionForm, AnswerForm
+from muckrock.qanda.models import Question, Answer
 from muckrock.qanda.serializers import QuestionSerializer, QuestionPermissions
 from muckrock.tags.models import Tag, parse_tags
-from muckrock.views import MRFilterableListView
+from muckrock.views import MRSearchFilterListView
 
-class QuestionList(MRFilterableListView):
+
+class QuestionList(MRSearchFilterListView):
     """List of unanswered questions"""
     model = Question
-    title = 'Questions & Answers'
-    template_name = 'lists/question_list.html'
+    filter_class = QuestionFilterSet
+    title = 'Q&A Forum'
+    template_name = 'qanda/list.html'
     default_sort = 'date'
     default_order = 'desc'
 
     def get_queryset(self):
         """Hides hidden jurisdictions from list"""
         objects = super(QuestionList, self).get_queryset()
-        objects = objects.select_related('user').prefetch_related('answers')
+        objects = (objects
+                .select_related('user')
+                .prefetch_related('answers')
+                )
         return objects
 
     def get_context_data(self, **kwargs):
@@ -52,11 +58,13 @@ class QuestionList(MRFilterableListView):
         messages.info(self.request, info_msg)
         return context
 
+
 class UnansweredQuestionList(QuestionList):
     """List of unanswered questions"""
     def get_queryset(self):
         objects = super(UnansweredQuestionList, self).get_queryset()
         return objects.annotate(num_answers=Count('answers')).filter(num_answers=0)
+
 
 class Detail(DetailView):
     """Question detail view"""
@@ -73,6 +81,16 @@ class Detail(DetailView):
                 'foia__jurisdiction__parent__parent',
                 'foia__user',
                 )
+
+    def get(self, request, *args, **kwargs):
+        """Mark any unread notifications for this object as read."""
+        user = request.user
+        if user.is_authenticated():
+            question = self.get_object()
+            notifications = Notification.objects.for_user(user).for_object(question).get_unread()
+            for notification in notifications:
+                notification.mark_read()
+        return super(Detail, self).get(request, *args, **kwargs)
 
     def post(self, request, **kwargs):
         """Edit the question or answer"""
@@ -127,30 +145,32 @@ class Detail(DetailView):
         context['sidebar_admin_url'] = reverse('admin:qanda_question_change',
             args=(context['object'].pk,))
         context['answers'] = context['object'].answers.select_related('user')
-        context['answer_users'] = set(a.user for a in context['answers'])
-        foia = context['object'].foia
+        context['answer_form'] = AnswerForm()
+        foia = self.object.foia
         if foia is not None:
-            foia.public_file_count = (FOIAFile.objects
-                    .filter(foia=foia, access='public')
-                    .aggregate(count=Count('id'))['count'])
+            foia.public_file_count = foia.files.filter(access='public').count()
+        context['foia_viewable'] = (foia is not None and
+                foia.has_perm(self.request.user, 'view'))
         return context
+
 
 @login_required
 def create_question(request):
     """Create a question"""
     if request.method == 'POST':
-        form = QuestionForm(request.POST)
+        form = QuestionForm(user=request.user, data=request.POST)
         if form.is_valid():
             question = form.save(commit=False)
-            question.slug = slugify(question.title)
+            question.slug = slugify(question.title) or 'untitled'
             question.user = request.user
             question.date = datetime.now()
             question.save()
             return redirect(question)
     else:
-        form = QuestionForm()
+        form = QuestionForm(user=request.user)
     return render_to_response('forms/question.html', {'form': form},
                               context_instance=RequestContext(request))
+
 
 @login_required
 def follow(request, slug, idx):
@@ -163,6 +183,22 @@ def follow(request, slug, idx):
         actstream.actions.follow(request.user, question, actor_only=False)
         messages.success(request, 'You are now following this question.')
     return redirect(question)
+
+
+@login_required
+def follow_new(request):
+    """Follow or unfollow all new questions"""
+    profile = request.user.profile
+    if profile.new_question_notifications:
+        profile.new_question_notifications = False
+        profile.save()
+        messages.success(request, 'You will not be notified of any new questions.')
+    else:
+        profile.new_question_notifications = True
+        profile.save()
+        messages.success(request, 'You will be notified of all new questions.')
+    return redirect('question-index')
+
 
 @login_required
 def create_answer(request, slug, idx):
@@ -178,7 +214,6 @@ def create_answer(request, slug, idx):
             answer.date = datetime.now()
             answer.question = question
             answer.save()
-            answer.question.notify_update()
             return redirect(answer.question)
     else:
         form = AnswerForm()
@@ -188,6 +223,7 @@ def create_answer(request, slug, idx):
         {'form': form, 'question': question},
         context_instance=RequestContext(request)
     )
+
 
 class QuestionViewSet(viewsets.ModelViewSet):
     """API views for Question"""

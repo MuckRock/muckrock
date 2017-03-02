@@ -33,7 +33,7 @@ class CrowdfundForm(forms.ModelForm):
     payment_required = forms.IntegerField(
         label='Amount',
         help_text='We will add 15% to this amount, which goes towards our operating costs.',
-        widget=NumberInput()
+        widget=NumberInput(attrs={'class': 'currency-field'})
     )
 
     payment_capped = forms.BooleanField(
@@ -79,6 +79,10 @@ class CrowdfundPaymentForm(forms.Form):
     stripe_amount = forms.CharField(widget=NumberInput())
     show = forms.BooleanField(required=False, widget=forms.CheckboxInput())
     crowdfund = forms.ModelChoiceField(queryset=Crowdfund.objects.all(), widget=forms.HiddenInput())
+    full_name = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'Your Full Name'})
+    )
 
     def clean_stripe_amount(self):
         """Ensure the amount of the payment is greater than zero"""

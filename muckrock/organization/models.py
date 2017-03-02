@@ -5,6 +5,7 @@ Models for the organization application
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.template.loader import render_to_string
 from django.utils.text import slugify
@@ -39,10 +40,9 @@ class Organization(models.Model):
     def __unicode__(self):
         return self.name
 
-    @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
-        return ('org-detail', [], {'slug': self.slug})
+        return reverse('org-detail', kwargs={'slug': self.slug})
 
     def restore_requests(self):
         """Restore the number of requests credited to the org."""
@@ -225,16 +225,17 @@ class Organization(models.Model):
         if not self.active:
             raise AttributeError('Cannot cancel an inactive subscription.')
         customer = self.owner.profile.customer()
-        subscription = customer.subscriptions.retrieve(self.stripe_id)
         try:
+            subscription = customer.subscriptions.retrieve(self.stripe_id)
             subscription = subscription.delete()
-            self.stripe_id = ''
-            self.owner.profile.subscription_id = ''
-            self.owner.profile.payment_failed = False
         except stripe.InvalidRequestError:
-            logger.error(('No subscription is associated with organization '
+            subscription = None
+            logger.warning(('No subscription is associated with organization '
                          'owner %s.'), self.owner.username)
+        self.stripe_id = ''
         self.active = False
+        self.owner.profile.subscription_id = ''
+        self.owner.profile.payment_failed = False
         self.save()
         self.owner.profile.save()
         return subscription

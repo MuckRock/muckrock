@@ -9,24 +9,36 @@ from django.db.models import Count, Prefetch, Q, Max
 from django.http import HttpResponse, Http404
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
+from django.views.generic import TemplateView
 
 import logging
+from datetime import datetime
 
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency, STALE_DURATION
 from muckrock.foia.models import STATUS, FOIARequest, FOIACommunication, FOIAFile
 from muckrock.models import ExtractDay, Now
+from muckrock.task.filters import (
+    TaskFilterSet,
+    ResponseTaskFilterSet,
+    NewAgencyTaskFilterSet,
+    SnailMailTaskFilterSet,
+    FlaggedTaskFilterSet,
+    StaleAgencyTaskFilterSet,
+    RejectedEmailTaskFilterSet,
+    FailedFaxTaskFilterSet,
+)
 from muckrock.task.forms import (
-    TaskFilterForm, FlaggedTaskForm, StaleAgencyTaskForm, ResponseTaskForm,
+    FlaggedTaskForm, StaleAgencyTaskForm, ResponseTaskForm,
     ProjectReviewTaskForm
     )
 from muckrock.task.models import (
     Task, OrphanTask, SnailMailTask, RejectedEmailTask,
     StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask,
     CrowdfundTask, MultiRequestTask, StatusChangeTask, FailedFaxTask,
-    ProjectReviewTask
+    ProjectReviewTask, NewExemptionTask
     )
-from muckrock.views import MRFilterableListView
+from muckrock.views import MRFilterListView
 
 # pylint:disable=missing-docstring
 
@@ -46,15 +58,17 @@ def count_tasks():
         crowdfund=Count('crowdfundtask'),
         multirequest=Count('multirequesttask'),
         failed_fax=Count('failedfaxtask'),
+        new_exemption=Count('newexemptiontask'),
         )
     return count
 
 
-class TaskList(MRFilterableListView):
+class TaskList(MRFilterListView):
     """List of tasks"""
     title = 'Tasks'
     model = Task
-    template_name = 'lists/task_list.html'
+    filter_class = TaskFilterSet
+    template_name = 'task/list.html'
     default_sort = 'pk'
     bulk_actions = ['resolve'] # bulk actions have to be lowercase and 1 word
 
@@ -62,8 +76,6 @@ class TaskList(MRFilterableListView):
         """Apply query parameters to the queryset"""
         queryset = super(TaskList, self).get_queryset()
         task_pk = self.kwargs.get('pk')
-        show_resolved = self.request.GET.get('show_resolved')
-        resolved_by = self.request.GET.get('resolved_by')
         if task_pk:
             # when we are looking for a specific task,
             # we filter the queryset for that task's pk
@@ -71,29 +83,22 @@ class TaskList(MRFilterableListView):
             queryset = queryset.filter(pk=task_pk)
             if queryset.count() == 0:
                 raise Http404()
-            show_resolved = True
-            resolved_by = None
-        if not show_resolved:
-            queryset = queryset.exclude(resolved=True)
-        if resolved_by:
-            queryset = queryset.filter(resolved_by__pk=resolved_by)
-        # order queryset
-        queryset = queryset.order_by('date_done', 'date_created')
         return queryset
 
+    def get_model(self):
+        """Returns the model from the class"""
+        if self.queryset is not None:
+            return self.queryset.model
+        if self.model is not None:
+            return self.model
+        raise AttributeError('No model or queryset have been defined for this view.')
+
     def get_context_data(self, **kwargs):
-        """Adds counters for each of the sections (except all) and uses TaskFilterForm"""
+        """Adds counters for each of the sections and for processing requests."""
         context = super(TaskList, self).get_context_data(**kwargs)
-        filter_initial = {}
-        show_resolved = self.request.GET.get('show_resolved')
-        if show_resolved:
-            filter_initial['show_resolved'] = True
-        resolved_by = self.request.GET.get('resolved_by')
-        if resolved_by:
-            filter_initial['resolved_by'] = resolved_by
-        context['filter_form'] = TaskFilterForm(initial=filter_initial)
         context['counters'] = count_tasks()
         context['bulk_actions'] = self.bulk_actions
+        context['processing_count'] = FOIARequest.objects.filter(status='submitted').count()
         return context
 
     @method_decorator(user_passes_test(lambda u: u.is_staff))
@@ -114,7 +119,8 @@ class TaskList(MRFilterableListView):
         task_pks = [int(task_pk) for task_pk in task_pks if task_pk is not None]
         if not task_pks:
             raise ValueError('No tasks were selected, so there\'s nothing to do!')
-        tasks = [get_object_or_404(self.get_model(), pk=each_pk) for each_pk in task_pks]
+        task_model = self.get_model()
+        tasks = task_model.objects.filter(pk__in=task_pks)
         return tasks
 
     def task_post_helper(self, request, task):
@@ -122,7 +128,7 @@ class TaskList(MRFilterableListView):
         # pylint: disable=no-self-use
         if request.POST.get('resolve'):
             task.resolve(request.user)
-        return
+        return task
 
     def post(self, request):
         """Handle general cases for updating Task objects"""
@@ -169,11 +175,12 @@ class OrphanTaskList(TaskList):
             except Http404:
                 messages.error(request, 'Tried to move to a nonexistant request.')
                 logging.debug('Tried to move to a nonexistant request.')
-        return
+        return super(OrphanTaskList, self).task_post_helper(request, task)
 
 
 class SnailMailTaskList(TaskList):
     model = SnailMailTask
+    filter_class = SnailMailTaskFilterSet
     title = 'Snail Mails'
     queryset = (SnailMailTask.objects
             .select_related(
@@ -197,24 +204,35 @@ class SnailMailTaskList(TaskList):
         """Special post helper exclusive to SnailMailTasks"""
         # we should always set the status of a request when resolving
         # a snail mail task so that the request leaves processing status
-        if request.POST.get('status'):
-            status = request.POST.get('status')
-            if status in dict(STATUS):
-                task.set_status(status)
+        status = request.POST.get('status')
+        check_number = request.POST.get('check_number')
+        if status and status not in dict(STATUS):
+            messages.error(request, 'Invalid status')
+            return
+        try:
+            if check_number:
+                check_number = int(check_number)
+        except ValueError:
+            messages.error(request, 'Check number must be an integer')
+            return
+        if status:
+            task.set_status(status)
             # updating the date is an option and not an action
             if request.POST.get('update_date'):
                 task.update_date()
         # if the task is in the payment category and we're given a check
         # number, then we should record the existence of this check
-        if request.POST.get('check_number') and task.category == 'p':
-            check_number = int(request.POST.get('check_number'))
+        if check_number and task.category == 'p':
             task.record_check(check_number, request.user)
+        task.communication.confirmed = datetime.now()
+        task.communication.save()
         task.resolve(request.user)
-        return
+        return super(SnailMailTaskList, self).task_post_helper(request, task)
 
 
 class RejectedEmailTaskList(TaskList):
     model = RejectedEmailTask
+    filter_class = RejectedEmailTaskFilterSet
     title = 'Rejected Emails'
     queryset = RejectedEmailTask.objects.select_related('foia__jurisdiction')
 
@@ -251,6 +269,7 @@ class RejectedEmailTaskList(TaskList):
 
 class StaleAgencyTaskList(TaskList):
     model = StaleAgencyTask
+    filter_class = StaleAgencyTaskFilterSet
     title = 'Stale Agencies'
     queryset = (StaleAgencyTask.objects
             .select_related('agency')
@@ -280,12 +299,12 @@ class StaleAgencyTaskList(TaskList):
             else:
                 messages.error(request, 'The email is invalid.')
                 return
-        if request.POST.get('resolve'):
-            task.resolve(request.user)
+        return super(StaleAgencyTaskList, self).task_post_helper(request, task)
 
 
 class FlaggedTaskList(TaskList):
     model = FlaggedTask
+    filter_class = FlaggedTaskFilterSet
     title = 'Flagged'
     queryset = FlaggedTask.objects.select_related(
             'user', 'foia__jurisdiction', 'agency', 'jurisdiction')
@@ -305,6 +324,7 @@ class FlaggedTaskList(TaskList):
                 return
         if request.POST.get('resolve'):
             task.resolve(request.user)
+        return super(FlaggedTaskList, self).task_post_helper(request, task)
 
 
 class ProjectReviewTaskList(TaskList):
@@ -329,10 +349,12 @@ class ProjectReviewTaskList(TaskList):
             elif action == 'reject':
                 task.reject(text)
                 task.resolve(request.user)
+        return super(ProjectReviewTaskList, self).task_post_helper(request, task)
 
 
 class NewAgencyTaskList(TaskList):
     title = 'New Agencies'
+    filter_class = NewAgencyTaskFilterSet
     queryset = NewAgencyTask.objects.preload_list()
 
     def task_post_helper(self, request, task):
@@ -351,11 +373,12 @@ class NewAgencyTaskList(TaskList):
             replacement_agency = get_object_or_404(Agency, id=replacement_agency_id)
             task.reject(replacement_agency)
             task.resolve(request.user)
-        return
+        return super(NewAgencyTaskList, self).task_post_helper(request, task)
 
 
 class ResponseTaskList(TaskList):
     title = 'Responses'
+    filter_class = ResponseTaskFilterSet
     queryset = (ResponseTask.objects
             .select_related('communication__foia__agency')
             .select_related('communication__foia__jurisdiction')
@@ -372,6 +395,7 @@ class ResponseTaskList(TaskList):
     def task_post_helper(self, request, task):
         """Special post helper exclusive to ResponseTask"""
         # pylint: disable=too-many-branches
+        task = super(ResponseTaskList, self).task_post_helper(request, task)
         error_happened = False
         form = ResponseTaskForm(request.POST)
         if not form.is_valid():
@@ -387,39 +411,40 @@ class ResponseTaskList(TaskList):
         proxy = cleaned_data['proxy']
         # move is executed first, so that the status and tracking
         # operations are applied to the correct FOIA request
+        comms = None
         if move:
             try:
-                task.move(move)
+                comms = task.move(move)
             except (Http404, ValueError):
                 messages.error(request, 'No valid destination for moving the request.')
                 error_happened = True
         if status:
             try:
-                task.set_status(status, set_foia)
+                task.set_status(status, set_foia, comms)
             except ValueError:
                 messages.error(request, 'You tried to set the request to an invalid status.')
                 error_happened = True
         if tracking_number:
             try:
-                task.set_tracking_id(tracking_number)
+                task.set_tracking_id(tracking_number, comms)
             except ValueError:
                 messages.error(request,
                     'You tried to set an invalid tracking id. Just use a string of characters.')
                 error_happened = True
         if date_estimate:
             try:
-                task.set_date_estimate(date_estimate)
+                task.set_date_estimate(date_estimate, comms)
             except ValueError:
                 messages.error(request, 'You tried to set the request to an invalid date.')
                 error_happened = True
         if price:
             try:
-                task.set_price(price)
+                task.set_price(price, comms)
             except ValueError:
                 messages.error(request, 'You tried to set a non-numeric price.')
                 error_happened = True
         if proxy:
-            task.proxy_reject()
+            task.proxy_reject(comms)
         action_taken = move or status or tracking_number or price or proxy
         if action_taken and not error_happened:
             task.resolve(request.user)
@@ -445,6 +470,7 @@ class MultiRequestTaskList(TaskList):
 
 class FailedFaxTaskList(TaskList):
     title = 'Failed Faxes'
+    filter_class = FailedFaxTaskFilterSet
     queryset = (FailedFaxTask.objects
             .select_related('communication__foia__agency')
             .select_related('communication__foia__user')
@@ -456,7 +482,12 @@ class FailedFaxTaskList(TaskList):
                     to_attr='reverse_communications')))
 
 
-class RequestTaskList(TaskList):
+class NewExemptionTaskList(TaskList):
+    title = 'New Exemptions'
+    queryset = NewExemptionTask.objects.select_related('foia__agency__jurisdiction__parent')
+
+
+class RequestTaskList(TemplateView):
     """Displays all the tasks for a given request."""
     title = 'Request Tasks'
     template_name = 'lists/request_task_list.html'
@@ -479,7 +510,9 @@ class RequestTaskList(TaskList):
         # we purposely call super on TaskList here, as we do want the generic
         # list views method to be called, but we don't need any of the
         # data calculated in the TaskList method, so using it just slows us down
-        context = super(TaskList, self).get_context_data(**kwargs)
+        context = super(RequestTaskList, self).get_context_data(**kwargs)
+        context['title'] = self.title
+        context['object_list'] = self.get_queryset()
         context['foia'] = self.foia_request
         context['foia_url'] = self.foia_request.get_absolute_url()
         return context

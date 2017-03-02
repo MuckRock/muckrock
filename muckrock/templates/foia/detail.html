@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 {% load compress %}
 {% load humanize %}
-{% load markdown_deux_tags %}
 {% load mathfilters %}
 {% load static from staticfiles %}
 {% load crowdfund_tags %}
@@ -17,7 +16,6 @@
 <meta property="og:title" content="{{ foia.title }}" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="{{ request.build_absolute_uri }}" />
-<meta property="og:image" content="{% static 'icons/logo.png' %}" />
 <meta property="og:description" content="{{ foia.user.get_full_name }} {% if foia.date_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to {{ foia.agency.name }} of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}{{ foia.jurisdiction.name }}.{% endif %}" />
 <meta property="og:site_name" content="MuckRock" />
 {% endblock open_graph %}
@@ -30,12 +28,11 @@
 {% endif %}
 <meta name="twitter:title" content="{{ foia.title }}" />
 <meta name="twitter:description" content="{{ foia.user.get_full_name }} {% if foia.date_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to {{ foia.agency.name }} of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}{{ foia.jurisdiction.name }}.{% endif %}" />
-<meta name="twitter:image:src" content="{% static 'icons/logo.png' %}" />
 {% endblock twitter_card %}
 
 {% block content %}
-<article class="request detail" id="foia-{{ foia.id }}">
-    <section class="request properties">
+<article class="request detail grid__row" id="foia-{{ foia.id }}">
+    <section class="request properties grid__column one-quarter">
         <header>
             <section class="identity">
                 <h1>{{ foia.title }}</h1>
@@ -47,7 +44,6 @@
             <p>It is a clone of <a href="{{ foia.parent.get_absolute_url }}">this request</a>.</p>
             {% endif %}
         </section>
-        <span class="toggle-details" id="toggle-specific-information" data-state="0">Show details</span>
         <section class="specific-information">
             {% if request.user.is_staff or foia.tracking_id %}
             <table class="numbers">
@@ -91,29 +87,25 @@
                 {% if show_estimated_date %}
                 <tr class="estimated-completion">
                     <td class="label">Est. Completion</td>
-                    <td class="date">{% if foia.date_estimate %}{{ foia.date_estimate|date }}{% else %}None{% endif %}{% if user_can_edit %}<span class="edit">Edit</span>{% endif %}</td>
+                    <td class="date">{% if foia.date_estimate %}{{ foia.date_estimate|date }}{% else %}None{% endif %}{% if user_can_edit %}<span class="edit action">Edit</span>{% endif %}</td>
                 </tr>
                 {% endif %}
             </table>
             {% if user_can_edit %}
             <form class="change-date" id="change-estimated-completion-date" method="post">
                 {% csrf_token %}
-                <label for="{{ change_estimated_date.date_estimate.id_for_label }}">{{ change_estimated_date.date_estimate.label }}</label>
-                {{ change_estimated_date.date_estimate }}
-                <p class="help-text">{{ change_estimated_date.date_estimate.help_text }}</p>
-                <button class="primary" type="submit" name="action" value="date_estimate">Save</button>
-                <button class="cancel" id="cancel-date-estimate">Cancel</button>
+                {% include 'lib/pattern/form.html' with form=change_estimated_date %}
+                <button class="primary button" type="submit" name="action" value="date_estimate">Save</button>
+                <button class="cancel button" id="cancel-date-estimate">Cancel</button>
             </form>
             {% endif %}
-            <section class="states">
-                {% include 'foia/component/status.html' %}
-                {% include 'foia/component/embargo.html' %}
-                {% project_manager foia %}
-                {% tag_manager foia %}
-            </section>
+            {% include 'foia/component/status.html' %}
+            {% include 'foia/component/embargo.html' %}
+            {% project_manager foia %}
+            {% tag_manager foia %}
         </section>
     </section>
-    <main class="request main">
+    <main class="request main grid__column three-quarters">
 
         {% if foia.has_crowdfund %}
             {% crowdfund foia.crowdfund.pk %}
@@ -167,7 +159,7 @@
                     <div class="communications filter">
                         <input id="comms-filter" type="search" placeholder="Filter communications" />
                     </div>
-                    <button id="toggle-communication-collapse" data-state="0">Collapse All</button>
+                    <button class="button" id="toggle-communication-collapse" data-state="0">Collapse All</button>
                 </div>
                 <div class="communications-list">
                 {% with foia_url=foia.get_absolute_url %}
@@ -194,125 +186,147 @@
                 {% if user_can_edit %}
                 <div class="communications-composer">
                     <div class="composer-actions">
-                        <a href="#follow-up" class="primary button">Follow Up</a>
-                        {% if foia.is_payable %}
-                        <a href="#pay" class="success button">Pay Fees</a>
-                        {% if not foia.has_crowdfund %}
-                        <a href="#crowdfund" class="success button">Crowdfund</a>
-                        {% endif %}
-                        {% endif %}
-                        {% if is_thankable %}
-                        <a href="#thanks" class="success button">Thank Agency</a>
-                        {% endif %}
-                        {% if can_appeal %}
-                        <a href="#appeal" class="failure button">Appeal</a>
-                        {% endif %}
+                        <div class="button-group">
+                            {% if is_thankable %}
+                            <a href="#thanks" class="blue button">Say Thanks</a>
+                            {% endif %}
+                            <a href="#follow-up" class="blue button">Follow Up</a>
+                            {% if foia.is_payable %}
+                            <a href="#pay" class="green button">Pay Fees</a>
+                            {% if not foia.has_crowdfund %}
+                            <a href="#crowdfund" class="green button">Crowdfund</a>
+                            {% endif %}
+                            {% endif %}
+                            {% if foia.is_appealable %}
+                            <a href="#appeal" class="red button">Appeal</a>
+                            {% endif %}
+                        </div>
+                        <a href="#get-advice" class="button">Get Advice</a>
                         {% if request.user.is_staff %}
                         <a href="{% url 'foia-admin-fix' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Make an admin fix" class="button">Admin Fix</a>
-                        {% else %}
-                        <button id="get-advice">Get Advice</button>
                         {% endif %}
                     </div>
                     <div class="composer-inputs">
-                        <div class="inactive composer-input" id="inactive">
-                            <p>You may <a href="#follow-up">follow up</a> {% if not foia.disable_autofollowups %}manually {% endif %}with the agency{% if can_appeal %} or <a href="#appeal">appeal</a> their decision{% endif %}.</p>
+                        <div class="composer" id="inactive">
+                            <div class="composer-input">
+                                <p>You may <a href="#follow-up">follow up</a> {% if not foia.disable_autofollowups %}manually {% endif %}with the agency{% if foia.is_appealable %} or <a href="#appeal">appeal</a> their decision{% endif %}.</p>
+                            </div>
                         </div>
-                        <form class="follow-up composer-input" id="follow-up" method="post">
-                            <header>Send a follow up to the {{ foia.agency.name }}</header>
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="follow_up" />
-                            <textarea name="text" id="follow-up-composer"></textarea>
-                            <div class="buttons">
-                                <button class="primary" type="submit" name="appeal" value="1">Send</button>
-                                <a href="#inactive" class="button cancel">Cancel</a>
-                            </div>
-                        </form>
+                        <div class="follow-up composer" id="follow-up">
+                            <form class="composer-input" method="post">
+                                <header>Send a follow up to the {{ foia.agency.name }}</header>
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="follow_up" />
+                                <textarea name="text" id="follow-up-composer"></textarea>
+                                <div class="buttons">
+                                    <button class="primary button" type="submit" name="appeal" value="1">Send</button>
+                                    <a href="#inactive" class="button cancel">Cancel</a>
+                                </div>
+                            </form>
+                        </div>
                         {% if is_thankable %}
-                        <form class="thanks composer-input" id="thanks" method="post">
-                            <header>Send a thank you note to the {{ foia.agency.name }}</header>
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="thanks" />
+                        <div class="composer" id="thanks">
+                            <form class="composer-input" method="post">
+                                <header>Send a thank you note to the {{ foia.agency.name }}</header>
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="thanks" />
+<textarea name="text" id="thanks-composer">
+Hi,
 
-                            <textarea name="text" id="thanks-composer">
-        Hi,
+Thanks so much for your help with this request! I really appreciate it.
 
-        Thanks so much for your help with this request! I really appreciate it.
-
-        Sincerely,
-        {{foia.user.get_full_name}}
-                            </textarea>
-                            <div class="buttons">
-                                <button class="primary" type="submit" name="thanks" value="1">Send</button>
-                                <a href="#inactive" class="button">Cancel</a>
-                            </div>
-                        </form>
+Sincerely,
+{{foia.user.get_full_name}}
+</textarea>
+                                <div class="buttons">
+                                    <button class="primary button" type="submit" name="thanks" value="1">Send</button>
+                                    <a href="#inactive" class="button">Cancel</a>
+                                </div>
+                            </form>
+                        </div>
                         {% endif %}
                         {% if can_appeal %}
-                        <form class="appeal composer-input" id="appeal" method="post">
-                            {% if foia.agency.appeal_agency %}
-                            <header>Send an appeal to the {{ foia.agency.appeal_agency.name }}</header>
-                            {% else %}
-                            <header>Send an appeal to the {{ foia.agency.name }}</header>
-                            {% endif %}
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="appeal" />
-                            <textarea name="text" id="appeal-composer"></textarea>
-                            <div class="buttons">
-                                <button class="primary" type="submit" name="appeal" value="1">Send</button>
-                                <a href="#inactive" class="button">Cancel</a>
+                        <div class="composer" id="appeal">
+                            {% if not foia.jurisdiction.can_appeal %}
+                            <div class="message warning">
+                                <span class="symbol">
+                                    {% include 'lib/component/icon/warning.svg' %}
+                                </span>
+                                <span class="text">
+                                    <p>{% if foia.jurisdiction.level == 'l' %}{{foia.jurisdiction.parent.name}}{% else %}{{foia.jurisdiction.name}}{% endif %} does not have a formal appeals process open to requesters. However, you can ask an agency to reconsider its determination or find ways to reword your request. If you're looking for legal resources, <a href="{% if foia.jurisdiction.level == 'l' %}{{foia.jurisdiction.parent.get_absolute_url}}{% else %}{{foia.jurisdiction.get_absolute_url}}{% endif %}">check out our {% if foia.jurisdiction.level == 'l' %}{{foia.jurisdiction.parent.name}}{% else %}{{foia.jurisdiction.name}}{% endif %} public records guide</a>.</p>
+                                </span>
                             </div>
-                        </form>
+                            {% endif %}
+                            <div id="dom-data" style="display: none;"
+                                data-request="{{foia.pk}}"
+                                data-jurisdiction="{% if foia.jurisdiction.level == 'l' %}{{foia.jurisdiction.parent.pk}}{% else %}{{foia.jurisdiction.pk}}{% endif %}"
+                                data-agency="{{foia.agency.pk}}"></div>
+                            <div class="exemption-browser" id="exemptionBrowser">
+                              <noscript>To search for exemptions and appeals, please enable Javascript.</noscript>
+                            </div>
+                            <form class="composer-input" method="post">
+                                {% if foia.agency.appeal_agency %}
+                                <header>Send an appeal to the {{ foia.agency.appeal_agency.name }}</header>
+                                {% else %}
+                                <header>Send an appeal to the {{ foia.agency.name }}</header>
+                                {% endif %}
+                                {% csrf_token %}
+                                <textarea name="text" id="appeal-composer"></textarea>
+                                <div class="buttons">
+                                    <a href="#inactive" class="button">Cancel</a>
+                                    <button class="primary button" type="submit" name="action" value="appeal">Send Appeal</button>
+                                </div>
+                            </form>
+                        </div>
                         {% endif %}
                         {% if foia.is_payable %}
-                        <form class="payment composer-input stripe-checkout" id="pay" method="post" action="{% url 'foia-pay' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">
-                            <header>
-                                <p>Pay your request fees</p>
-                                <p class="help-text">We will add a 5% fee to this amount to cover our transaction fees.</p>
-                            </header>
-                            {% csrf_token %}
-                            <input type="hidden" name="stripe_token" value="" />
-                            <input type="hidden" name="stripe_pk" value="{{ stripe_pk }}" />
-                            <input type="hidden" name="stripe_image" value="{% static 'icons/logo.png' %}" />
-                            <input type="hidden" name="stripe_email" value="{{request.user.email}}" />
-                            <input type="hidden" name="stripe_label" value="Pay" />
-                            <input type="hidden" name="stripe_description" value="Request Fee" />
-                            <input type="hidden" name="stripe_bitcoin" value="true" />
-                            <input type="hidden" name="stripe_fee" value="0.05" />
-                            <input type="number" name="stripe_amount" class="currency-field" id="stripe_amount" value="{{ foia.get_stripe_amount }}" />
-                            <div class="buttons">
-                                <button type="submit" class="primary">Pay</button>
-                                <a href="#inactive" class="button">Cancel</a>
-                            </div>
-                        </form>
+                        <div class="composer" id="pay">
+                            <form class="composer-input stripe-checkout" method="post" action="{% url 'foia-pay' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">
+                                <header>
+                                    <p>Pay your request fees</p>
+                                    <p class="help-text">We will add a 5% fee to this amount to cover our transaction fees.</p>
+                                </header>
+                                {% csrf_token %}
+                                <input type="hidden" name="stripe_token" value="" />
+                                <input type="hidden" name="stripe_pk" value="{{ stripe_pk }}" />
+                                <input type="hidden" name="stripe_image" value="{% static 'icons/logo.png' %}" />
+                                <input type="hidden" name="stripe_email" value="{{request.user.email}}" />
+                                <input type="hidden" name="stripe_label" value="Pay" />
+                                <input type="hidden" name="stripe_description" value="Request Fee" />
+                                <input type="hidden" name="stripe_bitcoin" value="true" />
+                                <input type="hidden" name="stripe_fee" value="0.05" />
+                                <input type="number" name="stripe_amount" class="currency-field" id="stripe_amount" value="{{ foia.get_stripe_amount }}" />
+                                <div class="buttons">
+                                    <button type="submit" class="primary button">Pay</button>
+                                    <a href="#inactive" class="button">Cancel</a>
+                                </div>
+                            </form>
+                        </div>
                         {% if not foia.has_crowdfund %}
-                        <form class="crowdfund composer-input" id="crowdfund" method="post" action="{% url 'foia-crowdfund' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">
-                            <header>Crowdfund your request fees</header>
-                            {% csrf_token %}
-                            {% if form.non_field_errors %}
-                            <object class="failure panel">
-                            {{ form.non_field_errors }}
-                            </object>
-                            {% endif %}
-                            <div class="hidden-fields">
-                            {% for field in form.hidden_fields %}
-                                {{ field }}
-                            {% endfor %}
-                            </div>
-                            {% for field in crowdfund_form.visible_fields %}
-                            <fieldset class="{{ field.label|lower }}{% if field.field.required %} required{% endif %}">
-                                <label {% if field.errors %}class="failure"{% endif %} for="{{ field.auto_id }}">{{ field.label}}</label>
-                                {{ field.errors }}
-                                {{ field }}
-                                {% if field.help_text %}<p class="help-text">{{ field.help_text }}</p>{% endif %}
-                            </fieldset>
-                            {% endfor %}
-                            <div class="buttons">
-                                <button type="submit" class="primary">Create Crowdfund</button>
-                                <a href="#inactive" class="button">Cancel</a>
-                            </div>
-                        </form>
+                        <div class="composer" id="crowdfund">
+                            <form class="crowdfund composer-input" id="crowdfund" method="post" action="{% url 'foia-crowdfund' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">
+                                <header>Crowdfund your request fees</header>
+                                {% csrf_token %}
+                                {% include 'lib/pattern/form.html' with form=crowdfund_form %}
+                                <div class="buttons">
+                                    <button type="submit" class="primary button">Create Crowdfund</button>
+                                    <a href="#inactive" class="button">Cancel</a>
+                                </div>
+                            </form>
+                        </div>
                         {% endif %}
                         {% endif %}
+                        <div class="composer" id="get-advice">
+                            <form class="composer-input" method="post" action="{% url 'question-create' %}">
+                                <header>Ask the MuckRock FOIA community for advice. This question will be public, or you can <a href="#" data-modal="#flag-modal" class="modal-link">flag your request</a> and staff can help you directly.</header>
+                                {% csrf_token %}
+                                {% include 'lib/pattern/form.html' with form=question_form %}
+                                <div class="buttons">
+                                    <button type="submit" class="primary button">Ask Question</button>
+                                    <a href="#inactive" class="button">Cancel</a>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
                 {% endif %}
@@ -325,17 +339,19 @@
                 {% if foia.total_pages > 0 %}
                 <div class="active-document">
                     <header>
-                        <h3 id="doc-title"></h3>
-                        <div class="file-viewer-actions">
-                            <span class="cancel button">Close</span>
-                        </div>
+                        <span>
+                            <h3 id="doc-title"></h3>
+                            <p><small><span id="doc-pages"></span> pages</small></p>
+                        </span>
+                        <span>
+                            <span class="red cancel button">Close</span>
+                        </span>
                     </header>
                     <div class="viewer" id="viewer"></div>
                 </div>
                 {% endif %}
-                {% with foia.files.all as files %}
                 {% if files %}
-                <ul class="files-list" id="all-files">
+                <ul class="files-list nostyle" id="all-files">
                     {% with foia_url=foia.get_absolute_url %}
                     {% for file in files %}
                     <li>{% include "lib/file.html" %}</li>
@@ -345,7 +361,14 @@
                 {% else %}
                 <p class="empty">There are no files associated with this request.</p>
                 {% endif %}
-                {% endwith %}
+                {% if foia.files.count > 50 %}
+                <div class="notification warning">
+                    <span class="symbol">{% include 'lib/component/icon/warning.svg' %}</span>
+                    <span class="text">
+                        <p>There are too many files to display on the request page. <a href="{% url 'foia-files' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">See all files</a>.</p>
+                    </span>
+                </div>
+                {% endif %}
             </section>
 
             {% if user_can_edit %}
@@ -372,7 +395,7 @@
                     </header>
                     {{ note_form.note }}
                     <footer>
-                        <button class="primary" type="submit" name="action" value="add_note">Save</button>
+                        <button class="primary button" type="submit" name="action" value="add_note">Add Note</button>
                         <p>Your notes are visible to you and other editors of this request.</p>
                     </footer>
                 </form>
@@ -411,38 +434,40 @@
                     {% else %}
                     <input type="text" value="No private link" readonly />
                     {% endif %}
-                    <button type="submit" name="action" value="generate_key">Create new link</button>
+                    <button class="button" type="submit" name="action" value="generate_key">Create new link</button>
                     <p class="help-text">Share this private link with anyone you want to be able to see this request. If you regenerate this link, it will break any that you have already given out.</p>
                 </form>
                 {% endif %}
                 <form class="grant-access" method="post">
                     {% csrf_token %}
                     <h3>Grant Access</h3>
-                    <div class="user search input">
-                        <label for="{{ access_form.users.id_for_label}}">Search for MuckRock users</label>
-                        {{ access_form.users }}
+                    <div class="picker">
+                        <div class="user search input">
+                            <label for="{{ access_form.users.id_for_label}}">Search for MuckRock users</label>
+                            {{ access_form.users }}
+                        </div>
+                        {{ access_form.access }}
                     </div>
-                    {{ access_form.access }}
-                    <button class="primary" type="submit" name="action" value="grant_access">Save</button>
+                    <button class="primary button" type="submit" name="action" value="grant_access">Save</button>
                 </form>
                 <table class="people with-access">
                     <h3>People with access</h3>
                     <tbody>
                         <tr class="person with-access">
-                            <td class="name"><p>{{ foia.user.get_full_name }} <span class="creator badge">Creator</span></p></td>
+                            <td class="name"><p>{{ foia.user.get_full_name }} <span class="small badge">Creator</span></p></td>
                             <td class="modify nostretch"></td>
                         </tr>
                         {% for user in foia.edit_collaborators.all %}
                         <tr class="person with-access">
                             <td class="name">
-                                <p>{{ user.get_full_name }} <span class="editor badge">Editor</span></p>
+                                <p>{{ user.get_full_name }} <span class="small badge">Editor</span></p>
                             </td>
                             <td class="modify nostretch">
                                 <form class="modify-access" method="post">
                                     {% csrf_token %}
                                     <input type="hidden" name="user" value="{{ user.id }}" />
-                                    <button type="submit" name="action" value="demote">Demote</button>
-                                    <button class="failure" type="submit" name="action" value="revoke_access">Revoke</button>
+                                    <button class="small basic button" type="submit" name="action" value="demote">Demote</button>
+                                    <button class="small basic red button" type="submit" name="action" value="revoke_access">Revoke</button>
                                 </form>
                             </td>
                         </tr>
@@ -450,14 +475,14 @@
                         {% for user in foia.read_collaborators.all %}
                         <tr class="person with-access">
                             <td class="name">
-                                <p>{{ user.get_full_name }} <span class="reader badge">Viewer</span></p>
+                                <p>{{ user.get_full_name }} <span class="small badge">Viewer</span></p>
                             </td>
                             <td class="modify nostretch">
                                 <form class="modify-access" method="post">
                                     {% csrf_token %}
                                     <input type="hidden" name="user" value="{{ user.id }}" />
-                                    <button type="submit" name="action" value="promote">Promote</button>
-                                    <button class="failure" type="submit" name="action" value="revoke_access">Revoke</button>
+                                    <button class="button" type="submit" name="action" value="promote">Promote</button>
+                                    <button class="failure button" type="submit" name="action" value="revoke_access">Revoke</button>
                                 </form>
                             </td>
                         </tr>
@@ -475,10 +500,9 @@
 {% block scripts %}
 <script type="text/javascript">
     $('.datepicker').datepicker({
-        maxDate: '+1m',
+        maxDate: '+30d',
         minDate: 0,
         firstDay: 1,
-        hideIfNoPrevNext: true,
         numberOfMonths: 1,
         {% if foia.date_embargo %}
         defaultDate: '{{ foia.date_embargo|date:"m/d/Y" }}'
@@ -486,11 +510,10 @@
     });
     $('#id_date_due').datepicker({
         dateFormat: 'yy-mm-dd',
-        maxDate: '+1m',
+        maxDate: '+30d',
         minDate: 0,
         firstDay: 1,
         hideIfNoPrevNext: true,
-        numberOfMonths: 1,
     });
     var foiaId = $('.request.detail').attr('id');
     if (foiaId != undefined) {
@@ -501,7 +524,5 @@
             foiaId: foiaId
         }
     }
-    $('#comms-filter').quicksearch('#comms .communications-list .communication');
-    $('#notes-filter').quicksearch('#notes .note');
 </script>
 {% endblock scripts %}

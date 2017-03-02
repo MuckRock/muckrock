@@ -1,0 +1,110 @@
+{% extends 'foiamachine/base/base.html' %}
+
+{% load hosts %}
+{% load tags %}
+
+{% block main %}
+<main>
+    <header class="space-between align-bottom">
+            <div class="space-between align-baseline w100">
+                <h1>{{object.title}}</h1>
+                {% if request.user == object.user %}
+                <p><a href="#share">Share</a> &bull; <a href="{% host_url 'foi-update' slug=object.slug pk=object.pk host 'foiamachine'%}">Edit</a> &bull; <a href="{% host_url 'foi-delete' slug=object.slug pk=object.pk host 'foiamachine'%}">Delete</a></p>
+                {% endif %}
+            </div>
+            <div class="space-between align-baseline w100">
+                <h2>{{object.get_status_display}}</h2>
+                <p>{% if object.agency %}<a href="{{object.agency.get_absolute_url}}">{{object.agency}}</a> &bull; {% endif %}<a href="{{object.jurisdiction.get_absolute_url}}">{{object.jurisdiction}}</a></p>
+            </div>
+    </header>
+    {% if object.sent_communications.exists %}
+    <div class="margin-bottom" id="dates">
+        {% if object.is_overdue %}
+        <p class="bold red">A response is {{object.days_overdue}} day{{object.days_overdue|pluralize}} overdue.</p>
+        {% else %}
+        <p class="bold">A response will be due in {{object.days_until_due}} day{{object.days_until_due|pluralize}}.</p>
+        {% endif %}
+        <table class="ruled">
+            <tr>
+                <td class="bold">Date Submitted</td>
+                <td>{{object.date_submitted}}</td>
+            </tr>
+            <tr>
+                <td class="bold">Date Due</td>
+                <td>{{object.date_due}}</td>
+            </tr>
+        </table>
+    </div>
+    {% endif %}
+    {% with object.agency as agency %}
+    {% if agency %}
+    <div class="margin-bottom" id="agency">
+        <h2>Contacts</h2>
+        <table class="ruled">
+            <tbody>
+                {% if agency.email %}
+                {% with object.communications.first as first_comm %}
+                <tr>
+                    <td class="bold top">Email</td>
+                    <td class="select-all"><a href="mailto:{{agency.email}}?subject={{object.title}}&body={{first_comm.message|urlencode}}">{{agency.email}}</a></td>
+                </tr>
+                {% endwith %}
+                {% endif %}
+                {% if agency.phone %}
+                <tr>
+                    <td class="bold top">Phone</td>
+                    <td>{{object.agency.phone}}</td>
+                </tr>
+                {% endif %}
+                {% if agency.address %}
+                <tr>
+                    <td class="bold top">Address</td>
+                    <td><address>{{object.agency.address|linebreaks}}</address></td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    {% endwith %}
+    <div id="communications">
+        <header class="space-between align-center margin-bottom">
+            <h2 class="nomargin">Communications</h2>
+            {% if request.user == object.user %}
+            <a class="blue button" href="{% host_url 'comm-create' foi_slug=object.slug foi_pk=object.pk host 'foiamachine' %}">Add a communication</a>
+            {% endif %}
+        </header>
+        {% for communication in object.communications.all %}
+        {% include 'foiamachine/patterns/communication.html' %}
+        {% empty %}
+        <p class="grey bold">This request has no communications.</p>
+        {% endfor %}
+    </div>
+    {% if request.user == object.user %}
+    <div class="margin-bottom" id="share">
+        <header class="space-between align-bottom margin-bottom">
+            <h2 class="nomargin">
+                Sharing
+                {% if object.sharing_code %}
+                <span class="red badge">On</span>
+                {% else %}
+                <span class="badge">Off</span>
+                {% endif %}
+            </h2>
+            <form method="post" action="{% host_url 'foi-share' slug=object.slug pk=object.pk host 'foiamachine'%}">
+                {% csrf_token %}
+                {% if object.sharing_code %}
+                <button type="submit" class="blue button" name="action" value="disable">Disable link sharing</button>
+                {% else %}
+                <button type="submit" class="blue button" name="action" value="enable">Enable link sharing</button>
+                {% endif %}
+            </form>
+        </header>
+        {% if object.sharing_code %}
+        <textarea readonly class="select-all" style="resize:none;" rows="1">{{request.get_host}}{{request.get_full_path}}?sharing={{object.sharing_code}}</textarea>
+        {% endif %}
+        <p class="small">All of your FOIA Machine requests are private, except for when you enable link sharing. The link contains a special code that is changed every time link sharing is enabled. Every time link sharing is disabled, the code is deleted.</p>
+    </div>
+    {% endif %}
+</main>
+{% endblock %}

@@ -4,6 +4,7 @@ App config for qanda
 
 from django.apps import AppConfig
 
+# pylint: disable=invalid-name
 
 class QuestionConfig(AppConfig):
     """Configures the project application to use activity streams"""
@@ -12,4 +13,9 @@ class QuestionConfig(AppConfig):
     def ready(self):
         """Registers the application with the activity streams plugin"""
         from actstream import registry
-        registry.register(self.get_model('Question'))
+        from watson import search
+        Question = self.get_model('Question')
+        Answer = self.get_model('Answer')
+        registry.register(Question)
+        registry.register(Answer)
+        search.register(Question)

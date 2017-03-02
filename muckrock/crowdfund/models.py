@@ -3,17 +3,18 @@ Models for the crowdfund application
 """
 
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
 
-import actstream
 from datetime import date
 from decimal import Decimal
 import logging
 import stripe
 
 from muckrock import task
+from muckrock.utils import new_action
 
 stripe.api_version = '2015-10-16'
 
@@ -33,7 +34,7 @@ class Crowdfund(models.Model):
         decimal_places=2,
         default='0.00'
     )
-    date_due = models.DateField()
+    date_due = models.DateField(blank=True, null=True)
     closed = models.BooleanField(default=False)
 
     def __unicode__(self):
@@ -45,7 +46,8 @@ class Crowdfund(models.Model):
 
     def expired(self):
         """Has this crowdfund run out of time?"""
-        return date.today() >= self.date_due or self.closed
+        return ((self.date_due is not None and date.today() >= self.date_due)
+                or self.closed)
 
     def amount_remaining(self):
         """Reports the amount still needed to be raised as a decimal."""
@@ -77,7 +79,7 @@ class Crowdfund(models.Model):
         if succeeded:
             logging.info('Crowdfund %d reached its goal.', self.id)
             verb = 'succeeded'
-        actstream.action.send(self, verb=verb)
+        new_action(self, verb)
         return
 
     def contributors_count(self):
@@ -132,6 +134,7 @@ class Crowdfund(models.Model):
             show=show,
             charge_id=charge.id
         )
+        cache.delete('cf:%s:crowdfund_widget_data' % self.pk)
         logging.info(payment)
         self.update_payment_received()
         return payment
@@ -140,11 +143,16 @@ class Crowdfund(models.Model):
     def project(self):
         """Get the project for this crowdfund if it exists"""
         # there will never be more than one project due to unique constraint
+        # pylint: disable=access-member-before-definition
+        # pylint: disable=attribute-defined-outside-init
+        if hasattr(self, '_project'):
+            return self._project
         projects = self.projects.all()
         if projects:
-            return projects[0]
+            self._project = projects[0]
         else:
-            return None
+            self._project = None
+        return self._project
 
 
 class CrowdfundPayment(models.Model):

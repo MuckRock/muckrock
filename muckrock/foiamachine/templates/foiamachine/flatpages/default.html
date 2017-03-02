@@ -1,0 +1,11 @@
+{% extends 'foiamachine/base/base.html' %}
+{% load tags %}
+
+{% block title %}{{flatpage.title}} &bull; {{block.super}}{% endblock %}
+
+{% block main %}
+<main class="flatpage">
+    <h1>{{flatpage.title}}</h1>
+    {{flatpage.content}}
+</main>
+{% endblock %}

@@ -18,4 +18,4 @@ class FoiaSitemap(LimitSitemap):
 
     def items(self):
         """Return all public FOIA requests"""
-        return FOIARequest.objects.get_public()
+        return FOIARequest.objects.select_related('jurisdiction').get_public()

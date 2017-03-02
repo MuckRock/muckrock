@@ -1,0 +1,48 @@
+{% extends 'base_list.html' %}
+
+{% block list-table-head %}
+<th data-sort="name">Name</th>
+<th data-sort="level">Level</th>
+{% endblock %}
+
+{% block list-table-row %}
+{% with object as jurisdiction %}
+<td><a href="{{ jurisdiction.get_absolute_url }}">{{ jurisdiction }}</a></td>
+{% if jurisdiction.level == 'f' %}
+<td>Federal</td>
+{% else %}
+    {% if jurisdiction.level == 's' %}
+<td>State</td>
+    {% else %}
+<td>Local</td>
+    {% endif %}
+{% endif %}
+{% endwith %}
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+var levelFilter = $('#id_level');
+var stateFilter = $('#id_parent');
+function disableStateFilter(){
+    $(stateFilter).attr('disabled', true).closest('.field').addClass('disabled');
+    $('#id_parent-autocomplete').attr('disabled', true);
+    $('#id_parent-wrapper').yourlabsWidget().freeDeck();
+}
+function enableStateFilter(){
+    $(stateFilter).attr('disabled', false).closest('.field').removeClass('disabled');
+    $(stateFilter).siblings('#id_parent-autocomplete').attr('disabled', false);
+}
+function updateStateFilter(){
+    var levelValue = $(levelFilter).val();
+    console.log(levelValue);
+    if (levelValue != 'l') {
+        disableStateFilter();
+    } else {
+        enableStateFilter();
+    }
+}
+levelFilter.change(updateStateFilter);
+updateStateFilter();
+</script>
+{% endblock %}

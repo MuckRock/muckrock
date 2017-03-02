@@ -1,0 +1,139 @@
+
+
+.create.organization, .update.organization, .activate.organization {
+    @include display(flex);
+    @include flex-wrap(wrap);
+    header {
+        @include flex(0 1 100%);
+    }
+    aside {
+        @include flex(1);
+    }
+    form {
+        @include flex(1);
+    }
+    aside {
+        @include border;
+        @include border-radius;
+        margin-right: $vr;
+        padding: $vr;
+    }
+    label {
+        @extend dfn;
+    }
+    form input {
+        display: block;
+        margin-bottom: $vr;
+        width: 100%;
+    }
+    .errorlist {
+        list-style: none;
+        padding-left: 0;
+        margin-bottom: 0;
+        color: $color-red;
+        li {
+            margin-bottom: $vr;
+        }
+        & + input {
+            color: $color-red-dark;
+            border-color: $color-red;
+            background: $color-red-light;
+        }
+    }
+}
+
+$request-breakpoint: 768px;
+.organization.detail {
+    @include display(flex);
+    @include align-items(stretch);
+    @include flex-direction(column);
+    @media all and (min-width: $request-breakpoint) {
+        @include flex-direction(row);
+        & > * {
+            margin-left: $vr;
+            &:first-child {
+                margin-left: 0;
+            }
+        }
+    }
+    aside {
+        @include flex(1);
+    }
+    main {
+        @include flex(3);
+    }
+}
+
+.organization.detail .sidebar {
+    h1 {
+        // font-size: $size-6;
+        font-weight: $bold;
+    }
+    form {
+        display: inline-block;
+    }
+    .progress {
+        margin-bottom: 0;
+    }
+}
+
+.organization.detail .tab-sections {
+    margin-bottom: $vr;
+    .tab-section {
+        display: none;
+        margin-bottom: 0;
+    }
+    .active {
+        display: block;
+    }
+    .empty {
+        margin: 2*$vr auto;
+        color: $color-grey;
+        font-size: $size-5;
+        font-weight: $bold;
+        text-align: center;
+    }
+}
+
+.organization.detail .add-members {
+    border: 1px solid $color-grey;
+    padding: $vr;
+    .add-members-input {
+        @include display(flex);
+        @include align-items(flex-end);
+    }
+    .user.search.input {
+        @include flex(3);
+        margin-bottom: 0;
+        & > span {
+            display: block;
+        }
+        input {
+            width: 100%;
+            padding: $vr/2;
+        }
+        label {
+            display: block;
+            font-size: $size-2;
+        }
+    }
+    button {
+        @include flex(1);
+        margin-left: $vr;
+    }
+
+    @include media($medium-bp) {
+        .user.search.input {
+            @include flex(0 1 70%);
+        }
+    }
+}
+
+.organization.detail .member {
+    td {
+        vertical-align: middle;
+    }
+    .remove {
+        text-align: right;
+    }
+}

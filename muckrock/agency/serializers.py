@@ -17,6 +17,11 @@ class AgencySerializer(serializers.ModelSerializer):
     parent = serializers.PrimaryKeyRelatedField(
             queryset=Agency.objects.all(),
             style={'base_template': 'input.html'})
+    location = serializers.JSONField()
+    absolute_url = serializers.ReadOnlyField(source='get_absolute_url')
+    average_response_time = serializers.ReadOnlyField()
+    fee_rate = serializers.ReadOnlyField()
+    success_rate = serializers.ReadOnlyField()
 
     def __init__(self, *args, **kwargs):
         """After initializing the serializer,
@@ -62,5 +67,9 @@ class AgencySerializer(serializers.ModelSerializer):
             'foia_guide',
             # misc
             'public_notes',
+            # computed fields
+            'absolute_url',
+            'average_response_time',
+            'fee_rate',
+            'success_rate',
         )
-

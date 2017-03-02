@@ -4,267 +4,208 @@ Views for muckrock project
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
-from django.core.exceptions import FieldError
+from django.core.urlresolvers import reverse
 from django.db.models import Sum, FieldDoesNotExist
-from django.shortcuts import render_to_response, get_object_or_404, redirect
-from django.template import RequestContext
+from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.decorators import method_decorator
 from django.utils.html import escape
-from django.views.generic import View, ListView
+from django.views.generic import View, ListView, FormView, TemplateView
 
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAFile
-from muckrock.forms import MRFilterForm, NewsletterSignupForm
+from muckrock.forms import NewsletterSignupForm, SearchForm, StripeForm
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.message.tasks import send_charge_receipt
 from muckrock.news.models import Article
 from muckrock.project.models import Project
-from muckrock.utils import cache_get_or_set
 
 import logging
-import re
 import requests
-from haystack.views import SearchView
-from haystack.query import RelatedSearchQuerySet
+import stripe
+from watson import search as watson
+from watson.views import SearchMixin
 
-class MRFilterableListView(ListView):
-    """
-    The main feature of MRFilterableListView is the ability to filter
-    a set of request objects by a dynamic dictionary of filters and
-    lookup conditions. MRFilterableListView should be used in conjunction
-    with MRFilterForm, available in the `muckrock.forms` module.
+logger = logging.getLogger(__name__)
 
-    To see an example of a subclass of MRFilterableListView that adds new
-    filter fields, look at `muckrock.foia.views.RequestList`.
-    """
 
-    title = ''
-    template_name = 'lists/base_list.html'
-    default_sort = 'title'
+class OrderedSortMixin(object):
+    """Sorts and orders a queryset given some inputs."""
+    default_sort = 'id'
     default_order = 'asc'
 
-    def get_filters(self):
+    def sort_queryset(self, queryset):
         """
-        Filters should be the same as the fields in MRFilterForm, or whichever
-        subclass of MRFilterForm is being used in as this class's `filter_form`.
-        Filters are an array of key-value pairs.
-        Required pairs are the field name and the [lookup condition][a].
+        Sorts a queryset of objects.
 
-        [a]: https://docs.djangoproject.com/en/1.7/ref/models/querysets/#field-lookups
+        We need to make sure the field to sort by actually exists.
+        If the field doesn't exist, return the unordered queryset.
         """
-        # pylint: disable=no-self-use
-        return [
-            {
-                'field': 'user',
-                'lookup': 'exact',
-            },
-            {
-                'field': 'agency',
-                'lookup': 'exact',
-            },
-            {
-                'field': 'jurisdiction',
-                'lookup': 'exact',
-            },
-            {
-                'field': 'tags',
-                'lookup': 'name__in',
-            },
-        ]
-
-    def clean_filter_value(self, filter_key, filter_value):
-        """Cleans filter inputs to their expected values if detected as incorrect"""
-        # pylint:disable=no-self-use
-        # pylint:disable=too-many-branches
-        if not filter_value:
-            return None
-
-        # tags need to be parsed into an array before filtering
-        if filter_key == 'tags':
-            filter_value = filter_value.split(',')
-        if filter_key == 'user':
-            # if looking up by PK, then result will be empty
-            # if looking up by username, then result will have length
-            if len(re.findall(r'\D+', filter_value)) > 0:
-                try:
-                    filter_value = User.objects.get(username=filter_value).pk
-                except User.DoesNotExist:
-                    filter_value = None
-                # username is unique so only one result should be returned by get
-        if filter_key == 'agency':
-            if len(re.findall(r'\D+', filter_value)) > 0:
-                try:
-                    filter_value = Agency.objects.get(slug=filter_value).pk
-                except Agency.DoesNotExist:
-                    filter_value = None
-                except Agency.MultipleObjectsReturned:
-                    filter_value = Agency.objects.filter(slug=filter_value)[0]
-        if filter_key == 'jurisdiction':
-            if len(re.findall(r'\D+', filter_value)) > 0:
-                try:
-                    filter_value = Jurisdiction.objects.get(slug=filter_value).pk
-                except Jurisdiction.DoesNotExist:
-                    filter_value = None
-                except Jurisdiction.MultipleObjectsReturned:
-                    filter_value = Jurisdiction.objects.filter(slug=filter_value)[0]
-
-        return filter_value
-
-    def get_filter_data(self):
-        """Returns a list of filter values and a url query for the filter."""
-        get = self.request.GET
-        filter_initials = {}
-        filter_url = ''
-        for filter_by in self.get_filters():
-            filter_key = filter_by['field']
-            filter_value = get.get(filter_key, None)
-            filter_value = self.clean_filter_value(filter_key, filter_value)
-            if filter_value:
-                if isinstance(filter_value, list):
-                    try:
-                        filter_value = ', '.join(filter_value)
-                    except TypeError:
-                        filter_value = str(filter_value)
-                kwarg = {filter_key: filter_value}
-                try:
-                    filter_initials.update(kwarg)
-                    filter_url += '&' + str(filter_key) + '=' + str(filter_value)
-                except ValueError:
-                    pass
-        return {
-            'filter_initials': filter_initials,
-            'filter_url': filter_url
-        }
-
-    def filter_list(self, objects):
-        """Filters a list of objects"""
-        get = self.request.GET
-        kwargs = {}
-        for filter_by in self.get_filters():
-            filter_key = filter_by['field']
-            filter_lookup = filter_by['lookup']
-            filter_value = get.get(filter_key, None)
-            filter_value = self.clean_filter_value(filter_key, filter_value)
-            if filter_value:
-                kwargs.update({'{0}__{1}'.format(filter_key, filter_lookup): filter_value})
-        # tag filtering could add duplicate items to results, so .distinct()
-        # is used only if there are tags, as adding distinct can cause
-        # performance issues
-        if get.get('tags'):
-            objects = objects.distinct()
-        try:
-            objects = objects.filter(**kwargs)
-        except FieldError:
-            pass
-        except ValueError:
-            error_msg = "Sorry, there was a problem with your filters. Please try filtering again."
-            messages.error(self.request, error_msg)
-        return objects
-
-    def sort_list(self, objects):
-        """Sorts the list of objects"""
+        # pylint:disable=protected-access
         sort = self.request.GET.get('sort', self.default_sort)
         order = self.request.GET.get('order', self.default_order)
-        # We need to make sure the field to sort by actually exists.
-        # If the field doesn't exist, revert to the default field.
-        # Otherwise, Django will throw a hard-to-catch FieldError.
-        # It's hard to catch because the error isn't raised until
-        # the QuerySet is evaluated. <Insert poop emoji here>
         try:
-            # pylint:disable=protected-access
-            self.get_model()._meta.get_field_by_name(sort)
-            # pylint:enable=protected-access
+            queryset.model._meta.get_field(sort)
         except FieldDoesNotExist:
             sort = self.default_sort
         if order != 'asc':
             sort = '-' + sort
-        objects = objects.order_by(sort)
-        return objects
-
-    def get_context_data(self, **kwargs):
-        """Gets basic context, including title, form, and url"""
-        context = super(MRFilterableListView, self).get_context_data(**kwargs)
-        filter_data = self.get_filter_data()
-        context['title'] = self.title
-        context['per_page'] = int(self.get_paginate_by(context['object_list']))
-        try:
-            context['filter_form'] = MRFilterForm(initial=filter_data['filter_initials'])
-        except ValueError:
-            context['filter_form'] = MRFilterForm()
-        context['filter_url'] = filter_data['filter_url']
-        context['active_sort'] = self.request.GET.get('sort', self.default_sort)
-        context['active_order'] = self.request.GET.get('order', self.default_order)
-        return context
+        return queryset.order_by(sort)
 
     def get_queryset(self):
-        objects = super(MRFilterableListView, self).get_queryset()
-        objects = self.filter_list(objects)
-        objects = self.sort_list(objects)
-        return objects
+        """Sorts the queryset before returning it."""
+        return self.sort_queryset(super(OrderedSortMixin, self).get_queryset())
 
-    def get_paginate_by(self, queryset):
-        """Paginates list by the return value"""
-        try:
-            per_page = int(self.request.GET.get('per_page'))
-            return max(min(per_page, 100), 5)
-        except (ValueError, TypeError):
-            return 25
-
-    def get_model(self):
-        """Get the model for this view - directly or from the queryset"""
-        if self.queryset is not None:
-            return self.queryset.model
-        if self.model is not None:
-            return self.model
-
-
-class MRSearchView(SearchView):
-    """Always lower case queries for case insensitive searches"""
-
-    def __init__(self, *args, **kwargs):
-        kwargs['searchqueryset'] = RelatedSearchQuerySet()
-        super(MRSearchView, self).__init__(*args, **kwargs)
-
-    def get_query(self):
-        """Lower case the query"""
-        return super(MRSearchView, self).get_query().lower()
-
-    def get_results(self):
-        """Apply select related to results"""
-        results = super(MRSearchView, self).get_results()
-        try:
-            results = results.load_all_queryset(
-                FOIARequest, FOIARequest.objects.select_related('jurisdiction'))
-        except AttributeError:
-            pass
-
-        return results
-
-    def extra_context(self):
-        """Adds per_page to context data"""
-        # pylint: disable=not-callable
-        context = super(MRSearchView, self).extra_context()
-        context['per_page'] = int(self.request.GET.get('per_page', 25))
-        models = self.request.GET.getlist('models')
-        context['news_checked'] = 'news.article' in models
-        context['foia_checked'] = 'foia.foiarequest' in models
-        context['qanda_checked'] = 'qanda.question' in models
+    def get_context_data(self, **kwargs):
+        """Adds sort and order data to the context."""
+        context = super(OrderedSortMixin, self).get_context_data(**kwargs)
+        context['sort'] = self.request.GET.get('sort', self.default_sort)
+        context['order'] = self.request.GET.get('order', self.default_order)
         return context
 
-    def get_paginate_by(self):
-        """Gets per_page the right way"""
+
+class ModelFilterMixin(object):
+    """
+    The ModelFilterMixin gives the ability to filter a list
+    of objects with the help of the django_filters library.
+
+    It requires a filter_class be defined.
+    """
+    filter_class = None
+
+    def get_filter(self):
+        """Initializes and returns the filter, if a filter_class is defined."""
+        # pylint:disable=not-callable
+        if self.filter_class is None:
+            raise AttributeError('Missing a filter class.')
+        return self.filter_class(self.request.GET, queryset=self.get_queryset())
+
+    def get_context_data(self, **kwargs):
+        """
+        Adds the filter to the context and overrides the
+        object_list value with the filter's queryset.
+        We also apply pagination to the filter queryset.
+        """
+        context = super(ModelFilterMixin, self).get_context_data(**kwargs)
+        _filter = self.get_filter()
+        queryset = _filter.qs.distinct()
+        try:
+            page_size = self.get_paginate_by(queryset)
+        except AttributeError:
+            page_size = 0
+        if page_size:
+            paginator, page, queryset, is_paginated = self.paginate_queryset(queryset, page_size)
+            context.update({
+                'filter': _filter,
+                'paginator': paginator,
+                'page_obj': page,
+                'is_paginated': is_paginated,
+                'object_list': queryset
+            })
+        else:
+            context.update({
+                'filter': _filter,
+                'paginator': None,
+                'page_obj': None,
+                'is_paginated': False,
+                'object_list': queryset
+            })
+        return context
+
+
+class PaginationMixin(object):
+    """
+    The PaginationMixin provides pagination support on a generic ListView,
+    but also allows the per_page value to be adjusted with URL arguments.
+    """
+    paginate_by = 25
+    min_per_page = 5
+    max_per_page = 100
+
+    def get_paginate_by(self, queryset):
+        """Allows paginate_by to be set by a query argument."""
+        # pylint:disable=unused-argument
         try:
             per_page = int(self.request.GET.get('per_page'))
-            return max(min(per_page, 100), 5)
+            return max(min(per_page, self.max_per_page), self.min_per_page)
         except (ValueError, TypeError):
-            return 25
+            return self.paginate_by
 
-    def build_page(self):
-        """Circumvents the hard-coded haystack per page value."""
-        self.results_per_page = self.get_paginate_by()
-        return super(MRSearchView, self).build_page()
+    def get_context_data(self, **kwargs):
+        """Adds per_page to the context"""
+        context = super(PaginationMixin, self).get_context_data(**kwargs)
+        context['per_page'] = self.get_paginate_by(self.get_queryset())
+        return context
+
+
+class ModelSearchMixin(object):
+    """
+    The ModelSearchMixin allows a queryset provided by a list view to be
+    searched, using the watson library.
+    """
+    search_form = SearchForm
+
+    def get_query(self):
+        """Gets the query from the request, if it exists."""
+        return self.request.GET.get('q')
+
+    def get_queryset(self):
+        """
+        If there is a search query provided in the request,
+        then filter the queryset with a search.
+        """
+        queryset = super(ModelSearchMixin, self).get_queryset()
+        query = self.get_query()
+        if query:
+            queryset = watson.filter(queryset.model, query)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        """Adds the query to the context."""
+        context = super(ModelSearchMixin, self).get_context_data(**kwargs)
+        query = self.get_query()
+        context['query'] = query
+        context['search_form'] = self.search_form(initial={'q': query})
+        return context
+
+
+class MRListView(PaginationMixin, ListView):
+    """Defines a title and base template for our list views."""
+    title = ''
+    template_name = 'base_list.html'
+
+    def get_context_data(self, **kwargs):
+        """Adds title to the context data."""
+        context = super(MRListView, self).get_context_data(**kwargs)
+        context['title'] = self.title
+        return context
+
+
+class MROrderedListView(OrderedSortMixin, MRListView):
+    """Adds ordering to a list view."""
+    pass
+
+
+class MRFilterListView(OrderedSortMixin, ModelFilterMixin, MRListView):
+    """Adds ordered sorting and filtering to a MRListView."""
+    pass
+
+
+class MRSearchFilterListView(OrderedSortMixin, ModelSearchMixin, ModelFilterMixin, MRListView):
+    """Adds ordered sorting, searching, and filtering to a MRListView."""
+    pass
+
+
+class SearchView(SearchMixin, MRListView):
+    """Always lower case queries for case insensitive searches"""
+    title = 'Search'
+    template_name = 'search.html'
+    context_object_name = 'object_list'
+
+    def get_queryset(self):
+        """Select related content types"""
+        return super(SearchView, self).get_queryset().select_related('content_type')
 
 
 class NewsletterSignupView(View):
@@ -273,7 +214,7 @@ class NewsletterSignupView(View):
         """Returns a signup form"""
         template = 'forms/newsletter.html'
         context = {'form': NewsletterSignupForm(initial={'list': settings.MAILCHIMP_LIST_DEFAULT})}
-        return render_to_response(template, context, context_instance=RequestContext(request))
+        return render(request, template, context)
 
     def redirect_url(self, request):
         """If a next url is provided, redirect there. Otherwise, redirect to the index."""
@@ -326,13 +267,13 @@ class NewsletterSignupView(View):
         # Add the user to the default list if they want to be added.
         # If an error occurred with the first subscription,
         # don't try signing up for the default list.
-        # IF an error occurs with this subscription, don't worry about it.
+        # If an error occurs with this subscription, don't worry about it.
         if default_list is not None and default_list != _list and not primary_error:
             try:
                 self.subscribe(_email, default_list)
             except (ValueError, requests.exceptions.HTTPError) as exception:
                 # suppress the error shown to the user, but still log it
-                logging.warning('Secondary signup: ' + exception)
+                logging.warning('Secondary signup: %s', exception)
         return self.redirect_url(request)
 
     def subscribe(self, _email, _list):
@@ -373,86 +314,174 @@ class NewsletterSignupView(View):
                 raise exception
         return response
 
+
+class LandingView(TemplateView):
+    """Renders the landing page template."""
+    template_name = 'flatpages/landing.html'
+
+
+class Homepage(object):
+    """Control caching for the homepage"""
+    # pylint: disable=no-self-use
+
+    def get_cached_values(self):
+        """Return all the methods used to generate the cached values"""
+        return [
+                ('articles', self.articles),
+                ('featured_projects', self.featured_projects),
+                ('completed_requests', self.completed_requests),
+                ('stats', self.stats),
+                ]
+
+    def articles(self):
+        """Get the articles for the front page"""
+        return (Article.objects
+                .get_published()
+                .prefetch_authors()
+                [:5])
+
+    def featured_projects(self):
+        """Get the featured projects for the front page"""
+        return (Project.objects
+                .get_public()
+                .optimize()
+                .filter(featured=True)
+                [:4])
+
+    def completed_requests(self):
+        """Get recently completed requests"""
+        return lambda: (FOIARequest.objects
+                .get_public()
+                .get_done()
+                .order_by('-date_done', 'pk')
+                .select_related_view()
+                .get_public_file_count(limit=6))
+
+    def stats(self):
+        """Get some stats to show on the front page"""
+        return {
+                'request_count':
+                    lambda: FOIARequest.objects.exclude(status='started').count(),
+                'completed_count':
+                    lambda: FOIARequest.objects.get_done().count(),
+                'page_count':
+                    lambda: FOIAFile.objects.aggregate(pages=Sum('pages'))['pages'],
+                'agency_count':
+                    lambda: Agency.objects.get_approved().count(),
+                }
+
+
 def homepage(request):
     """Get all the details needed for the homepage"""
-    # pylint: disable=unused-variable
-    articles = cache_get_or_set(
-            'hp:articles',
-            lambda: Article.objects.get_published()
-                                   .prefetch_related(
-                                        'authors',
-                                        'authors__profile',
-                                        'projects',
-                                    )
-                                   [:3],
-            600)
-    try:
-        lead_article = articles[0]
-        other_articles = articles[1:]
-    except IndexError:
-        # no published articles
-        lead_article = None
-        other_articles = None
-    featured_projects = cache_get_or_set(
-            'hp:featured_projects',
-            lambda: Project.objects.get_public().filter(featured=True)[:4],
-            600)
-    completed_requests = cache_get_or_set(
-            'hp:completed_requests',
-            lambda: (FOIARequest.objects.get_public().get_done()
-                   .order_by('-date_done')
-                   .select_related_view()
-                   .get_public_file_count(limit=6)),
-            600)
-    stats = cache_get_or_set(
-            'hp:stats',
-            lambda: {
-                'request_count': FOIARequest.objects
-                    .exclude(status='started').count(),
-                'completed_count': FOIARequest.objects.get_done().count(),
-                'page_count': FOIAFile.objects
-                    .aggregate(Sum('pages'))['pages__sum'],
-                'agency_count': Agency.objects.get_approved().count()
-            },
-            600)
-    return render_to_response('homepage.html', locals(),
-                              context_instance=RequestContext(request))
+    context = {}
+    for name, value in Homepage().get_cached_values():
+        context[name] = value()
+    return render(request, 'homepage.html', context)
+
 
 @user_passes_test(lambda u: u.is_staff)
 def reset_homepage_cache(request):
     """Reset the homepage cache"""
     # pylint: disable=unused-argument
 
-    cache.delete(make_template_fragment_key('news'))
-    cache.delete(make_template_fragment_key('projects'))
-    cache.delete(make_template_fragment_key('recent_articles'))
+    template_keys = (
+            'homepage_top',
+            'homepage_bottom',
+            'dropdown_recent_articles',
+            )
+    for key in template_keys:
+        cache.delete(make_template_fragment_key(key))
 
-    cache.set('hp:articles',
-            Article.objects.get_published().prefetch_related(
-                'authors',
-                'authors__profile',
-                'projects')[:3],
-            600)
-    cache.set('hp:featured_projects',
-            Project.objects.get_public().filter(featured=True)[:4],
-            600)
-    cache.set('hp:completed_requests',
-            FOIARequest.objects.get_public().get_done()
-                   .order_by('-date_done')
-                   .select_related_view()
-                   .get_public_file_count(limit=6),
-            600)
-    cache.set('hp:stats',
-            {
-                'request_count': FOIARequest.objects
-                    .exclude(status='started').count(),
-                'completed_count': FOIARequest.objects.get_done().count(),
-                'page_count': FOIAFile.objects
-                    .aggregate(Sum('pages'))['pages__sum'],
-                'agency_count': Agency.objects.get_approved().count()
-            },
-            600)
     return redirect('index')
+
+
+class StripeFormMixin(object):
+    """Prefills the StripeForm values."""
+    def get_initial(self):
+        """Add initial data to the form."""
+        initial = super(StripeFormMixin, self).get_initial()
+        initial['stripe_pk'] = settings.STRIPE_PUB_KEY
+        initial['stripe_label'] = 'Buy'
+        initial['stripe_description'] = ''
+        initial['stripe_fee'] = 0
+        initial['stripe_bitcoin'] = True
+        return initial
+
+
+class DonationFormView(StripeFormMixin, FormView):
+    """Accepts donations from all users."""
+    form_class = StripeForm
+    template_name = 'forms/donate.html'
+
+    def get_initial(self):
+        """Adds the user's email to the form if they're logged in."""
+        user = self.request.user
+        email = ''
+        if user.is_authenticated():
+            email = user.email
+        return {
+            'stripe_email': email,
+            'stripe_label': 'Donate',
+            'stripe_description': 'Tax Deductible Donation'
+        }
+
+    def form_valid(self, form):
+        """If the form is valid, charge the token provided by the form, then send a receipt."""
+        token = form.cleaned_data['stripe_token']
+        email = form.cleaned_data['stripe_email']
+        amount = form.cleaned_data['stripe_amount']
+        charge = self.make_charge(token, amount, email)
+        if charge is None:
+            return self.form_invalid(form)
+        # Send the receipt
+        send_charge_receipt.delay(charge.id)
+        return super(DonationFormView, self).form_valid(form)
+
+    def get_success_url(self):
+        """Return a redirection the donation page, always."""
+        return reverse('donate-thanks')
+
+    def make_charge(self, token, amount, email):
+        """Make a Stripe charge and catch any errors."""
+        charge = None
+        error_msg = None
+        try:
+            charge = stripe.Charge.create(
+                amount=amount,
+                currency='usd',
+                source=token,
+                description='Donation from %s' % email,
+                metadata={
+                    'email': email,
+                    'action': 'donation'
+                }
+            )
+        except (
+                stripe.error.InvalidRequestError,
+                # Invalid parameters were supplied to Stripe's API
+                stripe.error.AuthenticationError,
+                # Authentication with Stripe's API failed
+                stripe.error.APIConnectionError,
+                # Network communication with Stripe failed
+                stripe.error.StripeError,
+                # Generic error
+                ) as exception:
+            logger.error(exception)
+            error_msg = ('Oops, something went wrong on our end.'
+                        ' Sorry about that!')
+        finally:
+            if error_msg:
+                messages.error(self.request, error_msg)
+            else:
+                self.request.session['donated'] = amount
+                self.request.session['ga'] = 'donation'
+        return charge
+
+
+class DonationThanksView(TemplateView):
+    """Returns a thank you message to the user."""
+    template_name = 'forms/donate_thanks.html'
+
 
 def jurisdiction(request, jurisdiction=None, slug=None, idx=None, view=None):
     """Redirect to the jurisdiction page"""
@@ -469,6 +498,7 @@ def jurisdiction(request, jurisdiction=None, slug=None, idx=None, view=None):
     else:
         return redirect(jmodel.get_url(view))
 
+
 def handler500(request):
     """
     500 error handler which includes request in the context.
@@ -476,9 +506,8 @@ def handler500(request):
     Templates: `500.html`
     Context: None
     """
-    response = render_to_response('500.html', {}, context_instance=RequestContext(request))
-    response.status_code = 500
-    return response
+    return render(request, '500.html', status=500)
+
 
 # http://stackoverflow.com/a/8429311
 def class_view_decorator(function_decorator):

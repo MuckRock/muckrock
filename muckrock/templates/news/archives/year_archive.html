@@ -1,0 +1,11 @@
+{% extends 'news/archives/base_archive.html' %}
+{% block title %}{{ year.year }} &bull; {{block.super}}{% endblock %}
+{% block date %}{{ year.year }}{% endblock date %}
+
+{% block list-sections %}
+<ul class="nostyle list__sections">
+    {% for month in date_list %}
+    <li><a href="{% url 'news-archive-month' year=year.year month=month|date:"b" %}">{{month|date:"F"}}</a></li>
+    {% endfor %}
+</ul>
+{% endblock %}

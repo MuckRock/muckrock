@@ -55,8 +55,6 @@ USE_TZ = False
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
 
-SITE_ID = 1
-
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
 USE_I18N = False
@@ -98,11 +96,15 @@ if AWS_DEBUG:
     COMPRESS_URL = STATIC_URL
     MEDIA_URL = 'https://muckrock-devel2.s3.amazonaws.com/media/'
     CLEAN_S3_ON_FOIA_DELETE = True
+    USE_QUEUED_STORAGE = True
+    DIET_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    DIET_CONFIG = os.path.join(SITE_ROOT, '../config/image_diet.yaml')
 else:
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
     STATIC_URL = '/static/'
     MEDIA_URL = '/media/'
     CLEAN_S3_ON_FOIA_DELETE = False
+    USE_QUEUED_STORAGE = False
 
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -121,28 +123,33 @@ AWS_HEADERS = {
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
     'django.core.context_processors.debug',
-    'django.core.context_processors.i18n',
+    #'django.core.context_processors.i18n',
     'django.core.context_processors.media',
     'django.core.context_processors.request',
     'django.contrib.messages.context_processors.messages',
     'muckrock.sidebar.context_processors.sidebar_info',
     'muckrock.context_processors.google_analytics',
+    'muckrock.context_processors.domain',
+    'muckrock.context_processors.cache_timeout',
 )
 
 MIDDLEWARE_CLASSES = (
+    'corsheaders.middleware.CorsMiddleware',
+    'django_hosts.middleware.HostsRequestMiddleware',
     'djangosecure.middleware.SecurityMiddleware',
     'dogslow.WatchdogMiddleware',
     'django.middleware.gzip.GZipMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'lot.middleware.LOTMiddleware',
+    'muckrock.middleware.LOTMiddleware',
     'muckrock.middleware.RemoveTokenMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'reversion.middleware.RevisionMiddleware',
+    'django_hosts.middleware.HostsResponseMiddleware',
 )
 
 INTERNAL_IPS = ('127.0.0.1',)
@@ -170,8 +177,8 @@ INSTALLED_APPS = (
     'django.contrib.flatpages',
     'django.contrib.humanize',
     'django.contrib.staticfiles',
-    'celery_haystack',
     'compressor',
+    'corsheaders',
     'debug_toolbar',
     'django_premailer',
     'djangosecure',
@@ -179,11 +186,9 @@ INSTALLED_APPS = (
     'djgeojson',
     'easy_thumbnails',
     'gunicorn',
-    'haystack',
     'dbsettings',
     'leaflet',
     'localflavor',
-    'markdown_deux',
     'mathfilters',
     'news_sitemaps',
     'raven.contrib.django',
@@ -195,10 +200,13 @@ INSTALLED_APPS = (
     'rules.apps.AutodiscoverRulesConfig',
     'storages',
     'taggit',
+    'watson',
     'webpack_loader',
     'lot',
     'package_monitor',
     'image_diet',
+    'django_hosts',
+    'queued_storage',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
@@ -216,6 +224,7 @@ INSTALLED_APPS = (
     'muckrock.organization',
     'muckrock.project',
     'muckrock.mailgun',
+    'muckrock.foiamachine',
     'actstream'
 )
 
@@ -236,7 +245,8 @@ DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
 urlparse.uses_netloc.append('redis')
 
-BROKER_URL = os.environ.get('REDISTOGO_URL', 'redis://localhost:6379/0')
+BROKER_URL = os.environ.get('REDISTOGO_URL',
+        os.environ.get('REDIS_URL', 'redis://localhost:6379/0'))
 
 djcelery.setup_loader()
 
@@ -261,20 +271,7 @@ ABSOLUTE_URL_OVERRIDES = {
     'auth.user': lambda u: reverse('acct-profile', kwargs={'username': u.username}),
 }
 
-DBSETTINGS_USE_SITES = True
-
-HAYSTACK_CONNECTIONS = {
-    'default': {
-        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
-        'PATH': os.path.join(SITE_ROOT, 'whoosh/mysite_index'),
-        'STORAGE': 'file',
-        'POST_LIMIT': 128 * 1024 * 1024,
-        'INCLUDE_SPELLING': True,
-        'BATCH_SIZE': 100,
-    },
-}
-
-HAYSTACK_SIGNAL_PROCESSOR = 'muckrock.signals.RelatedCelerySignalProcessor'
+DBSETTINGS_USE_SITES = False
 
 SESAME_MAX_AGE = 60 * 60 * 24 * 2
 
@@ -299,22 +296,6 @@ BUNDLED_REQUESTS = {
     'org': 5,
     'robot': 0,
 }
-
-MARKDOWN_DEUX_STYLES = {
-    "default": {
-        "extras": {
-            "code-friendly": None,
-        },
-        "safe_mode": "escape",
-    },
-    "trusted": {
-        "extras": {
-            "code-friendly": None,
-        },
-        "safe_mode": False,
-    }
-}
-
 
 LOGGING = {
     'version': 1,
@@ -368,12 +349,12 @@ LOGGING = {
             'level': 'WARNING',
         },
         'django.request': {
-            'handlers': ['sentry'],
-            'level': 'ERROR',
+            'handlers': ['console', 'sentry'],
+            'level': 'WARNING',
             'propagate': False,
         },
         'muckrock': {
-            'handlers': ['console', 'mail_admins', 'sentry'],
+            'handlers': ['console', 'sentry'],
             'level': 'INFO',
         },
         'django.db.backends': {
@@ -428,6 +409,7 @@ DOCUMENTCLOUD_PASSWORD = os.environ.get('DOCUMENTCLOUD_PASSWORD')
 SLACK_WEBHOOK_URL = os.environ.get('SLACK_WEBHOOK_URL', '')
 
 PUBLICATION_NAME = 'MuckRock'
+PUBLICATION_TIME_ZONE = '-05:00'
 
 # Register database schemes in URLs.
 urlparse.uses_netloc.append('postgres')
@@ -442,7 +424,7 @@ DATABASES = {
             'PASSWORD': url.password,
             'HOST': url.hostname,
             'PORT': url.port,
-            'CONN_MAX_AGE': os.environ.get('CONN_MAX_AGE', 500),
+            'CONN_MAX_AGE': int(os.environ.get('CONN_MAX_AGE', 500)),
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             }
         }
@@ -452,6 +434,7 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     }
 }
+DEFAULT_CACHE_TIMEOUT = 15 * 60
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'muckrock.pagination.StandardPagination',
@@ -486,11 +469,15 @@ LOT = {
 LOT_MIDDLEWARE_PARAM_NAME = 'uuid-login'
 
 ROBOTS_CACHE_TIMEOUT = 60 * 60 * 24
+ROBOTS_SITE_BY_REQUEST = True
 
 PACKAGE_MONITOR_REQUIREMENTS_FILE = os.path.join(SITE_ROOT, '../requirements.txt')
 
 TAGGIT_CASE_INSENSITIVE = True
 TAGGIT_TAGS_FROM_STRING = 'muckrock.tags.models.parse_tags'
+
+ROOT_HOSTCONF = 'muckrock.hosts'
+DEFAULT_HOST = 'default'
 
 # Organization Settings
 
@@ -526,3 +513,17 @@ LEAFLET_CONFIG = {
         }
     }
 }
+
+# development urls
+MUCKROCK_URL = 'localhost:8000'
+FOIAMACHINE_URL = 'dev.foiamachine.org:8000'
+
+# Limit CORS support to just API endpoints
+CORS_URLS_REGEX = r'^/api(_v\d)?/.*$'
+# Limit CORS origin to just FOIA machine
+CORS_ORIGIN_REGEX_WHITELIST = (r'^(https?://)?(\w+\.)?foiamachine\.org(:\d+)?$', )
+CORS_ALLOW_CREDENTIALS = True
+
+# Django Filter settings
+FILTERS_HELP_TEXT_EXCLUDE = False
+FILTERS_HELP_TEXT_FILTER = False

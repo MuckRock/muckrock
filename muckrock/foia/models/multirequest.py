@@ -4,12 +4,12 @@ Models for the FOIA application
 """
 
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.db import models
 
 from taggit.managers import TaggableManager
 import logging
 
-from muckrock.agency.models import Agency
 from muckrock.foia.models.request import STATUS
 from muckrock.tags.models import TaggedItemBase
 
@@ -27,7 +27,7 @@ class FOIAMultiRequest(models.Model):
     embargo = models.BooleanField(default=False)
     requested_docs = models.TextField(blank=True)
     agencies = models.ManyToManyField(
-            Agency,
+            'agency.Agency',
             related_name='agencies',
             blank=True,
             )
@@ -39,13 +39,17 @@ class FOIAMultiRequest(models.Model):
     def __unicode__(self):
         return self.title
 
-    @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
-        return ('foia-multi-draft', [], {'slug': self.slug, 'idx': self.pk})
+        return reverse(
+                'foia-multi-draft',
+                kwargs={'slug': self.slug, 'idx': self.pk})
 
     class Meta:
         # pylint: disable=too-few-public-methods
         ordering = ['title']
         verbose_name = 'FOIA Multi-Request'
         app_label = 'foia'
+        permissions = (
+            ('file_multirequest', 'Can submit requests to multiple agencies'),
+            )

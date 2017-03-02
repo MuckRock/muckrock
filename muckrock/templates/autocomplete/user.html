@@ -1,17 +1,9 @@
 {% load static from staticfiles %}
 {% load thumbnail %}
 
-<span class="block user choice" data-value="{{choice.pk}}">
-    <div class="main">
-        {% if choice.profile.avatar %}
-        <img src="{% thumbnail choice.profile.avatar 50x50 %}" class="avatar" />
-        {% else %}
-        <img src="{% static 'icons/logo.png' %}" height="50" width="50" class="avatar" />
-        {% endif %}
-        <div class="name">
-            <span class="fullname">{{choice.get_full_name}}</span>
-            <span class="username">({{choice.username}})</span>
-        </div>
+<span class="choice" data-value="{{choice.pk}}">
+    <div class="choice__text">
+        <p class="nomargin">{{choice.get_full_name}}</p>
+        <p class="small nomargin grey">{{choice.username}}</p>
     </div>
 </span>
-

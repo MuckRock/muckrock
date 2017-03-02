@@ -1,14 +1,14 @@
 <dl class="request-record">
     <dt>Request Record</dt>
     {% if num_submitted %}
-    <dd><strong>{{ num_submitted }} Filed in Total</strong></dd>
-    {% if num_no_docs %}<dd class="success">{{ num_no_docs }} No Responsive Documents</dd>{% endif %}
-    {% if num_done %}<dd class="success">{{ num_done }} Complete</dd>{% endif %}
-    {% if num_ack %}<dd class="default">{{ num_ack }} Awaiting Acknowledgement</dd>{% endif %}
-    {% if num_processed %}<dd class="default">{{ num_processed }} Awaiting Response</dd>{% endif %}
-    {% if num_fix %}<dd class="default">{{ num_fix }} Requiring Action</dd>{% endif %}
-    {% if num_rejected %}<dd class="failure">{{ num_rejected }} Rejected</dd>{% endif %}
-    {% if num_overdue %}<dd class="failure">{{ num_overdue }} Overdue</dd>{% endif %}
+    <dd><span class="blue counter">{{ num_submitted }}</span> Filed</dd>
+    {% if num_done %}<dd><span class="green counter">{{ num_done }}</span> Completed</dd>{% endif %}
+    {% if num_rejected %}<dd><span class="red counter">{{ num_rejected }}</span> Rejected</dd>{% endif %}
+    {% if num_no_docs %}<dd><span class="red counter">{{ num_no_docs }}</span> No Responsive Documents</dd>{% endif %}
+    {% if num_ack %}<dd><span class="counter">{{ num_ack }}</span> Awaiting Acknowledgement</dd>{% endif %}
+    {% if num_processed %}<dd><span class="counter">{{ num_processed }}</span> Awaiting Response</dd>{% endif %}
+    {% if num_fix %}<dd><span class="counter">{{ num_fix }}</span> Requiring Action</dd>{% endif %}
+    {% if num_overdue %}<dd><span class="red counter">{{ num_overdue }}</span> Overdue</dd>{% endif %}
     {% else %}
     <dd>None</dd>
     {% endif %}

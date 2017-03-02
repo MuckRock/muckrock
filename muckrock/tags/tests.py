@@ -85,4 +85,3 @@ class TestTagDetailView(test.TestCase):
         tag_url = reverse('tag-detail', kwargs={'slug': self.tag_foo.slug})
         response = self.client.get(tag_url)
         eq_(response.status_code, 200)
-

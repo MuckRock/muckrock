@@ -10,18 +10,20 @@ from django.shortcuts import get_object_or_404, redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 
-import actstream
 import datetime
 import logging
 import stripe
 
 from muckrock.foia.models import FOIARequest
 from muckrock.organization.models import Organization
-from muckrock.organization.forms import CreateForm, \
-                                        StaffCreateForm, \
-                                        UpdateForm, \
-                                        StaffUpdateForm, \
-                                        AddMembersForm
+from muckrock.organization.forms import (
+    CreateForm,
+    StaffCreateForm,
+    UpdateForm,
+    StaffUpdateForm,
+    AddMembersForm
+)
+from muckrock.utils import new_action
 
 
 class OrganizationListView(ListView):
@@ -269,8 +271,13 @@ class OrganizationDetailView(DetailView):
             context['is_staff'] = user.is_staff
             context['is_owner'] = organization.is_owned_by(user)
             context['is_member'] = user.profile.is_member_of(organization)
-        context['requests'] = (FOIARequest.objects
-                .organization(organization).get_viewable(user)[:99])
+        requests = FOIARequest.objects.organization(organization).get_viewable(user)
+        context['requests'] = {
+            'count': len(requests),
+            'filed': requests.order_by('-date_submitted')[:10],
+            'completed': requests.get_done().order_by('-date_done')[:10]
+        }
+
         context['members'] = organization.members.select_related('user')
         context['available'] = {
             'requests': organization.num_requests,
@@ -331,12 +338,7 @@ class OrganizationDetailView(DetailView):
             for member in new_members:
                 try:
                     if organization.add_member(member):
-                        actstream.action.send(
-                            request.user,
-                            verb='added',
-                            action_object=member,
-                            target=organization
-                        )
+                        new_action(request.user, 'added', action_object=member, target=organization)
                         logging.info('%s %s %s to %s.',
                             request.user,
                             'added',
@@ -365,12 +367,7 @@ class OrganizationDetailView(DetailView):
         user_is_owner = organization.owner == request.user
         if removing_self or user_is_owner or request.user.is_staff:
             if organization.remove_member(user):
-                actstream.action.send(
-                    request.user,
-                    verb='removed',
-                    action_object=user,
-                    target=organization
-                )
+                new_action(request.user, 'removed', action_object=user, target=organization)
                 logging.info('%s %s %s from %s.', request.user, 'removed', user, organization)
                 if removing_self:
                     msg = 'You are no longer a member.'

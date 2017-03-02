@@ -1,11 +1,6 @@
-<span class="block agency choice" data-value="{{choice.pk}}">
-    <div class="main">
-        <div class="name">
-            {{choice.name}}
-            {% if choice.exempt %}
-            <span class="red badge">Exempt</span>
-            {% endif %}
-        </div>
-        <div class="jurisdiction">{{choice.jurisdiction}}</div>
+<span class="choice" data-value="{{choice.pk}}">
+    <div class="choice__text">
+        <p class="nomargin">{{choice.name}}{% if choice.exempt %}<span class="small red badge">Exempt</span>{% endif %}</p>
+        <p class="small grey nomargin">{{choice.jurisdiction}}</p>
     </div>
 </span>

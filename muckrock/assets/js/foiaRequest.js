@@ -1,4 +1,13 @@
-import { modal } from './modal';
+/* foiaRequest.js
+**
+** Provides functionality on the request page.
+**
+** TODO:
+** Much of this can and should be refactored into more general functions,
+** then applied to the specific selectors.
+*/
+
+import modal from './modal';
 
 $('.hidden-reply').hide();
 
@@ -19,23 +28,11 @@ function get_thumbnail(doc_id) {
         var idx = doc_id.indexOf('-');
         var num = doc_id.slice(0, idx);
         var name = doc_id.slice(idx + 1);
-        return 'https://s3.amazonaws.com/s3.documentcloud.org/documents/' + num + '/pages/' + name + '-p1-small.gif';
+        return 'https://assets.documentcloud.org/documents/' + num + '/pages/' + name + '-p1-small.gif';
 }
 /* eslint-enable no-unused-vars */
 
 /* Side Bar */
-
-$('#toggle-specific-information').click(function(e){
-    e.preventDefault();
-    $('.specific-information').toggleClass('visible');
-    if ($(this).data('state') == 0) {
-        $(this).data('state', 1);
-        $(this).text('Hide details');
-    } else {
-        $(this).data('state', 0);
-        $(this).text('Show details');
-    }
-});
 
 $('.estimated-completion .edit').click(function(){
     var button = $(this);
@@ -70,14 +67,14 @@ $('#toggle-communication-collapse').click(function(){
 
 /* Request action composer */
 
-var composerInputs = $('.composer-input');
+var composers = $('.composer');
 
 function showComposer(id) {
     // if no id provided, use the inactive panel
     id = !id ? '#inactive' : id;
     // hide all the composers, then filter to
     // the one we're interested in and show it
-    var composer = composerInputs.hide().filter(id).show();
+    var composer = composers.hide().filter(id).show();
     // We also want to bring the composer's first input into focus
     // in order to make it clear to the user that this is actionable
     composer.find(':text,textarea,select').filter(':visible:first').focus();
@@ -87,31 +84,31 @@ function showComposer(id) {
 $(window).on('hashchange', function () {
     // check if the hash is a target
     var hash = location.hash;
-    var composers = composerInputs.filter(hash);
-    if (composers.length > 0) {
+    var targetComposer = composers.filter(hash);
+    if (targetComposer.length > 0) {
         showComposer(hash);
     }
 });
 
 // Initialize
 $(document).ready(function(){
-    showComposer(composerInputs.filter(location.hash).length > 0 ? location.hash : '');
+    showComposer(composers.filter(location.hash).length > 0 ? location.hash : '');
 });
 
 /* Documents */
 
 export function displayFile(file) {
-    var activeFile = $('.active-document');
-    var files = $('.file');
     if (!file) {
         return;
     }
-    var title = file.data('title');
+    file = $(file);
+    var activeFile = $('.active-document');
+    var files = $('.file');
     var docId = file.data('doc-id');
-    if (!title) {
-        title = 'Untitled';
-    }
+    var title = file.data('title') || 'Untitled';
+    var pages = file.data('pages') || 0;
     $('#doc-title').empty().text(title);
+    $('#doc-pages').empty().text(pages);
     // remove the active class from all the list items,
     // then apply active class to this file's list item
     files.parent('li').removeClass('active');
@@ -120,7 +117,7 @@ export function displayFile(file) {
     /* DV is defined by the external DocumentCloud script at runtime. */
     DV.load('https://www.documentcloud.org/documents/' + docId + '.js', docCloudSettings);
     activeFile.addClass('visible');
-    window.scrollTo(0, activeFile.offset().top);
+    window.scrollTo(0, 0);
 }
 
 $('.view-file').click(function() {
@@ -185,5 +182,11 @@ $('form.generate-private-link').submit(function(e){
 $('.text-area.modal-button').click(function(e){
     e.preventDefault();
     textAreaModal($(this).next());
+    return false;
+});
+
+$('.modal-link').click(function(e){
+    e.preventDefault();
+    textAreaModal($($(this).data('modal')));
     return false;
 });

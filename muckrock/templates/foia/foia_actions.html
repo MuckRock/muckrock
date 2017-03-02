@@ -3,7 +3,7 @@
     {% if foia.is_payable %}
     <div class="payment prompt">
         <p>This request requires a payment{% if foia.price %} of ${{foia.price|floatformat:2}}{% endif %}.</p>
-        <footer>
+        <footer class="button-group">
             <a class="success button" href="#pay">Pay</a>
             {% if not foia.has_crowdfund %}
             <a class="success button" href="#crowdfund">Crowdfund</a>
@@ -19,11 +19,11 @@
                 <a href={{ action.link }} class="button{% if action.class_name %} {{ action.class_name }}{% endif %}" title="{{ action.desc }}">{{ action.title }}</a>
             {% endif %}
             {% if 'modal' in action.class_name %}
-                <span data-modal="#get-help-modal" class="text-area modal-button button {% if action.title == 'Get Help' %}failure{% endif %}">{{ action.title }}</span>
-                <div class="modal" id="get-help-modal">
+                <span data-modal="#{{action.action}}-modal" class="text-area modal-button button {% if action.title == 'Get Help' %}failure{% endif %}">{{ action.title }}</span>
+                <div class="modal" id="{{action.action}}-modal">
                     <h1>{{ action.title }}</h1>
                     <h2>{{ action.desc }}</h2>
-                    <button type="submit" name="action" value="{{ action.action }}" class="primary">{{ action.title }}</button>
+                    <button type="submit" name="action" value="{{ action.action }}" class="primary button">{{ action.title }}</button>
                     <span class="close-modal button">Close</span>
                 </div>
             {% endif %}
@@ -36,7 +36,7 @@
     <p>MuckRock users can file, duplicate, track, and share public records requests like this one. <a href="/about/muckrock-101">Learn more.</a></p>
     <footer>
         <a href="{% url 'foia-create' %}" class="primary button">
-            {% include 'lib/icons/create-request.svg' %}
+            {% include 'lib/component/icon/create-request.svg' %}
             <span>File a Request</span>
         </a>
     </footer>

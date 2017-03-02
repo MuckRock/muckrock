@@ -15,10 +15,12 @@ def parse_tags(tagstring):
     """Normalize tags after parsing"""
     return [normalize(t) for t in _parse_tags(tagstring)]
 
+
 def normalize(name):
     """Normalize tag name"""
     clean_name = re.sub(r'\s+', ' ', name)
-    return clean_name.strip().lower()
+    return clean_name.strip().lower()[:100]
+
 
 class Tag(TaggitTag):
     """Custom Tag Class"""
@@ -32,8 +34,14 @@ class Tag(TaggitTag):
         # pylint: disable=too-few-public-methods
         ordering = ['name']
 
+
 class TaggedItemBase(GenericTaggedItemBase):
     """Custom Tagged Item Base Class"""
     tag = models.ForeignKey(Tag, related_name="%(app_label)s_%(class)s_items")
 
-autocomplete_light.register(Tag)
+
+autocomplete_light.register(Tag, attrs={
+    'placeholder': 'Search tags',
+    'data-autocomplete-minimum-characters': 1
+    }
+)

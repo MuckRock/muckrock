@@ -1,0 +1,37 @@
+.foia__single {
+    width: 100%;
+    overflow: hidden;
+    @include border;
+    @include border-radius;
+    background-color: $color-white-pure;
+    text-align: left;
+    .title {
+        font-weight: $bold;
+        margin-bottom: $vr/2;
+    }
+    .files {
+        font-weight: $bold;
+        text-align: right;
+    }
+    .foia__single__header {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        @include justify-content(space-between);
+        @include align-items(center);
+        margin-bottom: 0;
+        padding: $vr/2;
+        p {
+            @include flex(1);
+            margin-bottom: 0;
+        }
+    }
+    .foia__single__main {
+        padding: $vr/2;
+    }
+    .foia__single__footer {
+        @include display(flex);
+        .basic.button {
+            @include flex(1);
+        }
+    }
+}

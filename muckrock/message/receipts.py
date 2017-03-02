@@ -49,8 +49,12 @@ class Receipt(TemplateEmail):
                 raise TypeError('Each item in the list should be a receipt LineItem.')
         self.items = items
         super(Receipt, self).__init__(**kwargs)
+        # add additional receipt emails for this user
+        if self.user:
+            cc_emails = [r.email for r in self.user.receipt_emails.all()]
+            self.cc.extend(cc_emails)
         # if no user provided, send the email to the address on the charge
-        if not self.user:
+        else:
             try:
                 user_email = self.charge.metadata['email']
                 self.to.append(user_email)
@@ -66,12 +70,15 @@ class Receipt(TemplateEmail):
             'total': total,
             'charge': {
                 'id': self.charge.id,
-                'name': self.charge.source.name,
                 'date': datetime.fromtimestamp(self.charge.created),
-                'card': self.charge.source.brand,
-                'last4': self.charge.source.last4,
             }
         })
+        if self.charge.source.object != 'bitcoin_receiver':
+            context['charge'].update({
+                'name': self.charge.source.name,
+                'card': self.charge.source.brand,
+                'last4': self.charge.source.last4,
+            })
         return context
 
 def generic_receipt(user, charge):
@@ -162,4 +169,13 @@ def org_subscription_receipt(user, charge):
         logger.warning('Org receipt generated for non-owner User.')
         context = {'org': None}
     return Receipt(charge, [item], user=user, subject=subject, extra_context=context,
+        text_template=text, html_template=html)
+
+def donation_receipt(user, charge):
+    """Generates a receipt for a donation."""
+    subject = u'Donation Receipt'
+    text = 'message/receipt/donation.txt'
+    html = 'message/receipt/donation.html'
+    item = LineItem('Tax Deductible Donation', charge.amount)
+    return Receipt(charge, [item], user=user, subject=subject,
         text_template=text, html_template=html)

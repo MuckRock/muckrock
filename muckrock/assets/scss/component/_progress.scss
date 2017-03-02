@@ -7,7 +7,7 @@
     .meter {
         display: block;
         background: $color-green;
-        height: $vertical-rhythm/4;
+        height: $vr/4;
         @include border-radius;
     }
 }

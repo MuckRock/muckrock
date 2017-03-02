@@ -13,12 +13,8 @@ def stale():
     for agency in Agency.objects.all():
         is_stale = agency.is_stale()
         if is_stale and not agency.stale:
-            agency.stale = True
-            agency.save()
-            if not StaleAgencyTask.objects.filter(resolved=False, agency=agency).exists():
-                StaleAgencyTask.objects.create(agency=agency)
+            agency.mark_stale()
         elif not is_stale and agency.stale:
-            agency.stale = False
-            agency.save()
+            agency.unmark_stale()
             for task in StaleAgencyTask.objects.filter(resolved=False, agency=agency):
                 task.resolve()

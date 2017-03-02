@@ -6,22 +6,18 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template.loader import get_template
 from django.template import RequestContext, Context
 from django.utils.encoding import smart_text
 
-import actstream
 from datetime import datetime, date
 import logging
-from random import choice
-import string
 
-from muckrock.accounts.models import Profile
+from muckrock.accounts.utils import miniregister
 from muckrock.agency.models import Agency
 from muckrock.foia.forms import (
     RequestForm,
@@ -36,8 +32,8 @@ from muckrock.foia.models import (
     STATUS,
     )
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.message.tasks import welcome
 from muckrock.task.models import NewAgencyTask, MultiRequestTask
+from muckrock.utils import new_action, generate_key
 
 # pylint: disable=too-many-ancestors
 
@@ -135,40 +131,21 @@ def _make_request(request, foia_request, parent=None):
     return foia, foia_comm
 
 def _make_user(request, data):
-    """Helper function to create a new user"""
-    # create unique username thats at most 30 characters
-    base_username = data['full_name'].replace(' ', '')[:30]
-    username = base_username
-    num = 1
-    while User.objects.filter(username__iexact=username).exists():
-        postfix = str(num)
-        username = '%s%s' % (base_username[:30 - len(postfix)], postfix)
-        num += 1
-    # create random password
-    password = ''.join(choice(string.ascii_letters + string.digits) for _ in range(12))
-    # create a new user
-    user = User.objects.create_user(username, data['email'], password)
-    full_name = data['full_name'].strip()
-    if ' ' in full_name:
-        first_name, last_name = full_name.rsplit(' ', 1)
-        user.first_name = first_name[:30]
-        user.last_name = last_name[:30]
-    else:
-        user.first_name = full_name[:30]
-    user.save()
-    # create a new profile
-    Profile.objects.create(
-        user=user,
-        acct_type='basic',
-        monthly_requests=settings.MONTHLY_REQUESTS.get('basic', 0),
-        date_update=datetime.now()
-    )
-    # send the new user a welcome email
-    password_link = user.profile.wrap_url(reverse('acct-change-pw'))
-    welcome.delay(user, password_link)
-    # login the new user
-    user = authenticate(username=username, password=password)
+    """
+    Create a new user from just their full name and email and return the user.
+    - create a password from a random string of letters and numbers
+    - log the user in to their new account
+    """
+    full_name = data['full_name']
+    email = data['email']
+    password = generate_key(12)
+    # register a new user
+    user = miniregister(full_name, email, password)
+    # log the new user in
+    user = authenticate(username=user.username, password=password)
     login(request, user)
+    # return the user
+    return user
 
 def _process_request_form(request):
     """A helper function for getting info out of a request composer form"""
@@ -202,20 +179,15 @@ def _submit_request(request, foia):
     """Submit request for user"""
     if not foia.user == request.user:
         messages.error(request, 'Only a request\'s owner may submit it.')
-    if not request.user.profile.make_request():
+    elif not request.user.profile.make_request():
         error_msg = ('You do not have any requests remaining. '
                      'Please purchase more requests and then resubmit.')
         messages.error(request, error_msg)
-    foia.submit()
-    request.session['ga'] = 'request_submitted'
-    messages.success(request, 'Your request was submitted.')
-    # generate action
-    actstream.action.send(
-        request.user,
-        verb='submitted',
-        action_object=foia,
-        target=foia.agency
-    )
+    else:
+        foia.submit()
+        request.session['ga'] = 'request_submitted'
+        messages.success(request, 'Your request was submitted.')
+        new_action(request.user, 'submitted', target=foia)
     return redirect(foia)
 
 def clone_request(request, jurisdiction, jidx, slug, idx):
@@ -234,6 +206,8 @@ def create_request(request):
     try:
         foia_pk = request.GET['clone']
         foia = get_object_or_404(FOIARequest, pk=foia_pk)
+        if not foia.has_perm(request.user, 'view'):
+            raise Http404()
         initial_data = {
             'title': foia.title,
             'document': smart_text(foia.requested_docs),
@@ -305,7 +279,7 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
     if not foia.is_editable():
         messages.error(request, 'This is not a draft.')
         return redirect(foia)
-    if not request.user.has_perm('foia.change_foiarequest', foia):
+    if not foia.has_perm(request.user, 'change'):
         messages.error(request, 'You may only edit your own drafts.')
         return redirect(foia)
 
@@ -326,7 +300,7 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
             foia.title = data['title']
             foia.slug = slugify(foia.title) or 'untitled'
             foia.embargo = data['embargo']
-            has_perm = request.user.has_perm('foia.embargo_foiarequest', foia)
+            has_perm = foia.has_perm(request.user, 'embargo')
             if foia.embargo and not has_perm:
                 error_msg = 'Only Pro users may embargo their requests.'
                 messages.error(request, error_msg)

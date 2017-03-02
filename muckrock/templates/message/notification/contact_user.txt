@@ -1,0 +1,11 @@
+{% extends 'message/base.txt' %}
+{% block body %}
+A MuckRock admin has contacted you about the following request:
+
+{{ base_url }}{{ foia_url }}
+
+{{ text }}
+
+Sincerely,
+The MuckRock Team
+{% endblock %}

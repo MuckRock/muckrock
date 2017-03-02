@@ -21,11 +21,10 @@ old_foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
 
 urlpatterns = patterns(
     '',
+    url(r'^$', views.RequestExploreView.as_view(), name='foia-root'),
+
     # Redirects
-    url(r'^$',
-        RedirectView.as_view(url='list'), name='foia-root'),
-    url(r'^multi/$',
-        RedirectView.as_view(url='/foia/create_multi')),
+    url(r'^multi/$', RedirectView.as_view(url='/foia/create_multi')),
 
     # List Views
     url(r'^list/$',
@@ -34,6 +33,9 @@ urlpatterns = patterns(
     url(r'^mylist/$',
         views.MyRequestList.as_view(),
         name='foia-mylist'),
+    url(r'^mylist/multirequest/$',
+        views.MyMultiRequestList.as_view(),
+        name='foia-mymulti'),
     url(r'^list/following/$',
         views.FollowingRequestList.as_view(),
         name='foia-list-following'),
@@ -55,29 +57,35 @@ urlpatterns = patterns(
     url(r'^%s/$' % foia_url,
         views.Detail.as_view(template_name='foia/detail.html'),
         name='foia-detail'),
-
-    url(r'^%s/clone/$' % foia_url,
-        views.clone_request, name='foia-clone'),
     url(r'^%s/admin_fix/$' % foia_url,
-        views.admin_fix, name='foia-admin-fix'),
-    url(r'^%s/delete/$' % foia_url,
-        views.delete, name='foia-delete'),
-    url(r'^%s/embargo/$' % foia_url,
-        views.embargo, name='foia-embargo'),
-    url(r'^%s/pay/$' % foia_url,
-        views.pay_request, name='foia-pay'),
+        views.admin_fix,
+        name='foia-admin-fix'),
+    url(r'^%s/clone/$' % foia_url,
+        views.clone_request,
+        name='foia-clone'),
     url(r'^%s/crowdfund/$' % foia_url,
-        views.crowdfund_request, name='foia-crowdfund'),
+        views.crowdfund_request,
+        name='foia-crowdfund'),
+    url(r'^%s/delete/$' % foia_url,
+        views.delete,
+        name='foia-delete'),
+    url(r'^%s/files/$' % foia_url,
+        views.FOIAFileListView.as_view(),
+        name='foia-files'),
     url(r'^%s/follow/$' % foia_url,
         views.follow, name='foia-follow'),
+    url(r'^%s/embargo/$' % foia_url,
+        views.embargo,
+        name='foia-embargo'),
+    url(r'^%s/pay/$' % foia_url,
+        views.pay_request,
+        name='foia-pay'),
     url(r'^%s/toggle-followups/$' % foia_url,
         views.toggle_autofollowups, name='foia-toggle-followups'),
 
     # Misc Views
     url(r'^(?P<jurisdiction>[\w\d_-]+)-(?P<idx>\d+)/$',
         jurisdiction, name='foia-jurisdiction'),
-    url(r'^orphans/$',
-        views.orphans, name='foia-orphans'),
     url(r'^acronyms/$',
         views.acronyms, name='foia-acronyms'),
     url(r'^drag_drop/$',
@@ -98,6 +106,11 @@ urlpatterns = patterns(
        UserDoneFeed(), name='foia-user-done-feed'),
     url(r'^feeds/(?P<username>[\w\d_.@ ]+)/$',
        UserUpdateFeed(), name='foia-user-feed'),
+
+    # Files
+    url(r'^file/(?P<pk>\d+)/embed/$',
+        views.FileEmbedView.as_view(),
+        name='file-embed'),
 
     # Old URLS
     url(r'^list/user/(?P<user_name>[\w\d_.@ ]+)/$',

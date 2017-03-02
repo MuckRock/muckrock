@@ -4,58 +4,48 @@ Tests for crowdfund app
 
 from django.contrib.auth.models import AnonymousUser
 from django.core.urlresolvers import reverse
-from django.test import TestCase, RequestFactory
+from django.test import TestCase, RequestFactory, Client
 
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 from decimal import Decimal
+import json
 from mock import Mock, patch
 from nose.tools import ok_, eq_
 
 from muckrock.crowdfund.forms import CrowdfundPaymentForm
-from muckrock.crowdfund.models import Crowdfund, CrowdfundPayment
+from muckrock.crowdfund.models import CrowdfundPayment
 from muckrock.crowdfund.views import CrowdfundDetailView
-from muckrock.factories import UserFactory, FOIARequestFactory, ProjectFactory
+from muckrock.factories import UserFactory, FOIARequestFactory, ProjectFactory, CrowdfundFactory
 from muckrock.project.models import ProjectCrowdfunds
-from muckrock.utils import mock_middleware
-
-
-class TestCrowdfundDetailView(TestCase):
-    """Tests the helper method in the DetailView subclass"""
-
-    def setUp(self):
-        self.view = CrowdfundDetailView()
-        self.mock_url = '/mock-123/'
-        self.crowdfund = Mock()
-        project = Mock()
-        project.get_absolute_url = Mock(return_value=self.mock_url)
-        self.crowdfund.get_crowdfund_object = Mock(return_value=project)
-        self.view.get_object = Mock(return_value=self.crowdfund)
-
-    def test_get_redirect_url(self):
-        """Should return a redirect url or the index url"""
-        eq_(self.view.get_redirect_url(), self.mock_url,
-            'The function should return the url of the crowdfund object.')
-        self.crowdfund.get_crowdfund_object = Mock(return_value=None)
-        self.view.get_object = Mock(return_value=self.crowdfund)
-        eq_(self.view.get_redirect_url(), reverse('index'),
-            ('The function should return the index url as a fallback '
-            'if the url cannot be reversed.'))
+from muckrock.test_utils import mock_middleware
 
 
 @patch('stripe.Charge', Mock(create=Mock(return_value=Mock(id='stripe-charge-id'))))
 class TestCrowdfundView(TestCase):
-    """Tests the Detail view for Crowdfund objects"""
+    """
+    The Crowdfund Detail View should be handle all the contributons made to the crowdfund.
+
+    Contributions can be made:
+    - anonymously while logged out
+    - anonymously while logged in
+    - onymously while logged in
+
+    If a logged out user wants to make an onymous contribution, they need to register an account.
+    We provide them with a method for registering for an account at the time of contribution.
+
+    Crowdfund contributions should normally be made with Javascript via AJAX, and the crowdfund
+    view should handle and respond with JSON when an AJAX request is made. The response to a
+    successful contribution should include the user's current logged-in state and whether they
+    were registered as a user at the time the contribution was made.
+    """
     def setUp(self):
         due = datetime.today() + timedelta(30)
-        self.crowdfund = Crowdfund.objects.create(
-            name='Test Crowdfund',
-            description='Testing contributions to this request',
-            payment_required=10.00,
-            date_due=due
+        self.crowdfund = CrowdfundFactory(date_due=due)
+        FOIARequestFactory(
+            status='payment',
+            price=self.crowdfund.payment_required,
+            crowdfund=self.crowdfund
         )
-        FOIARequestFactory(status='payment',
-                price=self.crowdfund.payment_required,
-                crowdfund=self.crowdfund)
         self.num_payments = self.crowdfund.payments.count()
         self.url = self.crowdfund.get_absolute_url()
         self.data = {
@@ -74,19 +64,32 @@ class TestCrowdfundView(TestCase):
         response = self.view(request, pk=self.crowdfund.pk)
         eq_(response.status_code, 200, 'The response should be 200 OK.')
 
-    def post(self, data, user=AnonymousUser()):
+    def post(self, data, user=AnonymousUser(), ajax=False):
         """Helper function to post the data as the user."""
         # need a unique token for each POST
         form = CrowdfundPaymentForm(data)
         ok_(form.is_valid(), form.errors)
-        request = self.request_factory.post(self.url, data=data)
+        if ajax:
+            request = self.request_factory.post(self.url, data=data,
+                HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        else:
+            request = self.request_factory.post(self.url, data=data)
         request = mock_middleware(request)
         request.user = user
         response = self.view(request, pk=self.crowdfund.pk)
         ok_(response, 'There should be a response.')
+        if ajax:
+            eq_(response.status_code, 200,
+                'If the request was AJAX then the response should return 200 OK.')
+            eq_(response['Content-Type'], 'application/json',
+                'If the request was AJAX then the response should be JSON encoded.')
+        else:
+            eq_(response.status_code, 302, 'The response should be a redirection.')
+            eq_(response.url, self.crowdfund.get_crowdfund_object().get_absolute_url(),
+                'The response should redirect to the crowdfund object.')
         return response
 
-    def test_anonymous_contribution(self):
+    def test_anonymous_unauthenticated(self):
         """
         After posting the payment, the email, and the token, the server should process the
         payment before creating and returning a payment object.
@@ -99,7 +102,7 @@ class TestCrowdfundView(TestCase):
         eq_(self.crowdfund.payments.count(), self.num_payments + 1,
             'The crowdfund should have the payment added to it.')
 
-    def test_anonymous_while_logged_in(self):
+    def test_anonymous_authenticated(self):
         """
         An attributed contribution checks if the user is logged in, but still
         defaults to anonymity.
@@ -114,7 +117,7 @@ class TestCrowdfundView(TestCase):
         eq_(self.crowdfund.payments.count(), self.num_payments + 1,
             'The crowdfund should have the payment added to it.')
 
-    def test_attributed_contribution(self):
+    def test_onymous_authenticated(self):
         """An attributed contribution is opted-in by the user"""
         user = UserFactory()
         self.data['show'] = True
@@ -126,6 +129,47 @@ class TestCrowdfundView(TestCase):
             'If the user wants to be attributed, then the show flag should be true.')
         eq_(self.crowdfund.payments.count(), self.num_payments + 1,
             'The crowdfund should have the payment added to it.')
+
+    def test_ajax(self):
+        """A contribution made via AJAX should respond with JSON."""
+        self.post(self.data, ajax=True)
+
+    def test_logged_out_ajax(self):
+        """
+        A contribution made via AJAX while logged out should report that:
+        - the user is not authenticated
+        - the user was not registered
+        """
+        response = self.post(self.data, ajax=True)
+        data = json.loads(response.content)
+        eq_(data['authenticated'], False)
+        eq_(data['registered'], False)
+
+    def test_logged_in_ajax(self):
+        """
+        A contribution made via AJAX while logged in should report that:
+        - the user is authenticated
+        - the user was not registered
+        """
+        response = self.post(self.data, user=UserFactory(), ajax=True)
+        data = json.loads(response.content)
+        eq_(data['authenticated'], True)
+        eq_(data['registered'], False)
+
+    def test_registered_ajax(self):
+        """
+        A contribution made via AJAX while logged out, but registering, should report that:
+        - the user is authenticated
+        - the user was registered
+        """
+        # when registering, the full name should be present
+        self.data['full_name'] = 'John Doe'
+        self.data['show'] = True
+        response = self.post(self.data, ajax=True)
+        data = json.loads(response.content)
+        print data
+        eq_(data['authenticated'], True)
+        eq_(data['registered'], True)
 
     def test_correct_amount(self):
         """
@@ -139,22 +183,22 @@ class TestCrowdfundView(TestCase):
 
     def test_contributors(self):
         """The crowdfund can get a list of all its contibutors by parsing its list of payments."""
-        # anonymous payment
+        # anonymous logged out payment
         self.post(self.data)
-        # anonymous payment
+        # anonymous logged in payment
         user1 = UserFactory()
         self.post(self.data, user1)
-        # attributed payment
+        # onymous logged in payment
         user2 = UserFactory()
         self.data['show'] = True
         self.post(self.data, user2)
-
-        new_crowdfund = Crowdfund.objects.get(pk=self.crowdfund.pk)
-        eq_(new_crowdfund.contributors_count(), 3,
+        # Check to see that we're counting contributors in the right way
+        self.crowdfund.refresh_from_db()
+        eq_(self.crowdfund.contributors_count(), 3,
                 'All contributions should return some kind of user')
-        eq_(new_crowdfund.anonymous_contributors_count(), 2,
+        eq_(self.crowdfund.anonymous_contributors_count(), 2,
                 'There should be 2 anonymous contributors')
-        eq_(len(new_crowdfund.named_contributors()), 1,
+        eq_(len(self.crowdfund.named_contributors()), 1,
                 'There should be 1 named contributor')
 
     def test_unlimit_amount(self):
@@ -192,12 +236,8 @@ class TestCrowdfundView(TestCase):
 
 class TestCrowdfundProjectDetailView(TestCase):
     """Tests for the crowdfund project detail view."""
-
     def setUp(self):
-        self.crowdfund = Crowdfund.objects.create(
-            name='Cool project please help',
-            date_due=date.today() + timedelta(30),
-        )
+        self.crowdfund = CrowdfundFactory()
         project = ProjectFactory()
         ProjectCrowdfunds.objects.create(crowdfund=self.crowdfund, project=project)
         self.url = self.crowdfund.get_absolute_url()
@@ -215,3 +255,17 @@ class TestCrowdfundProjectDetailView(TestCase):
         request = self.request_factory.get(self.url)
         response = self.view(request, pk=self.crowdfund.pk)
         eq_(response.status_code, 200, 'The response should be 200 OK.')
+
+
+class TestCrowdfundEmbedView(TestCase):
+    """Tests the crowdfund embed view."""
+    def setUp(self):
+        self.crowdfund = CrowdfundFactory()
+        FOIARequestFactory(crowdfund=self.crowdfund)
+        self.url = reverse('crowdfund-embed', kwargs={'pk': self.crowdfund.pk})
+        self.client = Client()
+
+    def test_get(self):
+        """The embed view should render just a crowdfund widget on a standalone page."""
+        response = self.client.get(self.url)
+        eq_(response.status_code, 200)

@@ -1,0 +1,17 @@
+.button-group {
+    @include display(inline-flex);
+    margin-bottom: 0;
+    .button {
+        @include flex(1 1 auto);
+        border-radius: 0;
+    }
+    .button:first-child {
+        border-top-left-radius: $border-radius;
+        border-bottom-left-radius: $border-radius;
+    }
+    .button:last-child {
+        margin-bottom: $vr/4;
+        border-top-right-radius: $border-radius;
+        border-bottom-right-radius: $border-radius;
+    }
+}

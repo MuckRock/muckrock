@@ -16,6 +16,9 @@ SECURE_SSL_REDIRECT = True
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 
-PREPEND_WWW = True
+PREPEND_WWW = False
 
 EMAIL_BACKEND = 'django_mailgun.MailgunBackend'
+
+MUCKROCK_URL = 'www.muckrock.com'
+FOIAMACHINE_URL = 'beta.foiamachine.org'

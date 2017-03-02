@@ -1,0 +1,31 @@
+{% extends 'base_list.html' %}
+{% load tags %}
+
+{% block list-actions %}
+<div class="list__actions">
+    <a href="{% url 'question-create' %}" class="blue button">Ask a Question</a>
+    {% if request.user.profile %}
+    {% if request.user.profile.new_question_notifications %}
+    <a href="{% url 'question-follow-new' %}" class="button">Unfollow asked questions</a>
+    {% else %}
+    <a href="{% url 'question-follow-new' %}" class="button">Follow asked questions</a>
+    {% endif %}
+    {% endif %}
+</div>
+{% endblock list-actions %}
+
+{% block list-table-head %}
+<th data-sort="title">Question</th>
+<th data-sort="user">Asked by</th>
+<th data-sort="date">Date</th>
+<th>Answers</th>
+{% endblock list-table-head %}
+
+{% block list-table-row %}
+{% with object as question %}
+<td><a href="{{ question.get_absolute_url }}">{{ question.title }}</a></td>
+<td><a href="{% url "acct-profile" question.user.username %}">{{ question.user.get_full_name }}</a></td>
+<td>{{ question.date | date:"F j, Y"}}</td>
+<td>{{ question.answers.all | length }}</td>
+{% endwith %}
+{% endblock list-table-row %}

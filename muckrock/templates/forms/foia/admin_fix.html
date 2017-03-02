@@ -8,57 +8,17 @@
 {% block form-form %}
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    {% if form.non_field_errors %}
-    <div class="failure panel">
-    {{ form.non_field_errors }}
-    </div>
-    {% endif %}
-    <div class="hidden-fields">
-    {% for field in form.hidden_fields %}
-        {{ field }}
-    {% endfor %}
-    </div>
-    <div class="visible-fields">
-    {% for field in form.visible_fields %}
-        <fieldset class="{{ field.label|lower }}{% if field.field.required %} required{% endif %}">
-            <label {% if field.errors %}class="failure"{% endif %} for="{{ field.auto_id }}">{{ field.label}}</label>
-            {{ field.errors }}
-            {{ field }}
-            {% if field.help_text %}<p class="default"><small>{{ field.help_text }}</small></p>{% endif %}
-        </fieldset>
-    {% endfor %}
-    </div>
-    <div class="formset-forms">
+    {% include 'lib/pattern/form.html' %}
     {% if formset %}
+    <div class="formset-forms">
         {{ formset.management_form }}
         {% for form in formset.forms %}
-			<span class="formset-container">
-            {% if form.non_field_errors %}
-            <div class="failure panel">
-            {{ form.non_field_errors }}
-            </div>
-            {% endif %}
-            <div class="hidden-fields">
-            {% for field in form.hidden_fields %}
-                {{ field }}
-            {% endfor %}
-            </div>
-            <div class="visible-fields">
-            {% for field in form.visible_fields %}
-                <fieldset class="{{ field.label|lower }}{% if field.field.required %} required{% endif %}">
-                    <label {% if field.errors %}class="failure"{% endif %} for="{{ field.auto_id }}">{{ field.label}}</label>
-                    {{ field.errors }}
-                    {{ field }}
-                    {% if field.help_text %}<p class="default"><small>{{ field.help_text }}</small></p>{% endif %}
-                </fieldset>
-            {% endfor %}
-            </div>
+		<span class="formset-container">
+            {% include 'lib/pattern/form.html' %}
 		</span>
         {% endfor %}
-      {% endif %}
+    {% endif %}
     </div>
-    <div class="buttons">
-        <input type="submit" name="submit" value="{% if button_text %}{{ button_text }}{% else %}Submit{% endif %}" class="primary button" />
-    </div>
+    <input type="submit" class="blue button" />
 </form>
 {% endblock form-form %}

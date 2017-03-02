@@ -103,4 +103,3 @@ add_perm('foia.flag_foiarequest', is_authenticated) # Why must be authenticated 
 add_perm('foia.followup_foiarequest', can_edit & ~has_status('started'))
 add_perm('foia.view_rawemail', is_advanced)
 add_perm('foia.file_multirequest', is_advanced)
-

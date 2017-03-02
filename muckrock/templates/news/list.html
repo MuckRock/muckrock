@@ -1,0 +1,36 @@
+{% extends 'base_list.html' %}
+
+{% load tags %}
+{% load thumbnail %}
+
+{% block list-sections %}
+{% if years %}
+<ul class="nostyle list__sections">
+    {% for year in years %}
+    <li><a href="{% url 'news-archive-year' year=year %}">{{year}}</a></li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}
+
+{% block list-content %}
+<div class="grid__column three-quarters">
+{% if object_list %}
+    {% include 'lib/component/pagination.html' %}
+    <ul class="nostyle">
+        {% for article in object_list %}
+        <li class="news-list-article">
+            {% include 'lib/pattern/article.html' %}
+        </li>
+        {% endfor %}
+    </ul>
+    {% include 'lib/component/pagination.html' %}
+{% else %}
+    {% if request.GET %}
+    <p class="empty">No results given this filter.</p>
+    {% else %}
+    <p class="empty">No Results</p>
+    {% endif %}
+{% endif %}
+</div>
+{% endblock list-content %}

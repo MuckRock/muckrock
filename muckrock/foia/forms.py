@@ -23,7 +23,7 @@ class RequestForm(forms.Form):
     ]
 
     title = forms.CharField(
-            widget=forms.TextInput(attrs={'placeholder': 'Pick a Title'}),
+            widget=forms.TextInput(attrs={'placeholder': 'Add a subject'}),
             max_length=255,
             )
     document_placeholder = (
@@ -47,7 +47,7 @@ class RequestForm(forms.Form):
     agency = forms.CharField(
         label='Agency',
         widget=autocomplete_light.TextWidget(
-            'AgencyAutocomplete',
+            'AgencySimpleAgencyAutocomplete',
             attrs={'placeholder': 'Type the agency\'s name'}),
         max_length=255)
     full_name = forms.CharField()
@@ -66,10 +66,10 @@ class RequestForm(forms.Form):
         state = data.get('state')
         local = data.get('local')
         if jurisdiction == 's' and not state:
-            error_msg = 'No state was selected'
+            error_msg = 'No state was selected.'
             self._errors['state'] = self.error_class([error_msg])
         if jurisdiction == 'l' and not local:
-            error_msg = 'No locality was selected'
+            error_msg = 'No locality was selected.'
             self._errors['local'] = self.error_class([error_msg])
         return self.cleaned_data
 
@@ -214,7 +214,15 @@ class FOIADeleteForm(forms.Form):
         help_text='This cannot be undone!'
     )
 
-FOIAFileFormSet = forms.models.modelformset_factory(FOIAFile, fields=('ffile',))
+class FOIAFileForm(forms.ModelForm):
+    """A form for a FOIA File"""
+    ffile = forms.FileField(label='File', required=False)
+
+    class Meta:
+        model = FOIAFile
+        fields = ['ffile']
+
+FOIAFileFormSet = forms.models.modelformset_factory(FOIAFile, form=FOIAFileForm)
 
 class FOIANoteForm(forms.ModelForm):
     """A form for a FOIA Note"""
@@ -222,16 +230,24 @@ class FOIANoteForm(forms.ModelForm):
         # pylint: disable=too-few-public-methods
         model = FOIANote
         fields = ['note']
-        widgets = {'note': forms.Textarea()}
+        widgets = {'note': forms.Textarea(attrs={'class': 'prose-editor'})}
 
 class FOIAAdminFixForm(forms.ModelForm):
     """Form to email from the request's address"""
     class Meta:
         model = FOIARequest
-        fields = ['from_email', 'email', 'other_emails', 'comm']
+        fields = [
+                'from_email',
+                'email',
+                'other_emails',
+                'subject',
+                'comm',
+                'snail_mail',
+                ]
 
     from_email = forms.CharField(
         label='From',
+        initial='MuckRock',
         required=False,
         help_text='Leaving blank will fill in with request owner.'
     )
@@ -241,6 +257,7 @@ class FOIAAdminFixForm(forms.ModelForm):
         help_text='Leave blank to send to agency default.'
     )
     other_emails = forms.CharField(label='CC', required=False)
+    subject = forms.CharField(max_length=255)
     comm = forms.CharField(label='Body', widget=forms.Textarea())
     snail_mail = forms.BooleanField(required=False, label='Snail Mail Only')
 

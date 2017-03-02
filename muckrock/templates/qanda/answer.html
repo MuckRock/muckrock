@@ -1,0 +1,12 @@
+{% load tags %}
+{% if answer %}
+<div class="collapsable textbox {% if answer.user == answer.question.user %}blue{% endif %}" id="answer-{{answer.id}}">
+    <header class="textbox__header">
+        <span class="from">{{answer.user.get_full_name}}</span>
+        <a href="{{answer.question.get_absolute_url}}#answer-{{answer.id}}" class="nocollapse permalink"><time class="date" datetime="{{answer.date|date:'c'}}">{{answer.date|date:'m/d/Y'}}</time></a>
+    </header>
+    <section class="textbox__section">
+        {{answer.answer|markdown}}
+    </section>
+</div>
+{% endif %}

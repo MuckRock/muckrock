@@ -1,9 +1,9 @@
-{% load markdown_deux_tags %}
+{% load tags %}
 
 {% if note %}
 <div class="note" id="note-{{ note.id }}">
     <header class="note-header">
-        <p class="note-author">{% if note.author %}{{ note.author.get_full_name }}{% if note.author.is_staff %}<span class="staff badge">Staff</span>{% endif %}{% else %}{{ note.foia.user.get_full_name }}{% endif %}</p>
+        <p class="note-author">{% if note.author %}{{ note.author.get_full_name }}{% if note.author.is_staff %}&nbsp;<span class="small blue badge">Staff</span>{% endif %}{% else %}{{ note.foia.user.get_full_name }}{% endif %}</p>
         {% if foia_url %}
         <a href="#note-{{ note.id }}">
         {% else %}

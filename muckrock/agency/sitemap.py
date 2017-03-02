@@ -18,4 +18,4 @@ class AgencySitemap(LimitSitemap):
 
     def items(self):
         """Return all approved Agencies"""
-        return Agency.objects.get_approved()
+        return Agency.objects.select_related('jurisdiction').get_approved()
