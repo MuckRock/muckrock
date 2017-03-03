@@ -50,3 +50,6 @@ class FOIAMultiRequest(models.Model):
         ordering = ['title']
         verbose_name = 'FOIA Multi-Request'
         app_label = 'foia'
+        permissions = (
+            ('file_multirequest', 'Can submit requests to multiple agencies'),
+            )

@@ -39,7 +39,7 @@ class TestRequestSharing(TestCase):
         """Editors should have the same abilities and permissions as creators."""
         new_editor = self.editor
         self.foia.add_editor(new_editor)
-        ok_(self.foia.editable_by(new_editor))
+        ok_(self.foia.has_perm(new_editor, 'change'))
 
     def test_add_viewer(self):
         """Editors should be able to add viewers to the request."""
@@ -63,28 +63,28 @@ class TestRequestSharing(TestCase):
         viewer = UserFactory()
         normie = UserFactory()
         embargoed_foia.add_viewer(viewer)
-        assert_true(embargoed_foia.viewable_by(viewer))
-        assert_false(embargoed_foia.viewable_by(normie))
+        assert_true(embargoed_foia.has_perm(viewer, 'view'))
+        assert_false(embargoed_foia.has_perm(normie, 'view'))
 
     def test_promote_viewer(self):
         """Editors should be able to promote viewers to editors."""
         embargoed_foia = FOIARequestFactory(embargo=True)
         viewer = UserFactory()
         embargoed_foia.add_viewer(viewer)
-        assert_true(embargoed_foia.viewable_by(viewer))
-        assert_false(embargoed_foia.editable_by(viewer))
+        assert_true(embargoed_foia.has_perm(viewer, 'view'))
+        assert_false(embargoed_foia.has_perm(viewer, 'change'))
         embargoed_foia.promote_viewer(viewer)
-        assert_true(embargoed_foia.editable_by(viewer))
+        assert_true(embargoed_foia.has_perm(viewer, 'change'))
 
     def test_demote_editor(self):
         """Editors should be able to demote editors to viewers."""
         embargoed_foia = FOIARequestFactory(embargo=True)
         editor = UserFactory()
         embargoed_foia.add_editor(editor)
-        assert_true(embargoed_foia.viewable_by(editor))
-        assert_true(embargoed_foia.editable_by(editor))
+        assert_true(embargoed_foia.has_perm(editor, 'view'))
+        assert_true(embargoed_foia.has_perm(editor, 'change'))
         embargoed_foia.demote_editor(editor)
-        assert_false(embargoed_foia.editable_by(editor))
+        assert_false(embargoed_foia.has_perm(editor, 'change'))
 
     def test_access_key(self):
         """Editors should be able to generate a secure access key to view an embargoed request."""
@@ -103,8 +103,8 @@ class TestRequestSharing(TestCase):
         self.foia.add_viewer(self.creator)
         assert_false(self.foia.has_viewer(self.creator))
         # but the creator should still be able to both view and edit!
-        assert_true(self.foia.editable_by(self.creator))
-        assert_true(self.foia.viewable_by(self.creator))
+        assert_true(self.foia.has_perm(self.creator, 'view'))
+        assert_true(self.foia.has_perm(self.creator, 'change'))
 
 
 class TestRequestSharingViews(TestCase):

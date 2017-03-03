@@ -1,4 +1,7 @@
+{% load rules %}
+
 {% if embargo.show %}
+{% has_perm 'foia.embargo_perm_foiarequest' request.user foia as can_embargo_permanently %}
 <section class="embargo manager">
     <header>
         <dfn>Embargo</dfn>
@@ -22,7 +25,7 @@
         {% csrf_token %}
         {{ embargo_form.errors }}
         {{ embargo_form.non_field_errors }}
-        {% if request.user.profile.can_embargo_permanently %}
+        {% if can_embargo_permanently %}
         <div class="permanent">
             <span>
                 <label for={{embargo_form.permanent_embargo.id_for_label}}>Permanent</label>
@@ -44,7 +47,7 @@
         {% if not foia.embargo %}
             <button class="blue button" type="submit" name="embargo" value="create">Embargo</button>
             {% else %}
-                {% if embargo_needs_date or request.user.profile.can_embargo_permanently %}
+                {% if embargo_needs_date or can_embargo_permanently %}
             <button class="blue button" type="submit" name="embargo" value="update">Update</button>
                 {% endif %}
             <button class="red button" type="submit" name="embargo" value="delete">Remove</button>

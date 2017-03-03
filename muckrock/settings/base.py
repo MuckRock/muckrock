@@ -197,6 +197,7 @@ INSTALLED_APPS = (
     'rest_framework_swagger',
     'reversion',
     'robots',
+    'rules.apps.AutodiscoverRulesConfig',
     'storages',
     'taggit',
     'watson',
@@ -262,6 +263,7 @@ CELERYD_MAX_TASKS_PER_CHILD = os.environ.get('CELERYD_MAX_TASKS_PER_CHILD', 100)
 CELERYD_TASK_TIME_LIMIT = os.environ.get('CELERYD_TASK_TIME_LIMIT', 5 * 60)
 
 AUTHENTICATION_BACKENDS = (
+    'rules.permissions.ObjectPermissionBackend',
     'muckrock.accounts.backends.CaseInsensitiveModelBackend',
     'lot.auth_backend.LOTBackend',
     )

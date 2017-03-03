@@ -28,7 +28,8 @@ class TestRequestFilesView(TestCase):
 
     def test_get_ok(self):
         """The view should return 200 if the foia is viewable to the user."""
-        ok_(self.foia.viewable_by(self.foia.user), 'The user should be able to view the request')
+        ok_(self.foia.has_perm(self.foia.user, 'view'),
+            'The user should be able to view the request')
         response = http_get_response(self.url, self.view, self.foia.user, **self.kwargs)
         eq_(response.status_code, 200, 'The view should return 200.')
 
@@ -38,5 +39,5 @@ class TestRequestFilesView(TestCase):
         self.foia.embargo = True
         self.foia.save()
         user = UserFactory()
-        ok_(not self.foia.viewable_by(user))
+        ok_(not self.foia.has_perm(user, 'view'))
         http_get_response(self.url, self.view, user, **self.kwargs)

@@ -280,9 +280,9 @@ class Detail(DetailView):
                 Prefetch('communications__rawemail', RawEmail.objects.defer('raw_email')),
                 ),
         )
-        user = self.request.user
         valid_access_key = self.request.GET.get('key') == foia.access_key
-        if not foia.viewable_by(user) and not valid_access_key:
+        has_perm = foia.has_perm(self.request.user, 'view')
+        if not has_perm and not valid_access_key:
             raise Http404()
         self._obj = foia
         return foia
@@ -292,7 +292,8 @@ class Detail(DetailView):
         context = super(Detail, self).get_context_data(**kwargs)
         foia = context['foia']
         user = self.request.user
-        user_can_edit = foia.editable_by(user)
+        user_can_edit = foia.has_perm(self.request.user, 'change')
+        user_can_embargo = foia.has_perm(self.request.user, 'embargo')
         is_past_due = foia.date_due < datetime.now().date() if foia.date_due else False
         include_draft = user.is_staff or foia.status == 'started'
         context['all_tags'] = Tag.objects.all()
@@ -300,11 +301,10 @@ class Detail(DetailView):
         context['user_can_edit'] = user_can_edit
         context['user_can_pay'] = user_can_edit and foia.is_payable()
         context['embargo'] = {
-            'show': ((user_can_edit and foia.user.profile.can_embargo)\
-                    or foia.embargo) or user.is_staff,
-            'edit': user_can_edit and foia.user.profile.can_embargo,
-            'add': user_can_edit and user.profile.can_embargo,
-            'remove': user_can_edit and foia.embargo
+            'show': user_can_embargo or foia.embargo,
+            'edit': user_can_embargo,
+            'add': user_can_embargo,
+            'remove': user_can_edit and foia.embargo,
         }
         context['embargo_form'] = FOIAEmbargoForm(initial={
             'permanent_embargo': foia.permanent_embargo,
@@ -335,7 +335,8 @@ class Detail(DetailView):
         context['open_tasks'] = open_tasks
         context['stripe_pk'] = settings.STRIPE_PUB_KEY
         context['sidebar_admin_url'] = reverse('admin:foia_foiarequest_change', args=(foia.pk,))
-        context['is_thankable'] = foia.is_thankable()
+        context['is_thankable'] = self.request.user.has_perm(
+                'foia.thank_foiarequest', foia)
         context['files'] = foia.files.all()[:50]
         if foia.sidebar_html:
             messages.info(self.request, foia.sidebar_html)
@@ -385,14 +386,15 @@ class Detail(DetailView):
     def _tags(self, request, foia):
         """Handle updating tags"""
         # pylint: disable=no-self-use
-        if foia.editable_by(request.user) or request.user.is_staff:
+        if foia.has_perm(request.user, 'change'):
             foia.update_tags(request.POST.get('tags'))
         return redirect(foia)
 
     def _projects(self, request, foia):
         """Handle updating projects"""
         form = ProjectManagerForm(request.POST)
-        if (foia.editable_by(request.user) or request.user.is_staff) and form.is_valid():
+        has_perm = foia.has_perm(request.user, 'change')
+        if has_perm and form.is_valid():
             projects = form.cleaned_data['projects']
             foia.projects = projects
         return redirect(foia)
@@ -401,7 +403,8 @@ class Detail(DetailView):
         """Handle updating status"""
         status = request.POST.get('status')
         old_status = foia.get_status_display()
-        user_editable = foia.editable_by(request.user) and status in [s for s, _ in STATUS_NODRAFT]
+        has_perm = foia.has_perm(request.user, 'change')
+        user_editable = has_perm and status in [s for s, _ in STATUS_NODRAFT]
         staff_editable = request.user.is_staff and status in [s for s, _ in STATUS]
         if foia.status not in ['started', 'submitted'] and (user_editable or staff_editable):
             foia.status = status
@@ -422,7 +425,8 @@ class Detail(DetailView):
     def _question(self, request, foia):
         """Handle asking a question"""
         text = request.POST.get('text')
-        if foia.editable_by(request.user) and text:
+        has_perm = foia.has_perm(request.user, 'change')
+        if has_perm and text:
             title = 'Question about request: %s' % foia.title
             question = Question.objects.create(
                 user=request.user,
@@ -439,7 +443,8 @@ class Detail(DetailView):
     def _add_note(self, request, foia):
         """Adds a note to the request"""
         note_form = FOIANoteForm(request.POST)
-        if foia.editable_by(request.user) and note_form.is_valid():
+        has_perm = foia.has_perm(request.user, 'change')
+        if has_perm and note_form.is_valid():
             foia_note = note_form.save(commit=False)
             foia_note.foia = foia
             foia_note.author = request.user
@@ -452,7 +457,8 @@ class Detail(DetailView):
     def _flag(self, request, foia):
         """Allow a user to notify us of a problem with the request"""
         text = request.POST.get('text')
-        if request.user.is_authenticated() and text:
+        has_perm = foia.has_perm(request.user, 'flag')
+        if has_perm and text:
             FlaggedTask.objects.create(
                 user=request.user,
                 text=text,
@@ -483,19 +489,19 @@ class Detail(DetailView):
 
     def _follow_up(self, request, foia):
         """Handle submitting follow ups"""
-        can_follow_up = foia.editable_by(request.user) or request.user.is_staff
-        test = can_follow_up and foia.status != 'started'
         success_msg = 'Your follow up has been sent.'
-        comm_sent = self._new_comm(request, foia, test, success_msg)
+        has_perm = foia.has_perm(request.user, 'followup')
+        comm_sent = self._new_comm(request, foia, has_perm, success_msg)
         if comm_sent:
             new_action(request.user, 'followed up on', target=foia)
         return redirect(foia)
 
     def _thank(self, request, foia):
         """Handle submitting a thank you follow up"""
-        test = foia.editable_by(request.user) and foia.is_thankable()
         success_msg = 'Your thank you has been sent.'
-        comm_sent = self._new_comm(request, foia, test, success_msg, thanks=True)
+        has_perm = foia.has_perm(request.user, 'thank')
+        comm_sent = self._new_comm(
+                request, foia, has_perm, success_msg, thanks=True)
         if comm_sent:
             new_action(request.user, verb='thanked', target=foia.agency)
         return redirect(foia)
@@ -503,14 +509,12 @@ class Detail(DetailView):
     def _appeal(self, request, foia):
         """Handle submitting an appeal, then create an Appeal from the returned communication."""
         form = AppealForm(request.POST)
-        if not foia.editable_by(request.user):
+        has_perm = foia.has_perm(request.user, 'appeal')
+        if not has_perm:
             messages.error(request, 'You do not have permission to submit an appeal.')
             return redirect(foia)
         if not form.is_valid():
             messages.error(request, 'You did not submit an appeal.')
-            return redirect(foia)
-        if not foia.is_appealable():
-            messages.error(request, 'This request cannot be appealed.')
             return redirect(foia)
         communication = foia.appeal(form.cleaned_data['text'])
         base_language = form.cleaned_data['base_language']
@@ -534,7 +538,7 @@ class Detail(DetailView):
     def _update_estimate(self, request, foia):
         """Change the estimated completion date"""
         form = FOIAEstimatedCompletionDateForm(request.POST, instance=foia)
-        if foia.editable_by(request.user):
+        if foia.has_perm(request.user, 'change'):
             if form.is_valid():
                 form.save()
                 messages.success(request, 'Successfully changed the estimated completion date.')
@@ -547,7 +551,7 @@ class Detail(DetailView):
     def _update_new_agency(self, request, foia):
         """Update the new agency"""
         form = AgencyForm(request.POST, instance=foia.agency)
-        if foia.editable_by(request.user):
+        if foia.has_perm(request.user, 'change'):
             if form.is_valid():
                 form.save()
                 messages.success(request, 'Agency info saved. Thanks for your help!')
@@ -559,7 +563,7 @@ class Detail(DetailView):
 
     def _generate_key(self, request, foia):
         """Generate and return an access key, with support for AJAX."""
-        if not foia.editable_by(request.user):
+        if not foia.has_perm(request.user, 'change'):
             if request.is_ajax():
                 return PermissionDenied
             else:
@@ -575,7 +579,8 @@ class Detail(DetailView):
     def _grant_access(self, request, foia):
         """Grant editor access to the specified users."""
         form = FOIAAccessForm(request.POST)
-        if not foia.editable_by(request.user) or not form.is_valid():
+        has_perm = foia.has_perm(request.user, 'change')
+        if not has_perm or not form.is_valid():
             return redirect(foia)
         access = form.cleaned_data['access']
         users = form.cleaned_data['users']
@@ -596,7 +601,8 @@ class Detail(DetailView):
         """Revoke access from a user."""
         user_pk = request.POST.get('user')
         user = User.objects.get(pk=user_pk)
-        if foia.editable_by(request.user) and user:
+        has_perm = foia.has_perm(request.user, 'change')
+        if has_perm and user:
             if foia.has_editor(user):
                 foia.remove_editor(user)
             elif foia.has_viewer(user):
@@ -608,7 +614,8 @@ class Detail(DetailView):
         """Demote user from editor access to viewer access"""
         user_pk = request.POST.get('user')
         user = User.objects.get(pk=user_pk)
-        if foia.editable_by(request.user) and user:
+        has_perm = foia.has_perm(request.user, 'change')
+        if has_perm and user:
             foia.demote_editor(user)
             messages.success(request, '%s can now only view this request.' % user.first_name)
         return redirect(foia)
@@ -617,7 +624,8 @@ class Detail(DetailView):
         """Promote user from viewer access to editor access"""
         user_pk = request.POST.get('user')
         user = User.objects.get(pk=user_pk)
-        if foia.editable_by(request.user) and user:
+        has_perm = foia.has_perm(request.user, 'change')
+        if has_perm and user:
             foia.promote_viewer(user)
             messages.success(request, '%s can now edit this request.' % user.first_name)
         return redirect(foia)

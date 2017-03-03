@@ -84,10 +84,6 @@ class FOIAFile(models.Model):
         if self.comm and self.comm.foia:
             return self.comm.foia
 
-    def viewable_by(self, user):
-        """Is this document viewable to user"""
-        return self.access == 'public' and self.foia.viewable_by(user)
-
     def is_public(self):
         """Is this document viewable to everyone"""
         return self.access == 'public'

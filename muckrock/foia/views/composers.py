@@ -206,7 +206,7 @@ def create_request(request):
     try:
         foia_pk = request.GET['clone']
         foia = get_object_or_404(FOIARequest, pk=foia_pk)
-        if not foia.viewable_by(request.user):
+        if not foia.has_perm(request.user, 'view'):
             raise Http404()
         initial_data = {
             'title': foia.title,
@@ -279,7 +279,7 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
     if not foia.is_editable():
         messages.error(request, 'This is not a draft.')
         return redirect(foia)
-    if not foia.editable_by(request.user) and not request.user.is_staff:
+    if not foia.has_perm(request.user, 'change'):
         messages.error(request, 'You may only edit your own drafts.')
         return redirect(foia)
 
@@ -300,7 +300,8 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
             foia.title = data['title']
             foia.slug = slugify(foia.title) or 'untitled'
             foia.embargo = data['embargo']
-            if foia.embargo and not request.user.profile.can_embargo():
+            has_perm = foia.has_perm(request.user, 'embargo')
+            if foia.embargo and not has_perm:
                 error_msg = 'Only Pro users may embargo their requests.'
                 messages.error(request, error_msg)
                 return redirect(foia)
