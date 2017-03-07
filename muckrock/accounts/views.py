@@ -191,10 +191,9 @@ class AccountsView(TemplateView):
         if logged_in:
             context['acct_type'] = self.request.user.profile.acct_type
             context['email'] = self.request.user.email
-            try:
-                context['org'] = Organization.objects.get(owner=self.request.user)
-            except Organization.DoesNotExist:
-                context['org'] = None
+            context['org'] = (Organization.objects
+                    .filter(owner=self.request.user)
+                    .first())
         context['stripe_pk'] = settings.STRIPE_PUB_KEY
         context['logged_in'] = logged_in
         return context
