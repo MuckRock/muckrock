@@ -40,7 +40,7 @@ class FOIAFileListView(PaginationMixin, ListView):
     def dispatch(self, request, *args, **kwargs):
         """Prevent unauthorized users from viewing the files."""
         foia = self.get_foia()
-        if not foia.viewable_by(request.user):
+        if not foia.has_perm(request.user, 'view'):
             raise Http404()
         return super(FOIAFileListView, self).dispatch(request, *args, **kwargs)
 

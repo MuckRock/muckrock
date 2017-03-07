@@ -1,6 +1,7 @@
 {% extends 'forms/base_form.html' %}
 {% load static from staticfiles %}
 {% load mathfilters %}
+{% load rules %}
 
 {% block title %}MuckRock &bull; {{ action|title }}{% endblock %}
 {% block form-type %}multirequest-draft{% endblock %}
@@ -60,7 +61,7 @@ and
         </div>
                     {{field.errors}}
         {% else %}
-        {% include 'lib/pattern/field.html' %}
+            {% include 'lib/pattern/field.html' %}
         {% endif %}
     {% endfor %}
     {% if not balance.extra_requests %}

@@ -5,6 +5,9 @@
 {% load static from staticfiles %}
 {% load crowdfund_tags %}
 {% load tags %}
+{% load rules %}
+
+{% has_perm 'foia.appeal_foiarequest' request.user foia as can_appeal %}
 
 {% block title %}{{ foia.title }}{% endblock %}
 {% block type %}request{% endblock %}
@@ -242,7 +245,7 @@ Sincerely,
                             </form>
                         </div>
                         {% endif %}
-                        {% if foia.is_appealable %}
+                        {% if can_appeal %}
                         <div class="composer" id="appeal">
                             {% if not foia.jurisdiction.can_appeal %}
                             <div class="message warning">

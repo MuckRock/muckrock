@@ -150,7 +150,7 @@ class Detail(DetailView):
         if foia is not None:
             foia.public_file_count = foia.files.filter(access='public').count()
         context['foia_viewable'] = (foia is not None and
-                foia.viewable_by(self.request.user))
+                foia.has_perm(self.request.user, 'view'))
         return context
 
 

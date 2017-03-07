@@ -79,21 +79,6 @@ def redact_emails(text):
     """Redact emails from text"""
     return email_re.sub(email_redactor, text)
 
-@register.filter
-def redact_list(obj_list, user):
-    """
-    Filters and returns a list of objects based on whether they should be visible
-    to the currently-logged in user.
-    """
-    redacted_list = []
-    for item in obj_list:
-        try:
-            if item.object.viewable_by(user):
-                redacted_list.append(item)
-        except AttributeError:
-            redacted_list.append(item)
-    return redacted_list
-
 # http://stackoverflow.com/questions/1278042/
 # in-django-is-there-an-easy-way-to-render-a-text-field-as-a-template-in-a-templ/1278507#1278507
 
@@ -123,11 +108,6 @@ class EvaluateNode(template.Node):
             return tmpl.render(context)
         except (template.VariableDoesNotExist, template.TemplateSyntaxError):
             return 'Error rendering', self.variable
-
-@register.assignment_tag
-def editable_by(foia, user):
-    """Template tag to call editable by on FOIAs"""
-    return foia.editable_by(user)
 
 @register.inclusion_tag('tags/tag_manager.html', takes_context=True)
 def tag_manager(context, mr_object):
