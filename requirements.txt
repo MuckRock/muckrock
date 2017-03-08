@@ -8,7 +8,7 @@
 -e git+git://github.com/mitchelljkotler/django-news-sitemaps.git@50f198287868612f2d34bc4306e0e95308f942a3#egg=django_news_sitemaps
 amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu
-appdirs==1.4.0            # via setuptools
+appdirs==1.4.3            # via setuptools
 billiard==3.3.0.23        # via celery
 bleach==1.5.0
 boto==2.42.0
