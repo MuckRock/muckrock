@@ -14,6 +14,7 @@ from nose.tools import eq_, ok_, raises
 from muckrock.factories import UserFactory, AgencyFactory
 from muckrock.foiamachine import factories, models
 
+
 class TestFoiaMachineRequest(TestCase):
     """The FOIA Machine Request should store information we need to send a request."""
     def setUp(self):
@@ -75,12 +76,12 @@ class TestFoiaMachineRequest(TestCase):
     def test_date_submitted(self):
         """The date submitted should be the first communication date or None."""
         comm = factories.FoiaMachineCommunicationFactory(request=self.foi)
-        eq_(self.foi.date_submitted, comm.date.date())
+        eq_(self.foi.date_submitted, comm.date)
 
     def test_date_due(self):
         """The date due should be the date submitted plus the jurisdiction's response time."""
         comm = factories.FoiaMachineCommunicationFactory(request=self.foi)
-        expected_date_due = comm.date.date() + timedelta(self.foi.jurisdiction.get_days())
+        expected_date_due = comm.date + timedelta(self.foi.jurisdiction.get_days())
         eq_(self.foi.date_due, expected_date_due)
 
     @raises(AttributeError)
@@ -98,7 +99,7 @@ class TestFoiaMachineRequest(TestCase):
     def test_days_until_due(self):
         """The days until due should compare the date due to today's date."""
         comm = factories.FoiaMachineCommunicationFactory(request=self.foi)
-        eq_(self.foi.days_until_due, (self.foi.date_due - timezone.now().date()).days)
+        eq_(self.foi.days_until_due, (self.foi.date_due - timezone.now()).days)
         # If there is no communication, the default should be 0
         comm.delete()
         eq_(self.foi.days_until_due, 0)
