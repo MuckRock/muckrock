@@ -174,6 +174,8 @@ class Command(BaseCommand):
             seen = set()
             for (user_email, title, status, jurisdiction_name, agency_name, text,
                     slug, date_added) in requests:
+                if status == 'X':
+                    continue
                 if jurisdiction_name == 'N':
                     jurisdiction = None
                 else:
