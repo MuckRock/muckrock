@@ -27,6 +27,8 @@ import csv
 import os
 from datetime import datetime
 
+# pylint: disable-all
+
 CSV_OPTS = {
         'doublequote': False,
         'escapechar': '\\',
