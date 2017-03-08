@@ -151,7 +151,11 @@ class FoiaMachineFile(models.Model):
     Files are uploaded by users and are attached to communications, like in an email.
     """
     communication = models.ForeignKey(FoiaMachineCommunication, related_name='files')
-    file = models.FileField(upload_to='foiamachine_files/%Y/%m/%d', verbose_name='File', max_length=255)
+    file = models.FileField(
+            upload_to='foiamachine_files/%Y/%m/%d',
+            verbose_name='File',
+            max_length=255,
+            )
     name = models.CharField(max_length=255)
     comment = models.TextField(blank=True)
     date_added = models.DateTimeField(auto_now_add=True)
