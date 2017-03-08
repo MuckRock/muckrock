@@ -43,7 +43,9 @@ class FoiaMachineRequest(models.Model):
 
     def save(self, *args, **kwargs):
         """Automatically update the slug field."""
-        # self.slug = slugify(self.title)
+        autoslug = kwargs.pop('autoslug', True)
+        if autoslug:
+            self.slug = slugify(self.title)
         super(FoiaMachineRequest, self).save(*args, **kwargs)
 
     def __unicode__(self):

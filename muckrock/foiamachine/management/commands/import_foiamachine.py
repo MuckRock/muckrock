@@ -194,7 +194,7 @@ class Command(BaseCommand):
                     if score < 89:
                         agency = None
                 count += 1
-                FoiaMachineRequest.objects.create(
+                req = FoiaMachineRequest(
                         user=User.objects.get(email=user_email),
                         title=title,
                         slug=slug,
@@ -204,6 +204,7 @@ class Command(BaseCommand):
                         jurisdiction=jurisdiction,
                         agency=agency,
                         )
+                req.save(autoslug=False)
         print 'Imported %s requests' % count
 
     def import_communications(self):
