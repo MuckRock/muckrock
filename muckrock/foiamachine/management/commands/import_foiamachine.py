@@ -64,16 +64,28 @@ class Command(BaseCommand):
         count = 0
         self.stdout.write('Importing users...')
         key = self.bucket.get_key('foiamachine/data/fm_users.csv')
-        with smart_open(key) as users_file:
+        user_log_key = self.bucket.new_key('foiamachine/data/user_log.csv')
+        with smart_open(key) as users_file, smart_open(user_log_key, 'wb') as user_log_file:
             users = csv.reader(users_file, **CSV_OPTS)
+            user_log = csv.writer(user_log_file, **CSV_OPTS)
+            user_log.writerow([
+                'muckrock username',
+                'foia machine username',
+                'email',
+                'first_name',
+                'last_name',
+                'new account',
+                'new username',
+                ])
             next(users) # drop the headers
             for (username, first_name, last_name, email, password, is_active,
                     last_login, date_joined, mailing_address, mailing_city,
                     mailing_state, mailing_zip, phone, is_verified) in users:
                 # only create users who do not already have an account
                 # associated with their email
+                new_username = unique_username(username)
                 defaults = {
-                        'username': unique_username(username),
+                        'username': new_username,
                         'first_name': first_name,
                         'last_name': last_name,
                         'password': password,
@@ -89,8 +101,16 @@ class Command(BaseCommand):
                             defaults=defaults,
                             )
                 else:
-                    created = True
-                    user = User.objects.create(email='', **defaults)
+                    continue
+                user_log.writerow([
+                    user.username,
+                    username,
+                    email,
+                    first_name,
+                    last_name,
+                    created,
+                    user.username != username,
+                    ])
                 # if we created a new user, create their corresponding profile
                 if created:
                     count += 1
