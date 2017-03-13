@@ -32,10 +32,12 @@ class ArticleAdminForm(forms.ModelForm):
     """Form with autocompletes"""
     # pylint: disable=too-few-public-methods
 
-    authors = forms.ModelMultipleChoiceField(
-        queryset=User.objects.order_by('username'))
-    editors = forms.ModelMultipleChoiceField(
-        queryset=User.objects.order_by('username'),
+    authors = autocomplete_light.ModelMultipleChoiceField(
+        'UserAutocomplete',
+        queryset=User.objects.all())
+    editors = autocomplete_light.ModelMultipleChoiceField(
+        'UserAutocomplete',
+        queryset=User.objects.all(),
         required=False)
     foias = autocomplete_light.ModelMultipleChoiceField(
         'FOIARequestAdminAutocomplete',
