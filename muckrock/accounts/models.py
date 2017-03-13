@@ -56,6 +56,14 @@ class Profile(models.Model):
     )
 
     user = models.OneToOneField(User)
+    source = models.CharField(
+            max_length=20,
+            blank=True,
+            choices=(
+                ('foia machine', 'FOIA Machine'),
+                ),
+            )
+
     address1 = models.CharField(
         max_length=50,
         blank=True,
