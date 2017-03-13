@@ -162,6 +162,7 @@ class Command(BaseCommand):
                             email_confirmed=is_verified,
                             acct_type='basic',
                             num_requests=5,
+                            source='foia machine',
                             )
         print 'Imported %s new users' % count
 
