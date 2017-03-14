@@ -7,8 +7,6 @@
 {% load tags %}
 {% load rules %}
 
-{% has_perm 'foia.appeal_foiarequest' request.user foia as can_appeal %}
-
 {% block title %}{{ foia.title }}{% endblock %}
 {% block type %}request{% endblock %}
 
@@ -31,6 +29,9 @@
 {% endblock twitter_card %}
 
 {% block content %}
+
+{% has_perm 'foia.appeal_foiarequest' request.user foia as can_appeal %}
+
 <article class="request detail grid__row" id="foia-{{ foia.id }}">
     <section class="request properties grid__column one-quarter">
         <header>
@@ -188,17 +189,17 @@
                     <div class="composer-actions">
                         <div class="button-group">
                             {% if is_thankable %}
-                            <a href="#thanks" class="blue button">Say Thanks</a>
+                                <a href="#thanks" class="blue button">Say Thanks</a>
                             {% endif %}
                             <a href="#follow-up" class="blue button">Follow Up</a>
                             {% if foia.is_payable %}
-                            <a href="#pay" class="green button">Pay Fees</a>
-                            {% if not foia.has_crowdfund %}
-                            <a href="#crowdfund" class="green button">Crowdfund</a>
+                                <a href="#pay" class="green button">Pay Fees</a>
+                                {% if not foia.has_crowdfund %}
+                                    <a href="#crowdfund" class="green button">Crowdfund</a>
+                                {% endif %}
                             {% endif %}
-                            {% endif %}
-                            {% if foia.is_appealable %}
-                            <a href="#appeal" class="red button">Appeal</a>
+                            {% if can_appeal %}
+                                <a href="#appeal" class="red button">Appeal</a>
                             {% endif %}
                         </div>
                         <a href="#get-advice" class="button">Get Advice</a>
@@ -209,7 +210,7 @@
                     <div class="composer-inputs">
                         <div class="composer" id="inactive">
                             <div class="composer-input">
-                                <p>You may <a href="#follow-up">follow up</a> {% if not foia.disable_autofollowups %}manually {% endif %}with the agency{% if foia.is_appealable %} or <a href="#appeal">appeal</a> their decision{% endif %}.</p>
+                                <p>You may <a href="#follow-up">follow up</a> {% if not foia.disable_autofollowups %}manually {% endif %}with the agency{% if can_appeal %} or <a href="#appeal">appeal</a> their decision{% endif %}.</p>
                             </div>
                         </div>
                         <div class="follow-up composer" id="follow-up">
