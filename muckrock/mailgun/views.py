@@ -5,11 +5,13 @@ Views for mailgun
 from django.conf import settings
 from django.core.cache import cache
 from django.core.mail import EmailMessage
+from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
 
 import hashlib
 import hmac
+import json
 import logging
 import os
 import re
@@ -180,8 +182,6 @@ def route_mailgun(request):
         m_request_email = p_request_email.match(email)
         if m_request_email:
             _handle_request(request, m_request_email.group(1))
-        elif email == 'fax@requests.muckrock.com':
-            _fax(request)
         elif email.endswith('@requests.muckrock.com'):
             _catch_all(request, email)
     return HttpResponse('OK')
@@ -286,79 +286,6 @@ def _handle_request(request, mail_id):
     return HttpResponse('OK')
 
 
-def _parse_faxaway_email(body, prefixes, addtl_info=False):
-    """Parse a faxaway confirmation email"""
-    values = {}
-    info_list = []
-    in_info = False
-    for line in body.split('\n'):
-        for prefix in prefixes:
-            if line.startswith(prefix):
-                values[prefix] = line[len(prefix):].strip()
-                prefixes.remove(prefix)
-        if not prefixes and not addtl_info:
-            break
-        if addtl_info and line.startswith('Additional Information:'):
-            in_info = True
-        elif addtl_info and line.startswith('==='):
-            # a line of equal signs marks the end of the additonal
-            # information, and the end of any data we want to parse
-            break
-        elif addtl_info and in_info:
-            info_list.append(line.strip())
-    values['info'] = '\n'.join(info_list)
-    return values
-
-
-def _fax(request):
-    """Handle fax confirmations and failures"""
-
-    p_id = re.compile(r'MR#(\d+)-(\d+)')
-
-    post = request.POST
-    subject = post.get('subject', '')
-    m_id = p_id.search(subject)
-
-    if m_id:
-        # pylint: disable=duplicate-except
-        try:
-            FOIARequest.objects.get(pk=m_id.group(1))
-            comm = FOIACommunication.objects.get(pk=m_id.group(2))
-        except FOIARequest.DoesNotExist:
-            logger.warning('Fax FOIARequest does not exist: %s', m_id.group(1))
-        except FOIACommunication.DoesNotExist:
-            logger.warning('Fax FOIACommunication does not exist: %s', m_id.group(2))
-        else:
-            if subject.startswith('CONFIRM:'):
-                comm.confirmed = datetime.now()
-                comm.save()
-            if subject.startswith('FAILURE:'):
-                parsed = _parse_faxaway_email(
-                        post.get('body-plain', ''),
-                        ['REASON:', 'FAX NUMBER:'],
-                        addtl_info=True,
-                        )
-                reason = parsed.get('REASON:', '')
-                recipient = parsed.get('FAX NUMBER:', '')
-                date = datetime.now()
-                error = parsed.get('info', '')
-                FailedFaxTask.objects.create(
-                        communication=comm,
-                        reason=reason,
-                        )
-                CommunicationError.objects.create(
-                        communication=comm,
-                        date=date,
-                        recipient=recipient,
-                        error=error,
-                        event='failed fax',
-                        reason=reason,
-                        )
-
-    _forward(request.POST, request.FILES)
-    return HttpResponse('OK')
-
-
 def _catch_all(request, address):
     """Handle emails sent to other addresses"""
 
@@ -441,6 +368,74 @@ def delivered(_request, communication, timestamp):
     """Notify when an email has been delivered"""
     communication.confirmed = timestamp
     communication.save()
+
+
+def phaxio_callback(request):
+    """Handle Phaxio callbacks"""
+    url = 'https://%s/%s/' % (
+            settings.MUCKROCK_URL,
+            reverse('phaxio-callback'),
+            )
+    if not _validate_phaxio(
+            settings.PHAXIO_CALLBACK_TOKEN,
+            url,
+            request.POST,
+            request.FILES,
+            request.META['HTTP_X_PHAXIO_SIGNATURE'],
+            ):
+        return HttpResponseForbidden()
+
+    fax_info = json.loads(request.POST['fax'])
+    comm_id = fax_info['tags']['comm_id']
+    try:
+        comm = FOIACommunication.objects.get(pk=comm_id)
+    except FOIACommunication.DoesNotExist:
+        logger.warning('Fax FOIACommunication does not exist: %s', comm_id)
+    else:
+        date = fax_info.get('completed_at') or datetime.now()
+        if request.POST['success']:
+            comm.confirmed = date
+            comm.save()
+        else:
+            reason = request.POST.get('message')
+            recipient = fax_info['recipients'][0]['number'] # XXX multi recipients?
+            error = fax_info.get('error_type') # XXX
+            #error = fax_info.get('error_code') # XXX is this the same as message?
+            FailedFaxTask.objects.create(
+                    communication=comm,
+                    reason=reason,
+                    )
+            CommunicationError.objects.create(
+                    communication=comm,
+                    date=date,
+                    recipient=recipient,
+                    error=error,
+                    event='failed fax',
+                    reason=reason,
+                    )
+
+    return HttpResponse('OK')
+
+
+def _validate_phaxio(token, url, parameters, files, signature):
+    """Validate Phaxio callback"""
+    # sort the post fields and add them to the URL
+    for key in sorted(parameters.keys()):
+        url += '{}{}'.format(key, parameters[key])
+
+    # sort the files and add their SHA1 sums to the URL
+    for filename in sorted(files.keys()):
+        file_hash = hashlib.sha1()
+        file_hash.update(files[filename].read())
+        files[filename].stream.seek(0)
+        url += '{}{}'.format(filename, file_hash.hexdigest())
+
+    digest = hmac.new(
+            key=token.encode('utf-8'),
+            msg=url.encode('utf-8'),
+            digestmod=hashlib.sha1,
+            ).hexdigest()
+    return signature == digest
 
 
 def _verify(post):

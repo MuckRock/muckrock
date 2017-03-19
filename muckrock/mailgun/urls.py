@@ -28,4 +28,9 @@ urlpatterns = patterns(
         views.delivered,
         name='mailgun-delivered'
     ),
+    url(
+        r'^phaxio/$',
+        views.phaxio_callback,
+        name='phaxio-callback'
+    ),
 )

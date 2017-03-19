@@ -579,21 +579,6 @@ def notify_unanswered():
               'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
 
 
-@task(ignore_result=True, max_retries=None, name='muckrock.foia.tasks.send_fax')
-def send_fax(msg, **kwargs):
-    """Send a fax - send only one per fax number per 5 minutes"""
-
-    fax_number = msg.to[0]
-    # cache.add will return false if key is already present
-    # not other faxes will be sent to this number for 5 minutes
-    if not cache.add('fax:' + fax_number, 1, 300):
-        logger.info('Buffering fax for %s', fax_number)
-        countdown = 300 + randint(0, 60)
-        send_fax.retry(countdown=countdown, args=[msg], kwargs=kwargs)
-
-    msg.send(fail_silently=False)
-
-
 def process_failure_signal(exception, traceback, sender, task_id,
                            signal, args, kwargs, einfo, **kw):
     """Log celery exceptions to sentry"""

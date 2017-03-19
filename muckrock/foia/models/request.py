@@ -16,9 +16,9 @@ from actstream.models import followers
 from datetime import datetime, date, timedelta
 from hashlib import md5
 import logging
+from phaxio import PhaxioApi
 from reversion import revisions as reversion
 from taggit.managers import TaggableManager
-from unidecode import unidecode
 
 from muckrock.accounts.models import Notification
 from muckrock.tags.models import Tag, TaggedItemBase, parse_tags
@@ -485,9 +485,13 @@ class FOIARequest(models.Model):
         """
         # can email appeal if the agency has an appeal agency which has an email address
         # and can accept emailed appeals
-        can_email_appeal = appeal and self.agency and \
-            self.agency.appeal_agency and self.agency.appeal_agency.email and \
-            self.agency.appeal_agency.can_email_appeals
+        can_email_appeal = (
+                appeal and
+                self.agency and
+                self.agency.appeal_agency and
+                self.agency.appeal_agency.email and
+                self.agency.appeal_agency.can_email_appeals
+                )
         # update email addresses for the request
         if can_email_appeal:
             self.email = self.agency.appeal_agency.get_email()
@@ -509,7 +513,7 @@ class FOIARequest(models.Model):
                 self.status = 'processed'
             elif not thanks:
                 self.status = 'ack'
-            self._send_email()
+            self._send_msg()
             self.update_dates()
         elif self.missing_proxy:
             # flag for proxy re-submitting
@@ -567,7 +571,7 @@ class FOIARequest(models.Model):
             self.save()
 
         if self.email:
-            self._send_email(show_all_comms)
+            self._send_msg(show_all_comms)
         else:
             self.status = 'submitted'
             self.date_processing = date.today()
@@ -636,31 +640,41 @@ class FOIARequest(models.Model):
         # We return the communication we generated, in case the caller wants to do anything with it
         return comm
 
-    def _send_email(self, show_all_comms=True):
-        """Send an email of the request to its email address"""
+    def _send_msg(self, show_all_comms=True):
+        """Send a message for this request as an email or fax"""
         # self.email should be set before calling this method
-        from muckrock.foia.tasks import send_fax
-
-        from_addr = 'fax' if self.email.endswith('faxaway.com') else self.get_mail_id()
 
         # get last comm to set delivered and raw_email
-        comm = self.communications.reverse()[0]
+        comm = self.communications.last()
         subject = comm.subject or self.default_subject()
-
-        if from_addr == 'fax':
-            subject = 'MR#%s-%s - %s' % (self.pk, comm.pk, subject)
-        # max database size
         subject = subject[:255]
 
-        cc_addrs = self.get_other_emails()
-        from_email = '%s@%s' % (from_addr, settings.MAILGUN_SERVER_NAME)
         # pylint:disable=attribute-defined-outside-init
         self.reverse_communications = self.communications.reverse()
         body = render_to_string(
             'text/foia/request_email.txt',
             {'request': self, 'show_all_comms': show_all_comms}
         )
-        body = unidecode(body) if from_addr == 'fax' else body
+
+        # send the msg
+        if all(c.isdigit() for c in self.email):
+            self._send_fax(subject, body, comm)
+        else:
+            self._send_email(subject, body, comm)
+
+        comm.subject = subject
+        comm.save()
+
+        # unblock incoming messages if we send one out
+        self.block_incoming = False
+        self.save()
+
+    def _send_email(self, subject, body, comm):
+        """Send the message as an email"""
+
+        from_addr = self.get_mail_id()
+        cc_addrs = self.get_other_emails()
+        from_email = '%s@%s' % (from_addr, settings.MAILGUN_SERVER_NAME)
         msg = EmailMultiAlternatives(
             subject=subject,
             body=body,
@@ -672,25 +686,44 @@ class FOIARequest(models.Model):
                 'X-Mailgun-Variables': {'comm_id': comm.pk}
             }
         )
-        if from_addr != 'fax':
-            msg.attach_alternative(linebreaks(escape(body)), 'text/html')
+        msg.attach_alternative(linebreaks(escape(body)), 'text/html')
         # atach all files from the latest communication
-        for file_ in self.communications.reverse()[0].files.all():
+        for file_ in comm.files.all():
             msg.attach(file_.name(), file_.ffile.read())
-        if from_addr == 'fax':
-            send_fax.apply_async(args=[msg])
-        else:
-            msg.send(fail_silently=False)
+
+        msg.send(fail_silently=False)
 
         # update communication
         comm.set_raw_email(msg.message())
-        comm.delivered = 'fax' if self.email.endswith('faxaway.com') else 'email'
-        comm.subject = subject
-        comm.save()
+        comm.delivered = 'email'
 
-        # unblock incoming messages if we send one out
-        self.block_incoming = False
-        self.save()
+    def _send_fax(self, subject, body, comm):
+        """Send the message as a fax"""
+
+        api = PhaxioApi(
+                settings.PHAXIO_KEY,
+                settings.PHAXIO_SECRET,
+                raise_errors=True,
+                )
+        files = [f.ffile for f in comm.files.all()]
+        callback_url = 'https://%s/%s/' % (
+                settings.MUCKROCK_URL,
+                reverse('phaxio-callback'),
+                )
+        api.send(
+                to=self.email,
+                header_text=subject[:50],
+                string_data=body,
+                string_data_type='text',
+                files=files,
+                batch=True,
+                batch_delay=settings.PHAXIO_BATCH_DELAY,
+                batch_collision_avoidance=True,
+                callback_url=callback_url,
+                **{'tag[comm_id]': comm.pk}
+                )
+
+        comm.delivered = 'fax'
 
     def update_dates(self):
         """Set the due date, follow up date and days until due attributes"""
