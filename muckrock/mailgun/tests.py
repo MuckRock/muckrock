@@ -218,68 +218,6 @@ class TestMailgunViewHandleRequest(TestMailgunViews):
         nose.tools.eq_(response.status_code, 403)
 
 
-@freeze_time("2017-01-02 08:34:56 EST", tz_offset=-5)
-class TestMailgunViewFax(TestMailgunViews):
-    """Tests for _fax"""
-
-    def setUp(self):
-        """Set up tests"""
-        mail.outbox = []
-        self.factory = RequestFactory()
-
-    def test_fax_confirm(self):
-        """Test a fax confirmation notification"""
-
-        comm = FOIACommunicationFactory(confirmed=None)
-        to_ = 'fax@requests.muckrock.com'
-        subject = 'CONFIRM: MR#%d-%d' % (comm.foia.pk, comm.pk)
-        body = 'Hello from faxaway\nTRANSMISSION: 02-Jan-2017 12:34:57 GMT.'
-
-        self.mailgun_route(to_=to_, subject=subject, body=body)
-
-        comm.refresh_from_db()
-        nose.tools.eq_(comm.confirmed, datetime(2017, 1, 2, 8, 34, 56))
-
-        nose.tools.eq_(len(mail.outbox), 1)
-        nose.tools.eq_(mail.outbox[0].body, body)
-
-    def test_fax_failure(self):
-        """Test a fax failure notification"""
-
-        comm = FOIACommunicationFactory()
-        to_ = 'fax@requests.muckrock.com'
-        subject = 'FAILURE: MR#%d-%d' % (comm.foia.pk, comm.pk)
-        body = ("Hello from faxaway\n"
-                "FAX NUMBER: 12128675309\n"
-                "TRANSMISSION ATTEMPT: 02-Jan-2017 01:02:03 -GMT\n"
-                "REASON: Communication Failure.\n\n"
-                "Additional Information:\n"
-                "Error Message\n"
-                "Line Two\n"
-                "======================\n")
-        self.mailgun_route(to_=to_, subject=subject, body=body)
-
-        comm.refresh_from_db()
-
-        nose.tools.ok_(FailedFaxTask.objects
-                .filter(communication=comm, reason='Communication Failure.')
-                .exists()
-                )
-        nose.tools.ok_(CommunicationError.objects
-                .filter(
-                    communication=comm,
-                    date=datetime(2017, 1, 2, 8, 34, 56),
-                    recipient='12128675309',
-                    error='Error Message\nLine Two',
-                    event='failed fax',
-                    reason='Communication Failure.',
-                    )
-                .exists()
-                )
-        nose.tools.eq_(len(mail.outbox), 1)
-        nose.tools.eq_(mail.outbox[0].body, body)
-
-
 class TestMailgunViewCatchAll(TestMailgunViews):
     """Tests for catch all"""
 

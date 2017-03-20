@@ -706,7 +706,7 @@ class FOIARequest(models.Model):
                 raise_errors=True,
                 )
         files = [f.ffile for f in comm.files.all()]
-        callback_url = 'https://%s/%s/' % (
+        callback_url = 'https://%s%s' % (
                 settings.MUCKROCK_URL,
                 reverse('phaxio-callback'),
                 )

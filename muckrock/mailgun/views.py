@@ -370,9 +370,10 @@ def delivered(_request, communication, timestamp):
     communication.save()
 
 
+@csrf_exempt
 def phaxio_callback(request):
     """Handle Phaxio callbacks"""
-    url = 'https://%s/%s/' % (
+    url = 'https://%s%s' % (
             settings.MUCKROCK_URL,
             reverse('phaxio-callback'),
             )
@@ -392,27 +393,30 @@ def phaxio_callback(request):
     except FOIACommunication.DoesNotExist:
         logger.warning('Fax FOIACommunication does not exist: %s', comm_id)
     else:
-        date = fax_info.get('completed_at') or datetime.now()
-        if request.POST['success']:
+        if 'completed_at' in fax_info:
+            date = datetime.fromtimestamp(int(fax_info['completed_at']))
+        else:
+            date = datetime.now()
+        if request.POST['success'] == 'true':
             comm.confirmed = date
             comm.save()
         else:
-            reason = request.POST.get('message')
-            recipient = fax_info['recipients'][0]['number'] # XXX multi recipients?
-            error = fax_info.get('error_type') # XXX
-            #error = fax_info.get('error_code') # XXX is this the same as message?
-            FailedFaxTask.objects.create(
-                    communication=comm,
-                    reason=reason,
-                    )
-            CommunicationError.objects.create(
-                    communication=comm,
-                    date=date,
-                    recipient=recipient,
-                    error=error,
-                    event='failed fax',
-                    reason=reason,
-                    )
+            for recipient in fax_info['recipients']:
+                number = recipient['number']
+                reason = recipient['error_code']
+                error = recipient['error_type']
+                FailedFaxTask.objects.create(
+                        communication=comm,
+                        reason=reason,
+                        )
+                CommunicationError.objects.create(
+                        communication=comm,
+                        date=date,
+                        recipient=number,
+                        error=error,
+                        event='failed fax',
+                        reason=reason,
+                        )
 
     return HttpResponse('OK')
 

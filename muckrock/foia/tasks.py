@@ -4,7 +4,6 @@ from celery.exceptions import SoftTimeLimitExceeded
 from celery.signals import task_failure
 from celery.schedules import crontab
 from celery.task import periodic_task, task
-from django.core.cache import cache
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
@@ -27,7 +26,6 @@ from boto.s3.connection import S3Connection
 from datetime import date, datetime
 from decimal import Decimal
 from django_mailgun import MailgunAPIError
-from random import randint
 from scipy.sparse import hstack
 from urllib import quote_plus
 

@@ -55,7 +55,7 @@ class TestAgencyUnit(TestCase):
     def test_agency_get_email(self):
         """Test the get email method"""
         eq_(self.agency1.get_email(), 'test@agency1.gov')
-        eq_(self.agency2.get_email(), '19876543210@fax2.faxaway.com')
+        eq_(self.agency2.get_email(), '19876543210')
         eq_(self.agency3.get_email(), '')
 
     def test_agency_get_other_emails(self):
