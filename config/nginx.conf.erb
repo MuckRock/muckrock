@@ -49,6 +49,9 @@ http {
 		server_name _;
 		keepalive_timeout 5;
 		limit_req zone=one burst=5;
+		if ($http_host ~ "\.$" ){
+			rewrite ^(.*) $scheme://$host$1 permanent;
+		}
 		if ($host = 'muckrock.com') {
 			rewrite ^ https://www.muckrock.com$request_uri? permanent;
 		}
