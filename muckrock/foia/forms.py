@@ -251,7 +251,7 @@ class FOIAAdminFixForm(forms.ModelForm):
         required=False,
         help_text='Leaving blank will fill in with request owner.'
     )
-    email = forms.EmailField(
+    email = forms.CharField(
         label='To',
         required=False,
         help_text='Leave blank to send to agency default.'

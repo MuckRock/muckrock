@@ -207,7 +207,7 @@ class FOIARequest(models.Model):
     tracking_id = models.CharField(blank=True, max_length=255)
     mail_id = models.CharField(blank=True, max_length=255, editable=False)
     updated = models.BooleanField(default=False)
-    email = models.EmailField(blank=True)
+    email = models.CharField(blank=True, max_length=254)
     other_emails = fields.EmailsListField(blank=True, max_length=255)
     times_viewed = models.IntegerField(default=0)
     disable_autofollowups = models.BooleanField(default=False)
