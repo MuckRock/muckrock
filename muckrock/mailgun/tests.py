@@ -3,7 +3,6 @@ Tests for mailgun
 """
 
 from django.conf import settings
-from django.core import mail
 from django.core.urlresolvers import reverse
 from django.test import TestCase, RequestFactory
 
@@ -30,7 +29,7 @@ from muckrock.mailgun.views import (
         _allowed_email,
         )
 from muckrock.mailgun.models import WhitelistDomain
-from muckrock.task.models import OrphanTask, FailedFaxTask, RejectedEmailTask
+from muckrock.task.models import OrphanTask, RejectedEmailTask
 
 # pylint: disable=no-self-use
 # pylint: disable=too-many-public-methods
