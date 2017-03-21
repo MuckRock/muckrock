@@ -127,7 +127,7 @@ class Agency(models.Model, RequestHelper):
         super(Agency, self).save(*args, **kwargs)
 
     def normalize_fax(self):
-        """Return a fax number suitable for use in a faxaway email address"""
+        """Return a fax number suitable for use with phaxio"""
 
         fax = ''.join(c for c in self.fax if c.isdigit())
         if len(fax) == 10:
@@ -142,7 +142,7 @@ class Agency(models.Model, RequestHelper):
         if self.email:
             return self.email
         elif self.normalize_fax():
-            return '%s@fax2.faxaway.com' % self.normalize_fax()
+            return self.normalize_fax()
         else:
             return ''
 

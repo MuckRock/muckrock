@@ -205,7 +205,7 @@ class FOIACommunication(models.Model):
         if email_address:
             # responsibility for handling validation errors
             # is on the caller of the resend method
-            validate_email(email_address)
+            validate_email_or_fax(email_address)
             foia.email = email_address
             foia.save(comment='new email from comm resend')
         else:
@@ -366,3 +366,11 @@ class CommunicationOpen(models.Model):
     class Meta:
         ordering = ['date']
         app_label = 'foia'
+
+
+def validate_email_or_fax(addr):
+    """Validate a valid email or fax"""
+    # valid fax
+    if len(addr) == 11 and addr[0] == '1' and all(c.isdigit() for c in addr):
+        return
+    validate_email(addr)
