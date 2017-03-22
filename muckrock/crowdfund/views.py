@@ -98,7 +98,7 @@ class CrowdfundDetailView(DetailView):
         return a CrowdfundRequestPayment object.
         """
         token = request.POST.get('stripe_token')
-        email = request.POST.get('stripe_email')
+        email = request.POST.get('stripe_email')[:254]
         payment_form = CrowdfundPaymentForm(request.POST)
         if payment_form.is_valid() and token:
             amount = payment_form.cleaned_data['stripe_amount']
