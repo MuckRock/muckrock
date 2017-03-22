@@ -319,7 +319,7 @@ def buy_requests(request, username=None):
     try:
         if request.POST:
             stripe_token = request.POST.get('stripe_token')
-            stripe_email = request.POST.get('stripe_email')[:254]
+            stripe_email = request.POST.get('stripe_email')
             if not stripe_token or not stripe_email:
                 raise KeyError('Missing Stripe payment data.')
             # take from the purchaser
@@ -328,7 +328,7 @@ def buy_requests(request, username=None):
                 currency='usd',
                 source=stripe_token,
                 metadata={
-                    'email': stripe_email,
+                    'email': stripe_email[:254],
                     'action': 'request-purchase',
                 }
             )

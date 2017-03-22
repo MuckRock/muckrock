@@ -98,9 +98,10 @@ class CrowdfundDetailView(DetailView):
         return a CrowdfundRequestPayment object.
         """
         token = request.POST.get('stripe_token')
-        email = request.POST.get('stripe_email')[:254]
+        email = request.POST.get('stripe_email')
         payment_form = CrowdfundPaymentForm(request.POST)
-        if payment_form.is_valid() and token:
+        if payment_form.is_valid() and token and email:
+            email = email[:254]
             amount = payment_form.cleaned_data['stripe_amount']
             # If there is no user but the show and full_name fields are filled in,
             # create the user with our "miniregistration" functionality and then log them in
