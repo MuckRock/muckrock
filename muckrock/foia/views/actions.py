@@ -129,7 +129,7 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
     """Pay us through CC for the payment on a request"""
     foia = _get_foia(jurisdiction, jidx, slug, idx)
     token = request.POST.get('stripe_token')
-    email = request.POST.get('stripe_email')
+    email = request.POST.get('stripe_email')[:254]
     amount = request.POST.get('stripe_amount')
     if request.method == 'POST':
         error_msg = None
