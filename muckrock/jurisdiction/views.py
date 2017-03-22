@@ -43,17 +43,24 @@ def detail(request, fed_slug, state_slug, local_slug):
                     'parent',
                     'parent__parent',
                     ),
+                level='l',
                 slug=local_slug,
                 parent__slug=state_slug,
-                parent__parent__slug=fed_slug)
+                parent__parent__slug=fed_slug,
+                )
     elif state_slug:
         jurisdiction = get_object_or_404(
                 Jurisdiction.objects.select_related('parent'),
+                level='s',
                 slug=state_slug,
-                parent__slug=fed_slug)
+                parent__slug=fed_slug,
+                )
     else:
-        jurisdiction = get_object_or_404(Jurisdiction,
-                slug=fed_slug)
+        jurisdiction = get_object_or_404(
+                Jurisdiction,
+                level='f',
+                slug=fed_slug,
+                )
 
     foia_requests = jurisdiction.get_requests()
     foia_requests = (foia_requests.get_viewable(request.user)
