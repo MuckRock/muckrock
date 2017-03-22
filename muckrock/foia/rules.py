@@ -4,6 +4,7 @@
 from __future__ import absolute_import
 
 from datetime import date
+from functools import wraps
 from rules import (
         add_perm,
         is_authenticated,
@@ -16,27 +17,43 @@ from muckrock.foia.models.request import END_STATUS
 # pylint: disable=missing-docstring
 # pylint: disable=unused-argument
 
+def skip_if_not_foia(func):
+    """Decorator for predicates
+    Skip the predicate if foia is None"""
+    @wraps(func)
+    def inner(user, foia):
+        if foia is None:
+            return None
+        else:
+            return func(user, foia)
+    return inner
+
 def has_status(*statuses):
     @predicate('has_status:%s' % ','.join(statuses))
+    @skip_if_not_foia
     def inner(user, foia):
         return foia.status in statuses
     return inner
 
 @predicate
+@skip_if_not_foia
 def is_owner(user, foia):
     return foia.user == user
 
 @predicate
+@skip_if_not_foia
 def is_editor(user, foia):
     return foia.edit_collaborators.filter(pk=user.pk).exists()
 
 can_edit = is_owner | is_editor | is_staff
 
 @predicate
+@skip_if_not_foia
 def is_viewer(user, foia):
     return foia.read_collaborators.filter(pk=user.pk).exists()
 
 @predicate
+@skip_if_not_foia
 def is_embargoed(user, foia):
     return foia.embargo
 
@@ -47,16 +64,19 @@ is_editable = has_status('started')
 is_deletable = has_status('started')
 
 @predicate
+@skip_if_not_foia
 def has_thanks(user, foia):
     return foia.communications.filter(thanks=True).exists()
 
 is_thankable = ~has_thanks & has_status(*END_STATUS)
 
 @predicate
+@skip_if_not_foia
 def has_appealable_jurisdiction(user, foia):
     return foia.agency and foia.agency.jurisdiction.can_appeal()
 
 @predicate
+@skip_if_not_foia
 def is_overdue(user, foia):
     return foia.date_due is not None and foia.date_due < date.today()
 
@@ -65,6 +85,7 @@ is_appealable = has_appealable_jurisdiction & (
         ~has_status('processed', 'appealing', 'started', 'submitted'))
 
 @predicate
+@skip_if_not_foia
 def has_crowdfund(user, foia):
     return bool(foia.crowdfund)
 
