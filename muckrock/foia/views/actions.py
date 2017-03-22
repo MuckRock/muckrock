@@ -129,7 +129,7 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
     """Pay us through CC for the payment on a request"""
     foia = _get_foia(jurisdiction, jidx, slug, idx)
     token = request.POST.get('stripe_token')
-    email = request.POST.get('stripe_email')[:254]
+    email = request.POST.get('stripe_email')
     amount = request.POST.get('stripe_amount')
     if request.method == 'POST':
         error_msg = None
@@ -145,7 +145,7 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
             return redirect(foia)
         try:
             metadata = {
-                'email': email,
+                'email': email[:254],
                 'action': 'request-fee',
                 'foia': foia.pk
             }
