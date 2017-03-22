@@ -4,7 +4,7 @@ Forms for Crowdfund application
 
 from django import forms
 
-from decimal import Decimal, ROUND_DOWN
+from decimal import Decimal, ROUND_DOWN, InvalidOperation
 from datetime import date, timedelta
 
 from muckrock.crowdfund.models import Crowdfund
@@ -89,5 +89,8 @@ class CrowdfundPaymentForm(forms.Form):
         amount = self.cleaned_data['stripe_amount']
         if not amount > 0:
             raise forms.ValidationError('Cannot contribute zero dollars')
-        amount = Decimal(amount)/100
+        try:
+            amount = Decimal(amount)/100
+        except InvalidOperation:
+            raise forms.ValidationError('Invalid amount')
         return amount
