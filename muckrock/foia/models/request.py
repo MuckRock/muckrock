@@ -819,7 +819,7 @@ class FOIARequest(models.Model):
                 class_name=('default' if is_following else 'primary')
             ),
             Action(
-                test=True,
+                test=self.has_perm(user, 'flag'),
                 title='Get Help',
                 action='flag',
                 desc=u'Something broken, buggy, or off?  Let us know and we’ll fix it',

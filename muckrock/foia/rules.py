@@ -99,7 +99,7 @@ add_perm('foia.crowdfund_foiarequest', # why cant editors crowdfund?
         (is_owner | is_staff) & ~has_crowdfund & has_status('payment'))
 add_perm('foia.appeal_foiarequest', can_edit & is_appealable)
 add_perm('foia.thank_foiarequest', can_edit & is_thankable)
-add_perm('foia.flag_foiarequest', is_authenticated) # Why must be authenticated for flag?
+add_perm('foia.flag_foiarequest', is_authenticated)
 add_perm('foia.followup_foiarequest', can_edit & ~has_status('started'))
 add_perm('foia.view_rawemail', is_advanced)
 add_perm('foia.file_multirequest', is_advanced)
