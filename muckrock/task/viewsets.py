@@ -3,7 +3,7 @@ Viewsets for the Task API
 """
 
 from rest_framework import viewsets
-from rest_framework.permissions import DjangoModelPermissions
+from rest_framework.permissions import IsAdminUser
 import django_filters
 
 from muckrock.task.models import (
@@ -41,7 +41,7 @@ def create_task_viewset(model, serializer, fields):
     return type((model.__name__ + 'ViewSet'), (viewsets.ModelViewSet,), {
         'queryset': model.objects.all(),
         'serializer_class': serializer,
-        'permission_classes': (DjangoModelPermissions,),
+        'permission_classes': (IsAdminUser,),
         'filter_class': Filter,
     })
 
