@@ -18,6 +18,7 @@ import logging
 import stripe
 import sys
 
+from muckrock.accounts.utils import validate_stripe_email
 from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.foia.forms import \
     FOIADeleteForm, \
@@ -130,6 +131,7 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
     foia = _get_foia(jurisdiction, jidx, slug, idx)
     token = request.POST.get('stripe_token')
     email = request.POST.get('stripe_email')
+    email = validate_stripe_email(email)
     amount = request.POST.get('stripe_amount')
     if request.method == 'POST':
         error_msg = None
@@ -145,7 +147,7 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
             return redirect(foia)
         try:
             metadata = {
-                'email': email[:254],
+                'email': email,
                 'action': 'request-fee',
                 'foia': foia.pk
             }

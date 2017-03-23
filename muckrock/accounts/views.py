@@ -49,6 +49,7 @@ from muckrock.accounts.models import (
         ACCT_TYPES,
         )
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
+from muckrock.accounts.utils import validate_stripe_email
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
 from muckrock.organization.models import Organization
@@ -324,6 +325,7 @@ def buy_requests(request, username=None):
         if request.POST:
             stripe_token = request.POST.get('stripe_token')
             stripe_email = request.POST.get('stripe_email')
+            stripe_email = validate_stripe_email(stripe_email)
             if not stripe_token or not stripe_email:
                 raise KeyError('Missing Stripe payment data.')
             # take from the purchaser
@@ -332,7 +334,7 @@ def buy_requests(request, username=None):
                 currency='usd',
                 source=stripe_token,
                 metadata={
-                    'email': stripe_email[:254],
+                    'email': stripe_email,
                     'action': 'request-purchase',
                 }
             )
