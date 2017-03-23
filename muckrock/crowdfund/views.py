@@ -16,7 +16,7 @@ from djangosecure.decorators import frame_deny_exempt
 import logging
 import stripe
 
-from muckrock.accounts.utils import miniregister
+from muckrock.accounts.utils import miniregister, validate_stripe_email
 from muckrock.crowdfund.forms import CrowdfundPaymentForm
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.utils import generate_key
@@ -99,9 +99,9 @@ class CrowdfundDetailView(DetailView):
         """
         token = request.POST.get('stripe_token')
         email = request.POST.get('stripe_email')
+        email = validate_stripe_email(email)
         payment_form = CrowdfundPaymentForm(request.POST)
         if payment_form.is_valid() and token and email:
-            email = email[:254]
             amount = payment_form.cleaned_data['stripe_amount']
             # If there is no user but the show and full_name fields are filled in,
             # create the user with our "miniregistration" functionality and then log them in

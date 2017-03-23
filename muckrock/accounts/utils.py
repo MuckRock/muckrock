@@ -3,6 +3,8 @@ Utility method for the accounts application
 """
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.validators import validate_email
+from django.forms import ValidationError
 
 from datetime import datetime
 import re
@@ -68,3 +70,15 @@ def unique_username(name):
         username = '%s%s' % (base_username[:30 - len(postfix)], postfix)
         num += 1
     return username
+
+def validate_stripe_email(email):
+    """Validate an email from stripe"""
+    if not email:
+        return None
+    if len(email) > 254:
+        return None
+    try:
+        validate_email(email)
+    except ValidationError:
+        return None
+    return email
