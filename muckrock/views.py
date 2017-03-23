@@ -24,6 +24,7 @@ from muckrock.project.models import Project
 import logging
 import requests
 import stripe
+import sys
 from watson import search as watson
 from watson.views import SearchMixin
 
@@ -466,7 +467,7 @@ class DonationFormView(StripeFormMixin, FormView):
                 stripe.error.StripeError,
                 # Generic error
                 ) as exception:
-            logger.error(exception)
+            logger.error(exception, exc_info=sys.exc_info())
             error_msg = ('Oops, something went wrong on our end.'
                         ' Sorry about that!')
         finally:
