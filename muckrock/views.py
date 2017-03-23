@@ -457,6 +457,10 @@ class DonationFormView(StripeFormMixin, FormView):
                     'action': 'donation'
                 }
             )
+        except stripe.error.CardError:
+            # card declined
+            logger.warn('Card was declined.')
+            error_msg = 'Your card was declined'
         except (
                 stripe.error.InvalidRequestError,
                 # Invalid parameters were supplied to Stripe's API
