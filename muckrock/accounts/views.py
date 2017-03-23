@@ -23,8 +23,8 @@ from django.views.generic import TemplateView, FormView, ListView
 from datetime import date
 from rest_framework import viewsets
 from rest_framework.permissions import (
-        DjangoModelPermissions,
         DjangoModelPermissionsOrAnonReadOnly,
+        IsAdminUser,
         )
 import json
 import logging
@@ -516,7 +516,7 @@ class UserViewSet(viewsets.ModelViewSet):
     # pylint: disable=too-many-public-methods
     queryset = User.objects.prefetch_related('profile', 'groups')
     serializer_class = UserSerializer
-    permission_classes = (DjangoModelPermissions,)
+    permission_classes = (IsAdminUser,)
     filter_fields = ('username', 'first_name', 'last_name', 'email', 'is_staff')
 
 
