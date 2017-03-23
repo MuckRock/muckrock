@@ -217,6 +217,10 @@ class AccountsView(TemplateView):
         except ValueError as exception:
             logger.error(exception)
             messages.error(request, exception)
+        except stripe.error.CardError:
+            # card declined
+            logger.warn('Card was declined.')
+            messages.error(request, 'Your card was declined')
         return self.render_to_response(self.get_context_data())
 
 def upgrade(request):
