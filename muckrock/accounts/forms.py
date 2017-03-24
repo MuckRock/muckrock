@@ -175,7 +175,10 @@ class RegistrationCompletionForm(SetPasswordForm):
 
 class RegisterOrganizationForm(RegisterForm):
     """Register for an organization account"""
-    organization_name = forms.CharField()
+    organization_name = forms.CharField(
+            min_length=2,
+            max_length=255,
+            )
 
     def clean_organization_name(self):
         """Check for an existing organizaiton."""
