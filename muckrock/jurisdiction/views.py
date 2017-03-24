@@ -89,12 +89,9 @@ def detail(request, fed_slug, state_slug, local_slug):
 
     if request.method == 'POST':
         form = FlagForm(request.POST)
-        if form.is_valid():
-            user = None
-            if request.user.is_authenticated():
-                user = request.user
+        if form.is_valid() and request.user.is_authenticated():
             FlaggedTask.objects.create(
-                user=user,
+                user=request.user,
                 text=form.cleaned_data.get('reason'),
                 jurisdiction=jurisdiction)
             messages.success(request, 'We received your feedback. Thanks!')
