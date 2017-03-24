@@ -361,10 +361,10 @@ def buy_requests(request, username=None):
         msg = 'Payment error: %s Your card has not been charged.' % exception
         messages.error(request, msg)
         logger.warn('Payment error: %s', exception, exc_info=sys.exc_info())
-    except (stripe.error.InvalidRequestError, stripe.error.APIError):
-        msg = 'Payment error: %s Your card has not been charged.' % exception
+    except (stripe.error.InvalidRequestError, stripe.error.APIError) as exc:
+        msg = 'Payment error: Your card has not been charged.'
         messages.error(request, msg)
-        logger.warn('Payment error: %s', exception, exc_info=sys.exc_info())
+        logger.warn('Payment error: %s', exc, exc_info=sys.exc_info())
     return redirect(url_redirect)
 
 @login_required
