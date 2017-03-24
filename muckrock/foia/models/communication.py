@@ -353,7 +353,7 @@ class CommunicationOpen(models.Model):
     country = models.CharField(max_length=10)
 
     client_type = models.CharField(max_length=15)
-    client_name = models.CharField(max_length=15)
+    client_name = models.CharField(max_length=50)
     client_os = models.CharField(max_length=10, verbose_name='Client OS')
 
     device_type = models.CharField(max_length=10)
