@@ -57,6 +57,7 @@ def is_read_collaborator(user, foia):
 def is_org_shared(user, foia):
     return (
             foia.user.profile.org_share and
+            foia.user.profile.organization is not None and
             foia.user.profile.organization == user.profile.organization
             )
 

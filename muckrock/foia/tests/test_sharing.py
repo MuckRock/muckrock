@@ -110,18 +110,20 @@ class TestRequestSharing(TestCase):
         assert_true(self.foia.has_perm(self.creator, 'view'))
         assert_true(self.foia.has_perm(self.creator, 'change'))
 
-        def test_org_share(self):
-            """Test sharing with your organization"""
-            org = OrganizationFactory()
-            self.foia.embargo = True
-            # fellow org member cannot view it before sharing is turned on
-            assert_false(self.foia.has_perm(org.owner, 'view'))
+    def test_org_share(self):
+        """Test sharing with your organization"""
+        org = OrganizationFactory()
+        self.foia.embargo = True
+        org.owner.profile.organization = org
+        self.foia.user.profile.organization = org
+        # fellow org member cannot view it before sharing is turned on
+        assert_false(self.foia.has_perm(org.owner, 'view'))
 
-            self.creator.profile.org_share = True
-            # now org member can view it
-            assert_true(self.foia.has_perm(org.owner, 'view'))
-            # non-org member still cannot view it
-            assert_false(self.foia.has_perm(self.editor, 'view'))
+        self.creator.profile.org_share = True
+        # now org member can view it
+        assert_true(self.foia.has_perm(org.owner, 'view'))
+        # non-org member still cannot view it
+        assert_false(self.foia.has_perm(self.editor, 'view'))
 
 
 class TestRequestSharingViews(TestCase):
