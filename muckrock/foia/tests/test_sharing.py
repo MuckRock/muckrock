@@ -6,7 +6,11 @@ from django.test import TestCase, RequestFactory
 
 from nose.tools import eq_, ok_, assert_true, assert_false
 
-from muckrock.factories import FOIARequestFactory, UserFactory
+from muckrock.factories import (
+        FOIARequestFactory,
+        UserFactory,
+        OrganizationFactory,
+        )
 from muckrock.foia.views import Detail
 from muckrock.test_utils import mock_middleware
 
@@ -105,6 +109,19 @@ class TestRequestSharing(TestCase):
         # but the creator should still be able to both view and edit!
         assert_true(self.foia.has_perm(self.creator, 'view'))
         assert_true(self.foia.has_perm(self.creator, 'change'))
+
+        def test_org_share(self):
+            """Test sharing with your organization"""
+            org = OrganizationFactory()
+            self.foia.embargo = True
+            # fellow org member cannot view it before sharing is turned on
+            assert_false(self.foia.has_perm(org.owner, 'view'))
+
+            self.creator.profile.org_share = True
+            # now org member can view it
+            assert_true(self.foia.has_perm(org.owner, 'view'))
+            # non-org member still cannot view it
+            assert_false(self.foia.has_perm(self.editor, 'view'))
 
 
 class TestRequestSharingViews(TestCase):

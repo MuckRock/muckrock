@@ -100,6 +100,14 @@ class BillingPreferencesForm(forms.ModelForm):
         return profile
 
 
+class OrgPreferencesForm(forms.ModelForm):
+    """A form for updating user organization preferences"""
+
+    class Meta():
+        model = Profile
+        fields = ['org_share']
+
+
 class ReceiptForm(forms.Form):
     """Form for setting receipt emails"""
     emails = forms.CharField(

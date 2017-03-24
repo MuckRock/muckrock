@@ -49,8 +49,18 @@ can_edit = is_owner | is_editor | is_staff
 
 @predicate
 @skip_if_not_foia
-def is_viewer(user, foia):
+def is_read_collaborator(user, foia):
     return foia.read_collaborators.filter(pk=user.pk).exists()
+
+@predicate
+@skip_if_not_foia
+def is_org_shared(user, foia):
+    return (
+            foia.user.profile.org_share and
+            foia.user.profile.organization == user.profile.organization
+            )
+
+is_viewer = is_read_collaborator | is_org_shared
 
 @predicate
 @skip_if_not_foia
