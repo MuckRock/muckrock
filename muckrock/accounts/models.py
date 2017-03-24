@@ -127,6 +127,13 @@ class Profile(models.Model):
     # notification preferences
     new_question_notifications = models.BooleanField(default=False)
 
+    org_share = models.BooleanField(
+            default=False,
+            verbose_name='Share',
+            help_text='Let other members of my organization view '
+            'my embargoed requests',
+            )
+
     # paid for requests
     num_requests = models.IntegerField(default=0)
     # for limiting # of requests / month

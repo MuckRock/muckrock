@@ -81,7 +81,9 @@ class Organization(models.Model):
             'member_name': user.first_name,
             'organization_name': self.name,
             'organization_owner': self.owner.get_full_name(),
-            'organization_link': self.get_absolute_url()
+            'organization_link': user.profile.wrap_url(self.get_absolute_url()),
+            'settings_link': user.profile.wrap_url(reverse('acct-settings')) +
+                             '#organization',
         })
         email = EmailMessage(
             subject=subject,

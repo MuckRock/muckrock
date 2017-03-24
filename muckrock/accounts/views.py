@@ -36,6 +36,7 @@ from muckrock.accounts.forms import (
         ProfileSettingsForm,
         EmailSettingsForm,
         BillingPreferencesForm,
+        OrgPreferencesForm,
         ReceiptForm,
         RegisterForm,
         RegisterOrganizationForm,
@@ -256,6 +257,7 @@ def profile_settings(request):
         'profile': ProfileSettingsForm,
         'email': EmailSettingsForm,
         'billing': BillingPreferencesForm,
+        'org': OrgPreferencesForm,
     }
     receipt_form = None
     if request.method == 'POST':
@@ -295,6 +297,7 @@ def profile_settings(request):
         }
     profile_form = ProfileSettingsForm(initial=profile_initial, instance=user_profile)
     email_form = EmailSettingsForm(initial=email_initial, instance=user_profile)
+    org_form = OrgPreferencesForm(instance=user_profile)
     receipt_form = receipt_form or ReceiptForm(initial=receipt_initial)
     current_plan = dict(ACCT_TYPES)[user_profile.acct_type]
     context = {
@@ -302,6 +305,7 @@ def profile_settings(request):
         'profile_form': profile_form,
         'email_form': email_form,
         'receipt_form': receipt_form,
+        'org_form': org_form,
         'current_plan': current_plan,
         'credit_card': user_profile.card()
     }

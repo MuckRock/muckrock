@@ -13,6 +13,7 @@
             <dd><a href="#email">Email</a></dd>
             <dd><a href="#billing">Billing</a></dd>
             <dd><a href="#receipts">Receipts</a></dd>
+            <dd><a href="#organization">Organization</a></dd>
             <dt>Password</dt>
             <dd><a href="{% url 'acct-change-pw' %}">Change Password</a></dd>
             <dd><a href="{% url 'acct-reset-pw' %}">Reset Password</a></dd>
@@ -108,6 +109,19 @@
             </div>
             <footer>
                 <button type="submit" class="primary button">Update receipt emails</button>
+            </footer>
+        </form>
+        <form method="post" class="organization form" id="organization">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="org" />
+            <h2>Organization</h2>
+            <div class="fields">
+            {% for field in org_form.visible_fields %}
+                {% include 'lib/pattern/field.html' %}
+            {% endfor %}
+            </div>
+            <footer>
+                <button type="submit" class="primary button">Update organization settings</button>
             </footer>
         </form>
     </main>

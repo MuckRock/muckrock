@@ -2,6 +2,11 @@ Hi {{ member_name }},
 
 {{ organization_owner }} has made you a member of {{ organization_name }}.
 You can view the organization here: https://www.muckrock.com{{ organization_link }}
+
+You can let other members of your organization see your embargoed requests by selecting that option on your settings page:
+
+https://www.muckrock.com{{ settings_link }}
+
 From now on, any requests you submit will deduct from {{ organization_name }}'s request pool.
 
 Happy filing!
