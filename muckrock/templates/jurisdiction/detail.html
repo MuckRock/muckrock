@@ -164,6 +164,7 @@
         {% endif %}
     </main>
     <aside class="jurisdiction__aside">
+        {% if user.is_authenticated %}
         <div class="modal" id="flag">
             <form method="post">
                 {% csrf_token %}
@@ -174,6 +175,7 @@
                 </footer>
             </form>
         </div>
+        {% endif %}
         <div class="jurisdiction__actions">
             <div class="button-group">
                 <a href="{% url 'foia-create' %}" class="blue button">
