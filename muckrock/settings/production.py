@@ -21,4 +21,4 @@ PREPEND_WWW = False
 EMAIL_BACKEND = 'django_mailgun.MailgunBackend'
 
 MUCKROCK_URL = 'www.muckrock.com'
-FOIAMACHINE_URL = 'beta.foiamachine.org'
+FOIAMACHINE_URL = 'www.foiamachine.org'
