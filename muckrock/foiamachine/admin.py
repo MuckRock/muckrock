@@ -63,7 +63,7 @@ class FoiaMachineRequestAdmin(VersionAdmin):
     list_display = ('title', 'user', 'status', 'agency', 'jurisdiction')
     list_filter = ['status']
     list_select_related = True
-    search_fields = ['title', 'user']
+    search_fields = ['title', 'user__username']
     inlines = [FoiaMachineCommunicationInline]
     save_on_top = True
     form = FoiaMachineRequestAdminForm
