@@ -22,6 +22,12 @@
                 <td class="bold">Date</td>
                 <td>{{communication.date|date:"F d, Y"}}</td>
             </tr>
+            {% if communication.subject %}
+            <tr>
+                <td class="bold">Subject</td>
+                <td>{{communication.subject}}</td>
+            </tr>
+            {% endif %}
         </table>
         <div>
             {% if request.user == object.user %}
@@ -30,7 +36,7 @@
         </div>
     </header>
     <div class="communication__message">
-        {{communication.message|markdown}}
+        {{communication.message|markdown:"strip"}}
     </div>
     {% if communication.files.exists %}
     <div class="communication__files">

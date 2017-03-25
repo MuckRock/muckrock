@@ -37,6 +37,7 @@ django<1.10 # Django is kinda important...
 djangorestframework # The API framework
 dogslow # Monitors slow requests
 easy-thumbnails # Used for thumbnailing images
+fuzzywuzzy # fuzzy string matching for FM agency import
 gunicorn # Python WSGI app server
 image-diet2 # Used to compress images on upload
 jsonfield # Used for storing JSON data, required by django-geojson
@@ -48,6 +49,7 @@ pillow # Used by Django for image handling
 psycopg2 # Interface to postgres DB
 pymdown-extensions # Adds more helpful Markdown extensions
 pyphaxio # For sending faxes through Phaxio
+python-Levenshtein # fuzzy string matching for FM agency import
 python-dateutil # Used for relative time deltas
 raven # Sentry integration
 redis # Redis integration - for use with celery
@@ -55,6 +57,7 @@ requests # HTTP for humans
 rules # Rule based permissions
 scikit-learn==0.16.1 # Used for machine learning
 scipy==0.14.0 # Used for machine learning
+smart-open # Use for streaming files from S3
 smartypants # Used for typographically-correct quotes
 stripe # Stripe payment processor integration
 unidecode # Used for unicode decoding

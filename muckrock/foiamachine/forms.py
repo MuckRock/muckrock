@@ -8,7 +8,7 @@ from autocomplete_light import shortcuts as autocomplete_light
 
 from muckrock.foiamachine.models import FoiaMachineRequest, FoiaMachineCommunication, STATUS
 
-MAX_UPLOAD_SIZE = "10485760" # 10mB
+MAX_UPLOAD_SIZE = 10485760 # 10mB
 ALLOWED_CONTENT_TYPES = ['application', 'image', 'video', 'text']
 
 
@@ -68,7 +68,7 @@ class FoiaMachineCommunicationForm(forms.ModelForm):
 
     class Meta:
         model = FoiaMachineCommunication
-        fields = ['request', 'date', 'sender', 'receiver', 'message', 'received',]
+        fields = ['request', 'date', 'sender', 'receiver', 'subject', 'message', 'received',]
         widgets = {
             'request': forms.HiddenInput(),
         }

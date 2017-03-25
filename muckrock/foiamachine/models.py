@@ -26,15 +26,26 @@ class FoiaMachineRequest(models.Model):
     title = models.CharField(max_length=255, db_index=True)
     slug = models.SlugField(max_length=255)
     date_created = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=10, choices=STATUS, default='started', db_index=True)
+    status = models.CharField(
+            max_length=10,
+            choices=STATUS,
+            default='started',
+            db_index=True,
+            )
     request_language = models.TextField()
-    jurisdiction = models.ForeignKey('jurisdiction.Jurisdiction')
+    jurisdiction = models.ForeignKey(
+            'jurisdiction.Jurisdiction',
+            blank=True,
+            null=True,
+            )
     agency = models.ForeignKey('agency.Agency', blank=True, null=True)
     sharing_code = models.CharField(max_length=255, blank=True)
 
     def save(self, *args, **kwargs):
         """Automatically update the slug field."""
-        self.slug = slugify(self.title)
+        autoslug = kwargs.pop('autoslug', True)
+        if autoslug:
+            self.slug = slugify(self.title)
         super(FoiaMachineRequest, self).save(*args, **kwargs)
 
     def __unicode__(self):
@@ -92,7 +103,7 @@ class FoiaMachineRequest(models.Model):
         """Compare the date of the last sent communication to the jurisdiction's response time."""
         try:
             # this subtraction produces a timedelta object, so we need to get the days from it
-            days_until_due = self.date_due - timezone.now().date()
+            days_until_due = self.date_due - timezone.now()
             return days_until_due.days
         except AttributeError:
             return 0
@@ -117,8 +128,9 @@ class FoiaMachineCommunication(models.Model):
     request = models.ForeignKey(FoiaMachineRequest, related_name='communications')
     sender = models.CharField(max_length=255)
     receiver = models.CharField(max_length=255, blank=True)
+    subject = models.CharField(max_length=255, blank=True)
     message = models.TextField()
-    date = models.DateField(default=timezone.now)
+    date = models.DateTimeField(default=timezone.now)
     received = models.BooleanField(default=False)
 
     def __unicode__(self):
@@ -139,11 +151,14 @@ class FoiaMachineFile(models.Model):
     Files are uploaded by users and are attached to communications, like in an email.
     """
     communication = models.ForeignKey(FoiaMachineCommunication, related_name='files')
-    file = models.FileField(upload_to='foia_files/%Y/%m/%d', verbose_name='File', max_length=255)
+    file = models.FileField(
+            upload_to='foiamachine_files/%Y/%m/%d',
+            verbose_name='File',
+            max_length=255,
+            )
     name = models.CharField(max_length=255)
     comment = models.TextField(blank=True)
     date_added = models.DateTimeField(auto_now_add=True)
-    date_modified = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
         return u'%s' % self.name

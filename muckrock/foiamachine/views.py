@@ -131,9 +131,10 @@ class Profile(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         """Gets context data for the profile."""
         context = super(Profile, self).get_context_data(**kwargs)
-        requests = (FoiaMachineRequest.objects.filter(user=self.request.user)
-                                              .order_by('-date_created')
-                                              .select_related('jurisdiction', 'agency'))
+        requests = (FoiaMachineRequest.objects
+                .filter(user=self.request.user)
+                .order_by('-date_created')
+                .select_related('jurisdiction', 'agency'))
         form = FoiaMachineBulkRequestForm()
         filter_ = FoiaMachineRequestFilter(self.request.GET, queryset=requests)
         context.update({
@@ -187,8 +188,7 @@ class FoiaMachineRequestDetailView(DetailView):
     def dispatch(self, *args, **kwargs):
         """Only the request's owner may update it."""
         foi = self.get_object()
-        if self.request.user != foi.user:
-            messages.warning(self.request, 'You will need to log in first.')
+        if self.request.user != foi.user and not self.request.user.is_staff:
             sharing_code = self.request.GET.get('sharing')
             if sharing_code != foi.sharing_code:
                 raise Http404()
