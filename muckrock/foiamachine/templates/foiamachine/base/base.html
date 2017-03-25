@@ -40,7 +40,6 @@
             <main class="space-between">
                 <p class="bold">
                     <a href="{% host_url 'index' host 'foiamachine' %}">FOIA Machine</a>
-                    <span class="badge">Beta</span>
                 </p>
                 {% if request.user.is_authenticated %}
                 <ul class="nostyle inline">
@@ -66,7 +65,7 @@
         <nav class="bottomnav small">
             <main>
                 {% include 'foiamachine/icons/mascot.svg' %}
-                <p class="bold"><a href="{% host_url 'index' host 'foiamachine' %}">FOIA Machine</a> <span class="badge">Beta</span></p>
+                <p class="bold"><a href="{% host_url 'index' host 'foiamachine' %}">FOIA Machine</a></p>
                 <ul class="nostyle inline small">
                     <li><a href="/about">About</a></li>
                     <li><a href="/tos">Terms of Service</a></li>
