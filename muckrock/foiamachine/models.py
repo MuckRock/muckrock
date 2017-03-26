@@ -13,7 +13,7 @@ from django.utils.text import slugify
 from datetime import timedelta
 from django_hosts.resolvers import reverse
 
-from muckrock.foia.models import STATUS
+from muckrock.foia.models import STATUS, END_STATUS
 from muckrock.utils import generate_key
 
 class FoiaMachineRequest(models.Model):
@@ -110,8 +110,8 @@ class FoiaMachineRequest(models.Model):
 
     @property
     def is_overdue(self):
-        """A request is overdue if its days_until_due is negative."""
-        return self.days_until_due < 0
+        """A request is overdue if its not completed and days_until_due is negative."""
+        return self.status not in END_STATUS and self.days_until_due < 0
 
     @property
     def days_overdue(self):
