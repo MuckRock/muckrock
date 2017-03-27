@@ -92,7 +92,10 @@ class FoiaMachineRequest(models.Model):
     def date_due(self):
         """Date due is the date of the last communication plus the jurisdiction response time."""
         last_comm = self.sent_communications.last()
-        response_time = self.jurisdiction.get_days()
+        if self.jurisdiction:
+            response_time = self.jurisdiction.get_days()
+        else:
+            response_time = 30
         if last_comm:
             return last_comm.date + timedelta(response_time)
         else:
