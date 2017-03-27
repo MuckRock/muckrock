@@ -710,7 +710,7 @@ class FOIARequest(models.Model):
                 settings.MUCKROCK_URL,
                 reverse('phaxio-callback'),
                 )
-        api.send(
+        results = api.send(
                 to=self.email,
                 header_text=subject[:50],
                 string_data=body,
@@ -724,6 +724,7 @@ class FOIARequest(models.Model):
                 )
 
         comm.delivered = 'fax'
+        comm.fax_id = results['faxId']
 
     def update_dates(self):
         """Set the due date, follow up date and days until due attributes"""

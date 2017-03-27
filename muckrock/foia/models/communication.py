@@ -59,6 +59,8 @@ class FOIACommunication(models.Model):
     delivered = models.CharField(max_length=10, choices=DELIVERED, blank=True, null=True)
     # what status this communication should set the request to - used for machine learning
     status = models.CharField(max_length=10, choices=STATUS, blank=True, null=True)
+    # just for faxes sent by phaxio
+    fax_id = models.CharField(max_length=10, blank=True, default='')
 
     # confirmed:
     #   datetime of when:
