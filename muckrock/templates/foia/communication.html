@@ -21,6 +21,7 @@
                 </span>
                 <ul class="options dropdown-list">
                     {% if comm.rawemail %}<li><a href="{% url 'foia-raw' idx=comm.pk %}" class="option dropdown-list-item">Raw Email</a></li>{% endif %}
+                    {% if comm.fax_id %}<li><a href="https://console.phaxio.com/viewFax?faxId={{comm.fax_id}}" class="option dropdown-list-item">Phaxio</a></li>{% endif %}
                     <li><a href="#status-{{comm.pk}}-form" class="option dropdown-list-item">Status</a></li>
                     <li><a href="#move-{{comm.pk}}-form" class="option dropdown-list-item">Move</a></li>
                     <li><a href="#resend-{{comm.pk}}-form" class="option dropdown-list-item">Resend</a></li>
@@ -46,9 +47,14 @@
     {% else %}
         <p class="small subject">Subject: None</p>
     {% endif %}
+    <span>
     {% if communication.status and request.user.is_staff %}
         <span class="small badge {{communication.status|classify_status}}">{{communication.get_status_display}}</span>
     {% endif %}
+    {% if communication.delivered and request.user.is_staff %}
+        <span class="small badge">{{communication.delivered|capfirst}}</span>
+    {% endif %}
+    </span>
     </section>
     {% if communication.communication %}
     <section class="textbox__section communication-body">
