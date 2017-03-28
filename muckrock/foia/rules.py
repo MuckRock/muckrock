@@ -56,6 +56,8 @@ def is_read_collaborator(user, foia):
 @skip_if_not_foia
 def is_org_shared(user, foia):
     return (
+            foia.user.is_authenticated() and
+            user.is_authenticated() and
             foia.user.profile.org_share and
             foia.user.profile.organization is not None and
             foia.user.profile.organization == user.profile.organization
@@ -104,16 +106,16 @@ def has_crowdfund(user, foia):
 
 @predicate
 def is_advanced_type(user):
-    return (user.profile and
+    return (user.is_authenticated() and
             user.profile.acct_type in ['admin', 'beta', 'pro', 'proxy'])
 
 @predicate
 def is_admin(user):
-    return user.profile.acct_type == 'admin'
+    return user.is_authenticated() and user.profile.acct_type == 'admin'
 
 @predicate
 def is_org_member(user):
-    return (user.profile and user.profile.organization and
+    return (user.is_authenticated() and user.profile.organization and
             user.profile.organization.active)
 
 is_advanced = is_advanced_type | is_org_member
