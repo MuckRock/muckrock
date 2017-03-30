@@ -9,14 +9,16 @@ from django.db import models
 from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
 
-from datetime import date
+from datetime import date, datetime
 from djgeojson.fields import PointField
 from easy_thumbnails.fields import ThumbnailerImageField
 import logging
 
+from muckrock.accounts.models import Profile
+from muckrock.accounts.utils import unique_username
 from muckrock.jurisdiction.models import Jurisdiction, RequestHelper
-from muckrock import fields
 from muckrock.task.models import StaleAgencyTask
+from muckrock import fields
 
 logger = logging.getLogger(__name__)
 
@@ -204,6 +206,9 @@ class Agency(models.Model, RequestHelper):
         self.stale = False
         self.manual_stale = False
         self.save()
+        (StaleAgencyTask.objects
+                .filter(resolved=False, agency=self)
+                .update(resolved=True))
 
     def count_thanks(self):
         """Count how many thanks this agency has received"""
@@ -215,6 +220,20 @@ class Agency(models.Model, RequestHelper):
     def get_requests(self):
         """Just returns the foiareqest_set value. Used for compatability with RequestHeper mixin"""
         return self.foiarequest_set
+
+    def get_user(self):
+        """Get the agency user for this agency"""
+        try:
+            return self.profile.user
+        except Profile.DoesNotExist:
+            user = User.objects.create_user(unique_username(self.name))
+            Profile.objects.create(
+                    user=user,
+                    acct_type='agency',
+                    date_update=datetime.now(),
+                    agency=self,
+                    )
+            return user
 
     class Meta:
         # pylint: disable=too-few-public-methods

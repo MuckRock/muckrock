@@ -36,9 +36,11 @@ from muckrock.foia.forms import (
     FOIANoteForm,
     FOIAEstimatedCompletionDateForm,
     FOIAAccessForm,
+    FOIAAgencyReplyForm,
     )
 from muckrock.foia.models import (
     FOIARequest,
+    FOIACommunication,
     FOIAMultiRequest,
     RawEmail,
     STATUS,
@@ -69,6 +71,15 @@ from muckrock.views import class_view_decorator, MRFilterListView, MRSearchFilte
 
 logger = logging.getLogger(__name__)
 STATUS_NODRAFT = [st for st in STATUS if st != ('started', 'Draft')]
+AGENCY_STATUS = [
+    ('processed', 'Further Response Coming'),
+    ('fix', 'Fix Required'),
+    ('payment', 'Payment Required'),
+    ('rejected', 'Rejected'),
+    ('no_docs', 'No Responsive Documents'),
+    ('done', 'Completed'),
+    ('partial', 'Partially Completed'),
+    ]
 
 
 class RequestExploreView(TemplateView):
@@ -223,6 +234,10 @@ class ProcessingRequestList(RequestList):
         return objects.prefetch_related('communications').filter(status='submitted')
 
 
+class FormError(Exception):
+    """If a form fails validation"""
+
+
 # pylint: disable=no-self-use
 class Detail(DetailView):
     """Details of a single FOIA request as well
@@ -233,12 +248,18 @@ class Detail(DetailView):
 
     def __init__(self, *args, **kwargs):
         self._obj = None
+        self.agency_reply_form = FOIAAgencyReplyForm()
         super(Detail, self).__init__(*args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
         """If request is a draft, then redirect to drafting interface"""
         if request.POST:
-            return self.post(request)
+            try:
+                return self.post(request)
+            except FormError:
+                # if their is a form error, continue onto the GET path
+                # and show the invalid form with errors displayed
+                return self.get(request, *args, **kwargs)
         foia = self.get_object()
         if foia.status == 'started':
             return redirect(
@@ -338,6 +359,8 @@ class Detail(DetailView):
         context['is_thankable'] = self.request.user.has_perm(
                 'foia.thank_foiarequest', foia)
         context['files'] = foia.files.all()[:50]
+        context['agency_status_choices'] = AGENCY_STATUS
+        context['agency_reply_form'] = self.agency_reply_form
         if foia.sidebar_html:
             messages.info(self.request, foia.sidebar_html)
         return context
@@ -377,6 +400,7 @@ class Detail(DetailView):
             'demote': self._demote_editor,
             'promote': self._promote_viewer,
             'update_new_agency': self._update_new_agency,
+            'agency_reply': self._agency_reply,
         }
         try:
             return actions[request.POST['action']](request, foia)
@@ -630,6 +654,37 @@ class Detail(DetailView):
             messages.success(request, '%s can now edit this request.' % user.first_name)
         return redirect(foia)
 
+    def _agency_reply(self, request, foia):
+        """Agency reply directly through the site"""
+        form = FOIAAgencyReplyForm(request.POST)
+        if form.is_valid():
+            comm = FOIACommunication.objects.create(
+                    foia=foia,
+                    from_who=request.user.profile.agency.name,
+                    to_who=foia.user.get_full_name(),
+                    response=True,
+                    date=datetime.now(),
+                    full_html=False,
+                    delivered='web',
+                    communication=form.cleaned_data['reply'],
+                    status=form.cleaned_data['status'],
+                    )
+            foia.date_estimate = form.cleaned_data['date_estimate']
+            foia.tracking_id = form.cleaned_data['tracking_id']
+            foia.status = form.cleaned_data['status']
+            if foia.status == 'payment':
+                foia.price = form.cleaned_data['price']
+            foia.save()
+            comm.process_attachments(request.FILES)
+            if foia.agency:
+                foia.agency.unmark_stale()
+            comm.create_agency_notifications()
+            messages.success(request, 'Reply succesfully posted')
+        else:
+            self.agency_reply_form = form
+            raise FormError
+
+        return redirect(foia)
 
 def redirect_old(request, jurisdiction, slug, idx, action):
     """Redirect old urls to new urls"""

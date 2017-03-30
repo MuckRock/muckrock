@@ -45,26 +45,6 @@ from muckrock.utils import new_action
 logger = logging.getLogger(__name__)
 
 
-def _upload_file(foia, comm, file_, sender):
-    """Upload a file to attach to a FOIA request"""
-
-    access = 'private' if foia and foia.embargo else 'public'
-    source = foia.agency.name if foia and foia.agency else sender
-
-    foia_file = FOIAFile(
-            foia=foia,
-            comm=comm,
-            title=os.path.splitext(file_.name)[0][:70],
-            date=datetime.now(),
-            source=source[:70],
-            access=access)
-    # max db size of 255, - 22 for folder name
-    foia_file.ffile.save(file_.name[:233].encode('ascii', 'ignore'), file_)
-    foia_file.save()
-    if foia:
-        upload_document_cloud.apply_async(args=[foia_file.pk, False], countdown=3)
-
-
 def _make_orphan_comm(from_, to_, subject, post, files, foia):
     """Make an orphan communication"""
     # pylint: disable=too-many-arguments
@@ -88,7 +68,7 @@ def _make_orphan_comm(from_, to_, subject, post, files, foia):
             post.get('message-headers', ''),
             post.get('body-plain', '')),
         )
-    _process_attachments(files, comm)
+    comm.process_attachments(files)
 
     return comm
 
@@ -230,17 +210,13 @@ def _handle_request(request, mail_id):
             communication=comm,
             raw_email='%s\n%s' % (post.get('message-headers', ''), post.get('body-plain', '')))
 
-        _process_attachments(request.FILES, comm)
+        comm.process_attachments(request.FILES)
 
         task = ResponseTask.objects.create(communication=comm)
         classify_status.apply_async(args=(task.pk,), countdown=30 * 60)
         # resolve any stale agency tasks for this agency
         if foia.agency:
-            (StaleAgencyTask.objects
-                    .filter(resolved=False, agency=foia.agency)
-                    .update(resolved=True))
-            foia.agency.stale = False
-            foia.agency.save()
+            foia.agency.unmark_stale()
 
         foia.email = from_email
         foia.other_emails = ','.join(
@@ -254,13 +230,7 @@ def _handle_request(request, mail_id):
         if foia.status == 'ack':
             foia.status = 'processed'
         foia.save(comment='incoming mail')
-        action = new_action(
-            foia.agency,
-            'sent a communication',
-            action_object=comm,
-            target=foia)
-        foia.notify(action)
-        foia.update(comm.anchor())
+        comm.create_agency_notifications()
 
     except FOIARequest.DoesNotExist:
         logger.warning('Invalid Address: %s', mail_id)
@@ -519,14 +489,3 @@ def _allowed_email(email, foia=None):
         return True
 
     return False
-
-
-def _process_attachments(files, comm):
-    """Process all attachments for the email"""
-
-    ignore_types = [('application/x-pkcs7-signature', 'p7s')]
-
-    for file_ in files.itervalues():
-        if not any(file_.content_type == t or file_.name.endswith(s)
-                for t, s in ignore_types):
-            _upload_file(comm.foia, comm, file_, comm.priv_from_who)

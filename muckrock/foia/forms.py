@@ -13,6 +13,17 @@ from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIAFile, FOIANote, STATUS
 from muckrock.jurisdiction.models import Jurisdiction
 
+AGENCY_STATUS = [
+    ('processed', 'Further Response Coming'),
+    ('fix', 'Fix Required'),
+    ('payment', 'Payment Required'),
+    ('rejected', 'Rejected'),
+    ('no_docs', 'No Responsive Documents'),
+    ('done', 'Completed'),
+    ('partial', 'Partially Completed'),
+    ]
+
+
 class RequestForm(forms.Form):
     """This form creates new, single MuckRock requests"""
 
@@ -80,6 +91,7 @@ class RequestForm(forms.Form):
             raise forms.ValidationError("User with this email already exists.  Please login first.")
         return email
 
+
 class RequestDraftForm(forms.Form):
     """Presents limited information from created single request for editing"""
     title = forms.CharField(
@@ -93,6 +105,7 @@ class RequestDraftForm(forms.Form):
                   'other users until the embargo date you set. '
                   'You may change this whenever you want.'
     )
+
 
 class AgencyMultipleChoiceField(forms.MultipleChoiceField):
     """Custom multiple choice field that loads without any data"""
@@ -124,6 +137,7 @@ class MultiRequestForm(forms.ModelForm):
             'agencies': autocomplete_light.MultipleChoiceWidget('AgencyMultiRequestAutocomplete')
         }
 
+
 class MultiRequestDraftForm(forms.ModelForm):
     """Presents info from created multi-request for editing"""
     title = forms.CharField(
@@ -144,6 +158,7 @@ class MultiRequestDraftForm(forms.ModelForm):
         model = FOIAMultiRequest
         fields = ['title', 'requested_docs', 'embargo']
 
+
 class RequestFilterForm(MRFilterForm):
     """Provides options for filtering list by request characteristics"""
     status_filters = [('', 'All Status')] + list(STATUS)
@@ -151,6 +166,7 @@ class RequestFilterForm(MRFilterForm):
         choices=status_filters,
         required=False
     )
+
 
 class FOIAEstimatedCompletionDateForm(forms.ModelForm):
     """Form to change an estimaged completion date."""
@@ -177,6 +193,7 @@ class FOIAEstimatedCompletionDateForm(forms.ModelForm):
     class Meta:
         model = FOIARequest
         fields = ['date_estimate']
+
 
 class FOIAEmbargoForm(forms.Form):
     """Form to configure an embargo on a request"""
@@ -214,6 +231,7 @@ class FOIADeleteForm(forms.Form):
         help_text='This cannot be undone!'
     )
 
+
 class FOIAFileForm(forms.ModelForm):
     """A form for a FOIA File"""
     ffile = forms.FileField(label='File', required=False)
@@ -222,7 +240,9 @@ class FOIAFileForm(forms.ModelForm):
         model = FOIAFile
         fields = ['ffile']
 
+
 FOIAFileFormSet = forms.models.modelformset_factory(FOIAFile, form=FOIAFileForm)
+
 
 class FOIANoteForm(forms.ModelForm):
     """A form for a FOIA Note"""
@@ -231,6 +251,7 @@ class FOIANoteForm(forms.ModelForm):
         model = FOIANote
         fields = ['note']
         widgets = {'note': forms.Textarea(attrs={'class': 'prose-editor'})}
+
 
 class FOIAAdminFixForm(forms.ModelForm):
     """Form to email from the request's address"""
@@ -267,6 +288,7 @@ class FOIAAdminFixForm(forms.ModelForm):
         other_emails = other_emails.strip()
         return other_emails
 
+
 class FOIAAccessForm(forms.Form):
     """Form to add editors or viewers to a request."""
     users = forms.ModelMultipleChoiceField(
@@ -278,3 +300,28 @@ class FOIAAccessForm(forms.Form):
         ('view', 'Can View'),
     ]
     access = forms.ChoiceField(choices=access_choices)
+
+
+class FOIAAgencyReplyForm(forms.Form):
+    """Form for direct agency reply"""
+    status = forms.ChoiceField(choices=AGENCY_STATUS)
+    tracking_id = forms.CharField(
+            label='Tracking Number',
+            help_text='If your agency assign a tracking number to the request, '
+            'please enter it here.',
+            required=False,
+            )
+    date_estimate = forms.DateField(
+            label='Estimated Completion Date',
+            help_text='Enter the date you expect the request to be fufilled by.  '
+            'We will not follow up with you until this date.',
+            widget=forms.DateInput(attrs={'class': 'datepicker'}),
+            required=False,
+            )
+    price = forms.IntegerField(
+            widget=forms.NumberInput(attrs={'class': 'currency-field'}),
+            required=False,
+            )
+    reply = forms.CharField(
+            widget=forms.Textarea(),
+            )

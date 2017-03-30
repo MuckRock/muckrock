@@ -57,7 +57,7 @@ class FOIARequestQuerySet(models.QuerySet):
                     Q(user=user) |
                     Q(edit_collaborators=user) |
                     Q(read_collaborators=user) |
-                    Q(agency=user.agencyprofile.agency) |
+                    Q(agency=user.profile.agency) |
                     (~Q(status='started') & ~Q(embargo=True)))
         elif user.is_authenticated():
             return self.filter(
@@ -651,9 +651,15 @@ class FOIARequest(models.Model):
 
         # pylint:disable=attribute-defined-outside-init
         self.reverse_communications = self.communications.reverse()
+        agency_user_profile = self.agency.get_user().profile
         body = render_to_string(
             'text/foia/request_email.txt',
-            {'request': self, 'show_all_comms': show_all_comms}
+            {
+                'request': self,
+                'show_all_comms': show_all_comms,
+                'reply_link': agency_user_profile.wrap_url(
+                    self.get_absolute_url()),
+            }
         )
 
         # send the msg
@@ -938,4 +944,5 @@ class FOIARequest(models.Model):
             ('thank_foiarequest', 'Can thank the FOI officer for their help'),
             ('flag_foiarequest', 'Can flag the request for staff attention'),
             ('followup_foiarequest', 'Can send a manual follow up'),
+            ('agency_reply_foiarequest', 'Can send a direct reply'),
             )

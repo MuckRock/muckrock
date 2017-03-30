@@ -295,6 +295,7 @@ BUNDLED_REQUESTS = {
     'proxy': 5,
     'org': 5,
     'robot': 0,
+    'agency': 0,
 }
 
 LOGGING = {
