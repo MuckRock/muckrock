@@ -74,7 +74,6 @@ class FOIARequestFilterSet(django_filters.FilterSet):
         fields = ['status', 'user', 'agency', 'jurisdiction', 'projects', 'tags']
 
 
-
 class MyFOIARequestFilterSet(django_filters.FilterSet):
     """Allows filtering a request by status, agency, jurisdiction, or tags."""
     status = django_filters.ChoiceFilter(choices=BLANK_STATUS)
@@ -155,3 +154,30 @@ class ProcessingFOIARequestFilterSet(django_filters.FilterSet):
     class Meta:
         model = FOIARequest
         fields = ['user', 'agency', 'jurisdiction', 'tags']
+
+
+class AgencyFOIARequestFilterSet(django_filters.FilterSet):
+    """Filters for agency users"""
+    user = django_filters.ModelMultipleChoiceFilter(
+        queryset=User.objects.all(),
+        widget=autocomplete_light.MultipleChoiceWidget('UserAutocomplete')
+    )
+    tags = django_filters.ModelMultipleChoiceFilter(
+        name='tags__name',
+        queryset=Tag.objects.all(),
+        widget=autocomplete_light.MultipleChoiceWidget('TagAutocomplete'),
+    )
+    date_range = django_filters.DateFromToRangeFilter(
+        name='communications__date',
+        label='Date Range',
+        lookup_expr='contains',
+        widget=RangeWidget(attrs={
+            'class': 'datepicker',
+            'placeholder': 'MM/DD/YYYY',
+        }),
+    )
+
+
+    class Meta:
+        model = FOIARequest
+        fields = ['user', 'tags']

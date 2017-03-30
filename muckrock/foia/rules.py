@@ -45,8 +45,6 @@ def is_owner(user, foia):
 def is_editor(user, foia):
     return foia.edit_collaborators.filter(pk=user.pk).exists()
 
-can_edit = is_owner | is_editor | is_staff
-
 @predicate
 @skip_if_not_foia
 def is_read_collaborator(user, foia):
@@ -102,6 +100,11 @@ is_appealable = has_appealable_jurisdiction & (
 def has_crowdfund(user, foia):
     return bool(foia.crowdfund)
 
+@predicate
+@skip_if_not_foia
+def match_agency(user, foia):
+    return bool(user.profile.agency and user.profile.agency == foia.agency)
+
 # User predicates
 
 @predicate
@@ -114,9 +117,17 @@ def is_admin(user):
     return user.is_authenticated() and user.profile.acct_type == 'admin'
 
 @predicate
+def is_agency_user(user):
+    return user.profile.acct_type == 'agency'
+
+@predicate
 def is_org_member(user):
     return (user.is_authenticated() and user.profile.organization and
             user.profile.organization.active)
+
+is_from_agency = is_agency_user & match_agency & ~has_status('started')
+
+can_edit = is_owner | is_editor | is_staff
 
 is_advanced = is_advanced_type | is_org_member
 
@@ -135,5 +146,6 @@ add_perm('foia.appeal_foiarequest', can_edit & is_appealable)
 add_perm('foia.thank_foiarequest', can_edit & is_thankable)
 add_perm('foia.flag_foiarequest', is_authenticated)
 add_perm('foia.followup_foiarequest', can_edit & ~has_status('started'))
+add_perm('foia.agency_reply_foiarequest', is_from_agency)
 add_perm('foia.view_rawemail', is_advanced)
 add_perm('foia.file_multirequest', is_advanced)

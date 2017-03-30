@@ -31,6 +31,7 @@
 {% block content %}
 
 {% has_perm 'foia.appeal_foiarequest' request.user foia as can_appeal %}
+{% has_perm 'foia.agency_reply_foiarequest' request.user foia as can_agency_reply %}
 
 <article class="request detail grid__row" id="foia-{{ foia.id }}">
     <section class="request properties grid__column one-quarter">
@@ -112,7 +113,9 @@
             {% crowdfund foia.crowdfund.pk %}
         {% endif %}
 
-        {% include 'foia/foia_actions.html' %}
+        {% if request.user.profile.acct_type != "agency" %}
+            {% include 'foia/foia_actions.html' %}
+        {% endif %}
 
         <div class="tab-container">
             <ul role="tablist" class="tab-list">
@@ -184,14 +187,19 @@
                 {% endif %}
                 {% endif %}
 
-                {% if user_can_edit %}
+                {% if user_can_edit or can_agency_reply %}
                 <div class="communications-composer">
                     <div class="composer-actions">
                         <div class="button-group">
                             {% if is_thankable %}
                                 <a href="#thanks" class="blue button">Say Thanks</a>
                             {% endif %}
+                            {% if can_agency_reply %}
+                                <a href="#agency-reply" class="blue button">Reply Directly</a>
+                            {% endif %}
+                            {% if not request.user.profile.acct_type == "agency" %}
                             <a href="#follow-up" class="blue button">Follow Up</a>
+                            {% endif %}
                             {% if foia.is_payable %}
                                 <a href="#pay" class="green button">Pay Fees</a>
                                 {% if not foia.has_crowdfund %}
@@ -210,7 +218,11 @@
                     <div class="composer-inputs">
                         <div class="composer" id="inactive">
                             <div class="composer-input">
+                                {% if can_agency_reply %}
+                                <p>You may <a href="#agency-reply">reply directly</a> to this request.</p>
+                                {% else %}
                                 <p>You may <a href="#follow-up">follow up</a> {% if not foia.disable_autofollowups %}manually {% endif %}with the agency{% if can_appeal %} or <a href="#appeal">appeal</a> their decision{% endif %}.</p>
+                                {% endif %}
                             </div>
                         </div>
                         <div class="follow-up composer" id="follow-up">
@@ -241,6 +253,29 @@ Sincerely,
 </textarea>
                                 <div class="buttons">
                                     <button class="primary button" type="submit" name="thanks" value="1">Send</button>
+                                    <a href="#inactive" class="button">Cancel</a>
+                                </div>
+                            </form>
+                        </div>
+                        {% endif %}
+                        {% if can_agency_reply %}
+                        <div class="composer" id="agency-reply">
+                            <form class="composer-input" method="post" enctype="multipart/form-data">
+                                <header>Reply directly</header>
+                                {% csrf_token %}
+                                {% include 'lib/pattern/form.html' with form=agency_reply_form %}
+                                <div class="formset-forms">
+                                    <span>Attachments</span>
+                                    {{ agency_reply_formset.management_form }}
+                                    {% for form in agency_reply_formset.forms %}
+                                    <span class="formset-container">
+                                        {% include 'lib/pattern/form.html' %}
+                                    </span>
+                                    {% endfor %}
+                                </div>
+								<input type="hidden" name="action" value="agency_reply" />
+                                <div class="buttons">
+                                    <button class="primary button" type="submit" name="agency-reply" value="1">Send</button>
                                     <a href="#inactive" class="button">Cancel</a>
                                 </div>
                             </form>
