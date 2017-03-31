@@ -1,0 +1,15 @@
+{% extends 'foia/list.html' %}
+
+{% block list-actions %}
+{% endblock %}
+
+{% block list-sections %}
+{% endblock %}
+
+{% block empty %}
+    {% if request.GET %}
+        <p class="empty">None of your requests match this filter.</p>
+    {% else %}
+        <p class="empty">Your agency has no open requests for you to respond to at this time.</p>
+    {% endif %}
+{% endblock %}

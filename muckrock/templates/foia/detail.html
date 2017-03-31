@@ -260,17 +260,20 @@ Sincerely,
                         {% endif %}
                         {% if can_agency_reply %}
                         <div class="composer" id="agency-reply">
-                            <form class="composer-input" method="post">
+                            <form class="composer-input" method="post" enctype="multipart/form-data">
                                 <header>Reply directly</header>
                                 {% csrf_token %}
                                 {% include 'lib/pattern/form.html' with form=agency_reply_form %}
-								<input type="hidden" name="action" value="agency_reply" />
-                                <div class="field">
-                                    <header>
-                                        <label for="attachments">Attachments:</label>
-                                        <input type="file" name="attachments" id="attachments" multiple/>
-                                    </header>
+                                <div class="formset-forms">
+                                    <span>Attachments</span>
+                                    {{ agency_reply_formset.management_form }}
+                                    {% for form in agency_reply_formset.forms %}
+                                    <span class="formset-container">
+                                        {% include 'lib/pattern/form.html' %}
+                                    </span>
+                                    {% endfor %}
                                 </div>
+								<input type="hidden" name="action" value="agency_reply" />
                                 <div class="buttons">
                                     <button class="primary button" type="submit" name="agency-reply" value="1">Send</button>
                                     <a href="#inactive" class="button">Cancel</a>

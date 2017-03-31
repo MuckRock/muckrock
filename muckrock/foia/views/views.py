@@ -5,7 +5,7 @@ Views for the FOIA application
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.db.models import Prefetch, Count
@@ -30,6 +30,7 @@ from muckrock.foia.filters import (
     MyFOIARequestFilterSet,
     MyFOIAMultiRequestFilterSet,
     ProcessingFOIARequestFilterSet,
+    AgencyFOIARequestFilterSet,
 )
 from muckrock.foia.forms import (
     FOIAEmbargoForm,
@@ -37,10 +38,12 @@ from muckrock.foia.forms import (
     FOIAEstimatedCompletionDateForm,
     FOIAAccessForm,
     FOIAAgencyReplyForm,
+    FOIAFileFormSet,
     )
 from muckrock.foia.models import (
     FOIARequest,
     FOIACommunication,
+    FOIAFile,
     FOIAMultiRequest,
     RawEmail,
     STATUS,
@@ -174,6 +177,22 @@ class MyRequestList(RequestList):
         return queryset.filter(user=self.request.user)
 
 
+@class_view_decorator(user_passes_test(lambda u: u.profile.acct_type == 'agency'))
+class AgencyRequestList(RequestList):
+    """View requests owned by current agency"""
+    filter_class = AgencyFOIARequestFilterSet
+    title = "Your Agency's Requests"
+    template_name = 'foia/agency_list.html'
+
+    def get_queryset(self):
+        """Requests owned by the current agency that they can respond to."""
+        queryset = super(AgencyRequestList, self).get_queryset()
+        return queryset.filter(
+                agency=self.request.user.profile.agency,
+                status__in=('ack', 'processed'),
+                )
+
+
 @class_view_decorator(login_required)
 class MyMultiRequestList(MRFilterListView):
     """View requests owned by current user"""
@@ -249,6 +268,8 @@ class Detail(DetailView):
     def __init__(self, *args, **kwargs):
         self._obj = None
         self.agency_reply_form = FOIAAgencyReplyForm()
+        self.agency_reply_formset = FOIAFileFormSet(
+                queryset=FOIAFile.objects.none())
         super(Detail, self).__init__(*args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
@@ -361,6 +382,7 @@ class Detail(DetailView):
         context['files'] = foia.files.all()[:50]
         context['agency_status_choices'] = AGENCY_STATUS
         context['agency_reply_form'] = self.agency_reply_form
+        context['agency_reply_formset'] = self.agency_reply_formset
         if foia.sidebar_html:
             messages.info(self.request, foia.sidebar_html)
         return context
@@ -657,7 +679,8 @@ class Detail(DetailView):
     def _agency_reply(self, request, foia):
         """Agency reply directly through the site"""
         form = FOIAAgencyReplyForm(request.POST)
-        if form.is_valid():
+        formset = FOIAFileFormSet(request.POST, request.FILES)
+        if form.is_valid() and formset.is_valid():
             comm = FOIACommunication.objects.create(
                     foia=foia,
                     from_who=request.user.profile.agency.name,
@@ -682,6 +705,7 @@ class Detail(DetailView):
             messages.success(request, 'Reply succesfully posted')
         else:
             self.agency_reply_form = form
+            self.agency_reply_formset = formset
             raise FormError
 
         return redirect(foia)

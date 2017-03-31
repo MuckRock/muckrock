@@ -122,7 +122,7 @@
             {% endif %}
             {% if user.profile.acct_type == "agency" %}
                 <ul class="unauthenticated section-list" id="nav-list-sections">
-                    <li><a class="nav-item" href="{% url 'foia-root' %}">Requests</a></li> {# XXX only show them relevant requests #}
+                    <li><a class="nav-item" href="{% url 'foia-agency-list' %}">Requests</a></li>
                     <li><a class="nav-item" href="{% url 'acct-logout' %}" onclick="ga('send', 'event', 'Account', 'Logout', window.location.pathname)">Log&nbsp;Out</a>
                 </ul>
                 <span>

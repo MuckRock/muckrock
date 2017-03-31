@@ -3,14 +3,13 @@
 Models for the FOIA application
 """
 
-import datetime
-
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.validators import validate_email
 from django.db import models
 from django.shortcuts import get_object_or_404
 
+from datetime import datetime
 import email
 import logging
 import os
@@ -205,7 +204,7 @@ class FOIACommunication(models.Model):
             logger.warn('Tried resending a communication with an unapproved agency')
             raise ValueError('This communication has no approved agency.', 'no_agency')
         snail = False
-        self.date = datetime.datetime.now()
+        self.date = datetime.now()
         self.save()
         if email_address:
             # responsibility for handling validation errors

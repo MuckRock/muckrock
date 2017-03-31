@@ -191,6 +191,9 @@ $request-breakpoint: 768px;
             @include display(flex);
             @include justify-content(space-between);
         }
+        .formset-forms {
+            padding: $vr/2;
+        }
     }
     #inactive .composer-input {
         p {
