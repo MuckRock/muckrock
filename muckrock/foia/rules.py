@@ -3,6 +3,7 @@
 # needed for rules
 from __future__ import absolute_import
 
+import inspect
 from datetime import date
 from functools import wraps
 from rules import (
@@ -26,6 +27,20 @@ def skip_if_not_foia(func):
             return None
         else:
             return func(user, foia)
+    return inner
+
+def user_authenticated(func):
+    """Decorator for predicates
+    Return false if user is not authenticated"""
+    argspec = inspect.getargspec(func)
+    if len(argspec.args) == 2:
+        @wraps(func)
+        def inner(user, foia):
+            return user.is_authenticated() and func(user, foia)
+    elif len(argspec.args) == 1:
+        @wraps(func)
+        def inner(user):
+            return user.is_authenticated() and func(user)
     return inner
 
 def has_status(*statuses):
@@ -52,10 +67,10 @@ def is_read_collaborator(user, foia):
 
 @predicate
 @skip_if_not_foia
+@user_authenticated
 def is_org_shared(user, foia):
     return (
             foia.user.is_authenticated() and
-            user.is_authenticated() and
             foia.user.profile.org_share and
             foia.user.profile.organization is not None and
             foia.user.profile.organization == user.profile.organization
@@ -102,28 +117,31 @@ def has_crowdfund(user, foia):
 
 @predicate
 @skip_if_not_foia
+@user_authenticated
 def match_agency(user, foia):
     return bool(user.profile.agency and user.profile.agency == foia.agency)
 
 # User predicates
 
 @predicate
+@user_authenticated
 def is_advanced_type(user):
-    return (user.is_authenticated() and
-            user.profile.acct_type in ['admin', 'beta', 'pro', 'proxy'])
+    return user.profile.acct_type in ['admin', 'beta', 'pro', 'proxy']
 
 @predicate
+@user_authenticated
 def is_admin(user):
-    return user.is_authenticated() and user.profile.acct_type == 'admin'
+    return user.profile.acct_type == 'admin'
 
 @predicate
+@user_authenticated
 def is_agency_user(user):
     return user.profile.acct_type == 'agency'
 
 @predicate
+@user_authenticated
 def is_org_member(user):
-    return (user.is_authenticated() and user.profile.organization and
-            user.profile.organization.active)
+    return user.profile.organization and user.profile.organization.active
 
 is_from_agency = is_agency_user & match_agency & ~has_status('started')
 

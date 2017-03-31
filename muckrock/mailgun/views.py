@@ -13,7 +13,6 @@ import hashlib
 import hmac
 import json
 import logging
-import os
 import re
 import sys
 import time
@@ -26,21 +25,18 @@ from muckrock.agency.models import Agency
 from muckrock.foia.models import (
         FOIARequest,
         FOIACommunication,
-        FOIAFile,
         RawEmail,
         CommunicationError,
         CommunicationOpen,
         )
-from muckrock.foia.tasks import upload_document_cloud, classify_status
+from muckrock.foia.tasks import classify_status
 from muckrock.mailgun.models import WhitelistDomain
 from muckrock.task.models import (
         FailedFaxTask,
         OrphanTask,
         RejectedEmailTask,
         ResponseTask,
-        StaleAgencyTask,
         )
-from muckrock.utils import new_action
 
 logger = logging.getLogger(__name__)
 
