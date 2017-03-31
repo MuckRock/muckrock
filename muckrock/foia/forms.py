@@ -304,7 +304,10 @@ class FOIAAccessForm(forms.Form):
 
 class FOIAAgencyReplyForm(forms.Form):
     """Form for direct agency reply"""
-    status = forms.ChoiceField(choices=AGENCY_STATUS)
+    status = forms.ChoiceField(
+            choices=AGENCY_STATUS,
+            help_text=' ',
+            )
     tracking_id = forms.CharField(
             label='Tracking Number',
             help_text='If your agency assign a tracking number to the request, '

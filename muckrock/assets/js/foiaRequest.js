@@ -190,3 +190,28 @@ $('.modal-link').click(function(e){
     textAreaModal($($(this).data('modal')));
     return false;
 });
+
+/* Agency Reply */
+
+$("#id_price").parent().hide();
+
+$("#id_status").change(function() {
+  var help_texts = {
+    "processed": "This is an acknowledgement or general update message.  A future communication will contain the results of the request.",
+    "fix": "You require requester to fix their request - they may need to provide additional details or narrow the scope of the request so that you may continue processing it.",
+    "payment": "You are notifying the requestor of the payment amount for the request.  Please fill in the price field with the price.",
+    "rejected": "The request has been rejected.  Please cite all relevant exemptions.",
+    "no_docs": "No responsive documents were found for the request.",
+    "done": "The request is complete.  All responsive documents are attached and uploaded.",
+    "partial": "Some of the responsive documents are attached and uploaded.  More documents will be sent in a future communication.",
+  }
+  if ($(this).val() == "payment") {
+    $("#id_price").parent().show();
+  } else {
+    $("#id_price").parent().hide();
+  }
+  $(this).next(".help-text").text(help_texts[$(this).val()]);
+});
+$("#id_status").trigger("change");
+
+
