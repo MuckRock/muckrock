@@ -216,13 +216,23 @@ class FOIADeleteForm(forms.Form):
 
 class FOIAFileForm(forms.ModelForm):
     """A form for a FOIA File"""
-    ffile = forms.FileField(label='File', required=False)
+    ffile = forms.FileField(
+            label='File',
+            required=False,
+            )
 
     class Meta:
         model = FOIAFile
         fields = ['ffile']
 
 FOIAFileFormSet = forms.models.modelformset_factory(FOIAFile, form=FOIAFileForm)
+FOIAFileDraftFormSet = forms.models.modelformset_factory(
+        FOIAFile,
+        form=FOIAFileForm,
+        extra=3,
+        max_num=3,
+        validate_max=True,
+        )
 
 class FOIANoteForm(forms.ModelForm):
     """A form for a FOIA Note"""

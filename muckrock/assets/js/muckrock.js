@@ -34,6 +34,9 @@ import './selectAll';
 import './tabs';
 import './task';
 
+import 'fine-uploader/lib/all';
+import 'fine-uploader/fine-uploader/fine-uploader-new.css';
+
 /* Bind plugins and event handlers to frontend elements. */
 
 $('document').ready(function(){

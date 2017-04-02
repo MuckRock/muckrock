@@ -13,7 +13,7 @@
 
 {% block form-form %}
 {% if form %}
-<form method="post" class="draft">
+<form method="post" class="draft" enctype="multipart/form-data">
     {% csrf_token %}
 
     <section class="info">
@@ -48,6 +48,17 @@
         {% if can_embargo %}
             {% include 'lib/pattern/field.html' with field=form.embargo %}
         {% endif %}
+
+        {# attachment formset #}
+        <div class="formset-forms">
+            <label class="bold">Attachments</label>
+            {{ formset.management_form }}
+            {% for form in formset.forms %}
+            <span>
+                {% include 'lib/pattern/form.html' %}
+            </span>
+            {% endfor %}
+        </div>
 
         <section class="button-group">
             <input type="submit"

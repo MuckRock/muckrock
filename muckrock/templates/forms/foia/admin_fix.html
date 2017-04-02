@@ -7,6 +7,7 @@
 
 {% block form-form %}
 <form method="post" enctype="multipart/form-data">
+    <span>Attachments</span>
     {% csrf_token %}
     {% include 'lib/pattern/form.html' %}
     {% if formset %}

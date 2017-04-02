@@ -40,6 +40,14 @@ var config = {
                 test: /\.json$/,
                 loader: 'json-loader',
             },
+            {
+                test: /\.css$/,
+                loader: 'css-loader',
+            },
+            {
+                test: /\.gif$/,
+                loader: 'url-loader',
+            },
         ],
     },
     plugins: [
