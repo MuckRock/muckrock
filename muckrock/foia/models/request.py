@@ -802,7 +802,8 @@ class FOIARequest(models.Model):
     def user_actions(self, user):
         '''Provides action interfaces for users'''
         is_owner = self.created_by(user)
-        is_agency_user = user.profile.acct_type == 'agency'
+        is_agency_user = (user.is_authenticated() and
+                user.profile.acct_type == 'agency')
         can_follow = (user.is_authenticated() and not is_owner and
                 not is_agency_user)
         is_following = user in followers(self)
