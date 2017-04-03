@@ -305,20 +305,21 @@ class FOIAAccessForm(forms.Form):
 class FOIAAgencyReplyForm(forms.Form):
     """Form for direct agency reply"""
     status = forms.ChoiceField(
+            label="What's the current status of the request?",
             choices=AGENCY_STATUS,
             help_text=' ',
             )
     tracking_id = forms.CharField(
             label='Tracking Number',
-            help_text='If your agency assign a tracking number to the request, '
-            'please enter it here.',
+            help_text="If your agency assign a tracking number to the request, "
+            "please enter it here.  We'll include this number in future "
+            "followups if necessary",
             required=False,
             )
     date_estimate = forms.DateField(
             label='Estimated Completion Date',
             help_text='Enter the date you expect the request to be fufilled by.  '
             'We will not follow up with you until this date.',
-            widget=forms.DateInput(attrs={'class': 'datepicker'}),
             required=False,
             )
     price = forms.IntegerField(
@@ -326,5 +327,6 @@ class FOIAAgencyReplyForm(forms.Form):
             required=False,
             )
     reply = forms.CharField(
+            label='Message to the requester',
             widget=forms.Textarea(),
             )

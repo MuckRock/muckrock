@@ -5,7 +5,7 @@
 <header class="global-header">
     <nav class="global-navigation space-between mb0" id="nav">
         <div class="nav-section align-center mb0" id="site-nav">
-            <a href="{% url 'index'%}" class="nav-item brand" id="nav-brand">
+            <a href="{% if user.profile.acct_type == "agency" %}{% url "foia-agency-list" %}{% else %}{% url 'index'%}{% endif %}" class="nav-item brand" id="nav-brand">
                 <span class="logotype">
                     {% include 'lib/component/icon/logotype.svg' %}
                 </span>

@@ -113,9 +113,7 @@
             {% crowdfund foia.crowdfund.pk %}
         {% endif %}
 
-        {% if request.user.profile.acct_type != "agency" %}
-            {% include 'foia/foia_actions.html' %}
-        {% endif %}
+        {% include 'foia/foia_actions.html' %}
 
         <div class="tab-container">
             <ul role="tablist" class="tab-list">
@@ -210,7 +208,9 @@
                                 <a href="#appeal" class="red button">Appeal</a>
                             {% endif %}
                         </div>
+                        {% if not request.user.profile.acct_type == "agency" %}
                         <a href="#get-advice" class="button">Get Advice</a>
+                        {% endif %}
                         {% if request.user.is_staff %}
                         <a href="{% url 'foia-admin-fix' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Make an admin fix" class="button">Admin Fix</a>
                         {% endif %}
@@ -550,6 +550,13 @@ Sincerely,
         minDate: 0,
         firstDay: 1,
         hideIfNoPrevNext: true,
+    });
+    $('#id_date_estimate').datepicker({
+        changeMonth: true,
+        changeYear: true,
+        dateFormat: 'yy-mm-dd',
+        maxDate: '+10y',
+        minDate: 0,
     });
     var foiaId = $('.request.detail').attr('id');
     if (foiaId != undefined) {

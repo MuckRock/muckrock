@@ -702,6 +702,11 @@ class Detail(DetailView):
             if foia.agency:
                 foia.agency.unmark_stale()
             comm.create_agency_notifications()
+            FlaggedTask.objects.create(
+                    user=self.request.user,
+                    foia=foia,
+                    text='An agency used its login to update this request',
+                    )
             messages.success(request, 'Reply succesfully posted')
         else:
             self.agency_reply_form = form

@@ -211,6 +211,17 @@ $request-breakpoint: 768px;
             }
         }
     }
+    #agency-reply .composer-input {
+        .field {
+            input[type="text"], textarea {
+                border: 1px solid $color-grey;
+            }
+            input, textarea, select {
+                width: 97%;
+                margin-left: 1.5%;
+            }
+        }
+    }
 }
 
 .request .files {

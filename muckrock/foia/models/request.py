@@ -802,7 +802,9 @@ class FOIARequest(models.Model):
     def user_actions(self, user):
         '''Provides action interfaces for users'''
         is_owner = self.created_by(user)
-        can_follow = user.is_authenticated() and not is_owner
+        is_agency_user = user.profile.acct_type == 'agency'
+        can_follow = (user.is_authenticated() and not is_owner and
+                not is_agency_user)
         is_following = user in followers(self)
         is_admin = user.is_staff
         kwargs = {
@@ -813,7 +815,7 @@ class FOIARequest(models.Model):
         }
         return [
             Action(
-                test=True,
+                test=not is_agency_user,
                 link=reverse('foia-clone', kwargs=kwargs),
                 title='Clone',
                 desc='Start a new request using this one as a base',

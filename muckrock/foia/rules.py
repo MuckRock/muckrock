@@ -155,7 +155,8 @@ can_embargo_permananently = is_admin | is_org_member
 
 add_perm('foia.change_foiarequest', can_edit)
 add_perm('foia.delete_foiarequest', can_edit & is_deletable)
-add_perm('foia.view_foiarequest', can_edit | is_viewer | ~is_private)
+add_perm('foia.view_foiarequest',
+        can_edit | is_viewer | is_from_agency | ~is_private)
 add_perm('foia.embargo_foiarequest', can_edit & can_embargo)
 add_perm('foia.embargo_perm_foiarequest', can_edit & can_embargo_permananently)
 add_perm('foia.crowdfund_foiarequest', # why cant editors crowdfund?
