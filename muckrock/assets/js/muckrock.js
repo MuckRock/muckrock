@@ -34,8 +34,9 @@ import './selectAll';
 import './tabs';
 import './task';
 
-import 'fine-uploader/lib/all';
-import 'fine-uploader/fine-uploader/fine-uploader-new.css';
+import qq from 'fine-uploader/lib/s3';
+import 'fine-uploader/s3.fine-uploader/fine-uploader-new.css';
+import 'fine-uploader/s3.fine-uploader/templates/simple-thumbnails.html';
 
 /* Bind plugins and event handlers to frontend elements. */
 
@@ -158,5 +159,44 @@ $('document').ready(function(){
             $(sidebar).removeClass('visible');
             $(overlay).removeClass('visible');
         });
+    });
+    
+    const uploader = new qq.s3.FineUploader({
+        element: document.getElementById('fine-uploader'),
+        debug: true,
+        template: 'qq-simple-thumbnails-template',
+        request: {
+            endpoint: '{{BUCKET_NAME}}.s3.amazonaws.com',
+            accessKey: '{{AWS_ACCESS_KEY}}',
+            customHeaders: {
+                'X-CSRFToken': '{{csrf_token}}',
+            },
+        },
+        signature: {
+            endpoint: '/fine-uploader/signature/',
+        },
+        uploadSuccess: {
+            endpoint: '/fine-uploader/success/',
+        },
+        iframeSupport: {
+            localBlankPagePath: '/fine-uploader/blank/',
+        },
+        retry: {
+            enableAuto: true,
+        },
+        deleteFile: {
+            enabled: true,
+            endpoint: '/fine-uploader/delete/',
+        },
+        chunking: {
+            enabled: true,
+            concurrent: {
+                enabled: true,
+            },
+        },
+        resume: {
+            enabled: true,
+        },
+
     });
 });

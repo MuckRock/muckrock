@@ -48,6 +48,10 @@ var config = {
                 test: /\.gif$/,
                 loader: 'url-loader',
             },
+            {
+                test: /\.html$/,
+                loader: 'html-loader',
+            },
         ],
     },
     plugins: [
