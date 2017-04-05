@@ -7,6 +7,7 @@ from celery.task import periodic_task, task
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
+from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string, get_template
 from django.template import Context
@@ -26,6 +27,8 @@ from boto.s3.connection import S3Connection
 from datetime import date, datetime
 from decimal import Decimal
 from django_mailgun import MailgunAPIError
+from phaxio import PhaxioApi
+from phaxio.exceptions import PhaxioError
 from scipy.sparse import hstack
 from urllib import quote_plus
 
@@ -74,7 +77,7 @@ def upload_document_cloud(doc_pk, change, **kwargs):
 
     try:
         doc = FOIAFile.objects.get(pk=doc_pk)
-    except FOIAFile.DoesNotExist, exc:
+    except FOIAFile.DoesNotExist as exc:
         # give database time to sync
         upload_document_cloud.retry(countdown=300, args=[doc_pk, change], kwargs=kwargs, exc=exc)
 
@@ -269,6 +272,60 @@ def classify_status(task_pk, **kwargs):
     resolve_if_possible(resp_task)
 
     resp_task.save()
+
+@task(
+    ignore_result=True,
+    max_retries=5,
+    name='muckrock.foia.tasks.send_fax',
+    rate_limit=0.5, # 1/2 per sec, or 1 per 2 seconds to be conservative
+    )
+def send_fax(comm_id, subject, body, **kwargs):
+    """Send a fax using the Phaxio API"""
+    api = PhaxioApi(
+            settings.PHAXIO_KEY,
+            settings.PHAXIO_SECRET,
+            raise_errors=True,
+            )
+
+    try:
+        comm = FOIACommunication.objects.get(pk=comm_id)
+    except FOIACommunication.DoesNotExist as exc:
+        send_fax.retry(
+                countdown=300,
+                args=[comm_id, subject, body],
+                kwargs=kwargs,
+                exc=exc,
+                )
+
+    files = [f.ffile for f in comm.files.all()]
+    callback_url = 'https://%s%s' % (
+            settings.MUCKROCK_URL,
+            reverse('phaxio-callback'),
+            )
+    try:
+        results = api.send(
+                to=comm.foia.email,
+                header_text=subject[:50],
+                string_data=body,
+                string_data_type='text',
+                files=files,
+                batch=True,
+                batch_delay=settings.PHAXIO_BATCH_DELAY,
+                batch_collision_avoidance=True,
+                callback_url=callback_url,
+                **{'tag[comm_id]': comm.pk}
+                )
+    except PhaxioError as exc:
+        send_fax.retry(
+                countdown=300,
+                args=[comm_id, subject, body],
+                kwargs=kwargs,
+                exc=exc,
+                )
+
+    comm.delivered = 'fax'
+    comm.fax_id = results['faxId']
+    comm.save()
 
 @periodic_task(
         run_every=crontab(hour=5, minute=0),
