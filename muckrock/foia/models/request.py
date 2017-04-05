@@ -16,7 +16,6 @@ from actstream.models import followers
 from datetime import datetime, date, timedelta
 from hashlib import md5
 import logging
-from phaxio import PhaxioApi
 from reversion import revisions as reversion
 from taggit.managers import TaggableManager
 
@@ -699,32 +698,9 @@ class FOIARequest(models.Model):
 
     def _send_fax(self, subject, body, comm):
         """Send the message as a fax"""
-
-        api = PhaxioApi(
-                settings.PHAXIO_KEY,
-                settings.PHAXIO_SECRET,
-                raise_errors=True,
-                )
-        files = [f.ffile for f in comm.files.all()]
-        callback_url = 'https://%s%s' % (
-                settings.MUCKROCK_URL,
-                reverse('phaxio-callback'),
-                )
-        results = api.send(
-                to=self.email,
-                header_text=subject[:50],
-                string_data=body,
-                string_data_type='text',
-                files=files,
-                batch=True,
-                batch_delay=settings.PHAXIO_BATCH_DELAY,
-                batch_collision_avoidance=True,
-                callback_url=callback_url,
-                **{'tag[comm_id]': comm.pk}
-                )
-
-        comm.delivered = 'fax'
-        comm.fax_id = results['faxId']
+        # pylint: disable=no-self-use
+        from muckrock.foia.tasks import send_fax
+        send_fax.apply_async(args=[comm.pk, subject, body])
 
     def update_dates(self):
         """Set the due date, follow up date and days until due attributes"""
