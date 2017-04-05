@@ -420,7 +420,7 @@ class NewAgencyTask(Task):
         self.agency.status = 'approved'
         self.agency.save()
         # resend the first comm of each foia associated to this agency
-        for foia in self.pending_requests():
+        for foia in self.agency.foiarequest_set.exclude(status='started'):
             comms = foia.communications.all()
             if comms.count():
                 first_comm = comms[0]
