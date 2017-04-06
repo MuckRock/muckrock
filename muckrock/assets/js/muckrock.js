@@ -35,8 +35,6 @@ import './tabs';
 import './task';
 
 import qq from 'fine-uploader/lib/s3';
-import 'fine-uploader/s3.fine-uploader/fine-uploader-new.css';
-import 'fine-uploader/s3.fine-uploader/templates/simple-thumbnails.html';
 
 /* Bind plugins and event handlers to frontend elements. */
 

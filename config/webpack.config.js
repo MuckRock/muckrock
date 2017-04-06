@@ -41,16 +41,8 @@ var config = {
                 loader: 'json-loader',
             },
             {
-                test: /\.css$/,
-                loader: 'css-loader',
-            },
-            {
                 test: /\.gif$/,
                 loader: 'url-loader',
-            },
-            {
-                test: /\.html$/,
-                loader: 'html-loader',
             },
         ],
     },

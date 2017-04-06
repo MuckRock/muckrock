@@ -36,7 +36,6 @@
     "expose-loader": "^0.7.1",
     "extract-text-webpack-plugin": "^1.0.1",
     "file-loader": "^0.11.1",
-    "html-loader": "^0.4.5",
     "json-loader": "^0.5.4",
     "node-sass": "^3.4.2",
     "sass-loader": "^3.1.2",
