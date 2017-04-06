@@ -1,7 +1,6 @@
 """Celery Tasks for the FOIA application"""
 
 from celery.exceptions import SoftTimeLimitExceeded
-from celery.signals import task_failure
 from celery.schedules import crontab
 from celery.task import periodic_task, task
 from django.conf import settings
@@ -18,6 +17,7 @@ import base64
 import json
 import logging
 import numpy as np
+import os
 import os.path
 import re
 import requests
@@ -29,6 +29,8 @@ from decimal import Decimal
 from django_mailgun import MailgunAPIError
 from phaxio import PhaxioApi
 from phaxio.exceptions import PhaxioError
+from raven import Client
+from raven.contrib.celery import register_logger_signal, register_signal
 from scipy.sparse import hstack
 from urllib import quote_plus
 
@@ -46,6 +48,10 @@ from muckrock.vendor import MultipartPostHandler
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)'
 
 logger = logging.getLogger(__name__)
+
+client = Client(os.environ.get('SENTRY_DSN'))
+register_logger_signal(client)
+register_signal(client)
 
 class FOIAOptions(dbsettings.Group):
     """DB settings for the FOIA app"""
@@ -277,7 +283,7 @@ def classify_status(task_pk, **kwargs):
     ignore_result=True,
     max_retries=5,
     name='muckrock.foia.tasks.send_fax',
-    rate_limit=0.5, # 1/2 per sec, or 1 per 2 seconds to be conservative
+    rate_limit='6/m',
     )
 def send_fax(comm_id, subject, body, **kwargs):
     """Send a fax using the Phaxio API"""
@@ -330,6 +336,7 @@ def send_fax(comm_id, subject, body, **kwargs):
 @periodic_task(
         run_every=crontab(hour=5, minute=0),
         time_limit=10 * 60,
+        soft_time_limit=570,
         name='muckrock.foia.tasks.followup_requests')
 def followup_requests():
     """Follow up on any requests that need following up on"""
@@ -339,13 +346,21 @@ def followup_requests():
     is_weekday = datetime.today().weekday() < 5
     if (foia_options.enable_followup and
             (foia_options.enable_weekend_followup or is_weekday)):
-        for foia in FOIARequest.objects.get_followup():
-            try:
-                foia.followup(automatic=True)
-                log.append('%s - %d - %s' % (foia.status, foia.pk, foia.title))
-            except MailgunAPIError as exc:
-                error_log.append('ERROR: %s - %d - %s - %s' %
-                        (foia.status, foia.pk, foia.title, exc))
+        try:
+            num_requests = FOIARequest.objects.get_followup().count()
+            for foia in FOIARequest.objects.get_followup():
+                try:
+                    foia.followup(automatic=True)
+                    log.append('%s - %d - %s' % (foia.status, foia.pk, foia.title))
+                except MailgunAPIError as exc:
+                    error_log.append('ERROR: %s - %d - %s - %s' %
+                            (foia.status, foia.pk, foia.title, exc))
+        except SoftTimeLimitExceeded:
+            log.append('Follow ups did not complete in time. '
+                    'Completed %d out of %d' % (
+                        num_requests - FOIARequest.objects.get_followup().count(),
+                        num_requests,
+                        ))
 
         if error_log:
             subject = '[ERROR] Follow Ups'
@@ -632,26 +647,3 @@ def notify_unanswered():
     send_mail('[UNANSWERED REQUESTS] %s' % datetime.now(),
               render_to_string('text/foia/unanswered.txt', {'total': total, 'foias': data[:20]}),
               'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
-
-
-def process_failure_signal(exception, traceback, sender, task_id,
-                           signal, args, kwargs, einfo, **kw):
-    """Log celery exceptions to sentry"""
-    # http://www.colinhowe.co.uk/2011/02/08/celery-and-sentry-recording-errors/
-    # pylint: disable=too-many-arguments
-    # pylint: disable=unused-argument
-    exc_info = (type(exception), exception, traceback)
-    logger.error(
-        'Celery job exception: %s(%s)', exception.__class__.__name__, exception,
-        exc_info=exc_info,
-        extra={
-            'data': {
-                'task_id': task_id,
-                'sender': sender,
-                'args': args,
-                'kwargs': kwargs,
-            }
-        }
-    )
-
-task_failure.connect(process_failure_signal, dispatch_uid='muckrock.foia.tasks.logging')
