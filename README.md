@@ -3,6 +3,68 @@
 [![Codeship Status for MuckRock/muckrock][codeship-img]][codeship]
 [![codecov.io][codecov-img]][codecov]
 
+# Fedora Core 26 Notes
+
+* sudo yum install postgresql-server.x86_64
+* sudo yum install postgresql-devel
+* sudo systemctl enable postgresql
+* sudo postgresql-setup initdb (or sudo postgresql-setup --initdb --unit postgresql)
+* service postgresql start
+* sudo su -l postgres
+```
+createuser --no-superuser --no-createdb --no-createrole --pwprompt muckrockuser
+createdb --owner muckrockuser muckrock
+exit
+```
+* sudo vim /var/lib/pgsql/data/postgresql.conf
+** uncomment and set ```listen_addresses``` to ```listen_addresses = '*'```
+* sudo vim /var/lib/pgsql/data/pg_hba.conf and change the lines to trust incoming connections
+
+```
+# "local" is for Unix domain socket connections only
+local   all             all                                     trust
+# IPv4 local connections:
+host    all             all             127.0.0.1/32            trust
+# IPv6 local connections:
+host    all             all             ::1/128                 trust
+```
+* service postgresql restart
+* pip install -r requirements
+* npm install
+* npm run watch
+* create a local file in muckrock/settings named mylocal.py and add the following:
+```
+from muckrock.settings.base import *
+
+DEBUG = True
+SITE_ID = 2
+
+SECRET_KEY = "NONUNIQUEHIDDENKEY"
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'muckrock',
+        'PORT': '5432', # PgBouncer port
+        'HOST': 'localhost',
+        'USER': 'muckrockuser',
+        'PASSWORD': ''
+    }
+}
+
+```
+* python manage.py migrate --settings=muckrock.settings.mylocal
+* psql -Umuckrockuser muckrock
+```
+insert into django_site values (2, 'foiamachine.org', 'foiamachine.org');
+```
+* add the following line to /etc/hosts
+```
+127.0.0.1   dev.foiamachine.org
+```
+* python manage.py runserver 0:8000 --settings=muckrock.settings.mylocal
+* visit http://dev.foiamachine.org:8000/
+
 ## Install
 
 1. Check out the git repository
