@@ -31,7 +31,7 @@
 
 {% block content %}
 
-{% cache cache_timeout foia_detail foia.pk request.user.pk %}
+{% cache foia_cache_timeout foia_detail foia.pk request.user.pk %}
 
 {% has_perm 'foia.appeal_foiarequest' request.user foia as can_appeal %}
 
