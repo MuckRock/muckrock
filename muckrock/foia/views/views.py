@@ -338,6 +338,10 @@ class Detail(DetailView):
         context['is_thankable'] = self.request.user.has_perm(
                 'foia.thank_foiarequest', foia)
         context['files'] = foia.files.all()[:50]
+        if self.request.user.is_authenticated():
+            context['foia_cache_timeout'] = 0
+        else:
+            context['foia_cache_timeout'] = settings.DEFAULT_CACHE_TIMEOUT
         if foia.sidebar_html:
             messages.info(self.request, foia.sidebar_html)
         return context
