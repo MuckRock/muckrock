@@ -272,7 +272,7 @@ class StaffDigest(Digest):
         }
         cost_per = {
             'email': 0.00,
-            'fax': 0.12,
+            'fax': 0.09,
             'mail': 0.54,
         }
         cost = {
