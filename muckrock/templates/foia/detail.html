@@ -6,6 +6,7 @@
 {% load crowdfund_tags %}
 {% load tags %}
 {% load rules %}
+{% load cache %}
 
 {% block title %}{{ foia.title }}{% endblock %}
 {% block type %}request{% endblock %}
@@ -29,6 +30,8 @@
 {% endblock twitter_card %}
 
 {% block content %}
+
+{% cache cache_timeout foia_detail foia.pk request.user.pk %}
 
 {% has_perm 'foia.appeal_foiarequest' request.user foia as can_appeal %}
 
@@ -496,6 +499,7 @@ Sincerely,
         </div>
     </main>
 </article>
+{% endcache %}
 {% endblock content %}
 
 {% block scripts %}
