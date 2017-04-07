@@ -322,6 +322,11 @@ def send_fax(comm_id, subject, body, **kwargs):
                 **{'tag[comm_id]': comm.pk}
                 )
     except PhaxioError as exc:
+        logger.error(
+                'Send fax error, will retry: %s',
+                exc,
+                exc_info=sys.exc_info(),
+                )
         send_fax.retry(
                 countdown=300,
                 args=[comm_id, subject, body],
