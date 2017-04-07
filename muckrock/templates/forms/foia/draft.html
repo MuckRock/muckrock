@@ -108,3 +108,46 @@
 {% endif %}
 
 {% endblock form-form %}
+
+{% block scripts %}
+    <script type="text/javascript">
+        const uploader = new window.qq.s3.FineUploader({
+            element: document.getElementById('fine-uploader'),
+            debug: true,
+            template: 'qq-simple-thumbnails-template',
+            request: {
+                endpoint: '{{AWS_STORAGE_BUCKET_NAME}}.s3.amazonaws.com',
+                accessKey: '{{AWS_ACCESS_KEY_ID}}',
+                customHeaders: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+            },
+            signature: {
+                endpoint: '',//'{# url "fine-uploader-sign" #}',
+            },
+            uploadSuccess: {
+                endpoint: '',//'{# url "fine-uploader-success" #}',
+            },
+            iframeSupport: {
+                localBlankPagePath: '',//'{# url "fine-uploader-blank" #}',
+            },
+            retry: {
+                enableAuto: true,
+            },
+            deleteFile: {
+                enabled: true,
+                endpoint: '',//'{# url "fine-uploader-delete" #}',
+            },
+            chunking: {
+                enabled: true,
+                concurrent: {
+                    enabled: true,
+                },
+            },
+            resume: {
+                enabled: true,
+            },
+
+        });
+    </script>
+{% endblock scripts %}
