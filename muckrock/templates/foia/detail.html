@@ -31,8 +31,6 @@
 
 {% block content %}
 
-{% cache foia_cache_timeout foia_detail foia.pk request.user.pk %}
-
 {% has_perm 'foia.appeal_foiarequest' request.user foia as can_appeal %}
 
 <article class="request detail grid__row" id="foia-{{ foia.id }}">
@@ -499,7 +497,6 @@ Sincerely,
         </div>
     </main>
 </article>
-{% endcache %}
 {% endblock content %}
 
 {% block scripts %}
