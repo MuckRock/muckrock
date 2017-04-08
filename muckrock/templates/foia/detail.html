@@ -12,14 +12,17 @@
 {% block type %}request{% endblock %}
 
 {% block open_graph %}
+{% cache cache_timeout foia_detail_open_graph foia.pk request.user.pk %}
 <meta property="og:title" content="{{ foia.title }}" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="{{ request.build_absolute_uri }}" />
 <meta property="og:description" content="{{ foia.user.get_full_name }} {% if foia.date_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to {{ foia.agency.name }} of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}{{ foia.jurisdiction.name }}.{% endif %}" />
 <meta property="og:site_name" content="MuckRock" />
+{% endcache %}
 {% endblock open_graph %}
 
 {% block twitter_card %}
+{% cache cache_timeout foia_detail_twitter_card foia.pk request.user.pk %}
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:site" content="@muckrock" />
 {% if foia.user.profile.twitter %}
@@ -27,6 +30,7 @@
 {% endif %}
 <meta name="twitter:title" content="{{ foia.title }}" />
 <meta name="twitter:description" content="{{ foia.user.get_full_name }} {% if foia.date_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to {{ foia.agency.name }} of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}{{ foia.jurisdiction.name }}.{% endif %}" />
+{% endcache %}
 {% endblock twitter_card %}
 
 {% block content %}
@@ -34,6 +38,7 @@
 {% has_perm 'foia.appeal_foiarequest' request.user foia as can_appeal %}
 
 <article class="request detail grid__row" id="foia-{{ foia.id }}">
+    {% cond_cache foia_cache_timeout foia_detail_top foia.pk request.user.pk %}
     <section class="request properties grid__column one-quarter">
         <header>
             <section class="identity">
@@ -107,12 +112,14 @@
             {% tag_manager foia %}
         </section>
     </section>
+    {% endcache %}
     <main class="request main grid__column three-quarters">
 
         {% if foia.has_crowdfund %}
             {% crowdfund foia.crowdfund.pk %}
         {% endif %}
 
+        {% cond_cache foia_cache_timeout foia_detail_bottom foia.pk request.user.pk %}
         {% include 'foia/foia_actions.html' %}
 
         <div class="tab-container">
@@ -495,6 +502,7 @@ Sincerely,
             {% endif %}
 
         </div>
+        {% endcache %}
     </main>
 </article>
 {% endblock content %}

@@ -43,14 +43,16 @@ def is_owner(user, foia):
 @predicate
 @skip_if_not_foia
 def is_editor(user, foia):
-    return foia.edit_collaborators.filter(pk=user.pk).exists()
+    return (user.is_authenticated() and
+            foia.edit_collaborators.filter(pk=user.pk).exists())
 
 can_edit = is_owner | is_editor | is_staff
 
 @predicate
 @skip_if_not_foia
 def is_read_collaborator(user, foia):
-    return foia.read_collaborators.filter(pk=user.pk).exists()
+    return (user.is_authenticated() and
+            foia.read_collaborators.filter(pk=user.pk).exists())
 
 @predicate
 @skip_if_not_foia
