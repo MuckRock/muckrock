@@ -264,6 +264,7 @@ def markdown_filter(text, _safe=None):
 class CacheNode(Node):
     """Cache Node for condtional cache tag"""
     def __init__(self, nodelist, expire_time_var, fragment_name, vary_on, cache_name):
+        # pylint: disable=too-many-arguments
         self.nodelist = nodelist
         self.expire_time_var = expire_time_var
         self.fragment_name = fragment_name
