@@ -773,7 +773,7 @@ class FOIARequest(models.Model):
         '''Provides action interfaces for users'''
         is_owner = self.created_by(user)
         can_follow = user.is_authenticated() and not is_owner
-        is_following = user in followers(self)
+        is_following = user.is_authenticated() and user in followers(self)
         is_admin = user.is_staff
         kwargs = {
             'jurisdiction': self.jurisdiction.slug,
