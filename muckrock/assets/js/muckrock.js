@@ -35,6 +35,7 @@ import './tabs';
 import './task';
 
 import qq from 'fine-uploader/lib/s3';
+window.qq = qq;
 
 /* Bind plugins and event handlers to frontend elements. */
 

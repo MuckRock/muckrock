@@ -39,6 +39,15 @@
     <dt>Agency Notes</dt>
     <dd>{{agency.notes}}</dd>
 	{% endif %}
+    {% with task.communication.files.all as files %}
+        {% if files %}
+            <dt>Attachments</dt>
+                {% for file in files %}
+                    <dd><a href="{{file.ffile.url}}" target="_blank">{{file.title}}</a></dd>
+                {% endfor %}
+        {% endif %}
+    {% endwith %}
+
 {% endif %}
 </dl>
 <div class="collapsed collapsable full-letter">

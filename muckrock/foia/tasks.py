@@ -505,6 +505,7 @@ def autoimport():
 
         foia_file = FOIAFile(foia=foia, comm=comm, title=title, date=comm.date,
                              source=comm.from_who[:70], access=access)
+        # XXX use get_available name also
         full_file_name = foia_file.ffile.field.generate_filename(
                 foia_file.ffile.instance,
                 file_name)

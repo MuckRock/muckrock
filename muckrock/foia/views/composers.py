@@ -296,8 +296,7 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
             messages.success(request, 'The request was deleted.')
             return redirect('foia-mylist')
         form = RequestDraftForm(request.POST)
-        formset = FOIAFileDraftFormSet(request.POST, request.FILES)
-        if form.is_valid() and formset.is_valid():
+        if form.is_valid():
             data = form.cleaned_data
             foia.title = data['title']
             foia.slug = slugify(foia.title) or 'untitled'
@@ -313,13 +312,6 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
             foia_comm.save()
             foia.save(comment='draft edited')
 
-            foia_files = formset.save(commit=False)
-            for foia_file in foia_files:
-                foia_file.comm = foia_comm
-                foia_file.title = foia_file.name()
-                foia_file.date = foia_comm.date
-                foia_file.save()
-
             if request.POST.get('submit') == 'Save':
                 messages.success(request, 'Your draft has been updated.')
             elif request.POST.get('submit') == 'Submit':
@@ -333,16 +325,17 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
         )
     else:
         form = RequestDraftForm(initial=initial_data)
-        formset = FOIAFileDraftFormSet(queryset=foia.last_comm().files.all())
 
     context = {
         'action': 'Draft',
         'form': form,
-        'formset': formset,
         'foia': foia,
         'remaining': foia.user.profile.total_requests(),
         'stripe_pk': settings.STRIPE_PUB_KEY,
-        'sidebar_admin_url': reverse('admin:foia_foiarequest_change', args=(foia.pk,))
+        'sidebar_admin_url': reverse('admin:foia_foiarequest_change', args=(foia.pk,)),
+        'AWS_STORAGE_BUCKET_NAME': settings.AWS_STORAGE_BUCKET_NAME,
+        'AWS_ACCESS_KEY_ID': settings.AWS_ACCESS_KEY_ID,
+        'MAX_ATTACHMENT_SIZE': settings.MAX_ATTACHMENT_SIZE,
     }
 
     return render_to_response(

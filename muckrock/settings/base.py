@@ -18,7 +18,7 @@ DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 EMAIL_DEBUG = DEBUG
 THUMBNAIL_DEBUG = DEBUG
-AWS_DEBUG = False
+AWS_DEBUG = True
 
 SITE_ROOT = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
 
@@ -225,6 +225,7 @@ INSTALLED_APPS = (
     'muckrock.project',
     'muckrock.mailgun',
     'muckrock.foiamachine',
+    'muckrock.fine_uploader',
     'actstream'
 )
 
@@ -532,3 +533,6 @@ CORS_ALLOW_CREDENTIALS = True
 # Django Filter settings
 FILTERS_HELP_TEXT_EXCLUDE = False
 FILTERS_HELP_TEXT_FILTER = False
+
+# fine uploader
+MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024
