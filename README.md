@@ -65,6 +65,12 @@ insert into django_site values (2, 'foiamachine.org', 'foiamachine.org');
 * python manage.py runserver 0:8000 --settings=muckrock.settings.mylocal
 * visit http://dev.foiamachine.org:8000/
 
+### additional steps
+* python manage.py loaddata muckrock/jurisdiction/fixtures/jurisdiction.json --settings=muckrock.settings.mylocal
+* python manage.py loaddata muckrock/agency/fixtures/agency_types.json --settings=muckrock.settings.mylocal
+* python manage.py loaddata muckrock/agency/fixtures/test_agencies.json --settings=muckrock.settings.mylocal
+* python manage.py import_fm --settings=muckrock.settings.mylocal
+
 ## Install
 
 1. Check out the git repository

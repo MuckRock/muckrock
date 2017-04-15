@@ -8,6 +8,9 @@ from autocomplete_light import shortcuts as autocomplete_light
 
 from muckrock.foiamachine.models import FoiaMachineRequest, FoiaMachineCommunication, STATUS
 
+import bleach
+
+
 MAX_UPLOAD_SIZE = 10485760 # 10mB
 ALLOWED_CONTENT_TYPES = ['application', 'image', 'video', 'text']
 
@@ -45,6 +48,14 @@ class FoiaMachineCommunicationForm(forms.ModelForm):
     The FOIA Machine Communication form allows for creating and updating communications.
     Also allows files to be attached to the request.
     """
+
+    def __init__(self, *args, **kwargs):
+        super(FoiaMachineCommunicationForm, self).__init__(*args, **kwargs)
+        try:
+            self.initial['message'] = bleach.clean(self.initial['message'].replace("<div>", "").replace("</div>", "\n").replace("<br>", "\n"), strip=True)
+        except:
+            pass
+
     files = forms.FileField(
         required=False,
         help_text='The maximum upload size is 10MB.',
