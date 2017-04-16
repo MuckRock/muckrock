@@ -21,7 +21,7 @@ def success(request):
     except FOIACommunication.DoesNotExist:
         return HttpResponse(status=400)
     if not(comm.foia and comm.foia.has_perm(request.user, 'change')):
-        return HttpResponse(status=400)
+        return HttpResponse(status=403)
     if 'name' not in request.POST or 'key' not in request.POST:
         return HttpResponse(status=400)
 
@@ -48,7 +48,7 @@ def session(request):
     except FOIACommunication.DoesNotExist:
         return HttpResponse(status=400)
     if not(comm.foia and comm.foia.has_perm(request.user, 'change')):
-        return HttpResponse(status=400)
+        return HttpResponse(status=403)
 
     data = []
     for file_ in comm.files.all():
@@ -71,9 +71,9 @@ def delete(request):
     if not(
             file_.comm and
             file_.comm.foia and
-            file_.comm.foia.has_perm(request.user, 'change'),
+            file_.comm.foia.has_perm(request.user, 'change')
             ):
-        return HttpResponse(status=400)
+        return HttpResponse(status=403)
 
     file_.delete()
     return HttpResponse()

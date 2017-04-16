@@ -24,7 +24,6 @@ from muckrock.foia.forms import (
     RequestDraftForm,
     MultiRequestForm,
     MultiRequestDraftForm,
-    FOIAFileDraftFormSet,
     )
 from muckrock.foia.models import (
     FOIARequest,
