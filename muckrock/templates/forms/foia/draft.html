@@ -106,7 +106,7 @@
             validation: {
                 acceptFiles: "application/pdf, image/gif, image/jpeg, image/png, image/tiff, application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.openxmlformats-officedocument.presentationml.presentation",
                 allowedExtensions: ["pdf","jpg","png","gif","tif","doc","docx","xls","xlsx","ppt","pptx"],
-                itemLimit: 3,
+                itemLimit: {% if request.user.is_staff %}0{% else %}{{MAX_ATTACHMENT_NUM}}{% endif %},
                 sizeLimit: {% if request.user.is_staff %}0{% else %}{{MAX_ATTACHMENT_SIZE}}{% endif %},
             },
             request: {

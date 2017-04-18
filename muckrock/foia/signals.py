@@ -37,6 +37,7 @@ def foia_file_delete_s3(sender, **kwargs):
         if key:
             key.delete()
 
+# XXX create a delete s3 signal for outbound attachments
 
 pre_save.connect(foia_update_embargo, sender=FOIARequest,
                  dispatch_uid='muckrock.foia.signals.embargo')

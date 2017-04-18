@@ -129,6 +129,7 @@ class OutboundAttachment(models.Model):
             max_length=255,
             )
     date_time_stamp = models.DateTimeField()
+    sent = models.BooleanField(default=False)
 
     def __unicode__(self):
         return 'Attachment: %s by %s for request %d' % (
@@ -136,3 +137,7 @@ class OutboundAttachment(models.Model):
                 self.user.username,
                 self.foia.pk,
                 )
+
+    def name(self):
+        """Return the basename of the file"""
+        return os.path.basename(self.ffile.name)
