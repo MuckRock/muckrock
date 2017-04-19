@@ -3,7 +3,12 @@
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.files.storage import default_storage
-from django.http import HttpResponse, JsonResponse
+from django.http import (
+        HttpResponse,
+        JsonResponse,
+        HttpResponseBadRequest,
+        HttpResponseForbidden,
+        )
 
 from datetime import datetime
 import base64
@@ -27,7 +32,7 @@ def success(request):
     elif 'foia_id' in request.POST:
         return _success_foia(request)
     else:
-        return HttpResponse(status=400)
+        return HttpResponseBadRequest()
 
 
 def _success_comm(request):
@@ -35,11 +40,11 @@ def _success_comm(request):
     try:
         comm = FOIACommunication.objects.get(pk=request.POST.get('comm_id'))
     except FOIACommunication.DoesNotExist:
-        return HttpResponse(status=400)
+        return HttpResponseBadRequest()
     if not(comm.foia and comm.foia.has_perm(request.user, 'change')):
-        return HttpResponse(status=403)
+        return HttpResponseForbidden()
     if 'name' not in request.POST or 'key' not in request.POST:
-        return HttpResponse(status=400)
+        return HttpResponseBadRequest()
 
     access = 'private' if comm.foia.embargo else 'public'
 
@@ -61,11 +66,11 @@ def _success_foia(request):
     try:
         foia = FOIARequest.objects.get(pk=request.POST.get('foia_id'))
     except FOIARequest.DoesNotExist:
-        return HttpResponse(status=400)
+        return HttpResponseBadRequest()
     if not foia.has_perm(request.user, 'change'):
-        return HttpResponse(status=403)
+        return HttpResponseForbidden()
     if 'name' not in request.POST or 'key' not in request.POST:
-        return HttpResponse(status=400)
+        return HttpResponseBadRequest()
 
     attachment = OutboundAttachment(
             foia=foia,
@@ -85,20 +90,20 @@ def session(request):
         try:
             comm = FOIACommunication.objects.get(pk=request.GET.get('comm_id'))
         except FOIACommunication.DoesNotExist:
-            return HttpResponse(status=400)
+            return HttpResponseBadRequest()
         if not(comm.foia and comm.foia.has_perm(request.user, 'change')):
-            return HttpResponse(status=403)
+            return HttpResponseForbidden()
         files = comm.files.all()
     elif 'foia_id' in request.GET:
         try:
             foia = FOIARequest.objects.get(pk=request.GET.get('foia_id'))
         except FOIARequest.DoesNotExist:
-            return HttpResponse(status=400)
+            return HttpResponseBadRequest()
         if not foia.has_perm(request.user, 'change'):
-            return HttpResponse(status=403)
+            return HttpResponseForbidden()
         files = foia.pending_attachments.filter(user=request.user, sent=False)
     else:
-        return HttpResponse(status=400)
+        return HttpResponseBadRequest()
 
     data = []
     for file_ in files:
@@ -121,7 +126,7 @@ def delete(request):
                 file_.comm.foia and
                 file_.comm.foia.has_perm(request.user, 'change')
                 ):
-            return HttpResponse(status=403)
+            return HttpResponseForbidden()
     except FOIAFile.DoesNotExist:
         try:
             file_ = OutboundAttachment.objects.get(
@@ -130,9 +135,9 @@ def delete(request):
                     sent=False,
                     )
             if not file_.foia.has_perm(request.user, 'change'):
-                return HttpResponse(status=403)
+                return HttpResponseForbidden()
         except OutboundAttachment.DoesNotExist:
-            return HttpResponse(status=400)
+            return HttpResponseBadRequest()
 
     file_.delete()
     return HttpResponse()
