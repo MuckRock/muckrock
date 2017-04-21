@@ -9,13 +9,12 @@ from nose.tools import eq_, assert_false
 import json
 
 from muckrock.factories import (
-        FOIAFileFactory,
         FOIARequestFactory,
         OutboundAttachmentFactory,
         UserFactory,
         )
 from muckrock.fine_uploader import views
-from muckrock.foia.models import FOIAFile, OutboundAttachment
+from muckrock.foia.models import OutboundAttachment
 
 # pylint: disable=no-self-use
 
