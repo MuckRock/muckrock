@@ -651,7 +651,7 @@ class ResponseTaskListViewTests(TestCase):
         # first saving a comm
         foia = self.task.communication.foia
         num_comms = foia.communications.count()
-        save_foia_comm(foia, 'Testman', 'Just testing, u no')
+        save_foia_comm(foia, 'Testman', 'Just testing, u no', foia.user)
         eq_(foia.communications.count(), num_comms + 1,
             'Should add a new communication to the FOIA.')
         num_comms = foia.communications.count()

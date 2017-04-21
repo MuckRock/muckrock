@@ -2,6 +2,7 @@
 FOIA views for actions
 """
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import (
@@ -20,12 +21,12 @@ import sys
 
 from muckrock.accounts.utils import validate_stripe_email
 from muckrock.crowdfund.forms import CrowdfundForm
-from muckrock.foia.forms import \
-    FOIADeleteForm, \
-    FOIAAdminFixForm, \
-    FOIAEmbargoForm, \
-    FOIAFileFormSet
-from muckrock.foia.models import FOIARequest, FOIAFile, END_STATUS
+from muckrock.foia.forms import (
+        FOIADeleteForm,
+        FOIAAdminFixForm,
+        FOIAEmbargoForm,
+        )
+from muckrock.foia.models import FOIARequest, END_STATUS
 from muckrock.foia.views.comms import save_foia_comm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.utils import new_action
@@ -198,8 +199,7 @@ def admin_fix(request, jurisdiction, jidx, slug, idx):
 
     if request.method == 'POST':
         form = FOIAAdminFixForm(request.POST)
-        formset = FOIAFileFormSet(request.POST, request.FILES)
-        if form.is_valid() and formset.is_valid():
+        if form.is_valid():
             if form.cleaned_data['email']:
                 foia.email = form.cleaned_data['email']
             if form.cleaned_data['other_emails']:
@@ -212,7 +212,7 @@ def admin_fix(request, jurisdiction, jidx, slug, idx):
                 foia,
                 from_who,
                 form.cleaned_data['comm'],
-                formset,
+                request.user,
                 snail=form.cleaned_data['snail_mail'],
                 subject=form.cleaned_data['subject'],
             )
@@ -223,13 +223,15 @@ def admin_fix(request, jurisdiction, jidx, slug, idx):
                 instance=foia,
                 initial={'subject': foia.default_subject()},
                 )
-        formset = FOIAFileFormSet(queryset=FOIAFile.objects.none())
     context = {
         'form': form,
         'foia': foia,
         'heading': 'Email from Request Address',
-        'formset': formset,
-        'action': 'Submit'
+        'action': 'Submit',
+        'MAX_ATTACHMENT_NUM': settings.MAX_ATTACHMENT_NUM,
+        'MAX_ATTACHMENT_SIZE': settings.MAX_ATTACHMENT_SIZE,
+        'AWS_STORAGE_BUCKET_NAME': settings.AWS_STORAGE_BUCKET_NAME,
+        'AWS_ACCESS_KEY_ID': settings.AWS_ACCESS_KEY_ID,
     }
     return render_to_response(
         'forms/foia/admin_fix.html',

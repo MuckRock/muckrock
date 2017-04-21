@@ -62,3 +62,92 @@
         </dialog>
     </div>
 </script>
+
+
+<script type="text/javascript">
+    const uploader = new qq.s3.FineUploader({
+        element: document.getElementById('fine-uploader'),
+        debug: true,
+        template: 'qq-simple-thumbnails-template',
+        {% if request.user.profile.limit_attachments %}
+            validation: {
+                acceptFiles: "application/pdf, image/gif, image/jpeg, image/png, image/tiff, application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                allowedExtensions: ["pdf","jpg","png","gif","tif","doc","docx","xls","xlsx","ppt","pptx"],
+                itemLimit: {{MAX_ATTACHMENT_NUM}},
+                sizeLimit: {{MAX_ATTACHMENT_SIZE}}
+            },
+        {% endif %}
+        request: {
+            endpoint: 'https://{{AWS_STORAGE_BUCKET_NAME}}.s3.amazonaws.com',
+            accessKey: '{{AWS_ACCESS_KEY_ID}}',
+        },
+        objectProperties: {
+            acl: 'public-read',
+            key: function(fileId) {
+                var keyRetrieval = new qq.Promise();
+                var filename = encodeURIComponent(uploader.getName(fileId));
+                $.post(
+                    '{% url "fine-uploader-key-name" %}',
+                    {name: filename, foia_id: {{foia.pk}} },
+                    )
+                    .done(function(data) {keyRetrieval.success(data.key);})
+                    .fail(function() {keyRetrieval.failure();});
+                return keyRetrieval;
+            },
+        },
+        signature: {
+            endpoint: '{% url "fine-uploader-sign" %}',
+            customHeaders: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+        },
+        uploadSuccess: {
+            endpoint: '{% url "fine-uploader-success" %}',
+            customHeaders: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            params: {
+                'foia_id': {{ foia.pk }},
+            },
+        },
+        session: {
+            endpoint: '{% url "fine-uploader-session" %}',
+            params: {
+                'foia_id': {{ foia.pk }},
+            },
+        },
+        iframeSupport: {
+            localBlankPagePath: '{% url "fine-uploader-blank" %}',
+        },
+        retry: {
+            enableAuto: true,
+        },
+        deleteFile: {
+            enabled: true,
+            method: 'POST',
+            endpoint: '{% url "fine-uploader-delete" %}',
+            customHeaders: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+        },
+        chunking: {
+            enabled: true,
+            concurrent: {
+                enabled: true,
+            },
+            success: {
+                endpoint: '{% url "fine-uploader-success" %}',
+                customHeaders: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                params: {
+                    'foia_id': {{ foia.pk }},
+                },
+            }
+        },
+        resume: {
+            enabled: true,
+        },
+
+    });
+</script>

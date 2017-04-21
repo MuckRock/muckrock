@@ -133,7 +133,7 @@ class OutboundAttachment(models.Model):
 
     def __unicode__(self):
         return 'Attachment: %s by %s for request %d' % (
-                self.ffile.name(),
+                self.ffile.name,
                 self.user.username,
                 self.foia.pk,
                 )

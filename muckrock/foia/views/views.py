@@ -338,6 +338,10 @@ class Detail(DetailView):
         context['is_thankable'] = self.request.user.has_perm(
                 'foia.thank_foiarequest', foia)
         context['files'] = foia.files.all()[:50]
+        context['MAX_ATTACHMENT_NUM'] = settings.MAX_ATTACHMENT_NUM
+        context['MAX_ATTACHMENT_SIZE'] = settings.MAX_ATTACHMENT_SIZE
+        context['AWS_STORAGE_BUCKET_NAME'] = settings.AWS_STORAGE_BUCKET_NAME
+        context['AWS_ACCESS_KEY_ID'] = settings.AWS_ACCESS_KEY_ID
         if foia.sidebar_html:
             messages.info(self.request, foia.sidebar_html)
         return context
@@ -530,7 +534,14 @@ class Detail(DetailView):
         text = request.POST.get('text')
         comm_sent = False
         if text and test:
-            save_foia_comm(foia, foia.user.get_full_name(), text, appeal=appeal, thanks=thanks)
+            save_foia_comm(
+                    foia,
+                    request.user.get_full_name(),
+                    text,
+                    request.user,
+                    appeal=appeal,
+                    thanks=thanks,
+                    )
             messages.success(request, success_msg)
             comm_sent = True
         return comm_sent

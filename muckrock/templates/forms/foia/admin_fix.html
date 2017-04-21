@@ -10,16 +10,12 @@
     <span>Attachments</span>
     {% csrf_token %}
     {% include 'lib/pattern/form.html' %}
-    {% if formset %}
-    <div class="formset-forms">
-        {{ formset.management_form }}
-        {% for form in formset.forms %}
-		<span class="formset-container">
-            {% include 'lib/pattern/form.html' %}
-		</span>
-        {% endfor %}
-    {% endif %}
-    </div>
+    <label class="bold">Attachments</label>
+    <div id="fine-uploader"></div>
     <input type="submit" class="blue button" />
 </form>
 {% endblock form-form %}
+
+{% block scripts %}
+    {% include 'lib/component/fine-uploader.html' %}
+{% endblock scripts %}

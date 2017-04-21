@@ -18,8 +18,6 @@ import json
 
 from muckrock.foia.models import (
         FOIARequest,
-        FOIACommunication,
-        FOIAFile,
         OutboundAttachment,
         )
 
@@ -27,49 +25,13 @@ from muckrock.foia.models import (
 @login_required
 def success(request):
     """"File has been succesfully uploaded"""
-    if 'comm_id' in request.POST:
-        return _success_comm(request)
-    elif 'foia_id' in request.POST:
-        return _success_foia(request)
-    else:
-        return HttpResponseBadRequest()
-
-
-def _success_comm(request):
-    """Handle the success view if posted with a communication id"""
-    try:
-        comm = FOIACommunication.objects.get(pk=request.POST.get('comm_id'))
-    except FOIACommunication.DoesNotExist:
-        return HttpResponseBadRequest()
-    if not(comm.foia and comm.foia.has_perm(request.user, 'change')):
-        return HttpResponseForbidden()
-    if 'name' not in request.POST or 'key' not in request.POST:
-        return HttpResponseBadRequest()
-
-    access = 'private' if comm.foia.embargo else 'public'
-
-    foia_file = FOIAFile(
-            foia=comm.foia,
-            comm=comm,
-            title=request.POST['name'],
-            date=comm.date,
-            source=comm.from_who[:70],
-            access=access,
-            )
-    foia_file.ffile.name = request.POST['key']
-    foia_file.save()
-    return HttpResponse()
-
-
-def _success_foia(request):
-    """Handle the success view if posted with a foia id"""
     try:
         foia = FOIARequest.objects.get(pk=request.POST.get('foia_id'))
     except FOIARequest.DoesNotExist:
         return HttpResponseBadRequest()
     if not foia.has_perm(request.user, 'change'):
         return HttpResponseForbidden()
-    if 'name' not in request.POST or 'key' not in request.POST:
+    if 'key' not in request.POST:
         return HttpResponseBadRequest()
 
     attachment = OutboundAttachment(
@@ -86,32 +48,22 @@ def _success_foia(request):
 @login_required
 def session(request):
     """"Get the initial file list"""
-    if 'comm_id' in request.GET:
-        try:
-            comm = FOIACommunication.objects.get(pk=request.GET.get('comm_id'))
-        except FOIACommunication.DoesNotExist:
-            return HttpResponseBadRequest()
-        if not(comm.foia and comm.foia.has_perm(request.user, 'change')):
-            return HttpResponseForbidden()
-        files = comm.files.all()
-    elif 'foia_id' in request.GET:
-        try:
-            foia = FOIARequest.objects.get(pk=request.GET.get('foia_id'))
-        except FOIARequest.DoesNotExist:
-            return HttpResponseBadRequest()
-        if not foia.has_perm(request.user, 'change'):
-            return HttpResponseForbidden()
-        files = foia.pending_attachments.filter(user=request.user, sent=False)
-    else:
+    try:
+        foia = FOIARequest.objects.get(pk=request.GET.get('foia_id'))
+    except FOIARequest.DoesNotExist:
         return HttpResponseBadRequest()
+    if not foia.has_perm(request.user, 'change'):
+        return HttpResponseForbidden()
+
+    attms = foia.pending_attachments.filter(user=request.user, sent=False)
 
     data = []
-    for file_ in files:
+    for attm in attms:
         data.append({
-            'name': file_.name(),
-            'uuid': file_.pk,
-            'size': file_.ffile.size,
-            's3Key': file_.ffile.name,
+            'name': attm.name(),
+            'uuid': attm.pk,
+            'size': attm.ffile.size,
+            's3Key': attm.ffile.name,
             })
     return JsonResponse(data, safe=False)
 
@@ -120,26 +72,18 @@ def session(request):
 def delete(request):
     """Delete a file"""
     try:
-        file_ = FOIAFile.objects.get(ffile=request.POST.get('key'))
-        if not(
-                file_.comm and
-                file_.comm.foia and
-                file_.comm.foia.has_perm(request.user, 'change')
-                ):
-            return HttpResponseForbidden()
-    except FOIAFile.DoesNotExist:
-        try:
-            file_ = OutboundAttachment.objects.get(
-                    ffile=request.POST.get('key'),
-                    user=request.user,
-                    sent=False,
-                    )
-            if not file_.foia.has_perm(request.user, 'change'):
-                return HttpResponseForbidden()
-        except OutboundAttachment.DoesNotExist:
-            return HttpResponseBadRequest()
+        attm = OutboundAttachment.objects.get(
+                ffile=request.POST.get('key'),
+                user=request.user,
+                sent=False,
+                )
+    except OutboundAttachment.DoesNotExist:
+        return HttpResponseBadRequest()
 
-    file_.delete()
+    if not attm.foia.has_perm(request.user, 'change'):
+        return HttpResponseForbidden()
+
+    attm.delete()
     return HttpResponse()
 
 
@@ -208,13 +152,13 @@ def _sign_headers(headers):
 def key_name(request):
     """Generate the S3 key name from the filename"""
     name = request.POST.get('name')
-    type_ = request.POST.get('type')
-    if type_ == 'foia_file':
-        obj = FOIAFile()
-    elif type_ == 'outbound_attachment':
-        obj = OutboundAttachment() # pylint: disable=redefined-variable-type
-    key = obj.ffile.field.generate_filename(
-            obj.ffile.instance,
+    foia_id = request.POST.get('foia_id')
+    attachment = OutboundAttachment(
+            user=request.user,
+            foia_id=foia_id,
+            )
+    key = attachment.ffile.field.generate_filename(
+            attachment.ffile.instance,
             name,
             )
     key = default_storage.get_available_name(key)

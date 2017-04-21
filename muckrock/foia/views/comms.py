@@ -12,7 +12,7 @@ from datetime import datetime
 
 from muckrock.foia.models import FOIACommunication, STATUS
 
-def save_foia_comm(foia, from_who, comm, formset=None, appeal=False,
+def save_foia_comm(foia, from_who, comm, user, appeal=False,
         snail=False, thanks=False, subject=''):
     """Save the FOI Communication"""
     #pylint:disable=too-many-arguments
@@ -27,13 +27,7 @@ def save_foia_comm(foia, from_who, comm, formset=None, appeal=False,
         thanks=thanks,
         subject=subject,
     )
-    if formset is not None:
-        foia_files = formset.save(commit=False)
-        for foia_file in foia_files:
-            foia_file.comm = comm
-            foia_file.title = foia_file.name()
-            foia_file.date = comm.date
-            foia_file.save()
+    foia.process_attachments(user)
     foia.submit(appeal=appeal, snail=snail, thanks=thanks)
 
 @user_passes_test(lambda u: u.is_staff)

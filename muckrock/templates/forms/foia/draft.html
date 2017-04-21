@@ -13,8 +13,6 @@
 
 {% block form-form %}
 
-{% include 'lib/component/fine-uploader.html' %}
-
 {% if form %}
 <form method="post" class="draft" enctype="multipart/form-data">
     {% csrf_token %}
@@ -98,83 +96,5 @@
 {% endblock form-form %}
 
 {% block scripts %}
-    <script type="text/javascript">
-        const uploader = new qq.s3.FineUploader({
-            element: document.getElementById('fine-uploader'),
-            debug: true,
-            template: 'qq-simple-thumbnails-template',
-            validation: {
-                acceptFiles: "application/pdf, image/gif, image/jpeg, image/png, image/tiff, application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.openxmlformats-officedocument.presentationml.presentation",
-                allowedExtensions: ["pdf","jpg","png","gif","tif","doc","docx","xls","xlsx","ppt","pptx"],
-                itemLimit: {% if request.user.is_staff %}0{% else %}{{MAX_ATTACHMENT_NUM}}{% endif %},
-                sizeLimit: {% if request.user.is_staff %}0{% else %}{{MAX_ATTACHMENT_SIZE}}{% endif %},
-            },
-            request: {
-                endpoint: 'https://{{AWS_STORAGE_BUCKET_NAME}}.s3.amazonaws.com',
-                accessKey: '{{AWS_ACCESS_KEY_ID}}',
-            },
-            objectProperties: {
-                acl: 'public-read',
-                key: function(fileId) {
-                    var keyRetrieval = new qq.Promise();
-                    var filename = encodeURIComponent(uploader.getName(fileId));
-                    $.post('{% url "fine-uploader-key-name" %}', {name: filename})
-                        .done(function(data) {keyRetrieval.success(data.key);})
-                        .fail(function() {keyRetrieval.failure();});
-                    return keyRetrieval;
-                },
-            },
-            signature: {
-                endpoint: '{% url "fine-uploader-sign" %}',
-                customHeaders: {
-                    'X-CSRFToken': '{{ csrf_token }}',
-                },
-            },
-            uploadSuccess: {
-                endpoint: '{% url "fine-uploader-success" %}',
-                customHeaders: {
-                    'X-CSRFToken': '{{ csrf_token }}',
-                },
-                params: {
-                    'comm_id': {{ foia.communications.first.pk }},
-                },
-            },
-            session: {
-                endpoint: '{% url "fine-uploader-session" %}',
-                params: {
-                    'comm_id': {{ foia.communications.first.pk }},
-                },
-            },
-            iframeSupport: {
-                localBlankPagePath: '{% url "fine-uploader-blank" %}',
-            },
-            retry: {
-                enableAuto: true,
-            },
-            deleteFile: {
-                enabled: true,
-                method: 'POST',
-                endpoint: '{% url "fine-uploader-delete" %}',
-                customHeaders: {
-                    'X-CSRFToken': '{{ csrf_token }}',
-                },
-            },
-            chunking: {
-                enabled: true,
-                concurrent: {
-                    enabled: true,
-                },
-                success: {
-                    endpoint: '{% url "fine-uploader-success" %}',
-                    customHeaders: {
-                        'X-CSRFToken': '{{ csrf_token }}',
-                    },
-                }
-            },
-            resume: {
-                enabled: true,
-            },
-
-        });
-    </script>
+    {% include 'lib/component/fine-uploader.html' %}
 {% endblock scripts %}

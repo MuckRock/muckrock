@@ -184,6 +184,7 @@ def _submit_request(request, foia):
                      'Please purchase more requests and then resubmit.')
         messages.error(request, error_msg)
     else:
+        foia.process_attachments(request.user)
         foia.submit()
         request.session['ga'] = 'request_submitted'
         messages.success(request, 'Your request was submitted.')
@@ -332,9 +333,10 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
         'remaining': foia.user.profile.total_requests(),
         'stripe_pk': settings.STRIPE_PUB_KEY,
         'sidebar_admin_url': reverse('admin:foia_foiarequest_change', args=(foia.pk,)),
+        'MAX_ATTACHMENT_NUM': settings.MAX_ATTACHMENT_NUM,
+        'MAX_ATTACHMENT_SIZE': settings.MAX_ATTACHMENT_SIZE,
         'AWS_STORAGE_BUCKET_NAME': settings.AWS_STORAGE_BUCKET_NAME,
         'AWS_ACCESS_KEY_ID': settings.AWS_ACCESS_KEY_ID,
-        'MAX_ATTACHMENT_SIZE': settings.MAX_ATTACHMENT_SIZE,
     }
 
     return render_to_response(
