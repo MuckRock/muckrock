@@ -88,7 +88,7 @@
                 var filename = encodeURIComponent(uploader.getName(fileId));
                 $.post(
                     '{% url "fine-uploader-key-name" %}',
-                    {name: filename, foia_id: {{foia.pk}} },
+                    {name: filename, foia_id: {{foia.pk}} }
                     )
                     .done(function(data) {keyRetrieval.success(data.key);})
                     .fail(function() {keyRetrieval.failure();});
