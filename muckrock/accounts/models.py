@@ -38,6 +38,7 @@ ACCT_TYPES = [
     ('pro', 'Professional'),
     ('proxy', 'Proxy'),
     ('robot', 'Robot'),
+    ('agency', 'Agency'),
 ]
 
 PAYMENT_FEE = .05
@@ -157,6 +158,14 @@ class Profile(models.Model):
             help_text='This user will be used over other proxies in the same '
             'state.  The account must still be set to type proxy for this to '
             'take affect')
+
+    # for agency users
+    agency = models.OneToOneField(
+        'agency.Agency',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        )
 
     def __unicode__(self):
         return u"%s's Profile" % unicode(self.user).capitalize()

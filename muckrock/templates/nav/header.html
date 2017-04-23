@@ -5,7 +5,7 @@
 <header class="global-header">
     <nav class="global-navigation space-between mb0" id="nav">
         <div class="nav-section align-center mb0" id="site-nav">
-            <a href="{% url 'index'%}" class="nav-item brand" id="nav-brand">
+            <a href="{% if user.profile.acct_type == "agency" %}{% url "foia-agency-list" %}{% else %}{% url 'index'%}{% endif %}" class="nav-item brand" id="nav-brand">
                 <span class="logotype">
                     {% include 'lib/component/icon/logotype.svg' %}
                 </span>
@@ -30,7 +30,7 @@
                 <li><a class="nav-item" href="{% url 'news-index' %}">News</a></li>
                 <li><a class="nav-item" href="{% url 'project' %}">Projects</a></li>
                 <li><a class="nav-item" href="{% url 'foia-root' %}">Requests</a></li>
-            {% else %}
+            {% elif user.profile.acct_type != "agency" %}
             <ul class="authenticated section-list" id="nav-list-sections">
                 <li class="dropdown">
                     <a class="nav-item" href="{% url 'news-index' %}">News</a>
@@ -104,6 +104,7 @@
                 </li>
                 {% endif %}
             {% endif %}
+            {% if not user.is_authenticated or user.profile.acct_type != "agency" %}
                 <li class="dropdown" id="more-sections">
                     <span class="nav-item">{% include 'lib/component/icon/sections-dots.svg' %} <span class="label">More</span></span>
                     <ul>
@@ -118,10 +119,22 @@
                     </ul>
                 </li>
             </ul>
+            {% endif %}
+            {% if user.profile.acct_type == "agency" %}
+                <ul class="unauthenticated section-list" id="nav-list-sections">
+                    <li><a class="nav-item" href="{% url 'foia-agency-list' %}">Requests</a></li>
+                    <li><a class="nav-item" href="{% url 'acct-logout' %}" onclick="ga('send', 'event', 'Account', 'Logout', window.location.pathname)">Log&nbsp;Out</a>
+                </ul>
+                <span>
+                    &nbsp; &nbsp; &nbsp;
+                    Need help?  Email us at &nbsp;<a href="mailto:info@muckrock.com">info@muckrock.com</a> or call at &nbsp;<a href="tel:+18574883081">(857) 488-3081</a>
+                </span>
+            {% endif %}
 
             {% comment %}
             This contains the toggle for the global search, which appears below the top header.
             {% endcomment %}
+            {% if user.profile.acct_type != "agency" %}
             <div class="global-search">
                 <span class="nav-item search-toggle" id="show-search">
                     {% include 'lib/component/icon/search.svg' %}
@@ -136,8 +149,10 @@
             </div>
             {# We need the search placeholder to retain the shape of the nav on mobile. #}
             <div class="search-placeholder"></div>
+            {% endif %}
         </div>
 
+        {% if user.profile.acct_type != "agency" %}
         <div class="nav-section" id="user-nav">
             <ul>
                 <li>
@@ -234,5 +249,6 @@
                 {% endif %}
             </ul>
         </div>
+        {% endif %}
     </nav>
 </header>

@@ -3,18 +3,19 @@
 Models for the FOIA application
 """
 
-import datetime
-
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.validators import validate_email
 from django.db import models
 from django.shortcuts import get_object_or_404
 
+from datetime import datetime
 import email
 import logging
+import os
 
 from muckrock.foia.models.request import FOIARequest, STATUS
+from muckrock.utils import new_action
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,7 @@ DELIVERED = (
     ('fax', 'Fax'),
     ('email', 'Email'),
     ('mail', 'Mail'),
+    ('web', 'Web'),
 )
 
 def requests_from_pks(foia_pks):
@@ -202,7 +204,7 @@ class FOIACommunication(models.Model):
             logger.warn('Tried resending a communication with an unapproved agency')
             raise ValueError('This communication has no approved agency.', 'no_agency')
         snail = False
-        self.date = datetime.datetime.now()
+        self.date = datetime.now()
         self.save()
         if email_address:
             # responsibility for handling validation errors
@@ -272,6 +274,50 @@ class FOIACommunication(models.Model):
         for test, modify in special_cases:
             if test:
                 modify()
+
+    def process_attachments(self, files):
+        """Given uploaded files, turn them into FOIAFiles attached to the comm"""
+
+        ignore_types = [('application/x-pkcs7-signature', 'p7s')]
+
+        for file_ in files.itervalues():
+            if not any(file_.content_type == t or file_.name.endswith(s)
+                    for t, s in ignore_types):
+                self.upload_file(file_)
+
+    def upload_file(self, file_):
+        """Upload and attach a file"""
+        # avoid circular imports
+        from muckrock.foia.tasks import upload_document_cloud
+        access = 'private' if self.foia and self.foia.embargo else 'public'
+        source = (self.foia.agency.name if self.foia and self.foia.agency
+                else self.from_who)
+
+        foia_file = self.files.create(
+                foia=self.foia,
+                title=os.path.splitext(file_.name)[0][:70],
+                date=datetime.now(),
+                source=source[:70],
+                access=access)
+        # max db size of 255, - 22 for folder name
+        foia_file.ffile.save(file_.name[:233].encode('ascii', 'ignore'), file_)
+        foia_file.save()
+        if self.foia:
+            upload_document_cloud.apply_async(
+                    args=[foia_file.pk, False], countdown=3)
+
+    def create_agency_notifications(self):
+        """Create the notifications for when an agency creates a new comm"""
+        if self.foia and self.foia.agency:
+            action = new_action(
+                self.foia.agency,
+                'sent a communication',
+                action_object=self,
+                target=self.foia)
+            self.foia.notify(action)
+        if self.foia:
+            self.foia.update(self.anchor())
+
 
     class Meta:
         # pylint: disable=too-few-public-methods
