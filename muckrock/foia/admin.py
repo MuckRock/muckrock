@@ -28,6 +28,7 @@ from muckrock.foia.models import (
         STATUS,
         CommunicationError,
         CommunicationOpen,
+        OutboundAttachment,
         )
 from muckrock.foia.tasks import (
         upload_document_cloud,
@@ -479,6 +480,33 @@ class FOIAMultiRequestAdmin(VersionAdmin):
         return HttpResponseRedirect(reverse('admin:foia_foiamultirequest_changelist'))
 
 
+class OutboundAttachmentAdminForm(forms.ModelForm):
+    """Form for outbound attachment admin"""
+
+    foia = autocomplete_light.ModelChoiceField(
+            'FOIARequestAdminAutocomplete',
+            queryset=FOIARequest.objects.all(),
+            )
+    user = autocomplete_light.ModelChoiceField(
+            'UserAutocomplete',
+            queryset=User.objects.all(),
+            )
+
+    class Meta:
+        model = OutboundAttachment
+        fields = '__all__'
+
+
+class OutboundAttachmentAdmin(VersionAdmin):
+    """Outbound Attachment admin options"""
+    search_fields = ('foia__title', 'user__username')
+    list_display = ('foia', 'user', 'ffile', 'date_time_stamp')
+    list_select_related = ('foia', 'user')
+    date_hierarchy = 'date_time_stamp'
+    form = OutboundAttachmentAdminForm
+
+
 admin.site.register(FOIARequest, FOIARequestAdmin)
 admin.site.register(FOIACommunication, FOIACommunicationAdmin)
 admin.site.register(FOIAMultiRequest, FOIAMultiRequestAdmin)
+admin.site.register(OutboundAttachment, OutboundAttachmentAdmin)

@@ -189,6 +189,7 @@ def _submit_request(request, foia):
                      'Please purchase more requests and then resubmit.')
         messages.error(request, error_msg)
     else:
+        foia.process_attachments(request.user)
         foia.submit()
         request.session['ga'] = 'request_submitted'
         messages.success(request, 'Your request was submitted.')
@@ -291,7 +292,7 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
     initial_data = {
         'title': foia.title,
         'request': foia.first_request(),
-        'embargo': foia.embargo
+        'embargo': foia.embargo,
     }
 
     if request.method == 'POST':
@@ -315,6 +316,7 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
             foia_comm.communication = smart_text(data['request'])
             foia_comm.save()
             foia.save(comment='draft edited')
+
             if request.POST.get('submit') == 'Save':
                 messages.success(request, 'Your draft has been updated.')
             elif request.POST.get('submit') == 'Submit':
@@ -335,7 +337,11 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
         'foia': foia,
         'remaining': foia.user.profile.total_requests(),
         'stripe_pk': settings.STRIPE_PUB_KEY,
-        'sidebar_admin_url': reverse('admin:foia_foiarequest_change', args=(foia.pk,))
+        'sidebar_admin_url': reverse('admin:foia_foiarequest_change', args=(foia.pk,)),
+        'MAX_ATTACHMENT_NUM': settings.MAX_ATTACHMENT_NUM,
+        'MAX_ATTACHMENT_SIZE': settings.MAX_ATTACHMENT_SIZE,
+        'AWS_STORAGE_BUCKET_NAME': settings.AWS_STORAGE_BUCKET_NAME,
+        'AWS_ACCESS_KEY_ID': settings.AWS_ACCESS_KEY_ID,
     }
 
     return render_to_response(

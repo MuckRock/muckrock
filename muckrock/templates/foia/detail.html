@@ -227,6 +227,8 @@
                                 {% csrf_token %}
                                 <input type="hidden" name="action" value="follow_up" />
                                 <textarea name="text" id="follow-up-composer"></textarea>
+                                <label class="bold">Attachments</label>
+                                <div id="fine-uploader"></div>
                                 <div class="buttons">
                                     <button class="primary button" type="submit" name="appeal" value="1">Send</button>
                                     <a href="#inactive" class="button cancel">Cancel</a>
@@ -508,31 +510,35 @@ Sincerely,
 {% endblock content %}
 
 {% block scripts %}
-<script type="text/javascript">
-    $('.datepicker').datepicker({
-        maxDate: '+30d',
-        minDate: 0,
-        firstDay: 1,
-        numberOfMonths: 1,
-        {% if foia.date_embargo %}
-        defaultDate: '{{ foia.date_embargo|date:"m/d/Y" }}'
-        {% endif %}
-    });
-    $('#id_date_due').datepicker({
-        dateFormat: 'yy-mm-dd',
-        maxDate: '+30d',
-        minDate: 0,
-        firstDay: 1,
-        hideIfNoPrevNext: true,
-    });
-    var foiaId = $('.request.detail').attr('id');
-    if (foiaId != undefined) {
-        foiaId = foiaId.substring(foiaId.indexOf('-') + 1);
-    }
-    if ($('#id_users-autocomplete').length) {
-        $('#id_users-autocomplete').yourlabsAutocomplete().data = {
-            foiaId: foiaId
+    
+    <script type="text/javascript">
+        $('.datepicker').datepicker({
+            maxDate: '+30d',
+            minDate: 0,
+            firstDay: 1,
+            numberOfMonths: 1,
+            {% if foia.date_embargo %}
+            defaultDate: '{{ foia.date_embargo|date:"m/d/Y" }}'
+            {% endif %}
+        });
+        $('#id_date_due').datepicker({
+            dateFormat: 'yy-mm-dd',
+            maxDate: '+30d',
+            minDate: 0,
+            firstDay: 1,
+            hideIfNoPrevNext: true,
+        });
+        var foiaId = $('.request.detail').attr('id');
+        if (foiaId != undefined) {
+            foiaId = foiaId.substring(foiaId.indexOf('-') + 1);
         }
-    }
-</script>
+        if ($('#id_users-autocomplete').length) {
+            $('#id_users-autocomplete').yourlabsAutocomplete().data = {
+                foiaId: foiaId
+            }
+        }
+    </script>
+
+    {% include 'lib/component/fine-uploader.html' %}
+
 {% endblock scripts %}
