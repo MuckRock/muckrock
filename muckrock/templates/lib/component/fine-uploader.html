@@ -71,8 +71,8 @@
         template: 'qq-simple-thumbnails-template',
         {% if request.user.profile.limit_attachments %}
             validation: {
-                acceptFiles: "application/pdf, image/gif, image/jpeg, image/png, image/tiff, application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.openxmlformats-officedocument.presentationml.presentation",
-                allowedExtensions: ["pdf","jpg","png","gif","tif","doc","docx","xls","xlsx","ppt","pptx"],
+                acceptFiles: "application/pdf, image/jpeg, image/png, image/tiff, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.oasis.opendocument.text, text/html, text/plain",
+                allowedExtensions: ["pdf","jpg","png","tif","doc","docx","odt","html","txt"],
                 itemLimit: {{MAX_ATTACHMENT_NUM}},
                 sizeLimit: {{MAX_ATTACHMENT_SIZE}}
             },
