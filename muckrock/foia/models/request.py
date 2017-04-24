@@ -946,4 +946,5 @@ class FOIARequest(models.Model):
             ('flag_foiarequest', 'Can flag the request for staff attention'),
             ('followup_foiarequest', 'Can send a manual follow up'),
             ('agency_reply_foiarequest', 'Can send a direct reply'),
+            ('upload_attachment_foiarequest', 'Can upload an attachment'),
             )
