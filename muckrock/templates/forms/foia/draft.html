@@ -50,8 +50,10 @@
             {% include 'lib/pattern/field.html' with field=form.embargo %}
         {% endif %}
 
-        <label class="bold">Attachments</label>
-        <div id="fine-uploader"></div>
+        {% if user.is_staff or user.profile.experimental %}
+            <label class="bold">Attachments</label>
+            <div id="fine-uploader"></div>
+        {% endif %}
 
         <section class="button-group">
             <input type="submit"
