@@ -12,8 +12,9 @@
 {% endblock form-info %}
 
 {% block form-form %}
+
 {% if form %}
-<form method="post" class="draft">
+<form method="post" class="draft" enctype="multipart/form-data">
     {% csrf_token %}
 
     <section class="info">
@@ -47,6 +48,11 @@
         {% has_perm 'foia.embargo_foiarequest' request.user foia as can_embargo %}
         {% if can_embargo %}
             {% include 'lib/pattern/field.html' with field=form.embargo %}
+        {% endif %}
+
+        {% if user.is_staff or user.profile.experimental %}
+            <label class="bold">Attachments</label>
+            <div id="fine-uploader"></div>
         {% endif %}
 
         <section class="button-group">
@@ -90,3 +96,7 @@
 {% endif %}
 
 {% endblock form-form %}
+
+{% block scripts %}
+    {% include 'lib/component/fine-uploader.html' %}
+{% endblock scripts %}
