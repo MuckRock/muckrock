@@ -5,6 +5,7 @@ from celery.schedules import crontab
 from celery.task import periodic_task, task
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.files.storage import default_storage
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
@@ -512,7 +513,9 @@ def autoimport():
                              source=comm.from_who[:70], access=access)
         full_file_name = foia_file.ffile.field.generate_filename(
                 foia_file.ffile.instance,
-                file_name)
+                file_name,
+                )
+        full_file_name = default_storage.get_available_name(full_file_name)
         new_key = key.copy(storage_bucket, full_file_name)
         new_key.set_acl('public-read')
 

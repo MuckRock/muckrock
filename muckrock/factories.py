@@ -11,7 +11,13 @@ import factory
 from muckrock.accounts.models import Profile, Notification, Statistics
 from muckrock.agency.models import Agency, STALE_DURATION
 from muckrock.crowdfund.models import Crowdfund
-from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, RawEmail
+from muckrock.foia.models import (
+        FOIARequest,
+        FOIACommunication,
+        FOIAFile,
+        RawEmail,
+        OutboundAttachment,
+        )
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.news.models import Article
 from muckrock.organization.models import Organization
@@ -133,6 +139,22 @@ class FOIAFileFactory(factory.django.DjangoModelFactory):
     comm = factory.SubFactory(FOIACommunicationFactory, foia=factory.SelfAttribute('..foia'))
     title = factory.Faker('word')
     ffile = factory.django.FileField(filename=factory.Faker('file_name'))
+
+
+class OutboundAttachmentFactory(factory.django.DjangoModelFactory):
+    """A factory for creating FOIAFile test objects."""
+    class Meta:
+        model = OutboundAttachment
+
+    user = factory.SubFactory(UserFactory)
+    foia = factory.SubFactory(
+            FOIARequestFactory,
+            user=factory.SelfAttribute('..user'),
+            )
+    ffile = factory.django.FileField(filename=factory.Faker('file_name'))
+    date_time_stamp = factory.LazyAttribute(lambda obj: datetime.datetime.now())
+    sent = False
+
 
 class ProjectFactory(factory.django.DjangoModelFactory):
     """A factory for creating Project test objects."""

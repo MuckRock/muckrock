@@ -371,6 +371,10 @@ class Profile(models.Model):
         extra.update(self.autologin())
         return link + '?' + urlencode(extra)
 
+    def limit_attachments(self):
+        """Does this user need to have their attachments limited?"""
+        return self.acct_type not in ('admin', 'agency')
+
 
 class ReceiptEmail(models.Model):
     """An additional email address to send receipts to"""

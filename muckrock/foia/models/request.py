@@ -16,6 +16,7 @@ from actstream.models import followers
 from datetime import datetime, date, timedelta
 from hashlib import md5
 import logging
+import os.path
 from reversion import revisions as reversion
 from taggit.managers import TaggableManager
 
@@ -482,6 +483,7 @@ class FOIARequest(models.Model):
         The only difference between a thanks andother submissions is that we do
         not set the request status, unless the request requires a proxy.
         """
+
         # can email appeal if the agency has an appeal agency which has an email address
         # and can accept emailed appeals
         can_email_appeal = (
@@ -546,6 +548,26 @@ class FOIARequest(models.Model):
             self.status = 'submitted'
             self.date_processing = date.today()
         self.save()
+
+    def process_attachments(self, user):
+        """Attach all outbound attachments to the last communication"""
+        attachments = self.pending_attachments.filter(
+                user=user,
+                sent=False,
+                )
+        comm = self.last_comm()
+        access = 'private' if self.embargo else 'public'
+        for attachment in attachments:
+            file_ = comm.files.create(
+                    foia=self,
+                    title=os.path.basename(attachment.ffile.name),
+                    date=comm.date,
+                    source=user.get_full_name(),
+                    access=access,
+                    )
+            file_.ffile.name = attachment.ffile.name
+            file_.save()
+        attachments.update(sent=True)
 
     def followup(self, automatic=False, show_all_comms=True):
         """Send a follow up email for this request"""
