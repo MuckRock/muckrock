@@ -244,9 +244,6 @@ class FOIAFileForm(forms.ModelForm):
         fields = ['ffile']
 
 
-FOIAFileFormSet = forms.models.modelformset_factory(FOIAFile, form=FOIAFileForm)
-
-
 class FOIANoteForm(forms.ModelForm):
     """A form for a FOIA Note"""
     class Meta:

@@ -38,7 +38,6 @@ from muckrock.foia.forms import (
     FOIAEstimatedCompletionDateForm,
     FOIAAccessForm,
     FOIAAgencyReplyForm,
-    FOIAFileFormSet,
     )
 from muckrock.foia.models import (
     FOIARequest,
@@ -268,8 +267,6 @@ class Detail(DetailView):
     def __init__(self, *args, **kwargs):
         self._obj = None
         self.agency_reply_form = FOIAAgencyReplyForm()
-        self.agency_reply_formset = FOIAFileFormSet(
-                queryset=FOIAFile.objects.none())
         super(Detail, self).__init__(*args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
@@ -392,7 +389,6 @@ class Detail(DetailView):
         context['AWS_ACCESS_KEY_ID'] = settings.AWS_ACCESS_KEY_ID
         context['agency_status_choices'] = AGENCY_STATUS
         context['agency_reply_form'] = self.agency_reply_form
-        context['agency_reply_formset'] = self.agency_reply_formset
         if foia.sidebar_html:
             messages.info(self.request, foia.sidebar_html)
         return context
@@ -696,8 +692,7 @@ class Detail(DetailView):
     def _agency_reply(self, request, foia):
         """Agency reply directly through the site"""
         form = FOIAAgencyReplyForm(request.POST)
-        formset = FOIAFileFormSet(request.POST, request.FILES)
-        if form.is_valid() and formset.is_valid():
+        if form.is_valid():
             comm = FOIACommunication.objects.create(
                     foia=foia,
                     from_who=request.user.profile.agency.name,
@@ -715,7 +710,7 @@ class Detail(DetailView):
             if foia.status == 'payment':
                 foia.price = form.cleaned_data['price']
             foia.save()
-            comm.process_attachments(request.FILES)
+            foia.process_attachments(request.user)
             if foia.agency:
                 foia.agency.unmark_stale()
             comm.create_agency_notifications()
@@ -727,7 +722,6 @@ class Detail(DetailView):
             messages.success(request, 'Reply succesfully posted')
         else:
             self.agency_reply_form = form
-            self.agency_reply_formset = formset
             raise FormError
 
         return redirect(foia)

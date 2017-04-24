@@ -233,6 +233,7 @@
                                 {% endif %}
                             </div>
                         </div>
+                        {% if not can_agency_reply %}
                         <div class="follow-up composer" id="follow-up">
                             <form class="composer-input" method="post">
                                 <header>Send a follow up to the {{ foia.agency.name }}</header>
@@ -247,6 +248,7 @@
                                 </div>
                             </form>
                         </div>
+                        {% endif %}
                         {% if is_thankable %}
                         <div class="composer" id="thanks">
                             <form class="composer-input" method="post">
@@ -274,15 +276,8 @@ Sincerely,
                                 <header>Reply directly</header>
                                 {% csrf_token %}
                                 {% include 'lib/pattern/form.html' with form=agency_reply_form %}
-                                <div class="formset-forms">
-                                    <span>Attachments</span>
-                                    {{ agency_reply_formset.management_form }}
-                                    {% for form in agency_reply_formset.forms %}
-                                    <span class="formset-container">
-                                        {% include 'lib/pattern/form.html' %}
-                                    </span>
-                                    {% endfor %}
-                                </div>
+                                <label class="bold">Attachments</label>
+                                <div id="fine-uploader"></div>
 								<input type="hidden" name="action" value="agency_reply" />
                                 <div class="buttons">
                                     <button class="primary button" type="submit" name="agency-reply" value="1">Send</button>
