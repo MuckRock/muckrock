@@ -42,7 +42,6 @@ from muckrock.foia.forms import (
 from muckrock.foia.models import (
     FOIARequest,
     FOIACommunication,
-    FOIAFile,
     FOIAMultiRequest,
     RawEmail,
     STATUS,
