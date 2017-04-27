@@ -36,7 +36,7 @@
         </div>
     </header>
     <div class="communication__message">
-        {{communication.message|markdown:"strip"}}
+        {{communication.message|markdown:"safe"}}
     </div>
     {% if communication.files.exists %}
     <div class="communication__files">
