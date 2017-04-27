@@ -51,10 +51,11 @@ class FoiaMachineCommunicationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(FoiaMachineCommunicationForm, self).__init__(*args, **kwargs)
-        try:
-            self.initial['message'] = bleach.clean(self.initial['message'].replace("<div>", "").replace("</div>", "\n").replace("<br>", "\n"), strip=True)
-        except:
-            pass
+        if 'message' in self.initial.keys():
+            self.initial['message'] = self.initial['message'].replace("<div>", "")
+            self.initial['message'] = self.initial['message'].replace("</div>", "\n")
+            self.initial['message'] = self.initial['message'].replace("<br>", "\n")
+            self.initial['message'] = bleach.clean(self.initial['message'], strip=True)
 
     files = forms.FileField(
         required=False,
