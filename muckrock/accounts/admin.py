@@ -13,6 +13,7 @@ from reversion.admin import VersionAdmin
 import stripe
 
 from muckrock.accounts.models import Profile, Statistics, ReceiptEmail
+from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 
 # These inhereit more than the allowed number of public methods
@@ -28,9 +29,16 @@ class StatisticsAdmin(VersionAdmin):
 class ProfileAdminForm(forms.ModelForm):
     """Form to include custom choice fields"""
 
-    location = autocomplete_light.ModelChoiceField('JurisdictionAdminAutocomplete',
-                                                   queryset=Jurisdiction.objects.all(),
-                                                   required=False)
+    location = autocomplete_light.ModelChoiceField(
+            'JurisdictionAdminAutocomplete',
+            queryset=Jurisdiction.objects.all(),
+            required=False,
+            )
+    agency = autocomplete_light.ModelChoiceField(
+            'AgencyAdminAutocomplete',
+            queryset=Agency.objects.filter(status='approved'),
+            required=False,
+            )
 
     class Meta:
         # pylint: disable=too-few-public-methods

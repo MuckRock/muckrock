@@ -672,22 +672,20 @@ class FOIARequest(models.Model):
 
         # pylint:disable=attribute-defined-outside-init
         self.reverse_communications = self.communications.reverse()
-        agency_user_profile = self.agency.get_user().profile
+        is_email = not all(c.isdigit() for c in self.email)
+        context = {'request': self, 'show_all_comms': show_all_comms}
+        if is_email:
+            context['reply_link'] = self.get_agency_reply_link(self.email)
         body = render_to_string(
             'text/foia/request_email.txt',
-            {
-                'request': self,
-                'show_all_comms': show_all_comms,
-                'reply_link': agency_user_profile.wrap_url(
-                    self.get_absolute_url()),
-            }
-        )
+            context,
+            )
 
         # send the msg
-        if all(c.isdigit() for c in self.email):
-            self._send_fax(subject, body, comm)
-        else:
+        if is_email:
             self._send_email(subject, body, comm)
+        else:
+            self._send_fax(subject, body, comm)
 
         comm.subject = subject
         comm.save()
@@ -695,6 +693,24 @@ class FOIARequest(models.Model):
         # unblock incoming messages if we send one out
         self.block_incoming = False
         self.save()
+
+    def get_agency_reply_link(self, email):
+        """Get the link for the agency user to log in"""
+        agency = self.agency
+        agency_user_profile = agency.get_user().profile
+        return agency_user_profile.wrap_url(
+                reverse(
+                    'acct-agency-redirect-login',
+                    kwargs={
+                        'agency_slug': agency.slug,
+                        'agency_idx': agency.pk,
+                        'foia_slug': self.slug,
+                        'foia_idx': self.pk,
+                        },
+                    ),
+                email=email,
+                )
+
 
     def _send_email(self, subject, body, comm):
         """Send the message as an email"""
