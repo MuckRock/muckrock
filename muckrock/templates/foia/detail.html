@@ -219,10 +219,8 @@
                                 {% csrf_token %}
                                 <input type="hidden" name="action" value="follow_up" />
                                 <textarea name="text" id="follow-up-composer"></textarea>
-                                {% if user.is_staff or user.profile.experimental %}
-                                    <label class="bold">Attachments</label>
-                                    <div id="fine-uploader"></div>
-                                {% endif %}
+                                <label class="bold">Attachments</label>
+                                <div id="fine-uploader"></div>
                                 <div class="buttons">
                                     <button class="primary button" type="submit" name="appeal" value="1">Send</button>
                                     <a href="#inactive" class="button cancel">Cancel</a>
