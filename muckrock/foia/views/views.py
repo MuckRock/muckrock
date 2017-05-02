@@ -340,6 +340,8 @@ class Detail(DetailView):
         context['files'] = foia.files.all()[:50]
         context['MAX_ATTACHMENT_NUM'] = settings.MAX_ATTACHMENT_NUM
         context['MAX_ATTACHMENT_SIZE'] = settings.MAX_ATTACHMENT_SIZE
+        context['ALLOWED_FILE_MIMES'] = settings.ALLOWED_FILE_MIMES
+        context['ALLOWED_FILE_EXTS'] = settings.ALLOWED_FILE_EXTS
         context['AWS_STORAGE_BUCKET_NAME'] = settings.AWS_STORAGE_BUCKET_NAME
         context['AWS_ACCESS_KEY_ID'] = settings.AWS_ACCESS_KEY_ID
         if foia.sidebar_html:

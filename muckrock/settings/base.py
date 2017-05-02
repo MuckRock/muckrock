@@ -537,3 +537,25 @@ FILTERS_HELP_TEXT_FILTER = False
 # fine uploader
 MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024
 MAX_ATTACHMENT_NUM = 3
+ALLOWED_FILE_MIMES = [
+        'application/pdf',
+        'image/jpeg',
+        'image/png',
+        'image/tiff',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.oasis.opendocument.text',
+        'text/html',
+        'text/plain',
+        ]
+ALLOWED_FILE_EXTS = [
+        'pdf',
+        'jpg',
+        'png',
+        'tif',
+        'doc',
+        'docx',
+        'odt',
+        'html',
+        'txt',
+        ]
