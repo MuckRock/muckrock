@@ -2,6 +2,8 @@
 Viewsets for the FOIA API
 """
 
+from django.conf import settings
+from django.core.files.base import ContentFile
 from django.template.defaultfilters import slugify
 from django.template.loader import get_template
 from django.template import RequestContext
@@ -13,17 +15,26 @@ from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from rest_framework.response import Response
 import django_filters
 import logging
+import requests
 
 from muckrock.agency.models import Agency
-from muckrock.foia.models import FOIARequest, FOIACommunication
-from muckrock.foia.serializers import FOIARequestSerializer, FOIACommunicationSerializer, \
-                                      FOIAPermissions, IsOwner
+from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile
+from muckrock.foia.serializers import (
+        FOIARequestSerializer,
+        FOIACommunicationSerializer,
+        FOIAPermissions,
+        IsOwner,
+        )
 from muckrock.jurisdiction.models import Jurisdiction
 
 # pylint: disable=too-many-ancestors
 # pylint: disable=bad-continuation
 
 logger = logging.getLogger(__name__)
+
+
+class MimeError(Exception):
+    """Try to attach a file with a disallowed mime type"""
 
 class FOIARequestViewSet(viewsets.ModelViewSet):
     """
@@ -73,12 +84,11 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
 
     def create(self, request):
         """Submit new request"""
+        # pylint: disable=too-many-locals
         data = request.data
         try:
             jurisdiction = Jurisdiction.objects.get(pk=int(data['jurisdiction']))
-            agency = Agency.objects.get(pk=int(data['agency']))
-            if agency.jurisdiction != jurisdiction:
-                raise ValueError
+            agency = Agency.objects.get(pk=int(data['agency']), jurisdiction=jurisdiction)
 
             requested_docs = data['document_request']
             template = get_template('text/foia/request.txt')
@@ -102,7 +112,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                     description=requested_docs,
                     )
 
-            FOIACommunication.objects.create(
+            comm = FOIACommunication.objects.create(
                     foia=foia,
                     communication=text,
                     from_who=request.user.get_full_name(),
@@ -110,6 +120,27 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                     date=datetime.now(),
                     response=False,
                     )
+
+            if 'attachments' in data:
+                attachments = data.get('attachments')[:3]
+            else:
+                attachments = []
+            for attm_path in attachments:
+                res = requests.get(attm_path)
+                mime_type = res.header['Conent-Type']
+                if mime_type not in settings.ALLOWED_FILE_MIMES:
+                    raise MimeError
+                res.raise_for_status()
+                title = attm_path.rsplit('/', 1)[1]
+                file_ = FOIAFile.objects.create(
+                        access='public',
+                        foia=foia,
+                        comm=comm,
+                        title=title,
+                        date=datetime.now(),
+                        source=request.user.get_full_name(),
+                        )
+                file_.ffile.save(title, ContentFile(res.content))
 
             if request.user.profile.make_request():
                 foia.submit()
@@ -129,11 +160,17 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                     'Missing data - Please supply title, document_request, '
                     'jurisdiction, and agency'},
                 status=http_status.HTTP_400_BAD_REQUEST)
-        except (ValueError, Jurisdiction.DoesNotExist, Agency.DoesNotExist):
+        except (Jurisdiction.DoesNotExist, Agency.DoesNotExist):
             return Response(
                 {'status':
                     'Bad data - please supply jurisdiction and agency as the PK'
                     ' of existing entities.  Agency must be in Jurisdiction.'},
+                status=http_status.HTTP_400_BAD_REQUEST)
+        except (requests.exceptions.RequestException, TypeError, MimeError):
+            # TypeError is thrown if 'attachments' is not a list
+            return Response(
+                {'status':
+                    'There was a problem with one of your attachments'},
                 status=http_status.HTTP_400_BAD_REQUEST)
 
     @decorators.detail_route(permission_classes=(IsOwner,))
