@@ -71,8 +71,8 @@
         template: 'qq-simple-thumbnails-template',
         {% if request.user.profile.limit_attachments %}
             validation: {
-                acceptFiles: "application/pdf, image/jpeg, image/png, image/tiff, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.oasis.opendocument.text, text/html, text/plain",
-                allowedExtensions: ["pdf","jpg","png","tif","doc","docx","odt","html","txt"],
+                acceptFiles: "{{ALLOWED_FILE_MIMES|join:', '}}",
+                allowedExtensions: ["{{ALLOWED_FILE_EXTS|join:'","'}}"],
                 itemLimit: {{MAX_ATTACHMENT_NUM}},
                 sizeLimit: {{MAX_ATTACHMENT_SIZE}}
             },

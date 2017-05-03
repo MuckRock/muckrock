@@ -340,6 +340,8 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
         'sidebar_admin_url': reverse('admin:foia_foiarequest_change', args=(foia.pk,)),
         'MAX_ATTACHMENT_NUM': settings.MAX_ATTACHMENT_NUM,
         'MAX_ATTACHMENT_SIZE': settings.MAX_ATTACHMENT_SIZE,
+        'ALLOWED_FILE_MIMES': settings.ALLOWED_FILE_MIMES,
+        'ALLOWED_FILE_EXTS': settings.ALLOWED_FILE_EXTS,
         'AWS_STORAGE_BUCKET_NAME': settings.AWS_STORAGE_BUCKET_NAME,
         'AWS_ACCESS_KEY_ID': settings.AWS_ACCESS_KEY_ID,
     }
