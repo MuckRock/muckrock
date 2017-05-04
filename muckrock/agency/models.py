@@ -12,10 +12,12 @@ from django.utils.safestring import mark_safe
 from datetime import date, datetime
 from djgeojson.fields import PointField
 from easy_thumbnails.fields import ThumbnailerImageField
+from email.utils import parseaddr
 import logging
 
 from muckrock.accounts.models import Profile
 from muckrock.accounts.utils import unique_username
+from muckrock.foia.models import FOIACommunication
 from muckrock.jurisdiction.models import Jurisdiction, RequestHelper
 from muckrock.task.models import StaleAgencyTask
 from muckrock import fields
@@ -234,6 +236,16 @@ class Agency(models.Model, RequestHelper):
                     agency=self,
                     )
             return user
+
+    def get_all_known_emails(self):
+        """Get all emails we have associated with this agency"""
+        emails = (FOIACommunication.objects
+                .filter(foia__agency=self, response=True)
+                .distinct()
+                .values_list('priv_from_who', flat=True)
+                .order_by()
+                )
+        return [parseaddr(e)[1] for e in emails if parseaddr(e)[1]]
 
     class Meta:
         # pylint: disable=too-few-public-methods
