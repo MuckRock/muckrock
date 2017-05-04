@@ -1,5 +1,6 @@
 -e git://github.com/BradWhittington/django-mailgun.git@4f2edb9466f6245c3bbf501aab2681f0b3c71e0c#egg=django_mailgun # Mail backend used directly (on production)
 -e git://github.com/mitchelljkotler/django-news-sitemaps.git@50f198287868612f2d34bc4306e0e95308f942a3#egg=django_news_sitemaps
+bandit # Used to hijack emails in a staging setting
 bleach # Used to sanitize any HTML we're rendering
 boto # Used to access AWS
 celery # Used to run async tasks
