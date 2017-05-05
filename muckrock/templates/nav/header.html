@@ -152,9 +152,9 @@
             {% endif %}
         </div>
 
-        {% if user.profile.acct_type != "agency" %}
         <div class="nav-section" id="user-nav">
             <ul>
+                {% if user.profile.acct_type != "agency" %}
                 <li>
                     <a class="blue nav-item" href="{% url 'foia-create'%}" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
                         {% include 'lib/component/icon/create-request.svg' %}
@@ -247,8 +247,16 @@
                 <li><a href="{% url 'accounts' %}" class="sign-up black nav-item">Sign&nbsp;Up</a></li>
                 <li><a href="{% url 'acct-login' %}?next={{ request.get_full_path }}" class="log-in black nav-item">Log&nbsp;In</a></li>
                 {% endif %}
+                {% else %} {# for agency users #}
+                    <li class="dropdown dropdown--right">
+                        <a href="{% url 'foia-agency-list' %}" class="black nav-item align-center avatar-container" data-for="#profile-dropdown">
+                            <span class="label">{{ user.profile.agency.name }}</span>
+                        </a>
+                    </li>
+                {% endif %}
             </ul>
         </div>
-        {% endif %}
     </nav>
 </header>
+
+

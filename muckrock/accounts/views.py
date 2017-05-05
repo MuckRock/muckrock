@@ -644,7 +644,7 @@ def agency_redirect_login(
 
     if request.method == 'POST':
         email = request.POST.get('email')
-        if email in valid_emails:
+        if email.lower() in valid_emails:
             msg = TemplateEmail(
                     subject='Login Token',
                     from_email='info@muckrock.com',
@@ -664,13 +664,13 @@ def agency_redirect_login(
                     )
         else:
             messages.error(request, 'Invalid email')
-        return redirect(foia.get_agency_reply_link(email=email))
+        return redirect(foia)
 
     authed = request.user.is_authenticated()
     agency_user = authed and request.user.profile.acct_type == 'agency'
     agency_match = agency_user and request.user.profile.agency == agency
     email = request.GET.get('email')
-    valid = email in valid_emails
+    valid = email.lower() in valid_emails
 
     if agency_match:
         return redirect(foia)

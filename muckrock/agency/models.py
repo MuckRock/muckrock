@@ -245,7 +245,7 @@ class Agency(models.Model, RequestHelper):
                 .values_list('priv_from_who', flat=True)
                 .order_by()
                 )
-        return [parseaddr(e)[1] for e in emails if parseaddr(e)[1]]
+        return [parseaddr(e)[1].lower() for e in emails if parseaddr(e)[1]]
 
     class Meta:
         # pylint: disable=too-few-public-methods
