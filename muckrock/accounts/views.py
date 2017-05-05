@@ -649,8 +649,8 @@ def agency_redirect_login(
                     subject='Login Token',
                     from_email='info@muckrock.com',
                     to=[email],
-                    text_template='account/email/login_token.txt',
-                    html_template='account/email/login_token.html',
+                    text_template='accounts/email/login_token.txt',
+                    html_template='accounts/email/login_token.html',
                     extra_context={
                         'reply_link': foia.get_agency_reply_link(email=email),
                         }
