@@ -11,7 +11,7 @@
       <form method="post">
         {% csrf_token %}
         <input type="hidden" name="email" value="{{email}}">
-        <input type="submit" value="Resend token" class="basic button blue">
+        <input type="submit" value="Resend token" class="primary button">
       </form>
     {% else %}
       <p>That email address is not valid for this agency.  If you need help logging in, please email <a href="mailto:info@muckrock.com">info@muckrock.com</a></p>
