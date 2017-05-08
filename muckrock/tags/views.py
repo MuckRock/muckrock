@@ -11,6 +11,7 @@ from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
 from muckrock.project.models import Project
 from muckrock.qanda.models import Question
+from muckrock.tags.forms import TagForm
 
 def list_all_tags():
     """Should list all tags that exist and that have at least one object"""
@@ -18,6 +19,7 @@ def list_all_tags():
     tags = tags.annotate(num_times=Count('tags_taggeditembase_items'))
     tags = tags.exclude(num_times=0)
     return tags
+
 
 class TagListView(TemplateView):
     """Presents a list of all tags"""
@@ -28,7 +30,9 @@ class TagListView(TemplateView):
         context = super(TagListView, self).get_context_data(**kwargs)
         context['tags'] = list_all_tags()
         context['popular_tags'] = list_all_tags().order_by('-num_times')[:10]
+        context['form'] = TagForm()
         return context
+
 
 class TagDetailView(DetailView):
     """Presents the details of a tag"""
@@ -46,6 +50,7 @@ class TagDetailView(DetailView):
         """Adds all tags to context data"""
         context = super(TagDetailView, self).get_context_data(**kwargs)
         context['tags'] = list_all_tags()
+        context['form'] = TagForm()
         user = self.request.user
         this_tag = self.get_object()
 

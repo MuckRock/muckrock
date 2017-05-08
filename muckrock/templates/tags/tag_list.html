@@ -9,20 +9,9 @@
     <section class="master">
         <h1>{{ tags|length }} Tag{{ tags|length|pluralize }}</h1>
         <div id="tags">
-            <input class="search" type="search" placeholder="Filter tags" />
-            <div class="tag-table">
-                <table>
-                    <tbody class="list">
-                    {% for tag_item in tags %}
-                        <tr>
-                            <td class="name">
-                                <a href="{% url 'tag-detail' slug=tag_item.slug %}" {% if tag and tag_item.name == tag.name %}class="active"{% endif %}>{{ tag_item.name }}</a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+            <form>
+                {% include 'lib/pattern/form.html' %}
+            </form>
         </div>
     </section>
     {% if tag %}
@@ -73,3 +62,13 @@
 </div>
 {% endcache %}
 {% endblock content %}
+
+{% block scripts %}
+    <script>
+        $(document).ready(function() {
+            $("#id_tag_select").change(function() {
+                window.location.href = '/tags/' + $(this).val() + '/';
+            })
+        })
+    </script>
+{% endblock %}

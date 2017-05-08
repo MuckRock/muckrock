@@ -21,6 +21,12 @@ http {
 	<% ENV.fetch('DENY_IPS', '').split(',').each do |ip| %>
 		deny <%= ip %>;
 	<% end %>
+    <% if ENV.key?('ALLOW_IPS') %>
+        <% ENV['ALLOW_IPS'].split(',').each do |ip| %>
+            allow <%= ip %>;
+        <% end %>
+        deny all;
+    <% end %>
 	include block_nobis.conf;
 
 	limit_req_zone $binary_remote_addr zone=one:10m rate=1r/s;
