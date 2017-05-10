@@ -403,12 +403,13 @@ def profile(request, username=None):
     user_profile = user.profile
     org = user_profile.organization
     show_org_link = (
-            not org.private
-            or request.user.is_staff
-            or (
-                request.user.is_authenticated() and
-                request.user.profile.is_member_of(org))
-            )
+            org and (
+                not org.private or 
+                request.user.is_staff
+                or (
+                    request.user.is_authenticated() and
+                    request.user.profile.is_member_of(org)
+                    )))
     requests = (FOIARequest.objects
             .filter(user=user)
             .get_viewable(request.user)
