@@ -14,7 +14,12 @@ from django.http import (
         HttpResponseNotAllowed,
         HttpResponseRedirect,
         )
-from django.shortcuts import render_to_response, get_object_or_404, redirect
+from django.shortcuts import (
+        get_object_or_404,
+        redirect,
+        render,
+        render_to_response,
+        )
 from django.template import RequestContext
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -51,7 +56,9 @@ from muckrock.accounts.models import (
         )
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.accounts.utils import validate_stripe_email
+from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest
+from muckrock.message.email import TemplateEmail
 from muckrock.news.models import Article
 from muckrock.organization.models import Organization
 from muckrock.project.models import Project
@@ -404,7 +411,7 @@ def profile(request, username=None):
     org = user_profile.organization
     show_org_link = (
             org and (
-                not org.private or 
+                not org.private or
                 request.user.is_staff
                 or (
                     request.user.is_authenticated() and
