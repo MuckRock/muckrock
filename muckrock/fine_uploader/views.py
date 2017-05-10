@@ -29,7 +29,7 @@ def success(request):
         foia = FOIARequest.objects.get(pk=request.POST.get('foia_id'))
     except FOIARequest.DoesNotExist:
         return HttpResponseBadRequest()
-    if not foia.has_perm(request.user, 'change'):
+    if not foia.has_perm(request.user, 'upload_attachment'):
         return HttpResponseForbidden()
     if 'key' not in request.POST:
         return HttpResponseBadRequest()
@@ -52,7 +52,7 @@ def session(request):
         foia = FOIARequest.objects.get(pk=request.GET.get('foia_id'))
     except FOIARequest.DoesNotExist:
         return HttpResponseBadRequest()
-    if not foia.has_perm(request.user, 'change'):
+    if not foia.has_perm(request.user, 'upload_attachment'):
         return HttpResponseForbidden()
 
     attms = foia.pending_attachments.filter(user=request.user, sent=False)
@@ -80,7 +80,7 @@ def delete(request):
     except OutboundAttachment.DoesNotExist:
         return HttpResponseBadRequest()
 
-    if not attm.foia.has_perm(request.user, 'change'):
+    if not attm.foia.has_perm(request.user, 'upload_attachment'):
         return HttpResponseForbidden()
 
     attm.delete()

@@ -14,7 +14,12 @@ from django.http import (
         HttpResponseNotAllowed,
         HttpResponseRedirect,
         )
-from django.shortcuts import render_to_response, get_object_or_404, redirect
+from django.shortcuts import (
+        render_to_response,
+        get_object_or_404,
+        redirect,
+        render,
+        )
 from django.template import RequestContext
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -51,7 +56,9 @@ from muckrock.accounts.models import (
         )
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.accounts.utils import validate_stripe_email
+from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest
+from muckrock.message.email import TemplateEmail
 from muckrock.news.models import Article
 from muckrock.organization.models import Organization
 from muckrock.project.models import Project
@@ -68,6 +75,7 @@ from muckrock.views import MRFilterListView
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
+
 def create_new_user(request, valid_form):
     """Create a user from the valid form, give them a profile, and log them in."""
     new_user = valid_form.save()
@@ -83,6 +91,7 @@ def create_new_user(request, valid_form):
     )
     login(request, new_user)
     return new_user
+
 
 def account_logout(request):
     """Logs a user out of their account and redirects to index page"""
@@ -225,6 +234,7 @@ class AccountsView(TemplateView):
             messages.error(request, 'Your card was declined')
         return self.render_to_response(self.get_context_data())
 
+
 def upgrade(request):
     """Upgrades the user from a Basic to a Professional account."""
     if not request.user.is_authenticated():
@@ -240,6 +250,7 @@ def upgrade(request):
         raise ValueError('Cannot upgrade this account, no Stripe token provided.')
     request.user.profile.start_pro_subscription(token)
 
+
 def downgrade(request):
     """Downgrades the user from a Professional to a Basic account."""
     if not request.user.is_authenticated():
@@ -247,6 +258,7 @@ def downgrade(request):
     if request.user.profile.acct_type != 'pro':
         raise ValueError('Cannot downgrade this account, it is not Professional.')
     request.user.profile.cancel_pro_subscription()
+
 
 @login_required
 def profile_settings(request):
@@ -314,6 +326,7 @@ def profile_settings(request):
         context,
         context_instance=RequestContext(request))
 
+
 def buy_requests(request, username=None):
     """A purchaser buys requests for a recipient. The recipient can even be themselves!"""
     url_redirect = request.GET.get('next', 'acct-my-profile')
@@ -371,6 +384,7 @@ def buy_requests(request, username=None):
         logger.warn('Payment error: %s', exc, exc_info=sys.exc_info())
     return redirect(url_redirect)
 
+
 @login_required
 def verify_email(request):
     """Verifies a user's email address"""
@@ -391,6 +405,7 @@ def verify_email(request):
     else:
         messages.warning(request, 'Your email is already confirmed, no need to verify again!')
     return redirect(_profile)
+
 
 def profile(request, username=None):
     """View a user's profile"""
@@ -434,6 +449,7 @@ def profile(request, username=None):
         context_instance=RequestContext(request)
     )
 
+
 @csrf_exempt
 def stripe_webhook(request):
     """Handle webhooks from stripe"""
@@ -475,6 +491,7 @@ def stripe_webhook(request):
     elif event_type == 'invoice.payment_failed':
         failed_payment.delay(event_object_id)
     return HttpResponse()
+
 
 @method_decorator(login_required, name='dispatch')
 class RegistrationCompletionView(FormView):
@@ -609,3 +626,61 @@ class ProxyList(MRFilterListView):
         return (objects
                 .filter(profile__acct_type='proxy')
                 .select_related('profile'))
+
+
+def agency_redirect_login(
+        request, agency_slug, agency_idx, foia_slug, foia_idx):
+    """View to redirect agency users to the correct page or offer to resend
+    them their login token"""
+
+    agency = get_object_or_404(Agency, slug=agency_slug, pk=agency_idx)
+    foia = get_object_or_404(
+            FOIARequest,
+            agency=agency,
+            slug=foia_slug,
+            pk=foia_idx,
+            )
+    valid_emails = agency.get_all_known_emails()
+
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        if email.lower() in valid_emails:
+            msg = TemplateEmail(
+                    subject='Login Token',
+                    from_email='info@muckrock.com',
+                    to=[email],
+                    text_template='accounts/email/login_token.txt',
+                    html_template='accounts/email/login_token.html',
+                    extra_context={
+                        'reply_link': foia.get_agency_reply_link(email=email),
+                        }
+                    )
+            msg.send(fail_silently=False)
+            messages.success(
+                    request,
+                    'Fresh login token succesfully sent to %s.  '
+                    'Please check your email'
+                    % email,
+                    )
+        else:
+            messages.error(request, 'Invalid email')
+        return redirect(foia)
+
+    authed = request.user.is_authenticated()
+    agency_user = authed and request.user.profile.acct_type == 'agency'
+    agency_match = agency_user and request.user.profile.agency == agency
+    email = request.GET.get('email')
+    valid = email.lower() in valid_emails
+
+    if agency_match:
+        return redirect(foia)
+    elif agency_user:
+        return redirect('foia-agency-list')
+    elif authed:
+        return redirect('index')
+    else:
+        return render(
+                request,
+                'accounts/agency_redirect_login.html',
+                {'email': email, 'valid': valid},
+                )

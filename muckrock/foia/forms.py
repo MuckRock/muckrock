@@ -13,6 +13,16 @@ from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIAFile, FOIANote, STATUS
 from muckrock.jurisdiction.models import Jurisdiction
 
+AGENCY_STATUS = [
+    ('processed', 'Further Response Coming'),
+    ('fix', 'Fix Required'),
+    ('payment', 'Payment Required'),
+    ('rejected', 'Rejected'),
+    ('no_docs', 'No Responsive Documents'),
+    ('done', 'Completed'),
+    ('partial', 'Partially Completed'),
+    ]
+
 
 class RequestForm(forms.Form):
     """This form creates new, single MuckRock requests"""
@@ -290,3 +300,33 @@ class FOIAAccessForm(forms.Form):
         ('view', 'Can View'),
     ]
     access = forms.ChoiceField(choices=access_choices)
+
+
+class FOIAAgencyReplyForm(forms.Form):
+    """Form for direct agency reply"""
+    status = forms.ChoiceField(
+            label="What's the current status of the request?",
+            choices=AGENCY_STATUS,
+            help_text=' ',
+            )
+    tracking_id = forms.CharField(
+            label='Tracking Number',
+            help_text="If your agency assign a tracking number to the request, "
+            "please enter it here.  We'll include this number in future "
+            "followups if necessary",
+            required=False,
+            )
+    date_estimate = forms.DateField(
+            label='Estimated Completion Date',
+            help_text='Enter the date you expect the request to be fufilled by.  '
+            'We will not follow up with you until this date.',
+            required=False,
+            )
+    price = forms.IntegerField(
+            widget=forms.NumberInput(attrs={'class': 'currency-field'}),
+            required=False,
+            )
+    reply = forms.CharField(
+            label='Message to the requester',
+            widget=forms.Textarea(),
+            )

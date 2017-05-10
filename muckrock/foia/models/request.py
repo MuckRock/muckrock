@@ -57,7 +57,7 @@ class FOIARequestQuerySet(models.QuerySet):
                     Q(user=user) |
                     Q(edit_collaborators=user) |
                     Q(read_collaborators=user) |
-                    Q(agency=user.agencyprofile.agency) |
+                    Q(agency=user.profile.agency) |
                     (~Q(status='started') & ~Q(embargo=True)))
         elif user.is_authenticated():
             return self.filter(
@@ -672,16 +672,20 @@ class FOIARequest(models.Model):
 
         # pylint:disable=attribute-defined-outside-init
         self.reverse_communications = self.communications.reverse()
+        is_email = not all(c.isdigit() for c in self.email)
+        context = {'request': self, 'show_all_comms': show_all_comms}
+        if is_email:
+            context['reply_link'] = self.get_agency_reply_link(self.email)
         body = render_to_string(
             'text/foia/request_email.txt',
-            {'request': self, 'show_all_comms': show_all_comms}
-        )
+            context,
+            )
 
         # send the msg
-        if all(c.isdigit() for c in self.email):
-            self._send_fax(subject, body, comm)
-        else:
+        if is_email:
             self._send_email(subject, body, comm)
+        else:
+            self._send_fax(subject, body, comm)
 
         comm.subject = subject
         comm.save()
@@ -689,6 +693,24 @@ class FOIARequest(models.Model):
         # unblock incoming messages if we send one out
         self.block_incoming = False
         self.save()
+
+    def get_agency_reply_link(self, email):
+        """Get the link for the agency user to log in"""
+        agency = self.agency
+        agency_user_profile = agency.get_user().profile
+        return agency_user_profile.wrap_url(
+                reverse(
+                    'acct-agency-redirect-login',
+                    kwargs={
+                        'agency_slug': agency.slug,
+                        'agency_idx': agency.pk,
+                        'foia_slug': self.slug,
+                        'foia_idx': self.pk,
+                        },
+                    ),
+                email=email,
+                )
+
 
     def _send_email(self, subject, body, comm):
         """Send the message as an email"""
@@ -794,7 +816,10 @@ class FOIARequest(models.Model):
     def user_actions(self, user):
         '''Provides action interfaces for users'''
         is_owner = self.created_by(user)
-        can_follow = user.is_authenticated() and not is_owner
+        is_agency_user = (user.is_authenticated() and
+                user.profile.acct_type == 'agency')
+        can_follow = (user.is_authenticated() and not is_owner and
+                not is_agency_user)
         is_following = user.is_authenticated() and user in followers(self)
         is_admin = user.is_staff
         kwargs = {
@@ -805,7 +830,7 @@ class FOIARequest(models.Model):
         }
         return [
             Action(
-                test=True,
+                test=not is_agency_user,
                 link=reverse('foia-clone', kwargs=kwargs),
                 title='Clone',
                 desc='Start a new request using this one as a base',
@@ -936,4 +961,6 @@ class FOIARequest(models.Model):
             ('thank_foiarequest', 'Can thank the FOI officer for their help'),
             ('flag_foiarequest', 'Can flag the request for staff attention'),
             ('followup_foiarequest', 'Can send a manual follow up'),
+            ('agency_reply_foiarequest', 'Can send a direct reply'),
+            ('upload_attachment_foiarequest', 'Can upload an attachment'),
             )
