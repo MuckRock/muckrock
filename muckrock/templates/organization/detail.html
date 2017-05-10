@@ -44,6 +44,16 @@
             <a class="primary button" href="{% url 'org-activate' slug=organization.slug %}">Activate</a>
             <a class="failure button" href="{% url 'org-delete' slug=organization.slug %}">Delete</a>
             {% endif %}
+            <form method="post" class="actions">
+                {% csrf_token %}
+                {% if organization.private %}
+                    <input type='hidden' name='action' value='public'>
+                    <button class="primary button">Make Organization Public</button>
+                {% else %}
+                    <input type='hidden' name='action' value='private'>
+                    <button class="primary button">Make Organization Private</button>
+                {% endif %}
+            </form>
         </div>
         {% elif is_member %}
         <div class="owner">

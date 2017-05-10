@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
@@ -28,9 +29,15 @@ from muckrock.utils import new_action
 
 class OrganizationListView(ListView):
     """List of organizations"""
-    queryset = Organization.objects.select_related('owner')
     template_name = "organization/list.html"
     paginate_by = 25
+
+    def get_queryset(self):
+        """Filter out private orgs for non-staff"""
+        queryset = Organization.objects.select_related('owner')
+        if not self.request.user.is_staff:
+            queryset = queryset.filter(private=False)
+        return queryset
 
 
 class OrganizationCreateView(CreateView):
@@ -210,6 +217,7 @@ class OrganizationUpdateView(UpdateView):
         organization.update_subscription(max_users)
         return redirect(self.get_success_url())
 
+
 def deactivate_organization(request, slug):
     """Unsubscribes its owner from the recurring payment plan."""
     organization = get_object_or_404(Organization, slug=slug)
@@ -259,6 +267,15 @@ class OrganizationDetailView(DetailView):
     queryset = Organization.objects.select_related('owner')
     template_name = "organization/detail.html"
 
+    def get_object(self, queryset=None):
+        """Get the org"""
+        org = super(OrganizationDetailView, self).get_object(queryset=queryset)
+        user = self.request.user
+        is_member = user.is_authenticated() and user.profile.is_member_of(org)
+        if org.private and not is_member and not user.is_staff:
+            raise Http404
+        return org
+
     def get_context_data(self, **kwargs):
         """Add extra context data"""
         context = super(OrganizationDetailView, self).get_context_data(**kwargs)
@@ -302,18 +319,25 @@ class OrganizationDetailView(DetailView):
 
     def post(self, request, **kwargs):
         """Handle form submission for adding and removing users"""
-        # pylint: disable=attribute-defined-outside-init
-        # disable setting self.object because its actually ok and Django does this also
-        self.object = self.get_object()
+        org = self.get_object()
         action = request.POST.get('action', '')
+        is_owner = org.is_owned_by(self.request.user)
+        is_owner_or_staff = is_owner or self.request.user.is_staff
         if action == 'add_members':
             self.add_members(request)
         elif action == 'remove_member':
             self.remove_member(request)
+        elif action == 'private' and is_owner_or_staff:
+            org.private = True
+            org.save()
+            messages.success(request, 'Organization has been made private')
+        elif action == 'public' and is_owner_or_staff:
+            org.private = False
+            org.save()
+            messages.success(request, 'Organization has been made public')
         else:
             messages.error(request, 'This action is not available.')
-        context = self.get_context_data()
-        return self.render_to_response(context)
+        return redirect(org)
 
     def add_members(self, request):
         """Grants organization membership to a list of users"""

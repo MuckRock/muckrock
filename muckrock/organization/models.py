@@ -31,6 +31,7 @@ class Organization(models.Model):
     monthly_requests = models.IntegerField(default=settings.MONTHLY_REQUESTS.get('org', 0))
     stripe_id = models.CharField(max_length=255, blank=True)
     active = models.BooleanField(default=False)
+    private = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         """Autogenerates the slug based on the org name"""
