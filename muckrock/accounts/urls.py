@@ -92,4 +92,8 @@ urlpatterns = patterns(
     url(r'^stripe_webhook_v2/$',
         views.stripe_webhook,
         name='acct-webhook-v2'),
+    url(r'agency_login/(?P<agency_slug>[\w\d_-]+)-(?P<agency_idx>\d+)/'
+        r'(?P<foia_slug>[\w\d_-]+)-(?P<foia_idx>\d+)/$',
+        views.agency_redirect_login,
+        name='acct-agency-redirect-login')
 )

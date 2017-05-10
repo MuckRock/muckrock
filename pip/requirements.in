@@ -12,6 +12,7 @@ django-compressor # Compress all JS and CSS assets into a single file
 django-cors-headers # Allows access to API endpoints from non-MuckRock domains
 django-dbsettings # DB stored configurations
 django-debug-toolbar # Toolbar for debugging
+django-email-bandit # Used to hijack emails in a staging setting
 django-filter==0.13.0 # Used for filtering in viewsets
 django-geojson # Used for storing geographic data
 django-hosts # Used for multi-domain routing

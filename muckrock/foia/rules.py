@@ -3,6 +3,7 @@
 # needed for rules
 from __future__ import absolute_import
 
+import inspect
 from datetime import date
 from functools import wraps
 from rules import (
@@ -28,6 +29,20 @@ def skip_if_not_foia(func):
             return func(user, foia)
     return inner
 
+def user_authenticated(func):
+    """Decorator for predicates
+    Return false if user is not authenticated"""
+    argspec = inspect.getargspec(func)
+    if len(argspec.args) == 2:
+        @wraps(func)
+        def inner(user, foia):
+            return user.is_authenticated() and func(user, foia)
+    elif len(argspec.args) == 1:
+        @wraps(func)
+        def inner(user):
+            return user.is_authenticated() and func(user)
+    return inner
+
 def has_status(*statuses):
     @predicate('has_status:%s' % ','.join(statuses))
     @skip_if_not_foia
@@ -46,8 +61,6 @@ def is_editor(user, foia):
     return (user.is_authenticated() and
             foia.edit_collaborators.filter(pk=user.pk).exists())
 
-can_edit = is_owner | is_editor | is_staff
-
 @predicate
 @skip_if_not_foia
 def is_read_collaborator(user, foia):
@@ -56,10 +69,10 @@ def is_read_collaborator(user, foia):
 
 @predicate
 @skip_if_not_foia
+@user_authenticated
 def is_org_shared(user, foia):
     return (
             foia.user.is_authenticated() and
-            user.is_authenticated() and
             foia.user.profile.org_share and
             foia.user.profile.organization is not None and
             foia.user.profile.organization == user.profile.organization
@@ -104,21 +117,37 @@ is_appealable = has_appealable_jurisdiction & (
 def has_crowdfund(user, foia):
     return bool(foia.crowdfund)
 
+@predicate
+@skip_if_not_foia
+@user_authenticated
+def match_agency(user, foia):
+    return bool(user.profile.agency and user.profile.agency == foia.agency)
+
 # User predicates
 
 @predicate
+@user_authenticated
 def is_advanced_type(user):
-    return (user.is_authenticated() and
-            user.profile.acct_type in ['admin', 'beta', 'pro', 'proxy'])
+    return user.profile.acct_type in ['admin', 'beta', 'pro', 'proxy']
 
 @predicate
+@user_authenticated
 def is_admin(user):
-    return user.is_authenticated() and user.profile.acct_type == 'admin'
+    return user.profile.acct_type == 'admin'
 
 @predicate
+@user_authenticated
+def is_agency_user(user):
+    return user.profile.acct_type == 'agency'
+
+@predicate
+@user_authenticated
 def is_org_member(user):
-    return (user.is_authenticated() and user.profile.organization and
-            user.profile.organization.active)
+    return user.profile.organization and user.profile.organization.active
+
+is_from_agency = is_agency_user & match_agency & ~has_status('started')
+
+can_edit = is_owner | is_editor | is_staff
 
 is_advanced = is_advanced_type | is_org_member
 
@@ -128,7 +157,8 @@ can_embargo_permananently = is_admin | is_org_member
 
 add_perm('foia.change_foiarequest', can_edit)
 add_perm('foia.delete_foiarequest', can_edit & is_deletable)
-add_perm('foia.view_foiarequest', can_edit | is_viewer | ~is_private)
+add_perm('foia.view_foiarequest',
+        can_edit | is_viewer | is_from_agency | ~is_private)
 add_perm('foia.embargo_foiarequest', can_edit & can_embargo)
 add_perm('foia.embargo_perm_foiarequest', can_edit & can_embargo_permananently)
 add_perm('foia.crowdfund_foiarequest', # why cant editors crowdfund?
@@ -137,5 +167,7 @@ add_perm('foia.appeal_foiarequest', can_edit & is_appealable)
 add_perm('foia.thank_foiarequest', can_edit & is_thankable)
 add_perm('foia.flag_foiarequest', is_authenticated)
 add_perm('foia.followup_foiarequest', can_edit & ~has_status('started'))
+add_perm('foia.agency_reply_foiarequest', is_from_agency)
+add_perm('foia.upload_attachment_foiarequest', can_edit | is_from_agency)
 add_perm('foia.view_rawemail', is_advanced)
 add_perm('foia.file_multirequest', is_advanced)

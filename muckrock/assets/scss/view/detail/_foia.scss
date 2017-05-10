@@ -191,6 +191,9 @@ $request-breakpoint: 768px;
             @include display(flex);
             @include justify-content(space-between);
         }
+        .formset-forms {
+            padding: $vr/2;
+        }
     }
     #inactive .composer-input {
         p {
@@ -205,6 +208,17 @@ $request-breakpoint: 768px;
             &:hover {
                 color: $color-blue;
                 border-bottom: 1px solid;
+            }
+        }
+    }
+    #agency-reply .composer-input {
+        .field {
+            input[type="text"], textarea {
+                border: 1px solid $color-grey;
+            }
+            input, textarea, select {
+                width: 97%;
+                margin-left: 1.5%;
             }
         }
     }

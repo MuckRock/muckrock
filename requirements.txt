@@ -28,6 +28,7 @@ django-compressor==2.1
 django-cors-headers==1.3.1
 django-dbsettings==0.10.0
 django-debug-toolbar==1.5
+django-email-bandit==1.2.0
 django-filter==0.13.0
 django-geojson==2.9.1
 django-hosts==2.0
@@ -71,8 +72,8 @@ psycopg2==2.6.2
 pyimagediet==1.1.1        # via image-diet2
 pylibmc==1.5.1            # via django-pylibmc
 pymdown-extensions==1.2
-pyphaxio==0.11
 pyparsing==2.1.10         # via packaging
+pyphaxio==0.11
 python-dateutil==2.5.3
 python-Levenshtein==0.12.0
 python-magic==0.4.12      # via pyimagediet
