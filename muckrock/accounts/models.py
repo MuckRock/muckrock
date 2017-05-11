@@ -9,7 +9,7 @@ from django.core.urlresolvers import reverse
 from django.db import models
 
 from actstream.models import Action
-from datetime import datetime
+from datetime import date
 import dbsettings
 from easy_thumbnails.fields import ThumbnailerImageField
 from localflavor.us.models import PhoneNumberField, USStateField
@@ -197,11 +197,11 @@ class Profile(models.Model):
 
     def get_monthly_requests(self):
         """Get the number of requests left for this month"""
-        not_this_month = self.date_update.month != datetime.now().month
-        not_this_year = self.date_update.year != datetime.now().year
+        not_this_month = self.date_update.month != date.today().month
+        not_this_year = self.date_update.year != date.today().year
         # update requests if they have not yet been updated this month
         if not_this_month or not_this_year:
-            self.date_update = datetime.now()
+            self.date_update = date.today()
             self.monthly_requests = settings.MONTHLY_REQUESTS.get(self.acct_type, 0)
             self.save()
         return self.monthly_requests
@@ -310,7 +310,7 @@ class Profile(models.Model):
         # modify the profile object (should this be part of a webhook callback?)
         self.subscription_id = subscription.id
         self.acct_type = 'pro'
-        self.date_update = datetime.now()
+        self.date_update = date.today()
         self.monthly_requests = settings.MONTHLY_REQUESTS.get('pro', 0)
         self.save()
         return subscription
