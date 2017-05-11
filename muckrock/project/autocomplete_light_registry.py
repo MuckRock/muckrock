@@ -8,13 +8,21 @@ from muckrock.project.models import Project
 
 class ProjectAutocomplete(autocomplete_light.AutocompleteModelBase):
     """Creates an acutocomplete registry for projects."""
-    choices = Project.objects.get_public()
     choice_template = 'autocomplete/project.html'
     search_fields = ['title']
     attrs = {
         'date-autocomplete-minimum-characters': 2,
         'placeholder': 'Search projects'
     }
+
+    def choices_for_request(self):
+        """
+        When showing possible requests to add, only show projects the user is a contributor to.
+        If the user is unauthenticated, only return public choices.
+        However, if the user is staff, then show them all the available projects.
+        """
+        self.choices = Project.objects.get_visible(self.request.user)
+        return super(ProjectAutocomplete, self).choices_for_request()
 
 
 class ProjectManagerAutocomplete(autocomplete_light.AutocompleteModelBase):

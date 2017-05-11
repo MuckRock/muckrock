@@ -19,9 +19,10 @@ class ProjectFilterSet(django_filters.FilterSet):
     tags = django_filters.ModelMultipleChoiceFilter(
         name='tags__name',
         queryset=Tag.objects.all(),
+        label='Tags',
         widget=autocomplete_light.MultipleChoiceWidget('TagAutocomplete'),
     )
 
     class Meta:
         model = Project
-        fields = ['contributors', 'tags']
+        fields = ['contributors']

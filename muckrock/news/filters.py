@@ -28,12 +28,13 @@ class ArticleFilterSet(django_filters.FilterSet):
     tags = django_filters.ModelMultipleChoiceFilter(
         name='tags__name',
         queryset=Tag.objects.all(),
+        label='Tags',
         widget=autocomplete_light.MultipleChoiceWidget('TagAutocomplete'),
     )
 
     class Meta:
         model = Article
-        fields = ['projects', 'authors', 'projects', 'tags']
+        fields = ['projects', 'authors', 'projects']
 
 
 class ArticleDateRangeFilterSet(django_filters.FilterSet):
@@ -59,12 +60,13 @@ class ArticleDateRangeFilterSet(django_filters.FilterSet):
     tags = django_filters.ModelMultipleChoiceFilter(
         name='tags__name',
         queryset=Tag.objects.all(),
+        label='Tags',
         widget=autocomplete_light.MultipleChoiceWidget('TagAutocomplete'),
     )
 
     class Meta:
         model = Article
-        fields = ['projects', 'authors', 'pub_date', 'tags']
+        fields = ['projects', 'authors', 'pub_date']
 
 
 class ArticleAuthorFilterSet(django_filters.FilterSet):
@@ -80,9 +82,10 @@ class ArticleAuthorFilterSet(django_filters.FilterSet):
     tags = django_filters.ModelMultipleChoiceFilter(
         name='tags__name',
         queryset=Tag.objects.all(),
+        label='Tags',
         widget=autocomplete_light.MultipleChoiceWidget('TagAutocomplete'),
     )
 
     class Meta:
         model = Article
-        fields = ['pub_date', 'tags']
+        fields = ['pub_date']

@@ -80,7 +80,11 @@ class ModelFilterMixin(object):
         # pylint:disable=not-callable
         if self.filter_class is None:
             raise AttributeError('Missing a filter class.')
-        return self.filter_class(self.request.GET, queryset=self.get_queryset())
+        return self.filter_class(
+                self.request.GET,
+                queryset=self.get_queryset(),
+                request=self.request,
+                )
 
     def get_context_data(self, **kwargs):
         """
