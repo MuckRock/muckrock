@@ -80,11 +80,11 @@ class TestProfileUnit(TestCase):
         self.profile.date_update = datetime.now() - timedelta(32)
         monthly_requests = settings.MONTHLY_REQUESTS[self.profile.acct_type]
         eq_(self.profile.get_monthly_requests(), monthly_requests)
-        eq_(self.profile.date_update.date(), date.today())
+        eq_(self.profile.date_update, date.today())
 
     def test_make_request_refresh(self):
         """Make request resets count if it has been more than a month"""
-        self.profile.date_update = datetime.now() - timedelta(32)
+        self.profile.date_update = date.today() - timedelta(32)
         assert_true(self.profile.make_request())
 
     def test_make_request_pass_monthly(self):
@@ -105,7 +105,7 @@ class TestProfileUnit(TestCase):
         """If out of requests, make request returns false"""
         # pylint:disable=no-self-use
         profile = factories.ProfileFactory(num_requests=0)
-        profile.date_update = datetime.now()
+        profile.date_update = date.today()
         assert_false(profile.make_request())
 
     def test_customer(self):
@@ -144,7 +144,7 @@ class TestProfileUnit(TestCase):
         ok_(mock_customer.subscriptions.create.called)
         eq_(self.profile.acct_type, 'pro')
         eq_(self.profile.subscription_id, mock_subscription.id)
-        eq_(self.profile.date_update.today(), date.today())
+        eq_(self.profile.date_update, date.today())
         eq_(self.profile.monthly_requests, settings.MONTHLY_REQUESTS.get('pro'))
 
     @raises(AttributeError)
