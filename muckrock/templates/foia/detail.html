@@ -226,14 +226,14 @@
                     <div class="composer-inputs">
                         <div class="composer" id="inactive">
                             <div class="composer-input">
-                                {% if can_agency_reply %}
+                                {% if request.user.profile.acct_type == "agency" %}
                                 <p>You may <a href="#agency-reply">reply directly</a> to this request.</p>
                                 {% else %}
                                 <p>You may <a href="#follow-up">follow up</a> {% if not foia.disable_autofollowups %}manually {% endif %}with the agency{% if can_appeal %} or <a href="#appeal">appeal</a> their decision{% endif %}.</p>
                                 {% endif %}
                             </div>
                         </div>
-                        {% if not can_agency_reply %}
+                        {% if not request.user.profile.acct_type == "agency" %}
                         <div class="follow-up composer" id="follow-up">
                             <form class="composer-input" method="post">
                                 <header>Send a follow up to the {{ foia.agency.name }}</header>
@@ -277,7 +277,7 @@ Sincerely,
                                 {% csrf_token %}
                                 {% include 'lib/pattern/form.html' with form=agency_reply_form %}
                                 <label class="bold">Attachments</label>
-                                <div id="fine-uploader"></div>
+                                <div id="fine-uploader1"></div>
 								<input type="hidden" name="action" value="agency_reply" />
                                 <div class="buttons">
                                     <button class="primary button" type="submit" name="agency-reply" value="1">Send</button>
