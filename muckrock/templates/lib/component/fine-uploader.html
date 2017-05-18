@@ -65,8 +65,11 @@
 
 
 <script type="text/javascript">
+function createUploader(id) {
+    var element = document.getElementById(id);
+    if (element === null) {return;}
     const uploader = new qq.s3.FineUploader({
-        element: document.getElementById('fine-uploader'),
+        element: element,
         debug: true,
         template: 'qq-simple-thumbnails-template',
         {% if request.user.profile.limit_attachments %}
@@ -150,4 +153,7 @@
         },
 
     });
+};
+createUploader('fine-uploader');
+createUploader('fine-uploader1');
 </script>
