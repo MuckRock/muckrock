@@ -127,7 +127,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                 attachments = []
             for attm_path in attachments:
                 res = requests.get(attm_path)
-                mime_type = res.headers['Conent-Type']
+                mime_type = res.headers['Content-Type']
                 if mime_type not in settings.ALLOWED_FILE_MIMES:
                     raise MimeError
                 res.raise_for_status()
