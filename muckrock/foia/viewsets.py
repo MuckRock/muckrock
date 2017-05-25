@@ -62,7 +62,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
 
         class Meta:
             model = FOIARequest
-            fields = ('user', 'title', 'status', 'embargo', 'jurisdiction', 'agency', 'tags')
+            fields = ('user', 'title', 'status', 'embargo', 'jurisdiction', 'agency', 'tags__name')
 
     filter_class = Filter
 
@@ -243,8 +243,8 @@ class FOIACommunicationViewSet(viewsets.ModelViewSet):
     class Filter(django_filters.FilterSet):
         """API Filter for FOIA Communications"""
         # pylint: disable=too-few-public-methods
-        min_date = django_filters.DateFilter(name='date', lookup_type='gte')
-        max_date = django_filters.DateFilter(name='date', lookup_type='lte')
+        min_date = django_filters.DateFilter(name='date', lookup_expr='gte')
+        max_date = django_filters.DateFilter(name='date', lookup_expr='lte')
         class Meta:
             model = FOIACommunication
             fields = ('max_date', 'min_date', 'foia', 'status', 'response', 'delivered')

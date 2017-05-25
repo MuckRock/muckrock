@@ -213,13 +213,13 @@ class ArticleViewSet(viewsets.ModelViewSet):
         authors = django_filters.CharFilter(name='authors__username')
         editors = django_filters.CharFilter(name='editors__username')
         tags = django_filters.CharFilter(name='tags__name')
-        min_date = django_filters.DateFilter(name='pub_date', lookup_type='gte')
-        max_date = django_filters.DateFilter(name='pub_date', lookup_type='lte')
+        min_date = django_filters.DateFilter(name='pub_date', lookup_expr='gte')
+        max_date = django_filters.DateFilter(name='pub_date', lookup_expr='lte')
 
         class Meta:
             model = Article
             fields = ('title', 'pub_date', 'min_date', 'max_date', 'authors', 'editors',
-                      'foias', 'publish', 'tags')
+                      'foias', 'publish', 'tags__name')
 
     filter_class = Filter
 

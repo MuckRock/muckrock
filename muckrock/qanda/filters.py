@@ -27,19 +27,21 @@ class QuestionFilterSet(django_filters.FilterSet):
             'placeholder': 'MM/DD/YYYY',
         }),
     )
-    unanswered = django_filters.MethodFilter(
-        action='unanswered_filter',
+    unanswered = django_filters.BooleanFilter(
+        method='unanswered_filter',
         widget=forms.CheckboxInput()
     )
     tags = django_filters.ModelMultipleChoiceFilter(
         name='tags__name',
         queryset=Tag.objects.all(),
+        label='Tags',
         widget=autocomplete_light.MultipleChoiceWidget('TagAutocomplete'),
     )
 
-    def unanswered_filter(self, queryset, value):
+    def unanswered_filter(self, queryset, name, value):
         """Filter to show either only unanswered questions or all questions"""
         # pylint: disable=no-self-use
+        # pylint: disable=unused-argument
         if value:
             return queryset.filter(answers__isnull=True)
         else:

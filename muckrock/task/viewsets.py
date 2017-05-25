@@ -31,10 +31,10 @@ def create_task_viewset(model, serializer, fields):
 
     Filter = type('Filter', (django_filters.FilterSet,), dict(
         assigned=django_filters.CharFilter(name='assigned__username'),
-        min_date_created=django_filters.DateFilter(name='date_created', lookup_type='gte'),
-        max_date_created=django_filters.DateFilter(name='date_created', lookup_type='lte'),
-        min_date_done=django_filters.DateFilter(name='date_done', lookup_type='gte'),
-        max_date_done=django_filters.DateFilter(name='date_done', lookup_type='lte'),
+        min_date_created=django_filters.DateFilter(name='date_created', lookup_expr='gte'),
+        max_date_created=django_filters.DateFilter(name='date_created', lookup_expr='lte'),
+        min_date_done=django_filters.DateFilter(name='date_done', lookup_expr='gte'),
+        max_date_done=django_filters.DateFilter(name='date_done', lookup_expr='lte'),
         Meta=Meta,
     ))
 

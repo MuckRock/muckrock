@@ -32,13 +32,14 @@ class FOIARequestFilterSet(django_filters.FilterSet):
         widget=autocomplete_light.MultipleChoiceWidget('JurisdictionAutocomplete')
     )
     projects = django_filters.ModelMultipleChoiceFilter(
-        name="projects",
-        queryset=Project.objects.get_public(),
+        name='projects',
+        queryset=lambda request: Project.objects.get_visible(request.user),
         widget=autocomplete_light.MultipleChoiceWidget('ProjectAutocomplete'),
     )
     tags = django_filters.ModelMultipleChoiceFilter(
         name='tags__name',
         queryset=Tag.objects.all(),
+        label='Tags',
         widget=autocomplete_light.MultipleChoiceWidget('TagAutocomplete'),
     )
     has_embargo = django_filters.BooleanFilter(
@@ -71,7 +72,7 @@ class FOIARequestFilterSet(django_filters.FilterSet):
 
     class Meta:
         model = FOIARequest
-        fields = ['status', 'user', 'agency', 'jurisdiction', 'projects', 'tags']
+        fields = ['status', 'user', 'agency', 'jurisdiction', 'projects']
 
 
 class MyFOIARequestFilterSet(django_filters.FilterSet):
@@ -88,6 +89,7 @@ class MyFOIARequestFilterSet(django_filters.FilterSet):
     tags = django_filters.ModelMultipleChoiceFilter(
         name='tags__name',
         queryset=Tag.objects.all(),
+        label='Tags',
         widget=autocomplete_light.MultipleChoiceWidget('TagAutocomplete'),
     )
     has_embargo = django_filters.BooleanFilter(
@@ -119,7 +121,7 @@ class MyFOIARequestFilterSet(django_filters.FilterSet):
 
     class Meta:
         model = FOIARequest
-        fields = ['status', 'agency', 'jurisdiction', 'tags']
+        fields = ['status', 'agency', 'jurisdiction']
 
 
 class MyFOIAMultiRequestFilterSet(django_filters.FilterSet):
@@ -148,12 +150,13 @@ class ProcessingFOIARequestFilterSet(django_filters.FilterSet):
     tags = django_filters.ModelMultipleChoiceFilter(
         name='tags__name',
         queryset=Tag.objects.all(),
+        label='Tags',
         widget=autocomplete_light.MultipleChoiceWidget('TagAutocomplete'),
     )
 
     class Meta:
         model = FOIARequest
-        fields = ['user', 'agency', 'jurisdiction', 'tags']
+        fields = ['user', 'agency', 'jurisdiction']
 
 
 class AgencyFOIARequestFilterSet(django_filters.FilterSet):
@@ -165,6 +168,7 @@ class AgencyFOIARequestFilterSet(django_filters.FilterSet):
     tags = django_filters.ModelMultipleChoiceFilter(
         name='tags__name',
         queryset=Tag.objects.all(),
+        label='Tags',
         widget=autocomplete_light.MultipleChoiceWidget('TagAutocomplete'),
     )
     date_range = django_filters.DateFromToRangeFilter(
@@ -180,4 +184,4 @@ class AgencyFOIARequestFilterSet(django_filters.FilterSet):
 
     class Meta:
         model = FOIARequest
-        fields = ['user', 'tags']
+        fields = ['user']

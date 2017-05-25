@@ -9,7 +9,7 @@ from autocomplete_light import shortcuts as autocomplete_light
 import django_filters
 
 from muckrock.agency.models import Agency
-from muckrock.filters import BLANK_STATUS, NULL_BOOLEAN_CHOICES
+from muckrock.filters import BLANK_STATUS, BOOLEAN_CHOICES
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import (
     SNAIL_MAIL_CATEGORIES,
@@ -57,11 +57,15 @@ class SnailMailTaskFilterSet(TaskFilterSet):
     """Allows snail mail tasks to be filtered by category, as well as the
     presence of a tracking number or an agency note."""
     category = django_filters.ChoiceFilter(choices=[('', 'All')] + SNAIL_MAIL_CATEGORIES)
-    has_tracking_number = django_filters.MethodFilter(
-        widget=forms.Select(choices=NULL_BOOLEAN_CHOICES),
+    has_tracking_number = django_filters.ChoiceFilter(
+        method='filter_has_tracking_number',
+        label='Has tracking number',
+        choices=BOOLEAN_CHOICES,
     )
-    has_agency_notes = django_filters.MethodFilter(
-        widget=forms.Select(choices=NULL_BOOLEAN_CHOICES),
+    has_agency_notes = django_filters.ChoiceFilter(
+        method='filter_has_agency_notes',
+        label='Has agency notes',
+        choices=BOOLEAN_CHOICES,
     )
     resolved = django_filters.BooleanFilter(
         label='Show Resolved',
@@ -80,12 +84,14 @@ class SnailMailTaskFilterSet(TaskFilterSet):
             return queryset.filter(**{name: ''})
         return queryset
 
-    def filter_has_tracking_number(self, queryset, value):
+    def filter_has_tracking_number(self, queryset, name, value):
         """Check if the foia has a tracking number."""
+        #pylint: disable=unused-argument
         return self.blank_choice(queryset, 'communication__foia__tracking_id', value)
 
-    def filter_has_agency_notes(self, queryset, value):
+    def filter_has_agency_notes(self, queryset, name, value):
         """Check if the agency has notes."""
+        #pylint: disable=unused-argument
         return self.blank_choice(queryset, 'communication__foia__agency__notes', value)
 
     class Meta:
