@@ -497,6 +497,7 @@ class Statistics(models.Model):
 
     total_pages = models.IntegerField(null=True, blank=True)
     total_users = models.IntegerField(null=True, blank=True)
+    total_users_excluding_agencies = models.IntegerField(null=True, blank=True)
     users_today = models.ManyToManyField(User)
     total_fees = models.IntegerField(null=True, blank=True)
     pro_users = models.IntegerField(null=True, blank=True)
