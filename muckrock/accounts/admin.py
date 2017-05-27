@@ -64,6 +64,7 @@ class ReceiptEmailInline(admin.StackedInline):
 class MRUserAdmin(UserAdmin):
     """User admin options"""
     list_display = ('username', 'date_joined',)
+    list_filter = ('profile__acct_type',) + UserAdmin.list_filter
     inlines = [ProfileInline, ReceiptEmailInline]
 
     def save_related(self, request, form, formsets, change):
