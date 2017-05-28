@@ -16,7 +16,7 @@ def save_foia_comm(foia, from_who, comm, user, appeal=False,
         snail=False, thanks=False, subject=''):
     """Save the FOI Communication"""
     #pylint:disable=too-many-arguments
-    comm = FOIACommunication.objects.create(
+    FOIACommunication.objects.create(
         foia=foia,
         from_who=from_who,
         to_who=foia.get_to_who(),
@@ -99,4 +99,7 @@ def raw(request, idx):
     comm = get_object_or_404(FOIACommunication, pk=idx)
     if not comm.rawemail:
         raise Http404()
-    return HttpResponse(comm.rawemail.raw_email, content_type='text/plain')
+    return HttpResponse(
+            comm.rawemail.raw_email,
+            content_type='text/plain; charset=utf-8',
+            )
