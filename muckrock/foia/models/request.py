@@ -13,9 +13,11 @@ from django.template.defaultfilters import escape, linebreaks, slugify
 from django.template.loader import render_to_string
 
 from actstream.models import followers
+import chardet
 from datetime import datetime, date, timedelta
 from hashlib import md5
 import logging
+import mimetypes
 import os.path
 from reversion import revisions as reversion
 from taggit.managers import TaggableManager
@@ -732,7 +734,13 @@ class FOIARequest(models.Model):
         msg.attach_alternative(linebreaks(escape(body)), 'text/html')
         # atach all files from the latest communication
         for file_ in comm.files.all():
-            msg.attach(file_.name(), file_.ffile.read())
+            name = file_.name()
+            content = file_.ffile.read()
+            mimetype, _ = mimetypes.guess_type(name)
+            if mimetype and mimetype.startswith('text/'):
+                enc = chardet.detect(content)['encoding']
+                content = content.decode(enc)
+            msg.attach(name, content)
 
         msg.send(fail_silently=False)
 

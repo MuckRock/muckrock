@@ -3,6 +3,7 @@
 bleach # Used to sanitize any HTML we're rendering
 boto # Used to access AWS
 celery # Used to run async tasks
+chardet # Detect character encodings for user uploaded text files
 dill # Used to serialize machine learning data
 django-activity-stream # Used for notifications
 django-adaptors # Used for model import
@@ -13,7 +14,7 @@ django-cors-headers # Allows access to API endpoints from non-MuckRock domains
 django-dbsettings # DB stored configurations
 django-debug-toolbar # Toolbar for debugging
 django-email-bandit # Used to hijack emails in a staging setting
-django-filter==0.13.0 # Used for filtering in viewsets
+django-filter # Used for filtering in viewsets
 django-geojson # Used for storing geographic data
 django-hosts # Used for multi-domain routing
 django-leaflet # Used for plotting geographic data

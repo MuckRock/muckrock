@@ -14,6 +14,7 @@ bleach==1.5.0
 boto==2.42.0
 bz2file==0.98             # via smart-open
 celery==3.1.23
+chardet==3.0.3
 Click==6.6                # via pyimagediet
 contextlib2==0.5.4        # via raven
 cssselect==0.9.2          # via premailer

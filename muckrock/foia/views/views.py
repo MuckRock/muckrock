@@ -693,10 +693,14 @@ class Detail(DetailView):
     def _agency_reply(self, request, foia):
         """Agency reply directly through the site"""
         form = FOIAAgencyReplyForm(request.POST)
+        if request.user.profile.agency:
+            from_who = request.user.profile.agency.name
+        else:
+            from_who = request.user.get_full_name()
         if form.is_valid():
             comm = FOIACommunication.objects.create(
                     foia=foia,
-                    from_who=request.user.profile.agency.name,
+                    from_who=from_who,
                     to_who=foia.user.get_full_name(),
                     response=True,
                     date=datetime.now(),
