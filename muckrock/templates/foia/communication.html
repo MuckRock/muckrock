@@ -75,7 +75,7 @@
     {% endwith %}
     {% endwith %}
     </ul>
-    {% if communication.files|length > 50 %}
+    {% if communication.files.all|length > 50 %}
     <span class="notification warning">
         <span class="symbol">{% include 'lib/component/icon/warning.svg' %}</span>
         <span class="text">
