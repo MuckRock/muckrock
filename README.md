@@ -5,33 +5,14 @@
 
 ## Install
 
-1. Check out the git repository
-  1. `git clone git@github.com:MuckRock/muckrock.git`
-
+1. Check out the git repository - `git clone git@github.com:MuckRock/muckrock.git`
 2. Set up your virtual machine
-  1. Install [Vagrant][vagrant] and [VirtualBox][virtualbox]
-  2. Run `vagrant up` (this will take a while)
-  3. Run `vagrant ssh` to ssh into the virtual machine
+    1. Install [Vagrant][vagrant] and [VirtualBox][virtualbox]
+    2. Run `vagrant up` (this will take a while)
+    3. Run `vagrant ssh` to ssh into the virtual machine
+3. You may edit the file `~/muckrock/.settings.sh` if you would like to set up accounts and passwords for any external providers - you should be able to develop without these unless you specifically need to use and test them
 
-3. Set the secrets
-  1. `cd muckrock`
-  2. `touch .settings.sh`
-  3. The `.settings.sh` file should **never** be checked in to the repository.
-  4. We will send you the (definitely) sensitive information in a (probably) secure manner.
-  5. Inside your VM, run `source ~/.bashrc`.
-
-4. Populate the database and sync the files from AWS inside the virtual machine (Run all commands inside the VM)
-  1. Restart the database to pick up correct permissions, `sudo service postgresql`
-  2. Login to heroku toolbelt, `heroku login`
-  3. Pull the database, `fab populate-db`
-  4. Pull files from S3, `fab sync-aws`
-
-5. Build the search index
-  1. Install watson with `fab manage:installwatson`
-  2. Build the search index with `fab manage:buildwatson`
-  3. After this, the index should stay updated. If a new model is registered with watson, then build the index (step 2). This command should be run on any staging or production servers when pushing code that updates the registration.
-
-You should have a fully populated MuckRock site running locally now.
+You should have a fully populated MuckRock site set up locally now.
 The code checked out from GitHub is synced between the virtual machine and your host machine, so you may edit the code using your favorite text editor locally while running the code from within the virtual machine.
 
 ## Develop
@@ -43,6 +24,10 @@ The code checked out from GitHub is synced between the virtual machine and your 
 2. Run `fab celery &` to start a background task queue
 3. Run `fab runserver` to start a server instance
 4. Navigate your web browser (from the host machine) to `localhost:8000`
+
+### Update search index
+
+The index should stay updated. If a new model is registered with watson, then build the index (`fab manage:buildwaston`). This command should be run on any staging or production servers when pushing code that updates the registration.
 
 ### Add dependencies
 
