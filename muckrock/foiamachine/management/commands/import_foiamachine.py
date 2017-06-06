@@ -25,7 +25,7 @@ from muckrock.jurisdiction.models import Jurisdiction
 
 import csv
 import os
-from datetime import datetime
+from datetime import datetime, date
 
 # pylint: disable-all
 
@@ -163,6 +163,7 @@ class Command(BaseCommand):
                             acct_type='basic',
                             num_requests=5,
                             source='foia machine',
+                            date_update=date.today(),
                             )
         print 'Imported %s new users' % count
 

@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.core.validators import validate_email
 from django.forms import ValidationError
 
-from datetime import datetime
+from datetime import date
 import re
 
 from muckrock.accounts.models import Profile
@@ -39,7 +39,7 @@ def miniregister(full_name, email, password):
         user=user,
         acct_type='basic',
         monthly_requests=settings.MONTHLY_REQUESTS.get('basic', 0),
-        date_update=datetime.now()
+        date_update=date.today()
     )
     # send the new user a welcome email
     welcome_miniregister.delay(user)
