@@ -9,7 +9,7 @@ from django.db import models
 from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
 
-from datetime import date, datetime
+from datetime import date
 from djgeojson.fields import PointField
 from easy_thumbnails.fields import ThumbnailerImageField
 from email.utils import parseaddr
