@@ -232,7 +232,7 @@ class Agency(models.Model, RequestHelper):
             Profile.objects.create(
                     user=user,
                     acct_type='agency',
-                    date_update=datetime.now(),
+                    date_update=date.today(),
                     agency=self,
                     )
             return user
