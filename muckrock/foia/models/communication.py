@@ -397,7 +397,7 @@ class CommunicationOpen(models.Model):
 
     recipient = models.EmailField()
     city = models.CharField(max_length=50)
-    region = models.CharField(max_length=10)
+    region = models.CharField(max_length=50)
     country = models.CharField(max_length=10)
 
     client_type = models.CharField(max_length=15)
