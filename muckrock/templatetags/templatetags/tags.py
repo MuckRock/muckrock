@@ -30,7 +30,7 @@ register = Library()
 @register.simple_tag
 def autologin(user):
     """Generate an autologin token for the user."""
-    if user.is_authenticated():
+    if user and user.is_authenticated():
         return urlencode(user.profile.autologin())
     return ''
 
