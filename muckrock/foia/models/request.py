@@ -52,21 +52,23 @@ class FOIARequestQuerySet(models.QuerySet):
         if user.is_staff:
             return self.all()
 
-        # Requests are visible if you own them, have view or edit permissions,
-        # or if they are not drafts and not embargoed
-        if user.is_authenticated() and user.profile.acct_type == 'agency':
-            return self.filter(
-                    Q(user=user) |
-                    Q(edit_collaborators=user) |
-                    Q(read_collaborators=user) |
-                    Q(agency=user.profile.agency) |
-                    (~Q(status='started') & ~Q(embargo=True)))
-        elif user.is_authenticated():
-            return self.filter(
-                    Q(user=user) |
+        if user.is_authenticated():
+            # Requests are visible if you own them, have view or edit permissions,
+            # or if they are not drafts and not embargoed
+            query = (Q(user=user) |
                     Q(edit_collaborators=user) |
                     Q(read_collaborators=user) |
                     (~Q(status='started') & ~Q(embargo=True)))
+            # agency users may also view requests for their agency
+            if user.profile.acct_type == 'agency':
+                query = query | Q(agency=user.profile.agency)
+            # organizational users may also view requests from their org that are shared
+            if user.profile.organization is not None:
+                query = query | Q(
+                        user__profile__org_share=True,
+                        user__profile__organization=user.profile.organization,
+                        )
+            return self.filter(query)
         else:
             # anonymous user, filter out drafts and embargoes
             return (self.exclude(status='started')
