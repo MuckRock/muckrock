@@ -274,7 +274,8 @@ class CacheNode(Node):
         self.cache_name = cache_name
         self.compress = compress
 
-    def render(self, context):
+    def _resolve_vars(self, context):
+        """Error handling for resolving vars"""
         try:
             expire_time = self.expire_time_var.resolve(context)
         except VariableDoesNotExist:
@@ -302,6 +303,12 @@ class CacheNode(Node):
                 fragment_cache = caches['template_fragments']
             except InvalidCacheBackendError:
                 fragment_cache = caches['default']
+
+        return (expire_time, fragment_cache)
+
+    def render(self, context):
+        """Render the cached fragment"""
+        expire_time, fragment_cache = self._resolve_vars(context)
 
         # if expire time is 0 do not cache
         # memcached backend does no allow for 0 for no caching so do it here
