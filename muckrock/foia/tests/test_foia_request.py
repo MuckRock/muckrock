@@ -22,8 +22,9 @@ from muckrock.factories import (
     FOIACommunicationFactory,
     ProjectFactory,
     AgencyFactory,
-    AppealAgencyFactory
-)
+    AppealAgencyFactory,
+    OrganizationFactory,
+    )
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.foia.views import Detail, FollowingRequestList
 from muckrock.foia.views.composers import _make_user
@@ -141,6 +142,22 @@ class TestFOIARequestUnit(TestCase):
         nose.tools.assert_false(foias[2].has_perm(AnonymousUser(), 'view'))
         nose.tools.assert_true(foias[3].has_perm(AnonymousUser(), 'view'))
         nose.tools.assert_true(foias[4].has_perm(AnonymousUser(), 'view'))
+
+    def test_foia_viewable_org_share(self):
+        """Test all the viewable and embargo functions"""
+        org = OrganizationFactory()
+        org.owner.profile.organization = org
+        foia = FOIARequestFactory(
+                embargo=True,
+                user__profile__organization=org,
+                )
+        foias = FOIARequest.objects.get_viewable(org.owner)
+        nose.tools.assert_not_in(foia, foias)
+
+        foia.user.profile.org_share = True
+        foia.user.profile.save()
+        foias = FOIARequest.objects.get_viewable(org.owner)
+        nose.tools.assert_in(foia, foias)
 
     def test_foia_set_mail_id(self):
         """Test the set_mail_id function"""

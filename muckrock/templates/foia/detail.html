@@ -121,7 +121,7 @@
             {% crowdfund foia.crowdfund.pk %}
         {% endif %}
 
-        {% cond_cache foia_cache_timeout foia_detail_bottom foia.pk request.user.pk %}
+        {% compress_cache foia_cache_timeout foia_detail_bottom foia.pk request.user.pk %}
         {% include 'foia/foia_actions.html' %}
 
         <div class="tab-container">
