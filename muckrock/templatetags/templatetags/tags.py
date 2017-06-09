@@ -317,11 +317,11 @@ class CacheNode(Node):
             cache_key = make_template_fragment_key(self.fragment_name, vary_on)
             value = fragment_cache.get(cache_key)
             if value is not None and self.compress:
-                value = zlib.decompress(value)
+                value = zlib.decompress(value).decode('utf8')
             if value is None:
                 value = self.nodelist.render(context)
                 if self.compress:
-                    fragment_cache.set(cache_key, zlib.compress(value), expire_time)
+                    fragment_cache.set(cache_key, zlib.compress(value.encode('utf8')), expire_time)
                 else:
                     fragment_cache.set(cache_key, value, expire_time)
             return value
