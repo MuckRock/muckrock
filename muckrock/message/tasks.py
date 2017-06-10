@@ -31,13 +31,15 @@ def send_activity_digest(user, subject, interval):
 
 def send_digests(preference, subject, interval):
     """Helper to send out timed digests"""
-    profiles = (Profile.objects.select_related('user')
-                               .prefetch_related('user__notifications')
-                               .filter(email_pref=preference)
-                               .distinct())
-    for profile in profiles:
-        if profile.has_unread_notifications():
-            send_activity_digest.delay(profile.user, subject, interval)
+    users = (User.objects
+            .filter(
+                profile__email_pref=preference,
+                notifications__read=False,
+                )
+            .distinct()
+            )
+    for user in users:
+        send_activity_digest.delay(user, subject, interval)
 
 # every hour
 @periodic_task(run_every=crontab(hour='*/1', minute=0), name='muckrock.message.tasks.hourly_digest')
