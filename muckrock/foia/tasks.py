@@ -30,6 +30,7 @@ from decimal import Decimal
 from django_mailgun import MailgunAPIError
 from phaxio import PhaxioApi
 from phaxio.exceptions import PhaxioError
+from random import randint
 from raven import Client
 from raven.contrib.celery import register_logger_signal, register_signal
 from scipy.sparse import hstack
@@ -78,7 +79,7 @@ def authenticate_documentcloud(request):
     request.add_header('Authorization', 'Basic %s' % auth)
     return request
 
-@task(ignore_result=True, max_retries=3, name='muckrock.foia.tasks.upload_document_cloud')
+@task(ignore_result=True, max_retries=10, name='muckrock.foia.tasks.upload_document_cloud')
 def upload_document_cloud(doc_pk, change, **kwargs):
     """Upload a document to Document Cloud"""
 
@@ -130,7 +131,14 @@ def upload_document_cloud(doc_pk, change, **kwargs):
             set_document_cloud_pages.apply_async(args=[doc.pk], countdown=1800)
     except (urllib2.URLError, urllib2.HTTPError) as exc:
         logger.warn('Upload Doc Cloud error: %s %s', url, doc.pk)
-        upload_document_cloud.retry(args=[doc.pk, change], kwargs=kwargs, exc=exc)
+        countdown = ((2 ** upload_document_cloud.request.retries)
+                * 300 + randint(0, 300))
+        upload_document_cloud.retry(
+                args=[doc.pk, change],
+                kwargs=kwargs,
+                exc=exc,
+                countdown=countdown,
+                )
 
 
 @task(ignore_result=True, max_retries=10, name='muckrock.foia.tasks.set_document_cloud_pages')
