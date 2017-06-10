@@ -371,6 +371,12 @@ class NewAgencyTaskList(TaskList):
         if request.POST.get('reject'):
             replacement_agency_id = request.POST.get('replacement')
             replacement_agency = get_object_or_404(Agency, id=replacement_agency_id)
+            if replacement_agency.status != 'approved':
+                messages.error(
+                        request,
+                        'Replacement agency must be an "approved" agency.',
+                        )
+                return
             task.reject(replacement_agency)
             task.resolve(request.user)
         return super(NewAgencyTaskList, self).task_post_helper(request, task)
