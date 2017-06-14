@@ -292,7 +292,7 @@ def classify_status(task_pk, **kwargs):
     ignore_result=True,
     max_retries=5,
     name='muckrock.foia.tasks.send_fax',
-    rate_limit='6/m',
+    rate_limit='30/m',
     )
 def send_fax(comm_id, subject, body, **kwargs):
     """Send a fax using the Phaxio API"""
