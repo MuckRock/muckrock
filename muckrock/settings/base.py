@@ -262,6 +262,9 @@ CELERY_IMPORTS = (
     )
 CELERYD_MAX_TASKS_PER_CHILD = os.environ.get('CELERYD_MAX_TASKS_PER_CHILD', 100)
 CELERYD_TASK_TIME_LIMIT = os.environ.get('CELERYD_TASK_TIME_LIMIT', 5 * 60)
+CELERY_ROUTES = {
+        'muckrock.foia.tasks.send_fax': {'queue': 'phaxio'},
+        }
 
 AUTHENTICATION_BACKENDS = (
     'rules.permissions.ObjectPermissionBackend',
