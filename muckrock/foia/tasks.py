@@ -320,7 +320,7 @@ def send_fax(comm_id, subject, body, **kwargs):
     try:
         results = api.send(
                 to=comm.foia.email,
-                header_text=subject[:50],
+                header_text=subject[:45],
                 string_data=body,
                 string_data_type='text',
                 files=files,
