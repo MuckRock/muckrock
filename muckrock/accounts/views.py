@@ -460,7 +460,7 @@ def stripe_webhook(request):
         event_id = event_json['id']
         event_type = event_json['type']
         if event_type.startswith(('charge', 'invoice')):
-            event_object_id = event_json['data']['object']['id']
+            event_object_id = event_json['data']['object'].get('id', '')
         else:
             event_object_id = ''
     except (TypeError, ValueError, SyntaxError) as exception:
