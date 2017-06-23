@@ -193,9 +193,9 @@ $('.modal-link').click(function(e){
 
 /* Agency Reply */
 
-$("#id_price").parent().hide();
+$("#agency-reply #id_price").parent().hide();
 
-$("#id_status").change(function() {
+$("#agency-reply #id_status").change(function() {
   var help_texts = {
     "processed": "This is an acknowledgement or general update message.  A future communication will contain the results of the request.",
     "fix": "You require requester to fix their request - they may need to provide additional details or narrow the scope of the request so that you may continue processing it.",
@@ -206,12 +206,12 @@ $("#id_status").change(function() {
     "partial": "Some of the responsive documents are attached and uploaded.  More documents will be sent in a future communication."
   };
   if ($(this).val() == "payment") {
-    $("#id_price").parent().show();
+    $("#agency-reply #id_price").parent().show();
   } else {
-    $("#id_price").parent().hide();
+    $("#agency-reply #id_price").parent().hide();
   }
   $(this).next(".help-text").text(help_texts[$(this).val()]);
 });
-$("#id_status").trigger("change");
+$("#agency-reply #id_status").trigger("change");
 
 
