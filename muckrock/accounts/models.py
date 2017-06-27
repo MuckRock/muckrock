@@ -468,6 +468,7 @@ class Statistics(models.Model):
     total_requests_no_docs = models.IntegerField(null=True, blank=True)
     total_requests_partial = models.IntegerField(null=True, blank=True)
     total_requests_abandoned = models.IntegerField(null=True, blank=True)
+    total_requests_lawsuit = models.IntegerField(null=True, blank=True)
     requests_processing_days = models.IntegerField(null=True, blank=True)
 
     # FOIA Machine Requests
@@ -484,6 +485,7 @@ class Statistics(models.Model):
     machine_requests_no_docs = models.IntegerField(null=True, blank=True)
     machine_requests_partial = models.IntegerField(null=True, blank=True)
     machine_requests_abandoned = models.IntegerField(null=True, blank=True)
+    machine_requests_lawsuit = models.IntegerField(null=True, blank=True)
 
     orphaned_communications = models.IntegerField(null=True, blank=True)
 

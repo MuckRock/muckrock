@@ -154,6 +154,7 @@ STATUS = [
     ('appealing', 'Awaiting Appeal'),
     ('fix', 'Fix Required'),
     ('payment', 'Payment Required'),
+    ('lawsuit', 'In Litigation'),
     ('rejected', 'Rejected'),
     ('no_docs', 'No Responsive Documents'),
     ('done', 'Completed'),

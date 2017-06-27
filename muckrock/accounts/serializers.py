@@ -99,6 +99,7 @@ class StatisticsSerializer(serializers.ModelSerializer):
                 'total_requests_no_docs',
                 'total_requests_partial',
                 'total_requests_abandoned',
+                'total_requests_lawsuit',
                 'total_pages',
                 'total_users',
                 'total_agencies',
