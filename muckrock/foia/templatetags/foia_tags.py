@@ -20,6 +20,10 @@ def classify_status(status):
         'submitted': class_wait,
         'fix': class_wait,
         'payment': class_wait,
+        'lawsuit': class_wait,
+        'appealing': class_wait,
+        'processed': class_wait,
+        'ack': class_wait,
         'done': class_go,
         'partial': class_go,
     }
