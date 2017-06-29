@@ -61,5 +61,6 @@ scikit-learn==0.16.1 # Used for machine learning
 scipy==0.14.0 # Used for machine learning
 smart-open # Use for streaming files from S3
 smartypants # Used for typographically-correct quotes
+stackimpact # Performance monitoring
 stripe # Stripe payment processor integration
 unidecode # Used for unicode decoding
