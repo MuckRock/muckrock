@@ -13,6 +13,7 @@ bleach==1.5.0
 boto==2.42.0
 bz2file==0.98             # via smart-open
 celery==3.1.23
+certifi==2017.4.17        # via requests
 chardet==3.0.3
 Click==6.6                # via pyimagediet
 contextlib2==0.5.4        # via raven
@@ -57,6 +58,7 @@ easy-thumbnails==2.3
 fuzzywuzzy==0.14.0
 gunicorn==19.6.0
 html5lib==0.9999999       # via bleach
+idna==2.5                 # via requests
 image-diet2==1.0
 jsonfield==1.0.3
 kombu==3.0.35             # via celery
@@ -80,7 +82,7 @@ PyYAML==3.12              # via django-rest-swagger, pyimagediet
 raven==5.27.1
 rcssmin==1.0.6            # via django-compressor
 redis==2.10.5
-requests==2.11.1
+requests==2.18.1
 requirements-parser==0.1.0  # via django-package-monitor
 rjsmin==1.0.12            # via django-compressor
 rules==1.1.1
@@ -95,6 +97,7 @@ sqlparse==0.2.1           # via django-debug-toolbar
 stackimpact==1.0.1
 stripe==1.38.0
 unidecode==0.4.19
+urllib3==1.21.1           # via requests
 
 # The following packages are commented out because they are
 # considered to be unsafe in a requirements file:
