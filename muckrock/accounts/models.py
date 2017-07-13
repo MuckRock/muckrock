@@ -18,7 +18,11 @@ from lot.models import LOT
 import stripe
 from urllib import urlencode
 
-from muckrock.utils import generate_key, get_image_storage
+from muckrock.utils import (
+        generate_key,
+        get_image_storage,
+        stripe_retry_on_error,
+        )
 from muckrock.values import TextValue
 
 logger = logging.getLogger(__name__)
@@ -270,12 +274,16 @@ class Profile(models.Model):
         try:
             if not self.customer_id:
                 raise AttributeError('No Stripe ID')
-            customer = stripe.Customer.retrieve(self.customer_id)
+            customer = stripe_retry_on_error(
+                    stripe.Customer.retrieve,
+                    self.customer_id,
+                    )
         except (AttributeError, stripe.InvalidRequestError):
-            customer = stripe.Customer.create(
-                description=self.user.username,
-                email=self.user.email
-            )
+            customer = stripe_retry_on_error(
+                    stripe.Customer.create,
+                    description=self.user.username,
+                    email=self.user.email
+                    )
             self.customer_id = customer.id
             self.save()
         return customer
@@ -349,12 +357,13 @@ class Profile(models.Model):
         modified_amount = int(amount + (amount * fee))
         if not metadata.get('email') or not metadata.get('action'):
             raise ValueError('The charge metadata is malformed.')
-        stripe.Charge.create(
-            amount=modified_amount,
-            currency='usd',
-            source=token,
-            metadata=metadata
-        )
+        stripe_retry_on_error(
+                stripe.Charge.create,
+                amount=modified_amount,
+                currency='usd',
+                source=token,
+                metadata=metadata
+                )
 
     def generate_confirmation_key(self):
         """Generate random key used for validating the email address"""

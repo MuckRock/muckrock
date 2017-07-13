@@ -14,7 +14,7 @@ import logging
 import stripe
 
 from muckrock import task
-from muckrock.utils import new_action
+from muckrock.utils import new_action, stripe_retry_on_error
 
 stripe.api_version = '2015-10-16'
 
@@ -116,17 +116,18 @@ class Crowdfund(models.Model):
         # If the payment fails, do not catch the error.
         # Stripe represents currency as smallest-unit integers.
         stripe_amount = int(float(amount) * 100)
-        charge = stripe.Charge.create(
-            amount=stripe_amount,
-            source=token,
-            currency='usd',
-            metadata={
-                'email': email,
-                'action': 'crowdfund-payment',
-                'crowdfund_id': self.id,
-                'crowdfund_name': self.name
-            }
-        )
+        charge = stripe_retry_on_error(
+                stripe.Charge.create,
+                amount=stripe_amount,
+                source=token,
+                currency='usd',
+                metadata={
+                    'email': email,
+                    'action': 'crowdfund-payment',
+                    'crowdfund_id': self.id,
+                    'crowdfund_name': self.name
+                    }
+                )
         payment = CrowdfundPayment.objects.create(
             amount=amount,
             crowdfund=self,
