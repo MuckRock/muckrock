@@ -28,8 +28,14 @@ def filefield_maxlength_validator(value):
 
     # File path length should fit in table cell
     if bytes_filename > value.field.max_length:
-        if os.path.isfile(value.path):
-            os.remove(value.path)
+        try:
+            if os.path.isfile(value.path):
+                os.remove(value.path)
+        except NotImplementedError:
+            # if we are using S3, there path is not implemented
+            # it also doesn't appear to be saved to S3 yet,
+            # so no need to delete
+            pass
         raise forms.ValidationError(_(u'File name too long.'))
     return value
 
