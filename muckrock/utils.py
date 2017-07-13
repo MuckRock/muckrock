@@ -4,9 +4,11 @@ Miscellanous utilities
 
 import actstream
 import datetime
+import logging
 import random
 import string
 import stripe
+import sys
 
 from django.conf import settings
 from django.contrib.auth.models import User, Group
@@ -16,6 +18,8 @@ from django.template.loader_tags import BlockNode, ExtendsNode
 from django.utils.module_loading import import_string
 
 from muckrock.storage import QueuedS3DietStorage
+
+logger = logging.getLogger(__name__)
 
 #From http://stackoverflow.com/questions/2687173/django-how-can-i-get-a-block-from-a-template
 
@@ -101,7 +105,7 @@ def get_stripe_token(card_number='4242424242424242'):
         "exp_year": datetime.date.today().year,
         "cvc": '123'
     }
-    token = stripe.Token.create(card=card)
+    token = stripe_retry_on_error(stripe.Token.create, card=card)
     # all we need for testing stripe calls is the token id
     return token.id
 
@@ -121,3 +125,18 @@ def get_image_storage():
         return QueuedS3DietStorage()
     else:
         return import_string(settings.DEFAULT_FILE_STORAGE)()
+
+
+def stripe_retry_on_error(func, *args, **kwargs):
+    """Retry stripe API calls on connection errors"""
+    times = kwargs.pop('times', 0) + 1
+    try:
+        return func(*args, **kwargs)
+    except stripe.error.APIConnectionError as exc:
+        logger.error(
+                'Stripe Error, retrying #%d:\n\n%s',
+                times,
+                exc,
+                exc_info=sys.exc_info(),
+                )
+        return stripe_retry_on_error(func, times=times, *args, **kwargs)

@@ -20,6 +20,7 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.tasks import send_charge_receipt
 from muckrock.news.models import Article
 from muckrock.project.models import Project
+from muckrock.utils import stripe_retry_on_error
 
 import logging
 import requests
@@ -451,16 +452,17 @@ class DonationFormView(StripeFormMixin, FormView):
         charge = None
         error_msg = None
         try:
-            charge = stripe.Charge.create(
-                amount=amount,
-                currency='usd',
-                source=token,
-                description='Donation from %s' % email,
-                metadata={
-                    'email': email,
-                    'action': 'donation'
-                }
-            )
+            charge = stripe_retry_on_error(
+                    stripe.Charge.create,
+                    amount=amount,
+                    currency='usd',
+                    source=token,
+                    description='Donation from %s' % email,
+                    metadata={
+                        'email': email,
+                        'action': 'donation'
+                        }
+                    )
         except stripe.error.CardError:
             # card declined
             logger.warn('Card was declined.')
