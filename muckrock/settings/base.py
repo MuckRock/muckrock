@@ -183,6 +183,7 @@ INSTALLED_APPS = (
     'django_premailer',
     'djangosecure',
     'djcelery',
+    'djcelery_email',
     'djgeojson',
     'easy_thumbnails',
     'gunicorn',
