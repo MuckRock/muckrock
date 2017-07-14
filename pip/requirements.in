@@ -9,6 +9,7 @@ django-activity-stream # Used for notifications
 django-adaptors # Used for model import
 django-autocomplete-light<3 # Autocomplete drop down inputs
 django-celery # Integrate celery with django
+django-celery-email<2.0 # Send emails asynchronously using Celery
 django-compressor # Compress all JS and CSS assets into a single file
 django-cors-headers # Allows access to API endpoints from non-MuckRock domains
 django-dbsettings # DB stored configurations

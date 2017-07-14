@@ -18,7 +18,11 @@ SESSION_COOKIE_SECURE = True
 
 PREPEND_WWW = False
 
-EMAIL_BACKEND = 'django_mailgun.MailgunBackend'
+if boolcheck(os.environ.get('USE_CELERY_EMAIL', True)):
+    CELERY_EMAIL_BACKEND = 'django_mailgun.MailgunBackend'
+    EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
+else:
+    EMAIL_BACKEND = 'django_mailgun.MailgunBackend'
 
 MUCKROCK_URL = 'www.muckrock.com'
 FOIAMACHINE_URL = 'www.foiamachine.org'
