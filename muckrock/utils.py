@@ -126,17 +126,21 @@ def get_image_storage():
     else:
         return import_string(settings.DEFAULT_FILE_STORAGE)()
 
-
-def stripe_retry_on_error(func, *args, **kwargs):
-    """Retry stripe API calls on connection errors"""
+def retry_on_error(error, func, *args, **kwargs):
+    """Retry a function on error"""
     times = kwargs.pop('times', 0) + 1
     try:
         return func(*args, **kwargs)
-    except stripe.error.APIConnectionError as exc:
+    except error as exc:
         logger.error(
-                'Stripe Error, retrying #%d:\n\n%s',
+                'Error, retrying #%d:\n\n%s',
                 times,
                 exc,
                 exc_info=sys.exc_info(),
                 )
-        return stripe_retry_on_error(func, times=times, *args, **kwargs)
+        return retry_on_error(error, func, times=times, *args, **kwargs)
+
+
+def stripe_retry_on_error(func, *args, **kwargs):
+    """Retry stripe API calls on connection errors"""
+    return retry_on_error(stripe.error.APIConnectionError, func, *args, **kwargs)
