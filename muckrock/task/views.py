@@ -85,6 +85,21 @@ class TaskList(MRFilterListView):
                 raise Http404()
         return queryset
 
+    def get_filter(self):
+        """Initializes and returns the filter, if a filter_class is defined.
+        Defaults resolved to true if only one task specified"""
+        # pylint:disable=not-callable
+        if self.filter_class is None:
+            raise AttributeError('Missing a filter class.')
+        data = self.request.GET.dict()
+        if 'resolved' not in data and 'pk' in self.kwargs:
+            data['resolved'] = True
+        return self.filter_class(
+                data,
+                queryset=self.get_queryset(),
+                request=self.request,
+                )
+
     def get_model(self):
         """Returns the model from the class"""
         if self.queryset is not None:
