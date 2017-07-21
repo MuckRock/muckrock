@@ -91,7 +91,7 @@ class TaskList(MRFilterListView):
         # pylint:disable=not-callable
         if self.filter_class is None:
             raise AttributeError('Missing a filter class.')
-        data = self.request.GET.dict()
+        data = self.request.GET.copy()
         if 'resolved' not in data and 'pk' in self.kwargs:
             data['resolved'] = True
         return self.filter_class(
