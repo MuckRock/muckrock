@@ -409,6 +409,12 @@ def profile(request, username=None):
         else:
             return redirect('acct-profile', username=request.user.username)
     user = get_object_or_404(User, username=username)
+    if (request.method == "POST" and
+            request.user.is_staff and
+            request.POST.get('action') == 'cancel-pro'):
+        user.profile.cancel_pro_subscription()
+        messages.success(request, 'Pro account has been cancelled')
+        return redirect('acct-profile', username=username)
     user_profile = user.profile
     org = user_profile.organization
     show_org_link = (

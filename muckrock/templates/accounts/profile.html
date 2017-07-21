@@ -97,19 +97,32 @@
     </form>
     <div>
         {% if request.user == user_obj %}
-        {% if user.profile.acct_type == 'basic' and not user.profile.organization %}
-        <a href="{% url 'accounts' %}" class="blue button">Go Pro!</a>
-        {% endif %}
-        <div class="button-group">
-            <a href="{% url 'foia-create' %}" class="blue button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
-                {% include 'lib/component/icon/create-request.svg' %}
-                <span>File a Request</span>
-            </a>
-            <button class="blue button" form="buy-requests" type="submit">Buy Requests</button>
-        </div>
-        <a href="{% url 'acct-settings' %}" class="button">Settings</a>
+            {% if user.profile.acct_type == 'basic' and not user.profile.organization %}
+                <a href="{% url 'accounts' %}" class="blue button">Go Pro!</a>
+            {% endif %}
+            <div class="button-group">
+                <a href="{% url 'foia-create' %}" class="blue button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
+                    {% include 'lib/component/icon/create-request.svg' %}
+                    <span>File a Request</span>
+                </a>
+                <button class="blue button" form="buy-requests" type="submit">Buy Requests</button>
+            </div>
+            <a href="{% url 'acct-settings' %}" class="button">Settings</a>
         {% else %}
-        <button class="primary button" form="buy-requests" type="submit">&hearts; Gift Requests</button>
+            <button class="primary button" form="buy-requests" type="submit">&hearts; Gift Requests</button>
+        {% endif %}
+        {% if request.user.is_staff and user_obj.profile.acct_type == "pro" %}
+            <div class="modal" id="cancel-pro">
+                <form method="post">
+                    {% csrf_token %}
+                    <p>Are you sure you want to cancel {{user_obj.username}}'s pro account?</p>
+                    <footer>
+                        <button type="submit" name="action" value="cancel-pro" class="primary button">Confirm</button>
+                        <span class="close-modal button">Cancel</span>
+                    </footer>
+                </form>
+            </div>
+            <a href="#cancel-pro" class="modal-trigger button">Cancel Subscription</a>
         {% endif %}
     </div>
 </section>
