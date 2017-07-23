@@ -355,7 +355,6 @@ def send_fax(comm_id, subject, body, **kwargs):
 def followup_requests():
     """Follow up on any requests that need following up on"""
     log = []
-    error_log = []
     # weekday returns 5 for sat and 6 for sun
     is_weekday = datetime.today().weekday() < 5
     if (foia_options.enable_followup and
@@ -367,23 +366,15 @@ def followup_requests():
                     foia.followup(automatic=True)
                     log.append('%s - %d - %s' % (foia.status, foia.pk, foia.title))
                 except MailgunAPIError as exc:
-                    error_log.append('ERROR: %s - %d - %s - %s' %
-                            (foia.status, foia.pk, foia.title, exc))
+                    logger.error('Mailgun error during followups: %s', exc, exc_info=sys.exc_info())
         except SoftTimeLimitExceeded:
-            log.append('Follow ups did not complete in time. '
-                    'Completed %d out of %d' % (
-                        num_requests - FOIARequest.objects.get_followup().count(),
-                        num_requests,
-                        ))
+            logger.warn('Follow ups did not complete in time. '
+                    'Completed %d out of %d',
+                    num_requests - FOIARequest.objects.get_followup().count(),
+                    num_requests,
+                    )
 
-        if error_log:
-            subject = '[ERROR] Follow Ups'
-            body = '\n'.join(error_log) + '\n\n' + '\n'.join(log)
-        else:
-            subject = '[LOG] Follow Ups'
-            body = '\n'.join(log)
-        send_mail(subject, body, 'info@muckrock.com',
-                  ['requests@muckrock.com', 'mitch@muckrock.com'])
+        logger.info('Follow Ups:\n%s', '\n'.join(log))
 
 
 @periodic_task(run_every=crontab(hour=6, minute=0), name='muckrock.foia.tasks.embargo_warn')
