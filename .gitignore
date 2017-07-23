@@ -25,3 +25,4 @@ node_modules
 .settings.sh
 webpack-stats.json
 npm-debug.log
+.secret_key.sh
