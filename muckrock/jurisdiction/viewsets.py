@@ -3,8 +3,11 @@ Provides Jurisdiction application API views
 """
 
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
+from django.template.loader import get_template
+from django.template import RequestContext
 
-from rest_framework.decorators import list_route
+from rest_framework.decorators import list_route, detail_route
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 from rest_framework.response import Response
@@ -31,6 +34,20 @@ class JurisdictionViewSet(ModelViewSet):
                 'fee_rate',
                 'success_rate',
                 )]
+
+    @detail_route()
+    def template(self, request, pk=None):
+        """API view to get the template language for a jurisdiction"""
+        # pylint: disable=no-self-use
+        jurisdiction = get_object_or_404(Jurisdiction, pk=pk)
+        template = get_template('text/foia/request.txt')
+        context = RequestContext(request, {
+            'document_request': '<insert requested documents here>',
+            'jurisdiction': jurisdiction,
+            'user_name': request.user.get_full_name,
+            })
+        text = template.render(context)
+        return Response({'text': text})
 
 
 class ExemptionPermissions(DjangoModelPermissionsOrAnonReadOnly):
