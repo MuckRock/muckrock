@@ -41,10 +41,14 @@ class JurisdictionViewSet(ModelViewSet):
         # pylint: disable=no-self-use
         jurisdiction = get_object_or_404(Jurisdiction, pk=pk)
         template = get_template('text/foia/request.txt')
+        if request.user.is_authenticated():
+            user_name = request.user.get_full_name()
+        else:
+            user_name = 'Anonymous User'
         context = RequestContext(request, {
             'document_request': '<insert requested documents here>',
             'jurisdiction': jurisdiction,
-            'user_name': request.user.get_full_name,
+            'user_name': user_name,
             })
         text = template.render(context)
         return Response({'text': text})
