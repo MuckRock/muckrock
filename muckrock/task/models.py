@@ -177,13 +177,11 @@ class OrphanTask(Task):
                 created_from_orphan=True
             )
             moved_comm.make_sender_primary_contact()
-        return
 
     def reject(self, blacklist=False):
         """If blacklist is true, should blacklist the sender's domain."""
         if blacklist:
             self.blacklist()
-        return
 
     def get_sender_domain(self):
         """Gets the domain of the sender's email address."""
@@ -203,7 +201,6 @@ class OrphanTask(Task):
         except BlacklistDomain.MultipleObjectsReturned:
             blacklist = BlacklistDomain.objects.filter(domain=domain).first()
         blacklist.resolve_matches()
-        return
 
 
 class SnailMailTask(Task):
@@ -618,4 +615,3 @@ class BlacklistDomain(models.Model):
         tasks_to_resolve = OrphanTask.objects.get_from_sender(self.domain)
         for task in tasks_to_resolve:
             task.resolve()
-        return

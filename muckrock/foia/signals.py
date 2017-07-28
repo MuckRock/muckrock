@@ -22,7 +22,6 @@ def foia_update_embargo(sender, **kwargs):
                 doc.access = access
                 doc.save()
                 upload_document_cloud.apply_async(args=[doc.pk, True], countdown=3)
-    return
 
 
 def foia_file_delete_s3(sender, **kwargs):
