@@ -129,15 +129,28 @@ class FOIACommunication(models.Model):
         communication to the first request, then clone it across the rest of
         the requests. Returns the moved and cloned communications.
         """
+        # avoid circular imports
+        from muckrock.foia.tasks import upload_document_cloud
         if not foia_pks:
             raise ValueError('Expected a request to move the communication to.')
         if not isinstance(foia_pks, list):
             foia_pks = [foia_pks]
         move_to_request = get_object_or_404(FOIARequest, pk=foia_pks[0])
+        old_foia = self.foia
         self.foia = move_to_request
+        # if this was an orphan, it has not yet been uploaded
+        # to document cloud
+        change = old_foia is not None
+
+        access = 'private' if self.foia.embargo else 'public'
+        source = self.foia.agency.name if self.foia.agency else self.from_who
         for each_file in self.files.all():
             each_file.foia = move_to_request
+            each_file.access = access
+            each_file.source = source[:70]
             each_file.save()
+            upload_document_cloud.apply_async(
+                    args=[each_file.pk, change], countdown=3)
         self.save()
         logger.info('Communication #%d moved to request #%d', self.id, self.foia.id)
         # if cloning happens, self gets overwritten. so we save it to a variable here
@@ -172,11 +185,15 @@ class FOIACommunication(models.Model):
             this_clone.pk = None
             this_clone.foia = request
             this_clone.save()
+            access = 'private' if request.embargo else 'public'
+            source = request.agency.name if request.agency else self.from_who
             for file_ in files:
                 original_file_id = file_.id
                 file_.pk = None
                 file_.foia = request
                 file_.comm = this_clone
+                file_.access = access
+                file_.source = source
                 # make a copy of the file on the storage backend
                 try:
                     new_ffile = ContentFile(file_.ffile.read())
@@ -289,7 +306,8 @@ class FOIACommunication(models.Model):
         """Upload and attach a file"""
         # avoid circular imports
         from muckrock.foia.tasks import upload_document_cloud
-        access = 'private' if self.foia and self.foia.embargo else 'public'
+        # make orphans and embargoed documents private
+        access = 'private' if not self.foia or self.foia.embargo else 'public'
         source = (self.foia.agency.name if self.foia and self.foia.agency
                 else self.from_who)
 
