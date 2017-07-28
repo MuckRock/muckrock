@@ -5,6 +5,7 @@ FOIA views for actions
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db import transaction
 from django.shortcuts import (
         render_to_response,
         get_object_or_404,
@@ -239,11 +240,14 @@ def admin_fix(request, jurisdiction, jidx, slug, idx):
         context_instance=RequestContext(request)
     )
 
+@transaction.atomic
 @login_required
 def crowdfund_request(request, idx, **kwargs):
     """Crowdfund a request"""
     # pylint: disable=unused-argument
-    foia = FOIARequest.objects.get(pk=idx)
+    # select for update locks this request in order to prevent a race condition
+    # allowing multiple crowdfunds to be created for it
+    foia = FOIARequest.objects.select_for_update().get(pk=idx)
     # check for unauthorized access
     if not foia.has_perm(request.user, 'crowdfund'):
         messages.error(request, 'You may not crowdfund this request.')
