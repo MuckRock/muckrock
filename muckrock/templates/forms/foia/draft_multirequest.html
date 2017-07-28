@@ -97,3 +97,7 @@ monthly request{{ profile.monthly_requests|sub:balance.monthly_requests|pluraliz
 
 {% endwith %}
 {% endblock form-form %}
+
+{% block scripts %}
+    <script src="https://checkout.stripe.com/checkout.js" type="text/javascript"></script>
+{% endblock scripts %}
