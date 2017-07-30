@@ -10,9 +10,12 @@ events {
 
 http {
 	gzip on;
-	gzip_comp_level 2;
-	gzip_min_length 512;
-
+	gzip_http_version 1.0;
+	gzip_comp_level 5;
+	gzip_min_length 256;
+	gzip_proxied any;
+	gzip_vary on;
+	gzip_types application/rss+xml text/html;
 
 	server_tokens off;
 
