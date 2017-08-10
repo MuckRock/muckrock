@@ -13,6 +13,7 @@ from django.views.generic import TemplateView
 
 import logging
 from datetime import datetime
+from django_filters import FilterSet
 
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency, STALE_DURATION
@@ -86,19 +87,11 @@ class TaskList(MRFilterListView):
         return queryset
 
     def get_filter(self):
-        """Initializes and returns the filter, if a filter_class is defined.
-        Defaults resolved to true if only one task specified"""
-        # pylint:disable=not-callable
-        if self.filter_class is None:
-            raise AttributeError('Missing a filter class.')
-        data = self.request.GET.copy()
-        if 'resolved' not in data and 'pk' in self.kwargs:
-            data['resolved'] = True
-        return self.filter_class(
-                data,
-                queryset=self.get_queryset(),
-                request=self.request,
-                )
+        """Return an empter filter set if we are looking at a specific task"""
+        if 'pk' in self.kwargs:
+            return FilterSet(queryset=self.get_queryset(), request=self.request)
+        else:
+            return super(TaskList, self).get_filter()
 
     def get_model(self):
         """Returns the model from the class"""
