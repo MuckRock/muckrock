@@ -5,6 +5,8 @@ Views for the project application
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.core.cache import cache
+from django.core.cache.utils import make_template_fragment_key
 from django.core.urlresolvers import reverse
 from django.db.models import Prefetch
 from django.http import Http404
@@ -201,6 +203,12 @@ class ProjectEditView(ProjectPermissionsMixin, UpdateView):
         new_contributors = form.cleaned_data['contributors']
         self.notify_new_contributors(existing_contributors, new_contributors)
         messages.success(self.request, 'Your edits were saved.')
+        # clear the template cache for the project after its been edited
+        key = make_template_fragment_key(
+                'project_detail_objects',
+                [self.object.pk],
+                )
+        cache.delete(key)
         return super(ProjectEditView, self).form_valid(form)
 
     def notify_new_contributors(self, existing, new):
