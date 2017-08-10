@@ -15,6 +15,7 @@ import base64
 import hashlib
 import hmac
 import json
+import os
 
 from muckrock.foia.models import (
         FOIARequest,
@@ -32,6 +33,8 @@ def success(request):
     if not foia.has_perm(request.user, 'upload_attachment'):
         return HttpResponseForbidden()
     if 'key' not in request.POST:
+        return HttpResponseBadRequest()
+    if len(request.POST['key']) > 255:
         return HttpResponseBadRequest()
 
     attachment = OutboundAttachment(
@@ -153,6 +156,17 @@ def key_name(request):
     """Generate the S3 key name from the filename"""
     name = request.POST.get('name')
     foia_id = request.POST.get('foia_id')
+    # total name cannot be longer than 255, but we limit the base name to 100
+    # to give room for the directory and because that's plenty long
+    max_len = 100
+    if len(name) > max_len:
+        base, ext = os.path.splitext(name)
+        if len(ext) > max_len:
+            # if someone give us a large extension just cut part of it off
+            name = name[:max_len]
+        else:
+            # otherwise truncate the base and put the extension back on
+            name = base[:max_len - len(ext)] + ext
     attachment = OutboundAttachment(
             user=request.user,
             foia_id=foia_id,
