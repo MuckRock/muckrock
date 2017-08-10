@@ -21,7 +21,7 @@ This is the base style for a list of objects: a collection of FOIA requests, age
         {% block list-sections %}
         {% endblock list-sections %}
 
-        {% if filter.form %}
+        {% if filter.form.fields %}
         <div class="nomargins">
             <a href="#filter-toggle" class="bold list__toggle" id="filter-toggle">{% include 'lib/component/icon/search.svg' %}Show Filters &amp; Search</a>
             <a href="#" class="bold list__toggle list__toggle--hide">&times; Hide Filters</a>
