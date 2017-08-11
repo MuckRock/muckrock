@@ -27,7 +27,7 @@ The code checked out from GitHub is synced between the virtual machine and your 
 
 ### Update search index
 
-The index should stay updated. If a new model is registered with watson, then build the index (`fab manage:buildwaston`). This command should be run on any staging or production servers when pushing code that updates the registration.
+The index should stay updated. If a new model is registered with watson, then build the index (`fab manage:buildwatson`). This command should be run on any staging or production servers when pushing code that updates the registration.
 
 ### Add dependencies
 
