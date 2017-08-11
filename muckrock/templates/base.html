@@ -1,6 +1,7 @@
 {% load static from staticfiles %}
 {% load compress %}
 {% load render_bundle from webpack_loader %}
+{% load hijack_tags %}
 <!doctype html>
 
 <html>
@@ -51,6 +52,7 @@
             }
         </style>
         <link rel="stylesheet" type="text/css" href="{% static 'autocomplete_light/style.css' %}" />
+        <link rel="stylesheet" type="text/css" href="{% static 'hijack/hijack-styles.css' %}" />
         {% render_bundle 'main' 'css' %}
         {% endcompress %}
         {% block styles %}
@@ -79,6 +81,7 @@
         {% endblock twitter_card %}
     </head>
     <body>
+        {% hijack_notification %}
         {% block body %}
         <div class="container">
             <div id="modal-overlay"></div>

@@ -96,6 +96,12 @@
         <input type="hidden" name="stripe_amount" value="2000" />
     </form>
     <div>
+        {% if request.user.is_superuser %}
+            <form method="post" action="/hijack/{{user_obj.pk}}/">
+                {% csrf_token %}
+                <button type="submit" class="red button">Hijack {{user_obj.username}}</button>
+            </form>
+        {% endif %}
         {% if request.user == user_obj %}
             {% if user.profile.acct_type == 'basic' and not user.profile.organization %}
                 <a href="{% url 'accounts' %}" class="blue button">Go Pro!</a>

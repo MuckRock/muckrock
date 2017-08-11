@@ -27,6 +27,15 @@ since we break it into two pieces.
     @include drop-shadow;
   }
 }
+.global-header.global-header-hijacked {
+  & + * {
+    /* The top margin accounts for the fixed top navigation. */
+    margin-top: 5.375em !important;
+  }
+  @media($bottom-nav-bp-min) {
+    top: 43px;
+  }
+}
 @media($bottom-nav-bp-max) {
   .website-footer {
     /* The bottom is added when we have a fixed bottom navigation. */
