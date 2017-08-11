@@ -135,6 +135,7 @@ urlpatterns = patterns(
     url(r'^donate/$', views.DonationFormView.as_view(), name='donate'),
     url(r'^donate/thanks/$', views.DonationThanksView.as_view(), name='donate-thanks'),
     url(r'^landing/$', views.LandingView.as_view(), name='landing'),
+    url(r'^hijack/', include('hijack.urls')),
 )
 
 if settings.DEBUG:

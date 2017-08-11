@@ -17,6 +17,7 @@ django-debug-toolbar # Toolbar for debugging
 django-email-bandit # Used to hijack emails in a staging setting
 django-filter # Used for filtering in viewsets
 django-geojson # Used for storing geographic data
+django-hijack # Allows admins to log in to other user accounts
 django-hosts # Used for multi-domain routing
 django-leaflet # Used for plotting geographic data
 django-localflavor # Used for phone numbers and state list

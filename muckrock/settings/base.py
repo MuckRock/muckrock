@@ -207,6 +207,8 @@ INSTALLED_APPS = (
     'image_diet',
     'django_hosts',
     'queued_storage',
+    'hijack',
+    'compat', # for hijack
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
