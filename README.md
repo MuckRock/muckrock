@@ -3,6 +3,13 @@
 [![Codeship Status for MuckRock/muckrock][codeship-img]][codeship]
 [![codecov.io][codecov-img]][codecov]
 
+## Software Versions
+
+The following instructions were tested to work with the following software versions:
+
+1. Vagrant 1.9.3
+2. VirtualBox 5.0.32
+
 ## Install
 
 1. Check out the git repository - `git clone git@github.com:MuckRock/muckrock.git`
@@ -19,11 +26,12 @@ The code checked out from GitHub is synced between the virtual machine and your 
 
 ### Run
 
-1. Run `npm run watch &` to start a background Webpack instance
-1. Run `fab mail &` to start a background email server
-2. Run `fab celery &` to start a background task queue
-3. Run `fab runserver` to start a server instance
-4. Navigate your web browser (from the host machine) to `localhost:8000`
+1. The following commands should be run from the MuckRock directory inside the virtual machine: `cd muckrock`
+2. Run `npm run build` to rebuild the javascript and css
+3. Run `fab mail &` to start a background email server
+4. Run `fab celery &` to start a background task queue
+5. Run `fab runserver` to start a server instance
+6. Navigate your web browser (from the host machine) to `localhost:8000`
 
 ### Update search index
 
