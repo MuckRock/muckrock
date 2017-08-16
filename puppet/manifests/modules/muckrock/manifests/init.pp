@@ -30,11 +30,12 @@ class muckrock {
 		owner  => "vagrant",
 		group  => "vagrant",
 	}
-    exec { "generate secret key":
-        user    => 'vagrant',
+
+	exec { "generate secret key":
+		user    => 'vagrant',
 		command => "/usr/bin/python -c 'import random; print \"export SECRET_KEY=\\x27%s\\x27\" % \"\".join([random.SystemRandom().choice(\"abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)\") for i in range(50)])' > .secret_key.sh",
 		cwd     => '/home/vagrant/muckrock',
-        creates => '/home/vagrant/muckrock/.secret_key.sh',
+		creates => '/home/vagrant/muckrock/.secret_key.sh',
 	}
 
 
@@ -44,6 +45,9 @@ class muckrock {
 
 	Exec["apt-update"] -> Package <| |>
 
+	package { 'ruby-dev':
+		ensure => installed,
+	} ->
 	package { 'sass':
 		ensure   => installed,
 		provider => 'gem',
@@ -109,35 +113,36 @@ class muckrock {
 		group        => 'vagrant',
 		requirements => '/home/vagrant/muckrock/requirements.txt',
 		require      => [File['/home/vagrant/ve'],
-		                 Package['zlib1g-dev'],],
+						Package['zlib1g-dev'],],
 	} ->
 	python::requirements {'/home/vagrant/muckrock/pip/dev-requirements.txt' :
 		virtualenv  => '/home/vagrant/ve/muckrock',
 		owner       => 'vagrant',
 		group       => 'vagrant',
-        forceupdate => true,
-        before      => Exec['migrate'],
+		forceupdate => true,
+		before      => Exec['migrate'],
 	}
 
 	# nodejs
 
 	class { 'nvm':
-		user => 'vagrant',
-		install_node => '5.6.0',
+		user                => 'vagrant',
+		install_node        => '5.6.0',
 		manage_dependencies => false,
-		profile_path => '/home/vagrant/.nvm.sh',
+		profile_path        => '/home/vagrant/.nvm.sh',
+		require             => Package['sass'],
 	} ->
 	exec { 'install node requirements':
-        user    => 'vagrant',
+		user    => 'vagrant',
 		command => '/home/vagrant/.nvm/versions/node/v5.6.0/bin/npm install',
 		cwd     => '/home/vagrant/muckrock',
 		creates => '/home/vagrant/muckrock/node_modules',
 	} ->
 	exec { 'npm build':
-        user    => 'vagrant',
+		user    => 'vagrant',
 		command => '/home/vagrant/.nvm/versions/node/v5.6.0/bin/npm run build',
 		cwd     => '/home/vagrant/muckrock',
-        creates => '/home/vagrant/muckrock/muckrock/assets/bundles/main.js',
+		creates => '/home/vagrant/muckrock/muckrock/assets/bundles/main.js',
 	}
 
 	# postgresql
@@ -179,14 +184,14 @@ class muckrock {
 		user        => 'all',
 		address     => '::1/128',
 		auth_method => 'trust',
-        before      => Exec['migrate'],
+		before      => Exec['migrate'],
 	}
 
 	postgresql::server::config_entry { 'synchronous_commit':
 		value => 'off',
 	}
-    # these speed up the database, but are not safe to data corruption
-    # can turn them on if you do not care about your dev database
+	# these speed up the database, but are not safe to data corruption
+	# can turn them on if you do not care about your dev database
 	#postgresql::server::config_entry { 'fsync':
 	#	value => 'off',
 	#}
@@ -204,19 +209,19 @@ class muckrock {
 	include 'heroku'
 
 	exec { "migrate":
-        user => 'vagrant',
+		user => 'vagrant',
 		command => "/bin/bash -c 'source ~/.bashrc; /home/vagrant/ve/muckrock/bin/python /home/vagrant/muckrock/manage.py migrate --noinput'",
 	} ->
 	exec { "load data":
-        user => 'vagrant',
+		user => 'vagrant',
 		command => "/bin/bash -c 'source ~/.bashrc; /home/vagrant/ve/muckrock/bin/python /home/vagrant/muckrock/manage.py loaddata test_users test_profiles test_statistics jurisdictions agency_types test_agencies holidays test_foiarequests test_foiacommunications test_foiafiles test_news test_task tagged_item_base taggit tags'",
 	} ->
 	exec { "install watson":
-        user => 'vagrant',
+		user => 'vagrant',
 		command => "/bin/bash -c 'source ~/.bashrc; /home/vagrant/ve/muckrock/bin/python /home/vagrant/muckrock/manage.py installwatson'",
 	} ->
 	exec { "build watson":
-        user => 'vagrant',
+		user => 'vagrant',
 		command => "/bin/bash -c 'source ~/.bashrc; /home/vagrant/ve/muckrock/bin/python /home/vagrant/muckrock/manage.py buildwatson'",
 	}
 }
