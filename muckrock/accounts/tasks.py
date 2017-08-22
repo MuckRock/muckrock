@@ -6,17 +6,24 @@ from celery.schedules import crontab
 from celery.task import periodic_task
 from django.core.management import call_command
 from django.contrib.auth.models import User
-from django.db.models import Sum, F
+from django.db.models import Count, F, Q, Sum
 
 import logging
 from datetime import date, timedelta
 
 from muckrock.accounts.models import Profile, Statistics
 from muckrock.agency.models import Agency
+from muckrock.crowdfund.models import Crowdfund, CrowdfundPayment
 from muckrock.foia.models import FOIARequest, FOIAFile, FOIACommunication
 from muckrock.foiamachine.models import FoiaMachineRequest
+from muckrock.jurisdiction.models import (
+        Exemption,
+        InvokedExemption,
+        ExampleAppeal,
+        )
 from muckrock.news.models import Article
 from muckrock.organization.models import Organization
+from muckrock.project.models import Project
 from muckrock.task.models import (
         Task,
         OrphanTask,
@@ -73,6 +80,24 @@ def store_statistics():
             .filter(status='submitted')
             .exclude(date_processing=None)
             .aggregate(days=Sum(date.today() - F('date_processing')))['days']),
+        sent_communications_email=FOIACommunication.objects
+            .filter(
+                date__range=(yesterday, date.today()),
+                response=False,
+                delivered='email',
+                ).count(),
+        sent_communications_fax=FOIACommunication.objects
+            .filter(
+                date__range=(yesterday, date.today()),
+                response=False,
+                delivered='fax',
+                ).count(),
+        sent_communications_mail=FOIACommunication.objects
+            .filter(
+                date__range=(yesterday, date.today()),
+                response=False,
+                delivered='mail',
+                ).count(),
         machine_requests=
             FoiaMachineRequest.objects.count(),
         machine_requests_success=
@@ -105,6 +130,11 @@ def store_statistics():
         total_users=User.objects.count(),
         total_users_excluding_agencies=
             User.objects.exclude(profile__acct_type='agency').count(),
+        total_users_filed=User.objects.annotate(
+                num_foia=Count('foiarequest')
+        ).exclude(
+                num_foia=0,
+        ).count(),
         total_agencies=Agency.objects.count(),
         total_fees=FOIARequest.objects.aggregate(Sum('price'))['price__sum'],
         pro_users=Profile.objects.filter(acct_type='pro').count(),
@@ -192,6 +222,11 @@ def store_statistics():
                date_done__lt=date.today(),
                resolved_by__profile__acct_type='robot',
                ).count(),
+        flag_processing_days=(FlaggedTask.objects
+            .exclude(resolved=True)
+            .aggregate(days=Sum(date.today() - F('date_created')))['days']),
+        unresolved_snailmail_appeals=
+            SnailMailTask.objects.filter(resolved=False, category='a').count(),
         total_active_org_members=Profile.objects.filter(
                 organization__active=True,
                 organization__monthly_cost__gt=0,
@@ -200,6 +235,118 @@ def store_statistics():
                 active=True,
                 monthly_cost__gt=0,
                 ).count(),
+        total_crowdfunds=Crowdfund.objects.count(),
+        total_crowdfunds_pro=Crowdfund.objects.filter(
+                Q(foia__user__profile__acct_type='pro') |
+                Q(projects__contributors__profile__acct_type='pro')
+                ).count(),
+        total_crowdfunds_basic=Crowdfund.objects.filter(
+                Q(foia__user__profile__acct_type='basic') |
+                Q(projects__contributors__profile__acct_type='basic')
+                ).count(),
+        total_crowdfunds_beta=Crowdfund.objects.filter(
+                Q(foia__user__profile__acct_type='beta') |
+                Q(projects__contributors__profile__acct_type='beta')
+                ).count(),
+        total_crowdfunds_proxy=Crowdfund.objects.filter(
+                Q(foia__user__profile__acct_type='proxy') |
+                Q(projects__contributors__profile__acct_type='proxy')
+                ).count(),
+        total_crowdfunds_admin=Crowdfund.objects.filter(
+                Q(foia__user__profile__acct_type='admin') |
+                Q(projects__contributors__profile__acct_type='admin')
+                ).count(),
+        open_crowdfunds=Crowdfund.objects.filter(closed=False).count(),
+        open_crowdfunds_pro=Crowdfund.objects.filter(
+                Q(foia__user__profile__acct_type='pro') |
+                Q(projects__contributors__profile__acct_type='pro'),
+                closed=False,
+                ).count(),
+        open_crowdfunds_basic=Crowdfund.objects.filter(
+                Q(foia__user__profile__acct_type='basic') |
+                Q(projects__contributors__profile__acct_type='basic'),
+                closed=False,
+                ).count(),
+        open_crowdfunds_beta=Crowdfund.objects.filter(
+                Q(foia__user__profile__acct_type='beta') |
+                Q(projects__contributors__profile__acct_type='beta'),
+                closed=False,
+                ).count(),
+        open_crowdfunds_proxy=Crowdfund.objects.filter(
+                Q(foia__user__profile__acct_type='proxy') |
+                Q(projects__contributors__profile__acct_type='proxy'),
+                closed=False,
+                ).count(),
+        open_crowdfunds_admin=Crowdfund.objects.filter(
+                Q(foia__user__profile__acct_type='admin') |
+                Q(projects__contributors__profile__acct_type='admin'),
+                closed=False,
+                ).count(),
+        closed_crowdfunds_0=Crowdfund.objects
+            .annotate(percent=F('payment_received') / F('payment_required'))
+            .filter(closed=True, percent=0)
+            .count(),
+        closed_crowdfunds_0_25=Crowdfund.objects
+            .annotate(percent=F('payment_received') / F('payment_required'))
+            .filter(closed=True, percent__gt=0, percent__lte=0.25)
+            .count(),
+        closed_crowdfunds_25_50=Crowdfund.objects
+            .annotate(percent=F('payment_received') / F('payment_required'))
+            .filter(closed=True, percent__gt=0.25, percent__lte=0.50)
+            .count(),
+        closed_crowdfunds_50_75=Crowdfund.objects
+            .annotate(percent=F('payment_received') / F('payment_required'))
+            .filter(closed=True, percent__gt=0.50, percent__lte=0.75)
+            .count(),
+        closed_crowdfunds_75_100=Crowdfund.objects
+            .annotate(percent=F('payment_received') / F('payment_required'))
+            .filter(closed=True, percent__gt=0.75, percent__lte=1.00)
+            .count(),
+        closed_crowdfunds_100_125=Crowdfund.objects
+            .annotate(percent=F('payment_received') / F('payment_required'))
+            .filter(closed=True, percent__gt=1.00, percent__lte=1.25)
+            .count(),
+        closed_crowdfunds_125_150=Crowdfund.objects
+            .annotate(percent=F('payment_received') / F('payment_required'))
+            .filter(closed=True, percent__gt=1.25, percent__lte=1.50)
+            .count(),
+        closed_crowdfunds_150_175=Crowdfund.objects
+            .annotate(percent=F('payment_received') / F('payment_required'))
+            .filter(closed=True, percent__gt=1.50, percent__lte=1.75)
+            .count(),
+        closed_crowdfunds_175_200=Crowdfund.objects
+            .annotate(percent=F('payment_received') / F('payment_required'))
+            .filter(closed=True, percent__gt=1.75, percent__lte=2.00)
+            .count(),
+        closed_crowdfunds_200=Crowdfund.objects
+            .annotate(percent=F('payment_received') / F('payment_required'))
+            .filter(closed=True, percent__gt=2.00)
+            .count(),
+        total_crowdfund_payments=CrowdfundPayment.objects.count(),
+        total_crowdfund_payments_loggedin=CrowdfundPayment.objects
+            .exclude(user=None).count(),
+        total_crowdfund_payments_loggedout=CrowdfundPayment.objects
+            .filter(user=None).count(),
+        public_projects=Project.objects
+            .filter(private=False, approved=True).count(),
+        private_projects=Project.objects
+            .filter(private=True, approved=True).count(),
+        unapproved_projects=Project.objects.filter(approved=False).count(),
+        crowdfund_projects=Project.objects.exclude(crowdfunds=None).count(),
+        project_users=User.objects.exclude(projects=None).count(),
+        project_users_pro=User.objects
+            .filter(profile__acct_type='pro').exclude(projects=None).count(),
+        project_users_basic=User.objects
+            .filter(profile__acct_type='basic').exclude(projects=None).count(),
+        project_users_beta=User.objects
+            .filter(profile__acct_type='beta').exclude(projects=None).count(),
+        project_users_proxy=User.objects
+            .filter(profile__acct_type='proxy').exclude(projects=None).count(),
+        project_users_admin=User.objects
+            .filter(profile__acct_type='admin').exclude(projects=None).count(),
+        total_exemptions=Exemption.objects.count(),
+        total_invoked_exemptions=InvokedExemption.objects.count(),
+        total_example_appeals=ExampleAppeal.objects.count(),
         )
     # stats needs to be saved before many to many relationships can be set
     stats.users_today = User.objects.filter(last_login__year=yesterday.year,

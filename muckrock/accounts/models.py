@@ -479,6 +479,9 @@ class Statistics(models.Model):
     total_requests_abandoned = models.IntegerField(null=True, blank=True)
     total_requests_lawsuit = models.IntegerField(null=True, blank=True)
     requests_processing_days = models.IntegerField(null=True, blank=True)
+    sent_communications_email = models.IntegerField(null=True, blank=True)
+    sent_communications_fax = models.IntegerField(null=True, blank=True)
+    sent_communications_mail = models.IntegerField(null=True, blank=True)
 
     # FOIA Machine Requests
     machine_requests = models.IntegerField(null=True, blank=True)
@@ -505,6 +508,7 @@ class Statistics(models.Model):
     total_pages = models.IntegerField(null=True, blank=True)
     total_users = models.IntegerField(null=True, blank=True)
     total_users_excluding_agencies = models.IntegerField(null=True, blank=True)
+    total_users_filed = models.IntegerField(null=True, blank=True)
     users_today = models.ManyToManyField(User)
     total_fees = models.IntegerField(null=True, blank=True)
     pro_users = models.IntegerField(null=True, blank=True)
@@ -544,6 +548,8 @@ class Statistics(models.Model):
     total_crowdfundpayment_tasks = models.IntegerField(null=True, blank=True)
     total_unresolved_crowdfundpayment_tasks = models.IntegerField(null=True, blank=True)
     daily_robot_response_tasks = models.IntegerField(null=True, blank=True)
+    flag_processing_days = models.IntegerField(null=True, blank=True)
+    unresolved_snailmail_appeals = models.IntegerField(null=True, blank=True)
 
     # Org stats
     total_active_org_members = models.IntegerField(null=True, blank=True)
@@ -552,6 +558,54 @@ class Statistics(models.Model):
     # notes
     public_notes = models.TextField(default='', blank=True)
     admin_notes = models.TextField(default='', blank=True)
+
+    # crowdfund
+    total_crowdfunds = models.IntegerField(null=True, blank=True)
+    total_crowdfunds_pro = models.IntegerField(null=True, blank=True)
+    total_crowdfunds_basic = models.IntegerField(null=True, blank=True)
+    total_crowdfunds_beta = models.IntegerField(null=True, blank=True)
+    total_crowdfunds_proxy = models.IntegerField(null=True, blank=True)
+    total_crowdfunds_admin = models.IntegerField(null=True, blank=True)
+    open_crowdfunds = models.IntegerField(null=True, blank=True)
+    open_crowdfunds_pro = models.IntegerField(null=True, blank=True)
+    open_crowdfunds_basic = models.IntegerField(null=True, blank=True)
+    open_crowdfunds_beta = models.IntegerField(null=True, blank=True)
+    open_crowdfunds_proxy = models.IntegerField(null=True, blank=True)
+    open_crowdfunds_admin = models.IntegerField(null=True, blank=True)
+    closed_crowdfunds_0 = models.IntegerField(null=True, blank=True)
+    closed_crowdfunds_0_25 = models.IntegerField(null=True, blank=True)
+    closed_crowdfunds_25_50 = models.IntegerField(null=True, blank=True)
+    closed_crowdfunds_50_75 = models.IntegerField(null=True, blank=True)
+    closed_crowdfunds_75_100 = models.IntegerField(null=True, blank=True)
+    closed_crowdfunds_100_125 = models.IntegerField(null=True, blank=True)
+    closed_crowdfunds_125_150 = models.IntegerField(null=True, blank=True)
+    closed_crowdfunds_150_175 = models.IntegerField(null=True, blank=True)
+    closed_crowdfunds_175_200 = models.IntegerField(null=True, blank=True)
+    closed_crowdfunds_200 = models.IntegerField(null=True, blank=True)
+
+    total_crowdfund_payments = models.IntegerField(null=True, blank=True)
+    total_crowdfund_payments_loggedin = models.IntegerField(
+            null=True, blank=True)
+    total_crowdfund_payments_loggedout = models.IntegerField(
+            null=True, blank=True)
+
+    # projects
+    public_projects = models.IntegerField(null=True, blank=True)
+    private_projects = models.IntegerField(null=True, blank=True)
+    unapproved_projects = models.IntegerField(null=True, blank=True)
+    crowdfund_projects = models.IntegerField(null=True, blank=True)
+    project_users = models.IntegerField(null=True, blank=True)
+    project_users_pro = models.IntegerField(null=True, blank=True)
+    project_users_basic = models.IntegerField(null=True, blank=True)
+    project_users_beta = models.IntegerField(null=True, blank=True)
+    project_users_proxy = models.IntegerField(null=True, blank=True)
+    project_users_admin = models.IntegerField(null=True, blank=True)
+
+    # exemptions
+    total_exemptions = models.IntegerField(null=True, blank=True)
+    total_invoked_exemptions = models.IntegerField(null=True, blank=True)
+    total_example_appeals = models.IntegerField(null=True, blank=True)
+
 
     def __unicode__(self):
         return 'Stats for %s' % self.date
