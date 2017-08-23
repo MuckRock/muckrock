@@ -8,8 +8,11 @@ from django.core.management import call_command
 from django.contrib.auth.models import User
 from django.db.models import Count, F, Q, Sum
 
-import logging
 from datetime import date, timedelta
+import logging
+import os
+from raven import Client
+from raven.contrib.celery import register_logger_signal, register_signal
 
 from muckrock.accounts.models import Profile, Statistics
 from muckrock.agency.models import Agency
@@ -39,6 +42,10 @@ from muckrock.task.models import (
         )
 
 logger = logging.getLogger(__name__)
+
+client = Client(os.environ.get('SENTRY_DSN'))
+register_logger_signal(client)
+register_signal(client)
 
 @periodic_task(run_every=crontab(hour=0, minute=30),
     name='muckrock.accounts.tasks.store_statistics')

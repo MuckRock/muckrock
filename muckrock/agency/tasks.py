@@ -3,8 +3,15 @@
 from celery.schedules import crontab
 from celery.task import periodic_task
 
+from raven import Client
+from raven.contrib.celery import register_logger_signal, register_signal
+
 from muckrock.agency.models import Agency
 from muckrock.task.models import StaleAgencyTask
+
+client = Client(os.environ.get('SENTRY_DSN'))
+register_logger_signal(client)
+register_signal(client)
 
 @periodic_task(run_every=crontab(day_of_week='sunday', hour=4, minute=0),
                name='muckrock.agency.tasks.stale')
