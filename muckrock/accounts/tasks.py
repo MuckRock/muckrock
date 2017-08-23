@@ -8,8 +8,11 @@ from django.core.management import call_command
 from django.contrib.auth.models import User
 from django.db.models import Count, F, Q, Sum
 
-import logging
 from datetime import date, timedelta
+import logging
+import os
+from raven import Client
+from raven.contrib.celery import register_logger_signal, register_signal
 
 from muckrock.accounts.models import Profile, Statistics
 from muckrock.agency.models import Agency
@@ -21,6 +24,7 @@ from muckrock.jurisdiction.models import (
         InvokedExemption,
         ExampleAppeal,
         )
+from muckrock.models import ExtractDay, Now
 from muckrock.news.models import Article
 from muckrock.organization.models import Organization
 from muckrock.project.models import Project
@@ -39,6 +43,10 @@ from muckrock.task.models import (
         )
 
 logger = logging.getLogger(__name__)
+
+client = Client(os.environ.get('SENTRY_DSN'))
+register_logger_signal(client)
+register_signal(client)
 
 @periodic_task(run_every=crontab(hour=0, minute=30),
     name='muckrock.accounts.tasks.store_statistics')
@@ -224,7 +232,7 @@ def store_statistics():
                ).count(),
         flag_processing_days=(FlaggedTask.objects
             .exclude(resolved=True)
-            .aggregate(days=Sum(date.today() - F('date_created')))['days']),
+            .aggregate(days=ExtractDay(Sum(Now() - F('date_created'))))['days']),
         unresolved_snailmail_appeals=
             SnailMailTask.objects.filter(resolved=False, category='a').count(),
         total_active_org_members=Profile.objects.filter(
