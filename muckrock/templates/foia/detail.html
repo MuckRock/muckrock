@@ -242,7 +242,7 @@
                                 <input type="hidden" name="action" value="follow_up" />
                                 <textarea name="text" id="follow-up-composer"></textarea>
                                 <label class="bold">Attachments</label>
-                                <div id="fine-uploader"></div>
+                                <div id="fine-uploader-follow-up" class="fine-uploader"></div>
                                 <div class="buttons">
                                     <button class="primary button" type="submit" name="appeal" value="1">Send</button>
                                     <a href="#inactive" class="button cancel">Cancel</a>
@@ -278,7 +278,7 @@ Sincerely,
                                 {% csrf_token %}
                                 {% include 'lib/pattern/form.html' with form=agency_reply_form %}
                                 <label class="bold">Attachments</label>
-                                <div id="fine-uploader1"></div>
+                                <div id="fine-uploader-agency-rpely" class="fine-uploader"></div>
 								<input type="hidden" name="action" value="agency_reply" />
                                 <div class="buttons">
                                     <button class="primary button" type="submit" name="agency-reply" value="1">Send</button>
@@ -314,6 +314,8 @@ Sincerely,
                                 {% endif %}
                                 {% csrf_token %}
                                 <textarea name="text" id="appeal-composer"></textarea>
+                                <label class="bold">Attachments</label>
+                                <div id="fine-uploader-appeal" class="fine-uploader"></div>
                                 <div class="buttons">
                                     <a href="#inactive" class="button">Cancel</a>
                                     <button class="primary button" type="submit" name="action" value="appeal">Send Appeal</button>
