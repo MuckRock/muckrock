@@ -3,6 +3,7 @@
 from celery.schedules import crontab
 from celery.task import periodic_task
 
+import os
 from raven import Client
 from raven.contrib.celery import register_logger_signal, register_signal
 
