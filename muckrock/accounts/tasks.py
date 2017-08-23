@@ -24,6 +24,7 @@ from muckrock.jurisdiction.models import (
         InvokedExemption,
         ExampleAppeal,
         )
+from muckrock.models import ExtractDay, Now
 from muckrock.news.models import Article
 from muckrock.organization.models import Organization
 from muckrock.project.models import Project
@@ -231,7 +232,7 @@ def store_statistics():
                ).count(),
         flag_processing_days=(FlaggedTask.objects
             .exclude(resolved=True)
-            .aggregate(days=Sum(date.today() - F('date_created')))['days']),
+            .aggregate(days=ExtractDay(Sum(Now() - F('date_created'))))['days']),
         unresolved_snailmail_appeals=
             SnailMailTask.objects.filter(resolved=False, category='a').count(),
         total_active_org_members=Profile.objects.filter(
