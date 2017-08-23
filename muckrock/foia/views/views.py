@@ -569,7 +569,7 @@ class Detail(DetailView):
         if not form.is_valid():
             messages.error(request, 'You did not submit an appeal.')
             return redirect(foia)
-        communication = foia.appeal(form.cleaned_data['text'])
+        communication = foia.appeal(form.cleaned_data['text'], request.user)
         base_language = form.cleaned_data['base_language']
         appeal = Appeal.objects.create(communication=communication)
         appeal.base_language.set(base_language)

@@ -583,7 +583,7 @@ class TestFOIARequestAppeal(TestCase):
             'The appeal agency should accept email.')
         # Create the appeal message and submit it
         appeal_message = 'Lorem ipsum'
-        appeal_comm = self.foia.appeal(appeal_message)
+        appeal_comm = self.foia.appeal(appeal_message, self.foia.user)
         # Check that everything happened like we expected
         self.foia.refresh_from_db()
         appeal_comm.refresh_from_db()
@@ -610,7 +610,7 @@ class TestFOIARequestAppeal(TestCase):
         self.appeal_agency.save()
         # Create the appeal message and submit it
         appeal_message = 'Lorem ipsum'
-        appeal_comm = self.foia.appeal(appeal_message)
+        appeal_comm = self.foia.appeal(appeal_message, self.foia.user)
         # Check that everything happened like we expected
         self.foia.refresh_from_db()
         appeal_comm.refresh_from_db()

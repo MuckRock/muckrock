@@ -65,8 +65,7 @@
 
 
 <script type="text/javascript">
-function createUploader(id) {
-    var element = document.getElementById(id);
+function createUploader(element) {
     if (element === null) {return;}
     const uploader = new qq.s3.FineUploader({
         element: element,
@@ -154,6 +153,9 @@ function createUploader(id) {
 
     });
 };
-createUploader('fine-uploader');
-createUploader('fine-uploader1');
+var elements = document.getElementsByClassName('fine-uploader');
+var i;
+for (i = 0; i < elements.length; i++) {
+  createUploader(elements[i]);
+}
 </script>
