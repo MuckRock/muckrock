@@ -9,7 +9,7 @@ from autocomplete_light import shortcuts as autocomplete_light
 import django_filters
 
 from muckrock.agency.models import Agency
-from muckrock.filters import BLANK_STATUS, BOOLEAN_CHOICES
+from muckrock.filters import BLANK_STATUS, BOOLEAN_CHOICES, RangeWidget
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import (
     SNAIL_MAIL_CATEGORIES,
@@ -31,6 +31,14 @@ class TaskFilterSet(django_filters.FilterSet):
     resolved_by = django_filters.ModelMultipleChoiceFilter(
         queryset=User.objects.all(),
         widget=autocomplete_light.MultipleChoiceWidget('UserTaskAutocomplete')
+    )
+    date_created = django_filters.DateFromToRangeFilter(
+        label='Date Range',
+        lookup_expr='contains',
+        widget=RangeWidget(attrs={
+            'class': 'datepicker',
+            'placeholder': 'MM/DD/YYYY',
+        }),
     )
 
     class Meta:
