@@ -32,6 +32,7 @@ The code checked out from GitHub is synced between the virtual machine and your 
 4. Run `fab celery &` to start a background task queue
 5. Run `fab runserver` to start a server instance
 6. Navigate your web browser (from the host machine) to `localhost:8000`
+7. You may log in as a super user with the username `super` and password `abc`
 
 ### Update search index
 
