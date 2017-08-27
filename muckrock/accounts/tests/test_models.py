@@ -6,7 +6,7 @@ from django.conf import settings
 from django.test import TestCase
 
 from datetime import datetime, date, timedelta
-from mock import Mock, patch
+from mock import Mock, patch, ANY
 from nose.tools import ok_, eq_, assert_true, assert_false, raises, nottest
 
 from muckrock.accounts.models import Notification
@@ -135,7 +135,9 @@ class TestProfileUnit(TestCase):
             currency='usd',
             amount=modified_amount,
             metadata=metadata,
-            source=token)
+            source=token,
+            idempotency_key=ANY,
+            )
 
     def test_start_pro_subscription(self):
         """Test starting a pro subscription"""
