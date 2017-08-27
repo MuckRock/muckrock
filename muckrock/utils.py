@@ -9,6 +9,7 @@ import random
 import string
 import stripe
 import sys
+import uuid
 
 from django.conf import settings
 from django.contrib.auth.models import User, Group
@@ -126,6 +127,7 @@ def get_image_storage():
     else:
         return import_string(settings.DEFAULT_FILE_STORAGE)()
 
+
 def retry_on_error(error, func, *args, **kwargs):
     """Retry a function on error"""
     times = kwargs.pop('times', 0) + 1
@@ -143,4 +145,5 @@ def retry_on_error(error, func, *args, **kwargs):
 
 def stripe_retry_on_error(func, *args, **kwargs):
     """Retry stripe API calls on connection errors"""
+    kwargs['idempotency_key'] = uuid.uuid4().hex
     return retry_on_error(stripe.error.APIConnectionError, func, *args, **kwargs)

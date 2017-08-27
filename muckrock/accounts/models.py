@@ -293,7 +293,10 @@ class Profile(models.Model):
         card = None
         customer = self.customer()
         if customer.default_source:
-            card = customer.sources.retrieve(customer.default_source)
+            card = stripe_retry_on_error(
+                    customer.sources.retrieve,
+                    customer.default_source,
+                    )
         return card
 
     def has_subscription(self):
@@ -309,8 +312,12 @@ class Profile(models.Model):
             raise AttributeError('Only allowed one active subscription at a time.')
         if not token and not customer.default_source:
             raise AttributeError('No payment method provided for this subscription.')
-        subscription = customer.subscriptions.create(plan='pro', source=token)
-        customer.save()
+        subscription = stripe_retry_on_error(
+                customer.subscriptions.create,
+                plan='pro',
+                source=token,
+                )
+        stripe_retry_on_error(customer.save)
         # modify the profile object (should this be part of a webhook callback?)
         self.subscription_id = subscription.id
         self.acct_type = 'pro'
@@ -333,9 +340,12 @@ class Profile(models.Model):
                 subscription_id = self.subscription_id
             else:
                 subscription_id = customer.subscriptions.data[0].id
-            subscription = customer.subscriptions.retrieve(subscription_id)
+            subscription = stripe_retry_on_error(
+                    customer.subscriptions.retrieve,
+                    subscription_id,
+                    )
             subscription = subscription.delete()
-            customer = customer.save()
+            customer = stripe_retry_on_error(customer.save)
         except AttributeError as exception:
             logger.warn(exception)
         except stripe.error.StripeError as exception:
