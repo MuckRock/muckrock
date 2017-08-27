@@ -4,8 +4,7 @@ Views for the Agency application
 
 from django.contrib import messages
 from django.core.urlresolvers import reverse
-from django.shortcuts import render_to_response, get_object_or_404, redirect
-from django.template import RequestContext
+from django.shortcuts import render, get_object_or_404, redirect
 
 from rest_framework import viewsets
 import django_filters
@@ -89,8 +88,11 @@ def detail(request, jurisdiction, jidx, slug, idx):
 
     collect_stats(agency, context)
 
-    return render_to_response('profile/agency.html', context,
-                              context_instance=RequestContext(request))
+    return render(
+            request,
+            'profile/agency.html',
+            context,
+            )
 
 
 def redirect_old(request, jurisdiction, slug, idx, action):

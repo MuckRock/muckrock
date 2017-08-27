@@ -2,7 +2,7 @@
 URL mappings for the FOIA application
 """
 
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from django.views.generic.base import RedirectView
 
 
@@ -19,8 +19,7 @@ from muckrock.views import jurisdiction
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)'
 old_foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(r'^$', views.RequestExploreView.as_view(), name='foia-root'),
 
     # Redirects
@@ -140,4 +139,4 @@ urlpatterns = patterns(
     url(r'^mylist/(?P<view>\w+)/$',
         RedirectView.as_view(url='foi/mylist/'),
         name='foia-mylist-old'),
-)
+    ]

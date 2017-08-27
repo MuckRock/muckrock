@@ -8,10 +8,10 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, Http404
-from django.shortcuts import render_to_response, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template.loader import get_template
-from django.template import RequestContext, Context
+from django.template import Context
 from django.utils.encoding import smart_text
 
 from datetime import datetime, date
@@ -272,11 +272,11 @@ def create_request(request):
         'featured': featured
     }
 
-    return render_to_response(
-        'forms/foia/create.html',
-        context,
-        context_instance=RequestContext(request)
-    )
+    return render(
+            request,
+            'forms/foia/create.html',
+            context,
+            )
 
 @login_required
 def draft_request(request, jurisdiction, jidx, slug, idx):
@@ -346,11 +346,11 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
         'AWS_ACCESS_KEY_ID': settings.AWS_ACCESS_KEY_ID,
     }
 
-    return render_to_response(
-        'forms/foia/draft.html',
-        context,
-        context_instance=RequestContext(request)
-    )
+    return render(
+            request,
+            'forms/foia/draft.html',
+            context,
+            )
 
 @login_required
 def create_multirequest(request):
@@ -374,11 +374,11 @@ def create_multirequest(request):
         form = MultiRequestForm()
 
     context = {'form': form}
-    return render_to_response(
-        'forms/foia/create_multirequest.html',
-        context,
-        context_instance=RequestContext(request)
-    )
+    return render(
+            request,
+            'forms/foia/create_multirequest.html',
+            context,
+            )
 
 @login_required
 def draft_multirequest(request, slug, idx):
@@ -443,8 +443,8 @@ def draft_multirequest(request, slug, idx):
         'stripe_pk': settings.STRIPE_PUB_KEY
     }
 
-    return render_to_response(
-        'forms/foia/draft_multirequest.html',
-        context,
-        context_instance=RequestContext(request)
-    )
+    return render(
+            request,
+            'forms/foia/draft_multirequest.html',
+            context,
+            )

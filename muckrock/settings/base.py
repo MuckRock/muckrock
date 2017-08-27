@@ -15,7 +15,6 @@ def boolcheck(setting):
         return bool(setting)
 
 DEBUG = False
-TEMPLATE_DEBUG = DEBUG
 EMAIL_DEBUG = DEBUG
 THUMBNAIL_DEBUG = DEBUG
 AWS_DEBUG = False
@@ -116,22 +115,33 @@ AWS_QUERYSTRING_AUTH = False
 AWS_S3_SECURE_URLS = True
 AWS_S3_FILE_OVERWRITE = False
 AWS_HEADERS = {
- 'Expires': 'Thu, 31 Dec 2099 20:00:00 GMT',
- 'Cache-Control': 'max-age=94608000',
+    'Expires': 'Thu, 31 Dec 2099 20:00:00 GMT',
+    'Cache-Control': 'max-age=94608000',
 }
 
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.contrib.auth.context_processors.auth',
-    'django.core.context_processors.debug',
-    #'django.core.context_processors.i18n',
-    'django.core.context_processors.media',
-    'django.core.context_processors.request',
-    'django.contrib.messages.context_processors.messages',
-    'muckrock.sidebar.context_processors.sidebar_info',
-    'muckrock.context_processors.google_analytics',
-    'muckrock.context_processors.domain',
-    'muckrock.context_processors.cache_timeout',
-)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            os.path.join(SITE_ROOT, 'templates'),
+            ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                #'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.request',
+                'django.contrib.messages.context_processors.messages',
+                'muckrock.sidebar.context_processors.sidebar_info',
+                'muckrock.context_processors.google_analytics',
+                'muckrock.context_processors.domain',
+                'muckrock.context_processors.cache_timeout',
+                ],
+            }
+        }
+    ]
 
 MIDDLEWARE_CLASSES = (
     'corsheaders.middleware.CorsMiddleware',
@@ -156,13 +166,6 @@ INTERNAL_IPS = ('127.0.0.1',)
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
 ROOT_URLCONF = 'muckrock.urls'
-
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    os.path.join(SITE_ROOT, 'templates'),
-)
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -194,7 +197,6 @@ INSTALLED_APPS = (
     'raven.contrib.django',
     'rest_framework',
     'rest_framework.authtoken',
-    'rest_framework_swagger',
     'reversion',
     'robots',
     'rules.apps.AutodiscoverRulesConfig',
@@ -203,7 +205,6 @@ INSTALLED_APPS = (
     'watson',
     'webpack_loader',
     'lot',
-    'package_monitor',
     'image_diet',
     'django_hosts',
     'queued_storage',
@@ -462,7 +463,10 @@ REST_FRAMEWORK = {
         ('rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',),
 }
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
+if 'ALLOWED_HOSTS' in os.environ:
+    ALLOWED_HOSTS = os.environ['ALLOWED_HOSTS'].split(',')
+else:
+    ALLOWED_HOSTS = []
 
 ACTSTREAM_SETTINGS = {
     'MANAGER': 'muckrock.managers.MRActionManager'

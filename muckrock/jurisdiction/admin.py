@@ -3,12 +3,11 @@ Admin registration for Jurisdiction models
 """
 
 from django import forms
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from django.contrib import admin, messages
 from django.contrib.auth.models import User
-from django.shortcuts import render_to_response, redirect
+from django.shortcuts import render, redirect
 from django.template.defaultfilters import slugify
-from django.template import RequestContext
 
 from adaptor.model import CsvModel
 from adaptor.fields import CharField, DjangoModelField
@@ -78,9 +77,14 @@ class JurisdictionAdmin(VersionAdmin):
     def get_urls(self):
         """Add custom URLs here"""
         urls = super(JurisdictionAdmin, self).get_urls()
-        my_urls = patterns('', url(r'^import/$', self.admin_site.admin_view(self.csv_import),
-                                   name='jurisdiction-admin-import'))
-        return my_urls + urls
+        urls.append(
+                url(
+                    r'^import/$',
+                    self.admin_site.admin_view(self.csv_import),
+                    name='jurisdiction-admin-import',
+                    )
+                )
+        return urls
 
     def csv_import(self, request):
         """Import a CSV file of jurisdictions"""
@@ -108,8 +112,11 @@ class JurisdictionAdmin(VersionAdmin):
             form = CSVImportForm()
 
         fields = ['name', 'slug', 'full_name', 'level', 'parent']
-        return render_to_response('admin/agency/import.html', {'form': form, 'fields': fields},
-                                  context_instance=RequestContext(request))
+        return render(
+                request,
+                'admin/agency/import.html',
+                {'form': form, 'fields': fields},
+                )
 
 
 class ExemptionAdminForm(forms.ModelForm):

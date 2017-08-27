@@ -54,7 +54,7 @@ django-storages==1.5.1
 django-taggit==0.20.1
 django-watson==1.2.1
 django-webpack-loader==0.3.0
-django==1.9.9
+django==1.10.7
 djangorestframework==3.4.7
 dogslow==0.9.7
 easy-thumbnails==2.3

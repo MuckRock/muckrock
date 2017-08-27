@@ -2,15 +2,14 @@
 URL mappings for the accounts application
 """
 
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from django.contrib.auth.decorators import login_required
 import django.contrib.auth.views as auth_views
 
 import muckrock.accounts.views as views
 from muckrock.forms import PasswordResetForm
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(r'^$',
         views.AccountsView.as_view(),
         name='accounts'),
@@ -95,5 +94,5 @@ urlpatterns = patterns(
     url(r'agency_login/(?P<agency_slug>[\w\d_-]+)-(?P<agency_idx>\d+)/'
         r'(?P<foia_slug>[\w\d_-]+)-(?P<foia_idx>\d+)/$',
         views.agency_redirect_login,
-        name='acct-agency-redirect-login')
-)
+        name='acct-agency-redirect-login'),
+    ]

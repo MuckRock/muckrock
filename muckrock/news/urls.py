@@ -2,7 +2,7 @@
 URL mappings for the News application
 """
 
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 
 from muckrock.news import views
 from muckrock.news.models import Article
@@ -13,8 +13,7 @@ from muckrock.news.feeds import LatestEntries
 article_args = {'queryset': Article.objects.get_published()}
 article_date_list_args = dict(article_args, date_field='pub_date', allow_empty=True)
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(
         r'^$',
         views.NewsExploreView.as_view(),
@@ -54,4 +53,4 @@ urlpatterns = patterns(
         LatestEntries(),
         name='news-feed'
     ),
-)
+    ]

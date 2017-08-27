@@ -2,12 +2,11 @@
 URL mappings for mailgun
 """
 
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 
 from muckrock.mailgun import views
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(
         r'^route/$',
         views.route_mailgun,
@@ -33,4 +32,4 @@ urlpatterns = patterns(
         views.phaxio_callback,
         name='phaxio-callback'
     ),
-)
+    ]

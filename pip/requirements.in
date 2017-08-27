@@ -1,8 +1,8 @@
 -e git://github.com/BradWhittington/django-mailgun.git@4f2edb9466f6245c3bbf501aab2681f0b3c71e0c#egg=django_mailgun # Mail backend used directly (on production)
--e git://github.com/mitchelljkotler/django-news-sitemaps.git@50f198287868612f2d34bc4306e0e95308f942a3#egg=django_news_sitemaps
+-e git://github.com/mitchelljkotler/django-news-sitemaps.git@5946718cd1d18abbfa7f0393c140fcc513dedac1#egg=django_news_sitemaps
 bleach # Used to sanitize any HTML we're rendering
 boto # Used to access AWS
-celery # Used to run async tasks
+celery<4 # Used to run async tasks
 chardet # Detect character encodings for user uploaded text files
 dill # Used to serialize machine learning data
 django-activity-stream # Used for notifications
@@ -23,12 +23,10 @@ django-leaflet # Used for plotting geographic data
 django-localflavor # Used for phone numbers and state list
 django-lot # Used for Log On Tokens
 django-mathfilters # Mathematical template filters
-django-package-monitor # Keeps track of which packages need upgrading
 django-premailer # Styles HTML emails
 django-pylibmc # Interface to memcache
 django-querycount # Counts queries for dev
 django-queued-storage # For delayed uploading of files
-django-rest-swagger==0.3.7 # API documentation
 django-reversion==1.10.2 # Version history for models
 django-robots # Manage robots.txt file
 django-secure # Enforces security best practices
@@ -37,7 +35,7 @@ django-storages # Store files on S3
 django-taggit # Used for tagging
 django-watson # Used for search
 django-webpack-loader==0.3.0 # Used for loading Webpack bundles
-django<1.10 # Django is kinda important...
+django<1.11 # Django is kinda important...
 djangorestframework # The API framework
 dogslow # Monitors slow requests
 easy-thumbnails # Used for thumbnailing images
@@ -63,6 +61,5 @@ scikit-learn==0.16.1 # Used for machine learning
 scipy==0.14.0 # Used for machine learning
 smart-open # Use for streaming files from S3
 smartypants # Used for typographically-correct quotes
-stackimpact # Performance monitoring
 stripe # Stripe payment processor integration
 unidecode # Used for unicode decoding

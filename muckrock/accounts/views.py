@@ -18,9 +18,7 @@ from django.shortcuts import (
         get_object_or_404,
         redirect,
         render,
-        render_to_response,
         )
-from django.template import RequestContext
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView, FormView, ListView
@@ -317,10 +315,11 @@ def profile_settings(request):
         'current_plan': current_plan,
         'credit_card': user_profile.card()
     }
-    return render_to_response(
-        'accounts/settings.html',
-        context,
-        context_instance=RequestContext(request))
+    return render(
+            request,
+            'accounts/settings.html',
+            context,
+            )
 
 def buy_requests(request, username=None):
     """A purchaser buys requests for a recipient. The recipient can even be themselves!"""
@@ -453,11 +452,11 @@ def profile(request, username=None):
         'stripe_pk': settings.STRIPE_PUB_KEY,
         'sidebar_admin_url': reverse('admin:auth_user_change', args=(user.pk,)),
     }
-    return render_to_response(
-        'accounts/profile.html',
-        context,
-        context_instance=RequestContext(request)
-    )
+    return render(
+            request,
+            'accounts/profile.html',
+            context,
+            )
 
 @csrf_exempt
 def stripe_webhook(request):

@@ -3,15 +3,14 @@ Admin registration for FOIA models
 """
 
 from django import forms
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from django.contrib import admin, messages
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.core.urlresolvers import reverse
 from django.db.models import Count
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response, get_object_or_404
-from django.template import RequestContext
+from django.shortcuts import render, get_object_or_404
 
 from autocomplete_light import shortcuts as autocomplete_light
 from datetime import date, datetime, timedelta
@@ -333,24 +332,26 @@ class FOIARequestAdmin(VersionAdmin):
     def get_urls(self):
         """Add custom URLs here"""
         urls = super(FOIARequestAdmin, self).get_urls()
-        my_urls = patterns('', url(r'^process/$', self.admin_site.admin_view(self.process),
-                                   name='foia-admin-process'),
-                               url(r'^followup/$', self.admin_site.admin_view(self.followup),
-                                   name='foia-admin-followup'),
-                               url(r'^undated/$', self.admin_site.admin_view(self.undated),
-                                   name='foia-admin-undated'),
-                               url(r'^send_update/(?P<idx>\d+)/$',
-                                   self.admin_site.admin_view(self.send_update),
-                                   name='foia-admin-send-update'),
-                               url(r'^retry_pages/(?P<idx>\d+)/$',
-                                   self.admin_site.admin_view(self.retry_pages),
-                                   name='foia-admin-retry-pages'),
-                               url(r'^set_status/(?P<idx>\d+)/(?P<status>\w+)/$',
-                                   self.admin_site.admin_view(self.set_status),
-                                   name='foia-admin-set-status'),
-                               url(r'^autoimport/$',
-                                   self.admin_site.admin_view(self.autoimport),
-                                   name='foia-admin-autoimport'))
+        my_urls = [
+                url(r'^process/$', self.admin_site.admin_view(self.process),
+                    name='foia-admin-process'),
+                url(r'^followup/$', self.admin_site.admin_view(self.followup),
+                    name='foia-admin-followup'),
+                url(r'^undated/$', self.admin_site.admin_view(self.undated),
+                    name='foia-admin-undated'),
+                url(r'^send_update/(?P<idx>\d+)/$',
+                    self.admin_site.admin_view(self.send_update),
+                    name='foia-admin-send-update'),
+                url(r'^retry_pages/(?P<idx>\d+)/$',
+                    self.admin_site.admin_view(self.retry_pages),
+                    name='foia-admin-retry-pages'),
+                url(r'^set_status/(?P<idx>\d+)/(?P<status>\w+)/$',
+                    self.admin_site.admin_view(self.set_status),
+                    name='foia-admin-set-status'),
+                url(r'^autoimport/$',
+                    self.admin_site.admin_view(self.autoimport),
+                    name='foia-admin-autoimport'),
+                ]
         return my_urls + urls
 
     def _list_helper(self, request, foias, action):
@@ -363,9 +364,11 @@ class FOIARequestAdmin(VersionAdmin):
             page = paginator.page(1)
         except EmptyPage:
             page = paginator.page(paginator.num_pages)
-        return render_to_response('admin/foia/admin_process.html',
-                                  {'page': page, 'action': action},
-                                  context_instance=RequestContext(request))
+        return render(
+                request,
+                'admin/foia/admin_process.html',
+                {'page': page, 'action': action},
+                )
 
     def process(self, request):
         """List all the requests that need to be processed"""
@@ -464,10 +467,14 @@ class FOIAMultiRequestAdmin(VersionAdmin):
     def get_urls(self):
         """Add custom URLs here"""
         urls = super(FOIAMultiRequestAdmin, self).get_urls()
-        my_urls = patterns('', url(r'^submit/(?P<idx>\d+)/$',
-                                   self.admin_site.admin_view(self.submit),
-                                   name='multifoia-admin-submit'))
-        return my_urls + urls
+        urls.append(
+                url(
+                    r'^submit/(?P<idx>\d+)/$',
+                    self.admin_site.admin_view(self.submit),
+                    name='multifoia-admin-submit',
+                    )
+                )
+        return urls
 
     def submit(self, request, idx):
         """Submit the multi request"""

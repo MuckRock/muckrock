@@ -10,9 +10,8 @@ from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.db.models import Prefetch, Count
 from django.http import HttpResponse, Http404
-from django.shortcuts import render_to_response, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
-from django.template import RequestContext
 from django.views.generic import DetailView, TemplateView
 
 from actstream.models import following
@@ -756,8 +755,8 @@ def acronyms(request):
     codes = [(acro, name, status_dict.get(status, ''), desc)
              for acro, (name, status, desc) in CODES.iteritems()]
     codes.sort()
-    return render_to_response(
-        'staff/acronyms.html',
-        {'codes': codes},
-        context_instance=RequestContext(request)
-    )
+    return render(
+            request,
+            'staff/acronyms.html',
+            {'codes': codes},
+            )

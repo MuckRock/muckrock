@@ -2,11 +2,11 @@
 URL routes for the project application
 """
 
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 
 from muckrock.project import views
 
-urlpatterns = patterns('',
+urlpatterns = [
     url(r'^$',
         views.ProjectExploreView.as_view(),
         name='project'),
@@ -31,4 +31,4 @@ urlpatterns = patterns('',
     url(r'^(?P<slug>[\w-]+)-(?P<pk>\d+)/crowdfund/$',
         views.ProjectCrowdfundView.as_view(),
         name='project-crowdfund'),
-)
+    ]

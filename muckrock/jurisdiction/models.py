@@ -22,7 +22,7 @@ class RequestHelper(object):
         """Get the average response time from a submitted to completed request"""
         requests = self.get_requests()
         avg = (requests.aggregate(avg=Avg(F('date_done') - F('date_submitted')))['avg'])
-        return int(avg) if avg else 0
+        return int(avg.days) if avg is not None else 0
 
     def average_fee(self):
         """Get the average fees required on requests that have a price."""

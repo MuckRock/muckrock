@@ -3,7 +3,7 @@ FOIA Machine urls
 """
 
 from django.conf import settings
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 from django.contrib.auth import views as auth_views
 from django.views.defaults import page_not_found, server_error
 from django.views.generic import TemplateView
@@ -32,8 +32,7 @@ def handler500(request):
             template_name='foiamachine/500.html')
 
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(r'^$', views.Homepage.as_view(), name='index'),
     url(r'^accounts/signup/$', views.Signup.as_view(), name='signup'),
     url(r'^accounts/login/$',
@@ -112,11 +111,10 @@ urlpatterns = patterns(
         name='jurisdiction-detail'),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^__debug__/', include(debug_toolbar.urls)),
-)
+    ]
 
 if settings.DEBUG:
-    urlpatterns += patterns(
-        '',
+    urlpatterns += [
         url(
             r'^media/(?P<path>.*)$',
             'django.views.static.serve',
@@ -124,4 +122,4 @@ if settings.DEBUG:
         ),
         url(r'^500/$', TemplateView.as_view(template_name='foiamachine/500.html')),
         url(r'^404/$', TemplateView.as_view(template_name='foiamachine/404.html')),
-    )
+        ]
