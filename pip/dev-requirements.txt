@@ -13,7 +13,7 @@ coverage==4.2
 decorator==4.0.10         # via ipython, traitlets
 dj-inmemorystorage==1.4.0
 django-nose==1.4.4
-django==1.9.9
+django==1.10.7
 ecdsa==0.13               # via paramiko
 enum34==1.1.6             # via traitlets
 fabric==1.12.0
