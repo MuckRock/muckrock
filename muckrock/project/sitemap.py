@@ -16,4 +16,4 @@ class ProjectSitemap(Sitemap):
 
     def items(self):
         """Return all projects"""
-        return Project.objects.get_public()
+        return Project.objects.order_by('id').get_public()

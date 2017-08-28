@@ -39,11 +39,17 @@ class muckrock {
 	}
 
 
-	exec { "apt-update":
-		command => "/usr/bin/apt-get update"
-	}
+    class { 'apt':
+        update => {
+            frequency => 'always',
+        },
+    }
 
-	Exec["apt-update"] -> Package <| |>
+    apt::ppa { 'ppa:ubuntugis/ppa': }
+
+	package { 'gdal-bin':
+		ensure => installed,
+	}
 
 	package { 'ruby-dev':
 		ensure => installed,

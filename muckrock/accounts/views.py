@@ -542,7 +542,10 @@ class UserViewSet(viewsets.ModelViewSet):
     """API views for User"""
     # pylint: disable=too-many-ancestors
     # pylint: disable=too-many-public-methods
-    queryset = User.objects.prefetch_related('profile', 'groups')
+    queryset = (User.objects
+            .order_by('id')
+            .prefetch_related('profile', 'groups')
+            )
     serializer_class = UserSerializer
     permission_classes = (IsAdminUser,)
     filter_fields = ('username', 'first_name', 'last_name', 'email', 'is_staff')

@@ -6,16 +6,18 @@ from django.contrib.sitemaps import Sitemap
 
 from muckrock.agency.models import Agency
 
-class LimitSitemap(Sitemap):
-    """Limit Sitemap"""
-    limit = 500
 
-class AgencySitemap(LimitSitemap):
+class AgencySitemap(Sitemap):
     """Sitemap for Agency Requests"""
 
     priority = 0.7
     changefreq = 'monthly'
+    limit = 500
 
     def items(self):
         """Return all approved Agencies"""
-        return Agency.objects.select_related('jurisdiction').get_approved()
+        return (Agency.objects
+                .order_by('id')
+                .select_related('jurisdiction')
+                .get_approved()
+                )

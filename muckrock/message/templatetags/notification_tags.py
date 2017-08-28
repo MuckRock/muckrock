@@ -19,7 +19,7 @@ class Action(AsNode):
         context['action'] = action_instance
         return template.loader.render_to_string(
                 self.template,
-                context,
+                context.flatten(),
                 )
 
 

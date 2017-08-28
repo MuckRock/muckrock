@@ -122,6 +122,7 @@ class AgencyViewSet(viewsets.ModelViewSet):
     # pylint: disable=too-many-ancestors
     # pylint: disable=too-many-public-methods
     queryset = (Agency.objects
+            .order_by('id')
             .select_related('jurisdiction', 'parent', 'appeal_agency')
             .prefetch_related('types')
             )

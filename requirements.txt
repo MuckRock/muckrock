@@ -20,7 +20,7 @@ contextlib2==0.5.4        # via raven
 cssselect==0.9.2          # via premailer
 cssutils==1.0.1           # via premailer
 dill==0.2.5
-django-activity-stream==0.6.3
+django-activity-stream==0.6.4
 django-adaptors==0.2.5
 django-appconf==1.0.2     # via django-celery-email, django-compressor, django-queued-storage
 django-autocomplete-light==2.3.3
@@ -54,7 +54,7 @@ django-storages==1.5.1
 django-taggit==0.20.1
 django-watson==1.2.1
 django-webpack-loader==0.3.0
-django==1.10.7
+django==1.11.4
 djangorestframework==3.4.7
 dogslow==0.9.7
 easy-thumbnails==2.3

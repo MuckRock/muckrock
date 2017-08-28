@@ -23,7 +23,10 @@ class JurisdictionViewSet(ModelViewSet):
     """API views for Jurisdiction"""
     # pylint: disable=too-many-ancestors
     # pylint: disable=too-many-public-methods
-    queryset = Jurisdiction.objects.select_related('parent__parent').order_by()
+    queryset = (Jurisdiction.objects
+            .order_by('id')
+            .select_related('parent__parent')
+            )
     serializer_class = JurisdictionSerializer
     filter_fields = ('name', 'abbrev', 'level', 'parent')
     # don't allow ordering by computed fields
@@ -70,8 +73,11 @@ class ExemptionViewSet(ModelViewSet):
     The Exemption model provides a list of individual exemption cases along with some
     example appeal language.
     """
-    queryset = (Exemption.objects.all().select_related('jurisdiction__parent__parent')
-                                       .prefetch_related('example_appeals'))
+    queryset = (Exemption.objects
+            .order_by('id')
+            .select_related('jurisdiction__parent__parent')
+            .prefetch_related('example_appeals')
+            )
     serializer_class = ExemptionSerializer
     filter_fields = ('name', 'jurisdiction')
     permission_classes = [ExemptionPermissions]
