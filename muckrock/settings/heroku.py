@@ -25,11 +25,11 @@ CLEAN_S3_ON_FOIA_DELETE = True
 USE_QUEUED_STORAGE = True
 
 TEMPLATES[0]['OPTIONS']['loaders'] = [
-    'django.template.loaders.cached.Loader', (
+    ('django.template.loaders.cached.Loader', [
         'django.template.loaders.filesystem.Loader',
         'django.template.loaders.app_directories.Loader',
-        ),
-    ]
+        ],
+    )]
 del TEMPLATES[0]['APP_DIRS']
 
 if 'MEMCACHIER_SERVERS' in os.environ:
