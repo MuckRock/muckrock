@@ -126,7 +126,8 @@ class Crowdfund(models.Model):
                     'action': 'crowdfund-payment',
                     'crowdfund_id': self.id,
                     'crowdfund_name': self.name
-                    }
+                    },
+                idempotency_key=True,
                 )
         payment = CrowdfundPayment.objects.create(
             amount=amount,
