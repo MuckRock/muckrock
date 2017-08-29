@@ -106,7 +106,11 @@ def get_stripe_token(card_number='4242424242424242'):
         "exp_year": datetime.date.today().year,
         "cvc": '123'
     }
-    token = stripe_retry_on_error(stripe.Token.create, card=card)
+    token = stripe_retry_on_error(
+            stripe.Token.create,
+            card=card,
+            idempotency_key=True,
+            )
     # all we need for testing stripe calls is the token id
     return token.id
 
@@ -145,5 +149,6 @@ def retry_on_error(error, func, *args, **kwargs):
 
 def stripe_retry_on_error(func, *args, **kwargs):
     """Retry stripe API calls on connection errors"""
-    kwargs['idempotency_key'] = uuid.uuid4().hex
+    if kwargs.get('idempotency_key') is True:
+        kwargs['idempotency_key'] = uuid.uuid4().hex
     return retry_on_error(stripe.error.APIConnectionError, func, *args, **kwargs)

@@ -282,7 +282,8 @@ class Profile(models.Model):
             customer = stripe_retry_on_error(
                     stripe.Customer.create,
                     description=self.user.username,
-                    email=self.user.email
+                    email=self.user.email,
+                    idempotency_key=True,
                     )
             self.customer_id = customer.id
             self.save()
@@ -316,8 +317,9 @@ class Profile(models.Model):
                 customer.subscriptions.create,
                 plan='pro',
                 source=token,
+                idempotency_key=True,
                 )
-        stripe_retry_on_error(customer.save)
+        stripe_retry_on_error(customer.save, idempotency_key=True)
         # modify the profile object (should this be part of a webhook callback?)
         self.subscription_id = subscription.id
         self.acct_type = 'pro'
@@ -345,7 +347,7 @@ class Profile(models.Model):
                     subscription_id,
                     )
             subscription = subscription.delete()
-            customer = stripe_retry_on_error(customer.save)
+            customer = stripe_retry_on_error(customer.save, idempotency_key=True)
         except AttributeError as exception:
             logger.warn(exception)
         except stripe.error.StripeError as exception:
@@ -372,7 +374,8 @@ class Profile(models.Model):
                 amount=modified_amount,
                 currency='usd',
                 source=token,
-                metadata=metadata
+                metadata=metadata,
+                idempotency_key=True,
                 )
 
     def generate_confirmation_key(self):
