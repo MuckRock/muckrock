@@ -57,7 +57,7 @@ django-webpack-loader==0.3.0
 django==1.11.4
 djangorestframework==3.4.7
 dogslow==0.9.7
-easy-thumbnails==2.3
+easy-thumbnails==2.4.1
 fuzzywuzzy==0.14.0
 gunicorn==19.6.0
 html5lib==0.9999999       # via bleach
@@ -67,10 +67,11 @@ jsonfield==1.0.3
 kombu==3.0.35             # via celery
 lxml==3.6.4               # via premailer
 markdown==2.6.7
+olefile==0.44
 newrelic==2.70.0.51
 numpy==1.9.1
 pascha==0.5
-pillow==3.3.1
+pillow==4.2.1
 premailer==3.0.0          # via django-premailer
 psycopg2==2.6.2
 pyimagediet==1.1.1        # via image-diet2
