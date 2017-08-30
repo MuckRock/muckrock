@@ -286,9 +286,9 @@ class StaleAgencyTaskList(TaskList):
                 Prefetch('agency__foiarequest_set',
                     queryset=FOIARequest.objects
                     .get_open()
-                    .annotate(latest_communication=ExtractDay(
+                    .annotate(latest_response=ExtractDay(
                         Now() - Max('communications__date')))
-                    .order_by('-latest_communication')
+                    .order_by('-latest_response')
                     .select_related('jurisdiction'),
                     to_attr='stale_requests_'),
                 ))
