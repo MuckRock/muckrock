@@ -305,7 +305,6 @@ class StaleAgencyTask(Task):
         # and it has autofollowups enabled
         requests = (FOIARequest.objects.filter(agency=self.agency)
             .get_open()
-            .filter(disable_autofollowups=False)
             .annotate(latest_communication=ExtractDay(Now() - Max('communications__date')))
             .order_by('-latest_communication')
             .select_related('jurisdiction')
