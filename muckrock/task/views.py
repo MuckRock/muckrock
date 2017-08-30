@@ -16,7 +16,7 @@ from datetime import datetime
 from django_filters import FilterSet
 
 from muckrock.agency.forms import AgencyForm
-from muckrock.agency.models import Agency, STALE_DURATION
+from muckrock.agency.models import Agency
 from muckrock.foia.models import STATUS, FOIARequest, FOIACommunication, FOIAFile
 from muckrock.models import ExtractDay, Now
 from muckrock.task.filters import (
@@ -290,7 +290,6 @@ class StaleAgencyTaskList(TaskList):
                     .filter(communications__response=True)
                     .annotate(latest_response=ExtractDay(
                         Now() - Max('communications__date')))
-                    .filter(latest_response__gte=STALE_DURATION)
                     .order_by('-latest_response'),
                     to_attr='stale_requests_'),
                 ))

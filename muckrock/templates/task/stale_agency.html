@@ -20,7 +20,7 @@
 {% if stale_requests %}
 <div class="collapsable stale-requests">
     <header>
-        <p>{{stale_requests|length}} request{{stale_requests|length|pluralize}} over 120 days stale</p>
+        <p>{{stale_requests|length}} request{{stale_requests|length|pluralize}} stale</p>
     </header>
     <table class="stale-request-table">
         <thead>
@@ -37,7 +37,7 @@
         <tbody>
         {% for stale_request in stale_requests %}
             <tr class="stale-request">
-                <td><input type="checkbox" form="{{task.pk}}-form" name="foia" value="{{stale_request.pk}}" checked /></td>
+                <td><input type="checkbox" form="{{task.pk}}-form" name="foia" value="{{stale_request.pk}}" {% if stale_request.latest_response >= 30 %}checked{% endif %} /></td>
                 <td><a href="{{stale_request.get_absolute_url}}">{{stale_request}}</a></td>
                 <td>{{stale_request.latest_response}}</td>
                 <td>{{stale_request.date_estimate|date:"m/d/y"}}</td>
