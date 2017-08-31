@@ -27,7 +27,7 @@
             <tr>
                 <th><input type="checkbox" class="select-all" data-name="foia" checked /></th>
                 <th>Request</th>
-                <th>Days Stale</th>
+                <th>Last Response</th>
                 <th><abbr title="Estimated Completion Date">ECD</abbr></th>
                 <th>Status</th>
                 <th>To:</th>
@@ -37,9 +37,9 @@
         <tbody>
         {% for stale_request in stale_requests %}
             <tr class="stale-request">
-                <td><input type="checkbox" form="{{task.pk}}-form" name="foia" value="{{stale_request.pk}}" {% if stale_request.latest_response >= 30 %}checked{% endif %} /></td>
+                <td><input type="checkbox" form="{{task.pk}}-form" name="foia" value="{{stale_request.pk}}" {% if stale_request.latest_response >= 30 or stale_request.latest_respone == None %}checked{% endif %} /></td>
                 <td><a href="{{stale_request.get_absolute_url}}">{{stale_request}}</a></td>
-                <td>{{stale_request.latest_response}}</td>
+                <td>{{stale_request.latest_response|default_if_none:"Never"}}</td>
                 <td>{{stale_request.date_estimate|date:"m/d/y"}}</td>
                 <td>{{stale_request.get_status_display}}</td>
                 <td><input type="text" value="{{stale_request.email}}" readonly /></td>

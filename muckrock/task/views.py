@@ -5,7 +5,7 @@ Views for the Task application
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import resolve
-from django.db.models import Count, Prefetch, Q, Max
+from django.db.models import Count, Prefetch, Q
 from django.http import HttpResponse, Http404
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
@@ -18,7 +18,6 @@ from django_filters import FilterSet
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
 from muckrock.foia.models import STATUS, FOIARequest, FOIACommunication, FOIAFile
-from muckrock.models import ExtractDay, Now
 from muckrock.task.filters import (
     TaskFilterSet,
     ResponseTaskFilterSet,
@@ -284,12 +283,7 @@ class StaleAgencyTaskList(TaskList):
             .prefetch_related(
                 'agency__foiarequest_set__communications__foia__jurisdiction',
                 Prefetch('agency__foiarequest_set',
-                    queryset=FOIARequest.objects
-                    .get_open()
-                    .annotate(latest_response=ExtractDay(
-                        Now() - Max('communications__date')))
-                    .order_by('-latest_response')
-                    .select_related('jurisdiction'),
+                    queryset=FOIARequest.objects.get_stale(),
                     to_attr='stale_requests_'),
                 ))
 

@@ -282,7 +282,7 @@ class StaleAgencyTaskTests(TestCase):
     def test_stale_requests(self):
         """
         The stale agency task should provide a list of open requests which have not
-        recieved any response since the stale duration and have autofollowups enabled.
+        recieved any response since the stale duration
         """
         closed_foia = factories.StaleFOIARequestFactory(
             agency=self.task.agency,
@@ -292,11 +292,6 @@ class StaleAgencyTaskTests(TestCase):
             agency=self.task.agency,
             stale_comm__response=False
         )
-        disabled_autofollowups = factories.StaleFOIARequestFactory(
-            agency=self.task.agency,
-            status='ack',
-            disable_autofollowups=True
-        )
         stale_requests = list(self.task.stale_requests())
         ok_(self.foia in stale_requests,
             'Open requests should be considered stale.')
@@ -304,8 +299,6 @@ class StaleAgencyTaskTests(TestCase):
             'Requests without any response should be considered stale.')
         ok_(closed_foia not in stale_requests,
             'Closed requests should not be considered stale.')
-        ok_(disabled_autofollowups not in stale_requests,
-            'Open requests with autofollowups disabled should not be considered stale.')
 
     def test_latest_response(self):
         """
