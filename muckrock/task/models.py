@@ -5,7 +5,7 @@ Models for the Task application
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import models
-from django.db.models import Max, Prefetch, Q
+from django.db.models import Prefetch, Q
 
 from datetime import datetime
 import email
@@ -22,7 +22,6 @@ from muckrock.foia.models import (
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import support
-from muckrock.models import ExtractDay, Now
 from muckrock.utils import generate_status_action
 
 # pylint: disable=missing-docstring
@@ -301,15 +300,7 @@ class StaleAgencyTask(Task):
         """Returns a list of stale requests associated with the task's agency"""
         if hasattr(self.agency, 'stale_requests_'):
             return self.agency.stale_requests_
-        # a request is stale when it is open
-        # and it has autofollowups enabled
-        requests = (FOIARequest.objects.filter(agency=self.agency)
-            .get_open()
-            .annotate(latest_communication=ExtractDay(Now() - Max('communications__date')))
-            .order_by('-latest_communication')
-            .select_related('jurisdiction')
-        )
-        return requests
+        return FOIARequest.objects.get_stale(agency=self.agency)
 
     def latest_response(self):
         """Returns the latest response from the agency"""

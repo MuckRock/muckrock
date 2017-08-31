@@ -8,7 +8,7 @@ from django.contrib.auth.models import User, AnonymousUser
 from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
 from django.db import models, connection
-from django.db.models import Q, Sum, Count
+from django.db.models import Q, Sum, Count, Max, Case, When
 from django.template.defaultfilters import escape, linebreaks, slugify
 from django.template.loader import render_to_string
 
@@ -23,6 +23,7 @@ from reversion import revisions as reversion
 from taggit.managers import TaggableManager
 
 from muckrock.accounts.models import Notification
+from muckrock.models import ExtractDay, Now
 from muckrock.tags.models import Tag, TaggedItemBase, parse_tags
 from muckrock import task
 from muckrock import fields
@@ -144,6 +145,23 @@ class FOIARequestQuerySet(models.QuerySet):
             foia.public_file_count = counts.get(foia.pk, 0)
             foias.append(foia)
         return foias
+
+    def get_stale(self, agency=None):
+        """Load requests for a stale agency"""
+        foia_qs = (self
+                .get_open()
+                .annotate(
+                    latest_response=ExtractDay(
+                        Now() - Max(Case(When(
+                            communications__response=True,
+                            then='communications__date'
+                            )))))
+                .order_by('-latest_response')
+                .select_related('jurisdiction')
+                )
+        if agency is not None:
+            foia_qs = foia_qs.filter(agency=agency)
+        return foia_qs
 
 
 STATUS = [
