@@ -86,12 +86,16 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
     def create(self, request):
         """Submit new request"""
         # pylint: disable=too-many-locals
+        # pylint: disable=too-many-return-statements
         data = request.data
         try:
             jurisdiction = Jurisdiction.objects.get(pk=int(data['jurisdiction']))
             agency = Agency.objects.get(pk=int(data['agency']), jurisdiction=jurisdiction)
 
             embargo = data.get('embargo', False)
+            permanent_embargo = data.get('permanent_embargo', False)
+            if permanent_embargo:
+                embargo = True
 
             if 'full_text' in data:
                 text = data['full_text']
@@ -119,10 +123,18 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                     requested_docs=requested_docs,
                     description=requested_docs,
                     embargo=embargo,
+                    permanent_embargo=permanent_embargo,
                     )
             if embargo and not foia.has_perm(request.user, 'embargo'):
                 return Response(
                     {'status': 'You do not have permission to embargo requests.'},
+                    status=http_status.HTTP_400_BAD_REQUEST,
+                    )
+            if permanent_embargo and not foia.has_perm(request.user, 'embargo_perm'):
+                return Response(
+                    {'status':
+                        'You do not have permission to permanently '
+                        'embargo requests.'},
                     status=http_status.HTTP_400_BAD_REQUEST,
                     )
             foia.save()

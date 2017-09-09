@@ -106,14 +106,27 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             if not foia:
                 self.fields.pop('notes')
             else:
-                has_perm = foia.has_perm(request.user, 'change')
-                if not has_perm:
+                has_change = foia.has_perm(request.user, 'change')
+                if not has_change:
                     self.fields.pop('notes')
-                if request.method == 'PATCH' and has_perm:
-                    allowed = ['notes', 'tags', 'embargo']
-                    for field in self.fields.keys():
-                        if field not in allowed:
-                            self.fields.pop(field)
+                if request.method == 'PATCH':
+                    self._set_patch_fields(request.user, foia)
+
+    def _set_patch_fields(self, user, foia):
+        """Set which fields the user may PATCH"""
+        has_change = foia.has_perm(user, 'change')
+        has_embargo = foia.has_perm(user, 'embargo')
+        has_embargo_perm = foia.has_perm(user, 'embargo_perm')
+        allowed = []
+        if has_change:
+            allowed.extend(['notes', 'tags'])
+        if has_embargo:
+            allowed.append('embargo')
+        if has_embargo_perm:
+            allowed.append('permanent_embargo')
+        for field in self.fields.keys():
+            if field not in allowed:
+                self.fields.pop(field)
 
     class Meta:
         model = FOIARequest
@@ -124,6 +137,7 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             'slug',
             'status',
             'embargo',
+            'permanent_embargo',
             'user',
             'username',
             'jurisdiction',
