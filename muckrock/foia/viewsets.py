@@ -87,6 +87,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
         """Submit new request"""
         # pylint: disable=too-many-locals
         # pylint: disable=too-many-return-statements
+        # pylint: disable=too-many-branches
         data = request.data
         try:
             jurisdiction = Jurisdiction.objects.get(pk=int(data['jurisdiction']))
