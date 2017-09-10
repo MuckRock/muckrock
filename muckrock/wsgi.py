@@ -9,8 +9,6 @@ https://docs.djangoproject.com/en/{{ docs_version }}/howto/deployment/wsgi/
 
 # pylint: disable=wrong-import-position
 # pylint: disable=ungrouped-imports
-from django.conf import settings
-
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
 

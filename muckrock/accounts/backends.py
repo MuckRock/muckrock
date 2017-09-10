@@ -10,8 +10,9 @@ class CaseInsensitiveModelBackend(ModelBackend):
     """By default ModelBackend does case _sensitive_ username authentication, which isn't what is
     generally expected.  This backend supports case insensitive username authentication. """
 
-    def authenticate(self, username=None, password=None):
+    def authenticate(self, request, username=None, password=None, **kwargs):
         """Authenticate the users case insenstively"""
+        # pylint: disable=unused-argument
         try:
             user = User.objects.get(username__iexact=username)
             if user.check_password(password):
