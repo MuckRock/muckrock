@@ -2,7 +2,7 @@
 URL mappings for the Q&A application
 """
 
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from django.views.generic.base import RedirectView
 
 from muckrock.qanda import views
@@ -10,8 +10,7 @@ from muckrock.qanda.feeds import LatestQuestions
 
 # pylint: disable=no-value-for-parameter
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(
         r'^$',
         views.QuestionList.as_view(),
@@ -57,4 +56,4 @@ urlpatterns = patterns(
         LatestQuestions(),
         name='question-feed'
     ),
-)
+    ]

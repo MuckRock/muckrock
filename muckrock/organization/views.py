@@ -34,7 +34,7 @@ class OrganizationListView(ListView):
 
     def get_queryset(self):
         """Filter out private orgs for non-staff"""
-        queryset = Organization.objects.select_related('owner')
+        queryset = Organization.objects.order_by('id').select_related('owner')
         if not self.request.user.is_staff:
             queryset = queryset.filter(private=False)
         return queryset

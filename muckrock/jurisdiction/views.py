@@ -6,8 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db.models import Count, Sum, Q
-from django.shortcuts import render_to_response, get_object_or_404, redirect
-from django.template import RequestContext
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import DetailView
 
 from rest_framework import viewsets
@@ -117,8 +116,11 @@ def detail(request, fed_slug, state_slug, local_slug):
             )
     collect_stats(jurisdiction, context)
 
-    return render_to_response('jurisdiction/detail.html', context,
-                              context_instance=RequestContext(request))
+    return render(
+            request,
+            'jurisdiction/detail.html',
+            context,
+            )
 
 
 class List(MRFilterListView):

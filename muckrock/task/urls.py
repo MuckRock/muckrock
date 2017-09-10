@@ -2,7 +2,7 @@
 URL mappings for the Task application
 """
 
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from django.views.generic.base import RedirectView
 
 # pylint: disable=unused-import
@@ -10,8 +10,7 @@ import muckrock.task.signals
 # pylint: enable=unused-import
 from muckrock.task import views
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(r'^$', RedirectView.as_view(url='/task/response/'), name='task-list'),
     url(r'^orphan/$', views.OrphanTaskList.as_view(), name='orphan-task-list'),
     url(r'^orphan/(?P<pk>\d+)/$', views.OrphanTaskList.as_view(), name='orphan-task'),
@@ -70,5 +69,5 @@ urlpatterns = patterns(
     # tasks for a specific request
     url(r'^request/(?P<pk>\d+)/$',
         views.RequestTaskList.as_view(),
-        name='request-task-list')
-)
+        name='request-task-list'),
+    ]

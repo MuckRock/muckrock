@@ -6,8 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.db.models import Count, Prefetch
-from django.shortcuts import render_to_response, get_object_or_404, redirect
-from django.template import RequestContext
+from django.shortcuts import render, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.views.generic.detail import DetailView
 
@@ -168,8 +167,11 @@ def create_question(request):
             return redirect(question)
     else:
         form = QuestionForm(user=request.user)
-    return render_to_response('forms/question.html', {'form': form},
-                              context_instance=RequestContext(request))
+    return render(
+            request,
+            'forms/question.html',
+            {'form': form},
+            )
 
 
 @login_required
@@ -218,11 +220,11 @@ def create_answer(request, slug, idx):
     else:
         form = AnswerForm()
 
-    return render_to_response(
-        'forms/answer.html',
-        {'form': form, 'question': question},
-        context_instance=RequestContext(request)
-    )
+    return render(
+            request,
+            'forms/answer.html',
+            {'form': form, 'question': question},
+            )
 
 
 class QuestionViewSet(viewsets.ModelViewSet):

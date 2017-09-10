@@ -7,12 +7,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import transaction
 from django.shortcuts import (
-        render_to_response,
         get_object_or_404,
         redirect,
         render,
         )
-from django.template import RequestContext
 
 import actstream
 from datetime import datetime, timedelta
@@ -234,11 +232,11 @@ def admin_fix(request, jurisdiction, jidx, slug, idx):
         'AWS_STORAGE_BUCKET_NAME': settings.AWS_STORAGE_BUCKET_NAME,
         'AWS_ACCESS_KEY_ID': settings.AWS_ACCESS_KEY_ID,
     }
-    return render_to_response(
-        'forms/foia/admin_fix.html',
-        context,
-        context_instance=RequestContext(request)
-    )
+    return render(
+            request,
+            'forms/foia/admin_fix.html',
+            context,
+            )
 
 @transaction.atomic
 @login_required
@@ -280,8 +278,8 @@ def crowdfund_request(request, idx, **kwargs):
         }
         form = CrowdfundForm(initial=initial)
 
-    return render_to_response(
-        'forms/foia/crowdfund.html',
-        {'form': form},
-        context_instance=RequestContext(request)
-    )
+    return render(
+            request,
+            'forms/foia/crowdfund.html',
+            {'form': form},
+            )

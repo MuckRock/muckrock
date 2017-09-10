@@ -6,7 +6,6 @@ Settings used when developing locally
 from muckrock.settings.base import *
 
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
 EMAIL_DEBUG = DEBUG
 THUMBNAIL_DEBUG = DEBUG
 AWS_DEBUG = False

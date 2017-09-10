@@ -1,7 +1,7 @@
 coverage # Used to generate coverage reports in dev
 dj-inmemorystorage # in memory file storage for faster testing
 django-nose # Used for testing
-django<1.10 # django
+django<2.0 # django
 fabric # Used for dev scripts
 factory-boy # Used for creating test data
 freezegun # Control time during testing

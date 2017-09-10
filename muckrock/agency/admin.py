@@ -3,13 +3,12 @@ Admin registration for Agency models
 """
 
 from django import forms
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from django.contrib import admin, messages
 from django.contrib.auth.models import User
 from django.core.validators import validate_email
-from django.shortcuts import render_to_response, redirect
+from django.shortcuts import render, redirect
 from django.template.defaultfilters import slugify
-from django.template import RequestContext
 
 from adaptor.model import CsvModel
 from adaptor.fields import CharField, DjangoModelField
@@ -75,9 +74,14 @@ class AgencyAdmin(VersionAdmin):
     def get_urls(self):
         """Add custom URLs here"""
         urls = super(AgencyAdmin, self).get_urls()
-        my_urls = patterns('', url(r'^import/$', self.admin_site.admin_view(self.csv_import),
-                                   name='agency-admin-import'))
-        return my_urls + urls
+        urls.append(
+            url(
+                r'^import/$',
+                self.admin_site.admin_view(self.csv_import),
+                name='agency-admin-import',
+                )
+            )
+        return urls
 
     def csv_import(self, request):
         """Import a CSV file of agencies"""
@@ -109,8 +113,11 @@ class AgencyAdmin(VersionAdmin):
 
         fields = ['name', 'slug', 'jurisdiction ("Boston, MA")', 'address', 'email', 'other_emails',
                   'contact first name', 'contact last name', 'contact_title', 'url', 'phone', 'fax']
-        return render_to_response('admin/agency/import.html', {'form': form, 'fields': fields},
-                                  context_instance=RequestContext(request))
+        return render(
+                request,
+                'admin/agency/import.html',
+                {'form': form, 'fields': fields},
+                )
 
 
 admin.site.register(AgencyType, AgencyTypeAdmin)

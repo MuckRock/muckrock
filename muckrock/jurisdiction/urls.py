@@ -2,7 +2,7 @@
 URL mappings for the jurisdiction application
 """
 
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 
 from muckrock.jurisdiction import views
 from muckrock.views import jurisdiction
@@ -10,8 +10,7 @@ from muckrock.views import jurisdiction
 jur_url = r'(?P<fed_slug>[\w\d_-]+)(?:/(?P<state_slug>[\w\d_-]+))?(?:/(?P<local_slug>[\w\d_-]+))?'
 old_jur_url = r'(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(r'^$',
         views.List.as_view(),
         name='jurisdiction-list'
@@ -27,11 +26,10 @@ urlpatterns = patterns(
         views.detail,
         name='jurisdiction-detail'
     ),
-)
+    ]
 
 # old url patterns go under jurisdictions, new ones switched to places
-old_urlpatterns = patterns(
-    '',
+old_urlpatterns = [
     url(r'^view/%s/$' % old_jur_url, jurisdiction),
     url(r'^flag/%s/$' % old_jur_url, jurisdiction, {'view': 'flag'}),
-)
+    ]

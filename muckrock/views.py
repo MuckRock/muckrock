@@ -211,7 +211,11 @@ class SearchView(SearchMixin, MRListView):
 
     def get_queryset(self):
         """Select related content types"""
-        return super(SearchView, self).get_queryset().select_related('content_type')
+        return (super(SearchView, self)
+                .get_queryset()
+                .order_by('id')
+                .select_related('content_type')
+                )
 
 
 class NewsletterSignupView(View):

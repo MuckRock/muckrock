@@ -3,11 +3,14 @@ URL mappings for muckrock project
 """
 
 from django.conf import settings
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 from django.contrib import admin
+import django.contrib.sitemaps.views
 from django.views.generic.base import RedirectView, TemplateView
+from django.views import static
 
 from rest_framework.routers import DefaultRouter
+from rest_framework.authtoken.views import obtain_auth_token
 import dbsettings.urls
 import debug_toolbar
 
@@ -92,8 +95,7 @@ router.register(r'responsetask',
         muckrock.task.viewsets.ResponseTaskViewSet,
         'api-responsetask')
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(r'^$', views.homepage, name='index'),
     url(r'^reset_cache/$', views.reset_homepage_cache, name='reset-cache'),
     url(r'^accounts/', include('muckrock.accounts.urls')),
@@ -117,18 +119,17 @@ urlpatterns = patterns(
     url(r'^search/$', views.SearchView.as_view(), name='search'),
     url(r'^settings/', include(dbsettings.urls)),
     url(r'^api_v1/', include(router.urls)),
-    url(r'^api_v1/token-auth/', 'rest_framework.authtoken.views.obtain_auth_token'),
-    url(r'^api_doc/', include('rest_framework_swagger.urls')),
+    url(r'^api_v1/token-auth/', obtain_auth_token),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
-    url(r'^package_monitor/', include('package_monitor.urls', namespace='package_monitor')),
     url(r'^robots\.txt$', include('robots.urls')),
     url(r'^favicon.ico$', RedirectView.as_view(
         url=settings.STATIC_URL + 'icons/favicon.ico')),
-    url(r'^sitemap\.xml$', 'django.contrib.sitemaps.views.index', {'sitemaps': sitemaps}),
+    url(r'^sitemap\.xml$', django.contrib.sitemaps.views.index, {'sitemaps': sitemaps}),
     url(
         r'^sitemap-(?P<section>.+)\.xml$',
-        'django.contrib.sitemaps.views.sitemap',
-        {'sitemaps': sitemaps}
+        django.contrib.sitemaps.views.sitemap,
+        {'sitemaps': sitemaps},
+        name='django.contrib.sitemaps.views.sitemap',
     ),
     url(r'^news-sitemaps/', include('news_sitemaps.urls')),
     url(r'^__debug__/', include(debug_toolbar.urls)),
@@ -136,16 +137,16 @@ urlpatterns = patterns(
     url(r'^donate/thanks/$', views.DonationThanksView.as_view(), name='donate-thanks'),
     url(r'^landing/$', views.LandingView.as_view(), name='landing'),
     url(r'^hijack/', include('hijack.urls')),
-)
+    ]
+
 
 if settings.DEBUG:
-    urlpatterns += patterns(
-        '',
+    urlpatterns += [
         url(
             r'^media/(?P<path>.*)$',
-            'django.views.static.serve',
+            static.serve,
             {'document_root': settings.MEDIA_ROOT}
         ),
         url(r'^500/$', TemplateView.as_view(template_name='500.html')),
         url(r'^404/$', TemplateView.as_view(template_name='404.html')),
-    )
+        ]
