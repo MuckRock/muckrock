@@ -13,7 +13,7 @@ coverage==4.2
 decorator==4.0.10         # via ipython, traitlets
 dj-inmemorystorage==1.4.0
 django-nose==1.4.4
-django==1.10.7
+django==1.11.4
 ecdsa==0.13               # via paramiko
 enum34==1.1.6             # via traitlets
 fabric==1.12.0
@@ -45,6 +45,7 @@ pylint-django==0.7.2
 pylint-plugin-utils==0.2.4  # via pylint-django
 pylint==1.6.4             # via pylint-django, pylint-plugin-utils
 python-dateutil==2.5.3    # via fake-factory, freezegun
+pytz==2017.2              # via django
 simplegeneric==0.8.1      # via ipython
 six==1.10.0               # via astroid, dj-inmemorystorage, fake-factory, freezegun, mock, pathlib2, pip-tools, prompt-toolkit, pylint, python-dateutil, traitlets
 traitlets==4.3.0          # via ipython
