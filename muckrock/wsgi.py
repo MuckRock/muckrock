@@ -10,11 +10,6 @@ https://docs.djangoproject.com/en/{{ docs_version }}/howto/deployment/wsgi/
 # pylint: disable=wrong-import-position
 # pylint: disable=ungrouped-imports
 from django.conf import settings
-import stackimpact
-agent = stackimpact.start(
-        agent_key=settings.STACKIMPACT_AGENT_KEY,
-        app_name=settings.MUCKROCK_URL,
-        )
 
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
