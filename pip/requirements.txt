@@ -79,7 +79,7 @@ pyphaxio==0.11
 python-dateutil==2.5.3
 python-Levenshtein==0.12.0
 python-magic==0.4.12      # via pyimagediet
-pytz==2016.6.1            # via celery, django
+pytz==2017.2            # via celery, django
 PyYAML==3.12              # via pyimagediet
 raven==5.27.1
 rcssmin==1.0.6            # via django-compressor
