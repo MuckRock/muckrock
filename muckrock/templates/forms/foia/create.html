@@ -101,7 +101,7 @@
                                 </svg>
                             {% endif %}
                                 {{ radio.choice_label }}</label>
-                                <input name="{{ radio.name }}" type="radio" id="j_{{ forloop.counter }}" value="{{ radio.choice_value }}" {% if field.value == radio.choice_value%}checked{% endif %}>
+                                <input name="{{ radio.data.name }}" type="radio" id="j_{{ forloop.counter }}" value="{{ radio.data.value }}" {% if field.value == radio.data.value %}checked{% endif %}>
                             </li>
                         {% endfor %}
                         </ul>

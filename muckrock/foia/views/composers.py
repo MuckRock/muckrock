@@ -11,7 +11,6 @@ from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template.loader import get_template
-from django.template import Context
 from django.utils.encoding import smart_text
 
 from datetime import datetime, date
@@ -62,12 +61,12 @@ def get_foia(jurisdiction, jidx, slug, idx, select_related=None, prefetch_relate
 def _make_comm(foia, from_who, proxy=False):
     """A helper function to compose the text of a communication"""
     template = get_template('text/foia/request.txt')
-    context = Context({
+    context = {
         'document_request': smart_text(foia.requested_docs),
         'jurisdiction': foia.jurisdiction,
         'user_name': from_who,
         'proxy': proxy,
-    })
+    }
     request_text = template.render(context).split('\n', 1)[1].strip()
     return request_text
 
