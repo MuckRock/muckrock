@@ -6,6 +6,8 @@
 #
 -e git+git://github.com/BradWhittington/django-mailgun.git@4f2edb9466f6245c3bbf501aab2681f0b3c71e0c#egg=django_mailgun
 -e git+git://github.com/mitchelljkotler/django-news-sitemaps.git@5946718cd1d18abbfa7f0393c140fcc513dedac1#egg=django_news_sitemaps
+-e git+git://github.com/jazzband/django-queued-storage@d30d70d6db4eb742ccde9d4a7da6ca7624e53219#egg=django_queued_storage
+-e git+git://github.com/MuckRock/django-autocomplete-light.git@a54a789b5a44adba678d980aaa64413472a11dbb#egg=django_autocomplete_light
 amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu
 billiard==3.3.0.23        # via celery
@@ -23,9 +25,8 @@ dill==0.2.5
 django-activity-stream==0.6.4
 django-adaptors==0.2.5
 django-appconf==1.0.2     # via django-celery-email, django-compressor, django-queued-storage
-django-autocomplete-light==2.3.3
 django-celery-email==1.1.5
-django-celery==3.1.17
+django-celery==3.2.1
 django-compat==1.0.14     # via django-hijack
 django-compressor==2.1
 django-cors-headers==1.3.1
@@ -43,7 +44,6 @@ django-mathfilters==0.4.0
 django-premailer==0.2.0
 django-pylibmc==0.6.1
 django-querycount==0.4.1
-django-queued-storage==0.8.0
 django-reversion==1.10.2
 django-robots==2.0
 django-secure==1.0.1

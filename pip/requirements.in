@@ -1,5 +1,7 @@
 -e git://github.com/BradWhittington/django-mailgun.git@4f2edb9466f6245c3bbf501aab2681f0b3c71e0c#egg=django_mailgun # Mail backend used directly (on production)
--e git://github.com/mitchelljkotler/django-news-sitemaps.git@5946718cd1d18abbfa7f0393c140fcc513dedac1#egg=django_news_sitemaps
+-e git://github.com/mitchelljkotler/django-news-sitemaps.git@5946718cd1d18abbfa7f0393c140fcc513dedac1#egg=django_news_sitemaps # For generating news sitemaps
+-e git://github.com/jazzband/django-queued-storage@d30d70d6db4eb742ccde9d4a7da6ca7624e53219#egg=django_queued_storage # For delayed uploading of files
+-e git://github.com/MuckRock/django-autocomplete-light.git@a54a789b5a44adba678d980aaa64413472a11dbb#egg=django_autocomplete_light # Autocomplete drop down inputs
 bleach # Used to sanitize any HTML we're rendering
 boto # Used to access AWS
 celery<4 # Used to run async tasks
@@ -7,7 +9,6 @@ chardet # Detect character encodings for user uploaded text files
 dill # Used to serialize machine learning data
 django-activity-stream # Used for notifications
 django-adaptors # Used for model import
-django-autocomplete-light<3 # Autocomplete drop down inputs
 django-celery # Integrate celery with django
 django-celery-email<2.0 # Send emails asynchronously using Celery
 django-compressor # Compress all JS and CSS assets into a single file
@@ -26,7 +27,6 @@ django-mathfilters # Mathematical template filters
 django-premailer # Styles HTML emails
 django-pylibmc # Interface to memcache
 django-querycount # Counts queries for dev
-django-queued-storage # For delayed uploading of files
 django-reversion==1.10.2 # Version history for models
 django-robots # Manage robots.txt file
 django-secure # Enforces security best practices
