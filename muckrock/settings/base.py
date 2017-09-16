@@ -210,6 +210,7 @@ INSTALLED_APPS = (
     'queued_storage',
     'hijack',
     'compat', # for hijack
+    'django_filters',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
