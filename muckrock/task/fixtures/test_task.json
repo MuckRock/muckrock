@@ -93,7 +93,7 @@
         "model":"task.snailmailtask",
         "fields":{
             "category":"n",
-            "communication":1
+            "communication":2
         }
     },
     {
