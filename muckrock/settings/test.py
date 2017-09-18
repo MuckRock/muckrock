@@ -37,3 +37,5 @@ CELERY_ALWAYS_EAGER = True
 DEFAULT_FILE_STORAGE = 'inmemorystorage.InMemoryStorage'
 
 LOGGING = {}
+
+TEMPLATES[0]['OPTIONS']['debug'] = True

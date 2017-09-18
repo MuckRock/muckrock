@@ -28,7 +28,8 @@ class TaskNode(template.Node):
         """Render the task"""
         self.task = self._task.resolve(context)
         context.update(self.get_extra_context())
-        return template.loader.render_to_string(self.task_template, context)
+        templ = context.template.engine.get_template(self.task_template)
+        return templ.render(context)
 
     def get_extra_context(self):
         """Returns a dictionary of context for the specific task"""
