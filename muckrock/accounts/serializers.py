@@ -122,6 +122,7 @@ class StatisticsSerializer(serializers.ModelSerializer):
                     'total_exemptions',
                     'total_invoked_exemptions',
                     'total_example_appeals',
+                    'requests_processing_days',
                     )
             for field in staff_only:
                 self.fields.pop(field)
@@ -144,6 +145,7 @@ class StatisticsSerializer(serializers.ModelSerializer):
                 'total_requests_partial',
                 'total_requests_abandoned',
                 'total_requests_lawsuit',
+                'requests_processing_days',
                 'total_pages',
                 'total_users',
                 'total_agencies',
@@ -231,4 +233,18 @@ class StatisticsSerializer(serializers.ModelSerializer):
                 'total_exemptions',
                 'total_invoked_exemptions',
                 'total_example_appeals',
+                'machine_requests',
+                'machine_requests_success',
+                'machine_requests_denied',
+                'machine_requests_draft',
+                'machine_requests_submitted',
+                'machine_requests_awaiting_ack',
+                'machine_requests_awaiting_response',
+                'machine_requests_awaiting_appeal',
+                'machine_requests_fix_required',
+                'machine_requests_payment_required',
+                'machine_requests_no_docs',
+                'machine_requests_partial',
+                'machine_requests_abandoned',
+                'machine_requests_lawsuit',
                 )
