@@ -119,7 +119,7 @@ urlpatterns = [
     url(r'^search/$', views.SearchView.as_view(), name='search'),
     url(r'^settings/', include(dbsettings.urls)),
     url(r'^api_v1/', include(router.urls)),
-    url(r'^api_v1/token-auth/', obtain_auth_token),
+    url(r'^api_v1/token-auth/', obtain_auth_token, name='api-token-auth'),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^robots\.txt$', include('robots.urls')),
     url(r'^favicon.ico$', RedirectView.as_view(
