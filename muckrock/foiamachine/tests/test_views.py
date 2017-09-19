@@ -55,7 +55,7 @@ class TestLogin(TestCase):
             'password': self.password,
         }
         response = http_post_response(self.url, self.view, data)
-        eq_(response.status_code, 200)
+        eq_(response.status_code, 302)
 
 
 class TestPasswordReset(TestCase):
