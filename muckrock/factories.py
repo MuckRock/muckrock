@@ -46,6 +46,14 @@ class UserFactory(factory.django.DjangoModelFactory):
     email = factory.Faker('email')
     profile = factory.RelatedFactory(ProfileFactory, 'user')
 
+    @factory.post_generation
+    def password(self, create, extracted, **kwargs):
+        """Sets password"""
+        # pylint: disable=unused-argument
+        if extracted:
+            self.set_password(extracted)
+            self.save()
+
 
 class NotificationFactory(factory.django.DjangoModelFactory):
     """A factory for creating Notification test objects."""

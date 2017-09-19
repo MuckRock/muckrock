@@ -6,7 +6,6 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django.template.defaultfilters import slugify
 from django.template.loader import get_template
-from django.template import RequestContext
 
 import actstream
 from datetime import datetime
@@ -104,11 +103,11 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             else:
                 requested_docs = data['document_request']
                 template = get_template('text/foia/request.txt')
-                context = RequestContext(request, {
+                context = {
                     'document_request': requested_docs,
                     'jurisdiction': jurisdiction,
                     'user_name': request.user.get_full_name,
-                    })
+                    }
                 text = template.render(context)
 
             title = data['title']
