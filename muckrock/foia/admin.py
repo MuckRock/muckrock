@@ -456,13 +456,31 @@ class FOIARequestAdmin(VersionAdmin):
         return HttpResponseRedirect(reverse('admin:foia_foiarequest_change', args=[foia.pk]))
 
 
+class FOIAMultiRequestAdminForm(forms.ModelForm):
+    """Form for multi request admin"""
+
+    user = autocomplete_light.ModelChoiceField(
+            'UserAutocomplete',
+            queryset=User.objects.all(),
+            )
+    agencies = autocomplete_light.ModelMultipleChoiceField(
+            'AgencyAdminAutocomplete',
+            queryset=Agency.objects.all(),
+            required=False,
+            )
+
+    class Meta:
+        model = FOIAMultiRequest
+        fields = '__all__'
+
+
 class FOIAMultiRequestAdmin(VersionAdmin):
     """FOIA Multi Request admin options"""
     change_form_template = 'admin/foia/multifoiarequest/change_form.html'
     prepopulated_fields = {'slug': ('title',)}
     list_display = ('title', 'user', 'status')
     search_fields = ['title', 'requested_docs']
-    filter_horizontal = ['agencies']
+    form = FOIAMultiRequestAdminForm
 
     def get_urls(self):
         """Add custom URLs here"""
