@@ -77,14 +77,12 @@ class JurisdictionAdmin(VersionAdmin):
     def get_urls(self):
         """Add custom URLs here"""
         urls = super(JurisdictionAdmin, self).get_urls()
-        urls.append(
-                url(
-                    r'^import/$',
-                    self.admin_site.admin_view(self.csv_import),
-                    name='jurisdiction-admin-import',
-                    )
-                )
-        return urls
+        my_urls = [url(
+            r'^import/$',
+            self.admin_site.admin_view(self.csv_import),
+            name='jurisdiction-admin-import',
+            )]
+        return my_urls + urls
 
     def csv_import(self, request):
         """Import a CSV file of jurisdictions"""

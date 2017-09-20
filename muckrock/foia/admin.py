@@ -485,14 +485,12 @@ class FOIAMultiRequestAdmin(VersionAdmin):
     def get_urls(self):
         """Add custom URLs here"""
         urls = super(FOIAMultiRequestAdmin, self).get_urls()
-        urls.append(
-                url(
-                    r'^submit/(?P<idx>\d+)/$',
-                    self.admin_site.admin_view(self.submit),
-                    name='multifoia-admin-submit',
-                    )
-                )
-        return urls
+        my_urls = [url(
+            r'^submit/(?P<idx>\d+)/$',
+            self.admin_site.admin_view(self.submit),
+            name='multifoia-admin-submit',
+            )]
+        return my_urls + urls
 
     def submit(self, request, idx):
         """Submit the multi request"""
