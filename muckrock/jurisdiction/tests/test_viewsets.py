@@ -2,6 +2,7 @@
 Test the API viewsets for the Jurisdiction application.
 """
 
+from django.core.urlresolvers import reverse
 from django.test import TestCase
 
 from nose.tools import eq_, ok_
@@ -10,7 +11,7 @@ from rest_framework.test import APIRequestFactory, force_authenticate
 from muckrock.factories import UserFactory, FOIARequestFactory
 from muckrock.jurisdiction.factories import StateJurisdictionFactory, ExemptionFactory
 from muckrock.jurisdiction.serializers import ExemptionSerializer
-from muckrock.jurisdiction.viewsets import ExemptionViewSet
+from muckrock.jurisdiction.viewsets import ExemptionViewSet, JurisdictionViewSet
 from muckrock.task.models import NewExemptionTask
 from muckrock.task.serializers import NewExemptionTaskSerializer
 
@@ -113,3 +114,22 @@ class TestExemptionCreation(TestCase):
         force_authenticate(request, user=self.user)
         response = self.view(request)
         eq_(response.status_code, 400)
+
+
+class TestTemplateEndpoint(TestCase):
+    """
+    Test the endpoint to get you the jurisdiction template
+    """
+    def setUp(self):
+        self.factory = APIRequestFactory()
+        self.view = JurisdictionViewSet.as_view({'get': 'template'})
+
+    def test_template(self):
+        """Get the default language for a given jurisdiction"""
+        jurisdiction = StateJurisdictionFactory.create()
+        request = self.factory.get(reverse(
+            'api-jurisdiction-template',
+            kwargs={'pk': jurisdiction.pk},
+            ))
+        response = self.view(request, pk=jurisdiction.pk)
+        eq_(response.status_code, 200)

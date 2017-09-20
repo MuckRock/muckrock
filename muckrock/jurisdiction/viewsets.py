@@ -5,7 +5,6 @@ Provides Jurisdiction application API views
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.template.loader import get_template
-from django.template import RequestContext
 
 from rest_framework.decorators import list_route, detail_route
 from rest_framework.exceptions import ValidationError
@@ -48,11 +47,11 @@ class JurisdictionViewSet(ModelViewSet):
             user_name = request.user.get_full_name()
         else:
             user_name = 'Anonymous User'
-        context = RequestContext(request, {
+        context = {
             'document_request': '<insert requested documents here>',
             'jurisdiction': jurisdiction,
             'user_name': user_name,
-            })
+            }
         text = template.render(context)
         return Response({'text': text})
 
