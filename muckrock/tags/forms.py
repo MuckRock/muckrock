@@ -11,7 +11,7 @@ class TagForm(forms.Form):
     """This form allows the selection of a tag"""
 
     tag_select = autocomplete_light.ModelChoiceField(
-        'TagAutocomplete',
+        'TagSlugAutocomplete',
         label=' ',
         required=False,
     )
