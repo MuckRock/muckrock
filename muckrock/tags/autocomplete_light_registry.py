@@ -20,8 +20,14 @@ class TagAutocomplete(autocomplete_light.AutocompleteModelBase):
         'placeholder': 'Search tags',
     }
 
+
+class TagSlugAutocomplete(TagAutocomplete):
+    """Tag autocomplete that uses the slug as the value"""
+
     def choice_value(self, choice):
         """Return the slug as the value"""
         return choice.slug
 
+
 autocomplete_light.register(Tag, TagAutocomplete)
+autocomplete_light.register(Tag, TagSlugAutocomplete)
