@@ -10,7 +10,6 @@ from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string, get_template
-from django.template import Context
 
 import dill as pickle
 import dbsettings
