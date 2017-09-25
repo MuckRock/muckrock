@@ -45,6 +45,7 @@ class AgencySerializer(serializers.ModelSerializer):
             'stale',
             'exempt',
             'types',
+            'requires_proxy',
             # location
             'jurisdiction',
             'address',

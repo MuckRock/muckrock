@@ -27,7 +27,7 @@ class JurisdictionViewSet(ModelViewSet):
             .select_related('parent__parent')
             )
     serializer_class = JurisdictionSerializer
-    filter_fields = ('name', 'abbrev', 'level', 'parent')
+    filter_fields = ('name', 'abbrev', 'level', 'parent', 'requires_proxy')
     # don't allow ordering by computed fields
     ordering_fields = [f for f in JurisdictionSerializer.Meta.fields
             if f not in (
