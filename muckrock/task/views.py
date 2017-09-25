@@ -473,6 +473,19 @@ class MultiRequestTaskList(TaskList):
             .select_related('multirequest__user')
             .prefetch_related('multirequest__agencies'))
 
+    def task_post_helper(self, request, task):
+        """Special post helper exclusive to MultiRequestTasks"""
+        if request.POST.get('action') == 'submit':
+            agency_list = request.POST.getlist('agencies')
+            task.submit(agency_list)
+            task.resolve(request.user)
+            messages.success(request, 'Multirequest submitted')
+        elif request.POST.get('action') == 'reject':
+            task.reject()
+            task.resolve(request.user)
+            messages.error(request, 'Multirequest rejected')
+        return super(MultiRequestTaskList, self).task_post_helper(request, task)
+
 
 class FailedFaxTaskList(TaskList):
     title = 'Failed Faxes'

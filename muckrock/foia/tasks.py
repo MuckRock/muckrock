@@ -208,7 +208,8 @@ def submit_multi_request(req_pk, **kwargs):
                 full_html=False, communication=foia_request)
 
             new_foia.submit()
-    req.delete()
+    req.status = 'filed'
+    req.save()
 
 @task(ignore_result=True, max_retries=3, name='muckrock.foia.tasks.classify_status')
 def classify_status(task_pk, **kwargs):

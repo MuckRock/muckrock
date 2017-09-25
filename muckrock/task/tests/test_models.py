@@ -474,6 +474,39 @@ class TestNewExemptionTask(TestCase):
         eq_(self.task.get_absolute_url(), reverse('newexemption-task', kwargs={'pk': self.task.pk}))
 
 
+class MultiRequestTaskTests(TestCase):
+    """Test the MultiRequestTask class"""
+
+    def setUp(self):
+        self.agencies = factories.AgencyFactory.create_batch(6)
+        self.multi = factories.FOIAMultiRequestFactory(
+                agencies=self.agencies,
+                num_org_requests=1,
+                num_monthly_requests=2,
+                num_reg_requests=3,
+                )
+        self.task = task.models.MultiRequestTask.objects.create(
+                multirequest=self.multi,
+                )
+
+    def test_get_absolute_url(self):
+        eq_(
+                self.task.get_absolute_url(),
+                reverse('multirequest-task', kwargs={'pk': self.task.pk}),
+                )
+
+    def test_submit(self):
+        """Test submitting the task"""
+
+    def test_reject(self):
+        """Test rejecting the request"""
+
+    def test_return_requests(self):
+        """Test return requests"""
+
+    def test_calc_return_requests(self):
+        """Test calculating the return requests"""
+
 
 
 class TestTaskManager(TestCase):

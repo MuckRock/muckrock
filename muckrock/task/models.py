@@ -577,6 +577,81 @@ class MultiRequestTask(Task):
     def get_absolute_url(self):
         return reverse('multirequest-task', kwargs={'pk': self.pk})
 
+    def submit(self, agency_list):
+        """Submit the multirequest"""
+        from muckrock.foia.tasks import submit_multi_request
+        return_requests = 0
+        for agency in self.multirequest.agencies.all():
+            if str(agency.pk) not in agency_list:
+                self.multirequest.agencies.remove(agency)
+                return_requests += 1
+        self.multirequest.save()
+        submit_multi_request.apply_async(args=(self.multirequest.pk,))
+        self._return_requests(return_requests)
+
+    def reject(self):
+        """Reject the multirequest and return the user their requests"""
+        self._return_requests(self.multirequest.agencies.count())
+        self.multirequest.status = 'started'
+        self.multirequest.save()
+
+    def _return_requests(self, num_requests):
+        """Return some number of requests to the user"""
+        return_amts = self._calc_return_requests(num_requests)
+        # remove returned requests from the multirequest
+        # use max to ensure all numbers are positive
+        self.multirequest.num_reg_requests -= max(return_amts['reg'], 0)
+        self.multirequest.num_monthly_requests -= max(return_amts['monthly'], 0)
+        self.multirequest.num_org_requests -= max(return_amts['org'], 0)
+        self.multirequest.save()
+
+        # add the return requests to the user's profile
+        profile = self.multirequest.user.profile
+        profile.num_requests += return_amts['reg']
+        profile.get_monthly_requests()
+        profile.monthly_requests += return_amts['monthly']
+        if profile.organization:
+            profile.organization.get_requests()
+            profile.organization.num_requests += return_amts['org']
+            profile.organization.save()
+        else:
+            profile.monthly_requests += return_amts['org']
+        profile.save()
+
+    def _calc_return_requests(self, num_requests):
+        """Determine how many of each type of request to return"""
+        num_reg = self.multirequest.num_reg_requests
+        num_monthly = self.multirequest.num_monthly_requests
+        num_org = self.multirequest.num_org_requests
+        if num_requests > (num_reg + num_monthly + num_org):
+            # if the number of requests to return is greater than the num of
+            # requests logged on the multirequest, just compensate with regular
+            # requests - this should only happen for returns on requests created
+            # before multi's started tracking where the requests came from
+            return {
+                    'reg': num_requests - num_monthly - num_org,
+                    'monthly': num_monthly,
+                    'org': num_org,
+                    }
+        elif num_requests > (num_reg + num_monthly):
+            return {
+                    'reg': num_reg,
+                    'monthly': num_monthly,
+                    'org': num_requests - num_reg - num_monthly,
+                    }
+        elif num_requests > num_reg:
+            return {
+                    'reg': num_reg,
+                    'monthly': num_requests - num_reg,
+                    'org': 0,
+                    }
+        else:
+            return {
+                    'reg': num_requests,
+                    'monthly': 0,
+                    'org': 0,
+                    }
+
 
 class NewExemptionTask(Task):
     """Created when a new exemption is submitted for our review."""
