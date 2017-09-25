@@ -143,6 +143,6 @@ class AgencyViewSet(viewsets.ModelViewSet):
         types = django_filters.CharFilter(name='types__name')
         class Meta:
             model = Agency
-            fields = ('name', 'status', 'jurisdiction', 'types')
+            fields = ('name', 'status', 'jurisdiction', 'types', 'requires_proxy')
 
     filter_class = Filter

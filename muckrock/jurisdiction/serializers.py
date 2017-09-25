@@ -30,6 +30,7 @@ class JurisdictionSerializer(serializers.ModelSerializer):
                 'parent',
                 'public_notes',
                 'days',
+                'requires_proxy',
                 # computed fields
                 'absolute_url',
                 'average_response_time',
