@@ -7,13 +7,29 @@ from rest_framework.permissions import IsAdminUser
 import django_filters
 
 from muckrock.task.models import (
-        Task, OrphanTask, SnailMailTask, RejectedEmailTask, StaleAgencyTask,
-        FlaggedTask, NewAgencyTask, ResponseTask, NewExemptionTask, GenericTask)
+        Task,
+        OrphanTask,
+        SnailMailTask,
+        RejectedEmailTask,
+        StaleAgencyTask,
+        FlaggedTask,
+        NewAgencyTask,
+        ResponseTask,
+        NewExemptionTask,
+        GenericTask,
+        )
 from muckrock.task.serializers import (
-        TaskSerializer, OrphanTaskSerializer, SnailMailTaskSerializer,
-        RejectedEmailTaskSerializer, StaleAgencyTaskSerializer,
-        FlaggedTaskSerializer, NewAgencyTaskSerializer, ResponseTaskSerializer,
-        NewExemptionTaskSerializer, GenericTaskSerializer)
+        TaskSerializer,
+        OrphanTaskSerializer,
+        SnailMailTaskSerializer,
+        RejectedEmailTaskSerializer,
+        StaleAgencyTaskSerializer,
+        FlaggedTaskSerializer,
+        NewAgencyTaskSerializer,
+        ResponseTaskSerializer,
+        NewExemptionTaskSerializer,
+        GenericTaskSerializer,
+        )
 
 def create_task_viewset(model, serializer, fields):
     """Create a viewset for a task"""
@@ -29,14 +45,32 @@ def create_task_viewset(model, serializer, fields):
             'assigned') + fields
     })
 
-    Filter = type('Filter', (django_filters.FilterSet,), dict(
+    filter_fields = dict(
         assigned=django_filters.CharFilter(name='assigned__username'),
-        min_date_created=django_filters.DateFilter(name='date_created', lookup_expr='gte'),
-        max_date_created=django_filters.DateFilter(name='date_created', lookup_expr='lte'),
-        min_date_done=django_filters.DateFilter(name='date_done', lookup_expr='gte'),
-        max_date_done=django_filters.DateFilter(name='date_done', lookup_expr='lte'),
+        min_date_created=django_filters.DateFilter(
+            name='date_created',
+            lookup_expr='gte',
+            ),
+        max_date_created=django_filters.DateFilter(
+            name='date_created',
+            lookup_expr='lte',
+            ),
+        min_date_done=django_filters.DateFilter(
+            name='date_done',
+            lookup_expr='gte',
+            ),
+        max_date_done=django_filters.DateFilter(
+            name='date_done',
+            lookup_expr='lte',
+            ),
         Meta=Meta,
-    ))
+        )
+    relation_fields = ['user', 'foia', 'communication', 'agency', 'jurisdiction']
+    for rfield in relation_fields:
+        if rfield in fields:
+            filter_fields[rfield] = django_filters.NumberFilter(
+                    name='%s__id' % rfield)
+    Filter = type('Filter', (django_filters.FilterSet,), filter_fields)
 
     return type((model.__name__ + 'ViewSet'), (viewsets.ModelViewSet,), {
         'queryset': model.objects.all(),
