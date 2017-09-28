@@ -11,6 +11,7 @@ from django.template.defaultfilters import slugify
 from django.views.generic.detail import DetailView
 
 import actstream
+import django_filters
 from datetime import datetime
 from rest_framework import viewsets, status
 from rest_framework.decorators import detail_route
@@ -237,7 +238,19 @@ class QuestionViewSet(viewsets.ModelViewSet):
                     queryset=Answer.objects.select_related('user'))))
     serializer_class = QuestionSerializer
     permission_classes = (QuestionPermissions,)
-    filter_fields = ('title', 'foia',)
+
+    class Filter(django_filters.FilterSet):
+        """API Filter for Questions"""
+        # pylint: disable=too-few-public-methods
+        foia = django_filters.NumberFilter(name='foia__id')
+        class Meta:
+            model = Question
+            fields = (
+                    'title',
+                    'foia',
+                    )
+
+    filter_class = Filter
 
     def pre_save(self, obj):
         """Auto fill fields on create"""

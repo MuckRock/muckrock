@@ -11,6 +11,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+import django_filters
 
 from muckrock.jurisdiction.forms import ExemptionSubmissionForm
 from muckrock.jurisdiction.models import Jurisdiction, Exemption
@@ -27,7 +28,6 @@ class JurisdictionViewSet(ModelViewSet):
             .select_related('parent__parent')
             )
     serializer_class = JurisdictionSerializer
-    filter_fields = ('name', 'abbrev', 'level', 'parent', 'requires_proxy')
     # don't allow ordering by computed fields
     ordering_fields = [f for f in JurisdictionSerializer.Meta.fields
             if f not in (
@@ -36,6 +36,22 @@ class JurisdictionViewSet(ModelViewSet):
                 'fee_rate',
                 'success_rate',
                 )]
+
+    class Filter(django_filters.FilterSet):
+        """API Filter for Jurisdictions"""
+        # pylint: disable=too-few-public-methods
+        parent = django_filters.NumberFilter(name='parent__id')
+        class Meta:
+            model = Jurisdiction
+            fields = (
+                    'name',
+                    'abbrev',
+                    'level',
+                    'parent',
+                    'requires_proxy',
+                    )
+
+    filter_class = Filter
 
     @detail_route()
     def template(self, request, pk=None):
@@ -78,8 +94,20 @@ class ExemptionViewSet(ModelViewSet):
             .prefetch_related('example_appeals')
             )
     serializer_class = ExemptionSerializer
-    filter_fields = ('name', 'jurisdiction')
     permission_classes = [ExemptionPermissions]
+
+    class Filter(django_filters.FilterSet):
+        """API Filter for Examptions"""
+        # pylint: disable=too-few-public-methods
+        jurisdiction = django_filters.NumberFilter(name='jurisdiction__id')
+        class Meta:
+            model = Exemption
+            fields = (
+                    'name',
+                    'jurisdiction',
+                    )
+
+    filter_class = Filter
 
     def list(self, request):
         """

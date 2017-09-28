@@ -168,8 +168,8 @@ def _handle_request(request, mail_id):
     # pylint: disable=broad-except
     # pylint: disable=too-many-locals
     post = request.POST
-    from_ = post.get('From')
-    to_ = post.get('To') or post.get('to')
+    from_ = post.get('From', '')
+    to_ = post.get('To') or post.get('to', '')
     subject = post.get('Subject') or post.get('subject', '')
 
     try:

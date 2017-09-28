@@ -12,7 +12,8 @@ class JurisdictionSerializer(serializers.ModelSerializer):
     """Serializer for Jurisidction model"""
     parent = serializers.PrimaryKeyRelatedField(
             queryset=Jurisdiction.objects.order_by(),
-            style={'base_template': 'input.html'})
+            style={'base_template': 'input.html'},
+            )
     absolute_url = serializers.ReadOnlyField(source='get_absolute_url')
     average_response_time = serializers.ReadOnlyField()
     fee_rate = serializers.ReadOnlyField()

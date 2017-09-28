@@ -159,4 +159,21 @@ $('document').ready(function(){
             $(overlay).removeClass('visible');
         });
     });
+
+    // https://github.com/yourlabs/django-autocomplete-light/issues/498#issuecomment-164601975
+    // This code resolves on issue with having an autocomplete field be required
+    $(document).bind('selectChoice', function(e, choice, autocomplete){
+        if(autocomplete.input.attr('required') !== undefined){
+            autocomplete.input.removeAttr('required');
+            autocomplete.input.attr('data-required', 'required');
+        }
+    });
+
+    $(document).bind('widgetDeselectChoice', function(e, choice, autocomplete){
+        if(autocomplete.input.attr('data-required') !== undefined){
+            autocomplete.input.removeAttr('data-required');
+            autocomplete.input.attr('required', 'required');
+        }
+    });
+
 });

@@ -5,6 +5,7 @@ Serilizers for the Agency application API
 from rest_framework import serializers
 
 from muckrock.agency.models import Agency
+from muckrock.jurisdiction.models import Jurisdiction
 
 # pylint: disable=too-few-public-methods
 
@@ -13,10 +14,16 @@ class AgencySerializer(serializers.ModelSerializer):
     types = serializers.StringRelatedField(many=True)
     appeal_agency = serializers.PrimaryKeyRelatedField(
             queryset=Agency.objects.all(),
-            style={'base_template': 'input.html'})
+            style={'base_template': 'input.html'},
+            )
     parent = serializers.PrimaryKeyRelatedField(
             queryset=Agency.objects.all(),
-            style={'base_template': 'input.html'})
+            style={'base_template': 'input.html'},
+            )
+    jurisdiction = serializers.PrimaryKeyRelatedField(
+            queryset=Jurisdiction.objects.all(),
+            style={'base_template': 'input.html'},
+            )
     location = serializers.JSONField()
     absolute_url = serializers.ReadOnlyField(source='get_absolute_url')
     average_response_time = serializers.ReadOnlyField()

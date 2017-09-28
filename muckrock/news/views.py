@@ -212,14 +212,23 @@ class ArticleViewSet(viewsets.ModelViewSet):
         # pylint: disable=too-few-public-methods
         authors = django_filters.CharFilter(name='authors__username')
         editors = django_filters.CharFilter(name='editors__username')
+        foias = django_filters.NumberFilter(name='foias__id')
         tags = django_filters.CharFilter(name='tags__name')
         min_date = django_filters.DateFilter(name='pub_date', lookup_expr='gte')
         max_date = django_filters.DateFilter(name='pub_date', lookup_expr='lte')
 
         class Meta:
             model = Article
-            fields = ('title', 'pub_date', 'min_date', 'max_date', 'authors', 'editors',
-                      'foias', 'publish', 'tags__name')
+            fields = (
+                    'title',
+                    'pub_date',
+                    'min_date',
+                    'max_date',
+                    'authors',
+                    'editors',
+                    'foias',
+                    'publish',
+                    )
 
     filter_class = Filter
 

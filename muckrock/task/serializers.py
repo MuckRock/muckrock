@@ -78,6 +78,9 @@ class SnailMailTaskSerializer(serializers.ModelSerializer):
     communication = serializers.PrimaryKeyRelatedField(
             queryset=FOIACommunication.objects.all(),
             style={'base_template': 'input.html'})
+    user = serializers.PrimaryKeyRelatedField(
+            queryset=User.objects.all(),
+            style={'base_template': 'input.html'})
 
     class Meta:
         model = SnailMailTask
