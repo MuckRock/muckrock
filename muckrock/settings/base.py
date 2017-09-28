@@ -28,6 +28,8 @@ SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 
 DEFAULT_FROM_EMAIL = 'MuckRock <info@muckrock.com>'
 
+DATA_UPLOAD_MAX_NUMBER_FIELDS = None
+
 DOGSLOW = True
 DOGSLOW_LOG_TO_FILE = False
 DOGSLOW_TIMER = 25
