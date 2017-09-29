@@ -6,6 +6,8 @@ Import from test settings
 # pylint: disable=unused-wildcard-import
 from muckrock.settings.test import *
 
+MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
+
 DATABASES['default'] = {
     'NAME': 'test',
     'USER': os.environ.get('PG_USER'),
