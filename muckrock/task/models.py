@@ -586,8 +586,8 @@ class MultiRequestTask(Task):
                 self.multirequest.agencies.remove(agency)
                 return_requests += 1
         self.multirequest.save()
-        submit_multi_request.apply_async(args=(self.multirequest.pk,))
         self._return_requests(return_requests)
+        submit_multi_request.apply_async(args=(self.multirequest.pk,))
 
     def reject(self):
         """Reject the multirequest and return the user their requests"""
@@ -598,25 +598,7 @@ class MultiRequestTask(Task):
     def _return_requests(self, num_requests):
         """Return some number of requests to the user"""
         return_amts = self._calc_return_requests(num_requests)
-        # remove returned requests from the multirequest
-        # use max to ensure all numbers are positive
-        self.multirequest.num_reg_requests -= max(return_amts['reg'], 0)
-        self.multirequest.num_monthly_requests -= max(return_amts['monthly'], 0)
-        self.multirequest.num_org_requests -= max(return_amts['org'], 0)
-        self.multirequest.save()
-
-        # add the return requests to the user's profile
-        profile = self.multirequest.user.profile
-        profile.num_requests += return_amts['reg']
-        profile.get_monthly_requests()
-        profile.monthly_requests += return_amts['monthly']
-        if profile.organization:
-            profile.organization.get_requests()
-            profile.organization.num_requests += return_amts['org']
-            profile.organization.save()
-        else:
-            profile.monthly_requests += return_amts['org']
-        profile.save()
+        self._do_return_requests(return_amts)
 
     def _calc_return_requests(self, num_requests):
         """Determine how many of each type of request to return"""
@@ -651,6 +633,28 @@ class MultiRequestTask(Task):
                     'monthly': 0,
                     'org': 0,
                     }
+
+    def _do_return_requests(self, return_amts):
+        """Update request count on the profile and multirequest given the amounts"""
+        # remove returned requests from the multirequest
+        # use max to ensure all numbers are positive
+        self.multirequest.num_reg_requests -= max(return_amts['reg'], 0)
+        self.multirequest.num_monthly_requests -= max(return_amts['monthly'], 0)
+        self.multirequest.num_org_requests -= max(return_amts['org'], 0)
+        self.multirequest.save()
+
+        # add the return requests to the user's profile
+        profile = self.multirequest.user.profile
+        profile.num_requests += return_amts['reg']
+        profile.get_monthly_requests()
+        profile.monthly_requests += return_amts['monthly']
+        if profile.organization:
+            profile.organization.get_requests()
+            profile.organization.num_requests += return_amts['org']
+            profile.organization.save()
+        else:
+            profile.monthly_requests += return_amts['org']
+        profile.save()
 
 
 class NewExemptionTask(Task):
