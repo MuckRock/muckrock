@@ -415,8 +415,9 @@ def draft_multirequest(request, slug, idx):
                     profile.num_requests -= request_count['reg_requests']
                     profile.monthly_requests -= request_count['monthly_requests']
                     profile.save()
-                    profile.organization.num_requests -= request_count['org_requests']
-                    profile.organization.save()
+                    if profile.organization:
+                        profile.organization.num_requests -= request_count['org_requests']
+                        profile.organization.save()
                     foia.num_reg_requests = request_count['reg_requests']
                     foia.num_monthly_requests = request_count['monthly_requests']
                     foia.num_org_requests = request_count['org_requests']
