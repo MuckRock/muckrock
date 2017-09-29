@@ -245,6 +245,11 @@ class FOIARequest(models.Model):
     )
     crowdfund = models.OneToOneField('crowdfund.Crowdfund',
             related_name='foia', blank=True, null=True)
+    multirequest = models.ForeignKey(
+            'foia.FOIAMultiRequest',
+            blank=True,
+            null=True,
+            )
 
     read_collaborators = models.ManyToManyField(
         User,
