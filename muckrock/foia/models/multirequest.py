@@ -10,10 +10,17 @@ from django.db import models
 from taggit.managers import TaggableManager
 import logging
 
-from muckrock.foia.models.request import STATUS
 from muckrock.tags.models import TaggedItemBase
 
 logger = logging.getLogger(__name__)
+
+
+STATUS = [
+    ('started', 'Draft'),
+    ('submitted', 'Processing'),
+    ('filed', 'Filed'),
+    ]
+
 
 class FOIAMultiRequest(models.Model):
     """A Freedom of Information Act request"""
@@ -23,7 +30,7 @@ class FOIAMultiRequest(models.Model):
     user = models.ForeignKey(User)
     title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)
-    status = models.CharField(max_length=10, choices=STATUS[:2])
+    status = models.CharField(max_length=10, choices=STATUS)
     embargo = models.BooleanField(default=False)
     requested_docs = models.TextField(blank=True)
     agencies = models.ManyToManyField(
@@ -31,6 +38,9 @@ class FOIAMultiRequest(models.Model):
             related_name='agencies',
             blank=True,
             )
+    num_org_requests = models.PositiveSmallIntegerField(default=0)
+    num_monthly_requests = models.PositiveSmallIntegerField(default=0)
+    num_reg_requests = models.PositiveSmallIntegerField(default=0)
 
     tags = TaggableManager(through=TaggedItemBase, blank=True)
 

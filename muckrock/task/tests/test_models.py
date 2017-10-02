@@ -12,7 +12,7 @@ import mock
 import nose
 
 from muckrock import factories, task
-from muckrock.foia.models import FOIARequest, FOIANote
+from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIANote
 from muckrock.task.factories import FlaggedTaskFactory, ProjectReviewTaskFactory
 from muckrock.task.signals import domain_blacklist
 
@@ -23,6 +23,7 @@ mock_send = mock.Mock()
 
 # pylint: disable=missing-docstring
 # pylint: disable=line-too-long
+# pylint: disable=protected-access
 
 
 class TaskTests(TestCase):
@@ -474,6 +475,88 @@ class TestNewExemptionTask(TestCase):
         eq_(self.task.get_absolute_url(), reverse('newexemption-task', kwargs={'pk': self.task.pk}))
 
 
+class MultiRequestTaskTests(TestCase):
+    """Test the MultiRequestTask class"""
+
+    def setUp(self):
+        self.agencies = factories.AgencyFactory.create_batch(6)
+        self.organization = factories.OrganizationFactory(num_requests=100)
+        self.multi = factories.FOIAMultiRequestFactory(
+                status='submitted',
+                agencies=self.agencies,
+                num_org_requests=1,
+                num_monthly_requests=2,
+                num_reg_requests=3,
+                user__profile__num_requests=5,
+                user__profile__monthly_requests=10,
+                user__profile__organization=self.organization,
+                )
+        self.task = task.models.MultiRequestTask.objects.create(
+                multirequest=self.multi,
+                )
+
+    def test_get_absolute_url(self):
+        eq_(
+                self.task.get_absolute_url(),
+                reverse('multirequest-task', kwargs={'pk': self.task.pk}),
+                )
+
+    def test_submit(self):
+        """Test submitting the task"""
+        agency_list = [str(a.pk) for a in self.agencies[:4]]
+        self.task.submit(agency_list)
+        eq_(
+                set(self.multi.agencies.all()),
+                set(self.agencies[:4]),
+                )
+        # reload from db
+        eq_(FOIAMultiRequest.objects.get(pk=self.multi.pk).status, 'filed')
+        eq_(FOIARequest.objects.filter(multirequest=self.multi).count(), 4)
+
+    def test_reject(self):
+        """Test rejecting the request"""
+        self.task.reject()
+        eq_(
+                set(self.multi.agencies.all()),
+                set(self.agencies),
+                )
+        eq_(self.multi.status, 'started')
+        eq_(FOIARequest.objects.filter(multirequest=self.multi).count(), 0)
+
+    def test_calc_return_requests(self):
+        """Test calculating the return requests"""
+        values = [
+                (7, 4, 2, 1),
+                (6, 3, 2, 1),
+                (5, 3, 2, 0),
+                (4, 3, 1, 0),
+                (3, 3, 0, 0),
+                (2, 2, 0, 0),
+                (1, 1, 0, 0),
+                ]
+        for total, reg, monthly, org in values:
+            eq_(
+                    self.task._calc_return_requests(total),
+                    {
+                        'reg': reg,
+                        'monthly': monthly,
+                        'org': org,
+                    },
+                    )
+
+    def test_do_return_requests(self):
+        """Test return requests"""
+        self.task._do_return_requests({
+            'reg': 2,
+            'monthly': 0,
+            'org': 1,
+            })
+        eq_(self.multi.num_reg_requests, 1)
+        eq_(self.multi.num_monthly_requests, 2)
+        eq_(self.multi.num_org_requests, 0)
+        eq_(self.multi.user.profile.num_requests, 7)
+        eq_(self.multi.user.profile.monthly_requests, 10)
+        eq_(self.multi.user.profile.organization.num_requests, 101)
 
 
 class TestTaskManager(TestCase):
