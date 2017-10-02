@@ -3,6 +3,8 @@
 Models for the FOIA application
 """
 
+# pylint: disable=too-many-lines
+
 from django.conf import settings
 from django.contrib.auth.models import User, AnonymousUser
 from django.core.mail import EmailMultiAlternatives
