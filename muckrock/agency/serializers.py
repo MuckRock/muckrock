@@ -29,6 +29,7 @@ class AgencySerializer(serializers.ModelSerializer):
     average_response_time = serializers.ReadOnlyField()
     fee_rate = serializers.ReadOnlyField()
     success_rate = serializers.ReadOnlyField()
+    # XXX how to do addresses?
 
     def __init__(self, *args, **kwargs):
         """After initializing the serializer,
@@ -55,20 +56,14 @@ class AgencySerializer(serializers.ModelSerializer):
             'requires_proxy',
             # location
             'jurisdiction',
-            'address',
             'location',
             # contact info
-            'email',
-            'other_emails',
-            'phone',
-            'fax',
             'website',
             'twitter',
             'twitter_handles',
             # connects to other agencies
             'parent',
             'appeal_agency',
-            'can_email_appeals',
             # describes agency foia process
             'url',
             'foia_logs',

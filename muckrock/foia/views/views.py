@@ -22,6 +22,11 @@ import logging
 from muckrock.accounts.models import Notification
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
+from muckrock.communication.models import (
+        EmailCommunication,
+        FaxCommunication,
+        WebCommunication,
+        )
 from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.foia.codes import CODES
 from muckrock.foia.filters import (
@@ -37,12 +42,12 @@ from muckrock.foia.forms import (
     FOIAEstimatedCompletionDateForm,
     FOIAAccessForm,
     FOIAAgencyReplyForm,
+    FOIAAdminFixForm,
     )
 from muckrock.foia.models import (
     FOIARequest,
     FOIACommunication,
     FOIAMultiRequest,
-    RawEmail,
     STATUS,
     END_STATUS,
     )
@@ -144,6 +149,7 @@ class RequestExploreView(TemplateView):
             .select_related_view()
             .get_public_file_count(limit=5))
         return context
+
 
 class RequestList(MRSearchFilterListView):
     """Base list view for other list views to inherit from"""
@@ -254,10 +260,10 @@ class FormError(Exception):
     """If a form fails validation"""
 
 
-# pylint: disable=no-self-use
 class Detail(DetailView):
     """Details of a single FOIA request as well
     as handling post actions for the request"""
+    # pylint: disable=no-self-use
 
     model = FOIARequest
     context_object_name = 'foia'
@@ -265,10 +271,21 @@ class Detail(DetailView):
     def __init__(self, *args, **kwargs):
         self._obj = None
         self.agency_reply_form = FOIAAgencyReplyForm()
+        self.admin_fix_form = None
         super(Detail, self).__init__(*args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
         """If request is a draft, then redirect to drafting interface"""
+        foia = self.get_object()
+        self.admin_fix_form = FOIAAdminFixForm(
+                request=self.request,
+                foia=self.get_object(),
+                initial={
+                    'email_or_fax': foia.email or foia.fax,
+                    'subject': foia.default_subject(),
+                    'other_emails': ', '.join(unicode(e) for e in foia.cc_emails.all()),
+                    }
+                )
         if request.POST:
             try:
                 return self.post(request)
@@ -276,7 +293,6 @@ class Detail(DetailView):
                 # if their is a form error, continue onto the GET path
                 # and show the invalid form with errors displayed
                 return self.get(request, *args, **kwargs)
-        foia = self.get_object()
         if foia.status == 'started':
             return redirect(
                 'foia-draft',
@@ -314,7 +330,20 @@ class Detail(DetailView):
             prefetch_related=(
                 'communications',
                 'communications__files',
-                Prefetch('communications__rawemail', RawEmail.objects.defer('raw_email')),
+                'communications__emails',
+                'communications__faxes',
+                'communications__mails',
+                'communications__web_comms',
+                Prefetch(
+                    'communications__faxes',
+                    FaxCommunication.objects.order_by('-sent_datetime'),
+                    to_attr='reverse_faxes',
+                    ),
+                Prefetch(
+                    'communications__emails',
+                    EmailCommunication.objects.exclude(rawemail=None),
+                    to_attr='raw_emails',
+                    ),
                 ),
         )
         valid_access_key = self.request.GET.get('key') == foia.access_key
@@ -359,8 +388,6 @@ class Detail(DetailView):
         })
         context['embargo_needs_date'] = foia.status in END_STATUS
         context['user_actions'] = foia.user_actions(user)
-        context['contextual_request_actions'] = \
-                foia.contextual_request_actions(user, user_can_edit)
         context['status_choices'] = STATUS if include_draft else STATUS_NODRAFT
         context['show_estimated_date'] = foia.status not in ['submitted', 'ack', 'done', 'rejected']
         context['change_estimated_date'] = FOIAEstimatedCompletionDateForm(instance=foia)
@@ -389,6 +416,7 @@ class Detail(DetailView):
         context['AWS_ACCESS_KEY_ID'] = settings.AWS_ACCESS_KEY_ID
         context['agency_status_choices'] = AGENCY_STATUS
         context['agency_reply_form'] = self.agency_reply_form
+        context['admin_fix_form'] = self.admin_fix_form
         if foia.sidebar_html:
             messages.info(self.request, foia.sidebar_html)
         return context
@@ -543,10 +571,29 @@ class Detail(DetailView):
         """Handle submitting follow ups"""
         success_msg = 'Your follow up has been sent.'
         has_perm = foia.has_perm(request.user, 'followup')
-        comm_sent = self._new_comm(request, foia, has_perm, success_msg)
-        if comm_sent:
-            new_action(request.user, 'followed up on', target=foia)
-        return redirect(foia)
+        if request.user.is_staff:
+            form = FOIAAdminFixForm(request.POST)
+            if form.is_valid():
+                foia.update_address(form.cleaned_data['email_or_fax'])
+                foia.cc_emails.set(form.cleaned_data['other_emails'])
+                save_foia_comm(
+                        foia,
+                        form.cleaned_data['from_user'],
+                        form.cleaned_data['comm'],
+                        request.user,
+                        snail=form.cleaned_data['snail_mail'],
+                        subject=form.cleaned_data['subject'],
+                        )
+                messages.success(request, success_msg)
+                new_action(request.user, 'followed up on', target=foia)
+            else:
+                self.admin_fix_form = form
+                raise FormError
+        else:
+            comm_sent = self._new_comm(request, foia, has_perm, success_msg)
+            if comm_sent:
+                new_action(request.user, 'followed up on', target=foia)
+            return redirect(foia)
 
     def _thank(self, request, foia):
         """Handle submitting a thank you follow up"""
@@ -584,7 +631,7 @@ class Detail(DetailView):
         if text and test:
             save_foia_comm(
                     foia,
-                    request.user.get_full_name(),
+                    request.user,
                     text,
                     request.user,
                     appeal=appeal,
@@ -692,21 +739,19 @@ class Detail(DetailView):
     def _agency_reply(self, request, foia):
         """Agency reply directly through the site"""
         form = FOIAAgencyReplyForm(request.POST)
-        if request.user.profile.agency:
-            from_who = request.user.profile.agency.name
-        else:
-            from_who = request.user.get_full_name()
         if form.is_valid():
             comm = FOIACommunication.objects.create(
                     foia=foia,
-                    from_who=from_who,
-                    to_who=foia.user.get_full_name(),
+                    from_user=request.user,
+                    to_user=foia.user,
                     response=True,
                     date=datetime.now(),
-                    full_html=False,
-                    delivered='web',
                     communication=form.cleaned_data['reply'],
                     status=form.cleaned_data['status'],
+                    )
+            WebCommunication.objects.create(
+                    communication=comm,
+                    sent_datetime=datetime.now(),
                     )
             foia.date_estimate = form.cleaned_data['date_estimate']
             foia.tracking_id = form.cleaned_data['tracking_id']
@@ -729,6 +774,7 @@ class Detail(DetailView):
             raise FormError
 
         return redirect(foia)
+
 
 def redirect_old(request, jurisdiction, slug, idx, action):
     """Redirect old urls to new urls"""

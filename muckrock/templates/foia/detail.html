@@ -220,9 +220,6 @@
                         {% if not request.user.profile.acct_type == "agency" %}
                         <a href="#get-advice" class="button">Get Advice</a>
                         {% endif %}
-                        {% if request.user.is_staff %}
-                        <a href="{% url 'foia-admin-fix' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Make an admin fix" class="button">Admin Fix</a>
-                        {% endif %}
                     </div>
                     <div class="composer-inputs">
                         <div class="composer" id="inactive">
@@ -239,8 +236,12 @@
                             <form class="composer-input" method="post">
                                 <header>Send a follow up to the {{ foia.agency.name }}</header>
                                 {% csrf_token %}
+                                {% if request.user.is_staff %}
+                                    {% include 'lib/pattern/form.html' with form=admin_fix_form %}
+                                {% else %}
+                                    <textarea name="text" id="follow-up-composer"></textarea>
+                                {% endif %}
                                 <input type="hidden" name="action" value="follow_up" />
-                                <textarea name="text" id="follow-up-composer"></textarea>
                                 <label class="bold">Attachments</label>
                                 <div id="fine-uploader-follow-up" class="fine-uploader"></div>
                                 <div class="buttons">

@@ -110,7 +110,15 @@ class NewAgencyTaskNode(TaskNode):
     def get_extra_context(self):
         """Adds an approval form, other agencies, and relevant requests to context"""
         extra_context = super(NewAgencyTaskNode, self).get_extra_context()
-        extra_context['agency_form'] = agency.forms.AgencyForm(instance=self.task.agency)
+        extra_context['agency_form'] = agency.forms.AgencyForm(
+                instance=self.task.agency,
+                initial={
+                    'email': self.task.agency.get_emails().first(),
+                    'phone': self.task.agency.get_phones().first(),
+                    'fax': self.task.agency.get_faxes().first(),
+                    'address': self.task.agency.get_addresses().first(),
+                    }
+                )
         return extra_context
 
 

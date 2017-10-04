@@ -23,19 +23,25 @@
     {# agency info #}
     <dt>Agency</dt>
     <dd><a href="{% url 'admin:agency_agency_change' agency.pk %}">{{agency}}</a></dd>
-	{% if agency.email %}
-    <dt>Agency Email</dt>
-    <dd>{{agency.email}}</dd>
-	{% endif %}
-	{% if agency.fax %}
-    <dt>Agency Fax</dt>
-    <dd>{{agency.fax}}@fax2.faxaway.com</dd>
-	{% endif %}
-	{% if agency.address %}
-    <dt>Agency Address</dt>
-    <dd>{{agency.address|linebreaks}}</dd>
-	{% endif %}
-	{% if agency.notes and not agency.email and not agency.fax %}
+    {% with email=agency.get_emails.first %}
+        {% if email %}
+            <dt>Agency Email</dt>
+            <dd>{{email}}</dd>
+        {% endif %}
+    {% endwith %}
+    {% with fax=agency.get_faxes.first %}
+        {% if fax %}
+            <dt>Agency Fax</dt>
+            <dd>{{fax}}</dd>
+        {% endif %}
+    {% endwith %}
+    {% with address=agency.get_addresses.first %}
+        {% if address %}
+            <dt>Agency Address</dt>
+            <dd>{{address|linebreaks}}</dd>
+        {% endif %}
+    {% endwith %}
+	{% if agency.notes %}
     <dt>Agency Notes</dt>
     <dd>{{agency.notes}}</dd>
 	{% endif %}
@@ -54,10 +60,7 @@
     {# full letter here, hidden #}
     <header>Full letter</header>
     <textarea name="full-communication" id="full-letter-{{task.pk}}">
-{{agency.address}}
-
-{% now "F j, Y" %}
-{% with foia as request %}{% include "text/foia/comms.txt" with show_all_comms=True %}{% endwith %}
+{% with foia as request %}{% include "text/foia/request_msg.txt" with show_all_comms=True %}{% endwith %}
     </textarea>
 </div>
 {% endwith %}

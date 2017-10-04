@@ -25,15 +25,16 @@ class TestAgencyUnit(TestCase):
     def setUp(self):
         """Set up tests"""
         self.agency1 = factories.AgencyFactory(
-            fax='1-987-654-3210',
-            email='test@agency1.gov',
-            other_emails='other_a@agency1.gov, other_b@agency1.gov'
-        )
+                fax__phone__number='1-987-654-3211',
+                email__email__email='test@agency1.gov',
+                other_emails='other_a@agency1.gov, other_b@agency1.gov'
+                )
         self.agency2 = factories.AgencyFactory(
-            fax='987.654.3210',
-            email=''
-        )
-        self.agency3 = factories.AgencyFactory()
+                fax__phone__number='987.654.3210',
+                )
+        self.agency3 = factories.AgencyFactory(
+                email=None,
+                )
 
     def test_agency_url(self):
         """Test Agency model's get_absolute_url method"""
@@ -45,22 +46,21 @@ class TestAgencyUnit(TestCase):
             })
         )
 
-    def test_agency_normalize_fax(self):
-        """Test the normalize fax method"""
-        normalized = '19876543210'
-        eq_(self.agency1.normalize_fax(), normalized)
-        eq_(self.agency2.normalize_fax(), normalized)
-        eq_(self.agency3.normalize_fax(), None)
-
     def test_agency_get_email(self):
-        """Test the get email method"""
-        eq_(self.agency1.get_email(), 'test@agency1.gov')
-        eq_(self.agency2.get_email(), '19876543210')
-        eq_(self.agency3.get_email(), '')
+        """Test the get emails method"""
+        eq_(self.agency1.get_emails().first().email, 'test@agency1.gov')
+        eq_(self.agency3.get_emails().first(), None)
+
+    def test_agency_get_faxes(self):
+        """Test the ganecy get faces method"""
+        eq_(self.agency2.get_faxes().first().number, '19876543210')
 
     def test_agency_get_other_emails(self):
         """Test get other emails method"""
-        eq_(self.agency1.get_other_emails(), ['other_a@agency1.gov', 'other_b@agency1.gov'])
+        eq_(
+                set(e.email for e in self.agency1.get_emails(email_type='cc')),
+                set(['other_a@agency1.gov', 'other_b@agency1.gov']),
+                )
 
     def test_agency_is_stale(self):
         """Should return the date of the last response by the agency"""

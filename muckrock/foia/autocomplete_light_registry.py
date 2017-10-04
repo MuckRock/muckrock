@@ -6,7 +6,7 @@ from django.db.models import Q
 
 from autocomplete_light import shortcuts as autocomplete_light
 
-from muckrock.foia.models import FOIARequest
+from muckrock.foia.models import FOIARequest, FOIAMultiRequest
 
 class FOIARequestAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     """Creates an autocomplete field for picking FOIA requests"""
@@ -56,4 +56,13 @@ autocomplete_light.register(
     search_fields=('title',),
     attrs={
         'placeholder': 'Search for requests',
+        'data-autocomplete-minimum-characters': 1})
+
+autocomplete_light.register(
+    FOIAMultiRequest,
+    name='FOIAMultiRequestAutocomplete',
+    choices=FOIAMultiRequest.objects.all(),
+    search_fields=('title',),
+    attrs={
+        'placeholder': 'Search for multirequests',
         'data-autocomplete-minimum-characters': 1})

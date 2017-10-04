@@ -232,6 +232,7 @@ INSTALLED_APPS = (
     'muckrock.mailgun',
     'muckrock.foiamachine',
     'muckrock.fine_uploader',
+    'muckrock.communication',
     'actstream'
 )
 
@@ -572,3 +573,8 @@ ALLOWED_FILE_EXTS = [
         'html',
         'txt',
         ]
+
+# for django-phonenumber-field
+PHONENUMBER_DB_FORMAT = 'INTERNATIONAL'
+PHONENUMBER_DEFAULT_REGION = 'US'
+PHONENUMBER_DEFAULT_FORMAT = 'NATIONAL'

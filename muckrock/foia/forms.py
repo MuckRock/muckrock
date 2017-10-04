@@ -6,11 +6,14 @@ from django import forms
 from django.contrib.auth.models import User
 
 from autocomplete_light import shortcuts as autocomplete_light
+from autocomplete_light.contrib.taggit_field import TaggitField
 from datetime import date, timedelta
 
-from muckrock.forms import MRFilterForm
 from muckrock.agency.models import Agency
+from muckrock.communication.models import EmailAddress
+from muckrock.communication.utils import get_email_or_fax
 from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIAFile, FOIANote, STATUS
+from muckrock.forms import MRFilterForm, TaggitWidget
 from muckrock.jurisdiction.models import Jurisdiction
 
 AGENCY_STATUS = [
@@ -253,40 +256,52 @@ class FOIANoteForm(forms.ModelForm):
         widgets = {'note': forms.Textarea(attrs={'class': 'prose-editor'})}
 
 
-class FOIAAdminFixForm(forms.ModelForm):
-    """Form to email from the request's address"""
-    class Meta:
-        model = FOIARequest
-        fields = [
-                'from_email',
-                'email',
-                'other_emails',
-                'subject',
-                'comm',
-                'snail_mail',
-                ]
+class FOIAAdminFixForm(forms.Form):
+    """Form with extra options for staff to follow up to requests"""
 
-    from_email = forms.CharField(
-        label='From',
-        initial='MuckRock',
-        required=False,
-        help_text='Leaving blank will fill in with request owner.'
-    )
-    email = forms.CharField(
-        label='To',
-        required=False,
-        help_text='Leave blank to send to agency default.'
-    )
-    other_emails = forms.CharField(label='CC', required=False)
+    from_user = forms.ModelChoiceField(
+            label='From',
+            queryset=User.objects.none(),
+            )
+    email_or_fax = forms.CharField(
+            label='To',
+            required=False,
+            widget=autocomplete_light.TextWidget('EmailOrFaxAutocomplete'),
+            )
+    other_emails = TaggitField(
+            label='CC',
+            required=False,
+            help_text='For emails only, comma seperated',
+            widget=TaggitWidget('EmailAddressAutocomplete'),
+            )
     subject = forms.CharField(max_length=255)
     comm = forms.CharField(label='Body', widget=forms.Textarea())
     snail_mail = forms.BooleanField(required=False, label='Snail Mail Only')
 
+    def __init__(self, *args, **kwargs):
+        request = kwargs.pop('request')
+        foia = kwargs.pop('foia')
+        super(FOIAAdminFixForm, self).__init__(*args, **kwargs)
+        muckrock_staff = User.objects.get(username='MuckrockStaff')
+        self.fields['from_user'].queryset = User.objects.filter(
+                pk__in=[
+                    muckrock_staff.pk,
+                    request.user.pk,
+                    foia.user.pk,
+                    ])
+        self.fields['from_user'].initial = request.user.pk
+
+    def clean_email_or_fax(self):
+        """Validate the email_or_fax field"""
+        return get_email_or_fax(self.cleaned_data['email_or_fax'])
+
     def clean_other_emails(self):
-        """Strips extra whitespace from email list"""
-        other_emails = self.cleaned_data['other_emails']
-        other_emails = other_emails.strip()
-        return other_emails
+        """Validate the other_emails field"""
+        return EmailAddress.objects.fetch_many(
+                self.cleaned_data['other_emails'],
+                ignore_errors=False,
+                )
+
 
 
 class FOIAAccessForm(forms.Form):

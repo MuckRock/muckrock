@@ -11,6 +11,7 @@ import mock
 import nose
 
 from muckrock import agency, factories, task
+from muckrock.communication.models import EmailAddress, EmailCommunication
 from muckrock.foia.models import FOIARequest, FOIANote
 from muckrock.foia.views import save_foia_comm
 from muckrock.task.factories import (
@@ -145,13 +146,18 @@ class OrphanTaskViewTests(TestCase):
         foia_1_comm_count = FOIARequest.objects.get(pk=1).communications.all().count()
         foia_2_comm_count = FOIARequest.objects.get(pk=2).communications.all().count()
         starting_date = self.task.communication.date
+        EmailCommunication.objects.create(
+                communication=self.task.communication,
+                sent_datetime=datetime.now(),
+                from_email=EmailAddress.objects.fetch('test@example.com'),
+                )
         self.client.post(self.url, {'move': '1, 2', 'task': self.task.pk})
         updated_foia_1_comm_count = FOIARequest.objects.get(pk=1).communications.all().count()
         updated_foia_2_comm_count = FOIARequest.objects.get(pk=2).communications.all().count()
         updated_task = task.models.OrphanTask.objects.get(pk=self.task.pk)
         ending_date = updated_task.communication.date
-        eq_(updated_task.resolved, True,
-            'Orphan task should be moved by posting the FOIA pks and task ID.')
+        ok_(updated_task.resolved,
+            'Orphan task should be resolved by posting the FOIA pks and task ID.')
         eq_(updated_foia_1_comm_count, foia_1_comm_count + 1,
             'Communication should be added to FOIA')
         eq_(updated_foia_2_comm_count, foia_2_comm_count + 1,
@@ -182,7 +188,11 @@ class OrphanTaskViewTests(TestCase):
                 ' the communication to that FOIA'))
 
     def test_reject_and_blacklist(self):
-        self.task.communication.priv_from_who = 'Michael Morisy <michael@muckrock.com>'
+        EmailCommunication.objects.create(
+                communication=self.task.communication,
+                from_email=EmailAddress.objects.fetch('Michael Morisy <michael@muckrock.com>'),
+                sent_datetime=datetime.now(),
+                )
         self.task.communication.save()
         self.client.post(self.url, {
             'reject': 'true',
@@ -651,7 +661,7 @@ class ResponseTaskListViewTests(TestCase):
         # first saving a comm
         foia = self.task.communication.foia
         num_comms = foia.communications.count()
-        save_foia_comm(foia, 'Testman', 'Just testing, u no', foia.user)
+        save_foia_comm(foia, foia.user, 'Just testing, u no', foia.user)
         eq_(foia.communications.count(), num_comms + 1,
             'Should add a new communication to the FOIA.')
         num_comms = foia.communications.count()

@@ -15,20 +15,19 @@ import nose.tools
 import os
 import time
 
-from muckrock.foia.models import (
-        FOIACommunication,
-        CommunicationError,
-        CommunicationOpen,
+from muckrock.communication.models import (
+        EmailAddress,
+        EmailOpen,
+        EmailError,
         )
+from muckrock.foia.models import FOIACommunication
 from muckrock.factories import FOIARequestFactory, FOIACommunicationFactory
 from muckrock.mailgun.views import (
         route_mailgun,
         bounces,
         opened,
         delivered,
-        _allowed_email,
         )
-from muckrock.mailgun.models import WhitelistDomain
 from muckrock.task.models import OrphanTask, RejectedEmailTask
 
 # pylint: disable=no-self-use
@@ -106,17 +105,17 @@ class TestMailgunViewHandleRequest(TestMailgunViews):
         last_comm = foia.communications.last()
         nose.tools.eq_(last_comm.communication, '%s\n%s' % (text, signature))
         nose.tools.eq_(last_comm.subject, subject)
-        nose.tools.eq_(last_comm.from_who, from_name)
-        nose.tools.eq_(last_comm.priv_from_who, from_)
-        nose.tools.eq_(last_comm.to_who, foia.user.get_full_name())
-        nose.tools.eq_(last_comm.priv_to_who, to_)
+        nose.tools.eq_(last_comm.from_user, foia.agency.get_user())
+        nose.tools.eq_(last_comm.to_user, foia.user)
         nose.tools.eq_(last_comm.response, True)
         nose.tools.eq_(last_comm.full_html, False)
-        nose.tools.eq_(last_comm.delivered, 'email')
-        nose.tools.ok_(last_comm.rawemail)
+        nose.tools.ok_(last_comm.get_raw_email())
         nose.tools.eq_(last_comm.responsetask_set.count(), 1)
-        nose.tools.eq_(foia.email, from_email)
-        nose.tools.eq_(foia.other_emails, 'other@agency.gov')
+        nose.tools.eq_(foia.email, EmailAddress.objects.fetch(from_email))
+        nose.tools.eq_(
+                set(foia.cc_emails.all()),
+                set(EmailAddress.objects.fetch_many('other@agency.gov')),
+                )
         nose.tools.eq_(foia.status, 'processed')
 
     def test_bad_sender(self):
@@ -177,7 +176,6 @@ class TestMailgunViewHandleRequest(TestMailgunViews):
 
     def test_attachments(self):
         """Test a message with an attachment"""
-
         try:
             foia = FOIARequestFactory()
             to_ = '%s@requests.muckrock.com' % foia.get_mail_id()
@@ -189,7 +187,6 @@ class TestMailgunViewHandleRequest(TestMailgunViews):
             file_path = date.today().strftime('foia_files/%Y/%m/%d/data.pdf')
             nose.tools.eq_(foia.files.count(), 1)
             nose.tools.eq_(foia.files.first().ffile.name, file_path)
-
         finally:
             foia.files.first().delete()
             file_path = os.path.join(settings.SITE_ROOT, 'static/media/', file_path)
@@ -275,21 +272,11 @@ class TestMailgunViewWebHooks(TestMailgunViews):
         bounces(request) # pylint: disable=no-value-for-parameter
         comm.refresh_from_db()
 
-        nose.tools.ok_(RejectedEmailTask.objects
+        nose.tools.ok_(EmailError.objects
                 .filter(
-                    category='b',
-                    foia=comm.foia,
-                    email=recipient,
-                    error=error,
-                    )
-                .exists()
-                )
-
-        nose.tools.ok_(CommunicationError.objects
-                .filter(
-                    communication=comm,
-                    date=datetime(2017, 1, 2, 12),
-                    recipient=recipient,
+                    email=comm.emails.first(),
+                    datetime=datetime(2017, 1, 2, 12),
+                    recipient=EmailAddress.objects.fetch(recipient),
                     code=code,
                     error=error,
                     event=event,
@@ -332,11 +319,11 @@ class TestMailgunViewWebHooks(TestMailgunViews):
         opened(request) # pylint: disable=no-value-for-parameter
         comm.refresh_from_db()
 
-        nose.tools.ok_(CommunicationOpen.objects
+        nose.tools.ok_(EmailOpen.objects
                 .filter(
-                    communication=comm,
-                    date=datetime(2017, 1, 2, 12),
-                    recipient=recipient,
+                    email=comm.emails.first(),
+                    datetime=datetime(2017, 1, 2, 12),
+                    recipient=EmailAddress.objects.fetch(recipient),
                     city=city,
                     region=region,
                     country=country,
@@ -353,7 +340,7 @@ class TestMailgunViewWebHooks(TestMailgunViews):
     def test_delivered(self):
         """Test a delivered webhook"""
 
-        comm = FOIACommunicationFactory(confirmed=None)
+        comm = FOIACommunicationFactory()
         data = {
                 'event': 'delivered',
                 'comm_id': comm.pk,
@@ -363,40 +350,7 @@ class TestMailgunViewWebHooks(TestMailgunViews):
         delivered(request) # pylint: disable=no-value-for-parameter
         comm.refresh_from_db()
 
-        nose.tools.eq_(comm.confirmed, datetime(2017, 1, 2, 12))
-
-
-class TestHelperFunctions(TestCase):
-    """Tests view helper functions"""
-
-    def test_allowed_email(self):
-        """Test allowed email function"""
-        foia = FOIARequestFactory(
-                email='foo@bar.com',
-                other_emails='foo@baz.com',
-                agency__email='main@agency.com',
-                agency__other_emails='foo@agency.com',
+        nose.tools.eq_(
+                comm.emails.first().confirmed_datetime,
+                datetime(2017, 1, 2, 12),
                 )
-        WhitelistDomain.objects.create(domain='whitehat.edu')
-
-        allowed_emails = [
-                'bar@bar.com', # same domain
-                'BAR@BAR.COM', # case insensitive
-                'foo@baz.com', # other email
-                'foo@agency.com', # agency email
-                'any@usa.gov', # any government tld
-                'any@domain.ma.us', # any government tld
-                'foo@whitehat.edu', # white listed domain
-                ]
-        not_allowed_emails = [
-                'other@baz.com',
-                'other@agency.com',
-                'random@random.edu',
-                'foo@co.uk',
-                ]
-        for email in allowed_emails:
-            nose.tools.ok_(_allowed_email(email, foia))
-        for email in not_allowed_emails:
-            nose.tools.assert_false(_allowed_email(email, foia))
-        # non foia test - any agency email
-        nose.tools.ok_(_allowed_email('main@agency.com'))

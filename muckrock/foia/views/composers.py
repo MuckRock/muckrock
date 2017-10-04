@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404, redirect
@@ -95,7 +96,7 @@ def _make_request(request, foia_request, parent=None):
         proxy = True
         proxy_user = agency.jurisdiction.get_proxy()
         if proxy_user is None:
-            from_who = '<Proxy Placeholder>'
+            from_user = User.objects.get(username='proxy_placeholder')
             missing_proxy = True
             messages.warning(request,
                 'This agency and jurisdiction requires requestors to be '
@@ -103,14 +104,14 @@ def _make_request(request, foia_request, parent=None):
                 'requestor on file for this state, but will attempt to find '
                 'one to submit this request on your behalf.')
         else:
-            from_who = proxy_user.get_full_name()
+            from_user = proxy_user
             messages.warning(request,
                 'This agency and jurisdiction requires requestors to be '
                 'in-state citizens.  This request will be filed in the name '
                 'of one of our volunteer filers for this state.')
     else:
         proxy = False
-        from_who = request.user.get_full_name()
+        from_user = request.user
 
     foia = FOIARequest.objects.create(
         user=request.user,
@@ -126,12 +127,11 @@ def _make_request(request, foia_request, parent=None):
     )
     foia_comm = FOIACommunication.objects.create(
         foia=foia,
-        from_who=from_who,
-        to_who=foia.get_to_who(),
+        from_user=from_user,
+        to_user=foia.get_to_user(),
         date=datetime.now(),
         response=False,
-        full_html=False,
-        communication=_make_comm(foia, from_who, proxy=proxy)
+        communication=_make_comm(foia, from_user.get_full_name(), proxy=proxy)
     )
     return foia, foia_comm
 

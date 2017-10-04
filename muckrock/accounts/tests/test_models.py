@@ -46,7 +46,11 @@ MockCustomer.retrieve.return_value = mock_customer
 class TestProfileUnit(TestCase):
     """Unit tests for profile model"""
     def setUp(self):
-        self.profile = factories.ProfileFactory(monthly_requests=25, acct_type='pro')
+        self.profile = factories.ProfileFactory(
+                monthly_requests=25,
+                acct_type='pro',
+                customer_id='',
+                )
 
     def test_unicode(self):
         """Test profile model's __unicode__ method"""

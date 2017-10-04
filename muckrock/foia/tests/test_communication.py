@@ -6,9 +6,9 @@ import datetime
 
 from django import test
 from django.core.urlresolvers import reverse
-from django.core.validators import ValidationError
 
 from muckrock import factories
+from muckrock.communication.models import EmailAddress
 from muckrock.foia.models.communication import FOIACommunication
 from muckrock.foia.views import raw
 
@@ -25,26 +25,16 @@ class TestCommunication(test.TestCase):
         self.foia = factories.FOIARequestFactory()
         self.comm = factories.FOIACommunicationFactory(
             foia=self.foia,
-            priv_from_who=u'Test Email <test@email.com>'
+            email__from_email=EmailAddress.objects.fetch(u'Test Email <test@email.com>'),
         )
         self.file = factories.FOIAFileFactory(comm=self.comm)
         eq_(self.comm.files.count(), 1)
-
-    def test_get_sender_email(self):
-        """Returns the email address the communication came from."""
-        eq_(self.comm.get_sender_email(), 'test@email.com')
-
-    def test_get_bad_sender_email(self):
-        """If the sender email is invalid, get_sender_email should return None."""
-        self.comm.priv_from_who = u'Test Email <foobar>'
-        self.comm.save()
-        eq_(self.comm.get_sender_email(), None)
 
     def test_primary_contact(self):
         """Makes the primary email of the FOIA to the email the communication was sent from."""
         self.comm.make_sender_primary_contact()
         self.foia.refresh_from_db()
-        eq_(self.foia.email, self.comm.get_sender_email())
+        eq_(self.foia.email, self.comm.emails.first().from_email)
 
     @raises(ValueError)
     def test_orphan_error(self):
@@ -55,9 +45,11 @@ class TestCommunication(test.TestCase):
     @raises(ValueError)
     def test_bad_sender_error(self):
         """Comms with bad sender email should raise an error"""
-        self.comm.priv_from_who = u'Test Email <foobar>'
-        self.comm.save()
+        email = self.comm.emails.first()
+        email.from_email = None
+        email.save()
         self.comm.make_sender_primary_contact()
+
 
 class TestCommunicationMove(test.TestCase):
     """Tests the move method"""
@@ -130,6 +122,7 @@ class TestCommunicationMove(test.TestCase):
         ok_(not self.comm.files.all()[0].ffile)
         self.comm.move(self.foia2.id)
 
+
 class TestCommunicationClone(test.TestCase):
     """Tests the clone method"""
     def setUp(self):
@@ -142,7 +135,7 @@ class TestCommunicationClone(test.TestCase):
         other_foia = factories.FOIARequestFactory()
         comm_count = FOIACommunication.objects.count()
         comm_pk = self.comm.pk
-        self.comm.clone(other_foia.pk)
+        self.comm.clone([other_foia.pk])
         # + 1 communications
         eq_(FOIACommunication.objects.count(), comm_count + 1,
             'Should clone the request once.')
@@ -191,7 +184,8 @@ class TestCommunicationClone(test.TestCase):
         self.file.save()
         ok_(not self.comm.files.all()[0].ffile)
         other_foia = factories.FOIARequestFactory()
-        self.comm.clone(other_foia.pk)
+        self.comm.clone([other_foia.pk])
+
 
 class TestCommunicationResend(test.TestCase):
     """Tests the resend method"""
@@ -212,18 +206,13 @@ class TestCommunicationResend(test.TestCase):
 
     def test_resend_with_email(self):
         """Should resubmit the FOIA containing the communication automatically"""
-        new_email = 'test@example.com'
+        new_email = EmailAddress.objects.fetch('test@example.com')
         self.comm.resend(new_email)
         self.comm.refresh_from_db()
         eq_(self.comm.foia.email, new_email,
             'Resubmitting with a new email should update the email of the FOIA request.')
         eq_(self.comm.foia.status, 'ack',
             'Resubmitting with an email should resubmit its associated FOIARequest.')
-
-    @raises(ValidationError)
-    def test_resend_bad_email(self):
-        """Should throw an error if given an invalid email"""
-        self.comm.resend('asdfads')
 
     @raises(ValueError)
     def test_resend_orphan_comm(self):

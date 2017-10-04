@@ -12,7 +12,8 @@ import mock
 import nose
 
 from muckrock import factories, task
-from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIANote
+from muckrock.communication.models import EmailAddress
+from muckrock.foia.models import FOIARequest, FOIANote
 from muckrock.task.factories import FlaggedTaskFactory, ProjectReviewTaskFactory
 from muckrock.task.signals import domain_blacklist
 
@@ -61,7 +62,9 @@ class OrphanTaskTests(TestCase):
     """Test the OrphanTask class"""
 
     def setUp(self):
-        self.comm = factories.FOIACommunicationFactory()
+        self.comm = factories.FOIACommunicationFactory(
+                email__from_email__email='test@muckrock.com',
+                )
         self.task = task.models.OrphanTask.objects.create(
             reason='ib',
             communication=self.comm,
@@ -318,12 +321,15 @@ class StaleAgencyTaskTests(TestCase):
         updated emails should automatically follow up with the agency.
         The agency should also have its stale flag lowered.
         """
-        new_email = 'test@email.com'
+        new_email = EmailAddress.objects.fetch('test@email.com')
         self.task.update_email(new_email, [self.foia])
         self.task.refresh_from_db()
-        eq_(self.task.agency.email, new_email, 'The agency\'s email should be updated.')
+        eq_(
+                self.task.agency.get_emails().first(),
+                new_email,
+                )
         eq_(self.foia.email, new_email, 'The foia\'s email should be updated.')
-        mock_followup.assert_called_with(automatic=True, show_all_comms=False)
+        mock_followup.assert_called()
 
     def test_resolve(self):
         """Resolving the task should lower the stale flag on the agency."""
@@ -509,8 +515,8 @@ class MultiRequestTaskTests(TestCase):
                 set(self.multi.agencies.all()),
                 set(self.agencies[:4]),
                 )
-        # reload from db
-        eq_(FOIAMultiRequest.objects.get(pk=self.multi.pk).status, 'filed')
+        self.multi.refresh_from_db()
+        eq_(self.multi.status, 'filed')
         eq_(FOIARequest.objects.filter(multirequest=self.multi).count(), 4)
 
     def test_reject(self):

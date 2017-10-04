@@ -17,6 +17,7 @@ from django_filters import FilterSet
 
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
+from muckrock.communication.models import MailCommunication, EmailAddress, EmailCommunication
 from muckrock.foia.models import STATUS, FOIARequest, FOIACommunication, FOIAFile
 from muckrock.task.filters import (
     TaskFilterSet,
@@ -160,7 +161,12 @@ class OrphanTaskList(TaskList):
     title = 'Orphans'
     queryset = (OrphanTask.objects
             .select_related('communication__likely_foia__jurisdiction')
-            .prefetch_related('communication__files'))
+            .prefetch_related(
+                'communication__files',
+                Prefetch(
+                    'communication__emails',
+                    queryset=EmailCommunication.objects.select_related('from_email'),
+                    )))
     bulk_actions = ['reject']
 
     def task_post_helper(self, request, task):
@@ -196,6 +202,7 @@ class SnailMailTaskList(TaskList):
                 'communication__foia__jurisdiction',
                 )
             .prefetch_related(
+                'communication__files',
                 Prefetch(
                     'communication__foia__communications',
                     queryset=FOIACommunication.objects.filter(response=True),
@@ -225,13 +232,18 @@ class SnailMailTaskList(TaskList):
         if status:
             task.set_status(status)
             # updating the date is an option and not an action
+            # XXX we should get rid of updating the date
             if request.POST.get('update_date'):
                 task.update_date()
         # if the task is in the payment category and we're given a check
         # number, then we should record the existence of this check
         if check_number and task.category == 'p':
             task.record_check(check_number, request.user)
-        task.communication.confirmed = datetime.now()
+        MailCommunication.objects.create(
+                communication=task.communication,
+                sent_datetime=datetime.now(),
+                to_address=task.communication.foia.address,
+                )
         task.communication.save()
         task.resolve(request.user)
         return super(SnailMailTaskList, self).task_post_helper(request, task)
@@ -292,7 +304,8 @@ class StaleAgencyTaskList(TaskList):
         if request.POST.get('update'):
             email_form = StaleAgencyTaskForm(request.POST)
             if email_form.is_valid():
-                new_email = email_form.cleaned_data['email']
+                new_email = EmailAddress.objects.fetch(
+                        email_form.cleaned_data['email'])
                 foia_pks = request.POST.getlist('foia')
                 foias = FOIARequest.objects.filter(pk__in=foia_pks)
                 task.update_email(new_email, foias)
@@ -330,10 +343,16 @@ class FlaggedTaskList(TaskList):
 class ProjectReviewTaskList(TaskList):
     model = ProjectReviewTask
     title = 'Pending Projects'
-    queryset = (ProjectReviewTask.objects.select_related('project')
-                                        .prefetch_related('project__requests')
-                                        .prefetch_related('project__articles')
-                                        .prefetch_related('project__contributors'))
+    queryset = (ProjectReviewTask.objects
+            .select_related('project')
+            .prefetch_related(
+                Prefetch(
+                    'project__requests',
+                    queryset=FOIARequest.objects.select_related('jurisdiction'),
+                    ),
+                'project__articles',
+                'project__contributors',
+                ))
 
     def task_post_helper(self, request, task):
         """Special post handler for ProjectReviewTasks"""
@@ -394,8 +413,18 @@ class ResponseTaskList(TaskList):
                 Prefetch('communication__foia__communications',
                     queryset=FOIACommunication.objects
                         .order_by('-date')
-                        .prefetch_related('files'),
+                        .prefetch_related(
+                            'files',
+                            'emails',
+                            'faxes',
+                            'mails',
+                            'web_comms',
+                            ),
                     to_attr='reverse_communications'),
+                'communication__emails',
+                'communication__faxes',
+                'communication__mails',
+                'communication__web_comms',
                 ))
 
     def task_post_helper(self, request, task):
@@ -464,7 +493,10 @@ class StatusChangeTaskList(TaskList):
 
 class CrowdfundTaskList(TaskList):
     title = 'Crowdfunds'
-    queryset = CrowdfundTask.objects.select_related('crowdfund')
+    queryset = (CrowdfundTask.objects
+            .select_related('crowdfund__foia__jurisdiction')
+            .prefetch_related('crowdfund__projects')
+            )
 
 
 class MultiRequestTaskList(TaskList):

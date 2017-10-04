@@ -3,7 +3,6 @@
         "pk": 1,
         "model": "foia.foiacommunication",
         "fields": {
-            "from_who": "Mitchell Kotler",
             "full_html": false,
             "communication": "Test request",
             "date": "2010-08-21",
@@ -16,7 +15,6 @@
         "pk": 2,
         "model": "foia.foiacommunication",
         "fields": {
-            "from_who": "Mitchell Kotler",
             "full_html": false,
             "communication": "Test request",
             "date": "2010-08-21",
@@ -29,7 +27,6 @@
         "pk": 3,
         "model": "foia.foiacommunication",
         "fields": {
-            "from_who": "Mitchell Kotler",
             "full_html": false,
             "communication": "Test request",
             "date": "2010-08-21",
@@ -42,7 +39,6 @@
         "pk": 4,
         "model": "foia.foiacommunication",
         "fields": {
-            "from_who": "Mitchell Kotler",
             "full_html": false,
             "communication": "Test request",
             "date": "2010-08-21",
@@ -55,7 +51,6 @@
         "pk": 5,
         "model": "foia.foiacommunication",
         "fields": {
-            "from_who": "Mitchell Kotler",
             "full_html": false,
             "communication": "Test request",
             "date": "2010-08-21",
@@ -68,7 +63,6 @@
         "pk": 6,
         "model": "foia.foiacommunication",
         "fields": {
-            "from_who": "Mitchell Kotler",
             "full_html": false,
             "communication": "Test request",
             "date": "2010-08-21",
@@ -81,7 +75,6 @@
         "pk": 7,
         "model": "foia.foiacommunication",
         "fields": {
-            "from_who": "Mitchell Kotler",
             "full_html": false,
             "communication": "Test request",
             "date": "2010-08-21",
@@ -94,7 +87,6 @@
         "pk": 8,
         "model": "foia.foiacommunication",
         "fields": {
-            "from_who": "Mitchell Kotler",
             "full_html": false,
             "communication": "Test request",
             "date": "2010-08-21",
@@ -107,7 +99,6 @@
         "pk": 9,
         "model": "foia.foiacommunication",
         "fields": {
-            "from_who": "Mitchell Kotler",
             "full_html": false,
             "communication": "Test request",
             "date": "2010-08-21",
@@ -120,7 +111,6 @@
         "pk": 10,
         "model": "foia.foiacommunication",
         "fields": {
-            "from_who": "Mitchell Kotler",
             "full_html": false,
             "communication": "Test request",
             "date": "2010-08-21",
@@ -133,7 +123,6 @@
         "pk": 11,
         "model": "foia.foiacommunication",
         "fields": {
-            "from_who": "Mitchell Kotler",
             "full_html": false,
             "communication": "Test request",
             "date": "2010-08-21",
@@ -146,7 +135,6 @@
         "pk": 12,
         "model": "foia.foiacommunication",
         "fields": {
-            "from_who": "Mitchell Kotler",
             "full_html": false,
             "communication": "Test request",
             "date": "2010-08-21",
@@ -159,7 +147,6 @@
         "pk": 13,
         "model": "foia.foiacommunication",
         "fields": {
-            "from_who": "Mitchell Kotler",
             "full_html": false,
             "communication": "Test request",
             "date": "2010-08-21",
@@ -172,7 +159,6 @@
         "pk": 14,
         "model": "foia.foiacommunication",
         "fields": {
-            "from_who": "Mitchell Kotler",
             "full_html": false,
             "communication": "Test request",
             "date": "2010-08-21",
@@ -185,7 +171,6 @@
         "pk": 15,
         "model": "foia.foiacommunication",
         "fields": {
-            "from_who": "Mitchell Kotler",
             "full_html": false,
             "communication": "Test request",
             "date": "2010-08-21",
@@ -198,7 +183,6 @@
         "pk": 16,
         "model": "foia.foiacommunication",
         "fields": {
-            "from_who": "Mitchell Kotler",
             "full_html": false,
             "communication": "Test request",
             "date": "2010-08-21",
@@ -211,7 +195,6 @@
         "pk": 17,
         "model": "foia.foiacommunication",
         "fields": {
-            "from_who": "Mitchell Kotler",
             "full_html": false,
             "communication": "Test request",
             "date": "2010-08-21",
@@ -224,7 +207,6 @@
         "pk": 18,
         "model": "foia.foiacommunication",
         "fields": {
-            "from_who": "Mitchell Kotler",
             "full_html": false,
             "communication": "Test request",
             "date": "2010-08-21",
@@ -237,7 +219,6 @@
         "pk": 19,
         "model": "foia.foiacommunication",
         "fields": {
-            "from_who": "Some Agency",
             "full_html": false,
             "communication": "Test orphan request",
             "date": "2010-08-21",

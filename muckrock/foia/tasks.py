@@ -35,6 +35,11 @@ from raven.contrib.celery import register_logger_signal, register_signal
 from scipy.sparse import hstack
 from urllib import quote_plus
 
+from muckrock.communication.models import (
+        FaxCommunication,
+        FaxError,
+        MailCommunication,
+        )
 from muckrock.foia.models import (
     FOIAFile,
     FOIARequest,
@@ -212,11 +217,10 @@ def submit_multi_request(req_pk, **kwargs):
 
             FOIACommunication.objects.create(
                 foia=new_foia,
-                from_who=new_foia.user.get_full_name(),
-                to_who=new_foia.get_to_who(),
+                from_user=new_foia.user,
+                to_user=new_foia.get_to_user(),
                 date=datetime.now(),
                 response=False,
-                full_html=False,
                 communication=foia_request,
                 )
 
@@ -332,9 +336,15 @@ def send_fax(comm_id, subject, body, **kwargs):
             settings.MUCKROCK_URL,
             reverse('phaxio-callback'),
             )
+
+    fax = FaxCommunication.objects.create(
+            communication=comm,
+            sent_datetime=datetime.now(),
+            to_number=comm.foia.fax,
+            )
     try:
         results = api.send(
-                to=comm.foia.email,
+                to=comm.foia.fax.as_e164,
                 header_text=subject[:45],
                 string_data=body,
                 string_data_type='text',
@@ -343,13 +353,20 @@ def send_fax(comm_id, subject, body, **kwargs):
                 batch_delay=settings.PHAXIO_BATCH_DELAY,
                 batch_collision_avoidance=True,
                 callback_url=callback_url,
-                **{'tag[comm_id]': comm.pk}
+                **{'tag[fax_id]': fax.pk}
                 )
     except PhaxioError as exc:
         logger.error(
                 'Send fax error, will retry: %s',
                 exc,
                 exc_info=sys.exc_info(),
+                )
+        FaxError.objects.create(
+                fax=fax,
+                datetime=datetime.now(),
+                recipient=comm.foia.fax,
+                error_type='apiError',
+                error_code=exc.args[0],
                 )
         send_fax.retry(
                 countdown=300,
@@ -358,9 +375,8 @@ def send_fax(comm_id, subject, body, **kwargs):
                 exc=exc,
                 )
 
-    comm.delivered = 'fax'
-    comm.fax_id = results['faxId']
-    comm.save()
+    fax.fax_id = results['faxId']
+    fax.save()
 
 @periodic_task(
         run_every=crontab(hour=5, minute=0),
@@ -378,7 +394,7 @@ def followup_requests():
             num_requests = FOIARequest.objects.get_followup().count()
             for foia in FOIARequest.objects.get_followup():
                 try:
-                    foia.followup(automatic=True)
+                    foia.followup()
                     log.append('%s - %d - %s' % (foia.status, foia.pk, foia.title))
                 except MailgunAPIError as exc:
                     logger.error('Mailgun error during followups: %s', exc, exc_info=sys.exc_info())
@@ -586,13 +602,21 @@ def autoimport():
             for foia_pk in foia_pks:
                 try:
                     foia = FOIARequest.objects.get(pk=foia_pk)
-                    source = foia.agency.name if foia.agency else ''
+                    from_user = foia.agency.get_user() if foia.agency else None
 
                     comm = FOIACommunication.objects.create(
-                        foia=foia, from_who=source,
-                        to_who=foia.user.get_full_name(), response=True,
-                        date=file_date, full_html=False, delivered='mail',
-                        communication=body, status=status)
+                        foia=foia,
+                        from_user=from_user,
+                        to_user=foia.user,
+                        response=True,
+                        date=file_date,
+                        communication=body,
+                        status=status,
+                        )
+                    MailCommunication.objects.create(
+                            communication=comm,
+                            sent_datetime=file_date,
+                            )
 
                     foia.status = status or foia.status
                     if foia.status in ['partial', 'done', 'rejected', 'no_docs']:
