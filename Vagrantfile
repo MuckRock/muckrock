@@ -25,7 +25,7 @@ Vagrant.configure(VERSION) do |config|
   # remove conf file which preconfigures packages with dpkg in order to avoid warnings
   # update apt
   # install puppet so we can provision
-  config.vm.provision :shell, inline: "sudo rm -v /etc/apt/apt.conf.d/70debconf && sudo apt-get update && sudo apt-get --assume-yes install puppet"
+  config.vm.provision :shell, inline: "sudo rm -vf /etc/apt/apt.conf.d/70debconf && sudo apt-get update && sudo apt-get --assume-yes install puppet"
   # create a blank hiera.yaml to silence a warning
   config.vm.provision :shell, inline: "sudo touch /etc/puppet/hiera.yaml"
   # provision with puppet

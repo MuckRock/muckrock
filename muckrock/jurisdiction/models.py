@@ -322,7 +322,7 @@ class InvokedExemption(models.Model):
     request = models.ForeignKey(FOIARequest)
     use_language = models.TextField(blank=True,
         help_text='What language did the aguency use to invoke the exemption?')
-    properly_invoked = models.BooleanField(default=True,
+    properly_invoked = models.NullBooleanField(default=None,
         help_text='Did the agency properly invoke the exemption to the request?')
 
     def __unicode__(self):

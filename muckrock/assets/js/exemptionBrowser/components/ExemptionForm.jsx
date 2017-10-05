@@ -61,13 +61,13 @@ const ExemptionForm = ({currentState, response, onDismiss, onCancel, handleSubmi
             <h2>Submit a new exemption</h2>
             <p>Was your request for records denied? Let us help! MuckRock staff will review the information on hand and, in a few days, you'll get an email with more details about the exemption, including some sample appeal language to use. The more details you provide us with upfront, the quicker we can get you a response.</p>
             <div className="field">
-                <label htmlFor="language">What language did the agency use to invoke the exemption?</label>
+                <label htmlFor="language">Why do you think your request was improperly denied?</label>
                 <Field name="language" component="textarea" />
                 <Field name="foia" component="input" type="hidden" />
             </div>
             <footer>
                 <span onClick={handleCancel} className="button">Cancel</span>
-                <button type="submit" className="blue button">Submit Exemption</button>
+                <button type="submit" className="blue button">Request Appeal Help</button>
             </footer>
         </form>
     )

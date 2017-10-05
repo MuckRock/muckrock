@@ -230,7 +230,7 @@
                                 {% if request.user.profile.acct_type == "agency" %}
                                 <p>You may <a href="#agency-reply">reply directly</a> to this request.</p>
                                 {% else %}
-                                <p>You may <a href="#follow-up">follow up</a> {% if not foia.disable_autofollowups %}manually {% endif %}with the agency{% if can_appeal %} or <a href="#appeal">appeal</a> their decision{% endif %}.</p>
+                                <p>You may <a href="#follow-up">follow up</a> {% if not foia.disable_autofollowups %}manually {% endif %}with the agency{% if can_appeal %} or <a href="#appeal">appeal</a> their decision.  If you appeal, MuckRock staff can review the rejection and help write an appeal{% endif %}.</p>
                                 {% endif %}
                             </div>
                         </div>
