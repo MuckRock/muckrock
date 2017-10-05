@@ -42,12 +42,12 @@
         {% endif %}
         {{exemption.appeal_language|markdown}}
         {% if exemption.invokations.exists %}
-        <h2>Invokations</h2>
+        <h2>Invocations</h2>
         <ul>
         {% for invokation in exemption.invokations.all %}
             <li>
                 <div class="invoked-exmption">
-                    <p><a href="{{invokation.request.agency.get_absolute_url}}">{{invokation.request.agency}}</a> invoked the exemption on <a href="{{invokation.request.get_absolute_url}}">{{invokation.request}}</a>. The exemption was invoked <strong>{% if not invokation.proper %}im{% endif %}properly</strong> and <strong>has {% if not invokation.appealed %}not {% endif %}been appealed</strong>.</p>
+                    <p><a href="{{invokation.request.agency.get_absolute_url}}">{{invokation.request.agency}}</a> invoked the exemption on <a href="{{invokation.request.get_absolute_url}}">{{invokation.request}}</a>.</p>
                 </div>
             </li>
         {% endfor %}
