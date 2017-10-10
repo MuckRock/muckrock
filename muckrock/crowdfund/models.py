@@ -14,6 +14,7 @@ import logging
 import stripe
 
 from muckrock import task
+from muckrock.message.email import TemplateEmail
 from muckrock.utils import new_action, stripe_retry_on_error
 
 stripe.api_version = '2015-10-16'
@@ -140,6 +141,22 @@ class Crowdfund(models.Model):
         logging.info(payment)
         self.update_payment_received()
         return payment
+
+    def send_intro_email(self, user):
+        """Send an intro email to the user upon crowdfund creation"""
+        msg = TemplateEmail(
+                subject='Crowdfund Campaign Launched',
+                from_email='info@muckrock.com',
+                user=user,
+                bcc=['diagnostics@muckrock', 'info@muckrock'],
+                text_template='crowdfund/email/intro.txt',
+                html_template='crowdfund/email/intro.html',
+                extra_context={
+                    'amount': int(self.payment_required),
+                    'url': self.get_crowdfund_object().get_absolute_url(),
+                    }
+                )
+        msg.send(fail_silently=False)
 
     @property
     def project(self):

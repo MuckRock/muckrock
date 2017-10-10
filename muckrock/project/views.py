@@ -297,6 +297,7 @@ class ProjectCrowdfundView(ProjectPermissionsMixin, CreateView):
             action_object=relationship.crowdfund,
             target=relationship.project
         )
+        crowdfund.send_intro_email(self.request.user)
         return redirection
 
     def get_success_url(self):
