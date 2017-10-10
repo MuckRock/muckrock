@@ -59,7 +59,3 @@ wcwidth==0.1.7            # via prompt-toolkit
 whoosh==2.7.4
 wrapt==1.10.8             # via astroid
 yet-another-django-profiler==1.0.3
-
-# The following packages are commented out because they are
-# considered to be unsafe in a requirements file:
-# setuptools                # via ipdb, ipython

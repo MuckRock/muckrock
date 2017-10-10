@@ -25,6 +25,7 @@ django-localflavor # Used for phone numbers and state list
 django-lot # Used for Log On Tokens
 django-mathfilters # Mathematical template filters
 django-phonenumber-field # for storing phone numbers in the database
+django-opensearch # Enables opensearch
 django-premailer # Styles HTML emails
 django-pylibmc # Interface to memcache
 django-querycount # Counts queries for dev

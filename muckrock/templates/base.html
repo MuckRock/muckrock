@@ -2,6 +2,7 @@
 {% load compress %}
 {% load render_bundle from webpack_loader %}
 {% load hijack_tags %}
+{% load opensearch_tags %}
 <!doctype html>
 
 <html lang="en-US">
@@ -79,6 +80,7 @@
         <meta name="twitter:description" content="MuckRock is a collaborative news site that gives you the tools to hold the government accountable." />
         <meta name="twitter:image:src" content="{% static 'icons/logo.png' %}" />
         {% endblock twitter_card %}
+        {% opensearch_meta %}
     </head>
     <body>
         {% hijack_notification %}
