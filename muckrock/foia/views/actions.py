@@ -263,6 +263,7 @@ def crowdfund_request(request, idx, **kwargs):
                 'began crowdfunding',
                 action_object=crowdfund,
                 target=foia)
+            crowdfund.send_intro_email(request.user)
             return redirect(foia)
 
     elif request.method == 'GET':

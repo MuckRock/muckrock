@@ -1,0 +1,36 @@
+{% extends 'message/base.txt' %}
+
+{% block body %}
+Hi {{ user.first_name }},
+
+Congratulations on launching your crowdfund campaign! We’re excited to help.
+
+Your crowdfund campaign is live here:
+
+{{ base_url }}{{ url }}
+
+We know fundraising can be tricky, so here are some tips on helping your campaign be successful:
+
+1. Use social media and email to spread the word.
+
+Nobody will contribute to your campaign if they can’t find it! Share your campaign with friends and people you think might be interested in helping it succeed, and ask them to forward it along to their networks.
+
+To help get you started, here are a sample email: "mailto:?Subject=Help%20with%20a%20public%20records%20project&Body=Hi%2C%0A%0AI%20am%20{{ user.get_full_name|urlencode }}%2C%20working%20on%20a%20project%20for%20government%20transparency.%20I%27m%20working%20with%20%5Bdescribe%20any%20organizations%20partners%20you%27re%20working%20with%20on%20the%20project%5D.%20%0A%0AWe%20filed%20Freedom%20of%20Information%20Act%20request%28s%29%20for%20information%20on%20%5Bdescribe%20your%20project%20in%20a%20few%20words%5D.%20You%20can%20see%20the%20request%20we%20filed%20right%20at%20the%20link%20below.%0A%0ABut%20we%20need%20your%20help.%20We%20need%20to%20raise%20{{ amount|urlencode }}%20to%20cover%20the%20cost%20of%20the%20request%20fees%20%5Band%20anything%20else%20the%20funding%20will%20go%20towards%5D%2C%20or%20else%20this%20information%20won%27t%20be%20made%20public.%20So%20I%27m%20asking%20for%20your%20help.%20Any%20donation%20you%20can%20afford%20will%20be%20incredibly%20helpful%20in%20helping%20keep%20government%20open%20and%20transparent.%20And%20if%20you%20can%27t%20afford%20to%20donate%2C%20I%27d%20still%20really%20appreciate%20if%20you%20share%20this%20campaign%20with%20people%20you%20think%20might%20be%20interested.%0A%0AThe%20campaign%20page%2C%20where%20you%20can%20donate%20and%20see%20the%20request%20we%20filed%2C%20is%20here%3A%0A%0A{{ base_url|urlencode }}{{ url|urlencode }}%0A%0AThanks%20so%20much%20for%20your%20help%2C%20and%20let%20me%20know%20if%20you%20have%20questions.%0A%0ASincerely%2C%0A{{ user.get_full_name|urlencode }}" and tweet: "https://twitter.com/home?status=Help%20me%20free%20these%20docs!%20I'm%20trying%20to%20raise%20$%20for%20government%20transparency%3A%20{{ base_url|urlencode }}{{ url|urlencode }}", and we recommend sharing your crowdfunding campaign on Facebook with a personalized message.
+
+2. Make sure you’ve explained why this project matters.
+
+Crowdfund campaigns that explain why the documents matter do a lot better than just using our default text. Did you tweak it to explain the history behind your request, or share what you’re going to do with the documents when you get them? If not, we can still update your campaign text — just reply to this email with the updated text, or ask us for help creating a compelling pitch.
+
+3. Let people know the clock is ticking.
+
+A lot of people might want to contribute to your campaign but have a hard time remembering when they finally have a free moment. Adding a sense of urgency can help put your campaign at the top of the list, whether that’s by reminding them that there’s an upcoming deadline or that you’re in the final stretch of your goal.
+
+4. Share updates as the project continues.
+
+A donation is just the beginning. Keep your supporters engaged by sending them updates on your progress, interesting things you learn as you research your project, and when you hit key milestones, such as hitting half your goal or when you have just a few days left to go!
+
+We’re here to help, so if you’ve got questions please let us know by just hitting reply to this email.
+
+Thanks,
+Michael
+{% endblock body %}
