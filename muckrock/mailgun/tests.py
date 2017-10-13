@@ -28,7 +28,7 @@ from muckrock.mailgun.views import (
         opened,
         delivered,
         )
-from muckrock.task.models import OrphanTask, RejectedEmailTask
+from muckrock.task.models import OrphanTask
 
 # pylint: disable=no-self-use
 # pylint: disable=too-many-public-methods

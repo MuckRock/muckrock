@@ -2,9 +2,8 @@
 FOIA views for actions
 """
 
-from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import (
         get_object_or_404,
@@ -22,11 +21,9 @@ from muckrock.accounts.utils import validate_stripe_email
 from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.foia.forms import (
         FOIADeleteForm,
-        FOIAAdminFixForm,
         FOIAEmbargoForm,
         )
 from muckrock.foia.models import FOIARequest, END_STATUS
-from muckrock.foia.views.comms import save_foia_comm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.utils import new_action
 
