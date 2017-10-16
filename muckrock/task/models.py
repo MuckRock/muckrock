@@ -233,15 +233,6 @@ class SnailMailTask(Task):
         comm.foia.save(comment='snail mail task')
         comm.foia.update()
 
-    def update_date(self):
-        """Sets the date of the communication to today"""
-        # XXX remove?
-        comm = self.communication
-        comm.date = datetime.now()
-        comm.save()
-
-        comm.foia.update()
-
     def update_text(self, new_text):
         """Sets the body text of the communication"""
         comm = self.communication
