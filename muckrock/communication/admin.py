@@ -82,11 +82,33 @@ class EmailCommunicationAdmin(CommunicationLinkMixin, VersionAdmin):
     readonly_fields = fields
 
 
-class EmailCommunicationInline(ReadOnlyMixin, admin.StackedInline):
+class EmailCommunicationInline(admin.StackedInline):
     """Email Communication Inline admin"""
     model = EmailCommunication
     show_change_link = True
     extra = 0
+    fields = (
+            'sent_datetime',
+            'confirmed_datetime',
+            'from_email',
+            'to_emails',
+            'cc_emails',
+            'open',
+            'error',
+            )
+    readonly_fields = fields
+
+    def open(self, instance):
+        """Does this email have an open?"""
+        # pylint: disable=no-self-use
+        return instance.opens.count() > 0
+    open.boolean = True
+
+    def error(self, instance):
+        """Does this email have an error?"""
+        # pylint: disable=no-self-use
+        return instance.errors.count() > 0
+    error.boolean = True
 
 
 class FaxCommunicationAdmin(CommunicationLinkMixin, VersionAdmin):
@@ -104,11 +126,26 @@ class FaxCommunicationAdmin(CommunicationLinkMixin, VersionAdmin):
     readonly_fields = fields
 
 
-class FaxCommunicationInline(ReadOnlyMixin, admin.StackedInline):
+class FaxCommunicationInline(admin.StackedInline):
     """Fax Communication Inline admin"""
     model = FaxCommunication
     show_change_link = True
     extra = 0
+    fields = (
+            'sent_datetime',
+            'confirmed_datetime',
+            'to_number',
+            'fax_id',
+            'error',
+            )
+    readonly_fields = fields
+
+    def error(self, instance):
+        """Does this fax have an error?"""
+        # pylint: disable=no-self-use
+        return instance.errors.count() > 0
+    error.boolean = True
+
 
 
 class MailCommunicationInline(ReadOnlyMixin, admin.StackedInline):

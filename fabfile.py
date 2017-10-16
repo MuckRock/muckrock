@@ -72,7 +72,7 @@ def runserver():
 def celery():
     """Run the celery worker"""
     with env.cd(env.base_path):
-        env.run('./manage.py celery worker')
+        env.run('./manage.py celery worker -Q celery,phaxio -l DEBUG')
 
 @task(alias='m')
 def manage(cmd):
