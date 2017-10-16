@@ -230,8 +230,6 @@ class FOIACommunication(models.Model):
             logger.warn('Tried resending a communication with an unapproved agency')
             raise ValueError('This communication has no approved agency.', 'no_agency')
         snail = False
-        self.date = datetime.now()
-        self.save()
         if email_or_fax is None:
             snail = True
         else:
