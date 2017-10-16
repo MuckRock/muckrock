@@ -163,9 +163,13 @@ class FOIACommunicationAdmin(VersionAdmin):
     foia_link.short_description = 'FOIA Request'
 
     def save_formset(self, request, form, formset, change):
-        """Actions to take while saving inline instances"""
+        """Actions to take while saving inline files"""
         # pylint: disable=no-self-use
         # pylint: disable=unused-argument
+
+        if formset.model != FOIAFile:
+            return super(FOIACommunicationAdmin, self).save_formset(
+                    request, form, formset, change)
 
         instances = formset.save(commit=False)
         for instance in instances:

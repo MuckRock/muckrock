@@ -28,8 +28,10 @@ class ReadOnlyMixin(object):
     def get_readonly_fields(self, request, obj=None):
         """Make all fields readonly"""
         # pylint: disable=unused-argument
-
-        return [field.name for field in self.opts.local_fields]
+        return (
+                [field.name for field in self.opts.local_fields] +
+                [field.name for field in self.opts.local_many_to_many]
+                )
 
 
 class CommunicationLinkMixin(object):
@@ -64,36 +66,11 @@ class FaxErrorInline(ReadOnlyMixin, admin.StackedInline):
     extra = 0
 
 
-class EmailCommunicationAdminForm(forms.ModelForm):
-    """Email Communication Inline admin form"""
-    from_email = autocomplete_light.ModelChoiceField(
-            'EmailAddressAutocomplete',
-            queryset=EmailAddress.objects.all(),
-            required=False,
-            )
-    to_emails = autocomplete_light.ModelMultipleChoiceField(
-            'EmailAddressAutocomplete',
-            queryset=EmailAddress.objects.all(),
-            required=False,
-            )
-    cc_emails = autocomplete_light.ModelMultipleChoiceField(
-            'EmailAddressAutocomplete',
-            queryset=EmailAddress.objects.all(),
-            required=False,
-            )
-
-    class Meta:
-        model = EmailCommunication
-        fields = '__all__'
-
-
 class EmailCommunicationAdmin(CommunicationLinkMixin, VersionAdmin):
     """Email Communication admin"""
     model = EmailCommunication
-    form = EmailCommunicationAdminForm
     inlines = [EmailOpenInline, EmailErrorInline]
 
-    readonly_fields = ('comm_link',)
     fields = (
             'comm_link',
             'sent_datetime',
@@ -102,36 +79,21 @@ class EmailCommunicationAdmin(CommunicationLinkMixin, VersionAdmin):
             'to_emails',
             'cc_emails',
             )
+    readonly_fields = fields
 
 
-class EmailCommunicationInline(admin.StackedInline):
+class EmailCommunicationInline(ReadOnlyMixin, admin.StackedInline):
     """Email Communication Inline admin"""
     model = EmailCommunication
-    form = EmailCommunicationAdminForm
     show_change_link = True
     extra = 0
-
-
-class FaxCommunicationAdminForm(forms.ModelForm):
-    """Fax Communication Inline admin form"""
-    to_number = autocomplete_light.ModelChoiceField(
-            'PhoneNumberFaxAutocomplete',
-            queryset=PhoneNumber.objects.filter(type='fax'),
-            required=False,
-            )
-
-    class Meta:
-        model = FaxCommunication
-        fields = '__all__'
 
 
 class FaxCommunicationAdmin(CommunicationLinkMixin, VersionAdmin):
     """Fax Communication admin"""
     model = FaxCommunication
-    form = FaxCommunicationAdminForm
     inlines = [FaxErrorInline]
 
-    readonly_fields = ('comm_link',)
     fields = (
             'comm_link',
             'sent_datetime',
@@ -139,42 +101,23 @@ class FaxCommunicationAdmin(CommunicationLinkMixin, VersionAdmin):
             'to_number',
             'fax_id',
             )
+    readonly_fields = fields
 
 
-class FaxCommunicationInline(admin.StackedInline):
+class FaxCommunicationInline(ReadOnlyMixin, admin.StackedInline):
     """Fax Communication Inline admin"""
     model = FaxCommunication
-    form = FaxCommunicationAdminForm
     show_change_link = True
     extra = 0
 
 
-class MailCommunicationAdminForm(forms.ModelForm):
-    """Mail Communication Inline admin form"""
-    from_address = autocomplete_light.ModelChoiceField(
-            'AddressAutocomplete',
-            queryset=Address.objects.all(),
-            required=False,
-            )
-    to_address = autocomplete_light.ModelChoiceField(
-            'AddressAutocomplete',
-            queryset=Address.objects.all(),
-            required=False,
-            )
-
-    class Meta:
-        model = MailCommunication
-        fields = '__all__'
-
-
-class MailCommunicationInline(admin.StackedInline):
+class MailCommunicationInline(ReadOnlyMixin, admin.StackedInline):
     """Mail Communication Inline admin"""
     model = MailCommunication
-    form = MailCommunicationAdminForm
     extra = 0
 
 
-class WebCommunicationInline(admin.StackedInline):
+class WebCommunicationInline(ReadOnlyMixin, admin.StackedInline):
     """Mail Communication Inline admin"""
     model = WebCommunication
     extra = 0

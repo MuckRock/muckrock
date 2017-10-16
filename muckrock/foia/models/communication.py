@@ -74,7 +74,7 @@ class FOIACommunication(models.Model):
 
     # Depreacted fields
     # keep these for old communications
-    from_who = models.CharField(max_length=255)
+    from_who = models.CharField(max_length=255, blank=True)
     to_who = models.CharField(max_length=255, blank=True)
     priv_from_who = models.CharField(max_length=255, blank=True)
     priv_to_who = models.CharField(max_length=255, blank=True)
@@ -364,6 +364,8 @@ class FOIACommunication(models.Model):
                 key=lambda x: x.sent_datetime,
                 reverse=True,
                 )
+        if not sorted_comms:
+            return None
         type_dict = {
                 EmailCommunication: 'email',
                 FaxCommunication: 'fax',
@@ -372,6 +374,8 @@ class FOIACommunication(models.Model):
                 type(None): None,
                 }
         return type_dict[type(sorted_comms[0])]
+    # for the admin
+    get_delivered.short_description = 'delivered'
 
     class Meta:
         # pylint: disable=too-few-public-methods
