@@ -288,7 +288,6 @@ class FOIACommunicationViewSet(viewsets.ModelViewSet):
                     'foia',
                     'status',
                     'response',
-                    'delivered',
                     )
 
     filter_class = Filter

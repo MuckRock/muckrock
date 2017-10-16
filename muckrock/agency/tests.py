@@ -55,8 +55,8 @@ class TestAgencyUnit(TestCase):
         """Test the ganecy get faces method"""
         eq_(self.agency2.get_faxes().first().number, '19876543210')
 
-    def test_agency_get_other_emails(self):
-        """Test get other emails method"""
+    def test_agency_get_emails(self):
+        """Test get emails method"""
         eq_(
                 set(e.email for e in self.agency1.get_emails(email_type='cc')),
                 set(['other_a@agency1.gov', 'other_b@agency1.gov']),

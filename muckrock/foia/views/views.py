@@ -283,7 +283,7 @@ class Detail(DetailView):
                 initial={
                     'email_or_fax': foia.email or foia.fax,
                     'subject': foia.default_subject(),
-                    'other_emails': ', '.join(unicode(e) for e in foia.cc_emails.all()),
+                    'other_emails': foia.get_other_emails(),
                     }
                 )
         if request.POST:

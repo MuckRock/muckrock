@@ -29,7 +29,6 @@ class AgencySerializer(serializers.ModelSerializer):
     average_response_time = serializers.ReadOnlyField()
     fee_rate = serializers.ReadOnlyField()
     success_rate = serializers.ReadOnlyField()
-    # XXX how to do addresses?
 
     def __init__(self, *args, **kwargs):
         """After initializing the serializer,
@@ -39,8 +38,10 @@ class AgencySerializer(serializers.ModelSerializer):
         super(AgencySerializer, self).__init__(*args, **kwargs)
         request = self.context.get('request', None)
         if request is None or not request.user.is_staff:
-            self.fields.pop('email')
-            self.fields.pop('other_emails')
+            # email and other_emails no longer exists
+            # keeping logic here for future use
+            self.fields.pop('email', None)
+            self.fields.pop('other_emails', None)
 
     class Meta:
         model = Agency

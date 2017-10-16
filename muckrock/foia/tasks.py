@@ -539,8 +539,14 @@ def autoimport():
         title = title or file_name
         access = 'private' if foia.embargo else 'public'
 
-        foia_file = FOIAFile(foia=foia, comm=comm, title=title, date=comm.date,
-                             source=comm.from_who[:70], access=access)
+        foia_file = FOIAFile(
+                foia=foia,
+                comm=comm,
+                title=title,
+                date=comm.date,
+                source=comm.get_source(),
+                access=access,
+                )
         full_file_name = foia_file.ffile.field.generate_filename(
                 foia_file.ffile.instance,
                 file_name,

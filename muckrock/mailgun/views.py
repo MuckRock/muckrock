@@ -397,7 +397,7 @@ def phaxio_callback(request):
     fax_info = json.loads(request.POST['fax'])
     fax_id = fax_info['tags'].get('fax_id')
     comm_id = fax_info['tags'].get('comm_id')
-    if not fax_id:
+    if fax_id:
         fax_comm = FaxCommunication.objects.filter(pk=fax_id).first()
     else:
         fax_comm = None

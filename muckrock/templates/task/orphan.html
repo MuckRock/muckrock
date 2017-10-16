@@ -6,10 +6,12 @@
     <dd>{{task.get_reason_display}}</dd>
     <dt>To</dt>
     <dd>{{task.address}}</dd>
-    {% if task.communication.priv_from_who %}
+    {% with from_email=task.communication.emails.first.from_email %}
+    {% if from_email %}
     <dt>From</dt>
-    <dd>{{ task.communication.priv_from_who }}</dd>
+    <dd>{{ from_email }}</dd>
     {% endif %}
+    {% endwith %}
     {% if task.communication.subject %}
     <dt>Subject</dt>
     <dd>{{ task.communication.subject }}</dd>

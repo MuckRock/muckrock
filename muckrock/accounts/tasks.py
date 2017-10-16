@@ -16,6 +16,11 @@ from raven.contrib.celery import register_logger_signal, register_signal
 
 from muckrock.accounts.models import Profile, Statistics
 from muckrock.agency.models import Agency
+from muckrock.communication.models import (
+        EmailCommunication,
+        FaxCommunication,
+        MailCommunication,
+        )
 from muckrock.crowdfund.models import Crowdfund, CrowdfundPayment
 from muckrock.foia.models import FOIARequest, FOIAFile, FOIACommunication
 from muckrock.foiamachine.models import FoiaMachineRequest
@@ -88,23 +93,20 @@ def store_statistics():
             .filter(status='submitted')
             .exclude(date_processing=None)
             .aggregate(days=Sum(date.today() - F('date_processing')))['days']),
-        sent_communications_email=FOIACommunication.objects
+        sent_communications_email=EmailCommunication.objects
             .filter(
-                date__range=(yesterday, date.today()),
-                response=False,
-                delivered='email',
+                communication__date__range=(yesterday, date.today()),
+                communication__response=False,
                 ).count(),
-        sent_communications_fax=FOIACommunication.objects
+        sent_communications_fax=FaxCommunication.objects
             .filter(
-                date__range=(yesterday, date.today()),
-                response=False,
-                delivered='fax',
+                communication__date__range=(yesterday, date.today()),
+                communication__response=False,
                 ).count(),
-        sent_communications_mail=FOIACommunication.objects
+        sent_communications_mail=MailCommunication.objects
             .filter(
-                date__range=(yesterday, date.today()),
-                response=False,
-                delivered='mail',
+                communication__date__range=(yesterday, date.today()),
+                communication__response=False,
                 ).count(),
         machine_requests=
             FoiaMachineRequest.objects.count(),

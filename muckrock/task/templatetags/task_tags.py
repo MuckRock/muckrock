@@ -202,10 +202,11 @@ class StaleAgencyTaskNode(TaskNode):
         """Adds a form for updating the email"""
         extra_context = super(StaleAgencyTaskNode, self).get_extra_context()
         latest_response = self.task.latest_response()
+        initial = {}
         if latest_response:
-            initial = {'email': latest_response.priv_from_who}
-        else:
-            initial = {}
+            last_email = latest_response.emails.last()
+            if last_email:
+                initial = {'email': last_email.from_email}
         extra_context['email_form'] = task.forms.StaleAgencyTaskForm(initial=initial)
         extra_context['latest_response'] = latest_response
         stale_requests = list(self.task.stale_requests())

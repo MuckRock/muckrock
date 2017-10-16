@@ -114,6 +114,15 @@ class FOIACommunication(models.Model):
         """Anchor name"""
         return 'comm-%d' % self.pk
 
+    def get_source(self):
+        """Get the source line for an attached file"""
+        if self.foia.agency:
+            return self.foia.agency.name[:70]
+        elif self.from_user:
+            return self.from_user.get_full_name()[:70]
+        else:
+            return ''
+
     def move(self, foia_pks):
         """
         Move this communication. If more than one foia_pk is given, move the
@@ -134,11 +143,10 @@ class FOIACommunication(models.Model):
         change = old_foia is not None
 
         access = 'private' if self.foia.embargo else 'public'
-        source = self.foia.agency.name if self.foia.agency else self.from_who
         for each_file in self.files.all():
             each_file.foia = move_to_request
             each_file.access = access
-            each_file.source = source[:70]
+            each_file.source = self.get_source()
             each_file.save()
             upload_document_cloud.apply_async(
                     args=[each_file.pk, change], countdown=3)
@@ -182,14 +190,13 @@ class FOIACommunication(models.Model):
             this_clone.foia = request
             this_clone.save()
             access = 'private' if request.embargo else 'public'
-            source = request.agency.name if request.agency else self.from_who
             for file_ in files:
                 original_file_id = file_.id
                 file_.pk = None
                 file_.foia = request
                 file_.comm = this_clone
                 file_.access = access
-                file_.source = source
+                file_.source = this_clone.source()
                 # make a copy of the file on the storage backend
                 try:
                     new_ffile = ContentFile(file_.ffile.read())
@@ -293,8 +300,7 @@ class FOIACommunication(models.Model):
         from muckrock.foia.tasks import upload_document_cloud
         # make orphans and embargoed documents private
         access = 'private' if not self.foia or self.foia.embargo else 'public'
-        source = (self.foia.agency.name if self.foia and self.foia.agency
-                else self.from_user.get_full_name())
+        source = self.get_source()
 
         foia_file = self.files.create(
                 foia=self.foia,

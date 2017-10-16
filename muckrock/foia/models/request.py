@@ -479,8 +479,8 @@ class FOIARequest(models.Model):
         return self.mail_id
 
     def get_other_emails(self):
-        """Get the other emails for this request as a list"""
-        return self.cc_emails.all()
+        """Get the other emails for this request as a comma seperated string"""
+        return ', '.join(unicode(e) for e in self.cc_emails.all())
 
     def get_to_user(self):
         """Who communications are to"""

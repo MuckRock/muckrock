@@ -486,11 +486,21 @@ class TestFOIAIntegration(TestCase):
 
         ## create and submit request
         foia = FOIARequest.objects.create(
-            user=user, title='Test with no email', slug='test-with-no-email',
-            status='submitted', jurisdiction=jurisdiction, agency=agency)
+                user=user,
+                title='Test with no email',
+                slug='test-with-no-email',
+                status='submitted',
+                jurisdiction=jurisdiction,
+                agency=agency,
+                )
         comm = FOIACommunication.objects.create(
-            foia=foia, from_who='Muckrock', to_who='Test Agency', date=datetime.datetime.now(),
-            response=False, communication=u'Test communication')
+                foia=foia,
+                from_user=user,
+                to_user=agency.get_user(),
+                date=datetime.datetime.now(),
+                response=False,
+                communication=u'Test communication',
+                )
         foia.submit()
 
         # check that a snail mail task was created
@@ -520,8 +530,13 @@ class TestFOIAIntegration(TestCase):
         ## after 5 days agency replies with a fix needed
         self.set_today(datetime.date.today() + datetime.timedelta(5))
         comm = FOIACommunication.objects.create(
-            foia=foia, from_who='Test Agency', to_who='Muckrock', date=datetime.datetime.now(),
-            response=True, communication='Test communication')
+                foia=foia,
+                from_user=agency.get_user(),
+                to_user=user,
+                date=datetime.datetime.now(),
+                response=True,
+                communication='Test communication',
+                )
         foia.status = 'fix'
         foia.save()
         foia.update(comm.anchor())
@@ -538,8 +553,13 @@ class TestFOIAIntegration(TestCase):
         ## after 10 days the user submits the fix and the admin submits it right away
         self.set_today(datetime.date.today() + datetime.timedelta(10))
         comm = FOIACommunication.objects.create(
-            foia=foia, from_who='Muckrock', to_who='Test Agency', date=datetime.datetime.now(),
-            response=False, communication='Test communication')
+                foia=foia,
+                from_user=user,
+                to_user=agency.get_user(),
+                date=datetime.datetime.now(),
+                response=False,
+                communication='Test communication',
+                )
         foia.status = 'submitted'
         foia.save()
         foia.submit()
@@ -568,8 +588,13 @@ class TestFOIAIntegration(TestCase):
         ## after 4 days agency replies with the documents
         self.set_today(datetime.date.today() + datetime.timedelta(4))
         comm = FOIACommunication.objects.create(
-            foia=foia, from_who='Test Agency', to_who='Muckrock', date=datetime.datetime.now(),
-            response=True, communication='Test communication')
+                foia=foia,
+                from_user=agency.get_user(),
+                to_user=user,
+                date=datetime.datetime.now(),
+                response=True,
+                communication='Test communication',
+                )
         foia.status = 'done'
         foia.save()
         foia.update(comm.anchor())

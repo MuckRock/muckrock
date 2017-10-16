@@ -3,6 +3,7 @@ Digest objects for the messages app
 """
 
 from django.contrib.auth.models import User
+from django.db.models import Q
 from django.utils import timezone
 
 from actstream.models import Action
@@ -10,6 +11,11 @@ from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 
 from muckrock.accounts.models import Notification, Statistics
+from muckrock.communication.models import (
+        EmailCommunication,
+        FaxCommunication,
+        MailCommunication,
+        )
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.message.email import TemplateEmail
 from muckrock.foia.models import FOIARequest, FOIACommunication
@@ -248,11 +254,14 @@ class StaffDigest(Digest):
         """Returns the trailing cost for communications over a period"""
         # pylint: disable=no-self-use
         period = [current - relativedelta(days=duration), current]
-        sent_comms = FOIACommunication.objects.filter(date__range=period, response=False)
+        filters = Q(
+                communication__date__range=period,
+                communication__response=False,
+                )
         trailing = {
-            'email': sent_comms.filter(delivered='email').count(),
-            'fax': sent_comms.filter(delivered='fax').count(),
-            'mail': sent_comms.filter(delivered='mail').count()
+            'email': EmailCommunication.objects.filter(filters).count(),
+            'fax': FaxCommunication.objects.filter(filters).count(),
+            'mail': MailCommunication.objects.filter(filters).count(),
         }
         trailing_cost = {
             'email': trailing['email'] * cost_per['email'],
@@ -264,11 +273,14 @@ class StaffDigest(Digest):
     def get_comms(self, start, end):
         """Returns communication data over a date range"""
         received = FOIACommunication.objects.filter(date__range=[start, end], response=True)
-        sent = FOIACommunication.objects.filter(date__range=[start, end], response=False)
+        filters = Q(
+                communication__date__range=[start, end],
+                communication__response=False,
+                )
         delivered_by = {
-            'email': sent.filter(delivered='email').count(),
-            'fax': sent.filter(delivered='fax').count(),
-            'mail': sent.filter(delivered='mail').count()
+            'email': EmailCommunication.objects.filter(filters).count(),
+            'fax': FaxCommunication.objects.filter(filters).count(),
+            'mail': MailCommunication.objects.filter(filters).count(),
         }
         cost_per = {
             'email': 0.00,
