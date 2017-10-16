@@ -51,7 +51,12 @@ def migrate_addresses(apps, schema_editor):
     PhoneNumber = apps.get_model('communication', 'PhoneNumber')
     email_separator_re = re.compile(r'[^\w\.\-\+\&@_]+')
 
+    i = 0
+    total = Agency.objects.count()
     for agency in Agency.objects.all():
+        if i % 1000 == 0:
+            print '%d%%' % (100 * (i / float(total)))
+        i += 1
         if agency.address:
             addr, _ = Address.objects.get_or_create(address=agency.address)
             AgencyAddress.objects.create(

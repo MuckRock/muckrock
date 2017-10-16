@@ -54,8 +54,12 @@ def migrate_requests(apps, schema_editor):
     PhoneNumber = apps.get_model('communication', 'PhoneNumber')
     email_separator_re = re.compile(r'[^\w\.\-\+\&@_\'"%/]+')
 
+    i = 0
     total = FOIARequest.objects.count()
     for foia in FOIARequest.objects.all():
+        if i % 1000 == 0:
+            print '%d%%' % (100 * (i / float(total)))
+        i += 1
         if foia.old_email:
             if '@' in foia.old_email:
                 try:
