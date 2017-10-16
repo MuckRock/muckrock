@@ -20,6 +20,7 @@ from datetime import datetime
 from email.utils import getaddresses
 from functools import wraps
 
+from muckrock.agency.models import AgencyEmail
 from muckrock.communication.models import (
         EmailAddress,
         EmailCommunication,
@@ -47,7 +48,10 @@ def _make_orphan_comm(from_email, to_emails, cc_emails,
         subject, post, files, foia):
     """Make an orphan communication"""
     # pylint: disable=too-many-arguments
-    agencies = from_email.agencies.all()
+    if from_email:
+        agencies = from_email.agencies.all()
+    else:
+        agencies = []
     if len(agencies) == 1:
         from_user = agencies[0].get_user()
     else:
@@ -201,7 +205,10 @@ def _handle_request(request, mail_id):
     try:
         foia = FOIARequest.objects.get(mail_id=mail_id)
 
-        email_allowed = from_email.allowed(foia)
+        if from_email is not None:
+            email_allowed = from_email.allowed(foia)
+        else:
+            email_allowed = False
         if not email_allowed:
             msg, reason = ('Bad Sender', 'bs')
         if foia.block_incoming:
@@ -222,6 +229,13 @@ def _handle_request(request, mail_id):
                 communication=comm,
                 address=mail_id)
             return HttpResponse('WARNING')
+
+        # if this isn't a known email for this agency, add it
+        if not from_email.agencies.filter(pk=foia.agency.pk).exists():
+            AgencyEmail.objects.create(
+                    agency=foia.agency,
+                    email=from_email,
+                    )
 
         comm = FOIACommunication.objects.create(
                 foia=foia,
