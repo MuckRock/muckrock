@@ -572,7 +572,11 @@ class Detail(DetailView):
         success_msg = 'Your follow up has been sent.'
         has_perm = foia.has_perm(request.user, 'followup')
         if request.user.is_staff:
-            form = FOIAAdminFixForm(request.POST)
+            form = FOIAAdminFixForm(
+                    request.POST,
+                    request=request,
+                    foia=foia,
+                    )
             if form.is_valid():
                 foia.update_address(form.cleaned_data['email_or_fax'])
                 foia.cc_emails.set(form.cleaned_data['other_emails'])
@@ -586,6 +590,7 @@ class Detail(DetailView):
                         )
                 messages.success(request, success_msg)
                 new_action(request.user, 'followed up on', target=foia)
+                return redirect(foia)
             else:
                 self.admin_fix_form = form
                 raise FormError

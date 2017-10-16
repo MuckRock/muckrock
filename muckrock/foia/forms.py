@@ -6,7 +6,6 @@ from django import forms
 from django.contrib.auth.models import User
 
 from autocomplete_light import shortcuts as autocomplete_light
-from autocomplete_light.contrib.taggit_field import TaggitField
 from datetime import date, timedelta
 
 from muckrock.agency.models import Agency
@@ -268,7 +267,7 @@ class FOIAAdminFixForm(forms.Form):
             required=False,
             widget=autocomplete_light.TextWidget('EmailOrFaxAutocomplete'),
             )
-    other_emails = TaggitField(
+    other_emails = forms.CharField(
             label='CC',
             required=False,
             help_text='For emails only, comma seperated',
