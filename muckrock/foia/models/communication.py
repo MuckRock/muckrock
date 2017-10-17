@@ -196,7 +196,7 @@ class FOIACommunication(models.Model):
                 file_.foia = request
                 file_.comm = this_clone
                 file_.access = access
-                file_.source = this_clone.source()
+                file_.source = this_clone.get_source()
                 # make a copy of the file on the storage backend
                 try:
                     new_ffile = ContentFile(file_.ffile.read())

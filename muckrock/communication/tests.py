@@ -80,7 +80,7 @@ class TestEmailAddress(TestCase):
     def test_domain(self):
         """Test the domain method"""
         eq_(EmailAddress.objects.fetch('a@a.com').domain, 'a.com')
-        eq_(EmailAddress.objects.fetch('"odd email@you"@weird.com').domain, 'weird.com')
+        eq_(EmailAddress.objects.fetch('"odd_email@you"@weird.com').domain, 'weird.com')
 
     def test_unicode(self):
         """Test the __unicode__ method"""

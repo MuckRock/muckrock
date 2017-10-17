@@ -246,14 +246,6 @@ class SnailMailTaskTests(TestCase):
         eq_(self.task.communication.foia.status, new_status,
             'Setting status should update status of associated communication\'s foia request')
 
-    def test_update_date(self):
-        old_date = self.task.communication.date
-        self.task.update_date()
-        ok_(self.task.communication.date > old_date,
-            'Date should be moved foward.')
-        eq_(self.task.communication.date.day, datetime.now().day,
-            'Should update the date to today.')
-
     def test_update_text(self):
         """Snail mail tasks should be able to update the text of their communication."""
         comm = self.task.communication

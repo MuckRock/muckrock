@@ -228,16 +228,6 @@ class SnailMailTaskViewTests(TestCase):
         eq_(updated_task.communication.foia.status, new_status,
             'Should update the status of the communication\'s associated request.')
 
-    def test_post_update_date(self):
-        """Should update the date of the communication to today."""
-        comm_date = self.task.communication.date
-        self.client.post(self.url, {'status': 'ack', 'update_date': 'true', 'task': self.task.pk})
-        updated_task = task.models.SnailMailTask.objects.get(pk=self.task.pk)
-        ok_(updated_task.communication.date > comm_date,
-            'Should update the communication date.')
-        eq_(updated_task.communication.date.day, datetime.now().day,
-            'Should update the communication to today\'s date.')
-
     def test_post_record_check(self):
         """A payment snail mail task should record the check number."""
         check_number = 42

@@ -515,9 +515,13 @@ class TestFOIAIntegration(TestCase):
         foia.save()
 
         # make sure dates were set correctly
-        nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 3))
-        nose.tools.eq_(foia.date_due, cal.business_days_from(datetime.date.today(),
-                                                             jurisdiction.get_days()))
+        nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 1))
+        nose.tools.eq_(
+                foia.date_due,
+                cal.business_days_from(
+                    datetime.date(2010, 2, 1),
+                    jurisdiction.get_days(),
+                    ))
         nose.tools.eq_(foia.date_followup.date(),
                        max(foia.date_due, foia.last_comm().date.date() +
                                           datetime.timedelta(foia._followup_days())))
@@ -542,7 +546,7 @@ class TestFOIAIntegration(TestCase):
         foia.update(comm.anchor())
 
         # make sure dates were set correctly
-        nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 3))
+        nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 1))
         nose.tools.ok_(foia.date_due is None)
         nose.tools.ok_(foia.date_followup is None)
         nose.tools.eq_(foia.days_until_due, cal.business_days_between(datetime.date(2010, 2, 8),
@@ -575,7 +579,7 @@ class TestFOIAIntegration(TestCase):
         foia.save()
 
         # make sure dates were set correctly
-        nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 3))
+        nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 1))
         nose.tools.eq_(foia.date_due, cal.business_days_from(datetime.date.today(),
                                                              old_days_until_due))
         nose.tools.eq_(foia.date_followup.date(),
@@ -600,7 +604,7 @@ class TestFOIAIntegration(TestCase):
         foia.update(comm.anchor())
 
         # make sure dates were set correctly
-        nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 3))
+        nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 1))
         nose.tools.eq_(foia.date_due, old_date_due)
         nose.tools.ok_(foia.date_followup is None)
         nose.tools.ok_(foia.days_until_due is None)
