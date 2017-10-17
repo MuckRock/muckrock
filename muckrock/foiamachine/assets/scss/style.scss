@@ -107,7 +107,7 @@ td p {
 }
 .select-all {
     -webkit-user-select: all;
-    -moz-user-select: all;
+    -moz-user-select: -moz-all;
     user-select: all;
 }
 .nostyle {
