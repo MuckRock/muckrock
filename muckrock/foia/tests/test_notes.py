@@ -27,6 +27,7 @@ class TestFOIANotes(TestCase):
             'slug': self.foia.slug,
             'idx': self.foia.id
         }
+        UserFactory(username='MuckrockStaff')
 
     def test_add_note(self):
         """User with edit permission should be able to create a note."""

@@ -10,16 +10,17 @@ from django.shortcuts import redirect, get_object_or_404
 
 from datetime import datetime
 
+from muckrock.communication.utils import get_email_or_fax
 from muckrock.foia.models import FOIACommunication, STATUS
 
-def save_foia_comm(foia, from_who, comm, user, appeal=False,
+def save_foia_comm(foia, from_user, comm, user, appeal=False,
         snail=False, thanks=False, subject=''):
     """Save the FOI Communication"""
     #pylint:disable=too-many-arguments
     FOIACommunication.objects.create(
         foia=foia,
-        from_who=from_who,
-        to_who=foia.get_to_who(),
+        from_user=from_user,
+        to_user=foia.get_to_user(),
         date=datetime.now(),
         response=False,
         full_html=False,
@@ -65,12 +66,16 @@ def resend_comm(request, next_):
     """Resend the FOI Communication"""
     try:
         comm = FOIACommunication.objects.get(pk=request.POST['comm_pk'])
-        comm.resend(request.POST['email'])
+        if request.POST['email_or_fax']:
+            email_or_fax = get_email_or_fax(request.POST['email_or_fax'])
+        else:
+            email_or_fax = None
+        comm.resend(email_or_fax)
         messages.success(request, 'The communication was resent.')
     except (KeyError, FOIACommunication.DoesNotExist):
         messages.error(request, 'The communication does not exist.')
     except ValidationError:
-        messages.error(request, 'The provided email was invalid')
+        messages.error(request, 'The provided email or fax was invalid')
     except ValueError as exc:
         if exc.args[1] == 'no_foia':
             messages.error(request, 'The communication is an orphan and cannot be resent.')
@@ -97,9 +102,11 @@ def raw(request, idx):
     """Get the raw email for a communication"""
     # pylint: disable=unused-argument
     comm = get_object_or_404(FOIACommunication, pk=idx)
-    if not comm.rawemail:
-        raise Http404()
-    return HttpResponse(
-            comm.rawemail.raw_email,
-            content_type='text/plain; charset=utf-8',
-            )
+    raw_email = comm.get_raw_email()
+    if raw_email:
+        return HttpResponse(
+                raw_email.raw_email,
+                content_type='text/plain; charset=utf-8',
+                )
+    else:
+        raise Http404

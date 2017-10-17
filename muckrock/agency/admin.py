@@ -17,8 +17,19 @@ from autocomplete_light import shortcuts as autocomplete_light
 import logging
 import sys
 
-from muckrock.agency.models import AgencyType, Agency
+from muckrock.agency.models import (
+        AgencyType,
+        Agency,
+        AgencyAddress,
+        AgencyEmail,
+        AgencyPhone,
+        )
 from muckrock.agency.forms import CSVImportForm
+from muckrock.communication.models import (
+        Address,
+        EmailAddress,
+        PhoneNumber,
+        )
 from muckrock.jurisdiction.models import Jurisdiction
 
 logger = logging.getLogger(__name__)
@@ -30,6 +41,63 @@ class AgencyTypeAdmin(VersionAdmin):
     """AgencyType admin options"""
     list_display = ('name', )
     search_fields = ['name']
+
+
+class AgencyAddressAdminForm(forms.ModelForm):
+    """AgencyAddress Inline admin form"""
+    address = autocomplete_light.ModelChoiceField(
+            'AddressAutocomplete',
+            queryset=Address.objects.all(),
+            )
+
+    class Meta:
+        model = AgencyAddress
+        fields = '__all__'
+
+
+class AgencyAddressInline(admin.TabularInline):
+    """Inline for agency's addresses"""
+    model = AgencyAddress
+    form = AgencyAddressAdminForm
+    extra = 1
+
+
+class AgencyEmailAdminForm(forms.ModelForm):
+    """AgencyEmail Inline admin form"""
+    email = autocomplete_light.ModelChoiceField(
+            'EmailAddressAutocomplete',
+            queryset=EmailAddress.objects.all(),
+            )
+
+    class Meta:
+        model = AgencyEmail
+        fields = '__all__'
+
+
+class AgencyEmailInline(admin.TabularInline):
+    """Inline for agency's email addresses"""
+    model = AgencyEmail
+    form = AgencyEmailAdminForm
+    extra = 1
+
+
+class AgencyPhoneAdminForm(forms.ModelForm):
+    """AgencyPhone Inline admin form"""
+    phone = autocomplete_light.ModelChoiceField(
+            'PhoneNumberAutocomplete',
+            queryset=PhoneNumber.objects.all(),
+            )
+
+    class Meta:
+        model = AgencyPhone
+        fields = '__all__'
+
+
+class AgencyPhoneInline(admin.TabularInline):
+    """Inline for agency's phone numbers"""
+    model = AgencyPhone
+    form = AgencyPhoneAdminForm
+    extra = 1
 
 
 class AgencyAdminForm(forms.ModelForm):
@@ -70,6 +138,69 @@ class AgencyAdmin(VersionAdmin):
     filter_horizontal = ('types',)
     form = AgencyAdminForm
     formats = ['xls', 'csv']
+    inlines = (
+            AgencyAddressInline,
+            AgencyEmailInline,
+            AgencyPhoneInline,
+            )
+    # deprecated fields are set to read only
+    readonly_fields = (
+            'can_email_appeals',
+            'address',
+            'email',
+            'other_emails',
+            'phone',
+            'fax',
+            )
+    fieldsets = (
+            (None, {
+                'fields': (
+                    'name',
+                    'slug',
+                    'jurisdiction',
+                    'types',
+                    'status',
+                    'user',
+                    'appeal_agency',
+                    'payable_to',
+                    'image',
+                    'image_attr_line',
+                    'public_notes',
+                    'stale',
+                    'manual_stale',
+                    'location',
+                    'contact_salutation',
+                    'contact_first_name',
+                    'contact_last_name',
+                    'contact_title',
+                    'url',
+                    'notes',
+                    'aliases',
+                    'parent',
+                    'website',
+                    'twitter',
+                    'twitter_handles',
+                    'foia_logs',
+                    'foia_guide',
+                    'exempt',
+                    'requires_proxy',
+                    ),
+                }),
+            ('Deprecated', {
+                'classes': ('collapse',),
+                'fields': (
+                    'can_email_appeals',
+                    'address',
+                    'email',
+                    'other_emails',
+                    'phone',
+                    'fax',
+                    ),
+                'description': 'These values are no longer actively used.  '
+                'They are here to view on old data only.  If you find yourself '
+                'needing to look here often, something is probably wrong and '
+                'you should file a bug',
+                }))
 
     def get_urls(self):
         """Add custom URLs here"""
@@ -109,8 +240,15 @@ class AgencyAdmin(VersionAdmin):
         else:
             form = CSVImportForm()
 
-        fields = ['name', 'slug', 'jurisdiction ("Boston, MA")', 'address', 'email', 'other_emails',
-                  'contact first name', 'contact last name', 'contact_title', 'url', 'phone', 'fax']
+        fields = [
+                'name',
+                'slug',
+                'jurisdiction ("Boston, MA")',
+                'contact first name',
+                'contact last name',
+                'contact_title',
+                'url',
+                ]
         return render(
                 request,
                 'admin/agency/import.html',
@@ -148,15 +286,10 @@ class AgencyCsvModel(CsvModel):
     name = CharField()
     slug = CharField()
     jurisdiction = DjangoModelField(Jurisdiction, prepare=get_jurisdiction)
-    address = CharField()
-    email = CharField(validator=EmailValidator)
-    other_emails = CharField()
     contact_first_name = CharField()
     contact_last_name = CharField()
     contact_title = CharField()
     url = CharField()
-    phone = CharField()
-    fax = CharField()
     status = CharField()
 
     class Meta:

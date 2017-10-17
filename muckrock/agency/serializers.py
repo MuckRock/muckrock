@@ -38,8 +38,10 @@ class AgencySerializer(serializers.ModelSerializer):
         super(AgencySerializer, self).__init__(*args, **kwargs)
         request = self.context.get('request', None)
         if request is None or not request.user.is_staff:
-            self.fields.pop('email')
-            self.fields.pop('other_emails')
+            # email and other_emails no longer exists
+            # keeping logic here for future use
+            self.fields.pop('email', None)
+            self.fields.pop('other_emails', None)
 
     class Meta:
         model = Agency
@@ -55,20 +57,14 @@ class AgencySerializer(serializers.ModelSerializer):
             'requires_proxy',
             # location
             'jurisdiction',
-            'address',
             'location',
             # contact info
-            'email',
-            'other_emails',
-            'phone',
-            'fax',
             'website',
             'twitter',
             'twitter_handles',
             # connects to other agencies
             'parent',
             'appeal_agency',
-            'can_email_appeals',
             # describes agency foia process
             'url',
             'foia_logs',

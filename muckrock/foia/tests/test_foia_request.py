@@ -60,6 +60,7 @@ class TestFOIARequestUnit(TestCase):
         mail.outbox = []
 
         self.foia = FOIARequest.objects.get(pk=1)
+        UserFactory(username='MuckrockStaff')
 
     # models
     def test_foia_model_unicode(self):
@@ -172,7 +173,16 @@ class TestFOIARequestUnit(TestCase):
     def test_foia_followup(self):
         """Make sure the follow up date is set correctly"""
         # pylint: disable=protected-access
-        foia = FOIARequest.objects.get(pk=15)
+        foia = FOIARequestFactory(
+                date_submitted=datetime.date.today(),
+                status='processed',
+                jurisdiction__level='s',
+                jurisdiction__days=10,
+                )
+        FOIACommunicationFactory(
+                foia=foia,
+                response=True,
+                )
         foia.followup()
         nose.tools.assert_in('I can expect', mail.outbox[-1].body)
         nose.tools.eq_(foia.date_followup,
@@ -182,7 +192,7 @@ class TestFOIARequestUnit(TestCase):
 
         num_days = 365
         foia.date_estimate = datetime.date.today() + datetime.timedelta(num_days)
-        foia.followup(automatic=True)
+        foia.followup()
         nose.tools.assert_in('I am still', mail.outbox[-1].body)
         nose.tools.eq_(foia._followup_days(), num_days)
 
@@ -228,6 +238,10 @@ class TestFOIAFunctional(TestCase):
     fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
                 'test_profiles.json', 'test_foiarequests.json', 'test_foiacommunications.json',
                 'test_agencies.json']
+
+    def setUp(self):
+        """Set up tests"""
+        UserFactory(username='MuckrockStaff')
 
     # views
     def test_foia_list(self):
@@ -318,33 +332,36 @@ class TestFOIAFunctional(TestCase):
                                         'jidx': foia.jurisdiction.pk,
                                         'idx': foia.pk, 'slug': 'bad_slug'}))
 
-
     def test_foia_submit_views(self):
         """Test submitting a FOIA request"""
 
-        foia = FOIARequest.objects.get(pk=1)
-        agency = Agency.objects.get(pk=3)
+        foia = FOIARequestFactory(
+                status='started',
+                user=User.objects.get(username='adam'),
+                )
+        FOIACommunicationFactory(foia=foia)
         self.client.login(username='adam', password='abc')
 
-        # test for submitting a foia request for enough credits
-        # tests for the wizard
-
-        foia_data = {'title': 'test a', 'request': 'updated request', 'submit': 'Submit',
-                     'agency': agency.pk, 'combo-name': agency.name}
-
-        kwargs = {'jurisdiction': foia.jurisdiction.slug,
-                  'jidx': foia.jurisdiction.pk,
-                  'idx': foia.pk, 'slug': foia.slug}
+        foia_data = {
+                'title': foia.title,
+                'request': 'updated request',
+                'submit': 'Submit',
+                'agency': foia.agency.pk,
+                'combo-name': foia.agency.name,
+                }
+        kwargs = {
+                'jurisdiction': foia.jurisdiction.slug,
+                'jidx': foia.jurisdiction.pk,
+                'idx': foia.pk,
+                'slug': foia.slug,
+                }
         draft = reverse('foia-draft', kwargs=kwargs)
-        kwargs = {'jurisdiction': foia.jurisdiction.slug,
-                  'jidx': foia.jurisdiction.pk,
-                  'idx': foia.pk, 'slug': 'test-a'}
         detail = reverse('foia-detail', kwargs=kwargs)
         post_allowed(self.client, draft, foia_data, detail)
 
-        foia = FOIARequest.objects.get(title='test a')
+        foia.refresh_from_db()
         nose.tools.ok_(foia.first_request().startswith('updated request'))
-        nose.tools.eq_(foia.status, 'submitted')
+        nose.tools.eq_(foia.status, 'ack')
 
     def test_foia_save_views(self):
         """Test saving a FOIA request"""
@@ -469,11 +486,21 @@ class TestFOIAIntegration(TestCase):
 
         ## create and submit request
         foia = FOIARequest.objects.create(
-            user=user, title='Test with no email', slug='test-with-no-email',
-            status='submitted', jurisdiction=jurisdiction, agency=agency)
+                user=user,
+                title='Test with no email',
+                slug='test-with-no-email',
+                status='submitted',
+                jurisdiction=jurisdiction,
+                agency=agency,
+                )
         comm = FOIACommunication.objects.create(
-            foia=foia, from_who='Muckrock', to_who='Test Agency', date=datetime.datetime.now(),
-            response=False, communication=u'Test communication')
+                foia=foia,
+                from_user=user,
+                to_user=agency.get_user(),
+                date=datetime.datetime.now(),
+                response=False,
+                communication=u'Test communication',
+                )
         foia.submit()
 
         # check that a snail mail task was created
@@ -488,9 +515,13 @@ class TestFOIAIntegration(TestCase):
         foia.save()
 
         # make sure dates were set correctly
-        nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 3))
-        nose.tools.eq_(foia.date_due, cal.business_days_from(datetime.date.today(),
-                                                             jurisdiction.get_days()))
+        nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 1))
+        nose.tools.eq_(
+                foia.date_due,
+                cal.business_days_from(
+                    datetime.date(2010, 2, 1),
+                    jurisdiction.get_days(),
+                    ))
         nose.tools.eq_(foia.date_followup.date(),
                        max(foia.date_due, foia.last_comm().date.date() +
                                           datetime.timedelta(foia._followup_days())))
@@ -503,14 +534,19 @@ class TestFOIAIntegration(TestCase):
         ## after 5 days agency replies with a fix needed
         self.set_today(datetime.date.today() + datetime.timedelta(5))
         comm = FOIACommunication.objects.create(
-            foia=foia, from_who='Test Agency', to_who='Muckrock', date=datetime.datetime.now(),
-            response=True, communication='Test communication')
+                foia=foia,
+                from_user=agency.get_user(),
+                to_user=user,
+                date=datetime.datetime.now(),
+                response=True,
+                communication='Test communication',
+                )
         foia.status = 'fix'
         foia.save()
         foia.update(comm.anchor())
 
         # make sure dates were set correctly
-        nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 3))
+        nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 1))
         nose.tools.ok_(foia.date_due is None)
         nose.tools.ok_(foia.date_followup is None)
         nose.tools.eq_(foia.days_until_due, cal.business_days_between(datetime.date(2010, 2, 8),
@@ -521,8 +557,13 @@ class TestFOIAIntegration(TestCase):
         ## after 10 days the user submits the fix and the admin submits it right away
         self.set_today(datetime.date.today() + datetime.timedelta(10))
         comm = FOIACommunication.objects.create(
-            foia=foia, from_who='Muckrock', to_who='Test Agency', date=datetime.datetime.now(),
-            response=False, communication='Test communication')
+                foia=foia,
+                from_user=user,
+                to_user=agency.get_user(),
+                date=datetime.datetime.now(),
+                response=False,
+                communication='Test communication',
+                )
         foia.status = 'submitted'
         foia.save()
         foia.submit()
@@ -538,7 +579,7 @@ class TestFOIAIntegration(TestCase):
         foia.save()
 
         # make sure dates were set correctly
-        nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 3))
+        nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 1))
         nose.tools.eq_(foia.date_due, cal.business_days_from(datetime.date.today(),
                                                              old_days_until_due))
         nose.tools.eq_(foia.date_followup.date(),
@@ -551,14 +592,19 @@ class TestFOIAIntegration(TestCase):
         ## after 4 days agency replies with the documents
         self.set_today(datetime.date.today() + datetime.timedelta(4))
         comm = FOIACommunication.objects.create(
-            foia=foia, from_who='Test Agency', to_who='Muckrock', date=datetime.datetime.now(),
-            response=True, communication='Test communication')
+                foia=foia,
+                from_user=agency.get_user(),
+                to_user=user,
+                date=datetime.datetime.now(),
+                response=True,
+                communication='Test communication',
+                )
         foia.status = 'done'
         foia.save()
         foia.update(comm.anchor())
 
         # make sure dates were set correctly
-        nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 3))
+        nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 1))
         nose.tools.eq_(foia.date_due, old_date_due)
         nose.tools.ok_(foia.date_followup is None)
         nose.tools.ok_(foia.days_until_due is None)
@@ -579,7 +625,7 @@ class TestFOIARequestAppeal(TestCase):
             'The request should be appealable.')
         ok_(self.agency and self.agency.status == 'approved',
             'The agency should be approved.')
-        ok_(self.appeal_agency.email and self.appeal_agency.can_email_appeals,
+        ok_(self.appeal_agency.get_emails('appeal'),
             'The appeal agency should accept email.')
         # Create the appeal message and submit it
         appeal_message = 'Lorem ipsum'
@@ -587,27 +633,19 @@ class TestFOIARequestAppeal(TestCase):
         # Check that everything happened like we expected
         self.foia.refresh_from_db()
         appeal_comm.refresh_from_db()
-        eq_(self.foia.email, self.appeal_agency.email,
-            'The FOIA primary email should be set to the appeal agency\'s email.')
-        eq_(self.foia.status, 'appealing',
-            'The status of the request should be updated. Actually: %s' % self.foia.status)
-        eq_(appeal_comm.communication, appeal_message,
-            'The appeal message parameter should be used as the body of the communication.')
-        eq_(appeal_comm.from_who, self.foia.user.get_full_name(),
-            'The appeal should be addressed from the request owner.')
-        eq_(appeal_comm.to_who, self.agency.name,
-            'The appeal should be addressed to the agency.')
-        eq_(appeal_comm.delivered, 'email',
-            'The appeal should be marked as delivered via email, not %s.' % appeal_comm.delivered)
+        eq_(self.foia.email, self.appeal_agency.get_emails('appeal').first())
+        eq_(self.foia.status, 'appealing')
+        eq_(appeal_comm.communication, appeal_message)
+        eq_(appeal_comm.from_user, self.foia.user)
+        eq_(appeal_comm.to_user, self.agency.get_user())
+        ok_(appeal_comm.emails.exists())
 
     def test_mailed_appeal(self):
         """Sending an appeal to an agency via mail should set the request to 'submitted',
         create a snail mail task with the 'a' category, and set the appeal communication
         delivery method to 'mail'."""
         # Make the appeal agency unreceptive to emails
-        self.appeal_agency.email = ''
-        self.appeal_agency.can_email_appeals = False
-        self.appeal_agency.save()
+        self.appeal_agency.emails.clear()
         # Create the appeal message and submit it
         appeal_message = 'Lorem ipsum'
         appeal_comm = self.foia.appeal(appeal_message, self.foia.user)
@@ -618,15 +656,13 @@ class TestFOIARequestAppeal(TestCase):
             'The status of the request should be updated. Actually: %s' % self.foia.status)
         eq_(appeal_comm.communication, appeal_message,
             'The appeal message parameter should be used as the body of the communication.')
-        eq_(appeal_comm.from_who, self.foia.user.get_full_name(),
+        eq_(appeal_comm.from_user, self.foia.user,
             'The appeal should be addressed from the request owner.')
-        eq_(appeal_comm.to_who, self.agency.name,
+        eq_(appeal_comm.to_user, self.agency.get_user(),
             'The appeal should be addressed to the agency.')
-        eq_(appeal_comm.delivered, 'mail',
-            'The appeal should be marked as delivered via mail, not %s.' % appeal_comm.delivered)
         task = SnailMailTask.objects.get(communication=appeal_comm)
         ok_(task, 'A snail mail task should be created.')
-        eq_(task.category, 'a', 'The task should be in the appeal category.')
+        eq_(task.category, 'a')
 
 
 class TestRequestDetailView(TestCase):
@@ -642,6 +678,7 @@ class TestRequestDetailView(TestCase):
             'slug': self.foia.slug,
             'idx': self.foia.id
         }
+        UserFactory(username='MuckrockStaff')
 
     def test_add_tags(self):
         """Posting a collection of tags to a request should update its tags."""
@@ -784,6 +821,7 @@ class TestRequestPayment(TestCase):
     """Allow users to pay fees on a request"""
     def setUp(self):
         self.foia = FOIARequestFactory()
+        UserFactory(username='MuckrockStaff')
 
     def test_make_payment(self):
         """The request should accept payments for request fees."""
@@ -791,16 +829,13 @@ class TestRequestPayment(TestCase):
         amount = 100.0
         comm = self.foia.pay(user, amount)
         self.foia.refresh_from_db()
-        eq_(self.foia.status, 'submitted',
-            'The request should be set to processing.')
-        eq_(self.foia.date_processing, datetime.date.today(),
-            'The request should start tracking its days processing.')
+        eq_(self.foia.status, 'submitted')
+        eq_(self.foia.date_processing, datetime.date.today())
         ok_(comm, 'The function should return a communication.')
-        eq_(comm.delivered, 'mail', 'The communication should be mailed.')
         task = SnailMailTask.objects.filter(communication=comm).first()
         ok_(task, 'A snail mail task should be created.')
-        eq_(task.user, user, 'The task should be attributed to the user.')
-        eq_(task.amount, amount, 'The task should contain the amount of the request.')
+        eq_(task.user, user)
+        eq_(task.amount, amount)
 
 
 class TestRequestSharing(TestCase):

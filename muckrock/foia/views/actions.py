@@ -2,9 +2,8 @@
 FOIA views for actions
 """
 
-from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import (
         get_object_or_404,
@@ -22,11 +21,9 @@ from muckrock.accounts.utils import validate_stripe_email
 from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.foia.forms import (
         FOIADeleteForm,
-        FOIAAdminFixForm,
         FOIAEmbargoForm,
         )
 from muckrock.foia.models import FOIARequest, END_STATUS
-from muckrock.foia.views.comms import save_foia_comm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.utils import new_action
 
@@ -191,53 +188,6 @@ def toggle_autofollowups(request, jurisdiction, jidx, slug, idx):
     return redirect(foia)
 
 # Staff Actions
-@user_passes_test(lambda u: u.is_staff)
-def admin_fix(request, jurisdiction, jidx, slug, idx):
-    """Send an email from the requests auto email address"""
-    foia = _get_foia(jurisdiction, jidx, slug, idx)
-
-    if request.method == 'POST':
-        form = FOIAAdminFixForm(request.POST)
-        if form.is_valid():
-            if form.cleaned_data['email']:
-                foia.email = form.cleaned_data['email']
-            if form.cleaned_data['other_emails']:
-                foia.other_emails = form.cleaned_data['other_emails']
-            if form.cleaned_data['from_email']:
-                from_who = form.cleaned_data['from_email']
-            else:
-                from_who = foia.user.get_full_name()
-            save_foia_comm(
-                foia,
-                from_who,
-                form.cleaned_data['comm'],
-                request.user,
-                snail=form.cleaned_data['snail_mail'],
-                subject=form.cleaned_data['subject'],
-            )
-            messages.success(request, 'Admin Fix submitted')
-            return redirect(foia)
-    else:
-        form = FOIAAdminFixForm(
-                instance=foia,
-                initial={'subject': foia.default_subject()},
-                )
-    context = {
-        'form': form,
-        'foia': foia,
-        'heading': 'Email from Request Address',
-        'action': 'Submit',
-        'MAX_ATTACHMENT_NUM': settings.MAX_ATTACHMENT_NUM,
-        'MAX_ATTACHMENT_SIZE': settings.MAX_ATTACHMENT_SIZE,
-        'AWS_STORAGE_BUCKET_NAME': settings.AWS_STORAGE_BUCKET_NAME,
-        'AWS_ACCESS_KEY_ID': settings.AWS_ACCESS_KEY_ID,
-    }
-    return render(
-            request,
-            'forms/foia/admin_fix.html',
-            context,
-            )
-
 @transaction.atomic
 @login_required
 def crowdfund_request(request, idx, **kwargs):

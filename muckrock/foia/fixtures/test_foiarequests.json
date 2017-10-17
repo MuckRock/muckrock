@@ -299,8 +299,7 @@
             "updated": false,
             "tracker": false,
             "featured": false,
-			"price": "0.00",
-			"email": "example@example.com"
+			"price": "0.00"
         }
     },
 	{

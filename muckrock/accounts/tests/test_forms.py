@@ -22,9 +22,11 @@ class TestEmailSettingsForm(TestCase):
         }
         self.form = EmailSettingsForm
 
+    @patch('stripe.Customer.retrieve')
     @patch('muckrock.message.tasks.email_change.delay')
-    def test_email_normal(self, mock_notify):
+    def test_email_normal(self, mock_notify, mock_stripe):
         """Changing email normally should succeed"""
+        # pylint: disable=unused-argument
         old_email = self.profile.user.email
         new_email = 'new@example.com'
         self.data['email'] = new_email

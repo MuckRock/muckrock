@@ -60,29 +60,17 @@
     {% endwith %}
 
     <dt>Mailing Address</dt>
-    {% if agency.address %}
-    <dd>{{ agency.address|linebreaks }}</dd>
-    {% else %}
-    <dd>Unknown</dd>
-    {% endif %}
+    <dd>{{ agency.get_addresses.first|linebreaks|default:"Unknown" }}</dd>
 
     <dt>E-mail Address</dt>
-    {% if agency.email %}
-        {% if request.user.profile.can_view_emails %}
-    <dd>{{agency.email}}</dd>
-        {% else %}
-    <dd><a href="{% url 'accounts' %}">Available to Pro Users</a></dd>
-        {% endif %}
+    {% if request.user.profile.can_view_emails %}
+        <dd>{{ agency.get_emails.first.email|default:"Unknown" }}</dd>
     {% else %}
-    <dd>Unknown</dd>
+        <dd><a href="{% url 'accounts' %}">Available to Pro Users</a></dd>
     {% endif %}
 
     <dt>Fax Number</dt>
-    {% if agency.fax %}
-    <dd>{{agency.fax}}</dd>
-    {% else %}
-    <dd>Unknown</dd>
-    {% endif %}
+    <dd>{{ agency.get_faxes.first|default:"Unknown" }}</dd>
 </dl>
 {% endblock metadata %}
 

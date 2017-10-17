@@ -149,8 +149,8 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             comm = FOIACommunication.objects.create(
                     foia=foia,
                     communication=text,
-                    from_who=request.user.get_full_name(),
-                    to_who=foia.get_to_who(),
+                    from_user=request.user,
+                    to_user=foia.get_to_user(),
                     date=datetime.now(),
                     response=False,
                     )
@@ -288,7 +288,6 @@ class FOIACommunicationViewSet(viewsets.ModelViewSet):
                     'foia',
                     'status',
                     'response',
-                    'delivered',
                     )
 
     filter_class = Filter

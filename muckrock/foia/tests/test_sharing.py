@@ -139,6 +139,7 @@ class TestRequestSharingViews(TestCase):
         self.foia.add_editor(self.editor)
         self.foia.add_viewer(self.viewer)
         self.foia.save()
+        UserFactory(username='MuckrockStaff')
 
     def reset_access_key(self):
         """Simple helper to reset access key betweeen tests"""

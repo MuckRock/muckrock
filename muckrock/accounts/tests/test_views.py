@@ -428,15 +428,19 @@ class TestAccountFunctional(TestCase):
         eq_(get.status_code, 302, 'GET /profile responds with 302 to logged out user.')
         eq_(post.status_code, 302, 'POST /settings reponds with 302 to logged out user.')
 
-    def test_auth_views(self):
+    @patch('stripe.Customer.retrieve')
+    def test_auth_views(self, mock_stripe):
         """Test private views while logged in"""
+        # pylint: disable=unused-argument
         response = http_get_response(reverse('acct-my-profile'), views.profile, self.user)
         eq_(response.status_code, 302, 'Logged in user may view their own profile.')
         response = http_get_response(reverse('acct-settings'), views.profile_settings, self.user)
         eq_(response.status_code, 200, 'Logged in user may view their own settings.')
 
-    def test_settings_view(self):
+    @patch('stripe.Customer.retrieve')
+    def test_settings_view(self, mock_stripe):
         """Test the account settings view"""
+        # pylint: disable=unused-argument
         profile = self.user.profile
         profile_data = {
             'action': 'profile',
@@ -534,6 +538,7 @@ class TestNotificationRead(TestCase):
     """Getting an object view should read its notifications for that user."""
     def setUp(self):
         self.user = UserFactory()
+        UserFactory(username='MuckrockStaff')
 
     def test_get_foia(self):
         """Try getting the detail page for a FOIA Request with an unread notification."""

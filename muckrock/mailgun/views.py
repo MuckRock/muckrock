@@ -17,49 +17,62 @@ import re
 import sys
 import time
 from datetime import datetime
-from email.utils import parseaddr, getaddresses
+from email.utils import getaddresses
 from functools import wraps
-from localflavor.us.us_states import STATE_CHOICES
 
-from muckrock.agency.models import Agency
+from muckrock.agency.models import AgencyEmail
+from muckrock.communication.models import (
+        EmailAddress,
+        EmailCommunication,
+        EmailError,
+        EmailOpen,
+        PhoneNumber,
+        FaxCommunication,
+        FaxError,
+        )
 from muckrock.foia.models import (
         FOIARequest,
         FOIACommunication,
         RawEmail,
-        CommunicationError,
-        CommunicationOpen,
         )
 from muckrock.foia.tasks import classify_status
-from muckrock.mailgun.models import WhitelistDomain
 from muckrock.task.models import (
-        FailedFaxTask,
         OrphanTask,
-        RejectedEmailTask,
         ResponseTask,
         )
 
 logger = logging.getLogger(__name__)
 
 
-def _make_orphan_comm(from_, to_, subject, post, files, foia):
+def _make_orphan_comm(from_email, to_emails, cc_emails,
+        subject, post, files, foia):
     """Make an orphan communication"""
     # pylint: disable=too-many-arguments
-    from_realname, _ = parseaddr(from_)
-    to_ = to_[:255] if to_ else ''
+    if from_email:
+        agencies = from_email.agencies.all()
+    else:
+        agencies = []
+    if len(agencies) == 1:
+        from_user = agencies[0].get_user()
+    else:
+        from_user = None
     comm = FOIACommunication.objects.create(
-            priv_from_who=from_[:255],
-            from_who=from_realname[:255],
-            priv_to_who=to_,
+            from_user=from_user,
             response=True,
             subject=subject[:255],
             date=datetime.now(),
-            full_html=False,
-            delivered='email',
             communication=_get_mail_body(post),
             likely_foia=foia,
             )
+    email_comm = EmailCommunication.objects.create(
+            communication=comm,
+            sent_datetime=datetime.now(),
+            from_email=from_email,
+            )
+    email_comm.to_emails.set(to_emails)
+    email_comm.cc_emails.set(cc_emails)
     RawEmail.objects.create(
-        communication=comm,
+        email=email_comm,
         raw_email='%s\n%s' % (
             post.get('message-headers', ''),
             post.get('body-plain', '')),
@@ -108,19 +121,27 @@ def get_common_webhook_params(function):
     def wrapper(request):
         """Wrapper"""
         comm_id = request.POST.get('comm_id')
-        if comm_id:
-            try:
-                comm = FOIACommunication.objects.get(pk=comm_id)
-                timestamp = request.POST['timestamp']
-                timestamp = datetime.fromtimestamp(int(timestamp))
-                function(request, comm, timestamp)
-            except FOIACommunication.DoesNotExist:
-                logger.warning(
-                        'Communication does not exist for %s: %s',
-                        function.__name__,
-                        comm_id)
+        email_id = request.POST.get('email_id')
+        timestamp = request.POST['timestamp']
+        timestamp = datetime.fromtimestamp(int(timestamp))
+
+        if email_id:
+            email_comm = EmailCommunication.objects.filter(pk=email_id).first()
         else:
-            logger.warning('No comm ID for %s webhook', function.__name__)
+            email_comm = None
+
+        if not email_comm and comm_id:
+            comm = FOIACommunication.objects.filter(pk=comm_id).first()
+            email_comm = comm.emails.last()
+
+        if not email_comm:
+            logger.warning(
+                    'No email comm for %s webhook: %s',
+                    function.__name__,
+                    request.POST,
+                    )
+        else:
+            function(request, email_comm, timestamp)
 
         return HttpResponse('OK')
     return wrapper
@@ -162,50 +183,79 @@ def route_mailgun(request):
             _catch_all(request, email)
     return HttpResponse('OK')
 
+def _parse_email_headers(post):
+    """Parse email headers and return email address models"""
+    from_ = post.get('From', '')
+    to_ = post.get('To') or post.get('to', '')
+    cc_ = post.get('Cc') or post.get('cc', '')
+    from_email = EmailAddress.objects.fetch(from_)
+    to_emails = EmailAddress.objects.fetch_many(to_)
+    cc_emails = EmailAddress.objects.fetch_many(cc_)
+    return from_email, to_emails, cc_emails
+
 
 def _handle_request(request, mail_id):
     """Handle incoming mailgun FOI request messages"""
     # pylint: disable=broad-except
     # pylint: disable=too-many-locals
     post = request.POST
-    from_ = post.get('From', '')
-    to_ = post.get('To') or post.get('to', '')
+    from_email, to_emails, cc_emails = _parse_email_headers(post)
     subject = post.get('Subject') or post.get('subject', '')
 
     try:
-        from_realname, from_email = parseaddr(from_)
         foia = FOIARequest.objects.get(mail_id=mail_id)
 
-        if not _allowed_email(from_email, foia):
+        if from_email is not None:
+            email_allowed = from_email.allowed(foia)
+        else:
+            email_allowed = False
+        if not email_allowed:
             msg, reason = ('Bad Sender', 'bs')
         if foia.block_incoming:
             msg, reason = ('Incoming Blocked', 'ib')
-        if not _allowed_email(from_email, foia) or foia.block_incoming:
-            logger.warning('%s: %s', msg, from_)
-            comm = _make_orphan_comm(from_, to_, subject, post, request.FILES, foia)
+        if not email_allowed or foia.block_incoming:
+            logger.warning('%s: %s', msg, from_email)
+            comm = _make_orphan_comm(
+                    from_email,
+                    to_emails,
+                    cc_emails,
+                    subject,
+                    post,
+                    request.FILES,
+                    foia,
+                    )
             OrphanTask.objects.create(
                 reason=reason,
                 communication=comm,
                 address=mail_id)
             return HttpResponse('WARNING')
 
+        # if this isn't a known email for this agency, add it
+        if not from_email.agencies.filter(pk=foia.agency.pk).exists():
+            AgencyEmail.objects.create(
+                    agency=foia.agency,
+                    email=from_email,
+                    )
+
         comm = FOIACommunication.objects.create(
                 foia=foia,
-                from_who=from_realname[:255],
-                priv_from_who=from_[:255],
-                to_who=foia.user.get_full_name(),
-                priv_to_who=to_[:255],
+                from_user=foia.agency.get_user(),
+                to_user=foia.user,
                 subject=subject[:255],
                 response=True,
                 date=datetime.now(),
-                full_html=False,
-                delivered='email',
                 communication=_get_mail_body(post),
                 )
+        email_comm = EmailCommunication.objects.create(
+                communication=comm,
+                sent_datetime=datetime.now(),
+                from_email=from_email,
+                )
+        email_comm.to_emails.set(to_emails)
+        email_comm.cc_emails.set(cc_emails)
         RawEmail.objects.create(
-            communication=comm,
+            email=email_comm,
             raw_email='%s\n%s' % (post.get('message-headers', ''), post.get('body-plain', '')))
-
         comm.process_attachments(request.FILES)
 
         task = ResponseTask.objects.create(communication=comm)
@@ -214,14 +264,10 @@ def _handle_request(request, mail_id):
         if foia.agency:
             foia.agency.unmark_stale()
 
+        new_cc_emails = [e for e in (to_emails + cc_emails)
+                if e.domain not in ('requests.muckrock.com', 'muckrock.com')]
         foia.email = from_email
-        foia.other_emails = ','.join(
-                email for name, email
-                in getaddresses([post.get('To', ''), post.get('Cc', '')])
-                if email and not email.endswith('muckrock.com'))
-        while len(foia.other_emails) > 255:
-            # drop emails until it fits in db
-            foia.other_emails = foia.other_emails[:foia.other_emails.rindex(',')]
+        foia.cc_emails.set(new_cc_emails)
 
         if foia.status == 'ack':
             foia.status = 'processed'
@@ -230,13 +276,20 @@ def _handle_request(request, mail_id):
 
     except FOIARequest.DoesNotExist:
         logger.warning('Invalid Address: %s', mail_id)
-        foia = None
         try:
             # try to get the foia by the PK before the dash
             foia = FOIARequest.objects.get(pk=mail_id.split('-')[0])
         except FOIARequest.DoesNotExist:
-            pass
-        comm = _make_orphan_comm(from_, to_, subject, post, request.FILES, foia)
+            foia = None
+        comm = _make_orphan_comm(
+                from_email,
+                to_emails,
+                cc_emails,
+                subject,
+                post,
+                request.FILES,
+                foia,
+                )
         OrphanTask.objects.create(
             reason='ia',
             communication=comm,
@@ -261,14 +314,19 @@ def _catch_all(request, address):
     """Handle emails sent to other addresses"""
 
     post = request.POST
-
-    from_ = post.get('From')
-    to_ = post.get('To') or post.get('to')
-    _, from_email = parseaddr(from_)
+    from_email, to_emails, cc_emails = _parse_email_headers(post)
     subject = post.get('Subject') or post.get('subject', '')
 
-    if _allowed_email(from_email):
-        comm = _make_orphan_comm(from_, to_, subject, post, request.FILES, None)
+    if from_email.allowed():
+        comm = _make_orphan_comm(
+                from_email,
+                to_emails,
+                cc_emails,
+                subject,
+                post,
+                request.FILES,
+                None,
+                )
         OrphanTask.objects.create(
             reason='ia',
             communication=comm,
@@ -280,11 +338,10 @@ def _catch_all(request, address):
 @mailgun_verify
 @csrf_exempt
 @get_common_webhook_params
-def bounces(request, communication, timestamp):
+def bounces(request, email_comm, timestamp):
     """Notify when an email is bounced or dropped"""
 
-    foia = communication.foia
-    recipient = request.POST.get('recipient', '')
+    recipient = EmailAddress.objects.fetch(request.POST.get('recipient', ''))
     event = request.POST.get('event', '')
     if event == 'bounced':
         error = request.POST.get('error', '')
@@ -293,16 +350,9 @@ def bounces(request, communication, timestamp):
     else:
         error = ''
 
-    RejectedEmailTask.objects.create(
-            category=event[0],
-            foia=foia,
-            email=recipient,
-            error=error,
-            )
-
-    CommunicationError.objects.create(
-            communication=communication,
-            date=timestamp,
+    EmailError.objects.create(
+            email=email_comm,
+            datetime=timestamp,
             recipient=recipient,
             code=request.POST.get('code', ''),
             error=error,
@@ -314,12 +364,13 @@ def bounces(request, communication, timestamp):
 @mailgun_verify
 @csrf_exempt
 @get_common_webhook_params
-def opened(request, communication, timestamp):
+def opened(request, email_comm, timestamp):
     """Notify when an email has been opened"""
-    CommunicationOpen.objects.create(
-            communication=communication,
-            date=timestamp,
-            recipient=request.POST.get('recipient', ''),
+    recipient = EmailAddress.objects.fetch(request.POST.get('recipient', ''))
+    EmailOpen.objects.create(
+            email=email_comm,
+            datetime=timestamp,
+            recipient=recipient,
             city=request.POST.get('city', ''),
             region=request.POST.get('region', ''),
             country=request.POST.get('country', ''),
@@ -335,10 +386,10 @@ def opened(request, communication, timestamp):
 @mailgun_verify
 @csrf_exempt
 @get_common_webhook_params
-def delivered(_request, communication, timestamp):
+def delivered(_request, email_comm, timestamp):
     """Notify when an email has been delivered"""
-    communication.confirmed = timestamp
-    communication.save()
+    email_comm.confirmed_datetime = timestamp
+    email_comm.save()
 
 
 @csrf_exempt
@@ -358,35 +409,43 @@ def phaxio_callback(request):
         return HttpResponseForbidden()
 
     fax_info = json.loads(request.POST['fax'])
-    comm_id = fax_info['tags']['comm_id']
-    try:
-        comm = FOIACommunication.objects.get(pk=comm_id)
-    except FOIACommunication.DoesNotExist:
-        logger.warning('Fax FOIACommunication does not exist: %s', comm_id)
+    fax_id = fax_info['tags'].get('fax_id')
+    comm_id = fax_info['tags'].get('comm_id')
+    if fax_id:
+        fax_comm = FaxCommunication.objects.filter(pk=fax_id).first()
+    else:
+        fax_comm = None
+
+    if not fax_comm and comm_id:
+        comm = FOIACommunication.objects.filter(pk=comm_id).first()
+        fax_comm = comm.faxes.last()
+
+    if not fax_comm:
+        logger.warning(
+                'No fax comm for phaxio callback: %s',
+                request.POST,
+                )
     else:
         if 'completed_at' in fax_info:
             date = datetime.fromtimestamp(int(fax_info['completed_at']))
         else:
             date = datetime.now()
         if request.POST['success'] == 'true':
-            comm.confirmed = date
-            comm.save()
+            fax_comm.confirmed_datetime = date
+            fax_comm.save()
         else:
             for recipient in fax_info['recipients']:
-                number = recipient['number']
-                reason = recipient['error_code']
-                error = recipient['error_type']
-                FailedFaxTask.objects.create(
-                        communication=comm,
-                        reason=reason,
+                number = PhoneNumber.objects.get_or_create(
+                        number=recipient['number'],
+                        defaults={'type': 'fax'},
                         )
-                CommunicationError.objects.create(
-                        communication=comm,
-                        date=date,
+                FaxError.objects.create(
+                        fax=fax_comm,
+                        datetime=date,
                         recipient=number,
-                        error=error,
-                        event='failed fax',
-                        reason=reason,
+                        error_type=recipient['error_type'],
+                        error_code=recipient['error_code'],
+                        error_id=int(recipient['error_id']),
                         )
 
     return HttpResponse('OK')
@@ -449,44 +508,3 @@ def _forward(post, files, title='', extra_content='', info=False):
         email.attach(file_.name, file_.read(), file_.content_type)
 
     email.send(fail_silently=False)
-
-
-def _allowed_email(email, foia=None):
-    """Is this an allowed email?"""
-    # pylint: disable=too-many-return-statements
-
-    email = email.lower()
-    allowed_tlds = ['.%s.us' % a.lower() for (a, _) in STATE_CHOICES
-            if a not in ('AS', 'DC', 'GU', 'MP', 'PR', 'VI')]
-    allowed_tlds.extend(['.gov', '.mil'])
-
-    # from the same domain as the FOIA email
-    if (foia and foia.email and '@' in foia.email and
-            email.endswith(foia.email.split('@')[1].lower())):
-        return True
-
-    # the email is a known email for this FOIA's agency
-    if (foia and foia.agency and email in
-            [i.lower() for i in foia.agency.get_other_emails()]):
-        return True
-
-    # the email is a known email for this FOIA
-    if foia and email in [i.lower() for i in foia.get_other_emails()]:
-        return True
-
-    # it is from any known government TLD
-    if any(email.endswith(tld) for tld in allowed_tlds):
-        return True
-
-    # if not associated with any FOIA,
-    # checked if the email is known for any agency
-    if not foia and (Agency.objects.filter(email__iexact=email).exists() or
-            Agency.objects.filter(other_emails__icontains=email).exists()):
-        return True
-
-    # check the email domain against the whitelist
-    if '@' in email and WhitelistDomain.objects.filter(
-            domain__iexact=email.split('@')[1]).exists():
-        return True
-
-    return False

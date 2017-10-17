@@ -9,7 +9,13 @@ import datetime
 import factory
 
 from muckrock.accounts.models import Profile, Notification, Statistics
-from muckrock.agency.models import Agency, STALE_DURATION
+from muckrock.agency.models import (
+        Agency,
+        AgencyEmail,
+        AgencyPhone,
+        STALE_DURATION,
+        )
+from muckrock.communication.models import EmailAddress
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.foia.models import (
         FOIARequest,
@@ -36,6 +42,7 @@ class ProfileFactory(factory.django.DjangoModelFactory):
     user = factory.SubFactory('muckrock.factories.UserFactory', profile=None)
     acct_type = 'basic'
     date_update = datetime.datetime.now()
+    customer_id = "cus_RTW3KxBMCknuhB"
 
 
 class UserFactory(factory.django.DjangoModelFactory):
@@ -95,12 +102,60 @@ class AgencyFactory(factory.django.DjangoModelFactory):
     slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
     jurisdiction = factory.SubFactory('muckrock.factories.JurisdictionFactory')
     status = 'approved'
+    email = factory.RelatedFactory(
+            'muckrock.factories.AgencyEmailFactory',
+            'agency',
+            )
+    fax = factory.RelatedFactory(
+            'muckrock.factories.AgencyPhoneFactory',
+            'agency',
+            request_type='primary',
+            phone__type='fax',
+            )
+
+    @factory.post_generation
+    def other_emails(self, create, extracted, **kwargs):
+        """Adds M2M other emails"""
+        # pylint: disable=unused-argument
+        if create and extracted:
+            # A list of emails were passed in, use them
+            for email in EmailAddress.objects.fetch_many(extracted):
+                AgencyEmailFactory(
+                        agency=self,
+                        email=email,
+                        request_type='primary',
+                        email_type='cc',
+                        )
+
+
+class AgencyEmailFactory(factory.django.DjangoModelFactory):
+    """A factory for linking agencies to emails"""
+    class Meta:
+        model = AgencyEmail
+
+    agency = factory.SubFactory('muckrock.factories.AgencyFactory')
+    email = factory.SubFactory('muckrock.communication.factories.EmailAddressFactory')
+    request_type = 'primary'
+    email_type = 'to'
+
+
+class AgencyPhoneFactory(factory.django.DjangoModelFactory):
+    """A factory for linking agencies to faxes"""
+    class Meta:
+        model = AgencyPhone
+
+    agency = factory.SubFactory('muckrock.factories.AgencyFactory')
+    phone = factory.SubFactory('muckrock.communication.factories.PhoneNumberFactory')
+    request_type = 'none'
 
 
 class AppealAgencyFactory(AgencyFactory):
     """A factory for creating an Agency that accepts email appeals."""
-    email = factory.Faker('email')
-    can_email_appeals = True
+    email = factory.RelatedFactory(
+            'muckrock.factories.AgencyEmailFactory',
+            'agency',
+            request_type='appeal',
+            )
 
 
 class FOIARequestFactory(factory.django.DjangoModelFactory):
@@ -116,6 +171,17 @@ class FOIARequestFactory(factory.django.DjangoModelFactory):
         'muckrock.factories.AgencyFactory',
         jurisdiction=factory.SelfAttribute('..jurisdiction')
     )
+    email = factory.SubFactory(
+            'muckrock.communication.factories.EmailAddressFactory',
+            )
+
+    @factory.post_generation
+    def cc_emails(self, create, extracted, **kwargs):
+        """Adds M2M cc emails"""
+        # pylint: disable=unused-argument
+        if create and extracted:
+            # A list of emails were passed in, use them
+            self.cc_emails.set(EmailAddress.objects.fetch_many(extracted))
 
 
 class FOIACommunicationFactory(factory.django.DjangoModelFactory):
@@ -124,10 +190,13 @@ class FOIACommunicationFactory(factory.django.DjangoModelFactory):
         model = FOIACommunication
 
     foia = factory.SubFactory(FOIARequestFactory)
-    from_who = factory.Sequence(lambda n: "From: %d" % n)
-    priv_from_who = 'Test Sender <test@muckrock.com>'
+    from_user = factory.SubFactory(UserFactory)
+    to_user = factory.SubFactory(UserFactory)
     date = factory.LazyAttribute(lambda obj: datetime.datetime.now())
-    rawemail = factory.RelatedFactory('muckrock.factories.RawEmailFactory', 'communication')
+    email = factory.RelatedFactory(
+            'muckrock.communication.factories.EmailCommunicationFactory',
+            'communication',
+            )
 
 
 class FOIAMultiRequestFactory(factory.django.DjangoModelFactory):
@@ -154,7 +223,9 @@ class RawEmailFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = RawEmail
 
-    communication = factory.SubFactory(FOIACommunicationFactory, rawemail=None)
+    email = factory.SubFactory(
+            'muckrock.communication.factories.EmailCommunicationFactory',
+            )
     raw_email = factory.Faker('paragraph')
 
 

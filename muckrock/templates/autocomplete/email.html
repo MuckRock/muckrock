@@ -1,0 +1,12 @@
+<span class="choice" data-value="{{choice.pk}}">
+    {% if choice.name %}
+        <div class="choice__text">
+            <p class="nomargin">{{choice.name}}</p>
+            <p class="small nomargin grey">{{choice.email}}</p>
+        </div>
+    {% else %}
+        <div class="choice__text">
+            <p class="nomargin">{{choice.email}}</p>
+        </div>
+    {% endif %}
+</span>
