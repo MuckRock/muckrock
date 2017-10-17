@@ -51,13 +51,21 @@ class Question(models.Model):
 
     def answer_authors(self):
         """Returns a list of users who have answered the question."""
-        authors = self.answers.order_by('user').values('user').distinct()
-        author_ids = [author['user'] for author in authors]
-        return User.objects.filter(id__in=author_ids)
+        return (User.objects
+                .filter(
+                    answer__question=self,
+                    is_active=True,
+                    )
+                .distinct()
+                )
 
     class Meta:
         # pylint: disable=too-few-public-methods
         ordering = ['-date']
+        permissions = (
+                ('post', 'Can post questions and answers'),
+                ('block', 'Can block other users'),
+                )
 
 
 class Answer(models.Model):
@@ -72,6 +80,10 @@ class Answer(models.Model):
 
     def __unicode__(self):
         return "Answer to %s" % self.question.title
+
+    def get_absolute_url(self):
+        """The url for this object"""
+        return '%s#answer-%s' % (self.question.get_absolute_url(), self.pk)
 
     def save(self, *args, **kwargs):
         """Update the questions answer date when you save the answer"""

@@ -409,7 +409,7 @@ def profile(request, username=None):
             return redirect('acct-login')
         else:
             return redirect('acct-profile', username=request.user.username)
-    user = get_object_or_404(User, username=username)
+    user = get_object_or_404(User, username=username, is_active=True)
     if (request.method == "POST" and
             request.user.is_staff and
             request.POST.get('action') == 'cancel-pro'):

@@ -2,12 +2,17 @@
 Views for the QandA application
 """
 
+from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.models import User
+from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.db.models import Count, Prefetch
+from django.http import Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
+from django.template.loader import render_to_string
 from django.views.generic.detail import DetailView
 
 import actstream
@@ -37,13 +42,12 @@ class QuestionList(MRSearchFilterListView):
     default_order = 'desc'
 
     def get_queryset(self):
-        """Hides hidden jurisdictions from list"""
-        objects = super(QuestionList, self).get_queryset()
-        objects = (objects
+        """Hide inactive users and prefetch"""
+        return (super(QuestionList, self).get_queryset()
+                .filter(user__is_active=True)
                 .select_related('user')
                 .prefetch_related('answers')
                 )
-        return objects
 
     def get_context_data(self, **kwargs):
         """Adds an info message to the context"""
@@ -72,15 +76,19 @@ class Detail(DetailView):
 
     def get_queryset(self):
         """Select related and prefetch the query set"""
-        return Question.objects.select_related(
-                'foia',
-                'foia__agency',
-                'foia__agency__jurisdiction',
-                'foia__jurisdiction',
-                'foia__jurisdiction__parent',
-                'foia__jurisdiction__parent__parent',
-                'foia__user',
-                )
+        return (Question.objects
+                .select_related(
+                    'foia',
+                    'foia__agency',
+                    'foia__agency__jurisdiction',
+                    'foia__jurisdiction',
+                    'foia__jurisdiction__parent',
+                    'foia__jurisdiction__parent__parent',
+                    'foia__user',
+                    )
+                .filter(
+                    user__is_active=True,
+                    ))
 
     def get(self, request, *args, **kwargs):
         """Mark any unread notifications for this object as read."""
@@ -144,7 +152,10 @@ class Detail(DetailView):
         context = super(Detail, self).get_context_data(**kwargs)
         context['sidebar_admin_url'] = reverse('admin:qanda_question_change',
             args=(context['object'].pk,))
-        context['answers'] = context['object'].answers.select_related('user')
+        context['answers'] = (context['object'].answers
+                .filter(user__is_active=True)
+                .select_related('user')
+                )
         context['answer_form'] = AnswerForm()
         foia = self.object.foia
         if foia is not None:
@@ -154,7 +165,7 @@ class Detail(DetailView):
         return context
 
 
-@login_required
+@permission_required('qanda.post')
 def create_question(request):
     """Create a question"""
     if request.method == 'POST':
@@ -203,7 +214,7 @@ def follow_new(request):
     return redirect('question-index')
 
 
-@login_required
+@permission_required('qanda.post')
 def create_answer(request, slug, idx):
     """Create an answer"""
 
@@ -282,3 +293,60 @@ class QuestionViewSet(viewsets.ModelViewSet):
                 {'status': 'Missing data - Please supply answer'},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+
+@permission_required('qanda.block')
+def block_user(request, model, model_pk):
+    """Block the posts author from the site"""
+    return _block_or_report(request, model, model_pk, block=True)
+
+
+def report_spam(request, model, model_pk):
+    """Report the post as being spam"""
+    return _block_or_report(request, model, model_pk, block=False)
+
+
+def _block_or_report(request, model, model_pk, block):
+    """Common code for blocking a user or reporting spam"""
+
+    if model == 'question':
+        obj = get_object_or_404(Question.objects.select_related('user'), pk=model_pk)
+        comment = obj.question
+    elif model == 'answer':
+        obj = get_object_or_404(Answer.objects.select_related('user'), pk=model_pk)
+        comment = obj.answer
+    else:
+        raise Http404
+
+    if block:
+        obj.user.is_active = False
+        obj.user.save()
+        subject = '%s blocked as spammer' % obj.user.username
+    else:
+        subject = '%s reported as spam' % obj.user.username
+
+    send_mail(
+            subject,
+            render_to_string(
+                'text/qanda/spam.txt',
+                {
+                    'url': obj.get_absolute_url(),
+                    'moderator': request.user,
+                    'comment': comment,
+                    'type': 'block' if block else 'report',
+                    'muckrock_url': settings.MUCKROCK_URL,
+                    },
+                ),
+            'info@muckrock.com',
+            ['info@muckrock.com'],
+            )
+
+    if block:
+        messages.success(request, 'User succesfully blocked')
+    else:
+        messages.success(request, 'Comment succesfully reported as spam')
+
+    if 'next' in request.GET:
+        return redirect(request.GET['next'])
+    else:
+        return redirect('question-index')
