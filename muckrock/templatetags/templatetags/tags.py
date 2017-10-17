@@ -236,12 +236,14 @@ def markdown_filter(text, _safe=None):
         u'h6',
         u'p',
         u'img',
-        u'iframe'
+        u'iframe',
+        u'a',
     ]
     allowed_attributes = bleach.ALLOWED_ATTRIBUTES.copy()
     allowed_attributes.update({
         'iframe': ['src', 'width', 'height', 'frameborder', 'marginheight', 'marginwidth'],
         'img': ['src', 'alt', 'title', 'width', 'height'],
+        'a': ['href', 'title', 'name'],
     })
     # allows bleaching to be avoided
     if _safe == 'safe':
