@@ -272,7 +272,6 @@ class StaffDigest(Digest):
 
     def get_comms(self, start, end):
         """Returns communication data over a date range"""
-        received = FOIACommunication.objects.filter(date__range=[start, end], response=True)
         filters = Q(
                 communication__date__range=[start, end],
                 communication__response=False,
@@ -292,6 +291,8 @@ class StaffDigest(Digest):
             'fax': delivered_by['fax'] * cost_per['fax'],
             'mail': delivered_by['mail'] * cost_per['mail'],
         }
+        received = FOIACommunication.objects.filter(date__range=[start, end], response=True)
+        sent = FOIACommunication.objects.filter(date__range=[start, end], response=False)
         return {
             'sent': sent.count(),
             'received': received.count(),

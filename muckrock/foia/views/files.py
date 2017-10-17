@@ -12,7 +12,7 @@ from djangosecure.decorators import frame_deny_exempt
 from muckrock.foia.models import FOIAFile, FOIARequest
 from muckrock.views import PaginationMixin
 
-# TODO remove drag n drop
+# remove drag n drop
 @user_passes_test(lambda u: u.is_staff)
 def drag_drop(request):
     """Drag and drop large files into the system"""

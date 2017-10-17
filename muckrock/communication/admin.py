@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 """Admin registration for communication models"""
 
-from django import forms
 from django.contrib import admin
 from django.core.urlresolvers import reverse
 
-from autocomplete_light import shortcuts as autocomplete_light
 from reversion.admin import VersionAdmin
 
 from muckrock.communication.models import (
@@ -145,7 +143,6 @@ class FaxCommunicationInline(admin.StackedInline):
         # pylint: disable=no-self-use
         return instance.errors.count() > 0
     error.boolean = True
-
 
 
 class MailCommunicationInline(ReadOnlyMixin, admin.StackedInline):
