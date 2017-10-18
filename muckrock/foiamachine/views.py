@@ -157,9 +157,9 @@ class FoiaMachineRequestCreateView(LoginRequiredMixin, CreateView):
         if not agency:
             return receiver_string
         receiver_string += unicode(agency)
-        agency_email = agency.get_email()
+        agency_email = agency.get_emails().first()
         if agency_email:
-            receiver_string += ' <%s>' % agency_email
+            receiver_string += ' <%s>' % agency_email.email
         return receiver_string
 
     def form_valid(self, form):

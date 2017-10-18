@@ -55,6 +55,7 @@ from muckrock.accounts.models import (
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.accounts.utils import validate_stripe_email
 from muckrock.agency.models import Agency
+from muckrcok.communication.models import EmailAddress
 from muckrock.foia.models import FOIARequest
 from muckrock.message.email import TemplateEmail
 from muckrock.news.models import Article
@@ -650,11 +651,17 @@ def agency_redirect_login(
             slug=foia_slug,
             pk=foia_idx,
             )
-    valid_emails = agency.get_all_known_emails()
 
     if request.method == 'POST':
         email = request.POST.get('email', '')
-        if email.lower() in valid_emails:
+        # valid if this email is associated with the agency
+        valid = (EmailAddress.objects
+                .fetch(email)
+                .agencies
+                .filter(id=agency.pk)
+                .exists()
+                )
+        if valid:
             msg = TemplateEmail(
                     subject='Login Token',
                     from_email='info@muckrock.com',
@@ -680,7 +687,13 @@ def agency_redirect_login(
     agency_user = authed and request.user.profile.acct_type == 'agency'
     agency_match = agency_user and request.user.profile.agency == agency
     email = request.GET.get('email', '')
-    valid = email.lower() in valid_emails
+    # valid if this email is associated with the agency
+    valid = (EmailAddress.objects
+            .fetch(email)
+            .agencies
+            .filter(id=agency.pk)
+            .exists()
+            )
 
     if agency_match:
         return redirect(foia)
