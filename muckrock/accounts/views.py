@@ -55,7 +55,7 @@ from muckrock.accounts.models import (
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.accounts.utils import validate_stripe_email
 from muckrock.agency.models import Agency
-from muckrcok.communication.models import EmailAddress
+from muckrock.communication.models import EmailAddress
 from muckrock.foia.models import FOIARequest
 from muckrock.message.email import TemplateEmail
 from muckrock.news.models import Article
