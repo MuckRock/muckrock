@@ -6,8 +6,9 @@ import re
 import resource
 from email.utils import parseaddr, getaddresses
 import traceback
+from itertools import islice
 
-from django.db import migrations
+from django.db import migrations, transaction
 from django.contrib.auth.models import User
 
 
@@ -60,7 +61,7 @@ def migrate_requests(apps, schema_editor):
         if i % 1000 == 0:
             print '%d%%' % (100 * (i / float(total)))
         i += 1
-        if foia.old_email:
+        if foia.old_email and not (foia.email or foia.fax):
             if '@' in foia.old_email:
                 try:
                     email_addr = fetch(EmailAddress.objects, foia.old_email)
@@ -80,7 +81,7 @@ def migrate_requests(apps, schema_editor):
                     print 'ERROR: bad fax %s - %s - %s' % (foia.pk, foia.title, foia.old_email)
             else:
                 print('What is this?: %s - %s - %s - %s' % (foia.pk, foia.title, foia.status, foia.old_email))
-        if foia.other_emails:
+        if foia.other_emails and not foia.cc_emails.exists():
             for email in email_separator_re.split(foia.other_emails):
                 if not email:
                     continue
@@ -105,101 +106,110 @@ def migrate_comms(apps, schema_editor):
     EmailOpen = apps.get_model('communication', 'EmailOpen')
 
     i = 0
+    chunk_size = 1000
     total = FOIACommunication.objects.count()
-    for comm in FOIACommunication.objects.iterator():
-        if i % 10000 == 0:
-            print '%d%%' % (100 * (i / float(total)))
-        i += 1
-        try:
-            if comm.delivered == 'email':
-                from_email = None
-                to_emails = []
+    itr = FOIACommunication.objects.iterator()
+    while True:
+
+        print '%.1f%%' % (100 * (i / float(total)))
+        i += chunk_size
+
+        comms = list(islice(itr, chunk_size))
+        if not comms:
+            break
+        with transaction.atomic():
+            for comm in comms:
                 try:
-                    if comm.priv_from_who:
-                        from_email = fetch(EmailAddress.objects, comm.priv_from_who)
-                except ValueError as exc:
-                    print 'ERROR priv_from_who: %s - %s - %s' % (comm.pk, comm.priv_from_who, exc.args[0])
-                try:
-                    to_emails = fetch_many(EmailAddress.objects, comm.priv_to_who)
-                except ValueError as exc:
-                    print 'ERROR priv_to_who: %s - %s - %s' % (comm.pk, comm.priv_to_who, exc.args[0])
-                email = EmailCommunication.objects.create(
-                        communication=comm,
-                        sent_datetime=comm.date,
-                        confirmed_datetime=comm.confirmed,
-                        from_email=from_email,
-                        )
-                email.to_emails.set(to_emails)
-                try:
-                    comm.rawemail.email = email
-                    comm.rawemail.save()
-                except RawEmail.DoesNotExist:
-                    pass
-                for open_ in comm.opens.all():
-                    EmailOpen.objects.create(
-                            email=email,
-                            datetime=open_.date,
-                            recipient=fetch(EmailAddress.objects, open_.recipient),
-                            city=open_.city,
-                            region=open_.region,
-                            country=open_.country,
-                            client_type=open_.client_type,
-                            client_name=open_.client_name,
-                            client_os=open_.client_os,
-                            device_type=open_.device_type,
-                            user_agent=open_.user_agent,
-                            ip_address=open_.ip_address,
-                            )
-                for error in comm.errors.all():
-                    try:
-                        if error.recipient:
-                            recipient = fetch(EmailAddress.objects, error.recipient)
-                            EmailError.objects.create(
+                    if comm.delivered == 'email' and not comm.emails.exists():
+                        from_email = None
+                        to_emails = []
+                        try:
+                            if comm.priv_from_who:
+                                from_email = fetch(EmailAddress.objects, comm.priv_from_who)
+                        except ValueError as exc:
+                            print 'ERROR priv_from_who: %s - %s - %s' % (comm.pk, comm.priv_from_who, exc.args[0])
+                        try:
+                            to_emails = fetch_many(EmailAddress.objects, comm.priv_to_who)
+                        except ValueError as exc:
+                            print 'ERROR priv_to_who: %s - %s - %s' % (comm.pk, comm.priv_to_who, exc.args[0])
+                        email = EmailCommunication.objects.create(
+                                communication=comm,
+                                sent_datetime=comm.date,
+                                confirmed_datetime=comm.confirmed,
+                                from_email=from_email,
+                                )
+                        email.to_emails.set(to_emails)
+                        try:
+                            comm.rawemail.email = email
+                            comm.rawemail.save()
+                        except RawEmail.DoesNotExist:
+                            pass
+                        for open_ in comm.opens.all():
+                            EmailOpen.objects.create(
                                     email=email,
+                                    datetime=open_.date,
+                                    recipient=fetch(EmailAddress.objects, open_.recipient),
+                                    city=open_.city,
+                                    region=open_.region,
+                                    country=open_.country,
+                                    client_type=open_.client_type,
+                                    client_name=open_.client_name,
+                                    client_os=open_.client_os,
+                                    device_type=open_.device_type,
+                                    user_agent=open_.user_agent,
+                                    ip_address=open_.ip_address,
+                                    )
+                        for error in comm.errors.all():
+                            try:
+                                if error.recipient:
+                                    recipient = fetch(EmailAddress.objects, error.recipient)
+                                    EmailError.objects.create(
+                                            email=email,
+                                            datetime=error.date,
+                                            recipient=recipient,
+                                            code=error.code,
+                                            error=error.error,
+                                            event=error.event,
+                                            reason=error.reason,
+                                            )
+                            except ValueError as exc:
+                                print 'ERROR recipient: %s - %s - %s' % (comm.pk, error.recipient, exc.args[0])
+                    elif comm.delivered == 'fax' and not comm.faxes.exists():
+                        fax = FaxCommunication.objects.create(
+                                communication=comm,
+                                sent_datetime=comm.date,
+                                confirmed_datetime=comm.confirmed,
+                                fax_id=comm.fax_id,
+                                )
+                        for error in comm.errors.all():
+                            if error.recipient:
+                                recipient, _ = PhoneNumber.objects.get_or_create(number=error.recipient)
+                            else:
+                                recipient = None
+                            FaxError.objects.create(
+                                    fax=fax,
                                     datetime=error.date,
                                     recipient=recipient,
-                                    code=error.code,
-                                    error=error.error,
-                                    event=error.event,
-                                    reason=error.reason,
+                                    error_type=error.error[:255],
+                                    error_code=error.reason,
                                     )
-                    except ValueError as exc:
-                        print 'ERROR recipient: %s - %s - %s' % (comm.pk, error.recipient, exc.args[0])
-            elif comm.delivered == 'fax':
-                fax = FaxCommunication.objects.create(
-                        communication=comm,
-                        sent_datetime=comm.date,
-                        confirmed_datetime=comm.confirmed,
-                        fax_id=comm.fax_id,
-                        )
-                for error in comm.errors.all():
-                    if error.recipient:
-                        recipient, _ = PhoneNumber.objects.get_or_create(number=error.recipient)
-                    else:
-                        recipient = None
-                    FaxError.objects.create(
-                            fax=fax,
-                            datetime=error.date,
-                            recipient=recipient,
-                            error_type=error.error[:255],
-                            error_code=error.reason,
-                            )
-            elif comm.delivered == 'mail':
-                MailCommunication.objects.create(
-                        communication=comm,
-                        sent_datetime=comm.date,
-                        )
-            elif comm.delivered == 'web':
-                WebCommunication.objects.create(
-                        communication=comm,
-                        sent_datetime=comm.date,
-                        )
-        except Exception as exc:
-            print "UNCAUGHT EXCEPTION: %s" % comm.pk
-            traceback.print_exc()
+                    elif comm.delivered == 'mail' and not comm.mails.exists():
+                        MailCommunication.objects.create(
+                                communication=comm,
+                                sent_datetime=comm.date,
+                                )
+                    elif comm.delivered == 'web' and not comm.web_comms.exists():
+                        WebCommunication.objects.create(
+                                communication=comm,
+                                sent_datetime=comm.date,
+                                )
+                except Exception as exc:
+                    print "UNCAUGHT EXCEPTION: %s" % comm.pk
+                    traceback.print_exc()
 
 
 class Migration(migrations.Migration):
+    atomic = False
 
     dependencies = [
         ('foia', '0037_auto_20171010_1007'),
@@ -207,6 +217,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(migrate_requests, lambda a, s: None),
+        migrations.RunPython(migrate_requests, lambda a, s: None, atomic=True),
         migrations.RunPython(migrate_comms, lambda a, s: None),
     ]
