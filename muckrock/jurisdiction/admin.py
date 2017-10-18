@@ -62,16 +62,35 @@ class JurisdictionAdmin(VersionAdmin):
     inlines = [LawInline]
     filter_horizontal = ('holidays', )
     fieldsets = (
-        (None, {
-            'fields': ('name', 'slug', 'abbrev', 'level', 'parent', 'hidden', 'image',
-                       'image_attr_line', 'public_notes')
-        }),
-        ('Options for states/federal', {
-            'classes': ('collapse',),
-            'fields': ('days', 'observe_sat', 'holidays', 'use_business_days',
-                       'intro', 'law_name', 'waiver', 'has_appeal', 'law_analysis')
-        }),
-    )
+            (None, {
+                'fields': (
+                    'name',
+                    'slug',
+                    'abbrev',
+                    'level',
+                    'parent',
+                    'hidden',
+                    'image',
+                    'image_attr_line',
+                    'public_notes',
+                    'aliases',
+                    ),
+                }),
+            ('Options for states/federal', {
+                'classes': ('collapse',),
+                'fields': (
+                    'days',
+                    'observe_sat',
+                    'holidays',
+                    'use_business_days',
+                    'intro',
+                    'law_name',
+                    'waiver',
+                    'has_appeal',
+                    'law_analysis',
+                    ),
+                }),
+            )
     formats = ['xls', 'csv']
 
     def get_urls(self):

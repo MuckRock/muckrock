@@ -74,6 +74,7 @@ class Jurisdiction(models.Model, RequestHelper):
     image = ThumbnailerImageField(upload_to='jurisdiction_images', blank=True, null=True)
     image_attr_line = models.CharField(blank=True, max_length=255, help_text='May use html')
     public_notes = models.TextField(blank=True, help_text='May use html')
+    aliases = models.TextField(blank=True)
 
     # non local
     days = models.PositiveSmallIntegerField(blank=True, null=True, help_text='How many days do they'
