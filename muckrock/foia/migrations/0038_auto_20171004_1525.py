@@ -108,6 +108,8 @@ def migrate_comms(apps, schema_editor):
     i = 0
     chunk_size = 1000
     total = FOIACommunication.objects.count()
+    if total == 0:
+        return
     itr = FOIACommunication.objects.iterator()
     while True:
 
