@@ -3,23 +3,25 @@
 {% block content %}
 <div class="notifications detail">
     <header class="notifications__header">
+        {% with unread_count=unread_notifications.count %}
         <span class="notifications__title">
             <h1>{{title}}</h1>
             <ul class="nostyle inline">
                 <li><a href="{% url 'acct-notifications-unread' %}">
-                    <span class="counter {% if unread_notifications.count > 0 %}blue{% endif %}">{{unread_notifications.count}}</span> Unread
+                    <span class="counter {% if unread_count > 0 %}blue{% endif %}">{{unread_count}}</span> Unread
                 </a></li>
                 <li><a href="{% url 'acct-notifications' %}">All Notifications</a></li>
             </ul>
         </span>
         <form method="post">
             {% csrf_token %}
-            {% if unread_notifications.count > 0 %}
+            {% if unread_count > 0 %}
             <button type="submit" name="action" value="mark_all_read" class="button">Mark all as read</button>
             {% else %}
             <button type="submit" name="action" value="mark_all_read" class="button" disabled>Mark all as read</button>
             {% endif %}
         </form>
+        {% endwith %}
     </header>
     {% if notifications|length > 0 %}
     {% if page_obj.paginator.num_pages > 1 %}
@@ -27,7 +29,7 @@
     {% endif %}
     <ul class="nostyle notifications__list">
     {% for notification in notifications %}
-        <li {% if not notification.read %}class="unread"{% endif %}>{% include 'lib/pattern/notification.html' %}</li>
+        <li {% if not notification.read %}class="unread"{% endif %}>{% include 'lib/pattern/notification.html' with disable_autologin=True %}</li>
     {% endfor %}
     </ul>
     {% if page_obj.paginator.count > 10 %}

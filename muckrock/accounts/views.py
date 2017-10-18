@@ -572,9 +572,16 @@ class NotificationList(ListView):
 
     def get_queryset(self):
         """Return all notifications for the user making the request."""
-        user = self.request.user
-        notifications = super(NotificationList, self).get_queryset()
-        return notifications.for_user(user).order_by('-datetime')
+        return (super(NotificationList, self)
+                .get_queryset()
+                .for_user(self.request.user)
+                .order_by('-datetime')
+                .select_related('action')
+                .prefetch_related(
+                    'action__actor',
+                    'action__target',
+                    'action__action_object',
+                    ))
 
     def get_paginate_by(self, queryset):
         """Paginates list by the return value"""
