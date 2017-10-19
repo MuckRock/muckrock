@@ -69,14 +69,22 @@ class EmailAddress(models.Model):
     """An email address"""
     email = models.EmailField(unique=True)
     name = models.CharField(blank=True, max_length=255)
+    status = models.CharField(
+            max_length=5,
+            choices=(('good', 'Good'), ('error', 'Error')),
+            default='good',
+            )
 
     objects = EmailAddressQuerySet.as_manager()
 
     def __unicode__(self):
         if self.name:
-            return '"%s" <%s>' % (self.name, self.email)
+            val = '"%s" <%s>' % (self.name, self.email)
         else:
-            return self.email
+            val = self.email
+        if self.status == 'error':
+            val += ' (error)'
+        return val
 
     @property
     def domain(self):
@@ -130,9 +138,17 @@ class PhoneNumber(models.Model):
             choices=PHONE_TYPES,
             default='phone',
             )
+    status = models.CharField(
+            max_length=5,
+            choices=(('good', 'Good'), ('error', 'Error')),
+            default='good',
+            )
 
     def __unicode__(self):
-        return self.number.as_national
+        if self.status == 'error':
+            return '%s (%s)' % (self.number.as_national, self.status)
+        else:
+            return self.number.as_national
 
     @property
     def as_e164(self):

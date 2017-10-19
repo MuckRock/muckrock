@@ -361,6 +361,13 @@ def bounces(request, email_comm, timestamp):
             reason=request.POST.get('reason', ''),
             )
 
+    if recipient:
+        recipient.status = 'error'
+        recipient.save()
+
+    # resubmit foia, with new contact info
+    email_comm.communication.foia.submit(clear=True)
+
 
 @mailgun_verify
 @csrf_exempt
@@ -412,6 +419,7 @@ def phaxio_callback(request):
     fax_info = json.loads(request.POST['fax'])
     fax_id = fax_info['tags'].get('fax_id')
     comm_id = fax_info['tags'].get('comm_id')
+    error_count = fax_info['tags'].get('error_count')
     if fax_id:
         fax_comm = FaxCommunication.objects.filter(pk=fax_id).first()
     else:
@@ -448,6 +456,20 @@ def phaxio_callback(request):
                         error_code=recipient['error_code'],
                         error_id=int(recipient['error_id']),
                         )
+                # the following phaxio error IDs all correspond to
+                # Phone Number Not Operational - all other errors are considered
+                # temporary for now
+                perm_error_ids = set([34, 47, 49, 91, 107, 109, 116, 123])
+                temp_failure = int(recipient['error_id']) not in perm_error_ids
+                if temp_failure and error_count < 4:
+                    # retry with exponential back off
+                    fax_comm.communication.foia_submit(fax_error_count=error_count + 1)
+                else:
+                    # for permanant failures, mark the number as bad and resubmit with fall back info
+                    number.status = 'error'
+                    number.save()
+                    # resubmit foia, with new contact info
+                    fax_comm.communication.foia.submit(clear=True)
 
     return HttpResponse('OK')
 

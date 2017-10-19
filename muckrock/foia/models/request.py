@@ -802,7 +802,18 @@ class FOIARequest(models.Model):
                 kwargs.get('thanks'),
                 )
 
-        send_fax.apply_async(args=[comm.pk, comm.subject, body])
+        error_count = kwargs.get('fax_error_count', 0)
+        if error_count > 0:
+            # after the first error, wait for 3 hours,
+            # then double the time for every additional error
+            countdown = 60 * 60 * 3 * (2 ** error_count)
+        else:
+            countdown = 0
+
+        send_fax.apply_async(
+                args=[comm.pk, comm.subject, body, error_count],
+                countdown=countdown,
+                )
 
     def _send_snail_mail(self, comm, **kwargs):
         """Send the message as a snail mail"""

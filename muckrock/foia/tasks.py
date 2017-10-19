@@ -313,7 +313,7 @@ def classify_status(task_pk, **kwargs):
     name='muckrock.foia.tasks.send_fax',
     rate_limit='15/m',
     )
-def send_fax(comm_id, subject, body, **kwargs):
+def send_fax(comm_id, subject, body, error_count, **kwargs):
     """Send a fax using the Phaxio API"""
     api = PhaxioApi(
             settings.PHAXIO_KEY,
@@ -353,8 +353,10 @@ def send_fax(comm_id, subject, body, **kwargs):
                 batch_delay=settings.PHAXIO_BATCH_DELAY,
                 batch_collision_avoidance=True,
                 callback_url=callback_url,
-                **{'tag[fax_id]': fax.pk}
-                )
+                **{
+                    'tag[fax_id]': fax.pk,
+                    'tag[error_count]': error_count,
+                    })
     except PhaxioError as exc:
         logger.error(
                 'Send fax error, will retry: %s',

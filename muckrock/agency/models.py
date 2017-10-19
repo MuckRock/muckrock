@@ -237,6 +237,7 @@ class Agency(models.Model, RequestHelper):
     def get_emails(self, request_type='primary', email_type='to'):
         """Get the specified type of email addresses for this agency"""
         return self.emails.filter(
+                status='good',
                 agencyemail__request_type=request_type,
                 agencyemail__email_type=email_type,
                 )
@@ -245,6 +246,7 @@ class Agency(models.Model, RequestHelper):
         """Get the contact fax numbers"""
         return self.phones.filter(
                 type='fax',
+                status='good',
                 agencyphone__request_type=request_type,
                 )
 
