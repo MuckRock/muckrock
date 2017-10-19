@@ -104,10 +104,12 @@ class FOIACommunicationAdminForm(forms.ModelForm):
     from_user = autocomplete_light.ModelChoiceField(
             'UserAutocomplete',
             queryset=User.objects.all(),
+            required=False,
             )
     to_user = autocomplete_light.ModelChoiceField(
             'UserAutocomplete',
             queryset=User.objects.all(),
+            required=False,
             )
 
     class Meta:
