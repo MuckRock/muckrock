@@ -142,6 +142,8 @@
             }
         </script>
         <!-- End Google Analytics -->
+        {% block prescripts %}
+        {% endblock prescripts %}
         {% compress js %}
         {% render_bundle 'main' 'js' %}
         <script type="text/javascript" src="{% static 'autocomplete_light/django_admin.js' %}"></script>

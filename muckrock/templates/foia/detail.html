@@ -543,6 +543,10 @@ Sincerely,
 </article>
 {% endblock content %}
 
+{% block prescripts %}
+    <script src="https://assets.documentcloud.org/viewer/loader.js" type="text/javascript"></script>
+{% endblock prescripts %}
+
 {% block scripts %}
 
     <script type="text/javascript">
@@ -581,6 +585,5 @@ Sincerely,
 
     {% include 'lib/component/fine-uploader.html' %}
 
-    <script src="https://assets.documentcloud.org/viewer/loader.js" type="text/javascript"></script>
     <script src="https://checkout.stripe.com/checkout.js" type="text/javascript"></script>
 {% endblock scripts %}
