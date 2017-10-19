@@ -25,16 +25,6 @@ class SnailMailTaskFactory(factory.django.DjangoModelFactory):
     communication = factory.SubFactory('muckrock.factories.FOIACommunicationFactory')
 
 
-class RejectedEmailTaskFactory(factory.django.DjangoModelFactory):
-    """A factory for creating RejectedEmailTask objects."""
-    class Meta:
-        model = task.models.RejectedEmailTask
-
-    category = 'b'
-    foia = factory.SubFactory('muckrock.factories.FOIARequestFactory')
-    email = factory.Faker('email')
-
-
 class StaleAgencyTaskFactory(factory.django.DjangoModelFactory):
     """A factory for creating StaleAgencyTask objects."""
     class Meta:
@@ -75,14 +65,6 @@ class ResponseTaskFactory(factory.django.DjangoModelFactory):
     """A factory for creating ResponseTask objects."""
     class Meta:
         model = task.models.ResponseTask
-
-    communication = factory.SubFactory('muckrock.factories.FOIACommunicationFactory')
-
-
-class FailedFaxFactory(factory.django.DjangoModelFactory):
-    """A factory for creating FailedFax objects."""
-    class Meta:
-        model = task.models.FailedFaxTask
 
     communication = factory.SubFactory('muckrock.factories.FOIACommunicationFactory')
 

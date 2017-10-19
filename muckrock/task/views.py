@@ -5,7 +5,7 @@ Views for the Task application
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import resolve
-from django.db.models import Count, Prefetch, Q
+from django.db.models import Count, Prefetch
 from django.http import HttpResponse, Http404
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
@@ -26,18 +26,26 @@ from muckrock.task.filters import (
     SnailMailTaskFilterSet,
     FlaggedTaskFilterSet,
     StaleAgencyTaskFilterSet,
-    RejectedEmailTaskFilterSet,
-    FailedFaxTaskFilterSet,
 )
 from muckrock.task.forms import (
-    FlaggedTaskForm, StaleAgencyTaskForm, ResponseTaskForm,
-    ProjectReviewTaskForm
+    FlaggedTaskForm,
+    StaleAgencyTaskForm,
+    ResponseTaskForm,
+    ProjectReviewTaskForm,
     )
 from muckrock.task.models import (
-    Task, OrphanTask, SnailMailTask, RejectedEmailTask,
-    StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask,
-    CrowdfundTask, MultiRequestTask, StatusChangeTask, FailedFaxTask,
-    ProjectReviewTask, NewExemptionTask
+    Task,
+    OrphanTask,
+    SnailMailTask,
+    StaleAgencyTask,
+    FlaggedTask,
+    NewAgencyTask,
+    ResponseTask,
+    CrowdfundTask,
+    MultiRequestTask,
+    StatusChangeTask,
+    ProjectReviewTask,
+    NewExemptionTask,
     )
 from muckrock.views import MRFilterListView
 
@@ -49,7 +57,6 @@ def count_tasks():
         all=Count('id'),
         orphan=Count('orphantask'),
         snail_mail=Count('snailmailtask'),
-        rejected=Count('rejectedemailtask'),
         stale_agency=Count('staleagencytask'),
         flagged=Count('flaggedtask'),
         projectreview=Count('projectreviewtask'),
@@ -58,7 +65,6 @@ def count_tasks():
         status_change=Count('statuschangetask'),
         crowdfund=Count('crowdfundtask'),
         multirequest=Count('multirequesttask'),
-        failed_fax=Count('failedfaxtask'),
         new_exemption=Count('newexemptiontask'),
         )
     return count
@@ -243,43 +249,6 @@ class SnailMailTaskList(TaskList):
         task.communication.save()
         task.resolve(request.user)
         return super(SnailMailTaskList, self).task_post_helper(request, task)
-
-
-class RejectedEmailTaskList(TaskList):
-    model = RejectedEmailTask
-    filter_class = RejectedEmailTaskFilterSet
-    title = 'Rejected Emails'
-    queryset = RejectedEmailTask.objects.select_related('foia__jurisdiction')
-
-    def get_context_data(self, **kwargs):
-        """Prefetch the agencies and foias sharing an email"""
-        context = super(RejectedEmailTaskList, self).get_context_data(**kwargs)
-        email_filter = Q()
-        all_emails = {t.email for t in context['object_list']}
-        for email in all_emails:
-            email_filter |= Q(email__iexact=email)
-            email_filter |= Q(other_emails__icontains=email)
-        agencies = Agency.objects.filter(email_filter)
-        statuses = ('ack', 'processed', 'appealing', 'fix', 'payment')
-        foias = (FOIARequest.objects.filter(email_filter)
-                .filter(status__in=statuses)
-                .select_related('jurisdiction')
-                .order_by())
-        def seperate_by_email(objects, emails):
-            """Make a dictionary of each email to the objects having that email"""
-            return_value = {}
-            for email in emails:
-                email_upper = email.upper()
-                return_value[email] = [o for o in objects if
-                        email_upper == o.email.upper() or
-                        email_upper in o.other_emails.upper()]
-            return return_value
-        agency_by_email = seperate_by_email(agencies, all_emails)
-        foia_by_email = seperate_by_email(foias, all_emails)
-        for task in context['object_list']:
-            task.foias = foia_by_email[task.email]
-            task.agencies = agency_by_email[task.email]
-        return context
 
 
 class StaleAgencyTaskList(TaskList):
@@ -514,20 +483,6 @@ class MultiRequestTaskList(TaskList):
             task.resolve(request.user)
             messages.error(request, 'Multirequest rejected')
         return super(MultiRequestTaskList, self).task_post_helper(request, task)
-
-
-class FailedFaxTaskList(TaskList):
-    title = 'Failed Faxes'
-    filter_class = FailedFaxTaskFilterSet
-    queryset = (FailedFaxTask.objects
-            .select_related('communication__foia__agency')
-            .select_related('communication__foia__user')
-            .select_related('communication__foia__jurisdiction')
-            .prefetch_related(
-                Prefetch(
-                    'communication__foia__communications',
-                    queryset=FOIACommunication.objects.order_by('-date'),
-                    to_attr='reverse_communications')))
 
 
 class NewExemptionTaskList(TaskList):

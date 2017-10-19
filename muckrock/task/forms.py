@@ -6,6 +6,7 @@ from django import forms
 
 from muckrock.foia.models import STATUS
 
+
 class FlaggedTaskForm(forms.Form):
     """Simple form for acting on a FlaggedTask"""
     text = forms.CharField(widget=forms.Textarea(attrs={
@@ -20,6 +21,7 @@ class ProjectReviewTaskForm(forms.Form):
         widget=forms.Textarea(attrs={
             'placeholder': 'Write your reply here'
         }))
+
 
 class StaleAgencyTaskForm(forms.Form):
     """Simple form for acting on a StaleAgencyTask"""

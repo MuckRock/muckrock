@@ -57,18 +57,6 @@
             Stale Agency
         </a>
     </li>
-    <li class="{% active request '^/task/rejected-email/$' %}">
-        <a href="{% url 'rejected-email-task-list' %}">
-            <span class="counter">{{ counters.rejected }}</span>
-            Rejected Email
-        </a>
-    </li>
-    <li class="{% active request '^/task/failed-fax/$' %}">
-        <a href="{% url 'failed-fax-task-list' %}">
-            <span class="counter">{{ counters.failed_fax }}</span>
-            Failed Fax
-        </a>
-    </li>
 </ul>
 <ul class="nostyle list__sections">
     <li class="{% active request '^/task/multirequest/$' %}">

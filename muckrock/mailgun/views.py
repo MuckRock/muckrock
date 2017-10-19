@@ -458,9 +458,11 @@ def phaxio_callback(request):
                 temp_failure = int(recipient['error_id']) not in perm_error_ids
                 if temp_failure and error_count < 4:
                     # retry with exponential back off
-                    fax_comm.communication.foia_submit(fax_error_count=error_count + 1)
+                    fax_comm.communication.foia_submit(
+                            fax_error_count=error_count + 1)
                 else:
-                    # for permanant failures, mark the number as bad and resubmit with fall back info
+                    # for permanant failures, mark the number as bad and
+                    # resubmit with fall back info
                     number.mark_error()
 
     return HttpResponse('OK')

@@ -71,7 +71,7 @@ class EmailOrFaxAutocomplete(autocomplete_light.AutocompleteBase):
     def choices_for_request(self):
         query = self.request.GET.get('q', '')
         emails = list(EmailAddress.objects
-                .filter(status='good',
+                .filter(status='good')
                 .filter(
                     Q(email__contains=query) |
                     Q(name__contains=query),

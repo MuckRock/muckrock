@@ -571,7 +571,9 @@ class FOIARequest(models.Model):
         """Update the current address for the request"""
         # if this is an appeal, clear the current addresses and get them
         # from the appeal agency
-        if appeal or clear:
+        bad_email = self.email and self.email.status == 'error'
+        bad_fax = not self.email and self.fax.status == 'error'
+        if appeal or clear or bad_email or bad_fax:
             self.email = None
             self.cc_emails.clear()
             self.fax = None
@@ -702,7 +704,7 @@ class FOIARequest(models.Model):
     def _send_msg(self, **kwargs):
         """Send a message for this request"""
         # self.email / self.fax / self.address should be set
-        # before calling thismethod
+        # before calling this method
 
         comm = self.communications.last()
         subject = comm.subject or self.default_subject()
@@ -806,7 +808,7 @@ class FOIARequest(models.Model):
         if error_count > 0:
             # after the first error, wait for 3 hours,
             # then double the time for every additional error
-            countdown = 60 * 60 * 3 * (2 ** error_count)
+            countdown = 60 * 60 * 3 * (2 ** (error_count - 1))
         else:
             countdown = 0
 

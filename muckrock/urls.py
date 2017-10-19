@@ -79,9 +79,6 @@ router.register(r'orphantask',
 router.register(r'snailmailtask',
         muckrock.task.viewsets.SnailMailTaskViewSet,
         'api-snailmailtask')
-router.register(r'rejectedemailtask',
-        muckrock.task.viewsets.RejectedEmailTaskViewSet,
-        'api-rejectedemailtask')
 router.register(r'staleagencytask',
         muckrock.task.viewsets.StaleAgencyTaskViewSet,
         'api-staleagencytask')

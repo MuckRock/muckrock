@@ -56,14 +56,6 @@ class CrowdfundTaskNode(TaskNode):
         return extra_context
 
 
-class FailedFaxTaskNode(TaskNode):
-    """Renders a failed fax task."""
-    model = task.models.FailedFaxTask
-    task_template = 'task/failed_fax.html'
-    endpoint_name = 'failed-fax-task-list'
-    class_name = 'failed-fax'
-
-
 class FlaggedTaskNode(TaskNode):
     """Renders a flagged task."""
     model = task.models.FlaggedTask
@@ -135,14 +127,6 @@ class OrphanTaskNode(TaskNode):
         extra_context['domain'] = self.task.get_sender_domain()
         extra_context['attachments'] = self.task.communication.files.all()
         return extra_context
-
-
-class RejectedEmailTaskNode(TaskNode):
-    """Renders a rejected email task."""
-    model = task.models.RejectedEmailTask
-    task_template = 'task/rejected_email.html'
-    endpoint_name = 'rejected-email-task-list'
-    class_name = 'rejected-email'
 
 
 class ResponseTaskNode(TaskNode):
@@ -269,11 +253,6 @@ def snail_mail_task(parser, token):
     return SnailMailTaskNode(get_id(token))
 
 @register.tag
-def rejected_email_task(parser, token):
-    """Returns a RejectedEmailTaskNode"""
-    return RejectedEmailTaskNode(get_id(token))
-
-@register.tag
 def stale_agency_task(parser, token):
     """Returns a StaleAgencyTaskNode"""
     return StaleAgencyTaskNode(get_id(token))
@@ -312,11 +291,6 @@ def crowdfund_task(parser, token):
 def multi_request_task(parser, token):
     """Returns a MultiRequestTaskNode"""
     return MultiRequestTaskNode(get_id(token))
-
-@register.tag
-def failed_fax_task(parser, token):
-    """Returns a FailedFaxTaskNode"""
-    return FailedFaxTaskNode(get_id(token))
 
 @register.tag
 def new_exemption_task(parser, token):

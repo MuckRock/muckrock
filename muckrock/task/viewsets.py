@@ -10,7 +10,6 @@ from muckrock.task.models import (
         Task,
         OrphanTask,
         SnailMailTask,
-        RejectedEmailTask,
         StaleAgencyTask,
         FlaggedTask,
         NewAgencyTask,
@@ -22,7 +21,6 @@ from muckrock.task.serializers import (
         TaskSerializer,
         OrphanTaskSerializer,
         SnailMailTaskSerializer,
-        RejectedEmailTaskSerializer,
         StaleAgencyTaskSerializer,
         FlaggedTaskSerializer,
         NewAgencyTaskSerializer,
@@ -95,12 +93,6 @@ SnailMailTaskViewSet = create_task_viewset(
     SnailMailTask,
     SnailMailTaskSerializer,
     ('category', 'communication'),
-)
-
-RejectedEmailTaskViewSet = create_task_viewset(
-    RejectedEmailTask,
-    RejectedEmailTaskSerializer,
-    ('category', 'foia', 'email', 'error'),
 )
 
 StaleAgencyTaskViewSet = create_task_viewset(
