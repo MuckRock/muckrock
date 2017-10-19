@@ -192,7 +192,14 @@ class AgencyRequestList(RequestList):
         queryset = super(AgencyRequestList, self).get_queryset()
         return queryset.filter(
                 agency=self.request.user.profile.agency,
-                status__in=('ack', 'processed'),
+                status__in=(
+                    'ack',
+                    'processed',
+                    'appealing',
+                    'fix',
+                    'payment',
+                    'partial',
+                    ),
                 )
 
 

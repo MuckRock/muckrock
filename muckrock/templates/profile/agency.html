@@ -15,6 +15,9 @@
 {% endif %}
 <h1>{{agency.name}}</h1>
 <h2><a href="{{ agency.jurisdiction.get_absolute_url }}">{{ agency.jurisdiction }}</a></h2>
+{% if request.user.is_staff and agency.profile %}
+<h3><a href="{{ agency.profile.get_absolute_url }}">{{ agency.profile.user.username }}</a></h3>
+{% endif %}
 {% include 'lib/request_stats.html' %}
 {% include 'lib/appeal_stats.html' %}
 <dl class="stats">
