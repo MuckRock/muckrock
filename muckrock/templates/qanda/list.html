@@ -1,15 +1,23 @@
 {% extends 'base_list.html' %}
 {% load tags %}
+{% load rules %}
 
 {% block list-actions %}
+{% has_perm 'qanda.post' request.user as can_post %}
 <div class="list__actions">
-    <a href="{% url 'question-create' %}" class="blue button">Ask a Question</a>
-    {% if request.user.profile %}
-    {% if request.user.profile.new_question_notifications %}
-    <a href="{% url 'question-follow-new' %}" class="button">Unfollow asked questions</a>
+    {% if can_post %}
+        <a href="{% url 'question-create' %}" class="blue button">Ask a Question</a>
+    {% elif request.user.is_authenticated %}
+        <p><a href="{% url 'acct-verify-email' %}">Please confirm your email address to ask a question</a></p>
     {% else %}
-    <a href="{% url 'question-follow-new' %}" class="button">Follow asked questions</a>
+        <a href="{% url 'accounts-signup' %}">Please sign up for an account and verify your email address to ask a question</a>
     {% endif %}
+    {% if request.user.is_authenticated %}
+        {% if request.user.profile.new_question_notifications %}
+            <a href="{% url 'question-follow-new' %}" class="button">Unfollow asked questions</a>
+        {% else %}
+            <a href="{% url 'question-follow-new' %}" class="button">Follow asked questions</a>
+        {% endif %}
     {% endif %}
 </div>
 {% endblock list-actions %}
