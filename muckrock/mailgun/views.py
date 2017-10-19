@@ -360,13 +360,7 @@ def bounces(request, email_comm, timestamp):
             event=event,
             reason=request.POST.get('reason', ''),
             )
-
-    if recipient:
-        recipient.status = 'error'
-        recipient.save()
-
-    # resubmit foia, with new contact info
-    email_comm.communication.foia.submit(clear=True)
+    recipient.mark_error()
 
 
 @mailgun_verify
@@ -403,6 +397,7 @@ def delivered(_request, email_comm, timestamp):
 @csrf_exempt
 def phaxio_callback(request):
     """Handle Phaxio callbacks"""
+    # pylint: disable=too-many-branches
     url = 'https://%s%s' % (
             settings.MUCKROCK_URL,
             reverse('phaxio-callback'),
@@ -466,10 +461,7 @@ def phaxio_callback(request):
                     fax_comm.communication.foia_submit(fax_error_count=error_count + 1)
                 else:
                     # for permanant failures, mark the number as bad and resubmit with fall back info
-                    number.status = 'error'
-                    number.save()
-                    # resubmit foia, with new contact info
-                    fax_comm.communication.foia.submit(clear=True)
+                    number.mark_error()
 
     return HttpResponse('OK')
 
