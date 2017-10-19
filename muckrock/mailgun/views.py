@@ -435,7 +435,7 @@ def phaxio_callback(request):
             fax_comm.save()
         else:
             for recipient in fax_info['recipients']:
-                number = PhoneNumber.objects.get_or_create(
+                number, _ = PhoneNumber.objects.get_or_create(
                         number=recipient['number'],
                         defaults={'type': 'fax'},
                         )

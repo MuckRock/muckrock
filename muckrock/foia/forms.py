@@ -292,7 +292,10 @@ class FOIAAdminFixForm(forms.Form):
 
     def clean_email_or_fax(self):
         """Validate the email_or_fax field"""
-        return get_email_or_fax(self.cleaned_data['email_or_fax'])
+        if self.cleaned_data['email_or_fax']:
+            return get_email_or_fax(self.cleaned_data['email_or_fax'])
+        else:
+            return None
 
     def clean_other_emails(self):
         """Validate the other_emails field"""
