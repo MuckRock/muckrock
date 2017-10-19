@@ -37,17 +37,27 @@ urlpatterns = [
         name='question-follow-new'
     ),
     url(
-        r'^(?P<slug>[\w\d_-]+)-(?P<pk>\d+)$',
+        r'^report-spam/(?P<model>(?:question)|(?:answer))/(?P<model_pk>\d+)/$',
+        views.report_spam,
+        name='question-spam'
+    ),
+    url(
+        r'^block-user/(?P<model>(?:question)|(?:answer))/(?P<model_pk>\d+)/$',
+        views.block_user,
+        name='question-block'
+    ),
+    url(
+        r'^(?P<slug>[\w\d_-]+)-(?P<pk>\d+)/$',
         views.Detail.as_view(template_name='qanda/detail.html'),
         name='question-detail'
     ),
     url(
-        r'^(?P<slug>[\w\d_-]+)-(?P<idx>\d+)/answer$',
+        r'^(?P<slug>[\w\d_-]+)-(?P<idx>\d+)/answer/$',
         views.create_answer,
         name='answer-create'
     ),
     url(
-        r'^(?P<slug>[\w\d_-]+)-(?P<idx>\d+)/follow$',
+        r'^(?P<slug>[\w\d_-]+)-(?P<idx>\d+)/follow/$',
         views.follow,
         name='question-follow'
     ),

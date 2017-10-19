@@ -1,0 +1,10 @@
+{% autoescape off %}
+{% if type == "report" %}https://{{muckrock_url}}{{ url }} was reported as spam by {{moderator.username}}{% elif type == "block" %}https://{{muckrock_url}}{{ url }} was reported as spam and the user was blocked.  This action was taken by {{moderator.username}}{% endif %}
+
+
+{{ comment }}
+
+
+{% if type == "report" %}Please check it out and deactivate the user if appropriate. If the comment is not spam, no further action is necessary.{% elif type == "block" %}If the comment is not spam, check with the moderator who made the action. Otherwise no further action is necessary{% endif %}
+
+{% endautoescape %}
