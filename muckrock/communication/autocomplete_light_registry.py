@@ -33,7 +33,7 @@ class AddressAutocomplete(autocomplete_light.AutocompleteModelTemplate):
 
 class EmailAddressAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     """An autocomplete for selecting an email address"""
-    choices = EmailAddress.objects.all()
+    choices = EmailAddress.objects.filter(status='good')
     search_fields = ['email', 'name']
     attrs = {
         'data-autocomplete-minimum-characters': 0,
@@ -54,7 +54,7 @@ class PhoneNumberAutocomplete(autocomplete_light.AutocompleteModelTemplate):
 
 class FaxAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     """An autocomplete for selecting a fax number"""
-    choices = PhoneNumber.objects.filter(type='fax')
+    choices = PhoneNumber.objects.filter(status='good', type='fax')
     search_fields = ['number']
     attrs = {
         'data-autocomplete-minimum-characters': 0,
@@ -71,11 +71,13 @@ class EmailOrFaxAutocomplete(autocomplete_light.AutocompleteBase):
     def choices_for_request(self):
         query = self.request.GET.get('q', '')
         emails = list(EmailAddress.objects
+                .filter(status='good',
                 .filter(
                     Q(email__contains=query) |
                     Q(name__contains=query),
                     )[:10])
         phones = list(PhoneNumber.objects
+                .filter(status='good')
                 .filter(number__contains=query, type='fax')
                 [:10])
         combined = (emails + phones)[:10]
