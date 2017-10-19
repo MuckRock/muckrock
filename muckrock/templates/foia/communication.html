@@ -11,7 +11,7 @@
             {% else %}
             <a href="{{communication.foia.get_absolute_url}}#{{communication.anchor}}" class="permalink">
             {% endif %}
-            {% if communication.mails %}
+            {% if communication.mails.all %}
             <time datetime="{{ communication.mails.0.sent_datetime|date:'c' }}" class="date">{{ communication.mails.0.sent_datetime|date:"m/d/Y" }}</time>
             {% else %}
             <time datetime="{{ communication.date|date:'c' }}" class="date">{{ communication.date | date:"m/d/Y" }}</time>
