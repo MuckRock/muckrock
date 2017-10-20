@@ -659,7 +659,7 @@ class FOIARequest(models.Model):
         self.submit(followup=True)
 
     def appeal(self, appeal_message, user):
-        """Send a followup to the agency or its appeal agency."""
+        """Send an appeal to the agency or its appeal agency."""
         communication = self.communications.create(
             from_user=user,
             to_user=self.get_to_user(),
@@ -1003,6 +1003,9 @@ class FOIARequest(models.Model):
     def get_msg_comms(self):
         """Get the communications to be displayed for outgoing messages"""
         msg_comms = []
+        # this needs to be updated here for some reason
+        # or it does not pick up the appeal communication
+        self.communications.update()
         comms = list(self.communications.all())
         # if theirs only one communication, do not double include it
         if len(comms) == 1:
