@@ -41,6 +41,10 @@
             <dd>{{address|linebreaks}}</dd>
         {% endif %}
     {% endwith %}
+    {% if task.category == "a" and appeal_address %}
+        <dt>Agency Appeal Address</dt>
+        <dd>{{appeal_address|linebreaks}}</dd>
+    {% endif %}
 	{% if agency.notes %}
     <dt>Agency Notes</dt>
     <dd>{{agency.notes}}</dd>

@@ -335,12 +335,17 @@ class Detail(DetailView):
                 'user__profile',
                 ),
             prefetch_related=(
-                'communications',
-                'communications__files',
-                'communications__emails',
-                'communications__faxes',
-                'communications__mails',
-                'communications__web_comms',
+                Prefetch(
+                    'communications',
+                    FOIACommunication.objects
+                    .select_related('from_user__profile')
+                    .prefetch_related(
+                        'files',
+                        'emails',
+                        'faxes',
+                        'mails',
+                        'web_comms',
+                        )),
                 Prefetch(
                     'communications__faxes',
                     FaxCommunication.objects.order_by('-sent_datetime'),

@@ -6,7 +6,7 @@
     <dd>{{task.get_reason_display}}</dd>
     <dt>To</dt>
     <dd>{{task.address}}</dd>
-    {% with from_email=task.communication.emails.first.from_email %}
+    {% with from_email=task.communication.emails.0.from_email %}
     {% if from_email %}
     <dt>From</dt>
     <dd>{{ from_email }}</dd>
