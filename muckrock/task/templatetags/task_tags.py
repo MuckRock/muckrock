@@ -188,6 +188,11 @@ class SnailMailTaskNode(TaskNode):
             extra_context['agency'] = foia_agency.appeal_agency
         else:
             extra_context['agency'] = foia_agency
+        extra_context['appeal_address'] = (
+                extra_context['agency']
+                .get_addresses('appeal')
+                .first()
+                )
         return extra_context
 
 
