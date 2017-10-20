@@ -1,9 +1,8 @@
 {% autoescape off %}
 {% now "F j, Y" %}
-{% if request.agency %}{{ request.agency.name }}
-{{ request.agency.address }}{% endif %}
+{% if request.agency %}{{ request.agency.name }}{% if request.agency.get_addresses.first %}
+{{ request.agency.get_addresses.first }}{% endif %}{% endif %}
 {% if request.communications.count > 1 %}{% if request.tracking_id %}
 This is a follow up to request number {{request.tracking_id}}:{% else %}
-This is a follow up to a previous request:{% endif %}{% endif %}
-{% include "text/foia/comms.txt" %}
+This is a follow up to a previous request:{% endif %}{% endif %}{% include "text/foia/comms.txt" %}
 {% endautoescape %}
