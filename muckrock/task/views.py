@@ -287,7 +287,7 @@ class StaleAgencyTaskList(TaskList):
     filter_class = StaleAgencyTaskFilterSet
     title = 'Stale Agencies'
     queryset = (StaleAgencyTask.objects
-            .select_related('agency')
+            .select_related('agency__jurisdiction')
             .prefetch_related(
                 'agency__foiarequest_set__communications__foia__jurisdiction',
                 Prefetch('agency__foiarequest_set',
@@ -417,7 +417,8 @@ class ResponseTaskList(TaskList):
                             'web_comms',
                             ),
                     to_attr='reverse_communications'),
-                'communication__emails',
+                Prefetch('communication__emails',
+                    queryset=EmailCommunication.objects.select_related('from_email')),
                 'communication__faxes',
                 'communication__mails',
                 'communication__web_comms',
@@ -531,7 +532,12 @@ class FailedFaxTaskList(TaskList):
 
 class NewExemptionTaskList(TaskList):
     title = 'New Exemptions'
-    queryset = NewExemptionTask.objects.select_related('foia__agency__jurisdiction__parent')
+    queryset = NewExemptionTask.objects.select_related(
+            'foia__agency__jurisdiction__parent',
+            'foia__jurisdiction__parent',
+            'user',
+
+            )
 
 
 class RequestTaskList(TemplateView):

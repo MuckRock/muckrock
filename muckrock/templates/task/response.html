@@ -8,7 +8,7 @@
 <dl class="task__data">
     {% with task.communication as comm %}
     {% with comm.foia as foia %}
-    {% with from_email=comm.emails.first.from_email %}
+    {% with from_email=comm.emails.0.from_email %}
     {% if from_email %}
     <dt>From</dt>
     <dd>{{from_email}}</dd>
