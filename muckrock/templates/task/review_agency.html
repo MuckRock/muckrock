@@ -1,0 +1,76 @@
+{% extends 'task/default.html' %}
+
+{% block title %}Review Agency Tasks{%endblock %}
+
+{% block task-content %}
+<dl class="task__data">
+  <dt>Agency</dt>
+  <dd><a href="{{task.agency.get_absolute_url}}">{{task.agency}}</a> (<a href="{% url 'admin:agency_agency_change' task.agency.pk %}">admin</a>)</dd>
+  {% if emails %}
+    <dt>Email</dt>
+    {% for email in emails %}
+      <dd>{{ email }}</dd>
+    {% endfor %}
+  {% endif %}
+  {% if faxes %}
+    <dt>Fax</dt>
+    {% for fax in faxes %}
+      <dd>{{ fax }}</dd>
+    {% endfor %}
+  {% endif %}
+  {% if phones %}
+    <dt>Phone</dt>
+    {% for phone in phones %}
+      <dd>{{ phone }}</dd>
+    {% endfor %}
+  {% endif %}
+  {% if addresses %}
+    <dt>Address</dt>
+    {% for address in addresses %}
+      <dd>{{ address|linebreaks }}</dd>
+    {% endfor %}
+  {% endif %}
+</dl>
+
+{% for data in review_data %}
+  <div class="collapsable review-requests">
+    <header {% if data.error %}class="error"{% endif %}>
+        <p>{{data.address}}</p>
+      </header>
+      <table>
+        <tr>
+          <td>Total Errors: {{data.total_errors}}</td>
+          <td>Last Error: {{data.last_error}}</td>
+          <td>Last Confirm: {{data.last_confirm}}</td>
+          <td>Last Open: {{data.last_open}}</td>
+        </tr>
+      </table>
+      <table class="review-request-table">
+          <thead>
+              <tr>
+                  <th><input type="checkbox" class="select-all" data-name="foia" checked /></th>
+                  <th>Request</th>
+                  <th>Last Response</th>
+                  <th><abbr title="Estimated Completion Date">ECD</abbr></th>
+                  <th>Status</th>
+                  <th>Email:</th>
+                  <th>Fax:</th>
+              </tr>
+          </thead>
+          <tbody>
+          {% for foia in data.foias %}
+              <tr class="review-request">
+                  <td><input type="checkbox" form="{{task.pk}}-form" name="foia" value="{{foia.pk}}" checked></td>
+                  <td><a href="{{foia.get_absolute_url}}">{{foia}}</a></td>
+                  <td>{{foia.latest_response|default_if_none:"Never"}}</td>
+                  <td>{{foia.date_estimate|date:"m/d/y"}}</td>
+                  <td>{{foia.get_status_display}}</td>
+                  <td><input type="text" value="{{foia.email}}" readonly {% if foia.email.status == "error" %}class="error"{% endif %}></td>
+                  <td><input type="text" value="{{foia.fax}}" readonly {% if foia.fax.status == "error" %}class="error"{% endif %}></td>
+              </tr>
+          {% endfor %}
+          </tbody>
+      </table>
+  </div>
+{% endfor %}
+{% endblock %}

@@ -5,6 +5,8 @@
     {% snail_mail_task task %}
 {% elif task.type == "StaleAgencyTask" %}
     {% stale_agency_task task %}
+{% elif task.type == "ReviewAgencyTask" %}
+    {% review_agency_task task %}
 {% elif task.type == "FlaggedTask" %}
     {% flagged_task task %}
 {% elif task.type == "ProjectReviewTask" %}

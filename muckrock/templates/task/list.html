@@ -57,6 +57,12 @@
             Stale Agency
         </a>
     </li>
+    <li class="{% active request '^/task/review-agency/$' %}">
+        <a href="{% url 'review-agency-task-list' %}">
+            <span class="counter">{{ counters.review_agency }}</span>
+            Review Agency
+        </a>
+    </li>
 </ul>
 <ul class="nostyle list__sections">
     <li class="{% active request '^/task/multirequest/$' %}">

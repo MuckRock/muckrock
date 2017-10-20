@@ -311,6 +311,12 @@ class AgencyEmail(models.Model):
             default='none',
             )
 
+    def __unicode__(self):
+        val = unicode(self.email)
+        if self.request_type != 'none' and self.email_type != 'none':
+            val = '%s (%s - %s)' % (val, self.request_type, self.email_type)
+        return val
+
 
 class AgencyPhone(models.Model):
     """Through model for agency to phone M2M"""

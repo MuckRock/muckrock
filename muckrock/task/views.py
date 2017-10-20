@@ -26,6 +26,7 @@ from muckrock.task.filters import (
     SnailMailTaskFilterSet,
     FlaggedTaskFilterSet,
     StaleAgencyTaskFilterSet,
+    ReviewAgencyTaskFilterSet,
 )
 from muckrock.task.forms import (
     FlaggedTaskForm,
@@ -38,6 +39,7 @@ from muckrock.task.models import (
     OrphanTask,
     SnailMailTask,
     StaleAgencyTask,
+    ReviewAgencyTask,
     FlaggedTask,
     NewAgencyTask,
     ResponseTask,
@@ -58,6 +60,7 @@ def count_tasks():
         orphan=Count('orphantask'),
         snail_mail=Count('snailmailtask'),
         stale_agency=Count('staleagencytask'),
+        review_agency=Count('reviewagencytask'),
         flagged=Count('flaggedtask'),
         projectreview=Count('projectreviewtask'),
         new_agency=Count('newagencytask'),
@@ -278,6 +281,17 @@ class StaleAgencyTaskList(TaskList):
                 messages.error(request, 'The email is invalid.')
                 return
         return super(StaleAgencyTaskList, self).task_post_helper(request, task)
+
+
+class ReviewAgencyTaskList(TaskList):
+    model = ReviewAgencyTask
+    filter_class = ReviewAgencyTaskFilterSet # XXX
+    title = 'Review Agencies'
+    queryset = ReviewAgencyTask.objects.all()
+
+    def task_post_helper(self, request, task):
+        """Do the things here"""
+        return super(ReviewAgencyTaskList, self).task_post_helper(request, task)
 
 
 class FlaggedTaskList(TaskList):

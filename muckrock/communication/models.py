@@ -129,21 +129,6 @@ class EmailAddress(models.Model):
 
         return False
 
-    def mark_error(self):
-        """
-        Mark this email as having had an error
-
-        Prevent further emails from being sent to it, as well as resending
-        the communications for all open requests to this email to any fallback
-        fax numbers or snail mail addresses
-        """
-        self.status = 'error'
-        self.save()
-
-        for foia in self.foias.get_open():
-            foia.submit(clear=True)
-
-
 
 class PhoneNumber(models.Model):
     """A phone number"""
@@ -169,20 +154,6 @@ class PhoneNumber(models.Model):
     def as_e164(self):
         """Format as E164 (suitable for phaxio)"""
         return self.number.as_e164
-
-    def mark_error(self):
-        """
-        Mark this phone number as having had an error
-
-        Prevent further faxes from being sent to it, as well as resending
-        the communications for all open requests to this fax to any fallback
-        addresses
-        """
-        self.status = 'error'
-        self.save()
-
-        for foia in self.foias.get_open().filter(email=None):
-            foia.submit(clear=True)
 
 
 class Address(models.Model):

@@ -9,8 +9,16 @@ from django.db.models import Prefetch
 
 from datetime import datetime
 import logging
+from itertools import groupby
 
 from muckrock.accounts.models import Notification
+from muckrock.communication.models import (
+        EmailCommunication,
+        EmailError,
+        EmailOpen,
+        FaxCommunication,
+        FaxError,
+        )
 from muckrock.foia.models import (
     FOIACommunication,
     FOIAFile,
@@ -57,7 +65,6 @@ class TaskQuerySet(models.QuerySet):
         if user.is_staff:
             communication_task_types.append(ResponseTask)
             communication_task_types.append(SnailMailTask)
-            communication_task_types.append(FailedFaxTask)
         for task_type in communication_task_types:
             tasks += list(task_type.objects
                     .filter(communication__foia=foia)
@@ -84,7 +91,7 @@ class TaskQuerySet(models.QuerySet):
                         )
                     )
         # these tasks have a direct foia attribute
-        foia_task_types = [RejectedEmailTask, FlaggedTask, StatusChangeTask]
+        foia_task_types = [FlaggedTask, StatusChangeTask]
         if user.is_staff:
             for task_type in foia_task_types:
                 tasks += list(task_type.objects
@@ -251,7 +258,10 @@ class SnailMailTask(Task):
 
 
 class RejectedEmailTask(Task):
-    """A FOIA request has had an outgoing email rejected"""
+    """
+    Deprecated: Keeping this model around to not lose historical data
+
+    A FOIA request has had an outgoing email rejected"""
     type = 'RejectedEmailTask'
     categories = (('b', 'Bounced'), ('d', 'Dropped'))
     category = models.CharField(max_length=1, choices=categories)
@@ -315,6 +325,85 @@ class StaleAgencyTask(Task):
         for foia in foia_list:
             foia.email = new_email
             foia.followup()
+
+
+class ReviewAgencyTask(Task):
+    """An agency has had one of its forms of communication have an error
+    and new contact information is required"""
+    type = 'ReviewAgencyTask'
+    agency = models.ForeignKey('agency.Agency')
+
+    def __unicode__(self):
+        return u'Review Agency Task'
+
+    def get_absolute_url(self):
+        return reverse('review-agency-task', kwargs={'pk': self.pk})
+
+    def get_review_data(self):
+        """Get all the data on all open requests for the agency"""
+        review_data = []
+
+        def get_data(open_requests, email_or_fax):
+            """Helper function to get email or fax data"""
+            if email_or_fax == 'email':
+                error_model = EmailError
+                comm_model = EmailCommunication
+                comm_to_attr = 'to_emails'
+            elif email_or_fax == 'fax':
+                error_model = FaxError
+                comm_model = FaxCommunication
+                comm_to_attr = 'to_number'
+
+            review_data = []
+            for addr, foias in groupby(open_requests, lambda f: getattr(f, email_or_fax)):
+                last_error = error_model.objects.filter(recipient=addr).last()
+                last_confirm = (comm_model.objects
+                        .filter(**{comm_to_attr: addr})
+                        .exclude(confirmed_datetime=None)
+                        .order_by('confirmed_datetime')
+                        .last()
+                        )
+                if email_or_fax == 'email':
+                    last_open = EmailOpen.objects.filter(recipient=addr).last()
+                else:
+                    last_open = None
+                review_data.append({
+                        'address': addr,
+                        'error': addr.status == 'error',
+                        'foias': list(foias),
+                        'total_errors': error_model.objects.filter(recipient=addr).count(),
+                        'last_error': last_error.datetime if last_error else None,
+                        'last_confirm': last_confirm.confirmed_datetime if last_confirm else None,
+                        'last_open': last_open.datetime if last_open else None,
+                        })
+            return review_data
+
+        open_requests = (self.agency.foiarequest_set
+                .get_open()
+                .order_by('email__status', 'email')
+                .exclude(email=None)
+                )
+        review_data.extend(get_data(open_requests, 'email'))
+        open_requests = (self.agency.foiarequest_set
+                .get_open()
+                .order_by('fax__status', 'fax')
+                .exclude(fax=None)
+                .exclude(email__status='good')
+                )
+        review_data.extend(get_data(open_requests, 'fax'))
+        foias = list(self.agency.foiarequest_set
+                .get_open()
+                .exclude(email=None)
+                .exclude(fax=None)
+                )
+        if foias:
+            review_data.append({
+                    'address': 'Snail Mail',
+                    'foias': foias,
+                    })
+
+        return review_data
+
 
 
 class FlaggedTask(Task):
@@ -521,7 +610,9 @@ class ResponseTask(Task):
 
 
 class FailedFaxTask(Task):
-    """A fax for this communication failed"""
+    """
+    Deprecated: keeping this model around to not lose historical data
+    A fax for this communication failed"""
     type = 'FailedFaxTask'
     communication = models.ForeignKey('foia.FOIACommunication')
     reason = models.CharField(max_length=255, blank=True, default='')

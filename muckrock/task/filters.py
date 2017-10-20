@@ -18,6 +18,7 @@ from muckrock.task.models import (
     SnailMailTask,
     FlaggedTask,
     StaleAgencyTask,
+    ReviewAgencyTask,
 )
 
 class TaskFilterSet(django_filters.FilterSet):
@@ -131,4 +132,16 @@ class StaleAgencyTaskFilterSet(TaskFilterSet):
     )
     class Meta:
         model = StaleAgencyTask
+        fields = ['jurisdiction', 'resolved', 'resolved_by']
+
+
+class ReviewAgencyTaskFilterSet(TaskFilterSet):
+    """Allows a review agency task to be filtered by jurisdiction."""
+    jurisdiction = django_filters.ModelMultipleChoiceFilter(
+        name='agency__jurisdiction',
+        queryset=Jurisdiction.objects.filter(hidden=False),
+        widget=autocomplete_light.MultipleChoiceWidget('JurisdictionAutocomplete')
+    )
+    class Meta:
+        model = ReviewAgencyTask
         fields = ['jurisdiction', 'resolved', 'resolved_by']

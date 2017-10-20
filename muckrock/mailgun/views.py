@@ -39,6 +39,7 @@ from muckrock.foia.tasks import classify_status
 from muckrock.task.models import (
         OrphanTask,
         ResponseTask,
+        ReviewAgencyTask,
         )
 
 logger = logging.getLogger(__name__)
@@ -360,7 +361,14 @@ def bounces(request, email_comm, timestamp):
             event=event,
             reason=request.POST.get('reason', ''),
             )
-    recipient.mark_error()
+    recipient.status = 'error'
+    recipient.save()
+    # XXX do not create dupes
+    ReviewAgencyTask.objects.create(
+            agency=email_comm.communication.foia.agency,
+            )
+    if not email_comm.cc_emails.filter(email=recipient):
+        email_comm.communication.foia.submit()
 
 
 @mailgun_verify
@@ -461,9 +469,13 @@ def phaxio_callback(request):
                     fax_comm.communication.foia_submit(
                             fax_error_count=error_count + 1)
                 else:
-                    # for permanant failures, mark the number as bad and
-                    # resubmit with fall back info
-                    number.mark_error()
+                    number.status = 'error'
+                    number.save()
+                    # XXX do not create dupes
+                    ReviewAgencyTask.objects.create(
+                            agency=fax_comm.communication.foia.agency,
+                            )
+                    fax_comm.communication.foia.submit()
 
     return HttpResponse('OK')
 

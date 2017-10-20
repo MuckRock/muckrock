@@ -207,6 +207,28 @@ class StaleAgencyTaskNode(TaskNode):
         return extra_context
 
 
+class ReviewAgencyTaskNode(TaskNode):
+    """Renders a stale agency task."""
+    model = task.models.ReviewAgencyTask
+    task_template = 'task/review_agency.html'
+    endpoint_name = 'review-agency-task-list'
+    class_name = 'review-agency'
+
+    def get_extra_context(self):
+        """Adds a form for updating the email"""
+        extra_context = super(ReviewAgencyTaskNode, self).get_extra_context()
+        extra_context['emails'] = [str(e) for e in
+                self.task.agency.agencyemail_set.all()]
+        extra_context['faxes'] = [str(f) for f in
+                self.task.agency.phones.filter(type='fax')]
+        extra_context['phones'] = [str(p) for p in
+                self.task.agency.phones.filter(type='phone')]
+        extra_context['addresses'] = [str(a) for a in
+                self.task.agency.addresses.all()]
+        extra_context['review_data'] = self.task.get_review_data()
+        return extra_context
+
+
 class StatusChangeTaskNode(TaskNode):
     """Renders a status change task."""
     model = task.models.StatusChangeTask
@@ -256,6 +278,11 @@ def snail_mail_task(parser, token):
 def stale_agency_task(parser, token):
     """Returns a StaleAgencyTaskNode"""
     return StaleAgencyTaskNode(get_id(token))
+
+@register.tag
+def review_agency_task(parser, token):
+    """Returns a ReviewAgencyTaskNode"""
+    return ReviewAgencyTaskNode(get_id(token))
 
 @register.tag
 def flagged_task(parser, token):
