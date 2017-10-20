@@ -60,7 +60,7 @@
     {# full letter here, hidden #}
     <header>Full letter</header>
     <textarea name="full-communication" id="full-letter-{{task.pk}}">
-{% with foia as request %}{% include "text/foia/request_msg.txt" with show_all_comms=True %}{% endwith %}
+{% with foia as request %}{% include "text/foia/request_msg.txt" %}{% endwith %}
     </textarea>
 </div>
 {% endwith %}
