@@ -774,7 +774,7 @@ class Detail(DetailView):
             foia.tracking_id = form.cleaned_data['tracking_id']
             foia.status = form.cleaned_data['status']
             if foia.status == 'payment':
-                foia.price = form.cleaned_data['price']
+                foia.price = form.cleaned_data['price'] / 100.0
             foia.save()
             foia.process_attachments(request.user)
             if foia.agency:
