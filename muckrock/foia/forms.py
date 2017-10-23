@@ -347,3 +347,16 @@ class FOIAAgencyReplyForm(forms.Form):
             label='Message to the requester',
             widget=forms.Textarea(),
             )
+
+    def clean(self):
+        """Make price required if status is set to payment"""
+        cleaned_data = super(FOIAAgencyReplyForm, self).clean()
+        status = cleaned_data.get('status')
+        price = cleaned_data.get('price')
+
+        if status == 'payment' and price is None:
+            self.add_error(
+                    'price',
+                    'You must set a price when setting the '
+                    'status to payment required',
+                    )
