@@ -375,6 +375,7 @@ class ReviewAgencyTask(Task):
                         'last_error': last_error.datetime if last_error else None,
                         'last_confirm': last_confirm.confirmed_datetime if last_confirm else None,
                         'last_open': last_open.datetime if last_open else None,
+                        'checkbox_name': '%d-%s-%d' % (self.pk, email_or_fax, addr.pk),
                         })
             return review_data
 
@@ -400,10 +401,10 @@ class ReviewAgencyTask(Task):
             review_data.append({
                     'address': 'Snail Mail',
                     'foias': foias,
+                    'checkbox_name': '%d-snail' % self.pk,
                     })
 
         return review_data
-
 
 
 class FlaggedTask(Task):

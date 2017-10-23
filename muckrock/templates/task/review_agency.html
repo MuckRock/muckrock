@@ -48,7 +48,7 @@
       <table class="review-request-table">
           <thead>
               <tr>
-                  <th><input type="checkbox" class="select-all" data-name="foia" checked /></th>
+                  <th><input type="checkbox" class="select-all" data-name="{{data.checkbox_name}}" {% if data.error %}checked{% endif %} ></th>
                   <th>Request</th>
                   <th>Last Response</th>
                   <th><abbr title="Estimated Completion Date">ECD</abbr></th>
@@ -60,7 +60,7 @@
           <tbody>
           {% for foia in data.foias %}
               <tr class="review-request">
-                  <td><input type="checkbox" form="{{task.pk}}-form" name="foia" value="{{foia.pk}}" checked></td>
+                  <td><input type="checkbox" form="{{task.pk}}-form" name="{{data.checkbox_name}}" value="{{foia.pk}}" {% if data.error %}checked{% endif %}></td>
                   <td><a href="{{foia.get_absolute_url}}">{{foia}}</a></td>
                   <td>{{foia.latest_response|default_if_none:"Never"}}</td>
                   <td>{{foia.date_estimate|date:"m/d/y"}}</td>

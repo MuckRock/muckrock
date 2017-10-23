@@ -7,26 +7,25 @@
 */
 
 (function( $ ){
-    var selectAllCheckbox, checkboxes, toolbar;
-    function disableToolbar() {
+    function disableToolbar(toolbar) {
         $(toolbar).attr('disabled', true).closest('.field').addClass('disabled');
     }
-    function enableToolbar() {
+    function enableToolbar(toolbar) {
         $(toolbar).attr('disabled', false).closest('.field').removeClass('disabled');
     }
-    function handleSelectAllCheckboxClick() {
+    function handleSelectAllCheckboxClick(selectAllCheckbox, checkboxes, toolbar) {
         var checked = $(selectAllCheckbox)[0].checked;
         $(checkboxes).each(function(){
             this.checked = checked;
             $(this).change();
         });
         if (checked) {
-            enableToolbar();
+            enableToolbar(toolbar);
         } else {
-            disableToolbar();
+            disableToolbar(toolbar);
         }
     }
-    function handleCheckboxClick() {
+    function handleCheckboxClick(selectAllCheckbox, checkboxes, toolbar) {
         var checkedCheckboxes = $(checkboxes).filter(':checked');
         if (checkedCheckboxes.length == $(checkboxes).length) {
             selectAllCheckbox[0].indeterminate = false;
@@ -37,24 +36,24 @@
         if (checkedCheckboxes.length == 0) {
             selectAllCheckbox[0].indeterminate = false;
             selectAllCheckbox[0].checked = false;
-            disableToolbar();
+            disableToolbar(toolbar);
         } else {
-            enableToolbar();
+            enableToolbar(toolbar);
         }
     }
     $.fn.selectAll = function() {
-        selectAllCheckbox = $(this);
+        var selectAllCheckbox = $(this);
         var checkboxesName = $(selectAllCheckbox).data('name');
         var toolbarId = $(selectAllCheckbox).data('toolbar');
         // The checkboxes are defined by a 'name' data attribute on the checkbox
-        checkboxes = $('input[name=' + checkboxesName + ']');
+        var checkboxes = $('input[name=' + checkboxesName + ']');
         // The toolbar is defined by a 'toolbar' data attribute on the checkbox
         // And is actually the inputs and buttons contained within the toolbar
-        toolbar = $(toolbarId).find(':input, :button');
+        var toolbar = $(toolbarId).find(':input, :button');
         // Listen to changes on the checkboxes
-        $(checkboxes).click(handleCheckboxClick);
+        $(checkboxes).click(function(){handleCheckboxClick(selectAllCheckbox, checkboxes, toolbar)});
         // Listen to changes to the select all checkbox
-        $(selectAllCheckbox).click(handleSelectAllCheckboxClick);
+        $(selectAllCheckbox).click(function(){handleSelectAllCheckboxClick(selectAllCheckbox, checkboxes, toolbar)});
         // Disable the toolbar to start.
         disableToolbar();
     };
