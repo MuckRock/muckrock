@@ -35,6 +35,7 @@ import 'autonumeric';
             $input.attr('value', value);
         }
         $currency.keyup(copyValue);
+        copyValue();
         // swap out the input with the currency field
         $currency.insertBefore($input);
         $input.attr('hidden', true).hide();
