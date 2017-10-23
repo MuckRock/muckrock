@@ -132,7 +132,8 @@ def get_common_webhook_params(function):
 
         if not email_comm and comm_id:
             comm = FOIACommunication.objects.filter(pk=comm_id).first()
-            email_comm = comm.emails.last()
+            if comm:
+                email_comm = comm.emails.last()
 
         if not email_comm:
             logger.warning(
