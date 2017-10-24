@@ -57,6 +57,9 @@ $task-padding: $vr/4 $vr/2;
         width: 100%;
         margin-bottom: $vr;
     }
+    label.check-label {
+        display: inline;
+    }
     input[type="checkbox"] {
         width: auto;
         float: left;

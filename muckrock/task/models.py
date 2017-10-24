@@ -5,7 +5,13 @@ Models for the Task application
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import models
-from django.db.models import Prefetch
+from django.db.models import (
+        Case,
+        Count,
+        Max,
+        Prefetch,
+        When,
+        )
 
 from datetime import datetime
 import logging
@@ -13,11 +19,10 @@ from itertools import groupby
 
 from muckrock.accounts.models import Notification
 from muckrock.communication.models import (
-        EmailCommunication,
         EmailError,
-        EmailOpen,
-        FaxCommunication,
         FaxError,
+        EmailAddress,
+        PhoneNumber,
         )
 from muckrock.foia.models import (
     FOIACommunication,
@@ -29,6 +34,7 @@ from muckrock.foia.models import (
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import support
+from muckrock.models import ExtractDay, Now
 from muckrock.utils import generate_status_action
 
 # pylint: disable=missing-docstring
@@ -103,6 +109,10 @@ class TaskQuerySet(models.QuerySet):
                     .filter(agency=foia.agency)
                     .preload_list()
                     .select_related('resolved_by'))
+            tasks += list(ReviewAgencyTask.objects
+                    .filter(agency=foia.agency)
+                    .preload_list()
+                    .select_related('resolved_by'))
         return tasks
 
 
@@ -127,6 +137,27 @@ class NewAgencyTaskQuerySet(models.QuerySet):
                         .filter(status='approved')
                         .order_by('name'),
                         to_attr='other_agencies')))
+
+
+class ReviewAgencyTaskQuerySet(models.QuerySet):
+    """Object manager for review agency tasks"""
+    def preload_list(self):
+        """Preload relations for list display"""
+        from muckrock.agency.models import (
+                AgencyEmail,
+                AgencyPhone,
+                AgencyAddress,
+                )
+        return (self
+                .select_related('agency__jurisdiction')
+                .prefetch_related(
+                    Prefetch('agency__agencyemail_set',
+                        queryset=AgencyEmail.objects.select_related('email')),
+                    Prefetch('agency__agencyphone_set',
+                        queryset=AgencyPhone.objects.select_related('phone')),
+                    Prefetch('agency__agencyaddress_set',
+                        queryset=AgencyAddress.objects.select_related('address')),
+                    ))
 
 
 class Task(models.Model):
@@ -224,6 +255,12 @@ class SnailMailTask(Task):
     communication = models.ForeignKey('foia.FOIACommunication')
     user = models.ForeignKey(User, blank=True, null=True)
     amount = models.DecimalField(default=0.00, max_digits=8, decimal_places=2)
+    switch = models.BooleanField(
+            default=False, 
+            help_text='Designates we have switched to sending to this address '
+            'from another formof communication due to some sort of error.  A '
+            'note should be included in the communication with an explanation.',
+            )
 
     def __unicode__(self):
         return u'Snail Mail Task'
@@ -307,7 +344,7 @@ class StaleAgencyTask(Task):
         else:
             return None
 
-    def update_email(self, new_email, foia_list=None):
+    def update_email(self, new_email, foia_list):
         """Updates the email on the agency and the provided requests."""
         from muckrock.agency.models import AgencyEmail
         agency_emails = (self.agency.agencyemail_set
@@ -324,7 +361,7 @@ class StaleAgencyTask(Task):
                 )
         for foia in foia_list:
             foia.email = new_email
-            foia.followup()
+            foia.followup(switch=True)
 
 
 class ReviewAgencyTask(Task):
@@ -332,6 +369,8 @@ class ReviewAgencyTask(Task):
     and new contact information is required"""
     type = 'ReviewAgencyTask'
     agency = models.ForeignKey('agency.Agency')
+
+    objects = ReviewAgencyTaskQuerySet.as_manager()
 
     def __unicode__(self):
         return u'Review Agency Task'
@@ -343,59 +382,88 @@ class ReviewAgencyTask(Task):
         """Get all the data on all open requests for the agency"""
         review_data = []
 
-        def get_data(open_requests, email_or_fax):
+        def get_data(email_or_fax):
             """Helper function to get email or fax data"""
             if email_or_fax == 'email':
+                address_model = EmailAddress
                 error_model = EmailError
-                comm_model = EmailCommunication
-                comm_to_attr = 'to_emails'
+                confirm_rel = 'to_emails'
             elif email_or_fax == 'fax':
+                address_model = PhoneNumber
                 error_model = FaxError
-                comm_model = FaxCommunication
-                comm_to_attr = 'to_number'
+                confirm_rel = 'faxes'
+
+            open_requests = (self.agency.foiarequest_set
+                    .get_open()
+                    .order_by('%s__status' % email_or_fax, email_or_fax)
+                    .exclude(**{email_or_fax: None})
+                    .select_related(email_or_fax, 'jurisdiction')
+                    .annotate(
+                        latest_response=ExtractDay(
+                            Now() - Max(Case(When(
+                                communications__response=True,
+                                then='communications__date'
+                                ))))
+                        )
+                    )
+            grouped_requests = [(k, list(v)) for k, v in groupby(
+                open_requests,
+                lambda f: getattr(f, email_or_fax)
+                )]
+            # do a seperate query for per email addr/fax number stats
+            addresses = (address_model.objects
+                    .annotate(
+                        error_count=Count('errors', distinct=True),
+                        last_error=Max('errors__datetime'),
+                        last_confirm=Max('%s__confirmed_datetime' % confirm_rel),
+                        )
+                    .prefetch_related(
+                        Prefetch(
+                            'errors',
+                            error_model.objects
+                                .select_related(
+                                    '%s__communication__foia__jurisdiction' % email_or_fax)
+                                .order_by('-datetime')
+                        )))
+            if email_or_fax == 'email':
+                addresses = addresses.annotate(
+                        last_open=Max('opens__datetime'),
+                        )
+            addresses = addresses.in_bulk(g[0].pk for g in grouped_requests)
 
             review_data = []
-            for addr, foias in groupby(open_requests, lambda f: getattr(f, email_or_fax)):
-                last_error = error_model.objects.filter(recipient=addr).last()
-                last_confirm = (comm_model.objects
-                        .filter(**{comm_to_attr: addr})
-                        .exclude(confirmed_datetime=None)
-                        .order_by('confirmed_datetime')
-                        .last()
-                        )
-                if email_or_fax == 'email':
-                    last_open = EmailOpen.objects.filter(recipient=addr).last()
-                else:
-                    last_open = None
+            for addr, foias in grouped_requests:
+                # fetch the address with the annotated stats
+                addr = addresses[addr.pk]
                 review_data.append({
                         'address': addr,
                         'error': addr.status == 'error',
-                        'foias': list(foias),
-                        'total_errors': error_model.objects.filter(recipient=addr).count(),
-                        'last_error': last_error.datetime if last_error else None,
-                        'last_confirm': last_confirm.confirmed_datetime if last_confirm else None,
-                        'last_open': last_open.datetime if last_open else None,
-                        'checkbox_name': '%d-%s-%d' % (self.pk, email_or_fax, addr.pk),
+                        'errors': addr.errors.all()[:5],
+                        'foias': foias,
+                        'total_errors': addr.error_count,
+                        'last_error': addr.last_error,
+                        'last_confirm': addr.last_confirm,
+                        'last_open': addr.last_open if email_or_fax == 'email' else None,
+                        'checkbox_name': 'foias-%d-%s-%d' % (self.pk, email_or_fax, addr.pk),
+                        'email_or_fax': email_or_fax,
                         })
             return review_data
 
-        open_requests = (self.agency.foiarequest_set
-                .get_open()
-                .order_by('email__status', 'email')
-                .exclude(email=None)
-                )
-        review_data.extend(get_data(open_requests, 'email'))
-        open_requests = (self.agency.foiarequest_set
-                .get_open()
-                .order_by('fax__status', 'fax')
-                .exclude(fax=None)
-                .exclude(email__status='good')
-                )
-        review_data.extend(get_data(open_requests, 'fax'))
+        review_data.extend(get_data('email'))
+        review_data.extend(get_data('fax'))
+        # snail mail
         foias = list(self.agency.foiarequest_set
                 .get_open()
                 .exclude(email=None)
                 .exclude(fax=None)
+                .select_related('jurisdiction')
+                .annotate(
+                    latest_response=ExtractDay(
+                        Now() - Max(Case(When(
+                            communications__response=True,
+                            then='communications__date'
+                            ))))
+                    )
                 )
         if foias:
             review_data.append({
@@ -405,6 +473,67 @@ class ReviewAgencyTask(Task):
                     })
 
         return review_data
+
+    def update_contact(self, email_or_fax, foia_list, update_info, snail):
+        """Updates the contact info on the agency and the provided requests."""
+        from muckrock.agency.models import AgencyEmail, AgencyPhone
+        is_email = isinstance(email_or_fax, EmailAddress) and not snail
+        is_fax = isinstance(email_or_fax, PhoneNumber) and not snail
+
+        if update_info:
+            # clear primary emails if we are updating with any new info
+            agency_emails = (self.agency.agencyemail_set
+                    .filter(request_type='primary', email_type='to'))
+            for agency_email in agency_emails:
+                agency_email.request_type = 'none'
+                agency_email.email_type = 'none'
+                agency_email.save()
+
+            # clear primary faxes if updating with a fax or snail mail address
+            if is_fax or snail:
+                agency_faxes = (self.agency.agencyphone_set
+                        .filter(request_type='primary', phone__type='fax'))
+                for agency_fax in agency_faxes:
+                    agency_fax.request_type = 'none'
+                    agency_fax.save()
+
+        if is_email:
+            if update_info:
+                AgencyEmail.objects.create(
+                        email=email_or_fax,
+                        agency=self.agency,
+                        request_type='primary',
+                        email_type='to',
+                        )
+            for foia in foia_list:
+                foia.email = email_or_fax
+                if foia.fax and foia.fax.status != 'good':
+                    foia.fax = None
+                foia.save()
+
+        elif is_fax:
+            if update_info:
+                AgencyPhone.objects.create(
+                        phone=email_or_fax,
+                        agency=self.agency,
+                        request_type='primary',
+                        )
+            for foia in foia_list:
+                foia.email = None
+                foia.fax = email_or_fax
+                foia.save()
+
+        elif snail:
+            for foia in foia_list:
+                foia.email = None
+                foia.fax = None
+                foia.address = self.agency.get_addresses().first()
+                foia.save()
+
+    def latest_response(self):
+        """Returns the latest response from the agency"""
+        return (self.agency.foiarequest_set
+                .aggregate(max_date=Max('communications__date'))['max_date'])
 
 
 class FlaggedTask(Task):

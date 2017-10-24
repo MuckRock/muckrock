@@ -188,6 +188,8 @@ class EmailCommunication(models.Model):
     to_emails = models.ManyToManyField(EmailAddress, related_name='to_emails')
     cc_emails = models.ManyToManyField(EmailAddress, related_name='cc_emails')
 
+    delivered = 'email'
+
     def __unicode__(self):
         value = 'Email Communication'
         if self.from_email:
@@ -201,17 +203,41 @@ class EmailCommunication(models.Model):
         raw_email.raw_email = msg
         raw_email.save()
 
+    def sent_to(self):
+        """Who was this email sent to?"""
+        return self.to_emails.first()
+
+    def sent_from(self):
+        """Who was this email sent from?"""
+        return self.from_email
+
 
 class FaxCommunication(models.Model):
     """A fax sent to deliver a communication"""
     communication = models.ForeignKey('foia.FOIACommunication', related_name='faxes')
     sent_datetime = models.DateTimeField()
     confirmed_datetime = models.DateTimeField(blank=True, null=True)
-    to_number = models.ForeignKey(PhoneNumber, blank=True, null=True)
+    to_number = models.ForeignKey(
+            PhoneNumber,
+            blank=True,
+            null=True,
+            related_name='faxes',
+            )
     fax_id = models.CharField(max_length=10, blank=True, default='')
+
+    delivered = 'fax'
 
     def __unicode__(self):
         return 'Fax Communication To %s' % self.to_number
+
+    def sent_to(self):
+        """Who was this fax sent to?"""
+        return self.to_number
+
+    def sent_from(self):
+        """Who was this fax sent from?"""
+        # pylint: disable=no-self-use
+        return None
 
 
 class MailCommunication(models.Model):
@@ -234,8 +260,18 @@ class MailCommunication(models.Model):
             related_name='to_mails',
             )
 
+    delivered = 'mail'
+
     def __unicode__(self):
         return 'Mail Communication To %s' % self.to_address
+
+    def sent_to(self):
+        """Who was this mail sent to?"""
+        return self.to_address
+
+    def sent_from(self):
+        """Who was this mail sent from?"""
+        return self.from_address
 
 
 class WebCommunication(models.Model):
@@ -243,8 +279,20 @@ class WebCommunication(models.Model):
     communication = models.ForeignKey('foia.FOIACommunication', related_name='web_comms')
     sent_datetime = models.DateTimeField()
 
+    delivered = 'web'
+
     def __unicode__(self):
         return 'Web Communication'
+
+    def sent_to(self):
+        """Who was web comm sent to?"""
+        # pylint: disable=no-self-use
+        return None
+
+    def sent_from(self):
+        """Who was web comm sent from?"""
+        # pylint: disable=no-self-use
+        return None
 
 
 # Error models

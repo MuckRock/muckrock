@@ -73,8 +73,8 @@ class EmailOrFaxAutocomplete(autocomplete_light.AutocompleteBase):
         emails = list(EmailAddress.objects
                 .filter(status='good')
                 .filter(
-                    Q(email__contains=query) |
-                    Q(name__contains=query),
+                    Q(email__icontains=query) |
+                    Q(name__icontains=query),
                     )[:10])
         phones = list(PhoneNumber.objects
                 .filter(status='good')

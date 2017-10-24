@@ -5,6 +5,8 @@ Nodes and tags for rendering tasks into templates
 from django import template
 from django.core.urlresolvers import reverse
 
+from datetime import datetime
+
 from muckrock import agency, foia, task
 # imports Task model separately to patch bug in django-compressor parser
 from muckrock.task.models import Task
@@ -167,16 +169,14 @@ class SnailMailTaskNode(TaskNode):
         extra_context['status'] = foia.models.STATUS
         # if this is an appeal and their is a specific appeal agency, display
         # that agency, else display the standard agency
-        foia_agency = self.task.communication.foia.agency
-        if self.task.category == 'a' and foia_agency.appeal_agency:
-            extra_context['agency'] = foia_agency.appeal_agency
+        foia_ = self.task.communication.foia
+        if self.task.category == 'a' and foia_.agency.appeal_agency:
+            extra_context['agency'] = foia_.agency.appeal_agency
         else:
-            extra_context['agency'] = foia_agency
-        extra_context['appeal_address'] = (
-                extra_context['agency']
-                .get_addresses('appeal')
-                .first()
-                )
+            extra_context['agency'] = foia_.agency
+        extra_context['address'] = foia_.address
+        extra_context['body'] = foia_.render_msg_body(switch=self.task.switch)
+
         return extra_context
 
 
@@ -220,12 +220,48 @@ class ReviewAgencyTaskNode(TaskNode):
         extra_context['emails'] = [str(e) for e in
                 self.task.agency.agencyemail_set.all()]
         extra_context['faxes'] = [str(f) for f in
-                self.task.agency.phones.filter(type='fax')]
+                self.task.agency.agencyphone_set.all()
+                if f.phone.type == 'fax']
         extra_context['phones'] = [str(p) for p in
-                self.task.agency.phones.filter(type='phone')]
+                self.task.agency.agencyphone_set.all()
+                if p.phone.type == 'phone']
         extra_context['addresses'] = [str(a) for a in
-                self.task.agency.addresses.all()]
+                self.task.agency.agencyaddress_set.all()]
+        extra_context['num_open_requests'] = (
+                self.task.agency.foiarequest_set.get_open().count())
+        latest_response = self.task.latest_response()
+        if latest_response:
+            extra_context['latest_response'] = (
+                    latest_response,
+                    (datetime.now() - latest_response).days,
+                    )
         extra_context['review_data'] = self.task.get_review_data()
+        email = [e.email for e in self.task.agency.agencyemail_set.all()
+                if e.request_type == 'primary' and e.email_type == 'to'
+                and e.email.status == 'good']
+        if email:
+            initial = str(email[0])
+        else:
+            fax = [p.phone for p in self.task.agency.agencyphone_set.all()
+                    if p.request_type == 'primary' and p.phone.type == 'fax'
+                    and p.phone.status == 'good']
+            if fax:
+                initial = str(fax[0])
+            else:
+                initial = ''
+        followup_text = (
+                'To Whom It May Concern:\n'
+                'I wanted to follow up on the following request, copied below. '
+                'Please let me know when I can expect to receive a response.\n'
+                'Thanks for your help, and let me know if further '
+                'clarification is needed.'
+                )
+        extra_context['form'] = task.forms.ReviewAgencyTaskForm(
+                initial={
+                    'email_or_fax': initial,
+                    'update_agency_info': not initial,
+                    'reply': followup_text,
+                    })
         return extra_context
 
 

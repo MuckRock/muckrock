@@ -35,15 +35,9 @@
             <dd>{{fax}}</dd>
         {% endif %}
     {% endwith %}
-    {% with address=agency.get_addresses.first %}
-        {% if address %}
-            <dt>Agency Address</dt>
-            <dd>{{address|linebreaks}}</dd>
-        {% endif %}
-    {% endwith %}
-    {% if task.category == "a" and appeal_address %}
-        <dt>Agency Appeal Address</dt>
-        <dd>{{appeal_address|linebreaks}}</dd>
+    {% if address %}
+        <dt>Agency Address</dt>
+        <dd>{{address|linebreaks}}</dd>
     {% endif %}
 	{% if agency.notes %}
     <dt>Agency Notes</dt>
@@ -64,7 +58,7 @@
     {# full letter here, hidden #}
     <header>Full letter</header>
     <textarea name="full-communication" id="full-letter-{{task.pk}}">
-{% with foia as request %}{% include "text/foia/request_msg.txt" %}{% endwith %}
+{{ body }}
     </textarea>
 </div>
 {% endwith %}

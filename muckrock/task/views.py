@@ -5,6 +5,7 @@ Views for the Task application
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import resolve
+from django.db import transaction
 from django.db.models import Count, Prefetch
 from django.http import HttpResponse, Http404
 from django.shortcuts import redirect, get_object_or_404
@@ -17,7 +18,11 @@ from django_filters import FilterSet
 
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
-from muckrock.communication.models import MailCommunication, EmailAddress, EmailCommunication
+from muckrock.communication.models import (
+        MailCommunication,
+        EmailAddress,
+        EmailCommunication,
+        )
 from muckrock.foia.models import STATUS, FOIARequest, FOIACommunication, FOIAFile
 from muckrock.task.filters import (
     TaskFilterSet,
@@ -33,6 +38,7 @@ from muckrock.task.forms import (
     StaleAgencyTaskForm,
     ResponseTaskForm,
     ProjectReviewTaskForm,
+    ReviewAgencyTaskForm,
     )
 from muckrock.task.models import (
     Task,
@@ -49,6 +55,7 @@ from muckrock.task.models import (
     ProjectReviewTask,
     NewExemptionTask,
     )
+from muckrock.task.tasks import submit_review_update
 from muckrock.views import MRFilterListView
 
 # pylint:disable=missing-docstring
@@ -285,12 +292,46 @@ class StaleAgencyTaskList(TaskList):
 
 class ReviewAgencyTaskList(TaskList):
     model = ReviewAgencyTask
-    filter_class = ReviewAgencyTaskFilterSet # XXX
+    filter_class = ReviewAgencyTaskFilterSet
     title = 'Review Agencies'
-    queryset = ReviewAgencyTask.objects.all()
+    queryset = ReviewAgencyTask.objects.all().preload_list()
 
     def task_post_helper(self, request, task):
-        """Do the things here"""
+        """Update the requests with new contact information"""
+        if request.POST.get('update'):
+            form = ReviewAgencyTaskForm(request.POST)
+            if form.is_valid():
+                email_or_fax = form.cleaned_data['email_or_fax']
+                foia_keys = [k for k in request.POST.keys()
+                        if k.startswith('foias-')]
+                foia_pks = []
+                for key in foia_keys:
+                    foia_pks.extend(request.POST.getlist(key))
+                foias = FOIARequest.objects.filter(pk__in=foia_pks)
+                update_info = form.cleaned_data['update_agency_info']
+                snail = form.cleaned_data['snail_mail']
+                task.agency.unmark_stale()
+                with transaction.atomic():
+                    task.update_contact(email_or_fax, foias, update_info, snail)
+                    # ensure th eupdated contact information is commited to the
+                    # database before trying to re-submit
+                    transaction.on_commit(
+                            lambda: submit_review_update.delay(
+                                foia_pks,
+                                form.cleaned_data['reply'],
+                                ))
+                messages.success(
+                        request,
+                        'Updated contact information for selected requests '
+                        'and sent followup message.',
+                        )
+            else:
+                messages.error(
+                        request,
+                        'A valid email or fax is required if '
+                        'snail mail is not checked',
+                        )
+                return
         return super(ReviewAgencyTaskList, self).task_post_helper(request, task)
 
 

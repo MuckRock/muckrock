@@ -350,10 +350,10 @@ class FOIACommunication(models.Model):
         else:
             return self.from_who
 
-    def get_delivered(self):
-        """Get how this comm was delivered"""
+    def get_subcomm(self):
+        """Get the latest sub communication type"""
         # sort all types of comms by sent datetime,
-        # and return the type of the latest
+        # and return the latest
         sorted_comms = sorted(
                 list(self.emails.all()) +
                 list(self.faxes.all()) +
@@ -364,16 +364,33 @@ class FOIACommunication(models.Model):
                 )
         if not sorted_comms:
             return None
-        type_dict = {
-                EmailCommunication: 'email',
-                FaxCommunication: 'fax',
-                MailCommunication: 'mail',
-                WebCommunication: 'web',
-                type(None): None,
-                }
-        return type_dict[type(sorted_comms[0])]
+        return sorted_comms[0]
+
+    def get_delivered(self):
+        """Get how this comm was delivered"""
+        subcomm = self.get_subcomm()
+        if subcomm:
+            return subcomm.delivered
+        else:
+            return 'none'
     # for the admin
     get_delivered.short_description = 'delivered'
+
+    def sent_to(self):
+        """Who was this communication sent to?"""
+        subcomm = self.get_subcomm()
+        if subcomm:
+            return subcomm.sent_to()
+        else:
+            return None
+
+    def sent_from(self):
+        """Who was this communication sent to?"""
+        subcomm = self.get_subcomm()
+        if subcomm:
+            return subcomm.sent_from()
+        else:
+            return None
 
     class Meta:
         # pylint: disable=too-few-public-methods

@@ -363,12 +363,12 @@ def bounces(request, email_comm, timestamp):
             )
     recipient.status = 'error'
     recipient.save()
-    # XXX do not create dupes
-    ReviewAgencyTask.objects.create(
+    ReviewAgencyTask.objects.get_or_create(
             agency=email_comm.communication.foia.agency,
+            resolved=False,
             )
     if not email_comm.cc_emails.filter(email=recipient):
-        email_comm.communication.foia.submit()
+        email_comm.communication.foia.submit(switch=True)
 
 
 @mailgun_verify
@@ -471,11 +471,11 @@ def phaxio_callback(request):
                 else:
                     number.status = 'error'
                     number.save()
-                    # XXX do not create dupes
-                    ReviewAgencyTask.objects.create(
+                    ReviewAgencyTask.objects.get_or_create(
                             agency=fax_comm.communication.foia.agency,
+                            resolved=False,
                             )
-                    fax_comm.communication.foia.submit()
+                    fax_comm.communication.foia.submit(switch=True)
 
     return HttpResponse('OK')
 

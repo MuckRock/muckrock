@@ -266,6 +266,7 @@ CELERY_IMPORTS = (
     'muckrock.foia.tasks',
     'muckrock.accounts.tasks',
     'muckrock.agency.tasks',
+    'muckrock.task.tasks',
     )
 CELERYD_MAX_TASKS_PER_CHILD = os.environ.get('CELERYD_MAX_TASKS_PER_CHILD', 100)
 CELERYD_TASK_TIME_LIMIT = os.environ.get('CELERYD_TASK_TIME_LIMIT', 5 * 60)

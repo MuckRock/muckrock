@@ -560,6 +560,8 @@ class Statistics(models.Model):
     total_unresolved_payment_tasks = models.IntegerField(null=True, blank=True)
     total_crowdfundpayment_tasks = models.IntegerField(null=True, blank=True)
     total_unresolved_crowdfundpayment_tasks = models.IntegerField(null=True, blank=True)
+    total_reviewagency_tasks = models.IntegerField(null=True, blank=True)
+    total_unresolved_reviewagency_tasks = models.IntegerField(null=True, blank=True)
     daily_robot_response_tasks = models.IntegerField(null=True, blank=True)
     flag_processing_days = models.IntegerField(null=True, blank=True)
     unresolved_snailmail_appeals = models.IntegerField(null=True, blank=True)

@@ -294,6 +294,12 @@ class AgencyAddress(models.Model):
             default='none',
             )
 
+    def __unicode__(self):
+        val = unicode(self.address)
+        if self.request_type != 'none':
+            val = '%s\n(%s)' % (val, self.request_type)
+        return val
+
 
 class AgencyEmail(models.Model):
     """Through model for agency to email M2M"""
@@ -328,3 +334,9 @@ class AgencyPhone(models.Model):
             choices=REQUEST_TYPES,
             default='none',
             )
+
+    def __unicode__(self):
+        val = unicode(self.phone)
+        if self.request_type != 'none':
+            val = '%s (%s)' % (val, self.request_type)
+        return val

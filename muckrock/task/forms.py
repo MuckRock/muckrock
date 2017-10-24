@@ -4,6 +4,9 @@ Forms for Task app
 
 from django import forms
 
+from autocomplete_light import shortcuts as autocomplete_light
+
+from muckrock.communication.utils import get_email_or_fax
 from muckrock.foia.models import STATUS
 
 
@@ -26,6 +29,49 @@ class ProjectReviewTaskForm(forms.Form):
 class StaleAgencyTaskForm(forms.Form):
     """Simple form for acting on a StaleAgencyTask"""
     email = forms.EmailField()
+
+
+class ReviewAgencyTaskForm(forms.Form):
+    """Simple form to allow selecting an email address or fax number"""
+    email_or_fax = forms.CharField(
+            label='Update email or fax on checked requests:',
+            widget=autocomplete_light.TextWidget('EmailOrFaxAutocomplete'),
+            required=False,
+            )
+    update_agency_info = forms.BooleanField(
+            label='Update agency\'s main contact info?',
+            required=False,
+            )
+    snail_mail = forms.BooleanField(
+            label='Make snail mail the prefered communication method',
+            required=False,
+            )
+    reply = forms.CharField(
+            label='Reply:',
+            widget=forms.Textarea(
+                attrs={
+                    'rows': 5,
+                    }),
+            )
+
+    def clean_email_or_fax(self):
+        """Validate the email_or_fax field"""
+        if self.cleaned_data['email_or_fax']:
+            return get_email_or_fax(self.cleaned_data['email_or_fax'])
+        else:
+            return None
+
+    def clean(self):
+        """Make email_or_fax required if snail mail is not checked"""
+        cleaned_data = super(ReviewAgencyTaskForm, self).clean()
+        email_or_fax = cleaned_data.get('email_or_fax')
+        snail_mail = cleaned_data.get('snail_mail')
+
+        if not email_or_fax and not snail_mail:
+            self.add_error(
+                    'email_or_fax',
+                    'Required if snail mail is not checked',
+                    )
 
 
 class ResponseTaskForm(forms.Form):

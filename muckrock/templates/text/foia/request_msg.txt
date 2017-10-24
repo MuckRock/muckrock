@@ -1,8 +1,17 @@
 {% autoescape off %}
+{% if address %}
+{{ agency.name }}
+{{ address }}
+{% endif %}
+
 {% now "F j, Y" %}
-{% if request.agency %}{{ request.agency.name }}{% if request.agency.get_addresses.first %}
-{{ request.agency.get_addresses.first }}{% endif %}{% endif %}
+
 {% if request.communications.count > 1 %}{% if request.tracking_id %}
 This is a follow up to request number {{request.tracking_id}}:{% else %}
-This is a follow up to a previous request:{% endif %}{% endif %}{% include "text/foia/comms.txt" %}
+This is a follow up to a previous request:{% endif %}{% endif %}
+
+{% if switch %}
+This request was originally submitted via {{ original.method }}{% if original.addr %} to {{ original.addr }}{% endif %}.  {% if last_resp %}It was last responded to on {{ last_resp.date|date }} via {{ last_resp.method }}{% if last_resp.addr %} by {{ last_resp.addr }}{% endif %}.{% else %}It was never acknowledged.{% endif %}  Due to issues with the original communication method, we are now directing this request to you.
+{% endif %}
+{% include "text/foia/comms.txt" %}
 {% endautoescape %}
