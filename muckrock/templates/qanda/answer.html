@@ -7,17 +7,19 @@
         <span class="from">{{answer.user.get_full_name}}</span>
         <span>
             <a href="{{answer.question.get_absolute_url}}#answer-{{answer.id}}" class="nocollapse permalink"><time class="date" datetime="{{answer.date|date:'c'}}">{{answer.date|date:'m/d/Y'}}</time></a>
-            <span class="options dropdown">
-                <span class="dropdown-trigger">
-                    {% include 'lib/component/icon/options.svg' %}
+            {% if request.user.is_authenticated %}
+                <span class="options dropdown">
+                    <span class="dropdown-trigger">
+                        {% include 'lib/component/icon/options.svg' %}
+                    </span>
+                        <ul class="options dropdown-list">
+                            <li><a href="{% url 'question-spam' model='answer' model_pk=answer.pk %}?next={{ request.path|urlencode }}" class="option dropdown-list-item">Report Spam</a></li>
+                            {% if can_block %}
+                            <li><a href="{% url 'question-block' model='answer' model_pk=answer.pk %}?next={{ request.path|urlencode }}" class="option dropdown-list-item">Block User</a></li>
+                            {% endif %}
+                        </ul>
                 </span>
-                <ul class="options dropdown-list">
-                    <li><a href="{% url 'question-spam' model='answer' model_pk=answer.pk %}?next={{ request.path|urlencode }}" class="option dropdown-list-item">Report Spam</a></li>
-                    {% if can_block %}
-                    <li><a href="{% url 'question-block' model='answer' model_pk=answer.pk %}?next={{ request.path|urlencode }}" class="option dropdown-list-item">Block User</a></li>
-                    {% endif %}
-                </ul>
-            </span>
+            {% endif %}
         </span>
     </header>
     <section class="textbox__section">

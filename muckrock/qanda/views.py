@@ -300,6 +300,7 @@ def block_user(request, model, model_pk):
     return _block_or_report(request, model, model_pk, block=True)
 
 
+@login_required
 def report_spam(request, model, model_pk):
     """Report the post as being spam"""
     return _block_or_report(request, model, model_pk, block=False)

@@ -7,17 +7,19 @@
         <span class="from">{{question.user.get_full_name}}</span>
         <span>
             <a href="{{question.get_absolute_url}}" class="nocollapse"><time class="date" datetime="{{question.date|date:'c'}}">{{question.date|date:'m/d/Y'}}</time></a>
-            <span class="options dropdown">
-                <span class="dropdown-trigger">
-                    {% include 'lib/component/icon/options.svg' %}
+            {% if request.user.is_authenticated %}
+                <span class="options dropdown">
+                    <span class="dropdown-trigger">
+                        {% include 'lib/component/icon/options.svg' %}
+                    </span>
+                    <ul class="options dropdown-list">
+                        <li><a href="{% url 'question-spam' model='question' model_pk=question.pk %}?next={{ request.path|urlencode }}" class="option dropdown-list-item">Report Spam</a></li>
+                        {% if can_block %}
+                        <li><a href="{% url 'question-block' model='question' model_pk=question.pk %}" class="option dropdown-list-item">Block User</a></li>
+                        {% endif %}
+                    </ul>
                 </span>
-                <ul class="options dropdown-list">
-                    <li><a href="{% url 'question-spam' model='question' model_pk=question.pk %}?next={{ request.path|urlencode }}" class="option dropdown-list-item">Report Spam</a></li>
-                    {% if can_block %}
-                    <li><a href="{% url 'question-block' model='question' model_pk=question.pk %}" class="option dropdown-list-item">Block User</a></li>
-                    {% endif %}
-                </ul>
-            </span>
+            {% endif %}
         </span>
     </header>
     <section class="textbox__section">
