@@ -13,12 +13,6 @@ import logging
 import mimetypes
 import os
 
-from muckrock.communication.models import (
-        EmailCommunication,
-        FaxCommunication,
-        MailCommunication,
-        WebCommunication,
-        )
 from muckrock.foia.models.request import FOIARequest, STATUS
 from muckrock.utils import new_action
 

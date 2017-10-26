@@ -256,7 +256,7 @@ class SnailMailTask(Task):
     user = models.ForeignKey(User, blank=True, null=True)
     amount = models.DecimalField(default=0.00, max_digits=8, decimal_places=2)
     switch = models.BooleanField(
-            default=False, 
+            default=False,
             help_text='Designates we have switched to sending to this address '
             'from another formof communication due to some sort of error.  A '
             'note should be included in the communication with an explanation.',
@@ -476,6 +476,7 @@ class ReviewAgencyTask(Task):
 
     def update_contact(self, email_or_fax, foia_list, update_info, snail):
         """Updates the contact info on the agency and the provided requests."""
+        # pylint: disable=too-many-branches
         from muckrock.agency.models import AgencyEmail, AgencyPhone
         is_email = isinstance(email_or_fax, EmailAddress) and not snail
         is_fax = isinstance(email_or_fax, PhoneNumber) and not snail

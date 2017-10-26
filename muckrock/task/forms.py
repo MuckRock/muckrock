@@ -46,6 +46,10 @@ class ReviewAgencyTaskForm(forms.Form):
             label='Make snail mail the prefered communication method',
             required=False,
             )
+    resolve = forms.BooleanField(
+            label='Resolve after updating',
+            required=False,
+            )
     reply = forms.CharField(
             label='Reply:',
             widget=forms.Textarea(
