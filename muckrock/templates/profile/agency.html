@@ -7,7 +7,7 @@
 {% block metadata %}
 {% if agency.image %}
 <figure class="agency image">
-    <img src="{% thumbnail agency.image 600x600 %}" class="header-image">
+    <img src="{% thumbnail agency.image 600x600 %}" class="header-image" alt="{{ agency.image_attr_line|striptags}}">
     {% if agency.image_attr_line %}
     <figcaption>{{ agency.image_attr_line | safe }}</figcaption>
     {% endif %}

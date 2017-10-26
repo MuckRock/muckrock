@@ -20,7 +20,7 @@
 {% endwith %}
 <div class="news detail">
     {% if article.image %}
-    <div class="news__image"><img src="{% thumbnail article.image 1200x400 crop %}"></div>
+    <div class="news__image"><img src="{% thumbnail article.image 1200x400 crop %}" alt="{{ article.title }}"></div>
     {% endif %}
     <article class="news__article">
         <header class="news__article__header">
