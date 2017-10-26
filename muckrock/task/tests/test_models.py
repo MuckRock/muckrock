@@ -566,7 +566,7 @@ class TestTaskManager(TestCase):
         self.foia = factories.FOIARequestFactory(user=user, agency=agency)
         self.comm = factories.FOIACommunicationFactory(foia=self.foia, response=True)
         # tasks that incorporate FOIAs are:
-        # ResponseTask, SnailMailTask, FailedFaxTask, RejectedEmailTask, FlaggedTask,
+        # ResponseTask, SnailMailTask, FlaggedTask,
         # StatusChangeTask, NewAgencyTask
         response_task = task.models.ResponseTask.objects.create(
             communication=self.comm
@@ -574,13 +574,6 @@ class TestTaskManager(TestCase):
         snail_mail_task = task.models.SnailMailTask.objects.create(
             category='a',
             communication=self.comm
-        )
-        failed_fax_task = task.models.FailedFaxTask.objects.create(
-            communication=self.comm
-        )
-        rejected_email_task = task.models.RejectedEmailTask.objects.create(
-            category='d',
-            foia=self.foia
         )
         flagged_task = task.models.FlaggedTask.objects.create(
             user=user,
@@ -599,8 +592,6 @@ class TestTaskManager(TestCase):
         self.tasks = [
             response_task,
             snail_mail_task,
-            failed_fax_task,
-            rejected_email_task,
             flagged_task,
             status_change_task,
             new_agency_task

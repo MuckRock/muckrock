@@ -850,7 +850,7 @@ class FOIARequest(models.Model):
         else:
             extra = {}
 
-        switch = (kwargs.get('switch') or
+        switch = bool(kwargs.get('switch', False) or
                 ((self.email and self.email.status == 'error')
                     and (self.last_request().sent_to() == self.email)) or
                 ((self.fax and self.fax.status == 'error')
