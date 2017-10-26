@@ -596,11 +596,12 @@ class FOIARequest(models.Model):
             request_type = 'appeal'
         else:
             request_type = 'primary'
-        # if no addresses are set, pull them from the agency
-        if not self.email and not self.fax and not self.address:
+        if not self.email:
             self.email = agency.get_emails(request_type, 'to').first()
             self.cc_emails.set(agency.get_emails(request_type, 'cc'))
+        if not self.fax:
             self.fax = agency.get_faxes(request_type).first()
+        if not self.address:
             self.address = agency.get_addresses(request_type).first()
         self.save()
 
