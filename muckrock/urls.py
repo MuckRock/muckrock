@@ -23,6 +23,7 @@ import muckrock.news.views
 import muckrock.qanda.views
 import muckrock.task.viewsets
 import muckrock.views as views
+from muckrock.sitemap import FlatPageSitemap
 from muckrock.agency.sitemap import AgencySitemap
 from muckrock.foia.sitemap import FoiaSitemap
 from muckrock.jurisdiction.sitemap import JurisdictionSitemap
@@ -40,6 +41,7 @@ sitemaps = {
     'Jurisdiction': JurisdictionSitemap,
     'Question': QuestionSitemap,
     'Project': ProjectSitemap,
+    'Flatpages': FlatPageSitemap,
 }
 
 router = DefaultRouter()
