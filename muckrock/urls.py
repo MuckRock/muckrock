@@ -124,7 +124,11 @@ urlpatterns = [
     url(r'^robots\.txt$', include('robots.urls')),
     url(r'^favicon.ico$', RedirectView.as_view(
         url=settings.STATIC_URL + 'icons/favicon.ico')),
-    url(r'^sitemap\.xml$', django.contrib.sitemaps.views.index, {'sitemaps': sitemaps}),
+    url(r'^sitemap\.xml$',
+        django.contrib.sitemaps.views.index,
+        {'sitemaps': sitemaps},
+        name='django.contrib.sitemaps.views.index',
+        ),
     url(
         r'^sitemap-(?P<section>.+)\.xml$',
         django.contrib.sitemaps.views.sitemap,
