@@ -868,6 +868,7 @@ class FOIARequest(models.Model):
         context = {
                 'request': self,
                 'switch': switch,
+                'address': self.address,
                 }
         if reply_link:
             context['reply_link'] = self.get_agency_reply_link(self.email.email)

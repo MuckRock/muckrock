@@ -1,6 +1,5 @@
 {% autoescape off %}
 {% if address %}
-{{ agency.name }}
 {{ address }}
 {% endif %}
 
