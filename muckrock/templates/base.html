@@ -81,6 +81,31 @@
         <meta name="twitter:image:src" content="{% static 'icons/logo.png' %}" />
         {% endblock twitter_card %}
         {% opensearch_meta %}
+        <script type="application/ld+json">
+        { "@context" : "http://schema.org",
+          "@type" : "Organization",
+          "legalName" : "MuckRock Foundation",
+          "url" : "https://www.muckrock.com/",
+          "address" : {
+            "@type" : "PostalAddress",
+            "addressCountry" : "US",
+            "addressLocality" : "Somerville",
+            "addressRegion" : "MA",
+            "postalCode" : "02144",
+            "streetAddress" : "411A Highland Ave"
+          },
+          "contactPoint" : [{
+            "@type" : "ContactPoint",
+            "telephone" : "+1-617-299-1832",
+            "email" : "info@muckrock.com",
+            "contactType" : "customer service"
+          }],
+          "logo" : "https://cdn.muckrock.com/icons/logo.png",
+          "sameAs" : [ "http://www.facebook.com/muckrock",
+            "http://www.twitter.com/MuckRock",
+            "https://en.wikipedia.org/wiki/MuckRock"]
+        }
+        </script>
     </head>
     <body>
         {% hijack_notification %}

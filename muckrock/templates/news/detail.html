@@ -9,6 +9,10 @@
 
 {% block title %}{{ article.title }} &bull; MuckRock{% endblock title %}
 
+{% block description %}
+<meta name="description" content="{{ article.summary }}" />
+{% endblock %}
+
 {% block content %}
 {% cache cache_timeout article_detail article.pk %}
 {% with article.projects.last as project %}
