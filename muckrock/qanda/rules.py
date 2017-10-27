@@ -26,5 +26,10 @@ def has_confirmed_email(user):
 def has_requests(user):
     return user.profile.num_requests > 0
 
-add_perm('qanda.post', has_confirmed_email | has_requests | is_advanced)
+@predicate
+@user_authenticated
+def made_request(user):
+    return user.foiarequest_set.exclude(status='started').exists()
+
+add_perm('qanda.post', made_request | is_advanced)
 add_perm('qanda.block', is_staff)
