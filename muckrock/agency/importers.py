@@ -49,6 +49,7 @@ LAST_UPDATE = 21
 
 def import_schools(file_name):
     """Import schools from spreadsheet"""
+    # pylint: disable=too-many-locals
     conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
     bucket = conn.get_bucket('muckrock')
     key = bucket.get_key(file_name)
@@ -61,31 +62,33 @@ def import_schools(file_name):
             print row[DISTRICT]
             try:
                 parent = Jurisdiction.objects.get(abbrev=row[STATE])
-                city, _ = Jurisdiction.objects.get_or_create(
-                        name=row[CITY],
+                county = Jurisdiction.objects.get(
+                        name='%s County' % row[COUNTY],
                         parent=parent,
                         level='l',
-                        defaults={
-                            'slug': slugify('%s, %s' % (row[CITY], row[STATE])),
-                            }
                         )
-            except (Jurisdiction.MultipleObjectsReturned) as exc:
+            except (
+                    Jurisdiction.DoesNotExist,
+                    Jurisdiction.MultipleObjectsReturned,
+                    ) as exc:
                 print '****'
                 print 'Jurisdiction error'
                 print row
                 print exc
                 print '****'
             else:
-                agency, _ = Agency.objects.get_or_create(
+                agency, created = Agency.objects.get_or_create(
                         name=row[DISTRICT],
                         slug=slugify(row[DISTRICT]),
-                        jurisdiction=city,
+                        jurisdiction=county,
                         status='approved',
                         defaults=dict(
                             contact_first_name=row[FIRST_NAME],
                             contact_last_name=row[LAST_NAME],
                             )
                         )
+                if not created:
+                    print 'agency already existed'
                 print agency.pk
                 agency.types.add(school_district)
                 address, _ = Address.objects.get_or_create(
@@ -121,5 +124,3 @@ def import_schools(file_name):
                             request_type='primary',
                             email_type='to',
                             )
-
-
