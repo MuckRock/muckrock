@@ -22,23 +22,30 @@
         {% newsletter %}
     {% endif %}
 {% endwith %}
-<div class="news detail">
+<div class="news detail" itemscope itemtype="https://schema.org/NewsArticle">
+    <meta itemscope itemprop="mainEntityOfPage" itemType="https://schema.org/WebPage" itemid="https://www.muckrock.com{{ article.get_absolute_url }}">
     {% if article.image %}
-    <div class="news__image"><img src="{% thumbnail article.image 1200x400 crop %}" alt="{{ article.title }}"></div>
+    <div class="news__image" itemprop="image" itemscope itemtype="https://schema.org/ImageObject">
+        <img src="{% thumbnail article.image 1200x400 crop %}" alt="{{ article.title }}">
+        <meta itemprop="url" content="https://www.muckrock.com{% thumbnail article.image 1200x400 crop %}">
+        <meta itemprop="width" content="1200">
+        <meta itemprop="height" content="400">
+    </div>
     {% endif %}
     <article class="news__article">
         <header class="news__article__header">
-            <time title="{{ article.pub_date|date:'c' }}" datetime="{{ article.pub_date|date:'c' }}">{{ article.pub_date | date:"F j, Y" }}</time>
-            <h1>{{ article.title|smartypants }}</h1>
+            <time title="{{ article.pub_date|date:'c' }}" datetime="{{ article.pub_date|date:'c' }}" itemprop="datePublished">{{ article.pub_date | date:"F j, Y" }}</time>
+            <meta itemprop="dateModified" content="{{ article.pub_date|date:"c"}}">
+            <h1 itemprop="headline">{{ article.title|smartypants }}</h1>
             {% if article.kicker %}
-            <summary class="kicker">{{ article.kicker|markdown }}</summary>
+            <summary class="kicker" itemprop="description">{{ article.kicker|markdown }}</summary>
             {% endif %}
             <div class="contributors">
                 {% with article.authors.all as authors %}
                 {% if authors %}
                 <div class="authors">Written by
                     {% for author in authors %}
-                        <a href="{{ author.profile.get_absolute_url }}" title="{{ author.get_full_name }}">{{ author.get_full_name }}</a>{% if not forloop.last %}, {% endif %}
+                    <a href="{{ author.profile.get_absolute_url }}" title="{{ author.get_full_name }}" itemprop="author" itemscope itemtype="https://schema.org/Person"><span itemprop="name">{{ author.get_full_name }}</span></a>{% if not forloop.last %}, {% endif %}
                     {% endfor %}
                 </div>
                 {% endif %}
@@ -47,14 +54,14 @@
                 {% if editors %}
                 <div class="editors">Edited by
                     {% for editor in editors %}
-                        <a href="{{ editor.profile.get_absolute_url }}" title="{{ editor.get_full_name }}">{{ editor.get_full_name }}</a>{% if not forloop.last %}, {% endif %}
+                    <a href="{{ editor.profile.get_absolute_url }}" title="{{ editor.get_full_name }}" itemprop="editor" itemscope itemtype="https://schema.org/Person"><span itemprop="name">{{ editor.get_full_name }}</span></a>{% if not forloop.last %}, {% endif %}
                     {% endfor %}
                 </div>
                 {% endif %}
                 {% endwith %}
             </div>
         </header>
-        <main class="news__article__main">
+        <main class="news__article__main" itemprop="articleBody">
 {% comment %}
 We have to keep this code un-tabbed for dumb reasons!
 The markdown filter will transform the tabbed text into a line of <code>.
@@ -78,6 +85,14 @@ Like  I said, real dumb stuff!
         </div>
         {% endif %}
     </aside>
+    <div itemprop="publisher" itemscope itemtype="https://schema.org/Organization">
+        <div itemprop="logo" itemscope itemtype="https://schema.org/ImageObject">
+            <meta itemprop="url" content="https://cdn.muckrock.com/icons/logo.jpg">
+            <meta itemprop="width" content="200">
+            <meta itemprop="height" content="200">
+        </div>
+        <meta itemprop="name" content="MuckRock Foundation">
+    </div>
 </div>
 {% if related_articles %}
 <div class="articles__related">
