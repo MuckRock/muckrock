@@ -279,6 +279,13 @@ def _handle_request(request, mail_id):
             classify_status.apply_async(args=(task.pk,), countdown=30 * 60)
             comm.create_agency_notifications()
 
+        if foia.portal:
+            foia.portal.receive_msg(comm)
+        else:
+            task = ResponseTask.objects.create(communication=comm)
+            classify_status.apply_async(args=(task.pk,), countdown=30 * 60)
+            comm.create_agency_notifications()
+
         new_cc_emails = [e for e in (to_emails + cc_emails)
                 if e.domain not in ('requests.muckrock.com', 'muckrock.com')]
         foia.email = from_email
