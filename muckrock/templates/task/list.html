@@ -37,6 +37,12 @@
             Snail Mail
         </a>
     </li>
+    <li class="{% active request '^/task/portal/$' %}">
+        <a href="{% url 'portal-task-list' %}">
+            <span class="blue counter">{{ counters.portal }}</span>
+            Portal
+        </a>
+    </li>
     <li class="{% active request '^/task/flagged/$' %}">
         <a href="{% url 'flagged-task-list' %}">
             <span class="blue counter">{{ counters.flagged }}</span>
@@ -115,3 +121,7 @@
     {% include 'lib/task.html' %}
 {% endfor %}
 {% endblock %}
+
+{% block scripts %}
+    {% include 'lib/component/fine-uploader.html' %}
+{% endblock scripts %}

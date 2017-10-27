@@ -234,6 +234,7 @@ INSTALLED_APPS = (
     'muckrock.foiamachine',
     'muckrock.fine_uploader',
     'muckrock.communication',
+    'muckrock.portal',
     'actstream'
 )
 

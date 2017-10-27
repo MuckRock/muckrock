@@ -31,6 +31,7 @@ from muckrock.communication.models import (
         PhoneNumber,
         )
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.portal.models import Portal
 
 logger = logging.getLogger(__name__)
 
@@ -121,6 +122,10 @@ class AgencyAdminForm(forms.ModelForm):
             'AgencyAdminAutocomplete',
             queryset=Agency.objects.all(),
             required=False)
+    portal = autocomplete_light.ModelChoiceField(
+            'PortalAutocomplete',
+            queryset=Portal.objects.all(),
+            required=False)
 
     class Meta:
         # pylint: disable=too-few-public-methods
@@ -169,6 +174,7 @@ class AgencyAdmin(VersionAdmin):
                     'stale',
                     'manual_stale',
                     'location',
+                    'portal',
                     'contact_salutation',
                     'contact_first_name',
                     'contact_last_name',

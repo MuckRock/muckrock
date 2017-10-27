@@ -23,6 +23,8 @@
     {% multi_request_task task %}
 {% elif task.type == "NewExemptionTask" %}
     {% new_exemption_task task %}
+{% elif task.type == "PortalTask" %}
+    {% portal_task task %}
 {% else %}
     {% default_task task %}
 {% endif %}

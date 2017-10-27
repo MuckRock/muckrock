@@ -46,6 +46,11 @@ $('.estimated-completion .edit').click(function(){
     });
 });
 
+$('#show-portal-info').click(function(){
+    $(this).hide();
+    $('.portal-info').addClass('visible');
+});
+
 /* Communications */
 
 $('#toggle-communication-collapse').click(function(){

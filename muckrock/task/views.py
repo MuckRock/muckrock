@@ -2,11 +2,12 @@
 Views for the Task application
 """
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import resolve
 from django.db import transaction
-from django.db.models import Count, Prefetch
+from django.db.models import Count
 from django.http import HttpResponse, Http404
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
@@ -19,11 +20,11 @@ from django_filters import FilterSet
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
 from muckrock.communication.models import (
-        MailCommunication,
         EmailAddress,
-        EmailCommunication,
+        MailCommunication,
+        PortalCommunication,
         )
-from muckrock.foia.models import STATUS, FOIARequest, FOIACommunication, FOIAFile
+from muckrock.foia.models import STATUS, FOIARequest
 from muckrock.task.filters import (
     TaskFilterSet,
     ResponseTaskFilterSet,
@@ -32,6 +33,7 @@ from muckrock.task.filters import (
     FlaggedTaskFilterSet,
     StaleAgencyTaskFilterSet,
     ReviewAgencyTaskFilterSet,
+    PortalTaskFilterSet,
 )
 from muckrock.task.forms import (
     FlaggedTaskForm,
@@ -54,6 +56,7 @@ from muckrock.task.models import (
     StatusChangeTask,
     ProjectReviewTask,
     NewExemptionTask,
+    PortalTask,
     )
 from muckrock.task.tasks import submit_review_update
 from muckrock.views import MRFilterListView
@@ -76,6 +79,7 @@ def count_tasks():
         crowdfund=Count('crowdfundtask'),
         multirequest=Count('multirequesttask'),
         new_exemption=Count('newexemptiontask'),
+        portal=Count('portaltask'),
         )
     return count
 
@@ -123,6 +127,13 @@ class TaskList(MRFilterListView):
         context['counters'] = count_tasks()
         context['bulk_actions'] = self.bulk_actions
         context['processing_count'] = FOIARequest.objects.filter(status='submitted').count()
+        # These are for fine-uploader
+        context['MAX_ATTACHMENT_NUM'] = settings.MAX_ATTACHMENT_NUM
+        context['MAX_ATTACHMENT_SIZE'] = settings.MAX_ATTACHMENT_SIZE
+        context['ALLOWED_FILE_MIMES'] = settings.ALLOWED_FILE_MIMES
+        context['ALLOWED_FILE_EXTS'] = settings.ALLOWED_FILE_EXTS
+        context['AWS_STORAGE_BUCKET_NAME'] = settings.AWS_STORAGE_BUCKET_NAME
+        context['AWS_ACCESS_KEY_ID'] = settings.AWS_ACCESS_KEY_ID
         return context
 
     @method_decorator(user_passes_test(lambda u: u.is_staff))
@@ -175,14 +186,7 @@ class TaskList(MRFilterListView):
 class OrphanTaskList(TaskList):
     model = OrphanTask
     title = 'Orphans'
-    queryset = (OrphanTask.objects
-            .select_related('communication__likely_foia__jurisdiction')
-            .prefetch_related(
-                'communication__files',
-                Prefetch(
-                    'communication__emails',
-                    queryset=EmailCommunication.objects.select_related('from_email'),
-                    )))
+    queryset = OrphanTask.objects.preload_list()
     bulk_actions = ['reject']
 
     def task_post_helper(self, request, task):
@@ -211,24 +215,7 @@ class SnailMailTaskList(TaskList):
     model = SnailMailTask
     filter_class = SnailMailTaskFilterSet
     title = 'Snail Mails'
-    queryset = (SnailMailTask.objects
-            .select_related(
-                'communication__foia__agency',
-                'communication__foia__user',
-                'communication__foia__jurisdiction',
-                )
-            .prefetch_related(
-                'communication__files',
-                Prefetch(
-                    'communication__foia__communications',
-                    queryset=FOIACommunication.objects.filter(response=True),
-                    to_attr='has_ack'),
-                Prefetch(
-                    'communication__foia__communications',
-                    queryset=FOIACommunication.objects.order_by('-date'),
-                    to_attr='reverse_communications'),
-                )
-            )
+    queryset = SnailMailTask.objects.preload_list()
 
     def task_post_helper(self, request, task):
         """Special post helper exclusive to SnailMailTasks"""
@@ -265,14 +252,7 @@ class StaleAgencyTaskList(TaskList):
     model = StaleAgencyTask
     filter_class = StaleAgencyTaskFilterSet
     title = 'Stale Agencies'
-    queryset = (StaleAgencyTask.objects
-            .select_related('agency__jurisdiction')
-            .prefetch_related(
-                'agency__foiarequest_set__communications__foia__jurisdiction',
-                Prefetch('agency__foiarequest_set',
-                    queryset=FOIARequest.objects.get_stale(),
-                    to_attr='stale_requests_'),
-                ))
+    queryset = StaleAgencyTask.objects.preload_list()
 
     def task_post_helper(self, request, task):
         """Check the new email is valid and, if so, apply it"""
@@ -340,8 +320,7 @@ class FlaggedTaskList(TaskList):
     model = FlaggedTask
     filter_class = FlaggedTaskFilterSet
     title = 'Flagged'
-    queryset = FlaggedTask.objects.select_related(
-            'user', 'foia__jurisdiction', 'agency', 'jurisdiction')
+    queryset = FlaggedTask.objects.preload_list()
 
     def task_post_helper(self, request, task):
         """Special post handler for FlaggedTasks"""
@@ -364,16 +343,7 @@ class FlaggedTaskList(TaskList):
 class ProjectReviewTaskList(TaskList):
     model = ProjectReviewTask
     title = 'Pending Projects'
-    queryset = (ProjectReviewTask.objects
-            .select_related('project')
-            .prefetch_related(
-                Prefetch(
-                    'project__requests',
-                    queryset=FOIARequest.objects.select_related('jurisdiction'),
-                    ),
-                'project__articles',
-                'project__contributors',
-                ))
+    queryset = ProjectReviewTask.objects.preload_list()
 
     def task_post_helper(self, request, task):
         """Special post handler for ProjectReviewTasks"""
@@ -425,107 +395,35 @@ class NewAgencyTaskList(TaskList):
 class ResponseTaskList(TaskList):
     title = 'Responses'
     filter_class = ResponseTaskFilterSet
-    queryset = (ResponseTask.objects
-            .select_related('communication__foia__agency')
-            .select_related('communication__foia__jurisdiction')
-            .prefetch_related(
-                Prefetch('communication__files',
-                    queryset=FOIAFile.objects.select_related('foia__jurisdiction')),
-                Prefetch('communication__foia__communications',
-                    queryset=FOIACommunication.objects
-                        .order_by('-date')
-                        .prefetch_related(
-                            'files',
-                            'emails',
-                            'faxes',
-                            'mails',
-                            'web_comms',
-                            ),
-                    to_attr='reverse_communications'),
-                Prefetch('communication__emails',
-                    queryset=EmailCommunication.objects.select_related('from_email')),
-                'communication__faxes',
-                'communication__mails',
-                'communication__web_comms',
-                ))
+    queryset = ResponseTask.objects.preload_list()
 
     def task_post_helper(self, request, task):
         """Special post helper exclusive to ResponseTask"""
-        # pylint: disable=too-many-branches
         task = super(ResponseTaskList, self).task_post_helper(request, task)
-        error_happened = False
         form = ResponseTaskForm(request.POST)
         if not form.is_valid():
             messages.error(request, 'Form is invalid')
             return
-        cleaned_data = form.cleaned_data
-        status = cleaned_data['status']
-        set_foia = cleaned_data['set_foia']
-        move = cleaned_data['move']
-        tracking_number = cleaned_data['tracking_number']
-        date_estimate = cleaned_data['date_estimate']
-        price = cleaned_data['price']
-        proxy = cleaned_data['proxy']
-        # move is executed first, so that the status and tracking
-        # operations are applied to the correct FOIA request
-        comms = None
-        if move:
-            try:
-                comms = task.move(move)
-            except (Http404, ValueError):
-                messages.error(request, 'No valid destination for moving the request.')
-                error_happened = True
-        if status:
-            try:
-                task.set_status(status, set_foia, comms)
-            except ValueError:
-                messages.error(request, 'You tried to set the request to an invalid status.')
-                error_happened = True
-        if tracking_number:
-            try:
-                task.set_tracking_id(tracking_number, comms)
-            except ValueError:
-                messages.error(request,
-                    'You tried to set an invalid tracking id. Just use a string of characters.')
-                error_happened = True
-        if date_estimate:
-            try:
-                task.set_date_estimate(date_estimate, comms)
-            except ValueError:
-                messages.error(request, 'You tried to set the request to an invalid date.')
-                error_happened = True
-        if price:
-            try:
-                task.set_price(price, comms)
-            except ValueError:
-                messages.error(request, 'You tried to set a non-numeric price.')
-                error_happened = True
-        if proxy:
-            task.proxy_reject(comms)
-        action_taken = move or status or tracking_number or price or proxy
-        if action_taken and not error_happened:
+        action_taken, error_msgs = form.process_form(task)
+        for msg in error_msgs:
+            messages.error(request, msg)
+        if action_taken and not error_msgs:
             task.resolve(request.user)
 
 
 class StatusChangeTaskList(TaskList):
     title = 'Status Change'
-    queryset = StatusChangeTask.objects.select_related(
-            'user', 'foia__jurisdiction')
+    queryset = StatusChangeTask.objects.preload_list()
 
 
 class CrowdfundTaskList(TaskList):
     title = 'Crowdfunds'
-    queryset = (CrowdfundTask.objects
-            .select_related('crowdfund__foia__jurisdiction')
-            .prefetch_related('crowdfund__projects')
-            )
+    queryset = CrowdfundTask.objects.preload_list()
 
 
 class MultiRequestTaskList(TaskList):
     title = 'Multi-Requests'
-    queryset = (MultiRequestTask.objects
-            .select_related('multirequest__user')
-            .prefetch_related('multirequest__agencies'))
+    queryset = MultiRequestTask.objects.preload_list()
 
     def task_post_helper(self, request, task):
         """Special post helper exclusive to MultiRequestTasks"""
@@ -543,12 +441,87 @@ class MultiRequestTaskList(TaskList):
 
 class NewExemptionTaskList(TaskList):
     title = 'New Exemptions'
-    queryset = NewExemptionTask.objects.select_related(
-            'foia__agency__jurisdiction__parent',
-            'foia__jurisdiction__parent',
-            'user',
+    queryset = NewExemptionTask.objects.preload_list()
 
-            )
+
+class PortalTaskList(TaskList):
+    title = 'Portal'
+    filter_class = PortalTaskFilterSet
+    queryset = PortalTask.objects.preload_list()
+
+    def task_post_helper(self, request, task):
+        """Special post helper exclusive to Portal Tasks"""
+        # incoming and outgoing portal tasks are very different
+        # incoming are very similar to response tasks
+        # outgoing are very similar to snail mail tasks
+        if task.category == 'i':
+            self._incoming_handler(request, task)
+        else:
+            self._outgoing_handler(request, task)
+        return task
+
+    def _incoming_handler(self, request, task):
+        """POST handler for incoming portal tasks"""
+        # pylint: disable=no-self-use
+        form = ResponseTaskForm(request.POST)
+        if not form.is_valid():
+            messages.error(request, 'Form is invalid')
+            return
+        action_taken, error_msgs = form.process_form(task)
+        for msg in error_msgs:
+            messages.error(request, msg)
+        new_text = request.POST.get('communication')
+        if new_text:
+            task.communication.communication = new_text
+        task.communication.create_agency_notifications()
+        task.communication.hidden = False
+        task.communication.save()
+        PortalCommunication.objects.create(
+                communication=task.communication,
+                sent_datetime=datetime.now(),
+                portal=task.communication.foia.portal,
+                direction='incoming',
+                )
+        if action_taken and not error_msgs:
+            task.resolve(request.user)
+
+    def _outgoing_handler(self, request, task):
+        """POST handler for outgoing portal tasks"""
+        # pylint: disable=no-self-use
+        status = request.POST.get('status')
+        if status and status not in dict(STATUS):
+            messages.error(request, 'Invalid status')
+            return
+        password = request.POST.get('password')
+        tracking_number = request.POST.get('tracking_number')
+        foia = task.communication.foia
+        if not foia.portal_password and not password:
+            messages.error(request, 'Must set a password')
+            return
+        if len(password) > 20:
+            messages.error(
+                    request,
+                    'Password cannot be longer than 20 characters',
+                    )
+            return
+        if status:
+            task.set_status(status)
+        save = False
+        if tracking_number:
+            foia.tracking_id = tracking_number[:255]
+            save = True
+        if not foia.portal_password:
+            foia.portal_password = password
+            save = True
+        if save:
+            foia.save()
+        PortalCommunication.objects.create(
+                communication=task.communication,
+                sent_datetime=datetime.now(),
+                portal=task.communication.foia.portal,
+                direction='outgoing',
+                )
+        task.resolve(request.user)
 
 
 class RequestTaskList(TemplateView):

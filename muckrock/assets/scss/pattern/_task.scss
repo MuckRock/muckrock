@@ -256,7 +256,7 @@ $task-padding: $vr/4 $vr/2;
 
 /* Response Task */
 
-.response.task {
+.response.task, .portal.task {
     .response-input {
         margin-bottom: 0;
         text-align: left;
@@ -294,4 +294,10 @@ $task-padding: $vr/4 $vr/2;
         @include flex(1 1 auto);
         text-align: right;
     }
+}
+
+/* Portal Task */
+
+.portal .form-field {
+    text-align: left;
 }

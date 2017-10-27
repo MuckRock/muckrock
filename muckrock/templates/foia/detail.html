@@ -100,6 +100,23 @@
                 </tr>
                 {% endif %}
             </table>
+            {% if user_can_edit and foia.portal_password %}
+                <div id="show-portal-info" class="action">Show Portal Info</div>
+                <table class="portal-info">
+                    <tr>
+                        <td>Portal Link</td>
+                        <td><a href="{{foia.portal.url}}">{{foia.portal.name}}</a></td>
+                    </tr>
+                    <tr>
+                        <td>Username</td>
+                        <td>{{foia.get_request_email}}</td>
+                    </tr>
+                    <tr>
+                        <td>Password</td>
+                        <td>{{foia.portal_password}}</td>
+                    </tr>
+                </table>
+            {% endif %}
             {% if user_can_edit %}
             <form class="change-date" id="change-estimated-completion-date" method="post">
                 {% csrf_token %}
@@ -243,7 +260,7 @@
                                 {% endif %}
                                 <input type="hidden" name="action" value="follow_up" />
                                 <label class="bold">Attachments</label>
-                                <div id="fine-uploader-follow-up" class="fine-uploader"></div>
+                                <div id="fine-uploader-follow-up" class="fine-uploader" data-foia-pk="{{foia.pk}}"></div>
                                 <div class="buttons">
                                     <button class="primary button" type="submit" name="appeal" value="1">Send</button>
                                     <a href="#inactive" class="button cancel">Cancel</a>
@@ -279,7 +296,7 @@ Sincerely,
                                 {% csrf_token %}
                                 {% include 'lib/pattern/form.html' with form=agency_reply_form %}
                                 <label class="bold">Attachments</label>
-                                <div id="fine-uploader-agency-rpely" class="fine-uploader"></div>
+                                <div id="fine-uploader-agency-reply" class="fine-uploader" data-foia-pk="{{foia.pk}}"></div>
 								<input type="hidden" name="action" value="agency_reply" />
                                 <div class="buttons">
                                     <button class="primary button" type="submit" name="agency-reply" value="1">Send</button>
@@ -316,7 +333,7 @@ Sincerely,
                                 {% csrf_token %}
                                 <textarea name="text" id="appeal-composer"></textarea>
                                 <label class="bold">Attachments</label>
-                                <div id="fine-uploader-appeal" class="fine-uploader"></div>
+                                <div id="fine-uploader-appeal" class="fine-uploader" data-foia-pk="{{foia.pk}}"></div>
                                 <div class="buttons">
                                     <a href="#inactive" class="button">Cancel</a>
                                     <button class="primary button" type="submit" name="action" value="appeal">Send Appeal</button>

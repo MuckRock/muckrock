@@ -67,6 +67,7 @@
 <script type="text/javascript">
 function createUploader(element) {
     if (element === null) {return;}
+    var foia_pk = element.getAttribute('data-foia-pk');
     const uploader = new qq.s3.FineUploader({
         element: element,
         debug: true,
@@ -90,7 +91,7 @@ function createUploader(element) {
                 var filename = encodeURIComponent(uploader.getName(fileId));
                 $.post(
                     '{% url "fine-uploader-key-name" %}',
-                    {name: filename, foia_id: {{foia.pk}} }
+                    {name: filename, foia_id: foia_pk}
                     )
                     .done(function(data) {keyRetrieval.success(data.key);})
                     .fail(function() {keyRetrieval.failure();});
@@ -109,13 +110,13 @@ function createUploader(element) {
                 'X-CSRFToken': '{{ csrf_token }}',
             },
             params: {
-                'foia_id': {{ foia.pk }},
+                'foia_id': foia_pk,
             },
         },
         session: {
             endpoint: '{% url "fine-uploader-session" %}',
             params: {
-                'foia_id': {{ foia.pk }},
+                'foia_id': foia_pk,
             },
         },
         iframeSupport: {
@@ -143,7 +144,82 @@ function createUploader(element) {
                     'X-CSRFToken': '{{ csrf_token }}',
                 },
                 params: {
-                    'foia_id': {{ foia.pk }},
+                    'foia_id': foia_pk,
+                },
+            }
+        },
+        resume: {
+            enabled: true,
+        },
+
+    });
+};
+function createUploaderComm(element) {
+    if (element === null) {return;}
+    var comm_pk = element.getAttribute('data-comm-pk');
+    const uploader = new qq.s3.FineUploader({
+        element: element,
+        debug: true,
+        template: 'qq-simple-thumbnails-template',
+        {% if request.user.profile.limit_attachments %}
+            validation: {
+                acceptFiles: "{{ALLOWED_FILE_MIMES|join:', '}}",
+                allowedExtensions: ["{{ALLOWED_FILE_EXTS|join:'","'}}"],
+                itemLimit: {{MAX_ATTACHMENT_NUM}},
+                sizeLimit: {{MAX_ATTACHMENT_SIZE}}
+            },
+        {% endif %}
+        request: {
+            endpoint: 'https://{{AWS_STORAGE_BUCKET_NAME}}.s3.amazonaws.com',
+            accessKey: '{{AWS_ACCESS_KEY_ID}}',
+        },
+        objectProperties: {
+            acl: 'public-read',
+            key: function(fileId) {
+                var keyRetrieval = new qq.Promise();
+                var filename = encodeURIComponent(uploader.getName(fileId));
+                $.post(
+                    '{% url "fine-uploader-key-name-comm" %}',
+                    {name: filename}
+                    )
+                    .done(function(data) {keyRetrieval.success(data.key);})
+                    .fail(function() {keyRetrieval.failure();});
+                return keyRetrieval;
+            },
+        },
+        signature: {
+            endpoint: '{% url "fine-uploader-sign" %}',
+            customHeaders: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+        },
+        uploadSuccess: {
+            endpoint: '{% url "fine-uploader-success-comm" %}',
+            customHeaders: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            params: {
+                'comm_id': comm_pk,
+            },
+        },
+        iframeSupport: {
+            localBlankPagePath: '{% url "fine-uploader-blank" %}',
+        },
+        retry: {
+            enableAuto: true,
+        },
+        chunking: {
+            enabled: true,
+            concurrent: {
+                enabled: true,
+            },
+            success: {
+                endpoint: '{% url "fine-uploader-success-comm" %}',
+                customHeaders: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                params: {
+                    'comm_id': comm_pk,
                 },
             }
         },
@@ -157,5 +233,9 @@ var elements = document.getElementsByClassName('fine-uploader');
 var i;
 for (i = 0; i < elements.length; i++) {
   createUploader(elements[i]);
+}
+elements = document.getElementsByClassName('fine-uploader-comm');
+for (i = 0; i < elements.length; i++) {
+  createUploaderComm(elements[i]);
 }
 </script>

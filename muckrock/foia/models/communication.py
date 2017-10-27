@@ -55,6 +55,7 @@ class FOIACommunication(models.Model):
     thanks = models.BooleanField(default=False)
     full_html = models.BooleanField(default=False)
     communication = models.TextField(blank=True)
+    hidden = models.BooleanField(default=False)
 
     # what status this communication should set the request to - used for machine learning
     status = models.CharField(max_length=10, choices=STATUS, blank=True, null=True)
@@ -353,7 +354,8 @@ class FOIACommunication(models.Model):
                 list(self.emails.all()) +
                 list(self.faxes.all()) +
                 list(self.mails.all()) +
-                list(self.web_comms.all()),
+                list(self.web_comms.all()) +
+                list(self.portals.all()),
                 key=lambda x: x.sent_datetime,
                 reverse=True,
                 )

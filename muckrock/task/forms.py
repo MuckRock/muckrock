@@ -3,11 +3,15 @@ Forms for Task app
 """
 
 from django import forms
+from django.http import Http404
 
 from autocomplete_light import shortcuts as autocomplete_light
+import logging
 
+from muckrock.accounts.models import Notification
 from muckrock.communication.utils import get_email_or_fax
 from muckrock.foia.models import STATUS
+from muckrock.utils import generate_status_action
 
 
 class FlaggedTaskForm(forms.Form):
@@ -80,6 +84,7 @@ class ReviewAgencyTaskForm(forms.Form):
 
 class ResponseTaskForm(forms.Form):
     """Simple form for acting on a ResponseTask"""
+    # pylint: disable=no-self-use
     move = forms.CharField(required=False)
     tracking_number = forms.CharField(required=False)
     price = forms.DecimalField(required=False)
@@ -113,3 +118,122 @@ class ResponseTaskForm(forms.Form):
         for string in move_list:
             string = string.strip()
         return move_list
+
+    def process_form(self, task):
+        """Handle the form for the task"""
+        cleaned_data = self.cleaned_data
+        status = cleaned_data['status']
+        set_foia = cleaned_data['set_foia']
+        move = cleaned_data['move']
+        tracking_number = cleaned_data['tracking_number']
+        date_estimate = cleaned_data['date_estimate']
+        price = cleaned_data['price']
+        proxy = cleaned_data['proxy']
+        # move is executed first, so that the status and tracking
+        # operations are applied to the correct FOIA request
+        comms = [task.communication]
+        error_msgs = []
+        if move:
+            try:
+                comms = self.move_communication(task.communication, move)
+            except (Http404, ValueError):
+                error_msgs.append('No valid destination for moving the request.')
+        if status:
+            try:
+                self.set_status(status, set_foia, comms)
+            except ValueError:
+                error_msgs.append('You tried to set the request to an invalid status.')
+        if tracking_number:
+            try:
+                self.set_tracking_id(tracking_number, comms)
+            except ValueError:
+                error_msgs.append(
+                    'You tried to set an invalid tracking id. Just use a string of characters.')
+        if date_estimate:
+            try:
+                self.set_date_estimate(date_estimate, comms)
+            except ValueError:
+                error_msgs.append('You tried to set the request to an invalid date.')
+        if price:
+            try:
+                self.set_price(price, comms)
+            except ValueError:
+                error_msgs.append('You tried to set a non-numeric price.')
+        if proxy:
+            self.proxy_reject(comms)
+        action_taken = move or status or tracking_number or price or proxy
+        return (action_taken, error_msgs)
+
+    def move_communication(self, communication, foia_pks):
+        """Moves the associated communication to a new request"""
+        return communication.move(foia_pks)
+
+    def set_tracking_id(self, tracking_id, comms):
+        """Sets the tracking ID of the communication's request"""
+        if type(tracking_id) is not type(unicode()):
+            raise ValueError('Tracking ID should be a unicode string.')
+        for comm in comms:
+            if not comm.foia:
+                raise ValueError('The task communication is an orphan.')
+            foia = comm.foia
+            foia.tracking_id = tracking_id
+            foia.save(comment='response task tracking id')
+
+    def set_status(self, status, set_foia, comms):
+        """Sets status of comm and foia"""
+        # check that status is valid
+        if status not in [status_set[0] for status_set in STATUS]:
+            raise ValueError('Invalid status.')
+        for comm in comms:
+            # save comm first
+            comm.status = status
+            comm.save()
+            # save foia next, unless just updating comm status
+            if set_foia:
+                foia = comm.foia
+                foia.status = status
+                if status in ['rejected', 'no_docs', 'done', 'abandoned']:
+                    foia.date_done = comm.date
+                foia.update()
+                foia.save(comment='response task status')
+                logging.info('Request #%d status changed to "%s"', foia.id, status)
+                action = generate_status_action(foia)
+                foia.notify(action)
+                # Mark generic '<Agency> sent a communication to <FOIARequest> as read.'
+                # https://github.com/MuckRock/muckrock/issues/1003
+                generic_notifications = (Notification.objects.for_object(foia)
+                                        .get_unread().filter(action__verb='sent a communication'))
+                for generic_notification in generic_notifications:
+                    generic_notification.mark_read()
+
+    def set_price(self, price, comms):
+        """Sets the price of the communication's request"""
+        price = float(price)
+        for comm in comms:
+            if not comm.foia:
+                raise ValueError('This tasks\'s communication is an orphan.')
+            foia = comm.foia
+            foia.price = price
+            foia.save(comment='response task price')
+
+    def set_date_estimate(self, date_estimate, comms):
+        """Sets the estimated completion date of the communication's request."""
+        for comm in comms:
+            foia = comm.foia
+            foia.date_estimate = date_estimate
+            foia.update()
+            foia.save(comment='response task date estimate')
+            logging.info('Estimated completion date set to %s', date_estimate)
+
+    def proxy_reject(self, comms):
+        """Special handling for a proxy reject"""
+        for comm in comms:
+            comm.status = 'rejected'
+            comm.save()
+            foia = comm.foia
+            foia.status = 'rejected'
+            foia.proxy_reject()
+            foia.update()
+            foia.save(comment='response task proxy reject')
+            action = generate_status_action(foia)
+            foia.notify(action)
