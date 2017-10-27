@@ -57,9 +57,9 @@
                 {% endif %}
             </form>
         {% elif request.user.is_authenticated %}
-            <p><a href="{% url 'acct-verify-email' %}">Please confirm your email address to answer a question</a></p>
+            <p><a href="{% url 'foia-create' %}">Please file a request to answer a question</a></p>
         {% else %}
-            <a href="{% url 'accounts-signup' %}">Please sign up for an account and verify your email address to answer a question</a>
+            <a href="{% url 'accounts-signup' %}">Please sign up for an account and file a request to answer a question</a>
         {% endif %}
     </div>
 </div>
