@@ -3,6 +3,7 @@ Tests for site level functionality and helper functions for application tests
 """
 
 from django.conf import settings
+from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.test import TestCase, RequestFactory
@@ -98,6 +99,7 @@ class TestFunctional(TestCase):
         # should move all fixtures to factories
 
         AnswerFactory()
+        Site.objects.create(domain='www.muckrock.com')
 
         get_allowed(self.client, reverse('index'))
         get_allowed(self.client, '/sitemap.xml')

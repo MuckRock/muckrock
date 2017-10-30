@@ -93,11 +93,10 @@ class TestNewsFunctional(TestCase):
                            for article in response.context['object_list']))
 
     def test_news_archive_day_empty(self):
-        """Should return nothing for a day with no articles"""
-        response = get_allowed(self.client,
+        """Should return 404 for a day with no articles"""
+        get_404(self.client,
                 reverse('news-archive-day',
                     kwargs={'year': 1999, 'month': 'mar', 'day': 1}))
-        eq_(len(response.context['object_list']), 0)
 
     def test_news_archive_author(self):
         """Should return all articles for the given author"""
