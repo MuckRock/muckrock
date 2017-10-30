@@ -19,8 +19,7 @@ from muckrock.task.models import (
     SnailMailTask,
     FlaggedTask,
     StaleAgencyTask,
-    RejectedEmailTask,
-    FailedFaxTask,
+    ReviewAgencyTask,
 )
 
 class TaskFilterSet(django_filters.FilterSet):
@@ -137,20 +136,18 @@ class StaleAgencyTaskFilterSet(TaskFilterSet):
         fields = ['jurisdiction', 'resolved', 'resolved_by']
 
 
-class RejectedEmailTaskFilterSet(TaskFilterSet):
-    """Allows a rejected email task to be filtered by the to: email"""
-    class Meta:
-        model = RejectedEmailTask
-        fields = ['email', 'resolved', 'resolved_by']
-
-
-class FailedFaxTaskFilterSet(TaskFilterSet):
-    """Allows a failed fax task to be filtered by the agency."""
+class ReviewAgencyTaskFilterSet(TaskFilterSet):
+    """Allows a review agency task to be filtered by jurisdiction."""
+    jurisdiction = django_filters.ModelMultipleChoiceFilter(
+            name='agency__jurisdiction',
+            queryset=Jurisdiction.objects.filter(hidden=False),
+            widget=autocomplete_light.MultipleChoiceWidget('JurisdictionAutocomplete')
+            )
     agency = django_filters.ModelMultipleChoiceFilter(
-        name='communication__foia__agency',
-        queryset=Agency.objects.get_approved(),
-        widget=autocomplete_light.MultipleChoiceWidget('AgencyAutocomplete')
-    )
+            name='agency',
+            queryset=Agency.objects.exclude(reviewagencytask=None),
+            widget=autocomplete_light.MultipleChoiceWidget('AgencyAutocomplete')
+            )
     class Meta:
-        model = FailedFaxTask
-        fields = ['agency', 'resolved', 'resolved_by']
+        model = ReviewAgencyTask
+        fields = ['jurisdiction', 'agency', 'resolved', 'resolved_by']

@@ -8,8 +8,6 @@ from muckrock.settings.heroku import *
 from bandit.backends.base import HijackBackendMixin
 from django_mailgun import MailgunBackend
 
-EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
-
 MUCKROCK_URL = 'muckrock-staging.herokuapp.com'
 FOIAMACHINE_URL = 'staging.foiamachine.org'
 

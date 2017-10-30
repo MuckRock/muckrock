@@ -130,7 +130,6 @@ class NewsExploreView(TemplateView):
 
 class NewsYear(PaginationMixin, YearArchiveView):
     """View for year archive"""
-    allow_empty = True
     date_field = 'pub_date'
     make_object_list = True
     queryset = Article.objects.get_published().prefetch_authors()
@@ -139,7 +138,6 @@ class NewsYear(PaginationMixin, YearArchiveView):
 
 class NewsMonth(PaginationMixin, MonthArchiveView):
     """View for month archive"""
-    allow_empty = True
     date_field = 'pub_date'
     make_object_list = True
     queryset = Article.objects.get_published().prefetch_authors()
@@ -148,7 +146,6 @@ class NewsMonth(PaginationMixin, MonthArchiveView):
 
 class NewsDay(PaginationMixin, DayArchiveView):
     """View for day archive"""
-    allow_empty = True
     date_field = 'pub_date'
     make_object_list = True
     queryset = Article.objects.get_published().prefetch_authors()
@@ -198,6 +195,7 @@ class AuthorArchiveView(NewsListView):
             'author': self.get_author()
         })
         return context
+
 
 class ArticleViewSet(viewsets.ModelViewSet):
     """API views for Article"""

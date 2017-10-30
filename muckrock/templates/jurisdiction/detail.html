@@ -31,7 +31,7 @@
     <header class="jurisdiction__header">
         {% if jurisdiction.image and jurisdiction.level != 'l' %}
         <figure class="jurisdiction__image">
-            <img src="{% thumbnail jurisdiction.image 300x300 %}" />
+            <img src="{% thumbnail jurisdiction.image 300x300 %}" alt="{{jurisdiction.image_attr_line|striptags}}"/>
             {% if jurisdiction.image_attr_line %}
             <figcaption>{{jurisdiction.image_attr_line|safe}}</figcaption>
             {% endif %}

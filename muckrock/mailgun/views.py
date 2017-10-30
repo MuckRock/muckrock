@@ -39,6 +39,7 @@ from muckrock.foia.tasks import classify_status
 from muckrock.task.models import (
         OrphanTask,
         ResponseTask,
+        ReviewAgencyTask,
         )
 
 logger = logging.getLogger(__name__)
@@ -360,6 +361,14 @@ def bounces(request, email_comm, timestamp):
             event=event,
             reason=request.POST.get('reason', ''),
             )
+    recipient.status = 'error'
+    recipient.save()
+    ReviewAgencyTask.objects.get_or_create(
+            agency=email_comm.communication.foia.agency,
+            resolved=False,
+            )
+    if not email_comm.cc_emails.filter(email=recipient):
+        email_comm.communication.foia.submit(switch=True)
 
 
 @mailgun_verify
@@ -396,6 +405,7 @@ def delivered(_request, email_comm, timestamp):
 @csrf_exempt
 def phaxio_callback(request):
     """Handle Phaxio callbacks"""
+    # pylint: disable=too-many-branches
     url = 'https://%s%s' % (
             settings.MUCKROCK_URL,
             reverse('phaxio-callback'),
@@ -412,6 +422,7 @@ def phaxio_callback(request):
     fax_info = json.loads(request.POST['fax'])
     fax_id = fax_info['tags'].get('fax_id')
     comm_id = fax_info['tags'].get('comm_id')
+    error_count = fax_info['tags'].get('error_count')
     if fax_id:
         fax_comm = FaxCommunication.objects.filter(pk=fax_id).first()
     else:
@@ -448,6 +459,23 @@ def phaxio_callback(request):
                         error_code=recipient['error_code'],
                         error_id=int(recipient['error_id']),
                         )
+                # the following phaxio error IDs all correspond to
+                # Phone Number Not Operational - all other errors are considered
+                # temporary for now
+                perm_error_ids = set([34, 47, 49, 91, 107, 109, 116, 123])
+                temp_failure = int(recipient['error_id']) not in perm_error_ids
+                if temp_failure and error_count < 4:
+                    # retry with exponential back off
+                    fax_comm.communication.foia_submit(
+                            fax_error_count=error_count + 1)
+                else:
+                    number.status = 'error'
+                    number.save()
+                    ReviewAgencyTask.objects.get_or_create(
+                            agency=fax_comm.communication.foia.agency,
+                            resolved=False,
+                            )
+                    fax_comm.communication.foia.submit(switch=True)
 
     return HttpResponse('OK')
 

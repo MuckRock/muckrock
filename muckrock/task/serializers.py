@@ -10,8 +10,16 @@ from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIACommunication, FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import (
-        Task, OrphanTask, SnailMailTask, RejectedEmailTask, StaleAgencyTask,
-        FlaggedTask, NewAgencyTask, ResponseTask, NewExemptionTask, GenericTask)
+        Task,
+        OrphanTask,
+        SnailMailTask,
+        StaleAgencyTask,
+        FlaggedTask,
+        NewAgencyTask,
+        ResponseTask,
+        NewExemptionTask,
+        GenericTask,
+        )
 
 class TaskSerializer(serializers.ModelSerializer):
     """Serializer for Task model"""
@@ -23,9 +31,6 @@ class TaskSerializer(serializers.ModelSerializer):
             style={'base_template': 'input.html'})
     snailmailtask = serializers.PrimaryKeyRelatedField(
             queryset=SnailMailTask.objects.all(),
-            style={'base_template': 'input.html'})
-    rejectedemailtask = serializers.PrimaryKeyRelatedField(
-            queryset=RejectedEmailTask.objects.all(),
             style={'base_template': 'input.html'})
     staleagencytask = serializers.PrimaryKeyRelatedField(
             queryset=StaleAgencyTask.objects.all(),
@@ -84,22 +89,6 @@ class SnailMailTaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SnailMailTask
-
-
-class RejectedEmailTaskSerializer(serializers.ModelSerializer):
-    """Serializer for RejectedEmailTask model"""
-    assigned = serializers.PrimaryKeyRelatedField(
-            queryset=User.objects.all(),
-            style={'base_template': 'input.html'})
-    resolved_by = serializers.PrimaryKeyRelatedField(
-            queryset=User.objects.all(),
-            style={'base_template': 'input.html'})
-    foia = serializers.PrimaryKeyRelatedField(
-            queryset=FOIARequest.objects.all(),
-            style={'base_template': 'input.html'})
-
-    class Meta:
-        model = RejectedEmailTask
 
 
 class StaleAgencyTaskSerializer(serializers.ModelSerializer):

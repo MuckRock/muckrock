@@ -45,6 +45,7 @@ from muckrock.task.models import (
         GenericTask,
         CrowdfundTask,
         FailedFaxTask,
+        ReviewAgencyTask,
         )
 
 logger = logging.getLogger(__name__)
@@ -227,6 +228,9 @@ def store_statistics():
         total_crowdfundpayment_tasks=CrowdfundTask.objects.count(),
         total_unresolved_crowdfundpayment_tasks=
             CrowdfundTask.objects.filter(resolved=False).count(),
+        total_reviewagency_tasks=ReviewAgencyTask.objects.count(),
+        total_unresolved_reviewagency_tasks=
+            ReviewAgencyTask.objects.filter(resolved=False).count(),
         daily_robot_response_tasks=ResponseTask.objects.filter(
                date_done__gte=yesterday,
                date_done__lt=date.today(),

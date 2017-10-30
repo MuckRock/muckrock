@@ -3,10 +3,10 @@
     {% orphan_task task %}
 {% elif task.type == "SnailMailTask" %}
     {% snail_mail_task task %}
-{% elif task.type == "RejectedEmailTask" %}
-    {% rejected_email_task task %}
 {% elif task.type == "StaleAgencyTask" %}
     {% stale_agency_task task %}
+{% elif task.type == "ReviewAgencyTask" %}
+    {% review_agency_task task %}
 {% elif task.type == "FlaggedTask" %}
     {% flagged_task task %}
 {% elif task.type == "ProjectReviewTask" %}
@@ -21,8 +21,6 @@
     {% crowdfund_task task %}
 {% elif task.type == "MultiRequestTask" %}
     {% multi_request_task task %}
-{% elif task.type == "FailedFaxTask" %}
-    {% failed_fax_task task %}
 {% elif task.type == "NewExemptionTask" %}
     {% new_exemption_task task %}
 {% else %}

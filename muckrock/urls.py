@@ -23,6 +23,7 @@ import muckrock.news.views
 import muckrock.qanda.views
 import muckrock.task.viewsets
 import muckrock.views as views
+from muckrock.sitemap import FlatPageSitemap
 from muckrock.agency.sitemap import AgencySitemap
 from muckrock.foia.sitemap import FoiaSitemap
 from muckrock.jurisdiction.sitemap import JurisdictionSitemap
@@ -40,6 +41,7 @@ sitemaps = {
     'Jurisdiction': JurisdictionSitemap,
     'Question': QuestionSitemap,
     'Project': ProjectSitemap,
+    'Flatpages': FlatPageSitemap,
 }
 
 router = DefaultRouter()
@@ -79,9 +81,6 @@ router.register(r'orphantask',
 router.register(r'snailmailtask',
         muckrock.task.viewsets.SnailMailTaskViewSet,
         'api-snailmailtask')
-router.register(r'rejectedemailtask',
-        muckrock.task.viewsets.RejectedEmailTaskViewSet,
-        'api-rejectedemailtask')
 router.register(r'staleagencytask',
         muckrock.task.viewsets.StaleAgencyTaskViewSet,
         'api-staleagencytask')
@@ -124,7 +123,11 @@ urlpatterns = [
     url(r'^robots\.txt$', include('robots.urls')),
     url(r'^favicon.ico$', RedirectView.as_view(
         url=settings.STATIC_URL + 'icons/favicon.ico')),
-    url(r'^sitemap\.xml$', django.contrib.sitemaps.views.index, {'sitemaps': sitemaps}),
+    url(r'^sitemap\.xml$',
+        django.contrib.sitemaps.views.index,
+        {'sitemaps': sitemaps},
+        name='django.contrib.sitemaps.views.index',
+        ),
     url(
         r'^sitemap-(?P<section>.+)\.xml$',
         django.contrib.sitemaps.views.sitemap,
@@ -137,6 +140,7 @@ urlpatterns = [
     url(r'^donate/thanks/$', views.DonationThanksView.as_view(), name='donate-thanks'),
     url(r'^landing/$', views.LandingView.as_view(), name='landing'),
     url(r'^hijack/', include('hijack.urls')),
+    url(r'^opensearch/', include('opensearch.urls')),
     ]
 
 

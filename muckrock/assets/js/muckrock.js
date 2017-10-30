@@ -63,7 +63,9 @@ $('document').ready(function(){
     });
 
     // Select All
-    $('.select-all').selectAll();
+    $('.select-all').each(function(){
+      $(this).selectAll();
+    });
 
     // Date Picker
     $('.datepicker').datepicker({

@@ -5,7 +5,8 @@ Views for the Task application
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import resolve
-from django.db.models import Count, Prefetch, Q
+from django.db import transaction
+from django.db.models import Count, Prefetch
 from django.http import HttpResponse, Http404
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
@@ -17,7 +18,11 @@ from django_filters import FilterSet
 
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
-from muckrock.communication.models import MailCommunication, EmailAddress, EmailCommunication
+from muckrock.communication.models import (
+        MailCommunication,
+        EmailAddress,
+        EmailCommunication,
+        )
 from muckrock.foia.models import STATUS, FOIARequest, FOIACommunication, FOIAFile
 from muckrock.task.filters import (
     TaskFilterSet,
@@ -26,19 +31,31 @@ from muckrock.task.filters import (
     SnailMailTaskFilterSet,
     FlaggedTaskFilterSet,
     StaleAgencyTaskFilterSet,
-    RejectedEmailTaskFilterSet,
-    FailedFaxTaskFilterSet,
+    ReviewAgencyTaskFilterSet,
 )
 from muckrock.task.forms import (
-    FlaggedTaskForm, StaleAgencyTaskForm, ResponseTaskForm,
-    ProjectReviewTaskForm
+    FlaggedTaskForm,
+    StaleAgencyTaskForm,
+    ResponseTaskForm,
+    ProjectReviewTaskForm,
+    ReviewAgencyTaskForm,
     )
 from muckrock.task.models import (
-    Task, OrphanTask, SnailMailTask, RejectedEmailTask,
-    StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask,
-    CrowdfundTask, MultiRequestTask, StatusChangeTask, FailedFaxTask,
-    ProjectReviewTask, NewExemptionTask
+    Task,
+    OrphanTask,
+    SnailMailTask,
+    StaleAgencyTask,
+    ReviewAgencyTask,
+    FlaggedTask,
+    NewAgencyTask,
+    ResponseTask,
+    CrowdfundTask,
+    MultiRequestTask,
+    StatusChangeTask,
+    ProjectReviewTask,
+    NewExemptionTask,
     )
+from muckrock.task.tasks import submit_review_update
 from muckrock.views import MRFilterListView
 
 # pylint:disable=missing-docstring
@@ -49,8 +66,8 @@ def count_tasks():
         all=Count('id'),
         orphan=Count('orphantask'),
         snail_mail=Count('snailmailtask'),
-        rejected=Count('rejectedemailtask'),
         stale_agency=Count('staleagencytask'),
+        review_agency=Count('reviewagencytask'),
         flagged=Count('flaggedtask'),
         projectreview=Count('projectreviewtask'),
         new_agency=Count('newagencytask'),
@@ -58,7 +75,6 @@ def count_tasks():
         status_change=Count('statuschangetask'),
         crowdfund=Count('crowdfundtask'),
         multirequest=Count('multirequesttask'),
-        failed_fax=Count('failedfaxtask'),
         new_exemption=Count('newexemptiontask'),
         )
     return count
@@ -245,43 +261,6 @@ class SnailMailTaskList(TaskList):
         return super(SnailMailTaskList, self).task_post_helper(request, task)
 
 
-class RejectedEmailTaskList(TaskList):
-    model = RejectedEmailTask
-    filter_class = RejectedEmailTaskFilterSet
-    title = 'Rejected Emails'
-    queryset = RejectedEmailTask.objects.select_related('foia__jurisdiction')
-
-    def get_context_data(self, **kwargs):
-        """Prefetch the agencies and foias sharing an email"""
-        context = super(RejectedEmailTaskList, self).get_context_data(**kwargs)
-        email_filter = Q()
-        all_emails = {t.email for t in context['object_list']}
-        for email in all_emails:
-            email_filter |= Q(email__iexact=email)
-            email_filter |= Q(other_emails__icontains=email)
-        agencies = Agency.objects.filter(email_filter)
-        statuses = ('ack', 'processed', 'appealing', 'fix', 'payment')
-        foias = (FOIARequest.objects.filter(email_filter)
-                .filter(status__in=statuses)
-                .select_related('jurisdiction')
-                .order_by())
-        def seperate_by_email(objects, emails):
-            """Make a dictionary of each email to the objects having that email"""
-            return_value = {}
-            for email in emails:
-                email_upper = email.upper()
-                return_value[email] = [o for o in objects if
-                        email_upper == o.email.upper() or
-                        email_upper in o.other_emails.upper()]
-            return return_value
-        agency_by_email = seperate_by_email(agencies, all_emails)
-        foia_by_email = seperate_by_email(foias, all_emails)
-        for task in context['object_list']:
-            task.foias = foia_by_email[task.email]
-            task.agencies = agency_by_email[task.email]
-        return context
-
-
 class StaleAgencyTaskList(TaskList):
     model = StaleAgencyTask
     filter_class = StaleAgencyTaskFilterSet
@@ -309,6 +288,51 @@ class StaleAgencyTaskList(TaskList):
                 messages.error(request, 'The email is invalid.')
                 return
         return super(StaleAgencyTaskList, self).task_post_helper(request, task)
+
+
+class ReviewAgencyTaskList(TaskList):
+    model = ReviewAgencyTask
+    filter_class = ReviewAgencyTaskFilterSet
+    title = 'Review Agencies'
+    queryset = ReviewAgencyTask.objects.all().preload_list()
+
+    def task_post_helper(self, request, task):
+        """Update the requests with new contact information"""
+        if request.POST.get('update'):
+            form = ReviewAgencyTaskForm(request.POST)
+            if form.is_valid():
+                email_or_fax = form.cleaned_data['email_or_fax']
+                foia_keys = [k for k in request.POST.keys()
+                        if k.startswith('foias-')]
+                foia_pks = []
+                for key in foia_keys:
+                    foia_pks.extend(request.POST.getlist(key))
+                foias = FOIARequest.objects.filter(pk__in=foia_pks)
+                update_info = form.cleaned_data['update_agency_info']
+                snail = form.cleaned_data['snail_mail']
+                task.agency.unmark_stale()
+                with transaction.atomic():
+                    task.update_contact(email_or_fax, foias, update_info, snail)
+                    # ensure th eupdated contact information is commited to the
+                    # database before trying to re-submit
+                    transaction.on_commit(
+                            lambda: submit_review_update.delay(
+                                foia_pks,
+                                form.cleaned_data['reply'],
+                                ))
+                messages.success(
+                        request,
+                        'Updated contact information for selected requests '
+                        'and sent followup message.',
+                        )
+            else:
+                messages.error(
+                        request,
+                        'A valid email or fax is required if '
+                        'snail mail is not checked',
+                        )
+                return
+        return super(ReviewAgencyTaskList, self).task_post_helper(request, task)
 
 
 class FlaggedTaskList(TaskList):
@@ -514,20 +538,6 @@ class MultiRequestTaskList(TaskList):
             task.resolve(request.user)
             messages.error(request, 'Multirequest rejected')
         return super(MultiRequestTaskList, self).task_post_helper(request, task)
-
-
-class FailedFaxTaskList(TaskList):
-    title = 'Failed Faxes'
-    filter_class = FailedFaxTaskFilterSet
-    queryset = (FailedFaxTask.objects
-            .select_related('communication__foia__agency')
-            .select_related('communication__foia__user')
-            .select_related('communication__foia__jurisdiction')
-            .prefetch_related(
-                Prefetch(
-                    'communication__foia__communications',
-                    queryset=FOIACommunication.objects.order_by('-date'),
-                    to_attr='reverse_communications')))
 
 
 class NewExemptionTaskList(TaskList):

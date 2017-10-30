@@ -57,6 +57,9 @@ $task-padding: $vr/4 $vr/2;
         width: 100%;
         margin-bottom: $vr;
     }
+    label.check-label {
+        display: inline;
+    }
     input[type="checkbox"] {
         width: auto;
         float: left;
@@ -143,17 +146,23 @@ $task-padding: $vr/4 $vr/2;
     margin-bottom: 0;
 }
 
-.stale-agency .stale-requests {
+.stale-agency .stale-requests, .review-agency .review-requests {
     border-bottom: 1px solid $color-grey;
     header {
         margin-bottom: 0;
         padding: $vr/2;
         background: $color-grey-7;
     }
+    header.error {
+        background: $color-red-light;
+    }
     input[type="text"] {
         margin: 0;
         border-radius: 0;
         width: 100%;
+    }
+    input[type="text"].error {
+        background: $color-red-light;
     }
     abbr {
         cursor: help;
@@ -167,7 +176,7 @@ $task-padding: $vr/4 $vr/2;
     }
 }
 
-.stale-agency .form-field {
+.stale-agency .form-field, .review-agency .form-field {
     text-align: left;
 }
 

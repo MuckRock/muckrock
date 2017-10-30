@@ -113,10 +113,23 @@ class TestFunctional(TestCase):
     def test_api_views(self):
         """Test API views"""
         self.client.login(username='super', password='abc')
-        api_objs = ['jurisdiction', 'agency', 'foia', 'question', 'statistics',
-                'communication', 'user', 'news', 'task', 'orphantask',
-                'snailmailtask', 'rejectedemailtask', 'staleagencytask',
-                'flaggedtask', 'newagencytask', 'responsetask']
+        api_objs = [
+                'jurisdiction',
+                'agency',
+                'foia',
+                'question',
+                'statistics',
+                'communication',
+                'user',
+                'news',
+                'task',
+                'orphantask',
+                'snailmailtask',
+                'staleagencytask',
+                'flaggedtask',
+                'newagencytask',
+                'responsetask',
+                ]
         for obj in api_objs:
             get_allowed(self.client, reverse('api-%s-list' % obj))
 

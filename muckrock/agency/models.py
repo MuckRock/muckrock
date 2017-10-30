@@ -237,6 +237,7 @@ class Agency(models.Model, RequestHelper):
     def get_emails(self, request_type='primary', email_type='to'):
         """Get the specified type of email addresses for this agency"""
         return self.emails.filter(
+                status='good',
                 agencyemail__request_type=request_type,
                 agencyemail__email_type=email_type,
                 )
@@ -245,6 +246,7 @@ class Agency(models.Model, RequestHelper):
         """Get the contact fax numbers"""
         return self.phones.filter(
                 type='fax',
+                status='good',
                 agencyphone__request_type=request_type,
                 )
 
@@ -292,6 +294,12 @@ class AgencyAddress(models.Model):
             default='none',
             )
 
+    def __unicode__(self):
+        val = unicode(self.address)
+        if self.request_type != 'none':
+            val = '%s\n(%s)' % (val, self.request_type)
+        return val
+
 
 class AgencyEmail(models.Model):
     """Through model for agency to email M2M"""
@@ -309,6 +317,12 @@ class AgencyEmail(models.Model):
             default='none',
             )
 
+    def __unicode__(self):
+        val = unicode(self.email)
+        if self.request_type != 'none' and self.email_type != 'none':
+            val = '%s (%s - %s)' % (val, self.request_type, self.email_type)
+        return val
+
 
 class AgencyPhone(models.Model):
     """Through model for agency to phone M2M"""
@@ -320,3 +334,9 @@ class AgencyPhone(models.Model):
             choices=REQUEST_TYPES,
             default='none',
             )
+
+    def __unicode__(self):
+        val = unicode(self.phone)
+        if self.request_type != 'none':
+            val = '%s (%s)' % (val, self.request_type)
+        return val

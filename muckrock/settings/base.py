@@ -213,6 +213,7 @@ INSTALLED_APPS = (
     'hijack',
     'compat', # for hijack
     'django_filters',
+    'opensearch',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
@@ -266,6 +267,7 @@ CELERY_IMPORTS = (
     'muckrock.foia.tasks',
     'muckrock.accounts.tasks',
     'muckrock.agency.tasks',
+    'muckrock.task.tasks',
     )
 CELERYD_MAX_TASKS_PER_CHILD = os.environ.get('CELERYD_MAX_TASKS_PER_CHILD', 100)
 CELERYD_TASK_TIME_LIMIT = os.environ.get('CELERYD_TASK_TIME_LIMIT', 5 * 60)
@@ -578,3 +580,7 @@ ALLOWED_FILE_EXTS = [
 PHONENUMBER_DB_FORMAT = 'INTERNATIONAL'
 PHONENUMBER_DEFAULT_REGION = 'US'
 PHONENUMBER_DEFAULT_FORMAT = 'NATIONAL'
+
+OPENSEARCH_CONTACT_EMAIL = 'mitch@muckrock.com'
+OPENSEARCH_SHORT_NAME = 'MuckRock'
+OPENSEARCH_DESCRIPTION = 'Search MuckRock for public documents and news'
