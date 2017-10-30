@@ -264,6 +264,14 @@ def markdown_filter(text, _safe=None):
     return mark_safe(bleached_text)
 
 
+@register.filter
+def nofollow(value):
+    """Add rel="nofollow" to all anchor tags"""
+    r_nofollow = re.compile('<a (?![^>]*rel=["\']nofollow[\'"])')
+    s_nofollow = '<a rel="nofollow" '
+    return mark_safe(r_nofollow.sub(s_nofollow, value))
+
+
 class CacheNode(Node):
     """Cache Node for condtional cache tag"""
     def __init__(self, nodelist, expire_time_var, fragment_name,

@@ -25,7 +25,7 @@
             <a href="{{project.get_absolute_url}}" title="{{project.title}}">
                 <h4 class="project-info title">{{project.title}}</h4>
             {% if project.image %}
-                <img src="{% thumbnail project.image 600x600 %}" class="project-image"/>
+                <img src="{% thumbnail project.image 600x600 %}" class="project-image" alt="{{project.title}}"/>
             {% endif %}
             </a>
         </div>

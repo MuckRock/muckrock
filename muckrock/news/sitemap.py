@@ -4,6 +4,8 @@ Sitemap for News application
 
 from django.contrib.sitemaps import Sitemap
 
+from datetime import datetime, timedelta
+
 from news_sitemaps import register, NewsSitemap
 
 from muckrock.news.models import Article
@@ -32,7 +34,11 @@ class ArticleNewsSitemap(NewsSitemap):
 
     def items(self):
         """Return all news articles"""
-        return Article.objects.get_published().prefetch_related('tags')
+        return (Article.objects
+                .get_published()
+                .filter(pub_date__gte=(datetime.now() - timedelta(2)))
+                .prefetch_related('tags')
+                )
 
     def lastmod(self, obj):
         """When was the article last modified?"""
