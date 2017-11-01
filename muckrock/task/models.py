@@ -109,6 +109,7 @@ class TaskQuerySet(models.QuerySet):
                     .filter(agency=foia.agency)
                     .preload_list()
                     .select_related('resolved_by'))
+        if foia.agency and user.is_staff:
             tasks += list(ReviewAgencyTask.objects
                     .filter(agency=foia.agency)
                     .preload_list()
