@@ -315,11 +315,12 @@ class ReviewAgencyTaskList(TaskList):
                     task.update_contact(email_or_fax, foias, update_info, snail)
                     # ensure th eupdated contact information is commited to the
                     # database before trying to re-submit
-                    transaction.on_commit(
-                            lambda: submit_review_update.delay(
-                                foia_pks,
-                                form.cleaned_data['reply'],
-                                ))
+                    if form.cleaned_data['reply']:
+                        transaction.on_commit(
+                                lambda: submit_review_update.delay(
+                                    foia_pks,
+                                    form.cleaned_data['reply'],
+                                    ))
                 messages.success(
                         request,
                         'Updated contact information for selected requests '

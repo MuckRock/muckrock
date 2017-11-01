@@ -454,8 +454,7 @@ class ReviewAgencyTask(Task):
         # snail mail
         foias = list(self.agency.foiarequest_set
                 .get_open()
-                .exclude(email=None)
-                .exclude(fax=None)
+                .filter(email=None, fax=None)
                 .select_related('jurisdiction')
                 .annotate(
                     latest_response=ExtractDay(
