@@ -363,7 +363,7 @@ def bounces(request, email_comm, timestamp):
             )
     recipient.status = 'error'
     recipient.save()
-    ReviewAgencyTask.objects.get_or_create(
+    ReviewAgencyTask.objects.ensure_one_created(
             agency=email_comm.communication.foia.agency,
             resolved=False,
             )
@@ -471,7 +471,7 @@ def phaxio_callback(request):
                 else:
                     number.status = 'error'
                     number.save()
-                    ReviewAgencyTask.objects.get_or_create(
+                    ReviewAgencyTask.objects.ensure_one_created(
                             agency=fax_comm.communication.foia.agency,
                             resolved=False,
                             )
