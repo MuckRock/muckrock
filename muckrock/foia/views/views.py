@@ -180,7 +180,8 @@ class MyRequestList(RequestList):
         return queryset.filter(user=self.request.user)
 
 
-@class_view_decorator(user_passes_test(lambda u: u.profile.acct_type == 'agency'))
+@class_view_decorator(user_passes_test(
+    lambda u: u.is_authenticated and u.profile.acct_type == 'agency'))
 class AgencyRequestList(RequestList):
     """View requests owned by current agency"""
     filter_class = AgencyFOIARequestFilterSet
