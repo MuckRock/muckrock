@@ -17,6 +17,7 @@ import logging
 import requests
 
 from muckrock.agency.models import Agency
+from muckrock.foia.exceptions import MimeError
 from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile
 from muckrock.foia.serializers import (
         FOIARequestSerializer,
@@ -30,10 +31,6 @@ from muckrock.jurisdiction.models import Jurisdiction
 # pylint: disable=bad-continuation
 
 logger = logging.getLogger(__name__)
-
-
-class MimeError(Exception):
-    """Try to attach a file with a disallowed mime type"""
 
 
 class FOIARequestViewSet(viewsets.ModelViewSet):

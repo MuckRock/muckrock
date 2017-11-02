@@ -27,6 +27,14 @@ DELIVERED = (
 )
 
 
+class FOIACommunicationQuerySet(models.QuerySet):
+    """Object manager for FOIA Communications"""
+
+    def visible(self):
+        """Hide hidden communications"""
+        return self.filter(hidden=False)
+
+
 class FOIACommunication(models.Model):
     """A single communication of a FOIA request"""
 
@@ -82,6 +90,8 @@ class FOIACommunication(models.Model):
     opened = models.BooleanField(default=False,
             help_text='DEPRECATED: If emailed, did we receive an open notification?'
                       ' If faxed, did we recieve a confirmation?')
+
+    objects = FOIACommunicationQuerySet.as_manager()
 
     def __unicode__(self):
         return u'%s - %s' % (self.date, self.subject)
@@ -215,23 +225,6 @@ class FOIACommunication(models.Model):
             cloned_comms.append(this_clone)
             logger.info('Communication #%d cloned to request #%d', original_pk, this_clone.foia.id)
         return cloned_comms
-
-    def resend(self, email_or_fax=None):
-        """Resend the communication"""
-        foia = self.foia
-        if not foia:
-            logger.warn('Tried resending an orphaned communication.')
-            raise ValueError('This communication has no FOIA to submit.', 'no_foia')
-        if not foia.agency or not foia.agency.status == 'approved':
-            logger.warn('Tried resending a communication with an unapproved agency')
-            raise ValueError('This communication has no approved agency.', 'no_agency')
-        snail = False
-        if email_or_fax is None:
-            snail = True
-        else:
-            foia.update_address(email_or_fax)
-        foia.submit(snail=snail)
-        logger.info('Communication #%d resent.', self.id)
 
     def make_sender_primary_contact(self):
         """Makes the communication's sender the primary contact of its FOIA."""

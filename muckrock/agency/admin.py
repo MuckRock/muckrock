@@ -47,7 +47,7 @@ class AgencyTypeAdmin(VersionAdmin):
 class AgencyAddressAdminForm(forms.ModelForm):
     """AgencyAddress Inline admin form"""
     address = autocomplete_light.ModelChoiceField(
-            'AddressAutocomplete',
+            'AddressAdminAutocomplete',
             queryset=Address.objects.all(),
             )
 
@@ -85,7 +85,7 @@ class AgencyEmailInline(admin.TabularInline):
 class AgencyPhoneAdminForm(forms.ModelForm):
     """AgencyPhone Inline admin form"""
     phone = autocomplete_light.ModelChoiceField(
-            'PhoneNumberAutocomplete',
+            'PhoneNumberAdminAutocomplete',
             queryset=PhoneNumber.objects.all(),
             )
 

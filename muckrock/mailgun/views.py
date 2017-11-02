@@ -158,7 +158,7 @@ def route_mailgun(request):
     # The way spam hero is currently set up, all emails are sent to the same
     # address, so we must parse to headers to find the recipient.  This can
     # cause duplicate messages if one email is sent to or CC'd to multiple
-    # addresses @request.muckrock.com.  To try and avoid this, we will cache
+    # addresses @requests.muckrock.com.  To try and avoid this, we will cache
     # the message id, which should be a unique identifier for the message.
     # If it exists int he cache, we will stop processing this email.  The
     # ID will be cached for 5 minutes - duplicates should normally be processed
@@ -172,16 +172,16 @@ def route_mailgun(request):
         if not cache.add(message_id, 1, 300):
             return HttpResponse('OK')
 
-    p_request_email = re.compile(r'(\d+-\d{3,10})@requests.muckrock.com')
+    p_request_email = re.compile(r'(\d+-\d{3,10})@%s' % settings.MAILGUN_SERVER_NAME)
     tos = post.get('To', '') or post.get('to', '')
     ccs = post.get('Cc', '') or post.get('cc', '')
     name_emails = getaddresses([tos.lower(), ccs.lower()])
-    logger.info('Incoming email: %s', name_emails)
+    logger.info('Incoming email: %s - %s', name_emails, post.get('Subject', ''))
     for _, email in name_emails:
         m_request_email = p_request_email.match(email)
         if m_request_email:
             _handle_request(request, m_request_email.group(1))
-        elif email.endswith('@requests.muckrock.com'):
+        elif email.endswith('@%s' % settings.MAILGUN_SERVER_NAME):
             _catch_all(request, email)
     return HttpResponse('OK')
 
@@ -279,15 +279,9 @@ def _handle_request(request, mail_id):
             classify_status.apply_async(args=(task.pk,), countdown=30 * 60)
             comm.create_agency_notifications()
 
-        if foia.portal:
-            foia.portal.receive_msg(comm)
-        else:
-            task = ResponseTask.objects.create(communication=comm)
-            classify_status.apply_async(args=(task.pk,), countdown=30 * 60)
-            comm.create_agency_notifications()
-
         new_cc_emails = [e for e in (to_emails + cc_emails)
-                if e.domain not in ('requests.muckrock.com', 'muckrock.com')]
+                if e.domain not in
+                (settings.MAILGUN_SERVER_NAME, 'muckrock.com')]
         foia.email = from_email
         foia.cc_emails.set(new_cc_emails)
 

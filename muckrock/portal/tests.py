@@ -8,7 +8,7 @@ from django.test import TestCase
 from nose.tools import eq_, ok_
 
 from muckrock.factories import FOIACommunicationFactory
-from muckrock.portal.portals import ManualPortal
+from muckrock.portal.models import Portal
 from muckrock.task.models import PortalTask
 
 # pylint: disable=no-self-use
@@ -18,7 +18,11 @@ class TestManualPortal(TestCase):
 
     def setUp(self):
         """All tests need a manual portal"""
-        self.portal = ManualPortal()
+        self.portal = Portal.objects.create(
+                url='https://www.example.com',
+                name='Test Portal',
+                type='other', # use manual logic
+                )
 
     def test_send_msg(self):
         """Sending a message should create a portal task"""

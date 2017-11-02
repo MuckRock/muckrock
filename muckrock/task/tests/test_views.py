@@ -13,7 +13,6 @@ import nose
 from muckrock import agency, factories, task
 from muckrock.communication.models import EmailAddress, EmailCommunication
 from muckrock.foia.models import FOIARequest, FOIANote
-from muckrock.foia.views import save_foia_comm
 from muckrock.task.factories import (
     FlaggedTaskFactory,
     StaleAgencyTaskFactory,
@@ -651,7 +650,11 @@ class ResponseTaskListViewTests(TestCase):
         # first saving a comm
         foia = self.task.communication.foia
         num_comms = foia.communications.count()
-        save_foia_comm(foia, foia.user, 'Just testing, u no', foia.user)
+        foia.create_out_communication(
+                from_user=foia.user,
+                text='Just testing',
+                user=foia.user,
+                )
         eq_(foia.communications.count(), num_comms + 1,
             'Should add a new communication to the FOIA.')
         num_comms = foia.communications.count()

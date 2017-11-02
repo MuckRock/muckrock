@@ -17,7 +17,7 @@ import logging
 from muckrock.accounts.models import Profile
 from muckrock.accounts.utils import unique_username
 from muckrock.jurisdiction.models import Jurisdiction, RequestHelper
-from muckrock.task.models import StaleAgencyTask
+from muckrock.task.models import NewAgencyTask, StaleAgencyTask
 from muckrock import fields
 
 logger = logging.getLogger(__name__)
@@ -51,6 +51,23 @@ class AgencyQuerySet(models.QuerySet):
                    .exclude(id=agency.id)\
                    .filter(status='approved')\
                    .order_by('name')
+
+    def create_new(self, name, jurisdiction, user):
+        """Create a pending agency with a NewAgency task"""
+        user = user if user.is_authenticated() else None
+        agency = self.create(
+            name=name,
+            slug=(slugify(name) or 'untitled'),
+            jurisdiction=jurisdiction,
+            user=user,
+            status='pending',
+        )
+        NewAgencyTask.objects.create(
+                assigned=user,
+                user=user,
+                agency=agency,
+                )
+        return agency
 
 
 class Agency(models.Model, RequestHelper):

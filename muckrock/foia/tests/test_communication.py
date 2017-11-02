@@ -2,8 +2,6 @@
 Tests for the FOIACommunication model
 """
 
-import datetime
-
 from django import test
 from django.core.urlresolvers import reverse
 
@@ -185,46 +183,6 @@ class TestCommunicationClone(test.TestCase):
         ok_(not self.comm.files.all()[0].ffile)
         other_foia = factories.FOIARequestFactory()
         self.comm.clone([other_foia.pk])
-
-
-class TestCommunicationResend(test.TestCase):
-    """Tests the resend method"""
-    def setUp(self):
-        self.creation_date = datetime.datetime.now() - datetime.timedelta(1)
-        agency = factories.AgencyFactory()
-        foia = factories.FOIARequestFactory(agency=agency)
-        self.comm = factories.FOIACommunicationFactory(foia=foia, date=self.creation_date)
-
-    def test_resend_sans_email(self):
-        """Should resubmit the FOIA containing the communication as a snail mail"""
-        self.comm.resend()
-        self.comm.refresh_from_db()
-        eq_(self.comm.foia.status, 'submitted',
-            'Resubmitting the communication should resubmit its associated FOIARequest.')
-
-    def test_resend_with_email(self):
-        """Should resubmit the FOIA containing the communication automatically"""
-        new_email = EmailAddress.objects.fetch('test@example.com')
-        self.comm.resend(new_email)
-        self.comm.refresh_from_db()
-        eq_(self.comm.foia.email, new_email,
-            'Resubmitting with a new email should update the email of the FOIA request.')
-        eq_(self.comm.foia.status, 'ack',
-            'Resubmitting with an email should resubmit its associated FOIARequest.')
-
-    @raises(ValueError)
-    def test_resend_orphan_comm(self):
-        """Should throw an error if the communication being resent is an orphan"""
-        self.comm.foia = None
-        self.comm.save()
-        self.comm.resend('hello@world.com')
-
-    @raises(ValueError)
-    def test_resend_unapproved_comm(self):
-        """Should throw an error if the communication being resent has an unapproved agency"""
-        self.comm.foia.agency.status = 'rejected'
-        self.comm.foia.agency.save()
-        self.comm.resend('hello@world.com')
 
 
 class TestRawEmail(test.TestCase):

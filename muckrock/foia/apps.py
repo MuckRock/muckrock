@@ -13,7 +13,9 @@ class FOIAConfig(AppConfig):
     def ready(self):
         """Registers requests and communications with the activity streams plugin"""
         from actstream import registry as action
+        from autocomplete_light import shortcuts as autocomplete_light
         from watson import search
+        import muckrock.foia.signals # pylint: disable=unused-import,unused-variable
         FOIARequest = self.get_model('FOIARequest')
         FOIACommunication = self.get_model('FOIACommunication')
         FOIANote = self.get_model('FOIANote')
@@ -21,3 +23,4 @@ class FOIAConfig(AppConfig):
         action.register(FOIACommunication)
         action.register(FOIANote)
         search.register(FOIARequest.objects.get_public())
+        autocomplete_light.autodiscover()

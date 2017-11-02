@@ -219,4 +219,37 @@ $("#agency-reply #id_status").change(function() {
 });
 $("#agency-reply #id_status").trigger("change");
 
+/* Communication Resend */
 
+$(".resend-communication select").change(function() {
+  if ($(this).val() == "portal" || $(this).val() == "snail") {
+    $(this).siblings("#id_email-wrapper").hide();
+    $(this).siblings("#id_fax-wrapper").hide();
+  } else if ($(this).val() == "email") {
+    $(this).siblings("#id_email-wrapper").show();
+    $(this).siblings("#id_fax-wrapper").hide();
+  } else if ($(this).val() == "fax") {
+    $(this).siblings("#id_email-wrapper").hide();
+    $(this).siblings("#id_fax-wrapper").show();
+  }
+});
+$(".resend-communication select").trigger("change");
+
+/* Admin Fix */
+
+$("#id_admin_fix-via").change(function() {
+  if ($(this).val() == "portal" || $(this).val() == "snail") {
+    $("#id_admin_fix-email-wrapper").parent().hide();
+    $("#id_admin_fix-other_emails").parent().hide();
+    $("#id_admin_fix-fax-wrapper").parent().hide();
+  } else if ($(this).val() == "email") {
+    $("#id_admin_fix-email-wrapper").parent().show();
+    $("#id_admin_fix-other_emails").parent().show();
+    $("#id_admin_fix-fax-wrapper").parent().hide();
+  } else if ($(this).val() == "fax") {
+    $("#id_admin_fix-email-wrapper").parent().hide();
+    $("#id_admin_fix-other_emails").parent().hide();
+    $("#id_admin_fix-fax-wrapper").parent().show();
+  }
+});
+$("#id_admin_fix-via").trigger("change");

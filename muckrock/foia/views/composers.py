@@ -16,7 +16,6 @@ from django.utils.encoding import smart_text
 
 from datetime import datetime, date
 from math import ceil
-import logging
 
 from muckrock.accounts.utils import miniregister
 from muckrock.agency.models import Agency
@@ -30,35 +29,11 @@ from muckrock.foia.models import (
     FOIARequest,
     FOIAMultiRequest,
     FOIACommunication,
-    STATUS,
     )
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.task.models import NewAgencyTask, MultiRequestTask
+from muckrock.task.models import MultiRequestTask
 from muckrock.utils import new_action, generate_key
 
-# pylint: disable=too-many-ancestors
-
-logger = logging.getLogger(__name__)
-STATUS_NODRAFT = [st for st in STATUS if st != ('started', 'Draft')]
-
-# HELPER FUNCTIONS
-
-def get_foia(jurisdiction, jidx, slug, idx, select_related=None, prefetch_related=None):
-    """A helper function that gets and returns a FOIA object"""
-    # pylint: disable=too-many-arguments
-    foia_qs = FOIARequest.objects.all()
-    if select_related:
-        foia_qs = foia_qs.select_related(*select_related)
-    if prefetch_related:
-        foia_qs = foia_qs.prefetch_related(*prefetch_related)
-    foia = get_object_or_404(
-            foia_qs,
-            jurisdiction__slug=jurisdiction,
-            jurisdiction__pk=jidx,
-            slug=slug,
-            id=idx,
-            )
-    return foia
 
 def _make_comm(foia, from_who, proxy=False):
     """A helper function to compose the text of a communication"""
@@ -72,21 +47,6 @@ def _make_comm(foia, from_who, proxy=False):
     request_text = template.render(context).split('\n', 1)[1].strip()
     return request_text
 
-def _make_new_agency(request, agency, jurisdiction):
-    """Helper function to create new agency"""
-    user = request.user if request.user.is_authenticated() else None
-    agency = Agency.objects.create(
-        name=agency,
-        slug=(slugify(agency) or 'untitled'),
-        jurisdiction=jurisdiction,
-        user=user,
-        status='pending',
-    )
-    NewAgencyTask.objects.create(
-            assigned=user,
-            user=user,
-            agency=agency)
-    return agency
 
 def _make_request(request, foia_request, parent=None):
     """A helper function for creating request and comms objects"""
@@ -135,6 +95,7 @@ def _make_request(request, foia_request, parent=None):
     )
     return foia, foia_comm
 
+
 def _make_user(request, data):
     """
     Create a new user from just their full name and email and return the user.
@@ -151,6 +112,7 @@ def _make_user(request, data):
     login(request, user)
     # return the user
     return user
+
 
 def _process_request_form(request):
     """A helper function for getting info out of a request composer form"""
@@ -178,7 +140,7 @@ def _process_request_form(request):
                 .first()
                 )
         if agency is None:
-            agency = _make_new_agency(request, data['agency'], jurisdiction)
+            agency = Agency.objects.create_new(data['agency'], jurisdiction, request.user)
         foia_request.update({
             'title': title,
             'document': document,
@@ -186,6 +148,7 @@ def _process_request_form(request):
             'agency': agency,
         })
     return foia_request
+
 
 def _submit_request(request, foia):
     """Submit request for user"""
@@ -203,11 +166,19 @@ def _submit_request(request, foia):
         new_action(request.user, 'submitted', target=foia)
     return redirect(foia)
 
+
 def clone_request(request, jurisdiction, jidx, slug, idx):
     """A URL handler for cloning requests"""
     # pylint: disable=unused-argument
-    foia = get_foia(jurisdiction, jidx, slug, idx)
+    foia = get_object_or_404(
+            FOIARequest,
+            jurisdiction__slug=jurisdiction,
+            jurisdiction__pk=jidx,
+            slug=slug,
+            pk=idx,
+            )
     return HttpResponseRedirect(reverse('foia-create') + '?clone=%s' % foia.pk)
+
 
 def create_request(request):
     """A very important view for composing FOIA requests"""
@@ -285,10 +256,17 @@ def create_request(request):
             context,
             )
 
+
 @login_required
 def draft_request(request, jurisdiction, jidx, slug, idx):
     """Edit a drafted FOIA Request"""
-    foia = get_foia(jurisdiction, jidx, slug, idx)
+    foia = get_object_or_404(
+            FOIARequest,
+            jurisdiction__slug=jurisdiction,
+            jurisdiction__pk=jidx,
+            slug=slug,
+            pk=idx,
+            )
     if not foia.is_editable():
         messages.error(request, 'This is not a draft.')
         return redirect(foia)
@@ -359,6 +337,7 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
             context,
             )
 
+
 @login_required
 def create_multirequest(request):
     """A view for composing multirequests"""
@@ -386,6 +365,7 @@ def create_multirequest(request):
             'forms/foia/create_multirequest.html',
             context,
             )
+
 
 @login_required
 def draft_multirequest(request, slug, idx):
