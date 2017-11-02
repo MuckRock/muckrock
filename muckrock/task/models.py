@@ -25,12 +25,12 @@ from muckrock.communication.models import (
         PhoneNumber,
         )
 from muckrock.foia.models import (
-    FOIACommunication,
-    FOIAFile,
-    FOIANote,
-    FOIARequest,
-    STATUS,
-)
+        FOIACommunication,
+        FOIAFile,
+        FOIANote,
+        FOIARequest,
+        STATUS,
+        )
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import support
@@ -159,6 +159,18 @@ class ReviewAgencyTaskQuerySet(models.QuerySet):
                     Prefetch('agency__agencyaddress_set',
                         queryset=AgencyAddress.objects.select_related('address')),
                     ))
+
+    def ensure_one_created(self, **kwargs):
+        """Ensure exactly one model exists in the database as specified"""
+        try:
+            self.get_or_create(**kwargs)
+        except ReviewAgencyTask.MultipleObjectsReturned:
+            # if there are multiples, delete all but the first one
+            # then try again
+            to_delete = self.filter(**kwargs).order_by('date_created')[1:]
+            self.filter(pk__in=to_delete).delete()
+            self.ensure_one_created(**kwargs)
+
 
 
 class Task(models.Model):
