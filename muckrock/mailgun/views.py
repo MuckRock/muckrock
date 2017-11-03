@@ -265,6 +265,7 @@ def _handle_request(request, mail_id):
         # resolve any stale agency tasks for this agency
         if foia.agency:
             foia.agency.unmark_stale()
+        comm.extract_tracking_id()
 
         new_cc_emails = [e for e in (to_emails + cc_emails)
                 if e.domain not in ('requests.muckrock.com', 'muckrock.com')]

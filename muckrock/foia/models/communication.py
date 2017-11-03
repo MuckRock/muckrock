@@ -12,6 +12,7 @@ from datetime import datetime
 import logging
 import mimetypes
 import os
+import re
 
 from muckrock.foia.models.request import FOIARequest, STATUS
 from muckrock.utils import new_action
@@ -385,6 +386,24 @@ class FOIACommunication(models.Model):
             return subcomm.sent_from()
         else:
             return None
+
+    def extract_tracking_id(self):
+        """Try to extract a tracking number from this communication"""
+        if self.foia.tracking_id:
+            return
+        pattern = re.compile(r"""
+            (?:tracking|case|file|foia
+            |freedom\ of\ information\ act) # leading word
+            [^.]*                           # anything but a period - stay in the same sentence
+            (?:number|no[.]|\#|id|log|case) # follow up word
+            [^.]*?                          # same sentence, don't be greey
+            ([a-z0-9-]*[0-9][a-z0-9-]*)     # the tracking number
+            """, re.IGNORECASE | re.VERBOSE)
+        match = pattern.search(self.communication)
+        if match:
+            self.foia.tracking_id = match.group(1).strip()[:255]
+            self.foia.save()
+
 
     class Meta:
         # pylint: disable=too-few-public-methods
