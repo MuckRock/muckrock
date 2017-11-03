@@ -1,0 +1,119 @@
+{% load compress %}
+{% load render_bundle from webpack_loader %}
+{% load static from staticfiles %}
+<!doctype html>
+<html>
+  <head>
+    <title>{{dataset.name}} &bull; MuckRock</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'vendor/tabulator/tabulator.css' %}">
+    <style>
+      table.email-table {
+        white-space: normal;
+      }
+      table.email-table td {
+        vertical-align: top;
+      }
+    </style>
+    {% compress js %}
+      {% render_bundle 'main' 'js' %}
+      <script type="text/javascript" src="{% static 'autocomplete_light/django_admin.js' %}"></script>
+      <script type="text/javascript" src="{% static 'autocomplete_light/autocomplete.js' %}"></script>
+      <script type="text/javascript" src="{% static 'autocomplete_light/widget.js' %}"></script>
+      <script type="text/javascript" src="{% static 'autocomplete_light/addanother.js' %}"></script>
+      <script type="text/javascript" src="{% static 'autocomplete_light/text_widget.js' %}"></script>
+      <script type="text/javascript" src="{% static 'autocomplete_light/remote.js' %}"></script>
+    {% endcompress %}
+  </head>
+  <body style="margin: 0;">
+    <div id="tabulator"></div>
+    <script type="text/javascript">
+      var selectEditor = function(cell, onRendered, success, cancel, editorParams){
+        //cell - the cell component for the editable cell
+        //onRendered - function to call when the editor has been rendered
+        //success - function to call to pass the succesfully updated value to Tabulator
+        //cancel - function to call to abort the edit and return to a normal cell
+        //editorParams - editorParams object set in column defintion
+
+        //create and style editor
+        options = "<option value=''>--</option>";
+        for (var i = 0; i < editorParams.choices.length; i++) {
+          options += ("<option value='" + editorParams.choices[i] + "'>" + editorParams.choices[i] + "</option>");
+        }
+        var editor = $("<select>" + options + "</select>");
+        editor.css({
+          "padding":"3px",
+          "width":"100%",
+          "box-sizing":"border-box",
+        });
+
+        //Set value of editor to the current value of the cell
+        editor.val(cell.getValue());
+
+        //set focus on the select box when the editor is selected (timeout allows for editor to be added to DOM)
+        onRendered(function(){
+          editor.focus();
+        });
+
+        //when the value has been set, trigger the cell to update
+        editor.on("change blur", function(e){
+          success(editor.val());
+        });
+
+        //return the editor element
+        return editor;
+      };
+      $("#tabulator").tabulator({
+        height: 560,
+        pagination: "remote",
+        ajaxURL: "{% url 'dataset-data' slug=dataset.slug idx=dataset.pk %}",
+        ajaxParams: {},
+        ajaxConfig: {traditional: false},
+        ajaxSorting: true,
+        ajaxFiltering: true,
+        layout: "fitColumns",
+        {% if dataset.custom_format == "" %}
+          paginationSize: 20,
+          columns: [
+            {% for field in dataset.fields.all %}
+              {
+                title: "{{field.name}}",
+                field: "{{field.slug}}",
+                formatter: "{{field.formatter}}",
+                {% if field.formatter == "money" %}
+                  formatterParams: {symbol: '$'},
+                {% endif %}
+                headerFilter: {{field.editor|safe}},
+                {% if field.type == "choice" or field.type == "bool" %}
+                  headerFilterParams: {choices: [{% for choice in field.choices %}"{{choice}}",{% endfor %}]},
+                {% endif %}
+              },
+            {% endfor %}
+          ],
+        {% endif %}
+        {% if dataset.custom_format == "email" %}
+          paginationSize: 1,
+          columns: [
+          {title: "Email", field: "Date", headerSort: false}
+          ],
+          rowFormatter: function(row, data) {
+            var element = row.getElement(),
+            data = row.getData(),
+            width = element.outerWidth(),
+            table;
+
+            // clear current row data
+            element.empty();
+
+            table = $('<table class="email-table" style="width: ' + width + 'px;"></table>');
+            $(table).append('<tr><td><strong>From:</strong></td><td>' + data.from + '</td></tr>');
+            $(table).append('<tr><td><strong>To:</strong></td><td>' + data.to + '</td></tr>');
+            $(table).append('<tr><td><strong>Subject:</strong></td><td>' + data.subject + '</td></tr>');
+            $(table).append('<tr><td><strong>Date:</strong></td><td>' + data.date + '</td></tr>');
+            $(table).append('<tr><td><strong>Body:</strong></td><td>' + data.body.replace(/(?:\r\n|\r|\n)/g, '<br>') + '</td></tr>');
+            element.append(table);
+          },
+        {% endif %}
+      });
+    </script>
+  </body>
+</html>

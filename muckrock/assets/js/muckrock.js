@@ -12,6 +12,7 @@
 */
 
 import 'jquery-ui/datepicker';
+import 'jquery-ui/widget';
 import '../vendor/formset';
 import '../vendor/loupe';
 import '../vendor/quicksearch';
@@ -36,6 +37,8 @@ import './task';
 
 import qq from 'fine-uploader/lib/s3';
 window.qq = qq;
+
+import 'jquery.tabulator';
 
 /* Bind plugins and event handlers to frontend elements. */
 
