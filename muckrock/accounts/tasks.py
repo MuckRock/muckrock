@@ -20,6 +20,7 @@ from muckrock.communication.models import (
         EmailCommunication,
         FaxCommunication,
         MailCommunication,
+        PortalCommunication,
         )
 from muckrock.crowdfund.models import Crowdfund, CrowdfundPayment
 from muckrock.foia.models import FOIARequest, FOIAFile, FOIACommunication
@@ -46,6 +47,7 @@ from muckrock.task.models import (
         CrowdfundTask,
         FailedFaxTask,
         ReviewAgencyTask,
+        PortalTask,
         )
 
 logger = logging.getLogger(__name__)
@@ -94,6 +96,11 @@ def store_statistics():
             .filter(status='submitted')
             .exclude(date_processing=None)
             .aggregate(days=Sum(date.today() - F('date_processing')))['days']),
+        sent_communications_portal=PortalCommunication.objects
+            .filter(
+                communication__date__range=(yesterday, date.today()),
+                communication__response=False,
+                ).count(),
         sent_communications_email=EmailCommunication.objects
             .filter(
                 communication__date__range=(yesterday, date.today()),
@@ -196,6 +203,7 @@ def store_statistics():
             FOIACommunication.objects.filter(foia=None).count(),
         stale_agencies=Agency.objects.filter(stale=True).count(),
         unapproved_agencies=Agency.objects.filter(status='pending').count(),
+        portal_agencies=Agency.objects.exclude(portal=None).count(),
         total_tasks=Task.objects.count(),
         total_unresolved_tasks=Task.objects.filter(resolved=False).count(),
         total_generic_tasks=GenericTask.objects.count(),
@@ -231,6 +239,9 @@ def store_statistics():
         total_reviewagency_tasks=ReviewAgencyTask.objects.count(),
         total_unresolved_reviewagency_tasks=
             ReviewAgencyTask.objects.filter(resolved=False).count(),
+        total_portal_tasks=PortalTask.objects.count(),
+        total_unresolved_portal_tasks=
+            PortalTask.objects.filter(resolved=False).count(),
         daily_robot_response_tasks=ResponseTask.objects.filter(
                date_done__gte=yesterday,
                date_done__lt=date.today(),

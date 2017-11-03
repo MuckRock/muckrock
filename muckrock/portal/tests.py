@@ -48,4 +48,3 @@ class TestManualPortal(TestCase):
         """Should generate a random password"""
         password = self.portal.get_new_password()
         eq_(len(password), 12)
-
