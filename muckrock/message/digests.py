@@ -239,15 +239,24 @@ class StaffDigest(Digest):
 
     class DataPoint():
         """Holds a data point for display in a digest."""
-        def __init__(self, name, current_value, previous_value, growth=True):
+        def __init__(self, name, current_value, previous_value,
+                previous_week_value, previous_month_value, growth=True):
             """Initialize the statistical object"""
+            # pylint: disable=too-many-arguments
             self.name = name
             self.current = current_value
-            self.previous = previous_value
-            if self.current and self.previous:
-                self.delta = self.current - self.previous
+            if self.current and previous_value is not None:
+                self.delta = self.current - previous_value
             else:
                 self.delta = None
+            if self.current and previous_week_value is not None:
+                self.delta_week = self.current - previous_week_value
+            else:
+                self.delta_week = None
+            if self.current and previous_month_value is not None:
+                self.delta_month = self.current - previous_month_value
+            else:
+                self.delta_month = None
             self.growth = growth
 
     def get_trailing_cost(self, current, duration, cost_per):
@@ -309,60 +318,59 @@ class StaffDigest(Digest):
         try:
             current = Statistics.objects.get(date=end)
             previous = Statistics.objects.get(date=start)
+            previous_week = Statistics.objects.get(date=end - relativedelta(weeks=1))
+            previous_month = Statistics.objects.get(date=end - relativedelta(months=1))
         except Statistics.DoesNotExist:
             return None # if statistics cannot be found, don't send anything
+        request_data = []
+        request_stats = [
+                ('Requests', 'total_requests', True),
+                ('Pages', 'total_pages', True),
+                ('Processing', 'total_requests_submitted', False),
+                ('Processing Time', 'requests_processing_days', False),
+                ('Responses', 'total_unresolved_response_tasks', False),
+                ('Automatically Resolved', 'daily_robot_response_tasks', True),
+                ('Orphans', 'total_unresolved_orphan_tasks', False),
+                ('Stale Agencies', 'stale_agencies', False),
+                ('New Agencies', 'unapproved_agencies', False),
+                ('Flags', 'total_unresolved_flagged_tasks', False),
+                ('Flags Time', 'flag_processing_days', False),
+                ('Snail Mail Total', 'total_unresolved_snailmail_tasks', False),
+                ('Snail Mail Appeals', 'unresolved_snailmail_appeals', False),
+                ]
+        for name, stat, growth in request_stats:
+            request_data.append(
+                    self.DataPoint(
+                        name,
+                        getattr(current, stat),
+                        getattr(previous, stat),
+                        getattr(previous_week, stat),
+                        getattr(previous_month, stat),
+                        growth,
+                        ))
         data = {
-            'request': [
-                self.DataPoint('Requests', current.total_requests, previous.total_requests),
-                self.DataPoint('Pages', current.total_pages, previous.total_pages),
-                self.DataPoint(
-                    'Processing',
-                    current.total_requests_submitted,
-                    previous.total_requests_submitted,
-                    False
-                ),
-                self.DataPoint(
-                    'Processing Time',
-                    current.requests_processing_days,
-                    previous.requests_processing_days,
-                    False
-                ),
-                self.DataPoint(
-                    'Responses',
-                    current.total_unresolved_response_tasks,
-                    previous.total_unresolved_response_tasks,
-                    False
-                ),
-                self.DataPoint(
-                    'Automatically Resolved',
-                    current.daily_robot_response_tasks,
-                    previous.daily_robot_response_tasks
-                ),
-                self.DataPoint(
-                    'Orphans',
-                    current.total_unresolved_orphan_tasks,
-                    previous.total_unresolved_orphan_tasks,
-                    False
-                ),
-                self.DataPoint(
-                    'Stale Agencies',
-                    current.stale_agencies,
-                    previous.stale_agencies, False
-                ),
-                self.DataPoint(
-                    'New Agencies',
-                    current.unapproved_agencies,
-                    previous.unapproved_agencies,
-                    False
-                ),
-            ],
+            'request': request_data,
             'user': [
-                self.DataPoint('Users', current.total_users, previous.total_users),
-                self.DataPoint('Pro Users', current.pro_users, previous.pro_users),
+                self.DataPoint(
+                    'Users',
+                    current.total_users,
+                    previous.total_users,
+                    previous_week.total_users,
+                    previous_month.total_users,
+                    ),
+                self.DataPoint(
+                    'Pro Users',
+                    current.pro_users,
+                    previous.pro_users,
+                    previous_week.pro_users,
+                    previous_month.pro_users,
+                    ),
                 self.DataPoint(
                     'Active Org Members',
                     current.total_active_org_members,
-                    previous.total_active_org_members
+                    previous.total_active_org_members,
+                    previous_week.total_active_org_members,
+                    previous_month.total_active_org_members,
                 ),
             ],
         }
@@ -407,7 +415,11 @@ class StaffDigest(Digest):
         context['stats'] = self.get_data(start, end)
         context['comms'] = self.get_comms(start, end)
         context['pro_users'] = self.get_pro_users(end - relativedelta(days=5), end)
-        context['crowdfunds'] = list(Crowdfund.objects.filter(closed=False))
+        context['crowdfunds'] = list(
+                Crowdfund.objects
+                .filter(closed=False)
+                .order_by('-date_due')
+                )
         context['projects'] = Project.objects.get_pending()
         return context
 

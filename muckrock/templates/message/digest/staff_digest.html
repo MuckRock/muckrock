@@ -10,6 +10,8 @@
             <th>Statistic</th>
             <th>Current value</th>
             <th>Change from day before</th>
+            <th>Change from week before</th>
+            <th>Change from month before</th>
         </tr>
     </thead>
     <tbody>
@@ -19,22 +21,60 @@
             <td>{{ stat.current }}</td>
             {% if stat.delta > 0 %}
                 {% if stat.growth %}
-            <td class="green">
+                    <td class="green">
                 {% else %}
-            <td class="red">
+                    <td class="red">
                 {% endif %}
                 +{{ stat.delta }}
-            </td>
+                </td>
             {% elif stat.delta < 0 %}
                 {% if stat.growth %}
-            <td class="red">
+                    <td class="red">
                 {% else %}
-            <td class="green">
+                    <td class="green">
                 {% endif %}
                 {{ stat.delta }}
-            </td>
+                </td>
             {% else %}
-            <td>{{ stat.delta }}</td>
+                <td>{{ stat.delta }}</td>
+            {% endif %}
+            {% if stat.delta_week > 0 %}
+                {% if stat.growth %}
+                    <td class="green">
+                {% else %}
+                    <td class="red">
+                {% endif %}
+                +{{ stat.delta_week }}
+                </td>
+            {% elif stat.delta_week < 0 %}
+                {% if stat.growth %}
+                    <td class="red">
+                {% else %}
+                    <td class="green">
+                {% endif %}
+                {{ stat.delta_week }}
+                </td>
+            {% else %}
+                <td>{{ stat.delta_week }}</td>
+            {% endif %}
+            {% if stat.delta_month > 0 %}
+                {% if stat.growth %}
+                    <td class="green">
+                {% else %}
+                    <td class="red">
+                {% endif %}
+                +{{ stat.delta_month }}
+                </td>
+            {% elif stat.delta_month < 0 %}
+                {% if stat.growth %}
+                    <td class="red">
+                {% else %}
+                    <td class="green">
+                {% endif %}
+                {{ stat.delta_month }}
+                </td>
+            {% else %}
+                <td>{{ stat.delta_month }}</td>
             {% endif %}
         </tr>
         {% endfor %}
@@ -100,6 +140,8 @@
             <th>Statistic</th>
             <th>Current value</th>
             <th>Change from day before</th>
+            <th>Change from week before</th>
+            <th>Change from month before</th>
         </tr>
     </thead>
     <tbody>
@@ -109,22 +151,60 @@
             <td>{{ stat.current }}</td>
             {% if stat.delta > 0 %}
                 {% if stat.growth %}
-            <td class="green">
+                    <td class="green">
                 {% else %}
-            <td class="red">
+                    <td class="red">
                 {% endif %}
                 +{{ stat.delta }}
-            </td>
+                </td>
             {% elif stat.delta < 0 %}
                 {% if stat.growth %}
-            <td class="red">
+                    <td class="red">
                 {% else %}
-            <td class="green">
+                    <td class="green">
                 {% endif %}
                 {{ stat.delta }}
-            </td>
+                </td>
             {% else %}
-            <td>{{ stat.delta }}</td>
+                <td>{{ stat.delta }}</td>
+            {% endif %}
+            {% if stat.delta_week > 0 %}
+                {% if stat.growth %}
+                    <td class="green">
+                {% else %}
+                    <td class="red">
+                {% endif %}
+                +{{ stat.delta_week }}
+                </td>
+            {% elif stat.delta_week < 0 %}
+                {% if stat.growth %}
+                    <td class="red">
+                {% else %}
+                    <td class="green">
+                {% endif %}
+                {{ stat.delta_week }}
+                </td>
+            {% else %}
+                <td>{{ stat.delta_week }}</td>
+            {% endif %}
+            {% if stat.delta_month > 0 %}
+                {% if stat.growth %}
+                    <td class="green">
+                {% else %}
+                    <td class="red">
+                {% endif %}
+                +{{ stat.delta_month }}
+                </td>
+            {% elif stat.delta_month < 0 %}
+                {% if stat.growth %}
+                    <td class="red">
+                {% else %}
+                    <td class="green">
+                {% endif %}
+                {{ stat.delta_month }}
+                </td>
+            {% else %}
+                <td>{{ stat.delta_month }}</td>
             {% endif %}
         </tr>
         {% endfor %}
