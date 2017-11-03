@@ -326,7 +326,7 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
     except FOIACommunication.DoesNotExist as exc:
         send_fax.retry(
                 countdown=300,
-                args=[comm_id, subject, body],
+                args=[comm_id, subject, body, error_count],
                 kwargs=kwargs,
                 exc=exc,
                 )
@@ -372,7 +372,7 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
                 )
         send_fax.retry(
                 countdown=300,
-                args=[comm_id, subject, body],
+                args=[comm_id, subject, body, error_count],
                 kwargs=kwargs,
                 exc=exc,
                 )
