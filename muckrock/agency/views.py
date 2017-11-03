@@ -24,6 +24,10 @@ class AgencyList(MRSearchFilterListView):
     title = 'Agencies'
     template_name = 'agency/list.html'
     default_sort = 'name'
+    sort_map = {
+            'name': 'name',
+            'jurisdiction': 'jurisdiction__slug',
+            }
 
     def get_queryset(self):
         """Limit agencies to only approved ones."""

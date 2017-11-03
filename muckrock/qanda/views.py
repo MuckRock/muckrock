@@ -39,6 +39,11 @@ class QuestionList(MRSearchFilterListView):
     template_name = 'qanda/list.html'
     default_sort = 'date'
     default_order = 'desc'
+    sort_map = {
+            'title': 'title',
+            'user': 'user__first_name',
+            'date': 'date',
+            }
 
     def get_queryset(self):
         """Hide inactive users and prefetch"""

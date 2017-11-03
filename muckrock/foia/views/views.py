@@ -159,6 +159,14 @@ class RequestList(MRSearchFilterListView):
     template_name = 'foia/list.html'
     default_sort = 'date_updated'
     default_order = 'desc'
+    sort_map = {
+            'title': 'title',
+            'user': 'user__first_name',
+            'agency': 'agency__name',
+            'jurisdiction': 'jurisdiction__name',
+            'date_updated': 'date_updated',
+            'date_submitted': 'date_submitted',
+            }
 
     def get_queryset(self):
         """Limits requests to those visible by current user"""
@@ -251,6 +259,11 @@ class ProcessingRequestList(RequestList):
     template_name = 'foia/processing_list.html'
     default_sort = 'date_processing'
     default_order = 'asc'
+    sort_map = {
+            'title': 'title',
+            'date_submitted': 'date_submitted',
+            'date_processing': 'date_processing',
+            }
 
     def dispatch(self, *args, **kwargs):
         """Only staff can see the list of processing requests."""

@@ -162,6 +162,7 @@ class NewsListView(MRSearchFilterListView):
     default_order = 'desc'
     queryset = Article.objects.get_published().prefetch_authors()
     paginate_by = 10
+    sort_map = {}
 
     def get_context_data(self, **kwargs):
         """Add a list of all the years we've published to the context."""
