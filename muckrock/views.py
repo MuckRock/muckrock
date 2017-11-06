@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.core.urlresolvers import reverse
-from django.db.models import Sum, FieldDoesNotExist
+from django.db.models import Sum
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.decorators import method_decorator
 from django.utils.html import escape
