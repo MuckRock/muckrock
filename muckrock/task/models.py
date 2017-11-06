@@ -32,6 +32,7 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import support
 from muckrock.models import ExtractDay, Now
+from muckrock.task.forms import ResponseTaskForm
 from muckrock.task.querysets import (
         TaskQuerySet,
         OrphanTaskQuerySet,
@@ -536,6 +537,11 @@ class ResponseTask(Task):
 
     def get_absolute_url(self):
         return reverse('response-task', kwargs={'pk': self.pk})
+
+    def set_status(self, status):
+        """Forward to form logic, for use in classify_status task"""
+        form = ResponseTaskForm()
+        form.set_status(status, set_foia=True, comms=[self.communication])
 
 
 class StatusChangeTask(Task):
