@@ -405,6 +405,13 @@ class FOIACommunication(models.Model):
         if match:
             self.foia.tracking_id = match.group(1).strip()[:255]
             self.foia.save()
+            logger.info(
+                    'FOIA Tracking ID set: FOIA PK: %d - Comm PK: %d - '
+                    'Tracking ID: %s',
+                    self.foia.id,
+                    self.id,
+                    self.foia.tracking_id,
+                    )
 
 
     class Meta:
