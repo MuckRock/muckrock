@@ -36,21 +36,19 @@ class OrderedSortMixin(object):
     """Sorts and orders a queryset given some inputs."""
     default_sort = 'id'
     default_order = 'asc'
+    sort_map = {}
 
     def sort_queryset(self, queryset):
         """
         Sorts a queryset of objects.
 
-        We need to make sure the field to sort by actually exists.
-        If the field doesn't exist, return the unordered queryset.
+        We need to make sure the field to sort by is allowed.
+        If the field isn't allowed, return the default order queryset.
         """
         # pylint:disable=protected-access
         sort = self.request.GET.get('sort', self.default_sort)
         order = self.request.GET.get('order', self.default_order)
-        try:
-            queryset.model._meta.get_field(sort)
-        except FieldDoesNotExist:
-            sort = self.default_sort
+        sort = self.sort_map.get(sort, self.default_sort)
         if order != 'asc':
             sort = '-' + sort
         return queryset.order_by(sort)

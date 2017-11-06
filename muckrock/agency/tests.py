@@ -192,7 +192,13 @@ class TestAgencyForm(TestCase):
 
     def setUp(self):
         self.agency = factories.AgencyFactory()
-        self.form = agency.forms.AgencyForm({'name': self.agency.name}, instance=self.agency)
+        self.form = agency.forms.AgencyForm(
+                {
+                    'name': self.agency.name,
+                    'portal_type': 'other',
+                    },
+                instance=self.agency,
+                )
 
     def test_validate_empty_form(self):
         """The form should have a name, at least"""

@@ -276,7 +276,10 @@ class MailCommunication(models.Model):
 
 class WebCommunication(models.Model):
     """A communication posted to our site directly through our web form"""
-    communication = models.ForeignKey('foia.FOIACommunication', related_name='web_comms')
+    communication = models.ForeignKey(
+            'foia.FOIACommunication',
+            related_name='web_comms',
+            )
     sent_datetime = models.DateTimeField()
 
     delivered = 'web'
@@ -293,6 +296,44 @@ class WebCommunication(models.Model):
         """Who was web comm sent from?"""
         # pylint: disable=no-self-use
         return None
+
+
+class PortalCommunication(models.Model):
+    """A communication sent or received from a portal"""
+    communication = models.ForeignKey(
+            'foia.FOIACommunication',
+            related_name='portals',
+            )
+    sent_datetime = models.DateTimeField()
+    portal = models.ForeignKey(
+            'portal.Portal',
+            related_name='communications',
+            )
+    direction = models.CharField(
+            max_length=8,
+            choices=(
+                ('incoming', 'Incoming'),
+                ('outgoing', 'Outgoing'),
+                ))
+
+    delivered = 'portal'
+
+    def __unicode__(self):
+        return 'Portal Communication'
+
+    def sent_to(self):
+        """Who was portal comm sent to?"""
+        if self.direction == 'outgoing':
+            return self.portal
+        else:
+            return None
+
+    def sent_from(self):
+        """Who was portal comm sent from?"""
+        if self.direction == 'incoming':
+            return self.portal
+        else:
+            return None
 
 
 # Error models

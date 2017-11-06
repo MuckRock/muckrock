@@ -248,6 +248,16 @@ class FOIARequest(models.Model):
     mail_id = models.CharField(blank=True, max_length=255, editable=False)
     updated = models.BooleanField(default=False)
 
+    portal = models.ForeignKey(
+            'portal.Portal',
+            related_name='foias',
+            blank=True,
+            null=True,
+            )
+    portal_password = models.CharField(
+            max_length=20,
+            blank=True,
+            )
     email = models.ForeignKey(
             'communication.EmailAddress',
             related_name='foias',
@@ -494,6 +504,10 @@ class FOIARequest(models.Model):
             self.set_mail_id()
         return self.mail_id
 
+    def get_request_email(self):
+        """Get the request's unique email address"""
+        return '%s@%s' % (self.get_mail_id(), settings.MAILGUN_SERVER_NAME)
+
     def get_other_emails(self):
         """Get the other emails for this request as a comma seperated string"""
         return ', '.join(unicode(e) for e in self.cc_emails.all())
@@ -596,6 +610,8 @@ class FOIARequest(models.Model):
             request_type = 'appeal'
         else:
             request_type = 'primary'
+        if not self.portal and not appeal:
+            self.portal = agency.portal
         if not self.email:
             self.email = agency.get_emails(request_type, 'to').first()
             self.cc_emails.set(agency.get_emails(request_type, 'cc'))
@@ -727,7 +743,9 @@ class FOIARequest(models.Model):
         comm.subject = subject
 
         # preferred order of communication methods
-        if self.email and self.email.status == 'good' and not kwargs.get('snail'):
+        if self.portal and self.portal.status == 'good' and not kwargs.get('snail'):
+            self._send_portal(comm, **kwargs)
+        elif self.email and self.email.status == 'good' and not kwargs.get('snail'):
             self._send_email(comm, **kwargs)
         elif self.fax and self.fax.status == 'good' and not kwargs.get('snail'):
             self._send_fax(comm, **kwargs)
@@ -740,29 +758,15 @@ class FOIARequest(models.Model):
         self.block_incoming = False
         self.save()
 
-    def get_agency_reply_link(self, email):
-        """Get the link for the agency user to log in"""
-        agency = self.agency
-        agency_user_profile = agency.get_user().profile
-        return agency_user_profile.wrap_url(
-                reverse(
-                    'acct-agency-redirect-login',
-                    kwargs={
-                        'agency_slug': agency.slug,
-                        'agency_idx': agency.pk,
-                        'foia_slug': self.slug,
-                        'foia_idx': self.pk,
-                        },
-                    ),
-                email=email,
-                )
+    def _send_portal(self, comm, **kwargs):
+        """Send the message via portal"""
+        self.portal.send_msg(comm, **kwargs)
 
     def _send_email(self, comm, **kwargs):
         """Send the message as an email"""
 
-        from_addr = self.get_mail_id()
         from_email, _ = EmailAddress.objects.get_or_create(
-                email='%s@%s' % (from_addr, settings.MAILGUN_SERVER_NAME),
+                email=self.get_request_email(),
                 )
 
         body = self.render_msg_body(
@@ -832,6 +836,25 @@ class FOIARequest(models.Model):
 
     def _send_snail_mail(self, comm, **kwargs):
         """Send the message as a snail mail"""
+        category, extra = self.process_manual_send(**kwargs)
+
+        switch = bool(kwargs.get('switch', False) or
+                ((self.email and self.email.status == 'error')
+                    and (self.last_request().sent_to() == self.email)) or
+                ((self.fax and self.fax.status == 'error')
+                    and (self.last_request().sent_to() == self.fax)))
+
+        task.models.SnailMailTask.objects.create(
+                category=category,
+                communication=comm,
+                user=comm.from_user,
+                switch=switch,
+                **extra
+                )
+
+    def process_manual_send(self, **kwargs):
+        """Select a category and set status for manually processed
+        sends - snail mails or manual portal tasks"""
         if not kwargs.get('thanks'):
             self.status = 'submitted'
             self.date_processing = date.today()
@@ -849,20 +872,7 @@ class FOIARequest(models.Model):
             extra = {'amount': kwargs['amount']}
         else:
             extra = {}
-
-        switch = bool(kwargs.get('switch', False) or
-                ((self.email and self.email.status == 'error')
-                    and (self.last_request().sent_to() == self.email)) or
-                ((self.fax and self.fax.status == 'error')
-                    and (self.last_request().sent_to() == self.fax)))
-
-        task.models.SnailMailTask.objects.create(
-                category=category,
-                communication=comm,
-                user=comm.from_user,
-                switch=switch,
-                **extra
-                )
+        return (category, extra)
 
     def render_msg_body(self, reply_link=False, switch=False):
         """Render the message body for outgoing messages"""
@@ -961,6 +971,23 @@ class FOIARequest(models.Model):
             return 30
         else:
             return 15
+
+    def get_agency_reply_link(self, email):
+        """Get the link for the agency user to log in"""
+        agency = self.agency
+        agency_user_profile = agency.get_user().profile
+        return agency_user_profile.wrap_url(
+                reverse(
+                    'acct-agency-redirect-login',
+                    kwargs={
+                        'agency_slug': agency.slug,
+                        'agency_idx': agency.pk,
+                        'foia_slug': self.slug,
+                        'foia_idx': self.pk,
+                        },
+                    ),
+                email=email,
+                )
 
     def update_tags(self, tags):
         """Update the requests tags"""
@@ -1068,7 +1095,8 @@ class FOIARequest(models.Model):
         # this needs to be updated here for some reason
         # or it does not pick up the appeal communication
         self.communications.update()
-        comms = list(self.communications.all())
+        # filtering in python here to use pre-cached communications
+        comms = list(c for c in self.communications.all() if not c.hidden)
         # if theirs only one communication, do not double include it
         if len(comms) == 1:
             return comms

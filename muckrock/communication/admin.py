@@ -14,6 +14,7 @@ from muckrock.communication.models import (
         FaxCommunication,
         MailCommunication,
         WebCommunication,
+        PortalCommunication,
         EmailOpen,
         EmailError,
         FaxError,
@@ -157,16 +158,23 @@ class WebCommunicationInline(ReadOnlyMixin, admin.StackedInline):
     extra = 0
 
 
+class PortalCommunicationInline(ReadOnlyMixin, admin.StackedInline):
+    """Portal Communication Inline admin"""
+    model = PortalCommunication
+    extra = 0
+
+
 class EmailAddressAdmin(VersionAdmin):
     """Email address admin"""
     search_fields = ['email', 'name']
+    list_filter = ['status']
 
 
 class PhoneNumberAdmin(VersionAdmin):
     """Phone number admin"""
     search_fields = ['number']
     list_display = ['__unicode__', 'type']
-    list_filter = ['type']
+    list_filter = ['type', 'status']
 
 
 class AddressAdmin(VersionAdmin):

@@ -19,13 +19,15 @@ import os
 
 from muckrock.foia.models import (
         FOIARequest,
+        FOIACommunication,
+        FOIAFile,
         OutboundAttachment,
         )
 
 
 @login_required
 def success(request):
-    """"File has been succesfully uploaded"""
+    """"File has been succesfully uploaded to a FOIA"""
     try:
         foia = FOIARequest.objects.get(pk=request.POST.get('foia_id'))
     except FOIARequest.DoesNotExist:
@@ -44,6 +46,36 @@ def success(request):
             )
     attachment.ffile.name = request.POST['key']
     attachment.save()
+
+    return HttpResponse()
+
+
+@login_required
+def success_comm(request):
+    """"File has been succesfully uploaded directly to a communication"""
+    try:
+        comm = FOIACommunication.objects.get(pk=request.POST.get('comm_id'))
+    except FOIACommunication.DoesNotExist:
+        return HttpResponseBadRequest()
+    if not (comm.foia and
+            comm.foia.has_perm(request.user, 'upload_attachment')):
+        return HttpResponseForbidden()
+    if 'key' not in request.POST:
+        return HttpResponseBadRequest()
+    if len(request.POST['key']) > 255:
+        return HttpResponseBadRequest()
+
+    access = 'private' if comm.foia.embargo else 'public'
+    file_ = FOIAFile(
+            foia=comm.foia,
+            comm=comm,
+            title=os.path.basename(request.POST['key']),
+            date=datetime.now(),
+            source=request.user.get_full_name(),
+            access=access,
+            )
+    file_.ffile.name = request.POST['key']
+    file_.save()
 
     return HttpResponse()
 
@@ -173,6 +205,30 @@ def key_name(request):
             )
     key = attachment.ffile.field.generate_filename(
             attachment.ffile.instance,
+            name,
+            )
+    key = default_storage.get_available_name(key)
+    return JsonResponse({'key': key})
+
+
+@login_required
+def key_name_comm(request):
+    """Generate the S3 key name from the filename"""
+    name = request.POST.get('name')
+    # total name cannot be longer than 255, but we limit the base name to 100
+    # to give room for the directory and because that's plenty long
+    max_len = 100
+    if len(name) > max_len:
+        base, ext = os.path.splitext(name)
+        if len(ext) > max_len:
+            # if someone give us a large extension just cut part of it off
+            name = name[:max_len]
+        else:
+            # otherwise truncate the base and put the extension back on
+            name = base[:max_len - len(ext)] + ext
+    file_ = FOIAFile()
+    key = file_.ffile.field.generate_filename(
+            file_.ffile.instance,
             name,
             )
     key = default_storage.get_available_name(key)

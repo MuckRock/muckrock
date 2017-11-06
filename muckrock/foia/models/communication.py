@@ -12,6 +12,7 @@ from datetime import datetime
 import logging
 import mimetypes
 import os
+import re
 
 from muckrock.foia.models.request import FOIARequest, STATUS
 from muckrock.utils import new_action
@@ -54,6 +55,7 @@ class FOIACommunication(models.Model):
     thanks = models.BooleanField(default=False)
     full_html = models.BooleanField(default=False)
     communication = models.TextField(blank=True)
+    hidden = models.BooleanField(default=False)
 
     # what status this communication should set the request to - used for machine learning
     status = models.CharField(max_length=10, choices=STATUS, blank=True, null=True)
@@ -352,7 +354,8 @@ class FOIACommunication(models.Model):
                 list(self.emails.all()) +
                 list(self.faxes.all()) +
                 list(self.mails.all()) +
-                list(self.web_comms.all()),
+                list(self.web_comms.all()) +
+                list(self.portals.all()),
                 key=lambda x: x.sent_datetime,
                 reverse=True,
                 )
@@ -385,6 +388,24 @@ class FOIACommunication(models.Model):
             return subcomm.sent_from()
         else:
             return None
+
+    def extract_tracking_id(self):
+        """Try to extract a tracking number from this communication"""
+        if self.foia.tracking_id:
+            return
+        pattern = re.compile(r"""
+            (?:tracking|case|file|foia
+            |freedom\ of\ information\ act) # leading word
+            [^.]*                           # anything but a period - stay in the same sentence
+            (?:number|no[.]|\#|id|log|case) # follow up word
+            [^.]*?                          # same sentence, don't be greey
+            ([a-z0-9-]*[0-9][a-z0-9-]*)     # the tracking number
+            """, re.IGNORECASE | re.VERBOSE)
+        match = pattern.search(self.communication)
+        if match:
+            self.foia.tracking_id = match.group(1).strip()[:255]
+            self.foia.save()
+
 
     class Meta:
         # pylint: disable=too-few-public-methods

@@ -96,8 +96,13 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
         # pylint: disable=too-many-branches
         data = request.data
         try:
-            jurisdiction = Jurisdiction.objects.get(pk=int(data['jurisdiction']))
-            agency = Agency.objects.get(pk=int(data['agency']), jurisdiction=jurisdiction)
+            jurisdiction = Jurisdiction.objects.get(
+                    pk=int(data['jurisdiction']))
+            agency = Agency.objects.get(
+                    pk=int(data['agency']),
+                    jurisdiction=jurisdiction,
+                    status='approved',
+                    )
 
             embargo = data.get('embargo', False)
             permanent_embargo = data.get('permanent_embargo', False)

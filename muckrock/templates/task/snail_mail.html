@@ -39,6 +39,10 @@
         <dt>Agency Address</dt>
         <dd>{{address|linebreaks}}</dd>
     {% endif %}
+    {% if agency.portal %}
+        <dt>Portal</dt>
+        <dd><a href="{{agency.portal.url}}">{{agency.portal.name}}</a> ({{agency.portal.get_type_display}})</dd>
+    {% endif %}
 	{% if agency.notes %}
     <dt>Agency Notes</dt>
     <dd>{{agency.notes}}</dd>
@@ -83,6 +87,6 @@
         {% endif %}
     </div>
     <div class="button-group">
-        <button class="primary button" type="submit" name="resolve" value="true">Save & Resolve</button>
+        <button class="primary button" type="submit" name="resolve" value="true">Save &amp; Resolve</button>
     </div>
 {% endblock %}

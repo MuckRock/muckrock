@@ -378,6 +378,7 @@ class ResponseTaskTests(TestCase):
         agency = factories.AgencyFactory()
         comm = factories.FOIACommunicationFactory(response=True, foia__agency=agency)
         self.task = task.models.ResponseTask.objects.create(communication=comm)
+        self.form = task.forms.ResponseTaskForm()
 
     def test_get_absolute_url(self):
         eq_(self.task.get_absolute_url(), reverse('response-task', kwargs={'pk': self.task.pk}))
@@ -387,7 +388,7 @@ class ResponseTaskTests(TestCase):
             'Response tasks should creates successfully given a communication')
 
     def test_set_status_to_ack(self):
-        self.task.set_status('ack')
+        self.form.set_status('ack', True, [self.task.communication])
         eq_(self.task.communication.foia.date_done, None,
             'The FOIA should not be set to done if the status does not indicate it is done.')
         eq_(self.task.communication.status, 'ack',
@@ -396,7 +397,7 @@ class ResponseTaskTests(TestCase):
             'The FOIA should be set to the proper status.')
 
     def test_set_status_to_done(self):
-        self.task.set_status('done')
+        self.form.set_status('done', True, [self.task.communication])
         eq_(self.task.communication.foia.date_done is None, False,
             'The FOIA should be set to done if the status indicates it is done.')
         eq_(self.task.communication.status, 'done',
@@ -407,7 +408,7 @@ class ResponseTaskTests(TestCase):
     def test_set_comm_status_only(self):
         foia = self.task.communication.foia
         existing_status = foia.status
-        self.task.set_status('done', set_foia=False)
+        self.form.set_status('done', False, [self.task.communication])
         foia.refresh_from_db()
         eq_(foia.date_done is None, True,
             'The FOIA should not be set to done because we are not settings its status.')
@@ -418,49 +419,48 @@ class ResponseTaskTests(TestCase):
 
     def test_set_tracking_id(self):
         new_tracking = u'dogs-r-cool'
-        self.task.set_tracking_id(new_tracking)
+        self.form.set_tracking_id(new_tracking, [self.task.communication])
         eq_(self.task.communication.foia.tracking_id, new_tracking,
             'Should update the tracking number on the request.')
 
     def test_set_date_estimate(self):
         new_date = datetime.now()
-        self.task.set_date_estimate(new_date)
+        self.form.set_date_estimate(new_date, [self.task.communication])
         eq_(self.task.communication.foia.date_estimate, new_date,
             'Should update the estimated completion date on the request.')
 
     def test_set_price(self):
         price = 1.23
-        self.task.set_price(price)
+        self.form.set_price(price, [self.task.communication])
         eq_(self.task.communication.foia.price, price,
             'Should update the price on the request.')
 
     def test_move(self):
         move_to_foia = factories.FOIARequestFactory()
-        self.task.move(move_to_foia.id)
+        self.form.move_communication(self.task.communication, move_to_foia.pk)
         eq_(self.task.communication.foia, move_to_foia,
             'Should move the communication to a different request.')
 
     @raises(ValueError)
     def test_bad_status(self):
         """Should raise an error if given a nonexistant status."""
-        self.task.set_status('foo')
+        self.form.set_status('foo', True, [self.task.communication])
 
     @raises(ValueError)
     def test_bad_tracking_number(self):
         """Should raise an error if not given a string."""
-        self.task.set_tracking_id(['foo'])
+        self.form.set_tracking_id(['foo'], [self.task.communication])
+
 
     @raises(Http404)
     def test_bad_move(self):
         """Should raise a 404 if non-existant move destination."""
-        self.task.move(111111)
+        self.form.move_communication(self.task.communication, 111111)
 
     @raises(ValueError)
     def test_bad_price(self):
         """Should raise an error if not given a value convertable to a float"""
-        self.task.set_price(1)
-        self.task.set_price('1')
-        self.task.set_price('foo')
+        self.form.set_price('foo', [self.task.communication])
 
 
 class TestNewExemptionTask(TestCase):

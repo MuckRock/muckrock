@@ -101,6 +101,12 @@ class Agency(models.Model, RequestHelper):
             through='AgencyPhone',
             related_name='agencies',
             )
+    portal = models.ForeignKey(
+            'portal.Portal',
+            related_name='agencies',
+            blank=True,
+            null=True,
+            )
     contact_salutation = models.CharField(blank=True, max_length=30)
     contact_first_name = models.CharField(blank=True, max_length=100)
     contact_last_name = models.CharField(blank=True, max_length=100)

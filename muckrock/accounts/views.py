@@ -632,6 +632,10 @@ class ProxyList(MRFilterListView):
     title = 'Proxies'
     template_name = 'lists/proxy_list.html'
     default_sort = 'profile__state'
+    sort_map = {
+            'name': 'last_name',
+            'state': 'profile__state',
+            }
 
     @method_decorator(user_passes_test(lambda u: u.is_staff))
     def dispatch(self, *args, **kwargs):

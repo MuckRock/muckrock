@@ -74,6 +74,10 @@
 
     <dt>Fax Number</dt>
     <dd>{{ agency.get_faxes.first|default:"Unknown" }}</dd>
+    {% if request.user.is_staff and agency.portal %}
+    <dt>Portal</dt>
+    <dd><a href="{{agency.portal.url}}">{{agency.portal.name}}</a> ({{agency.portal.get_type_display}})</dd>
+    {% endif%}
 </dl>
 {% endblock metadata %}
 

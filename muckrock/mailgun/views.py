@@ -198,8 +198,11 @@ def _parse_email_headers(post):
 
 def _handle_request(request, mail_id):
     """Handle incoming mailgun FOI request messages"""
+    # this function needs to be refactored
     # pylint: disable=broad-except
     # pylint: disable=too-many-locals
+    # pylint: disable=too-many-branches
+    # pylint: disable=too-many-statements
     post = request.POST
     from_email, to_emails, cc_emails = _parse_email_headers(post)
     subject = post.get('Subject') or post.get('subject', '')
@@ -239,6 +242,9 @@ def _handle_request(request, mail_id):
                     email=from_email,
                     )
 
+        # if this request is using a portal, hide the incoming messages
+        hidden = foia.portal is not None
+
         comm = FOIACommunication.objects.create(
                 foia=foia,
                 from_user=foia.agency.get_user(),
@@ -247,6 +253,7 @@ def _handle_request(request, mail_id):
                 response=True,
                 date=datetime.now(),
                 communication=_get_mail_body(post),
+                hidden=hidden,
                 )
         email_comm = EmailCommunication.objects.create(
                 communication=comm,
@@ -260,11 +267,17 @@ def _handle_request(request, mail_id):
             raw_email='%s\n%s' % (post.get('message-headers', ''), post.get('body-plain', '')))
         comm.process_attachments(request.FILES)
 
-        task = ResponseTask.objects.create(communication=comm)
-        classify_status.apply_async(args=(task.pk,), countdown=30 * 60)
         # resolve any stale agency tasks for this agency
         if foia.agency:
             foia.agency.unmark_stale()
+        comm.extract_tracking_id()
+
+        if foia.portal:
+            foia.portal.receive_msg(comm)
+        else:
+            task = ResponseTask.objects.create(communication=comm)
+            classify_status.apply_async(args=(task.pk,), countdown=30 * 60)
+            comm.create_agency_notifications()
 
         new_cc_emails = [e for e in (to_emails + cc_emails)
                 if e.domain not in ('requests.muckrock.com', 'muckrock.com')]
@@ -274,7 +287,6 @@ def _handle_request(request, mail_id):
         if foia.status == 'ack':
             foia.status = 'processed'
         foia.save(comment='incoming mail')
-        comm.create_agency_notifications()
 
     except FOIARequest.DoesNotExist:
         logger.warning('Invalid Address: %s', mail_id)

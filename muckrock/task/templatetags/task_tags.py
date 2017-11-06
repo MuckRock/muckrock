@@ -104,14 +104,18 @@ class NewAgencyTaskNode(TaskNode):
     def get_extra_context(self):
         """Adds an approval form, other agencies, and relevant requests to context"""
         extra_context = super(NewAgencyTaskNode, self).get_extra_context()
+        initial = {
+                'email': self.task.agency.get_emails().first(),
+                'phone': self.task.agency.get_phones().first(),
+                'fax': self.task.agency.get_faxes().first(),
+                'address': self.task.agency.get_addresses().first(),
+                }
+        if self.task.agency.portal:
+            initial['portal_url'] = self.task.agency.portal.url
+            initial['portal_type'] = self.task.agency.portal.type
         extra_context['agency_form'] = agency.forms.AgencyForm(
                 instance=self.task.agency,
-                initial={
-                    'email': self.task.agency.get_emails().first(),
-                    'phone': self.task.agency.get_phones().first(),
-                    'fax': self.task.agency.get_faxes().first(),
-                    'address': self.task.agency.get_addresses().first(),
-                    }
+                initial=initial,
                 )
         return extra_context
 
@@ -176,6 +180,39 @@ class SnailMailTaskNode(TaskNode):
             extra_context['agency'] = foia_.agency
         extra_context['address'] = foia_.address
         extra_context['body'] = foia_.render_msg_body(switch=self.task.switch)
+
+        return extra_context
+
+
+class PortalTaskNode(TaskNode):
+    """Renders a portal task."""
+    model = task.models.PortalTask
+    task_template = 'task/portal.html'
+    endpoint_name = 'portal-task-list'
+    class_name = 'portal'
+
+    def get_extra_context(self):
+        """Get extra context"""
+        extra_context = super(PortalTaskNode, self).get_extra_context()
+        foia_ = self.task.communication.foia
+
+        if self.task.category == 'i':
+            if foia_:
+                form_initial = {
+                        'status': foia_.status,
+                        'tracking_number': foia_.tracking_id,
+                        'date_estimate': foia_.date_estimate,
+                        'communication': self.task.communication.communication,
+                        }
+                extra_context['previous_communications'] = foia_.reverse_communications
+            else:
+                form_initial = {}
+            extra_context['form'] = task.forms.ResponseTaskForm(initial=form_initial)
+            extra_context['attachments'] = self.task.communication.files.all()
+        else:
+            extra_context['status'] = foia.models.STATUS
+            if foia_.portal and not foia_.portal_password:
+                extra_context['password'] = foia_.portal.get_new_password()
 
         return extra_context
 
@@ -309,6 +346,11 @@ def orphan_task(parser, token):
 def snail_mail_task(parser, token):
     """Returns a SnailMailTaskNode"""
     return SnailMailTaskNode(get_id(token))
+
+@register.tag
+def portal_task(parser, token):
+    """Returns a PortalTaskNode"""
+    return PortalTaskNode(get_id(token))
 
 @register.tag
 def stale_agency_task(parser, token):

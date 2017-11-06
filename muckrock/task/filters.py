@@ -13,6 +13,7 @@ from muckrock.filters import BLANK_STATUS, BOOLEAN_CHOICES, RangeWidget
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import (
     SNAIL_MAIL_CATEGORIES,
+    PORTAL_CATEGORIES,
     Task,
     ResponseTask,
     NewAgencyTask,
@@ -20,6 +21,7 @@ from muckrock.task.models import (
     FlaggedTask,
     StaleAgencyTask,
     ReviewAgencyTask,
+    PortalTask,
 )
 
 class TaskFilterSet(django_filters.FilterSet):
@@ -151,3 +153,23 @@ class ReviewAgencyTaskFilterSet(TaskFilterSet):
     class Meta:
         model = ReviewAgencyTask
         fields = ['jurisdiction', 'agency', 'resolved', 'resolved_by']
+
+
+class PortalTaskFilterSet(TaskFilterSet):
+    """Allows portal tasks to be filtered by category"""
+    category = django_filters.ChoiceFilter(choices=[('', 'All')] + PORTAL_CATEGORIES)
+    resolved = django_filters.BooleanFilter(
+        label='Show Resolved',
+        widget=forms.CheckboxInput())
+    resolved_by = django_filters.ModelMultipleChoiceFilter(
+        queryset=User.objects.all(),
+        widget=autocomplete_light.MultipleChoiceWidget('UserTaskAutocomplete')
+    )
+
+    class Meta:
+        model = PortalTask
+        fields = [
+            'category',
+            'resolved',
+            'resolved_by',
+        ]

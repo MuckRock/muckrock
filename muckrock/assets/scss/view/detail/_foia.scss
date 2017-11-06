@@ -18,7 +18,7 @@ $request-breakpoint: 768px;
             }
         }
     }
-    .numbers, .dates {
+    .numbers, .dates, .portal-info {
         font-size: $size-2;
         tr {
             background-color: $color-white;
@@ -48,6 +48,12 @@ $request-breakpoint: 768px;
         }
         &.visible {
             @include display(flex);
+        }
+    }
+    .portal-info {
+        display: none;
+        &.visible {
+            display: table;
         }
     }
 }
