@@ -41,6 +41,11 @@ class EmailAddressAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     }
 
 
+class EmailAddressAdminAutocomplete(EmailAddressAutocomplete):
+    """Allow choosing error emails in the admin"""
+    choices = EmailAddress.objects.all()
+
+
 class PhoneNumberAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     """An autocomplete for selecting a phone number"""
     choices = PhoneNumber.objects.all()
@@ -86,7 +91,8 @@ class EmailOrFaxAutocomplete(autocomplete_light.AutocompleteBase):
 
 autocomplete_light.register(Address, AddressAutocomplete,
         add_another_url_name='admin:communication_address_add')
-autocomplete_light.register(EmailAddress, EmailAddressAutocomplete,
+autocomplete_light.register(EmailAddress, EmailAddressAutocomplete)
+autocomplete_light.register(EmailAddress, EmailAddressAdminAutocomplete,
         add_another_url_name='admin:communication_emailaddress_add')
 autocomplete_light.register(PhoneNumber, PhoneNumberAutocomplete,
         add_another_url_name='admin:communication_phonenumber_add')
