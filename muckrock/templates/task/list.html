@@ -113,6 +113,10 @@
         {% endif %}
         <button class="button" id="collapse-all">Collapse All</button>
     </form>
+    {% active request '^/task/snail-mail/$' as snail_mail %}
+    {% if snail_mail %}
+    <a href="{% url 'snail-mail-bulk-pdf' %}">Download PDF</a>
+    {% endif %}
 </div>
 {% endblock %}
 

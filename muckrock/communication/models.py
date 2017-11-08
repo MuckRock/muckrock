@@ -259,6 +259,13 @@ class MailCommunication(models.Model):
             null=True,
             related_name='to_mails',
             )
+    pdf = models.FileField(
+            upload_to='snail_pdfs/%Y/%m/%d',
+            verbose_name='PDF',
+            max_length=255,
+            blank=True,
+            null=True,
+            )
 
     delivered = 'mail'
 

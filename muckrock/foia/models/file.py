@@ -73,9 +73,12 @@ class FOIAFile(models.Model):
                 num + '/pages/' + name + '-p1-small.gif'
             )
         else:
-            ext = os.path.splitext(self.name())[1][1:]
-            filename = mimetypes.get(ext, 'file-document.png')
+            filename = mimetypes.get(self.get_extension(), 'file-document.png')
             return '%simg/%s' % (settings.STATIC_URL, filename)
+
+    def get_extension(self):
+        """Get the file extension"""
+        return os.path.splitext(self.name())[1][1:]
 
     def get_foia(self):
         """Get FOIA - self.foia should be refactored out"""
