@@ -389,6 +389,14 @@ class FOIACommunication(models.Model):
         else:
             return None
 
+    def get_delivered_and_from(self):
+        """Combine get_delivered and sent_from for performance reasons"""
+        subcomm = self.get_subcomm()
+        if subcomm:
+            return (subcomm.delivered, subcomm.sent_from())
+        else:
+            return (None, None)
+
     def extract_tracking_id(self):
         """Try to extract a tracking number from this communication"""
         if self.foia.tracking_id:

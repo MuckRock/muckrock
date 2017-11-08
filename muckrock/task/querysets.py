@@ -96,24 +96,49 @@ class SnailMailTaskQuerySet(models.QuerySet):
     """Object manager for snail mail tasks"""
     def preload_list(self):
         """Preload relations for list display"""
+        from muckrock.agency.models import (
+                AgencyEmail,
+                AgencyPhone,
+                AgencyAddress,
+                )
         return (self
                 .select_related(
                     'communication__foia__agency__portal',
                     'communication__foia__agency__appeal_agency__portal',
                     'communication__foia__user',
                     'communication__foia__jurisdiction',
+                    'communication__foia__address',
                     'resolved_by',
                     )
                 .prefetch_related(
                     'communication__files',
+                    'communication__foia__communications',
+                    'communication__emails',
+                    'communication__faxes',
+                    'communication__mails',
+                    'communication__web_comms',
+                    'communication__portals',
+                    'communication__foia__communications__emails',
+                    'communication__foia__communications__faxes',
+                    'communication__foia__communications__mails',
+                    'communication__foia__communications__web_comms',
+                    'communication__foia__communications__portals',
                     Prefetch(
                         'communication__foia__communications',
                         queryset=FOIACommunication.objects.filter(response=True),
-                        to_attr='has_ack'),
-                    Prefetch(
-                        'communication__foia__communications',
-                        queryset=FOIACommunication.objects.order_by('-date'),
-                        to_attr='reverse_communications'),
+                        to_attr='ack'),
+                    Prefetch('communication__foia__agency__agencyemail_set',
+                        queryset=AgencyEmail.objects.select_related('email')),
+                    Prefetch('communication__foia__agency__agencyphone_set',
+                        queryset=AgencyPhone.objects.select_related('phone')),
+                    Prefetch('communication__foia__agency__agencyaddress_set',
+                        queryset=AgencyAddress.objects.select_related('address')),
+                    Prefetch('communication__foia__agency__appeal_agency__agencyemail_set',
+                        queryset=AgencyEmail.objects.select_related('email')),
+                    Prefetch('communication__foia__agency__appeal_agency__agencyphone_set',
+                        queryset=AgencyPhone.objects.select_related('phone')),
+                    Prefetch('communication__foia__agency__appeal_agency__agencyaddress_set',
+                        queryset=AgencyAddress.objects.select_related('address')),
                     ))
 
 

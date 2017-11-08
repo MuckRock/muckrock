@@ -11,7 +11,7 @@
 {% endif %}
 {% if foia %}
     <dt>Is Acknowledged</dt>
-    <dd>{{foia.has_ack|yesno:"True,False"}}</dd>
+    <dd>{{foia.ack|yesno:"True,False"}}</dd>
     <dt>Submitter</dt>
     <dd><a href="{% url 'admin:auth_user_change' foia.user.pk %}">{{foia.user}}</a></dd>
     <dt>Request</dt>
@@ -23,22 +23,30 @@
     {# agency info #}
     <dt>Agency</dt>
     <dd><a href="{% url 'admin:agency_agency_change' agency.pk %}">{{agency}}</a></dd>
-    {% with email=agency.get_emails.first %}
-        {% if email %}
-            <dt>Agency Email</dt>
-            <dd>{{email}}</dd>
-        {% endif %}
-    {% endwith %}
-    {% with fax=agency.get_faxes.first %}
-        {% if fax %}
-            <dt>Agency Fax</dt>
-            <dd>{{fax}}</dd>
-        {% endif %}
-    {% endwith %}
-    {% if address %}
-        <dt>Agency Address</dt>
-        <dd>{{address|linebreaks}}</dd>
-    {% endif %}
+      {% if emails %}
+        <dt>Email</dt>
+        {% for email in emails %}
+          <dd>{{ email }}</dd>
+        {% endfor %}
+      {% endif %}
+      {% if faxes %}
+        <dt>Fax</dt>
+        {% for fax in faxes %}
+          <dd>{{ fax }}</dd>
+        {% endfor %}
+      {% endif %}
+      {% if phones %}
+        <dt>Phone</dt>
+        {% for phone in phones %}
+          <dd>{{ phone }}</dd>
+        {% endfor %}
+      {% endif %}
+      {% if addresses %}
+        <dt>Address</dt>
+        {% for address in addresses %}
+          <dd>{{ address|linebreaks }}</dd>
+        {% endfor %}
+      {% endif %}
     {% if agency.portal %}
         <dt>Portal</dt>
         <dd><a href="{{agency.portal.url}}">{{agency.portal.name}}</a> ({{agency.portal.get_type_display}})</dd>
