@@ -585,3 +585,6 @@ PHONENUMBER_DEFAULT_FORMAT = 'NATIONAL'
 OPENSEARCH_CONTACT_EMAIL = 'mitch@muckrock.com'
 OPENSEARCH_SHORT_NAME = 'MuckRock'
 OPENSEARCH_DESCRIPTION = 'Search MuckRock for public documents and news'
+
+# for generating pdfs using FPDF
+FONT_PATH = '/usr/share/fonts/truetype/dejavu/'

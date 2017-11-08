@@ -55,7 +55,8 @@
                 {% endfor %}
         {% endif %}
     {% endwith %}
-
+    <dt>Print</dt>
+    <dd><a href="{% url 'snail-mail-pdf' pk=task.pk %}">PDF</a></dd>
 {% endif %}
 </dl>
 <div class="collapsed collapsable full-letter">

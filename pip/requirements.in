@@ -1,6 +1,6 @@
--e git://github.com/jazzband/django-queued-storage@d30d70d6db4eb742ccde9d4a7da6ca7624e53219#egg=django_queued_storage # For delayed uploading of files
 -e git://github.com/BradWhittington/django-mailgun.git@4f2edb9466f6245c3bbf501aab2681f0b3c71e0c#egg=django_mailgun # Mail backend used directly (on production)
 -e git://github.com/MuckRock/django-autocomplete-light.git@a54a789b5a44adba678d980aaa64413472a11dbb#egg=django_autocomplete_light # Autocomplete drop down inputs
+-e git://github.com/jazzband/django-queued-storage@d30d70d6db4eb742ccde9d4a7da6ca7624e53219#egg=django_queued_storage # For delayed uploading of files
 -e git://github.com/mitchelljkotler/django-news-sitemaps.git@5946718cd1d18abbfa7f0393c140fcc513dedac1#egg=django_news_sitemaps # For generating news sitemaps
 bleach # Used to sanitize any HTML we're rendering
 boto # Used to access AWS
@@ -24,8 +24,8 @@ django-leaflet # Used for plotting geographic data
 django-localflavor # Used for phone numbers and state list
 django-lot # Used for Log On Tokens
 django-mathfilters # Mathematical template filters
-django-phonenumber-field # for storing phone numbers in the database
 django-opensearch # Enables opensearch
+django-phonenumber-field # for storing phone numbers in the database
 django-premailer # Styles HTML emails
 django-pylibmc # Interface to memcache
 django-querycount # Counts queries for dev
@@ -41,6 +41,7 @@ django<2.0 # Django is kinda important...
 djangorestframework # The API framework
 dogslow # Monitors slow requests
 easy-thumbnails # Used for thumbnailing images
+fpdf # Used to generate PDFs
 fuzzywuzzy # fuzzy string matching for FM agency import
 gunicorn # Python WSGI app server
 image-diet2 # Used to compress images on upload
@@ -53,6 +54,7 @@ phonenumberslite # Library for validating and formatting phone numbers
 pillow # Used by Django for image handling
 psycopg2 # Interface to postgres DB
 pymdown-extensions # Adds more helpful Markdown extensions
+pypdf2 # Used to manipulate PDFs
 pyphaxio # For sending faxes through Phaxio
 python-Levenshtein # fuzzy string matching for FM agency import
 python-dateutil # Used for relative time deltas
