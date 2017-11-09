@@ -568,7 +568,11 @@ def snail_mail_bulk_pdf(request):
     # pylint: disable=unused-argument
     cover_info = []
     bulk_merger = PdfFileMerger()
-    for snail in SnailMailTask.objects.filter(resolved=False):
+    snails = (SnailMailTask.objects
+            .filter(resolved=False)
+            .preload_pdf()
+            )
+    for snail in snails:
         # generate the pdf and merge all pdf attachments
         pdf = SnailMailPDF(snail.communication.foia)
         pdf.generate()
@@ -614,7 +618,7 @@ def snail_mail_bulk_pdf(request):
 def snail_mail_pdf(request, pk):
     """Return a PDF file for a snail mail request"""
     # pylint: disable=unused-argument
-    snail = get_object_or_404(SnailMailTask, pk=pk)
+    snail = get_object_or_404(SnailMailTask.objects.preload_pdf(), pk=pk)
     merger = PdfFileMerger()
 
     # generate the pdf and merge all pdf attachments

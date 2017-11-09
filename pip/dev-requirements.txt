@@ -14,6 +14,8 @@ configparser==3.5.0       # via pylint
 coverage==4.2
 decorator==4.0.10         # via ipython, traitlets
 dj-inmemorystorage==1.4.0
+django-debug-toolbar-request-history==0.0.5
+django-debug-toolbar==1.8  # via django-debug-toolbar-request-history
 django-nose==1.4.4
 django==1.11.4
 ecdsa==0.13               # via paramiko
@@ -53,6 +55,7 @@ requests-mock==1.3.0
 requests==2.18.1          # via requests-mock
 simplegeneric==0.8.1      # via ipython
 six==1.10.0               # via astroid, dj-inmemorystorage, fake-factory, freezegun, mock, pathlib2, pip-tools, prompt-toolkit, pylint, python-dateutil, requests-mock, traitlets
+sqlparse==0.2.4           # via django-debug-toolbar
 traitlets==4.3.0          # via ipython
 urllib3==1.21.1           # via requests
 wcwidth==0.1.7            # via prompt-toolkit

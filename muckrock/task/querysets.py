@@ -141,6 +141,30 @@ class SnailMailTaskQuerySet(models.QuerySet):
                         queryset=AgencyAddress.objects.select_related('address')),
                     ))
 
+    def preload_pdf(self):
+        """Preload relations for PDF generation"""
+        return (self
+            .select_related(
+                'communication__foia__address',
+                'communication__foia__user',
+                'communication__from_user',
+                )
+            .prefetch_related(
+                'communication__files',
+                'communication__foia__communications',
+                'communication__emails',
+                'communication__faxes',
+                'communication__mails',
+                'communication__web_comms',
+                'communication__portals',
+                'communication__foia__communications__emails',
+                'communication__foia__communications__faxes',
+                'communication__foia__communications__mails',
+                'communication__foia__communications__web_comms',
+                'communication__foia__communications__portals',
+                )
+            )
+
 
 class StaleAgencyTaskQuerySet(models.QuerySet):
     """Object manager for stale agency tasks"""

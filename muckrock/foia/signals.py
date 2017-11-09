@@ -4,6 +4,7 @@ from django.conf import settings
 from django.db.models.signals import pre_save, post_delete
 
 from boto.s3.connection import S3Connection
+import boto
 
 from muckrock.foia.models import FOIARequest, FOIAFile, OutboundAttachment
 from muckrock.foia.tasks import upload_document_cloud
@@ -32,11 +33,29 @@ def foia_file_delete_s3(sender, **kwargs):
         # only delete if we are using s3
         foia_file = kwargs['instance']
 
-        conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
+        conn = S3Connection(
+                settings.AWS_ACCESS_KEY_ID,
+                settings.AWS_SECRET_ACCESS_KEY,
+                )
         bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
         key = bucket.get_key(foia_file.ffile.name)
         if key:
             key.delete()
+
+        # also clear the cloudfront cache
+        cloudfront = boto.connect_cloudfront(
+                settings.AWS_ACCESS_KEY_ID,
+                settings.AWS_SECRET_ACCESS_KEY,
+                )
+        # find the current distribution
+        distributions = [d for d in cloudfront.get_distributions()
+                if settings.AWS_S3_CUSTOM_DOMAIN in d.cnames]
+        if distributions:
+            distribution = distributions[0]
+            cloudfront.create_invalidation_requests(
+                    distribution.id,
+                    [foia_file.ffile.name],
+                    )
 
 
 def attachment_delete_s3(sender, **kwargs):
