@@ -191,3 +191,33 @@ $('.reveal-extra-context').click(function(e){
         $(this).next().removeClass('hidden');
     }
 });
+
+$('#snail-mail-bulk-download').click(function(e){
+  $(this).prop('disabled', 'disabled');
+  $(this).text('Generating...');
+  $.ajax({
+    url: '/task/snail-mail/pdf/',
+    type: 'get',
+    success: function(data) {
+      checkPdfExists(data['pdf_name']);
+    },
+    error: function() {
+      $(this.text('Error!'))
+    },
+  });
+});
+
+function checkPdfExists(pdfName) {
+  var url = 'https://cdn.muckrock.com/' + pdfName;
+  $.ajax({
+    url: url;
+    type: 'head',
+    success: function() {
+      $('#snail-mail-bulk-download').text('Downloading');
+      window.location.href = url;
+    },
+    error: function() {
+      setTimeout(checkPdfExists, 5000, pdfName);
+    },
+  });
+};

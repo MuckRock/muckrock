@@ -3,12 +3,21 @@ Celery tasks for the task application
 """
 
 from django.contrib.auth.models import User
+from django.conf import settings
+from django.core.files.base import ContentFile
 
 from celery.task import task
 
+from boto.s3.connection import S3Connection
+from boto.s3.key import Key
 from datetime import datetime
+from PyPDF2 import PdfFileMerger
+from cStringIO import StringIO
 
+from muckrock.communication.models import MailCommunication
 from muckrock.foia.models import FOIARequest, FOIACommunication
+from muckrock.task.models import SnailMailTask
+from muckrock.task.pdf import CoverPDF, SnailMailPDF
 
 
 @task(ignore_result=True, name='muckrock.task.tasks.submit_review_update')
@@ -27,3 +36,63 @@ def submit_review_update(foia_pks, reply_text, **kwargs):
                 communication=reply_text,
                 )
         foia.submit(switch=True)
+
+
+@task(ignore_result=True, name='muckrock.task.tasks.snail_mail_bulk_pdf_task')
+def snail_mail_bulk_pdf_task(pdf_name, **kwargs):
+    """Save a PDF file for all open snail mail tasks"""
+    # pylint: disable=too-many-locals
+    # pylint: disable=unused-argument
+    cover_info = []
+    bulk_merger = PdfFileMerger()
+    snails = (SnailMailTask.objects
+            .filter(resolved=False)
+            .preload_pdf()
+            )
+    for snail in snails:
+        # generate the pdf and merge all pdf attachments
+        pdf = SnailMailPDF(snail.communication.foia)
+        pdf.generate()
+        single_merger = PdfFileMerger()
+        single_merger.append(
+            StringIO(pdf.output(dest='S')))
+        for file_ in snail.communication.files.all():
+            if file_.get_extension() == 'pdf':
+                single_merger.append(file_.ffile)
+        cover_info.append((snail, pdf.page))
+        single_pdf = StringIO()
+        single_merger.write(single_pdf)
+
+        # attach to the mail communication
+        mail, _ = MailCommunication.objects.update_or_create(
+                communication=snail.communication,
+                defaults={
+                    'to_address': snail.communication.foia.address,
+                    'sent_datetime': datetime.now(),
+                    }
+                )
+        single_pdf.seek(0)
+        mail.pdf.save(
+                '{}.pdf'.format(snail.communication.pk),
+                ContentFile(single_pdf.read()),
+                )
+
+        # append to the bulk pdf
+        single_pdf.seek(0)
+        bulk_merger.append(single_pdf)
+
+    # preprend the cover sheet
+    cover_pdf = CoverPDF(cover_info)
+    cover_pdf.generate()
+    bulk_merger.merge(0, StringIO(cover_pdf.output(dest='S')))
+
+    bulk_pdf = StringIO()
+    bulk_merger.write(bulk_pdf)
+    bulk_pdf.seek(0)
+
+    conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
+    bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
+    key = Key(bucket)
+    key.key = pdf_name
+    key.set_contents_from_file(bulk_pdf)
+    key.set_canned_acl('public-read')
