@@ -1,5 +1,6 @@
 coverage # Used to generate coverage reports in dev
 dj-inmemorystorage # in memory file storage for faster testing
+django-debug-toolbar-request-history # Use DDT for non-html requests
 django-nose # Used for testing
 django<2.0 # django
 fabric # Used for dev scripts
