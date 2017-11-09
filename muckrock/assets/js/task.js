@@ -192,7 +192,7 @@ $('.reveal-extra-context').click(function(e){
     }
 });
 
-$('#snail-mail-bulk-download').click(function(e){
+$('#snail-mail-bulk-download').click(function(){
   $(this).prop('disabled', 'disabled');
   $(this).text('Generating...');
   $.ajax({
@@ -202,8 +202,8 @@ $('#snail-mail-bulk-download').click(function(e){
       checkPdfExists(data['pdf_name']);
     },
     error: function() {
-      $(this.text('Error!'))
-    },
+      $(this.text('Error!'));
+    }
   });
 });
 
@@ -218,6 +218,6 @@ function checkPdfExists(pdfName) {
     },
     error: function() {
       setTimeout(checkPdfExists, 5000, pdfName);
-    },
+    }
   });
-};
+}
