@@ -51,9 +51,9 @@
         // And is actually the inputs and buttons contained within the toolbar
         var toolbar = $(toolbarId).find(':input, :button');
         // Listen to changes on the checkboxes
-        $(checkboxes).click(function(){handleCheckboxClick(selectAllCheckbox, checkboxes, toolbar)});
+        $(checkboxes).click(function(){handleCheckboxClick(selectAllCheckbox, checkboxes, toolbar);});
         // Listen to changes to the select all checkbox
-        $(selectAllCheckbox).click(function(){handleSelectAllCheckboxClick(selectAllCheckbox, checkboxes, toolbar)});
+        $(selectAllCheckbox).click(function(){handleSelectAllCheckboxClick(selectAllCheckbox, checkboxes, toolbar);});
         // Disable the toolbar to start.
         disableToolbar();
     };
