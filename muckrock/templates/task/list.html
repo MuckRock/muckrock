@@ -115,7 +115,7 @@
     </form>
     {% active request '^/task/snail-mail/$' as snail_mail %}
     {% if snail_mail %}
-    <a href="{% url 'snail-mail-bulk-pdf' %}">Download PDF</a>
+    <button class="blue button" id="snail-mail-bulk-download">Download Bulk PDF</button>
     {% endif %}
 </div>
 {% endblock %}

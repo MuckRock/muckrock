@@ -9,7 +9,7 @@ from django.core.files.base import ContentFile
 from django.core.urlresolvers import resolve
 from django.db import transaction
 from django.db.models import Count
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
@@ -61,8 +61,8 @@ from muckrock.task.models import (
     NewExemptionTask,
     PortalTask,
     )
-from muckrock.task.tasks import submit_review_update
-from muckrock.task.pdf import CoverPDF, SnailMailPDF
+from muckrock.task.tasks import submit_review_update, snail_mail_bulk_pdf_task
+from muckrock.task.pdf import SnailMailPDF
 from muckrock.views import MRFilterListView
 
 # pylint:disable=missing-docstring
@@ -563,58 +563,16 @@ class RequestTaskList(TemplateView):
         return context
 
 
+@user_passes_test(lambda u: u.is_staff)
 def snail_mail_bulk_pdf(request):
-    """Return a PDF file for all open snail mail requests"""
+    """Generate the task asynchrnously"""
     # pylint: disable=unused-argument
-    cover_info = []
-    bulk_merger = PdfFileMerger()
-    snails = (SnailMailTask.objects
-            .filter(resolved=False)
-            .preload_pdf()
-            )
-    for snail in snails:
-        # generate the pdf and merge all pdf attachments
-        pdf = SnailMailPDF(snail.communication.foia)
-        pdf.generate()
-        content = StringIO(pdf.output(dest='S'))
-        single_merger = PdfFileMerger()
-        single_merger.append(content)
-        for file_ in snail.communication.files.all():
-            if file_.get_extension() == 'pdf':
-                single_merger.append(file_.ffile)
-        cover_info.append((snail, pdf.page))
-        single_pdf = StringIO()
-        single_merger.write(single_pdf)
-
-        # attach to the mail communication
-        mail, _ = MailCommunication.objects.update_or_create(
-                communication=snail.communication,
-                defaults={
-                    'to_address': snail.communication.foia.address,
-                    'sent_datetime': datetime.now(),
-                    }
-                )
-        single_pdf.seek(0)
-        mail.pdf.save(
-                '{}.pdf'.format(snail.communication.pk),
-                ContentFile(single_pdf.read()),
-                )
-
-        # append to the bulk pdf
-        single_pdf.seek(0)
-        bulk_merger.append(single_pdf)
-
-    # preprend the cover sheet
-    cover_pdf = CoverPDF(cover_info)
-    cover_pdf.generate()
-    bulk_merger.merge(0, StringIO(cover_pdf.output(dest='S')))
-
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'filename="bulk_snail_mail.pdf"'
-    bulk_merger.write(response)
-    return response
+    pdf_name = datetime.now().strftime('snail_mail_pdfs/%Y/%m/%d/%H-%M-%S.pdf')
+    snail_mail_bulk_pdf_task.delay(pdf_name)
+    return JsonResponse({'pdf_name': pdf_name})
 
 
+@user_passes_test(lambda u: u.is_staff)
 def snail_mail_pdf(request, pk):
     """Return a PDF file for a snail mail request"""
     # pylint: disable=unused-argument
