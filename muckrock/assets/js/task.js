@@ -210,7 +210,7 @@ $('#snail-mail-bulk-download').click(function(e){
 function checkPdfExists(pdfName) {
   var url = 'https://cdn.muckrock.com/' + pdfName;
   $.ajax({
-    url: url;
+    url: url,
     type: 'head',
     success: function() {
       $('#snail-mail-bulk-download').text('Downloading');
