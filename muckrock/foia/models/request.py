@@ -700,6 +700,9 @@ class FOIARequest(models.Model):
             communication=appeal_message,
             response=False,
         )
+        # this needs to be updated here for some reason
+        # or it does not pick up the appeal communication
+        self.communications.update()
         self.process_attachments(user)
         self.submit(appeal=True)
         return communication
@@ -884,17 +887,18 @@ class FOIARequest(models.Model):
         if reply_link:
             context['reply_link'] = self.get_agency_reply_link(self.email.email)
         if switch:
-            first_request = self.communications.first()
+            first_request = self.communications.all()[0]
             context['original'] = {
                     'method': first_request.get_delivered(),
                     'addr': first_request.sent_to(),
                     }
             last_response = self.last_response()
             if last_response:
+                method, addr = last_response.get_delivered_and_from()
                 context['last_resp'] = {
                         'date': last_response.date,
-                        'method': last_response.get_delivered(),
-                        'addr': last_response.sent_from(),
+                        'method': method,
+                        'addr': addr,
                         }
 
         return render_to_string(
@@ -1092,9 +1096,6 @@ class FOIARequest(models.Model):
     def get_msg_comms(self):
         """Get the communications to be displayed for outgoing messages"""
         msg_comms = []
-        # this needs to be updated here for some reason
-        # or it does not pick up the appeal communication
-        self.communications.update()
         # filtering in python here to use pre-cached communications
         comms = list(c for c in self.communications.all() if not c.hidden)
         # if theirs only one communication, do not double include it

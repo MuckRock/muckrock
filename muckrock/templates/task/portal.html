@@ -91,8 +91,8 @@
                 {% endfor %}
             </select>
             {% if not task.communication.foia.portal_password %}
-                <label for="id_password">Password</label>
-                <input type="text" id="id_password" name="password" value="{{ password }}" maxlength="20">
+                <label for="id_word_to_pass">Password</label>
+                <input type="text" id="id_word_to_pass" name="word_to_pass" value="{{ password }}" maxlength="20">
             {% endif %}
             <label for="id_tracking_number">Tracking Number</label>
             <input type="text" id="id_tracking_number" name="tracking_number" value="{{ task.communication.foia.tracking_number }}">

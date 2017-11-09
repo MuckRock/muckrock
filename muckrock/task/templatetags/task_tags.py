@@ -175,11 +175,22 @@ class SnailMailTaskNode(TaskNode):
         # that agency, else display the standard agency
         foia_ = self.task.communication.foia
         if self.task.category == 'a' and foia_.agency.appeal_agency:
-            extra_context['agency'] = foia_.agency.appeal_agency
+            agency_ = foia_.agency.appeal_agency
         else:
-            extra_context['agency'] = foia_.agency
+            agency_ = foia_.agency
+        extra_context['agency'] = agency_
         extra_context['address'] = foia_.address
         extra_context['body'] = foia_.render_msg_body(switch=self.task.switch)
+        extra_context['email'] = [str(e) for e in
+                agency_.agencyemail_set.all()]
+        extra_context['faxes'] = [str(f) for f in
+                agency_.agencyphone_set.all()
+                if f.phone.type == 'fax']
+        extra_context['phones'] = [str(p) for p in
+                agency_.agencyphone_set.all()
+                if p.phone.type == 'phone']
+        extra_context['addresses'] = [str(a) for a in
+                agency_.agencyaddress_set.all()]
 
         return extra_context
 
