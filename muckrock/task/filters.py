@@ -11,6 +11,7 @@ import django_filters
 from muckrock.agency.models import Agency
 from muckrock.filters import BLANK_STATUS, BOOLEAN_CHOICES, RangeWidget
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.portal.models import PORTAL_TYPES
 from muckrock.task.models import (
     SNAIL_MAIL_CATEGORIES,
     PORTAL_CATEGORIES,
@@ -157,7 +158,12 @@ class ReviewAgencyTaskFilterSet(TaskFilterSet):
 
 class PortalTaskFilterSet(TaskFilterSet):
     """Allows portal tasks to be filtered by category"""
-    category = django_filters.ChoiceFilter(choices=[('', 'All')] + PORTAL_CATEGORIES)
+    # pylint: disable=invalid-name
+    category = django_filters.ChoiceFilter(choices=PORTAL_CATEGORIES)
+    communication__foia__portal__type = django_filters.ChoiceFilter(
+            choices=PORTAL_TYPES,
+            label='Portal Type',
+            )
     resolved = django_filters.BooleanFilter(
         label='Show Resolved',
         widget=forms.CheckboxInput())
@@ -170,6 +176,7 @@ class PortalTaskFilterSet(TaskFilterSet):
         model = PortalTask
         fields = [
             'category',
+            'communication__foia__portal__type',
             'resolved',
             'resolved_by',
         ]

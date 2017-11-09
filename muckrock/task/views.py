@@ -479,10 +479,12 @@ class PortalTaskList(TaskList):
         for msg in error_msgs:
             messages.error(request, msg)
         new_text = request.POST.get('communication')
+        keep_hidden = request.POST.get('keep_hidden')
         if new_text:
             task.communication.communication = new_text
         task.communication.create_agency_notifications()
-        task.communication.hidden = False
+        if not keep_hidden:
+            task.communication.hidden = False
         task.communication.save()
         PortalCommunication.objects.create(
                 communication=task.communication,
@@ -503,9 +505,6 @@ class PortalTaskList(TaskList):
         password = request.POST.get('word_to_pass')
         tracking_number = request.POST.get('tracking_number')
         foia = task.communication.foia
-        if not foia.portal_password and not password:
-            messages.error(request, 'Must set a password')
-            return
         if len(password) > 20:
             messages.error(
                     request,
@@ -518,7 +517,7 @@ class PortalTaskList(TaskList):
         if tracking_number:
             foia.tracking_id = tracking_number[:255]
             save = True
-        if not foia.portal_password:
+        if not foia.portal_password and password:
             foia.portal_password = password
             save = True
         if save:
