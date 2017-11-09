@@ -6,13 +6,13 @@ from django.db import models
 from muckrock.portal.portals import ManualPortal
 
 
-PORTAL_TYPES = (
+PORTAL_TYPES = [
         ('foiaonline', 'FOIAonline'),
         ('govqa', 'GovQA'),
         ('nextrequest', 'NextRequest'),
         ('fbi', 'FBI eFOIPA Portal'),
         ('other', 'Other'),
-        )
+        ]
 
 
 class Portal(models.Model):

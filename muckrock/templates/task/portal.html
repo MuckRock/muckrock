@@ -17,7 +17,7 @@
                     <dd>{{foia.tracking_id}}</dd>
                 {% endif %}
                 {# agency info #}
-                {% with agency=task.communication.foia.agency %}
+                {% with agency=foia.agency %}
                     <dt>Agency</dt>
                     <dd><a href="{% url 'admin:agency_agency_change' agency.pk %}">{{agency}}</a></dd>
                     {% if agency.notes %}
@@ -25,15 +25,22 @@
                         <dd>{{agency.notes}}</dd>
                     {% endif %}
                 {% endwith %}
-                {% with portal=task.communication.foia.portal %}
+                <dt>Return Address</dt>
+                <dd>
+                    MuckRock News<br>
+                    DEPT MR {{foia.pk}}<br>
+                    411A Highland Ave<br>
+                    Somerville, MA 02144
+                </dd>
+                {% with portal=foia.portal %}
                     <dt>Portal Link</dt>
                     <dd><a href="{{portal.url}}">{{portal.name}}</a></dd>
                 {% endwith %}
                 <dt>Username</dt>
-                <dd>{{ task.communication.foia.get_request_email }}</dd>
-                {% if task.communication.foia.portal_password %}
+                <dd>{{ foia.get_request_email }}</dd>
+                {% if foia.portal_password %}
                     <dt>Password</dt>
-                    <dd>{{ task.communication.foia.portal_password }}</dd>
+                    <dd>{{ foia.portal_password }}</dd>
                 {% endif %}
                 {% with task.communication.files.all as files %}
                     {% if files %}
@@ -80,6 +87,8 @@
             <div class="response-input">
                 {{ form }}
             </div>
+            <label class="check-label" for="id_keep_hidden">Keep Hidden:</label>
+            <input id="id_keep_hidden" type="checkbox" checked="checked" name="keep_hidden">
             <label for="id_communication">Communication</label>
             <textarea id="id_communication" name="communication">{{ task.communication.communication }}</textarea>
         {% else %}
