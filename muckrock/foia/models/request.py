@@ -610,7 +610,8 @@ class FOIARequest(models.Model):
             request_type = 'appeal'
         else:
             request_type = 'primary'
-        if not self.portal and not appeal:
+        # do not add a portal to a request already in flight
+        if not self.portal and not appeal and self.communications.count() == 1:
             self.portal = agency.portal
         if not self.email:
             self.email = agency.get_emails(request_type, 'to').first()
