@@ -1,99 +1,107 @@
 {% extends 'task/default.html' %}
 
 {% block task-content %}
-{% if user.is_staff %}
-<dl class="task__data">
-    {% if task.agency %}
-    <dt>Agency</dt>
-    <dd><a href="{% url 'admin:agency_agency_change' task.agency.pk %}">{{task.agency}}</a>, {{task.agency.jurisdiction}}</dd>
-    {% endif %}
-    {% if task.newagency.user %}
-    <dt>User</dt>
-    <dd><a href="{% url 'admin:auth_user_change' task.user.pk %}">{{task.user}}</a></dd>
-    {% endif %}
-    {% if task.foias %}
-    <dt>Pending Requests</dt>
-    {% for foia in task.foias %}
-    <dd><a href="{{ foia.get_absolute_url }}">{{ foia }}</a> (<a href="{% url 'admin:foia_foiarequest_change' foia.pk %}">admin</a>)</dd>
-    {% endfor %}
-    {% endif %}
-</dl>
-{% else %}
-<dl class="task__data">
-    <dt>Instructions</dt>
-    <dd>
-        <p>
-            We don't have this agency in our database, yet.
-            If you can help us find its contact information, then we will be able to process your request faster.
-            If you need help, use the "Get Help" button above.
-        </p>
-    </dd>
-</dl>
-{% endif %}
-<div class="new-agency-forms">
     {% if user.is_staff %}
-    <form method="POST" action="{{ endpoint }}" class="new-agency red textbox form collapsable">
-        <header class="textbox__header">
-            <p>Reject</p>
-        </header>
-        <main class="textbox__section">
-            {% csrf_token %}
-            <input type="hidden" name="task" value="{{task.pk}}">
-            <input type="hidden" name="reject" value="true">
-            <label>Move this agency’s requests to:</label>
-            <select name="replacement">
-            {% for other_agency in task.agency.jurisdiction.other_agencies %}
-                <option value="{{ other_agency.id }}">{{ other_agency.name }}</option>
-            {% endfor %}
-            </select>
-        </main>
-        <footer class="textbox__footer">
-            <button type="submit" name="reject" value="true" class="failure button">Reject</button>
-        </footer>
-    </form>
-    <form method="POST" action="{{ endpoint }}" class="new-agency green textbox form collapsable">
-        <header class="textbox__header">
-            <p>Approve</p>
-        </header>
-        <main class="textbox__section">
-            {% csrf_token %}
-            <input type="hidden" name="task" value="{{task.pk}}">
-            <input type="hidden" name="approve" value="true">
-            {% for field in agency_form %}
-            <fieldset class="{{field.id_for_label}}">
-                {{ field.label_tag }}
-                {{ field }}
-                {% if field.help_text %}<p class="help-text">{{field.help_text}}</p>{% endif %}
-            </fieldset>
-            {% endfor %}
-        </main>
-        <footer class="textbox__footer">
-            <button type="submit" name="approve" value="true" class="success button">Approve</button>
-        </footer>
-    </form>
+        <dl class="task__data">
+            {% if task.agency %}
+                <dt>Agency</dt>
+                <dd><a href="{% url 'admin:agency_agency_change' task.agency.pk %}">{{task.agency}}</a>, {{task.agency.jurisdiction}}</dd>
+            {% endif %}
+            {% if task.agency.user %}
+                <dt>Agency User</dt>
+                <dd><a href="{% url 'admin:auth_user_change' task.agency.user.pk %}">{{task.agency.user}}</a></dd>
+            {% endif %}
+            {% if task.user %}
+                <dt>Task User</dt>
+                <dd><a href="{% url 'admin:auth_user_change' task.user.pk %}">{{task.user}}</a></dd>
+            {% endif %}
+            {% if task.agency.foiarequest_set.all %}
+                <dt>Pending Requests</dt>
+                {% for foia in task.agency.foiarequest_set.all %}
+                    <dd>
+                        <a href="{{ foia.get_absolute_url }}">{{ foia }}</a>
+                        (<a href="{% url 'admin:foia_foiarequest_change' foia.pk %}">admin</a>)
+                        - {{foia.get_status_display}}
+                    </dd>
+                {% endfor %}
+            {% endif %}
+        </dl>
     {% else %}
-    <form method="POST" class="new-agency update form collapsable">
-        <header>
-            <p>Update contact information</p>
-        </header>
-        <main>
-            {% csrf_token %}
-            <input type="hidden" name="task" value="{{task.pk}}">
-            <input type="hidden" name="update" value="true">
-            {% for field in agency_form %}
-            <fieldset class="{{field.id_for_label}}">
-                {{ field.label_tag }}
-                {{ field }}
-                {% if field.help_text %}<p class="help-text">{{field.help_text}}</p>{% endif %}
-            </fieldset>
-            {% endfor %}
-        </main>
-        <footer>
-            <button type="submit" name="action" value="update_new_agency" class="primary button">Save</button>
-        </footer>
-    </form>
+        <dl class="task__data">
+            <dt>Instructions</dt>
+            <dd>
+                <p>
+                    We don't have this agency in our database, yet.
+                    If you can help us find its contact information, then we will be able to process your request faster.
+                    If you need help, use the "Get Help" button above.
+                </p>
+            </dd>
+        </dl>
     {% endif %}
-</div>
+    <div class="new-agency-forms">
+        {% if user.is_staff %}
+            <form method="POST" action="{{ endpoint }}" class="new-agency red textbox form collapsable">
+                <header class="textbox__header">
+                    <p>Reject</p>
+                </header>
+                <main class="textbox__section">
+                    {% csrf_token %}
+                    <input type="hidden" name="task" value="{{task.pk}}">
+                    <input type="hidden" name="reject" value="true">
+                    <label>Move this agency’s requests to:</label>
+                    <select name="replacement">
+                    {% for other_agency in task.agency.jurisdiction.other_agencies %}
+                        <option value="{{ other_agency.id }}">{{ other_agency.name }}</option>
+                    {% endfor %}
+                    </select>
+                </main>
+                <footer class="textbox__footer">
+                    <button type="submit" name="reject" value="true" class="failure button">Reject</button>
+                </footer>
+            </form>
+            <form method="POST" action="{{ endpoint }}" class="new-agency green textbox form collapsable">
+                <header class="textbox__header">
+                    <p>Approve</p>
+                </header>
+                <main class="textbox__section">
+                    {% csrf_token %}
+                    <input type="hidden" name="task" value="{{task.pk}}">
+                    <input type="hidden" name="approve" value="true">
+                    {% for field in agency_form %}
+                        <fieldset class="{{field.id_for_label}}">
+                            {{ field.label_tag }}
+                            {{ field }}
+                            {% if field.help_text %}<p class="help-text">{{field.help_text}}</p>{% endif %}
+                        </fieldset>
+                    {% endfor %}
+                </main>
+                <footer class="textbox__footer">
+                    <button type="submit" name="approve" value="true" class="success button">Approve</button>
+                </footer>
+            </form>
+        {% else %}
+            <form method="POST" class="new-agency update form collapsable">
+                <header>
+                    <p>Update contact information</p>
+                </header>
+                <main>
+                    {% csrf_token %}
+                    <input type="hidden" name="task" value="{{task.pk}}">
+                    <input type="hidden" name="update" value="true">
+                    {% for field in agency_form %}
+                        <fieldset class="{{field.id_for_label}}">
+                            {{ field.label_tag }}
+                            {{ field }}
+                            {% if field.help_text %}<p class="help-text">{{field.help_text}}</p>{% endif %}
+                        </fieldset>
+                    {% endfor %}
+                </main>
+                <footer>
+                    <button type="submit" name="action" value="update_new_agency" class="primary button">Save</button>
+                </footer>
+            </form>
+        {% endif %}
+    </div>
 {% endblock %}
 
 {% block task-footer %}{% endblock %}

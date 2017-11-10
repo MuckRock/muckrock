@@ -219,13 +219,27 @@ class NewAgencyTaskQuerySet(models.QuerySet):
     """Object manager for new agency tasks"""
     def preload_list(self):
         """Preload relations for list display"""
-        from muckrock.agency.models import Agency
+        from muckrock.agency.models import (
+                Agency,
+                AgencyEmail,
+                AgencyPhone,
+                AgencyAddress,
+                )
         return (self
                 .select_related(
                     'agency__jurisdiction',
+                    'agency__user',
+                    'agency__portal',
+                    'user',
                     'resolved_by',
                     )
                 .prefetch_related(
+                    Prefetch('agency__agencyemail_set',
+                        queryset=AgencyEmail.objects.select_related('email')),
+                    Prefetch('agency__agencyphone_set',
+                        queryset=AgencyPhone.objects.select_related('phone')),
+                    Prefetch('agency__agencyaddress_set',
+                        queryset=AgencyAddress.objects.select_related('address')),
                     Prefetch('agency__foiarequest_set',
                         queryset=FOIARequest.objects.select_related('jurisdiction')),
                     Prefetch('agency__jurisdiction__agencies',
