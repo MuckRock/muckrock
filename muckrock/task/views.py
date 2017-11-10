@@ -482,9 +482,9 @@ class PortalTaskList(TaskList):
         keep_hidden = request.POST.get('keep_hidden')
         if new_text:
             task.communication.communication = new_text
-        task.communication.create_agency_notifications()
         if not keep_hidden:
             task.communication.hidden = False
+            task.communication.create_agency_notifications()
         task.communication.save()
         PortalCommunication.objects.create(
                 communication=task.communication,

@@ -104,11 +104,28 @@ class NewAgencyTaskNode(TaskNode):
     def get_extra_context(self):
         """Adds an approval form, other agencies, and relevant requests to context"""
         extra_context = super(NewAgencyTaskNode, self).get_extra_context()
+        emails = [e for e in self.task.agency.agencyemail_set.all()
+                if e.email.status == 'good'
+                and e.request_type == 'primary'
+                and e.email_type == 'to'
+                ]
+        phones = [p for p in self.task.agency.agencyphone_set.all()
+                if p.phone.status == 'good'
+                and p.phone.type == 'phone'
+                ]
+        faxes = [f for f in self.task.agency.agencyphone_set.all()
+                if f.phone.status == 'good'
+                and f.phone.type == 'fax'
+                and f.request_type == 'primary'
+                ]
+        addresses = [a for a in self.task.agency.agencyaddress_set.all()
+                if a.request_type == 'primary'
+                ]
         initial = {
-                'email': self.task.agency.get_emails().first(),
-                'phone': self.task.agency.get_phones().first(),
-                'fax': self.task.agency.get_faxes().first(),
-                'address': self.task.agency.get_addresses().first(),
+                'email': emails[0] if emails else None,
+                'phone': phones[0] if phones else None,
+                'fax': faxes[0] if faxes else None,
+                'address': addresses[0] if addresses else None,
                 }
         if self.task.agency.portal:
             initial['portal_url'] = self.task.agency.portal.url
