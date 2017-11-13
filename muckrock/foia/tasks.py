@@ -47,7 +47,7 @@ from muckrock.foia.models import (
     FOIACommunication,
     )
 from muckrock.foia.codes import CODES
-from muckrock.task.models import ResponseTask
+from muckrock.task.models import ResponseTask, ReviewAgencyTask
 from muckrock.utils import generate_status_action
 from muckrock.vendor import MultipartPostHandler
 
@@ -357,12 +357,9 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
                     'tag[fax_id]': fax.pk,
                     'tag[error_count]': error_count,
                     })
+        fax.fax_id = results['faxId']
+        fax.save()
     except PhaxioError as exc:
-        logger.error(
-                'Send fax error, will retry: %s',
-                exc,
-                exc_info=sys.exc_info(),
-                )
         FaxError.objects.create(
                 fax=fax,
                 datetime=datetime.now(),
@@ -370,15 +367,29 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
                 error_type='apiError',
                 error_code=exc.args[0],
                 )
-        send_fax.retry(
-                countdown=300,
-                args=[comm_id, subject, body, error_count],
-                kwargs=kwargs,
-                exc=exc,
-                )
-
-    fax.fax_id = results['faxId']
-    fax.save()
+        fatal_errors = {
+                ('Phone number is not formatted correctly or invalid. '
+                'Please check the number and try again.'),
+                }
+        if exc.args[0] in fatal_errors:
+            comm.foia.fax.status = 'error'
+            comm.foia.fax.save()
+            ReviewAgencyTask.objects.ensure_one_created(
+                    agency=comm.foia.agency,
+                    resolved=False,
+                    )
+        else:
+            logger.error(
+                    'Send fax error, will retry: %s',
+                    exc,
+                    exc_info=sys.exc_info(),
+                    )
+            send_fax.retry(
+                    countdown=300,
+                    args=[comm_id, subject, body, error_count],
+                    kwargs=kwargs,
+                    exc=exc,
+                    )
 
 @periodic_task(
         run_every=crontab(hour=5, minute=0),
