@@ -401,25 +401,22 @@ class FOIACommunication(models.Model):
         """Try to extract a tracking number from this communication"""
         if self.foia.tracking_id:
             return
-        pattern = re.compile(r"""
-            (?:tracking|case|file|foia
-            |freedom\ of\ information\ act) # leading word
-            [^.]*                           # anything but a period - stay in the same sentence
-            (?:number|no[.]|\#|id|log|case) # follow up word
-            [^.]*?                          # same sentence, don't be greey
-            ([a-z0-9-]*[0-9][a-z0-9-]*)     # the tracking number
-            """, re.IGNORECASE | re.VERBOSE)
-        match = pattern.search(self.communication)
-        if match:
-            self.foia.tracking_id = match.group(1).strip()[:255]
-            self.foia.save()
-            logger.info(
-                    'FOIA Tracking ID set: FOIA PK: %d - Comm PK: %d - '
-                    'Tracking ID: %s',
-                    self.foia.id,
-                    self.id,
-                    self.foia.tracking_id,
-                    )
+        patterns = [
+                re.compile(r'Tracking Number:\s+([0-9a-zA-Z-]+)'),
+                ]
+        for pattern in patterns:
+            match = pattern.search(self.communication)
+            if match:
+                self.foia.tracking_id = match.group(1).strip()[:255]
+                self.foia.save()
+                logger.info(
+                        'FOIA Tracking ID set: FOIA PK: %d - Comm PK: %d - '
+                        'Tracking ID: %s',
+                        self.foia.id,
+                        self.id,
+                        self.foia.tracking_id,
+                        )
+                break
 
 
     class Meta:
