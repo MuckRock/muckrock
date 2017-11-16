@@ -48,11 +48,11 @@ def foia_file_delete_s3(sender, **kwargs):
                 settings.AWS_SECRET_ACCESS_KEY,
                 )
         # find the current distribution
-        distributions = [d for d in cloudfront.get_distributions()
+        distributions = [d for d in cloudfront.get_all_distributions()
                 if settings.AWS_S3_CUSTOM_DOMAIN in d.cnames]
         if distributions:
             distribution = distributions[0]
-            cloudfront.create_invalidation_requests(
+            cloudfront.create_invalidation_request(
                     distribution.id,
                     [foia_file.ffile.name],
                     )
