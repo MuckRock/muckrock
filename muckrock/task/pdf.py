@@ -46,7 +46,7 @@ class SnailMailPDF(PDF):
         text = (
                 'MuckRock News\n'
                 'DEPT MR {pk}\n'
-                '411A Hihgland Ave\n'
+                '411A Highland Ave\n'
                 'Somerville, MA 02144-2516\n'
                 '{email}'.format(
                     pk=self.foia.pk,
