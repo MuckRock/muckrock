@@ -1,5 +1,6 @@
 {% autoescape off %}{% for comm in request.get_msg_comms %}{% if not forloop.first %}On {{ comm.date|date }}:
 {% endif %}{{ comm.communication }}
+
 {% if forloop.first or forloop.last %}{% include "text/foia/msg_footer.txt" %}{% endif %}{% if not forloop.last %}---
 {% endif %}
 {% endfor %}

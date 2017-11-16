@@ -689,7 +689,7 @@ class FOIARequest(models.Model):
                 'text/foia/followup.txt',
                 {'request': self, 'estimate': estimate}
                 ))
-
+        self.communications.update()
         self.submit(followup=True)
 
     def appeal(self, appeal_message, user):
@@ -701,8 +701,6 @@ class FOIARequest(models.Model):
             communication=appeal_message,
             response=False,
         )
-        # this needs to be updated here for some reason
-        # or it does not pick up the appeal communication
         self.communications.update()
         self.process_attachments(user)
         self.submit(appeal=True)
@@ -729,6 +727,7 @@ class FOIARequest(models.Model):
                     'amount': amount,
                     'payable_to': payable_to,
                     }))
+        self.communications.update()
         self.submit(payment=True, snail=True, amount=amount)
         # We perform some logging and activity generation
         logger.info('%s has paid %0.2f for request %s', user.username, amount, self.title)
