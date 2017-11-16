@@ -208,7 +208,7 @@ $('#snail-mail-bulk-download').click(function(){
 });
 
 function checkPdfExists(pdfName) {
-  var url = 'https://cdn.muckrock.com/' + pdfName;
+  var url = 'https://muckrock.s3.amazonaws.com/' + pdfName;
   $.ajax({
     url: url,
     type: 'head',
