@@ -12,6 +12,7 @@ from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 from datetime import datetime
 from PyPDF2 import PdfFileMerger
+from PyPDF2.utils import PdfReadError
 from cStringIO import StringIO
 
 from muckrock.communication.models import MailCommunication
@@ -56,10 +57,17 @@ def snail_mail_bulk_pdf_task(pdf_name, **kwargs):
         single_merger = PdfFileMerger()
         single_merger.append(
             StringIO(pdf.output(dest='S')))
+        files = []
         for file_ in snail.communication.files.all():
             if file_.get_extension() == 'pdf':
-                single_merger.append(file_.ffile)
-        cover_info.append((snail, pdf.page))
+                try:
+                    single_merger.append(file_.ffile)
+                    files.append((file_, 'attached'))
+                except PdfReadError:
+                    files.append((file_, 'error'))
+            else:
+                files.append((file_, 'skipped'))
+        cover_info.append((snail, pdf.page, files))
         single_pdf = StringIO()
         single_merger.write(single_pdf)
 
