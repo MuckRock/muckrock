@@ -28,6 +28,7 @@ def save_foia_comm(foia, from_user, comm, user, appeal=False,
         thanks=thanks,
         subject=subject,
     )
+    foia.communications.update()
     foia.process_attachments(user)
     foia.submit(appeal=appeal, snail=snail, thanks=thanks)
 
