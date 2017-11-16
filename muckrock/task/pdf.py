@@ -91,7 +91,7 @@ class CoverPDF(PDF):
         self.ln(10)
         self.set_font('DejaVu', '', 10)
         lines = []
-        for snail, pages in self.info:
+        for snail, pages, files in self.info:
             lines.append(u'\n□ MR #{} - "{}" by {} - {} pages'.format(
                 snail.communication.foia.pk,
                 snail.communication.foia.title,
@@ -102,14 +102,18 @@ class CoverPDF(PDF):
                 lines.append(
                         u'        □ Write a check for ${:.2f}'
                         .format(snail.amount))
-            for file_ in snail.communication.files.all():
-                if file_.get_extension() == 'pdf':
+            for file_, status in files:
+                if status == 'attached':
                     lines.append(
                             u'        ▣ Attached: {}'
                             .format(file_.name()))
-                else:
+                elif status == 'skipped':
                     lines.append(
                             u'        □ Print separately: {}'
+                            .format(file_.name()))
+                else: # status == 'error'
+                    lines.append(
+                            u'        □ Print separately (error): {}'
                             .format(file_.name()))
         text = u'\n'.join(lines)
         self.multi_cell(0, 13, text)
