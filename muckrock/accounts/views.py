@@ -699,8 +699,8 @@ def agency_redirect_login(
     agency_match = agency_user and request.user.profile.agency == agency
     email = request.GET.get('email', '')
     # valid if this email is associated with the agency
-    valid = (EmailAddress.objects
-            .fetch(email)
+    email_address = EmailAddress.objects.fetch(email)
+    valid = (email_address is not None and email_address
             .agencies
             .filter(id=agency.pk)
             .exists()
