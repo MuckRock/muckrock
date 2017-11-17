@@ -502,7 +502,7 @@ class PortalTaskList(TaskList):
         if status and status not in dict(STATUS):
             messages.error(request, 'Invalid status')
             return
-        password = request.POST.get('word_to_pass')
+        password = request.POST.get('word_to_pass', '')
         tracking_number = request.POST.get('tracking_number')
         foia = task.communication.foia
         if len(password) > 20:
