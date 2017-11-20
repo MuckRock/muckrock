@@ -51,6 +51,10 @@
                     {% endif %}
                 {% endwith %}
             {% endif %}
+            {% if task.reason %}
+                <dt>Reason</dt>
+                <dd>{{ task.reason|linebreaks }}</dd>
+            {% endif %}
             <dt>Communication</dt>
             <dd>{{task.communication.communication|linebreaks}}</dd>
         {% endwith %}

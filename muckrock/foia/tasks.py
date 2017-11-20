@@ -47,6 +47,7 @@ from muckrock.foia.models import (
     FOIACommunication,
     )
 from muckrock.foia.codes import CODES
+from muckrock.foia.exceptions import SizeError
 from muckrock.task.models import ResponseTask, ReviewAgencyTask
 from muckrock.utils import generate_status_action
 from muckrock.vendor import MultipartPostHandler
@@ -464,9 +465,6 @@ def retry_stuck_documents():
     logger.info('Reupload documents, %d documents are stuck', len(docs))
     for doc in docs:
         upload_document_cloud.apply_async(args=[doc.pk, False])
-
-class SizeError(Exception):
-    """Uploaded file is not the correct size"""
 
 # Increase the time limit for autoimport to 1 hour, and a soft time limit to
 # 5 minutes before that

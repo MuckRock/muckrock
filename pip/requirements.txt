@@ -11,6 +11,7 @@
 amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu
 babel==2.5.1              # via django-phonenumber-field
+beautifulsoup4==4.6.0
 billiard==3.3.0.23        # via celery
 bleach==1.5.0
 boto==2.42.0
@@ -60,6 +61,7 @@ djangorestframework==3.4.7
 dogslow==0.9.7
 easy-thumbnails==2.4.1
 fpdf==1.7.2
+furl==1.0.1
 fuzzywuzzy==0.14.0
 gunicorn==19.6.0
 html5lib==0.9999999       # via bleach
@@ -72,6 +74,7 @@ markdown==2.6.7
 newrelic==2.70.0.51
 numpy==1.9.1
 olefile==0.44             # via pillow
+orderedmultidict==0.7.11  # via furl
 packaging==16.8
 pascha==0.5
 phonenumberslite==8.8.2
@@ -98,7 +101,7 @@ rules==1.1.1
 scikit-learn==0.16.1
 scipy==0.14.0
 simplejson==3.8.2         # via django-lot
-six==1.10.0               # via bleach, django-compat, django-geojson, html5lib, packaging, python-dateutil
+six==1.10.0               # via bleach, django-compat, django-geojson, furl, html5lib, orderedmultidict, packaging, python-dateutil
 smart-open==1.4.0
 smartypants==1.8.6
 sqlparse==0.2.4           # via django-debug-toolbar

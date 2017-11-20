@@ -3,8 +3,6 @@
 
 from django.db import models
 
-from muckrock.portal.portals import ManualPortal
-
 
 PORTAL_TYPES = [
         ('foiaonline', 'FOIAonline'),
@@ -31,6 +29,7 @@ class Portal(models.Model):
             choices=(('good', 'Good'), ('error', 'Error')),
             default='good',
             )
+    created_timestamp = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
         return self.name
@@ -38,13 +37,20 @@ class Portal(models.Model):
     @property
     def portal_type(self):
         """Get an instance of the portal type logic"""
+        from muckrock.portal.portals import (
+                ManualPortal,
+                NextRequestPortal,
+                )
         # pylint: disable=access-member-before-definition
         # pylint: disable=attribute-defined-outside-init
-        portal_classes = {}
+        portal_classes = {
+                'nextrequest': NextRequestPortal,
+                }
         if hasattr(self, '_portal_type'):
             return self._portal_type
         else:
-            self._portal_type = portal_classes.get(self.type, ManualPortal)
+            portal_class = portal_classes.get(self.type, ManualPortal)
+            self._portal_type = portal_class(self)
             return self._portal_type
 
     def send_msg(self, comm, **kwargs):

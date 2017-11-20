@@ -19,45 +19,13 @@ import sys
 
 from muckrock.accounts.utils import validate_stripe_email
 from muckrock.crowdfund.forms import CrowdfundForm
-from muckrock.foia.forms import (
-        FOIADeleteForm,
-        FOIAEmbargoForm,
-        )
+from muckrock.foia.forms import FOIAEmbargoForm
 from muckrock.foia.models import FOIARequest, END_STATUS
-from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.utils import new_action
 
 logger = logging.getLogger(__name__)
 
-# Helper Functions
 
-def _get_foia(jurisdiction, jidx, slug, idx):
-    """Returns a foia object"""
-    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
-    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
-    return foia
-
-# remove this view?
-@login_required
-def delete(request, jurisdiction, jidx, slug, idx):
-    """Delete a non-submitted FOIA Request"""
-    foia = _get_foia(jurisdiction, jidx, slug, idx)
-    if not foia.has_perm(request.user, 'delete'):
-        messages.error(request, 'You may only delete your own drafts.')
-        return redirect(foia)
-
-    if request.method == 'POST':
-        form = FOIADeleteForm(request.POST)
-        if form.is_valid():
-            foia.delete()
-            messages.success(request, 'The draft has been deleted.')
-            return redirect('foia-mylist')
-    else:
-        form = FOIADeleteForm()
-
-    return render(request, 'forms/base_form.html', {'form': form})
-
-# remove this view?
 @login_required
 def embargo(request, jurisdiction, jidx, slug, idx):
     """Change the embargo on a request"""
@@ -110,7 +78,13 @@ def embargo(request, jurisdiction, jidx, slug, idx):
         new_action(request.user, 'unembargoed', target=foia)
         return
 
-    foia = _get_foia(jurisdiction, jidx, slug, idx)
+    foia = get_object_or_404(
+            FOIARequest,
+            jurisdiction__slug=jurisdiction,
+            jurisdiction__pk=jidx,
+            slug=slug,
+            pk=idx,
+            )
     has_perm = foia.has_perm(request.user, 'change')
     if request.method == 'POST' and has_perm:
         embargo_action = request.POST.get('embargo')
@@ -122,10 +96,17 @@ def embargo(request, jurisdiction, jidx, slug, idx):
             delete_embargo(request, foia)
     return redirect(foia)
 
+
 @login_required
 def pay_request(request, jurisdiction, jidx, slug, idx):
     """Pay us through CC for the payment on a request"""
-    foia = _get_foia(jurisdiction, jidx, slug, idx)
+    foia = get_object_or_404(
+            FOIARequest,
+            jurisdiction__slug=jurisdiction,
+            jurisdiction__pk=jidx,
+            slug=slug,
+            pk=idx,
+            )
     token = request.POST.get('stripe_token')
     email = request.POST.get('stripe_email')
     email = validate_stripe_email(email)
@@ -159,10 +140,17 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
         messages.success(request, msg)
     return redirect(foia)
 
+
 @login_required
 def follow(request, jurisdiction, jidx, slug, idx):
     """Follow or unfollow a request"""
-    foia = _get_foia(jurisdiction, jidx, slug, idx)
+    foia = get_object_or_404(
+            FOIARequest,
+            jurisdiction__slug=jurisdiction,
+            jurisdiction__pk=jidx,
+            slug=slug,
+            pk=idx,
+            )
     if actstream.actions.is_following(request.user, foia):
         actstream.actions.unfollow(request.user, foia)
         messages.success(request, 'You are no longer following this request.')
@@ -171,10 +159,17 @@ def follow(request, jurisdiction, jidx, slug, idx):
         messages.success(request, 'You are now following this request.')
     return redirect(foia)
 
+
 @login_required
 def toggle_autofollowups(request, jurisdiction, jidx, slug, idx):
     """Toggle autofollowups"""
-    foia = _get_foia(jurisdiction, jidx, slug, idx)
+    foia = get_object_or_404(
+            FOIARequest,
+            jurisdiction__slug=jurisdiction,
+            jurisdiction__pk=jidx,
+            slug=slug,
+            pk=idx,
+            )
 
     if foia.has_perm(request.user, 'change'):
         foia.disable_autofollowups = not foia.disable_autofollowups
@@ -186,6 +181,7 @@ def toggle_autofollowups(request, jurisdiction, jidx, slug, idx):
         msg = 'You must own the request to toggle auto-followups.'
         messages.error(request, msg)
     return redirect(foia)
+
 
 # Staff Actions
 @transaction.atomic

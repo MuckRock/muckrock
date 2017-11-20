@@ -24,23 +24,23 @@
                     {% include 'lib/component/icon/options.svg' %}
                 </span>
                 <ul class="options dropdown-list">
-                    {% if comm.raw_emails %}<li><a href="{% url 'foia-raw' idx=comm.pk %}" class="option dropdown-list-item">Raw Email</a></li>{% endif %}
-                    {% if comm.reverse_faxes.0.fax_id %}<li><a href="https://console.phaxio.com/viewFax?faxId={{comm.reverse_faxes.0.fax_id}}" class="option dropdown-list-item">Phaxio</a></li>{% endif %}
-                    {% if comm.mails.all.0.pdf %}<li><a href="{{ comm.mails.all.0.pdf.url }}" class="option dropdown-list-item">Mail PDF</a></li>{% endif %}
-                    <li><a href="#status-{{comm.pk}}-form" class="option dropdown-list-item">Status</a></li>
-                    <li><a href="#move-{{comm.pk}}-form" class="option dropdown-list-item">Move</a></li>
-                    <li><a href="#resend-{{comm.pk}}-form" class="option dropdown-list-item">Resend</a></li>
-                    <li><a href="#delete-{{comm.pk}}-form" class="option dropdown-list-item">Delete</a></li>
-                    <li><a href="#upload-{{comm.pk}}-form" class="option dropdown-list-item">Upload File</a></li>
+                    {% if communication.raw_emails %}<li><a href="{% url 'foia-raw' idx=communication.pk %}" class="option dropdown-list-item">Raw Email</a></li>{% endif %}
+                    {% if communication.reverse_faxes.0.fax_id %}<li><a href="https://console.phaxio.com/viewFax?faxId={{communication.reverse_faxes.0.fax_id}}" class="option dropdown-list-item">Phaxio</a></li>{% endif %}
+                    {% if communication.mails.all.0.pdf %}<li><a href="{{ communication.mails.all.0.pdf.url }}" class="option dropdown-list-item">Mail PDF</a></li>{% endif %}
+                    <li><a href="#status-{{communication.pk}}-form" class="option dropdown-list-item">Status</a></li>
+                    <li><a href="#move-{{communication.pk}}-form" class="option dropdown-list-item">Move</a></li>
+                    <li><a href="#resend-{{communication.pk}}-form" class="option dropdown-list-item">Resend</a></li>
+                    <li><a href="#delete-{{communication.pk}}-form" class="option dropdown-list-item">Delete</a></li>
+                    <li><a href="#upload-{{communication.pk}}-form" class="option dropdown-list-item">Upload File</a></li>
                 </ul>
             </div>
-            {% elif request.user.profile.is_advanced and comm.raw_emails %}
+            {% elif request.user.profile.is_advanced and communication.raw_emails %}
             <div class="options dropdown">
                 <span class="dropdown-trigger">
                     {% include 'lib/component/icon/options.svg' %}
                 </span>
                 <ul class="options dropdown-list">
-                    <li><a href="{% url 'foia-raw' idx=comm.pk %}" class="option">Raw Email</a></li>
+                    <li><a href="{% url 'foia-raw' idx=communication.pk %}" class="option">Raw Email</a></li>
                 </ul>
             </div>
             {% endif %}
@@ -92,9 +92,9 @@
     {% endif %}
     {% if request.user.is_staff %}
     <div class="communication-actions">
-        <form method="post" class="status-communication communication-action" id="status-{{comm.pk}}-form">
+        <form method="post" class="status-communication communication-action" id="status-{{communication.pk}}-form">
             {% csrf_token %}
-            <input type="hidden" name="comm_pk" value="{{comm.pk}}" />
+            <input type="hidden" name="comm_pk" value="{{communication.pk}}" />
             <label for="status">Change Communication Status</label>
             <select name="status">
             {% for choice in status_choices %}
@@ -105,50 +105,40 @@
             <button type="submit" name="action" value="status_comm" class="primary button">Change</button>
             <button class="cancel button" id="cancel-status-communication">Close</button>
         </form>
-        <form method="post" class="move-communication communication-action" id="move-{{comm.pk}}-form">
+        <form method="post" class="move-communication communication-action" id="move-{{communication.pk}}-form">
             {% csrf_token %}
-            <input type="hidden" name="comm_pk" value="{{comm.pk}}" />
+            <input type="hidden" name="comm_pk" value="{{communication.pk}}" />
             <label for="new_foia_pk">Move to Requests</label>
             <input type="text" name="new_foia_pks" value="{{ foia.pk }}" placeholder="Enter MuckRock number" />
             <button type="submit" name="action" value="move_comm" class="primary button">Move</button>
             <button class="cancel button" id="cancel-move-communication">Close</button>
         </form>
-        <form method="post" class="resend-communication communication-action" id="resend-{{comm.pk}}-form">
+        <form method="post" class="resend-communication communication-action" id="resend-{{communication.pk}}-form">
             {% csrf_token %}
-            <input type="hidden" name="comm_pk" value="{{comm.pk}}" />
-            <label for="email">Resend to Email</label>
-            <input
-                id="id_email_or_fax"
-                type="text"
-                name="email_or_fax"
-                {% if foia.email %}
-                    value="{{foia.email.email}}"
-                {% elif foia.fax %}
-                    value="{{foia.fax.number.as_international}}"
-                {% endif %}
-                data-widget-bootstrap="text"
-                data-autocomplete-choice-selector="[data-value]"
-                data-autocomplete-minimum-characters="2"
-                data-autocomplete-url="/autocomplete/EmailOrFaxAutocomplete/"
-                maxlength="255"
-                placeholder="Search emails and faxes"
-                class="autocomplete-light-widget multiple autocomplete vTextField autocomplete-light-text-widget"
-                >
-            <p class="help-text">This will become the new email address for the request. Leave the field blank to force a manual mailing. For faxes, enter the 10 digit fax number beginning with a leading 1.</p>
+            <label>Resend Communication</label>
+            {% with form=resend_forms|get_item:communication.pk %}
+                {% for field in form %}
+                    {% if field.errors %}
+                        <span class="error field">{{field.errors}}</span>
+                    {% endif %}
+                    {{ field }}
+                {% endfor %}
+            {% endwith %}
+            <p class="help-text">This will become the new default for future outgoing communications.</p>
             <button type="submit" name="action" value="resend_comm" class="primary button">Resend</button>
             <button class="cancel button" id="cancel-resend-communication">Close</button>
         </form>
-        <form method="post" class="delete-communication communication-action" id="delete-{{comm.pk}}-form">
+        <form method="post" class="delete-communication communication-action" id="delete-{{communication.pk}}-form">
             {% csrf_token %}
-            <input type="hidden" name="comm_pk" value="{{comm.pk}}" />
+            <input type="hidden" name="comm_pk" value="{{communication.pk}}" />
             <p>This will delete the communication. Are you sure you want to do this?</p>
             <button type="submit" name="action" value="delete_comm" class="failure button">Delete</button>
             <button class="cancel button" id="cancel-delete-communication">Close</button>
         </form>
-        <form method="post" class="upload-communication communication-action" id="upload-{{comm.pk}}-form">
+        <form method="post" class="upload-communication communication-action" id="upload-{{communication.pk}}-form">
             {% csrf_token %}
             <p>Upload an attachment directly to this communication</p>
-            <div class="fine-uploader-comm" data-comm-pk="{{comm.pk}}"></div>
+            <div class="fine-uploader-comm" data-comm-pk="{{communication.pk}}"></div>
         </form>
     </div>
     {% endif %}

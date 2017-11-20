@@ -197,7 +197,10 @@ class SnailMailTaskNode(TaskNode):
             agency_ = foia_.agency
         extra_context['agency'] = agency_
         extra_context['address'] = foia_.address
-        extra_context['body'] = foia_.render_msg_body(switch=self.task.switch)
+        extra_context['body'] = foia_.render_msg_body(
+                comm=self.task.communication,
+                switch=self.task.switch,
+                )
         extra_context['email'] = [str(e) for e in
                 agency_.agencyemail_set.all()]
         extra_context['faxes'] = [str(f) for f in

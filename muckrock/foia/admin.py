@@ -337,12 +337,12 @@ class FOIARequestAdminForm(forms.ModelForm):
             required=False,
             )
     fax = autocomplete_light.ModelChoiceField(
-            'PhoneNumberFaxAutocomplete',
+            'FaxAdminAutocomplete',
             queryset=PhoneNumber.objects.filter(type='fax'),
             required=False,
             )
     address = autocomplete_light.ModelChoiceField(
-            'AddressAutocomplete',
+            'AddressAdminAutocomplete',
             queryset=Address.objects.all(),
             required=False,
             )

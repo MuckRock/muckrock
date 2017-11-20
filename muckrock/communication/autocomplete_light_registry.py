@@ -46,7 +46,23 @@ class EmailAddressAdminAutocomplete(EmailAddressAutocomplete):
     choices = EmailAddress.objects.all()
 
 
-class PhoneNumberAutocomplete(autocomplete_light.AutocompleteModelTemplate):
+class GenericPhoneNumberAutocomplete(autocomplete_light.AutocompleteModelTemplate):
+    """Logic for querying numbers"""
+    def choices_for_request(self):
+        """Remove parentheses and convert spaces to dashes before searching"""
+        query = self.request.GET.get('q', '')
+        query = query.translate({
+            ord(u'('): None,
+            ord(u')'): None,
+            ord(u' '): u'-',
+            })
+        choices = self.choices.filter(
+                number__contains=query,
+                )
+        return self.order_choices(choices)[0:self.limit_choices]
+
+
+class PhoneNumberAutocomplete(GenericPhoneNumberAutocomplete):
     """An autocomplete for selecting a phone number"""
     choices = PhoneNumber.objects.all()
     choice_template = 'autocomplete/phone.html'
@@ -57,7 +73,7 @@ class PhoneNumberAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     }
 
 
-class FaxAutocomplete(autocomplete_light.AutocompleteModelTemplate):
+class FaxAutocomplete(GenericPhoneNumberAutocomplete):
     """An autocomplete for selecting a fax number"""
     choices = PhoneNumber.objects.filter(status='good', type='fax')
     search_fields = ['number']
@@ -90,12 +106,22 @@ class EmailOrFaxAutocomplete(autocomplete_light.AutocompleteBase):
 
 
 autocomplete_light.register(Address, AddressAutocomplete,
+        name='AddressAdminAutocomplete',
         add_another_url_name='admin:communication_address_add')
+
 autocomplete_light.register(EmailAddress, EmailAddressAutocomplete)
 autocomplete_light.register(EmailAddress, EmailAddressAdminAutocomplete,
         add_another_url_name='admin:communication_emailaddress_add')
+
+autocomplete_light.register(PhoneNumber, PhoneNumberAutocomplete)
 autocomplete_light.register(PhoneNumber, PhoneNumberAutocomplete,
+        name='PhoneNumberAdminAutocomplete',
         add_another_url_name='admin:communication_phonenumber_add')
 autocomplete_light.register(PhoneNumber, FaxAutocomplete,
+        name='FaxAutocomplete',
+        )
+autocomplete_light.register(PhoneNumber, FaxAutocomplete,
+        name='FaxAdminAutocomplete',
         add_another_url_name='admin:communication_phonenumber_add')
+
 autocomplete_light.register(EmailOrFaxAutocomplete)

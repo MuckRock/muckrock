@@ -691,6 +691,7 @@ class PortalTask(Task):
             max_length=1,
             choices=PORTAL_CATEGORIES,
             )
+    reason = models.TextField(blank=True)
 
     objects = PortalTaskQuerySet.as_manager()
 

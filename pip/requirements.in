@@ -2,6 +2,7 @@
 -e git://github.com/MuckRock/django-autocomplete-light.git@a54a789b5a44adba678d980aaa64413472a11dbb#egg=django_autocomplete_light # Autocomplete drop down inputs
 -e git://github.com/jazzband/django-queued-storage@d30d70d6db4eb742ccde9d4a7da6ca7624e53219#egg=django_queued_storage # For delayed uploading of files
 -e git://github.com/mitchelljkotler/django-news-sitemaps.git@5946718cd1d18abbfa7f0393c140fcc513dedac1#egg=django_news_sitemaps # For generating news sitemaps
+beautifulsoup4 # used for parsing html
 bleach # Used to sanitize any HTML we're rendering
 boto # Used to access AWS
 celery<4 # Used to run async tasks
@@ -42,6 +43,7 @@ djangorestframework # The API framework
 dogslow # Monitors slow requests
 easy-thumbnails # Used for thumbnailing images
 fpdf # Used to generate PDFs
+furl # Used to manipulate urls
 fuzzywuzzy # fuzzy string matching for FM agency import
 gunicorn # Python WSGI app server
 image-diet2 # Used to compress images on upload

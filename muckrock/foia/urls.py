@@ -5,16 +5,17 @@ URL mappings for the FOIA application
 from django.conf.urls import url
 from django.views.generic.base import RedirectView
 
-
-import muckrock.foia.signals # pylint: disable=unused-import
 from muckrock.foia import views
-from muckrock.foia.feeds import LatestSubmittedRequests, LatestDoneRequests, FOIAFeed,\
-                                UserSubmittedFeed, UserDoneFeed, UserUpdateFeed
+from muckrock.foia.feeds import (
+        LatestSubmittedRequests,
+        LatestDoneRequests,
+        FOIAFeed,
+        UserSubmittedFeed,
+        UserDoneFeed,
+        UserUpdateFeed,
+        )
 from muckrock.views import jurisdiction
 
-# pylint: disable=no-value-for-parameter
-# pylint: disable=bad-whitespace
-# pylint: disable=bad-continuation
 
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)'
 old_foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
@@ -65,9 +66,6 @@ urlpatterns = [
     url(r'^%s/crowdfund/$' % foia_url,
         views.crowdfund_request,
         name='foia-crowdfund'),
-    url(r'^%s/delete/$' % foia_url,
-        views.delete,
-        name='foia-delete'),
     url(r'^%s/files/$' % foia_url,
         views.FOIAFileListView.as_view(),
         name='foia-files'),
@@ -87,8 +85,6 @@ urlpatterns = [
         jurisdiction, name='foia-jurisdiction'),
     url(r'^acronyms/$',
         views.acronyms, name='foia-acronyms'),
-    url(r'^drag_drop/$',
-        views.drag_drop, name='foia-drag-drop'),
     url(r'^raw_email/(?P<idx>\d+)/$',
         views.raw, name='foia-raw'),
 

@@ -52,7 +52,7 @@ def snail_mail_bulk_pdf_task(pdf_name, **kwargs):
             )
     for snail in snails:
         # generate the pdf and merge all pdf attachments
-        pdf = SnailMailPDF(snail.communication.foia)
+        pdf = SnailMailPDF(snail.communication)
         pdf.generate()
         single_merger = PdfFileMerger()
         single_merger.append(

@@ -80,8 +80,11 @@
         label {
             font-weight: $bold;
         }
-        input {
+        input, select {
             color: $color-black;
+        }
+        .errorlist {
+            color: $color-red-light;
         }
     }
     &.collapsed {

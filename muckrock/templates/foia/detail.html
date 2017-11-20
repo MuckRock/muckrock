@@ -145,8 +145,10 @@
             <ul role="tablist" class="tab-list">
                 <li>
                     <a role="tab" class="tab" aria-controls="request" href="#comms">
-                        <span class="counter">{{foia.communications.count}}</span>
-                        <span class="label">Communication{{foia.communications.count|pluralize}}</span>
+                        {% with count=foia.communications.visible.count %}
+                            <span class="counter">{{count}}</span>
+                            <span class="label">Communication{{count|pluralize}}</span>
+                        {% endwith %}
                     </a>
                 </li>
                 <li>

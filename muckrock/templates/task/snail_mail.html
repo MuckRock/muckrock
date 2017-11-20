@@ -50,6 +50,10 @@
     {% if agency.portal %}
         <dt>Portal</dt>
         <dd><a href="{{agency.portal.url}}">{{agency.portal.name}}</a> ({{agency.portal.get_type_display}})</dd>
+        <dt>Username</dt>
+        <dd>{{foia.get_request_email}}</dd>
+        <dt>Password</dt>
+        <dd>{{foia.portal_password}}</dd>
     {% endif %}
 	{% if agency.notes %}
     <dt>Agency Notes</dt>
