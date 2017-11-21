@@ -18,7 +18,7 @@
     <dd><a href="{% url 'admin:agency_agency_change' task.agency.pk %}">{{task.agency}}</a></dd>
     {% elif task.jurisdiction %}
     <dt>Jurisdiction</dt>
-    <dd><a href="{% url 'admin:jurisdiction_jurisdiction_change' task.jurisdiction.pk %}">{{task.jurisidiction}}</a></dd>
+    <dd><a href="{% url 'admin:jurisdiction_jurisdiction_change' task.jurisdiction.pk %}">{{task.jurisdiction}}</a></dd>
     {% endif %}
 </dl>
 <form method="POST" action="{{ endpoint }}" class="collapsable flag-reply">
