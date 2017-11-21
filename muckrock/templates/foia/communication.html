@@ -90,7 +90,7 @@
     </span>
     {% endif %}
     {% endif %}
-    {% if request.user.is_staff %}
+    {% if request.user.is_staff and not hide_options %}
     <div class="communication-actions">
         <form method="post" class="status-communication communication-action" id="status-{{communication.pk}}-form">
             {% csrf_token %}

@@ -79,11 +79,11 @@ class EmailAddress(models.Model):
 
     def __unicode__(self):
         if self.name:
-            val = '"%s" <%s>' % (self.name, self.email)
+            val = u'"%s" <%s>' % (self.name, self.email)
         else:
             val = self.email
         if self.status == 'error':
-            val += ' (error)'
+            val += u' (error)'
         return val
 
     @property
@@ -146,7 +146,7 @@ class PhoneNumber(models.Model):
 
     def __unicode__(self):
         if self.status == 'error':
-            return '%s (%s)' % (self.number.as_national, self.status)
+            return u'%s (%s)' % (self.number.as_national, self.status)
         else:
             return self.number.as_national
 
@@ -191,9 +191,9 @@ class EmailCommunication(models.Model):
     delivered = 'email'
 
     def __unicode__(self):
-        value = 'Email Communication'
+        value = u'Email Communication'
         if self.from_email:
-            value += ' From: "%s"' % self.from_email
+            value += u' From: "%s"' % self.from_email
         return value
 
     def set_raw_email(self, msg):
@@ -228,7 +228,7 @@ class FaxCommunication(models.Model):
     delivered = 'fax'
 
     def __unicode__(self):
-        return 'Fax Communication To %s' % self.to_number
+        return u'Fax Communication To %s' % self.to_number
 
     def sent_to(self):
         """Who was this fax sent to?"""
@@ -270,7 +270,7 @@ class MailCommunication(models.Model):
     delivered = 'mail'
 
     def __unicode__(self):
-        return 'Mail Communication To %s' % self.to_address
+        return u'Mail Communication To %s' % self.to_address
 
     def sent_to(self):
         """Who was this mail sent to?"""
@@ -292,7 +292,7 @@ class WebCommunication(models.Model):
     delivered = 'web'
 
     def __unicode__(self):
-        return 'Web Communication'
+        return u'Web Communication'
 
     def sent_to(self):
         """Who was web comm sent to?"""
@@ -326,7 +326,7 @@ class PortalCommunication(models.Model):
     delivered = 'portal'
 
     def __unicode__(self):
-        return 'Portal Communication'
+        return u'Portal Communication'
 
     def sent_to(self):
         """Who was portal comm sent to?"""
