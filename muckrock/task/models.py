@@ -2,7 +2,9 @@
 Models for the Task application
 """
 
+from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.mail import EmailMessage
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import (
@@ -12,8 +14,9 @@ from django.db.models import (
         Prefetch,
         When,
         )
+from django.template.loader import render_to_string
 
-from datetime import datetime
+from datetime import datetime, date
 import logging
 from itertools import groupby
 
@@ -185,6 +188,37 @@ class SnailMailTask(Task):
             'amount': self.amount
         }
         note = FOIANote.objects.create(foia=foia, note=text, author=user)
+        if foia.agency.payable_to:
+            payable_to = foia.agency.payable_to
+        else:
+            payable_to = foia.agency
+        if foia.user.is_staff:
+            type_ = 'Staff'
+        else:
+            type_ = 'User'
+        context = {
+                'number': number,
+                'payable_to': payable_to,
+                'amount': self.amount,
+                'signed_by': user.get_full_name(),
+                'foia_pk': foia.pk,
+                'comm_pk': self.communication.pk,
+                'type': type_,
+                'today': date.today(),
+                }
+        body = render_to_string(
+                'text/task/check.txt',
+                context,
+                )
+        msg = EmailMessage(
+                subject='[CHECK MAILED] Check #{}'.format(number),
+                body=body,
+                from_email='info@muckrock.com',
+                to=[settings.CHECK_EMAIL],
+                cc=['info@muckrock.com'],
+                bcc=['diagnostics@muckrock.com'],
+                )
+        msg.send(fail_silently=False)
         return note
 
 

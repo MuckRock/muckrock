@@ -590,3 +590,5 @@ OPENSEARCH_DESCRIPTION = 'Search MuckRock for public documents and news'
 
 # for generating pdfs using FPDF
 FONT_PATH = '/usr/share/fonts/truetype/dejavu/'
+
+CHECK_EMAIL = os.environ.get('CHECK_EMAIL', '')

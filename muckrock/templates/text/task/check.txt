@@ -1,0 +1,11 @@
+{% autoescape off %}
+Check #: {{number}}
+Check To: {{payable_to}}
+Amount: ${{amount}}
+Signed By: {{signed_by}}
+MR Number: {{foia_pk}}
+Communication Number: {{comm_pk}}
+Payment Type: {{type}}
+Notes:
+Date: {{today|date}}
+{% endautoescape %}
