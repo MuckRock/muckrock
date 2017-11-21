@@ -14,7 +14,6 @@
 {% endblock %}
 
 {% block content %}
-{% cache cache_timeout article_detail article.pk %}
 {% with article.projects.last as project %}
     {% if project.newsletter %}
         {% newsletter list_id=project.newsletter label=project.newsletter_label cta=project.newsletter_cta %}
@@ -22,6 +21,7 @@
         {% newsletter %}
     {% endif %}
 {% endwith %}
+{% cache cache_timeout article_detail_1 article.pk %}
 <div class="news detail" itemscope itemtype="https://schema.org/NewsArticle">
     <meta itemscope itemprop="mainEntityOfPage" itemType="https://schema.org/WebPage" itemid="https://www.muckrock.com{{ article.get_absolute_url }}">
     {% if article.image %}
