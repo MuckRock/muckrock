@@ -12,7 +12,12 @@ from autocomplete_light import shortcuts as autocomplete_light
 from reversion.admin import VersionAdmin
 import stripe
 
-from muckrock.accounts.models import Profile, Statistics, ReceiptEmail
+from muckrock.accounts.models import (
+        Profile,
+        Statistics,
+        ReceiptEmail,
+        RecurringDonation,
+        )
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 
@@ -102,6 +107,62 @@ class MRUserAdmin(UserAdmin):
         super(MRUserAdmin, self).save_related(request, form, formsets, change)
 
 
+class RecurringDonationAdminForm(forms.ModelForm):
+    """Form to include custom choice fields"""
+
+    user = autocomplete_light.ModelChoiceField(
+            'UserAutocomplete',
+            queryset=User.objects.all(),
+            required=False,
+            )
+
+    class Meta:
+        # pylint: disable=too-few-public-methods
+        model = RecurringDonation
+        fields = '__all__'
+
+
+class RecurringDonationAdmin(VersionAdmin):
+    """Recurring donation admin options"""
+    model = RecurringDonation
+    list_display = (
+            'email',
+            'user',
+            'amount',
+            'payment_failed',
+            'active',
+            'created_datetime',
+            )
+    list_select_related = ('user',)
+    search_fields = ('email', 'user__username')
+    form = RecurringDonationAdminForm
+    date_hierarchy = 'created_datetime'
+    list_filter = ('active', 'payment_failed')
+    readonly_fields = (
+            'email',
+            'created_datetime',
+            'amount',
+            'customer_id',
+            'subscription_id',
+            'deactivated_datetime',
+            )
+
+    def get_readonly_fields(self, request, obj=None):
+        """Return read only fields"""
+        if obj.active:
+            return self.readonly_fields
+        else:
+            return self.readonly_fields + ('active',)
+
+    def save_model(self, request, obj, form, change):
+        """Cancel the subscription if manually deactivated"""
+        if not obj.active:
+            obj.cancel()
+        return super(RecurringDonationAdmin, self).save_model(
+                request, obj, form, change)
+
+
 admin.site.register(Statistics, StatisticsAdmin)
 admin.site.unregister(User)
 admin.site.register(User, MRUserAdmin)
+admin.site.register(RecurringDonation, RecurringDonationAdmin)

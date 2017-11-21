@@ -32,7 +32,7 @@ import 'autonumeric';
         // will ultimately be submitted
         function copyValue() {
             var value = ($currency.autoNumeric('get') * 100).toFixed(0);
-            $input.attr('value', value);
+            $input.val(value);
         }
         $currency.keyup(copyValue);
         copyValue();

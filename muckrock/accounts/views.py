@@ -50,6 +50,7 @@ from muckrock.accounts.models import (
         Notification,
         Statistics,
         ReceiptEmail,
+        RecurringDonation,
         ACCT_TYPES,
         )
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
@@ -285,6 +286,16 @@ def profile_settings(request):
                             for e in new_emails - old_emails])
                 messages.success(request, 'Your settings have been updated.')
                 return redirect('acct-settings')
+        elif action == 'cancel-donations':
+            donations = request.user.donations.filter(
+                    pk__in=request.POST.getlist('cancel-donations'))
+            for donation in donations:
+                donation.cancel()
+            if donations:
+                messages.success(request, 'The selected donations have been cancelled.')
+            else:
+                messages.warning(request, 'No donations were selected to be cancelled.')
+            return redirect('acct-settings')
         elif action:
             form = settings_forms[action]
             form = form(request.POST, request.FILES, instance=user_profile)
@@ -307,6 +318,7 @@ def profile_settings(request):
     org_form = OrgPreferencesForm(instance=user_profile)
     receipt_form = receipt_form or ReceiptForm(initial=receipt_initial)
     current_plan = dict(ACCT_TYPES)[user_profile.acct_type]
+    donations = RecurringDonation.objects.filter(user=request.user)
     context = {
         'stripe_pk': settings.STRIPE_PUB_KEY,
         'profile_form': profile_form,
@@ -314,7 +326,8 @@ def profile_settings(request):
         'receipt_form': receipt_form,
         'org_form': org_form,
         'current_plan': current_plan,
-        'credit_card': user_profile.card()
+        'credit_card': user_profile.card(),
+        'donations': donations,
     }
     return render(
             request,

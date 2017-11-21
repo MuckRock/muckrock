@@ -13,6 +13,7 @@ from django.utils.decorators import method_decorator
 from django.utils.html import escape
 from django.views.generic import View, ListView, FormView, TemplateView
 
+from muckrock.accounts.models import RecurringDonation
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAFile
 from muckrock.forms import NewsletterSignupForm, SearchForm, StripeForm
@@ -446,11 +447,17 @@ class DonationFormView(StripeFormMixin, FormView):
         token = form.cleaned_data['stripe_token']
         email = form.cleaned_data['stripe_email']
         amount = form.cleaned_data['stripe_amount']
-        charge = self.make_charge(token, amount, email)
-        if charge is None:
-            return self.form_invalid(form)
-        # Send the receipt
-        send_charge_receipt.delay(charge.id)
+        type_ = form.cleaned_data['type']
+        if type_ == 'one-time':
+            charge = self.make_charge(token, amount, email)
+            if charge is None:
+                return self.form_invalid(form)
+            # Send the receipt
+            send_charge_receipt.delay(charge.id)
+        elif type_ == 'monthly':
+            subscription = self.make_subscription(token, amount, email)
+            if subscription is None:
+                return self.form_invalid(form)
         return super(DonationFormView, self).form_valid(form)
 
     def get_success_url(self):
@@ -498,6 +505,47 @@ class DonationFormView(StripeFormMixin, FormView):
                 self.request.session['donated'] = amount
                 self.request.session['ga'] = 'donation'
         return charge
+
+    def make_subscription(self, token, amount, email):
+        """Start a subscription for recurring donations"""
+        quantity = amount / 100
+        if self.request.user:
+            user = self.request.user
+            customer = self.request.user.profile.customer()
+        else:
+            user = None
+            customer = stripe_retry_on_error(
+                    stripe.Customer.create,
+                    description='Donation for {}'.format(email),
+                    email=email,
+                    idempotency_key=True,
+                    )
+        try:
+            subscription = stripe_retry_on_error(
+                    customer.subscriptions.create,
+                    plan='donate',
+                    source=token,
+                    quantity=quantity,
+                    idempotency_key=True,
+                    )
+        except stripe.error.CardError:
+            logger.warn('Card was declined.')
+            messages.error(self.request, 'Your card was declined')
+        except stripe.error.StripeError as exception:
+            logger.error(exception, exc_info=sys.exc_info())
+            messages.error(
+                    self.request,
+                    'Oops, something went wrong on our end. Sorry about that!',
+                    )
+        else:
+            RecurringDonation.objects.create(
+                    user=user,
+                    email=email,
+                    amount=quantity,
+                    customer_id=customer.id,
+                    subscription_id=subscription.id,
+                    )
+        return subscription
 
 
 class DonationThanksView(TemplateView):

@@ -18,8 +18,17 @@
         font-size: $size-5;
         font-weight: $bold;
         color: $color-green;
+        width: 100%;
+        margin-top: 5px;
     }
     .button {
         width: 100%;
+    }
+    .donation.button-group {
+        font-size: $size-5;
+        width: 100%;
+        input[type="radio"] {
+            display: none;
+        }
     }
 }

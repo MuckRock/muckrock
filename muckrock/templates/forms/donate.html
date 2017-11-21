@@ -9,13 +9,60 @@
         <p>MuckRock is a <strong>501(c)(3)</strong> organization. Our tax identification number is <strong>81-1485228</strong>. Your donation is fully tax deductible.</p>
         <form method="post" class="stripe-checkout">
             {% csrf_token %}
+            {% comment %}
             {% include 'lib/pattern/form.html' %}
+            {% endcomment %}
+            {% for field in form.hidden_fields %}
+                    {{ field }}
+            {% endfor %}
+            <div>
+                <h2>How would you like to donate?</h2>
+                <div class="donation button-group">
+                    <label for="one-time" class="button">
+                        One Time
+                    </label>
+                    <input id="one-time" type="radio" name="type" value="one-time">
+                    <label for="monthly" class="primary button">
+                        Monthly
+                    </label>
+                    <input id="monthly" type="radio" name="type" value="monthly" checked="checked">
+                </div>
+            </div>
+            <div>
+                <h2>How much would you like to give?</h2>
+                <div class="donation button-group">
+                    <label for="amount_1" class="button">$10
+                    </label>
+                    <input id="amount_1" type="radio" name="amount" value="10">
+                    <label for="amount_2" class="button">$25
+                    </label>
+                    <input id="amount_2" type="radio" name="amount" value="25">
+                    <label for="amount_3" class="button">$50
+                    </label>
+                    <input id="amount_3" type="radio" name="amount" value="50" checked="checked">
+                    <label for="amount_4" class="button">$100
+                    </label>
+                    <input id="amount_4" type="radio" name="amount" value="100">
+                </div>
+                <div>
+                    <input type="number" name="stripe_amount" id="other_amount">
+                </div>
+            </div>
             <input type="hidden" name="stripe_image" value="{% static 'icons/logo.png' %}" />
             <div class="buttons">
                 <button type="submit" class="green button">Donate</button>
             </div>
         </form>
-        <p><small>Donations may also be sent via PayPal to info@muckrock.com or mailed to:</small></p>
+        <p><small>Donations may also be sent via PayPal:</small></p>
+
+        <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top" style="text-align: center;">
+        <input type="hidden" name="cmd" value="_s-xclick">
+        <input type="hidden" name="hosted_button_id" value="R4KKX227YWUUU">
+        <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+        <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+        </form>
+
+        <p><small>Or mailed to:</small></p>
         <p><small>
         MuckRock<br>
         411A Highland Ave<br>

@@ -11,7 +11,7 @@ from dateutil.relativedelta import relativedelta
 import logging
 import stripe
 
-from muckrock.accounts.models import Profile
+from muckrock.accounts.models import Profile, RecurringDonation
 from muckrock.message.email import TemplateEmail
 from muckrock.message.notifications import SlackNotification
 from muckrock.message import digests, receipts
@@ -96,20 +96,26 @@ def send_invoice_receipt(invoice_id):
         # maybe send a notification about the renewal
         # but for now just handle the error
         return
-    profile = Profile.objects.get(customer_id=invoice.customer)
-    # send a receipt based on the plan
-    customer = profile.customer()
-    subscription = customer.subscriptions.retrieve(invoice.subscription)
+
+    try:
+        profile = Profile.objects.get(customer_id=invoice.customer)
+    except Profile.DoesNotExist:
+        user = None
+    else:
+        user = profile.user
+
+    plan = invoice.lines.data[0].plan
     try:
         receipt_functions = {
             'pro': receipts.pro_subscription_receipt,
-            'org': receipts.org_subscription_receipt
-        }
-        receipt_function = receipt_functions[subscription.plan.id]
+            'org': receipts.org_subscription_receipt,
+            'donate': receipts.donation_receipt,
+            }
+        receipt_function = receipt_functions[plan.id]
     except KeyError:
-        logger.warning('Invoice charged for unrecognized plan: %s', subscription.plan.name)
+        logger.warning('Invoice charged for unrecognized plan: %s', plan.name)
         receipt_function = receipts.generic_receipt
-    receipt = receipt_function(profile.user, charge)
+    receipt = receipt_function(user, charge)
     receipt.send(fail_silently=False)
 
 @task(name='muckrock.message.tasks.send_charge_receipt')
@@ -169,11 +175,20 @@ def failed_payment(invoice_id):
             )
     attempt = invoice.attempt_count
     subscription_type = get_subscription_type(invoice)
-    profile = Profile.objects.get(customer_id=invoice.customer)
-    user = profile.user
-    # raise the failed payment flag on the profile
-    profile.payment_failed = True
-    profile.save()
+    recurring_donation = None
+    profile = None
+    if subscription_type == 'donate':
+        recurring_donation = RecurringDonation.objects.get(
+                subscription_id=invoice.subscription)
+        user = recurring_donation.user
+        recurring_donation.payment_failed = True
+        recurring_donation.save()
+    else:
+        profile = Profile.objects.get(customer_id=invoice.customer)
+        user = profile.user
+        # raise the failed payment flag on the profile
+        profile.payment_failed = True
+        profile.save()
     subject = u'Your payment has failed'
     org = None
     if subscription_type == 'org':
@@ -184,8 +199,11 @@ def failed_payment(invoice_id):
             profile.cancel_pro_subscription()
         elif subscription_type == 'org':
             org.cancel_subscription()
-        profile.payment_failed = False
-        profile.save()
+        elif subscription_type == 'donate':
+            recurring_donation.cancel()
+        if subscription_type in ('pro', 'org'):
+            profile.payment_failed = False
+            profile.save()
         logger.info('%s subscription has been cancelled due to failed payment', user.username)
         subject = u'Your %s subscription has been cancelled' % subscription_type
         context = {

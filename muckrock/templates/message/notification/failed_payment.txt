@@ -21,6 +21,15 @@ Your Organization subscription payment has failed.
 
 This is the {{attempt|ordinal}} attempt. The payment will be retried up to 3 times. Update your billing information here:  {{base_url}}{% url 'acct-settings' %}?{% autologin user %}
 {% endif %}
+{% elif type == 'donate' %}{% if attempt == "final" %}
+Your recurring donation has been deactivated.
+
+Our final attempt to charge your card has failed and your recurring donation has been deactivated. Reactivate here: {{base_url}}{% url 'donate' %}?{% autologin user %}
+{% else %}
+Your recurring donation payment has failed.
+
+This is the {{attempt|ordinal}} attempt. The payment will be retried up to 3 times. Update your billing information here:  {{base_url}}{% url 'acct-settings' %}?{% autologin user %}
+{% endif %}
 {% endif %}
 
 Sincerely,
