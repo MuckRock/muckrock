@@ -180,7 +180,31 @@ class PhoneNumberAdmin(VersionAdmin):
 class AddressAdmin(VersionAdmin):
     """Address admin"""
     search_fields = ['address']
-    fields = ['address']
+    fieldsets = (
+            (None, {
+                'fields': (
+                    'street',
+                    'suite',
+                    'city',
+                    'state',
+                    'zip_code',
+                    ),
+                }),
+            ('Override Fields', {
+                'classes': ('collapse',),
+                'description': 'Override particular fields',
+                'fields': (
+                    'agency_override',
+                    'attn_override',
+                    ),
+                }),
+            ('Full override', {
+                'classes': ('collapse',),
+                'description': 'Override the entire address',
+                'fields': (
+                    'address',
+                    ),
+                }),)
 
 
 admin.site.register(EmailCommunication, EmailCommunicationAdmin)

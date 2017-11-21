@@ -10,10 +10,11 @@ from celery.task import task
 
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
+from cStringIO import StringIO
 from datetime import datetime
+from fpdf import FPDF
 from PyPDF2 import PdfFileMerger
 from PyPDF2.utils import PdfReadError
-from cStringIO import StringIO
 
 from muckrock.communication.models import MailCommunication
 from muckrock.foia.models import FOIARequest, FOIACommunication
@@ -50,9 +51,12 @@ def snail_mail_bulk_pdf_task(pdf_name, **kwargs):
             .filter(resolved=False)
             .preload_pdf()
             )
+    blank_pdf = FPDF()
+    blank_pdf.add_page()
+    blank = StringIO(blank_pdf.output(dest='S'))
     for snail in snails:
         # generate the pdf and merge all pdf attachments
-        pdf = SnailMailPDF(snail.communication)
+        pdf = SnailMailPDF(snail.communication, snail.category)
         pdf.generate()
         single_merger = PdfFileMerger()
         single_merger.append(
@@ -88,10 +92,16 @@ def snail_mail_bulk_pdf_task(pdf_name, **kwargs):
         # append to the bulk pdf
         single_pdf.seek(0)
         bulk_merger.append(single_pdf)
+        # ensure we align for double sided printing
+        if pdf.page % 2 == 1:
+            blank.seek(0)
+            bulk_merger.append(blank)
 
     # preprend the cover sheet
     cover_pdf = CoverPDF(cover_info)
     cover_pdf.generate()
+    if cover_pdf.page % 2 == 1:
+        cover_pdf.add_page()
     bulk_merger.merge(0, StringIO(cover_pdf.output(dest='S')))
 
     bulk_pdf = StringIO()

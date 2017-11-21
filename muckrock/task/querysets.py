@@ -105,6 +105,7 @@ class SnailMailTaskQuerySet(models.QuerySet):
                 .select_related(
                     'communication__foia__agency__portal',
                     'communication__foia__agency__appeal_agency__portal',
+                    'communication__foia__agency__jurisdiction__parent',
                     'communication__foia__user',
                     'communication__foia__jurisdiction',
                     'communication__foia__address',
@@ -113,6 +114,8 @@ class SnailMailTaskQuerySet(models.QuerySet):
                 .prefetch_related(
                     'communication__files',
                     'communication__foia__communications',
+                    'communication__foia__agency__jurisdiction__laws',
+                    'communication__foia__agency__jurisdiction__parent__laws',
                     'communication__emails',
                     'communication__faxes',
                     'communication__mails',
