@@ -356,6 +356,10 @@ def _catch_all(request, address):
 def bounces(request, email_comm, timestamp):
     """Notify when an email is bounced or dropped"""
 
+    # infite nsa loop
+    if email_comm.communication.pk == 466590:
+        return
+
     recipient = EmailAddress.objects.fetch(request.POST.get('recipient', ''))
     event = request.POST.get('event', '')
     if event == 'bounced':
@@ -380,8 +384,8 @@ def bounces(request, email_comm, timestamp):
             agency=email_comm.communication.foia.agency,
             resolved=False,
             )
-    if not email_comm.cc_emails.filter(email=recipient):
-        email_comm.communication.foia.submit(switch=True)
+    # if not email_comm.cc_emails.filter(email=recipient):
+    #    email_comm.communication.foia.submit(switch=True)
 
 
 @mailgun_verify
