@@ -68,8 +68,8 @@
     {% endif %}
 </dl>
 {% endif %}
-{% if org %}
-<p class="organization">{% if org.owner == user_obj %}Owner{% else %}Member{% endif %} of {% if show_org_link %}<a href="{% url 'org-detail' org.slug %}" title="{{org}}'s organization page">{{org}}</a>{% else %}{{org}}{% endif %}</p>
+{% if org and show_org_link %}
+<p class="organization">{% if org.owner == user_obj %}Owner{% else %}Member{% endif %} of <a href="{% url 'org-detail' org.slug %}" title="{{org}}'s organization page">{{org}}</a></p>
 {% endif %}
 {% endblock metadata %}
 
