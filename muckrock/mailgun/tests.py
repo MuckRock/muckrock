@@ -251,7 +251,12 @@ class TestMailgunViewWebHooks(TestMailgunViews):
     def test_bounce(self):
         """Test a bounce webhook"""
 
-        comm = FOIACommunicationFactory()
+        recipient = 'alice@example.com'
+        comm = FOIACommunicationFactory(
+                foia__email=EmailAddress.objects.fetch(recipient),
+                foia__agency__fax=None,
+                )
+        email = comm.emails.first()
         event = 'bounced'
         code = 550
         error = ("5.1.1 The email account that you tried to reach "
@@ -259,10 +264,9 @@ class TestMailgunViewWebHooks(TestMailgunViews):
                 "the recipient's email address for typos or 5.1.1 "
                 "unnecessary spaces. Learn more at 5.1.1 "
                 "http://support.example.com/mail/bin/answer.py")
-        recipient = 'alice@example.com'
         data = {
                 'event': event,
-                'comm_id': comm.pk,
+                'email_id': email.pk,
                 'code': code,
                 'error': error,
                 'recipient': recipient,
@@ -274,7 +278,7 @@ class TestMailgunViewWebHooks(TestMailgunViews):
 
         nose.tools.ok_(EmailError.objects
                 .filter(
-                    email=comm.emails.first(),
+                    email=email,
                     datetime=datetime(2017, 1, 2, 12),
                     recipient=EmailAddress.objects.fetch(recipient),
                     code=code,
@@ -286,10 +290,14 @@ class TestMailgunViewWebHooks(TestMailgunViews):
 
     def test_open(self):
         """Test an open webhook"""
+        # pylint: disable=too-many-locals
 
-        comm = FOIACommunicationFactory()
-        event = 'opened'
         recipient = 'alice@example.com'
+        comm = FOIACommunicationFactory(
+                foia__email=EmailAddress.objects.fetch(recipient),
+                )
+        email = comm.emails.first()
+        event = 'opened'
         city = 'Boston'
         region = 'MA'
         country = 'US'
@@ -302,7 +310,7 @@ class TestMailgunViewWebHooks(TestMailgunViews):
         ip_address = '50.56.129.169'
         data = {
                 'event': event,
-                'comm_id': comm.pk,
+                'email_id': email.pk,
                 'recipient': recipient,
                 'city': city,
                 'region': region,
@@ -321,7 +329,7 @@ class TestMailgunViewWebHooks(TestMailgunViews):
 
         nose.tools.ok_(EmailOpen.objects
                 .filter(
-                    email=comm.emails.first(),
+                    email=email,
                     datetime=datetime(2017, 1, 2, 12),
                     recipient=EmailAddress.objects.fetch(recipient),
                     city=city,
@@ -341,9 +349,10 @@ class TestMailgunViewWebHooks(TestMailgunViews):
         """Test a delivered webhook"""
 
         comm = FOIACommunicationFactory()
+        email = comm.emails.first()
         data = {
                 'event': 'delivered',
-                'comm_id': comm.pk,
+                'email_id': email.pk,
                 }
         self.sign(data)
         request = self.factory.post(reverse('mailgun-delivered'), data)
