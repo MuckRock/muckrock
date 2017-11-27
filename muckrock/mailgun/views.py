@@ -121,7 +121,6 @@ def get_common_webhook_params(function):
     @wraps(function)
     def wrapper(request):
         """Wrapper"""
-        comm_id = request.POST.get('comm_id')
         email_id = request.POST.get('email_id')
         timestamp = request.POST['timestamp']
         timestamp = datetime.fromtimestamp(int(timestamp))
@@ -131,19 +130,14 @@ def get_common_webhook_params(function):
         else:
             email_comm = None
 
-        if not email_comm and comm_id:
-            comm = FOIACommunication.objects.filter(pk=comm_id).first()
-            if comm:
-                email_comm = comm.emails.last()
-
-        if not email_comm:
+        if email_comm:
+            function(request, email_comm, timestamp)
+        else:
             logger.warning(
                     'No email comm for %s webhook: %s',
                     function.__name__,
                     request.POST,
                     )
-        else:
-            function(request, email_comm, timestamp)
 
         return HttpResponse('OK')
     return wrapper
@@ -356,10 +350,6 @@ def _catch_all(request, address):
 def bounces(request, email_comm, timestamp):
     """Notify when an email is bounced or dropped"""
 
-    # infite nsa loop
-    if email_comm.communication.pk == 466590:
-        return
-
     recipient = EmailAddress.objects.fetch(request.POST.get('recipient', ''))
     event = request.POST.get('event', '')
     if event == 'bounced':
@@ -384,8 +374,30 @@ def bounces(request, email_comm, timestamp):
             agency=email_comm.communication.foia.agency,
             resolved=False,
             )
-    # if not email_comm.cc_emails.filter(email=recipient):
-    #    email_comm.communication.foia.submit(switch=True)
+
+    # ensure we don't create an infinite loop of emails
+    # we expect the reported recipient to be the same as the foia
+    # email, and we expect that email to have been just marked
+    # as in an error state
+    foia = email_comm.communication.foia
+    recipient_is_foia_email = foia.email == recipient
+    foia_email_is_error = foia.email.status == 'error'
+    recipient_is_cc = email_comm.cc_emails.filter(email=recipient)
+    if not recipient_is_foia_email:
+        logger.error(
+                'Bounce: recipient does not match foia email: %s - %s',
+                recipient,
+                foia.email,
+                )
+    elif not foia_email_is_error:
+        logger.error(
+                'Bounce: foia email is not marked as error: %s',
+                foia.email,
+                )
+    elif not recipient_is_cc:
+        # if the foia email matches and is not a CC, we resubmit
+        # in order to fall back to fax or snail mail
+        email_comm.communication.foia.submit(switch=True)
 
 
 @mailgun_verify
@@ -438,16 +450,11 @@ def phaxio_callback(request):
 
     fax_info = json.loads(request.POST['fax'])
     fax_id = fax_info['tags'].get('fax_id')
-    comm_id = fax_info['tags'].get('comm_id')
     error_count = fax_info['tags'].get('error_count')
     if fax_id:
         fax_comm = FaxCommunication.objects.filter(pk=fax_id).first()
     else:
         fax_comm = None
-
-    if not fax_comm and comm_id:
-        comm = FOIACommunication.objects.filter(pk=comm_id).first()
-        fax_comm = comm.faxes.last()
 
     if not fax_comm:
         logger.warning(
