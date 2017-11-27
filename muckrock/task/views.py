@@ -489,12 +489,16 @@ class PortalTaskList(TaskList):
             task.communication.hidden = False
             task.communication.create_agency_notifications()
         task.communication.save()
-        PortalCommunication.objects.create(
-                communication=task.communication,
-                sent_datetime=datetime.now(),
-                portal=task.communication.foia.portal,
-                direction='incoming',
-                )
+        if task.communication.foia.portal:
+            # If a communication is incorrectly sent to a request with a portal
+            # it may be moved to a request without a portal - do not save a
+            # portal communication in this case
+            PortalCommunication.objects.create(
+                    communication=task.communication,
+                    sent_datetime=datetime.now(),
+                    portal=task.communication.foia.portal,
+                    direction='incoming',
+                    )
         if action_taken and not error_msgs:
             task.resolve(request.user)
 
