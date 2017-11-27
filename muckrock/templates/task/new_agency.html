@@ -22,6 +22,7 @@
                         <a href="{{ foia.get_absolute_url }}">{{ foia }}</a>
                         (<a href="{% url 'admin:foia_foiarequest_change' foia.pk %}">admin</a>)
                         - {{foia.get_status_display}}
+                        <blockquote>{{ foia.requested_docs }}</blockquote>
                     </dd>
                 {% endfor %}
             {% endif %}
@@ -56,7 +57,8 @@
                     </select>
                 </main>
                 <footer class="textbox__footer">
-                    <button type="submit" name="reject" value="true" class="failure button">Reject</button>
+                    <button type="submit" name="spam" value="true" class="spam failure button">Mark as Spam &amp; Block</button>
+                    <button type="submit" name="reject" value="true" class="failure button">Reject &amp; Replace</button>
                 </footer>
             </form>
             <form method="POST" action="{{ endpoint }}" class="new-agency green textbox form collapsable">

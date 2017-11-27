@@ -339,7 +339,6 @@ class NewAgencyTaskTests(TestCase):
             user=self.user,
             agency=self.agency)
 
-
     def test_get_absolute_url(self):
         eq_(self.task.get_absolute_url(), reverse('new-agency-task', kwargs={'pk': self.task.pk}))
 
@@ -369,6 +368,17 @@ class NewAgencyTaskTests(TestCase):
             'Rejecting a new agency should leave it unapproved.')
         eq_(existing_foia.agency, replacement,
             'The replacement agency should receive the rejected agency\'s requests.')
+
+    def test_spam(self):
+        existing_foia = factories.FOIARequestFactory(
+                agency=self.agency,
+                status='submitted',
+                )
+        self.task.spam()
+        existing_foia.refresh_from_db()
+        eq_(self.agency.status, 'rejected')
+        nose.tools.assert_false(self.user.is_active)
+        eq_(existing_foia.status, 'started')
 
 
 class ResponseTaskTests(TestCase):
