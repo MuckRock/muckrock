@@ -397,6 +397,9 @@ class NewAgencyTaskList(TaskList):
                 return
             task.reject(replacement_agency)
             task.resolve(request.user)
+        if request.POST.get('spam'):
+            task.spam()
+            task.resolve(request.user)
         return super(NewAgencyTaskList, self).task_post_helper(request, task)
 
 

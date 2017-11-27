@@ -184,6 +184,9 @@ $task-padding: $vr/4 $vr/2;
 
 .new-agency-forms {
     padding: 0 $vr/2;
+    .spam.button {
+        float: left;
+    }
 }
 
 .new-agency .task__data {
