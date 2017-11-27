@@ -100,7 +100,7 @@ class Article(models.Model):
         self.body = self.body.replace(u'\xa0', ' ')
         # invalidate the template cache for the page on a save
         if self.pk:
-            cache.delete(make_template_fragment_key('article_detail', [self.pk]))
+            cache.delete(make_template_fragment_key('article_detail_1', [self.pk]))
         super(Article, self).save(*args, **kwargs)
 
     def get_authors_names(self):
