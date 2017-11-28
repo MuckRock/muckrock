@@ -4,6 +4,7 @@
 {% load tags %}
 {% load thumbnail %}
 {% load cache %}
+{% load rules %}
 
 {% block title %}
 {{ project.title }}
@@ -187,8 +188,14 @@
         </section>
         {% endif %}
         {% if visible_requests %}
+        {% has_perm 'foia.export_csv' request.user as can_export %}
         <section class="requests" id="requests">
             <h2>{{visible_requests|length}} Request{{ visible_requests|length|pluralize }}</h2>
+            {% if can_export %}
+                <p><a href="{% url "foia-list" %}?projects={{ project.pk }}&content_type=csv" class="blue button">
+                    <span>Export Requests as CSV</span>
+                </a></p>
+            {% endif %}
             {% for foia in visible_requests %}
             {% include 'lib/foia.html' with hide_actions=True %}
             {% endfor %}

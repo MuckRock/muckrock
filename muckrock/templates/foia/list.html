@@ -2,57 +2,68 @@
 {% load tags %}
 {% load foia_tags %}
 {% load static from staticfiles %}
+{% load rules %}
 
 {% block list-header %}
-{# we hard-code the title here because the subsection is defined by the active section item #}
-<h1>Requests</h1>
+    {# we hard-code the title here because the subsection is defined by the active section item #}
+    <h1>Requests</h1>
 {% endblock %}
 
 {% block list-sections %}
-{% if user.is_authenticated %}
-<ul class="nostyle list__sections">
-    <li class="{% active request '^/foi/list/$' %}"><a href="{% url 'foia-list' %}">All</a></li>
-    <li class="{% active request '^/foi/mylist/$' %}"><a href="{% url 'foia-mylist' %}">Yours</a></li>
-    {% if user.profile.is_advanced %}
-    <li class="{% active request '^/foi/mylist/multirequest/$' %}"><a href="{% url 'foia-mymulti' %}">Multirequests</a></li>
-    {% else %}
-    <li><a class="grey" href="{% url 'accounts' %}">Multirequests <span class="small badge">PRO</span></a></li>
+    {% if user.is_authenticated %}
+        <ul class="nostyle list__sections">
+            <li class="{% active request '^/foi/list/$' %}"><a href="{% url 'foia-list' %}">All</a></li>
+            <li class="{% active request '^/foi/mylist/$' %}"><a href="{% url 'foia-mylist' %}">Yours</a></li>
+            {% if user.profile.is_advanced %}
+                <li class="{% active request '^/foi/mylist/multirequest/$' %}"><a href="{% url 'foia-mymulti' %}">Multirequests</a></li>
+            {% else %}
+                <li><a class="grey" href="{% url 'accounts' %}">Multirequests <span class="small badge">PRO</span></a></li>
+            {% endif %}
+            <li class="{% active request '^/foi/list/following/$' %}"><a href="{% url 'foia-list-following' %}">Following</a></li>
+            {% if user.is_staff %}
+                <li class="{% active request '^/foi/list/processing/$' %}"><a href="{% url 'foia-list-processing' %}">Processing</a></li>
+            {% endif %}
+        </ul>
     {% endif %}
-    <li class="{% active request '^/foi/list/following/$' %}"><a href="{% url 'foia-list-following' %}">Following</a></li>
-    {% if user.is_staff %}
-    <li class="{% active request '^/foi/list/processing/$' %}"><a href="{% url 'foia-list-processing' %}">Processing</a></li>
-    {% endif %}
-</ul>
-{% endif %}
 {% endblock %}
 
 {% block list-actions %}
-<div class="space-between">
-    <div class="button-group">
-        <a href="{% url 'foia-create' %}" class="blue button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
-            {% include 'lib/component/icon/create-request.svg' %}
-            <span>File a Request</span>
-        </a>
+    {% has_perm 'foia.export_csv' request.user as can_export %}
+    <div class="space-between">
+        <div class="button-group">
+            <a href="{% url 'foia-create' %}" class="blue button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
+                {% include 'lib/component/icon/create-request.svg' %}
+                <span>File a Request</span>
+            </a>
+            {% if can_export %}
+                <a href="{{ csv_link }}" class="blue button">
+                    <span>Export Search Results as CSV</span>
+                </a>
+            {% else %}
+            <a href="{% url "accounts-signup" %}" class="button">
+                    <span>Export to CSV only available for Pro accounts</span>
+                </a>
+            {% endif %}
+        </div>
     </div>
-</div>
 {% endblock %}
 
 {% block list-table-head %}
-<th data-sort="title">Title</th>
-<th width="10%" data-sort="user">User</th>
-<th width="10%" data-sort="agency">Agency</th>
-<th width="20%" data-sort="jurisdiction">Jurisdiction</th>
-<th width="20%" data-sort="date_updated">Updated</th>
-<th width="10%" data-sort="date_submitted">Submitted</th>
+    <th data-sort="title">Title</th>
+    <th width="10%" data-sort="user">User</th>
+    <th width="10%" data-sort="agency">Agency</th>
+    <th width="20%" data-sort="jurisdiction">Jurisdiction</th>
+    <th width="20%" data-sort="date_updated">Updated</th>
+    <th width="10%" data-sort="date_submitted">Submitted</th>
 {% endblock list-table-head %}
 
 {% block list-table-row %}
-{% with object as foia %}
-<td><a class="bold" href="{{ foia.get_absolute_url }}">{{ foia.title }}</a><br><span class="small badge state {{ foia.status|classify_status }}">{{foia.get_status_display}}</span>{% if foia.embargo %}<span class="small red badge">Under Embargo</span>{% endif %}{% if foia.crowdfund and not foia.crowdfund.expired %}<span class="small green badge">Active Crowdfund</span>{% endif %}</td>
-<td>{{ foia.user.get_full_name }}</td>
-<td>{{ foia.agency }}</td>
-<td>{{ foia.jurisdiction }}</td>
-<td>{{ foia.date_updated|date:"m/d/Y" }}</td>
-<td>{{ foia.date_submitted|date:"m/d/Y" }}</td>
-{% endwith %}
+    {% with object as foia %}
+        <td><a class="bold" href="{{ foia.get_absolute_url }}">{{ foia.title }}</a><br><span class="small badge state {{ foia.status|classify_status }}">{{foia.get_status_display}}</span>{% if foia.embargo %}<span class="small red badge">Under Embargo</span>{% endif %}{% if foia.crowdfund and not foia.crowdfund.expired %}<span class="small green badge">Active Crowdfund</span>{% endif %}</td>
+        <td>{{ foia.user.get_full_name }}</td>
+        <td>{{ foia.agency }}</td>
+        <td>{{ foia.jurisdiction }}</td>
+        <td>{{ foia.date_updated|date:"m/d/Y" }}</td>
+        <td>{{ foia.date_submitted|date:"m/d/Y" }}</td>
+    {% endwith %}
 {% endblock list-table-row %}

@@ -1171,4 +1171,5 @@ class FOIARequest(models.Model):
             ('followup_foiarequest', 'Can send a manual follow up'),
             ('agency_reply_foiarequest', 'Can send a direct reply'),
             ('upload_attachment_foiarequest', 'Can upload an attachment'),
+            ('export_csv', 'Can export a CSV of search results'),
             )
