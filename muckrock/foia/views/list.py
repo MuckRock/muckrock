@@ -150,6 +150,7 @@ class RequestList(MRSearchFilterListView):
             fields = (
                     (lambda f: f.user.username, 'User'),
                     (lambda f: f.title, 'Title'),
+                    (lambda f: f.get_status_display(), 'Status'),
                     (lambda f: settings.MUCKROCK_URL + f.get_absolute_url(), 'URL'),
                     (lambda f: f.jurisdiction.name, 'Jurisdiction'),
                     (lambda f: f.jurisdiction.pk, 'Jurisdiction ID'),
@@ -175,6 +176,7 @@ class RequestList(MRSearchFilterListView):
                     .only(
                         'user__username',
                         'title',
+                        'status',
                         'slug',
                         'jurisdiction__name',
                         'jurisdiction__slug',
