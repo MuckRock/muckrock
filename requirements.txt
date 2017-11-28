@@ -106,5 +106,6 @@ smart-open==1.4.0
 smartypants==1.8.6
 sqlparse==0.2.4           # via django-debug-toolbar
 stripe==1.75.0
+unicodecsv==0.14.1
 unidecode==0.4.19
 urllib3==1.21.1           # via requests

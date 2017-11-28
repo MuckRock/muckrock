@@ -630,7 +630,7 @@ class Detail(DetailView):
                 comm_pk = request.POST['comm_pk']
                 comm = FOIACommunication.objects.get(pk=comm_pk)
                 new_foia_pks = request.POST['new_foia_pks'].split(',')
-                comm.move(new_foia_pks)
+                comm.move(new_foia_pks, request.user)
                 messages.success(request, 'Communication moved successfully')
             except (KeyError, FOIACommunication.DoesNotExist):
                 messages.error(request, 'The communication does not exist.')

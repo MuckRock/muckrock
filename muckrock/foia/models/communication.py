@@ -129,7 +129,7 @@ class FOIACommunication(models.Model):
         else:
             return ''
 
-    def move(self, foia_pks):
+    def move(self, foia_pks, user):
         """
         Move this communication. If more than one foia_pk is given, move the
         communication to the first request, then clone it across the rest of
@@ -157,16 +157,21 @@ class FOIACommunication(models.Model):
             upload_document_cloud.apply_async(
                     args=[each_file.pk, change], countdown=3)
         self.save()
+        CommunicationMoveLog.objects.create(
+                communication=self,
+                foia=old_foia,
+                user=user,
+                )
         logger.info('Communication #%d moved to request #%d', self.id, self.foia.id)
         # if cloning happens, self gets overwritten. so we save it to a variable here
         this_comm = FOIACommunication.objects.get(pk=self.pk)
         moved = [this_comm]
         cloned = []
         if foia_pks[1:]:
-            cloned = self.clone(foia_pks[1:])
+            cloned = self.clone(foia_pks[1:], user)
         return moved + cloned
 
-    def clone(self, foia_pks):
+    def clone(self, foia_pks, user):
         """
         Copies the communication to each request in the list,
         then returns all the new communications.
@@ -195,6 +200,11 @@ class FOIACommunication(models.Model):
             this_clone.pk = None
             this_clone.foia = request
             this_clone.save()
+            CommunicationMoveLog.objects.create(
+                    communication=this_clone,
+                    foia=self.foia,
+                    user=user,
+                    )
             access = 'private' if request.embargo else 'public'
             for file_ in files:
                 original_file_id = file_.id
@@ -511,3 +521,27 @@ class CommunicationOpen(models.Model):
     class Meta:
         ordering = ['date']
         app_label = 'foia'
+
+
+class CommunicationMoveLog(models.Model):
+    """Track communications being moved to different requests"""
+    communication = models.ForeignKey(FOIACommunication)
+    foia = models.ForeignKey(
+            'foia.FOIARequest',
+            blank=True,
+            null=True,
+            )
+    user = models.ForeignKey('auth.User')
+    datetime = models.DateTimeField(auto_now_add=True)
+
+    def __unicode__(self):
+        if self.foia:
+            foia = u'FOIA {}'.format(self.foia.pk)
+        else:
+            foia = u'orphan'
+        return u'Comm {} moved from {} by {} on {}'.format(
+                self.communication.pk,
+                foia,
+                self.user.username,
+                self.datetime,
+                )

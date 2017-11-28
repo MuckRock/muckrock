@@ -2,15 +2,20 @@
 Views to display lists of FOIA requests
 """
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.postgres.aggregates.general import StringAgg
 from django.core.urlresolvers import reverse
-from django.db.models import Count
-from django.http import Http404
+from django.db.models import Count, Sum, F
+from django.http import Http404, StreamingHttpResponse, HttpResponse
 from django.shortcuts import redirect
 from django.views.generic import TemplateView
 
 from actstream.models import following
+from furl import furl
+from itertools import chain
+import unicodecsv as csv
 
 from muckrock.agency.models import Agency
 from muckrock.foia.filters import (
@@ -24,6 +29,7 @@ from muckrock.foia.models import (
     FOIARequest,
     FOIAMultiRequest,
     )
+from muckrock.models import ExtractDay, Now
 from muckrock.news.models import Article
 from muckrock.project.models import Project
 from muckrock.views import (
@@ -109,7 +115,6 @@ class RequestList(MRSearchFilterListView):
             'title': 'title',
             'user': 'user__first_name',
             'agency': 'agency__name',
-            'jurisdiction': 'jurisdiction__name',
             'date_updated': 'date_updated',
             'date_submitted': 'date_submitted',
             }
@@ -119,6 +124,88 @@ class RequestList(MRSearchFilterListView):
         objects = super(RequestList, self).get_queryset()
         objects = objects.select_related_view()
         return objects.get_viewable(self.request.user)
+
+    def get_context_data(self):
+        """Add download link for downloading csv"""
+        context = super(RequestList, self).get_context_data()
+        url = furl(self.request.get_full_path())
+        url.args['content_type'] = 'csv'
+        context['csv_link'] = url.url
+        return context
+
+    def render_to_response(self, context, **kwargs):
+        """Allow CSV responses"""
+
+        class Echo(object):
+            """File like object that just returns written values"""
+            def write(self, value):
+                # pylint: disable=no-self-use
+                """Return the value"""
+                return value
+
+        wants_csv = self.request.GET.get('content_type') == 'csv'
+        has_perm = self.request.user.has_perm('foia.export_csv')
+        if wants_csv and has_perm:
+            psuedo_buffer = Echo()
+            fields = (
+                    (lambda f: f.user.username, 'User'),
+                    (lambda f: f.title, 'Title'),
+                    (lambda f: settings.MUCKROCK_URL + f.get_absolute_url(), 'URL'),
+                    (lambda f: f.jurisdiction.name, 'Jurisdiction'),
+                    (lambda f: f.jurisdiction.pk, 'Jurisdiction ID'),
+                    (lambda f: f.agency.name if f.agency else '', 'Agency'),
+                    (lambda f: f.agency.pk if f.agency else '', 'Agency ID'),
+                    (lambda f: f.date_followup, 'Followup Date'),
+                    (lambda f: f.date_estimate, 'Estimated Completion Date'),
+                    (lambda f: f.description, 'Description'),
+                    (lambda f: f.tracking_id, 'Tracking Number'),
+                    (lambda f: f.embargo, 'Embargo'),
+                    (lambda f: f.days_since_submitted, 'Days since submitted'),
+                    (lambda f: f.days_since_updated, 'Days since updated'),
+                    (lambda f: f.project_names, 'Projects'),
+                    (lambda f: f.tag_names, 'Tags'),
+                    )
+            foias = (context['paginator'].object_list
+                    .select_related(None)
+                    .select_related(
+                        'user',
+                        'jurisdiction',
+                        'agency',
+                        )
+                    .only(
+                        'user__username',
+                        'title',
+                        'slug',
+                        'jurisdiction__name',
+                        'jurisdiction__slug',
+                        'jurisdiction__id',
+                        'agency__name',
+                        'agency__id',
+                        'date_followup',
+                        'date_estimate',
+                        'description',
+                        'tracking_id',
+                        'embargo',
+                        )
+                    .annotate(
+                        days_since_submitted=ExtractDay(Now() - F('date_submitted')),
+                        days_since_updated=ExtractDay(Now() - F('date_updated')),
+                        project_names=StringAgg('projects__title', ',', distinct=True),
+                        tag_names=StringAgg('tags__name', ',', distinct=True),
+                        )
+                    )
+            writer = csv.writer(psuedo_buffer)
+            response = StreamingHttpResponse(
+                    chain(
+                        [writer.writerow(f[1] for f in fields)],
+                        (writer.writerow(f[0](foia) for f in fields) for foia in foias),
+                        ),
+                    content_type='text/csv',
+                    )
+            response['Content-Disposition'] = 'attachment; filename="requests.csv"'
+            return response
+        else:
+            return super(RequestList, self).render_to_response(context, **kwargs)
 
 
 @class_view_decorator(login_required)
