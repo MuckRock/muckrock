@@ -113,22 +113,21 @@ class CrowdfundDetailView(DetailView):
                 password = generate_key(12)
                 user = miniregister(full_name, email, password)
                 registered = True
+            crowdfund = payment_form.cleaned_data['crowdfund']
             try:
-                crowdfund = payment_form.cleaned_data['crowdfund']
-                crowdfund.make_payment(token, email, amount, show, user)
-            except (
-                stripe.InvalidRequestError,
-                stripe.CardError,
-                stripe.APIConnectionError,
-                stripe.AuthenticationError
-            ) as payment_error:
+                if crowdfund.can_recur() and payment_form.cleaned_data['recurring']:
+                    crowdfund.make_recurring_payment(
+                            token, email, amount, show, user)
+                else:
+                    crowdfund.make_payment(token, email, amount, show, user)
+            except stripe.StripeError as payment_error:
                 logging.warn(payment_error)
                 return self.return_error(request, payment_error)
             if request.is_ajax():
                 data = {
                     'authenticated': user.is_authenticated() if user else False,
-                    'registered': registered
-                }
+                    'registered': registered,
+                    }
                 return JsonResponse(data, status=200)
             else:
                 messages.success(request, 'Thank you for your contribution!')

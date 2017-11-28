@@ -28,6 +28,14 @@
             <p class="red">Your recurring donation payment has failed.</p>
             <p>This is the {{attempt|ordinal}} attempt. The payment will be retried up to 3 times. <a href="{% url 'acct-settings' %}?{% autologin user %}">Update your billing information</a>.</p>
         {% endif %}
+    {% elif type == 'crowdfund' %}
+        {% if attempt == "final" %}
+            <p class="red">Your recurring crowdfund payment has been deactivated.</p>
+            <p>Our final attempt to charge your card has failed and your recurring payment to {{crowdfund.name}} has been deactivated. <a href="{% url 'crowdfund' pk=crowdfund.pk %}?{% autologin user %}">Reactivate</a>.</p>
+        {% else %}
+            <p class="red">Your recurring crowdfund payment has failed.</p>
+            <p>This is the {{attempt|ordinal}} attempt. The payment will be retried up to 3 times. <a href="{% url 'acct-settings' %}?{% autologin user %}">Update your billing information</a>.</p>
+        {% endif %}
     {% endif %}
     <p>Sincerely,<br />The MuckRock Team</p>
 {% endblock %}

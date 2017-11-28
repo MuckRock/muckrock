@@ -14,6 +14,7 @@ from django.utils.html import escape
 from django.views.generic import View, ListView, FormView, TemplateView
 
 from muckrock.accounts.models import RecurringDonation
+from muckrock.accounts.utils import stripe_get_customer
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAFile
 from muckrock.forms import NewsletterSignupForm, SearchForm, StripeForm
@@ -508,18 +509,17 @@ class DonationFormView(StripeFormMixin, FormView):
 
     def make_subscription(self, token, amount, email):
         """Start a subscription for recurring donations"""
+        subscription = None
         quantity = amount / 100
+        customer = stripe_get_customer(
+                self.request.user,
+                email,
+                'Donation for {}'.format(email),
+                )
         if self.request.user.is_authenticated:
             user = self.request.user
-            customer = self.request.user.profile.customer()
         else:
             user = None
-            customer = stripe_retry_on_error(
-                    stripe.Customer.create,
-                    description='Donation for {}'.format(email),
-                    email=email,
-                    idempotency_key=True,
-                    )
         try:
             subscription = stripe_retry_on_error(
                     customer.subscriptions.create,

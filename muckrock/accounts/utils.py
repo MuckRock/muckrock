@@ -8,9 +8,11 @@ from django.forms import ValidationError
 
 from datetime import date
 import re
+import stripe
 
 from muckrock.accounts.models import Profile
-from muckrock.message.tasks import welcome_miniregister
+from muckrock.utils import stripe_retry_on_error
+
 
 def miniregister(full_name, email, password):
     """
@@ -23,6 +25,7 @@ def miniregister(full_name, email, password):
     - create a Profile for the user
     - send the user a welcome email with a link to reset their password
     """
+    from muckrock.message.tasks import welcome_miniregister
     full_name = full_name.strip()
     username = unique_username(full_name)
     first_name, last_name = split_name(full_name)
@@ -45,6 +48,7 @@ def miniregister(full_name, email, password):
     welcome_miniregister.delay(user)
     return user
 
+
 def split_name(name):
     """Splits a full name into a first and last name."""
     # infer first and last names from the full name
@@ -57,6 +61,7 @@ def split_name(name):
         first_name = name[:30]
         last_name = ''
     return first_name, last_name
+
 
 def unique_username(name):
     """Create a globally unique username from a name and return it."""
@@ -71,6 +76,7 @@ def unique_username(name):
         num += 1
     return username
 
+
 def validate_stripe_email(email):
     """Validate an email from stripe"""
     if not email:
@@ -82,3 +88,16 @@ def validate_stripe_email(email):
     except ValidationError:
         return None
     return email
+
+
+def stripe_get_customer(user, email, description):
+    """Get a customer for an authenticated or anonymous user"""
+    if user and user.is_authenticated:
+        return user.profile.customer()
+    else:
+        return stripe_retry_on_error(
+                stripe.Customer.create,
+                description=description,
+                email=email,
+                idempotency_key=True,
+                )

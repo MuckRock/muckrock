@@ -21,16 +21,16 @@
             <div class="row">
                 <div class="contributors">
                     <p class="contributor summary">{{ contributor_summary }}</p>
-                {% if contributors_count > 0 %}
-                    <ul class="contributor dropdown">
-                    {% for contributor in named_contributors %}
-                        <li>{{ contributor.get_full_name }}</li>
-                    {% endfor %}
-        			{% if anon_contributors_count %}
-        				<li>{{ anon_contributors_count }} anonymous backer{{ anon_contributors_count|pluralize }}</li>
-        			{% endif %}
-                    </ul>
-                {% endif %}
+                    {% if contributors_count > 0 %}
+                        <ul class="contributor dropdown">
+                            {% for contributor in named_contributors %}
+                                <li>{{ contributor.get_full_name }}</li>
+                            {% endfor %}
+                            {% if anon_contributors_count %}
+                                <li>{{ anon_contributors_count }} anonymous backer{{ anon_contributors_count|pluralize }}</li>
+                            {% endif %}
+                        </ul>
+                    {% endif %}
                 </div>
                 <p class="amount-raised">${{ crowdfund.payment_received|intcomma }} raised out of ${{ crowdfund.payment_required|intcomma }}.</p>
                 <p class="time-remaining">
@@ -44,37 +44,44 @@
         </section>
     </main>
     {% if not crowdfund.expired %}
-    <footer class="crowdfund__widget__footer">
-        <form method="POST" action="{{ endpoint }}" class="stripe-checkout crowdfund-form" id="crowdfund-form">
-            {% csrf_token %}
-            <input type="hidden" name="stripe_token" value="" />
-            <input type="hidden" name="stripe_pk" value="{{ stripe_pk }}" />
-            <input type="hidden" name="stripe_image" value="{% static 'icons/logo.png' %}" />
-            <input type="hidden" name="stripe_email" value="{{ user_email }}" />
-            <input type="hidden" name="stripe_label" value="Contribute" />
-            <input type="hidden" name="stripe_description" value="Crowdfund contribution" />
-            <input type="hidden" name="stripe_bitcoin" value="true" />
-            <input type="hidden" name="stripe_fee" value="0" />
-            {{ payment_form.crowdfund }}
-            <section class="anonymity">
-                <label for="id_show">{{ payment_form.show }} <strong>List me as a backer</strong></label>
-                {% if logged_in %}
-                <div class="anonymity__account anonymity__account--authenticated">
-                    <p class="small">You are logged in as <a class="action" href="{{request.user.get_absolute_url}}" target="_blank">{{ request.user.get_full_name }}</a>.</p>
-                </div>
-                {% else %}
-                <div class="anonymity__account anonymity__account--unauthenticated">
-                    <p>To be listed, you need a <a href="{% url 'accounts' %}" target="_blank">MuckRock account</a>. <span class="action" id="show-login">Log in</span> or sign up with just your full name:</p>
-                    {{payment_form.full_name}}
-                </div>
-                {% endif %}
-            </section>
-            <section class="crowdfund__donate">
-                <input type="number" class="currency-field" name="stripe_amount" value="2500" />
-                <button type="submit" class="basic green button">Donate</button>
-            </section>
-        </form>
-    </footer>
+        <footer class="crowdfund__widget__footer">
+            <form method="POST" action="{{ endpoint }}" class="stripe-checkout crowdfund-form" id="crowdfund-form">
+                {% csrf_token %}
+                <input type="hidden" name="stripe_token" value="" />
+                <input type="hidden" name="stripe_pk" value="{{ stripe_pk }}" />
+                <input type="hidden" name="stripe_image" value="{% static 'icons/logo.png' %}" />
+                <input type="hidden" name="stripe_email" value="{{ user_email }}" />
+                <input type="hidden" name="stripe_label" value="Contribute" />
+                <input type="hidden" name="stripe_description" value="Crowdfund contribution" />
+                <input type="hidden" name="stripe_bitcoin" value="true" />
+                <input type="hidden" name="stripe_fee" value="0" />
+                {{ payment_form.crowdfund }}
+                <section class="anonymity">
+                    <label for="id_show">{{ payment_form.show }} <strong>List me as a backer</strong></label>
+                    {% if logged_in %}
+                        <div class="anonymity__account anonymity__account--authenticated">
+                            <p class="small">You are logged in as <a class="action" href="{{request.user.get_absolute_url}}" target="_blank">{{ request.user.get_full_name }}</a>.</p>
+                        </div>
+                    {% else %}
+                        <div class="anonymity__account anonymity__account--unauthenticated">
+                            <p>To be listed, you need a <a href="{% url 'accounts' %}" target="_blank">MuckRock account</a>. <span class="action" id="show-login">Log in</span> or sign up with just your full name:</p>
+                            {{payment_form.full_name}}
+                        </div>
+                    {% endif %}
+                    {% if crowdfund.can_recur %}
+                        <p>
+                            <label for="id_recurring">
+                                {{ payment_form.recurring }} <strong>Make it a monthly donation</strong>
+                            </label>
+                        </p>
+                    {% endif %}
+                </section>
+                <section class="crowdfund__donate">
+                    <input type="number" class="currency-field" name="stripe_amount" value="2500" />
+                    <button type="submit" class="basic green button">Donate</button>
+                </section>
+            </form>
+        </footer>
     {% endif %}
     <div class="login overlay">
         <form method="post" action="{% url 'acct-login' %}?next={{ request.get_full_path }}" class="quick-log-in dialog" id="quick-log-in-form">
@@ -106,9 +113,9 @@
                 <div class="close action">Close</div>
             </header>
             {% if crowdfund.foia %}
-            {% social title="Help free these docs" url=obj_url %}
+                {% social title="Help free these docs" url=obj_url %}
             {% elif crowdfund.project %}
-            {% social title="Help fund this project" url=obj_url %}
+                {% social title="Help fund this project" url=obj_url %}
             {% endif %}
         </div>
     </div>
@@ -134,9 +141,9 @@
             {% newsletter %}
             <p>Help this crowdfund find more supporters:</p>
             {% if crowdfund.foia %}
-            {% social title="I helped free these docs" url=obj_url %}
+                {% social title="I helped free these docs" url=obj_url %}
             {% elif crowdfund.project %}
-            {% social title="I just funded this project" url=obj_url %}
+                {% social title="I just funded this project" url=obj_url %}
             {% endif %}
         </div>
     </div>

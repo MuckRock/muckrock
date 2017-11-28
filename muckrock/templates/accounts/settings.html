@@ -15,6 +15,7 @@
             <dd><a href="#receipts">Receipts</a></dd>
             <dd><a href="#organization">Organization</a></dd>
             <dd><a href="#donations">Donations</a></dd>
+            <dd><a href="#crowdfunds">Crowdfund Payments</a></dd>
             <dt>Password</dt>
             <dd><a href="{% url 'acct-change-pw' %}">Change Password</a></dd>
             <dd><a href="{% url 'acct-reset-pw' %}">Reset Password</a></dd>
@@ -142,14 +143,14 @@
                                  {% if not donation.active %}disabled="disabled"{% endif %}
                                  >
                             <label for="donation-{{donation.pk}}">
-                            ${{donation.amount}}/month since {{donation.created_datetime|date}}
-                            {% if donation.payment_failed %}<span class="badge red">Failed</span>{% endif %}
-                            {% if donation.active %}
-                                <span class="badge active">Active</span>
-                            {% else %}
-                                , deactivated on {{donation.deactivated_datetime|date}}
-                                <span class="badge inactive">Inactive</span>
-                            {% endif %}
+                                ${{donation.amount}}/month since {{donation.created_datetime|date}}
+                                {% if donation.payment_failed %}<span class="badge red">Failed</span>{% endif %}
+                                {% if donation.active %}
+                                    <span class="badge active">Active</span>
+                                {% else %}
+                                    , deactivated on {{donation.deactivated_datetime|date}}
+                                    <span class="badge inactive">Inactive</span>
+                                {% endif %}
                             <label>
                         </div>
                     {% endfor %}
@@ -157,6 +158,45 @@
                 <footer>
                     <button type="submit" class="primary button">Cancel donations</button>
                 </footer>
+            {% endif %}
+        </form>
+        <form method="post" class="donations form" id="crowdfunds">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="cancel-crowdfunds" />
+            <h2>Recurring Crowdfund Payments</h2>
+            {% if crowdfunds %}
+                <div class="fields">
+                    {% for crowdfund in crowdfunds %}
+                        <div>
+                            <input
+                                 type="checkbox"
+                                 name="cancel-crowdfunds"
+                                 value="{{crowdfund.pk}}"
+                                 id="crowdfund-{{crowdfund.pk}}"
+                                 {% if not crowdfund.active %}disabled="disabled"{% endif %}
+                                 >
+                            <label for="crowdfund-{{crowdfund.pk}}">
+                                ${{crowdfund.amount}}/month to
+                                <a href="{{crowdfund.crowdfund.get_absolute_url}}">
+                                    {{crowdfund.crowdfund.name}}
+                                </a>
+                                since {{crowdfund.created_datetime|date}}
+                                {% if crowdfund.payment_failed %}<span class="badge red">Failed</span>{% endif %}
+                                {% if crowdfund.active %}
+                                    <span class="badge active">Active</span>
+                                {% else %}
+                                    , deactivated on {{crowdfund.deactivated_datetime|date}}
+                                    <span class="badge inactive">Inactive</span>
+                                {% endif %}
+                            <label>
+                        </div>
+                    {% endfor %}
+                </div>
+                <footer>
+                    <button type="submit" class="primary button">Cancel crowdfunds</button>
+                </footer>
+            {% else %}
+                <p>You have not set up any recurring crowdfunds.</p>
             {% endif %}
         </form>
     </main>
