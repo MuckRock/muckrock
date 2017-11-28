@@ -63,7 +63,7 @@ def snail_mail_bulk_pdf_task(pdf_name, **kwargs):
                 try:
                     single_merger.append(file_.ffile)
                     files.append((file_, 'attached'))
-                except PdfReadError:
+                except (PdfReadError, ValueError):
                     files.append((file_, 'error'))
             else:
                 files.append((file_, 'skipped'))
