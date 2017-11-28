@@ -106,9 +106,9 @@ class OrphanTask(Task):
     def get_absolute_url(self):
         return reverse('orphan-task', kwargs={'pk': self.pk})
 
-    def move(self, foia_pks):
+    def move(self, foia_pks, user):
         """Moves the comm and creates a ResponseTask for it"""
-        moved_comms = self.communication.move(foia_pks)
+        moved_comms = self.communication.move(foia_pks, user)
         for moved_comm in moved_comms:
             ResponseTask.objects.create(
                 communication=moved_comm,

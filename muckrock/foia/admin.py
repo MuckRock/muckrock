@@ -39,6 +39,7 @@ from muckrock.foia.models import (
         FOIANote,
         STATUS,
         OutboundAttachment,
+        CommunicationMoveLog
         )
 from muckrock.foia.tasks import (
         upload_document_cloud,
@@ -98,6 +99,22 @@ class FOIAFileInline(admin.StackedInline):
             ('source', 'access'),
             )
     extra = 0
+
+
+class CommunicationMoveLogInline(admin.TabularInline):
+    """Communication Move Log inline"""
+    model = CommunicationMoveLog
+    readonly_fields = ('datetime', 'user', 'foia_link')
+    fields = ('datetime', 'user', 'foia_link')
+    extra = 0
+
+    def foia_link(self, obj):
+        """Link to the FOIA"""
+        # pylint: disable=no-self-use
+        link = reverse('admin:foia_foiarequest_change', args=(obj.foia.pk,))
+        return '<a href="%s">%s</a>' % (link, obj.foia.title)
+    foia_link.allow_tags = True
+    foia_link.short_description = 'From FOIA Request'
 
 
 class FOIACommunicationAdminForm(forms.ModelForm):
@@ -161,6 +178,7 @@ class FOIACommunicationAdmin(VersionAdmin):
             MailCommunicationInline,
             WebCommunicationInline,
             PortalCommunicationInline,
+            CommunicationMoveLogInline,
             )
 
     def foia_link(self, obj):

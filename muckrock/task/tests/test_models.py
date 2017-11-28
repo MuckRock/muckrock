@@ -69,6 +69,7 @@ class OrphanTaskTests(TestCase):
             reason='ib',
             communication=self.comm,
             address='Whatever Who Cares')
+        self.user = factories.UserFactory()
 
     def test_get_absolute_url(self):
         eq_(self.task.get_absolute_url(), reverse('orphan-task', kwargs={'pk': self.task.pk}))
@@ -83,7 +84,7 @@ class OrphanTaskTests(TestCase):
         foia2 = factories.FOIARequestFactory()
         foia3 = factories.FOIARequestFactory()
         count_response_tasks = task.models.ResponseTask.objects.count()
-        self.task.move([foia1.pk, foia2.pk, foia3.pk])
+        self.task.move([foia1.pk, foia2.pk, foia3.pk], self.user)
         eq_(task.models.ResponseTask.objects.count(), count_response_tasks + 3,
             'Reponse tasks should be created for each communication moved.')
 
@@ -389,6 +390,7 @@ class ResponseTaskTests(TestCase):
         comm = factories.FOIACommunicationFactory(response=True, foia__agency=agency)
         self.task = task.models.ResponseTask.objects.create(communication=comm)
         self.form = task.forms.ResponseTaskForm()
+        self.user = factories.UserFactory()
 
     def test_get_absolute_url(self):
         eq_(self.task.get_absolute_url(), reverse('response-task', kwargs={'pk': self.task.pk}))
@@ -447,7 +449,7 @@ class ResponseTaskTests(TestCase):
 
     def test_move(self):
         move_to_foia = factories.FOIARequestFactory()
-        self.form.move_communication(self.task.communication, move_to_foia.pk)
+        self.form.move_communication(self.task.communication, move_to_foia.pk, self.user)
         eq_(self.task.communication.foia, move_to_foia,
             'Should move the communication to a different request.')
 
@@ -465,7 +467,7 @@ class ResponseTaskTests(TestCase):
     @raises(Http404)
     def test_bad_move(self):
         """Should raise a 404 if non-existant move destination."""
-        self.form.move_communication(self.task.communication, 111111)
+        self.form.move_communication(self.task.communication, 111111, self.user)
 
     @raises(ValueError)
     def test_bad_price(self):

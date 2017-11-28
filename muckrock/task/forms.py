@@ -119,7 +119,7 @@ class ResponseTaskForm(forms.Form):
             string = string.strip()
         return move_list
 
-    def process_form(self, task):
+    def process_form(self, task, user):
         """Handle the form for the task"""
         cleaned_data = self.cleaned_data
         status = cleaned_data['status']
@@ -135,7 +135,7 @@ class ResponseTaskForm(forms.Form):
         error_msgs = []
         if move:
             try:
-                comms = self.move_communication(task.communication, move)
+                comms = self.move_communication(task.communication, move, user)
             except (Http404, ValueError):
                 error_msgs.append('No valid destination for moving the request.')
         if status:
@@ -164,9 +164,9 @@ class ResponseTaskForm(forms.Form):
         action_taken = move or status or tracking_number or price or proxy
         return (action_taken, error_msgs)
 
-    def move_communication(self, communication, foia_pks):
+    def move_communication(self, communication, foia_pks, user):
         """Moves the associated communication to a new request"""
-        return communication.move(foia_pks)
+        return communication.move(foia_pks, user)
 
     def set_tracking_id(self, tracking_id, comms):
         """Sets the tracking ID of the communication's request"""
