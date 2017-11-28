@@ -10,6 +10,8 @@ from django.db import models
 from django.template.loader import render_to_string
 from django.utils.text import slugify
 
+from muckrock.utils import stripe_retry_on_error
+
 from datetime import date
 import logging
 import stripe
@@ -172,11 +174,13 @@ class Organization(models.Model):
 
         quantity = self.compute_monthly_cost(num_seats)/100
         customer = self.owner.profile.customer()
-        subscription = customer.subscriptions.create(
-            plan='org',
-            source=token,
-            quantity=quantity
-        )
+        subscription = stripe_retry_on_error(
+                customer.subscriptions.create,
+                plan='org',
+                source=token,
+                quantity=quantity,
+                idempotency_key=True,
+                )
         self.update_num_seats(num_seats)
         self.num_requests = self.monthly_requests
         self.stripe_id = subscription.id

@@ -408,6 +408,7 @@ AWS_AUTOIMPORT_BUCKET_NAME = os.environ.get(
 
 STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
 STRIPE_PUB_KEY = os.environ.get('STRIPE_PUB_KEY')
+STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET')
 
 MAILCHIMP_API_KEY = os.environ.get('MAILCHIMP_API_KEY', '')
 MAILCHIMP_API_ROOT = 'https://us2.api.mailchimp.com/3.0'

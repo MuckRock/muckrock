@@ -88,3 +88,52 @@
         });
     };
 })( jQuery );
+
+$('document').ready(function(){
+
+  $("#other_amount").currencyField();
+  $(".currency").attr("placeholder", "Other Amount");
+  $(".currency").autoNumeric("set", "");
+  $(".currency").trigger("focusout");
+
+  $(".currency").focus(function() {
+    var amount = $(".donation.button-group input[name='amount']");
+    amount.prop("checked", false);
+    amount.trigger("change");
+    $(this).autoNumeric("set", $(this).autoNumeric("get"));
+  });
+
+  $(".donation.button-group input:radio").change(function() {
+    var label = $("label[for='" + $(this).attr("id") + "']");
+    label.siblings("label").removeClass('primary');
+    if ($(this).prop("checked")) {
+      label.addClass('primary');
+    } else {
+      label.removeClass('primary');
+    }
+  });
+
+  $(".donation.button-group input[name='amount']:radio").change(function() {
+    if ($(this).prop("checked")) {
+      $(".currency").autoNumeric("set", "");
+      $(".currency").trigger("focusout");
+      $("#other_amount").val($(this).val() * 100);
+    }
+  });
+
+  $(".donation.button-group input[name='type']:radio").change(function() {
+    var values;
+    if ($(this).val() == "one-time") {
+      values = [25, 50, 100, 250];
+    } else {
+      values = [10, 25, 50, 100];
+    }
+    $(".donation.button-group input[name='amount']:radio").each(function(index) {
+      $(this).val(values[index]);
+      $("label[for='" + $(this).attr("id") + "']").text("$" + values[index]);
+    });
+  });
+
+  $(".donation.button-group input:radio:checked").trigger("change");
+
+});

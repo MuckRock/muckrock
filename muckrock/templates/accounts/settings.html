@@ -14,6 +14,7 @@
             <dd><a href="#billing">Billing</a></dd>
             <dd><a href="#receipts">Receipts</a></dd>
             <dd><a href="#organization">Organization</a></dd>
+            <dd><a href="#donations">Donations</a></dd>
             <dt>Password</dt>
             <dd><a href="{% url 'acct-change-pw' %}">Change Password</a></dd>
             <dd><a href="{% url 'acct-reset-pw' %}">Reset Password</a></dd>
@@ -123,6 +124,40 @@
             <footer>
                 <button type="submit" class="primary button">Update organization settings</button>
             </footer>
+        </form>
+        <form method="post" class="donations form" id="donations">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="cancel-donations" />
+            <h2>Recurring Donations</h2>
+            <p><a class="blue button" href="{% url 'donate' %}">Donate Now</a></p>
+            {% if donations %}
+                <div class="fields">
+                    {% for donation in donations %}
+                        <div>
+                            <input
+                                 type="checkbox"
+                                 name="cancel-donations"
+                                 value="{{donation.pk}}"
+                                 id="donation-{{donation.pk}}"
+                                 {% if not donation.active %}disabled="disabled"{% endif %}
+                                 >
+                            <label for="donation-{{donation.pk}}">
+                            ${{donation.amount}}/month since {{donation.created_datetime|date}}
+                            {% if donation.payment_failed %}<span class="badge red">Failed</span>{% endif %}
+                            {% if donation.active %}
+                                <span class="badge active">Active</span>
+                            {% else %}
+                                , deactivated on {{donation.deactivated_datetime|date}}
+                                <span class="badge inactive">Inactive</span>
+                            {% endif %}
+                            <label>
+                        </div>
+                    {% endfor %}
+                </div>
+                <footer>
+                    <button type="submit" class="primary button">Cancel donations</button>
+                </footer>
+            {% endif %}
         </form>
     </main>
 </article>

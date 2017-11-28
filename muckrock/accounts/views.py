@@ -50,6 +50,7 @@ from muckrock.accounts.models import (
         Notification,
         Statistics,
         ReceiptEmail,
+        RecurringDonation,
         ACCT_TYPES,
         )
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
@@ -285,6 +286,16 @@ def profile_settings(request):
                             for e in new_emails - old_emails])
                 messages.success(request, 'Your settings have been updated.')
                 return redirect('acct-settings')
+        elif action == 'cancel-donations':
+            donations = request.user.donations.filter(
+                    pk__in=request.POST.getlist('cancel-donations'))
+            for donation in donations:
+                donation.cancel()
+            if donations:
+                messages.success(request, 'The selected donations have been cancelled.')
+            else:
+                messages.warning(request, 'No donations were selected to be cancelled.')
+            return redirect('acct-settings')
         elif action:
             form = settings_forms[action]
             form = form(request.POST, request.FILES, instance=user_profile)
@@ -307,6 +318,7 @@ def profile_settings(request):
     org_form = OrgPreferencesForm(instance=user_profile)
     receipt_form = receipt_form or ReceiptForm(initial=receipt_initial)
     current_plan = dict(ACCT_TYPES)[user_profile.acct_type]
+    donations = RecurringDonation.objects.filter(user=request.user)
     context = {
         'stripe_pk': settings.STRIPE_PUB_KEY,
         'profile_form': profile_form,
@@ -314,7 +326,8 @@ def profile_settings(request):
         'receipt_form': receipt_form,
         'org_form': org_form,
         'current_plan': current_plan,
-        'credit_card': user_profile.card()
+        'credit_card': user_profile.card(),
+        'donations': donations,
     }
     return render(
             request,
@@ -464,19 +477,45 @@ def stripe_webhook(request):
     """Handle webhooks from stripe"""
     if request.method != "POST":
         return HttpResponseNotAllowed(['POST'])
+
+    payload = request.body
+    sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
     try:
-        event_json = json.loads(request.body)
-        event_id = event_json['id']
-        event_type = event_json['type']
+        event = stripe.Webhook.construct_event(
+                payload,
+                sig_header,
+                settings.STRIPE_WEBHOOK_SECRET,
+                )
+
+        event_id = event['id']
+        event_type = event['type']
         if event_type.startswith(('charge', 'invoice')):
-            event_object_id = event_json['data']['object'].get('id', '')
+            event_object_id = event['data']['object'].get('id', '')
+            has_invoice = event['data']['object'].get('invoice') is not None
         else:
             event_object_id = ''
+            has_invoice = False
     except (TypeError, ValueError, SyntaxError) as exception:
-        logging.error('Error parsing JSON: %s', exception)
+        logging.error(
+                'Stripe Webhook: Error parsing JSON: %s',
+                exception,
+                exc_info=sys.exc_info(),
+                )
         return HttpResponseBadRequest()
     except KeyError as exception:
-        logging.error('Unexpected dictionary structure: %s in %s', exception, event_json)
+        logging.error(
+                'Stripe Webhook: Unexpected structure: %s in %s',
+                exception,
+                event,
+                exc_info=sys.exc_info(),
+                )
+        return HttpResponseBadRequest()
+    except stripe.error.SignatureVerificationError as exception:
+        logging.error(
+                'Stripe Webhook: Signature Verification Error: %s',
+                sig_header,
+                exc_info=sys.exc_info(),
+                )
         return HttpResponseBadRequest()
     # If we've made it this far, then the webhook message was successfully sent!
     # Now it's up to us to act on it.
@@ -490,10 +529,11 @@ def stripe_webhook(request):
         'address': request.META['REMOTE_ADDR'],
         'id': event_id,
         'type': event_type,
-        'data': event_json
+        'data': event
     }
     logger.info(success_msg)
-    if event_type == 'charge.succeeded':
+    if event_type == 'charge.succeeded' and not has_invoice:
+        # don't double send receipts with invoices
         send_charge_receipt.delay(event_object_id)
     elif event_type == 'invoice.payment_succeeded':
         send_invoice_receipt.delay(event_object_id)

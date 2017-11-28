@@ -123,9 +123,9 @@ class StripeForm(forms.Form):
     stripe_label = forms.CharField(initial='Buy', required=False, widget=forms.HiddenInput)
     stripe_description = forms.CharField(required=False, widget=forms.HiddenInput)
     stripe_bitcoin = forms.BooleanField(initial=True, required=False, widget=forms.HiddenInput)
-    stripe_amount = forms.IntegerField(
-        min_value=0,
-        initial=2500,
-        label='Amount',
-        widget=forms.NumberInput(attrs={'class': 'currency-field'})
-    )
+    stripe_amount = forms.IntegerField(min_value=0)
+    type = forms.ChoiceField(
+            choices=(
+                ('one-time', 'One Time'),
+                ('monthly', 'Monthly'),
+                ))

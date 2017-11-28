@@ -9,7 +9,7 @@ from django.core.urlresolvers import reverse
 from django.db import models
 
 from actstream.models import Action
-from datetime import date
+from datetime import date, datetime
 import dbsettings
 from easy_thumbnails.fields import ThumbnailerImageField
 from localflavor.us.models import PhoneNumberField, USStateField
@@ -413,6 +413,45 @@ class ReceiptEmail(models.Model):
 
     def __unicode__(self):
         return u'Receipt Email: <%s>' % self.email
+
+
+class RecurringDonation(models.Model):
+    """Keep track of our recurring donations"""
+    user = models.ForeignKey(
+            User,
+            blank=True,
+            null=True,
+            related_name='donations',
+            on_delete=models.SET_NULL,
+            )
+    email = models.EmailField()
+    amount = models.PositiveIntegerField()
+    customer_id = models.CharField(max_length=255)
+    subscription_id = models.CharField(
+            unique=True,
+            max_length=255,
+            )
+    payment_failed = models.BooleanField(default=False)
+    active = models.BooleanField(default=True)
+    created_datetime = models.DateTimeField(auto_now_add=True)
+    deactivated_datetime = models.DateTimeField(blank=True, null=True)
+
+    def __unicode__(self):
+        return u'Donation: ${}/Month by {}'.format(
+                self.amount,
+                self.email,
+                )
+
+    def cancel(self):
+        """Cancel the recurring donation"""
+        self.active = False
+        self.deactivated_datetime = datetime.now()
+        self.save()
+        subscription = stripe_retry_on_error(
+                stripe.Subscription.retrieve,
+                self.subscription_id,
+                )
+        stripe_retry_on_error(subscription.delete)
 
 
 class NotificationQuerySet(models.QuerySet):
