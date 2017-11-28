@@ -203,7 +203,7 @@ class OrphanTaskList(TaskList):
             foia_pks = request.POST.get('move', '')
             foia_pks = foia_pks.split(', ')
             try:
-                task.move(foia_pks)
+                task.move(foia_pks, request.user)
                 task.resolve(request.user)
                 messages.success(request, 'The communication was moved to the specified requests.')
             except ValueError as exception:
@@ -415,7 +415,7 @@ class ResponseTaskList(TaskList):
         if not form.is_valid():
             messages.error(request, 'Form is invalid')
             return
-        action_taken, error_msgs = form.process_form(task)
+        action_taken, error_msgs = form.process_form(task, request.user)
         for msg in error_msgs:
             messages.error(request, msg)
         if action_taken and not error_msgs:
@@ -478,7 +478,7 @@ class PortalTaskList(TaskList):
         if not form.is_valid():
             messages.error(request, 'Form is invalid')
             return
-        action_taken, error_msgs = form.process_form(task)
+        action_taken, error_msgs = form.process_form(task, request.user)
         for msg in error_msgs:
             messages.error(request, msg)
         new_text = request.POST.get('communication')
