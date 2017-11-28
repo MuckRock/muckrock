@@ -509,7 +509,7 @@ class DonationFormView(StripeFormMixin, FormView):
     def make_subscription(self, token, amount, email):
         """Start a subscription for recurring donations"""
         quantity = amount / 100
-        if self.request.user:
+        if self.request.user.is_authenticated:
             user = self.request.user
             customer = self.request.user.profile.customer()
         else:
