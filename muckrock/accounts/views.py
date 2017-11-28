@@ -481,11 +481,14 @@ def stripe_webhook(request):
     payload = request.body
     sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
     try:
-        event = stripe.Webhook.construct_event(
-                payload,
-                sig_header,
-                settings.STRIPE_WEBHOOK_SECRET,
-                )
+        if settings.STRIPE_WEBHOOK_SECRET:
+            event = stripe.Webhook.construct_event(
+                    payload,
+                    sig_header,
+                    settings.STRIPE_WEBHOOK_SECRET,
+                    )
+        else:
+            event = json.loads(request.body)
 
         event_id = event['id']
         event_type = event['type']

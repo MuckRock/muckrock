@@ -256,7 +256,12 @@ class TestDonations(TestCase):
         token = 'test'
         email = 'example@test.com'
         amount = 500
-        data = {'stripe_token': token, 'stripe_email': email, 'stripe_amount': amount}
+        data = {
+                'stripe_token': token,
+                'stripe_email': email,
+                'stripe_amount': amount,
+                'type': 'one-time',
+                }
         form = self.form(data)
         form.is_valid()
         ok_(form.is_valid(), 'The form should validate. %s' % form.errors)
