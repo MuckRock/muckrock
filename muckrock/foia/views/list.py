@@ -7,8 +7,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.postgres.aggregates.general import StringAgg
 from django.core.urlresolvers import reverse
-from django.db.models import Count, Sum, F
-from django.http import Http404, StreamingHttpResponse, HttpResponse
+from django.db.models import Count, F
+from django.http import Http404, StreamingHttpResponse
 from django.shortcuts import redirect
 from django.views.generic import TemplateView
 
