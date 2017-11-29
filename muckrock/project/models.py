@@ -43,6 +43,17 @@ class ProjectQuerySet(models.QuerySet):
             ).distinct()
         return projects
 
+    def get_manager(self, user):
+        """Return projects suitable for use in the manager"""
+        projects = self.all()
+        if not user.is_authenticated:
+            # non logged in users should never be able to use the manager
+            projects = projects.none()
+        elif not user.is_staff:
+            # show projects the user is a contributor to
+            projects = projects.get_for_contributor(user)
+        return projects
+
     def optimize(self):
         """Annotate, select, and prefetch data."""
         return (self.annotate(request_count=models.Count('requests', distinct=True))

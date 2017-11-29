@@ -89,7 +89,7 @@ class NewsDetail(DateDetailView):
         if not authorized:
             return HttpResponseForbidden()
         if action == 'projects':
-            form = ProjectManagerForm(request.POST)
+            form = ProjectManagerForm(request.POST, request.user)
             if form.is_valid():
                 projects = form.cleaned_data['projects']
                 article.projects = projects
