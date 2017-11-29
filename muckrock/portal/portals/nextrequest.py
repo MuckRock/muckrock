@@ -17,11 +17,11 @@ import time
 
 from muckrock.communication.models import PortalCommunication
 from muckrock.foia.models import FOIACommunication, FOIAFile
-from muckrock.foia.tasks import upload_document_cloud
+from muckrock.foia.tasks import upload_document_cloud, classify_status
 from muckrock.portal.exceptions import PortalError
 from muckrock.portal.portals.manual import ManualPortal
 from muckrock.portal.tasks import portal_task
-from muckrock.task.models import PortalTask, SnailMailTask
+from muckrock.task.models import PortalTask, SnailMailTask, ResponseTask
 
 
 class NextRequestPortal(ManualPortal):
@@ -386,6 +386,8 @@ class NextRequestPortal(ManualPortal):
             comm.hidden = False
             comm.create_agency_notifications()
             comm.save()
+            task = ResponseTask.objects.create(communication=comm)
+            classify_status.apply_async(args=(task.pk,), countdown=30 * 60)
             PortalCommunication.objects.create(
                     communication=comm,
                     sent_datetime=datetime.now(),
@@ -477,6 +479,8 @@ class NextRequestPortal(ManualPortal):
             comm.hidden = False
             comm.create_agency_notifications()
             comm.save()
+            task = ResponseTask.objects.create(communication=comm)
+            classify_status.apply_async(args=(task.pk,), countdown=30 * 60)
             PortalCommunication.objects.create(
                     communication=comm,
                     sent_datetime=datetime.now(),
@@ -491,25 +495,12 @@ class NextRequestPortal(ManualPortal):
 
     def status_update(self, comm, status):
         """A status update message"""
-        if status == 'closed':
-            if (comm.foia.communications
-                    .filter(response=True)
-                    .exclude(files=None)
-                    .exists()):
-                new_status = 'done'
-            else:
-                new_status = 'rejected'
-        elif status == 'published':
-            new_status = comm.foia.status
-        elif status == 'reopned':
-            new_status = 'processed'
-
         comm.communication = 'Your request has been {}.'.format(status)
         comm.hidden = False
         comm.create_agency_notifications()
         comm.save()
-        comm.foia.status = new_status
-        comm.foia.save()
+        task = ResponseTask.objects.create(communication=comm)
+        classify_status.apply_async(args=(task.pk,), countdown=30 * 60)
         PortalCommunication.objects.create(
                 communication=comm,
                 sent_datetime=datetime.now(),
