@@ -164,10 +164,13 @@ class TestNewsArticleViews(TestCase):
         """Posting a group of projects to an article should set that article's projects."""
         project1 = ProjectFactory()
         project2 = ProjectFactory()
-        project_form = ProjectManagerForm({'projects': [project1.pk, project2.pk]})
+        staff = UserFactory(is_staff=True)
+        project_form = ProjectManagerForm(
+                {'projects': [project1.pk, project2.pk]},
+                user=staff,
+                )
         ok_(project_form.is_valid(),
             'We want to be sure we are posting valid data.')
-        staff = UserFactory(is_staff=True)
         data = {'action': 'projects'}
         data.update(project_form.data)
         response = self.post_helper(data, staff)

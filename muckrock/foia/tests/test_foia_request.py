@@ -691,7 +691,8 @@ class TestRequestDetailView(TestCase):
     def test_add_projects(self):
         """Posting a collection of projects to a request should add it to those projects."""
         project = ProjectFactory()
-        form = ProjectManagerForm({'projects': [project.pk]})
+        project.contributors.add(self.foia.user)
+        form = ProjectManagerForm({'projects': [project.pk]}, user=self.foia.user)
         ok_(form.is_valid())
         data = {'action': 'projects'}
         data.update(form.data)
