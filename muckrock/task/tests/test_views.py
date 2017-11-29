@@ -471,9 +471,11 @@ class NewAgencyTaskViewTests(TestCase):
     def test_post_accept(self):
         contact_data = {
             'name': 'Test Agency',
-            'address': '1234 Whatever Street',
+            'address_street': '1234 Whatever Street',
             'email': 'who.cares@whatever.com',
             'portal_type': 'other',
+            'phone': '',
+            'fax': '',
         }
         form = agency.forms.AgencyForm(contact_data, instance=self.task.agency)
         ok_(form.is_valid())
