@@ -149,14 +149,18 @@ def project_manager(context, mr_object):
     except AttributeError:
         owner = None
     user = context['user']
-    experimental = user.is_authenticated() and user.profile.experimental
-    authorized = user.is_staff or (user == owner and experimental)
-    form = ProjectManagerForm(initial={'projects': [project.pk for project in projects]})
+    authorized = user.is_staff or user == owner
+    form = ProjectManagerForm(
+            initial={'projects': [project.pk for project in projects]},
+            user=user,
+            )
+    has_projects = user.projects.exists()
     return {
         'projects': projects,
         'form': form,
         'authorized': authorized,
         'endpoint': mr_object.get_absolute_url(),
+        'has_projects': has_projects,
     }
 
 @register.inclusion_tag('lib/social.html', takes_context=True)

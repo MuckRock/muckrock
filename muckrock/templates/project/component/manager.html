@@ -12,6 +12,7 @@
     <form action="{{endpoint}}" method="post">
         {% csrf_token %}
         {{form.projects}}
+        <p>{% if not has_projects %}Once you've created a project, you'll be able to add this request to it from here. {% endif %}<a href="{% url "project-create" %}">Create a new project</a> or <a href="{% url "news-detail" year=2015 month="sep" day=3 slug="muckrock-projects-organize-crowdfund-journalism" %}">learn more about projects</a></p>
         <footer>
             <button class="primary button" type="submit" name="action" value="projects">Save</button>
             <span class="cancel button">Cancel</span>

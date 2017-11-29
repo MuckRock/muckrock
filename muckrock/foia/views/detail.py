@@ -286,7 +286,7 @@ class Detail(DetailView):
 
     def _projects(self, request, foia):
         """Handle updating projects"""
-        form = ProjectManagerForm(request.POST)
+        form = ProjectManagerForm(request.POST, user=request.user)
         has_perm = foia.has_perm(request.user, 'change')
         if has_perm and form.is_valid():
             projects = form.cleaned_data['projects']

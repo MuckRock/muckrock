@@ -71,7 +71,12 @@ class ProjectManagerForm(forms.Form):
     """Form for managing a list of projects"""
     projects = forms.ModelMultipleChoiceField(
         required=False,
-        queryset=Project.objects.all(),
+        queryset=Project.objects.none(),
         widget=autocomplete_light.MultipleChoiceWidget(
             'ProjectManagerAutocomplete',
             attrs={'placeholder': 'Search for a project'}))
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user')
+        super(ProjectManagerForm, self).__init__(*args, **kwargs)
+        self.fields['projects'].queryset = Project.objects.get_manager(user)
