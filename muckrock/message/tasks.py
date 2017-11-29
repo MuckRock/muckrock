@@ -101,8 +101,17 @@ def send_invoice_receipt(invoice_id):
         profile = Profile.objects.get(customer_id=invoice.customer)
     except Profile.DoesNotExist:
         user = None
+        try:
+            customer = stripe_retry_on_error(
+                    stripe.Customer.retrieve,
+                    invoice.customer,
+                    )
+        except stripe.error.InvalidRequestError:
+            logger.error('Could not retrieve customer')
+            return
     else:
         user = profile.user
+        customer = None
 
     plan = invoice.lines.data[0].plan
     try:
@@ -115,7 +124,7 @@ def send_invoice_receipt(invoice_id):
     except KeyError:
         logger.warning('Invoice charged for unrecognized plan: %s', plan.name)
         receipt_function = receipts.generic_receipt
-    receipt = receipt_function(user, charge)
+    receipt = receipt_function(user, charge, customer)
     receipt.send(fail_silently=False)
 
 @task(name='muckrock.message.tasks.send_charge_receipt')
