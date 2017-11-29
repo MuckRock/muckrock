@@ -154,7 +154,7 @@ def project_manager(context, mr_object):
             initial={'projects': [project.pk for project in projects]},
             user=user,
             )
-    has_projects = user.projects.exists()
+    has_projects = user.is_authenticated and user.projects.exists()
     return {
         'projects': projects,
         'form': form,
