@@ -38,7 +38,7 @@ class Receipt(TemplateEmail):
     text_template = 'message/receipt/base.txt'
     html_template = 'message/receipt/base.html'
 
-    def __init__(self, charge, items, **kwargs):
+    def __init__(self, charge, items, customer, **kwargs):
         # we assign charge and item to the instance first so
         # they can be used by the get_context_data method
         self.charge = charge
@@ -54,12 +54,13 @@ class Receipt(TemplateEmail):
             cc_emails = [r.email for r in self.user.receipt_emails.all()]
             self.cc.extend(cc_emails)
         # if no user provided, send the email to the address on the charge
+        elif 'email' in self.charge.metadata:
+            user_email = self.charge.metadata['email']
+            self.to.append(user_email)
+        elif customer and customer.email:
+            self.to.append(customer.email)
         else:
-            try:
-                user_email = self.charge.metadata['email']
-                self.to.append(user_email)
-            except KeyError:
-                raise ValueError('No user or email provided to receipt.')
+            raise ValueError('No user or email provided to receipt.')
 
     def get_context_data(self, *args):
         """Returns a dictionary of context for the template, given the charge object"""
@@ -81,16 +82,23 @@ class Receipt(TemplateEmail):
             })
         return context
 
-def generic_receipt(user, charge):
+def generic_receipt(user, charge, customer=None):
     """Generates a very basic receipt. Should be used as a fallback."""
     subject = u'Receipt'
     text = 'message/receipt/base.txt'
     html = 'message/receipt/base.html'
     item = LineItem('Payment', charge.amount)
-    return Receipt(charge, [item], user=user, subject=subject,
-        text_template=text, html_template=html)
+    return Receipt(
+            charge,
+            [item],
+            customer,
+            user=user,
+            subject=subject,
+            text_template=text,
+            html_template=html,
+            )
 
-def request_purchase_receipt(user, charge):
+def request_purchase_receipt(user, charge, customer=None):
     """Generates a receipt for a request purchase and then returns it."""
     subject = u'Request Bundle Receipt'
     text = 'message/receipt/request_purchase.txt'
@@ -100,10 +108,17 @@ def request_purchase_receipt(user, charge):
         bundle_size = settings.BUNDLED_REQUESTS.get(user.profile.acct_type, 4)
         item_name = unicode(bundle_size) + u' requests'
     item = LineItem(item_name, charge.amount)
-    return Receipt(charge, [item], user=user, subject=subject,
-        text_template=text, html_template=html)
+    return Receipt(
+            charge,
+            [item],
+            customer,
+            user=user,
+            subject=subject,
+            text_template=text,
+            html_template=html,
+            )
 
-def request_fee_receipt(user, charge):
+def request_fee_receipt(user, charge, customer=None):
     """Generates a receipt for a payment of request fees."""
     subject = u'Request Fee Receipt'
     text = 'message/receipt/request_fees.txt'
@@ -124,10 +139,18 @@ def request_fee_receipt(user, charge):
         logger.error('No FOIA identified in Charge metadata.')
     except FOIARequest.DoesNotExist:
         logger.error('Could not find FOIARequest identified by Charge metadata.')
-    return Receipt(charge, items, user=user, subject=subject, extra_context=context,
-        text_template=text, html_template=html)
+    return Receipt(
+            charge,
+            items,
+            customer,
+            user=user,
+            subject=subject,
+            extra_context=context,
+            text_template=text,
+            html_template=html,
+            )
 
-def crowdfund_payment_receipt(user, charge):
+def crowdfund_payment_receipt(user, charge, customer=None):
     """Generates a receipt for a payment on a crowdfund."""
     subject = u'Crowdfund Payment Receipt'
     text = 'message/receipt/crowdfund.txt'
@@ -142,10 +165,18 @@ def crowdfund_payment_receipt(user, charge):
         logger.error('No Crowdfund identified in Charge metadata.')
     except Crowdfund.DoesNotExist:
         logger.error('Could not find Crowdfund identified by Charge metadata.')
-    return Receipt(charge, [item], user=user, subject=subject, extra_context=context,
-        text_template=text, html_template=html)
+    return Receipt(
+            charge,
+            [item],
+            customer,
+            user=user,
+            subject=subject,
+            extra_context=context,
+            text_template=text,
+            html_template=html,
+            )
 
-def pro_subscription_receipt(user, charge):
+def pro_subscription_receipt(user, charge, customer=None):
     """Generates a receipt for a payment on a pro account."""
     subject = u'Professional Account Receipt'
     text = 'message/receipt/pro_subscription.txt'
@@ -154,10 +185,18 @@ def pro_subscription_receipt(user, charge):
     context = {
         'monthly_requests': settings.MONTHLY_REQUESTS['pro']
     }
-    return Receipt(charge, [item], user=user, subject=subject, extra_context=context,
-        text_template=text, html_template=html)
+    return Receipt(
+            charge,
+            [item],
+            customer,
+            user=user,
+            subject=subject,
+            extra_context=context,
+            text_template=text,
+            html_template=html,
+            )
 
-def org_subscription_receipt(user, charge):
+def org_subscription_receipt(user, charge, customer=None):
     """Generates a receipt for a payment on an org account."""
     subject = u'Organization Account Receipt'
     text = 'message/receipt/org_subscription.txt'
@@ -168,14 +207,29 @@ def org_subscription_receipt(user, charge):
     except Organization.DoesNotExist:
         logger.warning('Org receipt generated for non-owner User.')
         context = {'org': None}
-    return Receipt(charge, [item], user=user, subject=subject, extra_context=context,
-        text_template=text, html_template=html)
+    return Receipt(
+            charge,
+            [item],
+            customer,
+            user=user,
+            subject=subject,
+            extra_context=context,
+            text_template=text,
+            html_template=html,
+            )
 
-def donation_receipt(user, charge):
+def donation_receipt(user, charge, customer=None):
     """Generates a receipt for a donation."""
     subject = u'Donation Receipt'
     text = 'message/receipt/donation.txt'
     html = 'message/receipt/donation.html'
     item = LineItem('Tax Deductible Donation', charge.amount)
-    return Receipt(charge, [item], user=user, subject=subject,
-        text_template=text, html_template=html)
+    return Receipt(
+            charge,
+            [item],
+            customer,
+            user=user,
+            subject=subject,
+            text_template=text,
+            html_template=html,
+            )
