@@ -8,6 +8,7 @@ PORTAL_TYPES = [
         ('foiaonline', 'FOIAonline'),
         ('govqa', 'GovQA'),
         ('nextrequest', 'NextRequest'),
+        ('foiaxpress', 'FOIAXpress'),
         ('fbi', 'FBI eFOIPA Portal'),
         ('other', 'Other'),
         ]
