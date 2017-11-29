@@ -580,7 +580,7 @@ def snail_mail_pdf(request, pk):
     merger = PdfFileMerger()
 
     # generate the pdf and merge all pdf attachments
-    pdf = SnailMailPDF(snail.communication)
+    pdf = SnailMailPDF(snail.communication, snail.category)
     pdf.generate()
     merger.append(StringIO(pdf.output(dest='S')))
     for file_ in snail.communication.files.all():
