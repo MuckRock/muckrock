@@ -487,7 +487,7 @@ class Detail(DetailView):
                 form.save()
                 messages.success(request, 'Agency info saved. Thanks for your help!')
             else:
-                messages.success(request, 'The data was invalid! Try again.')
+                messages.error(request, 'The data was invalid! Try again.')
         else:
             messages.error(request, 'You cannot do that, stop it.')
         return redirect(foia.get_absolute_url() + '#')

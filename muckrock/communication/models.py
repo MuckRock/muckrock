@@ -165,7 +165,7 @@ class Address(models.Model):
     street = models.CharField(blank=True, max_length=255)
     suite = models.CharField(blank=True, max_length=255)
     city = models.CharField(blank=True, max_length=255)
-    state = USStateField(null=True)
+    state = USStateField(blank=True)
     zip_code = USZipCodeField(blank=True)
     point = PointField(blank=True)
 
@@ -183,10 +183,7 @@ class Address(models.Model):
             )
 
     # This will become the override field for non-conforming addresses
-    address = models.TextField(
-            unique=True,
-            blank=True,
-            )
+    address = models.TextField(blank=True)
 
     def __unicode__(self):
         if self.street:

@@ -212,13 +212,25 @@ $task-padding: $vr/4 $vr/2;
     footer {
         text-align: right;
     }
-    input {
+    input, select {
         display: block;
         width: 100%;
     }
+    input#id_address_city {
+        display: inline-block;
+        width: 50%;
+    }
+    select#id_address_state {
+        display: inline-block;
+        width: 30%;
+    }
+    input#id_address_zip {
+        display: inline-block;
+        width: 18%;
+    }
     textarea {
         margin-bottom: 0;
-        height: 5em;
+        height: 6em;
         resize: none;
     }
     main {

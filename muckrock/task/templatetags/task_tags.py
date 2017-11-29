@@ -125,8 +125,13 @@ class NewAgencyTaskNode(TaskNode):
                 'email': emails[0].email if emails else None,
                 'phone': phones[0].phone if phones else None,
                 'fax': faxes[0].phone if faxes else None,
-                'address': addresses[0].address if addresses else None,
                 }
+        if addresses:
+            initial['address_suite'] = addresses[0].address.suite
+            initial['address_street'] = addresses[0].address.street
+            initial['address_city'] = addresses[0].address.city
+            initial['address_state'] = addresses[0].address.state
+            initial['address_zip'] = addresses[0].address.zip_code
         if self.task.agency.portal:
             initial['portal_url'] = self.task.agency.portal.url
             initial['portal_type'] = self.task.agency.portal.type
