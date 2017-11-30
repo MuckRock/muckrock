@@ -288,6 +288,11 @@ class NextRequestPortal(ManualPortal):
                         r'has been (?P<status>closed|published|reopned)[.]'),
                     self.status_update,
                     ),
+                (
+                    re.compile(
+                        r'\[Department Changed\]'),
+                    self.dept_change,
+                    ),
                 ]
 
         for pattern, handler in router:
@@ -398,7 +403,7 @@ class NextRequestPortal(ManualPortal):
         self._process_msg(
                 comm=comm,
                 regex=r'A message was sent to you regarding record request #[^:]*:'
-                      r'(?P<message>.*)View Request',
+                      r'(?P<message>.*?)View Request',
                 on_match=on_match,
                 error_reason='Could not extract the message',
                 )
@@ -506,6 +511,30 @@ class NextRequestPortal(ManualPortal):
                 sent_datetime=datetime.now(),
                 portal=self.portal,
                 direction='incoming',
+                )
+
+    def dept_change(self, comm):
+        """Handle department change replies"""
+        def on_match(match):
+            """Only show the message and unhide the communication"""
+            comm.communication = match.group('message')
+            comm.hidden = False
+            comm.create_agency_notifications()
+            comm.save()
+            task = ResponseTask.objects.create(communication=comm)
+            classify_status.apply_async(args=(task.pk,), countdown=30 * 60)
+            PortalCommunication.objects.create(
+                    communication=comm,
+                    sent_datetime=datetime.now(),
+                    portal=self.portal,
+                    direction='incoming',
+                    )
+
+        self._process_msg(
+                comm=comm,
+                regex=r'(?P<message>Department assignment for .*?)View Request',
+                on_match=on_match,
+                error_reason='Could not extract the message',
                 )
 
     def _process_msg(self, comm, regex, on_match, error_reason):
