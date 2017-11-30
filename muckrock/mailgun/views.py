@@ -204,6 +204,10 @@ def _handle_request(request, mail_id):
     try:
         foia = FOIARequest.objects.get(mail_id=mail_id)
 
+        # extra logging for next request portals for now
+        if foia.portal.type == 'nextrequest':
+            _log_mail(request)
+
         if from_email is not None:
             email_allowed = from_email.allowed(foia)
         else:
@@ -560,4 +564,18 @@ def _forward(post, files, title='', extra_content='', info=False):
     for file_ in files.itervalues():
         email.attach(file_.name, file_.read(), file_.content_type)
 
+    email.send(fail_silently=False)
+
+def _log_mail(request):
+    """Log a request"""
+    body = []
+    for key, value in request.POST.iteritems():
+        body.append('\n{}:'.format(key))
+        body.append(unicode(value))
+    email = EmailMessage(
+            '[NEXTREQUEST LOG]',
+            '\n'.join(body),
+            'info@muckrock.com',
+            ['mitch@muckrock.com'],
+            )
     email.send(fail_silently=False)
