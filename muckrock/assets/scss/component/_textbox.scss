@@ -14,6 +14,23 @@
     }
 }
 
+@mixin hidden-color-textbox($color1, $color2) {
+    border-color: $color1;
+    .textbox__header::before {
+        content: "HIDDEN - ";
+        font-weight: bold;
+    }
+    .textbox__header {
+        background: repeating-linear-gradient(
+        45deg,
+        $color1,
+        $color1 10px,
+        $color2 10px,
+        $color2 20px
+        );
+    }
+}
+
 .textbox {
     @include border;
     position: relative;
@@ -52,6 +69,8 @@
         color: $color-black;
     }
 }
+.hidden.textbox { @include hidden-color_textbox($color-black, $color-grey-3); }
+.hidden.blue.textbox { @include hidden-color_textbox($color-blue, $color-blue-dark); }
 
 .collapsable > header {
     cursor: pointer;
