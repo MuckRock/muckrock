@@ -205,7 +205,7 @@ def _handle_request(request, mail_id):
         foia = FOIARequest.objects.get(mail_id=mail_id)
 
         # extra logging for next request portals for now
-        if foia.portal.type == 'nextrequest':
+        if foia.portal and foia.portal.type == 'nextrequest':
             _log_mail(request)
 
         if from_email is not None:

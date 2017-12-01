@@ -219,6 +219,11 @@ def smartypants(text):
     smart_text = _smartypants.smartypants(text)
     return mark_safe(bleach.clean(smart_text))
 
+@register.filter
+def linkify(text):
+    """Use bleach to linkify text (better than urlize)"""
+    return mark_safe(bleach.linkify(text, parse_email=True))
+
 @register.filter(name='markdown')
 @stringfilter
 def markdown_filter(text, _safe=None):
