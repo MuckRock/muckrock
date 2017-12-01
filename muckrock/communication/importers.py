@@ -4,9 +4,10 @@ Custom importers for addresses
 
 from django.conf import settings
 
-import unicodecsv as csv
-
 from boto.s3.connection import S3Connection
+from localflavor.us.us_states import STATE_CHOICES
+import unicodecsv as csv
+import re
 
 from muckrock.communication.models import (
         Address,
@@ -28,6 +29,9 @@ SUITE = 11
 AGENCY_OVERRIDE = 12
 ATTN_OVERRIDE = 13
 
+STATES = {s[0] for s in STATE_CHOICES}
+p_zip = re.compile(r'^\d{5}(?:-\d{4})?$')
+
 def import_addresses(file_name):
     """Import addresses from spreadsheet"""
     # pylint: disable=too-many-locals
@@ -37,7 +41,15 @@ def import_addresses(file_name):
     key.get_contents_to_filename('/tmp/tmp.csv')
     with open('/tmp/tmp.csv') as tmp_file:
         reader = csv.reader(tmp_file)
-        for row in reader:
+        # discard header row
+        next(reader)
+        for i, row in enumerate(reader):
+            if i % 1000 == 0:
+                print i
+            if row[STATE] and row[STATE] not in STATES:
+                print u'Illegal State "{}"'.format(row[STATE])
+            if row[ZIP] and not p_zip.match(row[ZIP]):
+                print u'Illegal Zip "{}"'.format(row[ZIP])
             try:
                 address = Address.objects.get(pk=row[ADDRESS_PK])
             except Address.DoesNotExist:
@@ -51,4 +63,8 @@ def import_addresses(file_name):
                 address.point = {'type': 'Point', 'coordinates': [row[LONG], row[LAT]]}
                 address.agency_override = row[AGENCY_OVERRIDE]
                 address.attn_override = row[ATTN_OVERRIDE]
-                address.save()
+                try:
+                    address.save()
+                except Exception as e:
+                    print 'Data Error', e, row[ADDRESS_PK]
+                    print row
