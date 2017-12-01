@@ -67,7 +67,7 @@
         {% if communication.full_html %}
         {{ communication.communication|redact_emails|safe }}
         {% else %}
-        {{ communication.communication|redact_emails|linkify|linebreaks }}
+        {{ communication.communication|redact_emails|urlize|linebreaks }}
         {% endif %}
     </section>
     {% endif %}
