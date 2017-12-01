@@ -287,6 +287,7 @@ class FOIACommunicationInline(admin.StackedInline):
                     'faxes',
                     'mails',
                     'web_comms',
+                    'portals',
                     )
                 .annotate(
                     files_count=Count('files'),

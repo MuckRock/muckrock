@@ -142,6 +142,7 @@ class Detail(DetailView):
                             'faxes',
                             'mails',
                             'web_comms',
+                            'portals',
                             )),
                         Prefetch(
                             'communications__faxes',
