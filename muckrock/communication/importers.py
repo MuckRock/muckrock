@@ -32,6 +32,8 @@ ATTN_OVERRIDE = 13
 STATES = {s[0] for s in STATE_CHOICES}
 p_zip = re.compile(r'^\d{5}(?:-\d{4})?$')
 
+# pylint: disable=broad-except
+
 def import_addresses(file_name):
     """Import addresses from spreadsheet"""
     # pylint: disable=too-many-locals
@@ -60,11 +62,14 @@ def import_addresses(file_name):
                 address.city = row[CITY].strip()
                 address.state = row[STATE].strip()
                 address.zip_code = row[ZIP].strip()
-                address.point = {'type': 'Point', 'coordinates': [row[LONG].strip(), row[LAT].strip()]}
+                address.point = {
+                        'type': 'Point',
+                        'coordinates': [row[LONG].strip(), row[LAT].strip()],
+                        }
                 address.agency_override = row[AGENCY_OVERRIDE].strip()
                 address.attn_override = row[ATTN_OVERRIDE].strip()
                 try:
                     address.save()
-                except Exception as e:
-                    print 'Data Error', e, row[ADDRESS_PK]
+                except Exception as exc:
+                    print 'Data Error', exc, row[ADDRESS_PK]
                     print row
