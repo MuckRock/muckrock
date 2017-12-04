@@ -52,3 +52,34 @@ class TestManualPortal(TestCase):
         """Should generate a random password"""
         password = self.portal.get_new_password()
         eq_(len(password), 12)
+
+
+class TestNextRequestPortal(TestCase):
+    """Test cases for the NextRequest portal integration"""
+
+    def setUp(self):
+        """All tests need a manual portal"""
+        self.portal = Portal.objects.create(
+                url='https://www.example.com',
+                name='Test Portal',
+                type='nextrequest',
+                )
+
+    def test_confirm_open(self):
+        """Test receiving a confirmation message"""
+        comm = FOIACommunicationFactory(
+                subject='Your first record request 17-1 has been opened.',
+                communication=
+                ' -- Write ABOVE THIS LINE to post a message that will be sent '
+                'to staff. --\n\n'
+                'Your first Evanston record request (request number 17-764) '
+                'has been submitted. It is currently unpublished and is not '
+                'available for the general public to view.\n\n'
+                'As the requester, you can always see the status of your '
+                'request by signing into the Evanston Public Records portal '
+                'here. \n',
+                foia__status='ack',
+                )
+        self.portal.receive_msg(comm)
+        eq_(comm.foia.status, 'processed')
+        eq_(comm.portals.count(), 1)

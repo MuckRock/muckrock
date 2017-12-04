@@ -263,7 +263,7 @@ class NextRequestPortal(ManualPortal):
                 (
                     re.compile(
                         r'Your first record request (?P<tracking_id>[0-9-]+) '
-                        r'has been opened.'),
+                        r'has been opened[.]'),
                     self.confirm_open,
                     ),
                 (
