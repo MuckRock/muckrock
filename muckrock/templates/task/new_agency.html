@@ -48,7 +48,6 @@
                 <main class="textbox__section">
                     {% csrf_token %}
                     <input type="hidden" name="task" value="{{task.pk}}">
-                    <input type="hidden" name="reject" value="true">
                     <label>Move this agency’s requests to:</label>
                     <select name="replacement">
                     {% for other_agency in task.agency.jurisdiction.other_agencies %}

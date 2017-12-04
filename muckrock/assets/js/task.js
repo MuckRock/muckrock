@@ -154,6 +154,23 @@ $('button[name="reject"]').click(function(e){
     return false;
 });
 
+$('button[name="spam"]').click(function(e){
+    e.preventDefault();
+    var forms = [];
+    if ($(this).attr('id') == 'batched-reject') {
+        $(':checked[form=batched]').each(function() {
+            var taskForm = $(this).closest('.task').find('form');
+            if (formHasAction(taskForm, 'spam')) {
+                forms.push(taskForm);
+            }
+        });
+        batchAction(forms, 'spam');
+    } else {
+        singleAction($(this).closest('form'), 'spam');
+    }
+    return false;
+});
+
 var checkboxes = $('.task header').find(':checkbox');
 var batchedButtons = $('#batched button').not('#collapse-all');
 function toggleBatchedButtons() {
