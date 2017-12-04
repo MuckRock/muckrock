@@ -380,7 +380,7 @@ class NewAgencyTaskList(TaskList):
                 return
             task.approve()
             task.resolve(request.user)
-        if request.POST.get('reject'):
+        elif request.POST.get('reject'):
             replacement_agency_id = request.POST.get('replacement')
             replacement_agency = get_object_or_404(Agency, id=replacement_agency_id)
             if replacement_agency.status != 'approved':
@@ -391,7 +391,7 @@ class NewAgencyTaskList(TaskList):
                 return
             task.reject(replacement_agency)
             task.resolve(request.user)
-        if request.POST.get('spam'):
+        elif request.POST.get('spam'):
             task.spam()
             task.resolve(request.user)
         return super(NewAgencyTaskList, self).task_post_helper(request, task)
