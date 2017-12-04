@@ -3,8 +3,6 @@
 Logic for interacting with NextRequest portals automatically
 """
 
-from django.core.files.base import ContentFile
-from django.db import transaction
 from django.template.defaultfilters import linebreaks
 
 from bs4 import BeautifulSoup
@@ -16,16 +14,48 @@ import requests
 import time
 
 from muckrock.communication.models import PortalCommunication
-from muckrock.foia.models import FOIACommunication, FOIAFile
-from muckrock.foia.tasks import upload_document_cloud, classify_status
+from muckrock.foia.models import FOIACommunication
 from muckrock.portal.exceptions import PortalError
+from muckrock.portal.portals.automated import PortalAutoReceiveMixin
 from muckrock.portal.portals.manual import ManualPortal
 from muckrock.portal.tasks import portal_task
-from muckrock.task.models import PortalTask, SnailMailTask, ResponseTask
+from muckrock.task.models import PortalTask, SnailMailTask
 
 
-class NextRequestPortal(ManualPortal):
+class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
     """NextRequest Portal integration"""
+
+    router = [
+            (
+                r'Your first record request (?P<tracking_id>[0-9-]+) '
+                r'has been opened[.]',
+                'confirm_open',
+                ),
+            (
+                r'\[ACTION REQUIRED\] Confirm your .* portal account',
+                'confirm_account',
+                ),
+            (
+                r'\[External Message Added\]',
+                'text_reply',
+                ),
+            (
+                r'(?:\[Document Released to Requester\]|'
+                r'\[Document Released\])',
+                'document_reply',
+                ),
+            (
+                r'public records request (?:[0-9-]+) '
+                r'has been (?P<status>closed|published|reopned)[.]',
+                'status_update',
+                ),
+            (
+                r'\[Department Changed\]',
+                'dept_change',
+                ),
+            ]
+
+    # sending
 
     def send_msg(self, comm, **kwargs):
         """Send a message to the NextRequest portal"""
@@ -254,57 +284,7 @@ class NextRequestPortal(ManualPortal):
                 headers=headers,
                 )
 
-    def receive_msg(self, comm, **kwargs):
-        """Process a message received from the portal"""
-        # Match the incoming messages subject against a set of regular
-        # expressions to determine how to handle this message
-
-        router = [
-                (
-                    re.compile(
-                        r'Your first record request (?P<tracking_id>[0-9-]+) '
-                        r'has been opened.'),
-                    self.confirm_open,
-                    ),
-                (
-                    re.compile(
-                        r'\[ACTION REQUIRED\] Confirm your .* portal account'),
-                    self.confirm_account,
-                    ),
-                (
-                    re.compile(
-                        r'\[External Message Added\]'),
-                    self.text_reply,
-                    ),
-                (
-                    re.compile(
-                        r'(?:\[Document Released to Requester\]|'
-                        r'\[Document Released\])'),
-                    self.document_reply,
-                    ),
-                (
-                    re.compile(
-                        r'public records request (?:[0-9-]+) '
-                        r'has been (?P<status>closed|published|reopned)[.]'),
-                    self.status_update,
-                    ),
-                (
-                    re.compile(
-                        r'\[Department Changed\]'),
-                    self.dept_change,
-                    ),
-                ]
-
-        for pattern, handler in router:
-            match = pattern.search(comm.subject)
-            if match:
-                handler(comm, **match.groupdict())
-                break
-        else:
-            super(NextRequestPortal, self).receive_msg(
-                    comm,
-                    reason='Did not know how to handle',
-                    )
+    # receiving
 
     def confirm_open(self, comm, tracking_id):
         """Receive a confirmation that the request was created"""
@@ -378,7 +358,8 @@ class NextRequestPortal(ManualPortal):
                     direction='incoming',
                     )
         else:
-            super(NextRequestPortal, self).receive_msg(
+            ManualPortal.receive_msg(
+                    self,
                     comm,
                     reason='Confirmation link failed',
                     )
@@ -387,18 +368,7 @@ class NextRequestPortal(ManualPortal):
         """Handle text replies"""
         def on_match(match):
             """Only show the message and unhide the communication"""
-            comm.communication = match.group('message')
-            comm.hidden = False
-            comm.create_agency_notifications()
-            comm.save()
-            task = ResponseTask.objects.create(communication=comm)
-            classify_status.apply_async(args=(task.pk,), countdown=30 * 60)
-            PortalCommunication.objects.create(
-                    communication=comm,
-                    sent_datetime=datetime.now(),
-                    portal=self.portal,
-                    direction='incoming',
-                    )
+            self._accept_comm(comm, match.group('message'))
 
         self._process_msg(
                 comm=comm,
@@ -413,7 +383,8 @@ class NextRequestPortal(ManualPortal):
         def on_match(match):
             """Download the files"""
             if comm.foia.tracking_id != match.group('tracking_id'):
-                super(NextRequestPortal, self).receive_msg(
+                ManualPortal.receive_msg(
+                        self,
                         comm,
                         reason='Tracking ID does not match',
                         )
@@ -468,67 +439,27 @@ class NextRequestPortal(ManualPortal):
                         url,
                         'Downloading document: {}'.format(document),
                         )
-                with transaction.atomic():
-                    foia_file = FOIAFile.objects.create(
-                            foia=comm.foia,
-                            comm=comm,
-                            title=document,
-                            date=datetime.now(),
-                            source=self.portal.name,
-                            access='private' if comm.foia.embargo else 'public',
-                            )
-                    foia_file.ffile.save(document, ContentFile(reply.content))
-                    transaction.on_commit(lambda f=foia_file:
-                            upload_document_cloud.delay(f.pk, False))
-            comm.communication = text
-            comm.hidden = False
-            comm.create_agency_notifications()
-            comm.save()
-            task = ResponseTask.objects.create(communication=comm)
-            classify_status.apply_async(args=(task.pk,), countdown=30 * 60)
-            PortalCommunication.objects.create(
-                    communication=comm,
-                    sent_datetime=datetime.now(),
-                    portal=self.portal,
-                    direction='incoming',
-                    )
+                self._attach_file(comm, document, reply.content)
+            self._accept_comm(comm, text)
         except PortalError as exc:
-            super(NextRequestPortal, self).receive_msg(
+            ManualPortal.receive_msg(
+                    self,
                     comm,
                     reason=exc.args[0],
                     )
 
     def status_update(self, comm, status):
         """A status update message"""
-        comm.communication = 'Your request has been {}.'.format(status)
-        comm.hidden = False
-        comm.create_agency_notifications()
-        comm.save()
-        task = ResponseTask.objects.create(communication=comm)
-        classify_status.apply_async(args=(task.pk,), countdown=30 * 60)
-        PortalCommunication.objects.create(
-                communication=comm,
-                sent_datetime=datetime.now(),
-                portal=self.portal,
-                direction='incoming',
+        self._accept_comm(
+                comm,
+                'Your request has been {}.'.format(status),
                 )
 
     def dept_change(self, comm):
         """Handle department change replies"""
         def on_match(match):
             """Only show the message and unhide the communication"""
-            comm.communication = match.group('message')
-            comm.hidden = False
-            comm.create_agency_notifications()
-            comm.save()
-            task = ResponseTask.objects.create(communication=comm)
-            classify_status.apply_async(args=(task.pk,), countdown=30 * 60)
-            PortalCommunication.objects.create(
-                    communication=comm,
-                    sent_datetime=datetime.now(),
-                    portal=self.portal,
-                    direction='incoming',
-                    )
+            self._accept_comm(comm, match.group('message'))
 
         self._process_msg(
                 comm=comm,
@@ -544,7 +475,8 @@ class NextRequestPortal(ManualPortal):
         if match:
             on_match(match)
         else:
-            super(NextRequestPortal, self).receive_msg(
+            ManualPortal.receive_msg(
+                    self,
                     comm,
                     reason=error_reason,
                     )

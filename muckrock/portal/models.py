@@ -41,11 +41,13 @@ class Portal(models.Model):
         from muckrock.portal.portals import (
                 ManualPortal,
                 NextRequestPortal,
+                FBIPortal,
                 )
         # pylint: disable=access-member-before-definition
         # pylint: disable=attribute-defined-outside-init
         portal_classes = {
                 'nextrequest': NextRequestPortal,
+                'fbi': FBIPortal,
                 }
         if hasattr(self, '_portal_type'):
             return self._portal_type
