@@ -434,7 +434,11 @@ class TestAccountFunctional(TestCase):
         # pylint: disable=unused-argument
         response = http_get_response(reverse('acct-my-profile'), views.profile, self.user)
         eq_(response.status_code, 302, 'Logged in user may view their own profile.')
-        response = http_get_response(reverse('acct-settings'), views.ProfileSettings.as_view(), self.user)
+        response = http_get_response(
+                reverse('acct-settings'),
+                views.ProfileSettings.as_view(),
+                self.user,
+                )
         eq_(response.status_code, 200, 'Logged in user may view their own settings.')
 
     @patch('stripe.Customer.retrieve')
