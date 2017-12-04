@@ -790,6 +790,7 @@ class FOIARequest(models.Model):
                 comm=comm,
                 reply_link=True,
                 switch=kwargs.get('switch'),
+                appeal=kwargs.get('appeal')
                 )
 
         self.status = self._sent_status(
@@ -832,7 +833,11 @@ class FOIARequest(models.Model):
                 ((self.email and self.email.status == 'error')
                     and (self.last_request().sent_to() == self.email)))
 
-        body = self.render_msg_body(comm=comm, switch=switch)
+        body = self.render_msg_body(
+                comm=comm,
+                switch=switch,
+                appeal=kwargs.get('appeal')
+                )
 
         self.status = self._sent_status(
                 kwargs.get('appeal'),
@@ -892,14 +897,15 @@ class FOIARequest(models.Model):
             extra = {}
         return (category, extra)
 
-    def render_msg_body(self, comm, reply_link=False, switch=False):
+    def render_msg_body(self, comm, reply_link=False, switch=False, appeal=False):
         """Render the message body for outgoing messages"""
         context = {
                 'request': self,
                 'switch': switch,
-                'address': self.address,
                 'msg_comms': self.get_msg_comms(comm),
                 }
+        if self.address:
+            context['address'] = self.address.format(self.agency, appeal=appeal)
         if reply_link:
             context['reply_link'] = self.get_agency_reply_link(self.email.email)
         if switch:

@@ -2,7 +2,9 @@
 
 from django import forms
 
-from localflavor.us.forms import USPhoneNumberField
+from localflavor.us.forms import USZipCodeField
+from localflavor.us.us_states import STATE_CHOICES
+from phonenumber_field.formfields import PhoneNumberField
 
 from muckrock.agency.models import (
         Agency,
@@ -26,9 +28,29 @@ from muckrock.portal.models import (
 class AgencyForm(forms.ModelForm):
     """A form for an Agency"""
 
+    address_suite = forms.CharField(
+            required=False,
+            widget=forms.TextInput(attrs={'placeholder': 'Suite / Building Number (Optional)'}),
+            )
+    address_street = forms.CharField(
+            required=False,
+            widget=forms.TextInput(attrs={'placeholder': 'Street'}),
+            )
+    address_city = forms.CharField(
+            required=False,
+            widget=forms.TextInput(attrs={'placeholder': 'City'}),
+            )
+    address_state = forms.ChoiceField(
+            required=False,
+            choices=(('', '---'),) + STATE_CHOICES,
+            )
+    address_zip = USZipCodeField(
+            required=False,
+            widget=forms.TextInput(attrs={'placeholder': 'Zip'}),
+            )
     email = FullEmailField(required=False)
-    phone = USPhoneNumberField(required=False)
-    fax = USPhoneNumberField(required=False)
+    phone = PhoneNumberField(required=False)
+    fax = PhoneNumberField(required=False)
     portal_url = forms.URLField(required=False)
     portal_type = forms.ChoiceField(
             choices=PORTAL_TYPES,
@@ -65,10 +87,23 @@ class AgencyForm(forms.ModelForm):
                     phone=fax_number,
                     request_type='primary',
                     )
-        if self.cleaned_data['address']:
+        if (self.cleaned_data['address_suite'] or
+                self.cleaned_data['address_street'] or
+                self.cleaned_data['address_city'] or
+                self.cleaned_data['address_state'] or
+                self.cleaned_data['address_zip']):
             address, _ = Address.objects.get_or_create(
-                    address=self.cleaned_data['address'],
+                    suite=self.cleaned_data['address_suite'],
+                    street=self.cleaned_data['address_street'],
+                    city=self.cleaned_data['address_city'],
+                    state=self.cleaned_data['address_state'],
+                    zip_code=self.cleaned_data['address_zip'],
                     )
+            # clear out any previously set primary addresses
+            AgencyAddress.objects.filter(
+                    agency=agency,
+                    request_type='primary',
+                    ).delete()
             AgencyAddress.objects.create(
                     agency=agency,
                     address=address,
@@ -88,10 +123,9 @@ class AgencyForm(forms.ModelForm):
             agency.portal = portal
             agency.save()
 
-    class Meta:
-        # pylint: disable=too-few-public-methods
-        model = Agency
-        fields = [
+    def get_fields(self):
+        """Get the fields for rendering"""
+        field_order = [
                 'name',
                 'aliases',
                 'address',
@@ -102,10 +136,25 @@ class AgencyForm(forms.ModelForm):
                 'portal_url',
                 'portal_type',
                 ]
+        return [field if field == 'address' else self[field]
+                for field in field_order]
+
+    class Meta:
+        # pylint: disable=too-few-public-methods
+        model = Agency
+        fields = [
+                'name',
+                'aliases',
+                'email',
+                'url',
+                'phone',
+                'fax',
+                'portal_url',
+                'portal_type',
+                ]
         labels = {
             'aliases': 'Alias',
             'url': 'Website',
-            'address': 'Mailing Address'
         }
         help_texts = {
             'aliases': ('An alternate name for the agency, '

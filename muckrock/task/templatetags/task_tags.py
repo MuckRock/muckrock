@@ -122,11 +122,16 @@ class NewAgencyTaskNode(TaskNode):
                 if a.request_type == 'primary'
                 ]
         initial = {
-                'email': emails[0] if emails else None,
-                'phone': phones[0] if phones else None,
-                'fax': faxes[0] if faxes else None,
-                'address': addresses[0] if addresses else None,
+                'email': emails[0].email if emails else None,
+                'phone': phones[0].phone if phones else None,
+                'fax': faxes[0].phone if faxes else None,
                 }
+        if addresses:
+            initial['address_suite'] = addresses[0].address.suite
+            initial['address_street'] = addresses[0].address.street
+            initial['address_city'] = addresses[0].address.city
+            initial['address_state'] = addresses[0].address.state
+            initial['address_zip'] = addresses[0].address.zip_code
         if self.task.agency.portal:
             initial['portal_url'] = self.task.agency.portal.url
             initial['portal_type'] = self.task.agency.portal.type
@@ -200,6 +205,7 @@ class SnailMailTaskNode(TaskNode):
         extra_context['body'] = foia_.render_msg_body(
                 comm=self.task.communication,
                 switch=self.task.switch,
+                appeal=self.task.category == 'a',
                 )
         extra_context['email'] = [str(e) for e in
                 agency_.agencyemail_set.all()]

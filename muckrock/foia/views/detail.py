@@ -142,6 +142,7 @@ class Detail(DetailView):
                             'faxes',
                             'mails',
                             'web_comms',
+                            'portals',
                             )),
                         Prefetch(
                             'communications__faxes',
@@ -271,6 +272,7 @@ class Detail(DetailView):
             'promote': self._promote_viewer,
             'update_new_agency': self._update_new_agency,
             'agency_reply': self._agency_reply,
+            'staff_pay': self._staff_pay,
         }
         try:
             return actions[request.POST['action']](request, foia)
@@ -485,7 +487,7 @@ class Detail(DetailView):
                 form.save()
                 messages.success(request, 'Agency info saved. Thanks for your help!')
             else:
-                messages.success(request, 'The data was invalid! Try again.')
+                messages.error(request, 'The data was invalid! Try again.')
         else:
             messages.error(request, 'You cannot do that, stop it.')
         return redirect(foia.get_absolute_url() + '#')
@@ -598,6 +600,19 @@ class Detail(DetailView):
                 self.agency_reply_form = form
                 raise FoiaFormError
 
+        return redirect(foia.get_absolute_url() + '#')
+
+    def _staff_pay(self, request, foia):
+        """Staff pays for a request without using stripe"""
+        has_perm = self.request.user.is_staff
+        if has_perm:
+            amount = request.POST.get('amount')
+            try:
+                amount = int(amount)
+            except (ValueError, TypeError):
+                messages.error(request, 'Not a valid amount')
+            else:
+                foia.pay(request.user, amount / 100.0)
         return redirect(foia.get_absolute_url() + '#')
 
     def _resend_comm(self, request, foia):

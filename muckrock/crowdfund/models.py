@@ -6,18 +6,20 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, Sum
 
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 import logging
 import stripe
 
 from muckrock import task
+from muckrock.accounts.utils import stripe_get_customer
 from muckrock.message.email import TemplateEmail
 from muckrock.utils import new_action, stripe_retry_on_error
 
 stripe.api_version = '2015-10-16'
+logger = logging.getLogger(__name__)
 
 
 class Crowdfund(models.Model):
@@ -60,16 +62,11 @@ class Crowdfund(models.Model):
 
     def update_payment_received(self):
         """Combine the amounts of all the payments"""
-        total_amount = Decimal()
-        payments = self.payments.all()
-        for payment in payments:
-            logging.debug(payment)
-            total_amount += payment.amount
-        self.payment_received = total_amount
+        self.payment_received = (self.payments
+                .aggregate(total=Sum('amount'))['total'])
         self.save()
         if self.payment_received >= self.payment_required and self.payment_capped:
             self.close_crowdfund(succeeded=True)
-        return
 
     def close_crowdfund(self, succeeded=False):
         """Close the crowdfund and create a new task for it once it reaches its goal."""
@@ -78,7 +75,7 @@ class Crowdfund(models.Model):
         task.models.CrowdfundTask.objects.create(crowdfund=self)
         verb = 'ended'
         if succeeded:
-            logging.info('Crowdfund %d reached its goal.', self.id)
+            logger.info('Crowdfund %d reached its goal.', self.id)
             verb = 'succeeded'
         new_action(self, verb)
         return
@@ -130,17 +127,76 @@ class Crowdfund(models.Model):
                     },
                 idempotency_key=True,
                 )
+        return self.log_payment(
+                amount,
+                user,
+                show,
+                charge,
+                )
+
+    def log_payment(self, amount, user, show, charge, recurring=None):
+        """Log a payment that was made"""
+        # pylint: disable=too-many-arguments
         payment = CrowdfundPayment.objects.create(
             amount=amount,
             crowdfund=self,
             user=user,
             show=show,
-            charge_id=charge.id
+            charge_id=charge.id,
+            recurring=recurring,
         )
         cache.delete('cf:%s:crowdfund_widget_data' % self.pk)
-        logging.info(payment)
+        logger.info(payment)
         self.update_payment_received()
         return payment
+
+    def make_recurring_payment(self, token, email, amount, show, user):
+        """Make a recurring payment for the crowdfund"""
+        # pylint: disable=too-many-arguments
+        plan = self._get_stripe_plan()
+        customer = stripe_get_customer(
+                user,
+                email,
+                'Crowdfund {} for {}'.format(self.pk, email),
+                )
+        subscription = stripe_retry_on_error(
+                customer.subscriptions.create,
+                plan=plan,
+                source=token,
+                quantity=amount,
+                idempotency_key=True,
+                )
+        RecurringCrowdfundPayment.objects.create(
+                user=user,
+                crowdfund=self,
+                email=email,
+                amount=amount,
+                show=show,
+                customer_id=customer.id,
+                subscription_id=subscription.id,
+                )
+        return subscription
+
+    def _get_stripe_plan(self):
+        """Ensure there is a stripe plan created for this crowdfund"""
+        plan = 'crowdfund-{}'.format(self.pk)
+        try:
+            stripe_retry_on_error(
+                    stripe.Plan.retrieve,
+                    plan,
+                    )
+        except stripe.InvalidRequestError:
+            # default to $1 (100 cents) and then use the quantity
+            # on the subscription to set the amount
+            stripe_retry_on_error(
+                    stripe.Plan.create,
+                    id=plan,
+                    amount=100,
+                    currency='usd',
+                    interval='month',
+                    name=self.name,
+                    )
+        return plan
 
     def send_intro_email(self, user):
         """Send an intro email to the user upon crowdfund creation"""
@@ -173,6 +229,10 @@ class Crowdfund(models.Model):
             self._project = None
         return self._project
 
+    def can_recur(self):
+        """Can this crowdfund accept recurring payments?"""
+        return not self.payment_capped and self.date_due is None
+
 
 class CrowdfundPayment(models.Model):
     """A payment toward a crowdfund campaign"""
@@ -183,8 +243,66 @@ class CrowdfundPayment(models.Model):
     show = models.BooleanField(default=False)
     charge_id = models.CharField(max_length=255, blank=True)
     crowdfund = models.ForeignKey(Crowdfund, related_name='payments')
+    recurring = models.ForeignKey(
+            'crowdfund.RecurringCrowdfundPayment',
+            related_name='payments',
+            blank=True,
+            null=True,
+            )
 
     def __unicode__(self):
         return (u'Payment of $%.2f by %s on %s for %s' %
             (self.amount, self.user, self.date.date(),
                 self.crowdfund.get_crowdfund_object()))
+
+
+class RecurringCrowdfundPayment(models.Model):
+    """Keep track of recurring crowdfund payments"""
+    user = models.ForeignKey(
+            'auth.User',
+            blank=True,
+            null=True,
+            related_name='recurring_crowdfund_payments',
+            on_delete=models.SET_NULL,
+            )
+    crowdfund = models.ForeignKey(Crowdfund, related_name='recurring_payments')
+    email = models.EmailField()
+    amount = models.PositiveIntegerField()
+    show = models.BooleanField(default=False)
+    customer_id = models.CharField(max_length=255)
+    subscription_id = models.CharField(
+            unique=True,
+            max_length=255,
+            )
+    payment_failed = models.BooleanField(default=False)
+    active = models.BooleanField(default=True)
+    created_datetime = models.DateTimeField(auto_now_add=True)
+    deactivated_datetime = models.DateTimeField(blank=True, null=True)
+
+    def __unicode__(self):
+        return u'Recurring Crowdfund Payment: {} - ${}/Month by {}'.format(
+                self.crowdfund.name,
+                self.amount,
+                self.email,
+                )
+
+    def cancel(self):
+        """Cancel the recurring donation"""
+        self.active = False
+        self.deactivated_datetime = datetime.now()
+        self.save()
+        subscription = stripe_retry_on_error(
+                stripe.Subscription.retrieve,
+                self.subscription_id,
+                )
+        stripe_retry_on_error(subscription.delete)
+
+    def log_payment(self, charge):
+        """Log an instance of the recurring payment"""
+        return self.crowdfund.log_payment(
+                self.amount,
+                self.user,
+                self.show,
+                charge,
+                recurring=self,
+                )

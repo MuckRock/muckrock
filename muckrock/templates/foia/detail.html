@@ -231,6 +231,9 @@
                                 {% if not foia.has_crowdfund %}
                                     <a href="#crowdfund" class="green button">Crowdfund</a>
                                 {% endif %}
+                                {% if request.user.is_staff %}
+                                    <a href="#staff-pay" class="green button">Staff Pay</a>
+                                {% endif %}
                             {% endif %}
                             {% if can_appeal %}
                                 <a href="#appeal" class="red button">Appeal</a>
@@ -374,6 +377,21 @@ Sincerely,
                                 {% include 'lib/pattern/form.html' with form=crowdfund_form %}
                                 <div class="buttons">
                                     <button type="submit" class="primary button">Create Crowdfund</button>
+                                    <a href="#inactive" class="button">Cancel</a>
+                                </div>
+                            </form>
+                        </div>
+                        {% endif %}
+                        {% if request.user.is_staff %}
+                        <div class="composer" id="staff-pay">
+                            <form class="composer-input" method="post">
+                                <header>
+                                    <p>Pay your request fees</p>
+                                </header>
+                                {% csrf_token %}
+                                <input type="number" name="amount" class="currency-field" value="{{ foia.get_stripe_amount }}" />
+                                <div class="buttons">
+                                    <button type="submit" name="action" value="staff_pay" class="primary button">Pay</button>
                                     <a href="#inactive" class="button">Cancel</a>
                                 </div>
                             </form>

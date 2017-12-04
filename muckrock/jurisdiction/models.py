@@ -182,12 +182,18 @@ class Jurisdiction(models.Model, RequestHelper):
         else:
             return self.waiver
 
-    def get_law_name(self):
+    def get_law_name(self, abbrev=False):
         """The law name for the jurisdiction"""
+        #pylint: disable=redefined-variable-type
         if self.level == 'l':
-            return self.parent.law_name
+            jurisdiction = self.parent
         else:
-            return self.law_name
+            jurisdiction = self
+        if abbrev:
+            laws = jurisdiction.laws.all()
+            if laws and laws[0].shortname:
+                return laws[0].shortname
+        return jurisdiction.law_name
 
     def get_calendar(self):
         """Get a calendar of business days for the jurisdiction"""

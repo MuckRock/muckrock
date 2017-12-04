@@ -9,7 +9,9 @@ from django.forms import ValidationError
 
 from email.utils import parseaddr, getaddresses
 
+from djgeojson.fields import PointField
 from localflavor.us.us_states import STATE_CHOICES
+from localflavor.us.models import USStateField, USZipCodeField
 from phonenumber_field.modelfields import PhoneNumberField
 
 from muckrock.mailgun.models import WhitelistDomain
@@ -158,18 +160,80 @@ class PhoneNumber(models.Model):
 
 class Address(models.Model):
     """A mailing address"""
-    address = models.TextField(unique=True)
 
-    # These fields for future use
-    address_to = models.CharField(blank=True, max_length=255)
+    # These fields are the components of a normal address
     street = models.CharField(blank=True, max_length=255)
+    suite = models.CharField(blank=True, max_length=255)
     city = models.CharField(blank=True, max_length=255)
-    state = models.CharField(blank=True, max_length=255)
-    zip_code = models.CharField(blank=True, max_length=20)
-    country = models.CharField(blank=True, max_length=255)
+    state = USStateField(blank=True)
+    zip_code = USZipCodeField(blank=True)
+    point = PointField(blank=True)
+
+    # These are override fields for parts of the address
+    agency_override = models.CharField(
+            blank=True,
+            max_length=255,
+            help_text='Override the agency this is addressed to',
+            )
+    attn_override = models.CharField(
+            blank=True,
+            max_length=255,
+            help_text='Override the attention line to address '
+                      'this to a particular person',
+            )
+
+    # This will become the override field for non-conforming addresses
+    address = models.TextField(blank=True)
 
     def __unicode__(self):
-        return self.address
+        if self.street:
+            address = u'{}\n{}, {} {}'.format(
+                    self.street,
+                    self.city,
+                    self.state,
+                    self.zip_code,
+                    )
+            if self.suite:
+                address = u'{}\n{}'.format(self.suite, address)
+            return address
+        else:
+            return self.address
+
+    def format(self, agency, appeal=False):
+        """Format an address for mailing"""
+        # if we do not have address components use the
+        # full address override
+        if not self.street:
+            return self.address
+
+        # otherwise we build the address line by line
+        address = []
+        # agency addressed to
+        if self.agency_override:
+            address.append(self.agency_override)
+        else:
+            address.append(agency.name)
+        # ATTN line
+        if self.attn_override:
+            address.append(self.attn_override)
+        else:
+            if appeal:
+                office = u'Appeal'
+            else:
+                office = u'Office'
+            address.append(u'{} {}'.format(
+                agency.jurisdiction.get_law_name(abbrev=True),
+                office,
+                ))
+        if self.suite:
+            address.append(self.suit)
+        address.append(self.street)
+        address.append(u'{}, {} {}'.format(
+            self.city,
+            self.state,
+            self.zip_code,
+            ))
+        return '\n'.join(address)
 
 
 # Communication models

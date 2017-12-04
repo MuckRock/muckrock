@@ -57,6 +57,7 @@ from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.accounts.utils import validate_stripe_email
 from muckrock.agency.models import Agency
 from muckrock.communication.models import EmailAddress
+from muckrock.crowdfund.models import RecurringCrowdfundPayment
 from muckrock.foia.models import FOIARequest
 from muckrock.message.email import TemplateEmail
 from muckrock.news.models import Article
@@ -76,6 +77,7 @@ from muckrock.utils import stripe_retry_on_error
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
+
 def create_new_user(request, valid_form):
     """Create a user from the valid form, give them a profile, and log them in."""
     new_user = valid_form.save()
@@ -91,6 +93,7 @@ def create_new_user(request, valid_form):
     )
     login(request, new_user)
     return new_user
+
 
 def account_logout(request):
     """Logs a user out of their account and redirects to index page"""
@@ -233,6 +236,7 @@ class AccountsView(TemplateView):
             messages.error(request, 'Your card was declined')
         return self.render_to_response(self.get_context_data())
 
+
 def upgrade(request):
     """Upgrades the user from a Basic to a Professional account."""
     if not request.user.is_authenticated():
@@ -248,6 +252,7 @@ def upgrade(request):
         raise ValueError('Cannot upgrade this account, no Stripe token provided.')
     request.user.profile.start_pro_subscription(token)
 
+
 def downgrade(request):
     """Downgrades the user from a Professional to a Basic account."""
     if not request.user.is_authenticated():
@@ -256,84 +261,130 @@ def downgrade(request):
         raise ValueError('Cannot downgrade this account, it is not Professional.')
     request.user.profile.cancel_pro_subscription()
 
-@login_required
-def profile_settings(request):
+
+@method_decorator(login_required, name='dispatch')
+class ProfileSettings(TemplateView):
     """Update a users information"""
-    # pylint: disable=too-many-locals
-    user_profile = request.user.profile
-    settings_forms = {
-        'profile': ProfileSettingsForm,
-        'email': EmailSettingsForm,
-        'billing': BillingPreferencesForm,
-        'org': OrgPreferencesForm,
-    }
-    receipt_form = None
-    if request.method == 'POST':
+    template_name = 'accounts/settings.html'
+
+    def post(self, request, **kwargs):
+        """Handle form processing"""
+        # pylint: disable=unused-argument
+        settings_forms = {
+            'profile': ProfileSettingsForm,
+            'email': EmailSettingsForm,
+            'billing': BillingPreferencesForm,
+            'org': OrgPreferencesForm,
+        }
         action = request.POST.get('action')
         if action == 'receipt':
             receipt_form = ReceiptForm(request.POST)
-            if receipt_form.is_valid():
-                new_emails = receipt_form.cleaned_data['emails'].split('\n')
-                new_emails = {e.strip() for e in new_emails}
-                old_emails = {r.email for r in
-                        request.user.receipt_emails.all()}
-                ReceiptEmail.objects.filter(
-                        user=request.user,
-                        email__in=(old_emails - new_emails),
-                        ).delete()
-                ReceiptEmail.objects.bulk_create(
-                        [ReceiptEmail(user=request.user, email=e)
-                            for e in new_emails - old_emails])
-                messages.success(request, 'Your settings have been updated.')
+            success = self._handle_receipt_form(receipt_form)
+            if success:
                 return redirect('acct-settings')
         elif action == 'cancel-donations':
-            donations = request.user.donations.filter(
-                    pk__in=request.POST.getlist('cancel-donations'))
-            for donation in donations:
-                donation.cancel()
-            if donations:
-                messages.success(request, 'The selected donations have been cancelled.')
-            else:
-                messages.warning(request, 'No donations were selected to be cancelled.')
+            self._handle_cancel_payments('donations', 'cancel-donations')
+            return redirect('acct-settings')
+        elif action == 'cancel-crowdfunds':
+            self._handle_cancel_payments(
+                    'recurring_crowdfund_payments',
+                    'cancel-crowdfunds',
+                    )
             return redirect('acct-settings')
         elif action:
             form = settings_forms[action]
-            form = form(request.POST, request.FILES, instance=user_profile)
+            form = form(
+                    request.POST,
+                    request.FILES,
+                    instance=request.user.profile,
+                    )
             if form.is_valid():
                 form.save()
                 messages.success(request, 'Your settings have been updated.')
                 return redirect('acct-settings')
-    profile_initial = {
-        'first_name': request.user.first_name,
-        'last_name': request.user.last_name,
-    }
-    email_initial = {
-        'email': request.user.email
-    }
-    receipt_initial = {
-        'emails': '\n'.join(r.email for r in request.user.receipt_emails.all())
-        }
-    profile_form = ProfileSettingsForm(initial=profile_initial, instance=user_profile)
-    email_form = EmailSettingsForm(initial=email_initial, instance=user_profile)
-    org_form = OrgPreferencesForm(instance=user_profile)
-    receipt_form = receipt_form or ReceiptForm(initial=receipt_initial)
-    current_plan = dict(ACCT_TYPES)[user_profile.acct_type]
-    donations = RecurringDonation.objects.filter(user=request.user)
-    context = {
-        'stripe_pk': settings.STRIPE_PUB_KEY,
-        'profile_form': profile_form,
-        'email_form': email_form,
-        'receipt_form': receipt_form,
-        'org_form': org_form,
-        'current_plan': current_plan,
-        'credit_card': user_profile.card(),
-        'donations': donations,
-    }
-    return render(
-            request,
-            'accounts/settings.html',
-            context,
-            )
+
+        # form was invalid
+        context = self.get_context_data(receipt_form=receipt_form)
+        return self.render_to_response(context)
+
+    def _handle_receipt_form(self, receipt_form):
+        """Process the receipt form"""
+        if receipt_form.is_valid():
+            new_emails = receipt_form.cleaned_data['emails'].split('\n')
+            new_emails = {e.strip() for e in new_emails}
+            old_emails = {r.email for r in
+                    self.request.user.receipt_emails.all()}
+            ReceiptEmail.objects.filter(
+                    user=self.request.user,
+                    email__in=(old_emails - new_emails),
+                    ).delete()
+            ReceiptEmail.objects.bulk_create(
+                    [ReceiptEmail(user=self.request.user, email=e)
+                        for e in new_emails - old_emails])
+            messages.success(self.request, 'Your settings have been updated.')
+            return True
+        else:
+            return False
+
+    def _handle_cancel_payments(self, attr, arg):
+        """Handle cancelling recurring donations or crowdfunds"""
+        payments = getattr(self.request.user, attr).filter(
+                pk__in=self.request.POST.getlist(arg))
+        for payment in payments:
+            payment.cancel()
+        msg = attr.replace('_', ' ')
+        if payments:
+            messages.success(
+                    self.request,
+                    'The selected {} have been cancelled.'.format(msg),
+                    )
+        else:
+            messages.warning(
+                    self.request,
+                    'No {} were selected to be cancelled.'.format(msg),
+                    )
+
+    def get_context_data(self, **kwargs):
+        """Returns context for the template"""
+        context = super(ProfileSettings, self).get_context_data(**kwargs)
+        user_profile = self.request.user.profile
+        profile_initial = {
+            'first_name': self.request.user.first_name,
+            'last_name': self.request.user.last_name,
+            }
+        email_initial = {'email': self.request.user.email}
+        receipt_initial = {
+            'emails': '\n'.join(r.email
+                for r in self.request.user.receipt_emails.all())
+            }
+        profile_form = ProfileSettingsForm(
+                initial=profile_initial,
+                instance=user_profile,
+                )
+        email_form = EmailSettingsForm(
+                initial=email_initial,
+                instance=user_profile,
+                )
+        org_form = OrgPreferencesForm(instance=user_profile)
+        receipt_form = (kwargs.get('receipt_form') or
+                ReceiptForm(initial=receipt_initial))
+        current_plan = dict(ACCT_TYPES)[user_profile.acct_type]
+        donations = RecurringDonation.objects.filter(user=self.request.user)
+        crowdfunds = RecurringCrowdfundPayment.objects.filter(
+                user=self.request.user)
+        context.update({
+            'stripe_pk': settings.STRIPE_PUB_KEY,
+            'profile_form': profile_form,
+            'email_form': email_form,
+            'receipt_form': receipt_form,
+            'org_form': org_form,
+            'current_plan': current_plan,
+            'credit_card': user_profile.card(),
+            'donations': donations,
+            'crowdfunds': crowdfunds,
+            })
+        return context
+
 
 def buy_requests(request, username=None):
     """A purchaser buys requests for a recipient. The recipient can even be themselves!"""
@@ -394,6 +445,7 @@ def buy_requests(request, username=None):
         logger.warn('Payment error: %s', exc, exc_info=sys.exc_info())
     return redirect(url_redirect)
 
+
 @login_required
 def verify_email(request):
     """Verifies a user's email address"""
@@ -414,6 +466,7 @@ def verify_email(request):
     else:
         messages.warning(request, 'Your email is already confirmed, no need to verify again!')
     return redirect(_profile)
+
 
 def profile(request, username=None):
     """View a user's profile"""
@@ -472,6 +525,7 @@ def profile(request, username=None):
             context,
             )
 
+
 @csrf_exempt
 def stripe_webhook(request):
     """Handle webhooks from stripe"""
@@ -494,10 +548,8 @@ def stripe_webhook(request):
         event_type = event['type']
         if event_type.startswith(('charge', 'invoice')):
             event_object_id = event['data']['object'].get('id', '')
-            has_invoice = event['data']['object'].get('invoice') is not None
         else:
             event_object_id = ''
-            has_invoice = False
     except (TypeError, ValueError, SyntaxError) as exception:
         logging.error(
                 'Stripe Webhook: Error parsing JSON: %s',
@@ -535,7 +587,7 @@ def stripe_webhook(request):
         'data': event
     }
     logger.info(success_msg)
-    if event_type == 'charge.succeeded' and not has_invoice:
+    if event_type == 'charge.succeeded':
         # don't double send receipts with invoices
         send_charge_receipt.delay(event_object_id)
     elif event_type == 'invoice.payment_succeeded':
@@ -543,6 +595,7 @@ def stripe_webhook(request):
     elif event_type == 'invoice.payment_failed':
         failed_payment.delay(event_object_id)
     return HttpResponse()
+
 
 @method_decorator(login_required, name='dispatch')
 class RegistrationCompletionView(FormView):

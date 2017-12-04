@@ -80,7 +80,7 @@ urlpatterns = [
         views.UnreadNotificationList.as_view(),
         name='acct-notifications-unread'),
     url(r'^settings/$',
-        views.profile_settings,
+        views.ProfileSettings.as_view(),
         name='acct-settings'),
     url(r'^settings/verify_email/$',
         views.verify_email,

@@ -35,8 +35,9 @@ class PDF(FPDF):
 class SnailMailPDF(PDF):
     """Custom PDF class for a snail mail task"""
 
-    def __init__(self, comm):
+    def __init__(self, comm, category):
         self.comm = comm
+        self.appeal = category == 'a'
         super(SnailMailPDF, self).__init__('P', 'pt', 'Letter')
 
     def header(self):
@@ -53,8 +54,8 @@ class SnailMailPDF(PDF):
                     email=email,
                     ))
         width = self.get_string_width(email)
-        self.set_xy(8 * 72 - width - 4, 72 / 2)
-        self.multi_cell(width + 6, 13, text, 0, 'R')
+        self.set_xy(72 / 2, 72 / 2)
+        self.multi_cell(width + 6, 13, text, 0, 'L')
         self.line(72 / 2, 1.45 * 72, 8 * 72, 1.45 * 72)
         self.ln(30)
 
@@ -63,8 +64,8 @@ class SnailMailPDF(PDF):
         self.configure()
         self.rect(6.8 * 72, 10, 1.2 * 72, 72 / 4, 'F')
         self.set_font('DejaVu', '', 10)
-        msg_body = self.comm.foia.render_msg_body(self.comm)
-        self.multi_cell(0, 13, msg_body, 0, 'L')
+        msg_body = self.comm.foia.render_msg_body(self.comm, appeal=self.appeal)
+        self.multi_cell(0, 13, msg_body.rstrip(), 0, 'L')
 
 
 class CoverPDF(PDF):

@@ -12,6 +12,7 @@ import logging
 import stripe
 
 from muckrock.accounts.models import Profile, RecurringDonation
+from muckrock.crowdfund.models import RecurringCrowdfundPayment
 from muckrock.message.email import TemplateEmail
 from muckrock.message.notifications import SlackNotification
 from muckrock.message import digests, receipts
@@ -106,25 +107,39 @@ def send_invoice_receipt(invoice_id):
                     stripe.Customer.retrieve,
                     invoice.customer,
                     )
+            charge.metadata['email'] = customer.email
         except stripe.error.InvalidRequestError:
             logger.error('Could not retrieve customer')
             return
     else:
         user = profile.user
-        customer = None
 
-    plan = invoice.lines.data[0].plan
+    plan = get_subscription_type(invoice)
     try:
         receipt_functions = {
             'pro': receipts.pro_subscription_receipt,
             'org': receipts.org_subscription_receipt,
             'donate': receipts.donation_receipt,
             }
-        receipt_function = receipt_functions[plan.id]
+        receipt_function = receipt_functions[plan]
     except KeyError:
-        logger.warning('Invoice charged for unrecognized plan: %s', plan.name)
-        receipt_function = receipts.generic_receipt
-    receipt = receipt_function(user, charge, customer)
+        if plan.startswith('crowdfund'):
+            receipt_function = receipts.crowdfund_payment_receipt
+            charge.metadata['crowdfund_id'] = plan.split('-')[1]
+            recurring_payment = RecurringCrowdfundPayment.objects.filter(
+                    subscription_id=invoice.subscription,
+                    ).first()
+            if recurring_payment:
+                recurring_payment.log_payment(charge)
+            else:
+                logger.error(
+                        'No recurring crowdfund payment for: %s',
+                        invoice.subscription,
+                        )
+        else:
+            logger.warning('Invoice charged for unrecognized plan: %s', plan)
+            receipt_function = receipts.generic_receipt
+    receipt = receipt_function(user, charge)
     receipt.send(fail_silently=False)
 
 @task(name='muckrock.message.tasks.send_charge_receipt')
@@ -167,17 +182,16 @@ def send_charge_receipt(charge_id):
 def get_subscription_type(invoice):
     """Gets the subscription type from the invoice."""
     # get the first line of the invoice
-    lines = invoice.lines
-    subscription_type = 'unknown'
-    if lines.total_count > 0:
-        data = lines.data
-        plan = data[0].plan
-        subscription_type = plan.id
-    return subscription_type
+    if invoice.lines.total_count > 0:
+        return invoice.lines.data[0].plan.id
+    else:
+        return 'unknown'
 
 @task(name='muckrock.message.tasks.failed_payment')
 def failed_payment(invoice_id):
     """Notify a customer about a failed subscription invoice."""
+    # pylint: disable=too-many-branches
+    # pylint: disable=too-many-statements
     invoice = stripe_retry_on_error(
             stripe.Invoice.retrieve,
             invoice_id,
@@ -186,12 +200,36 @@ def failed_payment(invoice_id):
     subscription_type = get_subscription_type(invoice)
     recurring_donation = None
     profile = None
+    crowdfund = None
     if subscription_type == 'donate':
-        recurring_donation = RecurringDonation.objects.get(
-                subscription_id=invoice.subscription)
-        user = recurring_donation.user
-        recurring_donation.payment_failed = True
-        recurring_donation.save()
+        recurring_donation = RecurringDonation.objects.filter(
+                subscription_id=invoice.subscription,
+                ).first()
+        if recurring_donation:
+            user = recurring_donation.user
+            recurring_donation.payment_failed = True
+            recurring_donation.save()
+        else:
+            user = None
+            logger.error(
+                    'No recurring crowdfund found for %s',
+                    invoice.subscription,
+                    )
+    elif subscription_type.startswith('crowdfund'):
+        recurring_payment = RecurringCrowdfundPayment.objects.filter(
+                subscription_id=invoice.subscription,
+                ).first()
+        if recurring_payment:
+            user = recurring_payment.user
+            crowdfund = recurring_payment.crowdfund
+            recurring_payment.payment_failed = True
+            recurring_payment.save()
+        else:
+            user = None
+            logger.error(
+                    'No recurring crowdfund found for %s',
+                    invoice.subscription,
+                    )
     else:
         profile = Profile.objects.get(customer_id=invoice.customer)
         user = profile.user
@@ -202,31 +240,32 @@ def failed_payment(invoice_id):
     org = None
     if subscription_type == 'org':
         org = Organization.objects.get(owner=user)
+    context = {
+        'attempt': attempt,
+        'type': subscription_type,
+        'org': org,
+        'crowdfund': crowdfund,
+        }
+    if subscription_type.startswith('crowdfund'):
+        context['type'] = 'crowdfund'
     if attempt == 4:
         # on last attempt, cancel the user's subscription and lower the failed payment flag
         if subscription_type == 'pro':
             profile.cancel_pro_subscription()
         elif subscription_type == 'org':
             org.cancel_subscription()
-        elif subscription_type == 'donate':
+        elif subscription_type == 'donate' and recurring_donation:
             recurring_donation.cancel()
+        elif subscription_type.startswith('crowdfund') and recurring_payment:
+            recurring_payment.cancel()
         if subscription_type in ('pro', 'org'):
             profile.payment_failed = False
             profile.save()
-        logger.info('%s subscription has been cancelled due to failed payment', user.username)
+        logger.info('%s subscription has been cancelled due to failed payment', user)
         subject = u'Your %s subscription has been cancelled' % subscription_type
-        context = {
-            'attempt': 'final',
-            'type': subscription_type,
-            'org': org
-        }
+        context['attempt'] = 'final'
     else:
-        logger.info('Failed payment by %s, attempt %s', user.username, attempt)
-        context = {
-            'attempt': attempt,
-            'type': subscription_type,
-            'org': org
-        }
+        logger.info('Failed payment by %s, attempt %s', user, attempt)
     notification = TemplateEmail(
         user=user,
         extra_context=context,

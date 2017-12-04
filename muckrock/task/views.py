@@ -225,6 +225,9 @@ class SnailMailTaskList(TaskList):
         """Special post helper exclusive to SnailMailTasks"""
         # we should always set the status of a request when resolving
         # a snail mail task so that the request leaves processing status
+        if request.POST.get('no_mail'):
+            task.resolve(request.user)
+            return task
         status = request.POST.get('status')
         check_number = request.POST.get('check_number')
         if status and status not in dict(STATUS):
@@ -242,18 +245,9 @@ class SnailMailTaskList(TaskList):
         # number, then we should record the existence of this check
         if check_number and task.category == 'p':
             task.record_check(check_number, request.user)
-        # ensure a mail communication is created
-        # it should have been already created when the PDF was generated
-        MailCommunication.objects.get_or_create(
-                communication=task.communication,
-                defaults={
-                    'to_address': task.communication.foia.address,
-                    'sent_datetime': datetime.now(),
-                    }
-                )
         task.communication.save()
         task.resolve(request.user)
-        return super(SnailMailTaskList, self).task_post_helper(request, task)
+        return task
 
 
 class StaleAgencyTaskList(TaskList):
@@ -586,7 +580,7 @@ def snail_mail_pdf(request, pk):
     merger = PdfFileMerger()
 
     # generate the pdf and merge all pdf attachments
-    pdf = SnailMailPDF(snail.communication)
+    pdf = SnailMailPDF(snail.communication, snail.category)
     pdf.generate()
     merger.append(StringIO(pdf.output(dest='S')))
     for file_ in snail.communication.files.all():

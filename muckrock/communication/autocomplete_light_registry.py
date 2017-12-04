@@ -20,10 +20,10 @@ class AddressAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     search_fields = [
             'address',
             'street',
+            'suite',
             'city',
             'state',
             'zip_code',
-            'country',
             ]
     attrs = {
         'data-autocomplete-minimum-characters': 2,

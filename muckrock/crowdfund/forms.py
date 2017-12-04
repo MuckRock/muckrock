@@ -83,6 +83,7 @@ class CrowdfundPaymentForm(forms.Form):
         required=False,
         widget=forms.TextInput(attrs={'placeholder': 'Your Full Name'})
     )
+    recurring = forms.BooleanField(required=False)
 
     def clean_stripe_amount(self):
         """Ensure the amount of the payment is greater than zero"""
