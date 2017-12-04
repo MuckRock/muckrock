@@ -226,7 +226,7 @@ class Address(models.Model):
                 office,
                 ))
         if self.suite:
-            address.append(self.suit)
+            address.append(self.suite)
         address.append(self.street)
         address.append(u'{}, {} {}'.format(
             self.city,
