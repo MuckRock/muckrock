@@ -26,7 +26,7 @@ class PortalAutoReceiveMixin(object):
         """Initialize the router"""
         self._router = [(re.compile(pattern), getattr(self, method))
                 for pattern, method in self.router]
-        super(PortalAutoReceiveMixin, self).__init__(self, *args, **kwargs)
+        super(PortalAutoReceiveMixin, self).__init__(*args, **kwargs)
 
     def receive_msg(self, comm, **kwargs):
         """Route incoming messages"""
@@ -59,8 +59,9 @@ class PortalAutoReceiveMixin(object):
                     upload_document_cloud.delay(f.pk, False))
         return foia_file
 
-    def _accept_comm(self, comm):
+    def _accept_comm(self, comm, text):
         """Accept a communication onto the site"""
+        comm.communication = text
         comm.hidden = False
         comm.create_agency_notifications()
         comm.save()

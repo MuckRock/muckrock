@@ -44,8 +44,11 @@ class FBIPortal(PortalAutoReceiveMixin, ManualPortal):
         if match:
             portal_task.delay(self.portal.pk, 'document_reply_task', [comm.pk])
         else:
-            ManualPortal.receive_msg(self, comm,
-                    reason='Unexpected email format')
+            ManualPortal.receive_msg(
+                    self,
+                    comm,
+                    reason='Unexpected email format',
+                    )
 
     def document_reply_task(self, comm_pk):
         """Download the documents asynchornously"""
@@ -54,9 +57,14 @@ class FBIPortal(PortalAutoReceiveMixin, ManualPortal):
         for name, url in p_document_link.findall(comm.communication):
             reply = requests.get(url)
             if reply.status_code != 200:
-                ManualPortal.receive_msg(self, comm,
-                        reason='Error downloading file: {}'.format(name))
+                ManualPortal.receive_msg(
+                        self,
+                        comm,
+                        reason='Error downloading file: {}'.format(name),
+                        )
                 return
             self._attach_file(comm, name, reply.content)
-        comm.communication = 'There are eFOIA files available for you to download.'
-        self._accept_comm(comm)
+        self._accept_comm(
+                comm,
+                'There are eFOIA files available for you to download.',
+                )
