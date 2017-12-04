@@ -55,14 +55,14 @@ def import_addresses(file_name):
             except Address.DoesNotExist:
                 print 'Address {} does not exist'.format(row[ADDRESS_PK])
             else:
-                address.street = row[STREET]
-                address.suite = row[SUITE]
-                address.city = row[CITY]
-                address.state = row[STATE]
-                address.zip_code = row[ZIP]
-                address.point = {'type': 'Point', 'coordinates': [row[LONG], row[LAT]]}
-                address.agency_override = row[AGENCY_OVERRIDE]
-                address.attn_override = row[ATTN_OVERRIDE]
+                address.street = row[STREET].strip()
+                address.suite = row[SUITE].strip()
+                address.city = row[CITY].strip()
+                address.state = row[STATE].strip()
+                address.zip_code = row[ZIP].strip()
+                address.point = {'type': 'Point', 'coordinates': [row[LONG].strip(), row[LAT].strip()]}
+                address.agency_override = row[AGENCY_OVERRIDE].strip()
+                address.attn_override = row[ATTN_OVERRIDE].strip()
                 try:
                     address.save()
                 except Exception as e:
