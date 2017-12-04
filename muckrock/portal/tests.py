@@ -82,4 +82,6 @@ class TestNextRequestPortal(TestCase):
                 )
         self.portal.receive_msg(comm)
         eq_(comm.foia.status, 'processed')
+        eq_(comm.foia.tracking_id, '17-1')
+        eq_(comm.foia.tracking_id, '17-1')
         eq_(comm.portals.count(), 1)
