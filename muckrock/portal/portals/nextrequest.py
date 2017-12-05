@@ -110,7 +110,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
                     'request[request_text]': linebreaks(comm.communication),
                     'requester[email]': email,
                     'requester[name]': user.get_full_name(),
-                    'requester[phone_number]': '(617) 299-1873',
+                    'requester[phone_number]': '(617) 299-1832',
                     'requester[address]': 'Dept MR {} 411A Highland Ave'.format(foia.pk),
                     'requester[city]': 'Somerville',
                     'requester[state]': 'MA',
@@ -439,7 +439,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
                         url,
                         'Downloading document: {}'.format(document),
                         )
-                self._attach_file(comm, document, reply.content)
+                comm.attach_file(reply.content, document, self.portal.name)
             self._accept_comm(comm, text)
         except PortalError as exc:
             ManualPortal.receive_msg(

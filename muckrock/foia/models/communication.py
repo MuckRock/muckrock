@@ -4,7 +4,7 @@ Models for the FOIA application
 """
 
 from django.core.files.base import ContentFile
-from django.db import models
+from django.db import models, transaction
 from django.shortcuts import get_object_or_404
 
 import chardet
@@ -289,28 +289,7 @@ class FOIACommunication(models.Model):
         for file_ in files.itervalues():
             if not any(file_.content_type == t or file_.name.endswith(s)
                     for t, s in ignore_types):
-                self.upload_file(file_)
-
-    def upload_file(self, file_):
-        """Upload and attach a file"""
-        # avoid circular imports
-        from muckrock.foia.tasks import upload_document_cloud
-        # make orphans and embargoed documents private
-        access = 'private' if not self.foia or self.foia.embargo else 'public'
-        source = self.get_source()
-
-        foia_file = self.files.create(
-                foia=self.foia,
-                title=os.path.splitext(file_.name)[0][:70],
-                date=datetime.now(),
-                source=source[:70],
-                access=access)
-        # max db size of 255, - 22 for folder name
-        foia_file.ffile.save(file_.name[:233].encode('ascii', 'ignore'), file_)
-        foia_file.save()
-        if self.foia:
-            upload_document_cloud.apply_async(
-                    args=[foia_file.pk, False], countdown=3)
+                self.attach_file(file_)
 
     def create_agency_notifications(self):
         """Create the notifications for when an agency creates a new comm"""
@@ -324,7 +303,31 @@ class FOIACommunication(models.Model):
         if self.foia:
             self.foia.update(self.anchor())
 
-    def attach_files(self, msg):
+    def attach_file(self, content, name=None, source=None):
+        """Given a name and the file contents, attach a file to this"""
+        from muckrock.foia.tasks import upload_document_cloud
+        if name is None:
+            name = content.name
+        title = os.path.splitext(name)[0][:255]
+        if source is None:
+            source = self.get_source()
+        access = 'private' if not self.foia or self.foia.embargo else 'public'
+        with transaction.atomic():
+            foia_file = self.files.create(
+                    foia=self.foia,
+                    title=title,
+                    date=datetime.now(),
+                    source=source[:70],
+                    access=access,
+                    )
+            name = name[:233].encode('ascii', 'ignore')
+            foia_file.ffile.save(name, ContentFile(content))
+            if self.foia:
+                transaction.on_commit(lambda:
+                        upload_document_cloud.delay(foia_file.pk, False))
+        return foia_file
+
+    def attach_files_to_email(self, msg):
         """Attach all of this communications files to the email message"""
         for file_ in self.files.all():
             name = file_.name()

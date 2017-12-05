@@ -75,8 +75,8 @@ newrelic==2.70.0.51
 numpy==1.9.1
 olefile==0.44             # via pillow
 orderedmultidict==0.7.11  # via furl
-packaging==16.8
 pascha==0.5
+pdfrw==0.4
 phonenumberslite==8.8.2
 pillow==4.2.1
 premailer==3.0.0          # via django-premailer
@@ -84,7 +84,6 @@ psycopg2==2.6.2
 pyimagediet==1.1.1        # via image-diet2
 pylibmc==1.5.1            # via django-pylibmc
 pymdown-extensions==1.2
-pyparsing==2.2.0          # via packaging
 pypdf2==1.26.0
 pyphaxio==0.11
 python-dateutil==2.5.3
@@ -95,13 +94,14 @@ pyyaml==3.12              # via pyimagediet
 raven==5.27.1
 rcssmin==1.0.6            # via django-compressor
 redis==2.10.5
+reportlab==3.4.0
 requests==2.18.1
 rjsmin==1.0.12            # via django-compressor
 rules==1.1.1
 scikit-learn==0.16.1
 scipy==0.14.0
 simplejson==3.8.2         # via django-lot
-six==1.10.0               # via bleach, django-compat, django-geojson, furl, html5lib, orderedmultidict, packaging, python-dateutil
+six==1.10.0               # via bleach, django-compat, django-geojson, furl, html5lib, orderedmultidict, python-dateutil
 smart-open==1.4.0
 smartypants==1.8.6
 sqlparse==0.2.4           # via django-debug-toolbar
@@ -109,3 +109,8 @@ stripe==1.75.0
 unicodecsv==0.14.1
 unidecode==0.4.19
 urllib3==1.21.1           # via requests
+
+# The following packages are commented out because they are
+# considered to be unsafe in a requirements file:
+# pip                       # via reportlab
+# setuptools                # via python-levenshtein, reportlab

@@ -63,7 +63,7 @@ class FBIPortal(PortalAutoReceiveMixin, ManualPortal):
                         reason='Error downloading file: {}'.format(name),
                         )
                 return
-            self._attach_file(comm, name, reply.content)
+            comm.attach_file(reply.content, name, self.portal.name)
         self._accept_comm(
                 comm,
                 'There are eFOIA files available for you to download.',
