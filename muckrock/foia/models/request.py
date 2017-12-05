@@ -611,17 +611,16 @@ class FOIARequest(models.Model):
             request_type = 'appeal'
         else:
             request_type = 'primary'
-        # do not add a portal to a request already in flight
-        if not self.portal and not appeal and self.communications.count() == 1:
-            self.portal = agency.portal
-        if not self.email:
+
+        # set addresses if none have been set yet or if they have been cleared
+        if not self.portal and not self.email and not self.fax and not self.address:
+            if not appeal:
+                self.portal = agency.portal
             self.email = agency.get_emails(request_type, 'to').first()
             self.cc_emails.set(agency.get_emails(request_type, 'cc'))
-        if not self.fax:
             self.fax = agency.get_faxes(request_type).first()
-        if not self.address:
             self.address = agency.get_addresses(request_type).first()
-        self.save()
+        self.save(comment='update address from agency')
 
     def update_address(self, via, email, fax, other_emails=None):
         """Update the current address"""

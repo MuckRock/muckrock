@@ -195,6 +195,7 @@ class Crowdfund(models.Model):
                     currency='usd',
                     interval='month',
                     name=self.name,
+                    statement_descriptor='MuckRock Crowdfund',
                     )
         return plan
 
