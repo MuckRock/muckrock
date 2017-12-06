@@ -187,14 +187,16 @@ class Address(models.Model):
 
     def __unicode__(self):
         if self.street:
-            address = u'{}\n{}, {} {}'.format(
-                    self.street,
+            if self.suite:
+                street = u'{}, {}'.format(self.street, self.suite)
+            else:
+                street = self.street
+            address = u'{}, {}, {} {}'.format(
+                    street,
                     self.city,
                     self.state,
                     self.zip_code,
                     )
-            if self.suite:
-                address = u'{}\n{}'.format(self.suite, address)
             return address
         else:
             return self.address

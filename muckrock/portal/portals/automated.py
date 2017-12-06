@@ -2,15 +2,11 @@
 Shared logic for handling automated portal processing
 """
 
-from django.core.files.base import ContentFile
-from django.db import transaction
-
 from datetime import datetime
 import re
 
 from muckrock.communication.models import PortalCommunication
-from muckrock.foia.models import FOIAFile
-from muckrock.foia.tasks import upload_document_cloud, classify_status
+from muckrock.foia.tasks import classify_status
 from muckrock.task.models import ResponseTask
 
 
@@ -42,22 +38,6 @@ class PortalAutoReceiveMixin(object):
                     comm,
                     reason=self.error_msg,
                     )
-
-    def _attach_file(self, comm, name, content):
-        """Helper method to attach a file to a communication"""
-        with transaction.atomic():
-            foia_file = FOIAFile.objects.create(
-                    foia=comm.foia,
-                    comm=comm,
-                    title=name[:255],
-                    date=datetime.now(),
-                    source=self.portal.name,
-                    access='private' if comm.foia.embargo else 'public',
-                    )
-            foia_file.ffile.save(name, ContentFile(content))
-            transaction.on_commit(lambda f=foia_file:
-                    upload_document_cloud.delay(f.pk, False))
-        return foia_file
 
     def _accept_comm(self, comm, text):
         """Accept a communication onto the site"""

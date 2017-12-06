@@ -758,6 +758,10 @@ class FOIARequest(models.Model):
         subject = subject[:255]
         comm.subject = subject
 
+        # attach the pdf form if one exists and this is the initial request
+        if self.agency.form and self.communications.count() == 1:
+            self.agency.form.fill(comm)
+
         # preferred order of communication methods
         if self.portal and self.portal.status == 'good' and not kwargs.get('snail'):
             self._send_portal(comm, **kwargs)
@@ -818,7 +822,7 @@ class FOIARequest(models.Model):
                 )
         msg.attach_alternative(linebreaks(escape(body)), 'text/html')
         # atach all files from the latest communication
-        comm.attach_files(msg)
+        comm.attach_files_to_email(msg)
 
         msg.send(fail_silently=False)
 

@@ -15,6 +15,7 @@ from adaptor.fields import CharField, DjangoModelField
 from reversion.admin import VersionAdmin
 from autocomplete_light import shortcuts as autocomplete_light
 import logging
+from pdfrw import PdfReader
 import sys
 
 from muckrock.agency.models import (
@@ -23,6 +24,8 @@ from muckrock.agency.models import (
         AgencyAddress,
         AgencyEmail,
         AgencyPhone,
+        AgencyRequestForm,
+        AgencyRequestFormMapper,
         )
 from muckrock.agency.forms import CSVImportForm
 from muckrock.communication.models import (
@@ -179,6 +182,7 @@ class AgencyAdmin(VersionAdmin):
                     'contact_first_name',
                     'contact_last_name',
                     'contact_title',
+                    'form',
                     'url',
                     'notes',
                     'aliases',
@@ -262,8 +266,34 @@ class AgencyAdmin(VersionAdmin):
                 )
 
 
+class AgencyRequestFormMapperInline(admin.TabularInline):
+    """Inline for Agency Request Form mapper"""
+    model = AgencyRequestFormMapper
+    extra = 1
+
+    def get_formset(self, request, obj=None, **kwargs):
+        """Set choices based on the pdf file"""
+        obj.form.seek(0)
+        template = PdfReader(obj.form)
+        choices = [(field.T.decode(), field.T.decode())
+                for page in template.Root.Pages.Kids
+                for field in page.Annots
+                if field.T is not None]
+        choices = [('', '---')] + choices
+        formset = (super(AgencyRequestFormMapperInline, self)
+                .get_formset(request, obj, **kwargs))
+        formset.form.base_fields['field'].widget = (
+                forms.Select(choices=choices))
+        return formset
+
+class AgencyRequestFormAdmin(VersionAdmin):
+    """Agency request form admin"""
+    inlines = [AgencyRequestFormMapperInline]
+
+
 admin.site.register(AgencyType, AgencyTypeAdmin)
 admin.site.register(Agency, AgencyAdmin)
+admin.site.register(AgencyRequestForm, AgencyRequestFormAdmin)
 
 
 def get_jurisdiction(full_name):
