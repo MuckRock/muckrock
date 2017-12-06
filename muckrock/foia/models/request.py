@@ -904,7 +904,11 @@ class FOIARequest(models.Model):
                 'msg_comms': self.get_msg_comms(comm),
                 }
         if self.address:
-            context['address'] = self.address.format(self.agency, appeal=appeal)
+            if appeal and self.agency and self.agency.appeal_agency:
+                agency = self.agency.appeal_agency
+            else:
+                agency = self.agency
+            context['address'] = self.address.format(agency, appeal=appeal)
         if reply_link:
             context['reply_link'] = self.get_agency_reply_link(self.email.email)
         if switch:
