@@ -55,15 +55,26 @@ class SnailMailPDF(PDF):
                     email=email,
                     ))
         width = self.get_string_width(email)
-        self.set_xy(72 / 2, 72 / 2)
+        self.set_xy(72 / 2, (72 * 3) / 4)
         self.multi_cell(width + 6, 13, text, 0, 'L')
-        self.line(72 / 2, 1.45 * 72, 8 * 72, 1.45 * 72)
-        self.ln(30)
+        self.line(72 / 2, 1.7 * 72, 8 * 72, 1.7 * 72)
+        self.ln(45)
 
     def generate(self):
         """Generate a PDF for a given FOIA"""
+        # pylint: disable=invalid-name
         self.configure()
         self.rect(6.8 * 72, 10, 1.2 * 72, 72 / 4, 'F')
+        self.dashed_line(0, 4 * 72, 72 / 4, 4 * 72, 2, 2)
+        self.dashed_line(8.25 * 72, 4 * 72, 8.5 * 72, 4 * 72, 2, 2)
+        if self.appeal:
+            x = self.get_x()
+            y = self.get_y()
+            self.set_font('Arial', 'b', 18)
+            self.set_xy(3.5 * 72, (72 * 3) / 4)
+            law_name = self.comm.foia.jurisdiction.get_law_name(abbrev=True)
+            self.cell(0, 0, u'{} APPEAL'.format(law_name))
+            self.set_xy(x, y)
         self.set_font('DejaVu', '', 10)
         msg_body = self.comm.foia.render_msg_body(self.comm, appeal=self.appeal)
         self.multi_cell(0, 13, msg_body.rstrip(), 0, 'L')
