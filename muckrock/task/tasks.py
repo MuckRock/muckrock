@@ -49,6 +49,7 @@ def snail_mail_bulk_pdf_task(pdf_name, **kwargs):
     bulk_merger = PdfFileMerger()
     snails = (SnailMailTask.objects
             .filter(resolved=False)
+            .order_by('communication__foia__agency')
             .preload_pdf()
             )
     blank_pdf = FPDF()

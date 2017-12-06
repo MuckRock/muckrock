@@ -8,6 +8,7 @@ from django.conf import settings
 from fpdf import FPDF
 
 from datetime import date
+from itertools import groupby
 import os.path
 
 
@@ -93,29 +94,41 @@ class CoverPDF(PDF):
         self.ln(10)
         self.set_font('DejaVu', '', 10)
         lines = []
-        for snail, pages, files in self.info:
-            lines.append(u'\n□ MR #{} - "{}" by {} - {} pages'.format(
-                snail.communication.foia.pk,
-                snail.communication.foia.title,
-                snail.communication.from_user,
-                pages,
+        grouped_info = groupby(
+                self.info,
+                lambda x: x[0].communication.foia.agency,
+                )
+        tab = u' ' * 8
+        for agency, info in grouped_info:
+            info = list(info)
+            lines.append(u'\nAgency: {} - {} requests'.format(
+                agency.name,
+                len(info),
                 ))
-            if snail.category == 'p':
-                lines.append(
-                        u'        □ Write a check for ${:.2f}'
-                        .format(snail.amount))
-            for file_, status in files:
-                if status == 'attached':
+            for snail, pages, files in info:
+                lines.append(u'\n{}□ MR #{} - "{}" by {} - {} pages'.format(
+                    tab,
+                    snail.communication.foia.pk,
+                    snail.communication.foia.title,
+                    snail.communication.from_user,
+                    pages,
+                    ))
+                if snail.category == 'p':
                     lines.append(
-                            u'        ▣ Attached: {}'
-                            .format(file_.name()))
-                elif status == 'skipped':
-                    lines.append(
-                            u'        □ Print separately: {}'
-                            .format(file_.name()))
-                else: # status == 'error'
-                    lines.append(
-                            u'        □ Print separately (error): {}'
-                            .format(file_.name()))
+                            u'{}□ Write a check for ${:.2f}'
+                            .format(2 * tab, snail.amount))
+                for file_, status in files:
+                    if status == 'attached':
+                        lines.append(
+                                u'{}▣ Attached: {}'
+                                .format(2 * tab, file_.name()))
+                    elif status == 'skipped':
+                        lines.append(
+                                u'{}□ Print separately: {}'
+                                .format(2 * tab, file_.name()))
+                    else: # status == 'error'
+                        lines.append(
+                                u'{}□ Print separately (error): {}'
+                                .format(2 * tab, file_.name()))
         text = u'\n'.join(lines)
         self.multi_cell(0, 13, text)

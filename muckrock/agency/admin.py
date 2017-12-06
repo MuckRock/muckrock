@@ -139,7 +139,7 @@ class AgencyAdmin(VersionAdmin):
     prepopulated_fields = {'slug': ('name',)}
     list_display = ('name', 'jurisdiction', 'status')
     list_filter = ['status', 'types']
-    search_fields = ['name']
+    search_fields = ['name', 'aliases']
     filter_horizontal = ('types',)
     form = AgencyAdminForm
     formats = ['xls', 'csv']

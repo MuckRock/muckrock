@@ -149,6 +149,7 @@ class SnailMailTaskQuerySet(models.QuerySet):
         return (self
             .select_related(
                 'communication__foia__address',
+                'communication__foia__agency',
                 'communication__foia__user',
                 'communication__from_user',
                 )
