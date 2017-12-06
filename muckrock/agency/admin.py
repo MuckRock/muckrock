@@ -273,6 +273,10 @@ class AgencyRequestFormMapperInline(admin.TabularInline):
 
     def get_formset(self, request, obj=None, **kwargs):
         """Set choices based on the pdf file"""
+        formset = (super(AgencyRequestFormMapperInline, self)
+                .get_formset(request, obj, **kwargs))
+        if obj is None:
+            return formset
         obj.form.seek(0)
         template = PdfReader(obj.form)
         choices = [(field.T.decode(), field.T.decode())
@@ -280,8 +284,6 @@ class AgencyRequestFormMapperInline(admin.TabularInline):
                 for field in page.Annots
                 if field.T is not None]
         choices = [('', '---')] + choices
-        formset = (super(AgencyRequestFormMapperInline, self)
-                .get_formset(request, obj, **kwargs))
         formset.form.base_fields['field'].widget = (
                 forms.Select(choices=choices))
         return formset
