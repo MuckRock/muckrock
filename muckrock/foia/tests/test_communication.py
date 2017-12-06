@@ -5,6 +5,11 @@ Tests for the FOIACommunication model
 from django import test
 from django.core.urlresolvers import reverse
 
+import logging
+from mock import patch
+import nose
+from nose.tools import ok_, eq_, raises
+
 from muckrock import factories
 from muckrock.communication.models import EmailAddress
 from muckrock.foia.models import (
@@ -13,12 +18,6 @@ from muckrock.foia.models import (
         )
 from muckrock.foia.views import raw
 
-import logging
-import nose
-
-ok_ = nose.tools.ok_
-eq_ = nose.tools.eq_
-raises = nose.tools.raises
 
 class TestCommunication(test.TestCase):
     """Tests communication methods"""
@@ -62,7 +61,8 @@ class TestCommunicationMove(test.TestCase):
         eq_(self.comm.files.count(), 1)
         self.user = factories.UserFactory()
 
-    def test_move_single_comm(self):
+    @patch('muckrock.foia.tasks.upload_document_cloud.apply_async')
+    def test_move_single_comm(self, mock_upload):
         """Should change the request associated with the communication."""
         moved_comms = self.comm.move(self.foia2.id, self.user)
         eq_(len(moved_comms), 1,
@@ -85,8 +85,10 @@ class TestCommunicationMove(test.TestCase):
             foia=self.foia1,
             user=self.user,
             ).exists())
+        mock_upload.assert_called()
 
-    def test_move_multi_comms(self):
+    @patch('muckrock.foia.tasks.upload_document_cloud.apply_async')
+    def test_move_multi_comms(self, mock_upload):
         """Should move the comm to the first request, then clone it to the rest."""
         comm_count = FOIACommunication.objects.count()
         comms = self.comm.move([self.foia1.id, self.foia2.id], self.user)
@@ -109,6 +111,7 @@ class TestCommunicationMove(test.TestCase):
                 foia=self.foia1,
                 user=self.user,
                 ).exists())
+        mock_upload.assert_called()
 
     @raises(ValueError)
     def test_move_invalid_foia(self):
@@ -146,7 +149,8 @@ class TestCommunicationClone(test.TestCase):
         ok_(self.file in self.comm.files.all())
         self.user = factories.UserFactory()
 
-    def test_clone_single(self):
+    @patch('muckrock.foia.tasks.upload_document_cloud.apply_async')
+    def test_clone_single(self, mock_upload):
         """Should duplicate the communication to the request."""
         other_foia = factories.FOIARequestFactory()
         comm_count = FOIACommunication.objects.count()
@@ -168,8 +172,10 @@ class TestCommunicationClone(test.TestCase):
                 CommunicationMoveLog.objects.filter(
                     communication=self.comm,
                     ).exists())
+        mock_upload.assert_called()
 
-    def test_clone_multi(self):
+    @patch('muckrock.foia.tasks.upload_document_cloud.apply_async')
+    def test_clone_multi(self, mock_upload):
         """Should duplicate the communication to each request in the list."""
         first_foia = factories.FOIARequestFactory()
         second_foia = factories.FOIARequestFactory()
@@ -188,8 +194,10 @@ class TestCommunicationClone(test.TestCase):
                 foia=self.comm.foia,
                 user=self.user,
                 ).exists())
+        mock_upload.assert_called()
 
-    def test_clone_files(self):
+    @patch('muckrock.foia.tasks.upload_document_cloud.apply_async')
+    def test_clone_files(self, mock_upload):
         """Should duplicate all the files for each communication."""
         first_foia = factories.FOIARequestFactory()
         second_foia = factories.FOIARequestFactory()
@@ -199,6 +207,7 @@ class TestCommunicationClone(test.TestCase):
         for each_clone in clones:
             eq_(each_clone.files.count(), file_count,
                 'Each clone should have its own set of files.')
+        mock_upload.assert_called()
 
     @raises(ValueError)
     def test_clone_empty_list(self):
