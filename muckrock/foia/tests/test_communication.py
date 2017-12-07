@@ -9,6 +9,7 @@ import logging
 from mock import patch
 import nose
 from nose.tools import ok_, eq_, raises
+import os
 
 from muckrock import factories
 from muckrock.communication.models import EmailAddress
@@ -35,6 +36,34 @@ class TestCommunication(test.TestCase):
         self.comm.make_sender_primary_contact()
         self.foia.refresh_from_db()
         eq_(self.foia.email, self.comm.emails.first().from_email)
+
+    def test_attach_file_with_file(self):
+        """Test attaching a file with an actual file"""
+        # pylint: disable=no-self-use
+        comm = factories.FOIACommunicationFactory()
+        file_ = open('tmp.txt', 'w')
+        file_.write('The file contents')
+        file_.close()
+        file_ = open('tmp.txt', 'r')
+        comm.attach_file(file_=file_)
+        file_.close()
+        os.remove('tmp.txt')
+        eq_(comm.files.count(), 1)
+        foia_file = comm.files.first()
+        eq_(foia_file.title, 'tmp')
+        eq_(foia_file.ffile.file.name, 'tmp.txt')
+        eq_(foia_file.ffile.read(), 'The file contents')
+
+    def test_attach_file_with_content(self):
+        """Test attaching a file with n memory content"""
+        # pylint: disable=no-self-use
+        comm = factories.FOIACommunicationFactory()
+        comm.attach_file(content='More contents', name='doc.pdf')
+        eq_(comm.files.count(), 1)
+        foia_file = comm.files.first()
+        eq_(foia_file.title, 'doc')
+        eq_(foia_file.ffile.file.name, 'doc.pdf')
+        eq_(foia_file.ffile.read(), 'More contents')
 
     @raises(ValueError)
     def test_orphan_error(self):
