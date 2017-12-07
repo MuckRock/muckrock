@@ -55,10 +55,10 @@ class SnailMailPDF(PDF):
                     email=email,
                     ))
         width = self.get_string_width(email)
-        self.set_xy(72 / 2, (72 * 3) / 4)
+        self.set_xy(72 / 2, (72 * 0.6))
         self.multi_cell(width + 6, 13, text, 0, 'L')
-        self.line(72 / 2, 1.7 * 72, 8 * 72, 1.7 * 72)
-        self.ln(45)
+        self.line(72 / 2, 1.55 * 72, 8 * 72, 1.55 * 72)
+        self.ln(38)
 
     def generate(self):
         """Generate a PDF for a given FOIA"""
