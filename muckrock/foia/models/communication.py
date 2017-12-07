@@ -289,7 +289,7 @@ class FOIACommunication(models.Model):
         for file_ in files.itervalues():
             if not any(file_.content_type == t or file_.name.endswith(s)
                     for t, s in ignore_types):
-                self.attach_file(file_)
+                self.attach_file(file_=file_)
 
     def create_agency_notifications(self):
         """Create the notifications for when an agency creates a new comm"""
@@ -303,14 +303,18 @@ class FOIACommunication(models.Model):
         if self.foia:
             self.foia.update(self.anchor())
 
-    def attach_file(self, content, name=None, source=None):
-        """Given a name and the file contents, attach a file to this"""
+    def attach_file(self, file_=None, content=None, name=None, source=None):
+        """Given a file or name and the file contents, attach a file to this"""
+        # must supply either file_ or content and name_
         from muckrock.foia.tasks import upload_document_cloud
+        if file_ is None:
+            file_ = ContentFile(content)
         if name is None:
-            name = content.name
-        title = os.path.splitext(name)[0][:255]
+            name = file_.name
         if source is None:
             source = self.get_source()
+
+        title = os.path.splitext(name)[0][:255]
         access = 'private' if not self.foia or self.foia.embargo else 'public'
         with transaction.atomic():
             foia_file = self.files.create(
@@ -321,7 +325,7 @@ class FOIACommunication(models.Model):
                     access=access,
                     )
             name = name[:233].encode('ascii', 'ignore')
-            foia_file.ffile.save(name, ContentFile(content))
+            foia_file.ffile.save(name, file_)
             if self.foia:
                 transaction.on_commit(lambda:
                         upload_document_cloud.delay(foia_file.pk, False))

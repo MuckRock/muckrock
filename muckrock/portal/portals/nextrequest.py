@@ -439,7 +439,11 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
                         url,
                         'Downloading document: {}'.format(document),
                         )
-                comm.attach_file(reply.content, document, self.portal.name)
+                comm.attach_file(
+                        content=reply.content,
+                        name=document,
+                        source=self.portal.name,
+                        )
             self._accept_comm(comm, text)
         except PortalError as exc:
             ManualPortal.receive_msg(

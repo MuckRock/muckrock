@@ -30,7 +30,7 @@ class AgencyRequestForm(models.Model):
         overlay = self._create_overlay(data)
         form = self._merge_overlay(overlay)
         name = u'{}.pdf'.format(self.name)
-        comm.attach_file(form.read(), name, source='MuckRock')
+        comm.attach_file(content=form.read(), name=name, source='MuckRock')
 
     def _get_data(self, comm):
         """Get the data for filling in the form"""
