@@ -13,5 +13,6 @@ DATABASES['default'] = {
     'USER': os.environ.get('PG_USER'),
     'PASSWORD': os.environ.get('PG_PASSWORD'),
     'HOST': '127.0.0.1',
+    'PORT': '5435', # Port 5435 is Potsgres V9.5 on codeship
     'ENGINE': 'django.db.backends.postgresql_psycopg2',
 }
