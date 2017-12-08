@@ -197,7 +197,7 @@ FILTER_TYPES = {
         '<=': 'lte',
         '>': 'gt',
         '>=': 'gte',
-        'ne': 'iexact',
+        '!=': 'iexact',
         }
 
 
