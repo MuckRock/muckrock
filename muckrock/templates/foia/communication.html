@@ -25,7 +25,7 @@
                 </span>
                 <ul class="options dropdown-list">
                     {% if communication.raw_emails %}<li><a href="{% url 'foia-raw' idx=communication.pk %}" class="option dropdown-list-item">Raw Email</a></li>{% endif %}
-                    {% if communication.reverse_faxes.0.fax_id %}<li><a href="https://console.phaxio.com/viewFax?faxId={{communication.reverse_faxes.0.fax_id}}" class="option dropdown-list-item">Phaxio</a></li>{% endif %}
+                    {% if communication.reverse_faxes.0.fax_id %}<li><a href="https://console.phaxio.com/faxes/{{communication.reverse_faxes.0.fax_id}}" class="option dropdown-list-item">Phaxio</a></li>{% endif %}
                     {% if communication.mails.all.0.pdf %}<li><a href="{{ communication.mails.all.0.pdf.url }}" class="option dropdown-list-item">Mail PDF</a></li>{% endif %}
                     <li><a href="#status-{{communication.pk}}-form" class="option dropdown-list-item">Status</a></li>
                     <li><a href="#move-{{communication.pk}}-form" class="option dropdown-list-item">Move</a></li>
