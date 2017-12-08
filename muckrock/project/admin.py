@@ -39,8 +39,9 @@ class ProjectAdmin(VersionAdmin):
     """Admin interface for Project model"""
     form = ProjectAdminForm
     prepopulated_fields = {'slug': ('title',)}
-    list_display = ('title', 'private')
-    search_fields = ('title', 'description')
+    list_display = ('title', 'private', 'approved', 'featured')
+    list_filter = ('approved', 'private', 'featured')
+    search_fields = ('title', 'description', 'summary')
 
 
 admin.site.register(Project, ProjectAdmin)
