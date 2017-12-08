@@ -10,6 +10,7 @@ from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic.edit import FormView
 
+from djangosecure.decorators import frame_deny_exempt
 import os.path
 import re
 from xlrd import XLRDError
@@ -31,6 +32,7 @@ def detail(request, slug, idx):
     return render(request, 'dataset/detail.html', context)
 
 
+@frame_deny_exempt
 def embed(request, slug, idx):
     """Embed the data set"""
     dataset = get_object_or_404(DataSet, slug=slug, pk=idx)
