@@ -23,6 +23,8 @@ from muckrock.dataset import fields, views
 from muckrock.factories import UserFactory
 from muckrock.test_utils import mock_middleware
 
+# pylint: disable=invalid-name
+
 
 class TestDataSetModels(TestCase):
     """Test the data set models"""
@@ -75,6 +77,20 @@ class TestDataSetModels(TestCase):
         eq_(['doug', 'eric', 'fox'], [r.data['d'] for r in rows])
         eq_(['24', '45', '62'], [r.data['e'] for r in rows])
         eq_(['foo', 'bar', 'baz'], [r.data['f'] for r in rows])
+
+    def test_create_from_csv_repeat_columns(self):
+        """Duplicate column names do not crash creation"""
+        csv = StringIO(
+                'name,age,name\n'
+                'doug,24,foo\n'
+                'eric,45,bar\n'
+                'fox,62,baz\n'
+                )
+        DataSet.objects.create_from_csv(
+                'Name', 
+                self.user,
+                csv,
+                )
 
     def test_detect_field_types(self):
         """Test detecting the field types"""

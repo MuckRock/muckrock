@@ -18,6 +18,9 @@ class Field(object):
     @classmethod
     def validate(cls, value):
         """Is this value valid for this type?"""
+        # allow blanks for any type
+        if value == '':
+            return True
         try:
             cls.validator(value)
         except ValidationError:

@@ -10,6 +10,7 @@ from django.db import models
 from django.db.models.expressions import RawSQL, OrderBy
 from django.template.defaultfilters import slugify
 
+from collections import defaultdict
 from itertools import izip_longest
 import unicodecsv as csv
 import xlrd
@@ -20,6 +21,20 @@ from muckrock.dataset.fields import FIELDS, FIELD_DICT
 class DataSetQuerySet(models.QuerySet):
     """Customer manager for DataSets"""
 
+    def _unique_slugify(self, headers):
+        """Slugify the headers and also make them unique"""
+        # pylint: disable=no-self-use
+        seen = defaultdict(int)
+        slug_headers = []
+        for header in headers:
+            slug = slugify(header)
+            if slug in seen:
+                slug_headers.append('{}-{}'.format(slug, seen[slug]))
+            else:
+                slug_headers.append(slug)
+            seen[slug] += 1
+        return slug_headers
+
     def create_from_csv(self, name, user, file_):
         """Create a data set from a csv file"""
         csv_reader = csv.reader(file_)
@@ -28,12 +43,13 @@ class DataSetQuerySet(models.QuerySet):
                 user=user,
                 )
         headers = next(csv_reader)
-        for i, name in enumerate(headers):
+        slug_headers = self._unique_slugify(headers)
+        for i, (name, slug) in enumerate(zip(headers, slug_headers)):
             dataset.fields.create(
                     name=name,
+                    slug=slug,
                     field_number=i,
                     )
-        slug_headers = [slugify(h) for h in headers]
         headers_len = len(headers)
         for i, row in enumerate(csv_reader):
             dataset.rows.create(
@@ -59,12 +75,13 @@ class DataSetQuerySet(models.QuerySet):
                 )
 
         headers = sheet.row_values(0)
-        for i, name in enumerate(headers):
+        slug_headers = self._unique_slugify(headers)
+        for i, (name, slug) in enumerate(zip(headers, slug_headers)):
             dataset.fields.create(
                     name=name,
+                    slug=slug,
                     field_number=i,
                     )
-        slug_headers = [slugify(h) for h in headers]
         for i in xrange(1, sheet.nrows):
             row = [unicode(v) for v in sheet.row_values(i)]
             dataset.rows.create(
@@ -156,7 +173,8 @@ class DataField(models.Model):
 
     def save(self, *args, **kwargs):
         """Save the slug"""
-        self.slug = slugify(self.name)
+        if not self.slug:
+            self.slug = slugify(self.name)
         super(DataField, self).save(*args, **kwargs)
 
     def formatter(self):
@@ -184,7 +202,6 @@ class DataField(models.Model):
     class Meta:
         ordering = ('field_number',)
         unique_together = [
-                ('dataset', 'name'),
                 ('dataset', 'slug'),
                 ('dataset', 'field_number'),
                 ]
