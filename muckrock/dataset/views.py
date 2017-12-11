@@ -27,7 +27,8 @@ def detail(request, slug, idx):
             'sidebar_admin_url': reverse(
                 'admin:dataset_dataset_change',
                 args=(dataset.pk,),
-                )
+                ),
+            'base_url': 'https://www.muckrock.com',
             }
     return render(request, 'dataset/detail.html', context)
 
