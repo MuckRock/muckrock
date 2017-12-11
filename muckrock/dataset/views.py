@@ -3,21 +3,16 @@
 Views for the dataset application
 """
 
-from django.contrib import messages
+from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import reverse
 from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404, redirect
-from django.views.generic.edit import FormView
+from django.shortcuts import render, get_object_or_404
 
 from djangosecure.decorators import frame_deny_exempt
-import os.path
 import re
-from xlrd import XLRDError
 
-from muckrock.dataset.forms import DataSetUploadForm
 from muckrock.dataset.models import DataSet
-from muckrock.views import class_view_decorator
 
 def detail(request, slug, idx):
     """Show the data"""
@@ -27,7 +22,8 @@ def detail(request, slug, idx):
             'sidebar_admin_url': reverse(
                 'admin:dataset_dataset_change',
                 args=(dataset.pk,),
-                )
+                ),
+            'base_url': 'https://www.muckrock.com',
             }
     return render(request, 'dataset/detail.html', context)
 
@@ -103,30 +99,11 @@ def data(request, slug, idx):
         })
 
 
-@class_view_decorator(user_passes_test(lambda u: u.is_staff))
-class Create(FormView):
-    """Create a data set from a spreadsheet file"""
-    template_name = 'forms/dataset.html'
-    form_class = DataSetUploadForm
-
-    def form_valid(self, form):
-        """Create the data set"""
-        data_file = self.request.FILES['data_file']
-        ext = os.path.splitext(data_file.name)[1]
-        if ext == '.csv':
-            dataset = DataSet.objects.create_from_csv(
-                    form.cleaned_data['name'],
-                    self.request.user,
-                    data_file,
-                    )
-        elif ext in ('.xls', '.xlsx'):
-            try:
-                dataset = DataSet.objects.create_from_xls(
-                        form.cleaned_data['name'],
-                        self.request.user,
-                        data_file,
-                        )
-            except XLRDError:
-                messages.error(self.request, 'Corrupt excel file')
-                return self.form_invalid(form)
-        return redirect(dataset)
+@user_passes_test(lambda u: u.is_staff)
+def create(request):
+    """Upload a file to create a dataset from"""
+    context = {
+            'AWS_STORAGE_BUCKET_NAME': settings.AWS_STORAGE_BUCKET_NAME,
+            'AWS_ACCESS_KEY_ID': settings.AWS_ACCESS_KEY_ID,
+            }
+    return render(request, 'dataset/create.html', context)

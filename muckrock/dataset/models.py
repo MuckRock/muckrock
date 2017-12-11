@@ -10,69 +10,118 @@ from django.db import models
 from django.db.models.expressions import RawSQL, OrderBy
 from django.template.defaultfilters import slugify
 
+from collections import defaultdict
 from itertools import izip_longest
+import logging
+import sys
 import unicodecsv as csv
 import xlrd
 
 from muckrock.dataset.fields import FIELDS, FIELD_DICT
 
 
+logger = logging.getLogger(__name__)
+
+
 class DataSetQuerySet(models.QuerySet):
     """Customer manager for DataSets"""
 
+    def _unique_slugify(self, headers):
+        """Slugify the headers and also make them unique"""
+        # pylint: disable=no-self-use
+        seen = defaultdict(int)
+        slug_headers = []
+        for header in headers:
+            slug = slugify(header)
+            if slug in seen:
+                slug_headers.append('{}-{}'.format(slug, seen[slug]))
+            else:
+                slug_headers.append(slug)
+            seen[slug] += 1
+        return slug_headers
+
     def create_from_csv(self, name, user, file_):
         """Create a data set from a csv file"""
-        csv_reader = csv.reader(file_)
+        # pylint: disable=broad-except
         dataset = self.create(
                 name=name,
                 user=user,
+                status='processing',
                 )
-        headers = next(csv_reader)
-        for i, name in enumerate(headers):
-            dataset.fields.create(
-                    name=name,
-                    field_number=i,
-                    )
-        slug_headers = [slugify(h) for h in headers]
-        headers_len = len(headers)
-        for i, row in enumerate(csv_reader):
-            dataset.rows.create(
-                    data=dict(izip_longest(
-                        slug_headers,
-                        row[:headers_len],
-                        fillvalue='',
-                        )),
-                    row_number=i,
-                    )
+        try:
+            csv_reader = csv.reader(file_)
+            headers = next(csv_reader)
+            slug_headers = self._unique_slugify(headers)
+            for i, (name, slug) in enumerate(zip(headers, slug_headers)):
+                dataset.fields.create(
+                        name=name,
+                        slug=slug,
+                        field_number=i,
+                        )
+            headers_len = len(headers)
+            for i, row in enumerate(csv_reader):
+                dataset.rows.create(
+                        data=dict(izip_longest(
+                            slug_headers,
+                            row[:headers_len],
+                            fillvalue='',
+                            )),
+                        row_number=i,
+                        )
 
-        dataset.detect_field_types()
+            dataset.detect_field_types()
+        except Exception as exc:
+            logger.error(
+                    'DataSet CSV creation: %s',
+                    exc,
+                    exc_info=sys.exc_info(),
+                    )
+            dataset.status = 'error'
+            dataset.save()
+        else:
+            dataset.status = 'ready'
+            dataset.save()
         return dataset
 
     def create_from_xls(self, name, user, file_):
         """Create a data set from an xls file"""
-        book = xlrd.open_workbook(file_contents=file_.read())
-        sheet = book.sheet_by_index(0)
-
+        # pylint: disable=broad-except
         dataset = self.create(
                 name=name,
                 user=user,
+                status='processing',
                 )
+        try:
+            book = xlrd.open_workbook(file_contents=file_.read())
+            sheet = book.sheet_by_index(0)
 
-        headers = sheet.row_values(0)
-        for i, name in enumerate(headers):
-            dataset.fields.create(
-                    name=name,
-                    field_number=i,
-                    )
-        slug_headers = [slugify(h) for h in headers]
-        for i in xrange(1, sheet.nrows):
-            row = [unicode(v) for v in sheet.row_values(i)]
-            dataset.rows.create(
-                    data=dict(zip(slug_headers, row)),
-                    row_number=i,
-                    )
+            headers = sheet.row_values(0)
+            slug_headers = self._unique_slugify(headers)
+            for i, (name, slug) in enumerate(zip(headers, slug_headers)):
+                dataset.fields.create(
+                        name=name,
+                        slug=slug,
+                        field_number=i,
+                        )
+            for i in xrange(1, sheet.nrows):
+                row = [unicode(v) for v in sheet.row_values(i)]
+                dataset.rows.create(
+                        data=dict(zip(slug_headers, row)),
+                        row_number=i,
+                        )
 
-        dataset.detect_field_types()
+            dataset.detect_field_types()
+        except Exception as exc:
+            logger.error(
+                    'DataSet XLS creation: %s',
+                    exc,
+                    exc_info=sys.exc_info(),
+                    )
+            dataset.status = 'error'
+            dataset.save()
+        else:
+            dataset.status = 'ready'
+            dataset.save()
         return dataset
 
 
@@ -93,6 +142,15 @@ class DataSet(models.Model):
             max_length=5,
             choices=(('', '---'), ('email', 'Email Viewer')),
             blank=True,
+            )
+    status = models.CharField(
+            max_length=10,
+            choices=(
+                ('processing', 'Processing'),
+                ('error', 'Error'),
+                ('ready', 'Ready'),
+                ),
+            default='ready',
             )
 
     objects = DataSetQuerySet.as_manager()
@@ -135,6 +193,14 @@ class DataSet(models.Model):
 FIELD_CHOICES = [(f.slug, f.name) for f in FIELDS]
 
 
+class DataFieldQuerySet(models.QuerySet):
+    """Customer manager for DataFields"""
+
+    def visible(self):
+        """Return all visible fields"""
+        return self.filter(hidden=False)
+
+
 class DataField(models.Model):
     """A column of a data set"""
     dataset = models.ForeignKey(
@@ -150,13 +216,17 @@ class DataField(models.Model):
             choices=FIELD_CHOICES,
             default='text',
             )
+    hidden = models.BooleanField(default=False)
+
+    objects = DataFieldQuerySet.as_manager()
 
     def __unicode__(self):
         return self.name
 
     def save(self, *args, **kwargs):
         """Save the slug"""
-        self.slug = slugify(self.name)
+        if not self.slug:
+            self.slug = slugify(self.name)
         super(DataField, self).save(*args, **kwargs)
 
     def formatter(self):
@@ -184,7 +254,6 @@ class DataField(models.Model):
     class Meta:
         ordering = ('field_number',)
         unique_together = [
-                ('dataset', 'name'),
                 ('dataset', 'slug'),
                 ('dataset', 'field_number'),
                 ]
@@ -197,7 +266,7 @@ FILTER_TYPES = {
         '<=': 'lte',
         '>': 'gt',
         '>=': 'gte',
-        'ne': 'iexact',
+        '!=': 'iexact',
         }
 
 

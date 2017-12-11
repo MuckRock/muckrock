@@ -229,6 +229,74 @@ function createUploaderComm(element) {
 
     });
 };
+function createUploaderDataset(element) {
+    if (element === null) {return;}
+    const uploader = new qq.s3.FineUploader({
+        element: element,
+        debug: true,
+        template: 'qq-simple-thumbnails-template',
+        validation: {
+            acceptFiles: "text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            allowedExtensions: ["csv","xls","xlsx"],
+            {% if request.user.profile.limit_attachments %}
+              itemLimit: {{MAX_ATTACHMENT_NUM}},
+              sizeLimit: {{MAX_ATTACHMENT_SIZE}}
+            {% endif %}
+        },
+        request: {
+            endpoint: 'https://{{AWS_STORAGE_BUCKET_NAME}}.s3.amazonaws.com',
+            accessKey: '{{AWS_ACCESS_KEY_ID}}',
+        },
+        objectProperties: {
+            acl: 'public-read',
+            key: function(fileId) {
+                var keyRetrieval = new qq.Promise();
+                var filename = encodeURIComponent(uploader.getName(fileId));
+                $.post(
+                    '{% url "fine-uploader-key-name-dataset" %}',
+                    {name: filename}
+                    )
+                    .done(function(data) {keyRetrieval.success(data.key);})
+                    .fail(function() {keyRetrieval.failure();});
+                return keyRetrieval;
+            },
+        },
+        signature: {
+            endpoint: '{% url "fine-uploader-sign" %}',
+            customHeaders: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+        },
+        uploadSuccess: {
+            endpoint: '{% url "fine-uploader-success-dataset" %}',
+            customHeaders: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+        },
+        iframeSupport: {
+            localBlankPagePath: '{% url "fine-uploader-blank" %}',
+        },
+        retry: {
+            enableAuto: true,
+        },
+        chunking: {
+            enabled: true,
+            concurrent: {
+                enabled: true,
+            },
+            success: {
+                endpoint: '{% url "fine-uploader-success-dataset" %}',
+                customHeaders: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+            }
+        },
+        resume: {
+            enabled: true,
+        },
+
+    });
+};
 var elements = document.getElementsByClassName('fine-uploader');
 var i;
 for (i = 0; i < elements.length; i++) {
@@ -237,5 +305,9 @@ for (i = 0; i < elements.length; i++) {
 elements = document.getElementsByClassName('fine-uploader-comm');
 for (i = 0; i < elements.length; i++) {
   createUploaderComm(elements[i]);
+}
+elements = document.getElementsByClassName('fine-uploader-dataset');
+for (i = 0; i < elements.length; i++) {
+  createUploaderDataset(elements[i]);
 }
 </script>

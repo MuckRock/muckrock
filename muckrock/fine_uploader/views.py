@@ -10,13 +10,14 @@ from django.http import (
         HttpResponseForbidden,
         )
 
-from datetime import datetime
+from datetime import datetime, date
 import base64
 import hashlib
 import hmac
 import json
 import os
 
+from muckrock.dataset.tasks import process_dataset_file
 from muckrock.foia.models import (
         FOIARequest,
         FOIACommunication,
@@ -77,6 +78,18 @@ def success_comm(request):
     file_.ffile.name = request.POST['key']
     file_.save()
 
+    return HttpResponse()
+
+
+@login_required
+def success_dataset(request):
+    """"File has been succesfully uploaded for data set creation"""
+    if 'key' not in request.POST:
+        return HttpResponseBadRequest()
+    if len(request.POST['key']) > 255:
+        return HttpResponseBadRequest()
+
+    process_dataset_file.delay(request.POST['key'], request.user.pk)
     return HttpResponse()
 
 
@@ -183,13 +196,11 @@ def _sign_headers(headers):
     }
 
 
-@login_required
-def key_name(request):
-    """Generate the S3 key name from the filename"""
-    name = request.POST.get('name')
-    foia_id = request.POST.get('foia_id')
-    # total name cannot be longer than 255, but we limit the base name to 100
-    # to give room for the directory and because that's plenty long
+def _key_name_trim(name):
+    """
+    Total name cannot be longer than 255, but we limit the base name to 100
+    to give room for the directory and because that's plenty long
+    """
     max_len = 100
     if len(name) > max_len:
         base, ext = os.path.splitext(name)
@@ -199,6 +210,15 @@ def key_name(request):
         else:
             # otherwise truncate the base and put the extension back on
             name = base[:max_len - len(ext)] + ext
+    return name
+
+
+@login_required
+def key_name(request):
+    """Generate the S3 key name from the filename"""
+    name = request.POST.get('name')
+    foia_id = request.POST.get('foia_id')
+    name = _key_name_trim(name)
     attachment = OutboundAttachment(
             user=request.user,
             foia_id=foia_id,
@@ -215,22 +235,30 @@ def key_name(request):
 def key_name_comm(request):
     """Generate the S3 key name from the filename"""
     name = request.POST.get('name')
-    # total name cannot be longer than 255, but we limit the base name to 100
-    # to give room for the directory and because that's plenty long
-    max_len = 100
-    if len(name) > max_len:
-        base, ext = os.path.splitext(name)
-        if len(ext) > max_len:
-            # if someone give us a large extension just cut part of it off
-            name = name[:max_len]
-        else:
-            # otherwise truncate the base and put the extension back on
-            name = base[:max_len - len(ext)] + ext
+    name = _key_name_trim(name)
     file_ = FOIAFile()
     key = file_.ffile.field.generate_filename(
             file_.ffile.instance,
             name,
             )
+    key = default_storage.get_available_name(key)
+    return JsonResponse({'key': key})
+
+
+@login_required
+def key_name_dataset(request):
+    """Generate the S3 key name from the filename"""
+    name = request.POST.get('name')
+    name = _key_name_trim(name)
+    today = date.today()
+    key = ('dataset_uploads/{username}/{year}/{month:02d}/{day:02d}/{name}'
+            .format(
+                username=request.user.username,
+                year=today.year,
+                month=today.month,
+                day=today.day,
+                name=name,
+                ))
     key = default_storage.get_available_name(key)
     return JsonResponse({'key': key})
 

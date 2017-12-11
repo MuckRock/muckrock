@@ -10,7 +10,7 @@
     <iframe src="{% url 'dataset-embed' slug=dataset.slug idx=dataset.pk %}" width="80%" height="566px"></iframe>
     <p>
         <label>Embed Code:</label>
-        <textarea rows="1" readonly><iframe src="{% url 'dataset-embed' slug=dataset.slug idx=dataset.pk %}" width="80%" height="566px"></iframe></textarea>
+        <textarea rows="1" readonly><iframe src="{{ base_url }}{% url 'dataset-embed' slug=dataset.slug idx=dataset.pk %}" width="80%" height="566px"></iframe></textarea>
     </p>
 {% endblock main %}
 

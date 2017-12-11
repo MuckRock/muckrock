@@ -18,6 +18,9 @@ class Field(object):
     @classmethod
     def validate(cls, value):
         """Is this value valid for this type?"""
+        # allow blanks for any type
+        if value == '':
+            return True
         try:
             cls.validator(value)
         except ValidationError:
@@ -134,6 +137,7 @@ class ChoiceField(Field):
         """Is there less than a certain number of choices among all values?"""
         return len(set(values)) < cls.max_choices
 
+
 MONTH_NAME = '|'.join(calendar.month_name[1:])
 MONTH_ABBR = '|'.join(calendar.month_abbr[1:])
 MONTH_NUM = r'0?[1-9]|1[0-2]'
@@ -150,7 +154,7 @@ class DateField(Field):
     editor = '"input"'
     sort_type = 'date'
     validator = RegexValidator(
-            regex=r'^(?:{y}-{m}-{d}|{m} {d}, {y}|{m}/{d}/{y}|{m}-{d}-{y})'
+            regex=r'^(?:{y}-{m}-{d}|{m} {d}, {y}|{m}/{d}/{y}|{m}-{d}-{y})$'
                 .format(
                     m=MONTH_RE,
                     d=DAY_RE,
