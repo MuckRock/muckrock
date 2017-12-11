@@ -75,7 +75,7 @@
           paginationSize: 20,
         {% endif %}
         columns: [
-          {% for field in dataset.fields.all %}
+          {% for field in dataset.fields.visible %}
             {
               title: "{{field.name}}",
               field: "{{field.slug}}",
@@ -92,9 +92,6 @@
         ],
         {% if dataset.custom_format == "email" %}
           paginationSize: 1,
-          //columns: [
-          //{title: "Email", field: "Date", headerSort: false}
-          //],
           rowFormatter: function(row, data) {
             var element = row.getElement(),
             data = row.getData(),

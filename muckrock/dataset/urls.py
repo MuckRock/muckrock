@@ -24,7 +24,7 @@ urlpatterns = [
             ),
         url(
             r'^create/$',
-            views.Create.as_view(),
+            views.create,
             name='dataset-create',
             ),
         ]

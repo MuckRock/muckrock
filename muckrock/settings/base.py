@@ -271,6 +271,7 @@ CELERY_IMPORTS = (
     'muckrock.agency.tasks',
     'muckrock.task.tasks',
     'muckrock.portal.tasks',
+    'muckrock.dataset.tasks',
     )
 CELERYD_MAX_TASKS_PER_CHILD = os.environ.get('CELERYD_MAX_TASKS_PER_CHILD', 100)
 CELERYD_TASK_TIME_LIMIT = os.environ.get('CELERYD_TASK_TIME_LIMIT', 5 * 60)

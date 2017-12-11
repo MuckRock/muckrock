@@ -38,11 +38,13 @@ class DataSetAdmin(VersionAdmin):
     """Admin for a data set"""
     prepopulated_fields = {'slug': ('name',)}
     list_display = ('name', 'user', 'created_datetime')
+    list_filter = ('status',)
     date_hieracrhy = 'created_datetime'
     search_fields = ('name',)
-    readonly_fields = ('created_datetime',)
+    readonly_fields = ('created_datetime', 'status')
     form = DataSetForm
     inlines = [DataFieldInline]
+    save_on_top = True
 
 
 admin.site.register(DataSet, DataSetAdmin)

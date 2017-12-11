@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Create DataSet &bull; MuckRock{% endblock %}
+
+{% block content %}
+  <section class="form">
+    <h1>Upload a file to create a dataset</h1>
+    <p>File must be a CSV or Excel spreadsheet.</p>
+    <div id="fine-uploader-dataset" class="fine-uploader-dataset"></div>
+  </section>
+{% endblock content %}
+
+{% block scripts %}
+  {% include 'lib/component/fine-uploader.html' %}
+{% endblock scripts %}

@@ -66,7 +66,7 @@ class TestDataSetModels(TestCase):
                 'fox,62,baz\n'
                 )
         dataset = DataSet.objects.create_from_csv(
-                'Name', 
+                'Name',
                 self.user,
                 csv,
                 )
@@ -87,7 +87,7 @@ class TestDataSetModels(TestCase):
                 'fox,62,baz\n'
                 )
         DataSet.objects.create_from_csv(
-                'Name', 
+                'Name',
                 self.user,
                 csv,
                 )
