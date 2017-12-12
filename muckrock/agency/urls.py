@@ -24,5 +24,11 @@ urlpatterns = [
     url(
         r'^%s/flag/$' % agency_url,
         views.redirect_flag,
+        name='agency-flag',
+    ),
+    url(
+        r'^similar/$',
+        views.similar,
+        name='agency-similar',
     ),
     ]

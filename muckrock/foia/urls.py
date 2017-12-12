@@ -48,7 +48,7 @@ urlpatterns = [
 
     # Create and Draft Views
     url(r'^create/$',
-        views.create_request, name='foia-create'),
+        views.CreateRequest.as_view(), name='foia-create'),
     url(r'^%s/draft/$' % foia_url,
         views.draft_request, name='foia-draft'),
     url(r'^create_multi/$',

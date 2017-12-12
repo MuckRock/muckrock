@@ -28,6 +28,7 @@ import './dropdown';
 import './editor';
 import './exemptionBrowser/app';
 import './foiaRequest';
+import './foiaCreate';
 import './list';
 import modal from './modal';
 import './nav';

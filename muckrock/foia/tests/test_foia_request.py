@@ -10,7 +10,6 @@ from django.test import TestCase, RequestFactory
 from actstream.actions import follow, unfollow
 import datetime
 from datetime import date as real_date
-from mock import Mock
 import nose.tools
 from operator import attrgetter
 import re
@@ -27,14 +26,13 @@ from muckrock.factories import (
     )
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.foia.views import Detail, FollowingRequestList
-from muckrock.foia.views.composers import _make_user
 from muckrock.jurisdiction.models import Jurisdiction, Appeal
 from muckrock.jurisdiction.factories import ExampleAppealFactory
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.task.factories import ResponseTaskFactory
 from muckrock.task.models import SnailMailTask, StatusChangeTask
 from muckrock.tests import get_allowed, post_allowed, get_post_unallowed, get_404
-from muckrock.test_utils import mock_middleware, http_post_response
+from muckrock.test_utils import http_post_response
 from muckrock.utils import new_action
 
 ok_ = nose.tools.ok_
@@ -932,21 +930,6 @@ class TestRequestSharing(TestCase):
         # but the creator should still be able to both view and edit!
         nose.tools.assert_true(self.foia.has_perm(self.creator, 'change'))
         nose.tools.assert_true(self.foia.has_perm(self.creator, 'view'))
-
-
-class TestMakeUser(TestCase):
-    """The request composer should provide miniregistration functionality."""
-    def setUp(self):
-        self.request = mock_middleware(Mock())
-        self.data = {
-            'full_name': 'Mick Jagger',
-            'email': 'mick@hero.in'
-        }
-
-    def test_make_user(self):
-        """Should create the user, log them in, and return the user."""
-        user = _make_user(self.request, self.data)
-        ok_(user)
 
 
 class TestFOIANotification(TestCase):

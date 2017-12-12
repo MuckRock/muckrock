@@ -4,15 +4,18 @@ Views for the Agency application
 
 from django.contrib import messages
 from django.core.urlresolvers import reverse
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 
-from rest_framework import viewsets
 import django_filters
+from fuzzywuzzy import fuzz, process
+from rest_framework import viewsets
 
 from muckrock.agency.filters import AgencyFilterSet
 from muckrock.agency.models import Agency
 from muckrock.agency.serializers import AgencySerializer
 from muckrock.jurisdiction.forms import FlagForm
+from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.views import collect_stats
 from muckrock.task.models import FlaggedTask
 from muckrock.views import MRSearchFilterListView
@@ -150,3 +153,34 @@ class AgencyViewSet(viewsets.ModelViewSet):
             fields = ('name', 'status', 'jurisdiction', 'types', 'requires_proxy')
 
     filter_class = Filter
+
+
+def similar(request):
+    """Return agencies with similar names"""
+    query = request.GET.get('query', '')
+    jurisdiction_id = request.GET.get('jurisdiction')
+    if jurisdiction_id == 'f':
+        jurisdiction = Jurisdiction.objects.filter(level='f').first()
+    elif not jurisdiction_id:
+        jurisdiction = None
+    else:
+        jurisdiction = Jurisdiction.objects.filter(pk=jurisdiction_id).first()
+
+    agencies = Agency.objects.filter(status='approved')
+    if jurisdiction:
+        agencies = agencies.filter(jurisdiction=jurisdiction)
+
+    # if there is an exact match, do not bother fuzzy matching
+    exact = agencies.filter(name__iexact=query).first()
+    if exact:
+        return JsonResponse({'exact': {'value': exact.pk, 'text': exact.name}})
+
+    suggestions = process.extractBests(
+            query,
+            {a.pk: a.name for a in agencies},
+            scorer=fuzz.token_set_ratio,
+            score_cutoff=80,
+            limit=10,
+            )
+    suggestions = [{'value': s[2], 'text': s[0]} for s in suggestions]
+    return JsonResponse({'suggestions': suggestions})

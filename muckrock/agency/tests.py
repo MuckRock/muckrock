@@ -4,16 +4,18 @@ Tests for Agency application
 
 from django.core.urlresolvers import reverse
 from django.http import Http404
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 
 from datetime import datetime, timedelta
+import json
 import nose.tools
 
 from muckrock import agency
 from muckrock import factories
+from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import StaleAgencyTask
 from muckrock.task.factories import StaleAgencyTaskFactory
-from muckrock.test_utils import http_get_response
+from muckrock.test_utils import http_get_response, mock_middleware
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
@@ -124,6 +126,34 @@ class TestAgencyUnit(TestCase):
         ok_(not self.agency1.manual_stale,
             'A manually stale agency should also be freed from staleness.')
 
+    def test_agency_get_proxy_info(self):
+        """Test an agencies get_proxy_info method"""
+        # pylint: disable=no-self-use
+        agency_ = factories.AgencyFactory()
+        proxy_info = agency_.get_proxy_info()
+        eq_(proxy_info['proxy'], False)
+        eq_(proxy_info['missing_proxy'], False)
+        nose.tools.assert_not_in('from_user', proxy_info)
+        nose.tools.assert_not_in('warning', proxy_info)
+
+        proxy_placeholder = factories.UserFactory(username='proxy_placeholder')
+        agency_ = factories.AgencyFactory(requires_proxy=True)
+        proxy_info = agency_.get_proxy_info()
+        eq_(proxy_info['proxy'], True)
+        eq_(proxy_info['missing_proxy'], True)
+        eq_(proxy_info['from_user'], proxy_placeholder)
+        nose.tools.assert_in('warning', proxy_info)
+
+        proxy = factories.UserFactory(
+                profile__acct_type='proxy',
+                profile__state=agency_.jurisdiction.legal(),
+                )
+        proxy_info = agency_.get_proxy_info()
+        eq_(proxy_info['proxy'], True)
+        eq_(proxy_info['missing_proxy'], False)
+        eq_(proxy_info['from_user'], proxy)
+        nose.tools.assert_in('warning', proxy_info)
+
 
 class TestAgencyManager(TestCase):
     """Tests for the Agency object manager"""
@@ -185,6 +215,31 @@ class TestAgencyViews(TestCase):
         agency_list = response.context_data['object_list']
         ok_(approved_agency in agency_list, 'Approved agencies should be listed.')
         ok_(unapproved_agency not in agency_list, 'Unapproved agencies should not be listed.')
+
+    def test_similar(self):
+        """Test the similar ajax view"""
+        # pylint: disable=no-self-use
+        usa = Jurisdiction.objects.get(level='f')
+        agency1 = factories.AgencyFactory(name='Inspector General', jurisdiction=usa)
+        agency2 = factories.AgencyFactory(name='Federal Bureau of Investigation', jurisdiction=usa)
+        url = reverse('agency-similar')
+
+        request = RequestFactory().get(url, {'query': 'inspector general', 'jurisdiction': 'f'})
+        request = mock_middleware(request)
+        request.user = factories.UserFactory()
+        response = agency.views.similar(request)
+        data = json.loads(response.content)
+        eq_(data['exact'], {'value': agency1.pk, 'text': agency1.name})
+
+        request = RequestFactory().get(
+                url,
+                {'query': 'fedral buraeu investigation', 'jurisdiction': 'f'},
+                )
+        request = mock_middleware(request)
+        request.user = factories.UserFactory()
+        response = agency.views.similar(request)
+        data = json.loads(response.content)
+        eq_(data['suggestions'], [{'value': agency2.pk, 'text': agency2.name}])
 
 
 class TestAgencyForm(TestCase):

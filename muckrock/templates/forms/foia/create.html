@@ -114,21 +114,15 @@
 
             {% if user.is_authenticated %}
             <footer class="footer--submit">
-                {% if clone %}
-                <button type="submit" name="submit" value="Clone" class="primary button">Submit</button>
-                {% else %}
-                <button type="submit" name="submit" value="Create" class="primary button">Submit</button>
-                {% endif %}
+                <p id="submit_help" class="error"></p>
+                <button type="submit" class="primary button">Submit</button>
             </footer>
             {% else %}
             <footer class="footer--signup">
                 <p>Create a MuckRock account and file up to four requests for just $20, or <a href="{% url 'accounts-signup-professional' %}" target="_blank">go Pro for 20 requests a month</a> with the option to keep your submissions private. Already have an account? <a href="{% url 'acct-login' %}">Log in</a>.</p>
+                <p id="submit_help" class="error"></p>
                 <div class="footer--submit">
-                    {% if clone %}
-                    <button type="submit" name="submit" value="Clone" class="primary button" onclick="ga('send', 'event', 'Account', 'Registration', window.location.pathname)">Create Account and Submit</button>
-                    {% else %}
-                    <button type="submit" name="submit" value="Create" class="primary button" onclick="ga('send', 'event', 'Account', 'Registration', window.location.pathname)">Create Account and Submit</button>
-                    {% endif %}
+                    <button type="submit" class="primary button" onclick="ga('send', 'event', 'Account', 'Registration', window.location.pathname)">Create Account and Submit</button>
                 </div>
             </footer>
     		{% endif %}
@@ -143,105 +137,20 @@
     </div>
 </div>
 {% endif %}
+
+<div class="modal" id="similar-agency-modal">
+    <h1>You are submitting to an agency not in our database</h1>
+    <h2>If this is correct, we will add the new agency to our database, but first see if one of these is the agency you are looking for:</h2>
+    <p class="error"></p>
+    <div>
+        <select name="replacement-agency" id="replacement-agency" size="10">
+            <option>Loading...</option>
+        </select>
+    </div>
+    <button id="replacement-agency-button" class="primary button">Select Replacement Agency</button>
+    &nbsp;
+    <button id="new-agency-button" class="button">Continue with New Agency</button>
+</div>
+
 {% endblock %}
 
-{% block scripts %}
-<script>
-$(document).ready(function(){
-
-    var localField = $('fieldset.local');
-    var stateField = $('fieldset.state');
-    var localRadio = $('li.local input:radio');
-    var stateRadio = $('li.state input:radio');
-    var federalRadio = $('li.federal input:radio')
-    var localChecked = $('li.local input:checked');
-    var stateChecked = $('li.state input:checked');
-    var federalChecked = $('li.federal input:checked');
-    var localInput = $('li.local .autocomplete-light-widget input');
-    var localSelect = $('.autocomplete-light-widget select[name="local"]');
-    var stateSelect = $('.autocomplete-light-widget select[name="state"]');
-    var agencyField = $('fieldset.agency');
-    var agencyInput = agencyField.children('input');
-
-    function agencyByJurisdiction(jurisdictionSelectElement) {
-        agencyInput.yourlabsAutocomplete().data = {
-            jurisdiction_id: jurisdictionSelectElement.val()
-        }
-    }
-
-    function agencyToggle(value) {
-        if (value) {
-            agencyField.show();
-            agencyInput.focus();
-            agencyInput.keydown();
-        } else {
-            agencyField.hide();
-        }
-    }
-
-    /* Check if prefilled by cloning */
-    if (localChecked.length > 0) {
-        localChecked.parent().addClass('active');
-        localField.show();
-        agencyByJurisdiction(localSelect);
-        agencyToggle(localSelect.val());
-    }
-    if (stateChecked.length > 0) {
-        stateChecked.parent().addClass('active');
-        stateField.show();
-        agencyByJurisdiction(stateSelect);
-        agencyToggle(stateSelect.val());
-    }
-    if (federalChecked.length > 0) {
-        federalChecked.parent().addClass('active');
-        localField.hide();
-        stateField.hide();
-        agencyByJurisdiction(federalRadio);
-        agencyToggle(true);
-    }
-
-    /* Bind changes to actions */
-    localRadio.change(function() {
-        $(this).parent().addClass('active');
-        $(this).parent().siblings().removeClass('active');
-        localField.show();
-        stateField.hide();
-        agencyToggle(localSelect.val().length);
-        agencyInput.val('');
-    });
-
-    stateRadio.change(function() {
-        $(this).parent().addClass('active');
-        $(this).parent().siblings().removeClass('active');
-        localField.hide();
-        stateField.show();
-        agencyToggle(stateSelect.val().length);
-        agencyInput.val('');
-    });
-
-    federalRadio.change(function() {
-        $(this).parent().addClass('active');
-        $(this).parent().siblings().removeClass('active');
-        localField.hide();
-        stateField.hide();
-        agencyToggle(true);
-        agencyInput.val('');
-        agencyByJurisdiction(federalRadio);
-    });
-
-    function selectChange(select) {
-        agencyByJurisdiction(select);
-        agencyToggle(select.val().length);
-        agencyInput.val('');
-    }
-
-    localSelect.change(function(){
-        selectChange($(this));
-    });
-
-    stateSelect.change(function(){
-        selectChange($(this));
-    });
-});
-</script>
-{% endblock scripts %}

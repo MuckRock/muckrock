@@ -294,6 +294,34 @@ class Agency(models.Model, RequestHelper):
                 agencyaddress__request_type=request_type,
                 )
 
+    def get_proxy_info(self):
+        """Handle proxy users for request creation in this agency"""
+        if self.requires_proxy:
+            proxy_user = self.jurisdiction.get_proxy()
+            if proxy_user is None:
+                return {
+                        'from_user': User.objects.get(username='proxy_placeholder'),
+                        'proxy': True,
+                        'missing_proxy': True,
+                        'warning':
+                            'This agency and jurisdiction requires requestors to be '
+                            'in-state citizens.  We do not currently have a citizen proxy '
+                            'requestor on file for this state, but will attempt to find '
+                            'one to submit this request on your behalf.',
+                        }
+            else:
+                return {
+                        'from_user': proxy_user,
+                        'proxy': True,
+                        'missing_proxy': False,
+                        'warning':
+                            'This agency and jurisdiction requires requestors to be '
+                            'in-state citizens.  This request will be filed in the name '
+                            'of one of our volunteer filers for this state.',
+                        }
+        else:
+            return {'proxy': False, 'missing_proxy': False}
+
     class Meta:
         # pylint: disable=too-few-public-methods
         verbose_name_plural = 'agencies'

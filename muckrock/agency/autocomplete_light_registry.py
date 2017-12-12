@@ -5,13 +5,15 @@ Autocomplete registry for Agency
 from django.db.models import Q
 
 from autocomplete_light import shortcuts as autocomplete_light
+from fuzzywuzzy import fuzz, process
 
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 
-class SimpleAgencyAutocomplete(autocomplete_light.AutocompleteModelBase):
+class SimpleAgencyAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     """Creates an autocomplete field for picking agencies"""
     choices = Agency.objects.filter(status='approved').select_related('jurisdiction')
+    choice_template = 'autocomplete/simple_agency.html'
     search_fields = ['name', 'aliases']
     attrs = {
         'data-autocomplete-minimum-characters': 1,
@@ -25,7 +27,18 @@ class SimpleAgencyAutocomplete(autocomplete_light.AutocompleteModelBase):
             if jurisdiction_id == 'f':
                 jurisdiction_id = Jurisdiction.objects.get(level='f').id
             self.choices = self.choices.filter(jurisdiction__id=jurisdiction_id)
-        return super(SimpleAgencyAutocomplete, self).choices_for_request()
+        choices = super(SimpleAgencyAutocomplete, self).choices_for_request()
+        query = self.request.GET.get('q', '')
+        fuzzy_choices = process.extractBests(
+                query,
+                {a: a.name for a in self.choices.exclude(pk__in=choices)},
+                scorer=fuzz.partial_ratio,
+                score_cutoff=83,
+                limit=10,
+                )
+        choices = list(choices) + [c[2] for c in fuzzy_choices]
+        return choices
+
 
 
 class AgencyAutocomplete(autocomplete_light.AutocompleteModelTemplate):

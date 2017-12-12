@@ -167,12 +167,6 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
             background: transparent;
             border: none;
             font-size: $size-4;
-            &:before {
-                content: "Jurisdiction";
-                display: block;
-                @extend dfn;
-                color: $color-white;
-            }
             span.remove {
                 font-size: 0;
                 float: right;
@@ -182,6 +176,15 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
                 background-position: center center !important;
                 &:hover { background-position: center center !important; }
             }
+        }
+    }
+    .autocomplete-light-widget.state span.deck > span,
+    .autocomplete-light-widget.local span.deck > span {
+        &:before {
+            content: "Jurisdiction";
+            display: block;
+            @extend dfn;
+            color: $color-white;
         }
     }
 
