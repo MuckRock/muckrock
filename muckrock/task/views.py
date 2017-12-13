@@ -5,11 +5,17 @@ Views for the Task application
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 from django.core.urlresolvers import resolve
 from django.db import transaction
 from django.db.models import Count
-from django.http import HttpResponse, Http404, JsonResponse
+from django.http import (
+        HttpResponse,
+        HttpResponseForbidden,
+        Http404,
+        JsonResponse,
+        )
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
@@ -131,6 +137,7 @@ class TaskList(MRFilterListView):
         context['counters'] = count_tasks()
         context['bulk_actions'] = self.bulk_actions
         context['processing_count'] = FOIARequest.objects.filter(status='submitted').count()
+        context['asignees'] = User.objects.filter(is_staff=True).order_by('last_name')
         # These are for fine-uploader
         context['MAX_ATTACHMENT_NUM'] = settings.MAX_ATTACHMENT_NUM
         context['MAX_ATTACHMENT_SIZE'] = settings.MAX_ATTACHMENT_SIZE
@@ -610,3 +617,20 @@ def snail_mail_pdf(request, pk):
     output.seek(0)
     response.write(output.read())
     return response
+
+
+@user_passes_test(lambda u: u.is_staff)
+def assign_to(request):
+    """Assign a task to a user"""
+    try:
+        task_pk = int(request.POST.get('task_pk'))
+        asignee_pk = int(request.POST.get('asignee'))
+    except ValueError:
+        return HttpResponseForbidden
+    task = get_object_or_404(Task, pk=task_pk)
+    if asignee_pk == 0:
+        task.assigned = None
+    else:
+        task.assigned = get_object_or_404(User, pk=asignee_pk)
+    task.save()
+    return HttpResponse('OK')

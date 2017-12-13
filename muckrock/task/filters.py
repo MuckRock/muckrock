@@ -34,6 +34,10 @@ class TaskFilterSet(django_filters.FilterSet):
         queryset=User.objects.all(),
         widget=autocomplete_light.MultipleChoiceWidget('UserTaskAutocomplete')
     )
+    assigned = django_filters.ModelMultipleChoiceFilter(
+        queryset=User.objects.all(),
+        widget=autocomplete_light.MultipleChoiceWidget('UserTaskAutocomplete')
+    )
     date_created = django_filters.DateFromToRangeFilter(
         label='Date Range',
         lookup_expr='contains',

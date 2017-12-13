@@ -1,38 +1,47 @@
 <section class="{{class}} {% if task.resolved %}green{% endif %} collapsable task textbox" id="{{task.pk}}-task">
     <header class="textbox__header task__header">
         {% if task.resolved %}
-        <span>
-            <input type="checkbox" form="batched" name="tasks" value="{{task.pk}}" class="toggle checkbox nocollapse">
-            <span class="task-type">Resolved {{task}}</span>
-        </span>
-        <a class="permalink" href="{{task.get_absolute_url}}"><time class="task-date-done" datetime="{{task.date_done|date:'Y-m-d G:i::s'}}">Resolved {{task.date_done|date:'m/d/Y G:i'}}</time></a>
+          <span>
+              <input type="checkbox" form="batched" name="tasks" value="{{task.pk}}" class="toggle checkbox nocollapse">
+              <span class="task-type">Resolved {{task}}</span>
+          </span>
+          <a class="permalink" href="{{task.get_absolute_url}}"><time class="task-date-done" datetime="{{task.date_done|date:'Y-m-d G:i::s'}}">Resolved {{task.date_done|date:'m/d/Y G:i'}}</time></a>
         {% else %}
-        <span>
-            <input type="checkbox" form="batched" name="tasks" value="{{task.pk}}" class="toggle checkbox nocollapse">
-            <span class="task-type">{{task}}</span>
-        </span>
-        <a class="nocollapse permalink" href="{{task.get_absolute_url}}"><time class="task-date-created" datetime="{{task.date_created|date:'Y-m-d G:i::s'}}">{{task.date_created|date:'m/d/Y G:i'}}</time></a>
+          <span>
+              <input type="checkbox" form="batched" name="tasks" value="{{task.pk}}" class="toggle checkbox nocollapse">
+              <span class="task-type">{{task}}</span>
+          </span>
+          <a class="nocollapse permalink" href="{{task.get_absolute_url}}"><time class="task-date-created" datetime="{{task.date_created|date:'Y-m-d G:i::s'}}">{{task.date_created|date:'m/d/Y G:i'}}</time></a>
         {% endif %}
     </header>
     {% block task-main %}
-    <main class="textbox__section task__main">
-        {% if task.resolved and task.resolved_by %}
-        <p class="task__data">Resolved by <a href="{% url 'acct-profile' username=task.resolved_by.username %}">{{ task.resolved_by.get_full_name }}</a>.</p>
-        {% endif %}
-        {% block task-content %}
-        {% endblock %}
-    </main>
+      <main class="textbox__section task__main">
+          {% if task.resolved and task.resolved_by %}
+            <p class="task__data">Resolved by <a href="{% url 'acct-profile' username=task.resolved_by.username %}">{{ task.resolved_by.get_full_name }}</a>.</p>
+          {% endif %}
+          <p class="task__data">
+            Assigned to
+            <select class="assigned-chooser" data-task-pk="{{task.pk}}">
+              <option value="0">Nobody</option>
+              {% for asignee in asignees %}
+              <option value="{{asignee.pk}}" {% if task.assigned == asignee %}selected{%endif %}>{{asignee.get_full_name}}</option>
+              {% endfor %}
+            </select>
+          </p>
+          {% block task-content %}
+          {% endblock %}
+      </main>
     {% endblock %}
     {% block task-footer %}
-    <footer class="textbox__footer task__actions">
-        <form method="POST" action="{{ endpoint }}" class="task-post-actions" id="{{task.pk}}-form">
-            {% csrf_token %}
-            <input type="hidden" name="task" value="{{task.pk}}">
-            {% block task-actions %}
-            <button type="submit" name="resolve" value="true" class="primary button">Resolve</button>
-            {% endblock task-actions %}
-        </form>
-    </footer>
+      <footer class="textbox__footer task__actions">
+          <form method="POST" action="{{ endpoint }}" class="task-post-actions" id="{{task.pk}}-form">
+              {% csrf_token %}
+              <input type="hidden" name="task" value="{{task.pk}}">
+              {% block task-actions %}
+                <button type="submit" name="resolve" value="true" class="primary button">Resolve</button>
+              {% endblock task-actions %}
+          </form>
+      </footer>
     {% endblock %}
     <div class="pending ajax overlay">
         <!-- Loader animation via https://github.com/ConnorAtherton/loaders.css -->
