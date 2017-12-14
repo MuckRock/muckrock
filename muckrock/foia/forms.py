@@ -3,12 +3,16 @@ Forms for FOIA application
 """
 
 from django import forms
+from django.contrib import messages
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
+from django.utils.text import slugify
 
 from autocomplete_light import shortcuts as autocomplete_light
 from datetime import date, timedelta
 import phonenumbers
 
+from muckrock.accounts.utils import miniregister
 from muckrock.agency.models import Agency
 from muckrock.communication.models import EmailAddress, PhoneNumber
 from muckrock.foia.models import (
@@ -21,6 +25,7 @@ from muckrock.foia.models import (
         )
 from muckrock.forms import MRFilterForm, TaggitWidget
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.utils import generate_key
 
 AGENCY_STATUS = [
     ('processed', 'Further Response Coming'),
@@ -62,35 +67,36 @@ class RequestForm(forms.Form):
     )
     local = autocomplete_light.ModelChoiceField(
         'JurisdictionLocalAutocomplete',
+        queryset=Jurisdiction.objects.filter(level='l', hidden=False),
         required=False
     )
-    agency = forms.CharField(
-        label='Agency',
-        widget=autocomplete_light.TextWidget(
+    agency = autocomplete_light.ModelChoiceField(
             'AgencySimpleAgencyAutocomplete',
-            attrs={'placeholder': 'Type the agency\'s name'}),
-        max_length=255)
+            queryset=Agency.objects.get_approved(),
+            )
     full_name = forms.CharField()
     email = forms.EmailField(max_length=75)
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super(RequestForm, self).__init__(*args, **kwargs)
-        if self.request and self.request.user.is_authenticated():
+        if self.request and self.request.user.is_authenticated:
             del self.fields['full_name']
             del self.fields['email']
+        self.jurisdiction = None
+
+    def full_clean(self):
+        """Remove required from agency"""
+        # We want "required" attribute on the field, but we might take the text value
+        # instead of the drop down value
+        self.fields['agency'].required = False
+        super(RequestForm, self).full_clean()
 
     def clean(self):
-        data = self.cleaned_data
-        jurisdiction = data.get('jurisdiction')
-        state = data.get('state')
-        local = data.get('local')
-        if jurisdiction == 's' and not state:
-            error_msg = 'No state was selected.'
-            self._errors['state'] = self.error_class([error_msg])
-        if jurisdiction == 'l' and not local:
-            error_msg = 'No locality was selected.'
-            self._errors['local'] = self.error_class([error_msg])
+        """Ensure the jurisdiction and agency were set correctly"""
+        self.jurisdiction = self.get_jurisdiction()
+        if self.jurisdiction:
+            self.cleaned_data['agency'] = self.get_agency()
         return self.cleaned_data
 
     def clean_email(self):
@@ -99,6 +105,96 @@ class RequestForm(forms.Form):
         if User.objects.filter(email__iexact=email):
             raise forms.ValidationError("User with this email already exists.  Please login first.")
         return email
+
+    def get_jurisdiction(self):
+        """Get the jurisdiction from the correct field"""
+        jurisdiction = self.cleaned_data.get('jurisdiction')
+        state = self.cleaned_data.get('state')
+        local = self.cleaned_data.get('local')
+        if jurisdiction == 'f':
+            return Jurisdiction.objects.filter(level='f').first()
+        elif jurisdiction == 's' and not state:
+            self.add_error('state', 'No state was selected')
+            return None
+        elif jurisdiction == 's' and state:
+            return state
+        elif jurisdiction == 'l' and not local:
+            self.add_error('local', 'No locality was selected')
+            return None
+        elif jurisdiction == 'l' and local:
+            return local
+
+    def get_agency(self):
+        """Get the agency and create a new one if necessary"""
+        agency = self.cleaned_data.get('agency')
+        if agency is None and self.request.POST.get('agency-autocomplete'):
+            # See if the passed in agency name matches a valid known agency
+            agency = (Agency.objects
+                    .get_approved()
+                    .filter(
+                        name__iexact=self.request.POST['agency-autocomplete'],
+                        jurisdiction=self.jurisdiction,
+                        )
+                    .first()
+                    )
+            # if not, create a new one
+            if agency is None:
+                agency = Agency.objects.create_new(
+                        self.request.POST['agency-autocomplete'],
+                        self.jurisdiction,
+                        self.request.user,
+                        )
+        elif agency is None:
+            self.add_error('agency', 'Please select an agency')
+            return None
+        elif agency.exempt:
+            self.add_error(
+                    'agency',
+                    'The agency you selected is exempt from '
+                    'public records requests',
+                    )
+            return None
+        return agency
+
+    def make_user(self, data):
+        """Miniregister a new user if necessary"""
+        password = generate_key(12)
+        user = miniregister(
+                data['full_name'],
+                data['email'],
+                password,
+                )
+        user = authenticate(
+                username=user.username,
+                password=password,
+                )
+        login(self.request, user)
+
+    def process(self, parent):
+        """Create the new request"""
+        if self.request.user.is_anonymous():
+            self.make_user(self.cleaned_data)
+        agency = self.cleaned_data['agency']
+        proxy_info = agency.get_proxy_info()
+        if 'warning' in proxy_info:
+            messages.warning(self.request, proxy_info['warning'])
+        foia = FOIARequest.objects.create(
+                user=self.request.user,
+                status='started',
+                title=self.cleaned_data['title'],
+                jurisdiction=self.jurisdiction,
+                slug=slugify(self.cleaned_data['title']) or 'untitled',
+                agency=agency,
+                requested_docs=self.cleaned_data['document'],
+                description=self.cleaned_data['document'],
+                parent=parent,
+                missing_proxy=proxy_info['missing_proxy'],
+                )
+        foia.create_initial_communication(
+                proxy_info.get('from_user', self.request.user),
+                proxy_info['proxy'],
+                )
+        return foia
 
 
 class RequestDraftForm(forms.Form):

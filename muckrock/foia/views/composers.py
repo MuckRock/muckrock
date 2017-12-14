@@ -4,21 +4,17 @@ FOIA views for composing
 
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
-from django.template.loader import get_template
 from django.utils.encoding import smart_text
+from django.views.generic import FormView
 
 from datetime import datetime, date
 from math import ceil
 
-from muckrock.accounts.utils import miniregister
-from muckrock.agency.models import Agency
 from muckrock.foia.forms import (
     RequestForm,
     RequestDraftForm,
@@ -28,126 +24,9 @@ from muckrock.foia.forms import (
 from muckrock.foia.models import (
     FOIARequest,
     FOIAMultiRequest,
-    FOIACommunication,
     )
-from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import MultiRequestTask
-from muckrock.utils import new_action, generate_key
-
-
-def _make_comm(foia, from_who, proxy=False):
-    """A helper function to compose the text of a communication"""
-    template = get_template('text/foia/request.txt')
-    context = {
-        'document_request': smart_text(foia.requested_docs),
-        'jurisdiction': foia.jurisdiction,
-        'user_name': from_who,
-        'proxy': proxy,
-    }
-    request_text = template.render(context).split('\n', 1)[1].strip()
-    return request_text
-
-
-def _make_request(request, foia_request, parent=None):
-    """A helper function for creating request and comms objects"""
-    agency = foia_request['agency']
-    missing_proxy = False
-    if agency.requires_proxy:
-        proxy = True
-        proxy_user = agency.jurisdiction.get_proxy()
-        if proxy_user is None:
-            from_user = User.objects.get(username='proxy_placeholder')
-            missing_proxy = True
-            messages.warning(request,
-                'This agency and jurisdiction requires requestors to be '
-                'in-state citizens.  We do not currently have a citizen proxy '
-                'requestor on file for this state, but will attempt to find '
-                'one to submit this request on your behalf.')
-        else:
-            from_user = proxy_user
-            messages.warning(request,
-                'This agency and jurisdiction requires requestors to be '
-                'in-state citizens.  This request will be filed in the name '
-                'of one of our volunteer filers for this state.')
-    else:
-        proxy = False
-        from_user = request.user
-
-    foia = FOIARequest.objects.create(
-        user=request.user,
-        status='started',
-        title=foia_request['title'],
-        jurisdiction=foia_request['jurisdiction'],
-        slug=slugify(foia_request['title']) or 'untitled',
-        agency=agency,
-        requested_docs=foia_request['document'],
-        description=foia_request['document'],
-        parent=parent,
-        missing_proxy=missing_proxy,
-    )
-    foia_comm = FOIACommunication.objects.create(
-        foia=foia,
-        from_user=from_user,
-        to_user=foia.get_to_user(),
-        date=datetime.now(),
-        response=False,
-        communication=_make_comm(foia, from_user.get_full_name(), proxy=proxy)
-    )
-    return foia, foia_comm
-
-
-def _make_user(request, data):
-    """
-    Create a new user from just their full name and email and return the user.
-    - create a password from a random string of letters and numbers
-    - log the user in to their new account
-    """
-    full_name = data['full_name']
-    email = data['email']
-    password = generate_key(12)
-    # register a new user
-    user = miniregister(full_name, email, password)
-    # log the new user in
-    user = authenticate(username=user.username, password=password)
-    login(request, user)
-    # return the user
-    return user
-
-
-def _process_request_form(request):
-    """A helper function for getting info out of a request composer form"""
-    form = RequestForm(request.POST, request=request)
-    foia_request = {}
-    if form.is_valid():
-        data = form.cleaned_data
-        if request.user.is_anonymous():
-            _make_user(request, data)
-        title = data['title']
-        document = data['document']
-        level = data['jurisdiction']
-        if level == 'f':
-            jurisdiction = Jurisdiction.objects.filter(level='f')[0]
-        elif level == 's':
-            jurisdiction = data['state']
-        else:
-            jurisdiction = data['local']
-        agency = (Agency.objects
-                .get_approved()
-                .filter(
-                    name=data['agency'],
-                    jurisdiction=jurisdiction,
-                    )
-                .first()
-                )
-        if agency is None:
-            agency = Agency.objects.create_new(data['agency'], jurisdiction, request.user)
-        foia_request.update({
-            'title': title,
-            'document': document,
-            'jurisdiction': jurisdiction,
-            'agency': agency,
-        })
-    return foia_request
+from muckrock.utils import new_action
 
 
 def _submit_request(request, foia):
@@ -180,22 +59,32 @@ def clone_request(request, jurisdiction, jidx, slug, idx):
     return HttpResponseRedirect(reverse('foia-create') + '?clone=%s' % foia.pk)
 
 
-def create_request(request):
-    """A very important view for composing FOIA requests"""
-    # pylint: disable=too-many-locals
-    # we should refactor this, its too long, and remove the pylint disable
-    initial_data = {}
-    clone = False
-    parent = None
-    try:
-        foia_pk = request.GET['clone']
-        foia = get_object_or_404(FOIARequest, pk=foia_pk)
-        if not foia.has_perm(request.user, 'view'):
+class CreateRequest(FormView):
+    """Create a new request"""
+    template_name = 'forms/foia/create.html'
+    form_class = RequestForm
+
+    def __init__(self, *args, **kwargs):
+        super(CreateRequest, self).__init__(*args, **kwargs)
+        self.clone = False
+        self.parent = None
+
+    def get_initial(self):
+        """Get initial data from clone, if there is one"""
+        clone_pk = self.request.GET.get('clone')
+        if clone_pk is None:
+            return {}
+        try:
+            foia = get_object_or_404(FOIARequest, pk=clone_pk)
+        except ValueError:
+            # non integer passed in as clone_pk
+            return {}
+        if not foia.has_perm(self.request.user, 'view'):
             raise Http404()
         initial_data = {
             'title': foia.title,
             'document': smart_text(foia.requested_docs),
-            'agency': foia.agency.name if foia.agency else ''
+            'agency': foia.agency,
         }
         jurisdiction = foia.jurisdiction
         level = jurisdiction.level
@@ -204,57 +93,30 @@ def create_request(request):
         elif level == 'l':
             initial_data['local'] = jurisdiction
         initial_data['jurisdiction'] = level
-        clone = True
-        parent = foia
-    except (KeyError, ValueError):
-        # KeyError if no clone was passed in
-        # Value error if invalid clone is passed in
-        pass
-    if request.method == 'POST':
-        foia_request = _process_request_form(request)
-        if foia_request:
-            foia, foia_comm = _make_request(request, foia_request, parent)
-            foia_comm.save()
-            foia.save(comment='request drafted')
-            request.session['ga'] = 'request_drafted'
-            return redirect(foia)
-        else:
-            # form is invalid
-            # autocomplete blows up if you pass it a bad value in state
-            # or local - not sure how this is happening, but am removing
-            # non numeric values for these keys
-            # this seems to technically be a bug in autocompletes rendering
-            # should probably fix it there and submit a patch
-            post = request.POST.copy()
-            for chk_val in ['local', 'state']:
-                try:
-                    chk_val in post and int(post[chk_val])
-                except (ValueError, TypeError):
-                    del post[chk_val]
-            form = RequestForm(post, request=request)
-    else:
-        if clone:
-            form = RequestForm(initial=initial_data, request=request)
-        else:
-            form = RequestForm(request=request)
+        self.clone = True
+        self.parent = foia
+        return initial_data
 
-    featured = (FOIARequest.objects
-            .get_viewable(request.user)
-            .filter(featured=True)
-            .select_related_view()
-            .get_public_file_count())
+    def get_form_kwargs(self):
+        """Add request to the form kwargs"""
+        kwargs = super(CreateRequest, self).get_form_kwargs()
+        kwargs.update({'request': self.request})
+        return kwargs
 
-    context = {
-        'form': form,
-        'clone': clone,
-        'featured': featured
-    }
+    def get_context_data(self, **kwargs):
+        """Extra context"""
+        context = super(CreateRequest, self).get_context_data(**kwargs)
+        context.update({
+            'clone': self.clone,
+            'featured': FOIARequest.objects.get_featured(self.request.user),
+            })
+        return context
 
-    return render(
-            request,
-            'forms/foia/create.html',
-            context,
-            )
+    def form_valid(self, form):
+        """Create the request"""
+        foia = form.process(self.parent)
+        self.request.session['ga'] = 'request_drafted'
+        return redirect(foia)
 
 
 @login_required

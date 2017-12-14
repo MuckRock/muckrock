@@ -12,7 +12,8 @@ from django.core.urlresolvers import reverse
 from django.db import models, connection
 from django.db.models import Q, Sum, Count, Max, Case, When
 from django.template.defaultfilters import escape, linebreaks, slugify
-from django.template.loader import render_to_string
+from django.template.loader import get_template, render_to_string
+from django.utils.encoding import smart_text
 
 from actstream.models import followers
 from datetime import datetime, date, timedelta
@@ -178,6 +179,15 @@ class FOIARequestQuerySet(models.QuerySet):
         if agency is not None:
             foia_qs = foia_qs.filter(agency=agency)
         return foia_qs
+
+    def get_featured(self, user):
+        """Get featured requests"""
+        return (self
+                .get_viewable(user)
+                .filter(featured=True)
+                .select_related_view()
+                .get_public_file_count()
+                )
 
 
 STATUS = [
@@ -1164,6 +1174,25 @@ class FOIARequest(models.Model):
                 followup=kwargs.get('followup', False),
                 payment=kwargs.get('payment', False),
                 amount=kwargs.get('amount', 0),
+                )
+        return comm
+
+    def create_initial_communication(self, from_user, proxy):
+        """Create the initial request communication"""
+        template = get_template('text/foia/request.txt')
+        context = {
+                'document_request': smart_text(self.requested_docs),
+                'jurisdiction': self.jurisdiction,
+                'user_name': from_user.get_full_name(),
+                'proxy': proxy,
+                }
+        text = template.render(context).strip()
+        comm = self.communications.create(
+                from_user=from_user,
+                to_user=self.get_to_user(),
+                date=datetime.now(),
+                response=False,
+                communication=text,
                 )
         return comm
 
