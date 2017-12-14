@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 from django.core.urlresolvers import resolve
 from django.db import transaction
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.http import (
         HttpResponse,
         HttpResponseForbidden,
@@ -21,7 +21,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 
 import logging
-from datetime import datetime
+from datetime import datetime, date
 from django_filters import FilterSet
 from PyPDF2 import PdfFileMerger
 from cStringIO import StringIO
@@ -108,12 +108,10 @@ class TaskList(MRFilterListView):
         queryset = super(TaskList, self).get_queryset()
         task_pk = self.kwargs.get('pk')
         if task_pk:
-            # when we are looking for a specific task,
-            # we filter the queryset for that task's pk
-            # and override show_resolved and resolved_by
             queryset = queryset.filter(pk=task_pk)
             if queryset.count() == 0:
                 raise Http404()
+
         return queryset
 
     def get_filter(self):
@@ -174,6 +172,16 @@ class TaskList(MRFilterListView):
         # pylint: disable=no-self-use
         if request.POST.get('resolve'):
             task.resolve(request.user)
+        if request.POST.get('defer'):
+            date_deferred = request.POST.get('date_deferred')
+            if not date_deferred:
+                task.defer(None)
+            else:
+                try:
+                    task.defer(
+                            datetime.strptime(date_deferred, '%m/%d/%Y').date())
+                except ValueError:
+                    pass
         return task
 
     def post(self, request):

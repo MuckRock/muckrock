@@ -34,15 +34,25 @@
 {% endblock %}
 
 {% block task-actions %}
-    {% if task.communication.likely_foia %}
-    <input type="text" name="move" value="{{task.communication.likely_foia.pk}}">
-    {% else %}
-    <input type="text" name="move" placeholder="MuckRock №">
-    {% endif %}
-    <button type="submit" class="primary button">Move</button>
-    {% if domain %}
-    <input type="checkbox" name="blacklist" id="blacklist-orphan-{{ task.pk }}">
-    <label for="blacklist-orphan-{{ task.pk }}">Blacklist {{ domain }}</label>
-    {% endif %}
-    <button class="button" type="submit" name="reject" value="true">Reject</button>
+    <div>
+        {% if domain %}
+            <input type="checkbox" name="blacklist" id="blacklist-orphan-{{ task.pk }}">
+            <label for="blacklist-orphan-{{ task.pk }}">Blacklist {{ domain }}</label>
+        {% endif %}
+        <button class="button" type="submit" name="reject" value="true">Reject</button>
+    </div>
+    <span class="task-defer">
+      <input type="text" class="datepicker-future" name="date_deferred" value="{{task.date_deferred|date:"m/d/Y"|default:""}}">
+      <button type="submit" name="defer" value="true" class="primary button">Defer</button>
+    </span>
+    <div>
+        <input type="text" name="move"
+            {% if task.communication.likely_foia %}
+                value="{{task.communication.likely_foia.pk}}"
+            {% else %}
+                placeholder="MuckRock №"
+            {% endif %}
+            >
+        <button type="submit" class="primary button">Move</button>
+    </div>
 {% endblock %}

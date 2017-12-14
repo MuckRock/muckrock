@@ -68,6 +68,7 @@ class Task(models.Model):
     """A base task model for fields common to all tasks"""
     date_created = models.DateTimeField(auto_now_add=True)
     date_done = models.DateTimeField(blank=True, null=True)
+    date_deferred = models.DateField(blank=True, null=True)
     resolved = models.BooleanField(default=False, db_index=True)
     assigned = models.ForeignKey(User, blank=True, null=True, related_name="assigned_tasks")
     resolved_by = models.ForeignKey(User, blank=True, null=True, related_name="resolved_tasks")
@@ -88,6 +89,11 @@ class Task(models.Model):
         self.date_done = datetime.now()
         self.save()
         logging.info('User %s resolved task %s', user, self.pk)
+
+    def defer(self, date_deferred):
+        """Defer the task to the given date"""
+        self.date_deferred = date_deferred
+        self.save()
 
 
 class OrphanTask(Task):

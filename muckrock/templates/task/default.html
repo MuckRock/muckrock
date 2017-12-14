@@ -18,16 +18,17 @@
       <main class="textbox__section task__main">
           {% if task.resolved and task.resolved_by %}
             <p class="task__data">Resolved by <a href="{% url 'acct-profile' username=task.resolved_by.username %}">{{ task.resolved_by.get_full_name }}</a>.</p>
+          {% else %}
+            <p class="task__data">
+              Assigned to
+              <select class="assigned-chooser" name="{{task.pk}}">
+                <option value="0">Nobody</option>
+                {% for asignee in asignees %}
+                <option value="{{asignee.pk}}" {% if task.assigned == asignee %}selected{%endif %}>{{asignee.get_full_name}}</option>
+                {% endfor %}
+              </select>
+            </p>
           {% endif %}
-          <p class="task__data">
-            Assigned to
-            <select class="assigned-chooser" data-task-pk="{{task.pk}}">
-              <option value="0">Nobody</option>
-              {% for asignee in asignees %}
-              <option value="{{asignee.pk}}" {% if task.assigned == asignee %}selected{%endif %}>{{asignee.get_full_name}}</option>
-              {% endfor %}
-            </select>
-          </p>
           {% block task-content %}
           {% endblock %}
       </main>
@@ -38,6 +39,10 @@
               {% csrf_token %}
               <input type="hidden" name="task" value="{{task.pk}}">
               {% block task-actions %}
+                <span class="task-defer">
+                  <input type="text" class="datepicker-future" name="date_deferred" value="{{task.date_deferred|date:"m/d/Y"|default:""}}">
+                  <button type="submit" name="defer" value="true" class="primary button">Defer</button>
+                </span>
                 <button type="submit" name="resolve" value="true" class="primary button">Resolve</button>
               {% endblock task-actions %}
           </form>

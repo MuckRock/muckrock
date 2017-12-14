@@ -99,6 +99,10 @@
         </div>
         {% endif %}
     </div>
+    <span class="task-defer">
+      <input type="text" class="datepicker-future" name="date_deferred" value="{{task.date_deferred|date:"m/d/Y"|default:""}}">
+      <button type="submit" name="defer" value="true" class="primary button">Defer</button>
+    </span>
     <div class="button-group">
         <button class="button" type="submit" name="no_mail" value="true">Did Not Mail</button>
         <button class="primary button" type="submit" name="resolve" value="true">Save &amp; Resolve</button>

@@ -38,6 +38,10 @@ class TaskFilterSet(django_filters.FilterSet):
         queryset=User.objects.all(),
         widget=autocomplete_light.MultipleChoiceWidget('UserTaskAutocomplete')
     )
+    deferred = django_filters.BooleanFilter(
+        label='Show Deferred',
+        method='filter_deferred',
+        widget=forms.CheckboxInput())
     date_created = django_filters.DateFromToRangeFilter(
         label='Date Range',
         lookup_expr='contains',
@@ -50,6 +54,15 @@ class TaskFilterSet(django_filters.FilterSet):
     class Meta:
         model = Task
         fields = ['resolved', 'resolved_by']
+
+    def filter_deferred(self, queryset, name, value):
+        """Check if the foia has a tracking number."""
+        #pylint: disable=unused-argument
+        #pylint: disable=no-self-use
+        if not value:
+            # if not showing deferred, filter them out
+            queryset = queryset.get_undeferred()
+        return queryset
 
 
 class ResponseTaskFilterSet(TaskFilterSet):

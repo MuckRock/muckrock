@@ -132,60 +132,34 @@ $('document').ready(function(){
   ** This should be rewritten to bind to the task's form submission event,
   ** not the form's resolve button click.
   */
-  $('button[name="resolve"]').click(function(e){
+
+  function ajaxSubmit(action) {
+    return function(e) {
       /* If the button clicked is the "resolve all" button, then get forms
       for all the currently checked tasks. Else, just get the form for the
       task that owns the button. */
       e.preventDefault();
       var forms = [];
-      if ($(this).attr('id') == 'batched-resolve') {
+      if ($(this).attr('id') == 'batched-' + action) {
           $(':checked[form=batched]').each(function() {
               var taskForm = $(this).closest('.task').find('form');
               // the form needs to have a resolve action in order to be added
-              if (formHasAction(taskForm, 'resolve')) {
+              if (formHasAction(taskForm, action)) {
                   forms.push(taskForm);
               }
           });
-          batchAction(forms, 'resolve');
+          batchAction(forms, action);
       } else {
-          singleAction($(this).closest('form'), 'resolve');
+          singleAction($(this).closest('form'), action);
       }
       return false;
-  });
+    };
+  }
 
-  $('button[name="reject"]').click(function(e){
-      e.preventDefault();
-      var forms = [];
-      if ($(this).attr('id') == 'batched-reject') {
-          $(':checked[form=batched]').each(function() {
-              var taskForm = $(this).closest('.task').find('form');
-              if (formHasAction(taskForm, 'reject')) {
-                  forms.push(taskForm);
-              }
-          });
-          batchAction(forms, 'reject');
-      } else {
-          singleAction($(this).closest('form'), 'reject');
-      }
-      return false;
-  });
-
-  $('button[name="spam"]').click(function(e){
-      e.preventDefault();
-      var forms = [];
-      if ($(this).attr('id') == 'batched-reject') {
-          $(':checked[form=batched]').each(function() {
-              var taskForm = $(this).closest('.task').find('form');
-              if (formHasAction(taskForm, 'spam')) {
-                  forms.push(taskForm);
-              }
-          });
-          batchAction(forms, 'spam');
-      } else {
-          singleAction($(this).closest('form'), 'spam');
-      }
-      return false;
-  });
+  $('button[name="resolve"]').click(ajaxSubmit('resolve'));
+  $('button[name="reject"]').click(ajaxSubmit('reject'));
+  $('button[name="spam"]').click(ajaxSubmit('spam'));
+  $('button[name="defer"]').click(ajaxSubmit('defer'));
 
   var checkboxes = $('.task header').find(':checkbox');
   var batchedButtons = $('#batched button').not('#collapse-all');
@@ -244,7 +218,7 @@ $('document').ready(function(){
     $.ajax({
       url: '/task/assign-to/',
       data: {
-        task_pk: $(this).data('task-pk'),
+        task_pk: $(this).prop('name'),
         asignee: $(this).val()
       },
       type: 'post',

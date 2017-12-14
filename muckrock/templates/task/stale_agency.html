@@ -58,11 +58,15 @@
 
 {% block task-actions %}
     {% if stale_requests %}
-    <div class="form-field">
-        <label for="{{email_form.email.id_for_label}}">Update email on checked requests:</label>
-        {{ email_form.email }}
-    </div>
-    <button type="submit" name="update" value="true" class="primary button">Update email</button>
+        <div class="form-field">
+            <label for="{{email_form.email.id_for_label}}">Update email on checked requests:</label>
+            {{ email_form.email }}
+        </div>
+        <button type="submit" name="update" value="true" class="primary button">Update email</button>
     {% endif %}
+    <span class="task-defer">
+      <input type="text" class="datepicker-future" name="date_deferred" value="{{task.date_deferred|date:"m/d/Y"|default:""}}">
+      <button type="submit" name="defer" value="true" class="primary button">Defer</button>
+    </span>
     <button class="button" type="submit" name="resolve" value="true">Resolve</button>
 {% endblock %}

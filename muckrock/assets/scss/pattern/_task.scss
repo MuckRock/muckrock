@@ -99,6 +99,16 @@ $task-padding: $vr/4 $vr/2;
     }
 }
 
+.task__actions .task-defer {
+    text-align: left;
+    float: left;
+    width: 200px;
+    input {
+        width:100px;
+        display: inline-block;
+    }
+}
+
 /* Flagged Task */
 
 .flagged.task .flag-reply {
@@ -269,6 +279,17 @@ $task-padding: $vr/4 $vr/2;
     }
 }
 
+.new-agency .clear {
+    clear: both;
+}
+
+.new-agency .task__actions {
+    text-align: left;
+    .task-defer {
+        float: none;
+    }
+}
+
 /* Response Task */
 
 .response.task, .portal.task {
@@ -297,16 +318,11 @@ $task-padding: $vr/4 $vr/2;
 }
 
 .snail-mail.task .task-post-actions {
-    @include display(flex);
-    @include flex-wrap(wrap);
-    @include justify-content(space-between);
-    @include align-items(flex-end);
     margin-bottom: 0;
     .input-group {
-        @include flex(3 1 auto);
+        text-align: left;
     }
     .button-group {
-        @include flex(1 1 auto);
         text-align: right;
     }
 }
@@ -315,4 +331,24 @@ $task-padding: $vr/4 $vr/2;
 
 .portal .form-field {
     text-align: left;
+}
+
+/* Orphan Task */
+
+.orphan .task__actions{
+    /*text-align: left;*/
+    label {
+        display: inline;
+        width: auto;
+    }
+    input {
+        display: inline;
+        width: auto;
+    }
+    .task-defer {
+        input {
+            display: inline-block;
+            width: 100px;
+        }
+    }
 }

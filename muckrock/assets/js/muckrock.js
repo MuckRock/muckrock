@@ -79,6 +79,12 @@ $('document').ready(function(){
         maxDate: '+1y',
         yearRange: '2010:+1'
     });
+    $('.datepicker-future').datepicker({
+        changeMonth: true,
+        changeYear: true,
+        minDate: 0,
+        maxDate: '+1y',
+    });
 
     // Loupe
     $('.news__article__main img').loupe({
