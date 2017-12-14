@@ -97,6 +97,11 @@ class OrphanTaskQuerySet(TaskQuerySet):
                     'communication__files',
                     Prefetch(
                         'communication__emails',
+                        queryset=EmailCommunication.objects.exclude(rawemail=None),
+                        to_attr='raw_emails',
+                        ),
+                    Prefetch(
+                        'communication__emails',
                         queryset=EmailCommunication.objects.select_related('from_email'),
                         )))
 

@@ -24,6 +24,10 @@
             <dt>Probable Request</dt>
             <dd><a href="{{task.communication.likely_foia.get_absolute_url}}">{{task.communication.likely_foia}}</a> (<a href="{% url 'admin:foia_foiarequest_change' task.communication.likely_foia.pk %}">admin</a>) - MR #{{task.communication.likely_foia.pk}}</dd>
         {% endif %}
+        {% if task.communication.raw_emails %}
+            <dt>Raw Email</dt>
+            <dd><a href="{% url 'foia-raw' idx=task.communication.pk %}">Raw Email</a></dd>
+        {% endif %}
         {% if attachments %}
             <dt>Attachments</dt>
             {% for file in attachments %}
