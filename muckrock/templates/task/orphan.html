@@ -1,36 +1,36 @@
 {% extends 'task/default.html' %}
 
 {% block task-content %}
-<dl class="task__data">
-    <dt>Reason</dt>
-    <dd>{{task.get_reason_display}}</dd>
-    <dt>To</dt>
-    <dd>{{task.address}}</dd>
-    {% with from_email=task.communication.emails.0.from_email %}
-    {% if from_email %}
-    <dt>From</dt>
-    <dd>{{ from_email }}</dd>
-    {% endif %}
-    {% endwith %}
-    {% if task.communication.subject %}
-    <dt>Subject</dt>
-    <dd>{{ task.communication.subject }}</dd>
-    {% endif %}
-    {% if task.communication.communication %}
-    <dt>Communication</dt>
-    <dd>{{task.communication.communication}}</dd>
-    {% endif %}
-    {% if task.communication.likely_foia %}
-    <dt>Probable Request</dt>
-    <dd><a href="{{task.communication.likely_foia.get_absolute_url}}">{{task.communication.likely_foia.pk}}</a> (<a href="{% url 'admin:foia_foiarequest_change' task.communication.likely_foia.pk %}">admin</a>)</dd>
-    {% endif %}
-    {% if attachments %}
-    <dt>Attachments</dt>
-        {% for file in attachments %}
-    <dd>{% include "lib/file.html" %}</dd>
-        {% endfor %}
-    {% endif %}
-</dl>
+    <dl class="task__data">
+        <dt>Reason</dt>
+        <dd>{{task.get_reason_display}}</dd>
+        <dt>To</dt>
+        <dd>{{task.address}}</dd>
+        {% with from_email=task.communication.emails.all.0.from_email %}
+            {% if from_email %}
+                <dt>From</dt>
+                <dd>{{ from_email }}</dd>
+            {% endif %}
+        {% endwith %}
+        {% if task.communication.subject %}
+            <dt>Subject</dt>
+            <dd>{{ task.communication.subject }}</dd>
+        {% endif %}
+        {% if task.communication.communication %}
+            <dt>Communication</dt>
+            <dd>{{task.communication.communication}}</dd>
+        {% endif %}
+        {% if task.communication.likely_foia %}
+            <dt>Probable Request</dt>
+            <dd><a href="{{task.communication.likely_foia.get_absolute_url}}">{{task.communication.likely_foia.pk}}</a> (<a href="{% url 'admin:foia_foiarequest_change' task.communication.likely_foia.pk %}">admin</a>)</dd>
+        {% endif %}
+        {% if attachments %}
+            <dt>Attachments</dt>
+            {% for file in attachments %}
+                <dd>{% include "lib/file.html" %}</dd>
+            {% endfor %}
+        {% endif %}
+    </dl>
 {% endblock %}
 
 {% block task-actions %}
