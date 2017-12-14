@@ -139,17 +139,17 @@
 {% endif %}
 
 <div class="modal" id="similar-agency-modal">
-    <h1>You are submitting to an agency not in our database</h1>
-    <h2>If this is correct, we will add the new agency to our database, but first see if one of these is the agency you are looking for:</h2>
+    <h1>The agency you selected isn't in our database yet.</h1>
+    <p>Double check that it's not a match with one of the similarly spelled agencies below, and if not we'll research and send your request on its way.<p>
     <p class="error"></p>
     <div>
         <select name="replacement-agency" id="replacement-agency" size="10">
             <option>Loading...</option>
         </select>
     </div>
-    <button id="replacement-agency-button" class="primary button">Select Replacement Agency</button>
+    <button id="new-agency-button" class="primary button">Create New Agency and File</button>
     &nbsp;
-    <button id="new-agency-button" class="button">Continue with New Agency</button>
+    <button id="replacement-agency-button" class="button">File to Highlighted Agency</button>
 </div>
 
 {% endblock %}

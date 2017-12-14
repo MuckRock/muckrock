@@ -169,7 +169,7 @@ $(document).ready(function(){
           // there are suggestions, display a modal asking the user if they meant
           // one of the suggested agencies
           $("#similar-agency-modal h1").text(
-              "You are submitting to \"" + agencyInput.val() + "\", which is not in our agency database");
+              "The \"" + agencyInput.val() + "\" isn't in our database yet.");
           modal($("#similar-agency-modal"));
           $("#replacement-agency").children().remove();
           for (var i = 0; i < length; i++) {
