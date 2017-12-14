@@ -160,6 +160,9 @@ $('document').ready(function(){
   $('button[name="reject"]').click(ajaxSubmit('reject'));
   $('button[name="spam"]').click(ajaxSubmit('spam'));
   $('button[name="defer"]').click(ajaxSubmit('defer'));
+  $('button[name="approve"]').click(ajaxSubmit('approve'));
+  $('button[name="save"]').click(ajaxSubmit('save'));
+  $('button[name="move"]').click(ajaxSubmit('move'));
 
   var checkboxes = $('.task header').find(':checkbox');
   var batchedButtons = $('#batched button').not('#collapse-all');

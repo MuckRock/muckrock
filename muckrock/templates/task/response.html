@@ -77,6 +77,10 @@
     <div class="response-input">
         {{ response_form }}
     </div>
+    <span class="task-defer">
+      <input type="text" class="datepicker-future" name="date_deferred" value="{{task.date_deferred|date:"m/d/Y"|default:""}}">
+      <button type="submit" name="defer" value="true" class="primary button">Defer</button>
+    </span>
     <button type="submit" name="proxy" value="true" class="proxy button">Proxy Rejection</button>
-    <button type="submit" name="resolve" value="true" class="primary button">Save &amp; Resolve</button>
+    <button type="submit" name="save" value="true" class="primary button">Save &amp; Resolve</button>
 {% endblock %}

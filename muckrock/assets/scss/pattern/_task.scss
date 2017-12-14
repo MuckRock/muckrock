@@ -109,6 +109,26 @@ $task-padding: $vr/4 $vr/2;
     }
 }
 
+.task__main .form-data-table {
+    width: 95%;
+    margin: 10px auto;
+    padding: 5px;
+    br.clear {
+        clear: both;
+    }
+    .row {
+        margin: 0;
+        padding: 0;
+    }
+    .cell {
+        border: 1px solid black;
+        float: left;
+        height: 60px;
+        padding: 5px;
+        margin: 0;
+    }
+}
+
 /* Flagged Task */
 
 .flagged.task .flag-reply {

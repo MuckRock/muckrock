@@ -4,6 +4,7 @@ Models for the Task application
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.contrib.postgres.fields import JSONField
 from django.core.mail import EmailMessage
 from django.core.urlresolvers import reverse
 from django.db import models
@@ -72,6 +73,7 @@ class Task(models.Model):
     resolved = models.BooleanField(default=False, db_index=True)
     assigned = models.ForeignKey(User, blank=True, null=True, related_name="assigned_tasks")
     resolved_by = models.ForeignKey(User, blank=True, null=True, related_name="resolved_tasks")
+    form_data = JSONField(blank=True, null=True)
 
     objects = TaskQuerySet.as_manager()
 
@@ -82,11 +84,13 @@ class Task(models.Model):
         # pylint:disable=no-self-use
         return u'Task'
 
-    def resolve(self, user=None):
+    def resolve(self, user=None, form_data=None):
         """Resolve the task"""
         self.resolved = True
         self.resolved_by = user
         self.date_done = datetime.now()
+        if form_data is not None:
+            self.form_data = form_data
         self.save()
         logging.info('User %s resolved task %s', user, self.pk)
 

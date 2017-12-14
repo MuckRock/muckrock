@@ -274,7 +274,10 @@ def classify_status(task_pk, **kwargs):
             try:
                 ml_robot = User.objects.get(username='mlrobot')
                 resp_task.set_status(resp_task.predicted_status)
-                resp_task.resolve(ml_robot)
+                resp_task.resolve(
+                        ml_robot,
+                        {'status': resp_task.predicted_status},
+                        )
             except User.DoesNotExist:
                 logger.error('mlrobot account does not exist')
 

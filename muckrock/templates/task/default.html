@@ -29,6 +29,18 @@
               </select>
             </p>
           {% endif %}
+          {% if task.form_data %}
+            <div class="form-data-table">
+              <div class="row">
+                {% for key, value in task.form_data.iteritems %}
+                  <div class="cell">
+                    <strong>{{key}}:</strong><br>{{value}}
+                  </div>
+                {% endfor %}
+                <br class="clear">
+              </div>
+            </div>
+          {% endif %}
           {% block task-content %}
           {% endblock %}
       </main>

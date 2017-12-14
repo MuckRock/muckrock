@@ -18,7 +18,7 @@
         {% endif %}
         {% if task.communication.communication %}
             <dt>Communication</dt>
-            <dd>{{task.communication.communication}}</dd>
+            <dd>{{task.communication.communication|linebreaks}}</dd>
         {% endif %}
         {% if task.communication.likely_foia %}
             <dt>Probable Request</dt>
@@ -50,13 +50,13 @@
       <button type="submit" name="defer" value="true" class="primary button">Defer</button>
     </span>
     <div>
-        <input type="text" name="move"
+        <input type="text" name="foia_pks"
             {% if task.communication.likely_foia %}
                 value="{{task.communication.likely_foia.pk}}"
             {% else %}
                 placeholder="MuckRock №"
             {% endif %}
             >
-        <button type="submit" class="primary button">Move</button>
+        <button type="submit" name="move" value="true" class="primary button">Move</button>
     </div>
 {% endblock %}

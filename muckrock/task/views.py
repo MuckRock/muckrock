@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 from django.core.urlresolvers import resolve
 from django.db import transaction
-from django.db.models import Count, Q
+from django.db.models import Count
 from django.http import (
         HttpResponse,
         HttpResponseForbidden,
@@ -21,7 +21,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 
 import logging
-from datetime import datetime, date
+from datetime import datetime
 from django_filters import FilterSet
 from PyPDF2 import PdfFileMerger
 from cStringIO import StringIO
@@ -72,6 +72,7 @@ from muckrock.task.pdf import SnailMailPDF
 from muckrock.views import MRFilterListView
 
 # pylint:disable=missing-docstring
+# pylint:disable=arguments-differ
 
 def count_tasks():
     """Counts all unresolved tasks and adds them to a dictionary"""
@@ -167,11 +168,9 @@ class TaskList(MRFilterListView):
         tasks = task_model.objects.filter(pk__in=task_pks)
         return tasks
 
-    def task_post_helper(self, request, task):
+    def task_post_helper(self, request, task, form_data=None):
         """Specific actions to apply to the task"""
         # pylint: disable=no-self-use
-        if request.POST.get('resolve'):
-            task.resolve(request.user)
         if request.POST.get('defer'):
             date_deferred = request.POST.get('date_deferred')
             if not date_deferred:
@@ -182,6 +181,8 @@ class TaskList(MRFilterListView):
                             datetime.strptime(date_deferred, '%m/%d/%Y').date())
                 except ValueError:
                     pass
+        elif request.POST.get('resolve'):
+            task.resolve(request.user, form_data)
         return task
 
     def post(self, request):
@@ -213,14 +214,18 @@ class OrphanTaskList(TaskList):
         if request.POST.get('reject'):
             blacklist = request.POST.get('blacklist', False)
             task.reject(blacklist)
-            task.resolve(request.user)
+            form_data = {'reject': True, 'blacklist': blacklist}
+            task.resolve(request.user, form_data)
         elif request.POST.get('move'):
-            foia_pks = request.POST.get('move', '')
+            foia_pks = request.POST.get('foia_pks', '')
             foia_pks = foia_pks.split(', ')
             try:
                 task.move(foia_pks, request.user)
-                task.resolve(request.user)
-                messages.success(request, 'The communication was moved to the specified requests.')
+                task.resolve(request.user, {'move': True, 'foia_pks': foia_pks})
+                messages.success(
+                        request,
+                        'The communication was moved to the specified requests.',
+                        )
             except ValueError as exception:
                 messages.error(request, 'Error when moving: %s' % exception)
                 logging.debug('Error moving communications: %s', exception)
@@ -241,28 +246,32 @@ class SnailMailTaskList(TaskList):
         # we should always set the status of a request when resolving
         # a snail mail task so that the request leaves processing status
         if request.POST.get('no_mail'):
-            task.resolve(request.user)
+            task.resolve(request.user, {'no_mail': True})
             return task
-        status = request.POST.get('status')
-        check_number = request.POST.get('check_number')
-        if status and status not in dict(STATUS):
-            messages.error(request, 'Invalid status')
-            return
-        try:
-            if check_number:
-                check_number = int(check_number)
-        except ValueError:
-            messages.error(request, 'Check number must be an integer')
-            return
-        if status:
-            task.set_status(status)
-        # if the task is in the payment category and we're given a check
-        # number, then we should record the existence of this check
-        if check_number and task.category == 'p':
-            task.record_check(check_number, request.user)
-        task.communication.save()
-        task.resolve(request.user)
-        return task
+        elif request.POST.get('save'):
+            form_data = {}
+            status = request.POST.get('status')
+            check_number = request.POST.get('check_number')
+            if status and status not in dict(STATUS):
+                messages.error(request, 'Invalid status')
+                return
+            try:
+                if check_number:
+                    check_number = int(check_number)
+                    form_data['check_number'] = check_number
+            except ValueError:
+                messages.error(request, 'Check number must be an integer')
+                return
+            if status:
+                task.set_status(status)
+                form_data['status'] = status
+            # if the task is in the payment category and we're given a check
+            # number, then we should record the existence of this check
+            if check_number and task.category == 'p':
+                task.record_check(check_number, request.user)
+            task.communication.save()
+            task.resolve(request.user, form_data)
+        return super(SnailMailTaskList, self).task_post_helper(request, task)
 
 
 class StaleAgencyTaskList(TaskList):
@@ -341,20 +350,25 @@ class FlaggedTaskList(TaskList):
 
     def task_post_helper(self, request, task):
         """Special post handler for FlaggedTasks"""
+        form_data = {}
         if request.POST.get('reply'):
+            form_data['reply'] = True
             reply_form = FlaggedTaskForm(request.POST)
             if reply_form.is_valid() and task.user:
                 text = reply_form.cleaned_data['text']
                 task.reply(text)
+                form_data['text'] = text
             elif reply_form.is_valid():
                 messages.error(request, 'Cannot reply - task has no user')
                 return
             else:
                 messages.error(request, 'The form is invalid')
                 return
-        if request.POST.get('resolve'):
-            task.resolve(request.user)
-        return super(FlaggedTaskList, self).task_post_helper(request, task)
+        return super(FlaggedTaskList, self).task_post_helper(
+                request,
+                task,
+                form_data=form_data,
+                )
 
 
 class ProjectReviewTaskList(TaskList):
@@ -372,10 +386,10 @@ class ProjectReviewTaskList(TaskList):
                 task.reply(text)
             elif action == 'approve':
                 task.approve(text)
-                task.resolve(request.user)
+                task.resolve(request.user, {'action': 'approve'})
             elif action == 'reject':
                 task.reject(text)
-                task.resolve(request.user)
+                task.resolve(request.user, {'action': 'reject'})
         return super(ProjectReviewTaskList, self).task_post_helper(request, task)
 
 
@@ -394,7 +408,9 @@ class NewAgencyTaskList(TaskList):
                 messages.error(request, 'The agency info form is invalid.')
                 return
             task.approve()
-            task.resolve(request.user)
+            form_data = new_agency_form.cleaned_data
+            form_data.update({'approve': True})
+            task.resolve(request.user, form_data)
         elif request.POST.get('reject'):
             replacement_agency_id = request.POST.get('replacement')
             replacement_agency = get_object_or_404(Agency, id=replacement_agency_id)
@@ -405,10 +421,12 @@ class NewAgencyTaskList(TaskList):
                         )
                 return
             task.reject(replacement_agency)
-            task.resolve(request.user)
+            form_data = {'reject': True, 'replacement': replacement_agency_id}
+            task.resolve(request.user, form_data)
         elif request.POST.get('spam'):
             task.spam()
-            task.resolve(request.user)
+            form_data = {'spam': True}
+            task.resolve(request.user, form_data)
         return super(NewAgencyTaskList, self).task_post_helper(request, task)
 
 
@@ -419,16 +437,17 @@ class ResponseTaskList(TaskList):
 
     def task_post_helper(self, request, task):
         """Special post helper exclusive to ResponseTask"""
-        task = super(ResponseTaskList, self).task_post_helper(request, task)
-        form = ResponseTaskForm(request.POST)
-        if not form.is_valid():
-            messages.error(request, 'Form is invalid')
-            return
-        action_taken, error_msgs = form.process_form(task, request.user)
-        for msg in error_msgs:
-            messages.error(request, msg)
-        if action_taken and not error_msgs:
-            task.resolve(request.user)
+        if request.POST.get('proxy') or request.POST.get('save'):
+            form = ResponseTaskForm(request.POST)
+            if not form.is_valid():
+                messages.error(request, 'Form is invalid')
+                return
+            action_taken, error_msgs = form.process_form(task, request.user)
+            for msg in error_msgs:
+                messages.error(request, msg)
+            if action_taken and not error_msgs:
+                task.resolve(request.user, form.cleaned_data)
+        return super(ResponseTaskList, self).task_post_helper(request, task)
 
 
 class StatusChangeTaskList(TaskList):
@@ -450,11 +469,11 @@ class MultiRequestTaskList(TaskList):
         if request.POST.get('action') == 'submit':
             agency_list = request.POST.getlist('agencies')
             task.submit(agency_list)
-            task.resolve(request.user)
+            task.resolve(request.user, {'action': 'submit', 'agencies': 'agency_list'})
             messages.success(request, 'Multirequest submitted')
         elif request.POST.get('action') == 'reject':
             task.reject()
-            task.resolve(request.user)
+            task.resolve(request.user, {'action': 'reject'})
             messages.error(request, 'Multirequest rejected')
         return super(MultiRequestTaskList, self).task_post_helper(request, task)
 
@@ -474,11 +493,12 @@ class PortalTaskList(TaskList):
         # incoming and outgoing portal tasks are very different
         # incoming are very similar to response tasks
         # outgoing are very similar to snail mail tasks
-        if task.category == 'i':
-            self._incoming_handler(request, task)
-        else:
-            self._outgoing_handler(request, task)
-        return task
+        if request.POST.get('save'):
+            if task.category == 'i':
+                self._incoming_handler(request, task)
+            else:
+                self._outgoing_handler(request, task)
+        return super(PortalTaskList, self).task_post_helper(request, task)
 
     def _incoming_handler(self, request, task):
         """POST handler for incoming portal tasks"""
@@ -509,7 +529,12 @@ class PortalTaskList(TaskList):
                     direction='incoming',
                     )
         if action_taken and not error_msgs:
-            task.resolve(request.user)
+            form_data = form.cleaned_data
+            form_data.update({
+                'communication': new_text,
+                'keep_hidden': keep_hidden,
+                })
+            task.resolve(request.user, form_data)
 
     def _outgoing_handler(self, request, task):
         """POST handler for outgoing portal tasks"""
@@ -544,7 +569,12 @@ class PortalTaskList(TaskList):
                 portal=task.communication.foia.portal,
                 direction='outgoing',
                 )
-        task.resolve(request.user)
+        form_data = {
+                'status': status,
+                'word_to_pass': password,
+                'tracking_number': tracking_number,
+                }
+        task.resolve(request.user, form_data)
 
 
 class RequestTaskList(TemplateView):
