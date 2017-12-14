@@ -3,7 +3,7 @@
 {% block task-content %}
 <dl class="task__data">
     <dt>FOIA Request</dt>
-    <dd><a href="{{task.foia.get_absolute_url}}">{{task.foia}}</a></dd>
+    <dd><a href="{{task.foia.get_absolute_url}}">{{task.foia}}</a> (<a href="{% url 'admin:foia_foiarequest_change' task.foia.pk %}">admin</a>) - MR #{{task.foia.pk}}</dd>
     <dt>Agency</dt>
     <dd><a href="{{task.foia.agency.get_absolute_url}}">{{task.foia.agency}}</a></dd>
     <dt>Jurisdiction</dt>

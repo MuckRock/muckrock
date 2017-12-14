@@ -9,7 +9,7 @@
     <dd>{{task.agency.phone}}</dd>
     {% if stalest_request %}
     <dt>Stalest Request</dt>
-    <dd><a href="{{stalest_request.get_absolute_url}}">{{stalest_request}}</a> (<a href="{% url 'admin:foia_foiarequest_change' stalest_request.pk %}">admin</a>)</dd>
+    <dd><a href="{{stalest_request.get_absolute_url}}">{{stalest_request}}</a> (<a href="{% url 'admin:foia_foiarequest_change' stalest_request.pk %}">admin</a>) - MR #{{stalest_request.pk}}</dd>
     {% if stalest_request.latest_response %}
     <dd>{{stalest_request.latest_response}} day{{stalest_request.latest_response|pluralize}} stale</dd>
     {% endif %}
