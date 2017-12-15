@@ -68,6 +68,11 @@ class FOIACommunicationSerializer(serializers.ModelSerializer):
     likely_foia = serializers.PrimaryKeyRelatedField(
             queryset=FOIARequest.objects.all(),
             style={'base_template': 'input.html'})
+    delivered = serializers.SerializerMethodField()
+
+    def get_delivered(self, obj):
+        return obj.get_delivered()
+
     class Meta:
         model = FOIACommunication
         fields = [
@@ -83,8 +88,10 @@ class FOIACommunicationSerializer(serializers.ModelSerializer):
                 'communication',
                 'status',
                 'likely_foia',
-                'files'
+                'files',
+                'delivered',
                 ]
+
 
 
 class FOIANoteSerializer(serializers.ModelSerializer):
