@@ -205,26 +205,8 @@ class FOIACommunication(models.Model):
                     foia=self.foia,
                     user=user,
                     )
-            access = 'private' if request.embargo else 'public'
             for file_ in files:
-                original_file_id = file_.id
-                file_.pk = None
-                file_.foia = request
-                file_.comm = this_clone
-                file_.access = access
-                file_.source = this_clone.get_source()
-                # make a copy of the file on the storage backend
-                try:
-                    new_ffile = ContentFile(file_.ffile.read())
-                except ValueError:
-                    error_msg = ('FOIAFile #%s has no data in its ffile field. '
-                                'It has not been cloned.')
-                    logger.error(error_msg, original_file_id)
-                    continue
-                new_ffile.name = file_.ffile.name
-                file_.ffile = new_ffile
-                file_.save()
-                upload_document_cloud.apply_async(args=[file_.pk, False], countdown=3)
+                file_.clone(this_clone)
             # clone all sub communications as well
             for comms in [emails, faxes, mails, web_comms]:
                 for comm in comms:
