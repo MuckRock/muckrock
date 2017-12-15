@@ -305,6 +305,8 @@ class FOIACommunicationViewSet(viewsets.ModelViewSet):
 
         def filter_delivered(self, queryset, name, value):
             """Filter by delivered"""
+            # pylint: disable=no-self-use
+            # pylint: disable=unused-argument
             dmap = {
                     'email': 'emails',
                     'fax': 'faxes',
