@@ -114,8 +114,12 @@
         <button class="button" id="collapse-all">Collapse All</button>
     </form>
     {% active request '^/task/snail-mail/$' as snail_mail %}
+    {% active request '^/task/new-agency/$' as new_agency %}
     {% if snail_mail %}
-    <button class="blue button" id="snail-mail-bulk-download">Download Bulk PDF</button>
+        <button class="blue button" id="snail-mail-bulk-download">Download Bulk PDF</button>
+    {% endif %}
+    {% if new_agency %}
+        <a href="{% url "task-bulk-new-agency" %}" class="blue button">Bulk Create New Agencies</a>
     {% endif %}
 </div>
 {% endblock %}

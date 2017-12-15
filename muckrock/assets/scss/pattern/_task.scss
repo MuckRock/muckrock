@@ -310,6 +310,18 @@ $task-padding: $vr/4 $vr/2;
     }
 }
 
+.bulk-new-agency {
+    .autocomplete-light-widget {
+        width: 30%;
+        input {
+            width: 100%;
+        }
+    }
+    input {
+        width: 30%;
+    }
+}
+
 /* Response Task */
 
 .response.task, .portal.task {

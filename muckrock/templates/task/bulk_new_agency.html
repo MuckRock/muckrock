@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}MuckRock &bull; Bulk New Agency{% endblock %}
+
+{% block content %}
+    <section class="form">
+        <header class="form-head">
+            <h1 class="form-title">Bulk New Agency</h1>
+        </header>
+        <form method="post">
+            <div class="buttons">
+                <input type="submit" name="submit" value="Submit" class="blue button" />
+            </div>
+            {% csrf_token %}
+            {{ formset.management_form }}
+            {% for form in formset %}
+                <div class="bulk-new-agency">
+                    {% for field in form %}
+                        <label for="{{field.id_for_label}}">{{field.label}}:</label>
+                        {% if field.errors %}
+                            {{field.errors}}
+                        {% endif %}
+                        {{field}}
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            <div class="buttons">
+                <input type="submit" name="submit" value="Submit" class="blue button" />
+            </div>
+        </form>
+    </section>
+{% endblock content %}

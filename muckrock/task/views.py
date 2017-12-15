@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
-from django.core.urlresolvers import resolve
+from django.core.urlresolvers import resolve, reverse
 from django.db import transaction
 from django.db.models import Count
 from django.http import (
@@ -18,7 +18,7 @@ from django.http import (
         )
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, FormView
 
 import logging
 from datetime import datetime
@@ -50,6 +50,7 @@ from muckrock.task.forms import (
     ResponseTaskForm,
     ProjectReviewTaskForm,
     ReviewAgencyTaskForm,
+    BulkNewAgencyTaskFormSet,
     )
 from muckrock.task.models import (
     Task,
@@ -69,7 +70,7 @@ from muckrock.task.models import (
     )
 from muckrock.task.tasks import submit_review_update, snail_mail_bulk_pdf_task
 from muckrock.task.pdf import SnailMailPDF
-from muckrock.views import MRFilterListView
+from muckrock.views import MRFilterListView, class_view_decorator
 
 # pylint:disable=missing-docstring
 # pylint:disable=arguments-differ
@@ -680,3 +681,31 @@ def assign_to(request):
         task.assigned = get_object_or_404(User, pk=asignee_pk)
     task.save()
     return HttpResponse('OK')
+
+
+@class_view_decorator(user_passes_test(lambda u: u.is_staff))
+class BulkNewAgency(FormView):
+    """Allow bulk creation of new agencies"""
+    template_name = 'task/bulk_new_agency.html'
+    form_class = BulkNewAgencyTaskFormSet
+
+    def get_context_data(self, **kwargs):
+        """Name the form formset"""
+        context = super(BulkNewAgency, self).get_context_data(**kwargs)
+        formset = context.pop('form')
+        context['formset'] = formset
+        return context
+
+    def form_valid(self, form):
+        """Create the agencies"""
+        for form_ in form.forms:
+            name = form_.cleaned_data.get('name')
+            jurisdiction = form_.cleaned_data.get('jurisdiction')
+            if name and jurisdiction:
+                Agency.objects.create_new(
+                        name,
+                        jurisdiction,
+                        self.request.user,
+                        )
+        messages.success(self.request, 'Successfully create new agencies')
+        return redirect('new-agency-task-list')
