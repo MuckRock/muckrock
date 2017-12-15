@@ -269,10 +269,26 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
         return super(FOIARequestViewSet, self).post_save(obj, created=created)
 
 
+DELIVERED_CHOICES = (
+        ('email', 'Email'),
+        ('fax', 'Fax'),
+        ('mail', 'Mail'),
+        ('web', 'Web Comm'),
+        ('portal', 'Portal'),
+        )
+
+
 class FOIACommunicationViewSet(viewsets.ModelViewSet):
     """API views for FOIARequest"""
     # pylint: disable=too-many-public-methods
-    queryset = FOIACommunication.objects.prefetch_related('files')
+    queryset = FOIACommunication.objects.prefetch_related(
+            'files',
+            'emails',
+            'faxes',
+            'mails',
+            'web_comms',
+            'portals',
+            )
     serializer_class = FOIACommunicationSerializer
     permission_classes = (DjangoModelPermissions,)
 
@@ -282,6 +298,24 @@ class FOIACommunicationViewSet(viewsets.ModelViewSet):
         min_date = django_filters.DateFilter(name='date', lookup_expr='gte')
         max_date = django_filters.DateFilter(name='date', lookup_expr='lte')
         foia = django_filters.NumberFilter(name='foia__id')
+        delivered = django_filters.ChoiceFilter(
+                method='filter_delivered',
+                choices=DELIVERED_CHOICES,
+                )
+
+        def filter_delivered(self, queryset, name, value):
+            """Filter by delivered"""
+            dmap = {
+                    'email': 'emails',
+                    'fax': 'faxes',
+                    'mail': 'mails',
+                    'web': 'web_comms',
+                    'portal': 'portals',
+                    }
+            if value not in dmap:
+                return queryset
+            return queryset.exclude(**{dmap[value]: None})
+
         class Meta:
             model = FOIACommunication
             fields = (
@@ -290,6 +324,7 @@ class FOIACommunicationViewSet(viewsets.ModelViewSet):
                     'foia',
                     'status',
                     'response',
+                    'delivered',
                     )
 
     filter_class = Filter
