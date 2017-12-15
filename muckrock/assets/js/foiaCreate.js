@@ -111,14 +111,14 @@ $(document).ready(function(){
   // if the selected agency is exempt, show an error message
   agencyWidget.on("widgetSelectChoice", function(){
     if (agencyField.find('.small.red.badge').length > 0) {
-      $("#submit").prop("disabled", "disabled");
+      $("#submit_button").prop("disabled", "disabled");
       $("#submit_help").text("The agency you have selected is exempt from public records requests.  Please select another agency.");
     }
   });
 
   // clear the exempt error message when the agency is deselected
   agencyWidget.on("widgetDeselectChoice", function(){
-    $("#submit").prop("disabled", "");
+    $("#submit_button").prop("disabled", "");
     $("#submit_help").text("");
   });
 
