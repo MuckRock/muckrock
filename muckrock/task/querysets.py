@@ -75,8 +75,14 @@ class TaskQuerySet(models.QuerySet):
     def get_undeferred(self):
         """Get tasks which aren't deferred"""
         return self.filter(
-                Q(date_deferred__lt=date.today()) |
+                Q(date_deferred__lte=date.today()) |
                 Q(date_deferred=None)
+                )
+
+    def get_deferred(self):
+        """Get tasks which are deferred"""
+        return self.filter(
+                date_deferred__gt=date.today()
                 )
 
 

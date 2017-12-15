@@ -76,22 +76,25 @@ from muckrock.views import MRFilterListView
 
 def count_tasks():
     """Counts all unresolved tasks and adds them to a dictionary"""
-    count = Task.objects.filter(resolved=False).aggregate(
-        all=Count('id'),
-        orphan=Count('orphantask'),
-        snail_mail=Count('snailmailtask'),
-        stale_agency=Count('staleagencytask'),
-        review_agency=Count('reviewagencytask'),
-        flagged=Count('flaggedtask'),
-        projectreview=Count('projectreviewtask'),
-        new_agency=Count('newagencytask'),
-        response=Count('responsetask'),
-        status_change=Count('statuschangetask'),
-        crowdfund=Count('crowdfundtask'),
-        multirequest=Count('multirequesttask'),
-        new_exemption=Count('newexemptiontask'),
-        portal=Count('portaltask'),
-        )
+    count = (Task.objects
+            .get_unresolved()
+            .get_undeferred()
+            .aggregate(
+                all=Count('id'),
+                orphan=Count('orphantask'),
+                snail_mail=Count('snailmailtask'),
+                stale_agency=Count('staleagencytask'),
+                review_agency=Count('reviewagencytask'),
+                flagged=Count('flaggedtask'),
+                projectreview=Count('projectreviewtask'),
+                new_agency=Count('newagencytask'),
+                response=Count('responsetask'),
+                status_change=Count('statuschangetask'),
+                crowdfund=Count('crowdfundtask'),
+                multirequest=Count('multirequesttask'),
+                new_exemption=Count('newexemptiontask'),
+                portal=Count('portaltask'),
+                ))
     return count
 
 
@@ -446,6 +449,11 @@ class ResponseTaskList(TaskList):
             for msg in error_msgs:
                 messages.error(request, msg)
             if action_taken and not error_msgs:
+                form_data = form.cleaned_data
+                if form_data['price'] is not None:
+                    # cast from decimal to float, since decimal
+                    # is not json serializable
+                    form_data['price'] = float(form_data['price'])
                 task.resolve(request.user, form.cleaned_data)
         return super(ResponseTaskList, self).task_post_helper(request, task)
 

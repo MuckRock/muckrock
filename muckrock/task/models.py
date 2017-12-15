@@ -245,10 +245,10 @@ class StaleAgencyTask(Task):
     def get_absolute_url(self):
         return reverse('stale-agency-task', kwargs={'pk': self.pk})
 
-    def resolve(self, user=None):
+    def resolve(self, user=None, form_data=None):
         """Unmark the agency as stale when resolving"""
         self.agency.unmark_stale()
-        super(StaleAgencyTask, self).resolve(user)
+        super(StaleAgencyTask, self).resolve(user, form_data)
 
     def stale_requests(self):
         """Returns a list of stale requests associated with the task's agency"""
@@ -770,6 +770,7 @@ class GenericTask(Task):
     """A generic task"""
     subject = models.CharField(max_length=255)
     body = models.TextField(blank=True)
+    objects = TaskQuerySet.as_manager()
 
     def __unicode__(self):
         return u'Generic Task'
@@ -782,6 +783,7 @@ class FailedFaxTask(Task):
     type = 'FailedFaxTask'
     communication = models.ForeignKey('foia.FOIACommunication')
     reason = models.CharField(max_length=255, blank=True, default='')
+    objects = TaskQuerySet.as_manager()
 
     def __unicode__(self):
         return u'Failed Fax Task'
@@ -801,6 +803,7 @@ class RejectedEmailTask(Task):
     foia = models.ForeignKey('foia.FOIARequest', blank=True, null=True)
     email = models.EmailField(blank=True)
     error = models.TextField(blank=True)
+    objects = TaskQuerySet.as_manager()
 
     def __unicode__(self):
         return u'Rejected Email Task'
