@@ -71,6 +71,8 @@ class FOIACommunicationSerializer(serializers.ModelSerializer):
     delivered = serializers.SerializerMethodField()
 
     def get_delivered(self, obj):
+        """Get how the communication was delivered"""
+        # pylint: disable=no-self-use
         return obj.get_delivered()
 
     class Meta:
@@ -91,7 +93,6 @@ class FOIACommunicationSerializer(serializers.ModelSerializer):
                 'files',
                 'delivered',
                 ]
-
 
 
 class FOIANoteSerializer(serializers.ModelSerializer):
