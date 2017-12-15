@@ -9,10 +9,11 @@ import django.contrib.sitemaps.views
 from django.views.generic.base import RedirectView, TemplateView
 from django.views import static
 
-from rest_framework.routers import DefaultRouter
-from rest_framework.authtoken.views import obtain_auth_token
+from dashing.utils import router as dashing_router
 import dbsettings.urls
 import debug_toolbar
+from rest_framework.authtoken.views import obtain_auth_token
+from rest_framework.routers import DefaultRouter
 
 import muckrock.accounts.views
 import muckrock.agency.views
@@ -142,6 +143,7 @@ urlpatterns = [
     url(r'^landing/$', views.LandingView.as_view(), name='landing'),
     url(r'^hijack/', include('hijack.urls')),
     url(r'^opensearch/', include('opensearch.urls')),
+    url(r'^dashboard/', include(dashing_router.urls)),
     ]
 
 

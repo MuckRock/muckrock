@@ -32,6 +32,7 @@ django-celery==3.2.1
 django-compat==1.0.14     # via django-hijack
 django-compressor==2.1
 django-cors-headers==1.3.1
+django-dashing==0.3.3
 django-dbsettings==0.10.0
 django-debug-toolbar==1.8
 django-email-bandit==1.2.0

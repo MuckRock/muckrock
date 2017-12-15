@@ -214,6 +214,7 @@ INSTALLED_APPS = (
     'compat', # for hijack
     'django_filters',
     'opensearch',
+    'dashing',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
@@ -594,3 +595,10 @@ OPENSEARCH_DESCRIPTION = 'Search MuckRock for public documents and news'
 FONT_PATH = '/usr/share/fonts/truetype/dejavu/'
 
 CHECK_EMAIL = os.environ.get('CHECK_EMAIL', '')
+
+DASHING = {
+    'INSTALLED_WIDGETS': ('number', 'list', 'graph', 'clock', 'knob'),
+    'PERMISSION_CLASSES':  (
+        'dashing.permissions.IsAdminUser',
+    )
+}

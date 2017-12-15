@@ -30,7 +30,6 @@ from muckrock.jurisdiction.models import (
         InvokedExemption,
         ExampleAppeal,
         )
-from muckrock.models import ExtractDay, Now
 from muckrock.news.models import Article
 from muckrock.organization.models import Organization
 from muckrock.project.models import Project
@@ -92,10 +91,7 @@ def store_statistics():
             FOIARequest.objects.filter(status='abandoned').count(),
         total_requests_lawsuit=
             FOIARequest.objects.filter(status='lawsuit').count(),
-        requests_processing_days=(FOIARequest.objects
-            .filter(status='submitted')
-            .exclude(date_processing=None)
-            .aggregate(days=Sum(date.today() - F('date_processing')))['days']),
+        requests_processing_days=FOIARequest.objects.get_processing_days(),
         sent_communications_portal=PortalCommunication.objects
             .filter(
                 communication__date__range=(yesterday, date.today()),
@@ -272,10 +268,7 @@ def store_statistics():
                date_done__lt=date.today(),
                resolved_by__profile__acct_type='robot',
                ).count(),
-        flag_processing_days=(FlaggedTask.objects
-            .exclude(resolved=True)
-            .get_undeferred()
-            .aggregate(days=ExtractDay(Sum(Now() - F('date_created'))))['days']),
+        flag_processing_days=FlaggedTask.objects.get_processing_days(),
         unresolved_snailmail_appeals=
             SnailMailTask.objects
             .filter(resolved=False, category='a')

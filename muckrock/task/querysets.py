@@ -3,7 +3,7 @@ Custom QuerySets for the Task application
 """
 
 from django.db import models
-from django.db.models import Prefetch, Q
+from django.db.models import Prefetch, Sum, F, Q
 
 from datetime import date
 
@@ -15,6 +15,7 @@ from muckrock.foia.models import (
         FOIACommunication,
         FOIAFile,
         )
+from muckrock.models import ExtractDay, Now
 from muckrock import task
 
 
@@ -218,6 +219,15 @@ class FlaggedTaskQuerySet(TaskQuerySet):
             'user',
             'resolved_by',
             )
+
+    def get_processing_days(self):
+        """Get total processing days for flagged tasks"""
+        return (self
+                .exclude(resolved=True)
+                .get_undeferred()
+                .aggregate(days=ExtractDay(Sum(Now() - F('date_created'))))
+                ['days']
+                )
 
 
 class ProjectReviewTaskQuerySet(TaskQuerySet):
