@@ -1,27 +1,27 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<section class="{% block form-type %}{%endblock form-type %} form">
-    <header class="form-head">
-    {% block form-head %}
-        <h1 class="form-title">{% block form-title %}{% endblock form-title %}</h1>
-        {% block form-info %}{% endblock form-info %}
-    {% endblock form-head %}
-    </header>
-    {% block form-form %}
-    {% if form %}
-    {% if form.is_multipart %}
-    <form enctype="multipart/form-data" method="post">
-    {% else %}
-    <form method="post">
-    {% endif %}
-        {% csrf_token %}
-        {% include 'lib/pattern/form.html' %}
-        <div class="buttons">
-            <input type="submit" name="submit" value="Submit" class="blue button" />
-        </div>
-    </form>
-    {% endif %}
-    {% endblock form-form %}
-</section>
+    <section class="{% block form-type %}{%endblock form-type %} form">
+        <header class="form-head">
+            {% block form-head %}
+                <h1 class="form-title">{% block form-title %}{% endblock form-title %}</h1>
+                {% block form-info %}{% endblock form-info %}
+            {% endblock form-head %}
+        </header>
+        {% block form-form %}
+            {% if form %}
+                {% if form.is_multipart %}
+                    <form enctype="multipart/form-data" method="post">
+                {% else %}
+                    <form method="post">
+                {% endif %}
+                {% csrf_token %}
+                {% include 'lib/pattern/form.html' %}
+                <div class="buttons">
+                    <input type="submit" name="submit" value="Submit" class="blue button" />
+                </div>
+                </form>
+            {% endif %}
+        {% endblock form-form %}
+    </section>
 {% endblock content %}

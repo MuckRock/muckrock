@@ -63,7 +63,6 @@ class AgencyQuerySet(models.QuerySet):
             status='pending',
         )
         NewAgencyTask.objects.create(
-                assigned=user,
                 user=user,
                 agency=agency,
                 )

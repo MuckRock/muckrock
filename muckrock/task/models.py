@@ -4,6 +4,7 @@ Models for the Task application
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.contrib.postgres.fields import JSONField
 from django.core.mail import EmailMessage
 from django.core.urlresolvers import reverse
 from django.db import models
@@ -68,9 +69,11 @@ class Task(models.Model):
     """A base task model for fields common to all tasks"""
     date_created = models.DateTimeField(auto_now_add=True)
     date_done = models.DateTimeField(blank=True, null=True)
+    date_deferred = models.DateField(blank=True, null=True)
     resolved = models.BooleanField(default=False, db_index=True)
     assigned = models.ForeignKey(User, blank=True, null=True, related_name="assigned_tasks")
     resolved_by = models.ForeignKey(User, blank=True, null=True, related_name="resolved_tasks")
+    form_data = JSONField(blank=True, null=True)
 
     objects = TaskQuerySet.as_manager()
 
@@ -81,13 +84,20 @@ class Task(models.Model):
         # pylint:disable=no-self-use
         return u'Task'
 
-    def resolve(self, user=None):
+    def resolve(self, user=None, form_data=None):
         """Resolve the task"""
         self.resolved = True
         self.resolved_by = user
         self.date_done = datetime.now()
+        if form_data is not None:
+            self.form_data = form_data
         self.save()
         logging.info('User %s resolved task %s', user, self.pk)
+
+    def defer(self, date_deferred):
+        """Defer the task to the given date"""
+        self.date_deferred = date_deferred
+        self.save()
 
 
 class OrphanTask(Task):
@@ -235,10 +245,10 @@ class StaleAgencyTask(Task):
     def get_absolute_url(self):
         return reverse('stale-agency-task', kwargs={'pk': self.pk})
 
-    def resolve(self, user=None):
+    def resolve(self, user=None, form_data=None):
         """Unmark the agency as stale when resolving"""
         self.agency.unmark_stale()
-        super(StaleAgencyTask, self).resolve(user)
+        super(StaleAgencyTask, self).resolve(user, form_data)
 
     def stale_requests(self):
         """Returns a list of stale requests associated with the task's agency"""
@@ -760,6 +770,7 @@ class GenericTask(Task):
     """A generic task"""
     subject = models.CharField(max_length=255)
     body = models.TextField(blank=True)
+    objects = TaskQuerySet.as_manager()
 
     def __unicode__(self):
         return u'Generic Task'
@@ -772,6 +783,7 @@ class FailedFaxTask(Task):
     type = 'FailedFaxTask'
     communication = models.ForeignKey('foia.FOIACommunication')
     reason = models.CharField(max_length=255, blank=True, default='')
+    objects = TaskQuerySet.as_manager()
 
     def __unicode__(self):
         return u'Failed Fax Task'
@@ -791,6 +803,7 @@ class RejectedEmailTask(Task):
     foia = models.ForeignKey('foia.FOIARequest', blank=True, null=True)
     email = models.EmailField(blank=True)
     error = models.TextField(blank=True)
+    objects = TaskQuerySet.as_manager()
 
     def __unicode__(self):
         return u'Rejected Email Task'

@@ -21,6 +21,7 @@
                     <dd>
                         <a href="{{ foia.get_absolute_url }}">{{ foia }}</a>
                         (<a href="{% url 'admin:foia_foiarequest_change' foia.pk %}">admin</a>)
+                        - MR #{{ foia.pk }}
                         - {{foia.get_status_display}}
                         <blockquote>{{ foia.requested_docs }}</blockquote>
                     </dd>
@@ -127,4 +128,18 @@
     </div>
 {% endblock %}
 
-{% block task-footer %}{% endblock %}
+{% block task-footer %}
+    {# remove the resolve button #}
+    <footer class="textbox__footer task__actions">
+        <form method="POST" action="{{ endpoint }}" class="task-post-actions" id="{{task.pk}}-form">
+            {% csrf_token %}
+            <input type="hidden" name="task" value="{{task.pk}}">
+            {% block task-actions %}
+            <span class="task-defer">
+                <input type="text" class="datepicker-future" name="date_deferred" value="{{task.date_deferred|date:"m/d/Y"|default:""}}">
+                <button type="submit" name="defer" value="true" class="primary button">Defer</button>
+            </span>
+            {% endblock task-actions %}
+        </form>
+    </footer>
+{% endblock %}

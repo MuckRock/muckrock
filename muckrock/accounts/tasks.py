@@ -205,43 +205,68 @@ def store_statistics():
         unapproved_agencies=Agency.objects.filter(status='pending').count(),
         portal_agencies=Agency.objects.exclude(portal=None).count(),
         total_tasks=Task.objects.count(),
-        total_unresolved_tasks=Task.objects.filter(resolved=False).count(),
+        total_unresolved_tasks=Task.objects.filter(resolved=False).get_undeferred().count(),
+        total_deferred_tasks=Task.objects.get_deferred().count(),
         total_generic_tasks=GenericTask.objects.count(),
         total_unresolved_generic_tasks=
-            GenericTask.objects.filter(resolved=False).count(),
+            GenericTask.objects.filter(resolved=False).get_undeferred().count(),
+        total_deferred_generic_tasks=
+            GenericTask.objects.get_deferred().count(),
         total_orphan_tasks=OrphanTask.objects.count(),
         total_unresolved_orphan_tasks=
-            OrphanTask.objects.filter(resolved=False).count(),
+            OrphanTask.objects.filter(resolved=False).get_undeferred().count(),
+        total_deferred_orphan_tasks=
+            OrphanTask.objects.get_deferred().count(),
         total_snailmail_tasks=SnailMailTask.objects.count(),
         total_unresolved_snailmail_tasks=
-            SnailMailTask.objects.filter(resolved=False).count(),
+            SnailMailTask.objects.filter(resolved=False).get_undeferred().count(),
+        total_deferred_snailmail_tasks=
+            SnailMailTask.objects.get_deferred().count(),
         total_rejected_tasks=RejectedEmailTask.objects.count(),
         total_unresolved_rejected_tasks=
-            RejectedEmailTask.objects.filter(resolved=False).count(),
+            RejectedEmailTask.objects.filter(resolved=False).get_undeferred().count(),
+        total_deferred_rejected_tasks=
+            RejectedEmailTask.objects.get_deferred().count(),
         total_staleagency_tasks=StaleAgencyTask.objects.count(),
         total_unresolved_staleagency_tasks=
-            StaleAgencyTask.objects.filter(resolved=False).count(),
+            StaleAgencyTask.objects.filter(resolved=False).get_undeferred().count(),
+        total_deferred_staleagency_tasks=
+            StaleAgencyTask.objects.get_deferred().count(),
         total_flagged_tasks=FlaggedTask.objects.count(),
         total_unresolved_flagged_tasks=
-            FlaggedTask.objects.filter(resolved=False).count(),
+            FlaggedTask.objects.filter(resolved=False).get_undeferred().count(),
+        total_deferred_flagged_tasks=
+            FlaggedTask.objects.get_deferred().count(),
         total_newagency_tasks=NewAgencyTask.objects.count(),
         total_unresolved_newagency_tasks=
-            NewAgencyTask.objects.filter(resolved=False).count(),
+            NewAgencyTask.objects.filter(resolved=False).get_undeferred().count(),
+        total_deferred_newagency_tasks=
+            NewAgencyTask.objects.get_deferred().count(),
         total_response_tasks=ResponseTask.objects.count(),
         total_unresolved_response_tasks=
-            ResponseTask.objects.filter(resolved=False).count(),
+            ResponseTask.objects.filter(resolved=False).get_undeferred().count(),
+        total_deferred_response_tasks=
+            ResponseTask.objects.get_deferred().count(),
         total_faxfail_tasks=FailedFaxTask.objects.count(),
         total_unresolved_faxfail_tasks=
-            FailedFaxTask.objects.filter(resolved=False).count(),
+            FailedFaxTask.objects.filter(resolved=False).get_undeferred().count(),
+        total_deferred_faxfail_tasks=
+            FailedFaxTask.objects.get_deferred().count(),
         total_crowdfundpayment_tasks=CrowdfundTask.objects.count(),
         total_unresolved_crowdfundpayment_tasks=
-            CrowdfundTask.objects.filter(resolved=False).count(),
+            CrowdfundTask.objects.filter(resolved=False).get_undeferred().count(),
+        total_deferred_crowdfundpayment_tasks=
+            CrowdfundTask.objects.get_deferred().count(),
         total_reviewagency_tasks=ReviewAgencyTask.objects.count(),
         total_unresolved_reviewagency_tasks=
-            ReviewAgencyTask.objects.filter(resolved=False).count(),
+            ReviewAgencyTask.objects.filter(resolved=False).get_undeferred().count(),
+        total_deferred_reviewagency_tasks=
+            ReviewAgencyTask.objects.get_deferred().count(),
         total_portal_tasks=PortalTask.objects.count(),
         total_unresolved_portal_tasks=
-            PortalTask.objects.filter(resolved=False).count(),
+            PortalTask.objects.filter(resolved=False).get_undeferred().count(),
+        total_deferred_portal_tasks=
+            PortalTask.objects.get_deferred().count(),
         daily_robot_response_tasks=ResponseTask.objects.filter(
                date_done__gte=yesterday,
                date_done__lt=date.today(),
@@ -249,9 +274,13 @@ def store_statistics():
                ).count(),
         flag_processing_days=(FlaggedTask.objects
             .exclude(resolved=True)
+            .get_undeferred()
             .aggregate(days=ExtractDay(Sum(Now() - F('date_created'))))['days']),
         unresolved_snailmail_appeals=
-            SnailMailTask.objects.filter(resolved=False, category='a').count(),
+            SnailMailTask.objects
+            .filter(resolved=False, category='a')
+            .get_undeferred()
+            .count(),
         total_active_org_members=Profile.objects.filter(
                 organization__active=True,
                 organization__monthly_cost__gt=0,

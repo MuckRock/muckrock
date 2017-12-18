@@ -3,7 +3,9 @@ Custom QuerySets for the Task application
 """
 
 from django.db import models
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q
+
+from datetime import date
 
 from muckrock.communication.models import (
         EmailCommunication,
@@ -70,8 +72,21 @@ class TaskQuerySet(models.QuerySet):
                     )
         return tasks
 
+    def get_undeferred(self):
+        """Get tasks which aren't deferred"""
+        return self.filter(
+                Q(date_deferred__lte=date.today()) |
+                Q(date_deferred=None)
+                )
 
-class OrphanTaskQuerySet(models.QuerySet):
+    def get_deferred(self):
+        """Get tasks which are deferred"""
+        return self.filter(
+                date_deferred__gt=date.today()
+                )
+
+
+class OrphanTaskQuerySet(TaskQuerySet):
     """Object manager for orphan tasks"""
     def get_from_domain(self, domain):
         """Get all orphan tasks from a specific domain"""
@@ -88,11 +103,16 @@ class OrphanTaskQuerySet(models.QuerySet):
                     'communication__files',
                     Prefetch(
                         'communication__emails',
+                        queryset=EmailCommunication.objects.exclude(rawemail=None),
+                        to_attr='raw_emails',
+                        ),
+                    Prefetch(
+                        'communication__emails',
                         queryset=EmailCommunication.objects.select_related('from_email'),
                         )))
 
 
-class SnailMailTaskQuerySet(models.QuerySet):
+class SnailMailTaskQuerySet(TaskQuerySet):
     """Object manager for snail mail tasks"""
     def preload_list(self):
         """Preload relations for list display"""
@@ -170,7 +190,7 @@ class SnailMailTaskQuerySet(models.QuerySet):
             )
 
 
-class StaleAgencyTaskQuerySet(models.QuerySet):
+class StaleAgencyTaskQuerySet(TaskQuerySet):
     """Object manager for stale agency tasks"""
     def preload_list(self):
         """Preload relations for list display"""
@@ -187,7 +207,7 @@ class StaleAgencyTaskQuerySet(models.QuerySet):
                     ))
 
 
-class FlaggedTaskQuerySet(models.QuerySet):
+class FlaggedTaskQuerySet(TaskQuerySet):
     """Object manager for flagged tasks"""
     def preload_list(self):
         """Preload relations for list display"""
@@ -200,7 +220,7 @@ class FlaggedTaskQuerySet(models.QuerySet):
             )
 
 
-class ProjectReviewTaskQuerySet(models.QuerySet):
+class ProjectReviewTaskQuerySet(TaskQuerySet):
     """Object manager for project review tasks"""
     def preload_list(self):
         """Preload relations for list display"""
@@ -219,7 +239,7 @@ class ProjectReviewTaskQuerySet(models.QuerySet):
                     ))
 
 
-class NewAgencyTaskQuerySet(models.QuerySet):
+class NewAgencyTaskQuerySet(TaskQuerySet):
     """Object manager for new agency tasks"""
     def preload_list(self):
         """Preload relations for list display"""
@@ -253,7 +273,7 @@ class NewAgencyTaskQuerySet(models.QuerySet):
                         to_attr='other_agencies')))
 
 
-class ReviewAgencyTaskQuerySet(models.QuerySet):
+class ReviewAgencyTaskQuerySet(TaskQuerySet):
     """Object manager for review agency tasks"""
     def preload_list(self):
         """Preload relations for list display"""
@@ -289,7 +309,7 @@ class ReviewAgencyTaskQuerySet(models.QuerySet):
             self.ensure_one_created(**kwargs)
 
 
-class ResponseTaskQuerySet(models.QuerySet):
+class ResponseTaskQuerySet(TaskQuerySet):
     """Object manager for response tasks"""
     def preload_list(self):
         """Preload relations for list display"""
@@ -323,7 +343,7 @@ class ResponseTaskQuerySet(models.QuerySet):
                     ))
 
 
-class StatusChangeTaskQuerySet(models.QuerySet):
+class StatusChangeTaskQuerySet(TaskQuerySet):
     """Object manager for status change tasks"""
     def preload_list(self):
         """Preload relations for list display"""
@@ -334,7 +354,7 @@ class StatusChangeTaskQuerySet(models.QuerySet):
                 )
 
 
-class CrowdfundTaskQuerySet(models.QuerySet):
+class CrowdfundTaskQuerySet(TaskQuerySet):
     """Object manager for crowdfund tasks"""
     def preload_list(self):
         """Preload relations for list display"""
@@ -344,7 +364,7 @@ class CrowdfundTaskQuerySet(models.QuerySet):
                 )
 
 
-class MultiRequestTaskQuerySet(models.QuerySet):
+class MultiRequestTaskQuerySet(TaskQuerySet):
     """Object manager for multirequest tasks"""
     def preload_list(self):
         """Preload relations for list display"""
@@ -357,7 +377,7 @@ class MultiRequestTaskQuerySet(models.QuerySet):
                 )
 
 
-class NewExemptionTaskQuerySet(models.QuerySet):
+class NewExemptionTaskQuerySet(TaskQuerySet):
     """Object manager for new exemption tasks"""
     def preload_list(self):
         """Preload relations for list display"""
@@ -369,7 +389,7 @@ class NewExemptionTaskQuerySet(models.QuerySet):
                 )
 
 
-class PortalTaskQuerySet(models.QuerySet):
+class PortalTaskQuerySet(TaskQuerySet):
     """Object manager for portal tasks"""
     def preload_list(self):
         """Preload relations for list display"""

@@ -4,6 +4,7 @@ Models for the FOIA application
 """
 
 from django.conf import settings
+from django.core.files.base import ContentFile
 from django.db import models
 
 import logging
@@ -98,6 +99,29 @@ class FOIAFile(models.Model):
     def anchor(self):
         """Anchor name"""
         return 'file-%d' % self.pk
+
+    def clone(self, new_comm):
+        """Clone this file to a new communication"""
+        from muckrock.foia.tasks import upload_document_cloud
+        access = 'private' if new_comm.foia.embargo else 'public'
+        original_id = self.pk
+        self.pk = None
+        self.foia = new_comm.foia
+        self.comm = new_comm
+        self.access = access
+        self.source = new_comm.get_source()
+        # make a copy of the file on the storage backend
+        try:
+            new_ffile = ContentFile(self.ffile.read())
+        except ValueError:
+            error_msg = ('FOIAFile #%s has no data in its ffile field. '
+                        'It has not been cloned.')
+            logger.error(error_msg, original_id)
+            return
+        new_ffile.name = self.ffile.name
+        self.ffile = new_ffile
+        self.save()
+        upload_document_cloud.apply_async(args=[self.pk, False], countdown=3)
 
     class Meta:
         # pylint: disable=too-few-public-methods

@@ -78,4 +78,12 @@ urlpatterns = [
         views.snail_mail_pdf,
         name='snail-mail-pdf',
         ),
+    url(r'^assign-to/$',
+        views.assign_to,
+        name='task-assign',
+        ),
+    url(r'^bulk-new-agency/$',
+        views.BulkNewAgency.as_view(),
+        name='task-bulk-new-agency',
+        ),
     ]

@@ -1,48 +1,62 @@
 {% extends 'task/default.html' %}
 
 {% block task-content %}
-<dl class="task__data">
-    <dt>Reason</dt>
-    <dd>{{task.get_reason_display}}</dd>
-    <dt>To</dt>
-    <dd>{{task.address}}</dd>
-    {% with from_email=task.communication.emails.0.from_email %}
-    {% if from_email %}
-    <dt>From</dt>
-    <dd>{{ from_email }}</dd>
-    {% endif %}
-    {% endwith %}
-    {% if task.communication.subject %}
-    <dt>Subject</dt>
-    <dd>{{ task.communication.subject }}</dd>
-    {% endif %}
-    {% if task.communication.communication %}
-    <dt>Communication</dt>
-    <dd>{{task.communication.communication}}</dd>
-    {% endif %}
-    {% if task.communication.likely_foia %}
-    <dt>Probable Request</dt>
-    <dd><a href="{{task.communication.likely_foia.get_absolute_url}}">{{task.communication.likely_foia.pk}}</a> (<a href="{% url 'admin:foia_foiarequest_change' task.communication.likely_foia.pk %}">admin</a>)</dd>
-    {% endif %}
-    {% if attachments %}
-    <dt>Attachments</dt>
-        {% for file in attachments %}
-    <dd>{% include "lib/file.html" %}</dd>
-        {% endfor %}
-    {% endif %}
-</dl>
+    <dl class="task__data">
+        <dt>Reason</dt>
+        <dd>{{task.get_reason_display}}</dd>
+        <dt>To</dt>
+        <dd>{{task.address}}</dd>
+        {% with from_email=task.communication.emails.all.0.from_email %}
+            {% if from_email %}
+                <dt>From</dt>
+                <dd>{{ from_email }}</dd>
+            {% endif %}
+        {% endwith %}
+        {% if task.communication.subject %}
+            <dt>Subject</dt>
+            <dd>{{ task.communication.subject }}</dd>
+        {% endif %}
+        {% if task.communication.communication %}
+            <dt>Communication</dt>
+            <dd>{{task.communication.communication|linebreaks}}</dd>
+        {% endif %}
+        {% if task.communication.likely_foia %}
+            <dt>Probable Request</dt>
+            <dd><a href="{{task.communication.likely_foia.get_absolute_url}}">{{task.communication.likely_foia}}</a> (<a href="{% url 'admin:foia_foiarequest_change' task.communication.likely_foia.pk %}">admin</a>) - MR #{{task.communication.likely_foia.pk}}</dd>
+        {% endif %}
+        {% if task.communication.raw_emails %}
+            <dt>Raw Email</dt>
+            <dd><a href="{% url 'foia-raw' idx=task.communication.pk %}">Raw Email</a></dd>
+        {% endif %}
+        {% if attachments %}
+            <dt>Attachments</dt>
+            {% for file in attachments %}
+                <dd>{% include "lib/file.html" %}</dd>
+            {% endfor %}
+        {% endif %}
+    </dl>
 {% endblock %}
 
 {% block task-actions %}
-    {% if task.communication.likely_foia %}
-    <input type="text" name="move" value="{{task.communication.likely_foia.pk}}">
-    {% else %}
-    <input type="text" name="move" placeholder="MuckRock №">
-    {% endif %}
-    <button type="submit" class="primary button">Move</button>
-    {% if domain %}
-    <input type="checkbox" name="blacklist" id="blacklist-orphan-{{ task.pk }}">
-    <label for="blacklist-orphan-{{ task.pk }}">Blacklist {{ domain }}</label>
-    {% endif %}
-    <button class="button" type="submit" name="reject" value="true">Reject</button>
+    <div>
+        {% if domain %}
+            <input type="checkbox" name="blacklist" id="blacklist-orphan-{{ task.pk }}">
+            <label for="blacklist-orphan-{{ task.pk }}">Blacklist {{ domain }}</label>
+        {% endif %}
+        <button class="button" type="submit" name="reject" value="true">Reject</button>
+    </div>
+    <span class="task-defer">
+      <input type="text" class="datepicker-future" name="date_deferred" value="{{task.date_deferred|date:"m/d/Y"|default:""}}">
+      <button type="submit" name="defer" value="true" class="primary button">Defer</button>
+    </span>
+    <div>
+        <input type="text" name="foia_pks"
+            {% if task.communication.likely_foia %}
+                value="{{task.communication.likely_foia.pk}}"
+            {% else %}
+                placeholder="MuckRock №"
+            {% endif %}
+            >
+        <button type="submit" name="move" value="true" class="primary button">Move</button>
+    </div>
 {% endblock %}

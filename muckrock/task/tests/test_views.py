@@ -149,7 +149,14 @@ class OrphanTaskViewTests(TestCase):
                 sent_datetime=datetime.now(),
                 from_email=EmailAddress.objects.fetch('test@example.com'),
                 )
-        self.client.post(self.url, {'move': '1, 2', 'task': self.task.pk})
+        self.client.post(
+                self.url,
+                {
+                    'move': True,
+                    'foia_pks': '1, 2',
+                    'task': self.task.pk,
+                    },
+                )
         updated_foia_1_comm_count = FOIARequest.objects.get(pk=1).communications.all().count()
         updated_foia_2_comm_count = FOIARequest.objects.get(pk=2).communications.all().count()
         updated_task = task.models.OrphanTask.objects.get(pk=self.task.pk)
@@ -220,7 +227,14 @@ class SnailMailTaskViewTests(TestCase):
     def test_post_set_status(self):
         """Should update the status of the task's communication and associated request."""
         new_status = 'ack'
-        self.client.post(self.url, {'status': new_status, 'task': self.task.pk})
+        self.client.post(
+                self.url,
+                {
+                    'status': new_status,
+                    'task': self.task.pk,
+                    'save': True,
+                    },
+                )
         updated_task = task.models.SnailMailTask.objects.get(pk=self.task.pk)
         eq_(updated_task.communication.status, new_status,
             'Should update status of the communication.')
@@ -235,7 +249,8 @@ class SnailMailTaskViewTests(TestCase):
         self.client.post(self.url, {
             'status': 'ack',
             'check_number': check_number,
-            'task': self.task.pk
+            'task': self.task.pk,
+            'save': True,
         })
         self.task.refresh_from_db()
         note = FOIANote.objects.filter(foia=self.task.communication.foia).first()
@@ -534,7 +549,8 @@ class ResponseTaskListViewTests(TestCase):
         data = {
             'status': 'done',
             'price': price,
-            'task': self.task.pk
+            'task': self.task.pk,
+            'save': True,
         }
         http_post_response(self.url, self.view, data, self.user)
         self.task.refresh_from_db()
@@ -545,7 +561,12 @@ class ResponseTaskListViewTests(TestCase):
     def test_post_set_status(self):
         """Setting the status should save it to the response and request, then resolve task."""
         status_change = 'done'
-        data = {'status': status_change, 'set_foia': True, 'task': self.task.pk}
+        data = {
+                'status': status_change,
+                'set_foia': True,
+                'task': self.task.pk,
+                'save': True,
+                }
         http_post_response(self.url, self.view, data, self.user)
         self.task.refresh_from_db()
         self.task.communication.refresh_from_db()
@@ -563,7 +584,12 @@ class ResponseTaskListViewTests(TestCase):
         """Setting the status on just the communication should not influence its request."""
         status_change = 'done'
         existing_foia_status = self.task.communication.foia.status
-        data = {'status': status_change, 'set_foia': False, 'task': self.task.pk}
+        data = {
+                'status': status_change,
+                'set_foia': False,
+                'task': self.task.pk,
+                'save': True,
+                }
         http_post_response(self.url, self.view, data, self.user)
         self.task.refresh_from_db()
         self.task.communication.refresh_from_db()
@@ -583,7 +609,8 @@ class ResponseTaskListViewTests(TestCase):
         data = {
             'tracking_number': new_tracking_id,
             'status': 'done',
-            'task': self.task.pk
+            'task': self.task.pk,
+            'save': True,
         }
         http_post_response(self.url, self.view, data, self.user)
         self.task.refresh_from_db()
@@ -599,7 +626,12 @@ class ResponseTaskListViewTests(TestCase):
         """Moving the response should save it to a new request."""
         other_foia = factories.FOIARequestFactory()
         starting_date = self.task.communication.date
-        data = {'move': other_foia.id, 'status': 'done', 'task': self.task.pk}
+        data = {
+                'move': other_foia.id,
+                'status': 'done',
+                'task': self.task.pk,
+                'save': True,
+                }
         http_post_response(self.url, self.view, data, self.user)
         self.task.refresh_from_db()
         self.task.communication.refresh_from_db()
@@ -625,7 +657,8 @@ class ResponseTaskListViewTests(TestCase):
             'move': move_to_ids,
             'status': change_status,
             'tracking_number': change_tracking,
-            'task': self.task.pk
+            'task': self.task.pk,
+            'save': True,
         }
         http_post_response(self.url, self.view, data, self.user)
         for foia in other_foias:

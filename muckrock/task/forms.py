@@ -11,6 +11,7 @@ import logging
 from muckrock.accounts.models import Notification
 from muckrock.communication.utils import get_email_or_fax
 from muckrock.foia.models import STATUS
+from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.utils import generate_status_action
 
 
@@ -237,3 +238,17 @@ class ResponseTaskForm(forms.Form):
             foia.save(comment='response task proxy reject')
             action = generate_status_action(foia)
             foia.notify(action)
+
+
+class BulkNewAgencyTaskForm(forms.Form):
+    """Form for creating blank new agencies"""
+    name = forms.CharField(max_length=255)
+    jurisdiction = forms.ModelChoiceField(
+            widget=autocomplete_light.ChoiceWidget('JurisdictionAutocomplete'),
+            queryset=Jurisdiction.objects.all(),
+            )
+
+BulkNewAgencyTaskFormSet = forms.formset_factory(
+        BulkNewAgencyTaskForm,
+        extra=10,
+        )
