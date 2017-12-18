@@ -183,8 +183,6 @@ class FOIACommunication(models.Model):
         goes for each file attached to the communication.
         """
         # pylint: disable=too-many-locals
-        # avoid circular imports
-        from muckrock.foia.tasks import upload_document_cloud
         request_list = FOIARequest.objects.filter(pk__in=foia_pks)
         if not request_list:
             raise ValueError('No valid request(s) provided for cloning.')

@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
-from django.core.urlresolvers import resolve, reverse
+from django.core.urlresolvers import resolve
 from django.db import transaction
 from django.db.models import Count
 from django.http import (
