@@ -83,7 +83,7 @@ $('document').ready(function(){
         changeMonth: true,
         changeYear: true,
         minDate: 0,
-        maxDate: '+1y',
+        maxDate: '+1y'
     });
 
     // Loupe

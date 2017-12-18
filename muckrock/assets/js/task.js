@@ -224,13 +224,7 @@ $('document').ready(function(){
         task_pk: $(this).prop('name'),
         asignee: $(this).val()
       },
-      type: 'post',
-      success: function(data) {
-        console.log('Asignee succesfully changed');
-      },
-      error: function() {
-        console.log('Asignee error');
-      }
+      type: 'post'
     });
   });
 
