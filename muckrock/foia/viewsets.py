@@ -79,6 +79,11 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             )
             .prefetch_related(
                 'communications__files',
+                'communications__emails',
+                'communications__faxes',
+                'communications__mails',
+                'communications__web_comms',
+                'communications__portals',
                 'notes',
                 'tags',
                 'edit_collaborators',
