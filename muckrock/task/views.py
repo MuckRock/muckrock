@@ -413,6 +413,11 @@ class NewAgencyTaskList(TaskList):
                 return
             task.approve()
             form_data = new_agency_form.cleaned_data
+            # phone numbers must be strings not phone number objects to serialize
+            if form_data.get('phone'):
+                form_data['phone'] = unicode(form_data['phone'])
+            if form_data.get('fax'):
+                form_data['fax'] = unicode(form_data['fax'])
             form_data.update({'approve': True})
             task.resolve(request.user, form_data)
         elif request.POST.get('reject'):
@@ -455,6 +460,9 @@ class ResponseTaskList(TaskList):
                     # cast from decimal to float, since decimal
                     # is not json serializable
                     form_data['price'] = float(form_data['price'])
+                if form_data.get('date_estimate'):
+                    # to string for json
+                    form_data['date_estimate'] = form_data['date_estimate'].isoformat()
                 task.resolve(request.user, form.cleaned_data)
         return super(ResponseTaskList, self).task_post_helper(request, task)
 
@@ -539,6 +547,13 @@ class PortalTaskList(TaskList):
                     )
         if action_taken and not error_msgs:
             form_data = form.cleaned_data
+            if form_data['price'] is not None:
+                # cast from decimal to float, since decimal
+                # is not json serializable
+                form_data['price'] = float(form_data['price'])
+            if form_data.get('date_estimate'):
+                # to string for json
+                form_data['date_estimate'] = form_data['date_estimate'].isoformat()
             form_data.update({
                 'communication': new_text,
                 'keep_hidden': keep_hidden,
