@@ -135,10 +135,12 @@
             {% csrf_token %}
             <input type="hidden" name="task" value="{{task.pk}}">
             {% block task-actions %}
-            <span class="task-defer">
-                <input type="text" class="datepicker-future" name="date_deferred" value="{{task.date_deferred|date:"m/d/Y"|default:""}}">
-                <button type="submit" name="defer" value="true" class="primary button">Defer</button>
-            </span>
+                {% if user.is_staff %}
+                    <span class="task-defer">
+                        <input type="text" class="datepicker-future" name="date_deferred" value="{{task.date_deferred|date:"m/d/Y"|default:""}}">
+                        <button type="submit" name="defer" value="true" class="primary button">Defer</button>
+                    </span>
+                {% endif %}
             {% endblock task-actions %}
         </form>
     </footer>
