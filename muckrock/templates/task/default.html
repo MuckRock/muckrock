@@ -18,7 +18,7 @@
       <main class="textbox__section task__main">
           {% if task.resolved and task.resolved_by %}
             <p class="task__data">Resolved by <a href="{% url 'acct-profile' username=task.resolved_by.username %}">{{ task.resolved_by.get_full_name }}</a>.</p>
-          {% else %}
+          {% elif user.is_staff %}
             <p class="task__data">
               Assigned to
               <select class="assigned-chooser" name="{{task.pk}}">

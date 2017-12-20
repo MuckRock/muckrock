@@ -212,6 +212,7 @@ class Detail(DetailView):
             context['task_count'] = len(all_tasks)
             context['open_task_count'] = len(open_tasks)
             context['open_tasks'] = open_tasks
+            context['asignees'] = User.objects.filter(is_staff=True).order_by('last_name')
 
         context['stripe_pk'] = settings.STRIPE_PUB_KEY
         context['sidebar_admin_url'] = reverse('admin:foia_foiarequest_change', args=(foia.pk,))
