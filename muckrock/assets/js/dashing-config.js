@@ -1,3 +1,4 @@
+/* eslint no-undef: "off" */
 
 var dashboard = new Dashboard();
 var interval = 5000;
@@ -11,7 +12,7 @@ function getData(widget_name) {
         $(self.getWidget()).css('background-color', data.color);
       }
     });
-  }
+  };
 }
 /*
 dashboard.addWidget('processing_days_widget', 'Number', {
