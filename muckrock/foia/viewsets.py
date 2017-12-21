@@ -4,6 +4,7 @@ Viewsets for the FOIA API
 
 from django.conf import settings
 from django.core.files.base import ContentFile
+from django.db.models import Prefetch
 from django.template.defaultfilters import slugify
 from django.template.loader import get_template
 
@@ -26,6 +27,7 @@ from muckrock.foia.serializers import (
         IsOwner,
         )
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.task.models import ResponseTask
 
 # pylint: disable=too-many-ancestors
 # pylint: disable=bad-continuation
@@ -87,7 +89,11 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                 'notes',
                 'tags',
                 'edit_collaborators',
-                'read_collaborators'
+                'read_collaborators',
+                Prefetch(
+                    'communications__responsetask_set',
+                    queryset=ResponseTask.objects.select_related('resolved_by'),
+                    ),
             )
         )
 
@@ -293,6 +299,10 @@ class FOIACommunicationViewSet(viewsets.ModelViewSet):
             'mails',
             'web_comms',
             'portals',
+            Prefetch(
+                'responsetask_set',
+                queryset=ResponseTask.objects.select_related('resolved_by'),
+                ),
             )
     serializer_class = FOIACommunicationSerializer
     permission_classes = (DjangoModelPermissions,)
