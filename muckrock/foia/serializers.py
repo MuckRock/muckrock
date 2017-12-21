@@ -69,11 +69,29 @@ class FOIACommunicationSerializer(serializers.ModelSerializer):
             queryset=FOIARequest.objects.all(),
             style={'base_template': 'input.html'})
     delivered = serializers.SerializerMethodField()
+    resolved_by = serializers.SerializerMethodField()
+
+    def __init__(self, *args, **kwargs):
+        super(FOIACommunicationSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get('request', None)
+        if request is None:
+            self.fields.pop('resolved_by')
+        elif not request.user.is_staff:
+            self.fields.pop('resolved_by')
 
     def get_delivered(self, obj):
         """Get how the communication was delivered"""
         # pylint: disable=no-self-use
         return obj.get_delivered()
+
+    def get_resolved_by(self, obj):
+        """Get who resolved the response task"""
+        # pylint: disable=no-self-use
+        tasks = obj.responsetask_set.all()
+        if tasks and tasks[0].resolved_by:
+            return tasks[0].resolved_by.username
+        else:
+            return None
 
     class Meta:
         model = FOIACommunication
@@ -92,6 +110,7 @@ class FOIACommunicationSerializer(serializers.ModelSerializer):
                 'likely_foia',
                 'files',
                 'delivered',
+                'resolved_by',
                 ]
 
 
