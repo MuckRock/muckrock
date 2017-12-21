@@ -621,6 +621,7 @@ class FOIARequest(models.Model):
         # if this is an appeal, clear the current addresses and get them
         # from the appeal agency
         if appeal or clear:
+            self.portal = None
             self.email = None
             self.cc_emails.clear()
             self.fax = None
