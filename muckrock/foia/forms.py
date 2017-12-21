@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from django.utils.text import slugify
 
 from autocomplete_light import shortcuts as autocomplete_light
+from autocomplete_light.contrib.taggit_field import TaggitField, TaggitWidget
 from datetime import date, timedelta
 import phonenumbers
 
@@ -248,6 +249,14 @@ class MultiRequestDraftForm(forms.ModelForm):
     title = forms.CharField(
         widget=forms.TextInput(attrs={'placeholder': 'Pick a Title'})
     )
+    tags = TaggitField(
+            widget=TaggitWidget('TagAutocomplete', attrs={
+                'placeholder': 'Search tags',
+                'data-autocomplete-minimum-characters': 1
+                }),
+            help_text='Separate tags with commas.',
+            required=False,
+            )
     requested_docs = forms.CharField(
         label='Request',
         widget=forms.Textarea()
@@ -261,7 +270,7 @@ class MultiRequestDraftForm(forms.ModelForm):
     class Meta:
         # pylint: disable=too-few-public-methods
         model = FOIAMultiRequest
-        fields = ['title', 'requested_docs', 'embargo']
+        fields = ['title', 'tags', 'requested_docs', 'embargo']
 
 
 class RequestFilterForm(MRFilterForm):

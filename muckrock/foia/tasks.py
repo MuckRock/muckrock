@@ -201,7 +201,7 @@ def submit_multi_request(req_pk, **kwargs):
                     'jurisdiction': agency.jurisdiction,
                     'user_name': req.user.get_full_name(),
                     }
-            foia_request = template.render(context).split('\n', 1)[1].strip()
+            foia_request = template.render(context).strip()
 
             new_foia = FOIARequest.objects.create(
                 user=req.user,
@@ -215,6 +215,7 @@ def submit_multi_request(req_pk, **kwargs):
                 description=req.requested_docs,
                 multirequest=req,
                 )
+            new_foia.tags.set(*req.tags.all())
 
             FOIACommunication.objects.create(
                 foia=new_foia,
