@@ -587,12 +587,13 @@ class PortalTaskList(TaskList):
             save = True
         if save:
             foia.save()
-        PortalCommunication.objects.create(
-                communication=task.communication,
-                sent_datetime=datetime.now(),
-                portal=task.communication.foia.portal,
-                direction='outgoing',
-                )
+        if task.communication.foia.portal:
+            PortalCommunication.objects.create(
+                    communication=task.communication,
+                    sent_datetime=datetime.now(),
+                    portal=task.communication.foia.portal,
+                    direction='outgoing',
+                    )
         form_data = {
                 'status': status,
                 'word_to_pass': password,
