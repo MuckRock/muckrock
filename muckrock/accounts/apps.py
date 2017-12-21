@@ -11,6 +11,7 @@ class AccountsConfig(AppConfig):
 
     def ready(self):
         """Registers users with the activity streams plugin"""
+        # pylint: disable=too-many-locals
         from actstream import registry
         from dashing.utils import router
         registry.register(apps.get_model('auth.User'))
