@@ -24,6 +24,12 @@ class AccountsConfig(AppConfig):
                 FlagCountWidget,
                 OldestFlagWidget,
                 FlagGraphWidget,
+                ProUserGraphWidget,
+                RequestsFiledWidget,
+                ProUserCountWidget,
+                OrgUserCountWidget,
+                RecentRequestsWidget,
+                PageCountWidget,
                 )
         router.register(ProcessingDaysWidget, 'processing_days_widget')
         router.register(ProcessingCountWidget, 'processing_count_widget')
@@ -33,3 +39,9 @@ class AccountsConfig(AppConfig):
         router.register(FlagCountWidget, 'flag_count_widget')
         router.register(OldestFlagWidget, 'oldest_flag_widget')
         router.register(FlagGraphWidget, 'flag_graph_widget')
+        router.register(ProUserGraphWidget, 'pro_user_graph_widget')
+        router.register(RequestsFiledWidget, 'requests_filed_widget')
+        router.register(ProUserCountWidget, 'pro_user_count_widget')
+        router.register(OrgUserCountWidget, 'org_user_count_widget')
+        router.register(RecentRequestsWidget, 'recent_requests_widget')
+        router.register(PageCountWidget, 'page_count_widget')
