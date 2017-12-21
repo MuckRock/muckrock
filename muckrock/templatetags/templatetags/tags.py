@@ -46,12 +46,9 @@ def active(request, pattern):
 @register.simple_tag
 def page_link(request, page_num):
     """Generates a pagination link that preserves context"""
-    query = request.GET
-    href = '?page=' + str(page_num)
-    for key, value in query.iteritems():
-        if value and key != u'page':
-            href += '&%s=%s' % (key, escape(value))
-    return href
+    query = request.GET.copy()
+    query['page'] = page_num
+    return '?' + query.urlencode()
 
 @register.filter
 @stringfilter
