@@ -40,6 +40,7 @@ from muckrock.foia.forms import (
 from muckrock.foia.models import (
     FOIARequest,
     FOIACommunication,
+    FOIAMultiRequest,
     STATUS,
     END_STATUS,
     )
@@ -700,3 +701,39 @@ class Detail(DetailView):
             resp['Content-Disposition'] = 'attachment; filename="{}.zip"'.format(foia.title)
             return resp
         return redirect(foia.get_absolute_url() + '#')
+
+
+class MultiDetail(DetailView):
+    """Detail view for multi requests"""
+    model = FOIAMultiRequest
+    context_object_name = 'multi'
+    query_pk_and_slug = True
+
+    def __init__(self, *args, **kwargs):
+        super(MultiDetail, self).__init__(*args, **kwargs)
+        self._obj = None
+
+    def dispatch(self, request, *args, **kwargs):
+        """If request is a draft, then redirect to drafting interface"""
+        foia = self.get_object()
+        if foia.status == 'started':
+            return redirect(
+                'foia-multi-draft',
+                slug=foia.slug,
+                idx=foia.id
+                )
+        else:
+            return super(MultiDetail, self).dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        """Add extra context data"""
+        context = super(MultiDetail, self).get_context_data(**kwargs)
+        multi = context['multi']
+        context['foias'] = (multi
+                .foias
+                .get_viewable(self.request.user)
+                .select_related_view()
+                )
+        if not context['foias'] and multi.user != self.request.user:
+            raise Http404
+        return context

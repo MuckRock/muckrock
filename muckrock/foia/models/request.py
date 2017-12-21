@@ -313,6 +313,7 @@ class FOIARequest(models.Model):
             related_name='foia', blank=True, null=True)
     multirequest = models.ForeignKey(
             'foia.FOIAMultiRequest',
+            related_name='foias',
             blank=True,
             null=True,
             )

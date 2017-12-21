@@ -52,8 +52,8 @@ class FOIAMultiRequest(models.Model):
     def get_absolute_url(self):
         """The url for this object"""
         return reverse(
-                'foia-multi-draft',
-                kwargs={'slug': self.slug, 'idx': self.pk})
+                'foia-multi-detail',
+                kwargs={'slug': self.slug, 'pk': self.pk})
 
     class Meta:
         # pylint: disable=too-few-public-methods
