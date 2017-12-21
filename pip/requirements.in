@@ -14,6 +14,7 @@ django-celery # Integrate celery with django
 django-celery-email<2.0 # Send emails asynchronously using Celery
 django-compressor # Compress all JS and CSS assets into a single file
 django-cors-headers # Allows access to API endpoints from non-MuckRock domains
+django-dashing # Used to create the dashboard
 django-dbsettings # DB stored configurations
 django-debug-toolbar # Toolbar for debugging
 django-email-bandit # Used to hijack emails in a staging setting

@@ -10,7 +10,7 @@ from django.contrib.auth.models import User, AnonymousUser
 from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
 from django.db import models, connection
-from django.db.models import Q, Sum, Count, Max, Case, When
+from django.db.models import Q, F, Sum, Count, Max, Case, When
 from django.template.defaultfilters import escape, linebreaks, slugify
 from django.template.loader import get_template, render_to_string
 from django.utils.encoding import smart_text
@@ -187,6 +187,14 @@ class FOIARequestQuerySet(models.QuerySet):
                 .filter(featured=True)
                 .select_related_view()
                 .get_public_file_count()
+                )
+
+    def get_processing_days(self):
+        """Get the number of processing days"""
+        return (self
+                .filter(status='submitted')
+                .exclude(date_processing=None)
+                .aggregate(days=Sum(date.today() - F('date_processing')))['days']
                 )
 
 

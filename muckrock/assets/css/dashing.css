@@ -1,0 +1,9 @@
+
+.fa {
+  opacity: 0.4;
+}
+
+.widget-graph svg {
+  opacity: 0.6;
+  fill-opacity: 0.6;
+}
