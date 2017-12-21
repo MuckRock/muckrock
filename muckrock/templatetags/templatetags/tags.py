@@ -13,7 +13,6 @@ from django.template import (
         TemplateSyntaxError,
         )
 from django.template.defaultfilters import stringfilter
-from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
 import bleach
