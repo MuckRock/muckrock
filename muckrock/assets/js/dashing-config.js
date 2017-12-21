@@ -1,7 +1,7 @@
 /* eslint no-undef: "off" */
 
 var dashboard = new Dashboard();
-var interval = 5000;
+var interval = 1000 * 60 * 5; // 5 minutes
 
 function getData(widget_name) {
   return function () {
