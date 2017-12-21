@@ -24,10 +24,14 @@
             </select>
             items per page
         </p>
-        {% for key, value in request.GET.iteritems %}
-        {% if value and key != 'page' and key != 'per_page' %}
-        <input type="hidden" name="{{key}}" value="{{value}}">
-        {% endif %}
+        {% for key, value_list in request.GET.iterlists %}
+            {% if key != 'page' and key != 'per_page' %}
+                {% for value in value_list %}
+                    {% if value %}
+                        <input type="hidden" name="{{key}}" value="{{value}}">
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
         {% endfor %}
         <noscript><button class="button" type="submit">Update</button></noscript>
     </form>
