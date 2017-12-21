@@ -2,7 +2,7 @@
 Dashing widgets for the dashboard
 """
 
-from django.db.models import F
+from django.db.models import F, Sum
 
 from dashing.widgets import (
         NumberWidget,
@@ -11,8 +11,8 @@ from dashing.widgets import (
         )
 from datetime import date
 
-from muckrock.accounts.models import Statistics
-from muckrock.foia.models import FOIARequest
+from muckrock.accounts.models import Profile, Statistics
+from muckrock.foia.models import FOIARequest, FOIAFile
 from muckrock.models import ExtractDay, Now
 from muckrock.task.models import FlaggedTask
 
@@ -21,6 +21,8 @@ GREEN = '#96bf48'
 BLUE = '#12b0c5'
 
 # pylint: disable=no-self-use
+
+# Widgets to inherit from
 
 class CompareNumberWidget(NumberWidget):
     """A number widget which compares to a previous value"""
@@ -46,13 +48,26 @@ class CompareNumberWidget(NumberWidget):
             icon = ''
 
         return {
-                'value': unicode(value),
-                'detail': u'{:+}'.format(delta),
+                'value': u'{:,}'.format(value),
+                'detail': u'{:+,}'.format(delta),
                 'color': color,
                 'icon': icon,
                 'title': self.get_title(),
+                'moreInfo': self.get_more_info(),
                 }
 
+
+class StatGraphWidget(GraphWidget):
+    """Graph based on stats history"""
+    days = 30
+
+    def get_data(self):
+        """Get graph data"""
+        stats = Statistics.objects.all()[:self.days:-1]
+        return [{'x': i, 'y': getattr(stat, self.stat)}
+                for i, stat in enumerate(stats)]
+
+# Concrete widgets
 
 class ProcessingDaysWidget(CompareNumberWidget):
     """Show how many processing days"""
@@ -64,7 +79,7 @@ class ProcessingDaysWidget(CompareNumberWidget):
         return FOIARequest.objects.get_processing_days()
 
     def get_previous_value(self):
-        """Get detail"""
+        """Get previous value"""
         return Statistics.objects.latest('date').requests_processing_days
 
 
@@ -78,7 +93,7 @@ class ProcessingCountWidget(CompareNumberWidget):
         return FOIARequest.objects.filter(status='submitted').count()
 
     def get_previous_value(self):
-        """Get detail"""
+        """Get previous value"""
         return Statistics.objects.latest('date').total_requests_submitted
 
 
@@ -103,19 +118,14 @@ class OldestProcessingWidget(ListWidget):
             for r in requests]
 
 
-class ProcessingGraphWidget(GraphWidget):
+class ProcessingGraphWidget(StatGraphWidget):
     """Graph of processing days"""
     title = 'Processing Days'
+    stat = 'requests_processing_days'
 
     def get_value(self):
         """Get value"""
         return FOIARequest.objects.get_processing_days()
-
-    def get_data(self):
-        """Get graph data"""
-        stats = Statistics.objects.all()[:30:-1]
-        return [{'x': i, 'y': stat.requests_processing_days}
-                for i, stat in enumerate(stats)]
 
 
 class FlagDaysWidget(CompareNumberWidget):
@@ -128,7 +138,7 @@ class FlagDaysWidget(CompareNumberWidget):
         return FlaggedTask.objects.get_processing_days()
 
     def get_previous_value(self):
-        """Get detail"""
+        """Get previous value"""
         return Statistics.objects.latest('date').flag_processing_days
 
 
@@ -142,7 +152,7 @@ class FlagCountWidget(CompareNumberWidget):
         return FlaggedTask.objects.filter(resolved=False).count()
 
     def get_previous_value(self):
-        """Get detail"""
+        """Get previous value"""
         return Statistics.objects.latest('date').total_unresolved_flagged_tasks
 
 
@@ -167,16 +177,120 @@ class OldestFlagWidget(ListWidget):
             for t in tasks]
 
 
-class FlagGraphWidget(GraphWidget):
+class FlagGraphWidget(StatGraphWidget):
     """Graph of flag days"""
     title = 'Flag Days'
+    stat = 'flag_processing_days'
 
     def get_value(self):
         """Get value"""
         return FlaggedTask.objects.get_processing_days()
 
+
+class ProUserGraphWidget(StatGraphWidget):
+    """Graph of pro users"""
+    title = 'Pro Users'
+    stat = 'pro_users'
+
+    def get_value(self):
+        """Get value"""
+        return Profile.objects.filter(acct_type='pro').count()
+
+
+class RequestsFiledWidget(CompareNumberWidget):
+    """Number of requests filed today"""
+    title = 'Requests Filed Today'
+    direction = 1
+
+    def get_value(self):
+        """Get value"""
+        return FOIARequest.objects.filter(date_submitted=date.today()).count()
+
+    def get_previous_value(self):
+        """Get previous value"""
+        stat = Statistics.objects.latest('date')
+        return sum([
+                stat.daily_requests_pro,
+                stat.daily_requests_basic,
+                stat.daily_requests_beta,
+                stat.daily_requests_proxy,
+                stat.daily_requests_admin,
+                stat.daily_requests_org,
+                ])
+
+
+class ProUserCountWidget(CompareNumberWidget):
+    """Show how many Pro Users we have"""
+    title = 'Pro Users'
+    direction = 1
+    more_info = 'vs one month ago'
+
+    def get_value(self):
+        """Get value"""
+        return Profile.objects.filter(acct_type='pro').count()
+
+    def get_previous_value(self):
+        """Get previous value"""
+        # get 30th newest stat ~1 month ago
+        stat = list(Statistics.objects.all()[:30])[-1]
+        return stat.pro_users
+
+
+class OrgUserCountWidget(CompareNumberWidget):
+    """Show how many Org Users we have"""
+    title = 'Org Users'
+    direction = 1
+    more_info = 'vs one month ago'
+
+    def get_value(self):
+        """Get value"""
+        return (Profile.objects
+                .filter(
+                    organization__active=True,
+                    organization__monthly_cost__gt=0,
+                    )
+                .count()
+                )
+
+    def get_previous_value(self):
+        """Get previous value"""
+        # get 30th newest stat ~1 month ago
+        stat = list(Statistics.objects.all()[:30])[-1]
+        return stat.total_active_org_members
+
+
+class RecentRequestsWidget(ListWidget):
+    """Show the latest submitted requests"""
+    title = 'Recently Submitted Requests'
+
     def get_data(self):
-        """Get graph data"""
-        stats = Statistics.objects.all()[:30:-1]
-        return [{'x': i, 'y': stat.flag_processing_days}
-                for i, stat in enumerate(stats)]
+        """Get the oldest processing requests"""
+        requests = (FOIARequest.objects
+                .get_submitted()
+                .get_public()
+                .order_by('-date_submitted')
+                .values('title')
+                [:15]
+                )
+        return [{
+            'label': r['title'] if len(r['title']) < 32
+            else u'{}...'.format(r['title'][:32]),
+            }
+            for r in requests]
+
+
+class PageCountWidget(CompareNumberWidget):
+    """Show how many pages have been released"""
+    title = 'Total Pages Released'
+    direction = 1
+
+    def get_value(self):
+        """Get value"""
+        return (FOIAFile.objects
+                .aggregate(Sum('pages'))
+                ['pages__sum']
+                )
+
+    def get_previous_value(self):
+        """Get previous value"""
+        return Statistics.objects.latest('date').total_pages
