@@ -248,6 +248,7 @@ def draft_multirequest(request, slug, idx):
                 foia = form.save(commit=False)
                 foia.user = request.user
                 foia.slug = slugify(foia.title) or 'untitled'
+                foia.tags.set(*form.cleaned_data['tags'])
                 foia.save()
                 if request.POST['submit'] == 'Submit':
                     profile = request.user.profile
