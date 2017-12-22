@@ -178,7 +178,7 @@
         {% endif %}
         <div class="jurisdiction__actions">
             <div class="button-group">
-                <a href="{% url 'foia-create' %}" class="blue button">
+                <a href="{% url 'foia-create' %}?jurisdiction={{jurisdiction.pk}}" class="blue button">
                     {% include 'lib/component/icon/create-request.svg' %}
                     <span class="label">File a Request</span>
                 </a>
