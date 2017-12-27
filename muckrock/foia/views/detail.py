@@ -13,9 +13,11 @@ from django.shortcuts import redirect, get_object_or_404
 from django.template.defaultfilters import slugify
 from django.views.generic import DetailView
 
+from cStringIO import StringIO
 from datetime import datetime, timedelta
 import json
 import logging
+from zipfile import ZipFile
 
 from muckrock.accounts.models import Notification
 from muckrock.agency.forms import AgencyForm
@@ -245,6 +247,8 @@ class Detail(DetailView):
             notifications = Notification.objects.for_user(user).for_object(foia).get_unread()
             for notification in notifications:
                 notification.mark_read()
+        if foia.has_perm(request.user, 'zip_download') and request.GET.get('zip_download'):
+            return self._get_zip_download()
         return super(Detail, self).get(request, *args, **kwargs)
 
     def post(self, request):
@@ -679,4 +683,20 @@ class Detail(DetailView):
                     comm.save()
             except (KeyError, FOIACommunication.DoesNotExist):
                 messages.error(request, 'The communication does not exist.')
+        return redirect(foia.get_absolute_url() + '#')
+
+    def _get_zip_download(self):
+        """Get a zip file of the entire request"""
+        foia = self.get_object()
+        if foia.has_perm(self.request.user, 'zip_download'):
+            buff = StringIO()
+            with ZipFile(buff, 'w') as zip_file:
+                for i, comm in enumerate(foia.communications.all()):
+                    file_name = '{:03d}_{}_comm.txt'.format(i, comm.date)
+                    zip_file.writestr(file_name, comm.communication.encode('utf8'))
+                    for ffile in comm.files.all():
+                        zip_file.writestr(ffile.name(), ffile.ffile.read())
+            resp = HttpResponse(buff.getvalue(), 'application/x-zip-compressed')
+            resp['Content-Disposition'] = 'attachment; filename="{}.zip"'.format(foia.title)
+            return resp
         return redirect(foia.get_absolute_url() + '#')
