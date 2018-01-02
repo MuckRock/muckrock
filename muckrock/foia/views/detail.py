@@ -243,8 +243,8 @@ class Detail(DetailView):
     def get(self, request, *args, **kwargs):
         """Mark any unread notifications for this object as read."""
         user = request.user
+        foia = self.get_object()
         if user.is_authenticated():
-            foia = self.get_object()
             notifications = Notification.objects.for_user(user).for_object(foia).get_unread()
             for notification in notifications:
                 notification.mark_read()
