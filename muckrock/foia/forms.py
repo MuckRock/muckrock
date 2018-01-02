@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.utils.text import slugify
 
 from autocomplete_light import shortcuts as autocomplete_light
-from autocomplete_light.contrib.taggit_field import TaggitField, TaggitWidget
+from autocomplete_light.contrib.taggit_field import TaggitField
 from datetime import date, timedelta
 import phonenumbers
 
