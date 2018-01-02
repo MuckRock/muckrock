@@ -313,6 +313,7 @@ class FOIARequest(models.Model):
             related_name='foia', blank=True, null=True)
     multirequest = models.ForeignKey(
             'foia.FOIAMultiRequest',
+            related_name='foias',
             blank=True,
             null=True,
             )
@@ -1086,6 +1087,13 @@ class FOIARequest(models.Model):
                 class_name=('default' if is_following else 'primary')
             ),
             Action(
+                test=self.has_perm(user, 'zip_download'),
+                link='?zip_download=1',
+                title='Download as Zip',
+                desc=u'Download all communications and files as a zip archive',
+                class_name='primary'
+            ),
+            Action(
                 test=self.has_perm(user, 'flag'),
                 title='Get Help',
                 action='flag',
@@ -1238,4 +1246,5 @@ class FOIARequest(models.Model):
             ('agency_reply_foiarequest', 'Can send a direct reply'),
             ('upload_attachment_foiarequest', 'Can upload an attachment'),
             ('export_csv', 'Can export a CSV of search results'),
+            ('zip_download', 'Can download a zip file of all communications and files'),
             )

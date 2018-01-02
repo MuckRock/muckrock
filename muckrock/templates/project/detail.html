@@ -20,7 +20,7 @@
 <meta property="og:description" content="{{ project.summary }}" />
 <meta property="og:url" content="{{ project.get_absolute_url }}" />
 <meta property="og:site_name" content="MuckRock" />
-{% if article.image %}
+{% if project.image %}
 <meta property="og:image" content="{{ project.image.url }}" />
 {% endif %}
 {% endblock open_graph %}

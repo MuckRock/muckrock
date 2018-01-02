@@ -79,6 +79,8 @@ urlpatterns = [
         name='foia-pay'),
     url(r'^%s/toggle-followups/$' % foia_url,
         views.toggle_autofollowups, name='foia-toggle-followups'),
+    url(r'^multi/(?P<slug>[\w\d_-]+)-(?P<pk>\d+)/$',
+        views.MultiDetail.as_view(), name='foia-multi-detail'),
 
     # Misc Views
     url(r'^(?P<jurisdiction>[\w\d_-]+)-(?P<idx>\d+)/$',

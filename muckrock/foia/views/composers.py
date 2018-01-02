@@ -15,6 +15,7 @@ from django.views.generic import FormView
 from datetime import datetime, date
 from math import ceil
 
+from muckrock.agency.models import Agency
 from muckrock.foia.forms import (
     RequestForm,
     RequestDraftForm,
@@ -25,6 +26,7 @@ from muckrock.foia.models import (
     FOIARequest,
     FOIAMultiRequest,
     )
+from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import MultiRequestTask
 from muckrock.utils import new_action
 
@@ -72,8 +74,29 @@ class CreateRequest(FormView):
     def get_initial(self):
         """Get initial data from clone, if there is one"""
         clone_pk = self.request.GET.get('clone')
-        if clone_pk is None:
-            return {}
+        if clone_pk is not None:
+            return self._get_clone_data(clone_pk)
+        agency_pk = self.request.GET.get('agency')
+        if agency_pk is not None:
+            try:
+                agency = get_object_or_404(Agency, pk=agency_pk, status='approved')
+            except ValueError:
+                return {}
+            initial_data = {'agency': agency}
+            initial_data.update(self._get_jurisdiction_data(agency.jurisdiction))
+            return initial_data
+        jurisdiction_pk = self.request.GET.get('jurisdiction')
+        if jurisdiction_pk is not None:
+            try:
+                jurisdiction = get_object_or_404(Jurisdiction, pk=jurisdiction_pk)
+            except ValueError:
+                return {}
+            initial_data = self._get_jurisdiction_data(jurisdiction)
+            return initial_data
+        return {}
+
+    def _get_clone_data(self, clone_pk):
+        """Get the intial data for a clone"""
         try:
             foia = get_object_or_404(FOIARequest, pk=clone_pk)
         except ValueError:
@@ -86,15 +109,21 @@ class CreateRequest(FormView):
             'document': smart_text(foia.requested_docs),
             'agency': foia.agency,
         }
-        jurisdiction = foia.jurisdiction
+        initial_data.update(self._get_jurisdiction_data(foia.jurisdiction))
+        self.clone = True
+        self.parent = foia
+        return initial_data
+
+    def _get_jurisdiction_data(self, jurisdiction):
+        """Get the jurisdiction data for the initial form"""
+        # pylint: disable=no-self-use
+        initial_data = {}
         level = jurisdiction.level
         if level == 's':
             initial_data['state'] = jurisdiction
         elif level == 'l':
             initial_data['local'] = jurisdiction
         initial_data['jurisdiction'] = level
-        self.clone = True
-        self.parent = foia
         return initial_data
 
     def get_form_kwargs(self):

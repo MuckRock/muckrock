@@ -10,11 +10,7 @@
 
 {% block list-table-row %}
 {% with object as multirequest %}
-{% if multirequest.status == 'started' %}
 <td><a href="{{multirequest.get_absolute_url}}">{{multirequest.title}}</a></td>
-{% else %}
-<td>{{multirequest.title}}</td>
-{% endif %}
 <td>{{multirequest.agencies.count}}</td>
 <td><span class="small badge {{multirequest.status|classify_status}}">{{multirequest.get_status_display}}</span></td>
 {% endwith %}

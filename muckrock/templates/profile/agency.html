@@ -116,14 +116,18 @@
     </form>
 </div>
 {% endif %}
-{% if user.is_authenticated %}
-<div>
+<div class="button-group">
+    <a href="{% url 'foia-create' %}?agency={{agency.pk}}" class="blue button">
+        {% include 'lib/component/icon/create-request.svg' %}
+        <span class="label">File a Request</span>
+    </a>
     {% if user.is_staff and not agency.stale %}
-    <button type="submit" class="button" form="stale-form">Mark Stale</button>
+        <button type="submit" class="button" form="stale-form">Mark Stale</button>
     {% endif %}
-    <a href="#flag-form" class="modal-trigger button">Suggest Change</a>
+    {% if user.is_authenticated %}
+        <a href="#flag-form" class="modal-trigger button">Suggest Change</a>
+    {% endif %}
 </div>
-{% endif %}
 {% if agency.public_notes %}
 <section class="notes">
     {{ agency.public_notes|markdown }}

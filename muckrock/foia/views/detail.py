@@ -13,9 +13,11 @@ from django.shortcuts import redirect, get_object_or_404
 from django.template.defaultfilters import slugify
 from django.views.generic import DetailView
 
+from cStringIO import StringIO
 from datetime import datetime, timedelta
 import json
 import logging
+from zipfile import ZipFile
 
 from muckrock.accounts.models import Notification
 from muckrock.agency.forms import AgencyForm
@@ -38,6 +40,7 @@ from muckrock.foia.forms import (
 from muckrock.foia.models import (
     FOIARequest,
     FOIACommunication,
+    FOIAMultiRequest,
     STATUS,
     END_STATUS,
     )
@@ -245,6 +248,8 @@ class Detail(DetailView):
             notifications = Notification.objects.for_user(user).for_object(foia).get_unread()
             for notification in notifications:
                 notification.mark_read()
+        if foia.has_perm(request.user, 'zip_download') and request.GET.get('zip_download'):
+            return self._get_zip_download()
         return super(Detail, self).get(request, *args, **kwargs)
 
     def post(self, request):
@@ -680,3 +685,55 @@ class Detail(DetailView):
             except (KeyError, FOIACommunication.DoesNotExist):
                 messages.error(request, 'The communication does not exist.')
         return redirect(foia.get_absolute_url() + '#')
+
+    def _get_zip_download(self):
+        """Get a zip file of the entire request"""
+        foia = self.get_object()
+        if foia.has_perm(self.request.user, 'zip_download'):
+            buff = StringIO()
+            with ZipFile(buff, 'w') as zip_file:
+                for i, comm in enumerate(foia.communications.all()):
+                    file_name = '{:03d}_{}_comm.txt'.format(i, comm.date)
+                    zip_file.writestr(file_name, comm.communication.encode('utf8'))
+                    for ffile in comm.files.all():
+                        zip_file.writestr(ffile.name(), ffile.ffile.read())
+            resp = HttpResponse(buff.getvalue(), 'application/x-zip-compressed')
+            resp['Content-Disposition'] = 'attachment; filename="{}.zip"'.format(foia.title)
+            return resp
+        return redirect(foia.get_absolute_url() + '#')
+
+
+class MultiDetail(DetailView):
+    """Detail view for multi requests"""
+    model = FOIAMultiRequest
+    context_object_name = 'multi'
+    query_pk_and_slug = True
+
+    def __init__(self, *args, **kwargs):
+        super(MultiDetail, self).__init__(*args, **kwargs)
+        self._obj = None
+
+    def dispatch(self, request, *args, **kwargs):
+        """If request is a draft, then redirect to drafting interface"""
+        foia = self.get_object()
+        if foia.status == 'started':
+            return redirect(
+                'foia-multi-draft',
+                slug=foia.slug,
+                idx=foia.id
+                )
+        else:
+            return super(MultiDetail, self).dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        """Add extra context data"""
+        context = super(MultiDetail, self).get_context_data(**kwargs)
+        multi = context['multi']
+        context['foias'] = (multi
+                .foias
+                .get_viewable(self.request.user)
+                .select_related_view()
+                )
+        if not context['foias'] and multi.user != self.request.user:
+            raise Http404
+        return context
