@@ -486,7 +486,7 @@ class MultiRequestTaskList(TaskList):
         if request.POST.get('action') == 'submit':
             agency_list = request.POST.getlist('agencies')
             task.submit(agency_list)
-            task.resolve(request.user, {'action': 'submit', 'agencies': 'agency_list'})
+            task.resolve(request.user, {'action': 'submit', 'agencies': agency_list})
             messages.success(request, 'Multirequest submitted')
         elif request.POST.get('action') == 'reject':
             task.reject()
