@@ -4,8 +4,8 @@ var dashboardSet = new DashboardSet({
   rollingChoices: true
 });
 
-var dashboardPF = dashboardSet.addDashboard('Processing/Flags')
-var dashboardUser = dashboardSet.addDashboard('User')
+var dashboardPF = dashboardSet.addDashboard('Processing/Flags');
+var dashboardUser = dashboardSet.addDashboard('User');
 var interval = 1000 * 60 * 5;
 
 function getData(widget_name) {

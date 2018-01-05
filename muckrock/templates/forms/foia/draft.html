@@ -72,6 +72,14 @@
         </section>
     </div>
 
+    <div class="modal" id="email-warning-modal" data-foias-filed="{{foias_filed}}">
+        <p>Hi! It looks like you included your email address this in your request. When you file with MuckRock, we generate a unique email and physical address for every request to keep things organized. We include that information in what we send to the agency, so no need to add your contact information on this form. If you're including an email address to help the agency search for responsive documents, simple hit "Submit." If you'd like to edit the body of your request, click "Revise Request." You'll only see this message until you've submitted your first request.<p>
+        <footer>
+            <button type="submit" value="Submit" class="primary button">Submit</button>
+            <span class="close-modal button">Revise Request</span>
+        </footer>
+    </div>
+
 </form>
 {% if not remaining %}
 <form action="{% url 'acct-buy-requests' username=request.user.username %}?next={{ foia.get_absolute_url }}" method="POST" class="stripe-checkout" id="buy-requests">
