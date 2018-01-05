@@ -162,7 +162,7 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
         messages.error(request, 'This is not a draft.')
         return redirect(foia)
     if not foia.has_perm(request.user, 'change'):
-        messages.error(request, 'You may only edit your own drafts.')
+        messages.error(request, 'You do not have permission to edit this draft.')
         return redirect(foia)
 
     initial_data = {
@@ -211,7 +211,8 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
         'action': 'Draft',
         'form': form,
         'foia': foia,
-        'remaining': foia.user.profile.total_requests(),
+        'remaining': request.user.profile.total_requests(),
+        'foias_filed': request.user.foiarequest_set.exclude(status='started').count(),
         'stripe_pk': settings.STRIPE_PUB_KEY,
         'sidebar_admin_url': reverse('admin:foia_foiarequest_change', args=(foia.pk,)),
         'MAX_ATTACHMENT_NUM': settings.MAX_ATTACHMENT_NUM,

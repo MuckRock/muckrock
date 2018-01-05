@@ -201,4 +201,16 @@ $(document).ready(function(){
     }
   });
 
+  // draft page
+
+  $("form.draft").submit(function(e){
+    var email_regex = /\w+@\w+.\w+/;
+    if (email_regex.test($("#id_request").val()) &&
+        $("#email-warning-modal").data("foias-filed") == 0) {
+      e.preventDefault();
+      modal($("#email-warning-modal"));
+      $("form.draft").off("submit");
+    }
+  });
+
 });
