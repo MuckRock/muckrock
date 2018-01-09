@@ -277,6 +277,7 @@ class ProfileSettings(TemplateView):
             'org': OrgPreferencesForm,
         }
         action = request.POST.get('action')
+        receipt_form = None
         if action == 'receipt':
             receipt_form = ReceiptForm(request.POST)
             success = self._handle_receipt_form(receipt_form)
