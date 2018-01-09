@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load static from staticfiles %}
+{% block title %}MuckRock &bull; {{crowdsource.title}}{% endblock %}
+
+{% block content %}
+  <div class="form">
+      <h1>{{crowdsource.title}}</h1>
+      <p>{{crowdsource.question}}</p>
+      <form {% if form.is_multipart %}enctype="multipart/form-data"{% endif %} method="post">
+          {% csrf_token %}
+          {% include 'lib/pattern/form.html' %}
+          <div class="buttons">
+              <input type="submit" name="submit" value="Submit" class="blue button" />
+          </div>
+      </form>
+      {% if data %}
+        {{ data.embed }}
+      {% endif %}
+  </div>
+{% endblock %}
+
