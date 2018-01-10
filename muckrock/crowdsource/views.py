@@ -26,7 +26,7 @@ class CrowdsourceFormView(BaseDetailView, FormView):
     pk_url_kwarg = 'idx'
     query_pk_and_slug = True
     context_object_name = 'crowdsource'
-    queryset = Crowdsource.objects.filter(status='published')
+    queryset = Crowdsource.objects.filter(status='open')
 
     def post(self, request, *args, **kwargs):
         """Cache the object for POST requests"""
@@ -94,5 +94,5 @@ class CrowdsourceFormView(BaseDetailView, FormView):
 
 class CrowdsourceListView(ListView):
     """List of crowdfunds"""
-    queryset = Crowdsource.objects.filter(status='published')
+    queryset = Crowdsource.objects.filter(status='open')
     template_name = 'crowdsource/list.html'
