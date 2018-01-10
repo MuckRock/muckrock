@@ -57,6 +57,7 @@ pdfrw # Used for reading/writing PDFs for form filling in
 phonenumberslite # Library for validating and formatting phone numbers
 pillow # Used by Django for image handling
 psycopg2 # Interface to postgres DB
+pyembed # Used for embedding in crowdsources
 pymdown-extensions # Adds more helpful Markdown extensions
 pypdf2 # Used to manipulate PDFs
 pyphaxio # For sending faxes through Phaxio

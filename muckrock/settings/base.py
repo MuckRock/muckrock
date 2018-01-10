@@ -237,6 +237,7 @@ INSTALLED_APPS = (
     'muckrock.communication',
     'muckrock.portal',
     'muckrock.dataset',
+    'muckrock.crowdsource',
     'actstream'
 )
 
