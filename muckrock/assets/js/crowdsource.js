@@ -15,7 +15,7 @@ $(document).ready(function(){
         'number',
         'paragraph',
         'radio-group',
-        'textarea',
+        'textarea'
       ],
       disabledAttrs: [
         'access',
@@ -34,9 +34,9 @@ $(document).ready(function(){
         'style',
         'subtype',
         'toggle',
-        'value',
+        'value'
       ],
-      disabledActionButtons: ['data', 'save'],
+      disabledActionButtons: ['data', 'save']
   });
 
   $("form.create-crowdsource").submit(function() {
