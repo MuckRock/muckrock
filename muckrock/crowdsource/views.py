@@ -4,11 +4,16 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
-from django.views.generic import FormView, ListView
+from django.utils.text import slugify
+from django.views.generic import FormView, ListView, CreateView
 from django.views.generic.detail import BaseDetailView
 
 from muckrock.crowdsource.exceptions import NoAssignmentError
-from muckrock.crowdsource.forms import CrowdsourceAssignmentForm
+from muckrock.crowdsource.forms import (
+        CrowdsourceAssignmentForm,
+        CrowdsourceForm,
+        CrowdsourceDataFormset,
+        )
 from muckrock.crowdsource.models import (
         Crowdsource,
         CrowdsourceField,
@@ -89,10 +94,43 @@ class CrowdsourceFormView(BaseDetailView, FormView):
                     value=value,
                     )
         messages.success(self.request, 'Thank you!')
-        return redirect('crowdsource-list')
+        return redirect(crowdsource)
 
 
 class CrowdsourceListView(ListView):
     """List of crowdfunds"""
     queryset = Crowdsource.objects.filter(status='open')
     template_name = 'crowdsource/list.html'
+
+
+@class_view_decorator(login_required)
+class CrowdsourceCreateView(CreateView):
+    """Create a crowdsource"""
+    model = Crowdsource
+    form_class = CrowdsourceForm
+    template_name = 'crowdsource/create.html'
+
+    def get_context_data(self, **kwargs):
+        """Add the data formset to the context"""
+        data = super(CrowdsourceCreateView, self).get_context_data(**kwargs)
+        if self.request.POST:
+            data['data_formset'] = CrowdsourceDataFormset(self.request.POST)
+        else:
+            data['data_formset'] = CrowdsourceDataFormset()
+        return data
+
+    def form_valid(self, form):
+        """Save the crowdsource"""
+        context = self.get_context_data()
+        formset = context['data_formset']
+        crowdsource = form.save(commit=False)
+        crowdsource.slug = slugify(crowdsource.title)
+        crowdsource.user = self.request.user
+        crowdsource.status = 'open'
+        crowdsource.save()
+        crowdsource.create_form(form.cleaned_data['form_json'])
+        if formset.is_valid():
+            formset.instance = crowdsource
+            formset.save()
+        messages.success(self.request, 'Crowdsource started')
+        return redirect('crowdsource-list')

@@ -15,4 +15,8 @@ urlpatterns = [
             views.CrowdsourceListView.as_view(),
             name='crowdsource-list',
             ),
+        url(r'^create/$',
+            views.CrowdsourceCreateView.as_view(),
+            name='crowdsource-create',
+            ),
         ]

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static from staticfiles %}
+{% block title %}MuckRock &bull; New Crowdsource{% endblock %}
+
+{% block content %}
+  <div class="create crowdsource form">
+    <header>
+      <h1>Create a new crowdsource</h1>
+    </header>
+    <form method="post" class="create-crowdsource">
+      {% csrf_token %}
+      {% include 'lib/pattern/form.html' %}
+      {{ data_formset.management_form }}
+      <div class="field">
+        <label>Form</label>
+        <div id="build-wrap"></div>
+      </div>
+      {% for form in data_formset %}
+        <div class="crowdsource-data">
+          <div class="hidden-fields">
+            {% for field in form.hidden_fields %}
+              {{ field }}
+            {% endfor %}
+          </div>
+          {% for field in form.visible_fields %}
+            <div class="field">
+              <label for="{{field.id_for_label}}">{{field.label}}:</label>
+              {% if field.errors %}
+                {{field.errors}}
+              {% endif %}
+              {{field}}
+            </div>
+          {% endfor %}
+        </div>
+      {% endfor %}
+      <p><a href="#" id="add-crowdsource-data">Add another...</a></p>
+      <button type="submit" class="blue button">Submit</button>
+    </form>
+  </div>
+{% endblock %}
+

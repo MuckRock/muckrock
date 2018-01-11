@@ -13,6 +13,8 @@
 
 import 'jquery-ui/datepicker';
 import 'jquery-ui/widget';
+import 'jquery-ui/sortable';
+import 'formBuilder';
 import '../vendor/formset';
 import '../vendor/loupe';
 import '../vendor/quicksearch';
@@ -23,6 +25,7 @@ import './autocomplete';
 import './checkout';
 import './communication';
 import './crowdfund';
+import './crowdsource';
 import './currencyField';
 import './dropdown';
 import './editor';
