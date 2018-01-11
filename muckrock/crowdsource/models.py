@@ -70,6 +70,14 @@ class Crowdsource(models.Model):
                             order=choice_order,
                             )
 
+    def get_header_values(self):
+        """Get header values for CSV export"""
+        values = ['user', 'datetime']
+        if self.data.exists():
+            values.append('datum')
+        field_labels = list(self.fields.values_list('label', flat=True))
+        return values + field_labels
+
 
 class CrowdsourceData(models.Model):
     """A source of data to show with the crowdsource questions"""
@@ -166,6 +174,20 @@ class CrowdsourceResponse(models.Model):
                 self.user,
                 self.datetime,
                 )
+
+    def get_values(self):
+        """Get the values for this response for CSV export"""
+        values = [
+                self.user.username,
+                self.datetime.strftime('%Y-%m-%d %H:%M:%S'),
+                ]
+        if self.data:
+            values.append(self.data.url)
+        values += list(self.values
+                .order_by('field__order')
+                .values_list('value', flat=True)
+                )
+        return values
 
 
 class CrowdsourceValue(models.Model):

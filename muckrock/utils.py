@@ -152,3 +152,11 @@ def stripe_retry_on_error(func, *args, **kwargs):
     if kwargs.get('idempotency_key') is True:
         kwargs['idempotency_key'] = uuid.uuid4().hex
     return retry_on_error(stripe.error.APIConnectionError, func, *args, **kwargs)
+
+
+class Echo(object):
+    """File like object that just returns written values"""
+    def write(self, value):
+        # pylint: disable=no-self-use
+        """Return the value"""
+        return value

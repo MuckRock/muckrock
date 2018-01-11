@@ -2,11 +2,20 @@
 """Views for the crowdsource app"""
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import user_passes_test
+from django.http import StreamingHttpResponse
 from django.shortcuts import redirect
 from django.utils.text import slugify
-from django.views.generic import FormView, ListView, CreateView
+from django.views.generic import (
+        CreateView,
+        DetailView,
+        FormView,
+        ListView,
+        )
 from django.views.generic.detail import BaseDetailView
+
+from itertools import chain
+import unicodecsv as csv
 
 from muckrock.crowdsource.exceptions import NoAssignmentError
 from muckrock.crowdsource.forms import (
@@ -20,10 +29,67 @@ from muckrock.crowdsource.models import (
         CrowdsourceResponse,
         CrowdsourceValue,
         )
+from muckrock.utils import Echo
 from muckrock.views import class_view_decorator
 
 
-@class_view_decorator(login_required)
+@class_view_decorator(user_passes_test(lambda u: u.is_staff))
+class CrowdsourceDetailView(DetailView):
+    """A view for the crowdsource owner to view the particular crowdsource"""
+    template_name = 'crowdsource/detail.html'
+    pk_url_kwarg = 'idx'
+    query_pk_and_slug = True
+    context_object_name = 'crowdsource'
+    queryset = (Crowdsource.objects
+            .select_related('user')
+            .prefetch_related('data')
+            )
+
+    def get(self, request, *args, **kwargs):
+        """Redirect to assignment page for non owner, non staff"""
+        crowdsource = self.get_object()
+        is_owner = self.request.user == crowdsource.user
+        if not is_owner and not self.request.user.is_staff:
+            return redirect(
+                    'crowdsource-assignment',
+                    slug=crowdsource.slug,
+                    idx=crowdsource.pk,
+                    )
+        elif self.request.GET.get('csv'):
+            return self.results_csv()
+        elif self.request.GET.get('dataset'):
+            return self.create_dataset()
+        else:
+            return super(CrowdsourceDetailView, self).get(request, *args, **kwargs)
+
+    def results_csv(self):
+        """Return the results in CSV format"""
+        crowdsource = self.get_object()
+        psuedo_buffer = Echo()
+        writer = csv.writer(psuedo_buffer)
+        response = StreamingHttpResponse(
+                chain(
+                    [writer.writerow(crowdsource.get_header_values())],
+                    (writer.writerow(csr.get_values()) for csr in crowdsource.responses.all()),
+                    ),
+                content_type='text/csv',
+                )
+        response['Content-Disposition'] = 'attachment; filename="requests.csv"'
+        return response
+
+    def create_dataset(self):
+        """Create a dataset from a crowdsource's responses"""
+        from muckrock.dataset.models import DataSet
+        crowdsource = self.get_object()
+        dataset = DataSet.objects.create_from_crowdsource(
+                self.request.user,
+                crowdsource,
+                )
+        return redirect(dataset)
+
+
+#@class_view_decorator(login_required)
+@class_view_decorator(user_passes_test(lambda u: u.is_staff))
 class CrowdsourceFormView(BaseDetailView, FormView):
     """A view for a user to fill out the crowdsource form"""
     template_name = 'crowdsource/form.html'
@@ -94,16 +160,22 @@ class CrowdsourceFormView(BaseDetailView, FormView):
                     value=value,
                     )
         messages.success(self.request, 'Thank you!')
-        return redirect(crowdsource)
+        return redirect(
+                'crowdsource-assignment',
+                slug=crowdsource.slug,
+                idx=crowdsource.pk,
+                )
 
 
+@class_view_decorator(user_passes_test(lambda u: u.is_staff))
 class CrowdsourceListView(ListView):
     """List of crowdfunds"""
     queryset = Crowdsource.objects.filter(status='open')
     template_name = 'crowdsource/list.html'
 
 
-@class_view_decorator(login_required)
+#@class_view_decorator(login_required)
+@class_view_decorator(user_passes_test(lambda u: u.is_staff))
 class CrowdsourceCreateView(CreateView):
     """Create a crowdsource"""
     model = Crowdsource
@@ -133,4 +205,4 @@ class CrowdsourceCreateView(CreateView):
             formset.instance = crowdsource
             formset.save()
         messages.success(self.request, 'Crowdsource started')
-        return redirect('crowdsource-list')
+        return redirect(crowdsource)

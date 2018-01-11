@@ -1,0 +1,36 @@
+{% extends 'base_detail.html' %}
+{% block title %}{{ crowdsource.title }} &bull; MuckRock{% endblock %}
+
+{% block type %}crowdsource{% endblock type %}
+
+{% block header %}<h1>{{ crowdsource.title }}</h1>{% endblock header %}
+
+{% block actions %}
+  <div class="button-group">
+    <a href="{% url "crowdsource-assignment" slug=crowdsource.slug idx=crowdsource.pk %}" class="button primary">Assignment</a>
+    <a href="?csv=1" class="button primary">Results CSV</a>
+    <a href="?dataset=1" class="button primary">Create Data Set</a>
+  </div>
+{% endblock actions %}
+
+{% block main %}
+  <dl>
+    <dt>User</dt>
+    <dd>{{ crowdsource.user }}</dd>
+    <dt>Created</dt>
+    <dd>{{ crowdsource.datetime_created|date }}</dd>
+    <dt>Status</dt>
+    <dd>{{ crowdsource.get_status_display }}</dd>
+    <dt>Description</dt>
+    <dd>{{ crowdsource.description }}</dd>
+    <dt>Data</dt>
+    <dd><ul>
+      {% for data in crowdsource.data.all %}
+        <li><a href="{{ data.url }}">{{ data.url }}</a></li>
+      {% endfor %}
+    </ul></dd>
+    <dt>Responses</dt>
+    <dd>{{ crowdsource.responses.count }}</dd>
+
+  </dl>
+{% endblock main %}

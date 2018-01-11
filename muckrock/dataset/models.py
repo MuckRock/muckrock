@@ -14,9 +14,12 @@ from collections import defaultdict
 from itertools import izip_longest
 import logging
 import sys
-import unicodecsv as csv
-import xlrd
 
+from muckrock.dataset.creators import (
+        CsvCreator,
+        XlsCreator,
+        CrowdsourceCreator,
+        )
 from muckrock.dataset.fields import FIELDS, FIELD_DICT
 
 
@@ -42,15 +45,29 @@ class DataSetQuerySet(models.QuerySet):
 
     def create_from_csv(self, name, user, file_):
         """Create a data set from a csv file"""
+        creator = CsvCreator(name, file_)
+        return self._create_from(creator, user)
+
+    def create_from_xls(self, name, user, file_):
+        """Create a data set from an xls file"""
+        creator = XlsCreator(name, file_)
+        return self._create_from(creator, user)
+
+    def create_from_crowdsource(self, user, crowdsource):
+        """Create a data set from crowdsource's responses"""
+        creator = CrowdsourceCreator(crowdsource)
+        return self._create_from(creator, user)
+
+    def _create_from(self, creator, user):
+        """Create a data set from some source"""
         # pylint: disable=broad-except
         dataset = self.create(
-                name=name,
+                name=creator.get_name(),
                 user=user,
                 status='processing',
                 )
         try:
-            csv_reader = csv.reader(file_)
-            headers = next(csv_reader)
+            headers = creator.get_headers()
             slug_headers = self._unique_slugify(headers)
             for i, (name, slug) in enumerate(zip(headers, slug_headers)):
                 dataset.fields.create(
@@ -58,12 +75,11 @@ class DataSetQuerySet(models.QuerySet):
                         slug=slug,
                         field_number=i,
                         )
-            headers_len = len(headers)
-            for i, row in enumerate(csv_reader):
+            for i, row in enumerate(creator.get_rows()):
                 dataset.rows.create(
                         data=dict(izip_longest(
                             slug_headers,
-                            row[:headers_len],
+                            row,
                             fillvalue='',
                             )),
                         row_number=i,
@@ -72,48 +88,7 @@ class DataSetQuerySet(models.QuerySet):
             dataset.detect_field_types()
         except Exception as exc:
             logger.error(
-                    'DataSet CSV creation: %s',
-                    exc,
-                    exc_info=sys.exc_info(),
-                    )
-            dataset.status = 'error'
-            dataset.save()
-        else:
-            dataset.status = 'ready'
-            dataset.save()
-        return dataset
-
-    def create_from_xls(self, name, user, file_):
-        """Create a data set from an xls file"""
-        # pylint: disable=broad-except
-        dataset = self.create(
-                name=name,
-                user=user,
-                status='processing',
-                )
-        try:
-            book = xlrd.open_workbook(file_contents=file_.read())
-            sheet = book.sheet_by_index(0)
-
-            headers = sheet.row_values(0)
-            slug_headers = self._unique_slugify(headers)
-            for i, (name, slug) in enumerate(zip(headers, slug_headers)):
-                dataset.fields.create(
-                        name=name,
-                        slug=slug,
-                        field_number=i,
-                        )
-            for i in xrange(1, sheet.nrows):
-                row = [unicode(v) for v in sheet.row_values(i)]
-                dataset.rows.create(
-                        data=dict(zip(slug_headers, row)),
-                        row_number=i,
-                        )
-
-            dataset.detect_field_types()
-        except Exception as exc:
-            logger.error(
-                    'DataSet XLS creation: %s',
+                    'DataSet creation: %s',
                     exc,
                     exc_info=sys.exc_info(),
                     )

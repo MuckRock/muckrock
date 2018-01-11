@@ -32,6 +32,7 @@ from muckrock.foia.models import (
 from muckrock.models import ExtractDay, Now
 from muckrock.news.models import Article
 from muckrock.project.models import Project
+from muckrock.utils import Echo
 from muckrock.views import (
         class_view_decorator,
         MRFilterListView,
@@ -135,13 +136,6 @@ class RequestList(MRSearchFilterListView):
 
     def render_to_response(self, context, **kwargs):
         """Allow CSV responses"""
-
-        class Echo(object):
-            """File like object that just returns written values"""
-            def write(self, value):
-                # pylint: disable=no-self-use
-                """Return the value"""
-                return value
 
         wants_csv = self.request.GET.get('content_type') == 'csv'
         has_perm = self.request.user.has_perm('foia.export_csv')
