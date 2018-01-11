@@ -54,7 +54,6 @@ class Crowdsource(models.Model):
 
     def create_form(self, form_json):
         """Create the crowdsource form from the form builder json"""
-        # XXX better error check for malformed json
         form_data = json.loads(form_json)
         for order, field_data in enumerate(form_data):
             field = self.fields.create(
