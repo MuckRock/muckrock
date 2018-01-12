@@ -131,6 +131,9 @@ class EmailAddress(models.Model):
 
         return False
 
+    class Meta:
+        verbose_name_plural = 'email addresses'
+
 
 class PhoneNumber(models.Model):
     """A phone number"""
@@ -237,6 +240,8 @@ class Address(models.Model):
             ))
         return '\n'.join(address)
 
+    class Meta:
+        verbose_name_plural = 'addresses'
 
 # Communication models
 
