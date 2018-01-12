@@ -116,6 +116,13 @@ class OrphanTask(Task):
     def __unicode__(self):
         return u'Orphan Task'
 
+    def display(self):
+        """Display something useful and identifing"""
+        return u'{}: {}'.format(
+                self.get_reason_display(),
+                self.address,
+                )
+
     def get_absolute_url(self):
         return reverse('orphan-task', kwargs={'pk': self.pk})
 
@@ -171,6 +178,13 @@ class SnailMailTask(Task):
 
     def __unicode__(self):
         return u'Snail Mail Task'
+
+    def display(self):
+        """Display something useful and identifing"""
+        return u'{}: {}'.format(
+                self.get_category_display(),
+                self.communication.foia.title,
+                )
 
     def get_absolute_url(self):
         return reverse('snail-mail-task', kwargs={'pk': self.pk})
@@ -471,6 +485,17 @@ class FlaggedTask(Task):
     def __unicode__(self):
         return u'Flagged Task'
 
+    def display(self):
+        """Display something useful and identifing"""
+        if self.foia:
+            return self.foia.title
+        elif self.agency:
+            return self.agency.name
+        elif self.jurisdiction:
+            return self.jurisdiction.name
+        else:
+            return 'None'
+
     def get_absolute_url(self):
         return reverse('flagged-task', kwargs={'pk': self.pk})
 
@@ -520,6 +545,7 @@ class ProjectReviewTask(Task):
     def approve(self, text):
         """Mark the project approved and notify the user."""
         self.project.approved = True
+        self.project.date_approved = date.today()
         self.project.save()
         return self.reply(text, 'approved')
 
@@ -540,6 +566,10 @@ class NewAgencyTask(Task):
 
     def __unicode__(self):
         return u'New Agency Task'
+
+    def display(self):
+        """Display something useful and identifing"""
+        return self.agency.name
 
     def get_absolute_url(self):
         return reverse('new-agency-task', kwargs={'pk': self.pk})
@@ -733,6 +763,10 @@ class NewExemptionTask(Task):
     def __unicode__(self):
         return u'New Exemption Task'
 
+    def display(self):
+        """Display something useful and identifing"""
+        return self.foia.title
+
     def get_absolute_url(self):
         return reverse('newexemption-task', kwargs={'pk': self.pk})
 
@@ -751,6 +785,10 @@ class PortalTask(Task):
 
     def __unicode__(self):
         return u'Portal Task'
+
+    def display(self):
+        """Display something useful and identifing"""
+        return self.communication.foia.title
 
     def get_absolute_url(self):
         return reverse('portal-task', kwargs={'pk': self.pk})
