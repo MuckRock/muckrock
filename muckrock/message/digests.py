@@ -3,11 +3,12 @@ Digest objects for the messages app
 """
 
 from django.contrib.auth.models import User
-from django.db.models import Q
+from django.db.models import Q, F
 from django.utils import timezone
 
 from actstream.models import Action
-from datetime import timedelta
+from collections import OrderedDict
+from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
 from muckrock.accounts.models import Notification, Statistics
@@ -18,6 +19,7 @@ from muckrock.communication.models import (
         )
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.message.email import TemplateEmail
+from muckrock.models import ExtractDay, Now
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.qanda.models import Question
 
@@ -322,24 +324,25 @@ class StaffDigest(Digest):
             previous_month = Statistics.objects.get(date=end - relativedelta(months=1))
         except Statistics.DoesNotExist:
             return None # if statistics cannot be found, don't send anything
-        request_data = []
-        request_stats = [
-                ('Requests', 'total_requests', True),
-                ('Pages', 'total_pages', True),
-                ('Processing', 'total_requests_submitted', False),
-                ('Processing Time', 'requests_processing_days', False),
-                ('Responses', 'total_unresolved_response_tasks', False),
-                ('Automatically Resolved', 'daily_robot_response_tasks', True),
-                ('Orphans', 'total_unresolved_orphan_tasks', False),
-                ('Stale Agencies', 'stale_agencies', False),
-                ('New Agencies', 'unapproved_agencies', False),
-                ('Flags', 'total_unresolved_flagged_tasks', False),
-                ('Flags Time', 'flag_processing_days', False),
-                ('Snail Mail Total', 'total_unresolved_snailmail_tasks', False),
-                ('Snail Mail Appeals', 'unresolved_snailmail_appeals', False),
+        data = {
+                'request': [],
+                'user': [],
+                }
+        stats = [
+                ('request', 'Requests', 'total_requests', True),
+                ('request', 'Pages', 'total_pages', True),
+                ('request', 'Processing', 'total_requests_submitted', False),
+                ('request', 'Processing Time', 'requests_processing_days', False),
+                ('request', 'Flags', 'total_unresolved_flagged_tasks', False),
+                ('request', 'Flags Time', 'flag_processing_days', False),
+                ('request', 'Review Agency Tasks', 'total_review_agency_tasks', False),
+                ('user', 'Users Filed', 'total_users_filed', True),
+                ('user', 'Users', 'total_users', True),
+                ('user', 'Pro Users', 'pro_users', True),
+                ('user', 'Active Org Members', 'total_active_org_members', True),
                 ]
-        for name, stat, growth in request_stats:
-            request_data.append(
+        for section, name, stat, growth in stats:
+            data[section].append(
                     self.DataPoint(
                         name,
                         getattr(current, stat),
@@ -348,32 +351,6 @@ class StaffDigest(Digest):
                         getattr(previous_month, stat),
                         growth,
                         ))
-        data = {
-            'request': request_data,
-            'user': [
-                self.DataPoint(
-                    'Users',
-                    current.total_users,
-                    previous.total_users,
-                    previous_week.total_users,
-                    previous_month.total_users,
-                    ),
-                self.DataPoint(
-                    'Pro Users',
-                    current.pro_users,
-                    previous.pro_users,
-                    previous_week.pro_users,
-                    previous_month.pro_users,
-                    ),
-                self.DataPoint(
-                    'Active Org Members',
-                    current.total_active_org_members,
-                    previous.total_active_org_members,
-                    previous_week.total_active_org_members,
-                    previous_month.total_active_org_members,
-                ),
-            ],
-        }
         return data
 
     def get_pro_users(self, start, end):
@@ -406,21 +383,87 @@ class StaffDigest(Digest):
         }
         return data
 
+    def get_stale_tasks(self):
+        """Get stale tasks"""
+        # pylint: disable=no-self-use
+        from muckrock.task.models import (
+                NewAgencyTask,
+                OrphanTask,
+                FlaggedTask,
+                PortalTask,
+                SnailMailTask,
+                NewExemptionTask,
+                )
+        stale_tasks = OrderedDict()
+        stale_tasks['Processing Requests'] = (FOIARequest.objects
+                .filter(
+                    status='submitted',
+                    date_processing__lt=(date.today() - timedelta(5)),
+                    )
+                .order_by('date_processing')
+                .annotate(days_old=ExtractDay(Now() - F('date_processing')))
+                )[:5]
+        task_types = [
+            (NewAgencyTask, 3),
+            (OrphanTask, 5),
+            (FlaggedTask, 5),
+            (PortalTask, 5),
+            (SnailMailTask, 5),
+            (NewExemptionTask, 5),
+            ]
+        for task_type, days_old in task_types:
+            stale_tasks[task_type.type] = (task_type.objects
+                    .filter(
+                        date_created__lt=(datetime.now() - timedelta(days_old)),
+                        resolved=False,
+                        )
+                    .order_by('date_created')
+                    .annotate(days_old=ExtractDay(Now() - F('date_created')))
+                    [:5]
+                    )
+        return stale_tasks
+
+    def get_crowdfunds(self):
+        """Get crodfund information"""
+        # pylint: disable=no-self-use
+        crowdfund_info = {}
+        crowdfund_info['active'] = list(
+                Crowdfund.objects
+                .filter(closed=False)
+                .order_by('-date_due')
+                )
+        crowdfund_info['new'] = list(
+                Crowdfund.objects
+                .filter(date_created=date.today() - timedelta(1))
+                )
+        return crowdfund_info
+
+    def get_projects(self):
+        """Get project information"""
+        # pylint: disable=no-self-use
+        from muckrock.project.models import Project
+        project_info = OrderedDict()
+        project_info['Pending Projects'] = Project.objects.get_pending()
+        project_info['Projects Created in the Past Week'] = (Project.objects
+                .filter(date_created__gte=date.today() - timedelta(7))
+                )
+        project_info['Projects Approved in the Past Week'] = (Project.objects
+                .filter(date_approved__gte=date.today() - timedelta(7))
+                )
+        return project_info
+
     def get_context_data(self, *args):
         """Adds classified activity to the context"""
-        from muckrock.project.models import Project
         context = super(StaffDigest, self).get_context_data(*args)
         end = timezone.now() - self.interval
         start = end - self.interval
         context['stats'] = self.get_data(start, end)
         context['comms'] = self.get_comms(start, end)
         context['pro_users'] = self.get_pro_users(end - relativedelta(days=5), end)
-        context['crowdfunds'] = list(
-                Crowdfund.objects
-                .filter(closed=False)
-                .order_by('-date_due')
-                )
-        context['projects'] = Project.objects.get_pending()
+        context['stale_tasks'] = self.get_stale_tasks()
+        context['stale_tasks_show'] = any(i for i in context['stale_tasks'].itervalues())
+        context['crowdfunds'] = self.get_crowdfunds()
+        context['projects'] = self.get_projects()
         return context
 
     def send(self, *args):

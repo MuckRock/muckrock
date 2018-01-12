@@ -2,6 +2,23 @@
 
 {% block body %}
 <p>{{ salutation }}, {{ user.first_name }}.</p>
+{% if stale_tasks_show %}
+  <h1>Stale Tasks</h1>
+  {% for task_type, tasks in stale_tasks.iteritems %}
+    {% if tasks %}
+      <h2>{{ task_type }}</h2>
+      <ul>
+        {% for task in tasks %}
+          <li>
+            <a href="{{ task.get_absolute_url }}">{{ task.display|default:task }}</a><br>
+            <small>{{ task.days_old }} days old</small>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
 {% if stats %}
 <h1>Requests</h1>
 <table>
@@ -230,28 +247,54 @@
 </ul>
 {% endif %}
 {% endif %}
-{% if crowdfunds %}
-<h1>Active Crowdfunds</h1>
-<ul>
-{% for crowdfund in crowdfunds %}
-{% with crowdfund.get_crowdfund_object as object %}
-<li>
-    <a href="{{object.get_absolute_url}}">{{object}}</a>
-    <br/>
-    <small>{{crowdfund.percent_funded}}% funded &bull; ${{crowdfund.amount_remaining}} remaining &bull; {% if crowdfund.date_due %}Ends on {{crowdfund.date_due|date:"m/d/y"}}{% else %}No end date{% endif %}</small>
-</li>
-{% endwith %}
-{% endfor %}
-</ul>
-{% endif %}
-{% if projects %}
-<h1>Pending Projects</h1>
-<ul>
-    {% for project in projects %}
-    <li><a href="{{project.get_absolute_url}}">{{project.title}}</a></li>
+{% if crowdfunds.active %}
+  <h1>Active Crowdfunds</h1>
+  <ul>
+    {% for crowdfund in crowdfunds.active %}
+      {% with crowdfund.get_crowdfund_object as object %}
+        <li>
+          <a href="{{object.get_absolute_url}}">{{object}}</a>
+          <br/>
+          <small>
+            {{crowdfund.percent_funded}}% funded &bull;
+            ${{crowdfund.amount_remaining}} remaining &bull;
+            {% if crowdfund.date_due %}Ends on {{crowdfund.date_due|date:"m/d/y"}}{% else %}No end date{% endif %} &bull;
+            {% with num_donors=crowdfund.num_donations_yesterday %}
+              {{ num_donors }} donor{{ num_donors|pluralize }} yesterday
+            {% endwith %}
+          </small>
+        </li>
+      {% endwith %}
     {% endfor %}
-</ul>
+  </ul>
 {% endif %}
+{% if crowdfunds.new %}
+  <h1>New Crowdfunds</h1>
+  <ul>
+    {% for crowdfund in crowdfunds.new %}
+      {% with crowdfund.get_crowdfund_object as object %}
+        <li>
+          <a href="{{object.get_absolute_url}}">{{object}}</a>
+          <br/>
+          <small>
+            {% if crowdfund.date_due %}Ends on {{crowdfund.date_due|date:"m/d/y"}}{% else %}No end date{% endif %}
+          </small>
+        </li>
+      {% endwith %}
+    {% endfor %}
+  </ul>
+{% endif %}
+
+{% for title, projects in projects.iteritems %}
+  {% if projects %}
+  <h1>{{ title }}</h1>
+    <ul>
+      {% for project in projects %}
+        <li><a href="{{project.get_absolute_url}}">{{project.title}}</a></li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endfor %}
 <hr />
 <p>That is all for today. {{ signoff }} and see you tomorrow.</p>
 {% endblock %}

@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q, Sum
 
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 import logging
 import stripe
@@ -38,6 +38,12 @@ class Crowdfund(models.Model):
         default='0.00'
     )
     date_due = models.DateField(blank=True, null=True)
+    date_created = models.DateField(
+            # Only allow null's since this wasn't on here to begin with
+            blank=True,
+            null=True,
+            default=date.today,
+            )
     closed = models.BooleanField(default=False)
 
     def __unicode__(self):
@@ -233,6 +239,13 @@ class Crowdfund(models.Model):
     def can_recur(self):
         """Can this crowdfund accept recurring payments?"""
         return not self.payment_capped and self.date_due is None
+
+    def num_donations_yesterday(self):
+        """How many donations were made yesterday?"""
+        return self.payments.filter(
+                date__gte=date.today() - timedelta(1),
+                date__lt=date.today(),
+                ).count()
 
 
 class CrowdfundPayment(models.Model):

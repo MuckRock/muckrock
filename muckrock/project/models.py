@@ -6,13 +6,14 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.text import slugify
 
+from datetime import date
+import taggit
+
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
 from muckrock.task.models import ProjectReviewTask
 from muckrock.utils import get_image_storage
-
-import taggit
 
 
 class ProjectQuerySet(models.QuerySet):
@@ -125,6 +126,13 @@ class Project(models.Model):
         blank=True,
         verbose_name='Newsletter Description',
         help_text='Should encourage readers to subscribe.')
+    date_created = models.DateField(
+            # Only allow null's since this wasn't on here to begin with
+            blank=True,
+            null=True,
+            default=date.today,
+            )
+    date_approved = models.DateField(blank=True, null=True)
 
 
     def __unicode__(self):
