@@ -335,7 +335,7 @@ class StaffDigest(Digest):
                 ('request', 'Processing Time', 'requests_processing_days', False),
                 ('request', 'Flags', 'total_unresolved_flagged_tasks', False),
                 ('request', 'Flags Time', 'flag_processing_days', False),
-                ('request', 'Review Agency Tasks', 'total_review_agency_tasks', False),
+                ('request', 'Review Agency Tasks', 'total_reviewagency_tasks', False),
                 ('user', 'Users Filed', 'total_users_filed', True),
                 ('user', 'Users', 'total_users', True),
                 ('user', 'Pro Users', 'pro_users', True),
