@@ -102,8 +102,13 @@ class TestStaffDigest(TestCase):
         interval = relativedelta(days=1)
         yesterday = date.today() - interval
         day_before_yesterday = yesterday - interval
+        week_before_yesterday = yesterday - relativedelta(weeks=1)
+        month_before_yesterday = yesterday - relativedelta(months=1)
+
         factories.StatisticsFactory(date=yesterday)
         factories.StatisticsFactory(date=day_before_yesterday)
+        factories.StatisticsFactory(date=week_before_yesterday)
+        factories.StatisticsFactory(date=month_before_yesterday)
 
     def test_send(self):
         """The digest should send to staff members without errors."""
