@@ -57,7 +57,7 @@ http {
 		listen <%= ENV["PORT"] %>;
 		server_name _;
 		keepalive_timeout 5;
-		limit_req zone=one burst=5;
+		limit_req zone=one burst=10 nodelay;
 		if ($http_host ~ "\.$" ){
 			rewrite ^(.*) $scheme://$host$1 permanent;
 		}

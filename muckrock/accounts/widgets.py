@@ -5,6 +5,7 @@ Dashing widgets for the dashboard
 from django.db.models import F, Sum
 
 from dashing.widgets import (
+        Widget,
         NumberWidget,
         ListWidget,
         GraphWidget,
@@ -294,3 +295,31 @@ class PageCountWidget(CompareNumberWidget):
     def get_previous_value(self):
         """Get previous value"""
         return Statistics.objects.latest('date').total_pages
+
+# Top level widget to pull them all together into one request
+
+class TopWidget(Widget):
+    """Top level widget
+    This allows all widgets to be updated with only one HTTP request
+    """
+    widgets = [
+            ProcessingCountWidget(),
+            OldestProcessingWidget(),
+            ProcessingGraphWidget(),
+            FlagCountWidget(),
+            OldestFlagWidget(),
+            FlagGraphWidget(),
+            ProUserGraphWidget(),
+            RequestsFiledWidget(),
+            ProUserCountWidget(),
+            OrgUserCountWidget(),
+            RecentRequestsWidget(),
+            PageCountWidget(),
+            ]
+
+    def get_context(self):
+        """Return data for all widgets"""
+        context = {}
+        for widget in self.widgets:
+            context[widget.__class__.__name__] = widget.get_context()
+        return context
