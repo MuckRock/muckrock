@@ -16,6 +16,7 @@ The following instructions were tested to work with the following software versi
 2. Set up your virtual machine
     1. Install [Vagrant][vagrant] and [VirtualBox][virtualbox]
     2. Run `vagrant up` (this will take a while)
+        1. You will see the following error: `==> default: mesg: ttyname failed: Inappropriate ioctl for device`.  It can be safely ignored.
     3. Run `vagrant ssh` to ssh into the virtual machine
 3. You may edit the file `~/muckrock/.settings.sh` if you would like to set up accounts and passwords for any external providers - you should be able to develop without these unless you specifically need to use and test them
 
@@ -27,9 +28,9 @@ The code checked out from GitHub is synced between the virtual machine and your 
 ### Run
 
 1. The following commands should be run from the MuckRock directory inside the virtual machine: `cd muckrock`
-2. Run `npm run build` to rebuild the javascript and css
-3. Run `fab mail &` to start a background email server
-4. Run `fab celery &` to start a background task queue
+2. Run `npm run build` to rebuild the javascript and css (if you change any javascript or scss files)
+3. Run `fab mail` to start a background email server (in order to log email sent during development)
+4. Run `fab celery` to start a background task queue (in order to use celery during development)
 5. Run `fab runserver` to start a server instance
 6. Navigate your web browser (from the host machine) to `localhost:8000`
 7. You may log in as a super user with the username `super` and password `abc`

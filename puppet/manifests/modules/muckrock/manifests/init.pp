@@ -140,12 +140,14 @@ class muckrock {
 	} ->
 	exec { 'install node requirements':
 		user    => 'vagrant',
+        path    => '/home/vagrant/.nvm/versions/node/v5.6.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
 		command => '/home/vagrant/.nvm/versions/node/v5.6.0/bin/npm install',
 		cwd     => '/home/vagrant/muckrock',
 		creates => '/home/vagrant/muckrock/node_modules',
 	} ->
 	exec { 'npm build':
 		user    => 'vagrant',
+        path    => '/home/vagrant/.nvm/versions/node/v5.6.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
 		command => '/home/vagrant/.nvm/versions/node/v5.6.0/bin/npm run build',
 		cwd     => '/home/vagrant/muckrock',
 		creates => '/home/vagrant/muckrock/muckrock/assets/bundles/main.js',
