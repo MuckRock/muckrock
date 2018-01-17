@@ -230,9 +230,15 @@ class MultiRequestForm(forms.ModelForm):
     """A form for a multi-request"""
 
     requested_docs = forms.CharField(
-        label='Request',
-        widget=forms.Textarea()
-    )
+            label='Request',
+            widget=forms.Textarea()
+            )
+    agencies = forms.ModelMultipleChoiceField(
+            queryset=Agency.objects.get_approved(),
+            required=True,
+            widget=autocomplete_light.MultipleChoiceWidget(
+                'AgencyMultiRequestAutocomplete'),
+            )
 
     class Meta:
         # pylint: disable=too-few-public-methods
@@ -240,7 +246,6 @@ class MultiRequestForm(forms.ModelForm):
         fields = ['title', 'requested_docs', 'agencies']
         widgets = {
             'title': forms.TextInput(attrs={'placeholder': 'Pick a Title'}),
-            'agencies': autocomplete_light.MultipleChoiceWidget('AgencyMultiRequestAutocomplete')
         }
 
 

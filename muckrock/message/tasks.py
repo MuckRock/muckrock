@@ -145,6 +145,7 @@ def send_invoice_receipt(invoice_id):
 @task(name='muckrock.message.tasks.send_charge_receipt')
 def send_charge_receipt(charge_id):
     """Send out a receipt for a charge"""
+    logger.info('Charge Receipt for %s', charge_id)
     charge = stripe_retry_on_error(
             stripe.Charge.retrieve,
             charge_id,
@@ -165,6 +166,7 @@ def send_charge_receipt(charge_id):
         user = User.objects.get(email=user_email)
     except User.DoesNotExist:
         user = None
+    logger.info('Charge Receipt User: %s', user)
     try:
         receipt_functions = {
             'request-purchase': receipts.request_purchase_receipt,

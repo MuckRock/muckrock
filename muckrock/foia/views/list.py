@@ -148,6 +148,9 @@ class RequestList(MRSearchFilterListView):
                     (lambda f: settings.MUCKROCK_URL + f.get_absolute_url(), 'URL'),
                     (lambda f: f.jurisdiction.name, 'Jurisdiction'),
                     (lambda f: f.jurisdiction.pk, 'Jurisdiction ID'),
+                    (lambda f: f.jurisdiction.get_level_display(), 'Jurisdiction Level'),
+                    (lambda f: f.jurisdiction.parent.name if f.jurisdiction.level == 'l'
+                        else f.jurisdiction.name, 'Jurisdiction State'),
                     (lambda f: f.agency.name if f.agency else '', 'Agency'),
                     (lambda f: f.agency.pk if f.agency else '', 'Agency ID'),
                     (lambda f: f.date_followup, 'Followup Date'),
