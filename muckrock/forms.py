@@ -117,7 +117,7 @@ class StripeForm(forms.Form):
         initial=settings.STRIPE_PUB_KEY,
         required=False,
         widget=forms.HiddenInput)
-    stripe_token = forms.CharField(widget=forms.HiddenInput)
+    stripe_token = forms.CharField(widget=forms.HiddenInput(attrs={'autocomplete': 'off'}))
     stripe_email = forms.EmailField(widget=forms.HiddenInput)
     stripe_fee = forms.IntegerField(initial=0, required=False, widget=forms.HiddenInput)
     stripe_label = forms.CharField(initial='Buy', required=False, widget=forms.HiddenInput)
