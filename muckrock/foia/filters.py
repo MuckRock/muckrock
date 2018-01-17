@@ -4,19 +4,46 @@ Filters for FOIA models
 
 from django import forms
 from django.contrib.auth.models import User
+from django.db.models import Q
 
 from autocomplete_light import shortcuts as autocomplete_light
 import django_filters
+import re
 
 from muckrock.agency.models import Agency
 from muckrock.filters import RangeWidget, BLANK_STATUS, NULL_BOOLEAN_CHOICES
 from muckrock.foia.models import FOIARequest, FOIAMultiRequest
-from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag
 
 
-class FOIARequestFilterSet(django_filters.FilterSet):
+class JurisdictionFilterMixIn(django_filters.FilterSet):
+    """Mix in for including state inclusive jurisdiction filter"""
+    jurisdiction = django_filters.CharFilter(
+            widget=autocomplete_light.MultipleChoiceWidget(
+                'JurisdictionStateInclusiveAutocomplete'),
+            method='filter_jurisdiction',
+            )
+    value_format = re.compile(r'\d+-(True|False)')
+
+    def filter_jurisdiction(self, queryset, name, value):
+        """Filter jurisdction, allowing for state inclusive searches"""
+        #pylint: disable=unused-argument
+        #pylint: disable=no-self-use
+        values = self.request.GET.getlist('jurisdiction')
+        query = Q()
+        for value in values:
+            if not self.value_format.match(value):
+                continue
+            pk, include_local = value.split('-')
+            include_local = include_local == 'True'
+            query |= Q(jurisdiction__pk=pk)
+            if include_local:
+                query |= Q(jurisdiction__parent__pk=pk)
+        return queryset.filter(query)
+
+
+class FOIARequestFilterSet(JurisdictionFilterMixIn, django_filters.FilterSet):
     """Allows filtering a request by status, agency, jurisdiction, user, or tags."""
     status = django_filters.ChoiceFilter(choices=BLANK_STATUS)
     user = django_filters.ModelMultipleChoiceFilter(
@@ -26,10 +53,6 @@ class FOIARequestFilterSet(django_filters.FilterSet):
     agency = django_filters.ModelMultipleChoiceFilter(
         queryset=Agency.objects.get_approved(),
         widget=autocomplete_light.MultipleChoiceWidget('AgencyAutocomplete')
-    )
-    jurisdiction = django_filters.ModelMultipleChoiceFilter(
-        queryset=Jurisdiction.objects.filter(hidden=False),
-        widget=autocomplete_light.MultipleChoiceWidget('JurisdictionAutocomplete')
     )
     projects = django_filters.ModelMultipleChoiceFilter(
         name='projects',
@@ -75,16 +98,12 @@ class FOIARequestFilterSet(django_filters.FilterSet):
         fields = ['status', 'user', 'agency', 'jurisdiction', 'projects']
 
 
-class MyFOIARequestFilterSet(django_filters.FilterSet):
+class MyFOIARequestFilterSet(JurisdictionFilterMixIn, django_filters.FilterSet):
     """Allows filtering a request by status, agency, jurisdiction, or tags."""
     status = django_filters.ChoiceFilter(choices=BLANK_STATUS)
     agency = django_filters.ModelMultipleChoiceFilter(
         queryset=Agency.objects.get_approved(),
         widget=autocomplete_light.MultipleChoiceWidget('AgencyAutocomplete')
-    )
-    jurisdiction = django_filters.ModelMultipleChoiceFilter(
-        queryset=Jurisdiction.objects.filter(hidden=False),
-        widget=autocomplete_light.MultipleChoiceWidget('JurisdictionAutocomplete')
     )
     tags = django_filters.ModelMultipleChoiceFilter(
         name='tags__name',
@@ -133,7 +152,7 @@ class MyFOIAMultiRequestFilterSet(django_filters.FilterSet):
         fields = ['status']
 
 
-class ProcessingFOIARequestFilterSet(django_filters.FilterSet):
+class ProcessingFOIARequestFilterSet(JurisdictionFilterMixIn, django_filters.FilterSet):
     """Allows filtering a request by user, agency, jurisdiction, or tags."""
     user = django_filters.ModelMultipleChoiceFilter(
         queryset=User.objects.all(),
@@ -142,10 +161,6 @@ class ProcessingFOIARequestFilterSet(django_filters.FilterSet):
     agency = django_filters.ModelMultipleChoiceFilter(
         queryset=Agency.objects.get_approved(),
         widget=autocomplete_light.MultipleChoiceWidget('AgencyAutocomplete')
-    )
-    jurisdiction = django_filters.ModelMultipleChoiceFilter(
-        queryset=Jurisdiction.objects.filter(hidden=False),
-        widget=autocomplete_light.MultipleChoiceWidget('JurisdictionAutocomplete')
     )
     tags = django_filters.ModelMultipleChoiceFilter(
         name='tags__name',

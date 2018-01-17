@@ -1,0 +1,6 @@
+<span class="choice" data-value="{{choice.pk}}-{{choice.include_local}}">
+    <div class="choice__text">
+        <p class="nomargin">{{choice}}</p>
+        {% if choice.include_local %}<p class="small nomargin">Include Local</p>{% endif %}
+    </div>
+</span>
