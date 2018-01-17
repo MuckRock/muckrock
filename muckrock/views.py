@@ -19,7 +19,6 @@ from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAFile
 from muckrock.forms import NewsletterSignupForm, SearchForm, StripeForm
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.message.tasks import send_charge_receipt
 from muckrock.news.models import Article
 from muckrock.project.models import Project
 from muckrock.utils import stripe_retry_on_error, retry_on_error
@@ -453,8 +452,6 @@ class DonationFormView(StripeFormMixin, FormView):
             charge = self.make_charge(token, amount, email)
             if charge is None:
                 return self.form_invalid(form)
-            # Send the receipt
-            send_charge_receipt.delay(charge.id)
         elif type_ == 'monthly':
             subscription = self.make_subscription(token, amount, email)
             if subscription is None:

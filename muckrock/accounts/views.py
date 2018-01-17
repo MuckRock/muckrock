@@ -589,7 +589,6 @@ def stripe_webhook(request):
     }
     logger.info(success_msg)
     if event_type == 'charge.succeeded':
-        # don't double send receipts with invoices
         send_charge_receipt.delay(event_object_id)
     elif event_type == 'invoice.payment_succeeded':
         send_invoice_receipt.delay(event_object_id)

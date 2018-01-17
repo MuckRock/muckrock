@@ -249,8 +249,7 @@ class TestDonations(TestCase):
         self.view = DonationFormView.as_view()
         self.form = StripeForm
 
-    @patch('muckrock.message.tasks.send_charge_receipt.delay')
-    def test_donate(self, mock_send):
+    def test_donate(self):
         """Donations should have a token, email, and amount.
         An email receipt should be sent for the donation."""
         token = 'test'
@@ -266,6 +265,5 @@ class TestDonations(TestCase):
         form.is_valid()
         ok_(form.is_valid(), 'The form should validate. %s' % form.errors)
         response = http_post_response(self.url, self.view, data)
-        mock_send.assert_called_once()
         eq_(response.status_code, 302,
             'A successful donation will return a redirection.')
