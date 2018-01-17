@@ -22,6 +22,8 @@ Vagrant.configure(VERSION) do |config|
     v.customize ["modifyvm", :id, "--memory", MEMORY]
   end
 
+  # hack to supress false errors
+  config.vm.provision :shell , inline: "(grep -q 'mesg n' /root/.profile && sed -i '/mesg n/d' /root/.profile && echo 'Ignore the previous error, fixing this now...') || exit 0;"
   # remove conf file which preconfigures packages with dpkg in order to avoid warnings
   # update apt
   # install puppet so we can provision
