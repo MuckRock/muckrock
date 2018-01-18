@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Models for the Crowdsource application"""
 
+from django.contrib.postgres.fields import JSONField
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils import timezone
@@ -70,13 +71,22 @@ class Crowdsource(models.Model):
                             order=choice_order,
                             )
 
-    def get_header_values(self):
+    def get_header_values(self, metadata_keys):
         """Get header values for CSV export"""
         values = ['user', 'datetime']
         if self.data.exists():
             values.append('datum')
+            values.extend(metadata_keys)
         field_labels = list(self.fields.values_list('label', flat=True))
         return values + field_labels
+
+    def get_metadata_keys(self):
+        """Get the metadata keys for this crowdsource's data"""
+        datum = self.data.first()
+        if datum:
+            return datum.metadata.keys()
+        else:
+            return []
 
 
 class CrowdsourceData(models.Model):
@@ -84,6 +94,7 @@ class CrowdsourceData(models.Model):
 
     crowdsource = models.ForeignKey(Crowdsource, related_name='data')
     url = models.URLField(max_length=255, verbose_name='Data URL')
+    metadata = JSONField(default=dict)
 
     def __unicode__(self):
         return u'Crowdsource Data: {}'.format(self.url)
@@ -175,7 +186,7 @@ class CrowdsourceResponse(models.Model):
                 self.datetime,
                 )
 
-    def get_values(self):
+    def get_values(self, metadata_keys):
         """Get the values for this response for CSV export"""
         values = [
                 self.user.username,
@@ -183,6 +194,7 @@ class CrowdsourceResponse(models.Model):
                 ]
         if self.data:
             values.append(self.data.url)
+            values.extend(self.data.metadata.get(k, '') for k in metadata_keys)
         values += list(self.values
                 .order_by('field__order')
                 .values_list('value', flat=True)

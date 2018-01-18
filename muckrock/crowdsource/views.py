@@ -65,12 +65,14 @@ class CrowdsourceDetailView(DetailView):
     def results_csv(self):
         """Return the results in CSV format"""
         crowdsource = self.get_object()
+        metadata_keys = crowdsource.get_metadata_keys()
         psuedo_buffer = Echo()
         writer = csv.writer(psuedo_buffer)
         response = StreamingHttpResponse(
                 chain(
-                    [writer.writerow(crowdsource.get_header_values())],
-                    (writer.writerow(csr.get_values()) for csr in crowdsource.responses.all()),
+                    [writer.writerow(crowdsource.get_header_values(metadata_keys))],
+                    (writer.writerow(csr.get_values(metadata_keys))
+                        for csr in crowdsource.responses.all()),
                     ),
                 content_type='text/csv',
                 )
@@ -201,6 +203,7 @@ class CrowdsourceCreateView(CreateView):
         crowdsource.status = 'open'
         crowdsource.save()
         crowdsource.create_form(form.cleaned_data['form_json'])
+        form.process_data_csv(crowdsource)
         if formset.is_valid():
             formset.instance = crowdsource
             formset.save()

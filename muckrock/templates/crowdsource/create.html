@@ -7,32 +7,41 @@
     <header>
       <h1>Create a new crowdsource</h1>
     </header>
-    <form method="post" class="create-crowdsource">
+    <form method="post" enctype="multipart/form-data" class="create-crowdsource">
       {% csrf_token %}
-      {% include 'lib/pattern/form.html' %}
-      {{ data_formset.management_form }}
-      <div class="field">
-        <label>Form</label>
-        <div id="build-wrap"></div>
+      {% if form.non_field_errors %}
+        <div class="failure errorlist">
+          {{ form.non_field_errors }}
+        </div>
+      {% endif %}
+      <div class="hidden-fields">
+        {% for field in form.hidden_fields %}
+          {{ field }}
+        {% endfor %}
       </div>
+      <div class="visible-fields">
+        {% with form.title as field %}
+          {% include 'lib/pattern/field.html' %}
+        {% endwith %}
+        {% with form.description as field %}
+          {% include 'lib/pattern/field.html' %}
+        {% endwith %}
+        <div class="field">
+          <label>Form</label>
+          <div id="build-wrap"></div>
+        </div>
+        {% with form.data_csv as field %}
+          {% include 'lib/pattern/field.html' %}
+        {% endwith %}
+      </div>
+
+      {{ data_formset.management_form }}
       {% for form in data_formset %}
         <div class="crowdsource-data">
-          <div class="hidden-fields">
-            {% for field in form.hidden_fields %}
-              {{ field }}
-            {% endfor %}
-          </div>
-          {% for field in form.visible_fields %}
-            <div class="field">
-              <label for="{{field.id_for_label}}">{{field.label}}:</label>
-              {% if field.errors %}
-                {{field.errors}}
-              {% endif %}
-              {{field}}
-            </div>
-          {% endfor %}
+          {% include 'lib/pattern/form.html' %}
         </div>
       {% endfor %}
+
       <p><a href="#" id="add-crowdsource-data">Add another...</a></p>
       <button type="submit" class="blue button">Submit</button>
     </form>
