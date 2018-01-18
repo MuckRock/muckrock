@@ -105,6 +105,8 @@ class CrowdsourceFormView(BaseDetailView, FormView):
         """Cache the object for POST requests"""
         # pylint: disable=attribute-defined-outside-init
         self.object = self.get_object()
+        if request.POST.get('submit') == 'Skip':
+            return self.skip()
         return super(CrowdsourceFormView, self).post(request, args, kwargs)
 
     def get(self, request, *args, **kwargs):
@@ -146,22 +148,41 @@ class CrowdsourceFormView(BaseDetailView, FormView):
         """Save the form results"""
         crowdsource = self.get_object()
         data_id = form.cleaned_data.pop('data_id', None)
-        response = CrowdsourceResponse.objects.create(
-                crowdsource=crowdsource,
-                user=self.request.user,
-                data_id=data_id,
-                )
-        for label, value in form.cleaned_data.iteritems():
-            field = CrowdsourceField.objects.get(
+        if crowdsource.data.filter(pk=data_id).exists():
+            response = CrowdsourceResponse.objects.create(
                     crowdsource=crowdsource,
-                    label=label,
+                    user=self.request.user,
+                    data_id=data_id,
                     )
-            CrowdsourceValue.objects.create(
-                    response=response,
-                    field=field,
-                    value=value,
+            for label, value in form.cleaned_data.iteritems():
+                field = CrowdsourceField.objects.get(
+                        crowdsource=crowdsource,
+                        label=label,
+                        )
+                CrowdsourceValue.objects.create(
+                        response=response,
+                        field=field,
+                        value=value,
+                        )
+            messages.success(self.request, 'Thank you!')
+        return redirect(
+                'crowdsource-assignment',
+                slug=crowdsource.slug,
+                idx=crowdsource.pk,
+                )
+
+    def skip(self):
+        """The user wants to skip this data"""
+        crowdsource = self.get_object()
+        data_id = self.request.POST.get('data_id')
+        if crowdsource.data.filter(pk=data_id).exists():
+            CrowdsourceResponse.objects.create(
+                    crowdsource=crowdsource,
+                    user=self.request.user,
+                    data_id=data_id,
+                    skip=True,
                     )
-        messages.success(self.request, 'Thank you!')
+            messages.info(self.request, 'Skipped!')
         return redirect(
                 'crowdsource-assignment',
                 slug=crowdsource.slug,

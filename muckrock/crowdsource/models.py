@@ -73,7 +73,7 @@ class Crowdsource(models.Model):
 
     def get_header_values(self, metadata_keys):
         """Get header values for CSV export"""
-        values = ['user', 'datetime']
+        values = ['user', 'datetime', 'skip']
         if self.data.exists():
             values.append('datum')
             values.extend(metadata_keys)
@@ -179,6 +179,7 @@ class CrowdsourceResponse(models.Model):
             null=True,
             related_name='responses',
             )
+    skip = models.BooleanField(default=False)
 
     def __unicode__(self):
         return u'Response by {} on {}'.format(
@@ -191,6 +192,7 @@ class CrowdsourceResponse(models.Model):
         values = [
                 self.user.username,
                 self.datetime.strftime('%Y-%m-%d %H:%M:%S'),
+                self.skip,
                 ]
         if self.data:
             values.append(self.data.url)
