@@ -96,7 +96,7 @@ class JurisdictionStateInclusiveAutocomplete(autocomplete_light.AutocompleteMode
         """
         query = self.request.GET.get('q', '')
         exclude = [x.split('-')[0] for x in self.request.GET.getlist('exclude')
-                if self.value_Format.match(x)]
+                if self.value_format.match(x)]
 
         conditions = self._choices_for_request_conditions(
                 query,
