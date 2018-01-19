@@ -110,15 +110,30 @@ class CrowdsourceFormView(BaseDetailView, FormView):
         return super(CrowdsourceFormView, self).post(request, args, kwargs)
 
     def get(self, request, *args, **kwargs):
-        try:
+        """Check if there is a valid assignment"""
+        has_assignment = self._check_assignment(
+                self.get_object(),
+                self.request.user,
+                )
+        if has_assignment:
             return super(CrowdsourceFormView, self).get(request, args, kwargs)
-        except NoAssignmentError:
+        else:
             messages.error(
                     request,
                     'Sorry, there are no assignments left for you to complete '
                     'at this time for that crowdsource',
                     )
             return redirect('crowdsource-list')
+
+    def _has_assignment(self, crowdsource, user):
+        """Check if the user has a valid assignment to complete"""
+        # pylint: disable=attribute-defined-outside-init
+        self.data = crowdsource.get_data_to_show(user)
+        if crowdsource.data.exists():
+            return self.data is not None
+        else:
+            return not (crowdsource.user_limit and
+                crowdsource.responses.filter(user=self.request.user).exists())
 
     def get_form_kwargs(self):
         """Add the crowdsource object to the form"""
@@ -128,11 +143,6 @@ class CrowdsourceFormView(BaseDetailView, FormView):
 
     def get_context_data(self, **kwargs):
         """Get the data source to show, if there is one"""
-        # pylint: disable=attribute-defined-outside-init
-        crowdsource = self.get_object()
-        self.data = crowdsource.get_data_to_show(self.request.user)
-        if crowdsource.data.exists() and self.data is None:
-            raise NoAssignmentError
         kwargs['data'] = self.data
         return super(CrowdsourceFormView, self).get_context_data(**kwargs)
 
@@ -148,7 +158,9 @@ class CrowdsourceFormView(BaseDetailView, FormView):
         """Save the form results"""
         crowdsource = self.get_object()
         data_id = form.cleaned_data.pop('data_id', None)
-        if crowdsource.data.filter(pk=data_id).exists():
+        has_data = crowdsource.data.exists()
+        data_valid = crowdsource.data.filter(pk=data_id).exists()
+        if not has_data or data_valid:
             response = CrowdsourceResponse.objects.create(
                     crowdsource=crowdsource,
                     user=self.request.user,
@@ -165,11 +177,15 @@ class CrowdsourceFormView(BaseDetailView, FormView):
                         value=value,
                         )
             messages.success(self.request, 'Thank you!')
-        return redirect(
-                'crowdsource-assignment',
-                slug=crowdsource.slug,
-                idx=crowdsource.pk,
-                )
+
+        if has_data:
+            return redirect(
+                    'crowdsource-assignment',
+                    slug=crowdsource.slug,
+                    idx=crowdsource.pk,
+                    )
+        else:
+            return redirect('crowdsource-list')
 
     def skip(self):
         """The user wants to skip this data"""

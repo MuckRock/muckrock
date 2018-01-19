@@ -43,6 +43,8 @@ class CrowdsourceForm(forms.ModelForm):
         fields = (
                 'title',
                 'description',
+                'data_limit',
+                'user_limit',
                 'form_json',
                 'data_csv',
                 )

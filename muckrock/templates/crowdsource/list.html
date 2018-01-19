@@ -17,3 +17,7 @@
     <td>{{ crowdsource.datetime_created | date:"F j, Y"}}</td>
   {% endwith %}
 {% endblock list-table-row %}
+
+{% block list-actions %}
+  <a class="primary button" href="{% url "crowdsource-create" %}">Create a New Crowdsource</a>
+{% endblock %}

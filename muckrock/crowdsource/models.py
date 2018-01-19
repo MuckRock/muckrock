@@ -3,6 +3,7 @@
 
 from django.contrib.postgres.fields import JSONField
 from django.core.urlresolvers import reverse
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils import timezone
 from django.utils.html import format_html
@@ -11,6 +12,7 @@ from django.utils.safestring import mark_safe
 import json
 from pyembed.core import PyEmbed
 from pyembed.core.consumer import PyEmbedConsumerError
+from random import choice
 
 from muckrock.crowdsource import fields
 
@@ -33,6 +35,17 @@ class Crowdsource(models.Model):
                 ('close', 'Closed'),
                 ))
     description = models.CharField(max_length=255)
+    data_limit = models.PositiveSmallIntegerField(
+            default=3,
+            help_text='Number of times each data assignment will be completed '
+            '(by different users) - only used if using data for this crowdsource',
+            validators=[MinValueValidator(1)],
+            )
+    user_limit = models.BooleanField(
+            default=True,
+            help_text='Is the user limited to completing this form only once? '
+            '(else, it is unlimited) - only used if not using data for this crowdsource',
+            )
 
     def __unicode__(self):
         return self.title
@@ -49,9 +62,15 @@ class Crowdsource(models.Model):
 
     def get_data_to_show(self, user):
         """Get the crowdsource data to show"""
-        # ordering by ? might be slow, might need to find a different
-        # way to select a random record
-        return self.data.exclude(responses__user=user).order_by('?').first()
+        options = (self.data
+                .annotate(response_count=models.Count('responses'))
+                .filter(response_count__lt=self.data_limit)
+                .exclude(responses__user=user)
+                )
+        if options:
+            return choice(options)
+        else:
+            return None
 
     def create_form(self, form_json):
         """Create the crowdsource form from the form builder json"""
@@ -94,7 +113,7 @@ class CrowdsourceData(models.Model):
 
     crowdsource = models.ForeignKey(Crowdsource, related_name='data')
     url = models.URLField(max_length=255, verbose_name='Data URL')
-    metadata = JSONField(default=dict)
+    metadata = JSONField(default=dict, blank=True)
 
     def __unicode__(self):
         return u'Crowdsource Data: {}'.format(self.url)

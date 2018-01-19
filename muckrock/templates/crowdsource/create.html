@@ -20,19 +20,16 @@
         {% endfor %}
       </div>
       <div class="visible-fields">
-        {% with form.title as field %}
-          {% include 'lib/pattern/field.html' %}
-        {% endwith %}
-        {% with form.description as field %}
-          {% include 'lib/pattern/field.html' %}
-        {% endwith %}
+        {% with form.title as field %} {% include 'lib/pattern/field.html' %} {% endwith %}
+        {% with form.description as field %} {% include 'lib/pattern/field.html' %} {% endwith %}
+        {% with form.data_limit as field %} {% include 'lib/pattern/field.html' %} {% endwith %}
+        {% with form.user_limit as field %} {% include 'lib/pattern/field.html' %} {% endwith %}
         <div class="field">
           <label>Form</label>
           <div id="build-wrap"></div>
         </div>
-        {% with form.data_csv as field %}
-          {% include 'lib/pattern/field.html' %}
-        {% endwith %}
+        <p>Adding data allows your form to be filled out once per data item.  A data item can be things like a document, tweet or video.  URLs which support oEmbed work best (such as Document Cloud, Twitter, or YouTube), but any valid URL should work.  You may add URLs individually using the form below, or add them all at once by uploading them in a CSV file.  The CSV file expects a column named URL which contains the URL for the item.  Any other columns will be saved as metadata with the data and shown with the results.</p>
+        {% with form.data_csv as field %} {% include 'lib/pattern/field.html' %} {% endwith %}
       </div>
 
       {{ data_formset.management_form }}
