@@ -41,6 +41,12 @@ class Crowdsource(models.Model):
             '(by different users) - only used if using data for this crowdsource',
             validators=[MinValueValidator(1)],
             )
+    multiple_per_page = models.BooleanField(
+            default=False,
+            verbose_name='Allow multiple submissions per data item',
+            help_text='This is useful for cases when there may be multiple '
+            'records of interest per data source',
+            )
     user_limit = models.BooleanField(
             default=True,
             help_text='Is the user limited to completing this form only once? '
@@ -93,6 +99,8 @@ class Crowdsource(models.Model):
     def get_header_values(self, metadata_keys):
         """Get header values for CSV export"""
         values = ['user', 'datetime', 'skip']
+        if self.multiple_per_page:
+            values.append('number')
         if self.data.exists():
             values.append('datum')
             values.extend(metadata_keys)
@@ -199,6 +207,10 @@ class CrowdsourceResponse(models.Model):
             related_name='responses',
             )
     skip = models.BooleanField(default=False)
+    # number is only used for multiple_per_page crowdsources,
+    # keeping track of how many times a single user has submitted
+    # per data item
+    number = models.PositiveSmallIntegerField(default=1)
 
     def __unicode__(self):
         return u'Response by {} on {}'.format(
@@ -213,6 +225,8 @@ class CrowdsourceResponse(models.Model):
                 self.datetime.strftime('%Y-%m-%d %H:%M:%S'),
                 self.skip,
                 ]
+        if self.crowdsource.multiple_per_page:
+            values.append(self.number)
         if self.data:
             values.append(self.data.url)
             values.extend(self.data.metadata.get(k, '') for k in metadata_keys)

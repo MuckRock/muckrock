@@ -111,7 +111,7 @@ class CrowdsourceFormView(BaseDetailView, FormView):
 
     def get(self, request, *args, **kwargs):
         """Check if there is a valid assignment"""
-        has_assignment = self._check_assignment(
+        has_assignment = self._has_assignment(
                 self.get_object(),
                 self.request.user,
                 )
@@ -143,7 +143,13 @@ class CrowdsourceFormView(BaseDetailView, FormView):
 
     def get_context_data(self, **kwargs):
         """Get the data source to show, if there is one"""
-        kwargs['data'] = self.data
+        if 'data' not in kwargs:
+            kwargs['data'] = self.data
+        if self.object.multiple_per_page:
+            kwargs['number'] = (self.object.responses
+                    .filter(user=self.request.user, data=kwargs['data'])
+                    .count() + 1
+                    )
         return super(CrowdsourceFormView, self).get_context_data(**kwargs)
 
     def get_initial(self):
@@ -159,12 +165,17 @@ class CrowdsourceFormView(BaseDetailView, FormView):
         crowdsource = self.get_object()
         data_id = form.cleaned_data.pop('data_id', None)
         has_data = crowdsource.data.exists()
-        data_valid = crowdsource.data.filter(pk=data_id).exists()
-        if not has_data or data_valid:
+        data = crowdsource.data.filter(pk=data_id).first()
+        number = (self.object.responses
+                .filter(user=self.request.user, data=data)
+                .count() + 1
+                )
+        if not has_data or data is not None:
             response = CrowdsourceResponse.objects.create(
                     crowdsource=crowdsource,
                     user=self.request.user,
                     data_id=data_id,
+                    number=number,
                     )
             for label, value in form.cleaned_data.iteritems():
                 field = CrowdsourceField.objects.get(
@@ -177,6 +188,11 @@ class CrowdsourceFormView(BaseDetailView, FormView):
                         value=value,
                         )
             messages.success(self.request, 'Thank you!')
+
+        if self.request.POST['submit'] == 'Submit and Add Another':
+            return self.render_to_response(
+                    self.get_context_data(data=data),
+                    )
 
         if has_data:
             return redirect(

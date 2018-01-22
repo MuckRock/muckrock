@@ -59,6 +59,7 @@ class CrowdsourceForm(forms.ModelForm):
                 'user_limit',
                 'form_json',
                 'data_csv',
+                'multiple_per_page',
                 )
 
     def clean_data_csv(self):
