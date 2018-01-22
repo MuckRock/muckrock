@@ -19,7 +19,7 @@ class AuthorListFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         """All authors"""
-        authors = User.objects.exclude(authored_articles=None)
+        authors = User.objects.exclude(authored_articles=None).order_by('last_name')
         return tuple((a.pk, a.get_full_name()) for a in authors)
 
     def queryset(self, request, queryset):
@@ -59,6 +59,13 @@ class ArticleAdmin(VersionAdmin):
     date_hierarchy = 'pub_date'
     search_fields = ['title', 'body']
     save_on_top = True
+
+    def get_queryset(self, request):
+        """Prefetch authors"""
+        return (super(ArticleAdmin, self)
+                .get_queryset(request)
+                .prefetch_related('authors')
+                )
 
 admin.site.register(Article, ArticleAdmin)
 admin.site.register(Photo)
