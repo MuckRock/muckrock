@@ -2,7 +2,7 @@
 """Views for the crowdsource app"""
 
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.http import StreamingHttpResponse
 from django.shortcuts import redirect
 from django.utils.text import slugify
@@ -33,7 +33,6 @@ from muckrock.utils import Echo
 from muckrock.views import class_view_decorator
 
 
-@class_view_decorator(user_passes_test(lambda u: u.is_staff))
 class CrowdsourceDetailView(DetailView):
     """A view for the crowdsource owner to view the particular crowdsource"""
     template_name = 'crowdsource/detail.html'
@@ -90,8 +89,7 @@ class CrowdsourceDetailView(DetailView):
         return redirect(dataset)
 
 
-#@class_view_decorator(login_required)
-@class_view_decorator(user_passes_test(lambda u: u.is_staff))
+@class_view_decorator(login_required)
 class CrowdsourceFormView(BaseDetailView, FormView):
     """A view for a user to fill out the crowdsource form"""
     template_name = 'crowdsource/form.html'
@@ -101,10 +99,21 @@ class CrowdsourceFormView(BaseDetailView, FormView):
     context_object_name = 'crowdsource'
     queryset = Crowdsource.objects.filter(status='open')
 
-    def post(self, request, *args, **kwargs):
-        """Cache the object for POST requests"""
+    def dispatch(self, request, *args, **kwargs):
+        """Check permissions"""
         # pylint: disable=attribute-defined-outside-init
         self.object = self.get_object()
+        project_only = self.object.project_only and self.object.project
+        user_allowed = (request.user.is_staff or
+                request.user == self.object.user or
+                self.object.project.has_contributor(request.user))
+        if project_only and not user_allowed:
+            messages.error(request, 'That crowdsource is private')
+            return redirect('crowdsource-list')
+        return super(CrowdsourceFormView, self).dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """Cache the object for POST requests"""
         if request.POST.get('submit') == 'Skip':
             return self.skip()
         return super(CrowdsourceFormView, self).post(request, args, kwargs)
@@ -222,15 +231,13 @@ class CrowdsourceFormView(BaseDetailView, FormView):
                 )
 
 
-@class_view_decorator(user_passes_test(lambda u: u.is_staff))
 class CrowdsourceListView(ListView):
     """List of crowdfunds"""
     queryset = Crowdsource.objects.filter(status='open')
     template_name = 'crowdsource/list.html'
 
 
-#@class_view_decorator(login_required)
-@class_view_decorator(user_passes_test(lambda u: u.is_staff))
+@class_view_decorator(login_required)
 class CrowdsourceCreateView(CreateView):
     """Create a crowdsource"""
     model = Crowdsource

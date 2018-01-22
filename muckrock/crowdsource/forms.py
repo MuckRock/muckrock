@@ -2,6 +2,7 @@
 
 from django import forms
 
+from autocomplete_light import shortcuts as autocomplete_light
 import re
 import unicodecsv as csv
 
@@ -36,6 +37,10 @@ class CrowdsourceForm(forms.ModelForm):
             r'(?P<doc_id>[0-9A-Za-z-]+)[.]html'
             )
 
+    project = autocomplete_light.ModelChoiceField(
+            'ProjectManagerAutocomplete',
+            required=False,
+            )
     form_json = forms.CharField(
             widget=forms.HiddenInput(),
             )
@@ -54,12 +59,14 @@ class CrowdsourceForm(forms.ModelForm):
         model = Crowdsource
         fields = (
                 'title',
+                'project',
                 'description',
                 'data_limit',
                 'user_limit',
                 'form_json',
                 'data_csv',
                 'multiple_per_page',
+                'project_only',
                 )
 
     def clean_data_csv(self):

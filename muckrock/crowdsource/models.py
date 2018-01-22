@@ -23,6 +23,12 @@ class Crowdsource(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)
     user = models.ForeignKey('auth.User', related_name='crowdsources')
+    project = models.ForeignKey(
+            'project.Project',
+            related_name='crowdsources',
+            blank=True,
+            null=True,
+            )
     datetime_created = models.DateTimeField(default=timezone.now)
     datetime_opened = models.DateTimeField(blank=True, null=True)
     datetime_closed = models.DateTimeField(blank=True, null=True)
@@ -35,6 +41,11 @@ class Crowdsource(models.Model):
                 ('close', 'Closed'),
                 ))
     description = models.CharField(max_length=255)
+    project_only = models.BooleanField(
+            default=False,
+            help_text='Only members of the project will be able to complete '
+            'assignments for this crowdsource',
+            )
     data_limit = models.PositiveSmallIntegerField(
             default=3,
             help_text='Number of times each data assignment will be completed '

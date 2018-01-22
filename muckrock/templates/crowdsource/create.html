@@ -22,6 +22,8 @@
       <div class="visible-fields">
         {% with form.title as field %} {% include 'lib/pattern/field.html' %} {% endwith %}
         {% with form.description as field %} {% include 'lib/pattern/field.html' %} {% endwith %}
+        {% with form.project as field %} {% include 'lib/pattern/field.html' %} {% endwith %}
+        {% with form.project_only as field %} {% include 'lib/pattern/field.html' %} {% endwith %}
         {% with form.data_limit as field %} {% include 'lib/pattern/field.html' %} {% endwith %}
         {% with form.multiple_per_page as field %} {% include 'lib/pattern/field.html' %} {% endwith %}
         {% with form.user_limit as field %} {% include 'lib/pattern/field.html' %} {% endwith %}
