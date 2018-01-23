@@ -1,6 +1,7 @@
 """Forms for the crowdsource application"""
 
 from django import forms
+from django.core.validators import URLValidator
 
 from autocomplete_light import shortcuts as autocomplete_light
 import re
@@ -83,6 +84,7 @@ class CrowdsourceForm(forms.ModelForm):
 
     def process_data_csv(self, crowdsource):
         """Create the crowdsource data from the uploaded CSV"""
+        url_validator = URLValidator()
         data_csv = self.cleaned_data['data_csv']
         doccloud_each_page = self.cleaned_data['doccloud_each_page']
         if data_csv:
@@ -99,10 +101,16 @@ class CrowdsourceForm(forms.ModelForm):
                             data,
                             )
                 elif url:
-                    crowdsource.data.create(
-                            url=url,
-                            metadata=data,
-                            )
+                    # skip invalid URLs
+                    try:
+                        url_validator(url)
+                    except forms.ValidationError:
+                        pass
+                    else:
+                        crowdsource.data.create(
+                                url=url,
+                                metadata=data,
+                                )
 
 
 CrowdsourceDataFormset = forms.inlineformset_factory(
