@@ -6,7 +6,7 @@
 #
 -e git+git://github.com/MuckRock/django-autocomplete-light.git@a54a789b5a44adba678d980aaa64413472a11dbb#egg=django_autocomplete_light
 -e git+git://github.com/BradWhittington/django-mailgun.git@4f2edb9466f6245c3bbf501aab2681f0b3c71e0c#egg=django_mailgun
--e git+git://github.com/mitchelljkotler/django-news-sitemaps.git@5946718cd1d18abbfa7f0393c140fcc513dedac1#egg=django_news_sitemaps
+-e git+git://github.com/mitchelljkotler/django-news-sitemaps.git@be138fc8481ae999b052efe215d52ef5733506f4#egg=django_news_sitemaps
 -e git+git://github.com/jazzband/django-queued-storage@d30d70d6db4eb742ccde9d4a7da6ca7624e53219#egg=django_queued_storage
 amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu
