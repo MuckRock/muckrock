@@ -43,6 +43,7 @@ class CrowdsourceForm(forms.ModelForm):
             )
     form_json = forms.CharField(
             widget=forms.HiddenInput(),
+            initial='[]',
             )
     data_csv = forms.FileField(
             label='Data CSV File',

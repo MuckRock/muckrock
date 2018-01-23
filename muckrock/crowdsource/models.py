@@ -91,6 +91,8 @@ class Crowdsource(models.Model):
 
     def create_form(self, form_json):
         """Create the crowdsource form from the form builder json"""
+        # delete any old fields and re-create from the new JSON
+        self.fields.all().delete()
         form_data = json.loads(form_json)
         for order, field_data in enumerate(form_data):
             field = self.fields.create(
@@ -106,6 +108,10 @@ class Crowdsource(models.Model):
                             value=value['value'],
                             order=choice_order,
                             )
+
+    def get_form_json(self):
+        """Get the form JSON for editing the form"""
+        return json.dumps([f.get_json() for f in self.fields.all()])
 
     def get_header_values(self, metadata_keys):
         """Get header values for CSV export"""
@@ -173,6 +179,18 @@ class CrowdsourceField(models.Model):
         if self.help_text:
             kwargs['help_text'] = self.help_text
         return self.field.field(**kwargs)
+
+    def get_json(self):
+        """Get the JSON represenation for this field"""
+        data = {
+                'type': self.type,
+                'label': self.label,
+                'description': self.help_text,
+                }
+        if self.field.accepts_choices:
+            data['values'] = [{'label': c.choice, 'value': c.value}
+                    for c in self.choices.all()]
+        return data
 
     @property
     def field(self):

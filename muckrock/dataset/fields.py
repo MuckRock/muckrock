@@ -54,7 +54,7 @@ class MultiTextField(Field):
     @classmethod
     def validate(cls, value):
         """Is this value valid for this type?"""
-        return '\n' in value
+        return '\n' in unicode(value)
 
 
 class NumberField(Field):

@@ -2,8 +2,8 @@
 """Views for the crowdsource app"""
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.http import StreamingHttpResponse
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.http import StreamingHttpResponse, Http404
 from django.shortcuts import redirect
 from django.utils.text import slugify
 from django.views.generic import (
@@ -11,13 +11,13 @@ from django.views.generic import (
         DetailView,
         FormView,
         ListView,
+        UpdateView,
         )
 from django.views.generic.detail import BaseDetailView
 
 from itertools import chain
 import unicodecsv as csv
 
-from muckrock.crowdsource.exceptions import NoAssignmentError
 from muckrock.crowdsource.forms import (
         CrowdsourceAssignmentForm,
         CrowdsourceForm,
@@ -97,16 +97,19 @@ class CrowdsourceFormView(BaseDetailView, FormView):
     pk_url_kwarg = 'idx'
     query_pk_and_slug = True
     context_object_name = 'crowdsource'
-    queryset = Crowdsource.objects.filter(status='open')
+    queryset = Crowdsource.objects.filter(status__in=['draft', 'open'])
 
     def dispatch(self, request, *args, **kwargs):
         """Check permissions"""
         # pylint: disable=attribute-defined-outside-init
         self.object = self.get_object()
         project_only = self.object.project_only and self.object.project
-        user_allowed = (request.user.is_staff or
-                request.user == self.object.user or
+        owner_or_staff = (request.user.is_staff or
+                request.user == self.object.user)
+        user_allowed = (owner_or_staff or
                 self.object.project.has_contributor(request.user))
+        if self.object.status == 'draft' and not owner_or_staff:
+            raise Http404
         if project_only and not user_allowed:
             messages.error(request, 'That crowdsource is private')
             return redirect('crowdsource-list')
@@ -114,6 +117,10 @@ class CrowdsourceFormView(BaseDetailView, FormView):
 
     def post(self, request, *args, **kwargs):
         """Cache the object for POST requests"""
+        crowdsource = self.get_object()
+        if crowdsource.status == 'draft':
+            messages.error(request, 'No submitting to draft crowdsources')
+            return redirect(crowdsource)
         if request.POST.get('submit') == 'Skip':
             return self.skip()
         return super(CrowdsourceFormView, self).post(request, args, kwargs)
@@ -237,7 +244,8 @@ class CrowdsourceListView(ListView):
     template_name = 'crowdsource/list.html'
 
 
-@class_view_decorator(login_required)
+@class_view_decorator(user_passes_test(
+    lambda u: u.is_staff or (u.is_authenticated and u.profile.experimental)))
 class CrowdsourceCreateView(CreateView):
     """Create a crowdsource"""
     model = Crowdsource
@@ -255,17 +263,82 @@ class CrowdsourceCreateView(CreateView):
 
     def form_valid(self, form):
         """Save the crowdsource"""
+        if self.request.POST.get('submit') == 'start':
+            status = 'open'
+            msg = 'Crowdsource started'
+        else:
+            status = 'draft'
+            msg = 'Crowdsource created'
         context = self.get_context_data()
         formset = context['data_formset']
         crowdsource = form.save(commit=False)
         crowdsource.slug = slugify(crowdsource.title)
         crowdsource.user = self.request.user
-        crowdsource.status = 'open'
+        crowdsource.status = status
         crowdsource.save()
         crowdsource.create_form(form.cleaned_data['form_json'])
         form.process_data_csv(crowdsource)
         if formset.is_valid():
             formset.instance = crowdsource
             formset.save()
-        messages.success(self.request, 'Crowdsource started')
+        messages.success(self.request, msg)
+        return redirect(crowdsource)
+
+
+@class_view_decorator(login_required)
+class CrowdsourceUpdateView(UpdateView):
+    """Update a crowdsource"""
+    model = Crowdsource
+    form_class = CrowdsourceForm
+    template_name = 'crowdsource/create.html'
+    pk_url_kwarg = 'idx'
+    query_pk_and_slug = True
+
+    def dispatch(self, request, *args, **kwargs):
+        """Check permissions"""
+        # pylint: disable=attribute-defined-outside-init
+        crowdsource = self.get_object()
+        editable = crowdsource.status == 'draft'
+        user_allowed = request.user == crowdsource.user or request.user.is_staff
+        if not editable or not user_allowed:
+            messages.error(request, 'You may not edit this crowdsource')
+            return redirect(crowdsource)
+        return super(CrowdsourceUpdateView, self).dispatch(request, *args, **kwargs)
+
+    def get_initial(self):
+        """Set the form JSON in the initial form data"""
+        return {'form_json': self.get_object().get_form_json()}
+
+    def get_context_data(self, **kwargs):
+        """Add the data formset to the context"""
+        data = super(CrowdsourceUpdateView, self).get_context_data(**kwargs)
+        CrowdsourceDataFormset.can_delete = True
+        if self.request.POST:
+            data['data_formset'] = CrowdsourceDataFormset(
+                    self.request.POST,
+                    instance=self.get_object(),
+                    )
+        else:
+            data['data_formset'] = CrowdsourceDataFormset(instance=self.get_object())
+        return data
+
+    def form_valid(self, form):
+        """Save the crowdsource"""
+        if self.request.POST.get('submit') == 'start':
+            status = 'open'
+            msg = 'Crowdsource started'
+        else:
+            status = 'draft'
+            msg = 'Crowdsource updated'
+        context = self.get_context_data()
+        formset = context['data_formset']
+        crowdsource = form.save(commit=False)
+        crowdsource.slug = slugify(crowdsource.title)
+        crowdsource.status = status
+        crowdsource.save()
+        crowdsource.create_form(form.cleaned_data['form_json'])
+        form.process_data_csv(crowdsource)
+        if formset.is_valid():
+            formset.save()
+        messages.success(self.request, msg)
         return redirect(crowdsource)
