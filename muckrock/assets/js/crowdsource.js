@@ -36,7 +36,8 @@ $(document).ready(function(){
         'toggle',
         'value'
       ],
-      disabledActionButtons: ['data', 'save']
+      disabledActionButtons: ['data', 'save', 'clear'],
+      defaultFields: JSON.parse($("#id_crowdsource-form_json").val())
   });
 
   $("form.create-crowdsource").submit(function() {

@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """Models for the Crowdsource application"""
 
+from django.contrib.postgres.fields import JSONField
 from django.core.urlresolvers import reverse
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils import timezone
 from django.utils.html import format_html
@@ -10,6 +12,7 @@ from django.utils.safestring import mark_safe
 import json
 from pyembed.core import PyEmbed
 from pyembed.core.consumer import PyEmbedConsumerError
+from random import choice
 
 from muckrock.crowdsource import fields
 
@@ -20,6 +23,12 @@ class Crowdsource(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)
     user = models.ForeignKey('auth.User', related_name='crowdsources')
+    project = models.ForeignKey(
+            'project.Project',
+            related_name='crowdsources',
+            blank=True,
+            null=True,
+            )
     datetime_created = models.DateTimeField(default=timezone.now)
     datetime_opened = models.DateTimeField(blank=True, null=True)
     datetime_closed = models.DateTimeField(blank=True, null=True)
@@ -32,6 +41,28 @@ class Crowdsource(models.Model):
                 ('close', 'Closed'),
                 ))
     description = models.CharField(max_length=255)
+    project_only = models.BooleanField(
+            default=False,
+            help_text='Only members of the project will be able to complete '
+            'assignments for this crowdsource',
+            )
+    data_limit = models.PositiveSmallIntegerField(
+            default=3,
+            help_text='Number of times each data assignment will be completed '
+            '(by different users) - only used if using data for this crowdsource',
+            validators=[MinValueValidator(1)],
+            )
+    multiple_per_page = models.BooleanField(
+            default=False,
+            verbose_name='Allow multiple submissions per data item',
+            help_text='This is useful for cases when there may be multiple '
+            'records of interest per data source',
+            )
+    user_limit = models.BooleanField(
+            default=True,
+            help_text='Is the user limited to completing this form only once? '
+            '(else, it is unlimited) - only used if not using data for this crowdsource',
+            )
 
     def __unicode__(self):
         return self.title
@@ -48,12 +79,20 @@ class Crowdsource(models.Model):
 
     def get_data_to_show(self, user):
         """Get the crowdsource data to show"""
-        # ordering by ? might be slow, might need to find a different
-        # way to select a random record
-        return self.data.exclude(responses__user=user).order_by('?').first()
+        options = (self.data
+                .annotate(response_count=models.Count('responses'))
+                .filter(response_count__lt=self.data_limit)
+                .exclude(responses__user=user)
+                )
+        if options:
+            return choice(options)
+        else:
+            return None
 
     def create_form(self, form_json):
         """Create the crowdsource form from the form builder json"""
+        # delete any old fields and re-create from the new JSON
+        self.fields.all().delete()
         form_data = json.loads(form_json)
         for order, field_data in enumerate(form_data):
             field = self.fields.create(
@@ -70,13 +109,28 @@ class Crowdsource(models.Model):
                             order=choice_order,
                             )
 
-    def get_header_values(self):
+    def get_form_json(self):
+        """Get the form JSON for editing the form"""
+        return json.dumps([f.get_json() for f in self.fields.all()])
+
+    def get_header_values(self, metadata_keys):
         """Get header values for CSV export"""
-        values = ['user', 'datetime']
+        values = ['user', 'datetime', 'skip']
+        if self.multiple_per_page:
+            values.append('number')
         if self.data.exists():
             values.append('datum')
+            values.extend(metadata_keys)
         field_labels = list(self.fields.values_list('label', flat=True))
         return values + field_labels
+
+    def get_metadata_keys(self):
+        """Get the metadata keys for this crowdsource's data"""
+        datum = self.data.first()
+        if datum:
+            return datum.metadata.keys()
+        else:
+            return []
 
 
 class CrowdsourceData(models.Model):
@@ -84,6 +138,7 @@ class CrowdsourceData(models.Model):
 
     crowdsource = models.ForeignKey(Crowdsource, related_name='data')
     url = models.URLField(max_length=255, verbose_name='Data URL')
+    metadata = JSONField(default=dict, blank=True)
 
     def __unicode__(self):
         return u'Crowdsource Data: {}'.format(self.url)
@@ -124,6 +179,18 @@ class CrowdsourceField(models.Model):
         if self.help_text:
             kwargs['help_text'] = self.help_text
         return self.field.field(**kwargs)
+
+    def get_json(self):
+        """Get the JSON represenation for this field"""
+        data = {
+                'type': self.type,
+                'label': self.label,
+                'description': self.help_text,
+                }
+        if self.field.accepts_choices:
+            data['values'] = [{'label': c.choice, 'value': c.value}
+                    for c in self.choices.all()]
+        return data
 
     @property
     def field(self):
@@ -168,6 +235,11 @@ class CrowdsourceResponse(models.Model):
             null=True,
             related_name='responses',
             )
+    skip = models.BooleanField(default=False)
+    # number is only used for multiple_per_page crowdsources,
+    # keeping track of how many times a single user has submitted
+    # per data item
+    number = models.PositiveSmallIntegerField(default=1)
 
     def __unicode__(self):
         return u'Response by {} on {}'.format(
@@ -175,14 +247,18 @@ class CrowdsourceResponse(models.Model):
                 self.datetime,
                 )
 
-    def get_values(self):
+    def get_values(self, metadata_keys):
         """Get the values for this response for CSV export"""
         values = [
                 self.user.username,
                 self.datetime.strftime('%Y-%m-%d %H:%M:%S'),
+                self.skip,
                 ]
+        if self.crowdsource.multiple_per_page:
+            values.append(self.number)
         if self.data:
             values.append(self.data.url)
+            values.extend(self.data.metadata.get(k, '') for k in metadata_keys)
         values += list(self.values
                 .order_by('field__order')
                 .values_list('value', flat=True)

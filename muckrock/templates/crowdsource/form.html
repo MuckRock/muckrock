@@ -1,21 +1,36 @@
 {% extends 'base.html' %}
 {% load static from staticfiles %}
+{% load humanize %}
+
 {% block title %}MuckRock &bull; {{crowdsource.title}}{% endblock %}
 
 {% block content %}
   <div class="form">
-      <h1>{{crowdsource.title}}</h1>
-      <p>{{crowdsource.question}}</p>
-      <form {% if form.is_multipart %}enctype="multipart/form-data"{% endif %} method="post">
-          {% csrf_token %}
-          {% include 'lib/pattern/form.html' %}
-          <div class="buttons">
-              <input type="submit" name="submit" value="Submit" class="blue button" />
-          </div>
-      </form>
+    <h1>{{crowdsource.title}}</h1>
+    <p>{{crowdsource.question}}</p>
+    {% if crowdsource.multiple_per_page %}
+      <p>This is your {{ number|ordinal }} time responding for this data.</p>
+    {% endif %}
+    <form {% if form.is_multipart %}enctype="multipart/form-data"{% endif %} method="post">
+      {% csrf_token %}
+      {% include 'lib/pattern/form.html' %}
+      <div class="buttons">
+        <input type="submit" name="submit" value="Submit" class="blue button" {% if crowdsource.status != "open" %}disabled{% endif %}>
+        {% if crowdsource.multiple_per_page %}
+          <input type="submit" name="submit" value="Submit and Add Another" class="blue button" {% if crowdsource.status != "open" %}disabled{% endif %}>
+        {% endif %}
+      </div>
+    </form>
+    <form method="post">
+      {% csrf_token %}
+      {{ form.data_id }}
       {% if data %}
-        {{ data.embed }}
+        <input type="submit" name="submit" value="Skip" class="button" {% if crowdsource.status != "open" %}disabled{% endif %}>
       {% endif %}
+    </form>
+    {% if data %}
+      {{ data.embed }}
+    {% endif %}
   </div>
 {% endblock %}
 

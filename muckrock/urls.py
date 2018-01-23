@@ -109,7 +109,7 @@ urlpatterns = [
         include(muckrock.jurisdiction.urls.old_urlpatterns)),
     url(r'^questions/', include('muckrock.qanda.urls')),
     url(r'^crowdfund/', include('muckrock.crowdfund.urls')),
-    url(r'^crowdsource/', include('muckrock.crowdsource.urls')),
+    url(r'^assignment/', include('muckrock.crowdsource.urls')),
     url(r'^task/', include('muckrock.task.urls')),
     url(r'^tags/', include('muckrock.tags.urls')),
     url(r'^organization/', include('muckrock.organization.urls')),

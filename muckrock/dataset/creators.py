@@ -56,6 +56,7 @@ class CrowdsourceCreator(object):
 
     def __init__(self, crowdsource):
         self.crowdsource = crowdsource
+        self.metadata_keys = crowdsource.get_metadata_keys()
 
     def get_name(self):
         """Get the name of the dataset"""
@@ -63,9 +64,9 @@ class CrowdsourceCreator(object):
 
     def get_headers(self):
         """Get the header values of the dataset"""
-        return self.crowdsource.get_header_values()
+        return self.crowdsource.get_header_values(self.metadata_keys)
 
     def get_rows(self):
         """Return an iterator of the datasets row values"""
         for response in self.crowdsource.responses.all():
-            yield response.get_values()
+            yield response.get_values(self.metadata_keys)

@@ -10,6 +10,12 @@
     <a href="{% url "crowdsource-assignment" slug=crowdsource.slug idx=crowdsource.pk %}" class="button primary">Assignment</a>
     <a href="?csv=1" class="button primary">Results CSV</a>
     <a href="?dataset=1" class="button primary">Create Data Set</a>
+    {% if crowdsource.status == "draft" %}
+      <a href="{% url "crowdsource-draft" idx=crowdsource.pk slug=crowdsource.slug %}" class="button primary">Edit</a>
+    {% endif %}
+    {% if crowdsource.status == "open" %}
+      <a href="#" class="button primary">Close</a>
+    {% endif %}
   </div>
 {% endblock actions %}
 
@@ -23,12 +29,27 @@
     <dd>{{ crowdsource.get_status_display }}</dd>
     <dt>Description</dt>
     <dd>{{ crowdsource.description }}</dd>
-    <dt>Data</dt>
-    <dd><ul>
-      {% for data in crowdsource.data.all %}
-        <li><a href="{{ data.url }}">{{ data.url }}</a></li>
-      {% endfor %}
-    </ul></dd>
+    {% if crowdsource.project %}
+      <dt>Project</dt>
+      <dd><a href="{% url "project-detail" slug=crowdsource.project.slug pk=crowdsource.project.pk %}">{{crowdsource.project.title}}</a>
+      <dt>Project Only</dt>
+      <dd>{{crowdsource.project_only}}</dd>
+    {% endif %}
+    {% if crowdsource.data.all %}
+      <dt>Data</dt>
+      <dd><ul>
+        {% for data in crowdsource.data.all %}
+          <li><a href="{{ data.url }}">{{ data.url }}</a></li>
+        {% endfor %}
+      </ul></dd>
+      <dt>Data Limit</dt>
+      <dd>{{crowdsource.data_limit}}</dd>
+      <dt>Multiple Per Page</dt>
+      <dd>{{crowdsource.multiple_per_page}}</dd>
+    {% else %}
+      <dt>User Limit</dt>
+      <dd>{{crowdsource.user_limit}}</dd>
+    {% endif %}
     <dt>Responses</dt>
     <dd>{{ crowdsource.responses.count }}</dd>
 
