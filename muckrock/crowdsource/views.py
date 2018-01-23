@@ -163,9 +163,9 @@ class CrowdsourceFormView(BaseDetailView, FormView):
 
     def get_context_data(self, **kwargs):
         """Get the data source to show, if there is one"""
-        if 'data' not in kwargs:
+        if 'data' not in kwargs and hasattr(self, 'data'):
             kwargs['data'] = self.data
-        if self.object.multiple_per_page:
+        if self.object.multiple_per_page and 'data' in kwargs:
             kwargs['number'] = (self.object.responses
                     .filter(user=self.request.user, data=kwargs['data'])
                     .count() + 1
@@ -222,6 +222,14 @@ class CrowdsourceFormView(BaseDetailView, FormView):
                     )
         else:
             return redirect('crowdsource-list')
+
+    def form_invalid(self, form):
+        """Make sure we include the data in the context"""
+        crowdsource = self.get_object()
+        data_id = form.cleaned_data.pop('data_id', None)
+        data = crowdsource.data.filter(pk=data_id).first()
+        return self.render_to_response(
+                self.get_context_data(form=form, data=data))
 
     def skip(self):
         """The user wants to skip this data"""

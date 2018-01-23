@@ -8,22 +8,17 @@ $(document).ready(function(){
         'autocomplete',
         'button',
         'checkbox-group',
-        'date',
         'file',
         'header',
         'hidden',
-        'number',
         'paragraph',
         'radio-group',
-        'textarea'
       ],
       disabledAttrs: [
         'access',
         'className',
         'inline',
-        'max',
         'maxlength',
-        'min',
         'multiple',
         'name',
         'other',
@@ -37,6 +32,12 @@ $(document).ready(function(){
         'value'
       ],
       disabledActionButtons: ['data', 'save', 'clear'],
+      fields: [{label: 'Check Box', attrs: {type: 'checkbox2'}, icon: ''}],
+      templates: {checkbox2: function(data) {
+        return {
+          field: '<input type="checkbox" id="' + data.name + '">'
+        };
+      }},
       defaultFields: JSON.parse($("#id_crowdsource-form_json").val())
   });
 

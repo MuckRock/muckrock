@@ -92,12 +92,14 @@ class Crowdsource(models.Model):
         form_data = json.loads(form_json)
         seen_labels = set()
         for order, field_data in enumerate(form_data):
-            label = field_data['label'].strip('<br>')
+            label = field_data['label'].replace('<br>', '')
             label = self._uniqify_label_name(seen_labels, label)
             field = self.fields.create(
                     label=label,
                     type=field_data['type'],
                     help_text=field_data.get('description', ''),
+                    min=field_data.get('min'),
+                    max=field_data.get('max'),
                     order=order,
                     )
             if 'values' in field_data and field.field.accepts_choices:
@@ -190,6 +192,8 @@ class CrowdsourceField(models.Model):
             choices=fields.FIELD_CHOICES,
             )
     help_text = models.CharField(max_length=255, blank=True)
+    min = models.PositiveSmallIntegerField(blank=True, null=True)
+    max = models.PositiveSmallIntegerField(blank=True, null=True)
     order = models.PositiveSmallIntegerField()
 
     def __unicode__(self):
@@ -197,12 +201,7 @@ class CrowdsourceField(models.Model):
 
     def get_form_field(self):
         """Return a form field appropriate for rendering this field"""
-        kwargs = {'label': self.label}
-        if self.field.accepts_choices:
-            kwargs['choices'] = [(c.value, c.choice) for c in self.choices.all()]
-        if self.help_text:
-            kwargs['help_text'] = self.help_text
-        return self.field.field(**kwargs)
+        return self.field().get_form_field(self)
 
     def get_json(self):
         """Get the JSON represenation for this field"""
@@ -214,6 +213,10 @@ class CrowdsourceField(models.Model):
         if self.field.accepts_choices:
             data['values'] = [{'label': c.choice, 'value': c.value}
                     for c in self.choices.all()]
+        if self.min is not None:
+            data['min'] = self.min
+        if self.max is not None:
+            data['max'] = self.max
         return data
 
     @property
@@ -295,7 +298,7 @@ class CrowdsourceValue(models.Model):
 
     response = models.ForeignKey(CrowdsourceResponse, related_name='values')
     field = models.ForeignKey(CrowdsourceField, related_name='values')
-    value = models.CharField(max_length=255)
+    value = models.CharField(max_length=2000)
 
     def __unicode__(self):
         return self.value

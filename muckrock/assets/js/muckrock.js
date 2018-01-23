@@ -88,6 +88,10 @@ $('document').ready(function(){
         minDate: 0,
         maxDate: '+1y'
     });
+    $('.datepicker-simple').datepicker({
+        changeMonth: true,
+        changeYear: true,
+    });
 
     // Loupe
     $('.news__article__main img').loupe({
