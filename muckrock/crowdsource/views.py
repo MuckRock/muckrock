@@ -109,8 +109,9 @@ class CrowdsourceFormView(BaseDetailView, FormView):
         project_only = self.object.project_only and self.object.project
         owner_or_staff = (request.user.is_staff or
                 request.user == self.object.user)
-        user_allowed = (owner_or_staff or
+        is_contributor = (self.object.project and
                 self.object.project.has_contributor(request.user))
+        user_allowed = owner_or_staff or is_contributor
         if self.object.status == 'draft' and not owner_or_staff:
             raise Http404
         if project_only and not user_allowed:
@@ -137,7 +138,7 @@ class CrowdsourceFormView(BaseDetailView, FormView):
         if has_assignment:
             return super(CrowdsourceFormView, self).get(request, args, kwargs)
         else:
-            messages.error(
+            messages.warning(
                     request,
                     'Sorry, there are no assignments left for you to complete '
                     'at this time for that crowdsource',

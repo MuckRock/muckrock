@@ -79,11 +79,7 @@ class Crowdsource(models.Model):
 
     def get_data_to_show(self, user):
         """Get the crowdsource data to show"""
-        options = (self.data
-                .annotate(response_count=models.Count('responses'))
-                .filter(response_count__lt=self.data_limit)
-                .exclude(responses__user=user)
-                )
+        options = self.data.get_choices(self.data_limit, user)
         if options:
             return choice(options)
         else:
@@ -147,12 +143,26 @@ class Crowdsource(models.Model):
             return []
 
 
+class CrowdsourceDataQuerySet(models.QuerySet):
+    """Object manager for crowdsource data"""
+
+    def get_choices(self, data_limit, user):
+        """Get choices for data to show"""
+        return (self
+                .annotate(count=models.Count('responses__user', distinct=True))
+                .filter(count__lt=data_limit)
+                .exclude(responses__user=user)
+                )
+
+
 class CrowdsourceData(models.Model):
     """A source of data to show with the crowdsource questions"""
 
     crowdsource = models.ForeignKey(Crowdsource, related_name='data')
     url = models.URLField(max_length=255, verbose_name='Data URL')
     metadata = JSONField(default=dict, blank=True)
+
+    objects = CrowdsourceDataQuerySet.as_manager()
 
     def __unicode__(self):
         return u'Crowdsource Data: {}'.format(self.url)
