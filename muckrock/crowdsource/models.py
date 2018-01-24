@@ -94,9 +94,12 @@ class Crowdsource(models.Model):
         # delete any old fields and re-create from the new JSON
         self.fields.all().delete()
         form_data = json.loads(form_json)
+        seen_labels = set()
         for order, field_data in enumerate(form_data):
+            label = field_data['label'].strip('<br>')
+            label = self._uniqify_label_name(seen_labels, label)
             field = self.fields.create(
-                    label=field_data['label'].strip('<br>'),
+                    label=label,
                     type=field_data['type'],
                     help_text=field_data.get('description', ''),
                     order=order,
@@ -108,6 +111,17 @@ class Crowdsource(models.Model):
                             value=value['value'],
                             order=choice_order,
                             )
+
+    def _uniqify_label_name(self, seen_labels, label):
+        """Ensure the label names are all unique"""
+        # pylint: disable=no-self-use
+        new_label = label
+        i = 0
+        while new_label in seen_labels:
+            i += 1
+            new_label = '{}-{}'.format(label, i)
+        seen_labels.add(new_label)
+        return new_label
 
     def get_form_json(self):
         """Get the form JSON for editing the form"""

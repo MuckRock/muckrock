@@ -4,10 +4,12 @@ from django import forms
 from django.core.validators import URLValidator
 
 from autocomplete_light import shortcuts as autocomplete_light
+import json
 import re
 import unicodecsv as csv
 
 from muckrock.crowdsource.models import Crowdsource, CrowdsourceData
+from muckrock.crowdsource.fields import FIELD_DICT
 from muckrock.crowdsource.tasks import datum_per_page
 
 
@@ -111,6 +113,47 @@ class CrowdsourceForm(forms.ModelForm):
                                 url=url,
                                 metadata=data,
                                 )
+
+    def clean_form_json(self):
+        """Ensure the form JSON is in the correct format"""
+        form_json = self.cleaned_data['form_json']
+        try:
+            form_data = json.loads(form_json)
+        except ValueError:
+            raise forms.ValidationError('Invalid form data: Invalid JSON')
+        if not isinstance(form_data, list):
+            raise forms.ValidationError('Invalid form data: Not a list')
+        if form_data == []:
+            raise forms.ValidationError(
+                    'Having at least one field on the form is required')
+        for data in form_data:
+            label = data.get('label')
+            if not label:
+                raise forms.ValidationError('Invalid form data: Missing label')
+            type_ = data.get('type')
+            if not type_:
+                raise forms.ValidationError(
+                        'Invalid form data: Missing type for {}'.format(label))
+            if type_ not in FIELD_DICT:
+                raise forms.ValidationError(
+                        'Invalid form data: Bad type {}'.format(type_))
+            field = FIELD_DICT[type_]
+            if field.accepts_choices and 'values' not in data:
+                raise forms.ValidationError(
+                        'Invalid form data: {} requires choices'.format(type_))
+            if field.accepts_choices and 'values' in data:
+                for value in data['values']:
+                    choice_label = value.get('label')
+                    if not choice_label:
+                        raise forms.ValidationError(
+                                'Invalid form data: Missing label for '
+                                'choice of {}'.format(label))
+                    choice_value = value.get('value')
+                    if not choice_value:
+                        raise forms.ValidationError(
+                                'Invalid form data: Missing value for '
+                                'choice {} of {}'.format(choice_label, label))
+        return form_json
 
 
 CrowdsourceDataFormset = forms.inlineformset_factory(

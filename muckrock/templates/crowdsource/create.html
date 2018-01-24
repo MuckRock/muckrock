@@ -27,8 +27,9 @@
         {% with form.data_limit as field %} {% include 'lib/pattern/field.html' %} {% endwith %}
         {% with form.multiple_per_page as field %} {% include 'lib/pattern/field.html' %} {% endwith %}
         {% with form.user_limit as field %} {% include 'lib/pattern/field.html' %} {% endwith %}
-        <div class="field">
+        <div class="{% if form.form_json.errors %}error {% endif %}field">
           <label>Form</label>
+          {% if form.form_json.errors %} {{form.form_json.errors}} {% endif %}
           <div id="build-wrap"></div>
         </div>
         <p>Adding data allows your form to be filled out once per data item.  A data item can be things like a document, tweet or video.  URLs which support oEmbed work best (such as Document Cloud, Twitter, or YouTube), but any valid URL should work.  You may add URLs individually using the form below, or add them all at once by uploading them in a CSV file.  The CSV file expects a column named URL which contains the URL for the item.  Any other columns will be saved as metadata with the data and shown with the results.</p>
