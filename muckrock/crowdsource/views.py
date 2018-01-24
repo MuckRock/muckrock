@@ -3,6 +3,7 @@
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db.models import Q
 from django.http import StreamingHttpResponse, Http404
 from django.shortcuts import redirect
 from django.utils.text import slugify
@@ -10,7 +11,6 @@ from django.views.generic import (
         CreateView,
         DetailView,
         FormView,
-        ListView,
         UpdateView,
         )
 from django.views.generic.detail import BaseDetailView
@@ -30,7 +30,10 @@ from muckrock.crowdsource.models import (
         CrowdsourceValue,
         )
 from muckrock.utils import Echo
-from muckrock.views import class_view_decorator
+from muckrock.views import (
+        class_view_decorator,
+        MROrderedListView,
+        )
 
 
 class CrowdsourceDetailView(DetailView):
@@ -238,10 +241,27 @@ class CrowdsourceFormView(BaseDetailView, FormView):
                 )
 
 
-class CrowdsourceListView(ListView):
+class CrowdsourceListView(MROrderedListView):
     """List of crowdfunds"""
-    queryset = Crowdsource.objects.filter(status='open')
+    model = Crowdsource
     template_name = 'crowdsource/list.html'
+    sort_map = {
+            'title': 'title',
+            'status': 'status',
+            'user': 'user',
+            'datetime_created': 'datetime_created',
+            }
+
+    def get_queryset(self):
+        """Get all open crowdsources and all crowdsources you own"""
+        queryset = super(CrowdsourceListView, self).get_queryset()
+        if self.request.user.is_authenticated:
+            return queryset.filter(
+                    Q(user=self.request.user) |
+                    Q(status='open')
+                    )
+        else:
+            return queryset.filter(status='open')
 
 
 @class_view_decorator(user_passes_test(

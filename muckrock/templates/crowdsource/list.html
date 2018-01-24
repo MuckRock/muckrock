@@ -1,18 +1,20 @@
 {% extends 'base_list.html' %}
 
 {% block list-title %}
-  Open Crowdsources
+  Crowdsources
 {% endblock list-title %}
 
 {% block list-table-head %}
 <th data-sort="title">Title</th>
-<th data-sort="user">User</th>
+<th data-sort="status">Status</th>
+<th data-sort="user">Owner</th>
 <th data-sort="datetime_created">Date</th>
 {% endblock list-table-head %}
 
 {% block list-table-row %}
   {% with object as crowdsource %}
     <td><a href="{{ crowdsource.get_absolute_url }}">{{ crowdsource.title }}</a></td>
+    <td>{{ crowdsource.get_status_display }}</td>
     <td><a href="{% url "acct-profile" crowdsource.user.username %}">{{ crowdsource.user.get_full_name }}</a></td>
     <td>{{ crowdsource.datetime_created | date:"F j, Y"}}</td>
   {% endwith %}
