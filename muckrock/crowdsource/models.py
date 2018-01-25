@@ -100,6 +100,7 @@ class Crowdsource(models.Model):
                     help_text=field_data.get('description', ''),
                     min=field_data.get('min'),
                     max=field_data.get('max'),
+                    required=field_data.get('required', False),
                     order=order,
                     )
             if 'values' in field_data and field.field.accepts_choices:
@@ -194,6 +195,7 @@ class CrowdsourceField(models.Model):
     help_text = models.CharField(max_length=255, blank=True)
     min = models.PositiveSmallIntegerField(blank=True, null=True)
     max = models.PositiveSmallIntegerField(blank=True, null=True)
+    required = models.BooleanField(default=True)
     order = models.PositiveSmallIntegerField()
 
     def __unicode__(self):
@@ -209,6 +211,7 @@ class CrowdsourceField(models.Model):
                 'type': self.type,
                 'label': self.label,
                 'description': self.help_text,
+                'required': self.required,
                 }
         if self.field.accepts_choices:
             data['values'] = [{'label': c.choice, 'value': c.value}

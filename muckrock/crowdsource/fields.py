@@ -11,7 +11,7 @@ class Field(object):
     def get_form_field(self, field, **kwargs):
         """Create the form field"""
         kwargs['label'] = field.label
-        kwargs['required'] = True
+        kwargs['required'] = field.required
         if self.accepts_choices:
             kwargs['choices'] = [(c.value, c.choice) for c in field.choices.all()]
         if field.help_text:

@@ -23,7 +23,6 @@ $(document).ready(function(){
         'name',
         'other',
         'placeholder',
-        'required',
         'rows',
         'step',
         'style',

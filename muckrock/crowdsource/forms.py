@@ -130,6 +130,9 @@ class CrowdsourceForm(forms.ModelForm):
             label = data.get('label')
             if not label:
                 raise forms.ValidationError('Invalid form data: Missing label')
+            required = data.get('required', False)
+            if required not in [True, False]:
+                raise forms.ValidationError('Invalid form data: Invalid required')
             type_ = data.get('type')
             if not type_:
                 raise forms.ValidationError(
