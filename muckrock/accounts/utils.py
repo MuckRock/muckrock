@@ -11,21 +11,22 @@ import re
 import stripe
 
 from muckrock.accounts.models import Profile
-from muckrock.utils import stripe_retry_on_error
+from muckrock.utils import stripe_retry_on_error, generate_key
 
 
-def miniregister(full_name, email, password):
+def miniregister(full_name, email):
     """
     Create a new user from just their full name and email and return the user.
     - compress first and last name to create username
         - username must be unique
         - if the username already exists, add a number to the end
-    - given the username, email, and password, create a new User
+    - given the username, email create a new User
     - split the full name string to get the first and last names
     - create a Profile for the user
     - send the user a welcome email with a link to reset their password
     """
     from muckrock.message.tasks import welcome_miniregister
+    password = generate_key(12)
     full_name = full_name.strip()
     username = unique_username(full_name)
     first_name, last_name = split_name(full_name)
@@ -46,7 +47,7 @@ def miniregister(full_name, email, password):
     )
     # send the new user a welcome email
     welcome_miniregister.delay(user)
-    return user
+    return user, password
 
 
 def split_name(name):

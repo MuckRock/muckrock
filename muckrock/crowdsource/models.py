@@ -151,11 +151,13 @@ class CrowdsourceDataQuerySet(models.QuerySet):
 
     def get_choices(self, data_limit, user):
         """Get choices for data to show"""
-        return (self
+        choices = (self
                 .annotate(count=models.Count('responses__user', distinct=True))
                 .filter(count__lt=data_limit)
-                .exclude(responses__user=user)
                 )
+        if user is not None:
+            choices = choices.exclude(responses__user=user)
+        return choices
 
 
 class CrowdsourceData(models.Model):
@@ -294,6 +296,25 @@ class CrowdsourceResponse(models.Model):
                 .values_list('value', flat=True)
                 )
         return values
+
+    def create_values(self, data):
+        """Given the form data, create the values for this response"""
+        # these values are passed in the form, but should not have
+        # values created for them
+        for key in ['data_id', 'full_name', 'email']:
+            data.pop(key, None)
+        for label, value in data.iteritems():
+            try:
+                field = CrowdsourceField.objects.get(
+                        crowdsource=self.crowdsource,
+                        label=label,
+                        )
+                self.values.create(
+                        field=field,
+                        value=value,
+                        )
+            except CrowdsourceField.DoesNotExist:
+                pass
 
 
 class CrowdsourceValue(models.Model):

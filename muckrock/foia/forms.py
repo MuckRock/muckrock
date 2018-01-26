@@ -26,7 +26,6 @@ from muckrock.foia.models import (
         )
 from muckrock.forms import MRFilterForm, TaggitWidget
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.utils import generate_key
 
 AGENCY_STATUS = [
     ('processed', 'Further Response Coming'),
@@ -75,7 +74,7 @@ class RequestForm(forms.Form):
             'AgencySimpleAgencyAutocomplete',
             queryset=Agency.objects.get_approved(),
             )
-    full_name = forms.CharField()
+    full_name = forms.CharField(label='Full Name or Handle (Public)')
     email = forms.EmailField(max_length=75)
 
     def __init__(self, *args, **kwargs):
@@ -103,8 +102,9 @@ class RequestForm(forms.Form):
     def clean_email(self):
         """Do a case insensitive uniqueness check"""
         email = self.cleaned_data['email']
-        if User.objects.filter(email__iexact=email):
-            raise forms.ValidationError("User with this email already exists.  Please login first.")
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError(
+                    'User with this email already exists. Please login first.')
         return email
 
     def get_jurisdiction(self):
@@ -159,11 +159,9 @@ class RequestForm(forms.Form):
 
     def make_user(self, data):
         """Miniregister a new user if necessary"""
-        password = generate_key(12)
-        user = miniregister(
+        user, password = miniregister(
                 data['full_name'],
                 data['email'],
-                password,
                 )
         user = authenticate(
                 username=user.username,

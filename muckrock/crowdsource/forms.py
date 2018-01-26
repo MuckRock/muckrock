@@ -1,6 +1,7 @@
 """Forms for the crowdsource application"""
 
 from django import forms
+from django.contrib.auth.models import User
 from django.core.validators import URLValidator
 
 from autocomplete_light import shortcuts as autocomplete_light
@@ -26,10 +27,22 @@ class CrowdsourceAssignmentForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         crowdsource = kwargs.pop('crowdsource')
+        user = kwargs.pop('user')
         super(CrowdsourceAssignmentForm, self).__init__(*args, **kwargs)
 
         for field in crowdsource.fields.all():
             self.fields[field.label] = field.get_form_field()
+        if user.is_anonymous:
+            self.fields['full_name'] = forms.CharField(label='Full Name or Handle (Public)')
+            self.fields['email'] = forms.EmailField()
+
+    def clean_email(self):
+        """Do a case insensitive uniqueness check"""
+        email = self.cleaned_data['email']
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError(
+                    'User with this email already exists. Please login first.')
+        return email
 
 
 class CrowdsourceForm(forms.ModelForm):
@@ -116,6 +129,7 @@ class CrowdsourceForm(forms.ModelForm):
 
     def clean_form_json(self):
         """Ensure the form JSON is in the correct format"""
+        # pylint: disable=too-many-branches
         form_json = self.cleaned_data['form_json']
         try:
             form_data = json.loads(form_json)

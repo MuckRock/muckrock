@@ -21,5 +21,7 @@
 {% endblock list-table-row %}
 
 {% block list-actions %}
-  <a class="primary button" href="{% url "crowdsource-create" %}">Create a New Crowdsource</a>
+  {% if user.is_staff or user.profile.experimental %}
+    <a class="primary button" href="{% url "crowdsource-create" %}">Create a New Crowdsource</a>
+  {% endif %}
 {% endblock %}

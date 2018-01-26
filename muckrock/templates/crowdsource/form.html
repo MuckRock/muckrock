@@ -5,7 +5,7 @@
 {% block title %}MuckRock &bull; {{crowdsource.title}}{% endblock %}
 
 {% block content %}
-  <div class="form">
+  <div class="crowdsource form">
     <h1>{{crowdsource.title}}</h1>
     <p>{{crowdsource.question}}</p>
     {% if crowdsource.multiple_per_page %}
@@ -14,12 +14,17 @@
     <form {% if form.is_multipart %}enctype="multipart/form-data"{% endif %} method="post">
       {% csrf_token %}
       {% include 'lib/pattern/form.html' %}
+      {% if user.is_anonymous %}
+        <p>Thanks for helping out with this Assignment!  We need to create an account for you to save your data.  Already have an account?  <a href="{% url "acct-login" %}">Log in</a> instead.</p>
+      {% endif %}
+
       <div class="buttons">
         <input type="submit" name="submit" value="Submit" class="blue button" {% if crowdsource.status != "open" %}disabled{% endif %}>
         {% if crowdsource.multiple_per_page %}
           <input type="submit" name="submit" value="Submit and Add Another" class="blue button" {% if crowdsource.status != "open" %}disabled{% endif %}>
         {% endif %}
       </div>
+
     </form>
     <form method="post">
       {% csrf_token %}
