@@ -90,7 +90,7 @@ $('document').ready(function(){
     });
     $('.datepicker-simple').datepicker({
         changeMonth: true,
-        changeYear: true,
+        changeYear: true
     });
 
     // Loupe
