@@ -98,6 +98,7 @@ class CrowdfundDetailView(DetailView):
         Next, we charge their card. Finally, use the validated payment form to create and
         return a CrowdfundRequestPayment object.
         """
+        # pylint: disable=too-many-locals
         token = request.POST.get('stripe_token')
         email = request.POST.get('stripe_email')
         email = validate_stripe_email(email)
