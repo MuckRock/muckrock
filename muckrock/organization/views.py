@@ -25,16 +25,23 @@ from muckrock.organization.forms import (
     AddMembersForm
 )
 from muckrock.utils import new_action
+from muckrock.views import MROrderedListView
 
 
-class OrganizationListView(ListView):
+class OrganizationListView(MROrderedListView):
     """List of organizations"""
+    model = Organization
     template_name = "organization/list.html"
-    paginate_by = 25
+    sort_map = {
+            'name': 'name',
+            'owner': 'owner__username',
+            }
 
     def get_queryset(self):
         """Filter out private orgs for non-staff"""
-        queryset = Organization.objects.order_by('id').select_related('owner')
+        queryset = (super(OrganizationListView, self)
+                .get_queryset()
+                .select_related('owner'))
         if not self.request.user.is_staff:
             queryset = queryset.filter(private=False)
         return queryset
