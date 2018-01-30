@@ -6,15 +6,21 @@
 {% block header %}<h1>{{ crowdsource.title }}</h1>{% endblock header %}
 
 {% block actions %}
-  <div class="button-group">
+  <div class="actions">
     <a href="{% url "crowdsource-assignment" slug=crowdsource.slug idx=crowdsource.pk %}" class="button primary">Assignment</a>
     <a href="?csv=1" class="button primary">Results CSV</a>
-    <a href="?dataset=1" class="button primary">Create Data Set</a>
+    <form method="post">
+      {% csrf_token %}
+      <input type="submit" name="action" value="Create Data Set" class="button primary" id="dataset-button">
+    </form>
     {% if crowdsource.status == "draft" %}
       <a href="{% url "crowdsource-draft" idx=crowdsource.pk slug=crowdsource.slug %}" class="button primary">Edit</a>
     {% endif %}
     {% if crowdsource.status == "open" %}
-      <a href="#" class="button primary">Close</a>
+      <form method="post">
+        {% csrf_token %}
+        <input type="submit" name="action" value="Close" class="button primary form-button">
+      </form>
     {% endif %}
   </div>
 {% endblock actions %}

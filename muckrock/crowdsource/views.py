@@ -47,7 +47,7 @@ class CrowdsourceDetailView(DetailView):
             .prefetch_related('data')
             )
 
-    def get(self, request, *args, **kwargs):
+    def dispatch(self, *args, **kwargs):
         """Redirect to assignment page for non owner, non staff"""
         crowdsource = self.get_object()
         is_owner = self.request.user == crowdsource.user
@@ -57,12 +57,26 @@ class CrowdsourceDetailView(DetailView):
                     slug=crowdsource.slug,
                     idx=crowdsource.pk,
                     )
-        elif self.request.GET.get('csv'):
+        return super(CrowdsourceDetailView, self).dispatch(*args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        """Handle CSV downloads"""
+        if self.request.GET.get('csv'):
             return self.results_csv()
-        elif self.request.GET.get('dataset'):
-            return self.create_dataset()
         else:
             return super(CrowdsourceDetailView, self).get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """Handle closing the crowdsource"""
+        crowdsource = self.get_object()
+        if request.POST.get('action') == 'Close':
+            crowdsource.status = 'close'
+            crowdsource.save()
+            messages.success(request, 'The crowdsource has been closed')
+        elif request.POST.get('action') == 'Create Data Set':
+            return self.create_dataset()
+
+        return redirect(crowdsource)
 
     def results_csv(self):
         """Return the results in CSV format"""
