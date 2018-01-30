@@ -43,8 +43,7 @@ function ajaxPost(task, endpoint, data) {
         url: endpoint,
         type: 'post',
         data: data,
-        success: null,
-        dataType: 'json'
+        success: null
     });
 }
 

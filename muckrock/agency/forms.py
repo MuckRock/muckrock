@@ -49,6 +49,7 @@ class AgencyForm(forms.ModelForm):
             widget=forms.TextInput(attrs={'placeholder': 'Zip'}),
             )
     email = FullEmailField(required=False)
+    website = forms.URLField(label='General Website', required=False)
     phone = PhoneNumberField(required=False)
     fax = PhoneNumberField(required=False)
     portal_url = forms.URLField(required=False)
@@ -131,6 +132,7 @@ class AgencyForm(forms.ModelForm):
                 'address',
                 'email',
                 'url',
+                'website',
                 'phone',
                 'fax',
                 'portal_url',
@@ -147,6 +149,7 @@ class AgencyForm(forms.ModelForm):
                 'aliases',
                 'email',
                 'url',
+                'website',
                 'phone',
                 'fax',
                 'portal_url',
@@ -154,7 +157,7 @@ class AgencyForm(forms.ModelForm):
                 ]
         labels = {
             'aliases': 'Alias',
-            'url': 'Website',
+            'url': 'FOIA or public information contact page',
         }
         help_texts = {
             'aliases': ('An alternate name for the agency, '

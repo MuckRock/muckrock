@@ -13,6 +13,7 @@ from django.db.models import Count
 from django.http import (
         HttpResponse,
         HttpResponseForbidden,
+        HttpResponseBadRequest,
         Http404,
         JsonResponse,
         )
@@ -193,16 +194,16 @@ class TaskList(MRFilterListView):
         """Handle general cases for updating Task objects"""
         try:
             tasks = self.get_tasks()
+            for task in tasks:
+                self.task_post_helper(request, task)
         except ValueError as exception:
             if request.is_ajax():
-                return HttpResponse(400)
+                return HttpResponseBadRequest()
             else:
                 messages.warning(self.request, exception)
                 return redirect(self.get_redirect_url())
-        for task in tasks:
-            self.task_post_helper(request, task)
         if request.is_ajax():
-            return HttpResponse(200)
+            return HttpResponse('OK')
         else:
             return redirect(self.get_redirect_url())
 
@@ -409,8 +410,7 @@ class NewAgencyTaskList(TaskList):
             if new_agency_form.is_valid():
                 new_agency_form.save()
             else:
-                messages.error(request, 'The agency info form is invalid.')
-                return
+                raise ValueError('The agency info form is invalid.')
             task.approve()
             form_data = new_agency_form.cleaned_data
             # phone numbers must be strings not phone number objects to serialize
