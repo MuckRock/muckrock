@@ -13,7 +13,7 @@ from autocomplete_light.contrib.taggit_field import TaggitField
 from datetime import date, timedelta
 import phonenumbers
 
-from muckrock.accounts.utils import miniregister
+from muckrock.accounts.utils import miniregister, mailchimp_subscribe
 from muckrock.agency.models import Agency
 from muckrock.communication.models import EmailAddress, PhoneNumber
 from muckrock.foia.models import (
@@ -26,7 +26,6 @@ from muckrock.foia.models import (
         )
 from muckrock.forms import MRFilterForm, TaggitWidget
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.utils import generate_key
 
 AGENCY_STATUS = [
     ('processed', 'Further Response Coming'),
@@ -75,8 +74,14 @@ class RequestForm(forms.Form):
             'AgencySimpleAgencyAutocomplete',
             queryset=Agency.objects.get_approved(),
             )
-    full_name = forms.CharField()
+    full_name = forms.CharField(label='Full Name or Handle (Public)')
     email = forms.EmailField(max_length=75)
+    newsletter = forms.BooleanField(
+            initial=True,
+            required=False,
+            label='Get MuckRock\'s weekly newsletter with '
+            'FOIA news, tips, and more',
+            )
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
@@ -84,6 +89,7 @@ class RequestForm(forms.Form):
         if self.request and self.request.user.is_authenticated:
             del self.fields['full_name']
             del self.fields['email']
+            del self.fields['newsletter']
         self.jurisdiction = None
 
     def full_clean(self):
@@ -103,8 +109,9 @@ class RequestForm(forms.Form):
     def clean_email(self):
         """Do a case insensitive uniqueness check"""
         email = self.cleaned_data['email']
-        if User.objects.filter(email__iexact=email):
-            raise forms.ValidationError("User with this email already exists.  Please login first.")
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError(
+                    'User with this email already exists. Please login first.')
         return email
 
     def get_jurisdiction(self):
@@ -159,17 +166,14 @@ class RequestForm(forms.Form):
 
     def make_user(self, data):
         """Miniregister a new user if necessary"""
-        password = generate_key(12)
-        user = miniregister(
-                data['full_name'],
-                data['email'],
-                password,
-                )
+        user, password = miniregister(data['full_name'], data['email'])
         user = authenticate(
                 username=user.username,
                 password=password,
                 )
         login(self.request, user)
+        if data.get('newsletter'):
+            mailchimp_subscribe(self.request, user.email)
 
     def process(self, parent):
         """Create the new request"""

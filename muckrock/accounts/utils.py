@@ -2,30 +2,36 @@
 Utility method for the accounts application
 """
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.validators import validate_email
 from django.forms import ValidationError
 
 from datetime import date
+import logging
 import re
+import requests
 import stripe
 
 from muckrock.accounts.models import Profile
-from muckrock.utils import stripe_retry_on_error
+from muckrock.utils import stripe_retry_on_error, retry_on_error, generate_key
+
+logger = logging.getLogger(__name__)
 
 
-def miniregister(full_name, email, password):
+def miniregister(full_name, email):
     """
     Create a new user from just their full name and email and return the user.
     - compress first and last name to create username
         - username must be unique
         - if the username already exists, add a number to the end
-    - given the username, email, and password, create a new User
+    - given the username, email create a new User
     - split the full name string to get the first and last names
     - create a Profile for the user
     - send the user a welcome email with a link to reset their password
     """
     from muckrock.message.tasks import welcome_miniregister
+    password = generate_key(12)
     full_name = full_name.strip()
     username = unique_username(full_name)
     first_name, last_name = split_name(full_name)
@@ -46,7 +52,7 @@ def miniregister(full_name, email, password):
     )
     # send the new user a welcome email
     welcome_miniregister.delay(user)
-    return user
+    return user, password
 
 
 def split_name(name):
@@ -101,3 +107,47 @@ def stripe_get_customer(user, email, description):
                 email=email,
                 idempotency_key=True,
                 )
+
+
+def mailchimp_subscribe(request, email, list_=settings.MAILCHIMP_LIST_DEFAULT, suppress_msg=False):
+    """Adds the email to the mailing list throught the MailChimp API.
+    http://developer.mailchimp.com/documentation/mailchimp/reference/lists/members/"""
+    api_url = settings.MAILCHIMP_API_ROOT + '/lists/' + list_ + '/members/'
+    headers = {
+            'Content-Type': 'application/json',
+            'Authorization': 'apikey %s' % settings.MAILCHIMP_API_KEY
+            }
+    data = {
+            'email_address': email,
+            'status': 'pending',
+            }
+    response = retry_on_error(
+            requests.ConnectionError,
+            requests.post,
+            api_url,
+            json=data,
+            headers=headers,
+            )
+    try:
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as exception:
+        if (response.status_code == 400 and
+                response.json()['title'] == 'Member Exists'):
+            if not suppress_msg:
+                messages.error(request, 'Email is already a member of this list')
+        else:
+            if not suppress_msg:
+                messages.error(
+                        request,
+                        'Sorry, an error occurred while trying to subscribe you.',
+                        )
+            logger.warning(exception)
+        return True
+
+    if not suppress_msg:
+        messages.success(
+                request,
+                'Thank you for subscribing to our newsletter. We sent a '
+                'confirmation email to your inbox.',
+                )
+    return False

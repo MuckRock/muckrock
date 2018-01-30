@@ -5,6 +5,8 @@ Views for the crowdfund application
 from django.conf import settings
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib import messages
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.models import User
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import redirect
@@ -19,7 +21,6 @@ import stripe
 from muckrock.accounts.utils import miniregister, validate_stripe_email
 from muckrock.crowdfund.forms import CrowdfundPaymentForm
 from muckrock.crowdfund.models import Crowdfund
-from muckrock.utils import generate_key
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -97,6 +98,7 @@ class CrowdfundDetailView(DetailView):
         Next, we charge their card. Finally, use the validated payment form to create and
         return a CrowdfundRequestPayment object.
         """
+        # pylint: disable=too-many-locals
         token = request.POST.get('stripe_token')
         email = request.POST.get('stripe_email')
         email = validate_stripe_email(email)
@@ -104,15 +106,21 @@ class CrowdfundDetailView(DetailView):
         if payment_form.is_valid() and token and email:
             amount = payment_form.cleaned_data['stripe_amount']
             # If there is no user but the show and full_name fields are filled in,
+            # and a user with that email does not already exists,
             # create the user with our "miniregistration" functionality and then log them in
             user = request.user if request.user.is_authenticated() else None
             registered = False
             show = payment_form.cleaned_data['show']
             full_name = payment_form.cleaned_data['full_name']
-            if user is None and show and full_name:
-                password = generate_key(12)
-                user = miniregister(full_name, email, password)
+            email_exists = User.objects.filter(email__iexact=email).exists()
+            if user is None and show and full_name and not email_exists:
+                user, password = miniregister(full_name, email)
                 registered = True
+                user = authenticate(
+                        username=user.username,
+                        password=password,
+                        )
+                login(self.request, user)
             crowdfund = payment_form.cleaned_data['crowdfund']
             try:
                 if crowdfund.can_recur() and payment_form.cleaned_data['recurring']:

@@ -150,7 +150,7 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
 
     .state, .local { display: none; }
 
-    .full-name, .email {
+    .full-name-or-handle-public, .email {
         float: left;
         width: 50%;
         input { width: 100%; }

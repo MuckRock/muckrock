@@ -79,11 +79,7 @@ class Crowdsource(models.Model):
 
     def get_data_to_show(self, user):
         """Get the crowdsource data to show"""
-        options = (self.data
-                .annotate(response_count=models.Count('responses'))
-                .filter(response_count__lt=self.data_limit)
-                .exclude(responses__user=user)
-                )
+        options = self.data.get_choices(self.data_limit, user)
         if options:
             return choice(options)
         else:
@@ -94,11 +90,17 @@ class Crowdsource(models.Model):
         # delete any old fields and re-create from the new JSON
         self.fields.all().delete()
         form_data = json.loads(form_json)
+        seen_labels = set()
         for order, field_data in enumerate(form_data):
+            label = field_data['label'].replace('<br>', '')
+            label = self._uniqify_label_name(seen_labels, label)
             field = self.fields.create(
-                    label=field_data['label'].strip('<br>'),
+                    label=label,
                     type=field_data['type'],
                     help_text=field_data.get('description', ''),
+                    min=field_data.get('min'),
+                    max=field_data.get('max'),
+                    required=field_data.get('required', False),
                     order=order,
                     )
             if 'values' in field_data and field.field.accepts_choices:
@@ -108,6 +110,17 @@ class Crowdsource(models.Model):
                             value=value['value'],
                             order=choice_order,
                             )
+
+    def _uniqify_label_name(self, seen_labels, label):
+        """Ensure the label names are all unique"""
+        # pylint: disable=no-self-use
+        new_label = label
+        i = 0
+        while new_label in seen_labels:
+            i += 1
+            new_label = '{}-{}'.format(label, i)
+        seen_labels.add(new_label)
+        return new_label
 
     def get_form_json(self):
         """Get the form JSON for editing the form"""
@@ -133,12 +146,28 @@ class Crowdsource(models.Model):
             return []
 
 
+class CrowdsourceDataQuerySet(models.QuerySet):
+    """Object manager for crowdsource data"""
+
+    def get_choices(self, data_limit, user):
+        """Get choices for data to show"""
+        choices = (self
+                .annotate(count=models.Count('responses__user', distinct=True))
+                .filter(count__lt=data_limit)
+                )
+        if user is not None:
+            choices = choices.exclude(responses__user=user)
+        return choices
+
+
 class CrowdsourceData(models.Model):
     """A source of data to show with the crowdsource questions"""
 
     crowdsource = models.ForeignKey(Crowdsource, related_name='data')
     url = models.URLField(max_length=255, verbose_name='Data URL')
     metadata = JSONField(default=dict, blank=True)
+
+    objects = CrowdsourceDataQuerySet.as_manager()
 
     def __unicode__(self):
         return u'Crowdsource Data: {}'.format(self.url)
@@ -166,6 +195,9 @@ class CrowdsourceField(models.Model):
             choices=fields.FIELD_CHOICES,
             )
     help_text = models.CharField(max_length=255, blank=True)
+    min = models.PositiveSmallIntegerField(blank=True, null=True)
+    max = models.PositiveSmallIntegerField(blank=True, null=True)
+    required = models.BooleanField(default=True)
     order = models.PositiveSmallIntegerField()
 
     def __unicode__(self):
@@ -173,12 +205,7 @@ class CrowdsourceField(models.Model):
 
     def get_form_field(self):
         """Return a form field appropriate for rendering this field"""
-        kwargs = {'label': self.label}
-        if self.field.accepts_choices:
-            kwargs['choices'] = [(c.value, c.choice) for c in self.choices.all()]
-        if self.help_text:
-            kwargs['help_text'] = self.help_text
-        return self.field.field(**kwargs)
+        return self.field().get_form_field(self)
 
     def get_json(self):
         """Get the JSON represenation for this field"""
@@ -186,10 +213,15 @@ class CrowdsourceField(models.Model):
                 'type': self.type,
                 'label': self.label,
                 'description': self.help_text,
+                'required': self.required,
                 }
         if self.field.accepts_choices:
             data['values'] = [{'label': c.choice, 'value': c.value}
                     for c in self.choices.all()]
+        if self.min is not None:
+            data['min'] = self.min
+        if self.max is not None:
+            data['max'] = self.max
         return data
 
     @property
@@ -265,13 +297,32 @@ class CrowdsourceResponse(models.Model):
                 )
         return values
 
+    def create_values(self, data):
+        """Given the form data, create the values for this response"""
+        # these values are passed in the form, but should not have
+        # values created for them
+        for key in ['data_id', 'full_name', 'email']:
+            data.pop(key, None)
+        for label, value in data.iteritems():
+            try:
+                field = CrowdsourceField.objects.get(
+                        crowdsource=self.crowdsource,
+                        label=label,
+                        )
+                self.values.create(
+                        field=field,
+                        value=value,
+                        )
+            except CrowdsourceField.DoesNotExist:
+                pass
+
 
 class CrowdsourceValue(models.Model):
     """A field value for a given response"""
 
     response = models.ForeignKey(CrowdsourceResponse, related_name='values')
     field = models.ForeignKey(CrowdsourceField, related_name='values')
-    value = models.CharField(max_length=255)
+    value = models.CharField(max_length=2000)
 
     def __unicode__(self):
         return self.value

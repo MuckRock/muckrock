@@ -23,6 +23,7 @@ from muckrock.communication.models import (
         PortalCommunication,
         )
 from muckrock.crowdfund.models import Crowdfund, CrowdfundPayment
+from muckrock.crowdsource.models import Crowdsource, CrowdsourceResponse
 from muckrock.foia.models import FOIARequest, FOIAFile, FOIACommunication
 from muckrock.foiamachine.models import FoiaMachineRequest
 from muckrock.jurisdiction.models import (
@@ -394,6 +395,13 @@ def store_statistics():
         total_exemptions=Exemption.objects.count(),
         total_invoked_exemptions=InvokedExemption.objects.count(),
         total_example_appeals=ExampleAppeal.objects.count(),
+        total_crowdsources=Crowdsource.objects.count(),
+        total_draft_crowdsources=Crowdsource.objects.filter(status='draft').count(),
+        total_open_crowdsources=Crowdsource.objects.filter(status='open').count(),
+        total_close_crowdsources=Crowdsource.objects.filter(status='close').count(),
+        num_crowdsource_responded_users=CrowdsourceResponse.objects
+            .aggregate(Count('user', distinct=True))['user__count'],
+        total_crowdsource_responses=CrowdsourceResponse.objects.count(),
         )
     # stats needs to be saved before many to many relationships can be set
     stats.users_today = User.objects.filter(last_login__year=yesterday.year,
