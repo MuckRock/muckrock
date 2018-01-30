@@ -101,5 +101,5 @@ class TestRequestForm(TestCase):
         request = mock_middleware(request)
         request.user = AnonymousUser
         form = RequestForm(request=request)
-        form.make_user({'full_name': 'John Smith', 'email': 'john@example.com'})
+        form.make_user({'full_name': 'John Smith', 'email': 'john@example.com', 'newsletter': False})
         ok_(User.objects.filter(email='john@example.com').exists())

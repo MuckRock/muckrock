@@ -14,17 +14,16 @@ from django.utils.html import escape
 from django.views.generic import View, ListView, FormView, TemplateView
 
 from muckrock.accounts.models import RecurringDonation
-from muckrock.accounts.utils import stripe_get_customer
+from muckrock.accounts.utils import stripe_get_customer, mailchimp_subscribe
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAFile
 from muckrock.forms import NewsletterSignupForm, SearchForm, StripeForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.news.models import Article
 from muckrock.project.models import Project
-from muckrock.utils import stripe_retry_on_error, retry_on_error
+from muckrock.utils import stripe_retry_on_error
 
 import logging
-import requests
 import stripe
 import sys
 from watson import search as watson
@@ -263,73 +262,14 @@ class NewsletterSignupView(View):
         _default = form.cleaned_data['default']
         default_list = settings.MAILCHIMP_LIST_DEFAULT if _default else None
         # First try subscribing the user to the list they are signing up for.
-        primary_error = False
-        try:
-            self.subscribe(_email, _list)
-            messages.success(request, ('Thank you for subscribing to our newsletter. '
-                                       'We sent a confirmation email to your inbox.'))
-        except ValueError as exception:
-            messages.error(request, exception)
-            primary_error = True
-        except requests.exceptions.HTTPError as exception:
-            messages.error(request, 'Sorry, an error occurred while trying to subscribe you.')
-            logging.warning(exception)
-            primary_error = True
+        primary_error = mailchimp_subscribe(request, _email, _list)
         # Add the user to the default list if they want to be added.
         # If an error occurred with the first subscription,
         # don't try signing up for the default list.
         # If an error occurs with this subscription, don't worry about it.
         if default_list is not None and default_list != _list and not primary_error:
-            try:
-                self.subscribe(_email, default_list)
-            except (ValueError, requests.exceptions.HTTPError) as exception:
-                # suppress the error shown to the user, but still log it
-                logging.warning('Secondary signup: %s', exception)
+            mailchimp_subscribe(request, _email, default_list, suppress_msg=True)
         return self.redirect_url(request)
-
-    def subscribe(self, _email, _list):
-        """Adds the email to the mailing list throught the MailChimp API.
-        http://developer.mailchimp.com/documentation/mailchimp/reference/lists/members/"""
-        # pylint: disable=no-self-use
-        api_url = settings.MAILCHIMP_API_ROOT + '/lists/' + _list + '/members/'
-        headers = {
-            'Content-Type': 'application/json',
-            'Authorization': 'apikey %s' % settings.MAILCHIMP_API_KEY
-        }
-        data = {
-            'email_address': _email,
-            'status': 'pending',
-        }
-        response = retry_on_error(
-                requests.ConnectionError,
-                requests.post,
-                api_url,
-                json=data,
-                headers=headers,
-                )
-        try:
-            response.raise_for_status()
-        except requests.exceptions.HTTPError as exception:
-            # in the case of an error, the status will either be 4XX or 5XX
-            # if 4XX, the user did something wrong and should be notified
-            # if 5XX, MailChimp did something wrong and it's not our fault
-            status = response.status_code/100
-            if status == 4:
-                # MailChimp should have returned some data to us describing the error
-                error_data = response.json()
-                error_title = error_data['title']
-                if error_title == 'Member Exists':
-                    # the member already exists, so we should tell
-                    # the user they cannot use this email address
-                    raise ValueError('Email is already a member of the list.')
-                else:
-                    # we don't know how to specifically address this error
-                    # so we should just propagate the HTTPError
-                    raise exception
-            else:
-                # We did nothing wrong. Let's just allow the error to propagate.
-                raise exception
-        return response
 
 
 class LandingView(TemplateView):

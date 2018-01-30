@@ -9,7 +9,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase, RequestFactory
 
 from actstream.models import Action
-from mock import Mock, patch
+from mock import Mock, patch, ANY
 import logging
 import nose.tools
 from nose.tools import ok_
@@ -165,7 +165,7 @@ class TestNewsletterSignupView(TestCase):
         response = http_get_response(self.url, self.view)
         eq_(response.status_code, 200)
 
-    @patch('muckrock.views.NewsletterSignupView.subscribe')
+    @patch('muckrock.views.mailchimp_subscribe')
     def test_post_view(self, mock_subscribe):
         """Posting an email to the list should add that email to our MailChimp list."""
         form = NewsletterSignupForm({
@@ -174,10 +174,10 @@ class TestNewsletterSignupView(TestCase):
         })
         ok_(form.is_valid(), 'The form should validate.')
         response = http_post_response(self.url, self.view, form.data)
-        mock_subscribe.assert_called_with(form.data['email'], form.data['list'])
+        mock_subscribe.assert_called_with(ANY, form.data['email'], form.data['list'])
         eq_(response.status_code, 302, 'Should redirect upon successful submission.')
 
-    @patch('muckrock.views.NewsletterSignupView.subscribe')
+    @patch('muckrock.views.mailchimp_subscribe')
     def test_post_other_list(self, mock_subscribe):
         """Posting to a list other than the default should optionally subscribe to the default."""
         form = NewsletterSignupForm({
@@ -186,9 +186,15 @@ class TestNewsletterSignupView(TestCase):
             'list': 'other'
         })
         ok_(form.is_valid(), 'The form should validate.')
+        mock_subscribe.return_value = False
         response = http_post_response(self.url, self.view, form.data)
-        mock_subscribe.assert_any_call(form.data['email'], form.data['list'])
-        mock_subscribe.assert_any_call(form.data['email'], settings.MAILCHIMP_LIST_DEFAULT)
+        mock_subscribe.assert_any_call(ANY, form.data['email'], form.data['list'])
+        mock_subscribe.assert_any_call(
+                ANY,
+                form.data['email'],
+                settings.MAILCHIMP_LIST_DEFAULT,
+                suppress_msg=True,
+                )
         eq_(response.status_code, 302, 'Should redirect upon successful submission.')
 
     @nottest

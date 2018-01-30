@@ -19,7 +19,7 @@ from django.views.generic.detail import BaseDetailView
 from itertools import chain
 import unicodecsv as csv
 
-from muckrock.accounts.utils import miniregister
+from muckrock.accounts.utils import miniregister, mailchimp_subscribe
 from muckrock.crowdsource.forms import (
         CrowdsourceAssignmentForm,
         CrowdsourceForm,
@@ -208,6 +208,8 @@ class CrowdsourceFormView(BaseDetailView, FormView):
                     password=password,
                     )
             login(self.request, user)
+            if data.get('newsletter'):
+                mailchimp_subscribe(self.request, user.email)
             return user
 
     def form_valid(self, form):

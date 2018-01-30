@@ -13,7 +13,7 @@ from autocomplete_light.contrib.taggit_field import TaggitField
 from datetime import date, timedelta
 import phonenumbers
 
-from muckrock.accounts.utils import miniregister
+from muckrock.accounts.utils import miniregister, mailchimp_subscribe
 from muckrock.agency.models import Agency
 from muckrock.communication.models import EmailAddress, PhoneNumber
 from muckrock.foia.models import (
@@ -76,6 +76,12 @@ class RequestForm(forms.Form):
             )
     full_name = forms.CharField(label='Full Name or Handle (Public)')
     email = forms.EmailField(max_length=75)
+    newsletter = forms.BooleanField(
+            initial=True,
+            required=False,
+            label='Get MuckRock\'s weekly newsletter with '
+            'FOIA news, tips, and more',
+            )
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
@@ -83,6 +89,7 @@ class RequestForm(forms.Form):
         if self.request and self.request.user.is_authenticated:
             del self.fields['full_name']
             del self.fields['email']
+            del self.fields['newsletter']
         self.jurisdiction = None
 
     def full_clean(self):
@@ -159,15 +166,14 @@ class RequestForm(forms.Form):
 
     def make_user(self, data):
         """Miniregister a new user if necessary"""
-        user, password = miniregister(
-                data['full_name'],
-                data['email'],
-                )
+        user, password = miniregister(data['full_name'], data['email'])
         user = authenticate(
                 username=user.username,
                 password=password,
                 )
         login(self.request, user)
+        if data.get('newsletter'):
+            mailchimp_subscribe(self.request, user.email)
 
     def process(self, parent):
         """Create the new request"""

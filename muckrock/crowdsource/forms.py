@@ -35,6 +35,12 @@ class CrowdsourceAssignmentForm(forms.Form):
         if user.is_anonymous:
             self.fields['full_name'] = forms.CharField(label='Full Name or Handle (Public)')
             self.fields['email'] = forms.EmailField()
+            self.fields['newsletter'] = forms.BooleanField(
+                    initial=True,
+                    required=False,
+                    label='Get MuckRock\'s weekly newsletter with '
+                    'FOIA news, tips, and more',
+                    )
 
     def clean_email(self):
         """Do a case insensitive uniqueness check"""

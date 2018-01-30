@@ -76,8 +76,8 @@ class CrowdsourceChoiceFactory(factory.django.DjangoModelFactory):
         model = CrowdsourceChoice
 
     field = factory.SubFactory(CrowdsourceSelectFieldFactory)
-    choice = factory.Faker('word')
-    value = factory.Faker('word')
+    choice = factory.Sequence('Choice #{}'.format)
+    value = factory.Sequence('choice-{}'.format)
 
 
 class CrowdsourceResponseFactory(factory.django.DjangoModelFactory):
