@@ -12,7 +12,7 @@ $(document).ready(function(){
         'header',
         'hidden',
         'paragraph',
-        'radio-group',
+        'radio-group'
       ],
       disabledAttrs: [
         'access',
