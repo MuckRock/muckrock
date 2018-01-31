@@ -2,28 +2,27 @@
 Dashing widgets for the dashboard
 """
 
+# Django
 from django.db.models import F, Sum
+from django.db.models.functions import ExtractDay, Now
 
-from dashing.widgets import (
-        Widget,
-        NumberWidget,
-        ListWidget,
-        GraphWidget,
-        )
+# Standard Library
 from datetime import date
 
+# Third Party
+from dashing.widgets import GraphWidget, ListWidget, NumberWidget, Widget
+
+# MuckRock
 from muckrock.accounts.models import Profile, Statistics
-from muckrock.foia.models import FOIARequest, FOIAFile
-from muckrock.models import ExtractDay, Now
+from muckrock.foia.models import FOIAFile, FOIARequest
 from muckrock.task.models import FlaggedTask
 
 RED = '#dc5945'
 GREEN = '#96bf48'
 BLUE = '#12b0c5'
 
-# pylint: disable=no-self-use
-
 # Widgets to inherit from
+
 
 class CompareNumberWidget(NumberWidget):
     """A number widget which compares to a previous value"""
@@ -49,13 +48,13 @@ class CompareNumberWidget(NumberWidget):
             icon = ''
 
         return {
-                'value': u'{:,}'.format(value),
-                'detail': u'{:+,}'.format(delta),
-                'color': color,
-                'icon': icon,
-                'title': self.get_title(),
-                'moreInfo': self.get_more_info(),
-                }
+            'value': u'{:,}'.format(value),
+            'detail': u'{:+,}'.format(delta),
+            'color': color,
+            'icon': icon,
+            'title': self.get_title(),
+            'moreInfo': self.get_more_info(),
+        }
 
 
 class StatGraphWidget(GraphWidget):
@@ -65,10 +64,14 @@ class StatGraphWidget(GraphWidget):
     def get_data(self):
         """Get graph data"""
         stats = Statistics.objects.all()[:self.days:-1]
-        return [{'x': i, 'y': getattr(stat, self.stat)}
-                for i, stat in enumerate(stats)]
+        return [{
+            'x': i,
+            'y': getattr(stat, self.stat)
+        } for i, stat in enumerate(stats)]
+
 
 # Concrete widgets
+
 
 class ProcessingDaysWidget(CompareNumberWidget):
     """Show how many processing days"""
@@ -104,19 +107,18 @@ class OldestProcessingWidget(ListWidget):
 
     def get_data(self):
         """Get the oldest processing requests"""
-        requests = (FOIARequest.objects
-                .filter(status='submitted')
-                .annotate(days=date.today() - F('date_processing'))
-                .order_by('-days')
-                .values('title', 'days')
-                [:5]
-                )
+        requests = (
+            FOIARequest.objects.filter(status='submitted')
+            .annotate(days=date.today() - F('date_processing'))
+            .order_by('-days').values('title', 'days')[:5]
+        )
         return [{
-            'label': r['title'] if len(r['title']) < 28
-            else u'{}...'.format(r['title'][:28]),
-            'value': r['days'],
-            }
-            for r in requests]
+            'label':
+                r['title']
+                if len(r['title']) < 28 else u'{}...'.format(r['title'][:28]),
+            'value':
+                r['days'],
+        } for r in requests]
 
 
 class ProcessingGraphWidget(StatGraphWidget):
@@ -163,19 +165,18 @@ class OldestFlagWidget(ListWidget):
 
     def get_data(self):
         """Get the oldest processing requests"""
-        tasks = (FlaggedTask.objects
-                .filter(resolved=False)
-                .annotate(days=ExtractDay(Now() - F('date_created')))
-                .order_by('-days')
-                .values('text', 'days')
-                [:5]
-                )
+        tasks = (
+            FlaggedTask.objects.filter(resolved=False)
+            .annotate(days=ExtractDay(Now() - F('date_created')))
+            .order_by('-days').values('text', 'days')[:5]
+        )
         return [{
-            'label': t['text'] if len(t['text']) < 28
-            else u'{}...'.format(t['text'][:28]),
-            'value': t['days'],
-            }
-            for t in tasks]
+            'label':
+                t['text']
+                if len(t['text']) < 28 else u'{}...'.format(t['text'][:28]),
+            'value':
+                t['days'],
+        } for t in tasks]
 
 
 class FlagGraphWidget(StatGraphWidget):
@@ -211,13 +212,13 @@ class RequestsFiledWidget(CompareNumberWidget):
         """Get previous value"""
         stat = Statistics.objects.latest('date')
         return sum([
-                stat.daily_requests_pro,
-                stat.daily_requests_basic,
-                stat.daily_requests_beta,
-                stat.daily_requests_proxy,
-                stat.daily_requests_admin,
-                stat.daily_requests_org,
-                ])
+            stat.daily_requests_pro,
+            stat.daily_requests_basic,
+            stat.daily_requests_beta,
+            stat.daily_requests_proxy,
+            stat.daily_requests_admin,
+            stat.daily_requests_org,
+        ])
 
 
 class ProUserCountWidget(CompareNumberWidget):
@@ -245,13 +246,12 @@ class OrgUserCountWidget(CompareNumberWidget):
 
     def get_value(self):
         """Get value"""
-        return (Profile.objects
-                .filter(
-                    organization__active=True,
-                    organization__monthly_cost__gt=0,
-                    )
-                .count()
-                )
+        return (
+            Profile.objects.filter(
+                organization__active=True,
+                organization__monthly_cost__gt=0,
+            ).count()
+        )
 
     def get_previous_value(self):
         """Get previous value"""
@@ -266,18 +266,15 @@ class RecentRequestsWidget(ListWidget):
 
     def get_data(self):
         """Get the oldest processing requests"""
-        requests = (FOIARequest.objects
-                .get_submitted()
-                .get_public()
-                .order_by('-date_submitted')
-                .values('title')
-                [:15]
-                )
+        requests = (
+            FOIARequest.objects.get_submitted().get_public()
+            .order_by('-date_submitted').values('title')[:15]
+        )
         return [{
-            'label': r['title'] if len(r['title']) < 32
-            else u'{}...'.format(r['title'][:32]),
-            }
-            for r in requests]
+            'label':
+                r['title']
+                if len(r['title']) < 32 else u'{}...'.format(r['title'][:32]),
+        } for r in requests]
 
 
 class PageCountWidget(CompareNumberWidget):
@@ -287,35 +284,34 @@ class PageCountWidget(CompareNumberWidget):
 
     def get_value(self):
         """Get value"""
-        return (FOIAFile.objects
-                .aggregate(Sum('pages'))
-                ['pages__sum']
-                )
+        return FOIAFile.objects.aggregate(Sum('pages'))['pages__sum']
 
     def get_previous_value(self):
         """Get previous value"""
         return Statistics.objects.latest('date').total_pages
 
+
 # Top level widget to pull them all together into one request
+
 
 class TopWidget(Widget):
     """Top level widget
     This allows all widgets to be updated with only one HTTP request
     """
     widgets = [
-            ProcessingCountWidget(),
-            OldestProcessingWidget(),
-            ProcessingGraphWidget(),
-            FlagCountWidget(),
-            OldestFlagWidget(),
-            FlagGraphWidget(),
-            ProUserGraphWidget(),
-            RequestsFiledWidget(),
-            ProUserCountWidget(),
-            OrgUserCountWidget(),
-            RecentRequestsWidget(),
-            PageCountWidget(),
-            ]
+        ProcessingCountWidget(),
+        OldestProcessingWidget(),
+        ProcessingGraphWidget(),
+        FlagCountWidget(),
+        OldestFlagWidget(),
+        FlagGraphWidget(),
+        ProUserGraphWidget(),
+        RequestsFiledWidget(),
+        ProUserCountWidget(),
+        OrgUserCountWidget(),
+        RecentRequestsWidget(),
+        PageCountWidget(),
+    ]
 
     def get_context(self):
         """Return data for all widgets"""

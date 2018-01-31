@@ -2,11 +2,14 @@
 Custom object managers
 """
 
-from django.db.models import Q
+# Django
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import Q
 
+# Third Party
 from actstream.managers import ActionManager, stream
+
 
 class MRActionManager(ActionManager):
     """Adds custom activity streams"""
@@ -22,8 +25,8 @@ class MRActionManager(ActionManager):
             # self.none is inherited from the GFKManager parent
             return self.none()
         else:
-            return self.public(
-                (Q(
+            return self.public((
+                Q(
                     actor_content_type=ctype,
                     actor_object_id__in=pks,
                 ) | Q(
@@ -32,4 +35,5 @@ class MRActionManager(ActionManager):
                 ) | Q(
                     action_object_content_type=ctype,
                     action_object_object_id__in=pks,
-                )), **kwargs)
+                )
+            ), **kwargs)

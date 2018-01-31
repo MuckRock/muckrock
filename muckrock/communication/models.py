@@ -3,26 +3,33 @@
 Models for keeping track of how we send and receive communications
 """
 
+# Django
 from django.core.validators import validate_email
 from django.db import models
 from django.forms import ValidationError
 
-from email.utils import parseaddr, getaddresses
+# Standard Library
+from email.utils import getaddresses, parseaddr
 
+# Third Party
 from djgeojson.fields import PointField
-from localflavor.us.us_states import STATE_CHOICES
 from localflavor.us.models import USStateField, USZipCodeField
+from localflavor.us.us_states import STATE_CHOICES
 from phonenumber_field.modelfields import PhoneNumberField
 
+# MuckRock
 from muckrock.mailgun.models import WhitelistDomain
 
 PHONE_TYPES = (
-        ('fax', 'Fax',),
-        ('phone', 'Phone'),
-        )
-
+    (
+        'fax',
+        'Fax',
+    ),
+    ('phone', 'Phone'),
+)
 
 # Address models
+
 
 class EmailAddressQuerySet(models.QuerySet):
     """QuerySet for EmailAddresses"""
@@ -35,9 +42,9 @@ class EmailAddressQuerySet(models.QuerySet):
         except ValidationError:
             return None
         email_address, _ = self.update_or_create(
-                email=email,
-                defaults={'name': name},
-                )
+            email=email,
+            defaults={'name': name},
+        )
         return email_address
 
     def fetch_many(self, *addresses, **kwargs):
@@ -53,9 +60,9 @@ class EmailAddressQuerySet(models.QuerySet):
                 else:
                     raise
             email_address, _ = self.update_or_create(
-                    email=email,
-                    defaults={'name': name},
-                    )
+                email=email,
+                defaults={'name': name},
+            )
             addresses.append(email_address)
         return addresses
 
@@ -72,10 +79,10 @@ class EmailAddress(models.Model):
     email = models.EmailField(unique=True)
     name = models.CharField(blank=True, max_length=255)
     status = models.CharField(
-            max_length=5,
-            choices=(('good', 'Good'), ('error', 'Error')),
-            default='good',
-            )
+        max_length=5,
+        choices=(('good', 'Good'), ('error', 'Error')),
+        default='good',
+    )
 
     objects = EmailAddressQuerySet.as_manager()
 
@@ -100,8 +107,11 @@ class EmailAddress(models.Model):
         # pylint: disable=too-many-return-statements
         from muckrock.agency.models import AgencyEmail
 
-        allowed_tlds = ['.%s.us' % a.lower() for (a, _) in STATE_CHOICES
-                if a not in ('AS', 'DC', 'GU', 'MP', 'PR', 'VI')]
+        allowed_tlds = [
+            '.%s.us' % a.lower()
+            for (a, _) in STATE_CHOICES
+            if a not in ('AS', 'DC', 'GU', 'MP', 'PR', 'VI')
+        ]
         allowed_tlds.extend(['.gov', '.mil'])
 
         # from the same domain as the FOIA email
@@ -139,15 +149,15 @@ class PhoneNumber(models.Model):
     """A phone number"""
     number = PhoneNumberField(unique=True)
     type = models.CharField(
-            max_length=5,
-            choices=PHONE_TYPES,
-            default='phone',
-            )
+        max_length=5,
+        choices=PHONE_TYPES,
+        default='phone',
+    )
     status = models.CharField(
-            max_length=5,
-            choices=(('good', 'Good'), ('error', 'Error')),
-            default='good',
-            )
+        max_length=5,
+        choices=(('good', 'Good'), ('error', 'Error')),
+        default='good',
+    )
 
     def __unicode__(self):
         if self.status == 'error':
@@ -174,16 +184,16 @@ class Address(models.Model):
 
     # These are override fields for parts of the address
     agency_override = models.CharField(
-            blank=True,
-            max_length=255,
-            help_text='Override the agency this is addressed to',
-            )
+        blank=True,
+        max_length=255,
+        help_text='Override the agency this is addressed to',
+    )
     attn_override = models.CharField(
-            blank=True,
-            max_length=255,
-            help_text='Override the attention line to address '
-                      'this to a particular person',
-            )
+        blank=True,
+        max_length=255,
+        help_text='Override the attention line to address '
+        'this to a particular person',
+    )
 
     # This will become the override field for non-conforming addresses
     address = models.TextField(blank=True)
@@ -195,11 +205,11 @@ class Address(models.Model):
             else:
                 street = self.street
             address = u'{}, {}, {} {}'.format(
-                    street,
-                    self.city,
-                    self.state,
-                    self.zip_code,
-                    )
+                street,
+                self.city,
+                self.state,
+                self.zip_code,
+            )
             return address
         else:
             return self.address
@@ -226,36 +236,44 @@ class Address(models.Model):
                 office = u'Appeal'
             else:
                 office = u'Office'
-            address.append(u'{} {}'.format(
-                agency.jurisdiction.get_law_name(abbrev=True),
-                office,
-                ))
+            address.append(
+                u'{} {}'.format(
+                    agency.jurisdiction.get_law_name(abbrev=True),
+                    office,
+                )
+            )
         if self.suite:
             address.append(self.suite)
         address.append(self.street)
-        address.append(u'{}, {} {}'.format(
-            self.city,
-            self.state,
-            self.zip_code,
-            ))
+        address.append(
+            u'{}, {} {}'.format(
+                self.city,
+                self.state,
+                self.zip_code,
+            )
+        )
         return '\n'.join(address)
 
     class Meta:
         verbose_name_plural = 'addresses'
 
+
 # Communication models
+
 
 class EmailCommunication(models.Model):
     """An email sent or received to deliver a communication"""
-    communication = models.ForeignKey('foia.FOIACommunication', related_name='emails')
+    communication = models.ForeignKey(
+        'foia.FOIACommunication', related_name='emails'
+    )
     sent_datetime = models.DateTimeField()
     confirmed_datetime = models.DateTimeField(blank=True, null=True)
     from_email = models.ForeignKey(
-            EmailAddress,
-            blank=True,
-            null=True,
-            related_name='from_emails',
-            )
+        EmailAddress,
+        blank=True,
+        null=True,
+        related_name='from_emails',
+    )
     to_emails = models.ManyToManyField(EmailAddress, related_name='to_emails')
     cc_emails = models.ManyToManyField(EmailAddress, related_name='cc_emails')
 
@@ -285,15 +303,17 @@ class EmailCommunication(models.Model):
 
 class FaxCommunication(models.Model):
     """A fax sent to deliver a communication"""
-    communication = models.ForeignKey('foia.FOIACommunication', related_name='faxes')
+    communication = models.ForeignKey(
+        'foia.FOIACommunication', related_name='faxes'
+    )
     sent_datetime = models.DateTimeField()
     confirmed_datetime = models.DateTimeField(blank=True, null=True)
     to_number = models.ForeignKey(
-            PhoneNumber,
-            blank=True,
-            null=True,
-            related_name='faxes',
-            )
+        PhoneNumber,
+        blank=True,
+        null=True,
+        related_name='faxes',
+    )
     fax_id = models.CharField(max_length=10, blank=True, default='')
 
     delivered = 'fax'
@@ -307,36 +327,35 @@ class FaxCommunication(models.Model):
 
     def sent_from(self):
         """Who was this fax sent from?"""
-        # pylint: disable=no-self-use
         return None
 
 
 class MailCommunication(models.Model):
     """A snail mail sent or received to deliver a communication"""
     communication = models.ForeignKey(
-            'foia.FOIACommunication',
-            related_name='mails',
-            )
+        'foia.FOIACommunication',
+        related_name='mails',
+    )
     sent_datetime = models.DateTimeField()
     from_address = models.ForeignKey(
-            Address,
-            blank=True,
-            null=True,
-            related_name='from_mails',
-            )
+        Address,
+        blank=True,
+        null=True,
+        related_name='from_mails',
+    )
     to_address = models.ForeignKey(
-            Address,
-            blank=True,
-            null=True,
-            related_name='to_mails',
-            )
+        Address,
+        blank=True,
+        null=True,
+        related_name='to_mails',
+    )
     pdf = models.FileField(
-            upload_to='snail_pdfs/%Y/%m/%d',
-            verbose_name='PDF',
-            max_length=255,
-            blank=True,
-            null=True,
-            )
+        upload_to='snail_pdfs/%Y/%m/%d',
+        verbose_name='PDF',
+        max_length=255,
+        blank=True,
+        null=True,
+    )
 
     delivered = 'mail'
 
@@ -355,9 +374,9 @@ class MailCommunication(models.Model):
 class WebCommunication(models.Model):
     """A communication posted to our site directly through our web form"""
     communication = models.ForeignKey(
-            'foia.FOIACommunication',
-            related_name='web_comms',
-            )
+        'foia.FOIACommunication',
+        related_name='web_comms',
+    )
     sent_datetime = models.DateTimeField()
 
     delivered = 'web'
@@ -367,32 +386,31 @@ class WebCommunication(models.Model):
 
     def sent_to(self):
         """Who was web comm sent to?"""
-        # pylint: disable=no-self-use
         return None
 
     def sent_from(self):
         """Who was web comm sent from?"""
-        # pylint: disable=no-self-use
         return None
 
 
 class PortalCommunication(models.Model):
     """A communication sent or received from a portal"""
     communication = models.ForeignKey(
-            'foia.FOIACommunication',
-            related_name='portals',
-            )
+        'foia.FOIACommunication',
+        related_name='portals',
+    )
     sent_datetime = models.DateTimeField()
     portal = models.ForeignKey(
-            'portal.Portal',
-            related_name='communications',
-            )
+        'portal.Portal',
+        related_name='communications',
+    )
     direction = models.CharField(
-            max_length=8,
-            choices=(
-                ('incoming', 'Incoming'),
-                ('outgoing', 'Outgoing'),
-                ))
+        max_length=8,
+        choices=(
+            ('incoming', 'Incoming'),
+            ('outgoing', 'Outgoing'),
+        )
+    )
 
     delivered = 'portal'
 
@@ -416,18 +434,19 @@ class PortalCommunication(models.Model):
 
 # Error models
 
+
 class EmailError(models.Model):
     """An error has occured delivering this email"""
     email = models.ForeignKey(
-            'communication.EmailCommunication',
-            related_name='errors',
-            )
+        'communication.EmailCommunication',
+        related_name='errors',
+    )
     datetime = models.DateTimeField()
 
     recipient = models.ForeignKey(
-            'communication.EmailAddress',
-            related_name='errors',
-            )
+        'communication.EmailAddress',
+        related_name='errors',
+    )
     code = models.CharField(max_length=10)
     error = models.TextField(blank=True)
     event = models.CharField(max_length=10)
@@ -443,15 +462,15 @@ class EmailError(models.Model):
 class FaxError(models.Model):
     """An error has occured delivering this fax"""
     fax = models.ForeignKey(
-            'communication.FaxCommunication',
-            related_name='errors',
-            )
+        'communication.FaxCommunication',
+        related_name='errors',
+    )
     datetime = models.DateTimeField()
 
     recipient = models.ForeignKey(
-            'communication.PhoneNumber',
-            related_name='errors',
-            )
+        'communication.PhoneNumber',
+        related_name='errors',
+    )
     error_type = models.CharField(blank=True, max_length=255)
     error_code = models.CharField(blank=True, max_length=255)
     error_id = models.PositiveSmallIntegerField(blank=True, null=True)
@@ -465,18 +484,19 @@ class FaxError(models.Model):
 
 # Other models
 
+
 class EmailOpen(models.Model):
     """An email has been opened"""
     email = models.ForeignKey(
-            'communication.EmailCommunication',
-            related_name='opens',
-            )
+        'communication.EmailCommunication',
+        related_name='opens',
+    )
     datetime = models.DateTimeField()
 
     recipient = models.ForeignKey(
-            'communication.EmailAddress',
-            related_name='opens',
-            )
+        'communication.EmailAddress',
+        related_name='opens',
+    )
     city = models.CharField(max_length=50)
     region = models.CharField(max_length=50)
     country = models.CharField(max_length=10)

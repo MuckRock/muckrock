@@ -2,12 +2,15 @@
 Settings used when deployed to the production server
 Imports from the heroku settings
 """
+
 # pylint: disable=wildcard-import
 # pylint: disable=unused-wildcard-import
+
+# MuckRock
 from muckrock.settings.heroku import *
 
 # Security
-SECURE_HSTS_SECONDS = 31536000 #one year
+SECURE_HSTS_SECONDS = 31536000  #one year
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_FRAME_DENY = True
 SECURE_CONTENT_TYPE_NOSNIFF = True

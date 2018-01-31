@@ -2,15 +2,20 @@
 Forms for accounts application
 """
 
+# Django
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, SetPasswordForm
+from django.contrib.auth.forms import SetPasswordForm, UserCreationForm
 from django.contrib.auth.models import User
 from django.core.validators import validate_email
 from django.utils.text import slugify
 
-from autocomplete_light import shortcuts as autocomplete_light
+# Standard Library
 import re
 
+# Third Party
+from autocomplete_light import shortcuts as autocomplete_light
+
+# MuckRock
 from muckrock.accounts.models import Profile
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.tasks import email_change
@@ -24,7 +29,8 @@ class ProfileSettingsForm(forms.ModelForm):
     location = forms.ModelChoiceField(
         required=False,
         queryset=Jurisdiction.objects.all(),
-        widget=autocomplete_light.ChoiceWidget('JurisdictionLocalAutocomplete'))
+        widget=autocomplete_light.ChoiceWidget('JurisdictionLocalAutocomplete')
+    )
 
     class Meta():
         model = Profile
@@ -57,10 +63,14 @@ class EmailSettingsForm(forms.ModelForm):
         email = self.cleaned_data['email']
         users = User.objects.filter(email__iexact=email)
         if users.count() == 1 and users.first() != self.instance.user:
-            raise forms.ValidationError('A user with that e-mail address already exists.')
-        if users.count() > 1: # pragma: no cover
+            raise forms.ValidationError(
+                'A user with that e-mail address already exists.'
+            )
+        if users.count() > 1:  # pragma: no cover
             # this should never happen
-            raise forms.ValidationError('A user with that e-mail address already exists.')
+            raise forms.ValidationError(
+                'A user with that e-mail address already exists.'
+            )
         return email
 
     def save(self, commit=True):
@@ -111,11 +121,11 @@ class OrgPreferencesForm(forms.ModelForm):
 class ReceiptForm(forms.Form):
     """Form for setting receipt emails"""
     emails = forms.CharField(
-            widget=forms.Textarea,
-            required=False,
-            help_text='Additional email addresses to send receipts to.  '
-            'One per line.',
-            )
+        widget=forms.Textarea,
+        required=False,
+        help_text='Additional email addresses to send receipts to.  '
+        'One per line.',
+    )
 
     def clean_emails(self):
         """Make sure each line is a valid email"""
@@ -128,26 +138,35 @@ class ReceiptForm(forms.Form):
                 bad_emails.append(email)
         if bad_emails:
             raise forms.ValidationError(
-                    'Invalid email: %s' % ', '.join(bad_emails))
+                'Invalid email: %s' % ', '.join(bad_emails)
+            )
         return self.cleaned_data['emails']
 
 
 class RegisterForm(UserCreationForm):
     """Register for a basic account"""
+
     class Meta(UserCreationForm.Meta):
-        fields = ['username', 'email', 'first_name', 'last_name', 'password1', 'password2']
+        fields = [
+            'username', 'email', 'first_name', 'last_name', 'password1',
+            'password2'
+        ]
 
     username = forms.CharField()
     email = forms.EmailField()
     first_name = forms.CharField()
     last_name = forms.CharField()
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput())
-    password2 = forms.CharField(label='Password Confirmation', widget=forms.PasswordInput())
+    password2 = forms.CharField(
+        label='Password Confirmation', widget=forms.PasswordInput()
+    )
 
     def clean_username(self):
         """Do a case insensitive uniqueness check and clean username input"""
         username = self.cleaned_data['username']
-        username = re.sub(r'[^\w\-.@ ]', '', username) # strips illegal characters from username
+        username = re.sub(
+            r'[^\w\-.@ ]', '', username
+        )  # strips illegal characters from username
         if User.objects.filter(username__iexact=username).exists():
             raise forms.ValidationError("This username is taken.")
         return username
@@ -156,7 +175,9 @@ class RegisterForm(UserCreationForm):
         """Do a case insensitive uniqueness check"""
         email = self.cleaned_data['email']
         if User.objects.filter(email__iexact=email):
-            raise forms.ValidationError("An account with this email already exists.")
+            raise forms.ValidationError(
+                "An account with this email already exists."
+            )
         return email
 
 
@@ -167,7 +188,9 @@ class RegistrationCompletionForm(SetPasswordForm):
     def clean_username(self):
         """Do a case insensitive uniqueness check and clean username input"""
         username = self.cleaned_data['username']
-        username = re.sub(r'[^\w\-.@ ]', '', username) # strips illegal characters from username
+        username = re.sub(
+            r'[^\w\-.@ ]', '', username
+        )  # strips illegal characters from username
         existing_user = User.objects.filter(username__iexact=username)
         if existing_user.exists() and existing_user.first() != self.user:
             raise forms.ValidationError("This username is taken.")
@@ -181,12 +204,13 @@ class RegistrationCompletionForm(SetPasswordForm):
             self.user.save()
         return self.user
 
+
 class RegisterOrganizationForm(RegisterForm):
     """Register for an organization account"""
     organization_name = forms.CharField(
-            min_length=2,
-            max_length=255,
-            )
+        min_length=2,
+        max_length=255,
+    )
 
     def clean_organization_name(self):
         """Check for an existing organizaiton."""
@@ -196,8 +220,12 @@ class RegisterOrganizationForm(RegisterForm):
             Organization.objects.get(slug=slug)
         except Organization.DoesNotExist:
             return organization_name
-        raise forms.ValidationError('Organization already exists with this name.')
+        raise forms.ValidationError(
+            'Organization already exists with this name.'
+        )
 
     def create_organization(self, owner):
         """Creates and returns an organization from the form data"""
-        return Organization.objects.create(name=self.cleaned_data['organization_name'], owner=owner)
+        return Organization.objects.create(
+            name=self.cleaned_data['organization_name'], owner=owner
+        )

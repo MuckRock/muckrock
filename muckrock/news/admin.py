@@ -2,13 +2,16 @@
 Admin registration for news models
 """
 
+# Django
 from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import User
 
-from reversion.admin import VersionAdmin
+# Third Party
 from autocomplete_light import shortcuts as autocomplete_light
+from reversion.admin import VersionAdmin
 
+# MuckRock
 from muckrock.news.models import Article, Photo
 
 
@@ -19,7 +22,8 @@ class AuthorListFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         """All authors"""
-        authors = User.objects.exclude(authored_articles=None).order_by('last_name')
+        authors = User.objects.exclude(authored_articles=None
+                                       ).order_by('last_name')
         return tuple((a.pk, a.get_full_name()) for a in authors)
 
     def queryset(self, request, queryset):
@@ -30,21 +34,18 @@ class AuthorListFilter(admin.SimpleListFilter):
 
 class ArticleAdminForm(forms.ModelForm):
     """Form with autocompletes"""
-    # pylint: disable=too-few-public-methods
 
     authors = autocomplete_light.ModelMultipleChoiceField(
-        'UserAutocomplete',
-        queryset=User.objects.all())
+        'UserAutocomplete', queryset=User.objects.all()
+    )
     editors = autocomplete_light.ModelMultipleChoiceField(
-        'UserAutocomplete',
-        queryset=User.objects.all(),
-        required=False)
+        'UserAutocomplete', queryset=User.objects.all(), required=False
+    )
     foias = autocomplete_light.ModelMultipleChoiceField(
-        'FOIARequestAdminAutocomplete',
-        required=False)
+        'FOIARequestAdminAutocomplete', required=False
+    )
 
     class Meta:
-        # pylint: disable=too-few-public-methods
         model = Article
         fields = '__all__'
 
@@ -62,10 +63,11 @@ class ArticleAdmin(VersionAdmin):
 
     def get_queryset(self, request):
         """Prefetch authors"""
-        return (super(ArticleAdmin, self)
-                .get_queryset(request)
-                .prefetch_related('authors')
-                )
+        return (
+            super(ArticleAdmin, self).get_queryset(request)
+            .prefetch_related('authors')
+        )
+
 
 admin.site.register(Article, ArticleAdmin)
 admin.site.register(Photo)

@@ -2,8 +2,10 @@
 Celery tasks for the portal application
 """
 
+# Django
 from celery.task import task
 
+# MuckRock
 from muckrock.portal.models import Portal
 
 

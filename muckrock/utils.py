@@ -2,27 +2,33 @@
 Miscellanous utilities
 """
 
-import actstream
-import datetime
-import logging
-import random
-import string
-import stripe
-import sys
-import uuid
-
+# Django
 from django.conf import settings
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group, User
 from django.core.cache import cache
 from django.template import Context
 from django.template.loader_tags import BlockNode, ExtendsNode
 from django.utils.module_loading import import_string
 
+# Standard Library
+import datetime
+import logging
+import random
+import string
+import sys
+import uuid
+
+# Third Party
+import actstream
+import stripe
+
+# MuckRock
 from muckrock.storage import QueuedS3DietStorage
 
 logger = logging.getLogger(__name__)
 
 #From http://stackoverflow.com/questions/2687173/django-how-can-i-get-a-block-from-a-template
+
 
 class BlockNotFound(Exception):
     """Block not found exception"""
@@ -39,7 +45,9 @@ def get_node(template, context=Context(), name='subject'):
     raise BlockNotFound("Node '%s' could not be found in template." % name)
 
 
-def new_action(actor, verb, action_object=None, target=None, public=True, description=None):
+def new_action(
+    actor, verb, action_object=None, target=None, public=True, description=None
+):
     """Wrapper to send a new action and return the generated Action object."""
     # pylint: disable=too-many-arguments
     action_signal = actstream.action.send(
@@ -48,7 +56,8 @@ def new_action(actor, verb, action_object=None, target=None, public=True, descri
         action_object=action_object,
         target=target,
         public=public,
-        description=description)
+        description=description
+    )
     # action_signal = ((action_handler, Action))
     return action_signal[0][1]
 
@@ -107,10 +116,10 @@ def get_stripe_token(card_number='4242424242424242'):
         "cvc": '123'
     }
     token = stripe_retry_on_error(
-            stripe.Token.create,
-            card=card,
-            idempotency_key=True,
-            )
+        stripe.Token.create,
+        card=card,
+        idempotency_key=True,
+    )
     # all we need for testing stripe calls is the token id
     return token.id
 
@@ -139,11 +148,11 @@ def retry_on_error(error, func, *args, **kwargs):
         return func(*args, **kwargs)
     except error as exc:
         logger.warn(
-                'Error, retrying #%d:\n\n%s',
-                times,
-                exc,
-                exc_info=sys.exc_info(),
-                )
+            'Error, retrying #%d:\n\n%s',
+            times,
+            exc,
+            exc_info=sys.exc_info(),
+        )
         return retry_on_error(error, func, times=times, *args, **kwargs)
 
 
@@ -151,12 +160,14 @@ def stripe_retry_on_error(func, *args, **kwargs):
     """Retry stripe API calls on connection errors"""
     if kwargs.get('idempotency_key') is True:
         kwargs['idempotency_key'] = uuid.uuid4().hex
-    return retry_on_error(stripe.error.APIConnectionError, func, *args, **kwargs)
+    return retry_on_error(
+        stripe.error.APIConnectionError, func, *args, **kwargs
+    )
 
 
 class Echo(object):
     """File like object that just returns written values"""
+
     def write(self, value):
-        # pylint: disable=no-self-use
         """Return the value"""
         return value

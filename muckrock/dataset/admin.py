@@ -3,17 +3,17 @@
 Admin for data set application
 """
 
+# Django
 from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import User
 
+# Third Party
 from autocomplete_light import shortcuts as autocomplete_light
 from reversion.admin import VersionAdmin
 
-from muckrock.dataset.models import (
-        DataSet,
-        DataField,
-        )
+# MuckRock
+from muckrock.dataset.models import DataField, DataSet
 
 
 class DataFieldInline(admin.TabularInline):
@@ -26,8 +26,8 @@ class DataFieldInline(admin.TabularInline):
 class DataSetForm(forms.ModelForm):
     """Form with autocomplete for user"""
     user = autocomplete_light.ModelChoiceField(
-            'UserAutocomplete',
-            queryset=User.objects.all())
+        'UserAutocomplete', queryset=User.objects.all()
+    )
 
     class Meta:
         model = DataSet

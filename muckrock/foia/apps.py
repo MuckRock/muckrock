@@ -2,9 +2,9 @@
 App config for foia
 """
 
+# Django
 from django.apps import AppConfig
 
-# pylint: disable=invalid-name
 
 class FOIAConfig(AppConfig):
     """Configures the foia application to use activity streams"""
@@ -12,12 +12,13 @@ class FOIAConfig(AppConfig):
 
     def ready(self):
         """Registers requests and communications with the activity streams plugin"""
+        # pylint: disable=invalid-name
         from actstream import registry as action
         from autocomplete_light import shortcuts as autocomplete_light
         from watson import search
         import django.utils.html
         import re
-        import muckrock.foia.signals # pylint: disable=unused-import,unused-variable
+        import muckrock.foia.signals  # pylint: disable=unused-import,unused-variable
         FOIARequest = self.get_model('FOIARequest')
         FOIACommunication = self.get_model('FOIACommunication')
         FOIANote = self.get_model('FOIANote')

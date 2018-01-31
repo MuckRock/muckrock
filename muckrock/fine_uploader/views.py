@@ -1,29 +1,32 @@
 """Views to interact with Fine Uploader AJAX calls"""
 
+# Django
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.files.storage import default_storage
 from django.http import (
-        HttpResponse,
-        JsonResponse,
-        HttpResponseBadRequest,
-        HttpResponseForbidden,
-        )
+    HttpResponse,
+    HttpResponseBadRequest,
+    HttpResponseForbidden,
+    JsonResponse,
+)
 
-from datetime import datetime, date
+# Standard Library
 import base64
 import hashlib
 import hmac
 import json
 import os
+from datetime import date, datetime
 
+# MuckRock
 from muckrock.dataset.tasks import process_dataset_file
 from muckrock.foia.models import (
-        FOIARequest,
-        FOIACommunication,
-        FOIAFile,
-        OutboundAttachment,
-        )
+    FOIACommunication,
+    FOIAFile,
+    FOIARequest,
+    OutboundAttachment,
+)
 
 
 @login_required
@@ -41,10 +44,10 @@ def success(request):
         return HttpResponseBadRequest()
 
     attachment = OutboundAttachment(
-            foia=foia,
-            user=request.user,
-            date_time_stamp=datetime.now(),
-            )
+        foia=foia,
+        user=request.user,
+        date_time_stamp=datetime.now(),
+    )
     attachment.ffile.name = request.POST['key']
     attachment.save()
 
@@ -58,8 +61,9 @@ def success_comm(request):
         comm = FOIACommunication.objects.get(pk=request.POST.get('comm_id'))
     except FOIACommunication.DoesNotExist:
         return HttpResponseBadRequest()
-    if not (comm.foia and
-            comm.foia.has_perm(request.user, 'upload_attachment')):
+    if not (
+        comm.foia and comm.foia.has_perm(request.user, 'upload_attachment')
+    ):
         return HttpResponseForbidden()
     if 'key' not in request.POST:
         return HttpResponseBadRequest()
@@ -68,13 +72,13 @@ def success_comm(request):
 
     access = 'private' if comm.foia.embargo else 'public'
     file_ = FOIAFile(
-            foia=comm.foia,
-            comm=comm,
-            title=os.path.basename(request.POST['key']),
-            date=datetime.now(),
-            source=request.user.get_full_name(),
-            access=access,
-            )
+        foia=comm.foia,
+        comm=comm,
+        title=os.path.basename(request.POST['key']),
+        date=datetime.now(),
+        source=request.user.get_full_name(),
+        access=access,
+    )
     file_.ffile.name = request.POST['key']
     file_.save()
 
@@ -112,7 +116,7 @@ def session(request):
             'uuid': attm.pk,
             'size': attm.ffile.size,
             's3Key': attm.ffile.name,
-            })
+        })
     return JsonResponse(data, safe=False)
 
 
@@ -121,10 +125,10 @@ def delete(request):
     """Delete a file"""
     try:
         attm = OutboundAttachment.objects.get(
-                ffile=request.POST.get('key'),
-                user=request.user,
-                sent=False,
-                )
+            ffile=request.POST.get('key'),
+            user=request.user,
+            sent=False,
+        )
     except OutboundAttachment.DoesNotExist:
         return HttpResponseBadRequest()
 
@@ -161,38 +165,43 @@ def _is_valid_policy(user, policy_document):
         max_size = settings.MAX_ATTACHMENT_SIZE
 
     for condition in policy_document['conditions']:
-        if isinstance(condition, list) and condition[0] == 'content-length-range':
+        if isinstance(condition, list
+                      ) and condition[0] == 'content-length-range':
             parsed_max_size = int(condition[2])
         elif 'bucket' in condition:
             bucket = condition['bucket']
 
-    return (bucket == settings.AWS_STORAGE_BUCKET_NAME and
-            parsed_max_size == max_size)
+    return (
+        bucket == settings.AWS_STORAGE_BUCKET_NAME
+        and parsed_max_size == max_size
+    )
 
 
 def _sign_policy_document(policy_document):
     """Sign and return the policy doucument for a simple upload.
     http://aws.amazon.com/articles/1434/#signyours3postform"""
     policy = base64.b64encode(json.dumps(policy_document))
-    signature = base64.b64encode(hmac.new(
-        settings.AWS_SECRET_ACCESS_KEY,
-        policy,
-        hashlib.sha1,
-        ).digest())
-    return {
-        'policy': policy,
-        'signature': signature
-    }
+    signature = base64.b64encode(
+        hmac.new(
+            settings.AWS_SECRET_ACCESS_KEY,
+            policy,
+            hashlib.sha1,
+        ).digest()
+    )
+    return {'policy': policy, 'signature': signature}
 
 
 def _sign_headers(headers):
     """Sign and return the headers for a chunked upload"""
     return {
-        'signature': base64.b64encode(hmac.new(
-            settings.AWS_SECRET_ACCESS_KEY,
-            headers,
-            hashlib.sha1,
-            ).digest())
+        'signature':
+            base64.b64encode(
+                hmac.new(
+                    settings.AWS_SECRET_ACCESS_KEY,
+                    headers,
+                    hashlib.sha1,
+                ).digest()
+            )
     }
 
 
@@ -220,13 +229,13 @@ def key_name(request):
     foia_id = request.POST.get('foia_id')
     name = _key_name_trim(name)
     attachment = OutboundAttachment(
-            user=request.user,
-            foia_id=foia_id,
-            )
+        user=request.user,
+        foia_id=foia_id,
+    )
     key = attachment.ffile.field.generate_filename(
-            attachment.ffile.instance,
-            name,
-            )
+        attachment.ffile.instance,
+        name,
+    )
     key = default_storage.get_available_name(key)
     return JsonResponse({'key': key})
 
@@ -238,9 +247,9 @@ def key_name_comm(request):
     name = _key_name_trim(name)
     file_ = FOIAFile()
     key = file_.ffile.field.generate_filename(
-            file_.ffile.instance,
-            name,
-            )
+        file_.ffile.instance,
+        name,
+    )
     key = default_storage.get_available_name(key)
     return JsonResponse({'key': key})
 
@@ -251,14 +260,15 @@ def key_name_dataset(request):
     name = request.POST.get('name')
     name = _key_name_trim(name)
     today = date.today()
-    key = ('dataset_uploads/{username}/{year}/{month:02d}/{day:02d}/{name}'
-            .format(
-                username=request.user.username,
-                year=today.year,
-                month=today.month,
-                day=today.day,
-                name=name,
-                ))
+    key = (
+        'dataset_uploads/{username}/{year}/{month:02d}/{day:02d}/{name}'.format(
+            username=request.user.username,
+            year=today.year,
+            month=today.month,
+            day=today.day,
+            name=name,
+        )
+    )
     key = default_storage.get_available_name(key)
     return JsonResponse({'key': key})
 

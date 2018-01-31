@@ -1,28 +1,26 @@
 # -*- coding: utf-8 -*-
 """Tests for the crowdsource app"""
 
+# Django
 from django.test import TestCase
 
-from datetime import datetime
+# Standard Library
 import json
-from nose.tools import (
-        eq_,
-        ok_,
-        assert_is_none,
-        assert_false,
-        )
+from datetime import datetime
 
+# Third Party
+from nose.tools import assert_false, assert_is_none, eq_, ok_
+
+# MuckRock
 from muckrock.crowdsource.factories import (
-        CrowdsourceFactory,
-        CrowdsourceDataFactory,
-        CrowdsourceTextFieldFactory,
-        CrowdsourceSelectFieldFactory,
-        CrowdsourceResponseFactory,
-        CrowdsourceValueFactory,
-        )
+    CrowdsourceDataFactory,
+    CrowdsourceFactory,
+    CrowdsourceResponseFactory,
+    CrowdsourceSelectFieldFactory,
+    CrowdsourceTextFieldFactory,
+    CrowdsourceValueFactory,
+)
 from muckrock.factories import UserFactory
-
-# pylint: disable=no-self-use
 
 
 class TestCrowdsource(TestCase):
@@ -39,44 +37,51 @@ class TestCrowdsource(TestCase):
         """Create form should create fields from the JSON"""
         crowdsource = CrowdsourceFactory()
         CrowdsourceTextFieldFactory(
-                crowdsource=crowdsource,
-                label='Delete Me',
-                order=0,
-                )
-        crowdsource.create_form(json.dumps(
-            [
+            crowdsource=crowdsource,
+            label='Delete Me',
+            order=0,
+        )
+        crowdsource.create_form(
+            json.dumps([
                 {
                     'label': 'Text Field',
                     'type': 'text',
                     'description': 'Here is some help',
-                    },
+                },
                 {
-                    'label': 'Select Field',
-                    'type': 'select',
+                    'label':
+                        'Select Field',
+                    'type':
+                        'select',
                     'values': [
                         {
                             'label': 'Choice 1',
                             'value': 'choice-1',
-                            },
+                        },
                         {
                             'label': 'Choice 2',
                             'value': 'choice-2',
-                            },
-                        ],
-                    },
-                ]))
+                        },
+                    ],
+                },
+            ])
+        )
         assert_false(crowdsource.fields.filter(label='Delete Me').exists())
-        ok_(crowdsource.fields.filter(
-            label='Text Field',
-            type='text',
-            help_text='Here is some help',
-            order=0,
-            ).exists())
-        ok_(crowdsource.fields.filter(
-            label='Select Field',
-            type='select',
-            order=1,
-            ).exists())
+        ok_(
+            crowdsource.fields.filter(
+                label='Text Field',
+                type='text',
+                help_text='Here is some help',
+                order=0,
+            ).exists()
+        )
+        ok_(
+            crowdsource.fields.filter(
+                label='Select Field',
+                type='select',
+                order=1,
+            ).exists()
+        )
         eq_(crowdsource.fields.get(label='Select Field').choices.count(), 2)
 
     def test_uniqify_label_name(self):
@@ -94,16 +99,16 @@ class TestCrowdsource(TestCase):
         """Get the JSON to rebuild the form builder"""
         crowdsource = CrowdsourceFactory()
         CrowdsourceTextFieldFactory(
-                crowdsource=crowdsource,
-                label='Text Field',
-                help_text='Help',
-                order=0,
-                )
+            crowdsource=crowdsource,
+            label='Text Field',
+            help_text='Help',
+            order=0,
+        )
         CrowdsourceSelectFieldFactory(
-                crowdsource=crowdsource,
-                label='Select Field',
-                order=1,
-                )
+            crowdsource=crowdsource,
+            label='Select Field',
+            order=1,
+        )
         form_data = json.loads(crowdsource.get_form_json())
         eq_(form_data[0]['type'], 'text')
         eq_(form_data[0]['label'], 'Text Field')
@@ -113,39 +118,44 @@ class TestCrowdsource(TestCase):
         eq_(form_data[1]['label'], 'Select Field')
         eq_(len(form_data[1]['values']), 3)
         eq_(
-                set(form_data[1]['values'][0].keys()),
-                {'value', 'label'},
-                )
+            set(form_data[1]['values'][0].keys()),
+            {'value', 'label'},
+        )
 
     def test_get_header_values(self):
         """Get the header values for CSV export"""
         crowdsource = CrowdsourceFactory()
         CrowdsourceTextFieldFactory(
-                crowdsource=crowdsource,
-                label='Text Field',
-                help_text='Help',
-                order=0,
-                )
+            crowdsource=crowdsource,
+            label='Text Field',
+            help_text='Help',
+            order=0,
+        )
         CrowdsourceSelectFieldFactory(
-                crowdsource=crowdsource,
-                label='Select Field',
-                order=1,
-                )
+            crowdsource=crowdsource,
+            label='Select Field',
+            order=1,
+        )
         eq_(
-                crowdsource.get_header_values(['meta']),
-                ['user', 'datetime', 'skip', 'Text Field', 'Select Field'],
-                )
+            crowdsource.get_header_values(['meta']),
+            ['user', 'datetime', 'skip', 'Text Field', 'Select Field'],
+        )
         crowdsource.multiple_per_page = True
         eq_(
-                crowdsource.get_header_values(['meta']),
-                ['user', 'datetime', 'skip', 'number', 'Text Field', 'Select Field'],
-                )
+            crowdsource.get_header_values(['meta']),
+            [
+                'user', 'datetime', 'skip', 'number', 'Text Field',
+                'Select Field'
+            ],
+        )
         CrowdsourceDataFactory(crowdsource=crowdsource)
         eq_(
-                crowdsource.get_header_values(['meta']),
-                ['user', 'datetime', 'skip', 'number', 'datum', 'meta',
-                    'Text Field', 'Select Field'],
-                )
+            crowdsource.get_header_values(['meta']),
+            [
+                'user', 'datetime', 'skip', 'number', 'datum', 'meta',
+                'Text Field', 'Select Field'
+            ],
+        )
 
     def test_get_metadata_keys(self):
         """Get the metadata keys associated with this crowdsoucre's data"""
@@ -165,49 +175,49 @@ class TestCrowdsourceData(TestCase):
         """Test the get choices queryset method"""
         crowdsource = CrowdsourceFactory()
         data = CrowdsourceDataFactory.create_batch(
-                3,
-                crowdsource=crowdsource,
-                )
+            3,
+            crowdsource=crowdsource,
+        )
         user = crowdsource.user
         limit = 2
 
         # all data should be valid choices
         eq_(
-                set(crowdsource.data.get_choices(limit, user)),
-                set(data),
-                )
+            set(crowdsource.data.get_choices(limit, user)),
+            set(data),
+        )
         # if I respond to one, it is no longer a choice for me
         CrowdsourceResponseFactory(
-                crowdsource=crowdsource,
-                user=crowdsource.user,
-                data=data[0],
-                )
+            crowdsource=crowdsource,
+            user=crowdsource.user,
+            data=data[0],
+        )
         eq_(
-                set(crowdsource.data.get_choices(limit, user)),
-                set(data[1:]),
-                )
+            set(crowdsource.data.get_choices(limit, user)),
+            set(data[1:]),
+        )
         # if one has at least `limit` responses, it is no longer a valid choice
         CrowdsourceResponseFactory.create_batch(
-                2,
-                crowdsource=crowdsource,
-                data=data[1],
-                )
+            2,
+            crowdsource=crowdsource,
+            data=data[1],
+        )
         eq_(
-                set(crowdsource.data.get_choices(limit, user)),
-                set(data[2:]),
-                )
+            set(crowdsource.data.get_choices(limit, user)),
+            set(data[2:]),
+        )
         # multiple responses from the same user only count once
         new_user = UserFactory()
         CrowdsourceResponseFactory.create_batch(
-                2,
-                crowdsource=crowdsource,
-                data=data[2],
-                user=new_user,
-                )
+            2,
+            crowdsource=crowdsource,
+            data=data[2],
+            user=new_user,
+        )
         eq_(
-                set(crowdsource.data.get_choices(limit, user)),
-                set(data[2:]),
-                )
+            set(crowdsource.data.get_choices(limit, user)),
+            set(data[2:]),
+        )
 
 
 class TestCrowdsourceResponse(TestCase):
@@ -217,22 +227,22 @@ class TestCrowdsourceResponse(TestCase):
         """Test getting the values from the response"""
         crowdsource = CrowdsourceFactory()
         response = CrowdsourceResponseFactory(
-                crowdsource=crowdsource,
-                user__username='Username',
-                datetime=datetime(2017, 1, 2),
-                data=None,
-                )
+            crowdsource=crowdsource,
+            user__username='Username',
+            datetime=datetime(2017, 1, 2),
+            data=None,
+        )
         field = CrowdsourceTextFieldFactory(
-                crowdsource=crowdsource,
-                order=0,
-                )
+            crowdsource=crowdsource,
+            order=0,
+        )
         CrowdsourceValueFactory(
-                response=response,
-                field=field,
-                value='Value',
-                )
+            response=response,
+            field=field,
+            value='Value',
+        )
 
         eq_(
-                response.get_values([]),
-                ['Username', '2017-01-02 00:00:00', False, 'Value'],
-                )
+            response.get_values([]),
+            ['Username', '2017-01-02 00:00:00', False, 'Value'],
+        )

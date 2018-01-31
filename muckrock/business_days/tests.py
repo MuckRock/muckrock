@@ -2,21 +2,23 @@
 Tests using nose for the business_days application
 """
 
+# Django
 from django.test import TestCase
 
-import nose.tools
+# Standard Library
 from datetime import date
 
-from muckrock.business_days.models import Holiday, Calendar
+# Third Party
+import nose.tools
+
+# MuckRock
+from muckrock.business_days.models import Calendar, Holiday
 from muckrock.jurisdiction.models import Jurisdiction
 
-# allow long names, methods that could be functions and too many public methods in tests
-# pylint: disable=invalid-name
-# pylint: disable=no-self-use
-# pylint: disable=too-many-public-methods
 
 class TestBusinessDayUnit(TestCase):
     """Unit tests for business days"""
+    # pylint: disable=invalid-name
     fixtures = ['holidays.json', 'jurisdictions.json']
 
     def setUp(self):
@@ -24,7 +26,9 @@ class TestBusinessDayUnit(TestCase):
         self.new_years = Holiday.objects.get(name="New Year's Day")
         self.mlk_day = Holiday.objects.get(name='Martin Luther King, Jr. Day')
         self.good_friday = Holiday.objects.get(name='Good Friday')
-        self.usa_cal = Jurisdiction.objects.get(name='United States of America').get_calendar()
+        self.usa_cal = Jurisdiction.objects.get(
+            name='United States of America'
+        ).get_calendar()
         self.gen_cal = Calendar()
 
     def test_holiday_date_match(self):
@@ -43,7 +47,9 @@ class TestBusinessDayUnit(TestCase):
         """Test matching for a holiday that occurs based on Easter"""
 
         nose.tools.assert_true(self.good_friday.match(date(2010, 4, 2), False))
-        nose.tools.assert_false(self.good_friday.match(date(2010, 4, 18), False))
+        nose.tools.assert_false(
+            self.good_friday.match(date(2010, 4, 18), False)
+        )
 
     def test_holiday_calendars_is_holiday(self):
         """Test is_holiday"""
@@ -62,23 +68,33 @@ class TestBusinessDayUnit(TestCase):
     def test_business_days_from(self):
         """Test business_days_from"""
 
-        nose.tools.eq_(self.usa_cal.business_days_from(date(2010, 11, 1), 30),
-                       date(2010, 12, 15))
+        nose.tools.eq_(
+            self.usa_cal.business_days_from(date(2010, 11, 1), 30),
+            date(2010, 12, 15)
+        )
 
     def test_business_days_between(self):
         """Test business_days_between"""
 
-        nose.tools.eq_(self.usa_cal.business_days_between(date(2010, 11, 1),
-                                                          date(2010, 12, 15)), 30)
+        nose.tools.eq_(
+            self.usa_cal.business_days_between(
+                date(2010, 11, 1), date(2010, 12, 15)
+            ), 30
+        )
 
     def test_calendar_days_from(self):
         """Test business_days_from for calendar days"""
 
-        nose.tools.eq_(self.gen_cal.business_days_from(date(2010, 11, 1), 30),
-                       date(2010, 12, 1))
+        nose.tools.eq_(
+            self.gen_cal.business_days_from(date(2010, 11, 1), 30),
+            date(2010, 12, 1)
+        )
 
     def test_calendar_days_between(self):
         """Test business_days_between for calendar days"""
 
-        nose.tools.eq_(self.gen_cal.business_days_between(date(2010, 11, 1),
-                                                          date(2010, 12, 1)), 30)
+        nose.tools.eq_(
+            self.gen_cal.business_days_between(
+                date(2010, 11, 1), date(2010, 12, 1)
+            ), 30
+        )

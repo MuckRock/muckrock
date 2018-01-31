@@ -2,13 +2,18 @@
 Models for the project application.
 """
 
+# Django
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.text import slugify
 
+# Standard Library
 from datetime import date
+
+# Third Party
 import taggit
 
+# MuckRock
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
@@ -18,6 +23,7 @@ from muckrock.utils import get_image_storage
 
 class ProjectQuerySet(models.QuerySet):
     """Object manager for projects"""
+
     def get_public(self):
         """Only return nonprivate projects"""
         return self.filter(private=False, approved=True)
@@ -39,8 +45,8 @@ class ProjectQuerySet(models.QuerySet):
         elif not user.is_staff:
             # show public projects and projects the user is a contributor to
             projects = projects.filter(
-                models.Q(private=False, approved=True)|
-                models.Q(contributors=user)
+                models.Q(private=False, approved=True)
+                | models.Q(contributors=user)
             ).distinct()
         return projects
 
@@ -57,11 +63,18 @@ class ProjectQuerySet(models.QuerySet):
 
     def optimize(self):
         """Annotate, select, and prefetch data."""
-        return (self.annotate(request_count=models.Count('requests', distinct=True))
-                    .annotate(article_count=models.Count('articles', distinct=True))
-                    .prefetch_related(models.Prefetch('crowdfunds',
-                        queryset=Crowdfund.objects.order_by('-date_due')
-                        .annotate(contributors_count=models.Count('payments'))))
+        return (
+            self.annotate(
+                request_count=models.Count('requests', distinct=True)
+            ).annotate(article_count=models.Count('articles', distinct=True))
+            .prefetch_related(
+                models.Prefetch(
+                    'crowdfunds',
+                    queryset=Crowdfund.objects.order_by('-date_due').annotate(
+                        contributors_count=models.Count('payments')
+                    )
+                )
+            )
         )
 
 
@@ -71,69 +84,80 @@ class Project(models.Model):
     title = models.CharField(
         unique=True,
         max_length=100,
-        help_text='Titles are limited to 100 characters.')
+        help_text='Titles are limited to 100 characters.'
+    )
     slug = models.SlugField(
         unique=False,
         max_length=255,
-        help_text='The slug is automatically generated based on the title.')
+        help_text='The slug is automatically generated based on the title.'
+    )
     summary = models.TextField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     image = models.ImageField(
-            upload_to='project_images/%Y/%m/%d',
-            blank=True,
-            null=True,
-            storage=get_image_storage(),
-            )
+        upload_to='project_images/%Y/%m/%d',
+        blank=True,
+        null=True,
+        storage=get_image_storage(),
+    )
     private = models.BooleanField(
         default=True,
-        help_text='If a project is private, it is only visible to its contributors.')
+        help_text=
+        'If a project is private, it is only visible to its contributors.'
+    )
     approved = models.BooleanField(
         default=False,
-        help_text='If a project is approved, is is visible to everyone.')
+        help_text='If a project is approved, is is visible to everyone.'
+    )
     featured = models.BooleanField(
         default=False,
-        help_text='Featured projects will appear on the homepage.')
+        help_text='Featured projects will appear on the homepage.'
+    )
     contributors = models.ManyToManyField(
         'auth.User',
         related_name='projects',
         blank=True,
-        )
+    )
     articles = models.ManyToManyField(
         'news.Article',
         related_name='projects',
         blank=True,
-        )
+    )
     requests = models.ManyToManyField(
         'foia.FOIARequest',
         related_name='projects',
         blank=True,
-        )
+    )
     crowdfunds = models.ManyToManyField(
         'crowdfund.Crowdfund',
         through='ProjectCrowdfunds',
         related_name='projects'
-        )
+    )
 
-    tags = taggit.managers.TaggableManager(through='tags.TaggedItemBase', blank=True)
-    newsletter = models.CharField(max_length=255, blank=True, help_text='The MailChimp list id.')
+    tags = taggit.managers.TaggableManager(
+        through='tags.TaggedItemBase', blank=True
+    )
+    newsletter = models.CharField(
+        max_length=255, blank=True, help_text='The MailChimp list id.'
+    )
     newsletter_label = models.CharField(
         max_length=100,
         blank=True,
         verbose_name='Newsletter Name',
-        help_text='Should describe the newsletter.')
+        help_text='Should describe the newsletter.'
+    )
     newsletter_cta = models.CharField(
         max_length=255,
         blank=True,
         verbose_name='Newsletter Description',
-        help_text='Should encourage readers to subscribe.')
+        help_text='Should encourage readers to subscribe.'
+    )
     date_created = models.DateField(
-            # Only allow null's since this wasn't on here to begin with
-            blank=True,
-            null=True,
-            default=date.today,
-            )
+        # Only allow null's since this wasn't on here to begin with
+        blank=True,
+        null=True,
+        default=date.today,
+    )
     date_approved = models.DateField(blank=True, null=True)
-
 
     def __unicode__(self):
         return unicode(self.title)
@@ -145,7 +169,12 @@ class Project(models.Model):
 
     def get_absolute_url(self):
         """Returns the project URL as a string"""
-        return reverse('project-detail', kwargs={'pk': self.pk, 'slug': self.slug})
+        return reverse(
+            'project-detail', kwargs={
+                'pk': self.pk,
+                'slug': self.slug
+            }
+        )
 
     def make_private(self):
         """Sets a project to be private."""
@@ -173,18 +202,22 @@ class Project(models.Model):
 
     def suggest_requests(self):
         """Returns a list of requests that may be related to this project."""
-        requests = list(FOIARequest.objects.filter(
-            user__in=self.contributors.all(),
-            tags__name__in=self.tags.names()
-        ).exclude(projects=self))
+        requests = list(
+            FOIARequest.objects.filter(
+                user__in=self.contributors.all(),
+                tags__name__in=self.tags.names()
+            ).exclude(projects=self)
+        )
         return requests
 
     def suggest_articles(self):
         """Returns a list of articles that may be related to this project."""
-        articles = list(Article.objects.filter(
-            authors__in=self.contributors.all(),
-            tags__name__in=self.tags.names(),
-        ).exclude(projects=self))
+        articles = list(
+            Article.objects.filter(
+                authors__in=self.contributors.all(),
+                tags__name__in=self.tags.names(),
+            ).exclude(projects=self)
+        )
         return articles
 
     def publish(self, notes):

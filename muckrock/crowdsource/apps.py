@@ -3,6 +3,7 @@
 Application configuration for the crowdsource app
 """
 
+# Django
 from django.apps import AppConfig
 
 

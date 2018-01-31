@@ -2,36 +2,29 @@
 Tests for mailgun
 """
 
+# Django
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.test import TestCase, RequestFactory
+from django.test import RequestFactory, TestCase
 
-from datetime import date, datetime
-from freezegun import freeze_time
-from StringIO import StringIO
+# Standard Library
 import hashlib
 import hmac
-import nose.tools
 import os
 import time
+from datetime import date, datetime
+from StringIO import StringIO
 
-from muckrock.communication.models import (
-        EmailAddress,
-        EmailOpen,
-        EmailError,
-        )
+# Third Party
+import nose.tools
+from freezegun import freeze_time
+
+# MuckRock
+from muckrock.communication.models import EmailAddress, EmailError, EmailOpen
+from muckrock.factories import FOIACommunicationFactory, FOIARequestFactory
 from muckrock.foia.models import FOIACommunication
-from muckrock.factories import FOIARequestFactory, FOIACommunicationFactory
-from muckrock.mailgun.views import (
-        route_mailgun,
-        bounces,
-        opened,
-        delivered,
-        )
+from muckrock.mailgun.views import bounces, delivered, opened, route_mailgun
 from muckrock.task.models import OrphanTask
-
-# pylint: disable=no-self-use
-# pylint: disable=too-many-public-methods
 
 
 class TestMailgunViews(TestCase):
@@ -42,23 +35,25 @@ class TestMailgunViews(TestCase):
         token = 'token'
         timestamp = int(time.time())
         signature = hmac.new(
-                key=settings.MAILGUN_ACCESS_KEY,
-                msg='%s%s' % (timestamp, token),
-                digestmod=hashlib.sha256).hexdigest()
+            key=settings.MAILGUN_ACCESS_KEY,
+            msg='%s%s' % (timestamp, token),
+            digestmod=hashlib.sha256
+        ).hexdigest()
         data['token'] = token
         data['timestamp'] = timestamp
         data['signature'] = signature
 
-    def mailgun_route(self,
-            from_='from@agency.gov',
-            to_='example@requests.muckrock.com',
-            subject='Test Subject',
-            text='Test Text',
-            signature='-John Doe',
-            body=None,
-            attachments=None,
-            sign=True,
-            ):
+    def mailgun_route(
+        self,
+        from_='from@agency.gov',
+        to_='example@requests.muckrock.com',
+        subject='Test Subject',
+        text='Test Text',
+        signature='-John Doe',
+        body=None,
+        attachments=None,
+        sign=True,
+    ):
         """Helper function for testing the mailgun route"""
         # pylint: disable=too-many-arguments
         if attachments is None:
@@ -93,8 +88,10 @@ class TestMailgunViewHandleRequest(TestMailgunViews):
         from_name = 'Smith, Bob'
         from_email = 'test@agency.gov'
         from_ = '"%s" <%s>' % (from_name, from_email)
-        to_ = ('%s@requests.muckrock.com, "Doe, John" <other@agency.gov>' %
-                foia.get_mail_id())
+        to_ = (
+            '%s@requests.muckrock.com, "Doe, John" <other@agency.gov>' %
+            foia.get_mail_id()
+        )
         subject = 'Test subject'
         text = 'Test normal.'
         signature = '-Charlie Jones'
@@ -113,9 +110,9 @@ class TestMailgunViewHandleRequest(TestMailgunViews):
         nose.tools.eq_(last_comm.responsetask_set.count(), 1)
         nose.tools.eq_(foia.email, EmailAddress.objects.fetch(from_email))
         nose.tools.eq_(
-                set(foia.cc_emails.all()),
-                set(EmailAddress.objects.fetch_many('other@agency.gov')),
-                )
+            set(foia.cc_emails.all()),
+            set(EmailAddress.objects.fetch_many('other@agency.gov')),
+        )
         nose.tools.eq_(foia.status, 'processed')
 
     def test_bad_sender(self):
@@ -129,15 +126,16 @@ class TestMailgunViewHandleRequest(TestMailgunViews):
         self.mailgun_route(from_, to_, text=text, signature=signature)
 
         communication = FOIACommunication.objects.get(likely_foia=foia)
-        nose.tools.eq_(communication.communication, '%s\n%s' % (text, signature))
-        nose.tools.ok_(OrphanTask.objects
-                .filter(
-                    communication=communication,
-                    reason='bs',
-                    address=foia.get_mail_id(),
-                    )
-                .exists()
-                )
+        nose.tools.eq_(
+            communication.communication, '%s\n%s' % (text, signature)
+        )
+        nose.tools.ok_(
+            OrphanTask.objects.filter(
+                communication=communication,
+                reason='bs',
+                address=foia.get_mail_id(),
+            ).exists()
+        )
 
     def test_block_incoming(self):
         """Test receiving a message from an unauthorized sender"""
@@ -149,15 +147,16 @@ class TestMailgunViewHandleRequest(TestMailgunViews):
         self.mailgun_route(to_=to_, text=text, signature=signature)
 
         communication = FOIACommunication.objects.get(likely_foia=foia)
-        nose.tools.eq_(communication.communication, '%s\n%s' % (text, signature))
-        nose.tools.ok_(OrphanTask.objects
-                .filter(
-                    communication=communication,
-                    reason='ib',
-                    address=foia.get_mail_id(),
-                    )
-                .exists()
-                )
+        nose.tools.eq_(
+            communication.communication, '%s\n%s' % (text, signature)
+        )
+        nose.tools.ok_(
+            OrphanTask.objects.filter(
+                communication=communication,
+                reason='ib',
+                address=foia.get_mail_id(),
+            ).exists()
+        )
 
     def test_bad_addr(self):
         """Test sending to a non existent FOIA request"""
@@ -166,13 +165,10 @@ class TestMailgunViewHandleRequest(TestMailgunViews):
         text = 'Test bad address.'
         self.mailgun_route(to_=to_, text=text)
 
-        nose.tools.ok_(OrphanTask.objects
-                .filter(
-                    reason='ia',
-                    address='123-12345678'
-                    )
-                .exists()
-                )
+        nose.tools.ok_(
+            OrphanTask.objects.filter(reason='ia', address='123-12345678')
+            .exists()
+        )
 
     def test_attachments(self):
         """Test a message with an attachment"""
@@ -189,7 +185,9 @@ class TestMailgunViewHandleRequest(TestMailgunViews):
             nose.tools.eq_(foia.files.first().ffile.name, file_path)
         finally:
             foia.files.first().delete()
-            file_path = os.path.join(settings.SITE_ROOT, 'static/media/', file_path)
+            file_path = os.path.join(
+                settings.SITE_ROOT, 'static/media/', file_path
+            )
             if os.path.exists(file_path):
                 os.remove(file_path)
 
@@ -231,13 +229,13 @@ class TestMailgunViewCatchAll(TestMailgunViews):
         self.mailgun_route(to_=to_, text=text, signature=signature)
 
         task = OrphanTask.objects.get(
-                reason='ia',
-                address='foobar@requests.muckrock.com',
-                )
+            reason='ia',
+            address='foobar@requests.muckrock.com',
+        )
         nose.tools.eq_(
-                task.communication.communication,
-                '%s\n%s' % (text, signature),
-                )
+            task.communication.communication,
+            '%s\n%s' % (text, signature),
+        )
 
 
 @freeze_time("2017-01-02 12:00:00 EST", tz_offset=-5)
@@ -253,40 +251,41 @@ class TestMailgunViewWebHooks(TestMailgunViews):
 
         recipient = 'alice@example.com'
         comm = FOIACommunicationFactory(
-                foia__email=EmailAddress.objects.fetch(recipient),
-                foia__agency__fax=None,
-                )
+            foia__email=EmailAddress.objects.fetch(recipient),
+            foia__agency__fax=None,
+        )
         email = comm.emails.first()
         event = 'bounced'
         code = 550
-        error = ("5.1.1 The email account that you tried to reach "
-                "does not exist. Please try 5.1.1 double-checking "
-                "the recipient's email address for typos or 5.1.1 "
-                "unnecessary spaces. Learn more at 5.1.1 "
-                "http://support.example.com/mail/bin/answer.py")
+        error = (
+            "5.1.1 The email account that you tried to reach "
+            "does not exist. Please try 5.1.1 double-checking "
+            "the recipient's email address for typos or 5.1.1 "
+            "unnecessary spaces. Learn more at 5.1.1 "
+            "http://support.example.com/mail/bin/answer.py"
+        )
         data = {
-                'event': event,
-                'email_id': email.pk,
-                'code': code,
-                'error': error,
-                'recipient': recipient,
-                }
+            'event': event,
+            'email_id': email.pk,
+            'code': code,
+            'error': error,
+            'recipient': recipient,
+        }
         self.sign(data)
         request = self.factory.post(reverse('mailgun-bounces'), data)
-        bounces(request) # pylint: disable=no-value-for-parameter
+        bounces(request)  # pylint: disable=no-value-for-parameter
         comm.refresh_from_db()
 
-        nose.tools.ok_(EmailError.objects
-                .filter(
-                    email=email,
-                    datetime=datetime(2017, 1, 2, 12),
-                    recipient=EmailAddress.objects.fetch(recipient),
-                    code=code,
-                    error=error,
-                    event=event,
-                    )
-                .exists()
-                )
+        nose.tools.ok_(
+            EmailError.objects.filter(
+                email=email,
+                datetime=datetime(2017, 1, 2, 12),
+                recipient=EmailAddress.objects.fetch(recipient),
+                code=code,
+                error=error,
+                event=event,
+            ).exists()
+        )
 
     def test_open(self):
         """Test an open webhook"""
@@ -294,8 +293,8 @@ class TestMailgunViewWebHooks(TestMailgunViews):
 
         recipient = 'alice@example.com'
         comm = FOIACommunicationFactory(
-                foia__email=EmailAddress.objects.fetch(recipient),
-                )
+            foia__email=EmailAddress.objects.fetch(recipient),
+        )
         email = comm.emails.first()
         event = 'opened'
         city = 'Boston'
@@ -305,45 +304,46 @@ class TestMailgunViewWebHooks(TestMailgunViews):
         client_name = 'Chrome'
         client_os = 'Linux'
         device_type = 'desktop'
-        user_agent = ('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.31 '
-                      '(KHTML, like Gecko) Chrome/26.0.1410.43 Safari/537.31')
+        user_agent = (
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.31 '
+            '(KHTML, like Gecko) Chrome/26.0.1410.43 Safari/537.31'
+        )
         ip_address = '50.56.129.169'
         data = {
-                'event': event,
-                'email_id': email.pk,
-                'recipient': recipient,
-                'city': city,
-                'region': region,
-                'country': country,
-                'client-type': client_type,
-                'client-name': client_name,
-                'client-os': client_os,
-                'device-type': device_type,
-                'user-agent': user_agent,
-                'ip': ip_address,
-                }
+            'event': event,
+            'email_id': email.pk,
+            'recipient': recipient,
+            'city': city,
+            'region': region,
+            'country': country,
+            'client-type': client_type,
+            'client-name': client_name,
+            'client-os': client_os,
+            'device-type': device_type,
+            'user-agent': user_agent,
+            'ip': ip_address,
+        }
         self.sign(data)
         request = self.factory.post(reverse('mailgun-opened'), data)
-        opened(request) # pylint: disable=no-value-for-parameter
+        opened(request)  # pylint: disable=no-value-for-parameter
         comm.refresh_from_db()
 
-        nose.tools.ok_(EmailOpen.objects
-                .filter(
-                    email=email,
-                    datetime=datetime(2017, 1, 2, 12),
-                    recipient=EmailAddress.objects.fetch(recipient),
-                    city=city,
-                    region=region,
-                    country=country,
-                    client_type=client_type,
-                    client_name=client_name,
-                    client_os=client_os,
-                    device_type=device_type,
-                    user_agent=user_agent[:255],
-                    ip_address=ip_address,
-                    )
-                .exists()
-                )
+        nose.tools.ok_(
+            EmailOpen.objects.filter(
+                email=email,
+                datetime=datetime(2017, 1, 2, 12),
+                recipient=EmailAddress.objects.fetch(recipient),
+                city=city,
+                region=region,
+                country=country,
+                client_type=client_type,
+                client_name=client_name,
+                client_os=client_os,
+                device_type=device_type,
+                user_agent=user_agent[:255],
+                ip_address=ip_address,
+            ).exists()
+        )
 
     def test_delivered(self):
         """Test a delivered webhook"""
@@ -351,15 +351,15 @@ class TestMailgunViewWebHooks(TestMailgunViews):
         comm = FOIACommunicationFactory()
         email = comm.emails.first()
         data = {
-                'event': 'delivered',
-                'email_id': email.pk,
-                }
+            'event': 'delivered',
+            'email_id': email.pk,
+        }
         self.sign(data)
         request = self.factory.post(reverse('mailgun-delivered'), data)
-        delivered(request) # pylint: disable=no-value-for-parameter
+        delivered(request)  # pylint: disable=no-value-for-parameter
         comm.refresh_from_db()
 
         nose.tools.eq_(
-                comm.emails.first().confirmed_datetime,
-                datetime(2017, 1, 2, 12),
-                )
+            comm.emails.first().confirmed_datetime,
+            datetime(2017, 1, 2, 12),
+        )

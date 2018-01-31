@@ -2,6 +2,7 @@
 """
 App configuration for communication app
 """
+# Django
 from django.apps import AppConfig
 
 

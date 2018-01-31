@@ -2,8 +2,11 @@
 Settings used when deployed on heroku
 Not used directly - imported from production and staging settings
 """
+
 # pylint: disable=wildcard-import
 # pylint: disable=unused-wildcard-import
+
+# MuckRock
 from muckrock.settings.base import *
 
 # media and static asset handling
@@ -24,16 +27,18 @@ MEDIA_URL = STATIC_URL + 'media/'
 CLEAN_S3_ON_FOIA_DELETE = True
 USE_QUEUED_STORAGE = True
 
-TEMPLATES[0]['OPTIONS']['loaders'] = [
-    ('django.template.loaders.cached.Loader', [
+TEMPLATES[0]['OPTIONS']['loaders'] = [(
+    'django.template.loaders.cached.Loader',
+    [
         'django.template.loaders.filesystem.Loader',
         'django.template.loaders.app_directories.Loader',
-        ],
-    )]
+    ],
+)]
 del TEMPLATES[0]['APP_DIRS']
 
 if 'MEMCACHIER_SERVERS' in os.environ:
-    os.environ['MEMCACHE_SERVERS'] = os.environ.get('MEMCACHIER_SERVERS', '').replace(',', ';')
+    os.environ['MEMCACHE_SERVERS'] = os.environ.get('MEMCACHIER_SERVERS',
+                                                    '').replace(',', ';')
     os.environ['MEMCACHE_USERNAME'] = os.environ.get('MEMCACHIER_USERNAME', '')
     os.environ['MEMCACHE_PASSWORD'] = os.environ.get('MEMCACHIER_PASSWORD', '')
 
@@ -49,7 +54,6 @@ if 'MEMCACHIER_SERVERS' in os.environ:
             # timeout that should be applied to keys! Setting it to `None`
             # disables expiration.
             'TIMEOUT': None,
-
             'OPTIONS': {
                 # Enable faster IO
                 'no_block': True,

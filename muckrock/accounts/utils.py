@@ -1,20 +1,25 @@
 """
 Utility method for the accounts application
 """
+# Django
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.validators import validate_email
 from django.forms import ValidationError
 
-from datetime import date
+# Standard Library
 import logging
 import re
+from datetime import date
+
+# Third Party
 import requests
 import stripe
 
+# MuckRock
 from muckrock.accounts.models import Profile
-from muckrock.utils import stripe_retry_on_error, retry_on_error, generate_key
+from muckrock.utils import generate_key, retry_on_error, stripe_retry_on_error
 
 logger = logging.getLogger(__name__)
 
@@ -37,11 +42,7 @@ def miniregister(full_name, email):
     first_name, last_name = split_name(full_name)
     # create a new User
     user = User.objects.create_user(
-        username,
-        email,
-        password,
-        first_name=first_name,
-        last_name=last_name
+        username, email, password, first_name=first_name, last_name=last_name
     )
     # create a new Profile
     Profile.objects.create(
@@ -102,52 +103,58 @@ def stripe_get_customer(user, email, description):
         return user.profile.customer()
     else:
         return stripe_retry_on_error(
-                stripe.Customer.create,
-                description=description,
-                email=email,
-                idempotency_key=True,
-                )
+            stripe.Customer.create,
+            description=description,
+            email=email,
+            idempotency_key=True,
+        )
 
 
-def mailchimp_subscribe(request, email, list_=settings.MAILCHIMP_LIST_DEFAULT, suppress_msg=False):
+def mailchimp_subscribe(
+    request, email, list_=settings.MAILCHIMP_LIST_DEFAULT, suppress_msg=False
+):
     """Adds the email to the mailing list throught the MailChimp API.
     http://developer.mailchimp.com/documentation/mailchimp/reference/lists/members/"""
     api_url = settings.MAILCHIMP_API_ROOT + '/lists/' + list_ + '/members/'
     headers = {
-            'Content-Type': 'application/json',
-            'Authorization': 'apikey %s' % settings.MAILCHIMP_API_KEY
-            }
+        'Content-Type': 'application/json',
+        'Authorization': 'apikey %s' % settings.MAILCHIMP_API_KEY
+    }
     data = {
-            'email_address': email,
-            'status': 'pending',
-            }
+        'email_address': email,
+        'status': 'pending',
+    }
     response = retry_on_error(
-            requests.ConnectionError,
-            requests.post,
-            api_url,
-            json=data,
-            headers=headers,
-            )
+        requests.ConnectionError,
+        requests.post,
+        api_url,
+        json=data,
+        headers=headers,
+    )
     try:
         response.raise_for_status()
     except requests.exceptions.HTTPError as exception:
-        if (response.status_code == 400 and
-                response.json()['title'] == 'Member Exists'):
+        if (
+            response.status_code == 400
+            and response.json()['title'] == 'Member Exists'
+        ):
             if not suppress_msg:
-                messages.error(request, 'Email is already a member of this list')
+                messages.error(
+                    request, 'Email is already a member of this list'
+                )
         else:
             if not suppress_msg:
                 messages.error(
-                        request,
-                        'Sorry, an error occurred while trying to subscribe you.',
-                        )
+                    request,
+                    'Sorry, an error occurred while trying to subscribe you.',
+                )
             logger.warning(exception)
         return True
 
     if not suppress_msg:
         messages.success(
-                request,
-                'Thank you for subscribing to our newsletter. We sent a '
-                'confirmation email to your inbox.',
-                )
+            request,
+            'Thank you for subscribing to our newsletter. We sent a '
+            'confirmation email to your inbox.',
+        )
     return False

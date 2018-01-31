@@ -2,17 +2,22 @@
 Filters for FOIA models
 """
 
+# Django
 from django import forms
 from django.contrib.auth.models import User
 from django.db.models import Q
 
-from autocomplete_light import shortcuts as autocomplete_light
-import django_filters
+# Standard Library
 import re
 
+# Third Party
+import django_filters
+from autocomplete_light import shortcuts as autocomplete_light
+
+# MuckRock
 from muckrock.agency.models import Agency
-from muckrock.filters import RangeWidget, BLANK_STATUS, NULL_BOOLEAN_CHOICES
-from muckrock.foia.models import FOIARequest, FOIAMultiRequest
+from muckrock.filters import BLANK_STATUS, NULL_BOOLEAN_CHOICES, RangeWidget
+from muckrock.foia.models import FOIAMultiRequest, FOIARequest
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag
 
@@ -20,16 +25,15 @@ from muckrock.tags.models import Tag
 class JurisdictionFilterMixIn(django_filters.FilterSet):
     """Mix in for including state inclusive jurisdiction filter"""
     jurisdiction = django_filters.CharFilter(
-            widget=autocomplete_light.MultipleChoiceWidget(
-                'JurisdictionStateInclusiveAutocomplete'),
-            method='filter_jurisdiction',
-            )
+        widget=autocomplete_light.
+        MultipleChoiceWidget('JurisdictionStateInclusiveAutocomplete'),
+        method='filter_jurisdiction',
+    )
     value_format = re.compile(r'\d+-(True|False)')
 
     def filter_jurisdiction(self, queryset, name, value):
         """Filter jurisdction, allowing for state inclusive searches"""
         #pylint: disable=unused-argument
-        #pylint: disable=no-self-use
         values = self.request.GET.getlist('jurisdiction')
         query = Q()
         for value in values:
@@ -86,12 +90,13 @@ class FOIARequestFilterSet(JurisdictionFilterMixIn, django_filters.FilterSet):
         name='communications__date',
         label='Date Range',
         lookup_expr='contains',
-        widget=RangeWidget(attrs={
-            'class': 'datepicker',
-            'placeholder': 'MM/DD/YYYY',
-        }),
+        widget=RangeWidget(
+            attrs={
+                'class': 'datepicker',
+                'placeholder': 'MM/DD/YYYY',
+            }
+        ),
     )
-
 
     class Meta:
         model = FOIARequest
@@ -132,10 +137,12 @@ class MyFOIARequestFilterSet(JurisdictionFilterMixIn, django_filters.FilterSet):
         name='communications__date',
         label='Date Range',
         lookup_expr='contains',
-        widget=RangeWidget(attrs={
-            'class': 'datepicker',
-            'placeholder': 'MM/DD/YYYY',
-        }),
+        widget=RangeWidget(
+            attrs={
+                'class': 'datepicker',
+                'placeholder': 'MM/DD/YYYY',
+            }
+        ),
     )
 
     class Meta:
@@ -152,7 +159,9 @@ class MyFOIAMultiRequestFilterSet(django_filters.FilterSet):
         fields = ['status']
 
 
-class ProcessingFOIARequestFilterSet(JurisdictionFilterMixIn, django_filters.FilterSet):
+class ProcessingFOIARequestFilterSet(
+    JurisdictionFilterMixIn, django_filters.FilterSet
+):
     """Allows filtering a request by user, agency, jurisdiction, or tags."""
     user = django_filters.ModelMultipleChoiceFilter(
         queryset=User.objects.all(),
@@ -190,12 +199,13 @@ class AgencyFOIARequestFilterSet(django_filters.FilterSet):
         name='communications__date',
         label='Date Range',
         lookup_expr='contains',
-        widget=RangeWidget(attrs={
-            'class': 'datepicker',
-            'placeholder': 'MM/DD/YYYY',
-        }),
+        widget=RangeWidget(
+            attrs={
+                'class': 'datepicker',
+                'placeholder': 'MM/DD/YYYY',
+            }
+        ),
     )
-
 
     class Meta:
         model = FOIARequest

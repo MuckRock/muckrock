@@ -2,8 +2,10 @@
 URL mappings for the Agency application
 """
 
+# Django
 from django.conf.urls import url
 
+# MuckRock
 from muckrock.agency import views
 from muckrock.views import jurisdiction
 
@@ -31,4 +33,4 @@ urlpatterns = [
         views.similar,
         name='agency-similar',
     ),
-    ]
+]

@@ -2,18 +2,23 @@
 Files should be added to communications
 """
 
+# Django
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.test import TestCase
 
+# Third Party
 from nose.tools import eq_, ok_, raises
 
+# MuckRock
 from muckrock.factories import FOIAFileFactory, UserFactory
 from muckrock.foia.views import FOIAFileListView
 from muckrock.test_utils import http_get_response
 
+
 class TestRequestFilesView(TestCase):
     """Files should render in a paginated list on a separate page."""
+
     def setUp(self):
         self.file = FOIAFileFactory()
         self.foia = self.file.foia
@@ -28,9 +33,13 @@ class TestRequestFilesView(TestCase):
 
     def test_get_ok(self):
         """The view should return 200 if the foia is viewable to the user."""
-        ok_(self.foia.has_perm(self.foia.user, 'view'),
-            'The user should be able to view the request')
-        response = http_get_response(self.url, self.view, self.foia.user, **self.kwargs)
+        ok_(
+            self.foia.has_perm(self.foia.user, 'view'),
+            'The user should be able to view the request'
+        )
+        response = http_get_response(
+            self.url, self.view, self.foia.user, **self.kwargs
+        )
         eq_(response.status_code, 200, 'The view should return 200.')
 
     @raises(Http404)

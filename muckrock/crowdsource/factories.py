@@ -2,22 +2,26 @@
 Testing factories for the crowdsource app
 """
 
+# Django
 from django.utils.text import slugify
 
+# Third Party
 import factory
 
+# MuckRock
 from muckrock.crowdsource.models import (
-        Crowdsource,
-        CrowdsourceData,
-        CrowdsourceField,
-        CrowdsourceChoice,
-        CrowdsourceResponse,
-        CrowdsourceValue,
-        )
+    Crowdsource,
+    CrowdsourceChoice,
+    CrowdsourceData,
+    CrowdsourceField,
+    CrowdsourceResponse,
+    CrowdsourceValue,
+)
 
 
 class CrowdsourceFactory(factory.django.DjangoModelFactory):
     """A factory for creating Crowdsources"""
+
     class Meta:
         model = Crowdsource
 
@@ -29,6 +33,7 @@ class CrowdsourceFactory(factory.django.DjangoModelFactory):
 
 class CrowdsourceDataFactory(factory.django.DjangoModelFactory):
     """A factory for creating Crowdsource Data"""
+
     class Meta:
         model = CrowdsourceData
 
@@ -38,6 +43,7 @@ class CrowdsourceDataFactory(factory.django.DjangoModelFactory):
 
 class CrowdsourceFieldFactory(factory.django.DjangoModelFactory):
     """A factory for creating Crowdsource Fields"""
+
     class Meta:
         model = CrowdsourceField
 
@@ -54,24 +60,25 @@ class CrowdsourceSelectFieldFactory(CrowdsourceFieldFactory):
     """A factory for creating a select field"""
     type = 'select'
     choice0 = factory.RelatedFactory(
-            'muckrock.crowdsource.factories.CrowdsourceChoiceFactory',
-            'field',
-            order=1,
-            )
+        'muckrock.crowdsource.factories.CrowdsourceChoiceFactory',
+        'field',
+        order=1,
+    )
     choice1 = factory.RelatedFactory(
-            'muckrock.crowdsource.factories.CrowdsourceChoiceFactory',
-            'field',
-            order=2,
-            )
+        'muckrock.crowdsource.factories.CrowdsourceChoiceFactory',
+        'field',
+        order=2,
+    )
     choice2 = factory.RelatedFactory(
-            'muckrock.crowdsource.factories.CrowdsourceChoiceFactory',
-            'field',
-            order=3,
-            )
+        'muckrock.crowdsource.factories.CrowdsourceChoiceFactory',
+        'field',
+        order=3,
+    )
 
 
 class CrowdsourceChoiceFactory(factory.django.DjangoModelFactory):
     """A factory for creating a crowdsource choice"""
+
     class Meta:
         model = CrowdsourceChoice
 
@@ -82,6 +89,7 @@ class CrowdsourceChoiceFactory(factory.django.DjangoModelFactory):
 
 class CrowdsourceResponseFactory(factory.django.DjangoModelFactory):
     """A factory for creating crowdsource responses"""
+
     class Meta:
         model = CrowdsourceResponse
 
@@ -92,6 +100,7 @@ class CrowdsourceResponseFactory(factory.django.DjangoModelFactory):
 
 class CrowdsourceValueFactory(factory.django.DjangoModelFactory):
     """A factory for creating crowdsource values"""
+
     class Meta:
         model = CrowdsourceValue
 

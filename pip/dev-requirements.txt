@@ -26,12 +26,13 @@ fake-factory==0.7.2       # via factory-boy
 first==2.0.1              # via pip-tools
 freezegun==0.3.8
 funcsigs==1.0.2           # via mock
+futures==3.2.0
 idna==2.5                 # via requests
 ipaddress==1.0.17         # via fake-factory
 ipdb==0.10.1
 ipython-genutils==0.1.0   # via traitlets
 ipython==5.1.0
-isort==4.2.5              # via pylint
+isort==4.2.5
 lazy-object-proxy==1.2.2  # via astroid
 mccabe==0.5.2             # via pylint
 mock==2.0.0
@@ -61,6 +62,7 @@ urllib3==1.21.1           # via requests
 wcwidth==0.1.7            # via prompt-toolkit
 whoosh==2.7.4
 wrapt==1.10.8             # via astroid
+yapf==0.20.1
 yet-another-django-profiler==1.0.3
 
 # The following packages are commented out because they are

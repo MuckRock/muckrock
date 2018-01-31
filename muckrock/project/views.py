@@ -2,6 +2,7 @@
 Views for the project application
 """
 
+# Django
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -10,27 +11,36 @@ from django.core.cache.utils import make_template_fragment_key
 from django.core.urlresolvers import reverse
 from django.db.models import Prefetch
 from django.http import Http404
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
+from django.utils.decorators import method_decorator
 from django.views.generic import (
-    TemplateView,
-    FormView,
     CreateView,
     DetailView,
+    FormView,
+    TemplateView,
     UpdateView,
 )
-from django.utils.decorators import method_decorator
 
-from actstream.models import followers
+# Standard Library
 from datetime import date, timedelta
 
-from muckrock.crowdfund.models import Crowdfund
+# Third Party
+from actstream.models import followers
+
+# MuckRock
 from muckrock.crowdfund.forms import CrowdfundForm
+from muckrock.crowdfund.models import Crowdfund
 from muckrock.message.tasks import notify_project_contributor
-from muckrock.project.models import Project, ProjectCrowdfunds
 from muckrock.project.filters import ProjectFilterSet
-from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm, ProjectPublishForm
-from muckrock.views import MRSearchFilterListView
+from muckrock.project.forms import (
+    ProjectCreateForm,
+    ProjectPublishForm,
+    ProjectUpdateForm,
+)
+from muckrock.project.models import Project, ProjectCrowdfunds
 from muckrock.utils import new_action
+from muckrock.views import MRSearchFilterListView
+
 
 class ProjectExploreView(TemplateView):
     """Provides a space for exploring our different projects."""
@@ -40,7 +50,9 @@ class ProjectExploreView(TemplateView):
         """Gathers and returns a dictionary of context."""
         context = super(ProjectExploreView, self).get_context_data(**kwargs)
         user = self.request.user
-        featured_projects = Project.objects.get_visible(user).filter(featured=True).optimize()
+        featured_projects = Project.objects.get_visible(user).filter(
+            featured=True
+        ).optimize()
         context.update({
             'featured_projects': featured_projects,
         })
@@ -77,8 +89,10 @@ class ProjectContributorView(ProjectListView):
     def get_queryset(self):
         """Returns all the contributor's projects that are visible to the user."""
         queryset = super(ProjectContributorView, self).get_queryset()
-        queryset = (queryset.get_for_contributor(self.get_contributor())
-                    .get_visible(self.request.user))
+        queryset = (
+            queryset.get_for_contributor(self.get_contributor())
+            .get_visible(self.request.user)
+        )
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -135,30 +149,37 @@ class ProjectDetailView(DetailView):
         context = super(ProjectDetailView, self).get_context_data(**kwargs)
         project = context['object']
         user = self.request.user
-        context['sidebar_admin_url'] = reverse('admin:project_project_change',
-            args=(project.pk,))
-        context['visible_requests'] = (project.requests
-                .get_viewable(user)
-                .select_related(
-                    'jurisdiction',
-                    'jurisdiction__parent',
-                    'jurisdiction__parent__parent',
-                    'agency__jurisdiction',
-                    'user__profile',
-                ).get_public_file_count())
+        context['sidebar_admin_url'] = reverse(
+            'admin:project_project_change', args=(project.pk,)
+        )
+        context['visible_requests'] = (
+            project.requests.get_viewable(user).select_related(
+                'jurisdiction',
+                'jurisdiction__parent',
+                'jurisdiction__parent__parent',
+                'agency__jurisdiction',
+                'user__profile',
+            ).get_public_file_count()
+        )
         context['followers'] = followers(project)
-        context['articles'] = (project.articles
-                .get_published()
-                .prefetch_related(
-                    Prefetch(
-                        'authors',
-                        queryset=User.objects.select_related('profile'))))
+        context['articles'] = (
+            project.articles.get_published().prefetch_related(
+                Prefetch(
+                    'authors', queryset=User.objects.select_related('profile')
+                )
+            )
+        )
         context['contributors'] = project.contributors.select_related('profile')
-        context['user_is_experimental'] = user.is_authenticated() and user.profile.experimental
-        context['newsletter_label'] = ('Subscribe to the project newsletter'
-                                      if not project.newsletter_label else project.newsletter_label)
-        context['newsletter_cta'] = ('Get updates delivered to your inbox'
-                                    if not project.newsletter_cta else project.newsletter_cta)
+        context['user_is_experimental'
+                ] = user.is_authenticated() and user.profile.experimental
+        context['newsletter_label'] = (
+            'Subscribe to the project newsletter'
+            if not project.newsletter_label else project.newsletter_label
+        )
+        context['newsletter_cta'] = (
+            'Get updates delivered to your inbox'
+            if not project.newsletter_cta else project.newsletter_cta
+        )
         context['user_can_edit'] = project.editable_by(user)
         return context
 
@@ -182,6 +203,7 @@ class ProjectPermissionsMixin(object):
     Note: It must be included first when subclassing Django generic views
     because it overrides their dispatch method.
     """
+
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         """Overrides the dispatch function to include permissions checking."""
@@ -205,17 +227,19 @@ class ProjectEditView(ProjectPermissionsMixin, UpdateView):
         messages.success(self.request, 'Your edits were saved.')
         # clear the template cache for the project after its been edited
         key = make_template_fragment_key(
-                'project_detail_objects',
-                [self.object.pk],
-                )
+            'project_detail_objects',
+            [self.object.pk],
+        )
         cache.delete(key)
         return super(ProjectEditView, self).form_valid(form)
 
     def notify_new_contributors(self, existing, new):
         """Notify all newly added contributors."""
-        added_contributors = list(set(new)-set(existing))
+        added_contributors = list(set(new) - set(existing))
         for contributor in added_contributors:
-            notify_project_contributor.delay(contributor, self.object, self.request.user)
+            notify_project_contributor.delay(
+                contributor, self.object, self.request.user
+            )
 
 
 class ProjectPublishView(ProjectPermissionsMixin, FormView):
@@ -230,11 +254,14 @@ class ProjectPublishView(ProjectPermissionsMixin, FormView):
         if project.editable_by(self.request.user):
             if not project.private:
                 if project.approved:
-                    messages.warning(self.request,
-                        'This project is already public.')
+                    messages.warning(
+                        self.request, 'This project is already public.'
+                    )
                 else:
-                    messages.warning(self.request,
-                        'This project is already published and awaiting approval.')
+                    messages.warning(
+                        self.request,
+                        'This project is already published and awaiting approval.'
+                    )
                 return redirect(project)
         return super(ProjectPublishView, self).dispatch(*args, **kwargs)
 
@@ -262,11 +289,15 @@ class ProjectCrowdfundView(ProjectPermissionsMixin, CreateView):
 
     def dispatch(self, *args, **kwargs):
         """Crowdfunds may only be started on public projects."""
-        return_value = super(ProjectCrowdfundView, self).dispatch(*args, **kwargs)
+        return_value = super(ProjectCrowdfundView,
+                             self).dispatch(*args, **kwargs)
         project = self.get_project()
         if project.editable_by(self.request.user):
             if project.private or not project.approved:
-                messages.warning(self.request, 'Crowdfunds may only be started on public requests.')
+                messages.warning(
+                    self.request,
+                    'Crowdfunds may only be started on public requests.'
+                )
                 return redirect(project)
         return return_value
 
@@ -290,7 +321,9 @@ class ProjectCrowdfundView(ProjectPermissionsMixin, CreateView):
         redirection = super(ProjectCrowdfundView, self).form_valid(form)
         crowdfund = self.object
         project = self.get_project()
-        relationship = ProjectCrowdfunds.objects.create(project=project, crowdfund=crowdfund)
+        relationship = ProjectCrowdfunds.objects.create(
+            project=project, crowdfund=crowdfund
+        )
         new_action(
             self.request.user,
             'began crowdfunding',

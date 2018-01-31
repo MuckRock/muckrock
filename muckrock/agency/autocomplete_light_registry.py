@@ -2,17 +2,22 @@
 Autocomplete registry for Agency
 """
 
+# Django
 from django.db.models import Q
 
+# Third Party
 from autocomplete_light import shortcuts as autocomplete_light
 from fuzzywuzzy import fuzz, process
 
+# MuckRock
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 
+
 class SimpleAgencyAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     """Creates an autocomplete field for picking agencies"""
-    choices = Agency.objects.filter(status='approved').select_related('jurisdiction')
+    choices = Agency.objects.filter(status='approved'
+                                    ).select_related('jurisdiction')
     choice_template = 'autocomplete/simple_agency.html'
     search_fields = ['name', 'aliases']
     attrs = {
@@ -30,20 +35,21 @@ class SimpleAgencyAutocomplete(autocomplete_light.AutocompleteModelTemplate):
         choices = super(SimpleAgencyAutocomplete, self).choices_for_request()
         query = self.request.GET.get('q', '')
         fuzzy_choices = process.extractBests(
-                query,
-                {a: a.name for a in self.choices.exclude(pk__in=choices)},
-                scorer=fuzz.partial_ratio,
-                score_cutoff=83,
-                limit=10,
-                )
+            query,
+            {a: a.name
+             for a in self.choices.exclude(pk__in=choices)},
+            scorer=fuzz.partial_ratio,
+            score_cutoff=83,
+            limit=10,
+        )
         choices = list(choices) + [c[2] for c in fuzzy_choices]
         return choices
 
 
-
 class AgencyAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     """Creates an autocomplete field for picking agencies"""
-    choices = Agency.objects.filter(status='approved').select_related('jurisdiction')
+    choices = Agency.objects.filter(status='approved'
+                                    ).select_related('jurisdiction')
     choice_template = 'autocomplete/agency.html'
     search_fields = ['name', 'aliases']
     attrs = {
@@ -56,21 +62,25 @@ class AgencyAutocomplete(autocomplete_light.AutocompleteModelTemplate):
         jurisdiction_id = self.request.GET.get('jurisdiction_id')
         if jurisdiction_id:
             self.choices = self._filter_by_jurisdiction(
-                    self.choices, jurisdiction_id)
+                self.choices, jurisdiction_id
+            )
         return super(AgencyAutocomplete, self).choices_for_request()
 
     def _filter_by_jurisdiction(self, choices, jurisdiction_id):
         """Do the filtering here so subclasses can override this method"""
-        #pylint: disable=no-self-use
         if jurisdiction_id == 'f':
             jurisdiction_id = Jurisdiction.objects.get(level='f').id
         return choices.filter(jurisdiction__id=jurisdiction_id)
 
 
-class AgencyMultiRequestAutocomplete(autocomplete_light.AutocompleteModelTemplate):
+class AgencyMultiRequestAutocomplete(
+    autocomplete_light.AutocompleteModelTemplate
+):
     """Provides an autocomplete field for picking multiple agencies."""
-    choices = (Agency.objects.get_approved().select_related('jurisdiction__parent')
-                                            .prefetch_related('types'))
+    choices = (
+        Agency.objects.get_approved().select_related('jurisdiction__parent')
+        .prefetch_related('types')
+    )
     choice_template = 'autocomplete/agency.html'
     search_fields = ['name']
     attrs = {
@@ -81,13 +91,13 @@ class AgencyMultiRequestAutocomplete(autocomplete_light.AutocompleteModelTemplat
     def complex_condition(self, string):
         """Returns a complex set of database queries for getting agencies
         by name, alias, jurisdiction, jurisdiction abbreviation, and type."""
-        # pylint: disable=no-self-use
-        return (Q(name__icontains=string)|
-                Q(aliases__icontains=string)|
-                Q(jurisdiction__name__icontains=string)|
-                Q(jurisdiction__abbrev__iexact=string)|
-                Q(jurisdiction__parent__abbrev__iexact=string)|
-                Q(types__name__icontains=string))
+        return (
+            Q(name__icontains=string) | Q(aliases__icontains=string)
+            | Q(jurisdiction__name__icontains=string)
+            | Q(jurisdiction__abbrev__iexact=string)
+            | Q(jurisdiction__parent__abbrev__iexact=string)
+            | Q(types__name__icontains=string)
+        )
 
     def choices_for_request(self):
         query = self.request.GET.get('q', '')
@@ -115,13 +125,13 @@ class AgencyAppealAdminAutocomplete(AgencyAdminAutocomplete):
 
     def _filter_by_jurisdiction(self, choices, jurisdiction_id):
         """Filter the agency choices given a jurisdiction"""
-        #pylint: disable=no-self-use
         jurisdiction = Jurisdiction.objects.get(pk=jurisdiction_id)
         if jurisdiction.level == 'l':
             # For local jurisdictions, appeal agencies may come from the
             # parent level
             return choices.filter(
-                    jurisdiction__in=(jurisdiction, jurisdiction.parent))
+                jurisdiction__in=(jurisdiction, jurisdiction.parent)
+            )
         else:
             return choices.filter(jurisdiction=jurisdiction)
 

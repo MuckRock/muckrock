@@ -1,5 +1,6 @@
 """Validation routines for forms"""
 
+
 def validate_date_order(begin_field, end_field):
     """Creates a clean method to be added to forms to validate one date comes before another"""
 
@@ -10,9 +11,9 @@ def validate_date_order(begin_field, end_field):
 
         if date_begin and date_end and date_begin >= date_end:
             # pylint: disable=protected-access
-            self._errors[end_field] = self.error_class(
-                ['%s must be later than %s' % (end_field, begin_field)]
-            )
+            self._errors[end_field] = self.error_class([
+                '%s must be later than %s' % (end_field, begin_field)
+            ])
 
         return self.cleaned_data
 

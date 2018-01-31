@@ -2,14 +2,20 @@
 Models for the tags application
 """
 
+# pylint: disable=model-missing-unicode
+
+# Django
 from django.db import models
 
-from autocomplete_light import shortcuts as autocomplete_light
+# Standard Library
 import re
-from taggit.models import Tag as TaggitTag, GenericTaggedItemBase
+
+# Third Party
+from autocomplete_light import shortcuts as autocomplete_light
+from taggit.models import Tag as TaggitTag
+from taggit.models import GenericTaggedItemBase
 from taggit.utils import _parse_tags
 
-# pylint: disable=model-missing-unicode
 
 def parse_tags(tagstring):
     """Normalize tags after parsing"""
@@ -31,7 +37,6 @@ class Tag(TaggitTag):
         super(Tag, self).save(*args, **kwargs)
 
     class Meta:
-        # pylint: disable=too-few-public-methods
         ordering = ['name']
 
 
@@ -40,8 +45,10 @@ class TaggedItemBase(GenericTaggedItemBase):
     tag = models.ForeignKey(Tag, related_name="%(app_label)s_%(class)s_items")
 
 
-autocomplete_light.register(Tag, attrs={
-    'placeholder': 'Search tags',
-    'data-autocomplete-minimum-characters': 1
+autocomplete_light.register(
+    Tag,
+    attrs={
+        'placeholder': 'Search tags',
+        'data-autocomplete-minimum-characters': 1
     }
 )

@@ -2,9 +2,12 @@
 Autocomplete registry for news articles
 """
 
+# Third Party
+from autocomplete_light import shortcuts as autocomplete_light
+
+# MuckRock
 from muckrock.news.models import Article
 
-from autocomplete_light import shortcuts as autocomplete_light
 
 class ArticleAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     """Creates an autocomplete for picking articles"""
@@ -15,5 +18,6 @@ class ArticleAutocomplete(autocomplete_light.AutocompleteModelTemplate):
         'placeholder': 'Search for articles',
         'data-autocomplete-minimum-characters': 1
     }
+
 
 autocomplete_light.register(Article, ArticleAutocomplete)

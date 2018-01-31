@@ -2,10 +2,13 @@
 Utilities for testing MuckRock applications
 """
 
+# Django
 from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory
 
+# Third Party
 from mock import MagicMock
+
 
 def mock_middleware(request):
     """Mocks the request with messages and session middleware"""
@@ -13,6 +16,7 @@ def mock_middleware(request):
     setattr(request, '_messages', MagicMock())
     setattr(request, '_dont_enforce_csrf_checks', True)
     return request
+
 
 def http_get_response(url, view, user=AnonymousUser(), **kwargs):
     """Handles making GET requests, returns the response."""
@@ -22,6 +26,7 @@ def http_get_response(url, view, user=AnonymousUser(), **kwargs):
     request.user = user
     response = view(request, **kwargs)
     return response
+
 
 def http_post_response(url, view, data, user=AnonymousUser(), **kwargs):
     """Handles making POST requests, returns the response."""

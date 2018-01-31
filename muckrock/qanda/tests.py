@@ -2,24 +2,22 @@
 Tests for Q&A
 """
 
+# Django
 from django.core import mail
 from django.core.urlresolvers import reverse
-from django.test import TestCase, RequestFactory
+from django.test import RequestFactory, TestCase
 
+# Third Party
 import nose.tools
 
-from muckrock.factories import (
-        AnswerFactory,
-        QuestionFactory,
-        UserFactory,
-        )
+# MuckRock
+from muckrock.factories import AnswerFactory, QuestionFactory, UserFactory
 from muckrock.qanda.views import block_user, report_spam
 from muckrock.test_utils import mock_middleware
 
 
 class TestQandA(TestCase):
     """Test for Q&A"""
-    # pylint: disable=no-self-use
 
     def setUp(self):
         mail.outbox = []
@@ -28,36 +26,37 @@ class TestQandA(TestCase):
         """Test answer authors returns correct users"""
         question = QuestionFactory()
         answer1 = AnswerFactory(
-                question=question,
-                user__username='Alice',
-                )
+            question=question,
+            user__username='Alice',
+        )
         answer2 = AnswerFactory(
-                question=question,
-                user__username='Bob',
-                )
+            question=question,
+            user__username='Bob',
+        )
         AnswerFactory(
-                question=question,
-                user__username='Charlie',
-                user__is_active=False,
-                )
+            question=question,
+            user__username='Charlie',
+            user__is_active=False,
+        )
         AnswerFactory(
-                question=question,
-                user=answer1.user,
-                )
+            question=question,
+            user=answer1.user,
+        )
         nose.tools.eq_(
-                set(question.answer_authors()),
-                set([answer1.user, answer2.user]),
-                )
+            set(question.answer_authors()),
+            set([answer1.user, answer2.user]),
+        )
 
     def test_block_user(self):
         """Test blocking a user"""
         question = QuestionFactory()
         url = reverse(
-                'question-block',
-                kwargs={
-                    'model': 'question',
-                    'model_pk': question.pk,
-                    })
+            'question-block',
+            kwargs={
+                'model': 'question',
+                'model_pk': question.pk,
+            }
+        )
         request = RequestFactory().get(url)
         request = mock_middleware(request)
         request.user = UserFactory(is_staff=True)
@@ -73,11 +72,11 @@ class TestQandA(TestCase):
         """Test reporting spam"""
         answer = AnswerFactory()
         url = reverse(
-                'question-spam',
-                kwargs={
-                    'model': 'answer',
-                    'model_pk': answer.pk,
-                    })
+            'question-spam', kwargs={
+                'model': 'answer',
+                'model_pk': answer.pk,
+            }
+        )
         request = RequestFactory().get(url)
         request = mock_middleware(request)
         request.user = UserFactory()

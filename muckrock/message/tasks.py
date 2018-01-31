@@ -2,24 +2,30 @@
 Tasks for the messages application.
 """
 
+# Django
+from celery.schedules import crontab
+from celery.task import periodic_task, task
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
-from celery.schedules import crontab
-from celery.task import periodic_task, task
-from dateutil.relativedelta import relativedelta
+# Standard Library
 import logging
-import stripe
 
+# Third Party
+import stripe
+from dateutil.relativedelta import relativedelta
+
+# MuckRock
 from muckrock.accounts.models import Profile, RecurringDonation
 from muckrock.crowdfund.models import RecurringCrowdfundPayment
+from muckrock.message import digests, receipts
 from muckrock.message.email import TemplateEmail
 from muckrock.message.notifications import SlackNotification
-from muckrock.message import digests, receipts
 from muckrock.organization.models import Organization
 from muckrock.utils import stripe_retry_on_error
 
 logger = logging.getLogger(__name__)
+
 
 @task(name='muckrock.message.tasks.send_activity_digest')
 def send_activity_digest(user, subject, interval):
@@ -31,67 +37,86 @@ def send_activity_digest(user, subject, interval):
     )
     email.send()
 
+
 def send_digests(preference, subject, interval):
     """Helper to send out timed digests"""
-    users = (User.objects
-            .filter(
-                profile__email_pref=preference,
-                notifications__read=False,
-                )
-            .distinct()
-            )
+    users = (
+        User.objects.filter(
+            profile__email_pref=preference,
+            notifications__read=False,
+        ).distinct()
+    )
     for user in users:
         send_activity_digest.delay(user, subject, interval)
 
+
 # every hour
-@periodic_task(run_every=crontab(hour='*/1', minute=0), name='muckrock.message.tasks.hourly_digest')
+@periodic_task(
+    run_every=crontab(hour='*/1', minute=0),
+    name='muckrock.message.tasks.hourly_digest'
+)
 def hourly_digest():
     """Send out hourly digest"""
     send_digests('hourly', u'Hourly Digest', relativedelta(hours=1))
 
+
 # every day at 10am
-@periodic_task(run_every=crontab(hour=10, minute=0), name='muckrock.message.tasks.daily_digest')
+@periodic_task(
+    run_every=crontab(hour=10, minute=0),
+    name='muckrock.message.tasks.daily_digest'
+)
 def daily_digest():
     """Send out daily digest"""
     send_digests('daily', u'Daily Digest', relativedelta(days=1))
 
+
 # every Monday at 10am
 @periodic_task(
     run_every=crontab(day_of_week=1, hour=10, minute=0),
-    name='muckrock.message.tasks.weekly_digest')
+    name='muckrock.message.tasks.weekly_digest'
+)
 def weekly_digest():
     """Send out weekly digest"""
     send_digests('weekly', u'Weekly Digest', relativedelta(weeks=1))
 
+
 # first day of every month at 10am
 @periodic_task(
     run_every=crontab(day_of_month=1, hour=10, minute=0),
-    name='muckrock.message.tasks.monthly_digest')
+    name='muckrock.message.tasks.monthly_digest'
+)
 def monthly_digest():
     """Send out monthly digest"""
     send_digests('monthly', u'Monthly Digest', relativedelta(months=1))
 
+
 # every day at 9:30am
-@periodic_task(run_every=crontab(hour=9, minute=30), name='muckrock.message.tasks.staff_digest')
+@periodic_task(
+    run_every=crontab(hour=9, minute=30),
+    name='muckrock.message.tasks.staff_digest'
+)
 def staff_digest():
     """Send out staff digest"""
     staff_users = User.objects.filter(is_staff=True).distinct()
     for staff_user in staff_users:
-        email = digests.StaffDigest(user=staff_user, subject=u'Daily Staff Digest')
+        email = digests.StaffDigest(
+            user=staff_user, subject=u'Daily Staff Digest'
+        )
         email.send()
+
 
 @task(name='muckrock.message.tasks.send_invoice_receipt')
 def send_invoice_receipt(invoice_id):
     """Send out a receipt for an invoiced charge"""
     invoice = stripe_retry_on_error(
-            stripe.Invoice.retrieve,
-            invoice_id,
-            )
+        stripe.Invoice.retrieve,
+        invoice_id,
+    )
     try:
         charge = stripe_retry_on_error(
-                stripe.Charge.retrieve,
-                invoice.charge,
-                )
+            stripe.Charge.retrieve,
+            invoice.charge,
+        )
     except stripe.error.InvalidRequestError:
         # a free subscription has no charge attached
         # maybe send a notification about the renewal
@@ -104,9 +129,9 @@ def send_invoice_receipt(invoice_id):
         user = None
         try:
             customer = stripe_retry_on_error(
-                    stripe.Customer.retrieve,
-                    invoice.customer,
-                    )
+                stripe.Customer.retrieve,
+                invoice.customer,
+            )
             charge.metadata['email'] = customer.email
         except stripe.error.InvalidRequestError:
             logger.error('Could not retrieve customer')
@@ -120,36 +145,37 @@ def send_invoice_receipt(invoice_id):
             'pro': receipts.pro_subscription_receipt,
             'org': receipts.org_subscription_receipt,
             'donate': receipts.donation_receipt,
-            }
+        }
         receipt_function = receipt_functions[plan]
     except KeyError:
         if plan.startswith('crowdfund'):
             receipt_function = receipts.crowdfund_payment_receipt
             charge.metadata['crowdfund_id'] = plan.split('-')[1]
             recurring_payment = RecurringCrowdfundPayment.objects.filter(
-                    subscription_id=invoice.subscription,
-                    ).first()
+                subscription_id=invoice.subscription,
+            ).first()
             if recurring_payment:
                 recurring_payment.log_payment(charge)
             else:
                 logger.error(
-                        'No recurring crowdfund payment for: %s',
-                        invoice.subscription,
-                        )
+                    'No recurring crowdfund payment for: %s',
+                    invoice.subscription,
+                )
         else:
             logger.warning('Invoice charged for unrecognized plan: %s', plan)
             receipt_function = receipts.generic_receipt
     receipt = receipt_function(user, charge)
     receipt.send(fail_silently=False)
 
+
 @task(name='muckrock.message.tasks.send_charge_receipt')
 def send_charge_receipt(charge_id):
     """Send out a receipt for a charge"""
     logger.info('Charge Receipt for %s', charge_id)
     charge = stripe_retry_on_error(
-            stripe.Charge.retrieve,
-            charge_id,
-            )
+        stripe.Charge.retrieve,
+        charge_id,
+    )
     # if the charge was generated by an invoice, let the invoice handler send the receipt
     if charge.invoice:
         return
@@ -181,6 +207,7 @@ def send_charge_receipt(charge_id):
     receipt = receipt_function(user, charge)
     receipt.send(fail_silently=False)
 
+
 def get_subscription_type(invoice):
     """Gets the subscription type from the invoice."""
     # get the first line of the invoice
@@ -189,15 +216,16 @@ def get_subscription_type(invoice):
     else:
         return 'unknown'
 
+
 @task(name='muckrock.message.tasks.failed_payment')
 def failed_payment(invoice_id):
     """Notify a customer about a failed subscription invoice."""
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-statements
     invoice = stripe_retry_on_error(
-            stripe.Invoice.retrieve,
-            invoice_id,
-            )
+        stripe.Invoice.retrieve,
+        invoice_id,
+    )
     attempt = invoice.attempt_count
     subscription_type = get_subscription_type(invoice)
     recurring_donation = None
@@ -205,8 +233,8 @@ def failed_payment(invoice_id):
     crowdfund = None
     if subscription_type == 'donate':
         recurring_donation = RecurringDonation.objects.filter(
-                subscription_id=invoice.subscription,
-                ).first()
+            subscription_id=invoice.subscription,
+        ).first()
         if recurring_donation:
             user = recurring_donation.user
             recurring_donation.payment_failed = True
@@ -214,13 +242,13 @@ def failed_payment(invoice_id):
         else:
             user = None
             logger.error(
-                    'No recurring crowdfund found for %s',
-                    invoice.subscription,
-                    )
+                'No recurring crowdfund found for %s',
+                invoice.subscription,
+            )
     elif subscription_type.startswith('crowdfund'):
         recurring_payment = RecurringCrowdfundPayment.objects.filter(
-                subscription_id=invoice.subscription,
-                ).first()
+            subscription_id=invoice.subscription,
+        ).first()
         if recurring_payment:
             user = recurring_payment.user
             crowdfund = recurring_payment.crowdfund
@@ -229,9 +257,9 @@ def failed_payment(invoice_id):
         else:
             user = None
             logger.error(
-                    'No recurring crowdfund found for %s',
-                    invoice.subscription,
-                    )
+                'No recurring crowdfund found for %s',
+                invoice.subscription,
+            )
     else:
         profile = Profile.objects.get(customer_id=invoice.customer)
         user = profile.user
@@ -247,7 +275,7 @@ def failed_payment(invoice_id):
         'type': subscription_type,
         'org': org,
         'crowdfund': crowdfund,
-        }
+    }
     if subscription_type.startswith('crowdfund'):
         context['type'] = 'crowdfund'
     if attempt == 4:
@@ -263,7 +291,9 @@ def failed_payment(invoice_id):
         if subscription_type in ('pro', 'org'):
             profile.payment_failed = False
             profile.save()
-        logger.info('%s subscription has been cancelled due to failed payment', user)
+        logger.info(
+            '%s subscription has been cancelled due to failed payment', user
+        )
         subject = u'Your %s subscription has been cancelled' % subscription_type
         context['attempt'] = 'final'
     else:
@@ -277,12 +307,15 @@ def failed_payment(invoice_id):
     )
     notification.send(fail_silently=False)
 
+
 @task(name='muckrock.message.tasks.welcome')
 def welcome(user):
     """Send a welcome notification to a new user. Hello!"""
     verification_url = reverse('acct-verify-email')
     key = user.profile.generate_confirmation_key()
-    context = {'verification_link': user.profile.wrap_url(verification_url, key=key)}
+    context = {
+        'verification_link': user.profile.wrap_url(verification_url, key=key)
+    }
     notification = TemplateEmail(
         user=user,
         extra_context=context,
@@ -291,6 +324,7 @@ def welcome(user):
         subject=u'Welcome to MuckRock!'
     )
     notification.send(fail_silently=False)
+
 
 @task(name='muckrock.message.tasks.welcome_miniregister')
 def welcome_miniregister(user):
@@ -308,13 +342,11 @@ def welcome_miniregister(user):
     )
     notification.send(fail_silently=False)
 
+
 @task(name='muckrock.message.tasks.gift')
 def gift(to_user, from_user, gift_description):
     """Notify the user when they have been gifted requests."""
-    context = {
-        'from': from_user,
-        'gift': gift_description
-    }
+    context = {'from': from_user, 'gift': gift_description}
     notification = TemplateEmail(
         user=to_user,
         extra_context=context,
@@ -324,13 +356,11 @@ def gift(to_user, from_user, gift_description):
     )
     notification.send(fail_silently=False)
 
+
 @task(name='muckrock.message.tasks.email_change')
 def email_change(user, old_email):
     """Notify the user when their email is changed."""
-    context = {
-        'old_email': old_email,
-        'new_email': user.email
-    }
+    context = {'old_email': old_email, 'new_email': user.email}
     notification = TemplateEmail(
         user=user,
         extra_context=context,
@@ -338,17 +368,18 @@ def email_change(user, old_email):
         html_template='message/notification/email_change.html',
         subject=u'Changed email address'
     )
-    notification.to.append(old_email) # Send to both the new and old email addresses
+    notification.to.append(
+        old_email
+    )  # Send to both the new and old email addresses
     notification.send(fail_silently=False)
+
 
 @task(name='muckrock.message.tasks.email_verify')
 def email_verify(user):
     """Verify the user's email by sending them a message."""
     url = reverse('acct-verify-email')
     key = user.profile.generate_confirmation_key()
-    context = {
-        'verification_link': user.profile.wrap_url(url, key=key)
-    }
+    context = {'verification_link': user.profile.wrap_url(url, key=key)}
     notification = TemplateEmail(
         user=user,
         extra_context=context,
@@ -358,13 +389,11 @@ def email_verify(user):
     )
     notification.send(fail_silently=False)
 
+
 @task(name='muckrock.message.tasks.support')
 def support(user, message, _task):
     """Send a response to a user about a task."""
-    context = {
-        'message': message,
-        'task': _task
-    }
+    context = {'message': message, 'task': _task}
     notification = TemplateEmail(
         user=user,
         extra_context=context,
@@ -374,13 +403,11 @@ def support(user, message, _task):
     )
     notification.send(fail_silently=False)
 
+
 @task(name='muckrock.message.tasks.notify_project_contributor')
 def notify_project_contributor(user, project, added_by):
     """Notify a user that they were added as a contributor to a project."""
-    context = {
-        'project': project,
-        'added_by': added_by
-    }
+    context = {'project': project, 'added_by': added_by}
     notification = TemplateEmail(
         user=user,
         extra_context=context,
@@ -389,6 +416,7 @@ def notify_project_contributor(user, project, added_by):
         subject=u'Added to a project'
     )
     notification.send(fail_silently=False)
+
 
 @task(name='muckrock.message.tasks.slack')
 def slack(payload):

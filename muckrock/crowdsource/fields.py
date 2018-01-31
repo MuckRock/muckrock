@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Fields for the Crowdsource application"""
 
+# Django
 from django import forms
 
 
@@ -13,7 +14,8 @@ class Field(object):
         kwargs['label'] = field.label
         kwargs['required'] = field.required
         if self.accepts_choices:
-            kwargs['choices'] = [(c.value, c.choice) for c in field.choices.all()]
+            kwargs['choices'] = [(c.value, c.choice)
+                                 for c in field.choices.all()]
         if field.help_text:
             kwargs['help_text'] = field.help_text
         return self.field(**kwargs)
@@ -84,16 +86,14 @@ class TextareaField(Field):
 
 
 FIELDS = [
-        TextField,
-        SelectField,
-        CheckboxField,
-        DateField,
-        NumberField,
-        TextareaField,
-        ]
-
+    TextField,
+    SelectField,
+    CheckboxField,
+    DateField,
+    NumberField,
+    TextareaField,
+]
 
 FIELD_CHOICES = [(f.name, f.name) for f in FIELDS]
-
 
 FIELD_DICT = {f.name: f for f in FIELDS}

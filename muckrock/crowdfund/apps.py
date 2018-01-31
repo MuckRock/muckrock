@@ -2,6 +2,7 @@
 App config for crowdfunds
 """
 
+# Django
 from django.apps import AppConfig
 
 

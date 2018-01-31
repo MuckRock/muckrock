@@ -2,16 +2,21 @@
 Tests accounts forms
 """
 
+# Django
 from django.test import TestCase
 
-from nose.tools import eq_, assert_false, assert_true
+# Third Party
 from mock import patch
+from nose.tools import assert_false, assert_true, eq_
 
+# MuckRock
 from muckrock.accounts.forms import EmailSettingsForm, RegisterForm
-from muckrock.factories import UserFactory, ProfileFactory
+from muckrock.factories import ProfileFactory, UserFactory
+
 
 class TestEmailSettingsForm(TestCase):
     """Users should be able to modify their email settings."""
+
     def setUp(self):
         """Set up tests"""
         self.profile = ProfileFactory()
@@ -55,6 +60,7 @@ class TestEmailSettingsForm(TestCase):
 
 class TestRegistrationForm(TestCase):
     """New users should be created using a registration form."""
+
     def setUp(self):
         self.user = UserFactory()
         self.form = RegisterForm

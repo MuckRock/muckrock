@@ -2,19 +2,24 @@
 Models for the Map application
 """
 
+# Django
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.text import slugify
 
-from djgeojson.fields import PointField
+# Standard Library
 import json
+
+# Third Party
+from djgeojson.fields import PointField
 
 DEFAULT_CENTER_POINT = json.dumps({
     "type": "Point",
     "coordinates": settings.LEAFLET_CONFIG['DEFAULT_CENTER']
 })
 DEFAULT_ZOOM_LEVEL = settings.LEAFLET_CONFIG['DEFAULT_ZOOM']
+
 
 class Map(models.Model):
     """A map holds a collection of Markers."""
@@ -44,17 +49,14 @@ class Map(models.Model):
         """Returns the URL for this map"""
         return reverse('map-detail', kwargs={'slug': self.slug, 'idx': self.id})
 
+
 class Marker(models.Model):
     """A Marker connects a FOIARequest to a Map with a location."""
     map = models.ForeignKey(
-        Map,
-        on_delete=models.CASCADE,
-        related_name='markers'
+        Map, on_delete=models.CASCADE, related_name='markers'
     )
     foia = models.ForeignKey(
-        'foia.FOIARequest',
-        on_delete=models.CASCADE,
-        related_name='locations'
+        'foia.FOIARequest', on_delete=models.CASCADE, related_name='locations'
     )
     point = PointField(blank=True)
 

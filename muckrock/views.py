@@ -1,6 +1,7 @@
 """
 Views for muckrock project
 """
+# Django
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
@@ -8,26 +9,30 @@ from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.core.urlresolvers import reverse
 from django.db.models import Sum
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.decorators import method_decorator
 from django.utils.html import escape
-from django.views.generic import View, ListView, FormView, TemplateView
+from django.views.generic import FormView, ListView, TemplateView, View
 
+# Standard Library
+import logging
+import sys
+
+# Third Party
+import stripe
+from watson import search as watson
+from watson.views import SearchMixin
+
+# MuckRock
 from muckrock.accounts.models import RecurringDonation
-from muckrock.accounts.utils import stripe_get_customer, mailchimp_subscribe
+from muckrock.accounts.utils import mailchimp_subscribe, stripe_get_customer
 from muckrock.agency.models import Agency
-from muckrock.foia.models import FOIARequest, FOIAFile
+from muckrock.foia.models import FOIAFile, FOIARequest
 from muckrock.forms import NewsletterSignupForm, SearchForm, StripeForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.news.models import Article
 from muckrock.project.models import Project
 from muckrock.utils import stripe_retry_on_error
-
-import logging
-import stripe
-import sys
-from watson import search as watson
-from watson.views import SearchMixin
 
 logger = logging.getLogger(__name__)
 
@@ -80,10 +85,10 @@ class ModelFilterMixin(object):
         if self.filter_class is None:
             raise AttributeError('Missing a filter class.')
         return self.filter_class(
-                self.request.GET,
-                queryset=self.get_queryset(),
-                request=self.request,
-                )
+            self.request.GET,
+            queryset=self.get_queryset(),
+            request=self.request,
+        )
 
     def get_context_data(self, **kwargs):
         """
@@ -101,7 +106,9 @@ class ModelFilterMixin(object):
         except AttributeError:
             page_size = 0
         if page_size:
-            paginator, page, queryset, is_paginated = self.paginate_queryset(queryset, page_size)
+            paginator, page, queryset, is_paginated = self.paginate_queryset(
+                queryset, page_size
+            )
             context.update({
                 'filter': _filter,
                 'paginator': paginator,
@@ -198,7 +205,9 @@ class MRFilterListView(OrderedSortMixin, ModelFilterMixin, MRListView):
     pass
 
 
-class MRSearchFilterListView(OrderedSortMixin, ModelSearchMixin, ModelFilterMixin, MRListView):
+class MRSearchFilterListView(
+    OrderedSortMixin, ModelSearchMixin, ModelFilterMixin, MRListView
+):
     """Adds ordered sorting, searching, and filtering to a MRListView."""
     pass
 
@@ -211,24 +220,30 @@ class SearchView(SearchMixin, MRListView):
 
     def get_queryset(self):
         """Select related content types"""
-        return (super(SearchView, self)
-                .get_queryset()
-                .order_by('id')
-                .select_related('content_type')
-                )
+        return (
+            super(SearchView, self).get_queryset().order_by('id')
+            .select_related('content_type')
+        )
 
 
 class NewsletterSignupView(View):
     """Allows users to signup for our MailChimp newsletter."""
+
     def get(self, request, *args, **kwargs):
         """Returns a signup form"""
         template = 'forms/newsletter.html'
-        context = {'form': NewsletterSignupForm(initial={'list': settings.MAILCHIMP_LIST_DEFAULT})}
+        context = {
+            'form':
+                NewsletterSignupForm(
+                    initial={
+                        'list': settings.MAILCHIMP_LIST_DEFAULT
+                    }
+                )
+        }
         return render(request, template, context)
 
     def redirect_url(self, request):
         """If a next url is provided, redirect there. Otherwise, redirect to the index."""
-        # pylint: disable=no-self-use
         next_ = request.GET.get('next', 'index')
         return redirect(next_)
 
@@ -268,7 +283,9 @@ class NewsletterSignupView(View):
         # don't try signing up for the default list.
         # If an error occurs with this subscription, don't worry about it.
         if default_list is not None and default_list != _list and not primary_error:
-            mailchimp_subscribe(request, _email, default_list, suppress_msg=True)
+            mailchimp_subscribe(
+                request, _email, default_list, suppress_msg=True
+            )
         return self.redirect_url(request)
 
 
@@ -279,53 +296,46 @@ class LandingView(TemplateView):
 
 class Homepage(object):
     """Control caching for the homepage"""
-    # pylint: disable=no-self-use
 
     def get_cached_values(self):
         """Return all the methods used to generate the cached values"""
         return [
-                ('articles', self.articles),
-                ('featured_projects', self.featured_projects),
-                ('completed_requests', self.completed_requests),
-                ('stats', self.stats),
-                ]
+            ('articles', self.articles),
+            ('featured_projects', self.featured_projects),
+            ('completed_requests', self.completed_requests),
+            ('stats', self.stats),
+        ]
 
     def articles(self):
         """Get the articles for the front page"""
-        return (Article.objects
-                .get_published()
-                .prefetch_authors()
-                [:5])
+        return Article.objects.get_published().prefetch_authors()[:5]
 
     def featured_projects(self):
         """Get the featured projects for the front page"""
-        return (Project.objects
-                .get_public()
-                .optimize()
-                .filter(featured=True)
-                [:4])
+        return (
+            Project.objects.get_public().optimize().filter(featured=True)[:4]
+        )
 
     def completed_requests(self):
         """Get recently completed requests"""
-        return lambda: (FOIARequest.objects
-                .get_public()
-                .get_done()
-                .order_by('-date_done', 'pk')
-                .select_related_view()
-                .get_public_file_count(limit=6))
+        return lambda: (
+            FOIARequest.objects.get_public().get_done().order_by(
+                '-date_done', 'pk'
+            ).select_related_view().get_public_file_count(limit=6)
+        )
 
     def stats(self):
         """Get some stats to show on the front page"""
         return {
-                'request_count':
-                    lambda: FOIARequest.objects.exclude(status='started').count(),
-                'completed_count':
-                    lambda: FOIARequest.objects.get_done().count(),
-                'page_count':
-                    lambda: FOIAFile.objects.aggregate(pages=Sum('pages'))['pages'],
-                'agency_count':
-                    lambda: Agency.objects.get_approved().count(),
-                }
+            'request_count':
+                lambda: FOIARequest.objects.exclude(status='started').count(),
+            'completed_count':
+                lambda: FOIARequest.objects.get_done().count(),
+            'page_count':
+                lambda: FOIAFile.objects.aggregate(pages=Sum('pages'))['pages'],
+            'agency_count':
+                lambda: Agency.objects.get_approved().count(),
+        }
 
 
 def homepage(request):
@@ -342,10 +352,10 @@ def reset_homepage_cache(request):
     # pylint: disable=unused-argument
 
     template_keys = (
-            'homepage_top',
-            'homepage_bottom',
-            'dropdown_recent_articles',
-            )
+        'homepage_top',
+        'homepage_bottom',
+        'dropdown_recent_articles',
+    )
     for key in template_keys:
         cache.delete(make_template_fragment_key(key))
 
@@ -354,6 +364,7 @@ def reset_homepage_cache(request):
 
 class StripeFormMixin(object):
     """Prefills the StripeForm values."""
+
     def get_initial(self):
         """Add initial data to the form."""
         initial = super(StripeFormMixin, self).get_initial()
@@ -408,34 +419,33 @@ class DonationFormView(StripeFormMixin, FormView):
         error_msg = None
         try:
             charge = stripe_retry_on_error(
-                    stripe.Charge.create,
-                    amount=amount,
-                    currency='usd',
-                    source=token,
-                    description='Donation from %s' % email,
-                    metadata={
-                        'email': email,
-                        'action': 'donation'
-                        },
-                    idempotency_key=True,
-                    )
+                stripe.Charge.create,
+                amount=amount,
+                currency='usd',
+                source=token,
+                description='Donation from %s' % email,
+                metadata={'email': email,
+                          'action': 'donation'},
+                idempotency_key=True,
+            )
         except stripe.error.CardError:
             # card declined
             logger.warn('Card was declined.')
             error_msg = 'Your card was declined'
         except (
-                stripe.error.InvalidRequestError,
-                # Invalid parameters were supplied to Stripe's API
-                stripe.error.AuthenticationError,
-                # Authentication with Stripe's API failed
-                stripe.error.APIConnectionError,
-                # Network communication with Stripe failed
-                stripe.error.StripeError,
-                # Generic error
-                ) as exception:
+            stripe.error.InvalidRequestError,
+            # Invalid parameters were supplied to Stripe's API
+            stripe.error.AuthenticationError,
+            # Authentication with Stripe's API failed
+            stripe.error.APIConnectionError,
+            # Network communication with Stripe failed
+            stripe.error.StripeError,  # Generic error
+        ) as exception:
             logger.error(exception, exc_info=sys.exc_info())
-            error_msg = ('Oops, something went wrong on our end.'
-                        ' Sorry about that!')
+            error_msg = (
+                'Oops, something went wrong on our end.'
+                ' Sorry about that!'
+            )
         finally:
             if error_msg:
                 messages.error(self.request, error_msg)
@@ -449,39 +459,39 @@ class DonationFormView(StripeFormMixin, FormView):
         subscription = None
         quantity = amount / 100
         customer = stripe_get_customer(
-                self.request.user,
-                email,
-                'Donation for {}'.format(email),
-                )
+            self.request.user,
+            email,
+            'Donation for {}'.format(email),
+        )
         if self.request.user.is_authenticated:
             user = self.request.user
         else:
             user = None
         try:
             subscription = stripe_retry_on_error(
-                    customer.subscriptions.create,
-                    plan='donate',
-                    source=token,
-                    quantity=quantity,
-                    idempotency_key=True,
-                    )
+                customer.subscriptions.create,
+                plan='donate',
+                source=token,
+                quantity=quantity,
+                idempotency_key=True,
+            )
         except stripe.error.CardError:
             logger.warn('Card was declined.')
             messages.error(self.request, 'Your card was declined')
         except stripe.error.StripeError as exception:
             logger.error(exception, exc_info=sys.exc_info())
             messages.error(
-                    self.request,
-                    'Oops, something went wrong on our end. Sorry about that!',
-                    )
+                self.request,
+                'Oops, something went wrong on our end. Sorry about that!',
+            )
         else:
             RecurringDonation.objects.create(
-                    user=user,
-                    email=email,
-                    amount=quantity,
-                    customer_id=customer.id,
-                    subscription_id=subscription.id,
-                    )
+                user=user,
+                email=email,
+                amount=quantity,
+                customer_id=customer.id,
+                subscription_id=subscription.id,
+            )
         return subscription
 
 

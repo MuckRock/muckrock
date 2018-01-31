@@ -2,28 +2,31 @@
 Tests for site level functionality and helper functions for application tests
 """
 
+# Django
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
-from django.test import TestCase, RequestFactory
+from django.test import RequestFactory, TestCase
 
-from actstream.models import Action
-from mock import Mock, patch, ANY
+# Standard Library
 import logging
-import nose.tools
-from nose.tools import ok_
-from nose.tools import eq_
 
+# Third Party
+import nose.tools
+from actstream.models import Action
+from mock import ANY, Mock, patch
+from nose.tools import eq_, ok_
+
+# MuckRock
 from muckrock.accounts.models import Notification
-from muckrock.factories import UserFactory, AnswerFactory
+from muckrock.factories import AnswerFactory, UserFactory
 from muckrock.fields import EmailsListField
 from muckrock.forms import NewsletterSignupForm, StripeForm
-from muckrock.utils import new_action, notify
 from muckrock.test_utils import http_get_response, http_post_response
-from muckrock.views import NewsletterSignupView, DonationFormView
+from muckrock.utils import new_action, notify
+from muckrock.views import DonationFormView, NewsletterSignupView
 
-# pylint: disable=no-self-use
 # pylint: disable=too-many-public-methods
 
 logging.disable(logging.CRITICAL)
@@ -34,6 +37,7 @@ nottest = nose.tools.nottest
 
 kwargs = {"wsgi.url_scheme": "https"}
 
+
 # helper functions for view testing
 def get_allowed(client, url, redirect=None):
     """Test a get on a url that is allowed with the users current credntials"""
@@ -41,9 +45,12 @@ def get_allowed(client, url, redirect=None):
     nose.tools.eq_(response.status_code, 200)
 
     if redirect:
-        nose.tools.eq_(response.redirect_chain, [('https://testserver:80' + redirect, 302)])
+        nose.tools.eq_(
+            response.redirect_chain, [('https://testserver:80' + redirect, 302)]
+        )
 
     return response
+
 
 def post_allowed(client, url, data, redirect):
     """Test an allowed post with the given data and redirect location"""
@@ -53,6 +60,7 @@ def post_allowed(client, url, data, redirect):
 
     return response
 
+
 def post_allowed_bad(client, url, templates, data=None):
     """Test an allowed post with bad data"""
     if data is None:
@@ -60,7 +68,9 @@ def post_allowed_bad(client, url, templates, data=None):
     response = client.post(url, data, **kwargs)
     nose.tools.eq_(response.status_code, 200)
     # make sure first 3 match (4th one might be form.html, not important
-    nose.tools.eq_([t.name for t in response.templates][:3], templates + ['base.html'])
+    nose.tools.eq_([t.name for t in response.templates][:3],
+                   templates + ['base.html'])
+
 
 def get_post_unallowed(client, url):
     """Test an unauthenticated get and post on a url that is allowed
@@ -69,6 +79,7 @@ def get_post_unallowed(client, url):
     response = client.get(url, **kwargs)
     nose.tools.eq_(response.status_code, 302)
     nose.tools.eq_(response['Location'], redirect)
+
 
 def get_404(client, url):
     """Test a get on a url that is allowed with the users current credntials"""
@@ -81,16 +92,16 @@ def get_404(client, url):
 class TestFunctional(TestCase):
     """Functional tests for top level"""
     fixtures = [
-            'holidays.json',
-            'jurisdictions.json',
-            'agency_types.json',
-            'test_agencies.json',
-            'test_users.json',
-            'test_profiles.json',
-            'test_foiarequests.json',
-            'test_foiacommunications.json',
-            'test_news.json',
-            ]
+        'holidays.json',
+        'jurisdictions.json',
+        'agency_types.json',
+        'test_agencies.json',
+        'test_users.json',
+        'test_profiles.json',
+        'test_foiarequests.json',
+        'test_foiacommunications.json',
+        'test_news.json',
+    ]
 
     # tests for base level views
     def test_views(self):
@@ -116,22 +127,22 @@ class TestFunctional(TestCase):
         """Test API views"""
         self.client.login(username='super', password='abc')
         api_objs = [
-                'jurisdiction',
-                'agency',
-                'foia',
-                'question',
-                'statistics',
-                'communication',
-                'user',
-                'news',
-                'task',
-                'orphantask',
-                'snailmailtask',
-                'staleagencytask',
-                'flaggedtask',
-                'newagencytask',
-                'responsetask',
-                ]
+            'jurisdiction',
+            'agency',
+            'foia',
+            'question',
+            'statistics',
+            'communication',
+            'user',
+            'news',
+            'task',
+            'orphantask',
+            'snailmailtask',
+            'staleagencytask',
+            'flaggedtask',
+            'newagencytask',
+            'responsetask',
+        ]
         for obj in api_objs:
             get_allowed(self.client, reverse('api-%s-list' % obj))
 
@@ -155,6 +166,7 @@ class TestUnit(TestCase):
 
 class TestNewsletterSignupView(TestCase):
     """By submitting an email, users can subscribe to our MailChimp newsletter list."""
+
     def setUp(self):
         self.factory = RequestFactory()
         self.view = NewsletterSignupView.as_view()
@@ -174,8 +186,13 @@ class TestNewsletterSignupView(TestCase):
         })
         ok_(form.is_valid(), 'The form should validate.')
         response = http_post_response(self.url, self.view, form.data)
-        mock_subscribe.assert_called_with(ANY, form.data['email'], form.data['list'])
-        eq_(response.status_code, 302, 'Should redirect upon successful submission.')
+        mock_subscribe.assert_called_with(
+            ANY, form.data['email'], form.data['list']
+        )
+        eq_(
+            response.status_code, 302,
+            'Should redirect upon successful submission.'
+        )
 
     @patch('muckrock.views.mailchimp_subscribe')
     def test_post_other_list(self, mock_subscribe):
@@ -188,14 +205,19 @@ class TestNewsletterSignupView(TestCase):
         ok_(form.is_valid(), 'The form should validate.')
         mock_subscribe.return_value = False
         response = http_post_response(self.url, self.view, form.data)
-        mock_subscribe.assert_any_call(ANY, form.data['email'], form.data['list'])
         mock_subscribe.assert_any_call(
-                ANY,
-                form.data['email'],
-                settings.MAILCHIMP_LIST_DEFAULT,
-                suppress_msg=True,
-                )
-        eq_(response.status_code, 302, 'Should redirect upon successful submission.')
+            ANY, form.data['email'], form.data['list']
+        )
+        mock_subscribe.assert_any_call(
+            ANY,
+            form.data['email'],
+            settings.MAILCHIMP_LIST_DEFAULT,
+            suppress_msg=True,
+        )
+        eq_(
+            response.status_code, 302,
+            'Should redirect upon successful submission.'
+        )
 
     @nottest
     def test_subscribe(self):
@@ -210,6 +232,7 @@ class TestNewsletterSignupView(TestCase):
 
 class TestNewAction(TestCase):
     """The new action function will create a new action and return it."""
+
     def test_basic(self):
         """An action only needs an actor and a verb."""
         actor = UserFactory()
@@ -222,6 +245,7 @@ class TestNewAction(TestCase):
 
 class TestNotify(TestCase):
     """The notify function will notify one or many users about an action."""
+
     def setUp(self):
         self.action = new_action(UserFactory(), 'acted')
 
@@ -229,21 +253,28 @@ class TestNotify(TestCase):
         """Notify a single user about an action."""
         user = UserFactory()
         notifications = notify(user, self.action)
-        ok_(isinstance(notifications, list),
-            'A list should be returned.')
-        ok_(isinstance(notifications[0], Notification),
-            'The list should contain notification objects.')
+        ok_(isinstance(notifications, list), 'A list should be returned.')
+        ok_(
+            isinstance(notifications[0], Notification),
+            'The list should contain notification objects.'
+        )
 
     def test_many_users(self):
         """Notify many users about an action."""
         users = [UserFactory(), UserFactory(), UserFactory()]
         notifications = notify(users, self.action)
-        eq_(len(notifications), len(users),
-            'There should be a notification for every user in the list.')
+        eq_(
+            len(notifications), len(users),
+            'There should be a notification for every user in the list.'
+        )
         for user in users:
-            notification_for_user = any(notification.user == user for notification in notifications)
-            ok_(notification_for_user,
-                'Each user in the list should be notified.')
+            notification_for_user = any(
+                notification.user == user for notification in notifications
+            )
+            ok_(
+                notification_for_user,
+                'Each user in the list should be notified.'
+            )
 
 
 @patch('stripe.Charge', Mock())
@@ -262,14 +293,16 @@ class TestDonations(TestCase):
         email = 'example@test.com'
         amount = 500
         data = {
-                'stripe_token': token,
-                'stripe_email': email,
-                'stripe_amount': amount,
-                'type': 'one-time',
-                }
+            'stripe_token': token,
+            'stripe_email': email,
+            'stripe_amount': amount,
+            'type': 'one-time',
+        }
         form = self.form(data)
         form.is_valid()
         ok_(form.is_valid(), 'The form should validate. %s' % form.errors)
         response = http_post_response(self.url, self.view, data)
-        eq_(response.status_code, 302,
-            'A successful donation will return a redirection.')
+        eq_(
+            response.status_code, 302,
+            'A successful donation will return a redirection.'
+        )

@@ -2,40 +2,45 @@
 Factories generate objects during testing
 """
 
+# Django
 from django.contrib.auth.models import User
 from django.utils.text import slugify
 
+# Standard Library
 import datetime
+
+# Third Party
 import factory
 
-from muckrock.accounts.models import Profile, Notification, Statistics
+# MuckRock
+from muckrock.accounts.models import Notification, Profile, Statistics
 from muckrock.agency.models import (
-        Agency,
-        AgencyEmail,
-        AgencyPhone,
-        STALE_DURATION,
-        )
+    STALE_DURATION,
+    Agency,
+    AgencyEmail,
+    AgencyPhone,
+)
 from muckrock.communication.models import EmailAddress
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.foia.models import (
-        FOIARequest,
-        FOIACommunication,
-        FOIAFile,
-        RawEmail,
-        OutboundAttachment,
-        FOIAMultiRequest,
-        )
+    FOIACommunication,
+    FOIAFile,
+    FOIAMultiRequest,
+    FOIARequest,
+    OutboundAttachment,
+    RawEmail,
+)
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.news.models import Article
 from muckrock.organization.models import Organization
 from muckrock.project.models import Project
-from muckrock.qanda.models import Question, Answer
+from muckrock.qanda.models import Answer, Question
 from muckrock.utils import new_action
 
-# pylint:disable=too-many-instance-attributes
 
 class ProfileFactory(factory.django.DjangoModelFactory):
     """A factory for creating Profile test objects."""
+
     class Meta:
         model = Profile
 
@@ -47,6 +52,7 @@ class ProfileFactory(factory.django.DjangoModelFactory):
 
 class UserFactory(factory.django.DjangoModelFactory):
     """A factory for creating User test objects."""
+
     class Meta:
         model = User
 
@@ -65,6 +71,7 @@ class UserFactory(factory.django.DjangoModelFactory):
 
 class NotificationFactory(factory.django.DjangoModelFactory):
     """A factory for creating Notification test objects."""
+
     class Meta:
         model = Notification
 
@@ -74,6 +81,7 @@ class NotificationFactory(factory.django.DjangoModelFactory):
 
 class OrganizationFactory(factory.django.DjangoModelFactory):
     """A factory for creating Organization test objects."""
+
     class Meta:
         model = Organization
 
@@ -84,6 +92,7 @@ class OrganizationFactory(factory.django.DjangoModelFactory):
 
 class JurisdictionFactory(factory.django.DjangoModelFactory):
     """A factory for creating Jurisdiction test objects."""
+
     class Meta:
         model = Jurisdiction
 
@@ -95,6 +104,7 @@ class JurisdictionFactory(factory.django.DjangoModelFactory):
 
 class AgencyFactory(factory.django.DjangoModelFactory):
     """A factory for creating Agency test objects."""
+
     class Meta:
         model = Agency
 
@@ -103,15 +113,15 @@ class AgencyFactory(factory.django.DjangoModelFactory):
     jurisdiction = factory.SubFactory('muckrock.factories.JurisdictionFactory')
     status = 'approved'
     email = factory.RelatedFactory(
-            'muckrock.factories.AgencyEmailFactory',
-            'agency',
-            )
+        'muckrock.factories.AgencyEmailFactory',
+        'agency',
+    )
     fax = factory.RelatedFactory(
-            'muckrock.factories.AgencyPhoneFactory',
-            'agency',
-            request_type='primary',
-            phone__type='fax',
-            )
+        'muckrock.factories.AgencyPhoneFactory',
+        'agency',
+        request_type='primary',
+        phone__type='fax',
+    )
 
     @factory.post_generation
     def other_emails(self, create, extracted, **kwargs):
@@ -121,45 +131,52 @@ class AgencyFactory(factory.django.DjangoModelFactory):
             # A list of emails were passed in, use them
             for email in EmailAddress.objects.fetch_many(extracted):
                 AgencyEmailFactory(
-                        agency=self,
-                        email=email,
-                        request_type='primary',
-                        email_type='cc',
-                        )
+                    agency=self,
+                    email=email,
+                    request_type='primary',
+                    email_type='cc',
+                )
 
 
 class AgencyEmailFactory(factory.django.DjangoModelFactory):
     """A factory for linking agencies to emails"""
+
     class Meta:
         model = AgencyEmail
 
     agency = factory.SubFactory('muckrock.factories.AgencyFactory')
-    email = factory.SubFactory('muckrock.communication.factories.EmailAddressFactory')
+    email = factory.SubFactory(
+        'muckrock.communication.factories.EmailAddressFactory'
+    )
     request_type = 'primary'
     email_type = 'to'
 
 
 class AgencyPhoneFactory(factory.django.DjangoModelFactory):
     """A factory for linking agencies to faxes"""
+
     class Meta:
         model = AgencyPhone
 
     agency = factory.SubFactory('muckrock.factories.AgencyFactory')
-    phone = factory.SubFactory('muckrock.communication.factories.PhoneNumberFactory')
+    phone = factory.SubFactory(
+        'muckrock.communication.factories.PhoneNumberFactory'
+    )
     request_type = 'none'
 
 
 class AppealAgencyFactory(AgencyFactory):
     """A factory for creating an Agency that accepts email appeals."""
     email = factory.RelatedFactory(
-            'muckrock.factories.AgencyEmailFactory',
-            'agency',
-            request_type='appeal',
-            )
+        'muckrock.factories.AgencyEmailFactory',
+        'agency',
+        request_type='appeal',
+    )
 
 
 class FOIARequestFactory(factory.django.DjangoModelFactory):
     """A factory for creating FOIARequest test objects."""
+
     class Meta:
         model = FOIARequest
 
@@ -172,8 +189,8 @@ class FOIARequestFactory(factory.django.DjangoModelFactory):
         jurisdiction=factory.SelfAttribute('..jurisdiction')
     )
     email = factory.SubFactory(
-            'muckrock.communication.factories.EmailAddressFactory',
-            )
+        'muckrock.communication.factories.EmailAddressFactory',
+    )
 
     @factory.post_generation
     def cc_emails(self, create, extracted, **kwargs):
@@ -186,6 +203,7 @@ class FOIARequestFactory(factory.django.DjangoModelFactory):
 
 class FOIACommunicationFactory(factory.django.DjangoModelFactory):
     """A factory for creating FOIARequest test objects."""
+
     class Meta:
         model = FOIACommunication
 
@@ -194,13 +212,14 @@ class FOIACommunicationFactory(factory.django.DjangoModelFactory):
     to_user = factory.SubFactory(UserFactory)
     date = factory.LazyAttribute(lambda obj: datetime.datetime.now())
     email = factory.RelatedFactory(
-            'muckrock.communication.factories.EmailCommunicationFactory',
-            'communication',
-            )
+        'muckrock.communication.factories.EmailCommunicationFactory',
+        'communication',
+    )
 
 
 class FOIAMultiRequestFactory(factory.django.DjangoModelFactory):
     """A factory for creating FOIAMultiRequest test objects."""
+
     class Meta:
         model = FOIAMultiRequest
 
@@ -220,36 +239,41 @@ class FOIAMultiRequestFactory(factory.django.DjangoModelFactory):
 
 class RawEmailFactory(factory.django.DjangoModelFactory):
     """A factory for creating  objects."""
+
     class Meta:
         model = RawEmail
 
     email = factory.SubFactory(
-            'muckrock.communication.factories.EmailCommunicationFactory',
-            )
+        'muckrock.communication.factories.EmailCommunicationFactory',
+    )
     raw_email = factory.Faker('paragraph')
 
 
 class FOIAFileFactory(factory.django.DjangoModelFactory):
     """A factory for creating FOIAFile test objects."""
+
     class Meta:
         model = FOIAFile
 
     foia = factory.SubFactory(FOIARequestFactory)
-    comm = factory.SubFactory(FOIACommunicationFactory, foia=factory.SelfAttribute('..foia'))
+    comm = factory.SubFactory(
+        FOIACommunicationFactory, foia=factory.SelfAttribute('..foia')
+    )
     title = factory.Faker('word')
     ffile = factory.django.FileField(filename=factory.Faker('file_name'))
 
 
 class OutboundAttachmentFactory(factory.django.DjangoModelFactory):
     """A factory for creating FOIAFile test objects."""
+
     class Meta:
         model = OutboundAttachment
 
     user = factory.SubFactory(UserFactory)
     foia = factory.SubFactory(
-            FOIARequestFactory,
-            user=factory.SelfAttribute('..user'),
-            )
+        FOIARequestFactory,
+        user=factory.SelfAttribute('..user'),
+    )
     ffile = factory.django.FileField(filename=factory.Faker('file_name'))
     date_time_stamp = factory.LazyAttribute(lambda obj: datetime.datetime.now())
     sent = False
@@ -257,6 +281,7 @@ class OutboundAttachmentFactory(factory.django.DjangoModelFactory):
 
 class ProjectFactory(factory.django.DjangoModelFactory):
     """A factory for creating Project test objects."""
+
     class Meta:
         model = Project
 
@@ -266,17 +291,21 @@ class ProjectFactory(factory.django.DjangoModelFactory):
 
 class CrowdfundFactory(factory.django.DjangoModelFactory):
     """A factory for creating Crowdfund test objects."""
+
     class Meta:
         model = Crowdfund
 
     name = factory.Sequence(lambda n: "Crowdfund %d" % n)
     description = factory.Faker('paragraph')
     payment_required = 100.00
-    date_due = factory.LazyAttribute(lambda obj: datetime.datetime.now() + datetime.timedelta(30))
+    date_due = factory.LazyAttribute(
+        lambda obj: datetime.datetime.now() + datetime.timedelta(30)
+    )
 
 
 class QuestionFactory(factory.django.DjangoModelFactory):
     """A factory for creating Question test objects."""
+
     class Meta:
         model = Question
 
@@ -289,6 +318,7 @@ class QuestionFactory(factory.django.DjangoModelFactory):
 
 class AnswerFactory(factory.django.DjangoModelFactory):
     """A factory for creating Answer test objects."""
+
     class Meta:
         model = Answer
 
@@ -300,6 +330,7 @@ class AnswerFactory(factory.django.DjangoModelFactory):
 
 class ArticleFactory(factory.django.DjangoModelFactory):
     """A factory for creating Article test objects."""
+
     class Meta:
         model = Article
 
@@ -328,6 +359,7 @@ class ArticleFactory(factory.django.DjangoModelFactory):
 
 class StatisticsFactory(factory.django.DjangoModelFactory):
     """A factory for creating Statistics test objects."""
+
     class Meta:
         model = Statistics
 
@@ -349,23 +381,30 @@ class StatisticsFactory(factory.django.DjangoModelFactory):
     total_unresolved_tasks = 45
     daily_robot_response_tasks = 12
 
+
 # Stale Agency Factory
+
 
 class StaleAgencyFactory(AgencyFactory):
     """A factory for creating stale Agency test objects."""
     stale = True
-    stale_foia = factory.RelatedFactory('muckrock.factories.StaleFOIARequestFactory', 'agency')
+    stale_foia = factory.RelatedFactory(
+        'muckrock.factories.StaleFOIARequestFactory', 'agency'
+    )
 
 
 class StaleFOIARequestFactory(FOIARequestFactory):
     """A factory for creating stale FOIARequest test objects."""
     status = 'ack'
-    stale_comm = factory.RelatedFactory('muckrock.factories.StaleFOIACommunicationFactory', 'foia')
+    stale_comm = factory.RelatedFactory(
+        'muckrock.factories.StaleFOIACommunicationFactory', 'foia'
+    )
 
 
 class StaleFOIACommunicationFactory(FOIACommunicationFactory):
     """A factory for creating stale FOIARequest test objects."""
     response = True
     date = factory.LazyAttribute(
-        lambda obj: datetime.datetime.now() - datetime.timedelta(STALE_DURATION + 1)
+        lambda obj: datetime.datetime.now() - datetime.
+        timedelta(STALE_DURATION + 1)
     )

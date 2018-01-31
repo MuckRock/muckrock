@@ -2,22 +2,27 @@
 Views for the crowdfund application
 """
 
+# Django
 from django.conf import settings
-from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
+from django.core.urlresolvers import NoReverseMatch, reverse
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
-from django.views.generic import ListView, DetailView
+from django.views.generic import DetailView, ListView
 
-from datetime import date
-from djangosecure.decorators import frame_deny_exempt
+# Standard Library
 import logging
-import stripe
+from datetime import date
 
+# Third Party
+import stripe
+from djangosecure.decorators import frame_deny_exempt
+
+# MuckRock
 from muckrock.accounts.utils import miniregister, validate_stripe_email
 from muckrock.crowdfund.forms import CrowdfundPaymentForm
 from muckrock.crowdfund.models import Crowdfund
@@ -40,16 +45,21 @@ class CrowdfundListView(ListView):
     def get_queryset(self):
         """Only list open crowdfunds on unembargoed requests"""
         queryset = super(CrowdfundListView, self).get_queryset()
-        queryset = queryset.exclude(closed=True).exclude(date_due__lt=date.today())
+        queryset = queryset.exclude(closed=True
+                                    ).exclude(date_due__lt=date.today())
         user = self.request.user
         if not user.is_staff and user.is_authenticated():
-            queryset = (queryset
-                .filter(Q(foia__embargo=False) | Q(foia__user=user))
-                .filter(Q(projectcrowdfunds__project__private=False) |
-                        Q(projectcrowdfunds__project__contributors=user)))
+            queryset = (
+                queryset.filter(Q(foia__embargo=False) | Q(foia__user=user))
+                .filter(
+                    Q(projectcrowdfunds__project__private=False)
+                    | Q(projectcrowdfunds__project__contributors=user)
+                )
+            )
         elif not user.is_staff:
             queryset = queryset.filter(
-                    foia__embargo=False, projectcrowdfunds__project__private=False)
+                foia__embargo=False, projectcrowdfunds__project__private=False
+            )
         return queryset
 
 
@@ -86,8 +96,9 @@ class CrowdfundDetailView(DetailView):
         if request.is_ajax():
             return JsonResponse({
                 'message': error_msg,
-                'error':  str(error)
-            }, status=400)
+                'error': str(error)
+            },
+                                status=400)
         else:
             messages.error(request, error_msg)
             return redirect(self.get_redirect_url())
@@ -117,15 +128,17 @@ class CrowdfundDetailView(DetailView):
                 user, password = miniregister(full_name, email)
                 registered = True
                 user = authenticate(
-                        username=user.username,
-                        password=password,
-                        )
+                    username=user.username,
+                    password=password,
+                )
                 login(self.request, user)
             crowdfund = payment_form.cleaned_data['crowdfund']
             try:
-                if crowdfund.can_recur() and payment_form.cleaned_data['recurring']:
+                if crowdfund.can_recur(
+                ) and payment_form.cleaned_data['recurring']:
                     crowdfund.make_recurring_payment(
-                            token, email, amount, show, user)
+                        token, email, amount, show, user
+                    )
                 else:
                     crowdfund.make_payment(token, email, amount, show, user)
             except stripe.StripeError as payment_error:
@@ -133,9 +146,11 @@ class CrowdfundDetailView(DetailView):
                 return self.return_error(request, payment_error)
             if request.is_ajax():
                 data = {
-                    'authenticated': user.is_authenticated() if user else False,
-                    'registered': registered,
-                    }
+                    'authenticated':
+                        user.is_authenticated() if user else False,
+                    'registered':
+                        registered,
+                }
                 return JsonResponse(data, status=200)
             else:
                 messages.success(request, 'Thank you for your contribution!')

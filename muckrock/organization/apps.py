@@ -2,6 +2,7 @@
 App config for Organization
 """
 
+# Django
 from django.apps import AppConfig
 
 

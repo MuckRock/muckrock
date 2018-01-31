@@ -2,6 +2,7 @@
 Views for mailgun
 """
 
+# Django
 from django.conf import settings
 from django.core.cache import cache
 from django.core.mail import EmailMessage
@@ -9,6 +10,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
 
+# Standard Library
 import hashlib
 import hmac
 import json
@@ -20,33 +22,27 @@ from datetime import datetime
 from email.utils import getaddresses
 from functools import wraps
 
+# MuckRock
 from muckrock.agency.models import AgencyEmail
 from muckrock.communication.models import (
-        EmailAddress,
-        EmailCommunication,
-        EmailError,
-        EmailOpen,
-        PhoneNumber,
-        FaxCommunication,
-        FaxError,
-        )
-from muckrock.foia.models import (
-        FOIARequest,
-        FOIACommunication,
-        RawEmail,
-        )
+    EmailAddress,
+    EmailCommunication,
+    EmailError,
+    EmailOpen,
+    FaxCommunication,
+    FaxError,
+    PhoneNumber,
+)
+from muckrock.foia.models import FOIACommunication, FOIARequest, RawEmail
 from muckrock.foia.tasks import classify_status
-from muckrock.task.models import (
-        OrphanTask,
-        ResponseTask,
-        ReviewAgencyTask,
-        )
+from muckrock.task.models import OrphanTask, ResponseTask, ReviewAgencyTask
 
 logger = logging.getLogger(__name__)
 
 
-def _make_orphan_comm(from_email, to_emails, cc_emails,
-        subject, post, files, foia):
+def _make_orphan_comm(
+    from_email, to_emails, cc_emails, subject, post, files, foia
+):
     """Make an orphan communication"""
     # pylint: disable=too-many-arguments
     if from_email:
@@ -58,26 +54,25 @@ def _make_orphan_comm(from_email, to_emails, cc_emails,
     else:
         from_user = None
     comm = FOIACommunication.objects.create(
-            from_user=from_user,
-            response=True,
-            subject=subject[:255],
-            date=datetime.now(),
-            communication=_get_mail_body(post),
-            likely_foia=foia,
-            )
+        from_user=from_user,
+        response=True,
+        subject=subject[:255],
+        date=datetime.now(),
+        communication=_get_mail_body(post),
+        likely_foia=foia,
+    )
     email_comm = EmailCommunication.objects.create(
-            communication=comm,
-            sent_datetime=datetime.now(),
-            from_email=from_email,
-            )
+        communication=comm,
+        sent_datetime=datetime.now(),
+        from_email=from_email,
+    )
     email_comm.to_emails.set(to_emails)
     email_comm.cc_emails.set(cc_emails)
     RawEmail.objects.create(
         email=email_comm,
-        raw_email='%s\n%s' % (
-            post.get('message-headers', ''),
-            post.get('body-plain', '')),
-        )
+        raw_email='%s\n%s' %
+        (post.get('message-headers', ''), post.get('body-plain', '')),
+    )
     comm.process_attachments(files)
 
     return comm
@@ -88,24 +83,25 @@ def _get_mail_body(post):
     then get the full plain body"""
     stripped_text = post.get('stripped-text', '')
     bad_text = [
-            # if stripped-text is blank or not present
-            '',
-            '\n',
-            # the following are form Seattle's automated system
-            # they seem to confuse mailgun's parser
-            '--- Please respond above this line ---',
-            '--- Please respond above this line ---\n',
-            ]
+        # if stripped-text is blank or not present
+        '',
+        '\n',
+        # the following are form Seattle's automated system
+        # they seem to confuse mailgun's parser
+        '--- Please respond above this line ---',
+        '--- Please respond above this line ---\n',
+    ]
     if stripped_text in bad_text:
         return post.get('body-plain')
     else:
         return '%s\n%s' % (
-                post.get('stripped-text', ''),
-                post.get('stripped-signature', ''))
+            post.get('stripped-text', ''), post.get('stripped-signature', '')
+        )
 
 
 def mailgun_verify(function):
     """Decorator to verify mailgun webhooks"""
+
     @wraps(function)
     def wrapper(request):
         """Wrapper"""
@@ -113,11 +109,13 @@ def mailgun_verify(function):
             return function(request)
         else:
             return HttpResponseForbidden()
+
     return wrapper
 
 
 def get_common_webhook_params(function):
     """Decorator to handle getting the communication for mailgun webhooks"""
+
     @wraps(function)
     def wrapper(request):
         """Wrapper"""
@@ -134,12 +132,13 @@ def get_common_webhook_params(function):
             function(request, email_comm, timestamp)
         else:
             logger.warning(
-                    'No email comm for %s webhook: %s',
-                    function.__name__,
-                    request.POST,
-                    )
+                'No email comm for %s webhook: %s',
+                function.__name__,
+                request.POST,
+            )
 
         return HttpResponse('OK')
+
     return wrapper
 
 
@@ -158,15 +157,17 @@ def route_mailgun(request):
     # ID will be cached for 5 minutes - duplicates should normally be processed
     # within seconds of each other.
     message_id = (
-            post.get('Message-ID') or
-            post.get('Message-Id') or
-            post.get('message-id'))
+        post.get('Message-ID') or post.get('Message-Id')
+        or post.get('message-id')
+    )
     if message_id:
         # cache.add will return False if the key is already present
         if not cache.add(message_id, 1, 300):
             return HttpResponse('OK')
 
-    p_request_email = re.compile(r'(\d+-\d{3,10})@%s' % settings.MAILGUN_SERVER_NAME)
+    p_request_email = re.compile(
+        r'(\d+-\d{3,10})@%s' % settings.MAILGUN_SERVER_NAME
+    )
     tos = post.get('To', '') or post.get('to', '')
     ccs = post.get('Cc', '') or post.get('cc', '')
     name_emails = getaddresses([tos.lower(), ccs.lower()])
@@ -178,6 +179,7 @@ def route_mailgun(request):
         elif email.endswith('@%s' % settings.MAILGUN_SERVER_NAME):
             _catch_all(request, email)
     return HttpResponse('OK')
+
 
 def _parse_email_headers(post):
     """Parse email headers and return email address models"""
@@ -219,50 +221,51 @@ def _handle_request(request, mail_id):
         if not email_allowed or foia.block_incoming:
             logger.warning('%s: %s', msg, from_email)
             comm = _make_orphan_comm(
-                    from_email,
-                    to_emails,
-                    cc_emails,
-                    subject,
-                    post,
-                    request.FILES,
-                    foia,
-                    )
+                from_email,
+                to_emails,
+                cc_emails,
+                subject,
+                post,
+                request.FILES,
+                foia,
+            )
             OrphanTask.objects.create(
-                reason=reason,
-                communication=comm,
-                address=mail_id)
+                reason=reason, communication=comm, address=mail_id
+            )
             return HttpResponse('WARNING')
 
         # if this isn't a known email for this agency, add it
         if not from_email.agencies.filter(pk=foia.agency.pk).exists():
             AgencyEmail.objects.create(
-                    agency=foia.agency,
-                    email=from_email,
-                    )
+                agency=foia.agency,
+                email=from_email,
+            )
 
         # if this request is using a portal, hide the incoming messages
         hidden = foia.portal is not None
 
         comm = FOIACommunication.objects.create(
-                foia=foia,
-                from_user=foia.agency.get_user(),
-                to_user=foia.user,
-                subject=subject[:255],
-                response=True,
-                date=datetime.now(),
-                communication=_get_mail_body(post),
-                hidden=hidden,
-                )
+            foia=foia,
+            from_user=foia.agency.get_user(),
+            to_user=foia.user,
+            subject=subject[:255],
+            response=True,
+            date=datetime.now(),
+            communication=_get_mail_body(post),
+            hidden=hidden,
+        )
         email_comm = EmailCommunication.objects.create(
-                communication=comm,
-                sent_datetime=datetime.now(),
-                from_email=from_email,
-                )
+            communication=comm,
+            sent_datetime=datetime.now(),
+            from_email=from_email,
+        )
         email_comm.to_emails.set(to_emails)
         email_comm.cc_emails.set(cc_emails)
         RawEmail.objects.create(
             email=email_comm,
-            raw_email='%s\n%s' % (post.get('message-headers', ''), post.get('body-plain', '')))
+            raw_email='%s\n%s' %
+            (post.get('message-headers', ''), post.get('body-plain', ''))
+        )
         comm.process_attachments(request.FILES)
 
         # resolve any stale agency tasks for this agency
@@ -277,9 +280,10 @@ def _handle_request(request, mail_id):
             classify_status.apply_async(args=(task.pk,), countdown=30 * 60)
             comm.create_agency_notifications()
 
-        new_cc_emails = [e for e in (to_emails + cc_emails)
-                if e.domain not in
-                (settings.MAILGUN_SERVER_NAME, 'muckrock.com')]
+        new_cc_emails = [
+            e for e in (to_emails + cc_emails)
+            if e.domain not in (settings.MAILGUN_SERVER_NAME, 'muckrock.com')
+        ]
         foia.email = from_email
         foia.cc_emails.set(new_cc_emails)
 
@@ -295,28 +299,27 @@ def _handle_request(request, mail_id):
         except FOIARequest.DoesNotExist:
             foia = None
         comm = _make_orphan_comm(
-                from_email,
-                to_emails,
-                cc_emails,
-                subject,
-                post,
-                request.FILES,
-                foia,
-                )
+            from_email,
+            to_emails,
+            cc_emails,
+            subject,
+            post,
+            request.FILES,
+            foia,
+        )
         OrphanTask.objects.create(
-            reason='ia',
-            communication=comm,
-            address=mail_id)
+            reason='ia', communication=comm, address=mail_id
+        )
         return HttpResponse('WARNING')
     except Exception as exc:
         # If anything I haven't accounted for happens, at the very least forward
         # the email to requests so it isn't lost
         logger.error(
-                'Uncaught Mailgun Exception - %s: %s',
-                mail_id,
-                exc,
-                exc_info=sys.exc_info(),
-                )
+            'Uncaught Mailgun Exception - %s: %s',
+            mail_id,
+            exc,
+            exc_info=sys.exc_info(),
+        )
         _forward(post, request.FILES, 'Uncaught Mailgun Exception', info=True)
         return HttpResponse('ERROR')
 
@@ -332,18 +335,17 @@ def _catch_all(request, address):
 
     if from_email.allowed():
         comm = _make_orphan_comm(
-                from_email,
-                to_emails,
-                cc_emails,
-                subject,
-                post,
-                request.FILES,
-                None,
-                )
+            from_email,
+            to_emails,
+            cc_emails,
+            subject,
+            post,
+            request.FILES,
+            None,
+        )
         OrphanTask.objects.create(
-            reason='ia',
-            communication=comm,
-            address=address)
+            reason='ia', communication=comm, address=address
+        )
 
     return HttpResponse('OK')
 
@@ -364,20 +366,20 @@ def bounces(request, email_comm, timestamp):
         error = ''
 
     EmailError.objects.create(
-            email=email_comm,
-            datetime=timestamp,
-            recipient=recipient,
-            code=request.POST.get('code', ''),
-            error=error,
-            event=event,
-            reason=request.POST.get('reason', ''),
-            )
+        email=email_comm,
+        datetime=timestamp,
+        recipient=recipient,
+        code=request.POST.get('code', ''),
+        error=error,
+        event=event,
+        reason=request.POST.get('reason', ''),
+    )
     recipient.status = 'error'
     recipient.save()
     ReviewAgencyTask.objects.ensure_one_created(
-            agency=email_comm.communication.foia.agency,
-            resolved=False,
-            )
+        agency=email_comm.communication.foia.agency,
+        resolved=False,
+    )
 
     # ensure we don't create an infinite loop of emails
     # we expect the reported recipient to be the same as the foia
@@ -389,15 +391,15 @@ def bounces(request, email_comm, timestamp):
     recipient_is_cc = email_comm.cc_emails.filter(email=recipient)
     if not recipient_is_foia_email:
         logger.error(
-                'Bounce: recipient does not match foia email: %s - %s',
-                recipient,
-                foia.email,
-                )
+            'Bounce: recipient does not match foia email: %s - %s',
+            recipient,
+            foia.email,
+        )
     elif not foia_email_is_error:
         logger.error(
-                'Bounce: foia email is not marked as error: %s',
-                foia.email,
-                )
+            'Bounce: foia email is not marked as error: %s',
+            foia.email,
+        )
     elif not recipient_is_cc:
         # if the foia email matches and is not a CC, we resubmit
         # in order to fall back to fax or snail mail
@@ -411,19 +413,19 @@ def opened(request, email_comm, timestamp):
     """Notify when an email has been opened"""
     recipient = EmailAddress.objects.fetch(request.POST.get('recipient', ''))
     EmailOpen.objects.create(
-            email=email_comm,
-            datetime=timestamp,
-            recipient=recipient,
-            city=request.POST.get('city', ''),
-            region=request.POST.get('region', ''),
-            country=request.POST.get('country', ''),
-            client_type=request.POST.get('client-type', ''),
-            client_name=request.POST.get('client-name', ''),
-            client_os=request.POST.get('client-os', ''),
-            device_type=request.POST.get('device-type', ''),
-            user_agent=request.POST.get('user-agent', '')[:255],
-            ip_address=request.POST.get('ip', ''),
-            )
+        email=email_comm,
+        datetime=timestamp,
+        recipient=recipient,
+        city=request.POST.get('city', ''),
+        region=request.POST.get('region', ''),
+        country=request.POST.get('country', ''),
+        client_type=request.POST.get('client-type', ''),
+        client_name=request.POST.get('client-name', ''),
+        client_os=request.POST.get('client-os', ''),
+        device_type=request.POST.get('device-type', ''),
+        user_agent=request.POST.get('user-agent', '')[:255],
+        ip_address=request.POST.get('ip', ''),
+    )
 
 
 @mailgun_verify
@@ -440,16 +442,16 @@ def phaxio_callback(request):
     """Handle Phaxio callbacks"""
     # pylint: disable=too-many-branches
     url = 'https://%s%s' % (
-            settings.MUCKROCK_URL,
-            reverse('phaxio-callback'),
-            )
+        settings.MUCKROCK_URL,
+        reverse('phaxio-callback'),
+    )
     if not _validate_phaxio(
-            settings.PHAXIO_CALLBACK_TOKEN,
-            url,
-            request.POST,
-            request.FILES,
-            request.META['HTTP_X_PHAXIO_SIGNATURE'],
-            ):
+        settings.PHAXIO_CALLBACK_TOKEN,
+        url,
+        request.POST,
+        request.FILES,
+        request.META['HTTP_X_PHAXIO_SIGNATURE'],
+    ):
         return HttpResponseForbidden()
 
     fax_info = json.loads(request.POST['fax'])
@@ -462,9 +464,9 @@ def phaxio_callback(request):
 
     if not fax_comm:
         logger.warning(
-                'No fax comm for phaxio callback: %s',
-                request.POST,
-                )
+            'No fax comm for phaxio callback: %s',
+            request.POST,
+        )
     else:
         if 'completed_at' in fax_info:
             date = datetime.fromtimestamp(int(fax_info['completed_at']))
@@ -476,17 +478,17 @@ def phaxio_callback(request):
         else:
             for recipient in fax_info['recipients']:
                 number, _ = PhoneNumber.objects.get_or_create(
-                        number=recipient['number'],
-                        defaults={'type': 'fax'},
-                        )
+                    number=recipient['number'],
+                    defaults={'type': 'fax'},
+                )
                 FaxError.objects.create(
-                        fax=fax_comm,
-                        datetime=date,
-                        recipient=number,
-                        error_type=recipient['error_type'],
-                        error_code=recipient['error_code'],
-                        error_id=int(recipient['error_id']),
-                        )
+                    fax=fax_comm,
+                    datetime=date,
+                    recipient=number,
+                    error_type=recipient['error_type'],
+                    error_code=recipient['error_code'],
+                    error_id=int(recipient['error_id']),
+                )
                 # the following phaxio error IDs all correspond to
                 # Phone Number Not Operational - all other errors are considered
                 # temporary for now
@@ -495,14 +497,15 @@ def phaxio_callback(request):
                 if temp_failure and error_count < 4:
                     # retry with exponential back off
                     fax_comm.communication.foia_submit(
-                            fax_error_count=error_count + 1)
+                        fax_error_count=error_count + 1
+                    )
                 else:
                     number.status = 'error'
                     number.save()
                     ReviewAgencyTask.objects.ensure_one_created(
-                            agency=fax_comm.communication.foia.agency,
-                            resolved=False,
-                            )
+                        agency=fax_comm.communication.foia.agency,
+                        resolved=False,
+                    )
                     fax_comm.communication.foia.submit(switch=True)
 
     return HttpResponse('OK')
@@ -522,10 +525,10 @@ def _validate_phaxio(token, url, parameters, files, signature):
         url += '{}{}'.format(filename, file_hash.hexdigest())
 
     digest = hmac.new(
-            key=token.encode('utf-8'),
-            msg=url.encode('utf-8'),
-            digestmod=hashlib.sha1,
-            ).hexdigest()
+        key=token.encode('utf-8'),
+        msg=url.encode('utf-8'),
+        digestmod=hashlib.sha1,
+    ).hexdigest()
     return signature == digest
 
 
@@ -535,10 +538,10 @@ def _verify(post):
     timestamp = post.get('timestamp', '')
     signature = post.get('signature', '')
     signature_ = hmac.new(
-            key=settings.MAILGUN_ACCESS_KEY,
-            msg='%s%s' % (timestamp, token),
-            digestmod=hashlib.sha256,
-            ).hexdigest()
+        key=settings.MAILGUN_ACCESS_KEY,
+        msg='%s%s' % (timestamp, token),
+        digestmod=hashlib.sha256,
+    ).hexdigest()
     return signature == signature_ and int(timestamp) + 300 > time.time()
 
 
@@ -566,6 +569,7 @@ def _forward(post, files, title='', extra_content='', info=False):
 
     email.send(fail_silently=False)
 
+
 def _log_mail(request):
     """Log a request"""
     body = []
@@ -573,9 +577,9 @@ def _log_mail(request):
         body.append('\n{}:'.format(key))
         body.append(unicode(value))
     email = EmailMessage(
-            '[NEXTREQUEST LOG]',
-            '\n'.join(body),
-            'info@muckrock.com',
-            ['mitch@muckrock.com'],
-            )
+        '[NEXTREQUEST LOG]',
+        '\n'.join(body),
+        'info@muckrock.com',
+        ['mitch@muckrock.com'],
+    )
     email.send(fail_silently=False)

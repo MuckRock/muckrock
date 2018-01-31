@@ -2,16 +2,19 @@
 Views for tags
 """
 
+# Django
 from django.db.models import Count
-from django.views.generic import TemplateView, DetailView
+from django.views.generic import DetailView, TemplateView
 
-from . import models
-
+# MuckRock
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
 from muckrock.project.models import Project
 from muckrock.qanda.models import Question
 from muckrock.tags.forms import TagForm
+
+from . import models
+
 
 def list_all_tags():
     """Should list all tags that exist and that have at least one object"""
@@ -55,35 +58,29 @@ class TagDetailView(DetailView):
         this_tag = self.get_object()
 
         self._get_and_count(
-                context,
-                'tagged_projects',
-                Project.objects
-                    .get_visible(user)
-                    .filter(tags=this_tag)
-                    .optimize(),
-                )
+            context,
+            'tagged_projects',
+            Project.objects.get_visible(user).filter(tags=this_tag).optimize(),
+        )
         self._get_and_count(
-                context,
-                'tagged_requests',
-                FOIARequest.objects
-                    .get_viewable(self.request.user)
-                    .filter(tags=this_tag)
-                    .select_related_view()
-                )
+            context,
+            'tagged_requests',
+            FOIARequest.objects.get_viewable(self.request.user)
+            .filter(tags=this_tag).select_related_view()
+        )
         self._get_and_count(
-                context,
-                'tagged_articles',
-                Article.objects
-                    .get_published()
-                    .filter(tags=this_tag)
-                    .prefetch_related(
-                        'authors',
-                        'authors__profile',
-                        'projects',
-                    ))
+            context,
+            'tagged_articles',
+            Article.objects.get_published().filter(tags=this_tag)
+            .prefetch_related(
+                'authors',
+                'authors__profile',
+                'projects',
+            )
+        )
         self._get_and_count(
-                context,
-                'tagged_questions',
-                Question.objects.filter(tags__name__in=[this_tag]),
-                )
+            context,
+            'tagged_questions',
+            Question.objects.filter(tags__name__in=[this_tag]),
+        )
         return context

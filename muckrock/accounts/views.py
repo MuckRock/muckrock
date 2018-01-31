@@ -2,77 +2,78 @@
 Views for the accounts application
 """
 
+# Django
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http import (
-        HttpResponse,
-        HttpResponseBadRequest,
-        HttpResponseNotAllowed,
-        HttpResponseRedirect,
-        )
-from django.shortcuts import (
-        get_object_or_404,
-        redirect,
-        render,
-        )
+    HttpResponse,
+    HttpResponseBadRequest,
+    HttpResponseNotAllowed,
+    HttpResponseRedirect,
+)
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import TemplateView, FormView, ListView
+from django.views.generic import FormView, ListView, TemplateView
 
-from datetime import date
-from rest_framework import viewsets
-from rest_framework.permissions import (
-        DjangoModelPermissionsOrAnonReadOnly,
-        IsAdminUser,
-        )
+# Standard Library
 import json
 import logging
-import stripe
 import sys
+from datetime import date
 
+# Third Party
+import stripe
+from rest_framework import viewsets
+from rest_framework.permissions import (
+    DjangoModelPermissionsOrAnonReadOnly,
+    IsAdminUser,
+)
+
+# MuckRock
 from muckrock.accounts.filters import ProxyFilterSet
 from muckrock.accounts.forms import (
-        ProfileSettingsForm,
-        EmailSettingsForm,
-        BillingPreferencesForm,
-        OrgPreferencesForm,
-        ReceiptForm,
-        RegisterForm,
-        RegisterOrganizationForm,
-        RegistrationCompletionForm
-        )
+    BillingPreferencesForm,
+    EmailSettingsForm,
+    OrgPreferencesForm,
+    ProfileSettingsForm,
+    ReceiptForm,
+    RegisterForm,
+    RegisterOrganizationForm,
+    RegistrationCompletionForm,
+)
 from muckrock.accounts.models import (
-        Profile,
-        Notification,
-        Statistics,
-        ReceiptEmail,
-        RecurringDonation,
-        ACCT_TYPES,
-        )
-from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
+    ACCT_TYPES,
+    Notification,
+    Profile,
+    ReceiptEmail,
+    RecurringDonation,
+    Statistics,
+)
+from muckrock.accounts.serializers import StatisticsSerializer, UserSerializer
 from muckrock.accounts.utils import validate_stripe_email
 from muckrock.agency.models import Agency
 from muckrock.communication.models import EmailAddress
 from muckrock.crowdfund.models import RecurringCrowdfundPayment
 from muckrock.foia.models import FOIARequest
 from muckrock.message.email import TemplateEmail
+from muckrock.message.tasks import (
+    email_verify,
+    failed_payment,
+    gift,
+    send_charge_receipt,
+    send_invoice_receipt,
+    welcome,
+)
 from muckrock.news.models import Article
 from muckrock.organization.models import Organization
 from muckrock.project.models import Project
-from muckrock.message.tasks import (
-        send_charge_receipt,
-        send_invoice_receipt,
-        failed_payment,
-        email_verify,
-        welcome,
-        gift,
-        )
-from muckrock.views import MRFilterListView
 from muckrock.utils import stripe_retry_on_error
+from muckrock.views import MRFilterListView
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -104,6 +105,7 @@ def account_logout(request):
 
 class SignupView(FormView):
     """Generic ancestor for all account signup views."""
+
     def dispatch(self, *args, **kwargs):
         """Prevent logged-in users from accessing this view."""
         if self.request.user.is_authenticated():
@@ -146,28 +148,36 @@ class ProfessionalSignupView(SignupView):
         new_user = create_new_user(self.request, form)
         welcome.delay(new_user)
         try:
-            new_user.profile.start_pro_subscription(self.request.POST['stripe_token'])
+            new_user.profile.start_pro_subscription(
+                self.request.POST['stripe_token']
+            )
             success_msg = 'Your professional account was successfully created. Welcome to MuckRock!'
             messages.success(self.request, success_msg)
         except (KeyError, AttributeError):
             # no payment information provided
             logger.warn('No payment information provided.')
-            error_msg = ('Your account was successfully created, '
-                         'but you did not provide payment information. '
-                         'You can subscribe from the account management page.')
+            error_msg = (
+                'Your account was successfully created, '
+                'but you did not provide payment information. '
+                'You can subscribe from the account management page.'
+            )
             messages.error(self.request, error_msg)
         except stripe.error.CardError:
             # card declined
             logger.warn('Card was declined.')
-            error_msg = ('Your account was successfully created, but your card was declined. '
-                         'You can subscribe from the account management page.')
+            error_msg = (
+                'Your account was successfully created, but your card was declined. '
+                'You can subscribe from the account management page.'
+            )
             messages.error(self.request, error_msg)
         except (stripe.error.InvalidRequestError, stripe.error.APIError):
             # invalid request made to stripe
             logger.warn('No payment information provided.')
-            error_msg = ('Your account was successfully created, '
-                         'but we could not contact our payment provider. '
-                         'You can subscribe from the account management page.')
+            error_msg = (
+                'Your account was successfully created, '
+                'but we could not contact our payment provider. '
+                'You can subscribe from the account management page.'
+            )
             messages.error(self.request, error_msg)
         return super(ProfessionalSignupView, self).form_valid(form)
 
@@ -185,8 +195,15 @@ class OrganizationSignupView(SignupView):
         new_user = create_new_user(self.request, form)
         new_org = form.create_organization(new_user)
         welcome.delay(new_user)
-        messages.success(self.request, 'Your account and organization were successfully created.')
-        return HttpResponseRedirect(reverse('org-activate', kwargs={'slug': new_org.slug}))
+        messages.success(
+            self.request,
+            'Your account and organization were successfully created.'
+        )
+        return HttpResponseRedirect(
+            reverse('org-activate', kwargs={
+                'slug': new_org.slug
+            })
+        )
 
 
 class AccountsView(TemplateView):
@@ -204,9 +221,9 @@ class AccountsView(TemplateView):
         if logged_in:
             context['acct_type'] = self.request.user.profile.acct_type
             context['email'] = self.request.user.email
-            context['org'] = (Organization.objects
-                    .filter(owner=self.request.user)
-                    .first())
+            context['org'] = (
+                Organization.objects.filter(owner=self.request.user).first()
+            )
         context['stripe_pk'] = settings.STRIPE_PUB_KEY
         context['logged_in'] = logged_in
         return context
@@ -215,10 +232,7 @@ class AccountsView(TemplateView):
         """Handle upgrades and downgrades of accounts"""
         try:
             action = request.POST['action']
-            account_actions = {
-                'downgrade': downgrade,
-                'upgrade': upgrade
-            }
+            account_actions = {'downgrade': downgrade, 'upgrade': upgrade}
             account_actions[action](request)
         except KeyError as exception:
             logger.error(exception)
@@ -244,12 +258,18 @@ def upgrade(request):
     is_pro_user = request.user.profile.acct_type in ['pro', 'proxy']
     is_org_owner = Organization.objects.filter(owner=request.user).exists()
     if is_pro_user:
-        raise ValueError('Cannot upgrade this account, it is already Professional.')
+        raise ValueError(
+            'Cannot upgrade this account, it is already Professional.'
+        )
     if is_org_owner:
-        raise ValueError('Cannot upgrade this account, it owns an organization.')
+        raise ValueError(
+            'Cannot upgrade this account, it owns an organization.'
+        )
     token = request.POST.get('stripe_token')
     if not token:
-        raise ValueError('Cannot upgrade this account, no Stripe token provided.')
+        raise ValueError(
+            'Cannot upgrade this account, no Stripe token provided.'
+        )
     request.user.profile.start_pro_subscription(token)
 
 
@@ -258,7 +278,9 @@ def downgrade(request):
     if not request.user.is_authenticated():
         raise AttributeError('Cannot downgrade an anonymous user.')
     if request.user.profile.acct_type != 'pro':
-        raise ValueError('Cannot downgrade this account, it is not Professional.')
+        raise ValueError(
+            'Cannot downgrade this account, it is not Professional.'
+        )
     request.user.profile.cancel_pro_subscription()
 
 
@@ -288,17 +310,17 @@ class ProfileSettings(TemplateView):
             return redirect('acct-settings')
         elif action == 'cancel-crowdfunds':
             self._handle_cancel_payments(
-                    'recurring_crowdfund_payments',
-                    'cancel-crowdfunds',
-                    )
+                'recurring_crowdfund_payments',
+                'cancel-crowdfunds',
+            )
             return redirect('acct-settings')
         elif action:
             form = settings_forms[action]
             form = form(
-                    request.POST,
-                    request.FILES,
-                    instance=request.user.profile,
-                    )
+                request.POST,
+                request.FILES,
+                instance=request.user.profile,
+            )
             if form.is_valid():
                 form.save()
                 messages.success(request, 'Your settings have been updated.')
@@ -313,15 +335,18 @@ class ProfileSettings(TemplateView):
         if receipt_form.is_valid():
             new_emails = receipt_form.cleaned_data['emails'].split('\n')
             new_emails = {e.strip() for e in new_emails}
-            old_emails = {r.email for r in
-                    self.request.user.receipt_emails.all()}
+            old_emails = {
+                r.email
+                for r in self.request.user.receipt_emails.all()
+            }
             ReceiptEmail.objects.filter(
-                    user=self.request.user,
-                    email__in=(old_emails - new_emails),
-                    ).delete()
-            ReceiptEmail.objects.bulk_create(
-                    [ReceiptEmail(user=self.request.user, email=e)
-                        for e in new_emails - old_emails])
+                user=self.request.user,
+                email__in=(old_emails - new_emails),
+            ).delete()
+            ReceiptEmail.objects.bulk_create([
+                ReceiptEmail(user=self.request.user, email=e)
+                for e in new_emails - old_emails
+            ])
             messages.success(self.request, 'Your settings have been updated.')
             return True
         else:
@@ -329,21 +354,21 @@ class ProfileSettings(TemplateView):
 
     def _handle_cancel_payments(self, attr, arg):
         """Handle cancelling recurring donations or crowdfunds"""
-        payments = getattr(self.request.user, attr).filter(
-                pk__in=self.request.POST.getlist(arg))
+        payments = getattr(self.request.user,
+                           attr).filter(pk__in=self.request.POST.getlist(arg))
         for payment in payments:
             payment.cancel()
         msg = attr.replace('_', ' ')
         if payments:
             messages.success(
-                    self.request,
-                    'The selected {} have been cancelled.'.format(msg),
-                    )
+                self.request,
+                'The selected {} have been cancelled.'.format(msg),
+            )
         else:
             messages.warning(
-                    self.request,
-                    'No {} were selected to be cancelled.'.format(msg),
-                    )
+                self.request,
+                'No {} were selected to be cancelled.'.format(msg),
+            )
 
     def get_context_data(self, **kwargs):
         """Returns context for the template"""
@@ -352,27 +377,30 @@ class ProfileSettings(TemplateView):
         profile_initial = {
             'first_name': self.request.user.first_name,
             'last_name': self.request.user.last_name,
-            }
+        }
         email_initial = {'email': self.request.user.email}
         receipt_initial = {
-            'emails': '\n'.join(r.email
-                for r in self.request.user.receipt_emails.all())
-            }
+            'emails':
+                '\n'
+                .join(r.email for r in self.request.user.receipt_emails.all())
+        }
         profile_form = ProfileSettingsForm(
-                initial=profile_initial,
-                instance=user_profile,
-                )
+            initial=profile_initial,
+            instance=user_profile,
+        )
         email_form = EmailSettingsForm(
-                initial=email_initial,
-                instance=user_profile,
-                )
+            initial=email_initial,
+            instance=user_profile,
+        )
         org_form = OrgPreferencesForm(instance=user_profile)
-        receipt_form = (kwargs.get('receipt_form') or
-                ReceiptForm(initial=receipt_initial))
+        receipt_form = (
+            kwargs.get('receipt_form') or ReceiptForm(initial=receipt_initial)
+        )
         current_plan = dict(ACCT_TYPES)[user_profile.acct_type]
         donations = RecurringDonation.objects.filter(user=self.request.user)
         crowdfunds = RecurringCrowdfundPayment.objects.filter(
-                user=self.request.user)
+            user=self.request.user
+        )
         context.update({
             'stripe_pk': settings.STRIPE_PUB_KEY,
             'profile_form': profile_form,
@@ -383,7 +411,7 @@ class ProfileSettings(TemplateView):
             'credit_card': user_profile.card(),
             'donations': donations,
             'crowdfunds': crowdfunds,
-            })
+        })
         return context
 
 
@@ -407,16 +435,16 @@ def buy_requests(request, username=None):
                 raise KeyError('Missing Stripe payment data.')
             # take from the purchaser
             stripe_retry_on_error(
-                    stripe.Charge.create,
-                    amount=request_price,
-                    currency='usd',
-                    source=stripe_token,
-                    metadata={
-                        'email': stripe_email,
-                        'action': 'request-purchase',
-                        },
-                    idempotency_key=True,
-                    )
+                stripe.Charge.create,
+                amount=request_price,
+                currency='usd',
+                source=stripe_token,
+                metadata={
+                    'email': stripe_email,
+                    'action': 'request-purchase',
+                },
+                idempotency_key=True,
+            )
             # and give to the recipient
             recipient.profile.num_requests += request_count
             recipient.profile.save()
@@ -426,12 +454,16 @@ def buy_requests(request, username=None):
             if recipient == purchaser:
                 msg += '%d requests have been added to your account.' % request_count
             else:
-                msg += '%d requests have been gifted to %s' % (request_count, recipient.first_name)
+                msg += '%d requests have been gifted to %s' % (
+                    request_count, recipient.first_name
+                )
                 gift_description = '%d requests' % request_count
                 # notify the recipient with an email
                 gift.delay(recipient, purchaser, gift_description)
             messages.success(request, msg)
-            logger.info('%s purchased %d requests', purchaser.username, request_count)
+            logger.info(
+                '%s purchased %d requests', purchaser.username, request_count
+            )
     except KeyError as exception:
         msg = 'Payment error: %s' % exception
         messages.error(request, msg)
@@ -458,14 +490,21 @@ def verify_email(request):
             if key == _profile.confirmation_key:
                 _profile.email_confirmed = True
                 _profile.save()
-                messages.success(request, 'Your email address has been confirmed.')
+                messages.success(
+                    request, 'Your email address has been confirmed.'
+                )
             else:
                 messages.error(request, 'Your confirmation key is invalid.')
         else:
             email_verify.delay(user)
-            messages.info(request, 'We just sent you an email containing your verification link.')
+            messages.info(
+                request,
+                'We just sent you an email containing your verification link.'
+            )
     else:
-        messages.warning(request, 'Your email is already confirmed, no need to verify again!')
+        messages.warning(
+            request, 'Your email is already confirmed, no need to verify again!'
+        )
     return redirect(_profile)
 
 
@@ -477,34 +516,37 @@ def profile(request, username=None):
         else:
             return redirect('acct-profile', username=request.user.username)
     user = get_object_or_404(User, username=username, is_active=True)
-    if (request.method == "POST" and
-            request.user.is_staff and
-            request.POST.get('action') == 'cancel-pro'):
+    if (
+        request.method == "POST" and request.user.is_staff
+        and request.POST.get('action') == 'cancel-pro'
+    ):
         user.profile.cancel_pro_subscription()
         messages.success(request, 'Pro account has been cancelled')
         return redirect('acct-profile', username=username)
     user_profile = user.profile
     org = user_profile.organization
     show_org_link = (
-            org and (
-                not org.private or
-                request.user.is_staff
-                or (
-                    request.user.is_authenticated() and
-                    request.user.profile.is_member_of(org)
-                    )))
-    requests = (FOIARequest.objects
-            .filter(user=user)
-            .get_viewable(request.user)
-            .select_related(
-                'jurisdiction',
-                'jurisdiction__parent',
-                'jurisdiction__parent__parent',
-                ))
+        org and (
+            not org.private or request.user.is_staff or (
+                request.user.is_authenticated()
+                and request.user.profile.is_member_of(org)
+            )
+        )
+    )
+    requests = (
+        FOIARequest.objects.filter(user=user
+                                   ).get_viewable(request.user).select_related(
+                                       'jurisdiction',
+                                       'jurisdiction__parent',
+                                       'jurisdiction__parent__parent',
+                                   )
+    )
     recent_requests = requests.order_by('-date_submitted')[:5]
     recent_completed = requests.filter(status='done').order_by('-date_done')[:5]
     articles = Article.objects.get_published().filter(authors=user)[:5]
-    projects = Project.objects.get_for_contributor(user).get_visible(request.user)[:3]
+    projects = Project.objects.get_for_contributor(user).get_visible(
+        request.user
+    )[:3]
     context = {
         'user_obj': user,
         'profile': user_profile,
@@ -521,10 +563,10 @@ def profile(request, username=None):
         'sidebar_admin_url': reverse('admin:auth_user_change', args=(user.pk,)),
     }
     return render(
-            request,
-            'accounts/profile.html',
-            context,
-            )
+        request,
+        'accounts/profile.html',
+        context,
+    )
 
 
 @csrf_exempt
@@ -538,10 +580,10 @@ def stripe_webhook(request):
     try:
         if settings.STRIPE_WEBHOOK_SECRET:
             event = stripe.Webhook.construct_event(
-                    payload,
-                    sig_header,
-                    settings.STRIPE_WEBHOOK_SECRET,
-                    )
+                payload,
+                sig_header,
+                settings.STRIPE_WEBHOOK_SECRET,
+            )
         else:
             event = json.loads(request.body)
 
@@ -553,25 +595,25 @@ def stripe_webhook(request):
             event_object_id = ''
     except (TypeError, ValueError, SyntaxError) as exception:
         logging.error(
-                'Stripe Webhook: Error parsing JSON: %s',
-                exception,
-                exc_info=sys.exc_info(),
-                )
+            'Stripe Webhook: Error parsing JSON: %s',
+            exception,
+            exc_info=sys.exc_info(),
+        )
         return HttpResponseBadRequest()
     except KeyError as exception:
         logging.error(
-                'Stripe Webhook: Unexpected structure: %s in %s',
-                exception,
-                event,
-                exc_info=sys.exc_info(),
-                )
+            'Stripe Webhook: Unexpected structure: %s in %s',
+            exception,
+            event,
+            exc_info=sys.exc_info(),
+        )
         return HttpResponseBadRequest()
     except stripe.error.SignatureVerificationError as exception:
         logging.error(
-                'Stripe Webhook: Signature Verification Error: %s',
-                sig_header,
-                exc_info=sys.exc_info(),
-                )
+            'Stripe Webhook: Signature Verification Error: %s',
+            sig_header,
+            exc_info=sys.exc_info(),
+        )
         return HttpResponseBadRequest()
     # If we've made it this far, then the webhook message was successfully sent!
     # Now it's up to us to act on it.
@@ -622,7 +664,8 @@ class RegistrationCompletionView(FormView):
                 _profile.email_confirmed = True
                 _profile.save()
                 messages.success(request, 'Your email is validated.')
-        return super(RegistrationCompletionView, self).get(request, *args, **kwargs)
+        return super(RegistrationCompletionView,
+                     self).get(request, *args, **kwargs)
 
     def form_valid(self, form):
         """Saves the form and redirects to the success url."""
@@ -632,17 +675,19 @@ class RegistrationCompletionView(FormView):
 
     def get_success_url(self):
         """Return the user's profile."""
-        return reverse('acct-profile', kwargs={'username': self.request.user.username})
+        return reverse(
+            'acct-profile', kwargs={
+                'username': self.request.user.username
+            }
+        )
 
 
 class UserViewSet(viewsets.ModelViewSet):
     """API views for User"""
-    # pylint: disable=too-many-ancestors
     # pylint: disable=too-many-public-methods
-    queryset = (User.objects
-            .order_by('id')
-            .prefetch_related('profile', 'groups')
-            )
+    queryset = (
+        User.objects.order_by('id').prefetch_related('profile', 'groups')
+    )
     serializer_class = UserSerializer
     permission_classes = (IsAdminUser,)
     filter_fields = ('username', 'first_name', 'last_name', 'email', 'is_staff')
@@ -650,7 +695,6 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class StatisticsViewSet(viewsets.ModelViewSet):
     """API views for Statistics"""
-    # pylint: disable=too-many-ancestors
     # pylint: disable=too-many-public-methods
     queryset = Statistics.objects.all()
     serializer_class = StatisticsSerializer
@@ -668,16 +712,15 @@ class NotificationList(ListView):
 
     def get_queryset(self):
         """Return all notifications for the user making the request."""
-        return (super(NotificationList, self)
-                .get_queryset()
-                .for_user(self.request.user)
-                .order_by('-datetime')
-                .select_related('action')
-                .prefetch_related(
-                    'action__actor',
-                    'action__target',
-                    'action__action_object',
-                    ))
+        return (
+            super(NotificationList, self).get_queryset().for_user(
+                self.request.user
+            ).order_by('-datetime').select_related('action').prefetch_related(
+                'action__actor',
+                'action__target',
+                'action__action_object',
+            )
+        )
 
     def get_paginate_by(self, queryset):
         """Paginates list by the return value"""
@@ -729,9 +772,9 @@ class ProxyList(MRFilterListView):
     template_name = 'lists/proxy_list.html'
     default_sort = 'profile__state'
     sort_map = {
-            'name': 'last_name',
-            'state': 'profile__state',
-            }
+        'name': 'last_name',
+        'state': 'profile__state',
+    }
 
     @method_decorator(user_passes_test(lambda u: u.is_staff))
     def dispatch(self, *args, **kwargs):
@@ -741,51 +784,50 @@ class ProxyList(MRFilterListView):
     def get_queryset(self):
         """Display all proxies"""
         objects = super(ProxyList, self).get_queryset()
-        return (objects
-                .filter(profile__acct_type='proxy')
-                .select_related('profile'))
+        return (
+            objects.filter(profile__acct_type='proxy')
+            .select_related('profile')
+        )
 
 
 def agency_redirect_login(
-        request, agency_slug, agency_idx, foia_slug, foia_idx):
+    request, agency_slug, agency_idx, foia_slug, foia_idx
+):
     """View to redirect agency users to the correct page or offer to resend
     them their login token"""
 
     agency = get_object_or_404(Agency, slug=agency_slug, pk=agency_idx)
     foia = get_object_or_404(
-            FOIARequest,
-            agency=agency,
-            slug=foia_slug,
-            pk=foia_idx,
-            )
+        FOIARequest,
+        agency=agency,
+        slug=foia_slug,
+        pk=foia_idx,
+    )
 
     if request.method == 'POST':
         email = request.POST.get('email', '')
         # valid if this email is associated with the agency
-        valid = (EmailAddress.objects
-                .fetch(email)
-                .agencies
-                .filter(id=agency.pk)
-                .exists()
-                )
+        valid = (
+            EmailAddress.objects.fetch(email).agencies.filter(id=agency.pk)
+            .exists()
+        )
         if valid:
             msg = TemplateEmail(
-                    subject='Login Token',
-                    from_email='info@muckrock.com',
-                    to=[email],
-                    text_template='accounts/email/login_token.txt',
-                    html_template='accounts/email/login_token.html',
-                    extra_context={
-                        'reply_link': foia.get_agency_reply_link(email=email),
-                        }
-                    )
+                subject='Login Token',
+                from_email='info@muckrock.com',
+                to=[email],
+                text_template='accounts/email/login_token.txt',
+                html_template='accounts/email/login_token.html',
+                extra_context={
+                    'reply_link': foia.get_agency_reply_link(email=email),
+                }
+            )
             msg.send(fail_silently=False)
             messages.success(
-                    request,
-                    'Fresh login token succesfully sent to %s.  '
-                    'Please check your email'
-                    % email,
-                    )
+                request,
+                'Fresh login token succesfully sent to %s.  '
+                'Please check your email' % email,
+            )
         else:
             messages.error(request, 'Invalid email')
         return redirect(foia)
@@ -796,11 +838,10 @@ def agency_redirect_login(
     email = request.GET.get('email', '')
     # valid if this email is associated with the agency
     email_address = EmailAddress.objects.fetch(email)
-    valid = (email_address is not None and email_address
-            .agencies
-            .filter(id=agency.pk)
-            .exists()
-            )
+    valid = (
+        email_address is not None
+        and email_address.agencies.filter(id=agency.pk).exists()
+    )
 
     if agency_match:
         return redirect(foia)
@@ -810,7 +851,8 @@ def agency_redirect_login(
         return redirect('index')
     else:
         return render(
-                request,
-                'accounts/agency_redirect_login.html',
-                {'email': email, 'valid': valid},
-                )
+            request,
+            'accounts/agency_redirect_login.html',
+            {'email': email,
+             'valid': valid},
+        )

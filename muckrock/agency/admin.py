@@ -2,37 +2,38 @@
 Admin registration for Agency models
 """
 
+# Django
 from django import forms
 from django.conf.urls import url
 from django.contrib import admin, messages
 from django.contrib.auth.models import User
 from django.core.validators import validate_email
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect, render
 from django.template.defaultfilters import slugify
 
-from adaptor.model import CsvModel
-from adaptor.fields import CharField, DjangoModelField
-from reversion.admin import VersionAdmin
-from autocomplete_light import shortcuts as autocomplete_light
+# Standard Library
 import logging
-from pdfrw import PdfReader
 import sys
 
-from muckrock.agency.models import (
-        AgencyType,
-        Agency,
-        AgencyAddress,
-        AgencyEmail,
-        AgencyPhone,
-        AgencyRequestForm,
-        AgencyRequestFormMapper,
-        )
+# Third Party
+from adaptor.fields import CharField, DjangoModelField
+from adaptor.model import CsvModel
+from autocomplete_light import shortcuts as autocomplete_light
+from pdfrw import PdfReader
+from reversion.admin import VersionAdmin
+
+# MuckRock
 from muckrock.agency.forms import CSVImportForm
-from muckrock.communication.models import (
-        Address,
-        EmailAddress,
-        PhoneNumber,
-        )
+from muckrock.agency.models import (
+    Agency,
+    AgencyAddress,
+    AgencyEmail,
+    AgencyPhone,
+    AgencyRequestForm,
+    AgencyRequestFormMapper,
+    AgencyType,
+)
+from muckrock.communication.models import Address, EmailAddress, PhoneNumber
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.portal.models import Portal
 
@@ -41,18 +42,19 @@ logger = logging.getLogger(__name__)
 # These inhereit more than the allowed number of public methods
 # pylint: disable=too-many-public-methods
 
+
 class AgencyTypeAdmin(VersionAdmin):
     """AgencyType admin options"""
-    list_display = ('name', )
+    list_display = ('name',)
     search_fields = ['name']
 
 
 class AgencyAddressAdminForm(forms.ModelForm):
     """AgencyAddress Inline admin form"""
     address = autocomplete_light.ModelChoiceField(
-            'AddressAdminAutocomplete',
-            queryset=Address.objects.all(),
-            )
+        'AddressAdminAutocomplete',
+        queryset=Address.objects.all(),
+    )
 
     class Meta:
         model = AgencyAddress
@@ -69,9 +71,9 @@ class AgencyAddressInline(admin.TabularInline):
 class AgencyEmailAdminForm(forms.ModelForm):
     """AgencyEmail Inline admin form"""
     email = autocomplete_light.ModelChoiceField(
-            'EmailAddressAdminAutocomplete',
-            queryset=EmailAddress.objects.all(),
-            )
+        'EmailAddressAdminAutocomplete',
+        queryset=EmailAddress.objects.all(),
+    )
 
     class Meta:
         model = AgencyEmail
@@ -88,9 +90,9 @@ class AgencyEmailInline(admin.TabularInline):
 class AgencyPhoneAdminForm(forms.ModelForm):
     """AgencyPhone Inline admin form"""
     phone = autocomplete_light.ModelChoiceField(
-            'PhoneNumberAdminAutocomplete',
-            queryset=PhoneNumber.objects.all(),
-            )
+        'PhoneNumberAdminAutocomplete',
+        queryset=PhoneNumber.objects.all(),
+    )
 
     class Meta:
         model = AgencyPhone
@@ -107,31 +109,31 @@ class AgencyPhoneInline(admin.TabularInline):
 class AgencyAdminForm(forms.ModelForm):
     """Agency admin form to order users"""
     user = autocomplete_light.ModelChoiceField(
-            'UserAutocomplete',
-            queryset=User.objects.all(),
-            required=False)
+        'UserAutocomplete', queryset=User.objects.all(), required=False
+    )
     jurisdiction = autocomplete_light.ModelChoiceField(
-            'JurisdictionAdminAutocomplete',
-            queryset=Jurisdiction.objects.all())
+        'JurisdictionAdminAutocomplete', queryset=Jurisdiction.objects.all()
+    )
     appeal_agency = autocomplete_light.ModelChoiceField(
-            'AgencyAppealAdminAutocomplete',
-            queryset=Agency.objects.all(),
-            required=False)
+        'AgencyAppealAdminAutocomplete',
+        queryset=Agency.objects.all(),
+        required=False
+    )
     payable_to = autocomplete_light.ModelChoiceField(
-            'AgencyAdminAutocomplete',
-            queryset=Agency.objects.all(),
-            required=False)
+        'AgencyAdminAutocomplete',
+        queryset=Agency.objects.all(),
+        required=False
+    )
     parent = autocomplete_light.ModelChoiceField(
-            'AgencyAdminAutocomplete',
-            queryset=Agency.objects.all(),
-            required=False)
+        'AgencyAdminAutocomplete',
+        queryset=Agency.objects.all(),
+        required=False
+    )
     portal = autocomplete_light.ModelChoiceField(
-            'PortalAutocomplete',
-            queryset=Portal.objects.all(),
-            required=False)
+        'PortalAutocomplete', queryset=Portal.objects.all(), required=False
+    )
 
     class Meta:
-        # pylint: disable=too-few-public-methods
         model = Agency
         fields = '__all__'
 
@@ -147,96 +149,105 @@ class AgencyAdmin(VersionAdmin):
     form = AgencyAdminForm
     formats = ['xls', 'csv']
     inlines = (
-            AgencyAddressInline,
-            AgencyEmailInline,
-            AgencyPhoneInline,
-            )
+        AgencyAddressInline,
+        AgencyEmailInline,
+        AgencyPhoneInline,
+    )
     # deprecated fields are set to read only
     readonly_fields = (
-            'can_email_appeals',
-            'address',
-            'email',
-            'other_emails',
-            'phone',
-            'fax',
-            )
-    fieldsets = (
-            (None, {
-                'fields': (
-                    'name',
-                    'slug',
-                    'jurisdiction',
-                    'types',
-                    'status',
-                    'user',
-                    'appeal_agency',
-                    'payable_to',
-                    'image',
-                    'image_attr_line',
-                    'public_notes',
-                    'stale',
-                    'manual_stale',
-                    'location',
-                    'portal',
-                    'contact_salutation',
-                    'contact_first_name',
-                    'contact_last_name',
-                    'contact_title',
-                    'form',
-                    'url',
-                    'notes',
-                    'aliases',
-                    'parent',
-                    'website',
-                    'twitter',
-                    'twitter_handles',
-                    'foia_logs',
-                    'foia_guide',
-                    'exempt',
-                    'requires_proxy',
-                    ),
-                }),
-            ('Deprecated', {
-                'classes': ('collapse',),
-                'fields': (
-                    'can_email_appeals',
-                    'address',
-                    'email',
-                    'other_emails',
-                    'phone',
-                    'fax',
-                    ),
-                'description': 'These values are no longer actively used.  '
+        'can_email_appeals',
+        'address',
+        'email',
+        'other_emails',
+        'phone',
+        'fax',
+    )
+    fieldsets = ((
+        None, {
+            'fields': (
+                'name',
+                'slug',
+                'jurisdiction',
+                'types',
+                'status',
+                'user',
+                'appeal_agency',
+                'payable_to',
+                'image',
+                'image_attr_line',
+                'public_notes',
+                'stale',
+                'manual_stale',
+                'location',
+                'portal',
+                'contact_salutation',
+                'contact_first_name',
+                'contact_last_name',
+                'contact_title',
+                'form',
+                'url',
+                'notes',
+                'aliases',
+                'parent',
+                'website',
+                'twitter',
+                'twitter_handles',
+                'foia_logs',
+                'foia_guide',
+                'exempt',
+                'requires_proxy',
+            ),
+        }
+    ), (
+        'Deprecated', {
+            'classes': ('collapse',),
+            'fields': (
+                'can_email_appeals',
+                'address',
+                'email',
+                'other_emails',
+                'phone',
+                'fax',
+            ),
+            'description':
+                'These values are no longer actively used.  '
                 'They are here to view on old data only.  If you find yourself '
                 'needing to look here often, something is probably wrong and '
                 'you should file a bug',
-                }))
+        }
+    ))
 
     def get_urls(self):
         """Add custom URLs here"""
         urls = super(AgencyAdmin, self).get_urls()
-        my_urls = [url(
-            r'^import/$',
-            self.admin_site.admin_view(self.csv_import),
-            name='agency-admin-import',
-            )]
+        my_urls = [
+            url(
+                r'^import/$',
+                self.admin_site.admin_view(self.csv_import),
+                name='agency-admin-import',
+            )
+        ]
         return my_urls + urls
 
     def csv_import(self, request):
         """Import a CSV file of agencies"""
-        # pylint: disable=no-self-use
         # pylint: disable=broad-except
 
         if request.method == 'POST':
             form = CSVImportForm(request.POST, request.FILES)
             if form.is_valid():
                 try:
-                    agencies = AgencyCsvModel.import_data(data=request.FILES['csv_file'],
-                                                          extra_fields=['True'])
-                    messages.success(request, 'CSV - %d agencies imported' % len(agencies))
+                    agencies = AgencyCsvModel.import_data(
+                        data=request.FILES['csv_file'], extra_fields=['True']
+                    )
+                    messages.success(
+                        request, 'CSV - %d agencies imported' % len(agencies)
+                    )
                 except Exception as exc:
                     messages.error(request, 'ERROR: %s' % str(exc))
-                    logger.error('Import error: %s', exc, exc_info=sys.exc_info())
+                    logger.error(
+                        'Import error: %s', exc, exc_info=sys.exc_info()
+                    )
                 else:
                     if form.cleaned_data['type_']:
                         for agency in agencies:
@@ -251,19 +262,20 @@ class AgencyAdmin(VersionAdmin):
             form = CSVImportForm()
 
         fields = [
-                'name',
-                'slug',
-                'jurisdiction ("Boston, MA")',
-                'contact first name',
-                'contact last name',
-                'contact_title',
-                'url',
-                ]
+            'name',
+            'slug',
+            'jurisdiction ("Boston, MA")',
+            'contact first name',
+            'contact last name',
+            'contact_title',
+            'url',
+        ]
         return render(
-                request,
-                'admin/agency/import.html',
-                {'form': form, 'fields': fields},
-                )
+            request,
+            'admin/agency/import.html',
+            {'form': form,
+             'fields': fields},
+        )
 
 
 class AgencyRequestFormMapperInline(admin.TabularInline):
@@ -273,20 +285,23 @@ class AgencyRequestFormMapperInline(admin.TabularInline):
 
     def get_formset(self, request, obj=None, **kwargs):
         """Set choices based on the pdf file"""
-        formset = (super(AgencyRequestFormMapperInline, self)
-                .get_formset(request, obj, **kwargs))
+        formset = (
+            super(AgencyRequestFormMapperInline,
+                  self).get_formset(request, obj, **kwargs)
+        )
         if obj is None:
             return formset
         obj.form.seek(0)
         template = PdfReader(obj.form)
         choices = [(field.T.decode(), field.T.decode())
-                for page in template.Root.Pages.Kids
-                for field in page.Annots
-                if field.T is not None]
+                   for page in template.Root.Pages.Kids
+                   for field in page.Annots
+                   if field.T is not None]
         choices = [('', '---')] + choices
-        formset.form.base_fields['field'].widget = (
-                forms.Select(choices=choices))
+        formset.form.base_fields['field'
+                                 ].widget = (forms.Select(choices=choices))
         return formset
+
 
 class AgencyRequestFormAdmin(VersionAdmin):
     """Agency request form admin"""
@@ -307,16 +322,18 @@ def get_jurisdiction(full_name):
     else:
         return Jurisdiction.objects.exclude(level='l').get(name=full_name).pk
 
+
 class EmailValidator(object):
     """Class to validate emails"""
+
     def validate(self, value):
-        # pylint: disable=no-self-use
         """Must be blank or an email"""
         if value == '':
             return True
         # validate email will throw a validation error on failure
         validate_email(value)
         return True
+
 
 class AgencyCsvModel(CsvModel):
     """CSV import model for agency"""
@@ -331,7 +348,6 @@ class AgencyCsvModel(CsvModel):
     status = CharField()
 
     class Meta:
-        # pylint: disable=too-few-public-methods
         dbModel = Agency
         delimiter = ','
         update = {'keys': ['name', 'jurisdiction']}

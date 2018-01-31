@@ -2,17 +2,20 @@
 Nodes and tags for rendering tasks into templates
 """
 
+# Django
 from django import template
 from django.core.urlresolvers import reverse
 
+# Standard Library
 from datetime import datetime
 
+# MuckRock
 from muckrock import agency, foia, task
 # imports Task model separately to patch bug in django-compressor parser
 from muckrock.task.models import Task
 
-
 register = template.Library()
+
 
 class TaskNode(template.Node):
     """A base class for rendering a task into a template."""
@@ -54,7 +57,8 @@ class CrowdfundTaskNode(TaskNode):
     def get_extra_context(self):
         """Adds the crowdfund object to context."""
         extra_context = super(CrowdfundTaskNode, self).get_extra_context()
-        extra_context['crowdfund_object'] = self.task.crowdfund.get_crowdfund_object()
+        extra_context['crowdfund_object'
+                      ] = self.task.crowdfund.get_crowdfund_object()
         return extra_context
 
 
@@ -104,28 +108,29 @@ class NewAgencyTaskNode(TaskNode):
     def get_extra_context(self):
         """Adds an approval form, other agencies, and relevant requests to context"""
         extra_context = super(NewAgencyTaskNode, self).get_extra_context()
-        emails = [e for e in self.task.agency.agencyemail_set.all()
-                if e.email.status == 'good'
-                and e.request_type == 'primary'
-                and e.email_type == 'to'
-                ]
-        phones = [p for p in self.task.agency.agencyphone_set.all()
-                if p.phone.status == 'good'
-                and p.phone.type == 'phone'
-                ]
-        faxes = [f for f in self.task.agency.agencyphone_set.all()
-                if f.phone.status == 'good'
-                and f.phone.type == 'fax'
-                and f.request_type == 'primary'
-                ]
-        addresses = [a for a in self.task.agency.agencyaddress_set.all()
-                if a.request_type == 'primary'
-                ]
+        emails = [
+            e for e in self.task.agency.agencyemail_set.all()
+            if e.email.status == 'good' and e.request_type == 'primary'
+            and e.email_type == 'to'
+        ]
+        phones = [
+            p for p in self.task.agency.agencyphone_set.all()
+            if p.phone.status == 'good' and p.phone.type == 'phone'
+        ]
+        faxes = [
+            f for f in self.task.agency.agencyphone_set.all()
+            if f.phone.status == 'good' and f.phone.type == 'fax'
+            and f.request_type == 'primary'
+        ]
+        addresses = [
+            a for a in self.task.agency.agencyaddress_set.all()
+            if a.request_type == 'primary'
+        ]
         initial = {
-                'email': emails[0].email if emails else None,
-                'phone': phones[0].phone if phones else None,
-                'fax': faxes[0].phone if faxes else None,
-                }
+            'email': emails[0].email if emails else None,
+            'phone': phones[0].phone if phones else None,
+            'fax': faxes[0].phone if faxes else None,
+        }
         if addresses:
             initial['address_suite'] = addresses[0].address.suite
             initial['address_street'] = addresses[0].address.street
@@ -136,9 +141,9 @@ class NewAgencyTaskNode(TaskNode):
             initial['portal_url'] = self.task.agency.portal.url
             initial['portal_type'] = self.task.agency.portal.type
         extra_context['agency_form'] = agency.forms.AgencyForm(
-                instance=self.task.agency,
-                initial=initial,
-                )
+            instance=self.task.agency,
+            initial=initial,
+        )
         return extra_context
 
 
@@ -176,8 +181,11 @@ class ResponseTaskNode(TaskNode):
             form_initial['status'] = initial_status
             form_initial['tracking_number'] = _foia.tracking_id
             form_initial['date_estimate'] = _foia.date_estimate
-            extra_context['previous_communications'] = _foia.reverse_communications
-        extra_context['response_form'] = task.forms.ResponseTaskForm(initial=form_initial)
+            extra_context['previous_communications'
+                          ] = _foia.reverse_communications
+        extra_context['response_form'] = task.forms.ResponseTaskForm(
+            initial=form_initial
+        )
         extra_context['attachments'] = self.task.communication.files.all()
         return extra_context
 
@@ -203,20 +211,24 @@ class SnailMailTaskNode(TaskNode):
         extra_context['agency'] = agency_
         extra_context['address'] = foia_.address
         extra_context['body'] = foia_.render_msg_body(
-                comm=self.task.communication,
-                switch=self.task.switch,
-                appeal=self.task.category == 'a',
-                )
-        extra_context['email'] = [str(e) for e in
-                agency_.agencyemail_set.all()]
-        extra_context['faxes'] = [str(f) for f in
-                agency_.agencyphone_set.all()
-                if f.phone.type == 'fax']
-        extra_context['phones'] = [str(p) for p in
-                agency_.agencyphone_set.all()
-                if p.phone.type == 'phone']
-        extra_context['addresses'] = [str(a) for a in
-                agency_.agencyaddress_set.all()]
+            comm=self.task.communication,
+            switch=self.task.switch,
+            appeal=self.task.category == 'a',
+        )
+        extra_context['email'] = [str(e) for e in agency_.agencyemail_set.all()]
+        extra_context['faxes'] = [
+            str(f)
+            for f in agency_.agencyphone_set.all()
+            if f.phone.type == 'fax'
+        ]
+        extra_context['phones'] = [
+            str(p)
+            for p in agency_.agencyphone_set.all()
+            if p.phone.type == 'phone'
+        ]
+        extra_context['addresses'] = [
+            str(a) for a in agency_.agencyaddress_set.all()
+        ]
 
         return extra_context
 
@@ -236,15 +248,18 @@ class PortalTaskNode(TaskNode):
         if self.task.category == 'i':
             if foia_:
                 form_initial = {
-                        'status': foia_.status,
-                        'tracking_number': foia_.tracking_id,
-                        'date_estimate': foia_.date_estimate,
-                        'communication': self.task.communication.communication,
-                        }
-                extra_context['previous_communications'] = foia_.reverse_communications
+                    'status': foia_.status,
+                    'tracking_number': foia_.tracking_id,
+                    'date_estimate': foia_.date_estimate,
+                    'communication': self.task.communication.communication,
+                }
+                extra_context['previous_communications'
+                              ] = foia_.reverse_communications
             else:
                 form_initial = {}
-            extra_context['form'] = task.forms.ResponseTaskForm(initial=form_initial)
+            extra_context['form'] = task.forms.ResponseTaskForm(
+                initial=form_initial
+            )
             extra_context['attachments'] = self.task.communication.files.all()
         else:
             extra_context['status'] = foia.models.STATUS
@@ -270,7 +285,9 @@ class StaleAgencyTaskNode(TaskNode):
             last_email = latest_response.emails.last()
             if last_email:
                 initial = {'email': last_email.from_email}
-        extra_context['email_form'] = task.forms.StaleAgencyTaskForm(initial=initial)
+        extra_context['email_form'] = task.forms.StaleAgencyTaskForm(
+            initial=initial
+        )
         extra_context['latest_response'] = latest_response
         stale_requests = list(self.task.stale_requests())
         extra_context['stale_requests'] = stale_requests
@@ -291,51 +308,64 @@ class ReviewAgencyTaskNode(TaskNode):
     def get_extra_context(self):
         """Adds a form for updating the email"""
         extra_context = super(ReviewAgencyTaskNode, self).get_extra_context()
-        extra_context['emails'] = [str(e) for e in
-                self.task.agency.agencyemail_set.all()]
-        extra_context['faxes'] = [str(f) for f in
-                self.task.agency.agencyphone_set.all()
-                if f.phone.type == 'fax']
-        extra_context['phones'] = [str(p) for p in
-                self.task.agency.agencyphone_set.all()
-                if p.phone.type == 'phone']
-        extra_context['addresses'] = [str(a) for a in
-                self.task.agency.agencyaddress_set.all()]
-        extra_context['num_open_requests'] = (
-                self.task.agency.foiarequest_set.get_open().count())
+        extra_context['emails'] = [
+            str(e) for e in self.task.agency.agencyemail_set.all()
+        ]
+        extra_context['faxes'] = [
+            str(f)
+            for f in self.task.agency.agencyphone_set.all()
+            if f.phone.type == 'fax'
+        ]
+        extra_context['phones'] = [
+            str(p)
+            for p in self.task.agency.agencyphone_set.all()
+            if p.phone.type == 'phone'
+        ]
+        extra_context['addresses'] = [
+            str(a) for a in self.task.agency.agencyaddress_set.all()
+        ]
+        extra_context['num_open_requests'
+                      ] = (self.task.agency.foiarequest_set.get_open().count())
         latest_response = self.task.latest_response()
         if latest_response:
             extra_context['latest_response'] = (
-                    latest_response,
-                    (datetime.now() - latest_response).days,
-                    )
+                latest_response,
+                (datetime.now() - latest_response).days,
+            )
         extra_context['review_data'] = self.task.get_review_data()
-        email = [e.email for e in self.task.agency.agencyemail_set.all()
-                if e.request_type == 'primary' and e.email_type == 'to'
-                and e.email.status == 'good']
+        email = [
+            e.email
+            for e in self.task.agency.agencyemail_set.all()
+            if e.request_type == 'primary' and e.email_type == 'to'
+            and e.email.status == 'good'
+        ]
         if email:
             initial = str(email[0])
         else:
-            fax = [p.phone for p in self.task.agency.agencyphone_set.all()
-                    if p.request_type == 'primary' and p.phone.type == 'fax'
-                    and p.phone.status == 'good']
+            fax = [
+                p.phone
+                for p in self.task.agency.agencyphone_set.all()
+                if p.request_type == 'primary' and p.phone.type == 'fax'
+                and p.phone.status == 'good'
+            ]
             if fax:
                 initial = str(fax[0])
             else:
                 initial = ''
         followup_text = (
-                'To Whom It May Concern:\n'
-                'I wanted to follow up on the following request, copied below. '
-                'Please let me know when I can expect to receive a response.\n'
-                'Thanks for your help, and let me know if further '
-                'clarification is needed.'
-                )
+            'To Whom It May Concern:\n'
+            'I wanted to follow up on the following request, copied below. '
+            'Please let me know when I can expect to receive a response.\n'
+            'Thanks for your help, and let me know if further '
+            'clarification is needed.'
+        )
         extra_context['form'] = task.forms.ReviewAgencyTaskForm(
-                initial={
-                    'email_or_fax': initial,
-                    'update_agency_info': not initial,
-                    'reply': followup_text,
-                    })
+            initial={
+                'email_or_fax': initial,
+                'update_agency_info': not initial,
+                'reply': followup_text,
+            }
+        )
         return extra_context
 
 
@@ -357,82 +387,99 @@ class NewExemptionTaskNode(TaskNode):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
+
 def get_id(token):
     """Helper function to check token has correct arguments and return the task_id."""
     # pylint:disable=unused-variable
     try:
         tag_name, task_id = token.split_contents()
     except ValueError:
-        error_msg = "%s tag requires a single argument." % token.contents.split()[0]
+        error_msg = "%s tag requires a single argument." % token.contents.split(
+        )[0]
         raise template.TemplateSyntaxError(error_msg)
     return task_id
 
+
 # pylint:disable=unused-argument
+
 
 @register.tag
 def default_task(parser, token):
     """Returns the correct task node given a task ID"""
     return TaskNode(get_id(token))
 
+
 @register.tag
 def orphan_task(parser, token):
     """Returns an OrphanTaskNode"""
     return OrphanTaskNode(get_id(token))
+
 
 @register.tag
 def snail_mail_task(parser, token):
     """Returns a SnailMailTaskNode"""
     return SnailMailTaskNode(get_id(token))
 
+
 @register.tag
 def portal_task(parser, token):
     """Returns a PortalTaskNode"""
     return PortalTaskNode(get_id(token))
+
 
 @register.tag
 def stale_agency_task(parser, token):
     """Returns a StaleAgencyTaskNode"""
     return StaleAgencyTaskNode(get_id(token))
 
+
 @register.tag
 def review_agency_task(parser, token):
     """Returns a ReviewAgencyTaskNode"""
     return ReviewAgencyTaskNode(get_id(token))
+
 
 @register.tag
 def flagged_task(parser, token):
     """Returns a FlaggedTaskNode"""
     return FlaggedTaskNode(get_id(token))
 
+
 @register.tag
 def project_review_task(parser, token):
     """Returns a ProjectReviewTaskNode"""
     return ProjectReviewTaskNode(get_id(token))
+
 
 @register.tag
 def new_agency_task(parser, token):
     """Returns a NewAgencyTaskNode"""
     return NewAgencyTaskNode(get_id(token))
 
+
 @register.tag
 def response_task(parser, token):
     """Returns a ResponseTaskNode"""
     return ResponseTaskNode(get_id(token))
+
 
 @register.tag
 def status_change_task(parser, token):
     """Returns a StatusChangeTaskNode"""
     return StatusChangeTaskNode(get_id(token))
 
+
 @register.tag
 def crowdfund_task(parser, token):
     """Returns a CrowdfundTaskNode"""
     return CrowdfundTaskNode(get_id(token))
 
+
 @register.tag
 def multi_request_task(parser, token):
     """Returns a MultiRequestTaskNode"""
     return MultiRequestTaskNode(get_id(token))
+
 
 @register.tag
 def new_exemption_task(parser, token):

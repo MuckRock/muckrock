@@ -2,17 +2,21 @@
 Models for the Q&A application
 """
 
+# Django
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import models
 
+# Third Party
 from actstream.models import followers
 from taggit.managers import TaggableManager
 
+# MuckRock
 from muckrock.accounts.models import Profile
 from muckrock.foia.models import FOIARequest
 from muckrock.tags.models import TaggedItemBase
 from muckrock.utils import new_action, notify
+
 
 class Question(models.Model):
     """A question to which the community can respond"""
@@ -39,33 +43,38 @@ class Question(models.Model):
         if is_new:
             action = new_action(self.user, 'asked', target=self)
             # Notify users who subscribe to new question notifications
-            new_question_subscribers = Profile.objects.filter(new_question_notifications=True)
-            users_to_notify = [profile.user for profile in new_question_subscribers]
+            new_question_subscribers = Profile.objects.filter(
+                new_question_notifications=True
+            )
+            users_to_notify = [
+                profile.user for profile in new_question_subscribers
+            ]
             notify(users_to_notify, action)
 
     def get_absolute_url(self):
         """The url for this object"""
         return reverse(
-                'question-detail',
-                kwargs={'slug': self.slug, 'pk': self.pk})
+            'question-detail', kwargs={
+                'slug': self.slug,
+                'pk': self.pk
+            }
+        )
 
     def answer_authors(self):
         """Returns a list of users who have answered the question."""
-        return (User.objects
-                .filter(
-                    answer__question=self,
-                    is_active=True,
-                    )
-                .distinct()
-                )
+        return (
+            User.objects.filter(
+                answer__question=self,
+                is_active=True,
+            ).distinct()
+        )
 
     class Meta:
-        # pylint: disable=too-few-public-methods
         ordering = ['-date']
         permissions = (
-                ('post', 'Can post questions and answers'),
-                ('block', 'Can block other users'),
-                )
+            ('post', 'Can post questions and answers'),
+            ('block', 'Can block other users'),
+        )
 
 
 class Answer(models.Model):
@@ -92,11 +101,12 @@ class Answer(models.Model):
         self.question.answer_date = self.date
         self.question.save()
         if is_new:
-            action = new_action(self.user, 'answered', action_object=self, target=self.question)
+            action = new_action(
+                self.user, 'answered', action_object=self, target=self.question
+            )
             # Notify the question's owner and its followers about the new answer
             notify(self.question.user, action)
             notify(followers(self.question), action)
 
     class Meta:
-        # pylint: disable=too-few-public-methods
         ordering = ['date']

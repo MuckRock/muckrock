@@ -2,27 +2,30 @@
 Views for the news application
 """
 
+# Django
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.db.models import Q, Prefetch
+from django.db.models import Prefetch, Q
 from django.http import HttpResponseForbidden
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import TemplateView
 from django.views.generic.dates import (
-    YearArchiveView,
-    MonthArchiveView,
+    DateDetailView,
     DayArchiveView,
-    DateDetailView
+    MonthArchiveView,
+    YearArchiveView,
 )
 
+# Third Party
+import django_filters
 from rest_framework import viewsets
 from rest_framework.permissions import DjangoModelPermissions
-import django_filters
 
+# MuckRock
 from muckrock.news.filters import (
+    ArticleAuthorFilterSet,
     ArticleDateRangeFilterSet,
-    ArticleAuthorFilterSet
 )
 from muckrock.news.models import Article
 from muckrock.news.serializers import ArticleSerializer
@@ -30,9 +33,8 @@ from muckrock.project.forms import ProjectManagerForm
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag, parse_tags
 from muckrock.utils import cache_get_or_set
-from muckrock.views import PaginationMixin, MRSearchFilterListView
+from muckrock.views import MRSearchFilterListView, PaginationMixin
 
-# pylint: disable=too-many-ancestors
 
 class NewsDetail(DateDetailView):
     """View for news detail"""
@@ -53,30 +55,33 @@ class NewsDetail(DateDetailView):
 
     def get_related_articles(self, article):
         """Get articles related to the current one."""
-        # pylint: disable=no-self-use
         # articles in the same project as this one
         project_filter = Q(projects__in=article.projects.all())
         # articles with the same tag as this one
         tag_filter = Q(tags__in=article.tags.all())
         # articles in projects with the same tag as this one
         project_tag_filter = Q(projects__tags__in=article.tags.all())
-        related_articles = (Article.objects
-                .get_published()
-                .filter(project_filter | tag_filter | project_tag_filter)
-                .exclude(pk=article.pk)
-                .distinct()
-                .prefetch_authors()
-                .prefetch_editors())
+        related_articles = (
+            Article.objects.get_published()
+            .filter(project_filter | tag_filter | project_tag_filter)
+            .exclude(pk=article.pk).distinct().prefetch_authors()
+            .prefetch_editors()
+        )
         return related_articles[:4]
 
     def get_context_data(self, **kwargs):
         context = super(NewsDetail, self).get_context_data(**kwargs)
         context['projects'] = context['object'].projects.all()
-        context['foias'] = (context['object'].foias
-                .select_related_view().get_public_file_count())
-        context['related_articles'] = self.get_related_articles(context['object'])
-        context['sidebar_admin_url'] = reverse('admin:news_article_change',
-            args=(context['object'].pk,))
+        context['foias'] = (
+            context['object'].foias.select_related_view()
+            .get_public_file_count()
+        )
+        context['related_articles'] = self.get_related_articles(
+            context['object']
+        )
+        context['sidebar_admin_url'] = reverse(
+            'admin:news_article_change', args=(context['object'].pk,)
+        )
         context['stripe_pk'] = settings.STRIPE_PUB_KEY
         return context
 
@@ -110,19 +115,25 @@ class NewsExploreView(TemplateView):
     def get_context_data(self, **kwargs):
         """Adds interesting articles to the explore page."""
         context = super(NewsExploreView, self).get_context_data(**kwargs)
-        recent_articles = cache_get_or_set('hp:articles',
-            lambda: (Article.objects.get_published().prefetch_related(
-                'authors',
-                'authors__profile',
-                'projects',
-            )[:5]),
-            600)
-        context['featured_projects'] = (Project.objects
-                .get_visible(self.request.user)
-                .filter(featured=True)
-                .prefetch_related(Prefetch('articles__authors',
-                    queryset=User.objects.select_related('profile')))
-                .optimize())
+        recent_articles = cache_get_or_set(
+            'hp:articles', lambda: (
+                Article.objects.get_published().prefetch_related(
+                    'authors',
+                    'authors__profile',
+                    'projects',
+                )[:5]
+            ), 600
+        )
+        context['featured_projects'] = (
+            Project.objects.get_visible(
+                self.request.user
+            ).filter(featured=True).prefetch_related(
+                Prefetch(
+                    'articles__authors',
+                    queryset=User.objects.select_related('profile')
+                )
+            ).optimize()
+        )
         context['recent_articles'] = recent_articles
         context['top_tags'] = Article.tags.most_common()[:15]
         return context
@@ -170,7 +181,8 @@ class NewsListView(MRSearchFilterListView):
         articles_by_date = self.queryset.order_by('pub_date')
         years = range(
             articles_by_date.first().pub_date.year,
-            articles_by_date.last().pub_date.year + 1, # the range function stops at n - 1
+            articles_by_date.last().pub_date.year +
+            1,  # the range function stops at n - 1
         )
         years.reverse()
         context['years'] = years
@@ -192,15 +204,12 @@ class AuthorArchiveView(NewsListView):
 
     def get_context_data(self, **kwargs):
         context = super(AuthorArchiveView, self).get_context_data(**kwargs)
-        context.update({
-            'author': self.get_author()
-        })
+        context.update({'author': self.get_author()})
         return context
 
 
 class ArticleViewSet(viewsets.ModelViewSet):
     """API views for Article"""
-    # pylint: disable=too-many-ancestors
     # pylint: disable=too-many-public-methods
     model = Article
     serializer_class = ArticleSerializer
@@ -208,7 +217,6 @@ class ArticleViewSet(viewsets.ModelViewSet):
 
     class Filter(django_filters.FilterSet):
         """API Filter for Articles"""
-        # pylint: disable=too-few-public-methods
         authors = django_filters.CharFilter(name='authors__username')
         editors = django_filters.CharFilter(name='editors__username')
         foias = django_filters.NumberFilter(name='foias__id')
@@ -219,15 +227,15 @@ class ArticleViewSet(viewsets.ModelViewSet):
         class Meta:
             model = Article
             fields = (
-                    'title',
-                    'pub_date',
-                    'min_date',
-                    'max_date',
-                    'authors',
-                    'editors',
-                    'foias',
-                    'publish',
-                    )
+                'title',
+                'pub_date',
+                'min_date',
+                'max_date',
+                'authors',
+                'editors',
+                'foias',
+                'publish',
+            )
 
     filter_class = Filter
 

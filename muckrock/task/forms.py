@@ -2,12 +2,17 @@
 Forms for Task app
 """
 
+# Django
 from django import forms
 from django.http import Http404
 
-from autocomplete_light import shortcuts as autocomplete_light
+# Standard Library
 import logging
 
+# Third Party
+from autocomplete_light import shortcuts as autocomplete_light
+
+# MuckRock
 from muckrock.accounts.models import Notification
 from muckrock.communication.utils import get_email_or_fax
 from muckrock.foia.models import STATUS
@@ -17,9 +22,11 @@ from muckrock.utils import generate_status_action
 
 class FlaggedTaskForm(forms.Form):
     """Simple form for acting on a FlaggedTask"""
-    text = forms.CharField(widget=forms.Textarea(attrs={
-        'placeholder': 'Write your reply here'
-    }))
+    text = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'placeholder': 'Write your reply here'
+        })
+    )
 
 
 class ProjectReviewTaskForm(forms.Form):
@@ -28,7 +35,8 @@ class ProjectReviewTaskForm(forms.Form):
         required=False,
         widget=forms.Textarea(attrs={
             'placeholder': 'Write your reply here'
-        }))
+        })
+    )
 
 
 class StaleAgencyTaskForm(forms.Form):
@@ -39,29 +47,28 @@ class StaleAgencyTaskForm(forms.Form):
 class ReviewAgencyTaskForm(forms.Form):
     """Simple form to allow selecting an email address or fax number"""
     email_or_fax = forms.CharField(
-            label='Update email or fax on checked requests:',
-            widget=autocomplete_light.TextWidget('EmailOrFaxAutocomplete'),
-            required=False,
-            )
+        label='Update email or fax on checked requests:',
+        widget=autocomplete_light.TextWidget('EmailOrFaxAutocomplete'),
+        required=False,
+    )
     update_agency_info = forms.BooleanField(
-            label='Update agency\'s main contact info?',
-            required=False,
-            )
+        label='Update agency\'s main contact info?',
+        required=False,
+    )
     snail_mail = forms.BooleanField(
-            label='Make snail mail the prefered communication method',
-            required=False,
-            )
+        label='Make snail mail the prefered communication method',
+        required=False,
+    )
     resolve = forms.BooleanField(
-            label='Resolve after updating',
-            required=False,
-            )
+        label='Resolve after updating',
+        required=False,
+    )
     reply = forms.CharField(
-            label='Reply:',
-            widget=forms.Textarea(
-                attrs={
-                    'rows': 5,
-                    }),
-            )
+        label='Reply:',
+        widget=forms.Textarea(attrs={
+            'rows': 5,
+        }),
+    )
 
     def clean_email_or_fax(self):
         """Validate the email_or_fax field"""
@@ -78,36 +85,42 @@ class ReviewAgencyTaskForm(forms.Form):
 
         if not email_or_fax and not snail_mail:
             self.add_error(
-                    'email_or_fax',
-                    'Required if snail mail is not checked',
-                    )
+                'email_or_fax',
+                'Required if snail mail is not checked',
+            )
 
 
 class ResponseTaskForm(forms.Form):
     """Simple form for acting on a ResponseTask"""
-    # pylint: disable=no-self-use
     move = forms.CharField(required=False)
     tracking_number = forms.CharField(required=False)
     price = forms.DecimalField(required=False)
     date_estimate = forms.DateField(
         label='Estimated completion date',
         required=False,
-        widget=forms.DateInput(format='%m/%d/%Y', attrs={'placeholder': 'mm/dd/yyyy'}),
+        widget=forms.DateInput(
+            format='%m/%d/%Y', attrs={
+                'placeholder': 'mm/dd/yyyy'
+            }
+        ),
         input_formats=[
-            '%Y-%m-%d',      # '2006-10-25'
-            '%m/%d/%Y',      # '10/25/2006'
-            '%m/%d/%y',      # '10/25/06'
-            '%b %d %Y',      # 'Oct 25 2006'
-            '%b %d, %Y',     # 'Oct 25, 2006'
-            '%d %b %Y',      # '25 Oct 2006'
-            '%d %b, %Y',     # '25 Oct, 2006'
-            '%B %d %Y',      # 'October 25 2006'
-            '%B %d, %Y',     # 'October 25, 2006'
-            '%d %B %Y',      # '25 October 2006'
-            '%d %B, %Y']     # '25 October, 2006'
+            '%Y-%m-%d',  # '2006-10-25'
+            '%m/%d/%Y',  # '10/25/2006'
+            '%m/%d/%y',  # '10/25/06'
+            '%b %d %Y',  # 'Oct 25 2006'
+            '%b %d, %Y',  # 'Oct 25, 2006'
+            '%d %b %Y',  # '25 Oct 2006'
+            '%d %b, %Y',  # '25 Oct, 2006'
+            '%B %d %Y',  # 'October 25 2006'
+            '%B %d, %Y',  # 'October 25, 2006'
+            '%d %B %Y',  # '25 October 2006'
+            '%d %B, %Y'
+        ]  # '25 October, 2006'
     )
     status = forms.ChoiceField(choices=STATUS)
-    set_foia = forms.BooleanField(label='Set request status', initial=True, required=False)
+    set_foia = forms.BooleanField(
+        label='Set request status', initial=True, required=False
+    )
     proxy = forms.BooleanField(required=False, widget=forms.HiddenInput())
 
     def clean_move(self):
@@ -138,23 +151,30 @@ class ResponseTaskForm(forms.Form):
             try:
                 comms = self.move_communication(task.communication, move, user)
             except (Http404, ValueError):
-                error_msgs.append('No valid destination for moving the request.')
+                error_msgs.append(
+                    'No valid destination for moving the request.'
+                )
         if status:
             try:
                 self.set_status(status, set_foia, comms)
             except ValueError:
-                error_msgs.append('You tried to set the request to an invalid status.')
+                error_msgs.append(
+                    'You tried to set the request to an invalid status.'
+                )
         if tracking_number:
             try:
                 self.set_tracking_id(tracking_number, comms)
             except ValueError:
                 error_msgs.append(
-                    'You tried to set an invalid tracking id. Just use a string of characters.')
+                    'You tried to set an invalid tracking id. Just use a string of characters.'
+                )
         if date_estimate:
             try:
                 self.set_date_estimate(date_estimate, comms)
             except ValueError:
-                error_msgs.append('You tried to set the request to an invalid date.')
+                error_msgs.append(
+                    'You tried to set the request to an invalid date.'
+                )
         if price:
             try:
                 self.set_price(price, comms)
@@ -197,13 +217,17 @@ class ResponseTaskForm(forms.Form):
                     foia.date_done = comm.date
                 foia.update()
                 foia.save(comment='response task status')
-                logging.info('Request #%d status changed to "%s"', foia.id, status)
+                logging.info(
+                    'Request #%d status changed to "%s"', foia.id, status
+                )
                 action = generate_status_action(foia)
                 foia.notify(action)
                 # Mark generic '<Agency> sent a communication to <FOIARequest> as read.'
                 # https://github.com/MuckRock/muckrock/issues/1003
-                generic_notifications = (Notification.objects.for_object(foia)
-                                        .get_unread().filter(action__verb='sent a communication'))
+                generic_notifications = (
+                    Notification.objects.for_object(foia)
+                    .get_unread().filter(action__verb='sent a communication')
+                )
                 for generic_notification in generic_notifications:
                     generic_notification.mark_read()
 
@@ -244,11 +268,12 @@ class BulkNewAgencyTaskForm(forms.Form):
     """Form for creating blank new agencies"""
     name = forms.CharField(max_length=255)
     jurisdiction = forms.ModelChoiceField(
-            widget=autocomplete_light.ChoiceWidget('JurisdictionAutocomplete'),
-            queryset=Jurisdiction.objects.all(),
-            )
+        widget=autocomplete_light.ChoiceWidget('JurisdictionAutocomplete'),
+        queryset=Jurisdiction.objects.all(),
+    )
+
 
 BulkNewAgencyTaskFormSet = forms.formset_factory(
-        BulkNewAgencyTaskForm,
-        extra=10,
-        )
+    BulkNewAgencyTaskForm,
+    extra=10,
+)

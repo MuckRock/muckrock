@@ -1,17 +1,21 @@
 """
 Agency Request form
+
+Form filling in inspired by:
+https://medium.com/@zwinny/filling-pdf-forms-in-python-the-right-way-eb9592e03dba
 """
 
+# Django
 from django.db import models
 
+# Standard Library
+import inspect
 from cStringIO import StringIO
 from datetime import date
-import inspect
-from pdfrw import PdfReader, PdfWriter, PageMerge
-from reportlab.pdfgen import canvas
 
-# Form filling in inspired by:
-# https://medium.com/@zwinny/filling-pdf-forms-in-python-the-right-way-eb9592e03dba
+# Third Party
+from pdfrw import PageMerge, PdfReader, PdfWriter
+from reportlab.pdfgen import canvas
 
 
 class AgencyRequestForm(models.Model):
@@ -34,8 +38,10 @@ class AgencyRequestForm(models.Model):
 
     def _get_data(self, comm):
         """Get the data for filling in the form"""
-        return {m.field: getattr(self, m.value)(comm)
-                for m in self.mappers.all()}
+        return {
+            m.field: getattr(self, m.value)(comm)
+            for m in self.mappers.all()
+        }
 
     def _create_overlay(self, data):
         """Create the filled in overlay"""
@@ -55,10 +61,10 @@ class AgencyRequestForm(models.Model):
                 label = field.T.decode() if field.T else None
                 value = data.get(label, '')
                 overlay_canvas.drawString(
-                        x=left + 2,
-                        y=bottom + 1,
-                        text=value,
-                        )
+                    x=left + 2,
+                    y=bottom + 1,
+                    text=value,
+                )
             overlay_canvas.showPage()
         overlay_canvas.save()
         overlay_buffer.seek(0)
@@ -80,12 +86,12 @@ class AgencyRequestForm(models.Model):
         return final_form
 
     # Form filling out data
-    # pylint: disable=no-self-use
 
     def _date(self, comm):
         """Today's date"""
         # pylint: disable=unused-argument
         return unicode(date.today())
+
     _date.value_choice = True
 
     def _is_email(self, comm):
@@ -94,6 +100,7 @@ class AgencyRequestForm(models.Model):
             return 'x'
         else:
             return ''
+
     _is_email.value_choice = True
 
     def _is_fax(self, comm):
@@ -102,6 +109,7 @@ class AgencyRequestForm(models.Model):
             return 'x'
         else:
             return ''
+
     _is_fax.value_choice = True
 
     def _is_snail(self, comm):
@@ -110,11 +118,13 @@ class AgencyRequestForm(models.Model):
             return 'x'
         else:
             return ''
+
     _is_snail.value_choice = True
 
     def _agency_name(self, comm):
         """Agency name"""
         return comm.foia.agency.name
+
     _agency_name.value_choice = True
 
     def _agency_address(self, comm):
@@ -122,63 +132,67 @@ class AgencyRequestForm(models.Model):
         address = comm.foia.agency.get_addresses('primary').first()
         address = address if address is not None else u''
         return unicode(address)
+
     _agency_address.value_choice = True
 
     def _requester_name(self, comm):
         """User's full name"""
         return comm.from_user.get_full_name()
+
     _requester_name.value_choice = True
 
     def _return_address_1(self, comm):
         """The street portion of the return address"""
         return 'Dept MR {} 411A Highland Ave'.format(comm.foia.pk)
+
     _return_address_1.value_choice = True
 
     def _return_address_2(self, comm):
         """City/State/Zip of the return address"""
         # pylint: disable=unused-argument
         return 'Somerville, MA 02144-2516'
+
     _return_address_2.value_choice = True
 
     def _phone(self, comm):
         """MuckRock's phone number"""
         # pylint: disable=unused-argument
         return '(617) 299-1832'
+
     _phone.value_choice = True
 
     def _email(self, comm):
         """This request's email address"""
         return comm.foia.get_request_email()
+
     _email.value_choice = True
 
 
 # grab all the value choices from the methods
 # marked as being value choices and their docstrings
-VALUE_CHOICES = [
-        (m[0], m[1].__doc__)
-        for m in inspect.getmembers(
-            AgencyRequestForm(),
-            predicate=lambda x: getattr(x, 'value_choice', ''),
-            )]
+VALUE_CHOICES = [(m[0], m[1].__doc__) for m in inspect.getmembers(
+    AgencyRequestForm(),
+    predicate=lambda x: getattr(x, 'value_choice', ''),
+)]
 
 
 class AgencyRequestFormMapper(models.Model):
     """Map fields to values for an agency request form"""
 
     form = models.ForeignKey(
-            'AgencyRequestForm',
-            related_name='mappers',
-            on_delete=models.CASCADE,
-            )
+        'AgencyRequestForm',
+        related_name='mappers',
+        on_delete=models.CASCADE,
+    )
     field = models.CharField(max_length=255)
     value = models.CharField(
-            max_length=255,
-            choices=VALUE_CHOICES,
-            )
+        max_length=255,
+        choices=VALUE_CHOICES,
+    )
 
     def __unicode__(self):
         return u'{} - {} - {}'.format(
-                self.form,
-                self.field,
-                self.value,
-                )
+            self.form,
+            self.field,
+            self.value,
+        )

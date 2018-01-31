@@ -2,15 +2,20 @@
 Test the views of jurisdiction models
 """
 
+# Django
 from django.test import TestCase
 
+# Third Party
 from nose.tools import eq_, ok_
 
+# MuckRock
 from muckrock.jurisdiction import factories, views
 from muckrock.test_utils import http_get_response
 
+
 class TestExemptionDetailView(TestCase):
     """The exemption detail view provides information about the exemption at a standalone url."""
+
     def setUp(self):
         self.exemption = factories.ExemptionFactory()
         self.url = self.exemption.get_absolute_url()
@@ -41,10 +46,7 @@ class TestExemptionDetailView(TestCase):
         exemption = factories.ExemptionFactory(jurisdiction=local)
         url = exemption.get_absolute_url()
         kwargs = exemption.jurisdiction.get_slugs()
-        kwargs.update({
-            'slug': exemption.slug,
-            'pk': exemption.pk
-        })
+        kwargs.update({'slug': exemption.slug, 'pk': exemption.pk})
         response = http_get_response(url, self.view, **kwargs)
         eq_(response.status_code, 200)
 
@@ -54,10 +56,7 @@ class TestExemptionDetailView(TestCase):
         exemption = factories.ExemptionFactory(jurisdiction=state)
         url = exemption.get_absolute_url()
         kwargs = exemption.jurisdiction.get_slugs()
-        kwargs.update({
-            'slug': exemption.slug,
-            'pk': exemption.pk
-        })
+        kwargs.update({'slug': exemption.slug, 'pk': exemption.pk})
         response = http_get_response(url, self.view, **kwargs)
         eq_(response.status_code, 200)
 

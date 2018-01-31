@@ -2,21 +2,18 @@
 Form tests for the FOIA application
 """
 
-from django.contrib.auth.models import User, AnonymousUser
+# Django
+from django.contrib.auth.models import AnonymousUser, User
 from django.core.urlresolvers import reverse
-from django.test import TestCase, RequestFactory
+from django.test import RequestFactory, TestCase
 
+# Third Party
 from nose.tools import eq_, ok_
 
-from muckrock.factories import (
-        AgencyFactory,
-        JurisdictionFactory,
-        UserFactory,
-        )
+# MuckRock
+from muckrock.factories import AgencyFactory, JurisdictionFactory, UserFactory
 from muckrock.foia.forms import RequestForm
 from muckrock.test_utils import mock_middleware
-
-# pylint: disable=no-self-use
 
 
 class TestRequestForm(TestCase):
@@ -105,5 +102,5 @@ class TestRequestForm(TestCase):
             'full_name': 'John Smith',
             'email': 'john@example.com',
             'newsletter': False,
-            })
+        })
         ok_(User.objects.filter(email='john@example.com').exists())

@@ -2,36 +2,43 @@
 Models for the accounts application
 """
 
+# Django
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.db import models
 
-from actstream.models import Action
-from datetime import date, datetime
-import dbsettings
-from easy_thumbnails.fields import ThumbnailerImageField
-from localflavor.us.models import PhoneNumberField, USStateField
+# Standard Library
 import logging
-from lot.models import LOT
-import stripe
+from datetime import date, datetime
 from urllib import urlencode
 
+# Third Party
+import dbsettings
+import stripe
+from actstream.models import Action
+from easy_thumbnails.fields import ThumbnailerImageField
+from localflavor.us.models import PhoneNumberField, USStateField
+from lot.models import LOT
+
+# MuckRock
 from muckrock.utils import (
-        generate_key,
-        get_image_storage,
-        stripe_retry_on_error,
-        )
+    generate_key,
+    get_image_storage,
+    stripe_retry_on_error,
+)
 from muckrock.values import TextValue
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
 stripe.api_version = '2015-10-16'
 
+
 class EmailOptions(dbsettings.Group):
     """DB settings for sending email"""
     email_footer = TextValue('email footer')
+
 
 options = EmailOptions()
 
@@ -46,6 +53,7 @@ ACCT_TYPES = [
 ]
 
 PAYMENT_FEE = .05
+
 
 class Profile(models.Model):
     """User profile information for muckrock"""
@@ -62,29 +70,25 @@ class Profile(models.Model):
 
     user = models.OneToOneField(User)
     source = models.CharField(
-            max_length=20,
-            blank=True,
-            choices=(
-                ('foia machine', 'FOIA Machine'),
-                ),
-            )
+        max_length=20,
+        blank=True,
+        choices=(('foia machine', 'FOIA Machine'),),
+    )
 
     address1 = models.CharField(
-        max_length=50,
-        blank=True,
-        verbose_name='address'
+        max_length=50, blank=True, verbose_name='address'
     )
     address2 = models.CharField(
-        max_length=50,
-        blank=True,
-        verbose_name='address (line 2)'
+        max_length=50, blank=True, verbose_name='address (line 2)'
     )
     city = models.CharField(max_length=60, blank=True)
     state = USStateField(
         blank=True,
-        help_text=('Your state will be made public on this site.'
-                   'If you do not want this information to be public,'
-                   ' please leave blank.')
+        help_text=(
+            'Your state will be made public on this site.'
+            'If you do not want this information to be public,'
+            ' please leave blank.'
+        )
     )
     zip_code = models.CharField(max_length=10, blank=True)
     phone = PhoneNumberField(blank=True)
@@ -94,28 +98,29 @@ class Profile(models.Model):
         blank=True,
         null=True,
         related_name='members',
-        on_delete=models.SET_NULL)
+        on_delete=models.SET_NULL
+    )
 
     # extended information
     profile = models.TextField(blank=True)
-    location = models.ForeignKey('jurisdiction.Jurisdiction', blank=True, null=True)
+    location = models.ForeignKey(
+        'jurisdiction.Jurisdiction', blank=True, null=True
+    )
     public_email = models.EmailField(max_length=255, blank=True)
     pgp_public_key = models.TextField(blank=True)
     website = models.URLField(
-        max_length=255,
-        blank=True,
-        help_text='Begin with http://'
+        max_length=255, blank=True, help_text='Begin with http://'
     )
     twitter = models.CharField(max_length=255, blank=True)
     linkedin = models.URLField(
-        max_length=255,
-        blank=True,
-        help_text='Begin with http://'
+        max_length=255, blank=True, help_text='Begin with http://'
     )
     avatar = ThumbnailerImageField(
         upload_to='account_images',
-        blank=True, null=True,
-        resize_source={'size': (600, 600), 'crop': 'smart'},
+        blank=True,
+        null=True,
+        resize_source={'size': (600, 600),
+                       'crop': 'smart'},
         storage=get_image_storage(),
     )
 
@@ -134,18 +139,20 @@ class Profile(models.Model):
     )
     use_autologin = models.BooleanField(
         default=True,
-        help_text=('Links you receive in emails from us will contain'
-                   ' a one time token to automatically log you in')
+        help_text=(
+            'Links you receive in emails from us will contain'
+            ' a one time token to automatically log you in'
+        )
     )
     # notification preferences
     new_question_notifications = models.BooleanField(default=False)
 
     org_share = models.BooleanField(
-            default=False,
-            verbose_name='Share',
-            help_text='Let other members of my organization view '
-            'my embargoed requests',
-            )
+        default=False,
+        verbose_name='Share',
+        help_text='Let other members of my organization view '
+        'my embargoed requests',
+    )
 
     # paid for requests
     num_requests = models.IntegerField(default=0)
@@ -158,10 +165,11 @@ class Profile(models.Model):
     payment_failed = models.BooleanField(default=False)
 
     preferred_proxy = models.BooleanField(
-            default=False,
-            help_text='This user will be used over other proxies in the same '
-            'state.  The account must still be set to type proxy for this to '
-            'take affect')
+        default=False,
+        help_text='This user will be used over other proxies in the same '
+        'state.  The account must still be set to type proxy for this to '
+        'take affect'
+    )
 
     # for agency users
     agency = models.OneToOneField(
@@ -169,7 +177,7 @@ class Profile(models.Model):
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
-        )
+    )
 
     def __unicode__(self):
         return u"%s's Profile" % unicode(self.user).capitalize()
@@ -206,7 +214,9 @@ class Profile(models.Model):
         # update requests if they have not yet been updated this month
         if not_this_month or not_this_year:
             self.date_update = date.today()
-            self.monthly_requests = settings.MONTHLY_REQUESTS.get(self.acct_type, 0)
+            self.monthly_requests = settings.MONTHLY_REQUESTS.get(
+                self.acct_type, 0
+            )
             self.save()
         return self.monthly_requests
 
@@ -275,16 +285,16 @@ class Profile(models.Model):
             if not self.customer_id:
                 raise AttributeError('No Stripe ID')
             customer = stripe_retry_on_error(
-                    stripe.Customer.retrieve,
-                    self.customer_id,
-                    )
+                stripe.Customer.retrieve,
+                self.customer_id,
+            )
         except (AttributeError, stripe.InvalidRequestError):
             customer = stripe_retry_on_error(
-                    stripe.Customer.create,
-                    description=self.user.username,
-                    email=self.user.email,
-                    idempotency_key=True,
-                    )
+                stripe.Customer.create,
+                description=self.user.username,
+                email=self.user.email,
+                idempotency_key=True,
+            )
             self.customer_id = customer.id
             self.save()
         return customer
@@ -295,9 +305,9 @@ class Profile(models.Model):
         customer = self.customer()
         if customer.default_source:
             card = stripe_retry_on_error(
-                    customer.sources.retrieve,
-                    customer.default_source,
-                    )
+                customer.sources.retrieve,
+                customer.default_source,
+            )
         return card
 
     def has_subscription(self):
@@ -310,15 +320,19 @@ class Profile(models.Model):
         # create the stripe subscription
         customer = self.customer()
         if self.subscription_id:
-            raise AttributeError('Only allowed one active subscription at a time.')
+            raise AttributeError(
+                'Only allowed one active subscription at a time.'
+            )
         if not token and not customer.default_source:
-            raise AttributeError('No payment method provided for this subscription.')
+            raise AttributeError(
+                'No payment method provided for this subscription.'
+            )
         subscription = stripe_retry_on_error(
-                customer.subscriptions.create,
-                plan='pro',
-                source=token,
-                idempotency_key=True,
-                )
+            customer.subscriptions.create,
+            plan='pro',
+            source=token,
+            idempotency_key=True,
+        )
         stripe_retry_on_error(customer.save, idempotency_key=True)
         # modify the profile object (should this be part of a webhook callback?)
         self.subscription_id = subscription.id
@@ -336,18 +350,22 @@ class Profile(models.Model):
         # if it isn't, then they probably don't have a subscription. in that case, just make
         # sure that we demote their account and reset them back to basic.
         try:
-            if not self.subscription_id and not len(customer.subscriptions.data) > 0:
+            if not self.subscription_id and not len(
+                customer.subscriptions.data
+            ) > 0:
                 raise AttributeError('There is no subscription to cancel.')
             if self.subscription_id:
                 subscription_id = self.subscription_id
             else:
                 subscription_id = customer.subscriptions.data[0].id
             subscription = stripe_retry_on_error(
-                    customer.subscriptions.retrieve,
-                    subscription_id,
-                    )
+                customer.subscriptions.retrieve,
+                subscription_id,
+            )
             subscription = subscription.delete()
-            customer = stripe_retry_on_error(customer.save, idempotency_key=True)
+            customer = stripe_retry_on_error(
+                customer.save, idempotency_key=True
+            )
         except AttributeError as exception:
             logger.warn(exception)
         except stripe.error.StripeError as exception:
@@ -365,18 +383,17 @@ class Profile(models.Model):
         Should always expect a 1-cent based integer (e.g. $1.00 = 100)
         Should apply a baseline fee (5%) to all payments.
         """
-        # pylint: disable=no-self-use
         modified_amount = int(amount + (amount * fee))
         if not metadata.get('email') or not metadata.get('action'):
             raise ValueError('The charge metadata is malformed.')
         stripe_retry_on_error(
-                stripe.Charge.create,
-                amount=modified_amount,
-                currency='usd',
-                source=token,
-                metadata=metadata,
-                idempotency_key=True,
-                )
+            stripe.Charge.create,
+            amount=modified_amount,
+            currency='usd',
+            source=token,
+            metadata=metadata,
+            idempotency_key=True,
+        )
 
     def generate_confirmation_key(self):
         """Generate random key used for validating the email address"""
@@ -406,9 +423,8 @@ class Profile(models.Model):
 class ReceiptEmail(models.Model):
     """An additional email address to send receipts to"""
     user = models.ForeignKey(
-            User,
-            related_name='receipt_emails',
-            on_delete=models.CASCADE)
+        User, related_name='receipt_emails', on_delete=models.CASCADE
+    )
     email = models.EmailField()
 
     def __unicode__(self):
@@ -418,19 +434,19 @@ class ReceiptEmail(models.Model):
 class RecurringDonation(models.Model):
     """Keep track of our recurring donations"""
     user = models.ForeignKey(
-            User,
-            blank=True,
-            null=True,
-            related_name='donations',
-            on_delete=models.SET_NULL,
-            )
+        User,
+        blank=True,
+        null=True,
+        related_name='donations',
+        on_delete=models.SET_NULL,
+    )
     email = models.EmailField()
     amount = models.PositiveIntegerField()
     customer_id = models.CharField(max_length=255)
     subscription_id = models.CharField(
-            unique=True,
-            max_length=255,
-            )
+        unique=True,
+        max_length=255,
+    )
     payment_failed = models.BooleanField(default=False)
     active = models.BooleanField(default=True)
     created_datetime = models.DateTimeField(auto_now_add=True)
@@ -438,9 +454,9 @@ class RecurringDonation(models.Model):
 
     def __unicode__(self):
         return u'Donation: ${}/Month by {}'.format(
-                self.amount,
-                self.email,
-                )
+            self.amount,
+            self.email,
+        )
 
     def cancel(self):
         """Cancel the recurring donation"""
@@ -448,14 +464,15 @@ class RecurringDonation(models.Model):
         self.deactivated_datetime = datetime.now()
         self.save()
         subscription = stripe_retry_on_error(
-                stripe.Subscription.retrieve,
-                self.subscription_id,
-                )
+            stripe.Subscription.retrieve,
+            self.subscription_id,
+        )
         stripe_retry_on_error(subscription.delete)
 
 
 class NotificationQuerySet(models.QuerySet):
     """Object manager for notifications"""
+
     def for_user(self, user):
         """All notifications for a user"""
         return self.filter(user=user)
@@ -474,13 +491,16 @@ class NotificationQuerySet(models.QuerySet):
         object_ct = ContentType.objects.get_for_model(_object)
         actor = models.Q(
             action__actor_content_type=object_ct,
-            action__actor_object_id=object_pk)
+            action__actor_object_id=object_pk
+        )
         action_object = models.Q(
             action__action_object_content_type=object_ct,
-            action__action_object_object_id=object_pk)
+            action__action_object_object_id=object_pk
+        )
         target = models.Q(
             action__target_content_type=object_ct,
-            action__target_object_id=object_pk)
+            action__target_object_id=object_pk
+        )
         return self.filter(actor | action_object | target)
 
     def get_unread(self):
@@ -497,7 +517,8 @@ class Notification(models.Model):
     objects = NotificationQuerySet.as_manager()
 
     def __unicode__(self):
-        return u'<Notification for %s>' % unicode(self.user.username).capitalize()
+        return u'<Notification for %s>' % unicode(self.user.username
+                                                  ).capitalize()
 
     def mark_read(self):
         """Marks notification as read."""
@@ -522,7 +543,9 @@ class Statistics(models.Model):
     total_requests_draft = models.IntegerField(null=True, blank=True)
     total_requests_submitted = models.IntegerField(null=True, blank=True)
     total_requests_awaiting_ack = models.IntegerField(null=True, blank=True)
-    total_requests_awaiting_response = models.IntegerField(null=True, blank=True)
+    total_requests_awaiting_response = models.IntegerField(
+        null=True, blank=True
+    )
     total_requests_awaiting_appeal = models.IntegerField(null=True, blank=True)
     total_requests_fix_required = models.IntegerField(null=True, blank=True)
     total_requests_payment_required = models.IntegerField(null=True, blank=True)
@@ -543,10 +566,16 @@ class Statistics(models.Model):
     machine_requests_draft = models.IntegerField(null=True, blank=True)
     machine_requests_submitted = models.IntegerField(null=True, blank=True)
     machine_requests_awaiting_ack = models.IntegerField(null=True, blank=True)
-    machine_requests_awaiting_response = models.IntegerField(null=True, blank=True)
-    machine_requests_awaiting_appeal = models.IntegerField(null=True, blank=True)
+    machine_requests_awaiting_response = models.IntegerField(
+        null=True, blank=True
+    )
+    machine_requests_awaiting_appeal = models.IntegerField(
+        null=True, blank=True
+    )
     machine_requests_fix_required = models.IntegerField(null=True, blank=True)
-    machine_requests_payment_required = models.IntegerField(null=True, blank=True)
+    machine_requests_payment_required = models.IntegerField(
+        null=True, blank=True
+    )
     machine_requests_no_docs = models.IntegerField(null=True, blank=True)
     machine_requests_partial = models.IntegerField(null=True, blank=True)
     machine_requests_abandoned = models.IntegerField(null=True, blank=True)
@@ -587,19 +616,27 @@ class Statistics(models.Model):
     total_unresolved_orphan_tasks = models.IntegerField(null=True, blank=True)
     total_deferred_orphan_tasks = models.IntegerField(null=True, blank=True)
     total_snailmail_tasks = models.IntegerField(null=True, blank=True)
-    total_unresolved_snailmail_tasks = models.IntegerField(null=True, blank=True)
+    total_unresolved_snailmail_tasks = models.IntegerField(
+        null=True, blank=True
+    )
     total_deferred_snailmail_tasks = models.IntegerField(null=True, blank=True)
     total_rejected_tasks = models.IntegerField(null=True, blank=True)
     total_unresolved_rejected_tasks = models.IntegerField(null=True, blank=True)
     total_deferred_rejected_tasks = models.IntegerField(null=True, blank=True)
     total_staleagency_tasks = models.IntegerField(null=True, blank=True)
-    total_unresolved_staleagency_tasks = models.IntegerField(null=True, blank=True)
-    total_deferred_staleagency_tasks = models.IntegerField(null=True, blank=True)
+    total_unresolved_staleagency_tasks = models.IntegerField(
+        null=True, blank=True
+    )
+    total_deferred_staleagency_tasks = models.IntegerField(
+        null=True, blank=True
+    )
     total_flagged_tasks = models.IntegerField(null=True, blank=True)
     total_unresolved_flagged_tasks = models.IntegerField(null=True, blank=True)
     total_deferred_flagged_tasks = models.IntegerField(null=True, blank=True)
     total_newagency_tasks = models.IntegerField(null=True, blank=True)
-    total_unresolved_newagency_tasks = models.IntegerField(null=True, blank=True)
+    total_unresolved_newagency_tasks = models.IntegerField(
+        null=True, blank=True
+    )
     total_deferred_newagency_tasks = models.IntegerField(null=True, blank=True)
     total_response_tasks = models.IntegerField(null=True, blank=True)
     total_unresolved_response_tasks = models.IntegerField(null=True, blank=True)
@@ -611,11 +648,19 @@ class Statistics(models.Model):
     total_unresolved_payment_tasks = models.IntegerField(null=True, blank=True)
     total_deferred_payment_tasks = models.IntegerField(null=True, blank=True)
     total_crowdfundpayment_tasks = models.IntegerField(null=True, blank=True)
-    total_unresolved_crowdfundpayment_tasks = models.IntegerField(null=True, blank=True)
-    total_deferred_crowdfundpayment_tasks = models.IntegerField(null=True, blank=True)
+    total_unresolved_crowdfundpayment_tasks = models.IntegerField(
+        null=True, blank=True
+    )
+    total_deferred_crowdfundpayment_tasks = models.IntegerField(
+        null=True, blank=True
+    )
     total_reviewagency_tasks = models.IntegerField(null=True, blank=True)
-    total_unresolved_reviewagency_tasks = models.IntegerField(null=True, blank=True)
-    total_deferred_reviewagency_tasks = models.IntegerField(null=True, blank=True)
+    total_unresolved_reviewagency_tasks = models.IntegerField(
+        null=True, blank=True
+    )
+    total_deferred_reviewagency_tasks = models.IntegerField(
+        null=True, blank=True
+    )
     total_portal_tasks = models.IntegerField(null=True, blank=True)
     total_unresolved_portal_tasks = models.IntegerField(null=True, blank=True)
     total_deferred_portal_tasks = models.IntegerField(null=True, blank=True)
@@ -657,9 +702,11 @@ class Statistics(models.Model):
 
     total_crowdfund_payments = models.IntegerField(null=True, blank=True)
     total_crowdfund_payments_loggedin = models.IntegerField(
-            null=True, blank=True)
+        null=True, blank=True
+    )
     total_crowdfund_payments_loggedout = models.IntegerField(
-            null=True, blank=True)
+        null=True, blank=True
+    )
 
     # projects
     public_projects = models.IntegerField(null=True, blank=True)
@@ -686,11 +733,9 @@ class Statistics(models.Model):
     num_crowdsource_responded_users = models.IntegerField(null=True, blank=True)
     total_crowdsource_responses = models.IntegerField(null=True, blank=True)
 
-
     def __unicode__(self):
         return 'Stats for %s' % self.date
 
     class Meta:
-        # pylint: disable=too-few-public-methods
         ordering = ['-date']
         verbose_name_plural = 'statistics'

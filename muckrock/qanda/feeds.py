@@ -2,11 +2,14 @@
 Feeds for the QandA application
 """
 
+# Django
 # pylint: disable=no-name-in-module
 from django.contrib.syndication.views import Feed
 from django.template.defaultfilters import escape, linebreaks
 
+# MuckRock
 from muckrock.qanda.models import Question
+
 
 class LatestQuestions(Feed):
     """An RSS Feed for Questions"""
@@ -16,7 +19,6 @@ class LatestQuestions(Feed):
 
     def items(self):
         """Return the items for the rss feed"""
-        # pylint: disable=no-self-use
         return Question.objects.all().order_by('-date')[:25]
 
     def item_description(self, item):

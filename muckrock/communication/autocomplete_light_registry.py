@@ -2,15 +2,14 @@
 Autocomplete registry for Communication
 """
 
+# Django
 from django.db.models import Q
 
+# Third Party
 from autocomplete_light import shortcuts as autocomplete_light
 
-from muckrock.communication.models import (
-        EmailAddress,
-        PhoneNumber,
-        Address,
-        )
+# MuckRock
+from muckrock.communication.models import Address, EmailAddress, PhoneNumber
 
 
 class AddressAutocomplete(autocomplete_light.AutocompleteModelTemplate):
@@ -18,13 +17,13 @@ class AddressAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     choices = Address.objects.all()
     choice_template = 'autocomplete/address.html'
     search_fields = [
-            'address',
-            'street',
-            'suite',
-            'city',
-            'state',
-            'zip_code',
-            ]
+        'address',
+        'street',
+        'suite',
+        'city',
+        'state',
+        'zip_code',
+    ]
     attrs = {
         'data-autocomplete-minimum-characters': 2,
         'placeholder': 'Search for an address',
@@ -46,8 +45,11 @@ class EmailAddressAdminAutocomplete(EmailAddressAutocomplete):
     choices = EmailAddress.objects.all()
 
 
-class GenericPhoneNumberAutocomplete(autocomplete_light.AutocompleteModelTemplate):
+class GenericPhoneNumberAutocomplete(
+    autocomplete_light.AutocompleteModelTemplate
+):
     """Logic for querying numbers"""
+
     def choices_for_request(self):
         """Remove parentheses and convert spaces to dashes before searching"""
         query = self.request.GET.get('q', '')
@@ -55,10 +57,8 @@ class GenericPhoneNumberAutocomplete(autocomplete_light.AutocompleteModelTemplat
             ord(u'('): None,
             ord(u')'): None,
             ord(u' '): u'-',
-            })
-        choices = self.choices.filter(
-                number__contains=query,
-                )
+        })
+        choices = self.choices.filter(number__contains=query,)
         return self.order_choices(choices)[0:self.limit_choices]
 
 
@@ -89,39 +89,54 @@ class EmailOrFaxAutocomplete(autocomplete_light.AutocompleteBase):
         'data-autocomplete-minimum-characters': 0,
         'placeholder': 'Search for an email address or fax number',
     }
+
     def choices_for_request(self):
         query = self.request.GET.get('q', '')
-        emails = list(EmailAddress.objects
-                .filter(status='good')
-                .filter(
-                    Q(email__icontains=query) |
-                    Q(name__icontains=query),
-                    )[:10])
-        phones = list(PhoneNumber.objects
-                .filter(status='good')
-                .filter(number__contains=query, type='fax')
-                [:10])
+        emails = list(
+            EmailAddress.objects.filter(status='good').filter(
+                Q(email__icontains=query) | Q(name__icontains=query),
+            )[:10]
+        )
+        phones = list(
+            PhoneNumber.objects.filter(status='good').filter(
+                number__contains=query, type='fax'
+            )[:10]
+        )
         combined = (emails + phones)[:10]
         return [unicode(i) for i in combined]
 
 
-autocomplete_light.register(Address, AddressAutocomplete,
-        name='AddressAdminAutocomplete',
-        add_another_url_name='admin:communication_address_add')
+autocomplete_light.register(
+    Address,
+    AddressAutocomplete,
+    name='AddressAdminAutocomplete',
+    add_another_url_name='admin:communication_address_add'
+)
 
 autocomplete_light.register(EmailAddress, EmailAddressAutocomplete)
-autocomplete_light.register(EmailAddress, EmailAddressAdminAutocomplete,
-        add_another_url_name='admin:communication_emailaddress_add')
+autocomplete_light.register(
+    EmailAddress,
+    EmailAddressAdminAutocomplete,
+    add_another_url_name='admin:communication_emailaddress_add'
+)
 
 autocomplete_light.register(PhoneNumber, PhoneNumberAutocomplete)
-autocomplete_light.register(PhoneNumber, PhoneNumberAutocomplete,
-        name='PhoneNumberAdminAutocomplete',
-        add_another_url_name='admin:communication_phonenumber_add')
-autocomplete_light.register(PhoneNumber, FaxAutocomplete,
-        name='FaxAutocomplete',
-        )
-autocomplete_light.register(PhoneNumber, FaxAutocomplete,
-        name='FaxAdminAutocomplete',
-        add_another_url_name='admin:communication_phonenumber_add')
+autocomplete_light.register(
+    PhoneNumber,
+    PhoneNumberAutocomplete,
+    name='PhoneNumberAdminAutocomplete',
+    add_another_url_name='admin:communication_phonenumber_add'
+)
+autocomplete_light.register(
+    PhoneNumber,
+    FaxAutocomplete,
+    name='FaxAutocomplete',
+)
+autocomplete_light.register(
+    PhoneNumber,
+    FaxAutocomplete,
+    name='FaxAdminAutocomplete',
+    add_another_url_name='admin:communication_phonenumber_add'
+)
 
 autocomplete_light.register(EmailOrFaxAutocomplete)

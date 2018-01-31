@@ -3,28 +3,37 @@
 Views for the dataset application
 """
 
+# Django
 from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import reverse
 from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404, render
 
-from djangosecure.decorators import frame_deny_exempt
+# Standard Library
 import re
 
+# Third Party
+from djangosecure.decorators import frame_deny_exempt
+
+# MuckRock
 from muckrock.dataset.models import DataSet
+
 
 def detail(request, slug, idx):
     """Show the data"""
     dataset = get_object_or_404(DataSet, slug=slug, pk=idx)
     context = {
-            'dataset': dataset,
-            'sidebar_admin_url': reverse(
+        'dataset':
+            dataset,
+        'sidebar_admin_url':
+            reverse(
                 'admin:dataset_dataset_change',
                 args=(dataset.pk,),
-                ),
-            'base_url': 'https://www.muckrock.com',
-            }
+            ),
+        'base_url':
+            'https://www.muckrock.com',
+    }
     return render(request, 'dataset/detail.html', context)
 
 
@@ -33,10 +42,10 @@ def embed(request, slug, idx):
     """Embed the data set"""
     dataset = get_object_or_404(DataSet, slug=slug, pk=idx)
     return render(
-            request,
-            'dataset/embed.html',
-            {'dataset': dataset},
-            )
+        request,
+        'dataset/embed.html',
+        {'dataset': dataset},
+    )
 
 
 def _parse_params(get, name, fields):
@@ -96,14 +105,14 @@ def data(request, slug, idx):
     return JsonResponse({
         'data': json_data,
         'last_page': last_page,
-        })
+    })
 
 
 @user_passes_test(lambda u: u.is_staff)
 def create(request):
     """Upload a file to create a dataset from"""
     context = {
-            'AWS_STORAGE_BUCKET_NAME': settings.AWS_STORAGE_BUCKET_NAME,
-            'AWS_ACCESS_KEY_ID': settings.AWS_ACCESS_KEY_ID,
-            }
+        'AWS_STORAGE_BUCKET_NAME': settings.AWS_STORAGE_BUCKET_NAME,
+        'AWS_ACCESS_KEY_ID': settings.AWS_ACCESS_KEY_ID,
+    }
     return render(request, 'dataset/create.html', context)

@@ -1,30 +1,33 @@
 # -*- coding: utf-8 -*-
 """Admin configuration for the crowdsource app"""
 
+# Django
 from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
+# Third Party
 from autocomplete_light import shortcuts as autocomplete_light
 
+# MuckRock
 from muckrock.crowdsource.models import (
-        Crowdsource,
-        CrowdsourceData,
-        CrowdsourceField,
-        CrowdsourceChoice,
-        CrowdsourceResponse,
-        CrowdsourceValue,
-        )
+    Crowdsource,
+    CrowdsourceChoice,
+    CrowdsourceData,
+    CrowdsourceField,
+    CrowdsourceResponse,
+    CrowdsourceValue,
+)
 
 
 class CrowdsourceAdminForm(forms.ModelForm):
     """Form for Crowdsource admin"""
 
     user = autocomplete_light.ModelChoiceField(
-            'UserAutocomplete',
-            queryset=User.objects.all(),
-            )
+        'UserAutocomplete',
+        queryset=User.objects.all(),
+    )
 
     class Meta:
         model = Crowdsource
@@ -35,9 +38,9 @@ class CrowdsourceResponseAdminForm(forms.ModelForm):
     """Form for Crowdsource response admin"""
 
     user = autocomplete_light.ModelChoiceField(
-            'UserAutocomplete',
-            queryset=User.objects.all(),
-            )
+        'UserAutocomplete',
+        queryset=User.objects.all(),
+    )
 
     class Meta:
         model = CrowdsourceResponse
@@ -69,10 +72,10 @@ class CrowdsourceAdmin(admin.ModelAdmin):
     form = CrowdsourceAdminForm
     prepopulated_fields = {'slug': ('title',)}
     inlines = (
-            CrowdsourceDataInline,
-            CrowdsourceFieldInline,
-            CrowdsourceResponseInline,
-            )
+        CrowdsourceDataInline,
+        CrowdsourceFieldInline,
+        CrowdsourceResponseInline,
+    )
 
 
 class CrowdsourceChoiceInline(admin.TabularInline):
@@ -83,25 +86,23 @@ class CrowdsourceChoiceInline(admin.TabularInline):
 @admin.register(CrowdsourceField)
 class CrowdsourceFieldAdmin(admin.ModelAdmin):
     """Crowdsource field options"""
-    inlines = (
-            CrowdsourceChoiceInline,
-            )
+    inlines = (CrowdsourceChoiceInline,)
     fields = (
-            'cs_link',
-            'label',
-            'type',
-            'order',
-            )
+        'cs_link',
+        'label',
+        'type',
+        'order',
+    )
     readonly_fields = ('cs_link',)
 
     def cs_link(self, obj):
         """Link back to the crowdsource page"""
-        # pylint: disable=no-self-use
         link = reverse(
-                'admin:crowdsource_crowdsource_change',
-                args=(obj.crowdsource.pk,),
-                )
+            'admin:crowdsource_crowdsource_change',
+            args=(obj.crowdsource.pk,),
+        )
         return '<a href="{}">{}</a>'.format(link, obj.crowdsource.title)
+
     cs_link.allow_tags = True
     cs_link.short_description = 'Crowdsource'
 
@@ -115,24 +116,22 @@ class CrowdsourceValueInline(admin.TabularInline):
 class CrowdsourceResponseAdmin(admin.ModelAdmin):
     """Crowdsource response options"""
     form = CrowdsourceResponseAdminForm
-    inlines = (
-            CrowdsourceValueInline,
-            )
+    inlines = (CrowdsourceValueInline,)
     fields = (
-            'cs_link',
-            'user',
-            'datetime',
-            'data',
-            )
+        'cs_link',
+        'user',
+        'datetime',
+        'data',
+    )
     readonly_fields = ('cs_link', 'data')
 
     def cs_link(self, obj):
         """Link back to the crowdsource page"""
-        # pylint: disable=no-self-use
         link = reverse(
-                'admin:crowdsource_crowdsource_change',
-                args=(obj.crowdsource.pk,),
-                )
+            'admin:crowdsource_crowdsource_change',
+            args=(obj.crowdsource.pk,),
+        )
         return '<a href="{}">{}</a>'.format(link, obj.crowdsource.title)
+
     cs_link.allow_tags = True
     cs_link.short_description = 'Crowdsource'

@@ -2,57 +2,50 @@
 Models for the Task application
 """
 
+# Django
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
 from django.core.mail import EmailMessage
 from django.core.urlresolvers import reverse
 from django.db import models
-from django.db.models import (
-        Case,
-        Count,
-        Max,
-        Prefetch,
-        When,
-        )
+from django.db.models import Case, Count, Max, Prefetch, When
+from django.db.models.functions import ExtractDay, Now
 from django.template.loader import render_to_string
 
-from datetime import datetime, date
+# Standard Library
 import logging
+from datetime import date, datetime
 from itertools import groupby
 
+# MuckRock
 from muckrock.communication.models import (
-        EmailError,
-        FaxError,
-        EmailAddress,
-        PhoneNumber,
-        )
-from muckrock.foia.models import (
-        FOIANote,
-        FOIARequest,
-        STATUS,
-        )
+    EmailAddress,
+    EmailError,
+    FaxError,
+    PhoneNumber,
+)
+from muckrock.foia.models import STATUS, FOIANote, FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import support
-from muckrock.models import ExtractDay, Now
 from muckrock.task.forms import ResponseTaskForm
 from muckrock.task.querysets import (
-        TaskQuerySet,
-        OrphanTaskQuerySet,
-        SnailMailTaskQuerySet,
-        StaleAgencyTaskQuerySet,
-        FlaggedTaskQuerySet,
-        ProjectReviewTaskQuerySet,
-        NewAgencyTaskQuerySet,
-        ReviewAgencyTaskQuerySet,
-        ResponseTaskQuerySet,
-        StatusChangeTaskQuerySet,
-        CrowdfundTaskQuerySet,
-        MultiRequestTaskQuerySet,
-        NewExemptionTaskQuerySet,
-        PortalTaskQuerySet,
-        )
+    CrowdfundTaskQuerySet,
+    FlaggedTaskQuerySet,
+    MultiRequestTaskQuerySet,
+    NewAgencyTaskQuerySet,
+    NewExemptionTaskQuerySet,
+    OrphanTaskQuerySet,
+    PortalTaskQuerySet,
+    ProjectReviewTaskQuerySet,
+    ResponseTaskQuerySet,
+    ReviewAgencyTaskQuerySet,
+    SnailMailTaskQuerySet,
+    StaleAgencyTaskQuerySet,
+    StatusChangeTaskQuerySet,
+    TaskQuerySet,
+)
 
 # pylint: disable=missing-docstring
 
@@ -65,14 +58,19 @@ SNAIL_MAIL_CATEGORIES = [
 ]
 PORTAL_CATEGORIES = [('i', 'Incoming')] + SNAIL_MAIL_CATEGORIES
 
+
 class Task(models.Model):
     """A base task model for fields common to all tasks"""
     date_created = models.DateTimeField(auto_now_add=True)
     date_done = models.DateTimeField(blank=True, null=True)
     date_deferred = models.DateField(blank=True, null=True)
     resolved = models.BooleanField(default=False, db_index=True)
-    assigned = models.ForeignKey(User, blank=True, null=True, related_name="assigned_tasks")
-    resolved_by = models.ForeignKey(User, blank=True, null=True, related_name="resolved_tasks")
+    assigned = models.ForeignKey(
+        User, blank=True, null=True, related_name="assigned_tasks"
+    )
+    resolved_by = models.ForeignKey(
+        User, blank=True, null=True, related_name="resolved_tasks"
+    )
     form_data = JSONField(blank=True, null=True)
 
     objects = TaskQuerySet.as_manager()
@@ -81,7 +79,6 @@ class Task(models.Model):
         ordering = ['date_created']
 
     def __unicode__(self):
-        # pylint:disable=no-self-use
         return u'Task'
 
     def resolve(self, user=None, form_data=None):
@@ -103,8 +100,7 @@ class Task(models.Model):
 class OrphanTask(Task):
     """A communication that needs to be approved before showing it on the site"""
     type = 'OrphanTask'
-    reasons = (('bs', 'Bad Sender'),
-               ('ib', 'Incoming Blocked'),
+    reasons = (('bs', 'Bad Sender'), ('ib', 'Incoming Blocked'),
                ('ia', 'Invalid Address'))
     reason = models.CharField(max_length=2, choices=reasons)
     communication = models.ForeignKey('foia.FOIACommunication')
@@ -119,9 +115,9 @@ class OrphanTask(Task):
     def display(self):
         """Display something useful and identifing"""
         return u'{}: {}'.format(
-                self.get_reason_display(),
-                self.address,
-                )
+            self.get_reason_display(),
+            self.address,
+        )
 
     def get_absolute_url(self):
         return reverse('orphan-task', kwargs={'pk': self.pk})
@@ -131,8 +127,7 @@ class OrphanTask(Task):
         moved_comms = self.communication.move(foia_pks, user)
         for moved_comm in moved_comms:
             ResponseTask.objects.create(
-                communication=moved_comm,
-                created_from_orphan=True
+                communication=moved_comm, created_from_orphan=True
             )
             moved_comm.make_sender_primary_contact()
 
@@ -168,11 +163,11 @@ class SnailMailTask(Task):
     user = models.ForeignKey(User, blank=True, null=True)
     amount = models.DecimalField(default=0.00, max_digits=8, decimal_places=2)
     switch = models.BooleanField(
-            default=False,
-            help_text='Designates we have switched to sending to this address '
-            'from another formof communication due to some sort of error.  A '
-            'note should be included in the communication with an explanation.',
-            )
+        default=False,
+        help_text='Designates we have switched to sending to this address '
+        'from another formof communication due to some sort of error.  A '
+        'note should be included in the communication with an explanation.',
+    )
 
     objects = SnailMailTaskQuerySet.as_manager()
 
@@ -182,9 +177,9 @@ class SnailMailTask(Task):
     def display(self):
         """Display something useful and identifing"""
         return u'{}: {}'.format(
-                self.get_category_display(),
-                self.communication.foia.title,
-                )
+            self.get_category_display(),
+            self.communication.foia.title,
+        )
 
     def get_absolute_url(self):
         return reverse('snail-mail-task', kwargs={'pk': self.pk})
@@ -221,27 +216,27 @@ class SnailMailTask(Task):
         else:
             type_ = 'User'
         context = {
-                'number': number,
-                'payable_to': payable_to,
-                'amount': self.amount,
-                'signed_by': user.get_full_name(),
-                'foia_pk': foia.pk,
-                'comm_pk': self.communication.pk,
-                'type': type_,
-                'today': date.today(),
-                }
+            'number': number,
+            'payable_to': payable_to,
+            'amount': self.amount,
+            'signed_by': user.get_full_name(),
+            'foia_pk': foia.pk,
+            'comm_pk': self.communication.pk,
+            'type': type_,
+            'today': date.today(),
+        }
         body = render_to_string(
-                'text/task/check.txt',
-                context,
-                )
+            'text/task/check.txt',
+            context,
+        )
         msg = EmailMessage(
-                subject='[CHECK MAILED] Check #{}'.format(number),
-                body=body,
-                from_email='info@muckrock.com',
-                to=[settings.CHECK_EMAIL],
-                cc=['info@muckrock.com'],
-                bcc=['diagnostics@muckrock.com'],
-                )
+            subject='[CHECK MAILED] Check #{}'.format(number),
+            body=body,
+            from_email='info@muckrock.com',
+            to=[settings.CHECK_EMAIL],
+            cc=['info@muckrock.com'],
+            bcc=['diagnostics@muckrock.com'],
+        )
         msg.send(fail_silently=False)
         return note
 
@@ -282,18 +277,21 @@ class StaleAgencyTask(Task):
     def update_email(self, new_email, foia_list):
         """Updates the email on the agency and the provided requests."""
         from muckrock.agency.models import AgencyEmail
-        agency_emails = (self.agency.agencyemail_set
-                .filter(request_type='primary', email_type='to'))
+        agency_emails = (
+            self.agency.agencyemail_set.filter(
+                request_type='primary', email_type='to'
+            )
+        )
         for agency_email in agency_emails:
             agency_email.request_type = 'none'
             agency_email.email_type = 'none'
             agency_email.save()
         AgencyEmail.objects.create(
-                email=new_email,
-                agency=self.agency,
-                request_type='primary',
-                email_type='to',
-                )
+            email=new_email,
+            agency=self.agency,
+            request_type='primary',
+            email_type='to',
+        )
         for foia in foia_list:
             foia.email = new_email
             foia.followup(switch=True)
@@ -328,42 +326,48 @@ class ReviewAgencyTask(Task):
                 error_model = FaxError
                 confirm_rel = 'faxes'
 
-            open_requests = (self.agency.foiarequest_set
-                    .get_open()
-                    .order_by('%s__status' % email_or_fax, email_or_fax)
-                    .exclude(**{email_or_fax: None})
-                    .select_related(email_or_fax, 'jurisdiction')
-                    .annotate(
-                        latest_response=ExtractDay(
-                            Now() - Max(Case(When(
-                                communications__response=True,
-                                then='communications__date'
-                                ))))
+            open_requests = (
+                self.agency.foiarequest_set.get_open().order_by(
+                    '%s__status' % email_or_fax, email_or_fax
+                ).exclude(**{
+                    email_or_fax: None
+                }).select_related(email_or_fax, 'jurisdiction').annotate(
+                    latest_response=ExtractDay(
+                        Now() - Max(
+                            Case(
+                                When(
+                                    communications__response=True,
+                                    then='communications__date'
+                                )
+                            )
                         )
                     )
-            grouped_requests = [(k, list(v)) for k, v in groupby(
-                open_requests,
-                lambda f: getattr(f, email_or_fax)
-                )]
+                )
+            )
+            grouped_requests = [
+                (k, list(v)) for k, v in
+                groupby(open_requests, lambda f: getattr(f, email_or_fax))
+            ]
             # do a seperate query for per email addr/fax number stats
-            addresses = (address_model.objects
-                    .annotate(
-                        error_count=Count('errors', distinct=True),
-                        last_error=Max('errors__datetime'),
-                        last_confirm=Max('%s__confirmed_datetime' % confirm_rel),
-                        )
-                    .prefetch_related(
-                        Prefetch(
-                            'errors',
-                            error_model.objects
-                                .select_related(
-                                    '%s__communication__foia__jurisdiction' % email_or_fax)
-                                .order_by('-datetime')
-                        )))
+            addresses = (
+                address_model.objects.annotate(
+                    error_count=Count('errors', distinct=True),
+                    last_error=Max('errors__datetime'),
+                    last_confirm=Max('%s__confirmed_datetime' % confirm_rel),
+                ).prefetch_related(
+                    Prefetch(
+                        'errors',
+                        error_model.objects.select_related(
+                            '%s__communication__foia__jurisdiction' %
+                            email_or_fax
+                        ).order_by('-datetime')
+                    )
+                )
+            )
             if email_or_fax == 'email':
                 addresses = addresses.annotate(
-                        last_open=Max('opens__datetime'),
-                        )
+                    last_open=Max('opens__datetime'),
+                )
             addresses = addresses.in_bulk(g[0].pk for g in grouped_requests)
 
             review_data = []
@@ -371,40 +375,54 @@ class ReviewAgencyTask(Task):
                 # fetch the address with the annotated stats
                 addr = addresses[addr.pk]
                 review_data.append({
-                        'address': addr,
-                        'error': addr.status == 'error',
-                        'errors': addr.errors.all()[:5],
-                        'foias': foias,
-                        'total_errors': addr.error_count,
-                        'last_error': addr.last_error,
-                        'last_confirm': addr.last_confirm,
-                        'last_open': addr.last_open if email_or_fax == 'email' else None,
-                        'checkbox_name': 'foias-%d-%s-%d' % (self.pk, email_or_fax, addr.pk),
-                        'email_or_fax': email_or_fax,
-                        })
+                    'address':
+                        addr,
+                    'error':
+                        addr.status == 'error',
+                    'errors':
+                        addr.errors.all()[:5],
+                    'foias':
+                        foias,
+                    'total_errors':
+                        addr.error_count,
+                    'last_error':
+                        addr.last_error,
+                    'last_confirm':
+                        addr.last_confirm,
+                    'last_open':
+                        addr.last_open if email_or_fax == 'email' else None,
+                    'checkbox_name':
+                        'foias-%d-%s-%d' % (self.pk, email_or_fax, addr.pk),
+                    'email_or_fax':
+                        email_or_fax,
+                })
             return review_data
 
         review_data.extend(get_data('email'))
         review_data.extend(get_data('fax'))
         # snail mail
-        foias = list(self.agency.foiarequest_set
-                .get_open()
-                .filter(email=None, fax=None)
-                .select_related('jurisdiction')
-                .annotate(
-                    latest_response=ExtractDay(
-                        Now() - Max(Case(When(
-                            communications__response=True,
-                            then='communications__date'
-                            ))))
+        foias = list(
+            self.agency.foiarequest_set.get_open().filter(
+                email=None, fax=None
+            ).select_related('jurisdiction').annotate(
+                latest_response=ExtractDay(
+                    Now() - Max(
+                        Case(
+                            When(
+                                communications__response=True,
+                                then='communications__date'
+                            )
+                        )
                     )
                 )
+            )
+        )
         if foias:
             review_data.append({
-                    'address': 'Snail Mail',
-                    'foias': foias,
-                    'checkbox_name': '%d-snail' % self.pk,
-                    })
+                'address': 'Snail Mail',
+                'foias': foias,
+                'checkbox_name': '%d-snail' % self.pk,
+            })
 
         return review_data
 
@@ -417,8 +435,11 @@ class ReviewAgencyTask(Task):
 
         if update_info:
             # clear primary emails if we are updating with any new info
-            agency_emails = (self.agency.agencyemail_set
-                    .filter(request_type='primary', email_type='to'))
+            agency_emails = (
+                self.agency.agencyemail_set.filter(
+                    request_type='primary', email_type='to'
+                )
+            )
             for agency_email in agency_emails:
                 agency_email.request_type = 'none'
                 agency_email.email_type = 'none'
@@ -426,8 +447,11 @@ class ReviewAgencyTask(Task):
 
             # clear primary faxes if updating with a fax or snail mail address
             if is_fax or snail:
-                agency_faxes = (self.agency.agencyphone_set
-                        .filter(request_type='primary', phone__type='fax'))
+                agency_faxes = (
+                    self.agency.agencyphone_set.filter(
+                        request_type='primary', phone__type='fax'
+                    )
+                )
                 for agency_fax in agency_faxes:
                     agency_fax.request_type = 'none'
                     agency_fax.save()
@@ -435,11 +459,11 @@ class ReviewAgencyTask(Task):
         if is_email:
             if update_info:
                 AgencyEmail.objects.create(
-                        email=email_or_fax,
-                        agency=self.agency,
-                        request_type='primary',
-                        email_type='to',
-                        )
+                    email=email_or_fax,
+                    agency=self.agency,
+                    request_type='primary',
+                    email_type='to',
+                )
             for foia in foia_list:
                 foia.email = email_or_fax
                 if foia.fax and foia.fax.status != 'good':
@@ -449,10 +473,10 @@ class ReviewAgencyTask(Task):
         elif is_fax:
             if update_info:
                 AgencyPhone.objects.create(
-                        phone=email_or_fax,
-                        agency=self.agency,
-                        request_type='primary',
-                        )
+                    phone=email_or_fax,
+                    agency=self.agency,
+                    request_type='primary',
+                )
             for foia in foia_list:
                 foia.email = None
                 foia.fax = email_or_fax
@@ -467,8 +491,11 @@ class ReviewAgencyTask(Task):
 
     def latest_response(self):
         """Returns the latest response from the agency"""
-        return (self.agency.foiarequest_set
-                .aggregate(max_date=Max('communications__date'))['max_date'])
+        return (
+            self.agency.foiarequest_set.aggregate(
+                max_date=Max('communications__date')
+            )['max_date']
+        )
 
 
 class FlaggedTask(Task):
@@ -531,10 +558,14 @@ class ProjectReviewTask(Task):
 
     def reply(self, text, action='reply'):
         """Send an email reply to the user that raised the flag."""
-        send_to = [contributor.email for contributor in self.project.contributors.all()]
+        send_to = [
+            contributor.email for contributor in self.project.contributors.all()
+        ]
         project_email = TemplateEmail(
             to=send_to,
-            extra_context={'action': action, 'message': text, 'task': self},
+            extra_context={'action': action,
+                           'message': text,
+                           'task': self},
             subject=u'%s %s' % (self.project, action),
             text_template='message/project/%s.txt' % action,
             html_template='message/project/%s.html' % action
@@ -611,7 +642,9 @@ class ResponseTask(Task):
     communication = models.ForeignKey('foia.FOIACommunication')
     created_from_orphan = models.BooleanField(default=False)
     # for predicting statuses
-    predicted_status = models.CharField(max_length=10, choices=STATUS, blank=True, null=True)
+    predicted_status = models.CharField(
+        max_length=10, choices=STATUS, blank=True, null=True
+    )
     status_probability = models.IntegerField(blank=True, null=True)
 
     objects = ResponseTaskQuerySet.as_manager()
@@ -705,28 +738,28 @@ class MultiRequestTask(Task):
             # requests - this should only happen for returns on requests created
             # before multi's started tracking where the requests came from
             return {
-                    'reg': num_requests - num_monthly - num_org,
-                    'monthly': num_monthly,
-                    'org': num_org,
-                    }
+                'reg': num_requests - num_monthly - num_org,
+                'monthly': num_monthly,
+                'org': num_org,
+            }
         elif num_requests > (num_reg + num_monthly):
             return {
-                    'reg': num_reg,
-                    'monthly': num_monthly,
-                    'org': num_requests - num_reg - num_monthly,
-                    }
+                'reg': num_reg,
+                'monthly': num_monthly,
+                'org': num_requests - num_reg - num_monthly,
+            }
         elif num_requests > num_reg:
             return {
-                    'reg': num_reg,
-                    'monthly': num_requests - num_reg,
-                    'org': 0,
-                    }
+                'reg': num_reg,
+                'monthly': num_requests - num_reg,
+                'org': 0,
+            }
         else:
             return {
-                    'reg': num_requests,
-                    'monthly': 0,
-                    'org': 0,
-                    }
+                'reg': num_requests,
+                'monthly': 0,
+                'org': 0,
+            }
 
     def _do_return_requests(self, return_amts):
         """Update request count on the profile and multirequest given the amounts"""
@@ -776,9 +809,9 @@ class PortalTask(Task):
     type = 'PortalTask'
     communication = models.ForeignKey('foia.FOIACommunication')
     category = models.CharField(
-            max_length=1,
-            choices=PORTAL_CATEGORIES,
-            )
+        max_length=1,
+        choices=PORTAL_CATEGORIES,
+    )
     reason = models.TextField(blank=True)
 
     objects = PortalTaskQuerySet.as_manager()
@@ -802,7 +835,9 @@ class PortalTask(Task):
         comm.foia.save(comment='portal task')
         comm.foia.update()
 
+
 # Retired Tasks
+
 
 class GenericTask(Task):
     """A generic task"""

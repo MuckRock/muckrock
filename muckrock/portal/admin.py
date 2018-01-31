@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 """Admin for the portal app"""
 
+# Django
 from django.contrib import admin
 
+# Third Party
 from reversion.admin import VersionAdmin
 
+# MuckRock
 from muckrock.portal.models import Portal
 
 

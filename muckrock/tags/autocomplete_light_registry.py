@@ -2,18 +2,22 @@
 Autocomplete registry for Tags
 """
 
+# Django
 from django.db.models import Count
 
+# Third Party
 from autocomplete_light import shortcuts as autocomplete_light
 
+# MuckRock
 from muckrock.tags.models import Tag
 
 
 class TagAutocomplete(autocomplete_light.AutocompleteModelBase):
     """Creates an autocomplete field for picking tags"""
-    choices = (Tag.objects
-            .annotate(num=Count('tags_taggeditembase_items'))
-            .exclude(num=0))
+    choices = (
+        Tag.objects.annotate(num=Count('tags_taggeditembase_items'))
+        .exclude(num=0)
+    )
     search_fields = ['name']
     attrs = {
         'data-autocomplete-minimum-characters': 1,

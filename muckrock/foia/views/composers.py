@@ -2,30 +2,30 @@
 FOIA views for composing
 """
 
+# Django
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, Http404
-from django.shortcuts import render, get_object_or_404, redirect
+from django.http import Http404, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.template.defaultfilters import slugify
 from django.utils.encoding import smart_text
 from django.views.generic import FormView
 
-from datetime import datetime, date
+# Standard Library
+from datetime import date, datetime
 from math import ceil
 
+# MuckRock
 from muckrock.agency.models import Agency
 from muckrock.foia.forms import (
-    RequestForm,
-    RequestDraftForm,
-    MultiRequestForm,
     MultiRequestDraftForm,
-    )
-from muckrock.foia.models import (
-    FOIARequest,
-    FOIAMultiRequest,
-    )
+    MultiRequestForm,
+    RequestDraftForm,
+    RequestForm,
+)
+from muckrock.foia.models import FOIAMultiRequest, FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import MultiRequestTask
 from muckrock.utils import new_action
@@ -36,8 +36,10 @@ def _submit_request(request, foia):
     if not foia.user == request.user:
         messages.error(request, 'Only a request\'s owner may submit it.')
     elif not request.user.profile.make_request():
-        error_msg = ('You do not have any requests remaining. '
-                     'Please purchase more requests and then resubmit.')
+        error_msg = (
+            'You do not have any requests remaining. '
+            'Please purchase more requests and then resubmit.'
+        )
         messages.error(request, error_msg)
     else:
         foia.process_attachments(request.user)
@@ -52,12 +54,12 @@ def clone_request(request, jurisdiction, jidx, slug, idx):
     """A URL handler for cloning requests"""
     # pylint: disable=unused-argument
     foia = get_object_or_404(
-            FOIARequest,
-            jurisdiction__slug=jurisdiction,
-            jurisdiction__pk=jidx,
-            slug=slug,
-            pk=idx,
-            )
+        FOIARequest,
+        jurisdiction__slug=jurisdiction,
+        jurisdiction__pk=jidx,
+        slug=slug,
+        pk=idx,
+    )
     return HttpResponseRedirect(reverse('foia-create') + '?clone=%s' % foia.pk)
 
 
@@ -79,16 +81,22 @@ class CreateRequest(FormView):
         agency_pk = self.request.GET.get('agency')
         if agency_pk is not None:
             try:
-                agency = get_object_or_404(Agency, pk=agency_pk, status='approved')
+                agency = get_object_or_404(
+                    Agency, pk=agency_pk, status='approved'
+                )
             except ValueError:
                 return {}
             initial_data = {'agency': agency}
-            initial_data.update(self._get_jurisdiction_data(agency.jurisdiction))
+            initial_data.update(
+                self._get_jurisdiction_data(agency.jurisdiction)
+            )
             return initial_data
         jurisdiction_pk = self.request.GET.get('jurisdiction')
         if jurisdiction_pk is not None:
             try:
-                jurisdiction = get_object_or_404(Jurisdiction, pk=jurisdiction_pk)
+                jurisdiction = get_object_or_404(
+                    Jurisdiction, pk=jurisdiction_pk
+                )
             except ValueError:
                 return {}
             initial_data = self._get_jurisdiction_data(jurisdiction)
@@ -116,7 +124,6 @@ class CreateRequest(FormView):
 
     def _get_jurisdiction_data(self, jurisdiction):
         """Get the jurisdiction data for the initial form"""
-        # pylint: disable=no-self-use
         initial_data = {}
         level = jurisdiction.level
         if level == 's':
@@ -138,7 +145,7 @@ class CreateRequest(FormView):
         context.update({
             'clone': self.clone,
             'featured': FOIARequest.objects.get_featured(self.request.user),
-            })
+        })
         return context
 
     def form_valid(self, form):
@@ -152,17 +159,19 @@ class CreateRequest(FormView):
 def draft_request(request, jurisdiction, jidx, slug, idx):
     """Edit a drafted FOIA Request"""
     foia = get_object_or_404(
-            FOIARequest,
-            jurisdiction__slug=jurisdiction,
-            jurisdiction__pk=jidx,
-            slug=slug,
-            pk=idx,
-            )
+        FOIARequest,
+        jurisdiction__slug=jurisdiction,
+        jurisdiction__pk=jidx,
+        slug=slug,
+        pk=idx,
+    )
     if not foia.is_editable():
         messages.error(request, 'This is not a draft.')
         return redirect(foia)
     if not foia.has_perm(request.user, 'change'):
-        messages.error(request, 'You do not have permission to edit this draft.')
+        messages.error(
+            request, 'You do not have permission to edit this draft.'
+        )
         return redirect(foia)
 
     initial_data = {
@@ -187,7 +196,7 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
                 error_msg = 'Only Pro users may embargo their requests.'
                 messages.error(request, error_msg)
                 return redirect(foia)
-            foia_comm = foia.last_comm() # DEBUG
+            foia_comm = foia.last_comm()  # DEBUG
             foia_comm.date = datetime.now()
             foia_comm.communication = smart_text(data['request'])
             foia_comm.save()
@@ -208,26 +217,39 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
         form = RequestDraftForm(initial=initial_data)
 
     context = {
-        'action': 'Draft',
-        'form': form,
-        'foia': foia,
-        'remaining': request.user.profile.total_requests(),
-        'foias_filed': request.user.foiarequest_set.exclude(status='started').count(),
-        'stripe_pk': settings.STRIPE_PUB_KEY,
-        'sidebar_admin_url': reverse('admin:foia_foiarequest_change', args=(foia.pk,)),
-        'MAX_ATTACHMENT_NUM': settings.MAX_ATTACHMENT_NUM,
-        'MAX_ATTACHMENT_SIZE': settings.MAX_ATTACHMENT_SIZE,
-        'ALLOWED_FILE_MIMES': settings.ALLOWED_FILE_MIMES,
-        'ALLOWED_FILE_EXTS': settings.ALLOWED_FILE_EXTS,
-        'AWS_STORAGE_BUCKET_NAME': settings.AWS_STORAGE_BUCKET_NAME,
-        'AWS_ACCESS_KEY_ID': settings.AWS_ACCESS_KEY_ID,
+        'action':
+            'Draft',
+        'form':
+            form,
+        'foia':
+            foia,
+        'remaining':
+            request.user.profile.total_requests(),
+        'foias_filed':
+            request.user.foiarequest_set.exclude(status='started').count(),
+        'stripe_pk':
+            settings.STRIPE_PUB_KEY,
+        'sidebar_admin_url':
+            reverse('admin:foia_foiarequest_change', args=(foia.pk,)),
+        'MAX_ATTACHMENT_NUM':
+            settings.MAX_ATTACHMENT_NUM,
+        'MAX_ATTACHMENT_SIZE':
+            settings.MAX_ATTACHMENT_SIZE,
+        'ALLOWED_FILE_MIMES':
+            settings.ALLOWED_FILE_MIMES,
+        'ALLOWED_FILE_EXTS':
+            settings.ALLOWED_FILE_EXTS,
+        'AWS_STORAGE_BUCKET_NAME':
+            settings.AWS_STORAGE_BUCKET_NAME,
+        'AWS_ACCESS_KEY_ID':
+            settings.AWS_ACCESS_KEY_ID,
     }
 
     return render(
-            request,
-            'forms/foia/draft.html',
-            context,
-            )
+        request,
+        'forms/foia/draft.html',
+        context,
+    )
 
 
 @login_required
@@ -253,10 +275,10 @@ def create_multirequest(request):
 
     context = {'form': form}
     return render(
-            request,
-            'forms/foia/create_multirequest.html',
-            context,
-            )
+        request,
+        'forms/foia/create_multirequest.html',
+        context,
+    )
 
 
 @login_required
@@ -286,25 +308,31 @@ def draft_multirequest(request, slug, idx):
                     request_count = profile.multiple_requests(num_requests)
                     if request_count['extra_requests']:
                         messages.warning(
-                                request,
-                                'You have not purchased enough requests.  '
-                                'Please purchase more requests, then try '
-                                'submitting again.',
-                                )
+                            request,
+                            'You have not purchased enough requests.  '
+                            'Please purchase more requests, then try '
+                            'submitting again.',
+                        )
                         return redirect(foia)
                     profile.num_requests -= request_count['reg_requests']
-                    profile.monthly_requests -= request_count['monthly_requests']
+                    profile.monthly_requests -= request_count['monthly_requests'
+                                                              ]
                     profile.save()
                     if profile.organization:
-                        profile.organization.num_requests -= request_count['org_requests']
+                        profile.organization.num_requests -= request_count[
+                            'org_requests'
+                        ]
                         profile.organization.save()
                     foia.num_reg_requests = request_count['reg_requests']
-                    foia.num_monthly_requests = request_count['monthly_requests']
+                    foia.num_monthly_requests = request_count['monthly_requests'
+                                                              ]
                     foia.num_org_requests = request_count['org_requests']
                     foia.status = 'submitted'
                     foia.date_processing = date.today()
                     foia.save()
-                    messages.success(request, 'Your multi-request was submitted.')
+                    messages.success(
+                        request, 'Your multi-request was submitted.'
+                    )
                     MultiRequestTask.objects.create(multirequest=foia)
                     return redirect('foia-mylist')
                 messages.success(request, 'Updates to this request were saved.')
@@ -318,7 +346,7 @@ def draft_multirequest(request, slug, idx):
     profile = request.user.profile
     num_requests = len(foia.agencies.all())
     request_balance = profile.multiple_requests(num_requests)
-    num_bundles = int(ceil(request_balance['extra_requests']/5.0))
+    num_bundles = int(ceil(request_balance['extra_requests'] / 5.0))
 
     context = {
         'action': 'Draft',
@@ -331,7 +359,7 @@ def draft_multirequest(request, slug, idx):
     }
 
     return render(
-            request,
-            'forms/foia/draft_multirequest.html',
-            context,
-            )
+        request,
+        'forms/foia/draft_multirequest.html',
+        context,
+    )

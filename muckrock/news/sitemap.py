@@ -2,12 +2,16 @@
 Sitemap for News application
 """
 
+# Django
 from django.contrib.sitemaps import Sitemap
 
+# Standard Library
 from datetime import datetime, timedelta
 
-from news_sitemaps import register, NewsSitemap
+# Third Party
+from news_sitemaps import NewsSitemap, register
 
+# MuckRock
 from muckrock.news.models import Article
 
 
@@ -24,7 +28,6 @@ class ArticleSitemap(Sitemap):
 
     def lastmod(self, obj):
         """When was the article last modified?"""
-        # pylint: disable=no-self-use
         return obj.pub_date
 
 
@@ -34,19 +37,19 @@ class ArticleNewsSitemap(NewsSitemap):
 
     def items(self):
         """Return all news articles"""
-        return (Article.objects
-                .get_published()
-                .filter(pub_date__gte=(datetime.now() - timedelta(2)))
-                .prefetch_related('tags')
-                )
+        return (
+            Article.objects.get_published()
+            .filter(pub_date__gte=(datetime.now() - timedelta(2)))
+            .prefetch_related('tags')
+        )
 
     def lastmod(self, obj):
         """When was the article last modified?"""
-        # pylint: disable=no-self-use
         return obj.pub_date
 
     def keywords(self, obj):
         """Keywords for the article"""
         return ','.join(t.name for t in obj.tags.all())
+
 
 register(articles=ArticleNewsSitemap)

@@ -4,13 +4,18 @@ These will tell us if digests are
 correctly grabbing site activity.
 """
 
+# Django
 from django.test import TestCase
 
-from actstream.actions import follow
+# Standard Library
 from datetime import date
-from dateutil.relativedelta import relativedelta
-import nose.tools
 
+# Third Party
+import nose.tools
+from actstream.actions import follow
+from dateutil.relativedelta import relativedelta
+
+# MuckRock
 from muckrock import factories
 from muckrock.message import digests
 from muckrock.utils import new_action, notify
@@ -19,8 +24,10 @@ ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
 raises = nose.tools.raises
 
+
 class TestDailyDigest(TestCase):
     """Tests the ActivityDigest."""
+
     def setUp(self):
         self.user = factories.UserFactory()
         self.digest = digests.ActivityDigest
@@ -75,8 +82,13 @@ class TestDailyDigest(TestCase):
         # creating an answer _should_ have created a notification
         # so let's generate the email and see what happened
         email = self.digest(user=self.user, interval=self.interval)
-        eq_(email.activity['count'], 1, 'There should be activity that is not user initiated.')
-        eq_(email.activity['questions']['mine'].first().action.actor, other_user)
+        eq_(
+            email.activity['count'], 1,
+            'There should be activity that is not user initiated.'
+        )
+        eq_(
+            email.activity['questions']['mine'].first().action.actor, other_user
+        )
         eq_(email.activity['questions']['mine'].first().action.verb, 'answered')
         eq_(email.send(), 1, 'The email should send.')
 
@@ -89,14 +101,24 @@ class TestDailyDigest(TestCase):
         answer = factories.AnswerFactory(user=other_user, question=question)
         email = self.digest(user=self.user, interval=self.interval)
         eq_(email.activity['count'], 1, 'There should be activity.')
-        eq_(email.activity['questions']['following'].first().action.actor, other_user)
-        eq_(email.activity['questions']['following'].first().action.action_object, answer)
-        eq_(email.activity['questions']['following'].first().action.target, question)
+        eq_(
+            email.activity['questions']['following'].first().action.actor,
+            other_user
+        )
+        eq_(
+            email.activity['questions']['following'].first()
+            .action.action_object, answer
+        )
+        eq_(
+            email.activity['questions']['following'].first().action.target,
+            question
+        )
         eq_(email.send(), 1, 'The email should send.')
 
 
 class TestStaffDigest(TestCase):
     """The Staff Digest updates us about the state of the website."""
+
     def setUp(self):
         self.user = factories.UserFactory(is_staff=True)
         interval = relativedelta(days=1)
@@ -117,7 +139,6 @@ class TestStaffDigest(TestCase):
 
     def test_not_staff(self):
         """The digest should not send to users who are not staff."""
-        # pylint: disable=no-self-use
         not_staff = factories.UserFactory()
         digest = digests.StaffDigest(user=not_staff)
         eq_(digest.send(), 0)

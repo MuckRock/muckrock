@@ -1,24 +1,27 @@
 # -*- coding: utf-8 -*-
 """Admin registration for communication models"""
 
+# Django
 from django.contrib import admin
 from django.core.urlresolvers import reverse
 
+# Third Party
 from reversion.admin import VersionAdmin
 
+# MuckRock
 from muckrock.communication.models import (
-        Address,
-        EmailAddress,
-        PhoneNumber,
-        EmailCommunication,
-        FaxCommunication,
-        MailCommunication,
-        WebCommunication,
-        PortalCommunication,
-        EmailOpen,
-        EmailError,
-        FaxError,
-        )
+    Address,
+    EmailAddress,
+    EmailCommunication,
+    EmailError,
+    EmailOpen,
+    FaxCommunication,
+    FaxError,
+    MailCommunication,
+    PhoneNumber,
+    PortalCommunication,
+    WebCommunication,
+)
 
 
 class ReadOnlyMixin(object):
@@ -27,22 +30,21 @@ class ReadOnlyMixin(object):
     def get_readonly_fields(self, request, obj=None):
         """Make all fields readonly"""
         # pylint: disable=unused-argument
-        return (
-                [field.name for field in self.opts.local_fields] +
-                [field.name for field in self.opts.local_many_to_many]
-                )
+        return ([field.name for field in self.opts.local_fields] +
+                [field.name for field in self.opts.local_many_to_many])
 
 
 class CommunicationLinkMixin(object):
     """Admin mixin to show FOIA Communication link"""
+
     def comm_link(self, obj):
         """Link to the FOIA communication admin"""
-        # pylint: disable=no-self-use
         link = reverse(
-                'admin:foia_foiacommunication_change',
-                args=(obj.communication.pk,),
-                )
+            'admin:foia_foiacommunication_change',
+            args=(obj.communication.pk,),
+        )
         return '<a href="%s">FOIA Communication</a>' % link
+
     comm_link.allow_tags = True
     comm_link.short_description = 'FOIA Communication'
 
@@ -71,13 +73,13 @@ class EmailCommunicationAdmin(CommunicationLinkMixin, VersionAdmin):
     inlines = [EmailOpenInline, EmailErrorInline]
 
     fields = (
-            'comm_link',
-            'sent_datetime',
-            'confirmed_datetime',
-            'from_email',
-            'to_emails',
-            'cc_emails',
-            )
+        'comm_link',
+        'sent_datetime',
+        'confirmed_datetime',
+        'from_email',
+        'to_emails',
+        'cc_emails',
+    )
     readonly_fields = fields
 
 
@@ -87,26 +89,26 @@ class EmailCommunicationInline(admin.StackedInline):
     show_change_link = True
     extra = 0
     fields = (
-            'sent_datetime',
-            'confirmed_datetime',
-            'from_email',
-            'to_emails',
-            'cc_emails',
-            'open',
-            'error',
-            )
+        'sent_datetime',
+        'confirmed_datetime',
+        'from_email',
+        'to_emails',
+        'cc_emails',
+        'open',
+        'error',
+    )
     readonly_fields = fields
 
     def open(self, instance):
         """Does this email have an open?"""
-        # pylint: disable=no-self-use
         return instance.opens.count() > 0
+
     open.boolean = True
 
     def error(self, instance):
         """Does this email have an error?"""
-        # pylint: disable=no-self-use
         return instance.errors.count() > 0
+
     error.boolean = True
 
 
@@ -116,12 +118,12 @@ class FaxCommunicationAdmin(CommunicationLinkMixin, VersionAdmin):
     inlines = [FaxErrorInline]
 
     fields = (
-            'comm_link',
-            'sent_datetime',
-            'confirmed_datetime',
-            'to_number',
-            'fax_id',
-            )
+        'comm_link',
+        'sent_datetime',
+        'confirmed_datetime',
+        'to_number',
+        'fax_id',
+    )
     readonly_fields = fields
 
 
@@ -131,18 +133,18 @@ class FaxCommunicationInline(admin.StackedInline):
     show_change_link = True
     extra = 0
     fields = (
-            'sent_datetime',
-            'confirmed_datetime',
-            'to_number',
-            'fax_id',
-            'error',
-            )
+        'sent_datetime',
+        'confirmed_datetime',
+        'to_number',
+        'fax_id',
+        'error',
+    )
     readonly_fields = fields
 
     def error(self, instance):
         """Does this fax have an error?"""
-        # pylint: disable=no-self-use
         return instance.errors.count() > 0
+
     error.boolean = True
 
 
@@ -181,30 +183,33 @@ class AddressAdmin(VersionAdmin):
     """Address admin"""
     search_fields = ['address']
     fieldsets = (
-            (None, {
-                'fields': (
-                    'street',
-                    'suite',
-                    'city',
-                    'state',
-                    'zip_code',
-                    ),
-                }),
-            ('Override Fields', {
+        (None, {
+            'fields': (
+                'street',
+                'suite',
+                'city',
+                'state',
+                'zip_code',
+            ),
+        }),
+        (
+            'Override Fields', {
                 'classes': ('collapse',),
                 'description': 'Override particular fields',
                 'fields': (
                     'agency_override',
                     'attn_override',
-                    ),
-                }),
-            ('Full override', {
+                ),
+            }
+        ),
+        (
+            'Full override', {
                 'classes': ('collapse',),
                 'description': 'Override the entire address',
-                'fields': (
-                    'address',
-                    ),
-                }),)
+                'fields': ('address',),
+            }
+        ),
+    )
 
 
 admin.site.register(EmailCommunication, EmailCommunicationAdmin)

@@ -2,8 +2,10 @@
 Custom template tags for rendering actions
 """
 
+# Django
 from django import template
 
+# Third Party
 from actstream.templatetags.activity_tags import AsNode
 
 register = template.Library()
@@ -18,9 +20,9 @@ class Action(AsNode):
         action_instance = self.args[0].resolve(context)
         context['action'] = action_instance
         return template.loader.render_to_string(
-                self.template,
-                context.flatten(),
-                )
+            self.template,
+            context.flatten(),
+        )
 
 
 class PassiveAction(Action):
@@ -32,6 +34,7 @@ class PassiveAction(Action):
 def display_action(parser, token):
     """Renders the template for the action description"""
     return Action.handle_token(parser, token)
+
 
 @register.tag
 def display_passive_action(parser, token):

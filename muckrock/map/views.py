@@ -2,16 +2,20 @@
 Views for the Map application
 """
 
+# Django
 from django.contrib.auth.decorators import user_passes_test
 from django.http import HttpResponse
-from django.views.generic import DetailView, ListView, View
 from django.utils.decorators import method_decorator
+from django.views.generic import DetailView, ListView, View
 
+# Third Party
 from djgeojson.serializers import Serializer as GeoJSONSerializer
 
+# MuckRock
 from muckrock.map.models import Map, Marker
 
 user_can_view_maps = lambda u: u.is_authenticated() and u.profile.experimental
+
 
 class MapDetailView(DetailView):
     """Limits map detail view to experimental for now."""

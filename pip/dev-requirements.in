@@ -6,11 +6,14 @@ django<2.0 # django
 fabric # Used for dev scripts
 factory-boy # Used for creating test data
 freezegun # Control time during testing
+futures # for parallel yapf
 ipdb # interactive debugger
 ipython # Interactive python shell
+isort # sort imports
 mock # Used for mocking objects during test
 pip-tools # Keeps the requirements up to date
 pylint-django # Pylint for Django integration
 requests-mock # Mock for http requests
 whoosh # Used for search backend in development
+yapf # code formatter
 yet-another-django-profiler # Profiler for django

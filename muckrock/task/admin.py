@@ -2,25 +2,28 @@
 Admin registration for Tasks
 """
 
+# Django
 from django.contrib import admin
 
+# Third Party
 from reversion.admin import VersionAdmin
 
+# MuckRock
 from muckrock.task.models import (
-        BlacklistDomain,
-        CrowdfundTask,
-        FlaggedTask,
-        GenericTask,
-        MultiRequestTask,
-        NewAgencyTask,
-        OrphanTask,
-        ProjectReviewTask,
-        RejectedEmailTask,
-        ResponseTask,
-        SnailMailTask,
-        StaleAgencyTask,
-        PortalTask,
-        )
+    BlacklistDomain,
+    CrowdfundTask,
+    FlaggedTask,
+    GenericTask,
+    MultiRequestTask,
+    NewAgencyTask,
+    OrphanTask,
+    PortalTask,
+    ProjectReviewTask,
+    RejectedEmailTask,
+    ResponseTask,
+    SnailMailTask,
+    StaleAgencyTask,
+)
 
 
 class OrphanTaskAdmin(VersionAdmin):

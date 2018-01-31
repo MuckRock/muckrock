@@ -2,17 +2,14 @@
 All models for agency application
 """
 
-from muckrock.agency.models.agency import (
-        Agency,
-        AgencyType,
-        STALE_DURATION,
-        )
+# MuckRock
+from muckrock.agency.models.agency import STALE_DURATION, Agency, AgencyType
 from muckrock.agency.models.communication import (
-        AgencyAddress,
-        AgencyEmail,
-        AgencyPhone,
-        )
+    AgencyAddress,
+    AgencyEmail,
+    AgencyPhone,
+)
 from muckrock.agency.models.request_form import (
-        AgencyRequestForm,
-        AgencyRequestFormMapper,
-        )
+    AgencyRequestForm,
+    AgencyRequestFormMapper,
+)

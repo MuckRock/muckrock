@@ -2,20 +2,16 @@
 URL mappings for the Organization application
 """
 
+# Django
 from django.conf.urls import url
 
+# MuckRock
 from muckrock.organization import views
 
 urlpatterns = [
+    url(r'^$', views.OrganizationListView.as_view(), name='org-index'),
     url(
-        r'^$',
-        views.OrganizationListView.as_view(),
-        name='org-index'
-    ),
-    url(
-        r'^create/$',
-        views.OrganizationCreateView.as_view(),
-        name='org-create'
+        r'^create/$', views.OrganizationCreateView.as_view(), name='org-create'
     ),
     url(
         r'^(?P<slug>[\w-]+)/$',
@@ -42,4 +38,4 @@ urlpatterns = [
         views.OrganizationDeleteView.as_view(),
         name='org-delete'
     ),
-    ]
+]

@@ -2,24 +2,27 @@
 Admin display for FOIAMachine models
 """
 
+# Django
 from django import forms
 from django.contrib import admin
 
+# Third Party
 from autocomplete_light import shortcuts as autocomplete_light
 from reversion.admin import VersionAdmin
 
+# MuckRock
 from muckrock.foiamachine import models
 
 
 class FoiaMachineRequestAdminForm(forms.ModelForm):
     """Form to include custom choice fields"""
     jurisdiction = autocomplete_light.ModelChoiceField(
-            'JurisdictionAdminAutocomplete')
+        'JurisdictionAdminAutocomplete'
+    )
     agency = autocomplete_light.ModelChoiceField('AgencyAdminAutocomplete')
     user = autocomplete_light.ModelChoiceField('UserAutocomplete')
 
     class Meta:
-        # pylint: disable=too-few-public-methods
         model = models.FoiaMachineRequest
         fields = '__all__'
 
@@ -37,16 +40,15 @@ class FoiaMachineCommunicationInline(admin.StackedInline):
     show_change_link = True
     readonly_fields = ('file_count',)
     fields = (
-            ('sender', 'receiver'),
-            ('date', 'received'),
-            'subject',
-            'message',
-            'file_count',
-            )
+        ('sender', 'receiver'),
+        ('date', 'received'),
+        'subject',
+        'message',
+        'file_count',
+    )
 
     def file_count(self, instance):
         """File count for this communication"""
-        # pylint: disable=no-self-use
         return instance.files.count()
 
 
@@ -70,4 +72,6 @@ class FoiaMachineRequestAdmin(VersionAdmin):
 
 
 admin.site.register(models.FoiaMachineRequest, FoiaMachineRequestAdmin)
-admin.site.register(models.FoiaMachineCommunication, FoiaMachineCommunicationAdmin)
+admin.site.register(
+    models.FoiaMachineCommunication, FoiaMachineCommunicationAdmin
+)

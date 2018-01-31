@@ -4,17 +4,23 @@ Models for FOIA Machine
 
 from __future__ import unicode_literals
 
+# Django
 from django.contrib.auth.models import User
 from django.db import models
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.text import slugify
 
+# Standard Library
 from datetime import timedelta
+
+# Third Party
 from django_hosts.resolvers import reverse
 
-from muckrock.foia.models import STATUS, END_STATUS
+# MuckRock
+from muckrock.foia.models import END_STATUS, STATUS
 from muckrock.utils import generate_key
+
 
 class FoiaMachineRequest(models.Model):
     """
@@ -27,17 +33,17 @@ class FoiaMachineRequest(models.Model):
     slug = models.SlugField(max_length=255)
     date_created = models.DateTimeField(auto_now_add=True)
     status = models.CharField(
-            max_length=10,
-            choices=STATUS,
-            default='started',
-            db_index=True,
-            )
+        max_length=10,
+        choices=STATUS,
+        default='started',
+        db_index=True,
+    )
     request_language = models.TextField()
     jurisdiction = models.ForeignKey(
-            'jurisdiction.Jurisdiction',
-            blank=True,
-            null=True,
-            )
+        'jurisdiction.Jurisdiction',
+        blank=True,
+        null=True,
+    )
     agency = models.ForeignKey('agency.Agency', blank=True, null=True)
     sharing_code = models.CharField(max_length=255, blank=True)
 
@@ -53,10 +59,14 @@ class FoiaMachineRequest(models.Model):
 
     def get_absolute_url(self):
         """Returns the request detail url."""
-        return reverse('foi-detail', host='foiamachine', kwargs={
-            'slug': self.slug,
-            'pk': self.pk,
-        })
+        return reverse(
+            'foi-detail',
+            host='foiamachine',
+            kwargs={
+                'slug': self.slug,
+                'pk': self.pk,
+            }
+        )
 
     def generate_letter(self):
         """Returns a public records request letter for the request's jurisdiction."""
@@ -128,7 +138,9 @@ class FoiaMachineCommunication(models.Model):
     It is based on the MuckRock existing FOIACommunication object, and also
     loosely mimics the structure of an email.
     """
-    request = models.ForeignKey(FoiaMachineRequest, related_name='communications')
+    request = models.ForeignKey(
+        FoiaMachineRequest, related_name='communications'
+    )
     sender = models.CharField(max_length=255)
     receiver = models.CharField(max_length=255, blank=True)
     subject = models.CharField(max_length=255, blank=True)
@@ -141,11 +153,15 @@ class FoiaMachineCommunication(models.Model):
 
     def get_absolute_url(self):
         """Returns the communication detail url."""
-        return reverse('comm-detail', host='foiamachine', kwargs={
-            'foi-slug': self.request.slug,
-            'foi-pk': self.request.pk,
-            'pk': self.pk,
-        })
+        return reverse(
+            'comm-detail',
+            host='foiamachine',
+            kwargs={
+                'foi-slug': self.request.slug,
+                'foi-pk': self.request.pk,
+                'pk': self.pk,
+            }
+        )
 
 
 class FoiaMachineFile(models.Model):
@@ -153,12 +169,14 @@ class FoiaMachineFile(models.Model):
     A FOIA Machine File stores files that are created in the course of fulfilling a request.
     Files are uploaded by users and are attached to communications, like in an email.
     """
-    communication = models.ForeignKey(FoiaMachineCommunication, related_name='files')
+    communication = models.ForeignKey(
+        FoiaMachineCommunication, related_name='files'
+    )
     file = models.FileField(
-            upload_to='foiamachine_files/%Y/%m/%d',
-            verbose_name='File',
-            max_length=255,
-            )
+        upload_to='foiamachine_files/%Y/%m/%d',
+        verbose_name='File',
+        max_length=255,
+    )
     name = models.CharField(max_length=255)
     comment = models.TextField(blank=True)
     date_added = models.DateTimeField(auto_now_add=True)

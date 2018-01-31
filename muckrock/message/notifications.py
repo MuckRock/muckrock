@@ -2,10 +2,15 @@
 Notification objects for the messages app
 """
 
+# Django
 from django.conf import settings
 
+# Standard Library
 import json
+
+# Third Party
 import requests
+
 
 class SlackNotification(object):
     """
@@ -17,6 +22,7 @@ class SlackNotification(object):
     https://api.slack.com/docs/formatting
     https://api.slack.com/docs/attachments
     """
+
     def __init__(self, payload=None):
         """Initializes the request with a payload"""
         self.endpoint = settings.SLACK_WEBHOOK_URL

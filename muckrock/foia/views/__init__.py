@@ -2,7 +2,7 @@
 Views for the FOIA application
 """
 
-
+# MuckRock
 from muckrock.foia.views.actions import *
 from muckrock.foia.views.composers import *
 from muckrock.foia.views.detail import *

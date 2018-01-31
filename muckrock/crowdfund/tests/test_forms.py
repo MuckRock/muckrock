@@ -2,25 +2,33 @@
 Tests for crowdfund app
 """
 
+# Django
 from django.test import TestCase
 
+# Standard Library
 from datetime import datetime, timedelta
 from decimal import Decimal
-from mock import Mock
-import nose
 
+# Third Party
+import nose
+from mock import Mock
+
+# MuckRock
 from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.foia.models import FOIARequest
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
 
+
 class TestCrowdfundForm(TestCase):
     """Tests the form used to create a crowdfund campaign."""
 
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
-                'test_foiacommunications.json']
+    fixtures = [
+        'holidays.json', 'jurisdictions.json', 'agency_types.json',
+        'test_users.json', 'test_agencies.json', 'test_profiles.json',
+        'test_foiarequests.json', 'test_foiacommunications.json'
+    ]
 
     def setUp(self):
         self.form = CrowdfundForm()

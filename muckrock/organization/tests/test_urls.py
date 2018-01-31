@@ -2,11 +2,15 @@
 Test organization urls
 """
 
-from django.test import TestCase, Client
+# Django
+from django.test import Client, TestCase
 
+# Third Party
+from nose.tools import eq_
+
+# MuckRock
 import muckrock.factories
 
-from nose.tools import eq_
 
 class OrganizationURLTests(TestCase):
     """Test the urls for the organization app"""

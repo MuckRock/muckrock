@@ -1,6 +1,7 @@
 """
 Views for the organization application
 """
+# Django
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -9,32 +10,44 @@ from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.decorators import method_decorator
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
+from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 
+# Standard Library
 import datetime
 import logging
+
+# Third Party
 import stripe
 
+# MuckRock
 from muckrock.foia.models import FOIARequest
-from muckrock.organization.models import Organization
 from muckrock.organization.forms import (
+    AddMembersForm,
     CreateForm,
     StaffCreateForm,
-    UpdateForm,
     StaffUpdateForm,
-    AddMembersForm
+    UpdateForm,
 )
+from muckrock.organization.models import Organization
 from muckrock.utils import new_action
+from muckrock.views import MROrderedListView
 
 
-class OrganizationListView(ListView):
+class OrganizationListView(MROrderedListView):
     """List of organizations"""
+    model = Organization
     template_name = "organization/list.html"
-    paginate_by = 25
+    sort_map = {
+        'name': 'name',
+        'owner': 'owner__username',
+    }
 
     def get_queryset(self):
         """Filter out private orgs for non-staff"""
-        queryset = Organization.objects.order_by('id').select_related('owner')
+        queryset = (
+            super(OrganizationListView, self).get_queryset()
+            .select_related('owner')
+        )
         if not self.request.user.is_staff:
             queryset = queryset.filter(private=False)
         return queryset
@@ -55,10 +68,15 @@ class OrganizationCreateView(CreateView):
         Staff are exempt from the "can only own one" rule because
         they will likely be creating orgs for other folks.
         """
-        already_owns_org = Organization.objects.filter(owner=self.request.user).exists()
+        already_owns_org = Organization.objects.filter(owner=self.request.user
+                                                       ).exists()
         already_member = self.request.user.profile.organization is not None
-        if (already_member or already_owns_org) and not self.request.user.is_staff:
-            messages.error(self.request, 'You may only own one organization at a time.')
+        if (
+            already_member or already_owns_org
+        ) and not self.request.user.is_staff:
+            messages.error(
+                self.request, 'You may only own one organization at a time.'
+            )
             return redirect('org-index')
         return super(OrganizationCreateView, self).dispatch(*args, **kwargs)
 
@@ -72,7 +90,9 @@ class OrganizationCreateView(CreateView):
     def get_success_url(self):
         """The success url is the organization activation page."""
         if not self.object:
-            raise AttributeError('No organization created! Something went wrong.')
+            raise AttributeError(
+                'No organization created! Something went wrong.'
+            )
         success_url = reverse('org-activate', kwargs={'slug': self.object.slug})
         return success_url
 
@@ -92,7 +112,9 @@ class OrganizationCreateView(CreateView):
         self.object = organization
         # redirect to the success url with a nice message
         logging.info('%s created %s', user, organization)
-        messages.success(self.request, 'The organization has been created. Excellent!')
+        messages.success(
+            self.request, 'The organization has been created. Excellent!'
+        )
         return redirect(self.get_success_url())
 
 
@@ -112,21 +134,28 @@ class OrganizationActivateView(UpdateView):
         organization = self.get_object()
         user = self.request.user
         if not user.is_staff and not organization.is_owned_by(user):
-            messages.error(self.request, 'You cannot activate an organization you do not own.')
+            messages.error(
+                self.request,
+                'You cannot activate an organization you do not own.'
+            )
             return redirect(organization.get_absolute_url())
         if organization.active:
-            messages.error(self.request, 'You cannot activate an already active organization.')
+            messages.error(
+                self.request,
+                'You cannot activate an already active organization.'
+            )
             return redirect(organization.get_absolute_url())
         return super(OrganizationActivateView, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         """Adds Stripe pk and user's email to activation form."""
-        context = super(OrganizationActivateView, self).get_context_data(**kwargs)
+        context = super(OrganizationActivateView,
+                        self).get_context_data(**kwargs)
         organization = context['object']
         context['org'] = organization
         context['base_users'] = organization.max_users
         context['base_requests'] = organization.monthly_requests
-        context['base_price'] = organization.monthly_cost/100.00
+        context['base_price'] = organization.monthly_cost / 100.00
         context['user_email'] = self.request.user.email
         context['stripe_pk'] = settings.STRIPE_PUB_KEY
         return context
@@ -144,7 +173,9 @@ class OrganizationActivateView(UpdateView):
         if token:
             try:
                 organization.activate_subscription(token, num_seats)
-                messages.success(self.request, 'Your organization subscription is active.')
+                messages.success(
+                    self.request, 'Your organization subscription is active.'
+                )
                 logging.info('%s activated %s', self.request.user, organization)
             except (AttributeError, ValueError) as exception:
                 messages.error(self.request, exception)
@@ -152,8 +183,14 @@ class OrganizationActivateView(UpdateView):
             except stripe.CardError as exception:
                 messages.error(self.request, exception)
                 an_error = True
-            except (stripe.AuthenticationError, stripe.InvalidRequestError, stripe.StripeError):
-                messages.error(self.request, 'Payment error. Your card has not been charged.')
+            except (
+                stripe.AuthenticationError, stripe.InvalidRequestError,
+                stripe.StripeError
+            ):
+                messages.error(
+                    self.request,
+                    'Payment error. Your card has not been charged.'
+                )
                 an_error = True
         else:
             messages.error(self.request, 'No payment information provided!')
@@ -182,10 +219,15 @@ class OrganizationUpdateView(UpdateView):
         organization = self.get_object()
         user = self.request.user
         if not user.is_staff and not organization.is_owned_by(user):
-            messages.error(self.request, 'You cannot update an organization you do not own.')
+            messages.error(
+                self.request,
+                'You cannot update an organization you do not own.'
+            )
             return redirect(organization.get_absolute_url())
         if not organization.active:
-            messages.error(self.request, 'You cannot update an inactive organization.')
+            messages.error(
+                self.request, 'You cannot update an inactive organization.'
+            )
             return redirect(organization.get_absolute_url())
         return super(OrganizationUpdateView, self).dispatch(*args, **kwargs)
 
@@ -223,7 +265,9 @@ def deactivate_organization(request, slug):
     organization = get_object_or_404(Organization, slug=slug)
     # check if the user has the authority
     if not organization.is_owned_by(request.user) and not request.user.is_staff:
-        messages.error(request, 'Only this organization\'s owner may deactivate it.')
+        messages.error(
+            request, 'Only this organization\'s owner may deactivate it.'
+        )
         return redirect(organization)
     # check if org is already inactive
     if not organization.active:
@@ -254,10 +298,15 @@ class OrganizationDeleteView(DeleteView):
         organization = self.get_object()
         user = self.request.user
         if not user.is_staff and not organization.is_owned_by(user):
-            messages.error(self.request, 'You cannot delete an organization you do not own.')
+            messages.error(
+                self.request,
+                'You cannot delete an organization you do not own.'
+            )
             return redirect(organization.get_absolute_url())
         if organization.active:
-            messages.error(self.request, 'You cannot delete an active organization.')
+            messages.error(
+                self.request, 'You cannot delete an active organization.'
+            )
             return redirect(organization.get_absolute_url())
         return super(OrganizationDeleteView, self).dispatch(*args, **kwargs)
 
@@ -288,7 +337,8 @@ class OrganizationDetailView(DetailView):
             context['is_staff'] = user.is_staff
             context['is_owner'] = organization.is_owned_by(user)
             context['is_member'] = user.profile.is_member_of(organization)
-        requests = FOIARequest.objects.organization(organization).get_viewable(user)
+        requests = FOIARequest.objects.organization(organization
+                                                    ).get_viewable(user)
         context['requests'] = {
             'count': requests.count(),
             'filed': requests.order_by('-date_submitted')[:10],
@@ -301,20 +351,26 @@ class OrganizationDetailView(DetailView):
             'seats': organization.max_users - len(context['members'])
         }
         context['progress'] = {
-            'requests': (float(organization.num_requests) / organization.monthly_requests) * 100,
-            'seats': (1.0 - float(len(context['members'])) / organization.max_users) * 100,
+            'requests': (
+                float(organization.num_requests) / organization.monthly_requests
+            ) * 100,
+            'seats':
+                (1.0 - float(len(context['members'])) / organization.max_users)
+                * 100,
         }
         try:
             date_update = organization.date_update
-            refresh_date = datetime.date(date_update.year, date_update.month + 1, 1)
+            refresh_date = datetime.date(
+                date_update.year, date_update.month + 1, 1
+            )
         except ValueError:
             # ValueError should happen if the current month is December
             refresh_date = datetime.date(date_update.year + 1, 1, 1)
         context['refresh_date'] = refresh_date
         context['add_members_form'] = AddMembersForm()
         context['sidebar_admin_url'] = reverse(
-            'admin:organization_organization_change',
-            args=(organization.pk,))
+            'admin:organization_organization_change', args=(organization.pk,)
+        )
         return context
 
     def post(self, request, **kwargs):
@@ -342,7 +398,9 @@ class OrganizationDetailView(DetailView):
     def add_members(self, request):
         """Grants organization membership to a list of users"""
         organization = self.get_object()
-        if not organization.is_owned_by(request.user) and not request.user.is_staff:
+        if not organization.is_owned_by(
+            request.user
+        ) and not request.user.is_staff:
             messages.error(request, 'You cannot add members this organization.')
             return
         form = AddMembersForm(request.POST)
@@ -351,22 +409,33 @@ class OrganizationDetailView(DetailView):
             new_member_count = len(new_members)
             existing_member_count = organization.members.count()
             if new_member_count + existing_member_count > organization.max_users:
-                difference = (new_member_count + existing_member_count) - organization.max_users
+                difference = (
+                    new_member_count + existing_member_count
+                ) - organization.max_users
                 seat = 'seats' if difference > 1 else 'seat'
-                messages.error(request, 'You will need to purchase %d %s.' % (difference, seat))
+                messages.error(
+                    request,
+                    'You will need to purchase %d %s.' % (difference, seat)
+                )
                 return
             if not organization.active:
-                messages.error(request, 'You may not add members to an inactive organization.')
+                messages.error(
+                    request,
+                    'You may not add members to an inactive organization.'
+                )
                 return
             members_added = 0
             for member in new_members:
                 try:
                     if organization.add_member(member):
-                        new_action(request.user, 'added', action_object=member, target=organization)
-                        logging.info('%s %s %s to %s.',
+                        new_action(
                             request.user,
                             'added',
-                            member,
+                            action_object=member,
+                            target=organization
+                        )
+                        logging.info(
+                            '%s %s %s to %s.', request.user, 'added', member,
                             organization
                         )
                         members_added += 1
@@ -374,7 +443,10 @@ class OrganizationDetailView(DetailView):
                     messages.error(request, exception)
             if members_added > 0:
                 members_plural = 'members' if members_added > 1 else 'member'
-                messages.success(request, 'You added %d %s.' % (members_added, members_plural))
+                messages.success(
+                    request,
+                    'You added %d %s.' % (members_added, members_plural)
+                )
         return
 
     def remove_member(self, request):
@@ -391,13 +463,23 @@ class OrganizationDetailView(DetailView):
         user_is_owner = organization.owner == request.user
         if removing_self or user_is_owner or request.user.is_staff:
             if organization.remove_member(user):
-                new_action(request.user, 'removed', action_object=user, target=organization)
-                logging.info('%s %s %s from %s.', request.user, 'removed', user, organization)
+                new_action(
+                    request.user,
+                    'removed',
+                    action_object=user,
+                    target=organization
+                )
+                logging.info(
+                    '%s %s %s from %s.', request.user, 'removed', user,
+                    organization
+                )
                 if removing_self:
                     msg = 'You are no longer a member.'
                 else:
                     msg = 'You removed membership from %s.' % user.first_name
                 messages.success(request, msg)
         else:
-            messages.error(request, 'You do not have permission to remove this member.')
+            messages.error(
+                request, 'You do not have permission to remove this member.'
+            )
         return
