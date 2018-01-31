@@ -1090,6 +1090,9 @@ class FOIARequest(models.Model):
             # return the days until the estimated date
             date_difference = self.date_estimate - date.today()
             return date_difference.days
+        if self.portal is not None:
+            # if it is using a portal, give them extra time
+            return 90
         if self.jurisdiction and self.jurisdiction.level == 'f':
             return 30
         else:
