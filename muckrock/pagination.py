@@ -2,7 +2,9 @@
 Provides a pagination class for the API
 """
 
+# Third Party
 from rest_framework.pagination import PageNumberPagination
+
 
 class StandardPagination(PageNumberPagination):
     """Defines default and maximum page size for pagination"""

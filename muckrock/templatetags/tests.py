@@ -2,16 +2,16 @@
 Tests using nose for the templatetags
 """
 
+# Django
 from django.test import TestCase
 
+# Third Party
 import nose.tools
 from mock import Mock
 
+# MuckRock
 from muckrock.templatetags.templatetags import tags
 
-# allow methods that could be functions and too many public methods in tests
-# pylint: disable=no-self-use
-# pylint: disable=too-many-public-methods
 
 class TestTemplatetagsFunctional(TestCase):
     """Functional tests for templatetags"""
@@ -22,7 +22,9 @@ class TestTemplatetagsFunctional(TestCase):
         mock_request.user = 'adam'
         mock_request.path = '/test1/adam/'
 
-        nose.tools.eq_(tags.active(mock_request, '/test1/{{user}}/'), 'current-tab')
+        nose.tools.eq_(
+            tags.active(mock_request, '/test1/{{user}}/'), 'current-tab'
+        )
         nose.tools.eq_(tags.active(mock_request, '/test2/{{user}}/'), '')
 
     def test_company_title(self):

@@ -4,12 +4,20 @@ topics and issues we cover and then provide them avenues for
 deeper, sustained involvement with our work on those topics.
 """
 
+# Django
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 
+# Third Party
 from nose.tools import eq_, ok_
 
-from muckrock.factories import ProjectFactory, ArticleFactory, FOIARequestFactory, UserFactory
+# MuckRock
+from muckrock.factories import (
+    ArticleFactory,
+    FOIARequestFactory,
+    ProjectFactory,
+    UserFactory,
+)
 from muckrock.task.models import ProjectReviewTask
 
 test_title = u'Private Prisons'
@@ -18,11 +26,15 @@ test_description = (
     u'The prison industry is growing at an alarming rate. '
     'Even more alarming? The conditions inside prisions '
     'are growing worse while their tax-dollar derived '
-    'profits are growing larger.')
+    'profits are growing larger.'
+)
 test_image = SimpleUploadedFile(
     name='foo.gif',
-    content=(b'GIF87a\x01\x00\x01\x00\x80\x01\x00\x00\x00\x00ccc,'
-    '\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00'))
+    content=(
+        b'GIF87a\x01\x00\x01\x00\x80\x01\x00\x00\x00\x00ccc,'
+        '\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00'
+    )
+)
 
 
 class TestProject(TestCase):
@@ -61,7 +73,10 @@ class TestProject(TestCase):
         user1 = UserFactory()
         user2 = UserFactory()
         self.project.contributors.add(user1, user2)
-        ok_(user1 in self.project.contributors.all() and user2 in self.project.contributors.all())
+        ok_(
+            user1 in self.project.contributors.all()
+            and user2 in self.project.contributors.all()
+        )
         self.project.contributors.clear()
         eq_(len(self.project.contributors.all()), 0)
 
@@ -111,12 +126,15 @@ class TestProject(TestCase):
         """Publishing a project should make it public and submit it for approval."""
         explanation = 'Test'
         task = self.project.publish(explanation)
-        eq_(self.project.private, False,
-            'The project should be made public.')
-        eq_(self.project.approved, False,
-            'The project should be waiting approval.')
-        ok_(isinstance(task, ProjectReviewTask),
-            'A ProjectReviewTask should be created.\n\tTask: %s' % type(task))
+        eq_(self.project.private, False, 'The project should be made public.')
+        eq_(
+            self.project.approved, False,
+            'The project should be waiting approval.'
+        )
+        ok_(
+            isinstance(task, ProjectReviewTask),
+            'A ProjectReviewTask should be created.\n\tTask: %s' % type(task)
+        )
 
     def test_suggest_requests(self):
         """

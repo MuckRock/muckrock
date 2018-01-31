@@ -2,25 +2,26 @@
 FOIA views for actions
 """
 
+# Django
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.shortcuts import (
-        get_object_or_404,
-        redirect,
-        render,
-        )
+from django.shortcuts import get_object_or_404, redirect, render
 
-import actstream
-from datetime import datetime, timedelta
+# Standard Library
 import logging
-import stripe
 import sys
+from datetime import datetime, timedelta
 
+# Third Party
+import actstream
+import stripe
+
+# MuckRock
 from muckrock.accounts.utils import validate_stripe_email
 from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.foia.forms import FOIAEmbargoForm
-from muckrock.foia.models import FOIARequest, END_STATUS
+from muckrock.foia.models import END_STATUS, FOIARequest
 from muckrock.utils import new_action
 
 logger = logging.getLogger(__name__)
@@ -57,7 +58,9 @@ def embargo(request, jurisdiction, jidx, slug, idx):
             new_action(request.user, 'embargoed', target=foia)
             fine_tune_embargo(request, foia)
         else:
-            logger.error('%s was forbidden from embargoing %s', request.user, foia)
+            logger.error(
+                '%s was forbidden from embargoing %s', request.user, foia
+            )
             messages.error(request, 'You cannot embargo requests.')
         return
 
@@ -66,7 +69,10 @@ def embargo(request, jurisdiction, jidx, slug, idx):
         if foia.has_perm(request.user, 'embargo'):
             fine_tune_embargo(request, foia)
         else:
-            logger.error('%s was forbidden from updating the embargo on %s', request.user, foia)
+            logger.error(
+                '%s was forbidden from updating the embargo on %s',
+                request.user, foia
+            )
             messages.error(request, 'You cannot update this embargo.')
         return
 
@@ -79,12 +85,12 @@ def embargo(request, jurisdiction, jidx, slug, idx):
         return
 
     foia = get_object_or_404(
-            FOIARequest,
-            jurisdiction__slug=jurisdiction,
-            jurisdiction__pk=jidx,
-            slug=slug,
-            pk=idx,
-            )
+        FOIARequest,
+        jurisdiction__slug=jurisdiction,
+        jurisdiction__pk=jidx,
+        slug=slug,
+        pk=idx,
+    )
     has_perm = foia.has_perm(request.user, 'change')
     if request.method == 'POST' and has_perm:
         embargo_action = request.POST.get('embargo')
@@ -101,12 +107,12 @@ def embargo(request, jurisdiction, jidx, slug, idx):
 def pay_request(request, jurisdiction, jidx, slug, idx):
     """Pay us through CC for the payment on a request"""
     foia = get_object_or_404(
-            FOIARequest,
-            jurisdiction__slug=jurisdiction,
-            jurisdiction__pk=jidx,
-            slug=slug,
-            pk=idx,
-            )
+        FOIARequest,
+        jurisdiction__slug=jurisdiction,
+        jurisdiction__pk=jidx,
+        slug=slug,
+        pk=idx,
+    )
     token = request.POST.get('stripe_token')
     email = request.POST.get('stripe_email')
     email = validate_stripe_email(email)
@@ -121,7 +127,9 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
             error_msg = 'Missing payment amount.'
         if error_msg is not None:
             messages.error(request, 'Payment error: %s' % error_msg)
-            logger.warning('Payment error: %s', error_msg, exc_info=sys.exc_info())
+            logger.warning(
+                'Payment error: %s', error_msg, exc_info=sys.exc_info()
+            )
             return redirect(foia)
         try:
             metadata = {
@@ -132,9 +140,13 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
             amount = int(amount)
             request.user.profile.pay(token, amount, metadata)
             foia.pay(request.user, amount / 100.0)
-        except (stripe.InvalidRequestError, stripe.CardError, ValueError) as exception:
+        except (
+            stripe.InvalidRequestError, stripe.CardError, ValueError
+        ) as exception:
             messages.error(request, 'Payment error: %s' % exception)
-            logger.warning('Payment error: %s', exception, exc_info=sys.exc_info())
+            logger.warning(
+                'Payment error: %s', exception, exc_info=sys.exc_info()
+            )
             return redirect(foia)
         msg = 'Your payment was successful. We will get this to the agency right away!'
         messages.success(request, msg)
@@ -145,12 +157,12 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
 def follow(request, jurisdiction, jidx, slug, idx):
     """Follow or unfollow a request"""
     foia = get_object_or_404(
-            FOIARequest,
-            jurisdiction__slug=jurisdiction,
-            jurisdiction__pk=jidx,
-            slug=slug,
-            pk=idx,
-            )
+        FOIARequest,
+        jurisdiction__slug=jurisdiction,
+        jurisdiction__pk=jidx,
+        slug=slug,
+        pk=idx,
+    )
     if actstream.actions.is_following(request.user, foia):
         actstream.actions.unfollow(request.user, foia)
         messages.success(request, 'You are no longer following this request.')
@@ -164,12 +176,12 @@ def follow(request, jurisdiction, jidx, slug, idx):
 def toggle_autofollowups(request, jurisdiction, jidx, slug, idx):
     """Toggle autofollowups"""
     foia = get_object_or_404(
-            FOIARequest,
-            jurisdiction__slug=jurisdiction,
-            jurisdiction__pk=jidx,
-            slug=slug,
-            pk=idx,
-            )
+        FOIARequest,
+        jurisdiction__slug=jurisdiction,
+        jurisdiction__pk=jidx,
+        slug=slug,
+        pk=idx,
+    )
 
     if foia.has_perm(request.user, 'change'):
         foia.disable_autofollowups = not foia.disable_autofollowups
@@ -203,12 +215,15 @@ def crowdfund_request(request, idx, **kwargs):
             crowdfund = form.save()
             foia.crowdfund = crowdfund
             foia.save(comment='added a crowdfund')
-            messages.success(request, 'Your crowdfund has started, spread the word!')
+            messages.success(
+                request, 'Your crowdfund has started, spread the word!'
+            )
             new_action(
                 request.user,
                 'began crowdfunding',
                 action_object=crowdfund,
-                target=foia)
+                target=foia
+            )
             crowdfund.send_intro_email(request.user)
             return redirect(foia)
 
@@ -217,16 +232,21 @@ def crowdfund_request(request, idx, **kwargs):
         default_crowdfund_duration = 30
         date_due = datetime.now() + timedelta(default_crowdfund_duration)
         initial = {
-            'name': u'Crowdfund Request: %s' % unicode(foia),
-            'description': 'Help cover the request fees needed to free these docs!',
-            'payment_required': foia.get_stripe_amount(),
-            'date_due': date_due,
-            'foia': foia
+            'name':
+                u'Crowdfund Request: %s' % unicode(foia),
+            'description':
+                'Help cover the request fees needed to free these docs!',
+            'payment_required':
+                foia.get_stripe_amount(),
+            'date_due':
+                date_due,
+            'foia':
+                foia
         }
         form = CrowdfundForm(initial=initial)
 
     return render(
-            request,
-            'forms/foia/crowdfund.html',
-            {'form': form},
-            )
+        request,
+        'forms/foia/crowdfund.html',
+        {'form': form},
+    )

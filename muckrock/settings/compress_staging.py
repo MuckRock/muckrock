@@ -1,8 +1,11 @@
 """
 Settings for compressing staging assets
 """
+
 # pylint: disable=wildcard-import
 # pylint: disable=unused-wildcard-import
+
+# MuckRock
 from muckrock.settings.base import *
 
 BUCKET_NAME = 'muckrock-staging'

@@ -2,9 +2,9 @@
 App config for news
 """
 
+# Django
 from django.apps import AppConfig
 
-# pylint: disable=invalid-name
 
 class NewsConfig(AppConfig):
     """Configures the news application to use activity streams"""
@@ -12,6 +12,7 @@ class NewsConfig(AppConfig):
 
     def ready(self):
         """Registers articles with the activity streams plugin"""
+        # pylint: disable=invalid-name
         from actstream import registry as action
         from watson import search
         Article = self.get_model('Article')

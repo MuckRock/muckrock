@@ -2,9 +2,12 @@
 Autocomplete registry for projects
 """
 
+# Third Party
 from autocomplete_light import shortcuts as autocomplete_light
 
+# MuckRock
 from muckrock.project.models import Project
+
 
 class ProjectAutocomplete(autocomplete_light.AutocompleteModelBase):
     """Creates an acutocomplete registry for projects."""
@@ -42,6 +45,7 @@ class ProjectManagerAutocomplete(autocomplete_light.AutocompleteModelBase):
         """
         self.choices = Project.objects.get_manager(self.request.user)
         return super(ProjectManagerAutocomplete, self).choices_for_request()
+
 
 autocomplete_light.register(Project, ProjectAutocomplete)
 autocomplete_light.register(Project, ProjectManagerAutocomplete)

@@ -2,6 +2,7 @@
 Models for the organization application
 """
 
+# Django
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
@@ -10,14 +11,19 @@ from django.db import models
 from django.template.loader import render_to_string
 from django.utils.text import slugify
 
-from muckrock.utils import stripe_retry_on_error
-
-from datetime import date
+# Standard Library
 import logging
+from datetime import date
+
+# Third Party
 import stripe
+
+# MuckRock
+from muckrock.utils import stripe_retry_on_error
 
 logger = logging.getLogger(__name__)
 stripe.api_version = '2015-10-16'
+
 
 class Organization(models.Model):
     """Orginization to allow pooled requests and collaboration"""
@@ -30,7 +36,9 @@ class Organization(models.Model):
     num_requests = models.IntegerField(default=0)
     max_users = models.IntegerField(default=3)
     monthly_cost = models.IntegerField(default=10000)
-    monthly_requests = models.IntegerField(default=settings.MONTHLY_REQUESTS.get('org', 0))
+    monthly_requests = models.IntegerField(
+        default=settings.MONTHLY_REQUESTS.get('org', 0)
+    )
     stripe_id = models.CharField(max_length=255, blank=True)
     active = models.BooleanField(default=False)
     private = models.BooleanField(default=False)
@@ -80,14 +88,21 @@ class Organization(models.Model):
 
     def send_email_notification(self, user, subject, template):
         """Notifies a user via email about a change to their organization membership."""
-        msg = render_to_string(template, {
-            'member_name': user.first_name,
-            'organization_name': self.name,
-            'organization_owner': self.owner.get_full_name(),
-            'organization_link': user.profile.wrap_url(self.get_absolute_url()),
-            'settings_link': user.profile.wrap_url(reverse('acct-settings')) +
-                             '#organization',
-        })
+        msg = render_to_string(
+            template, {
+                'member_name':
+                    user.first_name,
+                'organization_name':
+                    self.name,
+                'organization_owner':
+                    self.owner.get_full_name(),
+                'organization_link':
+                    user.profile.wrap_url(self.get_absolute_url()),
+                'settings_link':
+                    user.profile.wrap_url(reverse('acct-settings')) +
+                    '#organization',
+            }
+        )
         email = EmailMessage(
             subject=subject,
             body=msg,
@@ -127,25 +142,30 @@ class Organization(models.Model):
         """Adds the given user as a member of the organization."""
         added = False
         if not self.active:
-            raise AttributeError('Cannot add members to an inactive organization.')
+            raise AttributeError(
+                'Cannot add members to an inactive organization.'
+            )
         if self.members.count() == self.max_users:
             raise AttributeError('No open seat for new members.')
         if user.profile.organization:
             which_org = 'this' if user.profile.organization == self else 'a different'
-            raise AttributeError('%s is already a member of %s organization.' %
+            raise AttributeError(
+                '%s is already a member of %s organization.' %
                 (user.first_name, which_org)
             )
         is_an_owner = Organization.objects.filter(owner=user).exists()
         owns_this_org = self.is_owned_by(user)
         if is_an_owner and not owns_this_org:
             user_name = user.first_name
-            raise AttributeError('%s is already an owner of a different organization.' % user_name)
+            raise AttributeError(
+                '%s is already an owner of a different organization.' %
+                user_name
+            )
         if not self.has_member(user):
             user.profile.organization = self
             user.profile.save()
             self.send_email_notification(
-                user,
-                '[MuckRock] You were added to an organization',
+                user, '[MuckRock] You were added to an organization',
                 'text/organization/add_member.txt'
             )
             added = True
@@ -158,8 +178,7 @@ class Organization(models.Model):
             user.profile.organization = None
             user.profile.save()
             self.send_email_notification(
-                user,
-                '[MuckRock] You were removed from an organization',
+                user, '[MuckRock] You were removed from an organization',
                 'text/organization/remove_member.txt'
             )
             removed = True
@@ -170,17 +189,19 @@ class Organization(models.Model):
         if self.active:
             raise AttributeError('Cannot activate an active organization.')
         if num_seats < settings.ORG_MIN_SEATS:
-            raise ValueError('Cannot have an organization with less than three member seats.')
+            raise ValueError(
+                'Cannot have an organization with less than three member seats.'
+            )
 
-        quantity = self.compute_monthly_cost(num_seats)/100
+        quantity = self.compute_monthly_cost(num_seats) / 100
         customer = self.owner.profile.customer()
         subscription = stripe_retry_on_error(
-                customer.subscriptions.create,
-                plan='org',
-                source=token,
-                quantity=quantity,
-                idempotency_key=True,
-                )
+            customer.subscriptions.create,
+            plan='org',
+            source=token,
+            quantity=quantity,
+            idempotency_key=True,
+        )
         self.update_num_seats(num_seats)
         self.num_requests = self.monthly_requests
         self.stripe_id = subscription.id
@@ -204,8 +225,10 @@ class Organization(models.Model):
         if not self.active:
             raise AttributeError('Cannot update an inactive subscription.')
         if num_seats < settings.ORG_MIN_SEATS:
-            raise ValueError('Cannot have an organization with less than three member seats.')
-        quantity = self.compute_monthly_cost(num_seats)/100
+            raise ValueError(
+                'Cannot have an organization with less than three member seats.'
+            )
+        quantity = self.compute_monthly_cost(num_seats) / 100
         customer = self.owner.profile.customer()
         try:
             subscription = customer.subscriptions.retrieve(self.stripe_id)
@@ -214,8 +237,10 @@ class Organization(models.Model):
             self.stripe_id = subscription.id
             self.owner.profile.subscription_id = subscription.id
         except stripe.InvalidRequestError:
-            logger.error(('No subscription is associated with organization '
-                         'owner %s.'), self.owner.username)
+            logger.error((
+                'No subscription is associated with organization '
+                'owner %s.'
+            ), self.owner.username)
             return
         old_monthly_requests = self.monthly_requests
         self.update_num_seats(num_seats)
@@ -237,8 +262,10 @@ class Organization(models.Model):
             subscription = subscription.delete()
         except stripe.InvalidRequestError:
             subscription = None
-            logger.warning(('No subscription is associated with organization '
-                         'owner %s.'), self.owner.username)
+            logger.warning((
+                'No subscription is associated with organization '
+                'owner %s.'
+            ), self.owner.username)
         self.stripe_id = ''
         self.active = False
         self.owner.profile.subscription_id = ''

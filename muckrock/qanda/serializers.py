@@ -2,12 +2,13 @@
 Serilizers for the Q&A application API
 """
 
-from rest_framework import serializers, permissions
+# Third Party
+from rest_framework import permissions, serializers
 
+# MuckRock
 from muckrock.foia.models import FOIARequest
-from muckrock.qanda.models import Question, Answer
+from muckrock.qanda.models import Answer, Question
 
-# pylint: disable=too-few-public-methods
 
 class QuestionPermissions(permissions.DjangoModelPermissionsOrAnonReadOnly):
     """
@@ -36,8 +37,11 @@ class QuestionSerializer(serializers.ModelSerializer):
     answers = AnswerSerializer(many=True, read_only=True)
     tags = serializers.StringRelatedField(many=True)
     foia = serializers.PrimaryKeyRelatedField(
-            queryset=FOIARequest.objects.all(),
-            style={'base_template': 'input.html'})
+        queryset=FOIARequest.objects.all(),
+        style={
+            'base_template': 'input.html'
+        }
+    )
 
     class Meta:
         model = Question

@@ -3,15 +3,18 @@
 Models for the FOIA application
 """
 
+# Django
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db import models
 
+# Standard Library
 import logging
 import os
 
-from muckrock.foia.models.request import FOIARequest
+# MuckRock
 from muckrock.foia.models.communication import FOIACommunication
+from muckrock.foia.models.request import FOIARequest
 
 logger = logging.getLogger(__name__)
 
@@ -19,11 +22,18 @@ logger = logging.getLogger(__name__)
 class FOIAFile(models.Model):
     """An arbitrary file attached to a FOIA request"""
 
-    access = (('public', 'Public'), ('private', 'Private'), ('organization', 'Organization'))
+    access = (('public', 'Public'), ('private', 'Private'),
+              ('organization', 'Organization'))
 
-    foia = models.ForeignKey(FOIARequest, related_name='files', blank=True, null=True)
-    comm = models.ForeignKey(FOIACommunication, related_name='files', blank=True, null=True)
-    ffile = models.FileField(upload_to='foia_files/%Y/%m/%d', verbose_name='File', max_length=255)
+    foia = models.ForeignKey(
+        FOIARequest, related_name='files', blank=True, null=True
+    )
+    comm = models.ForeignKey(
+        FOIACommunication, related_name='files', blank=True, null=True
+    )
+    ffile = models.FileField(
+        upload_to='foia_files/%Y/%m/%d', verbose_name='File', max_length=255
+    )
     title = models.CharField(max_length=255)
     date = models.DateTimeField(null=True, db_index=True)
     source = models.CharField(max_length=255, blank=True)
@@ -68,10 +78,10 @@ class FOIAFile(models.Model):
         if self.is_public() and self.is_doccloud() and self.doc_id:
             index = self.doc_id.index('-')
             num = self.doc_id[0:index]
-            name = self.doc_id[index+1:]
+            name = self.doc_id[index + 1:]
             return (
-                'https://assets.documentcloud.org/documents/' +
-                num + '/pages/' + name + '-p1-small.gif'
+                'https://assets.documentcloud.org/documents/' + num +
+                '/pages/' + name + '-p1-small.gif'
             )
         else:
             filename = mimetypes.get(self.get_extension(), 'file-document.png')
@@ -114,8 +124,10 @@ class FOIAFile(models.Model):
         try:
             new_ffile = ContentFile(self.ffile.read())
         except ValueError:
-            error_msg = ('FOIAFile #%s has no data in its ffile field. '
-                        'It has not been cloned.')
+            error_msg = (
+                'FOIAFile #%s has no data in its ffile field. '
+                'It has not been cloned.'
+            )
             logger.error(error_msg, original_id)
             return
         new_ffile.name = self.ffile.name
@@ -124,7 +136,6 @@ class FOIAFile(models.Model):
         upload_document_cloud.apply_async(args=[self.pk, False], countdown=3)
 
     class Meta:
-        # pylint: disable=too-few-public-methods
         verbose_name = 'FOIA Document File'
         ordering = ['date']
         app_label = 'foia'
@@ -133,37 +144,37 @@ class FOIAFile(models.Model):
 def attachment_path(instance, filename):
     """Generate path for attachment file"""
     return 'outbound_attachments/%s/%d/%s' % (
-            instance.user.username,
-            instance.foia.pk,
-            filename,
-            )
+        instance.user.username,
+        instance.foia.pk,
+        filename,
+    )
 
 
 class OutboundAttachment(models.Model):
     """An uploaded file waiting to be sent out"""
 
     foia = models.ForeignKey(
-            'FOIARequest',
-            related_name='pending_attachments',
-            )
+        'FOIARequest',
+        related_name='pending_attachments',
+    )
     user = models.ForeignKey(
-            'auth.User',
-            related_name='pending_attachments',
-            )
+        'auth.User',
+        related_name='pending_attachments',
+    )
     ffile = models.FileField(
-            upload_to=attachment_path,
-            verbose_name='file',
-            max_length=255,
-            )
+        upload_to=attachment_path,
+        verbose_name='file',
+        max_length=255,
+    )
     date_time_stamp = models.DateTimeField()
     sent = models.BooleanField(default=False)
 
     def __unicode__(self):
         return 'Attachment: %s by %s for request %d' % (
-                self.ffile.name,
-                self.user.username,
-                self.foia.pk,
-                )
+            self.ffile.name,
+            self.user.username,
+            self.foia.pk,
+        )
 
     def name(self):
         """Return the basename of the file"""

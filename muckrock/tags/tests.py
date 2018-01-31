@@ -1,44 +1,52 @@
 """
 Tests for tags
 """
+# Django
 from django import test
 from django.core.urlresolvers import reverse
 
+# Third Party
 from nose.tools import eq_
 
-from muckrock.tags.models import Tag, normalize
+# MuckRock
 from muckrock.tags import views
+from muckrock.tags.models import Tag, normalize
 
 
 class TestTagModel(test.TestCase):
     """
     Test the normalize function
     """
-    # pylint: disable=no-self-use
 
     def test_convert_to_lowercase(self):
         """The tag should be entirely lowercase"""
         dirty_string = u'HELLO'
         expected_clean_string = u'hello'
         clean_string = normalize(dirty_string)
-        eq_(clean_string, expected_clean_string,
-            'The tag should lowercase its name.')
+        eq_(
+            clean_string, expected_clean_string,
+            'The tag should lowercase its name.'
+        )
 
     def test_strip_whitespace(self):
         """The tag should strip extra whitespace from the beginning and end of the name."""
         dirty_string = u' hello '
         expected_clean_string = u'hello'
         clean_string = normalize(dirty_string)
-        eq_(clean_string, expected_clean_string,
-            'The tag should strip extra whitespace from the beginning and end of the name.')
+        eq_(
+            clean_string, expected_clean_string,
+            'The tag should strip extra whitespace from the beginning and end of the name.'
+        )
 
     def test_collapse_whitespace(self):
         """The tag should remove extra whitespace from between words."""
         dirty_string = u'hello    world'
         expected_clean_string = u'hello world'
         clean_string = normalize(dirty_string)
-        eq_(clean_string, expected_clean_string,
-            'The tag should strip extra whitespace from between words.')
+        eq_(
+            clean_string, expected_clean_string,
+            'The tag should strip extra whitespace from between words.'
+        )
 
 
 class TestTagListView(test.TestCase):
@@ -62,12 +70,11 @@ class TestTagListView(test.TestCase):
 
     def test_list_all_tags(self):
         """The tag list should list all the tags that are used."""
-        # pylint: disable=no-self-use
         tag_list = views.list_all_tags()
-        eq_(len(Tag.objects.all()), 3,
-            "There should be 3 tag items.")
-        eq_(len(tag_list), 0,
-            "But none should be listed since they aren't used")
+        eq_(len(Tag.objects.all()), 3, "There should be 3 tag items.")
+        eq_(
+            len(tag_list), 0, "But none should be listed since they aren't used"
+        )
 
 
 class TestTagDetailView(test.TestCase):

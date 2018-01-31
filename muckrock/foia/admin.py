@@ -2,56 +2,55 @@
 Admin registration for FOIA models
 """
 
+# Django
 from django import forms
 from django.conf.urls import url
 from django.contrib import admin, messages
 from django.contrib.auth.models import User
-from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.core.urlresolvers import reverse
 from django.db.models import Count, Max
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404, render
 
-from autocomplete_light import shortcuts as autocomplete_light
-from datetime import date, datetime, timedelta
-from reversion.admin import VersionAdmin
+# Standard Library
 import os
+from datetime import date, datetime, timedelta
 
+# Third Party
+from autocomplete_light import shortcuts as autocomplete_light
+from reversion.admin import VersionAdmin
+
+# MuckRock
 from muckrock.agency.models import Agency
 from muckrock.communication.admin import (
-        EmailCommunicationInline,
-        FaxCommunicationInline,
-        MailCommunicationInline,
-        WebCommunicationInline,
-        PortalCommunicationInline,
-        )
-from muckrock.communication.models import (
-        Address,
-        EmailAddress,
-        PhoneNumber,
-        )
+    EmailCommunicationInline,
+    FaxCommunicationInline,
+    MailCommunicationInline,
+    PortalCommunicationInline,
+    WebCommunicationInline,
+)
+from muckrock.communication.models import Address, EmailAddress, PhoneNumber
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.foia.models import (
-        FOIARequest,
-        FOIAMultiRequest,
-        FOIAFile,
-        FOIACommunication,
-        FOIANote,
-        STATUS,
-        OutboundAttachment,
-        CommunicationMoveLog
-        )
+    STATUS,
+    CommunicationMoveLog,
+    FOIACommunication,
+    FOIAFile,
+    FOIAMultiRequest,
+    FOIANote,
+    FOIARequest,
+    OutboundAttachment,
+)
 from muckrock.foia.tasks import (
-        upload_document_cloud,
-        set_document_cloud_pages,
-        autoimport,
-        submit_multi_request,
-        )
+    autoimport,
+    set_document_cloud_pages,
+    submit_multi_request,
+    upload_document_cloud,
+)
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.portal.models import Portal
 
-# These inhereit more than the allowed number of public methods
-# pylint: disable=too-many-public-methods
 
 class FOIAFileAdminForm(forms.ModelForm):
     """Form to validate document only has ASCII characters in it"""
@@ -63,7 +62,6 @@ class FOIAFileAdminForm(forms.ModelForm):
         self.clean_description = self._validate('description')
 
     class Meta:
-        # pylint: disable=too-few-public-methods
         model = FOIAFile
         fields = '__all__'
 
@@ -72,7 +70,9 @@ class FOIAFileAdminForm(forms.ModelForm):
         """Ensure's that text only contains ASCII characters"""
         non_ascii = ''.join(c for c in text if ord(c) >= 128)
         if non_ascii:
-            raise forms.ValidationError('Field contains non-ASCII characters: %s' % non_ascii)
+            raise forms.ValidationError(
+                'Field contains non-ASCII characters: %s' % non_ascii
+            )
 
     def _validate(self, field):
         """Make a validator for field"""
@@ -92,12 +92,12 @@ class FOIAFileInline(admin.StackedInline):
     form = FOIAFileAdminForm
     readonly_fields = ('doc_id', 'pages', 'access', 'source')
     fields = (
-            ('title', 'date'),
-            'ffile',
-            'description',
-            ('doc_id', 'pages'),
-            ('source', 'access'),
-            )
+        ('title', 'date'),
+        'ffile',
+        'description',
+        ('doc_id', 'pages'),
+        ('source', 'access'),
+    )
     extra = 0
 
 
@@ -110,9 +110,9 @@ class CommunicationMoveLogInline(admin.TabularInline):
 
     def foia_link(self, obj):
         """Link to the FOIA"""
-        # pylint: disable=no-self-use
         link = reverse('admin:foia_foiarequest_change', args=(obj.foia.pk,))
         return '<a href="%s">%s</a>' % (link, obj.foia.title)
+
     foia_link.allow_tags = True
     foia_link.short_description = 'From FOIA Request'
 
@@ -121,15 +121,15 @@ class FOIACommunicationAdminForm(forms.ModelForm):
     """Form for comm inline"""
 
     from_user = autocomplete_light.ModelChoiceField(
-            'UserAutocomplete',
-            queryset=User.objects.all(),
-            required=False,
-            )
+        'UserAutocomplete',
+        queryset=User.objects.all(),
+        required=False,
+    )
     to_user = autocomplete_light.ModelChoiceField(
-            'UserAutocomplete',
-            queryset=User.objects.all(),
-            required=False,
-            )
+        'UserAutocomplete',
+        queryset=User.objects.all(),
+        required=False,
+    )
 
     class Meta:
         model = FOIACommunication
@@ -141,62 +141,64 @@ class FOIACommunicationAdmin(VersionAdmin):
     model = FOIACommunication
     form = FOIACommunicationAdminForm
     readonly_fields = ('foia_link', 'confirmed')
-    fieldsets = (
-            (None, {
-                'fields': (
-                    'foia_link',
-                    ('from_user', 'to_user'),
-                    ('subject', 'date'),
-                    'communication',
-                    'status',
-                    'response',
-                    'autogenerated',
-                    'thanks',
-                    'full_html',
-                    'hidden',
-                    )
-                }),
-            ('Deprecated', {
-                'classes': ('collapse',),
-                'fields': (
-                    'from_who',
-                    'to_who',
-                    'priv_from_who',
-                    'priv_to_who',
-                    'delivered',
-                    'fax_id',
-                    ),
-                'description': 'These values are no longer actively used.  '
+    fieldsets = ((
+        None, {
+            'fields': (
+                'foia_link',
+                ('from_user', 'to_user'),
+                ('subject', 'date'),
+                'communication',
+                'status',
+                'response',
+                'autogenerated',
+                'thanks',
+                'full_html',
+                'hidden',
+            )
+        }
+    ), (
+        'Deprecated', {
+            'classes': ('collapse',),
+            'fields': (
+                'from_who',
+                'to_who',
+                'priv_from_who',
+                'priv_to_who',
+                'delivered',
+                'fax_id',
+            ),
+            'description':
+                'These values are no longer actively used.  '
                 'They are here to view on old data only.  If you find yourself '
                 'needing to look here often, something is probably wrong and '
                 'you should file a bug',
-                }))
+        }
+    ))
     inlines = (
-            FOIAFileInline,
-            EmailCommunicationInline,
-            FaxCommunicationInline,
-            MailCommunicationInline,
-            WebCommunicationInline,
-            PortalCommunicationInline,
-            CommunicationMoveLogInline,
-            )
+        FOIAFileInline,
+        EmailCommunicationInline,
+        FaxCommunicationInline,
+        MailCommunicationInline,
+        WebCommunicationInline,
+        PortalCommunicationInline,
+        CommunicationMoveLogInline,
+    )
 
     def foia_link(self, obj):
         """Link to this communication's FOIA admin"""
-        # pylint: disable=no-self-use
         link = reverse('admin:foia_foiarequest_change', args=(obj.foia.pk,))
         return '<a href="%s">%s</a>' % (link, obj.foia.title)
+
     foia_link.allow_tags = True
     foia_link.short_description = 'FOIA Request'
 
     def save_formset(self, request, form, formset, change):
         """Actions to take while saving inline files"""
-        # pylint: disable=no-self-use
         # pylint: disable=unused-argument
 
         if formset.model != FOIAFile:
-            return super(FOIACommunicationAdmin, self).save_formset(
-                    request, form, formset, change)
+            return super(FOIACommunicationAdmin,
+                         self).save_formset(request, form, formset, change)
 
         instances = formset.save(commit=False)
         for instance in instances:
@@ -215,7 +217,8 @@ class FOIACommunicationAdmin(VersionAdmin):
                 instance.comm.foia.update(instance.anchor())
 
             upload_document_cloud.apply_async(
-                    args=[instance.pk, change], countdown=30)
+                args=[instance.pk, change], countdown=30
+            )
 
         formset.save_m2m()
 
@@ -225,30 +228,29 @@ class FOIACommunicationAdmin(VersionAdmin):
 
 class FOIACommunicationInline(admin.StackedInline):
     """FOIA Communication Inline admin options"""
-    # pylint: disable=no-self-use
     model = FOIACommunication
     fk_name = 'foia'
     extra = 1
     readonly_fields = (
-            'get_delivered',
-            'confirmed_datetime',
-            'error',
-            'file_count',
-            'file_names',
-            'open',
-            )
+        'get_delivered',
+        'confirmed_datetime',
+        'error',
+        'file_count',
+        'file_names',
+        'open',
+    )
     show_change_link = True
     form = FOIACommunicationAdminForm
     fields = (
-            ('from_user', 'to_user'),
-            ('subject', 'date'),
-            'communication',
-            ('file_count', 'file_names'),
-            'status',
-            'get_delivered',
-            ('confirmed_datetime', 'open', 'error'),
-            ('response', 'autogenerated', 'thanks', 'full_html', 'hidden'),
-            )
+        ('from_user', 'to_user'),
+        ('subject', 'date'),
+        'communication',
+        ('file_count', 'file_names'),
+        'status',
+        'get_delivered',
+        ('confirmed_datetime', 'open', 'error'),
+        ('response', 'autogenerated', 'thanks', 'full_html', 'hidden'),
+    )
 
     def file_count(self, instance):
         """File count for this communication"""
@@ -256,8 +258,9 @@ class FOIACommunicationInline(admin.StackedInline):
 
     def file_names(self, instance):
         """All file's names for this communication"""
-        return ', '.join(os.path.basename(f.ffile.name) for f in
-                instance.files.all())
+        return ', '.join(
+            os.path.basename(f.ffile.name) for f in instance.files.all()
+        )
 
     def confirmed_datetime(self, instance):
         """Date time when this was confirmed as being sent"""
@@ -271,42 +274,42 @@ class FOIACommunicationInline(admin.StackedInline):
     def open(self, instance):
         """Was this communicaion opened?"""
         return instance.opens_count > 0
+
     open.boolean = True
 
     def error(self, instance):
         """Did this communication have an error sending?"""
         return instance.email_errors_count > 0 or instance.fax_errors_count > 0
+
     error.boolean = True
 
     def get_queryset(self, request):
-        return (super(FOIACommunicationInline, self)
-                .get_queryset(request)
-                .prefetch_related(
-                    'files',
-                    'emails',
-                    'faxes',
-                    'mails',
-                    'web_comms',
-                    'portals',
-                    )
-                .annotate(
-                    files_count=Count('files'),
-                    opens_count=Count('emails__opens'),
-                    email_errors_count=Count('emails__errors'),
-                    fax_errors_count=Count('faxes__errors'),
-                    email_confirmed_datetime=Max('emails__confirmed_datetime'),
-                    fax_confirmed_datetime=Max('faxes__confirmed_datetime'),
-                    )
-                )
+        return (
+            super(FOIACommunicationInline, self).get_queryset(request)
+            .prefetch_related(
+                'files',
+                'emails',
+                'faxes',
+                'mails',
+                'web_comms',
+                'portals',
+            ).annotate(
+                files_count=Count('files'),
+                opens_count=Count('emails__opens'),
+                email_errors_count=Count('emails__errors'),
+                fax_errors_count=Count('faxes__errors'),
+                email_confirmed_datetime=Max('emails__confirmed_datetime'),
+                fax_confirmed_datetime=Max('faxes__confirmed_datetime'),
+            )
+        )
 
 
 class FOIANoteAdminForm(forms.ModelForm):
     """Form for note inline"""
 
     author = autocomplete_light.ModelChoiceField(
-            'UserAutocomplete',
-            label='Author',
-            queryset=User.objects.all())
+        'UserAutocomplete', label='Author', queryset=User.objects.all()
+    )
 
     class Meta:
         model = FOIANote
@@ -324,70 +327,69 @@ class FOIARequestAdminForm(forms.ModelForm):
     """Form to include custom choice fields"""
 
     jurisdiction = autocomplete_light.ModelChoiceField(
-            'JurisdictionAdminAutocomplete',
-            queryset=Jurisdiction.objects.all(),
-            )
+        'JurisdictionAdminAutocomplete',
+        queryset=Jurisdiction.objects.all(),
+    )
     agency = autocomplete_light.ModelChoiceField(
-            'AgencyAdminAutocomplete',
-            queryset=Agency.objects.all(),
-            )
+        'AgencyAdminAutocomplete',
+        queryset=Agency.objects.all(),
+    )
     user = autocomplete_light.ModelChoiceField(
-            'UserAutocomplete',
-            queryset=User.objects.all(),
-            )
+        'UserAutocomplete',
+        queryset=User.objects.all(),
+    )
     parent = autocomplete_light.ModelChoiceField(
-            'FOIARequestAdminAutocomplete',
-            queryset=FOIARequest.objects.all(),
-            required=False,
-            )
+        'FOIARequestAdminAutocomplete',
+        queryset=FOIARequest.objects.all(),
+        required=False,
+    )
     read_collaborators = autocomplete_light.ModelMultipleChoiceField(
-            'UserAutocomplete',
-            queryset=User.objects.all(),
-            required=False,
-            )
+        'UserAutocomplete',
+        queryset=User.objects.all(),
+        required=False,
+    )
     edit_collaborators = autocomplete_light.ModelMultipleChoiceField(
-            'UserAutocomplete',
-            queryset=User.objects.all(),
-            required=False,
-            )
+        'UserAutocomplete',
+        queryset=User.objects.all(),
+        required=False,
+    )
     email = autocomplete_light.ModelChoiceField(
-            'EmailAddressAutocomplete',
-            queryset=EmailAddress.objects.all(),
-            required=False,
-            )
+        'EmailAddressAutocomplete',
+        queryset=EmailAddress.objects.all(),
+        required=False,
+    )
     fax = autocomplete_light.ModelChoiceField(
-            'FaxAdminAutocomplete',
-            queryset=PhoneNumber.objects.filter(type='fax'),
-            required=False,
-            )
+        'FaxAdminAutocomplete',
+        queryset=PhoneNumber.objects.filter(type='fax'),
+        required=False,
+    )
     address = autocomplete_light.ModelChoiceField(
-            'AddressAdminAutocomplete',
-            queryset=Address.objects.all(),
-            required=False,
-            )
+        'AddressAdminAutocomplete',
+        queryset=Address.objects.all(),
+        required=False,
+    )
     portal = autocomplete_light.ModelChoiceField(
-            'PortalAutocomplete',
-            queryset=Portal.objects.all(),
-            required=False,
-            )
+        'PortalAutocomplete',
+        queryset=Portal.objects.all(),
+        required=False,
+    )
     cc_emails = autocomplete_light.ModelMultipleChoiceField(
-            'EmailAddressAutocomplete',
-            queryset=EmailAddress.objects.all(),
-            required=False,
-            )
+        'EmailAddressAutocomplete',
+        queryset=EmailAddress.objects.all(),
+        required=False,
+    )
     crowdfund = autocomplete_light.ModelChoiceField(
-            'CrowdfundAutocomplete',
-            queryset=Crowdfund.objects.all(),
-            required=False,
-            )
+        'CrowdfundAutocomplete',
+        queryset=Crowdfund.objects.all(),
+        required=False,
+    )
     multirequest = autocomplete_light.ModelChoiceField(
-            'FOIAMultiRequestAutocomplete',
-            queryset=FOIAMultiRequest.objects.all(),
-            required=False,
-            )
+        'FOIAMultiRequestAutocomplete',
+        queryset=FOIAMultiRequest.objects.all(),
+        required=False,
+    )
 
     class Meta:
-        # pylint: disable=too-few-public-methods
         model = FOIARequest
         fields = '__all__'
 
@@ -413,11 +415,12 @@ class FOIARequestAdmin(VersionAdmin):
 
     def save_model(self, request, obj, form, change):
         """Actions to take when a request is saved from the admin"""
-        # pylint: disable=no-self-use
         # pylint: disable=unused-argument
 
         # If changing to completed and embargoed, set embargo date to 30 days out
-        if obj.status in ['done', 'partial'] and obj.embargo and not obj.date_embargo:
+        if obj.status in [
+            'done', 'partial'
+        ] and obj.embargo and not obj.date_embargo:
             obj.date_embargo = date.today() + timedelta(30)
 
         # NOT saving here if changed
@@ -427,7 +430,6 @@ class FOIARequestAdmin(VersionAdmin):
 
     def save_formset(self, request, form, formset, change):
         """Actions to take while saving inline instances"""
-        # pylint: disable=no-self-use
         # pylint: disable=unused-argument
 
         if formset.model == FOIANote:
@@ -463,30 +465,46 @@ class FOIARequestAdmin(VersionAdmin):
         """Add custom URLs here"""
         urls = super(FOIARequestAdmin, self).get_urls()
         my_urls = [
-                url(r'^process/$', self.admin_site.admin_view(self.process),
-                    name='foia-admin-process'),
-                url(r'^followup/$', self.admin_site.admin_view(self.followup),
-                    name='foia-admin-followup'),
-                url(r'^undated/$', self.admin_site.admin_view(self.undated),
-                    name='foia-admin-undated'),
-                url(r'^send_update/(?P<idx>\d+)/$',
-                    self.admin_site.admin_view(self.send_update),
-                    name='foia-admin-send-update'),
-                url(r'^retry_pages/(?P<idx>\d+)/$',
-                    self.admin_site.admin_view(self.retry_pages),
-                    name='foia-admin-retry-pages'),
-                url(r'^set_status/(?P<idx>\d+)/(?P<status>\w+)/$',
-                    self.admin_site.admin_view(self.set_status),
-                    name='foia-admin-set-status'),
-                url(r'^autoimport/$',
-                    self.admin_site.admin_view(self.autoimport),
-                    name='foia-admin-autoimport'),
-                ]
+            url(
+                r'^process/$',
+                self.admin_site.admin_view(self.process),
+                name='foia-admin-process'
+            ),
+            url(
+                r'^followup/$',
+                self.admin_site.admin_view(self.followup),
+                name='foia-admin-followup'
+            ),
+            url(
+                r'^undated/$',
+                self.admin_site.admin_view(self.undated),
+                name='foia-admin-undated'
+            ),
+            url(
+                r'^send_update/(?P<idx>\d+)/$',
+                self.admin_site.admin_view(self.send_update),
+                name='foia-admin-send-update'
+            ),
+            url(
+                r'^retry_pages/(?P<idx>\d+)/$',
+                self.admin_site.admin_view(self.retry_pages),
+                name='foia-admin-retry-pages'
+            ),
+            url(
+                r'^set_status/(?P<idx>\d+)/(?P<status>\w+)/$',
+                self.admin_site.admin_view(self.set_status),
+                name='foia-admin-set-status'
+            ),
+            url(
+                r'^autoimport/$',
+                self.admin_site.admin_view(self.autoimport),
+                name='foia-admin-autoimport'
+            ),
+        ]
         return my_urls + urls
 
     def _list_helper(self, request, foias, action):
         """List all the requests that need to be processed"""
-        # pylint: disable=no-self-use
         paginator = Paginator(foias, 10)
         try:
             page = paginator.page(request.GET.get('page'))
@@ -495,72 +513,82 @@ class FOIARequestAdmin(VersionAdmin):
         except EmptyPage:
             page = paginator.page(paginator.num_pages)
         return render(
-                request,
-                'admin/foia/admin_process.html',
-                {'page': page, 'action': action},
-                )
+            request,
+            'admin/foia/admin_process.html',
+            {'page': page,
+             'action': action},
+        )
 
     def process(self, request):
         """List all the requests that need to be processed"""
-        # pylint: disable=no-self-use
         foias = list(FOIARequest.objects.filter(status='submitted'))
         return self._list_helper(request, foias, 'Process')
 
     def followup(self, request):
         """List all the requests that need to be followed up"""
-        # pylint: disable=no-self-use
         foias = list(FOIARequest.objects.get_manual_followup())
         return self._list_helper(request, foias, 'Follow Up')
 
     def undated(self, request):
         """List all the requests that have undated documents or files"""
-        # pylint: disable=no-self-use
         foias = list(FOIARequest.objects.get_undated())
         return self._list_helper(request, foias, 'Undated')
 
     def send_update(self, request, idx):
         """Manually send the user an update notification"""
-        # pylint: disable=no-self-use
 
         foia = get_object_or_404(FOIARequest, pk=idx)
         foia.update()
-        messages.info(request, 'An update notification has been set to the user, %s' % foia.user)
-        return HttpResponseRedirect(reverse('admin:foia_foiarequest_change', args=[foia.pk]))
+        messages.info(
+            request,
+            'An update notification has been set to the user, %s' % foia.user
+        )
+        return HttpResponseRedirect(
+            reverse('admin:foia_foiarequest_change', args=[foia.pk])
+        )
 
     def retry_pages(self, request, idx):
         """Retry getting the page count"""
-        # pylint: disable=no-self-use
 
         docs = FOIAFile.objects.filter(foia=idx, pages=0)
         for doc in docs:
             if doc.is_doccloud():
                 set_document_cloud_pages.apply_async(args=[doc.pk])
 
-        messages.info(request, 'Attempting to set the page count for %d documents... Please '
-                               'wait while the Document Cloud servers are being accessed'
-                               % docs.count())
-        return HttpResponseRedirect(reverse('admin:foia_foiarequest_change', args=[idx]))
+        messages.info(
+            request,
+            'Attempting to set the page count for %d documents... Please '
+            'wait while the Document Cloud servers are being accessed' %
+            docs.count()
+        )
+        return HttpResponseRedirect(
+            reverse('admin:foia_foiarequest_change', args=[idx])
+        )
 
     def autoimport(self, request):
         """Autoimport documents from S3"""
-        # pylint: disable=no-self-use
         autoimport.apply_async()
         messages.info(request, 'Auotimport started')
-        return HttpResponseRedirect(reverse('admin:foia_foiarequest_changelist'))
+        return HttpResponseRedirect(
+            reverse('admin:foia_foiarequest_changelist')
+        )
 
     def set_status(self, request, idx, status):
         """Set the status of the request"""
-        # pylint: disable=no-self-use
 
         try:
             foia = FOIARequest.objects.get(pk=idx)
         except FOIARequest.DoesNotExist:
             messages.error(request, '%s is not a valid FOIA Request' % idx)
-            return HttpResponseRedirect(reverse('admin:foia_foiarequest_changelist'))
+            return HttpResponseRedirect(
+                reverse('admin:foia_foiarequest_changelist')
+            )
 
         if status not in [s for (s, _) in STATUS]:
             messages.error(request, '%s is not a valid status' % status)
-            return HttpResponseRedirect(reverse('admin:foia_foiarequest_change', args=[foia.pk]))
+            return HttpResponseRedirect(
+                reverse('admin:foia_foiarequest_change', args=[foia.pk])
+            )
 
         foia.status = status
         foia.update()
@@ -582,22 +610,26 @@ class FOIARequestAdmin(VersionAdmin):
         except FOIACommunication.DoesNotExist:
             pass
 
-        messages.success(request, 'Status set to %s' % foia.get_status_display())
-        return HttpResponseRedirect(reverse('admin:foia_foiarequest_change', args=[foia.pk]))
+        messages.success(
+            request, 'Status set to %s' % foia.get_status_display()
+        )
+        return HttpResponseRedirect(
+            reverse('admin:foia_foiarequest_change', args=[foia.pk])
+        )
 
 
 class FOIAMultiRequestAdminForm(forms.ModelForm):
     """Form for multi request admin"""
 
     user = autocomplete_light.ModelChoiceField(
-            'UserAutocomplete',
-            queryset=User.objects.all(),
-            )
+        'UserAutocomplete',
+        queryset=User.objects.all(),
+    )
     agencies = autocomplete_light.ModelMultipleChoiceField(
-            'AgencyAdminAutocomplete',
-            queryset=Agency.objects.all(),
-            required=False,
-            )
+        'AgencyAdminAutocomplete',
+        queryset=Agency.objects.all(),
+        required=False,
+    )
 
     class Meta:
         model = FOIAMultiRequest
@@ -615,35 +647,38 @@ class FOIAMultiRequestAdmin(VersionAdmin):
     def get_urls(self):
         """Add custom URLs here"""
         urls = super(FOIAMultiRequestAdmin, self).get_urls()
-        my_urls = [url(
-            r'^submit/(?P<idx>\d+)/$',
-            self.admin_site.admin_view(self.submit),
-            name='multifoia-admin-submit',
-            )]
+        my_urls = [
+            url(
+                r'^submit/(?P<idx>\d+)/$',
+                self.admin_site.admin_view(self.submit),
+                name='multifoia-admin-submit',
+            )
+        ]
         return my_urls + urls
 
     def submit(self, request, idx):
         """Submit the multi request"""
-        # pylint: disable=no-self-use
 
         get_object_or_404(FOIAMultiRequest, pk=idx)
         submit_multi_request.apply_async(args=[idx])
 
         messages.info(request, 'Multi request is being submitted...')
-        return HttpResponseRedirect(reverse('admin:foia_foiamultirequest_changelist'))
+        return HttpResponseRedirect(
+            reverse('admin:foia_foiamultirequest_changelist')
+        )
 
 
 class OutboundAttachmentAdminForm(forms.ModelForm):
     """Form for outbound attachment admin"""
 
     foia = autocomplete_light.ModelChoiceField(
-            'FOIARequestAdminAutocomplete',
-            queryset=FOIARequest.objects.all(),
-            )
+        'FOIARequestAdminAutocomplete',
+        queryset=FOIARequest.objects.all(),
+    )
     user = autocomplete_light.ModelChoiceField(
-            'UserAutocomplete',
-            queryset=User.objects.all(),
-            )
+        'UserAutocomplete',
+        queryset=User.objects.all(),
+    )
 
     class Meta:
         model = OutboundAttachment

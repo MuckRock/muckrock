@@ -2,11 +2,14 @@
 Filters for accounts
 """
 
-from autocomplete_light import shortcuts as autocomplete_light
+# Third Party
 import django_filters
+from autocomplete_light import shortcuts as autocomplete_light
 
+# MuckRock
 from muckrock.accounts.models import Profile
 from muckrock.jurisdiction.models import Jurisdiction
+
 
 class ProxyFilterSet(django_filters.FilterSet):
     """Allows proxies to be filtered by location."""

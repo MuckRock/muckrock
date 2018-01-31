@@ -2,22 +2,28 @@
 Test recurring crowdfund tasks
 """
 
+# Django
 from django import test
 
+# Standard Library
 from datetime import date, timedelta
+
+# Third Party
 from nose.tools import ok_
 
+# MuckRock
 from muckrock.crowdfund import models, tasks
 from muckrock.project.models import Project
 
+
 class TestRecurringTasks(test.TestCase):
     """Test recurring crowdfund tasks"""
+
     def setUp(self):
         self.project = Project.objects.create(title='Cool project')
 
     def test_close_expired(self):
         """Projects past their due date should be closed"""
-        # pylint: disable=no-self-use
         crowdfund = models.Crowdfund.objects.create(
             name='Cool project please help',
             date_due=(date.today() - timedelta(1)),
@@ -25,11 +31,13 @@ class TestRecurringTasks(test.TestCase):
         )
         tasks.close_expired()
         updated_crowdfund = models.Crowdfund.objects.get(pk=crowdfund.pk)
-        ok_(updated_crowdfund.closed, 'Any crowdfund past its date due should be closed.')
+        ok_(
+            updated_crowdfund.closed,
+            'Any crowdfund past its date due should be closed.'
+        )
 
     def test_do_not_close_today(self):
         """Projects with a due date of today should not be clsoed."""
-        # pylint: disable=no-self-use
         crowdfund = models.Crowdfund.objects.create(
             name='Cool project please help',
             date_due=(date.today()),
@@ -38,5 +46,7 @@ class TestRecurringTasks(test.TestCase):
         crowdfund.save()
         tasks.close_expired()
         updated_crowdfund = models.Crowdfund.objects.get(pk=crowdfund.pk)
-        ok_(not updated_crowdfund.closed,
-            'Crowdfunds with a due date of today should not be closed.')
+        ok_(
+            not updated_crowdfund.closed,
+            'Crowdfunds with a due date of today should not be closed.'
+        )

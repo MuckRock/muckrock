@@ -2,22 +2,29 @@
 Tests for Jurisdiction application
 """
 
+# Django
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
+# Standard Library
 from datetime import date, timedelta
+
+# Third Party
 from nose.tools import eq_
 
-from muckrock.jurisdiction import factories
+# MuckRock
 from muckrock.factories import (
-        FOIARequestFactory,
-        FOIACommunicationFactory,
-        FOIAFileFactory,
-        UserFactory,
-        )
+    FOIACommunicationFactory,
+    FOIAFileFactory,
+    FOIARequestFactory,
+    UserFactory,
+)
+from muckrock.jurisdiction import factories
+
 
 class TestJurisdictionUnit(TestCase):
     """Unit tests for Jurisdictions"""
+
     def setUp(self):
         """Set up tests"""
         self.federal = factories.FederalJurisdictionFactory()
@@ -31,27 +38,40 @@ class TestJurisdictionUnit(TestCase):
         eq_(unicode(self.local), u'Boston, MA')
         self.local.full_name = u'Test!'
         self.local.save()
-        eq_(unicode(self.local), u'Test!',
-            'If the locality has a hardcoded full_name, then always prefer that.')
+        eq_(
+            unicode(self.local), u'Test!',
+            'If the locality has a hardcoded full_name, then always prefer that.'
+        )
 
     def test_jurisdiction_url(self):
         """Test Jurisdiction model's get_absolute_url method"""
-        eq_(self.local.get_absolute_url(),
-            reverse('jurisdiction-detail', kwargs={
-                'local_slug': self.local.slug,
-                'state_slug': self.state.slug,
-                'fed_slug': self.federal.slug}
+        eq_(
+            self.local.get_absolute_url(),
+            reverse(
+                'jurisdiction-detail',
+                kwargs={
+                    'local_slug': self.local.slug,
+                    'state_slug': self.state.slug,
+                    'fed_slug': self.federal.slug
+                }
             )
         )
-        eq_(self.state.get_absolute_url(),
-            reverse('jurisdiction-detail', kwargs={
-                'state_slug': self.state.slug,
-                'fed_slug': self.federal.slug}
+        eq_(
+            self.state.get_absolute_url(),
+            reverse(
+                'jurisdiction-detail',
+                kwargs={
+                    'state_slug': self.state.slug,
+                    'fed_slug': self.federal.slug
+                }
             )
         )
-        eq_(self.federal.get_absolute_url(),
-            reverse('jurisdiction-detail', kwargs={
-                'fed_slug': self.federal.slug}
+        eq_(
+            self.federal.get_absolute_url(),
+            reverse(
+                'jurisdiction-detail', kwargs={
+                    'fed_slug': self.federal.slug
+                }
             )
         )
 
@@ -111,14 +131,17 @@ class TestJurisdictionUnit(TestCase):
         FOIARequestFactory(
             jurisdiction=self.state,
             date_done=today,
-            date_submitted=today-timedelta(state_duration)
+            date_submitted=today - timedelta(state_duration)
         )
         FOIARequestFactory(
             jurisdiction=self.local,
             date_done=today,
-            date_submitted=today-timedelta(local_duration)
+            date_submitted=today - timedelta(local_duration)
         )
-        eq_(self.state.average_response_time(), (local_duration + state_duration)/2)
+        eq_(
+            self.state.average_response_time(),
+            (local_duration + state_duration) / 2
+        )
         eq_(self.local.average_response_time(), local_duration)
 
     def test_success_rate(self):
@@ -128,14 +151,9 @@ class TestJurisdictionUnit(TestCase):
         """
         today = date.today()
         FOIARequestFactory(
-            jurisdiction=self.state,
-            status='done',
-            date_done=today
+            jurisdiction=self.state, status='done', date_done=today
         )
-        FOIARequestFactory(
-            jurisdiction=self.local,
-            status='ack'
-        )
+        FOIARequestFactory(jurisdiction=self.local, status='ack')
         eq_(self.state.success_rate(), 50.0)
         eq_(self.local.success_rate(), 0.0)
 
@@ -144,16 +162,8 @@ class TestJurisdictionUnit(TestCase):
         Jurisdictions should report the rate at which requests have fees.
         State jurisdictions should include fee rates of local jurisdictions.
         """
-        FOIARequestFactory(
-            jurisdiction=self.state,
-            status='ack',
-            price=0
-        )
-        FOIARequestFactory(
-            jurisdiction=self.local,
-            status='ack',
-            price=1.00
-        )
+        FOIARequestFactory(jurisdiction=self.state, status='ack', price=0)
+        FOIARequestFactory(jurisdiction=self.local, status='ack', price=1.00)
         eq_(self.state.fee_rate(), 50.0)
         eq_(self.local.fee_rate(), 100.0)
 
@@ -168,21 +178,21 @@ class TestJurisdictionUnit(TestCase):
         local_foia.files.add(FOIAFileFactory(pages=page_count))
         state_foia.files.add(FOIAFileFactory(pages=page_count))
         eq_(self.local.total_pages(), page_count)
-        eq_(self.state.total_pages(), 2*page_count)
+        eq_(self.state.total_pages(), 2 * page_count)
 
     def test_get_proxy(self):
         """Test getting the proxy user for a state"""
         eq_(self.state.get_proxy(), None)
         UserFactory(
-                profile__acct_type='proxy',
-                profile__state=self.state.abbrev,
-                profile__preferred_proxy=False,
-                )
+            profile__acct_type='proxy',
+            profile__state=self.state.abbrev,
+            profile__preferred_proxy=False,
+        )
         preferred_proxy = UserFactory(
-                profile__acct_type='proxy',
-                profile__state=self.state.abbrev,
-                profile__preferred_proxy=True,
-                )
+            profile__acct_type='proxy',
+            profile__state=self.state.abbrev,
+            profile__preferred_proxy=True,
+        )
         eq_(self.state.get_proxy(), preferred_proxy)
 
 
@@ -191,18 +201,24 @@ class TestLawModel(TestCase):
     The Law model contains information about a jurisdiction's law concerning public records.
     It should contain outside references to information on the law.
     """
+
     def setUp(self):
         self.law = factories.LawFactory()
 
     def test_unicode(self):
         """The text representation of the law should be the name of the law."""
-        eq_(unicode(self.law), self.law.name,
-            'The text representation of the law should match the name of the law.')
+        eq_(
+            unicode(self.law), self.law.name,
+            'The text representation of the law should match the name of the law.'
+        )
 
     def test_absolute_url(self):
         """The absolute url of the law should be the url of its jurisdiction."""
-        eq_(self.law.get_absolute_url(), self.law.jurisdiction.get_absolute_url(),
-            'The absolute url of the law should match the url of its jurisdicition.')
+        eq_(
+            self.law.get_absolute_url(),
+            self.law.jurisdiction.get_absolute_url(),
+            'The absolute url of the law should match the url of its jurisdicition.'
+        )
 
 
 class TestExemptionModel(TestCase):
@@ -210,14 +226,17 @@ class TestExemptionModel(TestCase):
     The Exemption model should contain information about a single kind of exemption.
     For example, the Public Employment Applications for Washtington state.
     """
+
     def setUp(self):
         self.exemption = factories.ExemptionFactory()
 
     def test_unicode(self):
         """The text representation should be the name of the exemption and its jurisdiction."""
-        eq_(unicode(self.exemption),
-            u'%s exemption of %s' % (self.exemption.name, self.exemption.jurisdiction),
-            'Should include the name of the exemption and the name of the jurisdiction.')
+        eq_(
+            unicode(self.exemption), u'%s exemption of %s' %
+            (self.exemption.name, self.exemption.jurisdiction),
+            'Should include the name of the exemption and the name of the jurisdiction.'
+        )
 
     def test_absolute_url(self):
         """The absolute url of the exemption should be a standalone exemption detail page."""
@@ -226,8 +245,12 @@ class TestExemptionModel(TestCase):
         kwargs['pk'] = self.exemption.pk
         expected_url = reverse('exemption-detail', kwargs=kwargs)
         actual_url = self.exemption.get_absolute_url()
-        eq_(actual_url, expected_url, ('The exemption should return the exemption-detail url.\n'
-             'Actual url: %s\nExpected url: %s') % (actual_url, expected_url))
+        eq_(
+            actual_url, expected_url, (
+                'The exemption should return the exemption-detail url.\n'
+                'Actual url: %s\nExpected url: %s'
+            ) % (actual_url, expected_url)
+        )
 
 
 class TestInvokedExemptionModel(TestCase):
@@ -236,6 +259,7 @@ class TestInvokedExemptionModel(TestCase):
     of an exemption. For example, when an agency in Washington state uses the
     Public Employment Applications exemption to withhold records from a request.
     """
+
     def setUp(self):
         self.invoked_exemption = factories.InvokedExemptionFactory()
 
@@ -246,10 +270,12 @@ class TestInvokedExemptionModel(TestCase):
             self.invoked_exemption.exemption.name,
             self.invoked_exemption.request,
         )
-        eq_(actual,
-            expected,
-            ('Should include the name of the exemption and the request.\n'
-            'Actual: %s\nExpected: %s' % (actual, expected)))
+        eq_(
+            actual, expected, (
+                'Should include the name of the exemption and the request.\n'
+                'Actual: %s\nExpected: %s' % (actual, expected)
+            )
+        )
 
     def test_absolute_url(self):
         """The absolute url of the invoked exemption should be the absolute url of the
@@ -258,13 +284,17 @@ class TestInvokedExemptionModel(TestCase):
         kwargs = exemption.jurisdiction.get_slugs()
         kwargs['slug'] = exemption.slug
         kwargs['pk'] = exemption.pk
-        expected_url = (reverse('exemption-detail', kwargs=kwargs) +
-                        '#invoked-%d' % self.invoked_exemption.pk)
+        expected_url = (
+            reverse('exemption-detail', kwargs=kwargs) +
+            '#invoked-%d' % self.invoked_exemption.pk
+        )
         actual_url = self.invoked_exemption.get_absolute_url()
-        eq_(actual_url,
-            expected_url,
-            ('The exemption should return the exemption-detail url.\n'
-             'Actual url: %s\nExpected url: %s') % (actual_url, expected_url))
+        eq_(
+            actual_url, expected_url, (
+                'The exemption should return the exemption-detail url.\n'
+                'Actual url: %s\nExpected url: %s'
+            ) % (actual_url, expected_url)
+        )
 
 
 class TestExampleAppealModel(TestCase):
@@ -272,17 +302,22 @@ class TestExampleAppealModel(TestCase):
     The ExampleAppeal model should contain sample language for appealing an exemption.
     Additionally, it should contain the context in which this language is most effective.
     """
+
     def setUp(self):
         self.example_appeal = factories.ExampleAppealFactory()
 
     def test_unicode(self):
         """The text representation should be the appeal's context and exemption."""
         actual = unicode(self.example_appeal)
-        expected = u'%s for %s' % (self.example_appeal.title, self.example_appeal.exemption)
-        eq_(actual,
-            expected,
-            ('Should include the name of the exemption and the request.\n'
-            'Actual: %s\nExpected: %s' % (actual, expected)))
+        expected = u'%s for %s' % (
+            self.example_appeal.title, self.example_appeal.exemption
+        )
+        eq_(
+            actual, expected, (
+                'Should include the name of the exemption and the request.\n'
+                'Actual: %s\nExpected: %s' % (actual, expected)
+            )
+        )
 
     def test_absolute_url(self):
         """The absolute url of the appeal language should be the absolute url of the exemption
@@ -291,13 +326,17 @@ class TestExampleAppealModel(TestCase):
         kwargs = exemption.jurisdiction.get_slugs()
         kwargs['slug'] = exemption.slug
         kwargs['pk'] = exemption.pk
-        expected_url = (reverse('exemption-detail', kwargs=kwargs) +
-                        '#appeal-%d' % self.example_appeal.pk)
+        expected_url = (
+            reverse('exemption-detail', kwargs=kwargs) +
+            '#appeal-%d' % self.example_appeal.pk
+        )
         actual_url = self.example_appeal.get_absolute_url()
-        eq_(actual_url,
-            expected_url,
-            ('The exemption should return the exemption-detail url.\n'
-             'Actual url: %s\nExpected url: %s') % (actual_url, expected_url))
+        eq_(
+            actual_url, expected_url, (
+                'The exemption should return the exemption-detail url.\n'
+                'Actual url: %s\nExpected url: %s'
+            ) % (actual_url, expected_url)
+        )
 
 
 class TestAppealModel(TestCase):
@@ -307,6 +346,7 @@ class TestAppealModel(TestCase):
     It should do this by analyzing the request's communication chain
     following the communication it corresponds to.
     """
+
     def setUp(self):
         self.appeal = factories.AppealFactory()
 
@@ -329,16 +369,14 @@ class TestAppealModel(TestCase):
     def test_successful(self):
         """The appeal was successful if a subsequent communication has a 'Completed' status."""
         FOIACommunicationFactory(
-            foia=self.appeal.communication.foia,
-            status='done'
+            foia=self.appeal.communication.foia, status='done'
         )
         eq_(self.appeal.is_successful(), True)
 
     def test_another_appeal(self):
         """The appeal was unsuccessful if a subsequent communication has an Appeal as well."""
         subsequent_communication = FOIACommunicationFactory(
-            foia=self.appeal.communication.foia,
-            status='done'
+            foia=self.appeal.communication.foia, status='done'
         )
         factories.AppealFactory(communication=subsequent_communication)
         eq_(self.appeal.is_successful(), False)
@@ -350,7 +388,6 @@ class TestAppealModel(TestCase):
     def test_finished(self):
         """The appeal was finished if a subsequent communication has a terminal status."""
         FOIACommunicationFactory(
-            foia=self.appeal.communication.foia,
-            status='rejected'
+            foia=self.appeal.communication.foia, status='rejected'
         )
         eq_(self.appeal.is_finished(), True)

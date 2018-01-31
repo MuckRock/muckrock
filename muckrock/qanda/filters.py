@@ -2,12 +2,15 @@
 Filters for the Q&A app
 """
 
+# Django
 from django import forms
 from django.contrib.auth.models import User
 
-from autocomplete_light import shortcuts as autocomplete_light
+# Third Party
 import django_filters
+from autocomplete_light import shortcuts as autocomplete_light
 
+# MuckRock
 from muckrock.filters import RangeWidget
 from muckrock.qanda.models import Question
 from muckrock.tags.models import Tag
@@ -22,14 +25,15 @@ class QuestionFilterSet(django_filters.FilterSet):
     date = django_filters.DateFromToRangeFilter(
         label='Date Range',
         lookup_expr='contains',
-        widget=RangeWidget(attrs={
-            'class': 'datepicker',
-            'placeholder': 'MM/DD/YYYY',
-        }),
+        widget=RangeWidget(
+            attrs={
+                'class': 'datepicker',
+                'placeholder': 'MM/DD/YYYY',
+            }
+        ),
     )
     unanswered = django_filters.BooleanFilter(
-        method='unanswered_filter',
-        widget=forms.CheckboxInput()
+        method='unanswered_filter', widget=forms.CheckboxInput()
     )
     tags = django_filters.ModelMultipleChoiceFilter(
         name='tags__name',
@@ -40,7 +44,6 @@ class QuestionFilterSet(django_filters.FilterSet):
 
     def unanswered_filter(self, queryset, name, value):
         """Filter to show either only unanswered questions or all questions"""
-        # pylint: disable=no-self-use
         # pylint: disable=unused-argument
         if value:
             return queryset.filter(answers__isnull=True)

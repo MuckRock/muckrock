@@ -2,21 +2,27 @@
 Tests for FOIA Machine models.
 """
 
+# Django
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.template.loader import render_to_string
 from django.test import TestCase
 from django.utils import timezone
 
+# Standard Library
 from datetime import timedelta
+
+# Third Party
 from django_hosts.resolvers import reverse
 from nose.tools import eq_, ok_, raises
 
-from muckrock.factories import UserFactory, AgencyFactory
+# MuckRock
+from muckrock.factories import AgencyFactory, UserFactory
 from muckrock.foiamachine import factories, models
 
 
 class TestFoiaMachineRequest(TestCase):
     """The FOIA Machine Request should store information we need to send a request."""
+
     def setUp(self):
         self.user = UserFactory()
         self.title = 'Test Request'
@@ -44,8 +50,10 @@ class TestFoiaMachineRequest(TestCase):
 
     def test_unicode(self):
         """Requests should use their titles when converted to unicode."""
-        eq_(unicode(self.foi), self.foi.title,
-            'The Unicode representation should be the title.')
+        eq_(
+            unicode(self.foi), self.foi.title,
+            'The Unicode representation should be the title.'
+        )
 
     def test_get_absolute_url(self):
         """Request urls should include their slug and their id."""
@@ -81,7 +89,9 @@ class TestFoiaMachineRequest(TestCase):
     def test_date_due(self):
         """The date due should be the date submitted plus the jurisdiction's response time."""
         comm = factories.FoiaMachineCommunicationFactory(request=self.foi)
-        expected_date_due = comm.date + timedelta(self.foi.jurisdiction.get_days())
+        expected_date_due = comm.date + timedelta(
+            self.foi.jurisdiction.get_days()
+        )
         eq_(self.foi.date_due, expected_date_due)
 
     @raises(AttributeError)
@@ -106,8 +116,11 @@ class TestFoiaMachineRequest(TestCase):
 
     def test_is_overdue(self):
         """The request should be overdue if days_until_due is negative."""
-        overdue_date = timezone.now().date() - timedelta(self.foi.jurisdiction.get_days() + 10)
-        comm = factories.FoiaMachineCommunicationFactory(request=self.foi, date=overdue_date)
+        overdue_date = timezone.now().date(
+        ) - timedelta(self.foi.jurisdiction.get_days() + 10)
+        comm = factories.FoiaMachineCommunicationFactory(
+            request=self.foi, date=overdue_date
+        )
         ok_(self.foi.is_overdue)
         # Now let's make it not overdue
         comm.date = timezone.now().date()
@@ -116,14 +129,18 @@ class TestFoiaMachineRequest(TestCase):
 
     def test_days_overdue(self):
         """Days overdue should just be the inverse of days_until_due."""
-        overdue_date = timezone.now().date() - timedelta(self.foi.jurisdiction.get_days() + 10)
-        factories.FoiaMachineCommunicationFactory(request=self.foi, date=overdue_date)
+        overdue_date = timezone.now().date(
+        ) - timedelta(self.foi.jurisdiction.get_days() + 10)
+        factories.FoiaMachineCommunicationFactory(
+            request=self.foi, date=overdue_date
+        )
         eq_(self.foi.days_overdue, self.foi.days_until_due * -1)
 
 
 class TestFoiaMachineCommunication(TestCase):
     """The FOIA Machine Communication should store information
     about communications between users and agencies."""
+
     def setUp(self):
         self.foi = factories.FoiaMachineRequestFactory()
         self.comm = factories.FoiaMachineCommunicationFactory(request=self.foi)
@@ -139,12 +156,15 @@ class TestFoiaMachineCommunication(TestCase):
 
     def test_unicode(self):
         """The string representation of a communication includes sender and receiver info."""
-        eq_(unicode(self.comm),
-            'Communication from %s to %s' % (self.comm.sender, self.comm.receiver))
+        eq_(
+            unicode(self.comm), 'Communication from %s to %s' %
+            (self.comm.sender, self.comm.receiver)
+        )
 
 
 class TestFoiaMachineFile(TestCase):
     """The FOIA Machine File should attach files to communications."""
+
     def setUp(self):
         self.comm = factories.FoiaMachineCommunicationFactory()
         self.file = factories.FoiaMachineFileFactory(communication=self.comm)
@@ -154,7 +174,8 @@ class TestFoiaMachineFile(TestCase):
         _file = models.FoiaMachineFile(
             communication=self.comm,
             file=SimpleUploadedFile('filename.txt', 'Test file contents'),
-            name='filename.txt')
+            name='filename.txt'
+        )
         ok_(_file)
 
     def test_unicode(self):

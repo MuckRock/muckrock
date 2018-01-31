@@ -2,14 +2,18 @@
 Autocomplete registry for Accounts
 """
 
+# Django
 from django.contrib.auth.models import User
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 
+# Third Party
 from autocomplete_light import shortcuts as autocomplete_light
 
+# MuckRock
 from muckrock.foia.models import FOIARequest
 from muckrock.organization.models import Organization
+
 
 class UserAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     """Creates an autocomplete field for picking users"""
@@ -29,8 +33,10 @@ class UserAutocomplete(autocomplete_light.AutocompleteModelTemplate):
 
 class AuthorAutocomplete(UserAutocomplete):
     """Limits choices to just users with more than 1 authored article."""
-    choices = (User.objects.annotate(article_count=Count('authored_articles'))
-        .exclude(article_count=0))
+    choices = (
+        User.objects.annotate(article_count=Count('authored_articles'))
+        .exclude(article_count=0)
+    )
     attrs = {
         'placeholder': 'Search authors',
         'data-autocomplete-minimum-characters': 1
@@ -39,19 +45,24 @@ class AuthorAutocomplete(UserAutocomplete):
 
 class UserTaskAutocomplete(UserAutocomplete):
     """Limits choices to just users with more than 1 authored article."""
-    choices = (User.objects.annotate(resolved_task_count=Count('resolved_tasks'))
-        .exclude(resolved_task_count=0))
+    choices = (
+        User.objects.annotate(resolved_task_count=Count('resolved_tasks'))
+        .exclude(resolved_task_count=0)
+    )
 
 
 class RequestSharingAutocomplete(UserAutocomplete):
     """Adds request sharing filtering for users"""
+
     def choices_for_request(self):
         # get filters
         query = self.request.GET.get('q', '')
         foia_id = self.request.GET.get('foiaId', '')
         # get all choices
         choices = self.choices
-        conditions = self._choices_for_request_conditions(query, self.search_fields)
+        conditions = self._choices_for_request_conditions(
+            query, self.search_fields
+        )
         choices = choices.filter(conditions)
         if foia_id:
             foia = get_object_or_404(FOIARequest, pk=foia_id)
@@ -65,8 +76,10 @@ class RequestSharingAutocomplete(UserAutocomplete):
         # return final list of choices
         return self.order_choices(choices)[0:self.limit_choices]
 
+
 class OrganizationAutocomplete(UserAutocomplete):
     """Adds organization-specific filtering for users"""
+
     def choices_for_request(self):
         # get filters
         query = self.request.GET.get('q', '')
@@ -79,7 +92,7 @@ class OrganizationAutocomplete(UserAutocomplete):
             choices = choices.filter(username__icontains=query)
         for user_id in exclude:
             choices = choices.exclude(pk=int(user_id))
-        if org_id: # exclude owner and members from choices
+        if org_id:  # exclude owner and members from choices
             organization = get_object_or_404(Organization, pk=org_id)
             owner = organization.owner
             profiles = organization.members.all()
@@ -87,6 +100,7 @@ class OrganizationAutocomplete(UserAutocomplete):
             choices = choices.exclude(pk__in=exclude_pks)
         # return final list of choices
         return self.order_choices(choices)[0:self.limit_choices]
+
 
 autocomplete_light.register(User, UserAutocomplete)
 autocomplete_light.register(User, OrganizationAutocomplete)

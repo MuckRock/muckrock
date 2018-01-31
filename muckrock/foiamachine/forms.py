@@ -2,16 +2,21 @@
 Forms for FOIA Machine
 """
 
+# Django
 from django import forms
 
+# Third Party
+import bleach
 from autocomplete_light import shortcuts as autocomplete_light
 
-from muckrock.foiamachine.models import FoiaMachineRequest, FoiaMachineCommunication, STATUS
+# MuckRock
+from muckrock.foiamachine.models import (
+    STATUS,
+    FoiaMachineCommunication,
+    FoiaMachineRequest,
+)
 
-import bleach
-
-
-MAX_UPLOAD_SIZE = 10485760 # 10mB
+MAX_UPLOAD_SIZE = 10485760  # 10mB
 ALLOWED_CONTENT_TYPES = ['application', 'image', 'video', 'text']
 
 
@@ -22,9 +27,12 @@ class FoiaMachineBulkRequestForm(forms.Form):
 
 class FoiaMachineRequestForm(autocomplete_light.ModelForm):
     """The FOIA Machine Request form provides a basis for creating and updating requests."""
+
     class Meta:
         model = FoiaMachineRequest
-        fields = ['title', 'status', 'request_language', 'jurisdiction', 'agency']
+        fields = [
+            'title', 'status', 'request_language', 'jurisdiction', 'agency'
+        ]
         autocomplete_names = {
             'jurisdiction': 'JurisdictionAutocomplete',
             'agency': 'AgencyAutocomplete',
@@ -39,7 +47,9 @@ class FoiaMachineRequestForm(autocomplete_light.ModelForm):
         jurisdiction = cleaned_data.get('jurisdiction')
         agency = cleaned_data.get('agency')
         if agency and agency.jurisdiction != jurisdiction:
-            raise forms.ValidationError('This agency does not belong to the jurisdiction.')
+            raise forms.ValidationError(
+                'This agency does not belong to the jurisdiction.'
+            )
         return cleaned_data
 
 
@@ -52,16 +62,29 @@ class FoiaMachineCommunicationForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(FoiaMachineCommunicationForm, self).__init__(*args, **kwargs)
         if 'message' in self.initial.keys():
-            self.initial['message'] = self.initial['message'].replace("<div>", "")
-            self.initial['message'] = self.initial['message'].replace("</div>", "\n")
-            self.initial['message'] = self.initial['message'].replace("<br>", "\n")
-            self.initial['message'] = bleach.clean(self.initial['message'], strip=True)
+            self.initial['message'] = self.initial['message'].replace(
+                "<div>", ""
+            )
+            self.initial['message'] = self.initial['message'].replace(
+                "</div>", "\n"
+            )
+            self.initial['message'] = self.initial['message'].replace(
+                "<br>", "\n"
+            )
+            self.initial['message'] = bleach.clean(
+                self.initial['message'], strip=True
+            )
 
     files = forms.FileField(
         required=False,
         help_text='The maximum upload size is 10MB.',
-        widget=forms.ClearableFileInput(attrs={'multiple': True}))
-    status = forms.ChoiceField(choices=STATUS, required=False, label='Update request status')
+        widget=forms.ClearableFileInput(attrs={
+            'multiple': True
+        })
+    )
+    status = forms.ChoiceField(
+        choices=STATUS, required=False, label='Update request status'
+    )
 
     def clean_files(self):
         """Enforces a size and filetype limit on uploaded files."""
@@ -80,12 +103,23 @@ class FoiaMachineCommunicationForm(forms.ModelForm):
 
     class Meta:
         model = FoiaMachineCommunication
-        fields = ['request', 'date', 'sender', 'receiver', 'subject', 'message', 'received',]
+        fields = [
+            'request',
+            'date',
+            'sender',
+            'receiver',
+            'subject',
+            'message',
+            'received',
+        ]
         widgets = {
             'request': forms.HiddenInput(),
         }
         help_texts = {
-            'sender': 'What is the name or email of who sent the message?',
-            'receiver': 'What is the name or email of who the message was sent to?',
-            'received': 'Was this message sent to you?'
+            'sender':
+                'What is the name or email of who sent the message?',
+            'receiver':
+                'What is the name or email of who the message was sent to?',
+            'received':
+                'Was this message sent to you?'
         }

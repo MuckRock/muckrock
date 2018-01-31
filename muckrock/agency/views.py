@@ -2,15 +2,18 @@
 Views for the Agency application
 """
 
+# Django
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 
+# Third Party
 import django_filters
 from fuzzywuzzy import fuzz, process
 from rest_framework import viewsets
 
+# MuckRock
 from muckrock.agency.filters import AgencyFilterSet
 from muckrock.agency.models import Agency
 from muckrock.agency.serializers import AgencySerializer
@@ -20,6 +23,7 @@ from muckrock.jurisdiction.views import collect_stats
 from muckrock.task.models import FlaggedTask
 from muckrock.views import MRSearchFilterListView
 
+
 class AgencyList(MRSearchFilterListView):
     """Filterable list of agencies"""
     model = Agency
@@ -28,9 +32,9 @@ class AgencyList(MRSearchFilterListView):
     template_name = 'agency/list.html'
     default_sort = 'name'
     sort_map = {
-            'name': 'name',
-            'jurisdiction': 'jurisdiction__slug',
-            }
+        'name': 'name',
+        'jurisdiction': 'jurisdiction__slug',
+    }
 
     def get_queryset(self):
         """Limit agencies to only approved ones."""
@@ -47,26 +51,26 @@ def detail(request, jurisdiction, jidx, slug, idx):
     """Details for an agency"""
 
     agency = get_object_or_404(
-            Agency.objects.select_related(
-                'jurisdiction',
-                'jurisdiction__parent',
-                'jurisdiction__parent__parent'),
-            jurisdiction__slug=jurisdiction,
-            jurisdiction__pk=jidx,
-            slug=slug,
-            pk=idx,
-            status='approved')
+        Agency.objects.select_related(
+            'jurisdiction', 'jurisdiction__parent',
+            'jurisdiction__parent__parent'
+        ),
+        jurisdiction__slug=jurisdiction,
+        jurisdiction__pk=jidx,
+        slug=slug,
+        pk=idx,
+        status='approved'
+    )
 
     foia_requests = agency.get_requests()
-    foia_requests = (foia_requests.get_viewable(request.user)
-        .get_submitted()
-        .filter(agency=agency)
-        .select_related(
-          'jurisdiction',
-          'jurisdiction__parent',
-          'jurisdiction__parent__parent',
-        )
-        .order_by('-date_submitted')[:10])
+    foia_requests = (
+        foia_requests.get_viewable(request.user).get_submitted()
+        .filter(agency=agency).select_related(
+            'jurisdiction',
+            'jurisdiction__parent',
+            'jurisdiction__parent__parent',
+        ).order_by('-date_submitted')[:10]
+    )
 
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -76,30 +80,39 @@ def detail(request, jurisdiction, jidx, slug, idx):
                 FlaggedTask.objects.create(
                     user=request.user,
                     text=form.cleaned_data.get('reason'),
-                    agency=agency)
+                    agency=agency
+                )
                 messages.success(request, 'Correction submitted. Thanks!')
                 return redirect(agency)
         elif action == 'mark_stale' and request.user.is_staff:
             task = agency.mark_stale(manual=True)
             messages.success(request, 'Agency marked as stale.')
-            return redirect(reverse('stale-agency-task', kwargs={'pk': task.pk}))
+            return redirect(
+                reverse('stale-agency-task', kwargs={
+                    'pk': task.pk
+                })
+            )
     else:
         form = FlagForm()
 
     context = {
-        'agency': agency,
-        'foia_requests': foia_requests,
-        'form': form,
-        'sidebar_admin_url': reverse('admin:agency_agency_change', args=(agency.pk,)),
+        'agency':
+            agency,
+        'foia_requests':
+            foia_requests,
+        'form':
+            form,
+        'sidebar_admin_url':
+            reverse('admin:agency_agency_change', args=(agency.pk,)),
     }
 
     collect_stats(agency, context)
 
     return render(
-            request,
-            'profile/agency.html',
-            context,
-            )
+        request,
+        'profile/agency.html',
+        context,
+    )
 
 
 def redirect_old(request, jurisdiction, slug, idx, action):
@@ -113,9 +126,14 @@ def redirect_old(request, jurisdiction, slug, idx, action):
     jidx = agency.jurisdiction.pk
 
     if action == 'view':
-        return redirect('/agency/%(jurisdiction)s-%(jidx)s/%(slug)s-%(idx)s/' % locals())
+        return redirect(
+            '/agency/%(jurisdiction)s-%(jidx)s/%(slug)s-%(idx)s/' % locals()
+        )
 
-    return redirect('/agency/%(jurisdiction)s-%(jidx)s/%(slug)s-%(idx)s/%(action)s/' % locals())
+    return redirect(
+        '/agency/%(jurisdiction)s-%(jidx)s/%(slug)s-%(idx)s/%(action)s/' %
+        locals()
+    )
 
 
 def redirect_flag(request, jurisdiction, jidx, slug, idx):
@@ -126,31 +144,33 @@ def redirect_flag(request, jurisdiction, jidx, slug, idx):
 
 class AgencyViewSet(viewsets.ModelViewSet):
     """API views for Agency"""
-    # pylint: disable=too-many-ancestors
     # pylint: disable=too-many-public-methods
-    queryset = (Agency.objects
-            .order_by('id')
-            .select_related('jurisdiction', 'parent', 'appeal_agency')
-            .prefetch_related('types')
-            )
+    queryset = (
+        Agency.objects.order_by('id').select_related(
+            'jurisdiction', 'parent', 'appeal_agency'
+        ).prefetch_related('types')
+    )
     serializer_class = AgencySerializer
     # don't allow ordering by computed fields
-    ordering_fields = [f for f in AgencySerializer.Meta.fields
-            if f not in (
-                'absolute_url',
-                'average_response_time',
-                'fee_rate',
-                'success_rate',
-                )]
+    ordering_fields = [
+        f for f in AgencySerializer.Meta.fields if f not in (
+            'absolute_url',
+            'average_response_time',
+            'fee_rate',
+            'success_rate',
+        )
+    ]
 
     class Filter(django_filters.FilterSet):
         """API Filter for Agencies"""
-        # pylint: disable=too-few-public-methods
         jurisdiction = django_filters.NumberFilter(name='jurisdiction__id')
         types = django_filters.CharFilter(name='types__name')
+
         class Meta:
             model = Agency
-            fields = ('name', 'status', 'jurisdiction', 'types', 'requires_proxy')
+            fields = (
+                'name', 'status', 'jurisdiction', 'types', 'requires_proxy'
+            )
 
     filter_class = Filter
 
@@ -176,11 +196,12 @@ def similar(request):
         return JsonResponse({'exact': {'value': exact.pk, 'text': exact.name}})
 
     suggestions = process.extractBests(
-            query,
-            {a.pk: a.name for a in agencies},
-            scorer=fuzz.token_set_ratio,
-            score_cutoff=80,
-            limit=10,
-            )
+        query,
+        {a.pk: a.name
+         for a in agencies},
+        scorer=fuzz.token_set_ratio,
+        score_cutoff=80,
+        limit=10,
+    )
     suggestions = [{'value': s[2], 'text': s[0]} for s in suggestions]
     return JsonResponse({'suggestions': suggestions})

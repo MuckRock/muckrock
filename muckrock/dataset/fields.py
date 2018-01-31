@@ -2,19 +2,18 @@
 Field types for data sets
 """
 
+# Django
 from django.core.exceptions import ValidationError
-from django.core.validators import (
-        RegexValidator,
-        EmailValidator,
-        URLValidator,
-        )
+from django.core.validators import EmailValidator, RegexValidator, URLValidator
 
+# Standard Library
 import calendar
 import re
 
 
 class Field(object):
     """A dataset field"""
+
     @classmethod
     def validate(cls, value):
         """Is this value valid for this type?"""
@@ -105,9 +104,9 @@ class BoolField(Field):
     editor = 'selectEditor'
     sort_type = 'text'
     validator = RegexValidator(
-            regex=r'^(?:true|1|false|0)$',
-            flags=re.IGNORECASE,
-            )
+        regex=r'^(?:true|1|false|0)$',
+        flags=re.IGNORECASE,
+    )
 
 
 class ColorField(Field):
@@ -118,9 +117,9 @@ class ColorField(Field):
     editor = '"input"'
     sort_type = 'text'
     validator = RegexValidator(
-            regex=r'^#[0-9a-f]{3}(?:[0-9a-f]{3})?$',
-            flags=re.IGNORECASE,
-            )
+        regex=r'^#[0-9a-f]{3}(?:[0-9a-f]{3})?$',
+        flags=re.IGNORECASE,
+    )
 
 
 class ChoiceField(Field):
@@ -154,25 +153,25 @@ class DateField(Field):
     editor = '"input"'
     sort_type = 'date'
     validator = RegexValidator(
-            regex=r'^(?:{y}-{m}-{d}|{m} {d}, {y}|{m}/{d}/{y}|{m}-{d}-{y})$'
-                .format(
-                    m=MONTH_RE,
-                    d=DAY_RE,
-                    y=YEAR_RE,
-                    ),
-            flags=re.IGNORECASE,
-            )
+        regex=r'^(?:{y}-{m}-{d}|{m} {d}, {y}|{m}/{d}/{y}|{m}-{d}-{y})$'.format(
+            m=MONTH_RE,
+            d=DAY_RE,
+            y=YEAR_RE,
+        ),
+        flags=re.IGNORECASE,
+    )
+
 
 FIELDS = [
-        MultiTextField,
-        NumberField,
-        MoneyField,
-        EmailField,
-        URLField,
-        BoolField,
-        ColorField,
-        DateField,
-        ChoiceField,
-        TextField,
-        ]
+    MultiTextField,
+    NumberField,
+    MoneyField,
+    EmailField,
+    URLField,
+    BoolField,
+    ColorField,
+    DateField,
+    ChoiceField,
+    TextField,
+]
 FIELD_DICT = {f.slug: f for f in FIELDS}

@@ -2,13 +2,18 @@
 Test organization view classes and functions
 """
 
+# Django
 from django.core.urlresolvers import reverse
-from django.test import TestCase, RequestFactory
+from django.test import RequestFactory, TestCase
 
+# Standard Library
 import logging
-from mock import patch
-from nose.tools import ok_, eq_
 
+# Third Party
+from mock import patch
+from nose.tools import eq_, ok_
+
+# MuckRock
 import muckrock.factories
 import muckrock.organization
 from muckrock.test_utils import mock_middleware
@@ -16,10 +21,12 @@ from muckrock.test_utils import mock_middleware
 
 class TestCreateView(TestCase):
     """Tests the expectations of the organization creation view."""
+
     def setUp(self):
         self.url = reverse('org-create')
         self.request_factory = RequestFactory()
-        self.create_view = muckrock.organization.views.OrganizationCreateView.as_view()
+        self.create_view = muckrock.organization.views.OrganizationCreateView.as_view(
+        )
 
     def test_get_ok(self):
         """Regular users should be able to create a request."""
@@ -28,10 +35,16 @@ class TestCreateView(TestCase):
         request = mock_middleware(request)
         request.user = regular_user
         response = self.create_view(request)
-        eq_(response.status_code, 200,
-            'Regular users should be able to create an organization.')
-        ok_(isinstance(response.context_data['form'], muckrock.organization.forms.CreateForm),
-            'Regular users should be shown the regular creation form.')
+        eq_(
+            response.status_code, 200,
+            'Regular users should be able to create an organization.'
+        )
+        ok_(
+            isinstance(
+                response.context_data['form'],
+                muckrock.organization.forms.CreateForm
+            ), 'Regular users should be shown the regular creation form.'
+        )
 
     def test_owner_get_forbidden(self):
         """Users who already own an organization should be denied access."""
@@ -40,8 +53,10 @@ class TestCreateView(TestCase):
         request = mock_middleware(request)
         request.user = org.owner
         response = self.create_view(request)
-        eq_(response.status_code, 302,
-            'Existing owners should not be allowed to create another organization.')
+        eq_(
+            response.status_code, 302,
+            'Existing owners should not be allowed to create another organization.'
+        )
 
     def test_member_get_forbidden(self):
         """Users who are already members of a different organization should be denied access."""
@@ -61,10 +76,16 @@ class TestCreateView(TestCase):
         request = mock_middleware(request)
         request.user = staff_user
         response = self.create_view(request)
-        eq_(response.status_code, 200,
-            'Staff should be allowed to create an organization even if they already own one.')
-        ok_(isinstance(response.context_data['form'], muckrock.organization.forms.StaffCreateForm),
-            'Staff should be shown a special staff-only creation form.')
+        eq_(
+            response.status_code, 200,
+            'Staff should be allowed to create an organization even if they already own one.'
+        )
+        ok_(
+            isinstance(
+                response.context_data['form'],
+                muckrock.organization.forms.StaffCreateForm
+            ), 'Staff should be shown a special staff-only creation form.'
+        )
 
     def test_post_ok(self):
         """
@@ -80,15 +101,19 @@ class TestCreateView(TestCase):
         request = mock_middleware(request)
         request.user = regular_user
         response = self.create_view(request)
-        org = muckrock.organization.models.Organization.objects.get(name=org_name)
-        ok_(org,
-            'The organization should be created.')
-        ok_(not org.active,
-            'The organization should be inactive.')
-        eq_(org.owner, regular_user,
-            'The user should be made the owner of the organization.')
-        eq_(response.status_code, 302,
-            'The user should be redirected to the activation page when creation is successful.')
+        org = muckrock.organization.models.Organization.objects.get(
+            name=org_name
+        )
+        ok_(org, 'The organization should be created.')
+        ok_(not org.active, 'The organization should be inactive.')
+        eq_(
+            org.owner, regular_user,
+            'The user should be made the owner of the organization.'
+        )
+        eq_(
+            response.status_code, 302,
+            'The user should be redirected to the activation page when creation is successful.'
+        )
 
     def test_staff_post(self):
         """Staff users should need to provide more information, including an owner."""
@@ -111,30 +136,42 @@ class TestCreateView(TestCase):
         request = mock_middleware(request)
         request.user = staff_user
         response = self.create_view(request)
-        eq_(response.status_code, 302,
-            'The user should be redirected to the activation page when creation is successful.')
-        org = muckrock.organization.models.Organization.objects.get(name=org_name)
-        ok_(org,
-            'The organization should be created.')
-        ok_(not org.active,
-            'The organization should be inactive.')
-        eq_(org.owner, org_owner,
-            'The organization should have an owner assigned to it.')
-        eq_(org.max_users, org_max,
-            'The organization should have its max users set.')
-        eq_(org.monthly_cost, org_cost,
-            'The organization should have its monthly cost set.')
-        eq_(org.monthly_requests, org_requests,
-            'The organization should have its monthly requests set.')
+        eq_(
+            response.status_code, 302,
+            'The user should be redirected to the activation page when creation is successful.'
+        )
+        org = muckrock.organization.models.Organization.objects.get(
+            name=org_name
+        )
+        ok_(org, 'The organization should be created.')
+        ok_(not org.active, 'The organization should be inactive.')
+        eq_(
+            org.owner, org_owner,
+            'The organization should have an owner assigned to it.'
+        )
+        eq_(
+            org.max_users, org_max,
+            'The organization should have its max users set.'
+        )
+        eq_(
+            org.monthly_cost, org_cost,
+            'The organization should have its monthly cost set.'
+        )
+        eq_(
+            org.monthly_requests, org_requests,
+            'The organization should have its monthly requests set.'
+        )
 
 
 class TestActivateView(TestCase):
     """Test the expectations of organization activation"""
+
     def setUp(self):
         self.org = muckrock.factories.OrganizationFactory()
         self.request_factory = RequestFactory()
         self.url = reverse('org-activate', kwargs={'slug': self.org.slug})
-        self.view = muckrock.organization.views.OrganizationActivateView.as_view()
+        self.view = muckrock.organization.views.OrganizationActivateView.as_view(
+        )
 
     def test_regular_get(self):
         """Regular users should be denied access to the activation view."""
@@ -180,14 +217,19 @@ class TestActivateView(TestCase):
         request.user = self.org.owner
         response = self.view(request, slug=self.org.slug)
         self.org.refresh_from_db()
-        eq_(response.status_code, 302,
-            'The view should redirect to the org page on success.')
-        ok_(mock_activation.called,
-            'The organization should be activated! That\'s the whole point!')
+        eq_(
+            response.status_code, 302,
+            'The view should redirect to the org page on success.'
+        )
+        ok_(
+            mock_activation.called,
+            'The organization should be activated! That\'s the whole point!'
+        )
 
 
 class TestDeactivateView(TestCase):
     """Only staff and owners should be allowed to POST to the deactivation view."""
+
     def setUp(self):
         # create an org with a plan, so we can cancel it
         self.org = muckrock.factories.OrganizationFactory(active=True)
@@ -236,8 +278,11 @@ class TestUpdateView(TestCase):
     It should provide staff with a form for updating the underlying basics of the organization,
     then handle updating those fundamentals before updating the subscription.
     """
+
     def setUp(self):
-        self.org = muckrock.factories.OrganizationFactory(active=True, stripe_id='test')
+        self.org = muckrock.factories.OrganizationFactory(
+            active=True, stripe_id='test'
+        )
         self.request_factory = RequestFactory()
         self.url = reverse('org-update', kwargs={'slug': self.org.slug})
         self.view = muckrock.organization.views.OrganizationUpdateView.as_view()
@@ -258,8 +303,12 @@ class TestUpdateView(TestCase):
         request.user = self.org.owner
         response = self.view(request, slug=self.org.slug)
         eq_(response.status_code, 200)
-        ok_(isinstance(response.context_data['form'], muckrock.organization.forms.UpdateForm),
-            'Owners should be shown an organization update form.')
+        ok_(
+            isinstance(
+                response.context_data['form'],
+                muckrock.organization.forms.UpdateForm
+            ), 'Owners should be shown an organization update form.'
+        )
 
     def test_staff_get(self):
         """Staff users should have access to the update view."""
@@ -269,8 +318,13 @@ class TestUpdateView(TestCase):
         request.user = staff_user
         response = self.view(request, slug=self.org.slug)
         eq_(response.status_code, 200)
-        ok_(isinstance(response.context_data['form'], muckrock.organization.forms.StaffUpdateForm),
-            'Staff should be shown a special staff-only organization update form.')
+        ok_(
+            isinstance(
+                response.context_data['form'],
+                muckrock.organization.forms.StaffUpdateForm
+            ),
+            'Staff should be shown a special staff-only organization update form.'
+        )
 
     def test_inactive_get(self):
         """Inactive organizations cannot be updated."""
@@ -292,8 +346,10 @@ class TestUpdateView(TestCase):
         request.user = self.org.owner
         response = self.view(request, slug=self.org.slug)
         self.org.refresh_from_db()
-        eq_(self.org.max_users, starting_max_users,
-            'The update view shouldn\'t modify the org itself.')
+        eq_(
+            self.org.max_users, starting_max_users,
+            'The update view shouldn\'t modify the org itself.'
+        )
         ok_(mock_update.called)
         eq_(response.status_code, 302)
 
@@ -331,6 +387,7 @@ class TestDeleteView(TestCase):
     The organization cannot be deleted.
     The delete method should be called by the organization upon POST.
     """
+
     def setUp(self):
         self.org = muckrock.factories.OrganizationFactory()
         self.request_factory = RequestFactory()
@@ -372,6 +429,7 @@ class TestDeleteView(TestCase):
 
 class TestDetailView(TestCase):
     """From the organization detail view, owners can add and remove users."""
+
     def setUp(self):
         self.org = muckrock.factories.OrganizationFactory(active=True)
         self.request_factory = RequestFactory()
@@ -507,10 +565,7 @@ class TestDetailView(TestCase):
     def test_staff_remove(self):
         """A staff user should be able to remove members."""
         member = muckrock.factories.UserFactory(profile__organization=self.org)
-        data = {
-            'action': 'remove_member',
-            'member': member.pk
-        }
+        data = {'action': 'remove_member', 'member': member.pk}
         request = self.request_factory.post(self.url, data)
         request = mock_middleware(request)
         request.user = muckrock.factories.UserFactory(is_staff=True)
@@ -520,10 +575,7 @@ class TestDetailView(TestCase):
     def test_owner_remove(self):
         """The owner should be able to remove members."""
         member = muckrock.factories.UserFactory(profile__organization=self.org)
-        data = {
-            'action': 'remove_member',
-            'member': member.pk
-        }
+        data = {'action': 'remove_member', 'member': member.pk}
         request = self.request_factory.post(self.url, data)
         request = mock_middleware(request)
         request.user = self.org.owner
@@ -533,10 +585,7 @@ class TestDetailView(TestCase):
     def test_user_remove(self):
         """Regular user should not be able to remove members."""
         member = muckrock.factories.UserFactory(profile__organization=self.org)
-        data = {
-            'action': 'remove_member',
-            'member': member.pk
-        }
+        data = {'action': 'remove_member', 'member': member.pk}
         request = self.request_factory.post(self.url, data)
         request = mock_middleware(request)
         request.user = muckrock.factories.UserFactory()
@@ -546,10 +595,7 @@ class TestDetailView(TestCase):
     def test_remove_self(self):
         """However, a member may remove themself from an org."""
         member = muckrock.factories.UserFactory(profile__organization=self.org)
-        data = {
-            'action': 'remove_member',
-            'member': member.pk
-        }
+        data = {'action': 'remove_member', 'member': member.pk}
         request = self.request_factory.post(self.url, data)
         request = mock_middleware(request)
         request.user = member

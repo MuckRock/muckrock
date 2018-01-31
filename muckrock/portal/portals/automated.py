@@ -2,9 +2,11 @@
 Shared logic for handling automated portal processing
 """
 
-from datetime import datetime
+# Standard Library
 import re
+from datetime import datetime
 
+# MuckRock
 from muckrock.communication.models import PortalCommunication
 from muckrock.foia.tasks import classify_status
 from muckrock.task.models import ResponseTask
@@ -21,7 +23,7 @@ class PortalAutoReceiveMixin(object):
     def __init__(self, *args, **kwargs):
         """Initialize the router"""
         self._router = [(re.compile(pattern), getattr(self, method))
-                for pattern, method in self.router]
+                        for pattern, method in self.router]
         super(PortalAutoReceiveMixin, self).__init__(*args, **kwargs)
 
     def receive_msg(self, comm, **kwargs):
@@ -35,9 +37,9 @@ class PortalAutoReceiveMixin(object):
                 break
         else:
             super(PortalAutoReceiveMixin, self).receive_msg(
-                    comm,
-                    reason=self.error_msg,
-                    )
+                comm,
+                reason=self.error_msg,
+            )
 
     def _accept_comm(self, comm, text):
         """Accept a communication onto the site"""
@@ -48,8 +50,8 @@ class PortalAutoReceiveMixin(object):
         task = ResponseTask.objects.create(communication=comm)
         classify_status.apply_async(args=(task.pk,), countdown=30 * 60)
         PortalCommunication.objects.create(
-                communication=comm,
-                sent_datetime=datetime.now(),
-                portal=self.portal,
-                direction='incoming',
-                )
+            communication=comm,
+            sent_datetime=datetime.now(),
+            portal=self.portal,
+            direction='incoming',
+        )

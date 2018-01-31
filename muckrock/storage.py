@@ -2,10 +2,13 @@
 Cache classes that extend S3, for asset compression
 """
 
+# Django
 from django.core.files.storage import get_storage_class
 
-from storages.backends.s3boto import S3BotoStorage
+# Third Party
 from queued_storage.backends import QueuedStorage
+from storages.backends.s3boto import S3BotoStorage
+
 
 # pylint: disable=abstract-method
 class CachedS3BotoStorage(S3BotoStorage):
@@ -13,9 +16,12 @@ class CachedS3BotoStorage(S3BotoStorage):
     S3 storage backend that saves the files locally, too.
     via http://django-compressor.readthedocs.org/en/latest/remote-storages/#using-staticfiles
     """
+
     def __init__(self, *args, **kwargs):
         super(CachedS3BotoStorage, self).__init__(*args, **kwargs)
-        self.local_storage = get_storage_class("compressor.storage.CompressorFileStorage")()
+        self.local_storage = get_storage_class(
+            "compressor.storage.CompressorFileStorage"
+        )()
 
     # pylint: disable=protected-access
     def save(self, name, content, max_length=None):
@@ -43,16 +49,24 @@ class QueuedS3DietStorage(QueuedStorage):
     Use S3 as the "local" storage and image_diet as the "remote"
     Since all files live on S3 we don't need to cache which storage the file is on
     """
-    def __init__(self,
-            local='storages.backends.s3boto.S3BotoStorage',
-            remote='image_diet.storage.DietStorage',
-            remote_options=None,
-            *args, **kwargs):
+
+    def __init__(
+        self,
+        local='storages.backends.s3boto.S3BotoStorage',
+        remote='image_diet.storage.DietStorage',
+        remote_options=None,
+        *args,
+        **kwargs
+    ):
         if remote_options is None:
             remote_options = {'file_overwrite': True}
         super(QueuedS3DietStorage, self).__init__(
-                local=local, remote=remote, remote_options=remote_options,
-                *args, **kwargs)
+            local=local,
+            remote=remote,
+            remote_options=remote_options,
+            *args,
+            **kwargs
+        )
 
     def get_storage(self, name):
         """No need to check cache, just always return local"""

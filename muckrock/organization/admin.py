@@ -2,22 +2,23 @@
 Admin registration for organization models
 """
 
+# Django
 from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import User
 
+# Third Party
 from autocomplete_light import shortcuts as autocomplete_light
 from reversion.admin import VersionAdmin
 
+# MuckRock
 from muckrock.organization.models import Organization
 
 
 class OrganizationAdminForm(forms.ModelForm):
     """Agency admin form to order users"""
     owner = autocomplete_light.ModelChoiceField(
-        'UserAutocomplete',
-        queryset=User.objects.all(),
-        required=False
+        'UserAutocomplete', queryset=User.objects.all(), required=False
     )
 
     def clean_owner(self):
@@ -28,7 +29,6 @@ class OrganizationAdminForm(forms.ModelForm):
         return owner
 
     class Meta:
-        # pylint: disable=too-few-public-methods
         model = Organization
         fields = '__all__'
 

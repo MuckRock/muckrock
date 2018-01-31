@@ -2,6 +2,7 @@
 Feeds for the FOIA application
 """
 
+# Django
 # pylint: disable=no-name-in-module
 from django.contrib.auth.models import User
 from django.contrib.syndication.views import Feed
@@ -9,7 +10,9 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import escape, linebreaks
 
-from muckrock.foia.models import FOIARequest, FOIACommunication
+# MuckRock
+from muckrock.foia.models import FOIACommunication, FOIARequest
+
 
 class LatestSubmittedRequests(Feed):
     """An RSS Feed for submitted FOIA requests"""
@@ -19,13 +22,11 @@ class LatestSubmittedRequests(Feed):
 
     def items(self):
         """Return the items for the rss feed"""
-        # pylint: disable=no-self-use
-        return (FOIARequest.objects
-                .get_submitted()
-                .get_public()
-                .order_by('-date_submitted')
-                .select_related('jurisdiction')
-                .prefetch_related('communications')[:25])
+        return (
+            FOIARequest.objects.get_submitted().get_public()
+            .order_by('-date_submitted').select_related('jurisdiction')
+            .prefetch_related('communications')[:25]
+        )
 
     def item_description(self, item):
         """The description of each rss item"""
@@ -40,13 +41,11 @@ class LatestDoneRequests(Feed):
 
     def items(self):
         """Return the items for the rss feed"""
-        # pylint: disable=no-self-use
-        return (FOIARequest.objects
-                .get_done()
-                .get_public()
-                .order_by('-date_done')
-                .select_related('jurisdiction')
-                .prefetch_related('communications')[:25])
+        return (
+            FOIARequest.objects.get_done().get_public()
+            .order_by('-date_done').select_related('jurisdiction')
+            .prefetch_related('communications')[:25]
+        )
 
     def item_description(self, item):
         """The description of each rss item"""
@@ -55,7 +54,6 @@ class LatestDoneRequests(Feed):
 
 class FOIAFeed(Feed):
     """Feed for an individual FOI request"""
-    # pylint: disable=no-self-use
 
     def get_object(self, request, idx):
         """Get the FOIA Request for this feed"""
@@ -88,7 +86,6 @@ class FOIAFeed(Feed):
 
 class UserSubmittedFeed(Feed):
     """Feed for a user's new submitted requests"""
-    # pylint: disable=no-self-use
 
     def get_object(self, request, username):
         """Get the user for this feed"""
@@ -109,12 +106,12 @@ class UserSubmittedFeed(Feed):
 
     def items(self, obj):
         """The submitted requests are the items for this feed"""
-        return (FOIARequest.objects
-                .get_submitted()
-                .filter(user=obj, embargo=False)
-                .order_by('-date_submitted')
-                .select_related('jurisdiction')
-                .prefetch_related('communications')[:25])
+        return (
+            FOIARequest.objects.get_submitted().filter(
+                user=obj, embargo=False
+            ).order_by('-date_submitted').select_related('jurisdiction')
+            .prefetch_related('communications')[:25]
+        )
 
     def item_description(self, item):
         """The description of each rss item"""
@@ -123,7 +120,6 @@ class UserSubmittedFeed(Feed):
 
 class UserDoneFeed(Feed):
     """Feed for a user's completed requests"""
-    # pylint: disable=no-self-use
 
     def get_object(self, request, username):
         """Get the user for this feed"""
@@ -144,12 +140,11 @@ class UserDoneFeed(Feed):
 
     def items(self, obj):
         """The completed requests are the items for this feed"""
-        return (FOIARequest.objects
-                .get_done()
-                .filter(user=obj, embargo=False)
-                .order_by('-date_submitted')
-                .select_related('jurisdiction')
-                .prefetch_related('communications')[:25])
+        return (
+            FOIARequest.objects.get_done().filter(user=obj, embargo=False)
+            .order_by('-date_submitted').select_related('jurisdiction')
+            .prefetch_related('communications')[:25]
+        )
 
     def item_description(self, item):
         """The description of each rss item"""
@@ -158,7 +153,6 @@ class UserDoneFeed(Feed):
 
 class UserUpdateFeed(Feed):
     """Feed for updates to all of user's requests"""
-    # pylint: disable=no-self-use
 
     def get_object(self, request, username):
         """Get the user for this feed"""
@@ -179,12 +173,11 @@ class UserUpdateFeed(Feed):
 
     def items(self, obj):
         """The communications are the items for this feed"""
-        communications = (FOIACommunication.objects
-                .filter(foia__user=obj)
-                .exclude(foia__status='started')
-                .exclude(foia__embargo=True)
-                .select_related('foia__jurisdiction')
-                .order_by('-date'))
+        communications = (
+            FOIACommunication.objects.filter(foia__user=obj)
+            .exclude(foia__status='started').exclude(foia__embargo=True)
+            .select_related('foia__jurisdiction').order_by('-date')
+        )
         return communications[:25]
 
     def item_description(self, item):

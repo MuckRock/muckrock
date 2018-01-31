@@ -2,16 +2,19 @@
 Custom importers for addresses
 """
 
+# Django
 from django.conf import settings
 
-from boto.s3.connection import S3Connection
-from localflavor.us.us_states import STATE_CHOICES
-import unicodecsv as csv
+# Standard Library
 import re
 
-from muckrock.communication.models import (
-        Address,
-        )
+# Third Party
+import unicodecsv as csv
+from boto.s3.connection import S3Connection
+from localflavor.us.us_states import STATE_CHOICES
+
+# MuckRock
+from muckrock.communication.models import Address
 
 # columns
 AGENCY_PK = 0
@@ -34,10 +37,13 @@ p_zip = re.compile(r'^\d{5}(?:-\d{4})?$')
 
 # pylint: disable=broad-except
 
+
 def import_addresses(file_name):
     """Import addresses from spreadsheet"""
     # pylint: disable=too-many-locals
-    conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
+    conn = S3Connection(
+        settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY
+    )
     bucket = conn.get_bucket('muckrock')
     key = bucket.get_key(file_name)
     key.get_contents_to_filename('/tmp/tmp.csv')
@@ -63,9 +69,9 @@ def import_addresses(file_name):
                 address.state = row[STATE].strip()
                 address.zip_code = row[ZIP].strip()
                 address.point = {
-                        'type': 'Point',
-                        'coordinates': [row[LONG].strip(), row[LAT].strip()],
-                        }
+                    'type': 'Point',
+                    'coordinates': [row[LONG].strip(), row[LAT].strip()],
+                }
                 address.agency_override = row[AGENCY_OVERRIDE].strip()
                 address.attn_override = row[ATTN_OVERRIDE].strip()
                 try:

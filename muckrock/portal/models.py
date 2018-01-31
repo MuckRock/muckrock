@@ -1,35 +1,35 @@
 # -*- coding: utf-8 -*-
 """Models for the portal application"""
 
+# Django
 from django.db import models
 
-
 PORTAL_TYPES = [
-        ('foiaonline', 'FOIAonline'),
-        ('govqa', 'GovQA'),
-        ('nextrequest', 'NextRequest'),
-        ('foiaxpress', 'FOIAXpress'),
-        ('fbi', 'FBI eFOIPA Portal'),
-        ('other', 'Other'),
-        ]
+    ('foiaonline', 'FOIAonline'),
+    ('govqa', 'GovQA'),
+    ('nextrequest', 'NextRequest'),
+    ('foiaxpress', 'FOIAXpress'),
+    ('fbi', 'FBI eFOIPA Portal'),
+    ('other', 'Other'),
+]
 
 
 class Portal(models.Model):
     """An instance of an agency portal"""
     url = models.URLField(
-            max_length=255,
-            unique=True,
-            )
+        max_length=255,
+        unique=True,
+    )
     name = models.CharField(max_length=255)
     type = models.CharField(
-            choices=PORTAL_TYPES,
-            max_length=11,
-            )
+        choices=PORTAL_TYPES,
+        max_length=11,
+    )
     status = models.CharField(
-            max_length=5,
-            choices=(('good', 'Good'), ('error', 'Error')),
-            default='good',
-            )
+        max_length=5,
+        choices=(('good', 'Good'), ('error', 'Error')),
+        default='good',
+    )
     created_timestamp = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
@@ -39,16 +39,16 @@ class Portal(models.Model):
     def portal_type(self):
         """Get an instance of the portal type logic"""
         from muckrock.portal.portals import (
-                ManualPortal,
-                NextRequestPortal,
-                FBIPortal,
-                )
+            ManualPortal,
+            NextRequestPortal,
+            FBIPortal,
+        )
         # pylint: disable=access-member-before-definition
         # pylint: disable=attribute-defined-outside-init
         portal_classes = {
-                'nextrequest': NextRequestPortal,
-                'fbi': FBIPortal,
-                }
+            'nextrequest': NextRequestPortal,
+            'fbi': FBIPortal,
+        }
         if hasattr(self, '_portal_type'):
             return self._portal_type
         else:

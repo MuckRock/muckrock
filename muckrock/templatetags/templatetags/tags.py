@@ -2,30 +2,36 @@
 General temaplate tags
 """
 
+# Django
 from django import template
 from django.conf import settings
 from django.core.cache import InvalidCacheBackendError, caches
 from django.core.cache.utils import make_template_fragment_key
 from django.template import (
-        Library,
-        Node,
-        VariableDoesNotExist,
-        TemplateSyntaxError,
-        )
+    Library,
+    Node,
+    TemplateSyntaxError,
+    VariableDoesNotExist,
+)
 from django.template.defaultfilters import stringfilter
 from django.utils.safestring import mark_safe
 
-import bleach
-from email.parser import Parser
-import markdown
+# Standard Library
 import re
-from urllib import urlencode
 import zlib
+from email.parser import Parser
+from urllib import urlencode
 
+# Third Party
+import bleach
+import markdown
+
+# MuckRock
 from muckrock.forms import NewsletterSignupForm, TagManagerForm
 from muckrock.project.forms import ProjectManagerForm
 
 register = Library()
+
 
 @register.simple_tag
 def autologin(user):
@@ -33,6 +39,7 @@ def autologin(user):
     if user and user.is_authenticated():
         return urlencode(user.profile.autologin())
     return ''
+
 
 @register.simple_tag
 def active(request, pattern):
@@ -42,12 +49,14 @@ def active(request, pattern):
         return 'current-tab'
     return ''
 
+
 @register.simple_tag
 def page_link(request, page_num):
     """Generates a pagination link that preserves context"""
     query = request.GET.copy()
     query['page'] = page_num
     return '?' + query.urlencode()
+
 
 @register.filter
 @stringfilter
@@ -64,7 +73,11 @@ def abs_filter(value):
     """Absolute value of a number"""
     return abs(value)
 
-email_re = re.compile(r'[a-zA-Z0-9._%+-]+@(?P<domain>[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4})')
+
+email_re = re.compile(
+    r'[a-zA-Z0-9._%+-]+@(?P<domain>[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4})'
+)
+
 
 def email_redactor(match):
     """Don't redact muckrock emails"""
@@ -73,18 +86,22 @@ def email_redactor(match):
     else:
         return 'requests@muckrock.com'
 
+
 @register.filter('fieldtype')
 def fieldtype(field):
     """Returns the name of the class."""
     return field.field.widget.__class__.__name__
+
 
 @register.filter
 def redact_emails(text):
     """Redact emails from text"""
     return email_re.sub(email_redactor, text)
 
+
 # http://stackoverflow.com/questions/1278042/
 # in-django-is-there-an-easy-way-to-render-a-text-field-as-a-template-in-a-templ/1278507#1278507
+
 
 @register.tag(name="evaluate")
 def do_evaluate(parser, token):
@@ -95,12 +112,15 @@ def do_evaluate(parser, token):
     try:
         _, variable = token.split_contents()
     except ValueError:
-        raise template.TemplateSyntaxError("%r tag requires a single argument" %
-                                           token.contents.split()[0])
+        raise template.TemplateSyntaxError(
+            "%r tag requires a single argument" % token.contents.split()[0]
+        )
     return EvaluateNode(variable)
+
 
 class EvaluateNode(template.Node):
     """Node for do_evaluate"""
+
     def __init__(self, variable):
         # pylint: disable=super-init-not-called
         self.variable = template.Variable(variable)
@@ -112,6 +132,7 @@ class EvaluateNode(template.Node):
             return tmpl.render(context)
         except (template.VariableDoesNotExist, template.TemplateSyntaxError):
             return 'Error rendering', self.variable
+
 
 @register.inclusion_tag('tags/tag_manager.html', takes_context=True)
 def tag_manager(context, mr_object):
@@ -133,6 +154,7 @@ def tag_manager(context, mr_object):
         'endpoint': mr_object.get_absolute_url()
     }
 
+
 @register.inclusion_tag('project/component/manager.html', takes_context=True)
 def project_manager(context, mr_object):
     """Template tag to insert a project manager component"""
@@ -147,9 +169,9 @@ def project_manager(context, mr_object):
     user = context['user']
     authorized = user.is_staff or user == owner
     form = ProjectManagerForm(
-            initial={'projects': [project.pk for project in projects]},
-            user=user,
-            )
+        initial={'projects': [project.pk for project in projects]},
+        user=user,
+    )
     has_projects = user.is_authenticated and user.projects.exists()
     return {
         'projects': projects,
@@ -158,6 +180,7 @@ def project_manager(context, mr_object):
         'endpoint': mr_object.get_absolute_url(),
         'has_projects': has_projects,
     }
+
 
 @register.inclusion_tag('lib/social.html', takes_context=True)
 def social(context, title=None, url=None):
@@ -171,6 +194,7 @@ def social(context, title=None, url=None):
         'title': title,
         'url': url,
     }
+
 
 @register.inclusion_tag('lib/newsletter.html', takes_context=True)
 def newsletter(context, list_id=None, label=None, cta=None):
@@ -192,6 +216,7 @@ def newsletter(context, list_id=None, label=None, cta=None):
         'newsletter_form': newsletter_form
     }
 
+
 @register.filter
 def display_eml(foia_file):
     """Extract text from eml file for display"""
@@ -203,10 +228,12 @@ def display_eml(foia_file):
             if sub_msg.get_content_type() == 'text/plain':
                 return sub_msg.get_payload(decode=True)
 
+
 @register.filter
 def get_item(dictionary, key):
     """Get an item from a dictionary template filter"""
     return dictionary.get(key)
+
 
 @register.filter
 def smartypants(text):
@@ -215,16 +242,17 @@ def smartypants(text):
     smart_text = _smartypants.smartypants(text)
     return mark_safe(bleach.clean(smart_text))
 
+
 @register.filter(name='markdown')
 @stringfilter
 def markdown_filter(text, _safe=None):
     """Take the provided markdown-formatted text and convert it to HTML."""
     # First render Markdown
     extensions = [
-            'markdown.extensions.smarty',
-            'markdown.extensions.tables',
-            'pymdownx.magiclink',
-            ]
+        'markdown.extensions.smarty',
+        'markdown.extensions.tables',
+        'pymdownx.magiclink',
+    ]
     markdown_text = markdown.markdown(text, extensions=extensions)
     # Next bleach the markdown
     allowed_tags = bleach.ALLOWED_TAGS + [
@@ -241,7 +269,10 @@ def markdown_filter(text, _safe=None):
     ]
     allowed_attributes = bleach.ALLOWED_ATTRIBUTES.copy()
     allowed_attributes.update({
-        'iframe': ['src', 'width', 'height', 'frameborder', 'marginheight', 'marginwidth'],
+        'iframe': [
+            'src', 'width', 'height', 'frameborder', 'marginheight',
+            'marginwidth'
+        ],
         'img': ['src', 'alt', 'title', 'width', 'height'],
         'a': ['href', 'title', 'name'],
     })
@@ -257,9 +288,7 @@ def markdown_filter(text, _safe=None):
         )
     else:
         bleached_text = bleach.clean(
-            markdown_text,
-            tags=allowed_tags,
-            attributes=allowed_attributes
+            markdown_text, tags=allowed_tags, attributes=allowed_attributes
         )
     return mark_safe(bleached_text)
 
@@ -274,8 +303,16 @@ def nofollow(value):
 
 class CacheNode(Node):
     """Cache Node for condtional cache tag"""
-    def __init__(self, nodelist, expire_time_var, fragment_name,
-            vary_on, cache_name, compress=False):
+
+    def __init__(
+        self,
+        nodelist,
+        expire_time_var,
+        fragment_name,
+        vary_on,
+        cache_name,
+        compress=False
+    ):
         # pylint: disable=too-many-arguments
         self.nodelist = nodelist
         self.expire_time_var = expire_time_var
@@ -290,24 +327,32 @@ class CacheNode(Node):
             expire_time = self.expire_time_var.resolve(context)
         except VariableDoesNotExist:
             raise TemplateSyntaxError(
-                    '"cache" tag got an unknown variable: %r' % self.expire_time_var.var)
+                '"cache" tag got an unknown variable: %r' %
+                self.expire_time_var.var
+            )
         if expire_time is not None:
             try:
                 expire_time = int(expire_time)
             except (ValueError, TypeError):
                 raise TemplateSyntaxError(
-                        '"cache" tag got a non-integer timeout value: %r' % expire_time)
+                    '"cache" tag got a non-integer timeout value: %r' %
+                    expire_time
+                )
         if self.cache_name:
             try:
                 cache_name = self.cache_name.resolve(context)
             except VariableDoesNotExist:
                 raise TemplateSyntaxError(
-                        '"cache" tag got an unknown variable: %r' % self.cache_name.var)
+                    '"cache" tag got an unknown variable: %r' %
+                    self.cache_name.var
+                )
             try:
                 fragment_cache = caches[cache_name]
             except InvalidCacheBackendError:
                 raise TemplateSyntaxError(
-                        'Invalid cache name specified for cache tag: %r' % cache_name)
+                    'Invalid cache name specified for cache tag: %r' %
+                    cache_name
+                )
         else:
             try:
                 fragment_cache = caches['template_fragments']
@@ -331,7 +376,10 @@ class CacheNode(Node):
             if value is None:
                 value = self.nodelist.render(context)
                 if self.compress:
-                    fragment_cache.set(cache_key, zlib.compress(value.encode('utf8')), expire_time)
+                    fragment_cache.set(
+                        cache_key, zlib.compress(value.encode('utf8')),
+                        expire_time
+                    )
                 else:
                     fragment_cache.set(cache_key, value, expire_time)
             return value
@@ -345,18 +393,21 @@ def parse_cache(parser, token):
     parser.delete_first_token()
     tokens = token.split_contents()
     if len(tokens) < 3:
-        raise TemplateSyntaxError("'%r' tag requires at least 2 arguments." % tokens[0])
+        raise TemplateSyntaxError(
+            "'%r' tag requires at least 2 arguments." % tokens[0]
+        )
     if len(tokens) > 3 and tokens[-1].startswith('using='):
         cache_name = parser.compile_filter(tokens[-1][len('using='):])
         tokens = tokens[:-1]
     else:
         cache_name = None
     return (
-        nodelist, parser.compile_filter(tokens[1]),
+        nodelist,
+        parser.compile_filter(tokens[1]),
         tokens[2],  # fragment_name can't be a variable.
         [parser.compile_filter(t) for t in tokens[3:]],
         cache_name,
-        )
+    )
 
 
 @register.tag('cond_cache')

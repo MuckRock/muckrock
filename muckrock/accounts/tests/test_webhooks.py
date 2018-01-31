@@ -2,17 +2,24 @@
 Tests accounts webhook handling
 """
 
+# Django
 from django.core.urlresolvers import reverse
-from django.test import TestCase, RequestFactory
+from django.test import RequestFactory, TestCase
 
+# Standard Library
 import json
+
+# Third Party
 from mock import patch
 from nose.tools import eq_
 
+# MuckRock
 from muckrock.accounts.views import stripe_webhook
+
 
 class TestStripeWebhook(TestCase):
     """The Stripe webhook listens for events in order to issue receipts."""
+
     def setUp(self):
         self.mock_event = {
             'id': 'test-event',
@@ -33,19 +40,17 @@ class TestStripeWebhook(TestCase):
         response = stripe_webhook(get_request)
         eq_(response.status_code, 405, 'Should respond to GET request with 405')
         post_request = self.request_factory.post(
-            self.url,
-            data=self.data,
-            content_type='application/json'
+            self.url, data=self.data, content_type='application/json'
         )
         response = stripe_webhook(post_request)
-        eq_(response.status_code, 200, 'Should respond to POST request with 200')
+        eq_(
+            response.status_code, 200, 'Should respond to POST request with 200'
+        )
 
     def test_bad_json(self):
         """POSTing bad JSON should return a 400 status code."""
         post_request = self.request_factory.post(
-            self.url,
-            data=u'Not JSON',
-            content_type='application/json'
+            self.url, data=u'Not JSON', content_type='application/json'
         )
         response = stripe_webhook(post_request)
         eq_(response.status_code, 400)
@@ -54,9 +59,7 @@ class TestStripeWebhook(TestCase):
         """POSTing unexpected JSON should return a 400 status code."""
         bad_data = json.dumps({'hello': 'world'})
         post_request = self.request_factory.post(
-            self.url,
-            data=bad_data,
-            content_type='application/json'
+            self.url, data=bad_data, content_type='application/json'
         )
         response = stripe_webhook(post_request)
         eq_(response.status_code, 400)
@@ -81,7 +84,8 @@ class TestStripeWebhook(TestCase):
         post_request = self.request_factory.post(
             self.url,
             data=json.dumps(self.mock_event),
-            content_type='application/json')
+            content_type='application/json'
+        )
         response = stripe_webhook(post_request)
         eq_(response.status_code, 200)
         mock_task.called_once()

@@ -2,22 +2,26 @@
 Celery tasks for the task application
 """
 
-from django.contrib.auth.models import User
+# Django
+from celery.task import task
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 
-from celery.task import task
-
-from boto.s3.connection import S3Connection
-from boto.s3.key import Key
+# Standard Library
 from cStringIO import StringIO
 from datetime import datetime
+
+# Third Party
+from boto.s3.connection import S3Connection
+from boto.s3.key import Key
 from fpdf import FPDF
 from PyPDF2 import PdfFileMerger
 from PyPDF2.utils import PdfReadError
 
+# MuckRock
 from muckrock.communication.models import MailCommunication
-from muckrock.foia.models import FOIARequest, FOIACommunication
+from muckrock.foia.models import FOIACommunication, FOIARequest
 from muckrock.task.models import SnailMailTask
 from muckrock.task.pdf import CoverPDF, SnailMailPDF
 
@@ -30,13 +34,13 @@ def submit_review_update(foia_pks, reply_text, **kwargs):
     muckrock_staff = User.objects.get(username='MuckrockStaff')
     for foia in foias:
         FOIACommunication.objects.create(
-                foia=foia,
-                from_user=muckrock_staff,
-                to_user=foia.get_to_user(),
-                date=datetime.now(),
-                response=False,
-                communication=reply_text,
-                )
+            foia=foia,
+            from_user=muckrock_staff,
+            to_user=foia.get_to_user(),
+            date=datetime.now(),
+            response=False,
+            communication=reply_text,
+        )
         foia.submit(switch=True)
 
 
@@ -47,11 +51,10 @@ def snail_mail_bulk_pdf_task(pdf_name, **kwargs):
     # pylint: disable=unused-argument
     cover_info = []
     bulk_merger = PdfFileMerger()
-    snails = (SnailMailTask.objects
-            .filter(resolved=False)
-            .order_by('communication__foia__agency')
-            .preload_pdf()
-            )
+    snails = (
+        SnailMailTask.objects.filter(resolved=False)
+        .order_by('communication__foia__agency').preload_pdf()
+    )
     blank_pdf = FPDF()
     blank_pdf.add_page()
     blank = StringIO(blank_pdf.output(dest='S'))
@@ -60,8 +63,7 @@ def snail_mail_bulk_pdf_task(pdf_name, **kwargs):
         pdf = SnailMailPDF(snail.communication, snail.category)
         pdf.generate()
         single_merger = PdfFileMerger()
-        single_merger.append(
-            StringIO(pdf.output(dest='S')))
+        single_merger.append(StringIO(pdf.output(dest='S')))
         files = []
         for file_ in snail.communication.files.all():
             if file_.get_extension() == 'pdf':
@@ -78,17 +80,17 @@ def snail_mail_bulk_pdf_task(pdf_name, **kwargs):
 
         # attach to the mail communication
         mail, _ = MailCommunication.objects.update_or_create(
-                communication=snail.communication,
-                defaults={
-                    'to_address': snail.communication.foia.address,
-                    'sent_datetime': datetime.now(),
-                    }
-                )
+            communication=snail.communication,
+            defaults={
+                'to_address': snail.communication.foia.address,
+                'sent_datetime': datetime.now(),
+            }
+        )
         single_pdf.seek(0)
         mail.pdf.save(
-                '{}.pdf'.format(snail.communication.pk),
-                ContentFile(single_pdf.read()),
-                )
+            '{}.pdf'.format(snail.communication.pk),
+            ContentFile(single_pdf.read()),
+        )
 
         # append to the bulk pdf
         single_pdf.seek(0)
@@ -109,7 +111,9 @@ def snail_mail_bulk_pdf_task(pdf_name, **kwargs):
     bulk_merger.write(bulk_pdf)
     bulk_pdf.seek(0)
 
-    conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
+    conn = S3Connection(
+        settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY
+    )
     bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
     key = Key(bucket)
     key.key = pdf_name

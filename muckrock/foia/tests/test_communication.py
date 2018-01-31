@@ -2,31 +2,35 @@
 Tests for the FOIACommunication model
 """
 
+# Django
 from django import test
 from django.core.urlresolvers import reverse
 
+# Standard Library
 import logging
-from mock import patch
-import nose
-from nose.tools import ok_, eq_, raises
 import os
 
+# Third Party
+import nose
+from mock import patch
+from nose.tools import eq_, ok_, raises
+
+# MuckRock
 from muckrock import factories
 from muckrock.communication.models import EmailAddress
-from muckrock.foia.models import (
-        FOIACommunication,
-        CommunicationMoveLog,
-        )
+from muckrock.foia.models import CommunicationMoveLog, FOIACommunication
 from muckrock.foia.views import raw
 
 
 class TestCommunication(test.TestCase):
     """Tests communication methods"""
+
     def setUp(self):
         self.foia = factories.FOIARequestFactory()
         self.comm = factories.FOIACommunicationFactory(
             foia=self.foia,
-            email__from_email=EmailAddress.objects.fetch(u'Test Email <test@email.com>'),
+            email__from_email=EmailAddress.objects.
+            fetch(u'Test Email <test@email.com>'),
         )
         self.file = factories.FOIAFileFactory(comm=self.comm)
         eq_(self.comm.files.count(), 1)
@@ -39,7 +43,6 @@ class TestCommunication(test.TestCase):
 
     def test_attach_file_with_file(self):
         """Test attaching a file with an actual file"""
-        # pylint: disable=no-self-use
         comm = factories.FOIACommunicationFactory()
         file_ = open('tmp.txt', 'w')
         file_.write('The file contents')
@@ -56,7 +59,6 @@ class TestCommunication(test.TestCase):
 
     def test_attach_file_with_content(self):
         """Test attaching a file with n memory content"""
-        # pylint: disable=no-self-use
         comm = factories.FOIACommunicationFactory()
         comm.attach_file(content='More contents', name='doc.pdf')
         eq_(comm.files.count(), 1)
@@ -82,6 +84,7 @@ class TestCommunication(test.TestCase):
 
 class TestCommunicationMove(test.TestCase):
     """Tests the move method"""
+
     def setUp(self):
         self.foia1 = factories.FOIARequestFactory()
         self.foia2 = factories.FOIARequestFactory()
@@ -94,26 +97,37 @@ class TestCommunicationMove(test.TestCase):
     def test_move_single_comm(self, mock_upload):
         """Should change the request associated with the communication."""
         moved_comms = self.comm.move(self.foia2.id, self.user)
-        eq_(len(moved_comms), 1,
-            'Move function should only return one item')
+        eq_(len(moved_comms), 1, 'Move function should only return one item')
         moved_comm = moved_comms[0]
-        eq_(moved_comm, self.comm,
-            'Communication returned should be the same as the one acted on.')
-        eq_(moved_comm.foia.id, self.foia2.id,
-            'Should change the FOIA associated with the communication.')
+        eq_(
+            moved_comm, self.comm,
+            'Communication returned should be the same as the one acted on.'
+        )
+        eq_(
+            moved_comm.foia.id, self.foia2.id,
+            'Should change the FOIA associated with the communication.'
+        )
         moved_files = moved_comm.files.all()
         moved_file = moved_files[0]
-        logging.debug('File foia: %d; Expected: %d', moved_file.foia.id, self.foia2.id)
-        eq_(moved_file.foia, self.foia2,
-            'Should also change the files to reference the destination FOIA.')
-        eq_(moved_file.comm, self.comm,
-            'Should not have changed the communication associated with the file.')
+        logging.debug(
+            'File foia: %d; Expected: %d', moved_file.foia.id, self.foia2.id
+        )
+        eq_(
+            moved_file.foia, self.foia2,
+            'Should also change the files to reference the destination FOIA.'
+        )
+        eq_(
+            moved_file.comm, self.comm,
+            'Should not have changed the communication associated with the file.'
+        )
         # a move log should be generated
-        ok_(CommunicationMoveLog.objects.filter(
-            communication=moved_comm,
-            foia=self.foia1,
-            user=self.user,
-            ).exists())
+        ok_(
+            CommunicationMoveLog.objects.filter(
+                communication=moved_comm,
+                foia=self.foia1,
+                user=self.user,
+            ).exists()
+        )
         mock_upload.assert_called()
 
     @patch('muckrock.foia.tasks.upload_document_cloud.apply_async')
@@ -123,23 +137,35 @@ class TestCommunicationMove(test.TestCase):
         comms = self.comm.move([self.foia1.id, self.foia2.id], self.user)
         # + 1 communications created
         self.comm.refresh_from_db()
-        eq_(self.comm.foia.id, self.foia1.id,
-            'The communication should be moved to the first listed request.')
-        eq_(FOIACommunication.objects.count(), comm_count + 1,
-            'A clone should be made for each additional request in the list.')
-        eq_(len(comms), 2,
-            'Two communications should be returned, since two were operated on.')
-        eq_(self.comm.pk, comms[0].pk,
-            'The first communication in the list should be this one.')
-        ok_(comms[1].pk is not self.comm.pk,
-            'The second communication should be a new one, since it was cloned.')
+        eq_(
+            self.comm.foia.id, self.foia1.id,
+            'The communication should be moved to the first listed request.'
+        )
+        eq_(
+            FOIACommunication.objects.count(), comm_count + 1,
+            'A clone should be made for each additional request in the list.'
+        )
+        eq_(
+            len(comms), 2,
+            'Two communications should be returned, since two were operated on.'
+        )
+        eq_(
+            self.comm.pk, comms[0].pk,
+            'The first communication in the list should be this one.'
+        )
+        ok_(
+            comms[1].pk is not self.comm.pk,
+            'The second communication should be a new one, since it was cloned.'
+        )
         # each comm should have a move log generated for it
         for comm in comms:
-            ok_(CommunicationMoveLog.objects.filter(
-                communication=comm,
-                foia=self.foia1,
-                user=self.user,
-                ).exists())
+            ok_(
+                CommunicationMoveLog.objects.filter(
+                    communication=comm,
+                    foia=self.foia1,
+                    user=self.user,
+                ).exists()
+            )
         mock_upload.assert_called()
 
     @raises(ValueError)
@@ -148,8 +174,10 @@ class TestCommunicationMove(test.TestCase):
         original_request = self.comm.foia.id
         self.comm.move('abc', self.user)
         self.comm.refresh_from_db()
-        eq_(self.comm.foia.id, original_request,
-            'If something goes wrong, the move should not complete.')
+        eq_(
+            self.comm.foia.id, original_request,
+            'If something goes wrong, the move should not complete.'
+        )
 
     @raises(ValueError)
     def test_move_empty_list(self):
@@ -157,8 +185,10 @@ class TestCommunicationMove(test.TestCase):
         original_request = self.comm.foia.id
         self.comm.move([], self.user)
         self.comm.refresh_from_db()
-        eq_(self.comm.foia.id, original_request,
-            'If something goes wrong, the move should not complete.')
+        eq_(
+            self.comm.foia.id, original_request,
+            'If something goes wrong, the move should not complete.'
+        )
 
     def test_move_missing_ffile(self):
         """
@@ -172,6 +202,7 @@ class TestCommunicationMove(test.TestCase):
 
 class TestCommunicationClone(test.TestCase):
     """Tests the clone method"""
+
     def setUp(self):
         self.comm = factories.FOIACommunicationFactory()
         self.file = factories.FOIAFileFactory(comm=self.comm)
@@ -186,21 +217,27 @@ class TestCommunicationClone(test.TestCase):
         comm_pk = self.comm.pk
         clone_comm = self.comm.clone([other_foia.pk], self.user)
         # + 1 communications
-        eq_(FOIACommunication.objects.count(), comm_count + 1,
-            'Should clone the request once.')
-        eq_(self.comm.pk, comm_pk,
-            'The identity of the communication that calls clone should not change.')
+        eq_(
+            FOIACommunication.objects.count(), comm_count + 1,
+            'Should clone the request once.'
+        )
+        eq_(
+            self.comm.pk, comm_pk,
+            'The identity of the communication that calls clone should not change.'
+        )
         # a move log should be generated for cloned request
-        ok_(CommunicationMoveLog.objects.filter(
-            communication=clone_comm[0],
-            foia=self.comm.foia,
-            user=self.user,
-            ).exists())
+        ok_(
+            CommunicationMoveLog.objects.filter(
+                communication=clone_comm[0],
+                foia=self.comm.foia,
+                user=self.user,
+            ).exists()
+        )
         # a move log should not be generated for the original request
         nose.tools.assert_false(
-                CommunicationMoveLog.objects.filter(
-                    communication=self.comm,
-                    ).exists())
+            CommunicationMoveLog.objects.filter(communication=self.comm,
+                                                ).exists()
+        )
         mock_upload.assert_called()
 
     @patch('muckrock.foia.tasks.upload_document_cloud.apply_async')
@@ -210,19 +247,26 @@ class TestCommunicationClone(test.TestCase):
         second_foia = factories.FOIARequestFactory()
         third_foia = factories.FOIARequestFactory()
         comm_count = FOIACommunication.objects.count()
-        clones = self.comm.clone([first_foia.pk, second_foia.pk, third_foia.pk], self.user)
+        clones = self.comm.clone([first_foia.pk, second_foia.pk, third_foia.pk],
+                                 self.user)
         # + 3 communications
-        eq_(FOIACommunication.objects.count(), comm_count + 3,
-            'Should clone the request twice.')
-        ok_(clones[0].pk is not clones[1].pk is not clones[2].pk,
-            'The returned list should contain unique communcation objects.')
+        eq_(
+            FOIACommunication.objects.count(), comm_count + 3,
+            'Should clone the request twice.'
+        )
+        ok_(
+            clones[0].pk is not clones[1].pk is not clones[2].pk,
+            'The returned list should contain unique communcation objects.'
+        )
         # a move log should be generated for each cloned request
         for clone in clones:
-            ok_(CommunicationMoveLog.objects.filter(
-                communication=clone,
-                foia=self.comm.foia,
-                user=self.user,
-                ).exists())
+            ok_(
+                CommunicationMoveLog.objects.filter(
+                    communication=clone,
+                    foia=self.comm.foia,
+                    user=self.user,
+                ).exists()
+            )
         mock_upload.assert_called()
 
     @patch('muckrock.foia.tasks.upload_document_cloud.apply_async')
@@ -232,10 +276,13 @@ class TestCommunicationClone(test.TestCase):
         second_foia = factories.FOIARequestFactory()
         third_foia = factories.FOIARequestFactory()
         file_count = self.comm.files.count()
-        clones = self.comm.clone([first_foia.pk, second_foia.pk, third_foia.pk], self.user)
+        clones = self.comm.clone([first_foia.pk, second_foia.pk, third_foia.pk],
+                                 self.user)
         for each_clone in clones:
-            eq_(each_clone.files.count(), file_count,
-                'Each clone should have its own set of files.')
+            eq_(
+                each_clone.files.count(), file_count,
+                'Each clone should have its own set of files.'
+            )
         mock_upload.assert_called()
 
     @raises(ValueError)
@@ -261,6 +308,7 @@ class TestCommunicationClone(test.TestCase):
 
 class TestRawEmail(test.TestCase):
     """Tests the raw email view"""
+
     def setUp(self):
         self.comm = factories.FOIACommunicationFactory()
         self.request_factory = test.RequestFactory()
@@ -277,4 +325,7 @@ class TestRawEmail(test.TestCase):
         eq_(response.status_code, 302, 'Basic users should be denied access.')
         request.user = pro_user
         response = self.view(request, self.comm.id)
-        eq_(response.status_code, 200, 'Advanced users should be allowed access.')
+        eq_(
+            response.status_code, 200,
+            'Advanced users should be allowed access.'
+        )

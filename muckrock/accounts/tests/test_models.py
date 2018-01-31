@@ -2,16 +2,21 @@
 Tests accounts models
 """
 
+# Django
 from django.conf import settings
 from django.test import TestCase
 
-from datetime import datetime, date, timedelta
-from mock import Mock, patch, ANY
-from nose.tools import ok_, eq_, assert_true, assert_false, raises, nottest
+# Standard Library
+from datetime import date, datetime, timedelta
 
-from muckrock.accounts.models import Notification
+# Third Party
+from mock import ANY, Mock, patch
+from nose.tools import assert_false, assert_true, eq_, nottest, ok_, raises
+
+# MuckRock
 from muckrock import factories
-from muckrock.utils import new_action, get_stripe_token
+from muckrock.accounts.models import Notification
+from muckrock.utils import get_stripe_token, new_action
 
 # Creates Mock items for testing methods that involve Stripe
 #
@@ -45,12 +50,13 @@ MockCustomer.retrieve.return_value = mock_customer
 @patch('stripe.Charge', mock_charge)
 class TestProfileUnit(TestCase):
     """Unit tests for profile model"""
+
     def setUp(self):
         self.profile = factories.ProfileFactory(
-                monthly_requests=25,
-                acct_type='pro',
-                customer_id='',
-                )
+            monthly_requests=25,
+            acct_type='pro',
+            customer_id='',
+        )
 
     def test_unicode(self):
         """Test profile model's __unicode__ method"""
@@ -65,8 +71,12 @@ class TestProfileUnit(TestCase):
         basic = factories.ProfileFactory(acct_type='basic')
         active_org = factories.OrganizationFactory(active=True)
         inactive_org = factories.OrganizationFactory(active=False)
-        active_org_member = factories.ProfileFactory(acct_type='basic', organization=active_org)
-        inactive_org_member = factories.ProfileFactory(acct_type='basic', organization=inactive_org)
+        active_org_member = factories.ProfileFactory(
+            acct_type='basic', organization=active_org
+        )
+        inactive_org_member = factories.ProfileFactory(
+            acct_type='basic', organization=inactive_org
+        )
         assert_true(self.profile.is_advanced())
         assert_true(beta.is_advanced())
         assert_true(proxy.is_advanced())
@@ -99,7 +109,6 @@ class TestProfileUnit(TestCase):
 
     def test_make_request_pass(self):
         """Make request call decrements number of requests if out of monthly requests"""
-        # pylint:disable=no-self-use
         num_requests = 10
         profile = factories.ProfileFactory(num_requests=num_requests)
         profile.make_request()
@@ -107,7 +116,6 @@ class TestProfileUnit(TestCase):
 
     def test_make_request_fail(self):
         """If out of requests, make request returns false"""
-        # pylint:disable=no-self-use
         profile = factories.ProfileFactory(num_requests=0)
         profile.date_update = date.today()
         assert_false(profile.make_request())
@@ -116,24 +124,27 @@ class TestProfileUnit(TestCase):
         """Test accessing the profile's Stripe customer"""
         ok_(not self.profile.customer_id)
         customer = self.profile.customer()
-        ok_(MockCustomer.create.called,
-            'If no customer exists, it should be created.')
+        ok_(
+            MockCustomer.create.called,
+            'If no customer exists, it should be created.'
+        )
         eq_(customer, mock_customer)
-        eq_(self.profile.customer_id, mock_customer.id,
-            'The customer id should be saved so the customer can be retrieved.')
+        eq_(
+            self.profile.customer_id, mock_customer.id,
+            'The customer id should be saved so the customer can be retrieved.'
+        )
         customer = self.profile.customer()
-        ok_(MockCustomer.retrieve.called,
-            'After the customer exists, it should be retrieved for subsequent calls.')
+        ok_(
+            MockCustomer.retrieve.called,
+            'After the customer exists, it should be retrieved for subsequent calls.'
+        )
 
     def test_pay(self):
         """Test making a payment"""
         token = 'token'
         amount = 100
         modified_amount = 105
-        metadata = {
-            'email': self.profile.user.email,
-            'action': 'test-charge'
-        }
+        metadata = {'email': self.profile.user.email, 'action': 'test-charge'}
         self.profile.pay(token, amount, metadata)
         mock_charge.create.assert_called_with(
             currency='usd',
@@ -141,7 +152,7 @@ class TestProfileUnit(TestCase):
             metadata=metadata,
             source=token,
             idempotency_key=ANY,
-            )
+        )
 
     def test_start_pro_subscription(self):
         """Test starting a pro subscription"""
@@ -167,7 +178,10 @@ class TestProfileUnit(TestCase):
         ok_(mock_subscription.delete.called)
         eq_(self.profile.acct_type, 'basic')
         ok_(not self.profile.subscription_id)
-        eq_(self.profile.monthly_requests, settings.MONTHLY_REQUESTS.get('basic'))
+        eq_(
+            self.profile.monthly_requests,
+            settings.MONTHLY_REQUESTS.get('basic')
+        )
 
     def test_cancel_pro_missing_sub(self):
         """Test cancelling a pro subscription without a subscription_id."""
@@ -181,13 +195,17 @@ class TestProfileUnit(TestCase):
 
     def test_cancel_legacy_subscription(self):
         """Test ending a pro subscription when missing a subscription ID"""
-        # pylint:disable=no-self-use
-        pro_profile = factories.ProfileFactory(acct_type='basic',
-                                     monthly_requests=settings.MONTHLY_REQUESTS.get('pro'))
+        pro_profile = factories.ProfileFactory(
+            acct_type='basic',
+            monthly_requests=settings.MONTHLY_REQUESTS.get('pro')
+        )
         ok_(not pro_profile.subscription_id)
         pro_profile.cancel_pro_subscription()
         eq_(pro_profile.acct_type, 'basic')
-        eq_(pro_profile.monthly_requests, settings.MONTHLY_REQUESTS.get('basic'))
+        eq_(
+            pro_profile.monthly_requests,
+            settings.MONTHLY_REQUESTS.get('basic')
+        )
 
 
 class TestStripeIntegration(TestCase):
@@ -198,6 +216,7 @@ class TestStripeIntegration(TestCase):
     If the methods tested here are changed, make sure to disable the @nottest decorator.
     After testing your changes locally, enable the decorator again.
     """
+
     def setUp(self):
         self.profile = factories.ProfileFactory()
 
@@ -205,10 +224,7 @@ class TestStripeIntegration(TestCase):
     def test_pay(self):
         """Test making a payment"""
         token = get_stripe_token()
-        metadata = {
-            'email': self.profile.user.email,
-            'action': 'test-charge'
-        }
+        metadata = {'email': self.profile.user.email, 'action': 'test-charge'}
         self.profile.pay(token, 100, metadata)
 
     @nottest
@@ -216,8 +232,10 @@ class TestStripeIntegration(TestCase):
         """Test accessing the profile's Stripe customer"""
         ok_(not self.profile.customer_id)
         self.profile.customer()
-        ok_(self.profile.customer_id,
-            'The customer id should be saved so the customer can be retrieved later.')
+        ok_(
+            self.profile.customer_id,
+            'The customer id should be saved so the customer can be retrieved later.'
+        )
 
     @nottest
     def test_subscription(self):
@@ -231,6 +249,7 @@ class TestStripeIntegration(TestCase):
 
 class TestNotifications(TestCase):
     """Notifications connect actions to users and contain a read state."""
+
     def setUp(self):
         self.user = factories.UserFactory()
         self.action = new_action(self.user, 'acted')
@@ -238,54 +257,88 @@ class TestNotifications(TestCase):
 
     def test_create_notification(self):
         """Create a notification with a user and an action."""
-        notification = Notification.objects.create(user=self.user, action=self.action)
+        notification = Notification.objects.create(
+            user=self.user, action=self.action
+        )
         ok_(notification, 'Notification object should create without error.')
-        ok_(isinstance(notification, Notification), 'Object should be a Notification.')
-        ok_(notification.read is not True, 'Notification sould be unread by default.')
+        ok_(
+            isinstance(notification, Notification),
+            'Object should be a Notification.'
+        )
+        ok_(
+            notification.read is not True,
+            'Notification sould be unread by default.'
+        )
 
     def test_mark_read(self):
         """Notifications should be markable as read if unread and unread if read."""
         self.notification.mark_read()
-        ok_(self.notification.read is True, 'Notification should be marked as read.')
+        ok_(
+            self.notification.read is True,
+            'Notification should be marked as read.'
+        )
         self.notification.mark_unread()
-        ok_(self.notification.read is not True, 'Notification should be marked as unread.')
+        ok_(
+            self.notification.read is not True,
+            'Notification should be marked as unread.'
+        )
 
     def test_for_user(self):
         """Notifications should be filterable by a single user."""
         user_notification = factories.NotificationFactory(user=self.user)
         user_notifications = Notification.objects.for_user(self.user)
-        ok_(user_notification in user_notifications,
-            'A notification for the user should be in the set returned.')
-        ok_(self.notification not in user_notifications,
-            'A notification for another user should not be in the set returned.')
+        ok_(
+            user_notification in user_notifications,
+            'A notification for the user should be in the set returned.'
+        )
+        ok_(
+            self.notification not in user_notifications,
+            'A notification for another user should not be in the set returned.'
+        )
 
     def test_for_model(self):
         """Notifications should be filterable by a model type."""
         foia = factories.FOIARequestFactory()
         _action = new_action(factories.UserFactory(), 'submitted', target=foia)
-        object_notification = factories.NotificationFactory(user=self.user, action=_action)
+        object_notification = factories.NotificationFactory(
+            user=self.user, action=_action
+        )
         model_notifications = Notification.objects.for_model(foia)
-        ok_(object_notification in model_notifications,
-            'A notification for the model should be in the set returned.')
-        ok_(self.notification not in model_notifications,
-            'A notification not including the model should not be in the set returned.')
+        ok_(
+            object_notification in model_notifications,
+            'A notification for the model should be in the set returned.'
+        )
+        ok_(
+            self.notification not in model_notifications,
+            'A notification not including the model should not be in the set returned.'
+        )
 
     def test_for_object(self):
         """Notifications should be filterable by a single object."""
         foia = factories.FOIARequestFactory()
         _action = new_action(factories.UserFactory(), 'submitted', target=foia)
-        object_notification = factories.NotificationFactory(user=self.user, action=_action)
+        object_notification = factories.NotificationFactory(
+            user=self.user, action=_action
+        )
         object_notifications = Notification.objects.for_object(foia)
-        ok_(object_notification in object_notifications,
-            'A notification for the object should be in the set returned.')
-        ok_(self.notification not in object_notifications,
-            'A notification not including the object should not be in the set returned.')
+        ok_(
+            object_notification in object_notifications,
+            'A notification for the object should be in the set returned.'
+        )
+        ok_(
+            self.notification not in object_notifications,
+            'A notification not including the object should not be in the set returned.'
+        )
 
     def test_get_unread(self):
         """Notifications should be filterable by their unread status."""
         self.notification.mark_unread()
-        ok_(self.notification in Notification.objects.get_unread(),
-            'Unread notifications should be in the set returned.')
+        ok_(
+            self.notification in Notification.objects.get_unread(),
+            'Unread notifications should be in the set returned.'
+        )
         self.notification.mark_read()
-        ok_(self.notification not in Notification.objects.get_unread(),
-            'Read notifications should not be in the set returned.')
+        ok_(
+            self.notification not in Notification.objects.get_unread(),
+            'Read notifications should not be in the set returned.'
+        )

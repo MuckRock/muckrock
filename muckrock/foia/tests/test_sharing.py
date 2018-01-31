@@ -2,22 +2,25 @@
 Tests sharing a FOIA request with other users
 """
 
-from django.test import TestCase, RequestFactory
+# Django
+from django.test import RequestFactory, TestCase
 
-from nose.tools import eq_, ok_, assert_true, assert_false
+# Third Party
+from nose.tools import assert_false, assert_true, eq_, ok_
 
+# MuckRock
 from muckrock.factories import (
-        FOIARequestFactory,
-        UserFactory,
-        OrganizationFactory,
-        )
+    FOIARequestFactory,
+    OrganizationFactory,
+    UserFactory,
+)
 from muckrock.foia.views import Detail
 from muckrock.test_utils import mock_middleware
 
-# pylint: disable=no-self-use
 
 class TestRequestSharing(TestCase):
     """Allow people to edit and view another user's request."""
+
     def setUp(self):
         self.foia = FOIARequestFactory()
         self.editor = UserFactory()
@@ -94,11 +97,15 @@ class TestRequestSharing(TestCase):
         """Editors should be able to generate a secure access key to view an embargoed request."""
         embargoed_foia = FOIARequestFactory(embargo=True)
         access_key = embargoed_foia.generate_access_key()
-        assert_true(access_key == embargoed_foia.access_key,
-            'The key in the URL should match the key saved to the request.')
+        assert_true(
+            access_key == embargoed_foia.access_key,
+            'The key in the URL should match the key saved to the request.'
+        )
         embargoed_foia.generate_access_key()
-        assert_false(access_key == embargoed_foia.access_key,
-            'After regenerating the link, the key should no longer match.')
+        assert_false(
+            access_key == embargoed_foia.access_key,
+            'After regenerating the link, the key should no longer match.'
+        )
 
     def test_creator_access(self):
         """Creators should not be granted access as editors or viewers"""
@@ -128,6 +135,7 @@ class TestRequestSharing(TestCase):
 
 class TestRequestSharingViews(TestCase):
     """Tests access and implementation of view methods for sharing requests."""
+
     def setUp(self):
         self.factory = RequestFactory()
         self.foia = FOIARequestFactory()
@@ -222,7 +230,9 @@ class TestRequestSharingViews(TestCase):
             'users': [user1.pk, user2.pk],
             'access': 'edit'
         }
-        edit_request = self.factory.post(self.foia.get_absolute_url(), edit_data)
+        edit_request = self.factory.post(
+            self.foia.get_absolute_url(), edit_data
+        )
         edit_request = mock_middleware(edit_request)
         edit_request.user = self.editor
         edit_response = Detail.as_view()(
@@ -244,7 +254,9 @@ class TestRequestSharingViews(TestCase):
             'users': [user1.pk, user2.pk],
             'access': 'view'
         }
-        view_request = self.factory.post(self.foia.get_absolute_url(), view_data)
+        view_request = self.factory.post(
+            self.foia.get_absolute_url(), view_data
+        )
         view_request = mock_middleware(view_request)
         view_request.user = self.editor
         view_response = Detail.as_view()(
@@ -262,10 +274,7 @@ class TestRequestSharingViews(TestCase):
         user = UserFactory()
         self.foia.add_editor(user)
         assert_true(self.foia.has_editor(user))
-        data = {
-            'action': 'demote',
-            'user': user.pk
-        }
+        data = {'action': 'demote', 'user': user.pk}
         request = self.factory.post(self.foia.get_absolute_url(), data)
         request = mock_middleware(request)
         request.user = self.editor
@@ -285,10 +294,7 @@ class TestRequestSharingViews(TestCase):
         user = UserFactory()
         self.foia.add_viewer(user)
         assert_true(self.foia.has_viewer(user))
-        data = {
-            'action': 'promote',
-            'user': user.pk
-        }
+        data = {'action': 'promote', 'user': user.pk}
         request = self.factory.post(self.foia.get_absolute_url(), data)
         request = mock_middleware(request)
         request.user = self.editor
@@ -307,10 +313,7 @@ class TestRequestSharingViews(TestCase):
         """Editors should be able to revoke access from an editor."""
         an_editor = UserFactory()
         self.foia.add_editor(an_editor)
-        data = {
-            'action': 'revoke_access',
-            'user': an_editor.pk
-        }
+        data = {'action': 'revoke_access', 'user': an_editor.pk}
         request = self.factory.post(self.foia.get_absolute_url(), data)
         request = mock_middleware(request)
         request.user = self.editor
@@ -328,10 +331,7 @@ class TestRequestSharingViews(TestCase):
         """Editors should be able to revoke access from a viewer."""
         a_viewer = UserFactory()
         self.foia.add_viewer(a_viewer)
-        data = {
-            'action': 'revoke_access',
-            'user': a_viewer.pk
-        }
+        data = {'action': 'revoke_access', 'user': a_viewer.pk}
         request = self.factory.post(self.foia.get_absolute_url(), data)
         request = mock_middleware(request)
         request.user = self.editor

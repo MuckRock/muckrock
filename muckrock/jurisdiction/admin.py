@@ -2,20 +2,25 @@
 Admin registration for Jurisdiction models
 """
 
+# Django
 from django import forms
 from django.conf.urls import url
 from django.contrib import admin, messages
 from django.contrib.auth.models import User
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect, render
 from django.template.defaultfilters import slugify
 
-from adaptor.model import CsvModel
-from adaptor.fields import CharField, DjangoModelField
-from autocomplete_light import shortcuts as autocomplete_light
-from reversion.admin import VersionAdmin
+# Standard Library
 import logging
 import sys
 
+# Third Party
+from adaptor.fields import CharField, DjangoModelField
+from adaptor.model import CsvModel
+from autocomplete_light import shortcuts as autocomplete_light
+from reversion.admin import VersionAdmin
+
+# MuckRock
 from muckrock.jurisdiction import models as JurisdictionModels
 from muckrock.jurisdiction.forms import CSVImportForm
 
@@ -23,6 +28,7 @@ logger = logging.getLogger(__name__)
 
 # These inhereit more than the allowed number of public methods
 # pylint: disable=too-many-public-methods
+
 
 class LawInline(admin.StackedInline):
     """Law admin options"""
@@ -38,7 +44,9 @@ class ExampleAppealInline(admin.TabularInline):
 
 class InvokedExemptionAdminForm(forms.ModelForm):
     """Adds an autocomplete to the invoked exemption request field."""
-    request = autocomplete_light.ModelChoiceField('FOIARequestAdminAutocomplete')
+    request = autocomplete_light.ModelChoiceField(
+        'FOIARequestAdminAutocomplete'
+    )
 
     class Meta:
         model = JurisdictionModels.InvokedExemption
@@ -60,9 +68,10 @@ class JurisdictionAdmin(VersionAdmin):
     list_filter = ['level']
     search_fields = ['name']
     inlines = [LawInline]
-    filter_horizontal = ('holidays', )
+    filter_horizontal = ('holidays',)
     fieldsets = (
-            (None, {
+        (
+            None, {
                 'fields': (
                     'name',
                     'slug',
@@ -74,9 +83,11 @@ class JurisdictionAdmin(VersionAdmin):
                     'image_attr_line',
                     'public_notes',
                     'aliases',
-                    ),
-                }),
-            ('Options for states/federal', {
+                ),
+            }
+        ),
+        (
+            'Options for states/federal', {
                 'classes': ('collapse',),
                 'fields': (
                     'days',
@@ -88,36 +99,42 @@ class JurisdictionAdmin(VersionAdmin):
                     'waiver',
                     'has_appeal',
                     'law_analysis',
-                    ),
-                }),
-            )
+                ),
+            }
+        ),
+    )
     formats = ['xls', 'csv']
 
     def get_urls(self):
         """Add custom URLs here"""
         urls = super(JurisdictionAdmin, self).get_urls()
-        my_urls = [url(
-            r'^import/$',
-            self.admin_site.admin_view(self.csv_import),
-            name='jurisdiction-admin-import',
-            )]
+        my_urls = [
+            url(
+                r'^import/$',
+                self.admin_site.admin_view(self.csv_import),
+                name='jurisdiction-admin-import',
+            )
+        ]
         return my_urls + urls
 
     def csv_import(self, request):
         """Import a CSV file of jurisdictions"""
-        # pylint: disable=no-self-use
         # pylint: disable=broad-except
 
         if request.method == 'POST':
             form = CSVImportForm(request.POST, request.FILES)
             if form.is_valid():
                 try:
-                    jurisdictions = JurisdictionCsvModel.import_data(data=request.FILES['csv_file'])
+                    jurisdictions = JurisdictionCsvModel.import_data(
+                        data=request.FILES['csv_file']
+                    )
                     msg = 'CSV - %d jurisdictions imported' % len(jurisdictions)
                     messages.success(request, msg)
                 except Exception as exc:
                     messages.error(request, 'ERROR: %s' % str(exc))
-                    logger.error('Import error: %s', exc, exc_info=sys.exc_info())
+                    logger.error(
+                        'Import error: %s', exc, exc_info=sys.exc_info()
+                    )
                 else:
                     for jurisdiction in jurisdictions:
                         jobj = jurisdiction.object
@@ -130,10 +147,11 @@ class JurisdictionAdmin(VersionAdmin):
 
         fields = ['name', 'slug', 'full_name', 'level', 'parent']
         return render(
-                request,
-                'admin/agency/import.html',
-                {'form': form, 'fields': fields},
-                )
+            request,
+            'admin/agency/import.html',
+            {'form': form,
+             'fields': fields},
+        )
 
 
 class ExemptionAdminForm(forms.ModelForm):
@@ -143,9 +161,7 @@ class ExemptionAdminForm(forms.ModelForm):
         queryset=JurisdictionModels.Jurisdiction.objects.all()
     )
     contributors = autocomplete_light.ModelMultipleChoiceField(
-        'UserAutocomplete',
-        queryset=User.objects.all(),
-        required=False
+        'UserAutocomplete', queryset=User.objects.all(), required=False
     )
 
     class Meta:
@@ -176,7 +192,6 @@ class JurisdictionCsvModel(CsvModel):
     parent = DjangoModelField(JurisdictionModels.Jurisdiction, pk='name')
 
     class Meta:
-        # pylint: disable=too-few-public-methods
         dbModel = JurisdictionModels.Jurisdiction
         delimiter = ','
         update = {'keys': ['slug', 'parent']}

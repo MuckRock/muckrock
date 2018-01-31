@@ -4,13 +4,16 @@ These will usually tell us if a message
 object cannot be instantiated.
 """
 
+# Django
 from django.core import mail
 from django.test import TestCase
 
-from dateutil.relativedelta import relativedelta
+# Third Party
 import mock
 import nose.tools
+from dateutil.relativedelta import relativedelta
 
+# MuckRock
 from muckrock import factories
 from muckrock.accounts.models import ReceiptEmail
 from muckrock.message import tasks
@@ -66,6 +69,7 @@ MockInvoice.retrieve.return_value = mock_invoice
 
 class TestDailyTask(TestCase):
     """Tests the daily email notification task."""
+
     def setUp(self):
         self.user = factories.UserFactory()
 
@@ -74,25 +78,26 @@ class TestDailyTask(TestCase):
         """The send method should be called when a user has unread notifications."""
         factories.NotificationFactory(user=self.user)
         tasks.daily_digest()
-        mock_send.assert_called_with(self.user, u'Daily Digest', relativedelta(days=1))
+        mock_send.assert_called_with(
+            self.user, u'Daily Digest', relativedelta(days=1)
+        )
 
     @mock.patch('muckrock.message.tasks.send_activity_digest.delay')
     def test_when_no_unread(self, mock_send):
         """The send method should not be called when a user does not have unread notifications."""
-        # pylint: disable=no-self-use
         tasks.daily_digest()
         mock_send.assert_not_called()
 
 
 class TestStaffTask(TestCase):
     """Tests the daily staff digest task."""
+
     def setUp(self):
         self.staff_user = factories.UserFactory(is_staff=True)
 
     @mock.patch('muckrock.message.digests.StaffDigest.send')
     def test_staff_digest_task(self, mock_send):
         """Make sure the send method is called with the staff user."""
-        # pylint: disable=no-self-use
         tasks.staff_digest()
         mock_send.assert_called_with()
 
@@ -100,6 +105,7 @@ class TestStaffTask(TestCase):
 @mock.patch('muckrock.message.email.TemplateEmail.send')
 class TestNotificationTasks(TestCase):
     """Email notifications are sent to users upon key events."""
+
     def setUp(self):
         self.user = factories.UserFactory()
 
@@ -143,14 +149,11 @@ class TestNotificationTasks(TestCase):
 @mock.patch('muckrock.message.receipts.Receipt.send')
 class TestSendChargeReceiptTask(TestCase):
     """Tests the send charge receipt task."""
-    # pylint: disable=no-self-use
 
     def setUp(self):
         self.user = factories.UserFactory()
         mock_charge.invoice = None
-        mock_charge.metadata = {
-            'email': self.user.email
-        }
+        mock_charge.metadata = {'email': self.user.email}
 
     def test_request_purchase_receipt(self, mock_send):
         """A receipt should be sent after request bundle is purchased."""
@@ -185,28 +188,31 @@ class TestSendChargeReceiptTask(TestCase):
         tasks.send_charge_receipt(mock_charge.id)
         mock_send.assert_not_called()
 
+
 @mock.patch('stripe.Charge', MockCharge)
 class TestSendChargeReceiptRecipient(TestCase):
     """Tests the send charge receipt recipients."""
-    # pylint: disable=no-self-use
 
     def setUp(self):
         self.user = factories.UserFactory()
         mock_charge.invoice = None
-        mock_charge.metadata = {
-            'email': self.user.email
-        }
+        mock_charge.metadata = {'email': self.user.email}
         mail.outbox = []
 
     def test_receipt_recipients(self):
         """Receipt should be to the user and CC'd to their receipt emails"""
         ReceiptEmail.objects.create(user=self.user, email='receipt1@gmail.com')
-        ReceiptEmail.objects.create(user=self.user, email='receipt2@hotmail.com')
+        ReceiptEmail.objects.create(
+            user=self.user, email='receipt2@hotmail.com'
+        )
         mock_charge.metadata['action'] = 'unknown-charge'
         tasks.send_charge_receipt(mock_charge.id)
         eq_(len(mail.outbox), 1)
         eq_(mail.outbox[0].to, [self.user.email])
-        eq_(set(mail.outbox[0].cc), {'receipt1@gmail.com', 'receipt2@hotmail.com'})
+        eq_(
+            set(mail.outbox[0].cc),
+            {'receipt1@gmail.com', 'receipt2@hotmail.com'}
+        )
 
 
 @mock.patch('stripe.Invoice', MockInvoice)
@@ -215,7 +221,6 @@ class TestSendChargeReceiptRecipient(TestCase):
 @mock.patch('muckrock.message.receipts.Receipt.send')
 class TestSendInvoiceReceiptTask(TestCase):
     """Invoice receipts are send when an invoice payment succeeds."""
-    # pylint: disable=no-self-use
 
     def test_pro_invoice_receipt(self, mock_send):
         """A receipt should be sent after a pro subscription payment is made."""
@@ -244,7 +249,9 @@ class TestFailedPaymentTask(TestCase):
     def setUp(self):
         mock_invoice.plan.id = 'pro'
         mock_invoice.attempt_count = 1
-        self.profile = factories.ProfileFactory(customer_id=mock_invoice.customer)
+        self.profile = factories.ProfileFactory(
+            customer_id=mock_invoice.customer
+        )
 
     @mock.patch('muckrock.message.email.TemplateEmail.send')
     def test_failed_invoice_charge(self, mock_send):
@@ -252,7 +259,10 @@ class TestFailedPaymentTask(TestCase):
         tasks.failed_payment(mock_invoice.id)
         mock_send.assert_called_with(fail_silently=False)
         self.profile.refresh_from_db()
-        ok_(self.profile.payment_failed, 'The payment failed flag should be raised.')
+        ok_(
+            self.profile.payment_failed,
+            'The payment failed flag should be raised.'
+        )
 
     @mock.patch('muckrock.message.email.TemplateEmail.send')
     @mock.patch('muckrock.accounts.models.Profile.cancel_pro_subscription')
@@ -260,14 +270,20 @@ class TestFailedPaymentTask(TestCase):
         """After the last attempt at payment, cancel the user's pro subscription"""
         self.profile.payment_failed = True
         self.profile.save()
-        ok_(self.profile.payment_failed, 'The payment failed flag should be raised.')
+        ok_(
+            self.profile.payment_failed,
+            'The payment failed flag should be raised.'
+        )
         mock_invoice.attempt_count = 4
         mock_invoice.lines.data[0].plan.id = 'pro'
         tasks.failed_payment(mock_invoice.id)
         self.profile.refresh_from_db()
         mock_cancel.assert_called_with()
         mock_send.assert_called_with(fail_silently=False)
-        ok_(not self.profile.payment_failed, 'The payment failed flag should be lowered.')
+        ok_(
+            not self.profile.payment_failed,
+            'The payment failed flag should be lowered.'
+        )
 
     @mock.patch('muckrock.message.email.TemplateEmail.send')
     @mock.patch('muckrock.organization.models.Organization.cancel_subscription')
@@ -275,7 +291,10 @@ class TestFailedPaymentTask(TestCase):
         """After the last attempt at payment, cancel the user's org subscription"""
         self.profile.payment_failed = True
         self.profile.save()
-        ok_(self.profile.payment_failed, 'The payment failed flag should be raised.')
+        ok_(
+            self.profile.payment_failed,
+            'The payment failed flag should be raised.'
+        )
         factories.OrganizationFactory(owner=self.profile.user)
         mock_invoice.attempt_count = 4
         mock_invoice.lines.data[0].plan.id = 'org'
@@ -283,4 +302,7 @@ class TestFailedPaymentTask(TestCase):
         self.profile.refresh_from_db()
         mock_cancel.assert_called_with()
         mock_send.assert_called_with(fail_silently=False)
-        ok_(not self.profile.payment_failed, 'The payment failed flag should be lowered.')
+        ok_(
+            not self.profile.payment_failed,
+            'The payment failed flag should be lowered.'
+        )

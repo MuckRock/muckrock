@@ -3,8 +3,10 @@ Backend to support case insensitive login
 http://www.shopfiber.com/case-insensitive-username-login-in-django/
 """
 
+# Django
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import User
+
 
 class CaseInsensitiveModelBackend(ModelBackend):
     """By default ModelBackend does case _sensitive_ username authentication, which isn't what is

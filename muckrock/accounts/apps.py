@@ -2,6 +2,7 @@
 App config for accounts
 """
 
+# Django
 from django.apps import AppConfig, apps
 
 

@@ -2,21 +2,24 @@
 Tests using nose for the news application
 """
 
+# Django
 from django.core.urlresolvers import reverse
-from django.test import TestCase, RequestFactory
+from django.test import RequestFactory, TestCase
 
-from nose.tools import eq_, ok_
+# Standard Library
 from datetime import datetime
 
-from muckrock.factories import ArticleFactory, UserFactory, ProjectFactory
+# Third Party
+from nose.tools import eq_, ok_
+
+# MuckRock
+from muckrock.factories import ArticleFactory, ProjectFactory, UserFactory
 from muckrock.news.models import Article
 from muckrock.news.views import NewsDetail
 from muckrock.project.forms import ProjectManagerForm
-from muckrock.tests import get_allowed, get_404
 from muckrock.test_utils import mock_middleware
+from muckrock.tests import get_404, get_allowed
 
-# pylint: disable=no-self-use
-# pylint: disable=too-many-public-methods
 
 class TestNewsUnit(TestCase):
     """Unit tests for news"""
@@ -32,17 +35,22 @@ class TestNewsUnit(TestCase):
 
     def test_article_model_url(self):
         """Test the Article model's get_absolute_url method"""
-        eq_(self.article.get_absolute_url(), reverse('news-detail', kwargs={
-            'year': self.article.pub_date.strftime('%Y'),
-            'month': self.article.pub_date.strftime('%b').lower(),
-            'day': self.article.pub_date.strftime('%d'),
-            'slug': self.article.slug
-        }))
+        eq_(
+            self.article.get_absolute_url(),
+            reverse(
+                'news-detail',
+                kwargs={
+                    'year': self.article.pub_date.strftime('%Y'),
+                    'month': self.article.pub_date.strftime('%b').lower(),
+                    'day': self.article.pub_date.strftime('%d'),
+                    'slug': self.article.slug
+                }
+            )
+        )
 
     # manager
     def test_manager_get_published(self):
         """Test the Article Manager's get_published method"""
-        # pylint: disable=no-self-use
         article1 = ArticleFactory(publish=True)
         article2 = ArticleFactory(publish=True)
         published = Article.objects.get_published()
@@ -69,59 +77,121 @@ class TestNewsFunctional(TestCase):
 
     def test_news_archive_year(self):
         """Should return all articles in the given year"""
-        response = get_allowed(self.client, reverse('news-archive-year', kwargs={'year': 1999}))
+        response = get_allowed(
+            self.client, reverse('news-archive-year', kwargs={
+                'year': 1999
+            })
+        )
         eq_(len(response.context['object_list']), 4)
-        ok_(all(article.pub_date.year == 1999
-                           for article in response.context['object_list']))
+        ok_(
+            all(
+                article.pub_date.year == 1999
+                for article in response.context['object_list']
+            )
+        )
 
     def test_news_archive_month(self):
         """Should return all articel from the given month"""
-        response = get_allowed(self.client,
-                reverse('news-archive-month', kwargs={'year': 1999, 'month': 'jan'}))
+        response = get_allowed(
+            self.client,
+            reverse(
+                'news-archive-month', kwargs={
+                    'year': 1999,
+                    'month': 'jan'
+                }
+            )
+        )
         eq_(len(response.context['object_list']), 3)
-        ok_(all(article.pub_date.year == 1999 and article.pub_date.month == 1
-                           for article in response.context['object_list']))
+        ok_(
+            all(
+                article.pub_date.year == 1999 and article.pub_date.month == 1
+                for article in response.context['object_list']
+            )
+        )
 
     def test_news_archive_day(self):
         """Should return all article for the given day"""
-        response = get_allowed(self.client,
-                reverse('news-archive-day',
-                    kwargs={'year': 1999, 'month': 'jan', 'day': 1}))
+        response = get_allowed(
+            self.client,
+            reverse(
+                'news-archive-day',
+                kwargs={
+                    'year': 1999,
+                    'month': 'jan',
+                    'day': 1
+                }
+            )
+        )
         eq_(len(response.context['object_list']), 2)
-        ok_(all(article.pub_date.year == 1999 and article.pub_date.month == 1 and
-                           article.pub_date.day == 1
-                           for article in response.context['object_list']))
+        ok_(
+            all(
+                article.pub_date.year == 1999 and article.pub_date.month == 1
+                and article.pub_date.day == 1
+                for article in response.context['object_list']
+            )
+        )
 
     def test_news_archive_day_empty(self):
         """Should return 404 for a day with no articles"""
-        get_404(self.client,
-                reverse('news-archive-day',
-                    kwargs={'year': 1999, 'month': 'mar', 'day': 1}))
+        get_404(
+            self.client,
+            reverse(
+                'news-archive-day',
+                kwargs={
+                    'year': 1999,
+                    'month': 'mar',
+                    'day': 1
+                }
+            )
+        )
 
     def test_news_archive_author(self):
         """Should return all articles for the given author"""
         author = Article.objects.get(slug='test-article-5').authors.first()
         response = get_allowed(
             self.client,
-            reverse('news-author', kwargs={'username': author.username})
+            reverse('news-author', kwargs={
+                'username': author.username
+            })
         )
-        eq_(len(response.context['object_list']), Article.objects.filter(authors=author).count())
+        eq_(
+            len(response.context['object_list']),
+            Article.objects.filter(authors=author).count()
+        )
 
     def test_news_detail(self):
         """News detail should display the given article"""
-        response = get_allowed(self.client,
-                reverse('news-detail',
-                    kwargs={
-                        'year': 1999,
-                        'month': 'jan',
-                        'day': 1,
-                        'slug': 'test-article-5'}))
-        eq_(response.context['object'], Article.objects.get(slug='test-article-5'))
+        response = get_allowed(
+            self.client,
+            reverse(
+                'news-detail',
+                kwargs={
+                    'year': 1999,
+                    'month': 'jan',
+                    'day': 1,
+                    'slug': 'test-article-5'
+                }
+            )
+        )
+        eq_(
+            response.context['object'],
+            Article.objects.get(slug='test-article-5')
+        )
 
     def test_news_detail_404(self):
         """Should give a 404 error for a article that doesn't exist"""
-        get_404(self.client, reverse('news-detail', kwargs={'year': 1999, 'month': 'mar',
-                                                            'day': 1, 'slug': 'test-article-1'}))
+        get_404(
+            self.client,
+            reverse(
+                'news-detail',
+                kwargs={
+                    'year': 1999,
+                    'month': 'mar',
+                    'day': 1,
+                    'slug': 'test-article-1'
+                }
+            )
+        )
 
     def test_feed(self):
         """Should have a feed"""
@@ -130,6 +200,7 @@ class TestNewsFunctional(TestCase):
 
 class TestNewsArticleViews(TestCase):
     """Tests the functions attached to news article views"""
+
     def setUp(self):
         self.article = ArticleFactory(publish=True)
         self.request_factory = RequestFactory()
@@ -166,11 +237,15 @@ class TestNewsArticleViews(TestCase):
         project2 = ProjectFactory()
         staff = UserFactory(is_staff=True)
         project_form = ProjectManagerForm(
-                {'projects': [project1.pk, project2.pk]},
-                user=staff,
-                )
-        ok_(project_form.is_valid(),
-            'We want to be sure we are posting valid data.')
+            {
+                'projects': [project1.pk, project2.pk]
+            },
+            user=staff,
+        )
+        ok_(
+            project_form.is_valid(),
+            'We want to be sure we are posting valid data.'
+        )
         data = {'action': 'projects'}
         data.update(project_form.data)
         response = self.post_helper(data, staff)
@@ -178,14 +253,20 @@ class TestNewsArticleViews(TestCase):
         project1.refresh_from_db()
         project2.refresh_from_db()
         ok_(response.status_code, 200)
-        ok_(self.article in project1.articles.all(),
-            'The article should be added to the project.')
-        ok_(self.article in project2.articles.all(),
-            'The article should be added to teh project.')
+        ok_(
+            self.article in project1.articles.all(),
+            'The article should be added to the project.'
+        )
+        ok_(
+            self.article in project2.articles.all(),
+            'The article should be added to teh project.'
+        )
 
     def test_staff_only(self):
         """Non-staff users cannot edit articles."""
         user = UserFactory()
         response = self.post_helper({'tags': 'hello'}, user)
-        eq_(response.status_code, 403,
-            'The server should return a 403 Forbidden error code.')
+        eq_(
+            response.status_code, 403,
+            'The server should return a 403 Forbidden error code.'
+        )

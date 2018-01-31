@@ -2,19 +2,23 @@
 Tests for Agency application
 """
 
+# Django
 from django.core.urlresolvers import reverse
 from django.http import Http404
-from django.test import TestCase, RequestFactory
+from django.test import RequestFactory, TestCase
 
-from datetime import datetime, timedelta
+# Standard Library
 import json
+from datetime import datetime, timedelta
+
+# Third Party
 import nose.tools
 
-from muckrock import agency
-from muckrock import factories
+# MuckRock
+from muckrock import agency, factories
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.task.models import StaleAgencyTask
 from muckrock.task.factories import StaleAgencyTaskFactory
+from muckrock.task.models import StaleAgencyTask
 from muckrock.test_utils import http_get_response, mock_middleware
 
 ok_ = nose.tools.ok_
@@ -27,25 +31,28 @@ class TestAgencyUnit(TestCase):
     def setUp(self):
         """Set up tests"""
         self.agency1 = factories.AgencyFactory(
-                fax__phone__number='1-987-654-3211',
-                email__email__email='test@agency1.gov',
-                other_emails='other_a@agency1.gov, other_b@agency1.gov'
-                )
+            fax__phone__number='1-987-654-3211',
+            email__email__email='test@agency1.gov',
+            other_emails='other_a@agency1.gov, other_b@agency1.gov'
+        )
         self.agency2 = factories.AgencyFactory(
-                fax__phone__number='987.654.3210',
-                )
-        self.agency3 = factories.AgencyFactory(
-                email=None,
-                )
+            fax__phone__number='987.654.3210',
+        )
+        self.agency3 = factories.AgencyFactory(email=None,)
 
     def test_agency_url(self):
         """Test Agency model's get_absolute_url method"""
-        eq_(self.agency1.get_absolute_url(), reverse('agency-detail', kwargs={
-                'idx': self.agency1.pk,
-                'slug': self.agency1.slug,
-                'jurisdiction': self.agency1.jurisdiction.slug,
-                'jidx': self.agency1.jurisdiction.pk
-            })
+        eq_(
+            self.agency1.get_absolute_url(),
+            reverse(
+                'agency-detail',
+                kwargs={
+                    'idx': self.agency1.pk,
+                    'slug': self.agency1.slug,
+                    'jurisdiction': self.agency1.jurisdiction.slug,
+                    'jidx': self.agency1.jurisdiction.pk
+                }
+            )
         )
 
     def test_agency_get_email(self):
@@ -60,9 +67,9 @@ class TestAgencyUnit(TestCase):
     def test_agency_get_emails(self):
         """Test get emails method"""
         eq_(
-                set(e.email for e in self.agency1.get_emails(email_type='cc')),
-                set(['other_a@agency1.gov', 'other_b@agency1.gov']),
-                )
+            set(e.email for e in self.agency1.get_emails(email_type='cc')),
+            set(['other_a@agency1.gov', 'other_b@agency1.gov']),
+        )
 
     def test_agency_is_stale(self):
         """Should return the date of the last response by the agency"""
@@ -74,34 +81,48 @@ class TestAgencyUnit(TestCase):
             foia__status='ack',
             foia__agency=self.agency1
         )
-        eq_(self.agency1.is_stale(), True,
-            "The agency should report the days since its latest response.")
+        eq_(
+            self.agency1.is_stale(), True,
+            "The agency should report the days since its latest response."
+        )
 
     def test_agency_mark_stale(self):
         """Should mark the agency as stale and return a stale agency task,
         creating the task if one doesn't already exist."""
-        ok_(not StaleAgencyTask.objects.filter(resolved=False, agency=self.agency1).exists(),
-            'There should not be any unresolved StaleAgencyTasks for this request.')
+        ok_(
+            not StaleAgencyTask.objects.filter(
+                resolved=False, agency=self.agency1
+            ).exists(),
+            'There should not be any unresolved StaleAgencyTasks for this request.'
+        )
         task = self.agency1.mark_stale()
-        ok_(self.agency1.stale,
-            'The agency should be marked as stale.')
-        ok_(not self.agency1.manual_stale,
-            'The agency should not be marked as manually stale.')
-        ok_(isinstance(task, StaleAgencyTask),
-            'A StaleAgencyTask should be returned.')
+        ok_(self.agency1.stale, 'The agency should be marked as stale.')
+        ok_(
+            not self.agency1.manual_stale,
+            'The agency should not be marked as manually stale.'
+        )
+        ok_(
+            isinstance(task, StaleAgencyTask),
+            'A StaleAgencyTask should be returned.'
+        )
         second_task = self.agency1.mark_stale()
-        eq_(task, second_task,
-            'Instead of creating another task, return the one that already exists.')
+        eq_(
+            task, second_task,
+            'Instead of creating another task, return the one that already exists.'
+        )
 
     def test_agency_manual_stale(self):
         """Should be able to manually mark an agency as stale."""
         self.agency1.mark_stale(manual=True)
-        ok_(self.agency1.stale,
-            'The agency should be marked as stale.')
-        ok_(self.agency1.manual_stale,
-            'The agency should be marked as manually stale.')
-        ok_(self.agency1.is_stale(),
-            'An agency that is manually stale should always be stale.')
+        ok_(self.agency1.stale, 'The agency should be marked as stale.')
+        ok_(
+            self.agency1.manual_stale,
+            'The agency should be marked as manually stale.'
+        )
+        ok_(
+            self.agency1.is_stale(),
+            'An agency that is manually stale should always be stale.'
+        )
 
     def test_agency_multiple_tasks(self):
         """If multiple StaleAgencyTasks exist, only the first should be returned
@@ -112,8 +133,10 @@ class TestAgencyUnit(TestCase):
             StaleAgencyTaskFactory(agency=self.agency1),
         ]
         task = self.agency1.mark_stale()
-        eq_(task, stale_agency_tasks[0],
-            'The returned task should be the first stale agency task.')
+        eq_(
+            task, stale_agency_tasks[0],
+            'The returned task should be the first stale agency task.'
+        )
 
     def test_agency_unmark_stale(self):
         """Unmark the agency as stale."""
@@ -121,14 +144,17 @@ class TestAgencyUnit(TestCase):
         self.agency1.mark_stale(manual=True)
         # then unmark it as stale
         self.agency1.unmark_stale()
-        ok_(not self.agency1.stale,
-            'The agency should no longer be marked as stale.')
-        ok_(not self.agency1.manual_stale,
-            'A manually stale agency should also be freed from staleness.')
+        ok_(
+            not self.agency1.stale,
+            'The agency should no longer be marked as stale.'
+        )
+        ok_(
+            not self.agency1.manual_stale,
+            'A manually stale agency should also be freed from staleness.'
+        )
 
     def test_agency_get_proxy_info(self):
         """Test an agencies get_proxy_info method"""
-        # pylint: disable=no-self-use
         agency_ = factories.AgencyFactory()
         proxy_info = agency_.get_proxy_info()
         eq_(proxy_info['proxy'], False)
@@ -145,9 +171,9 @@ class TestAgencyUnit(TestCase):
         nose.tools.assert_in('warning', proxy_info)
 
         proxy = factories.UserFactory(
-                profile__acct_type='proxy',
-                profile__state=agency_.jurisdiction.legal(),
-                )
+            profile__acct_type='proxy',
+            profile__state=agency_.jurisdiction.legal(),
+        )
         proxy_info = agency_.get_proxy_info()
         eq_(proxy_info['proxy'], True)
         eq_(proxy_info['missing_proxy'], False)
@@ -157,13 +183,15 @@ class TestAgencyUnit(TestCase):
 
 class TestAgencyManager(TestCase):
     """Tests for the Agency object manager"""
+
     def setUp(self):
         self.agency1 = factories.AgencyFactory()
         self.agency2 = factories.AgencyFactory(
-                jurisdiction=self.agency1.jurisdiction)
+            jurisdiction=self.agency1.jurisdiction
+        )
         self.agency3 = factories.AgencyFactory(
-                jurisdiction=self.agency1.jurisdiction,
-                status='pending')
+            jurisdiction=self.agency1.jurisdiction, status='pending'
+        )
 
     def test_get_approved(self):
         """Manager should return all approved agencies"""
@@ -175,13 +203,20 @@ class TestAgencyManager(TestCase):
     def test_get_siblings(self):
         """Manager should return all siblings to a given agency"""
         agencies = agency.models.Agency.objects.get_siblings(self.agency1)
-        ok_(self.agency1 not in agencies, 'The given agency shouldn\'t be its own sibling.')
+        ok_(
+            self.agency1 not in agencies,
+            'The given agency shouldn\'t be its own sibling.'
+        )
         ok_(self.agency2 in agencies)
-        ok_(self.agency3 not in agencies, 'Unapproved agencies shouldn\'t be siblings.')
+        ok_(
+            self.agency3 not in agencies,
+            'Unapproved agencies shouldn\'t be siblings.'
+        )
 
 
 class TestAgencyViews(TestCase):
     """Tests for Agency views"""
+
     def setUp(self):
         self.agency = factories.AgencyFactory()
         self.url = self.agency.get_absolute_url()
@@ -196,7 +231,9 @@ class TestAgencyViews(TestCase):
 
     def test_approved_ok(self):
         """An approved agency should return an 200 response."""
-        response = http_get_response(self.url, self.view, self.user, **self.kwargs)
+        response = http_get_response(
+            self.url, self.view, self.user, **self.kwargs
+        )
         eq_(response.status_code, 200)
 
     @nose.tools.raises(Http404)
@@ -208,23 +245,38 @@ class TestAgencyViews(TestCase):
 
     def test_list(self):
         """The list should only contain approved agencies"""
-        # pylint: disable=no-self-use
         approved_agency = factories.AgencyFactory()
         unapproved_agency = factories.AgencyFactory(status='pending')
-        response = http_get_response(reverse('agency-list'), agency.views.AgencyList.as_view())
+        response = http_get_response(
+            reverse('agency-list'), agency.views.AgencyList.as_view()
+        )
         agency_list = response.context_data['object_list']
-        ok_(approved_agency in agency_list, 'Approved agencies should be listed.')
-        ok_(unapproved_agency not in agency_list, 'Unapproved agencies should not be listed.')
+        ok_(
+            approved_agency in agency_list,
+            'Approved agencies should be listed.'
+        )
+        ok_(
+            unapproved_agency not in agency_list,
+            'Unapproved agencies should not be listed.'
+        )
 
     def test_similar(self):
         """Test the similar ajax view"""
-        # pylint: disable=no-self-use
         usa = Jurisdiction.objects.get(level='f')
-        agency1 = factories.AgencyFactory(name='Inspector General', jurisdiction=usa)
-        agency2 = factories.AgencyFactory(name='Federal Bureau of Investigation', jurisdiction=usa)
+        agency1 = factories.AgencyFactory(
+            name='Inspector General', jurisdiction=usa
+        )
+        agency2 = factories.AgencyFactory(
+            name='Federal Bureau of Investigation', jurisdiction=usa
+        )
         url = reverse('agency-similar')
 
-        request = RequestFactory().get(url, {'query': 'inspector general', 'jurisdiction': 'f'})
+        request = RequestFactory().get(
+            url, {
+                'query': 'inspector general',
+                'jurisdiction': 'f'
+            }
+        )
         request = mock_middleware(request)
         request.user = factories.UserFactory()
         response = agency.views.similar(request)
@@ -232,9 +284,10 @@ class TestAgencyViews(TestCase):
         eq_(data['exact'], {'value': agency1.pk, 'text': agency1.name})
 
         request = RequestFactory().get(
-                url,
-                {'query': 'fedral buraeu investigation', 'jurisdiction': 'f'},
-                )
+            url,
+            {'query': 'fedral buraeu investigation',
+             'jurisdiction': 'f'},
+        )
         request = mock_middleware(request)
         request.user = factories.UserFactory()
         response = agency.views.similar(request)
@@ -248,18 +301,19 @@ class TestAgencyForm(TestCase):
     def setUp(self):
         self.agency = factories.AgencyFactory()
         self.form = agency.forms.AgencyForm(
-                {
-                    'name': self.agency.name,
-                    'portal_type': 'other',
-                    },
-                instance=self.agency,
-                )
+            {
+                'name': self.agency.name,
+                'portal_type': 'other',
+            },
+            instance=self.agency,
+        )
 
     def test_validate_empty_form(self):
         """The form should have a name, at least"""
-        # pylint: disable=no-self-use
-        ok_(not agency.forms.AgencyForm().is_valid(),
-            'Empty AgencyForm should not validate.')
+        ok_(
+            not agency.forms.AgencyForm().is_valid(),
+            'Empty AgencyForm should not validate.'
+        )
 
     def test_instance_form(self):
         """The form should validate given only instance data"""
@@ -268,6 +322,7 @@ class TestAgencyForm(TestCase):
 
 class TestStaleAgency(TestCase):
     """Tests the stale agency task"""
+
     def setUp(self):
         self.stale_agency = factories.StaleAgencyFactory(stale=False)
         self.unstale_agency = factories.AgencyFactory(stale=True)
@@ -280,6 +335,15 @@ class TestStaleAgency(TestCase):
         self.stale_agency.refresh_from_db()
         self.unstale_agency.refresh_from_db()
         self.task.refresh_from_db()
-        ok_(self.stale_agency.stale, 'The stale agency should be marked as stale')
-        ok_(not self.unstale_agency.stale, 'The unstale agency should be unmarked as stale.')
-        ok_(self.task.resolved, 'The task for the unstale agency should be resolved automatically.')
+        ok_(
+            self.stale_agency.stale,
+            'The stale agency should be marked as stale'
+        )
+        ok_(
+            not self.unstale_agency.stale,
+            'The unstale agency should be unmarked as stale.'
+        )
+        ok_(
+            self.task.resolved,
+            'The task for the unstale agency should be resolved automatically.'
+        )

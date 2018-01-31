@@ -3,27 +3,24 @@
 Tests for data sets
 """
 
+# pylint: disable=invalid-name
+
+# Django
 from django.core.urlresolvers import reverse
-from django.test import TestCase, RequestFactory
+from django.test import RequestFactory, TestCase
 
-from cStringIO import StringIO
-from nose.tools import (
-        eq_,
-        assert_true,
-        assert_false,
-        )
+# Standard Library
 import random
+from cStringIO import StringIO
 
-from muckrock.dataset.models import (
-        DataSet,
-        DataField,
-        DataRow,
-        )
+# Third Party
+from nose.tools import assert_false, assert_true, eq_
+
+# MuckRock
 from muckrock.dataset import fields, views
+from muckrock.dataset.models import DataField, DataRow, DataSet
 from muckrock.factories import UserFactory
 from muckrock.test_utils import mock_middleware
-
-# pylint: disable=invalid-name
 
 
 class TestDataSetModels(TestCase):
@@ -33,43 +30,50 @@ class TestDataSetModels(TestCase):
         """Create a dataset for each test case"""
         self.user = UserFactory()
         self.dataset = DataSet.objects.create(
-                name='Data Set',
-                slug='data-set',
-                user=self.user,
-                )
+            name='Data Set',
+            slug='data-set',
+            user=self.user,
+        )
         for i, name in enumerate('abc'):
             DataField.objects.create(
-                    dataset=self.dataset,
-                    name=name,
-                    slug=name,
-                    field_number=i,
-                    type='text',
-                    )
+                dataset=self.dataset,
+                name=name,
+                slug=name,
+                field_number=i,
+                type='text',
+            )
         data = [
-                {'a': 'alice', 'b': '901', 'c': 'foo'},
-                {'a': 'bob', 'b': '102', 'c': 'bar'},
-                {'a': 'charlie', 'b': '201', 'c': 'baz'},
-                ]
+            {
+                'a': 'alice',
+                'b': '901',
+                'c': 'foo'
+            },
+            {
+                'a': 'bob',
+                'b': '102',
+                'c': 'bar'
+            },
+            {
+                'a': 'charlie',
+                'b': '201',
+                'c': 'baz'
+            },
+        ]
         for i, row in enumerate(data):
             DataRow.objects.create(
-                    dataset=self.dataset,
-                    row_number=i,
-                    data=row,
-                    )
+                dataset=self.dataset,
+                row_number=i,
+                data=row,
+            )
 
     def test_create_from_csv(self):
         """Test creating a dataset from a csv"""
-        csv = StringIO(
-                'd,e,f\n'
-                'doug,24,foo\n'
-                'eric,45,bar\n'
-                'fox,62,baz\n'
-                )
+        csv = StringIO('d,e,f\n' 'doug,24,foo\n' 'eric,45,bar\n' 'fox,62,baz\n')
         dataset = DataSet.objects.create_from_csv(
-                'Name',
-                self.user,
-                csv,
-                )
+            'Name',
+            self.user,
+            csv,
+        )
         field_names = dataset.fields.all()
         eq_(['d', 'e', 'f'], [f.name for f in field_names])
         eq_(['choice', 'number', 'choice'], [f.type for f in field_names])
@@ -81,16 +85,16 @@ class TestDataSetModels(TestCase):
     def test_create_from_csv_repeat_columns(self):
         """Duplicate column names do not crash creation"""
         csv = StringIO(
-                'name,age,name\n'
-                'doug,24,foo\n'
-                'eric,45,bar\n'
-                'fox,62,baz\n'
-                )
+            'name,age,name\n'
+            'doug,24,foo\n'
+            'eric,45,bar\n'
+            'fox,62,baz\n'
+        )
         DataSet.objects.create_from_csv(
-                'Name',
-                self.user,
-                csv,
-                )
+            'Name',
+            self.user,
+            csv,
+        )
 
     def test_detect_field_types(self):
         """Test detecting the field types"""
@@ -106,38 +110,59 @@ class TestDataSetModels(TestCase):
     def test_row_sort(self):
         """Test sorting the data"""
         field_names = {f.slug: f for f in self.dataset.fields.all()}
-        rows = list(self.dataset.rows.sort(
+        rows = list(
+            self.dataset.rows.sort(
                 field_names,
-                [{'field': 'b', 'dir': 'asc'}],
-                ))
+                [{
+                    'field': 'b',
+                    'dir': 'asc'
+                }],
+            )
+        )
         eq_(rows, sorted(rows, key=lambda x: x.data['b']))
-        rows = list(self.dataset.rows.sort(
+        rows = list(
+            self.dataset.rows.sort(
                 field_names,
-                [{'field': 'a', 'dir': 'desc'}],
-                ))
+                [{
+                    'field': 'a',
+                    'dir': 'desc'
+                }],
+            )
+        )
         eq_(rows, sorted(rows, key=lambda x: x.data['a'], reverse=True))
 
     def test_row_tabulator_filter(self):
         """Test filtering the data"""
         field_names = {f.slug: f for f in self.dataset.fields.all()}
         rows = self.dataset.rows.tabulator_filter(
-                field_names,
-                [{'field': 'a', 'type': '=', 'value': 'alice'}],
-                )
+            field_names,
+            [{
+                'field': 'a',
+                'type': '=',
+                'value': 'alice'
+            }],
+        )
         eq_(len(rows), 1)
         rows = self.dataset.rows.tabulator_filter(
-                field_names,
-                [
-                    {'field': 'a', 'type': '!=', 'value': 'bob'},
-                    {'field': 'c', 'type': 'like', 'value': 'ba'},
-                    ],
-                )
+            field_names,
+            [
+                {
+                    'field': 'a',
+                    'type': '!=',
+                    'value': 'bob'
+                },
+                {
+                    'field': 'c',
+                    'type': 'like',
+                    'value': 'ba'
+                },
+            ],
+        )
         eq_(len(rows), 1)
 
 
 class TestDataSetFields(TestCase):
     """Test the data set fields"""
-    # pylint: disable=no-self-use
 
     def test_text_field_validate(self):
         """Test text field validate"""
@@ -163,7 +188,9 @@ class TestDataSetFields(TestCase):
 
     def test_url_field_validate(self):
         """Test URL field validate"""
-        assert_true(fields.URLField.validate('https://www.example.com/file.pdf'))
+        assert_true(
+            fields.URLField.validate('https://www.example.com/file.pdf')
+        )
         assert_false(fields.URLField.validate('example.limo'))
 
     def test_bool_field_validate(self):
@@ -186,10 +213,16 @@ class TestDataSetFields(TestCase):
         """Test choice field validate"""
         # make random values deterministic
         random.seed(42)
-        good = [random.randint(1, fields.ChoiceField.max_choices - 1) for _ in xrange(20)]
+        good = [
+            random.randint(1, fields.ChoiceField.max_choices - 1)
+            for _ in xrange(20)
+        ]
         assert_true(fields.ChoiceField.validate_all(good))
 
-        bad = [random.randint(0, 10 * fields.ChoiceField.max_choices) for _ in xrange(20)]
+        bad = [
+            random.randint(0, 10 * fields.ChoiceField.max_choices)
+            for _ in xrange(20)
+        ]
         assert_false(fields.ChoiceField.validate_all(bad))
 
     def test_date_field_validate(self):
@@ -211,142 +244,153 @@ class TestDataSetViews(TestCase):
         self.request_factory = RequestFactory()
         self.user = UserFactory()
         csv = StringIO(
-                'name,age,job\n'
-                'alice,24,engineer\n'
-                'bob,45,journalist\n'
-                'charlie,62,doctor\n'
-                )
+            'name,age,job\n'
+            'alice,24,engineer\n'
+            'bob,45,journalist\n'
+            'charlie,62,doctor\n'
+        )
         self.dataset = DataSet.objects.create_from_csv(
-                'DataSet',
-                self.user,
-                csv,
-                )
+            'DataSet',
+            self.user,
+            csv,
+        )
 
     def test_detail(self):
         """Test the detail view"""
         request = self.request_factory.get(
-                reverse(
-                    'dataset-detail',
-                    kwargs={'slug': self.dataset.slug, 'idx': self.dataset.pk}
-                    ))
+            reverse(
+                'dataset-detail',
+                kwargs={
+                    'slug': self.dataset.slug,
+                    'idx': self.dataset.pk
+                }
+            )
+        )
         request = mock_middleware(request)
         request.user = self.user
         response = views.detail(
-                request,
-                self.dataset.slug,
-                self.dataset.pk,
-                )
+            request,
+            self.dataset.slug,
+            self.dataset.pk,
+        )
         eq_(response.status_code, 200)
 
     def test_embed(self):
         """Test the embed view"""
         request = self.request_factory.get(
-                reverse(
-                    'dataset-embed',
-                    kwargs={'slug': self.dataset.slug, 'idx': self.dataset.pk}
-                    ))
+            reverse(
+                'dataset-embed',
+                kwargs={
+                    'slug': self.dataset.slug,
+                    'idx': self.dataset.pk
+                }
+            )
+        )
         request = mock_middleware(request)
         request.user = self.user
         response = views.embed(
-                request,
-                self.dataset.slug,
-                self.dataset.pk,
-                )
+            request,
+            self.dataset.slug,
+            self.dataset.pk,
+        )
         eq_(response.status_code, 200)
 
     def test_data(self):
         """Test the data view"""
         request = self.request_factory.get(
-                reverse(
-                    'dataset-data',
-                    kwargs={'slug': self.dataset.slug, 'idx': self.dataset.pk}
-                    ))
+            reverse(
+                'dataset-data',
+                kwargs={
+                    'slug': self.dataset.slug,
+                    'idx': self.dataset.pk
+                }
+            )
+        )
         request = mock_middleware(request)
         request.user = self.user
         response = views.data(
-                request,
-                self.dataset.slug,
-                self.dataset.pk,
-                )
+            request,
+            self.dataset.slug,
+            self.dataset.pk,
+        )
         eq_(response.status_code, 200)
 
     def test_parse_params(self):
         """Test the tabulator parameter parsing function"""
-        # pylint: disable=no-self-use
         # pylint: disable=protected-access
         params = {
-                'filters[0][field]': 'a',
-                'filters[0][type]': '=',
-                'filters[0][value]': 'foo',
-                'filters[1][field]': 'b',
-                'filters[1][type]': 'like',
-                'filters[1][value]': 'bar',
-                }
+            'filters[0][field]': 'a',
+            'filters[0][type]': '=',
+            'filters[0][value]': 'foo',
+            'filters[1][field]': 'b',
+            'filters[1][type]': 'like',
+            'filters[1][value]': 'bar',
+        }
         data = views._parse_params(
-                params,
-                'filters',
-                ('field', 'type', 'value'),
-                )
+            params,
+            'filters',
+            ('field', 'type', 'value'),
+        )
         eq_(
-                data,
-                [
-                    {
-                        'field': 'a',
-                        'type': '=',
-                        'value': 'foo',
-                        },
-                    {
-                        'field': 'b',
-                        'type': 'like',
-                        'value': 'bar',
-                        },
-                    ],
-                )
+            data,
+            [
+                {
+                    'field': 'a',
+                    'type': '=',
+                    'value': 'foo',
+                },
+                {
+                    'field': 'b',
+                    'type': 'like',
+                    'value': 'bar',
+                },
+            ],
+        )
 
         # bad data causes it to return an empty list
         # missing value
         params = {
-                'filters[0][field]': 'a',
-                'filters[0][type]': '=',
-                'filters[0][value]': 'foo',
-                'filters[1][field]': 'b',
-                'filters[1][type]': 'like',
-                }
+            'filters[0][field]': 'a',
+            'filters[0][type]': '=',
+            'filters[0][value]': 'foo',
+            'filters[1][field]': 'b',
+            'filters[1][type]': 'like',
+        }
         data = views._parse_params(
-                params,
-                'filters',
-                ('field', 'type', 'value'),
-                )
+            params,
+            'filters',
+            ('field', 'type', 'value'),
+        )
         eq_(data, [])
 
         # bad format
         params = {
-                'filters[0][field]': 'a',
-                'filters[0][type]': '=',
-                'filters[0][value]': 'foo',
-                'filters[1][field]': 'b',
-                'filters[1][type]': 'like',
-                'filters[1]{value}': 'bar',
-                }
+            'filters[0][field]': 'a',
+            'filters[0][type]': '=',
+            'filters[0][value]': 'foo',
+            'filters[1][field]': 'b',
+            'filters[1][type]': 'like',
+            'filters[1]{value}': 'bar',
+        }
         data = views._parse_params(
-                params,
-                'filters',
-                ('field', 'type', 'value'),
-                )
+            params,
+            'filters',
+            ('field', 'type', 'value'),
+        )
         eq_(data, [])
 
         # bad field
         params = {
-                'filters[0][field]': 'a',
-                'filters[0][type]': '=',
-                'filters[0][value]': 'foo',
-                'filters[1][field]': 'b',
-                'filters[1][type]': 'like',
-                'filters[1][foobar]': 'bar',
-                }
+            'filters[0][field]': 'a',
+            'filters[0][type]': '=',
+            'filters[0][value]': 'foo',
+            'filters[1][field]': 'b',
+            'filters[1][type]': 'like',
+            'filters[1][foobar]': 'bar',
+        }
         data = views._parse_params(
-                params,
-                'filters',
-                ('field', 'type', 'value'),
-                )
+            params,
+            'filters',
+            ('field', 'type', 'value'),
+        )
         eq_(data, [])

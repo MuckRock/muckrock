@@ -2,25 +2,25 @@
 Custom importers for school agencies
 """
 
+# Django
 from django.conf import settings
 from django.template.defaultfilters import slugify
 
+# Standard Library
 import csv
 
+# Third Party
 from boto.s3.connection import S3Connection
 
+# MuckRock
 from muckrock.agency.models import (
-        Agency,
-        AgencyType,
-        AgencyAddress,
-        AgencyEmail,
-        AgencyPhone,
-        )
-from muckrock.communication.models import (
-        Address,
-        PhoneNumber,
-        EmailAddress,
-        )
+    Agency,
+    AgencyAddress,
+    AgencyEmail,
+    AgencyPhone,
+    AgencyType,
+)
+from muckrock.communication.models import Address, EmailAddress, PhoneNumber
 from muckrock.jurisdiction.models import Jurisdiction
 
 # columns
@@ -47,10 +47,13 @@ DOC_TYPE = 19
 STATUS = 20
 LAST_UPDATE = 21
 
+
 def import_schools(file_name):
     """Import schools from spreadsheet"""
     # pylint: disable=too-many-locals
-    conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
+    conn = S3Connection(
+        settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY
+    )
     bucket = conn.get_bucket('muckrock')
     key = bucket.get_key(file_name)
     key.get_contents_to_filename('/tmp/tmp.csv')
@@ -63,14 +66,14 @@ def import_schools(file_name):
             try:
                 parent = Jurisdiction.objects.get(abbrev=row[STATE])
                 county = Jurisdiction.objects.get(
-                        name='%s County' % row[COUNTY],
-                        parent=parent,
-                        level='l',
-                        )
+                    name='%s County' % row[COUNTY],
+                    parent=parent,
+                    level='l',
+                )
             except (
-                    Jurisdiction.DoesNotExist,
-                    Jurisdiction.MultipleObjectsReturned,
-                    ) as exc:
+                Jurisdiction.DoesNotExist,
+                Jurisdiction.MultipleObjectsReturned,
+            ) as exc:
                 print '****'
                 print 'Jurisdiction error'
                 print row
@@ -78,49 +81,50 @@ def import_schools(file_name):
                 print '****'
             else:
                 agency, created = Agency.objects.get_or_create(
-                        name=row[DISTRICT],
-                        slug=slugify(row[DISTRICT]),
-                        jurisdiction=county,
-                        status='approved',
-                        defaults=dict(
-                            contact_first_name=row[FIRST_NAME],
-                            contact_last_name=row[LAST_NAME],
-                            )
-                        )
+                    name=row[DISTRICT],
+                    slug=slugify(row[DISTRICT]),
+                    jurisdiction=county,
+                    status='approved',
+                    defaults=dict(
+                        contact_first_name=row[FIRST_NAME],
+                        contact_last_name=row[LAST_NAME],
+                    )
+                )
                 if not created:
                     print 'agency already existed'
                 print agency.pk
                 agency.types.add(school_district)
                 address, _ = Address.objects.get_or_create(
-                        address='{name}\n{street}\n{city}, {state} {zip}'.format(
-                            name=row[DISTRICT],
-                            street=row[MAIL_STREET],
-                            city=row[MAIL_CITY],
-                            state=row[MAIL_STATE],
-                            zip=row[MAIL_ZIP],
-                            ))
+                    address='{name}\n{street}\n{city}, {state} {zip}'.format(
+                        name=row[DISTRICT],
+                        street=row[MAIL_STREET],
+                        city=row[MAIL_CITY],
+                        state=row[MAIL_STATE],
+                        zip=row[MAIL_ZIP],
+                    )
+                )
                 AgencyAddress.objects.get_or_create(
-                        agency=agency,
-                        address=address,
-                        request_type='primary',
-                        )
+                    agency=agency,
+                    address=address,
+                    request_type='primary',
+                )
                 number = row[PHONE]
                 if number:
                     if row[EXT]:
                         number += (' x%s' % row[EXT])
                     phone, _ = PhoneNumber.objects.get_or_create(
-                            number=number,
-                            type='phone',
-                            )
+                        number=number,
+                        type='phone',
+                    )
                     AgencyPhone.objects.get_or_create(
-                            agency=agency,
-                            phone=phone,
-                            )
+                        agency=agency,
+                        phone=phone,
+                    )
                 if row[EMAIL]:
                     email = EmailAddress.objects.fetch(row[EMAIL])
                     AgencyEmail.objects.get_or_create(
-                            agency=agency,
-                            email=email,
-                            request_type='primary',
-                            email_type='to',
-                            )
+                        agency=agency,
+                        email=email,
+                        request_type='primary',
+                        email_type='to',
+                    )

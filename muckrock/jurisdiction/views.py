@@ -2,19 +2,22 @@
 Views for the Jurisdiction application
 """
 
+# Django
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.db.models import Count, Sum, Q
-from django.shortcuts import render, get_object_or_404, redirect
+from django.db.models import Count, Q, Sum
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView
 
+# Third Party
 from rest_framework import viewsets
 
+# MuckRock
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.filters import JurisdictionFilterSet
 from muckrock.jurisdiction.forms import FlagForm
-from muckrock.jurisdiction.models import Jurisdiction, Exemption
+from muckrock.jurisdiction.models import Exemption, Jurisdiction
 from muckrock.jurisdiction.serializers import JurisdictionSerializer
 from muckrock.task.models import FlaggedTask
 from muckrock.views import MRFilterListView
@@ -22,13 +25,14 @@ from muckrock.views import MRFilterListView
 
 def collect_stats(obj, context):
     """Helper for collecting stats"""
-    statuses = ('rejected', 'ack', 'processed', 'fix', 'no_docs', 'done', 'appealing')
+    statuses = (
+        'rejected', 'ack', 'processed', 'fix', 'no_docs', 'done', 'appealing'
+    )
     requests = obj.get_requests()
-    status_counts = (requests
-        .filter(status__in=statuses)
-        .order_by('status')
-        .values_list('status')
-        .annotate(Count('status')))
+    status_counts = (
+        requests.filter(status__in=statuses).order_by('status')
+        .values_list('status').annotate(Count('status'))
+    )
     context.update({'num_%s' % s: c for s, c in status_counts})
     context['num_overdue'] = requests.get_overdue().count()
     context['num_submitted'] = requests.get_submitted().count()
@@ -38,53 +42,57 @@ def detail(request, fed_slug, state_slug, local_slug):
     """Details for a jurisdiction"""
     if local_slug:
         jurisdiction = get_object_or_404(
-                Jurisdiction.objects.select_related(
-                    'parent',
-                    'parent__parent',
-                    ),
-                level='l',
-                slug=local_slug,
-                parent__slug=state_slug,
-                parent__parent__slug=fed_slug,
-                )
+            Jurisdiction.objects.select_related(
+                'parent',
+                'parent__parent',
+            ),
+            level='l',
+            slug=local_slug,
+            parent__slug=state_slug,
+            parent__parent__slug=fed_slug,
+        )
     elif state_slug:
         jurisdiction = get_object_or_404(
-                Jurisdiction.objects.select_related('parent'),
-                level='s',
-                slug=state_slug,
-                parent__slug=fed_slug,
-                )
+            Jurisdiction.objects.select_related('parent'),
+            level='s',
+            slug=state_slug,
+            parent__slug=fed_slug,
+        )
     else:
         jurisdiction = get_object_or_404(
-                Jurisdiction,
-                level='f',
-                slug=fed_slug,
-                )
+            Jurisdiction,
+            level='f',
+            slug=fed_slug,
+        )
 
     foia_requests = jurisdiction.get_requests()
-    foia_requests = (foia_requests.get_viewable(request.user)
-                                  .get_done()
-                                  .order_by('-date_done')
-                                  .select_related_view()
-                                  .get_public_file_count(limit=10)[:10])
+    foia_requests = (
+        foia_requests.get_viewable(request.user).get_done()
+        .order_by('-date_done').select_related_view()
+        .get_public_file_count(limit=10)[:10]
+    )
 
     if jurisdiction.level == 's':
         agencies = Agency.objects.filter(
-            Q(jurisdiction=jurisdiction)|
-            Q(jurisdiction__parent=jurisdiction)
+            Q(jurisdiction=jurisdiction)
+            | Q(jurisdiction__parent=jurisdiction)
         )
     else:
         agencies = jurisdiction.agencies
-    agencies = (agencies.get_approved()
-                        .only('pk', 'slug', 'name', 'jurisdiction')
-                        .annotate(foia_count=Count('foiarequest'))
-                        .annotate(pages=Sum('foiarequest__files__pages'))
-                        .order_by('-foia_count')[:10])
+    agencies = (
+        agencies.get_approved().only('pk', 'slug', 'name', 'jurisdiction')
+        .annotate(foia_count=Count('foiarequest'))
+        .annotate(pages=Sum('foiarequest__files__pages'))
+        .order_by('-foia_count')[:10]
+    )
 
-    _children = Jurisdiction.objects.filter(parent=jurisdiction).select_related('parent__parent')
-    _top_children = (_children.annotate(foia_count=Count('foiarequest'))
-                              .annotate(pages=Sum('foiarequest__files__pages'))
-                              .order_by('-foia_count')[:10])
+    _children = Jurisdiction.objects.filter(parent=jurisdiction
+                                            ).select_related('parent__parent')
+    _top_children = (
+        _children.annotate(foia_count=Count('foiarequest'))
+        .annotate(pages=Sum('foiarequest__files__pages'))
+        .order_by('-foia_count')[:10]
+    )
 
     if request.method == 'POST':
         form = FlagForm(request.POST)
@@ -92,13 +100,16 @@ def detail(request, fed_slug, state_slug, local_slug):
             FlaggedTask.objects.create(
                 user=request.user,
                 text=form.cleaned_data.get('reason'),
-                jurisdiction=jurisdiction)
+                jurisdiction=jurisdiction
+            )
             messages.success(request, 'We received your feedback. Thanks!')
             return redirect(jurisdiction)
     else:
         form = FlagForm()
 
-    admin_url = reverse('admin:jurisdiction_jurisdiction_change', args=(jurisdiction.pk,))
+    admin_url = reverse(
+        'admin:jurisdiction_jurisdiction_change', args=(jurisdiction.pk,)
+    )
     context = {
         'jurisdiction': jurisdiction,
         'agencies': agencies,
@@ -113,14 +124,14 @@ def detail(request, fed_slug, state_slug, local_slug):
         context['proxies'] = User.objects.filter(
             profile__acct_type='proxy',
             profile__state=jurisdiction.abbrev,
-            )
+        )
     collect_stats(jurisdiction, context)
 
     return render(
-            request,
-            'jurisdiction/detail.html',
-            context,
-            )
+        request,
+        'jurisdiction/detail.html',
+        context,
+    )
 
 
 class List(MRFilterListView):
@@ -131,14 +142,16 @@ class List(MRFilterListView):
     template_name = 'jurisdiction/list.html'
     default_sort = 'name'
     sort_map = {
-            'name': 'name',
-            'level': 'level',
-            }
+        'name': 'name',
+        'level': 'level',
+    }
 
     def get_queryset(self):
         """Hides hidden jurisdictions from list"""
         objects = super(List, self).get_queryset()
-        objects = objects.exclude(hidden=True).select_related('parent', 'parent__parent')
+        objects = objects.exclude(hidden=True).select_related(
+            'parent', 'parent__parent'
+        )
         return objects
 
 
@@ -152,7 +165,6 @@ def redirect_flag(request, **kwargs):
 
 class JurisdictionViewSet(viewsets.ModelViewSet):
     """API views for Jurisdiction"""
-    # pylint: disable=too-many-ancestors
     # pylint: disable=too-many-public-methods
     queryset = Jurisdiction.objects.select_related('parent__parent').order_by()
     serializer_class = JurisdictionSerializer
@@ -167,14 +179,18 @@ class ExemptionDetailView(DetailView):
     def get_queryset(self):
         """Adds some database optimizations for getting the Exemption queryset."""
         _queryset = super(ExemptionDetailView, self).get_queryset()
-        _queryset = (_queryset.select_related('jurisdiction__parent__parent')
-                              .prefetch_related('requests', 'requests__agency'))
+        _queryset = (
+            _queryset.select_related('jurisdiction__parent__parent')
+            .prefetch_related('requests', 'requests__agency')
+        )
         return _queryset
 
     def get_context_data(self, **kwargs):
         """Adds a flag form to the context."""
         context = super(ExemptionDetailView, self).get_context_data(**kwargs)
-        admin_url = reverse('admin:jurisdiction_exemption_change', args=(self.object.pk,))
+        admin_url = reverse(
+            'admin:jurisdiction_exemption_change', args=(self.object.pk,)
+        )
         context['flag_form'] = FlagForm()
         context['sidebar_admin_url'] = admin_url
         return context

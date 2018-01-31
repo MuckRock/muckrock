@@ -1,14 +1,18 @@
 """FOIA views for handling files"""
 
+# Django
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.generic import DetailView, ListView
 
+# Third Party
 from djangosecure.decorators import frame_deny_exempt
 
+# MuckRock
 from muckrock.foia.models import FOIAFile, FOIARequest
 from muckrock.views import PaginationMixin
+
 
 @method_decorator(frame_deny_exempt, name='dispatch')
 class FileEmbedView(DetailView):
@@ -33,19 +37,21 @@ class FOIAFileListView(PaginationMixin, ListView):
     def get_foia(self):
         """Returns the FOIA Request for the files. Caches it as an attribute."""
         if self.foia is None:
-            self.foia = get_object_or_404(FOIARequest, pk=self.kwargs.get('idx'))
+            self.foia = get_object_or_404(
+                FOIARequest, pk=self.kwargs.get('idx')
+            )
         return self.foia
 
     def get_queryset(self):
         foia = self.get_foia()
         queryset = super(FOIAFileListView, self).get_queryset()
-        return (queryset.filter(foia=foia)
-            .select_related('foia')
-            .select_related('foia__user')
-            .select_related('foia__agency')
+        return (
+            queryset.filter(foia=foia).select_related('foia')
+            .select_related('foia__user').select_related('foia__agency')
             .select_related('foia__jurisdiction')
             .prefetch_related('foia__edit_collaborators')
-            .prefetch_related('foia__read_collaborators'))
+            .prefetch_related('foia__read_collaborators')
+        )
 
     def get_context_data(self, **kwargs):
         context = super(FOIAFileListView, self).get_context_data(**kwargs)

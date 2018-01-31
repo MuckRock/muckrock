@@ -2,61 +2,66 @@
 Provides Jurisdiction application API views
 """
 
+# Django
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.template.loader import get_template
 
-from rest_framework.decorators import list_route, detail_route
+# Third Party
+import django_filters
+from rest_framework.decorators import detail_route, list_route
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-import django_filters
 
+# MuckRock
 from muckrock.jurisdiction.forms import ExemptionSubmissionForm
-from muckrock.jurisdiction.models import Jurisdiction, Exemption
-from muckrock.jurisdiction.serializers import JurisdictionSerializer, ExemptionSerializer
+from muckrock.jurisdiction.models import Exemption, Jurisdiction
+from muckrock.jurisdiction.serializers import (
+    ExemptionSerializer,
+    JurisdictionSerializer,
+)
 from muckrock.task.models import NewExemptionTask
 from muckrock.task.serializers import NewExemptionTaskSerializer
 
+
 class JurisdictionViewSet(ModelViewSet):
     """API views for Jurisdiction"""
-    # pylint: disable=too-many-ancestors
     # pylint: disable=too-many-public-methods
-    queryset = (Jurisdiction.objects
-            .order_by('id')
-            .select_related('parent__parent')
-            )
+    queryset = (
+        Jurisdiction.objects.order_by('id').select_related('parent__parent')
+    )
     serializer_class = JurisdictionSerializer
     # don't allow ordering by computed fields
-    ordering_fields = [f for f in JurisdictionSerializer.Meta.fields
-            if f not in (
-                'absolute_url',
-                'average_response_time',
-                'fee_rate',
-                'success_rate',
-                )]
+    ordering_fields = [
+        f for f in JurisdictionSerializer.Meta.fields if f not in (
+            'absolute_url',
+            'average_response_time',
+            'fee_rate',
+            'success_rate',
+        )
+    ]
 
     class Filter(django_filters.FilterSet):
         """API Filter for Jurisdictions"""
-        # pylint: disable=too-few-public-methods
         parent = django_filters.NumberFilter(name='parent__id')
+
         class Meta:
             model = Jurisdiction
             fields = (
-                    'name',
-                    'abbrev',
-                    'level',
-                    'parent',
-                    'requires_proxy',
-                    )
+                'name',
+                'abbrev',
+                'level',
+                'parent',
+                'requires_proxy',
+            )
 
     filter_class = Filter
 
     @detail_route()
     def template(self, request, pk=None):
         """API view to get the template language for a jurisdiction"""
-        # pylint: disable=no-self-use
         jurisdiction = get_object_or_404(Jurisdiction, pk=pk)
         template = get_template('text/foia/request.txt')
         if request.user.is_authenticated():
@@ -67,7 +72,7 @@ class JurisdictionViewSet(ModelViewSet):
             'document_request': '<insert requested documents here>',
             'jurisdiction': jurisdiction,
             'user_name': user_name,
-            }
+        }
         text = template.render(context)
         return Response({'text': text})
 
@@ -76,6 +81,7 @@ class ExemptionPermissions(DjangoModelPermissionsOrAnonReadOnly):
     """
     Allows authenticated users to submit exemptions.
     """
+
     def has_permission(self, request, view):
         """Allow authenticated users to submit exemptions."""
         if request.user.is_authenticated() and request.method in ['POST']:
@@ -88,24 +94,24 @@ class ExemptionViewSet(ModelViewSet):
     The Exemption model provides a list of individual exemption cases along with some
     example appeal language.
     """
-    queryset = (Exemption.objects
-            .order_by('id')
-            .select_related('jurisdiction__parent__parent')
-            .prefetch_related('example_appeals')
-            )
+    queryset = (
+        Exemption.objects.order_by('id')
+        .select_related('jurisdiction__parent__parent')
+        .prefetch_related('example_appeals')
+    )
     serializer_class = ExemptionSerializer
     permission_classes = [ExemptionPermissions]
 
     class Filter(django_filters.FilterSet):
         """API Filter for Examptions"""
-        # pylint: disable=too-few-public-methods
         jurisdiction = django_filters.NumberFilter(name='jurisdiction__id')
+
         class Meta:
             model = Exemption
             fields = (
-                    'name',
-                    'jurisdiction',
-                    )
+                'name',
+                'jurisdiction',
+            )
 
     filter_class = Filter
 
@@ -120,10 +126,9 @@ class ExemptionViewSet(ModelViewSet):
         jurisdiction = request.query_params.get('jurisdiction')
         if query:
             results = self.queryset.filter(
-                Q(name__icontains=query)|
-                Q(aliases__icontains=query)|
-                Q(example_appeals__language__icontains=query)|
-                Q(tags__name__icontains=query)
+                Q(name__icontains=query) | Q(aliases__icontains=query)
+                | Q(example_appeals__language__icontains=query)
+                | Q(tags__name__icontains=query)
             ).distinct()
         if jurisdiction:
             results = results.filter(jurisdiction__pk=jurisdiction)
@@ -142,15 +147,12 @@ class ExemptionViewSet(ModelViewSet):
         language the agency used to invoke it. Then, we should create both an InvokedExemption
         and a NewExemptionTask.
         """
-        # pylint: disable=no-self-use
         form = ExemptionSubmissionForm(request.data)
         if not form.is_valid():
             raise ValidationError(form.errors.as_json())
         foia = form.cleaned_data.get('foia')
         language = form.cleaned_data.get('language')
         task = NewExemptionTask.objects.create(
-            foia=foia,
-            language=language,
-            user=request.user
+            foia=foia, language=language, user=request.user
         )
         return Response(NewExemptionTaskSerializer(task).data)

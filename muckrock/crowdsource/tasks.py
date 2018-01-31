@@ -2,12 +2,18 @@
 Celery tasks for the crowdsource application
 """
 
+# Django
 from celery.task import task
 
-import requests
+# Standard Library
 from urllib import quote_plus
 
+# Third Party
+import requests
+
+# MuckRock
 from muckrock.crowdsource.models import Crowdsource
+
 
 @task(name='muckrock.crowdsource.tasks.datum_per_page')
 def datum_per_page(crowdsource_pk, doc_id, metadata, **kwargs):
@@ -17,26 +23,27 @@ def datum_per_page(crowdsource_pk, doc_id, metadata, **kwargs):
 
     doc_id = quote_plus(doc_id.encode('utf-8'))
     resp = requests.get(
-            u'https://www.documentcloud.org'
-            u'/api/documents/{}.json'.format(
-                doc_id,
-                ))
+        u'https://www.documentcloud.org'
+        u'/api/documents/{}.json'.format(
+            doc_id,
+        )
+    )
     try:
         resp_json = resp.json()
     except ValueError as exc:
         datum_per_page.retry(
-                args=[crowdsource_pk, doc_id, metadata],
-                countdown=300,
-                kwargs=kwargs,
-                exc=exc,
-                )
+            args=[crowdsource_pk, doc_id, metadata],
+            countdown=300,
+            kwargs=kwargs,
+            exc=exc,
+        )
     pages = resp_json['document']['pages']
     for i in xrange(1, pages + 1):
         url = (
-                u'https://www.documentcloud.org/documents/'
-                u'{}/pages/{}.html'.format(doc_id, i)
-                )
+            u'https://www.documentcloud.org/documents/'
+            u'{}/pages/{}.html'.format(doc_id, i)
+        )
         crowdsource.data.create(
-                url=url,
-                metadata=metadata,
-                )
+            url=url,
+            metadata=metadata,
+        )

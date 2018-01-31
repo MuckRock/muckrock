@@ -1,14 +1,19 @@
 """
 Models for the Business Days application
 """
+# Django
 from django.db import models
 
+# Standard Library
 from calendar import monthrange
 from datetime import timedelta
+
+# Third Party
 from pascha import computus, traditions
 
 JAN, FEB, MAR, APR, MAY, JUN, JUL, AUG, SEP, OCT, NOV, DEC = range(1, 13)
 MON, TUES, WEDS, THURS, FRI, SAT, SUN = range(0, 7)
+
 
 class Holiday(models.Model):
     """A holiday"""
@@ -22,10 +27,18 @@ class Holiday(models.Model):
 
     # pylint: disable=bad-whitespace
     months = (
-        (1, 'January'),  (2, 'February'),  (3, 'March'),
-        (4, 'April'),    (5, 'May'),       (6, 'June'),
-        (7, 'July'),     (8, 'August'),    (9, 'September'),
-        (10, 'October'), (11, 'November'), (12, 'December'),
+        (1, 'January'),
+        (2, 'February'),
+        (3, 'March'),
+        (4, 'April'),
+        (5, 'May'),
+        (6, 'June'),
+        (7, 'July'),
+        (8, 'August'),
+        (9, 'September'),
+        (10, 'October'),
+        (11, 'November'),
+        (12, 'December'),
     )
     # pylint: enable=bad-whitespace
 
@@ -113,7 +126,6 @@ class Holiday(models.Model):
 
     def _match_election(self, date_, _):
         """match for election day"""
-        # pylint: disable=no-self-use
         return date_.month == NOV and date_.weekday() == TUES and \
                date_.day >= 2 and date_.day <= 8
 
@@ -174,7 +186,6 @@ class HolidayCalendar(object):
 
 class Calendar(object):
     """A set of holidays"""
-    # pylint: disable=no-self-use
 
     def is_holiday(self, _):
         """Is given date a holiday?"""

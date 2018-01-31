@@ -2,18 +2,23 @@
 Forms for the organization application
 """
 
+# Django
 from django import forms
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.template.defaultfilters import slugify
 
+# Third Party
+from autocomplete_light import shortcuts as autocomplete_light
+
+# MuckRock
 from muckrock.organization.models import Organization
 
-from autocomplete_light import shortcuts as autocomplete_light
 
 class CreateForm(forms.ModelForm):
     """Allows ordinary users to create an organization"""
+
     class Meta:
         model = Organization
         fields = ['name']
@@ -26,14 +31,19 @@ class CreateForm(forms.ModelForm):
             Organization.objects.get(slug=slug)
         except ObjectDoesNotExist:
             return name
-        raise forms.ValidationError('Organization already exists with this name.')
+        raise forms.ValidationError(
+            'Organization already exists with this name.'
+        )
 
 
 class StaffCreateForm(CreateForm):
     """Allows staff more control over the creation of an organization"""
+
     class Meta:
         model = Organization
-        fields = ['name', 'owner', 'monthly_requests', 'monthly_cost', 'max_users']
+        fields = [
+            'name', 'owner', 'monthly_requests', 'monthly_cost', 'max_users'
+        ]
         widgets = {'owner': autocomplete_light.ChoiceWidget('UserAutocomplete')}
 
     def clean_max_users(self):
@@ -47,10 +57,16 @@ class StaffCreateForm(CreateForm):
 
 class UpdateForm(forms.ModelForm):
     """Allows owner to update the number of seats in their organization."""
+
     class Meta:
         model = Organization
         fields = ['max_users']
-        widgets = {'max_users': forms.NumberInput(attrs={'min': settings.ORG_MIN_SEATS})}
+        widgets = {
+            'max_users':
+                forms.NumberInput(attrs={
+                    'min': settings.ORG_MIN_SEATS
+                })
+        }
         labels = {'max_users': 'Member Seats'}
 
     def clean_max_users(self):
@@ -60,14 +76,17 @@ class UpdateForm(forms.ModelForm):
             err_msg = 'Organizations have a %d-seat minimum' % settings.ORG_MIN_SEATS
             raise forms.ValidationError(err_msg)
         if max_users < self.instance.members.count():
-            err_msg = ('Organizations cannot have fewer seats than members. ' +
-                       'Please remove members first.')
+            err_msg = (
+                'Organizations cannot have fewer seats than members. ' +
+                'Please remove members first.'
+            )
             raise forms.ValidationError(err_msg)
         return max_users
 
 
 class StaffUpdateForm(UpdateForm):
     """Allows staff more control over the updating of an organization"""
+
     class Meta:
         model = Organization
         fields = ['monthly_requests', 'monthly_cost', 'max_users']
@@ -78,5 +97,6 @@ class AddMembersForm(forms.Form):
     members = forms.ModelMultipleChoiceField(
         required=True,
         queryset=User.objects.all(),
-        widget=autocomplete_light.MultipleChoiceWidget('UserOrganizationAutocomplete')
+        widget=autocomplete_light.
+        MultipleChoiceWidget('UserOrganizationAutocomplete')
     )

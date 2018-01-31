@@ -2,26 +2,32 @@
 Digest objects for the messages app
 """
 
+# Django
 from django.contrib.auth.models import User
-from django.db.models import Q, F
+from django.db.models import F, Q
+from django.db.models.functions import ExtractDay, Now
 from django.utils import timezone
 
-from actstream.models import Action
+# Standard Library
 from collections import OrderedDict
 from datetime import date, datetime, timedelta
+
+# Third Party
+from actstream.models import Action
 from dateutil.relativedelta import relativedelta
 
+# MuckRock
 from muckrock.accounts.models import Notification, Statistics
 from muckrock.communication.models import (
-        EmailCommunication,
-        FaxCommunication,
-        MailCommunication,
-        )
+    EmailCommunication,
+    FaxCommunication,
+    MailCommunication,
+)
 from muckrock.crowdfund.models import Crowdfund
+from muckrock.foia.models import FOIACommunication, FOIARequest
 from muckrock.message.email import TemplateEmail
-from muckrock.models import ExtractDay, Now
-from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.qanda.models import Question
+
 
 def get_salutation():
     """Returns a time-appropriate salutation"""
@@ -33,6 +39,7 @@ def get_salutation():
     else:
         salutation = 'Good evening'
     return salutation
+
 
 def get_signoff():
     """Returns a time-appropriate signoff"""
@@ -53,7 +60,8 @@ class Digest(TemplateEmail):
         if interval:
             # we use relativedelta in addition to timedelta because it gives us a greater
             # flexibility in the kinds of intervals we can define, e.g. weeks and months
-            if isinstance(interval, relativedelta) or isinstance(interval, timedelta):
+            if isinstance(interval, relativedelta
+                          ) or isinstance(interval, timedelta):
                 self.interval = interval
             else:
                 raise TypeError('Interval must be relativedelta or timedelta')
@@ -74,7 +82,9 @@ class Digest(TemplateEmail):
     def get_interval(self):
         """Gets the interval or raises an error if it is missing or an unexpected type."""
         if not self.interval:
-            raise NotImplementedError('Interval must be provided by subclass or when initialized.')
+            raise NotImplementedError(
+                'Interval must be provided by subclass or when initialized.'
+            )
         return self.interval
 
     def get_user(self):
@@ -145,8 +155,12 @@ class ActivityDigest(Digest):
         user = self.get_user()
         model_notifications = notifications.for_model(model)
         own_model_actions = Action.objects.owned_by(user, model)
-        own_model_notifications = model_notifications.filter(action__in=own_model_actions)
-        following_model_notifications = model_notifications.exclude(action__in=own_model_actions)
+        own_model_notifications = model_notifications.filter(
+            action__in=own_model_actions
+        )
+        following_model_notifications = model_notifications.exclude(
+            action__in=own_model_actions
+        )
         return {
             'count': model_notifications.count(),
             'mine': own_model_notifications,
@@ -158,11 +172,14 @@ class ActivityDigest(Digest):
         duration = self.get_duration()
         user = self.get_user()
         # get unread notifications for the user that are new since the last email
-        notifications = (Notification.objects.for_user(user)
-                                             .get_unread()
-                                             .filter(datetime__gte=duration))
+        notifications = (
+            Notification.objects.for_user(user).get_unread()
+            .filter(datetime__gte=duration)
+        )
         self.activity['requests'] = self.foia_notifications(notifications)
-        self.activity['questions'] = self.notifications_for_model(notifications, Question)
+        self.activity['questions'] = self.notifications_for_model(
+            notifications, Question
+        )
         self.activity['count'] = (
             self.activity['requests']['count'] +
             self.activity['questions']['count']
@@ -171,33 +188,30 @@ class ActivityDigest(Digest):
 
     def foia_notifications(self, notifications):
         """Do some heavy filtering and classifying of foia notifications."""
-        filtered_notifications = self.notifications_for_model(notifications, FOIARequest)
+        filtered_notifications = self.notifications_for_model(
+            notifications, FOIARequest
+        )
         filtered_notifications['mine'] = self.classify_request_notifications(
             filtered_notifications['mine'],
-            [
-                ('completed', 'completed'),
-                ('rejected', 'rejected'),
-                ('no_documents', 'no responsive documents'),
-                ('require_payment', 'payment'),
-                ('require_fix', 'require_fix'),
-                ('interim_response', 'processing'),
-                ('acknowledged', 'acknowledged'),
-                ('received', 'sent a communication')
-            ]
+            [('completed', 'completed'), ('rejected', 'rejected'),
+             ('no_documents', 'no responsive documents'),
+             ('require_payment', 'payment'), ('require_fix', 'require_fix'),
+             ('interim_response', 'processing'),
+             ('acknowledged', 'acknowledged'),
+             ('received', 'sent a communication')]
         )
-        filtered_notifications['following'] = self.classify_request_notifications(
-            filtered_notifications['following'],
-            [
-                ('completed', 'completed'),
-                ('rejected', 'rejected'),
-                ('no_documents', 'no responsive documents'),
-                ('require_payment', 'payment'),
-                ('require_fix', 'require_fix'),
-                ('interim_response', 'processing'),
-                ('acknowledged', 'acknowledged'),
-                ('received', 'sent a communication')
-            ]
-        )
+        filtered_notifications['following'
+                               ] = self.classify_request_notifications(
+                                   filtered_notifications['following'],
+                                   [('completed', 'completed'),
+                                    ('rejected', 'rejected'),
+                                    ('no_documents', 'no responsive documents'),
+                                    ('require_payment', 'payment'),
+                                    ('require_fix', 'require_fix'),
+                                    ('interim_response', 'processing'),
+                                    ('acknowledged', 'acknowledged'),
+                                    ('received', 'sent a communication')]
+                               )
         filtered_notifications['count'] = (
             filtered_notifications['mine']['count'] +
             filtered_notifications['following']['count']
@@ -206,12 +220,13 @@ class ActivityDigest(Digest):
 
     def classify_request_notifications(self, notifications, classifiers):
         """Break a single list of notifications into a classified dictionary."""
-        # pylint: disable=no-self-use
         classified = {}
         # a classifier should be a tuple of a key and a verb phrase to filter by
         # e.g. ('no_documents', 'no responsive documents')
         for classifier in classifiers:
-            classified[classifier[0]] = notifications.filter(action__verb__icontains=classifier[1])
+            classified[classifier[0]] = notifications.filter(
+                action__verb__icontains=classifier[1]
+            )
         activity_count = 0
         for _, classified_stream in classified.iteritems():
             activity_count += len(classified_stream)
@@ -241,8 +256,16 @@ class StaffDigest(Digest):
 
     class DataPoint():
         """Holds a data point for display in a digest."""
-        def __init__(self, name, current_value, previous_value,
-                previous_week_value, previous_month_value, growth=True):
+
+        def __init__(
+            self,
+            name,
+            current_value,
+            previous_value,
+            previous_week_value,
+            previous_month_value,
+            growth=True
+        ):
             """Initialize the statistical object"""
             # pylint: disable=too-many-arguments
             self.name = name
@@ -263,12 +286,11 @@ class StaffDigest(Digest):
 
     def get_trailing_cost(self, current, duration, cost_per):
         """Returns the trailing cost for communications over a period"""
-        # pylint: disable=no-self-use
         period = [current - relativedelta(days=duration), current]
         filters = Q(
-                communication__date__range=period,
-                communication__response=False,
-                )
+            communication__date__range=period,
+            communication__response=False,
+        )
         trailing = {
             'email': EmailCommunication.objects.filter(filters).count(),
             'fax': FaxCommunication.objects.filter(filters).count(),
@@ -284,9 +306,9 @@ class StaffDigest(Digest):
     def get_comms(self, start, end):
         """Returns communication data over a date range"""
         filters = Q(
-                communication__date__range=[start, end],
-                communication__response=False,
-                )
+            communication__date__range=[start, end],
+            communication__response=False,
+        )
         delivered_by = {
             'email': EmailCommunication.objects.filter(filters).count(),
             'fax': FaxCommunication.objects.filter(filters).count(),
@@ -302,8 +324,12 @@ class StaffDigest(Digest):
             'fax': delivered_by['fax'] * cost_per['fax'],
             'mail': delivered_by['mail'] * cost_per['mail'],
         }
-        received = FOIACommunication.objects.filter(date__range=[start, end], response=True)
-        sent = FOIACommunication.objects.filter(date__range=[start, end], response=False)
+        received = FOIACommunication.objects.filter(
+            date__range=[start, end], response=True
+        )
+        sent = FOIACommunication.objects.filter(
+            date__range=[start, end], response=False
+        )
         return {
             'sent': sent.count(),
             'received': received.count(),
@@ -320,47 +346,54 @@ class StaffDigest(Digest):
         try:
             current = Statistics.objects.get(date=end)
             previous = Statistics.objects.get(date=start)
-            previous_week = Statistics.objects.get(date=end - relativedelta(weeks=1))
-            previous_month = Statistics.objects.get(date=end - relativedelta(months=1))
+            previous_week = Statistics.objects.get(
+                date=end - relativedelta(weeks=1)
+            )
+            previous_month = Statistics.objects.get(
+                date=end - relativedelta(months=1)
+            )
         except Statistics.DoesNotExist:
-            return None # if statistics cannot be found, don't send anything
+            return None  # if statistics cannot be found, don't send anything
         data = {
-                'request': [],
-                'user': [],
-                }
+            'request': [],
+            'user': [],
+        }
         stats = [
-                ('request', 'Requests', 'total_requests', True),
-                ('request', 'Pages', 'total_pages', True),
-                ('request', 'Processing', 'total_requests_submitted', False),
-                ('request', 'Processing Time', 'requests_processing_days', False),
-                ('request', 'Flags', 'total_unresolved_flagged_tasks', False),
-                ('request', 'Flags Time', 'flag_processing_days', False),
-                ('request', 'Review Agency Tasks', 'total_reviewagency_tasks', False),
-                ('user', 'Users Filed', 'total_users_filed', True),
-                ('user', 'Users', 'total_users', True),
-                ('user', 'Pro Users', 'pro_users', True),
-                ('user', 'Active Org Members', 'total_active_org_members', True),
-                ]
+            ('request', 'Requests', 'total_requests', True),
+            ('request', 'Pages', 'total_pages', True),
+            ('request', 'Processing', 'total_requests_submitted', False),
+            ('request', 'Processing Time', 'requests_processing_days', False),
+            ('request', 'Flags', 'total_unresolved_flagged_tasks', False),
+            ('request', 'Flags Time', 'flag_processing_days', False),
+            (
+                'request', 'Review Agency Tasks', 'total_reviewagency_tasks',
+                False
+            ),
+            ('user', 'Users Filed', 'total_users_filed', True),
+            ('user', 'Users', 'total_users', True),
+            ('user', 'Pro Users', 'pro_users', True),
+            ('user', 'Active Org Members', 'total_active_org_members', True),
+        ]
         for section, name, stat, growth in stats:
             data[section].append(
-                    self.DataPoint(
-                        name,
-                        getattr(current, stat),
-                        getattr(previous, stat),
-                        getattr(previous_week, stat),
-                        getattr(previous_month, stat),
-                        growth,
-                        ))
+                self.DataPoint(
+                    name,
+                    getattr(current, stat),
+                    getattr(previous, stat),
+                    getattr(previous_week, stat),
+                    getattr(previous_month, stat),
+                    growth,
+                )
+            )
         return data
 
     def get_pro_users(self, start, end):
         """Compares pro users between two dates"""
-        # pylint: disable=no-self-use
         try:
             current = Statistics.objects.get(date=end)
             previous = Statistics.objects.get(date=start)
         except Statistics.DoesNotExist:
-            return None # if statistics cannot be found, don't send anything
+            return None  # if statistics cannot be found, don't send anything
         current_pro = current.pro_user_names
         if current_pro:
             current_pro = set(current_pro.split(';'))
@@ -372,37 +405,34 @@ class StaffDigest(Digest):
         else:
             previous_pro = set([])
         pro_gained = [
-            User.objects.get(username=username) for username in list(current_pro - previous_pro)
+            User.objects.get(username=username)
+            for username in list(current_pro - previous_pro)
         ]
         pro_lost = [
-            User.objects.get(username=username) for username in list(previous_pro - current_pro)
+            User.objects.get(username=username)
+            for username in list(previous_pro - current_pro)
         ]
-        data = {
-            'gained': pro_gained,
-            'lost': pro_lost
-        }
+        data = {'gained': pro_gained, 'lost': pro_lost}
         return data
 
     def get_stale_tasks(self):
         """Get stale tasks"""
-        # pylint: disable=no-self-use
         from muckrock.task.models import (
-                NewAgencyTask,
-                OrphanTask,
-                FlaggedTask,
-                PortalTask,
-                SnailMailTask,
-                NewExemptionTask,
-                )
+            NewAgencyTask,
+            OrphanTask,
+            FlaggedTask,
+            PortalTask,
+            SnailMailTask,
+            NewExemptionTask,
+        )
         stale_tasks = OrderedDict()
-        stale_tasks['Processing Requests'] = (FOIARequest.objects
-                .filter(
-                    status='submitted',
-                    date_processing__lt=(date.today() - timedelta(5)),
-                    )
-                .order_by('date_processing')
-                .annotate(days_old=ExtractDay(Now() - F('date_processing')))
-                )[:5]
+        stale_tasks['Processing Requests'] = (
+            FOIARequest.objects.filter(
+                status='submitted',
+                date_processing__lt=(date.today() - timedelta(5)),
+            ).order_by('date_processing')
+            .annotate(days_old=ExtractDay(Now() - F('date_processing')))
+        )[:5]
         task_types = [
             (NewAgencyTask, 3),
             (OrphanTask, 5),
@@ -410,46 +440,44 @@ class StaffDigest(Digest):
             (PortalTask, 5),
             (SnailMailTask, 5),
             (NewExemptionTask, 5),
-            ]
+        ]
         for task_type, days_old in task_types:
-            stale_tasks[task_type.type] = (task_type.objects
-                    .filter(
-                        date_created__lt=(datetime.now() - timedelta(days_old)),
-                        resolved=False,
-                        )
-                    .order_by('date_created')
-                    .annotate(days_old=ExtractDay(Now() - F('date_created')))
-                    [:5]
-                    )
+            stale_tasks[task_type.type] = (
+                task_type.objects.filter(
+                    date_created__lt=(datetime.now() - timedelta(days_old)),
+                    resolved=False,
+                ).order_by('date_created').annotate(
+                    days_old=ExtractDay(Now() - F('date_created'))
+                )[:5]
+            )
         return stale_tasks
 
     def get_crowdfunds(self):
         """Get crodfund information"""
-        # pylint: disable=no-self-use
         crowdfund_info = {}
         crowdfund_info['active'] = list(
-                Crowdfund.objects
-                .filter(closed=False)
-                .order_by('-date_due')
-                )
+            Crowdfund.objects.filter(closed=False).order_by('-date_due')
+        )
         crowdfund_info['new'] = list(
-                Crowdfund.objects
-                .filter(date_created=date.today() - timedelta(1))
-                )
+            Crowdfund.objects.filter(date_created=date.today() - timedelta(1))
+        )
         return crowdfund_info
 
     def get_projects(self):
         """Get project information"""
-        # pylint: disable=no-self-use
         from muckrock.project.models import Project
         project_info = OrderedDict()
         project_info['Pending Projects'] = Project.objects.get_pending()
-        project_info['Projects Created in the Past Week'] = (Project.objects
-                .filter(date_created__gte=date.today() - timedelta(7))
-                )
-        project_info['Projects Approved in the Past Week'] = (Project.objects
-                .filter(date_approved__gte=date.today() - timedelta(7))
-                )
+        project_info['Projects Created in the Past Week'] = (
+            Project.objects.filter(
+                date_created__gte=date.today() - timedelta(7)
+            )
+        )
+        project_info['Projects Approved in the Past Week'] = (
+            Project.objects.filter(
+                date_approved__gte=date.today() - timedelta(7)
+            )
+        )
         return project_info
 
     def get_context_data(self, *args):
@@ -459,9 +487,13 @@ class StaffDigest(Digest):
         start = end - self.interval
         context['stats'] = self.get_data(start, end)
         context['comms'] = self.get_comms(start, end)
-        context['pro_users'] = self.get_pro_users(end - relativedelta(days=5), end)
+        context['pro_users'] = self.get_pro_users(
+            end - relativedelta(days=5), end
+        )
         context['stale_tasks'] = self.get_stale_tasks()
-        context['stale_tasks_show'] = any(i for i in context['stale_tasks'].itervalues())
+        context['stale_tasks_show'] = any(
+            i for i in context['stale_tasks'].itervalues()
+        )
         context['crowdfunds'] = self.get_crowdfunds()
         context['projects'] = self.get_projects()
         return context

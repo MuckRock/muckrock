@@ -2,24 +2,32 @@
 Test the API viewsets for the Jurisdiction application.
 """
 
+# Django
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
+# Third Party
 from nose.tools import eq_, ok_
 from rest_framework.test import APIRequestFactory, force_authenticate
 
-from muckrock.factories import UserFactory, FOIARequestFactory
-from muckrock.jurisdiction.factories import StateJurisdictionFactory, ExemptionFactory
+# MuckRock
+from muckrock.factories import FOIARequestFactory, UserFactory
+from muckrock.jurisdiction.factories import (
+    ExemptionFactory,
+    StateJurisdictionFactory,
+)
 from muckrock.jurisdiction.serializers import ExemptionSerializer
 from muckrock.jurisdiction.viewsets import ExemptionViewSet, JurisdictionViewSet
 from muckrock.task.models import NewExemptionTask
 from muckrock.task.serializers import NewExemptionTaskSerializer
+
 
 class TestExemptionList(TestCase):
     """
     The exemption list view allows exemptions to be listed and filtered.
     An exemption can be filtered by jurisdiction or by a keyword query.
     """
+
     def setUp(self):
         self.endpoint = '/exemption/'
         self.factory = APIRequestFactory()
@@ -42,24 +50,40 @@ class TestExemptionList(TestCase):
         request = self.factory.get(self.endpoint, {'q': 'Foo'})
         response = self.view(request)
         eq_(response.status_code, 200)
-        ok_(ExemptionSerializer(exemption_foo).data in response.data['results'],
-            'An exemption matching the query should be included in the list.')
-        ok_(ExemptionSerializer(exemption_bar).data not in response.data['results'],
-            'An exemption not matching the query should not be included in the list.')
+        ok_(
+            ExemptionSerializer(exemption_foo).data in response.data['results'],
+            'An exemption matching the query should be included in the list.'
+        )
+        ok_(
+            ExemptionSerializer(exemption_bar
+                                ).data not in response.data['results'],
+            'An exemption not matching the query should not be included in the list.'
+        )
 
     def test_list_jurisdiction_filter(self):
         """The list should be filterable by a jurisdiction."""
-        massachusetts = StateJurisdictionFactory(name='Massachusetts', abbrev='MA')
+        massachusetts = StateJurisdictionFactory(
+            name='Massachusetts', abbrev='MA'
+        )
         washington = StateJurisdictionFactory(name='Washington', abbrev='WA')
         exemption_ma = ExemptionFactory(jurisdiction=massachusetts)
         exemption_wa = ExemptionFactory(jurisdiction=washington)
-        request = self.factory.get(self.endpoint, {'jurisdiction': massachusetts.pk})
+        request = self.factory.get(
+            self.endpoint, {
+                'jurisdiction': massachusetts.pk
+            }
+        )
         response = self.view(request)
         eq_(response.status_code, 200)
-        ok_(ExemptionSerializer(exemption_ma).data in response.data['results'],
-            'An exemption for the jurisdiction should be included in the list.')
-        ok_(ExemptionSerializer(exemption_wa).data not in response.data['results'],
-            'An exemption not for the jurisdiction should not be included in the list.')
+        ok_(
+            ExemptionSerializer(exemption_ma).data in response.data['results'],
+            'An exemption for the jurisdiction should be included in the list.'
+        )
+        ok_(
+            ExemptionSerializer(exemption_wa
+                                ).data not in response.data['results'],
+            'An exemption not for the jurisdiction should not be included in the list.'
+        )
 
 
 class TestExemptionCreation(TestCase):
@@ -68,6 +92,7 @@ class TestExemptionCreation(TestCase):
     When an exemption is submitted, we need to know the request it was invoked on and the
     language the agency used to invoke it. Then, we should create a NewExemptionTask.
     """
+
     def setUp(self):
         self.endpoint = '/exemption/submit/'
         self.factory = APIRequestFactory()
@@ -110,7 +135,9 @@ class TestExemptionCreation(TestCase):
     def test_missing_data(self):
         """If the request is missing data, the form should return a validation error."""
         # we are missing the foia here
-        request = self.factory.post(self.endpoint, {'language': 'Lorem Ipsum'}, format='json')
+        request = self.factory.post(
+            self.endpoint, {'language': 'Lorem Ipsum'}, format='json'
+        )
         force_authenticate(request, user=self.user)
         response = self.view(request)
         eq_(response.status_code, 400)
@@ -120,6 +147,7 @@ class TestTemplateEndpoint(TestCase):
     """
     Test the endpoint to get you the jurisdiction template
     """
+
     def setUp(self):
         self.factory = APIRequestFactory()
         self.view = JurisdictionViewSet.as_view({'get': 'template'})
@@ -127,9 +155,11 @@ class TestTemplateEndpoint(TestCase):
     def test_template(self):
         """Get the default language for a given jurisdiction"""
         jurisdiction = StateJurisdictionFactory.create()
-        request = self.factory.get(reverse(
-            'api-jurisdiction-template',
-            kwargs={'pk': jurisdiction.pk},
-            ))
+        request = self.factory.get(
+            reverse(
+                'api-jurisdiction-template',
+                kwargs={'pk': jurisdiction.pk},
+            )
+        )
         response = self.view(request, pk=jurisdiction.pk)
         eq_(response.status_code, 200)

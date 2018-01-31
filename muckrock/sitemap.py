@@ -2,8 +2,10 @@
 Sitemap for flatpages
 """
 
+# Django
 from django.contrib.sitemaps import Sitemap
 from django.contrib.sites.models import Site
+
 
 class FlatPageSitemap(Sitemap):
     """Sitemap for Articles"""

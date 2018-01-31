@@ -3,17 +3,19 @@
 Tests for the portal application
 """
 
+# Django
 from django.test import TestCase
 
-from mock import patch
-from nose.tools import eq_, ok_, assert_false
+# Third Party
 import requests_mock
+from mock import patch
+from nose.tools import assert_false, eq_, ok_
 
+# MuckRock
 from muckrock.factories import FOIACommunicationFactory
 from muckrock.portal.models import Portal
 from muckrock.task.models import PortalTask
 
-# pylint: disable=no-self-use
 
 class TestManualPortal(TestCase):
     """Test cases for the manual portal integration"""
@@ -21,34 +23,32 @@ class TestManualPortal(TestCase):
     def setUp(self):
         """All tests need a manual portal"""
         self.portal = Portal.objects.create(
-                url='https://www.example.com',
-                name='Test Portal',
-                type='other', # use manual logic
-                )
+            url='https://www.example.com',
+            name='Test Portal',
+            type='other',  # use manual logic
+        )
 
     def test_send_msg(self):
         """Sending a message should create a portal task"""
         comm = FOIACommunicationFactory()
         self.portal.send_msg(comm)
-        ok_(PortalTask.objects
-                .filter(
-                    category='n',
-                    communication=comm,
-                    )
-                .exists()
-                )
+        ok_(
+            PortalTask.objects.filter(
+                category='n',
+                communication=comm,
+            ).exists()
+        )
 
     def test_receive_msg(self):
         """Receiving a message should create a portal task"""
         comm = FOIACommunicationFactory()
         self.portal.receive_msg(comm)
-        ok_(PortalTask.objects
-                .filter(
-                    category='i',
-                    communication=comm,
-                    )
-                .exists()
-                )
+        ok_(
+            PortalTask.objects.filter(
+                category='i',
+                communication=comm,
+            ).exists()
+        )
 
     def test_get_new_password(self):
         """Should generate a random password"""
@@ -62,48 +62,48 @@ class TestNextRequestPortal(TestCase):
     def setUp(self):
         """All tests need a NextRequest portal"""
         self.portal = Portal.objects.create(
-                url='https://www.example.com',
-                name='Test Portal',
-                type='nextrequest',
-                )
+            url='https://www.example.com',
+            name='Test Portal',
+            type='nextrequest',
+        )
 
     def test_confirm_open(self):
         """Test receiving a confirmation message"""
         comm = FOIACommunicationFactory(
-                subject='Your first record request 17-1 has been opened.',
-                communication=
-                ' -- Write ABOVE THIS LINE to post a message that will be sent '
-                'to staff. --\n\n'
-                'Your first Evanston record request (request number 17-764) '
-                'has been submitted. It is currently unpublished and is not '
-                'available for the general public to view.\n\n'
-                'As the requester, you can always see the status of your '
-                'request by signing into the Evanston Public Records portal '
-                'here. \n',
-                foia__status='ack',
-                )
+            subject='Your first record request 17-1 has been opened.',
+            communication=
+            ' -- Write ABOVE THIS LINE to post a message that will be sent '
+            'to staff. --\n\n'
+            'Your first Evanston record request (request number 17-764) '
+            'has been submitted. It is currently unpublished and is not '
+            'available for the general public to view.\n\n'
+            'As the requester, you can always see the status of your '
+            'request by signing into the Evanston Public Records portal '
+            'here. \n',
+            foia__status='ack',
+        )
         self.portal.receive_msg(comm)
         eq_(comm.foia.status, 'processed')
         eq_(comm.foia.tracking_id, '17-1')
         eq_(
-                comm.communication,
-                'Your first Evanston record request (request number 17-764) '
-                'has been submitted. It is currently unpublished and is not '
-                'available for the general public to view.\n\n',
-                )
+            comm.communication,
+            'Your first Evanston record request (request number 17-764) '
+            'has been submitted. It is currently unpublished and is not '
+            'available for the general public to view.\n\n',
+        )
         assert_false(comm.hidden)
         eq_(comm.portals.count(), 1)
 
     def test_text_reply(self):
         """Test receiving a normal reply"""
         comm = FOIACommunicationFactory(
-                subject='[External Message Added]',
-                communication=
-                'A message was sent to you regarding record request #17-1:\n'
-                'This is the reply\n'
-                'View Request',
-                foia__status='processed',
-                )
+            subject='[External Message Added]',
+            communication=
+            'A message was sent to you regarding record request #17-1:\n'
+            'This is the reply\n'
+            'View Request',
+            foia__status='processed',
+        )
         self.portal.receive_msg(comm)
         eq_(comm.foia.status, 'processed')
         eq_(comm.communication, '\nThis is the reply\n')
@@ -118,17 +118,17 @@ class TestFBIPortal(TestCase):
     def setUp(self):
         """All tests need a FBI portal"""
         self.portal = Portal.objects.create(
-                url='https://www.example.com',
-                name='Test Portal',
-                type='fbi',
-                )
+            url='https://www.example.com',
+            name='Test Portal',
+            type='fbi',
+        )
 
     def test_confirm_open(self):
         """Test receiving a confirmation message"""
         comm = FOIACommunicationFactory(
-                subject='eFOIA Request Received',
-                foia__status='ack',
-                )
+            subject='eFOIA Request Received',
+            foia__status='ack',
+        )
         self.portal.receive_msg(comm)
         eq_(comm.foia.status, 'processed')
         eq_(comm.portals.count(), 1)
@@ -140,20 +140,19 @@ class TestFBIPortal(TestCase):
         """Test receiving a confirmation message"""
         # pylint: disable=unused-argument
         mock_requests.get(
-                'https://www.example.com/file1.pdf',
-                text='File 1 Content',
-                )
+            'https://www.example.com/file1.pdf',
+            text='File 1 Content',
+        )
         mock_requests.get(
-                'https://www.example.com/file2.pdf',
-                text='File 2 Content',
-                )
+            'https://www.example.com/file2.pdf',
+            text='File 2 Content',
+        )
         comm = FOIACommunicationFactory(
-                subject='eFOIA files available',
-                communication=
-                'There are eFOIA files available for you to download\n'
-                '* [file1.pdf](https://www.example.com/file1.pdf)\n'
-                '* [file2.pdf](https://www.example.com/file2.pdf)\n'
-                )
+            subject='eFOIA files available',
+            communication='There are eFOIA files available for you to download\n'
+            '* [file1.pdf](https://www.example.com/file1.pdf)\n'
+            '* [file2.pdf](https://www.example.com/file2.pdf)\n'
+        )
         self.portal.receive_msg(comm)
         eq_(comm.files.count(), 2)
         eq_(comm.files.all()[0].ffile.read(), 'File 1 Content')

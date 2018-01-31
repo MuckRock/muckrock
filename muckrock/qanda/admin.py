@@ -2,24 +2,24 @@
 Admin registration for Q&A models
 """
 
+# Django
 from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import User
 
+# Third Party
 from autocomplete_light import shortcuts as autocomplete_light
 from reversion.admin import VersionAdmin
 
-from muckrock.qanda.models import Question, Answer
-
-# These inhereit more than the allowed number of public methods
-# pylint: disable=too-many-public-methods
+# MuckRock
+from muckrock.qanda.models import Answer, Question
 
 
 class AnswerForm(forms.ModelForm):
     """Form with autocomplete for users"""
     user = autocomplete_light.ModelChoiceField(
-            'UserAutocomplete',
-            queryset=User.objects.all())
+        'UserAutocomplete', queryset=User.objects.all()
+    )
 
     class Meta:
         model = Answer
@@ -29,11 +29,11 @@ class AnswerForm(forms.ModelForm):
 class QuestionForm(forms.ModelForm):
     """Form with autocomplete for user and foia"""
     user = autocomplete_light.ModelChoiceField(
-            'UserAutocomplete',
-            queryset=User.objects.all())
+        'UserAutocomplete', queryset=User.objects.all()
+    )
     foia = autocomplete_light.ModelChoiceField(
-            'FOIARequestAdminAutocomplete',
-            required=False)
+        'FOIARequestAdminAutocomplete', required=False
+    )
 
     class Meta:
         model = Question
@@ -54,5 +54,6 @@ class QuestionAdmin(VersionAdmin):
     search_fields = ('title', 'question')
     inlines = [AnswerInline]
     form = QuestionForm
+
 
 admin.site.register(Question, QuestionAdmin)

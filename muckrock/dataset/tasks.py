@@ -2,18 +2,24 @@
 Celery tasks for the dataset application
 """
 
+# Django
+from celery.task import task
 from django.conf import settings
 from django.contrib.auth.models import User
-from celery.task import task
 
-from boto.s3.connection import S3Connection
+# Standard Library
 import os.path
+
+# Third Party
+from boto.s3.connection import S3Connection
 from smart_open import smart_open
 
+# MuckRock
 from muckrock.dataset.models import DataSet
 
 CSV_FILES = ('.csv',)
 EXCEL_FILES = ('.xls', '.xlsx')
+
 
 @task(name='muckrock.dataset.tasks.process_dataset_file')
 def process_dataset_file(file_key, user_pk):
@@ -25,9 +31,9 @@ def process_dataset_file(file_key, user_pk):
         return
     user = User.objects.get(pk=user_pk)
     conn = S3Connection(
-            settings.AWS_ACCESS_KEY_ID,
-            settings.AWS_SECRET_ACCESS_KEY,
-            )
+        settings.AWS_ACCESS_KEY_ID,
+        settings.AWS_SECRET_ACCESS_KEY,
+    )
     bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
     key = bucket.get_key(file_key)
     with smart_open(key) as data_file:

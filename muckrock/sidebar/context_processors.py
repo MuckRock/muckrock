@@ -1,10 +1,13 @@
 """Context processors to ensure data is displayed in sidebar for all views"""
 
+# Django
 from django.conf import settings
 from django.contrib.auth.forms import AuthenticationForm
 
+# Standard Library
 from datetime import datetime, timedelta
 
+# MuckRock
 from muckrock.accounts.models import Profile
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
@@ -13,12 +16,10 @@ from muckrock.project.models import Project
 from muckrock.sidebar.models import Broadcast
 from muckrock.utils import cache_get_or_set
 
+
 def get_recent_articles():
     """Lists last five recent news articles"""
-    return (Article.objects
-                .get_published()
-                .order_by('-pub_date')
-                [:5])
+    return Article.objects.get_published().order_by('-pub_date')[:5]
 
 
 def get_actionable_requests(user):
@@ -44,8 +45,10 @@ def get_unread_notifications(user):
 
 def get_organization(user):
     """Gets organization, if it exists"""
+
     def load_organization(user):
         """Return a function to load the user's organization"""
+
         def inner():
             """Argument-less function to load user's organization"""
             org = None
@@ -56,12 +59,13 @@ def get_organization(user):
                 # there should only ever be one. if there is more than one, just get the first.
                 org = owned_org.first()
             return org
+
         return inner
 
     return cache_get_or_set(
-            'sb:%s:user_org' % user.username,
-            load_organization(user),
-            settings.DEFAULT_CACHE_TIMEOUT)
+        'sb:%s:user_org' % user.username, load_organization(user),
+        settings.DEFAULT_CACHE_TIMEOUT
+    )
 
 
 def sidebar_broadcast(user):
@@ -69,25 +73,30 @@ def sidebar_broadcast(user):
 
     def load_broadcast(user_class):
         """Return a function to load the correct broadcast"""
+
         def inner():
             """Argument-less function to load correct broadcast"""
             try:
                 # exclude stale broadcasts from displaying
                 last_week = datetime.now() - timedelta(7)
-                broadcast = Broadcast.objects.get(updated__gte=last_week, context=user_class).text
+                broadcast = Broadcast.objects.get(
+                    updated__gte=last_week, context=user_class
+                ).text
             except Broadcast.DoesNotExist:
                 broadcast = ''
             return broadcast
+
         return inner
 
     try:
-        user_class = user.profile.acct_type if user.is_authenticated() else 'anonymous'
+        user_class = user.profile.acct_type if user.is_authenticated(
+        ) else 'anonymous'
     except Profile.DoesNotExist:
         user_class = 'anonymous'
     return cache_get_or_set(
-            'sb:%s:broadcast' % user_class,
-            load_broadcast(user_class),
-            settings.DEFAULT_CACHE_TIMEOUT)
+        'sb:%s:broadcast' % user_class, load_broadcast(user_class),
+        settings.DEFAULT_CACHE_TIMEOUT
+    )
 
 
 def sidebar_info(request):
@@ -103,11 +112,17 @@ def sidebar_info(request):
     if request.user.is_authenticated():
         # content for logged in users
         sidebar_info_dict.update({
-            'unread_notifications': get_unread_notifications(request.user),
-            'actionable_requests': get_actionable_requests(request.user),
-            'organization': get_organization(request.user),
-            'my_projects': Project.objects.get_for_contributor(request.user).optimize()[:4],
-            'payment_failed': request.user.profile.payment_failed
+            'unread_notifications':
+                get_unread_notifications(request.user),
+            'actionable_requests':
+                get_actionable_requests(request.user),
+            'organization':
+                get_organization(request.user),
+            'my_projects':
+                Project.objects.get_for_contributor(request.user).optimize()
+                [:4],
+            'payment_failed':
+                request.user.profile.payment_failed
         })
 
     return sidebar_info_dict

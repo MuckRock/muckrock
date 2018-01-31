@@ -1,3 +1,0 @@
-"""
-Signal processor for plugins
-"""

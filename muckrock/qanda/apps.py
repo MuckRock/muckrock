@@ -2,9 +2,9 @@
 App config for qanda
 """
 
+# Django
 from django.apps import AppConfig
 
-# pylint: disable=invalid-name
 
 class QuestionConfig(AppConfig):
     """Configures the project application to use activity streams"""
@@ -12,6 +12,7 @@ class QuestionConfig(AppConfig):
 
     def ready(self):
         """Registers the application with the activity streams plugin"""
+        # pylint: disable=invalid-name
         from actstream import registry
         from watson import search
         Question = self.get_model('Question')

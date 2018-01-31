@@ -2,16 +2,21 @@
 Tests for FOIA Machine forms.
 """
 
+# Django
 from django.test import TestCase
 
+# Third Party
 from nose.tools import ok_
 
-from muckrock.factories import UserFactory, AgencyFactory
+# MuckRock
+from muckrock.factories import AgencyFactory, UserFactory
 from muckrock.foiamachine import factories, forms
 from muckrock.jurisdiction.factories import StateJurisdictionFactory
 
+
 class TestFoiaMachineRequestForm(TestCase):
     """The FoiaMachineRequestForm provides for the creation of new requests."""
+
     def setUp(self):
         self.user = UserFactory()
         self.title = 'Test Request'

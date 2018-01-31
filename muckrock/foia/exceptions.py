@@ -2,6 +2,7 @@
 Exceptions for the FOIA app
 """
 
+
 class FoiaFormError(Exception):
     """If a form fails validation during FOIA detail view"""
 

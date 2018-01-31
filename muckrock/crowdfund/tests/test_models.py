@@ -3,19 +3,25 @@
 Tests for crowdfunding models
 """
 
+# Django
 from django.test import TestCase
 
+# Standard Library
 from datetime import date, timedelta
 from decimal import Decimal
-from mock import patch, Mock
-from nose.tools import eq_, ok_, raises, nottest
-import stripe
 
-from muckrock.factories import ProjectFactory
+# Third Party
+import stripe
+from mock import Mock, patch
+from nose.tools import eq_, nottest, ok_, raises
+
+# MuckRock
 from muckrock.crowdfund import models
+from muckrock.factories import ProjectFactory
 from muckrock.project.models import ProjectCrowdfunds
 from muckrock.task.models import CrowdfundTask
 from muckrock.utils import get_stripe_token
+
 
 def create_project_crowdfund():
     """Helper function to create a project crowdfund"""
@@ -41,8 +47,10 @@ class TestCrowdfundAbstract(TestCase):
         self.crowdfund.close_crowdfund()
         self.crowdfund.refresh_from_db()
         ok_(self.crowdfund.closed, 'The closed flag should be raised.')
-        eq_(CrowdfundTask.objects.count(), crowdfund_task_count + 1,
-            'A new crowdfund task should be created.')
+        eq_(
+            CrowdfundTask.objects.count(), crowdfund_task_count + 1,
+            'A new crowdfund task should be created.'
+        )
 
 
 class TestCrowdfund(TestCase):
@@ -65,7 +73,11 @@ class TestCrowdfund(TestCase):
         """The crowdfund should have a project being crowdfunded."""
         eq_(self.crowdfund.get_crowdfund_object(), self.project)
 
-@patch('stripe.Charge', Mock(create=Mock(return_value=Mock(id='stripe-charge-id'))))
+
+@patch(
+    'stripe.Charge',
+    Mock(create=Mock(return_value=Mock(id='stripe-charge-id')))
+)
 class TestCrowdfundPayment(TestCase):
     """Test making a payment to a crowdfund"""
 
@@ -76,31 +88,46 @@ class TestCrowdfundPayment(TestCase):
     def test_make_payment(self):
         """Should make and return a payment object"""
         amount = Decimal(100)
-        payment = self.crowdfund.make_payment(self.token, 'test@email.com', amount)
-        ok_(isinstance(payment, models.CrowdfundPayment),
-            'Making a payment should create and return a payment object')
+        payment = self.crowdfund.make_payment(
+            self.token, 'test@email.com', amount
+        )
+        ok_(
+            isinstance(payment, models.CrowdfundPayment),
+            'Making a payment should create and return a payment object'
+        )
 
     def test_unlimit_amount(self):
         """The amount paid should be able to exceed the amount required."""
         amount = Decimal(100)
-        payment = self.crowdfund.make_payment(self.token, 'test@email.com', amount)
-        eq_(payment.amount, amount,
-            'The payment should be made in full despite exceeding the amount required.')
+        payment = self.crowdfund.make_payment(
+            self.token, 'test@email.com', amount
+        )
+        eq_(
+            payment.amount, amount,
+            'The payment should be made in full despite exceeding the amount required.'
+        )
 
     def test_limit_amount(self):
         """No more than the amount required should be paid if the crowdfund is capped."""
         self.crowdfund.payment_capped = True
         self.crowdfund.save()
         amount = Decimal(100)
-        payment = self.crowdfund.make_payment(self.token, 'test@email.com', amount)
-        eq_(payment.amount, self.crowdfund.payment_required,
-            'The amount should be capped at the crowdfund\'s required payment.')
-        ok_(self.crowdfund.closed,
-            'Once the cap has been reached, the crowdfund should close.')
+        payment = self.crowdfund.make_payment(
+            self.token, 'test@email.com', amount
+        )
+        eq_(
+            payment.amount, self.crowdfund.payment_required,
+            'The amount should be capped at the crowdfund\'s required payment.'
+        )
+        ok_(
+            self.crowdfund.closed,
+            'Once the cap has been reached, the crowdfund should close.'
+        )
 
 
 class TestStripeIntegration(TestCase):
     """Test Stripe integration and error handling"""
+
     def setUp(self):
         self.crowdfund = create_project_crowdfund()
         self.amount = Decimal(1)

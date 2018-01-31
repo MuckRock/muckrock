@@ -5,39 +5,41 @@ Models for the FOIA application
 
 # pylint: disable=too-many-lines
 
+# Django
 from django.conf import settings
-from django.contrib.auth.models import User, AnonymousUser
+from django.contrib.auth.models import AnonymousUser, User
 from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
-from django.db import models, connection
-from django.db.models import Q, F, Sum, Count, Max, Case, When
+from django.db import connection, models
+from django.db.models import Case, Count, F, Max, Q, Sum, When
+from django.db.models.functions import ExtractDay, Now
 from django.template.defaultfilters import escape, linebreaks, slugify
 from django.template.loader import get_template, render_to_string
 from django.utils.encoding import smart_text
 
-from actstream.models import followers
-from datetime import datetime, date, timedelta
-from hashlib import md5
+# Standard Library
 import logging
 import os.path
+from datetime import date, datetime, timedelta
+from hashlib import md5
+
+# Third Party
+from actstream.models import followers
 from reversion import revisions as reversion
 from taggit.managers import TaggableManager
 
+# MuckRock
+from muckrock import fields, task, utils
 from muckrock.accounts.models import Notification
-from muckrock.communication.models import (
-        EmailAddress,
-        EmailCommunication,
-        )
-from muckrock.models import ExtractDay, Now
+from muckrock.communication.models import EmailAddress, EmailCommunication
 from muckrock.tags.models import Tag, TaggedItemBase, parse_tags
-from muckrock import task
-from muckrock import fields
-from muckrock import utils
 
 logger = logging.getLogger(__name__)
 
+
 class FOIARequestQuerySet(models.QuerySet):
     """Object manager for FOIA requests"""
+
     # pylint: disable=too-many-public-methods
 
     def get_submitted(self):
@@ -46,7 +48,8 @@ class FOIARequestQuerySet(models.QuerySet):
 
     def get_done(self):
         """Get all FOIA requests with responses"""
-        return self.filter(status__in=['partial', 'done']).exclude(date_done=None)
+        return self.filter(status__in=['partial', 'done']
+                           ).exclude(date_done=None)
 
     def get_editable(self):
         """Get all editable FOIA requests"""
@@ -61,24 +64,24 @@ class FOIARequestQuerySet(models.QuerySet):
         if user.is_authenticated():
             # Requests are visible if you own them, have view or edit permissions,
             # or if they are not drafts and not embargoed
-            query = (Q(user=user) |
-                    Q(edit_collaborators=user) |
-                    Q(read_collaborators=user) |
-                    (~Q(status='started') & ~Q(embargo=True)))
+            query = (
+                Q(user=user) | Q(edit_collaborators=user)
+                | Q(read_collaborators=user) |
+                (~Q(status='started') & ~Q(embargo=True))
+            )
             # agency users may also view requests for their agency
             if user.profile.acct_type == 'agency':
                 query = query | Q(agency=user.profile.agency)
             # organizational users may also view requests from their org that are shared
             if user.profile.organization is not None:
                 query = query | Q(
-                        user__profile__org_share=True,
-                        user__profile__organization=user.profile.organization,
-                        )
+                    user__profile__org_share=True,
+                    user__profile__organization=user.profile.organization,
+                )
             return self.filter(query)
         else:
             # anonymous user, filter out drafts and embargoes
-            return (self.exclude(status='started')
-                        .exclude(embargo=True))
+            return self.exclude(status='started').exclude(embargo=True)
 
     def get_public(self):
         """Get all publically viewable FOIA requests"""
@@ -86,33 +89,37 @@ class FOIARequestQuerySet(models.QuerySet):
 
     def get_overdue(self):
         """Get all overdue FOIA requests"""
-        return self.filter(status__in=['ack', 'processed'], date_due__lt=date.today())
+        return self.filter(
+            status__in=['ack', 'processed'], date_due__lt=date.today()
+        )
 
     def get_manual_followup(self):
         """Get old requests which require us to follow up on with the agency"""
 
         return [
             f for f in self.get_overdue()
-            if f.communications.all().reverse()[0].date + timedelta(15) < datetime.now()
+            if f.communications.all().reverse()[0].date + timedelta(15) <
+            datetime.now()
         ]
 
     def get_followup(self):
         """Get requests that need follow up emails sent"""
-        return (self
-                .filter(
-                    status__in=['ack', 'processed'],
-                    date_followup__lte=date.today(),
-                    disable_autofollowups=False,
-                    )
-                # Exclude requests which should be emailed or faxed,
-                # but need to have their email address or fax number updated.
-                # This is to not overwhelm snail mail tasks with autogenerated
-                # messages while trying to find new contact info
-                .exclude(
-                    Q(email__status='error', fax=None) |
-                    Q(email=None, fax__status='error') |
-                    Q(email__status='error', fax__status='error')
-                    ))
+        return (
+            self.filter(
+                status__in=['ack', 'processed'],
+                date_followup__lte=date.today(),
+                disable_autofollowups=False,
+            )
+            # Exclude requests which should be emailed or faxed,
+            # but need to have their email address or fax number updated.
+            # This is to not overwhelm snail mail tasks with autogenerated
+            # messages while trying to find new contact info
+            .exclude(
+                Q(email__status='error', fax=None)
+                | Q(email=None, fax__status='error')
+                | Q(email__status='error', fax__status='error')
+            )
+        )
 
     def get_open(self):
         """Get requests which we are awaiting a response from"""
@@ -124,14 +131,13 @@ class FOIARequestQuerySet(models.QuerySet):
 
     def organization(self, organization):
         """Get requests belonging to an organization's members."""
-        return (self.select_related(
-                        'agency',
-                        'jurisdiction',
-                        'jurisdiction__parent',
-                        'jurisdiction__parent__parent')
-                    .filter(user__profile__organization=organization)
-                    .exclude(status='started')
-                    .order_by('-date_submitted'))
+        return (
+            self.select_related(
+                'agency', 'jurisdiction', 'jurisdiction__parent',
+                'jurisdiction__parent__parent'
+            ).filter(user__profile__organization=organization)
+            .exclude(status='started').order_by('-date_submitted')
+        )
 
     def select_related_view(self):
         """Select related models for viewing"""
@@ -148,11 +154,10 @@ class FOIARequestQuerySet(models.QuerySet):
     def get_public_file_count(self, limit=None):
         """Annotate the public file count"""
         foia_qs = self
-        count_qs = (self._clone()
-                .values_list('id')
-                .filter(files__access='public')
-                .annotate(Count('files'))
-                )
+        count_qs = (
+            self._clone().values_list('id').filter(files__access='public')
+            .annotate(Count('files'))
+        )
         if limit is not None:
             foia_qs = foia_qs[:limit]
             count_qs = count_qs[:limit]
@@ -165,37 +170,39 @@ class FOIARequestQuerySet(models.QuerySet):
 
     def get_stale(self, agency=None):
         """Load requests for a stale agency"""
-        foia_qs = (self
-                .get_open()
-                .annotate(
-                    latest_response=ExtractDay(
-                        Now() - Max(Case(When(
-                            communications__response=True,
-                            then='communications__date'
-                            )))))
-                .order_by('-latest_response')
-                .select_related('jurisdiction')
+        foia_qs = (
+            self.get_open().annotate(
+                latest_response=ExtractDay(
+                    Now() - Max(
+                        Case(
+                            When(
+                                communications__response=True,
+                                then='communications__date'
+                            )
+                        )
+                    )
                 )
+            ).order_by('-latest_response').select_related('jurisdiction')
+        )
         if agency is not None:
             foia_qs = foia_qs.filter(agency=agency)
         return foia_qs
 
     def get_featured(self, user):
         """Get featured requests"""
-        return (self
-                .get_viewable(user)
-                .filter(featured=True)
-                .select_related_view()
-                .get_public_file_count()
-                )
+        return (
+            self.get_viewable(user).filter(featured=True)
+            .select_related_view().get_public_file_count()
+        )
 
     def get_processing_days(self):
         """Get the number of processing days"""
-        return (self
-                .filter(status='submitted')
-                .exclude(date_processing=None)
-                .aggregate(days=Sum(date.today() - F('date_processing')))['days']
-                )
+        return (
+            self.filter(status='submitted')
+            .exclude(date_processing=None
+                     ).aggregate(days=Sum(date.today() - F('date_processing'))
+                                 )['days']
+        )
 
 
 STATUS = [
@@ -216,10 +223,20 @@ STATUS = [
 
 END_STATUS = ['rejected', 'no_docs', 'done', 'partial', 'abandoned']
 
+
 class Action():
     """A helper class to provide interfaces for request actions"""
+
     # pylint: disable=too-many-arguments
-    def __init__(self, test=None, link=None, title=None, action=None, desc=None, class_name=None):
+    def __init__(
+        self,
+        test=None,
+        link=None,
+        title=None,
+        action=None,
+        desc=None,
+        class_name=None
+    ):
         self.test = test
         self.link = link
         self.title = title
@@ -245,12 +262,15 @@ class FOIARequest(models.Model):
     agency = models.ForeignKey('agency.Agency', blank=True, null=True)
     date_submitted = models.DateField(blank=True, null=True, db_index=True)
     date_updated = models.DateField(blank=True, null=True, db_index=True)
-    date_done = models.DateField(blank=True, null=True, verbose_name='Date response received')
+    date_done = models.DateField(
+        blank=True, null=True, verbose_name='Date response received'
+    )
     date_due = models.DateField(blank=True, null=True, db_index=True)
     days_until_due = models.IntegerField(blank=True, null=True)
     date_followup = models.DateField(blank=True, null=True)
-    date_estimate = models.DateField(blank=True, null=True,
-            verbose_name='Estimated Date Completed')
+    date_estimate = models.DateField(
+        blank=True, null=True, verbose_name='Estimated Date Completed'
+    )
     date_processing = models.DateField(blank=True, null=True)
     embargo = models.BooleanField(default=False)
     permanent_embargo = models.BooleanField(default=False)
@@ -266,57 +286,64 @@ class FOIARequest(models.Model):
     updated = models.BooleanField(default=False)
 
     portal = models.ForeignKey(
-            'portal.Portal',
-            related_name='foias',
-            blank=True,
-            null=True,
-            )
+        'portal.Portal',
+        related_name='foias',
+        blank=True,
+        null=True,
+    )
     portal_password = models.CharField(
-            max_length=20,
-            blank=True,
-            )
+        max_length=20,
+        blank=True,
+    )
     email = models.ForeignKey(
-            'communication.EmailAddress',
-            related_name='foias',
-            blank=True,
-            null=True,
-            )
+        'communication.EmailAddress',
+        related_name='foias',
+        blank=True,
+        null=True,
+    )
     cc_emails = models.ManyToManyField(
-            'communication.EmailAddress',
-            related_name='cc_foias',
-            )
+        'communication.EmailAddress',
+        related_name='cc_foias',
+    )
     fax = models.ForeignKey(
-            'communication.PhoneNumber',
-            related_name='foias',
-            blank=True,
-            null=True,
-            )
+        'communication.PhoneNumber',
+        related_name='foias',
+        blank=True,
+        null=True,
+    )
     address = models.ForeignKey(
-            'communication.Address',
-            related_name='foias',
-            blank=True,
-            null=True,
-            )
+        'communication.Address',
+        related_name='foias',
+        blank=True,
+        null=True,
+    )
 
     times_viewed = models.IntegerField(default=0)
     disable_autofollowups = models.BooleanField(default=False)
-    missing_proxy = models.BooleanField(default=False,
-            help_text='This request requires a proxy to file, but no such '
-            'proxy was avilable upon draft creation.')
-    parent = models.ForeignKey('self', blank=True, null=True, on_delete=models.SET_NULL)
+    missing_proxy = models.BooleanField(
+        default=False,
+        help_text='This request requires a proxy to file, but no such '
+        'proxy was avilable upon draft creation.'
+    )
+    parent = models.ForeignKey(
+        'self', blank=True, null=True, on_delete=models.SET_NULL
+    )
     block_incoming = models.BooleanField(
         default=False,
-        help_text=('Block emails incoming to this request from '
-                   'automatically being posted on the site')
+        help_text=(
+            'Block emails incoming to this request from '
+            'automatically being posted on the site'
+        )
     )
-    crowdfund = models.OneToOneField('crowdfund.Crowdfund',
-            related_name='foia', blank=True, null=True)
+    crowdfund = models.OneToOneField(
+        'crowdfund.Crowdfund', related_name='foia', blank=True, null=True
+    )
     multirequest = models.ForeignKey(
-            'foia.FOIAMultiRequest',
-            related_name='foias',
-            blank=True,
-            null=True,
-            )
+        'foia.FOIAMultiRequest',
+        related_name='foias',
+        blank=True,
+        null=True,
+    )
 
     read_collaborators = models.ManyToManyField(
         User,
@@ -345,13 +372,14 @@ class FOIARequest(models.Model):
     def get_absolute_url(self):
         """The url for this object"""
         return reverse(
-                'foia-detail',
-                kwargs={
-                    'jurisdiction': self.jurisdiction.slug,
-                    'jidx': self.jurisdiction.pk,
-                    'slug': self.slug,
-                    'idx': self.pk,
-                    })
+            'foia-detail',
+            kwargs={
+                'jurisdiction': self.jurisdiction.slug,
+                'jidx': self.jurisdiction.pk,
+                'slug': self.slug,
+                'idx': self.pk,
+            }
+        )
 
     def save(self, *args, **kwargs):
         """Normalize fields before saving and set the embargo expiration if necessary"""
@@ -384,13 +412,14 @@ class FOIARequest(models.Model):
 
     def is_payable(self):
         """Can this request be payed for by the user?"""
-        has_open_crowdfund = self.has_crowdfund() and not self.crowdfund.expired()
+        has_open_crowdfund = self.has_crowdfund(
+        ) and not self.crowdfund.expired()
         has_payment_status = self.status == 'payment'
         return has_payment_status and not has_open_crowdfund
 
     def get_stripe_amount(self):
         """Output a Stripe Checkout formatted price"""
-        return int(self.price*100)
+        return int(self.price * 100)
 
     def is_public(self):
         """Is this document viewable to everyone"""
@@ -419,7 +448,9 @@ class FOIARequest(models.Model):
 
     def add_editor(self, user):
         """Grants the user permission to edit this request."""
-        if not self.has_viewer(user) and not self.has_editor(user) and not self.created_by(user):
+        if not self.has_viewer(user) and not self.has_editor(
+            user
+        ) and not self.created_by(user):
             self.edit_collaborators.add(user)
             self.save()
             logger.info('%s granted edit access to %s', user, self)
@@ -450,7 +481,9 @@ class FOIARequest(models.Model):
 
     def add_viewer(self, user):
         """Grants the user permission to view this request."""
-        if not self.has_viewer(user) and not self.has_editor(user) and not self.created_by(user):
+        if not self.has_viewer(user) and not self.has_editor(
+            user
+        ) and not self.created_by(user):
             self.read_collaborators.add(user)
             self.save()
             logger.info('%s granted view access to %s', user, self)
@@ -497,22 +530,29 @@ class FOIARequest(models.Model):
 
     def last_response(self):
         """Return the most recent response"""
-        return self.communications.filter(response=True).order_by('-date').first()
+        return self.communications.filter(response=True
+                                          ).order_by('-date').first()
 
     def last_request(self):
         """Return the most recent request"""
-        return self.communications.filter(response=False).order_by('-date').first()
+        return self.communications.filter(response=False
+                                          ).order_by('-date').first()
 
     def set_mail_id(self):
         """Set the mail id, which is the unique identifier for the auto mailer system"""
         # use raw sql here in order to avoid race conditions
-        uid = int(md5(self.title.encode('utf8') +
-                      datetime.now().isoformat()).hexdigest(), 16) % 10 ** 8
+        uid = int(
+            md5(self.title.encode('utf8') + datetime.now().isoformat())
+            .hexdigest(), 16
+        ) % 10**8
         mail_id = '%s-%08d' % (self.pk, uid)
         cursor = connection.cursor()
-        cursor.execute("UPDATE foia_foiarequest "
-                       "SET mail_id = CASE WHEN mail_id='' THEN %s ELSE mail_id END "
-                       "WHERE id = %s", [mail_id, self.pk])
+        cursor.execute(
+            "UPDATE foia_foiarequest "
+            "SET mail_id = CASE WHEN mail_id='' THEN %s ELSE mail_id END "
+            "WHERE id = %s",
+            [mail_id, self.pk]
+        )
         # set object's mail id to what is in the database
         self.mail_id = FOIARequest.objects.get(pk=self.pk).mail_id
 
@@ -572,8 +612,12 @@ class FOIARequest(models.Model):
         Mark any existing notifications with the same message as read,
         to avoid notifying users with duplicated information.
         """
-        identical_notifications = (Notification.objects.for_object(self).get_unread()
-            .filter(action__actor_object_id=action.actor_object_id, action__verb=action.verb))
+        identical_notifications = (
+            Notification.objects.for_object(self).get_unread().filter(
+                action__actor_object_id=action.actor_object_id,
+                action__verb=action.verb
+            )
+        )
         for notification in identical_notifications:
             notification.mark_read()
         utils.notify(self.user, action)
@@ -668,34 +712,34 @@ class FOIARequest(models.Model):
         self.status = 'submitted'
         self.date_processing = date.today()
         task.models.FlaggedTask.objects.create(
-                foia=self,
-                text='This request was filed for an agency requiring a '
-                'proxy, but no proxy was available.  Please add a suitable '
-                'proxy for the state and refile it with a note that the '
-                'request is being filed by a state citizen. Make sure the '
-                'new request is associated with the original user\'s '
-                'account. To add someone as a proxy, change their user type '
-                'to "Proxy" and make sure they properly have their state '
-                'set on the backend.  This message should only appear when '
-                'a suitable proxy does not exist.'
-                )
+            foia=self,
+            text='This request was filed for an agency requiring a '
+            'proxy, but no proxy was available.  Please add a suitable '
+            'proxy for the state and refile it with a note that the '
+            'request is being filed by a state citizen. Make sure the '
+            'new request is associated with the original user\'s '
+            'account. To add someone as a proxy, change their user type '
+            'to "Proxy" and make sure they properly have their state '
+            'set on the backend.  This message should only appear when '
+            'a suitable proxy does not exist.'
+        )
 
     def process_attachments(self, user):
         """Attach all outbound attachments to the last communication"""
         attachments = self.pending_attachments.filter(
-                user=user,
-                sent=False,
-                )
+            user=user,
+            sent=False,
+        )
         comm = self.last_comm()
         access = 'private' if self.embargo else 'public'
         for attachment in attachments:
             file_ = comm.files.create(
-                    foia=self,
-                    title=os.path.basename(attachment.ffile.name),
-                    date=comm.date,
-                    source=user.get_full_name(),
-                    access=access,
-                    )
+                foia=self,
+                title=os.path.basename(attachment.ffile.name),
+                date=comm.date,
+                source=user.get_full_name(),
+                access=access,
+            )
             file_.ffile.name = attachment.ffile.name
             file_.save()
         attachments.update(sent=True)
@@ -710,31 +754,33 @@ class FOIARequest(models.Model):
             estimate = 'none'
 
         text = render_to_string(
-                'text/foia/followup.txt',
-                {'request': self, 'estimate': estimate}
-                )
+            'text/foia/followup.txt', {
+                'request': self,
+                'estimate': estimate
+            }
+        )
 
         user = User.objects.get(username='MuckrockStaff')
         return self.create_out_communication(
-                from_user=user,
-                text=text,
-                user=user,
-                autogenerated=True,
-                followup=True,
-                switch=switch,
-                )
+            from_user=user,
+            text=text,
+            user=user,
+            autogenerated=True,
+            followup=True,
+            switch=switch,
+        )
 
     def appeal(self, appeal_message, user):
         """Send an appeal to the agency or its appeal agency."""
         return self.create_out_communication(
-                from_user=user,
-                text=appeal_message,
-                user=user,
-                appeal=True,
-                # we include the latest pdf here under the assumption
-                # it is the rejection letter
-                include_latest_pdf=True,
-                )
+            from_user=user,
+            text=appeal_message,
+            user=user,
+            appeal=True,
+            # we include the latest pdf here under the assumption
+            # it is the rejection letter
+            include_latest_pdf=True,
+        )
 
     def pay(self, user, amount):
         """
@@ -747,27 +793,29 @@ class FOIARequest(models.Model):
         # We create the payment communication and a snail mail task for it.
         payable_to = self.agency.payable_to if self.agency else None
         text = render_to_string(
-                'message/communication/payment.txt',
-                {
-                    'amount': amount,
-                    'payable_to': payable_to,
-                    }
-                )
+            'message/communication/payment.txt', {
+                'amount': amount,
+                'payable_to': payable_to,
+            }
+        )
 
         comm = self.create_out_communication(
-                from_user=user,
-                text=text,
-                user=user,
-                payment=True,
-                snail=True,
-                amount=amount,
-                # we include the latest pdf here under the assumption
-                # it is the invoice
-                include_latest_pdf=True,
-                )
+            from_user=user,
+            text=text,
+            user=user,
+            payment=True,
+            snail=True,
+            amount=amount,
+            # we include the latest pdf here under the assumption
+            # it is the invoice
+            include_latest_pdf=True,
+        )
 
         # We perform some logging and activity generation
-        logger.info('%s has paid %0.2f for request %s', user.username, amount, self.title)
+        logger.info(
+            '%s has paid %0.2f for request %s', user.username, amount,
+            self.title
+        )
         utils.new_action(user, 'paid fees', target=self)
         # We return the communication we generated, in case the caller wants to do anything with it
         return comm
@@ -778,9 +826,9 @@ class FOIARequest(models.Model):
         # before calling this method
 
         comm = kwargs.pop(
-                'comm',
-                self.communications.last(),
-                )
+            'comm',
+            self.communications.last(),
+        )
         subject = comm.subject or self.default_subject()
         subject = subject[:255]
         comm.subject = subject
@@ -790,9 +838,13 @@ class FOIARequest(models.Model):
             self.agency.form.fill(comm)
 
         # preferred order of communication methods
-        if self.portal and self.portal.status == 'good' and not kwargs.get('snail'):
+        if self.portal and self.portal.status == 'good' and not kwargs.get(
+            'snail'
+        ):
             self._send_portal(comm, **kwargs)
-        elif self.email and self.email.status == 'good' and not kwargs.get('snail'):
+        elif self.email and self.email.status == 'good' and not kwargs.get(
+            'snail'
+        ):
             self._send_email(comm, **kwargs)
         elif self.fax and self.fax.status == 'good' and not kwargs.get('snail'):
             self._send_fax(comm, **kwargs)
@@ -813,40 +865,41 @@ class FOIARequest(models.Model):
         """Send the message as an email"""
 
         from_email, _ = EmailAddress.objects.get_or_create(
-                email=self.get_request_email(),
-                )
+            email=self.get_request_email(),
+        )
 
         body = self.render_msg_body(
-                comm=comm,
-                reply_link=True,
-                switch=kwargs.get('switch'),
-                appeal=kwargs.get('appeal')
-                )
+            comm=comm,
+            reply_link=True,
+            switch=kwargs.get('switch'),
+            appeal=kwargs.get('appeal')
+        )
 
         self.status = self._sent_status(
-                kwargs.get('appeal'),
-                kwargs.get('thanks'),
-                )
+            kwargs.get('appeal'),
+            kwargs.get('thanks'),
+        )
 
         email_comm = EmailCommunication.objects.create(
-                communication=comm,
-                sent_datetime=datetime.now(),
-                from_email=from_email,
-                )
+            communication=comm,
+            sent_datetime=datetime.now(),
+            from_email=from_email,
+        )
         email_comm.to_emails.add(self.email)
         email_comm.cc_emails.set(self.cc_emails.all())
         msg = EmailMultiAlternatives(
-                subject=comm.subject,
-                body=body,
-                from_email=str(from_email),
-                to=[str(self.email)],
-                cc=[str(e) for e in self.cc_emails.all() if e.status == 'good'],
-                bcc=['diagnostics@muckrock.com'],
-                headers={
-                    'X-Mailgun-Variables':
-                    {'email_id': email_comm.pk},
-                    }
-                )
+            subject=comm.subject,
+            body=body,
+            from_email=str(from_email),
+            to=[str(self.email)],
+            cc=[str(e) for e in self.cc_emails.all() if e.status == 'good'],
+            bcc=['diagnostics@muckrock.com'],
+            headers={
+                'X-Mailgun-Variables': {
+                    'email_id': email_comm.pk
+                },
+            }
+        )
         msg.attach_alternative(linebreaks(escape(body)), 'text/html')
         # atach all files from the latest communication
         comm.attach_files_to_email(msg)
@@ -859,51 +912,53 @@ class FOIARequest(models.Model):
         """Send the message as a fax"""
         from muckrock.foia.tasks import send_fax
 
-        switch = (kwargs.get('switch') or
-                ((self.email and self.email.status == 'error')
-                    and (self.last_request().sent_to() == self.email)))
+        switch = (
+            kwargs.get('switch')
+            or ((self.email and self.email.status == 'error') and
+                (self.last_request().sent_to() == self.email))
+        )
 
         body = self.render_msg_body(
-                comm=comm,
-                switch=switch,
-                appeal=kwargs.get('appeal')
-                )
+            comm=comm, switch=switch, appeal=kwargs.get('appeal')
+        )
 
         self.status = self._sent_status(
-                kwargs.get('appeal'),
-                kwargs.get('thanks'),
-                )
+            kwargs.get('appeal'),
+            kwargs.get('thanks'),
+        )
 
         error_count = kwargs.get('fax_error_count', 0)
         if error_count > 0:
             # after the first error, wait for 3 hours,
             # then double the time for every additional error
-            countdown = 60 * 60 * 3 * (2 ** (error_count - 1))
+            countdown = 60 * 60 * 3 * (2**(error_count - 1))
         else:
             countdown = 0
 
         send_fax.apply_async(
-                args=[comm.pk, comm.subject, body, error_count],
-                countdown=countdown,
-                )
+            args=[comm.pk, comm.subject, body, error_count],
+            countdown=countdown,
+        )
 
     def _send_snail_mail(self, comm, **kwargs):
         """Send the message as a snail mail"""
         category, extra = self.process_manual_send(**kwargs)
 
-        switch = bool(kwargs.get('switch', False) or
-                ((self.email and self.email.status == 'error')
-                    and (self.last_request().sent_to() == self.email)) or
-                ((self.fax and self.fax.status == 'error')
-                    and (self.last_request().sent_to() == self.fax)))
+        switch = bool(
+            kwargs.get('switch', False)
+            or ((self.email and self.email.status == 'error') and
+                (self.last_request().sent_to() == self.email))
+            or ((self.fax and self.fax.status == 'error') and
+                (self.last_request().sent_to() == self.fax))
+        )
 
         task.models.SnailMailTask.objects.create(
-                category=category,
-                communication=comm,
-                user=comm.from_user,
-                switch=switch,
-                **extra
-                )
+            category=category,
+            communication=comm,
+            user=comm.from_user,
+            switch=switch,
+            **extra
+        )
 
     def process_manual_send(self, **kwargs):
         """Select a category and set status for manually processed
@@ -927,13 +982,15 @@ class FOIARequest(models.Model):
             extra = {}
         return (category, extra)
 
-    def render_msg_body(self, comm, reply_link=False, switch=False, appeal=False):
+    def render_msg_body(
+        self, comm, reply_link=False, switch=False, appeal=False
+    ):
         """Render the message body for outgoing messages"""
         context = {
-                'request': self,
-                'switch': switch,
-                'msg_comms': self.get_msg_comms(comm),
-                }
+            'request': self,
+            'switch': switch,
+            'msg_comms': self.get_msg_comms(comm),
+        }
         if self.address:
             if appeal and self.agency and self.agency.appeal_agency:
                 agency = self.agency.appeal_agency
@@ -945,22 +1002,22 @@ class FOIARequest(models.Model):
         if switch:
             first_request = self.communications.all()[0]
             context['original'] = {
-                    'method': first_request.get_delivered(),
-                    'addr': first_request.sent_to(),
-                    }
+                'method': first_request.get_delivered(),
+                'addr': first_request.sent_to(),
+            }
             last_response = self.last_response()
             if last_response:
                 method, addr = last_response.get_delivered_and_from()
                 context['last_resp'] = {
-                        'date': last_response.date,
-                        'method': method,
-                        'addr': addr,
-                        }
+                    'date': last_response.date,
+                    'method': method,
+                    'addr': addr,
+                }
 
         return render_to_string(
             'text/foia/request_msg.txt',
             context,
-            )
+        )
 
     def _sent_status(self, appeal, thanks):
         """After sending out the message, set the correct new status"""
@@ -986,7 +1043,9 @@ class FOIARequest(models.Model):
         if self.status in ['ack', 'processed']:
             # unpause the count down
             if self.days_until_due is not None:
-                self.date_due = cal.business_days_from(date.today(), self.days_until_due)
+                self.date_due = cal.business_days_from(
+                    date.today(), self.days_until_due
+                )
                 self.days_until_due = None
             self._update_followup_date()
         # if we are no longer waiting on the agency, do not follow up
@@ -997,14 +1056,18 @@ class FOIARequest(models.Model):
             last_datetime = self.last_comm().date
             if not last_datetime:
                 last_datetime = datetime.now()
-            self.days_until_due = cal.business_days_between(last_datetime.date(), self.date_due)
+            self.days_until_due = cal.business_days_between(
+                last_datetime.date(), self.date_due
+            )
             self.date_due = None
         self.save()
 
     def _update_followup_date(self):
         """Update the follow up date"""
         try:
-            new_date = self.last_comm().date.date() + timedelta(self._followup_days())
+            new_date = self.last_comm().date.date() + timedelta(
+                self._followup_days()
+            )
             if self.date_due and self.date_due > new_date:
                 new_date = self.date_due
 
@@ -1037,17 +1100,17 @@ class FOIARequest(models.Model):
         agency = self.agency
         agency_user_profile = agency.get_user().profile
         return agency_user_profile.wrap_url(
-                reverse(
-                    'acct-agency-redirect-login',
-                    kwargs={
-                        'agency_slug': agency.slug,
-                        'agency_idx': agency.pk,
-                        'foia_slug': self.slug,
-                        'foia_idx': self.pk,
-                        },
-                    ),
-                email=email,
-                )
+            reverse(
+                'acct-agency-redirect-login',
+                kwargs={
+                    'agency_slug': agency.slug,
+                    'agency_idx': agency.pk,
+                    'foia_slug': self.slug,
+                    'foia_idx': self.pk,
+                },
+            ),
+            email=email,
+        )
 
     def update_tags(self, tags):
         """Update the requests tags"""
@@ -1060,10 +1123,12 @@ class FOIARequest(models.Model):
     def user_actions(self, user):
         '''Provides action interfaces for users'''
         is_owner = self.created_by(user)
-        is_agency_user = (user.is_authenticated() and
-                user.profile.acct_type == 'agency')
-        can_follow = (user.is_authenticated() and not is_owner and
-                not is_agency_user)
+        is_agency_user = (
+            user.is_authenticated() and user.profile.acct_type == 'agency'
+        )
+        can_follow = (
+            user.is_authenticated() and not is_owner and not is_agency_user
+        )
         is_following = user.is_authenticated() and user in followers(self)
         is_admin = user.is_staff
         kwargs = {
@@ -1097,7 +1162,8 @@ class FOIARequest(models.Model):
                 test=self.has_perm(user, 'flag'),
                 title='Get Help',
                 action='flag',
-                desc=u'Something broken, buggy, or off?  Let us know and we’ll fix it',
+                desc=
+                u'Something broken, buggy, or off?  Let us know and we’ll fix it',
                 class_name='failure modal'
             ),
             Action(
@@ -1137,14 +1203,14 @@ class FOIARequest(models.Model):
             ' properly have their state set on the backend. This message should'
             ' only appear the first time an agency rejects a request for being'
             ' from an out-of-state resident.'
-            )
+        )
         self.notes.create(
             author=User.objects.get(username='MuckrockStaff'),
             note='The request has been rejected with the agency stating that '
             'you must be a resident of the state. MuckRock is working with our '
             'in-state volunteers to refile this request, and it should appear '
             'in your account within a few days.',
-            )
+        )
 
     def default_subject(self):
         """Make a subject line for a communication for this request"""
@@ -1172,7 +1238,8 @@ class FOIARequest(models.Model):
         msg_comms.append(comms[-1])
         # get up to the 5 latest non-autogenerated requests
         # (excluding the latest and the orginal, which we always include)
-        msg_comms.extend([c for c in comms[1:-1][::-1] if not c.autogenerated][:5])
+        msg_comms.extend([c for c in comms[1:-1][::-1]
+                          if not c.autogenerated][:5])
         # always include the original
         msg_comms.append(comms[0])
         return msg_comms
@@ -1193,43 +1260,42 @@ class FOIARequest(models.Model):
             thanks=kwargs.get('thanks', False),
             subject=kwargs.get('subject', ''),
             autogenerated=kwargs.get('autogenerated', False),
-            )
+        )
         self.communications.update()
         for pdf in pdfs:
             pdf.clone(comm)
         self.process_attachments(user)
         self.submit(
-                appeal=kwargs.get('appeal', False),
-                snail=kwargs.get('snail', False),
-                thanks=kwargs.get('thanks', False),
-                followup=kwargs.get('followup', False),
-                payment=kwargs.get('payment', False),
-                amount=kwargs.get('amount', 0),
-                switch=kwargs.get('switch', False),
-                )
+            appeal=kwargs.get('appeal', False),
+            snail=kwargs.get('snail', False),
+            thanks=kwargs.get('thanks', False),
+            followup=kwargs.get('followup', False),
+            payment=kwargs.get('payment', False),
+            amount=kwargs.get('amount', 0),
+            switch=kwargs.get('switch', False),
+        )
         return comm
 
     def create_initial_communication(self, from_user, proxy):
         """Create the initial request communication"""
         template = get_template('text/foia/request.txt')
         context = {
-                'document_request': smart_text(self.requested_docs),
-                'jurisdiction': self.jurisdiction,
-                'user_name': from_user.get_full_name(),
-                'proxy': proxy,
-                }
+            'document_request': smart_text(self.requested_docs),
+            'jurisdiction': self.jurisdiction,
+            'user_name': from_user.get_full_name(),
+            'proxy': proxy,
+        }
         text = template.render(context).strip()
         comm = self.communications.create(
-                from_user=from_user,
-                to_user=self.get_to_user(),
-                date=datetime.now(),
-                response=False,
-                communication=text,
-                )
+            from_user=from_user,
+            to_user=self.get_to_user(),
+            date=datetime.now(),
+            response=False,
+            communication=text,
+        )
         return comm
 
     class Meta:
-        # pylint: disable=too-few-public-methods
         ordering = ['title']
         verbose_name = 'FOIA Request'
         app_label = 'foia'
@@ -1237,8 +1303,10 @@ class FOIARequest(models.Model):
             ('view_foiarequest', 'Can view this request'),
             ('embargo_foiarequest', 'Can embargo request to make it private'),
             ('embargo_perm_foiarequest', 'Can embargo a request permananently'),
-            ('crowdfund_foiarequest',
-                'Can start a crowdfund campaign for the request'),
+            (
+                'crowdfund_foiarequest',
+                'Can start a crowdfund campaign for the request'
+            ),
             ('appeal_foiarequest', 'Can appeal the requests decision'),
             ('thank_foiarequest', 'Can thank the FOI officer for their help'),
             ('flag_foiarequest', 'Can flag the request for staff attention'),
@@ -1246,5 +1314,8 @@ class FOIARequest(models.Model):
             ('agency_reply_foiarequest', 'Can send a direct reply'),
             ('upload_attachment_foiarequest', 'Can upload an attachment'),
             ('export_csv', 'Can export a CSV of search results'),
-            ('zip_download', 'Can download a zip file of all communications and files'),
-            )
+            (
+                'zip_download',
+                'Can download a zip file of all communications and files'
+            ),
+        )

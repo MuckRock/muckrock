@@ -3,13 +3,16 @@
 PDF Class for Snail Mail PDF letter generation
 """
 
+# Django
 from django.conf import settings
 
-from fpdf import FPDF
-
+# Standard Library
+import os.path
 from datetime import date
 from itertools import groupby
-import os.path
+
+# Third Party
+from fpdf import FPDF
 
 
 class PDF(FPDF):
@@ -24,11 +27,11 @@ class PDF(FPDF):
     def configure(self):
         """Configure common settings"""
         self.add_font(
-                'DejaVu',
-                '',
-                os.path.join(settings.FONT_PATH, 'DejaVuSerif.ttf'),
-                uni=True,
-                )
+            'DejaVu',
+            '',
+            os.path.join(settings.FONT_PATH, 'DejaVuSerif.ttf'),
+            uni=True,
+        )
         self.alias_nb_pages()
         self.add_page()
 
@@ -46,14 +49,15 @@ class SnailMailPDF(PDF):
         self.set_font('DejaVu', '', 10)
         email = self.comm.foia.get_request_email()
         text = (
-                'MuckRock News\n'
-                'DEPT MR {pk}\n'
-                '411A Highland Ave\n'
-                'Somerville, MA 02144-2516\n'
-                '{email}'.format(
-                    pk=self.comm.foia.pk,
-                    email=email,
-                    ))
+            'MuckRock News\n'
+            'DEPT MR {pk}\n'
+            '411A Highland Ave\n'
+            'Somerville, MA 02144-2516\n'
+            '{email}'.format(
+                pk=self.comm.foia.pk,
+                email=email,
+            )
+        )
         width = self.get_string_width(email)
         self.set_xy(72 / 2, (72 * 0.6))
         self.multi_cell(width + 6, 13, text, 0, 'L')
@@ -90,8 +94,9 @@ class CoverPDF(PDF):
     def header(self):
         """Add letterhead"""
         self.image(
-                'muckrock/templates/lib/component/icon/logotype.png',
-                72 / 2, 72 / 2, 3 * 72)
+            'muckrock/templates/lib/component/icon/logotype.png', 72 / 2,
+            72 / 2, 3 * 72
+        )
         self.line(72 / 2, 1.1 * 72, 8 * 72, 1.1 * 72)
         self.ln(70)
 
@@ -99,47 +104,56 @@ class CoverPDF(PDF):
         """Generate a PDF cover page"""
         self.configure()
         self.set_font('DejaVu', '', 14)
-        title = 'Bulk Snail Mail Cover Letter for {}'.format(
-                date.today())
+        title = 'Bulk Snail Mail Cover Letter for {}'.format(date.today())
         self.cell(0, 0, title, 0, 1, 'C')
         self.ln(10)
         self.set_font('DejaVu', '', 10)
         lines = []
         grouped_info = groupby(
-                self.info,
-                lambda x: x[0].communication.foia.agency,
-                )
+            self.info,
+            lambda x: x[0].communication.foia.agency,
+        )
         tab = u' ' * 8
         for agency, info in grouped_info:
             info = list(info)
-            lines.append(u'\nAgency: {} - {} requests'.format(
-                agency.name,
-                len(info),
-                ))
+            lines.append(
+                u'\nAgency: {} - {} requests'.format(
+                    agency.name,
+                    len(info),
+                )
+            )
             for snail, pages, files in info:
-                lines.append(u'\n{}□ MR #{} - "{}" by {} - {} pages'.format(
-                    tab,
-                    snail.communication.foia.pk,
-                    snail.communication.foia.title,
-                    snail.communication.from_user,
-                    pages,
-                    ))
+                lines.append(
+                    u'\n{}□ MR #{} - "{}" by {} - {} pages'.format(
+                        tab,
+                        snail.communication.foia.pk,
+                        snail.communication.foia.title,
+                        snail.communication.from_user,
+                        pages,
+                    )
+                )
                 if snail.category == 'p':
                     lines.append(
-                            u'{}□ Write a check for ${:.2f}'
-                            .format(2 * tab, snail.amount))
+                        u'{}□ Write a check for ${:.2f}'.format(
+                            2 * tab, snail.amount
+                        )
+                    )
                 for file_, status in files:
                     if status == 'attached':
                         lines.append(
-                                u'{}▣ Attached: {}'
-                                .format(2 * tab, file_.name()))
+                            u'{}▣ Attached: {}'.format(2 * tab, file_.name())
+                        )
                     elif status == 'skipped':
                         lines.append(
-                                u'{}□ Print separately: {}'
-                                .format(2 * tab, file_.name()))
-                    else: # status == 'error'
+                            u'{}□ Print separately: {}'.format(
+                                2 * tab, file_.name()
+                            )
+                        )
+                    else:  # status == 'error'
                         lines.append(
-                                u'{}□ Print separately (error): {}'
-                                .format(2 * tab, file_.name()))
+                            u'{}□ Print separately (error): {}'.format(
+                                2 * tab, file_.name()
+                            )
+                        )
         text = u'\n'.join(lines)
         self.multi_cell(0, 13, text)

@@ -2,21 +2,28 @@
 Forms for the project application
 """
 
+# Django
 from django import forms
 
+# Third Party
 from autocomplete_light import shortcuts as autocomplete_light
 from autocomplete_light.contrib.taggit_field import TaggitField, TaggitWidget
 
+# MuckRock
 from muckrock.project.models import Project
+
 
 class ProjectCreateForm(forms.ModelForm):
     """Form for the basic fields of a project."""
 
     tags = TaggitField(
-        widget=TaggitWidget('TagAutocomplete', attrs={
-            'placeholder': 'Search tags',
-            'data-autocomplete-minimum-characters': 1
-        }),
+        widget=TaggitWidget(
+            'TagAutocomplete',
+            attrs={
+                'placeholder': 'Search tags',
+                'data-autocomplete-minimum-characters': 1
+            }
+        ),
         help_text='Separate tags with commas.',
         required=False
     )
@@ -34,7 +41,11 @@ class ProjectUpdateForm(forms.ModelForm):
     """Form for updating a project instance"""
 
     tags = TaggitField(
-        widget=TaggitWidget('TagAutocomplete', attrs={'placeholder': 'Search tags'}),
+        widget=TaggitWidget(
+            'TagAutocomplete', attrs={
+                'placeholder': 'Search tags'
+            }
+        ),
         help_text='Separate tags with commas.',
         required=False
     )
@@ -52,10 +63,17 @@ class ProjectUpdateForm(forms.ModelForm):
             'articles',
         ]
         widgets = {
-            'description': forms.Textarea(attrs={'class': 'prose-editor'}),
-            'contributors': autocomplete_light.MultipleChoiceWidget('UserAutocomplete'),
-            'requests': autocomplete_light.MultipleChoiceWidget('FOIARequestAutocomplete'),
-            'articles': autocomplete_light.MultipleChoiceWidget('ArticleAutocomplete'),
+            'description':
+                forms.Textarea(attrs={
+                    'class': 'prose-editor'
+                }),
+            'contributors':
+                autocomplete_light.MultipleChoiceWidget('UserAutocomplete'),
+            'requests':
+                autocomplete_light.
+                MultipleChoiceWidget('FOIARequestAutocomplete'),
+            'articles':
+                autocomplete_light.MultipleChoiceWidget('ArticleAutocomplete'),
         }
         help_texts = {
             'title': 'Changing the title will change the URL of your project.',
@@ -74,7 +92,11 @@ class ProjectManagerForm(forms.Form):
         queryset=Project.objects.none(),
         widget=autocomplete_light.MultipleChoiceWidget(
             'ProjectManagerAutocomplete',
-            attrs={'placeholder': 'Search for a project'}))
+            attrs={
+                'placeholder': 'Search for a project'
+            }
+        )
+    )
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user')

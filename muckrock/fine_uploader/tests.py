@@ -2,21 +2,25 @@
 Tests for fine uploader integration
 """
 
+# Django
 from django.core.urlresolvers import reverse
-from django.test import TestCase, RequestFactory
+from django.test import RequestFactory, TestCase
 
-from nose.tools import eq_, assert_false
+# Standard Library
 import json
 
+# Third Party
+from nose.tools import assert_false, eq_
+
+# MuckRock
 from muckrock.factories import (
-        FOIARequestFactory,
-        OutboundAttachmentFactory,
-        UserFactory,
-        )
+    FOIARequestFactory,
+    OutboundAttachmentFactory,
+    UserFactory,
+)
 from muckrock.fine_uploader import views
 from muckrock.foia.models import OutboundAttachment
 
-# pylint: disable=no-self-use
 
 class TestFineUploaderSuccessView(TestCase):
     """Tests for fine uploader success view"""
@@ -26,9 +30,10 @@ class TestFineUploaderSuccessView(TestCase):
         foia = FOIARequestFactory()
         request_factory = RequestFactory()
         request = request_factory.post(
-                reverse('fine-uploader-success'),
-                {'foia_id': foia.pk, 'key': 'file_key'},
-                )
+            reverse('fine-uploader-success'),
+            {'foia_id': foia.pk,
+             'key': 'file_key'},
+        )
         request.user = foia.user
         response = views.success(request)
         eq_(response.status_code, 200)
@@ -41,9 +46,10 @@ class TestFineUploaderSuccessView(TestCase):
         """Test a post to the success view with a non-existent foia"""
         request_factory = RequestFactory()
         request = request_factory.post(
-                reverse('fine-uploader-success'),
-                {'foia_id': 1234, 'key': 'file_key'},
-                )
+            reverse('fine-uploader-success'),
+            {'foia_id': 1234,
+             'key': 'file_key'},
+        )
         request.user = UserFactory()
         response = views.success(request)
         eq_(response.status_code, 400)
@@ -53,9 +59,10 @@ class TestFineUploaderSuccessView(TestCase):
         foia = FOIARequestFactory()
         request_factory = RequestFactory()
         request = request_factory.post(
-                reverse('fine-uploader-success'),
-                {'foia_id': foia.pk, 'key': 'file_key'},
-                )
+            reverse('fine-uploader-success'),
+            {'foia_id': foia.pk,
+             'key': 'file_key'},
+        )
         request.user = UserFactory()
         response = views.success(request)
         eq_(response.status_code, 403)
@@ -65,9 +72,9 @@ class TestFineUploaderSuccessView(TestCase):
         foia = FOIARequestFactory()
         request_factory = RequestFactory()
         request = request_factory.post(
-                reverse('fine-uploader-success'),
-                {'foia_id': foia.pk},
-                )
+            reverse('fine-uploader-success'),
+            {'foia_id': foia.pk},
+        )
         request.user = foia.user
         response = views.success(request)
         eq_(response.status_code, 400)
@@ -80,23 +87,23 @@ class TestFineUploaderSessionView(TestCase):
         """Test a successful post to the session view"""
         foia = FOIARequestFactory()
         attachments = OutboundAttachmentFactory.create_batch(
-                3,
-                foia=foia,
-                user=foia.user,
-                sent=False,
-                )
+            3,
+            foia=foia,
+            user=foia.user,
+            sent=False,
+        )
         OutboundAttachmentFactory.create_batch(
-                3,
-                foia=foia,
-                user=foia.user,
-                sent=True,
-                )
+            3,
+            foia=foia,
+            user=foia.user,
+            sent=True,
+        )
         OutboundAttachmentFactory.create_batch(3)
         request_factory = RequestFactory()
         request = request_factory.get(
-                reverse('fine-uploader-session'),
-                {'foia_id': foia.pk},
-                )
+            reverse('fine-uploader-session'),
+            {'foia_id': foia.pk},
+        )
         request.user = foia.user
         response = views.session(request)
         eq_(response.status_code, 200)
@@ -113,9 +120,9 @@ class TestFineUploaderSessionView(TestCase):
         """Test a post to the session view with a non-existent foia"""
         request_factory = RequestFactory()
         request = request_factory.get(
-                reverse('fine-uploader-session'),
-                {'foia_id': 1234},
-                )
+            reverse('fine-uploader-session'),
+            {'foia_id': 1234},
+        )
         request.user = UserFactory()
         response = views.session(request)
         eq_(response.status_code, 400)
@@ -125,9 +132,11 @@ class TestFineUploaderSessionView(TestCase):
         foia = FOIARequestFactory()
         request_factory = RequestFactory()
         request = request_factory.get(
-                reverse('fine-uploader-session'),
-                {'foia_id': foia.pk, 'name': 'file_name', 'key': 'file_key'},
-                )
+            reverse('fine-uploader-session'),
+            {'foia_id': foia.pk,
+             'name': 'file_name',
+             'key': 'file_key'},
+        )
         request.user = UserFactory()
         response = views.session(request)
         eq_(response.status_code, 403)
@@ -142,9 +151,9 @@ class TestFineUploaderDeleteView(TestCase):
 
         request_factory = RequestFactory()
         request = request_factory.post(
-                reverse('fine-uploader-delete'),
-                {'key': attm.ffile.name},
-                )
+            reverse('fine-uploader-delete'),
+            {'key': attm.ffile.name},
+        )
         request.user = attm.user
         response = views.delete(request)
         eq_(response.status_code, 200)
@@ -154,9 +163,9 @@ class TestFineUploaderDeleteView(TestCase):
         """Test a post to the delete view with a non-existent file"""
         request_factory = RequestFactory()
         request = request_factory.post(
-                reverse('fine-uploader-delete'),
-                {'key': 'foobar'},
-                )
+            reverse('fine-uploader-delete'),
+            {'key': 'foobar'},
+        )
         request.user = UserFactory()
         response = views.delete(request)
         eq_(response.status_code, 400)
@@ -166,9 +175,9 @@ class TestFineUploaderDeleteView(TestCase):
         attm = OutboundAttachmentFactory()
         request_factory = RequestFactory()
         request = request_factory.post(
-                reverse('fine-uploader-success'),
-                {'key': attm.ffile.name},
-                )
+            reverse('fine-uploader-success'),
+            {'key': attm.ffile.name},
+        )
         request.user = UserFactory()
         attm.user = request.user
         attm.save()

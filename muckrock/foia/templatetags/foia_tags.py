@@ -2,9 +2,11 @@
 Template tags and filters for FOIA requests
 """
 
+# Django
 from django import template
 
 register = template.Library()
+
 
 @register.filter
 def classify_status(status):

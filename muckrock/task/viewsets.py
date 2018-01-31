@@ -2,72 +2,78 @@
 Viewsets for the Task API
 """
 
+# Third Party
+import django_filters
 from rest_framework import viewsets
 from rest_framework.permissions import IsAdminUser
-import django_filters
 
+# MuckRock
 from muckrock.task.models import (
-        Task,
-        OrphanTask,
-        SnailMailTask,
-        StaleAgencyTask,
-        FlaggedTask,
-        NewAgencyTask,
-        ResponseTask,
-        NewExemptionTask,
-        GenericTask,
-        )
+    FlaggedTask,
+    GenericTask,
+    NewAgencyTask,
+    NewExemptionTask,
+    OrphanTask,
+    ResponseTask,
+    SnailMailTask,
+    StaleAgencyTask,
+    Task,
+)
 from muckrock.task.serializers import (
-        TaskSerializer,
-        OrphanTaskSerializer,
-        SnailMailTaskSerializer,
-        StaleAgencyTaskSerializer,
-        FlaggedTaskSerializer,
-        NewAgencyTaskSerializer,
-        ResponseTaskSerializer,
-        NewExemptionTaskSerializer,
-        GenericTaskSerializer,
-        )
+    FlaggedTaskSerializer,
+    GenericTaskSerializer,
+    NewAgencyTaskSerializer,
+    NewExemptionTaskSerializer,
+    OrphanTaskSerializer,
+    ResponseTaskSerializer,
+    SnailMailTaskSerializer,
+    StaleAgencyTaskSerializer,
+    TaskSerializer,
+)
+
 
 def create_task_viewset(model, serializer, fields):
     """Create a viewset for a task"""
     # pylint: disable=invalid-name
-    Meta = type('Meta', (object,), {
-        'model': model,
-        'fields': (
-            'min_date_created',
-            'max_date_created',
-            'min_date_done',
-            'max_date_done',
-            'resolved',
-            'assigned') + fields
-    })
+    Meta = type(
+        'Meta', (object,), {
+            'model':
+                model,
+            'fields': (
+                'min_date_created', 'max_date_created', 'min_date_done',
+                'max_date_done', 'resolved', 'assigned'
+            ) + fields
+        }
+    )
 
     filter_fields = dict(
         assigned=django_filters.CharFilter(name='assigned__username'),
         min_date_created=django_filters.DateFilter(
             name='date_created',
             lookup_expr='gte',
-            ),
+        ),
         max_date_created=django_filters.DateFilter(
             name='date_created',
             lookup_expr='lte',
-            ),
+        ),
         min_date_done=django_filters.DateFilter(
             name='date_done',
             lookup_expr='gte',
-            ),
+        ),
         max_date_done=django_filters.DateFilter(
             name='date_done',
             lookup_expr='lte',
-            ),
+        ),
         Meta=Meta,
-        )
-    relation_fields = ['user', 'foia', 'communication', 'agency', 'jurisdiction']
+    )
+    relation_fields = [
+        'user', 'foia', 'communication', 'agency', 'jurisdiction'
+    ]
     for rfield in relation_fields:
         if rfield in fields:
             filter_fields[rfield] = django_filters.NumberFilter(
-                    name='%s__id' % rfield)
+                name='%s__id' % rfield
+            )
     Filter = type('Filter', (django_filters.FilterSet,), filter_fields)
 
     return type((model.__name__ + 'ViewSet'), (viewsets.ModelViewSet,), {
@@ -76,6 +82,7 @@ def create_task_viewset(model, serializer, fields):
         'permission_classes': (IsAdminUser,),
         'filter_class': Filter,
     })
+
 
 TaskViewSet = create_task_viewset(
     Task,

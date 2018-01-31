@@ -2,10 +2,16 @@
 Django settings for muckrock project
 """
 
+# Django
 from django.core.urlresolvers import reverse
-import djcelery
+
+# Standard Library
 import os
 import urlparse
+
+# Third Party
+import djcelery
+
 
 def boolcheck(setting):
     """Turn env var into proper bool"""
@@ -13,6 +19,7 @@ def boolcheck(setting):
         return setting.lower() in ("yes", "true", "t", "1")
     else:
         return bool(setting)
+
 
 DEBUG = False
 EMAIL_DEBUG = DEBUG
@@ -35,12 +42,10 @@ DOGSLOW_LOG_TO_FILE = False
 DOGSLOW_TIMER = 25
 DOGSLOW_EMAIL_TO = 'mitch@muckrock.com'
 DOGSLOW_EMAIL_FROM = 'info@muckrock.com'
-DOGSLOW_LOGGER = 'dogslow' # can be anything, but must match `logger` below
+DOGSLOW_LOGGER = 'dogslow'  # can be anything, but must match `logger` below
 DOGSLOW_LOG_TO_SENTRY = True
 
-ADMINS = (
-    ('Mitchell Kotler', 'mitch@muckrock.com'),
-)
+ADMINS = (('Mitchell Kotler', 'mitch@muckrock.com'),)
 
 MANAGERS = ADMINS
 
@@ -67,9 +72,7 @@ MEDIA_ROOT = os.path.join(STATIC_ROOT, 'media')
 ASSETS_ROOT = os.path.join(SITE_ROOT, 'assets')
 COMPRESS_ROOT = ASSETS_ROOT
 
-STATICFILES_DIRS = (
-    os.path.join(SITE_ROOT, 'assets'),
-)
+STATICFILES_DIRS = (os.path.join(SITE_ROOT, 'assets'),)
 
 WEBPACK_LOADER = {
     'DEFAULT': {
@@ -121,29 +124,25 @@ AWS_HEADERS = {
     'Cache-Control': 'max-age=94608000',
 }
 
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            os.path.join(SITE_ROOT, 'templates'),
-            ],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.contrib.auth.context_processors.auth',
-                'django.template.context_processors.debug',
-                #'django.template.context_processors.i18n',
-                'django.template.context_processors.media',
-                'django.template.context_processors.request',
-                'django.contrib.messages.context_processors.messages',
-                'muckrock.sidebar.context_processors.sidebar_info',
-                'muckrock.context_processors.google_analytics',
-                'muckrock.context_processors.domain',
-                'muckrock.context_processors.cache_timeout',
-                ],
-            }
-        }
-    ]
+TEMPLATES = [{
+    'BACKEND': 'django.template.backends.django.DjangoTemplates',
+    'DIRS': [os.path.join(SITE_ROOT, 'templates'),],
+    'APP_DIRS': True,
+    'OPTIONS': {
+        'context_processors': [
+            'django.contrib.auth.context_processors.auth',
+            'django.template.context_processors.debug',
+            #'django.template.context_processors.i18n',
+            'django.template.context_processors.media',
+            'django.template.context_processors.request',
+            'django.contrib.messages.context_processors.messages',
+            'muckrock.sidebar.context_processors.sidebar_info',
+            'muckrock.context_processors.google_analytics',
+            'muckrock.context_processors.domain',
+            'muckrock.context_processors.cache_timeout',
+        ],
+    }
+}]
 
 MIDDLEWARE_CLASSES = (
     'corsheaders.middleware.CorsMiddleware',
@@ -211,7 +210,7 @@ INSTALLED_APPS = (
     'django_hosts',
     'queued_storage',
     'hijack',
-    'compat', # for hijack
+    'compat',  # for hijack
     'django_filters',
     'opensearch',
     'dashing',
@@ -241,12 +240,14 @@ INSTALLED_APPS = (
     'actstream'
 )
 
+
 def show_toolbar(request):
     """show toolbar on the site"""
-    if ((boolcheck(os.environ.get('SHOW_DDT', False))) or
-            (request.user and request.user.username == 'mitch')):
+    if ((boolcheck(os.environ.get('SHOW_DDT', False)))
+        or (request.user and request.user.username == 'mitch')):
         return True
     return False
+
 
 DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': show_toolbar,
@@ -258,8 +259,9 @@ DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
 urlparse.uses_netloc.append('redis')
 
-BROKER_URL = os.environ.get('REDISTOGO_URL',
-        os.environ.get('REDIS_URL', 'redis://localhost:6379/0'))
+BROKER_URL = os.environ.get(
+    'REDISTOGO_URL', os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+)
 
 djcelery.setup_loader()
 
@@ -275,20 +277,25 @@ CELERY_IMPORTS = (
     'muckrock.portal.tasks',
     'muckrock.dataset.tasks',
     'muckrock.crowdsource.tasks',
-    )
+)
 CELERYD_MAX_TASKS_PER_CHILD = os.environ.get('CELERYD_MAX_TASKS_PER_CHILD', 100)
 CELERYD_TASK_TIME_LIMIT = os.environ.get('CELERYD_TASK_TIME_LIMIT', 5 * 60)
 CELERY_ROUTES = {
-        'muckrock.foia.tasks.send_fax': {'queue': 'phaxio'},
-        }
+    'muckrock.foia.tasks.send_fax': {
+        'queue': 'phaxio'
+    },
+}
 
 AUTHENTICATION_BACKENDS = (
     'rules.permissions.ObjectPermissionBackend',
     'muckrock.accounts.backends.CaseInsensitiveModelBackend',
     'lot.auth_backend.LOTBackend',
-    )
+)
 ABSOLUTE_URL_OVERRIDES = {
-    'auth.user': lambda u: reverse('acct-profile', kwargs={'username': u.username}),
+    'auth.user':
+        lambda u: reverse('acct-profile', kwargs={
+            'username': u.username
+        }),
 }
 
 DBSETTINGS_USE_SITES = False
@@ -327,7 +334,8 @@ LOGGING = {
     },
     'formatters': {
         'verbose': {
-            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+            'format':
+                '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
         },
         'simple': {
             'format': '%(levelname)s %(message)s'
@@ -343,7 +351,7 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.NullHandler',
         },
-        'console':{
+        'console': {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose'
@@ -408,9 +416,12 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', 'muckrock-devel2')
+AWS_STORAGE_BUCKET_NAME = os.environ.get(
+    'AWS_STORAGE_BUCKET_NAME', 'muckrock-devel2'
+)
 AWS_AUTOIMPORT_BUCKET_NAME = os.environ.get(
-    'AWS_AUTOIMPORT_BUCKET_NAME', 'muckrock-autoimprot-devel')
+    'AWS_AUTOIMPORT_BUCKET_NAME', 'muckrock-autoimprot-devel'
+)
 
 STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
 STRIPE_PUB_KEY = os.environ.get('STRIPE_PUB_KEY')
@@ -442,20 +453,22 @@ PUBLICATION_TIME_ZONE = '-05:00'
 # Register database schemes in URLs.
 urlparse.uses_netloc.append('postgres')
 
-url = urlparse.urlparse(os.environ.get('DATABASE_URL', 'postgres://vagrant@localhost/muckrock'))
+url = urlparse.urlparse(
+    os.environ.get('DATABASE_URL', 'postgres://vagrant@localhost/muckrock')
+)
 
 # Update with environment configuration.
 DATABASES = {
-        'default': {
-            'NAME': url.path[1:],
-            'USER': url.username,
-            'PASSWORD': url.password,
-            'HOST': url.hostname,
-            'PORT': url.port,
-            'CONN_MAX_AGE': int(os.environ.get('CONN_MAX_AGE', 500)),
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            }
-        }
+    'default': {
+        'NAME': url.path[1:],
+        'USER': url.username,
+        'PASSWORD': url.password,
+        'HOST': url.hostname,
+        'PORT': url.port,
+        'CONN_MAX_AGE': int(os.environ.get('CONN_MAX_AGE', 500)),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+    }
+}
 
 CACHES = {
     'default': {
@@ -465,15 +478,19 @@ CACHES = {
 DEFAULT_CACHE_TIMEOUT = 15 * 60
 
 REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': 'muckrock.pagination.StandardPagination',
-    'DEFAULT_FILTER_BACKENDS':
-        ('rest_framework.filters.DjangoFilterBackend',
-         'rest_framework.filters.OrderingFilter'),
-    'DEFAULT_AUTHENTICATION_CLASSES':
-        ('rest_framework.authentication.TokenAuthentication',
-         'rest_framework.authentication.SessionAuthentication',),
-    'DEFAULT_PERMISSION_CLASSES':
-        ('rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',),
+    'DEFAULT_PAGINATION_CLASS':
+        'muckrock.pagination.StandardPagination',
+    'DEFAULT_FILTER_BACKENDS': (
+        'rest_framework.filters.DjangoFilterBackend',
+        'rest_framework.filters.OrderingFilter'
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
+    ),
 }
 
 if 'ALLOWED_HOSTS' in os.environ:
@@ -481,9 +498,7 @@ if 'ALLOWED_HOSTS' in os.environ:
 else:
     ALLOWED_HOSTS = []
 
-ACTSTREAM_SETTINGS = {
-    'MANAGER': 'muckrock.managers.MRActionManager'
-}
+ACTSTREAM_SETTINGS = {'MANAGER': 'muckrock.managers.MRActionManager'}
 
 SOUTH_MIGRATION_MODULES = {
     'taggit': 'taggit.south_migrations',
@@ -491,18 +506,20 @@ SOUTH_MIGRATION_MODULES = {
 }
 
 LOT = {
-  'slow-login': {
-      'name': u'Slow login',
-      'duration': 60 * 60 * 24 * 2,
-      'one-time': True,
-  },
+    'slow-login': {
+        'name': u'Slow login',
+        'duration': 60 * 60 * 24 * 2,
+        'one-time': True,
+    },
 }
 LOT_MIDDLEWARE_PARAM_NAME = 'uuid-login'
 
 ROBOTS_CACHE_TIMEOUT = 60 * 60 * 24
 ROBOTS_SITE_BY_REQUEST = True
 
-PACKAGE_MONITOR_REQUIREMENTS_FILE = os.path.join(SITE_ROOT, '../requirements.txt')
+PACKAGE_MONITOR_REQUIREMENTS_FILE = os.path.join(
+    SITE_ROOT, '../requirements.txt'
+)
 
 TAGGIT_CASE_INSENSITIVE = True
 TAGGIT_TAGS_FROM_STRING = 'muckrock.tags.models.parse_tags'
@@ -524,23 +541,20 @@ LEAFLET_CONFIG = {
     'MAX_ZOOM': 18,
     'PLUGINS': {
         'search': {
-            'css': [
-                'vendor/leaflet-geocoder-control/Control.Geocoder.css',
-            ],
+            'css': ['vendor/leaflet-geocoder-control/Control.Geocoder.css',],
             'js': [
                 'vendor/leaflet-geocoder-control/Control.Geocoder.js',
                 'js/leaflet-form.js'
             ],
-            'auto-include': True,
+            'auto-include':
+                True,
         },
         'draw': {
             'css': [
                 'leaflet/draw/leaflet.draw.css',
                 'leaflet/draw/leaflet.draw.ie.css'
             ],
-            'js': [
-                'leaflet/draw/leaflet.draw.js'
-            ]
+            'js': ['leaflet/draw/leaflet.draw.js']
         }
     }
 }
@@ -552,7 +566,9 @@ FOIAMACHINE_URL = 'dev.foiamachine.org:8000'
 # Limit CORS support to just API endpoints
 CORS_URLS_REGEX = r'^/api(_v\d)?/.*$'
 # Limit CORS origin to just FOIA machine
-CORS_ORIGIN_REGEX_WHITELIST = (r'^(https?://)?(\w+\.)?foiamachine\.org(:\d+)?$', )
+CORS_ORIGIN_REGEX_WHITELIST = (
+    r'^(https?://)?(\w+\.)?foiamachine\.org(:\d+)?$',
+)
 CORS_ALLOW_CREDENTIALS = True
 
 # Django Filter settings
@@ -563,27 +579,27 @@ FILTERS_HELP_TEXT_FILTER = False
 MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024
 MAX_ATTACHMENT_NUM = 3
 ALLOWED_FILE_MIMES = [
-        'application/pdf',
-        'image/jpeg',
-        'image/png',
-        'image/tiff',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'application/vnd.oasis.opendocument.text',
-        'text/html',
-        'text/plain',
-        ]
+    'application/pdf',
+    'image/jpeg',
+    'image/png',
+    'image/tiff',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.oasis.opendocument.text',
+    'text/html',
+    'text/plain',
+]
 ALLOWED_FILE_EXTS = [
-        'pdf',
-        'jpg',
-        'png',
-        'tif',
-        'doc',
-        'docx',
-        'odt',
-        'html',
-        'txt',
-        ]
+    'pdf',
+    'jpg',
+    'png',
+    'tif',
+    'doc',
+    'docx',
+    'odt',
+    'html',
+    'txt',
+]
 
 # for django-phonenumber-field
 PHONENUMBER_DB_FORMAT = 'INTERNATIONAL'
@@ -601,7 +617,5 @@ CHECK_EMAIL = os.environ.get('CHECK_EMAIL', '')
 
 DASHING = {
     'INSTALLED_WIDGETS': ('number', 'list', 'graph', 'clock', 'knob'),
-    'PERMISSION_CLASSES':  (
-        'dashing.permissions.IsAdminUser',
-    )
+    'PERMISSION_CLASSES': ('dashing.permissions.IsAdminUser',)
 }

@@ -1,20 +1,22 @@
 """
 Models for the Jurisdiction application
 """
+# Django
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import models
-from django.db.models import F, Q, Avg, Sum, Count
+from django.db.models import Avg, Count, F, Q, Sum
 from django.template.defaultfilters import slugify
 
+# Third Party
 from easy_thumbnails.fields import ThumbnailerImageField
 from taggit.managers import TaggableManager
 
-from muckrock.business_days.models import Holiday, HolidayCalendar, Calendar
-from muckrock.foia.models import FOIARequest, END_STATUS
+# MuckRock
+from muckrock.business_days.models import Calendar, Holiday, HolidayCalendar
+from muckrock.foia.models import END_STATUS, FOIARequest
 from muckrock.tags.models import TaggedItemBase
 
-# pylint: disable=bad-continuation
 
 class RequestHelper(object):
     """Helper methods for classes that have a get_requests() method"""
@@ -22,13 +24,17 @@ class RequestHelper(object):
     def average_response_time(self):
         """Get the average response time from a submitted to completed request"""
         requests = self.get_requests()
-        avg = (requests.aggregate(avg=Avg(F('date_done') - F('date_submitted')))['avg'])
+        avg = (
+            requests.aggregate(avg=Avg(F('date_done') - F('date_submitted'))
+                               )['avg']
+        )
         return int(avg.days) if avg is not None else 0
 
     def average_fee(self):
         """Get the average fees required on requests that have a price."""
         requests = self.get_requests()
-        avg = requests.filter(price__gt=0).aggregate(price=Avg('price'))['price']
+        avg = requests.filter(price__gt=0).aggregate(price=Avg('price')
+                                                     )['price']
         return avg if avg else 0
 
     def fee_rate(self):
@@ -69,33 +75,60 @@ class Jurisdiction(models.Model, RequestHelper):
     full_name = models.CharField(max_length=55, blank=True)
     abbrev = models.CharField(max_length=5, blank=True)
     level = models.CharField(max_length=1, choices=levels)
-    parent = models.ForeignKey('self', related_name='children', blank=True, null=True)
+    parent = models.ForeignKey(
+        'self', related_name='children', blank=True, null=True
+    )
     hidden = models.BooleanField(default=False)
-    image = ThumbnailerImageField(upload_to='jurisdiction_images', blank=True, null=True)
-    image_attr_line = models.CharField(blank=True, max_length=255, help_text='May use html')
+    image = ThumbnailerImageField(
+        upload_to='jurisdiction_images', blank=True, null=True
+    )
+    image_attr_line = models.CharField(
+        blank=True, max_length=255, help_text='May use html'
+    )
     public_notes = models.TextField(blank=True, help_text='May use html')
     aliases = models.TextField(blank=True)
 
     # non local
-    days = models.PositiveSmallIntegerField(blank=True, null=True, help_text='How many days do they'
-                                                                             ' have to respond?')
-    observe_sat = models.BooleanField(default=False,
-            help_text='Are holidays observed on Saturdays? '
-                      '(or are they moved to Friday?)')
+    days = models.PositiveSmallIntegerField(
+        blank=True,
+        null=True,
+        help_text='How many days do they'
+        ' have to respond?'
+    )
+    observe_sat = models.BooleanField(
+        default=False,
+        help_text='Are holidays observed on Saturdays? '
+        '(or are they moved to Friday?)'
+    )
     holidays = models.ManyToManyField(Holiday, blank=True)
-    use_business_days = models.BooleanField(default=True, help_text='Response time in business days'
-                                                                    ' (or calendar days)?')
-    intro = models.TextField(blank=True, help_text='Intro paragraph for request - '
-                                         'usually includes the pertinant FOI law')
-    law_name = models.CharField(blank=True, max_length=255, help_text='The pertinant FOIA law')
-    waiver = models.TextField(blank=True, help_text='Optional - custom waiver paragraph if '
-                              'FOI law has special line for waivers')
+    use_business_days = models.BooleanField(
+        default=True,
+        help_text='Response time in business days'
+        ' (or calendar days)?'
+    )
+    intro = models.TextField(
+        blank=True,
+        help_text='Intro paragraph for request - '
+        'usually includes the pertinant FOI law'
+    )
+    law_name = models.CharField(
+        blank=True, max_length=255, help_text='The pertinant FOIA law'
+    )
+    waiver = models.TextField(
+        blank=True,
+        help_text='Optional - custom waiver paragraph if '
+        'FOI law has special line for waivers'
+    )
     has_appeal = models.BooleanField(
-            default=True,
-            help_text='Does this jurisdiction have an appeals process?')
+        default=True,
+        help_text='Does this jurisdiction have an appeals process?'
+    )
     requires_proxy = models.BooleanField(default=False)
-    law_analysis = models.TextField(blank=True, help_text='Our analysis of the state FOIA law, '
-                                                'as a part of FOI95.')
+    law_analysis = models.TextField(
+        blank=True,
+        help_text='Our analysis of the state FOIA law, '
+        'as a part of FOI95.'
+    )
 
     def __unicode__(self):
         if self.level == 'l' and not self.full_name and self.parent:
@@ -126,9 +159,7 @@ class Jurisdiction(models.Model, RequestHelper):
                 'state_slug': self.slug
             })
         elif self.level == 'f':
-            slugs.update({
-                'fed_slug': self.slug
-            })
+            slugs.update({'fed_slug': self.slug})
         return slugs
 
     def get_url(self, view):
@@ -200,7 +231,9 @@ class Jurisdiction(models.Model, RequestHelper):
         if self.level == 'l' and not self.parent.use_business_days:
             return Calendar()
         elif self.level == 'l' and self.parent.use_business_days:
-            return HolidayCalendar(self.parent.holidays.all(), self.parent.observe_sat)
+            return HolidayCalendar(
+                self.parent.holidays.all(), self.parent.observe_sat
+            )
         elif not self.use_business_days:
             return Calendar()
         else:
@@ -209,10 +242,10 @@ class Jurisdiction(models.Model, RequestHelper):
     def get_proxy(self):
         """Get a random proxy user for this jurisdiction"""
         from muckrock.accounts.models import Profile
-        proxy = (Profile.objects
-                .filter(acct_type='proxy', state=self.legal())
-                .order_by('-preferred_proxy')
-                .first())
+        proxy = (
+            Profile.objects.filter(acct_type='proxy', state=self.legal())
+            .order_by('-preferred_proxy').first()
+        )
         if proxy:
             return proxy.user
         else:
@@ -237,15 +270,13 @@ class Jurisdiction(models.Model, RequestHelper):
         """State level jurisdictions should return requests from their localities as well."""
         if self.level == 's':
             requests = FOIARequest.objects.filter(
-                Q(jurisdiction=self)|
-                Q(jurisdiction__parent=self)
+                Q(jurisdiction=self) | Q(jurisdiction__parent=self)
             )
         else:
             requests = FOIARequest.objects.filter(jurisdiction=self)
         return requests.exclude(status='started')
 
     class Meta:
-        # pylint: disable=too-few-public-methods
         ordering = ['name']
         unique_together = ('slug', 'parent')
 
@@ -253,12 +284,21 @@ class Jurisdiction(models.Model, RequestHelper):
 class Law(models.Model):
     """A law that allows for requests for public records from a jurisdiction."""
     jurisdiction = models.ForeignKey(Jurisdiction, related_name='laws')
-    name = models.CharField(max_length=255, help_text='The common name of the law.')
-    shortname = models.CharField(blank=True, max_length=20,
-        help_text='Abbreviation or acronym, e.g. FOIA, FOIL, OPRA')
-    citation = models.CharField(max_length=255, help_text='The legal reference for this law.')
+    name = models.CharField(
+        max_length=255, help_text='The common name of the law.'
+    )
+    shortname = models.CharField(
+        blank=True,
+        max_length=20,
+        help_text='Abbreviation or acronym, e.g. FOIA, FOIL, OPRA'
+    )
+    citation = models.CharField(
+        max_length=255, help_text='The legal reference for this law.'
+    )
     url = models.URLField(help_text='The URL of the full text of the law.')
-    summary = models.CharField(blank=True, max_length=255, verbose_name='Major Dates')
+    summary = models.CharField(
+        blank=True, max_length=255, verbose_name='Major Dates'
+    )
 
     def __unicode__(self):
         return self.name
@@ -278,7 +318,9 @@ class Exemption(models.Model):
     slug = models.SlugField(max_length=255)
     jurisdiction = models.ForeignKey(Jurisdiction, related_name='exemptions')
     aliases = models.TextField(blank=True)
-    basis = models.TextField(help_text='The legal or contextual basis for the exemption.')
+    basis = models.TextField(
+        help_text='The legal or contextual basis for the exemption.'
+    )
     # Optional fields
     tags = TaggableManager(through=TaggedItemBase, blank=True)
     requests = models.ManyToManyField(
@@ -287,13 +329,24 @@ class Exemption(models.Model):
         related_name='exemptions',
         blank=True
     )
-    contributors = models.ManyToManyField(User, related_name='exemptions', blank=True)
-    proper_use = models.TextField(blank=True,
-        help_text='An editorialized description of cases when the exemption is properly used.')
-    improper_use = models.TextField(blank=True,
-        help_text='An editorialized description of cases when the exemption is improperly used.')
-    key_citations = models.TextField(blank=True,
-        help_text='Significant references to the exemption in caselaw or previous appeals.')
+    contributors = models.ManyToManyField(
+        User, related_name='exemptions', blank=True
+    )
+    proper_use = models.TextField(
+        blank=True,
+        help_text=
+        'An editorialized description of cases when the exemption is properly used.'
+    )
+    improper_use = models.TextField(
+        blank=True,
+        help_text=
+        'An editorialized description of cases when the exemption is improperly used.'
+    )
+    key_citations = models.TextField(
+        blank=True,
+        help_text=
+        'Significant references to the exemption in caselaw or previous appeals.'
+    )
 
     def __unicode__(self):
         return u'%s exemption of %s' % (self.name, self.jurisdiction)
@@ -324,10 +377,14 @@ class InvokedExemption(models.Model):
     but there can be many invocations of that exemption."""
     exemption = models.ForeignKey(Exemption, related_name='invokations')
     request = models.ForeignKey(FOIARequest)
-    use_language = models.TextField(blank=True,
-        help_text='What language did the aguency use to invoke the exemption?')
-    properly_invoked = models.NullBooleanField(default=None,
-        help_text='Did the agency properly invoke the exemption to the request?')
+    use_language = models.TextField(
+        blank=True,
+        help_text='What language did the aguency use to invoke the exemption?'
+    )
+    properly_invoked = models.NullBooleanField(
+        default=None,
+        help_text='Did the agency properly invoke the exemption to the request?'
+    )
 
     def __unicode__(self):
         return u'%s exemption of %s' % (self.exemption.name, self.request)
@@ -340,7 +397,9 @@ class InvokedExemption(models.Model):
         kwargs = self.exemption.jurisdiction.get_slugs()
         kwargs['slug'] = self.exemption.slug
         kwargs['pk'] = self.exemption.pk
-        return reverse('exemption-detail', kwargs=kwargs) + '#invoked-%d' % self.pk
+        return reverse(
+            'exemption-detail', kwargs=kwargs
+        ) + '#invoked-%d' % self.pk
 
 
 class ExampleAppeal(models.Model):
@@ -351,8 +410,11 @@ class ExampleAppeal(models.Model):
     exemption = models.ForeignKey(Exemption, related_name='example_appeals')
     title = models.TextField(default='Untitled Example')
     language = models.TextField()
-    context = models.TextField(blank=True,
-        help_text='Under what circumstances is this appeal language most effective?')
+    context = models.TextField(
+        blank=True,
+        help_text=
+        'Under what circumstances is this appeal language most effective?'
+    )
 
     def __unicode__(self):
         return u'%(name)s for %(exemption)s' % {
@@ -368,15 +430,21 @@ class ExampleAppeal(models.Model):
         kwargs = self.exemption.jurisdiction.get_slugs()
         kwargs['slug'] = self.exemption.slug
         kwargs['pk'] = self.exemption.pk
-        return reverse('exemption-detail', kwargs=kwargs) + '#appeal-%d' % self.pk
+        return reverse(
+            'exemption-detail', kwargs=kwargs
+        ) + '#appeal-%d' % self.pk
 
 
 class Appeal(models.Model):
     """Appeals should capture information about appeals submitted to agencies.
     It should capture the communication used to appeal, as well as the base language
     used to write the appeal, if any was used."""
-    communication = models.ForeignKey('foia.FOIACommunication', related_name='appeals')
-    base_language = models.ManyToManyField(ExampleAppeal, related_name='appeals', blank=True)
+    communication = models.ForeignKey(
+        'foia.FOIACommunication', related_name='appeals'
+    )
+    base_language = models.ManyToManyField(
+        ExampleAppeal, related_name='appeals', blank=True
+    )
 
     def __unicode__(self):
         return u'Appeal of %s' % self.communication.foia
@@ -391,15 +459,22 @@ class Appeal(models.Model):
     def is_successful(self):
         """Evaluate the FOIARequest communications to judge whether the appeal is successful."""
         foia = self.communication.foia
-        subsequent_comms = (foia.communications.filter(date__gt=self.communication.date)
-                                               .annotate(appeal__count=Count('appeals')))
+        subsequent_comms = (
+            foia.communications.filter(date__gt=self.communication.date)
+            .annotate(appeal__count=Count('appeals'))
+        )
         successful = False
-        successful = successful or subsequent_comms.filter(status='done').exists()
-        successful = successful and not subsequent_comms.filter(appeal__count__gt=0).exists()
+        successful = successful or subsequent_comms.filter(status='done'
+                                                           ).exists()
+        successful = successful and not subsequent_comms.filter(
+            appeal__count__gt=0
+        ).exists()
         return successful
 
     def is_finished(self):
         """Evaluate the FOIARequest communications to judge whether the appeal is finished."""
         foia = self.communication.foia
-        subsequent_comms = foia.communications.filter(date__gt=self.communication.date)
+        subsequent_comms = foia.communications.filter(
+            date__gt=self.communication.date
+        )
         return subsequent_comms.filter(status__in=END_STATUS).exists()

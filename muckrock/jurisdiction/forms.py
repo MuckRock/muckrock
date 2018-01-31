@@ -1,12 +1,16 @@
 """Forms for Jurisdiction application"""
 
+# Django
 from django import forms
 
+# Third Party
+from autocomplete_light import shortcuts as autocomplete_light
+
+# MuckRock
 from muckrock.foia.models import FOIARequest
 from muckrock.forms import MRFilterForm
-from muckrock.jurisdiction.models import Jurisdiction, ExampleAppeal
+from muckrock.jurisdiction.models import ExampleAppeal, Jurisdiction
 
-from autocomplete_light import shortcuts as autocomplete_light
 
 class JurisdictionFilterForm(MRFilterForm):
     """Adds a level filter to MRFilterForm"""
@@ -15,16 +19,16 @@ class JurisdictionFilterForm(MRFilterForm):
         ('s', 'State'),
         ('l', 'Local'),
     )
-    level = forms.ChoiceField(
-        choices=levels,
-        widget=forms.RadioSelect
-    )
+    level = forms.ChoiceField(choices=levels, widget=forms.RadioSelect)
     parent = forms.ModelChoiceField(
         required=False,
         queryset=Jurisdiction.objects.all(),
         widget=autocomplete_light.ChoiceWidget(
-            'StateAutocomplete',
-            attrs={'placeholder': 'All States'}))
+            'StateAutocomplete', attrs={
+                'placeholder': 'All States'
+            }
+        )
+    )
 
 
 class ExemptionSubmissionForm(forms.Form):
@@ -38,9 +42,7 @@ class FlagForm(forms.Form):
     reason = forms.CharField(
         widget=forms.Textarea(),
         label='Submit a Change',
-        help_text=(
-            'Please describe the change in sufficient detail.'
-        )
+        help_text=('Please describe the change in sufficient detail.')
     )
 
 

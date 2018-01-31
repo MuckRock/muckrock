@@ -2,8 +2,10 @@
 Sitemap for Project application
 """
 
+# Django
 from django.contrib.sitemaps import Sitemap
 
+# MuckRock
 from muckrock.project.models import Project
 
 

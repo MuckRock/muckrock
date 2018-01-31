@@ -1,16 +1,21 @@
 """Forms for the crowdsource application"""
 
+# Django
 from django import forms
 from django.contrib.auth.models import User
 from django.core.validators import URLValidator
 
-from autocomplete_light import shortcuts as autocomplete_light
+# Standard Library
 import json
 import re
-import unicodecsv as csv
 
-from muckrock.crowdsource.models import Crowdsource, CrowdsourceData
+# Third Party
+import unicodecsv as csv
+from autocomplete_light import shortcuts as autocomplete_light
+
+# MuckRock
 from muckrock.crowdsource.fields import FIELD_DICT
+from muckrock.crowdsource.models import Crowdsource, CrowdsourceData
 from muckrock.crowdsource.tasks import datum_per_page
 
 
@@ -21,9 +26,9 @@ class CrowdsourceAssignmentForm(forms.Form):
     """
 
     data_id = forms.IntegerField(
-            widget=forms.HiddenInput,
-            required=False,
-            )
+        widget=forms.HiddenInput,
+        required=False,
+    )
 
     def __init__(self, *args, **kwargs):
         crowdsource = kwargs.pop('crowdsource')
@@ -33,21 +38,24 @@ class CrowdsourceAssignmentForm(forms.Form):
         for field in crowdsource.fields.all():
             self.fields[field.label] = field.get_form_field()
         if user.is_anonymous:
-            self.fields['full_name'] = forms.CharField(label='Full Name or Handle (Public)')
+            self.fields['full_name'] = forms.CharField(
+                label='Full Name or Handle (Public)'
+            )
             self.fields['email'] = forms.EmailField()
             self.fields['newsletter'] = forms.BooleanField(
-                    initial=True,
-                    required=False,
-                    label='Get MuckRock\'s weekly newsletter with '
-                    'FOIA news, tips, and more',
-                    )
+                initial=True,
+                required=False,
+                label='Get MuckRock\'s weekly newsletter with '
+                'FOIA news, tips, and more',
+            )
 
     def clean_email(self):
         """Do a case insensitive uniqueness check"""
         email = self.cleaned_data['email']
         if User.objects.filter(email__iexact=email).exists():
             raise forms.ValidationError(
-                    'User with this email already exists. Please login first.')
+                'User with this email already exists. Please login first.'
+            )
         return email
 
 
@@ -55,42 +63,42 @@ class CrowdsourceForm(forms.ModelForm):
     """Form for creating a crowdsource"""
     prefix = 'crowdsource'
     document_url_re = re.compile(
-            r'https?://www[.]documentcloud[.]org/documents/'
-            r'(?P<doc_id>[0-9A-Za-z-]+)[.]html'
-            )
+        r'https?://www[.]documentcloud[.]org/documents/'
+        r'(?P<doc_id>[0-9A-Za-z-]+)[.]html'
+    )
 
     project = autocomplete_light.ModelChoiceField(
-            'ProjectManagerAutocomplete',
-            required=False,
-            )
+        'ProjectManagerAutocomplete',
+        required=False,
+    )
     form_json = forms.CharField(
-            widget=forms.HiddenInput(),
-            initial='[]',
-            )
+        widget=forms.HiddenInput(),
+        initial='[]',
+    )
     data_csv = forms.FileField(
-            label='Data CSV File',
-            required=False,
-            )
+        label='Data CSV File',
+        required=False,
+    )
     doccloud_each_page = forms.BooleanField(
-            label='Split Documents by Page',
-            help_text='Each DocumentCloud URL in the data CSV will be split '
-            'up into one assignment per page',
-            required=False,
-            )
+        label='Split Documents by Page',
+        help_text='Each DocumentCloud URL in the data CSV will be split '
+        'up into one assignment per page',
+        required=False,
+    )
 
     class Meta:
         model = Crowdsource
         fields = (
-                'title',
-                'project',
-                'description',
-                'data_limit',
-                'user_limit',
-                'form_json',
-                'data_csv',
-                'multiple_per_page',
-                'project_only',
-                )
+            'title',
+            'project',
+            'description',
+            'data_limit',
+            'user_limit',
+            'form_json',
+            'data_csv',
+            'multiple_per_page',
+            'project_only',
+        )
 
     def clean_data_csv(self):
         """If there is a data CSV, ensure it has a URL column"""
@@ -99,7 +107,9 @@ class CrowdsourceForm(forms.ModelForm):
             reader = csv.reader(data_csv)
             headers = [h.lower() for h in next(reader)]
             if 'url' not in headers:
-                raise forms.ValidationError('Data CSV should contain a URL column')
+                raise forms.ValidationError(
+                    'Data CSV should contain a URL column'
+                )
             data_csv.seek(0)
         return data_csv
 
@@ -117,10 +127,10 @@ class CrowdsourceForm(forms.ModelForm):
                 match = self.document_url_re.match(url)
                 if doccloud_each_page and match:
                     datum_per_page.delay(
-                            crowdsource.pk,
-                            match.group('doc_id'),
-                            data,
-                            )
+                        crowdsource.pk,
+                        match.group('doc_id'),
+                        data,
+                    )
                 elif url:
                     # skip invalid URLs
                     try:
@@ -129,9 +139,9 @@ class CrowdsourceForm(forms.ModelForm):
                         pass
                     else:
                         crowdsource.data.create(
-                                url=url,
-                                metadata=data,
-                                )
+                            url=url,
+                            metadata=data,
+                        )
 
     def clean_form_json(self):
         """Ensure the form JSON is in the correct format"""
@@ -145,44 +155,52 @@ class CrowdsourceForm(forms.ModelForm):
             raise forms.ValidationError('Invalid form data: Not a list')
         if form_data == []:
             raise forms.ValidationError(
-                    'Having at least one field on the form is required')
+                'Having at least one field on the form is required'
+            )
         for data in form_data:
             label = data.get('label')
             if not label:
                 raise forms.ValidationError('Invalid form data: Missing label')
             required = data.get('required', False)
             if required not in [True, False]:
-                raise forms.ValidationError('Invalid form data: Invalid required')
+                raise forms.ValidationError(
+                    'Invalid form data: Invalid required'
+                )
             type_ = data.get('type')
             if not type_:
                 raise forms.ValidationError(
-                        'Invalid form data: Missing type for {}'.format(label))
+                    'Invalid form data: Missing type for {}'.format(label)
+                )
             if type_ not in FIELD_DICT:
                 raise forms.ValidationError(
-                        'Invalid form data: Bad type {}'.format(type_))
+                    'Invalid form data: Bad type {}'.format(type_)
+                )
             field = FIELD_DICT[type_]
             if field.accepts_choices and 'values' not in data:
                 raise forms.ValidationError(
-                        'Invalid form data: {} requires choices'.format(type_))
+                    'Invalid form data: {} requires choices'.format(type_)
+                )
             if field.accepts_choices and 'values' in data:
                 for value in data['values']:
                     choice_label = value.get('label')
                     if not choice_label:
                         raise forms.ValidationError(
-                                'Invalid form data: Missing label for '
-                                'choice of {}'.format(label))
+                            'Invalid form data: Missing label for '
+                            'choice of {}'.format(label)
+                        )
                     choice_value = value.get('value')
                     if not choice_value:
                         raise forms.ValidationError(
-                                'Invalid form data: Missing value for '
-                                'choice {} of {}'.format(choice_label, label))
+                            'Invalid form data: Missing value for '
+                            'choice {} of {}'.format(choice_label, label)
+                        )
         return form_json
 
 
 CrowdsourceDataFormset = forms.inlineformset_factory(
-        Crowdsource,
-        CrowdsourceData,
-        fields=('url',),
-        extra=1,
-        can_delete=False,
-        )
+    Crowdsource,
+    CrowdsourceData,
+    fields=('url',),
+    extra=1,
+    can_delete=False,
+)

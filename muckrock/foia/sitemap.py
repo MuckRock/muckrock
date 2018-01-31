@@ -2,8 +2,10 @@
 Sitemap for FOIA application
 """
 
+# Django
 from django.contrib.sitemaps import Sitemap
 
+# MuckRock
 from muckrock.foia.models import FOIARequest
 
 
