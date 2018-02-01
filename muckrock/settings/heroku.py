@@ -76,3 +76,5 @@ if 'MEMCACHIER_SERVERS' in os.environ:
             }
         }
     }
+
+CONSTANCE_DATABASE_CACHE_BACKEND = 'default'

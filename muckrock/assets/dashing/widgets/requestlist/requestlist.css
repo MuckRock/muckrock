@@ -1,0 +1,54 @@
+.widget-requestlist>div { 
+    background-color: #12b0c5;
+    display: block;
+}
+
+.widget-requestlist h1 { 
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 2.5em;
+}
+
+.widget-requestlist ol, ul {
+    margin: 0 15px;
+    text-align: left;
+    color: rgba(255, 255, 255, 0.7);
+    display: block;
+}
+
+.widget-requestlist ol {
+    list-style-position: inside;
+}
+
+.widget-requestlist li {
+    margin-bottom: 5px;
+    display: block;
+}
+
+.widget-requestlist .list-nostyle {
+    list-style: none;
+}
+
+.widget-requestlist .label {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 2em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    max-width: 720px;
+}
+
+.widget-requestlist .value {
+    float: right;
+    margin-left: 12px;
+    font-weight: 600;
+    color: $value-color;
+}
+
+.widget-requestlist .updated-at {
+    color: rgba(0, 0, 0, 0.3);
+}
+
+.widget-requestlist .more-info {
+    color: rgba(255, 255, 255, 0.7);
+}

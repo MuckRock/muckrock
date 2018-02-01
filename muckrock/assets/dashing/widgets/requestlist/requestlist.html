@@ -1,0 +1,11 @@
+<div>
+    <h1>{ title }</h1>
+    <ul>
+      <li rv-each-item="data">
+        <span class="label">{ item.label }</span>
+        <span class="value">{ item.value }</span>
+      </li>
+    </ul>
+    <p class="more-info" rv-show="moreInfo">{ moreInfo }</p>
+    <p class="updated-at" rv-show="updatedAt">{ updatedAt }</p>
+</div>

@@ -13,9 +13,9 @@ django-adaptors # Used for model import
 django-celery # Integrate celery with django
 django-celery-email<2.0 # Send emails asynchronously using Celery
 django-compressor # Compress all JS and CSS assets into a single file
+django-constance[database] # Use for dynamic settings
 django-cors-headers # Allows access to API endpoints from non-MuckRock domains
 django-dashing # Used to create the dashboard
-django-dbsettings # DB stored configurations
 django-debug-toolbar # Toolbar for debugging
 django-email-bandit # Used to hijack emails in a staging setting
 django-filter # Used for filtering in viewsets
@@ -46,6 +46,7 @@ easy-thumbnails # Used for thumbnailing images
 fpdf # Used to generate PDFs
 furl # Used to manipulate urls
 fuzzywuzzy # fuzzy string matching for FM agency import
+google-api-python-client # Google analytics
 gunicorn # Python WSGI app server
 image-diet2 # Used to compress images on upload
 jsonfield # Used for storing JSON data, required by django-geojson
