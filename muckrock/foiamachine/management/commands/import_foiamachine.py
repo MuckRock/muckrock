@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 # Django
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -29,8 +31,6 @@ from muckrock.foiamachine.models import (
     FoiaMachineRequest,
 )
 from muckrock.jurisdiction.models import Jurisdiction
-
-# pylint: disable-all
 
 CSV_OPTS = {
     'doublequote': False,

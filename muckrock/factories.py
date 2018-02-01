@@ -177,6 +177,8 @@ class AppealAgencyFactory(AgencyFactory):
 class FOIARequestFactory(factory.django.DjangoModelFactory):
     """A factory for creating FOIARequest test objects."""
 
+    # pylint: disable=too-many-instance-attributes
+
     class Meta:
         model = FOIARequest
 
