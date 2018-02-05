@@ -14,9 +14,9 @@ from calendar import monthrange
 from datetime import date
 
 # Third Party
-from apiclient.discovery import build
 from boto.s3.connection import S3Connection
 from dashing.widgets import GraphWidget, ListWidget, NumberWidget, Widget
+from googleapiclient.discovery import build
 from oauth2client.service_account import ServiceAccountCredentials
 from smart_open import smart_open
 
