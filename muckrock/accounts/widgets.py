@@ -409,9 +409,12 @@ class PageCountWidget(CompareNumberWidget):
 class RegisteredUsersWidget(GoalCompareNumberWidget):
     """Show month over month registered user rate growth"""
     title = 'New Registered Users'
-    goal_initial = config.NEW_USER_GOAL_INIT
-    goal_growth = config.NEW_USER_GOAL_GROWTH
-    goal_start = config.NEW_USER_START_DATE
+
+    def __init__(self, *args, **kwargs):
+        super(RegisteredUsersWidget, self).__init__(*args, **kwargs)
+        self.goal_initial = config.NEW_USER_GOAL_INIT
+        self.goal_growth = config.NEW_USER_GOAL_GROWTH
+        self.goal_start = config.NEW_USER_START_DATE
 
     def get_value(self):
         """Get how many new users have registered this month"""
@@ -425,9 +428,12 @@ class RegisteredUsersWidget(GoalCompareNumberWidget):
 class PageViewsWidget(NumberWidget):
     """Show page view data"""
     title = 'Page Views'
-    goal_initial = config.PAGE_VIEWS_GOAL_INIT
-    goal_growth = config.PAGE_VIEWS_GOAL_GROWTH
-    goal_start = config.PAGE_VIEWS_START_DATE
+
+    def __init__(self, *args, **kwargs):
+        super(PageViewsWidget, self).__init__(*args, **kwargs)
+        self.goal_initial = config.PAGE_VIEWS_GOAL_INIT
+        self.goal_growth = config.PAGE_VIEWS_GOAL_GROWTH
+        self.goal_start = config.PAGE_VIEWS_START_DATE
 
     def get_value(self):
         """Get the page views so far for this month"""
