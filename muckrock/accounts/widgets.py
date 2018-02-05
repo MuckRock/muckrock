@@ -514,25 +514,28 @@ class TopWidget(Widget):
     """Top level widget
     This allows all widgets to be updated with only one HTTP request
     """
-    widgets = [
-        ProcessingCountWidget(),
-        OldestProcessingWidget(),
-        ProcessingGraphWidget(),
-        FlagCountWidget(),
-        OldestFlagWidget(),
-        FlagGraphWidget(),
-        ProUserCountWidget(),
-        OrgUserCountWidget(),
-        RecentRequestsWidget(),
-        RegisteredUsersWidget(),
-        ReviewAgencyGraphWidget(),
-        RequestsFiledGraphWidget(),
-        RequestsSuccessWidget(),
-        CrowdsourceRespondedUsersGraphWidget(),
-        CrowdsourceResponsesGraphWidget(),
-        PageViewsWidget(),
-        ProjectCountWidget(),
-    ]
+
+    def __init__(self, *args, **kwargs):
+        super(TopWidget, self).__init__(*args, **kwargs)
+        self.widgets = [
+            ProcessingCountWidget(),
+            OldestProcessingWidget(),
+            ProcessingGraphWidget(),
+            FlagCountWidget(),
+            OldestFlagWidget(),
+            FlagGraphWidget(),
+            ProUserCountWidget(),
+            OrgUserCountWidget(),
+            RecentRequestsWidget(),
+            RegisteredUsersWidget(),
+            ReviewAgencyGraphWidget(),
+            RequestsFiledGraphWidget(),
+            RequestsSuccessWidget(),
+            CrowdsourceRespondedUsersGraphWidget(),
+            CrowdsourceResponsesGraphWidget(),
+            PageViewsWidget(),
+            ProjectCountWidget(),
+        ]
 
     def get_context(self):
         """Return data for all widgets"""
