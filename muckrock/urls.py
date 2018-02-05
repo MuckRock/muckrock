@@ -11,7 +11,6 @@ from django.views import static
 from django.views.generic.base import RedirectView, TemplateView
 
 # Third Party
-import dbsettings.urls
 import debug_toolbar
 from dashing.utils import router as dashing_router
 from rest_framework.authtoken.views import obtain_auth_token
@@ -122,7 +121,6 @@ urlpatterns = [
     url(r'^fine-uploader/', include('muckrock.fine_uploader.urls')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^search/$', views.SearchView.as_view(), name='search'),
-    url(r'^settings/', include(dbsettings.urls)),
     url(r'^api_v1/', include(router.urls)),
     url(r'^api_v1/token-auth/', obtain_auth_token, name='api-token-auth'),
     url(r'^autocomplete/', include('autocomplete_light.urls')),

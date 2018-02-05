@@ -8,6 +8,8 @@ from django.core.urlresolvers import reverse
 # Standard Library
 import os
 import urlparse
+from collections import OrderedDict
+from datetime import date
 
 # Third Party
 import djcelery
@@ -190,7 +192,6 @@ INSTALLED_APPS = (
     'djgeojson',
     'easy_thumbnails',
     'gunicorn',
-    'dbsettings',
     'leaflet',
     'localflavor',
     'mathfilters',
@@ -214,6 +215,8 @@ INSTALLED_APPS = (
     'django_filters',
     'opensearch',
     'dashing',
+    'constance',
+    'constance.backends.database',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
@@ -616,6 +619,61 @@ FONT_PATH = '/usr/share/fonts/truetype/dejavu/'
 CHECK_EMAIL = os.environ.get('CHECK_EMAIL', '')
 
 DASHING = {
-    'INSTALLED_WIDGETS': ('number', 'list', 'graph', 'clock', 'knob'),
+    'INSTALLED_WIDGETS': ('number', 'list', 'graph', 'requestlist'),
     'PERMISSION_CLASSES': ('dashing.permissions.IsAdminUser',)
 }
+
+CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+CONSTANCE_CONFIG = OrderedDict([
+    ('ENABLE_FOLLOWUP', (True, 'Enable automated followups')),
+    (
+        'ENABLE_WEEKEND_FOLLOWUP',
+        (False, 'Enable automated followups during weekends')
+    ),
+    (
+        'ENABLE_ML',
+        (True, 'Automatically resolve response tasks by machine learning')
+    ),
+    (
+        'CONFIDENCE_MIN',
+        (70, 'Minimum percent confidence level to automatically resolve')
+    ),
+    (
+        'NEW_USER_GOAL_INIT',
+        (0, 'Initial goal for monthly new user registration')
+    ),
+    (
+        'NEW_USER_GOAL_GROWTH',
+        (1.07, 'Expected monthly growth rate for new user registration')
+    ),
+    (
+        'NEW_USER_START_DATE', (
+            date(2018, 1, 1),
+            'Month that the initial new user registration goal applies to'
+        )
+    ),
+    ('PAGE_VIEWS_GOAL_INIT', (0, 'Initial goal for monthly page views')),
+    (
+        'PAGE_VIEWS_GOAL_GROWTH',
+        (1.07, 'Expected monthly growth rate for page views')
+    ),
+    (
+        'PAGE_VIEWS_START_DATE',
+        (date(2018, 1, 1), 'Month that the initial page views goal applies to')
+    ),
+])
+CONSTANCE_CONFIG_FIELDSETS = {
+    'FOIA Options': ('ENABLE_FOLLOWUP', 'ENABLE_WEEKEND_FOLLOWUP'),
+    'Machine Learning Options': ('ENABLE_ML', 'CONFIDENCE_MIN'),
+    'Dashboard Options': (
+        'NEW_USER_GOAL_INIT',
+        'NEW_USER_GOAL_GROWTH',
+        'NEW_USER_START_DATE',
+        'PAGE_VIEWS_GOAL_INIT',
+        'PAGE_VIEWS_GOAL_GROWTH',
+        'PAGE_VIEWS_START_DATE',
+    )
+}
+
+# for google analytics
+VIEW_ID = os.environ.get('VIEW_ID', '')

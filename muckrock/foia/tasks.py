@@ -27,11 +27,11 @@ from random import randint
 from urllib import quote_plus
 
 # Third Party
-import dbsettings
 import dill as pickle
 import numpy as np
 import requests
 from boto.s3.connection import S3Connection
+from constance import config
 from django_mailgun import MailgunAPIError
 from phaxio import PhaxioApi
 from phaxio.exceptions import PhaxioError
@@ -64,32 +64,6 @@ logger = logging.getLogger(__name__)
 client = Client(os.environ.get('SENTRY_DSN'))
 register_logger_signal(client)
 register_signal(client)
-
-
-class FOIAOptions(dbsettings.Group):
-    """DB settings for the FOIA app"""
-    enable_followup = dbsettings.BooleanValue(
-        'whether to send automated followups or not'
-    )
-    enable_weekend_followup = dbsettings.BooleanValue(
-        'whether to send automated followups or not on the weekends'
-    )
-
-
-foia_options = FOIAOptions()
-
-
-class MLOptions(dbsettings.Group):
-    """DB settings for the machine learning"""
-    enable = dbsettings.BooleanValue(
-        'automatically resolve response tasks by machine learning'
-    )
-    confidence_min = dbsettings.PositiveIntegerValue(
-        'minimum percent confidence level to automatically resolve'
-    )
-
-
-ml_options = MLOptions()
 
 
 def authenticate_documentcloud(request):
@@ -166,7 +140,7 @@ def upload_document_cloud(doc_pk, change, **kwargs):
             set_document_cloud_pages.apply_async(args=[doc.pk], countdown=1800)
     except (urllib2.URLError, urllib2.HTTPError) as exc:
         logger.warn('Upload Doc Cloud error: %s %s', url, doc.pk)
-        countdown = ((2**upload_document_cloud.request.retries) * 300 +
+        countdown = ((2 ** upload_document_cloud.request.retries) * 300 +
                      randint(0, 300))
         upload_document_cloud.retry(
             args=[doc.pk, change],
@@ -324,8 +298,8 @@ def classify_status(task_pk, **kwargs):
     def resolve_if_possible(resp_task):
         """Resolve this response task if possible based off of ML setttings"""
         if (
-            ml_options.enable
-            and resp_task.status_probability >= ml_options.confidence_min
+            config.ENABLE_ML
+            and resp_task.status_probability >= config.CONFIDENCE_MIN
         ):
             try:
                 ml_robot = User.objects.get(username='mlrobot')
@@ -471,8 +445,8 @@ def followup_requests():
     # weekday returns 5 for sat and 6 for sun
     is_weekday = datetime.today().weekday() < 5
     if (
-        foia_options.enable_followup
-        and (foia_options.enable_weekend_followup or is_weekday)
+        config.ENABLE_FOLLOWUP
+        and (config.ENABLE_WEEKEND_FOLLOWUP or is_weekday)
     ):
         try:
             num_requests = FOIARequest.objects.get_followup().count()

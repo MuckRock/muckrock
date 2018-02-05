@@ -6,6 +6,7 @@ var dashboardSet = new DashboardSet({
 
 var dashboardPF = dashboardSet.addDashboard('Processing/Flags');
 var dashboardUser = dashboardSet.addDashboard('User');
+var dashboardRequest = dashboardSet.addDashboard('Request');
 var interval = 1000 * 60 * 5;
 var topData = {};
 
@@ -62,27 +63,51 @@ dashboardPF.addWidget('oldest_flag_widget', 'List', {
     row: 1,
     interval: interval
 });
-dashboardUser.addWidget('pro_user_graph_widget', 'Graph', {
-    getData: getData('ProUserGraphWidget'),
-    interval: interval
-});
-dashboardUser.addWidget('recent_requests_widget', 'List', {
-    getData: getData('RecentRequestsWidget'),
+
+dashboardUser.addWidget('crowdsource_responded_users_graph_widget', 'Graph', {
+    getData: getData('CrowdsourceRespondedUsersGraphWidget'),
     interval: interval
 });
 dashboardUser.addWidget('pro_user_count_widget', 'Number', {
     getData: getData('ProUserCountWidget'),
     interval: interval
 });
-dashboardUser.addWidget('requests_filed_widget', 'Number', {
-    getData: getData('RequestsFiledWidget'),
-    interval: interval
-});
-dashboardUser.addWidget('page_count_widget', 'Number', {
-    getData: getData('PageCountWidget'),
-    interval: interval
-});
 dashboardUser.addWidget('org_user_count_widget', 'Number', {
     getData: getData('OrgUserCountWidget'),
+    interval: interval
+});
+dashboardUser.addWidget('registered_users_widget', 'Number', {
+    getData: getData('RegisteredUsersWidget'),
+    interval: interval
+});
+dashboardUser.addWidget('page_views_widget', 'Number', {
+    getData: getData('PageViewsWidget'),
+    interval: interval
+});
+dashboardUser.addWidget('crowdsource_responses_graph_widget', 'Graph', {
+    getData: getData('CrowdsourceResponsesGraphWidget'),
+    interval: interval
+});
+
+dashboardRequest.addWidget('recent_requests_widget', 'RequestList', {
+    getData: getData('RecentRequestsWidget'),
+    col: 2,
+    row: 1,
+    interval: interval
+});
+dashboardRequest.addWidget('review_agency_graph_widget', 'Graph', {
+    getData: getData('ReviewAgencyGraphWidget'),
+    interval: interval
+});
+dashboardRequest.addWidget('requests_filed_graph_widget', 'Graph', {
+    getData: getData('RequestsFiledGraphWidget'),
+    interval: interval
+});
+dashboardRequest.addWidget('requests_success_widget', 'Number', {
+    getData: getData('RequestsSuccessWidget'),
+    interval: interval
+});
+dashboardRequest.addWidget('project_count_widget', 'Number', {
+    getData: getData('ProjectCountWidget'),
     interval: interval
 });

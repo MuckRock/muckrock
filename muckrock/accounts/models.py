@@ -15,7 +15,6 @@ from datetime import date, datetime
 from urllib import urlencode
 
 # Third Party
-import dbsettings
 import stripe
 from actstream.models import Action
 from easy_thumbnails.fields import ThumbnailerImageField
@@ -28,19 +27,10 @@ from muckrock.utils import (
     get_image_storage,
     stripe_retry_on_error,
 )
-from muckrock.values import TextValue
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
 stripe.api_version = '2015-10-16'
-
-
-class EmailOptions(dbsettings.Group):
-    """DB settings for sending email"""
-    email_footer = TextValue('email footer')
-
-
-options = EmailOptions()
 
 ACCT_TYPES = [
     ('admin', 'Admin'),

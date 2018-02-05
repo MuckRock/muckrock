@@ -3,19 +3,31 @@ Dashing widgets for the dashboard
 """
 
 # Django
-from django.db.models import F, Sum
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.db.models import Count, F, Sum
 from django.db.models.functions import ExtractDay, Now
 
 # Standard Library
+import json
+from calendar import monthrange
 from datetime import date
 
 # Third Party
+from apiclient.discovery import build
+from boto.s3.connection import S3Connection
+from constance import config
 from dashing.widgets import GraphWidget, ListWidget, NumberWidget, Widget
+from oauth2client.service_account import ServiceAccountCredentials
+from smart_open import smart_open
 
 # MuckRock
 from muckrock.accounts.models import Profile, Statistics
+from muckrock.crowdsource.models import CrowdsourceResponse
 from muckrock.foia.models import FOIAFile, FOIARequest
-from muckrock.task.models import FlaggedTask
+from muckrock.project.models import Project
+from muckrock.task.models import FlaggedTask, ReviewAgencyTask
+from muckrock.utils import cache_get_or_set
 
 RED = '#dc5945'
 GREEN = '#96bf48'
@@ -26,12 +38,18 @@ BLUE = '#12b0c5'
 
 class CompareNumberWidget(NumberWidget):
     """A number widget which compares to a previous value"""
+    percent = False
 
     def get_context(self):
         """Get data to pass to javascript"""
         value = self.get_value()
         previous = self.get_previous_value()
         delta = value - previous
+        if self.percent and previous != 0:
+            delta = (100 * delta) / previous
+            delta = u'{}%'.format(delta)
+        else:
+            delta = u'{:,}'.format(delta)
         comp = cmp(value, previous)
         if comp == 0:
             color = BLUE
@@ -49,12 +67,34 @@ class CompareNumberWidget(NumberWidget):
 
         return {
             'value': u'{:,}'.format(value),
-            'detail': u'{:+,}'.format(delta),
+            'detail': delta,
             'color': color,
             'icon': icon,
             'title': self.get_title(),
             'moreInfo': self.get_more_info(),
         }
+
+
+class GoalCompareNumberWidget(CompareNumberWidget):
+    """A number widget based on a goal that grows month over month"""
+    direction = 1
+
+    def get_previous_value(self):
+        """Calculate the goal for this point of the month"""
+        today = date.today()
+        _, days = monthrange(today.year, today.month)
+        return int(round(self._goal() * (float(today.day) / days)))
+
+    def get_more_info(self):
+        """Show the goal"""
+        return '{:,} monthly goal'.format(self._goal())
+
+    def _goal(self):
+        """Calculate the goal for the month"""
+        today = date.today()
+        num_months = ((today.year - self.goal_start.year) * 12 +
+                      (today.month - self.goal_start.month))
+        return int(self.goal_initial * (self.goal_growth ** num_months))
 
 
 class StatGraphWidget(GraphWidget):
@@ -152,7 +192,9 @@ class FlagCountWidget(CompareNumberWidget):
 
     def get_value(self):
         """Get value"""
-        return FlaggedTask.objects.filter(resolved=False).count()
+        return (
+            FlaggedTask.objects.filter(resolved=False).get_undeferred().count()
+        )
 
     def get_previous_value(self):
         """Get previous value"""
@@ -164,9 +206,9 @@ class OldestFlagWidget(ListWidget):
     title = 'Oldest Flags'
 
     def get_data(self):
-        """Get the oldest processing requests"""
+        """Get the oldest flag tasks"""
         tasks = (
-            FlaggedTask.objects.filter(resolved=False)
+            FlaggedTask.objects.filter(resolved=False).get_undeferred()
             .annotate(days=ExtractDay(Now() - F('date_created')))
             .order_by('-days').values('text', 'days')[:5]
         )
@@ -199,6 +241,68 @@ class ProUserGraphWidget(StatGraphWidget):
         return Profile.objects.filter(acct_type='pro').count()
 
 
+class ReviewAgencyGraphWidget(StatGraphWidget):
+    """Graph of review agency tasks"""
+    title = 'Review Agency Tasks'
+    stat = 'total_unresolved_reviewagency_tasks'
+
+    def get_value(self):
+        """Get value"""
+        return (
+            ReviewAgencyTask.objects.filter(resolved=False)
+            .get_undeferred().count()
+        )
+
+
+class RequestsFiledGraphWidget(GraphWidget):
+    """Graph of requests filed"""
+    title = 'Daily Requests Filed'
+    days = 30
+
+    def get_value(self):
+        """Get value"""
+        return FOIARequest.objects.filter(date_submitted=date.today()).count()
+
+    def get_data(self):
+        """Get graph data"""
+        stats = Statistics.objects.all()[:self.days:-1]
+        return [{
+            'x':
+                i,
+            'y':
+                sum([
+                    stat.daily_requests_pro,
+                    stat.daily_requests_basic,
+                    stat.daily_requests_beta,
+                    stat.daily_requests_proxy,
+                    stat.daily_requests_admin,
+                    stat.daily_requests_org,
+                ])
+        } for i, stat in enumerate(stats)]
+
+
+class CrowdsourceRespondedUsersGraphWidget(StatGraphWidget):
+    """Graph of how many users have responded to any crowdsource"""
+    title = 'Users Who Completed an Assignment'
+    stat = 'num_crowdsource_responded_users'
+
+    def get_value(self):
+        """Get value"""
+        return CrowdsourceResponse.objects.aggregate(
+            Count('user', distinct=True)
+        )['user__count']
+
+
+class CrowdsourceResponsesGraphWidget(StatGraphWidget):
+    """Graph of total crowdsource responses"""
+    title = 'Total Completed Assignments'
+    stat = 'total_crowdsource_responses'
+
+    def get_value(self):
+        """Get value"""
+        return CrowdsourceResponse.objects.count()
+
+
 class RequestsFiledWidget(CompareNumberWidget):
     """Number of requests filed today"""
     title = 'Requests Filed Today'
@@ -219,6 +323,20 @@ class RequestsFiledWidget(CompareNumberWidget):
             stat.daily_requests_admin,
             stat.daily_requests_org,
         ])
+
+
+class RequestsSuccessWidget(CompareNumberWidget):
+    """Number of total succesful requests"""
+    title = 'Total Succesful Requests'
+    direction = 1
+
+    def get_value(self):
+        """Get value"""
+        return FOIARequest.objects.filter(status='done').count()
+
+    def get_previous_value(self):
+        """Get previous value"""
+        return Statistics.objects.latest('date').total_requests_success
 
 
 class ProUserCountWidget(CompareNumberWidget):
@@ -268,13 +386,10 @@ class RecentRequestsWidget(ListWidget):
         """Get the oldest processing requests"""
         requests = (
             FOIARequest.objects.get_submitted().get_public()
-            .order_by('-date_submitted').values('title')[:15]
+            .exclude(date_submitted=None).order_by('-date_submitted')
+            .values('title')[:4]
         )
-        return [{
-            'label':
-                r['title']
-                if len(r['title']) < 32 else u'{}...'.format(r['title'][:32]),
-        } for r in requests]
+        return [{'label': r['title']} for r in requests]
 
 
 class PageCountWidget(CompareNumberWidget):
@@ -291,6 +406,101 @@ class PageCountWidget(CompareNumberWidget):
         return Statistics.objects.latest('date').total_pages
 
 
+class RegisteredUsersWidget(GoalCompareNumberWidget):
+    """Show month over month registered user rate growth"""
+    title = 'New Registered Users'
+    goal_initial = config.NEW_USER_GOAL_INIT
+    goal_growth = config.NEW_USER_GOAL_GROWTH
+    goal_start = config.NEW_USER_START_DATE
+
+    def get_value(self):
+        """Get how many new users have registered this month"""
+        month_start = date.today().replace(day=1)
+        return (
+            User.objects.filter(date_joined__gte=month_start)
+            .exclude(profile__acct_type='agency').count()
+        )
+
+
+class PageViewsWidget(NumberWidget):
+    """Show page view data"""
+    title = 'Page Views'
+    goal_initial = config.PAGE_VIEWS_GOAL_INIT
+    goal_growth = config.PAGE_VIEWS_GOAL_GROWTH
+    goal_start = config.PAGE_VIEWS_START_DATE
+
+    def get_value(self):
+        """Get the page views so far for this month"""
+
+        def inner():
+            """Inner function for caching"""
+            month_start = date.today().replace(day=1)
+
+            # initalize google analytics api
+            # we store the keyfile on s3
+            conn = S3Connection(
+                settings.AWS_ACCESS_KEY_ID,
+                settings.AWS_SECRET_ACCESS_KEY,
+            )
+            bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
+            key = bucket.get_key('google/analytics_key.json')
+            with smart_open(key) as key_file:
+                credentials = ServiceAccountCredentials.from_json_keyfile_dict(
+                    json.loads(key_file.read()),
+                    ['https://www.googleapis.com/auth/analytics.readonly'],
+                )
+            analytics = build(
+                'analyticsreporting',
+                'v4',
+                credentials=credentials,
+                cache_discovery=False,
+            )
+            response = analytics.reports().batchGet(
+                body={
+                    'reportRequests': [{
+                        'viewId':
+                            settings.VIEW_ID,
+                        'dateRanges': [{
+                            'startDate': month_start.isoformat(),
+                            'endDate': 'today',
+                        }],
+                        'metrics': [{
+                            'expression': 'ga:pageviews'
+                        }],
+                    }]
+                }
+            ).execute()
+            # google really buries the useful data in the response
+            # remove format if we want to go back to a comparison
+            return '{:,}'.format(
+                int(
+                    response['reports'][0]['data']['rows'][0]['metrics'][0]
+                    ['values'][0]
+                )
+            )
+
+        return cache_get_or_set('dashboard:pageviews', inner, 60 * 5)
+
+
+class ProjectCountWidget(NumberWidget):
+    """Show quarterly project count"""
+    title = 'Quarterly Projects'
+
+    def get_value(self):
+        """Projects since the beginning of the quarter"""
+        today = date.today()
+        month = today.month
+        quarter_month = month - (month - 1) % 3
+        quarter_start = today.replace(month=quarter_month, day=1)
+        return Project.objects.filter(
+            approved=True, date_created__gte=quarter_start
+        ).count()
+
+    def get_detail(self):
+        """Total approved projects"""
+        return 'Total: {:,}'.format(Project.objects.count())
+
+
 # Top level widget to pull them all together into one request
 
 
@@ -305,12 +515,17 @@ class TopWidget(Widget):
         FlagCountWidget(),
         OldestFlagWidget(),
         FlagGraphWidget(),
-        ProUserGraphWidget(),
-        RequestsFiledWidget(),
         ProUserCountWidget(),
         OrgUserCountWidget(),
         RecentRequestsWidget(),
-        PageCountWidget(),
+        RegisteredUsersWidget(),
+        ReviewAgencyGraphWidget(),
+        RequestsFiledGraphWidget(),
+        RequestsSuccessWidget(),
+        CrowdsourceRespondedUsersGraphWidget(),
+        CrowdsourceResponsesGraphWidget(),
+        PageViewsWidget(),
+        ProjectCountWidget(),
     ]
 
     def get_context(self):
