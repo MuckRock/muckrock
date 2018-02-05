@@ -544,7 +544,7 @@ class FOIARequest(models.Model):
         uid = int(
             md5(self.title.encode('utf8') + datetime.now().isoformat())
             .hexdigest(), 16
-        ) % 10**8
+        ) % 10 ** 8
         mail_id = '%s-%08d' % (self.pk, uid)
         cursor = connection.cursor()
         cursor.execute(
@@ -931,7 +931,7 @@ class FOIARequest(models.Model):
         if error_count > 0:
             # after the first error, wait for 3 hours,
             # then double the time for every additional error
-            countdown = 60 * 60 * 3 * (2**(error_count - 1))
+            countdown = 60 * 60 * 3 * (2 ** (error_count - 1))
         else:
             countdown = 0
 
