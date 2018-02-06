@@ -13,6 +13,7 @@ from autocomplete_light import shortcuts as autocomplete_light
 # MuckRock
 from muckrock.agency.models import Agency
 from muckrock.filters import BLANK_STATUS, BOOLEAN_CHOICES, RangeWidget
+from muckrock.foia.filters import JurisdictionFilterSet
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.portal.models import PORTAL_TYPES
 from muckrock.task.models import (
@@ -158,28 +159,21 @@ class FlaggedTaskFilterSet(TaskFilterSet):
         fields = ['user', 'resolved', 'resolved_by']
 
 
-class StaleAgencyTaskFilterSet(TaskFilterSet):
+class StaleAgencyTaskFilterSet(JurisdictionFilterSet, TaskFilterSet):
     """Allows a stale agency task to be filtered by jurisdiction."""
-    jurisdiction = django_filters.ModelMultipleChoiceFilter(
-        name='agency__jurisdiction',
-        queryset=Jurisdiction.objects.filter(hidden=False),
-        widget=autocomplete_light.
-        MultipleChoiceWidget('JurisdictionAutocomplete')
-    )
+
+    jurisdiction_field = 'agency__jurisdiction'
 
     class Meta:
         model = StaleAgencyTask
         fields = ['jurisdiction', 'resolved', 'resolved_by']
 
 
-class ReviewAgencyTaskFilterSet(TaskFilterSet):
+class ReviewAgencyTaskFilterSet(JurisdictionFilterSet, TaskFilterSet):
     """Allows a review agency task to be filtered by jurisdiction."""
-    jurisdiction = django_filters.ModelMultipleChoiceFilter(
-        name='agency__jurisdiction',
-        queryset=Jurisdiction.objects.filter(hidden=False),
-        widget=autocomplete_light.
-        MultipleChoiceWidget('JurisdictionAutocomplete')
-    )
+
+    jurisdiction_field = 'agency__jurisdiction'
+
     agency = django_filters.ModelMultipleChoiceFilter(
         name='agency',
         queryset=Agency.objects.exclude(reviewagencytask=None),
