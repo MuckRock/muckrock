@@ -22,14 +22,16 @@ from muckrock.project.models import Project
 from muckrock.tags.models import Tag
 
 
-class JurisdictionFilterMixIn(django_filters.FilterSet):
+class JurisdictionFilterSet(django_filters.FilterSet):
     """Mix in for including state inclusive jurisdiction filter"""
     jurisdiction = django_filters.CharFilter(
         widget=autocomplete_light.
         MultipleChoiceWidget('JurisdictionStateInclusiveAutocomplete'),
         method='filter_jurisdiction',
+        label='Jurisdiction',
     )
     value_format = re.compile(r'\d+-(True|False)')
+    jurisdiction_field = 'jurisdiction'
 
     def filter_jurisdiction(self, queryset, name, value):
         """Filter jurisdction, allowing for state inclusive searches"""
@@ -41,13 +43,17 @@ class JurisdictionFilterMixIn(django_filters.FilterSet):
                 continue
             pk, include_local = value.split('-')
             include_local = include_local == 'True'
-            query |= Q(jurisdiction__pk=pk)
+            query |= Q(**{'{}__pk'.format(self.jurisdiction_field): pk})
             if include_local:
-                query |= Q(jurisdiction__parent__pk=pk)
+                query |= Q(
+                    **{
+                        '{}__parent__pk'.format(self.jurisdiction_field): pk
+                    }
+                )
         return queryset.filter(query)
 
 
-class FOIARequestFilterSet(JurisdictionFilterMixIn, django_filters.FilterSet):
+class FOIARequestFilterSet(JurisdictionFilterSet):
     """Allows filtering a request by status, agency, jurisdiction, user, or tags."""
     status = django_filters.ChoiceFilter(choices=BLANK_STATUS)
     user = django_filters.ModelMultipleChoiceFilter(
@@ -103,7 +109,7 @@ class FOIARequestFilterSet(JurisdictionFilterMixIn, django_filters.FilterSet):
         fields = ['status', 'user', 'agency', 'jurisdiction', 'projects']
 
 
-class MyFOIARequestFilterSet(JurisdictionFilterMixIn, django_filters.FilterSet):
+class MyFOIARequestFilterSet(JurisdictionFilterSet):
     """Allows filtering a request by status, agency, jurisdiction, or tags."""
     status = django_filters.ChoiceFilter(choices=BLANK_STATUS)
     agency = django_filters.ModelMultipleChoiceFilter(
@@ -159,9 +165,7 @@ class MyFOIAMultiRequestFilterSet(django_filters.FilterSet):
         fields = ['status']
 
 
-class ProcessingFOIARequestFilterSet(
-    JurisdictionFilterMixIn, django_filters.FilterSet
-):
+class ProcessingFOIARequestFilterSet(JurisdictionFilterSet):
     """Allows filtering a request by user, agency, jurisdiction, or tags."""
     user = django_filters.ModelMultipleChoiceFilter(
         queryset=User.objects.all(),
