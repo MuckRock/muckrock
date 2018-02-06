@@ -1,0 +1,78 @@
+{% extends 'base_detail.html' %}
+
+{% block title %}{{ phone_number.number.as_national }}{% endblock title %}
+
+{% block header %}
+  <h1>{{ phone_number.number.as_national }}</h1>
+  <dl>
+    <dt>Status</dt>
+    <dd>{{ phone_number.get_status_display }}</dd>
+  </dl>
+{% endblock header %}
+
+{% block main %}
+  <div class="communication-detail">
+    {% for fax in faxes %}
+      <div class="collapsable textbox collapsed">
+        <header class="textbox__header{% if fax.errors.all %} error{% endif %}">
+          <p>{{ fax.communication.subject }}</p>
+        </header>
+        <section class="textbox__section subheader">
+          <p><a href="{{ fax.communication.get_absolute_url }}">{{ fax.communication.foia.title }}</a></p>
+        </section>
+        <table>
+          <thead>
+            <tr>
+              <th>Sent At</th>
+              <th>Confirmed At</th>
+              <th>To</th>
+              <th>Phaxio ID</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                {{ fax.sent_datetime|date:"Y-m-d" }}
+                {{ fax.sent_datetime|time:"H:i" }}
+              </td>
+              <td>
+                {{ fax.confirmed_datetime|date:"Y-m-d" }}
+                {{ fax.confirmed_datetime|time:"H:i" }}
+              </td>
+              <td><a href="{{ fax.to_number.get_absolute_url }}">{{ fax.to_number }}</a></td>
+              <td><a href="https://console.phaxio.com/faxes/{{ fax.fax_id }}">{{ fax.fax_id }}</a></td>
+            </tr>
+          </tbody>
+        </table>
+        {% if fax.errors.all %}
+          <div class="collapsable collapsed errors">
+            <header>Errors ({{fax.errors.all|length}})</header>
+            <table>
+              <thead>
+                <tr>
+                  <th>Date Time</th>
+                  <th>Recipient</th>
+                  <th>Type</th>
+                  <th>Code</th>
+                  <th>ID</th>
+                </tr>
+              </thead>
+              {% for error in fax.errors.all %}
+                <tr>
+                  <td>
+                    {{ error.datetime|date:"Y-m-d" }}
+                    {{ error.datetime|time:"H:i" }}
+                  </td>
+                  <td><a href="{{ error.recipient.get_absolute_url }}">{{ error.recipient }}</a></td>
+                  <td>{{ error.error_type }}</td>
+                  <td>{{ error.error_code }}</td>
+                  <td>{{ error.error_id }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+{% endblock main %}

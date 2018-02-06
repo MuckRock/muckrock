@@ -1,0 +1,133 @@
+{% extends 'base_detail.html' %}
+
+{% block title %}{{ email_address.email }}{% endblock title %}
+
+{% block header %}
+  <h1>{{ email_address.email }}</h1>
+  {% if email_address.name %}
+    <h2>{{ email_address.name }}</h2>
+  {% endif %}
+  <dl>
+    <dt>Status</dt>
+    <dd>{{ email_address.get_status_display }}</dd>
+  </dl>
+{% endblock header %}
+
+{% block main %}
+  <div class="communication-detail">
+    {% for email in emails %}
+      <div class="collapsable textbox collapsed">
+        <header class="textbox__header{% if email.errors.all %} error{% endif %}">
+          <p>{{ email.communication.subject }}</p>
+        </header>
+        <section class="textbox__section subheader">
+          <p><a href="{{ email.communication.get_absolute_url }}">{{ email.communication.foia.title }}</a></p>
+        </section>
+        <table>
+          <thead>
+            <tr>
+              <th>Sent At</th>
+              <th>Confirmed At</th>
+              <th>From</th>
+              <th>To</th>
+              <th>CC</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                {{ email.sent_datetime|date:"Y-m-d" }}
+                {{ email.sent_datetime|time:"H:i" }}
+              </td>
+              <td>
+                {{ email.confirmed_datetime|date:"Y-m-d" }}
+                {{ email.confirmed_datetime|time:"H:i" }}
+              </td>
+              <td><a href="{{ email.from_email.get_absolute_url }}">{{ email.from_email }}</a></td>
+              <td>
+                {% for e in email.to_emails.all %}
+                  <a href="{{ e.get_absolute_url }}">{{ e }}</a>{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+              </td>
+              <td>
+                {% for e in email.cc_emails.all %}
+                  <a href="{{ e.get_absolute_url }}">{{ e }}</a>{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+                </td>
+            </tr>
+          </tbody>
+        </table>
+        {% if email.opens.all %}
+          <div class="collapsable collapsed opens">
+            <header>Opens ({{email.opens.all|length}})</header>
+            <table>
+              <thead>
+                <tr>
+                  <th>Date Time</th>
+                  <th>Recipient</th>
+                  <th>City</th>
+                  <th>Region</th>
+                  <th>Country</th>
+                  <th>Client Type</th>
+                  <th>Client Name</th>
+                  <th>Client OS</th>
+                  <th>Device Type</th>
+                  <th>User Agent</th>
+                  <th>IP Address</th>
+                </tr>
+              </thead>
+              {% for open in email.opens.all %}
+                <tr>
+                  <td>
+                    {{ open.datetime|date:"Y-m-d" }}
+                    {{ open.datetime|time:"H:i" }}
+                  </td>
+                  <td><a href="{{ open.recipient.get_absolute_url }}">{{ open.recipient }}</a></td>
+                  <td>{{ open.city }}</td>
+                  <td>{{ open.region }}</td>
+                  <td>{{ open.country }}</td>
+                  <td>{{ open.client_type }}</td>
+                  <td>{{ open.client_name }}</td>
+                  <td>{{ open.client_os }}</td>
+                  <td>{{ open.device_type }}</td>
+                  <td>{{ open.user_agent }}</td>
+                  <td>{{ open.ip_address }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        {% endif %}
+        {% if email.errors.all %}
+          <div class="collapsable collapsed errors">
+            <header>Errors ({{email.errors.all|length}})</header>
+            <table>
+              <thead>
+                <tr>
+                  <th>Date Time</th>
+                  <th>Recipient</th>
+                  <th>Code</th>
+                  <th>Error</th>
+                  <th>Event</th>
+                  <th>Reason</th>
+                </tr>
+              </thead>
+              {% for error in email.errors.all %}
+                <tr>
+                  <td>
+                    {{ error.datetime|date:"Y-m-d" }}
+                    {{ error.datetime|time:"H:i" }}
+                  </td>
+                  <td><a href="{{ error.recipient.get_absolute_url }}">{{ error.recipient }}</a></td>
+                  <td>{{ error.code }}</td>
+                  <td>{{ error.error }}</td>
+                  <td>{{ error.event }}</td>
+                  <td>{{ error.reason }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+{% endblock main %}

@@ -9,13 +9,13 @@
   {% if emails %}
     <dt>Email</dt>
     {% for email in emails %}
-      <dd>{{ email }}</dd>
+    <dd><a href="{{ email.email.get_absolute_url }}">{{ email }}</a></dd>
     {% endfor %}
   {% endif %}
   {% if faxes %}
     <dt>Fax</dt>
     {% for fax in faxes %}
-      <dd>{{ fax }}</dd>
+      <dd><a href="{{ fax.phone.get_absolute_url }}">{{ fax }}</a></dd>
     {% endfor %}
   {% endif %}
   {% if phones %}
@@ -48,7 +48,7 @@
 {% for data in review_data %}
 <div class="collapsable review-requests{% if not data.error %} collapsed{% endif %}">
     <header {% if data.error %}class="error"{% endif %}>
-        <p>{{data.address}}</p>
+      <p>{{data.address}} (<a href="{{ data.address.get_absolute_url }}">Details</a>)</p>
       </header>
       <table>
         <tr>
