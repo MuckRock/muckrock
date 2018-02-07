@@ -57,4 +57,4 @@ class TestFOIAViewset(TestCase):
             content_type='application/json',
             **headers
         )
-        nose.tools.eq_(response.status_code, 201)
+        nose.tools.eq_(response.status_code, 201, response)

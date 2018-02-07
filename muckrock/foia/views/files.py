@@ -43,15 +43,10 @@ class FOIAFileListView(PaginationMixin, ListView):
         return self.foia
 
     def get_queryset(self):
+        """Only files for one FOIA request"""
         foia = self.get_foia()
         queryset = super(FOIAFileListView, self).get_queryset()
-        return (
-            queryset.filter(foia=foia).select_related('foia')
-            .select_related('foia__user').select_related('foia__agency')
-            .select_related('foia__jurisdiction')
-            .prefetch_related('foia__edit_collaborators')
-            .prefetch_related('foia__read_collaborators')
-        )
+        return queryset.filter(comm__foia=foia)
 
     def get_context_data(self, **kwargs):
         context = super(FOIAFileListView, self).get_context_data(**kwargs)

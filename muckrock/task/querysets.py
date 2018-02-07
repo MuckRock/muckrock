@@ -365,7 +365,7 @@ class ResponseTaskQuerySet(TaskQuerySet):
                 Prefetch(
                     'communication__files',
                     queryset=FOIAFile.objects.
-                    select_related('foia__jurisdiction')
+                    select_related('comm__foia__jurisdiction')
                 ),
                 Prefetch(
                     'communication__foia__communications',

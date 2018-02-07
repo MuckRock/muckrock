@@ -21,7 +21,7 @@ class TestRequestFilesView(TestCase):
 
     def setUp(self):
         self.file = FOIAFileFactory()
-        self.foia = self.file.foia
+        self.foia = self.file.comm.foia
         self.kwargs = {
             'idx': self.foia.pk,
             'slug': self.foia.slug,

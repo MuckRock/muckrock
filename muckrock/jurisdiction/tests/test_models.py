@@ -173,10 +173,10 @@ class TestJurisdictionUnit(TestCase):
         State jurisdictions should include pages from their local jurisdictions.
         """
         page_count = 10
-        local_foia = FOIARequestFactory(jurisdiction=self.local)
-        state_foia = FOIARequestFactory(jurisdiction=self.state)
-        local_foia.files.add(FOIAFileFactory(pages=page_count))
-        state_foia.files.add(FOIAFileFactory(pages=page_count))
+        local_comm = FOIACommunicationFactory(foia__jurisdiction=self.local)
+        state_comm = FOIACommunicationFactory(foia__jurisdiction=self.state)
+        local_comm.files.add(FOIAFileFactory(pages=page_count))
+        state_comm.files.add(FOIAFileFactory(pages=page_count))
         eq_(self.local.total_pages(), page_count)
         eq_(self.state.total_pages(), 2 * page_count)
 

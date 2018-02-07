@@ -319,9 +319,32 @@ class Homepage(object):
     def completed_requests(self):
         """Get recently completed requests"""
         return lambda: (
-            FOIARequest.objects.get_public().get_done().order_by(
-                '-date_done', 'pk'
-            ).select_related_view().get_public_file_count(limit=6)
+            FOIARequest.objects.get_public().get_done().
+            order_by('-date_done', 'pk').select_related(
+                'agency',
+                'agency__jurisdiction',
+                'jurisdiction',
+                'jurisdiction__parent',
+                'jurisdiction__parent__parent',
+                'user',
+            ).only(
+                'status',
+                'slug',
+                'title',
+                'agency__name',
+                'agency__slug',
+                'agency__jurisdiction__slug',
+                'jurisdiction__level',
+                'jurisdiction__name',
+                'jurisdiction__slug',
+                'jurisdiction__parent__abbrev',
+                'jurisdiction__parent__name',
+                'jurisdiction__parent__slug',
+                'jurisdiction__parent__parent__slug',
+                'user__username',
+                'user__first_name',
+                'user__last_name',
+            ).get_public_file_count(limit=6)
         )
 
     def stats(self):

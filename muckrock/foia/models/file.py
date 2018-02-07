@@ -14,7 +14,6 @@ import os
 
 # MuckRock
 from muckrock.foia.models.communication import FOIACommunication
-from muckrock.foia.models.request import FOIARequest
 
 logger = logging.getLogger(__name__)
 
@@ -25,9 +24,6 @@ class FOIAFile(models.Model):
     access = (('public', 'Public'), ('private', 'Private'),
               ('organization', 'Organization'))
 
-    foia = models.ForeignKey(
-        FOIARequest, related_name='files', blank=True, null=True
-    )
     comm = models.ForeignKey(
         FOIACommunication, related_name='files', blank=True, null=True
     )
@@ -39,7 +35,12 @@ class FOIAFile(models.Model):
     source = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
     # for doc cloud only
-    access = models.CharField(max_length=12, default='public', choices=access)
+    access = models.CharField(
+        max_length=12,
+        default='public',
+        choices=access,
+        db_index=True,
+    )
     doc_id = models.SlugField(max_length=80, blank=True, editable=False)
     pages = models.PositiveIntegerField(default=0, editable=False)
 
@@ -92,11 +93,11 @@ class FOIAFile(models.Model):
         return os.path.splitext(self.name())[1][1:]
 
     def get_foia(self):
-        """Get FOIA - self.foia should be refactored out"""
-        if self.foia:
-            return self.foia
+        """Get FOIA"""
         if self.comm and self.comm.foia:
             return self.comm.foia
+        else:
+            return None
 
     def is_public(self):
         """Is this document viewable to everyone"""
@@ -116,7 +117,6 @@ class FOIAFile(models.Model):
         access = 'private' if new_comm.foia.embargo else 'public'
         original_id = self.pk
         self.pk = None
-        self.foia = new_comm.foia
         self.comm = new_comm
         self.access = access
         self.source = new_comm.get_source()

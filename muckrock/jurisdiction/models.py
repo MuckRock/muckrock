@@ -60,7 +60,9 @@ class RequestHelper(object):
     def total_pages(self):
         """Total pages released"""
         requests = self.get_requests()
-        pages = requests.aggregate(Sum('files__pages'))['files__pages__sum']
+        pages = requests.aggregate(
+            pages=Sum('communications__files__pages'),
+        )['pages']
         return pages if pages else 0
 
 

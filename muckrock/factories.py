@@ -257,10 +257,7 @@ class FOIAFileFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = FOIAFile
 
-    foia = factory.SubFactory(FOIARequestFactory)
-    comm = factory.SubFactory(
-        FOIACommunicationFactory, foia=factory.SelfAttribute('..foia')
-    )
+    comm = factory.SubFactory(FOIACommunicationFactory)
     title = factory.Faker('word')
     ffile = factory.django.FileField(filename=factory.Faker('file_name'))
 

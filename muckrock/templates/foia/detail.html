@@ -159,7 +159,7 @@
                 </li>
                 <li>
                     <a role="tab" class="tab" aria-controls="files" href="#files">
-                        {% with foia.files.count as files_count %}
+                        {% with foia.get_files.count as files_count %}
                             <span class="counter">{{files_count}}</span>
                             <span class="label">File{{files_count|pluralize}}</span>
                         {% endwith %}
@@ -449,7 +449,7 @@ Sincerely,
                 {% else %}
                 <p class="empty">There are no files associated with this request.</p>
                 {% endif %}
-                {% if foia.files.count > 50 %}
+                {% if foia.get_files.count > 50 %}
                 <div class="notification warning">
                     <span class="symbol">{% include 'lib/component/icon/warning.svg' %}</span>
                     <span class="text">

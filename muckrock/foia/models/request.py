@@ -153,10 +153,12 @@ class FOIARequestQuerySet(models.QuerySet):
 
     def get_public_file_count(self, limit=None):
         """Annotate the public file count"""
+        # XXX optimize
         foia_qs = self
         count_qs = (
-            self._clone().values_list('id').filter(files__access='public')
-            .annotate(Count('files'))
+            self._clone().values_list('id').filter(
+                communications__files__access='public'
+            ).annotate(Count('communications__files'))
         )
         if limit is not None:
             foia_qs = foia_qs[:limit]
@@ -263,7 +265,10 @@ class FOIARequest(models.Model):
     date_submitted = models.DateField(blank=True, null=True, db_index=True)
     date_updated = models.DateField(blank=True, null=True, db_index=True)
     date_done = models.DateField(
-        blank=True, null=True, verbose_name='Date response received'
+        blank=True,
+        null=True,
+        db_index=True,
+        verbose_name='Date response received',
     )
     date_due = models.DateField(blank=True, null=True, db_index=True)
     days_until_due = models.IntegerField(blank=True, null=True)
@@ -513,9 +518,14 @@ class FOIARequest(models.Model):
         logger.info('New access key generated for %s', self)
         return key
 
+    def get_files(self):
+        """Get all files under this FOIA"""
+        from muckrock.foia.models import FOIAFile
+        return FOIAFile.objects.filter(comm__foia=self)
+
     def public_documents(self):
         """Get a list of public documents attached to this request"""
-        return self.files.filter(access='public')
+        return self.get_files().filter(access='public')
 
     def first_request(self):
         """Return the first request text"""
@@ -1180,7 +1190,7 @@ class FOIARequest(models.Model):
 
     def total_pages(self):
         """Get the total number of pages for this request"""
-        pages = self.files.aggregate(Sum('pages'))['pages__sum']
+        pages = self.get_files().aggregate(Sum('pages'))['pages__sum']
         if pages is None:
             return 0
         return pages

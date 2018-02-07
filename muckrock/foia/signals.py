@@ -21,7 +21,7 @@ def foia_update_embargo(sender, **kwargs):
     # if we are saving a new FOIA Request, there are no docs to update
     if old_request and request.embargo != old_request.embargo:
         access = 'private' if request.embargo else 'public'
-        for doc in request.files.all():
+        for doc in request.get_files().all():
             if doc.is_doccloud() and doc.access != access:
                 doc.access = access
                 doc.save()
