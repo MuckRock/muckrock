@@ -618,7 +618,7 @@ class PortalTaskList(TaskList):
             task.set_status(status)
         save = False
         if tracking_number:
-            foia.tracking_id = tracking_number[:255]
+            foia.add_tracking_id(tracking_number[:255])
             save = True
         if not foia.portal_password and password:
             foia.portal_password = password

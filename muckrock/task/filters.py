@@ -124,9 +124,10 @@ class SnailMailTaskFilterSet(TaskFilterSet):
     def filter_has_tracking_number(self, queryset, name, value):
         """Check if the foia has a tracking number."""
         #pylint: disable=unused-argument
-        return self.blank_choice(
-            queryset, 'communication__foia__tracking_id', value
-        )
+        if value == 'True':
+            return queryset.exclude(communication__foia__tracking_ids=None)
+        else:
+            return queryset.filter(communication__foia__tracking_ids=None)
 
     def filter_has_agency_notes(self, queryset, name, value):
         """Check if the agency has notes."""

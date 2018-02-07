@@ -185,7 +185,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
             self._login(comm, session)
             csrf_token = self._get_csrf_token(
                 session,
-                ['requests', comm.foia.tracking_id],
+                ['requests', comm.foia.current_tracking_id()],
             )
             headers = {
                 'X-CSRF-Token': csrf_token,
@@ -224,10 +224,10 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
                 'Communication has no FOIA\n'
                 'Fetching Request ID'
             )
-        if not comm.foia.tracking_id:
+        if not comm.foia.current_tracking_id():
             raise PortalError('FOIA has no tracking ID\n' 'Fetching Request ID')
         pattern = re.compile('[0-9]+-([0-9]+)')
-        match = pattern.match(comm.foia.tracking_id)
+        match = pattern.match(comm.foia.current_tracking_id())
         if not match:
             raise PortalError(
                 'FOIA tracking ID not in expected format\n'
@@ -240,7 +240,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
         # pylint: disable=too-many-locals
         csrf_token = self._get_csrf_token(
             session,
-            ['requests', comm.foia.tracking_id],
+            ['requests', comm.foia.current_tracking_id()],
         )
         documents = []
         for file_ in comm.files.all():
@@ -305,7 +305,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
         def on_match(match):
             """Set metadata and unhide the communication"""
             comm.foia.status = 'processed'
-            comm.foia.tracking_id = tracking_id
+            comm.foia.add_tracking_id(tracking_id)
             comm.foia.save()
             comm.communication = match.group('communication')
             comm.hidden = False
@@ -399,7 +399,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
 
         def on_match(match):
             """Download the files"""
-            if comm.foia.tracking_id != match.group('tracking_id'):
+            if comm.foia.current_tracking_id() != match.group('tracking_id'):
                 ManualPortal.receive_msg(
                     self,
                     comm,
@@ -433,7 +433,8 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
             reply = self._get(
                 session,
                 furl(self.portal.url
-                     ).add(path=['requests', comm.foia.tracking_id]).url,
+                     ).add(path=['requests',
+                                 comm.foia.current_tracking_id()]).url,
                 'Getting request page to view list of documents',
             )
             documents = [

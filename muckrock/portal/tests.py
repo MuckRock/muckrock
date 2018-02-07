@@ -13,6 +13,7 @@ from nose.tools import assert_false, eq_, ok_
 
 # MuckRock
 from muckrock.factories import FOIACommunicationFactory
+from muckrock.foia.models.communication import FOIACommunication
 from muckrock.portal.models import Portal
 from muckrock.task.models import PortalTask
 
@@ -83,8 +84,9 @@ class TestNextRequestPortal(TestCase):
             foia__status='ack',
         )
         self.portal.receive_msg(comm)
+        comm = FOIACommunication.objects.get(pk=comm.pk)
         eq_(comm.foia.status, 'processed')
-        eq_(comm.foia.tracking_id, '17-1')
+        eq_(comm.foia.current_tracking_id(), '17-1')
         eq_(
             comm.communication,
             'Your first Evanston record request (request number 17-764) '

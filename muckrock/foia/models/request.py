@@ -15,6 +15,7 @@ from django.db.models import Case, Count, F, Max, Q, Sum, When
 from django.db.models.functions import ExtractDay, Now
 from django.template.defaultfilters import escape, linebreaks, slugify
 from django.template.loader import get_template, render_to_string
+from django.utils import timezone
 from django.utils.encoding import smart_text
 
 # Standard Library
@@ -286,7 +287,6 @@ class FOIARequest(models.Model):
     featured = models.BooleanField(default=False)
     tracker = models.BooleanField(default=False)
     sidebar_html = models.TextField(blank=True)
-    tracking_id = models.CharField(blank=True, max_length=255)
     mail_id = models.CharField(blank=True, max_length=255, editable=False)
     updated = models.BooleanField(default=False)
 
@@ -1228,8 +1228,9 @@ class FOIARequest(models.Model):
     def default_subject(self):
         """Make a subject line for a communication for this request"""
         law_name = self.jurisdiction.get_law_name()
-        if self.tracking_id:
-            return 'RE: %s Request #%s' % (law_name, self.tracking_id)
+        tracking_id = self.current_tracking_id()
+        if tracking_id:
+            return 'RE: %s Request #%s' % (law_name, tracking_id)
         elif self.communications.count() > 1:
             return 'RE: %s Request: %s' % (law_name, self.title)
         else:
@@ -1308,6 +1309,34 @@ class FOIARequest(models.Model):
         )
         return comm
 
+    def current_tracking_id(self):
+        """Get the current tracking ID"""
+        # pylint: disable=access-member-before-definition
+        # pylint: disable=attribute-defined-outside-init
+        if hasattr(self, '_tracking_id'):
+            return self._tracking_id
+        tracking_ids = self.tracking_ids.all()
+        if tracking_ids:
+            self._tracking_id = tracking_ids[0].tracking_id
+        else:
+            self._tracking_id = ''
+        return self._tracking_id
+
+    def add_tracking_id(self, tracking_id, reason=None):
+        """Add a new tracking ID"""
+        if tracking_id == self.current_tracking_id():
+            return
+        if reason is None:
+            if self.tracking_ids.exists():
+                reason = 'other'
+            else:
+                reason = 'initial'
+        self.tracking_ids.create(
+            tracking_id=tracking_id,
+            reason=reason,
+        )
+        self._tracking_id = tracking_id
+
     class Meta:
         ordering = ['title']
         verbose_name = 'FOIA Request'
@@ -1332,3 +1361,32 @@ class FOIARequest(models.Model):
                 'Can download a zip file of all communications and files'
             ),
         )
+
+
+class TrackingNumber(models.Model):
+    """A tracking number for a FOIA Request"""
+    foia = models.ForeignKey(
+        FOIARequest,
+        on_delete=models.CASCADE,
+        related_name='tracking_ids',
+    )
+    tracking_id = models.CharField(
+        max_length=255,
+        verbose_name='Tracking Number',
+    )
+    datetime = models.DateTimeField(default=timezone.now)
+    reason = models.CharField(
+        max_length=7,
+        choices=(
+            ('initial', 'Initial'),
+            ('appeal', 'Appeal'),
+            ('agency', 'New agency'),
+            ('other', 'Other'),
+        ),
+    )
+
+    def __unicode__(self):
+        return self.tracking_id
+
+    class Meta:
+        ordering = ['-datetime']

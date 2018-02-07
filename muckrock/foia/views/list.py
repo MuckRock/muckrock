@@ -146,7 +146,7 @@ class RequestList(MRSearchFilterListView):
                 (lambda f: f.date_followup, 'Followup Date'),
                 (lambda f: f.date_estimate, 'Estimated Completion Date'),
                 (lambda f: f.description, 'Description'),
-                (lambda f: f.tracking_id, 'Tracking Number'),
+                (lambda f: f.current_tracking_id(), 'Tracking Number'),
                 (lambda f: f.embargo, 'Embargo'),
                 (lambda f: f.days_since_submitted, 'Days since submitted'),
                 (lambda f: f.days_since_updated, 'Days since updated'),
@@ -159,6 +159,8 @@ class RequestList(MRSearchFilterListView):
                     'user',
                     'jurisdiction',
                     'agency',
+                ).prefetch_related(
+                    'tracking_ids',
                 ).only(
                     'user__username',
                     'title',
@@ -172,7 +174,6 @@ class RequestList(MRSearchFilterListView):
                     'date_followup',
                     'date_estimate',
                     'description',
-                    'tracking_id',
                     'embargo',
                 ).annotate(
                     days_since_submitted=ExtractDay(
