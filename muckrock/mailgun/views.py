@@ -494,12 +494,18 @@ def phaxio_callback(request):
                 # temporary for now
                 perm_error_ids = set([34, 47, 49, 91, 107, 109, 116, 123])
                 temp_failure = int(recipient['error_id']) not in perm_error_ids
+                logger.warning(
+                    'Fax Error - Number: %s - ID: %s - Temp: %s - error_count: %s',
+                    number, recipient['error_id'], temp_failure, error_count
+                )
                 if temp_failure and error_count < 4:
+                    logger.warning('Fax Error Retrying...')
                     # retry with exponential back off
                     fax_comm.communication.foia_submit(
                         fax_error_count=error_count + 1
                     )
                 else:
+                    logger.warning('Fax Error Giving Up...')
                     number.status = 'error'
                     number.save()
                     ReviewAgencyTask.objects.ensure_one_created(

@@ -4,6 +4,7 @@ Models for keeping track of how we send and receive communications
 """
 
 # Django
+from django.core.urlresolvers import reverse
 from django.core.validators import validate_email
 from django.db import models
 from django.forms import ValidationError
@@ -21,10 +22,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 from muckrock.mailgun.models import WhitelistDomain
 
 PHONE_TYPES = (
-    (
-        'fax',
-        'Fax',
-    ),
+    ('fax', 'Fax'),
     ('phone', 'Phone'),
 )
 
@@ -95,6 +93,10 @@ class EmailAddress(models.Model):
             val += u' (error)'
         return val
 
+    def get_absolute_url(self):
+        """The url for this email address"""
+        return reverse('email-detail', kwargs={'idx': self.pk})
+
     @property
     def domain(self):
         """The domain part of the email address"""
@@ -164,6 +166,10 @@ class PhoneNumber(models.Model):
             return u'%s (%s)' % (self.number.as_national, self.status)
         else:
             return self.number.as_national
+
+    def get_absolute_url(self):
+        """The url for this phone number"""
+        return reverse('phone-detail', kwargs={'idx': self.pk})
 
     @property
     def as_e164(self):

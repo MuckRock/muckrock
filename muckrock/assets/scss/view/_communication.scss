@@ -1,0 +1,16 @@
+// SCSS for the communication app views
+
+.communication-detail {
+  .subheader {
+    background: $color-grey-7;
+    margin-bottom: 0;
+  }
+  .errors header, .opens header {
+    background: $color-grey-7;
+    margin-bottom: 0;
+    padding: 7px;
+  }
+  header.error {
+    background-color: $color-red;
+  }
+}

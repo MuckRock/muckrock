@@ -309,11 +309,10 @@ class ReviewAgencyTaskNode(TaskNode):
         """Adds a form for updating the email"""
         extra_context = super(ReviewAgencyTaskNode, self).get_extra_context()
         extra_context['emails'] = [
-            str(e) for e in self.task.agency.agencyemail_set.all()
+            e for e in self.task.agency.agencyemail_set.all()
         ]
         extra_context['faxes'] = [
-            str(f)
-            for f in self.task.agency.agencyphone_set.all()
+            f for f in self.task.agency.agencyphone_set.all()
             if f.phone.type == 'fax'
         ]
         extra_context['phones'] = [
