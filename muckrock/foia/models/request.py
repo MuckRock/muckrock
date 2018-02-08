@@ -154,7 +154,6 @@ class FOIARequestQuerySet(models.QuerySet):
 
     def get_public_file_count(self, limit=None):
         """Annotate the public file count"""
-        # XXX optimize
         foia_qs = self
         count_qs = (
             self._clone().values_list('id').filter(
@@ -1324,6 +1323,7 @@ class FOIARequest(models.Model):
 
     def add_tracking_id(self, tracking_id, reason=None):
         """Add a new tracking ID"""
+        # pylint: disable=attribute-defined-outside-init
         if tracking_id == self.current_tracking_id():
             return
         if reason is None:
