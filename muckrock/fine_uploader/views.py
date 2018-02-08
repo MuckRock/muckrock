@@ -72,7 +72,6 @@ def success_comm(request):
 
     access = 'private' if comm.foia.embargo else 'public'
     file_ = FOIAFile(
-        foia=comm.foia,
         comm=comm,
         title=os.path.basename(request.POST['key']),
         date=datetime.now(),
