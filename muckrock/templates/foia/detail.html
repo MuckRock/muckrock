@@ -54,7 +54,7 @@
             {% endif %}
         </section>
         <section class="specific-information">
-            {% if request.user.is_staff or foia.tracking_id %}
+            {% if request.user.is_staff or foia.current_tracking_id %}
             <table class="numbers">
                 {% if request.user.is_staff %}
                 <tr class="muckrock-number">
@@ -62,11 +62,15 @@
                     <td>{{ foia.id }}</td>
                 </tr>
                 {% endif %}
-                {% if foia.tracking_id %}
-                <tr class="tracking-number">
+                {% if foia.tracking_ids.all %}
+                  <tr class="tracking-number">
                     <td>Tracking #</td>
-                    <td>{{ foia.tracking_id }}</td>
-                </tr>
+                    <td>
+                      {% for tracking_id in foia.tracking_ids.all %}
+                        <p>{{ tracking_id }}</p>
+                      {% endfor %}
+                    </td>
+                  </tr>
                 {% endif %}
                 {% if foia.multirequest %}
                 <tr class="multirequest">
@@ -75,6 +79,17 @@
                 </tr>
                 {% endif %}
             </table>
+            {% endif %}
+            {% if request.user.is_staff %}
+              <p class="edit action tracking-id">Add Tracking ID</p>
+              <form class="add-tracking-id hidden-form" method="post">
+                {% csrf_token %}
+                {% include 'lib/pattern/form.html' with form=tracking_id_form %}
+                <footer>
+                  <button class="primary button" type="submit" name="action" value="tracking_id">Add</button>
+                  <button class="cancel button">Cancel</button>
+                </footer>
+              </form>
             {% endif %}
             <table class="dates">
                 <tr class="submitted">
@@ -124,11 +139,13 @@
                 </table>
             {% endif %}
             {% if user_can_edit %}
-            <form class="change-date" id="change-estimated-completion-date" method="post">
+            <form class="change-date hidden-form" method="post">
                 {% csrf_token %}
                 {% include 'lib/pattern/form.html' with form=change_estimated_date %}
-                <button class="primary button" type="submit" name="action" value="date_estimate">Save</button>
-                <button class="cancel button" id="cancel-date-estimate">Cancel</button>
+                <footer>
+                  <button class="primary button" type="submit" name="action" value="date_estimate">Save</button>
+                  <button class="cancel button">Cancel</button>
+                </footer>
             </form>
             {% endif %}
             {% include 'foia/component/status.html' %}

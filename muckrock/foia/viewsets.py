@@ -88,6 +88,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                 'tags',
                 'edit_collaborators',
                 'read_collaborators',
+                'tracking_ids',
                 Prefetch(
                     'communications__responsetask_set',
                     queryset=ResponseTask.objects.select_related('resolved_by'),

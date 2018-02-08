@@ -150,6 +150,7 @@ class FOIARequestSerializer(serializers.ModelSerializer):
     communications = FOIACommunicationSerializer(many=True)
     notes = FOIANoteSerializer(many=True)
     absolute_url = serializers.ReadOnlyField(source='get_absolute_url')
+    tracking_id = serializers.ReadOnlyField(source='current_tracking_id')
 
     def __init__(self, *args, **kwargs):
         # pylint: disable=super-on-old-class

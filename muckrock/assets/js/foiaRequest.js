@@ -46,6 +46,17 @@ $('.estimated-completion .edit').click(function(){
     });
 });
 
+$('.tracking-id.edit').click(function(){
+  var button = $(this);
+  button.hide();
+  $('.add-tracking-id').addClass('visible');
+  $('.add-tracking-id .cancel').click(function(e){
+    e.preventDefault();
+    $('.add-tracking-id').removeClass('visible');
+    button.show();
+  });
+});
+
 $('#show-portal-info').click(function(){
     $(this).hide();
     $('.portal-info').addClass('visible');

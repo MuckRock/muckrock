@@ -23,8 +23,8 @@
                 <dd>MuckRock #{{foia.id}}</dd>
                 <dd><a href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}#follow-up" title="Make an admin fix" class="admin-fix">Make an Admin Fix</a></dd>
                 <dt>Tracking Number</dt>
-                {% if foia.tracking_id %}
-                    <dd>{{foia.tracking_id}}</dd>
+                {% if foia.current_tracking_id %}
+                    <dd>{{foia.current_tracking_id}}</dd>
                 {% else %}
                     <dd>None</dd>
                 {% endif %}

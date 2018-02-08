@@ -39,6 +39,7 @@ from muckrock.foia.forms import (
     FOIAEstimatedCompletionDateForm,
     FOIANoteForm,
     ResendForm,
+    TrackingNumberForm,
 )
 from muckrock.foia.models import (
     END_STATUS,
@@ -178,6 +179,7 @@ class Detail(DetailView):
 
     def get_context_data(self, **kwargs):
         """Add extra context data"""
+        # pylint: disable=too-many-statements
         context = super(Detail, self).get_context_data(**kwargs)
         foia = context['foia']
         user = self.request.user
@@ -232,6 +234,7 @@ class Detail(DetailView):
         context['change_estimated_date'] = FOIAEstimatedCompletionDateForm(
             instance=foia
         )
+        context['tracking_id_form'] = TrackingNumberForm()
 
         if user_can_edit or user.is_staff:
             all_tasks = Task.objects.filter_by_foia(foia, user)
@@ -239,8 +242,9 @@ class Detail(DetailView):
             context['task_count'] = len(all_tasks)
             context['open_task_count'] = len(open_tasks)
             context['open_tasks'] = open_tasks
-            context['asignees'] = User.objects.filter(is_staff=True
-                                                      ).order_by('last_name')
+            context['asignees'] = User.objects.filter(
+                is_staff=True,
+            ).order_by('last_name')
 
         context['stripe_pk'] = settings.STRIPE_PUB_KEY
         context['sidebar_admin_url'] = reverse(
@@ -310,6 +314,7 @@ class Detail(DetailView):
             'update_new_agency': self._update_new_agency,
             'agency_reply': self._agency_reply,
             'staff_pay': self._staff_pay,
+            'tracking_id': self._tracking_id,
         }
         try:
             return actions[request.POST['action']](request, foia)
@@ -474,7 +479,9 @@ class Detail(DetailView):
         return redirect(foia.get_absolute_url() + '#')
 
     def _appeal(self, request, foia):
-        """Handle submitting an appeal, then create an Appeal from the returned communication."""
+        """Handle submitting an appeal, then create an Appeal from the returned
+        communication.
+        """
         form = AppealForm(request.POST)
         has_perm = foia.has_perm(request.user, 'appeal')
         if not has_perm:
@@ -493,9 +500,7 @@ class Detail(DetailView):
         messages.success(request, 'Your appeal has been sent.')
         return redirect(foia.get_absolute_url() + '#')
 
-    def _new_comm(
-        self, request, foia, test, success_msg, appeal=False, thanks=False
-    ):
+    def _new_comm(self, request, foia, test, success_msg, thanks=False):
         """Helper function for sending a new comm"""
         # pylint: disable=too-many-arguments
         text = request.POST.get('text')
@@ -505,7 +510,6 @@ class Detail(DetailView):
                 from_user=request.user,
                 text=text,
                 user=request.user,
-                appeal=appeal,
                 thanks=thanks,
             )
             messages.success(request, success_msg)
@@ -526,6 +530,26 @@ class Detail(DetailView):
                 messages.error(request, 'Invalid date provided.')
         else:
             messages.error(request, 'You cannot do that, stop it.')
+        return redirect(foia.get_absolute_url() + '#')
+
+    def _tracking_id(self, request, foia):
+        """Add a new tracking ID"""
+        form = TrackingNumberForm(request.POST)
+        if request.user.is_staff:
+            if form.is_valid():
+                tracking_id = form.save(commit=False)
+                tracking_id.foia = foia
+                tracking_id.save()
+                messages.success(
+                    request, 'Successfully added a tracking number'
+                )
+            else:
+                messages.error(
+                    request,
+                    'Please fill out the tracking number and reason',
+                )
+        else:
+            messages.error(request, 'You do not have permission to do that')
         return redirect(foia.get_absolute_url() + '#')
 
     def _update_new_agency(self, request, foia):
@@ -647,7 +671,7 @@ class Detail(DetailView):
                     sent_datetime=datetime.now(),
                 )
                 foia.date_estimate = form.cleaned_data['date_estimate']
-                foia.tracking_id = form.cleaned_data['tracking_id']
+                foia.add_tracking_id(form.cleaned_data['tracking_id'])
                 foia.status = form.cleaned_data['status']
                 if foia.status == 'payment':
                     foia.price = form.cleaned_data['price'] / 100.0

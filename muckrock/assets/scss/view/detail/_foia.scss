@@ -35,19 +35,25 @@ $request-breakpoint: 768px;
             float: right;
         }
     }
-    .change-date {
+    .hidden-form {
         display: none;
         @include border;
         padding: $vr/2;
-        @include align-items(flex-start);
-        @include flex-wrap(wrap);
+        //@include align-items(flex-start);
+        //@include flex-wrap(wrap);
         @include justify-content(space-between);
         label, input[type="text"] {
-            @include flex(0 1 100%);
+            //@include flex(0 1 100%);
             margin-bottom: $vr/2;
         }
         &.visible {
+            //@include display(flex);
+            @include display(block);
+        }
+        footer {
             @include display(flex);
+            @include justify-content(space-between);
+            @include flex-direction(row-reverse);
         }
     }
     .portal-info {

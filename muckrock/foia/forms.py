@@ -28,6 +28,7 @@ from muckrock.foia.models import (
     FOIAMultiRequest,
     FOIANote,
     FOIARequest,
+    TrackingNumber,
 )
 from muckrock.forms import MRFilterForm, TaggitWidget
 from muckrock.jurisdiction.models import Jurisdiction
@@ -636,3 +637,11 @@ class ResendForm(SendViaForm):
         """Set self.foia during cleaning"""
         self.foia = self.cleaned_data['communication'].foia
         return super(ResendForm, self).clean()
+
+
+class TrackingNumberForm(forms.ModelForm):
+    """Form for adding a tracking number"""
+
+    class Meta:
+        model = TrackingNumber
+        fields = ['tracking_id', 'reason']

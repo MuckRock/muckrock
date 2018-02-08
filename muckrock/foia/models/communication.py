@@ -421,7 +421,8 @@ class FOIACommunication(models.Model):
 
     def extract_tracking_id(self):
         """Try to extract a tracking number from this communication"""
-        if self.foia.tracking_id:
+        if self.foia.tracking_ids.exists():
+            # do not try to extract a tracking ID if one is already set
             return
         patterns = [
             re.compile(r'Tracking Number:\s+([0-9a-zA-Z-]+)'),
@@ -429,14 +430,14 @@ class FOIACommunication(models.Model):
         for pattern in patterns:
             match = pattern.search(self.communication)
             if match:
-                self.foia.tracking_id = match.group(1).strip()[:255]
-                self.foia.save()
+                tracking_id = match.group(1).strip()[:255]
+                self.foia.add_tracking_id(tracking_id)
                 logger.info(
                     'FOIA Tracking ID set: FOIA PK: %d - Comm PK: %d - '
                     'Tracking ID: %s',
                     self.foia.id,
                     self.id,
-                    self.foia.tracking_id,
+                    tracking_id,
                 )
                 break
 

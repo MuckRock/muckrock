@@ -743,7 +743,7 @@ def autoimport():
                     if code == 'FEE' and arg:
                         foia.price = Decimal(arg)
                     if id_:
-                        foia.tracking_id = id_
+                        foia.add_tracking_id(id_)
                     if est_date:
                         foia.date_estimate = est_date
                     if code == 'REJ-P':

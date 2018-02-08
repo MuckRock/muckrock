@@ -389,6 +389,7 @@ class ResponseTaskQuerySet(TaskQuerySet):
                 'communication__mails',
                 'communication__web_comms',
                 'communication__portals',
+                'communication__foia__tracking_ids',
             )
         )
 
@@ -482,5 +483,6 @@ class PortalTaskQuerySet(TaskQuerySet):
                 'communication__mails',
                 'communication__web_comms',
                 'communication__portals',
+                'communication__foia__tracking_ids',
             )
         )

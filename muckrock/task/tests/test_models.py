@@ -525,8 +525,9 @@ class ResponseTaskTests(TestCase):
     def test_set_tracking_id(self):
         new_tracking = u'dogs-r-cool'
         self.form.set_tracking_id(new_tracking, [self.task.communication])
+        self.task.refresh_from_db()
         eq_(
-            self.task.communication.foia.tracking_id, new_tracking,
+            self.task.communication.foia.current_tracking_id(), new_tracking,
             'Should update the tracking number on the request.'
         )
 

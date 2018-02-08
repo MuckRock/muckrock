@@ -41,6 +41,7 @@ from muckrock.foia.models import (
     FOIANote,
     FOIARequest,
     OutboundAttachment,
+    TrackingNumber,
 )
 from muckrock.foia.tasks import (
     autoimport,
@@ -323,6 +324,12 @@ class FOIANoteInline(admin.TabularInline):
     extra = 1
 
 
+class TrackingNumberInline(admin.TabularInline):
+    """Tracking Number Inline admin options"""
+    model = TrackingNumber
+    extra = 1
+
+
 class FOIARequestAdminForm(forms.ModelForm):
     """Form to include custom choice fields"""
 
@@ -401,10 +408,12 @@ class FOIARequestAdmin(VersionAdmin):
     list_display = ('title', 'user', 'status', 'agency', 'jurisdiction')
     list_filter = ['status']
     list_select_related = ('agency', 'jurisdiction', 'user')
-    search_fields = ['title', 'description', 'tracking_id', 'mail_id']
+    search_fields = [
+        'title', 'description', 'tracking_ids__tracking_id', 'mail_id'
+    ]
     readonly_fields = ['mail_id']
     filter_horizontal = ('read_collaborators', 'edit_collaborators')
-    inlines = [FOIACommunicationInline, FOIANoteInline]
+    inlines = [TrackingNumberInline, FOIACommunicationInline, FOIANoteInline]
     save_on_top = True
     form = FOIARequestAdminForm
     formats = ['xls', 'csv']
@@ -442,24 +451,25 @@ class FOIARequestAdmin(VersionAdmin):
                 foia.update()
             foia.update_dates()
             foia.save()
-            return
-
         # check communications for new ones to notify the user of an update
-        instances = formset.save(commit=False)
-        for instance in instances:
-            # only way to tell if its new or not is to check the db
-            change = True
-            try:
-                formset.model.objects.get(pk=instance.pk)
-            except formset.model.DoesNotExist:
-                change = False
+        elif formset.model == FOIACommunication:
+            instances = formset.save(commit=False)
+            for instance in instances:
+                # only way to tell if its new or not is to check the db
+                change = True
+                try:
+                    formset.model.objects.get(pk=instance.pk)
+                except formset.model.DoesNotExist:
+                    change = False
 
-            instance.save()
-            # its new, so notify the user about it
-            if not change:
-                instance.foia.update(instance.anchor())
+                instance.save()
+                # its new, so notify the user about it
+                if not change:
+                    instance.foia.update(instance.anchor())
 
-        formset.save_m2m()
+            formset.save_m2m()
+        else:
+            formset.save()
 
     def get_urls(self):
         """Add custom URLs here"""

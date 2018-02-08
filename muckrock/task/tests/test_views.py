@@ -762,7 +762,7 @@ class ResponseTaskListViewTests(TestCase):
         self.task.refresh_from_db()
         self.task.communication.refresh_from_db()
         self.task.communication.foia.refresh_from_db()
-        foia_tracking = self.task.communication.foia.tracking_id
+        foia_tracking = self.task.communication.foia.current_tracking_id()
         eq_(
             foia_tracking, new_tracking_id,
             'The new tracking number should be saved to the associated request.'
@@ -817,7 +817,7 @@ class ResponseTaskListViewTests(TestCase):
         for foia in other_foias:
             foia.refresh_from_db()
             eq_(
-                change_tracking, foia.tracking_id,
+                change_tracking, foia.current_tracking_id(),
                 'Tracking should update for each request in move list.'
             )
 

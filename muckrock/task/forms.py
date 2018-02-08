@@ -191,13 +191,13 @@ class ResponseTaskForm(forms.Form):
 
     def set_tracking_id(self, tracking_id, comms):
         """Sets the tracking ID of the communication's request"""
-        if type(tracking_id) is not type(unicode()):
+        if not isinstance(tracking_id, unicode):
             raise ValueError('Tracking ID should be a unicode string.')
         for comm in comms:
             if not comm.foia:
                 raise ValueError('The task communication is an orphan.')
             foia = comm.foia
-            foia.tracking_id = tracking_id
+            foia.add_tracking_id(tracking_id)
             foia.save(comment='response task tracking id')
 
     def set_status(self, status, set_foia, comms):
