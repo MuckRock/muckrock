@@ -76,13 +76,13 @@ def detail(request, fed_slug, state_slug, local_slug):
         agencies = Agency.objects.filter(
             Q(jurisdiction=jurisdiction)
             | Q(jurisdiction__parent=jurisdiction)
-        )
+        ).select_related('jurisdiction')
     else:
         agencies = jurisdiction.agencies
     agencies = (
         agencies.get_approved().only('pk', 'slug', 'name', 'jurisdiction')
         .annotate(foia_count=Count('foiarequest'))
-        .annotate(pages=Sum('foiarequest__files__pages'))
+        .annotate(pages=Sum('foiarequest__communications__files__pages'))
         .order_by('-foia_count')[:10]
     )
 
@@ -90,7 +90,7 @@ def detail(request, fed_slug, state_slug, local_slug):
                                             ).select_related('parent__parent')
     _top_children = (
         _children.annotate(foia_count=Count('foiarequest'))
-        .annotate(pages=Sum('foiarequest__files__pages'))
+        .annotate(pages=Sum('foiarequest__communications__files__pages'))
         .order_by('-foia_count')[:10]
     )
 

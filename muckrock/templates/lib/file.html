@@ -16,7 +16,7 @@
                 {# if foia_url, then we are on the FOIA page already #}
                 <a href="#{{ file.anchor }}" class="view-file action">
                 {% else %}
-                <a href="{{ SITE_ROOT }}{{ file.foia.get_absolute_url }}#{{ file.anchor }}" class="view-file action">
+                <a href="{{ SITE_ROOT }}{{ file.comm.foia.get_absolute_url }}#{{ file.anchor }}" class="view-file action">
                 {% endif %}
                     {% include 'lib/component/icon/view.svg' %}
                     <span class="label">View</span>

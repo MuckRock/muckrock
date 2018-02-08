@@ -187,7 +187,6 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                 title = attm_path.rsplit('/', 1)[1]
                 file_ = FOIAFile.objects.create(
                     access='public',
-                    foia=foia,
                     comm=comm,
                     title=title,
                     date=datetime.now(),
@@ -197,40 +196,50 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
 
             if request.user.profile.make_request():
                 foia.submit()
-                return Response({
-                    'status': 'FOI Request submitted',
-                    'Location': foia.get_absolute_url()
-                },
-                                status=http_status.HTTP_201_CREATED)
+                return Response(
+                    {
+                        'status': 'FOI Request submitted',
+                        'Location': foia.get_absolute_url()
+                    },
+                    status=http_status.HTTP_201_CREATED,
+                )
             else:
-                return Response({
-                    'status':
-                        'Error - Out of requests.  FOI Request has been saved.',
-                    'Location':
-                        foia.get_absolute_url()
-                },
-                                status=http_status.HTTP_402_PAYMENT_REQUIRED)
+                return Response(
+                    {
+                        'status':
+                            'Error - Out of requests.  FOI Request has been saved.',
+                        'Location':
+                            foia.get_absolute_url()
+                    },
+                    status=http_status.HTTP_402_PAYMENT_REQUIRED,
+                )
 
         except KeyError:
-            return Response({
-                'status':
-                    'Missing data - Please supply title, document_request, '
-                    'jurisdiction, and agency'
-            },
-                            status=http_status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    'status':
+                        'Missing data - Please supply title, document_request, '
+                        'jurisdiction, and agency'
+                },
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
         except (Jurisdiction.DoesNotExist, Agency.DoesNotExist):
-            return Response({
-                'status':
-                    'Bad data - please supply jurisdiction and agency as the PK'
-                    ' of existing entities.  Agency must be in Jurisdiction.'
-            },
-                            status=http_status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    'status':
+                        'Bad data - please supply jurisdiction and agency as the PK'
+                        ' of existing entities.  Agency must be in Jurisdiction.'
+                },
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
         except (requests.exceptions.RequestException, TypeError, MimeError):
             # TypeError is thrown if 'attachments' is not a list
-            return Response({
-                'status': 'There was a problem with one of your attachments'
-            },
-                            status=http_status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    'status': 'There was a problem with one of your attachments'
+                },
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
 
     @decorators.detail_route(permission_classes=(IsOwner,))
     def followup(self, request, pk=None):

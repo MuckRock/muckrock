@@ -32,7 +32,7 @@
             <div class="info">
                 <a class="logo" href="{% url 'index' %}" target="_blank">{% include 'lib/component/icon/logo.svg' %}</a>
                 <div>
-                    <p class="h3 mb0"><a href="{{file.foia.get_absolute_url}}" target="_blank">{{file.title}}</a></p>
+                    <p class="h3 mb0"><a href="{{file.comm.foia.get_absolute_url}}" target="_blank">{{file.title}}</a></p>
                     <p class="small">{% if file.pages %}{{file.pages}} page{{file.pages|pluralize}} &bull;{% endif %} {{file.date|date:"F d, Y"}}</p>
                 </div>
             </div>

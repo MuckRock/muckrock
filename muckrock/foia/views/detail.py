@@ -249,7 +249,7 @@ class Detail(DetailView):
         context['is_thankable'] = self.request.user.has_perm(
             'foia.thank_foiarequest', foia
         )
-        context['files'] = foia.files.all()[:50]
+        context['files'] = foia.get_files()[:50]
         if self.request.user.is_authenticated():
             context['foia_cache_timeout'] = 0
         else:

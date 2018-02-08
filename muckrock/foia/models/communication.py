@@ -170,7 +170,6 @@ class FOIACommunication(models.Model):
 
         access = 'private' if self.foia.embargo else 'public'
         for each_file in self.files.all():
-            each_file.foia = move_to_request
             each_file.access = access
             each_file.source = self.get_source()
             each_file.save()
@@ -333,7 +332,6 @@ class FOIACommunication(models.Model):
         access = 'private' if not self.foia or self.foia.embargo else 'public'
         with transaction.atomic():
             foia_file = self.files.create(
-                foia=self.foia,
                 title=title,
                 date=datetime.now(),
                 source=source[:70],

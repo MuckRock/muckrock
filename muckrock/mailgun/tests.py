@@ -181,10 +181,10 @@ class TestMailgunViewHandleRequest(TestMailgunViews):
             self.mailgun_route(to_=to_, attachments=attachments)
             foia.refresh_from_db()
             file_path = date.today().strftime('foia_files/%Y/%m/%d/data.pdf')
-            nose.tools.eq_(foia.files.count(), 1)
-            nose.tools.eq_(foia.files.first().ffile.name, file_path)
+            nose.tools.eq_(foia.get_files().count(), 1)
+            nose.tools.eq_(foia.get_files().first().ffile.name, file_path)
         finally:
-            foia.files.first().delete()
+            foia.communications.first().files.first().delete()
             file_path = os.path.join(
                 settings.SITE_ROOT, 'static/media/', file_path
             )

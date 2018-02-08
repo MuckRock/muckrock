@@ -110,11 +110,8 @@ class TestCommunicationMove(test.TestCase):
         moved_files = moved_comm.files.all()
         moved_file = moved_files[0]
         logging.debug(
-            'File foia: %d; Expected: %d', moved_file.foia.id, self.foia2.id
-        )
-        eq_(
-            moved_file.foia, self.foia2,
-            'Should also change the files to reference the destination FOIA.'
+            'File foia: %d; Expected: %d', moved_file.comm.foia.id,
+            self.foia2.id
         )
         eq_(
             moved_file.comm, self.comm,
