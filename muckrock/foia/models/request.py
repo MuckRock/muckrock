@@ -743,7 +743,6 @@ class FOIARequest(models.Model):
         access = 'private' if self.embargo else 'public'
         for attachment in attachments:
             file_ = comm.files.create(
-                foia=self,
                 title=os.path.basename(attachment.ffile.name),
                 date=comm.date,
                 source=user.get_full_name(),

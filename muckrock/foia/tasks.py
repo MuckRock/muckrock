@@ -639,7 +639,6 @@ def autoimport():
         access = 'private' if foia.embargo else 'public'
 
         foia_file = FOIAFile(
-            foia=foia,
             comm=comm,
             title=title,
             date=comm.date,
