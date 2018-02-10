@@ -100,6 +100,7 @@ class TestFunctional(TestCase):
         'test_profiles.json',
         'test_foiarequests.json',
         'test_foiacommunications.json',
+        'test_foiafiles.json',
         'test_news.json',
     ]
 
