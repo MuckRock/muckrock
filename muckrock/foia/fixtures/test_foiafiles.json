@@ -11,7 +11,7 @@
             "ffile": "foia_documents/meta-foi-request-for-amherst.pdf",
             "doc_id": "8097-test-meta-foi",
             "pages": 14,
-            "foia": 1
+            "comm": 1
         }
     },
     {
@@ -26,7 +26,7 @@
             "ffile": "foia_documents/collection-of-8-of-12-of-mbtas-dirty-dozen-wanted-fugitives_1.pdf",
             "doc_id": "21157-test-aaa",
             "pages": 8,
-            "foia": 2
+            "comm": 2
         }
     },
     {
@@ -41,7 +41,7 @@
             "ffile": "foia_documents/FOIA_Letter_11-0240_3.pdf",
             "doc_id": "268012-test",
             "pages": 2,
-            "foia": 3
+            "comm": 3
         }
     }
 ]
