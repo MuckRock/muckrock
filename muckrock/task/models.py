@@ -261,8 +261,8 @@ class StaleAgencyTask(Task):
 
     def stale_requests(self):
         """Returns a list of stale requests associated with the task's agency"""
-        if hasattr(self.agency, 'stale_requests_'):
-            return self.agency.stale_requests_
+        if hasattr(self.agency, 'stale_requests_cache'):
+            return self.agency.stale_requests_cache
         return FOIARequest.objects.get_stale(agency=self.agency)
 
     def latest_response(self):

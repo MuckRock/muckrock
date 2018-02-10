@@ -145,6 +145,7 @@ class SnailMailTaskQuerySet(TaskQuerySet):
                 'communication__foia__communications__mails',
                 'communication__foia__communications__web_comms',
                 'communication__foia__communications__portals',
+                'communication__foia__tracking_ids',
                 Prefetch(
                     'communication__foia__communications',
                     queryset=FOIACommunication.objects.filter(response=True),
@@ -215,8 +216,9 @@ class StaleAgencyTaskQuerySet(TaskQuerySet):
                 'agency__foiarequest_set__communications__foia__jurisdiction',
                 Prefetch(
                     'agency__foiarequest_set',
-                    queryset=FOIARequest.objects.get_stale(),
-                    to_attr='stale_requests_'
+                    queryset=FOIARequest.objects.get_stale()
+                    .select_related('email').prefetch_related('cc_emails'),
+                    to_attr='stale_requests_cache'
                 ),
             )
         )
@@ -360,6 +362,7 @@ class ResponseTaskQuerySet(TaskQuerySet):
             self.select_related(
                 'communication__foia__agency',
                 'communication__foia__jurisdiction',
+                'communication__from_user__profile__agency',
                 'resolved_by',
             ).prefetch_related(
                 Prefetch(
@@ -370,6 +373,7 @@ class ResponseTaskQuerySet(TaskQuerySet):
                 Prefetch(
                     'communication__foia__communications',
                     queryset=FOIACommunication.objects.order_by('-date')
+                    .select_related('from_user__profile__agency')
                     .prefetch_related(
                         'files',
                         'emails',
@@ -460,7 +464,7 @@ class PortalTaskQuerySet(TaskQuerySet):
                 Prefetch(
                     'communication__foia__communications',
                     queryset=FOIACommunication.objects.filter(response=True),
-                    to_attr='has_ack'
+                    to_attr='ack'
                 ),
                 Prefetch(
                     'communication__foia__communications',
