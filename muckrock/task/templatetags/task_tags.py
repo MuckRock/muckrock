@@ -179,7 +179,7 @@ class ResponseTaskNode(TaskNode):
         if _foia:
             initial_status = predicted_status if predicted_status else _foia.status
             form_initial['status'] = initial_status
-            form_initial['tracking_number'] = _foia.tracking_id
+            form_initial['tracking_number'] = _foia.current_tracking_id()
             form_initial['date_estimate'] = _foia.date_estimate
             extra_context['previous_communications'
                           ] = _foia.reverse_communications
@@ -249,7 +249,7 @@ class PortalTaskNode(TaskNode):
             if foia_:
                 form_initial = {
                     'status': foia_.status,
-                    'tracking_number': foia_.tracking_id,
+                    'tracking_number': foia_.current_tracking_id(),
                     'date_estimate': foia_.date_estimate,
                     'communication': self.task.communication.communication,
                 }
