@@ -456,7 +456,7 @@ def phaxio_callback(request):
 
     fax_info = json.loads(request.POST['fax'])
     fax_id = fax_info['tags'].get('fax_id')
-    error_count = fax_info['tags'].get('error_count')
+    error_count = int(fax_info['tags'].get('error_count', 0))
     if fax_id:
         fax_comm = FaxCommunication.objects.filter(pk=fax_id).first()
     else:
@@ -501,7 +501,7 @@ def phaxio_callback(request):
                 if temp_failure and error_count < 4:
                     logger.warning('Fax Error Retrying...')
                     # retry with exponential back off
-                    fax_comm.communication.foia_submit(
+                    fax_comm.communication.foia.submit(
                         fax_error_count=error_count + 1
                     )
                 else:
