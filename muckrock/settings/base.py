@@ -677,3 +677,5 @@ CONSTANCE_CONFIG_FIELDSETS = {
 
 # for google analytics
 VIEW_ID = os.environ.get('VIEW_ID', '')
+
+HIJACK_AUTHORIZE_STAFF = True
