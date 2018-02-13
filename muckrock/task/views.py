@@ -687,7 +687,7 @@ def snail_mail_pdf(request, pk):
     """Return a PDF file for a snail mail request"""
     # pylint: disable=unused-argument
     snail = get_object_or_404(SnailMailTask.objects.preload_pdf(), pk=pk)
-    merger = PdfFileMerger()
+    merger = PdfFileMerger(strict=False)
 
     # generate the pdf and merge all pdf attachments
     pdf = SnailMailPDF(snail.communication, snail.category)
