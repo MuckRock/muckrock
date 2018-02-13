@@ -50,7 +50,7 @@ def snail_mail_bulk_pdf_task(pdf_name, **kwargs):
     # pylint: disable=too-many-locals
     # pylint: disable=unused-argument
     cover_info = []
-    bulk_merger = PdfFileMerger()
+    bulk_merger = PdfFileMerger(strict=False)
     snails = (
         SnailMailTask.objects.filter(resolved=False)
         .order_by('communication__foia__agency').preload_pdf()
@@ -62,7 +62,7 @@ def snail_mail_bulk_pdf_task(pdf_name, **kwargs):
         # generate the pdf and merge all pdf attachments
         pdf = SnailMailPDF(snail.communication, snail.category)
         pdf.generate()
-        single_merger = PdfFileMerger()
+        single_merger = PdfFileMerger(strict=False)
         single_merger.append(StringIO(pdf.output(dest='S')))
         files = []
         for file_ in snail.communication.files.all():
