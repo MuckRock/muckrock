@@ -54,7 +54,7 @@ class JurisdictionViewSet(ModelViewSet):
                 'abbrev',
                 'level',
                 'parent',
-                'requires_proxy',
+                'law__requires_proxy',
             )
 
     filter_class = Filter

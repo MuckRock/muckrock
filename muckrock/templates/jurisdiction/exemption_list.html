@@ -1,0 +1,9 @@
+{% extends 'base_list.html' %}
+
+{% block list-table-head %}
+  <th data-sort="name">Name</th>
+{% endblock %}
+
+{% block list-table-row %}
+  <td><a href="{{ object.get_absolute_url }}">{{ object }}</a></td>
+{% endblock %}

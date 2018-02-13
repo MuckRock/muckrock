@@ -1019,7 +1019,7 @@ class FOIARequest(models.Model):
         # first submit
         if not self.date_submitted:
             self.date_submitted = date.today()
-            days = self.jurisdiction.get_days()
+            days = self.jurisdiction.days
             if days:
                 self.date_due = cal.business_days_from(date.today(), days)
         # updated from mailgun without setting status or submitted
@@ -1066,7 +1066,7 @@ class FOIARequest(models.Model):
         if self.status == 'ack' and self.jurisdiction:
             # if we have not at least been acknowledged yet, set the days
             # to the period required by law
-            jurisdiction_days = self.jurisdiction.get_days()
+            jurisdiction_days = self.jurisdiction.days
             if jurisdiction_days is not None:
                 return jurisdiction_days
         if self.date_estimate and date.today() < self.date_estimate:

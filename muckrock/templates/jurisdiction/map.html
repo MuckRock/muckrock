@@ -1,0 +1,34 @@
+{% load tags %}
+
+{% for row in state_map %}
+    {% for state in row %}
+      {% if state %}
+        <a href="{{ state.get_absolute_url }}"
+           class="cell state
+           {% if reverse %}
+             {{ state.law|get_attr:stat|yesno:"no,yes" }}
+           {% else %}
+             {{ state.law|get_attr:stat|yesno:"yes,no" }}
+           {% endif %}
+           ">
+           <div class="state-content">
+             <div class="table">
+               <div class="table-cell">
+                 {{ state.abbrev }}
+               </div>
+             </div>
+           </div>
+        </a>
+      {% else %}
+        <div class="cell">
+          <div class="state-content">
+            <div class="table">
+              <div class="table-cell">
+                &nbsp;
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+{% endfor %}

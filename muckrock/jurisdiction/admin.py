@@ -21,8 +21,14 @@ from autocomplete_light import shortcuts as autocomplete_light
 from reversion.admin import VersionAdmin
 
 # MuckRock
-from muckrock.jurisdiction import models as JurisdictionModels
 from muckrock.jurisdiction.forms import CSVImportForm
+from muckrock.jurisdiction.models import (
+    ExampleAppeal,
+    Exemption,
+    InvokedExemption,
+    Jurisdiction,
+    Law,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -32,13 +38,13 @@ logger = logging.getLogger(__name__)
 
 class LawInline(admin.StackedInline):
     """Law admin options"""
-    model = JurisdictionModels.Law
+    model = Law
     extra = 0
 
 
 class ExampleAppealInline(admin.TabularInline):
     """Example appeal inline"""
-    model = JurisdictionModels.ExampleAppeal
+    model = ExampleAppeal
     extra = 0
 
 
@@ -49,14 +55,14 @@ class InvokedExemptionAdminForm(forms.ModelForm):
     )
 
     class Meta:
-        model = JurisdictionModels.InvokedExemption
+        model = InvokedExemption
         fields = '__all__'
 
 
 class InvokedExemptionInline(admin.StackedInline):
     """Invoked exemption options"""
     form = InvokedExemptionAdminForm
-    model = JurisdictionModels.InvokedExemption
+    model = InvokedExemption
     extra = 0
 
 
@@ -90,15 +96,8 @@ class JurisdictionAdmin(VersionAdmin):
             'Options for states/federal', {
                 'classes': ('collapse',),
                 'fields': (
-                    'days',
                     'observe_sat',
                     'holidays',
-                    'use_business_days',
-                    'intro',
-                    'law_name',
-                    'waiver',
-                    'has_appeal',
-                    'law_analysis',
                 ),
             }
         ),
@@ -157,15 +156,14 @@ class JurisdictionAdmin(VersionAdmin):
 class ExemptionAdminForm(forms.ModelForm):
     """Form to include a jurisdiction and contributor autocomplete"""
     jurisdiction = autocomplete_light.ModelChoiceField(
-        'JurisdictionAdminAutocomplete',
-        queryset=JurisdictionModels.Jurisdiction.objects.all()
+        'JurisdictionAdminAutocomplete', queryset=Jurisdiction.objects.all()
     )
     contributors = autocomplete_light.ModelMultipleChoiceField(
         'UserAutocomplete', queryset=User.objects.all(), required=False
     )
 
     class Meta:
-        model = JurisdictionModels.Exemption
+        model = Exemption
         fields = '__all__'
 
 
@@ -179,8 +177,8 @@ class ExemptionAdmin(VersionAdmin):
     form = ExemptionAdminForm
 
 
-admin.site.register(JurisdictionModels.Exemption, ExemptionAdmin)
-admin.site.register(JurisdictionModels.Jurisdiction, JurisdictionAdmin)
+admin.site.register(Exemption, ExemptionAdmin)
+admin.site.register(Jurisdiction, JurisdictionAdmin)
 
 
 class JurisdictionCsvModel(CsvModel):
@@ -189,9 +187,9 @@ class JurisdictionCsvModel(CsvModel):
     name = CharField()
     slug = CharField()
     level = CharField(transform=lambda x: x.lower()[0])
-    parent = DjangoModelField(JurisdictionModels.Jurisdiction, pk='name')
+    parent = DjangoModelField(Jurisdiction, pk='name')
 
     class Meta:
-        dbModel = JurisdictionModels.Jurisdiction
+        dbModel = Jurisdiction
         delimiter = ','
         update = {'keys': ['slug', 'parent']}

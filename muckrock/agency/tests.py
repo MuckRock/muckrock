@@ -172,7 +172,7 @@ class TestAgencyUnit(TestCase):
 
         proxy = factories.UserFactory(
             profile__acct_type='proxy',
-            profile__state=agency_.jurisdiction.legal(),
+            profile__state=agency_.jurisdiction.legal.abbrev,
         )
         proxy_info = agency_.get_proxy_info()
         eq_(proxy_info['proxy'], True)

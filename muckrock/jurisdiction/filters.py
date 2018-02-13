@@ -7,7 +7,7 @@ import django_filters
 from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
-from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.jurisdiction.models import Exemption, Jurisdiction
 
 LEVELS = (('', 'All'), ('f', 'Federal'), ('s', 'State'), ('l', 'Local'))
 
@@ -24,3 +24,19 @@ class JurisdictionFilterSet(django_filters.FilterSet):
     class Meta:
         model = Jurisdiction
         fields = ['level', 'parent']
+
+
+class ExemptionFilterSet(django_filters.FilterSet):
+    """Allows exemptions to be filtered by jurisdiction"""
+    jurisdiction = django_filters.ModelChoiceFilter(
+        label='Jurisdiction',
+        queryset=Jurisdiction.objects.filter(
+            level__in=('s', 'f'),
+            hidden=False,
+        ),
+        widget=autocomplete_light.ChoiceWidget('FederalStateAutocomplete')
+    )
+
+    class Meta:
+        model = Exemption
+        fields = ['jurisdiction']

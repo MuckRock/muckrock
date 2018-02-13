@@ -31,7 +31,6 @@ from muckrock.foia.models import (
     OutboundAttachment,
     RawEmail,
 )
-from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.news.models import Article
 from muckrock.organization.models import Organization
 from muckrock.project.models import Project
@@ -91,18 +90,6 @@ class OrganizationFactory(factory.django.DjangoModelFactory):
     owner = factory.SubFactory(UserFactory)
 
 
-class JurisdictionFactory(factory.django.DjangoModelFactory):
-    """A factory for creating Jurisdiction test objects."""
-
-    class Meta:
-        model = Jurisdiction
-
-    name = factory.Sequence(lambda n: "Jurisdiction %d" % n)
-    slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
-    days = 20
-    level = 'f'
-
-
 class AgencyFactory(factory.django.DjangoModelFactory):
     """A factory for creating Agency test objects."""
 
@@ -111,7 +98,9 @@ class AgencyFactory(factory.django.DjangoModelFactory):
 
     name = factory.Sequence(lambda n: "Agency %d" % n)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
-    jurisdiction = factory.SubFactory('muckrock.factories.JurisdictionFactory')
+    jurisdiction = factory.SubFactory(
+        'muckrock.jurisdiction.factories.StateJurisdictionFactory'
+    )
     status = 'approved'
     email = factory.RelatedFactory(
         'muckrock.factories.AgencyEmailFactory',
@@ -186,7 +175,9 @@ class FOIARequestFactory(factory.django.DjangoModelFactory):
     title = factory.Sequence(lambda n: "FOIA Request %d" % n)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
     user = factory.SubFactory(UserFactory)
-    jurisdiction = factory.SubFactory('muckrock.factories.JurisdictionFactory')
+    jurisdiction = factory.SubFactory(
+        'muckrock.jurisdiction.factories.StateJurisdictionFactory'
+    )
     agency = factory.SubFactory(
         'muckrock.factories.AgencyFactory',
         jurisdiction=factory.SelfAttribute('..jurisdiction')

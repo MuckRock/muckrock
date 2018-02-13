@@ -25,11 +25,10 @@ class FederalJurisdictionFactory(factory.django.DjangoModelFactory):
 
     name = u'United States of America'
     slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
-    days = 20
     level = 'f'
-    intro = factory.Faker('sentence')
-    law_name = factory.Faker('word')
-    waiver = factory.Faker('paragraph')
+    law = factory.RelatedFactory(
+        'muckrock.jurisdiction.factories.LawFactory', 'jurisdiction'
+    )
 
 
 class StateJurisdictionFactory(factory.django.DjangoModelFactory):
@@ -41,12 +40,11 @@ class StateJurisdictionFactory(factory.django.DjangoModelFactory):
     name = u'Massachusetts'
     abbrev = u'MA'
     slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
-    days = 20
     level = 's'
     parent = factory.SubFactory(FederalJurisdictionFactory)
-    intro = factory.Faker('sentence')
-    law_name = factory.Faker('word')
-    waiver = factory.Faker('paragraph')
+    law = factory.RelatedFactory(
+        'muckrock.jurisdiction.factories.LawFactory', 'jurisdiction'
+    )
 
 
 class LocalJurisdictionFactory(factory.django.DjangoModelFactory):
@@ -59,7 +57,6 @@ class LocalJurisdictionFactory(factory.django.DjangoModelFactory):
     slug = factory.LazyAttribute(
         lambda obj: slugify(obj.name) + '-' + slugify(obj.parent.abbrev)
     )
-    days = 20
     level = 'l'
     parent = factory.SubFactory(StateJurisdictionFactory)
 
@@ -70,11 +67,11 @@ class LawFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Law
 
-    jurisdiction = factory.SubFactory(StateJurisdictionFactory)
+    jurisdiction = factory.SubFactory(StateJurisdictionFactory, law=None)
     name = u'Massachusetts Public Records Law'
     citation = u'Massachusetts General Laws, Part 1, Title X, Chapter 66'
     url = u'https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66'
-    summary = u'Passed in 1973, Reform bill signed into law 2015.'
+    days = 20
 
 
 class ExemptionFactory(factory.django.DjangoModelFactory):
