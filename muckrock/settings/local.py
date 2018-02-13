@@ -13,6 +13,8 @@ EMAIL_DEBUG = DEBUG
 THUMBNAIL_DEBUG = DEBUG
 AWS_DEBUG = False
 
+INSTALLED_APPS += ('django_extensions',)
+
 MIDDLEWARE_CLASSES += (
     'muckrock.settings.local.ExceptionLoggingMiddleware',
     'yet_another_django_profiler.middleware.ProfilerMiddleware',

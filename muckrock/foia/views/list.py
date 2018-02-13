@@ -31,7 +31,8 @@ from muckrock.foia.filters import (
     MyFOIARequestFilterSet,
     ProcessingFOIARequestFilterSet,
 )
-from muckrock.foia.models import FOIAMultiRequest, FOIARequest
+from muckrock.foia.forms import SaveLoadSearchForm, SaveLoadSearchFormHandler
+from muckrock.foia.models import FOIAMultiRequest, FOIARequest, FOIASavedSearch
 from muckrock.news.models import Article
 from muckrock.project.models import Project
 from muckrock.utils import Echo
@@ -117,6 +118,7 @@ class RequestList(MRSearchFilterListView):
         url = furl(self.request.get_full_path())
         url.args['content_type'] = 'csv'
         context['csv_link'] = url.url
+        context['save_search_form'] = SaveLoadSearchForm(request=self.request)
         return context
 
     def render_to_response(self, context, **kwargs):
@@ -204,6 +206,53 @@ class RequestList(MRSearchFilterListView):
         else:
             return super(RequestList,
                          self).render_to_response(context, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """Allow saving a search/filter"""
+        # pylint: disable=unused-argument
+
+        if request.user.is_anonymous:
+            messages.error(request, 'Please log in to save a search')
+            return redirect(request.resolver_match.view_name)
+        form_handler = SaveLoadSearchFormHandler(request, self.filter_class)
+
+        if form_handler.is_valid() and form_handler.has_title():
+            search = form_handler.create_saved_search()
+            messages.success(request, 'Search saved')
+            return redirect(
+                '{}?{}'.format(
+                    reverse(request.resolver_match.view_name),
+                    search.urlencode(),
+                )
+            )
+        elif form_handler.is_valid():
+            messages.error(request, 'Please enter a title')
+            return redirect(request.resolver_match.view_name)
+        else:
+            messages.error(request, 'Invalid data')
+            return redirect(request.resolver_match.view_name)
+
+    def get(self, request, *args, **kwargs):
+        """Check for loading saved searches"""
+        if (
+            request.GET.get('action') == 'load'
+            and request.user.is_authenticated
+        ):
+            try:
+                search = FOIASavedSearch.objects.get(
+                    pk=request.GET.get('search'),
+                    user=request.user,
+                )
+            except FOIASavedSearch.DoesNotExist:
+                return super(RequestList, self).get(request, *args, **kwargs)
+            return redirect(
+                '{}?{}'.format(
+                    reverse(request.resolver_match.view_name),
+                    search.urlencode(),
+                )
+            )
+        else:
+            return super(RequestList, self).get(request, *args, **kwargs)
 
 
 @class_view_decorator(login_required)

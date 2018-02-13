@@ -37,7 +37,7 @@ $(document).ready(function(){
           field: '<input type="checkbox" id="' + data.name + '">'
         };
       }},
-      defaultFields: JSON.parse($("#id_crowdsource-form_json").val())
+    defaultFields: JSON.parse($("#id_crowdsource-form_json").length ? $("#id_crowdsource-form_json").val() : "[]")
   });
 
   $("form.create-crowdsource").submit(function() {

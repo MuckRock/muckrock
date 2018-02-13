@@ -67,3 +67,19 @@
         <td>{{ foia.date_submitted|date:"m/d/Y" }}</td>
     {% endwith %}
 {% endblock list-table-row %}
+
+{% block filter-actions %}
+  <div class="button-group">
+    <button class="button" action="apply-filters">Filter</button>
+    <a class="button" href="{{ request.path }}">Clear</a>
+    <button class="button" name="action" value="save-search">Save Search</button>
+  </div>
+  <div class="field">
+    <label for="load-search">Load a saved search</label>
+    <select id="load-search">
+      <option value="0">A</option>
+      <option value="1">B</option>
+      <option value="2">C</option>
+    </select>
+  </div>
+{% endblock filter-actions %}
