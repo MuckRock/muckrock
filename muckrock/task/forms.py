@@ -65,6 +65,7 @@ class ReviewAgencyTaskForm(forms.Form):
     )
     reply = forms.CharField(
         label='Reply:',
+        required=False,
         widget=forms.Textarea(attrs={
             'rows': 5,
         }),
