@@ -496,8 +496,14 @@ def phaxio_callback(request):
                 perm_error_ids = set([34, 47, 49, 91, 107, 109, 116, 123])
                 temp_failure = int(recipient['error_id']) not in perm_error_ids
                 logger.warning(
-                    'Fax Error - Number: %s - ID: %s - Temp: %s - error_count: %s',
-                    number, recipient['error_id'], temp_failure, error_count
+                    'Fax Error - Number: %s - ID: %s - Temp: %s - '
+                    'error_count: %s - foia: %s - comm: %s',
+                    number,
+                    recipient['error_id'],
+                    temp_failure,
+                    error_count,
+                    fax_comm.communication.foia.pk,
+                    fax_comm.communication.pk,
                 )
                 if temp_failure and error_count < 4:
                     logger.warning('Fax Error Retrying...')
