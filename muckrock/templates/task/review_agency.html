@@ -3,52 +3,52 @@
 {% block title %}Review Agency Tasks{%endblock %}
 
 {% block task-content %}
-<dl class="task__data">
-  <dt>Agency</dt>
-  <dd><a href="{{task.agency.get_absolute_url}}">{{task.agency}}</a> (<a href="{% url 'admin:agency_agency_change' task.agency.pk %}">admin</a>){% if agency.stale %}(stale){% endif %}</dd>
-  {% if emails %}
-    <dt>Email</dt>
-    {% for email in emails %}
-    <dd><a href="{{ email.email.get_absolute_url }}">{{ email }}</a></dd>
-    {% endfor %}
-  {% endif %}
-  {% if faxes %}
-    <dt>Fax</dt>
-    {% for fax in faxes %}
-      <dd><a href="{{ fax.phone.get_absolute_url }}">{{ fax }}</a></dd>
-    {% endfor %}
-  {% endif %}
-  {% if phones %}
-    <dt>Phone</dt>
-    {% for phone in phones %}
-      <dd>{{ phone }}</dd>
-    {% endfor %}
-  {% endif %}
-  {% if addresses %}
-    <dt>Address</dt>
-    {% for address in addresses %}
-      <dd>{{ address|linebreaks }}</dd>
-    {% endfor %}
-  {% endif %}
-{% if agency.portal %}
-    <dt>Portal</dt>
-    <dd><a href="{{agency.portal.url}}">{{agency.portal.name}}</a> ({{agency.portal.get_type_display}})</dd>
-{% endif %}
-  <dt>Total Open Requests</dt>
-  <dd>{{ num_open_requests }}</dd>
-  <dt>Last Response</dt>
-  {% if latest_response %}
-    <dd>{{ latest_response.0|date:"m/d/y H:i" }}</dd>
-    <dd>{{ latest_response.1 }} day{{ latest_response.1|pluralize }} ago</dd>
-  {% else %}
-    <dd>Never</dd>
-  {% endif %}
-</dl>
+  <dl class="task__data">
+    <dt>Agency</dt>
+    <dd><a href="{{task.agency.get_absolute_url}}">{{task.agency}}</a> (<a href="{% url 'admin:agency_agency_change' task.agency.pk %}">admin</a>){% if agency.stale %}(stale){% endif %}</dd>
+    {% if emails %}
+      <dt>Email</dt>
+      {% for email in emails %}
+        <dd><a href="{{ email.email.get_absolute_url }}">{{ email }}</a></dd>
+      {% endfor %}
+    {% endif %}
+    {% if faxes %}
+      <dt>Fax</dt>
+      {% for fax in faxes %}
+        <dd><a href="{{ fax.phone.get_absolute_url }}">{{ fax }}</a></dd>
+      {% endfor %}
+    {% endif %}
+    {% if phones %}
+      <dt>Phone</dt>
+      {% for phone in phones %}
+        <dd>{{ phone }}</dd>
+      {% endfor %}
+    {% endif %}
+    {% if addresses %}
+      <dt>Address</dt>
+      {% for address in addresses %}
+        <dd>{{ address|linebreaks }}</dd>
+      {% endfor %}
+    {% endif %}
+    {% if agency.portal %}
+      <dt>Portal</dt>
+      <dd><a href="{{agency.portal.url}}">{{agency.portal.name}}</a> ({{agency.portal.get_type_display}})</dd>
+    {% endif %}
+    <dt>Total Open Requests</dt>
+    <dd>{{ num_open_requests }}</dd>
+    <dt>Last Response</dt>
+    {% if latest_response %}
+      <dd>{{ latest_response.0|date:"m/d/y H:i" }}</dd>
+      <dd>{{ latest_response.1 }} day{{ latest_response.1|pluralize }} ago</dd>
+    {% else %}
+      <dd>Never</dd>
+    {% endif %}
+  </dl>
 
-{% for data in review_data %}
-<div class="collapsable review-requests{% if not data.error %} collapsed{% endif %}">
-    <header {% if data.error %}class="error"{% endif %}>
-      <p>{{data.address}} (<a href="{{ data.address.get_absolute_url }}">Details</a>)</p>
+  {% for data in review_data %}
+    <div class="collapsable review-requests{% if not data.error %} collapsed{% endif %}">
+      <header {% if data.error %}class="error"{% endif %}>
+        <p>{{data.address}} (<a href="{{ data.address.get_absolute_url }}">Details</a>)</p>
       </header>
       <table>
         <tr>
@@ -60,105 +60,107 @@
         </tr>
       </table>
       {% if data.email_or_fax == "email" and data.errors %}
-      <table>
-        <thead>
-          <tr>
-            <th>Timestamp</th>
-            <th>Communication</th>
-            <th>Code</th>
-            <th>Error</th>
-            <th>Event</th>
-            <th>Reason</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for error in data.errors %}
-            <tr>
-              <td>{{ error.datetime|date:"m/d/y H:i" }}</td>
-              <td><a href="{{ error.email.communication.get_absolute_url }}">{{ error.email.communication.foia.title }}</a></td>
-              <td>{{ error.code }}</td>
-              <td>{{ error.error }}</td>
-              <td>{{ error.event }}</td>
-              <td>{{ error.reason }}</td>
-          {% endfor %}
-        </tbody>
-      </table>
-      {% endif %}
-      {% if data.email_or_fax == "fax" and data.errors %}
-      <table>
-        <thead>
-          <tr>
-            <th>Timestamp</th>
-            <th>Communication</th>
-            <th>Type</th>
-            <th>Code</th>
-            <th>ID</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for error in data.errors %}
-            <tr>
-              <td>{{ error.datetime|date:"m/d/y H:i" }}</td>
-              <td><a href="{{ error.fax.communication.get_absolute_url }}">{{ error.fax.communication.foia.title }}</a></td>
-              <td>{{ error.error_type }}</td>
-              <td>{{ error.error_code }}</td>
-              <td>{{ error.error_id }}</td>
-          {% endfor %}
-        </tbody>
-      </table>
-      {% endif %}
-      <table class="review-request-table">
+        <table>
           <thead>
-              <tr>
-                  <th><input type="checkbox" class="select-all" data-name="{{data.checkbox_name}}" {% if data.error %}checked{% endif %} ></th>
-                  <th>Request</th>
-                  <th>Originally Submitted</th>
-                  <th>Last Response</th>
-                  <th><abbr title="Estimated Completion Date">ECD</abbr></th>
-                  <th>Status</th>
-                  <th>Email:</th>
-                  <th>Fax:</th>
-              </tr>
+            <tr>
+              <th>Timestamp</th>
+              <th>Communication</th>
+              <th>Code</th>
+              <th>Error</th>
+              <th>Event</th>
+              <th>Reason</th>
+            </tr>
           </thead>
           <tbody>
-          {% for foia in data.foias %}
-              <tr class="review-request">
-                  <td><input type="checkbox" form="{{task.pk}}-form" name="{{data.checkbox_name}}" value="{{foia.pk}}" {% if data.error %}checked{% endif %}></td>
-                  <td><a href="{{foia.get_absolute_url}}">{{foia}}</a></td>
-                  <td>{{foia.date_submitted|date:"m/d/y"}}</td>
-                  <td>{{foia.latest_response|default_if_none:"Never"}}</td>
-                  <td>{{foia.date_estimate|date:"m/d/y"}}</td>
-                  <td>{{foia.get_status_display}}</td>
-                  <td><input type="text" value="{{foia.email}}" readonly {% if foia.email.status == "error" %}class="error"{% endif %}></td>
-                  <td><input type="text" value="{{foia.fax}}" readonly {% if foia.fax.status == "error" %}class="error"{% endif %}></td>
-              </tr>
-          {% endfor %}
+            {% for error in data.errors %}
+              <tr>
+                <td>{{ error.datetime|date:"m/d/y H:i" }}</td>
+                <td><a href="{{ error.email.communication.get_absolute_url }}">{{ error.email.communication.foia.title }}</a></td>
+                <td>{{ error.code }}</td>
+                <td>{{ error.error }}</td>
+                <td>{{ error.event }}</td>
+                <td>{{ error.reason }}</td>
+              {% endfor %}
           </tbody>
+        </table>
+      {% endif %}
+      {% if data.email_or_fax == "fax" and data.errors %}
+        <table>
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Communication</th>
+              <th>Type</th>
+              <th>Code</th>
+              <th>ID</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for error in data.errors %}
+              <tr>
+                <td>{{ error.datetime|date:"m/d/y H:i" }}</td>
+                <td><a href="{{ error.fax.communication.get_absolute_url }}">{{ error.fax.communication.foia.title }}</a></td>
+                <td>{{ error.error_type }}</td>
+                <td>{{ error.error_code }}</td>
+                <td>{{ error.error_id }}</td>
+              {% endfor %}
+          </tbody>
+        </table>
+      {% endif %}
+      <table class="review-request-table">
+        <thead>
+          <tr>
+            <th><input type="checkbox" class="select-all" data-name="{{data.checkbox_name}}" {% if data.error %}checked{% endif %} ></th>
+            <th>Request</th>
+            <th>Originally Submitted</th>
+            <th>Last Response</th>
+            <th><abbr title="Estimated Completion Date">ECD</abbr></th>
+            <th>Status</th>
+            <th>Portal</th>
+            <th>Email</th>
+            <th>Fax</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for foia in data.foias %}
+            <tr class="review-request">
+              <td><input type="checkbox" form="{{task.pk}}-form" name="{{data.checkbox_name}}" value="{{foia.pk}}" {% if data.error %}checked{% endif %}></td>
+              <td><a href="{{foia.get_absolute_url}}">{{foia}}</a></td>
+              <td>{{foia.date_submitted|date:"m/d/y"}}</td>
+              <td>{{foia.latest_response|default_if_none:"Never"}}</td>
+              <td>{{foia.date_estimate|date:"m/d/y"}}</td>
+              <td>{{foia.get_status_display}}</td>
+              <td><input type="text" value="{{foia.portal}}" readonly></td>
+              <td><input type="text" value="{{foia.email}}" readonly {% if foia.email.status == "error" %}class="error"{% endif %}></td>
+              <td><input type="text" value="{{foia.fax}}" readonly {% if foia.fax.status == "error" %}class="error"{% endif %}></td>
+            </tr>
+          {% endfor %}
+        </tbody>
       </table>
-  </div>
-{% endfor %}
+    </div>
+  {% endfor %}
 {% endblock %}
 
 {% block task-actions %}
-    <div class="form-field">
-      <label for="{{form.email_or_fax.id_for_label}}">{{form.email_or_fax.label}}</label>
-        {{ form.email_or_fax }}
-      <label class="check-label" for="{{form.update_agency_info.id_for_label}}">{{form.update_agency_info.label}}</label>
-        {{ form.update_agency_info }}
-      <br>
-      <label class="check-label" for="{{form.snail_mail.id_for_label}}">{{form.snail_mail.label}}</label>
-        {{ form.snail_mail }}
-      <br>
-      <label class="check-label" for="{{form.resolve.id_for_label}}">{{form.resolve.label}}</label>
-        {{ form.resolve }}
-      <label for="{{form.reply.id_for_label}}">{{form.reply.label}}</label>
-        {{ form.reply }}
-      <span>Leave blank to not send a follow up to the new address</span>
-    </div>
-    <span class="task-defer">
-      <input type="text" class="datepicker-future" name="date_deferred" value="{{task.date_deferred|date:"m/d/Y"|default:""}}">
-      <button type="submit" name="defer" value="true" class="primary button">Defer</button>
-    </span>
-    <button type="submit" name="update" value="true" class="primary button">Update email</button>
-    <button class="button" type="submit" name="resolve" value="true">Resolve</button>
+  <div class="form-field">
+    <label for="{{form.email_or_fax.id_for_label}}">{{form.email_or_fax.label}}</label>
+    {{ form.email_or_fax }}
+    <label class="check-label" for="{{form.update_agency_info.id_for_label}}">{{form.update_agency_info.label}}</label>
+    {{ form.update_agency_info }}
+    <br>
+    <label class="check-label" for="{{form.snail_mail.id_for_label}}">{{form.snail_mail.label}}</label>
+    {{ form.snail_mail }}
+    <br>
+    <label class="check-label" for="{{form.resolve.id_for_label}}">{{form.resolve.label}}</label>
+    {{ form.resolve }}
+    <label for="{{form.reply.id_for_label}}">{{form.reply.label}}</label>
+    {{ form.reply }}
+    <span>Leave blank to not send a follow up to the new address</span>
+  </div>
+  <span class="task-defer">
+    <input type="text" class="datepicker-future" name="date_deferred" value="{{task.date_deferred|date:"m/d/Y"|default:""}}">
+    <button type="submit" name="defer" value="true" class="primary button">Defer</button>
+  </span>
+  <button type="submit" name="update" value="true" class="primary button">Update email</button>
+  <button class="button" type="submit" name="resolve" value="true">Resolve</button>
 {% endblock %}
