@@ -454,6 +454,7 @@ def phaxio_callback(request):
     ):
         return HttpResponseForbidden()
 
+    logger.warning('In Phaxio Call Back %s', request.POST)
     fax_info = json.loads(request.POST['fax'])
     fax_id = fax_info['tags'].get('fax_id')
     error_count = int(fax_info['tags'].get('error_count', 0))
