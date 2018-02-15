@@ -30,9 +30,9 @@
         <dd>{{ address|linebreaks }}</dd>
       {% endfor %}
     {% endif %}
-    {% if agency.portal %}
+    {% if task.agency.portal %}
       <dt>Portal</dt>
-      <dd><a href="{{agency.portal.url}}">{{agency.portal.name}}</a> ({{agency.portal.get_type_display}})</dd>
+      <dd><a href="{{task.agency.portal.url}}">{{task.agency.portal.name}}</a> ({{task.agency.portal.get_type_display}})</dd>
     {% endif %}
     <dt>Total Open Requests</dt>
     <dd>{{ num_open_requests }}</dd>
