@@ -265,6 +265,7 @@ urlparse.uses_netloc.append('redis')
 BROKER_URL = os.environ.get(
     'REDISTOGO_URL', os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
 )
+BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 25 * 60 * 60}
 
 djcelery.setup_loader()
 
