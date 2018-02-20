@@ -61,7 +61,7 @@ class FOIASavedSearch(models.Model):
             'minimum_pages': min_pages,
             'date_range_0': min_date,
             'date_range_1': max_date,
-            'search': self.pk,
+            'search_title': self.title,
         })
         params.setlist('user', self.users.values_list('pk', flat=True))
         params.setlist('agency', self.agencies.values_list('pk', flat=True))

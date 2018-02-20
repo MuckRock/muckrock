@@ -27,12 +27,13 @@
             <a href="#" class="bold list__toggle list__toggle--hide">&times; Hide Filters</a>
             <form method="GET" class="filter form" id="filter-form">
               {% csrf_token %}
-              {% if save_search_form and request.user.is_authenticated %}
-                {% include 'lib/pattern/form.html' with form=save_search_form %}
-                <div class="button-group">
-                  <button class="button get" name="action" value="load">Load</button>
-                  <button class="button" name="action" value="save" formmethod="post">Save</button>
-                </div>
+              {% if saved_searches %}
+                <label>Saved searches:</label>
+                <ul>
+                  {% for saved_search in saved_searches %}
+                    <li><a href="?load={{ saved_search.title }}">{{ saved_search.title }}</a><button class="saved-search-delete" formmethod="post" name="delete" value="{{ saved_search.pk }}">Remove</button></li>
+                  {% endfor %}
+                </ul>
               {% endif %}
               {% if search_form %}
                 {% include 'lib/pattern/field.html' with field=search_form.q %}
@@ -42,6 +43,12 @@
                 <button class="button get" action="apply-filters">Filter</button>
                 <a class="button" href="{{ request.path }}">Clear</a>
               </div>
+              {% if save_search_form and request.user.is_authenticated %}
+                {% include 'lib/pattern/form.html' with form=save_search_form %}
+                <div class="button-group">
+                  <button class="button" name="action" value="save" formmethod="post">Save</button>
+                </div>
+              {% endif %}
             </form>
           </div>
         {% endif %}

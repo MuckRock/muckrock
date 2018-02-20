@@ -31,7 +31,7 @@ from muckrock.foia.filters import (
     MyFOIARequestFilterSet,
     ProcessingFOIARequestFilterSet,
 )
-from muckrock.foia.forms import SaveLoadSearchForm, SaveLoadSearchFormHandler
+from muckrock.foia.forms import SaveSearchForm, SaveSearchFormHandler
 from muckrock.foia.models import FOIAMultiRequest, FOIARequest, FOIASavedSearch
 from muckrock.news.models import Article
 from muckrock.project.models import Project
@@ -118,7 +118,15 @@ class RequestList(MRSearchFilterListView):
         url = furl(self.request.get_full_path())
         url.args['content_type'] = 'csv'
         context['csv_link'] = url.url
-        context['save_search_form'] = SaveLoadSearchForm(request=self.request)
+        context['save_search_form'] = SaveSearchForm(
+            initial={
+                'search_title': self.request.GET.get('search_title')
+            }
+        )
+        if self.request.user.is_authenticated:
+            context['saved_searches'] = (
+                FOIASavedSearch.objects.filter(user=self.request.user)
+            )
         return context
 
     def render_to_response(self, context, **kwargs):
@@ -214,9 +222,21 @@ class RequestList(MRSearchFilterListView):
         if request.user.is_anonymous:
             messages.error(request, 'Please log in to save a search')
             return redirect(request.resolver_match.view_name)
-        form_handler = SaveLoadSearchFormHandler(request, self.filter_class)
+        form_handler = SaveSearchFormHandler(request, self.filter_class)
 
-        if form_handler.is_valid() and form_handler.has_title():
+        if 'delete' in request.POST:
+            try:
+                search = FOIASavedSearch.objects.get(
+                    pk=request.POST.get('delete'),
+                    user=request.user,
+                )
+                search.delete()
+                messages.success(request, 'The saved search was deleted')
+                return redirect(request.resolver_match.view_name)
+            except FOIASavedSearch.DoesNotExist:
+                messages.error(request, 'That saved search no longer exists')
+            return redirect(request.resolver_match.view_name)
+        elif form_handler.is_valid():
             search = form_handler.create_saved_search()
             messages.success(request, 'Search saved')
             return redirect(
@@ -225,22 +245,16 @@ class RequestList(MRSearchFilterListView):
                     search.urlencode(),
                 )
             )
-        elif form_handler.is_valid():
-            messages.error(request, 'Please enter a title')
-            return redirect(request.resolver_match.view_name)
         else:
             messages.error(request, 'Invalid data')
             return redirect(request.resolver_match.view_name)
 
     def get(self, request, *args, **kwargs):
         """Check for loading saved searches"""
-        if (
-            request.GET.get('action') == 'load'
-            and request.user.is_authenticated
-        ):
+        if 'load' in request.GET and request.user.is_authenticated:
             try:
                 search = FOIASavedSearch.objects.get(
-                    pk=request.GET.get('search'),
+                    title=request.GET.get('load'),
                     user=request.user,
                 )
             except FOIASavedSearch.DoesNotExist:
