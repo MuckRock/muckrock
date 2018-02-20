@@ -629,8 +629,9 @@ class NewAgencyTask(Task):
         """Reject the agency and block the user"""
         self.agency.status = 'rejected'
         self.agency.save()
-        self.user.is_active = False
-        self.user.save()
+        if self.user.is_authenticated:
+            self.user.is_active = False
+            self.user.save()
         # reset all foia's to drafts - don't want them marked as processing,
         # but safer then deleting them
         self.agency.foiarequest_set.update(status='started')
