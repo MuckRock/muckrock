@@ -58,6 +58,7 @@ class RequestSharingAutocomplete(UserAutocomplete):
         # get filters
         query = self.request.GET.get('q', '')
         foia_id = self.request.GET.get('foiaId', '')
+        exclude_pks = self.request.GET.getlist('exclude')
         # get all choices
         choices = self.choices
         conditions = self._choices_for_request_conditions(
@@ -69,10 +70,10 @@ class RequestSharingAutocomplete(UserAutocomplete):
             creator = foia.user
             editors = foia.edit_collaborators.all()
             viewers = foia.read_collaborators.all()
-            exclude_pks = [creator.pk]
-            exclude_pks += [editor.pk for editor in editors]
-            exclude_pks += [viewer.pk for viewer in viewers]
-            choices = choices.exclude(pk__in=exclude_pks)
+            exclude_pks.append(creator.pk)
+            exclude_pks.extend([editor.pk for editor in editors])
+            exclude_pks.extend([viewer.pk for viewer in viewers])
+        choices = choices.exclude(pk__in=exclude_pks)
         # return final list of choices
         return self.order_choices(choices)[0:self.limit_choices]
 

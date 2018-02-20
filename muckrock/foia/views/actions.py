@@ -33,8 +33,6 @@ def embargo(request, jurisdiction, jidx, slug, idx):
 
     def fine_tune_embargo(request, foia):
         """Adds an expiration date or makes permanent if necessary."""
-        permanent = request.POST.get('permanent_embargo')
-        expiration = request.POST.get('date_embargo')
         form = FOIAEmbargoForm({
             'permanent_embargo': request.POST.get('permanent_embargo'),
             'date_embargo': request.POST.get('date_embargo')
@@ -47,7 +45,6 @@ def embargo(request, jurisdiction, jidx, slug, idx):
             if expiration and foia.status in END_STATUS:
                 foia.date_embargo = expiration
             foia.save(comment='updated embargo')
-        return
 
     def create_embargo(request, foia):
         """Apply an embargo to the FOIA"""
@@ -62,7 +59,6 @@ def embargo(request, jurisdiction, jidx, slug, idx):
                 '%s was forbidden from embargoing %s', request.user, foia
             )
             messages.error(request, 'You cannot embargo requests.')
-        return
 
     def update_embargo(request, foia):
         """Update an embargo to the FOIA"""
@@ -74,7 +70,6 @@ def embargo(request, jurisdiction, jidx, slug, idx):
                 request.user, foia
             )
             messages.error(request, 'You cannot update this embargo.')
-        return
 
     def delete_embargo(request, foia):
         """Remove an embargo from the FOIA"""
@@ -82,7 +77,6 @@ def embargo(request, jurisdiction, jidx, slug, idx):
         foia.save(comment='removed embargo')
         logger.info('%s unembargoed %s', request.user, foia)
         new_action(request.user, 'unembargoed', target=foia)
-        return
 
     foia = get_object_or_404(
         FOIARequest,

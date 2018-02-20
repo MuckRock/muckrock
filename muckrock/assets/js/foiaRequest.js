@@ -264,3 +264,26 @@ $("#id_admin_fix-via").change(function() {
   }
 });
 $("#id_admin_fix-via").trigger("change");
+
+/* Bulk Actions */
+
+$('document').ready(function(){
+  $("#request-actions .bulk").change(function(e) {
+    $("#request-actions .project-form").hide();
+    $("#request-actions .tag-form").hide();
+    $("#request-actions .share-form").hide();
+    $("#request-actions .help").text($(this).find(":selected").data("help") || "");
+    switch($(this).val()) {
+      case "project":
+        $("#request-actions .project-form").show();
+        break;
+      case "tags":
+        $("#request-actions .tag-form").show();
+        break;
+      case "share":
+        $("#request-actions .share-form").show();
+        break;
+    }
+  });
+  $("#request-actions .bulk").change();
+});

@@ -512,3 +512,18 @@ $request-breakpoint: 768px;
 .saved-search-delete:hover {
   color: $color-red-dark;
 }
+
+#request-actions {
+  .project-form, .tag-form, .share-form {
+    display: none;
+  }
+  #id_tags {
+    width: 300px;
+  }
+  #id_users-wrapper {
+    vertical-align: top;
+  }
+  #id_projects-wrapper, #id_users-wrapper, #id_projects-autocomplete, #id_users-autocomplete {
+    width: 300px;
+  }
+}

@@ -19,7 +19,7 @@ import json
 import logging
 from cStringIO import StringIO
 from datetime import datetime, timedelta
-from zipfile import ZipFile
+from zipfile import ZIP_DEFLATED, ZipFile
 
 # MuckRock
 from muckrock.accounts.models import Notification
@@ -775,7 +775,7 @@ class Detail(DetailView):
         foia = self.get_object()
         if foia.has_perm(self.request.user, 'zip_download'):
             buff = StringIO()
-            with ZipFile(buff, 'w') as zip_file:
+            with ZipFile(buff, 'w', ZIP_DEFLATED) as zip_file:
                 for i, comm in enumerate(foia.communications.all()):
                     file_name = '{:03d}_{}_comm.txt'.format(i, comm.date)
                     zip_file.writestr(

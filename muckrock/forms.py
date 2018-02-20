@@ -84,6 +84,11 @@ class TagManagerForm(forms.Form):
         )
     )
 
+    def __init__(self, *args, **kwargs):
+        required = kwargs.pop('required', True)
+        super(TagManagerForm, self).__init__(*args, **kwargs)
+        self.fields['tags'].required = required
+
 
 class NewsletterSignupForm(forms.Form):
     """A form for adding an email to a MailChimp mailing list."""
