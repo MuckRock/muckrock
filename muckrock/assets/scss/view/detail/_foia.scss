@@ -495,3 +495,20 @@ $request-breakpoint: 768px;
 #replacement-agency {
     width: 100%;
 }
+
+.saved-search-delete {
+  background: none;
+  border: none;
+  color: $color-red;
+  cursor: pointer;
+  font-size: $size-2;
+  float: right;
+}
+
+.saved-search-delete:focus {
+  outline: none;
+}
+
+.saved-search-delete:hover {
+  color: $color-red-dark;
+}
