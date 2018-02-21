@@ -2,3 +2,4 @@ User-agent: *
 Disallow: /foia_documents
 Disallow: /foia_files
 Disallow: /foiamachine_files
+Disallow: /outbound_attachments

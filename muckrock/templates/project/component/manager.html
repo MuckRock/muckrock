@@ -1,38 +1,38 @@
 {% load thumbnail %}
 {% if projects or authorized %}
-<div class="project manager">
+  <div class="project manager">
     <header>
-        <dfn>Projects</dfn>
-        {% if authorized %}
+      <dfn>Projects</dfn>
+      {% if authorized %}
         <span class="small action">Edit</span>
-        {% endif %}
+      {% endif %}
     </header>
     {# Active state #}
     {% if authorized %}
-    <form action="{{endpoint}}" method="post">
+      <form action="{{endpoint}}" method="post">
         {% csrf_token %}
         {{form.projects}}
         <p>{% if not has_projects %}Once you've created a project, you'll be able to add this request to it from here. {% endif %}<a href="{% url "project-create" %}">Create a new project</a> or <a href="{% url "news-detail" year=2015 month="sep" day=3 slug="muckrock-projects-organize-crowdfund-journalism" %}">learn more about projects</a></p>
         <footer>
-            <button class="primary button" type="submit" name="action" value="projects">Save</button>
-            <span class="cancel button">Cancel</span>
+          <button class="primary button" type="submit" name="action" value="projects">Save</button>
+          <span class="cancel button">Cancel</span>
         </footer>
-    </form>
+      </form>
     {% endif %}
     {# Inactive state #}
     <div class="project state">
-        {% for project in projects %}
+      {% for project in projects %}
         <div class="project-item">
-            <a href="{{project.get_absolute_url}}" title="{{project.title}}">
-                <h4 class="project-info title">{{project.title}}</h4>
+          <a href="{{project.get_absolute_url}}" title="{{project.title}}">
+            <h4 class="project-info title">{{project.title}}</h4>
             {% if project.image %}
-                <img src="{% thumbnail project.image 600x600 %}" class="project-image" alt="{{project.title}}"/>
+              <img src="{% thumbnail project.image 600x600 %}" class="project-image" alt="{{project.title}}"/>
             {% endif %}
-            </a>
+          </a>
         </div>
-        {% empty %}
+      {% empty %}
         <p>No projects.</p>
-        {% endfor %}
+      {% endfor %}
     </div>
-</div>
+  </div>
 {% endif %}

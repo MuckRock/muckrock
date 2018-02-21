@@ -13,7 +13,7 @@ anyjson==0.3.3            # via kombu
 babel==2.5.1              # via django-phonenumber-field
 beautifulsoup4==4.6.0
 billiard==3.3.0.23        # via celery
-bleach==1.5.0
+bleach==2.1.2
 boto==2.42.0
 bz2file==0.98             # via smart-open
 celery==3.1.23
@@ -67,7 +67,7 @@ furl==1.0.1
 fuzzywuzzy==0.14.0
 google-api-python-client==1.6.5
 gunicorn==19.6.0
-html5lib==0.9999999       # via bleach
+html5lib==1.0.1           # via bleach
 httplib2==0.10.3          # via google-api-python-client, oauth2client
 idna==2.5                 # via requests
 image-diet2==1.0
@@ -119,6 +119,7 @@ unicodecsv==0.14.1
 unidecode==0.4.19
 uritemplate==3.0.0        # via google-api-python-client
 urllib3==1.21.1           # via requests
+webencodings==0.5.1       # via html5lib
 xlrd==1.1.0
 
 # The following packages are commented out because they are
