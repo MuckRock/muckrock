@@ -15,6 +15,7 @@ import json
 from random import choice
 
 # Third Party
+from bleach.sanitizer import Cleaner
 from pyembed.core import PyEmbed
 from pyembed.core.consumer import PyEmbedConsumerError
 
@@ -97,13 +98,16 @@ class Crowdsource(models.Model):
         self.fields.all().delete()
         form_data = json.loads(form_json)
         seen_labels = set()
+        cleaner = Cleaner(tags=[], attributes={}, styles=[], strip=True)
         for order, field_data in enumerate(form_data):
-            label = field_data['label'].replace('<br>', '')
+            label = cleaner.clean(field_data['label'])[:255]
             label = self._uniqify_label_name(seen_labels, label)
             field = self.fields.create(
                 label=label,
                 type=field_data['type'],
-                help_text=field_data.get('description', ''),
+                help_text=cleaner.clean(
+                    field_data.get('description', ''),
+                )[:255],
                 min=field_data.get('min'),
                 max=field_data.get('max'),
                 required=field_data.get('required', False),
@@ -112,8 +116,8 @@ class Crowdsource(models.Model):
             if 'values' in field_data and field.field.accepts_choices:
                 for choice_order, value in enumerate(field_data['values']):
                     field.choices.create(
-                        choice=value['label'],
-                        value=value['value'],
+                        choice=cleaner.clean(value['label'])[:255],
+                        value=cleaner.clean(value['value'])[:255],
                         order=choice_order,
                     )
 
@@ -123,7 +127,8 @@ class Crowdsource(models.Model):
         i = 0
         while new_label in seen_labels:
             i += 1
-            new_label = '{}-{}'.format(label, i)
+            postfix = str(i)
+            new_label = '{}-{}'.format(label[:254 - len(postfix)], postfix)
         seen_labels.add(new_label)
         return new_label
 
