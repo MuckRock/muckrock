@@ -158,15 +158,15 @@ def tag_manager(context, mr_object):
 @register.inclusion_tag('project/component/manager.html', takes_context=True)
 def project_manager(context, mr_object):
     """Template tag to insert a project manager component"""
+    user = context['user']
     try:
-        projects = mr_object.projects.all()
+        projects = mr_object.projects.get_visible(user)
     except AttributeError:
         projects = None
     try:
         owner = mr_object.user
     except AttributeError:
         owner = None
-    user = context['user']
     authorized = user.is_staff or user == owner
     form = ProjectManagerForm(
         initial={'projects': [project.pk for project in projects]},
