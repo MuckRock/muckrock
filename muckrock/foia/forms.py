@@ -146,21 +146,27 @@ class RequestForm(forms.Form):
     def get_agency(self):
         """Get the agency and create a new one if necessary"""
         agency = self.cleaned_data.get('agency')
-        if agency is None and self.request.POST.get('agency-autocomplete'):
+        agency_autocomplete = self.request.POST.get('agency-autocomplete')
+        if agency is None and agency_autocomplete:
             # See if the passed in agency name matches a valid known agency
             agency = (
                 Agency.objects.get_approved().filter(
-                    name__iexact=self.request.POST['agency-autocomplete'],
+                    name__iexact=agency_autocomplete,
                     jurisdiction=self.jurisdiction,
                 ).first()
             )
             # if not, create a new one
-            if agency is None:
+            if agency is None and len(agency_autocomplete) < 256:
                 agency = Agency.objects.create_new(
-                    self.request.POST['agency-autocomplete'],
+                    agency_autocomplete,
                     self.jurisdiction,
                     self.request.user,
                 )
+            elif agency is None and len(agency_autocomplete) >= 256:
+                self.add_error(
+                    'agency', 'Agency name must be less than 256 characters'
+                )
+                return None
         elif agency is None:
             self.add_error('agency', 'Please select an agency')
             return None
