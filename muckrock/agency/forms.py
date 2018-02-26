@@ -58,7 +58,13 @@ class AgencyForm(forms.ModelForm):
     website = forms.URLField(label='General Website', required=False)
     phone = PhoneNumberField(required=False)
     fax = PhoneNumberField(required=False)
-    portal_url = forms.URLField(required=False)
+    portal_url = forms.URLField(
+        required=False,
+        help_text='This is a URL where you can submit a request directly from '
+        'the website.  You should probably leave this blank unless you know '
+        'this is what you want'
+    )
+
     portal_type = forms.ChoiceField(
         choices=PORTAL_TYPES,
         initial='other',
@@ -121,16 +127,16 @@ class AgencyForm(forms.ModelForm):
                 request_type='primary',
             )
         if self.cleaned_data['portal_url']:
+            portal_type = self.cleaned_data['portal_type']
             portal, _ = Portal.objects.get_or_create(
                 url=self.cleaned_data['portal_url'],
                 defaults={
                     'type':
-                        self.cleaned_data['portal_type'],
+                        portal_type,
                     'name':
-                        '%s %s' % (
+                        u'%s %s' % (
                             agency,
-                            dict(PORTAL_TYPES)[self.cleaned_data['portal_type']
-                                               ],
+                            dict(PORTAL_TYPES)[portal_type],
                         )
                 },
             )
