@@ -322,7 +322,11 @@ class CrowdsourceCreateView(CreateView):
         if self.request.POST:
             data['data_formset'] = CrowdsourceDataFormset(self.request.POST)
         else:
-            data['data_formset'] = CrowdsourceDataFormset()
+            data['data_formset'] = CrowdsourceDataFormset(
+                initial=[{
+                    'url': self.request.GET.get('initial_data')
+                }]
+            )
         return data
 
     def form_valid(self, form):
@@ -344,7 +348,9 @@ class CrowdsourceCreateView(CreateView):
         form.process_data_csv(crowdsource)
         if formset.is_valid():
             formset.instance = crowdsource
-            formset.save()
+            formset.save(
+                doccloud_each_page=form.cleaned_data['doccloud_each_page']
+            )
         messages.success(self.request, msg)
         return redirect(crowdsource)
 
@@ -406,6 +412,8 @@ class CrowdsourceUpdateView(UpdateView):
         crowdsource.create_form(form.cleaned_data['form_json'])
         form.process_data_csv(crowdsource)
         if formset.is_valid():
-            formset.save()
+            formset.save(
+                doccloud_each_page=form.cleaned_data['doccloud_each_page']
+            )
         messages.success(self.request, msg)
         return redirect(crowdsource)
