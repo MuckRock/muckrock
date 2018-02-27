@@ -101,6 +101,7 @@ class AgencyMultiRequestAutocomplete(
 
     def choices_for_request(self):
         query = self.request.GET.get('q', '')
+        exclude = self.request.GET.getlist('exclude')
         split_query = query.split()
         # if query is an empty string, then split will produce an empty array
         # if query is an empty string, then do nto filter the existing choices
@@ -111,6 +112,7 @@ class AgencyMultiRequestAutocomplete(
             choices = self.choices.filter(conditions).distinct()
         else:
             choices = self.choices
+        choices = choices.exclude(pk__in=exclude)
         return self.order_choices(choices)[0:self.limit_choices]
 
 

@@ -193,9 +193,21 @@ $('document').ready(function(){
   });
 
   $(document).bind('widgetDeselectChoice', function(e, choice, autocomplete){
-    if(autocomplete.input.attr('data-required') !== undefined){
+    // onlt re-enable if all selections have been removed
+    if(autocomplete.input.attr('data-required') !== undefined &&
+        autocomplete.deck[0].children.length == 0){
       autocomplete.input.removeAttr('data-required');
       autocomplete.input.attr('required', 'required');
+    }
+  });
+
+  // remove required if autocomplete has an initial value
+  $(".autocomplete-light-widget").each(function() {
+    var deck = $(this).children(".deck");
+    var input = $(this).children("input");
+    if(deck.children().length > 0 && input.attr('required') !== undefined) {
+      input.removeAttr('required');
+      input.attr('data-required', 'required');
     }
   });
 
