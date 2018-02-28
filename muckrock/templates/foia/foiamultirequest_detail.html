@@ -7,6 +7,11 @@
 {% block content %}
     <div class="foia detail">
         <h1>{{multi.title}}</h1>
+        {% if multi.user == request.user %}
+          <a href="{% url "foia-create-multi" %}?clone={{multi.pk}}" class="blue button">
+            Clone
+          </a>
+        {% endif %}
         {% if multi.status == "filed" %}
             <section class="requests" id="requests">
                 <h2>{{foias|length}} Request{{ foias|length|pluralize }}</h2>

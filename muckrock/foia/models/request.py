@@ -330,7 +330,10 @@ class FOIARequest(models.Model):
         'proxy was avilable upon draft creation.'
     )
     parent = models.ForeignKey(
-        'self', blank=True, null=True, on_delete=models.SET_NULL
+        'self',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
     )
     block_incoming = models.BooleanField(
         default=False,
@@ -340,7 +343,10 @@ class FOIARequest(models.Model):
         )
     )
     crowdfund = models.OneToOneField(
-        'crowdfund.Crowdfund', related_name='foia', blank=True, null=True
+        'crowdfund.Crowdfund',
+        related_name='foia',
+        blank=True,
+        null=True,
     )
     multirequest = models.ForeignKey(
         'foia.FOIAMultiRequest',

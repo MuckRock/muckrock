@@ -640,6 +640,11 @@ class FOIAMultiRequestAdminForm(forms.ModelForm):
         queryset=Agency.objects.all(),
         required=False,
     )
+    parent = autocomplete_light.ModelChoiceField(
+        'FOIAMultiRequestAutocomplete',
+        queryset=FOIAMultiRequest.objects.all(),
+        required=False,
+    )
 
     class Meta:
         model = FOIAMultiRequest

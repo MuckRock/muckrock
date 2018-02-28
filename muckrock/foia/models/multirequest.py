@@ -45,6 +45,12 @@ class FOIAMultiRequest(models.Model):
     num_org_requests = models.PositiveSmallIntegerField(default=0)
     num_monthly_requests = models.PositiveSmallIntegerField(default=0)
     num_reg_requests = models.PositiveSmallIntegerField(default=0)
+    parent = models.ForeignKey(
+        'self',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
 
     tags = TaggableManager(through=TaggedItemBase, blank=True)
 

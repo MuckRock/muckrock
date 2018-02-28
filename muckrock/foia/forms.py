@@ -257,15 +257,27 @@ class MultiRequestForm(forms.ModelForm):
         widget=autocomplete_light.
         MultipleChoiceWidget('AgencyMultiRequestAutocomplete'),
     )
+    parent = forms.ModelChoiceField(
+        queryset=FOIAMultiRequest.objects.none(),
+        required=False,
+        widget=forms.HiddenInput(),
+    )
 
     class Meta:
         model = FOIAMultiRequest
-        fields = ['title', 'requested_docs', 'agencies']
+        fields = ['title', 'requested_docs', 'agencies', 'parent']
         widgets = {
             'title': forms.TextInput(attrs={
                 'placeholder': 'Pick a Title'
             }),
         }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user')
+        super(MultiRequestForm, self).__init__(*args, **kwargs)
+        self.fields['parent'].queryset = FOIAMultiRequest.objects.filter(
+            user=user
+        )
 
 
 class MultiRequestDraftForm(forms.ModelForm):

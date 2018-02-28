@@ -261,7 +261,7 @@ def create_multirequest(request):
         return redirect('accounts')
 
     if request.method == 'POST':
-        form = MultiRequestForm(request.POST)
+        form = MultiRequestForm(request.POST, user=request.user)
         if form.is_valid():
             multirequest = form.save(commit=False)
             multirequest.user = request.user
@@ -270,8 +270,26 @@ def create_multirequest(request):
             multirequest.save()
             form.save_m2m()
             return redirect(multirequest)
+    elif 'clone' in request.GET:
+        try:
+            multi = get_object_or_404(
+                FOIAMultiRequest,
+                user=request.user,
+                pk=request.GET['clone'],
+            )
+        except ValueError:
+            # non integer passed in as clone_pk
+            initial_data = {}
+        else:
+            initial_data = {
+                'title': multi.title,
+                'requested_docs': smart_text(multi.requested_docs),
+                'agencies': multi.agencies.all(),
+                'parent': multi,
+            }
+        form = MultiRequestForm(user=request.user, initial=initial_data)
     else:
-        form = MultiRequestForm()
+        form = MultiRequestForm(user=request.user)
 
     context = {'form': form}
     return render(
