@@ -268,7 +268,7 @@ $("#id_admin_fix-via").trigger("change");
 /* Bulk Actions */
 
 $('document').ready(function(){
-  $("#request-actions .bulk").change(function(e) {
+  $("#request-actions .bulk").change(function() {
     $("#request-actions .project-form").hide();
     $("#request-actions .tag-form").hide();
     $("#request-actions .share-form").hide();
