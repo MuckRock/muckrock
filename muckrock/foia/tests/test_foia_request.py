@@ -16,6 +16,7 @@ from datetime import timedelta
 from operator import attrgetter
 
 # Third Party
+import nose.tools
 from actstream.actions import follow, is_following, unfollow
 from nose.tools import (
     assert_false,
