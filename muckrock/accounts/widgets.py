@@ -440,7 +440,8 @@ class PageViewsWidget(NumberWidget):
 
         def inner():
             """Inner function for caching"""
-            month_start = date.today().replace(day=1)
+            today = date.today()
+            month_start = today.replace(day=1)
 
             # initalize google analytics api
             # we store the keyfile on s3
@@ -468,7 +469,7 @@ class PageViewsWidget(NumberWidget):
                             settings.VIEW_ID,
                         'dateRanges': [{
                             'startDate': month_start.isoformat(),
-                            'endDate': 'today',
+                            'endDate': today.isoformat(),
                         }],
                         'metrics': [{
                             'expression': 'ga:pageviews'
