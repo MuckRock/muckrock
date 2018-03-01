@@ -293,10 +293,14 @@ class AgencyRequestFormMapperInline(admin.TabularInline):
             return formset
         obj.form.seek(0)
         template = PdfReader(obj.form)
-        choices = [(field.T.decode(), field.T.decode())
-                   for page in template.Root.Pages.Kids
-                   for field in page.Annots
-                   if field.T is not None]
+        try:
+            choices = [(field.T.decode(), field.T.decode())
+                       for page in template.Root.Pages.Kids
+                       for field in page.Annots
+                       if field.T is not None]
+        except TypeError:
+            # if template.Root.Pages.Kids or page.Annots is None
+            choices = []
         choices = [('', '---')] + choices
         formset.form.base_fields['field'
                                  ].widget = (forms.Select(choices=choices))
