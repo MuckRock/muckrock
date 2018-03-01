@@ -206,6 +206,7 @@ $('document').ready(function(){
     $(this).text('Generating...');
     $.ajax({
       url: '/task/snail-mail/pdf/',
+      data: window.location.search.substr(1),
       type: 'get',
       success: function(data) {
         checkPdfExists(data['pdf_name']);
