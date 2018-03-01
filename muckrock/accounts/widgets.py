@@ -440,7 +440,8 @@ class PageViewsWidget(NumberWidget):
 
         def inner():
             """Inner function for caching"""
-            month_start = date.today().replace(day=1)
+            today = date.today()
+            month_start = today.replace(day=1)
 
             # initalize google analytics api
             # we store the keyfile on s3
@@ -468,7 +469,7 @@ class PageViewsWidget(NumberWidget):
                             settings.VIEW_ID,
                         'dateRanges': [{
                             'startDate': month_start.isoformat(),
-                            'endDate': 'today',
+                            'endDate': today.isoformat(),
                         }],
                         'metrics': [{
                             'expression': 'ga:pageviews'
@@ -478,12 +479,15 @@ class PageViewsWidget(NumberWidget):
             ).execute()
             # google really buries the useful data in the response
             # remove format if we want to go back to a comparison
-            return '{:,}'.format(
-                int(
-                    response['reports'][0]['data']['rows'][0]['metrics'][0]
-                    ['values'][0]
+            try:
+                return '{:,}'.format(
+                    int(
+                        response['reports'][0]['data']['rows'][0]['metrics'][0]
+                        ['values'][0]
+                    )
                 )
-            )
+            except KeyError:
+                return 'Error'
 
         return cache_get_or_set('dashboard:pageviews', inner, 60 * 5)
 
