@@ -12,11 +12,19 @@ from django.test import RequestFactory, TestCase
 import datetime
 import re
 from datetime import date as real_date
+from datetime import timedelta
 from operator import attrgetter
 
 # Third Party
-import nose.tools
-from actstream.actions import follow, unfollow
+from actstream.actions import follow, is_following, unfollow
+from nose.tools import (
+    assert_false,
+    assert_in,
+    assert_is_none,
+    assert_not_in,
+    eq_,
+    ok_,
+)
 
 # MuckRock
 from muckrock.agency.models import Agency
@@ -30,7 +38,12 @@ from muckrock.factories import (
     UserFactory,
 )
 from muckrock.foia.models import FOIACommunication, FOIARequest
-from muckrock.foia.views import Detail, FollowingRequestList
+from muckrock.foia.views import (
+    Detail,
+    FollowingRequestList,
+    MyRequestList,
+    RequestList,
+)
 from muckrock.jurisdiction.factories import ExampleAppealFactory
 from muckrock.jurisdiction.models import Appeal, Jurisdiction
 from muckrock.project.forms import ProjectManagerForm
@@ -44,10 +57,6 @@ from muckrock.tests import (
     post_allowed,
 )
 from muckrock.utils import new_action
-
-ok_ = nose.tools.ok_
-eq_ = nose.tools.eq_
-raises = nose.tools.raises
 
 # allow methods that could be functions and too many public methods in tests
 # pylint: disable=too-many-public-methods
@@ -1269,3 +1278,252 @@ class TestFOIANotification(TestCase):
             self.owner.notifications.get_unread().count(), unread_count + 2,
             'The user should have two unread notifications.'
         )
+
+
+class TestBulkActions(TestCase):
+    """Test the bulk actions on the list views"""
+
+    # pylint: disable=protected-access
+
+    def test_follow(self):
+        """Test bulk following"""
+        public_foia = FOIARequestFactory()
+        private_foia = FOIARequestFactory(embargo=True)
+        user = UserFactory()
+
+        RequestList()._follow(
+            FOIARequest.objects.filter(
+                pk__in=[public_foia.pk, private_foia.pk]
+            ),
+            user,
+            {},
+        )
+
+        ok_(is_following(user, public_foia))
+        assert_false(is_following(user, private_foia))
+
+    def test_unfollow(self):
+        """Test bulk unfollowing"""
+        follow_foia = FOIARequestFactory()
+        unfollow_foia = FOIARequestFactory()
+        user = UserFactory()
+
+        follow(user, follow_foia, actor_only=False)
+
+        RequestList()._unfollow(
+            FOIARequest.objects.filter(
+                pk__in=[follow_foia.pk, unfollow_foia.pk]
+            ),
+            user,
+            {},
+        )
+
+        assert_false(is_following(user, follow_foia))
+        assert_false(is_following(user, unfollow_foia))
+
+    def test_extend_embargo(self):
+        """Test bulk embargo extending"""
+        tomorrow = datetime.date.today() + timedelta(1)
+        next_month = datetime.date.today() + timedelta(30)
+        user = UserFactory(profile__acct_type='pro')
+        other_foia = FOIARequestFactory()
+        public_foia = FOIARequestFactory(user=user, embargo=False, status='ack')
+        embargo_foia = FOIARequestFactory(user=user, embargo=True, status='ack')
+        embargo_done_foia = FOIARequestFactory(
+            user=user,
+            embargo=True,
+            status='done',
+            date_embargo=tomorrow,
+        )
+
+        MyRequestList()._extend_embargo(
+            FOIARequest.objects.filter(
+                pk__in=[
+                    other_foia.pk,
+                    public_foia.pk,
+                    embargo_foia.pk,
+                    embargo_done_foia.pk,
+                ]
+            ),
+            user,
+            {},
+        )
+
+        other_foia.refresh_from_db()
+        public_foia.refresh_from_db()
+        embargo_foia.refresh_from_db()
+        embargo_done_foia.refresh_from_db()
+
+        assert_false(other_foia.embargo)
+        ok_(public_foia.embargo)
+        assert_is_none(public_foia.date_embargo)
+        ok_(embargo_foia.embargo)
+        assert_is_none(embargo_foia.date_embargo)
+        ok_(embargo_done_foia.embargo)
+        eq_(embargo_done_foia.date_embargo, next_month)
+
+    def test_remove_embargo(self):
+        """Test bulk embargo removing"""
+        tomorrow = datetime.date.today() + timedelta(1)
+        user = UserFactory(profile__acct_type='pro')
+        other_foia = FOIARequestFactory()
+        public_foia = FOIARequestFactory(user=user, embargo=False, status='ack')
+        embargo_foia = FOIARequestFactory(user=user, embargo=True, status='ack')
+        embargo_done_foia = FOIARequestFactory(
+            user=user,
+            embargo=True,
+            status='done',
+            date_embargo=tomorrow,
+        )
+
+        MyRequestList()._remove_embargo(
+            FOIARequest.objects.filter(
+                pk__in=[
+                    other_foia.pk,
+                    public_foia.pk,
+                    embargo_foia.pk,
+                    embargo_done_foia.pk,
+                ]
+            ),
+            user,
+            {},
+        )
+
+        other_foia.refresh_from_db()
+        public_foia.refresh_from_db()
+        embargo_foia.refresh_from_db()
+        embargo_done_foia.refresh_from_db()
+
+        assert_false(other_foia.embargo)
+        assert_false(public_foia.embargo)
+        assert_false(embargo_foia.embargo)
+        assert_false(embargo_done_foia.embargo)
+
+    def test_perm_embargo(self):
+        """Test bulk permanent embargo"""
+        tomorrow = datetime.date.today() + timedelta(1)
+        user = UserFactory(profile__acct_type='admin')
+        other_foia = FOIARequestFactory()
+        public_foia = FOIARequestFactory(user=user, embargo=False, status='ack')
+        embargo_foia = FOIARequestFactory(user=user, embargo=True, status='ack')
+        embargo_done_foia = FOIARequestFactory(
+            user=user,
+            embargo=True,
+            status='done',
+            date_embargo=tomorrow,
+        )
+
+        MyRequestList()._perm_embargo(
+            FOIARequest.objects.filter(
+                pk__in=[
+                    other_foia.pk,
+                    public_foia.pk,
+                    embargo_foia.pk,
+                    embargo_done_foia.pk,
+                ]
+            ),
+            user,
+            {},
+        )
+
+        other_foia.refresh_from_db()
+        public_foia.refresh_from_db()
+        embargo_foia.refresh_from_db()
+        embargo_done_foia.refresh_from_db()
+
+        assert_false(other_foia.embargo)
+        ok_(public_foia.embargo)
+        assert_false(public_foia.permanent_embargo)
+        ok_(embargo_foia.embargo)
+        assert_false(embargo_foia.permanent_embargo)
+        ok_(embargo_done_foia.embargo)
+        ok_(embargo_done_foia.permanent_embargo)
+
+    def test_projects(self):
+        """Test bulk add to projects"""
+        user = UserFactory()
+        foia = FOIARequestFactory(user=user)
+        proj = ProjectFactory()
+        proj.contributors.add(user)
+
+        MyRequestList()._project(
+            FOIARequest.objects.filter(pk=foia.pk),
+            user,
+            {'projects': [proj.pk]},
+        )
+
+        foia.refresh_from_db()
+
+        assert_in(proj, foia.projects.all())
+
+    def test_tags(self):
+        """Test bulk add tags"""
+        user = UserFactory()
+        foia = FOIARequestFactory(user=user)
+
+        MyRequestList()._tags(
+            FOIARequest.objects.filter(pk=foia.pk),
+            user,
+            {'tags': 'red, blue'},
+        )
+
+        foia.refresh_from_db()
+
+        tags = [t.name for t in foia.tags.all()]
+
+        assert_in('red', tags)
+        assert_in('blue', tags)
+
+    def test_share(self):
+        """Test bulk sharing"""
+        user = UserFactory()
+        share_user = UserFactory()
+        foia = FOIARequestFactory(user=user)
+
+        MyRequestList()._share(
+            FOIARequest.objects.filter(pk=foia.pk),
+            user,
+            {'access': 'edit',
+             'users': [share_user.pk]},
+        )
+
+        foia.refresh_from_db()
+
+        assert_in(share_user, foia.edit_collaborators.all())
+        assert_not_in(share_user, foia.read_collaborators.all())
+
+    def test_autofollowup_on(self):
+        """Test bulk autofollowup enabling"""
+        user = UserFactory()
+        on_foia = FOIARequestFactory(user=user, disable_autofollowups=False)
+        off_foia = FOIARequestFactory(user=user, disable_autofollowups=True)
+
+        MyRequestList()._autofollowup_on(
+            FOIARequest.objects.filter(pk__in=[on_foia.pk, off_foia.pk]),
+            user,
+            {},
+        )
+
+        on_foia.refresh_from_db()
+        off_foia.refresh_from_db()
+
+        assert_false(on_foia.disable_autofollowups)
+        assert_false(off_foia.disable_autofollowups)
+
+    def test_autofollowup_off(self):
+        """Test bulk autofollowup disabling"""
+        user = UserFactory()
+        on_foia = FOIARequestFactory(user=user, disable_autofollowups=False)
+        off_foia = FOIARequestFactory(user=user, disable_autofollowups=True)
+
+        MyRequestList()._autofollowup_off(
+            FOIARequest.objects.filter(pk__in=[on_foia.pk, off_foia.pk]),
+            user,
+            {},
+        )
+
+        on_foia.refresh_from_db()
+        off_foia.refresh_from_db()
+
+        ok_(on_foia.disable_autofollowups)
+        ok_(off_foia.disable_autofollowups)

@@ -451,67 +451,45 @@ class FOIARequest(models.Model):
 
     def has_editor(self, user):
         """Checks whether the given user is an editor."""
-        user_is_editor = False
-        if self.edit_collaborators.filter(pk=user.pk).exists():
-            user_is_editor = True
-        return user_is_editor
+        return self.edit_collaborators.filter(pk=user.pk).exists()
 
     def add_editor(self, user):
         """Grants the user permission to edit this request."""
-        if not self.has_viewer(user) and not self.has_editor(
-            user
-        ) and not self.created_by(user):
+        if not self.has_viewer(user) and not self.created_by(user):
             self.edit_collaborators.add(user)
-            self.save()
             logger.info('%s granted edit access to %s', user, self)
-        return
 
     def remove_editor(self, user):
         """Revokes the user's permission to edit this request."""
-        if self.has_editor(user):
-            self.edit_collaborators.remove(user)
-            self.save()
-            logger.info('%s revoked edit access from %s', user, self)
-        return
+        self.edit_collaborators.remove(user)
+        logger.info('%s revoked edit access from %s', user, self)
 
     def demote_editor(self, user):
         """Reduces the editor's access to that of a viewer."""
         self.remove_editor(user)
         self.add_viewer(user)
-        return
 
     ## Viewers
 
     def has_viewer(self, user):
         """Checks whether the given user is a viewer."""
-        user_is_viewer = False
-        if self.read_collaborators.filter(pk=user.pk).exists():
-            user_is_viewer = True
-        return user_is_viewer
+        return self.read_collaborators.filter(pk=user.pk).exists()
 
     def add_viewer(self, user):
         """Grants the user permission to view this request."""
-        if not self.has_viewer(user) and not self.has_editor(
-            user
-        ) and not self.created_by(user):
+        if not self.has_editor(user) and not self.created_by(user):
             self.read_collaborators.add(user)
-            self.save()
             logger.info('%s granted view access to %s', user, self)
-        return
 
     def remove_viewer(self, user):
         """Revokes the user's permission to view this request."""
-        if self.has_viewer(user):
-            self.read_collaborators.remove(user)
-            logger.info('%s revoked view access from %s', user, self)
-            self.save()
-        return
+        self.read_collaborators.remove(user)
+        logger.info('%s revoked view access from %s', user, self)
 
     def promote_viewer(self, user):
         """Enhances the viewer's access to that of an editor."""
         self.remove_viewer(user)
         self.add_editor(user)
-        return
 
     ## Access key
 

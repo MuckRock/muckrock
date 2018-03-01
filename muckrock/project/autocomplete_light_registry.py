@@ -33,7 +33,7 @@ class ProjectManagerAutocomplete(autocomplete_light.AutocompleteModelBase):
     choice_template = 'autocomplete/project.html'
     search_fields = ['title', 'summary']
     attrs = {
-        'data-autocomplete-minimum-characters': 0,
+        'data-autocomplete-minimum-characters': 2,
         'placeholder': 'Search your projects'
     }
 

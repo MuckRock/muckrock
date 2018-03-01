@@ -5,81 +5,103 @@
 {% load rules %}
 
 {% block list-header %}
-    {# we hard-code the title here because the subsection is defined by the active section item #}
-    <h1>Requests</h1>
+  {# we hard-code the title here because the subsection is defined by the active section item #}
+  <h1>Requests</h1>
 {% endblock %}
 
 {% block list-sections %}
-    {% if user.is_authenticated %}
-        <ul class="nostyle list__sections">
-            <li class="{% active request '^/foi/list/$' %}"><a href="{% url 'foia-list' %}">All</a></li>
-            <li class="{% active request '^/foi/mylist/$' %}"><a href="{% url 'foia-mylist' %}">Yours</a></li>
-            {% if user.profile.is_advanced %}
-                <li class="{% active request '^/foi/mylist/multirequest/$' %}"><a href="{% url 'foia-mymulti' %}">Multirequests</a></li>
-            {% else %}
-                <li><a class="grey" href="{% url 'accounts' %}">Multirequests <span class="small badge">PRO</span></a></li>
-            {% endif %}
-            <li class="{% active request '^/foi/list/following/$' %}"><a href="{% url 'foia-list-following' %}">Following</a></li>
-            {% if user.is_staff %}
-                <li class="{% active request '^/foi/list/processing/$' %}"><a href="{% url 'foia-list-processing' %}">Processing</a></li>
-            {% endif %}
-        </ul>
-    {% endif %}
+  {% if user.is_authenticated %}
+    <ul class="nostyle list__sections">
+      <li class="{% active request '^/foi/list/$' %}"><a href="{% url 'foia-list' %}">All</a></li>
+      <li class="{% active request '^/foi/mylist/$' %}"><a href="{% url 'foia-mylist' %}">Yours</a></li>
+      {% if user.profile.is_advanced %}
+        <li class="{% active request '^/foi/mylist/multirequest/$' %}"><a href="{% url 'foia-mymulti' %}">Multirequests</a></li>
+      {% else %}
+        <li><a class="grey" href="{% url 'accounts' %}">Multirequests <span class="small badge">PRO</span></a></li>
+      {% endif %}
+      <li class="{% active request '^/foi/list/following/$' %}"><a href="{% url 'foia-list-following' %}">Following</a></li>
+      {% if user.is_staff %}
+        <li class="{% active request '^/foi/list/processing/$' %}"><a href="{% url 'foia-list-processing' %}">Processing</a></li>
+      {% endif %}
+    </ul>
+  {% endif %}
 {% endblock %}
 
 {% block list-actions %}
-    {% has_perm 'foia.export_csv' request.user as can_export %}
-    <div class="space-between">
-        <div class="button-group">
-            <a href="{% url 'foia-create' %}" class="blue button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
-                {% include 'lib/component/icon/create-request.svg' %}
-                <span>File a Request</span>
-            </a>
-            {% if can_export %}
-                <a href="{{ csv_link }}" class="blue button">
-                    <span>Export Search Results as CSV</span>
-                </a>
-            {% else %}
-            <a href="{% url "accounts-signup" %}" class="button">
-                    <span>Export to CSV only available for Pro accounts</span>
-                </a>
-            {% endif %}
-        </div>
+  {% has_perm 'foia.export_csv' request.user as can_export %}
+  <div class="space-between">
+    <div class="button-group">
+      <a href="{% url 'foia-create' %}" class="blue button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
+        {% include 'lib/component/icon/create-request.svg' %}
+        <span>File a Request</span>
+      </a>
+      {% if can_export %}
+        <a href="{{ csv_link }}" class="blue button">
+          <span>Export Search Results as CSV</span>
+        </a>
+      {% else %}
+        <a href="{% url "accounts-signup" %}" class="button">
+          <span>Export to CSV only available for Pro accounts</span>
+        </a>
+      {% endif %}
     </div>
+  </div>
+  <form method="POST" class="toolbar" id="request-actions">
+    {% csrf_token %}
+    {% block request-actions %}
+      {% if user.is_authenticated %}
+        <p>Select requests below in order to apply a bulk action.</p>
+        <select name="action" class="bulk">
+          <option value="">---</option>
+          <option value="follow" data-help="Receive update notifications on the selected requests.">Follow</option>
+          <option value="unfollow" data-help="Stop receiving update notifications on the selected requests.">Unfollow</option>
+        </select>
+        <button class="blue button" disabled>Go</button>
+        <p class="help"></p>
+      {% endif %}
+    {% endblock %}
+  </form>
 {% endblock %}
 
 {% block list-table-head %}
-    <th data-sort="title">Title</th>
-    <th width="10%" data-sort="user">User</th>
-    <th width="10%" data-sort="agency">Agency</th>
-    <th width="20%" data-sort="jurisdiction">Jurisdiction</th>
-    <th width="20%" data-sort="date_updated">Updated</th>
-    <th width="10%" data-sort="date_submitted">Submitted</th>
+  {% if user.is_authenticated %}
+    <th width="3%" class="list-table-checkbox">
+      <input type="checkbox" class="select-all" data-name="foias" data-toolbar="#request-actions">
+    </th>
+  {% endif %}
+  <th data-sort="title">Title</th>
+  <th width="10%" data-sort="user">User</th>
+  <th width="10%" data-sort="agency">Agency</th>
+  <th width="20%" data-sort="jurisdiction">Jurisdiction</th>
+  <th width="20%" data-sort="date_updated">Updated</th>
+  <th width="10%" data-sort="date_submitted">Submitted</th>
 {% endblock list-table-head %}
 
 {% block list-table-row %}
-    {% with object as foia %}
-        <td><a class="bold" href="{{ foia.get_absolute_url }}">{{ foia.title }}</a><br><span class="small badge state {{ foia.status|classify_status }}">{{foia.get_status_display}}</span>{% if foia.embargo %}<span class="small red badge">Under Embargo</span>{% endif %}{% if foia.crowdfund and not foia.crowdfund.expired %}<span class="small green badge">Active Crowdfund</span>{% endif %}</td>
-        <td>{{ foia.user.get_full_name }}</td>
-        <td>{{ foia.agency }}</td>
-        <td>{{ foia.jurisdiction }}</td>
-        <td>{{ foia.date_updated|date:"m/d/Y" }}</td>
-        <td>{{ foia.date_submitted|date:"m/d/Y" }}</td>
-    {% endwith %}
+  {% with object as foia %}
+    {% if user.is_authenticated %}
+      <td class="list-table-checkbox">
+        <input type="checkbox" name="foias" value="{{ foia.pk }}" form="request-actions">
+      </td>
+    {% endif %}
+    <td>
+      <a class="bold" href="{{ foia.get_absolute_url }}">
+        {{ foia.title }}
+      </a><br>
+      <span class="small badge state {{ foia.status|classify_status }}">
+        {{foia.get_status_display}}
+      </span>
+      {% if foia.embargo %}
+        <span class="small red badge">Under Embargo</span>
+      {% endif %}
+      {% if foia.crowdfund and not foia.crowdfund.expired %}
+        <span class="small green badge">Active Crowdfund</span>
+      {% endif %}
+    </td>
+    <td>{{ foia.user.get_full_name }}</td>
+    <td>{{ foia.agency }}</td>
+    <td>{{ foia.jurisdiction }}</td>
+    <td>{{ foia.date_updated|date:"m/d/Y" }}</td>
+    <td>{{ foia.date_submitted|date:"m/d/Y" }}</td>
+  {% endwith %}
 {% endblock list-table-row %}
-
-{% block filter-actions %}
-  <div class="button-group">
-    <button class="button" action="apply-filters">Filter</button>
-    <a class="button" href="{{ request.path }}">Clear</a>
-    <button class="button" name="action" value="save-search">Save Search</button>
-  </div>
-  <div class="field">
-    <label for="load-search">Load a saved search</label>
-    <select id="load-search">
-      <option value="0">A</option>
-      <option value="1">B</option>
-      <option value="2">C</option>
-    </select>
-  </div>
-{% endblock filter-actions %}

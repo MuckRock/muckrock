@@ -15,9 +15,11 @@ from django.shortcuts import redirect
 from django.views.generic import TemplateView
 
 # Standard Library
+from datetime import date, timedelta
 from itertools import chain
 
 # Third Party
+import actstream
 import unicodecsv as csv
 from actstream.models import following
 from furl import furl
@@ -31,10 +33,23 @@ from muckrock.foia.filters import (
     MyFOIARequestFilterSet,
     ProcessingFOIARequestFilterSet,
 )
-from muckrock.foia.forms import SaveSearchForm, SaveSearchFormHandler
-from muckrock.foia.models import FOIAMultiRequest, FOIARequest, FOIASavedSearch
+from muckrock.foia.forms import (
+    FOIAAccessForm,
+    SaveSearchForm,
+    SaveSearchFormHandler,
+)
+from muckrock.foia.models import (
+    END_STATUS,
+    FOIAMultiRequest,
+    FOIARequest,
+    FOIASavedSearch,
+)
+from muckrock.foia.rules import can_embargo, can_embargo_permananently
+from muckrock.forms import TagManagerForm
 from muckrock.news.models import Article
+from muckrock.project.forms import ProjectManagerForm
 from muckrock.project.models import Project
+from muckrock.tags.models import Tag, parse_tags
 from muckrock.utils import Echo
 from muckrock.views import (
     MRFilterListView,
@@ -219,24 +234,59 @@ class RequestList(MRSearchFilterListView):
         """Allow saving a search/filter"""
         # pylint: disable=unused-argument
 
+        actions = self.get_actions()
+
         if request.user.is_anonymous:
-            messages.error(request, 'Please log in to save a search')
+            messages.error(request, 'Please log in')
             return redirect(request.resolver_match.view_name)
-        form_handler = SaveSearchFormHandler(request, self.filter_class)
 
         if 'delete' in request.POST:
-            try:
-                search = FOIASavedSearch.objects.get(
-                    pk=request.POST.get('delete'),
-                    user=request.user,
-                )
-                search.delete()
-                messages.success(request, 'The saved search was deleted')
-                return redirect(request.resolver_match.view_name)
-            except FOIASavedSearch.DoesNotExist:
-                messages.error(request, 'That saved search no longer exists')
+            return self._delete(request)
+
+        if request.POST.get('action') == 'save':
+            return self._save_search(request)
+
+        try:
+            foias = FOIARequest.objects.filter(
+                pk__in=request.POST.getlist('foias')
+            )
+            msg = actions[request.POST['action']](
+                foias,
+                request.user,
+                request.POST,
+            )
+            if msg:
+                messages.success(request, msg)
             return redirect(request.resolver_match.view_name)
-        elif form_handler.is_valid():
+        except (KeyError, ValueError):
+            if request.POST.get('action') != '':
+                messages.error(request, 'Something went wrong')
+            return redirect(request.resolver_match.view_name)
+
+    def get_actions(self):
+        """Get available actions for this view"""
+        return {
+            'follow': self._follow,
+            'unfollow': self._unfollow,
+        }
+
+    def _delete(self, request):
+        """Delete a saved search"""
+        try:
+            search = FOIASavedSearch.objects.get(
+                pk=request.POST.get('delete'),
+                user=request.user,
+            )
+            search.delete()
+            messages.success(request, 'The saved search was deleted')
+        except FOIASavedSearch.DoesNotExist:
+            messages.error(request, 'That saved search no longer exists')
+        return redirect(request.resolver_match.view_name)
+
+    def _save_search(self, request):
+        """Save a search"""
+        form_handler = SaveSearchFormHandler(request, self.filter_class)
+        if form_handler.is_valid():
             search = form_handler.create_saved_search()
             messages.success(request, 'Search saved')
             return redirect(
@@ -246,8 +296,21 @@ class RequestList(MRSearchFilterListView):
                 )
             )
         else:
-            messages.error(request, 'Invalid data')
             return redirect(request.resolver_match.view_name)
+
+    def _follow(self, foias, user, _post):
+        """Follow the selected requests"""
+        foias = foias.get_viewable(user)
+        for foia in foias:
+            actstream.actions.follow(user, foia, actor_only=False)
+        return 'Followed requests'
+
+    def _unfollow(self, foias, user, _post):
+        """Unfollow the selected requests"""
+        foias = foias.get_viewable(user)
+        for foia in foias:
+            actstream.actions.unfollow(user, foia)
+        return 'Unfollowed requests'
 
     def get(self, request, *args, **kwargs):
         """Check for loading saved searches"""
@@ -280,6 +343,120 @@ class MyRequestList(RequestList):
         """Limit to just requests owned by the current user."""
         queryset = super(MyRequestList, self).get_queryset()
         return queryset.filter(user=self.request.user)
+
+    def get_context_data(self):
+        """Add forms for bulk actions"""
+        context = super(MyRequestList, self).get_context_data()
+        context['project_form'] = ProjectManagerForm(user=self.request.user)
+        context['tag_form'] = TagManagerForm(required=False)
+        context['share_form'] = FOIAAccessForm(required=False)
+        context['can_embargo'] = can_embargo(self.request.user)
+        context['can_perm_embargo'] = can_embargo_permananently(
+            self.request.user
+        )
+        return context
+
+    def get_actions(self):
+        """Get available actions for this view"""
+        actions = super(MyRequestList, self).get_actions()
+        actions.update({
+            'extend-embargo': self._extend_embargo,
+            'remove-embargo': self._remove_embargo,
+            'permanent-embargo': self._perm_embargo,
+            'project': self._project,
+            'tags': self._tags,
+            'share': self._share,
+            'autofollowup-on': self._autofollowup_on,
+            'autofollowup-off': self._autofollowup_off,
+        })
+        return actions
+
+    def _extend_embargo(self, foias, user, _post):
+        """Extend the embargo on the selected requests"""
+        end_date = date.today() + timedelta(30)
+        foias = [f.pk for f in foias if f.has_perm(user, 'embargo')]
+        FOIARequest.objects.filter(pk__in=foias).update(embargo=True)
+        # only set date if in end state
+        FOIARequest.objects.filter(
+            pk__in=foias,
+            status__in=END_STATUS,
+        ).update(date_embargo=end_date)
+        return 'Embargoes extended for 30 days'
+
+    def _remove_embargo(self, foias, user, _post):
+        """Remove the embargo on the selected requests"""
+        foias = [f.pk for f in foias if f.has_perm(user, 'embargo')]
+        FOIARequest.objects.filter(pk__in=foias).update(embargo=False)
+        return 'Embargoes removed'
+
+    def _perm_embargo(self, foias, user, _post):
+        """Permanently embargo the selected requests"""
+        foias = [f.pk for f in foias if f.has_perm(user, 'embargo_perm')]
+        FOIARequest.objects.filter(pk__in=foias).update(embargo=True)
+        # only set permanent
+        FOIARequest.objects.filter(
+            pk__in=foias,
+            status__in=END_STATUS,
+        ).update(permanent_embargo=True)
+        return 'Embargoes extended permanently'
+
+    def _project(self, foias, user, post):
+        """Add the requests to the selected projects"""
+        foias = [f for f in foias if f.has_perm(user, 'change')]
+        form = ProjectManagerForm(post, user=user)
+        if form.is_valid():
+            projects = form.cleaned_data['projects']
+            for foia in foias:
+                foia.projects.add(*projects)
+            return 'Requests added to projects'
+
+    def _tags(self, foias, user, post):
+        """Add tags to the selected requests"""
+        foias = [f for f in foias if f.has_perm(user, 'change')]
+        tags = [
+            Tag.objects.get_or_create(name=t)
+            for t in parse_tags(post.get('tags', ''))
+        ]
+        tags = [t for t, _ in tags]
+        for foia in foias:
+            foia.tags.add(*tags)
+        return 'Tags added to requests'
+
+    def _share(self, foias, user, post):
+        """Share the requests with the selected users"""
+        foias = [f for f in foias if f.has_perm(user, 'change')]
+        form = FOIAAccessForm(post)
+        if form.is_valid():
+            access = form.cleaned_data['access']
+            users = form.cleaned_data['users']
+            if access == 'edit':
+                for foia in foias:
+                    foia.read_collaborators.remove(*users)
+                    foia.edit_collaborators.add(*users)
+            elif access == 'view':
+                for foia in foias:
+                    foia.edit_collaborators.remove(*users)
+                    foia.read_collaborators.add(*users)
+            return 'Requests shared'
+
+    def _autofollowup_on(self, foias, user, _post):
+        """Turn autofollowups on"""
+        return self._autofollowup(foias, user, disable=False)
+
+    def _autofollowup_off(self, foias, user, _post):
+        """Turn autofollowups off"""
+        return self._autofollowup(foias, user, disable=True)
+
+    def _autofollowup(self, foias, user, disable):
+        """Set autofollowups"""
+        foias = [f.pk for f in foias if f.has_perm(user, 'change')]
+        FOIARequest.objects.filter(
+            pk__in=foias,
+        ).update(
+            disable_autofollowups=disable,
+        )
+        action = 'disabled' if disable else 'enabled'
+        return 'Autofollowups {}'.format(action)
 
 
 @class_view_decorator(
