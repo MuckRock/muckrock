@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.core.urlresolvers import reverse
-from django.db.models import Sum
+from django.db.models import F, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.decorators import method_decorator
 from django.utils.html import escape
@@ -54,8 +54,10 @@ class OrderedSortMixin(object):
         sort = self.request.GET.get('sort', self.default_sort)
         order = self.request.GET.get('order', self.default_order)
         sort = self.sort_map.get(sort, self.default_sort)
-        if order != 'asc':
-            sort = '-' + sort
+        if order == 'desc':
+            sort = F(sort).desc(nulls_last=True)
+        else:
+            sort = F(sort).asc(nulls_last=True)
         return queryset.order_by(sort)
 
     def get_queryset(self):

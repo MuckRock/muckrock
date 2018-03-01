@@ -14,6 +14,9 @@
     <ul class="nostyle list__sections">
       <li class="{% active request '^/foi/list/$' %}"><a href="{% url 'foia-list' %}">All</a></li>
       <li class="{% active request '^/foi/mylist/$' %}"><a href="{% url 'foia-mylist' %}">Yours</a></li>
+      {% if user.profile.organization %}
+        <li class="{% active request '^/foi/organization-list/$' %}"><a href="{% url 'foia-org-list' %}">Organization</a></li>
+      {% endif %}
       {% if user.profile.is_advanced %}
         <li class="{% active request '^/foi/mylist/multirequest/$' %}"><a href="{% url 'foia-mymulti' %}">Multirequests</a></li>
       {% else %}
