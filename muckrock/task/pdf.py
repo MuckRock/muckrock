@@ -39,9 +39,10 @@ class PDF(FPDF):
 class SnailMailPDF(PDF):
     """Custom PDF class for a snail mail task"""
 
-    def __init__(self, comm, category):
+    def __init__(self, comm, category, amount=None):
         self.comm = comm
         self.appeal = category == 'a'
+        self.amount = amount
         super(SnailMailPDF, self).__init__('P', 'pt', 'Letter')
 
     def header(self):
@@ -66,22 +67,28 @@ class SnailMailPDF(PDF):
 
     def generate(self):
         """Generate a PDF for a given FOIA"""
-        # pylint: disable=invalid-name
         self.configure()
         self.rect(6.8 * 72, 10, 1.2 * 72, 72 / 4, 'F')
         self.dashed_line(0, 4 * 72, 72 / 4, 4 * 72, 2, 2)
         self.dashed_line(8.25 * 72, 4 * 72, 8.5 * 72, 4 * 72, 2, 2)
-        if self.appeal:
-            x = self.get_x()
-            y = self.get_y()
-            self.set_font('Arial', 'b', 18)
-            self.set_xy(3.5 * 72, (72 * 3) / 4)
+        if self.amount:
+            self._extra_header(u'Check Enclosed for ${}'.format(self.amount))
+        elif self.appeal:
             law_name = self.comm.foia.jurisdiction.get_law_name(abbrev=True)
-            self.cell(0, 0, u'{} APPEAL'.format(law_name))
-            self.set_xy(x, y)
+            self._extra_header(u'{} APPEAL'.format(law_name))
         self.set_font('DejaVu', '', 10)
         msg_body = self.comm.foia.render_msg_body(self.comm, appeal=self.appeal)
         self.multi_cell(0, 13, msg_body.rstrip(), 0, 'L')
+
+    def _extra_header(self, text):
+        """Add an extra line to the header"""
+        # pylint: disable=invalid-name
+        x = self.get_x()
+        y = self.get_y()
+        self.set_font('Arial', 'b', 18)
+        self.set_xy(3.5 * 72, (72 * 3) / 4)
+        self.cell(0, 0, text)
+        self.set_xy(x, y)
 
 
 class CoverPDF(PDF):

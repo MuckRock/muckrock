@@ -95,6 +95,11 @@ class SnailMailTaskFilterSet(TaskFilterSet):
     category = django_filters.ChoiceFilter(
         choices=[('', 'All')] + SNAIL_MAIL_CATEGORIES
     )
+    has_address = django_filters.ChoiceFilter(
+        method='filter_has_address',
+        label='Has address',
+        choices=BOOLEAN_CHOICES,
+    )
     has_tracking_number = django_filters.ChoiceFilter(
         method='filter_has_tracking_number',
         label='Has tracking number',
@@ -121,6 +126,14 @@ class SnailMailTaskFilterSet(TaskFilterSet):
             return queryset.filter(**{name: ''})
         return queryset
 
+    def filter_has_address(self, queryset, name, value):
+        """Check if the foia has an address."""
+        #pylint: disable=unused-argument
+        if value == 'True':
+            return queryset.exclude(communication__foia__address=None)
+        else:
+            return queryset.filter(communication__foia__address=None)
+
     def filter_has_tracking_number(self, queryset, name, value):
         """Check if the foia has a tracking number."""
         #pylint: disable=unused-argument
@@ -140,6 +153,7 @@ class SnailMailTaskFilterSet(TaskFilterSet):
         model = SnailMailTask
         fields = [
             'category',
+            'has_address',
             'has_tracking_number',
             'has_agency_notes',
             'resolved',

@@ -22,6 +22,7 @@ from PyPDF2.utils import PdfReadError
 # MuckRock
 from muckrock.communication.models import MailCommunication
 from muckrock.foia.models import FOIACommunication, FOIARequest
+from muckrock.task.filters import SnailMailTaskFilterSet
 from muckrock.task.models import SnailMailTask
 from muckrock.task.pdf import CoverPDF, SnailMailPDF
 
@@ -45,22 +46,25 @@ def submit_review_update(foia_pks, reply_text, **kwargs):
 
 
 @task(ignore_result=True, name='muckrock.task.tasks.snail_mail_bulk_pdf_task')
-def snail_mail_bulk_pdf_task(pdf_name, **kwargs):
+def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
     """Save a PDF file for all open snail mail tasks"""
     # pylint: disable=too-many-locals
     # pylint: disable=unused-argument
     cover_info = []
     bulk_merger = PdfFileMerger(strict=False)
-    snails = (
-        SnailMailTask.objects.filter(resolved=False)
-        .order_by('communication__foia__agency').preload_pdf()
-    )
+
+    snails = SnailMailTaskFilterSet(
+        get,
+        queryset=SnailMailTask.objects.filter(resolved=False)
+        .order_by('communication__foia__agency').preload_pdf(),
+    ).qs
+
     blank_pdf = FPDF()
     blank_pdf.add_page()
     blank = StringIO(blank_pdf.output(dest='S'))
     for snail in snails:
         # generate the pdf and merge all pdf attachments
-        pdf = SnailMailPDF(snail.communication, snail.category)
+        pdf = SnailMailPDF(snail.communication, snail.category, snail.amount)
         pdf.generate()
         single_merger = PdfFileMerger(strict=False)
         single_merger.append(StringIO(pdf.output(dest='S')))

@@ -678,7 +678,7 @@ def snail_mail_bulk_pdf(request):
     """Generate the task asynchrnously"""
     # pylint: disable=unused-argument
     pdf_name = datetime.now().strftime('snail_mail_pdfs/%Y/%m/%d/%H-%M-%S.pdf')
-    snail_mail_bulk_pdf_task.delay(pdf_name)
+    snail_mail_bulk_pdf_task.delay(pdf_name, request.GET.dict())
     return JsonResponse({'pdf_name': pdf_name})
 
 
@@ -690,7 +690,7 @@ def snail_mail_pdf(request, pk):
     merger = PdfFileMerger(strict=False)
 
     # generate the pdf and merge all pdf attachments
-    pdf = SnailMailPDF(snail.communication, snail.category)
+    pdf = SnailMailPDF(snail.communication, snail.category, snail.amount)
     pdf.generate()
     merger.append(StringIO(pdf.output(dest='S')))
     for file_ in snail.communication.files.all():
