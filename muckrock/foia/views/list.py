@@ -243,8 +243,21 @@ class RequestList(MRSearchFilterListView):
         if 'delete' in request.POST:
             return self._delete(request)
 
+        if request.POST.get('action') == 'save':
+            return self._save_search(request)
+
         try:
-            return actions[request.POST['action']](request)
+            foias = FOIARequest.objects.filter(
+                pk__in=request.POST.getlist('foias')
+            )
+            msg = actions[request.POST['action']](
+                foias,
+                request.user,
+                request.POST,
+            )
+            if msg:
+                messages.success(request, msg)
+            return redirect(request.resolver_match.view_name)
         except (KeyError, ValueError):
             if request.POST.get('action') != '':
                 messages.error(request, 'Something went wrong')
@@ -253,7 +266,6 @@ class RequestList(MRSearchFilterListView):
     def get_actions(self):
         """Get available actions for this view"""
         return {
-            'save': self._save_search,
             'follow': self._follow,
             'unfollow': self._unfollow,
         }
@@ -286,27 +298,19 @@ class RequestList(MRSearchFilterListView):
         else:
             return redirect(request.resolver_match.view_name)
 
-    def _follow(self, request):
+    def _follow(self, foias, user, _post):
         """Follow the selected requests"""
-        foias = (
-            FOIARequest.objects.filter(pk__in=request.POST.getlist('foias'))
-            .get_viewable(request.user)
-        )
+        foias = foias.get_viewable(user)
         for foia in foias:
-            actstream.actions.follow(request.user, foia, actor_only=False)
-        messages.success(request, 'Followed requests')
-        return redirect(request.resolver_match.view_name)
+            actstream.actions.follow(user, foia, actor_only=False)
+        return 'Followed requests'
 
-    def _unfollow(self, request):
+    def _unfollow(self, foias, user, _post):
         """Unfollow the selected requests"""
-        foias = (
-            FOIARequest.objects.filter(pk__in=request.POST.getlist('foias'))
-            .get_viewable(request.user)
-        )
+        foias = foias.get_viewable(user)
         for foia in foias:
-            actstream.actions.unfollow(request.user, foia)
-        messages.success(request, 'Unfollowed requests')
-        return redirect(request.resolver_match.view_name)
+            actstream.actions.unfollow(user, foia)
+        return 'Unfollowed requests'
 
     def get(self, request, *args, **kwargs):
         """Check for loading saved searches"""
@@ -367,74 +371,61 @@ class MyRequestList(RequestList):
         })
         return actions
 
-    def _extend_embargo(self, request):
+    def _extend_embargo(self, foias, user, _post):
         """Extend the embargo on the selected requests"""
         end_date = date.today() + timedelta(30)
-        foias = FOIARequest.objects.filter(pk__in=request.POST.getlist('foias'))
-        foias = [f.pk for f in foias if f.has_perm(request.user, 'embargo')]
+        foias = [f.pk for f in foias if f.has_perm(user, 'embargo')]
         FOIARequest.objects.filter(pk__in=foias).update(embargo=True)
         # only set date if in end state
         FOIARequest.objects.filter(
             pk__in=foias,
             status__in=END_STATUS,
         ).update(date_embargo=end_date)
-        messages.success(request, 'Embargoes extended for 30 days')
-        return redirect('foia-mylist')
+        return 'Embargoes extended for 30 days'
 
-    def _remove_embargo(self, request):
+    def _remove_embargo(self, foias, user, _post):
         """Remove the embargo on the selected requests"""
-        foias = FOIARequest.objects.filter(pk__in=request.POST.getlist('foias'))
-        foias = [f.pk for f in foias if f.has_perm(request.user, 'embargo')]
+        foias = [f.pk for f in foias if f.has_perm(user, 'embargo')]
         FOIARequest.objects.filter(pk__in=foias).update(embargo=False)
-        messages.success(request, 'Embargoes removed')
-        return redirect('foia-mylist')
+        return 'Embargoes removed'
 
-    def _perm_embargo(self, request):
+    def _perm_embargo(self, foias, user, _post):
         """Permanently embargo the selected requests"""
-        foias = FOIARequest.objects.filter(pk__in=request.POST.getlist('foias'))
-        foias = [
-            f.pk for f in foias if f.has_perm(request.user, 'embargo_perm')
-        ]
+        foias = [f.pk for f in foias if f.has_perm(user, 'embargo_perm')]
         FOIARequest.objects.filter(pk__in=foias).update(embargo=True)
         # only set permanent
         FOIARequest.objects.filter(
             pk__in=foias,
             status__in=END_STATUS,
         ).update(permanent_embargo=True)
-        messages.success(request, 'Embargoes extended permanently')
-        return redirect('foia-mylist')
+        return 'Embargoes extended permanently'
 
-    def _project(self, request):
+    def _project(self, foias, user, post):
         """Add the requests to the selected projects"""
-        foias = FOIARequest.objects.filter(pk__in=request.POST.getlist('foias'))
-        foias = [f for f in foias if f.has_perm(request.user, 'change')]
-        form = ProjectManagerForm(request.POST, user=request.user)
+        foias = [f for f in foias if f.has_perm(user, 'change')]
+        form = ProjectManagerForm(post, user=user)
         if form.is_valid():
             projects = form.cleaned_data['projects']
             for foia in foias:
                 foia.projects.add(*projects)
-            messages.success(request, 'Requests added to projects')
-        return redirect('foia-mylist')
+            return 'Requests added to projects'
 
-    def _tags(self, request):
+    def _tags(self, foias, user, post):
         """Add tags to the selected requests"""
-        foias = FOIARequest.objects.filter(pk__in=request.POST.getlist('foias'))
-        foias = [f for f in foias if f.has_perm(request.user, 'change')]
+        foias = [f for f in foias if f.has_perm(user, 'change')]
         tags = [
             Tag.objects.get_or_create(name=t)
-            for t in parse_tags(request.POST.get('tags', ''))
+            for t in parse_tags(post.get('tags', ''))
         ]
         tags = [t for t, _ in tags]
         for foia in foias:
             foia.tags.add(*tags)
-        messages.success(request, 'Tags added to requests')
-        return redirect('foia-mylist')
+        return 'Tags added to requests'
 
-    def _share(self, request):
+    def _share(self, foias, user, post):
         """Share the requests with the selected users"""
-        foias = FOIARequest.objects.filter(pk__in=request.POST.getlist('foias'))
-        foias = [f for f in foias if f.has_perm(request.user, 'change')]
-        form = FOIAAccessForm(request.POST)
+        foias = [f for f in foias if f.has_perm(user, 'change')]
+        form = FOIAAccessForm(post)
         if form.is_valid():
             access = form.cleaned_data['access']
             users = form.cleaned_data['users']
@@ -446,29 +437,26 @@ class MyRequestList(RequestList):
                 for foia in foias:
                     foia.edit_collaborators.remove(*users)
                     foia.read_collaborators.add(*users)
-            messages.success(request, 'Requests shared')
-        return redirect('foia-mylist')
+            return 'Requests shared'
 
-    def _autofollowup_on(self, request):
+    def _autofollowup_on(self, foias, user, _post):
         """Turn autofollowups on"""
-        return self._autofollowup(request, disable=False)
+        return self._autofollowup(foias, user, disable=False)
 
-    def _autofollowup_off(self, request):
+    def _autofollowup_off(self, foias, user, _post):
         """Turn autofollowups off"""
-        return self._autofollowup(request, disable=True)
+        return self._autofollowup(foias, user, disable=True)
 
-    def _autofollowup(self, request, disable):
+    def _autofollowup(self, foias, user, disable):
         """Set autofollowups"""
-        foias = FOIARequest.objects.filter(pk__in=request.POST.getlist('foias'))
-        foias = [f.pk for f in foias if f.has_perm(request.user, 'change')]
+        foias = [f.pk for f in foias if f.has_perm(user, 'change')]
         FOIARequest.objects.filter(
             pk__in=foias,
         ).update(
             disable_autofollowups=disable,
         )
         action = 'disabled' if disable else 'enabled'
-        messages.success(request, 'Autofollowups {}'.format(action))
-        return redirect('foia-mylist')
+        return 'Autofollowups {}'.format(action)
 
 
 @class_view_decorator(
