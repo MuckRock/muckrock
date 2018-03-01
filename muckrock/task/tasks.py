@@ -60,7 +60,7 @@ def snail_mail_bulk_pdf_task(pdf_name, **kwargs):
     blank = StringIO(blank_pdf.output(dest='S'))
     for snail in snails:
         # generate the pdf and merge all pdf attachments
-        pdf = SnailMailPDF(snail.communication, snail.category)
+        pdf = SnailMailPDF(snail.communication, snail.category, snail.amount)
         pdf.generate()
         single_merger = PdfFileMerger(strict=False)
         single_merger.append(StringIO(pdf.output(dest='S')))
