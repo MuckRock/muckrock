@@ -31,24 +31,29 @@ urlpatterns = [
     url(r'^list/$', views.RequestList.as_view(), name='foia-list'),
     url(r'^mylist/$', views.MyRequestList.as_view(), name='foia-mylist'),
     url(
+        r'^organization-list/$',
+        views.MyOrgRequestList.as_view(),
+        name='foia-org-list',
+    ),
+    url(
         r'^agency-list/$',
         views.AgencyRequestList.as_view(),
-        name='foia-agency-list'
+        name='foia-agency-list',
     ),
     url(
         r'^mylist/multirequest/$',
         views.MyMultiRequestList.as_view(),
-        name='foia-mymulti'
+        name='foia-mymulti',
     ),
     url(
         r'^list/following/$',
         views.FollowingRequestList.as_view(),
-        name='foia-list-following'
+        name='foia-list-following',
     ),
     url(
         r'^list/processing/$',
         views.ProcessingRequestList.as_view(),
-        name='foia-list-processing'
+        name='foia-list-processing',
     ),
 
     # Create and Draft Views
@@ -60,25 +65,25 @@ urlpatterns = [
     url(
         r'^multi/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)/draft/$',
         views.draft_multirequest,
-        name='foia-multi-draft'
+        name='foia-multi-draft',
     ),
 
     # Detail View
     url(
         r'^%s/$' % foia_url,
         views.Detail.as_view(template_name='foia/detail.html'),
-        name='foia-detail'
+        name='foia-detail',
     ),
     url(r'^%s/clone/$' % foia_url, views.clone_request, name='foia-clone'),
     url(
         r'^%s/crowdfund/$' % foia_url,
         views.crowdfund_request,
-        name='foia-crowdfund'
+        name='foia-crowdfund',
     ),
     url(
         r'^%s/files/$' % foia_url,
         views.FOIAFileListView.as_view(),
-        name='foia-files'
+        name='foia-files',
     ),
     url(r'^%s/follow/$' % foia_url, views.follow, name='foia-follow'),
     url(r'^%s/embargo/$' % foia_url, views.embargo, name='foia-embargo'),
@@ -86,19 +91,19 @@ urlpatterns = [
     url(
         r'^%s/toggle-followups/$' % foia_url,
         views.toggle_autofollowups,
-        name='foia-toggle-followups'
+        name='foia-toggle-followups',
     ),
     url(
         r'^multi/(?P<slug>[\w\d_-]+)-(?P<pk>\d+)/$',
         views.MultiDetail.as_view(),
-        name='foia-multi-detail'
+        name='foia-multi-detail',
     ),
 
     # Misc Views
     url(
         r'^(?P<jurisdiction>[\w\d_-]+)-(?P<idx>\d+)/$',
         jurisdiction,
-        name='foia-jurisdiction'
+        name='foia-jurisdiction',
     ),
     url(r'^acronyms/$', views.acronyms, name='foia-acronyms'),
     url(r'^raw_email/(?P<idx>\d+)/$', views.raw, name='foia-raw'),
@@ -107,7 +112,7 @@ urlpatterns = [
     url(
         r'^feeds/submitted/$',
         LatestSubmittedRequests(),
-        name='foia-submitted-feed'
+        name='foia-submitted-feed',
     ),
     url(r'^feeds/completed/$', LatestDoneRequests(), name='foia-done-feed'),
     url(r'^feeds/(?P<idx>\d+)/$', FOIAFeed(), name='foia-feed'),
@@ -119,25 +124,25 @@ urlpatterns = [
     url(
         r'^feeds/completed/(?P<username>[\w\d_.@ ]+)/$',
         UserDoneFeed(),
-        name='foia-user-done-feed'
+        name='foia-user-done-feed',
     ),
     url(
         r'^feeds/(?P<username>[\w\d_.@ ]+)/$',
         UserUpdateFeed(),
-        name='foia-user-feed'
+        name='foia-user-feed',
     ),
 
     # Files
     url(
         r'^file/(?P<pk>\d+)/embed/$',
         views.FileEmbedView.as_view(),
-        name='file-embed'
+        name='file-embed',
     ),
 
     # Old URLS
     url(
         r'^list/user/(?P<user_name>[\w\d_.@ ]+)/$',
-        RedirectView.as_view(url='/foi/list/user-%(user_name)s')
+        RedirectView.as_view(url='/foi/list/user-%(user_name)s'),
     ),
     url(
         r'^list/tag/(?P<tag_slug>[\w\d_.@-]+)/$',
@@ -147,31 +152,31 @@ urlpatterns = [
     url(
         r'^list/user-(?P<user_pk>[\w\d_.@ -]+)/$',
         RedirectView.as_view(url='/foi/list/?user=%(user_pk)s'),
-        name='foia-list-user'
+        name='foia-list-user',
     ),
     url(
         r'^list/agency-(?P<agency>[\w\d_.@ -]+)-(?P<idx>\d+)/$',
         RedirectView.as_view(url='/foi/list/?agency=%(idx)s'),
-        name='foia-list-agency'
+        name='foia-list-agency',
     ),
     url(
         r'^list/place-(?P<jurisdiction>[\w\d_.@ -]+)-(?P<idx>\d+)/$',
         RedirectView.as_view(url='/foi/list/?jurisdiction=%(idx)s'),
-        name='foia-list-jurisdiction'
+        name='foia-list-jurisdiction',
     ),
     url(
         r'^list/tag-(?P<tag_slug>[\w\d_.@-]+)/$',
         RedirectView.as_view(url='/foi/list/?tags=%(tag_slug)s'),
-        name='foia-list-tag'
+        name='foia-list-tag',
     ),
     url(
         r'^list/status-(?P<status>[\w\d_.@ -]+)/$',
         RedirectView.as_view(url='/foi/list/?status=%(status)s'),
-        name='foia-list-status'
+        name='foia-list-status',
     ),
     url(
         r'^mylist/(?P<view>\w+)/$',
         RedirectView.as_view(url='foi/mylist/'),
-        name='foia-mylist-old'
+        name='foia-mylist-old',
     ),
 ]

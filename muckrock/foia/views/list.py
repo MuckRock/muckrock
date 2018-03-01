@@ -119,6 +119,7 @@ class RequestList(MRSearchFilterListView):
         'agency': 'agency__name',
         'date_updated': 'date_updated',
         'date_submitted': 'date_submitted',
+        'date_done': 'date_done',
     }
 
     def get_queryset(self):
@@ -457,6 +458,23 @@ class MyRequestList(RequestList):
         )
         action = 'disabled' if disable else 'enabled'
         return 'Autofollowups {}'.format(action)
+
+
+@class_view_decorator(
+    user_passes_test(lambda u: u.is_authenticated and u.profile.organization)
+)
+class MyOrgRequestList(RequestList):
+    """View requests owned by current user's organization"""
+    filter_class = FOIARequestFilterSet
+    title = 'Organization Requests'
+    template_name = 'foia/list.html'
+
+    def get_queryset(self):
+        """Limit to just requests owned by the current user."""
+        queryset = super(MyOrgRequestList, self).get_queryset()
+        return queryset.filter(
+            user__profile__organization=self.request.user.profile.organization
+        )
 
 
 @class_view_decorator(
