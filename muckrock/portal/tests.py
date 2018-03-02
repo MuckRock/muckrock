@@ -6,6 +6,9 @@ Tests for the portal application
 # Django
 from django.test import TestCase
 
+# Standard Library
+from datetime import date
+
 # Third Party
 import requests_mock
 from mock import patch
@@ -112,6 +115,23 @@ class TestNextRequestPortal(TestCase):
         assert_false(comm.hidden)
         eq_(comm.portals.count(), 1)
         eq_(comm.responsetask_set.count(), 1)
+
+    def test_due_date(self):
+        """Test receiving a due date reply"""
+        comm = FOIACommunicationFactory(
+            subject='[Due Date Changed]',
+            communication='The due date for record request #18-209 has been '
+            'changed to: March 16, 2018\nView Request #18-209',
+            foia__status='processed',
+        )
+        self.portal.receive_msg(comm)
+        eq_(comm.foia.status, 'processed')
+        eq_(
+            comm.communication, 'The due date for record request #18-209 has '
+            'been changed to: March 16, 2018'
+        )
+        assert_false(comm.hidden)
+        eq_(comm.foia.date_estimate, date(2018, 3, 16))
 
 
 class TestFBIPortal(TestCase):
