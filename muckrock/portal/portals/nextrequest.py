@@ -417,8 +417,8 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
 
         self._process_msg(
             comm=comm,
-            regex=r'(?P<text>(?:A document has|Docuements have) been released '
-            r'(:?to you )?for record request #(?P<tracking_id>[0-9-]+):'
+            regex=r'(?P<text>(?:A document has|Documents have) been released '
+            r'(:?to you )?for record request\s#(?P<tracking_id>[0-9-]+):'
             r'(?P<documents>.*))View Request',
             on_match=on_match,
             error_reason='Could not find the file list',
@@ -494,7 +494,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
 
     def _process_msg(self, comm, regex, on_match, error_reason):
         """Process an incoming message based on a regex match of the content"""
-        pattern = re.compile(regex, re.MULTILINE | re.DOTALL)
+        pattern = re.compile(regex, re.MULTILINE | re.DOTALL | re.UNICODE)
         match = pattern.search(comm.communication)
         if match:
             on_match(match)
