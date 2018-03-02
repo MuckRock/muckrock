@@ -74,7 +74,7 @@
                 <li class="touch--show"><a class="nav-item" href="{% url 'foia-root' %}">Explore</a></li>
                 <li><a class="nav-item" href="{% url 'foia-list' %}">All&nbsp;Requests</a></li>
                 <li><a class="nav-item" class="nav-item" href="{% url 'foia-mylist' %}">Your&nbsp;Requests</a></li>
-                {% if user.profile.organization %}
+                {% if organization %}
                   <li><a class="nav-item" class="nav-item" href="{% url 'foia-org-list' %}">Organization&nbsp;Requests</a></li>
                 {% endif %}
                 {% if user.profile.is_advanced %}

@@ -461,7 +461,7 @@ class MyRequestList(RequestList):
 
 
 @class_view_decorator(
-    user_passes_test(lambda u: u.is_authenticated and u.profile.organization)
+    user_passes_test(lambda u: u.is_authenticated and u.profile.get_org())
 )
 class MyOrgRequestList(RequestList):
     """View requests owned by current user's organization"""
@@ -473,7 +473,7 @@ class MyOrgRequestList(RequestList):
         """Limit to just requests owned by the current user."""
         queryset = super(MyOrgRequestList, self).get_queryset()
         return queryset.filter(
-            user__profile__organization=self.request.user.profile.organization
+            user__profile__organization=self.request.user.profile.get_org()
         )
 
 
