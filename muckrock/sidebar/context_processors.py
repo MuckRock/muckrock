@@ -11,7 +11,6 @@ from datetime import datetime, timedelta
 from muckrock.accounts.models import Profile
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
-from muckrock.organization.models import Organization
 from muckrock.project.models import Project
 from muckrock.sidebar.models import Broadcast
 from muckrock.utils import cache_get_or_set
