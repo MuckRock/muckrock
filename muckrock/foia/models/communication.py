@@ -256,10 +256,12 @@ class FOIACommunication(models.Model):
             and email_comm.from_email.domain not in muckrock_domains
         ):
             self.foia.email = email_comm.from_email
+            new_cc_emails = (
+                list(email_comm.to_emails.all()) +
+                list(email_comm.cc_emails.all())
+            )
             new_cc_emails = [
-                e for e in
-                (email_comm.to_emails.all() + email_comm.cc_emails.all())
-                if e.domain not in muckrock_domains
+                e for e in new_cc_emails if e.domain not in muckrock_domains
             ]
             self.foia.cc_emails.set(new_cc_emails)
             self.foia.save(comment='update primary contact from comm')
