@@ -290,18 +290,20 @@ class CrowdsourceListView(MROrderedListView):
     template_name = 'crowdsource/list.html'
     sort_map = {
         'title': 'title',
-        'status': 'status',
         'user': 'user',
-        'datetime_created': 'datetime_created',
     }
 
     def get_queryset(self):
         """Get all open crowdsources and all crowdsources you own"""
         queryset = super(CrowdsourceListView, self).get_queryset()
-        if self.request.user.is_authenticated:
-            return queryset.filter(Q(user=self.request.user) | Q(status='open'))
-        else:
-            return queryset.filter(status='open')
+        queryset = queryset.select_related(
+            'user__profile',
+            'project',
+        ).prefetch_related(
+            'data',
+            'responses',
+        )
+        return queryset.get_viewable(self.request.user)
 
 
 @class_view_decorator(

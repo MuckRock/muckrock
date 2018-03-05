@@ -6,6 +6,7 @@ from django.contrib.postgres.fields import JSONField
 from django.core.urlresolvers import reverse
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models import Q
 from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
@@ -21,6 +22,22 @@ from pyembed.core.consumer import PyEmbedConsumerError
 
 # MuckRock
 from muckrock.crowdsource import fields
+
+
+class CrowdsourceQuerySet(models.QuerySet):
+    """Object manager for crowdsources"""
+
+    def get_viewable(self, user):
+        """Get the viewable crowdsources for the user"""
+        if user.is_staff:
+            return self
+        elif user.is_authenticated:
+            return self.filter(
+                Q(user=user) | Q(status='open', project_only=False) |
+                Q(status='open', project_only=True, project__contributors=user)
+            )
+        else:
+            return self.filter(status='open', project_only=False)
 
 
 class Crowdsource(models.Model):
@@ -70,6 +87,8 @@ class Crowdsource(models.Model):
         help_text='Is the user limited to completing this form only once? '
         '(else, it is unlimited) - only used if not using data for this crowdsource',
     )
+
+    objects = CrowdsourceQuerySet.as_manager()
 
     def __unicode__(self):
         return self.title
@@ -154,6 +173,12 @@ class Crowdsource(models.Model):
             return datum.metadata.keys()
         else:
             return []
+
+    def total_assignments(self):
+        """Total assignments to be completed"""
+        if not self.data.all():
+            return None
+        return len(self.data.all()) * self.data_limit
 
 
 class CrowdsourceDataQuerySet(models.QuerySet):
