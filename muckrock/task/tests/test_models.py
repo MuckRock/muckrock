@@ -78,7 +78,7 @@ class OrphanTaskTests(TestCase):
 
     def setUp(self):
         self.comm = factories.FOIACommunicationFactory(
-            email__from_email__email='test@muckrock.com',
+            email__from_email__email='test@example.com',
         )
         self.task = task.models.OrphanTask.objects.create(
             reason='ib', communication=self.comm, address='Whatever Who Cares'
@@ -113,7 +113,7 @@ class OrphanTaskTests(TestCase):
 
     def test_get_sender_domain(self):
         """Should return the domain of the orphan's sender."""
-        eq_(self.task.get_sender_domain(), 'muckrock.com')
+        eq_(self.task.get_sender_domain(), 'example.com')
 
     def test_reject(self):
         """Shouldn't do anything, ATM. Revisit later."""
@@ -122,7 +122,7 @@ class OrphanTaskTests(TestCase):
     def test_blacklist(self):
         """A blacklisted orphan should add its sender's domain to the blacklist"""
         self.task.blacklist()
-        ok_(task.models.BlacklistDomain.objects.filter(domain='muckrock.com'))
+        ok_(task.models.BlacklistDomain.objects.filter(domain='example.com'))
 
     def test_blacklist_duplicate(self):
         """The blacklist method should not crash when a domain is dupliacted."""
