@@ -2,6 +2,7 @@
 """Tests for the crowdsource app"""
 
 # Django
+from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
 
 # Standard Library
@@ -9,7 +10,14 @@ import json
 from datetime import datetime
 
 # Third Party
-from nose.tools import assert_false, assert_is_none, eq_, ok_
+from nose.tools import (
+    assert_false,
+    assert_in,
+    assert_is_none,
+    assert_not_in,
+    eq_,
+    ok_,
+)
 
 # MuckRock
 from muckrock.crowdsource.factories import (
@@ -20,7 +28,8 @@ from muckrock.crowdsource.factories import (
     CrowdsourceTextFieldFactory,
     CrowdsourceValueFactory,
 )
-from muckrock.factories import UserFactory
+from muckrock.crowdsource.models import Crowdsource
+from muckrock.factories import ProjectFactory, UserFactory
 
 
 class TestCrowdsource(TestCase):
@@ -166,6 +175,53 @@ class TestCrowdsource(TestCase):
         data.metadata = {'foo': 'bar', 'muck': 'rock'}
         data.save()
         eq_(set(crowdsource.get_metadata_keys()), {'foo', 'muck'})
+
+    def test_get_viewable(self):
+        """Get the list of viewable crowdsources for the user"""
+        project = ProjectFactory()
+        admin = UserFactory(profile__acct_type='admin', is_staff=True)
+        proj_user, owner, user = UserFactory.create_batch(3)
+        project.contributors.add(proj_user)
+
+        draft_crowdsource = CrowdsourceFactory(user=owner, status='draft')
+        open_crowdsource = CrowdsourceFactory(user=owner, status='open')
+        closed_crowdsource = CrowdsourceFactory(user=owner, status='close')
+        project_crowdsource = CrowdsourceFactory(
+            user=owner,
+            status='open',
+            project=project,
+            project_only=True,
+        )
+
+        crowdsources = Crowdsource.objects.get_viewable(admin)
+        assert_in(draft_crowdsource, crowdsources)
+        assert_in(open_crowdsource, crowdsources)
+        assert_in(closed_crowdsource, crowdsources)
+        assert_in(project_crowdsource, crowdsources)
+
+        crowdsources = Crowdsource.objects.get_viewable(proj_user)
+        assert_not_in(draft_crowdsource, crowdsources)
+        assert_in(open_crowdsource, crowdsources)
+        assert_not_in(closed_crowdsource, crowdsources)
+        assert_in(project_crowdsource, crowdsources)
+
+        crowdsources = Crowdsource.objects.get_viewable(owner)
+        assert_in(draft_crowdsource, crowdsources)
+        assert_in(open_crowdsource, crowdsources)
+        assert_in(closed_crowdsource, crowdsources)
+        assert_in(project_crowdsource, crowdsources)
+
+        crowdsources = Crowdsource.objects.get_viewable(user)
+        assert_not_in(draft_crowdsource, crowdsources)
+        assert_in(open_crowdsource, crowdsources)
+        assert_not_in(closed_crowdsource, crowdsources)
+        assert_not_in(project_crowdsource, crowdsources)
+
+        crowdsources = Crowdsource.objects.get_viewable(AnonymousUser())
+        assert_not_in(draft_crowdsource, crowdsources)
+        assert_in(open_crowdsource, crowdsources)
+        assert_not_in(closed_crowdsource, crowdsources)
+        assert_not_in(project_crowdsource, crowdsources)
 
 
 class TestCrowdsourceData(TestCase):

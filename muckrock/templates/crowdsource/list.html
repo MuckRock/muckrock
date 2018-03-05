@@ -1,27 +1,45 @@
 {% extends 'base_list.html' %}
+{% load humanize %}
 
 {% block list-title %}
-  Crowdsources
+  Open Assignments
 {% endblock list-title %}
 
 {% block list-table-head %}
 <th data-sort="title">Title</th>
-<th data-sort="status">Status</th>
 <th data-sort="user">Owner</th>
-<th data-sort="datetime_created">Date</th>
+<th>Tasks Completed</th>
 {% endblock list-table-head %}
 
 {% block list-table-row %}
   {% with object as crowdsource %}
-    <td><a href="{{ crowdsource.get_absolute_url }}">{{ crowdsource.title }}</a></td>
-    <td>{{ crowdsource.get_status_display }}</td>
-    <td><a href="{% url "acct-profile" crowdsource.user.username %}">{{ crowdsource.user.get_full_name }}</a></td>
-    <td>{{ crowdsource.datetime_created | date:"F j, Y"}}</td>
+    <td>
+      <a href="{{ crowdsource.get_absolute_url }}">
+        {{ crowdsource.title }}
+      </a>
+      &nbsp;
+      {% if crowdsource.status == "close" %}
+        <span class="small badge state red">Closed</span>
+      {% elif crowdsource.status == "draft" %}
+        <span class="small badge state">Draft</span>
+      {% endif %}
+    </td>
+    {% if crowdsource.project %}
+      <td><a href="{{ crowdsource.project.get_absolute_url }}">{{ crowdsource.project.title }}</a></td>
+    {% else %}
+      <td><a href="{% url "acct-profile" crowdsource.user.username %}">{{ crowdsource.user.get_full_name }}</a></td>
+    {% endif %}
+    <td>
+      {{ crowdsource.responses.all|length|intcomma }}
+      {% if crowdsource.data.all %}
+        out of {{ crowdsource.total_assignments|intcomma }}
+      {% endif %}
+    </td>
   {% endwith %}
 {% endblock list-table-row %}
 
 {% block list-actions %}
   {% if user.is_staff or user.profile.experimental %}
-    <a class="primary button" href="{% url "crowdsource-create" %}">Create a New Crowdsource</a>
+    <a class="primary button" href="{% url "crowdsource-create" %}">Create a New Assignment</a>
   {% endif %}
 {% endblock %}
