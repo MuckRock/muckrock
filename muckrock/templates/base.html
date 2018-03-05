@@ -6,83 +6,83 @@
 <!doctype html>
 
 <html lang="en-US">
-    <head>
-        <title>{% block title %}MuckRock{% endblock title %}</title>
-        <meta charset="utf-8" />
-        {% block description %}<meta name="description" content=""/>{% endblock description %}
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="google-site-verification" content="j3QyPvF_0QX1v2YTWeY0Al5JCiBVdxhDjJM5JgFkxVE" />
-        <meta name="google-site-verification" content="4KnIEDr5Fi-PUL9klVnMlC2BMcStrUwQIj-4gMVfqjk" />
-        <!-- Load Assets -->
-        <link rel="shortcut icon"       href="{% static 'icons/favicon.ico' %}" />
-        <link rel="mask-icon"           href="{% static 'icons/favicon.svg' %}" color="#367AF0" />
-        <link rel="apple-touch-icon"    href="{% static 'icons/logo.png' %}" />
-        {% compress css %}
-        <style type="text/css">
-            /* Typefaces are loaded inside the base template so that they can be referenced
-            by the correct URL. In production, the typefaces should be served from a CDN. */
+  <head>
+    <title>{% block title %}MuckRock{% endblock title %}</title>
+    <meta charset="utf-8" />
+    {% block description %}<meta name="description" content=""/>{% endblock description %}
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="google-site-verification" content="j3QyPvF_0QX1v2YTWeY0Al5JCiBVdxhDjJM5JgFkxVE" />
+    <meta name="google-site-verification" content="4KnIEDr5Fi-PUL9klVnMlC2BMcStrUwQIj-4gMVfqjk" />
+    <!-- Load Assets -->
+    <link rel="shortcut icon"       href="{% static 'icons/favicon.ico' %}" />
+    <link rel="mask-icon"           href="{% static 'icons/favicon.svg' %}" color="#367AF0" />
+    <link rel="apple-touch-icon"    href="{% static 'icons/logo.png' %}" />
+    {% compress css %}
+      <style type="text/css">
+/* Typefaces are loaded inside the base template so that they can be referenced
+   by the correct URL. In production, the typefaces should be served from a CDN. */
+@font-face {
+  font-family: 'Source Sans Pro';
+  src: url("{% static 'fonts/SourceSansPro-Regular.ttf' %}");
+  font-weight: 400;
+  font-style: normal;
+}
             @font-face {
-                font-family: 'Source Sans Pro';
-                src: url("{% static 'fonts/SourceSansPro-Regular.ttf' %}");
-                font-weight: 400;
-                font-style: normal;
+              font-family: 'Source Sans Pro';
+              src: url("{% static 'fonts/SourceSansPro-Italic.ttf' %}");
+              font-weight: 400;
+              font-style: italic;
             }
             @font-face {
-                font-family: 'Source Sans Pro';
-                src: url("{% static 'fonts/SourceSansPro-Italic.ttf' %}");
-                font-weight: 400;
-                font-style: italic;
+              font-family: 'Source Sans Pro';
+              src: url("{% static 'fonts/SourceSansPro-Semibold.ttf' %}");
+              font-weight: 500;
+              font-style: normal;
             }
             @font-face {
-                font-family: 'Source Sans Pro';
-                src: url("{% static 'fonts/SourceSansPro-Semibold.ttf' %}");
-                font-weight: 500;
-                font-style: normal;
+              font-family: 'Source Sans Pro';
+              src: url("{% static 'fonts/SourceSansPro-SemiboldItalic.ttf' %}");
+              font-weight: 500;
+              font-style: italic;
             }
             @font-face {
-                font-family: 'Source Sans Pro';
-                src: url("{% static 'fonts/SourceSansPro-SemiboldItalic.ttf' %}");
-                font-weight: 500;
-                font-style: italic;
+              font-family: 'Source Code Pro';
+              src: url("{% static 'fonts/SourceCodePro-Regular.ttf' %}");
+              font-weight: normal;
+              font-style: normal;
             }
-            @font-face {
-                font-family: 'Source Code Pro';
-                src: url("{% static 'fonts/SourceCodePro-Regular.ttf' %}");
-                font-weight: normal;
-                font-style: normal;
-            }
-        </style>
-        <link rel="stylesheet" type="text/css" href="{% static 'autocomplete_light/style.css' %}" />
-        <link rel="stylesheet" type="text/css" href="{% static 'hijack/hijack-styles.css' %}" />
-        {% render_bundle 'main' 'css' %}
-        {% endcompress %}
-        {% block styles %}
-        {% endblock %}
-        <!-- Prefetch and Prerendering -->
-        {% block prefetch %}
-        {% endblock prefetch %}
-        {% block prerender %}
-        {% endblock prerender %}
-        <!-- Facebook and Twitter Integration -->
-        <!-- http://ogp.me & https://dev.twitter.com/docs/cards -->
-        {% block open_graph %}
-        <meta property="og:site_name" content="MuckRock" />
-        <meta property="og:title" content="MuckRock" />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="{{ request.build_absolute_uri }}" />
-        <meta property="og:description" content="MuckRock is a collaborative news site that gives you the tools to hold the government accountable." />
-        <meta property="og:image" content="{% static 'icons/logo.png' %}" />
-        {% endblock open_graph %}
-        {% block twitter_card %}
-        <meta name="twitter:card" content="summary" />
-        <meta name="twitter:site" content="@muckrock" />
-        <meta name="twitter:title" content="MuckRock" />
-        <meta name="twitter:description" content="MuckRock is a collaborative news site that gives you the tools to hold the government accountable." />
-        <meta name="twitter:image:src" content="{% static 'icons/logo.png' %}" />
-        {% endblock twitter_card %}
-        {% opensearch_meta %}
-        <script type="application/ld+json">
-        { "@context" : "http://schema.org",
+      </style>
+      <link rel="stylesheet" type="text/css" href="{% static 'autocomplete_light/style.css' %}" />
+      <link rel="stylesheet" type="text/css" href="{% static 'hijack/hijack-styles.css' %}" />
+      {% render_bundle 'main' 'css' %}
+    {% endcompress %}
+    {% block styles %}
+    {% endblock %}
+    <!-- Prefetch and Prerendering -->
+    {% block prefetch %}
+    {% endblock prefetch %}
+    {% block prerender %}
+    {% endblock prerender %}
+    <!-- Facebook and Twitter Integration -->
+    <!-- http://ogp.me & https://dev.twitter.com/docs/cards -->
+    {% block open_graph %}
+      <meta property="og:site_name" content="MuckRock" />
+      <meta property="og:title" content="MuckRock" />
+      <meta property="og:type" content="website" />
+      <meta property="og:url" content="{{ request.build_absolute_uri }}" />
+      <meta property="og:description" content="MuckRock is a collaborative news site that gives you the tools to hold the government accountable." />
+      <meta property="og:image" content="{% static 'icons/logo.png' %}" />
+    {% endblock open_graph %}
+    {% block twitter_card %}
+      <meta name="twitter:card" content="summary" />
+      <meta name="twitter:site" content="@muckrock" />
+      <meta name="twitter:title" content="MuckRock" />
+      <meta name="twitter:description" content="MuckRock is a collaborative news site that gives you the tools to hold the government accountable." />
+      <meta name="twitter:image:src" content="{% static 'icons/logo.png' %}" />
+    {% endblock twitter_card %}
+    {% opensearch_meta %}
+    <script type="application/ld+json">
+{ "@context" : "http://schema.org",
           "@type" : "Organization",
           "legalName" : "MuckRock Foundation",
           "url" : "https://www.muckrock.com/",
@@ -105,96 +105,109 @@
             "http://www.twitter.com/MuckRock",
             "https://en.wikipedia.org/wiki/MuckRock"]
         }
-        </script>
-		<script type="application/ld+json">
-		{
-		  "@context" : "http://schema.org",
-		  "@type" : "WebSite", 
-		  "name" : "MuckRock Foundation",
-		  "url" : "https://www.muckrock.com/",
-		  "potentialAction" : {
-			"@type" : "SearchAction",
-			"target" : "https://www.muckrock.com/search/?q={search_term}",
-			"query-input" : "required name=search_term"
-		  }                     
-		}
-		</script>
-    </head>
-    <body>
-        {% hijack_notification %}
-        {% block body %}
-        <div class="container">
-            <div id="modal-overlay"></div>
-            {% include 'nav/header.html' %}
-            {% if messages %}
-            <ul class="messages nostyle">
-                {% for message in messages %}
-                <li>{% include 'lib/pattern/message.html' %}</li>
-                {% endfor %}
-            </ul>
-            {% endif %}
-            <div class="content">
-            {% block content %}
-            {% endblock content %}
-            </div>
-            {% include 'nav/footer.html' %}
+    </script>
+    <script type="application/ld+json">
+{
+      "@context" : "http://schema.org",
+      "@type" : "WebSite",
+      "name" : "MuckRock Foundation",
+      "url" : "https://www.muckrock.com/",
+      "potentialAction" : {
+      "@type" : "SearchAction",
+      "target" : "https://www.muckrock.com/search/?q={search_term}",
+      "query-input" : "required name=search_term"
+      }
+    }
+    </script>
+  </head>
+  <body>
+    {% hijack_notification %}
+    {% block body %}
+      <div class="container">
+        <div id="modal-overlay"></div>
+        {% include 'nav/header.html' %}
+        {% if messages %}
+          <ul class="messages nostyle">
+            {% for message in messages %}
+              <li>{% include 'lib/pattern/message.html' %}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+        {% if user.profile.email_failed %}
+          <div class="message warning">
+            <span class="symbol">
+              {% include "lib/component/icon/warning.svg" %}
+            </span>
+            <span class="text">
+              <p>
+                The last email we sent you bounced back.
+                <a href="{% url "acct-settings" %}">Please update your email address.</a>
+              </p>
+            </span>
+          </div>
+        {% endif %}
+        <div class="content">
+          {% block content %}
+          {% endblock content %}
         </div>
-        {% endblock %}
-        <!-- SCRIPTS -->
-        <!-- Google Analytics -->
-        <script>
-            // Prevents Google Analytics from tracking events
-            // on our development or staging servers.
-            if (location.host == "www.muckrock.com") {
-                (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-                (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-                m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-                })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-                ga('create', 'UA-16635809-1', 'auto');
-                // Track the account type of the current user
-                {% if request.user.is_authenticated %}
-                var dimensionValue = '{{request.user.profile.acct_type}}';
-                {% else %}
-                var dimensionValue = 'anonymous';
-                {% endif %}
-                ga('set', 'dimension1', dimensionValue);
-                // Track this pageview
-                ga('send', 'pageview');
-                // Track any server events
-                {% if ga == 'request_purchase' %}
-                    ga('send', 'event', 'Requests', 'Purchase', 1);
-                {% endif %}
-                {% if ga == 'request_drafted' %}
-                    ga('send', 'event', 'Requests', 'Draft');
-                {% endif %}
-                {% if ga == 'request_submitted' %}
-                    ga('send', 'event', 'Requests', 'Submitted');
-                {% endif %}
-                {% if ga == "pro_started" %}
-                    ga('send', 'event', 'Account', 'Pro', 'Subscription');
-                {% endif %}
-                {% if ga == "pro_cancelled" %}
-                    ga('send', 'event', 'Account', 'Pro', 'Cancellation');
-                {% endif %}
-                {% if ga == "donation" %}
-                    ga('send', 'event', 'Donations', 'Donated', '', {{donated}});
-                {% endif %}
-            }
-        </script>
-        <!-- End Google Analytics -->
-        {% block prescripts %}
-        {% endblock prescripts %}
-        {% compress js %}
-        {% render_bundle 'main' 'js' %}
-        <script type="text/javascript" src="{% static 'autocomplete_light/django_admin.js' %}"></script>
-        <script type="text/javascript" src="{% static 'autocomplete_light/autocomplete.js' %}"></script>
-        <script type="text/javascript" src="{% static 'autocomplete_light/widget.js' %}"></script>
-        <script type="text/javascript" src="{% static 'autocomplete_light/addanother.js' %}"></script>
-        <script type="text/javascript" src="{% static 'autocomplete_light/text_widget.js' %}"></script>
-        <script type="text/javascript" src="{% static 'autocomplete_light/remote.js' %}"></script>
-        {% endcompress %}
-        {% block scripts %}
-        {% endblock scripts %}
-        <!-- END SCRIPTS -->
-    </body>
+        {% include 'nav/footer.html' %}
+      </div>
+    {% endblock %}
+    <!-- SCRIPTS -->
+    <!-- Google Analytics -->
+    <script>
+// Prevents Google Analytics from tracking events
+// on our development or staging servers.
+if (location.host == "www.muckrock.com") {
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-16635809-1', 'auto');
+  // Track the account type of the current user
+  {% if request.user.is_authenticated %}
+    var dimensionValue = '{{request.user.profile.acct_type}}';
+{% else %}
+    var dimensionValue = 'anonymous';
+{% endif %}
+  ga('set', 'dimension1', dimensionValue);
+  // Track this pageview
+  ga('send', 'pageview');
+  // Track any server events
+  {% if ga == 'request_purchase' %}
+    ga('send', 'event', 'Requests', 'Purchase', 1);
+{% endif %}
+  {% if ga == 'request_drafted' %}
+    ga('send', 'event', 'Requests', 'Draft');
+{% endif %}
+  {% if ga == 'request_submitted' %}
+    ga('send', 'event', 'Requests', 'Submitted');
+{% endif %}
+  {% if ga == "pro_started" %}
+    ga('send', 'event', 'Account', 'Pro', 'Subscription');
+{% endif %}
+  {% if ga == "pro_cancelled" %}
+    ga('send', 'event', 'Account', 'Pro', 'Cancellation');
+{% endif %}
+  {% if ga == "donation" %}
+    ga('send', 'event', 'Donations', 'Donated', '', {{donated}});
+{% endif %}
+}
+    </script>
+    <!-- End Google Analytics -->
+    {% block prescripts %}
+    {% endblock prescripts %}
+    {% compress js %}
+      {% render_bundle 'main' 'js' %}
+      <script type="text/javascript" src="{% static 'autocomplete_light/django_admin.js' %}"></script>
+      <script type="text/javascript" src="{% static 'autocomplete_light/autocomplete.js' %}"></script>
+      <script type="text/javascript" src="{% static 'autocomplete_light/widget.js' %}"></script>
+      <script type="text/javascript" src="{% static 'autocomplete_light/addanother.js' %}"></script>
+      <script type="text/javascript" src="{% static 'autocomplete_light/text_widget.js' %}"></script>
+      <script type="text/javascript" src="{% static 'autocomplete_light/remote.js' %}"></script>
+    {% endcompress %}
+    {% block scripts %}
+    {% endblock scripts %}
+    <!-- END SCRIPTS -->
+  </body>
 </html>

@@ -83,8 +83,12 @@ class EmailSettingsForm(forms.ModelForm):
             customer = profile.customer()
             user.email = new_email
             customer.email = new_email
+            profile.email_failed = False
+            profile.email_confirmed = False
+            profile.generate_confirmation_key()
             user.save()
             customer.save()
+            profile.save()
             # notify the user
             email_change.delay(user, old_email)
         return profile
