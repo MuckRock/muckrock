@@ -189,6 +189,13 @@ class Profile(models.Model):
         """Answers whether the user is a member of an active organization"""
         return self.organization is not None and self.organization.active
 
+    def get_org(self):
+        """Get the user's org"""
+        owned_org = self.user.organization_set.first()
+        if owned_org:
+            return owned_org
+        return self.organization
+
     def can_multirequest(self):
         """Is this user allowed to multirequest?"""
         return self.is_advanced()

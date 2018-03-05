@@ -280,11 +280,13 @@ def _handle_request(request, mail_id):
             classify_status.apply_async(args=(task.pk,), countdown=30 * 60)
             comm.create_agency_notifications()
 
+        muckrock_domains = (settings.MAILGUN_SERVER_NAME, 'muckrock.com')
         new_cc_emails = [
             e for e in (to_emails + cc_emails)
-            if e.domain not in (settings.MAILGUN_SERVER_NAME, 'muckrock.com')
+            if e.domain not in muckrock_domains
         ]
-        foia.email = from_email
+        if from_email.domain not in muckrock_domains:
+            foia.email = from_email
         foia.cc_emails.set(new_cc_emails)
 
         if foia.status == 'ack':

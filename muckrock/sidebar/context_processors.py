@@ -46,24 +46,8 @@ def get_unread_notifications(user):
 def get_organization(user):
     """Gets organization, if it exists"""
 
-    def load_organization(user):
-        """Return a function to load the user's organization"""
-
-        def inner():
-            """Argument-less function to load user's organization"""
-            org = None
-            if user.profile.organization:
-                org = user.profile.organization
-            owned_org = Organization.objects.filter(owner=user)
-            if owned_org.exists():
-                # there should only ever be one. if there is more than one, just get the first.
-                org = owned_org.first()
-            return org
-
-        return inner
-
     return cache_get_or_set(
-        'sb:%s:user_org' % user.username, load_organization(user),
+        'sb:%s:user_org' % user.username, user.profile.get_org,
         settings.DEFAULT_CACHE_TIMEOUT
     )
 

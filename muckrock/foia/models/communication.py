@@ -4,6 +4,7 @@ Models for the FOIA application
 """
 
 # Django
+from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db import models, transaction
 from django.shortcuts import get_object_or_404
@@ -248,11 +249,19 @@ class FOIACommunication(models.Model):
                 'Communication is an orphan and has no associated request.'
             )
 
+        muckrock_domains = (settings.MAILGUN_SERVER_NAME, 'muckrock.com')
         email_comm = self.emails.first()
-        if email_comm and email_comm.from_email:
+        if (
+            email_comm and email_comm.from_email
+            and email_comm.from_email.domain not in muckrock_domains
+        ):
             self.foia.email = email_comm.from_email
-            self.foia.cc_emails.set(email_comm.to_emails.all())
-            self.foia.cc_emails.add(*email_comm.cc_emails.all())
+            new_cc_emails = [
+                e for e in
+                (email_comm.to_emails.all() + email_comm.cc_emails.all())
+                if e.domain not in muckrock_domains
+            ]
+            self.foia.cc_emails.set(new_cc_emails)
             self.foia.save(comment='update primary contact from comm')
         else:
             raise ValueError('Communication was not sent from a valid email.')

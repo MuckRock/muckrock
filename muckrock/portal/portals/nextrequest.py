@@ -37,7 +37,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
             'confirm_open',
         ),
         (
-            r'\[ACTION REQUIRED\] Confirm your .* portal account',
+            r'\[(?:ACTION REQUIRED|Action Required)\] Confirm your .* portal account',
             'confirm_account',
         ),
         (
@@ -51,12 +51,16 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
         ),
         (
             r'public records request (?:[0-9-]+) '
-            r'has been (?P<status>closed|published|reopned)[.]',
+            r'has been (?P<status>closed|published|reopened)[.]',
             'status_update',
         ),
         (
             r'\[Department Changed\]',
             'dept_change',
+        ),
+        (
+            r'\[Due Date Changed\]',
+            'due_date_change',
         ),
     ]
 
@@ -417,8 +421,8 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
 
         self._process_msg(
             comm=comm,
-            regex=r'(?P<text>(?:A document has|Docuements have) been released '
-            r'(:?to you )?for record request #(?P<tracking_id>[0-9-]+):'
+            regex=r'(?P<text>(?:A document has|Documents have) been released '
+            r'(:?to you )?for record request\s#(?P<tracking_id>[0-9-]+):'
             r'(?P<documents>.*))View Request',
             on_match=on_match,
             error_reason='Could not find the file list',
@@ -492,9 +496,44 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
             error_reason='Could not extract the message',
         )
 
+    def due_date_change(self, comm):
+        """Handle due date change replies"""
+
+        def on_match(match):
+            """Set the estimated completion date"""
+            if comm.foia.current_tracking_id() != match.group('tracking_id'):
+                ManualPortal.receive_msg(
+                    self,
+                    comm,
+                    reason='Tracking ID does not match',
+                )
+            try:
+                comm.foia.date_estimate = datetime.strptime(
+                    match.group('date'),
+                    '%B %d, %Y',
+                ).date()
+            except ValueError:
+                ManualPortal.receive_msg(
+                    self,
+                    comm,
+                    reason='Bad date: {}'.format(match.group('date')),
+                )
+            else:
+                comm.foia.save()
+                self._accept_comm(comm, match.group('message'))
+
+        self._process_msg(
+            comm=comm,
+            regex=r'(?P<message>The due date for record request'
+            r'\s#(?P<tracking_id>[0-9-]+)\shas been changed to: '
+            r'(?P<date>[A-Za-z]+ [0-9]{1,2}, [0-9]{4}))',
+            on_match=on_match,
+            error_reason='Could not find the due date',
+        )
+
     def _process_msg(self, comm, regex, on_match, error_reason):
         """Process an incoming message based on a regex match of the content"""
-        pattern = re.compile(regex, re.MULTILINE | re.DOTALL)
+        pattern = re.compile(regex, re.MULTILINE | re.DOTALL | re.UNICODE)
         match = pattern.search(comm.communication)
         if match:
             on_match(match)
