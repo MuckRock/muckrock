@@ -5,7 +5,6 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.db.models import Q
 from django.http import Http404, StreamingHttpResponse
 from django.shortcuts import redirect
 from django.utils.text import slugify
