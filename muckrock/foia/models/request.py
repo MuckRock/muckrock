@@ -128,7 +128,10 @@ class FOIARequestQuerySet(models.QuerySet):
 
     def get_undated(self):
         """Get requests which have an undated file"""
-        return self.filter(~Q(files=None) & Q(files__date=None)).distinct()
+        return self.filter(
+            ~Q(communications__files=None) &
+            Q(communications__files__date=None)
+        ).distinct()
 
     def organization(self, organization):
         """Get requests belonging to an organization's members."""
