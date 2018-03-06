@@ -1,13 +1,14 @@
 {% extends 'base.html' %}
 {% load static from staticfiles %}
 {% load humanize %}
+{% load tags %}
 
-{% block title %}MuckRock &bull; {{crowdsource.title}}{% endblock %}
+{% block title %}MuckRock &bull; {{ crowdsource.title }}{% endblock %}
 
 {% block content %}
   <div class="crowdsource form">
-    <h1>{{crowdsource.title}}</h1>
-    <p>{{crowdsource.question}}</p>
+    <h1>{{ crowdsource.title }}</h1>
+    <p>{{ crowdsource.description|markdown }}</p>
     {% if crowdsource.multiple_per_page %}
       <p>This is your {{ number|ordinal }} time responding for this data.</p>
     {% endif %}

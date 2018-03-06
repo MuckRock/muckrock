@@ -13,6 +13,7 @@ from django.utils.safestring import mark_safe
 
 # Standard Library
 import json
+from HTMLParser import HTMLParser
 from random import choice
 
 # Third Party
@@ -64,7 +65,7 @@ class Crowdsource(models.Model):
             ('close', 'Closed'),
         )
     )
-    description = models.CharField(max_length=255)
+    description = models.TextField(help_text='May use markdown')
     project_only = models.BooleanField(
         default=False,
         help_text='Only members of the project will be able to complete '
@@ -118,8 +119,10 @@ class Crowdsource(models.Model):
         form_data = json.loads(form_json)
         seen_labels = set()
         cleaner = Cleaner(tags=[], attributes={}, styles=[], strip=True)
+        htmlparser = HTMLParser()
         for order, field_data in enumerate(form_data):
             label = cleaner.clean(field_data['label'])[:255]
+            label = htmlparser.unescape(label)
             label = self._uniqify_label_name(seen_labels, label)
             field = self.fields.create(
                 label=label,
@@ -147,7 +150,7 @@ class Crowdsource(models.Model):
         while new_label in seen_labels:
             i += 1
             postfix = str(i)
-            new_label = '{}-{}'.format(label[:254 - len(postfix)], postfix)
+            new_label = u'{}-{}'.format(label[:254 - len(postfix)], postfix)
         seen_labels.add(new_label)
         return new_label
 
