@@ -90,6 +90,10 @@ COMPRESS_CSS_FILTERS = [
     'compressor.filters.css_default.CssAbsoluteFilter',
     'compressor.filters.cssmin.CSSMinFilter',
 ]
+# Don't do any JS compression here
+# 1. It can cause bugs which means the resulting JS has a syntax error
+# 2. We compress the javascript in the webpack config when built for production
+COMPRESS_JS_FILTERS = []
 
 THUMBNAIL_CACHE_DIMENSIONS = True
 
