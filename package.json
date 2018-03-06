@@ -10,7 +10,9 @@
     "watch": "webpack --config config/webpack.config.js --progress --color --watch",
     "lint": "eslint ./muckrock/assets/js -c config/.eslintrc",
     "heroku-postbuild": "npm run build:production",
-    "preinstall": "lockdown"
+    "preinstall": "npm install lockdown && npm run lockdown",
+    "lockdown": "node ./node_modules/.bin/lockdown",
+    "lockdown-relock": "node ./node_modules/.bin/lockdown-relock"
   },
   "repository": {
     "type": "git",
