@@ -9,7 +9,8 @@
     "build:staging": "NODE_ENV=staging webpack --config config/webpack.config.production.js --color",
     "watch": "webpack --config config/webpack.config.js --progress --color --watch",
     "lint": "eslint ./muckrock/assets/js -c config/.eslintrc",
-    "heroku-postbuild": "npm run build:production"
+    "heroku-postbuild": "npm run build:production",
+    "preinstall": "lockdown"
   },
   "repository": {
     "type": "git",
@@ -33,7 +34,7 @@
     "babel-preset-react": "^6.5.0",
     "css-loader": "^0.23.1",
     "eslint": "^2.7.0",
-    "expose-loader": "^0.7.1",
+    "expose-loader": "0.7.3",
     "extract-text-webpack-plugin": "^1.0.1",
     "file-loader": "^0.11.1",
     "json-loader": "^0.5.4",
@@ -54,6 +55,7 @@
     "jquery-ui": "1.10.x",
     "jquery.tabulator": "^3.3.2",
     "js-cookie": "^2.1.0",
+    "lockdown": "0.0.8-dev",
     "lodash": "^4.14.2",
     "prosemirror": "^0.6.0",
     "react": "^15.3.0",
