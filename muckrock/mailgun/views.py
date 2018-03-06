@@ -4,6 +4,7 @@ Views for mailgun
 
 # Django
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.mail import EmailMessage
 from django.core.urlresolvers import reverse
@@ -113,33 +114,40 @@ def mailgun_verify(function):
     return wrapper
 
 
-def get_common_webhook_params(function):
+def get_common_webhook_params(allow_empty_email=False):
     """Decorator to handle getting the communication for mailgun webhooks"""
 
-    @wraps(function)
-    def wrapper(request):
-        """Wrapper"""
-        email_id = request.POST.get('email_id')
-        timestamp = request.POST['timestamp']
-        timestamp = datetime.fromtimestamp(int(timestamp))
+    def decorator(function):
+        """Decorator"""
 
-        if email_id:
-            email_comm = EmailCommunication.objects.filter(pk=email_id).first()
-        else:
-            email_comm = None
+        @wraps(function)
+        def wrapper(request):
+            """Wrapper"""
+            email_id = request.POST.get('email_id')
+            timestamp = request.POST['timestamp']
+            timestamp = datetime.fromtimestamp(int(timestamp))
 
-        if email_comm:
-            function(request, email_comm, timestamp)
-        else:
-            logger.warning(
-                'No email comm for %s webhook: %s',
-                function.__name__,
-                request.POST,
-            )
+            if email_id:
+                email_comm = (
+                    EmailCommunication.objects.filter(pk=email_id).first()
+                )
+            else:
+                email_comm = None
 
-        return HttpResponse('OK')
+            if email_comm or allow_empty_email:
+                function(request, email_comm, timestamp)
+            else:
+                logger.warning(
+                    'No email comm for %s webhook: %s',
+                    function.__name__,
+                    request.POST,
+                )
 
-    return wrapper
+            return HttpResponse('OK')
+
+        return wrapper
+
+    return decorator
 
 
 @mailgun_verify
@@ -354,9 +362,26 @@ def _catch_all(request, address):
 
 @mailgun_verify
 @csrf_exempt
-@get_common_webhook_params
+@get_common_webhook_params(allow_empty_email=True)
 def bounces(request, email_comm, timestamp):
     """Notify when an email is bounced or dropped"""
+
+    if email_comm is None:
+        # This was an email to a user
+        try:
+            user = (
+                User.objects.get(email=request.POST.get('recipient'))
+                .select_related('profile')
+            )
+        except User.DoesNotExist:
+            # Can't find the user, nothing to do
+            pass
+        else:
+            user.profile.email_failed = True
+            user.profile.save()
+
+        # stop further processing
+        return
 
     recipient = EmailAddress.objects.fetch(request.POST.get('recipient', ''))
     event = request.POST.get('event', '')
@@ -410,7 +435,7 @@ def bounces(request, email_comm, timestamp):
 
 @mailgun_verify
 @csrf_exempt
-@get_common_webhook_params
+@get_common_webhook_params()
 def opened(request, email_comm, timestamp):
     """Notify when an email has been opened"""
     recipient = EmailAddress.objects.fetch(request.POST.get('recipient', ''))
@@ -432,7 +457,7 @@ def opened(request, email_comm, timestamp):
 
 @mailgun_verify
 @csrf_exempt
-@get_common_webhook_params
+@get_common_webhook_params()
 def delivered(_request, email_comm, timestamp):
     """Notify when an email has been delivered"""
     email_comm.confirmed_datetime = timestamp

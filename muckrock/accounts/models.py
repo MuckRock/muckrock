@@ -134,6 +134,8 @@ class Profile(models.Model):
             ' a one time token to automatically log you in'
         )
     )
+    email_failed = models.BooleanField(default=False)
+
     # notification preferences
     new_question_notifications = models.BooleanField(default=False)
 
