@@ -350,14 +350,20 @@ class OrganizationDetailView(DetailView):
             'requests': organization.num_requests,
             'seats': organization.max_users - len(context['members'])
         }
-        context['progress'] = {
-            'requests': (
+        context['progress'] = {}
+        if organization.monthly_requests > 0:
+            context['progress']['requests'] = (
                 float(organization.num_requests) / organization.monthly_requests
-            ) * 100,
-            'seats':
-                (1.0 - float(len(context['members'])) / organization.max_users)
-                * 100,
-        }
+            ) * 100
+        else:
+            context['progress']['requests'] = 0
+        if organization.max_users > 0:
+            context['progress']['seats'] = (
+                1.0 - float(len(context['members'])) / organization.max_users
+            ) * 100
+        else:
+            context['progress']['seats'] = 0
+
         try:
             date_update = organization.date_update
             refresh_date = datetime.date(
