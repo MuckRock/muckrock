@@ -1,4 +1,6 @@
 {% extends 'base_detail.html' %}
+{% load tags %}
+
 {% block title %}{{ crowdsource.title }} &bull; MuckRock{% endblock %}
 
 {% block type %}crowdsource{% endblock type %}
@@ -34,7 +36,7 @@
     <dt>Status</dt>
     <dd>{{ crowdsource.get_status_display }}</dd>
     <dt>Description</dt>
-    <dd>{{ crowdsource.description }}</dd>
+    <dd>{{ crowdsource.description|markdown }}</dd>
     {% if crowdsource.project %}
       <dt>Project</dt>
       <dd><a href="{% url "project-detail" slug=crowdsource.project.slug pk=crowdsource.project.pk %}">{{crowdsource.project.title}}</a>
