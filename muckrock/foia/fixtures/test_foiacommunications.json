@@ -5,7 +5,7 @@
         "fields": {
             "full_html": false,
             "communication": "Test request",
-            "date": "2010-08-21",
+            "date": "2010-08-21 00:00:00+00:00",
             "response": false,
             "opened": false,
             "foia": 1
@@ -17,7 +17,7 @@
         "fields": {
             "full_html": false,
             "communication": "Test request",
-            "date": "2010-08-21",
+            "date": "2010-08-21 00:00:00+00:00",
             "response": false,
             "opened": false,
             "foia": 2
@@ -29,7 +29,7 @@
         "fields": {
             "full_html": false,
             "communication": "Test request",
-            "date": "2010-08-21",
+            "date": "2010-08-21 00:00:00+00:00",
             "response": false,
             "opened": false,
             "foia": 3
@@ -41,7 +41,7 @@
         "fields": {
             "full_html": false,
             "communication": "Test request",
-            "date": "2010-08-21",
+            "date": "2010-08-21 00:00:00+00:00",
             "response": false,
             "opened": false,
             "foia": 4
@@ -53,7 +53,7 @@
         "fields": {
             "full_html": false,
             "communication": "Test request",
-            "date": "2010-08-21",
+            "date": "2010-08-21 00:00:00+00:00",
             "response": false,
             "opened": false,
             "foia": 5
@@ -65,7 +65,7 @@
         "fields": {
             "full_html": false,
             "communication": "Test request",
-            "date": "2010-08-21",
+            "date": "2010-08-21 00:00:00+00:00",
             "response": false,
             "opened": false,
             "foia": 6
@@ -77,7 +77,7 @@
         "fields": {
             "full_html": false,
             "communication": "Test request",
-            "date": "2010-08-21",
+            "date": "2010-08-21 00:00:00+00:00",
             "response": false,
             "opened": false,
             "foia": 7
@@ -89,7 +89,7 @@
         "fields": {
             "full_html": false,
             "communication": "Test request",
-            "date": "2010-08-21",
+            "date": "2010-08-21 00:00:00+00:00",
             "response": false,
             "opened": false,
             "foia": 8
@@ -101,7 +101,7 @@
         "fields": {
             "full_html": false,
             "communication": "Test request",
-            "date": "2010-08-21",
+            "date": "2010-08-21 00:00:00+00:00",
             "response": false,
             "opened": false,
             "foia": 9
@@ -113,7 +113,7 @@
         "fields": {
             "full_html": false,
             "communication": "Test request",
-            "date": "2010-08-21",
+            "date": "2010-08-21 00:00:00+00:00",
             "response": false,
             "opened": false,
             "foia": 10
@@ -125,7 +125,7 @@
         "fields": {
             "full_html": false,
             "communication": "Test request",
-            "date": "2010-08-21",
+            "date": "2010-08-21 00:00:00+00:00",
             "response": false,
             "opened": false,
             "foia": 11
@@ -137,7 +137,7 @@
         "fields": {
             "full_html": false,
             "communication": "Test request",
-            "date": "2010-08-21",
+            "date": "2010-08-21 00:00:00+00:00",
             "response": false,
             "opened": false,
             "foia": 12
@@ -149,7 +149,7 @@
         "fields": {
             "full_html": false,
             "communication": "Test request",
-            "date": "2010-08-21",
+            "date": "2010-08-21 00:00:00+00:00",
             "response": false,
             "opened": false,
             "foia": 13
@@ -161,7 +161,7 @@
         "fields": {
             "full_html": false,
             "communication": "Test request",
-            "date": "2010-08-21",
+            "date": "2010-08-21 00:00:00+00:00",
             "response": false,
             "opened": false,
             "foia": 14
@@ -173,7 +173,7 @@
         "fields": {
             "full_html": false,
             "communication": "Test request",
-            "date": "2010-08-21",
+            "date": "2010-08-21 00:00:00+00:00",
             "response": false,
             "opened": false,
             "foia": 15
@@ -185,7 +185,7 @@
         "fields": {
             "full_html": false,
             "communication": "Test request",
-            "date": "2010-08-21",
+            "date": "2010-08-21 00:00:00+00:00",
             "response": false,
             "opened": false,
             "foia": 16
@@ -197,7 +197,7 @@
         "fields": {
             "full_html": false,
             "communication": "Test request",
-            "date": "2010-08-21",
+            "date": "2010-08-21 00:00:00+00:00",
             "response": false,
             "opened": false,
             "foia": 17
@@ -209,7 +209,7 @@
         "fields": {
             "full_html": false,
             "communication": "Test request",
-            "date": "2010-08-21",
+            "date": "2010-08-21 00:00:00+00:00",
             "response": false,
             "opened": false,
             "foia": 18
@@ -221,7 +221,7 @@
         "fields": {
             "full_html": false,
             "communication": "Test orphan request",
-            "date": "2010-08-21",
+            "date": "2010-08-21 00:00:00+00:00",
             "response": true,
             "opened": false,
             "likely_foia": 18

@@ -6,10 +6,10 @@ Tests for Tasks models
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.test import TestCase
+from django.utils import timezone
 
 # Standard Library
 import logging
-from datetime import datetime
 
 # Third Party
 import mock
@@ -532,7 +532,7 @@ class ResponseTaskTests(TestCase):
         )
 
     def test_set_date_estimate(self):
-        new_date = datetime.now()
+        new_date = timezone.now()
         self.form.set_date_estimate(new_date, [self.task.communication])
         eq_(
             self.task.communication.foia.date_estimate, new_date,

@@ -13,10 +13,8 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string
+from django.utils import timezone
 from django.views.generic.detail import DetailView
-
-# Standard Library
-from datetime import datetime
 
 # Third Party
 import actstream
@@ -191,7 +189,7 @@ def create_question(request):
             question = form.save(commit=False)
             question.slug = slugify(question.title) or 'untitled'
             question.user = request.user
-            question.date = datetime.now()
+            question.date = timezone.now()
             question.save()
             return redirect(question)
     else:
@@ -244,7 +242,7 @@ def create_answer(request, slug, idx):
         if form.is_valid():
             answer = form.save(commit=False)
             answer.user = request.user
-            answer.date = datetime.now()
+            answer.date = timezone.now()
             answer.question = question
             answer.save()
             return redirect(answer.question)
@@ -287,7 +285,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
     def pre_save(self, obj):
         """Auto fill fields on create"""
         if not obj.pk:
-            obj.date = datetime.now()
+            obj.date = timezone.now()
             obj.slug = slugify(obj.title)
             obj.user = self.request.user
         return super(QuestionViewSet, self).pre_save(obj)
@@ -300,7 +298,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
             self.check_object_permissions(request, question)
             Answer.objects.create(
                 user=request.user,
-                date=datetime.now(),
+                date=timezone.now(),
                 question=question,
                 answer=request.DATA['answer']
             )

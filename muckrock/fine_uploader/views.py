@@ -10,6 +10,7 @@ from django.http import (
     HttpResponseForbidden,
     JsonResponse,
 )
+from django.utils import timezone
 
 # Standard Library
 import base64
@@ -17,7 +18,7 @@ import hashlib
 import hmac
 import json
 import os
-from datetime import date, datetime
+from datetime import date
 
 # MuckRock
 from muckrock.dataset.tasks import process_dataset_file
@@ -46,7 +47,7 @@ def success(request):
     attachment = OutboundAttachment(
         foia=foia,
         user=request.user,
-        date_time_stamp=datetime.now(),
+        date_time_stamp=timezone.now(),
     )
     attachment.ffile.name = request.POST['key']
     attachment.save()
@@ -74,7 +75,7 @@ def success_comm(request):
     file_ = FOIAFile(
         comm=comm,
         title=os.path.basename(request.POST['key']),
-        date=datetime.now(),
+        date=timezone.now(),
         source=request.user.get_full_name(),
         access=access,
     )

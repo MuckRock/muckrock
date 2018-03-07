@@ -17,6 +17,7 @@ from StringIO import StringIO
 
 # Third Party
 import nose.tools
+import pytz
 from freezegun import freeze_time
 
 # MuckRock
@@ -279,7 +280,7 @@ class TestMailgunViewWebHooks(TestMailgunViews):
         nose.tools.ok_(
             EmailError.objects.filter(
                 email=email,
-                datetime=datetime(2017, 1, 2, 12),
+                datetime=datetime(2017, 1, 2, 17, tzinfo=pytz.utc),
                 recipient=EmailAddress.objects.fetch(recipient),
                 code=code,
                 error=error,
@@ -331,7 +332,7 @@ class TestMailgunViewWebHooks(TestMailgunViews):
         nose.tools.ok_(
             EmailOpen.objects.filter(
                 email=email,
-                datetime=datetime(2017, 1, 2, 12),
+                datetime=datetime(2017, 1, 2, 17, tzinfo=pytz.utc),
                 recipient=EmailAddress.objects.fetch(recipient),
                 city=city,
                 region=region,
@@ -361,5 +362,5 @@ class TestMailgunViewWebHooks(TestMailgunViews):
 
         nose.tools.eq_(
             comm.emails.first().confirmed_datetime,
-            datetime(2017, 1, 2, 12),
+            datetime(2017, 1, 2, 17, tzinfo=pytz.utc),
         )

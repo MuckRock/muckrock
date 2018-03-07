@@ -9,12 +9,12 @@
             "is_active": true,
             "is_superuser": false,
             "is_staff": true,
-            "last_login": "2010-07-11 13:28:22",
+            "last_login": "2010-07-11 13:28:22+00:00",
             "groups": [],
             "user_permissions": [],
             "password": "md5$JEW4AI75I9TU$d1dc98f925bab003993db20ef5f3b6f4",
             "email": "adam@example.com",
-            "date_joined": "2010-02-08 22:45:56"
+            "date_joined": "2010-02-08 22:45:56+00:00"
         }
     },
     {
@@ -27,12 +27,12 @@
             "is_active": true,
             "is_superuser": false,
             "is_staff": false,
-            "last_login": "2010-07-11 13:28:22",
+            "last_login": "2010-07-11 13:28:22+00:00",
             "groups": [],
             "user_permissions": [],
             "password": "md5$JEW4AI75I9TU$d1dc98f925bab003993db20ef5f3b6f4",
             "email": "bob@example.com",
-            "date_joined": "2010-02-08 22:45:56"
+            "date_joined": "2010-02-08 22:45:56+00:00"
         }
     },
     {
@@ -45,12 +45,12 @@
             "is_active": true,
             "is_superuser": false,
             "is_staff": true,
-            "last_login": "2010-07-11 13:28:22",
+            "last_login": "2010-07-11 13:28:22+00:00",
             "groups": [],
             "user_permissions": [],
             "password": "md5$JEW4AI75I9TU$d1dc98f925bab003993db20ef5f3b6f4",
             "email": "charles@example.com",
-            "date_joined": "2010-02-08 22:45:56"
+            "date_joined": "2010-02-08 22:45:56+00:00"
         }
     },
     {
@@ -63,12 +63,12 @@
             "is_active": true,
             "is_superuser": false,
             "is_staff": false,
-            "last_login": "2010-07-11 13:28:22",
+            "last_login": "2010-07-11 13:28:22+00:00",
             "groups": [],
             "user_permissions": [],
             "password": "md5$JEW4AI75I9TU$d1dc98f925bab003993db20ef5f3b6f4",
             "email": "charles@example.com",
-            "date_joined": "2010-02-08 22:45:56"
+            "date_joined": "2010-02-08 22:45:56+00:00"
         }
     },
     {
@@ -81,12 +81,12 @@
             "is_active": true,
             "is_superuser": false,
             "is_staff": false,
-            "last_login": "2010-07-11 13:28:22",
+            "last_login": "2010-07-11 13:28:22+00:00",
             "groups": [],
             "user_permissions": [],
             "password": "md5$JEW4AI75I9TU$d1dc98f925bab003993db20ef5f3b6f4",
             "email": "charles@example.com",
-            "date_joined": "2010-02-08 22:45:56"
+            "date_joined": "2010-02-08 22:45:56+00:00"
         }
     },
     {
@@ -99,12 +99,12 @@
             "is_active": true,
             "is_superuser": false,
             "is_staff": false,
-            "last_login": "2010-07-11 13:28:22",
+            "last_login": "2010-07-11 13:28:22+00:00",
             "groups": [],
             "user_permissions": [],
             "password": "md5$JEW4AI75I9TU$d1dc98f925bab003993db20ef5f3b6f4",
             "email": "charles@example.com",
-            "date_joined": "2010-02-08 22:45:56"
+            "date_joined": "2010-02-08 22:45:56+00:00"
         }
     },
     {
@@ -117,12 +117,12 @@
             "is_active": true,
             "is_superuser": true,
             "is_staff": true,
-            "last_login": "2010-07-11 13:28:22",
+            "last_login": "2010-07-11 13:28:22+00:00",
             "groups": [],
             "user_permissions": [],
             "password": "md5$JEW4AI75I9TU$d1dc98f925bab003993db20ef5f3b6f4",
             "email": "super@example.com",
-            "date_joined": "2010-02-08 22:45:56"
+            "date_joined": "2010-02-08 22:45:56+00:00"
         }
     }
 ]

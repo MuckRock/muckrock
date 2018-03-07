@@ -2,9 +2,11 @@
 Shared logic for handling automated portal processing
 """
 
+# Django
+from django.utils import timezone
+
 # Standard Library
 import re
-from datetime import datetime
 
 # MuckRock
 from muckrock.communication.models import PortalCommunication
@@ -51,7 +53,7 @@ class PortalAutoReceiveMixin(object):
         classify_status.apply_async(args=(task.pk,), countdown=30 * 60)
         PortalCommunication.objects.create(
             communication=comm,
-            sent_datetime=datetime.now(),
+            sent_datetime=timezone.now(),
             portal=self.portal,
             direction='incoming',
         )

@@ -10,11 +10,12 @@ from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.defaultfilters import slugify
+from django.utils import timezone
 from django.utils.encoding import smart_text
 from django.views.generic import FormView
 
 # Standard Library
-from datetime import date, datetime
+from datetime import date
 from math import ceil
 
 # MuckRock
@@ -197,7 +198,7 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
                 messages.error(request, error_msg)
                 return redirect(foia)
             foia_comm = foia.last_comm()  # DEBUG
-            foia_comm.date = datetime.now()
+            foia_comm.date = timezone.now()
             foia_comm.communication = smart_text(data['request'])
             foia_comm.save()
             foia.save(comment='draft edited')

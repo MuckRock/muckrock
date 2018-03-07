@@ -5,9 +5,7 @@ Tests using nose for the news application
 # Django
 from django.core.urlresolvers import reverse
 from django.test import RequestFactory, TestCase
-
-# Standard Library
-from datetime import datetime
+from django.utils import timezone
 
 # Third Party
 from nose.tools import eq_, ok_
@@ -55,7 +53,7 @@ class TestNewsUnit(TestCase):
         article2 = ArticleFactory(publish=True)
         published = Article.objects.get_published()
         ok_(article1 in published and article2 in published)
-        ok_(all(a.publish and a.pub_date <= datetime.now() for a in published))
+        ok_(all(a.publish and a.pub_date <= timezone.now() for a in published))
         eq_(published.count(), 2)
 
     def test_manager_get_drafts(self):

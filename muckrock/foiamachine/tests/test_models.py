@@ -116,21 +116,23 @@ class TestFoiaMachineRequest(TestCase):
 
     def test_is_overdue(self):
         """The request should be overdue if days_until_due is negative."""
-        overdue_date = timezone.now().date(
-        ) - timedelta(self.foi.jurisdiction.get_days() + 10)
+        overdue_date = (
+            timezone.now() - timedelta(self.foi.jurisdiction.get_days() + 10)
+        )
         comm = factories.FoiaMachineCommunicationFactory(
             request=self.foi, date=overdue_date
         )
         ok_(self.foi.is_overdue)
         # Now let's make it not overdue
-        comm.date = timezone.now().date()
+        comm.date = timezone.now()
         comm.save()
         ok_(not self.foi.is_overdue)
 
     def test_days_overdue(self):
         """Days overdue should just be the inverse of days_until_due."""
-        overdue_date = timezone.now().date(
-        ) - timedelta(self.foi.jurisdiction.get_days() + 10)
+        overdue_date = (
+            timezone.now() - timedelta(self.foi.jurisdiction.get_days() + 10)
+        )
         factories.FoiaMachineCommunicationFactory(
             request=self.foi, date=overdue_date
         )

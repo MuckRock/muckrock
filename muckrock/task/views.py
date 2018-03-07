@@ -19,6 +19,7 @@ from django.http import (
     JsonResponse,
 )
 from django.shortcuts import get_object_or_404, redirect
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.generic import FormView, TemplateView
 
@@ -578,7 +579,7 @@ class PortalTaskList(TaskList):
             # portal communication in this case
             PortalCommunication.objects.create(
                 communication=task.communication,
-                sent_datetime=datetime.now(),
+                sent_datetime=timezone.now(),
                 portal=task.communication.foia.portal,
                 direction='incoming',
             )
@@ -628,7 +629,7 @@ class PortalTaskList(TaskList):
         if task.communication.foia.portal:
             PortalCommunication.objects.create(
                 communication=task.communication,
-                sent_datetime=datetime.now(),
+                sent_datetime=timezone.now(),
                 portal=task.communication.foia.portal,
                 direction='outgoing',
             )
@@ -677,7 +678,7 @@ class RequestTaskList(TemplateView):
 def snail_mail_bulk_pdf(request):
     """Generate the task asynchrnously"""
     # pylint: disable=unused-argument
-    pdf_name = datetime.now().strftime('snail_mail_pdfs/%Y/%m/%d/%H-%M-%S.pdf')
+    pdf_name = timezone.now().strftime('snail_mail_pdfs/%Y/%m/%d/%H-%M-%S.pdf')
     snail_mail_bulk_pdf_task.delay(pdf_name, request.GET.dict())
     return JsonResponse({'pdf_name': pdf_name})
 
@@ -704,7 +705,7 @@ def snail_mail_pdf(request, pk):
         communication=snail.communication,
         defaults={
             'to_address': snail.communication.foia.address,
-            'sent_datetime': datetime.now(),
+            'sent_datetime': timezone.now(),
         }
     )
     output.seek(0)

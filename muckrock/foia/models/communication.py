@@ -8,13 +8,13 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db import models, transaction
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 # Standard Library
 import logging
 import mimetypes
 import os
 import re
-from datetime import datetime
 
 # Third Party
 import chardet
@@ -344,7 +344,7 @@ class FOIACommunication(models.Model):
         with transaction.atomic():
             foia_file = self.files.create(
                 title=title,
-                date=datetime.now(),
+                date=timezone.now(),
                 source=source[:70],
                 access=access,
             )

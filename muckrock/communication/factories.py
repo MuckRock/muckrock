@@ -2,8 +2,11 @@
 Testing factories for the communication app
 """
 
+# Django
+from django.utils import timezone
+
 # Standard Library
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 # Third Party
 import factory
@@ -55,7 +58,7 @@ class EmailCommunicationFactory(factory.django.DjangoModelFactory):
     communication = factory.SubFactory(
         'muckrock.factories.FOIACommunicationFactory'
     )
-    sent_datetime = datetime.now() - timedelta(3)
+    sent_datetime = timezone.now() - timedelta(3)
     from_email = factory.SubFactory(EmailAddressFactory)
     raw_email = factory.RelatedFactory(
         'muckrock.factories.RawEmailFactory',
@@ -72,5 +75,5 @@ class FaxCommunicationFactory(factory.django.DjangoModelFactory):
     communication = factory.SubFactory(
         'muckrock.factories.FOIACommunicationFactory'
     )
-    sent_datetime = datetime.now() - timedelta(3)
+    sent_datetime = timezone.now() - timedelta(3)
     to_number = factory.SubFactory(PhoneNumberFactory)

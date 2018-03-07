@@ -4,6 +4,7 @@ Factories generate objects during testing
 
 # Django
 from django.contrib.auth.models import User
+from django.utils import timezone
 from django.utils.text import slugify
 
 # Standard Library
@@ -46,7 +47,7 @@ class ProfileFactory(factory.django.DjangoModelFactory):
 
     user = factory.SubFactory('muckrock.factories.UserFactory', profile=None)
     acct_type = 'basic'
-    date_update = datetime.datetime.now()
+    date_update = timezone.now()
     customer_id = "cus_RTW3KxBMCknuhB"
 
 
@@ -212,7 +213,7 @@ class FOIACommunicationFactory(factory.django.DjangoModelFactory):
     foia = factory.SubFactory(FOIARequestFactory)
     from_user = factory.SubFactory(UserFactory)
     to_user = factory.SubFactory(UserFactory)
-    date = factory.LazyAttribute(lambda obj: datetime.datetime.now())
+    date = factory.LazyAttribute(lambda obj: timezone.now())
     email = factory.RelatedFactory(
         'muckrock.communication.factories.EmailCommunicationFactory',
         'communication',
@@ -274,7 +275,7 @@ class OutboundAttachmentFactory(factory.django.DjangoModelFactory):
         user=factory.SelfAttribute('..user'),
     )
     ffile = factory.django.FileField(filename=factory.Faker('file_name'))
-    date_time_stamp = factory.LazyAttribute(lambda obj: datetime.datetime.now())
+    date_time_stamp = factory.LazyAttribute(lambda obj: timezone.now())
     sent = False
 
 
@@ -298,7 +299,7 @@ class CrowdfundFactory(factory.django.DjangoModelFactory):
     description = factory.Faker('paragraph')
     payment_required = 100.00
     date_due = factory.LazyAttribute(
-        lambda obj: datetime.datetime.now() + datetime.timedelta(30)
+        lambda obj: datetime.date.today() + datetime.timedelta(30)
     )
 
 
@@ -312,7 +313,7 @@ class QuestionFactory(factory.django.DjangoModelFactory):
     title = factory.Sequence(lambda n: "Question %d" % n)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
     question = factory.Faker('paragraph')
-    date = factory.LazyAttribute(lambda obj: datetime.datetime.now())
+    date = factory.LazyAttribute(lambda obj: timezone.now())
 
 
 class AnswerFactory(factory.django.DjangoModelFactory):
@@ -322,7 +323,7 @@ class AnswerFactory(factory.django.DjangoModelFactory):
         model = Answer
 
     user = factory.SubFactory(UserFactory)
-    date = factory.LazyAttribute(lambda obj: datetime.datetime.now())
+    date = factory.LazyAttribute(lambda obj: timezone.now())
     question = factory.SubFactory(QuestionFactory)
     answer = factory.Faker('paragraph')
 
@@ -404,6 +405,5 @@ class StaleFOIACommunicationFactory(FOIACommunicationFactory):
     """A factory for creating stale FOIARequest test objects."""
     response = True
     date = factory.LazyAttribute(
-        lambda obj: datetime.datetime.now() - datetime.
-        timedelta(STALE_DURATION + 1)
+        lambda obj: timezone.now() - datetime.timedelta(STALE_DURATION + 1)
     )

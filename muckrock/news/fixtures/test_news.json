@@ -8,7 +8,7 @@
             "title": "Test Article 1", 
             "publish": true, 
             "summary": "Summary goes here", 
-            "pub_date": "1984-12-29 11:16:25", 
+            "pub_date": "1984-12-29 11:16:25+00:00", 
             "slug": "test-article-1", 
             "foias": []
         }
@@ -22,7 +22,7 @@
             "title": "Test Article 2", 
             "publish": false, 
             "summary": "Summary goes here", 
-            "pub_date": "1989-12-29 11:16:25", 
+            "pub_date": "1989-12-29 11:16:25+00:00", 
             "slug": "test-article-2", 
             "foias": []
         }
@@ -36,7 +36,7 @@
             "title": "Test Article 3", 
             "publish": true, 
             "summary": "Summary goes here", 
-            "pub_date": "2050-12-29 11:16:25", 
+            "pub_date": "2050-12-29 11:16:25+00:00", 
             "slug": "test-article-3", 
             "foias": []
         }
@@ -50,7 +50,7 @@
             "title": "Test Article 4", 
             "publish": false, 
             "summary": "Summary goes here", 
-            "pub_date": "2050-12-29 11:16:25", 
+            "pub_date": "2050-12-29 11:16:25+00:00", 
             "slug": "test-article-4", 
             "foias": []
         }
@@ -64,7 +64,7 @@
             "title": "Test Article 5", 
             "publish": true, 
             "summary": "Summary goes here", 
-            "pub_date": "1999-01-01 11:16:25", 
+            "pub_date": "1999-01-01 11:16:25+00:00", 
             "slug": "test-article-5", 
             "foias": []
         }
@@ -78,7 +78,7 @@
             "title": "Test Article 6", 
             "publish": true, 
             "summary": "Summary goes here", 
-            "pub_date": "1999-01-01 11:16:25", 
+            "pub_date": "1999-01-01 11:16:25+00:00", 
             "slug": "test-article-6", 
             "foias": []
         }
@@ -92,7 +92,7 @@
             "title": "Test Article 7", 
             "publish": true, 
             "summary": "Summary goes here", 
-            "pub_date": "1999-01-02 11:16:25", 
+            "pub_date": "1999-01-02 11:16:25+00:00", 
             "slug": "test-article-7", 
             "foias": []
         }
@@ -106,7 +106,7 @@
             "title": "Test Article 8", 
             "publish": true, 
             "summary": "Summary goes here", 
-            "pub_date": "1999-02-02 11:16:25", 
+            "pub_date": "1999-02-02 11:16:25+00:00", 
             "slug": "test-article-8", 
             "foias": []
         }

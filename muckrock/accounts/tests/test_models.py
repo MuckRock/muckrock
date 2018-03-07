@@ -5,9 +5,10 @@ Tests accounts models
 # Django
 from django.conf import settings
 from django.test import TestCase
+from django.utils import timezone
 
 # Standard Library
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 
 # Third Party
 from mock import ANY, Mock, patch
@@ -91,7 +92,7 @@ class TestProfileUnit(TestCase):
 
     def test_monthly_requests_refresh(self):
         """Get number requests resets the number of requests if its been over a month"""
-        self.profile.date_update = datetime.now() - timedelta(32)
+        self.profile.date_update = timezone.now() - timedelta(32)
         monthly_requests = settings.MONTHLY_REQUESTS[self.profile.acct_type]
         eq_(self.profile.get_monthly_requests(), monthly_requests)
         eq_(self.profile.date_update, date.today())

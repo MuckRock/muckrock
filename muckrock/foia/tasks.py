@@ -11,6 +11,7 @@ from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
 from django.template.loader import get_template, render_to_string
+from django.utils import timezone
 
 # Standard Library
 import base64
@@ -241,7 +242,7 @@ def submit_multi_request(req_pk, **kwargs):
                 foia=new_foia,
                 from_user=new_foia.user,
                 to_user=new_foia.get_to_user(),
-                date=datetime.now(),
+                date=timezone.now(),
                 response=False,
                 communication=foia_request,
             )
@@ -377,7 +378,7 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
 
     fax = FaxCommunication.objects.create(
         communication=comm,
-        sent_datetime=datetime.now(),
+        sent_datetime=timezone.now(),
         to_number=comm.foia.fax,
     )
     try:
@@ -401,7 +402,7 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
     except PhaxioError as exc:
         FaxError.objects.create(
             fax=fax,
-            datetime=datetime.now(),
+            datetime=timezone.now(),
             recipient=comm.foia.fax,
             error_type='apiError',
             error_code=exc.args[0],
@@ -443,7 +444,7 @@ def followup_requests():
     """Follow up on any requests that need following up on"""
     log = []
     # weekday returns 5 for sat and 6 for sun
-    is_weekday = datetime.today().weekday() < 5
+    is_weekday = date.today().weekday() < 5
     if (
         config.ENABLE_FOLLOWUP
         and (config.ENABLE_WEEKEND_FOLLOWUP or is_weekday)
@@ -692,7 +693,7 @@ def autoimport():
 
     def process(log):
         """Process the files"""
-        log.append('Start Time: %s' % datetime.now())
+        log.append('Start Time: %s' % timezone.now())
         conn = S3Connection(
             settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY
         )
@@ -779,7 +780,7 @@ def autoimport():
                     )
             # delete key after processing all requests for it
             s3_delete(bucket, key)
-        log.append('End Time: %s' % datetime.now())
+        log.append('End Time: %s' % timezone.now())
 
     try:
         log = []
@@ -789,10 +790,10 @@ def autoimport():
             'ERROR: Time limit exceeded, please check folder for '
             'undeleted uploads.  How big of a file did you put in there?'
         )
-        log.append('End Time: %s' % datetime.now())
+        log.append('End Time: %s' % timezone.now())
     finally:
         send_mail(
-            '[AUTOIMPORT] %s Logs' % datetime.now(),
+            '[AUTOIMPORT] %s Logs' % timezone.now(),
             '\n'.join(log),
             'info@muckrock.com', ['info@muckrock.com'],
             fail_silently=False

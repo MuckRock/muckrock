@@ -3,9 +3,11 @@
 Logic for interacting with FBI portals automatically
 """
 
+# Django
+from django.utils import timezone
+
 # Standard Library
 import re
-from datetime import datetime
 
 # Third Party
 import requests
@@ -36,7 +38,7 @@ class FBIPortal(PortalAutoReceiveMixin, ManualPortal):
         comm.foia.save()
         PortalCommunication.objects.create(
             communication=comm,
-            sent_datetime=datetime.now(),
+            sent_datetime=timezone.now(),
             portal=self.portal,
             direction='incoming',
         )

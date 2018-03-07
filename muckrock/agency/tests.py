@@ -6,10 +6,11 @@ Tests for Agency application
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.test import RequestFactory, TestCase
+from django.utils import timezone
 
 # Standard Library
 import json
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 # Third Party
 import nose.tools
@@ -74,9 +75,8 @@ class TestAgencyUnit(TestCase):
     def test_agency_is_stale(self):
         """Should return the date of the last response by the agency"""
         duration = agency.models.STALE_DURATION + 1
-        comm_date = datetime.today() - timedelta(duration)
         factories.FOIACommunicationFactory(
-            date=comm_date,
+            date=timezone.now() - timedelta(duration),
             response=True,
             foia__status='ack',
             foia__agency=self.agency1

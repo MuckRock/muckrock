@@ -4,9 +4,10 @@ Sitemap for News application
 
 # Django
 from django.contrib.sitemaps import Sitemap
+from django.utils import timezone
 
 # Standard Library
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 # Third Party
 from news_sitemaps import NewsSitemap, register
@@ -39,7 +40,7 @@ class ArticleNewsSitemap(NewsSitemap):
         """Return all news articles"""
         return (
             Article.objects.get_published()
-            .filter(pub_date__gte=(datetime.now() - timedelta(2)))
+            .filter(pub_date__gte=(timezone.now() - timedelta(2)))
             .prefetch_related('tags')
         )
 

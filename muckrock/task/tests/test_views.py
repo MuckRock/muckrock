@@ -4,10 +4,10 @@ Tests for Tasks views
 # Django
 from django.core.urlresolvers import reverse
 from django.test import Client, RequestFactory, TestCase
+from django.utils import timezone
 
 # Standard Library
 import logging
-from datetime import datetime
 
 # Third Party
 import mock
@@ -199,7 +199,7 @@ class OrphanTaskViewTests(TestCase):
         starting_date = self.task.communication.date
         EmailCommunication.objects.create(
             communication=self.task.communication,
-            sent_datetime=datetime.now(),
+            sent_datetime=timezone.now(),
             from_email=EmailAddress.objects.fetch('test@example.com'),
         )
         self.client.post(
@@ -274,7 +274,7 @@ class OrphanTaskViewTests(TestCase):
             communication=self.task.communication,
             from_email=EmailAddress.objects.
             fetch('Michael Morisy <michael@muckrock.com>'),
-            sent_datetime=datetime.now(),
+            sent_datetime=timezone.now(),
         )
         self.task.communication.save()
         self.client.post(

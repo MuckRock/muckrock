@@ -8,10 +8,11 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.utils import timezone
 
 # Standard Library
 import logging
-from datetime import date, datetime
+from datetime import date
 from urllib import urlencode
 
 # Third Party
@@ -460,7 +461,7 @@ class RecurringDonation(models.Model):
     def cancel(self):
         """Cancel the recurring donation"""
         self.active = False
-        self.deactivated_datetime = datetime.now()
+        self.deactivated_datetime = timezone.now()
         self.save()
         subscription = stripe_retry_on_error(
             stripe.Subscription.retrieve,

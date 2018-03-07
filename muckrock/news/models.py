@@ -9,9 +9,7 @@ from django.core.cache.utils import make_template_fragment_key
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Prefetch
-
-# Standard Library
-from datetime import datetime
+from django.utils import timezone
 
 # Third Party
 from easy_thumbnails.fields import ThumbnailerImageField
@@ -30,7 +28,7 @@ class ArticleQuerySet(models.QuerySet):
 
     def get_published(self):
         """Get all published news articles"""
-        return self.filter(publish=True, pub_date__lte=datetime.now())
+        return self.filter(publish=True, pub_date__lte=timezone.now())
 
     def get_drafts(self):
         """Get all draft news articles"""
@@ -54,7 +52,7 @@ class ArticleQuerySet(models.QuerySet):
 class Article(models.Model):
     """A news article"""
 
-    pub_date = models.DateTimeField('Publish date', default=datetime.now)
+    pub_date = models.DateTimeField('Publish date', default=timezone.now)
     title = models.CharField(max_length=200)
     kicker = models.CharField(max_length=200, blank=True)
     slug = models.SlugField(

@@ -8,8 +8,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.postgres.aggregates.general import StringAgg
 from django.core.urlresolvers import reverse
-from django.db.models import Count, F
-from django.db.models.functions import ExtractDay, Now
+from django.db.models import Count, DurationField, F
+from django.db.models.functions import Cast, Now
 from django.http import Http404, StreamingHttpResponse
 from django.shortcuts import redirect
 from django.views.generic import TemplateView
@@ -46,6 +46,7 @@ from muckrock.foia.models import (
 )
 from muckrock.foia.rules import can_embargo, can_embargo_permananently
 from muckrock.forms import TagManagerForm
+from muckrock.models import ExtractDay
 from muckrock.news.models import Article
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.project.models import Project
@@ -203,9 +204,11 @@ class RequestList(MRSearchFilterListView):
                     'embargo',
                 ).annotate(
                     days_since_submitted=ExtractDay(
-                        Now() - F('date_submitted')
+                        Cast(Now() - F('date_submitted'), DurationField())
                     ),
-                    days_since_updated=ExtractDay(Now() - F('date_updated')),
+                    days_since_updated=ExtractDay(
+                        Cast(Now() - F('date_updated'), DurationField())
+                    ),
                     project_names=StringAgg(
                         'projects__title', ',', distinct=True
                     ),

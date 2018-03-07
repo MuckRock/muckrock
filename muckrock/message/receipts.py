@@ -4,6 +4,7 @@ Receipt objects for the messages app
 
 # Django
 from django.conf import settings
+from django.utils import timezone
 
 # Standard Library
 import logging
@@ -77,8 +78,13 @@ class Receipt(TemplateEmail):
             'items': self.items,
             'total': total,
             'charge': {
-                'id': self.charge.id,
-                'date': datetime.fromtimestamp(self.charge.created),
+                'id':
+                    self.charge.id,
+                'date':
+                    datetime.fromtimestamp(
+                        self.charge.created,
+                        tz=timezone.get_current_timezone(),
+                    ),
             }
         })
         if self.charge.source.object != 'bitcoin_receiver':

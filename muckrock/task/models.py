@@ -10,12 +10,13 @@ from django.core.mail import EmailMessage
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Case, Count, Max, Prefetch, When
-from django.db.models.functions import ExtractDay, Now
+from django.db.models.functions import Cast, Now
 from django.template.loader import render_to_string
+from django.utils import timezone
 
 # Standard Library
 import logging
-from datetime import date, datetime
+from datetime import date
 from itertools import groupby
 
 # MuckRock
@@ -29,6 +30,7 @@ from muckrock.foia.models import STATUS, FOIANote, FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import support
+from muckrock.models import ExtractDay
 from muckrock.task.forms import ResponseTaskForm
 from muckrock.task.querysets import (
     CrowdfundTaskQuerySet,
@@ -85,7 +87,7 @@ class Task(models.Model):
         """Resolve the task"""
         self.resolved = True
         self.resolved_by = user
-        self.date_done = datetime.now()
+        self.date_done = timezone.now()
         if form_data is not None:
             self.form_data = form_data
         self.save()
@@ -333,13 +335,16 @@ class ReviewAgencyTask(Task):
                     email_or_fax: None
                 }).select_related(email_or_fax, 'jurisdiction').annotate(
                     latest_response=ExtractDay(
-                        Now() - Max(
-                            Case(
-                                When(
-                                    communications__response=True,
-                                    then='communications__date'
+                        Cast(
+                            Now() - Max(
+                                Case(
+                                    When(
+                                        communications__response=True,
+                                        then='communications__date'
+                                    )
                                 )
-                            )
+                            ),
+                            models.DurationField(),
                         )
                     )
                 )
@@ -406,13 +411,16 @@ class ReviewAgencyTask(Task):
                 email=None, fax=None
             ).select_related('jurisdiction').annotate(
                 latest_response=ExtractDay(
-                    Now() - Max(
-                        Case(
-                            When(
-                                communications__response=True,
-                                then='communications__date'
+                    Cast(
+                        Now() - Max(
+                            Case(
+                                When(
+                                    communications__response=True,
+                                    then='communications__date'
+                                )
                             )
-                        )
+                        ),
+                        models.DurationField(),
                     )
                 )
             )

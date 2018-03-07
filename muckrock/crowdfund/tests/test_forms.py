@@ -4,9 +4,10 @@ Tests for crowdfund app
 
 # Django
 from django.test import TestCase
+from django.utils import timezone
 
 # Standard Library
-from datetime import datetime, timedelta
+from datetime import date, timedelta
 from decimal import Decimal
 
 # Third Party
@@ -35,7 +36,7 @@ class TestCrowdfundForm(TestCase):
         foia = Mock(FOIARequest)
         foia.id = 1
         foia.price = Decimal(100.00)
-        due = datetime.today() + timedelta(30)
+        due = date.today() + timedelta(30)
         self.data = {
             'name': 'Crowdfund this Request',
             'description': 'Let\'s "payve" the way forward!',
@@ -75,7 +76,7 @@ class TestCrowdfundForm(TestCase):
     def test_incorrect_deadline(self):
         """The crowdfund deadline cannot be set in the past. That makes no sense!"""
         data = self.data
-        yesterday = datetime.now() - timedelta(1)
+        yesterday = timezone.now() - timedelta(1)
         data['date_due'] = yesterday.strftime('%Y-%m-%d')
         form = CrowdfundForm(data)
         ok_(not form.is_valid(), 'The form should not validate.')
@@ -83,7 +84,7 @@ class TestCrowdfundForm(TestCase):
     def test_incorrect_duration(self):
         """The crowdfund duration should be capped at 30 days."""
         data = self.data
-        too_long = datetime.now() + timedelta(45)
+        too_long = timezone.now() + timedelta(45)
         data['date_due'] = too_long.strftime('%Y-%m-%d')
         form = CrowdfundForm(data)
         ok_(not form.is_valid(), 'The form should not validate.')

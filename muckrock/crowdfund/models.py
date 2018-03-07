@@ -8,10 +8,11 @@ from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q, Sum
+from django.utils import timezone
 
 # Standard Library
 import logging
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 from decimal import Decimal
 
 # Third Party
@@ -308,7 +309,7 @@ class RecurringCrowdfundPayment(models.Model):
     def cancel(self):
         """Cancel the recurring donation"""
         self.active = False
-        self.deactivated_datetime = datetime.now()
+        self.deactivated_datetime = timezone.now()
         self.save()
         subscription = stripe_retry_on_error(
             stripe.Subscription.retrieve,

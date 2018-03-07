@@ -8,11 +8,12 @@ from celery.task import periodic_task
 from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.db.models import Count, F, Q, Sum
+from django.utils import timezone
 
 # Standard Library
 import logging
 import os
-from datetime import date, timedelta
+from datetime import date, datetime, time, timedelta
 
 # Third Party
 from raven import Client
@@ -69,7 +70,10 @@ register_signal(client)
 def store_statistics():
     """Store the daily statistics"""
 
+    midnight = time(tzinfo=timezone.get_current_timezone())
+    today_midnight = datetime.combine(date.today(), midnight)
     yesterday = date.today() - timedelta(1)
+    yesterday_midnight = today_midnight - timedelta(1)
 
     stats = Statistics.objects.create(
         date=yesterday,
@@ -105,19 +109,19 @@ def store_statistics():
                                                           ).count(),
         requests_processing_days=FOIARequest.objects.get_processing_days(),
         sent_communications_portal=PortalCommunication.objects.filter(
-            communication__date__range=(yesterday, date.today()),
+            communication__date__range=(yesterday_midnight, today_midnight),
             communication__response=False,
         ).count(),
         sent_communications_email=EmailCommunication.objects.filter(
-            communication__date__range=(yesterday, date.today()),
+            communication__date__range=(yesterday_midnight, today_midnight),
             communication__response=False,
         ).count(),
         sent_communications_fax=FaxCommunication.objects.filter(
-            communication__date__range=(yesterday, date.today()),
+            communication__date__range=(yesterday_midnight, today_midnight),
             communication__response=False,
         ).count(),
         sent_communications_mail=MailCommunication.objects.filter(
-            communication__date__range=(yesterday, date.today()),
+            communication__date__range=(yesterday_midnight, today_midnight),
             communication__response=False,
         ).count(),
         machine_requests=FoiaMachineRequest.objects.count(),
@@ -209,7 +213,7 @@ def store_statistics():
             date_submitted=yesterday
         ).count(),
         daily_articles=Article.objects.filter(
-            pub_date__gte=yesterday, pub_date__lt=date.today()
+            pub_date__gte=yesterday_midnight, pub_date__lt=today_midnight
         ).count(),
         orphaned_communications=FOIACommunication.objects.filter(foia=None
                                                                  ).count(),
@@ -289,8 +293,8 @@ def store_statistics():
         ).get_undeferred().count(),
         total_deferred_portal_tasks=PortalTask.objects.get_deferred().count(),
         daily_robot_response_tasks=ResponseTask.objects.filter(
-            date_done__gte=yesterday,
-            date_done__lt=date.today(),
+            date_done__gte=yesterday_midnight,
+            date_done__lt=today_midnight,
             resolved_by__profile__acct_type='robot',
         ).count(),
         flag_processing_days=FlaggedTask.objects.get_processing_days(),

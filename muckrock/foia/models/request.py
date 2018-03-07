@@ -12,7 +12,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
 from django.db import connection, models
 from django.db.models import Case, Count, F, Max, Q, Sum, When
-from django.db.models.functions import ExtractDay, Now
+from django.db.models.functions import Cast, Now
 from django.template.defaultfilters import escape, linebreaks, slugify
 from django.template.loader import get_template, render_to_string
 from django.utils import timezone
@@ -21,7 +21,7 @@ from django.utils.encoding import smart_text
 # Standard Library
 import logging
 import os.path
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 from hashlib import md5
 
 # Third Party
@@ -33,6 +33,7 @@ from taggit.managers import TaggableManager
 from muckrock import fields, task, utils
 from muckrock.accounts.models import Notification
 from muckrock.communication.models import EmailAddress, EmailCommunication
+from muckrock.models import ExtractDay
 from muckrock.tags.models import Tag, TaggedItemBase, parse_tags
 
 logger = logging.getLogger(__name__)
@@ -94,15 +95,6 @@ class FOIARequestQuerySet(models.QuerySet):
             status__in=['ack', 'processed'], date_due__lt=date.today()
         )
 
-    def get_manual_followup(self):
-        """Get old requests which require us to follow up on with the agency"""
-
-        return [
-            f for f in self.get_overdue()
-            if f.communications.all().reverse()[0].date + timedelta(15) <
-            datetime.now()
-        ]
-
     def get_followup(self):
         """Get requests that need follow up emails sent"""
         return (
@@ -125,13 +117,6 @@ class FOIARequestQuerySet(models.QuerySet):
     def get_open(self):
         """Get requests which we are awaiting a response from"""
         return self.filter(status__in=['ack', 'processed', 'appealing'])
-
-    def get_undated(self):
-        """Get requests which have an undated file"""
-        return self.filter(
-            ~Q(communications__files=None) &
-            Q(communications__files__date=None)
-        ).distinct()
 
     def organization(self, organization):
         """Get requests belonging to an organization's members."""
@@ -178,13 +163,16 @@ class FOIARequestQuerySet(models.QuerySet):
         foia_qs = (
             self.get_open().annotate(
                 latest_response=ExtractDay(
-                    Now() - Max(
-                        Case(
-                            When(
-                                communications__response=True,
-                                then='communications__date'
+                    Cast(
+                        Now() - Max(
+                            Case(
+                                When(
+                                    communications__response=True,
+                                    then='communications__date'
+                                )
                             )
-                        )
+                        ),
+                        models.DurationField(),
                     )
                 )
             ).order_by('-latest_response').select_related('jurisdiction')
@@ -538,7 +526,7 @@ class FOIARequest(models.Model):
         """Set the mail id, which is the unique identifier for the auto mailer system"""
         # use raw sql here in order to avoid race conditions
         uid = int(
-            md5(self.title.encode('utf8') + datetime.now().isoformat())
+            md5(self.title.encode('utf8') + timezone.now().isoformat())
             .hexdigest(), 16
         ) % 10 ** 8
         mail_id = '%s-%08d' % (self.pk, uid)
@@ -877,7 +865,7 @@ class FOIARequest(models.Model):
 
         email_comm = EmailCommunication.objects.create(
             communication=comm,
-            sent_datetime=datetime.now(),
+            sent_datetime=timezone.now(),
             from_email=from_email,
         )
         email_comm.to_emails.add(self.email)
@@ -1050,7 +1038,7 @@ class FOIARequest(models.Model):
         if self.status in ['fix', 'payment'] and self.date_due:
             last_datetime = self.last_comm().date
             if not last_datetime:
-                last_datetime = datetime.now()
+                last_datetime = timezone.now()
             self.days_until_due = cal.business_days_between(
                 last_datetime.date(), self.date_due
             )
@@ -1253,7 +1241,7 @@ class FOIARequest(models.Model):
         comm = self.communications.create(
             from_user=from_user,
             to_user=self.get_to_user(),
-            date=datetime.now(),
+            date=timezone.now(),
             response=False,
             communication=text,
             thanks=kwargs.get('thanks', False),
@@ -1288,7 +1276,7 @@ class FOIARequest(models.Model):
         comm = self.communications.create(
             from_user=from_user,
             to_user=self.get_to_user(),
-            date=datetime.now(),
+            date=timezone.now(),
             response=False,
             communication=text,
         )

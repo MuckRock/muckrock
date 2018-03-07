@@ -5,6 +5,9 @@ Settings used during testing of the application
 # pylint: disable=wildcard-import
 # pylint: disable=unused-wildcard-import
 
+# Standard Library
+import warnings
+
 # MuckRock
 from muckrock.settings.base import *
 
@@ -41,3 +44,10 @@ DEFAULT_FILE_STORAGE = 'inmemorystorage.InMemoryStorage'
 LOGGING = {}
 
 TEMPLATES[0]['OPTIONS']['debug'] = True
+
+warnings.filterwarnings(
+    'error',
+    r'DateTimeField .* received a naive datetime',
+    RuntimeWarning,
+    r'django\.db\.models\.fields',
+)
