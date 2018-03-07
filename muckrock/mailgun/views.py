@@ -370,8 +370,8 @@ def bounces(request, email_comm, timestamp):
         # This was an email to a user
         try:
             user = (
-                User.objects.get(email=request.POST.get('recipient'))
-                .select_related('profile')
+                User.objects.select_related('profile')
+                .get(email=request.POST.get('recipient'))
             )
         except User.DoesNotExist:
             # Can't find the user, nothing to do
