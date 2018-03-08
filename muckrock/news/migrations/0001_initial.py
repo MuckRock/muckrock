@@ -5,6 +5,7 @@ from django.db import models, migrations
 import datetime
 from django.conf import settings
 import easy_thumbnails.fields
+from django.utils import timezone
 
 
 class Migration(migrations.Migration):
@@ -19,7 +20,7 @@ class Migration(migrations.Migration):
             name='Article',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('pub_date', models.DateTimeField(default=datetime.datetime.now, verbose_name=b'Publish date')),
+                ('pub_date', models.DateTimeField(default=timezone.now, verbose_name=b'Publish date')),
                 ('title', models.CharField(max_length=200)),
                 ('kicker', models.CharField(max_length=200, blank=True)),
                 ('slug', models.SlugField(help_text=b'A "Slug" is a unique URL-friendly title for an object.', unique=True)),
