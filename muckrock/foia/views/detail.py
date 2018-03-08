@@ -12,13 +12,14 @@ from django.db.models import Prefetch
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.template.defaultfilters import slugify
+from django.utils import timezone
 from django.views.generic import DetailView
 
 # Standard Library
 import json
 import logging
 from cStringIO import StringIO
-from datetime import datetime, timedelta
+from datetime import timedelta
 from zipfile import ZIP_DEFLATED, ZipFile
 
 # MuckRock
@@ -185,7 +186,7 @@ class Detail(DetailView):
         user = self.request.user
         user_can_edit = foia.has_perm(self.request.user, 'change')
         user_can_embargo = foia.has_perm(self.request.user, 'embargo')
-        is_past_due = foia.date_due < datetime.now().date(
+        is_past_due = foia.date_due < timezone.now().date(
         ) if foia.date_due else False
         include_draft = user.is_staff or foia.status == 'started'
         context['all_tags'] = Tag.objects.all()
@@ -220,7 +221,7 @@ class Detail(DetailView):
                 'payment_required':
                     foia.get_stripe_amount(),
                 'date_due':
-                    datetime.now() + timedelta(30),
+                    timezone.now() + timedelta(30),
                 'foia':
                     foia
             }
@@ -374,7 +375,7 @@ class Detail(DetailView):
                 slug=slugify(title),
                 foia=foia,
                 question=text,
-                date=datetime.now()
+                date=timezone.now()
             )
             messages.success(request, 'Your question has been posted.')
             return redirect(question)
@@ -388,7 +389,7 @@ class Detail(DetailView):
             foia_note = note_form.save(commit=False)
             foia_note.foia = foia
             foia_note.author = request.user
-            foia_note.datetime = datetime.now()
+            foia_note.datetime = timezone.now()
             foia_note.save()
             logging.info(
                 '%s added %s to %s', foia_note.author, foia_note, foia_note.foia
@@ -662,13 +663,13 @@ class Detail(DetailView):
                     from_user=request.user,
                     to_user=foia.user,
                     response=True,
-                    date=datetime.now(),
+                    date=timezone.now(),
                     communication=form.cleaned_data['reply'],
                     status=form.cleaned_data['status'],
                 )
                 WebCommunication.objects.create(
                     communication=comm,
-                    sent_datetime=datetime.now(),
+                    sent_datetime=timezone.now(),
                 )
                 foia.date_estimate = form.cleaned_data['date_estimate']
                 foia.add_tracking_id(form.cleaned_data['tracking_id'])

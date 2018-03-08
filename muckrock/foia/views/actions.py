@@ -7,11 +7,12 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
 # Standard Library
 import logging
 import sys
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 # Third Party
 import actstream
@@ -224,7 +225,7 @@ def crowdfund_request(request, idx, **kwargs):
     elif request.method == 'GET':
         # create crowdfund form
         default_crowdfund_duration = 30
-        date_due = datetime.now() + timedelta(default_crowdfund_duration)
+        date_due = timezone.now() + timedelta(default_crowdfund_duration)
         initial = {
             'name':
                 u'Crowdfund Request: %s' % unicode(foia),

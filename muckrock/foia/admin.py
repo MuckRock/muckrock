@@ -7,15 +7,14 @@ from django import forms
 from django.conf.urls import url
 from django.contrib import admin, messages
 from django.contrib.auth.models import User
-from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.core.urlresolvers import reverse
 from django.db.models import Count, Max
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 
 # Standard Library
 import os
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
@@ -33,7 +32,6 @@ from muckrock.communication.admin import (
 from muckrock.communication.models import Address, EmailAddress, PhoneNumber
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.foia.models import (
-    STATUS,
     CommunicationMoveLog,
     FOIACommunication,
     FOIAFile,
@@ -209,9 +207,6 @@ class FOIACommunicationAdmin(VersionAdmin):
                 formset.model.objects.get(pk=instance.pk)
             except formset.model.DoesNotExist:
                 change = False
-
-            instance.foia = instance.comm.foia
-            instance.save()
 
             # its new, so notify the user about it
             if not change:
@@ -467,6 +462,9 @@ class FOIARequestAdmin(VersionAdmin):
                 if not change:
                     instance.foia.update(instance.anchor())
 
+            for instance in formset.deleted_objects:
+                instance.delete()
+
             formset.save_m2m()
         else:
             formset.save()
@@ -475,21 +473,6 @@ class FOIARequestAdmin(VersionAdmin):
         """Add custom URLs here"""
         urls = super(FOIARequestAdmin, self).get_urls()
         my_urls = [
-            url(
-                r'^process/$',
-                self.admin_site.admin_view(self.process),
-                name='foia-admin-process'
-            ),
-            url(
-                r'^followup/$',
-                self.admin_site.admin_view(self.followup),
-                name='foia-admin-followup'
-            ),
-            url(
-                r'^undated/$',
-                self.admin_site.admin_view(self.undated),
-                name='foia-admin-undated'
-            ),
             url(
                 r'^send_update/(?P<idx>\d+)/$',
                 self.admin_site.admin_view(self.send_update),
@@ -501,48 +484,12 @@ class FOIARequestAdmin(VersionAdmin):
                 name='foia-admin-retry-pages'
             ),
             url(
-                r'^set_status/(?P<idx>\d+)/(?P<status>\w+)/$',
-                self.admin_site.admin_view(self.set_status),
-                name='foia-admin-set-status'
-            ),
-            url(
                 r'^autoimport/$',
                 self.admin_site.admin_view(self.autoimport),
                 name='foia-admin-autoimport'
             ),
         ]
         return my_urls + urls
-
-    def _list_helper(self, request, foias, action):
-        """List all the requests that need to be processed"""
-        paginator = Paginator(foias, 10)
-        try:
-            page = paginator.page(request.GET.get('page'))
-        except PageNotAnInteger:
-            page = paginator.page(1)
-        except EmptyPage:
-            page = paginator.page(paginator.num_pages)
-        return render(
-            request,
-            'admin/foia/admin_process.html',
-            {'page': page,
-             'action': action},
-        )
-
-    def process(self, request):
-        """List all the requests that need to be processed"""
-        foias = list(FOIARequest.objects.filter(status='submitted'))
-        return self._list_helper(request, foias, 'Process')
-
-    def followup(self, request):
-        """List all the requests that need to be followed up"""
-        foias = list(FOIARequest.objects.get_manual_followup())
-        return self._list_helper(request, foias, 'Follow Up')
-
-    def undated(self, request):
-        """List all the requests that have undated documents or files"""
-        foias = list(FOIARequest.objects.get_undated())
-        return self._list_helper(request, foias, 'Undated')
 
     def send_update(self, request, idx):
         """Manually send the user an update notification"""
@@ -581,50 +528,6 @@ class FOIARequestAdmin(VersionAdmin):
         messages.info(request, 'Auotimport started')
         return HttpResponseRedirect(
             reverse('admin:foia_foiarequest_changelist')
-        )
-
-    def set_status(self, request, idx, status):
-        """Set the status of the request"""
-
-        try:
-            foia = FOIARequest.objects.get(pk=idx)
-        except FOIARequest.DoesNotExist:
-            messages.error(request, '%s is not a valid FOIA Request' % idx)
-            return HttpResponseRedirect(
-                reverse('admin:foia_foiarequest_changelist')
-            )
-
-        if status not in [s for (s, _) in STATUS]:
-            messages.error(request, '%s is not a valid status' % status)
-            return HttpResponseRedirect(
-                reverse('admin:foia_foiarequest_change', args=[foia.pk])
-            )
-
-        foia.status = status
-        foia.update()
-        dateord = request.GET.get('dateord')
-        if status in ['rejected', 'no_docs', 'done', 'abandoned'] and dateord:
-            foia.date_done = date.fromordinal(int(dateord))
-        foia.save()
-        last_comm = foia.last_comm()
-        last_comm.status = status
-        last_comm.save()
-
-        try:
-            if status in ['ack', 'processed', 'appealing']:
-                comm_pk = request.GET.get('comm_pk')
-                comm = FOIACommunication.objects.get(pk=comm_pk)
-                if comm.foia == foia:
-                    comm.date = datetime.now()
-                    comm.save()
-        except FOIACommunication.DoesNotExist:
-            pass
-
-        messages.success(
-            request, 'Status set to %s' % foia.get_status_display()
-        )
-        return HttpResponseRedirect(
-            reverse('admin:foia_foiarequest_change', args=[foia.pk])
         )
 
 

@@ -5,9 +5,7 @@ Nodes and tags for rendering tasks into templates
 # Django
 from django import template
 from django.core.urlresolvers import reverse
-
-# Standard Library
-from datetime import datetime
+from django.utils import timezone
 
 # MuckRock
 from muckrock import agency, foia, task
@@ -329,7 +327,7 @@ class ReviewAgencyTaskNode(TaskNode):
         if latest_response:
             extra_context['latest_response'] = (
                 latest_response,
-                (datetime.now() - latest_response).days,
+                (timezone.now() - latest_response).days,
             )
         extra_context['review_data'] = self.task.get_review_data()
         email = [

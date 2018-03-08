@@ -3,9 +3,6 @@
 
 {% block content %}
 	<ul>
-		<li><a href="{% url 'admin:foia-admin-process' %}">Requests to Process</a></li>
-		<li><a href="{% url 'admin:foia-admin-followup' %}">Requests to Follow Up</a></li>
-		<li><a href="{% url 'admin:foia-admin-undated' %}">Requests with undated attachments</a></li>
 		<li><a href="{% url 'admin:foia-admin-autoimport' %}">Autoimport</a></li>
 	</ul>
 	{{block.super}}

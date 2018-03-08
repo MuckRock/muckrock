@@ -40,5 +40,5 @@ class TestBroadcasts(TestCase):
         with patch('django.utils.timezone.now') as mock_now:
             mock_now.return_value = self.broadcast.updated - timedelta(8)
             self.broadcast.save()
-            broadcast = sidebar_broadcast(self.user)
-            eq_(broadcast, '')
+        broadcast = sidebar_broadcast(self.user)
+        eq_(broadcast, '')

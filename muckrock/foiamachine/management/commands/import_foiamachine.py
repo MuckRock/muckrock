@@ -7,11 +7,12 @@ from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.db.models import Q
+from django.utils import timezone
 
 # Standard Library
 import csv
 import os
-from datetime import date, datetime
+from datetime import date
 
 # Third Party
 from boto.s3.connection import S3Connection
@@ -278,7 +279,7 @@ class Command(BaseCommand):
                 try:
                     date = parser.parse(dated)
                 except ValueError:  # null dated
-                    date = datetime.now()
+                    date = timezone.now()
                 if len(subject) > 255:
                     print 'Subject too big:', subject
                 comm = FoiaMachineCommunication.objects.create(

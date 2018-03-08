@@ -5,6 +5,7 @@ Logic for interacting with NextRequest portals automatically
 
 # Django
 from django.template.defaultfilters import linebreaks
+from django.utils import timezone
 
 # Standard Library
 import json
@@ -169,7 +170,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
             foia.save()
             PortalCommunication.objects.create(
                 communication=comm,
-                sent_datetime=datetime.now(),
+                sent_datetime=timezone.now(),
                 portal=self.portal,
                 direction='outgoing',
             )
@@ -210,7 +211,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
             self._send_documents(comm, session, request_id)
             PortalCommunication.objects.create(
                 communication=comm,
-                sent_datetime=datetime.now(),
+                sent_datetime=timezone.now(),
                 portal=self.portal,
                 direction='outgoing',
             )
@@ -316,7 +317,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
             comm.save()
             PortalCommunication.objects.create(
                 communication=comm,
-                sent_datetime=datetime.now(),
+                sent_datetime=timezone.now(),
                 portal=self.portal,
                 direction='incoming',
             )
@@ -372,7 +373,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
                     )
             PortalCommunication.objects.create(
                 communication=comm,
-                sent_datetime=datetime.now(),
+                sent_datetime=timezone.now(),
                 portal=self.portal,
                 direction='incoming',
             )

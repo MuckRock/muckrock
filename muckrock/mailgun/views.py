@@ -9,6 +9,7 @@ from django.core.cache import cache
 from django.core.mail import EmailMessage
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseForbidden
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
 # Standard Library
@@ -58,13 +59,13 @@ def _make_orphan_comm(
         from_user=from_user,
         response=True,
         subject=subject[:255],
-        date=datetime.now(),
+        date=timezone.now(),
         communication=_get_mail_body(post),
         likely_foia=foia,
     )
     email_comm = EmailCommunication.objects.create(
         communication=comm,
-        sent_datetime=datetime.now(),
+        sent_datetime=timezone.now(),
         from_email=from_email,
     )
     email_comm.to_emails.set(to_emails)
@@ -125,7 +126,10 @@ def get_common_webhook_params(allow_empty_email=False):
             """Wrapper"""
             email_id = request.POST.get('email_id')
             timestamp = request.POST['timestamp']
-            timestamp = datetime.fromtimestamp(int(timestamp))
+            timestamp = datetime.fromtimestamp(
+                int(timestamp),
+                tz=timezone.get_current_timezone(),
+            )
 
             if email_id:
                 email_comm = (
@@ -258,13 +262,13 @@ def _handle_request(request, mail_id):
             to_user=foia.user,
             subject=subject[:255],
             response=True,
-            date=datetime.now(),
+            date=timezone.now(),
             communication=_get_mail_body(post),
             hidden=hidden,
         )
         email_comm = EmailCommunication.objects.create(
             communication=comm,
-            sent_datetime=datetime.now(),
+            sent_datetime=timezone.now(),
             from_email=from_email,
         )
         email_comm.to_emails.set(to_emails)
@@ -370,8 +374,8 @@ def bounces(request, email_comm, timestamp):
         # This was an email to a user
         try:
             user = (
-                User.objects.get(email=request.POST.get('recipient'))
-                .select_related('profile')
+                User.objects.select_related('profile')
+                .get(email=request.POST.get('recipient'))
             )
         except User.DoesNotExist:
             # Can't find the user, nothing to do
@@ -497,9 +501,12 @@ def phaxio_callback(request):
         )
     else:
         if 'completed_at' in fax_info:
-            date = datetime.fromtimestamp(int(fax_info['completed_at']))
+            date = datetime.fromtimestamp(
+                int(fax_info['completed_at']),
+                tz=timezone.get_current_timezone(),
+            )
         else:
-            date = datetime.now()
+            date = timezone.now()
         if request.POST['success'] == 'true':
             fax_comm.confirmed_datetime = date
             fax_comm.save()

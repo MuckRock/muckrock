@@ -9,7 +9,7 @@ from django.test import Client, RequestFactory, TestCase
 
 # Standard Library
 import json
-from datetime import datetime, timedelta
+from datetime import date, timedelta
 from decimal import Decimal
 
 # Third Party
@@ -53,7 +53,7 @@ class TestCrowdfundView(TestCase):
     """
 
     def setUp(self):
-        due = datetime.today() + timedelta(30)
+        due = date.today() + timedelta(30)
         self.crowdfund = CrowdfundFactory(date_due=due)
         FOIARequestFactory(
             status='payment',

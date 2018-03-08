@@ -7,10 +7,10 @@ from celery.task import task
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
+from django.utils import timezone
 
 # Standard Library
 from cStringIO import StringIO
-from datetime import datetime
 
 # Third Party
 from boto.s3.connection import S3Connection
@@ -38,7 +38,7 @@ def submit_review_update(foia_pks, reply_text, **kwargs):
             foia=foia,
             from_user=muckrock_staff,
             to_user=foia.get_to_user(),
-            date=datetime.now(),
+            date=timezone.now(),
             response=False,
             communication=reply_text,
         )
@@ -87,7 +87,7 @@ def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
             communication=snail.communication,
             defaults={
                 'to_address': snail.communication.foia.address,
-                'sent_datetime': datetime.now(),
+                'sent_datetime': timezone.now(),
             }
         )
         single_pdf.seek(0)

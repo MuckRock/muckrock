@@ -3,9 +3,10 @@
 # Django
 from django.conf import settings
 from django.contrib.auth.forms import AuthenticationForm
+from django.utils import timezone
 
 # Standard Library
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 # MuckRock
 from muckrock.accounts.models import Profile
@@ -61,7 +62,7 @@ def sidebar_broadcast(user):
             """Argument-less function to load correct broadcast"""
             try:
                 # exclude stale broadcasts from displaying
-                last_week = datetime.now() - timedelta(7)
+                last_week = timezone.now() - timedelta(7)
                 broadcast = Broadcast.objects.get(
                     updated__gte=last_week, context=user_class
                 ).text
@@ -72,8 +73,9 @@ def sidebar_broadcast(user):
         return inner
 
     try:
-        user_class = user.profile.acct_type if user.is_authenticated(
-        ) else 'anonymous'
+        user_class = (
+            user.profile.acct_type if user.is_authenticated() else 'anonymous'
+        )
     except Profile.DoesNotExist:
         user_class = 'anonymous'
     return cache_get_or_set(

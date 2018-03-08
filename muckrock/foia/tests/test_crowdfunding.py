@@ -8,6 +8,7 @@ Tests using nose for the FOIA application
 from django.contrib.auth.models import AnonymousUser
 from django.core.urlresolvers import resolve, reverse
 from django.test import RequestFactory, TestCase
+from django.utils import timezone
 
 # Standard Library
 import datetime
@@ -120,7 +121,7 @@ class TestFOIACrowdfunding(TestCase):
 
     def test_crowdfund_view_crowdfund_already_exists(self):
         """A crowdfund cannot be created for a request that already has one, even if expired."""
-        date_due = datetime.datetime.now() + datetime.timedelta(30)
+        date_due = timezone.now() + datetime.timedelta(30)
         self.foia.crowdfund = Crowdfund.objects.create(date_due=date_due)
         self.foia.save()
         response = self.get_res(self.foia.user)

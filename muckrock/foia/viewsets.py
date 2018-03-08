@@ -8,10 +8,10 @@ from django.core.files.base import ContentFile
 from django.db.models import Prefetch
 from django.template.defaultfilters import slugify
 from django.template.loader import get_template
+from django.utils import timezone
 
 # Standard Library
 import logging
-from datetime import datetime
 
 # Third Party
 import actstream
@@ -171,7 +171,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                 communication=text,
                 from_user=request.user,
                 to_user=foia.get_to_user(),
-                date=datetime.now(),
+                date=timezone.now(),
                 response=False,
             )
 
@@ -190,7 +190,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                     access='public',
                     comm=comm,
                     title=title,
-                    date=datetime.now(),
+                    date=timezone.now(),
                     source=request.user.get_full_name(),
                 )
                 file_.ffile.save(title, ContentFile(res.content))

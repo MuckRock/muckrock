@@ -5,8 +5,8 @@ Dashing widgets for the dashboard
 # Django
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.db.models import Count, F, Sum
-from django.db.models.functions import ExtractDay, Now
+from django.db.models import Count, DurationField, F, Sum
+from django.db.models.functions import Cast, Now
 
 # Standard Library
 import json
@@ -25,6 +25,7 @@ from smart_open import smart_open
 from muckrock.accounts.models import Profile, Statistics
 from muckrock.crowdsource.models import CrowdsourceResponse
 from muckrock.foia.models import FOIAFile, FOIARequest
+from muckrock.models import ExtractDay
 from muckrock.project.models import Project
 from muckrock.task.models import FlaggedTask, ReviewAgencyTask
 from muckrock.utils import cache_get_or_set
@@ -209,8 +210,11 @@ class OldestFlagWidget(ListWidget):
         """Get the oldest flag tasks"""
         tasks = (
             FlaggedTask.objects.filter(resolved=False).get_undeferred()
-            .annotate(days=ExtractDay(Now() - F('date_created')))
-            .order_by('-days').values('text', 'days')[:5]
+            .annotate(
+                days=ExtractDay(
+                    Cast(Now() - F('date_created'), DurationField())
+                )
+            ).order_by('-days').values('text', 'days')[:5]
         )
         return [{
             'label':

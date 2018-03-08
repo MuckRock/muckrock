@@ -4,7 +4,7 @@
         "model":"task.task",
         "fields":{
             "resolved":false,
-            "date_created":"2015-03-16T16:33:08.326",
+            "date_created":"2015-03-16T16:33:08.326+00:00",
             "assigned":null,
             "date_done":null
         }
@@ -14,7 +14,7 @@
         "model":"task.task",
         "fields":{
             "resolved":false,
-            "date_created":"2015-03-16T16:37:43.585",
+            "date_created":"2015-03-16T16:37:43.585+00:00",
             "assigned":null,
             "date_done":null
         }
@@ -24,7 +24,7 @@
         "model":"task.task",
         "fields":{
             "resolved":false,
-            "date_created":"2015-03-16T16:38:30.337",
+            "date_created":"2015-03-16T16:38:30.337+00:00",
             "assigned":null,
             "date_done":null
         }
@@ -34,7 +34,7 @@
         "model":"task.task",
         "fields":{
             "resolved":false,
-            "date_created":"2015-03-16T16:41:54.387",
+            "date_created":"2015-03-16T16:41:54.387+00:00",
             "assigned":null,
             "date_done":null
         }
@@ -44,7 +44,7 @@
         "model":"task.task",
         "fields":{
             "resolved":false,
-            "date_created":"2015-03-16T16:42:47.105",
+            "date_created":"2015-03-16T16:42:47.105+00:00",
             "assigned":null,
             "date_done":null
         }
@@ -54,7 +54,7 @@
         "model":"task.task",
         "fields":{
             "resolved":false,
-            "date_created":"2015-03-16T16:44:22.156",
+            "date_created":"2015-03-16T16:44:22.156+00:00",
             "assigned":null,
             "date_done":null
         }
@@ -64,7 +64,7 @@
         "model":"task.task",
         "fields":{
             "resolved":false,
-            "date_created":"2015-03-16T16:44:51.414",
+            "date_created":"2015-03-16T16:44:51.414+00:00",
             "assigned":null,
             "date_done":null
         }
@@ -74,7 +74,7 @@
         "model":"task.task",
         "fields":{
             "resolved":false,
-            "date_created":"2015-03-16T16:45:27.079",
+            "date_created":"2015-03-16T16:45:27.079+00:00",
             "assigned":null,
             "date_done":null
         }

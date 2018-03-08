@@ -4,6 +4,7 @@
 # Django
 from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
+from django.utils import timezone
 
 # Standard Library
 import json
@@ -285,7 +286,9 @@ class TestCrowdsourceResponse(TestCase):
         response = CrowdsourceResponseFactory(
             crowdsource=crowdsource,
             user__username='Username',
-            datetime=datetime(2017, 1, 2),
+            datetime=datetime(
+                2017, 1, 2, tzinfo=timezone.get_current_timezone()
+            ),
             data=None,
         )
         field = CrowdsourceTextFieldFactory(

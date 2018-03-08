@@ -4,13 +4,13 @@ Digest objects for the messages app
 
 # Django
 from django.contrib.auth.models import User
-from django.db.models import F, Q
-from django.db.models.functions import ExtractDay, Now
+from django.db.models import DurationField, F, Q
+from django.db.models.functions import Cast, Now
 from django.utils import timezone
 
 # Standard Library
 from collections import OrderedDict
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 
 # Third Party
 from actstream.models import Action
@@ -26,6 +26,7 @@ from muckrock.communication.models import (
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.foia.models import FOIACommunication, FOIARequest
 from muckrock.message.email import TemplateEmail
+from muckrock.models import ExtractDay
 from muckrock.qanda.models import Question
 
 
@@ -444,10 +445,12 @@ class StaffDigest(Digest):
         for task_type, days_old in task_types:
             stale_tasks[task_type.type] = (
                 task_type.objects.filter(
-                    date_created__lt=(datetime.now() - timedelta(days_old)),
+                    date_created__lt=(timezone.now() - timedelta(days_old)),
                     resolved=False,
                 ).order_by('date_created').annotate(
-                    days_old=ExtractDay(Now() - F('date_created'))
+                    days_old=ExtractDay(
+                        Cast(Now() - F('date_created'), DurationField())
+                    )
                 )[:5]
             )
         return stale_tasks
