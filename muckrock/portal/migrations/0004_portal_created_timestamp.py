@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
-import django.utils.datetime_safe
+from django.utils import timezone
 
 
 class Migration(migrations.Migration):
@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='portal',
             name='created_timestamp',
-            field=models.DateTimeField(auto_now_add=True, default=django.utils.datetime_safe.datetime.now),
+            field=models.DateTimeField(auto_now_add=True, default=timezone.now),
             preserve_default=False,
         ),
     ]
