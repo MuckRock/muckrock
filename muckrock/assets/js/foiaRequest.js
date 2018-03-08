@@ -291,3 +291,124 @@ $('document').ready(function(){
   });
   $("#request-actions .bulk").change();
 });
+
+
+
+/* Contact Info */
+
+$('document').ready(function(){
+
+  var origHtml = $(".contact-info .info span").html();
+
+  $(".contact-info .see-where").click(function(e) {
+    e.preventDefault();
+    $(".contact-info .see-where").hide();
+    $(".contact-info .info").show();
+  });
+
+  $(".contact-info .change").click(function(e) {
+    e.preventDefault();
+    $(".contact-info .form").show();
+    $(".contact-info .change").hide();
+    $(".contact-info #use_contact_information").val(true);
+
+    $(".contact-info #id_email").change();
+    $(".contact-info #id_fax").change();
+    $(".contact-info #id_via").change();
+  });
+  $(".contact-info .cancel").click(function(e) {
+    e.preventDefault();
+    $(".contact-info .form").hide();
+    $(".contact-info .change").show();
+    $(".contact-info #use_contact_information").val(false);
+    $(".contact-info .info span").html(origHtml);
+    $(".contact-info #id_other_email").removeAttr("required");
+    $(".contact-info #id_other_fax").removeAttr("required");
+  });
+
+  $(".contact-info #id_via").change(function() {
+    if($(this).val() === "email") {
+      $(".contact-info #id_email").parent().show();
+      $(".contact-info #id_email").change();
+    } else {
+      $(".contact-info #id_email").parent().hide();
+      $(".contact-info #id_other_email").parent().hide();
+      $(".contact-info #id_other_email").val('');
+      $(".contact-info #id_other_email").removeAttr("required");
+    }
+    if($(this).val() === "fax") {
+      $(".contact-info #id_fax").parent().show();
+      $(".contact-info #id_fax").change();
+    } else {
+      $(".contact-info #id_fax").parent().hide();
+      $(".contact-info #id_other_fax").parent().hide();
+      $(".contact-info #id_other_fax").val('');
+      $(".contact-info #id_other_fax").removeAttr("required");
+    }
+    if($(this).val() === "snail") {
+      $(".contact-info .info span").text(
+        "will be submitted via mail to " +
+        $(".contact-info .info").data("address") + "."
+      );
+    } else if($(this).val() == "portal") {
+      var portal_url = $(".contact-info .info").data("portal-url");
+      $(".contact-info .info span").text(
+        "will be submitted via the "
+      ).append(
+        $(".contact-info .info").data("portal-type")
+      ).append(
+        " portal, located at "
+      ).append(
+        portal_url
+      ).append(".");
+    }
+  });
+
+  $(".contact-info #id_email").change(function() {
+    var full_email;
+    if($(this).val() === "") {
+      $(".contact-info #id_other_email").parent().show();
+      $(".contact-info #id_other_email").attr("required", "required");
+      full_email = $(".contact-info #id_other_email").val();
+    } else {
+      $(".contact-info #id_other_email").parent().hide();
+      $(".contact-info #id_other_email").val('');
+      $(".contact-info #id_other_email").removeAttr("required");
+      full_email = $(this).children("option:selected").text();
+    }
+
+    $(".contact-info .info span").text(
+      "will be submitted via email to " + full_email + "."
+    );
+  });
+  $(".contact-info #id_other_email").on("input properychange paste", function() {
+    var email = $(this).val();
+    $(".contact-info .info span").text(
+      "will be submitted via email to " + email + "."
+    );
+  });
+
+  $(".contact-info #id_fax").change(function() {
+    var fax;
+    if($(this).val() === "") {
+      $(".contact-info #id_other_fax").parent().show();
+      $(".contact-info #id_other_fax").attr("required", "required");
+      fax = $(".contact-info #id_other_fax").val();
+    } else {
+      $(".contact-info #id_other_fax").parent().hide();
+      $(".contact-info #id_other_fax").val('');
+      $(".contact-info #id_other_fax").removeAttr("required");
+      fax = $(this).children("option:selected").text();
+    }
+    $(".contact-info .info span").text(
+      "will be submitted via fax to " + fax + "."
+    );
+  });
+  $(".contact-info #id_other_fax").on("input properychange paste", function() {
+    var fax = $(this).val();
+    $(".contact-info .info span").text(
+      "will be submitted via fax to " + fax + "."
+    );
+  });
+
+});

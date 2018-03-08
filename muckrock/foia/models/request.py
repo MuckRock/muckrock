@@ -626,7 +626,15 @@ class FOIARequest(models.Model):
         else:
             agency = self.agency
 
-        self.update_address_from_agency(agency, appeal, kwargs.get('clear'))
+        if kwargs.get('contact_info'):
+            needs_review = self.update_address_from_info(
+                agency,
+                appeal,
+                kwargs.get('contact_info'),
+            )
+        else:
+            needs_review = False
+            self.update_address_from_agency(agency, appeal, kwargs.get('clear'))
 
         # if agency isnt approved, do not email or snail mail
         # it will be handled after agency is approved
@@ -640,10 +648,63 @@ class FOIARequest(models.Model):
             self.status = 'submitted'
             self.date_processing = date.today()
             self.save()
+        elif needs_review:
+            # if the user submitted new contact information, leave processing
+            # and create a flag
+            self.status = 'submitted'
+            self.date_processing = date.today()
+            self.save()
         else:
             self.update_dates()
             self.save()
             self._send_msg(appeal=appeal, **kwargs)
+
+    def update_address_from_info(self, agency, appeal, contact_info):
+        """Update the contact information manually"""
+
+        # first clear all current contact information
+        self.portal = None
+        self.email = None
+        self.cc_emails.clear()
+        self.fax = None
+        self.address = None
+
+        if appeal:
+            request_type = 'appeal'
+        else:
+            request_type = 'primary'
+        # always set the address as a fallback option
+        self.address = agency.get_addresses(request_type).first()
+
+        if contact_info['via'] == 'portal':
+            self.portal = agency.portal
+        elif contact_info['via'] == 'email' and contact_info['email']:
+            self.email = contact_info['email']
+        elif contact_info['via'] == 'email':
+            self.email = contact_info['other_email']
+            # Flag for review
+            task.models.FlaggedTask.objects.create(
+                foia=self,
+                text='This request was filed with a user supplied email '
+                'address: {}.  Please check that this is an appropriate email '
+                'address before sending this request'.format(self.email),
+            )
+            return True
+        elif contact_info['via'] == 'fax' and contact_info['fax']:
+            self.fax = contact_info['fax']
+        elif contact_info['via'] == 'fax':
+            self.fax = contact_info['other_fax']
+            # Flag for review
+            task.models.FlaggedTask.objects.create(
+                foia=self,
+                text='This request was filed with a user supplied fax '
+                'number: {}.  Please check that this is an appropriate fax '
+                'number before sending this request'.format(self.fax),
+            )
+            return True
+
+        # Does not need review
+        return False
 
     def update_address_from_agency(self, agency, appeal, clear):
         """Update the current address for the request"""
@@ -1260,6 +1321,7 @@ class FOIARequest(models.Model):
             payment=kwargs.get('payment', False),
             amount=kwargs.get('amount', 0),
             switch=kwargs.get('switch', False),
+            contact_info=kwargs.get('contact_info'),
         )
         return comm
 
@@ -1310,6 +1372,17 @@ class FOIARequest(models.Model):
             reason=reason,
         )
         self._tracking_id = tracking_id
+
+    def add_contact_info_note(self, user, contact_info):
+        """Add a note that contact info has been overridden"""
+        via = contact_info.get('via', '')
+        addr = contact_info.get(via, '')
+        self.notes.create(
+            author=user,
+            note='Contact information overridden:\n\n{}\n\n{}'.format(
+                via, addr
+            )
+        )
 
     class Meta:
         ordering = ['title']

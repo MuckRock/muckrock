@@ -21,6 +21,7 @@ from math import ceil
 # MuckRock
 from muckrock.agency.models import Agency
 from muckrock.foia.forms import (
+    ContactInfoForm,
     MultiRequestDraftForm,
     MultiRequestForm,
     RequestDraftForm,
@@ -32,7 +33,7 @@ from muckrock.task.models import MultiRequestTask
 from muckrock.utils import new_action
 
 
-def _submit_request(request, foia):
+def _submit_request(request, foia, contact_info=None):
     """Submit request for user"""
     if not foia.user == request.user:
         messages.error(request, 'Only a request\'s owner may submit it.')
@@ -44,7 +45,9 @@ def _submit_request(request, foia):
         messages.error(request, error_msg)
     else:
         foia.process_attachments(request.user)
-        foia.submit()
+        foia.submit(contact_info=contact_info)
+        if contact_info:
+            foia.add_contact_info_note(request.user, contact_info)
         request.session['ga'] = 'request_submitted'
         messages.success(request, 'Your request was submitted.')
         new_action(request.user, 'submitted', target=foia)
@@ -159,6 +162,7 @@ class CreateRequest(FormView):
 @login_required
 def draft_request(request, jurisdiction, jidx, slug, idx):
     """Edit a drafted FOIA Request"""
+    # pylint: disable=too-many-locals
     foia = get_object_or_404(
         FOIARequest,
         jurisdiction__slug=jurisdiction,
@@ -180,6 +184,13 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
         'request': foia.first_request(),
         'embargo': foia.embargo,
     }
+    contact_info = {
+        'portal': foia.agency.portal,
+        'email': foia.agency.get_emails('primary', 'to').first(),
+        'cc_emails': foia.agency.get_emails('primary', 'cc'),
+        'fax': foia.agency.get_faxes('primary').first(),
+        'address': foia.agency.get_addresses('primary').first(),
+    }
 
     if request.method == 'POST':
         if request.POST.get('submit') == 'Delete':
@@ -187,17 +198,24 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
             messages.success(request, 'The request was deleted.')
             return redirect('foia-mylist')
         form = RequestDraftForm(request.POST)
-        if form.is_valid():
+        contact_info_form = ContactInfoForm(request.POST, foia=foia)
+        has_contact_perm = request.user.profile.is_advanced()
+        use_contact_info = (
+            has_contact_perm
+            and request.POST.get('use_contact_information') == 'true'
+        )
+        contact_valid = contact_info_form.is_valid()
+        if form.is_valid() and (not use_contact_info or contact_valid):
             data = form.cleaned_data
             foia.title = data['title']
             foia.slug = slugify(foia.title) or 'untitled'
             foia.embargo = data['embargo']
-            has_perm = foia.has_perm(request.user, 'embargo')
-            if foia.embargo and not has_perm:
+            has_embargo_perm = foia.has_perm(request.user, 'embargo')
+            if foia.embargo and not has_embargo_perm:
                 error_msg = 'Only Pro users may embargo their requests.'
                 messages.error(request, error_msg)
                 return redirect(foia)
-            foia_comm = foia.last_comm()  # DEBUG
+            foia_comm = foia.last_comm()
             foia_comm.date = timezone.now()
             foia_comm.communication = smart_text(data['request'])
             foia_comm.save()
@@ -205,17 +223,23 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
 
             if request.POST.get('submit') == 'Save':
                 messages.success(request, 'Your draft has been updated.')
+            elif request.POST.get('submit') == 'Submit' and use_contact_info:
+                _submit_request(request, foia, contact_info_form.cleaned_data)
             elif request.POST.get('submit') == 'Submit':
                 _submit_request(request, foia)
-        return redirect(
-            'foia-detail',
-            jurisdiction=foia.jurisdiction.slug,
-            jidx=foia.jurisdiction.pk,
-            slug=foia.slug,
-            idx=foia.pk
-        )
+            return redirect(
+                'foia-detail',
+                jurisdiction=foia.jurisdiction.slug,
+                jidx=foia.jurisdiction.pk,
+                slug=foia.slug,
+                idx=foia.pk
+            )
     else:
         form = RequestDraftForm(initial=initial_data)
+        contact_info_form = ContactInfoForm(
+            foia=foia,
+            contact_info=contact_info,
+        )
 
     context = {
         'action':
@@ -244,6 +268,10 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
             settings.AWS_STORAGE_BUCKET_NAME,
         'AWS_ACCESS_KEY_ID':
             settings.AWS_ACCESS_KEY_ID,
+        'contact_info':
+            contact_info,
+        'contact_info_form':
+            contact_info_form,
     }
 
     return render(

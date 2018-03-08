@@ -1,0 +1,61 @@
+
+<div
+  class="info"
+  {% if is_advanced %}
+    data-portal-type="{{ portal_data.get_type_display }}"
+    data-portal-url="{{ portal_data.url }}"
+    data-address="{{ address }}"
+  {% endif %}
+  >
+  This {{ subject }}
+  <span>
+    {% if portal %}
+      will be submitted via
+      {% if is_advanced %}
+        the {{ portal.get_type_display }} portal, located at {{ portal.url }}.
+      {% else %}
+        a portal.
+      {% endif %}
+    {% elif email and email.status == "good" %}
+      will be submitted via email
+      {% if is_advanced %}
+        to {{ email }}
+        {% if cc_emails %}
+          , as well as CCed to
+          {% for cc_email in cc_emails %}
+            {% if not forloop.first and not forloop.last %}
+              ,
+            {% elif not forloop.first and forloop.last %}
+              and
+            {% endif %}
+            {{ cc_email }}
+          {% endfor %}
+        {% endif %}
+      {% endif %}.
+    {% elif fax and fax.status == "good" %}
+      will be submitted via fax
+      {% if is_advanced %}
+        to {{ fax }}
+      {% endif %}.
+    {% elif address %}
+      will be submitted via mail
+      {% if is_advanced %}
+        to {{ address }}
+      {% endif %}.
+    {% else %}
+      currently has no valid contact information.  We will review it and find a suitable means of submitting it for you.
+    {% endif %}
+  </span>
+
+  {% if is_advanced %}
+    <p><a href="#" class="change">Not where this needs to go?</a></p>
+  {% endif %}
+</div>
+
+{% if is_advanced %}
+  <div class="form">
+    <input type="hidden" id="use_contact_information" name="use_contact_information" value="false">
+    {% include "lib/pattern/form.html" %}
+    <a href="#" class="cancel">Cancel</a>
+  </div>
+{% endif %}

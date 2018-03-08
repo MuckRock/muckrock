@@ -33,6 +33,7 @@ from muckrock.communication.models import (
 from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.foia.exceptions import FoiaFormError
 from muckrock.foia.forms import (
+    ContactInfoForm,
     FOIAAccessForm,
     FOIAAdminFixForm,
     FOIAAgencyReplyForm,
@@ -236,6 +237,17 @@ class Detail(DetailView):
             instance=foia
         )
         context['tracking_id_form'] = TrackingNumberForm()
+        contact_info = {
+            'portal': foia.portal,
+            'email': foia.email,
+            'cc_emails': foia.cc_emails.all(),
+            'fax': foia.fax,
+            'address': foia.address,
+        }
+        context['contact_info_form'] = ContactInfoForm(
+            foia=foia,
+            contact_info=contact_info,
+        )
 
         if user_can_edit or user.is_staff:
             all_tasks = Task.objects.filter_by_foia(foia, user)
@@ -432,41 +444,67 @@ class Detail(DetailView):
 
     def _follow_up(self, request, foia):
         """Handle submitting follow ups"""
-        success_msg = 'Your follow up has been sent.'
-        has_perm = foia.has_perm(request.user, 'followup')
         if request.user.is_staff:
-            form = FOIAAdminFixForm(
-                request.POST,
-                prefix='admin_fix',
-                request=request,
-                foia=foia,
-            )
-            if form.is_valid():
-                foia.update_address(
-                    form.cleaned_data['via'],
-                    email=form.cleaned_data['email'],
-                    other_emails=form.cleaned_data['other_emails'],
-                    fax=form.cleaned_data['fax'],
-                )
-                snail = form.cleaned_data['via'] == 'snail'
-                foia.create_out_communication(
-                    from_user=form.cleaned_data['from_user'],
-                    text=form.cleaned_data['comm'],
-                    user=request.user,
-                    snail=snail,
-                    subject=form.cleaned_data['subject'],
-                )
-                messages.success(request, success_msg)
-                new_action(request.user, 'followed up on', target=foia)
-                return redirect(foia.get_absolute_url() + '#')
-            else:
-                self.admin_fix_form = form
-                raise FoiaFormError
+            return self._admin_follow_up(request, foia)
         else:
-            comm_sent = self._new_comm(request, foia, has_perm, success_msg)
-            if comm_sent:
-                new_action(request.user, 'followed up on', target=foia)
+            return self._user_follow_up(request, foia)
+
+    def _admin_follow_up(self, request, foia):
+        """Handle follow ups for admins"""
+        form = FOIAAdminFixForm(
+            request.POST,
+            prefix='admin_fix',
+            request=request,
+            foia=foia,
+        )
+        if form.is_valid():
+            foia.update_address(
+                form.cleaned_data['via'],
+                email=form.cleaned_data['email'],
+                other_emails=form.cleaned_data['other_emails'],
+                fax=form.cleaned_data['fax'],
+            )
+            snail = form.cleaned_data['via'] == 'snail'
+            foia.create_out_communication(
+                from_user=form.cleaned_data['from_user'],
+                text=form.cleaned_data['comm'],
+                user=request.user,
+                snail=snail,
+                subject=form.cleaned_data['subject'],
+            )
+            messages.success(request, 'Your follow up has been sent.')
+            new_action(request.user, 'followed up on', target=foia)
             return redirect(foia.get_absolute_url() + '#')
+        else:
+            self.admin_fix_form = form
+            raise FoiaFormError
+
+    def _user_follow_up(self, request, foia):
+        """Handle follow ups for non-admins"""
+        has_perm = foia.has_perm(request.user, 'followup')
+        contact_info_form = ContactInfoForm(request.POST, foia=foia)
+        has_contact_perm = request.user.profile.is_advanced()
+        use_contact_info = (
+            has_contact_perm
+            and request.POST.get('use_contact_information') == 'true'
+        )
+        contact_valid = contact_info_form.is_valid()
+        comm_sent = self._new_comm(
+            request,
+            foia,
+            has_perm and (not use_contact_info or contact_valid),
+            'Your follow up has been sent.',
+            contact_info=contact_info_form.cleaned_data
+            if use_contact_info else None,
+        )
+        if use_contact_info:
+            foia.add_contact_info_note(
+                request.user,
+                contact_info_form.cleaned_data,
+            )
+        if comm_sent:
+            new_action(request.user, 'followed up on', target=foia)
+        return redirect(foia.get_absolute_url() + '#')
 
     def _thank(self, request, foia):
         """Handle submitting a thank you follow up"""
@@ -478,6 +516,19 @@ class Detail(DetailView):
         if comm_sent:
             new_action(request.user, verb='thanked', target=foia.agency)
         return redirect(foia.get_absolute_url() + '#')
+
+    def _new_comm(self, request, foia, test, success_msg, **kwargs):
+        """Helper function for sending a new comm"""
+        # pylint: disable=too-many-arguments
+        text = request.POST.get('text')
+        comm_sent = False
+        if text and test:
+            foia.create_out_communication(
+                from_user=request.user, text=text, user=request.user, **kwargs
+            )
+            messages.success(request, success_msg)
+            comm_sent = True
+        return comm_sent
 
     def _appeal(self, request, foia):
         """Handle submitting an appeal, then create an Appeal from the returned
@@ -500,22 +551,6 @@ class Detail(DetailView):
         new_action(request.user, 'appealed', target=foia)
         messages.success(request, 'Your appeal has been sent.')
         return redirect(foia.get_absolute_url() + '#')
-
-    def _new_comm(self, request, foia, test, success_msg, thanks=False):
-        """Helper function for sending a new comm"""
-        # pylint: disable=too-many-arguments
-        text = request.POST.get('text')
-        comm_sent = False
-        if text and test:
-            foia.create_out_communication(
-                from_user=request.user,
-                text=text,
-                user=request.user,
-                thanks=thanks,
-            )
-            messages.success(request, success_msg)
-            comm_sent = True
-        return comm_sent
 
     def _update_estimate(self, request, foia):
         """Change the estimated completion date"""
