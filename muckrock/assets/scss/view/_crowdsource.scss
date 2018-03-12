@@ -5,6 +5,20 @@
 .crowdsource.form {
   max-width: 60em;
   margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  & .crowdsource-form {
+    &__header {
+      flex: 1 1 100%;
+    }
+    &__inputs {
+      flex: 1 1 16em;
+      margin-right: 1.5em;
+    }
+    &__data {
+      flex: 4 1 24em;
+    }
+  }
 }
 
 .crowdsource.detail .actions form {

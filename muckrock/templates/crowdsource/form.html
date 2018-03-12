@@ -7,35 +7,41 @@
 
 {% block content %}
   <div class="crowdsource form">
-    <h1>{{ crowdsource.title }}</h1>
-    <p>{{ crowdsource.description|markdown }}</p>
-    {% if crowdsource.multiple_per_page %}
-      <p>This is your {{ number|ordinal }} time responding for this data.</p>
-    {% endif %}
-    <form {% if form.is_multipart %}enctype="multipart/form-data"{% endif %} method="post">
-      {% csrf_token %}
-      {% include 'lib/pattern/form.html' %}
-      {% if user.is_anonymous %}
-        <p>Thanks for helping out with this Assignment!  We need to create an account for you to save your data.  Already have an account?  <a href="{% url "acct-login" %}">Log in</a> instead.</p>
+    <header class="crowdsource-form__header">
+      <h1>{{ crowdsource.title }}</h1>
+      <p>{{ crowdsource.description|markdown }}</p>
+      {% if crowdsource.multiple_per_page %}
+        <p>This is your {{ number|ordinal }} time responding for this data.</p>
       {% endif %}
-
+    </header>
+    <div class="crowdsource-form__inputs">
+      <form {% if form.is_multipart %}enctype="multipart/form-data"{% endif %} method="post" id="submitInput">
+        {% csrf_token %}
+        {% include 'lib/pattern/form.html' %}
+        {% if user.is_anonymous %}
+          <p>Thanks for helping out with this Assignment!  We need to create an account for you to save your data.  Already have an account?  <a href="{% url "acct-login" %}">Log in</a> instead.</p>
+        {% endif %}
+      </form>
+      {% if data %}
+      <form method="post" id="skipInput">
+        {% csrf_token %}
+        {{ form.data_id }}
+      </form>
+      {% endif %}
       <div class="buttons">
-        <input type="submit" name="submit" value="Submit" class="blue button" {% if crowdsource.status != "open" %}disabled{% endif %}>
+        <input form="submitInput" type="submit" name="submit" value="Submit" class="blue button" {% if crowdsource.status != "open" %}disabled{% endif %}>
         {% if crowdsource.multiple_per_page %}
-          <input type="submit" name="submit" value="Submit and Add Another" class="blue button" {% if crowdsource.status != "open" %}disabled{% endif %}>
+          <input form="submitInput" type="submit" name="submit" value="Submit and Add Another" class="blue button" {% if crowdsource.status != "open" %}disabled{% endif %}>
+        {% endif %}
+        {% if data %}
+          <input form="skipInput" type="submit" name="submit" value="Skip" class="button" {% if crowdsource.status != "open" %}disabled{% endif %}>
         {% endif %}
       </div>
-
-    </form>
-    <form method="post">
-      {% csrf_token %}
-      {{ form.data_id }}
-      {% if data %}
-        <input type="submit" name="submit" value="Skip" class="button" {% if crowdsource.status != "open" %}disabled{% endif %}>
-      {% endif %}
-    </form>
+    </div>
     {% if data %}
+    <div class="crowdource-form__data">
       {{ data.embed }}
+    </div>
     {% endif %}
   </div>
 {% endblock %}
