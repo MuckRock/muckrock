@@ -8,15 +8,12 @@
             "level": "l",
             "public_notes": "",
             "image": "",
-            "days": null,
             "holidays": [],
             "abbrev": "",
             "image_attr_line": "",
             "observe_sat": false,
             "hidden": false,
-            "intro": "",
-            "slug": "amherst-ma",
-            "waiver": ""
+            "slug": "amherst-ma"
         }
     },
     {
@@ -28,15 +25,12 @@
             "level": "s",
             "public_notes": "",
             "image": "",
-            "days": 0,
             "holidays": [],
             "abbrev": "AZ",
             "image_attr_line": "",
             "observe_sat": false,
             "hidden": false,
-            "intro": "",
-            "slug": "arizona",
-            "waiver": ""
+            "slug": "arizona"
         }
     },
     {
@@ -48,15 +42,12 @@
             "level": "l",
             "public_notes": "",
             "image": "",
-            "days": null,
             "holidays": [],
             "abbrev": "",
             "image_attr_line": "",
             "observe_sat": false,
             "hidden": false,
-            "intro": "",
-            "slug": "boston-ma",
-            "waiver": ""
+            "slug": "boston-ma"
         }
     },
     {
@@ -68,15 +59,12 @@
             "level": "l",
             "public_notes": "",
             "image": "",
-            "days": null,
             "holidays": [],
             "abbrev": "",
             "image_attr_line": "",
             "observe_sat": false,
             "hidden": false,
-            "intro": "",
-            "slug": "brookline-ma",
-            "waiver": ""
+            "slug": "brookline-ma"
         }
     },
     {
@@ -88,15 +76,12 @@
             "level": "l",
             "public_notes": "",
             "image": "",
-            "days": null,
             "holidays": [],
             "abbrev": "",
             "image_attr_line": "",
             "observe_sat": false,
             "hidden": false,
-            "intro": "",
-            "slug": "cambridge-ma",
-            "waiver": ""
+            "slug": "cambridge-ma"
         }
     },
     {
@@ -108,15 +93,12 @@
             "level": "s",
             "public_notes": "",
             "image": "",
-            "days": null,
             "holidays": [],
             "abbrev": "DC",
             "image_attr_line": "",
             "observe_sat": false,
             "hidden": true,
-            "intro": "",
-            "slug": "district-of-columbia",
-            "waiver": ""
+            "slug": "district-of-columbia"
         }
     },
     {
@@ -128,15 +110,12 @@
             "level": "s",
             "public_notes": "",
             "image": "",
-            "days": null,
             "holidays": [],
             "abbrev": "FL",
             "image_attr_line": "",
             "observe_sat": false,
             "hidden": false,
-            "intro": "",
-            "slug": "florida",
-            "waiver": ""
+            "slug": "florida"
         }
     },
     {
@@ -148,15 +127,12 @@
             "level": "l",
             "public_notes": "",
             "image": "",
-            "days": null,
             "holidays": [],
             "abbrev": "",
             "image_attr_line": "",
             "observe_sat": false,
             "hidden": false,
-            "intro": "",
-            "slug": "groton-ma",
-            "waiver": ""
+            "slug": "groton-ma"
         }
     },
     {
@@ -168,7 +144,6 @@
             "level": "s",
             "public_notes": "",
             "image": "jurisdiction_images/mass.jpg",
-            "days": 10,
             "holidays": [
                 1
             ],
@@ -176,10 +151,7 @@
             "image_attr_line": "",
             "observe_sat": false,
             "hidden": false,
-            "intro": "",
-            "slug": "massachusetts",
-            "law_name": "Mass Law",
-            "waiver": ""
+            "slug": "massachusetts"
         }
     },
     {
@@ -191,15 +163,12 @@
             "level": "l",
             "public_notes": "",
             "image": "",
-            "days": null,
             "holidays": [],
             "abbrev": "",
             "image_attr_line": "",
             "observe_sat": false,
             "hidden": false,
-            "intro": "",
-            "slug": "milford-ma",
-            "waiver": ""
+            "slug": "milford-ma"
         }
     },
     {
@@ -211,15 +180,12 @@
             "level": "s",
             "public_notes": "",
             "image": "",
-            "days": null,
             "holidays": [],
             "abbrev": "NY",
             "image_attr_line": "",
             "observe_sat": false,
             "hidden": false,
-            "intro": "",
-            "slug": "new-york",
-            "waiver": ""
+            "slug": "new-york"
         }
     },
     {
@@ -231,15 +197,12 @@
             "level": "l",
             "public_notes": "",
             "image": "",
-            "days": null,
             "holidays": [],
             "abbrev": "",
             "image_attr_line": "",
             "observe_sat": false,
             "hidden": false,
-            "intro": "",
-            "slug": "somerville-ma",
-            "waiver": ""
+            "slug": "somerville-ma"
         }
     },
     {
@@ -251,7 +214,6 @@
             "level": "f",
             "public_notes": "",
             "image": "",
-            "days": 15,
             "holidays": [
                 1,
                 2,
@@ -268,9 +230,7 @@
             "image_attr_line": "",
             "observe_sat": false,
             "hidden": false,
-            "intro": "",
-            "slug": "united-states-of-america",
-            "waiver": ""
+            "slug": "united-states-of-america"
         }
     },
     {
@@ -282,15 +242,12 @@
             "level": "l",
             "public_notes": "",
             "image": "",
-            "days": null,
             "holidays": [],
             "abbrev": "",
             "image_attr_line": "",
             "observe_sat": false,
             "hidden": false,
-            "intro": "",
-            "slug": "washington",
-            "waiver": ""
+            "slug": "washington"
         }
     },
     {
@@ -302,15 +259,12 @@
             "level": "l",
             "public_notes": "",
             "image": "",
-            "days": null,
             "holidays": [],
             "abbrev": "",
             "image_attr_line": "",
             "observe_sat": false,
             "hidden": false,
-            "intro": "",
-            "slug": "worcester-ma",
-            "waiver": ""
+            "slug": "worcester-ma"
         }
     }
 ]

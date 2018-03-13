@@ -32,6 +32,7 @@ import './editor';
 import './exemptionBrowser/app';
 import './foiaRequest';
 import './foiaCreate';
+import './jurisdiction';
 import './list';
 import modal from './modal';
 import './nav';

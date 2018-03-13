@@ -78,7 +78,11 @@ class Jurisdiction(models.Model, RequestHelper):
     abbrev = models.CharField(max_length=5, blank=True)
     level = models.CharField(max_length=1, choices=levels)
     parent = models.ForeignKey(
-        'self', related_name='children', blank=True, null=True
+        'self',
+        related_name='children',
+        blank=True,
+        null=True,
+        limit_choices_to=~Q(level='l'),
     )
     hidden = models.BooleanField(default=False)
     image = ThumbnailerImageField(
@@ -91,46 +95,12 @@ class Jurisdiction(models.Model, RequestHelper):
     aliases = models.TextField(blank=True)
 
     # non local
-    days = models.PositiveSmallIntegerField(
-        blank=True,
-        null=True,
-        help_text='How many days do they'
-        ' have to respond?'
-    )
     observe_sat = models.BooleanField(
         default=False,
         help_text='Are holidays observed on Saturdays? '
         '(or are they moved to Friday?)'
     )
     holidays = models.ManyToManyField(Holiday, blank=True)
-    use_business_days = models.BooleanField(
-        default=True,
-        help_text='Response time in business days'
-        ' (or calendar days)?'
-    )
-    intro = models.TextField(
-        blank=True,
-        help_text='Intro paragraph for request - '
-        'usually includes the pertinant FOI law'
-    )
-    law_name = models.CharField(
-        blank=True, max_length=255, help_text='The pertinant FOIA law'
-    )
-    waiver = models.TextField(
-        blank=True,
-        help_text='Optional - custom waiver paragraph if '
-        'FOI law has special line for waivers'
-    )
-    has_appeal = models.BooleanField(
-        default=True,
-        help_text='Does this jurisdiction have an appeals process?'
-    )
-    requires_proxy = models.BooleanField(default=False)
-    law_analysis = models.TextField(
-        blank=True,
-        help_text='Our analysis of the state FOIA law, '
-        'as a part of FOI95.'
-    )
 
     def __unicode__(self):
         if self.level == 'l' and not self.full_name and self.parent:
@@ -180,93 +150,56 @@ class Jurisdiction(models.Model, RequestHelper):
         """So we can call from template"""
         return self.get_url('flag')
 
+    @property
     def legal(self):
-        """Return the jurisdiction abbreviation for which law this jurisdiction falls under"""
+        """Return the legal jurisdiction this jurisdiction falls under
+        This is the parent state for localities, and itself for all others
+        """
         if self.level == 'l':
-            return self.parent.abbrev
+            return self.parent
         else:
-            return self.abbrev
+            return self
 
-    def get_days(self):
-        """How many days does an agency have to reply?"""
-        if self.level == 'l':
-            return self.parent.days
-        else:
-            return self.days
+    def __getattr__(self, attr):
+        """Short cut access to properties stored on the legal jurisdiction"""
+        if attr in {'days', 'waiver', 'has_appeal'}:
+            return getattr(self.legal.law, attr)
+        raise AttributeError(
+            '{!r} object has no attribute {!r}'.format(
+                self.__class__.__name__, attr
+            )
+        )
 
     def get_day_type(self):
         """Does this jurisdiction use business or calendar days?"""
-        if self.level == 'l':
-            return 'business' if self.parent.use_business_days else 'calendar'
-        else:
-            return 'business' if self.use_business_days else 'calendar'
-
-    def get_intro(self):
-        """Intro for requests"""
-        if self.level == 'l':
-            return self.parent.intro
-        else:
-            return self.intro
-
-    def get_waiver(self):
-        """Waiver paragraph for requests"""
-        if self.level == 'l':
-            return self.parent.waiver
-        else:
-            return self.waiver
+        return 'business' if self.legal.law.use_business_days else 'calendar'
 
     def get_law_name(self, abbrev=False):
         """The law name for the jurisdiction"""
-        #pylint: disable=redefined-variable-type
-        if self.level == 'l':
-            jurisdiction = self.parent
-        else:
-            jurisdiction = self
-        if abbrev:
-            laws = jurisdiction.laws.all()
-            if laws and laws[0].shortname:
-                return laws[0].shortname
-        return jurisdiction.law_name
+        if abbrev and self.legal.law.shortname:
+            return self.legal.law.shortname
+        return self.legal.law.name
 
     def get_calendar(self):
         """Get a calendar of business days for the jurisdiction"""
-        if self.level == 'l' and not self.parent.use_business_days:
-            return Calendar()
-        elif self.level == 'l' and self.parent.use_business_days:
+        if self.legal.law.use_business_days:
             return HolidayCalendar(
-                self.parent.holidays.all(), self.parent.observe_sat
+                self.legal.holidays.all(), self.legal.observe_sat
             )
-        elif not self.use_business_days:
-            return Calendar()
         else:
-            return HolidayCalendar(self.holidays.all(), self.observe_sat)
+            return Calendar()
 
     def get_proxy(self):
         """Get a random proxy user for this jurisdiction"""
         from muckrock.accounts.models import Profile
         proxy = (
-            Profile.objects.filter(acct_type='proxy', state=self.legal())
+            Profile.objects.filter(acct_type='proxy', state=self.legal.abbrev)
             .order_by('-preferred_proxy').first()
         )
         if proxy:
             return proxy.user
         else:
             return None
-
-    def get_state(self):
-        """The state name for the jurisdiction"""
-        # pylint: disable=no-member
-        if self.level == 'l':
-            return self.parent.name
-        else:
-            return self.name
-
-    def can_appeal(self):
-        """Can you appeal to this jurisdiction?"""
-        if self.level == 'l':
-            return self.parent.has_appeal
-        else:
-            return self.has_appeal
 
     def get_requests(self):
         """State level jurisdictions should return requests from their localities as well."""
@@ -285,32 +218,81 @@ class Jurisdiction(models.Model, RequestHelper):
 
 class Law(models.Model):
     """A law that allows for requests for public records from a jurisdiction."""
-    jurisdiction = models.ForeignKey(Jurisdiction, related_name='laws')
+    jurisdiction = models.OneToOneField(Jurisdiction, on_delete=models.CASCADE)
     name = models.CharField(
-        max_length=255, help_text='The common name of the law.'
+        max_length=255,
+        help_text='The common name of the law.',
     )
     shortname = models.CharField(
         blank=True,
         max_length=20,
-        help_text='Abbreviation or acronym, e.g. FOIA, FOIL, OPRA'
+        help_text='Abbreviation or acronym, e.g. FOIA, FOIL, OPRA',
     )
     citation = models.CharField(
-        max_length=255, help_text='The legal reference for this law.'
+        max_length=255,
+        help_text='The legal reference for this law.',
     )
     url = models.URLField(help_text='The URL of the full text of the law.')
-    summary = models.CharField(
-        blank=True, max_length=255, verbose_name='Major Dates'
+    days = models.PositiveSmallIntegerField(
+        blank=True,
+        null=True,
+        help_text='How many days do they have to respond?'
     )
+    use_business_days = models.BooleanField(
+        default=True,
+        help_text='Response time in business days'
+        ' (or calendar days)?'
+    )
+    waiver = models.TextField(
+        blank=True,
+        help_text='Optional - custom waiver paragraph if '
+        'FOI law has special line for waivers'
+    )
+    has_appeal = models.BooleanField(
+        default=True,
+        help_text='Does this jurisdiction have an appeals process?'
+    )
+    requires_proxy = models.BooleanField(default=False)
+    law_analysis = models.TextField(
+        blank=True,
+        help_text='Our analysis of the state FOIA law, '
+        'as a part of FOI95.'
+    )
+    fee_schedule = models.BooleanField(default=False)
+    trade_secrets = models.BooleanField(
+        default=False, help_text='Can trade secrets be made public?'
+    )
+    penalties = models.BooleanField(default=True)
+    cover_judicial = models.BooleanField(default=False)
+    cover_legislative = models.BooleanField(default=False)
+    cover_executive = models.BooleanField(default=False)
 
     def __unicode__(self):
         return self.name
 
-    def __repr__(self):
-        return '%d' % self.pk
-
     def get_absolute_url(self):
         """Return the url for the jurisdiction."""
         return self.jurisdiction.get_absolute_url()
+
+
+class LawYear(models.Model):
+    """A notable year for a law"""
+    law = models.ForeignKey(Law, related_name='years')
+    reason = models.CharField(
+        choices=(
+            ('Enacted', 'Enacted'),
+            ('Passed', 'Passed'),
+            ('Updated', 'Updated'),
+        ),
+        max_length=7,
+    )
+    year = models.PositiveSmallIntegerField()
+
+    def __unicode__(self):
+        return u'{} in {}'.format(self.reason, self.year)
+
+    class Meta:
+        ordering = ['year']
 
 
 class Exemption(models.Model):

@@ -236,6 +236,12 @@ def get_item(dictionary, key):
 
 
 @register.filter
+def get_attr(obj, attr):
+    """Get an attribute from an object"""
+    return getattr(obj, attr)
+
+
+@register.filter
 def smartypants(text):
     """Renders typographically-correct quotes with the smartpants library"""
     import smartypants as _smartypants

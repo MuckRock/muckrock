@@ -145,3 +145,102 @@ $right-column: 4 1 32em;
         color: $color-green;
     }
 }
+
+// https://stackoverflow.com/questions/20456694/grid-of-responsive-squares/20457076#20457076
+.place-map {
+	.cell {
+		float: left;
+		position: relative;
+		width: 8%;
+		padding-bottom : 8%; /* = width for a 1:1 aspect ratio */
+		margin: 0.5%;
+		overflow: hidden;
+  }
+  .state {
+    color: $color-white;
+    background: $color-grey-5;
+    outline: $border $color-grey-6;
+    @include transition(background 0.2s linear);
+    .avg-response-time {
+      font-size: $size-5;
+      @media (max-width: 48em) {
+        font-size: $size-2;
+      }
+      margin: 0;
+    }
+    .abbrev {
+      font-size: $size-3;
+      margin: 0;
+      @media (max-width: 48em) {
+        display: none;
+      }
+    }
+  }
+  .state.yes {
+    background: $color-green;
+  }
+  .state.no {
+    background: $color-red;
+  }
+  .state.maybe {
+    background: $color-yellow;
+  }
+  .state:hover {
+    background: $color-grey-5;
+  }
+  .state-content {
+    position: absolute;
+    height: 90%; /* = 100% - 2*5% padding */
+    width: 90%; /* = 100% - 2*5% padding */
+    padding: 5%;
+    text-align: center;
+  }
+
+  .table{
+    display: table;
+    height: 100%;
+    width: 100%;
+  }
+  .table-cell{
+    display: table-cell;
+    vertical-align: middle;
+    height: 100%;
+    width: 100%;
+  }
+}
+
+div.place-map::after {
+  content: "";
+  display: block;
+  clear: both;
+}
+
+.top-map {
+  width: 80%;
+  margin: 0 auto;
+}
+
+.small-maps {
+  width: 100%;
+  .state {
+    font-size: $size-3;
+    @media (max-width: 48em) {
+      font-size: $size-2;
+    }
+  }
+  margin-top: 2em;
+  h2 {
+    margin-top: 3em;
+  }
+  .place-map {
+    margin-right: 3em;
+  }
+}
+
+.explore__section.jurisdiction-explore {
+  max-width: 62.5em;
+  .credits {
+    font-style: italic;
+    margin-top: 4rem;
+  }
+}

@@ -19,7 +19,7 @@ from muckrock.jurisdiction.models import Jurisdiction
 class TestBusinessDayUnit(TestCase):
     """Unit tests for business days"""
     # pylint: disable=invalid-name
-    fixtures = ['holidays.json', 'jurisdictions.json']
+    fixtures = ['holidays.json', 'jurisdictions.json', 'laws.json']
 
     def setUp(self):
         """Set up tests"""

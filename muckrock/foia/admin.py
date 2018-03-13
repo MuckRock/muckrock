@@ -208,6 +208,7 @@ class FOIACommunicationAdmin(VersionAdmin):
             except formset.model.DoesNotExist:
                 change = False
 
+            instance.save()
             # its new, so notify the user about it
             if not change:
                 instance.comm.foia.update(instance.anchor())

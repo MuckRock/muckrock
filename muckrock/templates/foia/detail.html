@@ -335,7 +335,7 @@ Sincerely,
                         {% endif %}
                         {% if can_appeal %}
                         <div class="composer" id="appeal">
-                            {% if not foia.jurisdiction.can_appeal %}
+                            {% if not foia.jurisdiction.has_appeal %}
                             <div class="message warning">
                                 <span class="symbol">
                                     {% include 'lib/component/icon/warning.svg' %}

@@ -161,7 +161,7 @@ class OrphanTaskViewTests(TestCase):
         'holidays.json', 'jurisdictions.json', 'agency_types.json',
         'test_users.json', 'test_agencies.json', 'test_profiles.json',
         'test_foiarequests.json', 'test_foiacommunications.json',
-        'test_task.json'
+        'test_task.json', 'laws.json'
     ]
 
     def setUp(self):
@@ -295,7 +295,7 @@ class SnailMailTaskViewTests(TestCase):
         'holidays.json', 'jurisdictions.json', 'agency_types.json',
         'test_users.json', 'test_agencies.json', 'test_profiles.json',
         'test_foiarequests.json', 'test_foiacommunications.json',
-        'test_task.json'
+        'test_task.json', 'laws.json'
     ]
 
     def setUp(self):
@@ -584,7 +584,7 @@ class NewAgencyTaskViewTests(TestCase):
         'holidays.json', 'jurisdictions.json', 'agency_types.json',
         'test_users.json', 'test_agencies.json', 'test_profiles.json',
         'test_foiarequests.json', 'test_foiacommunications.json',
-        'test_task.json'
+        'test_task.json', 'laws.json'
     ]
 
     def setUp(self):

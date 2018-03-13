@@ -89,9 +89,7 @@ class TestFoiaMachineRequest(TestCase):
     def test_date_due(self):
         """The date due should be the date submitted plus the jurisdiction's response time."""
         comm = factories.FoiaMachineCommunicationFactory(request=self.foi)
-        expected_date_due = comm.date + timedelta(
-            self.foi.jurisdiction.get_days()
-        )
+        expected_date_due = comm.date + timedelta(self.foi.jurisdiction.days)
         eq_(self.foi.date_due, expected_date_due)
 
     @raises(AttributeError)
@@ -117,7 +115,7 @@ class TestFoiaMachineRequest(TestCase):
     def test_is_overdue(self):
         """The request should be overdue if days_until_due is negative."""
         overdue_date = (
-            timezone.now() - timedelta(self.foi.jurisdiction.get_days() + 10)
+            timezone.now() - timedelta(self.foi.jurisdiction.days + 10)
         )
         comm = factories.FoiaMachineCommunicationFactory(
             request=self.foi, date=overdue_date
@@ -131,7 +129,7 @@ class TestFoiaMachineRequest(TestCase):
     def test_days_overdue(self):
         """Days overdue should just be the inverse of days_until_due."""
         overdue_date = (
-            timezone.now() - timedelta(self.foi.jurisdiction.get_days() + 10)
+            timezone.now() - timedelta(self.foi.jurisdiction.days + 10)
         )
         factories.FoiaMachineCommunicationFactory(
             request=self.foi, date=overdue_date
