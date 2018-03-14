@@ -1,5 +1,6 @@
 {% extends 'base_list.html' %}
 {% load humanize %}
+{% load rules %}
 
 {% block list-title %}
   Open Assignments
@@ -39,7 +40,8 @@
 {% endblock list-table-row %}
 
 {% block list-actions %}
-  {% if user.is_staff or user.profile.experimental %}
+  {% has_perm 'crowdsource.add_crowdsource' request.user as can_add %}
+  {% if can_add %}
     <a class="primary button" href="{% url "crowdsource-create" %}">Create a New Assignment</a>
   {% endif %}
 {% endblock %}
