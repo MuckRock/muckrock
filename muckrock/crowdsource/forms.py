@@ -16,7 +16,16 @@ from autocomplete_light import shortcuts as autocomplete_light
 # MuckRock
 from muckrock.crowdsource.fields import FIELD_DICT
 from muckrock.crowdsource.models import Crowdsource, CrowdsourceData
-from muckrock.crowdsource.tasks import datum_per_page
+from muckrock.crowdsource.tasks import datum_per_page, import_doccloud_proj
+
+DOCUMENT_URL_RE = re.compile(
+    r'https?://www[.]documentcloud[.]org/documents/'
+    r'(?P<doc_id>[0-9A-Za-z-]+)[.]html'
+)
+PROJECT_URL_RE = re.compile(
+    r'https?://www[.]documentcloud[.]org/projects/'
+    r'(?:[0-9A-Za-z-]+)[.]html'
+)
 
 
 class CrowdsourceAssignmentForm(forms.Form):
@@ -62,10 +71,6 @@ class CrowdsourceAssignmentForm(forms.Form):
 class CrowdsourceForm(forms.ModelForm):
     """Form for creating a crowdsource"""
     prefix = 'crowdsource'
-    document_url_re = re.compile(
-        r'https?://www[.]documentcloud[.]org/documents/'
-        r'(?P<doc_id>[0-9A-Za-z-]+)[.]html'
-    )
 
     project = autocomplete_light.ModelChoiceField(
         'ProjectManagerAutocomplete',
@@ -81,7 +86,7 @@ class CrowdsourceForm(forms.ModelForm):
     )
     doccloud_each_page = forms.BooleanField(
         label='Split Documents by Page',
-        help_text='Each DocumentCloud URL in the data CSV will be split '
+        help_text='Each DocumentCloud URL will be split '
         'up into one assignment per page',
         required=False,
     )
@@ -124,12 +129,20 @@ class CrowdsourceForm(forms.ModelForm):
             for line in reader:
                 data = dict(zip(headers, line))
                 url = data.pop('url', '')
-                match = self.document_url_re.match(url)
-                if doccloud_each_page and match:
+                doc_match = DOCUMENT_URL_RE.match(url)
+                proj_match = PROJECT_URL_RE.match(url)
+                if doccloud_each_page and doc_match:
                     datum_per_page.delay(
                         crowdsource.pk,
-                        match.group('doc_id'),
+                        doc_match.group('doc_id'),
                         data,
+                    )
+                elif proj_match:
+                    import_doccloud_proj.delay(
+                        crowdsource.pk,
+                        url,
+                        data,
+                        doccloud_each_page,
                     )
                 elif url:
                     # skip invalid URLs
@@ -197,10 +210,37 @@ class CrowdsourceForm(forms.ModelForm):
         return form_json
 
 
-CrowdsourceDataFormset = forms.inlineformset_factory(
+CrowdsourceDataFormsetBase = forms.inlineformset_factory(
     Crowdsource,
     CrowdsourceData,
     fields=('url',),
     extra=1,
     can_delete=False,
 )
+
+
+class CrowdsourceDataFormset(CrowdsourceDataFormsetBase):
+    """Crowdsource data formset"""
+
+    def save(self, commit=True, doccloud_each_page=False):
+        """Apply special cases to Document Cloud URLs"""
+        instances = super(CrowdsourceDataFormset, self).save(commit=False)
+        return_instances = []
+        for instance in instances:
+            doc_match = DOCUMENT_URL_RE.match(instance.url)
+            proj_match = PROJECT_URL_RE.match(instance.url)
+            if doccloud_each_page and doc_match:
+                datum_per_page.delay(
+                    self.instance.pk,
+                    doc_match.group('doc_id'),
+                    {},
+                )
+            elif proj_match:
+                import_doccloud_proj.delay(
+                    self.instance.pk, instance.url, {}, doccloud_each_page
+                )
+            else:
+                return_instances.append(instance)
+                if commit:
+                    instance.save()
+        return return_instances
