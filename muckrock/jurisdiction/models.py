@@ -164,6 +164,10 @@ class Jurisdiction(models.Model, RequestHelper):
         """Short cut access to properties stored on the legal jurisdiction"""
         if attr in {'days', 'waiver', 'has_appeal'}:
             return getattr(self.legal.law, attr)
+        # if looking for a law relation, but this model does not have one,
+        # do not error, but return None
+        if attr == 'law':
+            return None
         raise AttributeError(
             '{!r} object has no attribute {!r}'.format(
                 self.__class__.__name__, attr
