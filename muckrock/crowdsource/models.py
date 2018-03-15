@@ -342,7 +342,7 @@ class CrowdsourceResponse(models.Model):
         """Given the form data, create the values for this response"""
         # these values are passed in the form, but should not have
         # values created for them
-        for key in ['data_id', 'full_name', 'email']:
+        for key in ['data_id', 'full_name', 'email', 'newsletter']:
             data.pop(key, None)
         for label, value in data.iteritems():
             try:
@@ -352,7 +352,7 @@ class CrowdsourceResponse(models.Model):
                 )
                 self.values.create(
                     field=field,
-                    value=value,
+                    value=value if value is not None else '',
                 )
             except CrowdsourceField.DoesNotExist:
                 pass
