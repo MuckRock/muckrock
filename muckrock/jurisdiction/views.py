@@ -48,7 +48,7 @@ class JurisdictionExploreView(TemplateView):
         (10, 3): 'RI',
         (0, 4): 'OR',
         (1, 4): 'UT',
-        (2, 4): 'WV',
+        (2, 4): 'WY',
         (3, 4): 'SD',
         (4, 4): 'IA',
         (5, 4): 'WI',
