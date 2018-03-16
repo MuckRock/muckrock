@@ -27,8 +27,8 @@ class TestRequestForm(TestCase):
     def test_get_jurisdiction(self):
         """Test get_jurisdiction"""
         usa = FederalJurisdictionFactory()
-        mass = StateJurisdictionFactory()
-        boston = LocalJurisdictionFactory()
+        mass = StateJurisdictionFactory(parent=usa)
+        boston = LocalJurisdictionFactory(parent=mass)
         form = RequestForm()
         form.cleaned_data = {}
 
