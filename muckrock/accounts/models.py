@@ -726,12 +726,36 @@ class Statistics(models.Model):
     total_example_appeals = models.IntegerField(null=True, blank=True)
 
     # crowdsources
-    total_crowdsources = models.IntegerField(null=True, blank=True)
-    total_draft_crowdsources = models.IntegerField(null=True, blank=True)
-    total_open_crowdsources = models.IntegerField(null=True, blank=True)
-    total_close_crowdsources = models.IntegerField(null=True, blank=True)
-    num_crowdsource_responded_users = models.IntegerField(null=True, blank=True)
-    total_crowdsource_responses = models.IntegerField(null=True, blank=True)
+    total_crowdsources = models.IntegerField(
+        'total assignments',
+        null=True,
+        blank=True,
+    )
+    total_draft_crowdsources = models.IntegerField(
+        'total draft assignments',
+        null=True,
+        blank=True,
+    )
+    total_open_crowdsources = models.IntegerField(
+        'total open assignments',
+        null=True,
+        blank=True,
+    )
+    total_close_crowdsources = models.IntegerField(
+        'total close assignments',
+        null=True,
+        blank=True,
+    )
+    num_crowdsource_responded_users = models.IntegerField(
+        'num assignment responded users',
+        null=True,
+        blank=True,
+    )
+    total_crowdsource_responses = models.IntegerField(
+        'total assignment responses',
+        null=True,
+        blank=True,
+    )
 
     def __unicode__(self):
         return 'Stats for %s' % self.date
