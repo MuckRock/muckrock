@@ -77,12 +77,12 @@ class TestJurisdictionUnit(TestCase):
 
     def test_jurisdiction_legal(self):
         """Local jurisdictions should return state law"""
-        eq_(self.federal.legal(), self.federal.abbrev)
-        eq_(self.state.legal(), self.state.abbrev)
-        eq_(self.local.legal(), self.state.abbrev)
-        eq_(self.federal.get_law_name(), self.federal.law_name)
-        eq_(self.state.get_law_name(), self.state.law_name)
-        eq_(self.local.get_law_name(), self.state.law_name)
+        eq_(self.federal.legal, self.federal)
+        eq_(self.state.legal, self.state)
+        eq_(self.local.legal, self.state)
+        eq_(self.federal.get_law_name(), self.federal.law.name)
+        eq_(self.state.get_law_name(), self.state.law.name)
+        eq_(self.local.get_law_name(), self.state.law.name)
 
     def test_get_day_type(self):
         """Local jurisdictions should return state day type"""
@@ -92,33 +92,21 @@ class TestJurisdictionUnit(TestCase):
 
     def test_jurisdiction_get_days(self):
         """Local jurisdictions should return state days"""
-        eq_(self.federal.get_days(), self.federal.days)
-        eq_(self.state.get_days(), self.state.days)
-        eq_(self.local.get_days(), self.state.days)
-
-    def test_jurisdiction_get_intro(self):
-        """Local jurisdictions should return the state intro."""
-        eq_(self.federal.get_intro(), self.federal.intro)
-        eq_(self.state.get_intro(), self.state.intro)
-        eq_(self.local.get_intro(), self.state.intro)
+        eq_(self.federal.days, self.federal.law.days)
+        eq_(self.state.days, self.state.law.days)
+        eq_(self.local.days, self.state.law.days)
 
     def test_jurisdiction_get_waiver(self):
         """Local jurisdictions should return the state waiver."""
-        eq_(self.federal.get_waiver(), self.federal.waiver)
-        eq_(self.state.get_waiver(), self.state.waiver)
-        eq_(self.local.get_waiver(), self.state.waiver)
+        eq_(self.federal.waiver, self.federal.law.waiver)
+        eq_(self.state.waiver, self.state.law.waiver)
+        eq_(self.local.waiver, self.state.law.waiver)
 
     def test_jurisdiction_can_appeal(self):
         """Local jurisdictions should return the state's appealability."""
-        eq_(self.federal.can_appeal(), self.federal.has_appeal)
-        eq_(self.state.can_appeal(), self.state.has_appeal)
-        eq_(self.local.can_appeal(), self.state.has_appeal)
-
-    def test_get_state(self):
-        """Local jurisdictions should return the state's name."""
-        eq_(self.federal.get_state(), self.federal.name)
-        eq_(self.state.get_state(), self.state.name)
-        eq_(self.local.get_state(), self.state.name)
+        eq_(self.federal.has_appeal, self.federal.law.has_appeal)
+        eq_(self.state.has_appeal, self.state.law.has_appeal)
+        eq_(self.local.has_appeal, self.state.law.has_appeal)
 
     def test_average_response_time(self):
         """

@@ -23,7 +23,7 @@
 <dl class="stats">
 
     <dt>Allowed Response Time</dt>
-    {% with agency.jurisdiction.get_days as days %}
+    {% with agency.jurisdiction.days as days %}
         {% if days %}
         <dd>{{days}} day{{days|pluralize}}</dd>
         {% else %}

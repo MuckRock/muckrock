@@ -11,8 +11,13 @@ from django.test import RequestFactory, TestCase
 from nose.tools import eq_, ok_
 
 # MuckRock
-from muckrock.factories import AgencyFactory, JurisdictionFactory, UserFactory
+from muckrock.factories import AgencyFactory, UserFactory
 from muckrock.foia.forms import RequestForm
+from muckrock.jurisdiction.factories import (
+    FederalJurisdictionFactory,
+    LocalJurisdictionFactory,
+    StateJurisdictionFactory,
+)
 from muckrock.test_utils import mock_middleware
 
 
@@ -21,9 +26,9 @@ class TestRequestForm(TestCase):
 
     def test_get_jurisdiction(self):
         """Test get_jurisdiction"""
-        usa = JurisdictionFactory(level='f', name='USA')
-        mass = JurisdictionFactory(level='s', name='Massachusetts')
-        boston = JurisdictionFactory(level='l', name='Boston')
+        usa = FederalJurisdictionFactory()
+        mass = StateJurisdictionFactory(parent=usa)
+        boston = LocalJurisdictionFactory(parent=mass)
         form = RequestForm()
         form.cleaned_data = {}
 
@@ -44,7 +49,7 @@ class TestRequestForm(TestCase):
         """Test get_agency"""
         url = reverse('foia-create')
         factory = RequestFactory()
-        usa = JurisdictionFactory(level='f', name='USA')
+        usa = FederalJurisdictionFactory(name='USA')
         fbi = AgencyFactory(name='FBI', jurisdiction=usa)
         white_house = AgencyFactory(name='White House', exempt=True)
         user = UserFactory()

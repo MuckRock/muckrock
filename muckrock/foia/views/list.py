@@ -26,6 +26,7 @@ from furl import furl
 
 # MuckRock
 from muckrock.agency.models import Agency
+from muckrock.crowdsource.forms import CrowdsourceChoiceForm
 from muckrock.foia.filters import (
     AgencyFOIARequestFilterSet,
     FOIARequestFilterSet,
@@ -140,6 +141,10 @@ class RequestList(MRSearchFilterListView):
                 'search_title': self.request.GET.get('search_title')
             }
         )
+        if self.request.user.is_authenticated:
+            context['crowdsource_form'] = CrowdsourceChoiceForm(
+                user=self.request.user
+            )
         if self.request.user.is_authenticated:
             context['saved_searches'] = (
                 FOIASavedSearch.objects.filter(user=self.request.user)
@@ -272,6 +277,7 @@ class RequestList(MRSearchFilterListView):
         return {
             'follow': self._follow,
             'unfollow': self._unfollow,
+            'crowdsource': self._crowdsource,
         }
 
     def _delete(self, request):
@@ -315,6 +321,26 @@ class RequestList(MRSearchFilterListView):
         for foia in foias:
             actstream.actions.unfollow(user, foia)
         return 'Unfollowed requests'
+
+    def _crowdsource(self, foias, user, post):
+        """Extend the embargo on the selected requests"""
+        foias = foias.prefetch_related('communications__files')
+        foias = [f for f in foias if f.has_perm(user, 'view')]
+        form = CrowdsourceChoiceForm(post, user=user)
+        if form.is_valid():
+            crowdsource = form.cleaned_data['crowdsource']
+            if crowdsource is None:
+                return 'No crowdsource selected'
+            for foia in foias:
+                for comm in foia.communications.all():
+                    for file_ in comm.files.all():
+                        if file_.doc_id:
+                            crowdsource.data.create(
+                                url=
+                                'https://www.documentcloud.org/documents/{}.html'.
+                                format(file_.doc_id)
+                            )
+        return 'Files added to assignment'
 
     def get(self, request, *args, **kwargs):
         """Check for loading saved searches"""

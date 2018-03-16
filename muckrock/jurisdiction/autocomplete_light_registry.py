@@ -54,6 +54,17 @@ autocomplete_light.register(
     }
 )
 
+autocomplete_light.register(
+    Jurisdiction,
+    name='FederalStateAutocomplete',
+    choices=Jurisdiction.objects.filter(level__in=('s', 'f'), hidden=False),
+    search_fields=['name', 'aliases'],
+    attrs={
+        'placeholder': 'Jurisdiction name?',
+        'data-autocomplete-minimum-characters': 1
+    }
+)
+
 
 class JurisdictionAutocomplete(autocomplete_light.AutocompleteModelBase):
     """Allows autocompletes against all visible jurisdictions in database"""

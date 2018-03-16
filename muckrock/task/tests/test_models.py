@@ -19,6 +19,7 @@ import nose
 from muckrock import factories, task
 from muckrock.communication.models import EmailAddress
 from muckrock.foia.models import FOIANote, FOIARequest
+from muckrock.jurisdiction.factories import StateJurisdictionFactory
 from muckrock.task.factories import FlaggedTaskFactory, ProjectReviewTaskFactory
 from muckrock.task.signals import domain_blacklist
 
@@ -177,7 +178,7 @@ class FlaggedTaskTests(TestCase):
         user = factories.UserFactory()
         foia = factories.FOIARequestFactory()
         agency = factories.AgencyFactory()
-        jurisdiction = factories.JurisdictionFactory()
+        jurisdiction = StateJurisdictionFactory()
         flagged_foia_task = self.task.objects.create(
             user=user, foia=foia, text=text
         )

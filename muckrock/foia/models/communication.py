@@ -113,7 +113,10 @@ class FOIACommunication(models.Model):
 
     def get_absolute_url(self):
         """The url for this object"""
-        return self.foia.get_absolute_url() + ('#comm-%d' % self.pk)
+        if self.foia:
+            return self.foia.get_absolute_url() + ('#comm-%d' % self.pk)
+        else:
+            return ''
 
     def save(self, *args, **kwargs):
         """Remove controls characters from text before saving"""

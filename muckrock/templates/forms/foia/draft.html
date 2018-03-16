@@ -13,97 +13,99 @@
 
 {% block form-form %}
 
-{% if form %}
-<form method="post" class="draft" enctype="multipart/form-data">
-    {% csrf_token %}
+  {% if form %}
+    <form method="post" class="draft" enctype="multipart/form-data">
+      {% csrf_token %}
 
-    <section class="info">
+      <section class="info">
         <summary>From {{ foia.user.get_full_name }} to {{ foia.agency.name }} of {% if foia.jurisdiction.name == 'United States of America' %}the {% endif %}{{ foia.jurisdiction.name }}</summary>
         {{ form.title }}
-    </section>
+      </section>
 
-    <section class="blue communication textbox">
+      <section class="blue communication textbox">
         <header class="textbox__header communication-header">
-            <p class="from">From: {{foia.user.get_full_name}}</p>
-            <div class="actionables">
-                <time datetime="{% now 'c' %}" class="date">{% now 'm/d/Y' %}</time>
-            </div>
+          <p class="from">From: {{foia.user.get_full_name}}</p>
+          <div class="actionables">
+            <time datetime="{% now 'c' %}" class="date">{% now 'm/d/Y' %}</time>
+          </div>
         </header>
         <section class="textbox__section communication-metadata">
-            <p class="small subject">Subject: {{ foia.title }}</p>
+          <p class="small subject">Subject: {{ foia.title }}</p>
         </section>
         <section class="textbox__section communication-body">
-            {{ form.request }}
+          {{ form.request }}
         </section>
-    </section>
+      </section>
 
-    {% if not remaining %}
-    <div class="buy-requests panel">
-        <p>You have no requests credited to your account. You must purchase requests before you can submit your request.</p>
-        <button type="submit" class="success button" form="buy-requests">Buy Requests</button>
-    </div>
-    {% endif %}
+      {% if not remaining %}
+        <div class="buy-requests panel">
+          <p>You have no requests credited to your account. You must purchase requests before you can submit your request.</p>
+          <button type="submit" class="success button" form="buy-requests">Buy Requests</button>
+        </div>
+      {% endif %}
 
-    <div class="bottom">
+      <div class="bottom">
         {% has_perm 'foia.embargo_foiarequest' request.user foia as can_embargo %}
         {% if can_embargo %}
-            {% include 'lib/pattern/field.html' with field=form.embargo %}
+          {% include 'lib/pattern/field.html' with field=form.embargo %}
+        {% else %}
+          <p>This request will be filed publicly. Need to keep your request private? <a href="{% url "accounts" %}">Upgrade to a Pro or Organizational account</a> to embargo your request as long as you need to.</p>
         {% endif %}
 
         <label class="bold">Attachments</label>
         <div id="fine-uploader" class="fine-uploader" data-foia-pk="{{foia.pk}}"></div>
 
         <section class="button-group">
-            <input type="submit"
-                name="submit"
-                value="Save"
-                class="button" />
-            <input type="submit"
-               name="submit"
-               value="Submit"
-               class="primary button"
-               {% if not remaining %}disabled{% endif %}
-            />
-            <input type="submit"
-                   name="submit"
-                   value="Delete"
-                   class="failure button" />
+          <input type="submit"
+                 name="submit"
+                 value="Save"
+                 class="button" />
+          <input type="submit"
+                 name="submit"
+                 value="Submit"
+                 class="primary button"
+                 {% if not remaining %}disabled{% endif %}
+                 />
+          <input type="submit"
+                 name="submit"
+                 value="Delete"
+                 class="failure button" />
 
         </section>
-    </div>
+      </div>
 
-    <div class="modal" id="email-warning-modal" data-foias-filed="{{foias_filed}}">
+      <div class="modal" id="email-warning-modal" data-foias-filed="{{foias_filed}}">
         <p>Hi! It looks like you included your email address this in your request. When you file with MuckRock, we generate a unique email and physical address for every request to keep things organized. We include that information in what we send to the agency, so no need to add your contact information on this form. If you're including an email address to help the agency search for responsive documents, simple hit "Submit." If you'd like to edit the body of your request, click "Revise Request." You'll only see this message until you've submitted your first request.<p>
         <footer>
-            <button type="submit" value="Submit" class="primary button">Submit</button>
-            <span class="close-modal button">Revise Request</span>
+          <button type="submit" value="Submit" class="primary button">Submit</button>
+          <span class="close-modal button">Revise Request</span>
         </footer>
-    </div>
+      </div>
 
-</form>
-{% if not remaining %}
-<form action="{% url 'acct-buy-requests' username=request.user.username %}?next={{ foia.get_absolute_url }}" method="POST" class="stripe-checkout" id="buy-requests">
-    {% csrf_token %}
-    <input type="hidden" name="stripe_token" value="" />
-    <input type="hidden" name="stripe_pk" value="{{ stripe_pk }}" />
-    <input type="hidden" name="stripe_image" value="{% static 'icons/logo.png' %}" />
-    <input type="hidden" name="stripe_email" value="{{request.user.email}}" />
-    <input type="hidden" name="stripe_label" value="Buy" />
-    {% if request.user.is_authenticated %}
-    <input type="hidden" name="stripe_description" value="{{request.user.profile.bundled_requests}} requests ($20.00)" />
-    {% else %}
-    <input type="hidden" name="stripe_description" value="4 requests ($20.00)" />
+    </form>
+    {% if not remaining %}
+      <form action="{% url 'acct-buy-requests' username=request.user.username %}?next={{ foia.get_absolute_url }}" method="POST" class="stripe-checkout" id="buy-requests">
+        {% csrf_token %}
+        <input type="hidden" name="stripe_token" value="" />
+        <input type="hidden" name="stripe_pk" value="{{ stripe_pk }}" />
+        <input type="hidden" name="stripe_image" value="{% static 'icons/logo.png' %}" />
+        <input type="hidden" name="stripe_email" value="{{request.user.email}}" />
+        <input type="hidden" name="stripe_label" value="Buy" />
+        {% if request.user.is_authenticated %}
+          <input type="hidden" name="stripe_description" value="{{request.user.profile.bundled_requests}} requests ($20.00)" />
+        {% else %}
+          <input type="hidden" name="stripe_description" value="4 requests ($20.00)" />
+        {% endif %}
+        <input type="hidden" name="stripe_bitcoin" value="true" />
+        <input type="hidden" name="stripe_fee" value="0" />
+        <input type="hidden" name="stripe_amount" value="2000" />
+      </form>
     {% endif %}
-    <input type="hidden" name="stripe_bitcoin" value="true" />
-    <input type="hidden" name="stripe_fee" value="0" />
-    <input type="hidden" name="stripe_amount" value="2000" />
-</form>
-{% endif %}
-{% endif %}
+  {% endif %}
 
 {% endblock form-form %}
 
 {% block scripts %}
-    {% include 'lib/component/fine-uploader.html' %}
-    <script src="https://checkout.stripe.com/checkout.js" type="text/javascript"></script>
+  {% include 'lib/component/fine-uploader.html' %}
+  <script src="https://checkout.stripe.com/checkout.js" type="text/javascript"></script>
 {% endblock scripts %}

@@ -1,0 +1,119 @@
+<div class="explore__section jurisdiction-explore">
+  <div class="place-map top-map">
+    <h2>Average Response Time</h2>
+    <p>
+      Governments fulfilling requests for public records have a reputation for being slow, but how slow can vary widely based on state, agency, and the complexity of the request. Below is the average number of days for agencies to complete requests, updated in real time based on requests filed and tracked through MuckRock. Note that these are mean averages — a few outliers can make a big difference in states with fewer requests. States in green are the fastest at under 30 days; agencies in yellow respond, on average, within 30 to 60 days; and red agencies take more than  60 days to respond.
+    </p>
+    {% for row in state_map %}
+        {% for state in row %}
+          {% if state %}
+            {% with avg=state.average_response_time %}
+              <a href="{{ state.get_absolute_url }}"
+                 class="cell state
+                 {% if avg < 30 %}
+                   yes
+                 {% elif avg < 60 %}
+                   maybe
+                 {% else %}
+                   no
+                 {% endif %}
+                 ">
+                 <div class="state-content">
+                   <div class="table">
+                     <div class="table-cell">
+                       <div class="avg-response-time">{{ avg }}</div>
+                       <div class="abbrev">{{ state.abbrev }}</div>
+                     </div>
+                   </div>
+                 </div>
+              </a>
+            {% endwith %}
+          {% else %}
+            <div class="cell">
+              <div class="state-content">
+                <div class="table">
+                  <div class="table-cell">
+                    &nbsp;
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+    {% endfor %}
+  </div>
+
+  <div class="small-maps grid__row">
+    <div class="grid__column half">
+      <div class="place-map">
+        <h2>Is there a fixed time in which the agency needs to respond?</h2>
+        <p>
+          Most states specify a number of days that its governments have to respond to a public records request. While these deadlines are often missed, this element of the law is useful for reminding agencies that a legal clock is ticking. Some states interpret these deadlines as the deadline for an initial response, while others use it as a deadline for a final response, often with the ability to extend the deadline for complex requests.
+        </p>
+        {% include "jurisdiction/map.html" with stat="days" %}
+      </div>
+      <div class="place-map">
+        <h2>Do public record laws apply to the executive branch?</h2>
+        <p>
+        In almost every state, public records laws apply to the governor's office, although many states offer special carve outs for the executive. At the federal level, while the White House is exempt from the Freedom of Information Act, (FOIA) it is subject to the <a href="https://www.muckrock.com/news/archives/2015/feb/16/what-know-your-file-presidential-records/">Presidential Records Act</a>, which allows disclosure of some records five years after the president leaves office.
+        </p>
+        {% include "jurisdiction/map.html" with stat="cover_executive" %}
+      </div>
+      <div class="place-map">
+        <h2>Do public record laws apply to the legislative branch?</h2>
+        <p>
+          While many states offer some access to legislative records, that  can vary widely. In some cases, only administrative records are subject to disclosure, while other states allow broad access to communications with constituents and other records.
+        </p>
+        {% include "jurisdiction/map.html" with stat="cover_legislative" %}
+      </div>
+    </div>
+    <div class="grid__column half">
+      <div class="place-map">
+        <h2>Which states allow blocking out-of-state requestors?</h2>
+        <p>
+          Citing the Supreme Court precedent McBurney v. Young, a number of states can block requests from out of staters. Many  agencies in these states do continue to process requests from non-residents. The citizenship requirement can be an additional barrier to access, even for resident requesters who might prefer to maintain their privacy or who don't have access to identification.
+        </p>
+        {% include "jurisdiction/map.html" with stat="requires_proxy" reverse=True %}
+      </div>
+      <div class="place-map">
+        <h2>Do public records laws apply to the judiciary?</h2>
+        <p>
+          Often courts are exempt from traditional public records laws, and instead provide access to legal filings and other judicial records via their own access rules and systems. Even in those states where the judiciary is subject to public records requests, there are often wide exemptions for judges' own records .
+        </p>
+        {% include "jurisdiction/map.html" with stat="cover_judicial" %}
+      </div>
+      <div class="place-map">
+        <h2>How many exemptions are in MuckRock's database for each jurisdiction?</h2>
+        <p>
+          MuckRock has a growing database of public records exemptions, details on how they should and should not be applied, and sample language to craft an appeal. This database is not comprehensive. A jurisdiction may have more exemptions than are actually written into law.
+        </p>
+        {% for row in state_map %}
+          {% for state in row %}
+            {% if state %}
+              <a href="{% url "exemption-list" %}?jurisdiction={{ state.pk }}" class="cell state yes">
+                <div class="state-content">
+                  <div class="table">
+                    <div class="table-cell">
+                      <div>{{ state.exemption_count }}</div>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            {% else %}
+              <div class="cell">
+                <div class="state-content">
+                  <div class="table">
+                    <div class="table-cell">
+                      &nbsp;
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <p class="credits">Michael Andre, Gurman Bhatia, JPat Brown, Jabril Faraj, Maddy Kennedy, Mitchell Kotler, Beryl Lipton, Edgar Mendez, Michael Morisy, Devi Shastri, Theresa Soley, Miranda Spivack, and Curtis Waltman contributed to the research, fact checking, design and implementation of this database. For any updates, additions or corrections, please send an email to info@muckrock.com. It was funded in part by the Fund for Investigative Journalism, Marquette’s O’Brien Fellowship in Public Service Journalism, and the Arnold Foundation.</p>
+</div>

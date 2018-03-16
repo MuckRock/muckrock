@@ -72,7 +72,7 @@ class TestFOIARequestUnit(TestCase):
     fixtures = [
         'holidays.json', 'jurisdictions.json', 'agency_types.json',
         'test_users.json', 'test_agencies.json', 'test_profiles.json',
-        'test_foiarequests.json', 'test_foiacommunications.json'
+        'test_foiarequests.json', 'test_foiacommunications.json', 'laws.json'
     ]
 
     def setUp(self):
@@ -209,7 +209,7 @@ class TestFOIARequestUnit(TestCase):
             date_submitted=datetime.date.today(),
             status='processed',
             jurisdiction__level='s',
-            jurisdiction__days=10,
+            jurisdiction__law__days=10,
         )
         FOIACommunicationFactory(
             foia=foia,
@@ -277,7 +277,7 @@ class TestFOIAFunctional(TestCase):
     fixtures = [
         'holidays.json', 'jurisdictions.json', 'agency_types.json',
         'test_users.json', 'test_profiles.json', 'test_foiarequests.json',
-        'test_foiacommunications.json', 'test_agencies.json'
+        'test_foiacommunications.json', 'test_agencies.json', 'laws.json'
     ]
 
     def setUp(self):
@@ -540,7 +540,7 @@ class TestFOIAIntegration(TestCase):
     fixtures = [
         'holidays.json', 'jurisdictions.json', 'agency_types.json',
         'test_users.json', 'test_agencies.json', 'test_profiles.json',
-        'test_foiarequests.json', 'test_foiacommunications.json'
+        'test_foiarequests.json', 'test_foiacommunications.json', 'laws.json'
     ]
 
     def setUp(self):
@@ -597,7 +597,7 @@ class TestFOIAIntegration(TestCase):
                 foia.date_due,
                 cal.business_days_from(
                     datetime.date(2010, 2, 1),
-                    jurisdiction.get_days(),
+                    jurisdiction.days,
                 )
             )
             nose.tools.eq_(

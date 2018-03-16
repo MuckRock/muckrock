@@ -272,6 +272,7 @@ $('document').ready(function(){
     $("#request-actions .project-form").hide();
     $("#request-actions .tag-form").hide();
     $("#request-actions .share-form").hide();
+    $("#request-actions .crowdsource-form").hide();
     $("#request-actions .help").text($(this).find(":selected").data("help") || "");
     switch($(this).val()) {
       case "project":
@@ -282,6 +283,9 @@ $('document').ready(function(){
         break;
       case "share":
         $("#request-actions .share-form").show();
+        break;
+      case "crowdsource":
+        $("#request-actions .crowdsource-form").show();
         break;
     }
   });

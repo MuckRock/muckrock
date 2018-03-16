@@ -1,22 +1,22 @@
 {% autoescape off%}
 To Whom It May Concern:
 
-{{ jurisdiction.get_intro }}
+Pursuant to the {{ jurisdiction.get_law_name }}, I hereby request the following records:
 
 {% block content %}{{document_request}}{% endblock %}
-{% if jurisdiction.get_waiver %}
-{{ jurisdiction.get_waiver }}
+{% if jurisdiction.waiver %}
+{{ jurisdiction.waiver }}
 {% else %}
 The requested documents will be made available to the general public, and this request is not being made for commercial purposes.
 {% endif %}
 In the event that there are fees, I would be grateful if you would inform me of the total charges in advance of fulfilling my request. I would prefer the request filled electronically, by e-mail attachment if available or CD-ROM if not.
-{% if jurisdiction.get_days %}
-Thank you in advance for your anticipated cooperation in this matter. I look forward to receiving your response to this request within {{ jurisdiction.get_days }} {{ jurisdiction.get_day_type }} days, as the statute requires.
+{% if jurisdiction.days %}
+Thank you in advance for your anticipated cooperation in this matter. I look forward to receiving your response to this request within {{ jurisdiction.days }} {{ jurisdiction.get_day_type }} days, as the statute requires.
 {% else %}
 Thank you in advance for your anticipated cooperation in this matter. I would request your response within ten (10) business days.
 {% endif %}
 {% if proxy %}
-Please note that I am a citizen of {{ jurisdiction.get_state }}, and am using MuckRock's services to help manage and track my request.
+Please note that I am a citizen of {{ jurisdiction.legal.name }}, and am using MuckRock's services to help manage and track my request.
 {% endif %}
 Sincerely,
 

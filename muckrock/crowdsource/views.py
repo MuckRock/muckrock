@@ -4,7 +4,8 @@
 # Django
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.http import Http404, StreamingHttpResponse
 from django.shortcuts import redirect
 from django.utils.text import slugify
@@ -12,6 +13,7 @@ from django.views.generic import CreateView, DetailView, FormView, UpdateView
 from django.views.generic.detail import BaseDetailView
 
 # Standard Library
+from datetime import date
 from itertools import chain
 
 # Third Party
@@ -87,7 +89,13 @@ class CrowdsourceDetailView(DetailView):
             ),
             content_type='text/csv',
         )
-        response['Content-Disposition'] = 'attachment; filename="requests.csv"'
+        response['Content-Disposition'] = (
+            'attachment; '
+            'filename="results-{}-{}.csv"'.format(
+                self.get_object().slug,
+                date.today().isoformat(),
+            )
+        )
         return response
 
     def create_dataset(self):
@@ -305,16 +313,12 @@ class CrowdsourceListView(MROrderedListView):
         return queryset.get_viewable(self.request.user)
 
 
-@class_view_decorator(
-    user_passes_test(
-        lambda u: u.is_staff or (u.is_authenticated and u.profile.experimental)
-    )
-)
-class CrowdsourceCreateView(CreateView):
+class CrowdsourceCreateView(PermissionRequiredMixin, CreateView):
     """Create a crowdsource"""
     model = Crowdsource
     form_class = CrowdsourceForm
     template_name = 'crowdsource/create.html'
+    permission_required = 'crowdsource.add_crowdsource'
 
     def get_context_data(self, **kwargs):
         """Add the data formset to the context"""
@@ -322,7 +326,11 @@ class CrowdsourceCreateView(CreateView):
         if self.request.POST:
             data['data_formset'] = CrowdsourceDataFormset(self.request.POST)
         else:
-            data['data_formset'] = CrowdsourceDataFormset()
+            data['data_formset'] = CrowdsourceDataFormset(
+                initial=[{
+                    'url': self.request.GET.get('initial_data')
+                }]
+            )
         return data
 
     def form_valid(self, form):
@@ -344,7 +352,9 @@ class CrowdsourceCreateView(CreateView):
         form.process_data_csv(crowdsource)
         if formset.is_valid():
             formset.instance = crowdsource
-            formset.save()
+            formset.save(
+                doccloud_each_page=form.cleaned_data['doccloud_each_page']
+            )
         messages.success(self.request, msg)
         return redirect(crowdsource)
 
@@ -406,6 +416,8 @@ class CrowdsourceUpdateView(UpdateView):
         crowdsource.create_form(form.cleaned_data['form_json'])
         form.process_data_csv(crowdsource)
         if formset.is_valid():
-            formset.save()
+            formset.save(
+                doccloud_each_page=form.cleaned_data['doccloud_each_page']
+            )
         messages.success(self.request, msg)
         return redirect(crowdsource)

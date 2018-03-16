@@ -155,13 +155,11 @@ $('document').ready(function(){
     };
   }
 
-  $('button[name="resolve"]').click(ajaxSubmit('resolve'));
-  $('button[name="reject"]').click(ajaxSubmit('reject'));
-  $('button[name="spam"]').click(ajaxSubmit('spam'));
-  $('button[name="defer"]').click(ajaxSubmit('defer'));
-  $('button[name="approve"]').click(ajaxSubmit('approve'));
-  $('button[name="save"]').click(ajaxSubmit('save'));
-  $('button[name="move"]').click(ajaxSubmit('move'));
+  var actions = ['resolve', 'reject', 'spam', 'defer',
+    'approve', 'save', 'move', 'no_mail'];
+  for (var i = 0; i < actions.length; i++) {
+    $('button[name="'+ actions[i] +'"]').click(ajaxSubmit(actions[i]));
+  }
 
   var checkboxes = $('.task header').find(':checkbox');
   var batchedButtons = $('#batched button').not('#collapse-all');
