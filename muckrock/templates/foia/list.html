@@ -52,15 +52,24 @@
   <form method="POST" class="toolbar" id="request-actions">
     {% csrf_token %}
     {% block request-actions %}
+      {% has_perm 'crowdsource.add_crowdsource' request.user as can_crowdsource %}
       {% if user.is_authenticated %}
         <p>Select requests below in order to apply a bulk action.</p>
         <select name="action" class="bulk">
           <option value="">---</option>
           <option value="follow" data-help="Receive update notifications on the selected requests.">Follow</option>
           <option value="unfollow" data-help="Stop receiving update notifications on the selected requests.">Unfollow</option>
+          {% if can_crowdsource %}
+            <option value="crowdsource" data-help="Add these requests' files to your assignment">Add files to assignment</option>
+          {% endif %}
         </select>
         <button class="blue button" disabled>Go</button>
         <p class="help"></p>
+        {% if can_crowdsource %}
+          <div class="crowdsource-form">
+            {{ crowdsource_form.crowdsource }}
+          </div>
+        {% endif %}
       {% endif %}
     {% endblock %}
   </form>
