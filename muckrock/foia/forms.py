@@ -148,7 +148,8 @@ class RequestForm(forms.Form):
     def get_agency(self):
         """Get the agency and create a new one if necessary"""
         agency = self.cleaned_data.get('agency')
-        agency_autocomplete = self.request.POST.get('agency-autocomplete')
+        agency_autocomplete = self.request.POST.get('agency-autocomplete', '')
+        agency_autocomplete = agency_autocomplete.strip()
         if agency is None and agency_autocomplete:
             # See if the passed in agency name matches a valid known agency
             agency = (
