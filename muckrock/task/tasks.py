@@ -16,7 +16,7 @@ from cStringIO import StringIO
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 from fpdf import FPDF
-from PyPDF2 import PdfFileMerger
+from PyPDF2 import PdfFileMerger, PdfFileReader
 from PyPDF2.utils import PdfReadError
 
 # MuckRock
@@ -100,7 +100,7 @@ def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
         single_pdf.seek(0)
         bulk_merger.append(single_pdf)
         # ensure we align for double sided printing
-        if pdf.page % 2 == 1:
+        if PdfFileReader(single_pdf).getNumPages() % 2 == 1:
             blank.seek(0)
             bulk_merger.append(blank)
 
