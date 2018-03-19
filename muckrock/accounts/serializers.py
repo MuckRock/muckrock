@@ -45,8 +45,10 @@ class StatisticsSerializer(serializers.ModelSerializer):
     def __init__(self, *args, **kwargs):
         # pylint: disable=super-on-old-class
         super(StatisticsSerializer, self).__init__(*args, **kwargs)
-        if 'request' not in self.context or not self.context['request'
-                                                             ].user.is_staff:
+        if (
+            'request' not in self.context
+            or not self.context['request'].user.is_staff
+        ):
             staff_only = (
                 'pro_users',
                 'pro_user_names',
@@ -82,6 +84,8 @@ class StatisticsSerializer(serializers.ModelSerializer):
                 'total_unresolved_payment_tasks',
                 'total_crowdfundpayment_tasks',
                 'total_unresolved_crowdfundpayment_tasks',
+                'total_reviewagency_tasks',
+                'total_unresolved_reviewagency_tasks',
                 'daily_robot_response_tasks',
                 'admin_notes',
                 'total_active_org_members',
@@ -131,6 +135,12 @@ class StatisticsSerializer(serializers.ModelSerializer):
                 'total_invoked_exemptions',
                 'total_example_appeals',
                 'requests_processing_days',
+                'total_crowdsources',
+                'total_draft_crowdsources',
+                'total_open_crowdsources',
+                'total_close_crowdsources',
+                'num_crowdsource_responded_users',
+                'total_crowdsource_responses',
             )
             for field in staff_only:
                 self.fields.pop(field)
@@ -192,6 +202,8 @@ class StatisticsSerializer(serializers.ModelSerializer):
             'total_unresolved_payment_tasks',
             'total_crowdfundpayment_tasks',
             'total_unresolved_crowdfundpayment_tasks',
+            'total_reviewagency_tasks',
+            'total_unresolved_reviewagency_tasks',
             'daily_robot_response_tasks',
             'public_notes',
             'admin_notes',
@@ -241,6 +253,12 @@ class StatisticsSerializer(serializers.ModelSerializer):
             'total_exemptions',
             'total_invoked_exemptions',
             'total_example_appeals',
+            'total_crowdsources',
+            'total_draft_crowdsources',
+            'total_open_crowdsources',
+            'total_close_crowdsources',
+            'num_crowdsource_responded_users',
+            'total_crowdsource_responses',
             'machine_requests',
             'machine_requests_success',
             'machine_requests_denied',

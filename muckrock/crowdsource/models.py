@@ -183,6 +183,9 @@ class Crowdsource(models.Model):
             return None
         return len(self.data.all()) * self.data_limit
 
+    class Meta:
+        verbose_name = 'assignment'
+
 
 class CrowdsourceDataQuerySet(models.QuerySet):
     """Object manager for crowdsource data"""
@@ -221,6 +224,9 @@ class CrowdsourceData(models.Model):
                 '<iframe src="{}" width="100%" height="400px"></iframe>',
                 self.url,
             )
+
+    class Meta:
+        verbose_name = 'assignment data'
 
 
 class CrowdsourceField(models.Model):
@@ -270,6 +276,7 @@ class CrowdsourceField(models.Model):
         return fields.FIELD_DICT[self.type]
 
     class Meta:
+        verbose_name = 'assignment field'
         ordering = ('order',)
         unique_together = (
             ('crowdsource', 'label'),
@@ -289,6 +296,7 @@ class CrowdsourceChoice(models.Model):
         return self.choice
 
     class Meta:
+        verbose_name = 'assignment choice'
         ordering = ('order',)
         unique_together = (
             ('field', 'choice'),
@@ -357,6 +365,9 @@ class CrowdsourceResponse(models.Model):
             except CrowdsourceField.DoesNotExist:
                 pass
 
+    class Meta:
+        verbose_name = 'assignment response'
+
 
 class CrowdsourceValue(models.Model):
     """A field value for a given response"""
@@ -367,3 +378,6 @@ class CrowdsourceValue(models.Model):
 
     def __unicode__(self):
         return self.value
+
+    class Meta:
+        verbose_name = 'assignment value'

@@ -244,3 +244,19 @@ class CrowdsourceDataFormset(CrowdsourceDataFormsetBase):
                 if commit:
                     instance.save()
         return return_instances
+
+
+class CrowdsourceChoiceForm(forms.Form):
+    """Form to choose a crowdsource"""
+    crowdsource = autocomplete_light.ModelChoiceField(
+        'CrowdsourceDraftAutocomplete',
+        queryset=Crowdsource.objects.none(),
+        required=False,
+    )
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user')
+        super(CrowdsourceChoiceForm, self).__init__(*args, **kwargs)
+        self.fields['crowdsource'].queryset = (
+            Crowdsource.objects.filter(status='draft', user=user)
+        )

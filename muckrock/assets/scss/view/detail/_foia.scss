@@ -514,7 +514,7 @@ $request-breakpoint: 768px;
 }
 
 #request-actions {
-  .project-form, .tag-form, .share-form {
+  .project-form, .tag-form, .share-form, .crowdsource-form {
     display: none;
   }
   #id_tags {
@@ -523,7 +523,21 @@ $request-breakpoint: 768px;
   #id_users-wrapper {
     vertical-align: top;
   }
-  #id_projects-wrapper, #id_users-wrapper, #id_projects-autocomplete, #id_users-autocomplete {
+  #id_projects-wrapper, #id_users-wrapper, #id_projects-autocomplete, #id_users-autocomplete, #id_crowdsource-wrapper, #id_crowdsource-autocomplete {
     width: 300px;
+  }
+}
+
+.contact-info  {
+  .see-where {
+    font-style: italic;
+  }
+  .info {
+    display: none;
+    margin-bottom: 0;
+  }
+  .form {
+    display: none;
+    max-width: 400px;
   }
 }

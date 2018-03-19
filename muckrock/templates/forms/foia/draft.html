@@ -48,10 +48,17 @@
         {% has_perm 'foia.embargo_foiarequest' request.user foia as can_embargo %}
         {% if can_embargo %}
           {% include 'lib/pattern/field.html' with field=form.embargo %}
+        {% else %}
+          <p>This request will be filed publicly. Need to keep your request private? <a href="{% url "accounts" %}">Upgrade to a Pro or Organizational account</a> to embargo your request as long as you need to.</p>
         {% endif %}
 
         <label class="bold">Attachments</label>
         <div id="fine-uploader" class="fine-uploader" data-foia-pk="{{foia.pk}}"></div>
+
+        <div class="contact-info">
+          <a class="see-where" href="#">See where this request will be sent</a>
+          {% include "lib/pattern/contact_info.html" with portal=contact_info.portal email=contact_info.email cc_emails=contact_info.cc_emails fax=contact_info.fax address=contact_info.address subject="request" is_advanced=request.user.profile.is_advanced form=contact_info_form portal_data=contact_info.portal only %}
+        </div>
 
         <section class="button-group">
           <input type="submit"

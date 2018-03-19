@@ -17,11 +17,13 @@ from datetime import date, timedelta
 import phonenumbers
 from autocomplete_light import shortcuts as autocomplete_light
 from autocomplete_light.contrib.taggit_field import TaggitField
+from phonenumber_field.formfields import PhoneNumberField
 
 # MuckRock
 from muckrock.accounts.utils import mailchimp_subscribe, miniregister
 from muckrock.agency.models import Agency
 from muckrock.communication.models import EmailAddress, PhoneNumber
+from muckrock.fields import EmptyLastModelChoiceField
 from muckrock.foia.models import (
     STATUS,
     FOIACommunication,
@@ -492,20 +494,24 @@ class SendViaForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         initial = kwargs.pop('initial', {})
-        if self.foia:
-            if self.foia.portal:
-                via = 'portal'
-            elif self.foia.email:
-                via = 'email'
-            elif self.foia.fax:
-                via = 'fax'
-            else:
-                via = 'snail'
-            initial.update({
-                'via': via,
-                'email': self.foia.email,
-                'fax': self.foia.fax,
-            })
+        contact_info = kwargs.pop('contact_info', {})
+        for addr in ('portal', 'email', 'fax'):
+            if (
+                contact_info.get(addr)
+                or (self.foia and getattr(self.foia, addr))
+            ):
+                via = addr
+                break
+        else:
+            via = 'snail'
+        initial.update({
+            'via':
+                via,
+            'email':
+                contact_info.get('email') or (self.foia and self.foia.email),
+            'fax':
+                contact_info.get('fax') or (self.foia and self.foia.fax),
+        })
         super(SendViaForm, self).__init__(*args, initial=initial, **kwargs)
         # create auto complete fields for creating new instances
         # these are created here since they have invalid identifier names
@@ -533,14 +539,9 @@ class SendViaForm(forms.Form):
         corresponding information is provided"""
 
         cleaned_data = super(SendViaForm, self).clean()
-        if cleaned_data['via'] == 'portal' and not self.foia.agency.portal:
-            self.add_error(
-                'via',
-                'This request\'s agency does not use a portal',
-            )
-        elif cleaned_data['via'] == 'email' and not cleaned_data['email']:
+        if cleaned_data.get('via') == 'email' and not cleaned_data['email']:
             self._clean_email(cleaned_data)
-        elif cleaned_data['via'] == 'fax' and not cleaned_data['fax']:
+        elif cleaned_data.get('via') == 'fax' and not cleaned_data['fax']:
             self._clean_fax(cleaned_data)
         return cleaned_data
 
@@ -763,3 +764,67 @@ class SaveSearchFormHandler(object):
             )
 
         return saved_search
+
+
+class ContactInfoForm(SendViaForm):
+    """A form to let advanced users control where the communication will be sent"""
+
+    email = EmptyLastModelChoiceField(
+        queryset=EmailAddress.objects.none(),
+        required=False,
+        empty_label='Other...',
+    )
+    other_email = forms.EmailField(required=False)
+    fax = EmptyLastModelChoiceField(
+        queryset=PhoneNumber.objects.none(),
+        required=False,
+        empty_label='Other...',
+    )
+    other_fax = PhoneNumberField(required=False)
+
+    def __init__(self, *args, **kwargs):
+        self.foia = kwargs.pop('foia')
+        super(ContactInfoForm, self).__init__(*args, **kwargs)
+        self.fields['email'].queryset = self.foia.agency.emails.filter(
+            status='good',
+        ).exclude(email__endswith='muckrock.com')
+        self.fields['fax'].queryset = self.foia.agency.phones.filter(
+            status='good',
+            type='fax',
+        )
+
+    def clean(self):
+        """Make other fields required if chosen"""
+        if (
+            self.cleaned_data.get('via') == 'email'
+            and not self.cleaned_data.get('email')
+            and not self.cleaned_data.get('other_email')
+        ):
+            self.add_error(
+                'other_email',
+                'Please enter an email address',
+            )
+        if (
+            self.cleaned_data.get('via') == 'fax'
+            and not self.cleaned_data.get('fax')
+            and not self.cleaned_data.get('other_fax')
+        ):
+            self.add_error(
+                'other_fax',
+                'Please enter a fax number',
+            )
+
+    def clean_other_email(self):
+        """Turn other email into an Email Address object"""
+        return EmailAddress.objects.fetch(self.cleaned_data['other_email'])
+
+    def clean_other_fax(self):
+        """Turn other fax into a Phone Number object"""
+        if self.cleaned_data['other_fax']:
+            fax, _ = PhoneNumber.objects.update_or_create(
+                number=self.cleaned_data['other_fax'],
+                defaults={'type': 'fax'},
+            )
+            return fax
+        else:
+            return self.cleaned_data['other_fax']

@@ -417,7 +417,7 @@ class TestFOIAFunctional(TestCase):
     def test_auth_views(self):
         """Test private views while logged in"""
 
-        foia = FOIARequest.objects.get(pk=1)
+        foia = FOIARequestFactory(status='started')
         self.client.login(username='adam', password='abc')
 
         # get authenticated pages
@@ -516,10 +516,9 @@ class TestFOIAFunctional(TestCase):
     def test_action_views(self):
         """Test action views"""
 
-        foia = FOIARequest.objects.get(pk=1)
         self.client.login(username='adam', password='abc')
 
-        foia = FOIARequest.objects.get(pk=18)
+        foia = FOIARequestFactory(status='payment')
         get_allowed(
             self.client,
             reverse(

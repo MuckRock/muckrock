@@ -1,8 +1,10 @@
 {% extends 'foia/list.html' %}
 {% load tags %}
 {% load foia_tags %}
+{% load rules %}
 
 {% block request-actions %}
+  {% has_perm 'crowdsource.add_crowdsource' request.user as can_crowdsource %}
   <p>Select requests below in order to apply a bulk action.</p>
   <select name="action" class="bulk">
     <option value="">---</option>
@@ -18,6 +20,9 @@
     <option value="share" data-help="Give view or edit permissions to the selected users for the selected requests.">Share</option>
     <option value="autofollowup-on" data-help="Turn autofollowups on for the selected requests.">Turn on Autofollowups</option>
     <option value="autofollowup-off" data-help="Turn autofollowups off for the selected requests.">Turn off Autofollowups</option>
+    {% if can_crowdsource %}
+      <option value="crowdsource" data-help="Add these requests' files to your assignment">Add files to assignment</option>
+    {% endif %}
   </select>
   <button class="blue button" disabled>Go</button>
   <p class="help"></p>
@@ -31,6 +36,11 @@
     {{ share_form.users }}
     {{ share_form.access }}
   </div>
+  {% if can_crowdsource %}
+    <div class="crowdsource-form">
+      {{ crowdsource_form.crowdsource }}
+    </div>
+  {% endif %}
 {% endblock %}
 
 {% block list-table-head %}
