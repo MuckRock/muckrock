@@ -37,8 +37,10 @@ from muckrock.foia.forms import (
     FOIAAccessForm,
     FOIAAdminFixForm,
     FOIAAgencyReplyForm,
+    FOIAContactUserForm,
     FOIAEmbargoForm,
     FOIAEstimatedCompletionDateForm,
+    FOIAFlagForm,
     FOIANoteForm,
     ResendForm,
     TrackingNumberForm,
@@ -411,21 +413,29 @@ class Detail(DetailView):
 
     def _flag(self, request, foia):
         """Allow a user to notify us of a problem with the request"""
-        text = request.POST.get('text')
+        form = FOIAFlagForm(request.POST)
         has_perm = foia.has_perm(request.user, 'flag')
-        if has_perm and text:
-            FlaggedTask.objects.create(user=request.user, text=text, foia=foia)
+        if has_perm and form.is_valid():
+            FlaggedTask.objects.create(
+                user=request.user,
+                foia=foia,
+                text=form.cleaned_data['text'],
+                category=form.cleaned_data['category'],
+            )
             messages.success(request, 'Problem succesfully reported')
             new_action(request.user, 'flagged', target=foia)
         return redirect(foia.get_absolute_url() + '#')
 
     def _contact_user(self, request, foia):
         """Allow an admin to message the foia's owner"""
-        text = request.POST.get('text')
-        if request.user.is_staff and text:
+        form = FOIAContactUserForm(request.POST)
+        if (
+            request.user.is_staff and form.is_valid()
+            and form.cleaned_data['text']
+        ):
             context = {
                 'text':
-                    text,
+                    form.cleaned_data['text'],
                 'foia_url':
                     foia.user.profile.wrap_url(foia.get_absolute_url()),
                 'foia_title':

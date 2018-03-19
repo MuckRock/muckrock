@@ -31,6 +31,9 @@
         height: 10em;
         margin-top: $vr/2;
     }
+    select {
+      width: 100%;
+    }
     &.embed textarea {
         text-align: left;
         width: 100%;

@@ -11,17 +11,6 @@ import modal from './modal';
 
 $('.hidden-reply').hide();
 
-function textAreaModal(nextSelector) {
-    modal(nextSelector);
-    $('<textarea name="text"></textarea>').insertBefore(nextSelector.children('button'));
-    $('#modal-overlay').click(function(){
-        nextSelector.children('textarea').remove();
-    });
-    $('.close-modal').click(function(){
-        nextSelector.children('textarea').remove();
-    });
-}
-
 /* eslint-disable no-unused-vars */
 // Let's keep this around for when we need to fetch thumbnails.
 function get_thumbnail(doc_id) {
@@ -197,13 +186,13 @@ $('form.generate-private-link').submit(function(e){
 
 $('.text-area.modal-button').click(function(e){
     e.preventDefault();
-    textAreaModal($(this).next());
+    modal($(this).next());
     return false;
 });
 
 $('.modal-link').click(function(e){
     e.preventDefault();
-    textAreaModal($($(this).data('modal')));
+    modal($($(this).data('modal')));
     return false;
 });
 

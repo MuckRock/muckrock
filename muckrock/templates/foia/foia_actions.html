@@ -1,47 +1,52 @@
 {% if user.is_authenticated %}
-<section class="actions">
+  <section class="actions">
     {% if foia.is_payable %}
-    <div class="payment prompt">
+      <div class="payment prompt">
         <p>This request requires a payment{% if foia.price %} of ${{foia.price|floatformat:2}}{% endif %}.</p>
         <footer class="button-group">
-            <a class="success button" href="#pay">Pay</a>
-            {% if not foia.has_crowdfund %}
+          <a class="success button" href="#pay">Pay</a>
+          {% if not foia.has_crowdfund %}
             <a class="success button" href="#crowdfund">Crowdfund</a>
-            {% endif %}
-            {% if request.user.is_staff %}
-                <a href="#staff-pay" class="green button">Staff Pay</a>
-            {% endif %}
+          {% endif %}
+          {% if request.user.is_staff %}
+            <a href="#staff-pay" class="green button">Staff Pay</a>
+          {% endif %}
         </footer>
-    </div>
+      </div>
     {% endif %}
-    <form method="post">
-    {% csrf_token %}
-    {% for action in user_actions %}
-        {% if action.is_possible %}
-            {% if action.link %}
-                <a href={{ action.link }} class="button{% if action.class_name %} {{ action.class_name }}{% endif %}" title="{{ action.desc }}">{{ action.title }}</a>
-            {% endif %}
-            {% if 'modal' in action.class_name %}
-                <span data-modal="#{{action.action}}-modal" class="text-area modal-button button {% if action.title == 'Get Help' %}failure{% endif %}">{{ action.title }}</span>
-                <div class="modal" id="{{action.action}}-modal">
-                    <h1>{{ action.title }}</h1>
-                    <h2>{{ action.desc }}</h2>
-                    <button type="submit" name="action" value="{{ action.action }}" class="primary button">{{ action.title }}</button>
-                    <span class="close-modal button">Close</span>
-                </div>
-            {% endif %}
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% for action in user_actions %}
+        {% if action.test %}
+          {% if action.link %}
+            <a href="{{ action.link }}" class="button{% if action.class_name %} {{ action.class_name }}{% endif %}" title="{{ action.desc }}">{{ action.title }}</a>
+          {% endif %}
+
+          {% if action.modal %}
+            <span data-modal="#{{action.action}}-modal" class="text-area modal-button button {% if action.class_name %}{{ action.class_name }}{% endif %}">{{ action.title }}</span>
+            <div class="modal" id="{{action.action}}-modal">
+              <h1>{{ action.title }}</h1>
+              <h2>{{ action.desc }}</h2>
+              {% for field in action.form %}
+                {{ field }}
+              {% endfor %}
+              <button type="submit" name="action" value="{{ action.action }}" class="primary button">{{ action.title }}</button>
+              <span class="close-modal button">Close</span>
+            </div>
+          {% endif %}
+
         {% endif %}
-    {% endfor %}
+      {% endfor %}
     </form>
-</section>
+  </section>
 {% else %}
-<div class="signup prompt">
+  <div class="signup prompt">
     <p>MuckRock users can file, duplicate, track, and share public records requests like this one. <a href="/about/muckrock-101">Learn more.</a></p>
     <footer>
-        <a href="{% url 'foia-create' %}" class="primary button">
-            {% include 'lib/component/icon/create-request.svg' %}
-            <span>File a Request</span>
-        </a>
+      <a href="{% url 'foia-create' %}" class="primary button">
+        {% include 'lib/component/icon/create-request.svg' %}
+        <span>File a Request</span>
+      </a>
     </footer>
-</div>
+  </div>
 {% endif %}
