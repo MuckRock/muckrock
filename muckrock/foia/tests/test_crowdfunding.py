@@ -18,7 +18,8 @@ import nose.tools
 
 # MuckRock
 from muckrock.crowdfund.models import Crowdfund
-from muckrock.factories import FOIARequestFactory, UserFactory
+from muckrock.factories import UserFactory
+from muckrock.foia.factories import FOIARequestFactory
 from muckrock.foia.views import crowdfund_request
 from muckrock.test_utils import mock_middleware
 
@@ -169,6 +170,6 @@ class TestFOIACrowdfunding(TestCase):
         )
         self.foia.refresh_from_db()
         nose.tools.ok_(
-            self.foia.has_crowdfund(),
+            self.foia.crowdfund,
             'The crowdfund should be created and associated with the FOIA.'
         )

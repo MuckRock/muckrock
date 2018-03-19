@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  {{ composer.title }}
+{% endblock %}
+
+{% block content %}
+  <div class="foia detail">
+    <h1>{{composer.title}}</h1>
+    <a href="{% url "foia-create" %}?clone={{ composer.pk }}" class="blue button">
+      Clone
+    </a>
+    {% if composer.status == "filed" %}
+      <section class="requests" id="requests">
+        <h2>{{ foias|length }} Request{{ foias|length|pluralize }}</h2>
+        {% for foia in foias %}
+          {% include 'lib/foia.html' with hide_actions=True %}
+        {% endfor %}
+      </section>
+    {% elif composer.status == "submitted" %}
+      <section>
+        <h2>Pending Multi-Request</h2>
+        <h3>Requested Documents</h3>
+        <p>{{ composer.requested_docs }}</p>
+        <h3>Agencies</h3>
+        <ul>
+          {% for agency in composer.agencies.all %}
+            <li>
+              <a href="{% url "agency-detail" slug=agency.slug idx=agency.pk jurisdiction=agency.jurisdiction.slug jidx=agency.jurisdiction.pk %}">
+                {{agency}}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% endif %}
+  </div>
+{% endblock %}

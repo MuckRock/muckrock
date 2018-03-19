@@ -123,6 +123,7 @@ class TestSubscriptions(TestCase):
         expected_request_increase = self.org.monthly_requests + settings.ORG_REQUESTS_PER_SEAT * seat_increase
         num_seats = self.org.max_users + seat_increase
         self.org.activate_subscription('test', num_seats)
+        self.org.refresh_from_db()
         eq_(
             self.org.max_users, num_seats,
             'The maximum number of users should be updated.'
@@ -157,11 +158,8 @@ class TestSubscriptions(TestCase):
         self.org.owner = pro.user
         self.org.activate_subscription('test', self.org.max_users)
         pro.refresh_from_db()
-        eq_(pro.acct_type, 'basic', 'The pro account should be downgraded.')
-        eq_(
-            pro.subscription_id, mock_subscription.id,
-            'The subscription should be changed.'
-        )
+        eq_(pro.acct_type, 'basic')
+        eq_(pro.subscription_id, mock_subscription.id)
 
     @nose.tools.raises(ValueError)
     def test_activate_min_seats(self):
@@ -193,35 +191,16 @@ class TestSubscriptions(TestCase):
         expected_quantity = expected_cost_increase / 100
         num_seats = self.org.max_users + seat_increase
         self.org.update_subscription(num_seats)
-        eq_(
-            self.org.monthly_cost, expected_cost_increase,
-            'The monthly cost should be updated.'
-        )
-        eq_(
-            self.org.monthly_requests, expected_request_increase,
-            'The monthly requests should be updated.'
-        )
-        eq_(
-            self.org.num_requests, expected_request_count,
-            'The current request count should be increased.'
-        )
-        eq_(
-            self.org.max_users, num_seats,
-            'The maximum number of users should be updated.'
-        )
-        eq_(
-            mock_subscription.quantity, expected_quantity,
-            'The subscription quantity should be based on the monthly cost.'
-        )
-        eq_(
-            self.org.stripe_id, mock_subscription.id,
-            'The subscription ID should be saved to the organization.'
-        )
-        eq_(
-            self.org.owner.profile.subscription_id, mock_subscription.id,
-            'The subscription ID should also be saved to the user.'
-        )
-        ok_(self.org.active, 'The org should be set to an active state.')
+        self.org.refresh_from_db()
+        self.org.owner.profile.refresh_from_db()
+        eq_(self.org.monthly_cost, expected_cost_increase)
+        eq_(self.org.monthly_requests, expected_request_increase)
+        eq_(self.org.num_requests, expected_request_count)
+        eq_(self.org.max_users, num_seats)
+        eq_(mock_subscription.quantity, expected_quantity)
+        eq_(self.org.stripe_id, mock_subscription.id)
+        eq_(self.org.owner.profile.subscription_id, mock_subscription.id)
+        ok_(self.org.active)
 
     @nose.tools.raises(ValueError)
     def test_update_min_seats(self):

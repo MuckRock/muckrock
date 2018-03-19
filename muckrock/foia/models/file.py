@@ -35,6 +35,7 @@ class FOIAFile(models.Model):
     source = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
     # for doc cloud only
+    # XXX is access really needed?
     access = models.CharField(
         max_length=12,
         default='public',
@@ -141,6 +142,7 @@ class FOIAFile(models.Model):
         app_label = 'foia'
 
 
+# This needs to stick around for migration purposes
 def attachment_path(instance, filename):
     """Generate path for attachment file"""
     return 'outbound_attachments/%s/%d/%s' % (
@@ -148,34 +150,3 @@ def attachment_path(instance, filename):
         instance.foia.pk,
         filename,
     )
-
-
-class OutboundAttachment(models.Model):
-    """An uploaded file waiting to be sent out"""
-
-    foia = models.ForeignKey(
-        'FOIARequest',
-        related_name='pending_attachments',
-    )
-    user = models.ForeignKey(
-        'auth.User',
-        related_name='pending_attachments',
-    )
-    ffile = models.FileField(
-        upload_to=attachment_path,
-        verbose_name='file',
-        max_length=255,
-    )
-    date_time_stamp = models.DateTimeField()
-    sent = models.BooleanField(default=False)
-
-    def __unicode__(self):
-        return 'Attachment: %s by %s for request %d' % (
-            self.ffile.name,
-            self.user.username,
-            self.foia.pk,
-        )
-
-    def name(self):
-        """Return the basename of the file"""
-        return os.path.basename(self.ffile.name)

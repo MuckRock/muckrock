@@ -12,12 +12,8 @@ from django.test import TestCase
 from nose.tools import eq_, ok_
 
 # MuckRock
-from muckrock.factories import (
-    ArticleFactory,
-    FOIARequestFactory,
-    ProjectFactory,
-    UserFactory,
-)
+from muckrock.factories import ArticleFactory, ProjectFactory, UserFactory
+from muckrock.foia.factories import FOIARequestFactory
 from muckrock.task.models import ProjectReviewTask
 
 test_title = u'Private Prisons'
@@ -148,7 +144,7 @@ class TestProject(TestCase):
         user = UserFactory()
         self.project.contributors.add(user)
         self.project.tags.add(tags)
-        test_request = FOIARequestFactory(user=user)
+        test_request = FOIARequestFactory(composer__user=user)
         test_request.tags.add(tags)
         # since they have the same user and tags, the project should suggest the request
         ok_(test_request in self.project.suggest_requests())

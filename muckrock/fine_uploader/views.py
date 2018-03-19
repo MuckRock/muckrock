@@ -24,18 +24,19 @@ from datetime import date
 from muckrock.dataset.tasks import process_dataset_file
 from muckrock.foia.models import (
     FOIACommunication,
+    FOIAComposer,
     FOIAFile,
     FOIARequest,
-    OutboundAttachment,
+    OutboundComposerAttachment,
+    OutboundRequestAttachment,
 )
 
 
-@login_required
-def success(request):
-    """"File has been succesfully uploaded to a FOIA"""
+def _success(request, model, attachment_model, fk_name):
+    """"File has been succesfully uploaded to a FOIA/composer"""
     try:
-        foia = FOIARequest.objects.get(pk=request.POST.get('foia_id'))
-    except FOIARequest.DoesNotExist:
+        foia = model.objects.get(pk=request.POST.get('id'))
+    except model.DoesNotExist:
         return HttpResponseBadRequest()
     if not foia.has_perm(request.user, 'upload_attachment'):
         return HttpResponseForbidden()
@@ -44,10 +45,10 @@ def success(request):
     if len(request.POST['key']) > 255:
         return HttpResponseBadRequest()
 
-    attachment = OutboundAttachment(
-        foia=foia,
-        user=request.user,
-        date_time_stamp=timezone.now(),
+    attachment = attachment_model(
+        user=request.user, date_time_stamp=timezone.now(), **{
+            fk_name: foia
+        }
     )
     attachment.ffile.name = request.POST['key']
     attachment.save()
@@ -56,10 +57,32 @@ def success(request):
 
 
 @login_required
+def success_request(request):
+    """"File has been succesfully uploaded to a FOIA"""
+    return _success(
+        request,
+        FOIARequest,
+        OutboundRequestAttachment,
+        'foia',
+    )
+
+
+@login_required
+def success_composer(request):
+    """"File has been succesfully uploaded to a composer"""
+    return _success(
+        request,
+        FOIAComposer,
+        OutboundComposerAttachment,
+        'composer',
+    )
+
+
+@login_required
 def success_comm(request):
     """"File has been succesfully uploaded directly to a communication"""
     try:
-        comm = FOIACommunication.objects.get(pk=request.POST.get('comm_id'))
+        comm = FOIACommunication.objects.get(pk=request.POST.get('id'))
     except FOIACommunication.DoesNotExist:
         return HttpResponseBadRequest()
     if not (
@@ -97,12 +120,11 @@ def success_dataset(request):
     return HttpResponse()
 
 
-@login_required
-def session(request):
+def _session(request, model):
     """"Get the initial file list"""
     try:
-        foia = FOIARequest.objects.get(pk=request.GET.get('foia_id'))
-    except FOIARequest.DoesNotExist:
+        foia = model.objects.get(pk=request.GET.get('id'))
+    except model.DoesNotExist:
         return HttpResponseBadRequest()
     if not foia.has_perm(request.user, 'upload_attachment'):
         return HttpResponseForbidden()
@@ -121,22 +143,45 @@ def session(request):
 
 
 @login_required
-def delete(request):
-    """Delete a file"""
+def session_request(request):
+    """Get the initial file list for a request"""
+    return _session(request, FOIARequest)
+
+
+@login_required
+def session_composer(request):
+    """Get the initial file list for a composer"""
+    return _session(request, FOIAComposer)
+
+
+def _delete(request, model):
+    """Delete a pending attachment"""
     try:
-        attm = OutboundAttachment.objects.get(
+        attm = model.objects.get(
             ffile=request.POST.get('key'),
             user=request.user,
             sent=False,
         )
-    except OutboundAttachment.DoesNotExist:
+    except model.DoesNotExist:
         return HttpResponseBadRequest()
 
-    if not attm.foia.has_perm(request.user, 'upload_attachment'):
+    if not attm.attached_to.has_perm(request.user, 'upload_attachment'):
         return HttpResponseForbidden()
 
     attm.delete()
     return HttpResponse()
+
+
+@login_required
+def delete_request(request):
+    """Delete a pending attachment from a FOIA Request"""
+    return _delete(request, OutboundRequestAttachment)
+
+
+@login_required
+def delete_composer(request):
+    """Delete a pending attachment from a FOIA Composer"""
+    return _delete(request, OutboundComposerAttachment)
 
 
 @login_required
@@ -222,22 +267,30 @@ def _key_name_trim(name):
     return name
 
 
-@login_required
-def key_name(request):
+def _key_name(request, model, id_name):
     """Generate the S3 key name from the filename"""
     name = request.POST.get('name')
-    foia_id = request.POST.get('foia_id')
+    attached_id = request.POST.get('id')
     name = _key_name_trim(name)
-    attachment = OutboundAttachment(
-        user=request.user,
-        foia_id=foia_id,
-    )
+    attachment = model(user=request.user, **{id_name: attached_id})
     key = attachment.ffile.field.generate_filename(
         attachment.ffile.instance,
         name,
     )
     key = default_storage.get_available_name(key)
     return JsonResponse({'key': key})
+
+
+@login_required
+def key_name_request(request):
+    """Generate the S3 key name for a FOIA Request"""
+    return _key_name(request, OutboundRequestAttachment, 'foia_id')
+
+
+@login_required
+def key_name_composer(request):
+    """Generate the S3 key name for a FOIA Composer"""
+    return _key_name(request, OutboundComposerAttachment, 'composer_id')
 
 
 @login_required

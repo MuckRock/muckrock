@@ -24,8 +24,13 @@ from rest_framework.response import Response
 
 # MuckRock
 from muckrock.agency.models import Agency
-from muckrock.foia.exceptions import MimeError
-from muckrock.foia.models import FOIACommunication, FOIAFile, FOIARequest
+from muckrock.foia.exceptions import InsufficientRequestsError, MimeError
+from muckrock.foia.models import (
+    FOIACommunication,
+    FOIAComposer,
+    FOIAFile,
+    FOIARequest,
+)
 from muckrock.foia.serializers import (
     FOIACommunicationSerializer,
     FOIAPermissions,
@@ -57,7 +62,9 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
     class Filter(django_filters.FilterSet):
         """API Filter for FOIA Requests"""
         agency = django_filters.NumberFilter(name='agency__id')
-        jurisdiction = django_filters.NumberFilter(name='jurisdiction__id')
+        jurisdiction = django_filters.NumberFilter(
+            name='agency__jurisdiction__id'
+        )
         user = django_filters.CharFilter(name='user__username')
         tags = django_filters.CharFilter(name='tags__name')
 
@@ -76,8 +83,10 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return (
-            FOIARequest.objects.get_viewable(self.request.user)
-            .select_related('user', 'agency', 'jurisdiction').prefetch_related(
+            FOIARequest.objects.get_viewable(self.request.user).select_related(
+                'composer__user',
+                'agency__jurisdiction',
+            ).prefetch_related(
                 'communications__files',
                 'communications__emails',
                 'communications__faxes',
@@ -103,6 +112,78 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
         # pylint: disable=too-many-branches
         data = request.data
         try:
+            # XXX support multiple agencies
+            agencies = Agency.objects.filter(
+                pk=data.get('agency'),
+                status='approved',
+            )
+
+            embargo = data.get('embargo', False)
+            # XXX
+            permanent_embargo = data.get('permanent_embargo', False)
+            if permanent_embargo:
+                embargo = True
+
+            # XXX test validation
+            # XXX check for embargo permissions
+            # XXX support full text
+            # XXX support attachments
+            composer = FOIAComposer.objects.create(
+                user=request.user,
+                title=data['title'],
+                slug=slugify(data['title']) or 'untitled',
+                requested_docs=data['document_request'],
+                embargo=embargo,
+            )
+            composer.agencies.set(agencies)
+            try:
+                composer.submit()
+                return Response(
+                    {
+                        'status': 'FOI Request submitted',
+                        'Location': composer.get_absolute_url()
+                    },
+                    status=http_status.HTTP_201_CREATED,
+                )
+            except InsufficientRequestsError:
+                pass
+                # XXX messages.warning(request, 'You need to purchase more requests')
+
+        except KeyError:
+            return Response(
+                {
+                    'status':
+                        'Missing data - Please supply title, document_request, '
+                        'and agency'
+                },
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+        except Agency.DoesNotExist:
+            return Response(
+                {
+                    'status':
+                        'Bad data - please supply agency as the PK'
+                        ' of existing entities.'
+                },
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+        except (requests.exceptions.RequestException, TypeError, MimeError):
+            # TypeError is thrown if 'attachments' is not a list
+            return Response(
+                {
+                    'status': 'There was a problem with one of your attachments'
+                },
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+
+    def create_(self, request):
+        """Submit new request"""
+        # pylint: disable=too-many-locals
+        # pylint: disable=too-many-return-statements
+        # pylint: disable=too-many-branches
+        # XXX
+        data = request.data
+        try:
             jurisdiction = Jurisdiction.objects.get(
                 pk=int(data['jurisdiction'])
             )
@@ -124,7 +205,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                 requested_docs = data['document_request']
                 template = get_template('text/foia/request.txt')
                 context = {
-                    'document_request': requested_docs,
+                    'requested_docs': requested_docs,
                     'jurisdiction': jurisdiction,
                     'user_name': request.user.get_full_name,
                 }
@@ -137,11 +218,9 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                 user=request.user,
                 status='started',
                 title=title,
-                jurisdiction=jurisdiction,
                 slug=slug,
                 agency=agency,
                 requested_docs=requested_docs,
-                description=requested_docs,
                 embargo=embargo,
                 permanent_embargo=permanent_embargo,
             )

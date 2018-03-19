@@ -19,12 +19,12 @@ from muckrock.accounts import views
 from muckrock.accounts.forms import RegistrationCompletionForm
 from muckrock.factories import (
     AgencyFactory,
-    FOIARequestFactory,
     NotificationFactory,
     OrganizationFactory,
     QuestionFactory,
     UserFactory,
 )
+from muckrock.foia.factories import FOIARequestFactory
 from muckrock.foia.views import Detail as FOIARequestDetail
 from muckrock.organization.models import Organization
 from muckrock.qanda.views import Detail as QuestionDetail

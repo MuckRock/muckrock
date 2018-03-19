@@ -5,7 +5,6 @@ Views for the crowdfund application
 # Django
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.core.urlresolvers import NoReverseMatch, reverse
 from django.db.models import Q
@@ -23,7 +22,8 @@ import stripe
 from djangosecure.decorators import frame_deny_exempt
 
 # MuckRock
-from muckrock.accounts.utils import miniregister, validate_stripe_email
+from muckrock.accounts.mixins import MiniregMixin
+from muckrock.accounts.utils import validate_stripe_email
 from muckrock.crowdfund.forms import CrowdfundPaymentForm
 from muckrock.crowdfund.models import Crowdfund
 
@@ -63,7 +63,7 @@ class CrowdfundListView(ListView):
         return queryset
 
 
-class CrowdfundDetailView(DetailView):
+class CrowdfundDetailView(MiniregMixin, DetailView):
     """
     Presents details about a crowdfunding campaign,
     as well as providing a private endpoint for contributions.
@@ -119,19 +119,14 @@ class CrowdfundDetailView(DetailView):
             # If there is no user but the show and full_name fields are filled in,
             # and a user with that email does not already exists,
             # create the user with our "miniregistration" functionality and then log them in
-            user = request.user if request.user.is_authenticated() else None
+            user = request.user if request.user.is_authenticated else None
             registered = False
             show = payment_form.cleaned_data['show']
             full_name = payment_form.cleaned_data['full_name']
             email_exists = User.objects.filter(email__iexact=email).exists()
             if user is None and show and full_name and not email_exists:
-                user, password = miniregister(full_name, email)
+                user = self.miniregister(full_name, email)
                 registered = True
-                user = authenticate(
-                    username=user.username,
-                    password=password,
-                )
-                login(self.request, user)
             crowdfund = payment_form.cleaned_data['crowdfund']
             try:
                 if crowdfund.can_recur(

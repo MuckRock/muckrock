@@ -67,10 +67,9 @@ class RequestSharingAutocomplete(UserAutocomplete):
         choices = choices.filter(conditions)
         if foia_id:
             foia = get_object_or_404(FOIARequest, pk=foia_id)
-            creator = foia.user
             editors = foia.edit_collaborators.all()
             viewers = foia.read_collaborators.all()
-            exclude_pks.append(creator.pk)
+            exclude_pks.append(foia.user.pk)
             exclude_pks.extend([editor.pk for editor in editors])
             exclude_pks.extend([viewer.pk for viewer in viewers])
         choices = choices.exclude(pk__in=exclude_pks)

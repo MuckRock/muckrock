@@ -20,7 +20,13 @@ class MRActionManager(ActionManager):
         if user is None or not isinstance(user, User):
             raise ValueError('Must provide a User')
         ctype = ContentType.objects.get_for_model(model)
-        pks = list(model.objects.filter(user=user).values_list('pk', flat=True))
+        if model.__name__ == 'FOIARequest':
+            user_filter = {'composer__user': user}
+        else:
+            user_filter = {'user': user}
+        pks = list(
+            model.objects.filter(**user_filter).values_list('pk', flat=True)
+        )
         if not pks:
             # self.none is inherited from the GFKManager parent
             return self.none()

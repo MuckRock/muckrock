@@ -24,7 +24,8 @@ class LatestSubmittedRequests(Feed):
         """Return the items for the rss feed"""
         return (
             FOIARequest.objects.get_submitted().get_public()
-            .order_by('-date_submitted').select_related('jurisdiction')
+            .order_by('-composer__datetime_submitted')
+            .select_related('agency__jurisdiction')
             .prefetch_related('communications')[:25]
         )
 
@@ -43,7 +44,7 @@ class LatestDoneRequests(Feed):
         """Return the items for the rss feed"""
         return (
             FOIARequest.objects.get_done().get_public()
-            .order_by('-date_done').select_related('jurisdiction')
+            .order_by('-datetime_done').select_related('agency__jurisdiction')
             .prefetch_related('communications')[:25]
         )
 
@@ -109,7 +110,8 @@ class UserSubmittedFeed(Feed):
         return (
             FOIARequest.objects.get_submitted().filter(
                 user=obj, embargo=False
-            ).order_by('-date_submitted').select_related('jurisdiction')
+            ).order_by('-composer__datetime_submitted'
+                       ).select_related('agency__jurisdiction')
             .prefetch_related('communications')[:25]
         )
 
@@ -142,7 +144,8 @@ class UserDoneFeed(Feed):
         """The completed requests are the items for this feed"""
         return (
             FOIARequest.objects.get_done().filter(user=obj, embargo=False)
-            .order_by('-date_submitted').select_related('jurisdiction')
+            .order_by('-datetime_submitted'
+                      ).select_related('agency__jurisdiction')
             .prefetch_related('communications')[:25]
         )
 
@@ -176,7 +179,7 @@ class UserUpdateFeed(Feed):
         communications = (
             FOIACommunication.objects.filter(foia__user=obj)
             .exclude(foia__status='started').exclude(foia__embargo=True)
-            .select_related('foia__jurisdiction').order_by('-date')
+            .select_related('foia__agency__jurisdiction').order_by('-date')
         )
         return communications[:25]
 

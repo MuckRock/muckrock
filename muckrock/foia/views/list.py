@@ -96,12 +96,12 @@ class RequestExploreView(TemplateView):
         )
         context['recently_completed'] = (
             visible_requests.get_done().order_by(
-                '-date_done', 'pk'
+                '-datetime_done', 'pk'
             ).select_related_view().get_public_file_count(limit=5)
         )
         context['recently_rejected'] = (
             visible_requests.filter(status__in=['rejected', 'no_docs'])
-            .order_by('-date_updated', 'pk').select_related_view()
+            .order_by('-datetime_updated', 'pk').select_related_view()
             .get_public_file_count(limit=5)
         )
         return context
@@ -113,15 +113,15 @@ class RequestList(MRSearchFilterListView):
     filter_class = FOIARequestFilterSet
     title = 'All Requests'
     template_name = 'foia/list.html'
-    default_sort = 'date_updated'
+    default_sort = 'datetime_updated'
     default_order = 'desc'
     sort_map = {
         'title': 'title',
         'user': 'user__first_name',
         'agency': 'agency__name',
-        'date_updated': 'date_updated',
-        'date_submitted': 'date_submitted',
-        'date_done': 'date_done',
+        'date_updated': 'datetime_updated',
+        'date_submitted': 'composer__datetime_submitted',
+        'date_done': 'datetime_done',
     }
 
     def get_queryset(self):
@@ -167,17 +167,18 @@ class RequestList(MRSearchFilterListView):
                 (lambda f: f.jurisdiction.pk, 'Jurisdiction ID'),
                 (
                     lambda f: f.jurisdiction.get_level_display(),
-                    'Jurisdiction Level'
+                    'Jurisdiction Level',
                 ),
                 (
-                    lambda f: f.jurisdiction.parent.name if f.jurisdiction.level
-                    == 'l' else f.jurisdiction.name, 'Jurisdiction State'
+                    lambda f: f.jurisdiction.parent.name
+                    if f.jurisdiction.level == 'l' else f.jurisdiction.name,
+                    'Jurisdiction State',
                 ),
                 (lambda f: f.agency.name if f.agency else '', 'Agency'),
                 (lambda f: f.agency.pk if f.agency else '', 'Agency ID'),
                 (lambda f: f.date_followup, 'Followup Date'),
                 (lambda f: f.date_estimate, 'Estimated Completion Date'),
-                (lambda f: f.description, 'Description'),
+                (lambda f: f.composer.requested_docs, 'Requested Documents'),
                 (lambda f: f.current_tracking_id(), 'Tracking Number'),
                 (lambda f: f.embargo, 'Embargo'),
                 (lambda f: f.days_since_submitted, 'Days since submitted'),
@@ -191,6 +192,7 @@ class RequestList(MRSearchFilterListView):
                     'user',
                     'jurisdiction',
                     'agency',
+                    'composer',
                 ).prefetch_related(
                     'tracking_ids',
                 ).only(
@@ -207,12 +209,16 @@ class RequestList(MRSearchFilterListView):
                     'date_estimate',
                     'description',
                     'embargo',
+                    'composer__requested_docs',
                 ).annotate(
                     days_since_submitted=ExtractDay(
-                        Cast(Now() - F('date_submitted'), DurationField())
+                        Cast(
+                            Now() - F('composer__datetime_submitted'),
+                            DurationField()
+                        )
                     ),
                     days_since_updated=ExtractDay(
-                        Cast(Now() - F('date_updated'), DurationField())
+                        Cast(Now() - F('datetime_updated'), DurationField())
                     ),
                     project_names=StringAgg(
                         'projects__title', ',', distinct=True
@@ -586,7 +592,7 @@ class ProcessingRequestList(RequestList):
     default_order = 'asc'
     sort_map = {
         'title': 'title',
-        'date_submitted': 'date_submitted',
+        'date_submitted': 'composer__datetime_submitted',
         'date_processing': 'date_processing',
     }
 

@@ -151,7 +151,7 @@ class ResponseTaskForm(forms.Form):
         if move:
             try:
                 comms = self.move_communication(task.communication, move, user)
-            except (Http404, ValueError):
+            except ValueError:
                 error_msgs.append(
                     'No valid destination for moving the request.'
                 )
@@ -215,7 +215,7 @@ class ResponseTaskForm(forms.Form):
                 foia = comm.foia
                 foia.status = status
                 if status in ['rejected', 'no_docs', 'done', 'abandoned']:
-                    foia.date_done = comm.date
+                    foia.datetime_done = comm.date
                 foia.update()
                 foia.save(comment='response task status')
                 logging.info(

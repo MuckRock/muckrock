@@ -23,7 +23,7 @@
                         (<a href="{% url 'admin:foia_foiarequest_change' foia.pk %}">admin</a>)
                         - MR #{{ foia.pk }}
                         - {{foia.get_status_display}}
-                        <blockquote>{{ foia.requested_docs }}</blockquote>
+                        <blockquote>{{ foia.composer.requested_docs }}</blockquote>
                     </dd>
                 {% endfor %}
             {% endif %}

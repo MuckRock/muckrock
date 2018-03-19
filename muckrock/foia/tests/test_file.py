@@ -11,7 +11,8 @@ from django.test import TestCase
 from nose.tools import eq_, ok_, raises
 
 # MuckRock
-from muckrock.factories import FOIAFileFactory, UserFactory
+from muckrock.factories import UserFactory
+from muckrock.foia.factories import FOIAFileFactory
 from muckrock.foia.views import FOIAFileListView
 from muckrock.test_utils import http_get_response
 

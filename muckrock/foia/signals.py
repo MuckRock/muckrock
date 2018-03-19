@@ -9,7 +9,11 @@ import boto
 from boto.s3.connection import S3Connection
 
 # MuckRock
-from muckrock.foia.models import FOIAFile, FOIARequest, OutboundAttachment
+from muckrock.foia.models import (
+    FOIAFile,
+    FOIARequest,
+    OutboundRequestAttachment,
+)
 from muckrock.foia.tasks import upload_document_cloud
 
 
@@ -97,6 +101,6 @@ post_delete.connect(
 
 post_delete.connect(
     attachment_delete_s3,
-    sender=OutboundAttachment,
+    sender=OutboundRequestAttachment,
     dispatch_uid='muckrock.foia.signals.attachment_delete_s3',
 )

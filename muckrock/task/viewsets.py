@@ -40,8 +40,12 @@ def create_task_viewset(model, serializer, fields):
             'model':
                 model,
             'fields': (
-                'min_date_created', 'max_date_created', 'min_date_done',
-                'max_date_done', 'resolved', 'assigned'
+                'min_date_created',
+                'max_date_created',
+                'min_date_done',
+                'max_date_done',
+                'resolved',
+                'assigned',
             ) + fields
         }
     )

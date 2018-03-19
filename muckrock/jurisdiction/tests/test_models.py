@@ -5,6 +5,7 @@ Tests for Jurisdiction application
 # Django
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.utils import timezone
 
 # Standard Library
 from datetime import date, timedelta
@@ -13,11 +14,11 @@ from datetime import date, timedelta
 from nose.tools import eq_
 
 # MuckRock
-from muckrock.factories import (
+from muckrock.factories import UserFactory
+from muckrock.foia.factories import (
     FOIACommunicationFactory,
     FOIAFileFactory,
     FOIARequestFactory,
-    UserFactory,
 )
 from muckrock.jurisdiction import factories
 
@@ -36,12 +37,6 @@ class TestJurisdictionUnit(TestCase):
         eq_(unicode(self.federal), u'United States of America')
         eq_(unicode(self.state), u'Massachusetts')
         eq_(unicode(self.local), u'Boston, MA')
-        self.local.full_name = u'Test!'
-        self.local.save()
-        eq_(
-            unicode(self.local), u'Test!',
-            'If the locality has a hardcoded full_name, then always prefer that.'
-        )
 
     def test_jurisdiction_url(self):
         """Test Jurisdiction model's get_absolute_url method"""
@@ -113,18 +108,18 @@ class TestJurisdictionUnit(TestCase):
         Jurisdictions should report their average response time.
         State jurisdictions should include avg. response time of their local jurisdictions.
         """
-        today = date.today()
+        now = timezone.now()
         state_duration = 12
         local_duration = 6
         FOIARequestFactory(
-            jurisdiction=self.state,
-            date_done=today,
-            date_submitted=today - timedelta(state_duration)
+            agency__jurisdiction=self.state,
+            datetime_done=now,
+            composer__datetime_submitted=now - timedelta(state_duration)
         )
         FOIARequestFactory(
-            jurisdiction=self.local,
-            date_done=today,
-            date_submitted=today - timedelta(local_duration)
+            agency__jurisdiction=self.local,
+            datetime_done=now,
+            composer__datetime_submitted=now - timedelta(local_duration)
         )
         eq_(
             self.state.average_response_time(),
@@ -137,11 +132,12 @@ class TestJurisdictionUnit(TestCase):
         Jurisdictions should report their success rate: completed/filed.
         State jurisdictions should include success rates of local jurisdictions.
         """
-        today = date.today()
         FOIARequestFactory(
-            jurisdiction=self.state, status='done', date_done=today
+            agency__jurisdiction=self.state,
+            status='done',
+            datetime_done=timezone.now(),
         )
-        FOIARequestFactory(jurisdiction=self.local, status='ack')
+        FOIARequestFactory(agency__jurisdiction=self.local, status='ack')
         eq_(self.state.success_rate(), 50.0)
         eq_(self.local.success_rate(), 0.0)
 
@@ -150,8 +146,12 @@ class TestJurisdictionUnit(TestCase):
         Jurisdictions should report the rate at which requests have fees.
         State jurisdictions should include fee rates of local jurisdictions.
         """
-        FOIARequestFactory(jurisdiction=self.state, status='ack', price=0)
-        FOIARequestFactory(jurisdiction=self.local, status='ack', price=1.00)
+        FOIARequestFactory(
+            agency__jurisdiction=self.state, status='ack', price=0
+        )
+        FOIARequestFactory(
+            agency__jurisdiction=self.local, status='ack', price=1.00
+        )
         eq_(self.state.fee_rate(), 50.0)
         eq_(self.local.fee_rate(), 100.0)
 
@@ -161,8 +161,12 @@ class TestJurisdictionUnit(TestCase):
         State jurisdictions should include pages from their local jurisdictions.
         """
         page_count = 10
-        local_comm = FOIACommunicationFactory(foia__jurisdiction=self.local)
-        state_comm = FOIACommunicationFactory(foia__jurisdiction=self.state)
+        local_comm = FOIACommunicationFactory(
+            foia__agency__jurisdiction=self.local
+        )
+        state_comm = FOIACommunicationFactory(
+            foia__agency__jurisdiction=self.state
+        )
         local_comm.files.add(FOIAFileFactory(pages=page_count))
         state_comm.files.add(FOIAFileFactory(pages=page_count))
         eq_(self.local.total_pages(), page_count)

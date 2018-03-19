@@ -91,18 +91,6 @@ def get_404(client, url):
 
 class TestFunctional(TestCase):
     """Functional tests for top level"""
-    fixtures = [
-        'holidays.json',
-        'jurisdictions.json',
-        'agency_types.json',
-        'test_agencies.json',
-        'test_users.json',
-        'test_profiles.json',
-        'test_foiarequests.json',
-        'test_foiacommunications.json',
-        'test_foiafiles.json',
-        'test_news.json',
-    ]
 
     # tests for base level views
     def test_views(self):
@@ -126,6 +114,7 @@ class TestFunctional(TestCase):
 
     def test_api_views(self):
         """Test API views"""
+        UserFactory(username='super', password='abc', is_staff=True)
         self.client.login(username='super', password='abc')
         api_objs = [
             'jurisdiction',

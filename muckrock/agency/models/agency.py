@@ -8,6 +8,7 @@ from django.core.exceptions import MultipleObjectsReturned
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.template.defaultfilters import slugify
+from django.utils import timezone
 from django.utils.safestring import mark_safe
 
 # Standard Library
@@ -230,7 +231,10 @@ class Agency(models.Model, RequestHelper):
         if self.manual_stale:
             return True
         # find any open requests, if none, not stale
-        foias = self.foiarequest_set.get_open().order_by('date_submitted')
+        foias = (
+            self.foiarequest_set.get_open()
+            .order_by('composer__datetime_submitted')
+        )
         if not foias:
             return False
         # find the latest response to an open request
@@ -242,7 +246,8 @@ class Agency(models.Model, RequestHelper):
         if latest_responses:
             return min(latest_responses) >= STALE_DURATION
         # no response to open requests, use oldest open request submit date
-        return (date.today() - foias[0].date_submitted).days >= STALE_DURATION
+        return ((timezone.now() - foias[0].composer.datetime_submitted).days >=
+                STALE_DURATION)
 
     def mark_stale(self, manual=False):
         """Mark this agency as stale and create a StaleAgencyTask if one doesn't already exist."""

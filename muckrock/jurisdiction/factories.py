@@ -95,7 +95,7 @@ class InvokedExemptionFactory(factory.django.DjangoModelFactory):
         model = InvokedExemption
 
     exemption = factory.SubFactory(ExemptionFactory)
-    request = factory.SubFactory('muckrock.factories.FOIARequestFactory')
+    request = factory.SubFactory('muckrock.foia.factories.FOIARequestFactory')
 
 
 class ExampleAppealFactory(factory.django.DjangoModelFactory):
@@ -117,5 +117,5 @@ class AppealFactory(factory.django.DjangoModelFactory):
         model = Appeal
 
     communication = factory.SubFactory(
-        'muckrock.factories.FOIACommunicationFactory'
+        'muckrock.foia.factories.FOIACommunicationFactory'
     )

@@ -13,3 +13,7 @@ class MimeError(Exception):
 
 class SizeError(Exception):
     """Uploaded file is not the correct size"""
+
+
+class InsufficientRequestsError(Exception):
+    """User needs to purchase more requests"""

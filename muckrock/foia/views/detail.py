@@ -49,6 +49,7 @@ from muckrock.foia.models import (
     END_STATUS,
     STATUS,
     FOIACommunication,
+    FOIAComposer,
     FOIAMultiRequest,
     FOIARequest,
 )
@@ -137,14 +138,9 @@ class Detail(DetailView):
 
         foia = get_object_or_404(
             FOIARequest.objects.select_related(
-                'agency',
-                'agency__jurisdiction',
+                'agency__jurisdiction__parent__parent',
                 'crowdfund',
-                'jurisdiction',
-                'jurisdiction__parent',
-                'jurisdiction__parent__parent',
-                'user',
-                'user__profile',
+                'composer__user__profile',
             ).prefetch_related(
                 Prefetch(
                     'communications',
@@ -169,8 +165,8 @@ class Detail(DetailView):
                     to_attr='raw_emails',
                 ),
             ),
-            jurisdiction__slug=self.kwargs['jurisdiction'],
-            jurisdiction__pk=self.kwargs['jidx'],
+            agency__jurisdiction__slug=self.kwargs['jurisdiction'],
+            agency__jurisdiction__pk=self.kwargs['jidx'],
             slug=self.kwargs['slug'],
             pk=self.kwargs['idx'],
         )
@@ -864,5 +860,34 @@ class MultiDetail(DetailView):
             multi.foias.get_viewable(self.request.user).select_related_view()
         )
         if not context['foias'] and multi.user != self.request.user:
+            raise Http404
+        return context
+
+
+class ComposerDetail(DetailView):
+    """Detail view for multi requests"""
+    model = FOIAComposer
+    context_object_name = 'composer'
+    query_pk_and_slug = True
+    pk_url_kwarg = 'idx'
+
+    def dispatch(self, request, *args, **kwargs):
+        """If composer is a draft, then redirect to drafting interface"""
+        composer = self.get_object()
+        if composer.status == 'started':
+            return redirect('foia-draft', slug=composer.slug, idx=composer.pk)
+        else:
+            return (
+                super(ComposerDetail, self).dispatch(request, *args, **kwargs)
+            )
+
+    def get_context_data(self, **kwargs):
+        """Add extra context data"""
+        context = super(ComposerDetail, self).get_context_data(**kwargs)
+        composer = context['composer']
+        context['foias'] = (
+            composer.foias.get_viewable(self.request.user).select_related_view()
+        )
+        if not context['foias'] and composer.user != self.request.user:
             raise Http404
         return context

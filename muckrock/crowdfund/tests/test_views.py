@@ -20,12 +20,8 @@ from nose.tools import eq_, ok_
 from muckrock.crowdfund.forms import CrowdfundPaymentForm
 from muckrock.crowdfund.models import CrowdfundPayment
 from muckrock.crowdfund.views import CrowdfundDetailView
-from muckrock.factories import (
-    CrowdfundFactory,
-    FOIARequestFactory,
-    ProjectFactory,
-    UserFactory,
-)
+from muckrock.factories import CrowdfundFactory, ProjectFactory, UserFactory
+from muckrock.foia.factories import FOIARequestFactory
 from muckrock.project.models import ProjectCrowdfunds
 from muckrock.test_utils import mock_middleware
 

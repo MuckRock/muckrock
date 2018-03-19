@@ -18,6 +18,7 @@ from muckrock.foia.models import END_STATUS, FOIARequest
 from muckrock.tags.models import TaggedItemBase
 
 
+# XXX this needs to be moved somewhere else
 class RequestHelper(object):
     """Helper methods for classes that have a get_requests() method"""
 
@@ -25,8 +26,9 @@ class RequestHelper(object):
         """Get the average response time from a submitted to completed request"""
         requests = self.get_requests()
         avg = (
-            requests.aggregate(avg=Avg(F('date_done') - F('date_submitted'))
-                               )['avg']
+            requests.aggregate(
+                avg=Avg(F('datetime_done') - F('composer__datetime_submitted'))
+            )['avg']
         )
         return int(avg.days) if avg is not None else 0
 
@@ -74,7 +76,6 @@ class Jurisdiction(models.Model, RequestHelper):
     name = models.CharField(max_length=50)
     # slug should be slugify(unicode(self))
     slug = models.SlugField(max_length=55)
-    full_name = models.CharField(max_length=55, blank=True)
     abbrev = models.CharField(max_length=5, blank=True)
     level = models.CharField(max_length=1, choices=levels)
     parent = models.ForeignKey(
@@ -103,12 +104,8 @@ class Jurisdiction(models.Model, RequestHelper):
     holidays = models.ManyToManyField(Holiday, blank=True)
 
     def __unicode__(self):
-        if self.level == 'l' and not self.full_name and self.parent:
-            self.full_name = '%s, %s' % (self.name, self.parent.abbrev)
-            self.save()
-            return self.full_name
-        elif self.level == 'l':
-            return self.full_name
+        if self.level == 'l':
+            return '{}, {}'.format(self.name, self.parent.abbrev)
         else:
             return self.name
 
@@ -209,10 +206,11 @@ class Jurisdiction(models.Model, RequestHelper):
         """State level jurisdictions should return requests from their localities as well."""
         if self.level == 's':
             requests = FOIARequest.objects.filter(
-                Q(jurisdiction=self) | Q(jurisdiction__parent=self)
+                Q(agency__jurisdiction=self)
+                | Q(agency__jurisdiction__parent=self)
             )
         else:
-            requests = FOIARequest.objects.filter(jurisdiction=self)
+            requests = FOIARequest.objects.filter(agency__jurisdiction=self)
         return requests.exclude(status='started')
 
     class Meta:

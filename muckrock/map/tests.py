@@ -13,7 +13,8 @@ import json
 from nose.tools import eq_, ok_
 
 # MuckRock
-from muckrock.factories import AgencyFactory, FOIARequestFactory, ProjectFactory
+from muckrock.factories import AgencyFactory, ProjectFactory
+from muckrock.foia.factories import FOIARequestFactory
 from muckrock.map.models import Map, Marker
 
 

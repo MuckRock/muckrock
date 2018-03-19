@@ -16,8 +16,13 @@ from mock import patch
 from nose.tools import eq_, ok_, raises
 
 # MuckRock
-from muckrock import factories
 from muckrock.communication.models import EmailAddress
+from muckrock.factories import UserFactory
+from muckrock.foia.factories import (
+    FOIACommunicationFactory,
+    FOIAFileFactory,
+    FOIARequestFactory,
+)
 from muckrock.foia.models import CommunicationMoveLog, FOIACommunication
 from muckrock.foia.views import raw
 
@@ -26,13 +31,13 @@ class TestCommunication(test.TestCase):
     """Tests communication methods"""
 
     def setUp(self):
-        self.foia = factories.FOIARequestFactory()
-        self.comm = factories.FOIACommunicationFactory(
+        self.foia = FOIARequestFactory()
+        self.comm = FOIACommunicationFactory(
             foia=self.foia,
             email__from_email=EmailAddress.objects.
             fetch(u'Test Email <test@email.com>'),
         )
-        self.file = factories.FOIAFileFactory(comm=self.comm)
+        self.file = FOIAFileFactory(comm=self.comm)
         eq_(self.comm.files.count(), 1)
 
     def test_primary_contact(self):
@@ -43,7 +48,7 @@ class TestCommunication(test.TestCase):
 
     def test_attach_file_with_file(self):
         """Test attaching a file with an actual file"""
-        comm = factories.FOIACommunicationFactory()
+        comm = FOIACommunicationFactory()
         file_ = open('tmp.txt', 'w')
         file_.write('The file contents')
         file_.close()
@@ -59,7 +64,7 @@ class TestCommunication(test.TestCase):
 
     def test_attach_file_with_content(self):
         """Test attaching a file with n memory content"""
-        comm = factories.FOIACommunicationFactory()
+        comm = FOIACommunicationFactory()
         comm.attach_file(content='More contents', name='doc.pdf')
         eq_(comm.files.count(), 1)
         foia_file = comm.files.first()
@@ -86,17 +91,17 @@ class TestCommunicationMove(test.TestCase):
     """Tests the move method"""
 
     def setUp(self):
-        self.foia1 = factories.FOIARequestFactory()
-        self.foia2 = factories.FOIARequestFactory()
-        self.comm = factories.FOIACommunicationFactory(foia=self.foia1)
-        self.file = factories.FOIAFileFactory(comm=self.comm)
+        self.foia1 = FOIARequestFactory()
+        self.foia2 = FOIARequestFactory()
+        self.comm = FOIACommunicationFactory(foia=self.foia1)
+        self.file = FOIAFileFactory(comm=self.comm)
         eq_(self.comm.files.count(), 1)
-        self.user = factories.UserFactory()
+        self.user = UserFactory()
 
     @patch('muckrock.foia.tasks.upload_document_cloud.apply_async')
     def test_move_single_comm(self, mock_upload):
         """Should change the request associated with the communication."""
-        moved_comms = self.comm.move(self.foia2.id, self.user)
+        moved_comms = self.comm.move([self.foia2.pk], self.user)
         eq_(len(moved_comms), 1, 'Move function should only return one item')
         moved_comm = moved_comms[0]
         eq_(
@@ -194,25 +199,25 @@ class TestCommunicationMove(test.TestCase):
         self.file.ffile = None
         self.file.save()
         ok_(not self.comm.files.all()[0].ffile)
-        self.comm.move(self.foia2.id, self.user)
+        self.comm.move([self.foia2.pk], self.user)
 
 
 class TestCommunicationClone(test.TestCase):
     """Tests the clone method"""
 
     def setUp(self):
-        self.comm = factories.FOIACommunicationFactory()
-        self.file = factories.FOIAFileFactory(comm=self.comm)
+        self.comm = FOIACommunicationFactory()
+        self.file = FOIAFileFactory(comm=self.comm)
         ok_(self.file in self.comm.files.all())
-        self.user = factories.UserFactory()
+        self.user = UserFactory()
 
     @patch('muckrock.foia.tasks.upload_document_cloud.apply_async')
     def test_clone_single(self, mock_upload):
         """Should duplicate the communication to the request."""
-        other_foia = factories.FOIARequestFactory()
+        other_foia = FOIARequestFactory()
         comm_count = FOIACommunication.objects.count()
         comm_pk = self.comm.pk
-        clone_comm = self.comm.clone([other_foia.pk], self.user)
+        clone_comm = self.comm.clone([other_foia], self.user)
         # + 1 communications
         eq_(
             FOIACommunication.objects.count(), comm_count + 1,
@@ -240,12 +245,14 @@ class TestCommunicationClone(test.TestCase):
     @patch('muckrock.foia.tasks.upload_document_cloud.apply_async')
     def test_clone_multi(self, mock_upload):
         """Should duplicate the communication to each request in the list."""
-        first_foia = factories.FOIARequestFactory()
-        second_foia = factories.FOIARequestFactory()
-        third_foia = factories.FOIARequestFactory()
+        first_foia = FOIARequestFactory()
+        second_foia = FOIARequestFactory()
+        third_foia = FOIARequestFactory()
         comm_count = FOIACommunication.objects.count()
-        clones = self.comm.clone([first_foia.pk, second_foia.pk, third_foia.pk],
-                                 self.user)
+        clones = self.comm.clone(
+            [first_foia, second_foia, third_foia],
+            self.user,
+        )
         # + 3 communications
         eq_(
             FOIACommunication.objects.count(), comm_count + 3,
@@ -269,12 +276,14 @@ class TestCommunicationClone(test.TestCase):
     @patch('muckrock.foia.tasks.upload_document_cloud.apply_async')
     def test_clone_files(self, mock_upload):
         """Should duplicate all the files for each communication."""
-        first_foia = factories.FOIARequestFactory()
-        second_foia = factories.FOIARequestFactory()
-        third_foia = factories.FOIARequestFactory()
+        first_foia = FOIARequestFactory()
+        second_foia = FOIARequestFactory()
+        third_foia = FOIARequestFactory()
         file_count = self.comm.files.count()
-        clones = self.comm.clone([first_foia.pk, second_foia.pk, third_foia.pk],
-                                 self.user)
+        clones = self.comm.clone(
+            [first_foia, second_foia, third_foia],
+            self.user,
+        )
         for each_clone in clones:
             eq_(
                 each_clone.files.count(), file_count,
@@ -299,23 +308,23 @@ class TestCommunicationClone(test.TestCase):
         self.file.ffile = None
         self.file.save()
         ok_(not self.comm.files.all()[0].ffile)
-        other_foia = factories.FOIARequestFactory()
-        self.comm.clone([other_foia.pk], self.user)
+        other_foia = FOIARequestFactory()
+        self.comm.clone([other_foia], self.user)
 
 
 class TestRawEmail(test.TestCase):
     """Tests the raw email view"""
 
     def setUp(self):
-        self.comm = factories.FOIACommunicationFactory()
+        self.comm = FOIACommunicationFactory()
         self.request_factory = test.RequestFactory()
         self.url = reverse('foia-raw', kwargs={'idx': self.comm.id})
         self.view = raw
 
     def test_raw_email_view(self):
         """Advanced users should be able to view raw emails"""
-        basic_user = factories.UserFactory(profile__acct_type='basic')
-        pro_user = factories.UserFactory(profile__acct_type='pro')
+        basic_user = UserFactory(profile__acct_type='basic')
+        pro_user = UserFactory(profile__acct_type='pro')
         request = self.request_factory.get(self.url)
         request.user = basic_user
         response = self.view(request, self.comm.id)

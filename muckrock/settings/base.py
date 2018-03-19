@@ -462,7 +462,9 @@ PUBLICATION_TIME_ZONE = '-05:00'
 urlparse.uses_netloc.append('postgres')
 
 url = urlparse.urlparse(
-    os.environ.get('DATABASE_URL', 'postgres://vagrant@localhost/muckrock')
+    os.environ.get(
+        'DATABASE_URL', 'postgres://vagrant@localhost/muckrock_remodel'
+    )
 )
 
 # Update with environment configuration.
@@ -684,3 +686,5 @@ CONSTANCE_CONFIG_FIELDSETS = {
 VIEW_ID = os.environ.get('VIEW_ID', '')
 
 HIJACK_AUTHORIZE_STAFF = True
+
+MULTI_REVIEW_AMOUNT = 2

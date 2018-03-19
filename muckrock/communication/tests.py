@@ -12,7 +12,7 @@ from nose.tools import assert_false, assert_raises, eq_, ok_
 
 # MuckRock
 from muckrock.communication.models import EmailAddress
-from muckrock.factories import FOIARequestFactory
+from muckrock.foia.factories import FOIARequestFactory
 from muckrock.mailgun.models import WhitelistDomain
 
 

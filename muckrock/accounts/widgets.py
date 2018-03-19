@@ -265,7 +265,7 @@ class RequestsFiledGraphWidget(GraphWidget):
 
     def get_value(self):
         """Get value"""
-        return FOIARequest.objects.filter(date_submitted=date.today()).count()
+        return FOIARequest.objects.get_today().count()
 
     def get_data(self):
         """Get graph data"""
@@ -314,7 +314,7 @@ class RequestsFiledWidget(CompareNumberWidget):
 
     def get_value(self):
         """Get value"""
-        return FOIARequest.objects.filter(date_submitted=date.today()).count()
+        return FOIARequest.objects.get_today().count()
 
     def get_previous_value(self):
         """Get previous value"""
@@ -390,8 +390,8 @@ class RecentRequestsWidget(ListWidget):
         """Get the oldest processing requests"""
         requests = (
             FOIARequest.objects.get_submitted().get_public()
-            .exclude(date_submitted=None).order_by('-date_submitted')
-            .values('title')[:4]
+            .exclude(composer__datetime_submitted=None)
+            .order_by('-composer__date_submitted').values('title')[:4]
         )
         return [{'label': r['title']} for r in requests]
 

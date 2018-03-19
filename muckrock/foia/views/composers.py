@@ -7,30 +7,174 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.defaultfilters import slugify
 from django.utils import timezone
 from django.utils.encoding import smart_text
-from django.views.generic import FormView
+from django.views.generic import CreateView, FormView, UpdateView
 
 # Standard Library
+import re
 from datetime import date
 from math import ceil
 
 # MuckRock
+from muckrock.accounts.mixins import MiniregMixin
 from muckrock.agency.models import Agency
+from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.foia.forms import (
+    ComposerForm,
     ContactInfoForm,
     MultiRequestDraftForm,
     MultiRequestForm,
     RequestDraftForm,
-    RequestForm,
 )
-from muckrock.foia.models import FOIAMultiRequest, FOIARequest
+from muckrock.foia.models import FOIAComposer, FOIAMultiRequest, FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import MultiRequestTask
 from muckrock.utils import new_action
+
+
+def _submit_composer(request, composer):
+    """Submit a composer with error handling"""
+    try:
+        composer.submit()
+    except InsufficientRequestsError:
+        messages.warning(request, 'You need to purchase more requests')
+    else:
+        messages.success(request, 'Request submitted')
+
+
+class CreateComposer(MiniregMixin, CreateView):
+    """Create a new composer"""
+    # pylint: disable=attribute-defined-outside-init
+    template_name = 'forms/foia/create.html'
+    form_class = ComposerForm
+
+    def get_initial(self):
+        """Get initial data from clone, if there is one"""
+        self.clone = False
+        data = {}
+        clone_pk = self.request.GET.get('clone')
+        if clone_pk is not None:
+            data.update(self._get_clone_data(clone_pk))
+        agency_pks = self.request.GET.getlist('agency')
+        agency_pks = [pk for pk in agency_pks if re.match('[0-9]+', pk)]
+        if agency_pks:
+            agencies = Agency.objects.filter(
+                pk__in=agency_pks,
+                status='approved',
+            )
+            data.update({'agencies': agencies})
+        return data
+
+    def _get_clone_data(self, clone_pk):
+        """Get the intial data for a clone"""
+        try:
+            composer = get_object_or_404(FOIAComposer, pk=clone_pk)
+        except ValueError:
+            # non integer passed in as clone_pk
+            return {}
+        if not composer.has_perm(self.request.user, 'view'):
+            raise Http404()
+        initial_data = {
+            'title': composer.title,
+            'requested_docs': smart_text(composer.requested_docs),
+            'agencies': composer.agencies.all(),
+            'tags': composer.tags.all(),
+            'parent': composer,
+        }
+        self.clone = True
+        return initial_data
+
+    def get_form_kwargs(self):
+        """Add request to the form kwargs"""
+        kwargs = super(CreateComposer, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        """Extra context"""
+        context = super(CreateComposer, self).get_context_data(**kwargs)
+        context.update({
+            'clone': self.clone,
+            'featured': FOIARequest.objects.get_featured(self.request.user),
+            'settings': settings,
+        })
+        return context
+
+    def form_valid(self, form):
+        """Create the request"""
+        if self.request.user.is_authenticated:
+            user = self.request.user
+        else:
+            user = self.miniregister(
+                form.cleaned_data['full_name'],
+                form.cleaned_data['email'],
+                form.cleaned_data.get('newsletter'),
+            )
+        if form.cleaned_data['action'] in ('save', 'submit'):
+            composer = form.save(commit=False)
+            composer.user = user
+            composer.save()
+            form.save_m2m()
+        if form.cleaned_data['action'] == 'save':
+            self.request.session['ga'] = 'request_drafted'
+            messages.success(self.request, 'Request saved')
+        elif form.cleaned_data['action'] == 'submit':
+            _submit_composer(self.request, composer)
+        return redirect(composer)
+
+
+class UpdateComposer(UpdateView):
+    """Update a composer"""
+    # pylint: disable=attribute-defined-outside-init
+    template_name = 'forms/foia/create.html'
+    form_class = ComposerForm
+    pk_url_kwarg = 'idx'
+    context_object_name = 'composer'
+
+    def get_queryset(self):
+        """Restrict to composers you can view"""
+        return FOIAComposer.objects.filter(
+            status='started',
+            user=self.request.user,
+        )
+
+    def get_form_kwargs(self):
+        """Add request to the form kwargs"""
+        kwargs = super(UpdateComposer, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        """Extra context"""
+        context = super(UpdateComposer, self).get_context_data(**kwargs)
+        context.update({'settings': settings})
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """Allow deletion regardless of form validation"""
+        self.object = self.get_object()
+        if (
+            request.POST.get('action') == 'delete'
+            and self.object.has_perm(request.user, 'delete')
+        ):
+            self.object.delete()
+            messages.success(self.request, 'Draft deleted')
+            return redirect('foia-mylist')
+        return super(UpdateComposer, self).post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        """Update the request"""
+        if form.cleaned_data['action'] == 'save':
+            composer = form.save()
+            messages.success(self.request, 'Request saved')
+        elif form.cleaned_data['action'] == 'submit':
+            composer = form.save()
+            _submit_composer(self.request, composer)
+        return redirect(composer)
 
 
 def _submit_request(request, foia, contact_info=None):
@@ -54,23 +198,10 @@ def _submit_request(request, foia, contact_info=None):
     return redirect(foia)
 
 
-def clone_request(request, jurisdiction, jidx, slug, idx):
-    """A URL handler for cloning requests"""
-    # pylint: disable=unused-argument
-    foia = get_object_or_404(
-        FOIARequest,
-        jurisdiction__slug=jurisdiction,
-        jurisdiction__pk=jidx,
-        slug=slug,
-        pk=idx,
-    )
-    return HttpResponseRedirect(reverse('foia-create') + '?clone=%s' % foia.pk)
-
-
 class CreateRequest(FormView):
     """Create a new request"""
     template_name = 'forms/foia/create.html'
-    form_class = RequestForm
+    form_class = ComposerForm
 
     def __init__(self, *args, **kwargs):
         super(CreateRequest, self).__init__(*args, **kwargs)
@@ -140,7 +271,7 @@ class CreateRequest(FormView):
     def get_form_kwargs(self):
         """Add request to the form kwargs"""
         kwargs = super(CreateRequest, self).get_form_kwargs()
-        kwargs.update({'request': self.request})
+        kwargs['request'] = self.request
         return kwargs
 
     def get_context_data(self, **kwargs):
@@ -165,14 +296,14 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
     # pylint: disable=too-many-locals
     foia = get_object_or_404(
         FOIARequest,
-        jurisdiction__slug=jurisdiction,
-        jurisdiction__pk=jidx,
+        agency__jurisdiction__slug=jurisdiction,
+        agency__jurisdiction__pk=jidx,
         slug=slug,
         pk=idx,
     )
-    if not foia.is_editable():
-        messages.error(request, 'This is not a draft.')
-        return redirect(foia)
+    #if not foia.is_editable():
+    #messages.error(request, 'This is not a draft.')
+    #return redirect(foia)
     if not foia.has_perm(request.user, 'change'):
         messages.error(
             request, 'You do not have permission to edit this draft.'
@@ -251,7 +382,7 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
         'remaining':
             request.user.profile.total_requests(),
         'foias_filed':
-            request.user.foiarequest_set.exclude(status='started').count(),
+            request.user.composers.exclude(status='started').count(),
         'stripe_pk':
             settings.STRIPE_PUB_KEY,
         'sidebar_admin_url':

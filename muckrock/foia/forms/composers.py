@@ -4,60 +4,72 @@ FOIA forms for composing requests
 
 # Django
 from django import forms
-from django.contrib import messages
-from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
-from django.utils.text import slugify
 
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
 from autocomplete_light.contrib.taggit_field import TaggitField
 
 # MuckRock
-from muckrock.accounts.utils import mailchimp_subscribe, miniregister
 from muckrock.agency.models import Agency
-from muckrock.foia.models import FOIAMultiRequest, FOIARequest
+from muckrock.foia.models import FOIAComposer, FOIAMultiRequest
 from muckrock.forms import TaggitWidget
-from muckrock.jurisdiction.models import Jurisdiction
 
 
-class RequestForm(forms.Form):
-    """This form creates new, single MuckRock requests"""
-
-    JURISDICTION_CHOICES = [('f', 'Federal'), ('s', 'State'), ('l', 'Local')]
+class ComposerForm(forms.ModelForm):
+    """This form creates and updates FOIA composers"""
 
     title = forms.CharField(
         widget=forms.TextInput(attrs={
-            'placeholder': 'Add a subject'
+            'placeholder': 'Add a title'
         }),
         max_length=255,
     )
-    document_placeholder = (
-        'Write one sentence describing what you\'re looking for. '
-        'The more specific you can be, the better.'
+    requested_docs = forms.CharField(
+        widget=forms.Textarea(
+            attrs={
+                'placeholder':
+                    'Write a short description of the documents you are '
+                    'looking for. The more specific you can be, the better.'
+            }
+        )
     )
-    document = forms.CharField(
-        widget=forms.Textarea(attrs={
-            'placeholder': document_placeholder
-        })
-    )
-    jurisdiction = forms.ChoiceField(
-        choices=JURISDICTION_CHOICES, widget=forms.RadioSelect
-    )
-    state = autocomplete_light.ModelChoiceField(
-        'StateAutocomplete',
-        queryset=Jurisdiction.objects.filter(level='s', hidden=False),
-        required=False
-    )
-    local = autocomplete_light.ModelChoiceField(
-        'JurisdictionLocalAutocomplete',
-        queryset=Jurisdiction.objects.filter(level='l', hidden=False),
-        required=False
-    )
-    agency = autocomplete_light.ModelChoiceField(
-        'AgencySimpleAgencyAutocomplete',
+    agencies = autocomplete_light.ModelMultipleChoiceField(
+        'AgencyComposerAutocomplete',
         queryset=Agency.objects.get_approved(),
     )
+    embargo = forms.BooleanField(
+        required=False,
+        help_text='Embargoing a request keeps it completely private from '
+        'other users until the embargo date you set. '
+        'You may change this whenever you want.'
+    )
+    tags = TaggitField(
+        widget=TaggitWidget(
+            'TagAutocomplete',
+            attrs={
+                'placeholder': 'Search tags',
+                'data-autocomplete-minimum-characters': 1
+            }
+        ),
+        help_text='Separate tags with commas.',
+        required=False,
+    )
+    parent = forms.ModelChoiceField(
+        queryset=FOIAComposer.objects.none(),
+        required=False,
+        widget=forms.HiddenInput(),
+    )
+    action = forms.ChoiceField(
+        choices=[
+            ('save', 'Save'),
+            ('submit', 'Submit'),
+            ('delete', 'Delete'),
+        ],
+        required=True,
+        widget=forms.HiddenInput(),
+    )
+
     full_name = forms.CharField(label='Full Name or Handle (Public)')
     email = forms.EmailField(max_length=75)
     newsletter = forms.BooleanField(
@@ -67,28 +79,30 @@ class RequestForm(forms.Form):
         'FOIA news, tips, and more',
     )
 
+    class Meta:
+        model = FOIAComposer
+        fields = [
+            'title',
+            'requested_docs',
+            'agencies',
+            'embargo',
+            'tags',
+            'parent',
+            'full_name',
+            'email',
+            'newsletter',
+        ]
+
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
-        super(RequestForm, self).__init__(*args, **kwargs)
-        if self.request and self.request.user.is_authenticated:
+        user = kwargs.pop('user')
+        super(ComposerForm, self).__init__(*args, **kwargs)
+        if user.is_authenticated:
             del self.fields['full_name']
             del self.fields['email']
             del self.fields['newsletter']
-        self.jurisdiction = None
-
-    def full_clean(self):
-        """Remove required from agency"""
-        # We want "required" attribute on the field, but we might take the text value
-        # instead of the drop down value
-        self.fields['agency'].required = False
-        super(RequestForm, self).full_clean()
-
-    def clean(self):
-        """Ensure the jurisdiction and agency were set correctly"""
-        self.jurisdiction = self.get_jurisdiction()
-        if self.jurisdiction:
-            self.cleaned_data['agency'] = self.get_agency()
-        return self.cleaned_data
+        if not user.has_perm('foia.embargo_foiarequest'):
+            del self.fields['embargo']
+        self.fields['parent'].queryset = FOIAComposer.objects.get_viewable(user)
 
     def clean_email(self):
         """Do a case insensitive uniqueness check"""
@@ -99,26 +113,29 @@ class RequestForm(forms.Form):
             )
         return email
 
-    def get_jurisdiction(self):
-        """Get the jurisdiction from the correct field"""
-        jurisdiction = self.cleaned_data.get('jurisdiction')
-        state = self.cleaned_data.get('state')
-        local = self.cleaned_data.get('local')
-        if jurisdiction == 'f':
-            return Jurisdiction.objects.filter(level='f').first()
-        elif jurisdiction == 's' and not state:
-            self.add_error('state', 'No state was selected')
-            return None
-        elif jurisdiction == 's' and state:
-            return state
-        elif jurisdiction == 'l' and not local:
-            self.add_error('local', 'No locality was selected')
-            return None
-        elif jurisdiction == 'l' and local:
-            return local
+    def clean_title(self):
+        """Make sure we have a non-blank(ish) title"""
+        title = self.cleaned_data['title'].strip()
+        if title:
+            return title
+        else:
+            return 'Untitled'
+
+    def clean(self):
+        """Check cross field dependencies"""
+        cleaned_data = super(ComposerForm, self).clean()
+        if (
+            cleaned_data['action'] == 'submit'
+            and not self.cleaned_data['agencies']
+        ):
+            self.add_error(
+                'agencies',
+                'You must select at least one agency before submitting',
+            )
 
     def get_agency(self):
         """Get the agency and create a new one if necessary"""
+        # TODO need to completely rethink how new agencies work
         agency = self.cleaned_data.get('agency')
         agency_autocomplete = self.request.POST.get('agency-autocomplete', '')
         agency_autocomplete = agency_autocomplete.strip()
@@ -153,43 +170,6 @@ class RequestForm(forms.Form):
             )
             return None
         return agency
-
-    def make_user(self, data):
-        """Miniregister a new user if necessary"""
-        user, password = miniregister(data['full_name'], data['email'])
-        user = authenticate(
-            username=user.username,
-            password=password,
-        )
-        login(self.request, user)
-        if data.get('newsletter'):
-            mailchimp_subscribe(self.request, user.email)
-
-    def process(self, parent):
-        """Create the new request"""
-        if self.request.user.is_anonymous():
-            self.make_user(self.cleaned_data)
-        agency = self.cleaned_data['agency']
-        proxy_info = agency.get_proxy_info()
-        if 'warning' in proxy_info:
-            messages.warning(self.request, proxy_info['warning'])
-        foia = FOIARequest.objects.create(
-            user=self.request.user,
-            status='started',
-            title=self.cleaned_data['title'],
-            jurisdiction=self.jurisdiction,
-            slug=slugify(self.cleaned_data['title']) or 'untitled',
-            agency=agency,
-            requested_docs=self.cleaned_data['document'],
-            description=self.cleaned_data['document'],
-            parent=parent,
-            missing_proxy=proxy_info['missing_proxy'],
-        )
-        foia.create_initial_communication(
-            proxy_info.get('from_user', self.request.user),
-            proxy_info['proxy'],
-        )
-        return foia
 
 
 class RequestDraftForm(forms.Form):
