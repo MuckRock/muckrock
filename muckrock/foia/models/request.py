@@ -217,31 +217,6 @@ STATUS = [
 END_STATUS = ['rejected', 'no_docs', 'done', 'partial', 'abandoned']
 
 
-class Action():
-    """A helper class to provide interfaces for request actions"""
-
-    # pylint: disable=too-many-arguments
-    def __init__(
-        self,
-        test=None,
-        link=None,
-        title=None,
-        action=None,
-        desc=None,
-        class_name=None
-    ):
-        self.test = test
-        self.link = link
-        self.title = title
-        self.action = action
-        self.desc = desc
-        self.class_name = class_name
-
-    def is_possible(self):
-        """Is this action possible given the current context?"""
-        return self.test
-
-
 class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
     # pylint: disable=too-many-public-methods
@@ -1168,7 +1143,8 @@ class FOIARequest(models.Model):
         self.tags.set(*tag_set)
 
     def user_actions(self, user):
-        '''Provides action interfaces for users'''
+        """Provides action interfaces for users"""
+        from muckrock.foia.forms import FOIAFlagForm, FOIAContactUserForm
         is_owner = self.created_by(user)
         is_agency_user = (
             user.is_authenticated() and user.profile.acct_type == 'agency'
@@ -1185,41 +1161,47 @@ class FOIARequest(models.Model):
             'slug': self.slug
         }
         return [
-            Action(
-                test=not is_agency_user,
-                link=reverse('foia-clone', kwargs=kwargs),
-                title='Clone',
-                desc='Start a new request using this one as a base',
-                class_name='primary'
-            ),
-            Action(
-                test=can_follow,
-                link=reverse('foia-follow', kwargs=kwargs),
-                title=('Unfollow' if is_following else 'Follow'),
-                class_name=('default' if is_following else 'primary')
-            ),
-            Action(
-                test=self.has_perm(user, 'zip_download'),
-                link='?zip_download=1',
-                title='Download as Zip',
-                desc=u'Download all communications and files as a zip archive',
-                class_name='primary'
-            ),
-            Action(
-                test=self.has_perm(user, 'flag'),
-                title='Get Help',
-                action='flag',
-                desc=
-                u'Something broken, buggy, or off?  Let us know and we’ll fix it',
-                class_name='failure modal'
-            ),
-            Action(
-                test=is_admin,
-                title='Contact User',
-                action='contact_user',
-                desc=u'Send this request\'s owner an email',
-                class_name='modal'
-            ),
+            {
+                'test': not is_agency_user,
+                'link': reverse('foia-clone', kwargs=kwargs),
+                'title': 'Clone',
+                'desc': 'Start a new request using this one as a base',
+                'class_name': 'primary',
+            },
+            {
+                'test': can_follow,
+                'link': reverse('foia-follow', kwargs=kwargs),
+                'title': ('Unfollow' if is_following else 'Follow'),
+                'class_name': ('default' if is_following else 'primary'),
+            },
+            {
+                'test': self.has_perm(user, 'zip_download'),
+                'link': '?zip_download=1',
+                'title': 'Download as Zip',
+                'desc':
+                    u'Download all communications and '
+                    u'files as a zip archive',
+                'class_name': 'primary',
+            },
+            {
+                'test': self.has_perm(user, 'flag'),
+                'title': 'Get Help',
+                'action': 'flag',
+                'desc':
+                    u'Something broken, buggy, or off?  '
+                    u'Let us know and we\'ll fix it',
+                'class_name': 'failure',
+                'modal': True,
+                'form': FOIAFlagForm(),
+            },
+            {
+                'test': is_admin,
+                'title': 'Contact User',
+                'action': 'contact_user',
+                'desc': u'Send this request\'s owner an email',
+                'modal': True,
+                'form': FOIAContactUserForm(),
+            },
         ]
 
     def total_pages(self):

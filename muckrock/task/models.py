@@ -59,6 +59,41 @@ SNAIL_MAIL_CATEGORIES = [
     ('p', 'Payment'),
 ]
 PORTAL_CATEGORIES = [('i', 'Incoming')] + SNAIL_MAIL_CATEGORIES
+FLAG_CATEGORIES = [
+    (
+        'move communication',
+        'A communication ended up on this request inappropriately',
+    ),
+    (
+        'no response',
+        'This agency hasn\'t responded after multiple submissions.',
+    ),
+    (
+        'wrong agency',
+        'The agency has indicated that this request should be directed to '
+        'another agency.',
+    ),
+    (
+        'missing documents',
+        'I should have received documents for this request.',
+    ),
+    (
+        'form',
+        'The agency has asked that you use a form.',
+    ),
+    (
+        'follow-up complaints',
+        'Agency is complaining about follow-up messages.',
+    ),
+    (
+        'appeal',
+        'Should I appeal this response?',
+    ),
+    (
+        'proxy',
+        'The agency denied the request due to an in-state citzenship law.',
+    ),
+]
 
 
 class Task(models.Model):
@@ -514,6 +549,10 @@ class FlaggedTask(Task):
     foia = models.ForeignKey('foia.FOIARequest', blank=True, null=True)
     agency = models.ForeignKey('agency.Agency', blank=True, null=True)
     jurisdiction = models.ForeignKey(Jurisdiction, blank=True, null=True)
+    category = models.TextField(
+        choices=FLAG_CATEGORIES,
+        blank=True,
+    )
 
     objects = FlaggedTaskQuerySet.as_manager()
 

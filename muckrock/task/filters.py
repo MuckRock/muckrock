@@ -16,6 +16,7 @@ from muckrock.filters import BLANK_STATUS, BOOLEAN_CHOICES, RangeWidget
 from muckrock.foia.filters import JurisdictionFilterSet
 from muckrock.portal.models import PORTAL_TYPES
 from muckrock.task.models import (
+    FLAG_CATEGORIES,
     PORTAL_CATEGORIES,
     SNAIL_MAIL_CATEGORIES,
     FlaggedTask,
@@ -167,10 +168,11 @@ class FlaggedTaskFilterSet(TaskFilterSet):
         queryset=User.objects.all(),
         widget=autocomplete_light.MultipleChoiceWidget('UserAutocomplete')
     )
+    category = django_filters.ChoiceFilter(choices=FLAG_CATEGORIES)
 
     class Meta:
         model = FlaggedTask
-        fields = ['user', 'resolved', 'resolved_by']
+        fields = ['user', 'category', 'resolved', 'resolved_by']
 
 
 class StaleAgencyTaskFilterSet(JurisdictionFilterSet, TaskFilterSet):
