@@ -30,7 +30,7 @@ class AddressAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     }
 
 
-class EmailAddressAutocomplete(autocomplete_light.AutocompleteModelTemplate):
+class EmailAddressAutocomplete(autocomplete_light.AutocompleteModelBase):
     """An autocomplete for selecting an email address"""
     choices = EmailAddress.objects.filter(status='good')
     search_fields = ['email', 'name']
@@ -40,9 +40,16 @@ class EmailAddressAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     }
 
 
-class EmailAddressAdminAutocomplete(EmailAddressAutocomplete):
+class EmailAddressAdminAutocomplete(
+    autocomplete_light.AutocompleteModelTemplate
+):
     """Allow choosing error emails in the admin"""
     choices = EmailAddress.objects.all()
+    search_fields = ['email', 'name']
+    attrs = {
+        'data-autocomplete-minimum-characters': 0,
+        'placeholder': 'Search for an email address',
+    }
 
 
 class GenericPhoneNumberAutocomplete(
