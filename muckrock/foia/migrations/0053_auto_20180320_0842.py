@@ -44,7 +44,10 @@ def convert_composers(apps, schema_editor):
             )
         multi.composer = composer
         multi.save()
-        multi.foias.all().update(composer=composer)
+        if multi.foias.exist():
+            composer.datetime_submitted = multi.foias.first().date_submitted
+            composer.save()
+            multi.foias.all().update(composer=composer)
 
     def convert_foia(foia):
         if foia.parent is not None and foia.parent.composer is None:
@@ -76,9 +79,16 @@ def convert_composers(apps, schema_editor):
         foia.composer = composer
         foia.save()
 
-    for multi in FOIAMultiRequest.objects.all():
+    for multi in (
+        FOIAMultiRequest.objects.all().select_related('parent__composer')
+        .prefetch_related('agencies', 'foias')
+    ):
         convert_multi(multi)
-    for foia in FOIARequest.objects.filter(composer=None):
+    for foia in (
+        FOIARequest.objects.filter(composer=None).select_related(
+            'parent__composer', 'agency'
+        )
+    ):
         convert_foia(foia)
 
 
