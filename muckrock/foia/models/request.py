@@ -11,6 +11,7 @@ from django.contrib.auth.models import AnonymousUser, User
 from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
 from django.db import connection, models
+from django.db.models import Sum
 from django.template.defaultfilters import escape, linebreaks, slugify
 from django.template.loader import get_template, render_to_string
 from django.utils import timezone
@@ -37,7 +38,8 @@ from muckrock.tags.models import Tag, TaggedItemBase, parse_tags
 logger = logging.getLogger(__name__)
 
 STATUS = [
-    ('started', 'Draft'),
+    ('started',
+     'Draft'),  # XXX this status is removed (what to do for foia machine?)
     ('submitted', 'Processing'),
     ('ack', 'Awaiting Acknowledgement'),
     ('processed', 'Awaiting Response'),
@@ -60,14 +62,25 @@ class FOIARequest(models.Model):
     # pylint: disable=too-many-public-methods
     # pylint: disable=too-many-instance-attributes
 
+    # XXX moved to composer
     user = models.ForeignKey(User)
     title = models.CharField(max_length=255, db_index=True)
     slug = models.SlugField(max_length=255)
     status = models.CharField(max_length=10, choices=STATUS, db_index=True)
+    # XXX this is removed
     jurisdiction = models.ForeignKey('jurisdiction.Jurisdiction')
     agency = models.ForeignKey('agency.Agency', blank=True, null=True)
+    # XXX only nullable during data transition
+    composer = models.ForeignKey('foia.FOIAComposer', blank=True, null=True)
+    # XXX moved to composer
     date_submitted = models.DateField(blank=True, null=True, db_index=True)
-    date_updated = models.DateField(blank=True, null=True, db_index=True)
+    # XXX change these to date time fields
+    date_updated = models.DateField(
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text='Date of latest communication',
+    )
     date_done = models.DateField(
         blank=True,
         null=True,
@@ -76,6 +89,7 @@ class FOIARequest(models.Model):
     )
     date_due = models.DateField(blank=True, null=True, db_index=True)
     days_until_due = models.IntegerField(blank=True, null=True)
+    # XXX these 2 remain date fields
     date_followup = models.DateField(blank=True, null=True)
     date_estimate = models.DateField(
         blank=True, null=True, verbose_name='Estimated Date Completed'
@@ -86,11 +100,15 @@ class FOIARequest(models.Model):
     date_embargo = models.DateField(blank=True, null=True)
     price = models.DecimalField(max_digits=14, decimal_places=2, default='0.00')
     requested_docs = models.TextField(blank=True)
+    # XXX remove description
     description = models.TextField(blank=True)
+    # XXX do we want to reconsider how we do featured requests?
     featured = models.BooleanField(default=False)
+    # XXX tracker should be able to be removed
     tracker = models.BooleanField(default=False)
     sidebar_html = models.TextField(blank=True)
     mail_id = models.CharField(blank=True, max_length=255, editable=False)
+    # XXX i dont think we use updated any more
     updated = models.BooleanField(default=False)
 
     portal = models.ForeignKey(
@@ -126,13 +144,16 @@ class FOIARequest(models.Model):
         null=True,
     )
 
+    # XXX times viewed is not used
     times_viewed = models.IntegerField(default=0)
     disable_autofollowups = models.BooleanField(default=False)
+    # XXX missing proxy may work differently with a composer
     missing_proxy = models.BooleanField(
         default=False,
         help_text='This request requires a proxy to file, but no such '
         'proxy was avilable upon draft creation.'
     )
+    # XXX parent will no longer exist - there will be a FK to a composer
     parent = models.ForeignKey(
         'self',
         blank=True,
@@ -152,6 +173,7 @@ class FOIARequest(models.Model):
         blank=True,
         null=True,
     )
+    # XXX this goes away
     multirequest = models.ForeignKey(
         'foia.FOIAMultiRequest',
         related_name='foias',

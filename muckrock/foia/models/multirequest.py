@@ -51,6 +51,13 @@ class FOIAMultiRequest(models.Model):
         null=True,
         on_delete=models.SET_NULL,
     )
+    # only used during data migration
+    composer = models.OneToOneField(
+        'foia.FOIAComposer',
+        related_name='multi',
+        blank=True,
+        null=True,
+    )
 
     tags = TaggableManager(through=TaggedItemBase, blank=True)
 

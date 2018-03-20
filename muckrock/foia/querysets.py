@@ -29,10 +29,6 @@ class FOIARequestQuerySet(models.QuerySet):
         return self.filter(status__in=['partial', 'done']
                            ).exclude(date_done=None)
 
-    def get_editable(self):
-        """Get all editable FOIA requests"""
-        return self.filter(status='started')
-
     def get_viewable(self, user):
         """Get all viewable FOIA requests for given user"""
 
