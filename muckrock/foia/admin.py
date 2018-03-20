@@ -357,7 +357,7 @@ class FOIARequestAdminForm(forms.ModelForm):
         required=False,
     )
     email = autocomplete_light.ModelChoiceField(
-        'EmailAddressAutocomplete',
+        'EmailAddressAdminAutocomplete',
         queryset=EmailAddress.objects.all(),
         required=False,
     )
@@ -377,7 +377,7 @@ class FOIARequestAdminForm(forms.ModelForm):
         required=False,
     )
     cc_emails = autocomplete_light.ModelMultipleChoiceField(
-        'EmailAddressAutocomplete',
+        'EmailAddressAdminAutocomplete',
         queryset=EmailAddress.objects.all(),
         required=False,
     )
