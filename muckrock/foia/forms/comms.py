@@ -293,11 +293,13 @@ class ContactInfoForm(SendViaForm):
         super(ContactInfoForm, self).__init__(*args, **kwargs)
         self.fields['email'].queryset = self.foia.agency.emails.filter(
             status='good',
-        ).exclude(email__endswith='muckrock.com')
+        ).exclude(
+            email__endswith='muckrock.com',
+        ).distinct()
         self.fields['fax'].queryset = self.foia.agency.phones.filter(
             status='good',
             type='fax',
-        )
+        ).distinct()
 
     def clean(self):
         """Make other fields required if chosen"""
