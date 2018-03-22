@@ -7,12 +7,15 @@ from django.contrib.auth.models import AnonymousUser
 from django.db import models
 from django.db.models import Case, Count, F, Max, Q, Sum, When
 from django.db.models.functions import Cast, Now
+from django.utils import timezone
 
 # Standard Library
-from datetime import date
+from datetime import date, datetime, time
 
 # MuckRock
 from muckrock.models import ExtractDay
+
+# XXX go through these
 
 
 class FOIARequestQuerySet(models.QuerySet):
@@ -97,18 +100,15 @@ class FOIARequestQuerySet(models.QuerySet):
                 'agency', 'jurisdiction', 'jurisdiction__parent',
                 'jurisdiction__parent__parent'
             ).filter(user__profile__organization=organization)
-            .exclude(status='started').order_by('-date_submitted')
+            .exclude(status='started')
+            .order_by('-composer__datetime_submitted')
         )
 
     def select_related_view(self):
         """Select related models for viewing"""
         return self.select_related(
-            'agency',
-            'agency__jurisdiction',
-            'jurisdiction',
-            'jurisdiction__parent',
-            'jurisdiction__parent__parent',
-            'user',
+            'agency__jurisdiction__parent__parent',
+            'composer__user',
             'crowdfund',
         )
 
@@ -163,8 +163,23 @@ class FOIARequestQuerySet(models.QuerySet):
     def get_processing_days(self):
         """Get the number of processing days"""
         return (
-            self.filter(status='submitted')
-            .exclude(date_processing=None
-                     ).aggregate(days=Sum(date.today() - F('date_processing'))
-                                 )['days']
+            self.filter(status='submitted').exclude(date_processing=None)
+            .aggregate(days=Sum(date.today() - F('date_processing')))['days']
+        )
+
+    def get_submitted_range(self, start, end):
+        """Get requests submitted within a date range"""
+        return self.filter(composer__datetime_submitted__range=(start, end))
+
+    def get_today(self):
+        """Get requests submitted today"""
+        midnight = time(tzinfo=timezone.get_current_timezone())
+        today_midnight = datetime.combine(date.today(), midnight)
+        return self.filter(composer__datetime_submitted__gte=today_midnight)
+
+    def exclude_org_users(self):
+        """Exclude requests made by org users"""
+        return self.exclude(
+            user__profile__organization__active=True,
+            user__profile__organization__monthly_cost__gt=0,
         )

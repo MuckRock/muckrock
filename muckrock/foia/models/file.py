@@ -35,6 +35,7 @@ class FOIAFile(models.Model):
     source = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
     # for doc cloud only
+    # XXX is access really needed?
     access = models.CharField(
         max_length=12,
         default='public',

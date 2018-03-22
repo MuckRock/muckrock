@@ -534,14 +534,10 @@ def profile(request, username=None):
         )
     )
     requests = (
-        FOIARequest.objects.filter(user=user
-                                   ).get_viewable(request.user).select_related(
-                                       'jurisdiction',
-                                       'jurisdiction__parent',
-                                       'jurisdiction__parent__parent',
-                                   )
+        FOIARequest.objects.filter(user=user).get_viewable(request.user)
+        .select_related('jurisdiction__parent__parent')
     )
-    recent_requests = requests.order_by('-date_submitted')[:5]
+    recent_requests = requests.order_by('-composer__datetime_submitted')[:5]
     recent_completed = requests.filter(status='done').order_by('-date_done')[:5]
     articles = Article.objects.get_published().filter(authors=user)[:5]
     projects = Project.objects.get_for_contributor(user).get_visible(

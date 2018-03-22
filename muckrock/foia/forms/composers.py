@@ -16,48 +16,52 @@ from autocomplete_light.contrib.taggit_field import TaggitField
 # MuckRock
 from muckrock.accounts.utils import mailchimp_subscribe, miniregister
 from muckrock.agency.models import Agency
-from muckrock.foia.models import FOIAMultiRequest, FOIARequest
+from muckrock.foia.models import FOIAComposer, FOIAMultiRequest
 from muckrock.forms import TaggitWidget
-from muckrock.jurisdiction.models import Jurisdiction
 
 
-class RequestForm(forms.Form):
-    """This form creates new, single MuckRock requests"""
-
-    JURISDICTION_CHOICES = [('f', 'Federal'), ('s', 'State'), ('l', 'Local')]
+class ComposerForm(forms.Form):
+    """This form creates and updates FOIA composers"""
 
     title = forms.CharField(
         widget=forms.TextInput(attrs={
-            'placeholder': 'Add a subject'
+            'placeholder': 'Add a title'
         }),
         max_length=255,
     )
-    document_placeholder = (
-        'Write one sentence describing what you\'re looking for. '
-        'The more specific you can be, the better.'
-    )
     document = forms.CharField(
-        widget=forms.Textarea(attrs={
-            'placeholder': document_placeholder
-        })
+        widget=forms.Textarea(
+            attrs={
+                'placeholder':
+                    'Write a short description of the documents you are '
+                    'looking for. The more specific you can be, the better.'
+            }
+        )
     )
-    jurisdiction = forms.ChoiceField(
-        choices=JURISDICTION_CHOICES, widget=forms.RadioSelect
-    )
-    state = autocomplete_light.ModelChoiceField(
-        'StateAutocomplete',
-        queryset=Jurisdiction.objects.filter(level='s', hidden=False),
-        required=False
-    )
-    local = autocomplete_light.ModelChoiceField(
-        'JurisdictionLocalAutocomplete',
-        queryset=Jurisdiction.objects.filter(level='l', hidden=False),
-        required=False
-    )
-    agency = autocomplete_light.ModelChoiceField(
-        'AgencySimpleAgencyAutocomplete',
+    # XXX agencies is not required to save, but is required to submit
+    agencies = autocomplete_light.ModelMultipleChoiceField(
+        # XXX rename this autocomplete
+        'AgencyMultiRequestAutocomplete',
         queryset=Agency.objects.get_approved(),
     )
+    embargo = forms.BooleanField(
+        required=False,
+        help_text='Embargoing a request keeps it completely private from '
+        'other users until the embargo date you set. '
+        'You may change this whenever you want.'
+    )
+    tags = TaggitField(
+        widget=TaggitWidget(
+            'TagAutocomplete',
+            attrs={
+                'placeholder': 'Search tags',
+                'data-autocomplete-minimum-characters': 1
+            }
+        ),
+        help_text='Separate tags with commas.',
+        required=False,
+    )
+
     full_name = forms.CharField(label='Full Name or Handle (Public)')
     email = forms.EmailField(max_length=75)
     newsletter = forms.BooleanField(
@@ -67,28 +71,15 @@ class RequestForm(forms.Form):
         'FOIA news, tips, and more',
     )
 
+    # XXX move request out, just user in
+    # XXX move minireg to view
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
-        super(RequestForm, self).__init__(*args, **kwargs)
+        super(ComposerForm, self).__init__(*args, **kwargs)
         if self.request and self.request.user.is_authenticated:
             del self.fields['full_name']
             del self.fields['email']
             del self.fields['newsletter']
-        self.jurisdiction = None
-
-    def full_clean(self):
-        """Remove required from agency"""
-        # We want "required" attribute on the field, but we might take the text value
-        # instead of the drop down value
-        self.fields['agency'].required = False
-        super(RequestForm, self).full_clean()
-
-    def clean(self):
-        """Ensure the jurisdiction and agency were set correctly"""
-        self.jurisdiction = self.get_jurisdiction()
-        if self.jurisdiction:
-            self.cleaned_data['agency'] = self.get_agency()
-        return self.cleaned_data
 
     def clean_email(self):
         """Do a case insensitive uniqueness check"""
@@ -99,26 +90,17 @@ class RequestForm(forms.Form):
             )
         return email
 
-    def get_jurisdiction(self):
-        """Get the jurisdiction from the correct field"""
-        jurisdiction = self.cleaned_data.get('jurisdiction')
-        state = self.cleaned_data.get('state')
-        local = self.cleaned_data.get('local')
-        if jurisdiction == 'f':
-            return Jurisdiction.objects.filter(level='f').first()
-        elif jurisdiction == 's' and not state:
-            self.add_error('state', 'No state was selected')
-            return None
-        elif jurisdiction == 's' and state:
-            return state
-        elif jurisdiction == 'l' and not local:
-            self.add_error('local', 'No locality was selected')
-            return None
-        elif jurisdiction == 'l' and local:
-            return local
+    def clean_title(self):
+        """Make sure we have a non-blank(ish) title"""
+        title = self.cleaned_data['title'].strip()
+        if title:
+            return title
+        else:
+            return 'Untitled'
 
     def get_agency(self):
         """Get the agency and create a new one if necessary"""
+        # XXX need to completely rethink how new agencies work
         agency = self.cleaned_data.get('agency')
         agency_autocomplete = self.request.POST.get('agency-autocomplete', '')
         agency_autocomplete = agency_autocomplete.strip()
@@ -156,6 +138,7 @@ class RequestForm(forms.Form):
 
     def make_user(self, data):
         """Miniregister a new user if necessary"""
+        # XXX
         user, password = miniregister(data['full_name'], data['email'])
         user = authenticate(
             username=user.username,
@@ -165,31 +148,37 @@ class RequestForm(forms.Form):
         if data.get('newsletter'):
             mailchimp_subscribe(self.request, user.email)
 
-    def process(self, parent):
-        """Create the new request"""
+    def create_composer(self, parent):
+        """Create the new composer"""
         if self.request.user.is_anonymous():
             self.make_user(self.cleaned_data)
-        agency = self.cleaned_data['agency']
-        proxy_info = agency.get_proxy_info()
-        if 'warning' in proxy_info:
-            messages.warning(self.request, proxy_info['warning'])
-        foia = FOIARequest.objects.create(
+        # XXX - XXX
+        #proxy_info = agency.get_proxy_info()
+        # XXX shouldnt be warning here
+        #if 'warning' in proxy_info:
+        #    messages.warning(self.request, proxy_info['warning'])
+        composer = FOIAComposer.objects.create(
             user=self.request.user,
             status='started',
             title=self.cleaned_data['title'],
-            jurisdiction=self.jurisdiction,
             slug=slugify(self.cleaned_data['title']) or 'untitled',
-            agency=agency,
             requested_docs=self.cleaned_data['document'],
-            description=self.cleaned_data['document'],
             parent=parent,
-            missing_proxy=proxy_info['missing_proxy'],
         )
-        foia.create_initial_communication(
-            proxy_info.get('from_user', self.request.user),
-            proxy_info['proxy'],
-        )
-        return foia
+        composer.agencies.set(self.cleaned_data['agencies'])
+        return composer
+
+    def update_composer(self, composer):
+        """Update an existing composer"""
+        composer.title = self.cleaned_data['title']
+        composer.slug = slugify(self.cleaned_data['title']) or 'unititled'
+        composer.requested_docs = self.cleaned_data['document']
+        composer.agencies.set(self.cleaned_data['agencies'])
+        composer.save()
+
+    def submit_composer(self, composer):
+        """Submit a composer"""
+        # XXX check
 
 
 class RequestDraftForm(forms.Form):

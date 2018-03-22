@@ -18,6 +18,7 @@ from muckrock.foia.models import END_STATUS, FOIARequest
 from muckrock.tags.models import TaggedItemBase
 
 
+# XXX this needs to be moved somewhere else
 class RequestHelper(object):
     """Helper methods for classes that have a get_requests() method"""
 
@@ -25,8 +26,9 @@ class RequestHelper(object):
         """Get the average response time from a submitted to completed request"""
         requests = self.get_requests()
         avg = (
-            requests.aggregate(avg=Avg(F('date_done') - F('date_submitted'))
-                               )['avg']
+            requests.aggregate(
+                avg=Avg(F('date_done') - F('composer__datetime_submitted'))
+            )['avg']
         )
         return int(avg.days) if avg is not None else 0
 

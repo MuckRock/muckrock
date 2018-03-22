@@ -104,16 +104,6 @@ class TestFOIARequestUnit(TestCase):
             )
         )
 
-    def test_foia_model_editable(self):
-        """Test FOIA Request model's is_editable method"""
-
-        foias = FOIARequest.objects.all().order_by('id')[:5]
-        for foia in foias[:5]:
-            if foia.status in ['started']:
-                nose.tools.assert_true(foia.is_editable())
-            else:
-                nose.tools.assert_false(foia.is_editable())
-
     def test_foia_viewable(self):
         """Test all the viewable and embargo functions"""
 
@@ -206,7 +196,7 @@ class TestFOIARequestUnit(TestCase):
         """Make sure the follow up date is set correctly"""
         # pylint: disable=protected-access
         foia = FOIARequestFactory(
-            date_submitted=datetime.date.today(),
+            composer__datetime_submitted=timezone.now(),
             status='processed',
             jurisdiction__level='s',
             jurisdiction__law__days=10,

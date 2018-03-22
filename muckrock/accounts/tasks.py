@@ -178,42 +178,31 @@ def store_statistics():
             p.user.username for p in Profile.objects.filter(acct_type='pro')
         ),
         daily_requests_pro=FOIARequest.objects.filter(
-            user__profile__acct_type='pro', date_submitted=yesterday
-        ).exclude(
-            user__profile__organization__active=True,
-            user__profile__organization__monthly_cost__gt=0,
-        ).count(),
+            user__profile__acct_type='pro',
+        ).get_submitted_range(yesterday_midnight, today_midnight)
+        .exclude_org_users().count(),
         daily_requests_basic=FOIARequest.objects.filter(
-            user__profile__acct_type='basic', date_submitted=yesterday
-        ).exclude(
-            user__profile__organization__active=True,
-            user__profile__organization__monthly_cost__gt=0,
-        ).count(),
+            user__profile__acct_type='basic',
+        ).get_submitted_range(yesterday_midnight,
+                              today_midnight).exclude_org_users().count(),
         daily_requests_beta=FOIARequest.objects.filter(
-            user__profile__acct_type='beta', date_submitted=yesterday
-        ).exclude(
-            user__profile__organization__active=True,
-            user__profile__organization__monthly_cost__gt=0,
-        ).count(),
+            user__profile__acct_type='beta',
+        ).get_submitted_range(yesterday_midnight,
+                              today_midnight).exclude_org_users().count(),
         daily_requests_proxy=FOIARequest.objects.filter(
-            user__profile__acct_type='proxy', date_submitted=yesterday
-        ).exclude(
-            user__profile__organization__active=True,
-            user__profile__organization__monthly_cost__gt=0,
-        ).count(),
+            user__profile__acct_type='proxy',
+        ).get_submitted_range(yesterday_midnight,
+                              today_midnight).exclude_org_users().count(),
         daily_requests_admin=FOIARequest.objects.filter(
-            user__profile__acct_type='admin', date_submitted=yesterday
-        ).exclude(
-            user__profile__organization__active=True,
-            user__profile__organization__monthly_cost__gt=0,
-        ).count(),
+            user__profile__acct_type='admin',
+        ).get_submitted_range(yesterday_midnight,
+                              today_midnight).exclude_org_users().count(),
         daily_requests_org=FOIARequest.objects.filter(
             user__profile__organization__active=True,
             user__profile__organization__monthly_cost__gt=0,
-            date_submitted=yesterday
-        ).count(),
+        ).get_submitted_range(yesterday_midnight, today_midnight).count(),
         daily_articles=Article.objects.filter(
-            pub_date__gte=yesterday_midnight, pub_date__lt=today_midnight
+            pub_date__range=(yesterday_midnight, today_midnight)
         ).count(),
         orphaned_communications=FOIACommunication.objects.filter(foia=None
                                                                  ).count(),

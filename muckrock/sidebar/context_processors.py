@@ -24,7 +24,7 @@ def get_recent_articles():
 
 def get_actionable_requests(user):
     """Gets requests that require action or attention"""
-    requests = FOIARequest.objects.filter(user=user)
+    requests = FOIARequest.objects.filter(composer__user=user)
     started = requests.filter(status='started').count()
     payment = requests.filter(status='payment').count()
     fix = requests.filter(status='fix').count()

@@ -165,6 +165,7 @@ class FOIACommunication(models.Model):
             raise ValueError('Expected a request to move the communication to.')
         if not isinstance(foia_pks, list):
             foia_pks = [foia_pks]
+        # XXX should not 404 within a model
         move_to_request = get_object_or_404(FOIARequest, pk=foia_pks[0])
         old_foia = self.foia
         self.foia = move_to_request

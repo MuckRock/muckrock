@@ -62,26 +62,20 @@ class FOIARequest(models.Model):
     # pylint: disable=too-many-public-methods
     # pylint: disable=too-many-instance-attributes
 
-    # XXX moved to composer
-    user = models.ForeignKey(User)
     title = models.CharField(max_length=255, db_index=True)
     slug = models.SlugField(max_length=255)
     status = models.CharField(max_length=10, choices=STATUS, db_index=True)
-    # XXX this is removed
-    jurisdiction = models.ForeignKey('jurisdiction.Jurisdiction')
-    agency = models.ForeignKey('agency.Agency', blank=True, null=True)
-    # XXX only nullable during data transition
-    composer = models.ForeignKey('foia.FOIAComposer', blank=True, null=True)
-    # XXX moved to composer
-    date_submitted = models.DateField(blank=True, null=True, db_index=True)
-    # XXX change these to date time fields
-    date_updated = models.DateField(
+    agency = models.ForeignKey('agency.Agency')
+    composer = models.ForeignKey('foia.FOIAComposer')
+    # XXX rename this
+    date_updated = models.DateTimeField(
         blank=True,
         null=True,
         db_index=True,
         help_text='Date of latest communication',
     )
-    date_done = models.DateField(
+    # XXX rename this
+    date_done = models.DateTimeField(
         blank=True,
         null=True,
         db_index=True,
@@ -89,27 +83,21 @@ class FOIARequest(models.Model):
     )
     date_due = models.DateField(blank=True, null=True, db_index=True)
     days_until_due = models.IntegerField(blank=True, null=True)
-    # XXX these 2 remain date fields
     date_followup = models.DateField(blank=True, null=True)
     date_estimate = models.DateField(
         blank=True, null=True, verbose_name='Estimated Date Completed'
     )
     date_processing = models.DateField(blank=True, null=True)
+
     embargo = models.BooleanField(default=False)
     permanent_embargo = models.BooleanField(default=False)
     date_embargo = models.DateField(blank=True, null=True)
+
     price = models.DecimalField(max_digits=14, decimal_places=2, default='0.00')
-    requested_docs = models.TextField(blank=True)
-    # XXX remove description
-    description = models.TextField(blank=True)
     # XXX do we want to reconsider how we do featured requests?
     featured = models.BooleanField(default=False)
-    # XXX tracker should be able to be removed
-    tracker = models.BooleanField(default=False)
     sidebar_html = models.TextField(blank=True)
     mail_id = models.CharField(blank=True, max_length=255, editable=False)
-    # XXX i dont think we use updated any more
-    updated = models.BooleanField(default=False)
 
     portal = models.ForeignKey(
         'portal.Portal',
@@ -144,21 +132,12 @@ class FOIARequest(models.Model):
         null=True,
     )
 
-    # XXX times viewed is not used
-    times_viewed = models.IntegerField(default=0)
     disable_autofollowups = models.BooleanField(default=False)
     # XXX missing proxy may work differently with a composer
     missing_proxy = models.BooleanField(
         default=False,
         help_text='This request requires a proxy to file, but no such '
         'proxy was avilable upon draft creation.'
-    )
-    # XXX parent will no longer exist - there will be a FK to a composer
-    parent = models.ForeignKey(
-        'self',
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
     )
     block_incoming = models.BooleanField(
         default=False,
@@ -173,14 +152,8 @@ class FOIARequest(models.Model):
         blank=True,
         null=True,
     )
-    # XXX this goes away
-    multirequest = models.ForeignKey(
-        'foia.FOIAMultiRequest',
-        related_name='foias',
-        blank=True,
-        null=True,
-    )
 
+    # XXX move permission fields to composer?
     read_collaborators = models.ManyToManyField(
         User,
         related_name='read_access',
@@ -193,14 +166,8 @@ class FOIARequest(models.Model):
     )
     access_key = models.CharField(blank=True, max_length=255)
 
-    # Depreacted fields
-    old_email = models.CharField(blank=True, max_length=254)
-    other_emails = fields.EmailsListField(blank=True, max_length=255)
-
     objects = FOIARequestQuerySet.as_manager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
-
-    foia_type = 'foia'
 
     def __unicode__(self):
         return self.title
@@ -238,25 +205,29 @@ class FOIARequest(models.Model):
                 reversion.set_comment(comment)
         super(FOIARequest, self).save(*args, **kwargs)
 
-    def is_editable(self):
-        """Can this request be updated?"""
-        return self.status == 'started'
+    @property
+    def user(self):
+        """The request's user is its composer's user"""
+        return self.composer.user
 
-    def has_crowdfund(self):
-        """Does this request have crowdfunding enabled?"""
-        return bool(self.crowdfund)
+    @property
+    def jurisdiction(self):
+        """The request's jurisdiction is its agency's jurisdiction"""
+        return self.agency.jurisdiction
 
+    # XXX move this to rules
     def is_payable(self):
         """Can this request be payed for by the user?"""
-        has_open_crowdfund = self.has_crowdfund(
-        ) and not self.crowdfund.expired()
+        has_open_crowdfund = self.crowdfund and not self.crowdfund.expired()
         has_payment_status = self.status == 'payment'
         return has_payment_status and not has_open_crowdfund
 
+    # XXX this seems like it should not be in the model, but view
     def get_stripe_amount(self):
         """Output a Stripe Checkout formatted price"""
         return int(self.price * 100)
 
+    # XXX permision handling
     def is_public(self):
         """Is this document viewable to everyone"""
         return self.has_perm(AnonymousUser(), 'view')
@@ -271,8 +242,9 @@ class FOIARequest(models.Model):
 
     def created_by(self, user):
         """Did this user create this request?"""
-        return self.user == user
+        return self.composer.user == user
 
+    # XXX i dislike the how adding/removing/promoting/demoting is done
     ## Editors
 
     def has_editor(self, user):
@@ -329,13 +301,11 @@ class FOIARequest(models.Model):
 
     def get_files(self):
         """Get all files under this FOIA"""
+        # XXX try to remove circular import
         from muckrock.foia.models import FOIAFile
         return FOIAFile.objects.filter(comm__foia=self)
 
-    def public_documents(self):
-        """Get a list of public documents attached to this request"""
-        return self.get_files().filter(access='public')
-
+    # XXX rename
     def first_request(self):
         """Return the first request text"""
         try:
@@ -343,6 +313,7 @@ class FOIARequest(models.Model):
         except IndexError:
             return ''
 
+    # XXX remove
     def last_comm(self):
         """Return the last communication"""
         return self.communications.last()
@@ -375,6 +346,7 @@ class FOIARequest(models.Model):
         # set object's mail id to what is in the database
         self.mail_id = FOIARequest.objects.get(pk=self.pk).mail_id
 
+    # XXX merge with get_request email?
     def get_mail_id(self):
         """Get the mail id - generate it if it doesn't exist"""
         if not self.mail_id:
@@ -391,12 +363,10 @@ class FOIARequest(models.Model):
 
     def get_to_user(self):
         """Who communications are to"""
-        if self.agency:
-            return self.agency.get_user()
-        else:
-            return None
+        return self.agency.get_user()
 
     def get_saved(self):
+        # XXX ehh
         """Get the old model that is saved in the db"""
         try:
             return FOIARequest.objects.get(pk=self.pk)
@@ -420,8 +390,7 @@ class FOIARequest(models.Model):
         """Various actions whenever the request has been updated"""
         # pylint: disable=unused-argument
         # Do something with anchor
-        self.updated = True
-        self.save()
+        # XXX
         self.update_dates()
 
     def notify(self, action):
@@ -439,10 +408,11 @@ class FOIARequest(models.Model):
         )
         for notification in identical_notifications:
             notification.mark_read()
-        utils.notify(self.user, action)
+        utils.notify(self.composer.user, action)
         if self.is_public():
             utils.notify(followers(self), action)
 
+    # XXX split up sending responsiblity across composer and comm?
     def submit(self, appeal=False, **kwargs):
         """
         The request has been submitted.
@@ -909,12 +879,14 @@ class FOIARequest(models.Model):
         else:
             return 'ack'
 
+    # XXX this is a mess
     def update_dates(self):
         """Set the due date, follow up date and days until due attributes"""
         cal = self.jurisdiction.get_calendar()
         # first submit
-        if not self.date_submitted:
-            self.date_submitted = date.today()
+        if not self.composer.datetime_submitted:
+            self.composer.datetime_submitted = timezone.now()
+            self.composer.save()
             days = self.jurisdiction.days
             if days:
                 self.date_due = cal.business_days_from(date.today(), days)
@@ -977,6 +949,7 @@ class FOIARequest(models.Model):
         else:
             return 15
 
+    # XXX somewhere else?
     def get_agency_reply_link(self, email):
         """Get the link for the agency user to log in"""
         agency = self.agency
@@ -994,6 +967,7 @@ class FOIARequest(models.Model):
             email=email,
         )
 
+    # XXX necessary?
     def update_tags(self, tags):
         """Update the requests tags"""
         tag_set = set()
@@ -1002,6 +976,7 @@ class FOIARequest(models.Model):
             tag_set.add(new_tag)
         self.tags.set(*tag_set)
 
+    # XXX should not be in models
     def user_actions(self, user):
         """Provides action interfaces for users"""
         from muckrock.foia.forms import FOIAFlagForm, FOIAContactUserForm
@@ -1064,6 +1039,7 @@ class FOIARequest(models.Model):
             },
         ]
 
+    # XXX this is only ever used to check for > 0...
     def total_pages(self):
         """Get the total number of pages for this request"""
         pages = self.get_files().aggregate(Sum('pages'))['pages__sum']
@@ -1171,7 +1147,7 @@ class FOIARequest(models.Model):
         """Create the initial request communication"""
         template = get_template('text/foia/request.txt')
         context = {
-            'document_request': smart_text(self.requested_docs),
+            'document_request': smart_text(self.composer.requested_docs),
             'jurisdiction': self.jurisdiction,
             'user_name': from_user.get_full_name(),
             'proxy': proxy,

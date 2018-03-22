@@ -2,6 +2,7 @@ $color-title: #F26C5A;
 $color-jurisdiction: #5A90F2;
 $color-jurisdiction-picker: darken($color-jurisdiction, 10%);
 $color-agency: darken($color-jurisdiction-picker, 10%);
+$color-attachment: #F2B85A;
 
 .new-request {
     .create-request {
@@ -11,6 +12,8 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
     fieldset {
         margin: 0;
         padding: $vr;
+        border-left: 2px solid $color-grey;
+        border-right: 2px solid $color-grey;
     }
     .title {
         @include border-top-radius($border-radius);
@@ -32,9 +35,15 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
             }
         }
     }
+    .document-boilerplate {
+      border-left: 2px solid $color-grey;
+      border-right: 2px solid $color-grey;
+      width: 100%;
+      font-size: $size-3;
+      margin: 0;
+      padding: $vr;
+    }
     .document {
-        border-left: 2px solid $color-grey;
-        border-right: 2px solid $color-grey;
         padding: 0;
         label { display: none; }
         textarea {
@@ -42,6 +51,7 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
             width: 100%;
             height: 10em;
             padding: $vr;
+            margin: 0;
             resize: none;
             border: none;
             border-radius: 0;
@@ -50,73 +60,7 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
             }
         }
     }
-    fieldset.state, fieldset.local {
-        width: 100%;
-        background-color: $color-jurisdiction-picker;
-        border-left: 2px solid $color-blue-dark;
-        border-right: 2px solid $color-blue-dark;
-        label { display: none; }
-        input {
-            display: block;
-            width: 100%;
-        }
-        &.hidden { visibility: hidden; }
-        &.visible { visibility: visible; }
-    }
-
-    .jurisdiction {
-        padding: 0;
-        color: $color-white;
-        background-color: $color-jurisdiction;
-        border-left: 2px solid $color-blue-dark;
-        border-right: 2px solid $color-blue-dark;
-        width: 100%;
-        max-width: 100%;
-        h2 { margin: 0; }
-        ul {
-            display: table;
-            width: 100%;
-            padding: 0;
-            margin: 0;
-        }
-        li {
-            display: table-cell;
-            text-align: center;
-            width: 33%;
-            padding: $vr/2;
-            border-right: $border lighten($color-jurisdiction, 10%);
-            &.active {
-                &:hover { background-color: $color-jurisdiction-picker; }
-                background-color: $color-jurisdiction-picker;
-            }
-            &:hover {
-                background-color: darken($color-jurisdiction, 5%);
-            }
-            &:last-child { border-right: none; }
-            svg {
-                display: block;
-                margin: 0 auto;
-                fill: $color-white;
-                width: auto;
-                &#icon-federal { height: 3em; }
-                &#icon-state { height: 2.5em; margin-top: 0.5em; }
-                &#icon-local { height: 2.25em; margin-top: 0.75em; }
-            }
-        }
-        label {
-            font-size: $size-3;
-            letter-spacing: 0;
-            text-transform: initial;
-            color: $color-white;
-            text-align: center;
-            cursor: pointer;
-        }
-        input[type="radio"] {
-            display: none;
-        }
-    }
-    .agency {
-        display: none;
+    .agencies, .tags {
         margin: 0;
         width: 100%;
         color: $color-white;
@@ -147,13 +91,28 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
         }
 
     }
+    .embargo label, .newsletter label {
+      display: inline;
+      margin-right: $vr/2;
+    }
+    .no-embargo {
+      border-left: 2px solid $color-grey;
+      border-right: 2px solid $color-grey;
+      width: 100%;
+      margin: 0;
+      padding: $vr;
+    }
 
-    .state, .local { display: none; }
-
-    .full-name-or-handle-public, .email {
+    .full_name, .email {
         float: left;
         width: 50%;
         input { width: 100%; }
+    }
+    .full_name {
+      border-right: 0;
+    }
+    .email {
+      border-left: 0;
     }
 
     .autocomplete-light-widget {
@@ -197,6 +156,9 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
 
     .footer--submit {
         text-align: right;
+        .button-group {
+          width: 100%;
+        }
     }
 
     .failure.panel {

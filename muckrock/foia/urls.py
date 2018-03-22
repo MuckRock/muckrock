@@ -62,8 +62,13 @@ urlpatterns = [
     # - List of all composers that have multiple requests?
 
     # Create and Draft Views
-    url(r'^create/$', views.CreateRequest.as_view(), name='foia-create'),
-    url(r'^%s/draft/$' % foia_url, views.draft_request, name='foia-draft'),
+    url(r'^create/$', views.CreateComposer.as_view(), name='foia-create'),
+    url(
+        r'^composer/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)/draft/$',
+        views.UpdateComposer.as_view(),
+        name='foia-draft'
+    ),
+
     # XXX redirect to create
     url(
         r'^create_multi/$', views.create_multirequest, name='foia-create-multi'

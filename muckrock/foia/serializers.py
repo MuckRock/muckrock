@@ -131,6 +131,7 @@ class FOIANoteSerializer(serializers.ModelSerializer):
         exclude = ('id', 'foia')
 
 
+# XXX
 class FOIARequestSerializer(serializers.ModelSerializer):
     """Serializer for FOIA Request model"""
     username = serializers.StringRelatedField(source='user',)
@@ -212,7 +213,6 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             'requested_docs',
             'description',
             # request dates
-            'date_submitted',
             'date_due',
             'days_until_due',
             'date_followup',

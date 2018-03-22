@@ -92,7 +92,8 @@ class AgencyMultiRequestAutocomplete(
         """Returns a complex set of database queries for getting agencies
         by name, alias, jurisdiction, jurisdiction abbreviation, and type."""
         return (
-            Q(name__icontains=string) | Q(aliases__icontains=string)
+            Q(name__icontains=string)
+            | Q(aliases__icontains=string)
             | Q(jurisdiction__name__icontains=string)
             | Q(jurisdiction__abbrev__iexact=string)
             | Q(jurisdiction__parent__abbrev__iexact=string)

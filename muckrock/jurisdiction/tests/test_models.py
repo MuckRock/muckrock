@@ -5,6 +5,7 @@ Tests for Jurisdiction application
 # Django
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.utils import timezone
 
 # Standard Library
 from datetime import date, timedelta
@@ -114,17 +115,18 @@ class TestJurisdictionUnit(TestCase):
         State jurisdictions should include avg. response time of their local jurisdictions.
         """
         today = date.today()
+        now = timezone.now()
         state_duration = 12
         local_duration = 6
         FOIARequestFactory(
             jurisdiction=self.state,
             date_done=today,
-            date_submitted=today - timedelta(state_duration)
+            composer__datetime_submitted=now - timedelta(state_duration)
         )
         FOIARequestFactory(
             jurisdiction=self.local,
             date_done=today,
-            date_submitted=today - timedelta(local_duration)
+            composer__datetime_submitted=now - timedelta(local_duration)
         )
         eq_(
             self.state.average_response_time(),

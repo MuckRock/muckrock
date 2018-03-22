@@ -126,7 +126,7 @@
             <tr class="review-request">
               <td><input type="checkbox" form="{{task.pk}}-form" name="{{data.checkbox_name}}" value="{{foia.pk}}" {% if data.error %}checked{% endif %}></td>
               <td><a href="{{foia.get_absolute_url}}">{{foia}}</a></td>
-              <td>{{foia.date_submitted|date:"m/d/y"}}</td>
+              <td>{{foia.composer.datetime_submitted|date:"m/d/y"}}</td>
               <td>{{foia.latest_response|default_if_none:"Never"}}</td>
               <td>{{foia.date_estimate|date:"m/d/y"}}</td>
               <td>{{foia.get_status_display}}</td>

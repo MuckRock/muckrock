@@ -30,13 +30,17 @@ class FOIAComposer(models.Model):
     """A FOIA request composer"""
 
     user = models.ForeignKey(User, related_name='composers')
-    title = models.CharField(max_length=255, db_index=True)
+    title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)
     status = models.CharField(max_length=10, choices=STATUS)
     agencies = models.ManyToManyField('agency.Agency', related_name='composers')
     requested_docs = models.TextField(blank=True)
     datetime_created = models.DateTimeField(default=timezone.now)
-    datetime_submitted = models.DateTimeField(blank=True, null=True)
+    datetime_submitted = models.DateTimeField(
+        blank=True,
+        null=True,
+        db_index=True,
+    )
     embargo = models.BooleanField(default=False)
     parent = models.ForeignKey(
         'self',
@@ -52,6 +56,9 @@ class FOIAComposer(models.Model):
     num_reg_requests = models.PositiveSmallIntegerField(default=0)
 
     tags = TaggableManager(through=TaggedItemBase, blank=True)
+
+    class Meta:
+        verbose_name = 'FOIA Composer'
 
     def __unicode__(self):
         return self.title

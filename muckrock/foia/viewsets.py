@@ -137,11 +137,9 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                 user=request.user,
                 status='started',
                 title=title,
-                jurisdiction=jurisdiction,
                 slug=slug,
                 agency=agency,
                 requested_docs=requested_docs,
-                description=requested_docs,
                 embargo=embargo,
                 permanent_embargo=permanent_embargo,
             )

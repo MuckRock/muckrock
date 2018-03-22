@@ -24,7 +24,8 @@ class LatestSubmittedRequests(Feed):
         """Return the items for the rss feed"""
         return (
             FOIARequest.objects.get_submitted().get_public()
-            .order_by('-date_submitted').select_related('jurisdiction')
+            .order_by('-composer__datetime_submitted'
+                      ).select_related('jurisdiction')
             .prefetch_related('communications')[:25]
         )
 
@@ -109,7 +110,8 @@ class UserSubmittedFeed(Feed):
         return (
             FOIARequest.objects.get_submitted().filter(
                 user=obj, embargo=False
-            ).order_by('-date_submitted').select_related('jurisdiction')
+            ).order_by('-composer__datetime_submitted'
+                       ).select_related('jurisdiction')
             .prefetch_related('communications')[:25]
         )
 
@@ -142,7 +144,7 @@ class UserDoneFeed(Feed):
         """The completed requests are the items for this feed"""
         return (
             FOIARequest.objects.get_done().filter(user=obj, embargo=False)
-            .order_by('-date_submitted').select_related('jurisdiction')
+            .order_by('-datetime_submitted').select_related('jurisdiction')
             .prefetch_related('communications')[:25]
         )
 

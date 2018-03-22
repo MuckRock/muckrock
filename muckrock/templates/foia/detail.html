@@ -94,7 +94,7 @@
         <table class="dates">
           <tr class="submitted">
             <td class="label">Submitted</td>
-            <td class="date">{{ foia.date_submitted }}</td>
+            <td class="date">{{ foia.composer.datetime_submitted|date }}</td>
           </tr>
           {% if foia.date_due and foia.status == "processed" %}
             <tr class="due">
