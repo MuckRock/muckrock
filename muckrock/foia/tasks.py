@@ -50,6 +50,7 @@ from muckrock.foia.codes import CODES
 from muckrock.foia.exceptions import SizeError
 from muckrock.foia.models import (
     FOIACommunication,
+    FOIAComposer,
     FOIAFile,
     FOIAMultiRequest,
     FOIARequest,
@@ -250,6 +251,18 @@ def submit_multi_request(req_pk, **kwargs):
             new_foia.submit()
     req.status = 'filed'
     req.save()
+
+
+@task(
+    ignore_result=True,
+    max_retries=10,
+    name='muckrock.foia.tasks.submit_composer'
+)
+def approve_composer(composer_pk, **kwargs):
+    """Submit a composer to all agencies"""
+    # pylint: disable=unused-argument
+    composer = FOIAComposer.objects.get(pk=composer_pk)
+    composer.approved()
 
 
 @task(

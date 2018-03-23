@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.template.defaultfilters import slugify
 from django.utils import timezone
 from django.utils.encoding import smart_text
-from django.views.generic import FormView
+from django.views.generic import CreateView, FormView, UpdateView
 
 # Standard Library
 import re
@@ -20,7 +20,9 @@ from datetime import date
 from math import ceil
 
 # MuckRock
+from muckrock.accounts.mixins import MiniregMixin
 from muckrock.agency.models import Agency
+from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.foia.forms import (
     ComposerForm,
     ContactInfoForm,
@@ -34,19 +36,15 @@ from muckrock.task.models import MultiRequestTask
 from muckrock.utils import new_action
 
 
-class CreateComposer(FormView):
+class CreateComposer(MiniregMixin, CreateView):
     """Create a new composer"""
+    # pylint: disable=attribute-defined-outside-init
     template_name = 'forms/foia/create.html'
     form_class = ComposerForm
 
-    # XXX bake parent into form
-    def __init__(self, *args, **kwargs):
-        super(CreateComposer, self).__init__(*args, **kwargs)
-        self.clone = False
-        self.parent = None
-
     def get_initial(self):
         """Get initial data from clone, if there is one"""
+        self.clone = False
         clone_pk = self.request.GET.get('clone')
         if clone_pk is not None:
             return self._get_clone_data(clone_pk)
@@ -73,17 +71,18 @@ class CreateComposer(FormView):
         #    raise Http404()
         initial_data = {
             'title': composer.title,
-            'document': smart_text(composer.requested_docs),
+            'requested_docs': smart_text(composer.requested_docs),
             'agencies': composer.agencies.all(),
+            'tags': composer.tags.all(),
+            'parent': composer,
         }
         self.clone = True
-        self.parent = composer
         return initial_data
 
     def get_form_kwargs(self):
         """Add request to the form kwargs"""
         kwargs = super(CreateComposer, self).get_form_kwargs()
-        kwargs['request'] = self.request
+        kwargs['user'] = self.request.user
         return kwargs
 
     def get_context_data(self, **kwargs):
@@ -97,61 +96,56 @@ class CreateComposer(FormView):
 
     def form_valid(self, form):
         """Create the request"""
+        # XXX delete should be in post??
+
+        if self.request.user.is_authenticated:
+            user = self.request.user
+        else:
+            user = self.miniregister(
+                form.cleaned_data['full_name'],
+                form.cleaned_data['email'],
+                form.cleaned_data.get('newsletter'),
+            )
+        if self.request.POST.get('submit') in ('save', 'submit'):
+            composer = form.save(commit=False)
+            composer.user = user
+            composer.save()
+            form.save_m2m()
         if self.request.POST.get('submit') == 'save':
-            composer = form.create_composer(self.parent)
             self.request.session['ga'] = 'request_drafted'
             messages.success(self.request, 'Request saved')
-            return redirect(composer)
         elif self.request.POST.get('submit') == 'submit':
-            composer = form.create_composer(self.parent)
-            form.submit_composer(composer)
+            # XXX code share from UpdateComposer
+            composer.submit()
             messages.success(self.request, 'Request submitted')
-            return redirect(composer)
-        elif self.request.POST.get('submit') == 'delete':
-            # XXX only needs to delete if it was auto-saved
-            # no auto save yet
-            messages.success(self.request, 'Draft deleted')
-            return redirect('foia-mylist')
+        return redirect(composer)
+
+        # XXX should be in post
+        # elif self.request.POST.get('submit') == 'delete':
+        #     # XXX only needs to delete if it was auto-saved
+        #     # no auto save yet
+        #     messages.success(self.request, 'Draft deleted')
+        #     return redirect('foia-mylist')
 
 
-class UpdateComposer(FormView):
+class UpdateComposer(UpdateView):
     """Update a composer"""
+    # pylint: disable=attribute-defined-outside-init
     template_name = 'forms/foia/create.html'
     form_class = ComposerForm
+    pk_url_kwarg = 'idx'
 
-    def get(self, request, *args, **kwargs):
-        """Set object on get"""
-        self.composer = self.get_composer()
-        return super(UpdateComposer, self).get(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        """Set object on post"""
-        self.composer = self.get_composer()
-        return super(UpdateComposer, self).post(request, *args, **kwargs)
-
-    def get_composer(self):
-        """Get the composer"""
-        # XXX ensure it is editable
-        return get_object_or_404(
-            FOIAComposer,
-            pk=self.kwargs.get('idx'),
+    def get_queryset(self):
+        """Restrict to composers you can view"""
+        return FOIAComposer.objects.filter(
+            status='started',
             user=self.request.user,
         )
-
-    def get_initial(self):
-        """Set initial data from the object"""
-        return {
-            'title': self.composer.title,
-            'document': self.composer.requested_docs,
-            'agencies': self.composer.agencies.all(),
-            'embargo': self.composer.embargo,
-            'tags': self.composer.tags.all(),
-        }
 
     def get_form_kwargs(self):
         """Add request to the form kwargs"""
         kwargs = super(UpdateComposer, self).get_form_kwargs()
-        kwargs['request'] = self.request
+        kwargs['user'] = self.request.user
         return kwargs
 
     def get_context_data(self, **kwargs):
@@ -164,14 +158,21 @@ class UpdateComposer(FormView):
         """Update the request"""
         # XXX
         if self.request.POST.get('submit') == 'save':
-            form.update_composer(self.composer)
+            composer = form.save()
             messages.success(self.request, 'Request saved')
-            return redirect(self.composer)
+            return redirect(composer)
         elif self.request.POST.get('submit') == 'submit':
-            form.update_composer(self.composer)
-            form.submit_composer(self.composer)
-            messages.success(self.request, 'Request submitted')
-            return redirect(self.composer)
+            composer = form.save()
+            try:
+                # XXX ensure timing between composer creation and submission
+                composer.submit()
+            except InsufficientRequestsError:
+                # XXX
+                messages.warning(self.request, 'You need more requests')
+                return redirect(composer)
+            else:
+                messages.success(self.request, 'Request submitted')
+                return redirect(composer)
         # XXX allow deleting on invalid form
         elif self.request.POST.get('submit') == 'delete':
             self.composer.delete()

@@ -66,7 +66,7 @@ class FOIARequest(models.Model):
     slug = models.SlugField(max_length=255)
     status = models.CharField(max_length=10, choices=STATUS, db_index=True)
     agency = models.ForeignKey('agency.Agency')
-    composer = models.ForeignKey('foia.FOIAComposer')
+    composer = models.ForeignKey('foia.FOIAComposer', related_name='foias')
     # XXX rename this
     date_updated = models.DateTimeField(
         blank=True,
@@ -1147,7 +1147,7 @@ class FOIARequest(models.Model):
         """Create the initial request communication"""
         template = get_template('text/foia/request.txt')
         context = {
-            'document_request': smart_text(self.composer.requested_docs),
+            'requested_docs': smart_text(self.composer.requested_docs),
             'jurisdiction': self.jurisdiction,
             'user_name': from_user.get_full_name(),
             'proxy': proxy,

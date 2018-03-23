@@ -87,6 +87,11 @@ urlpatterns = [
         views.Detail.as_view(template_name='foia/detail.html'),
         name='foia-detail',
     ),
+    url(
+        r'^composer/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)/$',
+        views.ComposerDetail.as_view(),
+        name='foia-composer-detail',
+    ),
     # XXX is this clone url necessary?
     url(r'^%s/clone/$' % foia_url, views.clone_request, name='foia-clone'),
     # XXX are the action views necessary?

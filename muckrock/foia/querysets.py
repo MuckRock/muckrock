@@ -8,6 +8,7 @@ from django.db import models
 from django.db.models import Case, Count, F, Max, Q, Sum, When
 from django.db.models.functions import Cast, Now
 from django.utils import timezone
+from django.utils.text import slugify
 
 # Standard Library
 from datetime import date, datetime, time
@@ -183,3 +184,23 @@ class FOIARequestQuerySet(models.QuerySet):
             user__profile__organization__active=True,
             user__profile__organization__monthly_cost__gt=0,
         )
+
+    def create_new(self, composer, agency):
+        """Create a new request and submit it"""
+        # XXX
+        if composer.agencies.count() > 1:
+            title = '%s (%s)' % (composer.title, agency.name)
+        else:
+            title = composer.title
+        foia = self.create(
+            status='started',
+            title=title,
+            slug=slugify(title),
+            agency=agency,
+            embargo=composer.embargo,
+            composer=composer,
+        )
+        foia.tags.set(*composer.tags.all())
+        # TODO do proxy checking
+        foia.create_initial_communication(composer.user, proxy=False)
+        foia.submit()

@@ -13,6 +13,7 @@ from django.utils import timezone
 # Standard Library
 import logging
 from datetime import date
+from itertools import izip_longest
 from urllib import urlencode
 
 # Third Party
@@ -23,6 +24,7 @@ from localflavor.us.models import PhoneNumberField, USStateField
 from lot.models import LOT
 
 # MuckRock
+from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.utils import (
     generate_key,
     get_image_storage,
@@ -243,33 +245,37 @@ class Profile(models.Model):
 
     def multiple_requests(self, num):
         """How many requests of each type would be used for this user to make num requests"""
-        request_dict = {
-            'org_requests': 0,
-            'monthly_requests': 0,
-            'reg_requests': 0,
-            'extra_requests': 0
-        }
+        # XXX test
         org_reqs = self.organization.get_requests() if self.organization else 0
-        if org_reqs > num:
-            request_dict['org_requests'] = num
-            return request_dict
-        else:
-            request_dict['org_requests'] = org_reqs
-            num -= org_reqs
-        monthly = self.get_monthly_requests()
-        if monthly > num:
-            request_dict['monthly_requests'] = num
-            return request_dict
-        else:
-            request_dict['monthly_requests'] = monthly
-            num -= monthly
-        if self.num_requests > num:
-            request_dict['reg_requests'] = num
-            return request_dict
-        else:
-            request_dict['reg_requests'] = self.num_requests
-            request_dict['extra_requests'] = num - self.num_requests
-            return request_dict
+        have_amt = [org_reqs, self.get_monthly_requests(), self.num_requests]
+        use_amt = []
+
+        while num > 0:
+            try:
+                have = have_amt.pop(0)
+            except IndexError:
+                use_amt.append(num)
+                break
+            else:
+                use = min(num, have)
+                use_amt.append(use)
+                num -= use
+        types = ['org', 'monthly', 'regular', 'extra']
+        return dict(izip_longest(types, use_amt, fillvalue=0))
+
+    def make_requests(self, num):
+        """Try to deduct `num` requests from the users balance"""
+        request_count = self.multiple_requests(num)
+        if request_count['extra'] > 0:
+            raise InsufficientRequestsError(request_count['extra'])
+
+        # XXX none of this is thread safe, wrap in transaction with select_for_update
+        self.num_requests -= request_count['regular']
+        self.monthly_requests -= request_count['monthly']
+        self.save()
+        if self.organization:
+            self.organization.num_requests -= request_count['org']
+            self.organization.save()
 
     def bundled_requests(self):
         """Returns the number of requests the user gets when they buy a bundle."""

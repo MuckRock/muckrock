@@ -101,6 +101,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
         # pylint: disable=too-many-locals
         # pylint: disable=too-many-return-statements
         # pylint: disable=too-many-branches
+        # XXX
         data = request.data
         try:
             jurisdiction = Jurisdiction.objects.get(
@@ -124,7 +125,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                 requested_docs = data['document_request']
                 template = get_template('text/foia/request.txt')
                 context = {
-                    'document_request': requested_docs,
+                    'requested_docs': requested_docs,
                     'jurisdiction': jurisdiction,
                     'user_name': request.user.get_full_name,
                 }

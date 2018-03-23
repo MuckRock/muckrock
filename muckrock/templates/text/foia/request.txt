@@ -3,7 +3,7 @@ To Whom It May Concern:
 
 Pursuant to the {{ jurisdiction.get_law_name }}, I hereby request the following records:
 
-{% block content %}{{document_request}}{% endblock %}
+{% block content %}{{ requested_docs }}{% endblock %}
 {% if jurisdiction.waiver %}
 {{ jurisdiction.waiver }}
 {% else %}
@@ -20,5 +20,5 @@ Please note that I am a citizen of {{ jurisdiction.legal.name }}, and am using M
 {% endif %}
 Sincerely,
 
-{{user_name}}
+{{ user_name }}
 {% endautoescape %}

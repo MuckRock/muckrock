@@ -4,8 +4,6 @@ FOIA forms for composing requests
 
 # Django
 from django import forms
-from django.contrib import messages
-from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.utils.text import slugify
 
@@ -14,13 +12,12 @@ from autocomplete_light import shortcuts as autocomplete_light
 from autocomplete_light.contrib.taggit_field import TaggitField
 
 # MuckRock
-from muckrock.accounts.utils import mailchimp_subscribe, miniregister
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIAComposer, FOIAMultiRequest
 from muckrock.forms import TaggitWidget
 
 
-class ComposerForm(forms.Form):
+class ComposerForm(forms.ModelForm):
     """This form creates and updates FOIA composers"""
 
     title = forms.CharField(
@@ -29,7 +26,7 @@ class ComposerForm(forms.Form):
         }),
         max_length=255,
     )
-    document = forms.CharField(
+    requested_docs = forms.CharField(
         widget=forms.Textarea(
             attrs={
                 'placeholder':
@@ -61,6 +58,11 @@ class ComposerForm(forms.Form):
         help_text='Separate tags with commas.',
         required=False,
     )
+    parent = forms.ModelChoiceField(
+        queryset=FOIAComposer.objects.none(),
+        required=False,
+        widget=forms.HiddenInput(),
+    )
 
     full_name = forms.CharField(label='Full Name or Handle (Public)')
     email = forms.EmailField(max_length=75)
@@ -71,15 +73,31 @@ class ComposerForm(forms.Form):
         'FOIA news, tips, and more',
     )
 
-    # XXX move request out, just user in
-    # XXX move minireg to view
+    class Meta:
+        model = FOIAComposer
+        fields = [
+            'title',
+            'requested_docs',
+            'agencies',
+            'embargo',
+            'tags',
+            'parent',
+            'full_name',
+            'email',
+            'newsletter',
+        ]
+
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
+        user = kwargs.pop('user')
         super(ComposerForm, self).__init__(*args, **kwargs)
-        if self.request and self.request.user.is_authenticated:
+        if user.is_authenticated:
             del self.fields['full_name']
             del self.fields['email']
             del self.fields['newsletter']
+        # XXX check/enforce embargo permissions here
+        # XXX
+        #self.fields['parent'].queryset = FOIAComposer.objects.viewable_by(user)
+        self.fields['parent'].queryset = FOIAComposer.objects.all()
 
     def clean_email(self):
         """Do a case insensitive uniqueness check"""
@@ -135,50 +153,6 @@ class ComposerForm(forms.Form):
             )
             return None
         return agency
-
-    def make_user(self, data):
-        """Miniregister a new user if necessary"""
-        # XXX
-        user, password = miniregister(data['full_name'], data['email'])
-        user = authenticate(
-            username=user.username,
-            password=password,
-        )
-        login(self.request, user)
-        if data.get('newsletter'):
-            mailchimp_subscribe(self.request, user.email)
-
-    def create_composer(self, parent):
-        """Create the new composer"""
-        if self.request.user.is_anonymous():
-            self.make_user(self.cleaned_data)
-        # XXX - XXX
-        #proxy_info = agency.get_proxy_info()
-        # XXX shouldnt be warning here
-        #if 'warning' in proxy_info:
-        #    messages.warning(self.request, proxy_info['warning'])
-        composer = FOIAComposer.objects.create(
-            user=self.request.user,
-            status='started',
-            title=self.cleaned_data['title'],
-            slug=slugify(self.cleaned_data['title']) or 'untitled',
-            requested_docs=self.cleaned_data['document'],
-            parent=parent,
-        )
-        composer.agencies.set(self.cleaned_data['agencies'])
-        return composer
-
-    def update_composer(self, composer):
-        """Update an existing composer"""
-        composer.title = self.cleaned_data['title']
-        composer.slug = slugify(self.cleaned_data['title']) or 'unititled'
-        composer.requested_docs = self.cleaned_data['document']
-        composer.agencies.set(self.cleaned_data['agencies'])
-        composer.save()
-
-    def submit_composer(self, composer):
-        """Submit a composer"""
-        # XXX check
 
 
 class RequestDraftForm(forms.Form):
