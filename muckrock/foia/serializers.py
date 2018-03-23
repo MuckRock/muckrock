@@ -216,7 +216,7 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             'date_due',
             'days_until_due',
             'date_followup',
-            'date_done',
+            'datetime_done',
             'date_embargo',
             # processing details
             'mail_id',

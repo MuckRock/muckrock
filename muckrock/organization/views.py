@@ -343,7 +343,7 @@ class OrganizationDetailView(DetailView):
         context['requests'] = {
             'count': requests.count(),
             'filed': requests.order_by('-composer__datetime_submitted')[:10],
-            'completed': requests.get_done().order_by('-date_done')[:10]
+            'completed': requests.get_done().order_by('-datetime_done')[:10]
         }
 
         context['members'] = organization.members.select_related('user')

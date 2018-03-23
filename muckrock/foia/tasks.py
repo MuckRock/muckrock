@@ -624,7 +624,7 @@ def autoimport():
         if code not in CODES:
             raise ValueError('ERROR: %s uses an unknown code' % name)
         foia_pks = [pk[2:] for pk in m_name.group('docs').split()]
-        file_date = datetime(
+        file_datetime = datetime(
             int(m_name.group('year')) + 2000, int(m_name.group('month')),
             int(m_name.group('day'))
         )
@@ -640,7 +640,8 @@ def autoimport():
             est_date = None
 
         return (
-            foia_pks, file_date, code, title, status, body, arg, id_, est_date
+            foia_pks, file_datetime, code, title, status, body, arg, id_,
+            est_date
         )
 
     def import_key(key, storage_bucket, comm, log, title=None):
@@ -720,8 +721,8 @@ def autoimport():
 
             try:
                 (
-                    foia_pks, file_date, code, title, status, body, arg, id_,
-                    est_date
+                    foia_pks, file_datetime, code, title, status, body, arg,
+                    id_, est_date
                 ) = parse_name(file_name)
             except ValueError as exc:
                 s3_copy(bucket, key, 'review/%s' % file_name)
@@ -739,20 +740,20 @@ def autoimport():
                         from_user=from_user,
                         to_user=foia.user,
                         response=True,
-                        date=file_date,
+                        date=file_datetime,
                         communication=body,
                         status=status,
                     )
                     MailCommunication.objects.create(
                         communication=comm,
-                        sent_datetime=file_date,
+                        sent_datetime=file_datetime,
                     )
 
                     foia.status = status or foia.status
                     if foia.status in [
                         'partial', 'done', 'rejected', 'no_docs'
                     ]:
-                        foia.date_done = file_date.date()
+                        foia.datetime_done = file_datetime
                     if code == 'FEE' and arg:
                         foia.price = Decimal(arg)
                     if id_:

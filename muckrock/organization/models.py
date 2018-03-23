@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
 from django.core.urlresolvers import reverse
-from django.db import models
+from django.db import models, transaction
 from django.template.loader import render_to_string
 from django.utils.text import slugify
 
@@ -61,7 +61,6 @@ class Organization(models.Model):
             self.date_update = date.today()
             self.num_requests = self.monthly_requests
             self.save()
-        return
 
     def get_requests(self):
         """
@@ -69,14 +68,17 @@ class Organization(models.Model):
         Before doing so, restore the org's requests if they have not
         been restored for this month, or ever.
         """
-        if self.date_update:
-            not_this_month = self.date_update.month != date.today().month
-            not_this_year = self.date_update.year != date.today().year
-            if not_this_month or not_this_year:
-                self.restore_requests()
-        else:
-            self.restore_requests()
-        return self.num_requests
+        with transaction.atomic():
+            org = Organization.objects.get(pk=self.pk).select_for_update()
+            today = date.today()
+            if org.date_update:
+                not_this_month = org.date_update.month != today.month
+                not_this_year = org.date_update.year != today.year
+                if not_this_month or not_this_year:
+                    org.restore_requests()
+            else:
+                org.restore_requests()
+            return org.num_requests
 
     def is_owned_by(self, user):
         """Returns true IFF the passed-in user is the owner of the org"""
@@ -202,11 +204,13 @@ class Organization(models.Model):
             quantity=quantity,
             idempotency_key=True,
         )
-        self.update_num_seats(num_seats)
-        self.num_requests = self.monthly_requests
-        self.stripe_id = subscription.id
-        self.active = True
-        self.save()
+        with transaction.atomic():
+            org = Organization.objects.get(pk=self.pk).select_for_update()
+            org.update_num_seats(num_seats)
+            org.num_requests = org.monthly_requests
+            org.stripe_id = subscription.id
+            org.active = True
+            org.save()
 
         # If the owner has a pro account, cancel it.
         # Assume the pro user has an active subscription.
@@ -236,20 +240,22 @@ class Organization(models.Model):
             subscription = subscription.save()
             self.stripe_id = subscription.id
             self.owner.profile.subscription_id = subscription.id
+            self.owner.profile.save()
         except stripe.InvalidRequestError:
             logger.error((
                 'No subscription is associated with organization '
                 'owner %s.'
             ), self.owner.username)
             return
-        old_monthly_requests = self.monthly_requests
-        self.update_num_seats(num_seats)
-        new_monthly_requests = self.monthly_requests
-        # if it goes up, let it go up. if it goes down, don't let it go down
-        if new_monthly_requests > old_monthly_requests:
-            self.num_requests += new_monthly_requests - old_monthly_requests
-        self.save()
-        self.owner.profile.save()
+        with transaction.atomic():
+            org = Organization.objects.get(pk=self.pk).select_for_update()
+            old_monthly_requests = org.monthly_requests
+            org.update_num_seats(num_seats)
+            new_monthly_requests = org.monthly_requests
+            # if it goes up, let it go up. if it goes down, don't let it go down
+            if new_monthly_requests > old_monthly_requests:
+                org.num_requests += new_monthly_requests - old_monthly_requests
+            org.save()
         return subscription
 
     def cancel_subscription(self):

@@ -75,7 +75,7 @@
     </td>
     <td>{{ foia.agency }}</td>
     <td>{{ foia.jurisdiction }}</td>
-    <td>{{foia.date_updated|date:"m/d/Y"}}</td>
+    <td>{{foia.datetime_updated|date:"m/d/Y"}}</td>
     <td>{{ foia.composer.datetime_submitted|date:"m/d/Y" }}</td>
   {% endwith %}
 {% endblock %}

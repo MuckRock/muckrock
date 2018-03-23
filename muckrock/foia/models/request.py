@@ -29,7 +29,7 @@ from reversion import revisions as reversion
 from taggit.managers import TaggableManager
 
 # MuckRock
-from muckrock import fields, task, utils
+from muckrock import task, utils
 from muckrock.accounts.models import Notification
 from muckrock.communication.models import EmailAddress, EmailCommunication
 from muckrock.foia.querysets import FOIARequestQuerySet
@@ -67,15 +67,13 @@ class FOIARequest(models.Model):
     status = models.CharField(max_length=10, choices=STATUS, db_index=True)
     agency = models.ForeignKey('agency.Agency')
     composer = models.ForeignKey('foia.FOIAComposer', related_name='foias')
-    # XXX rename this
-    date_updated = models.DateTimeField(
+    datetime_updated = models.DateTimeField(
         blank=True,
         null=True,
         db_index=True,
         help_text='Date of latest communication',
     )
-    # XXX rename this
-    date_done = models.DateTimeField(
+    datetime_done = models.DateTimeField(
         blank=True,
         null=True,
         db_index=True,

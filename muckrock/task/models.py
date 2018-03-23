@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
 from django.core.mail import EmailMessage
 from django.core.urlresolvers import reverse
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Case, Count, Max, Prefetch, When
 from django.db.models.functions import Cast, Now
 from django.template.loader import render_to_string
@@ -17,9 +17,10 @@ from django.utils import timezone
 # Standard Library
 import logging
 from datetime import date
-from itertools import groupby
+from itertools import groupby, izip_longest
 
 # MuckRock
+from muckrock.accounts.models import Profile
 from muckrock.communication.models import (
     EmailAddress,
     EmailError,
@@ -98,6 +99,7 @@ FLAG_CATEGORIES = [
 
 class Task(models.Model):
     """A base task model for fields common to all tasks"""
+    # XXX rename these, change all auto_now_add's to default timezone nows
     date_created = models.DateTimeField(auto_now_add=True)
     date_done = models.DateTimeField(blank=True, null=True)
     date_deferred = models.DateField(blank=True, null=True)
@@ -777,59 +779,58 @@ class MultiRequestTask(Task):
 
     def _calc_return_requests(self, num_requests):
         """Determine how many of each type of request to return"""
-        num_reg = self.multirequest.num_reg_requests
-        num_monthly = self.multirequest.num_monthly_requests
-        num_org = self.multirequest.num_org_requests
-        if num_requests > (num_reg + num_monthly + num_org):
-            # if the number of requests to return is greater than the num of
-            # requests logged on the multirequest, just compensate with regular
-            # requests - this should only happen for returns on requests created
-            # before multi's started tracking where the requests came from
-            return {
-                'reg': num_requests - num_monthly - num_org,
-                'monthly': num_monthly,
-                'org': num_org,
-            }
-        elif num_requests > (num_reg + num_monthly):
-            return {
-                'reg': num_reg,
-                'monthly': num_monthly,
-                'org': num_requests - num_reg - num_monthly,
-            }
-        elif num_requests > num_reg:
-            return {
-                'reg': num_reg,
-                'monthly': num_requests - num_reg,
-                'org': 0,
-            }
-        else:
-            return {
-                'reg': num_requests,
-                'monthly': 0,
-                'org': 0,
-            }
+        # TODO test
+        used = [
+            self.multirequest.num_reg_requests,
+            self.multirequest.num_monthly_requests,
+            self.multirequest.num_org_requests,
+        ]
+        ret = []
+        while num_requests:
+            try:
+                num_used = used.pop(0)
+            except IndexError:
+                ret.append(num_requests)
+                break
+            else:
+                num_ret = min(num_used, num_requests)
+                num_requests -= num_ret
+                ret.append(num_ret)
+        ret_dict = dict(
+            izip_longest(
+                ['regular', 'monthly', 'org', 'extra'],
+                ret,
+                fillvalue=0,
+            )
+        )
+        ret_dict['regular'] += ret_dict.pop('extra')
+        return ret_dict
 
     def _do_return_requests(self, return_amts):
         """Update request count on the profile and multirequest given the amounts"""
         # remove returned requests from the multirequest
         # use max to ensure all numbers are positive
-        self.multirequest.num_reg_requests -= max(return_amts['reg'], 0)
+        self.multirequest.num_reg_requests -= max(return_amts['regular'], 0)
         self.multirequest.num_monthly_requests -= max(return_amts['monthly'], 0)
         self.multirequest.num_org_requests -= max(return_amts['org'], 0)
         self.multirequest.save()
 
         # add the return requests to the user's profile
-        profile = self.multirequest.user.profile
-        profile.num_requests += return_amts['reg']
-        profile.get_monthly_requests()
-        profile.monthly_requests += return_amts['monthly']
-        if profile.organization:
-            profile.organization.get_requests()
-            profile.organization.num_requests += return_amts['org']
-            profile.organization.save()
-        else:
-            profile.monthly_requests += return_amts['org']
-        profile.save()
+        with transaction.atomic():
+            profile = (
+                Profile.objects.get(pk=self.multirequest.user.profile_id)
+                .select_for_update()
+            )
+            profile.num_requests += return_amts['regular']
+            profile.get_monthly_requests()
+            profile.monthly_requests += return_amts['monthly']
+            if profile.organization:
+                profile.organization.get_requests()
+                profile.organization.num_requests += return_amts['org']
+                profile.organization.save()
+            else:
+                profile.monthly_requests += return_amts['org']
+            profile.save()
 
 
 class NewExemptionTask(Task):

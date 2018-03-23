@@ -66,6 +66,11 @@ def is_owner(user, foia):
 
 
 @predicate
+def no_foia(user, foia):
+    return foia is None
+
+
+@predicate
 @skip_if_not_foia
 def is_editor(user, foia):
     return (
@@ -192,8 +197,11 @@ add_perm('foia.delete_foiarequest', can_edit & is_deletable)
 add_perm(
     'foia.view_foiarequest', can_edit | is_viewer | is_from_agency | ~is_private
 )
-add_perm('foia.embargo_foiarequest', can_edit & can_embargo)
-add_perm('foia.embargo_perm_foiarequest', can_edit & can_embargo_permananently)
+add_perm('foia.embargo_foiarequest', (can_edit | no_foia) & can_embargo)
+add_perm(
+    'foia.embargo_perm_foiarequest',
+    (can_edit | no_foia) & can_embargo_permananently
+)
 add_perm(
     'foia.crowdfund_foiarequest',  # why cant editors crowdfund?
     (is_owner | is_staff) & ~has_crowdfund & has_status('payment')

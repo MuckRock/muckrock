@@ -44,7 +44,7 @@ class LatestDoneRequests(Feed):
         """Return the items for the rss feed"""
         return (
             FOIARequest.objects.get_done().get_public()
-            .order_by('-date_done').select_related('jurisdiction')
+            .order_by('-datetime_done').select_related('jurisdiction')
             .prefetch_related('communications')[:25]
         )
 

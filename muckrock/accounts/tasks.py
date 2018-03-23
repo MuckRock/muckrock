@@ -282,8 +282,8 @@ def store_statistics():
         ).get_undeferred().count(),
         total_deferred_portal_tasks=PortalTask.objects.get_deferred().count(),
         daily_robot_response_tasks=ResponseTask.objects.filter(
-            date_done__gte=yesterday_midnight,
-            date_done__lt=today_midnight,
+            datetime_done__gte=yesterday_midnight,
+            datetime_done__lt=today_midnight,
             resolved_by__profile__acct_type='robot',
         ).count(),
         flag_processing_days=FlaggedTask.objects.get_processing_days(),

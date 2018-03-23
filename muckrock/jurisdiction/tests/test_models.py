@@ -114,18 +114,17 @@ class TestJurisdictionUnit(TestCase):
         Jurisdictions should report their average response time.
         State jurisdictions should include avg. response time of their local jurisdictions.
         """
-        today = date.today()
         now = timezone.now()
         state_duration = 12
         local_duration = 6
         FOIARequestFactory(
             jurisdiction=self.state,
-            date_done=today,
+            datetime_done=now,
             composer__datetime_submitted=now - timedelta(state_duration)
         )
         FOIARequestFactory(
             jurisdiction=self.local,
-            date_done=today,
+            datetime_done=now,
             composer__datetime_submitted=now - timedelta(local_duration)
         )
         eq_(
@@ -139,9 +138,10 @@ class TestJurisdictionUnit(TestCase):
         Jurisdictions should report their success rate: completed/filed.
         State jurisdictions should include success rates of local jurisdictions.
         """
-        today = date.today()
         FOIARequestFactory(
-            jurisdiction=self.state, status='done', date_done=today
+            jurisdiction=self.state,
+            status='done',
+            datetime_done=timezone.now(),
         )
         FOIARequestFactory(jurisdiction=self.local, status='ack')
         eq_(self.state.success_rate(), 50.0)

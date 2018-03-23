@@ -2,8 +2,8 @@
 Autocomplete registry for Agency
 """
 
-# Django
-from django.db.models import Q
+# Standard Library
+import logging
 
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
@@ -13,37 +13,7 @@ from fuzzywuzzy import fuzz, process
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 
-
-class SimpleAgencyAutocomplete(autocomplete_light.AutocompleteModelTemplate):
-    """Creates an autocomplete field for picking agencies"""
-    choices = Agency.objects.filter(status='approved'
-                                    ).select_related('jurisdiction')
-    choice_template = 'autocomplete/simple_agency.html'
-    search_fields = ['name', 'aliases']
-    attrs = {
-        'data-autocomplete-minimum-characters': 1,
-        'placeholder': 'Search agencies',
-    }
-
-    def choices_for_request(self):
-        """Additionally filter choices by jurisdiction."""
-        jurisdiction_id = self.request.GET.get('jurisdiction_id')
-        if jurisdiction_id:
-            if jurisdiction_id == 'f':
-                jurisdiction_id = Jurisdiction.objects.get(level='f').id
-            self.choices = self.choices.filter(jurisdiction__id=jurisdiction_id)
-        choices = super(SimpleAgencyAutocomplete, self).choices_for_request()
-        query = self.request.GET.get('q', '')
-        fuzzy_choices = process.extractBests(
-            query,
-            {a: a.name
-             for a in self.choices.exclude(pk__in=choices)},
-            scorer=fuzz.partial_ratio,
-            score_cutoff=83,
-            limit=10,
-        )
-        choices = list(choices) + [c[2] for c in fuzzy_choices]
-        return choices
+logger = logging.getLogger(__name__)
 
 
 class AgencyAutocomplete(autocomplete_light.AutocompleteModelTemplate):
@@ -73,48 +43,47 @@ class AgencyAutocomplete(autocomplete_light.AutocompleteModelTemplate):
         return choices.filter(jurisdiction__id=jurisdiction_id)
 
 
-class AgencyMultiRequestAutocomplete(
-    autocomplete_light.AutocompleteModelTemplate
-):
-    """Provides an autocomplete field for picking multiple agencies."""
+class AgencyComposerAutocomplete(autocomplete_light.AutocompleteModelTemplate):
+    """Provides an autocomplete field for composing requests"""
     choices = (
-        Agency.objects.get_approved().select_related('jurisdiction__parent')
-        .prefetch_related('types')
+        Agency.objects.get_approved()
+        .select_related('jurisdiction__parent').only(
+            'name',
+            'exempt',
+            'jurisdiction__name',
+            'jurisdiction__level',
+            'jurisdiction__parent__abbrev',
+        )
     )
     choice_template = 'autocomplete/agency.html'
-    search_fields = ['name']
+    split_words = 'and'
+    # = prefix uses iexact match
+    search_fields = [
+        'name',
+        'aliases',
+        'types__name',
+        'jurisdiction__name',
+        '=jurisdiction__abbrev',
+        '=jurisdiction__parent__abbrev',
+    ]
     attrs = {
         'placeholder': 'Search by agency or jurisdiction',
-        'data-autocomplete-minimum-characters': 2
+        'data-autocomplete-minimum-characters': 2,
     }
 
-    def complex_condition(self, string):
-        """Returns a complex set of database queries for getting agencies
-        by name, alias, jurisdiction, jurisdiction abbreviation, and type."""
-        return (
-            Q(name__icontains=string)
-            | Q(aliases__icontains=string)
-            | Q(jurisdiction__name__icontains=string)
-            | Q(jurisdiction__abbrev__iexact=string)
-            | Q(jurisdiction__parent__abbrev__iexact=string)
-            | Q(types__name__icontains=string)
-        )
-
     def choices_for_request(self):
-        query = self.request.GET.get('q', '')
-        exclude = self.request.GET.getlist('exclude')
-        split_query = query.split()
-        # if query is an empty string, then split will produce an empty array
-        # if query is an empty string, then do nto filter the existing choices
-        if split_query:
-            conditions = self.complex_condition(split_query[0])
-            for string in split_query[1:]:
-                conditions &= self.complex_condition(string)
-            choices = self.choices.filter(conditions).distinct()
-        else:
-            choices = self.choices
-        choices = choices.exclude(pk__in=exclude)
-        return self.order_choices(choices)[0:self.limit_choices]
+        choices = super(AgencyComposerAutocomplete, self).choices_for_request()
+        # add fuzzy matches to the options
+        exclude = self.request.GET.getlist('exclude') + [c.pk for c in choices]
+        fuzzy_choices = process.extractBests(
+            self.request.GET.get('q', ''),
+            {a: a.name
+             for a in self.choices.exclude(pk__in=exclude)},
+            scorer=fuzz.partial_ratio,
+            score_cutoff=83,
+            limit=10,
+        )
+        return list(choices) + [c[2] for c in fuzzy_choices]
 
 
 class AgencyAdminAutocomplete(AgencyAutocomplete):
@@ -140,7 +109,6 @@ class AgencyAppealAdminAutocomplete(AgencyAdminAutocomplete):
 
 
 autocomplete_light.register(Agency, AgencyAutocomplete)
-autocomplete_light.register(Agency, AgencyMultiRequestAutocomplete)
+autocomplete_light.register(Agency, AgencyComposerAutocomplete)
 autocomplete_light.register(Agency, AgencyAdminAutocomplete)
 autocomplete_light.register(Agency, AgencyAppealAdminAutocomplete)
-autocomplete_light.register(Agency, SimpleAgencyAutocomplete)

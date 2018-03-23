@@ -322,13 +322,10 @@ class Homepage(object):
         """Get recently completed requests"""
         return lambda: (
             FOIARequest.objects.get_public().get_done().
-            order_by('-date_done', 'pk').select_related(
-                'agency',
+            order_by('-datetime_done', 'pk').select_related(
                 'agency__jurisdiction',
-                'jurisdiction',
-                'jurisdiction__parent',
                 'jurisdiction__parent__parent',
-                'user',
+                'coomposer__user',
             ).only(
                 'status',
                 'slug',
@@ -343,9 +340,9 @@ class Homepage(object):
                 'jurisdiction__parent__name',
                 'jurisdiction__parent__slug',
                 'jurisdiction__parent__parent__slug',
-                'user__username',
-                'user__first_name',
-                'user__last_name',
+                'composer__user__username',
+                'composer__user__first_name',
+                'composer__user__last_name',
             ).get_public_file_count(limit=6)
         )
 

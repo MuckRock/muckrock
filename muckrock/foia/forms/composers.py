@@ -5,7 +5,6 @@ FOIA forms for composing requests
 # Django
 from django import forms
 from django.contrib.auth.models import User
-from django.utils.text import slugify
 
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
@@ -35,10 +34,8 @@ class ComposerForm(forms.ModelForm):
             }
         )
     )
-    # XXX agencies is not required to save, but is required to submit
     agencies = autocomplete_light.ModelMultipleChoiceField(
-        # XXX rename this autocomplete
-        'AgencyMultiRequestAutocomplete',
+        'AgencyComposerAutocomplete',
         queryset=Agency.objects.get_approved(),
     )
     embargo = forms.BooleanField(
@@ -61,6 +58,15 @@ class ComposerForm(forms.ModelForm):
     parent = forms.ModelChoiceField(
         queryset=FOIAComposer.objects.none(),
         required=False,
+        widget=forms.HiddenInput(),
+    )
+    submit = forms.ChoiceField(
+        choices=[
+            ('save', 'Save'),
+            ('submit', 'Submit'),
+            ('delete', 'Delete'),
+        ],
+        required=True,
         widget=forms.HiddenInput(),
     )
 
@@ -94,10 +100,9 @@ class ComposerForm(forms.ModelForm):
             del self.fields['full_name']
             del self.fields['email']
             del self.fields['newsletter']
-        # XXX check/enforce embargo permissions here
-        # XXX
-        #self.fields['parent'].queryset = FOIAComposer.objects.viewable_by(user)
-        self.fields['parent'].queryset = FOIAComposer.objects.all()
+        if not user.has_perm('foia.embargo_foiarequest'):
+            del self.fields['embargo']
+        self.fields['parent'].queryset = FOIAComposer.objects.viewable_by(user)
 
     def clean_email(self):
         """Do a case insensitive uniqueness check"""
@@ -116,9 +121,21 @@ class ComposerForm(forms.ModelForm):
         else:
             return 'Untitled'
 
+    def clean(self):
+        """Check cross field dependencies"""
+        cleaned_data = super(ComposerForm, self).clean()
+        if (
+            cleaned_data['submit'] == 'submit'
+            and not self.cleaned_data['agencies']
+        ):
+            self.add_error(
+                'agencies',
+                'You must select at least one agent before submitting',
+            )
+
     def get_agency(self):
         """Get the agency and create a new one if necessary"""
-        # XXX need to completely rethink how new agencies work
+        # TODO need to completely rethink how new agencies work
         agency = self.cleaned_data.get('agency')
         agency_autocomplete = self.request.POST.get('agency-autocomplete', '')
         agency_autocomplete = agency_autocomplete.strip()

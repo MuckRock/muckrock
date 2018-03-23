@@ -77,9 +77,7 @@
           { number of days } { business or calendar } days, as the statute requires.
         </div>
         {% include "lib/pattern/new_request_field.html" with field=form.tags only %}
-        {# XXX ensure this works when no specific foia is given #}
-        {% has_perm 'foia.embargo_foiarequest' request.user as can_embargo %}
-        {% if can_embargo %}
+        {% if form.embargo %}
           {% include "lib/pattern/new_request_field.html" with field=form.embargo only %}
         {% else %}
           <div class="no-embargo">

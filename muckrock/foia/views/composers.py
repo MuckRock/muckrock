@@ -164,7 +164,6 @@ class UpdateComposer(UpdateView):
         elif self.request.POST.get('submit') == 'submit':
             composer = form.save()
             try:
-                # XXX ensure timing between composer creation and submission
                 composer.submit()
             except InsufficientRequestsError:
                 # XXX

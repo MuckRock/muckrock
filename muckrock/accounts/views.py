@@ -9,6 +9,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.db import transaction
 from django.http import (
     HttpResponse,
     HttpResponseBadRequest,
@@ -446,8 +447,13 @@ def buy_requests(request, username=None):
                 idempotency_key=True,
             )
             # and give to the recipient
-            recipient.profile.num_requests += request_count
-            recipient.profile.save()
+            with transaction.atomic():
+                recipiet_profile = (
+                    Profile.objects.get(pk=recipient.profile_id)
+                    .select_for_update()
+                )
+                recipiet_profile.num_requests += request_count
+                recipiet_profile.save()
             # record the purchase
             request.session['ga'] = 'request_purchase'
             msg = 'Purchase successful. '
@@ -538,7 +544,8 @@ def profile(request, username=None):
         .select_related('jurisdiction__parent__parent')
     )
     recent_requests = requests.order_by('-composer__datetime_submitted')[:5]
-    recent_completed = requests.filter(status='done').order_by('-date_done')[:5]
+    recent_completed = requests.filter(status='done'
+                                       ).order_by('-datetime_done')[:5]
     articles = Article.objects.get_published().filter(authors=user)[:5]
     projects = Project.objects.get_for_contributor(user).get_visible(
         request.user

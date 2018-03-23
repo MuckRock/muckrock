@@ -62,6 +62,7 @@ class FOIACommunication(models.Model):
     )
 
     subject = models.CharField(max_length=255, blank=True)
+    # XXX rename
     date = models.DateTimeField(db_index=True)
 
     response = models.BooleanField(
@@ -132,12 +133,12 @@ class FOIACommunication(models.Model):
         # update foia's date updated if this is the latest communication
         if (
             self.foia and (
-                self.foia.date_updated is None
-                or self.date.date() > self.foia.date_updated
+                self.foia.datetime_updated is None
+                or self.date.date() > self.foia.datetime_updated
             )
         ):
-            self.foia.date_updated = self.date.date()
-            self.foia.save(comment='update date_updated due to new comm')
+            self.foia.datetime_updated = self.date.date()
+            self.foia.save(comment='update datetime_updated due to new comm')
         super(FOIACommunication, self).save(*args, **kwargs)
 
     def anchor(self):
@@ -161,25 +162,22 @@ class FOIACommunication(models.Model):
         """
         # avoid circular imports
         from muckrock.foia.tasks import upload_document_cloud
-        if not foia_pks:
+        foias = FOIARequest.objects.filter(pk__in=foia_pks)
+        if not foias:
             raise ValueError('Expected a request to move the communication to.')
-        if not isinstance(foia_pks, list):
-            foia_pks = [foia_pks]
-        # XXX should not 404 within a model
-        move_to_request = get_object_or_404(FOIARequest, pk=foia_pks[0])
         old_foia = self.foia
-        self.foia = move_to_request
+        self.foia = foias[0]
         # if this was an orphan, it has not yet been uploaded
         # to document cloud
         change = old_foia is not None
 
         access = 'private' if self.foia.embargo else 'public'
-        for each_file in self.files.all():
-            each_file.access = access
-            each_file.source = self.get_source()
-            each_file.save()
+        for file_ in self.files.all():
+            file_.access = access
+            file_.source = self.get_source()
+            file_.save()
             upload_document_cloud.apply_async(
-                args=[each_file.pk, change], countdown=3
+                args=[file_.pk, change], countdown=3
             )
         self.save()
         CommunicationMoveLog.objects.create(
@@ -191,14 +189,14 @@ class FOIACommunication(models.Model):
             'Communication #%d moved to request #%d', self.id, self.foia.id
         )
         # if cloning happens, self gets overwritten. so we save it to a variable here
-        this_comm = FOIACommunication.objects.get(pk=self.pk)
-        moved = [this_comm]
+        comm = FOIACommunication.objects.get(pk=self.pk)
+        moved = [comm]
         cloned = []
-        if foia_pks[1:]:
-            cloned = self.clone(foia_pks[1:], user)
+        if foias[1:]:
+            cloned = self.clone(foias[1:], user)
         return moved + cloned
 
-    def clone(self, foia_pks, user):
+    def clone(self, foias, user):
         """
         Copies the communication to each request in the list,
         then returns all the new communications.
@@ -210,8 +208,7 @@ class FOIACommunication(models.Model):
         goes for each file attached to the communication.
         """
         # pylint: disable=too-many-locals
-        request_list = FOIARequest.objects.filter(pk__in=foia_pks)
-        if not request_list:
+        if not foias:
             raise ValueError('No valid request(s) provided for cloning.')
         cloned_comms = []
         original_pk = self.pk
@@ -220,29 +217,29 @@ class FOIACommunication(models.Model):
         faxes = self.faxes.all()
         mails = self.mails.all()
         web_comms = self.web_comms.all()
-        for request in request_list:
-            this_clone = FOIACommunication.objects.get(pk=original_pk)
-            this_clone.pk = None
-            this_clone.foia = request
-            this_clone.save()
+        for foia in foias:
+            clone = FOIACommunication.objects.get(pk=original_pk)
+            clone.pk = None
+            clone.foia = foia
+            clone.save()
             CommunicationMoveLog.objects.create(
-                communication=this_clone,
+                communication=clone,
                 foia=self.foia,
                 user=user,
             )
             for file_ in files:
-                file_.clone(this_clone)
+                file_.clone(clone)
             # clone all sub communications as well
             for comms in [emails, faxes, mails, web_comms]:
                 for comm in comms:
                     comm.pk = None
-                    comm.communication = this_clone
+                    comm.communication = clone
                     comm.save()
             # for each clone, self gets overwritten. each clone needs to be stored explicitly.
-            cloned_comms.append(this_clone)
+            cloned_comms.append(clone)
             logger.info(
                 'Communication #%d cloned to request #%d', original_pk,
-                this_clone.foia.id
+                clone.foia.id
             )
         return cloned_comms
 

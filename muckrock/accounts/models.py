@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 
 # Standard Library
@@ -211,41 +211,27 @@ class Profile(models.Model):
 
     def get_monthly_requests(self):
         """Get the number of requests left for this month"""
-        not_this_month = self.date_update.month != date.today().month
-        not_this_year = self.date_update.year != date.today().year
-        # update requests if they have not yet been updated this month
-        if not_this_month or not_this_year:
-            self.date_update = date.today()
-            self.monthly_requests = settings.MONTHLY_REQUESTS.get(
-                self.acct_type, 0
-            )
-            self.save()
-        return self.monthly_requests
+        with transaction.atomic():
+            profile = Profile.objects.get(pk=self.pk).select_for_update()
+            not_this_month = profile.date_update.month != date.today().month
+            not_this_year = profile.date_update.year != date.today().year
+            # update requests if they have not yet been updated this month
+            if not_this_month or not_this_year:
+                profile.date_update = date.today()
+                profile.monthly_requests = settings.MONTHLY_REQUESTS.get(
+                    profile.acct_type, 0
+                )
+                profile.save()
+            return profile.monthly_requests
 
     def total_requests(self):
         """Get sum of paid for requests and monthly requests"""
         org_reqs = self.organization.get_requests() if self.organization else 0
         return self.num_requests + self.get_monthly_requests() + org_reqs
 
-    def make_request(self):
-        """Decrement the user's request amount by one"""
-        organization = self.organization
-        if organization and organization.get_requests() > 0:
-            organization.num_requests -= 1
-            organization.save()
-            return True
-        if self.get_monthly_requests() > 0:
-            self.monthly_requests -= 1
-        elif self.num_requests > 0:
-            self.num_requests -= 1
-        else:
-            return False
-        self.save()
-        return True
-
     def multiple_requests(self, num):
         """How many requests of each type would be used for this user to make num requests"""
-        # XXX test
+        # TODO test
         org_reqs = self.organization.get_requests() if self.organization else 0
         have_amt = [org_reqs, self.get_monthly_requests(), self.num_requests]
         use_amt = []
@@ -265,17 +251,21 @@ class Profile(models.Model):
 
     def make_requests(self, num):
         """Try to deduct `num` requests from the users balance"""
-        request_count = self.multiple_requests(num)
-        if request_count['extra'] > 0:
-            raise InsufficientRequestsError(request_count['extra'])
+        with transaction.atomic():
+            profile = (
+                Profile.objects.get(pk=self.pk).select_for_update()
+                .select_related('organization')
+            )
+            request_count = profile.multiple_requests(num)
+            if request_count['extra'] > 0:
+                raise InsufficientRequestsError(request_count['extra'])
 
-        # XXX none of this is thread safe, wrap in transaction with select_for_update
-        self.num_requests -= request_count['regular']
-        self.monthly_requests -= request_count['monthly']
-        self.save()
-        if self.organization:
-            self.organization.num_requests -= request_count['org']
-            self.organization.save()
+            profile.num_requests -= request_count['regular']
+            profile.monthly_requests -= request_count['monthly']
+            profile.save()
+            if profile.organization:
+                profile.organization.num_requests -= request_count['org']
+                profile.organization.save()
 
     def bundled_requests(self):
         """Returns the number of requests the user gets when they buy a bundle."""
@@ -341,11 +331,13 @@ class Profile(models.Model):
         )
         stripe_retry_on_error(customer.save, idempotency_key=True)
         # modify the profile object (should this be part of a webhook callback?)
-        self.subscription_id = subscription.id
-        self.acct_type = 'pro'
-        self.date_update = date.today()
-        self.monthly_requests = settings.MONTHLY_REQUESTS.get('pro', 0)
-        self.save()
+        with transaction.atomic():
+            profile = Profile.objects.get(pk=self.pk).select_for_update()
+            profile.subscription_id = subscription.id
+            profile.acct_type = 'pro'
+            profile.date_update = date.today()
+            profile.monthly_requests = settings.MONTHLY_REQUESTS.get('pro', 0)
+            profile.save()
         return subscription
 
     def cancel_pro_subscription(self):
@@ -376,11 +368,13 @@ class Profile(models.Model):
             logger.warn(exception)
         except stripe.error.StripeError as exception:
             logger.warn(exception)
-        self.subscription_id = ''
-        self.acct_type = 'basic'
-        self.monthly_requests = settings.MONTHLY_REQUESTS.get('basic', 0)
-        self.payment_failed = False
-        self.save()
+        with transaction.atomic():
+            profile = Profile.objects.get(pk=self.pk).select_for_update()
+            profile.subscription_id = ''
+            profile.acct_type = 'basic'
+            profile.monthly_requests = settings.MONTHLY_REQUESTS.get('basic', 0)
+            profile.payment_failed = False
+            profile.save()
         return subscription
 
     def pay(self, token, amount, metadata, fee=PAYMENT_FEE):

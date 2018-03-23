@@ -2,7 +2,7 @@
 Admin registration for FOIA models
 """
 
-# XXX break this file up
+# TODO break this file up
 
 # Django
 from django import forms
@@ -383,7 +383,6 @@ class FOIARequestAdminForm(forms.ModelForm):
 
 class FOIARequestAdmin(VersionAdmin):
     """FOIA Request admin options"""
-    # XXX Add composer__user as a readonly field
     change_list_template = 'admin/foia/foiarequest/change_list.html'
     prepopulated_fields = {'slug': ('title',)}
     list_display = (
@@ -401,7 +400,7 @@ class FOIARequestAdmin(VersionAdmin):
         'tracking_ids__tracking_id',
         'mail_id',
     ]
-    readonly_fields = ['composer', 'mail_id']
+    readonly_fields = ['composer', 'get_user', 'mail_id']
     inlines = [TrackingNumberInline, FOIACommunicationInline, FOIANoteInline]
     save_on_top = True
     form = FOIARequestAdminForm

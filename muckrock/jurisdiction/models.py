@@ -27,7 +27,7 @@ class RequestHelper(object):
         requests = self.get_requests()
         avg = (
             requests.aggregate(
-                avg=Avg(F('date_done') - F('composer__datetime_submitted'))
+                avg=Avg(F('datetime_done') - F('composer__datetime_submitted'))
             )['avg']
         )
         return int(avg.days) if avg is not None else 0
@@ -76,6 +76,7 @@ class Jurisdiction(models.Model, RequestHelper):
     name = models.CharField(max_length=50)
     # slug should be slugify(unicode(self))
     slug = models.SlugField(max_length=55)
+    # XXX remove
     full_name = models.CharField(max_length=55, blank=True)
     abbrev = models.CharField(max_length=5, blank=True)
     level = models.CharField(max_length=1, choices=levels)
@@ -105,12 +106,8 @@ class Jurisdiction(models.Model, RequestHelper):
     holidays = models.ManyToManyField(Holiday, blank=True)
 
     def __unicode__(self):
-        if self.level == 'l' and not self.full_name and self.parent:
-            self.full_name = '%s, %s' % (self.name, self.parent.abbrev)
-            self.save()
-            return self.full_name
-        elif self.level == 'l':
-            return self.full_name
+        if self.level == 'l':
+            return '{}, {}'.format(self.name, self.parent.abbrev)
         else:
             return self.name
 

@@ -16,9 +16,8 @@ from datetime import date, datetime, time
 # MuckRock
 from muckrock.models import ExtractDay
 
+
 # XXX go through these
-
-
 class FOIARequestQuerySet(models.QuerySet):
     """Object manager for FOIA requests"""
 
@@ -30,8 +29,10 @@ class FOIARequestQuerySet(models.QuerySet):
 
     def get_done(self):
         """Get all FOIA requests with responses"""
-        return self.filter(status__in=['partial', 'done']
-                           ).exclude(date_done=None)
+        return (
+            self.filter(status__in=['partial', 'done'])
+            .exclude(datetime_done=None)
+        )
 
     def get_viewable(self, user):
         """Get all viewable FOIA requests for given user"""
@@ -204,3 +205,28 @@ class FOIARequestQuerySet(models.QuerySet):
         # TODO do proxy checking
         foia.create_initial_communication(composer.user, proxy=False)
         foia.submit()
+
+
+class FOIAComposerQuerySet(models.QuerySet):
+    """Custom Query Set for FOIA Composers"""
+
+    def get_viewable(self, user):
+        """Return all composers viewable to the user"""
+        # TODO rethink this
+        # test this
+        # embargo should be 'all foias are embargoed'?
+        if user.is_staff:
+            return self.all()
+
+        if user.is_authenticated():
+            query = Q(user=user) | (~Q(status='started') & ~Q(embargo=True))
+            # organizational users may also view requests from their org that are shared
+            if user.profile.organization is not None:
+                query = query | Q(
+                    user__profile__org_share=True,
+                    user__profile__organization=user.profile.organization,
+                )
+            return self.filter(query)
+        else:
+            # anonymous user, filter out drafts and embargoes
+            return self.exclude(status='started').exclude(embargo=True)

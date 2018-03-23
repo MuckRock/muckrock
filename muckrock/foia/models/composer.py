@@ -21,6 +21,7 @@ from taggit.managers import TaggableManager
 
 # MuckRock
 from muckrock.foia.models import FOIARequest
+from muckrock.foia.querysets import FOIAComposerQuerySet
 from muckrock.tags.models import TaggedItemBase
 
 STATUS = [
@@ -59,6 +60,7 @@ class FOIAComposer(models.Model):
     num_monthly_requests = models.PositiveSmallIntegerField(default=0)
     num_reg_requests = models.PositiveSmallIntegerField(default=0)
 
+    objects = FOIAComposerQuerySet.as_manager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
 
     class Meta:
