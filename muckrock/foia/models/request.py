@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 
 STATUS = [
     ('started',
-     'Draft'),  # XXX this status is removed (what to do for foia machine?)
+     'Draft'),  # TODO this status is removed (what to do for foia machine?)
     ('submitted', 'Processing'),
     ('ack', 'Awaiting Acknowledgement'),
     ('processed', 'Awaiting Response'),
@@ -92,7 +92,7 @@ class FOIARequest(models.Model):
     date_embargo = models.DateField(blank=True, null=True)
 
     price = models.DecimalField(max_digits=14, decimal_places=2, default='0.00')
-    # XXX do we want to reconsider how we do featured requests?
+    # TODO do we want to reconsider how we do featured requests?
     featured = models.BooleanField(default=False)
     sidebar_html = models.TextField(blank=True)
     mail_id = models.CharField(blank=True, max_length=255, editable=False)
@@ -131,7 +131,7 @@ class FOIARequest(models.Model):
     )
 
     disable_autofollowups = models.BooleanField(default=False)
-    # XXX missing proxy may work differently with a composer
+    # TODO missing proxy may work differently with a composer
     missing_proxy = models.BooleanField(
         default=False,
         help_text='This request requires a proxy to file, but no such '
@@ -151,7 +151,6 @@ class FOIARequest(models.Model):
         null=True,
     )
 
-    # XXX move permission fields to composer?
     read_collaborators = models.ManyToManyField(
         User,
         related_name='read_access',
@@ -213,21 +212,19 @@ class FOIARequest(models.Model):
         """The request's jurisdiction is its agency's jurisdiction"""
         return self.agency.jurisdiction
 
-    # XXX move this to rules
+    # TODO move this to rules
     def is_payable(self):
         """Can this request be payed for by the user?"""
         has_open_crowdfund = self.crowdfund and not self.crowdfund.expired()
         has_payment_status = self.status == 'payment'
         return has_payment_status and not has_open_crowdfund
 
-    # XXX this seems like it should not be in the model, but view
     def get_stripe_amount(self):
         """Output a Stripe Checkout formatted price"""
         return int(self.price * 100)
 
-    # XXX permision handling
     def is_public(self):
-        """Is this document viewable to everyone"""
+        """Is this request viewable to everyone"""
         return self.has_perm(AnonymousUser(), 'view')
 
     # Request Sharing and Permissions
@@ -242,7 +239,7 @@ class FOIARequest(models.Model):
         """Did this user create this request?"""
         return self.composer.user == user
 
-    # XXX i dislike the how adding/removing/promoting/demoting is done
+    # TODO i dislike the how adding/removing/promoting/demoting is done
     ## Editors
 
     def has_editor(self, user):
@@ -299,11 +296,10 @@ class FOIARequest(models.Model):
 
     def get_files(self):
         """Get all files under this FOIA"""
-        # XXX try to remove circular import
         from muckrock.foia.models import FOIAFile
         return FOIAFile.objects.filter(comm__foia=self)
 
-    # XXX rename
+    # TODO rename
     def first_request(self):
         """Return the first request text"""
         try:
@@ -311,7 +307,7 @@ class FOIARequest(models.Model):
         except IndexError:
             return ''
 
-    # XXX remove
+    # TODO remove
     def last_comm(self):
         """Return the last communication"""
         return self.communications.last()
@@ -344,7 +340,7 @@ class FOIARequest(models.Model):
         # set object's mail id to what is in the database
         self.mail_id = FOIARequest.objects.get(pk=self.pk).mail_id
 
-    # XXX merge with get_request email?
+    # TODO merge with get_request email?
     def get_mail_id(self):
         """Get the mail id - generate it if it doesn't exist"""
         if not self.mail_id:
@@ -364,7 +360,7 @@ class FOIARequest(models.Model):
         return self.agency.get_user()
 
     def get_saved(self):
-        # XXX ehh
+        # TODO ehh
         """Get the old model that is saved in the db"""
         try:
             return FOIARequest.objects.get(pk=self.pk)
@@ -388,7 +384,7 @@ class FOIARequest(models.Model):
         """Various actions whenever the request has been updated"""
         # pylint: disable=unused-argument
         # Do something with anchor
-        # XXX
+        # XXX no longer needed?
         self.update_dates()
 
     def notify(self, action):
@@ -410,7 +406,7 @@ class FOIARequest(models.Model):
         if self.is_public():
             utils.notify(followers(self), action)
 
-    # XXX split up sending responsiblity across composer and comm?
+    # TODO split up sending responsiblity across composer and comm?
     def submit(self, appeal=False, **kwargs):
         """
         The request has been submitted.
@@ -881,13 +877,6 @@ class FOIARequest(models.Model):
     def update_dates(self):
         """Set the due date, follow up date and days until due attributes"""
         cal = self.jurisdiction.get_calendar()
-        # first submit
-        if not self.composer.datetime_submitted:
-            self.composer.datetime_submitted = timezone.now()
-            self.composer.save()
-            days = self.jurisdiction.days
-            if days:
-                self.date_due = cal.business_days_from(date.today(), days)
         # updated from mailgun without setting status or submitted
         if self.status in ['ack', 'processed']:
             # unpause the count down

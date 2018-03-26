@@ -102,7 +102,7 @@ class ComposerForm(forms.ModelForm):
             del self.fields['newsletter']
         if not user.has_perm('foia.embargo_foiarequest'):
             del self.fields['embargo']
-        self.fields['parent'].queryset = FOIAComposer.objects.viewable_by(user)
+        self.fields['parent'].queryset = FOIAComposer.objects.get_viewable(user)
 
     def clean_email(self):
         """Do a case insensitive uniqueness check"""

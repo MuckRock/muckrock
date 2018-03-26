@@ -188,11 +188,19 @@ class FOIARequestQuerySet(models.QuerySet):
 
     def create_new(self, composer, agency):
         """Create a new request and submit it"""
-        # XXX
+        # TODO title ??
         if composer.agencies.count() > 1:
             title = '%s (%s)' % (composer.title, agency.name)
         else:
             title = composer.title
+        if agency.jurisdiction.days:
+            calendar = agency.jurisdiction.get_calendar()
+            date_due = calendar.business_days_from(
+                date.today(),
+                agency.jurisdiction.days,
+            )
+        else:
+            date_due = None
         foia = self.create(
             status='started',
             title=title,
@@ -200,6 +208,7 @@ class FOIARequestQuerySet(models.QuerySet):
             agency=agency,
             embargo=composer.embargo,
             composer=composer,
+            date_due=date_due,
         )
         foia.tags.set(*composer.tags.all())
         # TODO do proxy checking
