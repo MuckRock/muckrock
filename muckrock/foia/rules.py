@@ -192,11 +192,32 @@ can_embargo = is_advanced
 
 can_embargo_permananently = is_admin | is_org_member
 
+can_view = can_edit | is_viewer | is_from_agency | ~is_private
+
+
+@predicate
+@user_authenticated
+def can_view_composer_child(user, composer):
+    for foia in composer.foias.all():
+        if foia.has_perm(user, 'view'):
+            return True
+    return False
+
+
+@predicate
+@user_authenticated
+def is_owner_composer(user, composer):
+    if composer.user_id == user.pk:
+        return True
+
+
+can_view_composer = can_view_composer_child | is_owner_composer | is_staff
+
+can_edit_composer = is_owner_composer | is_staff
+
 add_perm('foia.change_foiarequest', can_edit)
 add_perm('foia.delete_foiarequest', can_edit & is_deletable)
-add_perm(
-    'foia.view_foiarequest', can_edit | is_viewer | is_from_agency | ~is_private
-)
+add_perm('foia.view_foiarequest', can_view)
 add_perm('foia.embargo_foiarequest', (can_edit | no_foia) & can_embargo)
 add_perm(
     'foia.embargo_perm_foiarequest',
@@ -212,6 +233,10 @@ add_perm('foia.flag_foiarequest', is_authenticated)
 add_perm('foia.followup_foiarequest', can_edit & ~has_status('started'))
 add_perm('foia.agency_reply_foiarequest', is_from_agency)
 add_perm('foia.upload_attachment_foiarequest', can_edit | is_from_agency)
+
+add_perm('foia.view_foiacomposer', can_view_composer)
+add_perm('foia.upload_attachment_foiacomposer', can_edit_composer)
+
 add_perm('foia.view_rawemail', is_advanced)
 add_perm('foia.file_multirequest', is_advanced)
 add_perm('foia.export_csv', is_advanced)

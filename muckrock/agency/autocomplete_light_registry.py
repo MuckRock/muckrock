@@ -74,6 +74,7 @@ class AgencyComposerAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     def choices_for_request(self):
         choices = super(AgencyComposerAutocomplete, self).choices_for_request()
         # add fuzzy matches to the options
+        # XXX too slow without jurisdiction filtering
         exclude = self.request.GET.getlist('exclude') + [c.pk for c in choices]
         fuzzy_choices = process.extractBests(
             self.request.GET.get('q', ''),

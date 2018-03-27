@@ -92,7 +92,7 @@
         {% if user.is_authenticated %}
           <fieldset class="attachments">
             <label class="bold">Attachments</label>
-            <div id="fine-uploader" class="fine-uploader"></div>
+            <div id="fine-uploader" class="fine-uploader-composer" data-composer-pk="{{ composer.pk }}"></div>
           </fieldset>
         {% else %}
           {% include "lib/pattern/new_request_field.html" with field=form.full_name only %}
@@ -104,13 +104,13 @@
           <footer class="footer--submit">
             <p id="submit_help" class="error"></p>
             <div class="button-group">
-              <button type="submit" class="button" name="submit" value="save">
+              <button type="submit" class="button" name="action" value="save">
                 Save
               </button>
-              <button type="submit" class="primary button" name="submit" value="submit">
+              <button type="submit" class="primary button" name="action" value="submit">
                 Submit
               </button>
-              <button type="submit" class="failure button" name="submit" value="delete">
+              <button type="submit" class="failure button" name="action" value="delete">
                 Delete
               </button>
           </footer>

@@ -24,10 +24,6 @@ old_foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
 urlpatterns = [
     url(r'^$', views.RequestExploreView.as_view(), name='foia-root'),
 
-    # Redirects
-    # XXX this redirects to create request?
-    url(r'^multi/$', RedirectView.as_view(url='/foia/create_multi')),
-
     # List Views
     url(r'^list/$', views.RequestList.as_view(), name='foia-list'),
     url(r'^mylist/$', views.MyRequestList.as_view(), name='foia-mylist'),
@@ -40,12 +36,6 @@ urlpatterns = [
         r'^agency-list/$',
         views.AgencyRequestList.as_view(),
         name='foia-agency-list',
-    ),
-    # XXX no more multi - redirect to mylist
-    url(
-        r'^mylist/multirequest/$',
-        views.MyMultiRequestList.as_view(),
-        name='foia-mymulti',
     ),
     url(
         r'^list/following/$',
@@ -69,18 +59,6 @@ urlpatterns = [
         name='foia-draft'
     ),
 
-    # XXX redirect to create
-    url(
-        r'^create_multi/$', views.create_multirequest, name='foia-create-multi'
-    ),
-    # XXX this just ceases to exist
-    url(
-        r'^multi/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)/draft/$',
-        views.draft_multirequest,
-        name='foia-multi-draft',
-    ),
-    # XXX create and draft forms should be unified
-
     # Detail View
     url(
         r'^%s/$' % foia_url,
@@ -92,8 +70,6 @@ urlpatterns = [
         views.ComposerDetail.as_view(),
         name='foia-composer-detail',
     ),
-    # XXX is this clone url necessary?
-    url(r'^%s/clone/$' % foia_url, views.clone_request, name='foia-clone'),
     # XXX are the action views necessary?
     url(
         r'^%s/crowdfund/$' % foia_url,
@@ -113,16 +89,12 @@ urlpatterns = [
         views.toggle_autofollowups,
         name='foia-toggle-followups',
     ),
-    # XXX multi detail goes away
+    # XXX redirect to composer
     url(
         r'^multi/(?P<slug>[\w\d_-]+)-(?P<pk>\d+)/$',
         views.MultiDetail.as_view(),
         name='foia-multi-detail',
     ),
-    # XXX composer detail?
-    # - draft - redirect to draft page
-    # - one request - redirect to request page
-    # - multi request - show a list of all requests
 
     # Misc Views
     url(r'^acronyms/$', views.acronyms, name='foia-acronyms'),
@@ -160,6 +132,17 @@ urlpatterns = [
     ),
 
     # Old URLS
+    url(r'^multi/$', RedirectView.as_view(url='/foi/create/')),
+    url(
+        r'^create_multi/$',
+        RedirectView.as_view(url='/foia/create/'),
+        name='foia-create-multi',
+    ),
+    url(
+        r'^mylist/multirequest/$',
+        RedirectView.as_view(url='/foi/mylist/'),
+        name='foia-mymulti',
+    ),
     url(
         r'^(?P<jurisdiction>[\w\d_-]+)-(?P<idx>\d+)/$',
         jurisdiction,

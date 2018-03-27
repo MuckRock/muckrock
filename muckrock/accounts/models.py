@@ -212,7 +212,7 @@ class Profile(models.Model):
     def get_monthly_requests(self):
         """Get the number of requests left for this month"""
         with transaction.atomic():
-            profile = Profile.objects.get(pk=self.pk).select_for_update()
+            profile = Profile.objects.select_for_update().get(pk=self.pk)
             not_this_month = profile.date_update.month != date.today().month
             not_this_year = profile.date_update.year != date.today().year
             # update requests if they have not yet been updated this month
@@ -252,10 +252,16 @@ class Profile(models.Model):
     def make_requests(self, num):
         """Try to deduct `num` requests from the users balance"""
         with transaction.atomic():
-            profile = (
-                Profile.objects.get(pk=self.pk).select_for_update()
-                .select_related('organization')
-            )
+            if self.organization:
+                # cannot lock on a nullable relation, but we do
+                # want to lock the organization if it exists
+                profile = (
+                    Profile.objects.select_for_update()
+                    .select_related('organization')
+                    .exclude(organization=None).get(pk=self.pk)
+                )
+            else:
+                profile = Profile.objects.select_for_update().get(pk=self.pk)
             request_count = profile.multiple_requests(num)
             if request_count['extra'] > 0:
                 raise InsufficientRequestsError(request_count['extra'])
@@ -332,7 +338,7 @@ class Profile(models.Model):
         stripe_retry_on_error(customer.save, idempotency_key=True)
         # modify the profile object (should this be part of a webhook callback?)
         with transaction.atomic():
-            profile = Profile.objects.get(pk=self.pk).select_for_update()
+            profile = Profile.objects.select_for_update().get(pk=self.pk)
             profile.subscription_id = subscription.id
             profile.acct_type = 'pro'
             profile.date_update = date.today()
@@ -369,7 +375,7 @@ class Profile(models.Model):
         except stripe.error.StripeError as exception:
             logger.warn(exception)
         with transaction.atomic():
-            profile = Profile.objects.get(pk=self.pk).select_for_update()
+            profile = Profile.objects.select_for_update().get(pk=self.pk)
             profile.subscription_id = ''
             profile.acct_type = 'basic'
             profile.monthly_requests = settings.MONTHLY_REQUESTS.get('basic', 0)

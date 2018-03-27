@@ -14,7 +14,7 @@
     {% if not hide_actions %}
     <footer class="foia__single__footer">
         <a href="{{ foia.get_absolute_url }}" class="basic blue button">View</a>
-        <a href="{% url 'foia-clone' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="basic blue button">Clone</a>
+        <a href="{% url 'foia-create' %}?clone={{ foia.composer.pk }}&agency={{ foia.agency.pk }}" class="basic blue button">Clone</a>
     </footer>
     {% endif %}
 </div>

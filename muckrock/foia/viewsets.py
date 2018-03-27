@@ -24,8 +24,13 @@ from rest_framework.response import Response
 
 # MuckRock
 from muckrock.agency.models import Agency
-from muckrock.foia.exceptions import MimeError
-from muckrock.foia.models import FOIACommunication, FOIAFile, FOIARequest
+from muckrock.foia.exceptions import InsufficientRequestsError, MimeError
+from muckrock.foia.models import (
+    FOIACommunication,
+    FOIAComposer,
+    FOIAFile,
+    FOIARequest,
+)
 from muckrock.foia.serializers import (
     FOIACommunicationSerializer,
     FOIAPermissions,
@@ -97,6 +102,70 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
         )
 
     def create(self, request):
+        """Submit new request"""
+        # pylint: disable=too-many-locals
+        # pylint: disable=too-many-return-statements
+        # pylint: disable=too-many-branches
+        data = request.data
+        try:
+            # XXX does data support getlist?
+            agencies = Agency.objects.filter(
+                pk__in=data.getlist('agency'),
+                status='approved',
+            )
+
+            embargo = data.get('embargo', False)
+            # XXX
+            permanent_embargo = data.get('permanent_embargo', False)
+            if permanent_embargo:
+                embargo = True
+
+            # XXX test validation
+            # XXX check for embargo permissions
+            # XXX support full text
+            # XXX support attachments
+            composer = FOIAComposer.objects.create(
+                user=request.user,
+                title=data['title'],
+                slug=slugify(data['title']) or 'untitled',
+                requested_docs=data['document_request'],
+                embargo=embargo,
+            )
+            composer.agencies.set(agencies)
+            try:
+                composer.submit()
+            except InsufficientRequestsError:
+                pass
+                # XXX messages.warning(request, 'You need to purchase more requests')
+
+        except KeyError:
+            return Response(
+                {
+                    'status':
+                        'Missing data - Please supply title, document_request, '
+                        'and agency'
+                },
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+        except Agency.DoesNotExist:
+            return Response(
+                {
+                    'status':
+                        'Bad data - please supply agency as the PK'
+                        ' of existing entities.'
+                },
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+        except (requests.exceptions.RequestException, TypeError, MimeError):
+            # TypeError is thrown if 'attachments' is not a list
+            return Response(
+                {
+                    'status': 'There was a problem with one of your attachments'
+                },
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+
+    def create_(self, request):
         """Submit new request"""
         # pylint: disable=too-many-locals
         # pylint: disable=too-many-return-statements

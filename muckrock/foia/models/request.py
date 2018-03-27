@@ -12,6 +12,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
 from django.db import connection, models
 from django.db.models import Sum
+from django.http.request import QueryDict
 from django.template.defaultfilters import escape, linebreaks, slugify
 from django.template.loader import get_template, render_to_string
 from django.utils import timezone
@@ -568,9 +569,14 @@ class FOIARequest(models.Model):
             'a suitable proxy does not exist.'
         )
 
-    def process_attachments(self, user):
+    def process_attachments(self, user, composer=False):
         """Attach all outbound attachments to the last communication"""
-        attachments = self.pending_attachments.filter(
+        # pylint: disable=redefined-variable-type
+        if composer:
+            attm_source = self.composer
+        else:
+            attm_source = self
+        attachments = attm_source.pending_attachments.filter(
             user=user,
             sent=False,
         )
@@ -982,13 +988,24 @@ class FOIARequest(models.Model):
             'idx': self.pk,
             'slug': self.slug
         }
+        clone_params = QueryDict('', mutable=True)
+        clone_params['clone'] = self.composer.pk
+        clone_params['agency'] = self.agency.pk
         return [
             {
-                'test': not is_agency_user,
-                'link': reverse('foia-clone', kwargs=kwargs),
-                'title': 'Clone',
-                'desc': 'Start a new request using this one as a base',
-                'class_name': 'primary',
+                'test':
+                    not is_agency_user,
+                'link':
+                    '{}?{}'.format(
+                        reverse('foia-create'),
+                        clone_params.urlencode(),
+                    ),
+                'title':
+                    'Clone',
+                'desc':
+                    'Start a new request using this one as a base',
+                'class_name':
+                    'primary',
             },
             {
                 'test': can_follow,

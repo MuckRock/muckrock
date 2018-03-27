@@ -69,7 +69,7 @@ class Organization(models.Model):
         been restored for this month, or ever.
         """
         with transaction.atomic():
-            org = Organization.objects.get(pk=self.pk).select_for_update()
+            org = Organization.objects.select_for_update().get(pk=self.pk)
             today = date.today()
             if org.date_update:
                 not_this_month = org.date_update.month != today.month
@@ -205,7 +205,7 @@ class Organization(models.Model):
             idempotency_key=True,
         )
         with transaction.atomic():
-            org = Organization.objects.get(pk=self.pk).select_for_update()
+            org = Organization.objects.select_for_update().get(pk=self.pk)
             org.update_num_seats(num_seats)
             org.num_requests = org.monthly_requests
             org.stripe_id = subscription.id
@@ -248,7 +248,7 @@ class Organization(models.Model):
             ), self.owner.username)
             return
         with transaction.atomic():
-            org = Organization.objects.get(pk=self.pk).select_for_update()
+            org = Organization.objects.select_for_update().get(pk=self.pk)
             old_monthly_requests = org.monthly_requests
             org.update_num_seats(num_seats)
             new_monthly_requests = org.monthly_requests

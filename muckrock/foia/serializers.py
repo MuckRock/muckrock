@@ -131,16 +131,12 @@ class FOIANoteSerializer(serializers.ModelSerializer):
         exclude = ('id', 'foia')
 
 
-# XXX
 class FOIARequestSerializer(serializers.ModelSerializer):
     """Serializer for FOIA Request model"""
-    username = serializers.StringRelatedField(source='user',)
+    username = serializers.StringRelatedField(source='composer__user',)
     user = serializers.PrimaryKeyRelatedField(
+        source='composer__user',
         queryset=User.objects.all(),
-        style={'base_template': 'input.html'},
-    )
-    jurisdiction = serializers.PrimaryKeyRelatedField(
-        queryset=Jurisdiction.objects.all(),
         style={'base_template': 'input.html'},
     )
     agency = serializers.PrimaryKeyRelatedField(
@@ -207,11 +203,9 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             'permanent_embargo',
             'user',
             'username',
-            'jurisdiction',
             'agency',
             # request content
             'requested_docs',
-            'description',
             # request dates
             'date_due',
             'days_until_due',

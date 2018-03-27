@@ -72,10 +72,10 @@
                 </td>
               </tr>
             {% endif %}
-            {% if foia.multirequest %}
+            {% if foia.composer.foias.count > 1 %}
               <tr class="multirequest">
                 <td>Multi Request</td>
-                <td><a href="{{foia.multirequest.get_absolute_url}}">{{ foia.multirequest.title }}</a></td>
+                <td><a href="{{foia.composer.get_absolute_url}}">{{ foia.composer.title }}</a></td>
               </tr>
             {% endif %}
           </table>

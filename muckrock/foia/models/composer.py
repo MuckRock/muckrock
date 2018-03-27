@@ -65,6 +65,7 @@ class FOIAComposer(models.Model):
 
     class Meta:
         verbose_name = 'FOIA Composer'
+        permissions = (('view_foiacomposer', 'Can view this composer'),)
 
     def __unicode__(self):
         return self.title
@@ -115,3 +116,7 @@ class FOIAComposer(models.Model):
             )
         self.status = 'filed'
         self.save()
+
+    def has_perm(self, user, perm):
+        """Short cut for checking a FOIA composer permission"""
+        return user.has_perm('foia.%s_foiacomposer' % perm, self)

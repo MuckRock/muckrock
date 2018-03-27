@@ -213,6 +213,7 @@ class FOIARequestQuerySet(models.QuerySet):
         foia.tags.set(*composer.tags.all())
         # TODO do proxy checking
         foia.create_initial_communication(composer.user, proxy=False)
+        foia.process_attachments(composer.user, composer=True)
         foia.submit()
 
 

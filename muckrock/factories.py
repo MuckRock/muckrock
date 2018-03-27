@@ -28,7 +28,7 @@ from muckrock.foia.models import (
     FOIAFile,
     FOIAMultiRequest,
     FOIARequest,
-    OutboundAttachment,
+    OutboundRequestAttachment,
     RawEmail,
 )
 from muckrock.news.models import Article
@@ -254,11 +254,11 @@ class FOIAFileFactory(factory.django.DjangoModelFactory):
     ffile = factory.django.FileField(filename=factory.Faker('file_name'))
 
 
-class OutboundAttachmentFactory(factory.django.DjangoModelFactory):
+class OutboundRequestAttachmentFactory(factory.django.DjangoModelFactory):
     """A factory for creating FOIAFile test objects."""
 
     class Meta:
-        model = OutboundAttachment
+        model = OutboundRequestAttachment
 
     user = factory.SubFactory(UserFactory)
     foia = factory.SubFactory(

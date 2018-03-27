@@ -76,8 +76,6 @@ class Jurisdiction(models.Model, RequestHelper):
     name = models.CharField(max_length=50)
     # slug should be slugify(unicode(self))
     slug = models.SlugField(max_length=55)
-    # XXX remove
-    full_name = models.CharField(max_length=55, blank=True)
     abbrev = models.CharField(max_length=5, blank=True)
     level = models.CharField(max_length=1, choices=levels)
     parent = models.ForeignKey(

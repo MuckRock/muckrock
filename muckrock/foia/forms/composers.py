@@ -60,7 +60,7 @@ class ComposerForm(forms.ModelForm):
         required=False,
         widget=forms.HiddenInput(),
     )
-    submit = forms.ChoiceField(
+    action = forms.ChoiceField(
         choices=[
             ('save', 'Save'),
             ('submit', 'Submit'),
@@ -125,12 +125,12 @@ class ComposerForm(forms.ModelForm):
         """Check cross field dependencies"""
         cleaned_data = super(ComposerForm, self).clean()
         if (
-            cleaned_data['submit'] == 'submit'
+            cleaned_data['action'] == 'submit'
             and not self.cleaned_data['agencies']
         ):
             self.add_error(
                 'agencies',
-                'You must select at least one agent before submitting',
+                'You must select at least one agency before submitting',
             )
 
     def get_agency(self):
