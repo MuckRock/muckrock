@@ -15,22 +15,9 @@ import factory
 
 # MuckRock
 from muckrock.accounts.models import Notification, Profile, Statistics
-from muckrock.agency.models import (
-    STALE_DURATION,
-    Agency,
-    AgencyEmail,
-    AgencyPhone,
-)
+from muckrock.agency.models import Agency, AgencyEmail, AgencyPhone
 from muckrock.communication.models import EmailAddress
 from muckrock.crowdfund.models import Crowdfund
-from muckrock.foia.models import (
-    FOIACommunication,
-    FOIAFile,
-    FOIAMultiRequest,
-    FOIARequest,
-    OutboundRequestAttachment,
-    RawEmail,
-)
 from muckrock.news.models import Article
 from muckrock.organization.models import Organization
 from muckrock.project.models import Project
@@ -164,112 +151,6 @@ class AppealAgencyFactory(AgencyFactory):
     )
 
 
-class FOIARequestFactory(factory.django.DjangoModelFactory):
-    """A factory for creating FOIARequest test objects."""
-
-    # pylint: disable=too-many-instance-attributes
-
-    class Meta:
-        model = FOIARequest
-
-    title = factory.Sequence(lambda n: "FOIA Request %d" % n)
-    slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
-    user = factory.SubFactory(UserFactory)
-    jurisdiction = factory.SubFactory(
-        'muckrock.jurisdiction.factories.StateJurisdictionFactory'
-    )
-    agency = factory.SubFactory(
-        'muckrock.factories.AgencyFactory',
-        jurisdiction=factory.SelfAttribute('..jurisdiction')
-    )
-    email = factory.SubFactory(
-        'muckrock.communication.factories.EmailAddressFactory',
-    )
-
-    @factory.post_generation
-    def cc_emails(self, create, extracted, **kwargs):
-        """Adds M2M cc emails"""
-        # pylint: disable=unused-argument
-        if create and extracted:
-            # A list of emails were passed in, use them
-            self.cc_emails.set(EmailAddress.objects.fetch_many(extracted))
-
-
-class FOIACommunicationFactory(factory.django.DjangoModelFactory):
-    """A factory for creating FOIARequest test objects."""
-
-    class Meta:
-        model = FOIACommunication
-
-    foia = factory.SubFactory(FOIARequestFactory)
-    from_user = factory.SubFactory(UserFactory)
-    to_user = factory.SubFactory(UserFactory)
-    date = factory.LazyAttribute(lambda obj: timezone.now())
-    email = factory.RelatedFactory(
-        'muckrock.communication.factories.EmailCommunicationFactory',
-        'communication',
-    )
-
-
-class FOIAMultiRequestFactory(factory.django.DjangoModelFactory):
-    """A factory for creating FOIAMultiRequest test objects."""
-
-    class Meta:
-        model = FOIAMultiRequest
-
-    title = factory.Sequence(lambda n: "FOIA Multi Request %d" % n)
-    slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
-    user = factory.SubFactory(UserFactory)
-
-    @factory.post_generation
-    def agencies(self, create, extracted, **kwargs):
-        """Adds M2M agencies"""
-        # pylint: disable=unused-argument
-        if create and extracted:
-            # A list of agencies were passed in, use them
-            for agency in extracted:
-                self.agencies.add(agency)
-
-
-class RawEmailFactory(factory.django.DjangoModelFactory):
-    """A factory for creating  objects."""
-
-    class Meta:
-        model = RawEmail
-
-    email = factory.SubFactory(
-        'muckrock.communication.factories.EmailCommunicationFactory',
-    )
-    raw_email = factory.Faker('paragraph')
-
-
-class FOIAFileFactory(factory.django.DjangoModelFactory):
-    """A factory for creating FOIAFile test objects."""
-
-    class Meta:
-        model = FOIAFile
-
-    comm = factory.SubFactory(FOIACommunicationFactory)
-    title = factory.Faker('word')
-    ffile = factory.django.FileField(filename=factory.Faker('file_name'))
-
-
-class OutboundRequestAttachmentFactory(factory.django.DjangoModelFactory):
-    """A factory for creating FOIAFile test objects."""
-
-    class Meta:
-        model = OutboundRequestAttachment
-
-    user = factory.SubFactory(UserFactory)
-    foia = factory.SubFactory(
-        FOIARequestFactory,
-        user=factory.SelfAttribute('..user'),
-    )
-    ffile = factory.django.FileField(filename=factory.Faker('file_name'))
-    date_time_stamp = factory.LazyAttribute(lambda obj: timezone.now())
-    sent = False
-
-
 class ProjectFactory(factory.django.DjangoModelFactory):
     """A factory for creating Project test objects."""
 
@@ -380,21 +261,5 @@ class StaleAgencyFactory(AgencyFactory):
     """A factory for creating stale Agency test objects."""
     stale = True
     stale_foia = factory.RelatedFactory(
-        'muckrock.factories.StaleFOIARequestFactory', 'agency'
-    )
-
-
-class StaleFOIARequestFactory(FOIARequestFactory):
-    """A factory for creating stale FOIARequest test objects."""
-    status = 'ack'
-    stale_comm = factory.RelatedFactory(
-        'muckrock.factories.StaleFOIACommunicationFactory', 'foia'
-    )
-
-
-class StaleFOIACommunicationFactory(FOIACommunicationFactory):
-    """A factory for creating stale FOIARequest test objects."""
-    response = True
-    date = factory.LazyAttribute(
-        lambda obj: timezone.now() - datetime.timedelta(STALE_DURATION + 1)
+        'muckrock.foia.factories.StaleFOIARequestFactory', 'agency'
     )

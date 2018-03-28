@@ -20,7 +20,7 @@ import mock
 import nose.tools
 
 # MuckRock
-from muckrock import factories
+from muckrock.factories import ProjectFactory, UserFactory
 from muckrock.project import forms, models, views
 from muckrock.test_utils import (
     http_get_response,
@@ -57,7 +57,7 @@ class TestProjectCreateView(TestCase):
 
     def test_basic(self):
         """Basic users should not be able to GET the ProjectCreateView."""
-        user = factories.UserFactory()
+        user = UserFactory()
         response = http_get_response(self.url, self.view, user)
         eq_(
             response.status_code, 200,
@@ -89,7 +89,7 @@ class TestProjectCreateView(TestCase):
             'featured': True
         })
         ok_(form.is_valid(), 'The form should validate.')
-        staff_user = factories.UserFactory(is_staff=True)
+        staff_user = UserFactory(is_staff=True)
         response = http_post_response(
             self.url, self.view, form.data, staff_user
         )
@@ -110,8 +110,8 @@ class TestProjectEditView(TestCase):
     def setUp(self):
         # We will start with a project that's already been made.
         # We will give that project a single contributor.
-        self.contributor = factories.UserFactory()
-        self.project = factories.ProjectFactory()
+        self.contributor = UserFactory()
+        self.project = ProjectFactory()
         self.project.contributors.add(self.contributor)
         self.project.save()
         self.factory = RequestFactory()
@@ -121,7 +121,7 @@ class TestProjectEditView(TestCase):
 
     def test_staff(self):
         """Staff users should be able to edit projects."""
-        staff_user = factories.UserFactory(is_staff=True)
+        staff_user = UserFactory(is_staff=True)
         response = http_get_response(
             self.url, self.view, staff_user, **self.kwargs
         )
@@ -137,7 +137,7 @@ class TestProjectEditView(TestCase):
     @raises(Http404)
     def test_basic(self):
         """Basic users should not be able to edit projects."""
-        user = factories.UserFactory()
+        user = UserFactory()
         http_get_response(self.url, self.view, user, **self.kwargs)
 
     def test_anonymous(self):
@@ -173,7 +173,7 @@ class TestProjectEditView(TestCase):
     @mock.patch('muckrock.message.tasks.notify_project_contributor.delay')
     def test_add_contributors(self, mock_notify):
         """When adding contributors, each new contributor should get an email notification."""
-        new_contributor = factories.UserFactory()
+        new_contributor = UserFactory()
         data = {
             'title': self.project.title,
             'contributors': [self.contributor.pk, new_contributor.pk]
@@ -196,8 +196,8 @@ class TestProjectPublishView(TestCase):
 
     def setUp(self):
         # We will start with a project that's already been made.
-        self.project = factories.ProjectFactory(private=True, approved=False)
-        self.contributor = factories.UserFactory()
+        self.project = ProjectFactory(private=True, approved=False)
+        self.contributor = UserFactory()
         self.project.contributors.add(self.contributor)
         self.kwargs = {'slug': self.project.slug, 'pk': self.project.pk}
         self.url = reverse('project-publish', kwargs=self.kwargs)
@@ -205,7 +205,7 @@ class TestProjectPublishView(TestCase):
 
     def test_staff(self):
         """Staff users should be able to publish projects."""
-        staff_user = factories.UserFactory(is_staff=True)
+        staff_user = UserFactory(is_staff=True)
         response = http_get_response(
             self.url, self.view, staff_user, **self.kwargs
         )
@@ -221,7 +221,7 @@ class TestProjectPublishView(TestCase):
     @raises(Http404)
     def test_basic(self):
         """Basic users should not be able to delete projects."""
-        user = factories.UserFactory()
+        user = UserFactory()
         http_get_response(self.url, self.view, user, **self.kwargs)
 
     def test_anonymous(self):
@@ -238,9 +238,7 @@ class TestProjectPublishView(TestCase):
 
     def test_pending(self):
         """Projects that are pending review should reject access to the Publish view."""
-        pending_project = factories.ProjectFactory(
-            private=False, approved=False
-        )
+        pending_project = ProjectFactory(private=False, approved=False)
         pending_project.contributors.add(self.contributor)
         response = http_get_response(
             self.url, self.view, self.contributor, **{
@@ -275,7 +273,7 @@ class TestProjectCrowdfundView(TestCase):
     """Tests the creation of a crowdfund for a project."""
 
     def setUp(self):
-        self.project = factories.ProjectFactory(private=False, approved=True)
+        self.project = ProjectFactory(private=False, approved=True)
         self.url = reverse(
             'project-crowdfund',
             kwargs={
@@ -288,7 +286,7 @@ class TestProjectCrowdfundView(TestCase):
 
     def test_post(self):
         """Posting data for a crowdfund should create it."""
-        user = factories.UserFactory(is_staff=True)
+        user = UserFactory(is_staff=True)
         name = 'Project Crowdfund'
         description = 'A crowdfund'
         payment_required = 100
@@ -334,8 +332,8 @@ class TestProjectContributorView(TestCase):
     """Provides a list of just projects the user contributes to."""
 
     def setUp(self):
-        self.user = factories.UserFactory()
-        project = factories.ProjectFactory()
+        self.user = UserFactory()
+        project = ProjectFactory()
         project.contributors.add(self.user)
         self.kwargs = {'username': self.user.username}
         self.url = reverse('project-contributor', kwargs=self.kwargs)

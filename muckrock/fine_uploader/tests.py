@@ -13,12 +13,12 @@ import json
 from nose.tools import assert_false, eq_
 
 # MuckRock
-from muckrock.factories import (
+from muckrock.factories import UserFactory
+from muckrock.fine_uploader import views
+from muckrock.foia.factories import (
     FOIARequestFactory,
     OutboundRequestAttachmentFactory,
-    UserFactory,
 )
-from muckrock.fine_uploader import views
 from muckrock.foia.models import OutboundRequestAttachment
 
 

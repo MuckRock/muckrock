@@ -14,8 +14,15 @@ import nose.tools
 from dateutil.relativedelta import relativedelta
 
 # MuckRock
-from muckrock import factories
 from muckrock.accounts.models import ReceiptEmail
+from muckrock.factories import (
+    NotificationFactory,
+    OrganizationFactory,
+    ProfileFactory,
+    ProjectFactory,
+    UserFactory,
+)
+from muckrock.foia.factories import FOIARequestFactory
 from muckrock.message import tasks
 from muckrock.task.factories import FlaggedTaskFactory
 
@@ -71,12 +78,12 @@ class TestDailyTask(TestCase):
     """Tests the daily email notification task."""
 
     def setUp(self):
-        self.user = factories.UserFactory()
+        self.user = UserFactory()
 
     @mock.patch('muckrock.message.tasks.send_activity_digest.delay')
     def test_when_unread(self, mock_send):
         """The send method should be called when a user has unread notifications."""
-        factories.NotificationFactory(user=self.user)
+        NotificationFactory(user=self.user)
         tasks.daily_digest()
         mock_send.assert_called_with(
             self.user, u'Daily Digest', relativedelta(days=1)
@@ -93,7 +100,7 @@ class TestStaffTask(TestCase):
     """Tests the daily staff digest task."""
 
     def setUp(self):
-        self.staff_user = factories.UserFactory(is_staff=True)
+        self.staff_user = UserFactory(is_staff=True)
 
     @mock.patch('muckrock.message.digests.StaffDigest.send')
     def test_staff_digest_task(self, mock_send):
@@ -107,7 +114,7 @@ class TestNotificationTasks(TestCase):
     """Email notifications are sent to users upon key events."""
 
     def setUp(self):
-        self.user = factories.UserFactory()
+        self.user = UserFactory()
 
     def test_welcome(self, mock_send):
         """Welcomes a new user to the site."""
@@ -116,7 +123,7 @@ class TestNotificationTasks(TestCase):
 
     def test_gift(self, mock_send):
         """Tells the user when they have been given a gift."""
-        sender = factories.UserFactory()
+        sender = UserFactory()
         gift = '4 requests'
         tasks.gift(self.user, sender, gift)
         mock_send.assert_called_with(fail_silently=False)
@@ -139,8 +146,8 @@ class TestNotificationTasks(TestCase):
 
     def test_notify_contributor(self, mock_send):
         """Notifies a contributor that they were added to a project."""
-        project = factories.ProjectFactory()
-        added_by = factories.UserFactory()
+        project = ProjectFactory()
+        added_by = UserFactory()
         tasks.notify_project_contributor(self.user, project, added_by)
         mock_send.assert_called_with(fail_silently=False)
 
@@ -151,7 +158,7 @@ class TestSendChargeReceiptTask(TestCase):
     """Tests the send charge receipt task."""
 
     def setUp(self):
-        self.user = factories.UserFactory()
+        self.user = UserFactory()
         mock_charge.invoice = None
         mock_charge.metadata = {'email': self.user.email}
 
@@ -163,7 +170,7 @@ class TestSendChargeReceiptTask(TestCase):
 
     def test_request_fee_receipt(self, mock_send):
         """A receipt should be sent after request fee is paid."""
-        foia = factories.FOIARequestFactory()
+        foia = FOIARequestFactory()
         mock_charge.metadata['action'] = 'request-fee'
         mock_charge.metadata['foia'] = foia.pk
         tasks.send_charge_receipt(mock_charge.id)
@@ -194,7 +201,7 @@ class TestSendChargeReceiptRecipient(TestCase):
     """Tests the send charge receipt recipients."""
 
     def setUp(self):
-        self.user = factories.UserFactory()
+        self.user = UserFactory()
         mock_charge.invoice = None
         mock_charge.metadata = {'email': self.user.email}
         mail.outbox = []
@@ -226,7 +233,7 @@ class TestSendInvoiceReceiptTask(TestCase):
         """A receipt should be sent after a pro subscription payment is made."""
         mock_subscription.plan.id = 'pro'
         customer_id = 'test-pro'
-        factories.ProfileFactory(customer_id=customer_id)
+        ProfileFactory(customer_id=customer_id)
         mock_invoice.customer = customer_id
         tasks.send_invoice_receipt(mock_invoice.id)
         mock_send.assert_called_with(fail_silently=False)
@@ -235,8 +242,8 @@ class TestSendInvoiceReceiptTask(TestCase):
         """A receipt should be sent after an org subscription payment is made."""
         mock_subscription.plan.id = 'org'
         customer_id = 'test-org'
-        owner = factories.UserFactory(profile__customer_id=customer_id)
-        factories.OrganizationFactory(owner=owner)
+        owner = UserFactory(profile__customer_id=customer_id)
+        OrganizationFactory(owner=owner)
         mock_invoice.customer = customer_id
         tasks.send_invoice_receipt(mock_invoice.id)
         mock_send.assert_called_with(fail_silently=False)
@@ -249,9 +256,7 @@ class TestFailedPaymentTask(TestCase):
     def setUp(self):
         mock_invoice.plan.id = 'pro'
         mock_invoice.attempt_count = 1
-        self.profile = factories.ProfileFactory(
-            customer_id=mock_invoice.customer
-        )
+        self.profile = ProfileFactory(customer_id=mock_invoice.customer)
 
     @mock.patch('muckrock.message.email.TemplateEmail.send')
     def test_failed_invoice_charge(self, mock_send):
@@ -295,7 +300,7 @@ class TestFailedPaymentTask(TestCase):
             self.profile.payment_failed,
             'The payment failed flag should be raised.'
         )
-        factories.OrganizationFactory(owner=self.profile.user)
+        OrganizationFactory(owner=self.profile.user)
         mock_invoice.attempt_count = 4
         mock_invoice.lines.data[0].plan.id = 'org'
         tasks.failed_payment(mock_invoice.id)

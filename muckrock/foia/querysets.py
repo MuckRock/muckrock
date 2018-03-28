@@ -149,7 +149,8 @@ class FOIARequestQuerySet(models.QuerySet):
                         models.DurationField(),
                     )
                 )
-            ).order_by('-latest_response').select_related('jurisdiction')
+            ).order_by('-latest_response')
+            .select_related('agency__jurisdiction')
         )
         if agency is not None:
             foia_qs = foia_qs.filter(agency=agency)

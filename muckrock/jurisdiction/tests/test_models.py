@@ -14,11 +14,11 @@ from datetime import date, timedelta
 from nose.tools import eq_
 
 # MuckRock
-from muckrock.factories import (
+from muckrock.factories import UserFactory
+from muckrock.foia.factories import (
     FOIACommunicationFactory,
     FOIAFileFactory,
     FOIARequestFactory,
-    UserFactory,
 )
 from muckrock.jurisdiction import factories
 

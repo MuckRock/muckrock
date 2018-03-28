@@ -204,8 +204,6 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             'user',
             'username',
             'agency',
-            # request content
-            'requested_docs',
             # request dates
             'date_due',
             'days_until_due',

@@ -124,8 +124,9 @@ class FOIACommunication(models.Model):
         remove_control = dict.fromkeys(
             range(0, 9) + range(11, 13) + range(14, 32)
         )
-        self.communication = unicode(self.communication
-                                     ).translate(remove_control)
+        self.communication = (
+            unicode(self.communication).translate(remove_control)
+        )
         # limit communication length to 150k
         self.communication = self.communication[:150000]
         # special handling for certain agencies
@@ -134,10 +135,10 @@ class FOIACommunication(models.Model):
         if (
             self.foia and (
                 self.foia.datetime_updated is None
-                or self.date.date() > self.foia.datetime_updated
+                or self.date > self.foia.datetime_updated
             )
         ):
-            self.foia.datetime_updated = self.date.date()
+            self.foia.datetime_updated = self.date
             self.foia.save(comment='update datetime_updated due to new comm')
         super(FOIACommunication, self).save(*args, **kwargs)
 

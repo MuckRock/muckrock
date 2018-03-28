@@ -22,7 +22,7 @@ from freezegun import freeze_time
 
 # MuckRock
 from muckrock.communication.models import EmailAddress, EmailError, EmailOpen
-from muckrock.factories import FOIACommunicationFactory, FOIARequestFactory
+from muckrock.foia.factories import FOIACommunicationFactory, FOIARequestFactory
 from muckrock.foia.models import FOIACommunication
 from muckrock.mailgun.views import bounces, delivered, opened, route_mailgun
 from muckrock.task.models import OrphanTask

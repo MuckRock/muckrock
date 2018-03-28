@@ -11,7 +11,8 @@ from mock import patch
 from nose.tools import eq_, ok_
 
 # MuckRock
-from muckrock.accounts.utils import miniregister, split_name, unique_username
+from muckrock.accounts.mixins import MiniregMixin, split_name
+from muckrock.accounts.utils import unique_username
 from muckrock.factories import UserFactory
 
 

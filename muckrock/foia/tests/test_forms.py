@@ -12,7 +12,7 @@ from nose.tools import eq_, ok_
 
 # MuckRock
 from muckrock.factories import AgencyFactory, UserFactory
-from muckrock.foia.forms import RequestForm
+from muckrock.foia.forms import ComposerForm
 from muckrock.jurisdiction.factories import (
     FederalJurisdictionFactory,
     LocalJurisdictionFactory,

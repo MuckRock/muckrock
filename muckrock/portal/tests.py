@@ -15,7 +15,7 @@ from mock import patch
 from nose.tools import assert_false, eq_, ok_
 
 # MuckRock
-from muckrock.factories import FOIACommunicationFactory
+from muckrock.foia.factories import FOIACommunicationFactory
 from muckrock.foia.models.communication import FOIACommunication
 from muckrock.portal.models import Portal
 from muckrock.task.models import PortalTask

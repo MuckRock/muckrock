@@ -226,16 +226,11 @@ def submit_multi_request(req_pk, **kwargs):
             foia_request = template.render(context).strip()
 
             new_foia = FOIARequest.objects.create(
-                user=req.user,
                 status='started',
                 title=title,
                 slug=slugify(title),
-                jurisdiction=agency.jurisdiction,
                 agency=agency,
                 embargo=req.embargo,
-                requested_docs=req.requested_docs,
-                description=req.requested_docs,
-                multirequest=req,
             )
             new_foia.tags.set(*req.tags.all())
 

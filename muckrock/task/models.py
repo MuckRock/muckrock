@@ -743,6 +743,7 @@ class CrowdfundTask(Task):
 
 class MultiRequestTask(Task):
     """Created when a multirequest is created and needs approval."""
+    # XXX this needs to be re-written for composers
     type = 'MultiRequestTask'
     multirequest = models.ForeignKey('foia.FOIAMultiRequest')
 
@@ -818,8 +819,8 @@ class MultiRequestTask(Task):
         # add the return requests to the user's profile
         with transaction.atomic():
             profile = (
-                Profile.objects.get(pk=self.multirequest.user.profile_id)
-                .select_for_update()
+                Profile.objects.select_for_update()
+                .get(pk=self.multirequest.user.profile.id)
             )
             profile.num_requests += return_amts['regular']
             profile.get_monthly_requests()

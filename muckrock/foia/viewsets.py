@@ -62,7 +62,9 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
     class Filter(django_filters.FilterSet):
         """API Filter for FOIA Requests"""
         agency = django_filters.NumberFilter(name='agency__id')
-        jurisdiction = django_filters.NumberFilter(name='jurisdiction__id')
+        jurisdiction = django_filters.NumberFilter(
+            name='agency__jurisdiction__id'
+        )
         user = django_filters.CharFilter(name='user__username')
         tags = django_filters.CharFilter(name='tags__name')
 
@@ -81,8 +83,10 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return (
-            FOIARequest.objects.get_viewable(self.request.user)
-            .select_related('user', 'agency', 'jurisdiction').prefetch_related(
+            FOIARequest.objects.get_viewable(self.request.user).select_related(
+                'composer__user',
+                'agency__jurisdiction',
+            ).prefetch_related(
                 'communications__files',
                 'communications__emails',
                 'communications__faxes',

@@ -323,9 +323,8 @@ class Homepage(object):
         return lambda: (
             FOIARequest.objects.get_public().get_done().
             order_by('-datetime_done', 'pk').select_related(
-                'agency__jurisdiction',
-                'jurisdiction__parent__parent',
-                'coomposer__user',
+                'agency__jurisdiction__parent__parent',
+                'composer__user',
             ).only(
                 'status',
                 'slug',
@@ -333,13 +332,12 @@ class Homepage(object):
                 'agency__name',
                 'agency__slug',
                 'agency__jurisdiction__slug',
-                'jurisdiction__level',
-                'jurisdiction__name',
-                'jurisdiction__slug',
-                'jurisdiction__parent__abbrev',
-                'jurisdiction__parent__name',
-                'jurisdiction__parent__slug',
-                'jurisdiction__parent__parent__slug',
+                'agency__jurisdiction__level',
+                'agency__jurisdiction__name',
+                'agency__jurisdiction__parent__abbrev',
+                'agency__jurisdiction__parent__name',
+                'agency__jurisdiction__parent__slug',
+                'agency__jurisdiction__parent__parent__slug',
                 'composer__user__username',
                 'composer__user__first_name',
                 'composer__user__last_name',

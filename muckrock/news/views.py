@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db.models import Prefetch, Q
-from django.http import HttpResponseForbidden
+from django.http import Http404, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import TemplateView
 from django.views.generic.dates import (
@@ -179,6 +179,8 @@ class NewsListView(MRSearchFilterListView):
         """Add a list of all the years we've published to the context."""
         context = super(NewsListView, self).get_context_data(**kwargs)
         articles_by_date = self.queryset.order_by('pub_date')
+        if not articles_by_date.exists():
+            raise Http404
         years = range(
             articles_by_date.first().pub_date.year,
             articles_by_date.last().pub_date.year +

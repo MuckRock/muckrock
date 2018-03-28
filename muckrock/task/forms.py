@@ -151,7 +151,7 @@ class ResponseTaskForm(forms.Form):
         if move:
             try:
                 comms = self.move_communication(task.communication, move, user)
-            except (Http404, ValueError):
+            except ValueError:
                 error_msgs.append(
                     'No valid destination for moving the request.'
                 )

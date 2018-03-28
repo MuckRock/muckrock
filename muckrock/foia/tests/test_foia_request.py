@@ -33,12 +33,11 @@ from muckrock.agency.models import Agency
 from muckrock.factories import (
     AgencyFactory,
     AppealAgencyFactory,
-    FOIACommunicationFactory,
-    FOIARequestFactory,
     OrganizationFactory,
     ProjectFactory,
     UserFactory,
 )
+from muckrock.foia.factories import FOIACommunicationFactory, FOIARequestFactory
 from muckrock.foia.models import FOIACommunication, FOIARequest
 from muckrock.foia.views import (
     Detail,
@@ -69,11 +68,6 @@ from muckrock.utils import new_action
 
 class TestFOIARequestUnit(TestCase):
     """Unit tests for FOIARequests"""
-    fixtures = [
-        'holidays.json', 'jurisdictions.json', 'agency_types.json',
-        'test_users.json', 'test_agencies.json', 'test_profiles.json',
-        'test_foiarequests.json', 'test_foiacommunications.json', 'laws.json'
-    ]
 
     def setUp(self):
         """Set up tests"""
@@ -264,11 +258,6 @@ class TestFOIARequestUnit(TestCase):
 
 class TestFOIAFunctional(TestCase):
     """Functional tests for FOIA"""
-    fixtures = [
-        'holidays.json', 'jurisdictions.json', 'agency_types.json',
-        'test_users.json', 'test_profiles.json', 'test_foiarequests.json',
-        'test_foiacommunications.json', 'test_agencies.json', 'laws.json'
-    ]
 
     def setUp(self):
         """Set up tests"""
@@ -283,7 +272,7 @@ class TestFOIAFunctional(TestCase):
             set(response.context['object_list']),
             set(
                 FOIARequest.objects.get_viewable(AnonymousUser())
-                .order_by('-date_submitted')[:12]
+                .order_by('-composer__datetime_submitted')[:12]
             )
         )
 
@@ -526,12 +515,6 @@ class TestFOIAFunctional(TestCase):
 class TestFOIAIntegration(TestCase):
     """Integration tests for FOIA"""
 
-    fixtures = [
-        'holidays.json', 'jurisdictions.json', 'agency_types.json',
-        'test_users.json', 'test_agencies.json', 'test_profiles.json',
-        'test_foiarequests.json', 'test_foiacommunications.json', 'laws.json'
-    ]
-
     def setUp(self):
         """Set up tests"""
         mail.outbox = []
@@ -581,7 +564,9 @@ class TestFOIAIntegration(TestCase):
             foia.save()
 
             # make sure dates were set correctly
-            nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 1))
+            nose.tools.eq_(
+                foia.composer.datetime_submitted, datetime.date(2010, 2, 1)
+            )
             nose.tools.eq_(
                 foia.date_due,
                 cal.business_days_from(
@@ -618,7 +603,9 @@ class TestFOIAIntegration(TestCase):
             foia.update(comm.anchor())
 
             # make sure dates were set correctly
-            nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 1))
+            nose.tools.eq_(
+                foia.composer.datetime_submitted, datetime.date(2010, 2, 1)
+            )
             nose.tools.ok_(foia.date_due is None)
             nose.tools.ok_(foia.date_followup is None)
             nose.tools.eq_(
@@ -656,7 +643,9 @@ class TestFOIAIntegration(TestCase):
             foia.save()
 
             # make sure dates were set correctly
-            nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 1))
+            nose.tools.eq_(
+                foia.composer.datetime_submitted, datetime.date(2010, 2, 1)
+            )
             nose.tools.eq_(
                 foia.date_due,
                 cal.business_days_from(
@@ -690,7 +679,9 @@ class TestFOIAIntegration(TestCase):
             foia.update(comm.anchor())
 
             # make sure dates were set correctly
-            nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 1))
+            nose.tools.eq_(
+                foia.composer.datetime_submitted, datetime.date(2010, 2, 1)
+            )
             nose.tools.eq_(foia.date_due, old_date_due)
             nose.tools.ok_(foia.date_followup is None)
             nose.tools.ok_(foia.days_until_due is None)
