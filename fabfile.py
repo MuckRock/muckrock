@@ -62,7 +62,7 @@ def coverage(settings='test'):
     with env.cd(env.base_path):
         env.run('coverage erase')
         env.run(
-            'coverage run --branch --source muckrock manage.py test --settings=muckrock.settings.%s'
+            'coverage run --branch --source muckrock --omit="*/migrations/*" manage.py test --settings=muckrock.settings.%s'
             % settings
         )
         env.run('coverage html')
