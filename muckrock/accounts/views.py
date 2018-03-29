@@ -449,8 +449,8 @@ def buy_requests(request, username=None):
             # and give to the recipient
             with transaction.atomic():
                 recipiet_profile = (
-                    Profile.objects.get(pk=recipient.profile_id)
-                    .select_for_update()
+                    Profile.objects.select_for_update()
+                    .get(pk=recipient.profile.id)
                 )
                 recipiet_profile.num_requests += request_count
                 recipiet_profile.save()
@@ -540,8 +540,9 @@ def profile(request, username=None):
         )
     )
     requests = (
-        FOIARequest.objects.filter(user=user).get_viewable(request.user)
-        .select_related('jurisdiction__parent__parent')
+        FOIARequest.objects.filter(composer__user=user)
+        .get_viewable(request.user)
+        .select_related('agency__jurisdiction__parent__parent')
     )
     recent_requests = requests.order_by('-composer__datetime_submitted')[:5]
     recent_completed = requests.filter(status='done'

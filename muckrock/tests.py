@@ -114,6 +114,7 @@ class TestFunctional(TestCase):
 
     def test_api_views(self):
         """Test API views"""
+        UserFactory(username='super', password='abc', is_staff=True)
         self.client.login(username='super', password='abc')
         api_objs = [
             'jurisdiction',

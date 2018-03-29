@@ -26,7 +26,7 @@ def boolcheck(setting):
 DEBUG = False
 EMAIL_DEBUG = DEBUG
 THUMBNAIL_DEBUG = DEBUG
-AWS_DEBUG = True
+AWS_DEBUG = False
 
 SITE_ROOT = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
 

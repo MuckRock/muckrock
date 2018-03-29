@@ -112,9 +112,9 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
         # pylint: disable=too-many-branches
         data = request.data
         try:
-            # XXX does data support getlist?
+            # XXX support multiple agencies
             agencies = Agency.objects.filter(
-                pk__in=data.getlist('agency'),
+                pk=data.get('agency'),
                 status='approved',
             )
 
@@ -138,6 +138,13 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             composer.agencies.set(agencies)
             try:
                 composer.submit()
+                return Response(
+                    {
+                        'status': 'FOI Request submitted',
+                        'Location': composer.get_absolute_url()
+                    },
+                    status=http_status.HTTP_201_CREATED,
+                )
             except InsufficientRequestsError:
                 pass
                 # XXX messages.warning(request, 'You need to purchase more requests')

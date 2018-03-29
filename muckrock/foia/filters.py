@@ -57,6 +57,7 @@ class FOIARequestFilterSet(JurisdictionFilterSet):
     """Allows filtering a request by status, agency, jurisdiction, user, or tags."""
     status = django_filters.ChoiceFilter(choices=BLANK_STATUS)
     user = django_filters.ModelMultipleChoiceFilter(
+        name='composer__user',
         queryset=User.objects.all(),
         widget=autocomplete_light.MultipleChoiceWidget('UserAutocomplete')
     )
@@ -168,6 +169,7 @@ class MyFOIAMultiRequestFilterSet(django_filters.FilterSet):
 class ProcessingFOIARequestFilterSet(JurisdictionFilterSet):
     """Allows filtering a request by user, agency, jurisdiction, or tags."""
     user = django_filters.ModelMultipleChoiceFilter(
+        name='composer__user',
         queryset=User.objects.all(),
         widget=autocomplete_light.MultipleChoiceWidget('UserAutocomplete')
     )
@@ -190,6 +192,7 @@ class ProcessingFOIARequestFilterSet(JurisdictionFilterSet):
 class AgencyFOIARequestFilterSet(django_filters.FilterSet):
     """Filters for agency users"""
     user = django_filters.ModelMultipleChoiceFilter(
+        name='composer__user',
         queryset=User.objects.all(),
         widget=autocomplete_light.MultipleChoiceWidget('UserAutocomplete')
     )

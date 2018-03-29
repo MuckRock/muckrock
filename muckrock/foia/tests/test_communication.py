@@ -101,7 +101,7 @@ class TestCommunicationMove(test.TestCase):
     @patch('muckrock.foia.tasks.upload_document_cloud.apply_async')
     def test_move_single_comm(self, mock_upload):
         """Should change the request associated with the communication."""
-        moved_comms = self.comm.move(self.foia2.id, self.user)
+        moved_comms = self.comm.move([self.foia2.pk], self.user)
         eq_(len(moved_comms), 1, 'Move function should only return one item')
         moved_comm = moved_comms[0]
         eq_(
@@ -199,7 +199,7 @@ class TestCommunicationMove(test.TestCase):
         self.file.ffile = None
         self.file.save()
         ok_(not self.comm.files.all()[0].ffile)
-        self.comm.move(self.foia2.id, self.user)
+        self.comm.move([self.foia2.pk], self.user)
 
 
 class TestCommunicationClone(test.TestCase):
@@ -217,7 +217,7 @@ class TestCommunicationClone(test.TestCase):
         other_foia = FOIARequestFactory()
         comm_count = FOIACommunication.objects.count()
         comm_pk = self.comm.pk
-        clone_comm = self.comm.clone([other_foia.pk], self.user)
+        clone_comm = self.comm.clone([other_foia], self.user)
         # + 1 communications
         eq_(
             FOIACommunication.objects.count(), comm_count + 1,
@@ -249,8 +249,10 @@ class TestCommunicationClone(test.TestCase):
         second_foia = FOIARequestFactory()
         third_foia = FOIARequestFactory()
         comm_count = FOIACommunication.objects.count()
-        clones = self.comm.clone([first_foia.pk, second_foia.pk, third_foia.pk],
-                                 self.user)
+        clones = self.comm.clone(
+            [first_foia, second_foia, third_foia],
+            self.user,
+        )
         # + 3 communications
         eq_(
             FOIACommunication.objects.count(), comm_count + 3,
@@ -278,8 +280,10 @@ class TestCommunicationClone(test.TestCase):
         second_foia = FOIARequestFactory()
         third_foia = FOIARequestFactory()
         file_count = self.comm.files.count()
-        clones = self.comm.clone([first_foia.pk, second_foia.pk, third_foia.pk],
-                                 self.user)
+        clones = self.comm.clone(
+            [first_foia, second_foia, third_foia],
+            self.user,
+        )
         for each_clone in clones:
             eq_(
                 each_clone.files.count(), file_count,
@@ -305,7 +309,7 @@ class TestCommunicationClone(test.TestCase):
         self.file.save()
         ok_(not self.comm.files.all()[0].ffile)
         other_foia = FOIARequestFactory()
-        self.comm.clone([other_foia.pk], self.user)
+        self.comm.clone([other_foia], self.user)
 
 
 class TestRawEmail(test.TestCase):

@@ -127,11 +127,8 @@ class OutboundRequestAttachmentFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = OutboundRequestAttachment
 
-    user = factory.SubFactory('muckrock.factories.UserFactory')
-    foia = factory.SubFactory(
-        FOIARequestFactory,
-        user=factory.SelfAttribute('..user'),
-    )
+    foia = factory.SubFactory(FOIARequestFactory)
+    user = factory.SelfAttribute('foia.composer.user')
     ffile = factory.django.FileField(filename=factory.Faker('file_name'))
     date_time_stamp = factory.LazyAttribute(lambda obj: timezone.now())
     sent = False

@@ -354,9 +354,10 @@ class Profile(models.Model):
         # if it isn't, then they probably don't have a subscription. in that case, just make
         # sure that we demote their account and reset them back to basic.
         try:
-            if not self.subscription_id and not len(
-                customer.subscriptions.data
-            ) > 0:
+            if (
+                not self.subscription_id
+                and not len(customer.subscriptions.data) > 0
+            ):
                 raise AttributeError('There is no subscription to cancel.')
             if self.subscription_id:
                 subscription_id = self.subscription_id
@@ -381,6 +382,7 @@ class Profile(models.Model):
             profile.monthly_requests = settings.MONTHLY_REQUESTS.get('basic', 0)
             profile.payment_failed = False
             profile.save()
+        self.refresh_from_db()
         return subscription
 
     def pay(self, token, amount, metadata, fee=PAYMENT_FEE):

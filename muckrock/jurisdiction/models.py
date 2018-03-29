@@ -206,10 +206,11 @@ class Jurisdiction(models.Model, RequestHelper):
         """State level jurisdictions should return requests from their localities as well."""
         if self.level == 's':
             requests = FOIARequest.objects.filter(
-                Q(jurisdiction=self) | Q(jurisdiction__parent=self)
+                Q(agency__jurisdiction=self)
+                | Q(agency__jurisdiction__parent=self)
             )
         else:
-            requests = FOIARequest.objects.filter(jurisdiction=self)
+            requests = FOIARequest.objects.filter(agency__jurisdiction=self)
         return requests.exclude(status='started')
 
     class Meta:

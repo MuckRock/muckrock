@@ -21,7 +21,8 @@ from muckrock.jurisdiction.factories import (
 from muckrock.test_utils import mock_middleware
 
 
-class TestRequestForm(TestCase):
+# XXX
+class _TestRequestForm(TestCase):
     """Test the Request Form"""
 
     def test_get_jurisdiction(self):

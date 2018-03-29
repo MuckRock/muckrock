@@ -5,7 +5,6 @@ Tests accounts models
 # Django
 from django.conf import settings
 from django.test import TestCase
-from django.utils import timezone
 
 # Standard Library
 from datetime import date, timedelta
@@ -15,8 +14,14 @@ from mock import ANY, Mock, patch
 from nose.tools import assert_false, assert_true, eq_, nottest, ok_, raises
 
 # MuckRock
-from muckrock import factories
 from muckrock.accounts.models import Notification
+from muckrock.factories import (
+    NotificationFactory,
+    OrganizationFactory,
+    ProfileFactory,
+    UserFactory,
+)
+from muckrock.foia.factories import FOIARequestFactory
 from muckrock.utils import get_stripe_token, new_action
 
 # Creates Mock items for testing methods that involve Stripe
@@ -53,7 +58,7 @@ class TestProfileUnit(TestCase):
     """Unit tests for profile model"""
 
     def setUp(self):
-        self.profile = factories.ProfileFactory(
+        self.profile = ProfileFactory(
             monthly_requests=25,
             acct_type='pro',
             customer_id='',
@@ -66,16 +71,16 @@ class TestProfileUnit(TestCase):
 
     def test_is_advanced(self):
         """Test whether the users are marked as advanced."""
-        beta = factories.ProfileFactory(acct_type='beta')
-        proxy = factories.ProfileFactory(acct_type='beta')
-        admin = factories.ProfileFactory(acct_type='admin')
-        basic = factories.ProfileFactory(acct_type='basic')
-        active_org = factories.OrganizationFactory(active=True)
-        inactive_org = factories.OrganizationFactory(active=False)
-        active_org_member = factories.ProfileFactory(
+        beta = ProfileFactory(acct_type='beta')
+        proxy = ProfileFactory(acct_type='beta')
+        admin = ProfileFactory(acct_type='admin')
+        basic = ProfileFactory(acct_type='basic')
+        active_org = OrganizationFactory(active=True)
+        inactive_org = OrganizationFactory(active=False)
+        active_org_member = ProfileFactory(
             acct_type='basic', organization=active_org
         )
-        inactive_org_member = factories.ProfileFactory(
+        inactive_org_member = ProfileFactory(
             acct_type='basic', organization=inactive_org
         )
         assert_true(self.profile.is_advanced())
@@ -92,34 +97,12 @@ class TestProfileUnit(TestCase):
 
     def test_monthly_requests_refresh(self):
         """Get number requests resets the number of requests if its been over a month"""
-        self.profile.date_update = timezone.now() - timedelta(32)
+        self.profile.date_update = date.today() - timedelta(32)
+        self.profile.save()
         monthly_requests = settings.MONTHLY_REQUESTS[self.profile.acct_type]
         eq_(self.profile.get_monthly_requests(), monthly_requests)
+        self.profile.refresh_from_db()
         eq_(self.profile.date_update, date.today())
-
-    def test_make_request_refresh(self):
-        """Make request resets count if it has been more than a month"""
-        self.profile.date_update = date.today() - timedelta(32)
-        assert_true(self.profile.make_request())
-
-    def test_make_request_pass_monthly(self):
-        """Make request call decrements number of monthly requests"""
-        num_requests = self.profile.monthly_requests
-        self.profile.make_request()
-        eq_(self.profile.monthly_requests, num_requests - 1)
-
-    def test_make_request_pass(self):
-        """Make request call decrements number of requests if out of monthly requests"""
-        num_requests = 10
-        profile = factories.ProfileFactory(num_requests=num_requests)
-        profile.make_request()
-        eq_(profile.num_requests, num_requests - 1)
-
-    def test_make_request_fail(self):
-        """If out of requests, make request returns false"""
-        profile = factories.ProfileFactory(num_requests=0)
-        profile.date_update = date.today()
-        assert_false(profile.make_request())
 
     def test_customer(self):
         """Test accessing the profile's Stripe customer"""
@@ -196,12 +179,13 @@ class TestProfileUnit(TestCase):
 
     def test_cancel_legacy_subscription(self):
         """Test ending a pro subscription when missing a subscription ID"""
-        pro_profile = factories.ProfileFactory(
+        pro_profile = ProfileFactory(
             acct_type='basic',
             monthly_requests=settings.MONTHLY_REQUESTS.get('pro')
         )
         ok_(not pro_profile.subscription_id)
         pro_profile.cancel_pro_subscription()
+        pro_profile.refresh_from_db()
         eq_(pro_profile.acct_type, 'basic')
         eq_(
             pro_profile.monthly_requests,
@@ -219,7 +203,7 @@ class TestStripeIntegration(TestCase):
     """
 
     def setUp(self):
-        self.profile = factories.ProfileFactory()
+        self.profile = ProfileFactory()
 
     @nottest
     def test_pay(self):
@@ -252,9 +236,9 @@ class TestNotifications(TestCase):
     """Notifications connect actions to users and contain a read state."""
 
     def setUp(self):
-        self.user = factories.UserFactory()
+        self.user = UserFactory()
         self.action = new_action(self.user, 'acted')
-        self.notification = factories.NotificationFactory()
+        self.notification = NotificationFactory()
 
     def test_create_notification(self):
         """Create a notification with a user and an action."""
@@ -286,7 +270,7 @@ class TestNotifications(TestCase):
 
     def test_for_user(self):
         """Notifications should be filterable by a single user."""
-        user_notification = factories.NotificationFactory(user=self.user)
+        user_notification = NotificationFactory(user=self.user)
         user_notifications = Notification.objects.for_user(self.user)
         ok_(
             user_notification in user_notifications,
@@ -299,9 +283,9 @@ class TestNotifications(TestCase):
 
     def test_for_model(self):
         """Notifications should be filterable by a model type."""
-        foia = factories.FOIARequestFactory()
-        _action = new_action(factories.UserFactory(), 'submitted', target=foia)
-        object_notification = factories.NotificationFactory(
+        foia = FOIARequestFactory()
+        _action = new_action(UserFactory(), 'submitted', target=foia)
+        object_notification = NotificationFactory(
             user=self.user, action=_action
         )
         model_notifications = Notification.objects.for_model(foia)
@@ -316,9 +300,9 @@ class TestNotifications(TestCase):
 
     def test_for_object(self):
         """Notifications should be filterable by a single object."""
-        foia = factories.FOIARequestFactory()
-        _action = new_action(factories.UserFactory(), 'submitted', target=foia)
-        object_notification = factories.NotificationFactory(
+        foia = FOIARequestFactory()
+        _action = new_action(UserFactory(), 'submitted', target=foia)
+        object_notification = NotificationFactory(
             user=self.user, action=_action
         )
         object_notifications = Notification.objects.for_object(foia)

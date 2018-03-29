@@ -71,7 +71,7 @@ class TestDailyDigest(TestCase):
         """Digests should include information on requests I follow."""
         # generate an action on a request the user owns
         other_user = UserFactory()
-        foia = FOIARequestFactory(user=other_user)
+        foia = FOIARequestFactory(composer__user=other_user)
         agency = AgencyFactory()
         action = new_action(agency, 'rejected', target=foia)
         notify(self.user, action)

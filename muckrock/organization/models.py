@@ -226,29 +226,32 @@ class Organization(models.Model):
 
     def update_subscription(self, num_seats):
         """Updates the quantity of the subscription, but only if the subscription is active"""
-        if not self.active:
-            raise AttributeError('Cannot update an inactive subscription.')
-        if num_seats < settings.ORG_MIN_SEATS:
-            raise ValueError(
-                'Cannot have an organization with less than three member seats.'
-            )
-        quantity = self.compute_monthly_cost(num_seats) / 100
-        customer = self.owner.profile.customer()
-        try:
-            subscription = customer.subscriptions.retrieve(self.stripe_id)
-            subscription.quantity = quantity
-            subscription = subscription.save()
-            self.stripe_id = subscription.id
-            self.owner.profile.subscription_id = subscription.id
-            self.owner.profile.save()
-        except stripe.InvalidRequestError:
-            logger.error((
-                'No subscription is associated with organization '
-                'owner %s.'
-            ), self.owner.username)
-            return
         with transaction.atomic():
-            org = Organization.objects.select_for_update().get(pk=self.pk)
+            org = (
+                Organization.objects.select_for_update()
+                .select_related('owner').get(pk=self.pk)
+            )
+            if not org.active:
+                raise AttributeError('Cannot update an inactive subscription.')
+            if num_seats < settings.ORG_MIN_SEATS:
+                raise ValueError(
+                    'Cannot have an organization with less than three member seats.'
+                )
+            quantity = org.compute_monthly_cost(num_seats) / 100
+            customer = org.owner.profile.customer()
+            try:
+                subscription = customer.subscriptions.retrieve(org.stripe_id)
+                subscription.quantity = quantity
+                subscription = subscription.save()
+                org.stripe_id = subscription.id
+                org.owner.profile.subscription_id = subscription.id
+                org.owner.profile.save()
+            except stripe.InvalidRequestError:
+                logger.error((
+                    'No subscription is associated with organization '
+                    'owner %s.'
+                ), org.owner.username)
+                return
             old_monthly_requests = org.monthly_requests
             org.update_num_seats(num_seats)
             new_monthly_requests = org.monthly_requests

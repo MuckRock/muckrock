@@ -417,9 +417,6 @@ class FOIARequest(models.Model):
         The only difference between a thanks andother submissions is that we do
         not set the request status, unless the request requires a proxy.
         """
-        if not self.agency:
-            # this should not happen
-            raise ValueError('Trying to submit a request without an agency.')
 
         if appeal and self.agency.appeal_agency:
             agency = self.agency.appeal_agency

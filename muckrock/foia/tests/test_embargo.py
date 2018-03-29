@@ -27,7 +27,7 @@ class TestEmbargo(TestCase):
     def setUp(self):
         self.user = UserFactory(profile__acct_type='pro')
         self.user.profile.organization = OrganizationFactory(active=True)
-        self.foia = FOIARequestFactory(user=self.user)
+        self.foia = FOIARequestFactory(composer__user=self.user)
         self.request_factory = RequestFactory()
         self.url = self.foia.get_absolute_url()
 
@@ -35,8 +35,11 @@ class TestEmbargo(TestCase):
         """Utility function for calling the embargo view function"""
         request = mock_middleware(request)
         return embargo(
-            request, self.foia.jurisdiction.slug, self.foia.jurisdiction.pk,
-            self.foia.slug, self.foia.pk
+            request,
+            self.foia.jurisdiction.slug,
+            self.foia.jurisdiction.pk,
+            self.foia.slug,
+            self.foia.pk,
         )
 
     def test_basic_embargo(self):
@@ -79,8 +82,8 @@ class TestEmbargo(TestCase):
     def test_no_permission_to_embargo(self):
         """Users without permission to embargo the request should not be allowed to do so."""
         user_without_permission = UserFactory()
-        self.foia.user = user_without_permission
-        self.foia.save()
+        self.foia.composer.user = user_without_permission
+        self.foia.composer.save()
         ok_(self.foia.has_perm(user_without_permission, 'change'))
         assert_false(self.foia.has_perm(user_without_permission, 'embargo'))
         data = {'embargo': 'create'}
@@ -100,7 +103,8 @@ class TestEmbargo(TestCase):
         Any user should be allowed to remove an embargo, even if they cannot apply one.
         """
         user_without_permission = UserFactory()
-        self.foia.user = user_without_permission
+        self.foia.composer.user = user_without_permission
+        self.foia.composer.save()
         self.foia.embargo = True
         self.foia.save()
         assert_true(self.foia.embargo)
@@ -152,8 +156,8 @@ class TestEmbargo(TestCase):
     def test_cannot_permanent_embargo(self):
         """Users who cannot set permanent embargoes shouldn't be able to."""
         user_without_permission = UserFactory(profile__acct_type='pro')
-        self.foia.user = user_without_permission
-        self.foia.save()
+        self.foia.composer.user = user_without_permission
+        self.foia.composer.save()
         assert_true(self.foia.has_perm(user_without_permission, 'embargo'))
         assert_false(
             self.foia.has_perm(user_without_permission, 'embargo_perm')
@@ -164,7 +168,7 @@ class TestEmbargo(TestCase):
         data = {'embargo': 'create'}
         data.update(embargo_form.data)
         request = self.request_factory.post(self.url, data)
-        request.user = self.foia.user
+        request.user = self.foia.composer.user
         response = self.get_response(request)
         self.foia.refresh_from_db()
         eq_(response.status_code, 302)

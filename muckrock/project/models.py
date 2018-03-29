@@ -204,7 +204,7 @@ class Project(models.Model):
         """Returns a list of requests that may be related to this project."""
         requests = list(
             FOIARequest.objects.filter(
-                user__in=self.contributors.all(),
+                composer__user__in=self.contributors.all(),
                 tags__name__in=self.tags.names()
             ).exclude(projects=self)
         )

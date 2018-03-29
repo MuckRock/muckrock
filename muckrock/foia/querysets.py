@@ -44,7 +44,7 @@ class FOIARequestQuerySet(models.QuerySet):
             # Requests are visible if you own them, have view or edit permissions,
             # or if they are not drafts and not embargoed
             query = (
-                Q(user=user) | Q(edit_collaborators=user)
+                Q(composer__user=user) | Q(edit_collaborators=user)
                 | Q(read_collaborators=user) |
                 (~Q(status='started') & ~Q(embargo=True))
             )
@@ -54,8 +54,9 @@ class FOIARequestQuerySet(models.QuerySet):
             # organizational users may also view requests from their org that are shared
             if user.profile.organization is not None:
                 query = query | Q(
-                    user__profile__org_share=True,
-                    user__profile__organization=user.profile.organization,
+                    composer__user__profile__org_share=True,
+                    composer__user__profile__organization=user.profile.
+                    organization,
                 )
             return self.filter(query)
         else:
@@ -101,7 +102,7 @@ class FOIARequestQuerySet(models.QuerySet):
             self.select_related(
                 'agency', 'jurisdiction', 'jurisdiction__parent',
                 'jurisdiction__parent__parent'
-            ).filter(user__profile__organization=organization)
+            ).filter(composer__user__profile__organization=organization)
             .exclude(status='started')
             .order_by('-composer__datetime_submitted')
         )
@@ -183,8 +184,8 @@ class FOIARequestQuerySet(models.QuerySet):
     def exclude_org_users(self):
         """Exclude requests made by org users"""
         return self.exclude(
-            user__profile__organization__active=True,
-            user__profile__organization__monthly_cost__gt=0,
+            composer__user__profile__organization__active=True,
+            composer__user__profile__organization__monthly_cost__gt=0,
         )
 
     def create_new(self, composer, agency):

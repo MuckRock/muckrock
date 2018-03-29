@@ -99,7 +99,7 @@ class TestExemptionCreation(TestCase):
         self.factory = APIRequestFactory()
         self.view = ExemptionViewSet.as_view({'post': 'submit'})
         self.user = UserFactory()
-        self.foia = FOIARequestFactory(user=self.user)
+        self.foia = FOIARequestFactory(composer__user=self.user)
         self.data = {
             'foia': self.foia.id,
             'language': 'Lorem ipsum',
