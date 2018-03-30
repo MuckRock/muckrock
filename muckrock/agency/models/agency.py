@@ -55,9 +55,12 @@ class AgencyQuerySet(models.QuerySet):
 
     def get_approved_and_pending(self, user):
         """Get approved and given user's pending agencies"""
-        return self.filter(
-            Q(status='approved') | Q(status='pending', user=user)
-        )
+        if user.is_authenticated:
+            return self.filter(
+                Q(status='approved') | Q(status='pending', user=user)
+            )
+        else:
+            return self.get_approved()
 
     def get_siblings(self, agency):
         """Get all approved agencies in the same jurisdiction as the given agency."""

@@ -60,12 +60,12 @@
 
         {% include "lib/pattern/new_request_field.html" with field=form.title only %}
         {% include "lib/pattern/new_request_field.html" with field=form.agencies only %}
-        <div class="document-boilerplate">
+        <div class="document-boilerplate intro">
           <p>To Whom It May Concern:</p>
           <p>Pursuant to the { law name }, I hereby request the following records:</p>
         </div>
         {% include "lib/pattern/new_request_field.html" with field=form.requested_docs only %}
-        <div class="document-boilerplate">
+        <div class="document-boilerplate outro">
           <p>The requested documents will be made available to the general public,
           and this request is not being made for commercial purposes.<p>
           <p>In the event that there are fees, I would be grateful if you would
@@ -73,10 +73,12 @@
           I would prefer the request filled electronically, by e-mail attachment
           if available or CD-ROM if not.</p>
           <p>Thank you in advance for your anticipated cooperation in this matter.</p>
-          I look forward to receiving your response to this request within
-          { number of days } { business or calendar } days, as the statute requires.
+          <p>I look forward to receiving your response to this request within
+          { number of days } { business or calendar } days,
+          as the statute requires.</p>
+          <p>Sincerely,</p>
+          <p>{{ user.get_full_name }}</p>
         </div>
-        {% include "lib/pattern/new_request_field.html" with field=form.tags only %}
         {% if form.embargo %}
           {% include "lib/pattern/new_request_field.html" with field=form.embargo only %}
         {% else %}
@@ -90,10 +92,16 @@
         {% endif %}
 
         {% if user.is_authenticated %}
-          <fieldset class="attachments">
-            <label class="bold">Attachments</label>
-            <div id="fine-uploader" class="fine-uploader-composer" data-composer-pk="{{ composer.pk }}"></div>
+          <fieldset>
+            <span class="toggle-advanced">&#9654; Advanced Options</span>
           </fieldset>
+          <div class="advanced-container">
+            {% include "lib/pattern/new_request_field.html" with field=form.tags only %}
+            <fieldset class="attachments">
+              <label class="bold">Attachments</label>
+              <div id="fine-uploader" class="fine-uploader-composer" data-composer-pk="{{ composer.pk }}"></div>
+            </fieldset>
+          </div>
         {% else %}
           {% include "lib/pattern/new_request_field.html" with field=form.full_name only %}
           {% include "lib/pattern/new_request_field.html" with field=form.email only %}

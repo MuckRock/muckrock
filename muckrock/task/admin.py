@@ -77,7 +77,7 @@ class CrowdfundTaskAdmin(VersionAdmin):
 
 class MultiRequestTaskAdmin(VersionAdmin):
     """MultiRequest Task Admin"""
-    readonly_fields = ['multirequest', 'assigned', 'resolved_by']
+    readonly_fields = ['composer', 'assigned', 'resolved_by']
 
 
 class PortalTaskAdmin(VersionAdmin):

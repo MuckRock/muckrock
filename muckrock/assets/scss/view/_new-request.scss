@@ -3,6 +3,7 @@ $color-jurisdiction: #5A90F2;
 $color-jurisdiction-picker: darken($color-jurisdiction, 10%);
 $color-agency: darken($color-jurisdiction-picker, 10%);
 $color-attachment: #F2B85A;
+$color-embargo: $color-agency;
 
 .new-request {
     .create-request {
@@ -60,7 +61,7 @@ $color-attachment: #F2B85A;
             }
         }
     }
-    .agencies, .tags {
+    .agencies {
         margin: 0;
         width: 100%;
         color: $color-white;
@@ -95,12 +96,27 @@ $color-attachment: #F2B85A;
       display: inline;
       margin-right: $vr/2;
     }
-    .no-embargo {
+    .embargo, .no-embargo {
+      color: $color-white;
+      background-color: $color-embargo;
       border-left: 2px solid $color-grey;
       border-right: 2px solid $color-grey;
       width: 100%;
       margin: 0;
       padding: $vr;
+      label { color: $color-white; }
+      a {
+        color: $color-grey-6;
+        &:hover { color: $color-grey-4; }
+      }
+    }
+
+    .advanced-container {
+      display: none;
+    }
+
+    .toggle-advanced {
+      cursor: pointer;
     }
 
     .full_name, .email {

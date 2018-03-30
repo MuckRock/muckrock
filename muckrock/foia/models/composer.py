@@ -98,9 +98,7 @@ class FOIAComposer(models.Model):
             self.save()
             if num_requests < settings.MULTI_REVIEW_AMOUNT:
                 # TODO delay actually submitting the request here
-                transaction.on_commit(
-                    lambda: approve_composer.apply_async(args=(self.pk,))
-                )
+                transaction.on_commit(lambda: approve_composer.delay(self.pk))
             else:
                 self.multirequesttask_set.create()
 
