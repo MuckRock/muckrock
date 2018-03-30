@@ -761,7 +761,7 @@ class BulkNewAgency(FormView):
             if name and jurisdiction:
                 Agency.objects.create_new(
                     name,
-                    jurisdiction,
+                    jurisdiction.pk,
                     self.request.user,
                 )
         messages.success(self.request, 'Successfully create new agencies')

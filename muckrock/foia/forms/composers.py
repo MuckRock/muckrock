@@ -5,6 +5,10 @@ FOIA forms for composing requests
 # Django
 from django import forms
 from django.contrib.auth.models import User
+from django.db.models import Q
+
+# Standard Library
+import re
 
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
@@ -12,6 +16,7 @@ from autocomplete_light.contrib.taggit_field import TaggitField
 
 # MuckRock
 from muckrock.agency.models import Agency
+from muckrock.foia.fields import ComposerAgencyField
 from muckrock.foia.models import FOIAComposer, FOIAMultiRequest
 from muckrock.forms import TaggitWidget
 
@@ -34,9 +39,10 @@ class ComposerForm(forms.ModelForm):
             }
         )
     )
-    agencies = autocomplete_light.ModelMultipleChoiceField(
-        'AgencyComposerAutocomplete',
+    agencies = ComposerAgencyField(
         queryset=Agency.objects.get_approved(),
+        widget=autocomplete_light.
+        MultipleChoiceWidget('AgencyComposerAutocomplete'),
     )
     embargo = forms.BooleanField(
         required=False,
@@ -94,15 +100,20 @@ class ComposerForm(forms.ModelForm):
         ]
 
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user')
+        self.user = kwargs.pop('user')
         super(ComposerForm, self).__init__(*args, **kwargs)
-        if user.is_authenticated:
+        if self.user.is_authenticated:
             del self.fields['full_name']
             del self.fields['email']
             del self.fields['newsletter']
-        if not user.has_perm('foia.embargo_foiarequest'):
+        if not self.user.has_perm('foia.embargo_foiarequest'):
             del self.fields['embargo']
-        self.fields['parent'].queryset = FOIAComposer.objects.get_viewable(user)
+        self.fields['parent'
+                    ].queryset = (FOIAComposer.objects.get_viewable(self.user))
+        self.fields['agencies'].user = self.user
+        self.fields['agencies'].queryset = (
+            Agency.objects.get_approved_and_pending(self.user)
+        )
 
     def clean_email(self):
         """Do a case insensitive uniqueness check"""
@@ -132,44 +143,6 @@ class ComposerForm(forms.ModelForm):
                 'agencies',
                 'You must select at least one agency before submitting',
             )
-
-    def get_agency(self):
-        """Get the agency and create a new one if necessary"""
-        # TODO need to completely rethink how new agencies work
-        agency = self.cleaned_data.get('agency')
-        agency_autocomplete = self.request.POST.get('agency-autocomplete', '')
-        agency_autocomplete = agency_autocomplete.strip()
-        if agency is None and agency_autocomplete:
-            # See if the passed in agency name matches a valid known agency
-            agency = (
-                Agency.objects.get_approved().filter(
-                    name__iexact=agency_autocomplete,
-                    jurisdiction=self.jurisdiction,
-                ).first()
-            )
-            # if not, create a new one
-            if agency is None and len(agency_autocomplete) < 256:
-                agency = Agency.objects.create_new(
-                    agency_autocomplete,
-                    self.jurisdiction,
-                    self.request.user,
-                )
-            elif agency is None and len(agency_autocomplete) >= 256:
-                self.add_error(
-                    'agency', 'Agency name must be less than 256 characters'
-                )
-                return None
-        elif agency is None:
-            self.add_error('agency', 'Please select an agency')
-            return None
-        elif agency.exempt:
-            self.add_error(
-                'agency',
-                'The agency you selected is exempt from '
-                'public records requests',
-            )
-            return None
-        return agency
 
 
 class RequestDraftForm(forms.Form):
