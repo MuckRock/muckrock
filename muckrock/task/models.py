@@ -761,10 +761,11 @@ class CrowdfundTask(Task):
 
 
 class MultiRequestTask(Task):
-    """Created when a multirequest is created and needs approval."""
-    # XXX this needs to be re-written for composers
+    """Created when a composer with multiple agencies is created and needs
+    approval.
+    """
     type = 'MultiRequestTask'
-    multirequest = models.ForeignKey('foia.FOIAMultiRequest')
+    composer = models.ForeignKey('foia.FOIAComposer')
 
     objects = MultiRequestTaskQuerySet.as_manager()
 
@@ -775,22 +776,24 @@ class MultiRequestTask(Task):
         return reverse('multirequest-task', kwargs={'pk': self.pk})
 
     def submit(self, agency_list):
-        """Submit the multirequest"""
-        from muckrock.foia.tasks import submit_multi_request
-        return_requests = 0
-        for agency in self.multirequest.agencies.all():
-            if str(agency.pk) not in agency_list:
-                self.multirequest.agencies.remove(agency)
-                return_requests += 1
-        self.multirequest.save()
-        self._return_requests(return_requests)
-        submit_multi_request.apply_async(args=(self.multirequest.pk,))
+        """Submit the composer"""
+        from muckrock.foia.tasks import approve_composer
+        with transaction.atomic():
+            return_requests = 0
+            for agency in self.composer.agencies.all():
+                if str(agency.pk) not in agency_list:
+                    self.composer.agencies.remove(agency)
+                    return_requests += 1
+            self._return_requests(return_requests)
+            transaction.on_commmit(
+                lambda: approve_composer.delay(self.composer.pk)
+            )
 
     def reject(self):
-        """Reject the multirequest and return the user their requests"""
-        self._return_requests(self.multirequest.agencies.count())
-        self.multirequest.status = 'started'
-        self.multirequest.save()
+        """Reject the composer and return the user their requests"""
+        self._return_requests(self.composer.agencies.count())
+        self.composer.status = 'started'
+        self.composer.save()
 
     def _return_requests(self, num_requests):
         """Return some number of requests to the user"""
@@ -801,9 +804,9 @@ class MultiRequestTask(Task):
         """Determine how many of each type of request to return"""
         # TODO test
         used = [
-            self.multirequest.num_reg_requests,
-            self.multirequest.num_monthly_requests,
-            self.multirequest.num_org_requests,
+            self.composer.num_reg_requests,
+            self.composer.num_monthly_requests,
+            self.composer.num_org_requests,
         ]
         ret = []
         while num_requests:
@@ -829,25 +832,40 @@ class MultiRequestTask(Task):
     def _do_return_requests(self, return_amts):
         """Update request count on the profile and multirequest given the amounts"""
         # remove returned requests from the multirequest
-        # use max to ensure all numbers are positive
-        self.multirequest.num_reg_requests -= max(return_amts['regular'], 0)
-        self.multirequest.num_monthly_requests -= max(return_amts['monthly'], 0)
-        self.multirequest.num_org_requests -= max(return_amts['org'], 0)
-        self.multirequest.save()
-
-        # add the return requests to the user's profile
         with transaction.atomic():
+            self.composer.num_reg_requests -= return_amts['regular']
+            self.composer.num_monthly_requests -= return_amts['monthly']
+            self.composer.num_org_requests -= return_amts['org']
+            # ensure num requests all stay positive
+            self.composer.num_reg_requests = max(
+                self.composer.num_reg_requests, 0
+            )
+            self.composer.num_monthly_requests = max(
+                self.composer.num_monthly_requests,
+                0,
+            )
+            self.composer.num_org_requests = max(
+                self.composer.num_org_requests, 0
+            )
+            self.composer.save()
+
+            # add the return requests to the user's profile
             profile = (
                 Profile.objects.select_for_update()
-                .get(pk=self.multirequest.user.profile.id)
+                .get(pk=self.composer.user.profile.id)
             )
             profile.num_requests += return_amts['regular']
             profile.get_monthly_requests()
             profile.monthly_requests += return_amts['monthly']
             if profile.organization:
-                profile.organization.get_requests()
-                profile.organization.num_requests += return_amts['org']
-                profile.organization.save()
+                org = (
+                    Organization.objects.select_for_update().get(
+                        pk=profile.organization.pk
+                    )
+                )
+                org.get_requests()
+                org.num_requests += return_amts['org']
+                org.save()
             else:
                 profile.monthly_requests += return_amts['org']
             profile.save()

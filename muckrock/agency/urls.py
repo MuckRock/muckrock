@@ -33,4 +33,9 @@ urlpatterns = [
         views.similar,
         name='agency-similar',
     ),
+    url(
+        r'^boilerplate/$',
+        views.boilerplate,
+        name='agency-boilerplate',
+    ),
 ]

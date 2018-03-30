@@ -433,9 +433,9 @@ class MultiRequestTaskQuerySet(TaskQuerySet):
         """Preload relations for list display"""
         return (
             self.select_related(
-                'multirequest__user',
+                'composer__user',
                 'resolved_by',
-            ).prefetch_related('multirequest__agencies')
+            ).prefetch_related('composer__agencies')
         )
 
 

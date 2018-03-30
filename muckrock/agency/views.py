@@ -7,6 +7,8 @@ from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import get_template
+from django.utils.html import linebreaks
 
 # Third Party
 import django_filters
@@ -203,3 +205,32 @@ def similar(request):
     )
     suggestions = [{'value': s[2], 'text': s[0]} for s in suggestions]
     return JsonResponse({'suggestions': suggestions})
+
+
+def boilerplate(request):
+    """Return the boilerplate language for requests to the given agency"""
+
+    agencies = Agency.objects.filter(pk__in=request.GET.getlist('agencies'))
+    jurisdictions = set(a.jurisdiction for a in agencies)
+    if len(jurisdictions) == 1:
+        jurisdiction = jurisdictions.pop()
+    else:
+        jurisdiction = {
+            'get_law_name': '{ law name }',
+            'days': '{ number of days }',
+            'get_day_type': '{ business or calendar }',
+        }
+    template = get_template('text/foia/request.txt')
+    split_token = '$split$'
+    context = {
+        'requested_docs': split_token,
+        'jurisdiction': jurisdiction,
+        'user_name': request.user.get_full_name(),
+        'proxy': False,
+    }
+    text = template.render(context)
+    intro, outro = text.split(split_token)
+    return JsonResponse({
+        'intro': linebreaks(intro.strip()),
+        'outro': linebreaks(outro.strip()),
+    })

@@ -2,10 +2,10 @@
 
 {% block task-content %}
 <summary class="task__data">
-    <p><a href="{% url 'admin:foia_foiamultirequest_change' task.multirequest.id %}">{{task.multirequest}}</a> was created by <a href="{% url 'admin:auth_user_change' task.multirequest.user.id %}">{{task.multirequest.user}}</a> and requires approval.</p>
-    <blockquote>{{task.multirequest.requested_docs|linebreaks}}</blockquote>
-    <ul>Upon approval, it will be sent to {{task.multirequest.agencies.all|length}} agencies:
-    {% for agency in task.multirequest.agencies.all %}
+    <p><a href="{% url 'admin:foia_foiamultirequest_change' task.composer.id %}">{{task.composer}}</a> was created by <a href="{% url 'admin:auth_user_change' task.composer.user.id %}">{{task.composer.user}}</a> and requires approval.</p>
+    <blockquote>{{task.composer.requested_docs|linebreaks}}</blockquote>
+    <ul>Upon approval, it will be sent to {{task.composer.agencies.all|length}} agencies:
+    {% for agency in task.composer.agencies.all %}
         <li>
             <input type="checkbox" name="agencies" form="{{task.pk}}-form" id="agency-{{task.pk}}-{{agency.pk}}" value="{{agency.pk}}" checked="checked" >
             <label for="agency-{{task.pk}}-{{agency.pk}}">

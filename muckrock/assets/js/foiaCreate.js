@@ -9,106 +9,29 @@ import modal from './modal';
 
 $(document).ready(function(){
 
-  var localField = $('fieldset.local');
-  var stateField = $('fieldset.state');
-  var localRadio = $('li.local input:radio');
-  var stateRadio = $('li.state input:radio');
-  var federalRadio = $('li.federal input:radio');
-  var localChecked = $('li.local input:checked');
-  var stateChecked = $('li.state input:checked');
-  var federalChecked = $('li.federal input:checked');
-  var localSelect = $('.autocomplete-light-widget select[name="local"]');
-  var stateSelect = $('.autocomplete-light-widget select[name="state"]');
-  var agencyField = $('fieldset.agency');
+  var agencyField = $('fieldset.agencies');
   var agencyInput = agencyField.find('input');
   var agencyWidget = agencyField.find('.autocomplete-light-widget');
   var agencySelect = agencyWidget.find('select');
 
-  function agencyByJurisdiction(jurisdictionSelectElement) {
-    agencyInput.yourlabsAutocomplete().data = {
-      jurisdiction_id: jurisdictionSelectElement.val()
-    };
-  }
-
-  function agencyToggle(value) {
-    if (value) {
-      agencyField.show();
-      agencyInput.focus();
-      agencyInput.keydown();
-    } else {
-      agencyField.hide();
-    }
-  }
-
-  /* Check if prefilled by cloning */
-  if (localChecked.length > 0) {
-    localChecked.parent().addClass('active');
-    localField.show();
-    agencyByJurisdiction(localSelect);
-    agencyToggle(localSelect.val());
-  }
-  if (stateChecked.length > 0) {
-    stateChecked.parent().addClass('active');
-    stateField.show();
-    agencyByJurisdiction(stateSelect);
-    agencyToggle(stateSelect.val());
-  }
-  if (federalChecked.length > 0) {
-    federalChecked.parent().addClass('active');
-    localField.hide();
-    stateField.hide();
-    agencyByJurisdiction(federalRadio);
-    agencyToggle(true);
-  }
-
-  /* Bind changes to actions */
-  localRadio.change(function() {
-    $(this).parent().addClass('active');
-    $(this).parent().siblings().removeClass('active');
-    localField.show();
-    stateField.hide();
-    agencyToggle(localSelect.val().length);
-    agencyInput.val('');
-    agencyWidget.yourlabsWidget().freeDeck();
-  });
-
-  stateRadio.change(function() {
-    $(this).parent().addClass('active');
-    $(this).parent().siblings().removeClass('active');
-    localField.hide();
-    stateField.show();
-    agencyToggle(stateSelect.val().length);
-    agencyInput.val('');
-    agencyWidget.yourlabsWidget().freeDeck();
-  });
-
-  federalRadio.change(function() {
-    $(this).parent().addClass('active');
-    $(this).parent().siblings().removeClass('active');
-    localField.hide();
-    stateField.hide();
-    agencyToggle(true);
-    agencyInput.val('');
-    agencyWidget.yourlabsWidget().freeDeck();
-    agencyByJurisdiction(federalRadio);
-  });
-
-  function selectChange(select) {
-    agencyByJurisdiction(select);
-    agencyToggle(select.val().length);
-    agencyInput.val('');
-    agencyWidget.yourlabsWidget().freeDeck();
-  }
-
-  localSelect.change(function(){
-    selectChange($(this));
-  });
-
-  stateSelect.change(function(){
-    selectChange($(this));
-  });
-
   // if the selected agency is exempt, show an error message
+  agencyWidget.on("widgetSelectChoice widgetDeselectChoice", function(){
+    console.log(agencyField.find('.choice.hilight').length);
+    $.ajax({
+      url: '/agency/boilerplate/',
+      data: {
+        agencies: agencyField.find(".choice.hilight").map(function(){
+          return $(this).data("value");
+        }).get(),
+      },
+      type: 'get',
+      success: function(data) {
+        $(".document-boilerplate.intro").html(data.intro);
+        $(".document-boilerplate.outro").html(data.outro);
+      }
+    });
+  });
+
   agencyWidget.on("widgetSelectChoice", function(){
     if (agencyField.find('.small.red.badge').length > 0) {
       $("#submit_button").prop("disabled", "disabled");
@@ -121,19 +44,6 @@ $(document).ready(function(){
     $("#submit_button").prop("disabled", "");
     $("#submit_help").text("");
   });
-
-  // get the selected jurisdiction for fuzzy agency checking
-  function getJurisdiction() {
-    if ($('li.local input:checked').length > 0) {
-      return localSelect.val();
-    } else if ($('li.state input:checked').length > 0) {
-      return stateSelect.val();
-    } else if ($('li.federal input:checked').length > 0) {
-      return 'f';
-    } else {
-      return '';
-    }
-  }
 
   // run some validation
   $("form.create-request").submit(function(e){
@@ -211,6 +121,15 @@ $(document).ready(function(){
       modal($("#email-warning-modal"));
       $("form.draft").off("submit");
     }
+  });
+
+  $(".toggle-advanced").click(function(e){
+    if($(".advanced-container").is(":visible")) {
+      $(this).text("\u25b6 Advanced Options");
+    } else {
+      $(this).text("\u25bc Advanced Options");
+    }
+    $(".advanced-container").toggle();
   });
 
 });
