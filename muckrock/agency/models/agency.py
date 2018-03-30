@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import MultipleObjectsReturned
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.db.models import Q
 from django.template.defaultfilters import slugify
 from django.utils import timezone
 from django.utils.safestring import mark_safe
@@ -52,6 +53,12 @@ class AgencyQuerySet(models.QuerySet):
         """Get all approved agencies"""
         return self.filter(status='approved')
 
+    def get_approved_and_pending(self, user):
+        """Get approved and given user's pending agencies"""
+        return self.filter(
+            Q(status='approved') | Q(status='pending', user=user)
+        )
+
     def get_siblings(self, agency):
         """Get all approved agencies in the same jurisdiction as the given agency."""
         return self.filter(jurisdiction=agency.jurisdiction)\
@@ -59,13 +66,13 @@ class AgencyQuerySet(models.QuerySet):
                    .filter(status='approved')\
                    .order_by('name')
 
-    def create_new(self, name, jurisdiction, user):
+    def create_new(self, name, jurisdiction_pk, user):
         """Create a pending agency with a NewAgency task"""
-        user = user if user.is_authenticated() else None
+        user = user if user.is_authenticated else None
         agency = self.create(
             name=name,
             slug=(slugify(name) or 'untitled'),
-            jurisdiction=jurisdiction,
+            jurisdiction_id=jurisdiction_pk,
             user=user,
             status='pending',
         )
