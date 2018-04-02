@@ -16,13 +16,12 @@ $(document).ready(function(){
 
   // if the selected agency is exempt, show an error message
   agencyWidget.on("widgetSelectChoice widgetDeselectChoice", function(){
-    console.log(agencyField.find('.choice.hilight').length);
     $.ajax({
       url: '/agency/boilerplate/',
       data: {
         agencies: agencyField.find(".choice.hilight").map(function(){
           return $(this).data("value");
-        }).get(),
+        }).get()
       },
       type: 'get',
       success: function(data) {
@@ -57,8 +56,8 @@ $(document).ready(function(){
       $.ajax({
         url: '/agency/similar/',
         data: {
-          query: agencyInput.val(),
-          jurisdiction: getJurisdiction()
+          query: agencyInput.val()
+          // jurisdiction: getJurisdiction()
         },
         type: 'get',
         success: function(data) {
@@ -122,7 +121,7 @@ $(document).ready(function(){
     }
   });
 
-  $(".toggle-advanced").click(function(e){
+  $(".toggle-advanced").click(function(){
     if($(".advanced-container").is(":visible")) {
       $(this).text("\u25b6 Advanced Options");
     } else {
