@@ -44,7 +44,7 @@ def convert_composers(apps, schema_editor):
             )
         multi.composer = composer
         multi.save()
-        if multi.foias.exist():
+        if multi.foias.exists():
             composer.datetime_submitted = multi.foias.first().date_submitted
             composer.save()
             multi.foias.all().update(composer=composer)
@@ -78,7 +78,7 @@ def convert_composers(apps, schema_editor):
                 object_id=composer.pk,
             )
         # end tag code #
-        if foia.status == 'started' and foia.communications.exist():
+        if foia.status == 'started' and foia.communications.exists():
             composer.edited_boilerplate = True
             composer.requested_docs = foia.communications.first().communication
             composer.save()
