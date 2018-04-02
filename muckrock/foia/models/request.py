@@ -1146,14 +1146,17 @@ class FOIARequest(models.Model):
 
     def create_initial_communication(self, from_user, proxy):
         """Create the initial request communication"""
-        template = get_template('text/foia/request.txt')
-        context = {
-            'requested_docs': smart_text(self.composer.requested_docs),
-            'jurisdiction': self.jurisdiction,
-            'user_name': from_user.get_full_name(),
-            'proxy': proxy,
-        }
-        text = template.render(context).strip()
+        if self.composer.edited_boilerplate:
+            text = smart_text(self.composer.requested_docs)
+        else:
+            template = get_template('text/foia/request.txt')
+            context = {
+                'requested_docs': smart_text(self.composer.requested_docs),
+                'jurisdiction': self.jurisdiction,
+                'user_name': from_user.get_full_name(),
+                'proxy': proxy,
+            }
+            text = template.render(context).strip()
         comm = self.communications.create(
             from_user=from_user,
             to_user=self.get_to_user(),

@@ -64,6 +64,7 @@ def convert_composers(apps, schema_editor):
         )
         if foia.agency:
             composer.agencies.add(foia.agency)
+        # do tags manually due to missing functionality in migrations #
         ct_foia = ContentType.objects.get(model='foiarequest')
         ct_comp = ContentType.objects.get(model='foiacomposer')
         tags = Tag.objects.filter(
@@ -76,8 +77,17 @@ def convert_composers(apps, schema_editor):
                 content_type=ct_comp,
                 object_id=composer.pk,
             )
-        foia.composer = composer
-        foia.save()
+        # end tag code #
+        if foia.status == 'started' and foia.communications.exist():
+            composer.edited_boilerplate = True
+            composer.requested_docs = foia.communications.first().communication
+            composer.save()
+            foia.delete()
+        elif foia.status == 'started':
+            foia.delete()
+        else:
+            foia.composer = composer
+            foia.save()
 
     for multi in (
         FOIAMultiRequest.objects.all().select_related('parent__composer')

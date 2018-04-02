@@ -27,6 +27,7 @@ class Migration(migrations.Migration):
                 ('slug', models.SlugField(max_length=255)),
                 ('status', models.CharField(choices=[(b'started', b'Draft'), (b'submitted', b'Processing'), (b'filed', b'Filed')], max_length=10)),
                 ('requested_docs', models.TextField(blank=True)),
+                ('edited_boilerplate', models.BooleanField(default=False)),
                 ('datetime_created', models.DateTimeField(default=django.utils.timezone.now)),
                 ('datetime_submitted', models.DateTimeField(blank=True, null=True)),
                 ('embargo', models.BooleanField(default=False)),
