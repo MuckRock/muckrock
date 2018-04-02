@@ -43,6 +43,7 @@ class ComposerForm(forms.ModelForm):
         queryset=Agency.objects.get_approved(),
         widget=autocomplete_light.
         MultipleChoiceWidget('AgencyComposerAutocomplete'),
+        required=False,
     )
     embargo = forms.BooleanField(
         required=False,
@@ -136,13 +137,14 @@ class ComposerForm(forms.ModelForm):
         """Check cross field dependencies"""
         cleaned_data = super(ComposerForm, self).clean()
         if (
-            cleaned_data['action'] == 'submit'
-            and not self.cleaned_data['agencies']
+            cleaned_data.get('action') == 'submit'
+            and not self.cleaned_data.get('agencies')
         ):
             self.add_error(
                 'agencies',
                 'You must select at least one agency before submitting',
             )
+        return cleaned_data
 
 
 class RequestDraftForm(forms.Form):

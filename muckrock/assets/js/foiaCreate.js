@@ -46,7 +46,8 @@ $(document).ready(function(){
   });
 
   // run some validation
-  $("form.create-request").submit(function(e){
+  // XXX redo this
+  $("foo form.create-request").submit(function(e){
     // if a real agency is not selected, prevent the submit and
     // help the user try and find a suitable replacement
     if (agencySelect.val().length === 0) {
@@ -111,15 +112,13 @@ $(document).ready(function(){
     }
   });
 
-  // draft page
-
-  $("form.draft").submit(function(e){
+  $("form.create-request").submit(function(e){
     var email_regex = /\w+@\w+.\w+/;
-    if (email_regex.test($("#id_request").val()) &&
+    if (email_regex.test($("#id_requested_docs").val()) &&
         $("#email-warning-modal").data("foias-filed") == 0) {
       e.preventDefault();
       modal($("#email-warning-modal"));
-      $("form.draft").off("submit");
+      $("form.create-request").off("submit");
     }
   });
 
