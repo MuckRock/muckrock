@@ -211,7 +211,7 @@ def boilerplate(request):
     """Return the boilerplate language for requests to the given agency"""
 
     agencies = Agency.objects.filter(pk__in=request.GET.getlist('agencies'))
-    jurisdictions = set(a.jurisdiction for a in agencies)
+    jurisdictions = set(a.jurisdiction.legal for a in agencies)
     if len(jurisdictions) == 1:
         jurisdiction = jurisdictions.pop()
     else:
@@ -220,12 +220,16 @@ def boilerplate(request):
             'days': '{ number of days }',
             'get_day_type': '{ business or calendar }',
         }
-    template = get_template('text/foia/request.txt')
+    if request.user.is_authenticated:
+        user_name = request.user.get_full_name()
+    else:
+        user_name = '{ name }'
     split_token = '$split$'
+    template = get_template('text/foia/request.txt')
     context = {
         'requested_docs': split_token,
         'jurisdiction': jurisdiction,
-        'user_name': request.user.get_full_name(),
+        'user_name': user_name,
         'proxy': False,
     }
     text = template.render(context)

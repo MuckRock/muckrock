@@ -97,10 +97,17 @@ class CreateComposer(MiniregMixin, CreateView):
     def get_context_data(self, **kwargs):
         """Extra context"""
         context = super(CreateComposer, self).get_context_data(**kwargs)
+        if self.request.user.is_authenticated:
+            foias_filed = (
+                self.request.user.composers.exclude(status='started').count()
+            )
+        else:
+            foias_filed = 0
         context.update({
             'clone': self.clone,
             'featured': FOIARequest.objects.get_featured(self.request.user),
             'settings': settings,
+            'foias_filed': foias_filed,
         })
         return context
 
@@ -151,7 +158,16 @@ class UpdateComposer(UpdateView):
     def get_context_data(self, **kwargs):
         """Extra context"""
         context = super(UpdateComposer, self).get_context_data(**kwargs)
-        context.update({'settings': settings})
+        if self.request.user.is_authenticated:
+            foias_filed = (
+                self.request.user.composers.exclude(status='started').count()
+            )
+        else:
+            foias_filed = 0
+        context.update({
+            'settings': settings,
+            'foias_filed': foias_filed,
+        })
         return context
 
     def post(self, request, *args, **kwargs):

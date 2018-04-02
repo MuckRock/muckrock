@@ -42,7 +42,7 @@
           <span class="text">
             <p>The form could not be submitted due to the following errors:</p>
             {{ form.non_field_errors }}
-            {% for field in form.visible_fields %}
+            {% for field in form %}
               {% if field.errors %}
                 <p><strong>{{ field.label }}:</strong> {{field.errors.as_text|cut:"* "}}</p>
               {% endif %}
@@ -77,7 +77,7 @@
           { number of days } { business or calendar } days,
           as the statute requires.</p>
           <p>Sincerely,</p>
-          <p>{{ user.get_full_name }}</p>
+          <p>{{ user.get_full_name|default:"{ name }" }}</p>
         </div>
         {% if form.embargo %}
           {% include "lib/pattern/new_request_field.html" with field=form.embargo only %}
@@ -131,10 +131,24 @@
             account? <a href="{% url 'acct-login' %}">Log in</a>.</p>
             <p id="submit_help" class="error"></p>
             <div class="footer--submit">
-              <button type="submit" class="primary button" onclick="ga('send', 'event', 'Account', 'Registration', window.location.pathname)">Create Account and Submit</button>
+              <button
+                 type="submit"
+                 class="primary button"
+                 name="action"
+                 value="save"
+                 onclick="ga('send', 'event', 'Account', 'Registration', window.location.pathname)">Create Account and Save Request</button>
             </div>
           </footer>
         {% endif %}
+
+        <div class="modal" id="email-warning-modal" data-foias-filed="{{foias_filed}}">
+          <p>Hi! It looks like you included your email address this in your request. When you file with MuckRock, we generate a unique email and physical address for every request to keep things organized. We include that information in what we send to the agency, so no need to add your contact information on this form. If you're including an email address to help the agency search for responsive documents, simple hit "Submit." If you'd like to edit the body of your request, click "Revise Request." You'll only see this message until you've submitted your first request.<p>
+          <footer>
+            <button type="submit" name="action" value="save" class="primary button">Submit</button>
+            <span class="close-modal button">Revise Request</span>
+          </footer>
+        </div>
+
       </form>
     </div>
     {% if featured and not clone %}
