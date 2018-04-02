@@ -20,6 +20,7 @@ from muckrock.communication.models import EmailAddress
 from muckrock.factories import AgencyFactory, OrganizationFactory, UserFactory
 from muckrock.foia.factories import (
     FOIACommunicationFactory,
+    FOIAComposerFactory,
     FOIAMultiRequestFactory,
     FOIARequestFactory,
     StaleFOIARequestFactory,
@@ -623,7 +624,7 @@ class MultiRequestTaskTests(TestCase):
     def setUp(self):
         self.agencies = AgencyFactory.create_batch(6)
         self.organization = OrganizationFactory(num_requests=100)
-        self.multi = FOIAMultiRequestFactory(
+        self.composer = FOIAComposerFactory(
             status='submitted',
             agencies=self.agencies,
             num_org_requests=1,
@@ -633,7 +634,7 @@ class MultiRequestTaskTests(TestCase):
             user__profile__monthly_requests=10,
             user__profile__organization=self.organization,
         )
-        self.task = MultiRequestTask.objects.create(multirequest=self.multi,)
+        self.task = MultiRequestTask.objects.create(composer=self.composer)
 
     def test_get_absolute_url(self):
         eq_(
@@ -643,29 +644,24 @@ class MultiRequestTaskTests(TestCase):
             }),
         )
 
-    def _test_submit(self):
+    def test_submit(self):
         """Test submitting the task"""
-        # XXX
         agency_list = [str(a.pk) for a in self.agencies[:4]]
         self.task.submit(agency_list)
         eq_(
-            set(self.multi.agencies.all()),
+            set(self.composer.agencies.all()),
             set(self.agencies[:4]),
         )
-        self.multi.refresh_from_db()
-        eq_(self.multi.status, 'filed')
-        eq_(FOIARequest.objects.filter(multirequest=self.multi).count(), 4)
 
     def test_reject(self):
         """Test rejecting the request"""
         self.task.reject()
         eq_(
-            set(self.multi.agencies.all()),
+            set(self.composer.agencies.all()),
             set(self.agencies),
         )
-        eq_(self.multi.status, 'started')
-        # XXX
-        # eq_(FOIARequest.objects.filter(multirequest=self.multi).count(), 0)
+        eq_(self.composer.status, 'started')
+        eq_(FOIARequest.objects.filter(composer=self.composer).count(), 0)
 
     def test_calc_return_requests(self):
         """Test calculating the return requests"""
@@ -695,14 +691,14 @@ class MultiRequestTaskTests(TestCase):
             'monthly': 0,
             'org': 1,
         })
-        self.multi.user.profile.refresh_from_db()
-        self.multi.user.profile.organization.refresh_from_db()
-        eq_(self.multi.num_reg_requests, 1)
-        eq_(self.multi.num_monthly_requests, 2)
-        eq_(self.multi.num_org_requests, 0)
-        eq_(self.multi.user.profile.num_requests, 7)
-        eq_(self.multi.user.profile.monthly_requests, 10)
-        eq_(self.multi.user.profile.organization.num_requests, 101)
+        self.composer.user.profile.refresh_from_db()
+        self.composer.user.profile.organization.refresh_from_db()
+        eq_(self.composer.num_reg_requests, 1)
+        eq_(self.composer.num_monthly_requests, 2)
+        eq_(self.composer.num_org_requests, 0)
+        eq_(self.composer.user.profile.num_requests, 7)
+        eq_(self.composer.user.profile.monthly_requests, 10)
+        eq_(self.composer.user.profile.organization.num_requests, 101)
 
 
 class TestTaskManager(TestCase):
