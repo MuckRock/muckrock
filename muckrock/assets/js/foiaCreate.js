@@ -14,12 +14,91 @@ $(document).ready(function(){
   var agencyWidget = agencyField.find('.autocomplete-light-widget');
   var agencySelect = agencyWidget.find('select');
 
+  function updateRequestCount(num) {
+    var requestsLeft = $(".requests-left"),
+    hasOrg = requestsLeft.data("org") || 0,
+    hasMonthly = requestsLeft.data("month") || 0,
+    hasRegular = requestsLeft.data("reg") || 0,
+    useOrg = 0,
+    useMonthly = 0,
+    useRegular = 0,
+    useExtra = 0;
+
+    if (num < hasOrg) {
+      useOrg = num;
+    } else if (num < (hasOrg + hasMonthly)) {
+      useOrg = hasOrg;
+      useMonthly = num - hasOrg;
+    } else if (num < (hasOrg + hasMonthly + hasRegular)) {
+      useOrg = hasOrg;
+      useMonthly = hasMonthly;
+      useRegular = num - (hasOrg + hasMonthly);
+    } else {
+      useOrg = hasOrg;
+      useMonthly = hasMonthly;
+      useRegular = hasRegular;
+      useExtra = num - (hasOrg + hasMonthly + hasRegular);
+    }
+    var text = "You are making <strong>" + num + "</strong> request" +
+      (num !== 1 ? "s" : "") + ".  ";
+    var useAny = (useOrg > 0 || useMonthly > 0 || useRegular > 0);
+    if (useAny) {
+      text += "This will use "
+      var useText = [];
+      if (useOrg > 0) {
+        useText.push("<strong>" + useOrg + "</strong> organizational request" +
+          (useOrg > 1 ? "s" : ""));
+      }
+      if (useMonthly > 0) {
+        useText.push("<strong>" + useMonthly + "</strong> monthly request" +
+          (useMonthly > 1 ? "s" : ""));
+      }
+      if (useRegular > 0) {
+        useText.push("<strong>" + useRegular + "</strong> regular request" +
+          (useRegular > 1 ? "s" : ""));
+      }
+      if (useText.length > 1) {
+        text += useText.slice(0, -1).join(", ");
+        text += (" and " + useText[useText.length - 1] + ".  ");
+      } else {
+        text += (useText[0] + ".  ");
+      }
+    }
+    if (useExtra > 0) {
+      text += ("You will " + (useAny ? "also " : "") + "need to purchase <strong>"
+        + useExtra + "</strong> extra request" + (useExtra > 1 ? "s" : "") + ".");
+      $(".buy-request-form").show();
+      $("#id_num_requests").val(Math.max(useExtra, $("#id_num_requests").attr("min")));
+      $("#id_num_requests").trigger("change");
+    } else {
+      $(".buy-request-form").hide();
+      $("#id_num_requests").val("");
+    }
+    $(".using-requests").html(text);
+  }
+  updateRequestCount(agencyField.find(".deck > .choice").length);
+
+  $("#id_num_requests").change(function(){
+    var bulkPrice = $(".buy-request-form").data("bulk-price");
+    var num = $(this).val();
+    var price;
+    if (num >= 20) {
+      price = num * bulkPrice;
+    } else {
+      price = num * 5;
+    }
+    $("[name='stripe_amount']").val(price * 100);
+    $("[name='stripe_description']").val(num + " request" + (num > 1 ? "s" : "") +
+      " ($" + price + ".00)");
+  });
+  $("#id_num_requests").trigger("change");
+
   // if the selected agency is exempt, show an error message
   agencyWidget.on("widgetSelectChoice widgetDeselectChoice", function(){
     $.ajax({
       url: '/agency/boilerplate/',
       data: {
-        agencies: agencyField.find(".choice.hilight").map(function(){
+        agencies: agencyField.find(".deck > .choice").map(function(){
           return $(this).data("value");
         }).get()
       },
@@ -29,6 +108,7 @@ $(document).ready(function(){
         $(".document-boilerplate.outro").html(data.outro);
       }
     });
+    updateRequestCount(agencyField.find(".deck > .choice").length);
   });
 
   agencyWidget.on("widgetSelectChoice", function(){

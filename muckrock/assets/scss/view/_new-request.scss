@@ -113,6 +113,7 @@ $color-embargo: $color-agency;
 
     .advanced-container {
       display: none;
+      margin-bottom: 0;
     }
 
     .toggle-advanced {
@@ -170,11 +171,24 @@ $color-embargo: $color-agency;
         border-top: none;
     }
 
+    .footer--signup .footer--submit {
+      text-align: right;
+    }
+
     .footer--submit {
-        text-align: right;
-        .button-group {
-          width: 100%;
-        }
+      .button-group {
+        width: 100%;
+      }
+      #id_num_requests {
+        max-width: 150px;
+      }
+      .field {
+        margin-right:30px;
+        float: left;
+      }
+      .buy-request-form {
+        display: flex;
+      }
     }
 
     .failure.panel {

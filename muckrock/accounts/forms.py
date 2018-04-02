@@ -4,8 +4,10 @@ Forms for accounts application
 
 # Django
 from django import forms
+from django.conf import settings
 from django.contrib.auth.forms import SetPasswordForm, UserCreationForm
 from django.contrib.auth.models import User
+from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.core.validators import validate_email
 from django.utils.text import slugify
 
@@ -233,3 +235,46 @@ class RegisterOrganizationForm(RegisterForm):
         return Organization.objects.create(
             name=self.cleaned_data['organization_name'], owner=owner
         )
+
+
+class StripeForm(forms.Form):
+    """Form for processing stripe payments"""
+    stripe_token = forms.CharField(widget=forms.HiddenInput())
+    stripe_pk = forms.CharField(
+        widget=forms.HiddenInput(),
+        initial=settings.STRIPE_PUB_KEY,
+    )
+    stripe_image = forms.CharField(
+        widget=forms.HiddenInput(),
+        initial=static('icons/logo.png'),
+    )
+    stripe_email = forms.CharField(widget=forms.HiddenInput())
+    stripe_label = forms.CharField(widget=forms.HiddenInput(), initial='Buy')
+    stripe_description = forms.CharField(widget=forms.HiddenInput())
+    stripe_fee = forms.IntegerField(
+        widget=forms.HiddenInput(),
+        initial=0,
+        min_value=0,
+    )
+    stripe_amount = forms.IntegerField(widget=forms.HiddenInput(), min_value=0)
+
+
+class BuyRequestForm(StripeForm):
+    """Form for buying more requests"""
+    num_requests = forms.IntegerField(
+        label='Number of requests to buy',
+        required=False,
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user')
+        super(BuyRequestForm, self).__init__(*args, **kwargs)
+        if self.user.is_authenticated:
+            self.fields['stripe_email'].initial = self.user.email
+        # XXX ensure min validation works
+        if self.user.is_authenticated and self.user.profile.is_advanced():
+            self.fields['num_requests'].min_value = 1
+            self.fields['num_requests'].widget.attrs['min'] = 1
+        else:
+            self.fields['num_requests'].min_value = 4
+            self.fields['num_requests'].widget.attrs['min'] = 4

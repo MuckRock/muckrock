@@ -20,6 +20,7 @@ from datetime import date
 from math import ceil
 
 # MuckRock
+from muckrock.accounts.forms import BuyRequestForm
 from muckrock.accounts.mixins import MiniregMixin
 from muckrock.agency.models import Agency
 from muckrock.foia.exceptions import InsufficientRequestsError
@@ -101,13 +102,23 @@ class CreateComposer(MiniregMixin, CreateView):
             foias_filed = (
                 self.request.user.composers.exclude(status='started').count()
             )
+            requests_left = {
+                'regular': self.request.user.profile.num_requests,
+                'monthly': self.request.user.profile.get_monthly_requests(),
+            }
+            org = self.request.user.profile.get_org()
+            if org is not None:
+                requests_left['org'] = org.get_requests()
         else:
             foias_filed = 0
+            requests_left = {}
         context.update({
             'clone': self.clone,
             'featured': FOIARequest.objects.get_featured(self.request.user),
             'settings': settings,
             'foias_filed': foias_filed,
+            'requests_left': requests_left,
+            'buy_request_form': BuyRequestForm(user=self.request.user),
         })
         return context
 

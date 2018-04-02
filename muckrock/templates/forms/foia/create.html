@@ -111,6 +111,47 @@
         {% if user.is_authenticated %}
           <footer class="footer--submit">
             <p id="submit_help" class="error"></p>
+            <div class="requests-left"
+                 data-org="0"
+                 data-month="0"
+                 data-reg="1"
+                 data--org="{{ requests_left.org }}"
+                 data--month="{{ requests_left.monthly }}"
+                 data--reg="{{ requests_left.regular }}"
+                 >
+               {% with org=user.profile.get_org %}
+                 <p>
+                   You have
+                    {% if org %}
+                      <strong>{{ requests_left.org }}</strong> organizational
+                      (<a href="{{ org.get_absolute_url }}">{{ org.name }} </a>)
+                      requests left,
+                    {% endif %}
+                    <strong>{{ requests_left.monthly }}</strong> monthly requests left
+                    and <strong>{{ requests_left.regular }}</strong> regular requests
+                    left.
+                 </p>
+                 <p class="using-requests"></p>
+               {% endwith %}
+            </div>
+
+            <div class="buy-request-form" data-bulk-price="{% if user.profile.is_advanced %}3{% else %}4{% endif %}">
+              {% include "lib/pattern/form.html" with form=buy_request_form %}
+              <span>
+                <p>
+                  $5/request<br class="nomargin">
+                  {% if user.profile.is_advanced %}
+                    <s>$4/request</s> $3/request if you buy 20 or more!
+                    <br class="nomargin">
+                    <em>Special price for pro users!</em>
+                  {% else %}
+                    $4/request if you buy 20 or more!
+                    <br class="nomargin">Minimum purchase of 4 requests
+                  {% endif %}
+                </p>
+              </span>
+            </div>
+
             <div class="button-group">
               <button type="submit" class="button" name="action" value="save">
                 Save
@@ -121,6 +162,7 @@
               <button type="submit" class="failure button" name="action" value="delete">
                 Delete
               </button>
+            </div>
           </footer>
         {% else %}
           <footer class="footer--signup">
