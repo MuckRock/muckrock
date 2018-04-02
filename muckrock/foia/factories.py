@@ -36,6 +36,15 @@ class FOIAComposerFactory(factory.django.DjangoModelFactory):
     title = factory.Sequence('FOIA Composer #{}'.format)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
 
+    @factory.post_generation
+    def agencies(self, create, extracted, **kwargs):
+        """Adds M2M agencies"""
+        # pylint: disable=unused-argument
+        if create and extracted:
+            # A list of agencies were passed in, use them
+            for agency in extracted:
+                self.agencies.add(agency)
+
 
 class FOIARequestFactory(factory.django.DjangoModelFactory):
     """A factory for creating FOIARequest test objects."""

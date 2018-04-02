@@ -32,6 +32,7 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import support
 from muckrock.models import ExtractDay
+from muckrock.organization.models import Organization
 from muckrock.task.forms import ResponseTaskForm
 from muckrock.task.querysets import (
     CrowdfundTaskQuerySet,
@@ -766,7 +767,7 @@ class MultiRequestTask(Task):
                     self.composer.agencies.remove(agency)
                     return_requests += 1
             self._return_requests(return_requests)
-            transaction.on_commmit(
+            transaction.on_commit(
                 lambda: approve_composer.delay(self.composer.pk)
             )
 
