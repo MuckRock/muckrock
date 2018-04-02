@@ -40,6 +40,7 @@ class FOIAComposer(models.Model):
     status = models.CharField(max_length=10, choices=STATUS, default='started')
     agencies = models.ManyToManyField('agency.Agency', related_name='composers')
     requested_docs = models.TextField(blank=True)
+    edited_boilerplate = models.BooleanField(default=False)
     datetime_created = models.DateTimeField(default=timezone.now)
     datetime_submitted = models.DateTimeField(
         blank=True,
