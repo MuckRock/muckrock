@@ -73,7 +73,6 @@ class ComposerForm(forms.ModelForm):
             ('submit', 'Submit'),
             ('delete', 'Delete'),
         ],
-        required=True,
         widget=forms.HiddenInput(),
     )
 
@@ -135,6 +134,8 @@ class ComposerForm(forms.ModelForm):
 
     def clean(self):
         """Check cross field dependencies"""
+        # XXX should title and requested_docs be semi-optional as well?
+        # should we try to have client side checks?
         cleaned_data = super(ComposerForm, self).clean()
         if (
             cleaned_data.get('action') == 'submit'

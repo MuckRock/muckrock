@@ -42,7 +42,6 @@
             amount      = formValue('stripe_amount'),
             fee         = formValue('stripe_fee'),
             email       = formValue('stripe_email'),
-            bitcoin     = formValue('stripe_bitcoin'),
             name        = 'MuckRock';
         amount = parseInt(amount);
         fee = parseFloat(fee);
@@ -57,8 +56,7 @@
             amount: amount,
             email: email,
             panelLabel: label,
-            token: handleToken,
-            bitcoin: bitcoin
+            token: handleToken
         };
         // We rely on an external script from Stripe to use Checkout
         // so it will be undefined until runtime.

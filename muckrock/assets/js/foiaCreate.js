@@ -59,7 +59,7 @@ $(document).ready(function(){
       }
       if (useText.length > 1) {
         text += useText.slice(0, -1).join(", ");
-        text += (" and " + useText[useText.length - 1] + ".  "); 
+        text += (" and " + useText[useText.length - 1] + ".  ");
       } else {
         text += (useText[0] + ".  ");
       }
@@ -67,17 +67,38 @@ $(document).ready(function(){
     if (useExtra > 0) {
       text += ("You will " + (useAny ? "also " : "") + "need to purchase <strong>"
         + useExtra + "</strong> extra request" + (useExtra > 1 ? "s" : "") + ".");
+      $(".buy-request-form").show();
+      $("#id_num_requests").val(Math.max(useExtra, $("#id_num_requests").attr("min")));
+      $("#id_num_requests").trigger("change");
+    } else {
+      $(".buy-request-form").hide();
+      $("#id_num_requests").val("");
     }
     $(".using-requests").html(text);
   }
-  updateRequestCount(agencyField.find(".choice.hilight").length);
+  updateRequestCount(agencyField.find(".deck > .choice").length);
+
+  $("#id_num_requests").change(function(){
+    var bulkPrice = $(".buy-request-form").data("bulk-price");
+    var num = $(this).val();
+    var price;
+    if (num >= 20) {
+      price = num * bulkPrice;
+    } else {
+      price = num * 5;
+    }
+    $("[name='stripe_amount']").val(price * 100);
+    $("[name='stripe_description']").val(num + " request" + (num > 1 ? "s" : "") +
+      " ($" + price + ".00)");
+  });
+  $("#id_num_requests").trigger("change");
 
   // if the selected agency is exempt, show an error message
   agencyWidget.on("widgetSelectChoice widgetDeselectChoice", function(){
     $.ajax({
       url: '/agency/boilerplate/',
       data: {
-        agencies: agencyField.find(".choice.hilight").map(function(){
+        agencies: agencyField.find(".deck > .choice").map(function(){
           return $(this).data("value");
         }).get()
       },
@@ -87,7 +108,7 @@ $(document).ready(function(){
         $(".document-boilerplate.outro").html(data.outro);
       }
     });
-    updateRequestCount(agencyField.find(".choice.hilight").length);
+    updateRequestCount(agencyField.find(".deck > .choice").length);
   });
 
   agencyWidget.on("widgetSelectChoice", function(){

@@ -201,10 +201,12 @@ class Profile(models.Model):
             return owned_org
         return self.organization
 
+    # TODO
     def can_multirequest(self):
         """Is this user allowed to multirequest?"""
         return self.is_advanced()
 
+    # TODO
     def can_view_emails(self):
         """Is this user allowed to view all emails and private contact information?"""
         return self.is_advanced()
