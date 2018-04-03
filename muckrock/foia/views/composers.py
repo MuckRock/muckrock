@@ -103,11 +103,19 @@ class CreateComposer(MiniregMixin, CreateView):
             )
         else:
             foias_filed = 0
+        requests_left = {
+            'regular': self.request.user.profile.num_requests,
+            'monthly': self.request.user.profile.get_monthly_requests(),
+        }
+        org = self.request.user.profile.get_org()
+        if org is not None:
+            requests_left['org'] = org.get_requests()
         context.update({
             'clone': self.clone,
             'featured': FOIARequest.objects.get_featured(self.request.user),
             'settings': settings,
             'foias_filed': foias_filed,
+            'requests_left': requests_left,
         })
         return context
 

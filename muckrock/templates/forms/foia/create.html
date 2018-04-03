@@ -111,6 +111,29 @@
         {% if user.is_authenticated %}
           <footer class="footer--submit">
             <p id="submit_help" class="error"></p>
+            <div class="requests-left"
+                 data-org="0"
+                 data-month="0"
+                 data-reg="0"
+                 data--org="{{ requests_left.org }}"
+                 data--month="{{ requests_left.monthly }}"
+                 data--reg="{{ requests_left.regular }}"
+                 >
+               {% with org=user.profile.get_org %}
+                 <p>
+                   You have
+                    {% if org %}
+                      <strong>{{ requests_left.org }}</strong> organizational
+                      (<a href="{{ org.get_absolute_url }}">{{ org.name }} </a>)
+                      requests left,
+                    {% endif %}
+                    <strong>{{ requests_left.monthly }}</strong> monthly requests left
+                    and <strong>{{ requests_left.regular }}</strong> regular requests
+                    left.
+                 </p>
+                 <p class="using-requests"></p>
+               {% endwith %}
+            </div>
             <div class="button-group">
               <button type="submit" class="button" name="action" value="save">
                 Save
