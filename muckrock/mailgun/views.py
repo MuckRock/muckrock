@@ -37,7 +37,12 @@ from muckrock.communication.models import (
 )
 from muckrock.foia.models import FOIACommunication, FOIARequest, RawEmail
 from muckrock.foia.tasks import classify_status
-from muckrock.task.models import OrphanTask, ResponseTask, ReviewAgencyTask
+from muckrock.task.models import (
+    FlaggedTask,
+    OrphanTask,
+    ResponseTask,
+    ReviewAgencyTask,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -251,6 +256,15 @@ def _handle_request(request, mail_id):
             AgencyEmail.objects.create(
                 agency=foia.agency,
                 email=from_email,
+            )
+        # if agency isn't currently using an outgoing email or a portal, flag it
+        if not foia.agency.get_emails().exists() and not foia.agency.portal:
+            FlaggedTask.objects.create(
+                agency=foia.agency,
+                category='agency new email',
+                text='We received an email from {} for a request to this'
+                'agency, but this agency does not currently have a primary '
+                'email address set'.format(from_email),
             )
 
         # if this request is using a portal, hide the incoming messages

@@ -660,6 +660,7 @@ class FOIARequest(models.Model):
             # Flag for review
             task.models.FlaggedTask.objects.create(
                 foia=self,
+                category='contact info changed',
                 text='This request was filed with a user supplied email '
                 'address: {}.  Please check that this is an appropriate email '
                 'address before sending this request'.format(self.email),
@@ -672,6 +673,7 @@ class FOIARequest(models.Model):
             # Flag for review
             task.models.FlaggedTask.objects.create(
                 foia=self,
+                category='contact info changed',
                 text='This request was filed with a user supplied fax '
                 'number: {}.  Please check that this is an appropriate fax '
                 'number before sending this request'.format(self.fax),
@@ -733,6 +735,7 @@ class FOIARequest(models.Model):
         self.date_processing = date.today()
         task.models.FlaggedTask.objects.create(
             foia=self,
+            category='no proxy',
             text='This request was filed for an agency requiring a '
             'proxy, but no proxy was available.  Please add a suitable '
             'proxy for the state and refile it with a note that the '
@@ -1224,6 +1227,7 @@ class FOIARequest(models.Model):
         # mark to re-file with a proxy
         FlaggedTask.objects.create(
             foia=self,
+            category='proxy',
             text='This request was rejected as requiring a proxy; please refile'
             ' it with one of our volunteers names and a note that the request is'
             ' being filed by a state citizen. Make sure the new request is'
