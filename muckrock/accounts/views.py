@@ -416,7 +416,7 @@ class ProfileSettings(TemplateView):
         return context
 
 
-def buy_requests(request, username=None):
+def buy_requests(request, username):
     """A purchaser buys requests for a recipient. The recipient can even be themselves!"""
     url_redirect = request.GET.get('next', 'acct-my-profile')
     bundles = int(request.POST.get('bundles', 1))

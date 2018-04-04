@@ -44,6 +44,9 @@ $color-embargo: $color-agency;
       margin: 0;
       padding: $vr;
     }
+    .edited-boilerplate .document-boilerplate {
+      display: none;
+    }
     .requested_docs {
         padding: 0;
         label { display: none; }
@@ -60,6 +63,9 @@ $color-embargo: $color-agency;
                 color: $color-grey;
             }
         }
+    }
+    .edited-boilerplate .requested_docs textarea {
+      height: 35em;
     }
     .agencies {
         margin: 0;
@@ -92,7 +98,7 @@ $color-embargo: $color-agency;
         }
 
     }
-    .embargo label, .newsletter label {
+    .embargo label, .newsletter label, .edited_boilerplate label {
       display: inline;
       margin-right: $vr/2;
     }

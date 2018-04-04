@@ -1,6 +1,6 @@
 <span class="choice" data-value="{% if choice.pk %}{{ choice.pk }}{% else %}$new${{ choice.name }}${{ choice.jurisdiction_id }}${% endif %}">
     <div class="choice__text">
-      <p class="nomargin">{{ choice.name }}{% if choice.exempt %} <span class="small red badge">Exempt</span>{% endif %}{% if not choice.pk %} <span class="small green badge">New</span>{% endif %}{% if choice.status == "pending" %} <span class="small green badge">Pending</span>{% endif %}</p>
+      <p class="nomargin">{{ choice.name }}{% if choice.exempt %} <span class="small red badge exempt">Exempt</span>{% endif %}{% if not choice.pk %} <span class="small green badge">New</span>{% endif %}{% if choice.status == "pending" %} <span class="small green badge">Pending</span>{% endif %}</p>
         <p class="small grey nomargin">{{ choice.jurisdiction }}</p>
     </div>
 </span>

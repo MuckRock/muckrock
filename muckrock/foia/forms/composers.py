@@ -45,6 +45,11 @@ class ComposerForm(forms.ModelForm):
         MultipleChoiceWidget('AgencyComposerAutocomplete'),
         required=False,
     )
+    edited_boilerplate = forms.BooleanField(
+        required=False,
+        label='Edit full language',
+        help_text='This is an advanced feature - you probably do not need this',
+    )
     embargo = forms.BooleanField(
         required=False,
         help_text='Embargoing a request keeps it completely private from '
@@ -89,8 +94,9 @@ class ComposerForm(forms.ModelForm):
         model = FOIAComposer
         fields = [
             'title',
-            'requested_docs',
             'agencies',
+            'requested_docs',
+            'edited_boilerplate',
             'embargo',
             'tags',
             'parent',
@@ -131,6 +137,10 @@ class ComposerForm(forms.ModelForm):
             return title
         else:
             return 'Untitled'
+
+    def clean_agencies(self):
+        """Remove exempt agencies"""
+        return [a for a in self.cleaned_data['agencies'] if not a.exempt]
 
     def clean(self):
         """Check cross field dependencies"""

@@ -378,7 +378,7 @@ class MyRequestList(RequestList):
     def get_queryset(self):
         """Limit to just requests owned by the current user."""
         queryset = super(MyRequestList, self).get_queryset()
-        return queryset.filter(user=self.request.user)
+        return queryset.filter(composer__user=self.request.user)
 
     def get_context_data(self):
         """Add forms for bulk actions"""
