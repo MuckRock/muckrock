@@ -37,25 +37,60 @@ from muckrock.task.models import MultiRequestTask
 from muckrock.utils import new_action
 
 
-def _submit_composer(request, composer):
-    """Submit a composer with error handling"""
-    try:
-        composer.submit()
-    except InsufficientRequestsError:
-        messages.warning(request, 'You need to purchase more requests')
-    else:
-        messages.success(request, 'Request submitted')
-
-
-class CreateComposer(MiniregMixin, CreateView):
-    """Create a new composer"""
-    # pylint: disable=attribute-defined-outside-init
+class GenericComposer(object):
+    """Shared functionality between create and update composer views"""
     template_name = 'forms/foia/create.html'
     form_class = ComposerForm
 
+    def get_form_kwargs(self):
+        """Add request to the form kwargs"""
+        kwargs = super(GenericComposer, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        """Extra context"""
+        context = super(GenericComposer, self).get_context_data(**kwargs)
+        if self.request.user.is_authenticated:
+            foias_filed = (
+                self.request.user.composers.exclude(status='started').count()
+            )
+            requests_left = {
+                'regular': self.request.user.profile.num_requests,
+                'monthly': self.request.user.profile.get_monthly_requests(),
+            }
+            org = self.request.user.profile.get_org()
+            if org is not None:
+                requests_left['org'] = org.get_requests()
+        else:
+            foias_filed = 0
+            requests_left = {}
+        context.update({
+            'settings': settings,
+            'foias_filed': foias_filed,
+            'requests_left': requests_left,
+            'buy_request_form': BuyRequestForm(user=self.request.user),
+        })
+        return context
+
+    def _submit_composer(self, composer):
+        """Submit a composer with error handling"""
+        try:
+            composer.submit()
+        except InsufficientRequestsError:
+            messages.warning(self.request, 'You need to purchase more requests')
+        else:
+            messages.success(self.request, 'Request submitted')
+
+
+class CreateComposer(MiniregMixin, GenericComposer, CreateView):
+    """Create a new composer"""
+
+    # pylint: disable=attribute-defined-outside-init
+
     def get_initial(self):
         """Get initial data from clone, if there is one"""
-        self.clone = False
+        self.clone = None
         data = {}
         clone_pk = self.request.GET.get('clone')
         if clone_pk is not None:
@@ -84,41 +119,18 @@ class CreateComposer(MiniregMixin, CreateView):
             'requested_docs': smart_text(composer.requested_docs),
             'agencies': composer.agencies.all(),
             'tags': composer.tags.all(),
+            'edited_boilerplate': composer.edited_boilerplate,
             'parent': composer,
         }
-        self.clone = True
+        self.clone = composer
         return initial_data
-
-    def get_form_kwargs(self):
-        """Add request to the form kwargs"""
-        kwargs = super(CreateComposer, self).get_form_kwargs()
-        kwargs['user'] = self.request.user
-        return kwargs
 
     def get_context_data(self, **kwargs):
         """Extra context"""
         context = super(CreateComposer, self).get_context_data(**kwargs)
-        if self.request.user.is_authenticated:
-            foias_filed = (
-                self.request.user.composers.exclude(status='started').count()
-            )
-            requests_left = {
-                'regular': self.request.user.profile.num_requests,
-                'monthly': self.request.user.profile.get_monthly_requests(),
-            }
-            org = self.request.user.profile.get_org()
-            if org is not None:
-                requests_left['org'] = org.get_requests()
-        else:
-            foias_filed = 0
-            requests_left = {}
         context.update({
             'clone': self.clone,
             'featured': FOIARequest.objects.get_featured(self.request.user),
-            'settings': settings,
-            'foias_filed': foias_filed,
-            'requests_left': requests_left,
-            'buy_request_form': BuyRequestForm(user=self.request.user),
         })
         return context
 
@@ -141,15 +153,13 @@ class CreateComposer(MiniregMixin, CreateView):
             self.request.session['ga'] = 'request_drafted'
             messages.success(self.request, 'Request saved')
         elif form.cleaned_data['action'] == 'submit':
-            _submit_composer(self.request, composer)
+            self._submit_composer(composer)
         return redirect(composer)
 
 
-class UpdateComposer(UpdateView):
+class UpdateComposer(GenericComposer, UpdateView):
     """Update a composer"""
     # pylint: disable=attribute-defined-outside-init
-    template_name = 'forms/foia/create.html'
-    form_class = ComposerForm
     pk_url_kwarg = 'idx'
     context_object_name = 'composer'
 
@@ -159,27 +169,6 @@ class UpdateComposer(UpdateView):
             status='started',
             user=self.request.user,
         )
-
-    def get_form_kwargs(self):
-        """Add request to the form kwargs"""
-        kwargs = super(UpdateComposer, self).get_form_kwargs()
-        kwargs['user'] = self.request.user
-        return kwargs
-
-    def get_context_data(self, **kwargs):
-        """Extra context"""
-        context = super(UpdateComposer, self).get_context_data(**kwargs)
-        if self.request.user.is_authenticated:
-            foias_filed = (
-                self.request.user.composers.exclude(status='started').count()
-            )
-        else:
-            foias_filed = 0
-        context.update({
-            'settings': settings,
-            'foias_filed': foias_filed,
-        })
-        return context
 
     def post(self, request, *args, **kwargs):
         """Allow deletion regardless of form validation"""
@@ -197,10 +186,11 @@ class UpdateComposer(UpdateView):
         """Update the request"""
         if form.cleaned_data['action'] == 'save':
             composer = form.save()
+            self.request.session['ga'] = 'request_drafted'
             messages.success(self.request, 'Request saved')
         elif form.cleaned_data['action'] == 'submit':
             composer = form.save()
-            _submit_composer(self.request, composer)
+            self._submit_composer(composer)
         return redirect(composer)
 
 

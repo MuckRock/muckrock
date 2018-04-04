@@ -248,19 +248,19 @@ class StripeForm(forms.Form):
         widget=forms.HiddenInput(),
         initial=static('icons/logo.png'),
     )
-    stripe_email = forms.CharField(widget=forms.HiddenInput())
+    stripe_email = forms.EmailField(widget=forms.HiddenInput())
     stripe_label = forms.CharField(widget=forms.HiddenInput(), initial='Buy')
     stripe_description = forms.CharField(widget=forms.HiddenInput())
     stripe_fee = forms.IntegerField(
         widget=forms.HiddenInput(),
         initial=0,
-        min_value=0,
     )
-    stripe_amount = forms.IntegerField(widget=forms.HiddenInput(), min_value=0)
+    stripe_amount = forms.IntegerField(widget=forms.HiddenInput())
 
 
 class BuyRequestForm(StripeForm):
     """Form for buying more requests"""
+
     num_requests = forms.IntegerField(
         label='Number of requests to buy',
         required=False,
@@ -278,3 +278,30 @@ class BuyRequestForm(StripeForm):
         else:
             self.fields['num_requests'].min_value = 4
             self.fields['num_requests'].widget.attrs['min'] = 4
+
+    def buy_requests(self, recipient):
+        """Buy the requests"""
+        num_requests = self.cleaned_data['num_requests']
+        self.user.profile.pay(
+            self.cleaned_data['stripe_token'],
+            self._get_price(num_requests),
+            {
+                'email': self.cleaned_data['stripe_email'],
+                'action': 'request-purchase',
+            },
+            fee=0,
+        )
+        recipient.profile.add_requests(num_requests)  # XXX
+
+    def _get_price(self, num_requests):
+        """Get the price for the requests"""
+        is_advanced = self.user.profile.is_advanced()
+        if num_requests > 20 and is_advanced:
+            # advanced users pay $3 for bulk purchases
+            return 300 * num_requests
+        elif num_requests > 20:
+            # other users pay $4 for bulk purchases
+            return 400 * num_requests
+        else:
+            # all users pay $5 for non-bulk purchases
+            return 500 * num_requests

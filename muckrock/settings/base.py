@@ -322,6 +322,7 @@ MONTHLY_REQUESTS = {
     'robot': 0,
 }
 
+# XXX remove
 BUNDLED_REQUESTS = {
     'admin': 5,
     'basic': 4,

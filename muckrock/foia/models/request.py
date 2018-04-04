@@ -1150,8 +1150,16 @@ class FOIARequest(models.Model):
 
     def create_initial_communication(self, from_user, proxy):
         """Create the initial request communication"""
+        tags = [
+            ('{ law name }', self.jurisdiction.get_law_name()),
+            ('{ number of days }', self.jurisdiction.days or 10),
+            ('{ business or calendar }', self.jurisdiction.get_day_type()),
+            ('{ name }', from_user.get_full_name()),
+        ]
         if self.composer.edited_boilerplate:
             text = smart_text(self.composer.requested_docs)
+            for tag, replace in tags:
+                text = text.replace(tag, unicode(replace))
         else:
             template = get_template('text/foia/request.txt')
             context = {

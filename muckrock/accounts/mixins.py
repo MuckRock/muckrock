@@ -4,19 +4,29 @@ View mixins
 
 # Django
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 
 # Standard Library
+import logging
+import sys
 from datetime import date
 
+# Third Party
+import stripe
+
 # MuckRock
+from muckrock.accounts.forms import BuyRequestForm
 from muckrock.accounts.models import Profile
 from muckrock.accounts.utils import mailchimp_subscribe, unique_username
-from muckrock.message.tasks import welcome_miniregister
+from muckrock.message.tasks import gift, welcome_miniregister
 from muckrock.utils import generate_key
 
+logger = logging.getLogger(__name__)
 
+
+# XXX move this in to minireg mixin
 def split_name(name):
     """Splits a full name into a first and last name."""
     # infer first and last names from the full name
@@ -65,3 +75,39 @@ class MiniregMixin(object):
         if newsletter:
             mailchimp_subscribe(self.request, user.email)
         return user
+
+
+class BuyRequestsMixin(object):
+    """Buy requests functionality"""
+
+    def buy_requests(self, recipient=None):
+        """Buy requests"""
+        if recipient is None:
+            recipient = self.request.user
+        form = BuyRequestForm(self.request.POST, user=self.request.user)
+        if form.is_valid():
+            try:
+                form.buy_requests(recipient)
+            except stripe.StripeError as exc:
+                messages.error(self.request, 'Payment Error')
+                logger.warn('Payment error: %s', exc, exc_info=sys.exc_info())
+                return False
+
+            self.request.session['ga'] = 'request_purchase'
+            num_requests = form.cleaned_data['num_requests']
+            if recipient == self.request.user:
+                msg = (
+                    'Purchase successful.  {} requests have been added to your'
+                    'account.'.format(num_requests)
+                )
+            else:
+                msg = (
+                    'Purchase successful.  {} requests have been gifted to'
+                    '{}.'.format(num_requests, recipient.first_name)
+                )
+                gift.delay(
+                    recipient,
+                    self.request.user,
+                    '{} requests'.format(num_requests),
+                )
+            messages.success(self.request, msg)

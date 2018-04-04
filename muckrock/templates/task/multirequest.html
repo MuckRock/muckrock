@@ -2,7 +2,7 @@
 
 {% block task-content %}
 <summary class="task__data">
-    <p><a href="{% url 'admin:foia_foiamultirequest_change' task.composer.id %}">{{task.composer}}</a> was created by <a href="{% url 'admin:auth_user_change' task.composer.user.id %}">{{task.composer.user}}</a> and requires approval.</p>
+    <p><a href="{% url 'admin:foia_foiacomposer_change' task.composer.id %}">{{task.composer}}</a> was created by <a href="{% url 'admin:auth_user_change' task.composer.user.id %}">{{task.composer.user}}</a> and requires approval.</p>
     <blockquote>{{task.composer.requested_docs|linebreaks}}</blockquote>
     <ul>Upon approval, it will be sent to {{task.composer.agencies.all|length}} agencies:
     {% for agency in task.composer.agencies.all %}

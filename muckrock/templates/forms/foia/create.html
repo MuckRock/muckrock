@@ -28,6 +28,7 @@
           <summary class="grid__column half">
             Not sure where to start? <a href="/about/foia-101/">We can help.</a>
             <br>
+            {# XXX dont show this if editing a request #}
             Out of ideas? <a href="#clone">Try cloning a request.</a>
             <br>
             <noscript>It looks like you have JavaScript turned off. This page requires JavaScript to function. If you are not willing to enable JavaScript, please send an email containing all necessary information to file and we will create your request for you.</noscript>
@@ -52,7 +53,7 @@
         </div>
         </section>
       {% endif %}
-      <form action="" method="post" class="create-request">
+      <form action="" method="post" class="create-request {% if composer.edited_boilerplate or clone.edited_boilerplate %}edited-boilerplate{% endif %}">
         {% csrf_token %}
         {% for field in form.hidden_fields %}
           {{ field }}
@@ -67,7 +68,7 @@
         {% include "lib/pattern/new_request_field.html" with field=form.requested_docs only %}
         <div class="document-boilerplate outro">
           <p>The requested documents will be made available to the general public,
-          and this request is not being made for commercial purposes.<p>
+          and this request is not being made for commercial purposes.</p>
           <p>In the event that there are fees, I would be grateful if you would
           inform me of the total charges in advance of fulfilling my request.
           I would prefer the request filled electronically, by e-mail attachment
@@ -79,6 +80,7 @@
           <p>Sincerely,</p>
           <p>{{ user.get_full_name|default:"{ name }" }}</p>
         </div>
+        {% include "lib/pattern/new_request_field.html" with field=form.edited_boilerplate only %}
         {% if form.embargo %}
           {% include "lib/pattern/new_request_field.html" with field=form.embargo only %}
         {% else %}
@@ -153,13 +155,13 @@
             </div>
 
             <div class="button-group">
-              <button type="submit" class="button" name="action" value="save">
+              <button type="button" class="button" id="save_button">
                 Save
               </button>
-              <button type="submit" class="primary button" name="action" value="submit">
+              <button type="button" class="primary button" id="submit_button">
                 Submit
               </button>
-              <button type="submit" class="failure button" name="action" value="delete">
+              <button type="button" class="failure button" id="delete_button">
                 Delete
               </button>
             </div>
