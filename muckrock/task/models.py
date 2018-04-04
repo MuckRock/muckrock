@@ -59,10 +59,10 @@ SNAIL_MAIL_CATEGORIES = [
     ('p', 'Payment'),
 ]
 PORTAL_CATEGORIES = [('i', 'Incoming')] + SNAIL_MAIL_CATEGORIES
-FLAG_CATEGORIES = [
+PUBLIC_FLAG_CATEGORIES = [
     (
         'move communication',
-        'A communication ended up on this request inappropriately',
+        'A communication ended up on this request inappropriately.',
     ),
     (
         'no response',
@@ -94,6 +94,25 @@ FLAG_CATEGORIES = [
         'The agency denied the request due to an in-state citzenship law.',
     ),
 ]
+PRIVATE_FLAG_CATEGORIES = [
+    (
+        'contact info changed',
+        'User supplied contact info.',
+    ),
+    (
+        'no proxy',
+        'No proxy was available.',
+    ),
+    (
+        'agency update',
+        'An agency logged in to the site and updated a request.',
+    ),
+    (
+        'agency new email',
+        'An agency with no primary email set replied via email.',
+    ),
+]
+FLAG_CATEGORIES = PUBLIC_FLAG_CATEGORIES + PRIVATE_FLAG_CATEGORIES
 
 
 class Task(models.Model):

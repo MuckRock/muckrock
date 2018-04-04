@@ -14,7 +14,7 @@ from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
 from muckrock.foia.models import FOIANote, FOIARequest, TrackingNumber
-from muckrock.task.models import FLAG_CATEGORIES
+from muckrock.task.models import PUBLIC_FLAG_CATEGORIES
 
 
 class FOIAEstimatedCompletionDateForm(forms.ModelForm):
@@ -108,7 +108,7 @@ class FOIAFlagForm(forms.Form):
 
     category = forms.ChoiceField(
         choices=[('', '-- Choose a category if one is relevant')] +
-        FLAG_CATEGORIES,
+        PUBLIC_FLAG_CATEGORIES,
         required=False,
     )
     text = forms.CharField(widget=forms.Textarea, required=False)
