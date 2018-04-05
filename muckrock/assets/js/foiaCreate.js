@@ -43,7 +43,7 @@ $(document).ready(function(){
       (num !== 1 ? "s" : "") + ".  ";
     var useAny = (useOrg > 0 || useMonthly > 0 || useRegular > 0);
     if (useAny) {
-      text += "This will use "
+      text += "This will use ";
       var useText = [];
       if (useOrg > 0) {
         useText.push("<strong>" + useOrg + "</strong> organizational request" +
@@ -237,9 +237,6 @@ $(document).ready(function(){
     $(this).closest("form").submit();
   });
 
-  var introHeight = $(".document-boilerplate.intro").height();
-  var outroHeight = $(".document-boilerplate.outro").height();
-  var docsHeight = $("#id_requested_docs").height();
   $("#id_edited_boilerplate").change(function(){
     if (this.checked) {
       var requestedDocs = $("#id_requested_docs").val();

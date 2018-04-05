@@ -301,24 +301,25 @@ class ContactInfoForm(SendViaForm):
 
     def clean(self):
         """Make other fields required if chosen"""
+        cleaned_data = super(ContactInfoForm, self).clean()
         if (
-            self.cleaned_data.get('via') == 'email'
-            and not self.cleaned_data.get('email')
-            and not self.cleaned_data.get('other_email')
+            cleaned_data.get('via') == 'email'
+            and not cleaned_data.get('email')
+            and not cleaned_data.get('other_email')
         ):
             self.add_error(
                 'other_email',
                 'Please enter an email address',
             )
         if (
-            self.cleaned_data.get('via') == 'fax'
-            and not self.cleaned_data.get('fax')
-            and not self.cleaned_data.get('other_fax')
+            cleaned_data.get('via') == 'fax' and not cleaned_data.get('fax')
+            and not cleaned_data.get('other_fax')
         ):
             self.add_error(
                 'other_fax',
                 'Please enter a fax number',
             )
+        return cleaned_data
 
     def clean_other_email(self):
         """Turn other email into an Email Address object"""
