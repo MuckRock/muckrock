@@ -114,12 +114,9 @@
           <footer class="footer--submit">
             <p id="submit_help" class="error"></p>
             <div class="requests-left"
-                 data-org="0"
-                 data-month="0"
-                 data-reg="1"
-                 data--org="{{ requests_left.org }}"
-                 data--month="{{ requests_left.monthly }}"
-                 data--reg="{{ requests_left.regular }}"
+                 data-org="{{ requests_left.org }}"
+                 data-month="{{ requests_left.monthly }}"
+                 data-reg="{{ requests_left.regular }}"
                  >
                {% with org=user.profile.get_org %}
                  <p>
@@ -138,7 +135,7 @@
             </div>
 
             <div class="buy-request-form" data-bulk-price="{% if user.profile.is_advanced %}3{% else %}4{% endif %}">
-              {% include "lib/pattern/form.html" with form=buy_request_form %}
+              {% include "lib/pattern/field.html" with field=form.num_requests only %}
               <span>
                 <p>
                   $5/request<br class="nomargin">

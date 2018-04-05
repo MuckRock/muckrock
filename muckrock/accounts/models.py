@@ -231,6 +231,13 @@ class Profile(models.Model):
         org_reqs = self.organization.get_requests() if self.organization else 0
         return self.num_requests + self.get_monthly_requests() + org_reqs
 
+    def add_requests(self, num):
+        """Add requests to the profile"""
+        with transaction.atomic():
+            profile = Profile.objects.select_for_update().get(pk=self.id)
+            profile.num_requests += num
+            profile.save()
+
     def multiple_requests(self, num):
         """How many requests of each type would be used for this user to make num requests"""
         # TODO test

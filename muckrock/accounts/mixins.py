@@ -80,34 +80,32 @@ class MiniregMixin(object):
 class BuyRequestsMixin(object):
     """Buy requests functionality"""
 
-    def buy_requests(self, recipient=None):
+    def buy_requests(self, form, recipient=None):
         """Buy requests"""
         if recipient is None:
             recipient = self.request.user
-        form = BuyRequestForm(self.request.POST, user=self.request.user)
-        if form.is_valid():
-            try:
-                form.buy_requests(recipient)
-            except stripe.StripeError as exc:
-                messages.error(self.request, 'Payment Error')
-                logger.warn('Payment error: %s', exc, exc_info=sys.exc_info())
-                return False
+        try:
+            form.buy_requests(recipient)
+        except stripe.StripeError as exc:
+            messages.error(self.request, 'Payment Error')
+            logger.warn('Payment error: %s', exc, exc_info=sys.exc_info())
+            return
 
-            self.request.session['ga'] = 'request_purchase'
-            num_requests = form.cleaned_data['num_requests']
-            if recipient == self.request.user:
-                msg = (
-                    'Purchase successful.  {} requests have been added to your'
-                    'account.'.format(num_requests)
-                )
-            else:
-                msg = (
-                    'Purchase successful.  {} requests have been gifted to'
-                    '{}.'.format(num_requests, recipient.first_name)
-                )
-                gift.delay(
-                    recipient,
-                    self.request.user,
-                    '{} requests'.format(num_requests),
-                )
-            messages.success(self.request, msg)
+        self.request.session['ga'] = 'request_purchase'
+        num_requests = form.cleaned_data['num_requests']
+        if recipient == self.request.user:
+            msg = (
+                'Purchase successful.  {} requests have been added to your'
+                'account.'.format(num_requests)
+            )
+        else:
+            msg = (
+                'Purchase successful.  {} requests have been gifted to'
+                '{}.'.format(num_requests, recipient.first_name)
+            )
+            gift.delay(
+                recipient,
+                self.request.user,
+                '{} requests'.format(num_requests),
+            )
+        messages.success(self.request, msg)
