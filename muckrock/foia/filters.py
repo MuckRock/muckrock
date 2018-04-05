@@ -103,6 +103,19 @@ class FOIARequestFilterSet(JurisdictionFilterSet):
             }
         ),
     )
+    file_types = django_filters.CharFilter(
+        label='File Types',
+        method='filter_file_types',
+    )
+
+    def filter_file_types(self, queryset, name, value):
+        """Filter requests with certain types of files"""
+        #pylint: disable=unused-argument
+        file_types = value.split(',')
+        query = Q()
+        for file_type in file_types:
+            query |= Q(communications__files__ffile__endswith=file_type.strip())
+        return queryset.filter(query)
 
     class Meta:
         model = FOIARequest
@@ -150,6 +163,19 @@ class MyFOIARequestFilterSet(JurisdictionFilterSet):
             }
         ),
     )
+    file_types = django_filters.CharFilter(
+        label='File Types',
+        method='filter_file_types',
+    )
+
+    def filter_file_types(self, queryset, name, value):
+        """Filter requests with certain types of files"""
+        #pylint: disable=unused-argument
+        file_types = value.split(',')
+        query = Q()
+        for file_type in file_types:
+            query |= Q(communications__files__ffile__endswith=file_type.strip())
+        return queryset.filter(query)
 
     class Meta:
         model = FOIARequest
