@@ -5,23 +5,20 @@ FOIA forms for composing requests
 # Django
 from django import forms
 from django.contrib.auth.models import User
-from django.db.models import Q
-
-# Standard Library
-import re
 
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
 from autocomplete_light.contrib.taggit_field import TaggitField
 
 # MuckRock
+from muckrock.accounts.forms import BuyRequestForm
 from muckrock.agency.models import Agency
 from muckrock.foia.fields import ComposerAgencyField
 from muckrock.foia.models import FOIAComposer, FOIAMultiRequest
 from muckrock.forms import TaggitWidget
 
 
-class ComposerForm(forms.ModelForm):
+class BaseComposerForm(forms.ModelForm):
     """This form creates and updates FOIA composers"""
 
     title = forms.CharField(
@@ -29,6 +26,7 @@ class ComposerForm(forms.ModelForm):
             'placeholder': 'Add a title'
         }),
         max_length=255,
+        required=False,
     )
     requested_docs = forms.CharField(
         widget=forms.Textarea(
@@ -37,7 +35,8 @@ class ComposerForm(forms.ModelForm):
                     'Write a short description of the documents you are '
                     'looking for. The more specific you can be, the better.'
             }
-        )
+        ),
+        required=False,
     )
     agencies = ComposerAgencyField(
         queryset=Agency.objects.get_approved(),
@@ -106,8 +105,9 @@ class ComposerForm(forms.ModelForm):
         ]
 
     def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop('user')
-        super(ComposerForm, self).__init__(*args, **kwargs)
+        if not hasattr(self, 'user'):
+            self.user = kwargs.pop('user')
+        super(BaseComposerForm, self).__init__(*args, **kwargs)
         if self.user.is_authenticated:
             del self.fields['full_name']
             del self.fields['email']
@@ -144,18 +144,37 @@ class ComposerForm(forms.ModelForm):
 
     def clean(self):
         """Check cross field dependencies"""
-        # XXX should title and requested_docs be semi-optional as well?
-        # should we try to have client side checks?
-        cleaned_data = super(ComposerForm, self).clean()
-        if (
-            cleaned_data.get('action') == 'submit'
-            and not self.cleaned_data.get('agencies')
-        ):
-            self.add_error(
-                'agencies',
-                'You must select at least one agency before submitting',
-            )
+        # XXX should we try to have client side checks?
+        cleaned_data = super(BaseComposerForm, self).clean()
+        if cleaned_data.get('action') == 'submit':
+            for field in ['title', 'requested_docs', 'agencies']:
+                if not self.cleaned_data.get(field):
+                    self.add_error(
+                        field,
+                        'This field is required when submitting',
+                    )
         return cleaned_data
+
+
+class ComposerForm(BuyRequestForm, BaseComposerForm):
+    """Composer form, including optional subforms"""
+
+    def __init__(self, *args, **kwargs):
+        super(ComposerForm, self).__init__(*args, **kwargs)
+        self.fields['stripe_token'].required = False
+        self.fields['stripe_email'].required = False
+        self.fields['num_requests'].required = False
+
+    def clean(self):
+        """Buy request fields are only required hwen buying requests"""
+        cleaned_data = super(ComposerForm, self).clean()
+        if cleaned_data.get('num_requests', 0) > 0:
+            for field in ['stripe_token', 'stripe_email']:
+                if not self.cleaned_data.get(field):
+                    self.add_error(
+                        field,
+                        'This field is required when purchasing requests',
+                    )
 
 
 class RequestDraftForm(forms.Form):

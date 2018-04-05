@@ -20,8 +20,7 @@ from datetime import date
 from math import ceil
 
 # MuckRock
-from muckrock.accounts.forms import BuyRequestForm
-from muckrock.accounts.mixins import MiniregMixin
+from muckrock.accounts.mixins import BuyRequestsMixin, MiniregMixin
 from muckrock.agency.models import Agency
 from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.foia.forms import (
@@ -37,7 +36,7 @@ from muckrock.task.models import MultiRequestTask
 from muckrock.utils import new_action
 
 
-class GenericComposer(object):
+class GenericComposer(BuyRequestsMixin):
     """Shared functionality between create and update composer views"""
     template_name = 'forms/foia/create.html'
     form_class = ComposerForm
@@ -69,7 +68,6 @@ class GenericComposer(object):
             'settings': settings,
             'foias_filed': foias_filed,
             'requests_left': requests_left,
-            'buy_request_form': BuyRequestForm(user=self.request.user),
         })
         return context
 
@@ -144,6 +142,8 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
                 form.cleaned_data['email'],
                 form.cleaned_data.get('newsletter'),
             )
+        if form.cleaned_data.get('num_requests', 0) > 0:
+            self.buy_requests(form)
         if form.cleaned_data['action'] in ('save', 'submit'):
             composer = form.save(commit=False)
             composer.user = user
@@ -184,6 +184,8 @@ class UpdateComposer(GenericComposer, UpdateView):
 
     def form_valid(self, form):
         """Update the request"""
+        if form.cleaned_data.get('num_requests', 0) > 0:
+            self.buy_requests(form)
         if form.cleaned_data['action'] == 'save':
             composer = form.save()
             self.request.session['ga'] = 'request_drafted'
