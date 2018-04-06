@@ -44,11 +44,8 @@ class BaseComposerForm(forms.ModelForm):
     )
     agencies = ComposerAgencyField(
         queryset=Agency.objects.get_approved(),
-        widget=autocomplete_light.MultipleChoiceWidget(
-            'AgencyComposerAutocomplete', attrs={
-                'class': 'submit-required'
-            }
-        ),
+        widget=autocomplete_light.
+        MultipleChoiceWidget('AgencyComposerAutocomplete'),
         required=False,
     )
     edited_boilerplate = forms.BooleanField(
