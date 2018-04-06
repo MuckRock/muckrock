@@ -221,6 +221,7 @@ $(document).ready(function(){
   $("#save_button").click(function(){
     $("input[name='action']").val("save");
     $(".submit-required").removeAttr("required");
+    agencyInput.removeAttr("required");
     $(this).closest("form").submit();
   });
 
@@ -231,6 +232,12 @@ $(document).ready(function(){
       $(this).closest("form").checkout();
     }
     $(".submit-required").attr("required", "required");
+    if (agencyField.find(".deck > .choice").length === 0) {
+      // no agency choices
+      agencyInput.attr("required", "required");
+    } else {
+      agencyInput.removeAttr("required");
+    }
     var form = $(this).closest("form");
     if (form.get(0).reportValidity()) {
       form.submit();
@@ -240,6 +247,7 @@ $(document).ready(function(){
   $("#delete_button").click(function(){
     $("input[name='action']").val("delete");
     $(".submit-required").removeAttr("required");
+    agencyInput.removeAttr("required");
     $(this).closest("form").submit();
   });
 
@@ -270,12 +278,12 @@ $(document).ready(function(){
   // https://stackoverflow.com/questions/19910843/autosave-input-boxs-to-database-during-pause-in-typing
 	var timeoutId;
   var composerPk = $("form.create-request").data("composer-pk");
-    
+
   function changeHandler() {
     $(".form-status-holder").text("Unsaved");
     clearTimeout(timeoutId);
     timeoutId = setTimeout(function() {
-      // Runs 1 second (1000 ms) after the last change    
+      // Runs 1 second (1000 ms) after the last change
       saveToDB();
     }, 1000);
   }
