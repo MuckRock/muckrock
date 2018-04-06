@@ -242,3 +242,28 @@ class FOIAComposerQuerySet(models.QuerySet):
         else:
             # anonymous user, filter out drafts and embargoes
             return self.exclude(status='started').exclude(embargo=True)
+
+    def get_or_create_draft(self, user):
+        """Return an existing blank draft or create one"""
+        draft = self.filter(
+            user=user,
+            title='Untitled',
+            slug='untitled',
+            status='started',
+            agencies=None,
+            requested_docs='',
+            edited_boilerplate=False,
+            datetime_submitted=None,
+            embargo=False,
+            parent=None,
+            tags=None,
+            num_org_requests=0,
+            num_monthly_requests=0,
+            num_reg_requests=0,
+        ).first()
+        if draft:
+            draft.datetime_created = timezone.now()
+            draft.save()
+            return draft
+        else:
+            return self.create(user=user)

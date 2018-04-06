@@ -22,9 +22,12 @@ class BaseComposerForm(forms.ModelForm):
     """This form creates and updates FOIA composers"""
 
     title = forms.CharField(
-        widget=forms.TextInput(attrs={
-            'placeholder': 'Add a title'
-        }),
+        widget=forms.TextInput(
+            attrs={
+                'placeholder': 'Add a title',
+                'class': 'submit-required',
+            }
+        ),
         max_length=255,
         required=False,
     )
@@ -33,15 +36,19 @@ class BaseComposerForm(forms.ModelForm):
             attrs={
                 'placeholder':
                     'Write a short description of the documents you are '
-                    'looking for. The more specific you can be, the better.'
+                    'looking for. The more specific you can be, the better.',
+                'class': 'submit-required',
             }
         ),
         required=False,
     )
     agencies = ComposerAgencyField(
         queryset=Agency.objects.get_approved(),
-        widget=autocomplete_light.
-        MultipleChoiceWidget('AgencyComposerAutocomplete'),
+        widget=autocomplete_light.MultipleChoiceWidget(
+            'AgencyComposerAutocomplete', attrs={
+                'class': 'submit-required'
+            }
+        ),
         required=False,
     )
     edited_boilerplate = forms.BooleanField(
@@ -141,6 +148,11 @@ class BaseComposerForm(forms.ModelForm):
     def clean_agencies(self):
         """Remove exempt agencies"""
         return [a for a in self.cleaned_data['agencies'] if not a.exempt]
+
+    def clean_tags(self):
+        """Parse tags correctly"""
+        # XXX
+        return self.cleaned_data['tags']
 
     def clean(self):
         """Check cross field dependencies"""

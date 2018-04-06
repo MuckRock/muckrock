@@ -35,6 +35,9 @@
           </summary>
         {% endif %}
       </header>
+      {% if composer %}
+        <div class="form-status-holder badge">Autosave enabled</div>
+      {% endif %}
       {% if form.non_field_errors or form.errors %}
         <div class="error message">
           <span class="symbol">
@@ -53,7 +56,12 @@
         </div>
         </section>
       {% endif %}
-      <form action="" method="post" class="create-request {% if composer.edited_boilerplate or clone.edited_boilerplate %}edited-boilerplate{% endif %}">
+      <form
+        action="{% if composer %}{% url "foia-draft" idx=composer.pk %}{% endif %}"
+        method="post"
+        class="create-request {% if composer.edited_boilerplate or clone.edited_boilerplate %}edited-boilerplate{% endif %}"
+        {% if composer %}data-composer-pk="{{ composer.pk }}"{% endif %}
+        >
         {% csrf_token %}
         {% for field in form.hidden_fields %}
           {{ field }}
@@ -80,7 +88,9 @@
           <p>Sincerely,</p>
           <p>{{ user.get_full_name|default:"{ name }" }}</p>
         </div>
-        {% include "lib/pattern/new_request_field.html" with field=form.edited_boilerplate only %}
+        {% if user.is_authenticated %}
+          {% include "lib/pattern/new_request_field.html" with field=form.edited_boilerplate only %}
+        {% endif %}
         {% if form.embargo %}
           {% include "lib/pattern/new_request_field.html" with field=form.embargo only %}
         {% else %}
@@ -101,7 +111,11 @@
             {% include "lib/pattern/new_request_field.html" with field=form.tags only %}
             <fieldset class="attachments">
               <label class="bold">Attachments</label>
-              <div id="fine-uploader" class="fine-uploader-composer" data-composer-pk="{{ composer.pk }}"></div>
+              {% if composer %}
+                <div id="fine-uploader" class="fine-uploader-composer" data-composer-pk="{{ composer.pk }}"></div>
+              {% else %}
+                <p>Please save this request before uploading attachments</p>
+              {% endif %}
             </fieldset>
           </div>
         {% else %}
@@ -158,9 +172,11 @@
               <button type="button" class="primary button" id="submit_button">
                 Submit
               </button>
-              <button type="button" class="failure button" id="delete_button">
-                Delete
-              </button>
+              {% if composer %}
+                <button type="button" class="failure button" id="delete_button">
+                  Delete
+                </button>
+              {% endif %}
             </div>
           </footer>
         {% else %}

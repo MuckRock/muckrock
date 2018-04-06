@@ -54,9 +54,14 @@ urlpatterns = [
     # Create and Draft Views
     url(r'^create/$', views.CreateComposer.as_view(), name='foia-create'),
     url(
-        r'^composer/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)/draft/$',
+        r'^composer-draft/(?P<idx>\d+)/$',
         views.UpdateComposer.as_view(),
         name='foia-draft'
+    ),
+    url(
+        r'^composer-autosave/(?P<idx>\d+)/$',
+        views.autosave,
+        name='foia-autosave',
     ),
 
     # Detail View

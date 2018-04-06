@@ -220,6 +220,7 @@ $(document).ready(function(){
 
   $("#save_button").click(function(){
     $("input[name='action']").val("save");
+    $(".submit-required").removeAttr("required");
     $(this).closest("form").submit();
   });
 
@@ -229,11 +230,16 @@ $(document).ready(function(){
     if ($(".buy-request-form").is(":visible")) {
       $(this).closest("form").checkout();
     }
-    $(this).closest("form").submit();
+    $(".submit-required").attr("required", "required");
+    var form = $(this).closest("form");
+    if (form.get(0).reportValidity()) {
+      form.submit();
+    }
   });
 
   $("#delete_button").click(function(){
     $("input[name='action']").val("delete");
+    $(".submit-required").removeAttr("required");
     $(this).closest("form").submit();
   });
 
@@ -260,5 +266,46 @@ $(document).ready(function(){
       $("form.create-request").removeClass("edited-boilerplate");
     }
   });
+
+  // https://stackoverflow.com/questions/19910843/autosave-input-boxs-to-database-during-pause-in-typing
+	var timeoutId;
+  var composerPk = $("form.create-request").data("composer-pk");
+    
+  function changeHandler() {
+    $(".form-status-holder").text("Unsaved");
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(function() {
+      // Runs 1 second (1000 ms) after the last change    
+      saveToDB();
+    }, 1000);
+  }
+
+  if (composerPk) {
+    $("form.create-request input, form.create-request textarea").on(
+      "input propertychange change", changeHandler);
+    agencyWidget.on("widgetSelectChoice widgetDeselectChoice", changeHandler);
+  }
+
+  function saveToDB() {
+    var form = $("form.create-request");
+    $.ajax({
+      url: "/foi/composer-autosave/" + form.data("composer-pk") + "/",
+      type: "POST",
+      data: form.serialize(), // serializes the form's elements.
+      beforeSend: function() {
+        // Let them know we are saving
+        $(".form-status-holder").text("Saving...");
+      },
+      success: function() {
+        // Now show them we saved and when we did
+        var d = new Date();
+        $(".form-status-holder").text("Saved! Last: " + d.toLocaleTimeString());
+      },
+      error: function() {
+        // Now show them we saved and when we did
+        $(".form-status-holder").text("Error");
+      },
+    });
+  }
 
 });

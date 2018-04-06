@@ -6,12 +6,14 @@ FOIA views for composing
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.urlresolvers import reverse
-from django.http import Http404
+from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.defaultfilters import slugify
 from django.utils import timezone
 from django.utils.encoding import smart_text
+from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, FormView, UpdateView
 
 # Standard Library
@@ -40,6 +42,7 @@ class GenericComposer(BuyRequestsMixin):
     """Shared functionality between create and update composer views"""
     template_name = 'forms/foia/create.html'
     form_class = ComposerForm
+    context_object_name = 'composer'
 
     def get_form_kwargs(self):
         """Add request to the form kwargs"""
@@ -89,7 +92,9 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
     def get_initial(self):
         """Get initial data from clone, if there is one"""
         self.clone = None
-        data = {}
+        # set title to blank, as if we create a new empty draft, it will
+        # set the title to 'Untitled'
+        data = {'title': ''}
         clone_pk = self.request.GET.get('clone')
         if clone_pk is not None:
             data.update(self._get_clone_data(clone_pk))
@@ -125,6 +130,14 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
 
     def get_context_data(self, **kwargs):
         """Extra context"""
+        # if user is authenticated, save an empty draft to the database
+        # so that autosaving and file uploading will work
+        if self.request.user.is_authenticated:
+            self.object = (
+                FOIAComposer.objects.get_or_create_draft(
+                    user=self.request.user
+                )
+            )
         context = super(CreateComposer, self).get_context_data(**kwargs)
         context.update({
             'clone': self.clone,
@@ -142,8 +155,6 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
                 form.cleaned_data['email'],
                 form.cleaned_data.get('newsletter'),
             )
-        if form.cleaned_data.get('num_requests', 0) > 0:
-            self.buy_requests(form)
         if form.cleaned_data['action'] in ('save', 'submit'):
             composer = form.save(commit=False)
             composer.user = user
@@ -153,15 +164,16 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
             self.request.session['ga'] = 'request_drafted'
             messages.success(self.request, 'Request saved')
         elif form.cleaned_data['action'] == 'submit':
+            if form.cleaned_data.get('num_requests', 0) > 0:
+                self.buy_requests(form)
             self._submit_composer(composer)
         return redirect(composer)
 
 
-class UpdateComposer(GenericComposer, UpdateView):
+class UpdateComposer(LoginRequiredMixin, GenericComposer, UpdateView):
     """Update a composer"""
     # pylint: disable=attribute-defined-outside-init
     pk_url_kwarg = 'idx'
-    context_object_name = 'composer'
 
     def get_queryset(self):
         """Restrict to composers you can view"""
@@ -184,16 +196,39 @@ class UpdateComposer(GenericComposer, UpdateView):
 
     def form_valid(self, form):
         """Update the request"""
-        if form.cleaned_data.get('num_requests', 0) > 0:
-            self.buy_requests(form)
         if form.cleaned_data['action'] == 'save':
             composer = form.save()
             self.request.session['ga'] = 'request_drafted'
             messages.success(self.request, 'Request saved')
         elif form.cleaned_data['action'] == 'submit':
             composer = form.save()
+            if form.cleaned_data.get('num_requests', 0) > 0:
+                self.buy_requests(form)
             self._submit_composer(composer)
         return redirect(composer)
+
+
+@login_required
+@require_POST
+def autosave(request, idx):
+    """Save the composer via AJAX"""
+    composer = get_object_or_404(
+        FOIAComposer,
+        pk=idx,
+        status='started',
+        user=request.user,
+    )
+    data = request.POST.copy()
+    # never attempt to buy requests from autosaver
+    data['num_requests'] = None
+    # we are always just saving
+    data['action'] = 'save'
+    form = ComposerForm(data, instance=composer, user=request.user)
+    if form.is_valid():
+        form.save()
+        return HttpResponse('OK')
+    else:
+        return HttpResponseBadRequest(form.errors.as_json())
 
 
 def _submit_request(request, foia, contact_info=None):
