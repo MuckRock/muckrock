@@ -96,6 +96,7 @@ class Detail(DetailView):
 
     def dispatch(self, request, *args, **kwargs):
         """If request is a draft, then redirect to drafting interface"""
+        # XXX
         foia = self.get_object()
         self.admin_fix_form = FOIAAdminFixForm(
             prefix='admin_fix',
@@ -875,7 +876,7 @@ class ComposerDetail(DetailView):
         """If composer is a draft, then redirect to drafting interface"""
         composer = self.get_object()
         if composer.status == 'started':
-            return redirect('foia-draft', slug=composer.slug, idx=composer.pk)
+            return redirect('foia-draft', idx=composer.pk)
         else:
             return (
                 super(ComposerDetail, self).dispatch(request, *args, **kwargs)
