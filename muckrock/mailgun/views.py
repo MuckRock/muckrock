@@ -258,7 +258,12 @@ def _handle_request(request, mail_id):
                 email=from_email,
             )
         # if agency isn't currently using an outgoing email or a portal, flag it
-        if not foia.agency.get_emails().exists() and not foia.agency.portal:
+        if (
+            not foia.agency.get_emails().exists() and not foia.agency.portal
+            and not FlaggedTask.objects.filter(
+                agency=foia.agency, category='agency new email'
+            ).exists()
+        ):
             FlaggedTask.objects.create(
                 agency=foia.agency,
                 category='agency new email',
