@@ -153,15 +153,6 @@ class AgencyAdmin(VersionAdmin):
         AgencyEmailInline,
         AgencyPhoneInline,
     )
-    # deprecated fields are set to read only
-    readonly_fields = (
-        'can_email_appeals',
-        'address',
-        'email',
-        'other_emails',
-        'phone',
-        'fax',
-    )
     fieldsets = ((
         None, {
             'fields': (

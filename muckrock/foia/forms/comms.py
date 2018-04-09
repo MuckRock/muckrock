@@ -99,23 +99,25 @@ class SendViaForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         initial = kwargs.pop('initial', {})
-        contact_info = kwargs.pop('contact_info', {})
-        for addr in ('portal', 'email', 'fax'):
-            if (
-                contact_info.get(addr)
-                or (self.foia and getattr(self.foia, addr))
-            ):
-                via = addr
-                break
+        via = 'snail'
+        if self.foia:
+            obj = self.foia
+            agency = self.foia.agency
+        elif self.agency:
+            obj = self.agency
+            agency = self.agency
         else:
-            via = 'snail'
+            obj = None
+            agency = None
+        if obj:
+            for addr in ('portal', 'email', 'fax'):
+                if getattr(obj, addr):
+                    via = addr
+                    break
         initial.update({
-            'via':
-                via,
-            'email':
-                contact_info.get('email') or (self.foia and self.foia.email),
-            'fax':
-                contact_info.get('fax') or (self.foia and self.foia.fax),
+            'via': via,
+            'email': obj and obj.email,
+            'fax': obj and obj.fax,
         })
         super(SendViaForm, self).__init__(*args, initial=initial, **kwargs)
         # create auto complete fields for creating new instances
@@ -132,7 +134,7 @@ class SendViaForm(forms.Form):
                 required=False,
             )
         # remove portal choice if the agency does not use a portal
-        if self.foia and self.foia.agency and not self.foia.agency.portal:
+        if agency and not agency.portal:
             self.fields['via'].choices = (
                 ('email', 'Email'),
                 ('fax', 'Fax'),
@@ -289,17 +291,23 @@ class ContactInfoForm(SendViaForm):
     other_fax = PhoneNumberField(required=False)
 
     def __init__(self, *args, **kwargs):
-        self.foia = kwargs.pop('foia')
+        self.foia = kwargs.pop('foia', None)
+        self.agency = kwargs.pop('agency', None)
         super(ContactInfoForm, self).__init__(*args, **kwargs)
-        self.fields['email'].queryset = self.foia.agency.emails.filter(
-            status='good',
-        ).exclude(
-            email__endswith='muckrock.com',
-        ).distinct()
-        self.fields['fax'].queryset = self.foia.agency.phones.filter(
-            status='good',
-            type='fax',
-        ).distinct()
+        if self.agency:
+            agency = self.agency
+        elif self.foia:
+            agency = self.foia.agency
+        else:
+            agency = None
+        if agency:
+            self.fields['email'].queryset = agency.emails.filter(
+                status='good',
+            ).exclude(email__endswith='muckrock.com').distinct()
+            self.fields['fax'].queryset = agency.phones.filter(
+                status='good',
+                type='fax',
+            ).distinct()
 
     def clean(self):
         """Make other fields required if chosen"""

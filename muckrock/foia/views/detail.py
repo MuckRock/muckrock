@@ -236,17 +236,7 @@ class Detail(DetailView):
             instance=foia
         )
         context['tracking_id_form'] = TrackingNumberForm()
-        contact_info = {
-            'portal': foia.portal,
-            'email': foia.email,
-            'cc_emails': foia.cc_emails.all(),
-            'fax': foia.fax,
-            'address': foia.address,
-        }
-        context['contact_info_form'] = ContactInfoForm(
-            foia=foia,
-            contact_info=contact_info,
-        )
+        context['contact_info_form'] = ContactInfoForm(foia=foia)
 
         if user_can_edit or user.is_staff:
             all_tasks = Task.objects.filter_by_foia(foia, user)
