@@ -165,7 +165,7 @@ class BaseComposerForm(forms.ModelForm):
         return cleaned_data
 
 
-class ComposerForm(BuyRequestForm, BaseComposerForm):
+class ComposerForm(ContactInfoForm, BuyRequestForm, BaseComposerForm):
     """Composer form, including optional subforms"""
 
     def __init__(self, *args, **kwargs):

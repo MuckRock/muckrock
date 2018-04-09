@@ -190,14 +190,6 @@ class Agency(models.Model, RequestHelper):
     exempt = models.BooleanField(default=False)
     requires_proxy = models.BooleanField(default=False)
 
-    # Depreacted fields
-    can_email_appeals = models.BooleanField(default=False)
-    address = models.TextField(blank=True)
-    email = models.EmailField(blank=True)
-    other_emails = fields.EmailsListField(blank=True, max_length=255)
-    phone = models.CharField(blank=True, max_length=30)
-    fax = models.CharField(blank=True, max_length=30)
-
     objects = AgencyQuerySet.as_manager()
 
     def __unicode__(self):
@@ -375,6 +367,26 @@ class Agency(models.Model, RequestHelper):
                 }
         else:
             return {'proxy': False, 'missing_proxy': False}
+
+    @property
+    def email(self):
+        """The main email"""
+        return self.get_emails('primary', 'to').first()
+
+    @property
+    def other_emails(self):
+        """The cc emails"""
+        return self.get_emails('primary', 'cc')
+
+    @property
+    def fax(self):
+        """The primary fax"""
+        return self.get_faxes('primary').first()
+
+    @property
+    def address(self):
+        """The primary address"""
+        return self.get_addresses('primary').first()
 
     class Meta:
         verbose_name_plural = 'agencies'

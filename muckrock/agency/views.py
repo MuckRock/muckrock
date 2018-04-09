@@ -177,6 +177,7 @@ class AgencyViewSet(viewsets.ModelViewSet):
 
 def similar(request):
     """Return agencies with similar names"""
+    # XXX this is currently unused
     query = request.GET.get('query', '')
     jurisdiction_id = request.GET.get('jurisdiction')
     if jurisdiction_id == 'f':
@@ -237,4 +238,29 @@ def boilerplate(request):
     return JsonResponse({
         'intro': linebreaks(intro.strip()),
         'outro': linebreaks(outro.strip()),
+    })
+
+
+def contact_info(request, idx):
+    """Return the agencies contact info"""
+    if request.user.is_anonymous or not request.user.profile.is_advanced():
+        return JsonResponse({'error': 'Permission Denied'}, status_code=403)
+    agency = get_object_or_404(Agency, pk=idx)
+    return JsonResponse({
+        'portal': {
+            'type': agency.portal.get_type_display(),
+            'url': agency.url
+        } if agency.portal else None,
+        'emails':
+            agency.emails.filter(status='good')
+            .exclude(email__endswith='muckrock'.com),
+        'faxes':
+            agency.faxes.filter(status='good', type='fax'),
+        'email':
+            unicode(agency.email),
+        'cc_emails': [unicode(e) for e in agency.other_emails],
+        'fax':
+            unicode(agency.fax),
+        'address':
+            unicode(agency.address),
     })
