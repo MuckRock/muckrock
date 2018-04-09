@@ -312,7 +312,7 @@ $(document).ready(function(){
       error: function() {
         // Now show them we saved and when we did
         $(".form-status-holder").text("Error");
-      },
+      }
     });
   }
 
