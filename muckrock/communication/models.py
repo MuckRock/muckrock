@@ -205,16 +205,26 @@ class Address(models.Model):
     address = models.TextField(blank=True)
 
     def __unicode__(self):
-        if self.street:
-            if self.suite:
-                street = u'{}, {}'.format(self.street, self.suite)
-            else:
-                street = self.street
-            address = u'{}, {}, {} {}'.format(
-                street,
+        if self.zip_code:
+            address = u'{}, {} {}'.format(
                 self.city,
                 self.state,
                 self.zip_code,
+            )
+            if self.street and self.suite:
+                street = u'{}, {}'.format(self.street, self.suite)
+            elif self.street:
+                street = self.street
+            elif self.attn_override:
+                street = self.attn_override
+            elif self.agency_override:
+                street = self.agency_override
+            else:
+                return address
+
+            address = u'{}, {}'.format(
+                street,
+                address,
             )
             return address
         else:
@@ -224,7 +234,7 @@ class Address(models.Model):
         """Format an address for mailing"""
         # if we do not have address components use the
         # full address override
-        if not self.street:
+        if not self.zip_code:
             return self.address
 
         # otherwise we build the address line by line
@@ -250,7 +260,8 @@ class Address(models.Model):
             )
         if self.suite:
             address.append(self.suite)
-        address.append(self.street)
+        if self.street:
+            address.append(self.street)
         address.append(
             u'{}, {} {}'.format(
                 self.city,
