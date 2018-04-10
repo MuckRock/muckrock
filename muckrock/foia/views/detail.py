@@ -483,11 +483,11 @@ class Detail(DetailView):
         has_contact_perm = (
             request.user.is_authenticated and request.user.profile.is_advanced()
         )
+        contact_valid = contact_info_form.is_valid()
         use_contact_info = (
             has_contact_perm
-            and request.POST.get('use_contact_information') == 'true'
+            and contact_info_form.cleaned_data.get('use_contact_information')
         )
-        contact_valid = contact_info_form.is_valid()
         comm_sent = self._new_comm(
             request,
             foia,

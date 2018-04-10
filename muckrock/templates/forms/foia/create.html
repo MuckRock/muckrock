@@ -165,6 +165,27 @@
               </span>
             </div>
 
+            <div class="contact-info">
+              <a class="see-where" href="#">See where this request will be sent</a>
+              <div class="info">
+                This request <span></span>
+                {% if user.profile.is_advanced %}
+                  <p><a href="#" class="change">Not where this needs to go?</a></p>
+                {% endif %}
+              </div>
+              {% if user.profile.is_advanced %}
+                <div class="form">
+                  {{ form.use_contact_information }}
+                  {% include "lib/pattern/field.html" with field=form.via only %}
+                  {% include "lib/pattern/field.html" with field=form.email only %}
+                  {% include "lib/pattern/field.html" with field=form.other_email only %}
+                  {% include "lib/pattern/field.html" with field=form.fax only %}
+                  {% include "lib/pattern/field.html" with field=form.other_fax only %}
+                  <a href="#" class="cancel">Cancel</a>
+                </div>
+              {% endif %}
+            </div>
+
             <div class="button-group">
               <button type="button" class="button" id="save_button">
                 Save

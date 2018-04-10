@@ -185,15 +185,15 @@ $color-embargo: $color-agency;
       .button-group {
         width: 100%;
       }
-      #id_num_requests {
-        max-width: 150px;
-      }
-      .field {
-        margin-right:30px;
-        float: left;
-      }
       .buy-request-form {
         display: flex;
+        #id_num_requests {
+          max-width: 150px;
+        }
+        .field {
+          margin-right:30px;
+          float: left;
+        }
       }
     }
 

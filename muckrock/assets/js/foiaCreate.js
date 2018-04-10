@@ -6,13 +6,13 @@
  */
 
 import modal from './modal';
+import showOrigContactInfo from './foiaRequest';
 
 $(document).ready(function(){
 
   var agencyField = $('fieldset.agencies');
   var agencyInput = agencyField.find('input');
   var agencyWidget = agencyField.find('.autocomplete-light-widget');
-  var agencySelect = agencyWidget.find('select');
 
   function updateRequestCount(num) {
     var requestsLeft = $(".requests-left"),
@@ -79,6 +79,16 @@ $(document).ready(function(){
     $(".using-requests").html(text);
   }
 
+  function setContactInfoOptions(select, options) {
+    select.find('option').remove();
+    for(var i = 0; i < options.length; i++) {
+      select.append(
+        $("<option>").attr("value", options[i].value).text(options[i].display)
+      );
+    }
+    select.append($("<option>").text("Other..."));
+  }
+
   $("#id_num_requests").change(function(){
     var bulkPrice = $(".buy-request-form").data("bulk-price");
     var num = $(this).val();
@@ -97,13 +107,13 @@ $(document).ready(function(){
   agencyWidget.on("widgetSelectChoice widgetDeselectChoice", function(){
     // get boilerplate language for selected agencies
     $.ajax({
-      url: '/agency/boilerplate/',
+      url: "/agency/boilerplate/",
       data: {
         agencies: agencyField.find(".deck > .choice").map(function(){
           return $(this).data("value");
         }).get()
       },
-      type: 'get',
+      type: "get",
       success: function(data) {
         $(".document-boilerplate.intro").html(data.intro);
         $(".document-boilerplate.outro").html(data.outro);
@@ -129,75 +139,43 @@ $(document).ready(function(){
       $("#submit_help").text("");
     }
 
-  });
-  agencyWidget.trigger("widgetSelectChoice");
-
-  // secondary agency fuzzy matching
-  // XXX redo this
-  $("foo form.create-request").submit(function(e){
-    // if a real agency is not selected, prevent the submit and
-    // help the user try and find a suitable replacement
-    if (agencySelect.val().length === 0) {
-      e.preventDefault();
-
-      // send whatever is typed in to the text box to an agency fuzzy matcher
+    // handle contact info
+    if (requestCount === 1) {
       $.ajax({
-        url: '/agency/similar/',
-        data: {
-          query: agencyInput.val()
-          // jurisdiction: getJurisdiction()
-        },
+        url: "/agency/contact-info/" + agencyField.find(".deck > .choice").data("value") + "/",
         type: 'get',
         success: function(data) {
-          // if there was an exact match, just chose that
-          if (data.hasOwnProperty('exact')) {
-            agencySelect.append($("<option>", data.exact));
-            agencySelect.val(data.exact.value);
-            $("form.create-request").off("submit");
-            $("form.create-request").submit();
-            return;
+          if (data.type) {
+            $(".contact-info .info").data("type", data.type);
+          } else {
+            if (data.portal) {
+              $(".contact-info .info").data("portal-type", data.portal.type);
+              $(".contact-info .info").data("portal-url", data.portal.url);
+              if ($("#id_via option[value='portal']").length === 0) {
+                $("#id_via").prepend("<option value=\"portal\">Portal</option>");
+              }
+            } else {
+              $("#id_via option[value='portal']").remove();
+            }
+            $(".contact-info .info").data("email", data.email);
+            $(".contact-info .info").data("cc-emails", data.cc_emails);
+            $(".contact-info .info").data("fax", data.fax);
+            $(".contact-info .info").data("address", data.address);
+            setContactInfoOptions($("#id_email"), data.emails);
+            setContactInfoOptions($("#id_fax"), data.faxes);
           }
-          length = data.suggestions.length;
-          // no suggestions, just submit as is
-          if (length === 0) {
-            $("form.create-request").off("submit");
-            $("form.create-request").submit();
-            return;
-          }
-          // there are suggestions, display a modal asking the user if they meant
-          // one of the suggested agencies
-          $("#similar-agency-modal h1").text(
-              "The \"" + agencyInput.val() + "\" isn't in our database yet.");
-          modal($("#similar-agency-modal"));
-          $("#replacement-agency").children().remove();
-          for (var i = 0; i < length; i++) {
-            $("#replacement-agency").append($("<option>", data.suggestions[i]));
-          }
-        },
-        error: function() {
-          $("#submit_help").text("Sorry, there was an error submitting this form.  Please try again later, or contact us if the eror continues.");
+          showOrigContactInfo();
+          $(".contact-info #use_contact_information").val(true);
+          $(".contact-info").show();
         }
       });
-    }
-  });
-
-  $("#new-agency-button").click(function() {
-    // The new agency button continues with the new agency - just submit the form as is
-    $("form.create-request").off("submit");
-    $("form.create-request").submit();
-  });
-
-  $("#replacement-agency-button").click(function() {
-    // The replacement agency button selects a replacement agency
-    if ($("#replacement-agency option:selected").length === 0) {
-      $("#similar-agency-modal .error").text("Please select a replacement agency.");
     } else {
-      agencySelect.append($("#replacement-agency option:selected").clone());
-      agencySelect.val($("#replacement-agency").val());
-      $("form.create-request").off("submit");
-      $("form.create-request").submit();
+      $(".contact-info #use_contact_information").val(false);
+      $(".contact-info").hide();
     }
+
   });
+  agencyWidget.trigger("widgetSelectChoice");
 
   $("form.create-request").submit(function(e){
     var email_regex = /\w+@\w+.\w+/;

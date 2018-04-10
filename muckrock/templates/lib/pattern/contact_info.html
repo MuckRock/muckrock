@@ -4,7 +4,22 @@
   {% if is_advanced %}
     data-portal-type="{{ portal_data.get_type_display }}"
     data-portal-url="{{ portal_data.url }}"
+    data-email="{% if email.status == "good" %}{{ email }}{% endif %}"
+    data-cc-emails="{{ cc_emails }}"
+    data-fax="{% if fax.status == "good" %}{{ fax }}{% endif %}"
     data-address="{{ address }}"
+  {% else %}
+    {% if portal %}
+      data-type="portal"
+    {% elif email %}
+      data-type="email"
+    {% elif fax %}
+      data-type="fax"
+    {% elif address %}
+      data-type="adress"
+    {% else %}
+      data-type="none"
+    {% endif %}
   {% endif %}
   >
   This {{ subject }}
@@ -54,7 +69,6 @@
 
 {% if is_advanced %}
   <div class="form">
-    <input type="hidden" id="use_contact_information" name="use_contact_information" value="false">
     {% include "lib/pattern/form.html" %}
     <a href="#" class="cancel">Cancel</a>
   </div>

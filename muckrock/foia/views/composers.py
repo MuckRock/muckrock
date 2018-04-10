@@ -26,6 +26,7 @@ from muckrock.accounts.mixins import BuyRequestsMixin, MiniregMixin
 from muckrock.agency.models import Agency
 from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.foia.forms import (
+    BaseComposerForm,
     ComposerForm,
     ContactInfoForm,
     MultiRequestDraftForm,
@@ -74,10 +75,23 @@ class GenericComposer(BuyRequestsMixin):
         })
         return context
 
-    def _submit_composer(self, composer):
-        """Submit a composer with error handling"""
+    def _submit_composer(self, composer, form):
+        """Submit a composer"""
+        if form.cleaned_data.get('num_requests', 0) > 0:
+            self.buy_requests(form)
+        if (
+            form.cleaned_data.get('use_contact_information')
+            and self.request.user.profile.is_advanced()
+            and len(composer.agencies.all()) == 1
+        ):
+            contact_info = {
+                k: form.cleaned_data.get(k)
+                for k in ContactInfoForm.base_fields
+            }
+        else:
+            contact_info = None
         try:
-            composer.submit()
+            composer.submit(contact_info)
         except InsufficientRequestsError:
             messages.warning(self.request, 'You need to purchase more requests')
         else:
@@ -164,9 +178,7 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
             self.request.session['ga'] = 'request_drafted'
             messages.success(self.request, 'Request saved')
         elif form.cleaned_data['action'] == 'submit':
-            if form.cleaned_data.get('num_requests', 0) > 0:
-                self.buy_requests(form)
-            self._submit_composer(composer)
+            self._submit_composer(composer, form)
         return redirect(composer)
 
 
@@ -202,9 +214,7 @@ class UpdateComposer(LoginRequiredMixin, GenericComposer, UpdateView):
             messages.success(self.request, 'Request saved')
         elif form.cleaned_data['action'] == 'submit':
             composer = form.save()
-            if form.cleaned_data.get('num_requests', 0) > 0:
-                self.buy_requests(form)
-            self._submit_composer(composer)
+            self._submit_composer(composer, form)
         return redirect(composer)
 
 
@@ -219,11 +229,9 @@ def autosave(request, idx):
         user=request.user,
     )
     data = request.POST.copy()
-    # never attempt to buy requests from autosaver
-    data['num_requests'] = None
     # we are always just saving
     data['action'] = 'save'
-    form = ComposerForm(data, instance=composer, user=request.user)
+    form = BaseComposerForm(data, instance=composer, user=request.user)
     if form.is_valid():
         form.save()
         return HttpResponse('OK')

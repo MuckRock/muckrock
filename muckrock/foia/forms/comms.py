@@ -146,9 +146,9 @@ class SendViaForm(forms.Form):
         corresponding information is provided"""
 
         cleaned_data = super(SendViaForm, self).clean()
-        if cleaned_data.get('via') == 'email' and not cleaned_data['email']:
+        if cleaned_data.get('via') == 'email' and not cleaned_data.get('email'):
             self._clean_email(cleaned_data)
-        elif cleaned_data.get('via') == 'fax' and not cleaned_data['fax']:
+        elif cleaned_data.get('via') == 'fax' and not cleaned_data.get('fax'):
             self._clean_fax(cleaned_data)
         return cleaned_data
 
@@ -289,11 +289,17 @@ class ContactInfoForm(SendViaForm):
         empty_label='Other...',
     )
     other_fax = PhoneNumberField(required=False)
+    use_contact_information = forms.BooleanField(
+        widget=forms.HiddenInput(),
+        default=False,
+        required=False,
+    )
 
     def __init__(self, *args, **kwargs):
         self.foia = kwargs.pop('foia', None)
         self.agency = kwargs.pop('agency', None)
         super(ContactInfoForm, self).__init__(*args, **kwargs)
+        self.fields['via'].required = False
         if self.agency:
             agency = self.agency
         elif self.foia:
@@ -312,6 +318,10 @@ class ContactInfoForm(SendViaForm):
     def clean(self):
         """Make other fields required if chosen"""
         cleaned_data = super(ContactInfoForm, self).clean()
+        if not cleaned_data.get('use_contact_information'):
+            return cleaned_data
+        if not cleaned_data.get('via'):
+            self.add_error('via', 'This field is required')
         if (
             cleaned_data.get('via') == 'email'
             and not cleaned_data.get('email')

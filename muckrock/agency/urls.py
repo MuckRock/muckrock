@@ -38,4 +38,9 @@ urlpatterns = [
         views.boilerplate,
         name='agency-boilerplate',
     ),
+    url(
+        r'^contact-info/(?P<idx>\d+)/$',
+        views.contact_info,
+        name='agency-contact-info',
+    ),
 ]
