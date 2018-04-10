@@ -230,6 +230,7 @@ $(document).ready(function(){
   });
 
   $("#id_edited_boilerplate").change(function(){
+    var textArea = $("form.create-request .requested_docs textarea");
     if (this.checked) {
       var requestedDocs = $("#id_requested_docs").val();
       var newText = "To Whom It May Concern:\n\nPursuant to the { law name }, " +
@@ -248,17 +249,32 @@ $(document).ready(function(){
         "{ name }";
       $("#id_requested_docs").val(newText);
       $("form.create-request").addClass("edited-boilerplate");
+      textArea.height(textArea[0].scrollHeight);
     } else {
       $("form.create-request").removeClass("edited-boilerplate");
+      textArea.height("10em");
     }
   });
 
+  // Autosaving
   // https://stackoverflow.com/questions/19910843/autosave-input-boxs-to-database-during-pause-in-typing
-	var timeoutId;
+	var timeoutId, hiddenId;
   var composerPk = $("form.create-request").data("composer-pk");
 
+  function changeText(text, error) {
+    clearTimeout(hiddenId);
+    $(".form-status-holder").text(text).removeClass("hidden");
+    if (error) {
+      $(".form-status-holder").addClass("error");
+    } else {
+      $(".form-status-holder").removeClass("error");
+    }
+    hiddenId = setTimeout(function(){$(".form-status-holder").addClass("hidden");}, 2000);
+  }
+  changeText("Autosave Enabled");
+
   function changeHandler() {
-    $(".form-status-holder").text("Unsaved");
+    changeText("Unsaved");
     clearTimeout(timeoutId);
     timeoutId = setTimeout(function() {
       // Runs 1 second (1000 ms) after the last change
@@ -280,16 +296,16 @@ $(document).ready(function(){
       data: form.serialize(), // serializes the form's elements.
       beforeSend: function() {
         // Let them know we are saving
-        $(".form-status-holder").text("Saving...");
+        changeText("Saving Changes...");
       },
       success: function() {
-        // Now show them we saved and when we did
-        var d = new Date();
-        $(".form-status-holder").text("Saved! Last: " + d.toLocaleTimeString());
+        // Now show them we saved
+        changeText("Draft Saved");
+        setTimeout(function(){$(".form-status-holder").addClass("hidden");}, 2000)
       },
       error: function() {
-        // Now show them we saved and when we did
-        $(".form-status-holder").text("Error");
+        // Now show them there was an error
+        changeText("Changes Not Saved", true);
       }
     });
   }

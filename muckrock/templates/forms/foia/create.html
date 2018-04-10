@@ -36,7 +36,7 @@
         {% endif %}
       </header>
       {% if composer %}
-        <div class="form-status-holder badge">Autosave enabled</div>
+        <div class="form-status-holder badge hidden">Autosave enabled</div>
       {% endif %}
       {% if form.non_field_errors or form.errors %}
         <div class="error message">
@@ -88,26 +88,39 @@
           <p>Sincerely,</p>
           <p>{{ user.get_full_name|default:"{ name }" }}</p>
         </div>
-        {% if user.is_authenticated %}
-          {% include "lib/pattern/new_request_field.html" with field=form.edited_boilerplate only %}
-        {% endif %}
-        {% if form.embargo %}
-          {% include "lib/pattern/new_request_field.html" with field=form.embargo only %}
-        {% else %}
-          <div class="no-embargo">
-            <p>This request will be filed publicly. Need to keep your request private?
-            <a href="{% url "accounts" %}">
-              Upgrade to a Pro or Organizational account
-            </a>
-            to embargo your request as long as you need to.</p>
-          </div>
-        {% endif %}
+        <div class="tags-explanation">
+          <p>Words in { brackets } are automatically replaced based on the agency and jurisdiction. You can use the following variables:</p>
+          <dl>
+            <dt>{ law name }</dt>
+            <dd>Inserts the full name of the relevant transparency law, i.e. Freedom of Information Act.</dd>
+            <dt>{ short name }</dt>
+            <dd>Inserts the abbreviation of the relevant transparency law, i.e., FOIA.</dd>
+            <dt>{ number of days }</dt>
+            <dd>Inserts the number of days the law permits before a response is required.</dd>
+            <dt>{ business or calendar }</dt>
+            <dd>Inserts whether the law counts weekends and other holidays in the above deadline.</dd>
+            <dt>{ name }</dt>
+            <dd>Inserts your name. Change that here.</dd>
+          </dl>
+        </div>
 
         {% if user.is_authenticated %}
-          <fieldset>
+          <fieldset class="advanced">
             <span class="toggle-advanced">&#9654; Advanced Options</span>
           </fieldset>
           <div class="advanced-container">
+            {% include "lib/pattern/new_request_field.html" with field=form.edited_boilerplate only %}
+            {% if form.embargo %}
+              {% include "lib/pattern/new_request_field.html" with field=form.embargo only %}
+            {% else %}
+              <div class="no-embargo">
+                <p>This request will be filed publicly. Need to keep your request private?
+                <a href="{% url "accounts" %}">
+                  Upgrade to a Pro or Organizational account
+                </a>
+                to embargo your request as long as you need to.</p>
+              </div>
+            {% endif %}
             {% include "lib/pattern/new_request_field.html" with field=form.tags only %}
             <fieldset class="attachments">
               <label class="bold">Attachments</label>
@@ -119,9 +132,10 @@
             </fieldset>
           </div>
         {% else %}
-          {% include "lib/pattern/new_request_field.html" with field=form.full_name only %}
-          {% include "lib/pattern/new_request_field.html" with field=form.email only %}
-          {% include "lib/pattern/new_request_field.html" with field=form.newsletter only %}
+          <hr class="nomargin">
+          {% include "lib/pattern/new_request_field.html" with field=form.register_full_name only %}
+          {% include "lib/pattern/new_request_field.html" with field=form.register_email only %}
+          {% include "lib/pattern/new_request_field.html" with field=form.register_newsletter only %}
         {% endif %}
 
         {% if user.is_authenticated %}
@@ -154,12 +168,15 @@
                 <p>
                   $5/request<br class="nomargin">
                   {% if user.profile.is_advanced %}
-                    <s>$4/request</s> $3/request if you buy 20 or more!
+                    <s>$4/request</s> $3/request if you buy 20 or more
                     <br class="nomargin">
-                    <em>Special price for pro users!</em>
+                    <em>Special price for pro users</em>
                   {% else %}
-                    $4/request if you buy 20 or more!
+                    $4/request if you buy 20 or more
                     <br class="nomargin">Minimum purchase of 4 requests
+                    <a href="{% url "accounts" %}">
+                      Upgrade to a Pro or Organizational account
+                    </a> for lower prices per request
                   {% endif %}
                 </p>
               </span>

@@ -1,6 +1,22 @@
 <span class="choice" data-value="{% if choice.pk %}{{ choice.pk }}{% else %}$new${{ choice.name }}${{ choice.jurisdiction_id }}${% endif %}">
-    <div class="choice__text">
-      <p class="nomargin">{{ choice.name }}{% if choice.exempt %} <span class="small red badge exempt">Exempt</span>{% endif %}{% if not choice.pk %} <span class="small green badge">New</span>{% endif %}{% if choice.status == "pending" %} <span class="small green badge">Pending</span>{% endif %}</p>
-        <p class="small grey nomargin">{{ choice.jurisdiction }}</p>
+  <div class="choice__text {% if not choice.pk %}selected-option{% endif %}">
+    <p class="nomargin">
+      {{ choice.name }}
+      {% if choice.exempt %}
+        <span class="small red badge exempt">Exempt</span>
+      {% endif %}
+      {% if choice.status == "pending" %}
+        <span class="small yellow badge">Pending</span>
+      {% endif %}
+    </p>
+    <p class="small grey nomargin">{{ choice.jurisdiction }}</p>
+  </div>
+  {% if not choice.pk %}
+    <div class="choice__text menu-option">
+      <p class="nomargin">
+        Can't find the agency?  Click to add "{{ choice.name }}"
+      </p>
+      <p class="small grey nomargin">Enter the agency name in the following format: Agency name, City, State or Agency Name, State</p>
     </div>
+  {% endif %}
 </span>

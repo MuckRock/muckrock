@@ -1152,6 +1152,7 @@ class FOIARequest(models.Model):
         """Create the initial request communication"""
         tags = [
             ('{ law name }', self.jurisdiction.get_law_name()),
+            ('{ short name }', self.jurisdiction.get_law_name(abbrev=True)),
             ('{ number of days }', self.jurisdiction.days or 10),
             ('{ business or calendar }', self.jurisdiction.get_day_type()),
             ('{ name }', from_user.get_full_name()),
