@@ -14,6 +14,7 @@ from autocomplete_light.contrib.taggit_field import TaggitField
 from muckrock.accounts.forms import BuyRequestForm
 from muckrock.agency.models import Agency
 from muckrock.foia.fields import ComposerAgencyField
+from muckrock.foia.forms.comms import ContactInfoForm
 from muckrock.foia.models import FOIAComposer, FOIAMultiRequest
 from muckrock.forms import TaggitWidget
 
@@ -84,9 +85,10 @@ class BaseComposerForm(forms.ModelForm):
         widget=forms.HiddenInput(),
     )
 
-    full_name = forms.CharField(label='Full Name or Handle (Public)')
-    email = forms.EmailField(max_length=75)
-    newsletter = forms.BooleanField(
+    # XXX this should be a sub form?
+    register_full_name = forms.CharField(label='Full Name or Handle (Public)')
+    register_email = forms.EmailField(max_length=75)
+    register_newsletter = forms.BooleanField(
         initial=True,
         required=False,
         label='Get MuckRock\'s weekly newsletter with '
@@ -103,9 +105,9 @@ class BaseComposerForm(forms.ModelForm):
             'embargo',
             'tags',
             'parent',
-            'full_name',
-            'email',
-            'newsletter',
+            'register_full_name',
+            'register_email',
+            'register_newsletter',
         ]
 
     def __init__(self, *args, **kwargs):
@@ -113,9 +115,9 @@ class BaseComposerForm(forms.ModelForm):
             self.user = kwargs.pop('user')
         super(BaseComposerForm, self).__init__(*args, **kwargs)
         if self.user.is_authenticated:
-            del self.fields['full_name']
-            del self.fields['email']
-            del self.fields['newsletter']
+            del self.fields['register_full_name']
+            del self.fields['register_email']
+            del self.fields['register_newsletter']
         if not self.user.has_perm('foia.embargo_foiarequest'):
             del self.fields['embargo']
         self.fields['parent'
@@ -125,9 +127,9 @@ class BaseComposerForm(forms.ModelForm):
             Agency.objects.get_approved_and_pending(self.user)
         )
 
-    def clean_email(self):
+    def clean_register_email(self):
         """Do a case insensitive uniqueness check"""
-        email = self.cleaned_data['email']
+        email = self.cleaned_data['register_email']
         if User.objects.filter(email__iexact=email).exists():
             raise forms.ValidationError(
                 'User with this email already exists. Please login first.'
@@ -153,7 +155,6 @@ class BaseComposerForm(forms.ModelForm):
 
     def clean(self):
         """Check cross field dependencies"""
-        # XXX should we try to have client side checks?
         cleaned_data = super(BaseComposerForm, self).clean()
         if cleaned_data.get('action') == 'submit':
             for field in ['title', 'requested_docs', 'agencies']:
@@ -170,12 +171,14 @@ class ComposerForm(ContactInfoForm, BuyRequestForm, BaseComposerForm):
 
     def __init__(self, *args, **kwargs):
         super(ComposerForm, self).__init__(*args, **kwargs)
+        # Make sub-form fields non-required
         self.fields['stripe_token'].required = False
         self.fields['stripe_email'].required = False
         self.fields['num_requests'].required = False
+        self.fields['via'].required = False
 
     def clean(self):
-        """Buy request fields are only required hwen buying requests"""
+        """Buy request fields are only required when buying requests"""
         cleaned_data = super(ComposerForm, self).clean()
         if cleaned_data.get('num_requests', 0) > 0:
             for field in ['stripe_token', 'stripe_email']:

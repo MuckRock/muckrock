@@ -243,24 +243,41 @@ def boilerplate(request):
 
 def contact_info(request, idx):
     """Return the agencies contact info"""
-    if request.user.is_anonymous or not request.user.profile.is_advanced():
-        return JsonResponse({'error': 'Permission Denied'}, status_code=403)
     agency = get_object_or_404(Agency, pk=idx)
-    return JsonResponse({
-        'portal': {
-            'type': agency.portal.get_type_display(),
-            'url': agency.url
-        } if agency.portal else None,
-        'emails':
-            agency.emails.filter(status='good')
-            .exclude(email__endswith='muckrock'.com),
-        'faxes':
-            agency.faxes.filter(status='good', type='fax'),
-        'email':
-            unicode(agency.email),
-        'cc_emails': [unicode(e) for e in agency.other_emails],
-        'fax':
-            unicode(agency.fax),
-        'address':
-            unicode(agency.address),
-    })
+    if request.user.is_anonymous or not request.user.profile.is_advanced():
+        if agency.portal:
+            type_ = 'portal'
+        elif agency.email:
+            type_ = 'email'
+        elif agency.fax:
+            type_ = 'fax'
+        elif agency.address:
+            type_ = 'snail'
+        else:
+            type_ = 'none'
+        return JsonResponse({'type': type_})
+    else:
+        return JsonResponse({
+            'portal': {
+                'type': agency.portal.get_type_display(),
+                'url': agency.url
+            } if agency.portal else None,
+            'emails': [{
+                'value': e.pk,
+                'display': unicode(e)
+            } for e in agency.emails.filter(status='good')
+                       .exclude(email__endswith='muckrock.com')],
+            'faxes': [{
+                'value': f.pk,
+                'display': unicode(f)
+            } for f in agency.phones.filter(status='good', type='fax')],
+            'email':
+                unicode(agency.email)
+                if agency.email and agency.email.status == 'good' else None,
+            'cc_emails': [unicode(e) for e in agency.other_emails],
+            'fax':
+                unicode(agency.fax)
+                if agency.fax and agency.fax.status == 'good' else None,
+            'address':
+                unicode(agency.address),
+        })

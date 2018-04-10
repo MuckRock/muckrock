@@ -86,9 +86,10 @@ class FOIAComposer(models.Model):
             }
         )
 
-    def submit(self):
+    def submit(self, contact_info=None):
         """Submit a composer to create the requests"""
         # TODO assuming only the owner can submit
+        # TODO get the contact info to the actual foia submit
         from muckrock.foia.tasks import approve_composer
 
         num_requests = self.agencies.count()
