@@ -217,14 +217,25 @@ def boilerplate(request):
         jurisdiction = jurisdictions.pop()
     else:
         jurisdiction = {
-            'get_law_name': '{ law name }',
-            'days': '{ number of days }',
-            'get_day_type': '{ business or calendar }',
+            'get_law_name':
+                '<abbr title="This will be replaced by the relevant '
+                'transparency law">{ law name }</abbr>',
+            'days':
+                '<abbr title="This will be replaced by the number of days '
+                'the law permits before a response is required">{ number of days }'
+                '</abbr>',
+            'get_day_type':
+                '<abbr title="This will be replaced by business or '
+                'calendar, depending on whether the law counts weekends and other '
+                'holidays in its deadline">{ business or calendar }</abbr>',
         }
     if request.user.is_authenticated:
         user_name = request.user.get_full_name()
     else:
-        user_name = '{ name }'
+        user_name = (
+            '<abbr title="This will be replaced by your full name">'
+            '{ name }</abbr>'
+        )
     split_token = '$split$'
     template = get_template('text/foia/request.txt')
     context = {

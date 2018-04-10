@@ -48,11 +48,12 @@ class BaseComposerForm(forms.ModelForm):
         widget=autocomplete_light.
         MultipleChoiceWidget('AgencyComposerAutocomplete'),
         required=False,
+        help_text='i.e., Police Department, Austin, TX or Office of the '
+        'Governor, Arkansas'
     )
     edited_boilerplate = forms.BooleanField(
         required=False,
-        label='Edit full language',
-        help_text='This is an advanced feature - you probably do not need this',
+        label='Edit Template Language',
     )
     embargo = forms.BooleanField(
         required=False,
@@ -175,7 +176,6 @@ class ComposerForm(ContactInfoForm, BuyRequestForm, BaseComposerForm):
         self.fields['stripe_token'].required = False
         self.fields['stripe_email'].required = False
         self.fields['num_requests'].required = False
-        self.fields['via'].required = False
 
     def clean(self):
         """Buy request fields are only required when buying requests"""

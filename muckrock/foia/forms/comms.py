@@ -291,7 +291,7 @@ class ContactInfoForm(SendViaForm):
     other_fax = PhoneNumberField(required=False)
     use_contact_information = forms.BooleanField(
         widget=forms.HiddenInput(),
-        default=False,
+        initial=False,
         required=False,
     )
 

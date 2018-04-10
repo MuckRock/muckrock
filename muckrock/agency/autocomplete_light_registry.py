@@ -70,7 +70,7 @@ class AgencyComposerAutocomplete(autocomplete_light.AutocompleteModelTemplate):
         '=jurisdiction__parent__abbrev',
     ]
     attrs = {
-        'placeholder': 'Search by agency or jurisdiction',
+        'placeholder': 'Agency\'s name, followed by location',
         'data-autocomplete-minimum-characters': 2,
     }
 
@@ -126,7 +126,7 @@ class AgencyComposerAutocomplete(autocomplete_light.AutocompleteModelTemplate):
             new_agency = Agency(
                 name=name,
                 jurisdiction=jurisdiction,
-                status='new',
+                status='pending',
             )
             return new_agency
         else:

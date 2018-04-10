@@ -104,3 +104,11 @@ input.autocomplete.xhr-pending { background-image: none; }
     width: 100%;
   }
 }
+
+.autocomplete-light-widget.yourlabs-autocomplete .choice__text.selected-option {
+  display: none;
+}
+
+.autocomplete-light-widget.agencies .choice__text.menu-option {
+  display: none;
+}
