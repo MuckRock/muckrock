@@ -229,7 +229,7 @@ $(document).ready(function(){
     $(this).closest("form").submit();
   });
 
-  $("#id_edited_boilerplate").change(function(){
+  $("#id_edited_boilerplate").change(function(e){
     var textArea = $("form.create-request .requested_docs textarea");
     if (this.checked) {
       var requestedDocs = $("#id_requested_docs").val();
@@ -250,9 +250,9 @@ $(document).ready(function(){
       $("#id_requested_docs").val(newText);
       $("form.create-request").addClass("edited-boilerplate");
       textArea.height(textArea[0].scrollHeight);
+      $(this).css("opacity", "0.5");
     } else {
-      $("form.create-request").removeClass("edited-boilerplate");
-      textArea.height("10em");
+      $(this).prop("checked", "checked");
     }
   });
 
