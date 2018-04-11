@@ -626,7 +626,6 @@ class ComposerList(MRSearchFilterListView):
         'date_created': 'datetime_created',
         'date_submitted': 'datetime_submitted',
     }
-    context_object_name = 'composer'
 
     def get_queryset(self):
         """Only show the current user's composers"""
