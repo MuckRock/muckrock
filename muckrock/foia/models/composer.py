@@ -41,7 +41,7 @@ class FOIAComposer(models.Model):
     agencies = models.ManyToManyField('agency.Agency', related_name='composers')
     requested_docs = models.TextField(blank=True)
     edited_boilerplate = models.BooleanField(default=False)
-    datetime_created = models.DateTimeField(default=timezone.now)
+    datetime_created = models.DateTimeField(default=timezone.now, db_index=True)
     datetime_submitted = models.DateTimeField(
         blank=True,
         null=True,

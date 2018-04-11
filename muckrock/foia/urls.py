@@ -47,6 +47,11 @@ urlpatterns = [
         views.ProcessingRequestList.as_view(),
         name='foia-list-processing',
     ),
+    url(
+        r'^mylist/drafts/$',
+        views.ComposerList.as_view(),
+        name='foia-mylist-drafts',
+    ),
     # XXX new list views
     # - List of all (composer) drafts
     # - List of all composers that have multiple requests?

@@ -17,7 +17,8 @@ from autocomplete_light import shortcuts as autocomplete_light
 # MuckRock
 from muckrock.agency.models import Agency
 from muckrock.filters import BLANK_STATUS, NULL_BOOLEAN_CHOICES, RangeWidget
-from muckrock.foia.models import FOIAMultiRequest, FOIARequest
+from muckrock.foia.models import FOIAComposer, FOIAMultiRequest, FOIARequest
+from muckrock.foia.models.composer import STATUS as COMPOSER_STATUS
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag
 
@@ -217,3 +218,12 @@ class AgencyFOIARequestFilterSet(django_filters.FilterSet):
     class Meta:
         model = FOIARequest
         fields = ['user']
+
+
+class ComposerFilterSet(django_filters.FilterSet):
+    """Filters for composers"""
+    status = django_filters.ChoiceFilter(choices=COMPOSER_STATUS)
+
+    class Meta:
+        model = FOIAComposer
+        fields = ['status']

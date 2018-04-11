@@ -29,6 +29,7 @@ from muckrock.agency.models import Agency
 from muckrock.crowdsource.forms import CrowdsourceChoiceForm
 from muckrock.foia.filters import (
     AgencyFOIARequestFilterSet,
+    ComposerFilterSet,
     FOIARequestFilterSet,
     MyFOIAMultiRequestFilterSet,
     MyFOIARequestFilterSet,
@@ -41,6 +42,7 @@ from muckrock.foia.forms import (
 )
 from muckrock.foia.models import (
     END_STATUS,
+    FOIAComposer,
     FOIAMultiRequest,
     FOIARequest,
     FOIASavedSearch,
@@ -607,4 +609,28 @@ class ProcessingRequestList(RequestList):
         objects = super(ProcessingRequestList, self).get_queryset()
         return objects.prefetch_related('communications').filter(
             status='submitted'
+        )
+
+
+@class_view_decorator(login_required)
+class ComposerList(MRSearchFilterListView):
+    """List to view your composers"""
+    model = FOIAComposer
+    title = 'Your Drafts'
+    filter_class = ComposerFilterSet
+    template_name = 'foia/composer_list.html'
+    default_sort = 'datetime_created'
+    default_order = 'desc'
+    sort_map = {
+        'title': 'title',
+        'date_created': 'datetime_created',
+        'date_submitted': 'datetime_submitted',
+    }
+    context_object_name = 'composer'
+
+    def get_queryset(self):
+        """Only show the current user's composers"""
+        return (
+            super(ComposerList, self).get_queryset()
+            .filter(user=self.request.user)
         )
