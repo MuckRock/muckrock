@@ -86,7 +86,7 @@ $(document).ready(function(){
         $("<option>").attr("value", options[i].value).text(options[i].display)
       );
     }
-    select.append($("<option>").text("Other..."));
+    select.append($("<option value=\"\">").text("Other..."));
   }
 
   $("#id_num_requests").change(function(){
@@ -166,11 +166,15 @@ $(document).ready(function(){
           }
           showOrigContactInfo();
           $(".contact-info #use_contact_information").val(true);
+          $("#id_email").prop("disabled", "");
+          $("#id_fax").prop("disabled", "");
           $(".contact-info").show();
         }
       });
     } else {
       $(".contact-info #use_contact_information").val(false);
+      $("#id_email").prop("disabled", "disabled");
+      $("#id_fax").prop("disabled", "disabled");
       $(".contact-info").hide();
     }
 

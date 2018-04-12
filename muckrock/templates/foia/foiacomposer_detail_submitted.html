@@ -17,7 +17,7 @@
         <summary class="synopsis">
           <a href="{% url 'acct-profile' composer.user.username %}">
             {{ composer.user.get_full_name }}
-          </a> filed this request
+          </a> is filing this request
           {% if composer.agencies.all|length == 1 %}
             {% with composer.agencies.all.0 as agency %}
               with the {{ agency.link_display }} of
@@ -34,25 +34,25 @@
                  title="{{ agency.jurisdiction.parent.name }}"
                  >
                  {{ agency.jurisdiction.parent.abbrev }}
-                </a>
+                </a>.
               {% endif %}
             {% endwith %}
           {% else %}
             with
             {% for agency in composer.agencies.all %}
               {% if forloop.last %}
-                and {{ agency.link_display }}
+                and {{ agency.link_display }}.
               {% elif forloop.revcounter == 2 %}
                 {{ agency.link_display }}
               {% else %}
                 {{ agency.link_display }},
               {% endif %}
             {% endfor %}
-          {% endif %}.
+          {% endif %}
         </summary>
         {% if composer.parent %}
           <p>It is a clone of
-            <a href="{{ foia.parent.get_absolute_url }}">this request</a>.
+            <a href="{{ composer.parent.get_absolute_url }}">this request</a>.
           </p>
         {% endif %}
       </section>
@@ -67,27 +67,37 @@
             <td class="date">{{ composer.datetime_submitted|date }}</td>
           </tr>
         </table>
+        {% if composer.embargo %}
+          <p>
+            This request is embargoed.  Only you will be able to view it until
+            30 days after it has been completed.  After it has been completed,
+            you will be able to extend this deadline if necessary.
+          </p>
+        {% else %}
+          <p>This request is being made publically.</p>
+        {% endif %}
+        {% if composer.tags.all %}
+          <p>Tags:</p>
+          <p>
+            {% for tag in composer.tags.all %}
+              {{ tag }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+          </p>
+        {% endif %}
       </section>
     </section>
   <main class="request main grid__column three-quarters">
 
-    {# actions go here #}
-
     <!-- COMMUNICATIONS -->
     <section class="communications" id="comms">
-      <h2>Communications</h2>
-      <div class="communications-controls">
-        <div class="communications filter">
-          <input id="comms-filter" type="search" placeholder="Filter communications" />
-        </div>
-        <button class="button" id="toggle-communication-collapse" data-state="0">Collapse All</button>
-      </div>
+      <p><a href="#" class="primary button">Edit Request</a></p>
+      <p>
+        Thank you for submitting this request.  Please review it now.
+        You will have 30 minutes after submitting it in order to make any
+        changes before it is sent to the agency.
+      </p>
       <div class="communications-list">
-        {% with foia_url=foia.get_absolute_url %}
-          {% for comm in foia.communications.all %}
-            {% include 'foia/communication.html' with communication=comm %}
-          {% endfor %}
-        {% endwith %}
+        {% include 'foia/communication.html' with communication=communication hide_options=True %}
       </div>
     </section>
 

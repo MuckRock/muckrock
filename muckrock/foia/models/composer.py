@@ -61,6 +61,9 @@ class FOIAComposer(models.Model):
     num_monthly_requests = models.PositiveSmallIntegerField(default=0)
     num_reg_requests = models.PositiveSmallIntegerField(default=0)
 
+    # for delayed submission
+    # delayed_id = models.CharField(blank=True, max_length=255)
+
     objects = FOIAComposerQuerySet.as_manager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
 

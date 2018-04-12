@@ -32,6 +32,7 @@ from taggit.managers import TaggableManager
 # MuckRock
 from muckrock import task, utils
 from muckrock.accounts.models import Notification
+from muckrock.agency.utils import initial_communication_template
 from muckrock.communication.models import EmailAddress, EmailCommunication
 from muckrock.foia.querysets import FOIARequestQuerySet
 from muckrock.tags.models import Tag, TaggedItemBase, parse_tags
@@ -1146,26 +1147,13 @@ class FOIARequest(models.Model):
 
     def create_initial_communication(self, from_user, proxy):
         """Create the initial request communication"""
-        tags = [
-            ('{ law name }', self.jurisdiction.get_law_name()),
-            ('{ short name }', self.jurisdiction.get_law_name(abbrev=True)),
-            ('{ number of days }', self.jurisdiction.days or 10),
-            ('{ business or calendar }', self.jurisdiction.get_day_type()),
-            ('{ name }', from_user.get_full_name()),
-        ]
-        if self.composer.edited_boilerplate:
-            text = smart_text(self.composer.requested_docs)
-            for tag, replace in tags:
-                text = text.replace(tag, unicode(replace))
-        else:
-            template = get_template('text/foia/request.txt')
-            context = {
-                'requested_docs': smart_text(self.composer.requested_docs),
-                'jurisdiction': self.jurisdiction,
-                'user_name': from_user.get_full_name(),
-                'proxy': proxy,
-            }
-            text = template.render(context).strip()
+        text = initial_communication_template(
+            [self.agency],
+            from_user.get_full_name(),
+            self.composer.requested_docs,
+            self.composer.edited_boilerplate,
+            proxy,
+        )
         comm = self.communications.create(
             from_user=from_user,
             to_user=self.get_to_user(),

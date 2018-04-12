@@ -19,6 +19,7 @@ from rest_framework import viewsets
 from muckrock.agency.filters import AgencyFilterSet
 from muckrock.agency.models import Agency
 from muckrock.agency.serializers import AgencySerializer
+from muckrock.agency.utils import initial_communication_template
 from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.views import collect_stats
@@ -212,23 +213,6 @@ def boilerplate(request):
     """Return the boilerplate language for requests to the given agency"""
 
     agencies = Agency.objects.filter(pk__in=request.GET.getlist('agencies'))
-    jurisdictions = set(a.jurisdiction.legal for a in agencies)
-    if len(jurisdictions) == 1:
-        jurisdiction = jurisdictions.pop()
-    else:
-        jurisdiction = {
-            'get_law_name':
-                '<abbr title="This will be replaced by the relevant '
-                'transparency law">{ law name }</abbr>',
-            'days':
-                '<abbr title="This will be replaced by the number of days '
-                'the law permits before a response is required">{ number of days }'
-                '</abbr>',
-            'get_day_type':
-                '<abbr title="This will be replaced by business or '
-                'calendar, depending on whether the law counts weekends and other '
-                'holidays in its deadline">{ business or calendar }</abbr>',
-        }
     if request.user.is_authenticated:
         user_name = request.user.get_full_name()
     else:
@@ -237,14 +221,13 @@ def boilerplate(request):
             '{ name }</abbr>'
         )
     split_token = '$split$'
-    template = get_template('text/foia/request.txt')
-    context = {
-        'requested_docs': split_token,
-        'jurisdiction': jurisdiction,
-        'user_name': user_name,
-        'proxy': False,
-    }
-    text = template.render(context)
+    text = initial_communication_template(
+        agencies,
+        user_name,
+        split_token,
+        edited_boilerplate=False,
+        proxy=False,
+    )
     intro, outro = text.split(split_token)
     return JsonResponse({
         'intro': linebreaks(intro.strip()),
