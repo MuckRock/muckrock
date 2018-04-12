@@ -170,16 +170,19 @@ def detail(request, fed_slug, state_slug, local_slug):
         agencies = jurisdiction.agencies
     agencies = (
         agencies.get_approved().only('pk', 'slug', 'name', 'jurisdiction')
-        .annotate(foia_count=Count('foiarequest', distinct=True))
-        .annotate(pages=Sum('foiarequest__communications__files__pages'))
+        .annotate(foia_count=Count('foias', distinct=True))
+        .annotate(pages=Sum('foias__communications__files__pages'))
         .order_by('-foia_count')[:10]
     )
 
-    _children = Jurisdiction.objects.filter(parent=jurisdiction
-                                            ).select_related('parent__parent')
+    _children = (
+        Jurisdiction.objects.filter(parent=jurisdiction)
+        .select_related('parent__parent')
+    )
     _top_children = (
-        _children.annotate(foia_count=Count('foiarequest', distinct=True))
-        .annotate(pages=Sum('foiarequest__communications__files__pages'))
+        _children.annotate(
+            foia_count=Count('agencies__foias', distinct=True)
+        ).annotate(pages=Sum('agencies__foias__communications__files__pages'))
         .order_by('-foia_count')[:10]
     )
 

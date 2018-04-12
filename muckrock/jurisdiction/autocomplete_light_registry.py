@@ -71,7 +71,7 @@ class JurisdictionAutocomplete(autocomplete_light.AutocompleteModelBase):
     choices = Jurisdiction.objects.filter(hidden=False).order_by(
         '-level', 'name'
     )
-    search_fields = ['^name', 'abbrev', 'full_name', 'aliases']
+    search_fields = ['^name', 'abbrev', 'parent__abbrev', 'aliases']
     attrs = {
         'data-autocomplete-minimum-characters': 1,
         'placeholder': 'Search jurisdictions',
@@ -86,7 +86,7 @@ class JurisdictionStateInclusiveAutocomplete(
     choices = Jurisdiction.objects.filter(hidden=False).order_by(
         '-level', 'name'
     )
-    search_fields = ['^name', 'abbrev', 'full_name', 'aliases']
+    search_fields = ['^name', 'abbrev', 'parent__abbrev', 'aliases']
     attrs = {
         'data-autocomplete-minimum-characters': 1,
         'placeholder': 'Search jurisdictions',
@@ -162,7 +162,7 @@ autocomplete_light.register(
     Jurisdiction,
     name='JurisdictionAdminAutocomplete',
     choices=Jurisdiction.objects.order_by('-level', 'name'),
-    search_fields=['name', 'full_name', 'aliases'],
+    search_fields=['name', 'parent__abbrev', 'aliases'],
     attrs={
         'placeholder': 'Jurisdiction?',
         'data-autocomplete-minimum-characters': 2
