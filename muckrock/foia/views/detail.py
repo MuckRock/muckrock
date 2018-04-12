@@ -25,6 +25,7 @@ from zipfile import ZIP_DEFLATED, ZipFile
 # MuckRock
 from muckrock.accounts.models import Notification
 from muckrock.agency.forms import AgencyForm
+from muckrock.agency.utils import initial_communication_template
 from muckrock.communication.models import (
     EmailCommunication,
     FaxCommunication,
@@ -872,6 +873,13 @@ class ComposerDetail(DetailView):
                 super(ComposerDetail, self).dispatch(request, *args, **kwargs)
             )
 
+    def get_template_names(self):
+        """Different templates dependeing on status"""
+        if self.object.status == 'submitted':
+            return ['foia/foiacomposer_detail_submitted.html']
+        else:
+            return ['foia/foiacomposer_detail.html']
+
     def get_context_data(self, **kwargs):
         """Add extra context data"""
         context = super(ComposerDetail, self).get_context_data(**kwargs)
@@ -881,4 +889,19 @@ class ComposerDetail(DetailView):
         )
         if not context['foias'] and composer.user != self.request.user:
             raise Http404
+        if composer.status == 'submitted':
+            communication = initial_communication_template(
+                composer.agencies.all(),
+                composer.user.get_full_name(),
+                composer.requested_docs,
+                composer.edited_boilerplate,
+                proxy=False,
+            )
+            context['communication'] = FOIACommunication(
+                id=-1,
+                from_user=composer.user,
+                response=False,
+                communication=communication,
+                subject=composer.title,
+            )
         return context

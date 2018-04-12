@@ -49,6 +49,13 @@ class GenericComposer(BuyRequestsMixin):
         """Add request to the form kwargs"""
         kwargs = super(GenericComposer, self).get_form_kwargs()
         kwargs['user'] = self.request.user
+        if len(self.request.POST.getlist('agencies')) == 1:
+            try:
+                kwargs['agency'] = Agency.objects.get(
+                    pk=self.request.POST.get('agencies')
+                )
+            except Agency.DoesNotExist:
+                pass
         return kwargs
 
     def get_context_data(self, **kwargs):
