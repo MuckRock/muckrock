@@ -326,7 +326,7 @@ export default function showOrigContactInfo() {
   } else if (email) {
     var text = $(".contact-info .info span").text(
       "will be submitted via email to " + email
-    )
+    );
     if (ccEmails) {
       text.append(
         ", as well as CCed to "

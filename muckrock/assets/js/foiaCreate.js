@@ -233,7 +233,7 @@ $(document).ready(function(){
     $(this).closest("form").submit();
   });
 
-  $("#id_edited_boilerplate").change(function(e){
+  $("#id_edited_boilerplate").change(function(){
     var textArea = $("form.create-request .requested_docs textarea");
     if (this.checked) {
       var requestedDocs = $("#id_requested_docs").val();
@@ -305,7 +305,7 @@ $(document).ready(function(){
       success: function() {
         // Now show them we saved
         changeText("Draft Saved");
-        setTimeout(function(){$(".form-status-holder").addClass("hidden");}, 2000)
+        setTimeout(function(){$(".form-status-holder").addClass("hidden");}, 2000);
       },
       error: function() {
         // Now show them there was an error
