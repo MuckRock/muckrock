@@ -154,7 +154,8 @@ class AgencyAdmin(VersionAdmin):
         AgencyPhoneInline,
     )
     fieldsets = ((
-        None, {
+        None,
+        {
             'fields': (
                 'name',
                 'slug',
@@ -186,27 +187,11 @@ class AgencyAdmin(VersionAdmin):
                 'foia_logs',
                 'foia_guide',
                 'exempt',
+                'exempt_note',
                 'requires_proxy',
             ),
-        }
-    ), (
-        'Deprecated', {
-            'classes': ('collapse',),
-            'fields': (
-                'can_email_appeals',
-                'address',
-                'email',
-                'other_emails',
-                'phone',
-                'fax',
-            ),
-            'description':
-                'These values are no longer actively used.  '
-                'They are here to view on old data only.  If you find yourself '
-                'needing to look here often, something is probably wrong and '
-                'you should file a bug',
-        }
-    ))
+        },
+    ),)
 
     def get_urls(self):
         """Add custom URLs here"""

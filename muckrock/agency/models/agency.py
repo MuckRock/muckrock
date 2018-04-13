@@ -188,6 +188,7 @@ class Agency(models.Model, RequestHelper):
         help_text='Begin with http://'
     )
     exempt = models.BooleanField(default=False)
+    exempt_note = models.CharField(max_length=255, blank=True)
     requires_proxy = models.BooleanField(default=False)
 
     objects = AgencyQuerySet.as_manager()
