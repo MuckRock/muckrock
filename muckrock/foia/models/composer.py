@@ -20,8 +20,11 @@ from django.utils.text import slugify
 from taggit.managers import TaggableManager
 
 # MuckRock
+from muckrock.accounts.models import Profile
+from muckrock.foia.constants import COMPOSER_SUBMIT_DELAY
 from muckrock.foia.models import FOIARequest
 from muckrock.foia.querysets import FOIAComposerQuerySet
+from muckrock.organization.models import Organization
 from muckrock.tags.models import TaggedItemBase
 
 STATUS = [
@@ -62,7 +65,7 @@ class FOIAComposer(models.Model):
     num_reg_requests = models.PositiveSmallIntegerField(default=0)
 
     # for delayed submission
-    # delayed_id = models.CharField(blank=True, max_length=255)
+    delayed_id = models.CharField(blank=True, max_length=255)
 
     objects = FOIAComposerQuerySet.as_manager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
@@ -93,19 +96,24 @@ class FOIAComposer(models.Model):
         """Submit a composer to create the requests"""
         # TODO assuming only the owner can submit
         # TODO get the contact info to the actual foia submit
-        from muckrock.foia.tasks import approve_composer
+        from muckrock.foia.tasks import submit_composer
 
         num_requests = self.agencies.count()
-        self.user.profile.make_requests(num_requests)
-        with transaction.atomic():
-            self.status = 'submitted'
-            self.datetime_submitted = timezone.now()
-            self.save()
-            if num_requests < settings.MULTI_REVIEW_AMOUNT:
-                # TODO delay actually submitting the request here
-                transaction.on_commit(lambda: approve_composer.delay(self.pk))
-            else:
-                self.multirequesttask_set.create()
+        request_count = self.user.profile.make_requests(num_requests)
+        self.num_reg_requests = request_count['regular']
+        self.num_monthly_requests = request_count['monthly']
+        self.num_org_requests = request_count['org']
+        self.status = 'submitted'
+        self.datetime_submitted = timezone.now()
+        # if num_requests is less than the multi-review amount, we will approve
+        # the request right away, other wise we create a multirequest tasl
+        approve = num_requests < settings.MULTI_REVIEW_AMOUNT
+        result = submit_composer.apply_async(
+            args=(self.pk, approve),
+            countdown=COMPOSER_SUBMIT_DELAY,
+        )
+        self.delayed_id = result.id
+        self.save()
 
     def approved(self):
         """A pending composer is approved for sending to the agencies"""
@@ -123,3 +131,45 @@ class FOIAComposer(models.Model):
     def has_perm(self, user, perm):
         """Short cut for checking a FOIA composer permission"""
         return user.has_perm('foia.%s_foiacomposer' % perm, self)
+
+    def return_requests(self, return_amts=None):
+        """Return requests to the composer's author"""
+        if return_amts is None:
+            # if no return amts passed in, refund all requests
+            return_amts = {
+                'regular': self.num_reg_requests,
+                'monthly': self.num_monthly_requests,
+                'org': self.num_org_requests,
+            }
+        with transaction.atomic():
+            self.num_reg_requests -= min(
+                return_amts['regular'], self.num_reg_requests
+            )
+            self.num_monthly_requests -= min(
+                return_amts['monthly'], self.num_monthly_requests
+            )
+            self.num_org_requests -= min(
+                return_amts['org'], self.num_org_requests
+            )
+            self.save()
+
+            # add the return requests to the user's profile
+            profile = (
+                Profile.objects.select_for_update()
+                .get(pk=self.user.profile.id)
+            )
+            profile.num_requests += return_amts['regular']
+            profile.get_monthly_requests()
+            profile.monthly_requests += return_amts['monthly']
+            if profile.organization:
+                org = (
+                    Organization.objects.select_for_update().get(
+                        pk=profile.organization.pk
+                    )
+                )
+                org.get_requests()
+                org.num_requests += return_amts['org']
+                org.save()
+            else:
+                profile.monthly_requests += return_amts['org']
+            profile.save()

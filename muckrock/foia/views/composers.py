@@ -3,11 +3,13 @@ FOIA views for composing
 """
 
 # Django
+from celery import current_app
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.urlresolvers import reverse
+from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.defaultfilters import slugify
@@ -18,12 +20,13 @@ from django.views.generic import CreateView, FormView, UpdateView
 
 # Standard Library
 import re
-from datetime import date
+from datetime import date, timedelta
 from math import ceil
 
 # MuckRock
 from muckrock.accounts.mixins import BuyRequestsMixin, MiniregMixin
 from muckrock.agency.models import Agency
+from muckrock.foia.constants import COMPOSER_EDIT_DELAY
 from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.foia.forms import (
     BaseComposerForm,
@@ -84,6 +87,7 @@ class GenericComposer(BuyRequestsMixin):
 
     def _submit_composer(self, composer, form):
         """Submit a composer"""
+        # pylint: disable=not-an-iterable
         if form.cleaned_data.get('num_requests', 0) > 0:
             self.buy_requests(form)
         if (
@@ -196,10 +200,43 @@ class UpdateComposer(LoginRequiredMixin, GenericComposer, UpdateView):
 
     def get_queryset(self):
         """Restrict to composers you can view"""
-        return FOIAComposer.objects.filter(
-            status='started',
-            user=self.request.user,
-        )
+        if self.request.method == 'POST':
+            # can only post draft requests
+            return FOIAComposer.objects.filter(
+                status='started',
+                user=self.request.user,
+            )
+        else:
+            # can get recently submitted requests also, which will convert them
+            # back to drafts
+            # XXX should not 404 for "timed out" composers,
+            # but redirect + error message
+            return FOIAComposer.objects.filter(
+                Q(status='started', user=self.request.user) | Q(
+                    ~Q(delayed_id=''),
+                    status='submitted',
+                    user=self.request.user,
+                    datetime_submitted__lt=timezone.now() +
+                    timedelta(seconds=COMPOSER_EDIT_DELAY),
+                )
+            )
+
+    def get_object(self, queryset=None):
+        """Convert object back to draft if it has been submitted recently"""
+        composer = super(UpdateComposer, self).get_object(queryset)
+        if composer.status == 'submitted':
+            current_app.control.revoke(composer.delayed_id)
+            composer.status = 'started'
+            composer.delayed_id = ''
+            composer.datetime_submitted = None
+            composer.return_requests()
+            composer.save()
+            messages.warning(
+                self.request,
+                'This request\'s submission has been cancelled.  You may now '
+                'edit it and submit it again when ready',
+            )
+        return composer
 
     def post(self, request, *args, **kwargs):
         """Allow deletion regardless of form validation"""

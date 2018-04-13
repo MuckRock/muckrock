@@ -32,6 +32,7 @@ from muckrock.communication.models import (
     WebCommunication,
 )
 from muckrock.crowdfund.forms import CrowdfundForm
+from muckrock.foia.constants import COMPOSER_EDIT_DELAY
 from muckrock.foia.exceptions import FoiaFormError
 from muckrock.foia.forms import (
     ContactInfoForm,
@@ -863,13 +864,19 @@ class ComposerDetail(DetailView):
 
     def dispatch(self, request, *args, **kwargs):
         """If composer is a draft, then redirect to drafting interface"""
+        # pylint: disable=attribute-defined-outside-init
         composer = self.get_object()
         if composer.status == 'started':
             return redirect('foia-draft', idx=composer.pk)
-        else:
-            return (
-                super(ComposerDetail, self).dispatch(request, *args, **kwargs)
-            )
+        self.foias = (
+            composer.foias.get_viewable(self.request.user).select_related_view()
+        )
+        not_owner = composer.user != self.request.user
+        if not_owner and (not self.foias or composer.status == 'submitted'):
+            raise Http404
+        if len(self.foias) == 1:
+            return redirect(self.foias[0])
+        return super(ComposerDetail, self).dispatch(request, *args, **kwargs)
 
     def get_template_names(self):
         """Different templates dependeing on status"""
@@ -882,11 +889,7 @@ class ComposerDetail(DetailView):
         """Add extra context data"""
         context = super(ComposerDetail, self).get_context_data(**kwargs)
         composer = context['composer']
-        context['foias'] = (
-            composer.foias.get_viewable(self.request.user).select_related_view()
-        )
-        if not context['foias'] and composer.user != self.request.user:
-            raise Http404
+        context['foias'] = self.foias
         if composer.status == 'submitted':
             communication = initial_communication_template(
                 composer.agencies.all(),
@@ -901,5 +904,13 @@ class ComposerDetail(DetailView):
                 response=False,
                 communication=communication,
                 subject=composer.title,
+            )
+            context['edit_deadline'] = (
+                composer.datetime_submitted +
+                timedelta(seconds=COMPOSER_EDIT_DELAY)
+            )
+            context['can_edit'] = (
+                timezone.now() < context['edit_deadline']
+                and composer.delayed_id
             )
         return context
