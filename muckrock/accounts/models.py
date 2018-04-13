@@ -281,6 +281,7 @@ class Profile(models.Model):
             if profile.organization:
                 profile.organization.num_requests -= request_count['org']
                 profile.organization.save()
+        return request_count
 
     def bundled_requests(self):
         """Returns the number of requests the user gets when they buy a bundle."""

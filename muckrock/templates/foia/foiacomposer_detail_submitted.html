@@ -90,12 +90,20 @@
 
     <!-- COMMUNICATIONS -->
     <section class="communications" id="comms">
-      <p><a href="#" class="primary button">Edit Request</a></p>
-      <p>
-        Thank you for submitting this request.  Please review it now.
-        You will have 30 minutes after submitting it in order to make any
-        changes before it is sent to the agency.
-      </p>
+      {% if can_edit %}
+        <p><a href="{% url "foia-draft" idx=composer.pk %}" class="primary button">Edit Request</a></p>
+        <p>
+          Thank you for submitting this request.  Please review it now.
+          You will have until {{ edit_deadline|time:"g:i a" }}
+          ({{ edit_deadline|timeuntil }} from now) in order to make any changes before
+          it is sent to the agency.
+        </p>
+      {% else %}
+        <p>
+          Thank you for submitting this request.  It is now past the edit deadline,
+          your request will be sent to the agency shortly.
+        </p>
+      {% endif %}
       <div class="communications-list">
         {% include 'foia/communication.html' with communication=communication hide_options=True %}
       </div>
