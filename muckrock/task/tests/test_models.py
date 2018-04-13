@@ -684,8 +684,9 @@ class MultiRequestTaskTests(TestCase):
                 },
             )
 
-    def test_do_return_requests(self):
+    def _test_do_return_requests(self):
         """Test return requests"""
+        # XXX move this to test composer
         self.task._do_return_requests({
             'regular': 2,
             'monthly': 0,
