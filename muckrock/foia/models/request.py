@@ -67,7 +67,7 @@ class FOIARequest(models.Model):
     title = models.CharField(max_length=255, db_index=True)
     slug = models.SlugField(max_length=255)
     status = models.CharField(max_length=10, choices=STATUS, db_index=True)
-    agency = models.ForeignKey('agency.Agency', related_name='foias')
+    agency = models.ForeignKey('agency.Agency')
     composer = models.ForeignKey('foia.FOIAComposer', related_name='foias')
     datetime_updated = models.DateTimeField(
         blank=True,

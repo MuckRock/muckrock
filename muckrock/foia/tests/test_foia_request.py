@@ -542,13 +542,9 @@ class TestFOIAIntegration(TestCase):
             composer = FOIAComposerFactory(
                 user=user,
                 title='Test with no email',
+                agencies=[agency],
             )
-            composer.agencies.add(agency)
             composer.submit()
-            # Composer should be automatically approved on submit,
-            # but due to how transactions work during testing, we call it manually
-            # here.  Using a TransactionTestCase caused database issues.
-            composer.approved()
             foia = FOIARequest.objects.get(composer=composer)
             comm = foia.communications.last()
 
