@@ -4,6 +4,9 @@
       {{ choice.name }}
       {% if choice.exempt %}
         <span class="small red badge exempt">Exempt</span>
+        {% if choice.exempt_note %}
+          <span class="exempt-note">{{ choice.exempt_note|safe }}</span>
+        {% endif %}
       {% endif %}
       {% if choice.status == "pending" %}
         <span class="small yellow badge">Pending</span>

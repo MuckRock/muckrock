@@ -46,6 +46,11 @@ input.autocomplete.xhr-pending { background-image: none; }
       font-size: $size-2;
     }
   }
+  .choice .exempt-note {
+    font-size: $size-3;
+    margin-left:  $vr;
+    font-style: italic;
+  }
 }
 
 .autocomplete-light-widget .choice {
