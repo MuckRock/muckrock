@@ -107,6 +107,45 @@ class GenericComposer(BuyRequestsMixin):
             messages.warning(self.request, 'You need to purchase more requests')
         else:
             messages.success(self.request, 'Request submitted')
+            warning = self._proxy_warnings(composer)
+            if warning:
+                messages.warning(self.request, warning)
+
+    def _proxy_warnings(self, composer):
+        """Check composer's agencies for proxy status"""
+        proxies = {'missing': 0, 'non-missing': 0}
+        for agency in composer.agencies.all():
+            proxy_info = agency.get_proxy_info()
+            if proxy_info['proxy'] and proxy_info['missing_proxy']:
+                proxies['missing'] += 1
+            elif proxy_info['proxy'] and not proxy_info['missing_proxy']:
+                proxies['non-missing'] += 1
+        if proxies['missing'] and proxies['non-missing']:
+            return (
+                'Some of the agencies you are requesting from require '
+                'requestors to be in-state citizens.  We will file these '
+                'with volunteer filers in states in which we have a '
+                'volunteer available.  If we do not have a volunteer '
+                'available, your request will be filed once we find a '
+                'suitable volunteer.'
+            )
+        elif proxies['missing']:
+            return (
+                'Some of the agencies you are requesting from require '
+                'requestors to be in-state citizens.  We do not currently '
+                'have a citizen proxy requestor on file for these '
+                'agencies, but will attempt to find one to submit these '
+                'requests on your behalf.'
+            )
+        elif proxies['non-missing']:
+            return (
+                'Some of the agencies you are requesting from require '
+                'requestors to be in-state citizens.  These requests will '
+                'be filed in the name of one of our volunteer files for '
+                'these states.'
+            )
+        else:
+            return ''
 
 
 class CreateComposer(MiniregMixin, GenericComposer, CreateView):

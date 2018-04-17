@@ -344,12 +344,9 @@ class Agency(models.Model, RequestHelper):
             proxy_user = self.jurisdiction.get_proxy()
             if proxy_user is None:
                 return {
-                    'from_user':
-                        User.objects.get(username='proxy_placeholder'),
-                    'proxy':
-                        True,
-                    'missing_proxy':
-                        True,
+                    'from_user': User.objects.get(username='Proxy'),
+                    'proxy': True,
+                    'missing_proxy': True,
                     'warning':
                         'This agency and jurisdiction requires requestors to be '
                         'in-state citizens.  We do not currently have a citizen proxy '

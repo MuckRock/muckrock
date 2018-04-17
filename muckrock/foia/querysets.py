@@ -203,6 +203,7 @@ class FOIARequestQuerySet(models.QuerySet):
             )
         else:
             date_due = None
+        proxy_info = agency.get_proxy_info()
         foia = self.create(
             status='started',
             title=title,
@@ -211,10 +212,13 @@ class FOIARequestQuerySet(models.QuerySet):
             embargo=composer.embargo,
             composer=composer,
             date_due=date_due,
+            missing_proxy=proxy_info['missing_proxy'],
         )
         foia.tags.set(*composer.tags.all())
-        # TODO do proxy checking
-        foia.create_initial_communication(composer.user, proxy=False)
+        foia.create_initial_communication(
+            proxy_info.get('from_user', composer.user),
+            proxy=proxy_info['proxy'],
+        )
         foia.process_attachments(composer.user, composer=True)
         foia.submit()
 
