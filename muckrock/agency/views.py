@@ -7,7 +7,6 @@ from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.template.loader import get_template
 from django.utils.html import linebreaks
 
 # Third Party
@@ -227,6 +226,7 @@ def boilerplate(request):
         split_token,
         edited_boilerplate=False,
         proxy=False,
+        html=True,
     )
     intro, outro = text.split(split_token)
     return JsonResponse({

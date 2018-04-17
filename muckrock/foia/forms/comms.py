@@ -86,16 +86,6 @@ class SendViaForm(forms.Form):
             ('snail', 'Snail Mail'),
         ),
     )
-    email = autocomplete_light.ModelChoiceField(
-        'EmailAddressAutocomplete',
-        queryset=EmailAddress.objects.filter(status='good'),
-        required=False,
-    )
-    fax = autocomplete_light.ModelChoiceField(
-        'FaxAutocomplete',
-        queryset=PhoneNumber.objects.filter(status='good', type='fax'),
-        required=False,
-    )
 
     def __init__(self, *args, **kwargs):
         initial = kwargs.pop('initial', {})
@@ -120,6 +110,31 @@ class SendViaForm(forms.Form):
             'fax': obj and obj.fax,
         })
         super(SendViaForm, self).__init__(*args, initial=initial, **kwargs)
+        # remove portal choice if the agency does not use a portal
+        if agency and not agency.portal:
+            self.fields['via'].choices = (
+                ('email', 'Email'),
+                ('fax', 'Fax'),
+                ('snail', 'Snail Mail'),
+            )
+
+
+class SendCommunicationForm(SendViaForm):
+    """Form for sending individual communications"""
+
+    email = autocomplete_light.ModelChoiceField(
+        'EmailAddressAutocomplete',
+        queryset=EmailAddress.objects.filter(status='good'),
+        required=False,
+    )
+    fax = autocomplete_light.ModelChoiceField(
+        'FaxAutocomplete',
+        queryset=PhoneNumber.objects.filter(status='good', type='fax'),
+        required=False,
+    )
+
+    def __init__(self, *args, **kwargs):
+        super(SendCommunicationForm, self).__init__(*args, **kwargs)
         # create auto complete fields for creating new instances
         # these are created here since they have invalid identifier names
         # only add them if the field is bound, as we do not want to add them
@@ -133,19 +148,12 @@ class SendViaForm(forms.Form):
                 widget=forms.HiddenInput(),
                 required=False,
             )
-        # remove portal choice if the agency does not use a portal
-        if agency and not agency.portal:
-            self.fields['via'].choices = (
-                ('email', 'Email'),
-                ('fax', 'Fax'),
-                ('snail', 'Snail Mail'),
-            )
 
     def clean(self):
         """Ensure the selected method is ok for this foia and the correct
         corresponding information is provided"""
 
-        cleaned_data = super(SendViaForm, self).clean()
+        cleaned_data = super(SendCommunicationForm, self).clean()
         if cleaned_data.get('via') == 'email' and not cleaned_data.get('email'):
             self._clean_email(cleaned_data)
         elif cleaned_data.get('via') == 'fax' and not cleaned_data.get('fax'):
@@ -168,7 +176,7 @@ class SendViaForm(forms.Form):
         else:
             self.add_error(
                 'email',
-                'An email address is required if resending via email',
+                'An email address is required if sending via email',
             )
 
     def _clean_fax(self, cleaned_data):
@@ -198,11 +206,11 @@ class SendViaForm(forms.Form):
         else:
             self.add_error(
                 'fax',
-                'A fax number is required if resending via fax',
+                'A fax number is required if sending via fax',
             )
 
 
-class FOIAAdminFixForm(SendViaForm):
+class FOIAAdminFixForm(SendCommunicationForm):
     """Form with extra options for staff to follow up to requests"""
 
     from_user = forms.ModelChoiceField(
@@ -250,7 +258,7 @@ class FOIAAdminFixForm(SendViaForm):
         )
 
 
-class ResendForm(SendViaForm):
+class ResendForm(SendCommunicationForm):
     """A form for resending a communication"""
     communication = forms.ModelChoiceField(
         queryset=FOIACommunication.objects.all(),
@@ -341,17 +349,16 @@ class ContactInfoForm(SendViaForm):
             )
         return cleaned_data
 
-    def clean_other_email(self):
-        """Turn other email into an Email Address object"""
-        return EmailAddress.objects.fetch(self.cleaned_data['other_email'])
-
-    def clean_other_fax(self):
-        """Turn other fax into a Phone Number object"""
-        if self.cleaned_data['other_fax']:
-            fax, _ = PhoneNumber.objects.update_or_create(
-                number=self.cleaned_data['other_fax'],
-                defaults={'type': 'fax'},
-            )
-            return fax
+    def clean_email(self):
+        """Turn email model into a string for serializing"""
+        if self.cleaned_data['email']:
+            return self.cleaned_data['email'].email
         else:
-            return self.cleaned_data['other_fax']
+            return self.cleaned_data['email']
+
+    def clean_fax(self):
+        """Turn phone number model into a string for serializing"""
+        if self.cleaned_data['fax']:
+            return self.cleaned_data['fax'].number.as_international
+        else:
+            return self.cleaned_data['fax']

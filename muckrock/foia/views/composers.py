@@ -101,6 +101,7 @@ class GenericComposer(BuyRequestsMixin):
             }
         else:
             contact_info = None
+        print 'view', contact_info
         try:
             composer.submit(contact_info)
         except InsufficientRequestsError:

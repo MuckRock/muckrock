@@ -33,7 +33,11 @@ from taggit.managers import TaggableManager
 from muckrock import task, utils
 from muckrock.accounts.models import Notification
 from muckrock.agency.utils import initial_communication_template
-from muckrock.communication.models import EmailAddress, EmailCommunication
+from muckrock.communication.models import (
+    EmailAddress,
+    EmailCommunication,
+    PhoneNumber,
+)
 from muckrock.foia.querysets import FOIARequestQuerySet
 from muckrock.tags.models import Tag, TaggedItemBase, parse_tags
 
@@ -477,9 +481,9 @@ class FOIARequest(models.Model):
         if contact_info['via'] == 'portal':
             self.portal = agency.portal
         elif contact_info['via'] == 'email' and contact_info['email']:
-            self.email = contact_info['email']
+            self.email = EmailAddress.objects.fetch(contact_info['email'])
         elif contact_info['via'] == 'email':
-            self.email = contact_info['other_email']
+            self.email = EmailAddress.objects.fetch(contact_info['other_email'])
             # Flag for review
             task.models.FlaggedTask.objects.create(
                 foia=self,
@@ -490,9 +494,15 @@ class FOIARequest(models.Model):
             )
             return True
         elif contact_info['via'] == 'fax' and contact_info['fax']:
-            self.fax = contact_info['fax']
+            self.fax, _ = PhoneNumber.objects.update_or_create(
+                number=contact_info['fax'],
+                defaults={'type': 'fax'},
+            )
         elif contact_info['via'] == 'fax':
-            self.fax = contact_info['other_fax']
+            self.fax, _ = PhoneNumber.objects.update_or_create(
+                number=contact_info['other_fax'],
+                defaults={'type': 'fax'},
+            )
             # Flag for review
             task.models.FlaggedTask.objects.create(
                 foia=self,
@@ -1155,8 +1165,8 @@ class FOIARequest(models.Model):
             [self.agency],
             from_user.get_full_name(),
             self.composer.requested_docs,
-            self.composer.edited_boilerplate,
-            proxy,
+            edited_boilerplate=self.composer.edited_boilerplate,
+            proxy=proxy,
         )
         comm = self.communications.create(
             from_user=from_user,

@@ -97,6 +97,7 @@ class FOIAComposer(models.Model):
         # TODO assuming only the owner can submit
         # TODO get the contact info to the actual foia submit
         from muckrock.foia.tasks import submit_composer
+        print 'submit', contact_info
 
         num_requests = self.agencies.count()
         request_count = self.user.profile.make_requests(num_requests)
@@ -109,14 +110,15 @@ class FOIAComposer(models.Model):
         # the request right away, other wise we create a multirequest tasl
         approve = num_requests < settings.MULTI_REVIEW_AMOUNT
         result = submit_composer.apply_async(
-            args=(self.pk, approve),
+            args=(self.pk, approve, contact_info),
             countdown=COMPOSER_SUBMIT_DELAY,
         )
         self.delayed_id = result.id
         self.save()
 
-    def approved(self):
+    def approved(self, contact_info=None):
         """A pending composer is approved for sending to the agencies"""
+        print 'approved', contact_info
         for agency in self.agencies.select_related(
             'jurisdiction__law',
             'jurisdiction__parent__law',
@@ -124,6 +126,7 @@ class FOIAComposer(models.Model):
             FOIARequest.objects.create_new(
                 composer=self,
                 agency=agency,
+                contact_info=contact_info,
             )
         self.status = 'filed'
         self.save()

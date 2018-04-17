@@ -165,14 +165,14 @@ $(document).ready(function(){
             setContactInfoOptions($("#id_fax"), data.faxes);
           }
           showOrigContactInfo();
-          $(".contact-info #use_contact_information").val(true);
+          $("#id_use_contact_information").val(true);
           $("#id_email").prop("disabled", "");
           $("#id_fax").prop("disabled", "");
           $(".contact-info").show();
         }
       });
     } else {
-      $(".contact-info #use_contact_information").val(false);
+      $("#id_use_contact_information").val(false);
       $("#id_email").prop("disabled", "disabled");
       $("#id_fax").prop("disabled", "disabled");
       $(".contact-info").hide();
