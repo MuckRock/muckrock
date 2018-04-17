@@ -276,6 +276,8 @@ class IncomingPortalForm(ResponseTaskForm):
     communication = forms.CharField(widget=forms.Textarea(), required=False)
 
 
+class ReplaceNewAgencyForm(forms.Form):
+
 class BulkNewAgencyTaskForm(forms.Form):
     """Form for creating blank new agencies"""
     name = forms.CharField(max_length=255)
