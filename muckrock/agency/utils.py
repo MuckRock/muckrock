@@ -8,7 +8,7 @@ from django.utils.encoding import smart_text
 
 
 def initial_communication_template(
-    agencies, user_name, requested_docs, edited_boilerplate, proxy
+    agencies, user_name, requested_docs, **kwargs
 ):
     """Construct the initial communication template language for a given set
     of agencies
@@ -17,7 +17,7 @@ def initial_communication_template(
     jurisdictions = set(a.jurisdiction.legal for a in agencies)
     if len(jurisdictions) == 1:
         jurisdiction = jurisdictions.pop()
-    else:
+    elif kwargs.get('html'):
         jurisdiction = {
             'get_law_name':
                 '<abbr title="This will be replaced by the relevant '
@@ -31,8 +31,14 @@ def initial_communication_template(
                 'calendar, depending on whether the law counts weekends and other '
                 'holidays in its deadline">{ business or calendar }</abbr>',
         }
+    else:
+        jurisdiction = {
+            'get_law_name': '{ law name }',
+            'days': '{ number of days }',
+            'get_day_type': '{ business or calendar }',
+        }
     requested_docs = requested_docs.replace('{ name }', user_name)
-    if len(jurisdictions) == 1 and edited_boilerplate:
+    if len(jurisdictions) == 1 and kwargs.get('edited_boilerplate'):
         tags = [
             ('{ law name }', jurisdiction.get_law_name()),
             ('{ short name }', jurisdiction.get_law_name(abbrev=True)),
@@ -42,12 +48,12 @@ def initial_communication_template(
         for tag, replace in tags:
             requested_docs = requested_docs.replace(tag, unicode(replace))
         return requested_docs
-    if not edited_boilerplate:
+    if not kwargs.get('edited_boilerplate'):
         template = get_template('text/foia/request.txt')
         context = {
             'requested_docs': smart_text(requested_docs),
             'jurisdiction': jurisdiction,
             'user_name': user_name,
-            'proxy': proxy,
+            'proxy': kwargs.get('proxy'),
         }
         return template.render(context)

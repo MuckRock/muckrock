@@ -327,7 +327,7 @@ export default function showOrigContactInfo() {
     var text = $(".contact-info .info span").text(
       "will be submitted via email to " + email
     );
-    if (ccEmails) {
+    if (ccEmails.length > 0) {
       text.append(
         ", as well as CCed to "
       ).append(
@@ -365,7 +365,7 @@ $('document').ready(function(){
     e.preventDefault();
     $(".contact-info .form").show();
     $(".contact-info .change").hide();
-    $(".contact-info #use_contact_information").val(true);
+    $("#id_use_contact_information").val(true);
 
     $(".contact-info #id_email").change();
     $(".contact-info #id_fax").change();
@@ -375,7 +375,7 @@ $('document').ready(function(){
     e.preventDefault();
     $(".contact-info .form").hide();
     $(".contact-info .change").show();
-    $(".contact-info #use_contact_information").val(false);
+    $("#id_use_contact_information").val(false);
     $(".contact-info #id_other_email").removeAttr("required");
     $(".contact-info #id_other_fax").removeAttr("required");
     showOrigContactInfo();

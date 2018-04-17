@@ -895,7 +895,7 @@ class ComposerDetail(DetailView):
                 composer.agencies.all(),
                 composer.user.get_full_name(),
                 composer.requested_docs,
-                composer.edited_boilerplate,
+                edited_boilerplate=composer.edited_boilerplate,
                 proxy=False,
             )
             context['communication'] = FOIACommunication(

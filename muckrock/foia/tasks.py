@@ -253,7 +253,7 @@ def submit_multi_request(req_pk, **kwargs):
     max_retries=10,
     name='muckrock.foia.tasks.submit_composer'
 )
-def submit_composer(composer_pk, approve, **kwargs):
+def submit_composer(composer_pk, approve, contact_info, **kwargs):
     """Submit a composer to all agencies"""
     # pylint: disable=unused-argument
     composer = FOIAComposer.objects.get(pk=composer_pk)
@@ -262,7 +262,7 @@ def submit_composer(composer_pk, approve, **kwargs):
     composer.delayed_id = ''
     composer.save()
     if approve:
-        composer.approved()
+        composer.approved(contact_info)
     else:
         composer.multirequesttask_set.create()
 
