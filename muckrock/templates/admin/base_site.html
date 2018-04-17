@@ -6,49 +6,49 @@
 {% block title %}{{ title }} | {% trans 'Django site admin' %}{% endblock %}
 
 {% block branding %}
-<h1 id="site-name">{% trans 'Django administration' %}</h1>
+  <h1 id="site-name">{% trans 'Django administration' %}</h1>
 {% endblock %}
 
 {% block nav-global %}{% endblock %}
 
 {% block extrahead %}
-    {% render_bundle 'main' 'js' %}
-    {% include 'autocomplete_light/static.html' %}
-    <script type="text/javascript">
+  {% render_bundle 'main' 'js' %}
+  {% include 'autocomplete_light/static.html' %}
+  <script type="text/javascript">
     $(document).ready(function() {
-            value = $('.autocomplete-light-widget select[name$=jurisdiction]').val();
-            var agencySelectElement = $('.autocomplete-light-widget select[name$=agency]');
-            var agencyWidgetElement = agencySelectElement.parents('.autocomplete-light-widget');
-            if (value) {
-                    // If value is contains something, add it to autocomplete.data
-                    agencyWidgetElement.yourlabsWidget().autocomplete.data = {
-                            'jurisdiction_id': value[0],
-                    };
-            } else {
-                    // If value is empty, empty autocomplete.data
-                    agencyWidgetElement.yourlabsWidget().autocomplete.data = {}
-            }
-            $('body').on('change', '.autocomplete-light-widget select[name$=jurisdiction]', function() {
-                    var agencySelectElement = $('.autocomplete-light-widget select[name$=agency]');
-                    var agencyWidgetElement = agencySelectElement.parents('.autocomplete-light-widget');
+      value = $('.autocomplete-light-widget select[name$=jurisdiction]').val();
+      var agencySelectElement = $('.autocomplete-light-widget select[name$=agency]');
+      var agencyWidgetElement = agencySelectElement.parents('.autocomplete-light-widget');
+      if (value) {
+        // If value is contains something, add it to autocomplete.data
+        agencyWidgetElement.yourlabsWidget().autocomplete.data = {
+          'jurisdiction_id': value[0],
+        };
+      } else {
+        // If value is empty, empty autocomplete.data
+        agencyWidgetElement.yourlabsWidget().autocomplete.data = {}
+      }
+      $('body').on('change', '.autocomplete-light-widget select[name$=jurisdiction]', function() {
+        var agencySelectElement = $('.autocomplete-light-widget select[name$=agency]');
+        var agencyWidgetElement = agencySelectElement.parents('.autocomplete-light-widget');
 
-                    // When the country select changes
-                    value = $(this).val();
+        // When the country select changes
+        value = $(this).val();
 
-                    if (value) {
-                            // If value is contains something, add it to autocomplete.data
-                            agencyWidgetElement.yourlabsWidget().autocomplete.data = {
-                                    'jurisdiction_id': value[0],
-                            };
-                    } else {
-                            // If value is empty, empty autocomplete.data
-                            agencyWidgetElement.yourlabsWidget().autocomplete.data = {}
-                    }
+        if (value) {
+          // If value is contains something, add it to autocomplete.data
+          agencyWidgetElement.yourlabsWidget().autocomplete.data = {
+            'jurisdiction_id': value[0],
+          };
+        } else {
+          // If value is empty, empty autocomplete.data
+          agencyWidgetElement.yourlabsWidget().autocomplete.data = {}
+        }
 
-                    // example debug statements, that does not replace using breakbpoints and a proper debugger but can hel
-                    // console.log($(this), 'changed to', value);
-                    // console.log(agencyWidgetElement, 'data is', agencyWidgetElement.yourlabsWidget().autocomplete.data)
-            })
+        // example debug statements, that does not replace using breakbpoints and a proper debugger but can hel
+        // console.log($(this), 'changed to', value);
+        // console.log(agencyWidgetElement, 'data is', agencyWidgetElement.yourlabsWidget().autocomplete.data)
+      })
     });
-    </script>
+  </script>
 {% endblock %}

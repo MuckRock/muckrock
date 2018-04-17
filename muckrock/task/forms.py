@@ -265,6 +265,8 @@ class ResponseTaskForm(forms.Form):
             foia.notify(action)
 
 
+class ReplaceNewAgencyForm(forms.Form):
+
 class BulkNewAgencyTaskForm(forms.Form):
     """Form for creating blank new agencies"""
     name = forms.CharField(max_length=255)

@@ -47,14 +47,18 @@
           <p>Reject</p>
         </header>
         <main class="textbox__section">
-        {% csrf_token %}
-        <input type="hidden" name="task" value="{{task.pk}}">
-        <label>Move this agency’s requests to:</label>
-        <select name="replacement">
-          {% for other_agency in task.agency.jurisdiction.other_agencies %}
-            <option value="{{ other_agency.id }}">{{ other_agency.name }}</option>
-          {% endfor %}
-        </select>
+          {% csrf_token %}
+          <input type="hidden" name="task" value="{{task.pk}}">
+
+          {{ replace_form }}
+
+          <label>Move this agency’s requests to:</label>
+          <select name="replacement">
+            {% for other_agency in task.agency.jurisdiction.other_agencies %}
+              <option value="{{ other_agency.id }}">{{ other_agency.name }}</option>
+            {% endfor %}
+          </select>
+
         </main>
         <footer class="textbox__footer">
           <button type="submit" name="spam" value="true" class="spam failure button">Mark as Spam &amp; Block</button>
@@ -66,27 +70,27 @@
           <p>Approve</p>
         </header>
         <main class="textbox__section">
-        {% csrf_token %}
-        <input type="hidden" name="task" value="{{task.pk}}">
-        <input type="hidden" name="approve" value="true">
-        {% for field in agency_form.get_fields %}
-          {% if field == "address" %}
-            <fieldset>
-              <label>Address</label>
-              {{ agency_form.address_suite }}
-              {{ agency_form.address_street }}
-              {{ agency_form.address_city }}
-              {{ agency_form.address_state }}
-              {{ agency_form.address_zip }}
-            </fieldset>
-          {% else %}
-            <fieldset class="{{field.id_for_label}}">
-              {{ field.label_tag }}
-              {{ field }}
-              {% if field.help_text %}<p class="help-text">{{field.help_text}}</p>{% endif %}
-            </fieldset>
-          {% endif %}
-        {% endfor %}
+          {% csrf_token %}
+          <input type="hidden" name="task" value="{{task.pk}}">
+          <input type="hidden" name="approve" value="true">
+          {% for field in agency_form.get_fields %}
+            {% if field == "address" %}
+              <fieldset>
+                <label>Address</label>
+                {{ agency_form.address_suite }}
+                {{ agency_form.address_street }}
+                {{ agency_form.address_city }}
+                {{ agency_form.address_state }}
+                {{ agency_form.address_zip }}
+              </fieldset>
+            {% else %}
+              <fieldset class="{{field.id_for_label}}">
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.help_text %}<p class="help-text">{{field.help_text}}</p>{% endif %}
+              </fieldset>
+            {% endif %}
+          {% endfor %}
         </main>
         <footer class="textbox__footer">
           <button type="submit" name="approve" value="true" class="success button">Approve</button>
