@@ -30,7 +30,12 @@ from muckrock.communication.models import (
 )
 from muckrock.crowdfund.models import Crowdfund, CrowdfundPayment
 from muckrock.crowdsource.models import Crowdsource, CrowdsourceResponse
-from muckrock.foia.models import FOIACommunication, FOIAFile, FOIARequest
+from muckrock.foia.models import (
+    FOIACommunication,
+    FOIAComposer,
+    FOIAFile,
+    FOIARequest,
+)
 from muckrock.foiamachine.models import FoiaMachineRequest
 from muckrock.jurisdiction.models import (
     ExampleAppeal,
@@ -112,11 +117,11 @@ def store_statistics():
             'total_composers':
                 FOIAComposer.objects.count(),
             'total_composers_draft':
-                FOIAComposer.objects.filter(status='started'),
+                FOIAComposer.objects.filter(status='started').count(),
             'total_composers_submitted':
-                FOIAComposer.objects.filter(status='submitted'),
+                FOIAComposer.objects.filter(status='submitted').count(),
             'total_composers_filed':
-                FOIAComposer.objects.filter(status='filed'),
+                FOIAComposer.objects.filter(status='filed').count(),
             'sent_communications_portal':
                 PortalCommunication.objects.filter(
                     communication__date__range=(

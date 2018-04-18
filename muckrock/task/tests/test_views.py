@@ -586,49 +586,30 @@ class NewAgencyTaskViewTests(TestCase):
             'portal_type': 'other',
             'phone': '',
             'fax': '',
+            'jurisdiction': self.task.agency.jurisdiction.pk,
         }
         form = AgencyForm(contact_data, instance=self.task.agency)
         ok_(form.is_valid())
-        post_data = form.cleaned_data
-        post_data.update({'approve': 'truthy', 'task': self.task.pk})
-        self.client.post(self.url, post_data)
+        contact_data.update({'approve': True, 'task': self.task.pk})
+        self.client.post(self.url, contact_data)
         updated_task = NewAgencyTask.objects.get(pk=self.task.pk)
-        eq_(
-            updated_task.agency.status, 'approved', (
-                'New agency task should approve agency when'
-                ' given a truthy value for the "approve" field'
-            )
-        )
-        eq_(
-            updated_task.resolved, True, (
-                'New agency task should resolve when given any'
-                ' truthy value for the "approve" data field'
-            )
-        )
+        eq_(updated_task.agency.status, 'approved')
+        ok_(updated_task.resolved)
 
     def test_post_reject(self):
         """Rejecting the agency requires a replacement agency"""
         replacement = AgencyFactory()
         self.client.post(
             self.url, {
-                'reject': 'truthy',
-                'task': self.task.id,
-                'replacement': replacement.id
+                'reject': True,
+                'task': self.task.pk,
+                'replace_agency': replacement.pk,
+                'replace_jurisdiction': replacement.jurisdiction.pk,
             }
         )
-        updated_task = NewAgencyTask.objects.get(pk=self.task.id)
-        eq_(
-            updated_task.agency.status, 'rejected', (
-                'New agency task should not approve the agency'
-                ' when given a truthy value for the "reject" field'
-            )
-        )
-        eq_(
-            updated_task.resolved, True, (
-                'New agency task should resolve when given any'
-                ' truthy value for the "reject" data field'
-            )
-        )
+        updated_task = NewAgencyTask.objects.get(pk=self.task.pk)
+        eq_(updated_task.agency.status, 'rejected')
+        eq_(updated_task.resolved, True)
 
 
 @mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)

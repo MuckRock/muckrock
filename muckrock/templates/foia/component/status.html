@@ -1,28 +1,24 @@
 {% load foia_tags %}
 <section class="status manager" id="request-status">
-    <header>
-        <dfn>Status</dfn>
-        {% if foia.status != 'started' and foia.status != 'submitted' %}
-        {% if user_can_edit %}
-        <div class="small action" id="edit-status" data-manager=".status-manager">Edit</div>
-        {% endif %}
-        {% endif %}
-    </header>
-    <span class="badge state {{ foia.status|classify_status }}">{{foia.get_status_display}}</span>
-    {% if foia.status != 'started' and foia.status != 'submitted' %}
-    {% if user_can_edit %}
+  <header>
+    <dfn>Status</dfn>
+    {% if foia.status != 'submitted' and user_can_edit %}
+      <div class="small action" id="edit-status" data-manager=".status-manager">Edit</div>
+    {% endif %}
+  </header>
+  <span class="badge state {{ foia.status|classify_status }}">{{foia.get_status_display}}</span>
+  {% if foia.status != 'submitted' and user_can_edit %}
     <form method="post" class="status-form" id="status-form">
-        {% csrf_token %}
-        <select name="status">
+      {% csrf_token %}
+      <select name="status">
         {% for choice in status_choices %}
-            <option value="{{ choice|first }}" {% if choice|first == foia.status %}selected{% endif %}>{{ choice|last }}</option>
+          <option value="{{ choice|first }}" {% if choice|first == foia.status %}selected{% endif %}>{{ choice|last }}</option>
         {% endfor %}
-        </select>
-        <footer>
-            <button type="submit" name="action" value="status" class="primary button">Save</button>
-            <button class="cancel button" id="cancel-status">Cancel</button>
-        </footer>
+      </select>
+      <footer>
+        <button type="submit" name="action" value="status" class="primary button">Save</button>
+        <button class="cancel button" id="cancel-status">Cancel</button>
+      </footer>
     </form>
-    {% endif %}
-    {% endif %}
+  {% endif %}
 </section>

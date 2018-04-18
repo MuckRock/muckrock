@@ -70,7 +70,6 @@ from muckrock.task.models import (
 )
 from muckrock.utils import new_action
 
-STATUS_NODRAFT = [st for st in STATUS if st != ('started', 'Draft')]
 AGENCY_STATUS = [
     ('processed', 'Further Response Coming'),
     ('fix', 'Fix Required'),
@@ -97,8 +96,7 @@ class Detail(DetailView):
         super(Detail, self).__init__(*args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
-        """If request is a draft, then redirect to drafting interface"""
-        # XXX
+        """Handle forms"""
         foia = self.get_object()
         self.admin_fix_form = FOIAAdminFixForm(
             prefix='admin_fix',
@@ -120,16 +118,8 @@ class Detail(DetailView):
                 # if their is a form error, continue onto the GET path
                 # and show the invalid form with errors displayed
                 return self.get(request, *args, **kwargs)
-        if foia.status == 'started':
-            return redirect(
-                'foia-draft',
-                jurisdiction=foia.jurisdiction.slug,
-                jidx=foia.jurisdiction.id,
-                slug=foia.slug,
-                idx=foia.id
-            )
-        else:
-            return super(Detail, self).dispatch(request, *args, **kwargs)
+
+        return super(Detail, self).dispatch(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
         """Get the FOIA Request"""
@@ -190,7 +180,6 @@ class Detail(DetailView):
         user_can_embargo = foia.has_perm(self.request.user, 'embargo')
         is_past_due = foia.date_due < timezone.now().date(
         ) if foia.date_due else False
-        include_draft = user.is_staff or foia.status == 'started'
         context['all_tags'] = Tag.objects.all()
         context['past_due'] = is_past_due
         context['user_can_edit'] = user_can_edit
@@ -230,7 +219,7 @@ class Detail(DetailView):
         )
         context['embargo_needs_date'] = foia.status in END_STATUS
         context['user_actions'] = foia.user_actions(user)
-        context['status_choices'] = STATUS if include_draft else STATUS_NODRAFT
+        context['status_choices'] = STATUS
         context['show_estimated_date'] = foia.status not in [
             'submitted', 'ack', 'done', 'rejected'
         ]
@@ -345,12 +334,11 @@ class Detail(DetailView):
         status = request.POST.get('status')
         old_status = foia.get_status_display()
         has_perm = foia.has_perm(request.user, 'change')
-        user_editable = has_perm and status in [s for s, _ in STATUS_NODRAFT]
+        user_editable = has_perm and status in [s for s, _ in STATUS]
         staff_editable = request.user.is_staff and status in [
             s for s, _ in STATUS
         ]
-        if foia.status not in ['started', 'submitted'
-                               ] and (user_editable or staff_editable):
+        if foia.status != 'submitted' and (user_editable or staff_editable):
             foia.status = status
             foia.save(comment='status updated')
             StatusChangeTask.objects.create(
@@ -830,31 +818,12 @@ class Detail(DetailView):
 class MultiDetail(DetailView):
     """Detail view for multi requests"""
     model = FOIAMultiRequest
-    context_object_name = 'multi'
     query_pk_and_slug = True
-
-    def __init__(self, *args, **kwargs):
-        super(MultiDetail, self).__init__(*args, **kwargs)
-        self._obj = None
 
     def dispatch(self, request, *args, **kwargs):
         """If request is a draft, then redirect to drafting interface"""
-        foia = self.get_object()
-        if foia.status == 'started':
-            return redirect('foia-multi-draft', slug=foia.slug, idx=foia.id)
-        else:
-            return super(MultiDetail, self).dispatch(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        """Add extra context data"""
-        context = super(MultiDetail, self).get_context_data(**kwargs)
-        multi = context['multi']
-        context['foias'] = (
-            multi.foias.get_viewable(self.request.user).select_related_view()
-        )
-        if not context['foias'] and multi.user != self.request.user:
-            raise Http404
-        return context
+        multi = self.get_object()
+        return redirect(multi.composer)
 
 
 class ComposerDetail(DetailView):

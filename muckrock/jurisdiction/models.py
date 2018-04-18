@@ -42,8 +42,8 @@ class RequestHelper(object):
     def fee_rate(self):
         """Get the percentage of requests that have a fee."""
         requests = self.get_requests()
-        filed = float(requests.get_submitted().count())
-        fee = float(requests.get_submitted().filter(price__gt=0).count())
+        filed = float(requests.count())
+        fee = float(requests.filter(price__gt=0).count())
         rate = 0
         if filed > 0:
             rate = fee / filed * 100
@@ -52,7 +52,7 @@ class RequestHelper(object):
     def success_rate(self):
         """Get the percentage of requests that are successful."""
         requests = self.get_requests()
-        filed = float(requests.get_submitted().count())
+        filed = float(requests.count())
         completed = float(requests.get_done().count())
         rate = 0
         if filed > 0:
@@ -211,7 +211,7 @@ class Jurisdiction(models.Model, RequestHelper):
             )
         else:
             requests = FOIARequest.objects.filter(agency__jurisdiction=self)
-        return requests.exclude(status='started')
+        return requests
 
     class Meta:
         ordering = ['name']

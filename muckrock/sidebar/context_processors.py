@@ -10,7 +10,7 @@ from datetime import timedelta
 
 # MuckRock
 from muckrock.accounts.models import Profile
-from muckrock.foia.models import FOIARequest
+from muckrock.foia.models import FOIAComposer, FOIARequest
 from muckrock.news.models import Article
 from muckrock.project.models import Project
 from muckrock.sidebar.models import Broadcast
@@ -25,7 +25,7 @@ def get_recent_articles():
 def get_actionable_requests(user):
     """Gets requests that require action or attention"""
     requests = FOIARequest.objects.filter(composer__user=user)
-    started = requests.filter(status='started').count()
+    started = FOIAComposer.objects.filter(user=user, status='started').count()
     payment = requests.filter(status='payment').count()
     fix = requests.filter(status='fix').count()
     return {

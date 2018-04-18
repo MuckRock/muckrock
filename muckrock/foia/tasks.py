@@ -199,58 +199,6 @@ def set_document_cloud_pages(doc_pk, **kwargs):
 @task(
     ignore_result=True,
     max_retries=10,
-    name='muckrock.foia.tasks.submit_multi_request'
-)
-def submit_multi_request(req_pk, **kwargs):
-    """Submit a multi request to all agencies"""
-    # pylint: disable=unused-argument
-    req = FOIAMultiRequest.objects.get(pk=req_pk)
-
-    # break the agencies into chunks of 50 to not timeout the database
-    agencies = req.agencies.all()
-    agency_chunks = [
-        agencies[i * 50:(i + 1) * 50]
-        for i in xrange(agencies.count() / 50 + 1)
-    ]
-
-    for agency_chunk in agency_chunks:
-        for agency in agency_chunk:
-            # make a copy of the foia (and its communication) for each agency
-            title = '%s (%s)' % (req.title, agency.name)
-            template = get_template('text/foia/request.txt')
-            context = {
-                'document_request': req.requested_docs,
-                'jurisdiction': agency.jurisdiction,
-                'user_name': req.user.get_full_name(),
-            }
-            foia_request = template.render(context).strip()
-
-            new_foia = FOIARequest.objects.create(
-                status='started',
-                title=title,
-                slug=slugify(title),
-                agency=agency,
-                embargo=req.embargo,
-            )
-            new_foia.tags.set(*req.tags.all())
-
-            FOIACommunication.objects.create(
-                foia=new_foia,
-                from_user=new_foia.user,
-                to_user=new_foia.get_to_user(),
-                date=timezone.now(),
-                response=False,
-                communication=foia_request,
-            )
-
-            new_foia.submit()
-    req.status = 'filed'
-    req.save()
-
-
-@task(
-    ignore_result=True,
-    max_retries=10,
     name='muckrock.foia.tasks.submit_composer'
 )
 def submit_composer(composer_pk, approve, contact_info, **kwargs):

@@ -47,7 +47,6 @@ from muckrock.foia.models import (
 from muckrock.foia.tasks import (
     autoimport,
     set_document_cloud_pages,
-    submit_multi_request,
     upload_document_cloud,
 )
 from muckrock.portal.models import Portal

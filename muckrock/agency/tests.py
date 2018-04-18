@@ -164,7 +164,7 @@ class TestAgencyUnit(TestCase):
         nose.tools.assert_not_in('from_user', proxy_info)
         nose.tools.assert_not_in('warning', proxy_info)
 
-        proxy_placeholder = UserFactory(username='proxy_placeholder')
+        proxy_placeholder = UserFactory(username='Proxy')
         agency_ = AgencyFactory(requires_proxy=True)
         proxy_info = agency_.get_proxy_info()
         eq_(proxy_info['proxy'], True)
@@ -301,6 +301,7 @@ class TestAgencyForm(TestCase):
         self.form = AgencyForm(
             {
                 'name': self.agency.name,
+                'jurisdiction': self.agency.jurisdiction.pk,
                 'portal_type': 'other',
             },
             instance=self.agency,

@@ -542,34 +542,6 @@ class AgencyRequestList(RequestList):
 
 
 @class_view_decorator(login_required)
-class MyMultiRequestList(MRFilterListView):
-    """View requests owned by current user"""
-    model = FOIAMultiRequest
-    filter_class = MyFOIAMultiRequestFilterSet
-    title = 'Multirequests'
-    template_name = 'foia/multirequest_list.html'
-
-    def dispatch(self, *args, **kwargs):
-        """Basic users cannot access this view"""
-        if self.request.user.is_authenticated and not self.request.user.profile.is_advanced(
-        ):
-            err_msg = (
-                'Multirequests are a pro feature. '
-                '<a href="%(settings_url)s">Upgrade today!</a>' % {
-                    'settings_url': reverse('accounts')
-                }
-            )
-            messages.error(self.request, err_msg)
-            return redirect('foia-mylist')
-        return super(MyMultiRequestList, self).dispatch(*args, **kwargs)
-
-    def get_queryset(self):
-        """Limit to just requests owned by the current user."""
-        queryset = super(MyMultiRequestList, self).get_queryset()
-        return queryset.filter(user=self.request.user)
-
-
-@class_view_decorator(login_required)
 class FollowingRequestList(RequestList):
     """List of all FOIA requests the user is following"""
     title = 'Requests You Follow'

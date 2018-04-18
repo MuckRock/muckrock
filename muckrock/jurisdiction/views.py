@@ -124,7 +124,7 @@ def collect_stats(obj, context):
     )
     context.update({'num_%s' % s: c for s, c in status_counts})
     context['num_overdue'] = requests.get_overdue().count()
-    context['num_submitted'] = requests.get_submitted().count()
+    context['num_submitted'] = requests.count()
 
 
 def detail(request, fed_slug, state_slug, local_slug):
