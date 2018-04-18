@@ -402,10 +402,14 @@ $('document').ready(function(){
       $(".contact-info #id_other_fax").removeAttr("required");
     }
     if($(this).val() === "snail") {
-      $(".contact-info .info span").text(
-        "will be submitted via mail to " +
-        $(".contact-info .info").data("address") + "."
-      );
+      if($(".contact-info .info").data("address")) {
+        $(".contact-info .info span").text(
+          "will be submitted via mail to " +
+          $(".contact-info .info").data("address") + "."
+        );
+      } else {
+        $(".contact-info .info span").text("will be submitted via mail.");
+      }
     } else if($(this).val() == "portal") {
       var portal_url = $(".contact-info .info").data("portal-url");
       $(".contact-info .info span").text(

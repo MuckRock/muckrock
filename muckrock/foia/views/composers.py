@@ -8,6 +8,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect
@@ -64,6 +65,10 @@ class GenericComposer(BuyRequestsMixin):
             org = self.request.user.profile.get_org()
             if org is not None:
                 requests_left['org'] = org.get_requests()
+            context['sidebar_admin_url'] = reverse(
+                'admin:foia_foiacomposer_change',
+                args=(self.object.pk,),
+            )
         else:
             foias_filed = 0
             requests_left = {}
