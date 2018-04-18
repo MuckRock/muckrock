@@ -36,6 +36,7 @@ STATUS = [
 
 class FOIAComposer(models.Model):
     """A FOIA request composer"""
+    # pylint: disable=too-many-instance-attributes
 
     user = models.ForeignKey(User, related_name='composers')
     title = models.CharField(max_length=255)
