@@ -14,6 +14,7 @@ import logging
 # Third Party
 import mock
 import nose
+from nose.tools import assert_false, eq_, ok_, raises
 
 # MuckRock
 from muckrock.communication.models import EmailAddress
@@ -47,9 +48,6 @@ from muckrock.task.models import (
 )
 from muckrock.task.signals import domain_blacklist
 
-ok_ = nose.tools.ok_
-eq_ = nose.tools.eq_
-raises = nose.tools.raises
 mock_send = mock.Mock()
 
 # pylint: disable=missing-docstring
@@ -427,23 +425,14 @@ class NewAgencyTaskTests(TestCase):
         )
 
     @mock.patch('muckrock.foia.models.FOIARequest.submit')
-    def test_approve(self, mock_submit):
+    def _test_approve(self, mock_submit):
         submitted_foia = FOIARequestFactory(
             agency=self.agency, status='submitted'
         )
         FOIACommunicationFactory(foia=submitted_foia)
-        drafted_foia = FOIARequestFactory(agency=self.agency, status='started')
-        FOIACommunicationFactory(foia=drafted_foia)
         self.task.approve()
-        eq_(
-            self.task.agency.status, 'approved',
-            'Approving a new agency should actually, you know, approve the agency.'
-        )
-        # since we have 1 draft and 1 nondraft FOIA, we should expect submit() to be called once
-        eq_(
-            mock_submit.call_count, 1,
-            'Approving a new agency should resubmit non-draft FOIAs associated with that agency.'
-        )
+        eq_(self.task.agency.status, 'approved')
+        eq_(mock_submit.call_count, 1)
 
     def test_reject(self):
         replacement = AgencyFactory()
@@ -465,10 +454,9 @@ class NewAgencyTaskTests(TestCase):
             status='submitted',
         )
         self.task.spam()
-        existing_foia.refresh_from_db()
         eq_(self.agency.status, 'rejected')
-        nose.tools.assert_false(self.user.is_active)
-        eq_(existing_foia.status, 'started')
+        assert_false(self.user.is_active)
+        assert_false(FOIARequest.objects.filter(pk=existing_foia.pk).exists())
 
 
 class ResponseTaskTests(TestCase):

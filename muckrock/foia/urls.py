@@ -52,9 +52,6 @@ urlpatterns = [
         views.ComposerList.as_view(),
         name='foia-mylist-drafts',
     ),
-    # XXX new list views
-    # - List of all (composer) drafts
-    # - List of all composers that have multiple requests?
 
     # Create and Draft Views
     url(r'^create/$', views.CreateComposer.as_view(), name='foia-create'),
@@ -99,7 +96,7 @@ urlpatterns = [
         views.toggle_autofollowups,
         name='foia-toggle-followups',
     ),
-    # XXX redirect to composer
+    # This just redirects to the composer
     url(
         r'^multi/(?P<slug>[\w\d_-]+)-(?P<pk>\d+)/$',
         views.MultiDetail.as_view(),

@@ -229,17 +229,6 @@ class TestFOIARequestUnit(TestCase):
         )
         nose.tools.eq_(foia._followup_days(), num_days)
 
-    # manager
-    def test_manager_get_submitted(self):
-        """Test the FOIA Manager's get_submitted method"""
-
-        submitted_foias = FOIARequest.objects.get_submitted()
-        for foia in FOIARequest.objects.all():
-            if foia in submitted_foias:
-                nose.tools.ok_(foia.status != 'started')
-            else:
-                nose.tools.ok_(foia.status == 'started')
-
     def test_manager_get_done(self):
         """Test the FOIA Manager's get_done method"""
 
@@ -250,7 +239,6 @@ class TestFOIARequestUnit(TestCase):
             else:
                 nose.tools.assert_in(
                     foia.status, [
-                        'started',
                         'submitted',
                         'processed',
                         'fix',
@@ -382,122 +370,6 @@ class TestFOIAFunctional(TestCase):
                 }
             )
         )
-
-    def _test_unallowed_views(self):
-        """Test private views while not logged in"""
-
-        foia = FOIARequestFactory()
-        get_post_unallowed(
-            self.client,
-            reverse(
-                'foia-draft',
-                kwargs={
-                    'jurisdiction': foia.jurisdiction.slug,
-                    'jidx': foia.jurisdiction.pk,
-                    'idx': foia.pk,
-                    'slug': foia.slug
-                }
-            )
-        )
-
-    def _test_auth_views(self):
-        """Test private views while logged in"""
-
-        foia = FOIARequestFactory(status='started')
-        self.client.login(username='adam', password='abc')
-
-        # get authenticated pages
-        get_allowed(self.client, reverse('foia-create'))
-
-        get_allowed(
-            self.client,
-            reverse(
-                'foia-draft',
-                kwargs={
-                    'jurisdiction': foia.jurisdiction.slug,
-                    'jidx': foia.jurisdiction.pk,
-                    'idx': foia.pk,
-                    'slug': foia.slug
-                }
-            )
-        )
-
-        get_404(
-            self.client,
-            reverse(
-                'foia-draft',
-                kwargs={
-                    'jurisdiction': foia.jurisdiction.slug,
-                    'jidx': foia.jurisdiction.pk,
-                    'idx': foia.pk,
-                    'slug': 'bad_slug'
-                }
-            )
-        )
-
-    def _test_foia_submit_views(self):
-        """Test submitting a FOIA request"""
-
-        foia = FOIARequestFactory(
-            status='started',
-            composer__user__password='abc',
-        )
-        FOIACommunicationFactory(foia=foia)
-        self.client.login(username=foia.composer.user.username, password='abc')
-
-        foia_data = {
-            'title': foia.title,
-            'request': 'updated request',
-            'submit': 'Submit',
-            'agency': foia.agency.pk,
-            'combo-name': foia.agency.name,
-        }
-        kwargs = {
-            'jurisdiction': foia.jurisdiction.slug,
-            'jidx': foia.jurisdiction.pk,
-            'idx': foia.pk,
-            'slug': foia.slug,
-        }
-        draft = reverse('foia-draft', kwargs=kwargs)
-        detail = reverse('foia-detail', kwargs=kwargs)
-        post_allowed(self.client, draft, foia_data, detail)
-
-        foia.refresh_from_db()
-        nose.tools.ok_(foia.first_request().startswith('updated request'))
-        nose.tools.eq_(foia.status, 'ack')
-
-    def _test_foia_save_views(self):
-        """Test saving a FOIA request"""
-
-        foia = FOIARequestFactory(composer__user__password='abc')
-        self.client.login(username=foia.composer.user.username, password='abc')
-
-        foia_data = {
-            'title': 'Test 6',
-            'request': 'saved request',
-            'submit': 'Save'
-        }
-
-        kwargs = {
-            'jurisdiction': foia.jurisdiction.slug,
-            'jidx': foia.jurisdiction.pk,
-            'idx': foia.pk,
-            'slug': foia.slug
-        }
-        draft = reverse(
-            'foia-draft', kwargs=kwargs
-        ).replace('http://testserver', '')
-        detail = reverse(
-            'foia-detail', kwargs=kwargs
-        ).replace('http://testserver', '')
-        chain = [(url, 302) for url in (detail, draft)]
-        response = self.client.post(draft, foia_data, follow=True)
-        nose.tools.eq_(response.status_code, 200)
-        nose.tools.eq_(response.redirect_chain, chain)
-
-        foia.refresh_from_db()
-        nose.tools.ok_(foia.first_request().startswith('saved request'))
-        nose.tools.eq_(foia.status, 'started')
 
     def test_action_views(self):
         """Test action views"""

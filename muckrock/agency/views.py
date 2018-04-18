@@ -66,7 +66,7 @@ def detail(request, jurisdiction, jidx, slug, idx):
 
     foia_requests = agency.get_requests()
     foia_requests = (
-        foia_requests.get_viewable(request.user).get_submitted()
+        foia_requests.get_viewable(request.user)
         .filter(agency=agency).select_related(
             'agency__jurisdiction__parent__parent',
         ).order_by('-composer__datetime_submitted')[:10]

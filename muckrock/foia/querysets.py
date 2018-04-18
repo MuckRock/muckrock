@@ -23,10 +23,6 @@ class FOIARequestQuerySet(models.QuerySet):
 
     # pylint: disable=too-many-public-methods
 
-    def get_submitted(self):
-        """Get all submitted FOIA requests"""
-        return self.exclude(status='started')
-
     def get_done(self):
         """Get all FOIA requests with responses"""
         return (
@@ -42,11 +38,10 @@ class FOIARequestQuerySet(models.QuerySet):
 
         if user.is_authenticated():
             # Requests are visible if you own them, have view or edit permissions,
-            # or if they are not drafts and not embargoed
+            # or if they are not embargoed
             query = (
                 Q(composer__user=user) | Q(edit_collaborators=user)
-                | Q(read_collaborators=user) |
-                (~Q(status='started') & ~Q(embargo=True))
+                | Q(read_collaborators=user) | ~Q(embargo=True)
             )
             # agency users may also view requests for their agency
             if user.profile.acct_type == 'agency':
@@ -60,8 +55,8 @@ class FOIARequestQuerySet(models.QuerySet):
                 )
             return self.filter(query)
         else:
-            # anonymous user, filter out drafts and embargoes
-            return self.exclude(status='started').exclude(embargo=True)
+            # anonymous user, filter out embargoes
+            return self.exclude(embargo=True)
 
     def get_public(self):
         """Get all publically viewable FOIA requests"""
@@ -103,7 +98,6 @@ class FOIARequestQuerySet(models.QuerySet):
                 'agency', 'jurisdiction', 'jurisdiction__parent',
                 'jurisdiction__parent__parent'
             ).filter(composer__user__profile__organization=organization)
-            .exclude(status='started')
             .order_by('-composer__datetime_submitted')
         )
 
@@ -205,7 +199,7 @@ class FOIARequestQuerySet(models.QuerySet):
             date_due = None
         proxy_info = agency.get_proxy_info()
         foia = self.create(
-            status='started',
+            status='submitted',
             title=title,
             slug=slugify(title),
             agency=agency,

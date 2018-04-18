@@ -346,9 +346,10 @@ class Homepage(object):
 
     def stats(self):
         """Get some stats to show on the front page"""
+        # pylint: disable=unnecessary-lambda
         return {
             'request_count':
-                lambda: FOIARequest.objects.exclude(status='started').count(),
+                lambda: FOIARequest.objects.count(),
             'completed_count':
                 lambda: FOIARequest.objects.get_done().count(),
             'page_count':
