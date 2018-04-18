@@ -88,7 +88,7 @@ class BaseComposerForm(forms.ModelForm):
 
     # XXX this should be a sub form?
     register_full_name = forms.CharField(label='Full Name or Handle (Public)')
-    register_email = forms.EmailField(max_length=75)
+    register_email = forms.EmailField(max_length=75, label='Email')
     register_newsletter = forms.BooleanField(
         initial=True,
         required=False,

@@ -165,7 +165,6 @@ $(document).ready(function(){
             setContactInfoOptions($("#id_fax"), data.faxes);
           }
           showOrigContactInfo();
-          $("#id_use_contact_information").val(true);
           $("#id_email").prop("disabled", "");
           $("#id_fax").prop("disabled", "");
           $(".contact-info").show();

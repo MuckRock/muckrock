@@ -21,6 +21,7 @@ from itertools import groupby, izip_longest
 
 # MuckRock
 from muckrock.accounts.models import Profile
+from muckrock.agency.utils import initial_communication_template
 from muckrock.communication.models import (
     EmailAddress,
     EmailError,
@@ -33,7 +34,6 @@ from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import support
 from muckrock.models import ExtractDay
 from muckrock.organization.models import Organization
-from muckrock.task.forms import ResponseTaskForm
 from muckrock.task.querysets import (
     CrowdfundTaskQuerySet,
     FlaggedTaskQuerySet,
@@ -657,22 +657,37 @@ class NewAgencyTask(Task):
 
     def approve(self):
         """Approves agency, resends pending requests to it"""
-        self.agency.status = 'approved'
-        self.agency.save()
-        # resubmit each foia associated to this agency
-        for foia in self.agency.foiarequest_set.exclude(status='started'):
-            if foia.communications.exists():
-                foia.submit(clear=True)
+        self._resolve_agency()
 
     def reject(self, replacement_agency):
         """Resends pending requests to replacement agency"""
-        self.agency.status = 'rejected'
+        self._resolve_agency(replacement_agency)
+
+    def _resolve_agency(self, replacement_agency=None):
+        """Approves or rejects an agency and re-submits the pending requests"""
+        if replacement_agency:
+            self.agency.status = 'rejected'
+            proxy_info = replacement_agency.get_proxy_info()
+        else:
+            self.agency.status = 'approved'
+            proxy_info = self.agency.get_proxy_info()
         self.agency.save()
         for foia in self.agency.foiarequest_set.all():
             # first switch foia to use replacement agency
-            foia.agency = replacement_agency
-            foia.save(comment='new agency task')
-            if foia.communications.exists() and foia.status != 'started':
+            if replacement_agency:
+                foia.agency = replacement_agency
+                foia.save(comment='new agency task')
+            if foia.communications.exists():
+                # regenerate communication text in case jurisdiction changed
+                comm = foia.communications.first()
+                comm.communication = initial_communication_template(
+                    [foia.agency],
+                    comm.from_user.get_full_name(),
+                    foia.composer.requested_docs,
+                    edited_boilerplate=foia.composer.edited_boilerplate,
+                    proxy=proxy_info['proxy'],
+                )
+                comm.save()
                 foia.submit(clear=True)
 
     def spam(self):
@@ -708,6 +723,7 @@ class ResponseTask(Task):
 
     def set_status(self, status):
         """Forward to form logic, for use in classify_status task"""
+        from muckrock.task.forms import ResponseTaskForm
         form = ResponseTaskForm()
         form.set_status(status, set_foia=True, comms=[self.communication])
 

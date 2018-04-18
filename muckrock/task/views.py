@@ -55,6 +55,7 @@ from muckrock.task.forms import (
     BulkNewAgencyTaskFormSet,
     FlaggedTaskForm,
     ProjectReviewTaskForm,
+    ReplaceNewAgencyForm,
     ResponseTaskForm,
     ReviewAgencyTaskForm,
     StaleAgencyTaskForm,
@@ -150,13 +151,8 @@ class TaskList(MRFilterListView):
         ).count()
         context['asignees'] = User.objects.filter(is_staff=True
                                                   ).order_by('last_name')
-        # These are for fine-uploader
-        context['MAX_ATTACHMENT_NUM'] = settings.MAX_ATTACHMENT_NUM
-        context['MAX_ATTACHMENT_SIZE'] = settings.MAX_ATTACHMENT_SIZE
-        context['ALLOWED_FILE_MIMES'] = settings.ALLOWED_FILE_MIMES
-        context['ALLOWED_FILE_EXTS'] = settings.ALLOWED_FILE_EXTS
-        context['AWS_STORAGE_BUCKET_NAME'] = settings.AWS_STORAGE_BUCKET_NAME
-        context['AWS_ACCESS_KEY_ID'] = settings.AWS_ACCESS_KEY_ID
+        # this is for fine-uploader
+        context['settings'] = settings
         return context
 
     @method_decorator(user_passes_test(lambda u: u.is_staff))
@@ -442,22 +438,23 @@ class NewAgencyTaskList(TaskList):
                 form_data['phone'] = unicode(form_data['phone'])
             if form_data.get('fax'):
                 form_data['fax'] = unicode(form_data['fax'])
+            if form_data.get('jurisdiction'):
+                form_data['jurisdiction'] = form_data['jurisdiction'].pk
             form_data.update({'approve': True})
             task.resolve(request.user, form_data)
         elif request.POST.get('reject'):
-            replacement_agency_id = request.POST.get('replacement')
-            replacement_agency = get_object_or_404(
-                Agency, id=replacement_agency_id
-            )
-            if replacement_agency.status != 'approved':
-                messages.error(
-                    request,
-                    'Replacement agency must be an "approved" agency.',
-                )
+            form = ReplaceNewAgencyForm(request.POST)
+            if form.is_valid():
+                replace_agency = form.cleaned_data['replace_agency']
+                task.reject(replace_agency)
+                form_data = {
+                    'reject': True,
+                    'replace_agency': replace_agency.pk
+                }
+                task.resolve(request.user, form_data)
+            else:
+                messages.error(request, 'Bad form data')
                 return
-            task.reject(replacement_agency)
-            form_data = {'reject': True, 'replacement': replacement_agency_id}
-            task.resolve(request.user, form_data)
         elif request.POST.get('spam'):
             task.spam()
             form_data = {'spam': True}

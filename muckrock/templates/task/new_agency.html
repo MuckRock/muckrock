@@ -49,16 +49,7 @@
         <main class="textbox__section">
           {% csrf_token %}
           <input type="hidden" name="task" value="{{task.pk}}">
-
           {{ replace_form }}
-
-          <label>Move this agency’s requests to:</label>
-          <select name="replacement">
-            {% for other_agency in task.agency.jurisdiction.other_agencies %}
-              <option value="{{ other_agency.id }}">{{ other_agency.name }}</option>
-            {% endfor %}
-          </select>
-
         </main>
         <footer class="textbox__footer">
           <button type="submit" name="spam" value="true" class="spam failure button">Mark as Spam &amp; Block</button>

@@ -97,7 +97,6 @@ class FOIAComposer(models.Model):
         # TODO assuming only the owner can submit
         # TODO get the contact info to the actual foia submit
         from muckrock.foia.tasks import submit_composer
-        print 'submit', contact_info
 
         num_requests = self.agencies.count()
         request_count = self.user.profile.make_requests(num_requests)
@@ -118,7 +117,6 @@ class FOIAComposer(models.Model):
 
     def approved(self, contact_info=None):
         """A pending composer is approved for sending to the agencies"""
-        print 'approved', contact_info
         for agency in self.agencies.select_related(
             'jurisdiction__law',
             'jurisdiction__parent__law',
