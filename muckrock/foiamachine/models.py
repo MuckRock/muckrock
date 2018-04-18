@@ -18,8 +18,11 @@ from datetime import timedelta
 from django_hosts.resolvers import reverse
 
 # MuckRock
-from muckrock.foia.models import END_STATUS, STATUS
+from muckrock.foia.models import STATUS as MR_STATUS
+from muckrock.foia.models import END_STATUS
 from muckrock.utils import generate_key
+
+STATUS = [('started', 'Draft')] + MR_STATUS
 
 
 class FoiaMachineRequest(models.Model):

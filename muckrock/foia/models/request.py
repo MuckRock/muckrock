@@ -44,8 +44,6 @@ from muckrock.tags.models import Tag, TaggedItemBase, parse_tags
 logger = logging.getLogger(__name__)
 
 STATUS = [
-    ('started',
-     'Draft'),  # TODO this status is removed (what to do for foia machine?)
     ('submitted', 'Processing'),
     ('ack', 'Awaiting Acknowledgement'),
     ('processed', 'Awaiting Response'),

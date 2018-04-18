@@ -86,7 +86,7 @@ def store_statistics():
             'total_requests_denied':
                 FOIARequest.objects.filter(status='rejected').count(),
             'total_requests_draft':
-                FOIARequest.objects.filter(status='started').count(),
+                0,  # draft is no longer a valid status
             'total_requests_submitted':
                 FOIARequest.objects.filter(status='submitted').count(),
             'total_requests_awaiting_ack':
@@ -109,6 +109,14 @@ def store_statistics():
                 FOIARequest.objects.filter(status='lawsuit').count(),
             'requests_processing_days':
                 FOIARequest.objects.get_processing_days(),
+            'total_composers':
+                FOIAComposer.objects.count(),
+            'total_composers_draft':
+                FOIAComposer.objects.filter(status='started'),
+            'total_composers_submitted':
+                FOIAComposer.objects.filter(status='submitted'),
+            'total_composers_filed':
+                FOIAComposer.objects.filter(status='filed'),
             'sent_communications_portal':
                 PortalCommunication.objects.filter(
                     communication__date__range=(
