@@ -9,6 +9,9 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.html import linebreaks
 
+# Standard Library
+import re
+
 # Third Party
 import django_filters
 from fuzzywuzzy import fuzz, process
@@ -211,7 +214,16 @@ def similar(request):
 def boilerplate(request):
     """Return the boilerplate language for requests to the given agency"""
 
-    agencies = Agency.objects.filter(pk__in=request.GET.getlist('agencies'))
+    p_new = re.compile(r'\$new\$[^$]+\$[0-9]+\$')
+    p_int = re.compile(r'[0-9]+')
+    agency_pks = request.GET.getlist('agencies')
+    new_agency_pks = [a for a in agency_pks if p_new.match(a)]
+    other_agency_pks = [a for a in agency_pks if p_int.match(a)]
+
+    agencies = Agency.objects.filter(pk__in=other_agency_pks)
+    extra_jurisdictions = Jurisdiction.objects.filter(
+        pk__in=[i.split('$')[3] for i in new_agency_pks]
+    )
     if request.user.is_authenticated:
         user_name = request.user.get_full_name()
     else:
@@ -224,6 +236,7 @@ def boilerplate(request):
         agencies,
         user_name,
         split_token,
+        extra_jurisdictions=extra_jurisdictions,
         edited_boilerplate=False,
         proxy=False,
         html=True,
@@ -273,5 +286,5 @@ def contact_info(request, idx):
                 unicode(agency.fax)
                 if agency.fax and agency.fax.status == 'good' else None,
             'address':
-                unicode(agency.address),
+                unicode(agency.address) if agency.address else None,
         })

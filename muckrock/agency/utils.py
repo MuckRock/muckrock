@@ -15,6 +15,9 @@ def initial_communication_template(
     """
 
     jurisdictions = set(a.jurisdiction.legal for a in agencies)
+    jurisdictions = jurisdictions.union(
+        j.legal for j in kwargs.get('extra_jurisdictions', [])
+    )
     if len(jurisdictions) == 1:
         jurisdiction = jurisdictions.pop()
     elif kwargs.get('html'):

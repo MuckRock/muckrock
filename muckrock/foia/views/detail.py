@@ -861,6 +861,10 @@ class ComposerDetail(DetailView):
         context = super(ComposerDetail, self).get_context_data(**kwargs)
         composer = context['composer']
         context['foias'] = self.foias
+        context['sidebar_admin_url'] = reverse(
+            'admin:foia_foiacomposer_change',
+            args=(composer.pk,),
+        )
         if composer.status == 'submitted':
             communication = initial_communication_template(
                 composer.agencies.all(),
