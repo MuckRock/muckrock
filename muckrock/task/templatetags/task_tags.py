@@ -142,6 +142,12 @@ class NewAgencyTaskNode(TaskNode):
             instance=self.task.agency,
             initial=initial,
         )
+        extra_context['replace_form'] = task.forms.ReplaceNewAgencyForm(
+            initial={
+                'replace_jurisdiction': self.task.agency.jurisdiction
+            }
+        )
+
         return extra_context
 
 

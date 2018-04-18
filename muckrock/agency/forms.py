@@ -4,6 +4,7 @@
 from django import forms
 
 # Third Party
+from autocomplete_light import shortcuts as autocomplete_light
 from localflavor.us.forms import USZipCodeField
 from localflavor.us.us_states import STATE_CHOICES
 from phonenumber_field.formfields import PhoneNumberField
@@ -18,12 +19,17 @@ from muckrock.agency.models import (
 )
 from muckrock.communication.models import Address, EmailAddress, PhoneNumber
 from muckrock.fields import FullEmailField
+from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.portal.models import PORTAL_TYPES, Portal
 
 
 class AgencyForm(forms.ModelForm):
     """A form for an Agency"""
 
+    jurisdiction = autocomplete_light.ModelChoiceField(
+        'JurisdictionAutocomplete',
+        queryset=Jurisdiction.objects.all(),
+    )
     address_suite = forms.CharField(
         required=False,
         widget=forms.TextInput(
@@ -147,6 +153,7 @@ class AgencyForm(forms.ModelForm):
         """Get the fields for rendering"""
         field_order = [
             'name',
+            'jurisdiction',
             'aliases',
             'address',
             'email',
@@ -166,6 +173,7 @@ class AgencyForm(forms.ModelForm):
         model = Agency
         fields = [
             'name',
+            'jurisdiction',
             'aliases',
             'email',
             'url',

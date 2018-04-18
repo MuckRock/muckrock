@@ -226,4 +226,19 @@ $('document').ready(function(){
     });
   });
 
+  // New Agency replacement agency chooser
+  $(".new-agency-forms .new-agency.red select[name=replace_jurisdiction]").change(function() {
+    var val = $(this).val();
+    var agency = $(this).closest("main").find(".autocomplete-light-widget.replace_agency");
+    if (val) {
+      agency.yourlabsWidget().autocomplete.data = {
+        'jurisdiction_id': val[0]
+      };
+    } else {
+      agency.yourlabsWidget().autocomplete.data = {};
+    }
+  });
+  $(".new-agency-forms .new-agency.red select[name=replace_jurisdiction]").change();
+      
+
 });

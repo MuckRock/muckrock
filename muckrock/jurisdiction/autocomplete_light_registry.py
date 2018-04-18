@@ -71,11 +71,22 @@ class JurisdictionAutocomplete(autocomplete_light.AutocompleteModelBase):
     choices = Jurisdiction.objects.filter(hidden=False).order_by(
         '-level', 'name'
     )
+    split_words = 'and'
     search_fields = ['^name', 'abbrev', 'parent__abbrev', 'aliases']
     attrs = {
         'data-autocomplete-minimum-characters': 1,
         'placeholder': 'Search jurisdictions',
     }
+
+    def _choices_for_request_conditions(self, query, search_fields):
+        """Strip out commas"""
+        return (
+            super(JurisdictionAutocomplete, self)
+            ._choices_for_request_conditions(
+                query.replace(',', ''),
+                search_fields,
+            )
+        )
 
 
 class JurisdictionStateInclusiveAutocomplete(

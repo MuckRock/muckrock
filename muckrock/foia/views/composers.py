@@ -53,11 +53,13 @@ class GenericComposer(BuyRequestsMixin):
         kwargs = super(GenericComposer, self).get_form_kwargs()
         kwargs['user'] = self.request.user
         if len(self.request.POST.getlist('agencies')) == 1:
+            # pass the agency for contact info form
             try:
                 kwargs['agency'] = Agency.objects.get(
                     pk=self.request.POST.get('agencies')
                 )
-            except Agency.DoesNotExist:
+            except (Agency.DoesNotExist, ValueError):
+                # ValueError for new agency format
                 pass
         return kwargs
 
@@ -101,7 +103,6 @@ class GenericComposer(BuyRequestsMixin):
             }
         else:
             contact_info = None
-        print 'view', contact_info
         try:
             composer.submit(contact_info)
         except InsufficientRequestsError:
@@ -216,9 +217,9 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
             user = self.request.user
         else:
             user = self.miniregister(
-                form.cleaned_data['full_name'],
-                form.cleaned_data['email'],
-                form.cleaned_data.get('newsletter'),
+                form.cleaned_data['register_full_name'],
+                form.cleaned_data['register_email'],
+                form.cleaned_data.get('register_newsletter'),
             )
         if form.cleaned_data['action'] in ('save', 'submit'):
             composer = form.save(commit=False)

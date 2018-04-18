@@ -33,7 +33,6 @@ class ComposerAgencyField(forms.ModelMultipleChoiceField):
                     self.user,
                 ).pk
             )
-        # TODO deal with exempt agencies
         existing_agencies = (
             super(ComposerAgencyField, self)._check_values(other)
         )

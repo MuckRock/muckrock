@@ -4,7 +4,6 @@ Forms for Task app
 
 # Django
 from django import forms
-from django.http import Http404
 
 # Standard Library
 import logging
@@ -14,6 +13,7 @@ from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
 from muckrock.accounts.models import Notification
+from muckrock.agency.models import Agency
 from muckrock.communication.utils import get_email_or_fax
 from muckrock.foia.models import STATUS
 from muckrock.jurisdiction.models import Jurisdiction
@@ -277,6 +277,17 @@ class IncomingPortalForm(ResponseTaskForm):
 
 
 class ReplaceNewAgencyForm(forms.Form):
+    """Form for rejecting and replacing a new agency"""
+    replace_jurisdiction = autocomplete_light.ModelChoiceField(
+        'JurisdictionAutocomplete',
+        queryset=Jurisdiction.objects.all(),
+    )
+    replace_agency = autocomplete_light.ModelChoiceField(
+        'AgencyAutocomplete',
+        label='Move this agency\'s requests to:',
+        queryset=Agency.objects.filter(status='approved'),
+    )
+
 
 class BulkNewAgencyTaskForm(forms.Form):
     """Form for creating blank new agencies"""
