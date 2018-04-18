@@ -4,7 +4,6 @@ Tests for Tasks views
 # Django
 from django.core.urlresolvers import reverse
 from django.test import Client, RequestFactory, TestCase
-from django.utils import timezone
 
 # Standard Library
 import logging
@@ -15,7 +14,6 @@ import nose
 
 # MuckRock
 from muckrock.agency.forms import AgencyForm
-from muckrock.communication.models import EmailAddress, EmailCommunication
 from muckrock.factories import AgencyFactory, UserFactory
 from muckrock.foia.factories import FOIARequestFactory
 from muckrock.foia.models import FOIANote

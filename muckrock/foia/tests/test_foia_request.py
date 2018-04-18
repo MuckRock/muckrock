@@ -3,10 +3,10 @@ Tests using nose for the FOIA application
 """
 
 # Django
-from django.contrib.auth.models import AnonymousUser, User
+from django.contrib.auth.models import AnonymousUser
 from django.core import mail
 from django.core.urlresolvers import reverse
-from django.test import RequestFactory, TestCase, TransactionTestCase
+from django.test import RequestFactory, TestCase
 from django.utils import timezone
 
 # Standard Library
@@ -29,7 +29,6 @@ from nose.tools import (
 )
 
 # MuckRock
-from muckrock.agency.models import Agency
 from muckrock.factories import (
     AgencyFactory,
     AppealAgencyFactory,
@@ -50,24 +49,18 @@ from muckrock.foia.views import (
     RequestList,
 )
 from muckrock.jurisdiction.factories import ExampleAppealFactory
-from muckrock.jurisdiction.models import Appeal, Jurisdiction
+from muckrock.jurisdiction.models import Appeal
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.task.factories import ResponseTaskFactory
 from muckrock.task.models import SnailMailTask, StatusChangeTask
 from muckrock.test_utils import http_post_response
-from muckrock.tests import (
-    get_404,
-    get_allowed,
-    get_post_unallowed,
-    post_allowed,
-)
+from muckrock.tests import get_404, get_allowed
 from muckrock.utils import new_action
 
 # allow methods that could be functions and too many public methods in tests
 # pylint: disable=too-many-public-methods
 # pylint: disable=too-many-lines
 # pylint: disable=invalid-name
-# pylint: disable=bad-mcs-method-argument
 
 
 class TestFOIARequestUnit(TestCase):

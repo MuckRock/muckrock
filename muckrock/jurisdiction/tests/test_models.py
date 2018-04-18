@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 # Standard Library
-from datetime import date, timedelta
+from datetime import timedelta
 
 # Third Party
 from nose.tools import eq_

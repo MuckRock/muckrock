@@ -9,7 +9,7 @@ from django.db.models import Q
 from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
-from muckrock.foia.models import FOIAComposer, FOIAMultiRequest, FOIARequest
+from muckrock.foia.models import FOIAComposer, FOIARequest
 
 
 class FOIARequestAutocomplete(autocomplete_light.AutocompleteModelTemplate):
@@ -63,17 +63,6 @@ autocomplete_light.register(
     search_fields=('title',),
     attrs={
         'placeholder': 'Search for requests',
-        'data-autocomplete-minimum-characters': 1
-    }
-)
-
-autocomplete_light.register(
-    FOIAMultiRequest,
-    name='FOIAMultiRequestAutocomplete',
-    choices=FOIAMultiRequest.objects.all(),
-    search_fields=('title',),
-    attrs={
-        'placeholder': 'Search for multirequests',
         'data-autocomplete-minimum-characters': 1
     }
 )

@@ -17,7 +17,7 @@ from autocomplete_light import shortcuts as autocomplete_light
 # MuckRock
 from muckrock.agency.models import Agency
 from muckrock.filters import BLANK_STATUS, NULL_BOOLEAN_CHOICES, RangeWidget
-from muckrock.foia.models import FOIAComposer, FOIAMultiRequest, FOIARequest
+from muckrock.foia.models import FOIAComposer, FOIARequest
 from muckrock.foia.models.composer import STATUS as COMPOSER_STATUS
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag
@@ -182,15 +182,6 @@ class MyFOIARequestFilterSet(JurisdictionFilterSet):
     class Meta:
         model = FOIARequest
         fields = ['status', 'agency', 'jurisdiction']
-
-
-class MyFOIAMultiRequestFilterSet(django_filters.FilterSet):
-    """Allows multirequests to be filtered by status."""
-    status = django_filters.ChoiceFilter(choices=BLANK_STATUS[:3])
-
-    class Meta:
-        model = FOIAMultiRequest
-        fields = ['status']
 
 
 class ProcessingFOIARequestFilterSet(JurisdictionFilterSet):

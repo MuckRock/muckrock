@@ -31,7 +31,6 @@ from muckrock.foia.filters import (
     AgencyFOIARequestFilterSet,
     ComposerFilterSet,
     FOIARequestFilterSet,
-    MyFOIAMultiRequestFilterSet,
     MyFOIARequestFilterSet,
     ProcessingFOIARequestFilterSet,
 )
@@ -43,7 +42,6 @@ from muckrock.foia.forms import (
 from muckrock.foia.models import (
     END_STATUS,
     FOIAComposer,
-    FOIAMultiRequest,
     FOIARequest,
     FOIASavedSearch,
 )
@@ -55,11 +53,7 @@ from muckrock.project.forms import ProjectManagerForm
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag, parse_tags
 from muckrock.utils import Echo
-from muckrock.views import (
-    MRFilterListView,
-    MRSearchFilterListView,
-    class_view_decorator,
-)
+from muckrock.views import MRSearchFilterListView, class_view_decorator
 
 
 class RequestExploreView(TemplateView):

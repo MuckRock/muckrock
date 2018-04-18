@@ -8,20 +8,17 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseBadRequest
-from django.shortcuts import get_object_or_404, redirect, render
-from django.template.defaultfilters import slugify
+from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
 from django.utils.encoding import smart_text
 from django.views.decorators.http import require_POST
-from django.views.generic import CreateView, FormView, UpdateView
+from django.views.generic import CreateView, UpdateView
 
 # Standard Library
 import re
-from datetime import date, timedelta
-from math import ceil
+from datetime import timedelta
 
 # MuckRock
 from muckrock.accounts.mixins import BuyRequestsMixin, MiniregMixin
@@ -29,10 +26,7 @@ from muckrock.agency.models import Agency
 from muckrock.foia.constants import COMPOSER_EDIT_DELAY
 from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.foia.forms import BaseComposerForm, ComposerForm, ContactInfoForm
-from muckrock.foia.models import FOIAComposer, FOIAMultiRequest, FOIARequest
-from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.task.models import MultiRequestTask
-from muckrock.utils import new_action
+from muckrock.foia.models import FOIAComposer, FOIARequest
 
 
 class GenericComposer(BuyRequestsMixin):
