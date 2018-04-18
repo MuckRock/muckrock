@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
 from django.core.mail import EmailMessage
 from django.core.urlresolvers import reverse
-from django.db import models, transaction
+from django.db import models
 from django.db.models import Case, Count, Max, Prefetch, When
 from django.db.models.functions import Cast, Now
 from django.template.loader import render_to_string
@@ -20,7 +20,6 @@ from datetime import date
 from itertools import groupby, izip_longest
 
 # MuckRock
-from muckrock.accounts.models import Profile
 from muckrock.agency.utils import initial_communication_template
 from muckrock.communication.models import (
     EmailAddress,
@@ -33,7 +32,6 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import support
 from muckrock.models import ExtractDay
-from muckrock.organization.models import Organization
 from muckrock.task.querysets import (
     CrowdfundTaskQuerySet,
     FlaggedTaskQuerySet,

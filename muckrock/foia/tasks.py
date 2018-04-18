@@ -9,8 +9,7 @@ from django.contrib.auth.models import User
 from django.core.files.storage import default_storage
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
-from django.template.defaultfilters import slugify
-from django.template.loader import get_template, render_to_string
+from django.template.loader import render_to_string
 from django.utils import timezone
 
 # Standard Library
@@ -52,7 +51,6 @@ from muckrock.foia.models import (
     FOIACommunication,
     FOIAComposer,
     FOIAFile,
-    FOIAMultiRequest,
     FOIARequest,
 )
 from muckrock.task.models import ResponseTask, ReviewAgencyTask

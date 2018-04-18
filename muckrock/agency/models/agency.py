@@ -21,7 +21,6 @@ from djgeojson.fields import PointField
 from easy_thumbnails.fields import ThumbnailerImageField
 
 # MuckRock
-from muckrock import fields
 from muckrock.accounts.models import Profile
 from muckrock.accounts.utils import unique_username
 from muckrock.jurisdiction.models import Jurisdiction, RequestHelper

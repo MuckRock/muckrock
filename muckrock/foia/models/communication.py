@@ -7,7 +7,6 @@ Models for the FOIA application
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db import models, transaction
-from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 # Standard Library

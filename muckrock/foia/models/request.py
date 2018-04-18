@@ -14,9 +14,8 @@ from django.db import connection, models
 from django.db.models import Sum
 from django.http.request import QueryDict
 from django.template.defaultfilters import escape, linebreaks, slugify
-from django.template.loader import get_template, render_to_string
+from django.template.loader import render_to_string
 from django.utils import timezone
-from django.utils.encoding import smart_text
 
 # Standard Library
 import logging

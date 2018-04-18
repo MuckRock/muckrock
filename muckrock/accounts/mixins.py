@@ -17,7 +17,6 @@ from datetime import date
 import stripe
 
 # MuckRock
-from muckrock.accounts.forms import BuyRequestForm
 from muckrock.accounts.models import Profile
 from muckrock.accounts.utils import mailchimp_subscribe, unique_username
 from muckrock.message.tasks import gift, welcome_miniregister

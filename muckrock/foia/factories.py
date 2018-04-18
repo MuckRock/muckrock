@@ -19,7 +19,6 @@ from muckrock.foia.models import (
     FOIACommunication,
     FOIAComposer,
     FOIAFile,
-    FOIAMultiRequest,
     FOIARequest,
     OutboundRequestAttachment,
     RawEmail,
@@ -85,26 +84,6 @@ class FOIACommunicationFactory(factory.django.DjangoModelFactory):
         'muckrock.communication.factories.EmailCommunicationFactory',
         'communication',
     )
-
-
-class FOIAMultiRequestFactory(factory.django.DjangoModelFactory):
-    """A factory for creating FOIAMultiRequest test objects."""
-
-    class Meta:
-        model = FOIAMultiRequest
-
-    title = factory.Sequence(lambda n: "FOIA Multi Request %d" % n)
-    slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
-    user = factory.SubFactory('muckrock.factories.UserFactory')
-
-    @factory.post_generation
-    def agencies(self, create, extracted, **kwargs):
-        """Adds M2M agencies"""
-        # pylint: disable=unused-argument
-        if create and extracted:
-            # A list of agencies were passed in, use them
-            for agency in extracted:
-                self.agencies.add(agency)
 
 
 class RawEmailFactory(factory.django.DjangoModelFactory):

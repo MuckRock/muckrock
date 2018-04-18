@@ -16,7 +16,6 @@ from muckrock.foia.models import (
     FOIANote,
     FOIARequest,
 )
-from muckrock.jurisdiction.models import Jurisdiction
 
 
 class FOIAPermissions(permissions.DjangoModelPermissionsOrAnonReadOnly):

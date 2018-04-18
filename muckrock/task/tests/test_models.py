@@ -4,7 +4,6 @@ Tests for Tasks models
 
 # Django
 from django.core.urlresolvers import reverse
-from django.http import Http404
 from django.test import TestCase
 from django.utils import timezone
 
@@ -13,7 +12,6 @@ import logging
 
 # Third Party
 import mock
-import nose
 from nose.tools import assert_false, eq_, ok_, raises
 
 # MuckRock
@@ -22,7 +20,6 @@ from muckrock.factories import AgencyFactory, OrganizationFactory, UserFactory
 from muckrock.foia.factories import (
     FOIACommunicationFactory,
     FOIAComposerFactory,
-    FOIAMultiRequestFactory,
     FOIARequestFactory,
     StaleFOIARequestFactory,
 )
@@ -51,7 +48,6 @@ from muckrock.task.signals import domain_blacklist
 mock_send = mock.Mock()
 
 # pylint: disable=missing-docstring
-# pylint: disable=line-too-long
 # pylint: disable=protected-access
 
 
@@ -123,7 +119,9 @@ class OrphanTaskTests(TestCase):
         )
 
     def test_move(self):
-        """Should move the communication to the listed requests and create a ResponseTask for each new communication."""
+        """Should move the communication to the listed requests and create a
+        ResponseTask for each new communication.
+        """
         foia1 = FOIARequestFactory()
         foia2 = FOIARequestFactory()
         foia3 = FOIARequestFactory()

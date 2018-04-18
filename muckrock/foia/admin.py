@@ -38,7 +38,6 @@ from muckrock.foia.models import (
     FOIACommunication,
     FOIAComposer,
     FOIAFile,
-    FOIAMultiRequest,
     FOIANote,
     FOIARequest,
     OutboundRequestAttachment,
@@ -547,7 +546,7 @@ class FOIAComposerAdminForm(forms.ModelForm):
     )
     parent = autocomplete_light.ModelChoiceField(
         'FOIAComposerAdminAutocomplete',
-        queryset=FOIAMultiRequest.objects.all(),
+        queryset=FOIAComposer.objects.all(),
         required=False,
     )
 
