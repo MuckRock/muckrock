@@ -285,11 +285,12 @@ class BuyRequestForm(StripeForm):
         if self.user.is_authenticated:
             self.fields['stripe_email'].initial = self.user.email
         if self.user.is_authenticated and self.user.profile.is_advanced():
-            self.fields['num_requests'].validators[0].limit_value = 1
-            self.fields['num_requests'].widget.attrs['min'] = 1
+            limit_val = 1
         else:
-            self.fields['num_requests'].validators[0].limit_value = 4
-            self.fields['num_requests'].widget.attrs['min'] = 4
+            limit_val = 4
+        self.fields['num_requests'].validators[0].limit_value = limit_val
+        self.fields['num_requests'].widget.attrs['min'] = limit_val
+        self.fields['num_requests'].initial = limit_val
 
     def buy_requests(self, recipient):
         """Buy the requests"""
