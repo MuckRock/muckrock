@@ -4,12 +4,25 @@ from __future__ import unicode_literals
 
 # Django
 from django.db import migrations
+from django.utils import timezone
+
+# Standard Library
+from datetime import datetime
+
+
+def make_aware(dt):
+    if dt is None:
+        return None
+    return timezone.make_aware(datetime.combine(dt, datetime.min.time()))
 
 
 def convert_composers(apps, schema_editor):
     FOIARequest = apps.get_model('foia', 'FOIARequest')
     FOIAMultiRequest = apps.get_model('foia', 'FOIAMultiRequest')
     FOIAComposer = apps.get_model('foia', 'FOIAComposer')
+    OutboundComposerAttachment = apps.get_model(
+        'foia', 'OutboundComposerAttachment'
+    )
     ContentType = apps.get_model('contenttypes', 'ContentType')
     Tag = apps.get_model('tags', 'Tag')
     TaggedItemBase = apps.get_model('tags', 'TaggedItemBase')
@@ -45,7 +58,9 @@ def convert_composers(apps, schema_editor):
         multi.composer = composer
         multi.save()
         if multi.foias.exists():
-            composer.datetime_submitted = multi.foias.first().date_submitted
+            composer.datetime_submitted = make_aware(
+                multi.foias.first().date_submitted
+            )
             composer.save()
             multi.foias.all().update(composer=composer)
 
@@ -58,7 +73,7 @@ def convert_composers(apps, schema_editor):
             slug=foia.slug,
             status='started' if foia.status == 'started' else 'filed',
             requested_docs=foia.requested_docs,
-            datetime_submitted=foia.date_submitted,
+            datetime_submitted=make_aware(foia.date_submitted),
             embargo=foia.embargo,
             parent=foia.parent.composer if foia.parent else None,
         )
@@ -78,15 +93,26 @@ def convert_composers(apps, schema_editor):
                 object_id=composer.pk,
             )
         # end tag code #
+        foia.composer = composer
         if foia.status == 'started' and foia.communications.exists():
             composer.edited_boilerplate = True
             composer.requested_docs = foia.communications.first().communication
             composer.save()
+            for attachment in foia.pending_attachments.all():
+                new_attachment = OutboundComposerAttachment(
+                    composer=composer,
+                    user=attachment.user,
+                    date_time_stamp=attachment.date_time_stamp,
+                    sent=attachment.sent,
+                )
+                new_attachment.ffile.name = attachment.ffile.name
+                new_attachment.save()
             foia.delete()
         elif foia.status == 'started':
             foia.delete()
         else:
-            foia.composer = composer
+            if foia.parent and foia.parent.pk is None:
+                foia.parent = None
             foia.save()
 
     for multi in (
@@ -105,7 +131,7 @@ def convert_composers(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('foia', '0052_foiamultirequest_composer'),
+        ('foia', '0053_auto_20180323_1548_squashed_0060_auto_20180413_1102'),
         ('tags', '0002_remove_tag_user'),
         ('contenttypes', '0001_initial'),
     ]
