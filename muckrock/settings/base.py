@@ -464,7 +464,7 @@ urlparse.uses_netloc.append('postgres')
 
 url = urlparse.urlparse(
     os.environ.get(
-        'DATABASE_URL', 'postgres://vagrant@localhost/muckrock_remodel'
+        'DATABASE_URL', 'postgres://vagrant@localhost/muckrock_remodel2'
     )
 )
 
