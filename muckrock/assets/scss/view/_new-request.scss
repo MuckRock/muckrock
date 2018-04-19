@@ -195,16 +195,6 @@ $color-advanced-container: lighten($color-agency, 40%);
       .button-group {
         width: 100%;
       }
-      .buy-request-form {
-        display: flex;
-        #id_num_requests {
-          max-width: 150px;
-        }
-        .field {
-          margin-right:30px;
-          float: left;
-        }
-      }
     }
 
     .form-status-holder {
@@ -265,3 +255,13 @@ $color-advanced-container: lighten($color-agency, 40%);
     text-align: center;
 }
 
+.buy-request-form {
+  display: flex;
+  #id_num_requests {
+    max-width: 150px;
+  }
+  .field {
+    margin-right:30px;
+    float: left;
+  }
+}

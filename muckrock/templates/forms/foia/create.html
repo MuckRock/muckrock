@@ -162,25 +162,7 @@
                {% endwith %}
             </div>
 
-            <div class="buy-request-form" data-bulk-price="{% if user.profile.is_advanced %}3{% else %}4{% endif %}">
-              {% include "lib/pattern/field.html" with field=form.num_requests only %}
-              <span>
-                <p>
-                  $5/request<br class="nomargin">
-                  {% if user.profile.is_advanced %}
-                    <s>$4/request</s> $3/request if you buy 20 or more
-                    <br class="nomargin">
-                    <em>Special price for pro users</em>
-                  {% else %}
-                    $4/request if you buy 20 or more
-                    <br class="nomargin">Minimum purchase of 4 requests
-                    <a href="{% url "accounts" %}">
-                      Upgrade to a Pro or Organizational account
-                    </a> for lower prices per request
-                  {% endif %}
-                </p>
-              </span>
-            </div>
+            {% include "lib/pattern/buy_requests.html" with user=user form=form only %}
 
             <div class="contact-info">
               <a class="see-where" href="#">See where this request will be sent</a>

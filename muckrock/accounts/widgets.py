@@ -389,7 +389,7 @@ class RecentRequestsWidget(ListWidget):
     def get_data(self):
         """Get the oldest processing requests"""
         requests = (
-            FOIARequest.objects.get_submitted().get_public()
+            FOIARequest.objects.get_public()
             .exclude(composer__datetime_submitted=None)
             .order_by('-composer__date_submitted').values('title')[:4]
         )
