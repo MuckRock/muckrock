@@ -130,7 +130,7 @@ def convert_composers(apps, schema_editor):
         enumerate(
             FOIARequest.objects.filter(composer=None).select_related(
                 'parent__composer', 'agency'
-            ).prefetch_related('pending_attachments')
+            ).iterator()
         )
     ):
         if i % 100 == 0:
