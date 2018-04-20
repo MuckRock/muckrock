@@ -98,7 +98,7 @@ def success_comm(request):
     file_ = FOIAFile(
         comm=comm,
         title=os.path.basename(request.POST['key']),
-        date=timezone.now(),
+        datetime=timezone.now(),
         source=request.user.get_full_name(),
         access=access,
     )

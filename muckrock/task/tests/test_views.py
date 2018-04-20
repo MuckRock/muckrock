@@ -206,7 +206,7 @@ class OrphanTaskViewTests(TestCase):
         foias = FOIARequestFactory.create_batch(2)
         foia_1_comm_count = foias[0].communications.all().count()
         foia_2_comm_count = foias[1].communications.all().count()
-        starting_date = self.task.communication.date
+        starting_date = self.task.communication.datetime
         self.client.post(
             self.url,
             {
@@ -218,7 +218,7 @@ class OrphanTaskViewTests(TestCase):
         updated_foia_1_comm_count = foias[0].communications.all().count()
         updated_foia_2_comm_count = foias[1].communications.all().count()
         updated_task = OrphanTask.objects.get(pk=self.task.pk)
-        ending_date = updated_task.communication.date
+        ending_date = updated_task.communication.datetime
         ok_(
             updated_task.resolved,
             'Orphan task should be resolved by posting the FOIA pks and task ID.'
@@ -728,7 +728,7 @@ class ResponseTaskListViewTests(TestCase):
     def test_post_move(self):
         """Moving the response should save it to a new request."""
         other_foia = FOIARequestFactory()
-        starting_date = self.task.communication.date
+        starting_date = self.task.communication.datetime
         data = {
             'move': other_foia.id,
             'status': 'done',
@@ -738,7 +738,7 @@ class ResponseTaskListViewTests(TestCase):
         http_post_response(self.url, self.view, data, self.user)
         self.task.refresh_from_db()
         self.task.communication.refresh_from_db()
-        ending_date = self.task.communication.date
+        ending_date = self.task.communication.datetime
         eq_(
             self.task.communication.foia, other_foia,
             'The response should be moved to a different FOIA.'

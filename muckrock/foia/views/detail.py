@@ -685,7 +685,7 @@ class Detail(DetailView):
                     from_user=request.user,
                     to_user=foia.user,
                     response=True,
-                    date=timezone.now(),
+                    datetime=timezone.now(),
                     communication=form.cleaned_data['reply'],
                     status=form.cleaned_data['status'],
                 )
@@ -800,7 +800,7 @@ class Detail(DetailView):
             buff = StringIO()
             with ZipFile(buff, 'w', ZIP_DEFLATED) as zip_file:
                 for i, comm in enumerate(foia.communications.all()):
-                    file_name = '{:03d}_{}_comm.txt'.format(i, comm.date)
+                    file_name = '{:03d}_{}_comm.txt'.format(i, comm.datetime)
                     zip_file.writestr(
                         file_name, comm.communication.encode('utf8')
                     )

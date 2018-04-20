@@ -25,7 +25,6 @@ from muckrock.utils import generate_key
 logger = logging.getLogger(__name__)
 
 
-# XXX move this in to minireg mixin
 def split_name(name):
     """Splits a full name into a first and last name."""
     # infer first and last names from the full name

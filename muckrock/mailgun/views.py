@@ -59,7 +59,7 @@ def _make_orphan_comm(
         from_user=from_user,
         response=True,
         subject=subject[:255],
-        date=timezone.now(),
+        datetime=timezone.now(),
         communication=_get_mail_body(post),
         likely_foia=foia,
     )
@@ -262,7 +262,7 @@ def _handle_request(request, mail_id):
             to_user=foia.user,
             subject=subject[:255],
             response=True,
-            date=timezone.now(),
+            datetime=timezone.now(),
             communication=_get_mail_body(post),
             hidden=hidden,
         )

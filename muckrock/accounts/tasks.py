@@ -124,28 +124,28 @@ def store_statistics():
                 FOIAComposer.objects.filter(status='filed').count(),
             'sent_communications_portal':
                 PortalCommunication.objects.filter(
-                    communication__date__range=(
+                    communication__datetime__range=(
                         yesterday_midnight, today_midnight
                     ),
                     communication__response=False,
                 ).count(),
             'sent_communications_email':
                 EmailCommunication.objects.filter(
-                    communication__date__range=(
+                    communication__datetime__range=(
                         yesterday_midnight, today_midnight
                     ),
                     communication__response=False,
                 ).count(),
             'sent_communications_fax':
                 FaxCommunication.objects.filter(
-                    communication__date__range=(
+                    communication__datetime__range=(
                         yesterday_midnight, today_midnight
                     ),
                     communication__response=False,
                 ).count(),
             'sent_communications_mail':
                 MailCommunication.objects.filter(
-                    communication__date__range=(
+                    communication__datetime__range=(
                         yesterday_midnight, today_midnight
                     ),
                     communication__response=False,

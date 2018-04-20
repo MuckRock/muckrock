@@ -14,7 +14,7 @@
             {% if communication.mails.all %}
               <time datetime="{{ communication.mails.all.0.sent_datetime|date:'c' }}" class="date">{{ communication.mails.all.0.sent_datetime|date:"m/d/Y" }}</time>
             {% else %}
-              <time datetime="{{ communication.date|date:'c' }}" class="date">{{ communication.date | date:"m/d/Y" }}</time>
+              <time datetime="{{ communication.datetime|date:'c' }}" class="date">{{ communication.datetime | date:"m/d/Y" }}</time>
             {% endif %}
             </a>
             {% if not hide_options %}

@@ -317,13 +317,17 @@ class FOIARequest(models.Model):
 
     def last_response(self):
         """Return the most recent response"""
-        return self.communications.filter(response=True
-                                          ).order_by('-date').first()
+        return (
+            self.communications.filter(response=True)
+            .order_by('-datetime').first()
+        )
 
     def last_request(self):
         """Return the most recent request"""
-        return self.communications.filter(response=False
-                                          ).order_by('-date').first()
+        return (
+            self.communications.filter(response=False)
+            .order_by('-datetime').first()
+        )
 
     def set_mail_id(self):
         """Set the mail id, which is the unique identifier for the auto mailer system"""
@@ -374,7 +378,7 @@ class FOIARequest(models.Model):
         """How many days since the last response"""
         response = self.last_response()
         if response:
-            return (date.today() - response.date.date()).days
+            return (date.today() - response.datetime.date()).days
 
     def processing_length(self):
         """How many days since the request was set as processing"""
@@ -590,7 +594,7 @@ class FOIARequest(models.Model):
         for attachment in attachments:
             file_ = comm.files.create(
                 title=os.path.basename(attachment.ffile.name),
-                date=comm.date,
+                datetime=comm.datetime,
                 source=user.get_full_name(),
                 access=access,
             )
@@ -863,7 +867,7 @@ class FOIARequest(models.Model):
             if last_response:
                 method, addr = last_response.get_delivered_and_from()
                 context['last_resp'] = {
-                    'date': last_response.date,
+                    'date': last_response.datetime,
                     'method': method,
                     'addr': addr,
                 }
@@ -902,7 +906,7 @@ class FOIARequest(models.Model):
             self.date_followup = None
         # if we need to respond, pause the count down until we do
         if self.status in ['fix', 'payment'] and self.date_due:
-            last_datetime = self.last_comm().date
+            last_datetime = self.last_comm().datetime
             if not last_datetime:
                 last_datetime = timezone.now()
             self.days_until_due = cal.business_days_between(
@@ -914,7 +918,7 @@ class FOIARequest(models.Model):
     def _update_followup_date(self):
         """Update the follow up date"""
         try:
-            new_date = self.last_comm().date.date() + timedelta(
+            new_date = self.last_comm().datetime.date() + timedelta(
                 self._followup_days()
             )
             if self.date_due and self.date_due > new_date:
@@ -1129,7 +1133,7 @@ class FOIARequest(models.Model):
         comm = self.communications.create(
             from_user=from_user,
             to_user=self.get_to_user(),
-            date=timezone.now(),
+            datetime=timezone.now(),
             response=False,
             communication=text,
             thanks=kwargs.get('thanks', False),
@@ -1164,7 +1168,7 @@ class FOIARequest(models.Model):
         comm = self.communications.create(
             from_user=from_user,
             to_user=self.get_to_user(),
-            date=timezone.now(),
+            datetime=timezone.now(),
             response=False,
             communication=text,
         )

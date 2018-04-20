@@ -308,7 +308,7 @@ class StaleAgencyTask(Task):
         foias = self.agency.foiarequest_set.all()
         comms = [c for f in foias for c in f.communications.all() if c.response]
         if len(comms) > 0:
-            return max(comms, key=lambda x: x.date)
+            return max(comms, key=lambda x: x.datetime)
         else:
             return None
 
@@ -376,7 +376,7 @@ class ReviewAgencyTask(Task):
                                 Case(
                                     When(
                                         communications__response=True,
-                                        then='communications__date'
+                                        then='communications__datetime'
                                     )
                                 )
                             ),
@@ -452,7 +452,7 @@ class ReviewAgencyTask(Task):
                             Case(
                                 When(
                                     communications__response=True,
-                                    then='communications__date'
+                                    then='communications__datetime'
                                 )
                             )
                         ),
@@ -537,7 +537,7 @@ class ReviewAgencyTask(Task):
         """Returns the latest response from the agency"""
         return (
             self.agency.foiarequest_set.aggregate(
-                max_date=Max('communications__date')
+                max_date=Max('communications__datetime')
             )['max_date']
         )
 

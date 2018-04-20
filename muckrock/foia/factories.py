@@ -79,7 +79,7 @@ class FOIACommunicationFactory(factory.django.DjangoModelFactory):
     foia = factory.SubFactory(FOIARequestFactory)
     from_user = factory.SubFactory('muckrock.factories.UserFactory')
     to_user = factory.SubFactory('muckrock.factories.UserFactory')
-    date = factory.LazyAttribute(lambda obj: timezone.now())
+    datetime = factory.LazyAttribute(lambda obj: timezone.now())
     email = factory.RelatedFactory(
         'muckrock.communication.factories.EmailCommunicationFactory',
         'communication',
@@ -133,6 +133,6 @@ class StaleFOIARequestFactory(FOIARequestFactory):
 class StaleFOIACommunicationFactory(FOIACommunicationFactory):
     """A factory for creating stale FOIARequest test objects."""
     response = True
-    date = factory.LazyAttribute(
+    datetime = factory.LazyAttribute(
         lambda obj: timezone.now() - timedelta(STALE_DURATION + 1)
     )

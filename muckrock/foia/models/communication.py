@@ -61,8 +61,7 @@ class FOIACommunication(models.Model):
     )
 
     subject = models.CharField(max_length=255, blank=True)
-    # XXX rename
-    date = models.DateTimeField(db_index=True)
+    datetime = models.DateTimeField(db_index=True)
 
     response = models.BooleanField(
         default=False, help_text='Is this a response (or a request)?'
@@ -109,7 +108,7 @@ class FOIACommunication(models.Model):
     objects = FOIACommunicationQuerySet.as_manager()
 
     def __unicode__(self):
-        return u'%s - %s' % (self.date, self.subject)
+        return u'%s - %s' % (self.datetime, self.subject)
 
     def get_absolute_url(self):
         """The url for this object"""
@@ -134,10 +133,10 @@ class FOIACommunication(models.Model):
         if (
             self.foia and (
                 self.foia.datetime_updated is None
-                or self.date > self.foia.datetime_updated
+                or self.datetime > self.foia.datetime_updated
             )
         ):
-            self.foia.datetime_updated = self.date
+            self.foia.datetime_updated = self.datetime
             self.foia.save(comment='update datetime_updated due to new comm')
         super(FOIACommunication, self).save(*args, **kwargs)
 
@@ -345,7 +344,7 @@ class FOIACommunication(models.Model):
         with transaction.atomic():
             foia_file = self.files.create(
                 title=title,
-                date=timezone.now(),
+                datetime=timezone.now(),
                 source=source[:70],
                 access=access,
             )
@@ -454,7 +453,7 @@ class FOIACommunication(models.Model):
                 break
 
     class Meta:
-        ordering = ['date']
+        ordering = ['datetime']
         verbose_name = 'FOIA Communication'
         app_label = 'foia'
 
@@ -516,7 +515,7 @@ class CommunicationError(models.Model):
 
     def __unicode__(self):
         return u'CommunicationError: %s - %s' % (
-            self.communication.pk, self.date
+            self.communication.pk, self.datetime
         )
 
     class Meta:
@@ -548,7 +547,7 @@ class CommunicationOpen(models.Model):
 
     def __unicode__(self):
         return u'CommunicationOpen: %s - %s' % (
-            self.communication.pk, self.date
+            self.communication.pk, self.datetime
         )
 
     class Meta:

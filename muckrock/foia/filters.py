@@ -95,7 +95,7 @@ class FOIARequestFilterSet(JurisdictionFilterSet):
         widget=forms.NumberInput(),
     )
     date_range = django_filters.DateFromToRangeFilter(
-        name='communications__date',
+        name='communications__datetime',
         label='Date Range',
         lookup_expr='contains',
         widget=RangeWidget(
@@ -142,7 +142,7 @@ class MyFOIARequestFilterSet(JurisdictionFilterSet):
         widget=forms.NumberInput(),
     )
     date_range = django_filters.DateFromToRangeFilter(
-        name='communications__date',
+        name='communications__datetime',
         label='Date Range',
         lookup_expr='contains',
         widget=RangeWidget(
@@ -195,7 +195,7 @@ class AgencyFOIARequestFilterSet(django_filters.FilterSet):
         widget=autocomplete_light.MultipleChoiceWidget('TagAutocomplete'),
     )
     date_range = django_filters.DateFromToRangeFilter(
-        name='communications__date',
+        name='communications__datetime',
         label='Date Range',
         lookup_expr='contains',
         widget=RangeWidget(

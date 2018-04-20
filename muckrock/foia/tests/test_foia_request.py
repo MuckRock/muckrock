@@ -441,7 +441,7 @@ class TestFOIAIntegration(TestCase):
                 foia.date_followup,
                 max(
                     foia.date_due,
-                    foia.last_comm().date.date() +
+                    foia.last_comm().datetime.date() +
                     timedelta(foia._followup_days())
                 )
             )
@@ -457,7 +457,7 @@ class TestFOIAIntegration(TestCase):
                 foia=foia,
                 from_user=agency.get_user(),
                 to_user=user,
-                date=timezone.now(),
+                datetime=timezone.now(),
                 response=True,
                 communication='Test communication',
             )
@@ -485,7 +485,7 @@ class TestFOIAIntegration(TestCase):
                 foia=foia,
                 from_user=user,
                 to_user=agency.get_user(),
-                date=timezone.now(),
+                datetime=timezone.now(),
                 response=False,
                 communication='Test communication',
             )
@@ -517,7 +517,7 @@ class TestFOIAIntegration(TestCase):
                 foia.date_followup,
                 max(
                     foia.date_due,
-                    foia.last_comm().date.date() +
+                    foia.last_comm().datetime.date() +
                     timedelta(foia._followup_days())
                 )
             )
@@ -531,7 +531,7 @@ class TestFOIAIntegration(TestCase):
                 foia=foia,
                 from_user=agency.get_user(),
                 to_user=user,
-                date=timezone.now(),
+                datetime=timezone.now(),
                 response=True,
                 communication='Test communication',
             )
