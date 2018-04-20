@@ -115,16 +115,26 @@ def convert_composers(apps, schema_editor):
                 foia.parent = None
             foia.save()
 
-    for multi in (
-        FOIAMultiRequest.objects.all().select_related('parent__composer')
-        .prefetch_related('agencies', 'foias')
-    ):
-        convert_multi(multi)
-    for foia in (
-        FOIARequest.objects.filter(composer=None).select_related(
-            'parent__composer', 'agency'
+    total_multi = FOIAMultiRequest.objects.count()
+    for i, multi in (
+        enumerate(
+            FOIAMultiRequest.objects.all().select_related('parent__composer')
+            .prefetch_related('agencies', 'foias')
         )
     ):
+        if i % 100 == 0:
+            print 'Multi: {} / {}'.format(i, total_multi)
+        convert_multi(multi)
+    total_foia = FOIARequest.objects.filter(composer=None).count()
+    for i, foia in (
+        enumerate(
+            FOIARequest.objects.filter(composer=None).select_related(
+                'parent__composer', 'agency'
+            ).iterator()
+        )
+    ):
+        if i % 100 == 0:
+            print 'FOIA: {} / {}'.format(i, total_foia)
         convert_foia(foia)
 
 
