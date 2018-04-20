@@ -250,7 +250,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                 communication=text,
                 from_user=request.user,
                 to_user=foia.get_to_user(),
-                date=timezone.now(),
+                datetime=timezone.now(),
                 response=False,
             )
 
@@ -269,7 +269,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                     access='public',
                     comm=comm,
                     title=title,
-                    date=timezone.now(),
+                    datetime=timezone.now(),
                     source=request.user.get_full_name(),
                 )
                 file_.ffile.save(title, ContentFile(res.content))
@@ -427,8 +427,8 @@ class FOIACommunicationViewSet(viewsets.ModelViewSet):
 
     class Filter(django_filters.FilterSet):
         """API Filter for FOIA Communications"""
-        min_date = django_filters.DateFilter(name='date', lookup_expr='gte')
-        max_date = django_filters.DateFilter(name='date', lookup_expr='lte')
+        min_date = django_filters.DateFilter(name='datetime', lookup_expr='gte')
+        max_date = django_filters.DateFilter(name='datetime', lookup_expr='lte')
         foia = django_filters.NumberFilter(name='foia__id')
         delivered = django_filters.ChoiceFilter(
             method='filter_delivered',

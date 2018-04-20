@@ -446,8 +446,9 @@ class Appeal(models.Model):
         """Evaluate the FOIARequest communications to judge whether the appeal is successful."""
         foia = self.communication.foia
         subsequent_comms = (
-            foia.communications.filter(date__gt=self.communication.date)
-            .annotate(appeal__count=Count('appeals'))
+            foia.communications.filter(
+                datetime__gt=self.communication.datetime
+            ).annotate(appeal__count=Count('appeals'))
         )
         successful = False
         successful = successful or subsequent_comms.filter(status='done'
@@ -461,6 +462,6 @@ class Appeal(models.Model):
         """Evaluate the FOIARequest communications to judge whether the appeal is finished."""
         foia = self.communication.foia
         subsequent_comms = foia.communications.filter(
-            date__gt=self.communication.date
+            datetime__gt=self.communication.datetime
         )
         return subsequent_comms.filter(status__in=END_STATUS).exists()

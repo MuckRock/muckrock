@@ -78,7 +78,7 @@ class TestAgencyUnit(TestCase):
         """Should return the date of the last response by the agency"""
         duration = STALE_DURATION + 1
         FOIACommunicationFactory(
-            date=timezone.now() - timedelta(duration),
+            datetime=timezone.now() - timedelta(duration),
             response=True,
             foia__status='ack',
             foia__agency=self.agency1

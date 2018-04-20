@@ -377,7 +377,7 @@ class ResponseTaskQuerySet(TaskQuerySet):
                 ),
                 Prefetch(
                     'communication__foia__communications',
-                    queryset=FOIACommunication.objects.order_by('-date')
+                    queryset=FOIACommunication.objects.order_by('-datetime')
                     .select_related('from_user__profile__agency')
                     .prefetch_related(
                         'files',
@@ -471,7 +471,7 @@ class PortalTaskQuerySet(TaskQuerySet):
                 ),
                 Prefetch(
                     'communication__foia__communications',
-                    queryset=FOIACommunication.objects.order_by('-date')
+                    queryset=FOIACommunication.objects.order_by('-datetime')
                     .select_related(
                         'from_user__profile',
                     ).prefetch_related(

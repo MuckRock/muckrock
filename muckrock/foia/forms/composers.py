@@ -86,7 +86,6 @@ class BaseComposerForm(forms.ModelForm):
         widget=forms.HiddenInput(),
     )
 
-    # XXX this should be a sub form?
     register_full_name = forms.CharField(label='Full Name or Handle (Public)')
     register_email = forms.EmailField(max_length=75, label='Email')
     register_newsletter = forms.BooleanField(
@@ -148,11 +147,6 @@ class BaseComposerForm(forms.ModelForm):
     def clean_agencies(self):
         """Remove exempt agencies"""
         return [a for a in self.cleaned_data['agencies'] if not a.exempt]
-
-    def clean_tags(self):
-        """Parse tags correctly"""
-        # XXX
-        return self.cleaned_data['tags']
 
     def clean(self):
         """Check cross field dependencies"""

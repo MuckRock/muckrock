@@ -137,7 +137,7 @@ class FOIARequestQuerySet(models.QuerySet):
                             Case(
                                 When(
                                     communications__response=True,
-                                    then='communications__date'
+                                    then='communications__datetime'
                                 )
                             )
                         ),

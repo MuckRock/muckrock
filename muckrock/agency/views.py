@@ -180,7 +180,7 @@ class AgencyViewSet(viewsets.ModelViewSet):
 
 def similar(request):
     """Return agencies with similar names"""
-    # XXX this is currently unused
+    # TODO this is currently unused
     query = request.GET.get('query', '')
     jurisdiction_id = request.GET.get('jurisdiction')
     if jurisdiction_id == 'f':

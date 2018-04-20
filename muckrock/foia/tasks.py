@@ -604,7 +604,7 @@ def autoimport():
         foia_file = FOIAFile(
             comm=comm,
             title=title,
-            date=comm.date,
+            datetime=comm.datetime,
             source=comm.get_source(),
             access=access,
         )
@@ -688,7 +688,7 @@ def autoimport():
                         from_user=from_user,
                         to_user=foia.user,
                         response=True,
-                        date=file_datetime,
+                        datetime=file_datetime,
                         communication=body,
                         status=status,
                     )

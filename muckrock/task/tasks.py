@@ -38,7 +38,7 @@ def submit_review_update(foia_pks, reply_text, **kwargs):
             foia=foia,
             from_user=muckrock_staff,
             to_user=foia.get_to_user(),
-            date=timezone.now(),
+            datetime=timezone.now(),
             response=False,
             communication=reply_text,
         )

@@ -31,7 +31,7 @@ class FOIAFile(models.Model):
         upload_to='foia_files/%Y/%m/%d', verbose_name='File', max_length=255
     )
     title = models.CharField(max_length=255)
-    date = models.DateTimeField(null=True, db_index=True)
+    datetime = models.DateTimeField(null=True, db_index=True)
     source = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
     # for doc cloud only
@@ -138,7 +138,7 @@ class FOIAFile(models.Model):
 
     class Meta:
         verbose_name = 'FOIA Document File'
-        ordering = ['date']
+        ordering = ['datetime']
         app_label = 'foia'
 
 
