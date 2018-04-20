@@ -454,6 +454,7 @@ class ProfileView(BuyRequestsMixin, FormView):
 
     def dispatch(self, request, *args, **kwargs):
         """Get the user and redirect if neccessary"""
+        # pylint: disable=attribute-defined-outside-init
         username = kwargs.get('username')
         if username is None:
             if request.user.is_anonymous():
