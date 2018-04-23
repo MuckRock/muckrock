@@ -1,6 +1,8 @@
 {% extends 'base_profile.html' %}
 {% load tags %}
 {% load thumbnail %}
+{% load rules %}
+
 {% block title %}{{ agency.name }} &bull; MuckRock{% endblock title %}
 {% block type %}agency{% endblock type %}
 
@@ -71,7 +73,8 @@
     {% endif%}
 
     <dt>E-mail Address</dt>
-    {% if request.user.profile.can_view_emails %}
+    {% has_perm 'agency.view_emails' request.user as can_view_emails %}
+    {% if can_view_emails %}
       <dd>{{ agency.get_emails.first.email|default:"Unknown" }}</dd>
     {% else %}
       <dd><a href="{% url 'accounts' %}">Available to Pro Users</a></dd>

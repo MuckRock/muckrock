@@ -77,7 +77,6 @@ urlpatterns = [
         views.ComposerDetail.as_view(),
         name='foia-composer-detail',
     ),
-    # XXX are the action views necessary?
     url(
         r'^%s/crowdfund/$' % foia_url,
         views.crowdfund_request,

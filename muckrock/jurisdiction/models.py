@@ -18,7 +18,6 @@ from muckrock.foia.models import END_STATUS, FOIARequest
 from muckrock.tags.models import TaggedItemBase
 
 
-# XXX this needs to be moved somewhere else
 class RequestHelper(object):
     """Helper methods for classes that have a get_requests() method"""
 

@@ -17,7 +17,6 @@ from datetime import date, datetime, time
 from muckrock.models import ExtractDay
 
 
-# XXX go through these
 class FOIARequestQuerySet(models.QuerySet):
     """Object manager for FOIA requests"""
 

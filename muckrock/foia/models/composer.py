@@ -95,8 +95,6 @@ class FOIAComposer(models.Model):
 
     def submit(self, contact_info=None):
         """Submit a composer to create the requests"""
-        # TODO assuming only the owner can submit
-        # TODO get the contact info to the actual foia submit
         from muckrock.foia.tasks import submit_composer
 
         num_requests = self.agencies.count()
@@ -107,7 +105,7 @@ class FOIAComposer(models.Model):
         self.status = 'submitted'
         self.datetime_submitted = timezone.now()
         # if num_requests is less than the multi-review amount, we will approve
-        # the request right away, other wise we create a multirequest tasl
+        # the request right away, other wise we create a multirequest task
         approve = num_requests < settings.MULTI_REVIEW_AMOUNT
         result = submit_composer.apply_async(
             args=(self.pk, approve, contact_info),

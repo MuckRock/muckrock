@@ -249,7 +249,7 @@
               {% if not request.user.profile.acct_type == "agency" %}
                 <a href="#follow-up" class="blue button">Follow Up</a>
               {% endif %}
-              {% if foia.is_payable %}
+              {% if user_can_pay %}
                 <a href="#pay" class="green button">Pay Fees</a>
                 {% if not foia.has_crowdfund %}
                   <a href="#crowdfund" class="green button">Crowdfund</a>
@@ -376,7 +376,7 @@
                 </form>
               </div>
             {% endif %}
-            {% if foia.is_payable %}
+            {% if user_can_pay %}
               <div class="composer" id="pay">
                 <form class="composer-input stripe-checkout" method="post" action="{% url 'foia-pay' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">
                   <header>

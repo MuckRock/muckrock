@@ -183,7 +183,7 @@ class Detail(DetailView):
         context['all_tags'] = Tag.objects.all()
         context['past_due'] = is_past_due
         context['user_can_edit'] = user_can_edit
-        context['user_can_pay'] = user_can_edit and foia.is_payable()
+        context['user_can_pay'] = foia.has_perm(self.request.user, 'pay')
         context['embargo'] = {
             'show': user_can_embargo or foia.embargo,
             'edit': user_can_embargo,

@@ -146,6 +146,15 @@ def has_crowdfund(user, foia):
 
 @predicate
 @skip_if_not_foia
+def has_open_crowdfund(user, foia):
+    return bool(foia.crowdfund) and not foia.crowdfund.expired()
+
+
+is_payable = has_status('payment') & ~has_open_crowdfund
+
+
+@predicate
+@skip_if_not_foia
 @user_authenticated
 def match_agency(user, foia):
     return bool(user.profile.agency and user.profile.agency == foia.agency)
@@ -228,6 +237,7 @@ add_perm('foia.flag_foiarequest', is_authenticated)
 add_perm('foia.followup_foiarequest', can_edit)
 add_perm('foia.agency_reply_foiarequest', is_from_agency)
 add_perm('foia.upload_attachment_foiarequest', can_edit | is_from_agency)
+add_perm('foia.pay_foiarequest', can_edit & is_payable)
 
 add_perm('foia.view_foiacomposer', can_view_composer)
 add_perm('foia.upload_attachment_foiacomposer', can_edit_composer)

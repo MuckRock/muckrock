@@ -301,6 +301,7 @@ class BuyRequestForm(StripeForm):
             {
                 'email': self.cleaned_data['stripe_email'],
                 'action': 'request-purchase',
+                'amount': num_requests,
             },
             fee=0,
         )

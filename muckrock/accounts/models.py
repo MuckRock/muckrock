@@ -201,16 +201,6 @@ class Profile(models.Model):
             return owned_org
         return self.organization
 
-    # TODO
-    def can_multirequest(self):
-        """Is this user allowed to multirequest?"""
-        return self.is_advanced()
-
-    # TODO
-    def can_view_emails(self):
-        """Is this user allowed to view all emails and private contact information?"""
-        return self.is_advanced()
-
     def get_monthly_requests(self):
         """Get the number of requests left for this month"""
         with transaction.atomic():
@@ -282,13 +272,6 @@ class Profile(models.Model):
                 profile.organization.num_requests -= request_count['org']
                 profile.organization.save()
         return request_count
-
-    def bundled_requests(self):
-        """Returns the number of requests the user gets when they buy a bundle."""
-        how_many = settings.BUNDLED_REQUESTS[self.acct_type]
-        if self.is_member_of_active_org():
-            how_many = 5
-        return how_many
 
     def customer(self):
         """Retrieve the customer from Stripe or create one if it doesn't exist. Then return it."""

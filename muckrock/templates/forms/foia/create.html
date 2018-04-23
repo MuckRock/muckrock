@@ -28,10 +28,16 @@
           <summary class="grid__column half">
             Not sure where to start? <a href="/about/foia-101/">We can help.</a>
             <br>
-            {# XXX dont show this if editing a request #}
-            Out of ideas? <a href="#clone">Try cloning a request.</a>
-            <br>
-            <noscript>It looks like you have JavaScript turned off. This page requires JavaScript to function. If you are not willing to enable JavaScript, please send an email containing all necessary information to file and we will create your request for you.</noscript>
+            {% if featured %}
+              Out of ideas? <a href="#clone">Try cloning a request.</a>
+              <br>
+            {% endif %}
+            <noscript>
+              It looks like you have JavaScript turned off. This page requires
+              JavaScript to function. If you are not willing to enable
+              JavaScript, please send an email containing all necessary
+              information to file and we will create your request for you.
+            </noscript>
           </summary>
         {% endif %}
       </header>

@@ -95,7 +95,6 @@ class FOIARequest(models.Model):
     date_embargo = models.DateField(blank=True, null=True)
 
     price = models.DecimalField(max_digits=14, decimal_places=2, default='0.00')
-    # TODO do we want to reconsider how we do featured requests?
     featured = models.BooleanField(default=False)
     sidebar_html = models.TextField(blank=True)
     mail_id = models.CharField(blank=True, max_length=255, editable=False)
@@ -134,7 +133,6 @@ class FOIARequest(models.Model):
     )
 
     disable_autofollowups = models.BooleanField(default=False)
-    # TODO missing proxy may work differently with a composer
     missing_proxy = models.BooleanField(
         default=False,
         help_text='This request requires a proxy to file, but no such '
@@ -215,13 +213,6 @@ class FOIARequest(models.Model):
         """The request's jurisdiction is its agency's jurisdiction"""
         return self.agency.jurisdiction
 
-    # TODO move this to rules
-    def is_payable(self):
-        """Can this request be payed for by the user?"""
-        has_open_crowdfund = self.crowdfund and not self.crowdfund.expired()
-        has_payment_status = self.status == 'payment'
-        return has_payment_status and not has_open_crowdfund
-
     def get_stripe_amount(self):
         """Output a Stripe Checkout formatted price"""
         return int(self.price * 100)
@@ -242,7 +233,6 @@ class FOIARequest(models.Model):
         """Did this user create this request?"""
         return self.composer.user == user
 
-    # TODO i dislike the how adding/removing/promoting/demoting is done
     ## Editors
 
     def has_editor(self, user):
@@ -299,21 +289,15 @@ class FOIARequest(models.Model):
 
     def get_files(self):
         """Get all files under this FOIA"""
-        from muckrock.foia.models import FOIAFile
+        from muckrock.foia.models.file import FOIAFile
         return FOIAFile.objects.filter(comm__foia=self)
 
-    # TODO rename
-    def first_request(self):
+    def first_request_text(self):
         """Return the first request text"""
         try:
             return self.communications.all()[0].communication
         except IndexError:
             return ''
-
-    # TODO remove
-    def last_comm(self):
-        """Return the last communication"""
-        return self.communications.last()
 
     def last_response(self):
         """Return the most recent response"""
@@ -347,16 +331,11 @@ class FOIARequest(models.Model):
         # set object's mail id to what is in the database
         self.mail_id = FOIARequest.objects.get(pk=self.pk).mail_id
 
-    # TODO merge with get_request email?
-    def get_mail_id(self):
-        """Get the mail id - generate it if it doesn't exist"""
-        if not self.mail_id:
-            self.set_mail_id()
-        return self.mail_id
-
     def get_request_email(self):
         """Get the request's unique email address"""
-        return '%s@%s' % (self.get_mail_id(), settings.MAILGUN_SERVER_NAME)
+        if not self.mail_id:
+            self.set_mail_id()
+        return '%s@%s' % (self.mail_id, settings.MAILGUN_SERVER_NAME)
 
     def get_other_emails(self):
         """Get the other emails for this request as a comma seperated string"""
@@ -367,7 +346,6 @@ class FOIARequest(models.Model):
         return self.agency.get_user()
 
     def get_saved(self):
-        # TODO ehh
         """Get the old model that is saved in the db"""
         try:
             return FOIARequest.objects.get(pk=self.pk)
@@ -391,7 +369,6 @@ class FOIARequest(models.Model):
         """Various actions whenever the request has been updated"""
         # pylint: disable=unused-argument
         # Do something with anchor
-        # XXX no longer needed?
         self.update_dates()
 
     def notify(self, action):
@@ -413,7 +390,6 @@ class FOIARequest(models.Model):
         if self.is_public():
             utils.notify(followers(self), action)
 
-    # TODO split up sending responsiblity across composer and comm?
     def submit(self, appeal=False, **kwargs):
         """
         The request has been submitted.
@@ -589,7 +565,7 @@ class FOIARequest(models.Model):
             user=user,
             sent=False,
         )
-        comm = self.last_comm()
+        comm = self.communications.last()
         access = 'private' if self.embargo else 'public'
         for attachment in attachments:
             file_ = comm.files.create(
@@ -888,7 +864,6 @@ class FOIARequest(models.Model):
         else:
             return 'ack'
 
-    # XXX this is a mess
     def update_dates(self):
         """Set the due date, follow up date and days until due attributes"""
         cal = self.jurisdiction.get_calendar()
@@ -906,7 +881,7 @@ class FOIARequest(models.Model):
             self.date_followup = None
         # if we need to respond, pause the count down until we do
         if self.status in ['fix', 'payment'] and self.date_due:
-            last_datetime = self.last_comm().datetime
+            last_datetime = self.communications.last().datetime
             if not last_datetime:
                 last_datetime = timezone.now()
             self.days_until_due = cal.business_days_between(
@@ -918,7 +893,7 @@ class FOIARequest(models.Model):
     def _update_followup_date(self):
         """Update the follow up date"""
         try:
-            new_date = self.last_comm().datetime.date() + timedelta(
+            new_date = self.communications.last().datetime.date() + timedelta(
                 self._followup_days()
             )
             if self.date_due and self.date_due > new_date:
@@ -951,7 +926,6 @@ class FOIARequest(models.Model):
         else:
             return 15
 
-    # XXX somewhere else?
     def get_agency_reply_link(self, email):
         """Get the link for the agency user to log in"""
         agency = self.agency
@@ -969,7 +943,6 @@ class FOIARequest(models.Model):
             email=email,
         )
 
-    # XXX necessary?
     def update_tags(self, tags):
         """Update the requests tags"""
         tag_set = set()
@@ -978,7 +951,6 @@ class FOIARequest(models.Model):
             tag_set.add(new_tag)
         self.tags.set(*tag_set)
 
-    # XXX should not be in models
     def user_actions(self, user):
         """Provides action interfaces for users"""
         from muckrock.foia.forms import FOIAFlagForm, FOIAContactUserForm
@@ -1052,7 +1024,6 @@ class FOIARequest(models.Model):
             },
         ]
 
-    # XXX this is only ever used to check for > 0...
     def total_pages(self):
         """Get the total number of pages for this request"""
         pages = self.get_files().aggregate(Sum('pages'))['pages__sum']
@@ -1232,6 +1203,7 @@ class FOIARequest(models.Model):
             ('followup_foiarequest', 'Can send a manual follow up'),
             ('agency_reply_foiarequest', 'Can send a direct reply'),
             ('upload_attachment_foiarequest', 'Can upload an attachment'),
+            ('pay_foiarequest', 'Can pay for a request'),
             ('export_csv', 'Can export a CSV of search results'),
             (
                 'zip_download',

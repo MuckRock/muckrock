@@ -31,7 +31,7 @@ class LatestSubmittedRequests(Feed):
 
     def item_description(self, item):
         """The description of each rss item"""
-        return linebreaks(escape(item.first_request()))
+        return linebreaks(escape(item.first_request_text()))
 
 
 class LatestDoneRequests(Feed):
@@ -50,7 +50,7 @@ class LatestDoneRequests(Feed):
 
     def item_description(self, item):
         """The description of each rss item"""
-        return linebreaks(escape(item.first_request()))
+        return linebreaks(escape(item.first_request_text()))
 
 
 class FOIAFeed(Feed):
@@ -119,7 +119,7 @@ class UserSubmittedFeed(Feed):
 
     def item_description(self, item):
         """The description of each rss item"""
-        return linebreaks(escape(item.first_request()))
+        return linebreaks(escape(item.first_request_text()))
 
 
 class UserDoneFeed(Feed):
@@ -153,7 +153,7 @@ class UserDoneFeed(Feed):
 
     def item_description(self, item):
         """The description of each rss item"""
-        return linebreaks(escape(item.first_request()))
+        return linebreaks(escape(item.first_request_text()))
 
 
 class UserUpdateFeed(Feed):
