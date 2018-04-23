@@ -441,7 +441,7 @@ class TestFOIAIntegration(TestCase):
                 foia.date_followup,
                 max(
                     foia.date_due,
-                    foia.last_comm().datetime.date() +
+                    foia.communications.last().datetime.date() +
                     timedelta(foia._followup_days())
                 )
             )
@@ -517,7 +517,7 @@ class TestFOIAIntegration(TestCase):
                 foia.date_followup,
                 max(
                     foia.date_due,
-                    foia.last_comm().datetime.date() +
+                    foia.communications.last().datetime.date() +
                     timedelta(foia._followup_days())
                 )
             )
@@ -679,13 +679,13 @@ class TestRequestDetailView(TestCase):
         eq_(self.foia.status, 'appealing')
         eq_(self.foia.communications.count(), comm_count + 1)
         eq_(
-            self.foia.last_comm().communication, data['text'],
+            self.foia.communications.last().communication, data['text'],
             'The appeal should use the language provided by the user.'
         )
         appeal = Appeal.objects.last()
         ok_(appeal, 'An Appeal object should be created.')
         eq_(
-            self.foia.last_comm(), appeal.communication,
+            self.foia.communications.last(), appeal.communication,
             'The appeal should reference the communication that was created.'
         )
 

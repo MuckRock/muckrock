@@ -2,8 +2,6 @@
 Admin registration for FOIA models
 """
 
-# TODO break this file up
-
 # Django
 from django import forms
 from django.conf.urls import url

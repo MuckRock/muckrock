@@ -30,7 +30,9 @@ from muckrock.foia.models import (
     FOIAComposer,
     FOIAFile,
     FOIARequest,
+    OutboundComposerAttachment,
 )
+from muckrock.foia.rules import can_embargo, can_embargo_permananently
 from muckrock.foia.serializers import (
     FOIACommunicationSerializer,
     FOIAPermissions,
@@ -112,43 +114,88 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
         # pylint: disable=too-many-branches
         data = request.data
         try:
-            # XXX support multiple agencies
+            agencies = data.get('agency')
+            if not isinstance(agencies, list):
+                agencies = [agencies]
+            # XXX agency pks are correct format validate
             agencies = Agency.objects.filter(
-                pk=data.get('agency'),
+                pk__in=agencies,
                 status='approved',
             )
 
             embargo = data.get('embargo', False)
-            # XXX
             permanent_embargo = data.get('permanent_embargo', False)
             if permanent_embargo:
                 embargo = True
+            if embargo and not can_embargo(request.user):
+                return Response(
+                    {
+                        'status':
+                            'You do not have permission to embargo requests.'
+                    },
+                    status=http_status.HTTP_400_BAD_REQUEST,
+                )
+            # XXX user permanent embargo
+            if permanent_embargo and not can_embargo_permananently(
+                request.user
+            ):
+                return Response(
+                    {
+                        'status':
+                            'You do not have permission to permanently '
+                            'embargo requests.'
+                    },
+                    status=http_status.HTTP_400_BAD_REQUEST,
+                )
 
             # XXX test validation
-            # XXX check for embargo permissions
-            # XXX support full text
-            # XXX support attachments
             composer = FOIAComposer.objects.create(
                 user=request.user,
-                title=data['title'],
-                slug=slugify(data['title']) or 'untitled',
-                requested_docs=data['document_request'],
+                title=data.get('title', 'Untitled'),
+                slug=slugify(data.get('title')) or 'untitled',
+                requested_docs=data.get('document_request', ''),
+                edited_boilerplate=data.get('full_text', False),
                 embargo=embargo,
             )
             composer.agencies.set(agencies)
-            try:
-                composer.submit()
-                return Response(
-                    {
-                        'status': 'FOI Request submitted',
-                        'Location': composer.get_absolute_url()
-                    },
-                    status=http_status.HTTP_201_CREATED,
-                )
-            except InsufficientRequestsError:
-                pass
-                # XXX messages.warning(request, 'You need to purchase more requests')
 
+            if 'attachments' in data:
+                attachments = data.get('attachments')[:3]
+            else:
+                attachments = []
+            for attm_path in attachments:
+                res = requests.get(attm_path)
+                mime_type = res.headers['Content-Type']
+                if mime_type not in settings.ALLOWED_FILE_MIMES:
+                    raise MimeError
+                res.raise_for_status()
+                title = attm_path.rsplit('/', 1)[1]
+                attm = OutboundComposerAttachment.objects.create(
+                    user=request.user,
+                    composer=composer,
+                    date_time_stamp=timezone.now(),
+                )
+                attm.ffile.save(title, ContentFile(res.content))
+
+            composer.submit()
+            return Response(
+                {
+                    'status': 'FOI Request submitted',
+                    'Location': composer.get_absolute_url()
+                },
+                status=http_status.HTTP_201_CREATED,
+            )
+
+        except InsufficientRequestsError:
+            return Response(
+                {
+                    'status':
+                        'Error - Out of requests.  FOI Request has been saved.',
+                    'Location':
+                        composer.get_absolute_url()
+                },
+                status=http_status.HTTP_402_PAYMENT_REQUIRED,
+            )
         except KeyError:
             return Response(
                 {

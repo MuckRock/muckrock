@@ -117,7 +117,6 @@ FLAG_CATEGORIES = PUBLIC_FLAG_CATEGORIES + PRIVATE_FLAG_CATEGORIES
 
 class Task(models.Model):
     """A base task model for fields common to all tasks"""
-    # XXX rename these, change all auto_now_add's to default timezone nows
     date_created = models.DateTimeField(auto_now_add=True)
     date_done = models.DateTimeField(blank=True, null=True)
     date_deferred = models.DateField(blank=True, null=True)

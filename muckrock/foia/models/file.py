@@ -12,9 +12,6 @@ from django.db import models
 import logging
 import os
 
-# MuckRock
-from muckrock.foia.models.communication import FOIACommunication
-
 logger = logging.getLogger(__name__)
 
 
@@ -25,7 +22,10 @@ class FOIAFile(models.Model):
               ('organization', 'Organization'))
 
     comm = models.ForeignKey(
-        FOIACommunication, related_name='files', blank=True, null=True
+        'foia.FOIACommunication',
+        related_name='files',
+        blank=True,
+        null=True,
     )
     ffile = models.FileField(
         upload_to='foia_files/%Y/%m/%d', verbose_name='File', max_length=255
@@ -35,7 +35,6 @@ class FOIAFile(models.Model):
     source = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
     # for doc cloud only
-    # XXX is access really needed?
     access = models.CharField(
         max_length=12,
         default='public',

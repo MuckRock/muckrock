@@ -322,18 +322,6 @@ MONTHLY_REQUESTS = {
     'robot': 0,
 }
 
-# XXX remove
-BUNDLED_REQUESTS = {
-    'admin': 5,
-    'basic': 4,
-    'beta': 4,
-    'pro': 5,
-    'proxy': 5,
-    'org': 5,
-    'robot': 0,
-    'agency': 0,
-}
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,

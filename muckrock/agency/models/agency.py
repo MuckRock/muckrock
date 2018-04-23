@@ -387,3 +387,4 @@ class Agency(models.Model, RequestHelper):
 
     class Meta:
         verbose_name_plural = 'agencies'
+        permissions = (('view_emails', 'Can view private contact information'),)

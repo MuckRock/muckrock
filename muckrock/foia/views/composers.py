@@ -9,7 +9,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.urlresolvers import reverse
-from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
@@ -242,22 +241,17 @@ class UpdateComposer(LoginRequiredMixin, GenericComposer, UpdateView):
         else:
             # can get recently submitted requests also, which will convert them
             # back to drafts
-            # XXX should not 404 for "timed out" composers,
-            # but redirect + error message
-            return FOIAComposer.objects.filter(
-                Q(status='started', user=self.request.user) | Q(
-                    ~Q(delayed_id=''),
-                    status='submitted',
-                    user=self.request.user,
-                    datetime_submitted__lt=timezone.now() +
-                    timedelta(seconds=COMPOSER_EDIT_DELAY),
-                )
-            )
+            # allow all composer's here - we don't want to 404 on non-drafts
+            return FOIAComposer.objects.filter(user=self.request.user)
 
     def get_object(self, queryset=None):
         """Convert object back to draft if it has been submitted recently"""
         composer = super(UpdateComposer, self).get_object(queryset)
-        if composer.status == 'submitted':
+        can_revoke = (
+            composer.delayed_id != '' and composer.datetime_submitted <
+            timezone.now() + timedelta(seconds=COMPOSER_EDIT_DELAY)
+        )
+        if composer.status == 'submitted' and can_revoke:
             current_app.control.revoke(composer.delayed_id)
             composer.status = 'started'
             composer.delayed_id = ''
@@ -282,6 +276,17 @@ class UpdateComposer(LoginRequiredMixin, GenericComposer, UpdateView):
             messages.success(self.request, 'Draft deleted')
             return redirect('foia-mylist')
         return super(UpdateComposer, self).post(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        """Redirect if this composer is not a draft"""
+        self.object = self.get_object()
+        if self.object.status != 'started':
+            messages.warning(
+                self.request, 'This request can no longer be updated.'
+            )
+            return redirect(self.object)
+        else:
+            return self.render_to_response(self.get_context_data())
 
     def form_valid(self, form):
         """Update the request"""

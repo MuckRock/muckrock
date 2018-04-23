@@ -89,10 +89,7 @@ class TestMailgunViewHandleRequest(TestMailgunViews):
         from_name = 'Smith, Bob'
         from_email = 'test@agency.gov'
         from_ = '"%s" <%s>' % (from_name, from_email)
-        to_ = (
-            '%s@requests.muckrock.com, "Doe, John" <other@agency.gov>' %
-            foia.get_mail_id()
-        )
+        to_ = '%s, "Doe, John" <other@agency.gov>' % foia.get_request_email()
         subject = 'Test subject'
         text = 'Test normal.'
         signature = '-Charlie Jones'
@@ -121,7 +118,7 @@ class TestMailgunViewHandleRequest(TestMailgunViews):
 
         foia = FOIARequestFactory()
         from_ = 'test@agency.com'
-        to_ = '%s@requests.muckrock.com' % foia.get_mail_id()
+        to_ = foia.get_request_email()
         text = 'Test bad sender.'
         signature = '-Spammer'
         self.mailgun_route(from_, to_, text=text, signature=signature)
@@ -134,7 +131,7 @@ class TestMailgunViewHandleRequest(TestMailgunViews):
             OrphanTask.objects.filter(
                 communication=communication,
                 reason='bs',
-                address=foia.get_mail_id(),
+                address=foia.get_request_email().split('@')[0],
             ).exists()
         )
 
@@ -142,7 +139,7 @@ class TestMailgunViewHandleRequest(TestMailgunViews):
         """Test receiving a message from an unauthorized sender"""
 
         foia = FOIARequestFactory(block_incoming=True)
-        to_ = '%s@requests.muckrock.com' % foia.get_mail_id()
+        to_ = foia.get_request_email()
         text = 'Test block incoming.'
         signature = '-Too Late'
         self.mailgun_route(to_=to_, text=text, signature=signature)
@@ -155,7 +152,7 @@ class TestMailgunViewHandleRequest(TestMailgunViews):
             OrphanTask.objects.filter(
                 communication=communication,
                 reason='ib',
-                address=foia.get_mail_id(),
+                address=foia.get_request_email().split('@')[0],
             ).exists()
         )
 
@@ -175,7 +172,7 @@ class TestMailgunViewHandleRequest(TestMailgunViews):
         """Test a message with an attachment"""
         try:
             foia = FOIARequestFactory()
-            to_ = '%s@requests.muckrock.com' % foia.get_mail_id()
+            to_ = foia.get_request_email()
             attachments = [StringIO('Good file'), StringIO('Ignore File')]
             attachments[0].name = 'data.pdf'
             attachments[1].name = 'ignore.p7s'
@@ -196,7 +193,7 @@ class TestMailgunViewHandleRequest(TestMailgunViews):
         """Test an improperly stripped message"""
 
         foia = FOIARequestFactory()
-        to_ = '%s@requests.muckrock.com' % foia.get_mail_id()
+        to_ = foia.get_request_email()
         text = ''
         body = 'Here is the full body.'
         self.mailgun_route(to_=to_, text=text, body=body)
@@ -208,7 +205,7 @@ class TestMailgunViewHandleRequest(TestMailgunViews):
         """Test an improperly signed message"""
 
         foia = FOIARequestFactory(block_incoming=True)
-        to_ = '%s@requests.muckrock.com' % foia.get_mail_id()
+        to_ = foia.get_request_email()
         response = self.mailgun_route(to_=to_, sign=False)
         nose.tools.eq_(response.status_code, 403)
 

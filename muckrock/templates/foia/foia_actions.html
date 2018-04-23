@@ -1,6 +1,6 @@
 {% if user.is_authenticated %}
   <section class="actions">
-    {% if foia.is_payable %}
+    {% if user_can_pay %}
       <div class="payment prompt">
         <p>This request requires a payment{% if foia.price %} of ${{foia.price|floatformat:2}}{% endif %}.</p>
         <footer class="button-group">
