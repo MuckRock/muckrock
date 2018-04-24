@@ -670,23 +670,6 @@ class MultiRequestTaskTests(TestCase):
                 },
             )
 
-    def _test_do_return_requests(self):
-        """Test return requests"""
-        # XXX move this to test composer
-        self.task._do_return_requests({
-            'regular': 2,
-            'monthly': 0,
-            'org': 1,
-        })
-        self.composer.user.profile.refresh_from_db()
-        self.composer.user.profile.organization.refresh_from_db()
-        eq_(self.composer.num_reg_requests, 1)
-        eq_(self.composer.num_monthly_requests, 2)
-        eq_(self.composer.num_org_requests, 0)
-        eq_(self.composer.user.profile.num_requests, 7)
-        eq_(self.composer.user.profile.monthly_requests, 10)
-        eq_(self.composer.user.profile.organization.num_requests, 101)
-
 
 class TestTaskManager(TestCase):
     """Tests for a helpful and handy task object manager."""

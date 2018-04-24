@@ -3,7 +3,6 @@ Tests accounts views
 """
 
 # Django
-from django.conf import settings
 from django.contrib.auth.models import AnonymousUser, User
 from django.contrib.auth.views import login
 from django.core.urlresolvers import reverse
@@ -20,7 +19,6 @@ from muckrock.accounts.forms import RegistrationCompletionForm
 from muckrock.factories import (
     AgencyFactory,
     NotificationFactory,
-    OrganizationFactory,
     QuestionFactory,
     UserFactory,
 )
@@ -245,20 +243,20 @@ class TestAccountsView(TestCase):
 
 
 @patch('stripe.Charge', Mock())
-class _TestBuyRequestsView(TestCase):
-    """The buy requests view allows one user to buy requests for another,
-    including themselves.
-    """
-
-    # XXX this view completely redone
+class TestProfileViewBuyRequests(TestCase):
+    """Test buying requests through the profile view"""
 
     def setUp(self):
         self.user = UserFactory()
         self.factory = RequestFactory()
         self.kwargs = {'username': self.user.username}
-        self.url = reverse('acct-buy-requests', kwargs=self.kwargs)
-        self.view = views.buy_requests
-        self.data = {'stripe_token': 'test', 'stripe_email': self.user.email}
+        self.url = reverse('acct-profile', kwargs=self.kwargs)
+        self.view = views.ProfileView.as_view()
+        self.data = {
+            'stripe_token': 'test',
+            'stripe_email': self.user.email,
+            'num_requests': 4,
+        }
 
     def test_buy_requests(self):
         """A user should be able to buy themselves requests."""
@@ -266,44 +264,11 @@ class _TestBuyRequestsView(TestCase):
         post_request = self.factory.post(self.url, self.data)
         post_request = mock_middleware(post_request)
         post_request.user = self.user
-        self.view(post_request, self.user.username)
+        self.view(post_request, username=self.user.username)
         self.user.profile.refresh_from_db()
-        requests_to_add = settings.BUNDLED_REQUESTS[self.user.profile.acct_type]
         eq_(
             self.user.profile.num_requests,
-            existing_request_count + requests_to_add
-        )
-
-    def test_buy_requests_as_pro(self):
-        """A pro user should get an extra request in each bundle."""
-        existing_request_count = self.user.profile.num_requests
-        self.user.profile.acct_type = 'pro'
-        self.user.profile.save()
-        post_request = self.factory.post(self.url, self.data)
-        post_request = mock_middleware(post_request)
-        post_request.user = self.user
-        self.view(post_request, self.user.username)
-        self.user.profile.refresh_from_db()
-        requests_to_add = settings.BUNDLED_REQUESTS[self.user.profile.acct_type]
-        eq_(
-            self.user.profile.num_requests,
-            existing_request_count + requests_to_add
-        )
-
-    def test_buy_requests_as_org(self):
-        """An org member should get an extra request in each bundle."""
-        existing_request_count = self.user.profile.num_requests
-        self.user.profile.organization = OrganizationFactory(active=True)
-        self.user.profile.save()
-        post_request = self.factory.post(self.url, self.data)
-        post_request = mock_middleware(post_request)
-        post_request.user = self.user
-        self.view(post_request, self.user.username)
-        self.user.profile.refresh_from_db()
-        requests_to_add = 5
-        eq_(
-            self.user.profile.num_requests,
-            existing_request_count + requests_to_add
+            existing_request_count + self.data['num_requests'],
         )
 
     @patch('muckrock.message.tasks.gift.delay')
@@ -313,14 +278,12 @@ class _TestBuyRequestsView(TestCase):
         existing_request_count = other_user.profile.num_requests
         post_request = self.factory.post(self.url, self.data)
         post_request = mock_middleware(post_request)
-        # here is the cool part: the request user is the buyer and the URL user is the recipient
         post_request.user = self.user
-        self.view(post_request, other_user.username)
+        self.view(post_request, username=other_user.username)
         other_user.profile.refresh_from_db()
-        requests_to_add = settings.BUNDLED_REQUESTS[self.user.profile.acct_type]
         eq_(
             other_user.profile.num_requests,
-            existing_request_count + requests_to_add
+            existing_request_count + self.data['num_requests'],
         )
         ok_(
             mock_notify.called,
@@ -334,35 +297,20 @@ class _TestBuyRequestsView(TestCase):
         post_request = self.factory.post(self.url, self.data)
         post_request = mock_middleware(post_request)
         post_request.user = AnonymousUser()
-        self.view(post_request, other_user.username)
+        self.view(post_request, username=other_user.username)
         other_user.profile.refresh_from_db()
-        requests_to_add = 4
         eq_(
             other_user.profile.num_requests,
-            existing_request_count + requests_to_add
+            existing_request_count + self.data['num_requests'],
         )
-
-    def test_buy_multiple_bundles(self):
-        """Users should be able to buy multiple bundles of four requests."""
-        profile = self.user.profile
-        bundles_to_buy = 2
-        existing_request_count = profile.num_requests
-        self.data['bundles'] = bundles_to_buy
-        http_post_response(
-            self.url, self.view, self.data, self.user, **self.kwargs
-        )
-        profile.refresh_from_db()
-        requests_to_add = bundles_to_buy * self.user.profile.bundled_requests()
-        eq_(profile.num_requests, existing_request_count + requests_to_add)
 
     @raises(Http404)
     def test_nonexistant_user(self):
         """Buying requests for nonexistant user should return a 404."""
         post_request = self.factory.post(self.url, self.data)
         post_request = mock_middleware(post_request)
-        # here is the cool part: the request user is the buyer and the URL user is the recipient
         post_request.user = self.user
-        self.view(post_request, 'nonexistant_user')
+        self.view(post_request, username='nonexistant_user')
 
     def test_bad_post_data(self):
         """Bad post data should cancel the transaction."""
@@ -371,7 +319,7 @@ class _TestBuyRequestsView(TestCase):
         post_request = self.factory.post(self.url, bad_data)
         post_request = mock_middleware(post_request)
         post_request.user = self.user
-        self.view(post_request, self.user.username)
+        self.view(post_request, username=self.user.username)
         self.user.profile.refresh_from_db()
         eq_(self.user.profile.num_requests, existing_request_count)
 

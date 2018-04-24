@@ -268,13 +268,17 @@ class UpdateComposer(LoginRequiredMixin, GenericComposer, UpdateView):
     def post(self, request, *args, **kwargs):
         """Allow deletion regardless of form validation"""
         self.object = self.get_object()
-        if (
-            request.POST.get('action') == 'delete'
-            and self.object.has_perm(request.user, 'delete')
-        ):
-            self.object.delete()
-            messages.success(self.request, 'Draft deleted')
-            return redirect('foia-mylist')
+        if request.POST.get('action') == 'delete':
+            if self.object.has_perm(request.user, 'delete'):
+                self.object.delete()
+                messages.success(self.request, 'Draft deleted')
+                return redirect('foia-mylist-drafts')
+            else:
+                messages.success(
+                    self.request,
+                    'You do not have permission to delete that draft',
+                )
+                return redirect('foia-mylist-drafts')
         return super(UpdateComposer, self).post(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):

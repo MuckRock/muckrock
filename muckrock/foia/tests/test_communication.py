@@ -310,28 +310,3 @@ class TestCommunicationClone(test.TestCase):
         ok_(not self.comm.files.all()[0].ffile)
         other_foia = FOIARequestFactory()
         self.comm.clone([other_foia], self.user)
-
-
-class TestRawEmail(test.TestCase):
-    """Tests the raw email view"""
-
-    def setUp(self):
-        self.comm = FOIACommunicationFactory()
-        self.request_factory = test.RequestFactory()
-        self.url = reverse('foia-raw', kwargs={'idx': self.comm.id})
-        self.view = raw
-
-    def test_raw_email_view(self):
-        """Advanced users should be able to view raw emails"""
-        basic_user = UserFactory(profile__acct_type='basic')
-        pro_user = UserFactory(profile__acct_type='pro')
-        request = self.request_factory.get(self.url)
-        request.user = basic_user
-        response = self.view(request, self.comm.id)
-        eq_(response.status_code, 302, 'Basic users should be denied access.')
-        request.user = pro_user
-        response = self.view(request, self.comm.id)
-        eq_(
-            response.status_code, 200,
-            'Advanced users should be allowed access.'
-        )

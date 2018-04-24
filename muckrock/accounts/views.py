@@ -9,7 +9,6 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.db import transaction
 from django.http import (
     HttpResponse,
     HttpResponseBadRequest,
@@ -58,7 +57,6 @@ from muckrock.accounts.models import (
     Statistics,
 )
 from muckrock.accounts.serializers import StatisticsSerializer, UserSerializer
-from muckrock.accounts.utils import validate_stripe_email
 from muckrock.agency.models import Agency
 from muckrock.communication.models import EmailAddress
 from muckrock.crowdfund.models import RecurringCrowdfundPayment
@@ -67,7 +65,6 @@ from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import (
     email_verify,
     failed_payment,
-    gift,
     send_charge_receipt,
     send_invoice_receipt,
     welcome,
@@ -75,7 +72,6 @@ from muckrock.message.tasks import (
 from muckrock.news.models import Article
 from muckrock.organization.models import Organization
 from muckrock.project.models import Project
-from muckrock.utils import stripe_retry_on_error
 from muckrock.views import MRFilterListView
 
 logger = logging.getLogger(__name__)

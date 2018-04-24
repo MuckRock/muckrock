@@ -57,13 +57,13 @@ def test(test_path='', reuse='0', capture=False):
 
 
 @task
-def coverage(settings='test'):
+def coverage(settings='test', reuse='0'):
     """Run the tests and generate a coverage report"""
     with env.cd(env.base_path):
         env.run('coverage erase')
         env.run(
-            'coverage run --branch --source muckrock --omit="*/migrations/*" manage.py test --settings=muckrock.settings.%s'
-            % settings
+            'REUSE_DB=%s coverage run --branch --source muckrock --omit="*/migrations/*" manage.py test --settings=muckrock.settings.%s'
+            % (reuse, settings)
         )
         env.run('coverage html')
 

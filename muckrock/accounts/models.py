@@ -229,8 +229,8 @@ class Profile(models.Model):
             profile.save()
 
     def multiple_requests(self, num):
-        """How many requests of each type would be used for this user to make num requests"""
-        # TODO test
+        """How many requests of each type would be used for this user to make
+        num requests"""
         org_reqs = self.organization.get_requests() if self.organization else 0
         have_amt = [org_reqs, self.get_monthly_requests(), self.num_requests]
         use_amt = []

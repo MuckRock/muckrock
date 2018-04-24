@@ -240,6 +240,7 @@ add_perm('foia.upload_attachment_foiarequest', can_edit | is_from_agency)
 add_perm('foia.pay_foiarequest', can_edit & is_payable)
 
 add_perm('foia.view_foiacomposer', can_view_composer)
+add_perm('foia.delete_foiacomposer', can_edit_composer)
 add_perm('foia.upload_attachment_foiacomposer', can_edit_composer)
 
 add_perm('foia.view_rawemail', is_advanced)
