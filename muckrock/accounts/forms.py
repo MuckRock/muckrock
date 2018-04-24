@@ -15,6 +15,7 @@ from django.utils.text import slugify
 import re
 
 # Third Party
+import stripe
 from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
@@ -22,6 +23,7 @@ from muckrock.accounts.models import Profile
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.tasks import email_change
 from muckrock.organization.models import Organization
+from muckrock.utils import stripe_retry_on_error
 
 
 class ProfileSettingsForm(forms.ModelForm):
@@ -295,25 +297,29 @@ class BuyRequestForm(StripeForm):
     def buy_requests(self, recipient):
         """Buy the requests"""
         num_requests = self.cleaned_data['num_requests']
-        self.user.profile.pay(
-            self.cleaned_data['stripe_token'],
-            self._get_price(num_requests),
-            {
+        stripe_retry_on_error(
+            stripe.Charge.create,
+            amount=self._get_price(num_requests),
+            currency='usd',
+            source=self.cleaned_data['stripe_token'],
+            metadata={
                 'email': self.cleaned_data['stripe_email'],
                 'action': 'request-purchase',
                 'amount': num_requests,
             },
-            fee=0,
+            idempotency_key=True,
         )
         recipient.profile.add_requests(num_requests)
 
     def _get_price(self, num_requests):
         """Get the price for the requests"""
-        is_advanced = self.user.profile.is_advanced()
-        if num_requests > 20 and is_advanced:
+        is_advanced = (
+            self.user.is_authenticated and self.user.profile.is_advanced()
+        )
+        if num_requests >= 20 and is_advanced:
             # advanced users pay $3 for bulk purchases
             return 300 * num_requests
-        elif num_requests > 20:
+        elif num_requests >= 20:
             # other users pay $4 for bulk purchases
             return 400 * num_requests
         else:

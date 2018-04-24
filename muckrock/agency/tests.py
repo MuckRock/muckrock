@@ -13,21 +13,24 @@ import json
 from datetime import timedelta
 
 # Third Party
-import nose.tools
+from nose.tools import assert_in, assert_not_in, eq_, ok_, raises
 
 # MuckRock
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import STALE_DURATION, Agency
-from muckrock.agency.views import AgencyList, detail, similar
+from muckrock.agency.views import (
+    AgencyList,
+    boilerplate,
+    contact_info,
+    detail,
+    similar,
+)
 from muckrock.factories import AgencyFactory, StaleAgencyFactory, UserFactory
 from muckrock.foia.factories import FOIACommunicationFactory
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.factories import StaleAgencyTaskFactory
 from muckrock.task.models import StaleAgencyTask
 from muckrock.test_utils import http_get_response, mock_middleware
-
-ok_ = nose.tools.ok_
-eq_ = nose.tools.eq_
 
 
 class TestAgencyUnit(TestCase):
@@ -161,8 +164,8 @@ class TestAgencyUnit(TestCase):
         proxy_info = agency_.get_proxy_info()
         eq_(proxy_info['proxy'], False)
         eq_(proxy_info['missing_proxy'], False)
-        nose.tools.assert_not_in('from_user', proxy_info)
-        nose.tools.assert_not_in('warning', proxy_info)
+        assert_not_in('from_user', proxy_info)
+        assert_not_in('warning', proxy_info)
 
         proxy_placeholder = UserFactory(username='Proxy')
         agency_ = AgencyFactory(requires_proxy=True)
@@ -170,7 +173,7 @@ class TestAgencyUnit(TestCase):
         eq_(proxy_info['proxy'], True)
         eq_(proxy_info['missing_proxy'], True)
         eq_(proxy_info['from_user'], proxy_placeholder)
-        nose.tools.assert_in('warning', proxy_info)
+        assert_in('warning', proxy_info)
 
         proxy = UserFactory(
             profile__acct_type='proxy',
@@ -180,7 +183,7 @@ class TestAgencyUnit(TestCase):
         eq_(proxy_info['proxy'], True)
         eq_(proxy_info['missing_proxy'], False)
         eq_(proxy_info['from_user'], proxy)
-        nose.tools.assert_in('warning', proxy_info)
+        assert_in('warning', proxy_info)
 
 
 class TestAgencyManager(TestCase):
@@ -236,7 +239,7 @@ class TestAgencyViews(TestCase):
         )
         eq_(response.status_code, 200)
 
-    @nose.tools.raises(Http404)
+    @raises(Http404)
     def test_unapproved_not_found(self):
         """An unapproved agency should return a 404 response."""
         self.agency.status = 'pending'
@@ -291,6 +294,52 @@ class TestAgencyViews(TestCase):
         response = similar(request)
         data = json.loads(response.content)
         eq_(data['suggestions'], [{'value': agency2.pk, 'text': agency2.name}])
+
+    def test_boilerplate(self):
+        """Test the boilerplate ajax view"""
+        agencies = AgencyFactory.create_batch(2)
+        request = RequestFactory().get(
+            reverse('agency-boilerplate'),
+            {
+                'agencies': [a.pk for a in agencies],
+            },
+        )
+        request = mock_middleware(request)
+        request.user = UserFactory(first_name='John', last_name='Doe')
+        response = boilerplate(request)
+        eq_(response.status_code, 200)
+        data = json.loads(response.content)
+        assert_in('{ law name }', data['intro'])
+        assert_in('{ number of days }', data['outro'])
+        assert_in('John Doe', data['outro'])
+
+    def test_contact_info(self):
+        """Test the contact_info ajax view"""
+        agency = AgencyFactory()
+
+        request = RequestFactory().get(
+            reverse('agency-contact-info', kwargs={
+                'idx': agency.pk
+            })
+        )
+        request = mock_middleware(request)
+        request.user = UserFactory()
+        response = contact_info(request, agency.pk)
+        eq_(response.status_code, 200)
+        data = json.loads(response.content)
+        eq_(data['type'], 'email')
+
+        request = RequestFactory().get(
+            reverse('agency-contact-info', kwargs={
+                'idx': agency.pk
+            })
+        )
+        request = mock_middleware(request)
+        request.user = UserFactory(profile__acct_type='pro')
+        response = contact_info(request, agency.pk)
+        eq_(response.status_code, 200)
+        data = json.loads(response.content)
+        eq_(data['email'], unicode(agency.email))
 
 
 class TestAgencyForm(TestCase):

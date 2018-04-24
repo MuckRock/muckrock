@@ -192,6 +192,54 @@ class TestProfileUnit(TestCase):
             settings.MONTHLY_REQUESTS.get('basic')
         )
 
+    def test_multiple_requests(self):
+        """Test how many of each request type you need"""
+        profile = ProfileFactory(
+            organization=OrganizationFactory(num_requests=1),
+            monthly_requests=2,
+            num_requests=3,
+        )
+        eq_(
+            profile.multiple_requests(2),
+            {
+                'org': 1,
+                'monthly': 1,
+                'regular': 0,
+                'extra': 0,
+            },
+        )
+        eq_(
+            profile.multiple_requests(7),
+            {
+                'org': 1,
+                'monthly': 2,
+                'regular': 3,
+                'extra': 1,
+            },
+        )
+        profile = ProfileFactory(
+            monthly_requests=2,
+            num_requests=0,
+        )
+        eq_(
+            profile.multiple_requests(2),
+            {
+                'org': 0,
+                'monthly': 2,
+                'regular': 0,
+                'extra': 0,
+            },
+        )
+        eq_(
+            profile.multiple_requests(7),
+            {
+                'org': 0,
+                'monthly': 2,
+                'regular': 0,
+                'extra': 5,
+            },
+        )
+
 
 class TestStripeIntegration(TestCase):
     """

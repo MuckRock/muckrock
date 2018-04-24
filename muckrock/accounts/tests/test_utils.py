@@ -4,7 +4,8 @@ Tests the accounts utility methods
 
 # Django
 from django.contrib.auth.models import User
-from django.test import TestCase
+from django.core.urlresolvers import reverse
+from django.test import RequestFactory, TestCase
 
 # Third Party
 from mock import patch
@@ -14,6 +15,7 @@ from nose.tools import eq_, ok_
 from muckrock.accounts.mixins import MiniregMixin, split_name
 from muckrock.accounts.utils import unique_username
 from muckrock.factories import UserFactory
+from muckrock.test_utils import mock_middleware
 
 
 class TestMiniregister(TestCase):
@@ -24,14 +26,16 @@ class TestMiniregister(TestCase):
         self.email = 'lou@hero.in'
 
     @patch('muckrock.message.tasks.welcome_miniregister.delay')
-    def _test_expected_case(self, mock_welcome):
-        # XXX
+    def test_expected_case(self, mock_welcome):
         """
         Giving the miniregister method a full name, email, and password should
         create a user, create a profile, send them a welcome email, and log them in.
         The method should return the authenticated user.
         """
-        user, _ = miniregister(self.full_name, self.email)
+        request = RequestFactory()
+        mixin = MiniregMixin()
+        mixin.request = mock_middleware(request.get(reverse('foia-create')))
+        user = mixin.miniregister(self.full_name, self.email)
         ok_(isinstance(user, User), 'A user should be created and returned.')
         ok_(user.profile, 'A profile should be created for the user.')
         ok_(user.is_authenticated(), 'The user should be logged in.')

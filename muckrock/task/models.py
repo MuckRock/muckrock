@@ -811,7 +811,6 @@ class MultiRequestTask(Task):
 
     def _calc_return_requests(self, num_requests):
         """Determine how many of each type of request to return"""
-        # TODO test
         used = [
             self.composer.num_reg_requests,
             self.composer.num_monthly_requests,
