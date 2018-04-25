@@ -3,8 +3,8 @@
 
 {% block list-table-head %}
   <th data-sort="title">Title</th>
+  <th>Agencies</th>
   <th width="10%" data-sort="date_created">Created</th>
-  <th width="10%" data-sort="date_submitted">Submitted</th>
 {% endblock list-table-head %}
 
 {% block list-table-row %}
@@ -13,24 +13,17 @@
       <a class="bold" href="{{composer.get_absolute_url}}">
         {{ composer.title }}
       </a><br>
-      <span class="small badge state {{ composer.status|classify_status }}">
-        {{ composer.get_status_display }}
-      </span>
       {% if composer.embargo %}
         <span class="small red badge">Under Embargo</span>
       {% endif %}
     </td>
+    <td>{{ composer.agencies.all|join:", " }}</td>
     <td>{{ composer.datetime_created|date:"m/d/Y" }}</td>
-    <td>{{ composer.datetime_submitted|date:"m/d/Y" }}</td>
   {% endwith %}
 {% endblock %}
 
 {% block empty %}
-  {% if request.GET %}
-    <p class="empty">None of your requests match this filter.</p>
-  {% else %}
     <p class="empty">You haven&rsquo;t filed any requests! Get started by <a href="{% url "foia-create" %}">filing a request now!</a></p>
-  {% endif %}
 {% endblock %}
 
 
