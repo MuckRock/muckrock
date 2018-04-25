@@ -219,15 +219,25 @@ class FOIAComposerQuerySet(models.QuerySet):
 
     def get_viewable(self, user):
         """Return all composers viewable to the user"""
-        # TODO rethink this
-        # test this
-        # embargo should be 'all foias are embargoed'?
+        # TODO test this
+        # collaborators?
         if user.is_staff:
             return self.all()
 
         if user.is_authenticated():
-            query = Q(user=user) | (~Q(status='started') & ~Q(embargo=True))
-            # organizational users may also view requests from their org that are shared
+            # you can view if
+            # * you are the owner
+            # * you are a read or edit collaborator on at least one foia
+            # * the request is public
+            #   * not a draft
+            #   * at leats one foia request is not embargoed
+            query = (
+                Q(user=user) | Q(foias__read_collaborators=user)
+                | Q(foias__edit_collaborators=user) |
+                (~Q(status='started') & Q(foias__embargo=False))
+            )
+            # organizational users may also view requests from their org
+            # that are shared
             if user.profile.organization is not None:
                 query = query | Q(
                     user__profile__org_share=True,
@@ -236,7 +246,7 @@ class FOIAComposerQuerySet(models.QuerySet):
             return self.filter(query)
         else:
             # anonymous user, filter out drafts and embargoes
-            return self.exclude(status='started').exclude(embargo=True)
+            return self.exclude(status='started').filter(foias__embargo=False)
 
     def get_or_create_draft(self, user):
         """Return an existing blank draft or create one"""
