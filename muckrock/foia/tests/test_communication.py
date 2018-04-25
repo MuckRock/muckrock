@@ -4,7 +4,6 @@ Tests for the FOIACommunication model
 
 # Django
 from django import test
-from django.core.urlresolvers import reverse
 
 # Standard Library
 import logging
@@ -24,7 +23,6 @@ from muckrock.foia.factories import (
     FOIARequestFactory,
 )
 from muckrock.foia.models import CommunicationMoveLog, FOIACommunication
-from muckrock.foia.views import raw
 
 
 class TestCommunication(test.TestCase):
