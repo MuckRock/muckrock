@@ -29,7 +29,6 @@ from muckrock.agency.models import Agency
 from muckrock.crowdsource.forms import CrowdsourceChoiceForm
 from muckrock.foia.filters import (
     AgencyFOIARequestFilterSet,
-    ComposerFilterSet,
     FOIARequestFilterSet,
     MyFOIARequestFilterSet,
     ProcessingFOIARequestFilterSet,
@@ -53,7 +52,11 @@ from muckrock.project.forms import ProjectManagerForm
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag, parse_tags
 from muckrock.utils import Echo
-from muckrock.views import MRSearchFilterListView, class_view_decorator
+from muckrock.views import (
+    MRListView,
+    MRSearchFilterListView,
+    class_view_decorator,
+)
 
 
 class RequestExploreView(TemplateView):
@@ -579,23 +582,22 @@ class ProcessingRequestList(RequestList):
 
 
 @class_view_decorator(login_required)
-class ComposerList(MRSearchFilterListView):
+class ComposerList(MRListView):
     """List to view your composers"""
     model = FOIAComposer
     title = 'Your Drafts'
-    filter_class = ComposerFilterSet
     template_name = 'foia/composer_list.html'
     default_sort = 'datetime_created'
     default_order = 'desc'
     sort_map = {
         'title': 'title',
         'date_created': 'datetime_created',
-        'date_submitted': 'datetime_submitted',
     }
 
     def get_queryset(self):
-        """Only show the current user's composers"""
+        """Only show the current user's drafts"""
         return (
             super(ComposerList, self).get_queryset()
-            .filter(user=self.request.user)
+            .filter(user=self.request.user,
+                    status='started').prefetch_related('agencies')
         )

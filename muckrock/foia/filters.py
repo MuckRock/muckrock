@@ -209,12 +209,3 @@ class AgencyFOIARequestFilterSet(django_filters.FilterSet):
     class Meta:
         model = FOIARequest
         fields = ['user']
-
-
-class ComposerFilterSet(django_filters.FilterSet):
-    """Filters for composers"""
-    status = django_filters.ChoiceFilter(choices=COMPOSER_STATUS)
-
-    class Meta:
-        model = FOIAComposer
-        fields = ['status']
