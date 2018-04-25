@@ -141,7 +141,7 @@ urlpatterns = [
     url(r'^multi/$', RedirectView.as_view(url='/foi/create/')),
     url(
         r'^create_multi/$',
-        RedirectView.as_view(url='/foia/create/'),
+        RedirectView.as_view(url='/foi/create/'),
         name='foia-create-multi',
     ),
     url(

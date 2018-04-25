@@ -794,6 +794,7 @@ class MultiRequestTask(Task):
         for agency in self.composer.agencies.all():
             if str(agency.pk) not in agency_list:
                 self.composer.agencies.remove(agency)
+                self.composer.foias.filter(agency=agency).delete()
                 return_requests += 1
         self._return_requests(return_requests)
         self.composer.approved()

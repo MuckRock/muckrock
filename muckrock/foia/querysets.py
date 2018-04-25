@@ -181,9 +181,8 @@ class FOIARequestQuerySet(models.QuerySet):
             composer__user__profile__organization__monthly_cost__gt=0,
         )
 
-    def create_new(self, composer, agency, contact_info=None):
+    def create_new(self, composer, agency):
         """Create a new request and submit it"""
-        # TODO title ??
         if composer.agencies.count() > 1:
             title = '%s (%s)' % (composer.title, agency.name)
         else:
@@ -213,7 +212,6 @@ class FOIARequestQuerySet(models.QuerySet):
             proxy=proxy_info['proxy'],
         )
         foia.process_attachments(composer.user, composer=True)
-        foia.submit(contact_info=contact_info)
 
 
 class FOIAComposerQuerySet(models.QuerySet):

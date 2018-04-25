@@ -3,7 +3,6 @@ FOIA views for composing
 """
 
 # Django
-from celery import current_app
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -11,19 +10,16 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect
-from django.utils import timezone
 from django.utils.encoding import smart_text
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, UpdateView
 
 # Standard Library
 import re
-from datetime import timedelta
 
 # MuckRock
 from muckrock.accounts.mixins import BuyRequestsMixin, MiniregMixin
 from muckrock.agency.models import Agency
-from muckrock.foia.constants import COMPOSER_EDIT_DELAY
 from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.foia.forms import BaseComposerForm, ComposerForm, ContactInfoForm
 from muckrock.foia.models import FOIAComposer, FOIARequest
@@ -247,17 +243,8 @@ class UpdateComposer(LoginRequiredMixin, GenericComposer, UpdateView):
     def get_object(self, queryset=None):
         """Convert object back to draft if it has been submitted recently"""
         composer = super(UpdateComposer, self).get_object(queryset)
-        can_revoke = (
-            composer.delayed_id != '' and composer.datetime_submitted <
-            timezone.now() + timedelta(seconds=COMPOSER_EDIT_DELAY)
-        )
-        if composer.status == 'submitted' and can_revoke:
-            current_app.control.revoke(composer.delayed_id)
-            composer.status = 'started'
-            composer.delayed_id = ''
-            composer.datetime_submitted = None
-            composer.return_requests()
-            composer.save()
+        if composer.revokable():
+            composer.revoke()
             messages.warning(
                 self.request,
                 'This request\'s submission has been cancelled.  You may now '
