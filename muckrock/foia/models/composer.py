@@ -9,6 +9,7 @@ upgrades, such as recurring requests.
 """
 
 # Django
+from celery import current_app
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
@@ -16,12 +17,15 @@ from django.db import models, transaction
 from django.utils import timezone
 from django.utils.text import slugify
 
+# Standard Library
+from datetime import timedelta
+
 # Third Party
 from taggit.managers import TaggableManager
 
 # MuckRock
 from muckrock.accounts.models import Profile
-from muckrock.foia.constants import COMPOSER_SUBMIT_DELAY
+from muckrock.foia.constants import COMPOSER_EDIT_DELAY, COMPOSER_SUBMIT_DELAY
 from muckrock.foia.models import FOIARequest
 from muckrock.foia.querysets import FOIAComposerQuerySet
 from muckrock.organization.models import Organization
@@ -104,6 +108,14 @@ class FOIAComposer(models.Model):
         self.num_org_requests = request_count['org']
         self.status = 'submitted'
         self.datetime_submitted = timezone.now()
+        for agency in self.agencies.select_related(
+            'jurisdiction__law',
+            'jurisdiction__parent__law',
+        ).iterator():
+            FOIARequest.objects.create_new(
+                composer=self,
+                agency=agency,
+            )
         # if num_requests is less than the multi-review amount, we will approve
         # the request right away, other wise we create a multirequest task
         approve = num_requests < settings.MULTI_REVIEW_AMOUNT
@@ -116,15 +128,8 @@ class FOIAComposer(models.Model):
 
     def approved(self, contact_info=None):
         """A pending composer is approved for sending to the agencies"""
-        for agency in self.agencies.select_related(
-            'jurisdiction__law',
-            'jurisdiction__parent__law',
-        ).iterator():
-            FOIARequest.objects.create_new(
-                composer=self,
-                agency=agency,
-                contact_info=contact_info,
-            )
+        for foia in self.foias.all():
+            foia.submit(contact_info=contact_info)
         self.status = 'filed'
         self.save()
 
@@ -173,3 +178,21 @@ class FOIAComposer(models.Model):
             else:
                 profile.monthly_requests += return_amts['org']
             profile.save()
+
+    def revokable(self):
+        """Is this composer revokable?"""
+        return (
+            self.delayed_id != '' and self.datetime_submitted <
+            timezone.now() + timedelta(seconds=COMPOSER_EDIT_DELAY)
+            and self.status == 'submitted'
+        )
+
+    def revoke(self):
+        """Revoke a submitted composer"""
+        current_app.control.revoke(self.delayed_id)
+        self.status = 'started'
+        self.delayed_id = ''
+        self.datetime_submitted = None
+        self.foias.all().delete()
+        self.return_requests()
+        self.save()

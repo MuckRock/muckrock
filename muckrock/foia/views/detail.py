@@ -183,7 +183,9 @@ class Detail(DetailView):
         context['all_tags'] = Tag.objects.all()
         context['past_due'] = is_past_due
         context['user_can_edit'] = user_can_edit
-        context['user_can_pay'] = foia.has_perm(self.request.user, 'pay')
+        context['user_can_pay'] = (
+            foia.has_perm(self.request.user, 'pay') and foia.status == 'payment'
+        )
         context['embargo'] = {
             'show': user_can_embargo or foia.embargo,
             'edit': user_can_embargo,
@@ -251,16 +253,17 @@ class Detail(DetailView):
             context['foia_cache_timeout'] = 0
         else:
             context['foia_cache_timeout'] = settings.DEFAULT_CACHE_TIMEOUT
-        context['MAX_ATTACHMENT_NUM'] = settings.MAX_ATTACHMENT_NUM
-        context['MAX_ATTACHMENT_SIZE'] = settings.MAX_ATTACHMENT_SIZE
-        context['ALLOWED_FILE_MIMES'] = settings.ALLOWED_FILE_MIMES
-        context['ALLOWED_FILE_EXTS'] = settings.ALLOWED_FILE_EXTS
-        context['AWS_STORAGE_BUCKET_NAME'] = settings.AWS_STORAGE_BUCKET_NAME
-        context['AWS_ACCESS_KEY_ID'] = settings.AWS_ACCESS_KEY_ID
+        context['settings'] = settings
         context['agency_status_choices'] = AGENCY_STATUS
         context['agency_reply_form'] = self.agency_reply_form
         context['admin_fix_form'] = self.admin_fix_form
         context['resend_forms'] = self.resend_forms
+        if foia.composer.status == 'submitted':
+            context['revoke_deadline'] = (
+                foia.composer.datetime_submitted +
+                timedelta(seconds=COMPOSER_EDIT_DELAY)
+            )
+            context['can_revoke'] = foia.composer.revokable()
         if foia.sidebar_html:
             messages.info(self.request, foia.sidebar_html)
         return context
@@ -830,29 +833,25 @@ class ComposerDetail(DetailView):
     context_object_name = 'composer'
     query_pk_and_slug = True
     pk_url_kwarg = 'idx'
+    template_name = 'foia/foiacomposer_detail.html'
 
     def dispatch(self, request, *args, **kwargs):
         """If composer is a draft, then redirect to drafting interface"""
         # pylint: disable=attribute-defined-outside-init
         composer = self.get_object()
-        if composer.status == 'started':
+        is_owner = composer.user == self.request.user
+        if composer.status == 'started' and is_owner:
             return redirect('foia-draft', idx=composer.pk)
+        if composer.status == 'started' and not is_owner:
+            raise Http404
         self.foias = (
             composer.foias.get_viewable(self.request.user).select_related_view()
         )
-        not_owner = composer.user != self.request.user
-        if not_owner and (not self.foias or composer.status == 'submitted'):
+        if not is_owner and not self.foias:
             raise Http404
         if len(self.foias) == 1:
             return redirect(self.foias[0])
         return super(ComposerDetail, self).dispatch(request, *args, **kwargs)
-
-    def get_template_names(self):
-        """Different templates dependeing on status"""
-        if self.object.status == 'submitted':
-            return ['foia/foiacomposer_detail_submitted.html']
-        else:
-            return ['foia/foiacomposer_detail.html']
 
     def get_context_data(self, **kwargs):
         """Add extra context data"""
@@ -864,20 +863,6 @@ class ComposerDetail(DetailView):
             args=(composer.pk,),
         )
         if composer.status == 'submitted':
-            communication = initial_communication_template(
-                composer.agencies.all(),
-                composer.user.get_full_name(),
-                composer.requested_docs,
-                edited_boilerplate=composer.edited_boilerplate,
-                proxy=False,
-            )
-            context['communication'] = FOIACommunication(
-                id=-1,
-                from_user=composer.user,
-                response=False,
-                communication=communication,
-                subject=composer.title,
-            )
             context['edit_deadline'] = (
                 composer.datetime_submitted +
                 timedelta(seconds=COMPOSER_EDIT_DELAY)
