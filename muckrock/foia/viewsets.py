@@ -3,11 +3,11 @@ Viewsets for the FOIA API
 """
 
 # Django
+from django import forms
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db.models import Prefetch
 from django.template.defaultfilters import slugify
-from django.template.loader import get_template
 from django.utils import timezone
 
 # Standard Library
@@ -24,22 +24,14 @@ from rest_framework.response import Response
 
 # MuckRock
 from muckrock.agency.models import Agency
-from muckrock.foia.exceptions import InsufficientRequestsError, MimeError
-from muckrock.foia.models import (
-    FOIACommunication,
-    FOIAComposer,
-    FOIAFile,
-    FOIARequest,
-    OutboundComposerAttachment,
-)
-from muckrock.foia.rules import can_embargo, can_embargo_permananently
+from muckrock.foia.exceptions import InsufficientRequestsError
+from muckrock.foia.models import FOIACommunication, FOIAComposer, FOIARequest
 from muckrock.foia.serializers import (
     FOIACommunicationSerializer,
     FOIAPermissions,
     FOIARequestSerializer,
     IsOwner,
 )
-from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import ResponseTask
 
 logger = logging.getLogger(__name__)
@@ -107,268 +99,153 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             )
         )
 
-    def create(self, request):
-        """Submit new request"""
-        # pylint: disable=too-many-locals
-        # pylint: disable=too-many-return-statements
-        # pylint: disable=too-many-branches
-        data = request.data
+    def _validate_create(self, user, data):
+        """Do all of the data validation for request creation"""
+        cleaned_data = {}
+        cleaned_data['agencies'] = self._clean_agencies(data.get('agency', []))
+        cleaned_data['embargo'], cleaned_data['permanent_embargo'] = (
+            self._clean_embargo(
+                user,
+                data.get('embargo', False),
+                data.get('permanent_embargo', False),
+            )
+        )
+        cleaned_data['title'] = self._clean_title(data.get('title'))
+        cleaned_data['document_request'] = self._clean_document_request(
+            data.get('document_request')
+        )
+        cleaned_data['full_text'] = data.get('full_text', False)
+        cleaned_data['attachments'] = self._clean_attachments(
+            data.get('attachments', [])
+        )
+        return cleaned_data
+
+    def _clean_agencies(self, agencies):
+        """Clean agencies"""
+        if not isinstance(agencies, list):
+            agencies = [agencies]
         try:
-            agencies = data.get('agency')
-            if not isinstance(agencies, list):
-                agencies = [agencies]
-            # XXX agency pks are correct format validate
             agencies = Agency.objects.filter(
                 pk__in=agencies,
                 status='approved',
             )
+        except ValueError:
+            raise forms.ValidationError('Bad agency ID format')
 
-            embargo = data.get('embargo', False)
-            permanent_embargo = data.get('permanent_embargo', False)
-            if permanent_embargo:
-                embargo = True
-            if embargo and not request.user.has_perm(
-                'foia.embargo_foiarequest'
-            ):
-                return Response(
-                    {
-                        'status':
-                            'You do not have permission to embargo requests.'
-                    },
-                    status=http_status.HTTP_400_BAD_REQUEST,
-                )
-            if (
-                permanent_embargo
-                and not request.user.has_perm('foia.embargo_perm_foiarequest')
-            ):
-                return Response(
-                    {
-                        'status':
-                            'You do not have permission to permanently '
-                            'embargo requests.'
-                    },
-                    status=http_status.HTTP_400_BAD_REQUEST,
-                )
+        if not agencies:
+            raise forms.ValidationError('At least one valid agency required')
+        return agencies
 
-            # XXX test validation
-            composer = FOIAComposer.objects.create(
-                user=request.user,
-                title=data.get('title', 'Untitled'),
-                slug=slugify(data.get('title')) or 'untitled',
-                requested_docs=data.get('document_request', ''),
-                edited_boilerplate=data.get('full_text', False),
-                embargo=embargo,
-                permanent_embargo=permanent_embargo,
+    def _clean_embargo(self, user, embargo, permanent_embargo):
+        """Clean embargo and permanent embargo"""
+        if permanent_embargo:
+            embargo = True
+        if embargo and not user.has_perm('foia.embargo_foiarequest'):
+            raise forms.ValidationError(
+                'You do not have permission to embargo requests'
             )
-            composer.agencies.set(agencies)
+        if permanent_embargo and not user.has_perm(
+            'foia.embargo_perm_foiarequest'
+        ):
+            raise forms.ValidationError(
+                'You do not have permission to permanently embargo requests'
+            )
+        return embargo, permanent_embargo
 
-            if 'attachments' in data:
-                attachments = data.get('attachments')[:3]
-            else:
-                attachments = []
-            for attm_path in attachments:
+    def _clean_title(self, title):
+        """Clean title"""
+        if not title:
+            raise forms.ValidationError('title required')
+        return title
+
+    def _clean_document_request(self, document_request):
+        """Clean document_request"""
+        if not document_request:
+            raise forms.ValidationError('document_request required')
+        return document_request
+
+    def _clean_attachments(self, attachments):
+        """Clean attachments"""
+
+        clean_attachments = []
+
+        if not isinstance(attachments, list):
+            raise forms.ValidationError(
+                'attachments should be a list of publicly available URLs'
+            )
+
+        for attm_path in attachments[:3]:
+            try:
                 res = requests.get(attm_path)
-                mime_type = res.headers['Content-Type']
-                if mime_type not in settings.ALLOWED_FILE_MIMES:
-                    raise MimeError
-                res.raise_for_status()
-                title = attm_path.rsplit('/', 1)[1]
-                attm = OutboundComposerAttachment.objects.create(
-                    user=request.user,
-                    composer=composer,
-                    date_time_stamp=timezone.now(),
+            except requests.exceptions.RequestException:
+                raise forms.ValidationError(
+                    'Error downloading attachment: {}'.format(attm_path)
                 )
-                attm.ffile.save(title, ContentFile(res.content))
+            mime_type = res.headers.get('Content-Type')
+            if mime_type not in settings.ALLOWED_FILE_MIMES:
+                raise forms.ValidationError(
+                    'Attachment: {} is not of a valid mime type.  Valid types '
+                    'include: {}'.format(
+                        attm_path, ', '.join(settings.ALLOWED_FILE_MIMES)
+                    )
+                )
+            if res.status_code != 200:
+                raise forms.ValidationError(
+                    'Error downloading attachment: {}, code: {}'.format(
+                        attm_path, res.status_code
+                    )
+                )
+            title = attm_path.rsplit('/', 1)[1]
+            clean_attachments.append((title, res.content))
+        return clean_attachments
 
+    def create(self, request):
+        """Submit new request"""
+        try:
+            data = self._validate_create(request.user, request.data)
+        except forms.ValidationError as exc:
+            return Response(
+                {
+                    'status': exc.args[0],
+                },
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+
+        composer = FOIAComposer.objects.create(
+            user=request.user,
+            title=data['title'],
+            slug=slugify(data['title']) or 'untitled',
+            requested_docs=data['document_request'],
+            edited_boilerplate=data['full_text'],
+            embargo=data['embargo'],
+            permanent_embargo=data['permanent_embargo'],
+        )
+        composer.agencies.set(data['agencies'])
+
+        for title, content in data['attachments']:
+            attm = composer.pending_attachments.create(
+                user=request.user,
+                date_time_stamp=timezone.now(),
+            )
+            attm.ffile.save(title, ContentFile(content))
+
+        try:
             composer.submit()
+        except InsufficientRequestsError:
+            return Response(
+                {
+                    'status': 'Out of requests.  FOI Request has been saved.',
+                    'Location': composer.get_absolute_url()
+                },
+                status=http_status.HTTP_402_PAYMENT_REQUIRED,
+            )
+        else:
             return Response(
                 {
                     'status': 'FOI Request submitted',
                     'Location': composer.get_absolute_url()
                 },
                 status=http_status.HTTP_201_CREATED,
-            )
-
-        except InsufficientRequestsError:
-            return Response(
-                {
-                    'status':
-                        'Error - Out of requests.  FOI Request has been saved.',
-                    'Location':
-                        composer.get_absolute_url()
-                },
-                status=http_status.HTTP_402_PAYMENT_REQUIRED,
-            )
-        except KeyError:
-            return Response(
-                {
-                    'status':
-                        'Missing data - Please supply title, document_request, '
-                        'and agency'
-                },
-                status=http_status.HTTP_400_BAD_REQUEST,
-            )
-        except Agency.DoesNotExist:
-            return Response(
-                {
-                    'status':
-                        'Bad data - please supply agency as the PK'
-                        ' of existing entities.'
-                },
-                status=http_status.HTTP_400_BAD_REQUEST,
-            )
-        except (requests.exceptions.RequestException, TypeError, MimeError):
-            # TypeError is thrown if 'attachments' is not a list
-            return Response(
-                {
-                    'status': 'There was a problem with one of your attachments'
-                },
-                status=http_status.HTTP_400_BAD_REQUEST,
-            )
-
-    def create_(self, request):
-        """Submit new request"""
-        # pylint: disable=too-many-locals
-        # pylint: disable=too-many-return-statements
-        # pylint: disable=too-many-branches
-        # XXX
-        data = request.data
-        try:
-            jurisdiction = Jurisdiction.objects.get(
-                pk=int(data['jurisdiction'])
-            )
-            agency = Agency.objects.get(
-                pk=int(data['agency']),
-                jurisdiction=jurisdiction,
-                status='approved',
-            )
-
-            embargo = data.get('embargo', False)
-            permanent_embargo = data.get('permanent_embargo', False)
-            if permanent_embargo:
-                embargo = True
-
-            if 'full_text' in data:
-                text = data['full_text']
-                requested_docs = data.get('document_request', '')
-            else:
-                requested_docs = data['document_request']
-                template = get_template('text/foia/request.txt')
-                context = {
-                    'requested_docs': requested_docs,
-                    'jurisdiction': jurisdiction,
-                    'user_name': request.user.get_full_name,
-                }
-                text = template.render(context)
-
-            title = data['title']
-
-            slug = slugify(title) or 'untitled'
-            foia = FOIARequest(
-                user=request.user,
-                status='started',
-                title=title,
-                slug=slug,
-                agency=agency,
-                requested_docs=requested_docs,
-                embargo=embargo,
-                permanent_embargo=permanent_embargo,
-            )
-            if embargo and not foia.has_perm(request.user, 'embargo'):
-                return Response(
-                    {
-                        'status':
-                            'You do not have permission to embargo requests.'
-                    },
-                    status=http_status.HTTP_400_BAD_REQUEST,
-                )
-            if permanent_embargo and not foia.has_perm(
-                request.user, 'embargo_perm'
-            ):
-                return Response(
-                    {
-                        'status':
-                            'You do not have permission to permanently '
-                            'embargo requests.'
-                    },
-                    status=http_status.HTTP_400_BAD_REQUEST,
-                )
-            foia.save()
-
-            comm = FOIACommunication.objects.create(
-                foia=foia,
-                communication=text,
-                from_user=request.user,
-                to_user=foia.get_to_user(),
-                datetime=timezone.now(),
-                response=False,
-            )
-
-            if 'attachments' in data:
-                attachments = data.get('attachments')[:3]
-            else:
-                attachments = []
-            for attm_path in attachments:
-                res = requests.get(attm_path)
-                mime_type = res.headers['Content-Type']
-                if mime_type not in settings.ALLOWED_FILE_MIMES:
-                    raise MimeError
-                res.raise_for_status()
-                title = attm_path.rsplit('/', 1)[1]
-                file_ = FOIAFile.objects.create(
-                    access='public',
-                    comm=comm,
-                    title=title,
-                    datetime=timezone.now(),
-                    source=request.user.get_full_name(),
-                )
-                file_.ffile.save(title, ContentFile(res.content))
-
-            if request.user.profile.make_request():
-                foia.submit()
-                return Response(
-                    {
-                        'status': 'FOI Request submitted',
-                        'Location': foia.get_absolute_url()
-                    },
-                    status=http_status.HTTP_201_CREATED,
-                )
-            else:
-                return Response(
-                    {
-                        'status':
-                            'Error - Out of requests.  FOI Request has been saved.',
-                        'Location':
-                            foia.get_absolute_url()
-                    },
-                    status=http_status.HTTP_402_PAYMENT_REQUIRED,
-                )
-
-        except KeyError:
-            return Response(
-                {
-                    'status':
-                        'Missing data - Please supply title, document_request, '
-                        'jurisdiction, and agency'
-                },
-                status=http_status.HTTP_400_BAD_REQUEST,
-            )
-        except (Jurisdiction.DoesNotExist, Agency.DoesNotExist):
-            return Response(
-                {
-                    'status':
-                        'Bad data - please supply jurisdiction and agency as the PK'
-                        ' of existing entities.  Agency must be in Jurisdiction.'
-                },
-                status=http_status.HTTP_400_BAD_REQUEST,
-            )
-        except (requests.exceptions.RequestException, TypeError, MimeError):
-            # TypeError is thrown if 'attachments' is not a list
-            return Response(
-                {
-                    'status': 'There was a problem with one of your attachments'
-                },
-                status=http_status.HTTP_400_BAD_REQUEST,
             )
 
     @decorators.detail_route(permission_classes=(IsOwner,))

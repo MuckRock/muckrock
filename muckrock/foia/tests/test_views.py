@@ -1283,7 +1283,7 @@ class TestFOIAComposerViews(TestCase):
                 }
             )
         )
-        request.user = UserFactory()
+        request.user = composer.user
         request = mock_middleware(request)
         response = ComposerDetail.as_view()(
             request,
@@ -1292,6 +1292,27 @@ class TestFOIAComposerViews(TestCase):
         )
         eq_(response.status_code, 302)
         eq_(response.url, reverse('foia-draft', kwargs={'idx': composer.pk}))
+
+    @raises(Http404)
+    def test_composer_detail_draft_bad(self):
+        """Composer detail view redirects to update page if draft"""
+        composer = FOIAComposerFactory(status='started')
+        request = self.request_factory.get(
+            reverse(
+                'foia-composer-detail',
+                kwargs={
+                    'slug': composer.slug,
+                    'idx': composer.pk
+                }
+            )
+        )
+        request.user = UserFactory()
+        request = mock_middleware(request)
+        response = ComposerDetail.as_view()(
+            request,
+            slug=composer.slug,
+            idx=composer.pk,
+        )
 
     @raises(Http404)
     def test_composer_detail_private(self):
@@ -1342,6 +1363,33 @@ class TestFOIAComposerViews(TestCase):
         eq_(response.status_code, 302)
         eq_(response.url, foia.get_absolute_url())
 
+    def test_composer_detail_single_submitted(self):
+        """Composer redirects to foia page if only a single request even
+        if it hasn't been filed yet"""
+        foia = FOIARequestFactory(
+            composer__status='submitted',
+            composer__datetime_submitted=timezone.now(),
+        )
+        composer = foia.composer
+        request = self.request_factory.get(
+            reverse(
+                'foia-composer-detail',
+                kwargs={
+                    'slug': composer.slug,
+                    'idx': composer.pk
+                }
+            )
+        )
+        request.user = UserFactory()
+        request = mock_middleware(request)
+        response = ComposerDetail.as_view()(
+            request,
+            slug=composer.slug,
+            idx=composer.pk,
+        )
+        eq_(response.status_code, 302)
+        eq_(response.url, foia.get_absolute_url())
+
     def test_composer_detail_multi(self):
         """Composer shows its own page if multiple foias"""
         foia = FOIARequestFactory(composer__status='filed')
@@ -1366,12 +1414,14 @@ class TestFOIAComposerViews(TestCase):
         eq_(response.status_code, 200)
         eq_(response.template_name, ['foia/foiacomposer_detail.html'])
 
-    def test_composer_detail_submitted(self):
-        """Composer shows its own page if submitted but not filed yet"""
-        composer = FOIAComposerFactory(
-            status='submitted',
-            datetime_submitted=timezone.now(),
+    def test_composer_detail_multi_submitted(self):
+        """Composer shows its own page if multiple foias"""
+        foia = FOIARequestFactory(
+            composer__status='submitted',
+            composer__datetime_submitted=timezone.now(),
         )
+        FOIARequestFactory(composer=foia.composer)
+        composer = foia.composer
         request = self.request_factory.get(
             reverse(
                 'foia-composer-detail',
@@ -1381,7 +1431,7 @@ class TestFOIAComposerViews(TestCase):
                 }
             )
         )
-        request.user = composer.user
+        request.user = UserFactory()
         request = mock_middleware(request)
         response = ComposerDetail.as_view()(
             request,
@@ -1389,4 +1439,4 @@ class TestFOIAComposerViews(TestCase):
             idx=composer.pk,
         )
         eq_(response.status_code, 200)
-        eq_(response.template_name, ['foia/foiacomposer_detail_submitted.html'])
+        eq_(response.template_name, ['foia/foiacomposer_detail.html'])
