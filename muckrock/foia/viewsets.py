@@ -127,7 +127,9 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             permanent_embargo = data.get('permanent_embargo', False)
             if permanent_embargo:
                 embargo = True
-            if embargo and not can_embargo(request.user):
+            if embargo and not request.user.has_perm(
+                'foia.embargo_foiarequest'
+            ):
                 return Response(
                     {
                         'status':
@@ -135,9 +137,9 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                     },
                     status=http_status.HTTP_400_BAD_REQUEST,
                 )
-            # XXX user permanent embargo
-            if permanent_embargo and not can_embargo_permananently(
-                request.user
+            if (
+                permanent_embargo
+                and not request.user.has_perm('foia.embargo_perm_foiarequest')
             ):
                 return Response(
                     {
@@ -156,6 +158,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                 requested_docs=data.get('document_request', ''),
                 edited_boilerplate=data.get('full_text', False),
                 embargo=embargo,
+                permanent_embargo=permanent_embargo,
             )
             composer.agencies.set(agencies)
 

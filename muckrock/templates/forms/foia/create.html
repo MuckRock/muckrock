@@ -118,6 +118,9 @@
             {% include "lib/pattern/new_request_field.html" with field=form.edited_boilerplate only %}
             {% if form.embargo %}
               {% include "lib/pattern/new_request_field.html" with field=form.embargo only %}
+              {% if form.permanent_embargo %}
+                {% include "lib/pattern/new_request_field.html" with field=form.permanent_embargo only %}
+              {% endif %}
             {% else %}
               <div class="no-embargo">
                 <p>This request will be filed publicly. Need to keep your request private?
