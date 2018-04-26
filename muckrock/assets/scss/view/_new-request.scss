@@ -33,7 +33,7 @@ $color-advanced-container: lighten($color-agency, 40%);
             color: $color-white;
             font-size: $size-6;
             @include placeholder {
-                color: lighten($color-title, 15%);
+                color: lighten($color-title, 20%);
             }
         }
     }
@@ -79,7 +79,7 @@ $color-advanced-container: lighten($color-agency, 40%);
             border: none;
             border-radius: 0;
             @include placeholder {
-                color: $color-grey;
+                color: $color-grey-4;
             }
         }
     }
@@ -105,7 +105,7 @@ $color-advanced-container: lighten($color-agency, 40%);
             display: block;
             width: 100%;
             margin: 0;
-            @include placeholder { color: $color-jurisdiction; }
+            @include placeholder { color: lighten($color-agency, 20%); }
             &:disabled {
                 @include placeholder { color: darken($color-white, 2%); }
                 background: $color-disabled;

@@ -177,6 +177,18 @@ $(document).ready(function(){
       $(".contact-info").hide();
     }
 
+    if (requestCount === 0) {
+      $("#id_agencies-autocomplete").attr(
+        "placeholder",
+        "Agency's name, followed by location"
+      );
+    } else {
+      $("#id_agencies-autocomplete").attr(
+        "placeholder",
+        "Optionally add another agency - the request will be sent to all of them"
+      );
+    }
+
   });
   agencyWidget.trigger("widgetSelectChoice");
 
