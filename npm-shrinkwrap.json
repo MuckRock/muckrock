@@ -3323,6 +3323,11 @@
       "from": "to-fast-properties@>=1.0.3 <2.0.0",
       "resolved": "https://registry.npmjs.org/to-fast-properties/-/to-fast-properties-1.0.3.tgz"
     },
+    "tooltipster": {
+      "version": "4.2.6",
+      "from": "tooltipster@latest",
+      "resolved": "https://registry.npmjs.org/tooltipster/-/tooltipster-4.2.6.tgz"
+    },
     "topo": {
       "version": "2.0.2",
       "from": "topo@>=2.0.0 <3.0.0",

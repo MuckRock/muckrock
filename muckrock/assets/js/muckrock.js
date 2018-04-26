@@ -15,6 +15,7 @@ import 'jquery-ui/datepicker';
 import 'jquery-ui/widget';
 import 'jquery-ui/sortable';
 import 'formBuilder';
+import 'tooltipster';
 import '../vendor/formset';
 import '../vendor/loupe';
 import '../vendor/quicksearch';

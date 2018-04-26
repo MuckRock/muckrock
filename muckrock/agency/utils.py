@@ -23,16 +23,17 @@ def initial_communication_template(
     elif kwargs.get('html'):
         jurisdiction = {
             'get_law_name':
-                '<abbr title="This will be replaced by the relevant '
-                'transparency law">{ law name }</abbr>',
+                '<abbr class="tooltip" title="This will be replaced by the '
+                'relevant transparency law">{ law name }</abbr>',
             'days':
-                '<abbr title="This will be replaced by the number of days '
-                'the law permits before a response is required">{ number of days }'
-                '</abbr>',
+                '<abbr class="tooltip" title="This will be replaced by the '
+                'number of days the law permits before a response is '
+                'required">{ number of days }</abbr>',
             'get_day_type':
-                '<abbr title="This will be replaced by business or '
-                'calendar, depending on whether the law counts weekends and other '
-                'holidays in its deadline">{ business or calendar }</abbr>',
+                '<abbr class="tooltip" title="This will be replaced by '
+                'business or calendar, depending on whether the law counts '
+                'weekends and other holidays in its deadline">'
+                '{ business or calendar }</abbr>',
         }
     else:
         jurisdiction = {

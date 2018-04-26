@@ -228,8 +228,8 @@ def boilerplate(request):
         user_name = request.user.get_full_name()
     else:
         user_name = (
-            '<abbr title="This will be replaced by your full name">'
-            '{ name }</abbr>'
+            '<abbr class="tooltip" title="This will be replaced by your full '
+            'name">{ name }</abbr>'
         )
     split_token = '$split$'
     text = initial_communication_template(

@@ -46,6 +46,7 @@ $color-advanced-container: lighten($color-agency, 40%);
       padding: $vr;
       abbr {
         cursor: help;
+        border-bottom: 1px dotted;
       }
     }
     .edited-boilerplate .document-boilerplate {

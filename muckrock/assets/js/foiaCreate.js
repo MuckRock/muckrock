@@ -117,6 +117,22 @@ $(document).ready(function(){
       success: function(data) {
         $(".document-boilerplate.intro").html(data.intro);
         $(".document-boilerplate.outro").html(data.outro);
+        $(".tooltip").tooltipster({
+          trigger: "custom",
+          triggerOpen: {
+            click: true,
+            mouseenter: true,
+            touchstart: true,
+            tap: true
+          },
+          triggerClose: {
+            click: true,
+            mouseleave: true,
+            originClick: true,
+            tap: true,
+            touchleave: true
+          },
+        });
       }
     });
 
