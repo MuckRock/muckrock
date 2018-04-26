@@ -1308,7 +1308,7 @@ class TestFOIAComposerViews(TestCase):
         )
         request.user = UserFactory()
         request = mock_middleware(request)
-        response = ComposerDetail.as_view()(
+        ComposerDetail.as_view()(
             request,
             slug=composer.slug,
             idx=composer.pk,

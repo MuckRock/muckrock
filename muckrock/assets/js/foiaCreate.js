@@ -131,7 +131,7 @@ $(document).ready(function(){
             originClick: true,
             tap: true,
             touchleave: true
-          },
+          }
         });
       }
     });

@@ -25,7 +25,6 @@ from zipfile import ZIP_DEFLATED, ZipFile
 # MuckRock
 from muckrock.accounts.models import Notification
 from muckrock.agency.forms import AgencyForm
-from muckrock.agency.utils import initial_communication_template
 from muckrock.communication.models import (
     EmailCommunication,
     FaxCommunication,

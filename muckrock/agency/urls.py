@@ -29,11 +29,6 @@ urlpatterns = [
         name='agency-flag',
     ),
     url(
-        r'^similar/$',
-        views.similar,
-        name='agency-similar',
-    ),
-    url(
         r'^boilerplate/$',
         views.boilerplate,
         name='agency-boilerplate',

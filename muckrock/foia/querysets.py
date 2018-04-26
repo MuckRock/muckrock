@@ -220,8 +220,6 @@ class FOIAComposerQuerySet(models.QuerySet):
 
     def get_viewable(self, user):
         """Return all composers viewable to the user"""
-        # TODO test this
-        # collaborators?
         if user.is_staff:
             return self.all()
 

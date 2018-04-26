@@ -14,7 +14,6 @@ import re
 
 # Third Party
 import django_filters
-from fuzzywuzzy import fuzz, process
 from rest_framework import viewsets
 
 # MuckRock
@@ -176,39 +175,6 @@ class AgencyViewSet(viewsets.ModelViewSet):
             )
 
     filter_class = Filter
-
-
-def similar(request):
-    """Return agencies with similar names"""
-    # TODO this is currently unused
-    query = request.GET.get('query', '')
-    jurisdiction_id = request.GET.get('jurisdiction')
-    if jurisdiction_id == 'f':
-        jurisdiction = Jurisdiction.objects.filter(level='f').first()
-    elif not jurisdiction_id:
-        jurisdiction = None
-    else:
-        jurisdiction = Jurisdiction.objects.filter(pk=jurisdiction_id).first()
-
-    agencies = Agency.objects.filter(status='approved')
-    if jurisdiction:
-        agencies = agencies.filter(jurisdiction=jurisdiction)
-
-    # if there is an exact match, do not bother fuzzy matching
-    exact = agencies.filter(name__iexact=query).first()
-    if exact:
-        return JsonResponse({'exact': {'value': exact.pk, 'text': exact.name}})
-
-    suggestions = process.extractBests(
-        query,
-        {a.pk: a.name
-         for a in agencies},
-        scorer=fuzz.token_set_ratio,
-        score_cutoff=80,
-        limit=10,
-    )
-    suggestions = [{'value': s[2], 'text': s[0]} for s in suggestions]
-    return JsonResponse({'suggestions': suggestions})
 
 
 def boilerplate(request):

@@ -18,16 +18,9 @@ from nose.tools import assert_in, assert_not_in, eq_, ok_, raises
 # MuckRock
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import STALE_DURATION, Agency
-from muckrock.agency.views import (
-    AgencyList,
-    boilerplate,
-    contact_info,
-    detail,
-    similar,
-)
+from muckrock.agency.views import AgencyList, boilerplate, contact_info, detail
 from muckrock.factories import AgencyFactory, StaleAgencyFactory, UserFactory
 from muckrock.foia.factories import FOIACommunicationFactory
-from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.factories import StaleAgencyTaskFactory
 from muckrock.task.models import StaleAgencyTask
 from muckrock.test_utils import http_get_response, mock_middleware
@@ -262,38 +255,6 @@ class TestAgencyViews(TestCase):
             unapproved_agency not in agency_list,
             'Unapproved agencies should not be listed.'
         )
-
-    def test_similar(self):
-        """Test the similar ajax view"""
-        usa = Jurisdiction.objects.get(level='f')
-        agency1 = AgencyFactory(name='Inspector General', jurisdiction=usa)
-        agency2 = AgencyFactory(
-            name='Federal Bureau of Investigation', jurisdiction=usa
-        )
-        url = reverse('agency-similar')
-
-        request = RequestFactory().get(
-            url, {
-                'query': 'inspector general',
-                'jurisdiction': 'f'
-            }
-        )
-        request = mock_middleware(request)
-        request.user = UserFactory()
-        response = similar(request)
-        data = json.loads(response.content)
-        eq_(data['exact'], {'value': agency1.pk, 'text': agency1.name})
-
-        request = RequestFactory().get(
-            url,
-            {'query': 'fedral buraeu investigation',
-             'jurisdiction': 'f'},
-        )
-        request = mock_middleware(request)
-        request.user = UserFactory()
-        response = similar(request)
-        data = json.loads(response.content)
-        eq_(data['suggestions'], [{'value': agency2.pk, 'text': agency2.name}])
 
     def test_boilerplate(self):
         """Test the boilerplate ajax view"""

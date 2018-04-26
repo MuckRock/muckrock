@@ -17,8 +17,7 @@ from autocomplete_light import shortcuts as autocomplete_light
 # MuckRock
 from muckrock.agency.models import Agency
 from muckrock.filters import BLANK_STATUS, NULL_BOOLEAN_CHOICES, RangeWidget
-from muckrock.foia.models import FOIAComposer, FOIARequest
-from muckrock.foia.models.composer import STATUS as COMPOSER_STATUS
+from muckrock.foia.models import FOIARequest
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag
 
