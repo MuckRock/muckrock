@@ -3,6 +3,7 @@
   @each $placeholder in $placeholders {
     &:#{$placeholder}-placeholder {
       @content;
+      opacity: 1;
     }
   }
 }
