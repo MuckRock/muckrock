@@ -118,7 +118,7 @@ $color-advanced-container: lighten($color-agency, 40%);
         }
 
     }
-    .embargo label, .register_newsletter label, .edited_boilerplate label {
+    .embargo label, .register_newsletter label, .edited_boilerplate label, .permanent_embargo label {
       display: inline;
       margin-right: $vr/2;
     }

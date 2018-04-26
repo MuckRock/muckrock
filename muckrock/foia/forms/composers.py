@@ -61,6 +61,7 @@ class BaseComposerForm(forms.ModelForm):
         'other users until the embargo date you set. '
         'You may change this whenever you want.'
     )
+    permanent_embargo = forms.BooleanField(required=False)
     tags = TaggitField(
         widget=TaggitWidget(
             'TagAutocomplete',
@@ -103,6 +104,7 @@ class BaseComposerForm(forms.ModelForm):
             'requested_docs',
             'edited_boilerplate',
             'embargo',
+            'permanent_embargo',
             'tags',
             'parent',
             'register_full_name',
@@ -120,6 +122,8 @@ class BaseComposerForm(forms.ModelForm):
             del self.fields['register_newsletter']
         if not self.user.has_perm('foia.embargo_foiarequest'):
             del self.fields['embargo']
+        if not self.user.has_perm('foia.embargo_perm_foiarequest'):
+            del self.fields['permanent_embargo']
         self.fields['parent'
                     ].queryset = (FOIAComposer.objects.get_viewable(self.user))
         self.fields['agencies'].user = self.user
@@ -158,6 +162,8 @@ class BaseComposerForm(forms.ModelForm):
                         field,
                         'This field is required when submitting',
                     )
+        if cleaned_data.get('permanent_embargo'):
+            cleaned_data['embargo'] = True
         return cleaned_data
 
 

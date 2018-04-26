@@ -56,6 +56,7 @@ class FOIAComposer(models.Model):
         db_index=True,
     )
     embargo = models.BooleanField(default=False)
+    permanent_embargo = models.BooleanField(default=False)
     parent = models.ForeignKey(
         'self',
         blank=True,

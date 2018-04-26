@@ -287,6 +287,18 @@ $(document).ready(function(){
     }
   });
 
+  $("#id_permanent_embargo").change(function(){
+    if (this.checked) {
+      $("#id_embargo").prop("checked", true);
+    }
+  });
+
+  $("#id_embargo").change(function(){
+    if (!this.checked) {
+      $("#id_permanent_embargo").prop("checked", false);
+    }
+  });
+
   // Autosaving
   // https://stackoverflow.com/questions/19910843/autosave-input-boxs-to-database-during-pause-in-typing
 	var timeoutId, hiddenId;
