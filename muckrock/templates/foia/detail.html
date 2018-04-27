@@ -287,7 +287,7 @@
                       <br class="nomargin">
                       <div class="contact-info">
                         <a class="see-where" href="#">See where</a>
-                        {% include "lib/pattern/contact_info.html" with portal=foia.portal email=foia.email cc_emails=foia.cc_emails.all fax=foia.fax address=foia.address subject="follow up communication" is_advanced=request.user.profile.is_advanced form=contact_info_form portal_data=foia.agency.portal only %}
+                        {% include "lib/pattern/contact_info.html" with portal=foia.portal email=foia.email cc_emails=foia.cc_emails.all|join:'","' fax=foia.fax address=foia.address subject="follow up communication" is_advanced=request.user.profile.is_advanced form=contact_info_form portal_data=foia.agency.portal only %}
                       </div>
                     </header>
                     {% csrf_token %}
