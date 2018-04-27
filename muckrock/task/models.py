@@ -463,7 +463,7 @@ class ReviewAgencyTask(Task):
         foias = list(
             self.agency.foiarequest_set.get_open().filter(
                 email=None, fax=None
-            ).select_related('jurisdiction').annotate(
+            ).select_related('agency__jurisdiction').annotate(
                 latest_response=ExtractDay(
                     Cast(
                         Now() - Max(

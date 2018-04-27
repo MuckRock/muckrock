@@ -1181,7 +1181,9 @@ class FOIARequest(models.Model):
     def add_contact_info_note(self, user, contact_info):
         """Add a note that contact info has been overridden"""
         via = contact_info.get('via', '')
-        addr = contact_info.get(via, '')
+        addr = (
+            contact_info.get(via, '') or contact_info.get('other_' + via, '')
+        )
         self.notes.create(
             author=user,
             note='Contact information overridden:\n\n{}\n\n{}'.format(

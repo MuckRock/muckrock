@@ -112,7 +112,6 @@ def data(request, slug, idx):
 def create(request):
     """Upload a file to create a dataset from"""
     context = {
-        'AWS_STORAGE_BUCKET_NAME': settings.AWS_STORAGE_BUCKET_NAME,
-        'AWS_ACCESS_KEY_ID': settings.AWS_ACCESS_KEY_ID,
+        'settings': settings,
     }
     return render(request, 'dataset/create.html', context)

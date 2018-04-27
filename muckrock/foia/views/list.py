@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.postgres.aggregates.general import StringAgg
 from django.core.urlresolvers import reverse
-from django.db.models import Count, DurationField, F
+from django.db.models import Count, DurationField, F, Prefetch
 from django.db.models.functions import Cast, Now
 from django.http import Http404, StreamingHttpResponse
 from django.shortcuts import redirect
@@ -80,17 +80,26 @@ class RequestExploreView(TemplateView):
             Article.objects.get_published()
             .annotate(foia_count=Count('foias')).exclude(foia_count__lt=2)
             .exclude(foia_count__gt=9).prefetch_related(
-                'authors', 'foias', 'foias__user', 'foias__user__profile',
-                'foias__agency', 'foias__agency__jurisdiction',
-                'foias__jurisdiction__parent__parent'
+                'authors',
+                Prefetch(
+                    'foias',
+                    queryset=FOIARequest.objects.select_related(
+                        'composer__user',
+                        'agency__jurisdiction__parent__parent',
+                    ),
+                ),
             ).order_by('-pub_date')
         )[:3]
         context['featured_projects'] = (
             Project.objects.get_visible(user).filter(featured=True)
             .prefetch_related(
-                'requests', 'requests__user', 'requests__user__profile',
-                'requests__agency', 'requests__agency__jurisdiction',
-                'requests__jurisdiction__parent__parent'
+                Prefetch(
+                    'requests',
+                    queryset=FOIARequest.objects.select_related(
+                        'composer__user',
+                        'agency__jurisdiction__parent__parent',
+                    ),
+                ),
             )
         )
         context['recently_completed'] = (

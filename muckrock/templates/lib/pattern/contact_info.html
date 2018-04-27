@@ -5,7 +5,7 @@
     data-portal-type="{{ portal_data.get_type_display }}"
     data-portal-url="{{ portal_data.url }}"
     data-email="{% if email.status == "good" %}{{ email }}{% endif %}"
-    data-cc-emails='["{{ cc_emails|escapejs }}"]'
+    data-cc-emails="{{ cc_emails }}"
     data-foo='["a", "b", "c"]'
     data-fax="{% if fax.status == "good" %}{{ fax }}{% endif %}"
     data-address="{{ address }}"

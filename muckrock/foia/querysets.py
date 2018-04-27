@@ -94,8 +94,7 @@ class FOIARequestQuerySet(models.QuerySet):
         """Get requests belonging to an organization's members."""
         return (
             self.select_related(
-                'agency', 'jurisdiction', 'jurisdiction__parent',
-                'jurisdiction__parent__parent'
+                'agency__jurisdiction__parent__parent',
             ).filter(composer__user__profile__organization=organization)
             .order_by('-composer__datetime_submitted')
         )

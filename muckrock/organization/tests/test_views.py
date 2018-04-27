@@ -16,7 +16,9 @@ from nose.tools import eq_, ok_
 # MuckRock
 import muckrock.factories
 import muckrock.organization
+from muckrock.foia.factories import FOIARequestFactory
 from muckrock.test_utils import mock_middleware
+from muckrock.tests import get_allowed
 
 
 class TestCreateView(TestCase):
@@ -436,6 +438,11 @@ class TestDetailView(TestCase):
         self.url = reverse('org-detail', kwargs={'slug': self.org.slug})
         self.view = muckrock.organization.views.OrganizationDetailView.as_view()
 
+    def test_get(self):
+        """Test getting the page"""
+        FOIARequestFactory(composer__user__profile__organization=self.org)
+        get_allowed(self.client, self.url)
+
     def test_user_add_member(self):
         """Regular users should not be able to add members to an organization."""
         user1 = muckrock.factories.UserFactory()
@@ -449,9 +456,10 @@ class TestDetailView(TestCase):
         request = mock_middleware(request)
         request.user = muckrock.factories.UserFactory()
         self.view(request, slug=self.org.slug)
-        ok_(not self.org.has_member(user1) and \
-            not self.org.has_member(user2) and \
-            not self.org.has_member(user3))
+        ok_(
+            not self.org.has_member(user1) and not self.org.has_member(user2)
+            and not self.org.has_member(user3)
+        )
 
     def test_owner_add_member(self):
         """Owners should be able to add members to an organization."""
@@ -466,9 +474,10 @@ class TestDetailView(TestCase):
         request = mock_middleware(request)
         request.user = self.org.owner
         self.view(request, slug=self.org.slug)
-        ok_(self.org.has_member(user1) and \
-            self.org.has_member(user2) and \
-            self.org.has_member(user3))
+        ok_(
+            self.org.has_member(user1) and self.org.has_member(user2)
+            and self.org.has_member(user3)
+        )
 
     def test_staff_add_member(self):
         """Staff should be able to add members to an organization."""
@@ -483,9 +492,10 @@ class TestDetailView(TestCase):
         request = mock_middleware(request)
         request.user = muckrock.factories.UserFactory(is_staff=True)
         self.view(request, slug=self.org.slug)
-        ok_(self.org.has_member(user1) and \
-            self.org.has_member(user2) and \
-            self.org.has_member(user3))
+        ok_(
+            self.org.has_member(user1) and self.org.has_member(user2)
+            and self.org.has_member(user3)
+        )
 
     def test_active(self):
         """Members may only be added and removed from active organizations."""
@@ -502,9 +512,10 @@ class TestDetailView(TestCase):
         request = mock_middleware(request)
         request.user = self.org.owner
         self.view(request, slug=self.org.slug)
-        ok_(not self.org.has_member(user1) and \
-            not self.org.has_member(user2) and \
-            not self.org.has_member(user3))
+        ok_(
+            not self.org.has_member(user1) and not self.org.has_member(user2)
+            and not self.org.has_member(user3)
+        )
 
     def test_existing_member(self):
         """A member cannot be added if they are a member of a different organization."""
@@ -520,9 +531,10 @@ class TestDetailView(TestCase):
         request = mock_middleware(request)
         request.user = self.org.owner
         self.view(request, slug=self.org.slug)
-        ok_(not self.org.has_member(user1) and \
-            self.org.has_member(user2) and \
-            self.org.has_member(user3))
+        ok_(
+            not self.org.has_member(user1) and self.org.has_member(user2)
+            and self.org.has_member(user3)
+        )
 
     def test_existing_owner(self):
         """A member cannot be added if they are an owner of a different organization."""
@@ -538,9 +550,10 @@ class TestDetailView(TestCase):
         request = mock_middleware(request)
         request.user = self.org.owner
         self.view(request, slug=self.org.slug)
-        ok_(not self.org.has_member(user1) and \
-            self.org.has_member(user2) and \
-            self.org.has_member(user3))
+        ok_(
+            not self.org.has_member(user1) and self.org.has_member(user2)
+            and self.org.has_member(user3)
+        )
 
     def test_no_seats(self):
         """A member cannot be added if there are no open seats for them."""
@@ -557,10 +570,11 @@ class TestDetailView(TestCase):
         request.user = self.org.owner
         self.view(request, slug=self.org.slug)
         eq_(self.org.max_users, 3)
-        ok_(not self.org.has_member(user1) and \
-            not self.org.has_member(user2) and \
-            not self.org.has_member(user3) and \
-            not self.org.has_member(user4))
+        ok_(
+            not self.org.has_member(user1) and not self.org.has_member(user2)
+            and not self.org.has_member(user3)
+            and not self.org.has_member(user4)
+        )
 
     def test_staff_remove(self):
         """A staff user should be able to remove members."""

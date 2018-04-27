@@ -324,17 +324,12 @@ export default function showOrigContactInfo() {
       portalURL
     ).append(".");
   } else if (email) {
-    var text = $(".contact-info .info span").text(
-      "will be submitted via email to " + email
-    );
+    var text = "will be submitted via email to " + email;
     if (ccEmails.length > 0) {
-      text.append(
-        ", as well as CCed to "
-      ).append(
-        formatCC(ccEmails)
-      );
+      text += ", as well as CCed to " + formatCC(ccEmails);
     }
-    text.append(".");
+    text += ".";
+    $(".contact-info .info span").text(text);
   } else if (fax) {
     $(".contact-info .info span").text(
       "will be submitted via fax to "

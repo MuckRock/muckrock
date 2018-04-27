@@ -157,7 +157,7 @@
   {% endcache %}
   <main class="request main grid__column three-quarters">
 
-  {% if foia.has_crowdfund %}
+  {% if foia.crowdfund %}
     {% crowdfund foia.crowdfund.pk %}
   {% endif %}
 
@@ -252,7 +252,7 @@
                 {% endif %}
                 {% if user_can_pay %}
                   <a href="#pay" class="green button">Pay Fees</a>
-                  {% if not foia.has_crowdfund %}
+                  {% if not foia.crowdfund %}
                     <a href="#crowdfund" class="green button">Crowdfund</a>
                   {% endif %}
                   {% if request.user.is_staff %}
@@ -287,7 +287,7 @@
                       <br class="nomargin">
                       <div class="contact-info">
                         <a class="see-where" href="#">See where</a>
-                        {% include "lib/pattern/contact_info.html" with portal=foia.portal email=foia.email cc_emails=foia.cc_emails.all|join:'","' fax=foia.fax address=foia.address subject="follow up communication" is_advanced=request.user.profile.is_advanced form=contact_info_form portal_data=foia.agency.portal only %}
+                        {% include "lib/pattern/contact_info.html" with portal=foia.portal email=foia.email cc_emails=cc_emails fax=foia.fax address=foia.address subject="follow up communication" is_advanced=request.user.profile.is_advanced form=contact_info_form portal_data=foia.agency.portal only %}
                       </div>
                     </header>
                     {% csrf_token %}
@@ -298,7 +298,7 @@
                     {% endif %}
                     <input type="hidden" name="action" value="follow_up" />
                     <label class="bold">Attachments</label>
-                    <div id="fine-uploader-follow-up" class="fine-uploader" data-foia-pk="{{foia.pk}}"></div>
+                    <div id="fine-uploader-follow-up" class="fine-uploader-request" data-foia-pk="{{foia.pk}}"></div>
                     <div class="buttons">
                       <button class="primary button" type="submit" name="appeal" value="1">Send</button>
                       <a href="#inactive" class="button cancel">Cancel</a>
@@ -334,7 +334,7 @@ Sincerely,
                     {% csrf_token %}
                     {% include 'lib/pattern/form.html' with form=agency_reply_form %}
                     <label class="bold">Attachments</label>
-                    <div id="fine-uploader-agency-reply" class="fine-uploader" data-foia-pk="{{foia.pk}}"></div>
+                    <div id="fine-uploader-agency-reply" class="fine-uploader-request" data-foia-pk="{{foia.pk}}"></div>
                     <input type="hidden" name="action" value="agency_reply" />
                     <div class="buttons">
                       <button class="primary button" type="submit" name="agency-reply" value="1">Send</button>
@@ -371,7 +371,7 @@ Sincerely,
                     {% csrf_token %}
                     <textarea name="text" id="appeal-composer"></textarea>
                     <label class="bold">Attachments</label>
-                    <div id="fine-uploader-appeal" class="fine-uploader" data-foia-pk="{{foia.pk}}"></div>
+                    <div id="fine-uploader-appeal" class="fine-uploader-request" data-foia-pk="{{foia.pk}}"></div>
                     <div class="buttons">
                       <a href="#inactive" class="button">Cancel</a>
                       <button class="primary button" type="submit" name="action" value="appeal">Send Appeal</button>
@@ -402,7 +402,7 @@ Sincerely,
                     </div>
                   </form>
                 </div>
-                {% if not foia.has_crowdfund %}
+                {% if not foia.crowdfund %}
                   <div class="composer" id="crowdfund">
                     <form class="crowdfund composer-input" id="crowdfund" method="post" action="{% url 'foia-crowdfund' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">
                       <header>Crowdfund your request fees</header>

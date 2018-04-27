@@ -44,7 +44,6 @@ class FOIARequestAutocomplete(autocomplete_light.AutocompleteModelTemplate):
                 conditions &= self.complex_condition(string)
             choices = (
                 self.choices.get_viewable(self.request.user)
-                .select_related('jurisdiction').select_related('agency')
                 .filter(conditions).distinct()
             )
         else:

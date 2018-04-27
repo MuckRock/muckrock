@@ -257,6 +257,9 @@ class Detail(DetailView):
         context['agency_reply_form'] = self.agency_reply_form
         context['admin_fix_form'] = self.admin_fix_form
         context['resend_forms'] = self.resend_forms
+        context['cc_emails'] = json.dumps([
+            unicode(e) for e in foia.cc_emails.all()
+        ])
         if foia.composer.status == 'submitted':
             context['revoke_deadline'] = (
                 foia.composer.datetime_submitted +
