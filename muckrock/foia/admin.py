@@ -38,6 +38,7 @@ from muckrock.foia.models import (
     FOIAFile,
     FOIANote,
     FOIARequest,
+    OutboundComposerAttachment,
     OutboundRequestAttachment,
     TrackingNumber,
 )
@@ -587,7 +588,34 @@ class OutboundRequestAttachmentAdmin(VersionAdmin):
     form = OutboundRequestAttachmentAdminForm
 
 
+class OutboundComposerAttachmentAdminForm(forms.ModelForm):
+    """Form for outbound attachment admin"""
+
+    composer = autocomplete_light.ModelChoiceField(
+        'FOIAComposerAdminAutocomplete',
+        queryset=FOIAComposer.objects.all(),
+    )
+    user = autocomplete_light.ModelChoiceField(
+        'UserAutocomplete',
+        queryset=User.objects.all(),
+    )
+
+    class Meta:
+        model = OutboundComposerAttachment
+        fields = '__all__'
+
+
+class OutboundComposerAttachmentAdmin(VersionAdmin):
+    """Outbound Attachment admin options"""
+    search_fields = ('composer__title', 'user__username')
+    list_display = ('composer', 'user', 'ffile', 'date_time_stamp')
+    list_select_related = ('composer', 'user')
+    date_hierarchy = 'date_time_stamp'
+    form = OutboundComposerAttachmentAdminForm
+
+
 admin.site.register(FOIARequest, FOIARequestAdmin)
 admin.site.register(FOIACommunication, FOIACommunicationAdmin)
 admin.site.register(FOIAComposer, FOIAComposerAdmin)
 admin.site.register(OutboundRequestAttachment, OutboundRequestAttachmentAdmin)
+admin.site.register(OutboundComposerAttachment, OutboundComposerAttachmentAdmin)
