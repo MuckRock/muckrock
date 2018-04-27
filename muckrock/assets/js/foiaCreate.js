@@ -231,15 +231,25 @@ $(document).ready(function(){
     $("input[name='action']").val("save");
     $(".submit-required").removeAttr("required");
     agencyInput.removeAttr("required");
+
+    if ($("#id_register_pro").prop("checked")) {
+      $("#id_stripe_amount").val(4000);
+      $("#id_stripe_description").val("Pro Subscription ($40.00/month)");
+      $("#id_stripe_email").val($("#id_register_email").val());
+      $(this).closest("form").checkout();
+    }
+
     $(this).closest("form").submit();
   });
 
   $("#submit_button").click(function(){
     $("input[name='action']").val("submit");
+
     // if they need to buy requests, enable checkout on this form before submitting
     if ($(".buy-request-form").is(":visible")) {
       $(this).closest("form").checkout();
     }
+
     $(".submit-required").attr("required", "required");
     if (agencyField.find(".deck > .choice").length === 0) {
       // no agency choices

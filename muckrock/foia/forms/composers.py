@@ -95,6 +95,13 @@ class BaseComposerForm(forms.ModelForm):
         label='Get MuckRock\'s weekly newsletter with '
         'FOIA news, tips, and more',
     )
+    register_pro = forms.BooleanField(
+        initial=False,
+        required=False,
+        label='Go Pro',
+        help_text='Get 20 requests for $40 per month, as well as the ability to '
+        'keep your requests private',
+    )
 
     class Meta:
         model = FOIAComposer
@@ -180,10 +187,13 @@ class ComposerForm(ContactInfoForm, BuyRequestForm, BaseComposerForm):
     def clean(self):
         """Buy request fields are only required when buying requests"""
         cleaned_data = super(ComposerForm, self).clean()
-        if cleaned_data.get('num_requests', 0) > 0:
+        if (
+            cleaned_data.get('num_requests', 0) > 0
+            or cleaned_data.get('register_pro')
+        ):
             for field in ['stripe_token', 'stripe_email']:
                 if not self.cleaned_data.get(field):
                     self.add_error(
                         field,
-                        'This field is required when purchasing requests',
+                        'This field is required when making a purchase',
                     )

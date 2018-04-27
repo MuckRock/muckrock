@@ -145,6 +145,7 @@
           {% include "lib/pattern/new_request_field.html" with field=form.register_full_name only %}
           {% include "lib/pattern/new_request_field.html" with field=form.register_email only %}
           {% include "lib/pattern/new_request_field.html" with field=form.register_newsletter only %}
+          {% include "lib/pattern/new_request_field.html" with field=form.register_pro only %}
         {% endif %}
 
         {% if user.is_authenticated %}
@@ -209,11 +210,12 @@
           </footer>
         {% else %}
           <footer class="footer--signup">
-            <p>Create a MuckRock account and file up to four requests for just $20, or
-            <a href="{% url 'accounts-signup-professional' %}" target="_blank">
+            <p>
+              Create a MuckRock account and file up to four requests for just $20, or
               go Pro for 20 requests a month
-            </a> with the option to keep your submissions private. Already have an
-            account? <a href="{% url 'acct-login' %}">Log in</a>.</p>
+              with the option to keep your submissions private. Already have an
+              account? <a href="{% url 'acct-login' %}">Log in</a>.
+            </p>
             <p id="submit_help" class="error"></p>
             <div class="footer--submit">
               <button
@@ -221,6 +223,7 @@
                  class="primary button"
                  name="action"
                  value="save"
+                 id="save_button"
                  onclick="ga('send', 'event', 'Account', 'Registration', window.location.pathname)">Create Account and Save Request</button>
             </div>
           </footer>

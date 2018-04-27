@@ -17,6 +17,9 @@ from django.views.generic import CreateView, UpdateView
 # Standard Library
 import re
 
+# Third Party
+from stripe.error import StripeError
+
 # MuckRock
 from muckrock.accounts.mixins import BuyRequestsMixin, MiniregMixin
 from muckrock.agency.models import Agency
@@ -96,6 +99,7 @@ class GenericComposer(BuyRequestsMixin):
             messages.warning(self.request, 'You need to purchase more requests')
         else:
             messages.success(self.request, 'Request submitted')
+            self.request.session['ga'] = 'request_submitted'
             warning = self._proxy_warnings(composer)
             if warning:
                 messages.warning(self.request, warning)
@@ -208,6 +212,18 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
                 form.cleaned_data['register_email'],
                 form.cleaned_data.get('register_newsletter'),
             )
+            if form.cleaned_data.get('register_pro'):
+                try:
+                    user.profile.start_pro_subscription(
+                        form.cleaned_data['stripe_token'],
+                    )
+                except StripeError:
+                    messages.error(
+                        self.request, 'There was an error processing your '
+                        'payment.  Your account has been created, but you '
+                        'have not been subscribed to a professional account.  '
+                        'You can subscribe from the settings page.'
+                    )
         if form.cleaned_data['action'] in ('save', 'submit'):
             composer = form.save(commit=False)
             composer.user = user
