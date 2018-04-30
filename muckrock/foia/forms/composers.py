@@ -187,10 +187,10 @@ class ComposerForm(ContactInfoForm, BuyRequestForm, BaseComposerForm):
     def clean(self):
         """Buy request fields are only required when buying requests"""
         cleaned_data = super(ComposerForm, self).clean()
-        if (
-            cleaned_data.get('num_requests', 0) > 0
-            or cleaned_data.get('register_pro')
-        ):
+        action = cleaned_data.get('action')
+        num_requests = cleaned_data.get('num_requests', 0)
+        pro = cleaned_data.get('register_pro')
+        if action == 'submit' and (num_requests > 0 or pro):
             for field in ['stripe_token', 'stripe_email']:
                 if not self.cleaned_data.get(field):
                     self.add_error(

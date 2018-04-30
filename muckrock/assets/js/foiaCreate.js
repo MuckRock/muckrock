@@ -54,7 +54,7 @@ $(document).ready(function(){
           (useMonthly > 1 ? "s" : ""));
       }
       if (useRegular > 0) {
-        useText.push("<strong>" + useRegular + "</strong> regular request" +
+        useText.push("<strong>" + useRegular + "</strong> purchased request" +
           (useRegular > 1 ? "s" : ""));
       }
       if (useText.length > 1) {
@@ -67,12 +67,12 @@ $(document).ready(function(){
     if (useExtra > 0) {
       text += ("You will " + (useAny ? "also " : "") + "need to purchase <strong>"
         + useExtra + "</strong> extra request" + (useExtra > 1 ? "s" : "") + ".");
-      $(".buy-request-form").show();
+      $(".buy-section").show();
       $("#submit_button").text("Buy & Submit");
       $("#id_num_requests").val(Math.max(useExtra, $("#id_num_requests").attr("min")));
       $("#id_num_requests").trigger("change");
     } else {
-      $(".buy-request-form").hide();
+      $(".buy-section").hide();
       $("#submit_button").text("Submit");
       $("#id_num_requests").val("");
     }
@@ -246,7 +246,7 @@ $(document).ready(function(){
     $("input[name='action']").val("submit");
 
     // if they need to buy requests, enable checkout on this form before submitting
-    if ($(".buy-request-form").is(":visible")) {
+    if ($(".buy-section").is(":visible")) {
       $(this).closest("form").checkout();
     }
 
@@ -307,6 +307,12 @@ $(document).ready(function(){
     if (!this.checked) {
       $("#id_permanent_embargo").prop("checked", false);
     }
+  });
+
+  $(".show-buy-form").click(function(e) {
+    e.preventDefault();
+    $(".buy-section").removeClass("hide-form");
+    $(".simple-buy").hide();
   });
 
   // Autosaving

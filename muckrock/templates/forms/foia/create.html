@@ -122,13 +122,13 @@
                 {% include "lib/pattern/new_request_field.html" with field=form.permanent_embargo only %}
               {% endif %}
             {% else %}
-              <div class="no-embargo">
+              <fieldset class="no-embargo">
                 <p>This request will be filed publicly. Need to keep your request private?
                 <a href="{% url "accounts" %}">
                   Upgrade to a Pro or Organizational account
                 </a>
                 to embargo your request as long as you need to.</p>
-              </div>
+              </fieldset>
             {% endif %}
             {% include "lib/pattern/new_request_field.html" with field=form.tags only %}
             <fieldset class="attachments">
@@ -164,15 +164,30 @@
                       (<a href="{{ org.get_absolute_url }}">{{ org.name }} </a>)
                       requests left,
                     {% endif %}
-                    <strong>{{ requests_left.monthly }}</strong> monthly requests left
-                    and <strong>{{ requests_left.regular }}</strong> regular requests
+                    {% if user.profile.is_advanced %}
+                      <strong>{{ requests_left.monthly }}</strong>
+                      monthly requests left and
+                    {% endif %}
+                    <strong>{{ requests_left.regular }}</strong> purchased requests
                     left.
                  </p>
                  <p class="using-requests"></p>
                {% endwith %}
             </div>
 
-            {% include "lib/pattern/buy_requests.html" with user=user form=form only %}
+            <div class="buy-section{% if not use.profile.is_advanced %} hide-form{% endif %}">
+              {% if not user.profile.is_advanced %}
+                <p class="simple-buy">
+                  Click buy &amp; submit to purchase a bundle of four requests
+                  for $20, or
+                  <a href="#" class="show-buy-form">
+                    see our other pricing options, including bulk discounts and
+                    Pro tools.
+                  </a>
+                </p>
+              {% endif %}
+              {% include "lib/pattern/buy_requests.html" with user=user form=form only %}
+            </div>
 
             <div class="contact-info">
               <a class="see-where" href="#">See where this request will be sent</a>
