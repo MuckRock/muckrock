@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.http import Http404, StreamingHttpResponse
 from django.shortcuts import redirect
+from django.utils.decorators import method_decorator
 from django.utils.text import slugify
 from django.views.generic import CreateView, DetailView, FormView, UpdateView
 from django.views.generic.detail import BaseDetailView
@@ -18,6 +19,7 @@ from itertools import chain
 
 # Third Party
 import unicodecsv as csv
+from djangosecure.decorators import frame_deny_exempt
 
 # MuckRock
 from muckrock.accounts.utils import mailchimp_subscribe, miniregister
@@ -289,6 +291,12 @@ class CrowdsourceFormView(BaseDetailView, FormView):
             slug=crowdsource.slug,
             idx=crowdsource.pk,
         )
+
+
+@method_decorator(frame_deny_exempt, name='dispatch')
+class CrowdsourceEmbededFormView(CrowdsourceFormView):
+    """A view to embed an assignment"""
+    template_name = 'crowdsource/embed.html'
 
 
 class CrowdsourceListView(MROrderedListView):
