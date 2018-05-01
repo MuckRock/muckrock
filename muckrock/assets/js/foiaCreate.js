@@ -71,6 +71,8 @@ $(document).ready(function(){
       $("#submit_button").text("Buy & Submit");
       $("#id_num_requests").val(Math.max(useExtra, $("#id_num_requests").attr("min")));
       $("#id_num_requests").trigger("change");
+      $(".simple-buy .amount").text($("#id_num_requests").val());
+      $(".simple-buy .price").text("$" + $("#id_stripe_amount").val() / 100);
     } else {
       $(".buy-section").hide();
       $("#submit_button").text("Submit");
