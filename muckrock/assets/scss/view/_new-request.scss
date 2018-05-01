@@ -150,16 +150,24 @@ $color-advanced-container: lighten($color-agency, 40%);
       cursor: pointer;
     }
 
-    .register_full_name, .register_email {
+    .register_full_name, .register_email, .login_username, .login_password {
         float: left;
         width: 50%;
         input { width: 100%; }
     }
-    .register_full_name {
+    .register_full_name, .login_username {
       border-right: 0;
     }
-    .register_email {
+    .register_email, .login_password {
       border-left: 0;
+    }
+
+    .login-form, .register-form {
+      margin: 0;
+    }
+
+    .login-form, .login-toggle-text {
+      display: none;
     }
 
     .autocomplete-light-widget {

@@ -315,6 +315,37 @@ $(document).ready(function(){
     $(".simple-buy").hide();
   });
 
+  var showLogin = false;
+  $(".login-toggle-link").click(function(e) {
+    showLogin = !showLogin;
+    e.preventDefault();
+    if (showLogin) {
+      $(".login-form").show();
+      $(".register-form").hide();
+      $(".login-toggle-text").show();
+      $(".register-toggle-text").hide();
+      $(".login-toggle-link").text("Register now");
+      $("#id_register_full_name").removeAttr("required");
+      $("#id_register_email").removeAttr("required");
+      $("#id_login_username").attr("required", "required");
+      $("#id_login_password").attr("required", "required");
+      $("#save_button").text("Log In and Save Request");
+    } else {
+      $(".login-form").hide();
+      $(".register-form").show();
+      $(".login-toggle-text").hide();
+      $(".register-toggle-text").show();
+      $(".login-toggle-link").text("Log in");
+      $("#id_register_full_name").attr("required", "required");
+      $("#id_register_email").attr("required", "required");
+      $("#id_login_username").removeAttr("required");
+      $("#id_login_password").removeAttr("required");
+      $("#save_button").text("Create Account and Save Request");
+    }
+  });
+  $("#id_register_full_name").attr("required", "required");
+  $("#id_register_email").attr("required", "required");
+
   // Autosaving
   // https://stackoverflow.com/questions/19910843/autosave-input-boxs-to-database-during-pause-in-typing
 	var timeoutId, hiddenId;

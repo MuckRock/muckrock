@@ -142,10 +142,16 @@
           </div>
         {% else %}
           <hr class="nomargin">
-          {% include "lib/pattern/new_request_field.html" with field=form.register_full_name only %}
-          {% include "lib/pattern/new_request_field.html" with field=form.register_email only %}
-          {% include "lib/pattern/new_request_field.html" with field=form.register_newsletter only %}
-          {% include "lib/pattern/new_request_field.html" with field=form.register_pro only %}
+          <div class="register-form">
+            {% include "lib/pattern/new_request_field.html" with field=form.register_full_name only %}
+            {% include "lib/pattern/new_request_field.html" with field=form.register_email only %}
+            {% include "lib/pattern/new_request_field.html" with field=form.register_newsletter only %}
+            {% include "lib/pattern/new_request_field.html" with field=form.register_pro only %}
+          </div>
+          <div class="login-form">
+            {% include "lib/pattern/new_request_field.html" with field=form.login_username only %}
+            {% include "lib/pattern/new_request_field.html" with field=form.login_password only %}
+          </div>
         {% endif %}
 
         {% if user.is_authenticated %}
@@ -226,10 +232,17 @@
         {% else %}
           <footer class="footer--signup">
             <p>
-              Create a MuckRock account and file up to four requests for just $20, or
-              go Pro for 20 requests a month
-              with the option to keep your submissions private. Already have an
-              account? <a href="{% url 'acct-login' %}">Log in</a>.
+              <span class="register-toggle-text">
+                Create a MuckRock account and file up to four requests for just
+                $20, or go Pro for 20 requests a month
+                with the option to keep your submissions private.
+                Already have an account?
+              </span>
+              <span class="login-toggle-text">
+                Log in to your account before submitting your request.
+                Don't have an account yet?
+              </span>
+              <a href="#" class="login-toggle-link">Log in</a>.
             </p>
             <p id="submit_help" class="error"></p>
             <div class="footer--submit">

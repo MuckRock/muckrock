@@ -4,6 +4,7 @@ FOIA forms for composing requests
 
 # Django
 from django import forms
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 
 # Third Party
@@ -87,8 +88,11 @@ class BaseComposerForm(forms.ModelForm):
         widget=forms.HiddenInput(),
     )
 
-    register_full_name = forms.CharField(label='Full Name or Handle (Public)')
-    register_email = forms.EmailField(max_length=75, label='Email')
+    register_full_name = forms.CharField(
+        label='Full Name or Handle (Public)',
+        required=False,
+    )
+    register_email = forms.EmailField(label='Email', required=False)
     register_newsletter = forms.BooleanField(
         initial=True,
         required=False,
@@ -101,6 +105,11 @@ class BaseComposerForm(forms.ModelForm):
         label='Go Pro',
         help_text='Get 20 requests for $40 per month, as well as the ability to '
         'keep your requests private',
+    )
+
+    login_username = forms.CharField(label='Username', required=False)
+    login_password = forms.CharField(
+        label='Password', widget=forms.PasswordInput(), required=False
     )
 
     class Meta:
@@ -122,11 +131,14 @@ class BaseComposerForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         if not hasattr(self, 'user'):
             self.user = kwargs.pop('user')
+        self.request = kwargs.pop('request')
         super(BaseComposerForm, self).__init__(*args, **kwargs)
         if self.user.is_authenticated:
             del self.fields['register_full_name']
             del self.fields['register_email']
             del self.fields['register_newsletter']
+            del self.fields['login_username']
+            del self.fields['login_password']
         if not self.user.has_perm('foia.embargo_foiarequest'):
             del self.fields['embargo']
         if not self.user.has_perm('foia.embargo_perm_foiarequest'):
@@ -141,7 +153,7 @@ class BaseComposerForm(forms.ModelForm):
     def clean_register_email(self):
         """Do a case insensitive uniqueness check"""
         email = self.cleaned_data['register_email']
-        if User.objects.filter(email__iexact=email).exists():
+        if email and User.objects.filter(email__iexact=email).exists():
             raise forms.ValidationError(
                 'User with this email already exists. Please login first.'
             )
@@ -171,6 +183,29 @@ class BaseComposerForm(forms.ModelForm):
                     )
         if cleaned_data.get('permanent_embargo'):
             cleaned_data['embargo'] = True
+        if not self.user.is_authenticated:
+            register = (
+                cleaned_data.get('register_full_name')
+                and cleaned_data.get('register_email')
+            )
+            login = (
+                cleaned_data.get('login_username')
+                and cleaned_data.get('login_password')
+            )
+            if not register and not login:
+                raise forms.ValidationError(
+                    'You must supply either registration information or '
+                    'login information'
+                )
+            if login:
+                form = AuthenticationForm(
+                    data={
+                        'username': cleaned_data.get('login_username'),
+                        'password': cleaned_data.get('login_password'),
+                    }
+                )
+                form.full_clean()
+                self.user = form.get_user()
         return cleaned_data
 
 

@@ -5,6 +5,7 @@ FOIA views for composing
 # Django
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.urlresolvers import reverse
@@ -38,6 +39,7 @@ class GenericComposer(BuyRequestsMixin):
         """Add request to the form kwargs"""
         kwargs = super(GenericComposer, self).get_form_kwargs()
         kwargs['user'] = self.request.user
+        kwargs['request'] = self.request
         if len(self.request.POST.getlist('agencies')) == 1:
             # pass the agency for contact info form
             try:
@@ -202,11 +204,10 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
         })
         return context
 
-    def form_valid(self, form):
-        """Create the request"""
-        if self.request.user.is_authenticated:
-            user = self.request.user
-        else:
+    def _handle_anonymous_submitter(self, form):
+        """Handle a submission from an anonymous user"""
+        # form validation guarentees we have either registration or login info
+        if form.cleaned_data.get('register_full_name'):
             user = self.miniregister(
                 form.cleaned_data['register_full_name'],
                 form.cleaned_data['register_email'],
@@ -215,7 +216,7 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
             if form.cleaned_data.get('register_pro'):
                 try:
                     user.profile.start_pro_subscription(
-                        form.cleaned_data['stripe_token'],
+                        form.cleaned_data.get('stripe_token'),
                     )
                 except StripeError:
                     messages.error(
@@ -224,6 +225,17 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
                         'have not been subscribed to a professional account.  '
                         'You can subscribe from the settings page.'
                     )
+            return user
+        else:
+            login(self.request, form.user)
+            return form.user
+
+    def form_valid(self, form):
+        """Create the request"""
+        if self.request.user.is_authenticated:
+            user = self.request.user
+        else:
+            user = self._handle_anonymous_submitter(form)
         if form.cleaned_data['action'] in ('save', 'submit'):
             composer = form.save(commit=False)
             composer.user = user
