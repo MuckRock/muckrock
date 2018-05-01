@@ -312,12 +312,12 @@
                   {% csrf_token %}
                   <input type="hidden" name="action" value="thanks" />
                   <textarea name="text" id="thanks-composer">
-                    Hi,
+Hi,
 
-                    Thanks so much for your help with this request! I really appreciate it.
+Thanks so much for your help with this request! I really appreciate it.
 
-                    Sincerely,
-                    {{foia.user.get_full_name}}
+Sincerely,
+{{foia.user.get_full_name}}
                   </textarea>
                   <div class="buttons">
                     <button class="primary button" type="submit" name="thanks" value="1">Send</button>
