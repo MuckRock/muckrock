@@ -270,13 +270,28 @@ class NewsletterSignupView(View):
         default = form.cleaned_data['default']
         default_list = settings.MAILCHIMP_LIST_DEFAULT if default else None
         # First try subscribing the user to the list they are signing up for.
-        primary_error = mailchimp_subscribe(request, email, list_)
+        path = request.GET.get('next', request.path)
+        url = 'https://{}{}'.format(settings.MUCKROCK_URL, path)
+        primary_error = mailchimp_subscribe(
+            request,
+            email,
+            list_,
+            source='Newsletter Sign Up Form',
+            url=url,
+        )
         # Add the user to the default list if they want to be added.
         # If an error occurred with the first subscription,
         # don't try signing up for the default list.
         # If an error occurs with this subscription, don't worry about it.
         if default_list is not None and default_list != list_ and not primary_error:
-            mailchimp_subscribe(request, email, default_list, suppress_msg=True)
+            mailchimp_subscribe(
+                request,
+                email,
+                default_list,
+                suppress_msg=True,
+                source='Newsletter Sign Up Form',
+                url=url,
+            )
         return self.redirect_url(request)
 
 
