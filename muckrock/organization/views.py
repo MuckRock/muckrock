@@ -346,14 +346,15 @@ class OrganizationDetailView(DetailView):
         }
 
         context['members'] = organization.members.select_related('user')
+        num_requests = organization.get_requests()
         context['available'] = {
-            'requests': organization.num_requests,
+            'requests': num_requests,
             'seats': organization.max_users - len(context['members'])
         }
         context['progress'] = {}
         if organization.monthly_requests > 0:
             context['progress']['requests'] = (
-                float(organization.num_requests) / organization.monthly_requests
+                float(num_requests) / organization.monthly_requests
             ) * 100
         else:
             context['progress']['requests'] = 0
