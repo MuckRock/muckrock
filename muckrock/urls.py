@@ -101,7 +101,7 @@ urlpatterns = [
     url(r'^foi/', include('muckrock.foia.urls')),
     url(r'^news/', include('muckrock.news.urls')),
     url(
-        r'^newsletter/$',
+        r'^newsletter-post/$',
         views.NewsletterSignupView.as_view(),
         name='newsletter'
     ),
