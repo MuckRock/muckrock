@@ -54,6 +54,7 @@ from muckrock.task.filters import (
 from muckrock.task.forms import (
     BulkNewAgencyTaskFormSet,
     FlaggedTaskForm,
+    IncomingPortalForm,
     ProjectReviewTaskForm,
     ResponseTaskForm,
     ReviewAgencyTaskForm,
@@ -558,20 +559,24 @@ class PortalTaskList(TaskList):
     def _incoming_handler(self, request, task):
         """POST handler for incoming portal tasks"""
         # pylint: disable=no-self-use
-        form = ResponseTaskForm(request.POST)
+        form = IncomingPortalForm(request.POST)
         if not form.is_valid():
             messages.error(request, 'Form is invalid')
             return
         action_taken, error_msgs = form.process_form(task, request.user)
         for msg in error_msgs:
             messages.error(request, msg)
-        new_text = request.POST.get('communication')
-        keep_hidden = request.POST.get('keep_hidden')
+        new_text = form.cleaned_data.get('communication')
+        keep_hidden = form.cleaned_data.get('keep_hidden')
+        password = form.cleaned_data.get('word_to_pass')
         if new_text:
             task.communication.communication = new_text
         if not keep_hidden:
             task.communication.hidden = False
             task.communication.create_agency_notifications()
+        if password:
+            task.communication.foia.portal_password = password
+            task.communication.foia.save()
         task.communication.save()
         if task.communication.foia.portal:
             # If a communication is incorrectly sent to a request with a portal
@@ -591,12 +596,8 @@ class PortalTaskList(TaskList):
                 form_data['price'] = float(form_data['price'])
             if form_data.get('date_estimate'):
                 # to string for json
-                form_data['date_estimate'] = form_data['date_estimate'
-                                                       ].isoformat()
-            form_data.update({
-                'communication': new_text,
-                'keep_hidden': keep_hidden,
-            })
+                form_data['date_estimate'
+                          ] = (form_data['date_estimate'].isoformat())
             task.resolve(request.user, form_data)
 
     def _outgoing_handler(self, request, task):

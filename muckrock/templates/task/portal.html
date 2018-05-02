@@ -89,12 +89,27 @@
     <div class="form-field">
         {% if task.category == "i" %}
             <div class="response-input">
-                {{ form }}
+              {{ form.move.label_tag }}
+              {{ form.move }}
+              {{ form.tracking_number.label_tag }}
+              {{ form.tracking_number }}
+              {{ form.price.label_tag }}
+              {{ form.price }}
+              {{ form.date_estimate.label_tag }}
+              {{ form.date_estimate }}
+              {{ form.status.label_tag }}
+              {{ form.status }}
+              {{ form.word_to_pass.label_tag }}
+              {{ form.word_to_pass }}
             </div>
-            <label class="check-label" for="id_keep_hidden">Keep Hidden:</label>
-            <input id="id_keep_hidden" type="checkbox" name="keep_hidden">
-            <label for="id_communication">Communication</label>
-            <textarea id="id_communication" name="communication" rows="7">{{ task.communication.communication }}</textarea>
+            <div class="response-input">
+              {{ form.set_foia.label_tag }}
+              {{ form.set_foia }}
+              {{ form.keep_hidden.label_tag }}
+              {{ form.keep_hidden }}
+            </div>
+            {{ form.communication.label_tag }}
+            {{ form.communication }}
         {% else %}
             <label for="id_status">Set Status</label>
             <select name="status" id="id_status">

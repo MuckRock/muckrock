@@ -265,6 +265,17 @@ class ResponseTaskForm(forms.Form):
             foia.notify(action)
 
 
+class IncomingPortalForm(ResponseTaskForm):
+    """Form for incoming portal tasks, based on the response task form"""
+    keep_hidden = forms.BooleanField(required=False)
+    word_to_pass = forms.CharField(
+        label='Password',
+        max_length=20,
+        required=False,
+    )
+    communication = forms.CharField(widget=forms.Textarea(), required=False)
+
+
 class BulkNewAgencyTaskForm(forms.Form):
     """Form for creating blank new agencies"""
     name = forms.CharField(max_length=255)
