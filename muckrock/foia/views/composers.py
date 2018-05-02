@@ -332,7 +332,12 @@ def autosave(request, idx):
     data = request.POST.copy()
     # we are always just saving
     data['action'] = 'save'
-    form = BaseComposerForm(data, instance=composer, user=request.user)
+    form = BaseComposerForm(
+        data,
+        instance=composer,
+        user=request.user,
+        request=request,
+    )
     if form.is_valid():
         form.save()
         return HttpResponse('OK')

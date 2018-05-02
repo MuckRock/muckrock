@@ -329,6 +329,8 @@ $(document).ready(function(){
       $(".login-toggle-link").text("Register now");
       $("#id_register_full_name").removeAttr("required");
       $("#id_register_email").removeAttr("required");
+      $("#id_register_full_name").val("");
+      $("#id_register_email").val("");
       $("#id_login_username").attr("required", "required");
       $("#id_login_password").attr("required", "required");
       $("#save_button").text("Log In and Save Request");
@@ -342,6 +344,8 @@ $(document).ready(function(){
       $("#id_register_email").attr("required", "required");
       $("#id_login_username").removeAttr("required");
       $("#id_login_password").removeAttr("required");
+      $("#id_login_username").val("");
+      $("#id_login_password").val("");
       $("#save_button").text("Create Account and Save Request");
     }
   });
