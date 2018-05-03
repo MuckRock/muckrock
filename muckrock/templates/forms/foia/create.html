@@ -197,7 +197,7 @@
             </div>
 
             <div class="contact-info">
-              <a class="see-where" href="#">See where this request will be sent</a>
+              <a class="see-where" href="#">See {% if user.profile.is_advanced %}where{% else %}how{% endif %} this request will be sent</a>
               <div class="info">
                 This request <span></span>
                 {% if user.profile.is_advanced %}
