@@ -192,6 +192,10 @@ class AgencyComposerAutocomplete(autocomplete_light.AutocompleteModelTemplate):
             ]
         )
 
+    def order_choices(self, choices):
+        """Order choices by popularity"""
+        return choices.annotate(count=Count('foiarequest')).order_by('-count')
+
 
 class AgencyAdminAutocomplete(AgencyAutocomplete):
     """Autocomplete for Agencies for FOIA admin page"""
