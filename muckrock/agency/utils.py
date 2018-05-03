@@ -18,7 +18,8 @@ def initial_communication_template(
     jurisdictions = jurisdictions.union(
         j.legal for j in kwargs.get('extra_jurisdictions', [])
     )
-    if len(jurisdictions) == 1:
+    num_jurisdictions = len(jurisdictions)
+    if num_jurisdictions == 1:
         jurisdiction = jurisdictions.pop()
     elif kwargs.get('html'):
         jurisdiction = {
@@ -42,7 +43,8 @@ def initial_communication_template(
             'get_day_type': '{ business or calendar }',
         }
     requested_docs = requested_docs.replace('{ name }', user_name)
-    if len(jurisdictions) == 1 and kwargs.get('edited_boilerplate'):
+
+    if num_jurisdictions == 1 and kwargs.get('edited_boilerplate'):
         tags = [
             ('{ law name }', jurisdiction.get_law_name()),
             ('{ short name }', jurisdiction.get_law_name(abbrev=True)),
@@ -52,7 +54,9 @@ def initial_communication_template(
         for tag, replace in tags:
             requested_docs = requested_docs.replace(tag, unicode(replace))
         return requested_docs
-    if not kwargs.get('edited_boilerplate'):
+    elif kwargs.get('edited_boilerplate'):
+        return requested_docs
+    elif not kwargs.get('edited_boilerplate'):
         template = get_template('text/foia/request.txt')
         context = {
             'requested_docs': smart_text(requested_docs),

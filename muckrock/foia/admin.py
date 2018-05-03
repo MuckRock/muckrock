@@ -90,7 +90,7 @@ class FOIAFileInline(admin.StackedInline):
     form = FOIAFileAdminForm
     readonly_fields = ('doc_id', 'pages', 'access', 'source')
     fields = (
-        ('title', 'date'),
+        ('title', 'datetime'),
         'ffile',
         'description',
         ('doc_id', 'pages'),
@@ -144,7 +144,7 @@ class FOIACommunicationAdmin(VersionAdmin):
             'fields': (
                 'foia_link',
                 ('from_user', 'to_user'),
-                ('subject', 'date'),
+                ('subject', 'datetime'),
                 'communication',
                 'status',
                 'response',
@@ -239,7 +239,7 @@ class FOIACommunicationInline(admin.StackedInline):
     form = FOIACommunicationAdminForm
     fields = (
         ('from_user', 'to_user'),
-        ('subject', 'date'),
+        ('subject', 'datetime'),
         'communication',
         ('file_count', 'file_names'),
         'status',
