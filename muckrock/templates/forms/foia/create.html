@@ -221,17 +221,17 @@
             </div>
 
             <div class="button-group">
+              {% if composer %}
+                <button type="button" class="failure button" id="delete_button">
+                  Delete
+                </button>
+              {% endif %}
               <button type="button" class="button" id="save_button">
                 Save
               </button>
               <button type="button" class="primary button" id="submit_button">
                 Submit
               </button>
-              {% if composer %}
-                <button type="button" class="failure button" id="delete_button">
-                  Delete
-                </button>
-              {% endif %}
             </div>
           </footer>
         {% else %}
