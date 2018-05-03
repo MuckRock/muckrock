@@ -112,26 +112,28 @@
           </dl>
         </div>
 
+        <hr class="nomargin">
+        {% if form.embargo %}
+          {% include "lib/pattern/new_request_field.html" with field=form.embargo only %}
+          {% if form.permanent_embargo %}
+            {% include "lib/pattern/new_request_field.html" with field=form.permanent_embargo only %}
+          {% endif %}
+        {% else %}
+          <fieldset class="no-embargo">
+            <p>This request will be filed publicly. Need to keep your request private?
+            <a href="{% url "accounts" %}">
+              Upgrade to a Pro or Organizational account
+            </a>
+            to embargo your request as long as you need to.</p>
+          </fieldset>
+        {% endif %}
+
         {% if user.is_authenticated %}
           <fieldset class="advanced">
             <span class="toggle-advanced">&#9654; Advanced Options</span>
           </fieldset>
           <div class="advanced-container">
             {% include "lib/pattern/new_request_field.html" with field=form.edited_boilerplate only %}
-            {% if form.embargo %}
-              {% include "lib/pattern/new_request_field.html" with field=form.embargo only %}
-              {% if form.permanent_embargo %}
-                {% include "lib/pattern/new_request_field.html" with field=form.permanent_embargo only %}
-              {% endif %}
-            {% else %}
-              <fieldset class="no-embargo">
-                <p>This request will be filed publicly. Need to keep your request private?
-                <a href="{% url "accounts" %}">
-                  Upgrade to a Pro or Organizational account
-                </a>
-                to embargo your request as long as you need to.</p>
-              </fieldset>
-            {% endif %}
             {% include "lib/pattern/new_request_field.html" with field=form.tags only %}
             <fieldset class="attachments">
               <label class="bold">Attachments</label>
