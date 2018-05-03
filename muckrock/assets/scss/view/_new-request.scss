@@ -22,6 +22,7 @@ $color-advanced-container: lighten($color-agency, 40%);
         background-color: $color-title;
         border: 2px solid $color-red-dark;
         border-bottom: none;
+        color: $color-white;
         label { display: none; }
         input {
             width: 100%;

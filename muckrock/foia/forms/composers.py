@@ -32,6 +32,8 @@ class BaseComposerForm(forms.ModelForm):
         ),
         max_length=255,
         required=False,
+        help_text='i.e., "John Doe Arrest Report" or "2017 Agency Leadership '
+        'Calendars". Agencies may see this on emailed requests.',
     )
     requested_docs = forms.CharField(
         widget=forms.Textarea(
