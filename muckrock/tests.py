@@ -163,9 +163,9 @@ class TestNewsletterSignupView(TestCase):
         self.url = reverse('newsletter')
 
     def test_get_view(self):
-        """Visiting the page should present a signup form."""
+        """GET is not allowed - POST only"""
         response = http_get_response(self.url, self.view)
-        eq_(response.status_code, 200)
+        eq_(response.status_code, 405)
 
     @patch('muckrock.views.mailchimp_subscribe')
     def test_post_view(self, mock_subscribe):
