@@ -516,7 +516,8 @@ class MyOrgRequestList(RequestList):
         """Limit to just requests owned by the current user."""
         queryset = super(MyOrgRequestList, self).get_queryset()
         return queryset.filter(
-            user__profile__organization=self.request.user.profile.get_org()
+            composer__user__profile__organization=self.request.user.profile.
+            get_org()
         )
 
 

@@ -391,7 +391,7 @@ class RecentRequestsWidget(ListWidget):
         requests = (
             FOIARequest.objects.get_public()
             .exclude(composer__datetime_submitted=None)
-            .order_by('-composer__date_submitted').values('title')[:4]
+            .order_by('-composer__datetime_submitted').values('title')[:4]
         )
         return [{'label': r['title']} for r in requests]
 
