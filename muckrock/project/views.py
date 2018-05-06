@@ -154,11 +154,8 @@ class ProjectDetailView(DetailView):
         )
         context['visible_requests'] = (
             project.requests.get_viewable(user).select_related(
-                'jurisdiction',
-                'jurisdiction__parent',
-                'jurisdiction__parent__parent',
-                'agency__jurisdiction',
-                'user__profile',
+                'agency__jurisdiction__parent__parent',
+                'composer__user__profile',
             ).get_public_file_count()
         )
         context['followers'] = followers(project)
