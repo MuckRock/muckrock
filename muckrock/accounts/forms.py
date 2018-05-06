@@ -299,7 +299,7 @@ class BuyRequestForm(StripeForm):
         num_requests = self.cleaned_data['num_requests']
         stripe_retry_on_error(
             stripe.Charge.create,
-            amount=self._get_price(num_requests),
+            amount=self.get_price(num_requests),
             currency='usd',
             source=self.cleaned_data['stripe_token'],
             metadata={
@@ -311,7 +311,7 @@ class BuyRequestForm(StripeForm):
         )
         recipient.profile.add_requests(num_requests)
 
-    def _get_price(self, num_requests):
+    def get_price(self, num_requests):
         """Get the price for the requests"""
         is_advanced = (
             self.user.is_authenticated and self.user.profile.is_advanced()

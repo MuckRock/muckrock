@@ -12,11 +12,23 @@ def domain(request):
 
 def google_analytics(request):
     """
-    Retrieve and delete any google analytics session data and send it to the template
+    Retrieve and delete any analytics session data and send it to the template
     """
     return {
         'ga': request.session.pop('ga', None),
         'donated': request.session.pop('donated', 0),
+    }
+
+
+def mixpanel(request):
+    """
+    Retrieve and delete any mixpanel analytics session data and send it to the template
+    """
+    return {
+        'mp_events': request.session.pop('mp_events', []),
+        'mp_alias': request.session.pop('mp_alias', False),
+        'mp_charge': request.session.pop('mp_charge', 0),
+        'mp_token': settings.MIXPANEL_TOKEN,
     }
 
 

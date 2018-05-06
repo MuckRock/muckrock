@@ -20,6 +20,7 @@ import logging
 import stripe
 
 # MuckRock
+from muckrock.accounts.utils import mixpanel_event
 from muckrock.foia.models import FOIARequest
 from muckrock.organization.forms import (
     AddMembersForm,
@@ -115,6 +116,11 @@ class OrganizationCreateView(CreateView):
         messages.success(
             self.request, 'The organization has been created. Excellent!'
         )
+        mixpanel_event(
+            self.request,
+            'Organization Created',
+            organization.mixpanel_event(),
+        )
         return redirect(self.get_success_url())
 
 
@@ -177,6 +183,11 @@ class OrganizationActivateView(UpdateView):
                     self.request, 'Your organization subscription is active.'
                 )
                 logging.info('%s activated %s', self.request.user, organization)
+                mixpanel_event(
+                    self.request,
+                    'Organization Activated',
+                    organization.mixpanel_event(),
+                )
             except (AttributeError, ValueError) as exception:
                 messages.error(self.request, exception)
                 an_error = True
@@ -257,6 +268,11 @@ class OrganizationUpdateView(UpdateView):
             # if staff we want the changes made to the org to be saved before updating
             organization = form.save()
         organization.update_subscription(max_users)
+        mixpanel_event(
+            self.request,
+            'Organization Updated',
+            organization.mixpanel_event(),
+        )
         return redirect(self.get_success_url())
 
 
@@ -276,6 +292,11 @@ def deactivate_organization(request, slug):
     # finally, actually deactivate the organization
     if request.method == 'POST':
         organization.cancel_subscription()
+        mixpanel_event(
+            request,
+            'Organization Deactivated',
+            organization.mixpanel_event(),
+        )
     return redirect(organization)
 
 
@@ -308,6 +329,11 @@ class OrganizationDeleteView(DeleteView):
                 self.request, 'You cannot delete an active organization.'
             )
             return redirect(organization.get_absolute_url())
+        mixpanel_event(
+            self.request,
+            'Organization Deleted',
+            organization.mixpanel_event(),
+        )
         return super(OrganizationDeleteView, self).dispatch(*args, **kwargs)
 
 

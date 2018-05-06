@@ -23,7 +23,7 @@ from djangosecure.decorators import frame_deny_exempt
 
 # MuckRock
 from muckrock.accounts.mixins import MiniregMixin
-from muckrock.accounts.utils import validate_stripe_email
+from muckrock.accounts.utils import mixpanel_event, validate_stripe_email
 from muckrock.crowdfund.forms import CrowdfundPaymentForm
 from muckrock.crowdfund.models import Crowdfund
 
@@ -70,6 +70,7 @@ class CrowdfundDetailView(MiniregMixin, DetailView):
     """
     model = Crowdfund
     template_name = 'crowdfund/detail.html'
+    minireg_source = 'Crowdfund'
 
     def get_context_data(self, **kwargs):
         """Adds Stripe public key to context"""
@@ -129,16 +130,31 @@ class CrowdfundDetailView(MiniregMixin, DetailView):
                 registered = True
             crowdfund = payment_form.cleaned_data['crowdfund']
             try:
-                if crowdfund.can_recur(
-                ) and payment_form.cleaned_data['recurring']:
+                if (
+                    crowdfund.can_recur()
+                    and payment_form.cleaned_data['recurring']
+                ):
                     crowdfund.make_recurring_payment(
                         token, email, amount, show, user
                     )
+                    event = 'Recurring Crowdfund Payment',
+                    kwargs = {}
                 else:
                     crowdfund.make_payment(token, email, amount, show, user)
+                    event = 'Crowdfund Payment',
+                    kwargs = {'charge': amount}
             except stripe.StripeError as payment_error:
                 logging.warn(payment_error)
                 return self.return_error(request, payment_error)
+            else:
+                mixpanel_event(
+                    request, event, {
+                        'Amount': float(amount),
+                        'Crowdfund': crowdfund.name,
+                        'Crowdfund ID': crowdfund.pk,
+                        'Show': show,
+                    }, **kwargs
+                )
             if request.is_ajax():
                 data = {
                     'authenticated':

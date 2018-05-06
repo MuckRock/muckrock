@@ -18,7 +18,11 @@ import stripe
 
 # MuckRock
 from muckrock.accounts.models import Profile
-from muckrock.accounts.utils import mailchimp_subscribe, unique_username
+from muckrock.accounts.utils import (
+    mailchimp_subscribe,
+    mixpanel_event,
+    unique_username,
+)
 from muckrock.message.tasks import gift, welcome_miniregister
 from muckrock.utils import generate_key
 
@@ -72,6 +76,16 @@ class MiniregMixin(object):
         login(self.request, user)
         if newsletter:
             mailchimp_subscribe(self.request, user.email)
+
+        mixpanel_event(
+            self.request,
+            'Sign Up',
+            {
+                'Source': 'Mini-Register: {}'.format(self.minireg_source),
+                'Newsletter': newsletter,
+            },
+            signup=True,
+        )
         return user
 
 
@@ -89,8 +103,19 @@ class BuyRequestsMixin(object):
             logger.warn('Payment error: %s', exc, exc_info=sys.exc_info())
             return
 
-        self.request.session['ga'] = 'request_purchase'
         num_requests = form.cleaned_data['num_requests']
+        price = form.get_price(num_requests)
+        self.request.session['ga'] = 'request_purchase'
+        mixpanel_event(
+            self.request,
+            'Requests Purchased',
+            {
+                'Number': num_requests,
+                'Recipient': recipient.username,
+                'Price': price / 100,
+            },
+            charge=price,
+        )
         if recipient == self.request.user:
             msg = (
                 'Purchase successful.  {} requests have been added to your'

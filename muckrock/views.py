@@ -25,7 +25,11 @@ from watson.views import SearchMixin
 
 # MuckRock
 from muckrock.accounts.models import RecurringDonation
-from muckrock.accounts.utils import mailchimp_subscribe, stripe_get_customer
+from muckrock.accounts.utils import (
+    mailchimp_subscribe,
+    mixpanel_event,
+    stripe_get_customer,
+)
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIAFile, FOIARequest
 from muckrock.forms import NewsletterSignupForm, SearchForm, StripeForm
@@ -458,6 +462,12 @@ class DonationFormView(StripeFormMixin, FormView):
             else:
                 self.request.session['donated'] = amount
                 self.request.session['ga'] = 'donation'
+                mixpanel_event(
+                    self.request,
+                    'Donate',
+                    {'Amount': amount / 100},
+                    charge=amount,
+                )
         return charge
 
     def make_subscription(self, token, amount, email):
@@ -497,6 +507,11 @@ class DonationFormView(StripeFormMixin, FormView):
                 amount=quantity,
                 customer_id=customer.id,
                 subscription_id=subscription.id,
+            )
+            mixpanel_event(
+                self.request,
+                'Recurring Donation',
+                {'Amount': quantity},
             )
         return subscription
 
