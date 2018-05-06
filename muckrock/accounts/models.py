@@ -7,12 +7,13 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 
 # Standard Library
 import logging
 from datetime import date
+from itertools import izip_longest
 from urllib import urlencode
 
 # Third Party
@@ -23,6 +24,7 @@ from localflavor.us.models import PhoneNumberField, USStateField
 from lot.models import LOT
 
 # MuckRock
+from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.utils import (
     generate_key,
     get_image_storage,
@@ -199,84 +201,77 @@ class Profile(models.Model):
             return owned_org
         return self.organization
 
-    def can_multirequest(self):
-        """Is this user allowed to multirequest?"""
-        return self.is_advanced()
-
-    def can_view_emails(self):
-        """Is this user allowed to view all emails and private contact information?"""
-        return self.is_advanced()
-
     def get_monthly_requests(self):
         """Get the number of requests left for this month"""
-        not_this_month = self.date_update.month != date.today().month
-        not_this_year = self.date_update.year != date.today().year
-        # update requests if they have not yet been updated this month
-        if not_this_month or not_this_year:
-            self.date_update = date.today()
-            self.monthly_requests = settings.MONTHLY_REQUESTS.get(
-                self.acct_type, 0
-            )
-            self.save()
-        return self.monthly_requests
+        with transaction.atomic():
+            profile = Profile.objects.select_for_update().get(pk=self.pk)
+            not_this_month = profile.date_update.month != date.today().month
+            not_this_year = profile.date_update.year != date.today().year
+            # update requests if they have not yet been updated this month
+            if not_this_month or not_this_year:
+                profile.date_update = date.today()
+                profile.monthly_requests = settings.MONTHLY_REQUESTS.get(
+                    profile.acct_type, 0
+                )
+                profile.save()
+            return profile.monthly_requests
 
     def total_requests(self):
         """Get sum of paid for requests and monthly requests"""
         org_reqs = self.organization.get_requests() if self.organization else 0
         return self.num_requests + self.get_monthly_requests() + org_reqs
 
-    def make_request(self):
-        """Decrement the user's request amount by one"""
-        organization = self.organization
-        if organization and organization.get_requests() > 0:
-            organization.num_requests -= 1
-            organization.save()
-            return True
-        if self.get_monthly_requests() > 0:
-            self.monthly_requests -= 1
-        elif self.num_requests > 0:
-            self.num_requests -= 1
-        else:
-            return False
-        self.save()
-        return True
+    def add_requests(self, num):
+        """Add requests to the profile"""
+        with transaction.atomic():
+            profile = Profile.objects.select_for_update().get(pk=self.id)
+            profile.num_requests += num
+            profile.save()
 
     def multiple_requests(self, num):
-        """How many requests of each type would be used for this user to make num requests"""
-        request_dict = {
-            'org_requests': 0,
-            'monthly_requests': 0,
-            'reg_requests': 0,
-            'extra_requests': 0
-        }
+        """How many requests of each type would be used for this user to make
+        num requests"""
         org_reqs = self.organization.get_requests() if self.organization else 0
-        if org_reqs > num:
-            request_dict['org_requests'] = num
-            return request_dict
-        else:
-            request_dict['org_requests'] = org_reqs
-            num -= org_reqs
-        monthly = self.get_monthly_requests()
-        if monthly > num:
-            request_dict['monthly_requests'] = num
-            return request_dict
-        else:
-            request_dict['monthly_requests'] = monthly
-            num -= monthly
-        if self.num_requests > num:
-            request_dict['reg_requests'] = num
-            return request_dict
-        else:
-            request_dict['reg_requests'] = self.num_requests
-            request_dict['extra_requests'] = num - self.num_requests
-            return request_dict
+        have_amt = [org_reqs, self.get_monthly_requests(), self.num_requests]
+        use_amt = []
 
-    def bundled_requests(self):
-        """Returns the number of requests the user gets when they buy a bundle."""
-        how_many = settings.BUNDLED_REQUESTS[self.acct_type]
-        if self.is_member_of_active_org():
-            how_many = 5
-        return how_many
+        while num > 0:
+            try:
+                have = have_amt.pop(0)
+            except IndexError:
+                use_amt.append(num)
+                break
+            else:
+                use = min(num, have)
+                use_amt.append(use)
+                num -= use
+        types = ['org', 'monthly', 'regular', 'extra']
+        return dict(izip_longest(types, use_amt, fillvalue=0))
+
+    def make_requests(self, num):
+        """Try to deduct `num` requests from the users balance"""
+        with transaction.atomic():
+            if self.organization:
+                # cannot lock on a nullable relation, but we do
+                # want to lock the organization if it exists
+                profile = (
+                    Profile.objects.select_for_update()
+                    .select_related('organization')
+                    .exclude(organization=None).get(pk=self.pk)
+                )
+            else:
+                profile = Profile.objects.select_for_update().get(pk=self.pk)
+            request_count = profile.multiple_requests(num)
+            if request_count['extra'] > 0:
+                raise InsufficientRequestsError(request_count['extra'])
+
+            profile.num_requests -= request_count['regular']
+            profile.monthly_requests -= request_count['monthly']
+            profile.save()
+            if profile.organization:
+                profile.organization.num_requests -= request_count['org']
+                profile.organization.save()
+        return request_count
 
     def customer(self):
         """Retrieve the customer from Stripe or create one if it doesn't exist. Then return it."""
@@ -335,11 +330,13 @@ class Profile(models.Model):
         )
         stripe_retry_on_error(customer.save, idempotency_key=True)
         # modify the profile object (should this be part of a webhook callback?)
-        self.subscription_id = subscription.id
-        self.acct_type = 'pro'
-        self.date_update = date.today()
-        self.monthly_requests = settings.MONTHLY_REQUESTS.get('pro', 0)
-        self.save()
+        with transaction.atomic():
+            profile = Profile.objects.select_for_update().get(pk=self.pk)
+            profile.subscription_id = subscription.id
+            profile.acct_type = 'pro'
+            profile.date_update = date.today()
+            profile.monthly_requests = settings.MONTHLY_REQUESTS.get('pro', 0)
+            profile.save()
         return subscription
 
     def cancel_pro_subscription(self):
@@ -350,9 +347,10 @@ class Profile(models.Model):
         # if it isn't, then they probably don't have a subscription. in that case, just make
         # sure that we demote their account and reset them back to basic.
         try:
-            if not self.subscription_id and not len(
-                customer.subscriptions.data
-            ) > 0:
+            if (
+                not self.subscription_id
+                and not len(customer.subscriptions.data) > 0
+            ):
                 raise AttributeError('There is no subscription to cancel.')
             if self.subscription_id:
                 subscription_id = self.subscription_id
@@ -370,11 +368,14 @@ class Profile(models.Model):
             logger.warn(exception)
         except stripe.error.StripeError as exception:
             logger.warn(exception)
-        self.subscription_id = ''
-        self.acct_type = 'basic'
-        self.monthly_requests = settings.MONTHLY_REQUESTS.get('basic', 0)
-        self.payment_failed = False
-        self.save()
+        with transaction.atomic():
+            profile = Profile.objects.select_for_update().get(pk=self.pk)
+            profile.subscription_id = ''
+            profile.acct_type = 'basic'
+            profile.monthly_requests = settings.MONTHLY_REQUESTS.get('basic', 0)
+            profile.payment_failed = False
+            profile.save()
+        self.refresh_from_db()
         return subscription
 
     def pay(self, token, amount, metadata, fee=PAYMENT_FEE):
@@ -554,6 +555,10 @@ class Statistics(models.Model):
     total_requests_abandoned = models.IntegerField(null=True, blank=True)
     total_requests_lawsuit = models.IntegerField(null=True, blank=True)
     requests_processing_days = models.IntegerField(null=True, blank=True)
+    total_composers = models.IntegerField(null=True, blank=True)
+    total_composers_draft = models.IntegerField(null=True, blank=True)
+    total_composers_submitted = models.IntegerField(null=True, blank=True)
+    total_composers_filed = models.IntegerField(null=True, blank=True)
     sent_communications_portal = models.IntegerField(null=True, blank=True)
     sent_communications_email = models.IntegerField(null=True, blank=True)
     sent_communications_fax = models.IntegerField(null=True, blank=True)

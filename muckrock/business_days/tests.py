@@ -13,22 +13,63 @@ import nose.tools
 
 # MuckRock
 from muckrock.business_days.models import Calendar, Holiday
-from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.jurisdiction.factories import FederalJurisdictionFactory
 
 
 class TestBusinessDayUnit(TestCase):
     """Unit tests for business days"""
+
     # pylint: disable=invalid-name
-    fixtures = ['holidays.json', 'jurisdictions.json', 'laws.json']
+    # pylint: disable=too-many-instance-attributes
 
     def setUp(self):
         """Set up tests"""
-        self.new_years = Holiday.objects.get(name="New Year's Day")
-        self.mlk_day = Holiday.objects.get(name='Martin Luther King, Jr. Day')
-        self.good_friday = Holiday.objects.get(name='Good Friday')
-        self.usa_cal = Jurisdiction.objects.get(
-            name='United States of America'
-        ).get_calendar()
+        self.new_years = Holiday.objects.create(
+            name='New Year\'s Day',
+            kind='date',
+            month=1,
+            day=1,
+        )
+        self.mlk_day = Holiday.objects.create(
+            name='Martin Luther King, Jr. Day',
+            kind='ord_wd',
+            month=1,
+            num=3,
+            weekday=0,
+        )
+        self.good_friday = Holiday.objects.create(
+            name='Good Friday',
+            kind='easter',
+        )
+        self.independence_day = Holiday.objects.create(
+            name='Independence Day',
+            kind='date',
+            month=7,
+            day=4,
+        )
+        self.veterans_day = Holiday.objects.create(
+            name='Veterans Day',
+            kind='date',
+            month=11,
+            day=11,
+        )
+        self.thanksgiving = Holiday.objects.create(
+            name='Thanksgiving',
+            kind='ord_wd',
+            month=11,
+            num=4,
+            weekday=3,
+        )
+        usa = FederalJurisdictionFactory()
+        usa.holidays.set([
+            self.new_years,
+            self.mlk_day,
+            self.good_friday,
+            self.independence_day,
+            self.veterans_day,
+            self.thanksgiving,
+        ])
+        self.usa_cal = usa.get_calendar()
         self.gen_cal = Calendar()
 
     def test_holiday_date_match(self):

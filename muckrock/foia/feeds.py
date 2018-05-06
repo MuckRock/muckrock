@@ -23,14 +23,15 @@ class LatestSubmittedRequests(Feed):
     def items(self):
         """Return the items for the rss feed"""
         return (
-            FOIARequest.objects.get_submitted().get_public()
-            .order_by('-date_submitted').select_related('jurisdiction')
+            FOIARequest.objects.get_public()
+            .order_by('-composer__datetime_submitted')
+            .select_related('agency__jurisdiction')
             .prefetch_related('communications')[:25]
         )
 
     def item_description(self, item):
         """The description of each rss item"""
-        return linebreaks(escape(item.first_request()))
+        return linebreaks(escape(item.first_request_text()))
 
 
 class LatestDoneRequests(Feed):
@@ -43,13 +44,13 @@ class LatestDoneRequests(Feed):
         """Return the items for the rss feed"""
         return (
             FOIARequest.objects.get_done().get_public()
-            .order_by('-date_done').select_related('jurisdiction')
+            .order_by('-datetime_done').select_related('agency__jurisdiction')
             .prefetch_related('communications')[:25]
         )
 
     def item_description(self, item):
         """The description of each rss item"""
-        return linebreaks(escape(item.first_request()))
+        return linebreaks(escape(item.first_request_text()))
 
 
 class FOIAFeed(Feed):
@@ -107,15 +108,18 @@ class UserSubmittedFeed(Feed):
     def items(self, obj):
         """The submitted requests are the items for this feed"""
         return (
-            FOIARequest.objects.get_submitted().filter(
-                user=obj, embargo=False
-            ).order_by('-date_submitted').select_related('jurisdiction')
+            FOIARequest.objects.filter(
+                user=obj,
+                embargo=False,
+            ).order_by(
+                '-composer__datetime_submitted',
+            ).select_related('agency__jurisdiction')
             .prefetch_related('communications')[:25]
         )
 
     def item_description(self, item):
         """The description of each rss item"""
-        return linebreaks(escape(item.first_request()))
+        return linebreaks(escape(item.first_request_text()))
 
 
 class UserDoneFeed(Feed):
@@ -142,13 +146,14 @@ class UserDoneFeed(Feed):
         """The completed requests are the items for this feed"""
         return (
             FOIARequest.objects.get_done().filter(user=obj, embargo=False)
-            .order_by('-date_submitted').select_related('jurisdiction')
+            .order_by('-datetime_submitted'
+                      ).select_related('agency__jurisdiction')
             .prefetch_related('communications')[:25]
         )
 
     def item_description(self, item):
         """The description of each rss item"""
-        return linebreaks(escape(item.first_request()))
+        return linebreaks(escape(item.first_request_text()))
 
 
 class UserUpdateFeed(Feed):
@@ -175,8 +180,8 @@ class UserUpdateFeed(Feed):
         """The communications are the items for this feed"""
         communications = (
             FOIACommunication.objects.filter(foia__user=obj)
-            .exclude(foia__status='started').exclude(foia__embargo=True)
-            .select_related('foia__jurisdiction').order_by('-date')
+            .exclude(foia__embargo=True)
+            .select_related('foia__agency__jurisdiction').order_by('-date')
         )
         return communications[:25]
 

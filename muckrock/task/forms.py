@@ -4,7 +4,6 @@ Forms for Task app
 
 # Django
 from django import forms
-from django.http import Http404
 
 # Standard Library
 import logging
@@ -14,6 +13,7 @@ from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
 from muckrock.accounts.models import Notification
+from muckrock.agency.models import Agency
 from muckrock.communication.utils import get_email_or_fax
 from muckrock.foia.models import STATUS
 from muckrock.jurisdiction.models import Jurisdiction
@@ -151,7 +151,7 @@ class ResponseTaskForm(forms.Form):
         if move:
             try:
                 comms = self.move_communication(task.communication, move, user)
-            except (Http404, ValueError):
+            except ValueError:
                 error_msgs.append(
                     'No valid destination for moving the request.'
                 )
@@ -215,7 +215,7 @@ class ResponseTaskForm(forms.Form):
                 foia = comm.foia
                 foia.status = status
                 if status in ['rejected', 'no_docs', 'done', 'abandoned']:
-                    foia.date_done = comm.date
+                    foia.datetime_done = comm.datetime
                 foia.update()
                 foia.save(comment='response task status')
                 logging.info(
@@ -263,6 +263,30 @@ class ResponseTaskForm(forms.Form):
             foia.save(comment='response task proxy reject')
             action = generate_status_action(foia)
             foia.notify(action)
+
+
+class IncomingPortalForm(ResponseTaskForm):
+    """Form for incoming portal tasks, based on the response task form"""
+    keep_hidden = forms.BooleanField(required=False)
+    word_to_pass = forms.CharField(
+        label='Password',
+        max_length=20,
+        required=False,
+    )
+    communication = forms.CharField(widget=forms.Textarea(), required=False)
+
+
+class ReplaceNewAgencyForm(forms.Form):
+    """Form for rejecting and replacing a new agency"""
+    replace_jurisdiction = autocomplete_light.ModelChoiceField(
+        'JurisdictionAutocomplete',
+        queryset=Jurisdiction.objects.all(),
+    )
+    replace_agency = autocomplete_light.ModelChoiceField(
+        'AgencyAutocomplete',
+        label='Move this agency\'s requests to:',
+        queryset=Agency.objects.filter(status='approved'),
+    )
 
 
 class BulkNewAgencyTaskForm(forms.Form):

@@ -17,9 +17,10 @@ from django.utils import timezone
 # Standard Library
 import logging
 from datetime import date
-from itertools import groupby
+from itertools import groupby, izip_longest
 
 # MuckRock
+from muckrock.agency.utils import initial_communication_template
 from muckrock.communication.models import (
     EmailAddress,
     EmailError,
@@ -31,7 +32,6 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import support
 from muckrock.models import ExtractDay
-from muckrock.task.forms import ResponseTaskForm
 from muckrock.task.querysets import (
     CrowdfundTaskQuerySet,
     FlaggedTaskQuerySet,
@@ -326,7 +326,7 @@ class StaleAgencyTask(Task):
         foias = self.agency.foiarequest_set.all()
         comms = [c for f in foias for c in f.communications.all() if c.response]
         if len(comms) > 0:
-            return max(comms, key=lambda x: x.date)
+            return max(comms, key=lambda x: x.datetime)
         else:
             return None
 
@@ -394,7 +394,7 @@ class ReviewAgencyTask(Task):
                                 Case(
                                     When(
                                         communications__response=True,
-                                        then='communications__date'
+                                        then='communications__datetime'
                                     )
                                 )
                             ),
@@ -463,14 +463,14 @@ class ReviewAgencyTask(Task):
         foias = list(
             self.agency.foiarequest_set.get_open().filter(
                 email=None, fax=None
-            ).select_related('jurisdiction').annotate(
+            ).select_related('agency__jurisdiction').annotate(
                 latest_response=ExtractDay(
                     Cast(
                         Now() - Max(
                             Case(
                                 When(
                                     communications__response=True,
-                                    then='communications__date'
+                                    then='communications__datetime'
                                 )
                             )
                         ),
@@ -555,7 +555,7 @@ class ReviewAgencyTask(Task):
         """Returns the latest response from the agency"""
         return (
             self.agency.foiarequest_set.aggregate(
-                max_date=Max('communications__date')
+                max_date=Max('communications__datetime')
             )['max_date']
         )
 
@@ -673,22 +673,37 @@ class NewAgencyTask(Task):
 
     def approve(self):
         """Approves agency, resends pending requests to it"""
-        self.agency.status = 'approved'
-        self.agency.save()
-        # resubmit each foia associated to this agency
-        for foia in self.agency.foiarequest_set.exclude(status='started'):
-            if foia.communications.exists():
-                foia.submit(clear=True)
+        self._resolve_agency()
 
     def reject(self, replacement_agency):
         """Resends pending requests to replacement agency"""
-        self.agency.status = 'rejected'
+        self._resolve_agency(replacement_agency)
+
+    def _resolve_agency(self, replacement_agency=None):
+        """Approves or rejects an agency and re-submits the pending requests"""
+        if replacement_agency:
+            self.agency.status = 'rejected'
+            proxy_info = replacement_agency.get_proxy_info()
+        else:
+            self.agency.status = 'approved'
+            proxy_info = self.agency.get_proxy_info()
         self.agency.save()
         for foia in self.agency.foiarequest_set.all():
             # first switch foia to use replacement agency
-            foia.agency = replacement_agency
-            foia.save(comment='new agency task')
-            if foia.communications.exists() and foia.status != 'started':
+            if replacement_agency:
+                foia.agency = replacement_agency
+                foia.save(comment='new agency task')
+            if foia.communications.exists():
+                # regenerate communication text in case jurisdiction changed
+                comm = foia.communications.first()
+                comm.communication = initial_communication_template(
+                    [foia.agency],
+                    comm.from_user.get_full_name(),
+                    foia.composer.requested_docs,
+                    edited_boilerplate=foia.composer.edited_boilerplate,
+                    proxy=proxy_info['proxy'],
+                )
+                comm.save()
                 foia.submit(clear=True)
 
     def spam(self):
@@ -698,9 +713,7 @@ class NewAgencyTask(Task):
         if self.user.is_authenticated:
             self.user.is_active = False
             self.user.save()
-        # reset all foia's to drafts - don't want them marked as processing,
-        # but safer then deleting them
-        self.agency.foiarequest_set.update(status='started')
+        self.agency.foiarequest_set.all().delete()
 
 
 class ResponseTask(Task):
@@ -724,6 +737,7 @@ class ResponseTask(Task):
 
     def set_status(self, status):
         """Forward to form logic, for use in classify_status task"""
+        from muckrock.task.forms import ResponseTaskForm
         form = ResponseTaskForm()
         form.set_status(status, set_foia=True, comms=[self.communication])
 
@@ -759,9 +773,11 @@ class CrowdfundTask(Task):
 
 
 class MultiRequestTask(Task):
-    """Created when a multirequest is created and needs approval."""
+    """Created when a composer with multiple agencies is created and needs
+    approval.
+    """
     type = 'MultiRequestTask'
-    multirequest = models.ForeignKey('foia.FOIAMultiRequest')
+    composer = models.ForeignKey('foia.FOIAComposer')
 
     objects = MultiRequestTaskQuerySet.as_manager()
 
@@ -772,83 +788,55 @@ class MultiRequestTask(Task):
         return reverse('multirequest-task', kwargs={'pk': self.pk})
 
     def submit(self, agency_list):
-        """Submit the multirequest"""
-        from muckrock.foia.tasks import submit_multi_request
+        """Submit the composer"""
+        # pylint: disable=not-callable
         return_requests = 0
-        for agency in self.multirequest.agencies.all():
+        for agency in self.composer.agencies.all():
             if str(agency.pk) not in agency_list:
-                self.multirequest.agencies.remove(agency)
+                self.composer.agencies.remove(agency)
+                self.composer.foias.filter(agency=agency).delete()
                 return_requests += 1
-        self.multirequest.save()
         self._return_requests(return_requests)
-        submit_multi_request.apply_async(args=(self.multirequest.pk,))
+        self.composer.approved()
 
     def reject(self):
-        """Reject the multirequest and return the user their requests"""
-        self._return_requests(self.multirequest.agencies.count())
-        self.multirequest.status = 'started'
-        self.multirequest.save()
+        """Reject the composer and return the user their requests"""
+        self._return_requests(self.composer.agencies.count())
+        self.composer.status = 'started'
+        self.composer.save()
 
     def _return_requests(self, num_requests):
         """Return some number of requests to the user"""
         return_amts = self._calc_return_requests(num_requests)
-        self._do_return_requests(return_amts)
+        self.composer.return_requests(return_amts)
 
     def _calc_return_requests(self, num_requests):
         """Determine how many of each type of request to return"""
-        num_reg = self.multirequest.num_reg_requests
-        num_monthly = self.multirequest.num_monthly_requests
-        num_org = self.multirequest.num_org_requests
-        if num_requests > (num_reg + num_monthly + num_org):
-            # if the number of requests to return is greater than the num of
-            # requests logged on the multirequest, just compensate with regular
-            # requests - this should only happen for returns on requests created
-            # before multi's started tracking where the requests came from
-            return {
-                'reg': num_requests - num_monthly - num_org,
-                'monthly': num_monthly,
-                'org': num_org,
-            }
-        elif num_requests > (num_reg + num_monthly):
-            return {
-                'reg': num_reg,
-                'monthly': num_monthly,
-                'org': num_requests - num_reg - num_monthly,
-            }
-        elif num_requests > num_reg:
-            return {
-                'reg': num_reg,
-                'monthly': num_requests - num_reg,
-                'org': 0,
-            }
-        else:
-            return {
-                'reg': num_requests,
-                'monthly': 0,
-                'org': 0,
-            }
-
-    def _do_return_requests(self, return_amts):
-        """Update request count on the profile and multirequest given the amounts"""
-        # remove returned requests from the multirequest
-        # use max to ensure all numbers are positive
-        self.multirequest.num_reg_requests -= max(return_amts['reg'], 0)
-        self.multirequest.num_monthly_requests -= max(return_amts['monthly'], 0)
-        self.multirequest.num_org_requests -= max(return_amts['org'], 0)
-        self.multirequest.save()
-
-        # add the return requests to the user's profile
-        profile = self.multirequest.user.profile
-        profile.num_requests += return_amts['reg']
-        profile.get_monthly_requests()
-        profile.monthly_requests += return_amts['monthly']
-        if profile.organization:
-            profile.organization.get_requests()
-            profile.organization.num_requests += return_amts['org']
-            profile.organization.save()
-        else:
-            profile.monthly_requests += return_amts['org']
-        profile.save()
+        used = [
+            self.composer.num_reg_requests,
+            self.composer.num_monthly_requests,
+            self.composer.num_org_requests,
+        ]
+        ret = []
+        while num_requests:
+            try:
+                num_used = used.pop(0)
+            except IndexError:
+                ret.append(num_requests)
+                break
+            else:
+                num_ret = min(num_used, num_requests)
+                num_requests -= num_ret
+                ret.append(num_ret)
+        ret_dict = dict(
+            izip_longest(
+                ['regular', 'monthly', 'org', 'extra'],
+                ret,
+                fillvalue=0,
+            )
+        )
+        ret_dict['regular'] += ret_dict.pop('extra')
+        return ret_dict
 
 
 class NewExemptionTask(Task):

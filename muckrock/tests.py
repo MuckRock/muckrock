@@ -91,18 +91,6 @@ def get_404(client, url):
 
 class TestFunctional(TestCase):
     """Functional tests for top level"""
-    fixtures = [
-        'holidays.json',
-        'jurisdictions.json',
-        'agency_types.json',
-        'test_agencies.json',
-        'test_users.json',
-        'test_profiles.json',
-        'test_foiarequests.json',
-        'test_foiacommunications.json',
-        'test_foiafiles.json',
-        'test_news.json',
-    ]
 
     # tests for base level views
     def test_views(self):
@@ -126,6 +114,7 @@ class TestFunctional(TestCase):
 
     def test_api_views(self):
         """Test API views"""
+        UserFactory(username='super', password='abc', is_staff=True)
         self.client.login(username='super', password='abc')
         api_objs = [
             'jurisdiction',
@@ -174,9 +163,9 @@ class TestNewsletterSignupView(TestCase):
         self.url = reverse('newsletter')
 
     def test_get_view(self):
-        """Visiting the page should present a signup form."""
+        """GET is not allowed - POST only"""
         response = http_get_response(self.url, self.view)
-        eq_(response.status_code, 200)
+        eq_(response.status_code, 405)
 
     @patch('muckrock.views.mailchimp_subscribe')
     def test_post_view(self, mock_subscribe):

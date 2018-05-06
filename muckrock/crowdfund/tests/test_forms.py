@@ -25,12 +25,6 @@ eq_ = nose.tools.eq_
 class TestCrowdfundForm(TestCase):
     """Tests the form used to create a crowdfund campaign."""
 
-    fixtures = [
-        'holidays.json', 'jurisdictions.json', 'agency_types.json',
-        'test_users.json', 'test_agencies.json', 'test_profiles.json',
-        'test_foiarequests.json', 'test_foiacommunications.json'
-    ]
-
     def setUp(self):
         self.form = CrowdfundForm()
         foia = Mock(FOIARequest)

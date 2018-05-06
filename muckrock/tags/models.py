@@ -19,7 +19,12 @@ from taggit.utils import _parse_tags
 
 def parse_tags(tagstring):
     """Normalize tags after parsing"""
-    return [normalize(t) for t in _parse_tags(tagstring)]
+    if not tagstring:
+        return []
+    elif ',' not in tagstring and '"' not in tagstring:
+        return [normalize(tagstring)]
+    else:
+        return [normalize(t) for t in _parse_tags(tagstring)]
 
 
 def normalize(name):

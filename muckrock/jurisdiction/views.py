@@ -124,7 +124,7 @@ def collect_stats(obj, context):
     )
     context.update({'num_%s' % s: c for s, c in status_counts})
     context['num_overdue'] = requests.get_overdue().count()
-    context['num_submitted'] = requests.get_submitted().count()
+    context['num_submitted'] = requests.count()
 
 
 def detail(request, fed_slug, state_slug, local_slug):
@@ -157,7 +157,7 @@ def detail(request, fed_slug, state_slug, local_slug):
     foia_requests = jurisdiction.get_requests()
     foia_requests = (
         foia_requests.get_viewable(request.user).get_done()
-        .order_by('-date_done').select_related_view()
+        .order_by('-datetime_done').select_related_view()
         .get_public_file_count(limit=10)[:10]
     )
 
@@ -170,17 +170,23 @@ def detail(request, fed_slug, state_slug, local_slug):
         agencies = jurisdiction.agencies
     agencies = (
         agencies.get_approved().only('pk', 'slug', 'name', 'jurisdiction')
-        .annotate(foia_count=Count('foiarequest', distinct=True))
-        .annotate(pages=Sum('foiarequest__communications__files__pages'))
+        .annotate(foia_count=Count('foiarequest_set', distinct=True))
+        .annotate(pages=Sum('foiarequest_set__communications__files__pages'))
         .order_by('-foia_count')[:10]
     )
 
-    _children = Jurisdiction.objects.filter(parent=jurisdiction
-                                            ).select_related('parent__parent')
+    _children = (
+        Jurisdiction.objects.filter(parent=jurisdiction)
+        .select_related('parent__parent')
+    )
     _top_children = (
-        _children.annotate(foia_count=Count('foiarequest', distinct=True))
-        .annotate(pages=Sum('foiarequest__communications__files__pages'))
-        .order_by('-foia_count')[:10]
+        _children.annotate(
+            foia_count=Count('agencies__foiarequest_set', distinct=True)
+        ).annotate(
+            pages=Sum(
+                'agencies__foiarequest_set__communications__files__pages'
+            )
+        ).order_by('-foia_count')[:10]
     )
 
     if request.method == 'POST':

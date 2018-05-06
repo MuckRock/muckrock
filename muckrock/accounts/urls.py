@@ -81,16 +81,15 @@ urlpatterns = [
         views.RegistrationCompletionView.as_view(),
         name='accounts-complete-registration'
     ),
-    url(r'^profile/$', login_required(views.profile), name='acct-my-profile'),
     url(
-        r'^profile/(?P<username>[\w\-.@ ]+)/$',
-        views.profile,
-        name='acct-profile'
+        r'^profile/$',
+        login_required(views.ProfileView.as_view()),
+        name='acct-my-profile'
     ),
     url(
-        r'^profile/(?P<username>[\w\-.@ ]+)/buy_requests/$',
-        views.buy_requests,
-        name='acct-buy-requests'
+        r'^profile/(?P<username>[\w\-.@ ]+)/$',
+        login_required(views.ProfileView.as_view()),
+        name='acct-profile'
     ),
     url(
         r'^notifications/$',

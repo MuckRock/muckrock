@@ -322,17 +322,6 @@ MONTHLY_REQUESTS = {
     'robot': 0,
 }
 
-BUNDLED_REQUESTS = {
-    'admin': 5,
-    'basic': 4,
-    'beta': 4,
-    'pro': 5,
-    'proxy': 5,
-    'org': 5,
-    'robot': 0,
-    'agency': 0,
-}
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
@@ -684,3 +673,5 @@ CONSTANCE_CONFIG_FIELDSETS = {
 VIEW_ID = os.environ.get('VIEW_ID', '')
 
 HIJACK_AUTHORIZE_STAFF = True
+
+MULTI_REVIEW_AMOUNT = 2

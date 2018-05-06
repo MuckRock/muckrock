@@ -4,251 +4,67 @@ FOIA forms for composing requests
 
 # Django
 from django import forms
-from django.contrib import messages
-from django.contrib.auth import authenticate, login
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
-from django.utils.text import slugify
 
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
 from autocomplete_light.contrib.taggit_field import TaggitField
 
 # MuckRock
-from muckrock.accounts.utils import mailchimp_subscribe, miniregister
+from muckrock.accounts.forms import BuyRequestForm
 from muckrock.agency.models import Agency
-from muckrock.foia.models import FOIAMultiRequest, FOIARequest
+from muckrock.foia.fields import ComposerAgencyField
+from muckrock.foia.forms.comms import ContactInfoForm
+from muckrock.foia.models import FOIAComposer
 from muckrock.forms import TaggitWidget
-from muckrock.jurisdiction.models import Jurisdiction
 
 
-class RequestForm(forms.Form):
-    """This form creates new, single MuckRock requests"""
-
-    JURISDICTION_CHOICES = [('f', 'Federal'), ('s', 'State'), ('l', 'Local')]
+class BaseComposerForm(forms.ModelForm):
+    """This form creates and updates FOIA composers"""
 
     title = forms.CharField(
-        widget=forms.TextInput(attrs={
-            'placeholder': 'Add a subject'
-        }),
+        widget=forms.TextInput(
+            attrs={
+                'placeholder': 'Add a title',
+                'class': 'submit-required',
+            }
+        ),
         max_length=255,
-    )
-    document_placeholder = (
-        'Write one sentence describing what you\'re looking for. '
-        'The more specific you can be, the better.'
-    )
-    document = forms.CharField(
-        widget=forms.Textarea(attrs={
-            'placeholder': document_placeholder
-        })
-    )
-    jurisdiction = forms.ChoiceField(
-        choices=JURISDICTION_CHOICES, widget=forms.RadioSelect
-    )
-    state = autocomplete_light.ModelChoiceField(
-        'StateAutocomplete',
-        queryset=Jurisdiction.objects.filter(level='s', hidden=False),
-        required=False
-    )
-    local = autocomplete_light.ModelChoiceField(
-        'JurisdictionLocalAutocomplete',
-        queryset=Jurisdiction.objects.filter(level='l', hidden=False),
-        required=False
-    )
-    agency = autocomplete_light.ModelChoiceField(
-        'AgencySimpleAgencyAutocomplete',
-        queryset=Agency.objects.get_approved(),
-    )
-    full_name = forms.CharField(label='Full Name or Handle (Public)')
-    email = forms.EmailField(max_length=75)
-    newsletter = forms.BooleanField(
-        initial=True,
         required=False,
-        label='Get MuckRock\'s weekly newsletter with '
-        'FOIA news, tips, and more',
+        help_text='i.e., "John Doe Arrest Report" or "2017 Agency Leadership '
+        'Calendars". Agencies may see this on emailed requests.',
     )
-
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
-        super(RequestForm, self).__init__(*args, **kwargs)
-        if self.request and self.request.user.is_authenticated:
-            del self.fields['full_name']
-            del self.fields['email']
-            del self.fields['newsletter']
-        self.jurisdiction = None
-
-    def full_clean(self):
-        """Remove required from agency"""
-        # We want "required" attribute on the field, but we might take the text value
-        # instead of the drop down value
-        self.fields['agency'].required = False
-        super(RequestForm, self).full_clean()
-
-    def clean(self):
-        """Ensure the jurisdiction and agency were set correctly"""
-        self.jurisdiction = self.get_jurisdiction()
-        if self.jurisdiction:
-            self.cleaned_data['agency'] = self.get_agency()
-        return self.cleaned_data
-
-    def clean_email(self):
-        """Do a case insensitive uniqueness check"""
-        email = self.cleaned_data['email']
-        if User.objects.filter(email__iexact=email).exists():
-            raise forms.ValidationError(
-                'User with this email already exists. Please login first.'
-            )
-        return email
-
-    def get_jurisdiction(self):
-        """Get the jurisdiction from the correct field"""
-        jurisdiction = self.cleaned_data.get('jurisdiction')
-        state = self.cleaned_data.get('state')
-        local = self.cleaned_data.get('local')
-        if jurisdiction == 'f':
-            return Jurisdiction.objects.filter(level='f').first()
-        elif jurisdiction == 's' and not state:
-            self.add_error('state', 'No state was selected')
-            return None
-        elif jurisdiction == 's' and state:
-            return state
-        elif jurisdiction == 'l' and not local:
-            self.add_error('local', 'No locality was selected')
-            return None
-        elif jurisdiction == 'l' and local:
-            return local
-
-    def get_agency(self):
-        """Get the agency and create a new one if necessary"""
-        agency = self.cleaned_data.get('agency')
-        agency_autocomplete = self.request.POST.get('agency-autocomplete', '')
-        agency_autocomplete = agency_autocomplete.strip()
-        if agency is None and agency_autocomplete:
-            # See if the passed in agency name matches a valid known agency
-            agency = (
-                Agency.objects.get_approved().filter(
-                    name__iexact=agency_autocomplete,
-                    jurisdiction=self.jurisdiction,
-                ).first()
-            )
-            # if not, create a new one
-            if agency is None and len(agency_autocomplete) < 256:
-                agency = Agency.objects.create_new(
-                    agency_autocomplete,
-                    self.jurisdiction,
-                    self.request.user,
-                )
-            elif agency is None and len(agency_autocomplete) >= 256:
-                self.add_error(
-                    'agency', 'Agency name must be less than 256 characters'
-                )
-                return None
-        elif agency is None:
-            self.add_error('agency', 'Please select an agency')
-            return None
-        elif agency.exempt:
-            self.add_error(
-                'agency',
-                'The agency you selected is exempt from '
-                'public records requests',
-            )
-            return None
-        return agency
-
-    def make_user(self, data):
-        """Miniregister a new user if necessary"""
-        user, password = miniregister(data['full_name'], data['email'])
-        user = authenticate(
-            username=user.username,
-            password=password,
-        )
-        login(self.request, user)
-        if data.get('newsletter'):
-            mailchimp_subscribe(self.request, user.email)
-
-    def process(self, parent):
-        """Create the new request"""
-        if self.request.user.is_anonymous():
-            self.make_user(self.cleaned_data)
-        agency = self.cleaned_data['agency']
-        proxy_info = agency.get_proxy_info()
-        if 'warning' in proxy_info:
-            messages.warning(self.request, proxy_info['warning'])
-        foia = FOIARequest.objects.create(
-            user=self.request.user,
-            status='started',
-            title=self.cleaned_data['title'],
-            jurisdiction=self.jurisdiction,
-            slug=slugify(self.cleaned_data['title']) or 'untitled',
-            agency=agency,
-            requested_docs=self.cleaned_data['document'],
-            description=self.cleaned_data['document'],
-            parent=parent,
-            missing_proxy=proxy_info['missing_proxy'],
-        )
-        foia.create_initial_communication(
-            proxy_info.get('from_user', self.request.user),
-            proxy_info['proxy'],
-        )
-        return foia
-
-
-class RequestDraftForm(forms.Form):
-    """Presents limited information from created single request for editing"""
-    title = forms.CharField(
-        widget=forms.TextInput(attrs={
-            'placeholder': 'Pick a Title'
-        }),
-        max_length=255,
+    requested_docs = forms.CharField(
+        widget=forms.Textarea(
+            attrs={
+                'placeholder':
+                    'Write a short description of the documents you are '
+                    'looking for. The more specific you can be, the better.',
+                'class': 'submit-required',
+            }
+        ),
+        required=False,
     )
-    request = forms.CharField(widget=forms.Textarea())
+    agencies = ComposerAgencyField(
+        queryset=Agency.objects.get_approved(),
+        widget=autocomplete_light.
+        MultipleChoiceWidget('AgencyComposerAutocomplete'),
+        required=False,
+        help_text='i.e., Police Department, Austin, TX or Office of the '
+        'Governor, Arkansas'
+    )
+    edited_boilerplate = forms.BooleanField(
+        required=False,
+        label='Edit Template Language',
+    )
     embargo = forms.BooleanField(
         required=False,
         help_text='Embargoing a request keeps it completely private from '
         'other users until the embargo date you set. '
         'You may change this whenever you want.'
     )
-
-
-class MultiRequestForm(forms.ModelForm):
-    """A form for a multi-request"""
-
-    requested_docs = forms.CharField(label='Request', widget=forms.Textarea())
-    agencies = forms.ModelMultipleChoiceField(
-        queryset=Agency.objects.get_approved(),
-        required=True,
-        widget=autocomplete_light.
-        MultipleChoiceWidget('AgencyMultiRequestAutocomplete'),
-    )
-    parent = forms.ModelChoiceField(
-        queryset=FOIAMultiRequest.objects.none(),
-        required=False,
-        widget=forms.HiddenInput(),
-    )
-
-    class Meta:
-        model = FOIAMultiRequest
-        fields = ['title', 'requested_docs', 'agencies', 'parent']
-        widgets = {
-            'title': forms.TextInput(attrs={
-                'placeholder': 'Pick a Title'
-            }),
-        }
-
-    def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user')
-        super(MultiRequestForm, self).__init__(*args, **kwargs)
-        self.fields['parent'].queryset = FOIAMultiRequest.objects.filter(
-            user=user
-        )
-
-
-class MultiRequestDraftForm(forms.ModelForm):
-    """Presents info from created multi-request for editing"""
-    title = forms.CharField(
-        widget=forms.TextInput(attrs={
-            'placeholder': 'Pick a Title'
-        })
-    )
+    permanent_embargo = forms.BooleanField(required=False)
     tags = TaggitField(
         widget=TaggitWidget(
             'TagAutocomplete',
@@ -260,14 +76,161 @@ class MultiRequestDraftForm(forms.ModelForm):
         help_text='Separate tags with commas.',
         required=False,
     )
-    requested_docs = forms.CharField(label='Request', widget=forms.Textarea())
-    embargo = forms.BooleanField(
+    parent = forms.ModelChoiceField(
+        queryset=FOIAComposer.objects.none(),
         required=False,
-        help_text='Embargoing a request keeps it completely private from '
-        'other users until the embargo date you set.  '
-        'You may change this whenever you want.'
+        widget=forms.HiddenInput(),
+    )
+    action = forms.ChoiceField(
+        choices=[
+            ('save', 'Save'),
+            ('submit', 'Submit'),
+            ('delete', 'Delete'),
+        ],
+        widget=forms.HiddenInput(),
+    )
+
+    register_full_name = forms.CharField(
+        label='Full Name or Handle (Public)',
+        required=False,
+    )
+    register_email = forms.EmailField(label='Email', required=False)
+    register_newsletter = forms.BooleanField(
+        initial=True,
+        required=False,
+        label='Get MuckRock\'s weekly newsletter with '
+        'FOIA news, tips, and more',
+    )
+    register_pro = forms.BooleanField(
+        initial=False,
+        required=False,
+        label='Go Pro',
+        help_text='Get 20 requests for $40 per month, as well as the ability to '
+        'keep your requests private',
+    )
+
+    login_username = forms.CharField(label='Username', required=False)
+    login_password = forms.CharField(
+        label='Password', widget=forms.PasswordInput(), required=False
     )
 
     class Meta:
-        model = FOIAMultiRequest
-        fields = ['title', 'tags', 'requested_docs', 'embargo']
+        model = FOIAComposer
+        fields = [
+            'title',
+            'agencies',
+            'requested_docs',
+            'edited_boilerplate',
+            'embargo',
+            'permanent_embargo',
+            'tags',
+            'parent',
+            'register_full_name',
+            'register_email',
+            'register_newsletter',
+        ]
+
+    def __init__(self, *args, **kwargs):
+        if not hasattr(self, 'user'):
+            self.user = kwargs.pop('user')
+        self.request = kwargs.pop('request')
+        super(BaseComposerForm, self).__init__(*args, **kwargs)
+        if self.user.is_authenticated:
+            del self.fields['register_full_name']
+            del self.fields['register_email']
+            del self.fields['register_newsletter']
+            del self.fields['login_username']
+            del self.fields['login_password']
+        if not self.user.has_perm('foia.embargo_foiarequest'):
+            del self.fields['embargo']
+        if not self.user.has_perm('foia.embargo_perm_foiarequest'):
+            del self.fields['permanent_embargo']
+        self.fields['parent'
+                    ].queryset = (FOIAComposer.objects.get_viewable(self.user))
+        self.fields['agencies'].user = self.user
+        self.fields['agencies'].queryset = (
+            Agency.objects.get_approved_and_pending(self.user)
+        )
+
+    def clean_register_email(self):
+        """Do a case insensitive uniqueness check"""
+        email = self.cleaned_data['register_email']
+        if email and User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError(
+                'User with this email already exists. Please login first.'
+            )
+        return email
+
+    def clean_title(self):
+        """Make sure we have a non-blank(ish) title"""
+        title = self.cleaned_data['title'].strip()
+        if title:
+            return title
+        else:
+            return 'Untitled'
+
+    def clean_agencies(self):
+        """Remove exempt agencies"""
+        return [a for a in self.cleaned_data['agencies'] if not a.exempt]
+
+    def clean(self):
+        """Check cross field dependencies"""
+        cleaned_data = super(BaseComposerForm, self).clean()
+        if cleaned_data.get('action') == 'submit':
+            for field in ['title', 'requested_docs', 'agencies']:
+                if not self.cleaned_data.get(field):
+                    self.add_error(
+                        field,
+                        'This field is required when submitting',
+                    )
+        if cleaned_data.get('permanent_embargo'):
+            cleaned_data['embargo'] = True
+        if not self.user.is_authenticated:
+            register = (
+                cleaned_data.get('register_full_name')
+                and cleaned_data.get('register_email')
+            )
+            login = (
+                cleaned_data.get('login_username')
+                and cleaned_data.get('login_password')
+            )
+            if not register and not login:
+                raise forms.ValidationError(
+                    'You must supply either registration information or '
+                    'login information'
+                )
+            if login:
+                form = AuthenticationForm(
+                    data={
+                        'username': cleaned_data.get('login_username'),
+                        'password': cleaned_data.get('login_password'),
+                    }
+                )
+                form.full_clean()
+                self.user = form.get_user()
+        return cleaned_data
+
+
+class ComposerForm(ContactInfoForm, BuyRequestForm, BaseComposerForm):
+    """Composer form, including optional subforms"""
+
+    def __init__(self, *args, **kwargs):
+        super(ComposerForm, self).__init__(*args, **kwargs)
+        # Make sub-form fields non-required
+        self.fields['stripe_token'].required = False
+        self.fields['stripe_email'].required = False
+        self.fields['num_requests'].required = False
+
+    def clean(self):
+        """Buy request fields are only required when buying requests"""
+        cleaned_data = super(ComposerForm, self).clean()
+        action = cleaned_data.get('action')
+        num_requests = cleaned_data.get('num_requests', 0)
+        pro = cleaned_data.get('register_pro')
+        if action == 'submit' and (num_requests > 0 or pro):
+            for field in ['stripe_token', 'stripe_email']:
+                if not self.cleaned_data.get(field):
+                    self.add_error(
+                        field,
+                        'This field is required when making a purchase',
+                    )

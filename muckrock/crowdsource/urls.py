@@ -26,6 +26,11 @@ urlpatterns = [
         name='crowdsource-assignment',
     ),
     url(
+        r'^(?P<slug>[-\w]+)-(?P<idx>\d+)/embed/$',
+        views.CrowdsourceEmbededFormView.as_view(),
+        name='crowdsource-embed',
+    ),
+    url(
         r'^$',
         RedirectView.as_view(url='/assignment/list'),
         name='crowdsource-index',

@@ -25,8 +25,9 @@ class RequestHelper(object):
         """Get the average response time from a submitted to completed request"""
         requests = self.get_requests()
         avg = (
-            requests.aggregate(avg=Avg(F('date_done') - F('date_submitted'))
-                               )['avg']
+            requests.aggregate(
+                avg=Avg(F('datetime_done') - F('composer__datetime_submitted'))
+            )['avg']
         )
         return int(avg.days) if avg is not None else 0
 
@@ -40,8 +41,8 @@ class RequestHelper(object):
     def fee_rate(self):
         """Get the percentage of requests that have a fee."""
         requests = self.get_requests()
-        filed = float(requests.get_submitted().count())
-        fee = float(requests.get_submitted().filter(price__gt=0).count())
+        filed = float(requests.count())
+        fee = float(requests.filter(price__gt=0).count())
         rate = 0
         if filed > 0:
             rate = fee / filed * 100
@@ -50,7 +51,7 @@ class RequestHelper(object):
     def success_rate(self):
         """Get the percentage of requests that are successful."""
         requests = self.get_requests()
-        filed = float(requests.get_submitted().count())
+        filed = float(requests.count())
         completed = float(requests.get_done().count())
         rate = 0
         if filed > 0:
@@ -74,7 +75,6 @@ class Jurisdiction(models.Model, RequestHelper):
     name = models.CharField(max_length=50)
     # slug should be slugify(unicode(self))
     slug = models.SlugField(max_length=55)
-    full_name = models.CharField(max_length=55, blank=True)
     abbrev = models.CharField(max_length=5, blank=True)
     level = models.CharField(max_length=1, choices=levels)
     parent = models.ForeignKey(
@@ -103,12 +103,8 @@ class Jurisdiction(models.Model, RequestHelper):
     holidays = models.ManyToManyField(Holiday, blank=True)
 
     def __unicode__(self):
-        if self.level == 'l' and not self.full_name and self.parent:
-            self.full_name = '%s, %s' % (self.name, self.parent.abbrev)
-            self.save()
-            return self.full_name
-        elif self.level == 'l':
-            return self.full_name
+        if self.level == 'l':
+            return '{}, {}'.format(self.name, self.parent.abbrev)
         else:
             return self.name
 
@@ -209,11 +205,12 @@ class Jurisdiction(models.Model, RequestHelper):
         """State level jurisdictions should return requests from their localities as well."""
         if self.level == 's':
             requests = FOIARequest.objects.filter(
-                Q(jurisdiction=self) | Q(jurisdiction__parent=self)
+                Q(agency__jurisdiction=self)
+                | Q(agency__jurisdiction__parent=self)
             )
         else:
-            requests = FOIARequest.objects.filter(jurisdiction=self)
-        return requests.exclude(status='started')
+            requests = FOIARequest.objects.filter(agency__jurisdiction=self)
+        return requests
 
     class Meta:
         ordering = ['name']
@@ -448,8 +445,9 @@ class Appeal(models.Model):
         """Evaluate the FOIARequest communications to judge whether the appeal is successful."""
         foia = self.communication.foia
         subsequent_comms = (
-            foia.communications.filter(date__gt=self.communication.date)
-            .annotate(appeal__count=Count('appeals'))
+            foia.communications.filter(
+                datetime__gt=self.communication.datetime
+            ).annotate(appeal__count=Count('appeals'))
         )
         successful = False
         successful = successful or subsequent_comms.filter(status='done'
@@ -463,6 +461,6 @@ class Appeal(models.Model):
         """Evaluate the FOIARequest communications to judge whether the appeal is finished."""
         foia = self.communication.foia
         subsequent_comms = foia.communications.filter(
-            date__gt=self.communication.date
+            datetime__gt=self.communication.datetime
         )
         return subsequent_comms.filter(status__in=END_STATUS).exists()

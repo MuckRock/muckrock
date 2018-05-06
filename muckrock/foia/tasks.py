@@ -9,8 +9,7 @@ from django.contrib.auth.models import User
 from django.core.files.storage import default_storage
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
-from django.template.defaultfilters import slugify
-from django.template.loader import get_template, render_to_string
+from django.template.loader import render_to_string
 from django.utils import timezone
 
 # Standard Library
@@ -50,8 +49,8 @@ from muckrock.foia.codes import CODES
 from muckrock.foia.exceptions import SizeError
 from muckrock.foia.models import (
     FOIACommunication,
+    FOIAComposer,
     FOIAFile,
-    FOIAMultiRequest,
     FOIARequest,
 )
 from muckrock.task.models import ResponseTask, ReviewAgencyTask
@@ -198,58 +197,20 @@ def set_document_cloud_pages(doc_pk, **kwargs):
 @task(
     ignore_result=True,
     max_retries=10,
-    name='muckrock.foia.tasks.submit_multi_request'
+    name='muckrock.foia.tasks.submit_composer'
 )
-def submit_multi_request(req_pk, **kwargs):
-    """Submit a multi request to all agencies"""
+def submit_composer(composer_pk, approve, contact_info, **kwargs):
+    """Submit a composer to all agencies"""
     # pylint: disable=unused-argument
-    req = FOIAMultiRequest.objects.get(pk=req_pk)
-
-    # break the agencies into chunks of 50 to not timeout the database
-    agencies = req.agencies.all()
-    agency_chunks = [
-        agencies[i * 50:(i + 1) * 50]
-        for i in xrange(agencies.count() / 50 + 1)
-    ]
-
-    for agency_chunk in agency_chunks:
-        for agency in agency_chunk:
-            # make a copy of the foia (and its communication) for each agency
-            title = '%s (%s)' % (req.title, agency.name)
-            template = get_template('text/foia/request.txt')
-            context = {
-                'document_request': req.requested_docs,
-                'jurisdiction': agency.jurisdiction,
-                'user_name': req.user.get_full_name(),
-            }
-            foia_request = template.render(context).strip()
-
-            new_foia = FOIARequest.objects.create(
-                user=req.user,
-                status='started',
-                title=title,
-                slug=slugify(title),
-                jurisdiction=agency.jurisdiction,
-                agency=agency,
-                embargo=req.embargo,
-                requested_docs=req.requested_docs,
-                description=req.requested_docs,
-                multirequest=req,
-            )
-            new_foia.tags.set(*req.tags.all())
-
-            FOIACommunication.objects.create(
-                foia=new_foia,
-                from_user=new_foia.user,
-                to_user=new_foia.get_to_user(),
-                date=timezone.now(),
-                response=False,
-                communication=foia_request,
-            )
-
-            new_foia.submit()
-    req.status = 'filed'
-    req.save()
+    composer = FOIAComposer.objects.get(pk=composer_pk)
+    # the delayed submit is processing,
+    # clear the delayed id, it is too late to cancel
+    composer.delayed_id = ''
+    composer.save()
+    if approve:
+        composer.approved(contact_info)
+    else:
+        composer.multirequesttask_set.create()
 
 
 @task(
@@ -611,7 +572,7 @@ def autoimport():
         if code not in CODES:
             raise ValueError('ERROR: %s uses an unknown code' % name)
         foia_pks = [pk[2:] for pk in m_name.group('docs').split()]
-        file_date = datetime(
+        file_datetime = datetime(
             int(m_name.group('year')) + 2000, int(m_name.group('month')),
             int(m_name.group('day'))
         )
@@ -627,7 +588,8 @@ def autoimport():
             est_date = None
 
         return (
-            foia_pks, file_date, code, title, status, body, arg, id_, est_date
+            foia_pks, file_datetime, code, title, status, body, arg, id_,
+            est_date
         )
 
     def import_key(key, storage_bucket, comm, log, title=None):
@@ -642,7 +604,7 @@ def autoimport():
         foia_file = FOIAFile(
             comm=comm,
             title=title,
-            date=comm.date,
+            datetime=comm.datetime,
             source=comm.get_source(),
             access=access,
         )
@@ -707,8 +669,8 @@ def autoimport():
 
             try:
                 (
-                    foia_pks, file_date, code, title, status, body, arg, id_,
-                    est_date
+                    foia_pks, file_datetime, code, title, status, body, arg,
+                    id_, est_date
                 ) = parse_name(file_name)
             except ValueError as exc:
                 s3_copy(bucket, key, 'review/%s' % file_name)
@@ -726,20 +688,20 @@ def autoimport():
                         from_user=from_user,
                         to_user=foia.user,
                         response=True,
-                        date=file_date,
+                        datetime=file_datetime,
                         communication=body,
                         status=status,
                     )
                     MailCommunication.objects.create(
                         communication=comm,
-                        sent_datetime=file_date,
+                        sent_datetime=file_datetime,
                     )
 
                     foia.status = status or foia.status
                     if foia.status in [
                         'partial', 'done', 'rejected', 'no_docs'
                     ]:
-                        foia.date_done = file_date.date()
+                        foia.datetime_done = file_datetime
                     if code == 'FEE' and arg:
                         foia.price = Decimal(arg)
                     if id_:

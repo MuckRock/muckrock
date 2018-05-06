@@ -1,11 +1,26 @@
 {% if user.is_authenticated %}
   <section class="actions">
-    {% if foia.is_payable %}
+    {% if can_revoke %}
+      <div class="prompt">
+        <p>
+          Thank you for submitting this request.  Please review it now.
+          You will have until {{ revoke_deadline|time:"g:i a" }}
+          ({{ revoke_deadline|timeuntil }} from now) in order to make any changes before
+          it is sent to the agency.
+        </p>
+        <footer class="button-group">
+          <a class="primary button" href="{% url "foia-draft" idx=foia.composer.pk %}">
+            Edit
+          </a>
+        </footer>
+      </div>
+    {% endif %}
+    {% if user_can_pay %}
       <div class="payment prompt">
         <p>This request requires a payment{% if foia.price %} of ${{foia.price|floatformat:2}}{% endif %}.</p>
         <footer class="button-group">
           <a class="success button" href="#pay">Pay</a>
-          {% if not foia.has_crowdfund %}
+          {% if not foia.crowdfund %}
             <a class="success button" href="#crowdfund">Crowdfund</a>
           {% endif %}
           {% if request.user.is_staff %}

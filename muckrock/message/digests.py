@@ -289,7 +289,7 @@ class StaffDigest(Digest):
         """Returns the trailing cost for communications over a period"""
         period = [current - relativedelta(days=duration), current]
         filters = Q(
-            communication__date__range=period,
+            communication__datetime__range=period,
             communication__response=False,
         )
         trailing = {
@@ -307,7 +307,7 @@ class StaffDigest(Digest):
     def get_comms(self, start, end):
         """Returns communication data over a date range"""
         filters = Q(
-            communication__date__range=[start, end],
+            communication__datetime__range=[start, end],
             communication__response=False,
         )
         delivered_by = {
@@ -326,10 +326,10 @@ class StaffDigest(Digest):
             'mail': delivered_by['mail'] * cost_per['mail'],
         }
         received = FOIACommunication.objects.filter(
-            date__range=[start, end], response=True
+            datetime__range=[start, end], response=True
         )
         sent = FOIACommunication.objects.filter(
-            date__range=[start, end], response=False
+            datetime__range=[start, end], response=False
         )
         return {
             'sent': sent.count(),

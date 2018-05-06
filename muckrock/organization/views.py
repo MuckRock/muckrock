@@ -337,23 +337,25 @@ class OrganizationDetailView(DetailView):
             context['is_staff'] = user.is_staff
             context['is_owner'] = organization.is_owned_by(user)
             context['is_member'] = user.profile.is_member_of(organization)
-        requests = FOIARequest.objects.organization(organization
-                                                    ).get_viewable(user)
+        requests = (
+            FOIARequest.objects.organization(organization).get_viewable(user)
+        )
         context['requests'] = {
             'count': requests.count(),
-            'filed': requests.order_by('-date_submitted')[:10],
-            'completed': requests.get_done().order_by('-date_done')[:10]
+            'filed': requests.order_by('-composer__datetime_submitted')[:10],
+            'completed': requests.get_done().order_by('-datetime_done')[:10]
         }
 
         context['members'] = organization.members.select_related('user')
+        num_requests = organization.get_requests()
         context['available'] = {
-            'requests': organization.num_requests,
+            'requests': num_requests,
             'seats': organization.max_users - len(context['members'])
         }
         context['progress'] = {}
         if organization.monthly_requests > 0:
             context['progress']['requests'] = (
-                float(organization.num_requests) / organization.monthly_requests
+                float(num_requests) / organization.monthly_requests
             ) * 100
         else:
             context['progress']['requests'] = 0

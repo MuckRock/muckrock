@@ -38,6 +38,7 @@ from rest_framework.permissions import (
 from muckrock.accounts.filters import ProxyFilterSet
 from muckrock.accounts.forms import (
     BillingPreferencesForm,
+    BuyRequestForm,
     EmailSettingsForm,
     OrgPreferencesForm,
     ProfileSettingsForm,
@@ -46,6 +47,7 @@ from muckrock.accounts.forms import (
     RegisterOrganizationForm,
     RegistrationCompletionForm,
 )
+from muckrock.accounts.mixins import BuyRequestsMixin
 from muckrock.accounts.models import (
     ACCT_TYPES,
     Notification,
@@ -55,7 +57,6 @@ from muckrock.accounts.models import (
     Statistics,
 )
 from muckrock.accounts.serializers import StatisticsSerializer, UserSerializer
-from muckrock.accounts.utils import validate_stripe_email
 from muckrock.agency.models import Agency
 from muckrock.communication.models import EmailAddress
 from muckrock.crowdfund.models import RecurringCrowdfundPayment
@@ -64,7 +65,6 @@ from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import (
     email_verify,
     failed_payment,
-    gift,
     send_charge_receipt,
     send_invoice_receipt,
     welcome,
@@ -72,7 +72,6 @@ from muckrock.message.tasks import (
 from muckrock.news.models import Article
 from muckrock.organization.models import Organization
 from muckrock.project.models import Project
-from muckrock.utils import stripe_retry_on_error
 from muckrock.views import MRFilterListView
 
 logger = logging.getLogger(__name__)
@@ -415,70 +414,6 @@ class ProfileSettings(TemplateView):
         return context
 
 
-def buy_requests(request, username=None):
-    """A purchaser buys requests for a recipient. The recipient can even be themselves!"""
-    url_redirect = request.GET.get('next', 'acct-my-profile')
-    bundles = int(request.POST.get('bundles', 1))
-    recipient = get_object_or_404(User, username=username)
-    purchaser = request.user
-    request_price = bundles * 2000
-    if purchaser.is_authenticated():
-        request_count = bundles * purchaser.profile.bundled_requests()
-    else:
-        request_count = bundles * 4
-    try:
-        if request.POST:
-            stripe_token = request.POST.get('stripe_token')
-            stripe_email = request.POST.get('stripe_email')
-            stripe_email = validate_stripe_email(stripe_email)
-            if not stripe_token or not stripe_email:
-                raise KeyError('Missing Stripe payment data.')
-            # take from the purchaser
-            stripe_retry_on_error(
-                stripe.Charge.create,
-                amount=request_price,
-                currency='usd',
-                source=stripe_token,
-                metadata={
-                    'email': stripe_email,
-                    'action': 'request-purchase',
-                },
-                idempotency_key=True,
-            )
-            # and give to the recipient
-            recipient.profile.num_requests += request_count
-            recipient.profile.save()
-            # record the purchase
-            request.session['ga'] = 'request_purchase'
-            msg = 'Purchase successful. '
-            if recipient == purchaser:
-                msg += '%d requests have been added to your account.' % request_count
-            else:
-                msg += '%d requests have been gifted to %s' % (
-                    request_count, recipient.first_name
-                )
-                gift_description = '%d requests' % request_count
-                # notify the recipient with an email
-                gift.delay(recipient, purchaser, gift_description)
-            messages.success(request, msg)
-            logger.info(
-                '%s purchased %d requests', purchaser.username, request_count
-            )
-    except KeyError as exception:
-        msg = 'Payment error: %s' % exception
-        messages.error(request, msg)
-        logger.warn('Payment error: %s', exception, exc_info=sys.exc_info())
-    except stripe.CardError as exception:
-        msg = 'Payment error: %s Your card has not been charged.' % exception
-        messages.error(request, msg)
-        logger.warn('Payment error: %s', exception, exc_info=sys.exc_info())
-    except (stripe.error.InvalidRequestError, stripe.error.APIError) as exc:
-        msg = 'Payment error: Your card has not been charged.'
-        messages.error(request, msg)
-        logger.warn('Payment error: %s', exc, exc_info=sys.exc_info())
-    return redirect(url_redirect)
-
-
 @login_required
 def verify_email(request):
     """Verifies a user's email address"""
@@ -508,65 +443,101 @@ def verify_email(request):
     return redirect(_profile)
 
 
-def profile(request, username=None):
+class ProfileView(BuyRequestsMixin, FormView):
     """View a user's profile"""
-    if username is None:
-        if request.user.is_anonymous():
-            return redirect('acct-login')
+    template_name = 'accounts/profile.html'
+    form_class = BuyRequestForm
+
+    def dispatch(self, request, *args, **kwargs):
+        """Get the user and redirect if neccessary"""
+        # pylint: disable=attribute-defined-outside-init
+        username = kwargs.get('username')
+        if username is None:
+            if request.user.is_anonymous():
+                return redirect('acct-login')
+            else:
+                return redirect('acct-profile', username=request.user.username)
+        self.user = get_object_or_404(User, username=username, is_active=True)
+        return super(ProfileView, self).dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """Check for cancel pro before checking form"""
+        if (
+            request.user.is_staff and request.POST.get('action') == 'cancel-pro'
+        ):
+            self.user.profile.cancel_pro_subscription()
+            messages.success(request, 'Pro account has been cancelled')
+            return redirect('acct-profile', username=self.user.username)
         else:
-            return redirect('acct-profile', username=request.user.username)
-    user = get_object_or_404(User, username=username, is_active=True)
-    if (
-        request.method == "POST" and request.user.is_staff
-        and request.POST.get('action') == 'cancel-pro'
-    ):
-        user.profile.cancel_pro_subscription()
-        messages.success(request, 'Pro account has been cancelled')
-        return redirect('acct-profile', username=username)
-    user_profile = user.profile
-    org = user_profile.organization
-    show_org_link = (
-        org and (
-            not org.private or request.user.is_staff or (
-                request.user.is_authenticated()
-                and request.user.profile.is_member_of(org)
+            return super(ProfileView, self).post(request, *args, **kwargs)
+
+    def get_initial(self):
+        """Set the form label"""
+        if self.user == self.request.user:
+            return {'stripe_label': 'Buy'}
+        else:
+            return {'stripe_label': 'Gift'}
+
+    def get_form_kwargs(self):
+        """Give the form the current user"""
+        kwargs = super(ProfileView, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        """Get data for the profile page"""
+        context_data = super(ProfileView, self).get_context_data(**kwargs)
+        org = self.user.profile.organization
+        show_org_link = (
+            org and (
+                not org.private or self.request.user.is_staff or (
+                    self.request.user.is_authenticated()
+                    and self.request.user.profile.is_member_of(org)
+                )
             )
         )
-    )
-    requests = (
-        FOIARequest.objects.filter(user=user
-                                   ).get_viewable(request.user).select_related(
-                                       'jurisdiction',
-                                       'jurisdiction__parent',
-                                       'jurisdiction__parent__parent',
-                                   )
-    )
-    recent_requests = requests.order_by('-date_submitted')[:5]
-    recent_completed = requests.filter(status='done').order_by('-date_done')[:5]
-    articles = Article.objects.get_published().filter(authors=user)[:5]
-    projects = Project.objects.get_for_contributor(user).get_visible(
-        request.user
-    )[:3]
-    context = {
-        'user_obj': user,
-        'profile': user_profile,
-        'org': org,
-        'show_org_link': show_org_link,
-        'projects': projects,
-        'requests': {
-            'all': requests,
-            'recent': recent_requests,
-            'completed': recent_completed
-        },
-        'articles': articles,
-        'stripe_pk': settings.STRIPE_PUB_KEY,
-        'sidebar_admin_url': reverse('admin:auth_user_change', args=(user.pk,)),
-    }
-    return render(
-        request,
-        'accounts/profile.html',
-        context,
-    )
+        requests = (
+            FOIARequest.objects.filter(composer__user=self.user)
+            .get_viewable(self.request.user)
+            .select_related('agency__jurisdiction__parent__parent')
+        )
+        recent_requests = requests.order_by('-composer__datetime_submitted')[:5]
+        recent_completed = (
+            requests.filter(status='done').order_by('-datetime_done')[:5]
+        )
+        articles = Article.objects.get_published().filter(authors=self.user)[:5]
+        projects = Project.objects.get_for_contributor(self.user).get_visible(
+            self.request.user
+        )[:3]
+        context_data.update({
+            'user_obj':
+                self.user,
+            'profile':
+                self.user.profile,
+            'org':
+                org,
+            'show_org_link':
+                show_org_link,
+            'projects':
+                projects,
+            'requests': {
+                'all': requests,
+                'recent': recent_requests,
+                'completed': recent_completed
+            },
+            'articles':
+                articles,
+            'stripe_pk':
+                settings.STRIPE_PUB_KEY,
+            'sidebar_admin_url':
+                reverse('admin:auth_user_change', args=(self.user.pk,)),
+        })
+        return context_data
+
+    def form_valid(self, form):
+        """Buy requests"""
+        self.buy_requests(form, recipient=self.user)
+        return redirect('acct-profile', username=self.user.username)
 
 
 @csrf_exempt

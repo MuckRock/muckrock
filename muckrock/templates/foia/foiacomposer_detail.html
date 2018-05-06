@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  {{ composer.title }}
+{% endblock %}
+
+{% block content %}
+  <div class="foia detail">
+    <h1>{{composer.title}}</h1>
+
+    {% if can_edit %}
+      <p>
+        <a href="{% url "foia-draft" idx=composer.pk %}" class="primary button">
+          Edit Request
+        </a>
+      </p>
+      <p>
+        Thank you for submitting this request.  Please review it now.
+        You will have until {{ edit_deadline|time:"g:i a" }}
+        ({{ edit_deadline|timeuntil }} from now) in order to make any changes before
+        it is sent to the agency.
+      </p>
+    {% endif %}
+
+    <a href="{% url "foia-create" %}?clone={{ composer.pk }}" class="blue button">
+      Clone
+    </a>
+
+    <section class="requests" id="requests">
+      <h2>{{ foias|length }} Request{{ foias|length|pluralize }}</h2>
+      {% for foia in foias %}
+        {% include 'lib/foia.html' with hide_actions=True %}
+      {% endfor %}
+    </section>
+  </div>
+{% endblock %}

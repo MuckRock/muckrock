@@ -1,0 +1,37 @@
+{% extends 'foia/list.html' %}
+{% load foia_tags %}
+
+{% block list-table-head %}
+  <th data-sort="title">Title</th>
+  <th>Agencies</th>
+  <th width="10%" data-sort="date_created">Created</th>
+{% endblock list-table-head %}
+
+{% block list-table-row %}
+  {% with object as composer %}
+    <td>
+      <a class="bold" href="{{composer.get_absolute_url}}">
+        {{ composer.title }}
+      </a><br>
+      {% if composer.embargo %}
+        <span class="small red badge">Under Embargo</span>
+      {% endif %}
+    </td>
+    <td>{{ composer.agencies.all|join:", " }}</td>
+    <td>{{ composer.datetime_created|date:"m/d/Y" }}</td>
+  {% endwith %}
+{% endblock %}
+
+{% block empty %}
+    <p class="empty">You haven&rsquo;t filed any requests! Get started by <a href="{% url "foia-create" %}">filing a request now!</a></p>
+{% endblock %}
+
+
+{% block list-actions %}
+  <div class="button-group">
+    <a href="{% url 'foia-create' %}" class="blue button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
+      {% include 'lib/component/icon/create-request.svg' %}
+      <span>File a Request</span>
+    </a>
+  </div>
+{% endblock %}

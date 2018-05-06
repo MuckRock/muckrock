@@ -7,16 +7,20 @@ from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.html import linebreaks
+
+# Standard Library
+import re
 
 # Third Party
 import django_filters
-from fuzzywuzzy import fuzz, process
 from rest_framework import viewsets
 
 # MuckRock
 from muckrock.agency.filters import AgencyFilterSet
 from muckrock.agency.models import Agency
 from muckrock.agency.serializers import AgencySerializer
+from muckrock.agency.utils import initial_communication_template
 from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.views import collect_stats
@@ -64,12 +68,10 @@ def detail(request, jurisdiction, jidx, slug, idx):
 
     foia_requests = agency.get_requests()
     foia_requests = (
-        foia_requests.get_viewable(request.user).get_submitted()
+        foia_requests.get_viewable(request.user)
         .filter(agency=agency).select_related(
-            'jurisdiction',
-            'jurisdiction__parent',
-            'jurisdiction__parent__parent',
-        ).order_by('-date_submitted')[:10]
+            'agency__jurisdiction__parent__parent',
+        ).order_by('-composer__datetime_submitted')[:10]
     )
 
     if request.method == 'POST':
@@ -175,33 +177,80 @@ class AgencyViewSet(viewsets.ModelViewSet):
     filter_class = Filter
 
 
-def similar(request):
-    """Return agencies with similar names"""
-    query = request.GET.get('query', '')
-    jurisdiction_id = request.GET.get('jurisdiction')
-    if jurisdiction_id == 'f':
-        jurisdiction = Jurisdiction.objects.filter(level='f').first()
-    elif not jurisdiction_id:
-        jurisdiction = None
-    else:
-        jurisdiction = Jurisdiction.objects.filter(pk=jurisdiction_id).first()
+def boilerplate(request):
+    """Return the boilerplate language for requests to the given agency"""
 
-    agencies = Agency.objects.filter(status='approved')
-    if jurisdiction:
-        agencies = agencies.filter(jurisdiction=jurisdiction)
+    p_new = re.compile(r'\$new\$[^$]+\$[0-9]+\$')
+    p_int = re.compile(r'[0-9]+')
+    agency_pks = request.GET.getlist('agencies')
+    new_agency_pks = [a for a in agency_pks if p_new.match(a)]
+    other_agency_pks = [a for a in agency_pks if p_int.match(a)]
 
-    # if there is an exact match, do not bother fuzzy matching
-    exact = agencies.filter(name__iexact=query).first()
-    if exact:
-        return JsonResponse({'exact': {'value': exact.pk, 'text': exact.name}})
-
-    suggestions = process.extractBests(
-        query,
-        {a.pk: a.name
-         for a in agencies},
-        scorer=fuzz.token_set_ratio,
-        score_cutoff=80,
-        limit=10,
+    agencies = Agency.objects.filter(pk__in=other_agency_pks)
+    extra_jurisdictions = Jurisdiction.objects.filter(
+        pk__in=[i.split('$')[3] for i in new_agency_pks]
     )
-    suggestions = [{'value': s[2], 'text': s[0]} for s in suggestions]
-    return JsonResponse({'suggestions': suggestions})
+    if request.user.is_authenticated:
+        user_name = request.user.get_full_name()
+    else:
+        user_name = (
+            '<abbr class="tooltip" title="This will be replaced by your full '
+            'name">{ name }</abbr>'
+        )
+    split_token = '$split$'
+    text = initial_communication_template(
+        agencies,
+        user_name,
+        split_token,
+        extra_jurisdictions=extra_jurisdictions,
+        edited_boilerplate=False,
+        proxy=False,
+        html=True,
+    )
+    intro, outro = text.split(split_token)
+    return JsonResponse({
+        'intro': linebreaks(intro.strip()),
+        'outro': linebreaks(outro.strip()),
+    })
+
+
+def contact_info(request, idx):
+    """Return the agencies contact info"""
+    agency = get_object_or_404(Agency, pk=idx)
+    if request.user.is_anonymous or not request.user.profile.is_advanced():
+        if agency.portal:
+            type_ = 'portal'
+        elif agency.email:
+            type_ = 'email'
+        elif agency.fax:
+            type_ = 'fax'
+        elif agency.address:
+            type_ = 'snail'
+        else:
+            type_ = 'none'
+        return JsonResponse({'type': type_})
+    else:
+        return JsonResponse({
+            'portal': {
+                'type': agency.portal.get_type_display(),
+                'url': agency.url
+            } if agency.portal else None,
+            'emails': [{
+                'value': e.pk,
+                'display': unicode(e)
+            } for e in agency.emails.filter(status='good')
+                       .exclude(email__endswith='muckrock.com')],
+            'faxes': [{
+                'value': f.pk,
+                'display': unicode(f)
+            } for f in agency.phones.filter(status='good', type='fax')],
+            'email':
+                unicode(agency.email)
+                if agency.email and agency.email.status == 'good' else None,
+            'cc_emails': [unicode(e) for e in agency.other_emails],
+            'fax':
+                unicode(agency.fax)
+                if agency.fax and agency.fax.status == 'good' else None,
+            'address':
+                unicode(agency.address) if agency.address else None,
+        })

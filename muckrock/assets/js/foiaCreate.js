@@ -6,211 +6,404 @@
  */
 
 import modal from './modal';
+import showOrigContactInfo from './foiaRequest';
 
 $(document).ready(function(){
 
-  var localField = $('fieldset.local');
-  var stateField = $('fieldset.state');
-  var localRadio = $('li.local input:radio');
-  var stateRadio = $('li.state input:radio');
-  var federalRadio = $('li.federal input:radio');
-  var localChecked = $('li.local input:checked');
-  var stateChecked = $('li.state input:checked');
-  var federalChecked = $('li.federal input:checked');
-  var localSelect = $('.autocomplete-light-widget select[name="local"]');
-  var stateSelect = $('.autocomplete-light-widget select[name="state"]');
-  var agencyField = $('fieldset.agency');
+  var agencyField = $('fieldset.agencies');
   var agencyInput = agencyField.find('input');
   var agencyWidget = agencyField.find('.autocomplete-light-widget');
-  var agencySelect = agencyWidget.find('select');
 
-  function agencyByJurisdiction(jurisdictionSelectElement) {
-    agencyInput.yourlabsAutocomplete().data = {
-      jurisdiction_id: jurisdictionSelectElement.val()
-    };
-  }
+  function updateRequestCount(num) {
+    var requestsLeft = $(".requests-left"),
+    hasOrg = requestsLeft.data("org") || 0,
+    hasMonthly = requestsLeft.data("month") || 0,
+    hasRegular = requestsLeft.data("reg") || 0,
+    useOrg = 0,
+    useMonthly = 0,
+    useRegular = 0,
+    useExtra = 0;
 
-  function agencyToggle(value) {
-    if (value) {
-      agencyField.show();
-      agencyInput.focus();
-      agencyInput.keydown();
+    if (num < hasOrg) {
+      useOrg = num;
+    } else if (num < (hasOrg + hasMonthly)) {
+      useOrg = hasOrg;
+      useMonthly = num - hasOrg;
+    } else if (num < (hasOrg + hasMonthly + hasRegular)) {
+      useOrg = hasOrg;
+      useMonthly = hasMonthly;
+      useRegular = num - (hasOrg + hasMonthly);
     } else {
-      agencyField.hide();
+      useOrg = hasOrg;
+      useMonthly = hasMonthly;
+      useRegular = hasRegular;
+      useExtra = num - (hasOrg + hasMonthly + hasRegular);
     }
+    var text = "You are making <strong>" + num + "</strong> request" +
+      (num !== 1 ? "s" : "") + ".  ";
+    var useAny = (useOrg > 0 || useMonthly > 0 || useRegular > 0);
+    if (useAny) {
+      text += "This will use ";
+      var useText = [];
+      if (useOrg > 0) {
+        useText.push("<strong>" + useOrg + "</strong> organizational request" +
+          (useOrg > 1 ? "s" : ""));
+      }
+      if (useMonthly > 0) {
+        useText.push("<strong>" + useMonthly + "</strong> monthly request" +
+          (useMonthly > 1 ? "s" : ""));
+      }
+      if (useRegular > 0) {
+        useText.push("<strong>" + useRegular + "</strong> purchased request" +
+          (useRegular > 1 ? "s" : ""));
+      }
+      if (useText.length > 1) {
+        text += useText.slice(0, -1).join(", ");
+        text += (" and " + useText[useText.length - 1] + ".  ");
+      } else {
+        text += (useText[0] + ".  ");
+      }
+    }
+    if (useExtra > 0) {
+      text += ("You will " + (useAny ? "also " : "") + "need to purchase <strong>"
+        + useExtra + "</strong> extra request" + (useExtra > 1 ? "s" : "") + ".");
+      $(".buy-section").show();
+      $("#submit_button").text("Buy & Submit");
+      $("#id_num_requests").val(Math.max(useExtra, $("#id_num_requests").attr("min")));
+      $("#id_num_requests").trigger("change");
+      $(".simple-buy .amount").text($("#id_num_requests").val());
+      $(".simple-buy .price").text("$" + $("#id_stripe_amount").val() / 100);
+    } else {
+      $(".buy-section").hide();
+      $("#submit_button").text("Submit");
+      $("#id_num_requests").val("");
+    }
+    $(".using-requests").html(text);
   }
 
-  /* Check if prefilled by cloning */
-  if (localChecked.length > 0) {
-    localChecked.parent().addClass('active');
-    localField.show();
-    agencyByJurisdiction(localSelect);
-    agencyToggle(localSelect.val());
-  }
-  if (stateChecked.length > 0) {
-    stateChecked.parent().addClass('active');
-    stateField.show();
-    agencyByJurisdiction(stateSelect);
-    agencyToggle(stateSelect.val());
-  }
-  if (federalChecked.length > 0) {
-    federalChecked.parent().addClass('active');
-    localField.hide();
-    stateField.hide();
-    agencyByJurisdiction(federalRadio);
-    agencyToggle(true);
+  function setContactInfoOptions(select, options) {
+    select.find('option').remove();
+    for(var i = 0; i < options.length; i++) {
+      select.append(
+        $("<option>").attr("value", options[i].value).text(options[i].display)
+      );
+    }
+    select.append($("<option value=\"\">").text("Other..."));
   }
 
-  /* Bind changes to actions */
-  localRadio.change(function() {
-    $(this).parent().addClass('active');
-    $(this).parent().siblings().removeClass('active');
-    localField.show();
-    stateField.hide();
-    agencyToggle(localSelect.val().length);
-    agencyInput.val('');
-    agencyWidget.yourlabsWidget().freeDeck();
+  $("#id_num_requests").change(function(){
+    var bulkPrice = $(".buy-request-form").data("bulk-price");
+    var num = $(this).val();
+    var price;
+    if (num >= 20) {
+      price = num * bulkPrice;
+    } else {
+      price = num * 5;
+    }
+    $("[name='stripe_amount']").val(price * 100);
+    $("[name='stripe_description']").val(num + " request" + (num > 1 ? "s" : "") +
+      " ($" + price + ".00)");
   });
+  $("#id_num_requests").trigger("change");
 
-  stateRadio.change(function() {
-    $(this).parent().addClass('active');
-    $(this).parent().siblings().removeClass('active');
-    localField.hide();
-    stateField.show();
-    agencyToggle(stateSelect.val().length);
-    agencyInput.val('');
-    agencyWidget.yourlabsWidget().freeDeck();
-  });
+  agencyWidget.on("widgetSelectChoice widgetDeselectChoice", function(){
+    // get boilerplate language for selected agencies
+    $.ajax({
+      url: "/agency/boilerplate/",
+      data: {
+        agencies: agencyField.find(".deck > .choice").map(function(){
+          return $(this).data("value");
+        }).get()
+      },
+      type: "get",
+      success: function(data) {
+        $(".document-boilerplate.intro").html(data.intro);
+        $(".document-boilerplate.outro").html(data.outro);
+        $(".tooltip").tooltipster({
+          trigger: "custom",
+          triggerOpen: {
+            click: true,
+            mouseenter: true,
+            touchstart: true,
+            tap: true
+          },
+          triggerClose: {
+            click: true,
+            mouseleave: true,
+            originClick: true,
+            tap: true,
+            touchleave: true
+          }
+        });
+      }
+    });
 
-  federalRadio.change(function() {
-    $(this).parent().addClass('active');
-    $(this).parent().siblings().removeClass('active');
-    localField.hide();
-    stateField.hide();
-    agencyToggle(true);
-    agencyInput.val('');
-    agencyWidget.yourlabsWidget().freeDeck();
-    agencyByJurisdiction(federalRadio);
-  });
+    // update the request count
+    var requestCount = agencyField.find(".deck > .choice").length;
+    var exemptCount = agencyField.find(".exempt").length;
+    var nonExemptCount = requestCount - exemptCount;
 
-  function selectChange(select) {
-    agencyByJurisdiction(select);
-    agencyToggle(select.val().length);
-    agencyInput.val('');
-    agencyWidget.yourlabsWidget().freeDeck();
-  }
+    updateRequestCount(nonExemptCount);
 
-  localSelect.change(function(){
-    selectChange($(this));
-  });
-
-  stateSelect.change(function(){
-    selectChange($(this));
-  });
-
-  // if the selected agency is exempt, show an error message
-  agencyWidget.on("widgetSelectChoice", function(){
-    if (agencyField.find('.small.red.badge').length > 0) {
+    // handle exempt agencies
+    if ((exemptCount > 0) && (nonExemptCount > 0)) {
+      $("#submit_button").prop("disabled", "");
+      $("#submit_help").text("Some of the agencies you have selected are exempt.  You may submit this request to the non-exempt agencies, but the selected exempt agencies will not be included.");
+    } else if (exemptCount > 0) {
       $("#submit_button").prop("disabled", "disabled");
       $("#submit_help").text("The agency you have selected is exempt from public records requests.  Please select another agency.");
-    }
-  });
-
-  // clear the exempt error message when the agency is deselected
-  agencyWidget.on("widgetDeselectChoice", function(){
-    $("#submit_button").prop("disabled", "");
-    $("#submit_help").text("");
-  });
-
-  // get the selected jurisdiction for fuzzy agency checking
-  function getJurisdiction() {
-    if ($('li.local input:checked').length > 0) {
-      return localSelect.val();
-    } else if ($('li.state input:checked').length > 0) {
-      return stateSelect.val();
-    } else if ($('li.federal input:checked').length > 0) {
-      return 'f';
     } else {
-      return '';
+      $("#submit_button").prop("disabled", "");
+      $("#submit_help").text("");
     }
-  }
 
-  // run some validation
-  $("form.create-request").submit(function(e){
-    // if a real agency is not selected, prevent the submit and
-    // help the user try and find a suitable replacement
-    if (agencySelect.val().length === 0) {
-      e.preventDefault();
-
-      // send whatever is typed in to the text box to an agency fuzzy matcher
+    // handle contact info
+    if (requestCount === 1) {
       $.ajax({
-        url: '/agency/similar/',
-        data: {
-          query: agencyInput.val(),
-          jurisdiction: getJurisdiction()
-        },
+        url: "/agency/contact-info/" + agencyField.find(".deck > .choice").data("value") + "/",
         type: 'get',
         success: function(data) {
-          // if there was an exact match, just chose that
-          if (data.hasOwnProperty('exact')) {
-            agencySelect.append($("<option>", data.exact));
-            agencySelect.val(data.exact.value);
-            $("form.create-request").off("submit");
-            $("form.create-request").submit();
-            return;
+          if (data.type) {
+            $(".contact-info .info").data("type", data.type);
+          } else {
+            if (data.portal) {
+              $(".contact-info .info").data("portal-type", data.portal.type);
+              $(".contact-info .info").data("portal-url", data.portal.url);
+              if ($("#id_via option[value='portal']").length === 0) {
+                $("#id_via").prepend("<option value=\"portal\">Portal</option>");
+              }
+            } else {
+              $("#id_via option[value='portal']").remove();
+            }
+            $(".contact-info .info").data("email", data.email);
+            $(".contact-info .info").data("cc-emails", data.cc_emails);
+            $(".contact-info .info").data("fax", data.fax);
+            $(".contact-info .info").data("address", data.address);
+            setContactInfoOptions($("#id_email"), data.emails);
+            setContactInfoOptions($("#id_fax"), data.faxes);
           }
-          length = data.suggestions.length;
-          // no suggestions, just submit as is
-          if (length === 0) {
-            $("form.create-request").off("submit");
-            $("form.create-request").submit();
-            return;
-          }
-          // there are suggestions, display a modal asking the user if they meant
-          // one of the suggested agencies
-          $("#similar-agency-modal h1").text(
-              "The \"" + agencyInput.val() + "\" isn't in our database yet.");
-          modal($("#similar-agency-modal"));
-          $("#replacement-agency").children().remove();
-          for (var i = 0; i < length; i++) {
-            $("#replacement-agency").append($("<option>", data.suggestions[i]));
-          }
-        },
-        error: function() {
-          $("#submit_help").text("Sorry, there was an error submitting this form.  Please try again later, or contact us if the eror continues.");
+          showOrigContactInfo();
+          $("#id_email").prop("disabled", "");
+          $("#id_fax").prop("disabled", "");
+          $(".contact-info").show();
         }
       });
-    }
-  });
-
-  $("#new-agency-button").click(function() {
-    // The new agency button continues with the new agency - just submit the form as is
-    $("form.create-request").off("submit");
-    $("form.create-request").submit();
-  });
-
-  $("#replacement-agency-button").click(function() {
-    // The replacement agency button selects a replacement agency
-    if ($("#replacement-agency option:selected").length === 0) {
-      $("#similar-agency-modal .error").text("Please select a replacement agency.");
     } else {
-      agencySelect.append($("#replacement-agency option:selected").clone());
-      agencySelect.val($("#replacement-agency").val());
-      $("form.create-request").off("submit");
-      $("form.create-request").submit();
+      $("#id_use_contact_information").val(false);
+      $("#id_email").prop("disabled", "disabled");
+      $("#id_fax").prop("disabled", "disabled");
+      $(".contact-info").hide();
     }
+
+    if (requestCount === 0) {
+      $("#id_agencies-autocomplete").attr(
+        "placeholder",
+        "Agency's name, followed by location"
+      );
+    } else {
+      $("#id_agencies-autocomplete").attr(
+        "placeholder",
+        "Optionally add another agency - the request will be sent to all of them"
+      );
+    }
+
   });
+  agencyWidget.trigger("widgetSelectChoice");
 
-  // draft page
-
-  $("form.draft").submit(function(e){
+  $("form.create-request").submit(function(e){
     var email_regex = /\w+@\w+.\w+/;
-    if (email_regex.test($("#id_request").val()) &&
+    if (email_regex.test($("#id_requested_docs").val()) &&
         $("#email-warning-modal").data("foias-filed") == 0) {
       e.preventDefault();
       modal($("#email-warning-modal"));
-      $("form.draft").off("submit");
+      $("form.create-request").off("submit");
     }
   });
+
+  $(".toggle-advanced").click(function(){
+    if($(".advanced-container").is(":visible")) {
+      $(this).text("\u25b6 Advanced Options");
+    } else {
+      $(this).text("\u25bc Advanced Options");
+    }
+    $(".advanced-container").toggle();
+  });
+
+  $("#save_button").click(function(){
+    $("input[name='action']").val("save");
+    $(".submit-required").removeAttr("required");
+    agencyInput.removeAttr("required");
+
+    if ($("#id_register_pro").prop("checked")) {
+      $("#id_stripe_amount").val(4000);
+      $("#id_stripe_description").val("Pro Subscription ($40.00/month)");
+      $("#id_stripe_email").val($("#id_register_email").val());
+      $(this).closest("form").checkout();
+    }
+
+    $(this).closest("form").submit();
+  });
+
+  $("#submit_button").click(function(){
+    $("input[name='action']").val("submit");
+
+    // if they need to buy requests, enable checkout on this form before submitting
+    if ($(".buy-section").is(":visible")) {
+      $(this).closest("form").checkout();
+    }
+
+    $(".submit-required").attr("required", "required");
+    if (agencyField.find(".deck > .choice").length === 0) {
+      // no agency choices
+      agencyInput.attr("required", "required");
+    } else {
+      agencyInput.removeAttr("required");
+    }
+    var form = $(this).closest("form");
+    if (form.get(0).reportValidity()) {
+      form.submit();
+    }
+  });
+
+  $("#delete_button").click(function(){
+    $("input[name='action']").val("delete");
+    $(".submit-required").removeAttr("required");
+    agencyInput.removeAttr("required");
+    $(this).closest("form").submit();
+  });
+
+  $("#id_edited_boilerplate").change(function(){
+    var textArea = $("form.create-request .requested_docs textarea");
+    if (this.checked) {
+      var requestedDocs = $("#id_requested_docs").val();
+      var newText = "To Whom It May Concern:\n\nPursuant to the { law name }, " +
+        "I hereby request the following records:\n\n" + requestedDocs + "\n\n" +
+        "The requested documents will be made available to the general public, " +
+        "and this request is not being made for commercial purposes.\n\n" +
+        "In the event that there are fees, I would be grateful if you would " +
+        "inform me of the total charges in advance of fulfilling my request. " +
+        "I would prefer the request filled electronically, by e-mail attachment " +
+        "if available or CD-ROM if not.\n\nThank you in advance for your " +
+        "anticipated cooperation in this matter.\n\n" +
+        "I look forward to receiving your response to this request within " +
+        "{ number of days } { business or calendar } days, " +
+        "as the statute requires.\n\n" +
+        "Sincerely,\n\n" +
+        "{ name }";
+      $("#id_requested_docs").val(newText);
+      $("form.create-request").addClass("edited-boilerplate");
+      textArea.height(textArea[0].scrollHeight);
+      $(this).css("opacity", "0.5");
+    } else {
+      $(this).prop("checked", "checked");
+    }
+  });
+
+  $("#id_permanent_embargo").change(function(){
+    if (this.checked) {
+      $("#id_embargo").prop("checked", true);
+    }
+  });
+
+  $("#id_embargo").change(function(){
+    if (!this.checked) {
+      $("#id_permanent_embargo").prop("checked", false);
+    }
+  });
+
+  $(".show-buy-form").click(function(e) {
+    e.preventDefault();
+    $(".buy-section").removeClass("hide-form");
+    $(".simple-buy").hide();
+  });
+
+  var showLogin = false;
+  $(".login-toggle-link").click(function(e) {
+    showLogin = !showLogin;
+    e.preventDefault();
+    if (showLogin) {
+      $(".login-form").show();
+      $(".register-form").hide();
+      $(".login-toggle-text").show();
+      $(".register-toggle-text").hide();
+      $(".login-toggle-link").text("Register now");
+      $("#id_register_full_name").removeAttr("required");
+      $("#id_register_email").removeAttr("required");
+      $("#id_register_full_name").val("");
+      $("#id_register_email").val("");
+      $("#id_login_username").attr("required", "required");
+      $("#id_login_password").attr("required", "required");
+      $("#save_button").text("Log In and Save Request");
+    } else {
+      $(".login-form").hide();
+      $(".register-form").show();
+      $(".login-toggle-text").hide();
+      $(".register-toggle-text").show();
+      $(".login-toggle-link").text("Log in");
+      $("#id_register_full_name").attr("required", "required");
+      $("#id_register_email").attr("required", "required");
+      $("#id_login_username").removeAttr("required");
+      $("#id_login_password").removeAttr("required");
+      $("#id_login_username").val("");
+      $("#id_login_password").val("");
+      $("#save_button").text("Create Account and Save Request");
+    }
+  });
+  $("#id_register_full_name").attr("required", "required");
+  $("#id_register_email").attr("required", "required");
+
+  // Autosaving
+  // https://stackoverflow.com/questions/19910843/autosave-input-boxs-to-database-during-pause-in-typing
+	var timeoutId, hiddenId;
+  var composerPk = $("form.create-request").data("composer-pk");
+
+  function changeText(text, error) {
+    clearTimeout(hiddenId);
+    $(".form-status-holder").text(text).removeClass("hidden");
+    if (error) {
+      $(".form-status-holder").addClass("error");
+    } else {
+      $(".form-status-holder").removeClass("error");
+    }
+    hiddenId = setTimeout(function(){$(".form-status-holder").addClass("hidden");}, 2000);
+  }
+  changeText("Autosave Enabled");
+
+  function changeHandler() {
+    changeText("Unsaved");
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(function() {
+      // Runs 1 second (1000 ms) after the last change
+      saveToDB();
+    }, 1000);
+  }
+
+  if (composerPk) {
+    $("form.create-request input, form.create-request textarea").on(
+      "input propertychange change", changeHandler);
+    agencyWidget.on("widgetSelectChoice widgetDeselectChoice", changeHandler);
+  }
+
+  function saveToDB() {
+    var form = $("form.create-request");
+    $.ajax({
+      url: "/foi/composer-autosave/" + form.data("composer-pk") + "/",
+      type: "POST",
+      data: form.serialize(), // serializes the form's elements.
+      beforeSend: function() {
+        // Let them know we are saving
+        changeText("Saving Changes...");
+      },
+      success: function() {
+        // Now show them we saved
+        changeText("Draft Saved");
+        setTimeout(function(){$(".form-status-holder").addClass("hidden");}, 2000);
+      },
+      error: function() {
+        // Now show them there was an error
+        changeText("Changes Not Saved", true);
+      }
+    });
+  }
 
 });

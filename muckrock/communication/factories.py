@@ -56,12 +56,12 @@ class EmailCommunicationFactory(factory.django.DjangoModelFactory):
         model = EmailCommunication
 
     communication = factory.SubFactory(
-        'muckrock.factories.FOIACommunicationFactory'
+        'muckrock.foia.factories.FOIACommunicationFactory'
     )
     sent_datetime = timezone.now() - timedelta(3)
     from_email = factory.SubFactory(EmailAddressFactory)
     raw_email = factory.RelatedFactory(
-        'muckrock.factories.RawEmailFactory',
+        'muckrock.foia.factories.RawEmailFactory',
         'email',
     )
 
@@ -73,7 +73,7 @@ class FaxCommunicationFactory(factory.django.DjangoModelFactory):
         model = FaxCommunication
 
     communication = factory.SubFactory(
-        'muckrock.factories.FOIACommunicationFactory'
+        'muckrock.foia.factories.FOIACommunicationFactory'
     )
     sent_datetime = timezone.now() - timedelta(3)
     to_number = factory.SubFactory(PhoneNumberFactory)

@@ -90,12 +90,8 @@ class Detail(DetailView):
         return (
             Question.objects.select_related(
                 'foia',
-                'foia__agency',
-                'foia__agency__jurisdiction',
-                'foia__jurisdiction',
-                'foia__jurisdiction__parent',
-                'foia__jurisdiction__parent__parent',
-                'foia__user',
+                'foia__agency__jurisdiction__parent__parent',
+                'foia__composer__user',
             ).filter(user__is_active=True,)
         )
 

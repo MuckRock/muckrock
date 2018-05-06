@@ -3,11 +3,11 @@
 
 # Django
 from django.contrib import messages
-from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.http import Http404, StreamingHttpResponse
 from django.shortcuts import redirect
+from django.utils.decorators import method_decorator
 from django.utils.text import slugify
 from django.views.generic import CreateView, DetailView, FormView, UpdateView
 from django.views.generic.detail import BaseDetailView
@@ -18,9 +18,10 @@ from itertools import chain
 
 # Third Party
 import unicodecsv as csv
+from djangosecure.decorators import frame_deny_exempt
 
 # MuckRock
-from muckrock.accounts.utils import mailchimp_subscribe, miniregister
+from muckrock.accounts.mixins import MiniregMixin
 from muckrock.crowdsource.forms import (
     CrowdsourceAssignmentForm,
     CrowdsourceDataFormset,
@@ -109,7 +110,7 @@ class CrowdsourceDetailView(DetailView):
         return redirect(dataset)
 
 
-class CrowdsourceFormView(BaseDetailView, FormView):
+class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
     """A view for a user to fill out the crowdsource form"""
     template_name = 'crowdsource/form.html'
     form_class = CrowdsourceAssignmentForm
@@ -220,26 +221,18 @@ class CrowdsourceFormView(BaseDetailView, FormView):
         else:
             return {}
 
-    def _minireg(self, data):
-        """Mini-register a new user if needed"""
-        if self.request.user.is_authenticated:
-            return self.request.user
-        else:
-            user, password = miniregister(data['full_name'], data['email'])
-            user = authenticate(
-                username=user.username,
-                password=password,
-            )
-            login(self.request, user)
-            if data.get('newsletter'):
-                mailchimp_subscribe(self.request, user.email)
-            return user
-
     def form_valid(self, form):
         """Save the form results"""
         crowdsource = self.get_object()
         has_data = crowdsource.data.exists()
-        user = self._minireg(form.cleaned_data)
+        if self.request.user.is_authenticated:
+            user = self.request.user
+        else:
+            user = self.miniregister(
+                form.cleaned_data['full_name'],
+                form.cleaned_data['email'],
+                form.cleaned_data.get('newsletter'),
+            )
         number = (
             self.object.responses.filter(user=user, data=self.data).count() + 1
         )
@@ -289,6 +282,12 @@ class CrowdsourceFormView(BaseDetailView, FormView):
             slug=crowdsource.slug,
             idx=crowdsource.pk,
         )
+
+
+@method_decorator(frame_deny_exempt, name='dispatch')
+class CrowdsourceEmbededFormView(CrowdsourceFormView):
+    """A view to embed an assignment"""
+    template_name = 'crowdsource/embed.html'
 
 
 class CrowdsourceListView(MROrderedListView):

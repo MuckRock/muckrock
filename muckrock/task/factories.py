@@ -17,7 +17,7 @@ class OrphanTaskFactory(factory.django.DjangoModelFactory):
 
     reason = 'bs'
     communication = factory.SubFactory(
-        'muckrock.factories.FOIACommunicationFactory'
+        'muckrock.foia.factories.FOIACommunicationFactory'
     )
     address = factory.Faker('email')
 
@@ -30,7 +30,7 @@ class SnailMailTaskFactory(factory.django.DjangoModelFactory):
 
     category = 'a'
     communication = factory.SubFactory(
-        'muckrock.factories.FOIACommunicationFactory'
+        'muckrock.foia.factories.FOIACommunicationFactory'
     )
 
 
@@ -52,7 +52,7 @@ class FlaggedTaskFactory(factory.django.DjangoModelFactory):
         model = task.models.FlaggedTask
 
     user = factory.SubFactory('muckrock.factories.UserFactory')
-    foia = factory.SubFactory('muckrock.factories.FOIARequestFactory')
+    foia = factory.SubFactory('muckrock.foia.factories.FOIARequestFactory')
 
 
 class ProjectReviewTaskFactory(factory.django.DjangoModelFactory):
@@ -71,7 +71,7 @@ class NewExemptionTaskFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = task.models.NewExemptionTask
 
-    foia = factory.SubFactory('muckrock.factories.FOIARequestFactory')
+    foia = factory.SubFactory('muckrock.foia.factories.FOIARequestFactory')
     user = factory.SubFactory('muckrock.factories.UserFactory')
     language = factory.Faker('paragraph')
 
@@ -83,7 +83,7 @@ class ResponseTaskFactory(factory.django.DjangoModelFactory):
         model = task.models.ResponseTask
 
     communication = factory.SubFactory(
-        'muckrock.factories.FOIACommunicationFactory'
+        'muckrock.foia.factories.FOIACommunicationFactory'
     )
 
 
@@ -95,4 +95,14 @@ class StatusChangeTaskFactory(factory.django.DjangoModelFactory):
 
     user = factory.SubFactory('muckrock.factories.UserFactory')
     old_status = 'done'
-    foia = factory.SubFactory('muckrock.factories.FOIARequestFactory')
+    foia = factory.SubFactory('muckrock.foia.factories.FOIARequestFactory')
+
+
+class NewAgencyTaskFactory(factory.django.DjangoModelFactory):
+    """A factory for creating new agency tasks"""
+
+    class Meta:
+        model = task.models.NewAgencyTask
+
+    user = factory.SubFactory('muckrock.factories.UserFactory')
+    agency = factory.SubFactory('muckrock.factories.AgencyFactory')

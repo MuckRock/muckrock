@@ -19,7 +19,6 @@ from decimal import Decimal
 import stripe
 
 # MuckRock
-from muckrock import task
 from muckrock.accounts.utils import stripe_get_customer
 from muckrock.message.email import TemplateEmail
 from muckrock.utils import new_action, stripe_retry_on_error
@@ -81,7 +80,7 @@ class Crowdfund(models.Model):
         """Close the crowdfund and create a new task for it once it reaches its goal."""
         self.closed = True
         self.save()
-        task.models.CrowdfundTask.objects.create(crowdfund=self)
+        self.crowdfundtask_set.create()
         verb = 'ended'
         if succeeded:
             logger.info('Crowdfund %d reached its goal.', self.id)

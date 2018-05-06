@@ -7,7 +7,11 @@ from django.core.urlresolvers import reverse
 from django.test import RequestFactory, TestCase
 from django.utils import timezone
 
+# Standard Library
+from datetime import datetime, timedelta
+
 # Third Party
+import pytz
 from nose.tools import eq_, ok_
 
 # MuckRock
@@ -66,7 +70,23 @@ class TestNewsUnit(TestCase):
 
 class TestNewsFunctional(TestCase):
     """Functional tests for news"""
-    fixtures = ['test_users.json', 'test_news.json']
+
+    def setUp(self):
+        """Create articles for the tests"""
+        ArticleFactory.create_batch(
+            2,
+            publish=True,
+            pub_date=datetime(1999, 1, 1, 12, 12, tzinfo=pytz.utc),
+        )
+        ArticleFactory(
+            publish=True, pub_date=datetime(1999, 1, 2, 12, tzinfo=pytz.utc)
+        )
+        ArticleFactory(
+            publish=True, pub_date=datetime(1999, 2, 3, 12, tzinfo=pytz.utc)
+        )
+        ArticleFactory(
+            publish=True, pub_date=datetime(2000, 6, 6, tzinfo=pytz.utc)
+        )
 
     # views
     def test_news_index(self):
@@ -145,7 +165,13 @@ class TestNewsFunctional(TestCase):
 
     def test_news_archive_author(self):
         """Should return all articles for the given author"""
-        author = Article.objects.get(slug='test-article-5').authors.first()
+        author = UserFactory()
+        ArticleFactory.create_batch(
+            3,
+            publish=True,
+            authors=[author],
+            pub_date=timezone.now() - timedelta(1),
+        )
         response = get_allowed(
             self.client,
             reverse('news-author', kwargs={
@@ -159,6 +185,10 @@ class TestNewsFunctional(TestCase):
 
     def test_news_detail(self):
         """News detail should display the given article"""
+        article = ArticleFactory(
+            publish=True,
+            pub_date=datetime(1999, 1, 1, 12, tzinfo=pytz.utc),
+        )
         response = get_allowed(
             self.client,
             reverse(
@@ -167,14 +197,11 @@ class TestNewsFunctional(TestCase):
                     'year': 1999,
                     'month': 'jan',
                     'day': 1,
-                    'slug': 'test-article-5'
+                    'slug': article.slug,
                 }
             )
         )
-        eq_(
-            response.context['object'],
-            Article.objects.get(slug='test-article-5')
-        )
+        eq_(response.context['object'], article)
 
     def test_news_detail_404(self):
         """Should give a 404 error for a article that doesn't exist"""

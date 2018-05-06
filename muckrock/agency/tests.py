@@ -13,17 +13,17 @@ import json
 from datetime import timedelta
 
 # Third Party
-import nose.tools
+from nose.tools import assert_in, assert_not_in, eq_, ok_, raises
 
 # MuckRock
-from muckrock import agency, factories
-from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.agency.forms import AgencyForm
+from muckrock.agency.models import STALE_DURATION, Agency
+from muckrock.agency.views import AgencyList, boilerplate, contact_info, detail
+from muckrock.factories import AgencyFactory, StaleAgencyFactory, UserFactory
+from muckrock.foia.factories import FOIACommunicationFactory
 from muckrock.task.factories import StaleAgencyTaskFactory
 from muckrock.task.models import StaleAgencyTask
 from muckrock.test_utils import http_get_response, mock_middleware
-
-ok_ = nose.tools.ok_
-eq_ = nose.tools.eq_
 
 
 class TestAgencyUnit(TestCase):
@@ -31,15 +31,13 @@ class TestAgencyUnit(TestCase):
 
     def setUp(self):
         """Set up tests"""
-        self.agency1 = factories.AgencyFactory(
+        self.agency1 = AgencyFactory(
             fax__phone__number='1-987-654-3211',
             email__email__email='test@agency1.gov',
             other_emails='other_a@agency1.gov, other_b@agency1.gov'
         )
-        self.agency2 = factories.AgencyFactory(
-            fax__phone__number='987.654.3210',
-        )
-        self.agency3 = factories.AgencyFactory(email=None,)
+        self.agency2 = AgencyFactory(fax__phone__number='987.654.3210',)
+        self.agency3 = AgencyFactory(email=None,)
 
     def test_agency_url(self):
         """Test Agency model's get_absolute_url method"""
@@ -74,9 +72,9 @@ class TestAgencyUnit(TestCase):
 
     def test_agency_is_stale(self):
         """Should return the date of the last response by the agency"""
-        duration = agency.models.STALE_DURATION + 1
-        factories.FOIACommunicationFactory(
-            date=timezone.now() - timedelta(duration),
+        duration = STALE_DURATION + 1
+        FOIACommunicationFactory(
+            datetime=timezone.now() - timedelta(duration),
             response=True,
             foia__status='ack',
             foia__agency=self.agency1
@@ -155,22 +153,22 @@ class TestAgencyUnit(TestCase):
 
     def test_agency_get_proxy_info(self):
         """Test an agencies get_proxy_info method"""
-        agency_ = factories.AgencyFactory()
+        agency_ = AgencyFactory()
         proxy_info = agency_.get_proxy_info()
         eq_(proxy_info['proxy'], False)
         eq_(proxy_info['missing_proxy'], False)
-        nose.tools.assert_not_in('from_user', proxy_info)
-        nose.tools.assert_not_in('warning', proxy_info)
+        assert_not_in('from_user', proxy_info)
+        assert_not_in('warning', proxy_info)
 
-        proxy_placeholder = factories.UserFactory(username='proxy_placeholder')
-        agency_ = factories.AgencyFactory(requires_proxy=True)
+        proxy_placeholder = UserFactory(username='Proxy')
+        agency_ = AgencyFactory(requires_proxy=True)
         proxy_info = agency_.get_proxy_info()
         eq_(proxy_info['proxy'], True)
         eq_(proxy_info['missing_proxy'], True)
         eq_(proxy_info['from_user'], proxy_placeholder)
-        nose.tools.assert_in('warning', proxy_info)
+        assert_in('warning', proxy_info)
 
-        proxy = factories.UserFactory(
+        proxy = UserFactory(
             profile__acct_type='proxy',
             profile__state=agency_.jurisdiction.legal.abbrev,
         )
@@ -178,31 +176,29 @@ class TestAgencyUnit(TestCase):
         eq_(proxy_info['proxy'], True)
         eq_(proxy_info['missing_proxy'], False)
         eq_(proxy_info['from_user'], proxy)
-        nose.tools.assert_in('warning', proxy_info)
+        assert_in('warning', proxy_info)
 
 
 class TestAgencyManager(TestCase):
     """Tests for the Agency object manager"""
 
     def setUp(self):
-        self.agency1 = factories.AgencyFactory()
-        self.agency2 = factories.AgencyFactory(
-            jurisdiction=self.agency1.jurisdiction
-        )
-        self.agency3 = factories.AgencyFactory(
+        self.agency1 = AgencyFactory()
+        self.agency2 = AgencyFactory(jurisdiction=self.agency1.jurisdiction)
+        self.agency3 = AgencyFactory(
             jurisdiction=self.agency1.jurisdiction, status='pending'
         )
 
     def test_get_approved(self):
         """Manager should return all approved agencies"""
-        agencies = agency.models.Agency.objects.get_approved()
+        agencies = Agency.objects.get_approved()
         ok_(self.agency1 in agencies)
         ok_(self.agency2 in agencies)
         ok_(self.agency3 not in agencies)
 
     def test_get_siblings(self):
         """Manager should return all siblings to a given agency"""
-        agencies = agency.models.Agency.objects.get_siblings(self.agency1)
+        agencies = Agency.objects.get_siblings(self.agency1)
         ok_(
             self.agency1 not in agencies,
             'The given agency shouldn\'t be its own sibling.'
@@ -218,10 +214,10 @@ class TestAgencyViews(TestCase):
     """Tests for Agency views"""
 
     def setUp(self):
-        self.agency = factories.AgencyFactory()
+        self.agency = AgencyFactory()
         self.url = self.agency.get_absolute_url()
-        self.view = agency.views.detail
-        self.user = factories.UserFactory()
+        self.view = detail
+        self.user = UserFactory()
         self.kwargs = {
             'jurisdiction': self.agency.jurisdiction.slug,
             'jidx': self.agency.jurisdiction.id,
@@ -236,7 +232,7 @@ class TestAgencyViews(TestCase):
         )
         eq_(response.status_code, 200)
 
-    @nose.tools.raises(Http404)
+    @raises(Http404)
     def test_unapproved_not_found(self):
         """An unapproved agency should return a 404 response."""
         self.agency.status = 'pending'
@@ -245,10 +241,10 @@ class TestAgencyViews(TestCase):
 
     def test_list(self):
         """The list should only contain approved agencies"""
-        approved_agency = factories.AgencyFactory()
-        unapproved_agency = factories.AgencyFactory(status='pending')
+        approved_agency = AgencyFactory()
+        unapproved_agency = AgencyFactory(status='pending')
         response = http_get_response(
-            reverse('agency-list'), agency.views.AgencyList.as_view()
+            reverse('agency-list'), AgencyList.as_view()
         )
         agency_list = response.context_data['object_list']
         ok_(
@@ -260,49 +256,62 @@ class TestAgencyViews(TestCase):
             'Unapproved agencies should not be listed.'
         )
 
-    def test_similar(self):
-        """Test the similar ajax view"""
-        usa = Jurisdiction.objects.get(level='f')
-        agency1 = factories.AgencyFactory(
-            name='Inspector General', jurisdiction=usa
-        )
-        agency2 = factories.AgencyFactory(
-            name='Federal Bureau of Investigation', jurisdiction=usa
-        )
-        url = reverse('agency-similar')
-
+    def test_boilerplate(self):
+        """Test the boilerplate ajax view"""
+        agencies = AgencyFactory.create_batch(2)
         request = RequestFactory().get(
-            url, {
-                'query': 'inspector general',
-                'jurisdiction': 'f'
-            }
+            reverse('agency-boilerplate'),
+            {
+                'agencies': [a.pk for a in agencies],
+            },
         )
         request = mock_middleware(request)
-        request.user = factories.UserFactory()
-        response = agency.views.similar(request)
+        request.user = UserFactory(first_name='John', last_name='Doe')
+        response = boilerplate(request)
+        eq_(response.status_code, 200)
         data = json.loads(response.content)
-        eq_(data['exact'], {'value': agency1.pk, 'text': agency1.name})
+        assert_in('{ law name }', data['intro'])
+        assert_in('{ number of days }', data['outro'])
+        assert_in('John Doe', data['outro'])
+
+    def test_contact_info(self):
+        """Test the contact_info ajax view"""
+        agency = AgencyFactory()
 
         request = RequestFactory().get(
-            url,
-            {'query': 'fedral buraeu investigation',
-             'jurisdiction': 'f'},
+            reverse('agency-contact-info', kwargs={
+                'idx': agency.pk
+            })
         )
         request = mock_middleware(request)
-        request.user = factories.UserFactory()
-        response = agency.views.similar(request)
+        request.user = UserFactory()
+        response = contact_info(request, agency.pk)
+        eq_(response.status_code, 200)
         data = json.loads(response.content)
-        eq_(data['suggestions'], [{'value': agency2.pk, 'text': agency2.name}])
+        eq_(data['type'], 'email')
+
+        request = RequestFactory().get(
+            reverse('agency-contact-info', kwargs={
+                'idx': agency.pk
+            })
+        )
+        request = mock_middleware(request)
+        request.user = UserFactory(profile__acct_type='pro')
+        response = contact_info(request, agency.pk)
+        eq_(response.status_code, 200)
+        data = json.loads(response.content)
+        eq_(data['email'], unicode(agency.email))
 
 
 class TestAgencyForm(TestCase):
     """Tests the AgencyForm"""
 
     def setUp(self):
-        self.agency = factories.AgencyFactory()
-        self.form = agency.forms.AgencyForm(
+        self.agency = AgencyFactory()
+        self.form = AgencyForm(
             {
                 'name': self.agency.name,
+                'jurisdiction': self.agency.jurisdiction.pk,
                 'portal_type': 'other',
             },
             instance=self.agency,
@@ -311,8 +320,7 @@ class TestAgencyForm(TestCase):
     def test_validate_empty_form(self):
         """The form should have a name, at least"""
         ok_(
-            not agency.forms.AgencyForm().is_valid(),
-            'Empty AgencyForm should not validate.'
+            not AgencyForm().is_valid(), 'Empty AgencyForm should not validate.'
         )
 
     def test_instance_form(self):
@@ -324,8 +332,8 @@ class TestStaleAgency(TestCase):
     """Tests the stale agency task"""
 
     def setUp(self):
-        self.stale_agency = factories.StaleAgencyFactory(stale=False)
-        self.unstale_agency = factories.AgencyFactory(stale=True)
+        self.stale_agency = StaleAgencyFactory(stale=False)
+        self.unstale_agency = AgencyFactory(stale=True)
         self.task = StaleAgencyTaskFactory(agency=self.unstale_agency)
 
     def test_stale_task(self):

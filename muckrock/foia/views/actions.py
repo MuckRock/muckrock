@@ -81,8 +81,8 @@ def embargo(request, jurisdiction, jidx, slug, idx):
 
     foia = get_object_or_404(
         FOIARequest,
-        jurisdiction__slug=jurisdiction,
-        jurisdiction__pk=jidx,
+        agency__jurisdiction__slug=jurisdiction,
+        agency__jurisdiction__pk=jidx,
         slug=slug,
         pk=idx,
     )
@@ -103,8 +103,8 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
     """Pay us through CC for the payment on a request"""
     foia = get_object_or_404(
         FOIARequest,
-        jurisdiction__slug=jurisdiction,
-        jurisdiction__pk=jidx,
+        agency__jurisdiction__slug=jurisdiction,
+        agency__jurisdiction__pk=jidx,
         slug=slug,
         pk=idx,
     )
@@ -153,8 +153,8 @@ def follow(request, jurisdiction, jidx, slug, idx):
     """Follow or unfollow a request"""
     foia = get_object_or_404(
         FOIARequest,
-        jurisdiction__slug=jurisdiction,
-        jurisdiction__pk=jidx,
+        agency__jurisdiction__slug=jurisdiction,
+        agency__jurisdiction__pk=jidx,
         slug=slug,
         pk=idx,
     )
@@ -172,8 +172,8 @@ def toggle_autofollowups(request, jurisdiction, jidx, slug, idx):
     """Toggle autofollowups"""
     foia = get_object_or_404(
         FOIARequest,
-        jurisdiction__slug=jurisdiction,
-        jurisdiction__pk=jidx,
+        agency__jurisdiction__slug=jurisdiction,
+        agency__jurisdiction__pk=jidx,
         slug=slug,
         pk=idx,
     )

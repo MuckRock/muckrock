@@ -17,7 +17,7 @@ from autocomplete_light import shortcuts as autocomplete_light
 # MuckRock
 from muckrock.agency.models import Agency
 from muckrock.filters import BLANK_STATUS, NULL_BOOLEAN_CHOICES, RangeWidget
-from muckrock.foia.models import FOIAMultiRequest, FOIARequest
+from muckrock.foia.models import FOIARequest
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag
 
@@ -57,6 +57,7 @@ class FOIARequestFilterSet(JurisdictionFilterSet):
     """Allows filtering a request by status, agency, jurisdiction, user, or tags."""
     status = django_filters.ChoiceFilter(choices=BLANK_STATUS)
     user = django_filters.ModelMultipleChoiceFilter(
+        name='composer__user',
         queryset=User.objects.all(),
         widget=autocomplete_light.MultipleChoiceWidget('UserAutocomplete')
     )
@@ -93,7 +94,7 @@ class FOIARequestFilterSet(JurisdictionFilterSet):
         widget=forms.NumberInput(),
     )
     date_range = django_filters.DateFromToRangeFilter(
-        name='communications__date',
+        name='communications__datetime',
         label='Date Range',
         lookup_expr='contains',
         widget=RangeWidget(
@@ -153,7 +154,7 @@ class MyFOIARequestFilterSet(JurisdictionFilterSet):
         widget=forms.NumberInput(),
     )
     date_range = django_filters.DateFromToRangeFilter(
-        name='communications__date',
+        name='communications__datetime',
         label='Date Range',
         lookup_expr='contains',
         widget=RangeWidget(
@@ -182,18 +183,10 @@ class MyFOIARequestFilterSet(JurisdictionFilterSet):
         fields = ['status', 'agency', 'jurisdiction']
 
 
-class MyFOIAMultiRequestFilterSet(django_filters.FilterSet):
-    """Allows multirequests to be filtered by status."""
-    status = django_filters.ChoiceFilter(choices=BLANK_STATUS[:3])
-
-    class Meta:
-        model = FOIAMultiRequest
-        fields = ['status']
-
-
 class ProcessingFOIARequestFilterSet(JurisdictionFilterSet):
     """Allows filtering a request by user, agency, jurisdiction, or tags."""
     user = django_filters.ModelMultipleChoiceFilter(
+        name='composer__user',
         queryset=User.objects.all(),
         widget=autocomplete_light.MultipleChoiceWidget('UserAutocomplete')
     )
@@ -216,6 +209,7 @@ class ProcessingFOIARequestFilterSet(JurisdictionFilterSet):
 class AgencyFOIARequestFilterSet(django_filters.FilterSet):
     """Filters for agency users"""
     user = django_filters.ModelMultipleChoiceFilter(
+        name='composer__user',
         queryset=User.objects.all(),
         widget=autocomplete_light.MultipleChoiceWidget('UserAutocomplete')
     )
@@ -226,7 +220,7 @@ class AgencyFOIARequestFilterSet(django_filters.FilterSet):
         widget=autocomplete_light.MultipleChoiceWidget('TagAutocomplete'),
     )
     date_range = django_filters.DateFromToRangeFilter(
-        name='communications__date',
+        name='communications__datetime',
         label='Date Range',
         lookup_expr='contains',
         widget=RangeWidget(

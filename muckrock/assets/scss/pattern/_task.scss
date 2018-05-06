@@ -273,11 +273,6 @@ $task-padding: $vr/4 $vr/2;
         margin-bottom: $vr/2;
         padding: 0 $vr/2;
     }
-    fieldset.id_name {
-        @include flex(1 0 100%);
-        margin-left: 0;
-        margin-right: 0;
-    }
     .help-text {
         color: $color-grey-3;
         line-height: $lh;

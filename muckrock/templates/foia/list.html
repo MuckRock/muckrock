@@ -14,13 +14,9 @@
     <ul class="nostyle list__sections">
       <li class="{% active request '^/foi/list/$' %}"><a href="{% url 'foia-list' %}">All</a></li>
       <li class="{% active request '^/foi/mylist/$' %}"><a href="{% url 'foia-mylist' %}">Yours</a></li>
+      <li class="{% active request '^/foi/mylist/drafts/$' %}"><a href="{% url 'foia-mylist-drafts' %}">Drafts</a></li>
       {% if organization %}
         <li class="{% active request '^/foi/organization-list/$' %}"><a href="{% url 'foia-org-list' %}">Organization</a></li>
-      {% endif %}
-      {% if user.profile.is_advanced %}
-        <li class="{% active request '^/foi/mylist/multirequest/$' %}"><a href="{% url 'foia-mymulti' %}">Multirequests</a></li>
-      {% else %}
-        <li><a class="grey" href="{% url 'accounts' %}">Multirequests <span class="small badge">PRO</span></a></li>
       {% endif %}
       <li class="{% active request '^/foi/list/following/$' %}"><a href="{% url 'foia-list-following' %}">Following</a></li>
       {% if user.is_staff %}
@@ -113,7 +109,7 @@
     <td>{{ foia.user.get_full_name }}</td>
     <td>{{ foia.agency }}</td>
     <td>{{ foia.jurisdiction }}</td>
-    <td>{{ foia.date_updated|date:"m/d/Y" }}</td>
-    <td>{{ foia.date_submitted|date:"m/d/Y" }}</td>
+    <td>{{ foia.datetime_updated|date:"m/d/Y" }}</td>
+    <td>{{ foia.composer.datetime_submitted|date:"m/d/Y" }}</td>
   {% endwith %}
 {% endblock list-table-row %}

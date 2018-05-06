@@ -28,5 +28,6 @@ def classify_status(status):
         'ack': class_wait,
         'done': class_go,
         'partial': class_go,
+        'filed': class_go,
     }
     return classes.get(status, class_default)

@@ -117,10 +117,11 @@ def request_purchase_receipt(user, charge):
     subject = u'Request Bundle Receipt'
     text = 'message/receipt/request_purchase.txt'
     html = 'message/receipt/request_purchase.html'
-    item_name = u'4 requests'
-    if user:
-        bundle_size = settings.BUNDLED_REQUESTS.get(user.profile.acct_type, 4)
-        item_name = unicode(bundle_size) + u' requests'
+    num_requests = charge.metadata.get('amount')
+    if num_requests:
+        item_name = '{} requests'.format(num_requests)
+    else:
+        item_name = 'Requests'
     item = LineItem(item_name, charge.amount)
     return Receipt(
         charge,

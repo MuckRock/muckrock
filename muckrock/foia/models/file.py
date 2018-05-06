@@ -12,9 +12,6 @@ from django.db import models
 import logging
 import os
 
-# MuckRock
-from muckrock.foia.models.communication import FOIACommunication
-
 logger = logging.getLogger(__name__)
 
 
@@ -25,13 +22,16 @@ class FOIAFile(models.Model):
               ('organization', 'Organization'))
 
     comm = models.ForeignKey(
-        FOIACommunication, related_name='files', blank=True, null=True
+        'foia.FOIACommunication',
+        related_name='files',
+        blank=True,
+        null=True,
     )
     ffile = models.FileField(
         upload_to='foia_files/%Y/%m/%d', verbose_name='File', max_length=255
     )
     title = models.CharField(max_length=255)
-    date = models.DateTimeField(null=True, db_index=True)
+    datetime = models.DateTimeField(null=True, db_index=True)
     source = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
     # for doc cloud only
@@ -137,10 +137,11 @@ class FOIAFile(models.Model):
 
     class Meta:
         verbose_name = 'FOIA Document File'
-        ordering = ['date']
+        ordering = ['datetime']
         app_label = 'foia'
 
 
+# This needs to stick around for migration purposes
 def attachment_path(instance, filename):
     """Generate path for attachment file"""
     return 'outbound_attachments/%s/%d/%s' % (
@@ -148,34 +149,3 @@ def attachment_path(instance, filename):
         instance.foia.pk,
         filename,
     )
-
-
-class OutboundAttachment(models.Model):
-    """An uploaded file waiting to be sent out"""
-
-    foia = models.ForeignKey(
-        'FOIARequest',
-        related_name='pending_attachments',
-    )
-    user = models.ForeignKey(
-        'auth.User',
-        related_name='pending_attachments',
-    )
-    ffile = models.FileField(
-        upload_to=attachment_path,
-        verbose_name='file',
-        max_length=255,
-    )
-    date_time_stamp = models.DateTimeField()
-    sent = models.BooleanField(default=False)
-
-    def __unicode__(self):
-        return 'Attachment: %s by %s for request %d' % (
-            self.ffile.name,
-            self.user.username,
-            self.foia.pk,
-        )
-
-    def name(self):
-        """Return the basename of the file"""
-        return os.path.basename(self.ffile.name)

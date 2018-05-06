@@ -34,20 +34,19 @@ from muckrock.crowdfund.models import Crowdfund
 from muckrock.foia.models import (
     CommunicationMoveLog,
     FOIACommunication,
+    FOIAComposer,
     FOIAFile,
-    FOIAMultiRequest,
     FOIANote,
     FOIARequest,
-    OutboundAttachment,
+    OutboundComposerAttachment,
+    OutboundRequestAttachment,
     TrackingNumber,
 )
 from muckrock.foia.tasks import (
     autoimport,
     set_document_cloud_pages,
-    submit_multi_request,
     upload_document_cloud,
 )
-from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.portal.models import Portal
 
 
@@ -91,7 +90,7 @@ class FOIAFileInline(admin.StackedInline):
     form = FOIAFileAdminForm
     readonly_fields = ('doc_id', 'pages', 'access', 'source')
     fields = (
-        ('title', 'date'),
+        ('title', 'datetime'),
         'ffile',
         'description',
         ('doc_id', 'pages'),
@@ -145,7 +144,7 @@ class FOIACommunicationAdmin(VersionAdmin):
             'fields': (
                 'foia_link',
                 ('from_user', 'to_user'),
-                ('subject', 'date'),
+                ('subject', 'datetime'),
                 'communication',
                 'status',
                 'response',
@@ -240,7 +239,7 @@ class FOIACommunicationInline(admin.StackedInline):
     form = FOIACommunicationAdminForm
     fields = (
         ('from_user', 'to_user'),
-        ('subject', 'date'),
+        ('subject', 'datetime'),
         'communication',
         ('file_count', 'file_names'),
         'status',
@@ -329,22 +328,9 @@ class TrackingNumberInline(admin.TabularInline):
 class FOIARequestAdminForm(forms.ModelForm):
     """Form to include custom choice fields"""
 
-    jurisdiction = autocomplete_light.ModelChoiceField(
-        'JurisdictionAdminAutocomplete',
-        queryset=Jurisdiction.objects.all(),
-    )
     agency = autocomplete_light.ModelChoiceField(
         'AgencyAdminAutocomplete',
         queryset=Agency.objects.all(),
-    )
-    user = autocomplete_light.ModelChoiceField(
-        'UserAutocomplete',
-        queryset=User.objects.all(),
-    )
-    parent = autocomplete_light.ModelChoiceField(
-        'FOIARequestAdminAutocomplete',
-        queryset=FOIARequest.objects.all(),
-        required=False,
     )
     read_collaborators = autocomplete_light.ModelMultipleChoiceField(
         'UserAutocomplete',
@@ -386,11 +372,6 @@ class FOIARequestAdminForm(forms.ModelForm):
         queryset=Crowdfund.objects.all(),
         required=False,
     )
-    multirequest = autocomplete_light.ModelChoiceField(
-        'FOIAMultiRequestAutocomplete',
-        queryset=FOIAMultiRequest.objects.all(),
-        required=False,
-    )
 
     class Meta:
         model = FOIARequest
@@ -401,31 +382,49 @@ class FOIARequestAdmin(VersionAdmin):
     """FOIA Request admin options"""
     change_list_template = 'admin/foia/foiarequest/change_list.html'
     prepopulated_fields = {'slug': ('title',)}
-    list_display = ('title', 'user', 'status', 'agency', 'jurisdiction')
+    list_display = (
+        'title',
+        'get_user',
+        'status',
+        'agency',
+        'get_jurisdiction',
+    )
     list_filter = ['status']
-    list_select_related = ('agency', 'jurisdiction', 'user')
+    list_select_related = ('agency__jurisdiction', 'composer__user')
     search_fields = [
-        'title', 'description', 'tracking_ids__tracking_id', 'mail_id'
+        'title',
+        'description',
+        'tracking_ids__tracking_id',
+        'mail_id',
     ]
-    readonly_fields = ['mail_id']
-    filter_horizontal = ('read_collaborators', 'edit_collaborators')
+    readonly_fields = ['composer', 'get_user', 'mail_id']
     inlines = [TrackingNumberInline, FOIACommunicationInline, FOIANoteInline]
     save_on_top = True
     form = FOIARequestAdminForm
-    formats = ['xls', 'csv']
-    # pylint: disable=protected-access
-    headers = [f.name for f in FOIARequest._meta.fields] + ['total_pages']
-    # pylint: enable=protected-access
-    exclude = ['old_email', 'other_emails']
+
+    def get_user(self, obj):
+        """Get the user"""
+        return obj.composer.user
+
+    get_user.short_description = 'User'
+    get_user.admin_order_field = 'composer__user'
+
+    def get_jurisdiction(self, obj):
+        """Get the jurisdiction"""
+        return obj.agency.jurisdiction
+
+    get_jurisdiction.short_description = 'Jurisdiction'
+    get_jurisdiction.admin_order_field = 'agency__jurisdiction'
 
     def save_model(self, request, obj, form, change):
         """Actions to take when a request is saved from the admin"""
         # pylint: disable=unused-argument
 
         # If changing to completed and embargoed, set embargo date to 30 days out
-        if obj.status in [
-            'done', 'partial'
-        ] and obj.embargo and not obj.date_embargo:
+        if (
+            obj.status in ['done', 'partial'] and obj.embargo
+            and not obj.date_embargo
+        ):
             obj.date_embargo = date.today() + timedelta(30)
 
         # NOT saving here if changed
@@ -532,8 +531,8 @@ class FOIARequestAdmin(VersionAdmin):
         )
 
 
-class FOIAMultiRequestAdminForm(forms.ModelForm):
-    """Form for multi request admin"""
+class FOIAComposerAdminForm(forms.ModelForm):
+    """Form for the FOIA composer admin"""
 
     user = autocomplete_light.ModelChoiceField(
         'UserAutocomplete',
@@ -545,49 +544,25 @@ class FOIAMultiRequestAdminForm(forms.ModelForm):
         required=False,
     )
     parent = autocomplete_light.ModelChoiceField(
-        'FOIAMultiRequestAutocomplete',
-        queryset=FOIAMultiRequest.objects.all(),
+        'FOIAComposerAdminAutocomplete',
+        queryset=FOIAComposer.objects.all(),
         required=False,
     )
 
     class Meta:
-        model = FOIAMultiRequest
+        model = FOIAComposer
         fields = '__all__'
 
 
-class FOIAMultiRequestAdmin(VersionAdmin):
-    """FOIA Multi Request admin options"""
-    change_form_template = 'admin/foia/multifoiarequest/change_form.html'
+class FOIAComposerAdmin(VersionAdmin):
+    """FOIA Composer admin options"""
     prepopulated_fields = {'slug': ('title',)}
     list_display = ('title', 'user', 'status')
     search_fields = ['title', 'requested_docs']
-    form = FOIAMultiRequestAdminForm
-
-    def get_urls(self):
-        """Add custom URLs here"""
-        urls = super(FOIAMultiRequestAdmin, self).get_urls()
-        my_urls = [
-            url(
-                r'^submit/(?P<idx>\d+)/$',
-                self.admin_site.admin_view(self.submit),
-                name='multifoia-admin-submit',
-            )
-        ]
-        return my_urls + urls
-
-    def submit(self, request, idx):
-        """Submit the multi request"""
-
-        get_object_or_404(FOIAMultiRequest, pk=idx)
-        submit_multi_request.apply_async(args=[idx])
-
-        messages.info(request, 'Multi request is being submitted...')
-        return HttpResponseRedirect(
-            reverse('admin:foia_foiamultirequest_changelist')
-        )
+    form = FOIAComposerAdminForm
 
 
-class OutboundAttachmentAdminForm(forms.ModelForm):
+class OutboundRequestAttachmentAdminForm(forms.ModelForm):
     """Form for outbound attachment admin"""
 
     foia = autocomplete_light.ModelChoiceField(
@@ -600,20 +575,47 @@ class OutboundAttachmentAdminForm(forms.ModelForm):
     )
 
     class Meta:
-        model = OutboundAttachment
+        model = OutboundRequestAttachment
         fields = '__all__'
 
 
-class OutboundAttachmentAdmin(VersionAdmin):
+class OutboundRequestAttachmentAdmin(VersionAdmin):
     """Outbound Attachment admin options"""
     search_fields = ('foia__title', 'user__username')
     list_display = ('foia', 'user', 'ffile', 'date_time_stamp')
     list_select_related = ('foia', 'user')
     date_hierarchy = 'date_time_stamp'
-    form = OutboundAttachmentAdminForm
+    form = OutboundRequestAttachmentAdminForm
+
+
+class OutboundComposerAttachmentAdminForm(forms.ModelForm):
+    """Form for outbound attachment admin"""
+
+    composer = autocomplete_light.ModelChoiceField(
+        'FOIAComposerAdminAutocomplete',
+        queryset=FOIAComposer.objects.all(),
+    )
+    user = autocomplete_light.ModelChoiceField(
+        'UserAutocomplete',
+        queryset=User.objects.all(),
+    )
+
+    class Meta:
+        model = OutboundComposerAttachment
+        fields = '__all__'
+
+
+class OutboundComposerAttachmentAdmin(VersionAdmin):
+    """Outbound Attachment admin options"""
+    search_fields = ('composer__title', 'user__username')
+    list_display = ('composer', 'user', 'ffile', 'date_time_stamp')
+    list_select_related = ('composer', 'user')
+    date_hierarchy = 'date_time_stamp'
+    form = OutboundComposerAttachmentAdminForm
 
 
 admin.site.register(FOIARequest, FOIARequestAdmin)
 admin.site.register(FOIACommunication, FOIACommunicationAdmin)
-admin.site.register(FOIAMultiRequest, FOIAMultiRequestAdmin)
-admin.site.register(OutboundAttachment, OutboundAttachmentAdmin)
+admin.site.register(FOIAComposer, FOIAComposerAdmin)
+admin.site.register(OutboundRequestAttachment, OutboundRequestAttachmentAdmin)
+admin.site.register(OutboundComposerAttachment, OutboundComposerAttachmentAdmin)

@@ -9,7 +9,7 @@ from django.test import TestCase
 import nose.tools
 
 # MuckRock
-from muckrock.factories import FOIACommunicationFactory
+from muckrock.foia.factories import FOIACommunicationFactory
 from muckrock.foia.tasks import classify_status
 from muckrock.task.factories import ResponseTaskFactory
 

@@ -85,7 +85,7 @@
               {% endif %}
               headerFilter: {{field.editor|safe}},
               {% if field.type == "choice" or field.type == "bool" %}
-                headerFilterParams: {choices: [{% for choice in field.choices %}"{{choice}}",{% endfor %}]},
+                headerFilterParams: {choices: [{% for choice in field.choices %}"{{ choice|escapejs }}",{% endfor %}]},
               {% endif %}
             },
           {% endfor %}

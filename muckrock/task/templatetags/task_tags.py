@@ -142,6 +142,12 @@ class NewAgencyTaskNode(TaskNode):
             instance=self.task.agency,
             initial=initial,
         )
+        extra_context['replace_form'] = task.forms.ReplaceNewAgencyForm(
+            initial={
+                'replace_jurisdiction': self.task.agency.jurisdiction
+            }
+        )
+
         return extra_context
 
 
@@ -250,12 +256,13 @@ class PortalTaskNode(TaskNode):
                     'tracking_number': foia_.current_tracking_id(),
                     'date_estimate': foia_.date_estimate,
                     'communication': self.task.communication.communication,
+                    'word_to_pass': foia_.portal_password,
                 }
                 extra_context['previous_communications'
                               ] = foia_.reverse_communications
             else:
                 form_initial = {}
-            extra_context['form'] = task.forms.ResponseTaskForm(
+            extra_context['form'] = task.forms.IncomingPortalForm(
                 initial=form_initial
             )
             extra_context['attachments'] = self.task.communication.files.all()

@@ -285,9 +285,70 @@ $('document').ready(function(){
 
 /* Contact Info */
 
-$('document').ready(function(){
+function formatCC(ccEmails) {
+  if (ccEmails.length == 1) {
+    return ccEmails[0];
+  } else {
+    return ccEmails.slice(0, -1).join(" ,") + " and " + ccEmails[ccEmails.length - 1];
+  }
+}
 
-  var origHtml = $(".contact-info .info span").html();
+export default function showOrigContactInfo() {
+  var
+  portalType = $(".contact-info .info").data("portal-type"),
+  portalURL = $(".contact-info .info").data("portal-url"),
+  email = $(".contact-info .info").data("email"),
+  ccEmails = $(".contact-info .info").data("cc-emails"),
+  fax = $(".contact-info .info").data("fax"),
+  address = $(".contact-info .info").data("address"),
+  type = $(".contact-info .info").data("type");
+
+  if (type === "portal") {
+    $(".contact-info .info span").text("will be submitted via a portal.");
+  } else if (type === "email") {
+    $(".contact-info .info span").text("will be submitted via email.");
+  } else if (type === "fax") {
+    $(".contact-info .info span").text("will be submitted via fax.");
+  } else if (type === "snail") {
+    $(".contact-info .info span").text("will be submitted via mail.");
+  } else if (type === "none") {
+    $(".contact-info .info span").text("currently has no valid contact information.  We will review it and find a suitable means of submitting it for you.");
+  } else if (portalURL) {
+    $(".contact-info .info span").text(
+      "will be submitted via the "
+    ).append(
+      portalType
+    ).append(
+      " portal, located at "
+    ).append(
+      portalURL
+    ).append(".");
+  } else if (email) {
+    var text = "will be submitted via email to " + email;
+    if (ccEmails.length > 0) {
+      text += ", as well as CCed to " + formatCC(ccEmails);
+    }
+    text += ".";
+    $(".contact-info .info span").text(text);
+  } else if (fax) {
+    $(".contact-info .info span").text(
+      "will be submitted via fax to "
+    ).append(
+      fax
+    ).append(".");
+  } else if (address) {
+    $(".contact-info .info span").text(
+      "will be submitted via mail to "
+    ).append(
+      address
+    ).append(".");
+  } else {
+    $(".contact-info .info span").text("currently has no valid contact information.  We will review it and find a suitable means of submitting it for you.");
+  }
+
+}
+
+$('document').ready(function(){
 
   $(".contact-info .see-where").click(function(e) {
     e.preventDefault();
@@ -299,7 +360,7 @@ $('document').ready(function(){
     e.preventDefault();
     $(".contact-info .form").show();
     $(".contact-info .change").hide();
-    $(".contact-info #use_contact_information").val(true);
+    $("#id_use_contact_information").val(true);
 
     $(".contact-info #id_email").change();
     $(".contact-info #id_fax").change();
@@ -309,11 +370,12 @@ $('document').ready(function(){
     e.preventDefault();
     $(".contact-info .form").hide();
     $(".contact-info .change").show();
-    $(".contact-info #use_contact_information").val(false);
-    $(".contact-info .info span").html(origHtml);
+    $("#id_use_contact_information").val(false);
     $(".contact-info #id_other_email").removeAttr("required");
     $(".contact-info #id_other_fax").removeAttr("required");
+    showOrigContactInfo();
   });
+  showOrigContactInfo();
 
   $(".contact-info #id_via").change(function() {
     if($(this).val() === "email") {
@@ -335,10 +397,14 @@ $('document').ready(function(){
       $(".contact-info #id_other_fax").removeAttr("required");
     }
     if($(this).val() === "snail") {
-      $(".contact-info .info span").text(
-        "will be submitted via mail to " +
-        $(".contact-info .info").data("address") + "."
-      );
+      if($(".contact-info .info").data("address")) {
+        $(".contact-info .info span").text(
+          "will be submitted via mail to " +
+          $(".contact-info .info").data("address") + "."
+        );
+      } else {
+        $(".contact-info .info span").text("will be submitted via mail.");
+      }
     } else if($(this).val() == "portal") {
       var portal_url = $(".contact-info .info").data("portal-url");
       $(".contact-info .info span").text(

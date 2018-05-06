@@ -231,19 +231,6 @@ class SearchView(SearchMixin, MRListView):
 class NewsletterSignupView(View):
     """Allows users to signup for our MailChimp newsletter."""
 
-    def get(self, request, *args, **kwargs):
-        """Returns a signup form"""
-        template = 'forms/newsletter.html'
-        context = {
-            'form':
-                NewsletterSignupForm(
-                    initial={
-                        'list': settings.MAILCHIMP_LIST_DEFAULT
-                    }
-                )
-        }
-        return render(request, template, context)
-
     def redirect_url(self, request):
         """If a next url is provided, redirect there. Otherwise, redirect to the index."""
         next_ = request.GET.get('next', 'index')
@@ -259,14 +246,14 @@ class NewsletterSignupView(View):
 
     def form_invalid(self, request, form):
         """If the form is invalid, then either a bad or no email was provided."""
-        _email = form.data['email']
+        email = form.data['email']
         # if they provided an email, then it is invalid
         # if they didn't, then they're just being dumb!
-        if _email:
-            # _email needs to be escaped as messages are marked as safe
-            # and _email is user supplied - failure to do so is a
+        if email:
+            # email needs to be escaped as messages are marked as safe
+            # and email is user supplied - failure to do so is a
             # XSS vulnerability
-            msg = '%s is not a valid email address.' % escape(_email)
+            msg = '%s is not a valid email address.' % escape(email)
         else:
             msg = 'You forgot to enter an email!'
         messages.error(request, msg)
@@ -274,20 +261,18 @@ class NewsletterSignupView(View):
 
     def form_valid(self, request, form):
         """If the form is valid, try subscribing the email to our MailChimp newsletters."""
-        _email = form.cleaned_data['email']
-        _list = form.cleaned_data['list']
-        _default = form.cleaned_data['default']
-        default_list = settings.MAILCHIMP_LIST_DEFAULT if _default else None
+        email = form.cleaned_data['email']
+        list_ = form.cleaned_data['list']
+        default = form.cleaned_data['default']
+        default_list = settings.MAILCHIMP_LIST_DEFAULT if default else None
         # First try subscribing the user to the list they are signing up for.
-        primary_error = mailchimp_subscribe(request, _email, _list)
+        primary_error = mailchimp_subscribe(request, email, list_)
         # Add the user to the default list if they want to be added.
         # If an error occurred with the first subscription,
         # don't try signing up for the default list.
         # If an error occurs with this subscription, don't worry about it.
-        if default_list is not None and default_list != _list and not primary_error:
-            mailchimp_subscribe(
-                request, _email, default_list, suppress_msg=True
-            )
+        if default_list is not None and default_list != list_ and not primary_error:
+            mailchimp_subscribe(request, email, default_list, suppress_msg=True)
         return self.redirect_url(request)
 
 
@@ -322,13 +307,9 @@ class Homepage(object):
         """Get recently completed requests"""
         return lambda: (
             FOIARequest.objects.get_public().get_done().
-            order_by('-date_done', 'pk').select_related(
-                'agency',
-                'agency__jurisdiction',
-                'jurisdiction',
-                'jurisdiction__parent',
-                'jurisdiction__parent__parent',
-                'user',
+            order_by('-datetime_done', 'pk').select_related(
+                'agency__jurisdiction__parent__parent',
+                'composer__user',
             ).only(
                 'status',
                 'slug',
@@ -336,24 +317,24 @@ class Homepage(object):
                 'agency__name',
                 'agency__slug',
                 'agency__jurisdiction__slug',
-                'jurisdiction__level',
-                'jurisdiction__name',
-                'jurisdiction__slug',
-                'jurisdiction__parent__abbrev',
-                'jurisdiction__parent__name',
-                'jurisdiction__parent__slug',
-                'jurisdiction__parent__parent__slug',
-                'user__username',
-                'user__first_name',
-                'user__last_name',
+                'agency__jurisdiction__level',
+                'agency__jurisdiction__name',
+                'agency__jurisdiction__parent__abbrev',
+                'agency__jurisdiction__parent__name',
+                'agency__jurisdiction__parent__slug',
+                'agency__jurisdiction__parent__parent__slug',
+                'composer__user__username',
+                'composer__user__first_name',
+                'composer__user__last_name',
             ).get_public_file_count(limit=6)
         )
 
     def stats(self):
         """Get some stats to show on the front page"""
+        # pylint: disable=unnecessary-lambda
         return {
             'request_count':
-                lambda: FOIARequest.objects.exclude(status='started').count(),
+                lambda: FOIARequest.objects.count(),
             'completed_count':
                 lambda: FOIARequest.objects.get_done().count(),
             'page_count':

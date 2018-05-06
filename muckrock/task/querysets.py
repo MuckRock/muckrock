@@ -94,7 +94,7 @@ class OrphanTaskQuerySet(TaskQuerySet):
         """Preloadrelations for list display"""
         return (
             self.select_related(
-                'communication__likely_foia__jurisdiction',
+                'communication__likely_foia__agency__jurisdiction',
                 'resolved_by',
             ).prefetch_related(
                 'communication__files',
@@ -128,8 +128,7 @@ class SnailMailTaskQuerySet(TaskQuerySet):
                 'communication__foia__agency__appeal_agency__portal',
                 'communication__foia__agency__jurisdiction__law',
                 'communication__foia__agency__jurisdiction__parent__law',
-                'communication__foia__user',
-                'communication__foia__jurisdiction',
+                'communication__foia__composer__user',
                 'communication__foia__address',
                 'resolved_by',
             ).prefetch_related(
@@ -184,7 +183,7 @@ class SnailMailTaskQuerySet(TaskQuerySet):
             self.select_related(
                 'communication__foia__address',
                 'communication__foia__agency',
-                'communication__foia__user',
+                'communication__foia__composer__user',
                 'communication__from_user',
             ).prefetch_related(
                 'communication__files',
@@ -231,7 +230,7 @@ class FlaggedTaskQuerySet(TaskQuerySet):
         """Preload relations for list display"""
         return self.select_related(
             'agency',
-            'foia__jurisdiction',
+            'foia__agency__jurisdiction',
             'jurisdiction',
             'user',
             'resolved_by',
@@ -262,7 +261,8 @@ class ProjectReviewTaskQuerySet(TaskQuerySet):
             ).prefetch_related(
                 Prefetch(
                     'project__requests',
-                    queryset=FOIARequest.objects.select_related('jurisdiction'),
+                    queryset=FOIARequest.objects.
+                    select_related('agency__jurisdiction'),
                 ),
                 'project__articles',
                 'project__contributors',
@@ -303,11 +303,12 @@ class NewAgencyTaskQuerySet(TaskQuerySet):
                 ),
                 Prefetch(
                     'agency__foiarequest_set',
-                    queryset=FOIARequest.objects.select_related('jurisdiction')
+                    queryset=FOIARequest.objects.
+                    select_related('agency__jurisdiction')
                 ),
                 Prefetch(
                     'agency__jurisdiction__agencies',
-                    queryset=Agency.objects.filter(status='approved'
+                    queryset=Agency.objects.filter(status='approved',
                                                    ).order_by('name'),
                     to_attr='other_agencies'
                 )
@@ -365,19 +366,18 @@ class ResponseTaskQuerySet(TaskQuerySet):
         """Preload relations for list display"""
         return (
             self.select_related(
-                'communication__foia__agency',
-                'communication__foia__jurisdiction',
+                'communication__foia__agency__jurisdiction',
                 'communication__from_user__profile__agency',
                 'resolved_by',
             ).prefetch_related(
                 Prefetch(
                     'communication__files',
                     queryset=FOIAFile.objects.
-                    select_related('comm__foia__jurisdiction')
+                    select_related('comm__foia__agency__jurisdiction')
                 ),
                 Prefetch(
                     'communication__foia__communications',
-                    queryset=FOIACommunication.objects.order_by('-date')
+                    queryset=FOIACommunication.objects.order_by('-datetime')
                     .select_related('from_user__profile__agency')
                     .prefetch_related(
                         'files',
@@ -409,7 +409,7 @@ class StatusChangeTaskQuerySet(TaskQuerySet):
     def preload_list(self):
         """Preload relations for list display"""
         return self.select_related(
-            'foia__jurisdiction',
+            'foia__agency__jurisdiction',
             'user',
             'resolved_by',
         )
@@ -421,7 +421,7 @@ class CrowdfundTaskQuerySet(TaskQuerySet):
     def preload_list(self):
         """Preload relations for list display"""
         return self.select_related(
-            'crowdfund__foia__jurisdiction',
+            'crowdfund__foia__agency__jurisdiction',
             'resolved_by',
         )
 
@@ -433,9 +433,9 @@ class MultiRequestTaskQuerySet(TaskQuerySet):
         """Preload relations for list display"""
         return (
             self.select_related(
-                'multirequest__user',
+                'composer__user',
                 'resolved_by',
-            ).prefetch_related('multirequest__agencies')
+            ).prefetch_related('composer__agencies')
         )
 
 
@@ -446,7 +446,6 @@ class NewExemptionTaskQuerySet(TaskQuerySet):
         """Preload relations for list display"""
         return self.select_related(
             'foia__agency__jurisdiction__parent',
-            'foia__jurisdiction__parent',
             'user',
             'resolved_by',
         )
@@ -459,9 +458,8 @@ class PortalTaskQuerySet(TaskQuerySet):
         """Preload relations for list display"""
         return (
             self.select_related(
-                'communication__foia__agency',
-                'communication__foia__jurisdiction',
-                'communication__foia__user',
+                'communication__foia__agency__jurisdiction',
+                'communication__foia__composer__user',
                 'communication__foia__portal',
                 'communication__from_user__profile',
                 'resolved_by',
@@ -473,7 +471,7 @@ class PortalTaskQuerySet(TaskQuerySet):
                 ),
                 Prefetch(
                     'communication__foia__communications',
-                    queryset=FOIACommunication.objects.order_by('-date')
+                    queryset=FOIACommunication.objects.order_by('-datetime')
                     .select_related(
                         'from_user__profile',
                     ).prefetch_related(

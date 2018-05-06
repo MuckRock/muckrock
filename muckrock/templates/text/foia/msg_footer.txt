@@ -1,5 +1,5 @@
 {% autoescape off %}Filed via MuckRock.com
-E-mail (Preferred): {{ request.get_mail_id }}@requests.muckrock.com
+E-mail (Preferred): {{ request.get_request_email }}
 {% if reply_link %}Upload documents directly: https://www.muckrock.com{{ reply_link }}#agency-reply
 Is this email coming to the wrong contact?  Something else wrong?  Use the above link to let us know.
 {% endif %}

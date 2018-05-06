@@ -46,6 +46,11 @@ input.autocomplete.xhr-pending { background-image: none; }
       font-size: $size-2;
     }
   }
+  .choice .exempt-note {
+    font-size: $size-3;
+    margin-left:  $vr;
+    font-style: italic;
+  }
 }
 
 .autocomplete-light-widget .choice {
@@ -103,4 +108,18 @@ input.autocomplete.xhr-pending { background-image: none; }
     color: $color-black;
     width: 100%;
   }
+}
+
+.autocomplete-light-widget.yourlabs-autocomplete .choice__text.selected-option {
+  display: none;
+}
+
+.autocomplete-light-widget.agencies .choice__text.menu-option {
+  display: none;
+}
+
+.autocomplete-light-widget.agencies a {
+  text-decoration: underline;
+  color: lighten($color-blue, 30%);
+  &:hover { color: lighten($color-blue, 20%); }
 }

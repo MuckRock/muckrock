@@ -4,7 +4,6 @@ Tests for Tasks models
 
 # Django
 from django.core.urlresolvers import reverse
-from django.http import Http404
 from django.test import TestCase
 from django.utils import timezone
 
@@ -13,23 +12,42 @@ import logging
 
 # Third Party
 import mock
-import nose
+from nose.tools import assert_false, eq_, ok_, raises
 
 # MuckRock
-from muckrock import factories, task
 from muckrock.communication.models import EmailAddress
+from muckrock.factories import AgencyFactory, OrganizationFactory, UserFactory
+from muckrock.foia.factories import (
+    FOIACommunicationFactory,
+    FOIAComposerFactory,
+    FOIARequestFactory,
+    StaleFOIARequestFactory,
+)
 from muckrock.foia.models import FOIANote, FOIARequest
 from muckrock.jurisdiction.factories import StateJurisdictionFactory
-from muckrock.task.factories import FlaggedTaskFactory, ProjectReviewTaskFactory
+from muckrock.task.factories import (
+    FlaggedTaskFactory,
+    NewExemptionTaskFactory,
+    ProjectReviewTaskFactory,
+    StaleAgencyTaskFactory,
+)
+from muckrock.task.forms import ResponseTaskForm
+from muckrock.task.models import (
+    BlacklistDomain,
+    FlaggedTask,
+    MultiRequestTask,
+    NewAgencyTask,
+    OrphanTask,
+    ResponseTask,
+    SnailMailTask,
+    StatusChangeTask,
+    Task,
+)
 from muckrock.task.signals import domain_blacklist
 
-ok_ = nose.tools.ok_
-eq_ = nose.tools.eq_
-raises = nose.tools.raises
 mock_send = mock.Mock()
 
 # pylint: disable=missing-docstring
-# pylint: disable=line-too-long
 # pylint: disable=protected-access
 
 
@@ -37,7 +55,7 @@ class TaskTests(TestCase):
     """Test the Task base class"""
 
     def setUp(self):
-        self.task = task.models.Task.objects.create()
+        self.task = Task.objects.create()
 
     def test_task_creates_successfully(self):
         ok_(self.task, 'Tasks given no arguments should create successfully')
@@ -66,7 +84,7 @@ class TaskTests(TestCase):
 
     def test_resolve_with_user(self):
         """Tasks should record the user responsible for the resolution."""
-        user = factories.UserFactory()
+        user = UserFactory()
         self.task.resolve(user)
         eq_(
             self.task.resolved_by, user,
@@ -78,13 +96,13 @@ class OrphanTaskTests(TestCase):
     """Test the OrphanTask class"""
 
     def setUp(self):
-        self.comm = factories.FOIACommunicationFactory(
+        self.comm = FOIACommunicationFactory(
             email__from_email__email='test@example.com',
         )
-        self.task = task.models.OrphanTask.objects.create(
+        self.task = OrphanTask.objects.create(
             reason='ib', communication=self.comm, address='Whatever Who Cares'
         )
-        self.user = factories.UserFactory()
+        self.user = UserFactory()
 
     def test_get_absolute_url(self):
         eq_(
@@ -101,14 +119,16 @@ class OrphanTaskTests(TestCase):
         )
 
     def test_move(self):
-        """Should move the communication to the listed requests and create a ResponseTask for each new communication."""
-        foia1 = factories.FOIARequestFactory()
-        foia2 = factories.FOIARequestFactory()
-        foia3 = factories.FOIARequestFactory()
-        count_response_tasks = task.models.ResponseTask.objects.count()
+        """Should move the communication to the listed requests and create a
+        ResponseTask for each new communication.
+        """
+        foia1 = FOIARequestFactory()
+        foia2 = FOIARequestFactory()
+        foia3 = FOIARequestFactory()
+        count_response_tasks = ResponseTask.objects.count()
         self.task.move([foia1.pk, foia2.pk, foia3.pk], self.user)
         eq_(
-            task.models.ResponseTask.objects.count(), count_response_tasks + 3,
+            ResponseTask.objects.count(), count_response_tasks + 3,
             'Reponse tasks should be created for each communication moved.'
         )
 
@@ -123,18 +143,18 @@ class OrphanTaskTests(TestCase):
     def test_blacklist(self):
         """A blacklisted orphan should add its sender's domain to the blacklist"""
         self.task.blacklist()
-        ok_(task.models.BlacklistDomain.objects.filter(domain='example.com'))
+        ok_(BlacklistDomain.objects.filter(domain='example.com'))
 
     def test_blacklist_duplicate(self):
         """The blacklist method should not crash when a domain is dupliacted."""
-        task.models.BlacklistDomain.objects.create(domain='muckrock.com')
-        task.models.BlacklistDomain.objects.create(domain='muckrock.com')
+        BlacklistDomain.objects.create(domain='muckrock.com')
+        BlacklistDomain.objects.create(domain='muckrock.com')
         self.task.blacklist()
-        ok_(task.models.BlacklistDomain.objects.filter(domain='muckrock.com'))
+        ok_(BlacklistDomain.objects.filter(domain='muckrock.com'))
 
     def test_resolve_after_blacklisting(self):
         """After blacklisting, other orphan tasks from the sender should be resolved."""
-        other_task = task.models.OrphanTask.objects.create(
+        other_task = OrphanTask.objects.create(
             reason='ib', communication=self.comm, address='Whatever Who Cares'
         )
         self.task.blacklist()
@@ -147,11 +167,11 @@ class OrphanTaskTests(TestCase):
         self.task.blacklist()
         self.task.refresh_from_db()
         ok_(self.task.resolved)
-        new_orphan = task.models.OrphanTask.objects.create(
+        new_orphan = OrphanTask.objects.create(
             reason='ib', communication=self.comm, address='orphan-address'
         )
         # manually call the method since the signal isn't triggering during testing
-        domain_blacklist(task.models.OrphanTask, new_orphan, True)
+        domain_blacklist(OrphanTask, new_orphan, True)
         new_orphan.refresh_from_db()
         logging.debug(new_orphan.resolved)
         ok_(new_orphan.resolved)
@@ -162,12 +182,12 @@ class FlaggedTaskTests(TestCase):
     """Test the FlaggedTask class"""
 
     def setUp(self):
-        self.task = task.models.FlaggedTask
+        self.task = FlaggedTask
 
     def test_get_absolute_url(self):
         text = 'Lorem ipsum'
-        user = factories.UserFactory()
-        foia = factories.FOIARequestFactory()
+        user = UserFactory()
+        foia = FOIARequestFactory()
         flagged_task = self.task.objects.create(user=user, foia=foia, text=text)
         _url = reverse('flagged-task', kwargs={'pk': flagged_task.pk})
         eq_(flagged_task.get_absolute_url(), _url)
@@ -175,9 +195,9 @@ class FlaggedTaskTests(TestCase):
     def test_flagged_object(self):
         """A flagged task should be able to return its object."""
         text = 'Lorem ipsum'
-        user = factories.UserFactory()
-        foia = factories.FOIARequestFactory()
-        agency = factories.AgencyFactory()
+        user = UserFactory()
+        foia = FOIARequestFactory()
+        agency = AgencyFactory()
         jurisdiction = StateJurisdictionFactory()
         flagged_foia_task = self.task.objects.create(
             user=user, foia=foia, text=text
@@ -196,7 +216,7 @@ class FlaggedTaskTests(TestCase):
     def test_no_flagged_object(self):
         """Should raise an error if no flagged object"""
         text = 'Lorem ipsum'
-        user = factories.UserFactory()
+        user = UserFactory()
         flagged_task = self.task.objects.create(user=user, text=text)
         flagged_task.flagged_object()
 
@@ -221,7 +241,7 @@ class ProjectReviewTaskTests(TestCase):
 
     def setUp(self):
         self.task = ProjectReviewTaskFactory()
-        contributor = factories.UserFactory()
+        contributor = UserFactory()
         self.task.project.contributors.add(contributor)
 
     def test_get_aboslute_url(self):
@@ -252,8 +272,8 @@ class SnailMailTaskTests(TestCase):
     """Test the SnailMailTask class"""
 
     def setUp(self):
-        self.comm = factories.FOIACommunicationFactory()
-        self.task = task.models.SnailMailTask.objects.create(
+        self.comm = FOIACommunicationFactory()
+        self.task = SnailMailTask.objects.create(
             category='a', communication=self.comm
         )
 
@@ -297,7 +317,7 @@ class SnailMailTaskTests(TestCase):
 
     def test_record_check(self):
         """When given a check number, a note should be attached to the request."""
-        user = factories.UserFactory(is_staff=True)
+        user = UserFactory(is_staff=True)
         check_number = 1
         self.task.amount = 100.00
         self.task.save()
@@ -309,7 +329,7 @@ class StaleAgencyTaskTests(TestCase):
     """Test the StaleAgencyTask class"""
 
     def setUp(self):
-        self.task = task.factories.StaleAgencyTaskFactory()
+        self.task = StaleAgencyTaskFactory()
         self.foia = FOIARequest.objects.filter(agency=self.task.agency).first()
 
     def test_get_absolute_url(self):
@@ -325,10 +345,10 @@ class StaleAgencyTaskTests(TestCase):
         The stale agency task should provide a list of open requests which have not
         recieved any response since the stale duration
         """
-        closed_foia = factories.StaleFOIARequestFactory(
+        closed_foia = StaleFOIARequestFactory(
             agency=self.task.agency, status='done'
         )
-        no_response = factories.StaleFOIARequestFactory(
+        no_response = StaleFOIARequestFactory(
             agency=self.task.agency, stale_comm__response=False
         )
         stale_requests = list(self.task.stale_requests())
@@ -382,9 +402,9 @@ class NewAgencyTaskTests(TestCase):
     """Test the NewAgencyTask class"""
 
     def setUp(self):
-        self.user = factories.UserFactory()
-        self.agency = factories.AgencyFactory(status='pending')
-        self.task = task.models.NewAgencyTask.objects.create(
+        self.user = UserFactory()
+        self.agency = AgencyFactory(status='pending')
+        self.task = NewAgencyTask.objects.create(
             user=self.user, agency=self.agency
         )
 
@@ -403,29 +423,18 @@ class NewAgencyTaskTests(TestCase):
         )
 
     @mock.patch('muckrock.foia.models.FOIARequest.submit')
-    def test_approve(self, mock_submit):
-        submitted_foia = factories.FOIARequestFactory(
+    def _test_approve(self, mock_submit):
+        submitted_foia = FOIARequestFactory(
             agency=self.agency, status='submitted'
         )
-        factories.FOIACommunicationFactory(foia=submitted_foia)
-        drafted_foia = factories.FOIARequestFactory(
-            agency=self.agency, status='started'
-        )
-        factories.FOIACommunicationFactory(foia=drafted_foia)
+        FOIACommunicationFactory(foia=submitted_foia)
         self.task.approve()
-        eq_(
-            self.task.agency.status, 'approved',
-            'Approving a new agency should actually, you know, approve the agency.'
-        )
-        # since we have 1 draft and 1 nondraft FOIA, we should expect submit() to be called once
-        eq_(
-            mock_submit.call_count, 1,
-            'Approving a new agency should resubmit non-draft FOIAs associated with that agency.'
-        )
+        eq_(self.task.agency.status, 'approved')
+        eq_(mock_submit.call_count, 1)
 
     def test_reject(self):
-        replacement = factories.AgencyFactory()
-        existing_foia = factories.FOIARequestFactory(agency=self.agency)
+        replacement = AgencyFactory()
+        existing_foia = FOIARequestFactory(agency=self.agency)
         self.task.reject(replacement)
         existing_foia.refresh_from_db()
         eq_(
@@ -438,28 +447,25 @@ class NewAgencyTaskTests(TestCase):
         )
 
     def test_spam(self):
-        existing_foia = factories.FOIARequestFactory(
+        existing_foia = FOIARequestFactory(
             agency=self.agency,
             status='submitted',
         )
         self.task.spam()
-        existing_foia.refresh_from_db()
         eq_(self.agency.status, 'rejected')
-        nose.tools.assert_false(self.user.is_active)
-        eq_(existing_foia.status, 'started')
+        assert_false(self.user.is_active)
+        assert_false(FOIARequest.objects.filter(pk=existing_foia.pk).exists())
 
 
 class ResponseTaskTests(TestCase):
     """Test the ResponseTask class"""
 
     def setUp(self):
-        agency = factories.AgencyFactory()
-        comm = factories.FOIACommunicationFactory(
-            response=True, foia__agency=agency
-        )
-        self.task = task.models.ResponseTask.objects.create(communication=comm)
-        self.form = task.forms.ResponseTaskForm()
-        self.user = factories.UserFactory()
+        agency = AgencyFactory()
+        comm = FOIACommunicationFactory(response=True, foia__agency=agency)
+        self.task = ResponseTask.objects.create(communication=comm)
+        self.form = ResponseTaskForm()
+        self.user = UserFactory()
 
     def test_get_absolute_url(self):
         eq_(
@@ -478,7 +484,7 @@ class ResponseTaskTests(TestCase):
     def test_set_status_to_ack(self):
         self.form.set_status('ack', True, [self.task.communication])
         eq_(
-            self.task.communication.foia.date_done, None,
+            self.task.communication.foia.datetime_done, None,
             'The FOIA should not be set to done if the status does not indicate it is done.'
         )
         eq_(
@@ -493,7 +499,7 @@ class ResponseTaskTests(TestCase):
     def test_set_status_to_done(self):
         self.form.set_status('done', True, [self.task.communication])
         eq_(
-            self.task.communication.foia.date_done is None, False,
+            self.task.communication.foia.datetime_done is None, False,
             'The FOIA should be set to done if the status indicates it is done.'
         )
         eq_(
@@ -511,7 +517,7 @@ class ResponseTaskTests(TestCase):
         self.form.set_status('done', False, [self.task.communication])
         foia.refresh_from_db()
         eq_(
-            foia.date_done is None, True,
+            foia.datetime_done is None, True,
             'The FOIA should not be set to done because we are not settings its status.'
         )
         eq_(
@@ -549,9 +555,10 @@ class ResponseTaskTests(TestCase):
         )
 
     def test_move(self):
-        move_to_foia = factories.FOIARequestFactory()
+        move_to_foia = FOIARequestFactory()
         self.form.move_communication(
-            self.task.communication, move_to_foia.pk, self.user
+            self.task.communication,
+            [move_to_foia.pk], self.user
         )
         eq_(
             self.task.communication.foia, move_to_foia,
@@ -568,10 +575,12 @@ class ResponseTaskTests(TestCase):
         """Should raise an error if not given a string."""
         self.form.set_tracking_id(['foo'], [self.task.communication])
 
-    @raises(Http404)
+    @raises(ValueError)
     def test_bad_move(self):
-        """Should raise a 404 if non-existant move destination."""
-        self.form.move_communication(self.task.communication, 111111, self.user)
+        """Should raise a value error if non-existant move destination."""
+        self.form.move_communication(
+            self.task.communication, [111111], self.user
+        )
 
     @raises(ValueError)
     def test_bad_price(self):
@@ -584,7 +593,7 @@ class TestNewExemptionTask(TestCase):
     document the use of exemptions, and use them to create new ones."""
 
     def setUp(self):
-        self.task = task.factories.NewExemptionTaskFactory()
+        self.task = NewExemptionTaskFactory()
 
     def test_get_absolute_url(self):
         eq_(
@@ -599,9 +608,9 @@ class MultiRequestTaskTests(TestCase):
     """Test the MultiRequestTask class"""
 
     def setUp(self):
-        self.agencies = factories.AgencyFactory.create_batch(6)
-        self.organization = factories.OrganizationFactory(num_requests=100)
-        self.multi = factories.FOIAMultiRequestFactory(
+        self.agencies = AgencyFactory.create_batch(6)
+        self.organization = OrganizationFactory(num_requests=100)
+        self.composer = FOIAComposerFactory(
             status='submitted',
             agencies=self.agencies,
             num_org_requests=1,
@@ -611,9 +620,7 @@ class MultiRequestTaskTests(TestCase):
             user__profile__monthly_requests=10,
             user__profile__organization=self.organization,
         )
-        self.task = task.models.MultiRequestTask.objects.create(
-            multirequest=self.multi,
-        )
+        self.task = MultiRequestTask.objects.create(composer=self.composer)
 
     def test_get_absolute_url(self):
         eq_(
@@ -628,22 +635,19 @@ class MultiRequestTaskTests(TestCase):
         agency_list = [str(a.pk) for a in self.agencies[:4]]
         self.task.submit(agency_list)
         eq_(
-            set(self.multi.agencies.all()),
+            set(self.composer.agencies.all()),
             set(self.agencies[:4]),
         )
-        self.multi.refresh_from_db()
-        eq_(self.multi.status, 'filed')
-        eq_(FOIARequest.objects.filter(multirequest=self.multi).count(), 4)
 
     def test_reject(self):
         """Test rejecting the request"""
         self.task.reject()
         eq_(
-            set(self.multi.agencies.all()),
+            set(self.composer.agencies.all()),
             set(self.agencies),
         )
-        eq_(self.multi.status, 'started')
-        eq_(FOIARequest.objects.filter(multirequest=self.multi).count(), 0)
+        eq_(self.composer.status, 'started')
+        eq_(FOIARequest.objects.filter(composer=self.composer).count(), 0)
 
     def test_calc_return_requests(self):
         """Test calculating the return requests"""
@@ -660,25 +664,11 @@ class MultiRequestTaskTests(TestCase):
             eq_(
                 self.task._calc_return_requests(total),
                 {
-                    'reg': reg,
+                    'regular': reg,
                     'monthly': monthly,
                     'org': org,
                 },
             )
-
-    def test_do_return_requests(self):
-        """Test return requests"""
-        self.task._do_return_requests({
-            'reg': 2,
-            'monthly': 0,
-            'org': 1,
-        })
-        eq_(self.multi.num_reg_requests, 1)
-        eq_(self.multi.num_monthly_requests, 2)
-        eq_(self.multi.num_org_requests, 0)
-        eq_(self.multi.user.profile.num_requests, 7)
-        eq_(self.multi.user.profile.monthly_requests, 10)
-        eq_(self.multi.user.profile.organization.num_requests, 101)
 
 
 class TestTaskManager(TestCase):
@@ -688,30 +678,24 @@ class TestTaskManager(TestCase):
         'muckrock.message.notifications.SlackNotification.send', mock_send
     )
     def setUp(self):
-        user = factories.UserFactory()
-        agency = factories.AgencyFactory(status='pending')
-        self.foia = factories.FOIARequestFactory(user=user, agency=agency)
-        self.comm = factories.FOIACommunicationFactory(
-            foia=self.foia, response=True
-        )
+        user = UserFactory()
+        agency = AgencyFactory(status='pending')
+        self.foia = FOIARequestFactory(composer__user=user, agency=agency)
+        self.comm = FOIACommunicationFactory(foia=self.foia, response=True)
         # tasks that incorporate FOIAs are:
         # ResponseTask, SnailMailTask, FlaggedTask,
         # StatusChangeTask, NewAgencyTask
-        response_task = task.models.ResponseTask.objects.create(
-            communication=self.comm
-        )
-        snail_mail_task = task.models.SnailMailTask.objects.create(
+        response_task = ResponseTask.objects.create(communication=self.comm)
+        snail_mail_task = SnailMailTask.objects.create(
             category='a', communication=self.comm
         )
-        flagged_task = task.models.FlaggedTask.objects.create(
+        flagged_task = FlaggedTask.objects.create(
             user=user, text='Halp', foia=self.foia
         )
-        status_change_task = task.models.StatusChangeTask.objects.create(
+        status_change_task = StatusChangeTask.objects.create(
             user=user, old_status='ack', foia=self.foia
         )
-        new_agency_task = task.models.NewAgencyTask.objects.create(
-            user=user, agency=agency
-        )
+        new_agency_task = NewAgencyTask.objects.create(user=user, agency=agency)
         self.tasks = [
             response_task, snail_mail_task, flagged_task, status_change_task,
             new_agency_task
@@ -722,12 +706,8 @@ class TestTaskManager(TestCase):
         The task manager should return all tasks that explictly
         or implicitly reference the provided FOIA.
         """
-        staff_user = factories.UserFactory(
-            is_staff=True, profile__acct_type='admin'
-        )
-        returned_tasks = task.models.Task.objects.filter_by_foia(
-            self.foia, staff_user
-        )
+        staff_user = UserFactory(is_staff=True, profile__acct_type='admin')
+        returned_tasks = Task.objects.filter_by_foia(self.foia, staff_user)
         eq_(
             returned_tasks, self.tasks,
             'The manager should return all the tasks that incorporate this FOIA.'

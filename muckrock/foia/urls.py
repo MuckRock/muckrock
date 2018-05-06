@@ -24,9 +24,6 @@ old_foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
 urlpatterns = [
     url(r'^$', views.RequestExploreView.as_view(), name='foia-root'),
 
-    # Redirects
-    url(r'^multi/$', RedirectView.as_view(url='/foia/create_multi')),
-
     # List Views
     url(r'^list/$', views.RequestList.as_view(), name='foia-list'),
     url(r'^mylist/$', views.MyRequestList.as_view(), name='foia-mylist'),
@@ -41,11 +38,6 @@ urlpatterns = [
         name='foia-agency-list',
     ),
     url(
-        r'^mylist/multirequest/$',
-        views.MyMultiRequestList.as_view(),
-        name='foia-mymulti',
-    ),
-    url(
         r'^list/following/$',
         views.FollowingRequestList.as_view(),
         name='foia-list-following',
@@ -55,17 +47,27 @@ urlpatterns = [
         views.ProcessingRequestList.as_view(),
         name='foia-list-processing',
     ),
+    url(
+        r'^mylist/drafts/$',
+        views.ComposerList.as_view(),
+        name='foia-mylist-drafts',
+    ),
 
     # Create and Draft Views
-    url(r'^create/$', views.CreateRequest.as_view(), name='foia-create'),
-    url(r'^%s/draft/$' % foia_url, views.draft_request, name='foia-draft'),
+    url(r'^create/$', views.CreateComposer.as_view(), name='foia-create'),
     url(
-        r'^create_multi/$', views.create_multirequest, name='foia-create-multi'
+        r'^(?P<idx>\d+)/draft/$',
+        views.UpdateComposer.as_view(),
+        name='foia-draft',
     ),
     url(
-        r'^multi/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)/draft/$',
-        views.draft_multirequest,
-        name='foia-multi-draft',
+        r'^(?P<idx>\d+)/$',
+        RedirectView.as_view(pattern_name='foia-draft'),
+    ),
+    url(
+        r'^composer-autosave/(?P<idx>\d+)/$',
+        views.autosave,
+        name='foia-autosave',
     ),
 
     # Detail View
@@ -74,7 +76,11 @@ urlpatterns = [
         views.Detail.as_view(template_name='foia/detail.html'),
         name='foia-detail',
     ),
-    url(r'^%s/clone/$' % foia_url, views.clone_request, name='foia-clone'),
+    url(
+        r'^multirequest/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)/$',
+        views.ComposerDetail.as_view(),
+        name='foia-composer-detail',
+    ),
     url(
         r'^%s/crowdfund/$' % foia_url,
         views.crowdfund_request,
@@ -93,6 +99,7 @@ urlpatterns = [
         views.toggle_autofollowups,
         name='foia-toggle-followups',
     ),
+    # This just redirects to the composer
     url(
         r'^multi/(?P<slug>[\w\d_-]+)-(?P<pk>\d+)/$',
         views.MultiDetail.as_view(),
@@ -100,11 +107,6 @@ urlpatterns = [
     ),
 
     # Misc Views
-    url(
-        r'^(?P<jurisdiction>[\w\d_-]+)-(?P<idx>\d+)/$',
-        jurisdiction,
-        name='foia-jurisdiction',
-    ),
     url(r'^acronyms/$', views.acronyms, name='foia-acronyms'),
     url(r'^raw_email/(?P<idx>\d+)/$', views.raw, name='foia-raw'),
 
@@ -140,6 +142,22 @@ urlpatterns = [
     ),
 
     # Old URLS
+    url(r'^multi/$', RedirectView.as_view(url='/foi/create/')),
+    url(
+        r'^create_multi/$',
+        RedirectView.as_view(url='/foi/create/'),
+        name='foia-create-multi',
+    ),
+    url(
+        r'^mylist/multirequest/$',
+        RedirectView.as_view(url='/foi/mylist/'),
+        name='foia-mymulti',
+    ),
+    url(
+        r'^(?P<jurisdiction>[\w\d_-]+)-(?P<idx>\d+)/$',
+        jurisdiction,
+        name='foia-jurisdiction',
+    ),
     url(
         r'^list/user/(?P<user_name>[\w\d_.@ ]+)/$',
         RedirectView.as_view(url='/foi/list/user-%(user_name)s'),

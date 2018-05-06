@@ -7,7 +7,9 @@ from django.contrib.auth.models import User
 from django.core.exceptions import MultipleObjectsReturned
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.db.models import Q
 from django.template.defaultfilters import slugify
+from django.utils import timezone
 from django.utils.safestring import mark_safe
 
 # Standard Library
@@ -19,7 +21,6 @@ from djgeojson.fields import PointField
 from easy_thumbnails.fields import ThumbnailerImageField
 
 # MuckRock
-from muckrock import fields
 from muckrock.accounts.models import Profile
 from muckrock.accounts.utils import unique_username
 from muckrock.jurisdiction.models import Jurisdiction, RequestHelper
@@ -51,6 +52,15 @@ class AgencyQuerySet(models.QuerySet):
         """Get all approved agencies"""
         return self.filter(status='approved')
 
+    def get_approved_and_pending(self, user):
+        """Get approved and given user's pending agencies"""
+        if user.is_authenticated:
+            return self.filter(
+                Q(status='approved') | Q(status='pending', user=user)
+            )
+        else:
+            return self.get_approved()
+
     def get_siblings(self, agency):
         """Get all approved agencies in the same jurisdiction as the given agency."""
         return self.filter(jurisdiction=agency.jurisdiction)\
@@ -58,13 +68,13 @@ class AgencyQuerySet(models.QuerySet):
                    .filter(status='approved')\
                    .order_by('name')
 
-    def create_new(self, name, jurisdiction, user):
+    def create_new(self, name, jurisdiction_pk, user):
         """Create a pending agency with a NewAgency task"""
-        user = user if user.is_authenticated() else None
+        user = user if user.is_authenticated else None
         agency = self.create(
             name=name,
             slug=(slugify(name) or 'untitled'),
-            jurisdiction=jurisdiction,
+            jurisdiction_id=jurisdiction_pk,
             user=user,
             status='pending',
         )
@@ -177,15 +187,8 @@ class Agency(models.Model, RequestHelper):
         help_text='Begin with http://'
     )
     exempt = models.BooleanField(default=False)
+    exempt_note = models.CharField(max_length=255, blank=True)
     requires_proxy = models.BooleanField(default=False)
-
-    # Depreacted fields
-    can_email_appeals = models.BooleanField(default=False)
-    address = models.TextField(blank=True)
-    email = models.EmailField(blank=True)
-    other_emails = fields.EmailsListField(blank=True, max_length=255)
-    phone = models.CharField(blank=True, max_length=30)
-    fax = models.CharField(blank=True, max_length=30)
 
     objects = AgencyQuerySet.as_manager()
 
@@ -230,7 +233,10 @@ class Agency(models.Model, RequestHelper):
         if self.manual_stale:
             return True
         # find any open requests, if none, not stale
-        foias = self.foiarequest_set.get_open().order_by('date_submitted')
+        foias = (
+            self.foiarequest_set.get_open()
+            .order_by('composer__datetime_submitted')
+        )
         if not foias:
             return False
         # find the latest response to an open request
@@ -242,7 +248,8 @@ class Agency(models.Model, RequestHelper):
         if latest_responses:
             return min(latest_responses) >= STALE_DURATION
         # no response to open requests, use oldest open request submit date
-        return (date.today() - foias[0].date_submitted).days >= STALE_DURATION
+        return ((timezone.now() - foias[0].composer.datetime_submitted).days >=
+                STALE_DURATION)
 
     def mark_stale(self, manual=False):
         """Mark this agency as stale and create a StaleAgencyTask if one doesn't already exist."""
@@ -336,12 +343,9 @@ class Agency(models.Model, RequestHelper):
             proxy_user = self.jurisdiction.get_proxy()
             if proxy_user is None:
                 return {
-                    'from_user':
-                        User.objects.get(username='proxy_placeholder'),
-                    'proxy':
-                        True,
-                    'missing_proxy':
-                        True,
+                    'from_user': User.objects.get(username='Proxy'),
+                    'proxy': True,
+                    'missing_proxy': True,
                     'warning':
                         'This agency and jurisdiction requires requestors to be '
                         'in-state citizens.  We do not currently have a citizen proxy '
@@ -361,5 +365,26 @@ class Agency(models.Model, RequestHelper):
         else:
             return {'proxy': False, 'missing_proxy': False}
 
+    @property
+    def email(self):
+        """The main email"""
+        return self.get_emails('primary', 'to').first()
+
+    @property
+    def other_emails(self):
+        """The cc emails"""
+        return self.get_emails('primary', 'cc')
+
+    @property
+    def fax(self):
+        """The primary fax"""
+        return self.get_faxes('primary').first()
+
+    @property
+    def address(self):
+        """The primary address"""
+        return self.get_addresses('primary').first()
+
     class Meta:
         verbose_name_plural = 'agencies'
+        permissions = (('view_emails', 'Can view private contact information'),)

@@ -54,7 +54,9 @@ from muckrock.task.filters import (
 from muckrock.task.forms import (
     BulkNewAgencyTaskFormSet,
     FlaggedTaskForm,
+    IncomingPortalForm,
     ProjectReviewTaskForm,
+    ReplaceNewAgencyForm,
     ResponseTaskForm,
     ReviewAgencyTaskForm,
     StaleAgencyTaskForm,
@@ -150,13 +152,8 @@ class TaskList(MRFilterListView):
         ).count()
         context['asignees'] = User.objects.filter(is_staff=True
                                                   ).order_by('last_name')
-        # These are for fine-uploader
-        context['MAX_ATTACHMENT_NUM'] = settings.MAX_ATTACHMENT_NUM
-        context['MAX_ATTACHMENT_SIZE'] = settings.MAX_ATTACHMENT_SIZE
-        context['ALLOWED_FILE_MIMES'] = settings.ALLOWED_FILE_MIMES
-        context['ALLOWED_FILE_EXTS'] = settings.ALLOWED_FILE_EXTS
-        context['AWS_STORAGE_BUCKET_NAME'] = settings.AWS_STORAGE_BUCKET_NAME
-        context['AWS_ACCESS_KEY_ID'] = settings.AWS_ACCESS_KEY_ID
+        # this is for fine-uploader
+        context['settings'] = settings
         return context
 
     @method_decorator(user_passes_test(lambda u: u.is_staff))
@@ -442,22 +439,23 @@ class NewAgencyTaskList(TaskList):
                 form_data['phone'] = unicode(form_data['phone'])
             if form_data.get('fax'):
                 form_data['fax'] = unicode(form_data['fax'])
+            if form_data.get('jurisdiction'):
+                form_data['jurisdiction'] = form_data['jurisdiction'].pk
             form_data.update({'approve': True})
             task.resolve(request.user, form_data)
         elif request.POST.get('reject'):
-            replacement_agency_id = request.POST.get('replacement')
-            replacement_agency = get_object_or_404(
-                Agency, id=replacement_agency_id
-            )
-            if replacement_agency.status != 'approved':
-                messages.error(
-                    request,
-                    'Replacement agency must be an "approved" agency.',
-                )
+            form = ReplaceNewAgencyForm(request.POST)
+            if form.is_valid():
+                replace_agency = form.cleaned_data['replace_agency']
+                task.reject(replace_agency)
+                form_data = {
+                    'reject': True,
+                    'replace_agency': replace_agency.pk
+                }
+                task.resolve(request.user, form_data)
+            else:
+                messages.error(request, 'Bad form data')
                 return
-            task.reject(replacement_agency)
-            form_data = {'reject': True, 'replacement': replacement_agency_id}
-            task.resolve(request.user, form_data)
         elif request.POST.get('spam'):
             task.spam()
             form_data = {'spam': True}
@@ -558,20 +556,24 @@ class PortalTaskList(TaskList):
     def _incoming_handler(self, request, task):
         """POST handler for incoming portal tasks"""
         # pylint: disable=no-self-use
-        form = ResponseTaskForm(request.POST)
+        form = IncomingPortalForm(request.POST)
         if not form.is_valid():
             messages.error(request, 'Form is invalid')
             return
         action_taken, error_msgs = form.process_form(task, request.user)
         for msg in error_msgs:
             messages.error(request, msg)
-        new_text = request.POST.get('communication')
-        keep_hidden = request.POST.get('keep_hidden')
+        new_text = form.cleaned_data.get('communication')
+        keep_hidden = form.cleaned_data.get('keep_hidden')
+        password = form.cleaned_data.get('word_to_pass')
         if new_text:
             task.communication.communication = new_text
         if not keep_hidden:
             task.communication.hidden = False
             task.communication.create_agency_notifications()
+        if password:
+            task.communication.foia.portal_password = password
+            task.communication.foia.save()
         task.communication.save()
         if task.communication.foia.portal:
             # If a communication is incorrectly sent to a request with a portal
@@ -591,12 +593,8 @@ class PortalTaskList(TaskList):
                 form_data['price'] = float(form_data['price'])
             if form_data.get('date_estimate'):
                 # to string for json
-                form_data['date_estimate'] = form_data['date_estimate'
-                                                       ].isoformat()
-            form_data.update({
-                'communication': new_text,
-                'keep_hidden': keep_hidden,
-            })
+                form_data['date_estimate'
+                          ] = (form_data['date_estimate'].isoformat())
             task.resolve(request.user, form_data)
 
     def _outgoing_handler(self, request, task):
@@ -761,7 +759,7 @@ class BulkNewAgency(FormView):
             if name and jurisdiction:
                 Agency.objects.create_new(
                     name,
-                    jurisdiction,
+                    jurisdiction.pk,
                     self.request.user,
                 )
         messages.success(self.request, 'Successfully create new agencies')

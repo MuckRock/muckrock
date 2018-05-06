@@ -25,7 +25,8 @@ http {
 		deny <%= ip %>;
 	<% end %>
     <% if ENV.key?('ALLOW_IPS') %>
-        <% ENV['ALLOW_IPS'].split(',').each do |ip| %>
+        <% ENV['ALLOW_IPS'].split(',').each do |entry| %>
+            <% ip, comment = entry.split(':') %>
             allow <%= ip %>;
         <% end %>
         deny all;

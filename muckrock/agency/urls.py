@@ -29,8 +29,13 @@ urlpatterns = [
         name='agency-flag',
     ),
     url(
-        r'^similar/$',
-        views.similar,
-        name='agency-similar',
+        r'^boilerplate/$',
+        views.boilerplate,
+        name='agency-boilerplate',
+    ),
+    url(
+        r'^contact-info/(?P<idx>\d+)/$',
+        views.contact_info,
+        name='agency-contact-info',
     ),
 ]
