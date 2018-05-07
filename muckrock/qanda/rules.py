@@ -27,7 +27,7 @@ def has_requests(user):
 @predicate
 @user_authenticated
 def made_request(user):
-    return user.foiarequest_set.exists()
+    return user.composers.exclude(status='started').exists()
 
 
 add_perm('qanda.post', made_request | is_advanced)
