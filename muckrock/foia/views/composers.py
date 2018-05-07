@@ -241,6 +241,12 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
             composer.user = user
             composer.save()
             form.save_m2m()
+            # if a new agency is added while the user is anonymous,
+            # we want to associate that agency to the user once they
+            # login or register
+            composer.agencies.filter(
+                user=None, status='pending'
+            ).update(user=user)
         if form.cleaned_data['action'] == 'save':
             self.request.session['ga'] = 'request_drafted'
             messages.success(self.request, 'Request saved')
