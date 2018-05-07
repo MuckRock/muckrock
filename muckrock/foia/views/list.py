@@ -197,25 +197,22 @@ class RequestList(MRSearchFilterListView):
             foias = (
                 context['paginator'].object_list.select_related(None)
                 .select_related(
-                    'user',
-                    'jurisdiction',
-                    'agency',
-                    'composer',
+                    'composer__user',
+                    'agency__jurisdiction',
                 ).prefetch_related(
                     'tracking_ids',
                 ).only(
-                    'user__username',
+                    'composer__user__username',
                     'title',
                     'status',
                     'slug',
-                    'jurisdiction__name',
-                    'jurisdiction__slug',
-                    'jurisdiction__id',
+                    'agency__jurisdiction__name',
+                    'agency__jurisdiction__slug',
+                    'agency__jurisdiction__id',
                     'agency__name',
                     'agency__id',
                     'date_followup',
                     'date_estimate',
-                    'description',
                     'embargo',
                     'composer__requested_docs',
                 ).annotate(
