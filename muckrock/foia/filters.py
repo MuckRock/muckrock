@@ -31,7 +31,7 @@ class JurisdictionFilterSet(django_filters.FilterSet):
         label='Jurisdiction',
     )
     value_format = re.compile(r'\d+-(True|False)')
-    jurisdiction_field = 'jurisdiction'
+    jurisdiction_field = 'agency__jurisdiction'
 
     def filter_jurisdiction(self, queryset, name, value):
         """Filter jurisdction, allowing for state inclusive searches"""
