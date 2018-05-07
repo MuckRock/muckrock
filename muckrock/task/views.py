@@ -650,8 +650,8 @@ class RequestTaskList(TemplateView):
         # pylint: disable=unsubscriptable-object
         self.foia_request = get_object_or_404(
             FOIARequest.objects.select_related(
-                'agency__jurisdiction', 'jurisdiction__parent__parent',
-                'user__profile'
+                'agency__jurisdiction__parent__parent',
+                'composer__user__profile',
             ),
             pk=self.kwargs['pk']
         )
