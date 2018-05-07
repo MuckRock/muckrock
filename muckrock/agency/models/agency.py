@@ -4,12 +4,10 @@ Agency Model
 
 # Django
 from django.contrib.auth.models import User
-from django.core.exceptions import MultipleObjectsReturned
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
 from django.template.defaultfilters import slugify
-from django.utils import timezone
 from django.utils.safestring import mark_safe
 
 # Standard Library
@@ -24,11 +22,9 @@ from easy_thumbnails.fields import ThumbnailerImageField
 from muckrock.accounts.models import Profile
 from muckrock.accounts.utils import unique_username
 from muckrock.jurisdiction.models import Jurisdiction, RequestHelper
-from muckrock.task.models import NewAgencyTask, StaleAgencyTask
+from muckrock.task.models import NewAgencyTask
 
 logger = logging.getLogger(__name__)
-
-STALE_DURATION = 120
 
 
 class AgencyType(models.Model):
@@ -134,10 +130,6 @@ class Agency(models.Model, RequestHelper):
         blank=True, max_length=255, help_text='May use html'
     )
     public_notes = models.TextField(blank=True, help_text='May use html')
-    stale = models.BooleanField(default=False)
-    manual_stale = models.BooleanField(
-        default=False, help_text='For marking an agency stale by hand.'
-    )
     location = PointField(blank=True)
 
     addresses = models.ManyToManyField(
@@ -232,70 +224,6 @@ class Agency(models.Model, RequestHelper):
         else:
             return self.name
 
-    def is_stale(self):
-        """Should this agency be marked as stale?
-
-        If the latest response to any open request is greater than STALE_DURATION
-        days ago, or if no responses to any open request, if the oldest open
-        request was sent greater than STALE_DURATION days ago.  If no open requests,
-        do not mark as stale."""
-        # check if agency is manually marked as stale
-        if self.manual_stale:
-            return True
-        # find any open requests, if none, not stale
-        foias = (
-            self.foiarequest_set.get_open()
-            .exclude(composer__datetime_submitted=None)
-            .order_by('composer__datetime_submitted')
-        )
-        if not foias:
-            return False
-        # find the latest response to an open request
-        latest_responses = []
-        for foia in foias:
-            response = foia.latest_response()
-            if response:
-                latest_responses.append(response)
-        if latest_responses:
-            return min(latest_responses) >= STALE_DURATION
-        # no response to open requests, use oldest open request submit date
-        return ((timezone.now() - foias[0].composer.datetime_submitted).days >=
-                STALE_DURATION)
-
-    def mark_stale(self, manual=False):
-        """Mark this agency as stale and create a StaleAgencyTask if one doesn't already exist."""
-        self.stale = True
-        self.manual_stale = manual
-        self.save()
-        try:
-            task, created = StaleAgencyTask.objects.get_or_create(
-                resolved=False, agency=self
-            )
-            if created:
-                logger.info(
-                    'Created new StaleAgencyTask <%d> for Agency <%d>', task.pk,
-                    self.pk
-                )
-        except MultipleObjectsReturned as exception:
-            # If there are multiple StaleAgencyTasks returned, just return the first one.
-            # We only want this method to return a single task.
-            # Also, log the exception as a warning.
-            task = StaleAgencyTask.objects.filter(
-                resolved=False, agency=self
-            ).first()
-            logger.warning(exception)
-        return task
-
-    def unmark_stale(self):
-        """Unmark this agency as stale and resolve all of its StaleAgencyTasks."""
-        self.stale = False
-        self.manual_stale = False
-        self.save()
-        (
-            StaleAgencyTask.objects.filter(resolved=False, agency=self)
-            .update(resolved=True)
-        )
-
     def count_thanks(self):
         """Count how many thanks this agency has received"""
         return (
@@ -375,6 +303,10 @@ class Agency(models.Model, RequestHelper):
                 }
         else:
             return {'proxy': False, 'missing_proxy': False}
+
+    def has_open_review_task(self):
+        """Is there an open review agency task for this agency"""
+        return self.reviewagencytask_set.filter(resolved=False).exists()
 
     @property
     def email(self):

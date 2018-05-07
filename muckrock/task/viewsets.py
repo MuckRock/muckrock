@@ -16,7 +16,6 @@ from muckrock.task.models import (
     OrphanTask,
     ResponseTask,
     SnailMailTask,
-    StaleAgencyTask,
     Task,
 )
 from muckrock.task.serializers import (
@@ -27,7 +26,6 @@ from muckrock.task.serializers import (
     OrphanTaskSerializer,
     ResponseTaskSerializer,
     SnailMailTaskSerializer,
-    StaleAgencyTaskSerializer,
     TaskSerializer,
 )
 
@@ -104,12 +102,6 @@ SnailMailTaskViewSet = create_task_viewset(
     SnailMailTask,
     SnailMailTaskSerializer,
     ('category', 'communication'),
-)
-
-StaleAgencyTaskViewSet = create_task_viewset(
-    StaleAgencyTask,
-    StaleAgencyTaskSerializer,
-    ('agency',),
 )
 
 FlaggedTaskViewSet = create_task_viewset(

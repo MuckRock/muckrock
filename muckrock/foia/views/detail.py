@@ -710,8 +710,6 @@ class Detail(DetailView):
                     foia.price = form.cleaned_data['price'] / 100.0
                 foia.save()
                 foia.process_attachments(request.user)
-                if foia.agency:
-                    foia.agency.unmark_stale()
                 comm.create_agency_notifications()
                 FlaggedTask.objects.create(
                     user=self.request.user,

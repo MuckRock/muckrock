@@ -64,12 +64,10 @@ class TaskQuerySet(models.QuerySet):
                 .preload_list()
             )
         if foia.agency and user.is_staff:
-            pass
-            # skip these for now as they are slow
-            #tasks += list(
-            #    task.models.ReviewAgencyTask.objects.filter(agency=foia.agency)
-            #    .preload_list()
-            #)
+            tasks += list(
+                task.models.ReviewAgencyTask.objects.filter(agency=foia.agency)
+                .preload_list()
+            )
         return tasks
 
     def get_undeferred(self):
@@ -204,27 +202,6 @@ class SnailMailTaskQuerySet(TaskQuerySet):
         )
 
 
-class StaleAgencyTaskQuerySet(TaskQuerySet):
-    """Object manager for stale agency tasks"""
-
-    def preload_list(self):
-        """Preload relations for list display"""
-        return (
-            self.select_related(
-                'agency__jurisdiction',
-                'resolved_by',
-            ).prefetch_related(
-                'agency__foiarequest_set__communications__foia__jurisdiction',
-                Prefetch(
-                    'agency__foiarequest_set',
-                    queryset=FOIARequest.objects.get_stale()
-                    .select_related('email').prefetch_related('cc_emails'),
-                    to_attr='stale_requests_cache'
-                ),
-            )
-        )
-
-
 class FlaggedTaskQuerySet(TaskQuerySet):
     """Object manager for flagged tasks"""
 
@@ -352,7 +329,8 @@ class ReviewAgencyTaskQuerySet(TaskQuerySet):
     def ensure_one_created(self, **kwargs):
         """Ensure exactly one model exists in the database as specified"""
         try:
-            self.get_or_create(**kwargs)
+            task_, _ = self.get_or_create(**kwargs)
+            return task_
         except task.models.ReviewAgencyTask.MultipleObjectsReturned:
             # if there are multiples, delete all but the first one
             # then try again

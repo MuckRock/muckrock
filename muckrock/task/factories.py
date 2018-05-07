@@ -34,17 +34,6 @@ class SnailMailTaskFactory(factory.django.DjangoModelFactory):
     )
 
 
-class StaleAgencyTaskFactory(factory.django.DjangoModelFactory):
-    """A factory for creating StaleAgencyTask objects."""
-
-    class Meta:
-        model = task.models.StaleAgencyTask
-
-    agency = factory.SubFactory(
-        'muckrock.factories.StaleAgencyFactory', stale=True
-    )
-
-
 class FlaggedTaskFactory(factory.django.DjangoModelFactory):
     """A factory for creating FlaggedTask objects."""
 

@@ -15,13 +15,11 @@ import mock
 from nose.tools import assert_false, eq_, ok_, raises
 
 # MuckRock
-from muckrock.communication.models import EmailAddress
 from muckrock.factories import AgencyFactory, OrganizationFactory, UserFactory
 from muckrock.foia.factories import (
     FOIACommunicationFactory,
     FOIAComposerFactory,
     FOIARequestFactory,
-    StaleFOIARequestFactory,
 )
 from muckrock.foia.models import FOIANote, FOIARequest
 from muckrock.jurisdiction.factories import StateJurisdictionFactory
@@ -29,7 +27,6 @@ from muckrock.task.factories import (
     FlaggedTaskFactory,
     NewExemptionTaskFactory,
     ProjectReviewTaskFactory,
-    StaleAgencyTaskFactory,
 )
 from muckrock.task.forms import ResponseTaskForm
 from muckrock.task.models import (
@@ -323,79 +320,6 @@ class SnailMailTaskTests(TestCase):
         self.task.save()
         note = self.task.record_check(check_number, user)
         ok_(isinstance(note, FOIANote), 'The method should return a FOIANote.')
-
-
-class StaleAgencyTaskTests(TestCase):
-    """Test the StaleAgencyTask class"""
-
-    def setUp(self):
-        self.task = StaleAgencyTaskFactory()
-        self.foia = FOIARequest.objects.filter(agency=self.task.agency).first()
-
-    def test_get_absolute_url(self):
-        eq_(
-            self.task.get_absolute_url(),
-            reverse('stale-agency-task', kwargs={
-                'pk': self.task.pk
-            })
-        )
-
-    def test_stale_requests(self):
-        """
-        The stale agency task should provide a list of open requests which have not
-        recieved any response since the stale duration
-        """
-        closed_foia = StaleFOIARequestFactory(
-            agency=self.task.agency, status='done'
-        )
-        no_response = StaleFOIARequestFactory(
-            agency=self.task.agency, stale_comm__response=False
-        )
-        stale_requests = list(self.task.stale_requests())
-        ok_(
-            self.foia in stale_requests,
-            'Open requests should be considered stale.'
-        )
-        ok_(
-            no_response in stale_requests,
-            'Requests without any response should be considered stale.'
-        )
-        ok_(
-            closed_foia not in stale_requests,
-            'Closed requests should not be considered stale.'
-        )
-
-    def test_latest_response(self):
-        """
-        The stale agency task should provide the most
-        recent response received from the agency.
-        """
-        latest_response = self.task.latest_response()
-        eq_(latest_response, self.foia.last_response())
-        ok_(latest_response.response, 'Should return a response!')
-
-    @mock.patch('muckrock.foia.models.FOIARequest.followup')
-    def test_update_email(self, mock_followup):
-        """
-        The stale agency task should update the email of its associated
-        agency and any selected stale requests. Then, the foias with
-        updated emails should automatically follow up with the agency.
-        The agency should also have its stale flag lowered.
-        """
-        new_email = EmailAddress.objects.fetch('test@email.com')
-        self.task.update_email(new_email, [self.foia])
-        self.task.refresh_from_db()
-        eq_(
-            self.task.agency.get_emails().first(),
-            new_email,
-        )
-        eq_(self.foia.email, new_email, 'The foia\'s email should be updated.')
-        mock_followup.assert_called()
-
-    def test_resolve(self):
-        """Resolving the task should lower the stale flag on the agency."""
-        self.task.resolve()
-        ok_(not self.task.agency.stale, 'The agency should no longer be stale.')
 
 
 class NewAgencyTaskTests(TestCase):

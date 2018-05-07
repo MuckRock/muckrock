@@ -52,7 +52,6 @@ class AgencySerializer(serializers.ModelSerializer):
             'name',
             'slug',
             'status',
-            'stale',
             'exempt',
             'types',
             'requires_proxy',

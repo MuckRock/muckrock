@@ -274,37 +274,8 @@ class PortalTaskNode(TaskNode):
         return extra_context
 
 
-class StaleAgencyTaskNode(TaskNode):
-    """Renders a stale agency task."""
-    model = task.models.StaleAgencyTask
-    task_template = 'task/stale_agency.html'
-    endpoint_name = 'stale-agency-task-list'
-    class_name = 'stale-agency'
-
-    def get_extra_context(self):
-        """Adds a form for updating the email"""
-        extra_context = super(StaleAgencyTaskNode, self).get_extra_context()
-        latest_response = self.task.latest_response()
-        initial = {}
-        if latest_response:
-            last_email = latest_response.emails.last()
-            if last_email:
-                initial = {'email': last_email.from_email}
-        extra_context['email_form'] = task.forms.StaleAgencyTaskForm(
-            initial=initial
-        )
-        extra_context['latest_response'] = latest_response
-        stale_requests = list(self.task.stale_requests())
-        extra_context['stale_requests'] = stale_requests
-        if len(stale_requests) > 0:
-            extra_context['stalest_request'] = stale_requests[0]
-        else:
-            extra_context['stalest_request'] = None
-        return extra_context
-
-
 class ReviewAgencyTaskNode(TaskNode):
-    """Renders a stale agency task."""
+    """Renders a review agency task."""
     model = task.models.ReviewAgencyTask
     task_template = 'task/review_agency.html'
     endpoint_name = 'review-agency-task-list'
@@ -429,12 +400,6 @@ def snail_mail_task(parser, token):
 def portal_task(parser, token):
     """Returns a PortalTaskNode"""
     return PortalTaskNode(get_id(token))
-
-
-@register.tag
-def stale_agency_task(parser, token):
-    """Returns a StaleAgencyTaskNode"""
-    return StaleAgencyTaskNode(get_id(token))
 
 
 @register.tag

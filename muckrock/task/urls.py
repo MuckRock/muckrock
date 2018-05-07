@@ -28,16 +28,6 @@ urlpatterns = [
         name='snail-mail-task'
     ),
     url(
-        r'^stale-agency/$',
-        views.StaleAgencyTaskList.as_view(),
-        name='stale-agency-task-list'
-    ),
-    url(
-        r'^stale-agency/(?P<pk>\d+)/$',
-        views.StaleAgencyTaskList.as_view(),
-        name='stale-agency-task'
-    ),
-    url(
         r'^review-agency/$',
         views.ReviewAgencyTaskList.as_view(),
         name='review-agency-task-list'

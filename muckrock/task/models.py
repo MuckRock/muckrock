@@ -44,7 +44,6 @@ from muckrock.task.querysets import (
     ResponseTaskQuerySet,
     ReviewAgencyTaskQuerySet,
     SnailMailTaskQuerySet,
-    StaleAgencyTaskQuerySet,
     StatusChangeTaskQuerySet,
     TaskQuerySet,
 )
@@ -297,62 +296,6 @@ class SnailMailTask(Task):
         return note
 
 
-class StaleAgencyTask(Task):
-    """An agency has gone stale"""
-    type = 'StaleAgencyTask'
-    agency = models.ForeignKey('agency.Agency')
-
-    objects = StaleAgencyTaskQuerySet.as_manager()
-
-    def __unicode__(self):
-        return u'Stale Agency Task'
-
-    def get_absolute_url(self):
-        return reverse('stale-agency-task', kwargs={'pk': self.pk})
-
-    def resolve(self, user=None, form_data=None):
-        """Unmark the agency as stale when resolving"""
-        self.agency.unmark_stale()
-        super(StaleAgencyTask, self).resolve(user, form_data)
-
-    def stale_requests(self):
-        """Returns a list of stale requests associated with the task's agency"""
-        if hasattr(self.agency, 'stale_requests_cache'):
-            return self.agency.stale_requests_cache
-        return FOIARequest.objects.get_stale(agency=self.agency)
-
-    def latest_response(self):
-        """Returns the latest response from the agency"""
-        foias = self.agency.foiarequest_set.all()
-        comms = [c for f in foias for c in f.communications.all() if c.response]
-        if len(comms) > 0:
-            return max(comms, key=lambda x: x.datetime)
-        else:
-            return None
-
-    def update_email(self, new_email, foia_list):
-        """Updates the email on the agency and the provided requests."""
-        from muckrock.agency.models import AgencyEmail
-        agency_emails = (
-            self.agency.agencyemail_set.filter(
-                request_type='primary', email_type='to'
-            )
-        )
-        for agency_email in agency_emails:
-            agency_email.request_type = 'none'
-            agency_email.email_type = 'none'
-            agency_email.save()
-        AgencyEmail.objects.create(
-            email=new_email,
-            agency=self.agency,
-            request_type='primary',
-            email_type='to',
-        )
-        for foia in foia_list:
-            foia.email = new_email
-            foia.followup(switch=True)
-
-
 class ReviewAgencyTask(Task):
     """An agency has had one of its forms of communication have an error
     and new contact information is required"""
@@ -388,7 +331,11 @@ class ReviewAgencyTask(Task):
                 ).exclude(**{
                     email_or_fax: None
                 }).select_related(
-                    email_or_fax, 'agency__jurisdiction'
+                    'agency__jurisdiction',
+                    'composer',
+                    'email',
+                    'fax',
+                    'portal',
                 ).annotate(
                     latest_response=ExtractDay(
                         Cast(
@@ -465,7 +412,13 @@ class ReviewAgencyTask(Task):
         foias = list(
             self.agency.foiarequest_set.get_open().filter(
                 email=None, fax=None
-            ).select_related('agency__jurisdiction').annotate(
+            ).select_related(
+                'agency__jurisdiction',
+                'composer',
+                'email',
+                'fax',
+                'portal',
+            ).annotate(
                 latest_response=ExtractDay(
                     Cast(
                         Now() - Max(
@@ -940,6 +893,60 @@ class RejectedEmailTask(Task):
 
     def get_absolute_url(self):
         return reverse('rejected-email-task', kwargs={'pk': self.pk})
+
+
+class StaleAgencyTask(Task):
+    """An agency has gone stale"""
+    type = 'StaleAgencyTask'
+    agency = models.ForeignKey('agency.Agency')
+
+    def __unicode__(self):
+        return u'Stale Agency Task'
+
+    def get_absolute_url(self):
+        return reverse('stale-agency-task', kwargs={'pk': self.pk})
+
+    def resolve(self, user=None, form_data=None):
+        """Unmark the agency as stale when resolving"""
+        self.agency.unmark_stale()
+        super(StaleAgencyTask, self).resolve(user, form_data)
+
+    def stale_requests(self):
+        """Returns a list of stale requests associated with the task's agency"""
+        if hasattr(self.agency, 'stale_requests_cache'):
+            return self.agency.stale_requests_cache
+        return FOIARequest.objects.get_stale(agency=self.agency)
+
+    def latest_response(self):
+        """Returns the latest response from the agency"""
+        foias = self.agency.foiarequest_set.all()
+        comms = [c for f in foias for c in f.communications.all() if c.response]
+        if len(comms) > 0:
+            return max(comms, key=lambda x: x.datetime)
+        else:
+            return None
+
+    def update_email(self, new_email, foia_list):
+        """Updates the email on the agency and the provided requests."""
+        from muckrock.agency.models import AgencyEmail
+        agency_emails = (
+            self.agency.agencyemail_set.filter(
+                request_type='primary', email_type='to'
+            )
+        )
+        for agency_email in agency_emails:
+            agency_email.request_type = 'none'
+            agency_email.email_type = 'none'
+            agency_email.save()
+        AgencyEmail.objects.create(
+            email=new_email,
+            agency=self.agency,
+            request_type='primary',
+            email_type='to',
+        )
+        for foia in foia_list:
+            foia.email = new_email
+            foia.followup(switch=True)
 
 
 # Not a task, but used by tasks

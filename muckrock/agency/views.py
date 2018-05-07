@@ -24,7 +24,7 @@ from muckrock.agency.utils import initial_communication_template
 from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.views import collect_stats
-from muckrock.task.models import FlaggedTask
+from muckrock.task.models import FlaggedTask, ReviewAgencyTask
 from muckrock.views import MRSearchFilterListView
 
 
@@ -86,11 +86,14 @@ def detail(request, jurisdiction, jidx, slug, idx):
                 )
                 messages.success(request, 'Correction submitted. Thanks!')
                 return redirect(agency)
-        elif action == 'mark_stale' and request.user.is_staff:
-            task = agency.mark_stale(manual=True)
-            messages.success(request, 'Agency marked as stale.')
+        elif action == 'review' and request.user.is_staff:
+            task = ReviewAgencyTask.objects.ensure_one_created(
+                agency=agency,
+                resolved=False,
+            )
+            messages.success(request, 'Agency marked for review.')
             return redirect(
-                reverse('stale-agency-task', kwargs={
+                reverse('review-agency-task', kwargs={
                     'pk': task.pk
                 })
             )

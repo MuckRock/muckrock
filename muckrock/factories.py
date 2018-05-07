@@ -252,14 +252,3 @@ class StatisticsFactory(factory.django.DjangoModelFactory):
     total_tasks = 100
     total_unresolved_tasks = 45
     daily_robot_response_tasks = 12
-
-
-# Stale Agency Factory
-
-
-class StaleAgencyFactory(AgencyFactory):
-    """A factory for creating stale Agency test objects."""
-    stale = True
-    stale_foia = factory.RelatedFactory(
-        'muckrock.foia.factories.StaleFOIARequestFactory', 'agency'
-    )

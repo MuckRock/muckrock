@@ -3,8 +3,6 @@
     {% orphan_task task %}
 {% elif task.type == "SnailMailTask" %}
     {% snail_mail_task task %}
-{% elif task.type == "StaleAgencyTask" %}
-    {% stale_agency_task task %}
 {% elif task.type == "ReviewAgencyTask" %}
     {% review_agency_task task %}
 {% elif task.type == "FlaggedTask" %}
