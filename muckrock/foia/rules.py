@@ -201,6 +201,7 @@ can_view = can_edit | is_viewer | is_from_agency | ~is_private
 
 
 @predicate
+@skip_if_not_foia
 @user_authenticated
 def can_view_composer_child(user, composer):
     for foia in composer.foias.all():
@@ -210,6 +211,7 @@ def can_view_composer_child(user, composer):
 
 
 @predicate
+@skip_if_not_foia
 @user_authenticated
 def is_owner_composer(user, composer):
     if composer.user_id == user.pk:
