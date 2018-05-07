@@ -71,6 +71,16 @@ class AgencyQuerySet(models.QuerySet):
     def create_new(self, name, jurisdiction_pk, user):
         """Create a pending agency with a NewAgency task"""
         user = user if user.is_authenticated else None
+
+        existing_agency = self.filter(
+            name=name,
+            jurisdiction_id=jurisdiction_pk,
+            user=user,
+            status='pending',
+        ).first()
+        if existing_agency:
+            return existing_agency
+
         agency = self.create(
             name=name,
             slug=(slugify(name) or 'untitled'),
