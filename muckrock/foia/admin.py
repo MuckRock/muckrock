@@ -393,7 +393,6 @@ class FOIARequestAdmin(VersionAdmin):
     list_select_related = ('agency__jurisdiction', 'composer__user')
     search_fields = [
         'title',
-        'description',
         'tracking_ids__tracking_id',
         'mail_id',
     ]
