@@ -93,7 +93,7 @@ class SendViaForm(forms.Form):
         if self.foia:
             obj = self.foia
             agency = self.foia.agency
-        elif self.agency:
+        elif hasattr(self, 'agency') and self.agency:
             obj = self.agency
             agency = self.agency
         else:
