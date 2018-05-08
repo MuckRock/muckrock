@@ -78,9 +78,14 @@ def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
                     files.append((file_, 'error'))
             else:
                 files.append((file_, 'skipped'))
-        cover_info.append((snail, pdf.page, files))
         single_pdf = StringIO()
-        single_merger.write(single_pdf)
+        try:
+            single_merger.write(single_pdf)
+        except PdfReadError:
+            cover_info.append((snail, None, files))
+            continue
+        else:
+            cover_info.append((snail, pdf.page, files))
 
         # attach to the mail communication
         mail, _ = MailCommunication.objects.update_or_create(

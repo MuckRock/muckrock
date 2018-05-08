@@ -130,15 +130,25 @@ class CoverPDF(PDF):
                 )
             )
             for snail, pages, files in info:
-                lines.append(
-                    u'\n{}□ MR #{} - "{}" by {} - {} pages'.format(
-                        tab,
-                        snail.communication.foia.pk,
-                        snail.communication.foia.title,
-                        snail.communication.from_user,
-                        pages,
+                if pages is None:
+                    lines.append(
+                        u'\n{}□ Error: MR #{} - "{}" by {}'.format(
+                            tab,
+                            snail.communication.foia.pk,
+                            snail.communication.foia.title,
+                            snail.communication.from_user,
+                        )
                     )
-                )
+                else:
+                    lines.append(
+                        u'\n{}□ MR #{} - "{}" by {} - {} pages'.format(
+                            tab,
+                            snail.communication.foia.pk,
+                            snail.communication.foia.title,
+                            snail.communication.from_user,
+                            pages,
+                        )
+                    )
                 if snail.category == 'p':
                     lines.append(
                         u'{}□ Write a check for ${:.2f}'.format(
